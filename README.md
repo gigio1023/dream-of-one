@@ -65,6 +65,8 @@ dream-of-one/
 - **전체 계획**: [`plan.md`](plan.md) (초기 설계 문서)
 - **아키텍처**: [`docs/ArchitectureOverview.md`](docs/ArchitectureOverview.md)
 - **개발 가이드**: [`docs/Contrib/DevelopersGuide.md`](docs/Contrib/DevelopersGuide.md)
+- **컨벤션**: [`docs/Contrib/UnityProjectConventions.md`](docs/Contrib/UnityProjectConventions.md)
+- **버티컬 슬라이스 로드맵(가안)**: [`game/docs/Design/VerticalSliceRoadmap.md`](game/docs/Design/VerticalSliceRoadmap.md)
 
 ## 개발 상태
 
@@ -87,6 +89,17 @@ dream-of-one/
 - LLM 백엔드 서버 (`server/`)
 - ProBuilder 레벨 블록아웃
 - 플레이테스트 및 밸런싱
+
+## 초보자용 작은 스텝 진행 가이드 (가안)
+- **오늘 20–40분**
+  - `Prototype.unity`에서 플레이어 이동/`DebugOverlay` G 표시 확인
+  - `ClueTrigger` 2개 배치 → `Player` 태그 접촉 시 `HypothesisTracker.LogClue` 호출되는지 확인
+  - 규칙 SO 1개 작성(`RUL-ETQ-LeftHandWave`) → 단서 2개로 3회 확정 로그/노트 뷰 표시 확인
+- **내일 30–60분**
+  - 테스트 버튼/간단 행동으로 `SuspicionManager.ApplyViolation` 호출 → NPC 의심/전역 G 상승 확인
+  - 180초 무단서 시 `Director` 로그 발생 확인
+
+> 본 가이드는 가안이며, 진행 난이도에 따라 순서를 조정하세요. 상세 DoD는 VS 로드맵 참조.
 
 ## 기여
 

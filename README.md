@@ -90,16 +90,19 @@ dream-of-one/
 - ProBuilder 레벨 블록아웃
 - 플레이테스트 및 밸런싱
 
-## 초보자용 작은 스텝 진행 가이드 (가안)
-- **오늘 20–40분**
-  - `Prototype.unity`에서 플레이어 이동/`DebugOverlay` G 표시 확인
-  - `ClueTrigger` 2개 배치 → `Player` 태그 접촉 시 `HypothesisTracker.LogClue` 호출되는지 확인
-  - 규칙 SO 1개 작성(`RUL-ETQ-LeftHandWave`) → 단서 2개로 3회 확정 로그/노트 뷰 표시 확인
-- **내일 30–60분**
-  - 테스트 버튼/간단 행동으로 `SuspicionManager.ApplyViolation` 호출 → NPC 의심/전역 G 상승 확인
-  - 180초 무단서 시 `Director` 로그 발생 확인
+## 초보자용 개발 가이드
 
-> 본 가이드는 가안이며, 진행 난이도에 따라 순서를 조정하세요. 상세 DoD는 VS 로드맵 참조.
+Unity/C# 초보자를 위한 상세한 10일 개발 계획(가안)을 별도 문서로 제공합니다:
+- **가이드 문서**: [`BEGINNER_DEV_PLAN.md`](BEGINNER_DEV_PLAN.md)
+- Day 0(사전 준비) ~ Day 10(회고) 단계별 작업, Unity 조작, C# 코드 예제 포함
+- 매일 20–90분, DoD 체크리스트로 작은 완결 달성
+
+빠른 시작:
+- Day 0: Unity 설치 → 프로젝트 열기 → 씬 탐색
+- Day 1: 플레이어 이동 확인 + 디버그 G 라벨 표시
+- Day 2~3: 지식 노트 UI + 단서 3회 확정 루프
+- Day 5: 위반 시뮬레이션(V 키) + 의심도 상승
+- Day 10: 플레이 영상 캡처 + 회고
 
 ## 기여
 

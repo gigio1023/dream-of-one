@@ -2,6 +2,11 @@
 
 용도: 단일 소스 계획과 주변 참고 자료의 위치를 한눈에 안내한다. 모든 실행 기준은 루트 `README.md`와 `docs/slice-plan-single-source.md`를 따른다.
 
+## 문서 분류
+- 실행 기준: [`docs/slice-plan-single-source.md`](slice-plan-single-source.md)
+- 컨텍스트: [`docs/pre-timeline-architecture.md`](pre-timeline-architecture.md), [`docs/slice-plan.md`](slice-plan.md), [`docs/slice-plan-impl.md`](slice-plan-impl.md)
+- 레거시 비전: [`docs/whole-plan.md`](whole-plan.md) (확장 기획 참고용)
+
 ## 주요 문서
 - [`docs/slice-plan-single-source.md`](slice-plan-single-source.md): 범위·데이터 계약·주차 계획·검증 루틴의 기준.
 - [`docs/pre-timeline-architecture.md`](pre-timeline-architecture.md): 착수 전에 공유해야 할 의도와 시스템 책임 요약.

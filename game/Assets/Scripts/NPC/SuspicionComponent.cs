@@ -14,11 +14,11 @@ namespace DreamOfOne.NPC
 
         [SerializeField]
         [Tooltip("초당 감소 수치")]
-        private float decayPerSecond = 5f;
+        private float decayPerSecond = 0.5f;
 
         [SerializeField]
         [Tooltip("신고를 일으킬 최소 의심 수치")]
-        private float reportThreshold = 40f;
+        private float reportThreshold = 50f;
 
         [SerializeField]
         [Tooltip("신고 후 다시 신고할 수 있을 때까지의 대기 시간")]

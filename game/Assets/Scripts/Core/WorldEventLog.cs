@@ -11,7 +11,7 @@ namespace DreamOfOne.Core
     {
         [SerializeField]
         [Tooltip("버퍼에 유지할 최대 이벤트 수")]
-        private int bufferSize = 64;
+        private int bufferSize = 512;
 
         [SerializeField]
         [Tooltip("에디터 디버깅을 위해 콘솔 출력 여부")]

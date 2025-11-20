@@ -22,6 +22,15 @@ namespace DreamOfOne.LLM
         [Tooltip("LLM 실패 시 사용할 폴백 문장")]
         private string fallbackLine = "규칙 위반을 확인했습니다. 조심해 주세요.";
 
+        [System.Serializable]
+        private struct UtteranceRequest
+        {
+            public string role;
+            public string situation_summary;
+            public string tone;
+            public string constraints;
+        }
+
         public void RequestLine(string role, string summary, System.Action<string> onResult)
         {
             StartCoroutine(RequestCoroutine(role, summary, onResult));
@@ -29,9 +38,9 @@ namespace DreamOfOne.LLM
 
         private IEnumerator RequestCoroutine(string role, string summary, System.Action<string> onResult)
         {
-            var payload = new
+            var payload = new UtteranceRequest
             {
-                role,
+                role = role,
                 situation_summary = summary,
                 tone = "neutral",
                 constraints = "한 줄, 80자 이내"

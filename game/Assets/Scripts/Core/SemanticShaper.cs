@@ -48,7 +48,9 @@ namespace DreamOfOne.Core
                     break;
             }
 
-            if (!string.IsNullOrEmpty(record.note) && builder.Length > 0 && record.eventType is EventType.VerdictGiven or EventType.SuspicionUpdated)
+            if (!string.IsNullOrEmpty(record.note) &&
+                builder.Length > 0 &&
+                record.eventType is not (EventType.VerdictGiven or EventType.SuspicionUpdated))
             {
                 builder.Append($" ({record.note})");
             }

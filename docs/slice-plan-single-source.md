@@ -4,7 +4,7 @@
 - 목적: `whole-plan.md`의 대규모 비전을 유지하되, 1인·8주·Unity 입문 조건에서 실행 가능한 최소 루프를 정의한다.
 - 적용 범위: `docs/slice-plan.md`, `docs/slice-plan-impl.md`, `docs/pre-timeline-architecture.md` 내용을 통합한 단일 레퍼런스.
 - 출력 목표: 편의점 구역에서 **규범 위반 → 의심 → 신고 → 경찰 심문 → 판정 텍스트** 흐름이 1회 이상 자연스럽게 실행되는 v0.1 빌드.
-- 레거시 문서는 삭제되었으며, 필요 시 Git history에서만 참고한다.
+- 기존 레거시 문서(`slice-plan.md`, `slice-plan-impl.md`, `pre-timeline-architecture.md`)는 삭제되었으며, 필요 시 Git history에서만 참고한다. 본 문서는 단일 소스 레퍼런스로 새로 작성되었다.
 - 단일 소스 원칙: 실행 기준·수치·검증 루틴은 본 문서만 따른다. `pre-timeline-architecture.md`·`slice-plan.md`·`slice-plan-impl.md`는 컨텍스트, `whole-plan.md`는 레거시 비전으로 분류하며, 값이 다를 경우 반드시 이 문서 기준으로 덮어쓴다.
 - 문서 색인은 `docs/README.md`에 정리하되, 신규 내용은 항상 이 파일을 먼저 업데이트한 뒤 다른 문서에 요약한다.
 

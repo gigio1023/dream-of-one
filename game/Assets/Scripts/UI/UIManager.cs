@@ -102,6 +102,7 @@ namespace DreamOfOne.UI
             if (toastRoutine != null)
             {
                 StopCoroutine(toastRoutine);
+                toastRoutine = null;
             }
 
             toastRoutine = StartCoroutine(ToastRoutine(text, duration));
@@ -113,6 +114,7 @@ namespace DreamOfOne.UI
             toastText.SetText(text);
             yield return new WaitForSeconds(duration);
             toastText.gameObject.SetActive(false);
+            toastRoutine = null;
         }
 
         public void ShowInterrogationText(string text)

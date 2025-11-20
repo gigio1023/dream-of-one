@@ -13,7 +13,7 @@ namespace DreamOfOne.NPC
         private SuspicionComponent suspicion = null;
 
         [SerializeField]
-        [Tooltip("好奇心 이벤트 주기(초)")]
+        [Tooltip("호기심 이벤트 주기(초)")]
         private float curiosityInterval = 8f;
 
         private float curiosityTimer = 0f;

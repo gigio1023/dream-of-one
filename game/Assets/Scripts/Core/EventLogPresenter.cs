@@ -18,7 +18,10 @@ namespace DreamOfOne.Core
         [SerializeField]
         private UIManager uiManager = null;
 
-        private int processedCount = 0;
+        /// <summary>
+        /// WorldEventLog의 총 발행 카운터를 기억해 버퍼 회전 후에도 신규 이벤트를 감지한다.
+        /// </summary>
+        private int lastProcessedTotal = 0;
 
         private void Update()
         {
@@ -28,14 +31,25 @@ namespace DreamOfOne.Core
             }
 
             var events = eventLog.Events;
-            for (; processedCount < events.Count; processedCount++)
+            int total = eventLog.TotalEvents;
+            int dropped = eventLog.DroppedEvents;
+
+            // 앞에서 드롭된 수만큼 오프셋을 줄여 현재 버퍼 인덱스를 계산한다.
+            int startIndex = Mathf.Max(0, lastProcessedTotal - dropped);
+            if (startIndex > events.Count)
             {
-                var record = events[processedCount];
+                startIndex = events.Count;
+            }
+
+            for (int i = startIndex; i < events.Count; i++)
+            {
+                var record = events[i];
                 string text = semanticShaper != null ? semanticShaper.ToText(record) : record.eventType.ToString();
                 uiManager.AddLogLine(text);
             }
+
+            lastProcessedTotal = total;
         }
     }
 }
-
 

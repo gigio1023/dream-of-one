@@ -14,6 +14,9 @@ namespace DreamOfOne.UI
     public sealed class UIManager : MonoBehaviour
     {
         [SerializeField]
+        private GlobalSuspicionSystem globalSuspicionSystem = null;
+
+        [SerializeField]
         private Slider globalSuspicionBar = null;
 
         [SerializeField]
@@ -34,6 +37,7 @@ namespace DreamOfOne.UI
 
         private readonly Queue<string> logLines = new();
         private Coroutine toastRoutine = null;
+        private GlobalSuspicionSystem boundSuspicionSystem = null;
 
         private void Awake()
         {
@@ -43,6 +47,8 @@ namespace DreamOfOne.UI
             {
                 toastText.gameObject.SetActive(false);
             }
+
+            Bind(globalSuspicionSystem);
         }
 
         /// <summary>
@@ -55,8 +61,22 @@ namespace DreamOfOne.UI
                 return;
             }
 
-            system.OnGlobalSuspicionChanged += UpdateGlobalSuspicion;
-            UpdateGlobalSuspicion(system.GlobalSuspicion);
+            if (boundSuspicionSystem != null)
+            {
+                boundSuspicionSystem.OnGlobalSuspicionChanged -= UpdateGlobalSuspicion;
+            }
+
+            boundSuspicionSystem = system;
+            boundSuspicionSystem.OnGlobalSuspicionChanged += UpdateGlobalSuspicion;
+            UpdateGlobalSuspicion(boundSuspicionSystem.GlobalSuspicion);
+        }
+
+        private void OnDestroy()
+        {
+            if (boundSuspicionSystem != null)
+            {
+                boundSuspicionSystem.OnGlobalSuspicionChanged -= UpdateGlobalSuspicion;
+            }
         }
 
         public void UpdateGlobalSuspicion(float value)

@@ -13,7 +13,7 @@
 1. Unity Hub 설치 ([unity.com/download](https://unity.com/download))
 2. Unity 6000.2.10f1 버전 설치
    - Hub > Installs > Add > 6000.2.10f1 검색/설치
-3. Hub > Projects > Add > `<repo경로>/game/` 선택
+3. Hub > Projects > Add > `<repo경로>/draem-of-one/` 선택
 4. 프로젝트 열기(첫 로드는 5–10분 소요 가능)
 5. **DoD**: Unity Editor가 열리고 Console/Inspector/Hierarchy 패널이 보임
 
@@ -26,10 +26,10 @@
 
 ### Day 0-3: 문서 숙지 (20–30분, 선택적으로 분산 가능)
 - 컨벤션: `docs/Contrib/UnityProjectConventions.md`
-- VS 로드맵(가안): `game/docs/Design/VerticalSliceRoadmap.md`
-- 규칙 스키마: `game/docs/Design/DreamRules.md`
-- 의심 모델: `game/docs/Design/SuspicionModel.md`
-- 디렉터: `game/docs/Design/Director.md`
+- VS 로드맵(가안): `draem-of-one/docs/Design/VerticalSliceRoadmap.md`
+- 규칙 스키마: `draem-of-one/docs/Design/DreamRules.md`
+- 의심 모델: `draem-of-one/docs/Design/SuspicionModel.md`
+- 디렉터: `draem-of-one/docs/Design/Director.md`
 - **DoD**: 핵심 용어(SO, DoD, 단서, 의심, G) 이해
 
 ---
@@ -509,7 +509,7 @@ Cinemachine으로 부드러운 3인칭 카메라를 설정하고, NPC 목격 범
    - 개선 희망 사항 3가지
 
 #### 10-3. 로드맵 체크박스 갱신 (5–10분)
-1. `game/docs/Design/VerticalSliceRoadmap.md` 열기
+1. `draem-of-one/docs/Design/VerticalSliceRoadmap.md` 열기
 2. 완료한 마일스톤(M0-1~M0-2, M1-1~M1-2) 체크 또는 메모 추가
 3. Commit 준비
 

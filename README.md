@@ -35,8 +35,8 @@
 - [`docs/whole-plan.md`](docs/whole-plan.md): 축소 전 원본 비전 문서(조직별 목표·산출물·Artifact 체계 포함). 레거시 세부 자료는 Git history에서만 확인할 수 있다.
 
 ### 실행 방법
-1. Unity Hub에서 `game/` 폴더를 프로젝트로 열기
-2. `game/Assets/Scenes/Prototype.unity` 씬 열기
+1. Unity Hub에서 `draem-of-one/` 폴더를 프로젝트로 열기
+2. `draem-of-one/Assets/Scenes/Prototype.unity` 씬 열기
 3. Play
 
 ### 컨트롤 (임시)
@@ -47,19 +47,19 @@
 
 ```
 dream-of-one/
-├── game/              # Unity 6 URP 프로젝트
+├── draem-of-one/      # Unity 6 URP 프로젝트
 │   ├── Assets/
 │   ├── Packages/
 │   └── ProjectSettings/
 ├── server/            # LLM 백엔드 (향후 예정)
 ├── docs/              # 리포지터리 전반 문서
-│   ├── ADR/          # 아키텍처 결정 기록
-│   └── Contrib/      # 기여 가이드
-└── game/docs/         # 게임 전용 문서
-    ├── Design/       # GDD, 규칙, 의심 모델
-    ├── Tech/         # 아키텍처, 루프, LLM 인터페이스
-    ├── UX/           # UI/UX 명세
-    └── Content/      # 규칙 프리셋
+│   ├── ADR/           # 아키텍처 결정 기록
+│   └── Contrib/       # 기여 가이드
+└── draem-of-one/docs/ # 게임 전용 문서
+    ├── Design/        # GDD, 규칙, 의심 모델
+    ├── Tech/          # 아키텍처, 루프, LLM 인터페이스
+    ├── UX/            # UI/UX 명세
+    └── Content/       # 규칙 프리셋
 ```
 
 ## 핵심 시스템
@@ -79,12 +79,12 @@ dream-of-one/
 
 ## 문서
 
-- **빠른 참조**: [`game/docs/Design/OnePageGDD.md`](game/docs/Design/OnePageGDD.md)
+- **빠른 참조**: [`draem-of-one/docs/Design/OnePageGDD.md`](draem-of-one/docs/Design/OnePageGDD.md)
 - **전체 계획**: [`plan.md`](plan.md) (초기 설계 문서)
 - **아키텍처**: [`docs/ArchitectureOverview.md`](docs/ArchitectureOverview.md)
 - **개발 가이드**: [`docs/Contrib/DevelopersGuide.md`](docs/Contrib/DevelopersGuide.md)
 - **컨벤션**: [`docs/Contrib/UnityProjectConventions.md`](docs/Contrib/UnityProjectConventions.md)
-- **버티컬 슬라이스 로드맵(가안)**: [`game/docs/Design/VerticalSliceRoadmap.md`](game/docs/Design/VerticalSliceRoadmap.md)
+- **버티컬 슬라이스 로드맵(가안)**: [`draem-of-one/docs/Design/VerticalSliceRoadmap.md`](draem-of-one/docs/Design/VerticalSliceRoadmap.md)
 
 ## 개발 상태
 

@@ -13,6 +13,7 @@
 - [`docs/slice-plan.md`](slice-plan.md): 초기 설계 의도와 축소 배경을 보존한 메모.
 - [`docs/slice-plan-impl.md`](slice-plan-impl.md): 단일 소스를 실행 단계로 옮길 때 참고하는 구현 팁.
 - [`docs/whole-plan.md`](whole-plan.md): 축소 이전 대규모 비전 문서. 조직별 목표·Artifact 정의가 필요할 때 참조한다.
+- [`docs/devlog/README.md`](devlog/README.md): 난이도 보정 주차별 실행 계획 인덱스(주0~주10 링크 포함).
 
 ## 기타 지침
 - 추가 문서가 필요하면 단일 소스를 우선 업데이트한 뒤, 이 색인에서 링크를 연결한다.

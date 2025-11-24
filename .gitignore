@@ -1,19 +1,19 @@
-# Unity project artifacts (scoped under game/)
-game/[Ll]ibrary/
-game/[Tt]emp/
-game/[Oo]bj/
-game/[Bb]uild/
-game/[Bb]uilds/
-game/[Ll]ogs/
-game/[Uu]ser[Ss]ettings/
-game/[Mm]emoryCaptures/
-game/[Rr]ecordings/
+# Unity project artifacts (scoped under draem-of-one/)
+draem-of-one/[Ll]ibrary/
+draem-of-one/[Tt]emp/
+draem-of-one/[Oo]bj/
+draem-of-one/[Bb]uild/
+draem-of-one/[Bb]uilds/
+draem-of-one/[Ll]ogs/
+draem-of-one/[Uu]ser[Ss]ettings/
+draem-of-one/[Mm]emoryCaptures/
+draem-of-one/[Rr]ecordings/
 
 # Crashlytics
-game/[Cc]rashlytics-build.properties
+draem-of-one/[Cc]rashlytics-build.properties
 
 # Addressables
-game/Assets/AddressableAssetsData/
+draem-of-one/Assets/AddressableAssetsData/
 
 # Visual Studio / Rider
 /.idea/

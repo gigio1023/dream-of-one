@@ -3,7 +3,7 @@
 게임 구현에 바로 필요한 정보만 정리했다. 기획·배경 설명은 단일 소스 문서에서 확인한다.
 
 ## 현재 목표
-- 8주 안에 편의점 거리 씬에서 “규범 위반 → 의심 → 신고 → 심문 → 판정” 루프 1회 완주.
+- 10주 안에 편의점 거리 씬에서 “규범 위반 → 의심 → 신고 → 심문 → 판정” 루프 1회 완주.
 - 새 Input System, Cinemachine, NavMesh, Suspicion/Report/Police 루프를 단계적으로 연결.
 - 주차별 할 일과 난이도는 [`docs/devlog/README.md`](docs/devlog/README.md)을 따른다.
 

@@ -1,7 +1,7 @@
 # Dream of One – 수직 슬라이스 단일 소스 v1.0
 
 ## 0. 개요
-- 목적: `whole-plan.md`의 대규모 비전을 유지하되, 1인·8주 일정에서 실행 가능한 최소 루프를 정의한다.
+- 목적: `whole-plan.md`의 대규모 비전을 유지하되, 1인·10주 일정에서 실행 가능한 최소 루프를 정의한다.
 - 적용 범위: `docs/slice-plan.md`, `docs/slice-plan-impl.md`, `docs/pre-timeline-architecture.md` 내용을 통합한 단일 레퍼런스.
 - 출력 목표: 편의점 구역에서 **규범 위반 → 의심 → 신고 → 경찰 심문 → 판정 텍스트** 흐름이 1회 이상 자연스럽게 실행되는 v0.1 빌드.
 - 기존 레거시 문서(`slice-plan.md`, `slice-plan-impl.md`, `pre-timeline-architecture.md`)는 삭제되었으며, 필요 시 Git history에서만 참고한다. 본 문서는 단일 소스 레퍼런스로 새로 작성되었다.
@@ -10,7 +10,7 @@
 
 ## 1. 전제와 제약
 - 인원: 1명, 역할 겸임 전제로 진행.
-- 일정: 8주(주 5일, 1일 4–5시간 가정). 주차마다 학습 시간을 명시해 과부하를 피한다.
+- 일정: 10주(주 5일, 1일 4–5시간 가정). 주차마다 학습 시간을 명시해 과부하를 피한다.
 - 플랫폼: Unity 2022/2023 LTS 3D Core, PC Standalone 빌드.
 - 장비: 단일 개발 PC, 로컬 Git. CI·커스텀 툴은 선택 사항으로 후순위 배치.
 
@@ -29,7 +29,7 @@
 - SuspicionComponent, GlobalSuspicionSystem(G 바), ReportManager, PoliceController.
 - LLM 연동은 선택. 템플릿 폴백 필수.
 
-## 4. 제외(8주 이후로 이관)
+## 4. 제외(10주 이후로 이관)
 - `whole-plan.md`에 있는 12명 NPC, Spatial Blackboard, 지속 세션, Generator/Referee 이중화.
 - Artifact 시스템, RC/승인 노트, 정책 팩, SignalBus DI, Addressables.
 - 커스텀 인스펙터, 자동 CI, NavMesh 런타임 리빌드, Behavior Graph.
@@ -110,34 +110,18 @@
 - 검증
   - 기본 이동 + 카메라 + NavMesh 플레이 모드 테스트 녹화 1회.
 
-## 8. 주차별 계획(학습 포함)
-- 주0 (사전 학습 2~3일)
-  - Unity 3D Core 프로젝트 생성, Git 초기화, `.gitignore` 정리.
-  - PlayerController 튜토리얼, Cinemachine Follow/FreeLook, NavMesh Bake 기초 강좌를 순서대로 학습한다.
-  - Input System Action Asset 샘플을 만들어 WASD, 마우스 감도, 상호작용 키를 바인딩해둔다.
-  - 산출물: 플레이어 캡슐 이동 GIF 1개, 학습 노트 5줄.
-- 주1
-  - 주0에서 만든 샘플을 `Main` 씬으로 옮기고 PlayerController, FollowCamera, 기본 HUD placeholder를 고정한다.
-  - 학습 블록(입력, Cinemachine)은 하루 1~2시간 복습으로 끝낸 뒤 남은 시간에 코드 품질을 다듬는다.
-- 주2
-  - 편의점 지형, NavMesh Bake, NPC 프리팹 배치, 단순 순찰.
-  - 학습: NavMeshAgent 튜토리얼, Gizmo 디버깅.
-- 주3
-  - Zone 트리거, Queue/Seat/Photo 상호작용, ViolationDetected 이벤트 파이프.
-  - 학습: Collider Trigger, ScriptableObject 기초.
-- 주4
-  - WEL + SemanticShaper + EventLogPresenter, UI 로그 5줄.
-  - 테스트: 위반 이벤트 → 로그 문장 표시.
-- 주5
-  - SuspicionComponent, Global G 바, ReportManager 신고 큐, sᵢ UI 디버그 텍스트.
-- 주6
-  - PoliceController 상태 머신, InterrogationStarted/VerdictGiven 이벤트, 판정 UI.
-  - 루프 1회 완료 여부 확인, 플레이 영상 기록.
-- 주7
-  - UI 정리, 토스트, 심문 문구 템플릿, 선택적으로 LLMClient HTTP 스텁.
-  - 안정화: 파라미터 튜닝, 신고 쿨다운 조정.
-- 주8
-  - 버그 수정, 성능 체크(Profiler 10분), README/빌드 가이드 작성, `v0.1-slice` 태그 후보.
+## 8. 주차별 계획(학습 포함, 10주)
+- 주0: 새 Input System 이동/카메라 확보, `InputActions.inputactions` 작성, Cinemachine 기본 팔로우. 산출물: 이동 GIF 1개, 학습 노트 5줄.
+- 주1: `Main` 씬 이식, PlayerInput UnityEvent 고정, 70m 이상 바닥 교체, HUD 자리잡기.
+- 주2: 이동/카메라/입력 안정화, 파라미터 튜닝, Prefab 참조 정리.
+- 주3: NavMesh 첫 베이크, NPC 1명 이동 성공, 베이크 파라미터 튠.
+- 주4: NPC 4종 프리팹, 순찰/정지 상태 구현, 경로 배치.
+- 주5: Queue/Bench/Photo Zone 트리거, Interact → ViolationDetected 이벤트 라우팅, 프롬프트 표시.
+- 주6: WorldEventLog → SemanticShaper → UI 로그 5줄, 토스트 큐 기본 구현.
+- 주7: SuspicionComponent/Global G/ReportManager 연결, sᵢ·G 디버그 UI 노출.
+- 주8: Police 상태 머신, 신고→심문→판정 UI 루프 1회 완주, 영상 기록.
+- 주9: HUD/토스트 폴리싱, 심문 문구 템플릿, 선택적 LLM HTTP 스텁, 밀린 TODO 버퍼 처리.
+- 주10: 10분 안정성 점검, 문서/태그/빌드 정리, 릴리즈 노트 초안.
 
 ## 9. 구현 순서(실행 지침)
 1. PlayerController, FollowCamera, Input 바인딩 고정.

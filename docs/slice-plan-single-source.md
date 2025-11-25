@@ -1,7 +1,7 @@
 # Dream of One – 수직 슬라이스 단일 소스 v1.0
 
 ## 0. 개요
-- 목적: `whole-plan.md`의 대규모 비전을 유지하되, 1인·8주·Unity 입문 조건에서 실행 가능한 최소 루프를 정의한다.
+- 목적: `whole-plan.md`의 대규모 비전을 유지하되, 1인·8주 일정에서 실행 가능한 최소 루프를 정의한다.
 - 적용 범위: `docs/slice-plan.md`, `docs/slice-plan-impl.md`, `docs/pre-timeline-architecture.md` 내용을 통합한 단일 레퍼런스.
 - 출력 목표: 편의점 구역에서 **규범 위반 → 의심 → 신고 → 경찰 심문 → 판정 텍스트** 흐름이 1회 이상 자연스럽게 실행되는 v0.1 빌드.
 - 기존 레거시 문서(`slice-plan.md`, `slice-plan-impl.md`, `pre-timeline-architecture.md`)는 삭제되었으며, 필요 시 Git history에서만 참고한다. 본 문서는 단일 소스 레퍼런스로 새로 작성되었다.
@@ -9,7 +9,7 @@
 - 문서 색인은 `docs/README.md`에 정리하되, 신규 내용은 항상 이 파일을 먼저 업데이트한 뒤 다른 문서에 요약한다.
 
 ## 1. 전제와 제약
-- 인원: 1명, Python 백엔드/DevOps 경력 3년, Unity·C# 초보.
+- 인원: 1명, 역할 겸임 전제로 진행.
 - 일정: 8주(주 5일, 1일 4–5시간 가정). 주차마다 학습 시간을 명시해 과부하를 피한다.
 - 플랫폼: Unity 2022/2023 LTS 3D Core, PC Standalone 빌드.
 - 장비: 단일 개발 PC, 로컬 Git. CI·커스텀 툴은 선택 사항으로 후순위 배치.
@@ -178,5 +178,3 @@
   - EventRecord JSONL 1분 샘플, Suspicion 그래프 스크린샷, UI 캡처를 문서에 첨부.
 - 차주 계획 수립 전
   - 미완료 항목을 체크리스트로 이월하고, 학습 시간이 필요하면 별도 블록으로 예약.
-
-

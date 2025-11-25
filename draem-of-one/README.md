@@ -19,4 +19,4 @@ Unity 6000.2.10f1, URP 17.2. 게임 루프(규범 위반→의심→신고→심
 ## 참고 문서
 - 단일 소스(범위·데이터·주차 계획): [`../docs/slice-plan-single-source.md`](../docs/slice-plan-single-source.md)
 - 착수 컨텍스트 요약: [`../docs/pre-timeline-architecture.md`](../docs/pre-timeline-architecture.md)
-- 초보자 10일 가이드: [`../BEGINNER_DEV_PLAN.md`](../BEGINNER_DEV_PLAN.md)
+- 10일 가이드: [`../BEGINNER_DEV_PLAN.md`](../BEGINNER_DEV_PLAN.md)

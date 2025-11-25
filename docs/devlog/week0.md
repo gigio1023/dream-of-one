@@ -1,6 +1,6 @@
 # Week 0 — 새 Input System 이동/카메라 (추천 5~8시간)
 
-목표: Legacy Input 없이 새 Input System으로 이동/카메라를 확보한다. Unity/C# 완전 초보 기준으로 에디터 조작까지 상세히 적었다. PlayerInput UnityEvent와 NavMesh는 “맛보기” 옵션으로 두고 성공 경험에 집중한다.
+목표: Legacy Input 없이 새 Input System으로 이동/카메라를 확보한다. 에디터 조작까지 상세히 적었다. PlayerInput UnityEvent와 NavMesh는 “맛보기” 옵션으로 두고 성공 경험에 집중한다.
 
 ## 준비 체크
 - Unity Hub에서 LTS 설치 후 프로젝트를 연다.

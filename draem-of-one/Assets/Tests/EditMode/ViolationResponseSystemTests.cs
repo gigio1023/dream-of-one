@@ -1,4 +1,5 @@
 using DreamOfOne.Core;
+using CoreEventType = DreamOfOne.Core.EventType;
 using DreamOfOne.NPC;
 using NUnit.Framework;
 using UnityEngine;
@@ -15,9 +16,9 @@ namespace DreamOfOne.Tests
 
             var npcObject = new GameObject("Witness");
             var suspicion = npcObject.AddComponent<SuspicionComponent>();
-            TestHelpers.SetPrivateField(suspicion, "reportManager", null);
-            TestHelpers.SetPrivateField(suspicion, "globalSuspicion", null);
-            TestHelpers.SetPrivateField(suspicion, "eventLog", null);
+            TestHelpers.SetPrivateField<ReportManager>(suspicion, "reportManager", null);
+            TestHelpers.SetPrivateField<GlobalSuspicionSystem>(suspicion, "globalSuspicion", null);
+            TestHelpers.SetPrivateField<WorldEventLog>(suspicion, "eventLog", null);
 
             var systemObject = new GameObject("ResponseSystem");
             var responseSystem = systemObject.AddComponent<ViolationResponseSystem>();
@@ -31,7 +32,7 @@ namespace DreamOfOne.Tests
             {
                 actorId = "Player",
                 actorRole = "Player",
-                eventType = EventType.ViolationDetected,
+                eventType = CoreEventType.ViolationDetected,
                 ruleId = "R10",
                 zoneId = "Photo"
             };

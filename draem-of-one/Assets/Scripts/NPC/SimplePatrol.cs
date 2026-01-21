@@ -18,6 +18,20 @@ namespace DreamOfOne.NPC
 
         private int index = 0;
 
+        private void Start()
+        {
+            if (waypoints == null || waypoints.Length == 0)
+            {
+                var left = new GameObject($"{name}_WP_A").transform;
+                left.position = transform.position + new Vector3(-1.5f, 0f, -1.5f);
+
+                var right = new GameObject($"{name}_WP_B").transform;
+                right.position = transform.position + new Vector3(1.5f, 0f, 1.5f);
+
+                Configure(new[] { left, right }, speed, arrivalThreshold);
+            }
+        }
+
         private void Update()
         {
             Tick(Time.deltaTime);

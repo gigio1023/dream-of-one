@@ -1,4 +1,5 @@
 using DreamOfOne.Core;
+using CoreEventType = DreamOfOne.Core.EventType;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -24,7 +25,7 @@ namespace DreamOfOne.Tests
             {
                 actorId = "Player",
                 actorRole = "Player",
-                eventType = EventType.ViolationDetected,
+                eventType = CoreEventType.ViolationDetected,
                 ruleId = "R4",
                 note = "test"
             };

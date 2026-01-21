@@ -28,6 +28,15 @@ namespace DreamOfOne.Core
         {
             if (target == null)
             {
+                var player = GameObject.FindGameObjectWithTag("Player");
+                if (player != null)
+                {
+                    target = player.transform;
+                }
+            }
+
+            if (target == null)
+            {
                 return;
             }
 
@@ -44,4 +53,3 @@ namespace DreamOfOne.Core
         }
     }
 }
-

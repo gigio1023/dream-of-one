@@ -2,7 +2,9 @@
   "name": "DreamOfOne",
   "rootNamespace": "DreamOfOne",
   "references": [
-    "Unity.InputSystem"
+    "Unity.InputSystem",
+    "Unity.TextMeshPro",
+    "Unity.AI.Navigation"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

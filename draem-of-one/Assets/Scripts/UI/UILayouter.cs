@@ -4,180 +4,126 @@ using UnityEngine.UI;
 
 namespace DreamOfOne.UI
 {
+    /// <summary>
+    /// Simple runtime layout for HUD elements created in Prototype scene.
+    /// </summary>
     public sealed class UILayouter : MonoBehaviour
     {
         [SerializeField]
-        private Canvas canvas = null;
-
-        [SerializeField]
-        private TMP_Text eventLog = null;
-
-        [SerializeField]
-        private TMP_Text prompt = null;
-
-        [SerializeField]
-        private TMP_Text interrogation = null;
-
-        [SerializeField]
-        private TMP_Text caseBundle = null;
-
-        [SerializeField]
-        private TMP_Text coverStatus = null;
-
-        [SerializeField]
-        private TMP_Text blackboard = null;
-
-        [SerializeField]
-        private TMP_Text controls = null;
-
-        [SerializeField]
-        private Image promptPanel = null;
-
-        [SerializeField]
-        private Image interrogationPanel = null;
+        private bool applyOnAwake = true;
 
         private void Awake()
         {
-            ApplyLayout();
+            if (applyOnAwake)
+            {
+                Apply();
+            }
         }
 
-        public void ApplyLayout()
+        public void Apply()
         {
-            if (canvas == null)
-            {
-                canvas = GetComponentInChildren<Canvas>(true);
-            }
-
+            var canvas = GetComponentInChildren<Canvas>(true);
             if (canvas == null)
             {
                 return;
             }
 
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1920f, 1080f);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
+            var slider = canvas.GetComponentInChildren<Slider>(true);
+            if (slider != null)
+            {
+                slider.name = "GlobalSuspicionBar";
+                Place(slider.GetComponent<RectTransform>(), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(160f, 20f), new Vector2(140f, -20f));
+                slider.minValue = 0f;
+                slider.maxValue = 1f;
+                slider.value = 0f;
+            }
+
+            TMP_Text globalLabel = null;
+            TMP_Text eventLog = null;
+            TMP_Text toast = null;
+            TMP_Text interrogation = null;
+            TMP_Text prompt = null;
+
+            foreach (var label in canvas.GetComponentsInChildren<TMP_Text>(true))
+            {
+                if (label.text == "G 0%")
+                {
+                    globalLabel = label;
+                }
+                else if (label.text == "EventLog")
+                {
+                    eventLog = label;
+                }
+                else if (label.text == "E: Interact")
+                {
+                    prompt = label;
+                }
+            }
+
+            var remaining = new System.Collections.Generic.List<TMP_Text>();
+            foreach (var label in canvas.GetComponentsInChildren<TMP_Text>(true))
+            {
+                if (label == globalLabel || label == eventLog || label == prompt)
+                {
+                    continue;
+                }
+                remaining.Add(label);
+            }
+
+            if (remaining.Count > 0)
+            {
+                toast = remaining[0];
+            }
+            if (remaining.Count > 1)
+            {
+                interrogation = remaining[1];
+            }
+
+            if (globalLabel != null)
+            {
+                globalLabel.name = "GlobalSuspicionLabel";
+                globalLabel.fontSize = 22f;
+                Place(globalLabel.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(120f, 28f), new Vector2(20f, -20f));
+            }
+
             if (eventLog != null)
             {
                 eventLog.name = "EventLogText";
-                eventLog.fontSize = 28f;
+                eventLog.fontSize = 20f;
                 eventLog.alignment = TextAlignmentOptions.TopLeft;
-                eventLog.raycastTarget = false;
-                Place(eventLog.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(600f, 240f), new Vector2(20f, -20f));
+                Place(eventLog.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(520f, 160f), new Vector2(20f, -60f));
+            }
+
+            if (toast != null)
+            {
+                toast.name = "ToastText";
+                toast.fontSize = 24f;
+                toast.alignment = TextAlignmentOptions.Center;
+                Place(toast.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(600f, 40f), new Vector2(0f, 80f));
             }
 
             if (interrogation != null)
             {
                 interrogation.name = "InterrogationText";
-                interrogation.fontSize = 28f;
-                interrogation.alignment = TextAlignmentOptions.BottomLeft;
-                interrogation.raycastTarget = false;
-                Place(interrogation.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(800f, 64f), new Vector2(0f, 26f));
-
-                if (interrogationPanel == null)
-                {
-                    var panelObject = new GameObject("InterrogationPanel", typeof(RectTransform), typeof(Image));
-                    panelObject.transform.SetParent(canvas.transform, false);
-                    interrogationPanel = panelObject.GetComponent<Image>();
-                }
-
-                if (interrogationPanel != null)
-                {
-                    interrogationPanel.color = new Color(0f, 0f, 0f, 0.4f);
-                    var panelRect = interrogationPanel.rectTransform;
-                    Place(panelRect, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(800f, 80f), new Vector2(0f, 24f));
-                    interrogationPanel.transform.SetSiblingIndex(interrogation.transform.GetSiblingIndex());
-                    interrogation.transform.SetSiblingIndex(interrogationPanel.transform.GetSiblingIndex() + 1);
-                }
+                interrogation.fontSize = 24f;
+                interrogation.alignment = TextAlignmentOptions.Center;
+                Place(interrogation.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(680f, 60f), new Vector2(0f, 20f));
             }
 
             if (prompt != null)
             {
                 prompt.name = "PromptText";
-                prompt.fontSize = 34f;
+                prompt.fontSize = 22f;
                 prompt.alignment = TextAlignmentOptions.BottomLeft;
-                prompt.raycastTarget = false;
-                Place(prompt.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(360f, 44f), new Vector2(20f, 26f));
-
-                if (promptPanel == null)
-                {
-                    var panelObject = new GameObject("PromptPanel", typeof(RectTransform), typeof(Image));
-                    panelObject.transform.SetParent(canvas.transform, false);
-                    promptPanel = panelObject.GetComponent<Image>();
-                }
-
-                if (promptPanel != null)
-                {
-                    promptPanel.color = new Color(0f, 0f, 0f, 0.35f);
-                    var panelRect = promptPanel.rectTransform;
-                    Place(panelRect, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(380f, 50f), new Vector2(20f, 26f));
-                    promptPanel.transform.SetSiblingIndex(prompt.transform.GetSiblingIndex());
-                    prompt.transform.SetSiblingIndex(promptPanel.transform.GetSiblingIndex() + 1);
-                }
-            }
-
-            if (controls == null)
-            {
-                var controlObject = new GameObject("ControlsText", typeof(RectTransform), typeof(TextMeshProUGUI));
-                controlObject.transform.SetParent(canvas.transform, false);
-                controls = controlObject.GetComponent<TextMeshProUGUI>();
-            }
-
-            if (controls != null)
-            {
-                controls.name = "ControlsText";
-                controls.fontSize = 30f;
-                controls.alignment = TextAlignmentOptions.BottomRight;
-                controls.raycastTarget = false;
-                controls.SetText("WASD 이동 / E 상호작용 / F 촬영");
-                Place(controls.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(480f, 40f), new Vector2(-20f, 26f));
-            }
-
-            if (coverStatus == null)
-            {
-                var coverObject = new GameObject("CoverStatusText", typeof(RectTransform), typeof(TextMeshProUGUI));
-                coverObject.transform.SetParent(canvas.transform, false);
-                coverStatus = coverObject.GetComponent<TextMeshProUGUI>();
-            }
-
-            if (coverStatus != null)
-            {
-                coverStatus.name = "CoverStatusText";
-                coverStatus.fontSize = 30f;
-                coverStatus.alignment = TextAlignmentOptions.TopRight;
-                coverStatus.raycastTarget = false;
-                coverStatus.SetText("Cover: -");
-                Place(coverStatus.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(460f, 40f), new Vector2(-20f, -76f));
-            }
-
-            if (caseBundle == null)
-            {
-                var bundleObject = new GameObject("CaseBundleText", typeof(RectTransform), typeof(TextMeshProUGUI));
-                bundleObject.transform.SetParent(canvas.transform, false);
-                caseBundle = bundleObject.GetComponent<TextMeshProUGUI>();
-            }
-
-            if (caseBundle != null)
-            {
-                caseBundle.name = "CaseBundleText";
-                caseBundle.fontSize = 26f;
-                caseBundle.alignment = TextAlignmentOptions.TopRight;
-                caseBundle.raycastTarget = false;
-                caseBundle.SetText(string.Empty);
-                Place(caseBundle.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(460f, 200f), new Vector2(-20f, -140f));
-            }
-
-            if (blackboard == null)
-            {
-                var boardObject = new GameObject("BlackboardText", typeof(RectTransform), typeof(TextMeshProUGUI));
-                boardObject.transform.SetParent(canvas.transform, false);
-                blackboard = boardObject.GetComponent<TextMeshProUGUI>();
-            }
-
-            if (blackboard != null)
-            {
-                blackboard.name = "BlackboardText";
-                blackboard.fontSize = 24f;
-                blackboard.alignment = TextAlignmentOptions.TopLeft;
-                blackboard.raycastTarget = false;
-                blackboard.SetText(string.Empty);
-                Place(blackboard.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(640f, 220f), new Vector2(20f, -340f));
+                Place(prompt.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(260f, 30f), new Vector2(20f, 20f));
             }
         }
 

@@ -32,6 +32,8 @@ namespace DreamOfOne.Core
         public int TotalEvents => totalEvents;
         public int DroppedEvents => droppedEvents;
 
+        public event Action<EventRecord> OnEventRecorded;
+
         private void Awake()
         {
             logFilePath = Path.Combine(Application.persistentDataPath, "world-event-log.txt");
@@ -42,7 +44,9 @@ namespace DreamOfOne.Core
         /// </summary>
         public void RecordEvent(EventRecord record)
         {
-            record.timestamp = Time.time;
+            record.id = string.IsNullOrEmpty(record.id) ? Guid.NewGuid().ToString("N") : record.id;
+            record.stamp = Time.time;
+            record.category = InferCategory(record.eventType);
             events.Add(record);
             totalEvents++;
 
@@ -54,13 +58,15 @@ namespace DreamOfOne.Core
 
             if (echoToConsole)
             {
-                Debug.Log($"[WEL] {record.timestamp:F1}s {record.eventType} {record.actorId} {record.note}");
+                Debug.Log($"[WEL] {record.stamp:F1}s {record.eventType} {record.actorId} {record.note}");
             }
 
             if (!string.IsNullOrEmpty(logFilePath))
             {
                 EnqueueFileWrite(record);
             }
+
+            OnEventRecorded?.Invoke(record);
         }
 
         /// <summary>
@@ -74,6 +80,7 @@ namespace DreamOfOne.Core
                 actorRole = "Unknown",
                 eventType = entered ? EventType.EnteredZone : EventType.ExitedZone,
                 zoneId = zoneId,
+                category = EventCategory.Zone,
                 note = zoneType.ToString()
             };
 
@@ -100,7 +107,7 @@ namespace DreamOfOne.Core
         /// </summary>
         private void EnqueueFileWrite(EventRecord record)
         {
-            string line = $"{DateTime.UtcNow:O}\t{record.timestamp:F3}\t{record.eventType}\t{record.actorId}\t{record.ruleId}\t{record.zoneId}\t{record.note}";
+            string line = $"{DateTime.UtcNow:O}\t{record.stamp:F3}\t{record.id}\t{record.eventType}\t{record.category}\t{record.actorId}\t{record.ruleId}\t{record.zoneId}\t{record.note}";
             lock (fileWriteQueue)
             {
                 fileWriteQueue.Enqueue(line);
@@ -139,6 +146,20 @@ namespace DreamOfOne.Core
                 }
             }
         }
+
+        private static EventCategory InferCategory(EventType eventType)
+        {
+            return eventType switch
+            {
+                EventType.EnteredZone => EventCategory.Zone,
+                EventType.ExitedZone => EventCategory.Zone,
+                EventType.ViolationDetected => EventCategory.Rule,
+                EventType.SuspicionUpdated => EventCategory.Suspicion,
+                EventType.ReportFiled => EventCategory.Report,
+                EventType.InterrogationStarted => EventCategory.Verdict,
+                EventType.VerdictGiven => EventCategory.Verdict,
+                _ => EventCategory.Rule
+            };
+        }
     }
 }
-

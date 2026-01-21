@@ -1,10 +1,12 @@
 {
-  "name": "DreamOfOne",
-  "rootNamespace": "DreamOfOne",
+  "name": "DreamOfOne.Tests",
+  "rootNamespace": "DreamOfOne.Tests",
   "references": [
-    "Unity.InputSystem"
+    "DreamOfOne"
   ],
-  "includePlatforms": [],
+  "includePlatforms": [
+    "Editor"
+  ],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
   "overrideReferences": false,
@@ -12,5 +14,8 @@
   "autoReferenced": true,
   "defineConstraints": [],
   "versionDefines": [],
-  "noEngineReferences": false
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
 }

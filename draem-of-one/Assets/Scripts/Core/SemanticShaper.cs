@@ -32,10 +32,10 @@ namespace DreamOfOne.Core
                     builder.Append($"{record.actorId} 규칙 위반 {record.ruleId} 감지.");
                     break;
                 case EventType.SuspicionUpdated:
-                    builder.Append($"{record.actorId} 의심도가 {record.note}만큼 변했습니다.");
+                    builder.Append($"{record.actorId} 의심도 변화: {record.note}");
                     break;
                 case EventType.ReportFiled:
-                    builder.Append($"{record.actorId}이(가) 경찰에 신고했습니다.");
+                    builder.Append($"{record.actorId}이(가) {record.ruleId} 관련 신고를 제출했습니다.");
                     break;
                 case EventType.InterrogationStarted:
                     builder.Append("경찰 심문이 시작되었습니다.");
@@ -59,5 +59,4 @@ namespace DreamOfOne.Core
         }
     }
 }
-
 

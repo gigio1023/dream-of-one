@@ -37,7 +37,11 @@ namespace DreamOfOne.Core
             Quaternion desiredRotation = Quaternion.LookRotation(target.position - transform.position, Vector3.up);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, desiredRotation, rotateSpeed * Time.deltaTime);
         }
+
+        public void Configure(Transform followTarget)
+        {
+            target = followTarget;
+        }
     }
 }
-
 

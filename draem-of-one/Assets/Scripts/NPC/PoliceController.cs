@@ -48,16 +48,39 @@ namespace DreamOfOne.NPC
         [Tooltip("심문 이후 Patrol로 돌아가기까지의 대기 시간")]
         private float cooldownSeconds = 5f;
 
+        [SerializeField]
+        [Tooltip("NavMesh가 없을 때 사용할 이동 속도")]
+        private float fallbackMoveSpeed = 2.5f;
+
+        [SerializeField]
+        [Tooltip("심문 지연 시간")]
+        private float interrogationDelaySeconds = 2f;
+
+        [SerializeField]
+        [Tooltip("심문 텍스트 최대 길이")]
+        private int maxInterrogationChars = 80;
+
+        [SerializeField]
+        private DreamOfOne.LLM.LLMClient llmClient = null;
+
         private readonly List<EventRecord> buffer = new();
 
         private NavMeshAgent agent = null;
         private PoliceState state = PoliceState.Patrol;
         private int patrolIndex = 0;
         private float stateTimer = 0f;
+        private ReportEnvelope currentReport = null;
+        private readonly List<SuspicionComponent> cachedSuspicion = new();
 
         private void Awake()
         {
             agent = GetComponent<NavMeshAgent>();
+            CacheSuspicionComponents();
+        }
+
+        private void Start()
+        {
+            CacheSuspicionComponents();
         }
 
         private void Update()
@@ -86,16 +109,17 @@ namespace DreamOfOne.NPC
         /// </summary>
         private void UpdatePatrol()
         {
-            if (patrolPoints.Length > 0 && (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance))
+            if (HasNavMeshAgent() && patrolPoints.Length > 0 && (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance))
             {
                 patrolIndex = (patrolIndex + 1) % patrolPoints.Length;
                 agent.SetDestination(patrolPoints[patrolIndex].position);
             }
 
-            if (reportManager != null && reportManager.ShouldTriggerInterrogation())
+            if (reportManager != null && reportManager.TryConsumeReport(out var report))
             {
                 state = PoliceState.MoveToPlayer;
                 stateTimer = 0f;
+                currentReport = report;
             }
         }
 
@@ -110,19 +134,30 @@ namespace DreamOfOne.NPC
                 return;
             }
 
-            agent.SetDestination(player.position);
+            if (HasNavMeshAgent())
+            {
+                agent.SetDestination(player.position);
+            }
+            else
+            {
+                transform.position = Vector3.MoveTowards(transform.position, player.position, fallbackMoveSpeed * Time.deltaTime);
+            }
 
             if (Vector3.Distance(transform.position, player.position) <= interrogationDistance)
             {
                 state = PoliceState.Interrogate;
                 stateTimer = 0f;
-                agent.isStopped = true;
+                if (HasNavMeshAgent())
+                {
+                    agent.isStopped = true;
+                }
 
                 eventLog?.RecordEvent(new EventRecord
                 {
                     actorId = name,
                     actorRole = "Police",
                     eventType = EventType.InterrogationStarted,
+                    category = EventCategory.Verdict,
                     note = "player"
                 });
             }
@@ -133,7 +168,7 @@ namespace DreamOfOne.NPC
         /// </summary>
         private void UpdateInterrogate()
         {
-            if (stateTimer < 2f)
+            if (stateTimer < interrogationDelaySeconds)
             {
                 return;
             }
@@ -144,14 +179,27 @@ namespace DreamOfOne.NPC
                 actorId = name,
                 actorRole = "Police",
                 eventType = EventType.VerdictGiven,
-                note = verdict
+                category = EventCategory.Verdict,
+                note = verdict,
+                severity = 2
             });
 
             string text = semanticShaper != null
                 ? semanticShaper.ToText(new EventRecord { eventType = EventType.VerdictGiven, note = verdict })
                 : $"판정: {verdict}";
+            text = DialogueLineLimiter.ClampLine(text, maxInterrogationChars);
 
-            uiManager?.ShowInterrogationText(text);
+            if (llmClient != null)
+            {
+                llmClient.RequestLine("Police", $"판정 {verdict}", line =>
+                    uiManager?.ShowInterrogationText(DialogueLineLimiter.ClampLine(line, maxInterrogationChars)));
+            }
+            else
+            {
+                uiManager?.ShowInterrogationText(text);
+            }
+
+            ResetReporters();
 
             state = PoliceState.Cooldown;
             stateTimer = 0f;
@@ -159,7 +207,11 @@ namespace DreamOfOne.NPC
 
         private void UpdateCooldown()
         {
-            agent.isStopped = false;
+            if (HasNavMeshAgent())
+            {
+                agent.isStopped = false;
+            }
+
             if (stateTimer >= cooldownSeconds)
             {
                 state = PoliceState.Patrol;
@@ -189,17 +241,64 @@ namespace DreamOfOne.NPC
                 }
             }
 
-            if (reportCount >= 2)
+            int required = currentReport != null ? currentReport.reporterIds.Count : reportCount;
+            if (required >= 2)
             {
                 return "외부인";
             }
 
-            if (reportCount == 1)
+            if (required == 1)
             {
                 return "외부인 의심";
             }
 
             return "꿈 속 시민";
+        }
+
+        private bool HasNavMeshAgent()
+        {
+            return agent != null && agent.enabled && agent.isOnNavMesh;
+        }
+
+        private void CacheSuspicionComponents()
+        {
+            cachedSuspicion.Clear();
+            cachedSuspicion.AddRange(FindObjectsOfType<SuspicionComponent>());
+        }
+
+        private void ResetReporters()
+        {
+            if (currentReport == null || currentReport.reporterIds.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < cachedSuspicion.Count; i++)
+            {
+                var component = cachedSuspicion[i];
+                if (component == null)
+                {
+                    continue;
+                }
+
+                if (currentReport.reporterIds.Contains(component.NpcId))
+                {
+                    component.ResetAfterInterrogation();
+                }
+            }
+
+            currentReport.resolved = true;
+            currentReport = null;
+        }
+
+        public void Configure(Transform playerTransform, ReportManager reports, WorldEventLog log, SemanticShaper shaper, UIManager manager, DreamOfOne.LLM.LLMClient client = null)
+        {
+            player = playerTransform;
+            reportManager = reports;
+            eventLog = log;
+            semanticShaper = shaper;
+            uiManager = manager;
+            llmClient = client;
         }
     }
 }

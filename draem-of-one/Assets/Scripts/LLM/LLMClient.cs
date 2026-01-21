@@ -1,4 +1,5 @@
 using System.Collections;
+using DreamOfOne.Core;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -21,6 +22,10 @@ namespace DreamOfOne.LLM
         [SerializeField]
         [Tooltip("LLM 실패 시 사용할 폴백 문장")]
         private string fallbackLine = "규칙 위반을 확인했습니다. 조심해 주세요.";
+
+        [SerializeField]
+        [Tooltip("한 줄 최대 글자 수")]
+        private int maxChars = 80;
 
         [System.Serializable]
         private struct UtteranceRequest
@@ -59,12 +64,18 @@ namespace DreamOfOne.LLM
 
             if (request.result != UnityWebRequest.Result.Success)
             {
-                onResult?.Invoke(fallbackLine);
+                onResult?.Invoke(DialogueLineLimiter.ClampLine(fallbackLine, maxChars));
                 yield break;
             }
 
             var response = JsonUtility.FromJson<UtteranceResponse>(request.downloadHandler.text);
-            onResult?.Invoke(string.IsNullOrEmpty(response.utterance) ? fallbackLine : response.utterance);
+            string sanitized = DialogueLineLimiter.ClampLine(response.utterance, maxChars);
+            if (string.IsNullOrEmpty(sanitized))
+            {
+                sanitized = DialogueLineLimiter.ClampLine(fallbackLine, maxChars);
+            }
+
+            onResult?.Invoke(sanitized);
         }
 
         [System.Serializable]

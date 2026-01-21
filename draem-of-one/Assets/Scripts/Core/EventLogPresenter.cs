@@ -18,10 +18,21 @@ namespace DreamOfOne.Core
         [SerializeField]
         private UIManager uiManager = null;
 
+        [SerializeField]
+        [Tooltip("프레임당 처리할 최대 이벤트 수")]
+        private int maxEventsPerFrame = 2;
+
         /// <summary>
         /// WorldEventLog의 총 발행 카운터를 기억해 버퍼 회전 후에도 신규 이벤트를 감지한다.
         /// </summary>
         private int lastProcessedTotal = 0;
+
+        public void Configure(WorldEventLog log, SemanticShaper shaper, UIManager manager)
+        {
+            eventLog = log;
+            semanticShaper = shaper;
+            uiManager = manager;
+        }
 
         private void Update()
         {
@@ -41,15 +52,26 @@ namespace DreamOfOne.Core
                 startIndex = events.Count;
             }
 
+            int processed = 0;
             for (int i = startIndex; i < events.Count; i++)
             {
                 var record = events[i];
                 string text = semanticShaper != null ? semanticShaper.ToText(record) : record.eventType.ToString();
                 uiManager.AddLogLine(text);
+
+                if (record.severity >= 2 || record.eventType == EventType.VerdictGiven)
+                {
+                    uiManager.ShowToast(text);
+                }
+
+                processed++;
+                if (processed >= maxEventsPerFrame)
+                {
+                    break;
+                }
             }
 
-            lastProcessedTotal = total;
+            lastProcessedTotal = Mathf.Min(total, lastProcessedTotal + processed);
         }
     }
 }
-

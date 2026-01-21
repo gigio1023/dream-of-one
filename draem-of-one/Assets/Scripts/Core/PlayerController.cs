@@ -1,4 +1,7 @@
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace DreamOfOne.Core
 {
@@ -25,12 +28,56 @@ namespace DreamOfOne.Core
         [Tooltip("입력 이벤트를 기록할 WorldEventLog")]
         private WorldEventLog eventLog = null;
 
+        [SerializeField]
+        [Tooltip("현재 상호작용 가능한 Zone")]
+        private ZoneInteractable currentInteractable = null;
+
+        [SerializeField]
+        [Tooltip("촬영 시 사용할 규칙 ID")]
+        private string photoRuleId = "R10";
+
+#if ENABLE_INPUT_SYSTEM
+        [SerializeField]
+        [Tooltip("이동 입력 액션")]
+        private InputActionReference moveAction = null;
+
+        [SerializeField]
+        [Tooltip("상호작용 입력 액션")]
+        private InputActionReference interactAction = null;
+
+        [SerializeField]
+        [Tooltip("촬영 입력 액션")]
+        private InputActionReference photoAction = null;
+#endif
+
         private CharacterController characterController = null;
         private float verticalVelocity = 0.0f;
 
         private void Awake()
         {
             characterController = GetComponent<CharacterController>();
+        }
+
+        private void OnEnable()
+        {
+#if ENABLE_INPUT_SYSTEM
+            moveAction?.action.Enable();
+            interactAction?.action.Enable();
+            photoAction?.action.Enable();
+#endif
+            ZoneInteractable.OnPlayerEntered += HandleZoneEnter;
+            ZoneInteractable.OnPlayerExited += HandleZoneExit;
+        }
+
+        private void OnDisable()
+        {
+#if ENABLE_INPUT_SYSTEM
+            moveAction?.action.Disable();
+            interactAction?.action.Disable();
+            photoAction?.action.Disable();
+#endif
+            ZoneInteractable.OnPlayerEntered -= HandleZoneEnter;
+            ZoneInteractable.OnPlayerExited -= HandleZoneExit;
         }
 
         private void Update()
@@ -44,7 +91,7 @@ namespace DreamOfOne.Core
         /// </summary>
         private void HandleMovement()
         {
-            Vector2 input = new(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+            Vector2 input = ReadMoveInput();
             Vector3 move = new(input.x, 0f, input.y);
 
             if (cameraPivot != null)
@@ -85,21 +132,21 @@ namespace DreamOfOne.Core
         /// </summary>
         private void HandleInteraction()
         {
-            if (Input.GetKeyDown(KeyCode.E))
+            if (WasInteractPressed())
             {
-                RecordPlayerEvent("interaction_generic");
+                currentInteractable?.TryInteract("Player", "Player");
             }
 
-            if (Input.GetKeyDown(KeyCode.F))
+            if (WasPhotoPressed())
             {
-                RecordPlayerEvent("photo_attempt");
+                RecordPhotoEvent();
             }
         }
 
         /// <summary>
         /// 실제 규칙 구현 전까지는 단순히 이벤트 로그에 기록만 해 둔다.
         /// </summary>
-        private void RecordPlayerEvent(string note)
+        private void RecordPhotoEvent()
         {
             if (eventLog == null)
             {
@@ -111,13 +158,84 @@ namespace DreamOfOne.Core
                 actorId = "Player",
                 actorRole = "Player",
                 eventType = EventType.ViolationDetected,
-                ruleId = note,
-                note = note
+                category = EventCategory.Rule,
+                ruleId = photoRuleId,
+                severity = 2,
+                note = "photo_attempt"
             };
 
             eventLog.RecordEvent(record);
         }
+
+        private Vector2 ReadMoveInput()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (moveAction != null)
+            {
+                return moveAction.action.ReadValue<Vector2>();
+            }
+
+            if (Keyboard.current == null)
+            {
+                return Vector2.zero;
+            }
+
+            Vector2 input = Vector2.zero;
+            if (Keyboard.current.wKey.isPressed) input.y += 1f;
+            if (Keyboard.current.sKey.isPressed) input.y -= 1f;
+            if (Keyboard.current.aKey.isPressed) input.x -= 1f;
+            if (Keyboard.current.dKey.isPressed) input.x += 1f;
+            return input;
+#else
+            return new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+#endif
+        }
+
+        private bool WasInteractPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (interactAction != null)
+            {
+                return interactAction.action.WasPerformedThisFrame();
+            }
+
+            return Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame;
+#else
+            return Input.GetKeyDown(KeyCode.E);
+#endif
+        }
+
+        private bool WasPhotoPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (photoAction != null)
+            {
+                return photoAction.action.WasPerformedThisFrame();
+            }
+
+            return Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame;
+#else
+            return Input.GetKeyDown(KeyCode.F);
+#endif
+        }
+
+        private void HandleZoneEnter(ZoneInteractable interactable)
+        {
+            currentInteractable = interactable;
+        }
+
+        private void HandleZoneExit(ZoneInteractable interactable)
+        {
+            if (currentInteractable == interactable)
+            {
+                currentInteractable = null;
+            }
+        }
+
+        public void Configure(WorldEventLog log, Transform cameraRoot)
+        {
+            eventLog = log;
+            cameraPivot = cameraRoot;
+        }
     }
 }
-
-

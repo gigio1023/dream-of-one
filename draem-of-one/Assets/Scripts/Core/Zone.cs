@@ -1,3 +1,4 @@
+using DreamOfOne.NPC;
 using UnityEngine;
 
 namespace DreamOfOne.Core
@@ -31,6 +32,16 @@ namespace DreamOfOne.Core
 
         private Collider cachedCollider = null;
 
+        public string ZoneId => zoneId;
+        public ZoneType ZoneType => zoneType;
+
+        public void Configure(string id, ZoneType type, WorldEventLog log)
+        {
+            zoneId = id;
+            zoneType = type;
+            eventLog = log;
+        }
+
         private void Reset()
         {
             cachedCollider = GetComponent<Collider>();
@@ -63,10 +74,39 @@ namespace DreamOfOne.Core
                 return;
             }
 
+            bool isPlayer = other.CompareTag("Player");
+            bool isNpc = other.GetComponentInParent<NPCBase>() != null;
+            if (!isPlayer && !isNpc)
+            {
+                return;
+            }
+
             string actorId = other.gameObject.name;
             eventLog.RecordZoneEvent(actorId, zoneId, zoneType, entered);
         }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = zoneType switch
+            {
+                ZoneType.Queue => new Color(0.8f, 0.6f, 0.2f, 0.6f),
+                ZoneType.Seat => new Color(0.2f, 0.8f, 0.4f, 0.6f),
+                ZoneType.Photo => new Color(0.4f, 0.6f, 0.9f, 0.6f),
+                _ => new Color(0.7f, 0.7f, 0.7f, 0.6f)
+            };
+
+            if (TryGetComponent<Collider>(out var col))
+            {
+                Gizmos.matrix = transform.localToWorldMatrix;
+                if (col is BoxCollider box)
+                {
+                    Gizmos.DrawCube(box.center, box.size);
+                }
+                else if (col is SphereCollider sphere)
+                {
+                    Gizmos.DrawSphere(sphere.center, sphere.radius);
+                }
+            }
+        }
     }
 }
-
-

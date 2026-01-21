@@ -32,23 +32,57 @@ namespace DreamOfOne.UI
         private TMP_Text interrogationText = null;
 
         [SerializeField]
+        private TMP_Text promptText = null;
+
+        [SerializeField]
+        [Tooltip("UI 오브젝트가 없을 때 OnGUI로 표시")]
+        private bool useOnGuiFallback = false;
+
+        [SerializeField]
         [Tooltip("UI 로그 패널에 유지할 최대 줄 수")]
         private int logLineCount = 5;
 
         private readonly Queue<string> logLines = new();
         private Coroutine toastRoutine = null;
         private GlobalSuspicionSystem boundSuspicionSystem = null;
+        private float targetSuspicion = 0f;
+        private float currentSuspicion = 0f;
+        private string fallbackToast = string.Empty;
+        private float fallbackToastExpire = -1f;
+        private bool useFallback = false;
+        private GUIStyle fallbackStyle = null;
+        private string fallbackPrompt = string.Empty;
 
         private void Awake()
         {
             UpdateGlobalSuspicion(0f);
             interrogationText?.SetText(string.Empty);
+            promptText?.SetText(string.Empty);
             if (toastText != null)
             {
                 toastText.gameObject.SetActive(false);
             }
 
+            useFallback = useOnGuiFallback || (globalSuspicionBar == null && eventLogText == null && toastText == null && interrogationText == null);
+            if (useFallback)
+            {
+                fallbackStyle = new GUIStyle
+                {
+                    fontSize = 16,
+                    normal = { textColor = Color.white }
+                };
+            }
+
             Bind(globalSuspicionSystem);
+        }
+
+        private void Update()
+        {
+            currentSuspicion = Mathf.Lerp(currentSuspicion, targetSuspicion, 0.25f);
+            if (globalSuspicionBar != null)
+            {
+                globalSuspicionBar.SetValueWithoutNotify(currentSuspicion);
+            }
         }
 
         /// <summary>
@@ -81,7 +115,7 @@ namespace DreamOfOne.UI
 
         public void UpdateGlobalSuspicion(float value)
         {
-            globalSuspicionBar?.SetValueWithoutNotify(value);
+            targetSuspicion = value;
             globalSuspicionLabel?.SetText($"G {value:P0}");
         }
 
@@ -116,6 +150,12 @@ namespace DreamOfOne.UI
         {
             if (toastText == null)
             {
+                if (useFallback)
+                {
+                    fallbackToast = text;
+                    fallbackToastExpire = Time.time + duration;
+                }
+
                 return;
             }
 
@@ -140,6 +180,69 @@ namespace DreamOfOne.UI
         public void ShowInterrogationText(string text)
         {
             interrogationText?.SetText(text);
+            if (useFallback)
+            {
+                // Keep latest interrogation line for fallback render.
+                fallbackToast = text;
+            }
+        }
+
+        public void ShowPrompt(string text)
+        {
+            if (promptText == null)
+            {
+                if (useFallback)
+                {
+                    fallbackPrompt = text;
+                }
+
+                return;
+            }
+
+            promptText.gameObject.SetActive(true);
+            promptText.SetText(text);
+        }
+
+        public void HidePrompt()
+        {
+            if (promptText == null)
+            {
+                if (useFallback)
+                {
+                    fallbackPrompt = string.Empty;
+                }
+
+                return;
+            }
+
+            promptText.gameObject.SetActive(false);
+        }
+
+        private void OnGUI()
+        {
+            if (!useFallback || fallbackStyle == null)
+            {
+                return;
+            }
+
+            float y = 10f;
+            GUI.Label(new Rect(10f, y, 400f, 24f), $"G {currentSuspicion:P0}", fallbackStyle);
+            y += 26f;
+
+            string logText = string.Join("\n", logLines);
+            GUI.Label(new Rect(10f, y, 600f, 140f), logText, fallbackStyle);
+            y += 150f;
+
+            if (!string.IsNullOrEmpty(fallbackToast) && Time.time <= fallbackToastExpire)
+            {
+                GUI.Label(new Rect(10f, y, 600f, 24f), fallbackToast, fallbackStyle);
+                y += 26f;
+            }
+
+            if (!string.IsNullOrEmpty(fallbackPrompt))
+            {
+                GUI.Label(new Rect(10f, y, 400f, 24f), fallbackPrompt, fallbackStyle);
+            }
         }
     }
 }

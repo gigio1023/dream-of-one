@@ -123,6 +123,7 @@ namespace DreamOfOne.UI
 
             runtimeFallback.name = "Runtime_KoreanFallback";
             runtimeFallback.atlasPopulationMode = AtlasPopulationMode.Dynamic;
+            runtimeFallback.enableMultiAtlasSupport = true;
             runtimeFallback.fallbackFontAssetTable.Clear();
             runtimeFallback.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
@@ -289,6 +290,11 @@ namespace DreamOfOne.UI
                 {
                     return false;
                 }
+            }
+
+            if (asset.material == null || asset.material.mainTexture == null)
+            {
+                return false;
             }
 
             return true;

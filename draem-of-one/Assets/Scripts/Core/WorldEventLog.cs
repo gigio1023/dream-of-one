@@ -47,6 +47,20 @@ namespace DreamOfOne.Core
             record.id = string.IsNullOrEmpty(record.id) ? Guid.NewGuid().ToString("N") : record.id;
             record.stamp = Time.time;
             record.category = InferCategory(record.eventType);
+            if (string.IsNullOrEmpty(record.placeId) && !string.IsNullOrEmpty(record.zoneId))
+            {
+                record.placeId = record.zoneId;
+            }
+
+            if (string.IsNullOrEmpty(record.topic))
+            {
+                record.topic = !string.IsNullOrEmpty(record.ruleId) ? record.ruleId : record.eventType.ToString();
+            }
+
+            if (ShouldSkipDuplicate(record))
+            {
+                return;
+            }
             events.Add(record);
             totalEvents++;
 
@@ -69,10 +83,30 @@ namespace DreamOfOne.Core
             OnEventRecorded?.Invoke(record);
         }
 
+        public bool TryGetEventById(string eventId, out EventRecord record)
+        {
+            record = null;
+            if (string.IsNullOrEmpty(eventId))
+            {
+                return false;
+            }
+
+            for (int i = events.Count - 1; i >= 0; i--)
+            {
+                if (events[i].id == eventId)
+                {
+                    record = events[i];
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Zone 트리거 전용 헬퍼. 굳이 새로운 코드 없이 공통 경로를 사용한다.
         /// </summary>
-        public void RecordZoneEvent(string actorId, string zoneId, ZoneType zoneType, bool entered)
+        public void RecordZoneEvent(string actorId, string zoneId, ZoneType zoneType, bool entered, Vector3 position)
         {
             var record = new EventRecord
             {
@@ -80,8 +114,10 @@ namespace DreamOfOne.Core
                 actorRole = "Unknown",
                 eventType = entered ? EventType.EnteredZone : EventType.ExitedZone,
                 zoneId = zoneId,
+                placeId = zoneId,
                 category = EventCategory.Zone,
-                note = zoneType.ToString()
+                note = zoneType.ToString(),
+                position = position
             };
 
             RecordEvent(record);
@@ -158,8 +194,73 @@ namespace DreamOfOne.Core
                 EventType.ReportFiled => EventCategory.Report,
                 EventType.InterrogationStarted => EventCategory.Verdict,
                 EventType.VerdictGiven => EventCategory.Verdict,
+                EventType.NpcUtterance => EventCategory.Dialogue,
+                EventType.RumorShared => EventCategory.Gossip,
+                EventType.RumorConfirmed => EventCategory.Gossip,
+                EventType.RumorDebunked => EventCategory.Gossip,
+                EventType.EvidenceCaptured => EventCategory.Evidence,
+                EventType.TicketIssued => EventCategory.Evidence,
+                EventType.CctvCaptured => EventCategory.Evidence,
+                EventType.TaskStarted => EventCategory.Procedure,
+                EventType.TaskCompleted => EventCategory.Procedure,
+                EventType.ApprovalGranted => EventCategory.Procedure,
+                EventType.RcInserted => EventCategory.Procedure,
+                EventType.LabelChanged => EventCategory.Organization,
+                EventType.PaymentProcessed => EventCategory.Organization,
+                EventType.QueueUpdated => EventCategory.Organization,
+                EventType.SeatClaimed => EventCategory.Organization,
+                EventType.NoiseObserved => EventCategory.Organization,
                 _ => EventCategory.Rule
             };
+        }
+
+        [SerializeField]
+        [Tooltip("동일 이벤트 연속 중복 방지")]
+        private bool enableDeduplication = true;
+
+        [SerializeField]
+        [Tooltip("중복 이벤트를 무시할 시간 간격(초)")]
+        private float dedupeWindowSeconds = 0.25f;
+
+        [SerializeField]
+        [Tooltip("중복 방지에서 제외할 이벤트 타입")]
+        private EventType[] dedupeIgnoreTypes = new[]
+        {
+            EventType.VerdictGiven,
+            EventType.InterrogationStarted,
+            EventType.ReportFiled,
+            EventType.NpcUtterance
+        };
+
+        private readonly Dictionary<string, float> lastEventTimeByKey = new();
+
+        private bool ShouldSkipDuplicate(EventRecord record)
+        {
+            if (!enableDeduplication)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < dedupeIgnoreTypes.Length; i++)
+            {
+                if (record.eventType == dedupeIgnoreTypes[i])
+                {
+                    return false;
+                }
+            }
+
+            string key = $"{record.eventType}|{record.actorId}|{record.topic}|{record.placeId}";
+            float now = Time.time;
+            if (lastEventTimeByKey.TryGetValue(key, out float lastTime))
+            {
+                if (now - lastTime < dedupeWindowSeconds)
+                {
+                    return true;
+                }
+            }
+
+            lastEventTimeByKey[key] = now;
+            return false;
         }
     }
 }

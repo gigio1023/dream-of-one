@@ -52,6 +52,15 @@ namespace DreamOfOne.Core
         {
             cachedCollider = GetComponent<Collider>();
             cachedCollider.isTrigger = true;
+            if (eventLog == null)
+            {
+                eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+
+            if (string.IsNullOrEmpty(zoneId))
+            {
+                zoneId = name;
+            }
         }
 
         private void OnTriggerEnter(Collider other)
@@ -82,7 +91,7 @@ namespace DreamOfOne.Core
             }
 
             string actorId = other.gameObject.name;
-            eventLog.RecordZoneEvent(actorId, zoneId, zoneType, entered);
+            eventLog.RecordZoneEvent(actorId, zoneId, zoneType, entered, transform.position);
         }
 
         private void OnDrawGizmos()

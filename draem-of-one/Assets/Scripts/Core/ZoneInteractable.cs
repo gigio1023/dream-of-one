@@ -55,6 +55,16 @@ namespace DreamOfOne.Core
             {
                 zone = GetComponent<Zone>();
             }
+
+            if (eventLog == null)
+            {
+                eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+
+            if (uiManager == null)
+            {
+                uiManager = FindFirstObjectByType<UIManager>();
+            }
         }
 
         private void OnTriggerEnter(Collider other)
@@ -107,6 +117,11 @@ namespace DreamOfOne.Core
         {
             if (eventLog == null)
             {
+                eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+
+            if (eventLog == null)
+            {
                 return;
             }
 
@@ -118,8 +133,11 @@ namespace DreamOfOne.Core
                 category = EventCategory.Rule,
                 ruleId = ruleId,
                 zoneId = ZoneId,
+                placeId = ZoneId,
+                topic = ruleId,
                 severity = severity,
-                note = "interact"
+                note = "interact",
+                position = transform.position
             };
 
             eventLog.RecordEvent(record);

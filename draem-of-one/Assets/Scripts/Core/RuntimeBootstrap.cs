@@ -13,7 +13,7 @@ namespace DreamOfOne.Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
         {
-            if (FindObjectOfType<WorldEventLog>() != null)
+            if (FindFirstObjectByType<WorldEventLog>() != null)
             {
                 return;
             }
@@ -26,6 +26,7 @@ namespace DreamOfOne.Core
         {
             var systems = new GameObject("Systems");
             systems.transform.SetParent(root);
+            systems.AddComponent<RuntimeDiagnostics>();
 
             var log = systems.AddComponent<WorldEventLog>();
             var shaper = systems.AddComponent<SemanticShaper>();
@@ -36,14 +37,27 @@ namespace DreamOfOne.Core
             var response = systems.AddComponent<ViolationResponseSystem>();
             response.Configure(log);
 
+            systems.AddComponent<BlackboardSystem>();
+            systems.AddComponent<GossipSystem>();
+            systems.AddComponent<OrganizationRoutineSystem>();
+            systems.AddComponent<ArtifactSystem>();
+            systems.AddComponent<DemoDirector>();
+            systems.AddComponent<DreamOfOne.NPC.NpcLogInjector>();
+            systems.AddComponent<LoopVerifier>();
+
             var llmHost = new GameObject("LLMClient");
             llmHost.transform.SetParent(systems.transform);
             var llmClient = llmHost.AddComponent<DreamOfOne.LLM.LLMClient>();
+
+            var dialogueSystem = systems.AddComponent<DreamOfOne.NPC.NpcDialogueSystem>();
 
             var uiRoot = new GameObject("UI");
             uiRoot.transform.SetParent(root);
             var uiManager = uiRoot.AddComponent<UIManager>();
             uiManager.Bind(global);
+
+            uiRoot.AddComponent<FontBootstrap>();
+            uiRoot.AddComponent<DreamOfOne.UI.BlackboardDebugUI>();
 
             var presenter = uiRoot.AddComponent<EventLogPresenter>();
             presenter.Configure(log, shaper, uiManager);
@@ -62,9 +76,9 @@ namespace DreamOfOne.Core
             var cameraRig = CreateCamera(root, player.transform);
             player.GetComponent<PlayerController>().Configure(log, cameraRig.transform);
 
-            CreateZone(root, log, ui, response, "Queue", ZoneType.Queue, new Vector3(-5f, 0f, 3f), "R4");
-            CreateZone(root, log, ui, response, "Seat", ZoneType.Seat, new Vector3(4f, 0f, 3f), "R5");
-            CreateZone(root, log, ui, response, "Photo", ZoneType.Photo, new Vector3(0f, 0f, -4f), "R10");
+            CreateZone(root, log, ui, response, "StoreQueue", ZoneType.Queue, new Vector3(-5f, 0f, 3f), "R4");
+            CreateZone(root, log, ui, response, "ParkSeat", ZoneType.Seat, new Vector3(4f, 0f, 3f), "R5");
+            CreateZone(root, log, ui, response, "StudioPhoto", ZoneType.Photo, new Vector3(0f, 0f, -4f), "R10");
 
             var clerk = CreateNpc(root, "Clerk", new Vector3(-3f, 0f, 2f), reports, global, log);
             var elder = CreateNpc(root, "Elder", new Vector3(4f, 0f, 2f), reports, global, log);
@@ -74,7 +88,7 @@ namespace DreamOfOne.Core
             response.RegisterWitness(elder);
             response.RegisterWitness(tourist);
 
-            CreatePolice(root, player.transform, reports, log, shaper: FindObjectOfType<SemanticShaper>(), uiManager: ui, llmClient: llmClient);
+            CreatePolice(root, player.transform, reports, log, shaper: FindFirstObjectByType<SemanticShaper>(), uiManager: ui, llmClient: llmClient);
         }
 
         private GameObject CreatePlayer(Transform root, WorldEventLog log)
@@ -92,6 +106,18 @@ namespace DreamOfOne.Core
             controller.center = new Vector3(0f, 1f, 0f);
 
             player.AddComponent<PlayerController>().Configure(log, null);
+
+            var coverProfile = player.AddComponent<CoverProfile>();
+            coverProfile.Configure(
+                "스튜디오 인턴",
+                "스튜디오",
+                "인턴",
+                new[] { "Studio", "StudioPhoto", "StoreQueue", "ParkSeat" },
+                new[] { "PROC_NOTE_MISSING", "PROC_APPROVAL_DELAY", "PROC_RC_SKIP" },
+                new[] { "R_QUEUE", "R_LABEL", "R_NOISE" },
+                new[] { "칸반", "패치노트", "RC" });
+
+            player.AddComponent<CoverStatus>();
             return player;
         }
 
@@ -134,8 +160,13 @@ namespace DreamOfOne.Core
             npc.transform.SetParent(root);
             npc.transform.position = position;
 
+            var persona = npc.AddComponent<NpcPersona>();
+            ConfigurePersona(persona, name);
+
             var suspicion = npc.AddComponent<SuspicionComponent>();
             suspicion.Configure(reports, global, log);
+
+            npc.AddComponent<NpcContext>();
 
             var patrol = npc.AddComponent<DreamOfOne.NPC.SimplePatrol>();
             var left = CreateWaypoint(root, $"{name}_WP_A", position + new Vector3(-1.5f, 0f, -1.5f));
@@ -151,6 +182,11 @@ namespace DreamOfOne.Core
             police.name = "Police";
             police.transform.SetParent(root);
             police.transform.position = new Vector3(0f, 0f, -6f);
+
+            var persona = police.AddComponent<NpcPersona>();
+            ConfigurePersona(persona, "Police");
+
+            police.AddComponent<NpcContext>();
 
             var agent = police.AddComponent<NavMeshAgent>();
             agent.speed = 2.5f;
@@ -169,6 +205,33 @@ namespace DreamOfOne.Core
             point.transform.SetParent(root);
             point.transform.position = position;
             return point.transform;
+        }
+
+        private void ConfigurePersona(NpcPersona persona, string name)
+        {
+            if (persona == null)
+            {
+                return;
+            }
+
+            switch (name)
+            {
+                case "Clerk":
+                    persona.Configure("Clerk", "편의점 점원", "친절하지만 규칙에 엄격함", "짧고 단호한 말투");
+                    break;
+                case "Elder":
+                    persona.Configure("Elder", "동네 어르신", "질서 강조, 잔소리 섞임", "엄격하고 고전적인 말투");
+                    break;
+                case "Tourist":
+                    persona.Configure("Tourist", "관광객", "어눌한 한국어, 호기심 많음", "짧고 어색한 말투");
+                    break;
+                case "Police":
+                    persona.Configure("Police", "경찰", "단호하고 간결함", "단호한 말투");
+                    break;
+                default:
+                    persona.Configure(name, "시민", "현실적인 반응", "짧고 담백한 말투");
+                    break;
+            }
         }
     }
 }

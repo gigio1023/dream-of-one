@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace DreamOfOne.Core
 {
@@ -32,6 +33,21 @@ namespace DreamOfOne.Core
 
         /// <summary>Zone 관련 이벤트라면 Zone 식별자.</summary>
         public string zoneId = string.Empty;
+
+        /// <summary>사건이 발생한 장소/노드 식별자.</summary>
+        public string placeId = string.Empty;
+
+        /// <summary>사건 주제(규칙/업무/가십 토픽 등).</summary>
+        public string topic = string.Empty;
+
+        /// <summary>사건이 발생한 위치.</summary>
+        public Vector3 position = Vector3.zero;
+
+        /// <summary>가십/증거 신뢰도(0~1).</summary>
+        public float trust = 0f;
+
+        /// <summary>출처(가십 원문/증거 생성자 등).</summary>
+        public string sourceId = string.Empty;
 
         /// <summary>표준 payload(규칙/수치/추가 노트).</summary>
         public EventPayload payload = new();
@@ -76,4 +92,3 @@ namespace DreamOfOne.Core
         public string note;
     }
 }
-

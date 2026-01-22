@@ -12,8 +12,22 @@ namespace DreamOfOne.Core
         SuspicionUpdated,
         ReportFiled,
         InterrogationStarted,
-        VerdictGiven
+        VerdictGiven,
+        NpcUtterance,
+        RumorShared,
+        RumorConfirmed,
+        RumorDebunked,
+        EvidenceCaptured,
+        TicketIssued,
+        TaskStarted,
+        TaskCompleted,
+        ApprovalGranted,
+        RcInserted,
+        LabelChanged,
+        PaymentProcessed,
+        QueueUpdated,
+        SeatClaimed,
+        NoiseObserved,
+        CctvCaptured
     }
 }
-
-

@@ -10,6 +10,11 @@ namespace DreamOfOne.Core
         Rule,
         Suspicion,
         Report,
-        Verdict
+        Verdict,
+        Dialogue,
+        Gossip,
+        Evidence,
+        Procedure,
+        Organization
     }
 }

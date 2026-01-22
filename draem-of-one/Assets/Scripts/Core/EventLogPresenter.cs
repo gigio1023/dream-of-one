@@ -22,10 +22,56 @@ namespace DreamOfOne.Core
         [Tooltip("프레임당 처리할 최대 이벤트 수")]
         private int maxEventsPerFrame = 2;
 
+        [SerializeField]
+        [Tooltip("LLM 기반 시민 반응 표시")]
+        private bool useLlmNarration = true;
+
+        [SerializeField]
+        [Tooltip("NPC 대화 시스템이 있으면 LLM 내레이션을 비활성화")]
+        private bool suppressWhenDialogueSystemPresent = true;
+
+        [SerializeField]
+        [Tooltip("LLM 대사 최소 간격(초)")]
+        private float llmCooldownSeconds = 4f;
+
+        [SerializeField]
+        private DreamOfOne.LLM.LLMClient llmClient = null;
+
+        private DreamOfOne.NPC.NpcDialogueSystem npcDialogueSystem = null;
+
         /// <summary>
         /// WorldEventLog의 총 발행 카운터를 기억해 버퍼 회전 후에도 신규 이벤트를 감지한다.
         /// </summary>
         private int lastProcessedTotal = 0;
+        private float lastLlmTime = -999f;
+
+        private void Awake()
+        {
+            if (eventLog == null)
+            {
+                eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+
+            if (semanticShaper == null)
+            {
+                semanticShaper = FindFirstObjectByType<SemanticShaper>();
+            }
+
+            if (uiManager == null)
+            {
+                uiManager = FindFirstObjectByType<UIManager>();
+            }
+
+            if (llmClient == null)
+            {
+                llmClient = FindFirstObjectByType<DreamOfOne.LLM.LLMClient>();
+            }
+
+            if (npcDialogueSystem == null)
+            {
+                npcDialogueSystem = FindFirstObjectByType<DreamOfOne.NPC.NpcDialogueSystem>();
+            }
+        }
 
         public void Configure(WorldEventLog log, SemanticShaper shaper, UIManager manager)
         {
@@ -64,6 +110,8 @@ namespace DreamOfOne.Core
                     uiManager.ShowToast(text);
                 }
 
+                TryRequestLlmLine(record);
+
                 processed++;
                 if (processed >= maxEventsPerFrame)
                 {
@@ -72,6 +120,95 @@ namespace DreamOfOne.Core
             }
 
             lastProcessedTotal = Mathf.Min(total, lastProcessedTotal + processed);
+        }
+
+        private void TryRequestLlmLine(EventRecord record)
+        {
+            if (!useLlmNarration || llmClient == null || uiManager == null)
+            {
+                return;
+            }
+
+            if (suppressWhenDialogueSystemPresent && npcDialogueSystem != null)
+            {
+                return;
+            }
+
+            if (!ShouldNarrate(record))
+            {
+                return;
+            }
+
+            if (Time.time - lastLlmTime < llmCooldownSeconds)
+            {
+                return;
+            }
+
+            lastLlmTime = Time.time;
+
+            var request = new DreamOfOne.LLM.LLMClient.LineRequest
+            {
+                role = ResolveRole(record),
+                persona = ResolvePersona(record.actorId),
+                situation = BuildSituation(record),
+                tone = "short, natural Korean",
+                constraints = "한 줄, 60자 이내"
+            };
+
+            llmClient.RequestLine(request, line =>
+            {
+                if (string.IsNullOrEmpty(line))
+                {
+                    line = semanticShaper != null ? semanticShaper.ToText(record) : record.eventType.ToString();
+                }
+
+                if (!string.IsNullOrEmpty(line))
+                {
+                    uiManager.ShowToast(line);
+                }
+            });
+        }
+
+        private static bool ShouldNarrate(EventRecord record)
+        {
+            return record.eventType switch
+            {
+                EventType.ReportFiled => true,
+                EventType.SuspicionUpdated => record.severity >= 2,
+                _ => false
+            };
+        }
+
+        private static string ResolveRole(EventRecord record)
+        {
+            if (!string.IsNullOrEmpty(record.actorId))
+            {
+                return record.actorId;
+            }
+
+            return string.IsNullOrEmpty(record.actorRole) ? "Citizen" : record.actorRole;
+        }
+
+        private static string ResolvePersona(string actorId)
+        {
+            return actorId switch
+            {
+                "Clerk" => "편의점 점원, 친절하지만 규칙에 엄격함",
+                "Elder" => "동네 어르신, 질서 강조, 잔소리 섞임",
+                "Tourist" => "관광객, 어눌한 한국어, 호기심 많음",
+                "Police" => "경찰, 단호하고 간결한 말투",
+                _ => "동네 주민, 짧고 현실적인 반응"
+            };
+        }
+
+        private static string BuildSituation(EventRecord record)
+        {
+            return record.eventType switch
+            {
+                EventType.ReportFiled => $"{record.actorId}이(가) 규칙 {record.ruleId} 위반을 신고함.",
+                EventType.SuspicionUpdated => $"{record.actorId}이(가) 규칙 {record.ruleId} 위반을 목격하고 의심함.",
+                _ => record.eventType.ToString()
+            };
         }
     }
 }

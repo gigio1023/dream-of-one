@@ -56,6 +56,15 @@ namespace DreamOfOne.Core
         private void Awake()
         {
             characterController = GetComponent<CharacterController>();
+            if (eventLog == null)
+            {
+                eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+
+            if (cameraPivot == null && Camera.main != null)
+            {
+                cameraPivot = Camera.main.transform;
+            }
         }
 
         private void OnEnable()
@@ -161,7 +170,9 @@ namespace DreamOfOne.Core
                 category = EventCategory.Rule,
                 ruleId = photoRuleId,
                 severity = 2,
-                note = "photo_attempt"
+                note = "photo_attempt",
+                position = transform.position,
+                topic = photoRuleId
             };
 
             eventLog.RecordEvent(record);

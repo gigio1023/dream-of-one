@@ -17,18 +17,20 @@ namespace DreamOfOne.Core
         public string reportId = string.Empty;
         public List<string> reporterIds = new();
         public List<string> attachedEventIds = new();
+        public string ruleId = string.Empty;
+        public string topic = string.Empty;
+        public string placeId = string.Empty;
+        public string zoneId = string.Empty;
         public ReportReason reason = ReportReason.RepeatedRuleBreak;
-        public bool resolved = false;
     }
 
     /// <summary>
-    /// 신고 이벤트 큐를 관리하고 경찰 심문 조건을 판별한다.
-    /// 신고와 판정 사이의 느슨한 결합을 위해 별도 컴포넌트로 분리했다.
+    /// 신고를 수집해 경찰 심문을 트리거하는 관리 시스템.
     /// </summary>
     public sealed class ReportManager : MonoBehaviour
     {
         [SerializeField]
-        [Tooltip("신고 이벤트를 기록할 WEL")]
+        [Tooltip("신고 이벤트 로그")]
         private WorldEventLog eventLog = null;
 
         [SerializeField]
@@ -40,12 +42,20 @@ namespace DreamOfOne.Core
         private int reportsRequired = 2;
 
         [SerializeField]
+        [Tooltip("심문 조건으로 사용하는 전역 G 임계값")]
+        private float globalSuspicionThreshold = 0.2f;
+
+        [SerializeField]
+        [Tooltip("사회 압력 강화 임계값 (G가 높을 때 요구 신고 수 감소)")]
+        private float socialPressureThreshold = 0.6f;
+
+        [SerializeField]
         [Tooltip("심문 완료 후 다시 심문하기 전까지의 쿨다운")]
         private float interrogationCooldownSeconds = 20f;
 
         [SerializeField]
         [Tooltip("신고 유효 기간(초)")]
-        private float reportWindowSeconds = 45f;
+        private float reportWindowSeconds = 90f;
 
         [SerializeField]
         [Tooltip("심문에 첨부할 최대 이벤트 수")]
@@ -57,24 +67,61 @@ namespace DreamOfOne.Core
             public string reporterId;
             public string ruleId;
             public string eventId;
+            public string placeId;
+            public string zoneId;
+            public string topic;
+            public Vector3 position;
         }
 
         /// <summary>최근 신고를 시간순으로 저장한다.</summary>
         private readonly List<ReportEntry> recentReports = new();
         private float lastInterrogationTime = -999f;
 
+        private void Awake()
+        {
+            if (eventLog == null)
+            {
+                eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+
+            if (globalSuspicion == null)
+            {
+                globalSuspicion = FindFirstObjectByType<GlobalSuspicionSystem>();
+            }
+        }
+
         /// <summary>
         /// SuspicionComponent가 신고를 접수할 때 호출된다.
         /// </summary>
-        public void FileReport(string reporterId, string ruleId, float suspicionSnapshot, string eventId = "")
+        public void FileReport(string reporterId, string ruleId, float suspicionSnapshot, string eventId = "", Vector3 position = default)
         {
             float now = Time.time;
+            string placeId = string.Empty;
+            string zoneId = string.Empty;
+            string topic = ruleId;
+            Vector3 eventPosition = position;
+
+            if (eventLog != null && !string.IsNullOrEmpty(eventId) && eventLog.TryGetEventById(eventId, out var source))
+            {
+                placeId = source.placeId;
+                zoneId = source.zoneId;
+                topic = string.IsNullOrEmpty(source.topic) ? ruleId : source.topic;
+                if (eventPosition == Vector3.zero)
+                {
+                    eventPosition = source.position;
+                }
+            }
+
             recentReports.Add(new ReportEntry
             {
                 timestamp = now,
                 reporterId = reporterId,
                 ruleId = ruleId,
-                eventId = eventId
+                eventId = eventId,
+                placeId = placeId,
+                zoneId = zoneId,
+                topic = topic,
+                position = eventPosition
             });
 
             PruneExpiredReports(now);
@@ -89,7 +136,11 @@ namespace DreamOfOne.Core
                     category = EventCategory.Report,
                     ruleId = ruleId,
                     note = $"s={suspicionSnapshot:0}",
-                    severity = 2
+                    severity = 2,
+                    position = eventPosition,
+                    topic = topic,
+                    placeId = placeId,
+                    zoneId = zoneId
                 });
             }
         }
@@ -117,7 +168,7 @@ namespace DreamOfOne.Core
             envelope = new ReportEnvelope
             {
                 reportId = Guid.NewGuid().ToString("N"),
-                reason = globalSuspicion != null && globalSuspicion.GlobalSuspicion >= 0.3f
+                reason = globalSuspicion != null && globalSuspicion.GlobalSuspicion >= globalSuspicionThreshold
                     ? ReportReason.HighGlobalG
                     : ReportReason.RepeatedRuleBreak
             };
@@ -133,6 +184,14 @@ namespace DreamOfOne.Core
                 if (!string.IsNullOrEmpty(entry.eventId) && envelope.attachedEventIds.Count < maxAttachedEvents)
                 {
                     envelope.attachedEventIds.Add(entry.eventId);
+                }
+
+                if (string.IsNullOrEmpty(envelope.ruleId))
+                {
+                    envelope.ruleId = entry.ruleId;
+                    envelope.topic = entry.topic;
+                    envelope.placeId = entry.placeId;
+                    envelope.zoneId = entry.zoneId;
                 }
             }
 
@@ -151,12 +210,18 @@ namespace DreamOfOne.Core
 
             PruneExpiredReports(now);
 
-            if (recentReports.Count < reportsRequired)
+            int required = reportsRequired;
+            if (globalSuspicion != null && globalSuspicion.GlobalSuspicion >= socialPressureThreshold)
+            {
+                required = Mathf.Max(1, reportsRequired - 1);
+            }
+
+            if (recentReports.Count < required)
             {
                 return false;
             }
 
-            if (globalSuspicion != null && globalSuspicion.GlobalSuspicion < 0.3f)
+            if (globalSuspicion != null && globalSuspicion.GlobalSuspicion < globalSuspicionThreshold)
             {
                 return false;
             }

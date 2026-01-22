@@ -22,8 +22,31 @@ namespace DreamOfOne.NPC
 
         private float waitTimer = 0f;
 
+        protected override void Awake()
+        {
+            base.Awake();
+            if (seatZone == null)
+            {
+                foreach (var zone in FindObjectsByType<Zone>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                {
+                    if (zone != null && zone.ZoneType == ZoneType.Seat)
+                    {
+                        seatZone = zone;
+                        break;
+                    }
+                }
+            }
+        }
+
         protected override void OnActing()
         {
+            if (seatZone != null && Vector3.Distance(transform.position, seatZone.transform.position) > 1.5f)
+            {
+                agent.SetDestination(seatZone.transform.position);
+                state = NPCState.Moving;
+                return;
+            }
+
             waitTimer += Time.deltaTime;
             if (waitTimer >= waitAtBenchSeconds)
             {
@@ -38,5 +61,4 @@ namespace DreamOfOne.NPC
         }
     }
 }
-
 

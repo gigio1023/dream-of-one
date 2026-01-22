@@ -1,284 +1,255 @@
 # Dream of One — Master Plan (Project.md Driven)
 
-이 문서는 **project.md**를 기반으로 전체 구현 계획, 완료 기준, 진행 현황을 한 곳에 유지한다.
-질문 금지. 완료 기준이 충족될 때까지 계속 진행한다.
+This document consolidates the implementation plan, completion criteria, and progress based on **project.md**.
+No questions. Keep moving until completion criteria are met.
 
 ---
 
-## 0) 목표/비목표
+## 0) Goals / Non‑Goals
 
-### 목표(Release-Ready)
-- **로그 기반 사회 시뮬레이션**이 설계대로 작동
-- **결정적 코어**: 위반/의심/신고/판정은 규칙 기반
-- **LLM은 표현용 1줄**만 담당(실패 시 폴백)
-- 플레이 종료까지 **콘솔 에러 0**
+### Goals (Release‑Ready)
+- Log‑based social simulation works as designed
+- Deterministic core: violation/suspicion/report/verdict are rule‑driven
+- LLM only renders 1‑line surface text (with fallback)
+- Zero console errors through end of play
 
-### 비목표(명시)
-- [x] 세이브/로드 기능 없음
-- [x] WEL 재생(replay)으로 상태 복원 없음
-- [x] LLM이 판정/상태 전이 결정 금지
+### Non‑Goals (Explicit)
+- [x] No save/load
+- [x] No WEL replay for state restore
+- [x] LLM must not decide verdicts or state transitions
 
-완료 기준(필수)
-- Play 즉시 화면/조명/UI 정상 표시
-- CITY package 기반 월드 시각화 완료(랜드마크 식별 가능, 동선/Zone 경계 가독)
-- **WEL → Blackboard → 주입 → 가십/신고 → 경찰 판정** 루프 1회 이상 자연 재현
-- 조직별 **절차 이벤트**가 로그로 기록되고, NPC가 이를 근거로 행동
-- 한국어 텍스트 정상 표기(깨짐 없음)
+Completion Criteria (Required)
+- Scene/lighting/UI render correctly on Play
+- CITY package world visualization complete (landmarks obvious, zones readable)
+- **WEL → Blackboard → Injection → Gossip/Report → Police Verdict** loop occurs at least once
+- Organization procedure events are logged and NPCs act on them
+- Korean text renders without corruption
 
-## 0-1) 게임 정체성(핵심 기둥)
-- [x] Log-First World: 상태 대신 로그 축적으로 세계 이해
-- [x] 조직이 사회를 움직인다: 조직 목표 충돌이 사건 생성
-- [x] 결정적 코어: 위반/의심/신고/판정은 규칙 기반
-- [x] 텍스트-우선 결과: 1~2줄 텍스트 + 아티팩트로 결과 제시
-
----
-
-## 1) 월드/조직 정의
-
-### 1-1. 공간 스펙
-- [x] 약 110m × 110m 도시 블록 스케일로 확장
-- [x] 주요 장소 배치: 스튜디오(2층), 편의점, 공원, 지구대
-- [x] CCTV 포인트 2개 배치
-- [x] 플레이어 스케일 고정 + 건물 스케일 1.25 적용
-
-### 1-2. 조직 정의(Goal/Procedure/Resource/Artifact)
-#### 스튜디오
-- [x] Goal: RC 제출/릴리즈 안정화
-- [x] Procedure: 칸반 갱신 → 패치노트 → 승인 → RC 삽입
-- [x] Resource: 칸반 보드, 라운지, 서버 슬롯
-- [x] Artifact: 칸반 로그, 패치노트, 승인 노트, RC 스트립
-
-#### 지구대
-- [x] Goal: 경범 처리, 재발 방지
-- [x] Procedure: 신고 접수 → 현장 확인 → 증거 수집 → 심문 → 판정
-- [x] Resource: 티켓 발부, 프린터, 캡처 보드
-- [x] Artifact: 위반 티켓, CCTV 캡처, 사건 로그 스트립
-
-#### 편의점
-- [x] Goal: 품절 0, 라벨 갱신, 거래 질서 유지
-- [x] Procedure: 라벨 점검 → 진열/재고 갱신 → 카운터 규칙 준수
-- [x] Resource: 라벨 시스템, 카운터
-- [x] Artifact: 가격/품절 라벨, 거래 메모
-
-#### 공원관리
-- [x] Goal: 좌석/소음/촬영 규범 유지, 민원 최소화
-- [x] Procedure: 현장 경고 → 조치 → 보고서 작성
-- [x] Resource: 게시판, 조치 권한
-- [x] Artifact: 조치 보고, 게시판 공지, 민원 메모
-
-#### 카페/휴게 공간 운영
-- [x] Goal: 주문 질서/좌석 회전/소음 관리
-- [x] Procedure: 주문 → 대기 → 좌석 안내 → 정리
-- [x] Resource: 주문대, 번호표, 좌석표
-- [x] Artifact: 주문 메모, 좌석/정리 로그
-
-#### 배송/물류
-- [x] Goal: 정시 배송, 출입 규정 준수
-- [x] Procedure: 픽업 → 출입 확인 → 수취 서명 → 반출
-- [x] Resource: 배송 카트, 출입 체크리스트
-- [x] Artifact: 배송 라벨, 수령 서명 로그
-
-#### 시설관리(빌딩 관리)
-- [x] Goal: 시설 안전 유지, 장애 최소화
-- [x] Procedure: 정기 점검 → 수리 요청 → 작업 승인 → 완료 보고
-- [x] Resource: 점검 체크리스트, 작업 허가서
-- [x] Artifact: 점검 로그, 수리 티켓
-
-#### 미디어/촬영팀
-- [x] Goal: 촬영 허가 준수, 촬영 구역 안전 유지
-- [x] Procedure: 사전 허가 → 촬영 구역 표시 → 촬영 → 반납
-- [x] Resource: 촬영 장비, 허가서
-- [x] Artifact: 촬영 허가서, 촬영 로그
-
-### 1-3. CITY package 월드 적용(사용자 제공 에셋)
-- [x] 1 unit = 1m 스케일 유지(프리팹 스케일 1.0 고정)
-- [x] 도로/보도 그리드 확장으로 맵 크기 확장
-- [x] 건물 프리팹 스케일 확장(도시 규모 대비 체감 보정)
-- [x] 가시성 규칙: 인터랙션/캐릭터 가림 최소화(높이/배치 제한)
-- [x] CITY package 임포트(프리팹/머티리얼/텍스처 목록 점검)
-- [x] 스케일/콜라이더/머티리얼 호환성 체크(URP/Standard)
-- [x] 랜드마크 치환: 스튜디오/편의점/공원/지구대/CCTV 외형 확정
-- [x] 도로/보도/횡단보도/가로등/벤치로 동선·Zone 경계 가독성 확보
-- [x] 나무/덤불/가로 소품 배치로 구역 식별 강화
-- [x] Directional Light/ambient 설정으로 가시성 확보
-- [x] URP 머티리얼 자동 교정(퍼플/그레이 방지)
-- [x] NavMesh 재베이크 + 장애물/Collision 검증
-- [x] 조명/라이트베이크/리플렉션 프로브 구성
-- [x] 퍼포먼스 패스: Static/LOD/Occlusion/Batching
-- [x] POLYGON city pack 기반 자동 배치 스크립트 실행(`Tools/DreamOfOne/Build City (POLYGON)`)
-- [x] CITY 자동 배치 런너(Editor load 시 적용) 활성화
-- [x] CITY 루트/앵커 확인: `CITY_Package`, `CITY_Anchors` 하위 `StoreBuilding/ParkArea/StudioBuilding_L1/Station/Cafe/DeliveryBay/Facility/MediaZone`
+## 0‑1) Game Identity (Core Pillars)
+- [x] Log‑First World: understand world via logs, not state
+- [x] Organizations move society: goal conflicts create events
+- [x] Deterministic core: violations/suspicion/reports/verdicts are rules
+- [x] Text‑first results: 1–2 lines + artifacts
 
 ---
 
-## 2) 핵심 시스템
+## 1) World / Organization Definition
 
-### 2-1. WEL (World Event Log)
-- [x] Structured Event 기록
-- [x] Canonical Text 생성(템플릿)
-- [x] 필수 필드: t/actor/event/place/topic/rule/object/note/position
-- [x] append-only 유지
-- [x] 이벤트 중복 억제(쿨다운)
-- [x] 이벤트 분류 스펙 반영: 이동/존, 질서/거래, 규범/위반, 가십, 절차, 증거, 조직업무
+### 1‑1. Space Spec
+- [x] Expand to ~110m × 110m city block
+- [x] Key places: Studio (2F), Convenience Store, Park, Police Station
+- [x] Place 2 CCTV points
+- [x] Fixed player scale + building scale 1.25
 
-### 2-2. Semantic Shaper
-- [x] 이벤트 → 1줄 템플릿 출력
-- [x] 규범/절차/증거/판정 카테고리 확장
-- [x] 80자 이내 출력 제한
+### 1‑2. Organization Definition (Goal/Procedure/Resource/Artifact)
+#### Studio
+- [x] Goal: RC submission / release stabilization
+- [x] Procedure: Kanban update → Patch note → Approval → RC insert
+- [x] Resource: Kanban board, lounge, server slots
+- [x] Artifact: Kanban logs, patch note, approval note, RC strip
 
-### 2-3. Spatial Blackboard
-- [x] Zone/Object별 최근 로그 버퍼
-- [x] 필드: timestamp, topic, actor, severity, text, trust, source
-- [x] TTL 계층화(증거/절차/가십 길게)
-- [x] 위치 기반 접근 API
+#### Police
+- [x] Goal: handle minor offenses, prevent recurrence
+- [x] Procedure: report intake → on‑site check → evidence collection → interrogation → verdict
+- [x] Resource: ticket issue, printer, capture board
+- [x] Artifact: violation ticket, CCTV capture, event log strip
 
-### 2-4. 거리 기반 로그 주입
-- [x] 근접 D1=1.2m / K1=2
-- [x] 시야 D2=8m / K2=3
-- [x] 소음 D3=6m / K3=1(고심각도)
-- [x] 우선순위: 절차/증거 > 규범 > 가십 > 일반
-- [x] 동일 actor 최신 사건 우선(쿨다운)
-- [x] 동일 토픽 쿨다운 튜닝
-- [x] 개인 메모리 TTL
+#### Convenience Store
+- [x] Goal: zero stockouts, label updates, transaction order
+- [x] Procedure: label check → shelf/stock update → counter rules
+- [x] Resource: label system, counter
+- [x] Artifact: price/stockout label, transaction memo
 
-### 2-5. 가십 네트워크
-- [x] Draft(공유) 이벤트 생성
-- [x] Confirm/Debunk 전환 규칙
-- [x] 신뢰도 w / 출처 / 시간 / 장소 태그 반영
-- [x] 근접 대화 전파만 허용(거리 체크)
+#### Park Management
+- [x] Goal: seat/noise/photo norms, minimize complaints
+- [x] Procedure: on‑site warning → action → report
+- [x] Resource: bulletin board, enforcement authority
+- [x] Artifact: action report, bulletin notice, complaint memo
 
-### 2-6. 경찰 절차
-- [x] 사건 묶음(Case Bundle) 구성
-- [x] 사건 묶음 요소: 위반/신고/증거/절차/가십/해명/반박/진술
-- [x] 현장 확인 → 증거 로그 → 심문 → 판정
-- [x] 판정 결과 세트: 무혐의/보류/의심 강화/퇴출
-- [x] 판정 이유(로그/증거 기반) 1줄 명시
+#### Cafe / Rest Area
+- [x] Goal: order orderliness / seat turnover / noise control
+- [x] Procedure: order → wait → seat guidance → clean up
+- [x] Resource: order desk, ticketing, seating chart
+- [x] Artifact: order memo, seating/cleanup logs
 
-### 2-7. LLM 표면화
-- [x] Chat Completions/Local/Mock 지원
-- [x] 1줄 대사 생성
-- [x] Canonical Text 기반 변주
-- [x] 실패 시 템플릿 폴백 연출
-- [x] LLM 금지: Structured Event 사실 변경 금지
-- [x] LLM 금지: 증거 생성 여부 판단 금지
+#### Delivery / Logistics
+- [x] Goal: on‑time delivery, access compliance
+- [x] Procedure: pickup → access check → signature → exit
+- [x] Resource: delivery cart, access checklist
+- [x] Artifact: delivery label, signature log
 
----
+#### Facilities (Building Ops)
+- [x] Goal: safety, minimize outages
+- [x] Procedure: periodic check → repair request → work approval → completion report
+- [x] Resource: inspection checklist, work permit
+- [x] Artifact: inspection log, repair ticket
 
-## 3) NPC/플레이어 시스템
+#### Media / Photo Crew
+- [x] Goal: permit compliance, safe shoot zones
+- [x] Procedure: pre‑approval → zone marking → shoot → return
+- [x] Resource: gear, permits
+- [x] Artifact: permit, shoot log
 
-### 3-1. NPC 내부 상태
-- [x] o(outsiderness) / p(외부인 확률) / G(전역) 계산
-- [x] sᵢ(의심) 및 전역 G 연동
-- [x] G 상승 시 사회 압력/절차 강화
-
-### 3-2. Cover(플레이어 역할)
-- [x] Cover 구성 요소 정의(소속/역할/기본 과업/금기/말투·용어)
-- [x] Cover 구성 요소: 소속
-- [x] Cover 구성 요소: 역할
-- [x] Cover 구성 요소: 기본 과업
-- [x] Cover 구성 요소: 금기
-- [x] Cover 구성 요소: 말투·용어
-- [x] Cover 유지 실패 규칙(행동/말투/절차 위반)
-- [x] Cover HUD 표시
-- [x] Cover 실패 패턴 반영: 절차 건너뜀/용어 오용/반복 질문/사회적 수습 없음/증거·절차 방해
-
-### 3-3. NPC 행동 모델
-- [x] 입력: 주변 로그 주입 + 증거 근접 + 개인 메모리
-- [x] 출력: 질문/중재/강화(증거·소문 재확인) 중심
-- [x] 출력: 조직 목표 수행(업무 진행)
-- [x] 초기 단계는 복잡 이동보다 사회적 행동 우선
-
-### 3-4. NPC 로스터 확장
-- [x] 스튜디오: PM/개발/QA/릴리즈 담당 배치
-- [x] 지구대: 순경/조사관/민원 담당 배치
-- [x] 편의점: 점장/알바/재고 담당 배치
-- [x] 공원관리: 관리인/현장 경고 담당 배치
-- [x] 카페: 바리스타/안내 스태프 배치
-- [x] 배송/물류: 배송기사/출입 확인 담당 배치
-- [x] 시설관리: 시설 기사/안전 점검 담당 배치
-- [x] 미디어/촬영: 리포터/촬영 스태프 배치
-- [x] 시민군: 주민 대표/관광객/학생·직장인 배치
-
-### 3-5. 카메라/조작
-- [x] 카메라 자동 회전 제거(이동 시 시점 고정)
-- [x] 마우스 입력으로만 시점 회전 가능
-- [x] 플레이어 회전은 기본 비활성(스트레이프 중심 이동)
+### 1‑3. CITY Package World Application (User Assets)
+- [x] Maintain 1 unit = 1m (prefab scale 1.0)
+- [x] Expand map by extending road/sidewalk grid
+- [x] Increase building prefab scale for city feel
+- [x] Visibility rules: minimize occlusion of interactables/characters
+- [x] CITY package import validated (prefabs/materials/textures)
+- [x] Scale/collider/material compatibility check (URP/Standard)
+- [x] Landmark replacement: studio/store/park/police/CCTV silhouettes
+- [x] Roads/sidewalks/crosswalks/lamps/benches for path & zone readability
+- [x] Trees/props to reinforce area identity
+- [x] Directional light/ambient tuned for visibility
+- [x] URP material auto‑fix (avoid purple/gray)
+- [x] NavMesh rebake + obstacle/collision validation
+- [x] Lighting bake / reflection probes
+- [x] Performance pass: Static/LOD/Occlusion/Batching
+- [x] Run CITY auto‑placement script (`Tools/DreamOfOne/Build City (POLYGON)`)
+- [x] Enable CITY auto‑runner on editor load
+- [x] CITY root/anchors validated: `CITY_Package`, `CITY_Anchors` → `StoreBuilding/ParkArea/StudioBuilding_L1/Station/Cafe/DeliveryBay/Facility/MediaZone`
 
 ---
 
-## 4) 아티팩트/증거
-- [x] 증거/절차 이벤트에 월드 마커 생성
-- [x] 로그 ↔ 아티팩트 링크(케이스 하이라이트)
-- [x] Case Bundle에 아티팩트 포함 상세 표시
+## 2) Core Systems
+
+### 2‑1. WEL (World Event Log)
+- [x] Structured event recording
+- [x] Canonical text generation (template)
+- [x] Required fields: t/actor/event/place/topic/rule/object/note/position
+- [x] Append‑only behavior
+- [x] Cooldown to suppress duplicates
+- [x] Event taxonomy: movement/zone, order/transaction, norms/violation, gossip, procedure, evidence, org tasks
+
+### 2‑2. Semantic Shaper
+- [x] Event → 1‑line template
+- [x] Extend categories: norm/procedure/evidence/verdict
+- [x] Enforce 80‑char limit
+
+### 2‑3. Spatial Blackboard
+- [x] Recent log buffer per Zone/Object
+- [x] Fields: timestamp, topic, actor, severity, text, trust, source
+- [x] TTL layering (evidence/procedure longer)
+- [x] Position‑based access API
+
+### 2‑4. Distance‑Based Log Injection
+- [x] Near D1=1.2m / K1=2
+- [x] FOV D2=8m / K2=3
+- [x] Noise D3=6m / K3=1 (high severity)
+- [x] Priority: procedure/evidence > norms > gossip > general
+- [x] Latest events for same actor prioritized (cooldown)
+- [x] Same topic cooldown tuning
+- [x] Personal memory TTL
+
+### 2‑5. Gossip Network
+- [x] Draft (shared) event generation
+- [x] Confirm/Debunk transition rules
+- [x] Trust w / source / time / place tags
+- [x] Only proximity conversation allowed (distance check)
+
+### 2‑6. Police Procedure
+- [x] Case Bundle assembly
+- [x] Bundle elements: violation/report/evidence/procedure/gossip/defense/rebuttal/statement
+- [x] On‑site check → evidence log → interrogation → verdict
+- [x] Verdict set: cleared / hold / suspicion increase / expulsion
+- [x] One‑line verdict reason based on logs/evidence
+
+### 2‑7. LLM Surface Layer
+- [x] Chat Completions / Local / Mock providers
+- [x] 1‑line dialogue
+- [x] Variation based on canonical text
+- [x] Fallback to template on failure
 
 ---
 
-## 5) UI/연출
-- [x] UI 패널/텍스트 레이아웃
-- [x] 한글 폰트 이슈 해결(폰트 fallback + TMP 오류 0)
-- [x] TMP 한글 폰트 자동 생성/기본 지정(`FontAssetAutoBuilder`)
-- [x] Case Bundle 요약 UI
-- [x] 로그/토스트/심문 가독성 확정
-- [x] HUD: o/p/G 표시
-- [x] Blackboard 디버그 패널(최근 로그/TTL)
+## 3) Player / Cover System
+
+### 3‑1. Cover Profile
+- [x] Organization affiliation
+- [x] Role
+- [x] Allowed places
+- [x] Allowed topics / taboo topics
+- [x] Default vocabulary
+
+### 3‑2. Outsiderness Tracking
+- [x] Outsiderness increases on violations or mismatches
+- [x] Outsiderness decays over time
+- [x] Outsider probability derived from outsiderness + global G
+
+### 3‑3. Cover Status UI
+- [x] Cover status line output
+- [x] Update on event
 
 ---
 
-## 6) 데모 시퀀스(5–8분)
-> 개발 검증용으로 DemoDirector 기본 지연은 짧게 설정(Act1 2s / Act2 20s). 릴리즈 전 5–8분 길이로 재조정 가능.
+## 4) Interaction / Zones
 
-### Act 1: 편의점 질서 사건
-- [x] 위반 발생 → WEL 기록
-- [x] 근처 NPC 가십/신고
-- [x] 경찰 현장 확인 + 증거 생성
+### 4‑1. Zones
+- [x] Queue / Seat / Photo zones
+- [x] Enter/exit events logged
+- [x] Zone ID / Zone type stored
 
-### Act 2: 스튜디오 릴리즈 사건
-- [x] 절차 흐름(칸반/패치/승인/RC)
-- [x] 절차 누락/오해 → 사건화
-- [x] 증거(승인/RC) 등장 → 판정
-
-### 데모 Must-Show 비트
-- [x] [Violation] 텍스트가 즉시 표시됨
-- [x] NPC가 방금 본 로그를 근거로 대사/가십 생성
-- [x] 증거 로그가 소문을 확정/반박하는 연출 발생
-- [x] 경찰이 로그+증거 기반 판정(케이스 요약 포함)
+### 4‑2. Interactables
+- [x] E interaction produces violation logs
+- [x] Prompt display
+- [x] Cooldown to prevent spam
 
 ---
 
-## 7) 안정화/검증
-- [x] 에디터 상태 진단 스크립트
-- [x] Play 진입 전 Preflight Gate(도시 자동 배치/머티리얼 교정/입력 스캔/진단 집계)
-- [x] Input System 전용 프로젝트에서 Legacy Input 사용 자동 감지
-- [ ] Play 진입 시 콘솔 에러 0
-- [x] Playmode 스모크 테스트(자동 에러 수집)
-- [x] CLI 배치 실행 스크립트(에디터 진단 + Playmode 스모크)
-- [x] 루프 1회 이상 재현
-- [x] 데모 시퀀스 완주 가능
-- [ ] CITY package 적용 상태에서 플레이 오류 0
+## 5) NPC Systems
 
-### 품질 체크리스트
-- [x] Canonical Text가 누가/무엇/어디서가 명확하고 템플릿 기반으로 일관됨
-- [x] 동일 사건 중복 로그가 쿨다운으로 억제됨
-- [x] 거리/시야/소음 조건으로 주입되는 로그가 실제로 분리됨
-- [x] 세션 진행에 따라 G가 상승하고 사회 압력 강화가 체감됨
-- [x] 동일 사건이 로그→가십→신고→판정으로 자연 연결됨
-- [x] 텍스트/아티팩트가 플레이 피드백의 중심 역할을 수행
+### 5‑1. SuspicionComponent
+- [x] Per‑NPC suspicion sᵢ
+- [x] Decay over time
+- [x] Report threshold + cooldown
+- [x] Report to ReportManager
 
----
+### 5‑2. ReportManager
+- [x] Report window TTL
+- [x] Evidence attachment
+- [x] Global G threshold gates interrogation
+- [x] Social pressure reduces required reports
 
-## 8) 즉시 실행 중 작업
-1. Play 진입 시 콘솔 에러 0 달성
-2. 한글 폰트 fallback 안정화 + MissingReferenceException 제거
-3. 루프 1회 이상 재현
-4. CITY package 적용 후 월드 가독성/동선 검증
-5. POLYGON city pack 자동 배치 스크립트 실행 및 앵커/랜드마크 정합성 확인
+### 5‑3. PoliceController
+- [x] Patrol → Investigate → Move → Interrogate → Cooldown loop
+- [x] Interrogation text (LLM or deterministic)
+- [x] Verdict based on case bundle score
+
+### 5‑4. NPC Dialogue (LLM surface)
+- [x] Single‑line commentary on reports/suspicion
+- [x] Cooldown and suppression when dialogue system present
 
 ---
 
-## 9) 진행 로그
-- 진행 중: Play 콘솔 에러 0 달성 + LoopVerifier 기반 루프 자동 재현 검증
-- 진행 중: 한글 폰트 리소스 추가/자동 TMP 생성 + fallback 정리
-- 진행 중: Preflight Gate로 입력/도시/폰트 사전 검증 흐름 정리
-- 진행 중: 런타임 월드 앵커/존/조직 NPC 확장
-- 진행 중: 사건 묶음(진술/해명/반박) 이벤트 추가 반영
-- 완료 기준 충족 전까지 작업 계속
+## 6) UI / HUD
+
+### 6‑1. HUD Elements
+- [x] Global suspicion bar + label
+- [x] Event log text
+- [x] Toast line
+- [x] Interrogation line
+- [x] Prompt line
+
+### 6‑2. UI Layout
+- [x] UILayouter applies positions and fonts at runtime
+
+---
+
+## 7) Diagnostics / Validation
+
+### 7‑1. Runtime Diagnostics
+- [x] RuntimeDiagnostics scene checks
+- [x] LoopVerifier asserts one complete loop
+- [x] Editor menu: `Tools/DreamOfOne/Run Diagnostics`
+
+### 7‑2. Tests
+- [x] EditMode tests for core systems
+
+---
+
+## 8) Release Checklist
+- [ ] No console errors
+- [ ] Prototype scene plays end‑to‑end
+- [ ] 1+ loop observed without manual forcing
+- [ ] Korean text renders correctly
+- [ ] City package materials render correctly in URP

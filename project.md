@@ -1,461 +1,426 @@
-```markdown
-# Dream of One — 게임 정의 및 기획서 (로그 기반 사회조직 시뮬레이션, 개정판)
-이벤트 중심, 로그 누적 기반 세계 이해, 거리 기반 로그 주입, 결정적 코어 + LLM 표면화
+# Dream of One — Game Definition & Design (Log‑First Social Organization Simulation, Revised)
+Event‑centric, log accumulation world model, distance‑based log injection, deterministic core + LLM surface layer
 
 ---
 
-## 0. 문서 목적과 범위
+## 0. Purpose and Scope
 
-### 0.1 목적
-본 문서는 **Dream of One**을 “현실 사회를 모방하는 조직 기반 시뮬레이션 게임”으로 정의하고, 게임이 무엇이며 플레이어가 무엇을 하게 되는지, 세계가 어떤 방식으로 굴러가는지를 **로그 중심(world-understanding-by-logs)** 관점에서 상세히 규정한다.
+### 0.1 Purpose
+This document defines **Dream of One** as an organization‑driven simulation of society. It specifies what the game is, what the player does, and how the world operates from a **log‑first (world‑understanding‑by‑logs)** perspective.
 
-### 0.2 핵심 전제(이번 개정의 중심)
-- 본 프로젝트는 **VLM / world model 수준의 ‘세계 이해 AI’를 만들려는 것이 아니다.**
-- 대신, 세계에서 발생하는 사실 변화가 **텍스트 기반 로그(WEL)** 로 지속적으로 누적되고,
-- NPC는 자신의 위치/거리/시야 조건에 따라 **주변에서 최근에 발생한 로그를 주입받아** 다음 행동을 결정한다.
-- 따라서 “**로그가 잘 쌓이고, 잘 주입되고, 잘 해석되는 구조**”가 게임의 핵심이다.
+### 0.2 Core Assumptions (Revision Focus)
+- This project **does not** attempt to build a VLM/world‑model‑level “world understanding AI.”
+- Instead, factual changes in the world are continuously written to a **text‑based World Event Log (WEL)**.
+- NPCs receive **nearby, recent logs** based on location/distance/visibility and decide their next actions.
+- Therefore, the core of the game is **logs that accumulate, inject, and interpret well**.
 
-### 0.3 비목표(명확히 제외)
-- **스냅샷 저장/복원(세이브/로드)** 기능은 고려하지 않는다.
-- 이벤트 로그(WEL)의 재생(replay)으로 상태를 복원하는 기능도 고려하지 않는다.
-- LLM이 판정/상태 전이를 결정하는 구조는 금지한다(결정적 코어 유지).
-
----
-
-## 1. 한 줄 정의
-
-여러 조직이 공존하는 작은 사회(도시 블록)에서 플레이어는 **꿈 밖에서 온 티(outsiderness)를 내지 않고** 살아가야 한다.  
-사회는 모든 사건을 **텍스트 로그로 기록**하고, NPC는 **주변 로그를 근거로** 가십을 전파하거나 신고하며, 경찰은 **축적된 기록과 증거(Artifact)** 로 절차적 판정을 내린다.
+### 0.3 Non‑Goals (Explicit)
+- No snapshot save/load.
+- No WEL replay to restore state.
+- LLM must not decide verdicts or state transitions (deterministic core only).
 
 ---
 
-## 2. 게임 정체성(핵심 기둥)
-
-1) **로그-우선 세계(Log-First World)**
-- 세계의 “지금 상태”를 완벽히 모델링하지 않는다.
-- 대신 “무슨 일이 있었는지”를 텍스트 로그로 남기고,
-- NPC는 주변 로그를 읽어 “지금 어떤 분위기/맥락인지”를 추론한다.
-
-2) **조직이 사회를 움직인다**
-- NPC는 개인의 랜덤 행동이 아니라 **조직 목표**를 수행한다.
-- 조직 목표의 충돌이 사건을 만들고, 사건은 로그로 누적된다.
-
-3) **결정적 코어(Deterministic Core)**
-- 위반/탐지/의심/신고/판정/지표 업데이트는 규칙 기반으로 결정한다.
-- LLM은 1줄 대사/요약 등 **표면 텍스트**만 담당한다.
-
-4) **텍스트-우선 결과**
-- 플레이어에게 보이는 모든 결과는 **1–2줄 텍스트 + 성과물(Artifact)** 로 귀결된다.
+## 1. One‑Line Definition
+In a small multi‑organization society (a city block), the player must survive **without revealing their outsiderness**. The society records all events as **text logs**, NPCs spread gossip or file reports based on **nearby logs**, and police issue **procedural verdicts** using accumulated records and evidence (artifacts).
 
 ---
 
-## 3. 월드(사회) 구성
+## 2. Game Identity (Core Pillars)
 
-### 3.1 공간 스케일
-- 약 110m × 110m 도시 블록(확장된 사회 단위)
-- 장소는 “활동 노드”로 기능하며, 사건은 장소에 귀속되어 누적된다.
+1) **Log‑First World**
+- The game does not fully model “current state.”
+- It records “what happened” in logs.
+- NPCs infer context from nearby logs.
 
-### 3.2 주요 장소(노드)
-- **인디 스튜디오(2층)**: 개발/검수/승인/릴리즈 흐름
-- **편의점**: 줄, 거래, 라벨(운영 규범) 마찰 지점
-- **공원**: 좌석/소음/촬영/민원 등 생활 규범 무대
-- **지구대 초소**: 신고/심문/증거/판정 절차 기관
-- **CCTV 포인트(2개)**: “기록 → 증거” 전환 장치
+2) **Organizations Move Society**
+- NPCs follow **organization goals**, not random behavior.
+- Goal conflicts create events that become logs.
 
-### 3.3 사회조직(조직 단위 정의)
-각 조직은 다음 항목으로 정의한다.
-- **조직 목표(Goal)**
-- **조직 절차(Procedure)**
-- **조직 자원(Resource)**
-- **조직이 생산하는 성과물(Artifacts)**
+3) **Deterministic Core**
+- Violation/detection/suspicion/report/verdict/update are rule‑based.
+- LLM outputs only 1‑line surface text.
 
-예시:
-
-#### A) 스튜디오
-- 목표: RC 제출(검수 → 승인 → 투입)
-- 절차: 칸반 갱신 → 패치노트 작성 → PM 승인 → RC 삽입
-- 자원: 칸반 보드, 라운지, 서버 슬롯
-- 성과물: 칸반 로그, 패치노트, 승인 노트, 사건 로그 스트립
-
-#### B) 지구대
-- 목표: 경범 처리, 재발 방지, 증거 확보
-- 절차: 신고 접수 → 현장 확인 → 증거 수집 → 심문 → 판정
-- 자원: 티켓 발부, 프린터, 캡처 보드
-- 성과물: 위반 티켓, CCTV 캡처, 사건 로그 스트립
-
-#### C) 상인회/편의점 운영
-- 목표: 품절 0, 라벨 갱신, 거래 질서 유지
-- 절차: 라벨 점검 → 진열/재고 갱신 → 카운터 규칙 준수
-- 자원: 라벨 시스템, 카운터
-- 성과물: 가격/품절 라벨, 거래 메모
-
-#### D) 공원관리
-- 목표: 좌석/소음/촬영 규범 유지, 민원 최소화
-- 절차: 현장 경고 → 조치 → 보고서 작성
-- 자원: 게시판, 조치 권한
-- 성과물: 조치 보고, 게시판 공지, 민원 메모
-
-#### E) 카페/휴게 공간 운영
-- 목표: 주문 질서/좌석 회전/소음 관리
-- 절차: 주문 → 대기 → 좌석 안내 → 정리
-- 자원: 주문대, 번호표, 좌석표
-- 성과물: 주문 메모, 좌석/정리 로그
-
-#### F) 배송/물류
-- 목표: 정시 배송, 출입 규정 준수
-- 절차: 픽업 → 출입 확인 → 수취 서명 → 반출
-- 자원: 배송 카트, 출입 체크리스트
-- 성과물: 배송 라벨, 수령 서명 로그
-
-#### G) 시설관리(빌딩 관리)
-- 목표: 시설 안전 유지, 장애 최소화
-- 절차: 정기 점검 → 수리 요청 → 작업 승인 → 완료 보고
-- 자원: 점검 체크리스트, 작업 허가서
-- 성과물: 점검 로그, 수리 티켓
-
-#### H) 미디어/촬영팀
-- 목표: 촬영 허가 준수, 촬영 구역 안전 유지
-- 절차: 사전 허가 → 촬영 구역 표시 → 촬영 → 반납
-- 자원: 촬영 장비, 허가서
-- 성과물: 촬영 허가서, 촬영 로그
-
-### 3.4 아트/환경 에셋 적용 (CITY package 기준)
-도시 블록 규모가 커졌으므로 플레이 가능성과 가독성을 유지하면서 **CITY package** 기반으로 월드를 시각적으로 완성한다.
-
-- **목표**: 프리미티브/대체 오브젝트를 CITY 패키지 프리팹으로 치환해 “도시 블록”으로 설득력 있게 보이게 한다.
-- **적용 에셋**: `Assets/POLYGON city pack` (CITY Package 1.0)
-- **스케일 규칙**: 1 unit = 1m 고정, 플레이어 스케일 고정, 건물 프리팹은 1.25 배 스케일로 확장.
-- **맵 확장 규칙**: 도로/보도 그리드 범위를 확장해 맵 자체를 키우고 건물을 재배치.
-- **랜드마크 구분**: 스튜디오/편의점/공원/지구대/CCTV는 건물 외형·간판·소품으로 명확히 식별.
-- **동선 표현**: 도로/보도/횡단보도/가로등/벤치/가로수로 이동 경로와 Zone 경계를 시각화.
-- **가시성 우선**: 주요 상호작용 오브젝트와 NPC가 가려지지 않도록 배치/높이 제한.
-- **충돌/네비게이션**: 모든 건물/소품에 적절한 콜라이더와 NavMesh 장애물 적용.
-- **퍼포먼스**: Static 플래그, LOD, 라이트 베이크/프로브 전제.
+4) **Text‑First Outcomes**
+- Outcomes are shown as **1–2 lines of text + artifacts**.
 
 ---
 
-## 3.5 조작/카메라 원칙(개정)
-- **카메라는 기본 고정 오프셋**을 유지하며, **마우스 입력으로만 시점 변경**.
-- **이동 입력은 카메라 기준 평면 이동**을 유지하되, 기본적으로 플레이어 회전은 억제(스트레이프 중심).
-- 이동으로 인해 시점이 자동 변경되지 않도록 자동 회전/스냅을 최소화한다.
+## 3. World (Society) Composition
+
+### 3.1 Spatial Scale
+- ~110m × 110m city block
+- Places act as “activity nodes”; events are anchored to places.
+
+### 3.2 Key Places (Nodes)
+- **Indie Studio (2F)**: dev/review/approval/release flow
+- **Convenience Store**: queueing, transactions, label norms
+- **Park**: seating/noise/photo norms
+- **Police Outpost**: report/interrogate/evidence/verdict procedure
+- **CCTV Points (2)**: “record → evidence” conversion
+
+### 3.3 Social Organizations (Definition)
+Each organization has:
+- **Goal**
+- **Procedure**
+- **Resources**
+- **Artifacts**
+
+Examples:
+
+#### A) Studio
+- Goal: RC submission (review → approval → insertion)
+- Procedure: Kanban update → patch note → PM approval → RC insert
+- Resources: Kanban board, lounge, server slots
+- Artifacts: Kanban logs, patch notes, approval notes, event log strips
+
+#### B) Police
+- Goal: handle minor offenses, prevent recurrence, secure evidence
+- Procedure: report intake → on‑site check → evidence collection → interrogation → verdict
+- Resources: ticket issuance, printer, capture board
+- Artifacts: violation ticket, CCTV capture, event log strips
+
+#### C) Store / Merchant Association
+- Goal: zero stockouts, label updates, orderly transactions
+- Procedure: label check → shelf/stock update → counter rules
+- Resources: label system, counter
+- Artifacts: price/stockout labels, transaction notes
+
+#### D) Park Management
+- Goal: seat/noise/photo norms, minimize complaints
+- Procedure: on‑site warning → action → report writing
+- Resources: bulletin board, enforcement authority
+- Artifacts: action report, bulletin notice, complaint memo
+
+#### E) Cafe / Rest Area
+- Goal: order orderliness / seat turnover / noise control
+- Procedure: order → wait → seat guidance → cleanup
+- Resources: order desk, ticketing, seating chart
+- Artifacts: order notes, seating/cleanup logs
+
+#### F) Delivery / Logistics
+- Goal: on‑time delivery, access compliance
+- Procedure: pickup → access check → signature → exit
+- Resources: delivery cart, access checklist
+- Artifacts: delivery labels, signature logs
+
+#### G) Facilities (Building Ops)
+- Goal: safety, minimize failures
+- Procedure: routine check → repair request → approval → completion report
+- Resources: inspection checklist, work permit
+- Artifacts: inspection logs, repair tickets
+
+#### H) Media / Photo Crew
+- Goal: permit compliance, safe shoot zones
+- Procedure: pre‑approval → zone marking → shoot → return
+- Resources: camera gear, permits
+- Artifacts: permits, shoot logs
+
+### 3.4 Art / Environment Assets (CITY Package)
+With the larger city block, visual clarity must remain high while using **CITY package** assets.
+
+- Target: replace primitives with CITY prefabs to sell the city block.
+- Assets: `Assets/POLYGON city pack` (CITY Package 1.0)
+- Scale: 1 unit = 1m; player scale fixed; building prefabs scaled to ~1.25.
+- Map expansion: extend road/sidewalk grid and re‑place buildings.
+- Landmark clarity: studio/store/park/police/CCTV obvious via silhouettes/signage.
+- Path readability: roads/sidewalks/crosswalks/lamps/benches/trees.
+- Visibility first: do not hide NPCs/interactables.
+- Collision & NavMesh: apply colliders and obstacles appropriately.
+- Performance: static flags, LOD, baked lighting/probes.
+
+### 3.5 Controls / Camera Principles
+- Camera uses a **fixed offset**, rotates **only via mouse**.
+- Movement is camera‑relative on the ground plane.
+- Minimize auto‑rotation or snap to avoid forced camera changes.
 
 ---
 
-## 4. 플레이어: Cover(역할) 중심 생존
+## 4. Player: Survive via Cover
 
-### 4.1 Cover의 의미
-Cover는 “플레이어가 사회 내부자처럼 보이게 하는 일관된 정체성”이며,
-단순 직업명이 아니라 **행동 기대치/언어/절차 이해 수준**을 포함한다.
+### 4.1 What Cover Means
+Cover is a consistent identity that makes the player appear as an insider. It includes **role expectations, vocabulary, and procedural fluency**, not just a job title.
 
-### 4.2 Cover의 구성 요소
-- 소속(조직 또는 외부 협력자)
-- 역할(예: 인턴, 계약직, 납품 기사, 청소 용역)
-- 기본 과업(일상 과업 1–2개)
-- 금기(하면 이상해 보이는 행동/말)
-- 기본 말투/용어(조직 용어집과 정합성)
+### 4.2 Cover Components
+- Affiliation (organization or contractor)
+- Role (intern, temp, delivery, cleaning, etc.)
+- Base tasks (1–2 everyday tasks)
+- Taboos (actions/phrases that look wrong)
+- Default tone/vocabulary (org lexicon)
 
-### 4.3 Cover 유지의 실패 패턴(outsiderness 상승 원인)
-- 절차를 건너뛰거나, 역할에 맞지 않는 권한 행동을 함
-- 조직 용어를 어색하게 사용하거나, 같은 질문을 반복
-- 사회 규범 위반 후 “사회적 수습”을 하지 않음
-- 증거물/절차(티켓, 캡처, 신고)를 방해함
-
----
-
-## 5. 로그 기반 세계 모델: WEL(World Event Log)
-
-### 5.1 WEL의 정의
-WEL은 세계에서 일어난 사실 변화의 **append-only 텍스트 로그**다.  
-이 프로젝트에서 WEL은 “세계 이해”의 중심이며, NPC 행동 결정의 기본 입력이 된다.
-
-- WEL은 복원/세이브를 위한 장치가 아니다.
-- WEL은 “무슨 일이 있었는지”를 축적하고, “누가 무엇을 알고 있는지”를 형성한다.
-
-### 5.2 WEL의 두 층(권장)
-WEL은 “읽기 쉬움”과 “판정 가능함”을 동시에 만족해야 한다. 이를 위해 2층 구조를 권장한다.
-
-1) **Structured Event(판정용 필드)**
-- 최소 필드: `{t, actor, event, place, topic, rule?, object?, note?}`
-- 판정/지표 업데이트는 이 구조화 필드에 의해 결정된다.
-
-2) **Canonical Text(주입용 1줄 텍스트)**
-- NPC와 플레이어가 읽는 1줄 로그
-- 규칙 기반 템플릿으로 생성(결정적)
-- 예: `[R4][Queue][Violation] 새치기 의심: 말로 순서 합의 없음.`
-
-> 중요: NPC가 “텍스트 기반으로 주입받아 행동 결정”한다는 요구를 충족하면서도,
-> 판정이 흔들리지 않도록 Canonical Text는 템플릿 기반으로 고정한다.
-
-### 5.3 이벤트 분류(예시)
-- 이동/존: `EnteredZone / ExitedZone`
-- 질서/거래: `QueuedAtCounter / PaymentProcessed / LabelChanged`
-- 규범/위반: `ViolationDetected(rule)`
-- 가십: `RumorShared / RumorQuestioned / RumorConfirmed / RumorDebunked`
-- 절차: `ReportFiled / InterrogationStarted / VerdictGiven`
-- 증거: `CCTVCaptured / EvidenceTouched / TicketIssued`
-- 조직 업무: `TaskStarted / TaskCompleted / ApprovalGranted / RCInserted`
+### 4.3 Cover Failure Patterns (Outsiderness Increase)
+- Skip procedures or act outside role authority
+- Use jargon incorrectly or repeat basic questions
+- Fail to socially remediate after a violation
+- Obstruct evidence or procedural artifacts
 
 ---
 
-## 6. 로그가 “사회”가 되는 과정: Semantic Shaper + Spatial Blackboard
+## 5. Log‑First World Model: WEL (World Event Log)
 
-### 6.1 Semantic Shaper(승격 규칙)
-WEL의 저수준 사건 묶음을 “사회가 이해 가능한 1줄 사건”으로 승격한다.
+### 5.1 Definition
+WEL is an **append‑only text log** of factual changes in the world. It is the primary input for NPC reasoning.
 
-- 승격은 결정 규칙으로 수행(판정 일관성)
-- 출력은 1줄, 80자 내(권장)
-- 예:
-  - `QueuedAtCounter` + “합의 없음” 조건 → “새치기 의심: 말로 순서 합의 없음.”
-  - `PhotoTriggered x N` → “촬영 위반 정황: 제한 구역에서 반복 촬영.”
+- Not a save/restore mechanism.
+- Accumulates “what happened” and shapes “who knows what.”
 
-### 6.2 Spatial Blackboard(거리 기반 주입의 핵심)
-각 장소/오브젝트는 “최근 로그 요약 버퍼”를 가진다.
+### 5.2 Two‑Layer Structure (Recommended)
+To be both readable and judgeable:
 
-- 단위: `Zone` 또는 `Object` (카운터, 벤치, CCTV, 게시판 등)
-- 구성:
-  - 최근 N개 Canonical Text
-  - 각 항목은 `{timestamp, topic, actor, severity, text}` 성격을 가진다.
-- 목적:
-  - NPC가 매번 전체 WEL을 읽지 않고,
-  - **자기 주변의 ‘최근 분위기/사건’만** 빠르게 주입받도록 한다.
+1) **Structured Event (for rules)**
+- Minimum fields: `{t, actor, event, place, topic, rule?, object?, note?}`
+- Deterministic updates rely on this layer.
 
----
+2) **Canonical Text (for injection)**
+- 1‑line, NPC‑readable text
+- Template‑based and deterministic
+- Example: `[R4][Queue][Violation] Queue cutting suspected: no verbal agreement.`
 
-## 7. 거리 기반 로그 주입 규칙(게임의 핵심 규칙)
-
-### 7.1 주입의 의미
-“NPC가 세계를 이해한다”는 것은,
-NPC가 자신의 위치/시야 조건에서 접근 가능한 Blackboard의 로그들을 **컨텍스트로 획득**한다는 뜻이다.
-
-### 7.2 주입 범위(권장 정의)
-NPC는 매 의사결정 틱마다 다음을 읽는다.
-
-1) **근접 주입(Near)**
-- 거리 D₁ 이내(예: 1.2m): 오브젝트/존 로그 최대 K₁줄
-
-2) **시야 주입(FOV)**
-- 시야각 + 거리 D₂ 이내(예: 8m): 보이는 존 로그 최대 K₂줄
-
-3) **소음 주입(Noise)**
-- 소음 거리 D₃ 이내(예: 6m): “소음 이벤트” 로그 1줄
-
-4) **개인 메모리(Personal Memory)**
-- NPC 개인이 최근에 본 중요한 로그 N개(예: 5개, TTL 8분)
-
-### 7.3 주입 우선순위(권장)
-- 절차/증거 > 규범 위반 > 가십 > 일반 관찰
-- 동일 토픽은 쿨다운(예: 30초) 적용
-- 동일 actor(플레이어)에 대한 최신 사건이 우선
-
-### 7.4 TTL과 망각(사회적 엔트로피)
-- Blackboard 항목은 TTL이 지나면 사라진다.
-- 다만 “증거/절차 로그(티켓, 캡처, 승인)”는 TTL이 더 길다.
-- 목표:
-  - 사회가 영원히 기억하지는 않되,
-  - 증거가 있으면 더 오래 남는 현실적 성격을 만든다.
+### 5.3 Event Taxonomy (Examples)
+- Movement/Zone: `EnteredZone / ExitedZone`
+- Order/Transaction: `QueuedAtCounter / PaymentProcessed / LabelChanged`
+- Norm/Violation: `ViolationDetected(rule)`
+- Gossip: `RumorShared / RumorQuestioned / RumorConfirmed / RumorDebunked`
+- Procedure: `ReportFiled / InterrogationStarted / VerdictGiven`
+- Evidence: `CCTVCaptured / EvidenceTouched / TicketIssued`
+- Org Work: `TaskStarted / TaskCompleted / ApprovalGranted / RCInserted`
 
 ---
 
-## 8. NPC 의사결정: 로그 기반 사회 에이전트
+## 6. How Logs Become “Society”: Semantic Shaper + Spatial Blackboard
 
-### 8.1 NPC 입력(매 틱)
-NPC는 다음 컨텍스트를 입력으로 가진다.
-- 조직 목표/개인 목표
-- 역할/권한/절차
-- 주입된 주변 로그(Blackboard)
-- 개인 메모리(최근 사건)
-- 증거물 근접 여부
-- 플레이어에 대한 신념/의심 상태
+### 6.1 Semantic Shaper (Promotion Rules)
+Promotes low‑level events into “socially meaningful” 1‑line statements.
 
-### 8.2 NPC 내부 상태(핵심 수치)
-- `o`: 대화/행동 1건에서 드러난 외부인스러움(0~1)
-- `pᵢ`: 플레이어가 외부인일 확률(신념)
-- `sᵢ`: 의심 점수(0~100)
-- `G`: 전역 인지율(0~1)
+- Rule‑based (deterministic)
+- 1 line, ≤ 80 chars (recommended)
+- Examples:
+  - `QueuedAtCounter` + “no agreement” → “Queue cutting suspected: no verbal agreement.”
+  - `PhotoTriggered x N` → “Photo violation pattern: repeated shots in restricted area.”
 
-### 8.3 NPC 출력(행동 선택)
-NPC가 선택하는 출력은 “사회적 행위” 위주다.
-- 질문(확인/추궁)
-- 가십 전파(공유)
-- 신고(절차 개시)
-- 중재(수습)
-- 업무 수행(조직 목표 진행)
-- 증거 생성/보강(캡처 요청, 티켓 발부 유도 등)
+### 6.2 Spatial Blackboard (Distance Injection Core)
+Each place/object keeps a **recent log buffer**.
 
-> v0.1/초기 단계에서 NPC의 이동/회피 같은 복잡 행동은 최소화하되,
-> “질문/공유/신고/절차” 같은 사회적 출력이 풍부해지도록 설계한다.
-
-### 8.4 NPC 로스터(확장)
-조직 확장을 반영해 NPC 역할을 늘린다(초기 배치 기준, 균형은 추후 조정).
-- 스튜디오: PM, 개발자, QA, 릴리즈 담당
-- 지구대: 순경, 조사관, 민원 담당
-- 편의점/상인회: 점장, 알바, 재고 담당
-- 공원관리: 관리인, 현장 경고 담당
-- 카페/휴게: 바리스타, 안내 스태프
-- 배송/물류: 배송기사, 출입 확인 담당
-- 시설관리: 시설 기사, 안전 점검 담당
-- 미디어/촬영: 리포터/촬영 스태프
-- 시민군: 주민 대표, 관광객, 학생/직장인
+- Unit: Zone or Object (counter, bench, CCTV, bulletin, etc.)
+- Fields: `{timestamp, topic, actor, severity, text}`
+- Purpose: NPCs read **nearby recent context** instead of the entire WEL.
 
 ---
 
-## 9. 가십 네트워크(로그 기반으로 구현되는 사회적 확산)
+## 7. Distance‑Based Log Injection Rules (Core Gameplay Rule)
 
-### 9.1 가십의 정의
-가십은 “사건의 해석”이며, 증거가 없을 때 사회가 사건을 처리하는 중간 상태다.
+### 7.1 Meaning of Injection
+“N PCs understand the world” means they acquire **contextual logs** from nearby blackboards based on position and visibility.
 
-- 상태:
-  - Draft(회색): 미확정, 질문/의심 단계
-  - Final(컬러): 증거/절차로 확정 또는 반박
+### 7.2 Recommended Injection Ranges
+Each decision tick:
 
-### 9.2 전파 규칙(개념)
-- 근접 대화로만 전파(사회적 접촉)
-- 신뢰도 `w ∈ [0,1]` 보유
-- 출처, 시각, 장소 태그 유지
-- 증거가 가까우면 `w`가 크게 변하며 Final로 전환될 수 있다.
+1) **Near**: within D₁ (e.g., 1.2m) → up to K₁ logs
+2) **FOV**: within D₂ (e.g., 8m) → up to K₂ logs
+3) **Noise**: within D₃ (e.g., 6m) → 1 noise log
+4) **Personal Memory**: last N important logs (TTL e.g., 8 min)
 
-### 9.3 확정/반박 트리거
-- CCTV 캡처, 티켓, 승인 노트, 조치 보고 등 Artifact가 생성되거나,
-- 경찰 심문/판정 절차가 실행되면,
-가십은 Confirmed/Debunked로 전환된다.
+### 7.3 Priority (Recommended)
+- Procedure/Evidence > Norm Violation > Gossip > General
+- Same topic cooldown (e.g., 30s)
+- Latest actor events prioritized
 
----
-
-## 10. 경찰 절차: 로그와 증거로 내리는 판정
-
-### 10.1 경찰의 역할
-경찰은 즉흥 처벌이 아니라 **사건 묶음(Case Bundle)** 을 구성해 절차적으로 판정한다.
-
-### 10.2 사건 묶음(Case Bundle) 구성 요소
-- 위반 사건 로그(언제/어디서/무엇을)
-- 신고 로그(누가/왜)
-- 증거물(캡처/티켓/메모/승인 관련 문서)
-- 반박/해명 로그(있다면)
-- 관련자 진술(1줄 대사/요약)
-
-### 10.3 판정 결과(개념)
-- 무혐의/보류/의심 강화/퇴출(또는 강한 페널티 상태)
-- 판정은 “규칙 기반”으로 결정되며, 텍스트는 판정 결과를 1줄로 서술한다.
+### 7.4 TTL & Forgetting (Social Entropy)
+- Blackboard entries expire after TTL
+- Evidence/procedure logs last longer
+- Society forgets, but evidence persists
 
 ---
 
-## 11. LLM 사용 범위(표면화만, 로그 중심 유지)
+## 8. NPC Decision‑Making: Log‑Driven Social Agents
 
-### 11.1 LLM의 허용 역할
-- 1줄 대사 생성(질문, 중재, 심문, 판정 멘트)
-- 1줄 요약(플레이어에게 보여줄 표현의 자연화)
+### 8.1 NPC Inputs (Per Tick)
+- Org goal / personal goal
+- Role / authority / procedure
+- Injected nearby logs
+- Personal memory
+- Evidence proximity
+- Belief/suspicion about player
 
-### 11.2 LLM의 금지 역할
-- 판정/상태 전이의 결정
-- 로그(Structured Event)의 사실 내용 변경
-- 증거의 생성 여부 판단
+### 8.2 NPC Internal State (Key Metrics)
+- `o`: outsiderness revealed in a single act (0–1)
+- `pᵢ`: belief that player is outsider
+- `sᵢ`: suspicion score (0–100)
+- `G`: global awareness (0–1)
 
-### 11.3 로그와 LLM의 관계(권장)
-- NPC가 읽는 핵심 입력은 **Canonical Text(템플릿)** 이다.
-- LLM은 그 Canonical Text를 기반으로 “말투/표현”을 1줄로 변주한다.
-- 실패 시 즉시 템플릿 문장으로 폴백한다.
+### 8.3 NPC Outputs (Action Choices)
+- Ask / verify / challenge
+- Spread gossip
+- File report
+- Mediate / de‑escalate
+- Perform org tasks
+- Create/strengthen evidence
 
----
+> In early versions, keep movement simple but make social outputs rich.
 
-## 12. 대표 사건 설계(조직이 알아서 돌아가는 사회)
-
-### 12.1 스튜디오: 릴리즈(Release) 흐름
-- 개발자/PM이 RC 제출을 추진한다.
-- 칸반/패치노트/승인 절차가 진행된다.
-- 이 과정에서 플레이어는 Cover에 맞는 방식으로 참여하거나 방해/오해를 만들 수 있다.
-- 사건은 로그로 축적되고, 승인/RC 관련 Artifact가 생긴다.
-
-### 12.2 편의점: 운영/질서 마찰
-- 줄 규범, 라벨 규범, 결제 절차가 반복적으로 발생한다.
-- 사소한 새치기/라벨 오류가 루머로 번지고,
-- 신고/절차로 이어질 수 있다.
-
-### 12.3 공원: 생활 규범 마찰
-- 벤치 양보, 촬영, 소음 규범이 갈등을 만든다.
-- 공원관리 조직이 조치 보고를 만들고,
-- 경찰은 민원/증거에 반응한다.
-
-### 12.4 지구대: 절차적 처리(사회적 클라이맥스)
-- 신고가 누적되면 경찰은 사건 묶음을 구성한다.
-- “말”이 아니라 “로그+증거”로 판정한다.
+### 8.4 NPC Roster (Expansion)
+- Studio: PM, dev, QA, release
+- Police: officer, investigator, complaints
+- Store: manager, clerk, stock
+- Park: caretaker, on‑site warning
+- Cafe: barista, host
+- Logistics: courier, access checker
+- Facilities: technician, safety inspector
+- Media: reporter, camera crew
+- Citizens: resident rep, tourist, student/worker
 
 ---
 
-## 13. 플레이 루프(로그 중심 정의)
+## 9. Gossip Network (Social Propagation via Logs)
 
-### 13.1 미시 루프(분 단위)
-1) 조직들이 목표 수행(일상 진행)  
-2) 충돌/사건 발생(위반, 오해, 절차 누락, 업무 지연 등)  
-3) 사건이 WEL에 기록되고 1줄 Canonical Text로 승격  
-4) 장소 Blackboard에 축적  
-5) NPC가 거리 기반으로 로그 주입  
-6) NPC가 가십/질문/신고/중재/업무 수행을 선택  
-7) 결과가 다시 로그 및 Artifact로 누적
+### 9.1 Definition
+Gossip is interpretation without evidence; it is the social middle state.
 
-### 13.2 거시 루프(세션 단위)
-- 플레이어는 Cover를 유지하며 조직들과 상호작용한다.
-- 실수는 “사회적 수습(중재/해명/절차 준수)”로 관리한다.
-- 전역 G가 상승하면 사회적 압력이 강해지고(검문/절차 강화),
-- 증거/절차로 사건이 확정/반박되며 사회는 다음 사건으로 넘어간다.
+- States:
+  - Draft (gray): unconfirmed, inquiry phase
+  - Final (colored): confirmed or debunked
 
----
+### 9.2 Propagation (Concept)
+- Only via proximity conversation
+- Trust weight `w ∈ [0,1]`
+- Source/time/place tags preserved
+- Evidence can flip state to Final
 
-## 14. 데모 시연 설계(사회조직 버전, 로그 중심)
-
-### 14.1 데모 목표(5–8분)
-- “조직이 일을 한다”는 장면을 보여준다.
-- 사건이 발생하고(위반/오해/절차 충돌),
-- 로그가 주변에 축적되고,
-- NPC가 로그를 읽고 신고/절차로 이동하며,
-- 경찰이 로그+증거 기반으로 판정하는 장면을 보여준다.
-
-### 14.2 데모 2막 구성(권장)
-
-#### 막 1: 편의점 질서 사건(규범 → 로그 → 신고)
-- 플레이어 또는 시민이 줄 규범/라벨 관련 마찰을 만든다.
-- 사건이 WEL/Blackboard에 1줄로 축적된다.
-- 관광객/시민이 그 로그를 근거로 가십 또는 신고를 발생시킨다.
-
-필수로 보이기:
-- `[Violation]` 계열 Canonical Text
-- 근처 NPC가 “방금 본 사건”을 근거로 한 줄 발화/신고
-
-#### 막 2: 스튜디오 릴리즈 사건(조직 목표 → 증거 → 판정)
-- 스튜디오에서 RC 제출이 진행된다(칸반/패치노트/승인).
-- 작은 절차 누락/오해/개입이 사건을 만든다.
-- CCTV/승인 노트/사건 로그 스트립 중 최소 1개가 등장해 “증거” 역할을 한다.
-- 경찰은 사건 묶음을 구성하고 판정을 출력한다.
-
-필수로 보이기:
-- 조직 목표 수행(“그냥 걷는 NPC”가 아니라 실제 업무 흐름)
-- 증거(Artifact)가 루머를 확정/반박시키는 순간
-- 경찰이 “로그+증거”로 판정하는 순간
+### 9.3 Confirm/Debunk Triggers
+- CCTV captures, tickets, approval notes, action reports, etc.
+- Police interrogation/verdict
 
 ---
 
-## 15. 설계 품질 체크리스트(로그 중심 완결성)
+## 10. Police Procedure: Verdict from Logs + Evidence
 
-본 게임이 “사회처럼 작동”하려면 아래 조건이 만족되어야 한다.
+### 10.1 Police Role
+Police do not punish impulsively; they assemble **Case Bundles** and decide procedurally.
 
-### 15.1 로그 품질
-- 모든 핵심 사건은 1줄 Canonical Text로 남는다.
-- Canonical Text는 템플릿 기반이며 모호하지 않다(누가/무엇을/어디서).
-- 동일 사건이 과도하게 중복 기록되지 않는다(쿨다운/디바운스).
+### 10.2 Case Bundle Elements
+- Violation logs (when/where/what)
+- Report logs (who/why)
+- Evidence artifacts (captures/tickets/notes/approvals)
+- Defense/rebuttal logs
+- 1‑line statements (surface text)
 
-### 15.2 주입 품질
-- NPC는 “자기 주변에서 최근에 일어난 일”을 실제로 읽는다.
-- 거리/시야/소음 조건이 명확히 반영된다.
-- Blackboard TTL로 사회적 망각이 발생한다.
-
-### 15.3 사회적 절차의 일관성
-- 위반/가십/신고/증거/판정의 인과가 로그에서 추적 가능하다.
-- 판정은 규칙 기반이며, LLM의 표현이 판정을 바꾸지 않는다.
+### 10.3 Verdict Results
+- Cleared / Hold / Suspicion Increase / Expulsion (or strong penalty)
+- Verdicts are rule‑based; text only describes the outcome.
 
 ---
 
-## 16. 요약(핵심 문장)
+## 11. LLM Scope (Surface Only)
 
-Dream of One은 “상태를 완벽히 모델링하는 AI”가 아니라,  
-**텍스트 로그가 누적되는 사회**를 만들고, NPC가 **거리 기반으로 주변 로그를 주입받아**  
-조직 목표/절차를 수행하며 가십/신고/판정이라는 사회적 프로세스를 돌리는 게임이다.
-```
+### 11.1 Allowed
+- 1‑line dialogue (question, mediation, interrogation, verdict line)
+- 1‑line summary (player‑visible surface text)
+
+### 11.2 Disallowed
+- Deciding verdicts or state transitions
+- Altering structured event facts
+- Deciding whether evidence exists
+
+### 11.3 Relationship to Logs
+- NPCs read **canonical template text** as input.
+- LLM paraphrases tone/style only.
+- On failure, fallback to templates immediately.
+
+---
+
+## 12. Representative Incident Design
+
+### 12.1 Studio: Release Flow
+- Developers/PM push RC submission.
+- Kanban/patch notes/approvals proceed.
+- Player can participate, disrupt, or misunderstand under cover.
+- Logs accumulate; approval/RC artifacts appear.
+
+### 12.2 Convenience Store: Order Friction
+- Queue norms, label rules, payment procedure repeat.
+- Minor infractions spread as rumor → report → procedure.
+
+### 12.3 Park: Daily Norm Friction
+- Seating, photography, noise norms create conflict.
+- Park management issues action reports.
+- Police respond to complaints/evidence.
+
+### 12.4 Police: Procedural Climax
+- When reports accumulate, police assemble a case bundle.
+- Verdict uses logs + evidence, not “opinion.”
+
+---
+
+## 13. Play Loops (Log‑First)
+
+### 13.1 Micro Loop (Minutes)
+1) Organizations perform daily goals
+2) Conflict/event occurs (violation, misunderstanding, procedure slip)
+3) Event recorded to WEL and promoted to 1‑line canonical text
+4) Accumulates in place blackboards
+5) NPCs inject logs based on distance/visibility
+6) NPCs choose gossip/report/mediation/procedure/work
+7) Results accumulate back into logs + artifacts
+
+### 13.2 Macro Loop (Session)
+- Player maintains cover while interacting with orgs
+- Mistakes are mitigated via social remediation or procedure compliance
+- As global G rises, pressure increases
+- Evidence/procedure confirm or debunk incidents; society moves on
+
+---
+
+## 14. Demo Design (Log‑First Social Org Version)
+
+### 14.1 Demo Goal (5–8 minutes)
+- Show organizations “doing work.”
+- Events occur (violation/ misunderstanding/ procedure conflict).
+- Logs accumulate locally.
+- NPCs read logs and move into report/procedure.
+- Police issue verdicts from logs + evidence.
+
+### 14.2 Two‑Act Demo (Recommended)
+
+**Act 1: Store Order Incident (Norm → Log → Report)**
+- Player or citizen triggers queue/label friction.
+- WEL/Blackboard holds 1‑line log.
+- Nearby NPC uses that log to gossip or report.
+
+Must show:
+- `[Violation]` canonical text
+- NPC line/report based on “just saw” context
+
+**Act 2: Studio Release Incident (Org Goal → Evidence → Verdict)**
+- Studio RC submission proceeds (kanban/patch/approval).
+- Procedure slip creates an incident.
+- At least one artifact appears as evidence.
+- Police assembles case bundle and outputs verdict.
+
+Must show:
+- Real org workflow (not idle NPCs)
+- Evidence confirming or debunking rumor
+- Police verdict based on logs + evidence
+
+---
+
+## 15. Design Quality Checklist (Log‑First Completeness)
+
+### 15.1 Log Quality
+- All key events emit 1‑line canonical text
+- Canonical text is template‑based and unambiguous (who/what/where)
+- Excess duplicate logging prevented (cooldowns)
+
+### 15.2 Injection Quality
+- NPCs actually read nearby recent logs
+- Distance/FOV/noise rules are applied
+- Blackboard TTL creates social forgetting
+
+### 15.3 Procedural Consistency
+- Causality of violation→gossip→report→evidence→verdict traceable in logs
+- Verdicts are rule‑based; LLM text does not alter outcomes
+
+---
+
+## 16. Summary (Core Statement)
+
+Dream of One is not a “perfect world‑state AI.” It builds a **society of accumulated text logs**, and NPCs **inject nearby logs by distance** to execute organization goals and run social processes like gossip, report, and verdict.

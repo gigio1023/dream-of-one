@@ -22,7 +22,7 @@ namespace DreamOfOne.Core
 
         [SerializeField]
         [Tooltip("기본 의심 증가량")]
-        private float defaultSuspicionDelta = 10f;
+        private float defaultSuspicionDelta = 20f;
 
         [SerializeField]
         [Tooltip("거리 감쇠 적용 여부")]
@@ -49,12 +49,12 @@ namespace DreamOfOne.Core
             CacheZones();
             if (eventLog == null)
             {
-                eventLog = FindObjectOfType<WorldEventLog>();
+                eventLog = FindFirstObjectByType<WorldEventLog>();
             }
 
             if (witnesses.Count == 0)
             {
-                witnesses.AddRange(FindObjectsOfType<SuspicionComponent>());
+                witnesses.AddRange(FindObjectsByType<SuspicionComponent>(FindObjectsInactive.Include, FindObjectsSortMode.None));
             }
         }
 
@@ -170,7 +170,7 @@ namespace DreamOfOne.Core
         private void CacheZones()
         {
             zoneLookup.Clear();
-            foreach (var zone in FindObjectsOfType<Zone>())
+            foreach (var zone in FindObjectsByType<Zone>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 if (zone == null || string.IsNullOrEmpty(zone.ZoneId))
                 {

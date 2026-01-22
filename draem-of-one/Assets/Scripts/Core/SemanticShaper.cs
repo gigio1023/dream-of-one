@@ -9,10 +9,6 @@ namespace DreamOfOne.Core
     /// </summary>
     public sealed class SemanticShaper : MonoBehaviour
     {
-        [SerializeField]
-        [Tooltip("향후 다국어 지원을 대비한 플레이스홀더")]
-        private string defaultLanguage = "ko";
-
         /// <summary>
         /// 이벤트 타입에 맞는 간단한 한국어 문장을 만들어 반환한다.
         /// </summary>
@@ -43,6 +39,54 @@ namespace DreamOfOne.Core
                 case EventType.VerdictGiven:
                     builder.Append($"판정: {record.note}");
                     break;
+                case EventType.NpcUtterance:
+                    builder.Append($"{record.actorId}: {record.note}");
+                    break;
+                case EventType.RumorShared:
+                    builder.Append($"소문: {record.note}");
+                    break;
+                case EventType.RumorConfirmed:
+                    builder.Append($"소문 확정: {record.note}");
+                    break;
+                case EventType.RumorDebunked:
+                    builder.Append($"소문 반박: {record.note}");
+                    break;
+                case EventType.EvidenceCaptured:
+                    builder.Append($"증거 확보: {record.note}");
+                    break;
+                case EventType.TicketIssued:
+                    builder.Append($"티켓 발부: {record.note}");
+                    break;
+                case EventType.CctvCaptured:
+                    builder.Append($"CCTV 캡처: {record.note}");
+                    break;
+                case EventType.TaskStarted:
+                    builder.Append($"업무 시작: {record.note}");
+                    break;
+                case EventType.TaskCompleted:
+                    builder.Append($"업무 완료: {record.note}");
+                    break;
+                case EventType.ApprovalGranted:
+                    builder.Append($"승인 완료: {record.note}");
+                    break;
+                case EventType.RcInserted:
+                    builder.Append($"RC 반영: {record.note}");
+                    break;
+                case EventType.LabelChanged:
+                    builder.Append($"라벨 갱신: {record.note}");
+                    break;
+                case EventType.PaymentProcessed:
+                    builder.Append($"결제 처리: {record.note}");
+                    break;
+                case EventType.QueueUpdated:
+                    builder.Append($"줄 정리: {record.note}");
+                    break;
+                case EventType.SeatClaimed:
+                    builder.Append($"좌석 사용: {record.note}");
+                    break;
+                case EventType.NoiseObserved:
+                    builder.Append($"소음 민원: {record.note}");
+                    break;
                 default:
                     builder.Append($"{record.eventType} 이벤트");
                     break;
@@ -50,13 +94,12 @@ namespace DreamOfOne.Core
 
             if (!string.IsNullOrEmpty(record.note) &&
                 builder.Length > 0 &&
-                record.eventType is not (EventType.VerdictGiven or EventType.SuspicionUpdated))
+                record.eventType is not (EventType.VerdictGiven or EventType.SuspicionUpdated or EventType.NpcUtterance or EventType.RumorShared or EventType.RumorConfirmed or EventType.RumorDebunked))
             {
                 builder.Append($" ({record.note})");
             }
 
-            return builder.ToString();
+            return DialogueLineLimiter.ClampLine(builder.ToString(), 80);
         }
     }
 }
-

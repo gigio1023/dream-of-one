@@ -1,4 +1,5 @@
 using DreamOfOne.Core;
+using CoreEventType = DreamOfOne.Core.EventType;
 using UnityEngine;
 
 namespace DreamOfOne.NPC
@@ -14,11 +15,11 @@ namespace DreamOfOne.NPC
 
         [SerializeField]
         [Tooltip("초당 감소 수치")]
-        private float decayPerSecond = 0.5f;
+        private float decayPerSecond = 0.1f;
 
         [SerializeField]
         [Tooltip("신고를 일으킬 최소 의심 수치")]
-        private float reportThreshold = 50f;
+        private float reportThreshold = 30f;
 
         [SerializeField]
         [Tooltip("신고 후 다시 신고할 수 있을 때까지의 대기 시간")]
@@ -48,6 +49,24 @@ namespace DreamOfOne.NPC
         public float CurrentSuspicion => suspicion;
         public float CurrentSuspicionNormalized => Mathf.Clamp01(suspicion / Mathf.Max(1f, maxSuspicion));
         public string NpcId => string.IsNullOrEmpty(npcId) ? name : npcId;
+
+        private void Awake()
+        {
+            if (reportManager == null)
+            {
+                reportManager = FindFirstObjectByType<ReportManager>();
+            }
+
+            if (globalSuspicion == null)
+            {
+                globalSuspicion = FindFirstObjectByType<GlobalSuspicionSystem>();
+            }
+
+            if (eventLog == null)
+            {
+                eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+        }
 
         private void OnEnable()
         {
@@ -90,12 +109,14 @@ namespace DreamOfOne.NPC
                 {
                     actorId = NpcId,
                     actorRole = "Citizen",
-                    eventType = EventType.SuspicionUpdated,
+                    eventType = CoreEventType.SuspicionUpdated,
                     category = EventCategory.Suspicion,
                     ruleId = ruleId,
+                    topic = ruleId,
                     delta = delta,
                     note = $"{suspicion:0}",
-                    severity = suspicion >= reportThreshold ? 2 : 0
+                    severity = suspicion >= reportThreshold ? 2 : 0,
+                    position = transform.position
                 });
             }
 
@@ -120,7 +141,7 @@ namespace DreamOfOne.NPC
 
             lastReportTimestamp = now;
             reported = true;
-            reportManager.FileReport(NpcId, ruleId, suspicion, lastEventId);
+            reportManager.FileReport(NpcId, ruleId, suspicion, lastEventId, transform.position);
         }
 
         public void ResetAfterInterrogation()

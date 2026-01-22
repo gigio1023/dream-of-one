@@ -1,0 +1,337 @@
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace DreamOfOne.UI
+{
+    /// <summary>
+    /// Simple runtime layout for HUD elements created in Prototype scene.
+    /// </summary>
+    public sealed class UILayouter : MonoBehaviour
+    {
+        [SerializeField]
+        private bool applyOnAwake = true;
+
+        private void Awake()
+        {
+            if (applyOnAwake)
+            {
+                Apply();
+            }
+        }
+
+        public void Apply()
+        {
+            var canvas = GetComponentInChildren<Canvas>(true);
+            if (canvas == null)
+            {
+                return;
+            }
+
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1920f, 1080f);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
+            var slider = canvas.GetComponentInChildren<Slider>(true);
+            if (slider != null)
+            {
+                slider.name = "GlobalSuspicionBar";
+                Place(slider.GetComponent<RectTransform>(), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(160f, 20f), new Vector2(140f, -20f));
+                slider.minValue = 0f;
+                slider.maxValue = 1f;
+                slider.value = 0f;
+            }
+
+            TMP_Text globalLabel = null;
+            TMP_Text eventLog = null;
+            TMP_Text toast = null;
+            TMP_Text interrogation = null;
+            TMP_Text prompt = null;
+            TMP_Text controls = null;
+            TMP_Text coverStatus = null;
+            TMP_Text caseBundle = null;
+            TMP_Text blackboard = null;
+            Image eventLogPanel = null;
+            Image promptPanel = null;
+            Image interrogationPanel = null;
+            Image toastPanel = null;
+
+            foreach (var image in canvas.GetComponentsInChildren<Image>(true))
+            {
+                if (image.name == "EventLogPanel")
+                {
+                    eventLogPanel = image;
+                }
+                else if (image.name == "PromptPanel")
+                {
+                    promptPanel = image;
+                }
+                else if (image.name == "InterrogationPanel")
+                {
+                    interrogationPanel = image;
+                }
+                else if (image.name == "ToastPanel")
+                {
+                    toastPanel = image;
+                }
+            }
+
+            foreach (var label in canvas.GetComponentsInChildren<TMP_Text>(true))
+            {
+                switch (label.name)
+                {
+                    case "GlobalSuspicionLabel":
+                        globalLabel ??= label;
+                        break;
+                    case "EventLogText":
+                        eventLog ??= label;
+                        break;
+                    case "PromptText":
+                        prompt ??= label;
+                        break;
+                    case "ControlsText":
+                        controls ??= label;
+                        break;
+                    case "CoverStatusText":
+                        coverStatus ??= label;
+                        break;
+                    case "CaseBundleText":
+                        caseBundle ??= label;
+                        break;
+                    case "BlackboardText":
+                        blackboard ??= label;
+                        break;
+                }
+            }
+
+            foreach (var label in canvas.GetComponentsInChildren<TMP_Text>(true))
+            {
+                if (globalLabel == null && label.text == "G 0%")
+                {
+                    globalLabel = label;
+                }
+                else if (eventLog == null && label.text == "EventLog")
+                {
+                    eventLog = label;
+                }
+                else if (prompt == null && label.text == "E: Interact")
+                {
+                    prompt = label;
+                }
+            }
+
+            var remaining = new System.Collections.Generic.List<TMP_Text>();
+            foreach (var label in canvas.GetComponentsInChildren<TMP_Text>(true))
+            {
+                if (label == globalLabel || label == eventLog || label == prompt)
+                {
+                    continue;
+                }
+                remaining.Add(label);
+            }
+
+            if (remaining.Count > 0)
+            {
+                toast = remaining[0];
+            }
+            if (remaining.Count > 1)
+            {
+                interrogation = remaining[1];
+            }
+
+            if (globalLabel != null)
+            {
+                globalLabel.name = "GlobalSuspicionLabel";
+                globalLabel.fontSize = 34f;
+                globalLabel.raycastTarget = false;
+                Place(globalLabel.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(120f, 28f), new Vector2(20f, -20f));
+            }
+
+            if (eventLog != null)
+            {
+                eventLog.name = "EventLogText";
+                eventLog.fontSize = 26f;
+                eventLog.alignment = TextAlignmentOptions.TopLeft;
+                eventLog.raycastTarget = false;
+                Place(eventLog.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(600f, 220f), new Vector2(20f, -70f));
+
+                if (eventLogPanel == null)
+                {
+                    var panelObject = new GameObject("EventLogPanel", typeof(RectTransform), typeof(Image));
+                    panelObject.transform.SetParent(canvas.transform, false);
+                    eventLogPanel = panelObject.GetComponent<Image>();
+                }
+
+                if (eventLogPanel != null)
+                {
+                    eventLogPanel.color = new Color(0f, 0f, 0f, 0.45f);
+                    var panelRect = eventLogPanel.rectTransform;
+                    Place(panelRect, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(620f, 240f), new Vector2(20f, -70f));
+                    eventLogPanel.transform.SetSiblingIndex(eventLog.transform.GetSiblingIndex());
+                    eventLog.transform.SetSiblingIndex(eventLogPanel.transform.GetSiblingIndex() + 1);
+                }
+            }
+
+            if (toast != null)
+            {
+                toast.name = "ToastText";
+                toast.fontSize = 34f;
+                toast.alignment = TextAlignmentOptions.Center;
+                toast.raycastTarget = false;
+                Place(toast.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(680f, 50f), new Vector2(0f, 90f));
+
+                if (toastPanel == null)
+                {
+                    var panelObject = new GameObject("ToastPanel", typeof(RectTransform), typeof(Image));
+                    panelObject.transform.SetParent(canvas.transform, false);
+                    toastPanel = panelObject.GetComponent<Image>();
+                }
+
+                if (toastPanel != null)
+                {
+                    toastPanel.color = new Color(0f, 0f, 0f, 0.35f);
+                    var panelRect = toastPanel.rectTransform;
+                    Place(panelRect, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(720f, 60f), new Vector2(0f, 90f));
+                    toastPanel.transform.SetSiblingIndex(toast.transform.GetSiblingIndex());
+                    toast.transform.SetSiblingIndex(toastPanel.transform.GetSiblingIndex() + 1);
+                }
+            }
+
+            if (interrogation != null)
+            {
+                interrogation.name = "InterrogationText";
+                interrogation.fontSize = 32f;
+                interrogation.alignment = TextAlignmentOptions.Center;
+                interrogation.raycastTarget = false;
+                Place(interrogation.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(760f, 70f), new Vector2(0f, 24f));
+
+                if (interrogationPanel == null)
+                {
+                    var panelObject = new GameObject("InterrogationPanel", typeof(RectTransform), typeof(Image));
+                    panelObject.transform.SetParent(canvas.transform, false);
+                    interrogationPanel = panelObject.GetComponent<Image>();
+                }
+
+                if (interrogationPanel != null)
+                {
+                    interrogationPanel.color = new Color(0f, 0f, 0f, 0.4f);
+                    var panelRect = interrogationPanel.rectTransform;
+                    Place(panelRect, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(800f, 80f), new Vector2(0f, 24f));
+                    interrogationPanel.transform.SetSiblingIndex(interrogation.transform.GetSiblingIndex());
+                    interrogation.transform.SetSiblingIndex(interrogationPanel.transform.GetSiblingIndex() + 1);
+                }
+            }
+
+            if (prompt != null)
+            {
+                prompt.name = "PromptText";
+                prompt.fontSize = 30f;
+                prompt.alignment = TextAlignmentOptions.BottomLeft;
+                prompt.raycastTarget = false;
+                Place(prompt.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(320f, 36f), new Vector2(20f, 22f));
+
+                if (promptPanel == null)
+                {
+                    var panelObject = new GameObject("PromptPanel", typeof(RectTransform), typeof(Image));
+                    panelObject.transform.SetParent(canvas.transform, false);
+                    promptPanel = panelObject.GetComponent<Image>();
+                }
+
+                if (promptPanel != null)
+                {
+                    promptPanel.color = new Color(0f, 0f, 0f, 0.35f);
+                    var panelRect = promptPanel.rectTransform;
+                    Place(panelRect, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(340f, 42f), new Vector2(20f, 22f));
+                    promptPanel.transform.SetSiblingIndex(prompt.transform.GetSiblingIndex());
+                    prompt.transform.SetSiblingIndex(promptPanel.transform.GetSiblingIndex() + 1);
+                }
+            }
+
+            if (controls == null)
+            {
+                var controlObject = new GameObject("ControlsText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                controlObject.transform.SetParent(canvas.transform, false);
+                controls = controlObject.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (controls != null)
+            {
+                controls.name = "ControlsText";
+                controls.fontSize = 26f;
+                controls.alignment = TextAlignmentOptions.BottomRight;
+                controls.raycastTarget = false;
+                controls.SetText("WASD 이동 / E 상호작용 / F 촬영");
+                Place(controls.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(420f, 32f), new Vector2(-20f, 22f));
+            }
+
+            if (coverStatus == null)
+            {
+                var coverObject = new GameObject("CoverStatusText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                coverObject.transform.SetParent(canvas.transform, false);
+                coverStatus = coverObject.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (coverStatus != null)
+            {
+                coverStatus.name = "CoverStatusText";
+                coverStatus.fontSize = 26f;
+                coverStatus.alignment = TextAlignmentOptions.TopRight;
+                coverStatus.raycastTarget = false;
+                coverStatus.SetText("Cover: -");
+                Place(coverStatus.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(420f, 32f), new Vector2(-20f, -70f));
+            }
+
+            if (caseBundle == null)
+            {
+                var bundleObject = new GameObject("CaseBundleText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                bundleObject.transform.SetParent(canvas.transform, false);
+                caseBundle = bundleObject.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (caseBundle != null)
+            {
+                caseBundle.name = "CaseBundleText";
+                caseBundle.fontSize = 24f;
+                caseBundle.alignment = TextAlignmentOptions.TopRight;
+                caseBundle.raycastTarget = false;
+                caseBundle.SetText(string.Empty);
+                Place(caseBundle.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(420f, 180f), new Vector2(-20f, -130f));
+            }
+
+            if (blackboard == null)
+            {
+                var boardObject = new GameObject("BlackboardText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                boardObject.transform.SetParent(canvas.transform, false);
+                blackboard = boardObject.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (blackboard != null)
+            {
+                blackboard.name = "BlackboardText";
+                blackboard.fontSize = 22f;
+                blackboard.alignment = TextAlignmentOptions.TopLeft;
+                blackboard.raycastTarget = false;
+                blackboard.SetText(string.Empty);
+                Place(blackboard.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(600f, 180f), new Vector2(20f, -320f));
+            }
+        }
+
+        private static void Place(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 size, Vector2 anchoredPos)
+        {
+            if (rect == null)
+            {
+                return;
+            }
+
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMax;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = size;
+            rect.anchoredPosition = anchoredPos;
+        }
+    }
+}

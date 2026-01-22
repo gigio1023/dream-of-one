@@ -137,7 +137,7 @@
 
 ## 5) UI/연출
 - [x] UI 패널/텍스트 레이아웃
-- [x] 한글 폰트 이슈 해결
+- [ ] 한글 폰트 이슈 해결(폰트 fallback + TMP 오류 0)
 - [x] Case Bundle 요약 UI
 - [x] 로그/토스트/심문 가독성 확정
 - [x] HUD: o/p/G 표시
@@ -182,8 +182,9 @@
 
 ## 8) 즉시 실행 중 작업
 1. Play 진입 시 콘솔 에러 0 달성
-2. 루프 1회 이상 재현
-3. CITY package 적용 후 월드 가독성/동선 검증
+2. 한글 폰트 fallback 안정화 + MissingReferenceException 제거
+3. 루프 1회 이상 재현
+4. CITY package 적용 후 월드 가독성/동선 검증
 
 ---
 

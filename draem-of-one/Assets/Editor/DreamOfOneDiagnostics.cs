@@ -26,6 +26,8 @@ namespace DreamOfOne.Editor
                 return;
             }
 
+            FontFallbackResolver.EnsureDefaultAndFallback(null);
+
             var warnings = new List<string>();
             var errors = new List<string>();
 

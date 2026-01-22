@@ -1,6 +1,7 @@
 ---
+
 name: unity-runtime-diagnostics
-description: Runtime diagnostics workflow: event probes, error capture, and automatic summary logging during Play.
+description: "Runtime diagnostics workflow: event probes, error capture, and automatic summary logging during Play."
 ---
 
 # Unity Runtime Diagnostics

@@ -1,6 +1,7 @@
 ---
+
 name: unity-ui-text-localization
-description: UI text stability: TMP font fallback, min size, and CJK readiness for UI and debug overlays.
+description: "UI text stability: TMP font fallback, min size, and CJK readiness for UI and debug overlays."
 ---
 
 # Unity UI Text + Localization

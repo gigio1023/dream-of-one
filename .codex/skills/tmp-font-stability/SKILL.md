@@ -1,6 +1,7 @@
 ---
+
 name: tmp-font-stability
-description: Stabilize TMP fonts: generate SDF assets, validate atlas textures, and enforce fallback chains (CJK-safe).
+description: "Stabilize TMP fonts: generate SDF assets, validate atlas textures, and enforce fallback chains (CJK-safe)."
 ---
 
 # TMP Font Stability

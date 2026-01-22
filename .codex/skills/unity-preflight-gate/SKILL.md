@@ -1,6 +1,7 @@
 ---
+
 name: unity-preflight-gate
-description: Run preflight validation before Play or CLI runs: aggregate diagnostics, city build/material fixes, input scans, and block Play if errors exist.
+description: "Run preflight validation before Play or CLI runs: aggregate diagnostics, city build/material fixes, input scans, and block Play if errors exist."
 ---
 
 # Unity Preflight Gate

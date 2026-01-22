@@ -1,6 +1,7 @@
 ---
+
 name: npc-navmesh-safety
-description: Ensure NPCs do not pass through geometry: NavMeshAgent setup, collider checks, and fallback rules.
+description: "Ensure NPCs do not pass through geometry: NavMeshAgent setup, collider checks, and fallback rules."
 ---
 
 # NPC NavMesh Safety

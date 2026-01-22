@@ -1,6 +1,7 @@
 ---
+
 name: urp-material-fixer
-description: Convert or fix materials for URP: detect error/legacy shaders, swap to URP Lit, preserve textures.
+description: "Convert or fix materials for URP: detect error/legacy shaders, swap to URP Lit, preserve textures."
 ---
 
 # URP Material Fixer

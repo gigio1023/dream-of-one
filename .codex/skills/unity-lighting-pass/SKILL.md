@@ -1,6 +1,7 @@
 ---
+
 name: unity-lighting-pass
-description: Lighting pass for clarity: directional light, ambient, reflection probes, and shadow distance tuning.
+description: "Lighting pass for clarity: directional light, ambient, reflection probes, and shadow distance tuning."
 ---
 
 # Unity Lighting Pass

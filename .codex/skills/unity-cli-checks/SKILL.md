@@ -1,6 +1,7 @@
 ---
+
 name: unity-cli-checks
-description: Batchmode checks for Unity projects: run diagnostics, playmode smoke tests, and interpret logs with clear exit codes.
+description: "Batchmode checks for Unity projects: run diagnostics, playmode smoke tests, and interpret logs with clear exit codes."
 ---
 
 # Unity CLI Checks

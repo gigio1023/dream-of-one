@@ -1,6 +1,7 @@
 ---
+
 name: unity-input-system-migration
-description: Migrate or guard input usage: detect legacy Input, switch to Input System, and add action map bindings.
+description: "Migrate or guard input usage: detect legacy Input, switch to Input System, and add action map bindings."
 ---
 
 # Unity Input System Migration

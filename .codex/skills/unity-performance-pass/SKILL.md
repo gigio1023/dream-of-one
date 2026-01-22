@@ -1,6 +1,7 @@
 ---
+
 name: unity-performance-pass
-description: Performance pass: static flags, batching, LOD, occlusion, and basic profiler checks.
+description: "Performance pass: static flags, batching, LOD, occlusion, and basic profiler checks."
 ---
 
 # Unity Performance Pass

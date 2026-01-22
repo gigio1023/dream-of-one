@@ -1,6 +1,7 @@
 ---
+
 name: city-pack-world-builder
-description: Build or rebuild a CITY package world: grid layout, anchor placement, scaling rules, and navmesh bake.
+description: "Build or rebuild a CITY package world: grid layout, anchor placement, scaling rules, and navmesh bake."
 ---
 
 # City Pack World Builder

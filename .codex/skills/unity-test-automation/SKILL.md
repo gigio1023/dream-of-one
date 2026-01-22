@@ -1,6 +1,7 @@
 ---
+
 name: unity-test-automation
-description: Automate Unity tests: editmode/playmode tests, smoke runner, and log-based error capture.
+description: "Automate Unity tests: editmode/playmode tests, smoke runner, and log-based error capture."
 ---
 
 # Unity Test Automation

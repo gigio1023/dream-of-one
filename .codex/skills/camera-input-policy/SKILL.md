@@ -1,6 +1,7 @@
 ---
+
 name: camera-input-policy
-description: Enforce camera and input behavior: fixed baseline, mouse/arrow rotation only, no auto-yaw on movement.
+description: "Enforce camera and input behavior: fixed baseline, mouse/arrow rotation only, no auto-yaw on movement."
 ---
 
 # Camera + Input Policy

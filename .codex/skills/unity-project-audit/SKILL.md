@@ -1,6 +1,7 @@
 ---
+
 name: unity-project-audit
-description: Baseline Unity project audit: build settings, render pipeline, input system, tags/layers, scenes, and package health.
+description: "Baseline Unity project audit: build settings, render pipeline, input system, tags/layers, scenes, and package health."
 ---
 
 # Unity Project Audit

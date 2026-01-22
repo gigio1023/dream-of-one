@@ -1,6 +1,7 @@
 ---
+
 name: unity-build-release
-description: Build/release workflow: player settings, versioning, build targets, and post-build smoke checks.
+description: "Build/release workflow: player settings, versioning, build targets, and post-build smoke checks."
 ---
 
 # Unity Build + Release

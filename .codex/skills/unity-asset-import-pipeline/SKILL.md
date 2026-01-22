@@ -1,6 +1,7 @@
 ---
+
 name: unity-asset-import-pipeline
-description: Asset import workflow: validate scale, materials, missing scripts, and prefab integrity after imports.
+description: "Asset import workflow: validate scale, materials, missing scripts, and prefab integrity after imports."
 ---
 
 # Unity Asset Import Pipeline

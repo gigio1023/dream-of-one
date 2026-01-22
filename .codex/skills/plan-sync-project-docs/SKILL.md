@@ -1,6 +1,7 @@
 ---
+
 name: plan-sync-project-docs
-description: Sync project.md and plan.md: ensure definition changes update plan, add missing tasks, update status.
+description: "Sync project.md and plan.md: ensure definition changes update plan, add missing tasks, update status."
 ---
 
 # Plan Sync (project.md -> plan.md)

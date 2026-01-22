@@ -1,6 +1,7 @@
 ---
+
 name: unity-scene-bootstrap
-description: Ensure scenes have baseline objects: camera, lights, UI root, systems root, and anchors.
+description: "Ensure scenes have baseline objects: camera, lights, UI root, systems root, and anchors."
 ---
 
 # Unity Scene Bootstrap

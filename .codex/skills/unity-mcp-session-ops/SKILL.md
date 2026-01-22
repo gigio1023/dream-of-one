@@ -1,6 +1,7 @@
 ---
+
 name: unity-mcp-session-ops
-description: Operate Unity via MCP: connect session, set active instance, read console, and run editor tools in a stable sequence.
+description: "Operate Unity via MCP: connect session, set active instance, read console, and run editor tools in a stable sequence."
 ---
 
 # Unity MCP Session Ops

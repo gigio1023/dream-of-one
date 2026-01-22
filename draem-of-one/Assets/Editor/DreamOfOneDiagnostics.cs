@@ -3,6 +3,7 @@ using System.Linq;
 using DreamOfOne.LLM;
 using DreamOfOne.Core;
 using DreamOfOne.NPC;
+using DreamOfOne.UI;
 using TMPro;
 using UnityEditor;
 using UnityEngine;

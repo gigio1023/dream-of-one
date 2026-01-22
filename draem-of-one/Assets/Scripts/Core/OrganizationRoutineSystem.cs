@@ -23,6 +23,18 @@ namespace DreamOfOne.Core
         private Transform stationAnchor = null;
 
         [SerializeField]
+        private Transform cafeAnchor = null;
+
+        [SerializeField]
+        private Transform deliveryAnchor = null;
+
+        [SerializeField]
+        private Transform facilityAnchor = null;
+
+        [SerializeField]
+        private Transform mediaAnchor = null;
+
+        [SerializeField]
         private float studioStepInterval = 18f;
 
         [SerializeField]
@@ -34,10 +46,26 @@ namespace DreamOfOne.Core
         [SerializeField]
         private float stationInterval = 30f;
 
+        [SerializeField]
+        private float cafeInterval = 24f;
+
+        [SerializeField]
+        private float deliveryInterval = 28f;
+
+        [SerializeField]
+        private float facilityInterval = 32f;
+
+        [SerializeField]
+        private float mediaInterval = 34f;
+
         private float nextStudioTime = 0f;
         private float nextStoreTime = 0f;
         private float nextParkTime = 0f;
         private float nextStationTime = 0f;
+        private float nextCafeTime = 0f;
+        private float nextDeliveryTime = 0f;
+        private float nextFacilityTime = 0f;
+        private float nextMediaTime = 0f;
         private StudioStep studioStep = StudioStep.Kanban;
 
         private enum StudioStep
@@ -60,6 +88,10 @@ namespace DreamOfOne.Core
             nextStoreTime = Time.time + 6f;
             nextParkTime = Time.time + 8f;
             nextStationTime = Time.time + 10f;
+            nextCafeTime = Time.time + 12f;
+            nextDeliveryTime = Time.time + 14f;
+            nextFacilityTime = Time.time + 16f;
+            nextMediaTime = Time.time + 18f;
         }
 
         private void Update()
@@ -92,6 +124,30 @@ namespace DreamOfOne.Core
             {
                 EmitStationEvent();
                 nextStationTime = now + stationInterval;
+            }
+
+            if (now >= nextCafeTime)
+            {
+                EmitCafeEvent();
+                nextCafeTime = now + cafeInterval;
+            }
+
+            if (now >= nextDeliveryTime)
+            {
+                EmitDeliveryEvent();
+                nextDeliveryTime = now + deliveryInterval;
+            }
+
+            if (now >= nextFacilityTime)
+            {
+                EmitFacilityEvent();
+                nextFacilityTime = now + facilityInterval;
+            }
+
+            if (now >= nextMediaTime)
+            {
+                EmitMediaEvent();
+                nextMediaTime = now + mediaInterval;
             }
         }
 
@@ -158,6 +214,11 @@ namespace DreamOfOne.Core
 
         private void EmitStationEvent()
         {
+            if (stationAnchor == null)
+            {
+                return;
+            }
+
             int roll = Random.Range(0, 2);
             switch (roll)
             {
@@ -166,6 +227,88 @@ namespace DreamOfOne.Core
                     break;
                 default:
                     RecordEvidence("Police", "Station", "Station", EventType.TicketIssued, "티켓 발부", stationAnchor);
+                    break;
+            }
+        }
+
+        private void EmitCafeEvent()
+        {
+            if (cafeAnchor == null)
+            {
+                return;
+            }
+
+            int roll = Random.Range(0, 3);
+            switch (roll)
+            {
+                case 0:
+                    RecordOrg("Barista", "Cafe", "CafeSeat", EventType.TaskStarted, "주문 처리", cafeAnchor);
+                    break;
+                case 1:
+                    RecordOrg("Barista", "Cafe", "CafeSeat", EventType.SeatClaimed, "좌석 안내", cafeAnchor);
+                    MaybeEmitViolation("Cafe", "CafeSeat", "R_CAFE_SEAT", "좌석 회전 지연", cafeAnchor);
+                    break;
+                default:
+                    RecordOrg("Barista", "Cafe", "CafeSeat", EventType.TaskCompleted, "정리 완료", cafeAnchor);
+                    break;
+            }
+        }
+
+        private void EmitDeliveryEvent()
+        {
+            if (deliveryAnchor == null)
+            {
+                return;
+            }
+
+            int roll = Random.Range(0, 2);
+            switch (roll)
+            {
+                case 0:
+                    RecordProcedure("Courier", "Delivery", "DeliveryBay", EventType.TaskStarted, "출입 확인", deliveryAnchor);
+                    break;
+                default:
+                    RecordProcedure("Courier", "Delivery", "DeliveryBay", EventType.TaskCompleted, "수취 서명", deliveryAnchor);
+                    MaybeEmitViolation("Delivery", "DeliveryBay", "R_DELIVERY", "출입 절차 누락", deliveryAnchor);
+                    break;
+            }
+        }
+
+        private void EmitFacilityEvent()
+        {
+            if (facilityAnchor == null)
+            {
+                return;
+            }
+
+            int roll = Random.Range(0, 2);
+            switch (roll)
+            {
+                case 0:
+                    RecordProcedure("Maintenance", "Facility", "Facility", EventType.TaskStarted, "정기 점검", facilityAnchor);
+                    break;
+                default:
+                    RecordProcedure("Maintenance", "Facility", "Facility", EventType.TaskCompleted, "수리 완료", facilityAnchor);
+                    break;
+            }
+        }
+
+        private void EmitMediaEvent()
+        {
+            if (mediaAnchor == null)
+            {
+                return;
+            }
+
+            int roll = Random.Range(0, 2);
+            switch (roll)
+            {
+                case 0:
+                    RecordEvidence("Reporter", "Media", "MediaZone", EventType.EvidenceCaptured, "촬영 진행", mediaAnchor);
+                    MaybeEmitViolation("Media", "MediaZone", "R_MEDIA_PERMIT", "촬영 허가 확인 요청", mediaAnchor);
+                    break;
+                default:
+                    RecordOrg("Reporter", "Media", "MediaZone", EventType.TaskCompleted, "촬영 정리", mediaAnchor);
                     break;
             }
         }
@@ -239,6 +382,26 @@ namespace DreamOfOne.Core
             if (stationAnchor == null)
             {
                 stationAnchor = FindAnchor("Station") ?? FindAnchor("Police");
+            }
+
+            if (cafeAnchor == null)
+            {
+                cafeAnchor = FindAnchor("Cafe") ?? FindAnchor("CafeSeat");
+            }
+
+            if (deliveryAnchor == null)
+            {
+                deliveryAnchor = FindAnchor("DeliveryBay") ?? FindAnchor("Store");
+            }
+
+            if (facilityAnchor == null)
+            {
+                facilityAnchor = FindAnchor("Facility") ?? FindAnchor("Station");
+            }
+
+            if (mediaAnchor == null)
+            {
+                mediaAnchor = FindAnchor("MediaZone") ?? FindAnchor("Park");
             }
         }
 

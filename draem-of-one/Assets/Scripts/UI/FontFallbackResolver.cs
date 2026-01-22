@@ -121,9 +121,18 @@ namespace DreamOfOne.UI
                 RuntimeAtlasSize,
                 AtlasPopulationMode.Dynamic);
 
+            if (runtimeFallback == null)
+            {
+                Debug.LogError("[FontFallback] TMP_FontAsset.CreateFontAsset returned null.");
+                return null;
+            }
+
             runtimeFallback.name = "Runtime_KoreanFallback";
             runtimeFallback.atlasPopulationMode = AtlasPopulationMode.Dynamic;
-            runtimeFallback.fallbackFontAssetTable.Clear();
+            if (runtimeFallback.fallbackFontAssetTable != null)
+            {
+                runtimeFallback.fallbackFontAssetTable.Clear();
+            }
             runtimeFallback.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
             MarkAssetPersistent(runtimeFallback);

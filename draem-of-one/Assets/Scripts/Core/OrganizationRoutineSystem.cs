@@ -58,6 +58,10 @@ namespace DreamOfOne.Core
         [SerializeField]
         private float mediaInterval = 34f;
 
+        [SerializeField]
+        [Tooltip("조직 이벤트 발생 시 해당 NPC를 앵커 근처로 이동시킴")]
+        private bool snapActorsToAnchor = true;
+
         private float nextStudioTime = 0f;
         private float nextStoreTime = 0f;
         private float nextParkTime = 0f;
@@ -156,21 +160,21 @@ namespace DreamOfOne.Core
             switch (studioStep)
             {
                 case StudioStep.Kanban:
-                    RecordProcedure("Studio", "Studio", "StudioPhoto", EventType.TaskStarted, "칸반 갱신", studioAnchor);
+                    RecordProcedure("PM", "Studio", "StudioPhoto", EventType.TaskStarted, "칸반 갱신", studioAnchor);
                     studioStep = StudioStep.PatchNotes;
                     break;
                 case StudioStep.PatchNotes:
-                    RecordProcedure("Studio", "Studio", "StudioPhoto", EventType.TaskCompleted, "패치노트 작성", studioAnchor);
+                    RecordProcedure("Developer", "Studio", "StudioPhoto", EventType.TaskCompleted, "패치노트 작성", studioAnchor);
                     MaybeEmitProcedureViolation("PROC_NOTE_MISSING", "패치노트 누락 의심", studioAnchor);
                     studioStep = StudioStep.Approval;
                     break;
                 case StudioStep.Approval:
-                    RecordProcedure("Studio", "Studio", "StudioPhoto", EventType.ApprovalGranted, "PM 승인", studioAnchor);
+                    RecordProcedure("PM", "Studio", "StudioPhoto", EventType.ApprovalGranted, "PM 승인", studioAnchor);
                     MaybeEmitProcedureViolation("PROC_APPROVAL_DELAY", "승인 지연 의심", studioAnchor);
                     studioStep = StudioStep.RcInsert;
                     break;
                 case StudioStep.RcInsert:
-                    RecordProcedure("Studio", "Studio", "StudioPhoto", EventType.RcInserted, "RC 삽입", studioAnchor);
+                    RecordProcedure("Release", "Studio", "StudioPhoto", EventType.RcInserted, "RC 삽입", studioAnchor);
                     MaybeEmitProcedureViolation("PROC_RC_SKIP", "RC 절차 누락 의심", studioAnchor);
                     studioStep = StudioStep.Kanban;
                     break;
@@ -285,10 +289,10 @@ namespace DreamOfOne.Core
             switch (roll)
             {
                 case 0:
-                    RecordProcedure("Maintenance", "Facility", "Facility", EventType.TaskStarted, "정기 점검", facilityAnchor);
+                    RecordProcedure("FacilityTech", "Facility", "Facility", EventType.TaskStarted, "정기 점검", facilityAnchor);
                     break;
                 default:
-                    RecordProcedure("Maintenance", "Facility", "Facility", EventType.TaskCompleted, "수리 완료", facilityAnchor);
+                    RecordProcedure("FacilityTech", "Facility", "Facility", EventType.TaskCompleted, "수리 완료", facilityAnchor);
                     break;
             }
         }
@@ -346,6 +350,11 @@ namespace DreamOfOne.Core
 
         private void RecordEvent(string actorId, string placeId, string zoneId, EventType type, EventCategory category, string note, Transform anchor, string ruleId = "")
         {
+            if (snapActorsToAnchor)
+            {
+                TryMoveActor(actorId, anchor);
+            }
+
             eventLog.RecordEvent(new EventRecord
             {
                 actorId = actorId,
@@ -366,17 +375,17 @@ namespace DreamOfOne.Core
         {
             if (storeAnchor == null)
             {
-                storeAnchor = FindAnchor("StoreBuilding") ?? FindAnchor("QueueZone");
+                storeAnchor = FindAnchor("StoreBuilding") ?? FindZoneAnchor("StoreQueue");
             }
 
             if (parkAnchor == null)
             {
-                parkAnchor = FindAnchor("ParkArea") ?? FindAnchor("SeatZone");
+                parkAnchor = FindAnchor("ParkArea") ?? FindZoneAnchor("ParkSeat");
             }
 
             if (studioAnchor == null)
             {
-                studioAnchor = FindAnchor("StudioBuilding_L1") ?? FindAnchor("PhotoZone");
+                studioAnchor = FindAnchor("StudioBuilding_L1") ?? FindZoneAnchor("StudioPhoto");
             }
 
             if (stationAnchor == null)
@@ -386,22 +395,22 @@ namespace DreamOfOne.Core
 
             if (cafeAnchor == null)
             {
-                cafeAnchor = FindAnchor("Cafe") ?? FindAnchor("CafeSeat");
+                cafeAnchor = FindAnchor("Cafe") ?? FindZoneAnchor("CafeSeat");
             }
 
             if (deliveryAnchor == null)
             {
-                deliveryAnchor = FindAnchor("DeliveryBay") ?? FindAnchor("Store");
+                deliveryAnchor = FindAnchor("DeliveryBay") ?? FindZoneAnchor("DeliveryBay");
             }
 
             if (facilityAnchor == null)
             {
-                facilityAnchor = FindAnchor("Facility") ?? FindAnchor("Station");
+                facilityAnchor = FindAnchor("Facility") ?? FindZoneAnchor("Facility");
             }
 
             if (mediaAnchor == null)
             {
-                mediaAnchor = FindAnchor("MediaZone") ?? FindAnchor("Park");
+                mediaAnchor = FindAnchor("MediaZone") ?? FindZoneAnchor("MediaZone");
             }
         }
 
@@ -409,6 +418,41 @@ namespace DreamOfOne.Core
         {
             var go = GameObject.Find(name);
             return go != null ? go.transform : null;
+        }
+
+        private void TryMoveActor(string actorId, Transform anchor)
+        {
+            if (string.IsNullOrEmpty(actorId) || anchor == null)
+            {
+                return;
+            }
+
+            var actor = GameObject.Find(actorId);
+            if (actor == null)
+            {
+                return;
+            }
+
+            float offsetX = (Mathf.Abs(actorId.GetHashCode()) % 3 - 1) * 0.6f;
+            float offsetZ = (Mathf.Abs(actorId.GetHashCode() / 3) % 3 - 1) * 0.6f;
+            actor.transform.position = anchor.position + new Vector3(offsetX, 0f, offsetZ);
+        }
+
+        private Transform FindZoneAnchor(string zoneId)
+        {
+            if (string.IsNullOrEmpty(zoneId))
+            {
+                return null;
+            }
+
+            var direct = GameObject.Find(zoneId);
+            if (direct != null)
+            {
+                return direct.transform;
+            }
+
+            var zoned = GameObject.Find($"{zoneId}Zone");
+            return zoned != null ? zoned.transform : null;
         }
     }
 }

@@ -63,7 +63,7 @@ namespace DreamOfOne.Core
                     "스튜디오 인턴",
                     "스튜디오",
                     "인턴",
-                    new[] { "Studio", "StudioPhoto", "StoreQueue", "ParkSeat" },
+                    new[] { "Studio", "StudioPhoto", "StoreQueue", "ParkSeat", "CafeQueue", "CafeSeat" },
                     new[] { "PROC_NOTE_MISSING", "PROC_APPROVAL_DELAY", "PROC_RC_SKIP" },
                     new[] { "R_QUEUE", "R_LABEL", "R_NOISE" },
                     new[] { "칸반", "패치노트", "RC" });

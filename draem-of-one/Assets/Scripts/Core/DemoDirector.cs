@@ -44,21 +44,30 @@ namespace DreamOfOne.Core
 
             if (queueZone == null)
             {
-                var obj = GameObject.Find("QueueZone");
-                if (obj != null)
-                {
-                    queueZone = obj.transform;
-                }
+                queueZone = ResolveZoneAnchor("StoreQueue");
             }
 
             if (studioZone == null)
             {
-                var obj = GameObject.Find("PhotoZone");
-                if (obj != null)
-                {
-                    studioZone = obj.transform;
-                }
+                studioZone = ResolveZoneAnchor("StudioPhoto");
             }
+        }
+
+        private Transform ResolveZoneAnchor(string zoneId)
+        {
+            if (string.IsNullOrEmpty(zoneId))
+            {
+                return null;
+            }
+
+            var direct = GameObject.Find(zoneId);
+            if (direct != null)
+            {
+                return direct.transform;
+            }
+
+            var zoned = GameObject.Find($"{zoneId}Zone");
+            return zoned != null ? zoned.transform : null;
         }
 
         private void Start()

@@ -28,7 +28,7 @@ namespace DreamOfOne.UI
         private TMP_FontAsset fontAsset = null;
 
         [SerializeField]
-        private float minFontSize = 20f;
+        private float minFontSize = 26f;
 
         private void Awake()
         {

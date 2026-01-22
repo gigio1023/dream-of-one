@@ -59,7 +59,8 @@ namespace DreamOfOne.Core
             }
 
             if (record.eventType is not (EventType.CctvCaptured or EventType.TicketIssued or EventType.EvidenceCaptured
-                or EventType.ApprovalGranted or EventType.RcInserted))
+                or EventType.ApprovalGranted or EventType.RcInserted or EventType.TaskStarted or EventType.TaskCompleted
+                or EventType.LabelChanged or EventType.QueueUpdated or EventType.SeatClaimed or EventType.NoiseObserved))
             {
                 return;
             }
@@ -84,6 +85,12 @@ namespace DreamOfOne.Core
                     EventType.EvidenceCaptured => new Color(0.3f, 0.8f, 0.4f),
                     EventType.ApprovalGranted => new Color(0.8f, 0.8f, 0.2f),
                     EventType.RcInserted => new Color(0.9f, 0.6f, 0.2f),
+                    EventType.TaskStarted => new Color(0.6f, 0.6f, 0.9f),
+                    EventType.TaskCompleted => new Color(0.4f, 0.9f, 0.6f),
+                    EventType.LabelChanged => new Color(0.9f, 0.7f, 0.4f),
+                    EventType.QueueUpdated => new Color(0.7f, 0.7f, 0.7f),
+                    EventType.SeatClaimed => new Color(0.5f, 0.8f, 0.5f),
+                    EventType.NoiseObserved => new Color(0.9f, 0.4f, 0.6f),
                     _ => new Color(0.7f, 0.7f, 0.7f)
                 };
             }

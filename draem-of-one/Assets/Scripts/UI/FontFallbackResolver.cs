@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.TextCore.LowLevel;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace DreamOfOne.UI
 {
@@ -10,8 +13,9 @@ namespace DreamOfOne.UI
     {
         private const string DefaultFontResource = "Fonts & Materials/LiberationSans SDF";
         private const string SourceFontResource = "Fonts/NotoSansCJKkr-Regular";
+        private const string FallbackFontAssetResource = "Fonts/NotoSansCJKkr-Regular_SDF";
         private const int RuntimePointSize = 90;
-        private const int RuntimeAtlasSize = 1024;
+        private const int RuntimeAtlasSize = 2048;
         private static TMP_FontAsset runtimeFallback = null;
         private static Font runtimeSourceFont = null;
 
@@ -29,6 +33,12 @@ namespace DreamOfOne.UI
 
         public static TMP_FontAsset EnsureDefaultAndFallback(TMP_FontAsset preferred)
         {
+            if (!Application.isPlaying)
+            {
+                runtimeFallback = null;
+                runtimeSourceFont = null;
+            }
+
             CleanupFallbackList();
 
             TMP_FontAsset defaultFont = preferred;
@@ -37,21 +47,34 @@ namespace DreamOfOne.UI
                 defaultFont = TMP_Settings.defaultFontAsset;
             }
 
+            var resourceFallback = Resources.Load<TMP_FontAsset>(FallbackFontAssetResource);
+
             if (!IsFontAssetValid(defaultFont))
             {
-                defaultFont = Resources.Load<TMP_FontAsset>(DefaultFontResource);
+                defaultFont = IsFontAssetValid(resourceFallback)
+                    ? resourceFallback
+                    : Resources.Load<TMP_FontAsset>(DefaultFontResource);
             }
+
+            CleanupFallbackTable(defaultFont);
 
             bool defaultHasHangul = HasHangul(defaultFont);
             TMP_FontAsset fallbackFont = null;
+            bool allowRuntimeFallback = Application.isPlaying;
             if (!defaultHasHangul)
             {
-                fallbackFont = EnsureRuntimeFallback();
+                fallbackFont = IsFontAssetValid(resourceFallback)
+                    ? resourceFallback
+                    : (allowRuntimeFallback ? EnsureRuntimeFallback() : null);
             }
 
             if (IsFontAssetValid(defaultFont))
             {
                 TMP_Settings.defaultFontAsset = defaultFont;
+            }
+            else if (TMP_Settings.defaultFontAsset != null)
+            {
+                TMP_Settings.defaultFontAsset = null;
             }
 
             if (IsFontAssetValid(fallbackFont))
@@ -77,6 +100,7 @@ namespace DreamOfOne.UI
                 }
 
                 text.font = font;
+                text.fontSize = Mathf.Max(text.fontSize, minSize);
                 text.enableAutoSizing = true;
                 text.fontSizeMin = Mathf.Max(minSize, text.fontSizeMin);
                 text.fontSizeMax = Mathf.Max(text.fontSizeMax, text.fontSize);
@@ -148,6 +172,11 @@ namespace DreamOfOne.UI
                 return;
             }
 
+            if (TMP_Settings.fallbackFontAssets == null)
+            {
+                TMP_Settings.fallbackFontAssets = new List<TMP_FontAsset>();
+            }
+
             if (!TMP_Settings.fallbackFontAssets.Contains(fallback))
             {
                 TMP_Settings.fallbackFontAssets.Add(fallback);
@@ -178,6 +207,31 @@ namespace DreamOfOne.UI
                 }
 
                 if (!seen.Add(asset))
+                {
+                    fallbacks.RemoveAt(i);
+                }
+            }
+        }
+
+        private static void CleanupFallbackTable(TMP_FontAsset asset)
+        {
+            if (asset == null || asset.fallbackFontAssetTable == null)
+            {
+                return;
+            }
+
+            var fallbacks = asset.fallbackFontAssetTable;
+            var seen = new HashSet<TMP_FontAsset>();
+            for (int i = fallbacks.Count - 1; i >= 0; i--)
+            {
+                var entry = fallbacks[i];
+                if (!IsFontAssetValid(entry))
+                {
+                    fallbacks.RemoveAt(i);
+                    continue;
+                }
+
+                if (!seen.Add(entry))
                 {
                     fallbacks.RemoveAt(i);
                 }
@@ -284,7 +338,25 @@ namespace DreamOfOne.UI
                 return false;
             }
 
-            asset.ReadFontAssetDefinition();
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                string path = AssetDatabase.GetAssetPath(asset);
+                if (string.IsNullOrEmpty(path))
+                {
+                    return false;
+                }
+            }
+#endif
+
+            try
+            {
+                asset.ReadFontAssetDefinition();
+            }
+            catch (Exception)
+            {
+                return false;
+            }
 
             var textures = asset.atlasTextures;
             if (textures == null || textures.Length == 0)

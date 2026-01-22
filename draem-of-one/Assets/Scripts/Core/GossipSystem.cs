@@ -219,6 +219,24 @@ namespace DreamOfOne.Core
                 sourceId = verdict.actorId
             });
 
+            if (!confirmed)
+            {
+                eventLog.RecordEvent(new EventRecord
+                {
+                    actorId = verdict.actorId,
+                    actorRole = verdict.actorRole,
+                    eventType = EventType.RebuttalGiven,
+                    category = EventCategory.Verdict,
+                    note = "소문 반박",
+                    topic = verdict.topic,
+                    placeId = verdict.placeId,
+                    zoneId = verdict.zoneId,
+                    position = verdict.position,
+                    severity = 1,
+                    sourceId = verdict.actorId
+                });
+            }
+
             rumorTopics.Remove(key);
         }
 

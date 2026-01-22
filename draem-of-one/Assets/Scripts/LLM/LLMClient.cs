@@ -323,7 +323,9 @@ namespace DreamOfOne.LLM
                 builder.Append($"제약: {constraints}. ");
             }
 
-            builder.Append("출력은 한 줄 대사만 반환한다.");
+            builder.Append("출력은 한 줄 대사만 반환한다. ");
+            builder.Append("사실/증거/판정은 이미 로그로 결정되어 있으며 새 사실/증거/판정을 만들지 않는다. ");
+            builder.Append("Structured Event 내용을 바꾸지 말고 표현만 한다.");
             return builder.ToString();
         }
 
@@ -386,8 +388,23 @@ namespace DreamOfOne.LLM
             string prefix = role switch
             {
                 "편의점 점원" or "Clerk" => "점원",
+                "편의점 점장" or "Manager" => "점장",
                 "동네 어르신" or "Elder" => "어르신",
+                "공원 관리인" or "Caretaker" => "관리인",
                 "관광객" or "Tourist" => "관광객",
+                "주민 대표" or "Resident" => "주민",
+                "학생" or "Student" => "학생",
+                "스튜디오 PM" or "PM" => "PM",
+                "개발자" or "Developer" => "개발",
+                "QA" => "QA",
+                "릴리즈 담당" or "Release" => "릴리즈",
+                "바리스타" or "Barista" => "바리스타",
+                "카페 안내" or "CafeHost" => "카페",
+                "배송기사" or "Courier" => "배송",
+                "시설 기사" or "FacilityTech" => "시설",
+                "리포터" or "Reporter" => "기자",
+                "순경" or "Officer" => "경찰",
+                "조사관" or "Investigator" => "조사관",
                 "경찰" or "Police" => "경찰",
                 _ => "시민"
             };

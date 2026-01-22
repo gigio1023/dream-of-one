@@ -16,11 +16,29 @@ namespace DreamOfOne.Core
 
         private void CheckFonts()
         {
+            DreamOfOne.UI.FontFallbackResolver.EnsureDefaultAndFallback(null);
+
             var sample = "한글 테스트";
             var defaultFont = TMP_Settings.defaultFontAsset;
             if (!IsFontAssetValid(defaultFont))
             {
                 Debug.LogWarning("[Diag] TMP 기본 폰트가 없거나 손상됨");
+            }
+
+            bool defaultHasHangul = defaultFont != null && defaultFont.HasCharacters(sample, out _);
+            bool fallbackHasHangul = false;
+            var fallbacks = TMP_Settings.fallbackFontAssets;
+            if (fallbacks != null)
+            {
+                for (int i = 0; i < fallbacks.Count; i++)
+                {
+                    var fallback = fallbacks[i];
+                    if (fallback != null && fallback.HasCharacters(sample, out _))
+                    {
+                        fallbackHasHangul = true;
+                        break;
+                    }
+                }
             }
 
             var text = FindFirstObjectByType<TMP_Text>();
@@ -38,12 +56,18 @@ namespace DreamOfOne.Core
 
             var missing = new System.Collections.Generic.List<char>();
             bool hasAll = text.font.HasCharacters(sample, out missing);
-            if (!hasAll)
+            if (!hasAll && !fallbackHasHangul)
             {
                 string missingChars = new string(missing.ToArray());
                 Debug.LogWarning($"[Diag] 한글 글리프 누락: {missingChars}");
                 var ui = FindFirstObjectByType<DreamOfOne.UI.UIManager>();
                 ui?.ShowToast("한글 폰트 누락. FontBootstrap 확인.");
+                return;
+            }
+
+            if (!defaultHasHangul && fallbackHasHangul)
+            {
+                Debug.Log("[Diag] 한글 글리프는 fallback 폰트로 처리됨");
                 return;
             }
 

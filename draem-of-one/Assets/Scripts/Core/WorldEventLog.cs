@@ -194,6 +194,9 @@ namespace DreamOfOne.Core
                 EventType.ReportFiled => EventCategory.Report,
                 EventType.InterrogationStarted => EventCategory.Verdict,
                 EventType.VerdictGiven => EventCategory.Verdict,
+                EventType.StatementGiven => EventCategory.Verdict,
+                EventType.ExplanationGiven => EventCategory.Verdict,
+                EventType.RebuttalGiven => EventCategory.Verdict,
                 EventType.NpcUtterance => EventCategory.Dialogue,
                 EventType.RumorShared => EventCategory.Gossip,
                 EventType.RumorConfirmed => EventCategory.Gossip,
@@ -229,7 +232,10 @@ namespace DreamOfOne.Core
             EventType.VerdictGiven,
             EventType.InterrogationStarted,
             EventType.ReportFiled,
-            EventType.NpcUtterance
+            EventType.NpcUtterance,
+            EventType.StatementGiven,
+            EventType.ExplanationGiven,
+            EventType.RebuttalGiven
         };
 
         private readonly Dictionary<string, float> lastEventTimeByKey = new();

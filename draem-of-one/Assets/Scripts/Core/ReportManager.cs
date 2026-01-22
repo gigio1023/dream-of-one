@@ -17,20 +17,22 @@ namespace DreamOfOne.Core
         public string reportId = string.Empty;
         public List<string> reporterIds = new();
         public List<string> attachedEventIds = new();
+        public ReportReason reason = ReportReason.RepeatedRuleBreak;
+        public bool resolved = false;
         public string ruleId = string.Empty;
         public string topic = string.Empty;
         public string placeId = string.Empty;
         public string zoneId = string.Empty;
-        public ReportReason reason = ReportReason.RepeatedRuleBreak;
     }
 
     /// <summary>
-    /// 신고를 수집해 경찰 심문을 트리거하는 관리 시스템.
+    /// 신고 이벤트 큐를 관리하고 경찰 심문 조건을 판별한다.
+    /// 신고와 판정 사이의 느슨한 결합을 위해 별도 컴포넌트로 분리했다.
     /// </summary>
     public sealed class ReportManager : MonoBehaviour
     {
         [SerializeField]
-        [Tooltip("신고 이벤트 로그")]
+        [Tooltip("신고 이벤트를 기록할 WEL")]
         private WorldEventLog eventLog = null;
 
         [SerializeField]

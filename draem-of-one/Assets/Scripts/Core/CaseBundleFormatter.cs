@@ -30,12 +30,27 @@ namespace DreamOfOne.Core
             {
                 sb.Append($"  절차:{bundle.procedures.Count}");
             }
+            if (bundle.statements.Count > 0)
+            {
+                sb.Append($"  진술:{bundle.statements.Count}");
+            }
+            if (bundle.explanations.Count > 0)
+            {
+                sb.Append($"  해명:{bundle.explanations.Count}");
+            }
+            if (bundle.rebuttals.Count > 0)
+            {
+                sb.Append($"  반박:{bundle.rebuttals.Count}");
+            }
 
             sb.Append($"  점수:{bundle.Score}");
 
             AppendDetailLines(sb, "증거", bundle.evidence, 2);
             AppendDetailLines(sb, "신고", bundle.reports, 2);
             AppendDetailLines(sb, "위반", bundle.violations, 2);
+            AppendDetailLines(sb, "진술", bundle.statements, 1);
+            AppendDetailLines(sb, "해명", bundle.explanations, 1);
+            AppendDetailLines(sb, "반박", bundle.rebuttals, 1);
 
             return sb.ToString();
         }
@@ -57,7 +72,7 @@ namespace DreamOfOne.Core
                 }
 
             sb.Append($"\n{label}: {record.note}");
-            }
         }
     }
+}
 }

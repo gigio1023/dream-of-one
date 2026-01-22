@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DreamOfOne.Core;
+using CoreEventType = DreamOfOne.Core.EventType;
 using DreamOfOne.LLM;
 using DreamOfOne.UI;
 using UnityEngine;
@@ -7,20 +8,24 @@ using UnityEngine;
 namespace DreamOfOne.NPC
 {
     /// <summary>
-    /// 주요 사건 발생 시 NPC 한 줄 발화를 요청한다.
+    /// 월드 이벤트를 받아 NPC 역할에 맞는 한 줄 대사를 생성한다.
     /// </summary>
     public sealed class NpcDialogueSystem : MonoBehaviour
     {
         [SerializeField]
+        [Tooltip("이벤트 소스")]
         private WorldEventLog eventLog = null;
 
         [SerializeField]
+        [Tooltip("LLM 클라이언트")]
         private LLMClient llmClient = null;
 
         [SerializeField]
+        [Tooltip("UI 매니저(토스트 출력용)")]
         private UIManager uiManager = null;
 
         [SerializeField]
+        [Tooltip("SemanticShaper 요약을 상황으로 사용")]
         private SemanticShaper semanticShaper = null;
 
         [SerializeField]

@@ -194,8 +194,23 @@ namespace DreamOfOne.Core
             return actorId switch
             {
                 "Clerk" => "편의점 점원, 친절하지만 규칙에 엄격함",
+                "Manager" => "편의점 점장, 질서/재고 관리",
                 "Elder" => "동네 어르신, 질서 강조, 잔소리 섞임",
+                "Caretaker" => "공원 관리인, 민원 대응",
                 "Tourist" => "관광객, 어눌한 한국어, 호기심 많음",
+                "Resident" => "주민 대표, 규칙에 민감",
+                "Student" => "학생, 빠른 반응",
+                "PM" => "스튜디오 PM, 일정/승인 관리",
+                "Developer" => "개발자, 기술 중심",
+                "QA" => "QA, 품질/검수 집중",
+                "Release" => "릴리즈 담당, 배포 절차 확인",
+                "Barista" => "바리스타, 주문/좌석 안내",
+                "CafeHost" => "카페 안내, 대기/정리",
+                "Courier" => "배송기사, 출입/수취 확인",
+                "FacilityTech" => "시설 기사, 점검/수리",
+                "Reporter" => "리포터, 촬영/취재",
+                "Officer" => "순경, 현장 대응",
+                "Investigator" => "조사관, 증거/진술 확인",
                 "Police" => "경찰, 단호하고 간결한 말투",
                 _ => "동네 주민, 짧고 현실적인 반응"
             };

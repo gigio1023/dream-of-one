@@ -75,6 +75,15 @@ namespace DreamOfOne.Core
                     case EventType.RcInserted:
                         bundle.procedures.Add(record);
                         break;
+                    case EventType.StatementGiven:
+                        bundle.statements.Add(record);
+                        break;
+                    case EventType.ExplanationGiven:
+                        bundle.explanations.Add(record);
+                        break;
+                    case EventType.RebuttalGiven:
+                        bundle.rebuttals.Add(record);
+                        break;
                     case EventType.RumorShared:
                     case EventType.RumorConfirmed:
                     case EventType.RumorDebunked:

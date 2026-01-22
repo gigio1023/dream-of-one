@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace DreamOfOne.NPC
 {
@@ -17,6 +18,19 @@ namespace DreamOfOne.NPC
         private float arrivalThreshold = 0.2f;
 
         private int index = 0;
+        private NavMeshAgent agent = null;
+        private bool destinationSet = false;
+
+        private void Awake()
+        {
+            agent = GetComponent<NavMeshAgent>();
+            if (agent != null)
+            {
+                agent.speed = speed;
+                agent.stoppingDistance = arrivalThreshold;
+                agent.angularSpeed = 360f;
+            }
+        }
 
         private void Start()
         {
@@ -50,6 +64,23 @@ namespace DreamOfOne.NPC
                 return;
             }
 
+            if (agent != null && agent.enabled && agent.isOnNavMesh)
+            {
+                if (!destinationSet)
+                {
+                    agent.SetDestination(target.position);
+                    destinationSet = true;
+                }
+
+                if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.05f)
+                {
+                    index = (index + 1) % waypoints.Length;
+                    destinationSet = false;
+                }
+
+                return;
+            }
+
             Vector3 toTarget = target.position - transform.position;
             Vector3 planar = new Vector3(toTarget.x, 0f, toTarget.z);
             float distance = planar.magnitude;
@@ -73,6 +104,12 @@ namespace DreamOfOne.NPC
             waypoints = patrolPoints ?? System.Array.Empty<Transform>();
             this.speed = speed;
             this.arrivalThreshold = arrivalThreshold;
+
+            if (agent != null)
+            {
+                agent.speed = speed;
+                agent.stoppingDistance = arrivalThreshold;
+            }
         }
     }
 }

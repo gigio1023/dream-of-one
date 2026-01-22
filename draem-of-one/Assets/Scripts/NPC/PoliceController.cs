@@ -185,6 +185,20 @@ namespace DreamOfOne.NPC
                     placeId = currentCase != null ? currentCase.placeId : string.Empty,
                     zoneId = currentCase != null ? currentCase.zoneId : string.Empty
                 });
+
+                var statementActor = player != null ? player.name : "Player";
+                eventLog?.RecordEvent(new EventRecord
+                {
+                    actorId = statementActor,
+                    actorRole = "Player",
+                    eventType = CoreEventType.StatementGiven,
+                    category = EventCategory.Verdict,
+                    note = "진술 제출",
+                    position = player != null ? player.position : transform.position,
+                    topic = currentCase != null && !string.IsNullOrEmpty(currentCase.topic) ? currentCase.topic : "Statement",
+                    placeId = currentCase != null ? currentCase.placeId : string.Empty,
+                    zoneId = currentCase != null ? currentCase.zoneId : string.Empty
+                });
             }
         }
 
@@ -290,6 +304,20 @@ namespace DreamOfOne.NPC
                 category = EventCategory.Verdict,
                 note = verdict,
                 severity = 2,
+                position = transform.position,
+                topic = topic,
+                placeId = placeId,
+                zoneId = zoneId
+            });
+
+            eventLog?.RecordEvent(new EventRecord
+            {
+                actorId = name,
+                actorRole = "Police",
+                eventType = CoreEventType.ExplanationGiven,
+                category = EventCategory.Verdict,
+                note = string.IsNullOrEmpty(lastVerdictReason) ? verdict : lastVerdictReason,
+                severity = 1,
                 position = transform.position,
                 topic = topic,
                 placeId = placeId,

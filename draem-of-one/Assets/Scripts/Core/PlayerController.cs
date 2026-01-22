@@ -21,6 +21,10 @@ namespace DreamOfOne.Core
         private float gravity = -9.81f;
 
         [SerializeField]
+        [Tooltip("이동 방향으로 회전할지 여부(고정 시점 유지용)")]
+        private bool rotateToMove = false;
+
+        [SerializeField]
         [Tooltip("카메라 기준 이동을 계산할 기준 Transform")]
         private Transform cameraPivot = null;
 
@@ -130,7 +134,7 @@ namespace DreamOfOne.Core
             Vector3 velocity = move * moveSpeed + Vector3.up * verticalVelocity;
             characterController.Move(velocity * Time.deltaTime);
 
-            if (move.sqrMagnitude > 0.1f)
+            if (rotateToMove && move.sqrMagnitude > 0.1f)
             {
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(move), 10f * Time.deltaTime);
             }
@@ -197,8 +201,11 @@ namespace DreamOfOne.Core
             if (Keyboard.current.aKey.isPressed) input.x -= 1f;
             if (Keyboard.current.dKey.isPressed) input.x += 1f;
             return input;
-#else
+#elif ENABLE_LEGACY_INPUT_MANAGER
             return new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+#else
+            LogInputUnavailable();
+            return Vector2.zero;
 #endif
         }
 
@@ -211,8 +218,11 @@ namespace DreamOfOne.Core
             }
 
             return Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame;
-#else
+#elif ENABLE_LEGACY_INPUT_MANAGER
             return Input.GetKeyDown(KeyCode.E);
+#else
+            LogInputUnavailable();
+            return false;
 #endif
         }
 
@@ -225,10 +235,28 @@ namespace DreamOfOne.Core
             }
 
             return Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame;
-#else
+#elif ENABLE_LEGACY_INPUT_MANAGER
             return Input.GetKeyDown(KeyCode.F);
+#else
+            LogInputUnavailable();
+            return false;
 #endif
         }
+
+#if !ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
+        private static bool inputUnavailableLogged = false;
+
+        private static void LogInputUnavailable()
+        {
+            if (inputUnavailableLogged)
+            {
+                return;
+            }
+
+            inputUnavailableLogged = true;
+            Debug.LogWarning("[PlayerController] No input system available. Enable Input System or Legacy Input Manager.");
+        }
+#endif
 
         private void HandleZoneEnter(ZoneInteractable interactable)
         {

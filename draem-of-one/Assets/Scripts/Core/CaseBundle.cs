@@ -14,6 +14,9 @@ namespace DreamOfOne.Core
         public readonly List<EventRecord> evidence = new();
         public readonly List<EventRecord> procedures = new();
         public readonly List<EventRecord> gossip = new();
+        public readonly List<EventRecord> statements = new();
+        public readonly List<EventRecord> explanations = new();
+        public readonly List<EventRecord> rebuttals = new();
 
         public int Score { get; private set; }
 
@@ -24,6 +27,9 @@ namespace DreamOfOne.Core
             score += violations.Count;
             score += evidence.Count * 3;
             score += procedures.Count > 0 ? 1 : 0;
+            score += statements.Count > 0 ? 1 : 0;
+            score += explanations.Count > 0 ? 1 : 0;
+            score += rebuttals.Count > 0 ? 1 : 0;
             score -= gossip.Count == 0 ? 0 : 0;
             Score = score;
         }

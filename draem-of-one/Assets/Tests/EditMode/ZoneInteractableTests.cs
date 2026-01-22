@@ -1,4 +1,5 @@
 using DreamOfOne.Core;
+using CoreEventType = DreamOfOne.Core.EventType;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -13,6 +14,7 @@ namespace DreamOfOne.Tests
             var log = logObject.AddComponent<WorldEventLog>();
 
             var zoneObject = new GameObject("Zone");
+            zoneObject.AddComponent<BoxCollider>();
             var zone = zoneObject.AddComponent<Zone>();
             TestHelpers.SetPrivateField(zone, "zoneId", "Queue");
             TestHelpers.SetPrivateField(zone, "zoneType", ZoneType.Queue);
@@ -27,7 +29,7 @@ namespace DreamOfOne.Tests
 
             Assert.AreEqual(1, log.Events.Count, "Violation should be recorded.");
             var record = log.Events[0];
-            Assert.AreEqual(EventType.ViolationDetected, record.eventType);
+            Assert.AreEqual(CoreEventType.ViolationDetected, record.eventType);
             Assert.AreEqual("R4", record.ruleId);
             Assert.AreEqual("Queue", record.zoneId);
 

@@ -35,16 +35,22 @@ namespace DreamOfOne.UI
         private TMP_Text promptText = null;
 
         [SerializeField]
+        private TMP_Text coverStatusText = null;
+
+        [SerializeField]
+        private TMP_Text caseBundleText = null;
+        [SerializeField]
         [Tooltip("UI 오브젝트가 없을 때 OnGUI로 표시")]
         private bool useOnGuiFallback = false;
 
         [SerializeField]
         [Tooltip("UI 로그 패널에 유지할 최대 줄 수")]
-        private int logLineCount = 5;
+        private int logLineCount = 6;
 
         private readonly Queue<string> logLines = new();
         private Coroutine toastRoutine = null;
         private GlobalSuspicionSystem boundSuspicionSystem = null;
+        private CoverStatus coverStatus = null;
         private float targetSuspicion = 0f;
         private float currentSuspicion = 0f;
         private string fallbackToast = string.Empty;
@@ -55,9 +61,20 @@ namespace DreamOfOne.UI
 
         private void Awake()
         {
+            ResolveUiReferences();
+            if (globalSuspicionSystem == null)
+            {
+                globalSuspicionSystem = FindFirstObjectByType<GlobalSuspicionSystem>();
+            }
+
             UpdateGlobalSuspicion(0f);
             interrogationText?.SetText(string.Empty);
             promptText?.SetText(string.Empty);
+            caseBundleText?.SetText(string.Empty);
+            if (caseBundleText != null)
+            {
+                caseBundleText.gameObject.SetActive(false);
+            }
             if (toastText != null)
             {
                 toastText.gameObject.SetActive(false);
@@ -68,12 +85,129 @@ namespace DreamOfOne.UI
             {
                 fallbackStyle = new GUIStyle
                 {
-                    fontSize = 16,
+                    fontSize = 20,
                     normal = { textColor = Color.white }
                 };
             }
 
             Bind(globalSuspicionSystem);
+            BindCoverStatus();
+        }
+
+        private void Start()
+        {
+            ResolveUiReferences();
+            if (globalSuspicionSystem == null)
+            {
+                globalSuspicionSystem = FindFirstObjectByType<GlobalSuspicionSystem>();
+            }
+
+            if (boundSuspicionSystem == null && globalSuspicionSystem != null)
+            {
+                Bind(globalSuspicionSystem);
+            }
+
+            if (coverStatus == null)
+            {
+                BindCoverStatus();
+            }
+        }
+
+        private void ResolveUiReferences()
+        {
+            if (globalSuspicionBar == null)
+            {
+                foreach (var slider in GetComponentsInChildren<Slider>(true))
+                {
+                    if (string.Equals(slider.name, "GlobalSuspicionBar", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        globalSuspicionBar = slider;
+                        break;
+                    }
+                }
+
+                if (globalSuspicionBar == null)
+                {
+                    var sliders = GetComponentsInChildren<Slider>(true);
+                    if (sliders.Length > 0)
+                    {
+                        globalSuspicionBar = sliders[0];
+                    }
+                }
+            }
+
+            if (globalSuspicionLabel == null || eventLogText == null || toastText == null || interrogationText == null || promptText == null)
+            {
+                var labels = GetComponentsInChildren<TMP_Text>(true);
+                foreach (var label in labels)
+                {
+                    switch (label.name)
+                    {
+                        case "GlobalSuspicionLabel":
+                            globalSuspicionLabel ??= label;
+                            break;
+                        case "EventLogText":
+                            eventLogText ??= label;
+                            break;
+                        case "ToastText":
+                            toastText ??= label;
+                            break;
+                        case "InterrogationText":
+                            interrogationText ??= label;
+                            break;
+                        case "PromptText":
+                            promptText ??= label;
+                            break;
+                    case "CoverStatusText":
+                        coverStatusText ??= label;
+                        break;
+                    case "CaseBundleText":
+                        caseBundleText ??= label;
+                        break;
+                }
+            }
+
+                if (globalSuspicionLabel == null || eventLogText == null || toastText == null || interrogationText == null || promptText == null)
+                {
+                    foreach (var label in labels)
+                    {
+                        if (label == globalSuspicionLabel || label == eventLogText || label == toastText || label == interrogationText || label == promptText)
+                        {
+                            continue;
+                        }
+
+                        if (globalSuspicionLabel == null)
+                        {
+                            globalSuspicionLabel = label;
+                            continue;
+                        }
+
+                        if (eventLogText == null)
+                        {
+                            eventLogText = label;
+                            continue;
+                        }
+
+                        if (toastText == null)
+                        {
+                            toastText = label;
+                            continue;
+                        }
+
+                        if (interrogationText == null)
+                        {
+                            interrogationText = label;
+                            continue;
+                        }
+
+                        if (promptText == null)
+                        {
+                            promptText = label;
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         private void Update()
@@ -111,12 +245,65 @@ namespace DreamOfOne.UI
             {
                 boundSuspicionSystem.OnGlobalSuspicionChanged -= UpdateGlobalSuspicion;
             }
+
+            if (coverStatus != null)
+            {
+                coverStatus.OnCoverStatusChanged -= HandleCoverStatus;
+            }
         }
 
         public void UpdateGlobalSuspicion(float value)
         {
             targetSuspicion = value;
             globalSuspicionLabel?.SetText($"G {value:P0}");
+        }
+
+        public void UpdateCoverStatus(string text)
+        {
+            if (coverStatusText == null)
+            {
+                return;
+            }
+
+            coverStatusText.SetText(text);
+        }
+
+        public void ShowCaseBundle(string text)
+        {
+            if (caseBundleText == null)
+            {
+                return;
+            }
+
+            caseBundleText.gameObject.SetActive(!string.IsNullOrEmpty(text));
+            caseBundleText.SetText(text ?? string.Empty);
+        }
+
+        private void BindCoverStatus()
+        {
+            if (coverStatus != null)
+            {
+                coverStatus.OnCoverStatusChanged -= HandleCoverStatus;
+            }
+
+            coverStatus = FindFirstObjectByType<CoverStatus>();
+            if (coverStatus == null)
+            {
+                return;
+            }
+
+            coverStatus.OnCoverStatusChanged += HandleCoverStatus;
+            UpdateCoverStatus(coverStatus.BuildStatusLine());
+        }
+
+        private void HandleCoverStatus(CoverStatus status)
+        {
+            if (status == null)
+            {
+                return;
+            }
+
+            UpdateCoverStatus(status.BuildStatusLine());
         }
 
         /// <summary>
@@ -129,7 +316,8 @@ namespace DreamOfOne.UI
                 return;
             }
 
-            logLines.Enqueue(text);
+            string trimmed = DialogueLineLimiter.ClampLine(text, 80);
+            logLines.Enqueue(trimmed);
             while (logLines.Count > logLineCount)
             {
                 logLines.Dequeue();

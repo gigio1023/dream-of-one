@@ -23,6 +23,13 @@ MonoBehaviour:
   eventCategory: 4
   zoneType: 0
   prompt: 'E: Interact'
+  promptTemplate: 'E: Interact'
+  verbs:
+  - Interact
+  stateMachineId: 
+  emittedEvents:
+  - ReportFiled
+  artifactRules: []
   note: Report filed
   severity: 2
   placeId: Police

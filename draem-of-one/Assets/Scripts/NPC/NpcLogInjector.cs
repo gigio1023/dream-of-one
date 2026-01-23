@@ -25,10 +25,10 @@ namespace DreamOfOne.NPC
         private float noiseDistance = 6f;
 
         [SerializeField]
-        private int maxNearEntries = 2;
+        private int maxNearEntries = 3;
 
         [SerializeField]
-        private int maxFovEntries = 3;
+        private int maxFovEntries = 5;
 
         [SerializeField]
         private int maxNoiseEntries = 1;
@@ -40,9 +40,20 @@ namespace DreamOfOne.NPC
         private readonly List<NpcContext> contexts = new();
         private readonly List<SpatialBlackboard> boards = new();
 
+        private static readonly Queue<string> debugInjectedLines = new();
+        private const int DebugLineCapacity = 12;
+
+        public static IReadOnlyList<string> GetRecentInjectedLines()
+        {
+            return debugInjectedLines.ToArray();
+        }
+
         private void Awake()
         {
             RefreshCaches();
+            maxNearEntries = Mathf.Max(maxNearEntries, 3);
+            maxFovEntries = Mathf.Max(maxFovEntries, 5);
+            maxNoiseEntries = Mathf.Max(maxNoiseEntries, 1);
         }
 
         private void Update()
@@ -160,6 +171,27 @@ namespace DreamOfOne.NPC
             for (int i = 0; i < entries.Count; i++)
             {
                 context.ReceiveEntry(entries[i], now);
+                RememberDebugLine(context, entries[i]);
+            }
+        }
+
+        private static void RememberDebugLine(NpcContext context, BlackboardEntry entry)
+        {
+            if (context == null || string.IsNullOrEmpty(entry.text))
+            {
+                return;
+            }
+
+            string line = $"{context.NpcId}: {entry.text}";
+            if (line.Length > 120)
+            {
+                line = line.Substring(0, 120);
+            }
+
+            debugInjectedLines.Enqueue(line);
+            while (debugInjectedLines.Count > DebugLineCapacity)
+            {
+                debugInjectedLines.Dequeue();
             }
         }
 

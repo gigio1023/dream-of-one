@@ -82,6 +82,9 @@ namespace DreamOfOne.Core
         {
             yield return new WaitForSeconds(act1Delay);
             var act1EventId = EmitViolation("Player", "Store", "StoreQueue", "R_QUEUE", "새치기 의심", queueZone);
+            EmitOrganization("Clerk", "Store", "StoreQueue", EventType.LabelChanged, "라벨 보정", queueZone);
+            EmitEvidence("Clerk", "Store", "StoreQueue", EventType.CctvCaptured, "CCTV 캡처", queueZone);
+            EmitEvidence("Clerk", "Store", "StoreQueue", EventType.TicketIssued, "티켓 발행", queueZone);
             yield return new WaitForSeconds(2f);
             FileReport("Clerk", "R_QUEUE", act1EventId, queueZone);
             FileReport("Elder", "R_QUEUE", act1EventId, queueZone);
@@ -91,6 +94,9 @@ namespace DreamOfOne.Core
             yield return new WaitForSeconds(2f);
             EmitProcedure("Studio", "Studio", "StudioPhoto", EventType.ApprovalGranted, "PM 승인", studioZone);
             EmitProcedure("Studio", "Studio", "StudioPhoto", EventType.RcInserted, "RC 삽입", studioZone);
+            EmitEvidence("QA", "Studio", "StudioPhoto", EventType.EvidenceCaptured, "로그 증거", studioZone);
+            EmitOrganization("PM", "Studio", "StudioPhoto", EventType.TaskStarted, "검수 시작", studioZone);
+            EmitOrganization("PM", "Studio", "StudioPhoto", EventType.TaskCompleted, "검수 완료", studioZone);
             FileReport("Clerk", "PROC_RC_SKIP", act2EventId, studioZone);
             FileReport("Tourist", "PROC_RC_SKIP", act2EventId, studioZone);
         }
@@ -135,6 +141,50 @@ namespace DreamOfOne.Core
                 actorRole = actorId,
                 eventType = type,
                 category = EventCategory.Procedure,
+                note = note,
+                topic = note,
+                placeId = placeId,
+                zoneId = zoneId,
+                position = anchor != null ? anchor.position : Vector3.zero,
+                severity = 1
+            });
+        }
+
+        private void EmitEvidence(string actorId, string placeId, string zoneId, EventType type, string note, Transform anchor)
+        {
+            if (eventLog == null)
+            {
+                return;
+            }
+
+            eventLog.RecordEvent(new EventRecord
+            {
+                actorId = actorId,
+                actorRole = actorId,
+                eventType = type,
+                category = EventCategory.Evidence,
+                note = note,
+                topic = note,
+                placeId = placeId,
+                zoneId = zoneId,
+                position = anchor != null ? anchor.position : Vector3.zero,
+                severity = 2
+            });
+        }
+
+        private void EmitOrganization(string actorId, string placeId, string zoneId, EventType type, string note, Transform anchor)
+        {
+            if (eventLog == null)
+            {
+                return;
+            }
+
+            eventLog.RecordEvent(new EventRecord
+            {
+                actorId = actorId,
+                actorRole = actorId,
+                eventType = type,
+                category = EventCategory.Organization,
                 note = note,
                 topic = note,
                 placeId = placeId,

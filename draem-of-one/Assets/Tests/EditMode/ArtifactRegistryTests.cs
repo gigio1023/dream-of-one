@@ -21,7 +21,7 @@ namespace DreamOfOne.Tests
                 note = "ticket"
             };
 
-            bool added = registry.TryAddFromEvent(record);
+            bool added = registry.TryAddFromEvent(record, "Violation Ticket", "ticket");
 
             Assert.IsTrue(added);
             Assert.AreEqual(1, registry.Artifacts.Count);
@@ -41,7 +41,7 @@ namespace DreamOfOne.Tests
                 placeId = "Park"
             };
 
-            bool added = registry.TryAddFromEvent(record);
+            bool added = registry.TryAddFromEvent(record, "Zone", "zone");
 
             Assert.IsFalse(added);
             Assert.AreEqual(0, registry.Artifacts.Count);

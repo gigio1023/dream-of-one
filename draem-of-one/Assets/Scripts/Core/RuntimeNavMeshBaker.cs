@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace DreamOfOne.Core
 {
@@ -29,8 +30,19 @@ namespace DreamOfOne.Core
                 return;
             }
 
+            if (HasNavMeshData())
+            {
+                return;
+            }
+
             var buildMethod = resolvedSurface.GetType().GetMethod("BuildNavMesh", BindingFlags.Instance | BindingFlags.Public);
             buildMethod?.Invoke(resolvedSurface, null);
+        }
+
+        private static bool HasNavMeshData()
+        {
+            var triangulation = NavMesh.CalculateTriangulation();
+            return triangulation.vertices != null && triangulation.vertices.Length > 0;
         }
 
         private static MonoBehaviour ResolveSurface()

@@ -39,6 +39,21 @@ namespace DreamOfOne.World
         private string prompt = "E: Interact";
 
         [SerializeField]
+        private string promptTemplate = string.Empty;
+
+        [SerializeField]
+        private string[] verbs = System.Array.Empty<string>();
+
+        [SerializeField]
+        private string stateMachineId = string.Empty;
+
+        [SerializeField]
+        private string[] emittedEvents = System.Array.Empty<string>();
+
+        [SerializeField]
+        private string[] artifactRules = System.Array.Empty<string>();
+
+        [SerializeField]
         private string note = string.Empty;
 
         [SerializeField]
@@ -61,6 +76,11 @@ namespace DreamOfOne.World
         public DreamOfOne.Core.EventCategory EventCategory => eventCategory;
         public DreamOfOne.Core.ZoneType ZoneType => zoneType;
         public string Prompt => prompt;
+        public string PromptTemplate => promptTemplate;
+        public string[] Verbs => verbs;
+        public string StateMachineId => stateMachineId;
+        public string[] EmittedEvents => emittedEvents;
+        public string[] ArtifactRules => artifactRules;
         public string Note => note;
         public int Severity => severity;
         public string PlaceId => placeId;

@@ -13,11 +13,16 @@ MonoBehaviour:
   m_Name: Building_Studio
   m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.BuildingDefinition
   buildingId: Studio
+  displayName: Studio
   anchorName: StudioBuilding_L1
   exteriorPrefab: {fileID: 0}
+  signagePrefab: {fileID: 0}
+  keyProps: []
   exteriorOffset: {x: 0, y: 0, z: 0}
   exteriorRotationEuler: {x: 0, y: 0, z: 0}
   interiorPrefab: {fileID: 2211568937452699634, guid: 57b231a09e15c49a68eb6faf921cef8a, type: 3}
   interiorLocalOffset: {x: 0, y: 0, z: 0}
   interiorPortalLocalOffset: {x: 0, y: 0.1, z: -3}
   exteriorPortalOffset: {x: 0, y: 0, z: 2.2}
+  doorwayLocalOffset: {x: 0, y: 0, z: 2}
+  doorwaySize: {x: 2, y: 2.4, z: 0.5}

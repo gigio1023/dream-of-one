@@ -7,6 +7,7 @@ namespace DreamOfOne.World
     {
         private readonly List<string> warnings = new();
         private readonly List<string> errors = new();
+        private readonly List<string> info = new();
 
         public int WarningCount => warnings.Count;
         public int ErrorCount => errors.Count;
@@ -14,6 +15,7 @@ namespace DreamOfOne.World
 
         public IReadOnlyList<string> Warnings => warnings;
         public IReadOnlyList<string> Errors => errors;
+        public IReadOnlyList<string> Info => info;
 
         public void AddWarning(string message)
         {
@@ -35,6 +37,16 @@ namespace DreamOfOne.World
             errors.Add(message);
         }
 
+        public void AddInfo(string message)
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                return;
+            }
+
+            info.Add(message);
+        }
+
         public void LogSummary(string header)
         {
             Debug.Log($"[WorldBuilder] {header} Warnings={warnings.Count} Errors={errors.Count}");
@@ -45,6 +57,11 @@ namespace DreamOfOne.World
             for (int i = 0; i < errors.Count; i++)
             {
                 Debug.LogError($"[WorldBuilder] {errors[i]}");
+            }
+
+            for (int i = 0; i < info.Count; i++)
+            {
+                Debug.Log($"[WorldBuilder] {info[i]}");
             }
         }
     }

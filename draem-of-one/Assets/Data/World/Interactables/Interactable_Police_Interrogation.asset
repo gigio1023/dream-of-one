@@ -23,6 +23,13 @@ MonoBehaviour:
   eventCategory: 9
   zoneType: 0
   prompt: 'E: Interact'
+  promptTemplate: 'E: Interact'
+  verbs:
+  - Interact
+  stateMachineId: 
+  emittedEvents:
+  - InterrogationStarted
+  artifactRules: []
   note: Interrogation started
   severity: 2
   placeId: Police

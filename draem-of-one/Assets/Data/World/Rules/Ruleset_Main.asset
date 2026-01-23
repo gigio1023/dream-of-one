@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea00e26f598124dcf8c91564fc716288, type: 3}
+  m_Name: Ruleset_Main
+  m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.RulesetDefinition
+  rulesetId: Main
+  rules:
+  - {fileID: 11400000, guid: 3ea9509424f1f41f58c822e0ad91cc6e, type: 2}
+  - {fileID: 11400000, guid: 95a32abfa98934ab3b942f05640f2003, type: 2}
+  - {fileID: 11400000, guid: 388db0899f4614576b927c560e8f9920, type: 2}
+  - {fileID: 11400000, guid: eed5f95d1761540baba8063053b1c7c7, type: 2}

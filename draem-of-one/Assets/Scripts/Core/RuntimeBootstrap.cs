@@ -44,6 +44,9 @@ namespace DreamOfOne.Core
             systems.AddComponent<DemoDirector>();
             systems.AddComponent<DreamOfOne.NPC.NpcLogInjector>();
             systems.AddComponent<LoopVerifier>();
+            systems.AddComponent<PerformanceProbe>();
+            systems.AddComponent<GcAllocationProbe>();
+            systems.AddComponent<SessionDirector>();
 
             var llmHost = new GameObject("LLMClient");
             llmHost.transform.SetParent(systems.transform);
@@ -55,6 +58,7 @@ namespace DreamOfOne.Core
             uiRoot.transform.SetParent(root);
             var uiManager = uiRoot.AddComponent<UIManager>();
             uiManager.Bind(global);
+            uiRoot.AddComponent<UIShortcutController>();
 
             uiRoot.AddComponent<FontBootstrap>();
             uiRoot.AddComponent<DreamOfOne.UI.BlackboardDebugUI>();

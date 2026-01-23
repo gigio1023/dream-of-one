@@ -23,6 +23,13 @@ MonoBehaviour:
   eventCategory: 8
   zoneType: 0
   prompt: 'E: Interact'
+  promptTemplate: 'E: Interact'
+  verbs:
+  - Interact
+  stateMachineId: 
+  emittedEvents:
+  - LabelChanged
+  artifactRules: []
   note: Label update
   severity: 2
   placeId: Store

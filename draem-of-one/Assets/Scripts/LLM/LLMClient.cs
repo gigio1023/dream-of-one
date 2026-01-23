@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using DreamOfOne.Core;
 using UnityEngine;
@@ -23,6 +24,18 @@ namespace DreamOfOne.LLM
         [SerializeField]
         [Tooltip("LLM 제공자 선택")]
         private Provider provider = Provider.Mock;
+
+        [SerializeField]
+        [Tooltip("LLM 호출 활성화 여부 (비활성 시 템플릿만 사용)")]
+        private bool llmEnabled = true;
+
+        [SerializeField]
+        [Tooltip("분당 평균 호출 제한 (0이면 제한 없음)")]
+        private int maxCallsPerMinuteAverage = 4;
+
+        [SerializeField]
+        [Tooltip("분당 피크 호출 제한 (0이면 제한 없음)")]
+        private int maxCallsPerMinutePeak = 6;
 
         [Header("OpenAI Chat Completions")]
         [SerializeField]
@@ -94,6 +107,9 @@ namespace DreamOfOne.LLM
         [Tooltip("실패/오류를 콘솔에 출력")]
         private bool logErrors = true;
 
+        private readonly Queue<float> callTimestamps = new();
+        private float lastCallTime = -999f;
+
         [Serializable]
         public struct LineRequest
         {
@@ -162,11 +178,23 @@ namespace DreamOfOne.LLM
 
         public void RequestLine(LineRequest request, Action<string> onResult)
         {
+            if (!CanRequestNow())
+            {
+                onResult?.Invoke(DialogueLineLimiter.ClampLine(BuildMockLine(request), maxChars));
+                return;
+            }
+
             StartCoroutine(RequestCoroutine(request, onResult));
         }
 
         private IEnumerator RequestCoroutine(LineRequest request, Action<string> onResult)
         {
+            if (!llmEnabled)
+            {
+                onResult?.Invoke(DialogueLineLimiter.ClampLine(BuildMockLine(request), maxChars));
+                yield break;
+            }
+
             switch (provider)
             {
                 case Provider.Mock:
@@ -372,6 +400,35 @@ namespace DreamOfOne.LLM
             }
 
             onResult?.Invoke(DialogueLineLimiter.ClampLine(BuildMockLine(request), maxChars));
+        }
+
+        private bool CanRequestNow()
+        {
+            if (!llmEnabled)
+            {
+                return false;
+            }
+
+            float now = Time.time;
+            float minInterval = maxCallsPerMinuteAverage > 0 ? 60f / maxCallsPerMinuteAverage : 0f;
+            if (minInterval > 0f && now - lastCallTime < minInterval)
+            {
+                return false;
+            }
+
+            while (callTimestamps.Count > 0 && now - callTimestamps.Peek() > 60f)
+            {
+                callTimestamps.Dequeue();
+            }
+
+            if (maxCallsPerMinutePeak > 0 && callTimestamps.Count >= maxCallsPerMinutePeak)
+            {
+                return false;
+            }
+
+            lastCallTime = now;
+            callTimestamps.Enqueue(now);
+            return true;
         }
 
         private string BuildMockLine(LineRequest request)

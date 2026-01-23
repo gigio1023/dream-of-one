@@ -15,6 +15,11 @@ namespace DreamOfOne.Editor
         private const string WorldRoot = "Assets/Data/World";
         private const string InteriorRoot = "Assets/Data/Interiors";
         private const string PrefabRoot = "Assets/Data/Prefabs";
+        private const string RulesRoot = "Assets/Data/World/Rules";
+        private const string PoliciesRoot = "Assets/Data/World/Policies";
+        private const string BudgetsRoot = "Assets/Data/World/Budgets";
+        private const string ZonesRoot = "Assets/Data/World/Zones";
+        private const string ArtifactRoot = "Assets/Resources/Artifacts";
 
         [MenuItem("Tools/DreamOfOne/Seed World Definition (Default)")]
         public static void SeedDefaultWorld()
@@ -32,6 +37,27 @@ namespace DreamOfOne.Editor
             var citizenPrefab = EnsureNpcPrefab("NPC_Citizen", new Color(0.35f, 0.9f, 0.35f, 1f), false);
             var policePrefab = EnsureNpcPrefab("NPC_Police", new Color(0.2f, 0.45f, 0.95f, 1f), true);
 
+            var rules = new List<RuleDefinition>
+            {
+                CreateRule("R_QUEUE", 2, 30f, "Queue", "줄 규칙 위반이 감지됨"),
+                CreateRule("R_LABEL", 2, 20f, "Label", "라벨 규정 위반이 감지됨"),
+                CreateRule("R_NOISE", 2, 20f, "Noise", "소음 규정 위반이 감지됨"),
+                CreateRule("PROC_RC_SKIP", 2, 25f, "Procedure", "RC 절차 누락이 감지됨")
+            };
+
+            var ruleset = CreateRuleset("Main", rules);
+            var policyPack = CreatePolicyPack("Default", "Baseline policy pack for MCSS slice.");
+            var budget = CreateBudget(16, 3f, 10f, 10, "0B");
+            var artifacts = new List<ArtifactDefinition>
+            {
+                CreateArtifact("CCTV Capture", CoreEventType.CctvCaptured, "CCTV Capture", "CCTV clip from {place}: {note}"),
+                CreateArtifact("Violation Ticket", CoreEventType.TicketIssued, "Violation Ticket", "Ticket issued at {place}: {note}"),
+                CreateArtifact("Rumor Card", CoreEventType.RumorConfirmed, "Rumor Card", "Rumor confirmed about {topic} at {place}."),
+                CreateArtifact("Complaint Memo", CoreEventType.ReportFiled, "Complaint Memo", "Complaint filed by {actor} at {place}."),
+                CreateArtifact("Defense Memo", CoreEventType.ExplanationGiven, "Defense Memo", "Defense note: {note}"),
+                CreateArtifact("Approval Note", CoreEventType.ApprovalGranted, "Approval Note", "Approval granted at {place}.")
+            };
+
             var buildings = new List<BuildingDefinition>
             {
                 CreateBuilding("Store", "StoreBuilding", CreateInteriorPrefab("Interior_Store", new Vector3(10f, 3f, 10f), InteriorStyle.Store)),
@@ -39,6 +65,14 @@ namespace DreamOfOne.Editor
                 CreateBuilding("Police", "Station", CreateInteriorPrefab("Interior_Police", new Vector3(9f, 3f, 9f), InteriorStyle.Police)),
                 CreateBuilding("Cafe", "Cafe", CreateInteriorPrefab("Interior_Cafe", new Vector3(8f, 3f, 8f), InteriorStyle.Cafe)),
                 CreateBuilding("Park", "ParkArea", null)
+            };
+
+            var zones = new List<ZoneDefinition>
+            {
+                CreateZone("StoreQueue", ZoneType.Queue, new Vector3(-10f, 0f, 6f)),
+                CreateZone("StudioPhoto", ZoneType.Photo, new Vector3(0f, 0f, -10f)),
+                CreateZone("ParkSeat", ZoneType.Seat, new Vector3(12f, 0f, 8f)),
+                CreateZone("PoliceReport", ZoneType.None, new Vector3(0f, 0f, -18f))
             };
 
             var interactables = new List<InteractableDefinition>
@@ -98,6 +132,7 @@ namespace DreamOfOne.Editor
             };
 
             ApplyWorldAsset(world, buildings, interactables, incidents, npcs);
+            ApplyWorldSettings(world, ruleset, policyPack, budget, zones);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -150,6 +185,40 @@ namespace DreamOfOne.Editor
             EditorUtility.SetDirty(world);
         }
 
+        private static void ApplyWorldSettings(
+            WorldDefinition world,
+            RulesetDefinition ruleset,
+            PolicyPackDefinition policyPack,
+            WorldBudgetDefinition budget,
+            List<ZoneDefinition> zones)
+        {
+            var so = new SerializedObject(world);
+            so.FindProperty("worldId").stringValue = "DreamOfOne_World";
+            so.FindProperty("seedMode").enumValueIndex = (int)WorldSeedMode.Fixed;
+            so.FindProperty("seed").intValue = 1024;
+            so.FindProperty("ruleset").objectReferenceValue = ruleset;
+            so.FindProperty("budgets").objectReferenceValue = budget;
+
+            var policyProp = so.FindProperty("policyPacks");
+            policyProp.ClearArray();
+            if (policyPack != null)
+            {
+                policyProp.InsertArrayElementAtIndex(0);
+                policyProp.GetArrayElementAtIndex(0).objectReferenceValue = policyPack;
+            }
+
+            var zoneProp = so.FindProperty("zones");
+            zoneProp.ClearArray();
+            for (int i = 0; i < zones.Count; i++)
+            {
+                zoneProp.InsertArrayElementAtIndex(i);
+                zoneProp.GetArrayElementAtIndex(i).objectReferenceValue = zones[i];
+            }
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(world);
+        }
+
         private static BuildingDefinition CreateBuilding(string id, string anchorName, GameObject interiorPrefab)
         {
             string path = $"{WorldRoot}/Buildings/Building_{id}.asset";
@@ -163,6 +232,7 @@ namespace DreamOfOne.Editor
 
             var so = new SerializedObject(asset);
             so.FindProperty("buildingId").stringValue = id;
+            so.FindProperty("displayName").stringValue = id;
             so.FindProperty("anchorName").stringValue = anchorName;
             so.FindProperty("interiorPrefab").objectReferenceValue = interiorPrefab;
             so.FindProperty("exteriorOffset").vector3Value = Vector3.zero;
@@ -170,6 +240,34 @@ namespace DreamOfOne.Editor
             so.FindProperty("interiorLocalOffset").vector3Value = Vector3.zero;
             so.FindProperty("interiorPortalLocalOffset").vector3Value = new Vector3(0f, 0.1f, -3f);
             so.FindProperty("exteriorPortalOffset").vector3Value = new Vector3(0f, 0f, 2.2f);
+            so.FindProperty("doorwayLocalOffset").vector3Value = new Vector3(0f, 0f, 2f);
+            so.FindProperty("doorwaySize").vector3Value = new Vector3(2f, 2.4f, 0.5f);
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(asset);
+            return asset;
+        }
+
+        private static ArtifactDefinition CreateArtifact(string id, CoreEventType sourceEvent, string displayName, string inspectTemplate)
+        {
+            EnsureFolder(ArtifactRoot);
+            string safeId = id.Replace(" ", string.Empty);
+            string path = $"{ArtifactRoot}/Artifact_{safeId}.asset";
+            var asset = AssetDatabase.LoadAssetAtPath<ArtifactDefinition>(path);
+            if (asset == null)
+            {
+                asset = ScriptableObject.CreateInstance<ArtifactDefinition>();
+                AssetDatabase.CreateAsset(asset, path);
+            }
+
+            var so = new SerializedObject(asset);
+            so.FindProperty("artifactId").stringValue = id;
+            so.FindProperty("displayName").stringValue = displayName;
+            so.FindProperty("sourceEvent").enumValueIndex = (int)sourceEvent;
+            so.FindProperty("prefab").objectReferenceValue = null;
+            so.FindProperty("state").stringValue = "New";
+            so.FindProperty("ttlSeconds").floatValue = 600f;
+            so.FindProperty("inspectTextTemplate").stringValue = inspectTemplate;
+            so.FindProperty("links").ClearArray();
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(asset);
             return asset;
@@ -207,6 +305,11 @@ namespace DreamOfOne.Editor
             so.FindProperty("eventCategory").enumValueIndex = (int)category;
             so.FindProperty("zoneType").enumValueIndex = (int)zoneType;
             so.FindProperty("prompt").stringValue = "E: Interact";
+            so.FindProperty("promptTemplate").stringValue = "E: Interact";
+            SetStringArray(so.FindProperty("verbs"), new[] { "Interact" });
+            so.FindProperty("stateMachineId").stringValue = string.Empty;
+            SetStringArray(so.FindProperty("emittedEvents"), new[] { eventType.ToString() });
+            SetStringArray(so.FindProperty("artifactRules"), System.Array.Empty<string>());
             so.FindProperty("note").stringValue = note;
             so.FindProperty("severity").intValue = 2;
             so.FindProperty("placeId").stringValue = placeId;
@@ -239,9 +342,16 @@ namespace DreamOfOne.Editor
             var so = new SerializedObject(asset);
             so.FindProperty("npcId").stringValue = id;
             so.FindProperty("roleName").stringValue = role;
+            so.FindProperty("organization").stringValue = isPolice ? "Police" : "City";
+            so.FindProperty("routine").stringValue = isPolice ? "Patrol" : "Wander";
+            so.FindProperty("perceptionProfile").stringValue = "Default";
+            so.FindProperty("injectionProfile").stringValue = "Default";
+            so.FindProperty("dialogueStyle").stringValue = "Short";
+            so.FindProperty("authorityProfile").stringValue = isPolice ? "High" : "Low";
             so.FindProperty("anchorName").stringValue = anchorName;
             so.FindProperty("spawnOffset").vector3Value = spawnOffset;
             so.FindProperty("isPolice").boolValue = isPolice;
+            so.FindProperty("spawnCount").intValue = isPolice ? 1 : 2;
             so.FindProperty("speed").floatValue = speed;
             so.FindProperty("stoppingDistance").floatValue = stoppingDistance;
             so.FindProperty("avoidancePriority").intValue = avoidancePriority;
@@ -267,6 +377,120 @@ namespace DreamOfOne.Editor
             so.FindProperty("description").stringValue = description;
             SetStringArray(so.FindProperty("requiredInteractables"), interactables);
             SetStringArray(so.FindProperty("requiredArtifacts"), artifacts);
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(asset);
+            return asset;
+        }
+
+        private static RuleDefinition CreateRule(string id, int severity, float suspicionDelta, string artifactPolicy, string template)
+        {
+            string path = $"{RulesRoot}/Rule_{id}.asset";
+            var asset = AssetDatabase.LoadAssetAtPath<RuleDefinition>(path);
+            if (asset == null)
+            {
+                EnsureFolder(RulesRoot);
+                asset = ScriptableObject.CreateInstance<RuleDefinition>();
+                AssetDatabase.CreateAsset(asset, path);
+            }
+
+            var so = new SerializedObject(asset);
+            so.FindProperty("ruleId").stringValue = id;
+            so.FindProperty("severity").intValue = severity;
+            so.FindProperty("suspicionDelta").floatValue = suspicionDelta;
+            so.FindProperty("artifactPolicy").stringValue = artifactPolicy;
+            so.FindProperty("canonicalLineTemplate").stringValue = template;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(asset);
+            return asset;
+        }
+
+        private static RulesetDefinition CreateRuleset(string id, List<RuleDefinition> rules)
+        {
+            string path = $"{RulesRoot}/Ruleset_{id}.asset";
+            var asset = AssetDatabase.LoadAssetAtPath<RulesetDefinition>(path);
+            if (asset == null)
+            {
+                EnsureFolder(RulesRoot);
+                asset = ScriptableObject.CreateInstance<RulesetDefinition>();
+                AssetDatabase.CreateAsset(asset, path);
+            }
+
+            var so = new SerializedObject(asset);
+            so.FindProperty("rulesetId").stringValue = id;
+            var rulesProp = so.FindProperty("rules");
+            rulesProp.ClearArray();
+            for (int i = 0; i < rules.Count; i++)
+            {
+                rulesProp.InsertArrayElementAtIndex(i);
+                rulesProp.GetArrayElementAtIndex(i).objectReferenceValue = rules[i];
+            }
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(asset);
+            return asset;
+        }
+
+        private static PolicyPackDefinition CreatePolicyPack(string id, string description)
+        {
+            string path = $"{PoliciesRoot}/PolicyPack_{id}.asset";
+            var asset = AssetDatabase.LoadAssetAtPath<PolicyPackDefinition>(path);
+            if (asset == null)
+            {
+                EnsureFolder(PoliciesRoot);
+                asset = ScriptableObject.CreateInstance<PolicyPackDefinition>();
+                AssetDatabase.CreateAsset(asset, path);
+            }
+
+            var so = new SerializedObject(asset);
+            so.FindProperty("policyId").stringValue = id;
+            so.FindProperty("description").stringValue = description;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(asset);
+            return asset;
+        }
+
+        private static WorldBudgetDefinition CreateBudget(int npcMax, float baseline, float peak, int blackboardCapacity, string steadyAlloc)
+        {
+            string path = $"{BudgetsRoot}/WorldBudget_Default.asset";
+            var asset = AssetDatabase.LoadAssetAtPath<WorldBudgetDefinition>(path);
+            if (asset == null)
+            {
+                EnsureFolder(BudgetsRoot);
+                asset = ScriptableObject.CreateInstance<WorldBudgetDefinition>();
+                AssetDatabase.CreateAsset(asset, path);
+            }
+
+            var so = new SerializedObject(asset);
+            so.FindProperty("npcMax").intValue = npcMax;
+            so.FindProperty("eventRateBaseline").floatValue = baseline;
+            so.FindProperty("eventRatePeak").floatValue = peak;
+            so.FindProperty("blackboardCapacity").intValue = blackboardCapacity;
+            so.FindProperty("steadyAllocationTarget").stringValue = steadyAlloc;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(asset);
+            return asset;
+        }
+
+        private static ZoneDefinition CreateZone(string id, ZoneType type, Vector3 center)
+        {
+            string path = $"{ZonesRoot}/Zone_{id}.asset";
+            var asset = AssetDatabase.LoadAssetAtPath<ZoneDefinition>(path);
+            if (asset == null)
+            {
+                EnsureFolder(ZonesRoot);
+                asset = ScriptableObject.CreateInstance<ZoneDefinition>();
+                AssetDatabase.CreateAsset(asset, path);
+            }
+
+            var so = new SerializedObject(asset);
+            so.FindProperty("zoneId").stringValue = id;
+            so.FindProperty("zoneType").enumValueIndex = (int)type;
+            so.FindProperty("shape").enumValueIndex = (int)ZoneShape.Box;
+            so.FindProperty("center").vector3Value = center;
+            so.FindProperty("size").vector3Value = new Vector3(3f, 2f, 3f);
+            so.FindProperty("blackboardCapacity").intValue = 10;
+            so.FindProperty("ttlSeconds").floatValue = 120f;
+            so.FindProperty("noiseRadius").floatValue = 6f;
+            so.FindProperty("injectionProfile").stringValue = "Default";
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(asset);
             return asset;
@@ -446,8 +670,13 @@ namespace DreamOfOne.Editor
             EnsureFolder($"{WorldRoot}/Interactables");
             EnsureFolder($"{WorldRoot}/Incidents");
             EnsureFolder($"{WorldRoot}/NPCs");
+            EnsureFolder(RulesRoot);
+            EnsureFolder(PoliciesRoot);
+            EnsureFolder(BudgetsRoot);
+            EnsureFolder(ZonesRoot);
             EnsureFolder(InteriorRoot);
             EnsureFolder(PrefabRoot);
+            EnsureFolder(ArtifactRoot);
         }
 
         private static void EnsureFolder(string path)

@@ -31,12 +31,47 @@ namespace DreamOfOne.Core
         public IReadOnlyList<EventRecord> Events => events;
         public int TotalEvents => totalEvents;
         public int DroppedEvents => droppedEvents;
+        public string LogFilePath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(logFilePath))
+                {
+                    var logDir = Path.Combine(Application.persistentDataPath, "Logs");
+                    Directory.CreateDirectory(logDir);
+                    logFilePath = Path.Combine(logDir, "world-event-log.jsonl");
+                }
+
+                return logFilePath;
+            }
+        }
 
         public event Action<EventRecord> OnEventRecorded;
 
+        [Serializable]
+        private struct LogLine
+        {
+            public string utc;
+            public float stamp;
+            public string id;
+            public string eventType;
+            public string category;
+            public string actorId;
+            public string actorRole;
+            public string ruleId;
+            public string zoneId;
+            public string placeId;
+            public string topic;
+            public string note;
+            public int severity;
+            public float trust;
+        }
+
         private void Awake()
         {
-            logFilePath = Path.Combine(Application.persistentDataPath, "world-event-log.txt");
+            var logDir = Path.Combine(Application.persistentDataPath, "Logs");
+            Directory.CreateDirectory(logDir);
+            logFilePath = Path.Combine(logDir, "world-event-log.jsonl");
         }
 
         /// <summary>
@@ -81,6 +116,7 @@ namespace DreamOfOne.Core
             }
 
             OnEventRecorded?.Invoke(record);
+            EventBus.Publish(record);
         }
 
         public bool TryGetEventById(string eventId, out EventRecord record)
@@ -143,7 +179,23 @@ namespace DreamOfOne.Core
         /// </summary>
         private void EnqueueFileWrite(EventRecord record)
         {
-            string line = $"{DateTime.UtcNow:O}\t{record.stamp:F3}\t{record.id}\t{record.eventType}\t{record.category}\t{record.actorId}\t{record.ruleId}\t{record.zoneId}\t{record.note}";
+            string line = JsonUtility.ToJson(new LogLine
+            {
+                utc = DateTime.UtcNow.ToString("O"),
+                stamp = record.stamp,
+                id = record.id,
+                eventType = record.eventType.ToString(),
+                category = record.category.ToString(),
+                actorId = record.actorId,
+                actorRole = record.actorRole,
+                ruleId = record.ruleId,
+                zoneId = record.zoneId,
+                placeId = record.placeId,
+                topic = record.topic,
+                note = record.note,
+                severity = record.severity,
+                trust = record.trust
+            });
             lock (fileWriteQueue)
             {
                 fileWriteQueue.Enqueue(line);

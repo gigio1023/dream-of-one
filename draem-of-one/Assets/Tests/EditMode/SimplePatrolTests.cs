@@ -1,3 +1,4 @@
+using System.Reflection;
 using DreamOfOne.NPC;
 using NUnit.Framework;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace DreamOfOne.Tests
             var npc = new GameObject("NPC");
             var patrol = npc.AddComponent<SimplePatrol>();
             patrol.Configure(new[] { waypoint.transform }, speed: 5f, arrivalThreshold: 0.1f);
+            EnableTransformFallback(patrol);
 
             Vector3 start = npc.transform.position;
             patrol.Tick(1f);
@@ -23,6 +25,12 @@ namespace DreamOfOne.Tests
 
             Object.DestroyImmediate(npc);
             Object.DestroyImmediate(waypoint);
+        }
+
+        private static void EnableTransformFallback(SimplePatrol patrol)
+        {
+            var field = typeof(SimplePatrol).GetField("allowTransformFallback", BindingFlags.NonPublic | BindingFlags.Instance);
+            field?.SetValue(patrol, true);
         }
     }
 }

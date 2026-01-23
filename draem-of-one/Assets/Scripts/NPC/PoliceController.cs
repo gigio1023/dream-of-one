@@ -99,6 +99,8 @@ namespace DreamOfOne.NPC
         private CaseBundle currentCase = null;
         private Vector3 investigationTarget = Vector3.zero;
         private string lastVerdictReason = string.Empty;
+
+        public string LastVerdictReason => lastVerdictReason;
         private readonly List<SuspicionComponent> cachedSuspicion = new();
         private float baseOffset = 0f;
         private float jumpTimer = 0f;

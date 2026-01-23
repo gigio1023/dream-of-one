@@ -27,6 +27,7 @@ namespace DreamOfOne.Core
 
         private readonly Dictionary<string, ArtifactInfo> markers = new();
         private readonly ArtifactRegistry registry = new();
+        private Dictionary<EventType, DreamOfOne.World.ArtifactDefinition> definitions = null;
 
         private void Awake()
         {
@@ -34,6 +35,8 @@ namespace DreamOfOne.Core
             {
                 eventLog = FindFirstObjectByType<WorldEventLog>();
             }
+
+            BuildDefinitionLookup();
         }
 
         private void OnEnable()
@@ -59,7 +62,11 @@ namespace DreamOfOne.Core
                 return;
             }
 
-            if (!registry.TryAddFromEvent(record))
+            var definition = ResolveDefinition(record.eventType);
+            string artifactId = definition != null ? definition.DisplayName : record.eventType.ToString();
+            string inspectText = BuildInspectText(definition, record);
+
+            if (!registry.TryAddFromEvent(record, artifactId, inspectText))
             {
                 return;
             }
@@ -97,6 +104,63 @@ namespace DreamOfOne.Core
                 placeId = record.placeId,
                 type = record.eventType
             };
+        }
+
+        private void BuildDefinitionLookup()
+        {
+            if (definitions != null)
+            {
+                return;
+            }
+
+            definitions = new Dictionary<EventType, DreamOfOne.World.ArtifactDefinition>();
+            var assets = Resources.LoadAll<DreamOfOne.World.ArtifactDefinition>("Artifacts");
+            for (int i = 0; i < assets.Length; i++)
+            {
+                var definition = assets[i];
+                if (definition == null)
+                {
+                    continue;
+                }
+
+                if (!definitions.ContainsKey(definition.SourceEvent))
+                {
+                    definitions.Add(definition.SourceEvent, definition);
+                }
+            }
+        }
+
+        private DreamOfOne.World.ArtifactDefinition ResolveDefinition(EventType type)
+        {
+            BuildDefinitionLookup();
+            if (definitions == null)
+            {
+                return null;
+            }
+
+            definitions.TryGetValue(type, out var definition);
+            return definition;
+        }
+
+        private static string BuildInspectText(DreamOfOne.World.ArtifactDefinition definition, EventRecord record)
+        {
+            if (record == null)
+            {
+                return string.Empty;
+            }
+
+            if (definition == null || string.IsNullOrEmpty(definition.InspectTextTemplate))
+            {
+                return string.IsNullOrEmpty(record.note) ? record.eventType.ToString() : record.note;
+            }
+
+            string text = definition.InspectTextTemplate;
+            text = text.Replace("{actor}", record.actorId ?? string.Empty);
+            text = text.Replace("{place}", record.placeId ?? string.Empty);
+            text = text.Replace("{zone}", record.zoneId ?? string.Empty);
+            text = text.Replace("{topic}", record.topic ?? string.Empty);
+            text = text.Replace("{note}", record.note ?? string.Empty);
+            return text;
         }
 
         public IReadOnlyList<ArtifactRecord> GetArtifacts()

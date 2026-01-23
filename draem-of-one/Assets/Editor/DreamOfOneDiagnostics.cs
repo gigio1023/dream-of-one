@@ -174,7 +174,7 @@ namespace DreamOfOne.Editor
             }
             else if (!defaultHasHangul && fallbackHasHangul)
             {
-                warnings.Add("TMP default font lacks Hangul glyphs; relying on fallback font.");
+                info.Add("TMP default font lacks Hangul glyphs; relying on fallback font.");
             }
 
             ValidateWorldData(warnings, errors);
@@ -248,6 +248,16 @@ namespace DreamOfOne.Editor
                 return;
             }
 
+            var log = Object.FindFirstObjectByType<WorldEventLog>();
+            if (log == null)
+            {
+                warnings.Add("WorldEventLog missing in scene.");
+            }
+            else if (string.IsNullOrEmpty(log.LogFilePath) || !log.LogFilePath.EndsWith(".jsonl"))
+            {
+                warnings.Add("WorldEventLog is not configured for JSONL output.");
+            }
+
             var interactables = Object.FindObjectsByType<ZoneInteractable>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             if (interactables.Length < 20)
             {
@@ -283,6 +293,13 @@ namespace DreamOfOne.Editor
             if (missingCollider > 0)
             {
                 warnings.Add($"Interactables missing colliders: {missingCollider}");
+            }
+
+            var boards = Object.FindObjectsByType<SpatialBlackboard>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            var boardSystem = Object.FindFirstObjectByType<BlackboardSystem>();
+            if (boards.Length == 0 && boardSystem == null)
+            {
+                warnings.Add("SpatialBlackboard/BlackboardSystem not found (injection may fail).");
             }
 
             info.Add($"World_Built: Interactables={interactables.Length}, Portals={portals.Length}");

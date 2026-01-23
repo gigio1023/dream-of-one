@@ -59,6 +59,8 @@ namespace DreamOfOne.UI
             TMP_Text coverStatus = null;
             TMP_Text caseBundle = null;
             TMP_Text blackboard = null;
+            TMP_Text artifact = null;
+            TMP_Text devOverlay = null;
             Image eventLogPanel = null;
             Image promptPanel = null;
             Image interrogationPanel = null;
@@ -108,6 +110,12 @@ namespace DreamOfOne.UI
                         break;
                     case "BlackboardText":
                         blackboard ??= label;
+                        break;
+                    case "ArtifactText":
+                        artifact ??= label;
+                        break;
+                    case "DevOverlayText":
+                        devOverlay ??= label;
                         break;
                 }
             }
@@ -341,6 +349,50 @@ namespace DreamOfOne.UI
                 blackboard.raycastTarget = false;
                 blackboard.SetText(string.Empty);
                 Place(blackboard.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(640f, 220f), new Vector2(20f, -340f));
+            }
+
+            if (artifact == null)
+            {
+                var artifactObject = new GameObject("ArtifactText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                artifactObject.transform.SetParent(canvas.transform, false);
+                artifact = artifactObject.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (artifact != null)
+            {
+                artifact.gameObject.SetActive(showExtendedHud);
+            }
+
+            if (artifact != null && showExtendedHud)
+            {
+                artifact.name = "ArtifactText";
+                artifact.fontSize = 24f;
+                artifact.alignment = TextAlignmentOptions.TopRight;
+                artifact.raycastTarget = false;
+                artifact.SetText(string.Empty);
+                Place(artifact.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(420f, 200f), new Vector2(-20f, 140f));
+            }
+
+            if (devOverlay == null)
+            {
+                var devObject = new GameObject("DevOverlayText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                devObject.transform.SetParent(canvas.transform, false);
+                devOverlay = devObject.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (devOverlay != null)
+            {
+                devOverlay.gameObject.SetActive(showExtendedHud);
+            }
+
+            if (devOverlay != null && showExtendedHud)
+            {
+                devOverlay.name = "DevOverlayText";
+                devOverlay.fontSize = 22f;
+                devOverlay.alignment = TextAlignmentOptions.TopLeft;
+                devOverlay.raycastTarget = false;
+                devOverlay.SetText(string.Empty);
+                Place(devOverlay.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(620f, 200f), new Vector2(20f, 140f));
             }
         }
 

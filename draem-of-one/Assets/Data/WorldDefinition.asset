@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 738bedaefb3a14aa29028277ff49215f, type: 3}
   m_Name: WorldDefinition
   m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.WorldDefinition
+  worldId: DreamOfOne_World
+  seedMode: 0
+  seed: 1024
   buildings:
   - {fileID: 11400000, guid: 6706129a890ef47099dab744fb3f6d9a, type: 2}
   - {fileID: 11400000, guid: 732424bce2a854c64a6f7464d0ed2698, type: 2}
@@ -39,6 +42,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d87b63d7ded3a4bf28933bc98a1dbd4c, type: 2}
   - {fileID: 11400000, guid: bc4258f59fad143eb92eff9f5358c8ee, type: 2}
   - {fileID: 11400000, guid: fea20dab1dd604be783d12f08de8cdca, type: 2}
+  zones:
+  - {fileID: 11400000, guid: 35e3f9760e9094618b1c56d9c8c4eabb, type: 2}
+  - {fileID: 11400000, guid: 9f3c6fbd9160b400f9ec736864241af7, type: 2}
+  - {fileID: 11400000, guid: 0c76d311d932f4fa7a03b46a9c1150a7, type: 2}
+  - {fileID: 11400000, guid: 55d3b7c361f384b10bfd04054a10b27a, type: 2}
   npcs:
   - {fileID: 11400000, guid: de4ddd7398a2b435481641b008a2ce20, type: 2}
   - {fileID: 11400000, guid: 0431bd8f58a104f96b4460ed317facda, type: 2}
@@ -50,5 +58,9 @@ MonoBehaviour:
   incidents:
   - {fileID: 11400000, guid: 73f7c24f572df41ff87faa7bd6e1e0ec, type: 2}
   - {fileID: 11400000, guid: 343d7c8bfef8f4d8f91dd1a9bc01e108, type: 2}
+  ruleset: {fileID: 11400000, guid: afa682a84a06f460a8cb1f973a6dc1f3, type: 2}
+  policyPacks:
+  - {fileID: 11400000, guid: 11d41f94a3ea940d495f0a14d218cee3, type: 2}
+  budgets: {fileID: 11400000, guid: 353be058fce0e42b5b133a39ae60369d, type: 2}
   interiorRootPosition: {x: 0, y: 0, z: 80}
   interiorSpacing: 18

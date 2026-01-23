@@ -23,6 +23,13 @@ MonoBehaviour:
   eventCategory: 2
   zoneType: 1
   prompt: 'E: Interact'
+  promptTemplate: 'E: Interact'
+  verbs:
+  - Interact
+  stateMachineId: 
+  emittedEvents:
+  - ViolationDetected
+  artifactRules: []
   note: Queue marker
   severity: 2
   placeId: Store

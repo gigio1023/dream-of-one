@@ -12,6 +12,24 @@ namespace DreamOfOne.World
         private string roleName = "Citizen";
 
         [SerializeField]
+        private string organization = "None";
+
+        [SerializeField]
+        private string routine = "Idle";
+
+        [SerializeField]
+        private string perceptionProfile = "Default";
+
+        [SerializeField]
+        private string injectionProfile = "Default";
+
+        [SerializeField]
+        private string dialogueStyle = "Short";
+
+        [SerializeField]
+        private string authorityProfile = "Low";
+
+        [SerializeField]
         private string anchorName = "StoreBuilding";
 
         [SerializeField]
@@ -24,6 +42,9 @@ namespace DreamOfOne.World
         private bool isPolice = false;
 
         [SerializeField]
+        private int spawnCount = 2;
+
+        [SerializeField]
         private float speed = 1.2f;
 
         [SerializeField]
@@ -34,10 +55,17 @@ namespace DreamOfOne.World
 
         public string NpcId => npcId;
         public string RoleName => roleName;
+        public string Organization => organization;
+        public string Routine => routine;
+        public string PerceptionProfile => perceptionProfile;
+        public string InjectionProfile => injectionProfile;
+        public string DialogueStyle => dialogueStyle;
+        public string AuthorityProfile => authorityProfile;
         public string AnchorName => anchorName;
         public GameObject Prefab => prefab;
         public Vector3 SpawnOffset => spawnOffset;
         public bool IsPolice => isPolice;
+        public int SpawnCount => spawnCount;
         public float Speed => speed;
         public float StoppingDistance => stoppingDistance;
         public int AvoidancePriority => avoidancePriority;

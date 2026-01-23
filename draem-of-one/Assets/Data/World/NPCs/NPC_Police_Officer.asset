@@ -14,10 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.NpcDefinition
   npcId: Police_Officer
   roleName: Police
+  organization: Police
+  routine: Patrol
+  perceptionProfile: Default
+  injectionProfile: Default
+  dialogueStyle: Short
+  authorityProfile: High
   anchorName: Station
   prefab: {fileID: 5620060744776670700, guid: e0b5918c12c6643ca934de44fc6922eb, type: 3}
   spawnOffset: {x: 1, y: 0, z: 1}
   isPolice: 1
+  spawnCount: 1
   speed: 1.5
   stoppingDistance: 0.35
   avoidancePriority: 45

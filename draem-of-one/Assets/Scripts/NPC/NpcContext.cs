@@ -19,7 +19,7 @@ namespace DreamOfOne.NPC
         private float memoryTtlSeconds = 480f;
 
         [SerializeField]
-        private int memoryCapacity = 12;
+        private int memoryCapacity = 5;
 
         [SerializeField]
         private float topicCooldownSeconds = 30f;
@@ -49,6 +49,8 @@ namespace DreamOfOne.NPC
             {
                 suspicion = GetComponent<SuspicionComponent>();
             }
+
+            memoryCapacity = Mathf.Clamp(memoryCapacity, 1, 5);
         }
 
         public void ReceiveEntry(BlackboardEntry entry, float now)

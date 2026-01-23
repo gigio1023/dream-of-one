@@ -24,7 +24,7 @@ namespace DreamOfOne.Core
         private float gossipTtlSeconds = 150f;
 
         [SerializeField]
-        private int maxEntries = 16;
+        private int maxEntries = 10;
 
         private readonly List<BlackboardEntry> entries = new();
 

@@ -23,6 +23,13 @@ MonoBehaviour:
   eventCategory: 2
   zoneType: 3
   prompt: 'E: Interact'
+  promptTemplate: 'E: Interact'
+  verbs:
+  - Interact
+  stateMachineId: 
+  emittedEvents:
+  - ViolationDetected
+  artifactRules: []
   note: Photo violation
   severity: 2
   placeId: Park

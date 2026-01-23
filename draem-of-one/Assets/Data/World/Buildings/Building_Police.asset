@@ -13,11 +13,16 @@ MonoBehaviour:
   m_Name: Building_Police
   m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.BuildingDefinition
   buildingId: Police
+  displayName: Police
   anchorName: Station
   exteriorPrefab: {fileID: 0}
+  signagePrefab: {fileID: 0}
+  keyProps: []
   exteriorOffset: {x: 0, y: 0, z: 0}
   exteriorRotationEuler: {x: 0, y: 0, z: 0}
   interiorPrefab: {fileID: 7996232624914077395, guid: bd658fcc7ddae43529ba507d6fb90758, type: 3}
   interiorLocalOffset: {x: 0, y: 0, z: 0}
   interiorPortalLocalOffset: {x: 0, y: 0.1, z: -3}
   exteriorPortalOffset: {x: 0, y: 0, z: 2.2}
+  doorwayLocalOffset: {x: 0, y: 0, z: 2}
+  doorwaySize: {x: 2, y: 2.4, z: 0.5}

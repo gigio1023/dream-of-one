@@ -152,7 +152,7 @@ namespace DreamOfOne.Core
                 persona = ResolvePersona(record.actorId),
                 situation = BuildSituation(record),
                 tone = "short, natural Korean",
-                constraints = "한 줄, 60자 이내"
+                constraints = "한 줄, 80자 이내"
             };
 
             llmClient.RequestLine(request, line =>

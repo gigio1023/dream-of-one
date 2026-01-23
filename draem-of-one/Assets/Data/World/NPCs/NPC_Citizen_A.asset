@@ -14,10 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.NpcDefinition
   npcId: Citizen_A
   roleName: Citizen
+  organization: City
+  routine: Wander
+  perceptionProfile: Default
+  injectionProfile: Default
+  dialogueStyle: Short
+  authorityProfile: Low
   anchorName: StoreBuilding
   prefab: {fileID: 7423431579312459003, guid: 42d95ae4d63db4f2c9e4cc360cd37779, type: 3}
   spawnOffset: {x: 2, y: 0, z: 2}
   isPolice: 0
+  spawnCount: 2
   speed: 1.2
   stoppingDistance: 0.2
   avoidancePriority: 60

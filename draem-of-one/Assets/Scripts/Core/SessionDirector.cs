@@ -142,10 +142,70 @@ namespace DreamOfOne.Core
 
             ended = true;
             endReason = reason;
-            uiManager?.ShowPrompt($"SESSION END — {reason}");
-            uiManager?.ShowToast("Session complete.", 5f);
+            string summary = BuildSummary();
+            if (uiManager != null)
+            {
+                uiManager.ShowPrompt($"SESSION END — {reason}\n{summary}");
+                uiManager.ShowToast(summary, 8f);
+            }
 
             ApplyFreeze();
+        }
+
+        private string BuildSummary()
+        {
+            int violations = 0;
+            int reports = 0;
+            int evidence = 0;
+            int verdicts = 0;
+            int rumors = 0;
+            int total = 0;
+
+            if (eventLog != null)
+            {
+                var events = eventLog.Events;
+                total = events.Count;
+                for (int i = 0; i < events.Count; i++)
+                {
+                    var record = events[i];
+                    if (record == null)
+                    {
+                        continue;
+                    }
+
+                    switch (record.eventType)
+                    {
+                        case EventType.ViolationDetected:
+                            violations++;
+                            break;
+                        case EventType.ReportFiled:
+                            reports++;
+                            break;
+                        case EventType.EvidenceCaptured:
+                        case EventType.TicketIssued:
+                        case EventType.CctvCaptured:
+                            evidence++;
+                            break;
+                        case EventType.VerdictGiven:
+                            verdicts++;
+                            break;
+                        case EventType.RumorShared:
+                        case EventType.RumorConfirmed:
+                        case EventType.RumorDebunked:
+                            rumors++;
+                            break;
+                    }
+                }
+            }
+
+            int artifacts = 0;
+            var artifactSystem = FindFirstObjectByType<ArtifactSystem>();
+            if (artifactSystem != null)
+            {
+                artifacts = artifactSystem.GetArtifacts().Count;
+            }
+
+            return $"Summary: events {total}, violations {violations}, reports {reports}, evidence {evidence}, rumors {rumors}, artifacts {artifacts}, verdicts {verdicts}.";
         }
 
         public void ResetSession()

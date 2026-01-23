@@ -23,6 +23,13 @@ MonoBehaviour:
   eventCategory: 7
   zoneType: 0
   prompt: 'E: Interact'
+  promptTemplate: 'E: Interact'
+  verbs:
+  - Interact
+  stateMachineId: 
+  emittedEvents:
+  - RumorShared
+  artifactRules: []
   note: Bulletin rumor
   severity: 2
   placeId: Park

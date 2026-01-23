@@ -121,8 +121,6 @@ namespace DreamOfOne.Core
         {
 #if ENABLE_INPUT_SYSTEM
             HandleInputNew();
-#elif ENABLE_LEGACY_INPUT_MANAGER
-            HandleInputLegacy();
 #else
             HandleInputUnavailable();
 #endif
@@ -205,59 +203,6 @@ namespace DreamOfOne.Core
             }
 
             return Keyboard.current[key].wasPressedThisFrame;
-        }
-#elif ENABLE_LEGACY_INPUT_MANAGER
-        private void HandleInputLegacy()
-        {
-            if (Input.GetKeyDown(snapKey) && target != null)
-            {
-                yaw = target.eulerAngles.y;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                SetDistancePreset(0);
-            }
-            else if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                SetDistancePreset(1);
-            }
-            else if (Input.GetKeyDown(KeyCode.Alpha3))
-            {
-                SetDistancePreset(2);
-            }
-
-            float scroll = Input.GetAxis("Mouse ScrollWheel");
-            if (Mathf.Abs(scroll) > 0.001f)
-            {
-                distance = Mathf.Clamp(distance - scroll * zoomSpeed, distanceRange.x, distanceRange.y);
-            }
-
-            bool orbitInput = !requireRightMouse || Input.GetMouseButton(1);
-            if (orbitInput)
-            {
-                yaw += Input.GetAxis("Mouse X") * orbitSpeed * Time.deltaTime;
-                pitch -= Input.GetAxis("Mouse Y") * orbitSpeed * Time.deltaTime;
-            }
-
-            if (allowArrowKeys)
-            {
-                float arrowX = 0f;
-                if (Input.GetKey(KeyCode.LeftArrow)) arrowX -= 1f;
-                if (Input.GetKey(KeyCode.RightArrow)) arrowX += 1f;
-
-                float arrowY = 0f;
-                if (Input.GetKey(KeyCode.UpArrow)) arrowY += 1f;
-                if (Input.GetKey(KeyCode.DownArrow)) arrowY -= 1f;
-
-                if (Mathf.Abs(arrowX) > 0.01f || Mathf.Abs(arrowY) > 0.01f)
-                {
-                    yaw += arrowX * keyboardOrbitSpeed * Time.deltaTime;
-                    pitch -= arrowY * keyboardOrbitSpeed * Time.deltaTime;
-                }
-            }
-
-            pitch = Mathf.Clamp(pitch, pitchRange.x, pitchRange.y);
         }
 #else
         private static bool inputUnavailableLogged = false;

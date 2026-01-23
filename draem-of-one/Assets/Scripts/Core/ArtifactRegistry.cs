@@ -16,7 +16,11 @@ namespace DreamOfOne.Core
             EventType.LabelChanged,
             EventType.QueueUpdated,
             EventType.SeatClaimed,
-            EventType.NoiseObserved
+            EventType.NoiseObserved,
+            EventType.ReportFiled,
+            EventType.RumorConfirmed,
+            EventType.ExplanationGiven,
+            EventType.RebuttalGiven
         };
 
         private readonly List<ArtifactRecord> artifacts = new();
@@ -24,7 +28,7 @@ namespace DreamOfOne.Core
 
         public IReadOnlyList<ArtifactRecord> Artifacts => artifacts;
 
-        public bool TryAddFromEvent(EventRecord record)
+        public bool TryAddFromEvent(EventRecord record, string artifactId, string inspectText)
         {
             if (record == null || string.IsNullOrEmpty(record.id))
             {
@@ -41,13 +45,16 @@ namespace DreamOfOne.Core
                 return false;
             }
 
+            string summary = string.IsNullOrEmpty(record.note) ? record.eventType.ToString() : record.note;
             var artifact = new ArtifactRecord(
                 record.id,
                 record.eventType,
+                artifactId ?? record.eventType.ToString(),
                 record.topic,
                 record.placeId,
                 record.position,
-                record.note);
+                summary,
+                inspectText ?? summary);
 
             artifacts.Add(artifact);
             artifactIds.Add(record.id);

@@ -18,20 +18,20 @@ namespace DreamOfOne.Core
         private int targetPoliceCount = 1;
 
         [SerializeField]
-        private float npcScale = 0.8f;
+        private float npcScale = 0.7f;
 
         [SerializeField]
         private float navmeshSampleRadius = 3f;
 
         [Header("NavMesh Agent Tuning")]
         [SerializeField]
-        private float agentRadius = 0.28f;
+        private float agentRadius = 0.25f;
 
         [SerializeField]
-        private float agentHeight = 1.6f;
+        private float agentHeight = 1.4f;
 
         [SerializeField]
-        private float agentBaseOffset = 0.05f;
+        private float agentBaseOffset = 0.04f;
 
         [SerializeField]
         private float agentAngularSpeed = 420f;
@@ -93,6 +93,7 @@ namespace DreamOfOne.Core
             for (int i = 0; i < patrols.Length; i++)
             {
                 ApplyNpcScale(patrols[i].transform);
+                EnsureGrounding(patrols[i].gameObject);
                 WarpToGround(patrols[i].gameObject);
                 ApplyAgentSettings(patrols[i].GetComponent<NavMeshAgent>(), isPolice: false);
             }
@@ -100,6 +101,7 @@ namespace DreamOfOne.Core
             for (int i = 0; i < police.Length; i++)
             {
                 ApplyNpcScale(police[i].transform);
+                EnsureGrounding(police[i].gameObject);
                 WarpToGround(police[i].gameObject);
                 ApplyAgentSettings(police[i].GetComponent<NavMeshAgent>(), isPolice: true);
             }
@@ -190,6 +192,7 @@ namespace DreamOfOne.Core
             npc.AddComponent<NpcContext>();
             npc.AddComponent<SimplePatrol>();
 
+            EnsureGrounding(npc);
             WarpToGround(npc);
         }
 
@@ -209,6 +212,7 @@ namespace DreamOfOne.Core
             npc.AddComponent<NpcContext>();
             npc.AddComponent<PoliceController>();
 
+            EnsureGrounding(npc);
             WarpToGround(npc);
         }
 
@@ -220,6 +224,22 @@ namespace DreamOfOne.Core
             }
 
             target.localScale = new Vector3(npcScale, npcScale, npcScale);
+        }
+
+        private static void EnsureGrounding(GameObject actor)
+        {
+            if (actor == null)
+            {
+                return;
+            }
+
+            var grounding = actor.GetComponent<ActorGrounding>();
+            if (grounding == null)
+            {
+                grounding = actor.AddComponent<ActorGrounding>();
+            }
+
+            grounding.Apply();
         }
 
         private void WarpToGround(GameObject actor)

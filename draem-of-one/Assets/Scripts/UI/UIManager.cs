@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using DreamOfOne.Core;
+using DreamOfOne.NPC;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -39,6 +41,12 @@ namespace DreamOfOne.UI
 
         [SerializeField]
         private TMP_Text caseBundleText = null;
+
+        [SerializeField]
+        private TMP_Text artifactText = null;
+
+        [SerializeField]
+        private TMP_Text devOverlayText = null;
         [SerializeField]
         [Tooltip("UI 오브젝트가 없을 때 OnGUI로 표시")]
         private bool useOnGuiFallback = false;
@@ -58,6 +66,21 @@ namespace DreamOfOne.UI
         private bool useFallback = false;
         private GUIStyle fallbackStyle = null;
         private string fallbackPrompt = string.Empty;
+        private bool showArtifactPanel = false;
+        private bool showDevOverlay = false;
+        private bool showLogPanel = true;
+        private bool showCasePanel = false;
+        private float lastDebugRefresh = -999f;
+
+        [SerializeField]
+        [Tooltip("디버그 패널 갱신 간격(초)")]
+        private float debugRefreshSeconds = 0.5f;
+
+        private ArtifactSystem artifactSystem = null;
+        private PoliceController policeController = null;
+        private WorldEventLog eventLog = null;
+        private int selectedArtifactIndex = -1;
+        private string selectedArtifactId = string.Empty;
 
         private void Awake()
         {
@@ -74,6 +97,16 @@ namespace DreamOfOne.UI
             if (caseBundleText != null)
             {
                 caseBundleText.gameObject.SetActive(false);
+            }
+            if (artifactText != null)
+            {
+                artifactText.SetText(string.Empty);
+                artifactText.gameObject.SetActive(false);
+            }
+            if (devOverlayText != null)
+            {
+                devOverlayText.SetText(string.Empty);
+                devOverlayText.gameObject.SetActive(false);
             }
             if (toastText != null)
             {
@@ -92,6 +125,15 @@ namespace DreamOfOne.UI
 
             Bind(globalSuspicionSystem);
             BindCoverStatus();
+
+            artifactSystem = FindFirstObjectByType<ArtifactSystem>();
+            policeController = FindFirstObjectByType<PoliceController>();
+            eventLog = FindFirstObjectByType<WorldEventLog>();
+
+            if (GetComponent<UIShortcutController>() == null)
+            {
+                gameObject.AddComponent<UIShortcutController>();
+            }
         }
 
         private void Start()
@@ -110,6 +152,21 @@ namespace DreamOfOne.UI
             if (coverStatus == null)
             {
                 BindCoverStatus();
+            }
+
+            if (artifactSystem == null)
+            {
+                artifactSystem = FindFirstObjectByType<ArtifactSystem>();
+            }
+
+            if (policeController == null)
+            {
+                policeController = FindFirstObjectByType<PoliceController>();
+            }
+
+            if (eventLog == null)
+            {
+                eventLog = FindFirstObjectByType<WorldEventLog>();
             }
         }
 
@@ -164,6 +221,12 @@ namespace DreamOfOne.UI
                     case "CaseBundleText":
                         caseBundleText ??= label;
                         break;
+                    case "ArtifactText":
+                        artifactText ??= label;
+                        break;
+                    case "DevOverlayText":
+                        devOverlayText ??= label;
+                        break;
                 }
             }
 
@@ -216,6 +279,13 @@ namespace DreamOfOne.UI
             if (globalSuspicionBar != null)
             {
                 globalSuspicionBar.SetValueWithoutNotify(currentSuspicion);
+            }
+
+            if ((showArtifactPanel || showDevOverlay) && Time.time - lastDebugRefresh >= debugRefreshSeconds)
+            {
+                lastDebugRefresh = Time.time;
+                RefreshArtifactPanel();
+                RefreshDevOverlay();
             }
         }
 
@@ -275,8 +345,213 @@ namespace DreamOfOne.UI
                 return;
             }
 
-            caseBundleText.gameObject.SetActive(!string.IsNullOrEmpty(text));
+            if (!string.IsNullOrEmpty(text))
+            {
+                showCasePanel = true;
+            }
+
+            caseBundleText.gameObject.SetActive(showCasePanel && !string.IsNullOrEmpty(text));
             caseBundleText.SetText(text ?? string.Empty);
+        }
+
+        public void ToggleCasePanel()
+        {
+            showCasePanel = !showCasePanel;
+            if (caseBundleText != null)
+            {
+                caseBundleText.gameObject.SetActive(showCasePanel && !string.IsNullOrEmpty(caseBundleText.text));
+            }
+        }
+
+        public void ToggleArtifactPanel()
+        {
+            showArtifactPanel = !showArtifactPanel;
+            if (artifactText != null)
+            {
+                artifactText.gameObject.SetActive(showArtifactPanel);
+            }
+            if (showArtifactPanel && selectedArtifactIndex < 0)
+            {
+                SelectLatestArtifact();
+            }
+            RefreshArtifactPanel();
+        }
+
+        public void InspectNextArtifact()
+        {
+            if (artifactSystem == null)
+            {
+                artifactSystem = FindFirstObjectByType<ArtifactSystem>();
+            }
+
+            if (artifactSystem == null)
+            {
+                return;
+            }
+
+            var artifacts = artifactSystem.GetArtifacts();
+            if (artifacts.Count == 0)
+            {
+                selectedArtifactIndex = -1;
+                selectedArtifactId = string.Empty;
+                return;
+            }
+
+            if (!showArtifactPanel && artifactText != null)
+            {
+                showArtifactPanel = true;
+                artifactText.gameObject.SetActive(true);
+            }
+
+            selectedArtifactIndex = (selectedArtifactIndex + 1) % artifacts.Count;
+            selectedArtifactId = artifacts[selectedArtifactIndex].Id;
+            RefreshArtifactPanel();
+        }
+
+        public void ToggleDevOverlay()
+        {
+            showDevOverlay = !showDevOverlay;
+            if (devOverlayText != null)
+            {
+                devOverlayText.gameObject.SetActive(showDevOverlay);
+            }
+            RefreshDevOverlay();
+        }
+
+        public void ToggleLogPanel()
+        {
+            showLogPanel = !showLogPanel;
+            if (eventLogText != null)
+            {
+                eventLogText.gameObject.SetActive(showLogPanel);
+            }
+        }
+
+        private void RefreshArtifactPanel()
+        {
+            if (!showArtifactPanel || artifactText == null)
+            {
+                return;
+            }
+
+            if (artifactSystem == null)
+            {
+                artifactSystem = FindFirstObjectByType<ArtifactSystem>();
+            }
+
+            var builder = new StringBuilder();
+            builder.AppendLine("Artifacts");
+
+            if (artifactSystem == null)
+            {
+                builder.Append("없음");
+            }
+            else
+            {
+                var artifacts = artifactSystem.GetArtifacts();
+                int count = Mathf.Min(6, artifacts.Count);
+                for (int i = 0; i < count; i++)
+                {
+                    var artifact = artifacts[i];
+                    string marker = (i == selectedArtifactIndex) ? ">" : "-";
+                    builder.AppendLine($"{marker} {artifact.ArtifactId} [{artifact.PlaceId}] {artifact.Summary}");
+                }
+                if (artifacts.Count > count)
+                {
+                    builder.AppendLine($"... +{artifacts.Count - count}");
+                }
+
+                if (selectedArtifactIndex >= 0 && selectedArtifactIndex < artifacts.Count)
+                {
+                    var selected = artifacts[selectedArtifactIndex];
+                    builder.AppendLine();
+                    builder.AppendLine("Inspect");
+                    builder.AppendLine(BuildInspectText(selected));
+                }
+            }
+
+            artifactText.SetText(builder.ToString());
+        }
+
+        private string BuildInspectText(ArtifactRecord record)
+        {
+            if (string.IsNullOrEmpty(record.Id))
+            {
+                return string.Empty;
+            }
+
+            if (eventLog == null)
+            {
+                eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+
+            string baseText = record.InspectText;
+            if (eventLog != null && eventLog.TryGetEventById(record.Id, out var source))
+            {
+                string detail = $"{source.eventType} {source.actorId} {source.note}";
+                if (!string.IsNullOrEmpty(baseText))
+                {
+                    return $"{baseText}\n{detail}";
+                }
+
+                return detail;
+            }
+
+            return baseText;
+        }
+
+        private void SelectLatestArtifact()
+        {
+            if (artifactSystem == null)
+            {
+                artifactSystem = FindFirstObjectByType<ArtifactSystem>();
+            }
+
+            if (artifactSystem == null)
+            {
+                selectedArtifactIndex = -1;
+                selectedArtifactId = string.Empty;
+                return;
+            }
+
+            var artifacts = artifactSystem.GetArtifacts();
+            if (artifacts.Count == 0)
+            {
+                selectedArtifactIndex = -1;
+                selectedArtifactId = string.Empty;
+                return;
+            }
+
+            selectedArtifactIndex = Mathf.Clamp(artifacts.Count - 1, 0, artifacts.Count - 1);
+            selectedArtifactId = artifacts[selectedArtifactIndex].Id;
+        }
+
+        private void RefreshDevOverlay()
+        {
+            if (!showDevOverlay || devOverlayText == null)
+            {
+                return;
+            }
+
+            if (policeController == null)
+            {
+                policeController = FindFirstObjectByType<PoliceController>();
+            }
+
+            var builder = new StringBuilder();
+            builder.AppendLine("Injected Lines");
+
+            var lines = NpcLogInjector.GetRecentInjectedLines();
+            for (int i = 0; i < lines.Count; i++)
+            {
+                builder.AppendLine(lines[i]);
+            }
+
+            builder.AppendLine();
+            string reason = policeController != null ? policeController.LastVerdictReason : "N/A";
+            builder.Append($"Verdict Reason: {reason}");
+
+            devOverlayText.SetText(builder.ToString());
         }
 
         private void BindCoverStatus()
@@ -328,7 +603,10 @@ namespace DreamOfOne.UI
                 return;
             }
 
-            eventLogText.SetText(string.Join("\n", logLines));
+            if (showLogPanel)
+            {
+                eventLogText.SetText(string.Join("\n", logLines));
+            }
         }
 
         /// <summary>

@@ -23,6 +23,13 @@ MonoBehaviour:
   eventCategory: 1
   zoneType: 2
   prompt: 'E: Interact'
+  promptTemplate: 'E: Interact'
+  verbs:
+  - Interact
+  stateMachineId: 
+  emittedEvents:
+  - SeatClaimed
+  artifactRules: []
   note: Seat claimed
   severity: 2
   placeId: Park

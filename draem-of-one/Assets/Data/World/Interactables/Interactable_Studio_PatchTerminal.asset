@@ -23,6 +23,13 @@ MonoBehaviour:
   eventCategory: 10
   zoneType: 0
   prompt: 'E: Interact'
+  promptTemplate: 'E: Interact'
+  verbs:
+  - Interact
+  stateMachineId: 
+  emittedEvents:
+  - TaskCompleted
+  artifactRules: []
   note: Patch note
   severity: 2
   placeId: Studio

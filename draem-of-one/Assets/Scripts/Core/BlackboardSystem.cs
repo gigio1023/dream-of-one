@@ -18,7 +18,7 @@ namespace DreamOfOne.Core
         private float defaultTtlSeconds = 120f;
 
         [SerializeField]
-        private int maxEntriesPerBoard = 20;
+        private int maxEntriesPerBoard = 10;
 
         private readonly List<SpatialBlackboard> boards = new();
 

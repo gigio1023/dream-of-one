@@ -124,6 +124,21 @@ namespace DreamOfOne.Core
                 SkinWidth = controllerSkinWidth,
                 MinMoveDistance = controllerMinMoveDistance
             });
+
+            var grounding = GetComponent<ActorGrounding>();
+            if (grounding == null)
+            {
+                grounding = gameObject.AddComponent<ActorGrounding>();
+            }
+
+            grounding.Apply();
+
+#if ENABLE_INPUT_SYSTEM
+            if (GetComponent<PlayerInputBootstrapper>() == null)
+            {
+                gameObject.AddComponent<PlayerInputBootstrapper>();
+            }
+#endif
         }
 
         private void OnEnable()
@@ -264,8 +279,6 @@ namespace DreamOfOne.Core
             if (Keyboard.current.aKey.isPressed) input.x -= 1f;
             if (Keyboard.current.dKey.isPressed) input.x += 1f;
             return input;
-#elif ENABLE_LEGACY_INPUT_MANAGER
-            return new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 #else
             LogInputUnavailable();
             return Vector2.zero;
@@ -281,8 +294,6 @@ namespace DreamOfOne.Core
             }
 
             return Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame;
-#elif ENABLE_LEGACY_INPUT_MANAGER
-            return Input.GetKeyDown(KeyCode.E);
 #else
             LogInputUnavailable();
             return false;
@@ -298,8 +309,6 @@ namespace DreamOfOne.Core
             }
 
             return Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame;
-#elif ENABLE_LEGACY_INPUT_MANAGER
-            return Input.GetKeyDown(KeyCode.F);
 #else
             LogInputUnavailable();
             return false;
@@ -315,8 +324,6 @@ namespace DreamOfOne.Core
             }
 
             return Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame;
-#elif ENABLE_LEGACY_INPUT_MANAGER
-            return Input.GetKeyDown(KeyCode.Space);
 #else
             LogInputUnavailable();
             return false;
@@ -356,6 +363,16 @@ namespace DreamOfOne.Core
             eventLog = log;
             cameraPivot = cameraRoot;
         }
+
+#if ENABLE_INPUT_SYSTEM
+        public void BindInputActions(InputAction move, InputAction interact, InputAction photo, InputAction jump)
+        {
+            moveAction = move != null ? InputActionReference.Create(move) : null;
+            interactAction = interact != null ? InputActionReference.Create(interact) : null;
+            photoAction = photo != null ? InputActionReference.Create(photo) : null;
+            jumpAction = jump != null ? InputActionReference.Create(jump) : null;
+        }
+#endif
 
         private void UpdateStuckRecovery(float inputMagnitude)
         {

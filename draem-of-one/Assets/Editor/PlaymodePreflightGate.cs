@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace DreamOfOne.Editor
 {
@@ -26,6 +27,11 @@ namespace DreamOfOne.Editor
                 return;
             }
 
+            if (IsTestRunnerScene())
+            {
+                return;
+            }
+
             isRunning = true;
             var results = PreflightValidator.Run(true);
             if (results.HasErrors)
@@ -34,6 +40,22 @@ namespace DreamOfOne.Editor
                 EditorApplication.isPlaying = false;
             }
             isRunning = false;
+        }
+
+        private static bool IsTestRunnerScene()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (!scene.IsValid())
+            {
+                return false;
+            }
+
+            if (scene.name.StartsWith("InitTestScene"))
+            {
+                return true;
+            }
+
+            return GameObject.Find("Code-based tests runner") != null;
         }
     }
 }

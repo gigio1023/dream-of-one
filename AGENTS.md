@@ -1,11 +1,12 @@
 # Repo-specific agent notes
 - Use GitHub MCP (personal account) or local git CLI for GitHub actions on this project (branches, commits, pushes, PRs).
 - Do not use the local `gh` CLI because it is configured with company auth.
-- When committing, prefer verbose bodies even for small changes: list what
-  changed, why, files/paths touched, tests run, and any side effects or TODOs.
-- When mentioning files in responses, always wrap the path in a proper Markdown link (e.g., `[docs/PLAN.md](docs/PLAN.md)`).
+- Commits: prefer verbose bodies (what/why/paths/tests/side effects/TODOs).
+- File references in responses: use Markdown links (e.g., `[docs/PLAN.md](docs/PLAN.md)`).
+- Unity project root: `draem-of-one/` (all `Assets/...` paths are relative to this folder).
 - Scene authority: use `Assets/Scenes/Prototype.unity` as the playable prototype scene.
 - Rendering: project uses URP 3D renderer via `Assets/Settings/UniversalRP.asset` → `Assets/Settings/UniversalRenderer.asset`.
 - Runtime helpers: `RuntimeNavMeshBaker` builds NavMesh on play; `UILayouter` arranges HUD at runtime.
 - TMP resources: ensure TextMesh Pro essential resources are present under `Assets/TextMesh Pro`.
-- Verification mandate: after any Unity code/scene changes, use Unity MCP to run `Tools/DreamOfOne/Run Diagnostics`, check the Unity console for errors, and re-run until the console is clean. If Unity MCP is unavailable, fall back to documenting the blocked verification and the intended checks.
+- Unity MCP: for Unity asset/scene work, prefer Editor-driven changes via Unity MCP (AssetDatabase/menu tools) and save assets/scenes. If MCP is unavailable/not connected, stop and ask the user to (re)open Unity + connect MCP before proceeding; avoid hand-editing `.asset`/`.meta`/`.unity`/`.prefab` unless explicitly approved.
+- Verification: after Unity code/scene changes, run `Tools/DreamOfOne/Run Diagnostics` via Unity MCP and ensure the console is clean (repeat until clean). If MCP is unavailable, document what checks are blocked and what would be run.

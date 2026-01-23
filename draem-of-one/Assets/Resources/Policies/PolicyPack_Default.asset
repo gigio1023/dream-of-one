@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33c5316678f584850880b35dba6bb597, type: 3}
+  m_Name: PolicyPack_Default
+  m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.PolicyPackDefinition
+  policyId: Default
+  description: Default policy pack used for the LLM society planning loop.
+  roles:
+  - {fileID: 11400000, guid: e011ad0190f94cfb8472ef957b65832a, type: 2}
+  - {fileID: 11400000, guid: 436e1ae04fa845ddbff17ade2bfc0731, type: 2}
+  - {fileID: 11400000, guid: 6e58719d0e944417930409609768ca29, type: 2}
+  - {fileID: 11400000, guid: e48365e093f84226abf1d46f41cb8483, type: 2}
+  skills:
+  - {fileID: 11400000, guid: ab00e3fa5b7b40a0b0c185ad388ab1c6, type: 2}
+  - {fileID: 11400000, guid: d6f4519d348c449d9b5d77a245ff4a05, type: 2}
+  - {fileID: 11400000, guid: 743c121a3809438884baeaf07055e0de, type: 2}
+

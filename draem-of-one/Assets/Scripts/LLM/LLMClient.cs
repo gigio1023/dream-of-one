@@ -120,6 +120,18 @@ namespace DreamOfOne.LLM
             public string constraints;
         }
 
+        /// <summary>
+        /// Raw text request (used for structured JSON plans, summaries, etc).
+        /// </summary>
+        [Serializable]
+        public struct TextRequest
+        {
+            public string system;
+            public string user;
+            public int maxTokens;
+            public float temperature;
+        }
+
         [Serializable]
         private struct UtteranceRequest
         {
@@ -187,6 +199,17 @@ namespace DreamOfOne.LLM
             StartCoroutine(RequestCoroutine(request, onResult));
         }
 
+        public void RequestText(TextRequest request, Action<string> onResult)
+        {
+            if (!CanRequestNow())
+            {
+                onResult?.Invoke(BuildMockText(request));
+                return;
+            }
+
+            StartCoroutine(RequestTextCoroutine(request, onResult));
+        }
+
         private IEnumerator RequestCoroutine(LineRequest request, Action<string> onResult)
         {
             if (!llmEnabled)
@@ -205,6 +228,28 @@ namespace DreamOfOne.LLM
                     yield break;
                 default:
                     yield return RequestLocal(request, onResult);
+                    yield break;
+            }
+        }
+
+        private IEnumerator RequestTextCoroutine(TextRequest request, Action<string> onResult)
+        {
+            if (!llmEnabled)
+            {
+                onResult?.Invoke(BuildMockText(request));
+                yield break;
+            }
+
+            switch (provider)
+            {
+                case Provider.Mock:
+                    onResult?.Invoke(BuildMockText(request));
+                    yield break;
+                case Provider.OpenAIChatCompletions:
+                    yield return RequestOpenAiText(request, onResult);
+                    yield break;
+                default:
+                    yield return RequestLocalText(request, onResult);
                     yield break;
             }
         }
@@ -250,6 +295,55 @@ namespace DreamOfOne.LLM
             }
 
             onResult?.Invoke(sanitized);
+        }
+
+        private IEnumerator RequestLocalText(TextRequest request, Action<string> onResult)
+        {
+            string summary = request.system ?? string.Empty;
+            string userText = request.user ?? string.Empty;
+            if (!string.IsNullOrEmpty(userText))
+            {
+                summary = string.IsNullOrEmpty(summary) ? userText : $"{summary}\n\n{userText}";
+            }
+
+            var payload = new UtteranceRequest
+            {
+                role = "Planner",
+                situation_summary = summary,
+                tone = defaultTone,
+                constraints = "Return raw text. If asked for JSON, output JSON only."
+            };
+
+            string json = JsonUtility.ToJson(payload);
+
+            using UnityWebRequest requestWeb = new(endpoint, "POST");
+            byte[] body = Encoding.UTF8.GetBytes(json);
+            requestWeb.timeout = Mathf.CeilToInt(timeoutSeconds);
+            requestWeb.uploadHandler = new UploadHandlerRaw(body);
+            requestWeb.downloadHandler = new DownloadHandlerBuffer();
+            requestWeb.SetRequestHeader("Content-Type", "application/json");
+
+            yield return requestWeb.SendWebRequest();
+
+            if (requestWeb.result != UnityWebRequest.Result.Success)
+            {
+                if (logErrors && !string.IsNullOrEmpty(requestWeb.error))
+                {
+                    Debug.LogWarning($"[LLM] {requestWeb.error}");
+                }
+
+                onResult?.Invoke(BuildMockText(request));
+                yield break;
+            }
+
+            var response = JsonUtility.FromJson<UtteranceResponse>(requestWeb.downloadHandler.text);
+            string text = response.utterance ?? string.Empty;
+            if (string.IsNullOrEmpty(text))
+            {
+                text = BuildMockText(request);
+            }
+
+            onResult?.Invoke(text);
         }
 
         private IEnumerator RequestOpenAi(LineRequest request, Action<string> onResult)
@@ -309,6 +403,75 @@ namespace DreamOfOne.LLM
             }
 
             onResult?.Invoke(sanitized);
+        }
+
+        private IEnumerator RequestOpenAiText(TextRequest request, Action<string> onResult)
+        {
+            string apiKeyResolved = ResolveApiKey();
+            if (string.IsNullOrEmpty(apiKeyResolved))
+            {
+                if (logErrors)
+                {
+                    Debug.LogWarning("[LLM] OPENAI_API_KEY missing");
+                }
+
+                onResult?.Invoke(BuildMockText(request));
+                yield break;
+            }
+
+            string role = useDeveloperRole ? "developer" : "system";
+
+            int resolvedMaxTokens = request.maxTokens > 0 ? request.maxTokens : Mathf.Max(80, maxTokens);
+            float resolvedTemperature = request.temperature > 0f ? request.temperature : temperature;
+
+            var payload = new ChatCompletionRequest
+            {
+                model = openAiModel,
+                messages = new[]
+                {
+                    new ChatMessage { role = role, content = request.system ?? string.Empty },
+                    new ChatMessage { role = "user", content = request.user ?? string.Empty }
+                },
+                temperature = resolvedTemperature,
+                max_tokens = resolvedMaxTokens,
+                store = storeResponses
+            };
+
+            string json = JsonUtility.ToJson(payload);
+
+            using UnityWebRequest requestWeb = new(openAiEndpoint, "POST");
+            byte[] body = Encoding.UTF8.GetBytes(json);
+            requestWeb.timeout = Mathf.CeilToInt(timeoutSeconds);
+            requestWeb.uploadHandler = new UploadHandlerRaw(body);
+            requestWeb.downloadHandler = new DownloadHandlerBuffer();
+            requestWeb.SetRequestHeader("Content-Type", "application/json");
+            requestWeb.SetRequestHeader("Authorization", $"Bearer {apiKeyResolved}");
+
+            yield return requestWeb.SendWebRequest();
+
+            if (requestWeb.result != UnityWebRequest.Result.Success)
+            {
+                if (logErrors && !string.IsNullOrEmpty(requestWeb.error))
+                {
+                    Debug.LogWarning($"[LLM] {requestWeb.error}");
+                }
+
+                onResult?.Invoke(BuildMockText(request));
+                yield break;
+            }
+
+            if (!TryParseOpenAiResponse(requestWeb.downloadHandler.text, out string text))
+            {
+                if (logErrors)
+                {
+                    Debug.LogWarning("[LLM] OpenAI response parse failed");
+                }
+
+                onResult?.Invoke(BuildMockText(request));
+                yield break;
+            }
+
+            onResult?.Invoke(text ?? string.Empty);
         }
 
         private string ResolveApiKey()
@@ -400,6 +563,26 @@ namespace DreamOfOne.LLM
             }
 
             onResult?.Invoke(DialogueLineLimiter.ClampLine(BuildMockLine(request), maxChars));
+        }
+
+        private string BuildMockText(TextRequest request)
+        {
+            // For planning calls we return a minimal valid JSON object.
+            // This keeps downstream validators deterministic even without a live model.
+            string speak = "알겠어요. 주변 상황을 좀 더 볼게요.";
+            string mem = "Observed recent events; staying cautious.";
+
+            return $"{{\"intent\":\"observe\",\"speak\":\"{EscapeJson(speak)}\",\"actions\":[],\"memoryWrite\":\"{EscapeJson(mem)}\"}}";
+        }
+
+        private static string EscapeJson(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+
+            return value.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "");
         }
 
         private bool CanRequestNow()

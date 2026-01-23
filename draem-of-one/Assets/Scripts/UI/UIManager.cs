@@ -28,6 +28,9 @@ namespace DreamOfOne.UI
         private TMP_Text eventLogText = null;
 
         [SerializeField]
+        private TMP_Text dialogueText = null;
+
+        [SerializeField]
         private TMP_Text toastText = null;
 
         [SerializeField]
@@ -55,7 +58,12 @@ namespace DreamOfOne.UI
         [Tooltip("UI 로그 패널에 유지할 최대 줄 수")]
         private int logLineCount = 6;
 
+        [SerializeField]
+        [Tooltip("대화 로그 패널에 유지할 최대 줄 수")]
+        private int dialogueLineCount = 6;
+
         private readonly Queue<string> logLines = new();
+        private readonly Queue<string> dialogueLines = new();
         private Coroutine toastRoutine = null;
         private GlobalSuspicionSystem boundSuspicionSystem = null;
         private CoverStatus coverStatus = null;
@@ -94,6 +102,7 @@ namespace DreamOfOne.UI
             interrogationText?.SetText(string.Empty);
             promptText?.SetText(string.Empty);
             caseBundleText?.SetText(string.Empty);
+            dialogueText?.SetText(string.Empty);
             if (caseBundleText != null)
             {
                 caseBundleText.gameObject.SetActive(false);
@@ -205,6 +214,9 @@ namespace DreamOfOne.UI
                             break;
                         case "EventLogText":
                             eventLogText ??= label;
+                            break;
+                        case "DialogueText":
+                            dialogueText ??= label;
                             break;
                         case "ToastText":
                             toastText ??= label;
@@ -607,6 +619,27 @@ namespace DreamOfOne.UI
             {
                 eventLogText.SetText(string.Join("\n", logLines));
             }
+        }
+
+        public void AddDialogueLine(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return;
+            }
+
+            if (dialogueText == null)
+            {
+                return;
+            }
+
+            dialogueLines.Enqueue(text);
+            while (dialogueLines.Count > dialogueLineCount)
+            {
+                dialogueLines.Dequeue();
+            }
+
+            dialogueText.SetText(string.Join("\n", dialogueLines));
         }
 
         /// <summary>

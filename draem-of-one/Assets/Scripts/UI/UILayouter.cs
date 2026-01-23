@@ -52,6 +52,7 @@ namespace DreamOfOne.UI
 
             TMP_Text globalLabel = null;
             TMP_Text eventLog = null;
+            TMP_Text dialogue = null;
             TMP_Text toast = null;
             TMP_Text interrogation = null;
             TMP_Text prompt = null;
@@ -62,6 +63,7 @@ namespace DreamOfOne.UI
             TMP_Text artifact = null;
             TMP_Text devOverlay = null;
             Image eventLogPanel = null;
+            Image dialoguePanel = null;
             Image promptPanel = null;
             Image interrogationPanel = null;
             Image toastPanel = null;
@@ -71,6 +73,10 @@ namespace DreamOfOne.UI
                 if (image.name == "EventLogPanel")
                 {
                     eventLogPanel = image;
+                }
+                else if (image.name == "DialoguePanel")
+                {
+                    dialoguePanel = image;
                 }
                 else if (image.name == "PromptPanel")
                 {
@@ -95,6 +101,9 @@ namespace DreamOfOne.UI
                         break;
                     case "EventLogText":
                         eventLog ??= label;
+                        break;
+                    case "DialogueText":
+                        dialogue ??= label;
                         break;
                     case "PromptText":
                         prompt ??= label;
@@ -129,6 +138,10 @@ namespace DreamOfOne.UI
                 else if (eventLog == null && label.text == "EventLog")
                 {
                     eventLog = label;
+                }
+                else if (dialogue == null && label.text == "Dialogue")
+                {
+                    dialogue = label;
                 }
                 else if (prompt == null && label.text == "E: Interact")
                 {
@@ -185,6 +198,38 @@ namespace DreamOfOne.UI
                     Place(panelRect, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(620f, 240f), new Vector2(20f, -70f));
                     eventLogPanel.transform.SetSiblingIndex(eventLog.transform.GetSiblingIndex());
                     eventLog.transform.SetSiblingIndex(eventLogPanel.transform.GetSiblingIndex() + 1);
+                }
+            }
+
+            if (dialogue == null)
+            {
+                var dialogueObject = new GameObject("DialogueText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                dialogueObject.transform.SetParent(canvas.transform, false);
+                dialogue = dialogueObject.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (dialogue != null)
+            {
+                dialogue.name = "DialogueText";
+                dialogue.fontSize = 24f;
+                dialogue.alignment = TextAlignmentOptions.TopLeft;
+                dialogue.raycastTarget = false;
+                Place(dialogue.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(600f, 140f), new Vector2(20f, -320f));
+
+                if (dialoguePanel == null)
+                {
+                    var panelObject = new GameObject("DialoguePanel", typeof(RectTransform), typeof(Image));
+                    panelObject.transform.SetParent(canvas.transform, false);
+                    dialoguePanel = panelObject.GetComponent<Image>();
+                }
+
+                if (dialoguePanel != null)
+                {
+                    dialoguePanel.color = new Color(0f, 0f, 0f, 0.35f);
+                    var panelRect = dialoguePanel.rectTransform;
+                    Place(panelRect, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(620f, 160f), new Vector2(20f, -320f));
+                    dialoguePanel.transform.SetSiblingIndex(dialogue.transform.GetSiblingIndex());
+                    dialogue.transform.SetSiblingIndex(dialoguePanel.transform.GetSiblingIndex() + 1);
                 }
             }
 

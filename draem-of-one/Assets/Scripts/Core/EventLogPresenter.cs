@@ -103,6 +103,11 @@ namespace DreamOfOne.Core
             {
                 var record = events[i];
                 string text = semanticShaper != null ? semanticShaper.ToText(record) : record.eventType.ToString();
+                if (record.eventType == EventType.NpcUtterance)
+                {
+                    text = $"{record.actorId}: {record.note}";
+                    uiManager.AddDialogueLine(text);
+                }
                 uiManager.AddLogLine(text);
 
                 if (record.severity >= 2 || record.eventType == EventType.VerdictGiven)

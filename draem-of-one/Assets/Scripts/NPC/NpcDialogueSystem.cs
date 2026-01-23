@@ -120,11 +120,6 @@ namespace DreamOfOne.NPC
                 return;
             }
 
-            if (llmClient == null)
-            {
-                return;
-            }
-
             if (Time.time - lastGlobalLineTime < globalCooldownSeconds)
             {
                 return;
@@ -144,6 +139,12 @@ namespace DreamOfOne.NPC
             lastGlobalLineTime = Time.time;
             speaker.MarkSpoke(Time.time);
 
+            if (llmClient == null)
+            {
+                EmitLine(speaker, BuildSituation(record));
+                return;
+            }
+
             var request = new LLMClient.LineRequest
             {
                 role = speaker.Role,
@@ -155,36 +156,7 @@ namespace DreamOfOne.NPC
 
             llmClient.RequestLine(request, line =>
             {
-                if (string.IsNullOrEmpty(line))
-                {
-                    line = BuildSituation(record);
-                }
-
-                string sanitized = DialogueLineLimiter.ClampLine(line, maxChars);
-                if (string.IsNullOrEmpty(sanitized))
-                {
-                    return;
-                }
-
-                if (showToast && uiManager != null)
-                {
-                    uiManager.ShowToast($"{speaker.NpcId}: {sanitized}");
-                }
-
-                if (logUtterance && eventLog != null)
-                {
-                    eventLog.RecordEvent(new EventRecord
-                    {
-                        actorId = speaker.NpcId,
-                        actorRole = speaker.Role,
-                        eventType = CoreEventType.NpcUtterance,
-                        category = EventCategory.Dialogue,
-                        note = sanitized,
-                        severity = 1,
-                        position = speaker.transform.position,
-                        topic = "Dialogue"
-                    });
-                }
+                EmitLine(speaker, line);
             });
         }
 
@@ -314,6 +286,45 @@ namespace DreamOfOne.NPC
             }
 
             return record.eventType.ToString();
+        }
+
+        private void EmitLine(NpcPersona speaker, string line)
+        {
+            if (speaker == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(line))
+            {
+                line = BuildSituation(new EventRecord { eventType = CoreEventType.RumorShared });
+            }
+
+            string sanitized = DialogueLineLimiter.ClampLine(line, maxChars);
+            if (string.IsNullOrEmpty(sanitized))
+            {
+                return;
+            }
+
+            if (showToast && uiManager != null)
+            {
+                uiManager.ShowToast($"{speaker.NpcId}: {sanitized}");
+            }
+
+            if (logUtterance && eventLog != null)
+            {
+                eventLog.RecordEvent(new EventRecord
+                {
+                    actorId = speaker.NpcId,
+                    actorRole = speaker.Role,
+                    eventType = CoreEventType.NpcUtterance,
+                    category = EventCategory.Dialogue,
+                    note = sanitized,
+                    severity = 1,
+                    position = speaker.transform.position,
+                    topic = "Dialogue"
+                });
+            }
         }
     }
 }

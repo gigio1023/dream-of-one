@@ -14,6 +14,10 @@ namespace DreamOfOne.UI
         private TMP_Text outputText = null;
 
         [SerializeField]
+        [Tooltip("디버그 오버레이 표시 여부")]
+        private bool showDebugOverlay = false;
+
+        [SerializeField]
         private Transform target = null;
 
         [SerializeField]
@@ -29,6 +33,16 @@ namespace DreamOfOne.UI
             if (outputText == null)
             {
                 outputText = GetComponentInChildren<TMP_Text>(true);
+            }
+
+            if (!showDebugOverlay)
+            {
+                if (outputText != null)
+                {
+                    outputText.gameObject.SetActive(false);
+                }
+                enabled = false;
+                return;
             }
 
             if (target == null)

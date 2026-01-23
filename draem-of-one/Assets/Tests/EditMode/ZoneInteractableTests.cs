@@ -36,5 +36,36 @@ namespace DreamOfOne.Tests
             Object.DestroyImmediate(zoneObject);
             Object.DestroyImmediate(logObject);
         }
+
+        [Test]
+        public void TryInteract_UsesConfiguredEventType()
+        {
+            var logObject = new GameObject("WEL");
+            var log = logObject.AddComponent<WorldEventLog>();
+
+            var zoneObject = new GameObject("Zone");
+            zoneObject.AddComponent<BoxCollider>();
+            var zone = zoneObject.AddComponent<Zone>();
+            TestHelpers.SetPrivateField(zone, "zoneId", "PoliceDesk");
+            TestHelpers.SetPrivateField(zone, "zoneType", ZoneType.None);
+
+            var interactable = zoneObject.AddComponent<ZoneInteractable>();
+            TestHelpers.SetPrivateField(interactable, "eventLog", log);
+            TestHelpers.SetPrivateField(interactable, "zone", zone);
+            TestHelpers.SetPrivateField(interactable, "ruleId", "R_QUEUE");
+            TestHelpers.SetPrivateField(interactable, "playerInside", true);
+            interactable.ConfigureEvent(CoreEventType.TicketIssued, EventCategory.Evidence, "ticket", 2, "R_QUEUE", "Police");
+
+            interactable.TryInteract("Player", "Player");
+
+            Assert.AreEqual(1, log.Events.Count, "Event should be recorded.");
+            var record = log.Events[0];
+            Assert.AreEqual(CoreEventType.TicketIssued, record.eventType);
+            Assert.AreEqual(EventCategory.Evidence, record.category);
+            Assert.AreEqual("Police", record.placeId);
+
+            Object.DestroyImmediate(zoneObject);
+            Object.DestroyImmediate(logObject);
+        }
     }
 }

@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 738bedaefb3a14aa29028277ff49215f, type: 3}
+  m_Name: WorldDefinition
+  m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.WorldDefinition
+  buildings:
+  - {fileID: 11400000, guid: 6706129a890ef47099dab744fb3f6d9a, type: 2}
+  - {fileID: 11400000, guid: 732424bce2a854c64a6f7464d0ed2698, type: 2}
+  - {fileID: 11400000, guid: d8f180914b5214716bb325770e820b5f, type: 2}
+  - {fileID: 11400000, guid: 7b4a11215f17b4170b68f5bddfc1695d, type: 2}
+  - {fileID: 11400000, guid: 1a96ae83be8ff4ca48bd1f9a448bf9b8, type: 2}
+  interactables:
+  - {fileID: 11400000, guid: b5c2a7daed19f4f7fb3867dc6dce5963, type: 2}
+  - {fileID: 11400000, guid: a93cb673b8fda4a0f8aefa2452c87c8d, type: 2}
+  - {fileID: 11400000, guid: 2b53e93d83c044aee93f488bce054661, type: 2}
+  - {fileID: 11400000, guid: 657ac8bd8fff8412197dd8474e88d815, type: 2}
+  - {fileID: 11400000, guid: 4a2351c8006744317882c2856b5893c7, type: 2}
+  - {fileID: 11400000, guid: 631d18c0f5a7040d2a311cca48ff112d, type: 2}
+  - {fileID: 11400000, guid: 85ee677fd24eb44efb563bc8e4b76a85, type: 2}
+  - {fileID: 11400000, guid: 2cb72d3f0678c4128bb5b0ec38be9ba7, type: 2}
+  - {fileID: 11400000, guid: 73f49412fbf32422fb28b5e0e7cb4399, type: 2}
+  - {fileID: 11400000, guid: 3c43d7946bbfe47a388e63b26505a535, type: 2}
+  - {fileID: 11400000, guid: abf8b877f854a44908f1b14fcfe402a6, type: 2}
+  - {fileID: 11400000, guid: 8a03bf4b1fb984a6dab5934cbf17d527, type: 2}
+  - {fileID: 11400000, guid: 38c35b91735014acfb926eb49d31c5f9, type: 2}
+  - {fileID: 11400000, guid: 5d84872da54524342b695134d47abade, type: 2}
+  - {fileID: 11400000, guid: dd590945cc1f749719cd5b6e40327ff5, type: 2}
+  - {fileID: 11400000, guid: fd472144656f84d129452f121e13acbb, type: 2}
+  - {fileID: 11400000, guid: 855bcf888589e4d74b70ece96a76ed19, type: 2}
+  - {fileID: 11400000, guid: d87b63d7ded3a4bf28933bc98a1dbd4c, type: 2}
+  - {fileID: 11400000, guid: bc4258f59fad143eb92eff9f5358c8ee, type: 2}
+  - {fileID: 11400000, guid: fea20dab1dd604be783d12f08de8cdca, type: 2}
+  npcs:
+  - {fileID: 11400000, guid: de4ddd7398a2b435481641b008a2ce20, type: 2}
+  - {fileID: 11400000, guid: 0431bd8f58a104f96b4460ed317facda, type: 2}
+  - {fileID: 11400000, guid: 56cf4ed67002641ea9e687ffc77abb09, type: 2}
+  - {fileID: 11400000, guid: ce0e66603135e4f8893847e21e61e9e3, type: 2}
+  - {fileID: 11400000, guid: 9d4dd74a6b8ce4f96bdebe5c81898e09, type: 2}
+  - {fileID: 11400000, guid: 8610ba3a5f7704a49bb6beedf3b0240b, type: 2}
+  - {fileID: 11400000, guid: b759df0d926b444168d21791fb41d2da, type: 2}
+  incidents:
+  - {fileID: 11400000, guid: 73f7c24f572df41ff87faa7bd6e1e0ec, type: 2}
+  - {fileID: 11400000, guid: 343d7c8bfef8f4d8f91dd1a9bc01e108, type: 2}
+  interiorRootPosition: {x: 0, y: 0, z: 80}
+  interiorSpacing: 18

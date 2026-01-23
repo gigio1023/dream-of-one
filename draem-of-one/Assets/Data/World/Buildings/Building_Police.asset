@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666b00ccbd3cc4438b500f1aa40bb3c3, type: 3}
+  m_Name: Building_Police
+  m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.BuildingDefinition
+  buildingId: Police
+  anchorName: Station
+  exteriorPrefab: {fileID: 0}
+  exteriorOffset: {x: 0, y: 0, z: 0}
+  exteriorRotationEuler: {x: 0, y: 0, z: 0}
+  interiorPrefab: {fileID: 7996232624914077395, guid: bd658fcc7ddae43529ba507d6fb90758, type: 3}
+  interiorLocalOffset: {x: 0, y: 0, z: 0}
+  interiorPortalLocalOffset: {x: 0, y: 0.1, z: -3}
+  exteriorPortalOffset: {x: 0, y: 0, z: 2.2}

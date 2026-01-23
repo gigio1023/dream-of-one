@@ -21,6 +21,46 @@ namespace DreamOfOne.Core
         private float gravity = -9.81f;
 
         [SerializeField]
+        [Tooltip("점프 높이")]
+        private float jumpHeight = 1.2f;
+
+        [SerializeField]
+        [Tooltip("지면에 붙일 때 사용할 수직 속도")]
+        private float groundedSnapVelocity = -1f;
+
+        [SerializeField]
+        [Tooltip("CharacterController StepOffset")]
+        private float controllerStepOffset = 0.3f;
+
+        [SerializeField]
+        [Tooltip("CharacterController SlopeLimit")]
+        private float controllerSlopeLimit = 45f;
+
+        [SerializeField]
+        [Tooltip("CharacterController SkinWidth")]
+        private float controllerSkinWidth = 0.08f;
+
+        [SerializeField]
+        [Tooltip("CharacterController MinMoveDistance")]
+        private float controllerMinMoveDistance = 0.001f;
+
+        [SerializeField]
+        [Tooltip("벽 끼임 감지용 입력 임계값")]
+        private float stuckInputThreshold = 0.2f;
+
+        [SerializeField]
+        [Tooltip("벽 끼임 감지용 속도 임계값")]
+        private float stuckVelocityThreshold = 0.05f;
+
+        [SerializeField]
+        [Tooltip("벽 끼임 복구까지의 대기 시간")]
+        private float stuckRecoveryDelay = 0.5f;
+
+        [SerializeField]
+        [Tooltip("벽 끼임 복구 시 위로 올리는 높이")]
+        private float stuckRecoveryLift = 0.05f;
+
+        [SerializeField]
         [Tooltip("이동 방향으로 회전할지 여부(고정 시점 유지용)")]
         private bool rotateToMove = false;
 
@@ -52,10 +92,16 @@ namespace DreamOfOne.Core
         [SerializeField]
         [Tooltip("촬영 입력 액션")]
         private InputActionReference photoAction = null;
+
+        [SerializeField]
+        [Tooltip("점프 입력 액션")]
+        private InputActionReference jumpAction = null;
 #endif
 
         private CharacterController characterController = null;
         private float verticalVelocity = 0.0f;
+        private Vector3 lastStablePosition = Vector3.zero;
+        private float stuckTimer = 0f;
 
         private void Awake()
         {
@@ -69,6 +115,15 @@ namespace DreamOfOne.Core
             {
                 cameraPivot = Camera.main.transform;
             }
+
+            lastStablePosition = transform.position;
+            CharacterControllerTuning.Apply(characterController, new CharacterControllerTuning.Settings
+            {
+                StepOffset = controllerStepOffset,
+                SlopeLimit = controllerSlopeLimit,
+                SkinWidth = controllerSkinWidth,
+                MinMoveDistance = controllerMinMoveDistance
+            });
         }
 
         private void OnEnable()
@@ -77,6 +132,7 @@ namespace DreamOfOne.Core
             moveAction?.action.Enable();
             interactAction?.action.Enable();
             photoAction?.action.Enable();
+            jumpAction?.action.Enable();
 #endif
             ZoneInteractable.OnPlayerEntered += HandleZoneEnter;
             ZoneInteractable.OnPlayerExited += HandleZoneExit;
@@ -88,6 +144,7 @@ namespace DreamOfOne.Core
             moveAction?.action.Disable();
             interactAction?.action.Disable();
             photoAction?.action.Disable();
+            jumpAction?.action.Disable();
 #endif
             ZoneInteractable.OnPlayerEntered -= HandleZoneEnter;
             ZoneInteractable.OnPlayerExited -= HandleZoneExit;
@@ -125,14 +182,20 @@ namespace DreamOfOne.Core
                 move.Normalize();
             }
 
-            verticalVelocity += gravity * Time.deltaTime;
-            if (characterController.isGrounded && verticalVelocity < 0f)
-            {
-                verticalVelocity = -1f;
-            }
+            float inputMagnitude = move.magnitude;
+            verticalVelocity = PlayerVerticalMotion.UpdateVerticalVelocity(
+                verticalVelocity,
+                characterController.isGrounded,
+                WasJumpPressed(),
+                gravity,
+                jumpHeight,
+                Time.deltaTime,
+                groundedSnapVelocity);
 
             Vector3 velocity = move * moveSpeed + Vector3.up * verticalVelocity;
             characterController.Move(velocity * Time.deltaTime);
+
+            UpdateStuckRecovery(inputMagnitude);
 
             if (rotateToMove && move.sqrMagnitude > 0.1f)
             {
@@ -243,6 +306,23 @@ namespace DreamOfOne.Core
 #endif
         }
 
+        private bool WasJumpPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (jumpAction != null)
+            {
+                return jumpAction.action.WasPerformedThisFrame();
+            }
+
+            return Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            return Input.GetKeyDown(KeyCode.Space);
+#else
+            LogInputUnavailable();
+            return false;
+#endif
+        }
+
 #if !ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
         private static bool inputUnavailableLogged = false;
 
@@ -275,6 +355,51 @@ namespace DreamOfOne.Core
         {
             eventLog = log;
             cameraPivot = cameraRoot;
+        }
+
+        private void UpdateStuckRecovery(float inputMagnitude)
+        {
+            float speed = characterController.velocity.magnitude;
+            bool hasSideCollision = (characterController.collisionFlags & CollisionFlags.Sides) != 0;
+
+            if (characterController.isGrounded && (!hasSideCollision || speed > stuckVelocityThreshold))
+            {
+                lastStablePosition = transform.position;
+            }
+
+            stuckTimer = PlayerStuckRecovery.UpdateStuckTimer(
+                stuckTimer,
+                inputMagnitude,
+                speed,
+                hasSideCollision,
+                Time.deltaTime,
+                stuckInputThreshold,
+                stuckVelocityThreshold);
+
+            if (PlayerStuckRecovery.ShouldRecover(
+                stuckTimer,
+                stuckRecoveryDelay,
+                inputMagnitude,
+                speed,
+                hasSideCollision,
+                stuckInputThreshold,
+                stuckVelocityThreshold))
+            {
+                RecoverToLastStablePosition();
+            }
+        }
+
+        private void RecoverToLastStablePosition()
+        {
+            stuckTimer = 0f;
+            if (characterController == null)
+            {
+                return;
+            }
+
+            characterController.enabled = false;
+            transform.position = lastStablePosition + Vector3.up * stuckRecoveryLift;
+            characterController.enabled = true;
         }
     }
 }

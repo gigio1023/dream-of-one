@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f8a45971bf3145a190dcaa3d1af20f6, type: 3}
+  m_Name: Interactable_Store_QueueMarker
+  m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.InteractableDefinition
+  interactableId: Store_QueueMarker
+  anchorName: StoreBuilding
+  prefab: {fileID: 8638773249212896086, guid: 49083b508571e480a931d16675d34376, type: 3}
+  localOffset: {x: 1.5, y: 0, z: -1.5}
+  localRotationEuler: {x: 0, y: 0, z: 0}
+  ruleId: R_QUEUE
+  artifactId: 
+  eventType: 2
+  eventCategory: 2
+  zoneType: 1
+  prompt: 'E: Interact'
+  note: Queue marker
+  severity: 2
+  placeId: Store
+  triggerSize: {x: 2, y: 2, z: 2}

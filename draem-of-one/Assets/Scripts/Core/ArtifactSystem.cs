@@ -26,6 +26,7 @@ namespace DreamOfOne.Core
         }
 
         private readonly Dictionary<string, ArtifactInfo> markers = new();
+        private readonly ArtifactRegistry registry = new();
 
         private void Awake()
         {
@@ -58,14 +59,7 @@ namespace DreamOfOne.Core
                 return;
             }
 
-            if (record.eventType is not (EventType.CctvCaptured or EventType.TicketIssued or EventType.EvidenceCaptured
-                or EventType.ApprovalGranted or EventType.RcInserted or EventType.TaskStarted or EventType.TaskCompleted
-                or EventType.LabelChanged or EventType.QueueUpdated or EventType.SeatClaimed or EventType.NoiseObserved))
-            {
-                return;
-            }
-
-            if (markers.ContainsKey(record.id))
+            if (!registry.TryAddFromEvent(record))
             {
                 return;
             }
@@ -103,6 +97,11 @@ namespace DreamOfOne.Core
                 placeId = record.placeId,
                 type = record.eventType
             };
+        }
+
+        public IReadOnlyList<ArtifactRecord> GetArtifacts()
+        {
+            return registry.Artifacts;
         }
 
         public void HighlightCase(CaseBundle bundle)

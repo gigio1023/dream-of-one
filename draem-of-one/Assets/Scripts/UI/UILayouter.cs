@@ -12,6 +12,10 @@ namespace DreamOfOne.UI
         [SerializeField]
         private bool applyOnAwake = true;
 
+        [SerializeField]
+        [Tooltip("추가 HUD(컨트롤/커버/케이스/블랙보드) 표시 여부")]
+        private bool showExtendedHud = false;
+
         private void Awake()
         {
             if (applyOnAwake)
@@ -260,6 +264,11 @@ namespace DreamOfOne.UI
 
             if (controls != null)
             {
+                controls.gameObject.SetActive(showExtendedHud);
+            }
+
+            if (controls != null && showExtendedHud)
+            {
                 controls.name = "ControlsText";
                 controls.fontSize = 30f;
                 controls.alignment = TextAlignmentOptions.BottomRight;
@@ -276,6 +285,11 @@ namespace DreamOfOne.UI
             }
 
             if (coverStatus != null)
+            {
+                coverStatus.gameObject.SetActive(showExtendedHud);
+            }
+
+            if (coverStatus != null && showExtendedHud)
             {
                 coverStatus.name = "CoverStatusText";
                 coverStatus.fontSize = 30f;
@@ -294,6 +308,11 @@ namespace DreamOfOne.UI
 
             if (caseBundle != null)
             {
+                caseBundle.gameObject.SetActive(showExtendedHud);
+            }
+
+            if (caseBundle != null && showExtendedHud)
+            {
                 caseBundle.name = "CaseBundleText";
                 caseBundle.fontSize = 26f;
                 caseBundle.alignment = TextAlignmentOptions.TopRight;
@@ -310,6 +329,11 @@ namespace DreamOfOne.UI
             }
 
             if (blackboard != null)
+            {
+                blackboard.gameObject.SetActive(showExtendedHud);
+            }
+
+            if (blackboard != null && showExtendedHud)
             {
                 blackboard.name = "BlackboardText";
                 blackboard.fontSize = 24f;

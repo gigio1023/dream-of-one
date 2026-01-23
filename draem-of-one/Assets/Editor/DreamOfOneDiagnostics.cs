@@ -4,6 +4,7 @@ using DreamOfOne.LLM;
 using DreamOfOne.Core;
 using DreamOfOne.NPC;
 using DreamOfOne.UI;
+using DreamOfOne.World;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -176,6 +177,9 @@ namespace DreamOfOne.Editor
                 warnings.Add("TMP default font lacks Hangul glyphs; relying on fallback font.");
             }
 
+            ValidateWorldData(warnings, errors);
+            ValidateWorldRuntime(warnings, errors, info);
+
             return new DiagnosticResults
             {
                 errors = errors,
@@ -206,6 +210,82 @@ namespace DreamOfOne.Editor
             {
                 Debug.Log($"[Diagnostics] {message}");
             }
+        }
+
+        private static void ValidateWorldData(List<string> warnings, List<string> errors)
+        {
+#if UNITY_EDITOR
+            var world = AssetDatabase.LoadAssetAtPath<WorldDefinition>("Assets/Data/WorldDefinition.asset");
+            if (world == null)
+            {
+                warnings.Add("WorldDefinition asset missing: Assets/Data/WorldDefinition.asset");
+                return;
+            }
+
+            if (world.Buildings == null || world.Buildings.Count == 0)
+            {
+                warnings.Add("WorldDefinition has no building definitions.");
+            }
+
+            if (world.Interactables == null || world.Interactables.Count < 20)
+            {
+                warnings.Add($"WorldDefinition interactables < 20 (found {world.Interactables?.Count ?? 0}).");
+            }
+
+            if (world.Incidents == null || world.Incidents.Count < 2)
+            {
+                warnings.Add("WorldDefinition incidents < 2 (MCSS incidents not fully defined).");
+            }
+#endif
+        }
+
+        private static void ValidateWorldRuntime(List<string> warnings, List<string> errors, List<string> info)
+        {
+            var worldRoot = GameObject.Find("World_Built");
+            if (worldRoot == null)
+            {
+                warnings.Add("World_Built root not found. Run Tools/DreamOfOne/Rebuild World From Data.");
+                return;
+            }
+
+            var interactables = Object.FindObjectsByType<ZoneInteractable>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            if (interactables.Length < 20)
+            {
+                warnings.Add($"Interactables in scene < 20 (found {interactables.Length}).");
+            }
+
+            var portals = Object.FindObjectsByType<InteriorPortal>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            if (portals.Length < 4)
+            {
+                warnings.Add($"Interior portals in scene < 4 (found {portals.Length}).");
+            }
+
+            var interiors = GameObject.Find("Interiors");
+            if (interiors == null)
+            {
+                warnings.Add("Interiors root missing. Interior entry may fail.");
+            }
+
+            int missingCollider = 0;
+            foreach (var interactable in interactables)
+            {
+                if (interactable == null)
+                {
+                    continue;
+                }
+
+                if (interactable.GetComponent<Collider>() == null)
+                {
+                    missingCollider++;
+                }
+            }
+
+            if (missingCollider > 0)
+            {
+                warnings.Add($"Interactables missing colliders: {missingCollider}");
+            }
+
+            info.Add($"World_Built: Interactables={interactables.Length}, Portals={portals.Length}");
         }
 
         private static bool HasValidAtlas(TMP_FontAsset asset)
@@ -280,6 +360,13 @@ namespace DreamOfOne.Editor
                 return;
             }
 
+            var nonUniformScaleAllowlist = new HashSet<string>
+            {
+                "CCTV_A",
+                "CCTV_B",
+                "street"
+            };
+
             var renderers = root.GetComponentsInChildren<Renderer>(true);
             for (int i = 0; i < renderers.Length; i++)
             {
@@ -290,9 +377,10 @@ namespace DreamOfOne.Editor
                 }
 
                 var scale = renderer.transform.localScale;
-                if (Mathf.Abs(scale.x - 1f) > 0.01f || Mathf.Abs(scale.y - 1f) > 0.01f || Mathf.Abs(scale.z - 1f) > 0.01f)
+                if (!nonUniformScaleAllowlist.Contains(renderer.name)
+                    && (Mathf.Abs(scale.x - scale.y) > 0.01f || Mathf.Abs(scale.x - scale.z) > 0.01f || Mathf.Abs(scale.y - scale.z) > 0.01f))
                 {
-                    warnings.Add($"CITY scale not 1.0: {renderer.name}");
+                    warnings.Add($"CITY non-uniform scale: {renderer.name}");
                 }
 
                 if (renderer.GetComponent<Collider>() == null && renderer.GetComponentInParent<Collider>() == null)

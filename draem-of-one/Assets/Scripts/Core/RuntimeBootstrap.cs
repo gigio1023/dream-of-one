@@ -217,10 +217,17 @@ namespace DreamOfOne.Core
             npc.transform.position = position;
 
             var agent = npc.AddComponent<NavMeshAgent>();
-            agent.speed = 1.2f;
-            agent.angularSpeed = 360f;
-            agent.stoppingDistance = 0.2f;
-            agent.radius = 0.25f;
+            NavMeshAgentTuning.Apply(agent, new NavMeshAgentTuning.Settings
+            {
+                Radius = 0.28f,
+                Height = 1.6f,
+                BaseOffset = 0.05f,
+                Speed = 1.2f,
+                AngularSpeed = 420f,
+                Acceleration = 10f,
+                StoppingDistance = 0.2f,
+                AvoidancePriority = 55
+            });
             if (!NavMesh.SamplePosition(npc.transform.position, out _, 1f, NavMesh.AllAreas))
             {
                 agent.enabled = false;
@@ -255,7 +262,17 @@ namespace DreamOfOne.Core
             police.AddComponent<NpcContext>();
 
             var agent = police.AddComponent<NavMeshAgent>();
-            agent.speed = 2.5f;
+            NavMeshAgentTuning.Apply(agent, new NavMeshAgentTuning.Settings
+            {
+                Radius = 0.28f,
+                Height = 1.6f,
+                BaseOffset = 0.05f,
+                Speed = 1.5f,
+                AngularSpeed = 420f,
+                Acceleration = 10f,
+                StoppingDistance = 0.35f,
+                AvoidancePriority = 45
+            });
             if (!NavMesh.SamplePosition(police.transform.position, out _, 1f, NavMesh.AllAreas))
             {
                 agent.enabled = false;

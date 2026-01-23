@@ -63,6 +63,22 @@ namespace DreamOfOne.NPC
         private float fallbackMoveSpeed = 2.5f;
 
         [SerializeField]
+        [Tooltip("자동 점프 여부")]
+        private bool autoJump = true;
+
+        [SerializeField]
+        [Tooltip("점프 높이")]
+        private float jumpHeight = 0.35f;
+
+        [SerializeField]
+        [Tooltip("점프 지속 시간")]
+        private float jumpDuration = 0.5f;
+
+        [SerializeField]
+        [Tooltip("점프 간격 최소/최대 (초)")]
+        private Vector2 jumpIntervalRange = new Vector2(4f, 7f);
+
+        [SerializeField]
         [Tooltip("심문 지연 시간")]
         private float interrogationDelaySeconds = 2f;
 
@@ -84,10 +100,19 @@ namespace DreamOfOne.NPC
         private Vector3 investigationTarget = Vector3.zero;
         private string lastVerdictReason = string.Empty;
         private readonly List<SuspicionComponent> cachedSuspicion = new();
+        private float baseOffset = 0f;
+        private float jumpTimer = 0f;
+        private float jumpCooldown = 0f;
 
         private void Awake()
         {
             agent = GetComponent<NavMeshAgent>();
+            if (agent != null)
+            {
+                baseOffset = agent.baseOffset;
+            }
+
+            jumpCooldown = Random.Range(jumpIntervalRange.x, jumpIntervalRange.y);
             EnsureReferences();
             CacheSuspicionComponents();
         }
@@ -120,6 +145,8 @@ namespace DreamOfOne.NPC
                     UpdateCooldown();
                     break;
             }
+
+            UpdateJump(Time.deltaTime);
         }
 
         /// <summary>
@@ -127,10 +154,18 @@ namespace DreamOfOne.NPC
         /// </summary>
         private void UpdatePatrol()
         {
-            if (HasNavMeshAgent() && patrolPoints.Length > 0 && (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance))
+            if (HasNavMeshAgent())
             {
-                patrolIndex = (patrolIndex + 1) % patrolPoints.Length;
-                agent.SetDestination(patrolPoints[patrolIndex].position);
+                if (!agent.isOnNavMesh)
+                {
+                    TryWarpToNavMesh();
+                }
+
+                if (agent.isOnNavMesh && patrolPoints.Length > 0 && (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance))
+                {
+                    patrolIndex = (patrolIndex + 1) % patrolPoints.Length;
+                    agent.SetDestination(patrolPoints[patrolIndex].position);
+                }
             }
 
             if (reportManager != null && reportManager.TryConsumeReport(out var report))
@@ -157,7 +192,15 @@ namespace DreamOfOne.NPC
 
             if (HasNavMeshAgent())
             {
-                agent.SetDestination(player.position);
+                if (!agent.isOnNavMesh)
+                {
+                    TryWarpToNavMesh();
+                }
+
+                if (agent.isOnNavMesh)
+                {
+                    agent.SetDestination(player.position);
+                }
             }
             else
             {
@@ -211,7 +254,15 @@ namespace DreamOfOne.NPC
 
             if (HasNavMeshAgent())
             {
-                agent.SetDestination(investigationTarget);
+                if (!agent.isOnNavMesh)
+                {
+                    TryWarpToNavMesh();
+                }
+
+                if (agent.isOnNavMesh)
+                {
+                    agent.SetDestination(investigationTarget);
+                }
             }
             else
             {
@@ -383,6 +434,54 @@ namespace DreamOfOne.NPC
             }
         }
 
+        private void TryWarpToNavMesh()
+        {
+            if (agent == null)
+            {
+                return;
+            }
+
+            if (NavMesh.SamplePosition(transform.position, out var hit, 2f, NavMesh.AllAreas))
+            {
+                agent.Warp(hit.position);
+            }
+        }
+
+        private void UpdateJump(float deltaTime)
+        {
+            if (!autoJump || agent == null)
+            {
+                return;
+            }
+
+            if (jumpHeight <= 0f || jumpDuration <= 0f)
+            {
+                return;
+            }
+
+            if (jumpCooldown > 0f)
+            {
+                jumpCooldown -= deltaTime;
+                return;
+            }
+
+            if (jumpTimer <= 0f)
+            {
+                jumpTimer = jumpDuration;
+            }
+
+            float t = 1f - (jumpTimer / jumpDuration);
+            float offset = Mathf.Sin(t * Mathf.PI) * jumpHeight;
+            agent.baseOffset = baseOffset + offset;
+
+            jumpTimer -= deltaTime;
+            if (jumpTimer <= 0f)
+            {
+                agent.baseOffset = baseOffset;
+                jumpCooldown = Random.Range(jumpIntervalRange.x, jumpIntervalRange.y);
+            }
+        }
+
         /// <summary>
         /// 최근 WEL 이벤트만으로 간단한 if-else 판정을 수행한다.
         /// </summary>
@@ -416,7 +515,7 @@ namespace DreamOfOne.NPC
 
         private bool HasNavMeshAgent()
         {
-            return agent != null && agent.enabled && agent.isOnNavMesh;
+            return agent != null && agent.enabled;
         }
 
         private void CacheSuspicionComponents()

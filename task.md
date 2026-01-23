@@ -128,3 +128,4 @@
 ## 5) Scaling Targets (post-slice)
 - [ ] Stage B: 3x3 block streaming, cross-chunk rumor decay
 - [ ] Stage C: multi-district city, more orgs, policy packs, persistence
+

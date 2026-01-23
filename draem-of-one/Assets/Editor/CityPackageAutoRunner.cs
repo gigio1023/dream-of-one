@@ -21,11 +21,6 @@ namespace DreamOfOne.Editor
 
         public static bool EnsureCityBuilt(List<string> warnings = null, List<string> errors = null)
         {
-            if (EditorApplication.isPlayingOrWillChangePlaymode)
-            {
-                return false;
-            }
-
             if (!File.Exists(ScenePath))
             {
                 errors?.Add($"Missing scene: {ScenePath}");
@@ -35,8 +30,26 @@ namespace DreamOfOne.Editor
             var activeScene = SceneManager.GetActiveScene();
             if (activeScene.path != ScenePath)
             {
-                warnings?.Add("Active scene is not Prototype. Opening Prototype scene for CITY build.");
-                EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+                if (EditorApplication.isPlayingOrWillChangePlaymode)
+                {
+                    warnings?.Add("Active scene is not Prototype. CITY build check skipped for Play mode.");
+                }
+                else
+                {
+                    warnings?.Add("Active scene is not Prototype. Opening Prototype scene for CITY build.");
+                    EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+                }
+            }
+
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                if (GameObject.Find("CITY_Package") == null)
+                {
+                    errors?.Add("CITY_Package root missing before Play mode.");
+                    return false;
+                }
+
+                return true;
             }
 
             if (GameObject.Find("CITY_Package") == null)

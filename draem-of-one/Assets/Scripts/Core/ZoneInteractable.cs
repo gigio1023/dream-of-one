@@ -29,6 +29,14 @@ namespace DreamOfOne.Core
         private string promptText = "E: Interact";
 
         [SerializeField]
+        [Tooltip("트리거 진입 시 프롬프트를 표시할지 여부")]
+        private bool useTriggerPrompt = false;
+
+        [SerializeField]
+        [Tooltip("트리거 밖에서도 상호작용을 허용할 최대 거리")]
+        private float maxInteractDistance = 2.2f;
+
+        [SerializeField]
         [Tooltip("이벤트를 기록할 WEL")]
         private WorldEventLog eventLog = null;
 
@@ -64,6 +72,7 @@ namespace DreamOfOne.Core
         private bool playerInside = false;
         private string lastActorId = "Player";
         private string lastActorRole = "Player";
+        private Collider cachedCollider = null;
 
         public string PromptText => promptText;
         public string RuleId => ruleId;
@@ -71,6 +80,7 @@ namespace DreamOfOne.Core
 
         private void Awake()
         {
+            cachedCollider = GetComponent<Collider>();
             if (zone == null)
             {
                 zone = GetComponent<Zone>();
@@ -97,7 +107,10 @@ namespace DreamOfOne.Core
             playerInside = true;
             lastActorId = other.gameObject.name;
             lastActorRole = "Player";
-            uiManager?.ShowPrompt(GetPrompt(new InteractContext(lastActorId, lastActorRole, other.transform.position)));
+            if (useTriggerPrompt)
+            {
+                uiManager?.ShowPrompt(GetPrompt(new InteractContext(lastActorId, lastActorRole, other.transform.position)));
+            }
             OnPlayerEntered?.Invoke(this);
         }
 
@@ -109,7 +122,10 @@ namespace DreamOfOne.Core
             }
 
             playerInside = false;
-            uiManager?.HidePrompt();
+            if (useTriggerPrompt)
+            {
+                uiManager?.HidePrompt();
+            }
             OnPlayerExited?.Invoke(this);
         }
 
@@ -191,7 +207,7 @@ namespace DreamOfOne.Core
 
         public bool CanInteract(InteractContext context)
         {
-            if (!playerInside)
+            if (!playerInside && !IsWithinRange(context))
             {
                 return false;
             }
@@ -207,6 +223,22 @@ namespace DreamOfOne.Core
             lastActorRole = string.IsNullOrEmpty(context.ActorRole) ? lastActorRole : context.ActorRole;
 
             EmitViolation();
+        }
+
+        private bool IsWithinRange(InteractContext context)
+        {
+            if (maxInteractDistance <= 0f)
+            {
+                return false;
+            }
+
+            if (cachedCollider != null)
+            {
+                float sqrDistance = cachedCollider.bounds.SqrDistance(context.ActorPosition);
+                return sqrDistance <= maxInteractDistance * maxInteractDistance;
+            }
+
+            return Vector3.Distance(context.ActorPosition, transform.position) <= maxInteractDistance;
         }
 
         public string GetWorldStateSummary()

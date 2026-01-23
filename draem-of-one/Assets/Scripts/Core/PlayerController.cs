@@ -1,3 +1,4 @@
+using DreamOfOne.UI;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -73,8 +74,24 @@ namespace DreamOfOne.Core
         private WorldEventLog eventLog = null;
 
         [SerializeField]
-        [Tooltip("현재 상호작용 가능한 Zone")]
-        private ZoneInteractable currentInteractable = null;
+        [Tooltip("현재 상호작용 가능한 오브젝트")]
+        private IInteractable currentInteractable = null;
+
+        [SerializeField]
+        [Tooltip("상호작용 탐색 거리")]
+        private float interactionRange = 2.2f;
+
+        [SerializeField]
+        [Tooltip("상호작용 탐색 레이어 마스크")]
+        private LayerMask interactionMask = ~0;
+
+        [SerializeField]
+        [Tooltip("카메라가 없을 때 사용하는 레이캐스트 시작 오프셋")]
+        private Vector3 fallbackRayOffset = new Vector3(0f, 1.5f, 0f);
+
+        [SerializeField]
+        [Tooltip("상호작용 프롬프트 표시용 UIManager")]
+        private UIManager uiManager = null;
 
         [SerializeField]
         [Tooltip("촬영 시 사용할 규칙 ID")]
@@ -116,6 +133,11 @@ namespace DreamOfOne.Core
                 cameraPivot = Camera.main.transform;
             }
 
+            if (uiManager == null)
+            {
+                uiManager = FindFirstObjectByType<UIManager>();
+            }
+
             lastStablePosition = transform.position;
             CharacterControllerTuning.Apply(characterController, new CharacterControllerTuning.Settings
             {
@@ -149,8 +171,6 @@ namespace DreamOfOne.Core
             photoAction?.action.Enable();
             jumpAction?.action.Enable();
 #endif
-            ZoneInteractable.OnPlayerEntered += HandleZoneEnter;
-            ZoneInteractable.OnPlayerExited += HandleZoneExit;
         }
 
         private void OnDisable()
@@ -161,13 +181,12 @@ namespace DreamOfOne.Core
             photoAction?.action.Disable();
             jumpAction?.action.Disable();
 #endif
-            ZoneInteractable.OnPlayerEntered -= HandleZoneEnter;
-            ZoneInteractable.OnPlayerExited -= HandleZoneExit;
         }
 
         private void Update()
         {
             HandleMovement();
+            UpdateInteractionFocus();
             HandleInteraction();
         }
 
@@ -225,7 +244,11 @@ namespace DreamOfOne.Core
         {
             if (WasInteractPressed())
             {
-                currentInteractable?.TryInteract("Player", "Player");
+                var context = new InteractContext("Player", "Player", transform.position);
+                if (currentInteractable != null && currentInteractable.CanInteract(context))
+                {
+                    currentInteractable.Interact(context);
+                }
             }
 
             if (WasPhotoPressed())
@@ -258,6 +281,73 @@ namespace DreamOfOne.Core
             };
 
             eventLog.RecordEvent(record);
+        }
+
+        private void UpdateInteractionFocus()
+        {
+            if (uiManager == null)
+            {
+                return;
+            }
+
+            var context = new InteractContext("Player", "Player", transform.position);
+            var focused = FindInteractable(context, out string prompt);
+
+            if (focused != null && focused.CanInteract(context))
+            {
+                currentInteractable = focused;
+                if (!string.IsNullOrEmpty(prompt))
+                {
+                    uiManager.ShowPrompt(prompt);
+                }
+                else
+                {
+                    uiManager.HidePrompt();
+                }
+                return;
+            }
+
+            currentInteractable = null;
+            uiManager.HidePrompt();
+        }
+
+        private IInteractable FindInteractable(InteractContext context, out string prompt)
+        {
+            prompt = string.Empty;
+
+            Vector3 origin = cameraPivot != null ? cameraPivot.position : transform.position + fallbackRayOffset;
+            Vector3 direction = cameraPivot != null ? cameraPivot.forward : transform.forward;
+
+            if (Physics.Raycast(origin, direction, out var hit, interactionRange, interactionMask, QueryTriggerInteraction.Collide))
+            {
+                var interactable = ResolveInteractable(hit.collider);
+                if (interactable != null)
+                {
+                    prompt = interactable.GetPrompt(context);
+                }
+                return interactable;
+            }
+
+            return null;
+        }
+
+        private static IInteractable ResolveInteractable(Collider collider)
+        {
+            if (collider == null)
+            {
+                return null;
+            }
+
+            var behaviours = collider.GetComponentsInParent<MonoBehaviour>();
+            for (int i = 0; i < behaviours.Length; i++)
+            {
+                if (behaviours[i] is IInteractable interactable)
+                {
+                    return interactable;
+                }
+            }
+
+            return null;
         }
 
         private Vector2 ReadMoveInput()

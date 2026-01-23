@@ -2,7 +2,7 @@
 
 **Document type:** Integrated project definition and implementation contract
 **Revision date:** 2026-01-23
-**Primary inputs:** new-plan.md (v6.2 implementation spec) + existing project status
+**Primary inputs:** `docs/spec/new-plan.md` (v6.2 implementation spec) + current project status
 
 ---
 
@@ -203,11 +203,48 @@ Actions → Structured Events → WEL append → Semantic Shaper → Canonical L
 **WP8 — Performance & QA Gate**
 - Play Mode tests, diagnostics expansion, GC profiling
 
-## 15) Scaling plan (post-slice)
-- Stage B: 3x3 block district with chunk streaming and cross-chunk rumor decay
-- Stage C: multi-district city, more orgs, policy packs, session persistence
+## 15) Roadmap (how we evolve the game)
+**Goal:** Extend the current MCSS slice into a replayable, choice-driven “casework” loop without breaking determinism.
+
+### Phase 0 — Immediate (stability + feel, 1–3 days)
+- Ensure runtime-only spawning (avoid edit-time NavMeshAgent errors during rebuild/compile)
+- Make interaction UX consistent (one interaction model, one prompt model)
+- Reduce always-on debug text; show only when toggled
+- Lock in quality gates: errors 0, softlocks 0, repeatable session 0 failures
+
+### Phase 1 — Vertical Slice v1 (repeatable loop, 1–2 weeks)
+- Expand from 2 incidents → 4–6 incidents with meaningful branches
+- Upgrade case UI for “why this verdict happened”
+  - Link: event ↔ artifact ↔ witness ↔ rule
+  - Filter/pin/highlight for quick reasoning
+- Add navigation UX (mini-map/compass + landmark markers + current objective)
+- Move NPC behavior from “wander” → “role + routine” (store/studio/park/police)
+- Add 3+ end states (cleared / guilty / unresolved / escalation) + a score/replay reason
+
+### Phase 2 — Core Expansion (social depth, 3–6 weeks)
+- Rumor network: trust/authority-weighted propagation + rebuttal/confirmation travel
+- Organization policy packs: same action judged differently by org/zone/time
+- Interiors become purpose-built spaces (visibility, choke points, evidence stations)
+- WEL-driven replay harness for debugging/balancing (reproduce a session from logs)
+
+### Phase 3 — Productization (scale + meta, 2–3 months)
+- Chunk streaming (3x3 district), addressables handles discipline, portal + nav safety at scale
+- Meta progression (rank/permissions/tools) that unlocks new cases/areas
+- Build/release pipeline + automated gates (tests/diagnostics) for every release
+
+### Success criteria (clear “it got better” signals)
+- 15–20 minute session remains stable (no errors, no hard locks)
+- 6 incidents / 3 endings / 4+ NPC routines
+- Player can always answer: “What happened, why, and what evidence supports it?”
 
 ## 16) Document policy
-- `project.md` is the integrated source of truth for decisions and scope.
-- `new-plan.md` remains the detailed implementation contract and reference.
-- Update `project.md` when decisions change; update `new-plan.md` when execution details change.
+**Single source of truth**
+- `project.md`: decisions, scope, roadmap, and non-negotiables
+- `docs/spec/new-plan.md`: detailed implementation contract (long-form)
+
+**Archive**
+- `docs/archive/`: historical snapshots (completed checklists, older status notes)
+
+**Rule**
+- Update `project.md` when decisions/scope/roadmap change.
+- Update `docs/spec/new-plan.md` when execution details change.

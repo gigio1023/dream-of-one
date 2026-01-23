@@ -1,5 +1,7 @@
 # Project Status (2026-01-23)
 
+_Archived snapshot. For current scope/roadmap, see `project.md`._
+
 ## Summary
 - The playable scene is **Prototype** with a runnable core loop (suspicions, events, prompts) and runtime-generated interiors.
 - NPC population is enforced at runtime to avoid empty streets, with basic patrol/police behavior and portal visits.

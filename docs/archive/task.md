@@ -1,6 +1,6 @@
-# Dream of One — Task Plan (Derived from new-plan.md)
+# Dream of One — Task Plan (Derived from docs/spec/new-plan.md)
 
-**Purpose:** Provide an execution-ready checklist to implement the MCSS slice defined in new-plan.md.
+**Purpose:** Provide an execution-ready checklist to implement the MCSS slice defined in docs/spec/new-plan.md.
 **Revision date:** 2026-01-23
 
 ---

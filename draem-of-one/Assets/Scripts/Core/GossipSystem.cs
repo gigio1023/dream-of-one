@@ -31,10 +31,36 @@ namespace DreamOfOne.Core
         [Tooltip("가십 전파 최소 근접 거리")]
         private float talkDistance = 4f;
 
+        [SerializeField]
+        [Tooltip("역할별 소문 신뢰 가중치")]
+        private List<RoleTrust> roleTrustWeights = new()
+        {
+            new RoleTrust("Police", 1.1f),
+            new RoleTrust("Clerk", 0.95f),
+            new RoleTrust("Elder", 0.9f),
+            new RoleTrust("Barista", 0.85f),
+            new RoleTrust("Citizen", 0.75f),
+            new RoleTrust("Tourist", 0.6f)
+        };
+
         private readonly Queue<PendingGossip> pending = new();
         private float lastGossipTime = -999f;
 
         private readonly Dictionary<string, float> rumorTopics = new();
+        private readonly Dictionary<string, float> trustLookup = new();
+
+        [System.Serializable]
+        private struct RoleTrust
+        {
+            public string role;
+            public float weight;
+
+            public RoleTrust(string role, float weight)
+            {
+                this.role = role;
+                this.weight = weight;
+            }
+        }
 
         private void Awake()
         {
@@ -47,6 +73,8 @@ namespace DreamOfOne.Core
             {
                 semanticShaper = FindFirstObjectByType<SemanticShaper>();
             }
+
+            BuildTrustLookup();
         }
 
         private void OnEnable()
@@ -135,7 +163,7 @@ namespace DreamOfOne.Core
                 zoneId = source.zoneId,
                 position = speaker.transform.position,
                 severity = 1,
-                trust = 0.45f,
+                trust = Mathf.Clamp01(0.45f * GetTrustWeight(speaker.Role)),
                 sourceId = source.actorId
             });
 
@@ -175,7 +203,7 @@ namespace DreamOfOne.Core
                 zoneId = evidence.zoneId,
                 position = evidence.position,
                 severity = 2,
-                trust = 0.9f,
+                trust = Mathf.Clamp01(0.9f * GetTrustWeight(evidence.actorRole)),
                 sourceId = evidence.actorId
             });
 
@@ -215,7 +243,9 @@ namespace DreamOfOne.Core
                 zoneId = verdict.zoneId,
                 position = verdict.position,
                 severity = confirmed ? 2 : 1,
-                trust = confirmed ? 0.95f : 0.1f,
+                trust = confirmed
+                    ? Mathf.Clamp01(0.95f * GetTrustWeight(verdict.actorRole))
+                    : Mathf.Clamp01(0.1f * GetTrustWeight(verdict.actorRole)),
                 sourceId = verdict.actorId
             });
 
@@ -238,6 +268,36 @@ namespace DreamOfOne.Core
             }
 
             rumorTopics.Remove(key);
+        }
+
+        private void BuildTrustLookup()
+        {
+            trustLookup.Clear();
+            for (int i = 0; i < roleTrustWeights.Count; i++)
+            {
+                var entry = roleTrustWeights[i];
+                if (string.IsNullOrEmpty(entry.role))
+                {
+                    continue;
+                }
+
+                trustLookup[entry.role] = Mathf.Max(0.1f, entry.weight);
+            }
+        }
+
+        private float GetTrustWeight(string role)
+        {
+            if (string.IsNullOrEmpty(role))
+            {
+                return 1f;
+            }
+
+            if (trustLookup.TryGetValue(role, out float weight))
+            {
+                return weight;
+            }
+
+            return 1f;
         }
 
         private NpcContext FindNearestSpeaker(Vector3 position)

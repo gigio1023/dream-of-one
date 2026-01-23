@@ -442,7 +442,7 @@ namespace DreamOfOne.Core
 
         private void HandleZoneExit(ZoneInteractable interactable)
         {
-            if (currentInteractable == interactable)
+            if (ReferenceEquals(currentInteractable, interactable))
             {
                 currentInteractable = null;
             }

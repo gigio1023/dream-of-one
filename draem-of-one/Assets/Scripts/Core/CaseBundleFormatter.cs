@@ -45,6 +45,8 @@ namespace DreamOfOne.Core
 
             sb.Append($"  점수:{bundle.Score}");
 
+            AppendRuleSummary(sb, bundle);
+
             AppendDetailLines(sb, "증거", bundle.evidence, 2);
             AppendDetailLines(sb, "신고", bundle.reports, 2);
             AppendDetailLines(sb, "위반", bundle.violations, 2);
@@ -53,6 +55,62 @@ namespace DreamOfOne.Core
             AppendDetailLines(sb, "반박", bundle.rebuttals, 1);
 
             return sb.ToString();
+        }
+
+        private static void AppendRuleSummary(StringBuilder sb, CaseBundle bundle)
+        {
+            if (bundle == null)
+            {
+                return;
+            }
+
+            var rules = new System.Collections.Generic.HashSet<string>();
+            CollectRules(rules, bundle.violations);
+            CollectRules(rules, bundle.evidence);
+            CollectRules(rules, bundle.reports);
+
+            if (rules.Count == 0)
+            {
+                return;
+            }
+
+            sb.Append("\n규칙: ");
+            int count = 0;
+            foreach (var rule in rules)
+            {
+                if (count > 0)
+                {
+                    sb.Append(", ");
+                }
+                sb.Append(rule);
+                count++;
+                if (count >= 4)
+                {
+                    break;
+                }
+            }
+        }
+
+        private static void CollectRules(System.Collections.Generic.HashSet<string> rules, System.Collections.Generic.List<EventRecord> list)
+        {
+            if (rules == null || list == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                var record = list[i];
+                if (record == null)
+                {
+                    continue;
+                }
+
+                if (!string.IsNullOrEmpty(record.ruleId))
+                {
+                    rules.Add(record.ruleId);
+                }
+            }
         }
 
         private static void AppendDetailLines(StringBuilder sb, string label, System.Collections.Generic.List<EventRecord> list, int max)
@@ -71,8 +129,11 @@ namespace DreamOfOne.Core
                     continue;
                 }
 
-            sb.Append($"\n{label}: {record.note}");
+                string actor = string.IsNullOrEmpty(record.actorRole) ? record.actorId : $"{record.actorId}({record.actorRole})";
+                string rule = string.IsNullOrEmpty(record.ruleId) ? "-" : record.ruleId;
+                string note = string.IsNullOrEmpty(record.note) ? record.eventType.ToString() : record.note;
+                sb.Append($"\n{label}: [{rule}] {actor} - {note}");
+            }
         }
     }
-}
 }

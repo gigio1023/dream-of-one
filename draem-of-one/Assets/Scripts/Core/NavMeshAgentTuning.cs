@@ -25,7 +25,9 @@ namespace DreamOfOne.Core
 
             agent.radius = settings.Radius;
             agent.height = settings.Height;
-            agent.baseOffset = settings.BaseOffset;
+            agent.baseOffset = settings.BaseOffset > agent.baseOffset
+                ? settings.BaseOffset
+                : agent.baseOffset;
             agent.speed = settings.Speed;
             agent.angularSpeed = settings.AngularSpeed;
             agent.acceleration = settings.Acceleration;

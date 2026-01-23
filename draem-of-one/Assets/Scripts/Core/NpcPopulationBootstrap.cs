@@ -12,7 +12,7 @@ namespace DreamOfOne.Core
     public sealed class NpcPopulationBootstrap : MonoBehaviour
     {
         [SerializeField]
-        private int targetCitizenCount = 6;
+        private int targetCitizenCount = 12;
 
         [SerializeField]
         private int targetPoliceCount = 1;
@@ -57,6 +57,10 @@ namespace DreamOfOne.Core
         [SerializeField]
         private int policeAvoidancePriority = 45;
 
+        [SerializeField]
+        [Tooltip("NavMesh가 준비될 때까지 NPC 스폰을 지연")]
+        private float navmeshReadyTimeout = 6f;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void EnsureBootstrap()
         {
@@ -69,14 +73,31 @@ namespace DreamOfOne.Core
             host.AddComponent<NpcPopulationBootstrap>();
         }
 
-        private void Awake()
-        {
-            EnsurePopulation();
-        }
-
         private void Start()
         {
+            StartCoroutine(EnsurePopulationWhenReady());
             StartCoroutine(AttachInteriorRoutinesDeferred());
+        }
+
+        private IEnumerator EnsurePopulationWhenReady()
+        {
+            float start = Time.time;
+            while (!IsNavMeshReady())
+            {
+                if (Time.time - start > navmeshReadyTimeout)
+                {
+                    break;
+                }
+                yield return new WaitForSeconds(0.2f);
+            }
+
+            if (!IsNavMeshReady())
+            {
+                Debug.LogWarning("[NpcPopulationBootstrap] NavMesh not ready. NPC spawn deferred.");
+                yield break;
+            }
+
+            EnsurePopulation();
         }
 
         private void EnsurePopulation()
@@ -96,6 +117,7 @@ namespace DreamOfOne.Core
                 EnsureGrounding(patrols[i].gameObject);
                 WarpToGround(patrols[i].gameObject);
                 ApplyAgentSettings(patrols[i].GetComponent<NavMeshAgent>(), isPolice: false);
+                EnsureRoleRoutine(patrols[i].gameObject);
             }
 
             for (int i = 0; i < police.Length; i++)
@@ -191,6 +213,7 @@ namespace DreamOfOne.Core
             npc.AddComponent<NpcPersona>();
             npc.AddComponent<NpcContext>();
             npc.AddComponent<SimplePatrol>();
+            npc.AddComponent<NpcRoleRoutine>();
 
             EnsureGrounding(npc);
             WarpToGround(npc);
@@ -283,6 +306,82 @@ namespace DreamOfOne.Core
             };
 
             NavMeshAgentTuning.Apply(agent, settings);
+            ApplyVisualBaseOffset(agent);
+        }
+
+        private void ApplyVisualBaseOffset(NavMeshAgent agent)
+        {
+            if (agent == null)
+            {
+                return;
+            }
+
+            float offset = ComputeVisualOffset(agent.transform);
+            if (offset <= 0f)
+            {
+                return;
+            }
+
+            if (offset > agent.baseOffset)
+            {
+                agent.baseOffset = offset;
+            }
+        }
+
+        private static void EnsureRoleRoutine(GameObject actor)
+        {
+            if (actor == null)
+            {
+                return;
+            }
+
+            if (actor.GetComponent<DreamOfOne.NPC.NpcRoleRoutine>() == null)
+            {
+                actor.AddComponent<DreamOfOne.NPC.NpcRoleRoutine>();
+            }
+        }
+
+        private static float ComputeVisualOffset(Transform target)
+        {
+            if (target == null)
+            {
+                return 0f;
+            }
+
+            var renderers = target.GetComponentsInChildren<Renderer>(true);
+            if (renderers == null || renderers.Length == 0)
+            {
+                return 0f;
+            }
+
+            float minY = float.PositiveInfinity;
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                var renderer = renderers[i];
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                float rendererMin = renderer.bounds.min.y;
+                if (rendererMin < minY)
+                {
+                    minY = rendererMin;
+                }
+            }
+
+            if (float.IsInfinity(minY))
+            {
+                return 0f;
+            }
+
+            return target.position.y - minY;
+        }
+
+        private static bool IsNavMeshReady()
+        {
+            var triangulation = NavMesh.CalculateTriangulation();
+            return triangulation.vertices != null && triangulation.vertices.Length > 0;
         }
 
         private IEnumerator AttachInteriorRoutinesDeferred()

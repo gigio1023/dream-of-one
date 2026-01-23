@@ -18,6 +18,15 @@ namespace DreamOfOne.Core
         [SerializeField]
         private float minVisualOffset = 0.01f;
 
+        [SerializeField]
+        private bool alignNavMeshAgent = true;
+
+        [SerializeField]
+        private float navMeshBaseOffsetMin = 0.04f;
+
+        [SerializeField]
+        private float navMeshBaseOffsetPadding = 0.02f;
+
         private void Awake()
         {
             Apply();
@@ -38,6 +47,11 @@ namespace DreamOfOne.Core
             if (alignVisualMesh)
             {
                 EnsureVisualOffset();
+            }
+
+            if (alignNavMeshAgent)
+            {
+                AlignNavMeshAgent();
             }
         }
 
@@ -126,6 +140,59 @@ namespace DreamOfOne.Core
             childRenderer.motionVectorGenerationMode = meshRenderer.motionVectorGenerationMode;
 
             DisableRootRenderer();
+        }
+
+        private void AlignNavMeshAgent()
+        {
+            var agent = GetComponent<NavMeshAgent>();
+            if (agent == null)
+            {
+                return;
+            }
+
+            float visualOffset = ComputeVisualOffset();
+            if (visualOffset <= 0f)
+            {
+                visualOffset = navMeshBaseOffsetMin;
+            }
+
+            float targetOffset = Mathf.Max(navMeshBaseOffsetMin, visualOffset + navMeshBaseOffsetPadding);
+            if (targetOffset > agent.baseOffset)
+            {
+                agent.baseOffset = targetOffset;
+            }
+        }
+
+        private float ComputeVisualOffset()
+        {
+            var renderers = GetComponentsInChildren<Renderer>(true);
+            if (renderers == null || renderers.Length == 0)
+            {
+                return 0f;
+            }
+
+            float minY = float.PositiveInfinity;
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                var renderer = renderers[i];
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                float rendererMin = renderer.bounds.min.y;
+                if (rendererMin < minY)
+                {
+                    minY = rendererMin;
+                }
+            }
+
+            if (float.IsInfinity(minY))
+            {
+                return 0f;
+            }
+
+            return transform.position.y - minY;
         }
 
         private bool HasChildRenderer()

@@ -79,7 +79,8 @@ namespace DreamOfOne.Core
         private int facilityStepIndex = 0;
         private int mediaStepIndex = 0;
         private int studioViolationCounter = 0;
-        private int storeViolationCounter = 0;
+        private int storeLabelViolationCounter = 0;
+        private int storeQueueViolationCounter = 0;
         private int parkViolationCounter = 0;
         private int stationViolationCounter = 0;
         private int cafeViolationCounter = 0;
@@ -202,14 +203,14 @@ namespace DreamOfOne.Core
             {
                 case 0:
                     RecordOrg("Clerk", "Store", "StoreQueue", EventType.LabelChanged, "가격 라벨 갱신", storeAnchor, "PROC_STORE_LABEL");
-                    EmitViolationEvery("Store", "StoreQueue", "R_LABEL", "라벨 오류 의심", storeAnchor, ref storeViolationCounter, 3);
+                    EmitViolationEvery("Store", "StoreQueue", "R_LABEL", "라벨 오류 의심", storeAnchor, ref storeLabelViolationCounter, 3);
                     break;
                 case 1:
                     RecordOrg("Clerk", "Store", "StoreQueue", EventType.PaymentProcessed, "결제 처리", storeAnchor, "PROC_STORE_PAYMENT");
                     break;
                 default:
                     RecordOrg("Clerk", "Store", "StoreQueue", EventType.QueueUpdated, "줄 안내", storeAnchor, "PROC_STORE_QUEUE");
-                    EmitViolationEvery("Store", "StoreQueue", "R_QUEUE", "새치기 의심", storeAnchor, ref storeViolationCounter, 2);
+                    EmitViolationEvery("Store", "StoreQueue", "R_QUEUE", "새치기 의심", storeAnchor, ref storeQueueViolationCounter, 2);
                     break;
             }
 

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc70c40e1be93477688e356ad8b3368f, type: 3}
+  m_Name: NPC_Studio_PM
+  m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.NpcDefinition
+  npcId: Studio_PM
+  roleName: PM
+  organization: Studio
+  routine: Studio_PM
+  routineAnchors:
+  - Studio_Kanban
+  - Studio_ApprovalDesk
+  - Studio_RCInsert
+  perceptionProfile: Default
+  injectionProfile: Default
+  dialogueStyle: Short
+  authorityProfile: High
+  anchorName: StudioBuilding_L1
+  prefab: {fileID: 7423431579312459003, guid: 42d95ae4d63db4f2c9e4cc360cd37779, type: 3}
+  spawnOffset: {x: 1.2, y: 0, z: 0.6}
+  isPolice: 0
+  spawnCount: 2
+  speed: 1.25
+  stoppingDistance: 0.2
+  avoidancePriority: 58

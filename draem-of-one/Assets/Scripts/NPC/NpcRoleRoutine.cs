@@ -98,6 +98,7 @@ namespace DreamOfOne.NPC
             route.AddRange(anchors);
             routeIndex = 0;
             nextMoveTime = Time.time + Random.Range(0.5f, dwellSeconds);
+            DisableSimplePatrolIfNeeded();
         }
 
         private void BuildRoute()
@@ -127,13 +128,20 @@ namespace DreamOfOne.NPC
                 }
             }
 
-            if (disableSimplePatrol && route.Count > 0)
+            DisableSimplePatrolIfNeeded();
+        }
+
+        private void DisableSimplePatrolIfNeeded()
+        {
+            if (!disableSimplePatrol || route.Count == 0)
             {
-                var patrol = GetComponent<SimplePatrol>();
-                if (patrol != null)
-                {
-                    patrol.enabled = false;
-                }
+                return;
+            }
+
+            var patrol = GetComponent<SimplePatrol>();
+            if (patrol != null)
+            {
+                patrol.enabled = false;
             }
         }
 

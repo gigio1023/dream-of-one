@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc70c40e1be93477688e356ad8b3368f, type: 3}
+  m_Name: NPC_Station_Officer
+  m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.NpcDefinition
+  npcId: Station_Officer
+  roleName: Officer
+  organization: Station
+  routine: Station_Officer
+  routineAnchors:
+  - Police_ReportDesk
+  - Police_EvidenceBoard
+  - Police_InterrogationSpot
+  - Police_Printer
+  perceptionProfile: Default
+  injectionProfile: Default
+  dialogueStyle: Short
+  authorityProfile: High
+  anchorName: Station
+  prefab: {fileID: 5620060744776670700, guid: e0b5918c12c6643ca934de44fc6922eb, type: 3}
+  spawnOffset: {x: 1, y: 0, z: 0.8}
+  isPolice: 1
+  spawnCount: 1
+  speed: 1.5
+  stoppingDistance: 0.35
+  avoidancePriority: 45

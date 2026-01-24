@@ -73,6 +73,9 @@ namespace DreamOfOne.Editor
             var portalRoot = CreateChild(root, "InteriorPortals");
             var markerRoot = CreateChild(root, "PortalMarkers");
 
+            var routineAnchorLookup = new Dictionary<string, Transform>(StringComparer.OrdinalIgnoreCase);
+            CacheRoutineAnchors(anchors.transform, routineAnchorLookup);
+
             int buildingCount = 0;
             int interiorCount = 0;
             int interactableCount = 0;
@@ -248,6 +251,8 @@ namespace DreamOfOne.Editor
                     string.IsNullOrEmpty(interactable.RuleId) ? interactable.EventType.ToString() : interactable.RuleId,
                     placeId);
 
+                RegisterRoutineAnchor(routineAnchorLookup, interactable.InteractableId, instance.transform);
+
                 interactableCount++;
 
                 if (!IsNavMeshReachable(instance.transform.position, InteractableNavMeshSampleRadius))
@@ -369,12 +374,98 @@ namespace DreamOfOne.Editor
                         persona.Configure(npc.NpcId, npc.RoleName, npc.Organization, npc.DialogueStyle);
                     }
 
+                    ConfigureNpcRoutine(instance, npc, routineAnchorLookup, report);
+
                     npcInstanceCount++;
                 }
             }
 
             report.LogSummary($"Rebuild complete: Buildings={buildingCount}, Interiors={interiorCount}, Interactables={interactableCount}, Portals={portalCount}, NPCSpawns={npcSpawnCount}");
             BakeNavMesh(report);
+        }
+
+        private static void CacheRoutineAnchors(Transform anchorsRoot, Dictionary<string, Transform> lookup)
+        {
+            if (anchorsRoot == null || lookup == null)
+            {
+                return;
+            }
+
+            lookup.Clear();
+            foreach (Transform child in anchorsRoot)
+            {
+                if (child == null)
+                {
+                    continue;
+                }
+
+                RegisterRoutineAnchor(lookup, child.name, child);
+            }
+        }
+
+        private static void RegisterRoutineAnchor(Dictionary<string, Transform> lookup, string id, Transform target)
+        {
+            if (lookup == null || target == null || string.IsNullOrEmpty(id))
+            {
+                return;
+            }
+
+            if (!lookup.ContainsKey(id))
+            {
+                lookup[id] = target;
+            }
+        }
+
+        private static void ConfigureNpcRoutine(GameObject instance, NpcDefinition npc, Dictionary<string, Transform> lookup, WorldBuildReport report)
+        {
+            if (instance == null || npc == null || lookup == null)
+            {
+                return;
+            }
+
+            var routine = instance.GetComponent<NpcRoleRoutine>();
+            if (routine == null)
+            {
+                routine = instance.AddComponent<NpcRoleRoutine>();
+            }
+
+            var anchors = npc.RoutineAnchors;
+            if (anchors == null || anchors.Count == 0)
+            {
+                return;
+            }
+
+            var route = new List<Transform>(anchors.Count);
+            for (int i = 0; i < anchors.Count; i++)
+            {
+                var anchorId = anchors[i];
+                if (string.IsNullOrEmpty(anchorId))
+                {
+                    continue;
+                }
+
+                if (lookup.TryGetValue(anchorId, out var transform))
+                {
+                    route.Add(transform);
+                    continue;
+                }
+
+                var fallback = GameObject.Find($"CITY_Anchors/{anchorId}");
+                if (fallback != null)
+                {
+                    lookup[anchorId] = fallback.transform;
+                    route.Add(fallback.transform);
+                }
+                else
+                {
+                    report?.AddWarning($"Missing routine anchor {anchorId} for NPC {npc.NpcId}.");
+                }
+            }
+
+            if (route.Count > 0)
+            {
+                routine.Configure(route);
+            }
         }
 
         private static void ClearPreviousBuild()

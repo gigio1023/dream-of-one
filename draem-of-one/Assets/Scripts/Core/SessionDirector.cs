@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
 using DreamOfOne.UI;
 using UnityEngine;
 using UnityEngine.AI;
@@ -12,6 +15,34 @@ namespace DreamOfOne.Core
     /// </summary>
     public sealed class SessionDirector : MonoBehaviour
     {
+        private enum SessionEndTrigger
+        {
+            TimeLimit,
+            Suspicion,
+            Verdict
+        }
+
+        private enum SessionEnding
+        {
+            Cleared,
+            Guilty,
+            Unresolved,
+            Escalation
+        }
+
+        private struct SessionMetrics
+        {
+            public int totalEvents;
+            public int violations;
+            public int reports;
+            public int evidence;
+            public int rumors;
+            public int artifacts;
+            public int verdicts;
+            public float globalSuspicion;
+            public float elapsedSeconds;
+        }
+
         [SerializeField]
         private GlobalSuspicionSystem globalSuspicionSystem = null;
 
@@ -126,13 +157,13 @@ namespace DreamOfOne.Core
 
             if (elapsedSeconds >= sessionDurationSeconds)
             {
-                EndSession("Time limit reached. You slipped away.");
+                EndSession(SessionEndTrigger.TimeLimit, "Time limit reached. You slipped away.");
                 return;
             }
 
             if (globalSuspicionSystem != null && globalSuspicionSystem.GlobalSuspicion >= suspicionEndThreshold)
             {
-                EndSession("G reached critical. You were flagged.");
+                EndSession(SessionEndTrigger.Suspicion, "G reached critical. You were flagged.");
             }
         }
 
@@ -146,11 +177,11 @@ namespace DreamOfOne.Core
             if (endOnVerdict && record.eventType == EventType.VerdictGiven)
             {
                 string verdict = string.IsNullOrEmpty(record.note) ? "Verdict delivered." : record.note;
-                EndSession($"Verdict: {verdict}");
+                EndSession(SessionEndTrigger.Verdict, $"Verdict: {verdict}");
             }
         }
 
-        private void EndSession(string reason)
+        private void EndSession(SessionEndTrigger trigger, string reason)
         {
             if (ended)
             {
@@ -159,29 +190,37 @@ namespace DreamOfOne.Core
 
             ended = true;
             endReason = reason;
-            string summary = BuildSummary();
+            var metrics = BuildMetrics();
+            var summary = BuildSummaryLine(metrics);
+            var endText = BuildEndSummary(trigger, reason, metrics);
             if (uiManager != null)
             {
-                uiManager.ShowSessionEnd($"SESSION END — {reason}\n{summary}\n\nRestart: {restartKey} / Quit: {(allowQuit ? quitKey.ToString() : "N/A")}");
+                uiManager.ShowSessionEnd(endText);
                 uiManager.ShowToast(summary, 6f);
             }
 
             ApplyFreeze();
         }
 
-        private string BuildSummary()
+        private SessionMetrics BuildMetrics()
         {
-            int violations = 0;
-            int reports = 0;
-            int evidence = 0;
-            int verdicts = 0;
-            int rumors = 0;
-            int total = 0;
+            var metrics = new SessionMetrics
+            {
+                totalEvents = 0,
+                violations = 0,
+                reports = 0,
+                evidence = 0,
+                verdicts = 0,
+                rumors = 0,
+                artifacts = 0,
+                globalSuspicion = globalSuspicionSystem != null ? globalSuspicionSystem.GlobalSuspicion : 0f,
+                elapsedSeconds = elapsedSeconds
+            };
 
             if (eventLog != null)
             {
                 var events = eventLog.Events;
-                total = events.Count;
+                metrics.totalEvents = events.Count;
                 for (int i = 0; i < events.Count; i++)
                 {
                     var record = events[i];
@@ -193,36 +232,222 @@ namespace DreamOfOne.Core
                     switch (record.eventType)
                     {
                         case EventType.ViolationDetected:
-                            violations++;
+                            metrics.violations++;
                             break;
                         case EventType.ReportFiled:
-                            reports++;
+                            metrics.reports++;
                             break;
                         case EventType.EvidenceCaptured:
                         case EventType.TicketIssued:
                         case EventType.CctvCaptured:
-                            evidence++;
+                            metrics.evidence++;
                             break;
                         case EventType.VerdictGiven:
-                            verdicts++;
+                            metrics.verdicts++;
                             break;
                         case EventType.RumorShared:
                         case EventType.RumorConfirmed:
                         case EventType.RumorDebunked:
-                            rumors++;
+                            metrics.rumors++;
                             break;
                     }
                 }
             }
 
-            int artifacts = 0;
             var artifactSystem = FindFirstObjectByType<ArtifactSystem>();
             if (artifactSystem != null)
             {
-                artifacts = artifactSystem.GetArtifacts().Count;
+                metrics.artifacts = artifactSystem.GetArtifacts().Count;
             }
 
-            return $"Summary: events {total}, violations {violations}, reports {reports}, evidence {evidence}, rumors {rumors}, artifacts {artifacts}, verdicts {verdicts}.";
+            return metrics;
+        }
+
+        private string BuildSummaryLine(SessionMetrics metrics)
+        {
+            return $"Summary: events {metrics.totalEvents}, violations {metrics.violations}, reports {metrics.reports}, evidence {metrics.evidence}, rumors {metrics.rumors}, artifacts {metrics.artifacts}, verdicts {metrics.verdicts}.";
+        }
+
+        private string BuildEndSummary(SessionEndTrigger trigger, string reason, SessionMetrics metrics)
+        {
+            var ending = ResolveEnding(trigger, metrics);
+            int score = ComputeScore(trigger, metrics);
+            string grade = GetGrade(score);
+            var why = BuildWhyReasons(trigger, metrics);
+            var replay = BuildReplayReasons(ending, trigger);
+            var summary = BuildSummaryLine(metrics);
+
+            var builder = new StringBuilder();
+            builder.AppendLine($"SESSION END — {ending}");
+            builder.AppendLine($"Reason: {reason}");
+            builder.AppendLine($"Score: {score} ({grade})");
+            builder.AppendLine($"Why: {string.Join(", ", why)}");
+            builder.AppendLine($"Replay: {string.Join(" / ", replay)}");
+            builder.AppendLine(summary);
+            builder.AppendLine();
+            builder.AppendLine($"Restart: {restartKey} / Quit: {(allowQuit ? quitKey.ToString() : "N/A")}");
+            return builder.ToString();
+        }
+
+        private SessionEnding ResolveEnding(SessionEndTrigger trigger, SessionMetrics metrics)
+        {
+            if (trigger == SessionEndTrigger.Suspicion || metrics.globalSuspicion >= suspicionEndThreshold)
+            {
+                return SessionEnding.Escalation;
+            }
+
+            if (metrics.verdicts > 0)
+            {
+                if (metrics.evidence >= 2 && metrics.violations <= 1)
+                {
+                    return SessionEnding.Cleared;
+                }
+
+                return SessionEnding.Guilty;
+            }
+
+            if (metrics.evidence >= 3 && metrics.reports >= 2)
+            {
+                return SessionEnding.Cleared;
+            }
+
+            return SessionEnding.Unresolved;
+        }
+
+        private int ComputeScore(SessionEndTrigger trigger, SessionMetrics metrics)
+        {
+            int score = 50;
+            score += metrics.evidence * 5;
+            score += metrics.reports * 4;
+            score += metrics.artifacts * 3;
+            score += metrics.verdicts * 6;
+            score += metrics.rumors * 2;
+            score -= metrics.violations * 6;
+            score -= Mathf.RoundToInt(metrics.globalSuspicion * 20f);
+
+            if (trigger == SessionEndTrigger.Suspicion)
+            {
+                score -= 10;
+            }
+
+            return Mathf.Clamp(score, 0, 100);
+        }
+
+        private static string GetGrade(int score)
+        {
+            if (score >= 85)
+            {
+                return "S";
+            }
+
+            if (score >= 70)
+            {
+                return "A";
+            }
+
+            if (score >= 55)
+            {
+                return "B";
+            }
+
+            if (score >= 40)
+            {
+                return "C";
+            }
+
+            return "D";
+        }
+
+        private List<string> BuildWhyReasons(SessionEndTrigger trigger, SessionMetrics metrics)
+        {
+            var candidates = new List<(string text, int weight)>();
+
+            if (metrics.evidence >= 3)
+            {
+                candidates.Add(("Strong evidence trail", metrics.evidence * 3));
+            }
+
+            if (metrics.reports >= 2)
+            {
+                candidates.Add(("Filed reports", metrics.reports * 3));
+            }
+
+            if (metrics.artifacts >= 2)
+            {
+                candidates.Add(("Artifacts secured", metrics.artifacts * 2));
+            }
+
+            if (metrics.verdicts > 0)
+            {
+                candidates.Add(("Verdict delivered", 6));
+            }
+
+            if (metrics.rumors >= 3)
+            {
+                candidates.Add(("Rumors traced", metrics.rumors * 2));
+            }
+
+            if (metrics.violations >= 2)
+            {
+                candidates.Add(("Multiple violations", -metrics.violations * 3));
+            }
+
+            if (metrics.globalSuspicion >= suspicionEndThreshold)
+            {
+                candidates.Add(("Suspicion peaked", -8));
+            }
+
+            if (trigger == SessionEndTrigger.TimeLimit)
+            {
+                candidates.Add(("Time expired", -5));
+            }
+
+            candidates.Sort((a, b) => Math.Abs(b.weight).CompareTo(Math.Abs(a.weight)));
+
+            var results = new List<string>();
+            for (int i = 0; i < candidates.Count && results.Count < 2; i++)
+            {
+                results.Add(candidates[i].text);
+            }
+
+            if (results.Count == 0)
+            {
+                results.Add("Session concluded");
+            }
+
+            return results;
+        }
+
+        private List<string> BuildReplayReasons(SessionEnding ending, SessionEndTrigger trigger)
+        {
+            var replay = new List<string>();
+
+            switch (ending)
+            {
+                case SessionEnding.Cleared:
+                    replay.Add("Push for a riskier ending");
+                    replay.Add("Chase different incidents");
+                    break;
+                case SessionEnding.Guilty:
+                    replay.Add("Gather more evidence before verdict");
+                    replay.Add("Reduce violations to clear suspicion");
+                    break;
+                case SessionEnding.Unresolved:
+                    replay.Add("Trigger more incidents to reach a verdict");
+                    replay.Add("File reports to increase clarity");
+                    break;
+                case SessionEnding.Escalation:
+                    replay.Add("Keep suspicion low");
+                    replay.Add("Resolve incidents earlier");
+                    break;
+            }
+
+            if (trigger == SessionEndTrigger.TimeLimit)
+            {
+                replay[0] = "Finish key objectives sooner";
+            }
+
+            return replay;
         }
 
         public void ResetSession()

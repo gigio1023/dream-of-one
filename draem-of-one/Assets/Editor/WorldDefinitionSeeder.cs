@@ -87,6 +87,7 @@ namespace DreamOfOne.Editor
                 // Studio
                 CreateInteractable("Studio_Kanban", "StudioBuilding_L1", interactablePrefab, new Vector3(1.2f, 0f, 0.8f), CoreEventType.TaskStarted, EventCategory.Organization, ZoneType.None, "PROC_KANBAN", "Kanban moved", "Studio"),
                 CreateInteractable("Studio_PatchTerminal", "StudioBuilding_L1", interactablePrefab, new Vector3(-1.2f, 0f, 0.8f), CoreEventType.TaskCompleted, EventCategory.Organization, ZoneType.None, "PROC_PATCH", "Patch note", "Studio"),
+                CreateInteractable("Studio_Terminal", "StudioBuilding_L1", interactablePrefab, new Vector3(-1.6f, 0f, 0.6f), CoreEventType.TaskCompleted, EventCategory.Organization, ZoneType.None, "PROC_PATCH", "Terminal log", "Studio"),
                 CreateInteractable("Studio_ApprovalDesk", "StudioBuilding_L1", interactablePrefab, new Vector3(0.6f, 0f, -0.6f), CoreEventType.ApprovalGranted, EventCategory.Procedure, ZoneType.None, "PROC_APPROVAL", "Approval granted", "Studio"),
                 CreateInteractable("Studio_RCInsert", "StudioBuilding_L1", interactablePrefab, new Vector3(-0.6f, 0f, -0.6f), CoreEventType.RcInserted, EventCategory.Procedure, ZoneType.None, "PROC_RC", "RC inserted", "Studio"),
                 CreateInteractable("Studio_Lounge", "StudioBuilding_L1", interactablePrefab, new Vector3(0f, 0f, 1.6f), CoreEventType.RumorShared, EventCategory.Gossip, ZoneType.None, "GOSSIP", "Lounge gossip", "Studio"),
@@ -94,15 +95,19 @@ namespace DreamOfOne.Editor
                 // Park
                 CreateInteractable("Park_Bench", "ParkArea", interactablePrefab, new Vector3(1.5f, 0f, 1f), CoreEventType.SeatClaimed, EventCategory.Zone, ZoneType.Seat, "R_SEAT", "Seat claimed", "Park"),
                 CreateInteractable("Park_QuietSign", "ParkArea", interactablePrefab, new Vector3(-1.5f, 0f, 1f), CoreEventType.NoiseObserved, EventCategory.Rule, ZoneType.None, "R_NOISE", "Noise warning", "Park"),
+                CreateInteractable("Park_NoiseSpot", "ParkArea", interactablePrefab, new Vector3(-1.2f, 0f, 0.6f), CoreEventType.NoiseObserved, EventCategory.Rule, ZoneType.None, "R_NOISE", "Noise spot", "Park"),
                 CreateInteractable("Park_Bulletin", "ParkArea", interactablePrefab, new Vector3(0f, 0f, -1.2f), CoreEventType.RumorShared, EventCategory.Gossip, ZoneType.None, "GOSSIP", "Bulletin rumor", "Park"),
+                CreateInteractable("Park_NoticeBoard", "ParkArea", interactablePrefab, new Vector3(0.2f, 0f, -1.6f), CoreEventType.RumorShared, EventCategory.Gossip, ZoneType.None, "GOSSIP", "Notice board", "Park"),
                 CreateInteractable("Park_PhotoSpot", "ParkArea", interactablePrefab, new Vector3(0.8f, 0f, -0.6f), CoreEventType.ViolationDetected, EventCategory.Rule, ZoneType.Photo, "R_PHOTO", "Photo violation", "Park"),
 
                 // Police
                 CreateInteractable("Police_ReportDesk", "Station", interactablePrefab, new Vector3(1f, 0f, -0.6f), CoreEventType.ReportFiled, EventCategory.Report, ZoneType.None, "R_QUEUE", "Report filed", "Police"),
                 CreateInteractable("Police_EvidenceBoard", "Station", interactablePrefab, new Vector3(-1f, 0f, -0.6f), CoreEventType.EvidenceCaptured, EventCategory.Evidence, ZoneType.None, "EVIDENCE", "Evidence attached", "Police"),
                 CreateInteractable("Police_TicketPrinter", "Station", interactablePrefab, new Vector3(0.6f, 0f, 0.6f), CoreEventType.TicketIssued, EventCategory.Evidence, ZoneType.None, "R_QUEUE", "Ticket issued", "Police"),
+                CreateInteractable("Police_Printer", "Station", interactablePrefab, new Vector3(0.9f, 0f, 0.2f), CoreEventType.TicketIssued, EventCategory.Evidence, ZoneType.None, "R_QUEUE", "Printer output", "Police"),
                 CreateInteractable("Police_CCTVConsole", "Station", interactablePrefab, new Vector3(-0.6f, 0f, 0.6f), CoreEventType.CctvCaptured, EventCategory.Evidence, ZoneType.None, "CCTV", "CCTV capture", "Police"),
                 CreateInteractable("Police_Interrogation", "Station", interactablePrefab, new Vector3(0f, 0f, 1.2f), CoreEventType.InterrogationStarted, EventCategory.Procedure, ZoneType.None, "PROC_INTERROGATION", "Interrogation started", "Police"),
+                CreateInteractable("Police_InterrogationSpot", "Station", interactablePrefab, new Vector3(-0.2f, 0f, 1.0f), CoreEventType.InterrogationStarted, EventCategory.Procedure, ZoneType.None, "PROC_INTERROGATION", "Interrogation spot", "Police"),
                 CreateInteractable("Police_CaseBoard", "Station", interactablePrefab, new Vector3(0f, 0f, -1.2f), CoreEventType.TaskCompleted, EventCategory.Procedure, ZoneType.None, "PROC_CASE", "Case review", "Police")
             };
 

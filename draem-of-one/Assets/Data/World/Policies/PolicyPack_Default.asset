@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.PolicyPackDefinition
   policyId: Default
   description: Baseline policy pack for MCSS slice.
+  roles: []
+  skills: []

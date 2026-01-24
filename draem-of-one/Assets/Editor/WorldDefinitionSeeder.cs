@@ -127,13 +127,121 @@ namespace DreamOfOne.Editor
 
             var npcs = new List<NpcDefinition>
             {
-                CreateNpc("Citizen_A", "Citizen", "StoreBuilding", new Vector3(2f, 0f, 2f), false, 1.2f, 0.2f, 60, citizenPrefab),
-                CreateNpc("Citizen_B", "Citizen", "ParkArea", new Vector3(-2f, 0f, 1f), false, 1.2f, 0.2f, 60, citizenPrefab),
-                CreateNpc("Citizen_C", "Citizen", "StudioBuilding_L1", new Vector3(1f, 0f, -1f), false, 1.2f, 0.2f, 60, citizenPrefab),
-                CreateNpc("Citizen_D", "Citizen", "Cafe", new Vector3(-1f, 0f, 1f), false, 1.2f, 0.2f, 60, citizenPrefab),
-                CreateNpc("Citizen_E", "Citizen", "ParkArea", new Vector3(1f, 0f, -1f), false, 1.2f, 0.2f, 60, citizenPrefab),
-                CreateNpc("Citizen_F", "Citizen", "StoreBuilding", new Vector3(-1f, 0f, -1f), false, 1.2f, 0.2f, 60, citizenPrefab),
-                CreateNpc("Police_Officer", "Police", "Station", new Vector3(1f, 0f, 1f), true, 1.5f, 0.35f, 45, policePrefab)
+                CreateNpc(
+                    "Store_Clerk_A",
+                    "Clerk",
+                    "Store",
+                    "Store_Clerk",
+                    "Medium",
+                    "StoreBuilding",
+                    new Vector3(1.4f, 0f, 0.6f),
+                    false,
+                    1.2f,
+                    0.2f,
+                    60,
+                    citizenPrefab,
+                    new [] { "Store_LabelBoard", "Store_QueueMarker", "Store_CounterBell", "Store_Printer" }),
+                CreateNpc(
+                    "Store_Manager",
+                    "Manager",
+                    "Store",
+                    "Store_Manager",
+                    "High",
+                    "StoreBuilding",
+                    new Vector3(-1.2f, 0f, -0.4f),
+                    false,
+                    1.2f,
+                    0.2f,
+                    58,
+                    citizenPrefab,
+                    new [] { "Store_CounterBell", "Store_LabelBoard", "Store_Printer" }),
+
+                CreateNpc(
+                    "Studio_PM",
+                    "PM",
+                    "Studio",
+                    "Studio_PM",
+                    "High",
+                    "StudioBuilding_L1",
+                    new Vector3(1.2f, 0f, 0.6f),
+                    false,
+                    1.25f,
+                    0.2f,
+                    58,
+                    citizenPrefab,
+                    new [] { "Studio_Kanban", "Studio_ApprovalDesk", "Studio_RCInsert" }),
+                CreateNpc(
+                    "Studio_QA",
+                    "QA",
+                    "Studio",
+                    "Studio_QA",
+                    "Medium",
+                    "StudioBuilding_L1",
+                    new Vector3(-1.2f, 0f, 0.4f),
+                    false,
+                    1.2f,
+                    0.2f,
+                    58,
+                    citizenPrefab,
+                    new [] { "Studio_Kanban", "Studio_Terminal", "Studio_ApprovalDesk" }),
+
+                CreateNpc(
+                    "Park_Caretaker",
+                    "Caretaker",
+                    "Park",
+                    "Park_Caretaker",
+                    "Medium",
+                    "ParkArea",
+                    new Vector3(1.2f, 0f, 0.8f),
+                    false,
+                    1.2f,
+                    0.2f,
+                    60,
+                    citizenPrefab,
+                    new [] { "Park_Bench", "Park_NoiseSpot", "Park_NoticeBoard" }),
+                CreateNpc(
+                    "Park_Elder",
+                    "Elder",
+                    "Park",
+                    "Park_Elder",
+                    "High",
+                    "ParkArea",
+                    new Vector3(-1.1f, 0f, -0.6f),
+                    false,
+                    1.15f,
+                    0.2f,
+                    60,
+                    citizenPrefab,
+                    new [] { "Park_NoticeBoard", "Park_Bench" }),
+
+                CreateNpc(
+                    "Station_Officer",
+                    "Officer",
+                    "Station",
+                    "Station_Officer",
+                    "High",
+                    "Station",
+                    new Vector3(1.0f, 0f, 0.8f),
+                    true,
+                    1.5f,
+                    0.35f,
+                    45,
+                    policePrefab,
+                    new [] { "Police_ReportDesk", "Police_EvidenceBoard", "Police_InterrogationSpot", "Police_Printer" }),
+                CreateNpc(
+                    "Station_Investigator",
+                    "Investigator",
+                    "Station",
+                    "Station_Investigator",
+                    "Medium",
+                    "Station",
+                    new Vector3(-1.0f, 0f, 0.8f),
+                    true,
+                    1.45f,
+                    0.35f,
+                    47,
+                    policePrefab,
+                    new [] { "Police_EvidenceBoard", "StoreBuilding", "StudioBuilding_L1", "ParkArea", "Police_EvidenceBoard" })
             };
 
             ApplyWorldAsset(world, buildings, interactables, incidents, npcs);
@@ -327,13 +435,17 @@ namespace DreamOfOne.Editor
         private static NpcDefinition CreateNpc(
             string id,
             string role,
+            string organization,
+            string routine,
+            string authorityProfile,
             string anchorName,
             Vector3 spawnOffset,
             bool isPolice,
             float speed,
             float stoppingDistance,
             int avoidancePriority,
-            GameObject prefab)
+            GameObject prefab,
+            string[] routineAnchors)
         {
             string path = $"{WorldRoot}/NPCs/NPC_{id}.asset";
             var asset = AssetDatabase.LoadAssetAtPath<NpcDefinition>(path);
@@ -347,12 +459,13 @@ namespace DreamOfOne.Editor
             var so = new SerializedObject(asset);
             so.FindProperty("npcId").stringValue = id;
             so.FindProperty("roleName").stringValue = role;
-            so.FindProperty("organization").stringValue = isPolice ? "Police" : "City";
-            so.FindProperty("routine").stringValue = isPolice ? "Patrol" : "Wander";
+            so.FindProperty("organization").stringValue = organization;
+            so.FindProperty("routine").stringValue = routine;
             so.FindProperty("perceptionProfile").stringValue = "Default";
             so.FindProperty("injectionProfile").stringValue = "Default";
             so.FindProperty("dialogueStyle").stringValue = "Short";
-            so.FindProperty("authorityProfile").stringValue = isPolice ? "High" : "Low";
+            so.FindProperty("authorityProfile").stringValue = authorityProfile;
+            SetStringArray(so.FindProperty("routineAnchors"), routineAnchors ?? System.Array.Empty<string>());
             so.FindProperty("anchorName").stringValue = anchorName;
             so.FindProperty("spawnOffset").vector3Value = spawnOffset;
             so.FindProperty("isPolice").boolValue = isPolice;

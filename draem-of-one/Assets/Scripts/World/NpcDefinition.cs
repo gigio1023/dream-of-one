@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DreamOfOne.World
@@ -16,6 +17,10 @@ namespace DreamOfOne.World
 
         [SerializeField]
         private string routine = "Idle";
+
+        [SerializeField]
+        [Tooltip("Routine anchor/interactable IDs (ordered)")]
+        private string[] routineAnchors = System.Array.Empty<string>();
 
         [SerializeField]
         private string perceptionProfile = "Default";
@@ -57,6 +62,7 @@ namespace DreamOfOne.World
         public string RoleName => roleName;
         public string Organization => organization;
         public string Routine => routine;
+        public IReadOnlyList<string> RoutineAnchors => routineAnchors;
         public string PerceptionProfile => perceptionProfile;
         public string InjectionProfile => injectionProfile;
         public string DialogueStyle => dialogueStyle;

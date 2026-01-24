@@ -347,21 +347,74 @@ namespace DreamOfOne.Core
             }
         }
 
-        private bool WasRestartPressed()
-        {
 #if ENABLE_INPUT_SYSTEM
+        private static bool WasKeyPressed(KeyCode keyCode)
+        {
             if (Keyboard.current == null)
             {
                 return false;
             }
 
-            return restartKey switch
+            if (!TryGetInputSystemKey(keyCode, out var inputKey))
             {
-                KeyCode.R => Keyboard.current[Key.R].wasPressedThisFrame,
-                KeyCode.Space => Keyboard.current[Key.Space].wasPressedThisFrame,
-                KeyCode.Return => Keyboard.current[Key.Enter].wasPressedThisFrame,
-                _ => Keyboard.current[Key.R].wasPressedThisFrame
-            };
+                return false;
+            }
+
+            return Keyboard.current[inputKey].wasPressedThisFrame;
+        }
+
+        private static bool TryGetInputSystemKey(KeyCode keyCode, out Key inputKey)
+        {
+            inputKey = Key.None;
+
+            if (keyCode == KeyCode.None)
+            {
+                return false;
+            }
+
+            switch (keyCode)
+            {
+                case KeyCode.Return:
+                    inputKey = Key.Enter;
+                    return true;
+                case KeyCode.KeypadEnter:
+                    inputKey = Key.NumpadEnter;
+                    return true;
+                case KeyCode.Space:
+                    inputKey = Key.Space;
+                    return true;
+                case KeyCode.Backspace:
+                    inputKey = Key.Backspace;
+                    return true;
+                case KeyCode.Delete:
+                    inputKey = Key.Delete;
+                    return true;
+                case KeyCode.Escape:
+                    inputKey = Key.Escape;
+                    return true;
+            }
+
+            var keyName = keyCode.ToString();
+            if (keyName.StartsWith("Alpha", System.StringComparison.Ordinal))
+            {
+                var digitName = "Digit" + keyName.Substring("Alpha".Length);
+                return System.Enum.TryParse(digitName, out inputKey);
+            }
+
+            if (keyName.StartsWith("Keypad", System.StringComparison.Ordinal))
+            {
+                var numpadName = "Numpad" + keyName.Substring("Keypad".Length);
+                return System.Enum.TryParse(numpadName, out inputKey);
+            }
+
+            return System.Enum.TryParse(keyName, out inputKey);
+        }
+#endif
+
+        private bool WasRestartPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            return WasKeyPressed(restartKey);
 #else
             return Input.GetKeyDown(restartKey);
 #endif
@@ -370,17 +423,7 @@ namespace DreamOfOne.Core
         private bool WasQuitPressed()
         {
 #if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current == null)
-            {
-                return false;
-            }
-
-            return quitKey switch
-            {
-                KeyCode.Q => Keyboard.current[Key.Q].wasPressedThisFrame,
-                KeyCode.Escape => Keyboard.current[Key.Escape].wasPressedThisFrame,
-                _ => Keyboard.current[Key.Q].wasPressedThisFrame
-            };
+            return WasKeyPressed(quitKey);
 #else
             return Input.GetKeyDown(quitKey);
 #endif

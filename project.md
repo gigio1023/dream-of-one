@@ -134,6 +134,7 @@ Actions → Structured Events → WEL append → Semantic Shaper → Canonical L
 
 **Organizations and procedures**
 - Deterministic task graphs (e.g., Store Queue Procedure)
+- Spec baseline: `docs/spec/org-npc-v1.md`
 
 **Gossip network**
 - Draft → Final (confirmed/debunked) transitions via evidence

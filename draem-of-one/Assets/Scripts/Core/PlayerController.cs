@@ -370,8 +370,12 @@ namespace DreamOfOne.Core
             if (Keyboard.current.dKey.isPressed) input.x += 1f;
             return input;
 #else
-            LogInputUnavailable();
-            return Vector2.zero;
+            Vector2 input = Vector2.zero;
+            if (Input.GetKey(KeyCode.W)) input.y += 1f;
+            if (Input.GetKey(KeyCode.S)) input.y -= 1f;
+            if (Input.GetKey(KeyCode.A)) input.x -= 1f;
+            if (Input.GetKey(KeyCode.D)) input.x += 1f;
+            return input;
 #endif
         }
 
@@ -385,8 +389,7 @@ namespace DreamOfOne.Core
 
             return Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame;
 #else
-            LogInputUnavailable();
-            return false;
+            return Input.GetKeyDown(KeyCode.E);
 #endif
         }
 
@@ -400,8 +403,7 @@ namespace DreamOfOne.Core
 
             return Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame;
 #else
-            LogInputUnavailable();
-            return false;
+            return Input.GetKeyDown(KeyCode.F);
 #endif
         }
 
@@ -415,25 +417,9 @@ namespace DreamOfOne.Core
 
             return Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame;
 #else
-            LogInputUnavailable();
-            return false;
+            return Input.GetKeyDown(KeyCode.Space);
 #endif
         }
-
-#if !ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
-        private static bool inputUnavailableLogged = false;
-
-        private static void LogInputUnavailable()
-        {
-            if (inputUnavailableLogged)
-            {
-                return;
-            }
-
-            inputUnavailableLogged = true;
-            Debug.LogWarning("[PlayerController] No input system available. Enable Input System or Legacy Input Manager.");
-        }
-#endif
 
         private void HandleZoneEnter(ZoneInteractable interactable)
         {

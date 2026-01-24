@@ -100,7 +100,15 @@ namespace DreamOfOne.Editor
             var cityRoot = GameObject.Find("CITY_Package");
             if (cityRoot == null)
             {
-                warnings.Add("CITY_Package root not found (POLYGON city pack layout missing).");
+                var worldV2 = GameObject.Find("World_v2");
+                if (worldV2 == null)
+                {
+                    warnings.Add("CITY_Package root not found (POLYGON city pack layout missing).");
+                }
+                else
+                {
+                    info.Add("World_v2 root detected (CITY_Package legacy disabled).");
+                }
             }
             else
             {

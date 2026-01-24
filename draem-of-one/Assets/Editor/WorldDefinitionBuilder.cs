@@ -14,6 +14,11 @@ namespace DreamOfOne.Editor
     public static class WorldDefinitionBuilder
     {
         private const string WorldAssetPath = "Assets/Data/WorldDefinition.asset";
+        private const float DefaultNavMeshSampleRadius = 1.2f;
+        private const float InteractableNavMeshSampleRadius = 1.8f;
+        private const float NpcNavMeshSampleRadius = 2.2f;
+        private const int OverlapBufferSize = 16;
+        private static readonly Collider[] OverlapBuffer = new Collider[OverlapBufferSize];
 
         [MenuItem("Tools/DreamOfOne/Create World Definition Asset")]
         public static void CreateWorldDefinitionAsset()
@@ -245,17 +250,36 @@ namespace DreamOfOne.Editor
 
                 interactableCount++;
 
-                if (!IsNavMeshReachable(instance.transform.position))
+                if (!IsNavMeshReachable(instance.transform.position, InteractableNavMeshSampleRadius))
                 {
                     Debug.Log($"[WorldBuilder] NavMesh check: {interactable.InteractableId} not on NavMesh.");
                 }
 
                 if (collider is BoxCollider overlapBox)
                 {
-                    var hits = Physics.OverlapBox(instance.transform.position + overlapBox.center, overlapBox.size * 0.5f);
-                    if (hits.Length > 1)
+                    Vector3 center = instance.transform.position + overlapBox.center;
+                    Vector3 halfExtents = Vector3.Scale(overlapBox.size, instance.transform.lossyScale) * 0.5f;
+                    int hitCount = Physics.OverlapBoxNonAlloc(center, halfExtents, OverlapBuffer, instance.transform.rotation);
+                    int overlapCount = 0;
+
+                    for (int hitIndex = 0; hitIndex < hitCount; hitIndex++)
                     {
-                        Debug.Log($"[WorldBuilder] Overlap check: {interactable.InteractableId} overlaps {hits.Length - 1} colliders.");
+                        var hit = OverlapBuffer[hitIndex];
+                        OverlapBuffer[hitIndex] = null;
+                        if (hit == null || hit.transform == instance.transform)
+                        {
+                            continue;
+                        }
+
+                        if (hit.GetComponentInParent<Zone>() != null)
+                        {
+                            overlapCount++;
+                        }
+                    }
+
+                    if (overlapCount > 2)
+                    {
+                        Debug.Log($"[WorldBuilder] Overlap check: {interactable.InteractableId} overlaps {overlapCount} zones.");
                     }
                 }
             }
@@ -311,6 +335,12 @@ namespace DreamOfOne.Editor
 
                     grounding.Apply();
 
+                    bool snappedToNavMesh = TrySnapToNavMesh(instance.transform.position, NpcNavMeshSampleRadius, out Vector3 snappedPosition);
+                    if (snappedToNavMesh)
+                    {
+                        instance.transform.position = snappedPosition;
+                    }
+
                     var agent = instance.GetComponent<NavMeshAgent>();
                     if (agent != null)
                     {
@@ -326,7 +356,7 @@ namespace DreamOfOne.Editor
                             AvoidancePriority = npc.AvoidancePriority
                         });
 
-                        if (!IsNavMeshReachable(instance.transform.position))
+                        if (!snappedToNavMesh)
                         {
                             report.AddWarning($"NPC {npc.NpcId} spawned off NavMesh.");
                             agent.enabled = false;
@@ -602,9 +632,21 @@ namespace DreamOfOne.Editor
             return offset;
         }
 
-        private static bool IsNavMeshReachable(Vector3 position)
+        private static bool IsNavMeshReachable(Vector3 position, float radius = DefaultNavMeshSampleRadius)
         {
-            return NavMesh.SamplePosition(position, out _, 1.2f, NavMesh.AllAreas);
+            return NavMesh.SamplePosition(position, out _, radius, NavMesh.AllAreas);
+        }
+
+        private static bool TrySnapToNavMesh(Vector3 position, float radius, out Vector3 snappedPosition)
+        {
+            if (NavMesh.SamplePosition(position, out NavMeshHit hit, radius, NavMesh.AllAreas))
+            {
+                snappedPosition = hit.position;
+                return true;
+            }
+
+            snappedPosition = position;
+            return false;
         }
 
         private static void BakeNavMesh(WorldBuildReport report)

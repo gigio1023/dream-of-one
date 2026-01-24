@@ -1,97 +1,85 @@
 #!/usr/bin/env python3
-"""Validate YAML frontmatter in repo-local Codex skills."""
-
 from __future__ import annotations
 
-from dataclasses import dataclass
-from pathlib import Path
+import re
 import sys
-from typing import Iterable
+from pathlib import Path
 
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-SKILLS_DIR = REPO_ROOT / ".codex" / "skills"
+
+NAME_RE = re.compile(r"^[a-z0-9-]{1,64}$")
+RESERVED_NAMES = {"anthropic", "claude"}
 
 
-@dataclass
-class SkillValidationError:
-    path: Path
-    message: str
-
-
-def iter_skill_files(skills_dir: Path) -> Iterable[Path]:
-    return sorted(skills_dir.glob("*/SKILL.md"))
-
-
-def split_frontmatter(text: str) -> tuple[str | None, str]:
-    if not text.startswith("---"):
-        return None, text
-
-    lines = text.splitlines()
-    if not lines or lines[0].strip() != "---":
-        return None, text
-
-    for idx, line in enumerate(lines[1:], start=1):
-        if line.strip() == "---":
-            frontmatter = "\n".join(lines[1:idx])
-            body = "\n".join(lines[idx + 1 :])
-            return frontmatter, body
-
-    return None, text
-
-
-def validate_skill(path: Path) -> list[SkillValidationError]:
-    errors: list[SkillValidationError] = []
-    text = path.read_text(encoding="utf-8")
-    frontmatter, _ = split_frontmatter(text)
-
-    if frontmatter is None:
-        errors.append(SkillValidationError(path, "missing YAML frontmatter block"))
-        return errors
-
-    try:
-        parsed = yaml.safe_load(frontmatter) or {}
-    except yaml.YAMLError as exc:  # pragma: no cover - exercised in CI
-        errors.append(SkillValidationError(path, f"invalid YAML: {exc}"))
-        return errors
-
-    if not isinstance(parsed, dict):
-        errors.append(SkillValidationError(path, "frontmatter must be a YAML mapping"))
-        return errors
-
-    name = parsed.get("name")
-    description = parsed.get("description")
-
-    if not isinstance(name, str) or not name.strip():
-        errors.append(SkillValidationError(path, "frontmatter.name must be a non-empty string"))
-
-    if not isinstance(description, str) or not description.strip():
-        errors.append(
-            SkillValidationError(path, "frontmatter.description must be a non-empty string")
-        )
-
-    return errors
+def extract_frontmatter(text: str) -> str | None:
+    stripped = text.lstrip()
+    if not stripped.startswith("---"):
+        return None
+    parts = stripped.split("---", 2)
+    if len(parts) < 3:
+        return None
+    return parts[1]
 
 
 def main() -> int:
-    if not SKILLS_DIR.exists():
-        print(f"skills directory not found: {SKILLS_DIR}", file=sys.stderr)
+    root = Path(__file__).resolve().parents[2]
+    skills_dir = root / ".codex" / "skills"
+
+    failures: list[str] = []
+
+    for skill_md in sorted(skills_dir.glob("*/SKILL.md")):
+        text = skill_md.read_text(encoding="utf-8")
+        fm_raw = extract_frontmatter(text)
+        if fm_raw is None:
+            failures.append(f"{skill_md}: missing or incomplete YAML frontmatter")
+            continue
+
+        try:
+            fm = yaml.safe_load(fm_raw) or {}
+        except Exception as e:  # noqa: BLE001
+            failures.append(f"{skill_md}: invalid YAML: {e}")
+            continue
+
+        if not isinstance(fm, dict):
+            failures.append(f"{skill_md}: frontmatter must be a mapping")
+            continue
+
+        keys = set(fm.keys())
+        if keys != {"name", "description"}:
+            extra = sorted(keys - {"name", "description"})
+            missing = sorted({"name", "description"} - keys)
+            failures.append(
+                f"{skill_md}: frontmatter keys must be {{name, description}}; "
+                f"extra={extra} missing={missing}"
+            )
+
+        name = fm.get("name", "")
+        if (
+            not isinstance(name, str)
+            or not NAME_RE.match(name)
+            or name in RESERVED_NAMES
+        ):
+            failures.append(f"{skill_md}: invalid name {name!r}")
+
+        desc = fm.get("description", "")
+        if not isinstance(desc, str) or not desc.strip():
+            failures.append(f"{skill_md}: description must be a non-empty string")
+        elif len(desc) > 1024:
+            failures.append(
+                f"{skill_md}: description too long ({len(desc)} > 1024 chars)"
+            )
+
+        # Simple XML-tag check (avoid false positives like "<id>")
+        if isinstance(desc, str) and re.search(r"<[^>]+>", desc):
+            failures.append(f"{skill_md}: description contains XML-like tags")
+
+    if failures:
+        for line in failures:
+            print(f"FAIL {line}", file=sys.stderr)
         return 1
 
-    skill_files = list(iter_skill_files(SKILLS_DIR))
-    all_errors: list[SkillValidationError] = []
-    for skill_path in skill_files:
-        all_errors.extend(validate_skill(skill_path))
-
-    if all_errors:
-        print("Skill frontmatter validation failed:\n", file=sys.stderr)
-        for error in all_errors:
-            rel_path = error.path.relative_to(REPO_ROOT)
-            print(f"- {rel_path}: {error.message}", file=sys.stderr)
-        return 1
-
-    print(f"Validated {len(skill_files)} skill(s).")
+    print("OK: all skill frontmatter valid")
     return 0
 
 

@@ -43,10 +43,20 @@ namespace DreamOfOne.PlayModeTests
         }
 
         [UnityTest]
+        public IEnumerator PerformanceGateComponentsPresent()
+        {
+            yield return null;
+            Assert.NotNull(Object.FindFirstObjectByType<PerformanceProbe>(FindObjectsInactive.Include), "PerformanceProbe missing");
+            Assert.NotNull(Object.FindFirstObjectByType<GcAllocationProbe>(FindObjectsInactive.Include), "GcAllocationProbe missing");
+            Assert.NotNull(Object.FindFirstObjectByType<RuntimeDiagnostics>(FindObjectsInactive.Include), "RuntimeDiagnostics missing");
+            Assert.NotNull(Object.FindFirstObjectByType<LoopVerifier>(FindObjectsInactive.Include), "LoopVerifier missing");
+        }
+
+        [UnityTest]
         public IEnumerator PortalRoundTripRestoresAgent()
         {
             var npc = Object.FindObjectsByType<NavMeshAgent>(FindObjectsInactive.Include, FindObjectsSortMode.None)
-                .FirstOrDefault(agent => agent != null && agent.gameObject.CompareTag("Player") == false);
+                .FirstOrDefault(agent => agent != null && agent.enabled && agent.gameObject.CompareTag("Player") == false);
             var portals = Object.FindObjectsByType<InteriorPortal>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             var exterior = portals.FirstOrDefault(p => p != null && p.MarksInside == false);
             var interior = portals.FirstOrDefault(p => p != null && p.MarksInside == true);
@@ -185,6 +195,48 @@ namespace DreamOfOne.PlayModeTests
 
             Object.DestroyImmediate(logObject);
             Assert.AreEqual(first.Score, second.Score, "CaseBundle score is not deterministic");
+        }
+
+        [Test]
+        public void CaseVerdictDeterministic()
+        {
+            var logObject = new GameObject("CaseVerdictLog");
+            var log = logObject.AddComponent<WorldEventLog>();
+
+            var violation = new EventRecord
+            {
+                actorId = "Player",
+                actorRole = "Player",
+                eventType = CoreEventType.ViolationDetected,
+                category = EventCategory.Rule,
+                ruleId = "R_QUEUE",
+                topic = "R_QUEUE",
+                placeId = "Store",
+                zoneId = "StoreQueue",
+                severity = 2,
+                note = "test"
+            };
+            log.RecordEvent(violation);
+
+            var report = new ReportEnvelope
+            {
+                reportId = "R2",
+                ruleId = "R_QUEUE",
+                topic = "R_QUEUE",
+                placeId = "Store",
+                zoneId = "StoreQueue",
+                attachedEventIds = new List<string> { violation.id }
+            };
+
+            var builder = new CaseBundleBuilder(log);
+            var bundle = builder.Build(report);
+
+            string verdictA = CaseVerdict.DetermineVerdict(bundle, out string reasonA);
+            string verdictB = CaseVerdict.DetermineVerdict(bundle, out string reasonB);
+
+            Object.DestroyImmediate(logObject);
+            Assert.AreEqual(verdictA, verdictB, "Case verdict is not deterministic");
+            Assert.AreEqual(reasonA, reasonB, "Verdict reason is not deterministic");
         }
 
         [UnityTest]

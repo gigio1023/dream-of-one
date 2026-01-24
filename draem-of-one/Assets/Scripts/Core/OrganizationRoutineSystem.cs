@@ -71,6 +71,22 @@ namespace DreamOfOne.Core
         private float nextFacilityTime = 0f;
         private float nextMediaTime = 0f;
         private StudioStep studioStep = StudioStep.Kanban;
+        private int storeStepIndex = 0;
+        private int parkStepIndex = 0;
+        private int stationStepIndex = 0;
+        private int cafeStepIndex = 0;
+        private int deliveryStepIndex = 0;
+        private int facilityStepIndex = 0;
+        private int mediaStepIndex = 0;
+        private int studioViolationCounter = 0;
+        private int storeLabelViolationCounter = 0;
+        private int storeQueueViolationCounter = 0;
+        private int parkViolationCounter = 0;
+        private int stationViolationCounter = 0;
+        private int cafeViolationCounter = 0;
+        private int deliveryViolationCounter = 0;
+        private int facilityViolationCounter = 0;
+        private int mediaViolationCounter = 0;
 
         private enum StudioStep
         {
@@ -160,22 +176,22 @@ namespace DreamOfOne.Core
             switch (studioStep)
             {
                 case StudioStep.Kanban:
-                    RecordProcedure("PM", "Studio", "StudioPhoto", EventType.TaskStarted, "칸반 갱신", studioAnchor);
+                    RecordProcedure("PM", "Studio", "StudioPhoto", EventType.TaskStarted, "칸반 갱신", studioAnchor, "PROC_STUDIO_KANBAN");
                     studioStep = StudioStep.PatchNotes;
                     break;
                 case StudioStep.PatchNotes:
-                    RecordProcedure("Developer", "Studio", "StudioPhoto", EventType.TaskCompleted, "패치노트 작성", studioAnchor);
-                    MaybeEmitProcedureViolation("PROC_NOTE_MISSING", "패치노트 누락 의심", studioAnchor);
+                    RecordProcedure("Developer", "Studio", "StudioPhoto", EventType.TaskCompleted, "패치노트 작성", studioAnchor, "PROC_STUDIO_PATCH");
+                    EmitViolationEvery("Studio", "StudioPhoto", "PROC_NOTE_MISSING", "패치노트 누락 의심", studioAnchor, ref studioViolationCounter, 4);
                     studioStep = StudioStep.Approval;
                     break;
                 case StudioStep.Approval:
-                    RecordProcedure("PM", "Studio", "StudioPhoto", EventType.ApprovalGranted, "PM 승인", studioAnchor);
-                    MaybeEmitProcedureViolation("PROC_APPROVAL_DELAY", "승인 지연 의심", studioAnchor);
+                    RecordProcedure("PM", "Studio", "StudioPhoto", EventType.ApprovalGranted, "PM 승인", studioAnchor, "PROC_STUDIO_APPROVAL");
+                    EmitViolationEvery("Studio", "StudioPhoto", "PROC_APPROVAL_DELAY", "승인 지연 의심", studioAnchor, ref studioViolationCounter, 6);
                     studioStep = StudioStep.RcInsert;
                     break;
                 case StudioStep.RcInsert:
-                    RecordProcedure("Release", "Studio", "StudioPhoto", EventType.RcInserted, "RC 삽입", studioAnchor);
-                    MaybeEmitProcedureViolation("PROC_RC_SKIP", "RC 절차 누락 의심", studioAnchor);
+                    RecordProcedure("Release", "Studio", "StudioPhoto", EventType.RcInserted, "RC 삽입", studioAnchor, "PROC_STUDIO_RC");
+                    EmitViolationEvery("Studio", "StudioPhoto", "PROC_RC_SKIP", "RC 절차 누락 의심", studioAnchor, ref studioViolationCounter, 5);
                     studioStep = StudioStep.Kanban;
                     break;
             }
@@ -183,37 +199,41 @@ namespace DreamOfOne.Core
 
         private void EmitStoreEvent()
         {
-            int roll = Random.Range(0, 3);
-            switch (roll)
+            switch (storeStepIndex)
             {
                 case 0:
-                    RecordOrg("Clerk", "Store", "StoreQueue", EventType.LabelChanged, "가격 라벨 갱신", storeAnchor);
-                    MaybeEmitViolation("Store", "StoreQueue", "R_LABEL", "라벨 오류 의심", storeAnchor);
+                    RecordOrg("Clerk", "Store", "StoreQueue", EventType.LabelChanged, "가격 라벨 갱신", storeAnchor, "PROC_STORE_LABEL");
+                    EmitViolationEvery("Store", "StoreQueue", "R_LABEL", "라벨 오류 의심", storeAnchor, ref storeLabelViolationCounter, 3);
                     break;
                 case 1:
-                    RecordOrg("Clerk", "Store", "StoreQueue", EventType.PaymentProcessed, "결제 처리", storeAnchor);
+                    RecordOrg("Clerk", "Store", "StoreQueue", EventType.PaymentProcessed, "결제 처리", storeAnchor, "PROC_STORE_PAYMENT");
                     break;
                 default:
-                    RecordOrg("Clerk", "Store", "StoreQueue", EventType.QueueUpdated, "줄 안내", storeAnchor);
-                    MaybeEmitViolation("Store", "StoreQueue", "R_QUEUE", "새치기 의심", storeAnchor);
+                    RecordOrg("Clerk", "Store", "StoreQueue", EventType.QueueUpdated, "줄 안내", storeAnchor, "PROC_STORE_QUEUE");
+                    EmitViolationEvery("Store", "StoreQueue", "R_QUEUE", "새치기 의심", storeAnchor, ref storeQueueViolationCounter, 2);
                     break;
             }
+
+            storeStepIndex = (storeStepIndex + 1) % 3;
         }
 
         private void EmitParkEvent()
         {
-            int roll = Random.Range(0, 3);
-            switch (roll)
+            switch (parkStepIndex)
             {
                 case 0:
-                    RecordOrg("Elder", "Park", "ParkSeat", EventType.SeatClaimed, "좌석 사용", parkAnchor);
+                    RecordProcedure("Caretaker", "Park", "ParkSeat", EventType.TaskStarted, "순찰", parkAnchor, "PROC_PARK_PATROL");
+                    break;
+                case 1:
+                    RecordOrg("Elder", "Park", "ParkSeat", EventType.NoiseObserved, "소음 점검", parkAnchor, "PROC_PARK_NOISE_CHECK");
+                    EmitViolationEvery("Park", "ParkSeat", "R_NOISE", "소음 민원", parkAnchor, ref parkViolationCounter, 3);
                     break;
                 default:
-                    RecordOrg("Elder", "Park", "ParkSeat", EventType.NoiseObserved, "소음 주의", parkAnchor);
-                    RecordProcedure("Park", "Park", "ParkSeat", EventType.TaskCompleted, "조치 보고", parkAnchor);
-                    MaybeEmitViolation("Park", "ParkSeat", "R_NOISE", "소음 민원", parkAnchor);
+                    RecordProcedure("Caretaker", "Park", "ParkSeat", EventType.TaskCompleted, "조치 보고", parkAnchor, "PROC_PARK_REPORT");
                     break;
             }
+
+            parkStepIndex = (parkStepIndex + 1) % 3;
         }
 
         private void EmitStationEvent()
@@ -223,16 +243,21 @@ namespace DreamOfOne.Core
                 return;
             }
 
-            int roll = Random.Range(0, 2);
-            switch (roll)
+            switch (stationStepIndex)
             {
                 case 0:
-                    RecordEvidence("Police", "Station", "Station", EventType.CctvCaptured, "CCTV 캡처", stationAnchor);
+                    RecordEvidence("Officer", "Station", "PoliceReport", EventType.CctvCaptured, "CCTV 캡처", stationAnchor, "PROC_STATION_CCTV");
+                    break;
+                case 1:
+                    RecordEvidence("Officer", "Station", "PoliceReport", EventType.TicketIssued, "티켓 발부", stationAnchor, "PROC_STATION_TICKET");
                     break;
                 default:
-                    RecordEvidence("Police", "Station", "Station", EventType.TicketIssued, "티켓 발부", stationAnchor);
+                    RecordProcedure("Officer", "Station", "PoliceReport", EventType.InterrogationStarted, "심문 시작", stationAnchor, "PROC_INTERROGATION");
+                    EmitViolationEvery("Station", "PoliceReport", "PROC_INTERROGATION_DELAY", "심문 지연 의심", stationAnchor, ref stationViolationCounter, 4);
                     break;
             }
+
+            stationStepIndex = (stationStepIndex + 1) % 3;
         }
 
         private void EmitCafeEvent()
@@ -242,20 +267,21 @@ namespace DreamOfOne.Core
                 return;
             }
 
-            int roll = Random.Range(0, 3);
-            switch (roll)
+            switch (cafeStepIndex)
             {
                 case 0:
-                    RecordOrg("Barista", "Cafe", "CafeSeat", EventType.TaskStarted, "주문 처리", cafeAnchor);
+                    RecordOrg("Barista", "Cafe", "CafeSeat", EventType.TaskStarted, "주문 처리", cafeAnchor, "PROC_CAFE_ORDER");
                     break;
                 case 1:
-                    RecordOrg("Barista", "Cafe", "CafeSeat", EventType.SeatClaimed, "좌석 안내", cafeAnchor);
-                    MaybeEmitViolation("Cafe", "CafeSeat", "R_CAFE_SEAT", "좌석 회전 지연", cafeAnchor);
+                    RecordOrg("Barista", "Cafe", "CafeSeat", EventType.SeatClaimed, "좌석 안내", cafeAnchor, "PROC_CAFE_SEAT");
+                    EmitViolationEvery("Cafe", "CafeSeat", "R_CAFE_SEAT", "좌석 회전 지연", cafeAnchor, ref cafeViolationCounter, 4);
                     break;
                 default:
-                    RecordOrg("Barista", "Cafe", "CafeSeat", EventType.TaskCompleted, "정리 완료", cafeAnchor);
+                    RecordOrg("Barista", "Cafe", "CafeSeat", EventType.TaskCompleted, "정리 완료", cafeAnchor, "PROC_CAFE_CLEAN");
                     break;
             }
+
+            cafeStepIndex = (cafeStepIndex + 1) % 3;
         }
 
         private void EmitDeliveryEvent()
@@ -265,17 +291,18 @@ namespace DreamOfOne.Core
                 return;
             }
 
-            int roll = Random.Range(0, 2);
-            switch (roll)
+            switch (deliveryStepIndex)
             {
                 case 0:
-                    RecordProcedure("Courier", "Delivery", "DeliveryBay", EventType.TaskStarted, "출입 확인", deliveryAnchor);
+                    RecordProcedure("Courier", "Delivery", "DeliveryBay", EventType.TaskStarted, "출입 확인", deliveryAnchor, "PROC_DELIVERY_CHECK");
                     break;
                 default:
-                    RecordProcedure("Courier", "Delivery", "DeliveryBay", EventType.TaskCompleted, "수취 서명", deliveryAnchor);
-                    MaybeEmitViolation("Delivery", "DeliveryBay", "R_DELIVERY", "출입 절차 누락", deliveryAnchor);
+                    RecordProcedure("Courier", "Delivery", "DeliveryBay", EventType.TaskCompleted, "수취 서명", deliveryAnchor, "PROC_DELIVERY_SIGN");
+                    EmitViolationEvery("Delivery", "DeliveryBay", "R_DELIVERY", "출입 절차 누락", deliveryAnchor, ref deliveryViolationCounter, 4);
                     break;
             }
+
+            deliveryStepIndex = (deliveryStepIndex + 1) % 2;
         }
 
         private void EmitFacilityEvent()
@@ -285,16 +312,18 @@ namespace DreamOfOne.Core
                 return;
             }
 
-            int roll = Random.Range(0, 2);
-            switch (roll)
+            switch (facilityStepIndex)
             {
                 case 0:
-                    RecordProcedure("FacilityTech", "Facility", "Facility", EventType.TaskStarted, "정기 점검", facilityAnchor);
+                    RecordProcedure("FacilityTech", "Facility", "Facility", EventType.TaskStarted, "정기 점검", facilityAnchor, "PROC_FACILITY_CHECK");
                     break;
                 default:
-                    RecordProcedure("FacilityTech", "Facility", "Facility", EventType.TaskCompleted, "수리 완료", facilityAnchor);
+                    RecordProcedure("FacilityTech", "Facility", "Facility", EventType.TaskCompleted, "수리 완료", facilityAnchor, "PROC_FACILITY_FIX");
+                    EmitViolationEvery("Facility", "Facility", "R_FACILITY_SAFETY", "안전 점검 누락", facilityAnchor, ref facilityViolationCounter, 6);
                     break;
             }
+
+            facilityStepIndex = (facilityStepIndex + 1) % 2;
         }
 
         private void EmitMediaEvent()
@@ -304,48 +333,49 @@ namespace DreamOfOne.Core
                 return;
             }
 
-            int roll = Random.Range(0, 2);
-            switch (roll)
+            switch (mediaStepIndex)
             {
                 case 0:
-                    RecordEvidence("Reporter", "Media", "MediaZone", EventType.EvidenceCaptured, "촬영 진행", mediaAnchor);
-                    MaybeEmitViolation("Media", "MediaZone", "R_MEDIA_PERMIT", "촬영 허가 확인 요청", mediaAnchor);
+                    RecordEvidence("Reporter", "Media", "MediaZone", EventType.EvidenceCaptured, "촬영 진행", mediaAnchor, "PROC_MEDIA_SHOOT");
+                    EmitViolationEvery("Media", "MediaZone", "R_MEDIA_PERMIT", "촬영 허가 확인 요청", mediaAnchor, ref mediaViolationCounter, 3);
                     break;
                 default:
-                    RecordOrg("Reporter", "Media", "MediaZone", EventType.TaskCompleted, "촬영 정리", mediaAnchor);
+                    RecordOrg("Reporter", "Media", "MediaZone", EventType.TaskCompleted, "촬영 정리", mediaAnchor, "PROC_MEDIA_WRAP");
                     break;
             }
+
+            mediaStepIndex = (mediaStepIndex + 1) % 2;
         }
 
-        private void RecordProcedure(string actorId, string placeId, string zoneId, EventType type, string note, Transform anchor)
+        private void RecordProcedure(string actorId, string placeId, string zoneId, EventType type, string note, Transform anchor, string ruleId = "")
         {
-            RecordEvent(actorId, placeId, zoneId, type, EventCategory.Procedure, note, anchor);
+            RecordEvent(actorId, placeId, zoneId, type, EventCategory.Procedure, note, anchor, ruleId);
         }
 
-        private void RecordOrg(string actorId, string placeId, string zoneId, EventType type, string note, Transform anchor)
+        private void RecordOrg(string actorId, string placeId, string zoneId, EventType type, string note, Transform anchor, string ruleId = "")
         {
-            RecordEvent(actorId, placeId, zoneId, type, EventCategory.Organization, note, anchor);
+            RecordEvent(actorId, placeId, zoneId, type, EventCategory.Organization, note, anchor, ruleId);
         }
 
-        private void RecordEvidence(string actorId, string placeId, string zoneId, EventType type, string note, Transform anchor)
+        private void RecordEvidence(string actorId, string placeId, string zoneId, EventType type, string note, Transform anchor, string ruleId = "")
         {
-            RecordEvent(actorId, placeId, zoneId, type, EventCategory.Evidence, note, anchor);
+            RecordEvent(actorId, placeId, zoneId, type, EventCategory.Evidence, note, anchor, ruleId);
         }
 
-        private void MaybeEmitViolation(string placeId, string zoneId, string ruleId, string note, Transform anchor)
+        private void EmitViolationEvery(string placeId, string zoneId, string ruleId, string note, Transform anchor, ref int counter, int interval)
         {
-            if (Random.value < 0.25f)
+            if (interval <= 0)
             {
-                RecordEvent("Citizen", placeId, zoneId, EventType.ViolationDetected, EventCategory.Rule, note, anchor, ruleId);
+                return;
             }
-        }
 
-        private void MaybeEmitProcedureViolation(string ruleId, string note, Transform anchor)
-        {
-            if (Random.value < 0.2f)
+            counter++;
+            if (counter % interval != 0)
             {
-                RecordEvent("Studio", "Studio", "StudioPhoto", EventType.ViolationDetected, EventCategory.Rule, note, anchor, ruleId);
+                return;
             }
+
+            RecordEvent("Citizen", placeId, zoneId, EventType.ViolationDetected, EventCategory.Rule, note, anchor, ruleId);
         }
 
         private void RecordEvent(string actorId, string placeId, string zoneId, EventType type, EventCategory category, string note, Transform anchor, string ruleId = "")

@@ -588,6 +588,30 @@ namespace DreamOfOne.NPC
             currentReport = null;
         }
 
+        public void ResetPoliceState()
+        {
+            EnsureReferences();
+            CacheSuspicionComponents();
+            state = PoliceState.Patrol;
+            stateTimer = 0f;
+            currentReport = null;
+            currentCase = null;
+            investigationTarget = Vector3.zero;
+            lastVerdictReason = string.Empty;
+            jumpTimer = 0f;
+            jumpCooldown = Random.Range(jumpIntervalRange.x, jumpIntervalRange.y);
+
+            if (agent != null)
+            {
+                agent.isStopped = false;
+                if (agent.isOnNavMesh && patrolPoints.Length > 0)
+                {
+                    patrolIndex = Mathf.Clamp(patrolIndex, 0, patrolPoints.Length - 1);
+                    agent.SetDestination(patrolPoints[patrolIndex].position);
+                }
+            }
+        }
+
         public void Configure(Transform playerTransform, ReportManager reports, WorldEventLog log, SemanticShaper shaper, UIManager manager, DreamOfOne.LLM.LLMClient client = null)
         {
             player = playerTransform;

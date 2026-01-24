@@ -247,5 +247,11 @@ namespace DreamOfOne.Core
             eventLog = log;
             globalSuspicion = suspicion;
         }
+
+        public void ResetReports()
+        {
+            recentReports.Clear();
+            lastInterrogationTime = -999f;
+        }
     }
 }

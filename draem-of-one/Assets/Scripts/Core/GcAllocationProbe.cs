@@ -16,6 +16,9 @@ namespace DreamOfOne.Core
         private float nextLogTime = 0f;
         private long lastAllocBytes = 0;
 
+        public long LastAllocBytes => lastAllocBytes;
+        public bool HasWarmedUp => frameCount > warmupFrames;
+
         private void OnEnable()
         {
             gcAllocRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Allocated In Frame");

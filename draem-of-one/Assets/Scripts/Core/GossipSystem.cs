@@ -35,29 +35,29 @@ namespace DreamOfOne.Core
         [Tooltip("역할별 소문 신뢰 가중치")]
         private List<RoleTrust> roleTrustWeights = new()
         {
-            new RoleTrust("Police", 1.1f),
-            new RoleTrust("Clerk", 0.95f),
-            new RoleTrust("Elder", 0.9f),
-            new RoleTrust("Barista", 0.85f),
-            new RoleTrust("Citizen", 0.75f),
-            new RoleTrust("Tourist", 0.6f)
+            new RoleTrust(RoleId.Police, 1.1f),
+            new RoleTrust(RoleId.Clerk, 0.95f),
+            new RoleTrust(RoleId.Elder, 0.9f),
+            new RoleTrust(RoleId.Barista, 0.85f),
+            new RoleTrust(RoleId.Citizen, 0.75f),
+            new RoleTrust(RoleId.Tourist, 0.6f)
         };
 
         private readonly Queue<PendingGossip> pending = new();
         private float lastGossipTime = -999f;
 
         private readonly Dictionary<string, float> rumorTopics = new();
-        private readonly Dictionary<string, float> trustLookup = new();
+        private readonly Dictionary<RoleId, float> trustLookup = new();
 
         [System.Serializable]
         private struct RoleTrust
         {
-            public string role;
+            public RoleId roleId;
             public float weight;
 
-            public RoleTrust(string role, float weight)
+            public RoleTrust(RoleId roleId, float weight)
             {
-                this.role = role;
+                this.roleId = roleId;
                 this.weight = weight;
             }
         }
@@ -163,7 +163,7 @@ namespace DreamOfOne.Core
                 zoneId = source.zoneId,
                 position = speaker.transform.position,
                 severity = 1,
-                trust = Mathf.Clamp01(0.45f * GetTrustWeight(speaker.Role)),
+                trust = Mathf.Clamp01(0.45f * GetTrustWeight(speaker.RoleId)),
                 sourceId = source.actorId
             });
 
@@ -203,7 +203,7 @@ namespace DreamOfOne.Core
                 zoneId = evidence.zoneId,
                 position = evidence.position,
                 severity = 2,
-                trust = Mathf.Clamp01(0.9f * GetTrustWeight(evidence.actorRole)),
+                trust = Mathf.Clamp01(0.9f * GetTrustWeight(IdentifierUtility.ParseRoleId(evidence.actorRole))),
                 sourceId = evidence.actorId
             });
 
@@ -244,8 +244,8 @@ namespace DreamOfOne.Core
                 position = verdict.position,
                 severity = confirmed ? 2 : 1,
                 trust = confirmed
-                    ? Mathf.Clamp01(0.95f * GetTrustWeight(verdict.actorRole))
-                    : Mathf.Clamp01(0.1f * GetTrustWeight(verdict.actorRole)),
+                    ? Mathf.Clamp01(0.95f * GetTrustWeight(IdentifierUtility.ParseRoleId(verdict.actorRole)))
+                    : Mathf.Clamp01(0.1f * GetTrustWeight(IdentifierUtility.ParseRoleId(verdict.actorRole))),
                 sourceId = verdict.actorId
             });
 
@@ -276,23 +276,23 @@ namespace DreamOfOne.Core
             for (int i = 0; i < roleTrustWeights.Count; i++)
             {
                 var entry = roleTrustWeights[i];
-                if (string.IsNullOrEmpty(entry.role))
+                if (entry.roleId == RoleId.None)
                 {
                     continue;
                 }
 
-                trustLookup[entry.role] = Mathf.Max(0.1f, entry.weight);
+                trustLookup[entry.roleId] = Mathf.Max(0.1f, entry.weight);
             }
         }
 
-        private float GetTrustWeight(string role)
+        private float GetTrustWeight(RoleId roleId)
         {
-            if (string.IsNullOrEmpty(role))
+            if (roleId == RoleId.None)
             {
                 return 1f;
             }
 
-            if (trustLookup.TryGetValue(role, out float weight))
+            if (trustLookup.TryGetValue(roleId, out float weight))
             {
                 return weight;
             }
@@ -313,7 +313,7 @@ namespace DreamOfOne.Core
                     continue;
                 }
 
-                if (context.Role == "Police")
+                if (context.RoleId is RoleId.Police or RoleId.Officer)
                 {
                     continue;
                 }
@@ -339,7 +339,7 @@ namespace DreamOfOne.Core
                     continue;
                 }
 
-                if (context.Role == "Police")
+                if (context.RoleId is RoleId.Police or RoleId.Officer)
                 {
                     continue;
                 }

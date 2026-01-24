@@ -77,8 +77,7 @@ namespace DreamOfOne.Society
                     continue;
                 }
 
-                bool isPolice = persona.Role.ToLowerInvariant().Contains("police")
-                    || persona.Role.ToLowerInvariant().Contains("officer")
+                bool isPolice = persona.RoleId is RoleId.Police or RoleId.Officer
                     || persona.GetComponent<PoliceController>() != null;
 
                 if (isPolice && !attachToPolice)
@@ -102,4 +101,3 @@ namespace DreamOfOne.Society
         }
     }
 }
-

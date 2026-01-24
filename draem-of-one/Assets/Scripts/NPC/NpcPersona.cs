@@ -1,3 +1,4 @@
+using DreamOfOne.Core;
 using UnityEngine;
 
 namespace DreamOfOne.NPC
@@ -16,6 +17,10 @@ namespace DreamOfOne.NPC
         private string role = "Citizen";
 
         [SerializeField]
+        [Tooltip("역할 enum (비워두면 Role 문자열에서 파싱)")]
+        private RoleId roleId = RoleId.None;
+
+        [SerializeField]
         [TextArea(2, 4)]
         [Tooltip("페르소나 설명")]
         private string persona = "동네 주민, 현실적인 한 줄 반응";
@@ -31,7 +36,19 @@ namespace DreamOfOne.NPC
         private float lastSpokeTime = -999f;
 
         public string NpcId => string.IsNullOrEmpty(npcId) ? name : npcId;
-        public string Role => string.IsNullOrEmpty(role) ? "Citizen" : role;
+        public string Role
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(role))
+                {
+                    return role;
+                }
+
+                return roleId != RoleId.None ? roleId.ToString() : "Citizen";
+            }
+        }
+        public RoleId RoleId => roleId != RoleId.None ? roleId : IdentifierUtility.ParseRoleId(role);
         public string Persona => persona;
         public string Tone => tone;
         public float SpeakCooldownSeconds => speakCooldownSeconds;
@@ -46,6 +63,7 @@ namespace DreamOfOne.NPC
             if (!string.IsNullOrEmpty(roleName))
             {
                 role = roleName;
+                roleId = IdentifierUtility.ParseRoleId(roleName);
             }
 
             if (!string.IsNullOrEmpty(personaText))

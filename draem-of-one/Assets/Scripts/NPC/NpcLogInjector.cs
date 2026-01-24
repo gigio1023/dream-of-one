@@ -74,7 +74,7 @@ namespace DreamOfOne.NPC
                     continue;
                 }
 
-                if (!includePolice && context.Role == "Police")
+                if (!includePolice && context.RoleId is RoleId.Police or RoleId.Officer)
                 {
                     continue;
                 }

@@ -36,6 +36,7 @@ namespace DreamOfOne.NPC
         private readonly HashSet<string> seenEventIds = new();
 
         public string Role => persona != null ? persona.Role : "Citizen";
+        public RoleId RoleId => persona != null ? persona.RoleId : RoleId.Citizen;
         public string NpcId => persona != null ? persona.NpcId : name;
 
         private void Awake()

@@ -112,24 +112,24 @@ namespace DreamOfOne.Core
 
             var witnesses = new System.Collections.Generic.List<SuspicionComponent>
             {
-                CreateNpc(root, "Clerk", storePos + new Vector3(1f, 0f, -1f), reports, global, log),
-                CreateNpc(root, "Manager", storePos + new Vector3(-1f, 0f, 1f), reports, global, log),
-                CreateNpc(root, "Elder", parkPos + new Vector3(1f, 0f, -1f), reports, global, log),
-                CreateNpc(root, "Caretaker", parkPos + new Vector3(-1f, 0f, 1f), reports, global, log),
-                CreateNpc(root, "Tourist", new Vector3(0f, 0f, 6f), reports, global, log),
-                CreateNpc(root, "Resident", new Vector3(2f, 0f, 2f), reports, global, log),
-                CreateNpc(root, "Student", new Vector3(-2f, 0f, 2f), reports, global, log),
-                CreateNpc(root, "PM", studioPos + new Vector3(1f, 0f, 1f), reports, global, log),
-                CreateNpc(root, "Developer", studioPos + new Vector3(-1f, 0f, 1f), reports, global, log),
-                CreateNpc(root, "QA", studioPos + new Vector3(1f, 0f, -1f), reports, global, log),
-                CreateNpc(root, "Release", studioPos + new Vector3(-1f, 0f, -1f), reports, global, log),
-                CreateNpc(root, "Barista", cafePos + new Vector3(1f, 0f, 0.5f), reports, global, log),
-                CreateNpc(root, "CafeHost", cafePos + new Vector3(-1f, 0f, -0.5f), reports, global, log),
-                CreateNpc(root, "Courier", deliveryPos + new Vector3(1f, 0f, 0.5f), reports, global, log),
-                CreateNpc(root, "FacilityTech", facilityPos + new Vector3(-1f, 0f, 0.5f), reports, global, log),
-                CreateNpc(root, "Officer", stationPos + new Vector3(1f, 0f, 1f), reports, global, log),
-                CreateNpc(root, "Investigator", stationPos + new Vector3(-1f, 0f, 1f), reports, global, log),
-                CreateNpc(root, "Reporter", mediaPos + new Vector3(0.5f, 0f, -0.5f), reports, global, log)
+                CreateNpc(root, RoleId.Clerk, storePos + new Vector3(1f, 0f, -1f), reports, global, log),
+                CreateNpc(root, RoleId.Manager, storePos + new Vector3(-1f, 0f, 1f), reports, global, log),
+                CreateNpc(root, RoleId.Elder, parkPos + new Vector3(1f, 0f, -1f), reports, global, log),
+                CreateNpc(root, RoleId.Caretaker, parkPos + new Vector3(-1f, 0f, 1f), reports, global, log),
+                CreateNpc(root, RoleId.Tourist, new Vector3(0f, 0f, 6f), reports, global, log),
+                CreateNpc(root, RoleId.Resident, new Vector3(2f, 0f, 2f), reports, global, log),
+                CreateNpc(root, RoleId.Student, new Vector3(-2f, 0f, 2f), reports, global, log),
+                CreateNpc(root, RoleId.PM, studioPos + new Vector3(1f, 0f, 1f), reports, global, log),
+                CreateNpc(root, RoleId.Developer, studioPos + new Vector3(-1f, 0f, 1f), reports, global, log),
+                CreateNpc(root, RoleId.QA, studioPos + new Vector3(1f, 0f, -1f), reports, global, log),
+                CreateNpc(root, RoleId.Release, studioPos + new Vector3(-1f, 0f, -1f), reports, global, log),
+                CreateNpc(root, RoleId.Barista, cafePos + new Vector3(1f, 0f, 0.5f), reports, global, log),
+                CreateNpc(root, RoleId.CafeHost, cafePos + new Vector3(-1f, 0f, -0.5f), reports, global, log),
+                CreateNpc(root, RoleId.Courier, deliveryPos + new Vector3(1f, 0f, 0.5f), reports, global, log),
+                CreateNpc(root, RoleId.FacilityTech, facilityPos + new Vector3(-1f, 0f, 0.5f), reports, global, log),
+                CreateNpc(root, RoleId.Officer, stationPos + new Vector3(1f, 0f, 1f), reports, global, log),
+                CreateNpc(root, RoleId.Investigator, stationPos + new Vector3(-1f, 0f, 1f), reports, global, log),
+                CreateNpc(root, RoleId.Reporter, mediaPos + new Vector3(0.5f, 0f, -0.5f), reports, global, log)
             };
 
             for (int i = 0; i < witnesses.Count; i++)
@@ -213,8 +213,9 @@ namespace DreamOfOne.Core
             response.ConfigureRuleDelta(ruleId, type == ZoneType.Queue ? 30f : type == ZoneType.Seat ? 20f : 15f);
         }
 
-        private SuspicionComponent CreateNpc(Transform root, string name, Vector3 position, ReportManager reports, GlobalSuspicionSystem global, WorldEventLog log)
+        private SuspicionComponent CreateNpc(Transform root, RoleId roleId, Vector3 position, ReportManager reports, GlobalSuspicionSystem global, WorldEventLog log)
         {
+            string name = roleId != RoleId.None ? roleId.ToString() : "Citizen";
             var npc = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             npc.name = name;
             npc.transform.SetParent(root);
@@ -238,7 +239,7 @@ namespace DreamOfOne.Core
             }
 
             var persona = npc.AddComponent<NpcPersona>();
-            ConfigurePersona(persona, name);
+            ConfigurePersona(persona, roleId);
 
             var suspicion = npc.AddComponent<SuspicionComponent>();
             suspicion.Configure(reports, global, log);
@@ -261,7 +262,7 @@ namespace DreamOfOne.Core
             police.transform.position = new Vector3(0f, 0f, -6f);
 
             var persona = police.AddComponent<NpcPersona>();
-            ConfigurePersona(persona, "Police");
+            ConfigurePersona(persona, RoleId.Police);
 
             police.AddComponent<NpcContext>();
 
@@ -294,74 +295,74 @@ namespace DreamOfOne.Core
             return point.transform;
         }
 
-        private void ConfigurePersona(NpcPersona persona, string name)
+        private void ConfigurePersona(NpcPersona persona, RoleId roleId)
         {
             if (persona == null)
             {
                 return;
             }
 
-            switch (name)
+            switch (roleId)
             {
-                case "Clerk":
-                    persona.Configure("Clerk", "편의점 점원", "친절하지만 규칙에 엄격함", "짧고 단호한 말투");
+                case RoleId.Clerk:
+                    persona.Configure(RoleId.Clerk.ToString(), "편의점 점원", "친절하지만 규칙에 엄격함", "짧고 단호한 말투");
                     break;
-                case "Manager":
-                    persona.Configure("Manager", "편의점 점장", "매장 질서와 재고를 관리", "차분하지만 단호한 말투");
+                case RoleId.Manager:
+                    persona.Configure(RoleId.Manager.ToString(), "편의점 점장", "매장 질서와 재고를 관리", "차분하지만 단호한 말투");
                     break;
-                case "Elder":
-                    persona.Configure("Elder", "동네 어르신", "질서 강조, 잔소리 섞임", "엄격하고 고전적인 말투");
+                case RoleId.Elder:
+                    persona.Configure(RoleId.Elder.ToString(), "동네 어르신", "질서 강조, 잔소리 섞임", "엄격하고 고전적인 말투");
                     break;
-                case "Caretaker":
-                    persona.Configure("Caretaker", "공원 관리인", "민원과 규정 준수를 확인", "정돈된 말투");
+                case RoleId.Caretaker:
+                    persona.Configure(RoleId.Caretaker.ToString(), "공원 관리인", "민원과 규정 준수를 확인", "정돈된 말투");
                     break;
-                case "Tourist":
-                    persona.Configure("Tourist", "관광객", "어눌한 한국어, 호기심 많음", "짧고 어색한 말투");
+                case RoleId.Tourist:
+                    persona.Configure(RoleId.Tourist.ToString(), "관광객", "어눌한 한국어, 호기심 많음", "짧고 어색한 말투");
                     break;
-                case "Resident":
-                    persona.Configure("Resident", "주민 대표", "동네 질서에 민감", "엄격한 말투");
+                case RoleId.Resident:
+                    persona.Configure(RoleId.Resident.ToString(), "주민 대표", "동네 질서에 민감", "엄격한 말투");
                     break;
-                case "Student":
-                    persona.Configure("Student", "학생", "호기심 많고 빠른 반응", "밝고 빠른 말투");
+                case RoleId.Student:
+                    persona.Configure(RoleId.Student.ToString(), "학생", "호기심 많고 빠른 반응", "밝고 빠른 말투");
                     break;
-                case "PM":
-                    persona.Configure("PM", "스튜디오 PM", "일정과 승인 절차를 관리", "차분하고 단호한 말투");
+                case RoleId.PM:
+                    persona.Configure(RoleId.PM.ToString(), "스튜디오 PM", "일정과 승인 절차를 관리", "차분하고 단호한 말투");
                     break;
-                case "Developer":
-                    persona.Configure("Developer", "개발자", "기술 중심, 요구사항에 집중", "담백한 말투");
+                case RoleId.Developer:
+                    persona.Configure(RoleId.Developer.ToString(), "개발자", "기술 중심, 요구사항에 집중", "담백한 말투");
                     break;
-                case "QA":
-                    persona.Configure("QA", "QA", "검수와 품질에 민감", "꼼꼼한 말투");
+                case RoleId.QA:
+                    persona.Configure(RoleId.QA.ToString(), "QA", "검수와 품질에 민감", "꼼꼼한 말투");
                     break;
-                case "Release":
-                    persona.Configure("Release", "릴리즈 담당", "배포 절차를 확인", "짧고 단호한 말투");
+                case RoleId.Release:
+                    persona.Configure(RoleId.Release.ToString(), "릴리즈 담당", "배포 절차를 확인", "짧고 단호한 말투");
                     break;
-                case "Barista":
-                    persona.Configure("Barista", "바리스타", "주문/좌석 안내", "친절한 말투");
+                case RoleId.Barista:
+                    persona.Configure(RoleId.Barista.ToString(), "바리스타", "주문/좌석 안내", "친절한 말투");
                     break;
-                case "CafeHost":
-                    persona.Configure("CafeHost", "카페 안내", "대기/좌석 정리", "밝고 친절한 말투");
+                case RoleId.CafeHost:
+                    persona.Configure(RoleId.CafeHost.ToString(), "카페 안내", "대기/좌석 정리", "밝고 친절한 말투");
                     break;
-                case "Courier":
-                    persona.Configure("Courier", "배송기사", "출입/수취 확인 담당", "짧고 빠른 말투");
+                case RoleId.Courier:
+                    persona.Configure(RoleId.Courier.ToString(), "배송기사", "출입/수취 확인 담당", "짧고 빠른 말투");
                     break;
-                case "FacilityTech":
-                    persona.Configure("FacilityTech", "시설 기사", "점검/수리 담당", "담담한 말투");
+                case RoleId.FacilityTech:
+                    persona.Configure(RoleId.FacilityTech.ToString(), "시설 기사", "점검/수리 담당", "담담한 말투");
                     break;
-                case "Reporter":
-                    persona.Configure("Reporter", "리포터", "촬영/취재 진행", "짧고 빠른 말투");
+                case RoleId.Reporter:
+                    persona.Configure(RoleId.Reporter.ToString(), "리포터", "촬영/취재 진행", "짧고 빠른 말투");
                     break;
-                case "Officer":
-                    persona.Configure("Officer", "순경", "현장 대응 담당", "단호한 말투");
+                case RoleId.Officer:
+                    persona.Configure(RoleId.Officer.ToString(), "순경", "현장 대응 담당", "단호한 말투");
                     break;
-                case "Investigator":
-                    persona.Configure("Investigator", "조사관", "증거/진술 확인", "차분한 말투");
+                case RoleId.Investigator:
+                    persona.Configure(RoleId.Investigator.ToString(), "조사관", "증거/진술 확인", "차분한 말투");
                     break;
-                case "Police":
-                    persona.Configure("Police", "경찰", "단호하고 간결함", "단호한 말투");
+                case RoleId.Police:
+                    persona.Configure(RoleId.Police.ToString(), "경찰", "단호하고 간결함", "단호한 말투");
                     break;
                 default:
-                    persona.Configure(name, "시민", "현실적인 반응", "짧고 담백한 말투");
+                    persona.Configure(roleId != RoleId.None ? roleId.ToString() : "Citizen", "시민", "현실적인 반응", "짧고 담백한 말투");
                     break;
             }
         }

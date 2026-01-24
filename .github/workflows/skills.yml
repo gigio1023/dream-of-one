@@ -19,8 +19,11 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Install dependencies
-        run: python3 -m pip install --upgrade pip pyyaml
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.9.26"
+          enable-cache: true
 
       - name: Validate skill frontmatter
-        run: python3 scripts/skills/validate_skills.py
+        run: uv run --with pyyaml python scripts/skills/validate_skills.py

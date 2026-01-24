@@ -75,6 +75,7 @@ namespace DreamOfOne.Core
 
         private float yaw = 0f;
         private float pitch = 15f;
+        private bool isInitialized = false;
         private DreamOfOne.UI.UIManager uiManager = null;
         private Camera cachedCamera = null;
 
@@ -95,6 +96,7 @@ namespace DreamOfOne.Core
             }
 
             EnsureCamera();
+            InitializeOrientationIfNeeded();
             HandleInput();
 
             Vector3 targetPos = target.position + Vector3.up * height;
@@ -122,7 +124,7 @@ namespace DreamOfOne.Core
 #if ENABLE_INPUT_SYSTEM
             HandleInputNew();
 #else
-            HandleInputUnavailable();
+            HandleInputLegacy();
 #endif
         }
 
@@ -205,19 +207,73 @@ namespace DreamOfOne.Core
             return Keyboard.current[key].wasPressedThisFrame;
         }
 #else
-        private static bool inputUnavailableLogged = false;
-
-        private void HandleInputUnavailable()
+        private void HandleInputLegacy()
         {
-            if (inputUnavailableLogged)
+            if (target != null && Input.GetKeyDown(snapKey))
+            {
+                yaw = target.eulerAngles.y;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                SetDistancePreset(0);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                SetDistancePreset(1);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                SetDistancePreset(2);
+            }
+
+            float scroll = Input.mouseScrollDelta.y;
+            if (Mathf.Abs(scroll) > 0.001f)
+            {
+                distance = Mathf.Clamp(distance - scroll * zoomSpeed * 0.05f, distanceRange.x, distanceRange.y);
+            }
+
+            bool orbitInput = !requireRightMouse || Input.GetMouseButton(1);
+            if (orbitInput)
+            {
+                yaw += Input.GetAxisRaw("Mouse X") * orbitSpeed;
+                pitch -= Input.GetAxisRaw("Mouse Y") * orbitSpeed;
+            }
+
+            if (allowArrowKeys)
+            {
+                float arrowX = 0f;
+                float arrowY = 0f;
+                if (Input.GetKey(KeyCode.LeftArrow)) arrowX -= 1f;
+                if (Input.GetKey(KeyCode.RightArrow)) arrowX += 1f;
+                if (Input.GetKey(KeyCode.UpArrow)) arrowY += 1f;
+                if (Input.GetKey(KeyCode.DownArrow)) arrowY -= 1f;
+
+                if (Mathf.Abs(arrowX) > 0f || Mathf.Abs(arrowY) > 0f)
+                {
+                    yaw += arrowX * keyboardOrbitSpeed * Time.deltaTime;
+                    pitch -= arrowY * keyboardOrbitSpeed * Time.deltaTime;
+                }
+            }
+
+            pitch = Mathf.Clamp(pitch, pitchRange.x, pitchRange.y);
+        }
+#endif
+
+        private void InitializeOrientationIfNeeded()
+        {
+            if (isInitialized)
             {
                 return;
             }
 
-            inputUnavailableLogged = true;
-            Debug.LogWarning("[FollowCamera] No input system available. Enable Input System or Legacy Input Manager.");
+            if (target != null)
+            {
+                yaw = target.eulerAngles.y;
+            }
+
+            isInitialized = true;
         }
-#endif
 
         private void SetDistancePreset(int index)
         {

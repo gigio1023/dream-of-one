@@ -450,7 +450,9 @@ namespace DreamOfOne.UI
 
             rect.anchorMin = anchorMin;
             rect.anchorMax = anchorMax;
-            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(
+                Mathf.Approximately(anchorMin.x, anchorMax.x) ? anchorMin.x : 0.5f,
+                Mathf.Approximately(anchorMin.y, anchorMax.y) ? anchorMin.y : 0.5f);
             rect.sizeDelta = size;
             rect.anchoredPosition = anchoredPos;
         }

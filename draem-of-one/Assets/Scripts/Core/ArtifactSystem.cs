@@ -168,6 +168,20 @@ namespace DreamOfOne.Core
             return registry.Artifacts;
         }
 
+        public void ResetArtifacts()
+        {
+            foreach (var entry in markers.Values)
+            {
+                if (entry.marker != null)
+                {
+                    Destroy(entry.marker);
+                }
+            }
+
+            markers.Clear();
+            registry.Clear();
+        }
+
         public void HighlightCase(CaseBundle bundle)
         {
             if (bundle == null)

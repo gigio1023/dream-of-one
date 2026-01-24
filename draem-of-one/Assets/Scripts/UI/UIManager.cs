@@ -50,6 +50,12 @@ namespace DreamOfOne.UI
 
         [SerializeField]
         private TMP_Text devOverlayText = null;
+
+        [SerializeField]
+        private TMP_Text sessionEndText = null;
+
+        [SerializeField]
+        private Image sessionEndPanel = null;
         [SerializeField]
         [Tooltip("UI 오브젝트가 없을 때 OnGUI로 표시")]
         private bool useOnGuiFallback = false;
@@ -93,6 +99,7 @@ namespace DreamOfOne.UI
         private void Awake()
         {
             ResolveUiReferences();
+            EnsureSessionEndUi();
             if (globalSuspicionSystem == null)
             {
                 globalSuspicionSystem = FindFirstObjectByType<GlobalSuspicionSystem>();
@@ -122,6 +129,15 @@ namespace DreamOfOne.UI
                 toastText.gameObject.SetActive(false);
             }
 
+            if (sessionEndText != null)
+            {
+                sessionEndText.gameObject.SetActive(false);
+            }
+            if (sessionEndPanel != null)
+            {
+                sessionEndPanel.gameObject.SetActive(false);
+            }
+
             useFallback = useOnGuiFallback || (globalSuspicionBar == null && eventLogText == null && toastText == null && interrogationText == null);
             if (useFallback)
             {
@@ -148,6 +164,7 @@ namespace DreamOfOne.UI
         private void Start()
         {
             ResolveUiReferences();
+            EnsureSessionEndUi();
             if (globalSuspicionSystem == null)
             {
                 globalSuspicionSystem = FindFirstObjectByType<GlobalSuspicionSystem>();
@@ -176,6 +193,92 @@ namespace DreamOfOne.UI
             if (eventLog == null)
             {
                 eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+        }
+
+        private void EnsureSessionEndUi()
+        {
+            if (sessionEndText != null)
+            {
+                return;
+            }
+
+            var canvas = GetComponentInChildren<Canvas>(true);
+            if (canvas == null)
+            {
+                canvas = FindFirstObjectByType<Canvas>();
+            }
+
+            if (canvas == null)
+            {
+                return;
+            }
+
+            foreach (var label in canvas.GetComponentsInChildren<TMP_Text>(true))
+            {
+                if (label != null && label.name == "SessionEndText")
+                {
+                    sessionEndText = label;
+                    break;
+                }
+            }
+
+            if (sessionEndText == null)
+            {
+                var endObject = new GameObject("SessionEndText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                endObject.transform.SetParent(canvas.transform, false);
+                sessionEndText = endObject.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (sessionEndPanel == null)
+            {
+                foreach (var image in canvas.GetComponentsInChildren<Image>(true))
+                {
+                    if (image != null && image.name == "SessionEndPanel")
+                    {
+                        sessionEndPanel = image;
+                        break;
+                    }
+                }
+            }
+
+            if (sessionEndPanel == null)
+            {
+                var panelObject = new GameObject("SessionEndPanel", typeof(RectTransform), typeof(Image));
+                panelObject.transform.SetParent(canvas.transform, false);
+                sessionEndPanel = panelObject.GetComponent<Image>();
+            }
+
+            if (sessionEndPanel != null)
+            {
+                sessionEndPanel.color = new Color(0f, 0f, 0f, 0.6f);
+                var panelRect = sessionEndPanel.rectTransform;
+                panelRect.anchorMin = new Vector2(0.5f, 0.5f);
+                panelRect.anchorMax = new Vector2(0.5f, 0.5f);
+                panelRect.pivot = new Vector2(0.5f, 0.5f);
+                panelRect.sizeDelta = new Vector2(960f, 440f);
+                panelRect.anchoredPosition = Vector2.zero;
+            }
+
+            if (sessionEndText != null)
+            {
+                sessionEndText.fontSize = 32f;
+                sessionEndText.alignment = TextAlignmentOptions.Center;
+                sessionEndText.enableWordWrapping = true;
+                sessionEndText.raycastTarget = false;
+
+                var rect = sessionEndText.rectTransform;
+                rect.anchorMin = new Vector2(0.5f, 0.5f);
+                rect.anchorMax = new Vector2(0.5f, 0.5f);
+                rect.pivot = new Vector2(0.5f, 0.5f);
+                rect.sizeDelta = new Vector2(900f, 380f);
+                rect.anchoredPosition = Vector2.zero;
+            }
+
+            if (sessionEndPanel != null && sessionEndText != null)
+            {
+                sessionEndPanel.transform.SetSiblingIndex(sessionEndText.transform.GetSiblingIndex());
+                sessionEndText.transform.SetSiblingIndex(sessionEndPanel.transform.GetSiblingIndex() + 1);
             }
         }
 
@@ -715,6 +818,88 @@ namespace DreamOfOne.UI
             }
 
             promptText.gameObject.SetActive(false);
+        }
+
+        public void ShowSessionEnd(string text)
+        {
+            EnsureSessionEndUi();
+            if (sessionEndPanel != null)
+            {
+                sessionEndPanel.gameObject.SetActive(true);
+            }
+
+            if (sessionEndText != null)
+            {
+                sessionEndText.gameObject.SetActive(true);
+                sessionEndText.SetText(text ?? string.Empty);
+            }
+        }
+
+        public void HideSessionEnd()
+        {
+            if (sessionEndText != null)
+            {
+                sessionEndText.gameObject.SetActive(false);
+                sessionEndText.SetText(string.Empty);
+            }
+
+            if (sessionEndPanel != null)
+            {
+                sessionEndPanel.gameObject.SetActive(false);
+            }
+        }
+
+        public void ResetUiState()
+        {
+            logLines.Clear();
+            dialogueLines.Clear();
+            selectedArtifactIndex = -1;
+            selectedArtifactId = string.Empty;
+            showArtifactPanel = false;
+            showDevOverlay = false;
+            showCasePanel = false;
+            showLogPanel = true;
+            lastDebugRefresh = -999f;
+            fallbackToast = string.Empty;
+            fallbackToastExpire = -1f;
+            fallbackPrompt = string.Empty;
+
+            UpdateGlobalSuspicion(0f);
+
+            if (eventLogText != null)
+            {
+                eventLogText.SetText(string.Empty);
+                eventLogText.gameObject.SetActive(showLogPanel);
+            }
+            dialogueText?.SetText(string.Empty);
+            interrogationText?.SetText(string.Empty);
+
+            if (toastText != null)
+            {
+                toastText.SetText(string.Empty);
+                toastText.gameObject.SetActive(false);
+            }
+
+            if (caseBundleText != null)
+            {
+                caseBundleText.SetText(string.Empty);
+                caseBundleText.gameObject.SetActive(false);
+            }
+
+            if (artifactText != null)
+            {
+                artifactText.SetText(string.Empty);
+                artifactText.gameObject.SetActive(false);
+            }
+
+            if (devOverlayText != null)
+            {
+                devOverlayText.SetText(string.Empty);
+                devOverlayText.gameObject.SetActive(false);
+            }
+
+            HidePrompt();
+            HideSessionEnd();
         }
 
         private void OnGUI()

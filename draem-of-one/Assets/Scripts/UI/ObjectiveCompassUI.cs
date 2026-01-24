@@ -359,5 +359,25 @@ namespace DreamOfOne.UI
             int index = Mathf.RoundToInt(angle / 45f) % labels.Length;
             return labels[index];
         }
+
+        public void ResetObjective()
+        {
+            foreach (var entry in markers.Values)
+            {
+                if (entry != null)
+                {
+                    Destroy(entry.gameObject);
+                }
+            }
+
+            markers.Clear();
+            visited.Clear();
+            completed = false;
+            nextUpdate = 0f;
+            ResolveAnchors();
+            EnsureMarkers();
+            UpdateMarkers();
+            UpdateOutput();
+        }
     }
 }

@@ -119,6 +119,19 @@ namespace DreamOfOne.Core
             EventBus.Publish(record);
         }
 
+        public void ResetLog()
+        {
+            events.Clear();
+            totalEvents = 0;
+            droppedEvents = 0;
+            lastEventTimeByKey.Clear();
+
+            lock (fileWriteQueue)
+            {
+                fileWriteQueue.Clear();
+            }
+        }
+
         public bool TryGetEventById(string eventId, out EventRecord record)
         {
             record = null;

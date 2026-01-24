@@ -1,6 +1,9 @@
 using DreamOfOne.UI;
 using UnityEngine;
 using UnityEngine.AI;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace DreamOfOne.Core
 {
@@ -27,6 +30,15 @@ namespace DreamOfOne.Core
 
         [SerializeField]
         private bool endOnVerdict = true;
+
+        [SerializeField]
+        private KeyCode restartKey = KeyCode.R;
+
+        [SerializeField]
+        private KeyCode quitKey = KeyCode.Q;
+
+        [SerializeField]
+        private bool allowQuit = true;
 
         private float elapsedSeconds = 0f;
         private bool ended = false;
@@ -84,12 +96,17 @@ namespace DreamOfOne.Core
 
         private void Start()
         {
-            uiManager?.ShowPrompt("Goal: observe rules, avoid suspicion, and survive the investigation.");
-            uiManager?.ShowToast("Enter buildings to gather context. Avoid raising G too high.", 4f);
+            ShowStartHints();
         }
 
         private void Update()
         {
+            if (ended)
+            {
+                HandleEndInput();
+                return;
+            }
+
             Tick(Time.deltaTime);
         }
 
@@ -145,8 +162,8 @@ namespace DreamOfOne.Core
             string summary = BuildSummary();
             if (uiManager != null)
             {
-                uiManager.ShowPrompt($"SESSION END — {reason}\n{summary}");
-                uiManager.ShowToast(summary, 8f);
+                uiManager.ShowSessionEnd($"SESSION END — {reason}\n{summary}\n\nRestart: {restartKey} / Quit: {(allowQuit ? quitKey.ToString() : "N/A")}");
+                uiManager.ShowToast(summary, 6f);
             }
 
             ApplyFreeze();
@@ -214,6 +231,46 @@ namespace DreamOfOne.Core
             endReason = string.Empty;
             elapsedSeconds = 0f;
             RestoreActors();
+            ResetRuntimeState();
+            ShowStartHints();
+        }
+
+        private void ResetRuntimeState()
+        {
+            if (eventLog == null)
+            {
+                eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+
+            if (eventLog != null)
+            {
+                eventLog.ResetLog();
+            }
+
+            var artifactSystem = FindFirstObjectByType<ArtifactSystem>();
+            artifactSystem?.ResetArtifacts();
+
+            var reportManager = FindFirstObjectByType<ReportManager>();
+            reportManager?.ResetReports();
+
+            var objective = FindFirstObjectByType<ObjectiveCompassUI>();
+            objective?.ResetObjective();
+
+            var police = FindFirstObjectByType<DreamOfOne.NPC.PoliceController>();
+            police?.ResetPoliceState();
+
+            foreach (var suspicion in FindObjectsByType<DreamOfOne.NPC.SuspicionComponent>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                suspicion.ResetAfterInterrogation();
+            }
+
+            if (globalSuspicionSystem == null)
+            {
+                globalSuspicionSystem = FindFirstObjectByType<GlobalSuspicionSystem>();
+            }
+
+            globalSuspicionSystem?.Recalculate();
+            uiManager?.ResetUiState();
         }
 
         private void ApplyFreeze()
@@ -274,6 +331,117 @@ namespace DreamOfOne.Core
             {
                 agent.isStopped = false;
             }
+        }
+
+        private void HandleEndInput()
+        {
+            if (WasRestartPressed())
+            {
+                ResetSession();
+                return;
+            }
+
+            if (allowQuit && WasQuitPressed())
+            {
+                QuitGame();
+            }
+        }
+
+#if ENABLE_INPUT_SYSTEM
+        private static bool WasKeyPressed(KeyCode keyCode)
+        {
+            if (Keyboard.current == null)
+            {
+                return false;
+            }
+
+            if (!TryGetInputSystemKey(keyCode, out var inputKey))
+            {
+                return false;
+            }
+
+            return Keyboard.current[inputKey].wasPressedThisFrame;
+        }
+
+        private static bool TryGetInputSystemKey(KeyCode keyCode, out Key inputKey)
+        {
+            inputKey = Key.None;
+
+            if (keyCode == KeyCode.None)
+            {
+                return false;
+            }
+
+            switch (keyCode)
+            {
+                case KeyCode.Return:
+                    inputKey = Key.Enter;
+                    return true;
+                case KeyCode.KeypadEnter:
+                    inputKey = Key.NumpadEnter;
+                    return true;
+                case KeyCode.Space:
+                    inputKey = Key.Space;
+                    return true;
+                case KeyCode.Backspace:
+                    inputKey = Key.Backspace;
+                    return true;
+                case KeyCode.Delete:
+                    inputKey = Key.Delete;
+                    return true;
+                case KeyCode.Escape:
+                    inputKey = Key.Escape;
+                    return true;
+            }
+
+            var keyName = keyCode.ToString();
+            if (keyName.StartsWith("Alpha", System.StringComparison.Ordinal))
+            {
+                var digitName = "Digit" + keyName.Substring("Alpha".Length);
+                return System.Enum.TryParse(digitName, out inputKey);
+            }
+
+            if (keyName.StartsWith("Keypad", System.StringComparison.Ordinal))
+            {
+                var numpadName = "Numpad" + keyName.Substring("Keypad".Length);
+                return System.Enum.TryParse(numpadName, out inputKey);
+            }
+
+            return System.Enum.TryParse(keyName, out inputKey);
+        }
+#endif
+
+        private bool WasRestartPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            return WasKeyPressed(restartKey);
+#else
+            return Input.GetKeyDown(restartKey);
+#endif
+        }
+
+        private bool WasQuitPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            return WasKeyPressed(quitKey);
+#else
+            return Input.GetKeyDown(quitKey);
+#endif
+        }
+
+        private void QuitGame()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
+
+        private void ShowStartHints()
+        {
+            uiManager?.ShowPrompt("Goal: observe rules, avoid suspicion, and survive the investigation.");
+            uiManager?.ShowToast("WASD 이동 / E 상호작용 / I 증거 / L 로그 / C 케이스 / F1 디버그", 4f);
         }
     }
 }

@@ -60,5 +60,11 @@ namespace DreamOfOne.Core
             artifactIds.Add(record.id);
             return true;
         }
+
+        public void Clear()
+        {
+            artifacts.Clear();
+            artifactIds.Clear();
+        }
     }
 }

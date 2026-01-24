@@ -32,7 +32,6 @@ labels: design, discussion
 ## 참고
 
 <!-- 관련 문서나 레퍼런스 -->
-- plan.md 섹션:
+- 관련 문서 (`docs/`):
 - 관련 ADR:
 - 관련 이슈:
-

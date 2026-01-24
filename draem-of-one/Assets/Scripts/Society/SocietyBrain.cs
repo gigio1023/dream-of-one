@@ -199,7 +199,7 @@ namespace DreamOfOne.Society
                 return DefaultAllowedSkills;
             }
 
-            var roleDef = ResolveRoleDefinition(persona.Role);
+            var roleDef = ResolveRoleDefinition(persona.RoleId);
             if (roleDef != null && roleDef.AllowedSkillIds != null && roleDef.AllowedSkillIds.Length > 0)
             {
                 return roleDef.AllowedSkillIds;
@@ -208,7 +208,7 @@ namespace DreamOfOne.Society
             return DefaultAllowedSkills;
         }
 
-        private RoleDefinition ResolveRoleDefinition(string roleId)
+        private RoleDefinition ResolveRoleDefinition(RoleId roleId)
         {
             if (policyPack == null || policyPack.Roles == null || policyPack.Roles.Length == 0)
             {
@@ -223,7 +223,7 @@ namespace DreamOfOne.Society
                     continue;
                 }
 
-                if (string.Equals(role.RoleId, roleId, System.StringComparison.OrdinalIgnoreCase))
+                if (role.RoleId == roleId)
                 {
                     return role;
                 }

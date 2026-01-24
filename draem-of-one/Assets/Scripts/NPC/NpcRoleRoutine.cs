@@ -24,13 +24,13 @@ namespace DreamOfOne.NPC
         private bool disableSimplePatrol = true;
 
         [SerializeField]
-        private string[] fallbackAnchors =
+        private AnchorId[] fallbackAnchors =
         {
-            "StoreBuilding",
-            "StudioBuilding_L1",
-            "ParkArea",
-            "Station",
-            "Cafe"
+            AnchorId.StoreBuilding,
+            AnchorId.StudioBuildingL1,
+            AnchorId.ParkArea,
+            AnchorId.Station,
+            AnchorId.Cafe
         };
 
         private readonly List<Transform> route = new();
@@ -109,12 +109,12 @@ namespace DreamOfOne.NPC
                 return;
             }
 
-            string role = persona != null ? persona.Role : string.Empty;
-            string[] targets = ResolveAnchorsForRole(role);
+            RoleId role = persona != null ? persona.RoleId : RoleId.None;
+            AnchorId[] targets = ResolveAnchorsForRole(role);
 
             for (int i = 0; i < targets.Length; i++)
             {
-                string anchorName = targets[i];
+                string anchorName = targets[i].ToAnchorName();
                 if (string.IsNullOrEmpty(anchorName))
                 {
                     continue;
@@ -137,37 +137,36 @@ namespace DreamOfOne.NPC
             }
         }
 
-        private string[] ResolveAnchorsForRole(string role)
+        private AnchorId[] ResolveAnchorsForRole(RoleId role)
         {
-            if (string.IsNullOrEmpty(role))
+            if (role == RoleId.None)
             {
                 return fallbackAnchors;
             }
 
-            string lower = role.ToLowerInvariant();
-            if (lower.Contains("police") || lower.Contains("officer"))
+            if (role is RoleId.Police or RoleId.Officer or RoleId.Investigator)
             {
-                return new[] { "Station" };
+                return new[] { AnchorId.Station };
             }
 
-            if (lower.Contains("clerk"))
+            if (role is RoleId.Clerk or RoleId.Manager)
             {
-                return new[] { "StoreBuilding" };
+                return new[] { AnchorId.StoreBuilding };
             }
 
-            if (lower.Contains("elder") || lower.Contains("park"))
+            if (role is RoleId.Elder or RoleId.Caretaker)
             {
-                return new[] { "ParkArea" };
+                return new[] { AnchorId.ParkArea };
             }
 
-            if (lower.Contains("barista") || lower.Contains("cafe"))
+            if (role is RoleId.Barista or RoleId.CafeHost)
             {
-                return new[] { "Cafe" };
+                return new[] { AnchorId.Cafe };
             }
 
-            if (lower.Contains("developer") || lower.Contains("pm") || lower.Contains("release") || lower.Contains("studio"))
+            if (role is RoleId.Developer or RoleId.PM or RoleId.Release or RoleId.QA)
             {
-                return new[] { "StudioBuilding_L1" };
+                return new[] { AnchorId.StudioBuildingL1 };
             }
 
             return fallbackAnchors;

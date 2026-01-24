@@ -194,7 +194,7 @@ namespace DreamOfOne.NPC
                     return bystander;
                 }
 
-                return FindByRole("Police");
+                return FindByRole(RoleId.Police);
             }
 
             if (!string.IsNullOrEmpty(record.actorId))
@@ -227,11 +227,11 @@ namespace DreamOfOne.NPC
             return null;
         }
 
-        private NpcPersona FindByRole(string role)
+        private NpcPersona FindByRole(RoleId roleId)
         {
             for (int i = 0; i < personas.Count; i++)
             {
-                if (personas[i] != null && personas[i].Role == role)
+                if (personas[i] != null && personas[i].RoleId == roleId)
                 {
                     return personas[i];
                 }
@@ -245,7 +245,7 @@ namespace DreamOfOne.NPC
             for (int i = 0; i < personas.Count; i++)
             {
                 var persona = personas[i];
-                if (persona != null && persona.Role != "경찰" && persona.Role != "Police")
+                if (persona != null && persona.RoleId is not (RoleId.Police or RoleId.Officer))
                 {
                     return persona;
                 }

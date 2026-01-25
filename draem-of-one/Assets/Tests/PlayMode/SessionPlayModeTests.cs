@@ -196,6 +196,93 @@ namespace DreamOfOne.PlayModeTests
             Assert.IsTrue(errors.Count == 0, $"Errors during short run: {string.Join("\\n", errors)}");
         }
 
+        [UnityTest]
+        public IEnumerator DoDChecklistSignals()
+        {
+            var log = Object.FindFirstObjectByType<WorldEventLog>();
+            var artifacts = Object.FindFirstObjectByType<ArtifactSystem>();
+            Assert.NotNull(log, "WorldEventLog missing");
+            Assert.NotNull(artifacts, "ArtifactSystem missing");
+
+            log.ResetLog();
+            artifacts.ResetArtifacts();
+
+            var errors = new List<string>();
+            void HandleLog(string condition, string stackTrace, LogType type)
+            {
+                if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert)
+                {
+                    errors.Add(condition);
+                }
+            }
+
+            Application.logMessageReceived += HandleLog;
+            var records = new List<EventRecord>
+            {
+                new EventRecord { actorId = "Player", actorRole = "Player", eventType = CoreEventType.ViolationDetected, ruleId = "R_QUEUE", topic = "R_QUEUE", placeId = "Store", zoneId = "StoreQueue", severity = 2, note = "violation" },
+                new EventRecord { actorId = "Cam01", actorRole = "System", eventType = CoreEventType.CctvCaptured, ruleId = "R_QUEUE", topic = "R_QUEUE", placeId = "Store", zoneId = "StoreQueue", severity = 1, note = "cctv" },
+                new EventRecord { actorId = "ClerkA", actorRole = "Clerk", eventType = CoreEventType.ReportFiled, ruleId = "R_QUEUE", topic = "R_QUEUE", placeId = "Store", zoneId = "StoreQueue", severity = 1, note = "report" },
+                new EventRecord { actorId = "WitnessA", actorRole = "Clerk", eventType = CoreEventType.StatementGiven, ruleId = "R_QUEUE", topic = "R_QUEUE", placeId = "Store", zoneId = "StoreQueue", severity = 1, note = "statement" },
+                new EventRecord { actorId = "WitnessB", actorRole = "QA", eventType = CoreEventType.ExplanationGiven, ruleId = "R_QUEUE", topic = "R_QUEUE", placeId = "Store", zoneId = "StoreQueue", severity = 1, note = "explanation" },
+                new EventRecord { actorId = "WitnessC", actorRole = "PM", eventType = CoreEventType.RebuttalGiven, ruleId = "R_QUEUE", topic = "R_QUEUE", placeId = "Store", zoneId = "StoreQueue", severity = 1, note = "rebuttal" },
+                new EventRecord { actorId = "GossipA", actorRole = "Citizen", eventType = CoreEventType.RumorShared, ruleId = "R_QUEUE", topic = "R_QUEUE", placeId = "Store", zoneId = "StoreQueue", severity = 1, note = "rumor" },
+                new EventRecord { actorId = "GossipB", actorRole = "Citizen", eventType = CoreEventType.RumorConfirmed, ruleId = "R_QUEUE", topic = "R_QUEUE", placeId = "Store", zoneId = "StoreQueue", severity = 1, note = "confirmed" },
+                new EventRecord { actorId = "OfficerA", actorRole = "Officer", eventType = CoreEventType.TicketIssued, ruleId = "R_QUEUE", topic = "R_QUEUE", placeId = "Store", zoneId = "StoreQueue", severity = 1, note = "ticket" },
+                new EventRecord { actorId = "OfficerB", actorRole = "Officer", eventType = CoreEventType.EvidenceCaptured, ruleId = "R_QUEUE", topic = "R_QUEUE", placeId = "Store", zoneId = "StoreQueue", severity = 1, note = "evidence" },
+                new EventRecord { actorId = "ProcA", actorRole = "System", eventType = CoreEventType.TaskStarted, ruleId = "PROC_A", topic = "PROC_A", placeId = "Station", zoneId = "StationDesk", severity = 1, note = "task start" },
+                new EventRecord { actorId = "ProcB", actorRole = "System", eventType = CoreEventType.TaskCompleted, ruleId = "PROC_B", topic = "PROC_B", placeId = "Station", zoneId = "StationDesk", severity = 1, note = "task complete" },
+                new EventRecord { actorId = "OfficerC", actorRole = "Officer", eventType = CoreEventType.VerdictGiven, ruleId = "R_QUEUE", topic = "R_QUEUE", placeId = "Station", zoneId = "StationDesk", severity = 2, note = "verdict" }
+            };
+
+            try
+            {
+                foreach (var record in records)
+                {
+                    log.RecordEvent(record);
+                }
+
+                yield return null;
+            }
+            finally
+            {
+                Application.logMessageReceived -= HandleLog;
+            }
+
+            int meaningfulEvents = log.Events.Count(e => e != null && e.eventType != CoreEventType.EnteredZone && e.eventType != CoreEventType.ExitedZone);
+            Assert.GreaterOrEqual(meaningfulEvents, 12, $"Meaningful events below target: {meaningfulEvents}");
+
+            int socialEvents = log.Events.Count(e => e != null && (
+                e.eventType == CoreEventType.ReportFiled
+                || e.eventType == CoreEventType.RumorShared
+                || e.eventType == CoreEventType.RumorConfirmed
+                || e.eventType == CoreEventType.StatementGiven
+                || e.eventType == CoreEventType.ExplanationGiven
+                || e.eventType == CoreEventType.RebuttalGiven));
+            Assert.GreaterOrEqual(socialEvents, 6, $"Social reaction events below target: {socialEvents}");
+
+            Assert.GreaterOrEqual(artifacts.GetArtifacts().Count, 3, "Artifacts below target");
+
+            var report = new ReportEnvelope
+            {
+                reportId = "TEST_REPORT",
+                topic = "R_QUEUE",
+                placeId = "Store",
+                zoneId = "StoreQueue"
+            };
+            report.attachedEventIds.AddRange(records
+                .Where(r => r.eventType == CoreEventType.StatementGiven
+                    || r.eventType == CoreEventType.ExplanationGiven
+                    || r.eventType == CoreEventType.RebuttalGiven)
+                .Select(r => r.id));
+
+            var builder = new CaseBundleBuilder(log, 80);
+            var bundle = builder.Build(report);
+            Assert.GreaterOrEqual(bundle.statements.Count, 1, "Statements missing in bundle");
+            Assert.GreaterOrEqual(bundle.explanations.Count, 1, "Explanations missing in bundle");
+            Assert.GreaterOrEqual(bundle.rebuttals.Count, 1, "Rebuttals missing in bundle");
+            Assert.IsTrue(errors.Count == 0, $"Errors during DoD smoke: {string.Join("\\n", errors)}");
+        }
+
         [Test]
         public void CanonicalLineIsCapped()
         {

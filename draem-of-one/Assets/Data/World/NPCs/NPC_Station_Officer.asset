@@ -26,7 +26,7 @@ MonoBehaviour:
   dialogueStyle: Short
   authorityProfile: High
   anchorName: Station
-  prefab: {fileID: 5620060744776670700, guid: e0b5918c12c6643ca934de44fc6922eb, type: 3}
+  prefab: {fileID: 6690685374279832741, guid: 40adc621c96fd4856930ca1f9669044e, type: 3}
   spawnOffset: {x: 1, y: 0, z: 0.8}
   isPolice: 1
   spawnCount: 1

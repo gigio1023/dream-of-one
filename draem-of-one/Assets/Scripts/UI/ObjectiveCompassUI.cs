@@ -71,6 +71,8 @@ namespace DreamOfOne.UI
         private float nextUpdate = 0f;
         private bool completed = false;
         private bool markersVisible = true;
+        private readonly StringBuilder outputBuilder = new StringBuilder(256);
+        private string lastOutput = string.Empty;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void EnsureInstance()
@@ -291,7 +293,7 @@ namespace DreamOfOne.UI
             string target = GetCurrentTarget();
             if (string.IsNullOrEmpty(target) || completed)
             {
-                outputText.SetText(LocalizationManager.Text(LocalizationKey.ObjectiveAllVisited));
+                SetOutputText(LocalizationManager.Text(LocalizationKey.ObjectiveAllVisited));
                 return;
             }
 
@@ -300,7 +302,7 @@ namespace DreamOfOne.UI
             if (!anchors.TryGetValue(target, out var targetTransform) || targetTransform == null || player == null)
             {
                 string header = LocalizationManager.Text(LocalizationKey.ObjectiveTarget, target);
-                outputText.SetText(BuildOutput(header, reason, incidentHint, string.Empty));
+                SetOutputText(BuildOutput(header, reason, incidentHint, string.Empty));
                 return;
             }
 
@@ -311,7 +313,7 @@ namespace DreamOfOne.UI
             string remaining = BuildRemainingList();
             string headerLine = LocalizationManager.Text(LocalizationKey.ObjectiveTargetWithDirection, target, direction, distance);
             string remainingLine = LocalizationManager.Text(LocalizationKey.ObjectiveRemainingLine, remaining);
-            outputText.SetText(BuildOutput(headerLine, reason, incidentHint, remainingLine));
+            SetOutputText(BuildOutput(headerLine, reason, incidentHint, remainingLine));
         }
 
         private string GetCurrentTarget()
@@ -380,7 +382,8 @@ namespace DreamOfOne.UI
 
         private string BuildOutput(string header, string reason, string incidentHint, string remaining)
         {
-            var builder = new StringBuilder();
+            var builder = outputBuilder;
+            builder.Clear();
             if (!string.IsNullOrWhiteSpace(header))
             {
                 builder.Append(header.Trim());
@@ -418,6 +421,22 @@ namespace DreamOfOne.UI
             }
 
             return builder.Length == 0 ? string.Empty : builder.ToString();
+        }
+
+        private void SetOutputText(string text)
+        {
+            if (outputText == null)
+            {
+                return;
+            }
+
+            if (string.Equals(text, lastOutput, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            lastOutput = text;
+            outputText.SetText(text ?? string.Empty);
         }
 
         private void SetMarkersActive(bool active)

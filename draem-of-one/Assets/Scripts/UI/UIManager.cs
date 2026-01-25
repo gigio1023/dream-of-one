@@ -87,6 +87,10 @@ namespace DreamOfOne.UI
         private float lastDebugRefresh = -999f;
         private CaseBundle currentCaseBundle = null;
         private CaseViewFilter caseViewFilter = CaseViewFilter.All;
+        private readonly StringBuilder artifactBuilder = new StringBuilder(512);
+        private readonly StringBuilder devOverlayBuilder = new StringBuilder(512);
+        private string lastArtifactPanelText = string.Empty;
+        private string lastDevOverlayText = string.Empty;
 
         [SerializeField]
         [Tooltip("디버그 패널 갱신 간격(초)")]
@@ -583,7 +587,8 @@ namespace DreamOfOne.UI
                 artifactSystem = FindFirstObjectByType<ArtifactSystem>();
             }
 
-            var builder = new StringBuilder();
+            var builder = artifactBuilder;
+            builder.Clear();
             builder.AppendLine("Artifacts");
 
             if (artifactSystem == null)
@@ -614,7 +619,12 @@ namespace DreamOfOne.UI
                 }
             }
 
-            artifactText.SetText(builder.ToString());
+            string output = builder.ToString();
+            if (!string.Equals(output, lastArtifactPanelText, System.StringComparison.Ordinal))
+            {
+                lastArtifactPanelText = output;
+                artifactText.SetText(output);
+            }
         }
 
         private string BuildInspectText(ArtifactRecord record)
@@ -682,7 +692,8 @@ namespace DreamOfOne.UI
                 policeController = FindFirstObjectByType<PoliceController>();
             }
 
-            var builder = new StringBuilder();
+            var builder = devOverlayBuilder;
+            builder.Clear();
             builder.AppendLine("Injected Lines");
 
             var lines = NpcLogInjector.GetRecentInjectedLines();
@@ -695,7 +706,12 @@ namespace DreamOfOne.UI
             string reason = policeController != null ? policeController.LastVerdictReason : "N/A";
             builder.Append($"Verdict Reason: {reason}");
 
-            devOverlayText.SetText(builder.ToString());
+            string output = builder.ToString();
+            if (!string.Equals(output, lastDevOverlayText, System.StringComparison.Ordinal))
+            {
+                lastDevOverlayText = output;
+                devOverlayText.SetText(output);
+            }
         }
 
         private void BindCoverStatus()

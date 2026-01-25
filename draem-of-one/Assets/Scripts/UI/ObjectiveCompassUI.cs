@@ -67,6 +67,7 @@ namespace DreamOfOne.UI
         private Transform player = null;
         private UIManager uiManager = null;
         private WorldEventLog eventLog = null;
+        private IncidentHintProvider incidentHints = new();
         private float nextUpdate = 0f;
         private bool completed = false;
         private bool markersVisible = true;
@@ -295,10 +296,11 @@ namespace DreamOfOne.UI
             }
 
             string reason = GetReasonFor(target);
+            string incidentHint = incidentHints != null ? incidentHints.BuildHint(target) : string.Empty;
             if (!anchors.TryGetValue(target, out var targetTransform) || targetTransform == null || player == null)
             {
                 string header = LocalizationManager.Text(LocalizationKey.ObjectiveTarget, target);
-                outputText.SetText(BuildOutput(header, reason, string.Empty));
+                outputText.SetText(BuildOutput(header, reason, incidentHint, string.Empty));
                 return;
             }
 
@@ -309,7 +311,7 @@ namespace DreamOfOne.UI
             string remaining = BuildRemainingList();
             string headerLine = LocalizationManager.Text(LocalizationKey.ObjectiveTargetWithDirection, target, direction, distance);
             string remainingLine = LocalizationManager.Text(LocalizationKey.ObjectiveRemainingLine, remaining);
-            outputText.SetText(BuildOutput(headerLine, reason, remainingLine));
+            outputText.SetText(BuildOutput(headerLine, reason, incidentHint, remainingLine));
         }
 
         private string GetCurrentTarget()
@@ -376,7 +378,7 @@ namespace DreamOfOne.UI
             return string.Empty;
         }
 
-        private string BuildOutput(string header, string reason, string remaining)
+        private string BuildOutput(string header, string reason, string incidentHint, string remaining)
         {
             var builder = new StringBuilder();
             if (!string.IsNullOrWhiteSpace(header))
@@ -395,6 +397,15 @@ namespace DreamOfOne.UI
                     }
                     builder.Append(reasonLine.Trim());
                 }
+            }
+
+            if (!string.IsNullOrWhiteSpace(incidentHint))
+            {
+                if (builder.Length > 0)
+                {
+                    builder.Append('\n');
+                }
+                builder.Append(incidentHint.Trim());
             }
 
             if (!string.IsNullOrWhiteSpace(remaining))

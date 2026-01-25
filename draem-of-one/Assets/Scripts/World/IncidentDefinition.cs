@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DreamOfOne.World
@@ -5,6 +6,15 @@ namespace DreamOfOne.World
     [CreateAssetMenu(menuName = "DreamOfOne/World/Incident Definition", fileName = "IncidentDefinition")]
     public sealed class IncidentDefinition : ScriptableObject
     {
+        [System.Serializable]
+        public struct IncidentBranch
+        {
+            public string ending;
+
+            [TextArea]
+            public string condition;
+        }
+
         [SerializeField]
         private string incidentId = "Incident";
 
@@ -22,5 +32,9 @@ namespace DreamOfOne.World
         public string Description => description;
         public string[] RequiredInteractables => requiredInteractables;
         public string[] RequiredArtifacts => requiredArtifacts;
+        [SerializeField]
+        private IncidentBranch[] branches = System.Array.Empty<IncidentBranch>();
+
+        public IReadOnlyList<IncidentBranch> Branches => branches;
     }
 }

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53fcbb74c032c4a8a86b6167b7c88e09, type: 3}
+  m_Name: Incident_Incident_StoreQueue
+  m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.IncidentDefinition
+  incidentId: Incident_StoreQueue
+  description: Store queue cutting + label dispute. Collect queue/label evidence
+    and file a report.
+  requiredInteractables:
+  - Store_QueueMarker
+  - Store_LabelBoard
+  - Police_ReportDesk
+  requiredArtifacts:
+  - TicketIssued
+  - CctvCaptured
+  - ReportFiled
+  - StatementGiven
+  branches:
+  - ending: Cleared
+    condition: Label mismatch confirmed; violation downgraded.
+  - ending: Guilty
+    condition: Ticket + CCTV confirm queue violation.
+  - ending: Escalation
+    condition: Conflicting statements require Station review.

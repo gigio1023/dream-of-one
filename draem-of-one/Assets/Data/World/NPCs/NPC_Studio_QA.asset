@@ -25,7 +25,7 @@ MonoBehaviour:
   dialogueStyle: Short
   authorityProfile: Medium
   anchorName: StudioBuilding_L1
-  prefab: {fileID: 8074292648909302261, guid: 49049d5efe185470ea4ec8072cd6b1d5, type: 3}
+  prefab: {fileID: 7423431579312459003, guid: 42d95ae4d63db4f2c9e4cc360cd37779, type: 3}
   spawnOffset: {x: -1.2, y: 0, z: 0.4}
   isPolice: 0
   spawnCount: 2

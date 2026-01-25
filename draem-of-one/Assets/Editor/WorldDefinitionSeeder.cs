@@ -20,6 +20,7 @@ namespace DreamOfOne.Editor
         private const string BudgetsRoot = "Assets/Data/World/Budgets";
         private const string ZonesRoot = "Assets/Data/World/Zones";
         private const string ArtifactRoot = "Assets/Resources/Artifacts";
+        private const string IncidentRoot = "Assets/Resources/Incidents";
 
         [MenuItem("Tools/DreamOfOne/Seed World Definition (Default)")]
         public static void SeedDefaultWorld()
@@ -115,14 +116,49 @@ namespace DreamOfOne.Editor
             {
                 CreateIncident(
                     "Incident_StoreQueue",
-                    "Store queue/label friction -> gossip/report -> police follow-up.",
+                    "Store queue cutting + label dispute. Collect queue/label evidence and file a report.",
                     new [] { "Store_QueueMarker", "Store_LabelBoard", "Police_ReportDesk" },
-                    new [] { "TicketIssued", "CctvCaptured" }),
+                    new [] { "TicketIssued", "CctvCaptured", "ReportFiled", "StatementGiven" },
+                    new []
+                    {
+                        Branch("Cleared", "Label mismatch confirmed; violation downgraded."),
+                        Branch("Guilty", "Ticket + CCTV confirm queue violation."),
+                        Branch("Escalation", "Conflicting statements require Station review.")
+                    }),
                 CreateIncident(
                     "Incident_StudioRC",
-                    "Studio RC procedure slip -> approval artifact -> verdict.",
+                    "RC inserted without approval. Verify kanban/approval trail and RC insert timing.",
                     new [] { "Studio_Kanban", "Studio_ApprovalDesk", "Studio_RCInsert" },
-                    new [] { "ApprovalGranted", "RcInserted" })
+                    new [] { "ApprovalGranted", "RcInserted", "CctvCaptured" },
+                    new []
+                    {
+                        Branch("Guilty", "RC insert precedes approval or approval missing."),
+                        Branch("Cleared", "Approval artifact precedes RC insert."),
+                        Branch("Unresolved", "Artifacts conflict; requires Station escalation.")
+                    }),
+                CreateIncident(
+                    "Incident_ParkNoise",
+                    "Noise complaint vs permitted performance. Check notice board + noise spot.",
+                    new [] { "Park_NoiseSpot", "Park_NoticeBoard", "Park_QuietSign" },
+                    new [] { "NoiseObserved", "ReportFiled", "RumorConfirmed" },
+                    new []
+                    {
+                        Branch("Cleared", "Notice board allows performance window."),
+                        Branch("Guilty", "No allowance; warnings ignored."),
+                        Branch("Escalation", "Repeated complaints routed to Station.")
+                    }),
+                CreateIncident(
+                    "Incident_StationConflict",
+                    "Conflicting testimonies across orgs. Reconcile with evidence board + interrogation.",
+                    new [] { "Police_ReportDesk", "Police_EvidenceBoard", "Police_InterrogationSpot" },
+                    new [] { "ReportFiled", "EvidenceCaptured", "CctvCaptured", "StatementGiven" },
+                    new []
+                    {
+                        Branch("Cleared", "Timeline + policy context resolve contradictions."),
+                        Branch("Guilty", "Hard artifact disproves one claim."),
+                        Branch("Unresolved", "Insufficient artifacts; case remains open."),
+                        Branch("Escalation", "Policy conflict requires higher authority.")
+                    })
             };
 
             var npcs = new List<NpcDefinition>
@@ -479,13 +515,13 @@ namespace DreamOfOne.Editor
             return asset;
         }
 
-        private static IncidentDefinition CreateIncident(string id, string description, string[] interactables, string[] artifacts)
+        private static IncidentDefinition CreateIncident(string id, string description, string[] interactables, string[] artifacts, IncidentDefinition.IncidentBranch[] branches)
         {
-            string path = $"{WorldRoot}/Incidents/Incident_{id}.asset";
+            string path = $"{IncidentRoot}/Incident_{id}.asset";
             var asset = AssetDatabase.LoadAssetAtPath<IncidentDefinition>(path);
             if (asset == null)
             {
-                EnsureFolder($"{WorldRoot}/Incidents");
+                EnsureFolder(IncidentRoot);
                 asset = ScriptableObject.CreateInstance<IncidentDefinition>();
                 AssetDatabase.CreateAsset(asset, path);
             }
@@ -495,6 +531,7 @@ namespace DreamOfOne.Editor
             so.FindProperty("description").stringValue = description;
             SetStringArray(so.FindProperty("requiredInteractables"), interactables);
             SetStringArray(so.FindProperty("requiredArtifacts"), artifacts);
+            SetBranchArray(so.FindProperty("branches"), branches);
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(asset);
             return asset;
@@ -786,7 +823,7 @@ namespace DreamOfOne.Editor
             EnsureFolder(WorldRoot);
             EnsureFolder($"{WorldRoot}/Buildings");
             EnsureFolder($"{WorldRoot}/Interactables");
-            EnsureFolder($"{WorldRoot}/Incidents");
+            EnsureFolder(IncidentRoot);
             EnsureFolder($"{WorldRoot}/NPCs");
             EnsureFolder(RulesRoot);
             EnsureFolder(PoliciesRoot);
@@ -827,6 +864,32 @@ namespace DreamOfOne.Editor
                 property.InsertArrayElementAtIndex(i);
                 property.GetArrayElementAtIndex(i).stringValue = values[i];
             }
+        }
+
+        private static void SetBranchArray(SerializedProperty property, IncidentDefinition.IncidentBranch[] branches)
+        {
+            property.ClearArray();
+            if (branches == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < branches.Length; i++)
+            {
+                property.InsertArrayElementAtIndex(i);
+                var entry = property.GetArrayElementAtIndex(i);
+                entry.FindPropertyRelative("ending").stringValue = branches[i].ending;
+                entry.FindPropertyRelative("condition").stringValue = branches[i].condition;
+            }
+        }
+
+        private static IncidentDefinition.IncidentBranch Branch(string ending, string condition)
+        {
+            return new IncidentDefinition.IncidentBranch
+            {
+                ending = ending,
+                condition = condition
+            };
         }
 
         private enum InteriorStyle

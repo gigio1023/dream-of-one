@@ -19,6 +19,7 @@ namespace DreamOfOne.PlayModeTests
         [UnitySetUp]
         public IEnumerator LoadPrototypeScene()
         {
+            RuntimeNavMeshBaker.SkipRuntimeBakeForTests = true;
             if (SceneManager.GetActiveScene().name != "Prototype")
             {
                 var op = SceneManager.LoadSceneAsync("Prototype", LoadSceneMode.Single);
@@ -29,6 +30,12 @@ namespace DreamOfOne.PlayModeTests
             }
 
             yield return null;
+        }
+
+        [TearDown]
+        public void ResetRuntimeBakeFlag()
+        {
+            RuntimeNavMeshBaker.SkipRuntimeBakeForTests = false;
         }
 
         [UnityTest]
@@ -140,6 +147,53 @@ namespace DreamOfOne.PlayModeTests
             Object.Destroy(npcA);
             Object.Destroy(npcB);
             Assert.IsTrue(confirmed, "Rumor was not confirmed with evidence");
+        }
+
+        [UnityTest]
+        public IEnumerator ShortRunHasNonMovementEventAndNoErrors()
+        {
+            var log = Object.FindFirstObjectByType<WorldEventLog>();
+            Assert.NotNull(log, "WorldEventLog missing");
+
+            var errors = new List<string>();
+            void HandleLog(string condition, string stackTrace, LogType type)
+            {
+                if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert)
+                {
+                    errors.Add(condition);
+                }
+            }
+
+            Application.logMessageReceived += HandleLog;
+            try
+            {
+                yield return new WaitForSeconds(1f);
+
+                log.RecordEvent(new EventRecord
+                {
+                    actorId = "TestRunner",
+                    actorRole = "Test",
+                    eventType = CoreEventType.EvidenceCaptured,
+                    category = EventCategory.Evidence,
+                    ruleId = "R_TEST",
+                    topic = "R_TEST",
+                    placeId = "Test",
+                    zoneId = "TestZone",
+                    position = Vector3.zero,
+                    severity = 1,
+                    note = "smoke"
+                });
+
+                yield return null;
+            }
+            finally
+            {
+                Application.logMessageReceived -= HandleLog;
+            }
+
+            bool hasNonMovement = log.Events.Any(e => e != null && e.eventType != CoreEventType.EnteredZone && e.eventType != CoreEventType.ExitedZone);
+            Assert.IsTrue(hasNonMovement, "No non-movement events recorded during short run");
+            Assert.IsTrue(errors.Count == 0, $"Errors during short run: {string.Join("\\n", errors)}");
         }
 
         [Test]

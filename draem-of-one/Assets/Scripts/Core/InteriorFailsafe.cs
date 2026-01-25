@@ -50,8 +50,11 @@ namespace DreamOfOne.Core
 
             if (agent != null && agent.enabled)
             {
-                agent.Warp(destination);
-                agent.ResetPath();
+                bool warped = agent.Warp(destination);
+                if (warped && agent.isOnNavMesh)
+                {
+                    agent.ResetPath();
+                }
             }
             else if (controller != null)
             {

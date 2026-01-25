@@ -11,6 +11,8 @@ namespace DreamOfOne.Core
     [DefaultExecutionOrder(-1000)]
     public sealed class RuntimeNavMeshBaker : MonoBehaviour
     {
+        public static bool SkipRuntimeBakeForTests { get; set; }
+
         [SerializeField]
         private MonoBehaviour surface = null;
 
@@ -20,6 +22,11 @@ namespace DreamOfOne.Core
         private void Awake()
         {
             if (!bakeOnAwake)
+            {
+                return;
+            }
+
+            if (SkipRuntimeBakeForTests)
             {
                 return;
             }
@@ -34,6 +41,8 @@ namespace DreamOfOne.Core
             {
                 return;
             }
+
+            ConfigureSurfaceForRuntime(resolvedSurface);
 
             var buildMethod = resolvedSurface.GetType().GetMethod("BuildNavMesh", BindingFlags.Instance | BindingFlags.Public);
             buildMethod?.Invoke(resolvedSurface, null);
@@ -69,6 +78,37 @@ namespace DreamOfOne.Core
             }
 
             return null;
+        }
+
+        private static void ConfigureSurfaceForRuntime(MonoBehaviour resolvedSurface)
+        {
+            if (resolvedSurface == null)
+            {
+                return;
+            }
+
+            var surfaceType = resolvedSurface.GetType();
+            var useGeometryProperty = surfaceType.GetProperty("useGeometry", BindingFlags.Instance | BindingFlags.Public);
+            if (useGeometryProperty == null || !useGeometryProperty.CanWrite)
+            {
+                return;
+            }
+
+            var enumType = useGeometryProperty.PropertyType;
+            if (!enumType.IsEnum)
+            {
+                return;
+            }
+
+            try
+            {
+                var physicsColliders = Enum.Parse(enumType, "PhysicsColliders");
+                useGeometryProperty.SetValue(resolvedSurface, physicsColliders);
+            }
+            catch
+            {
+                // Ignore if enum value not found in this package version.
+            }
         }
     }
 }

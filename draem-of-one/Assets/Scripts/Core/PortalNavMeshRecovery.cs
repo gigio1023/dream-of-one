@@ -35,8 +35,11 @@ namespace DreamOfOne.Core
                 agent.enabled = true;
             }
 
-            agent.Warp(target);
-            agent.ResetPath();
+            bool warped = agent.Warp(target);
+            if (warped && agent.isOnNavMesh)
+            {
+                agent.ResetPath();
+            }
 
             if (!keepEnabled)
             {

@@ -26,6 +26,9 @@ namespace DreamOfOne.UI
 
         [SerializeField]
         private InputActionReference cycleLanguageAction = null;
+
+        [SerializeField]
+        private InputActionReference cycleCaseFilterAction = null;
 #endif
 
         [SerializeField]
@@ -43,6 +46,9 @@ namespace DreamOfOne.UI
         [SerializeField]
         private KeyCode cycleLanguageKey = KeyCode.F2;
 
+        [SerializeField]
+        private KeyCode cycleCaseFilterKey = KeyCode.V;
+
         private void Awake()
         {
             if (uiManager == null)
@@ -59,6 +65,7 @@ namespace DreamOfOne.UI
             toggleDebugAction?.action.Enable();
             toggleCaseAction?.action.Enable();
             cycleLanguageAction?.action.Enable();
+            cycleCaseFilterAction?.action.Enable();
 #endif
         }
 
@@ -70,6 +77,7 @@ namespace DreamOfOne.UI
             toggleDebugAction?.action.Disable();
             toggleCaseAction?.action.Disable();
             cycleLanguageAction?.action.Disable();
+            cycleCaseFilterAction?.action.Disable();
 #endif
         }
 
@@ -108,6 +116,11 @@ namespace DreamOfOne.UI
                     var lang = localization.CycleLanguage();
                     uiManager?.ShowToast(LocalizationManager.Text(LocalizationKey.LanguageChangedToast, localization.GetLanguageDisplayName(lang)), 2f);
                 }
+            }
+
+            if (WasCycleCaseFilterPressed())
+            {
+                uiManager.CycleCaseFilter();
             }
         }
 
@@ -181,6 +194,20 @@ namespace DreamOfOne.UI
 #endif
         }
 
+        private bool WasCycleCaseFilterPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (cycleCaseFilterAction != null)
+            {
+                return cycleCaseFilterAction.action.WasPerformedThisFrame();
+            }
+
+            return IsKeyPressed(cycleCaseFilterKey);
+#else
+            return false;
+#endif
+        }
+
 #if ENABLE_INPUT_SYSTEM
         private static bool IsKeyPressed(KeyCode code)
         {
@@ -195,6 +222,8 @@ namespace DreamOfOne.UI
                 KeyCode.I => Key.I,
                 KeyCode.F1 => Key.F1,
                 KeyCode.C => Key.C,
+                KeyCode.F2 => Key.F2,
+                KeyCode.V => Key.V,
                 _ => Key.None
             };
 
@@ -208,12 +237,13 @@ namespace DreamOfOne.UI
 #endif
 
 #if ENABLE_INPUT_SYSTEM
-        public void BindInputActions(InputAction toggleLog, InputAction toggleArtifact, InputAction toggleDebug, InputAction toggleCase)
+        public void BindInputActions(InputAction toggleLog, InputAction toggleArtifact, InputAction toggleDebug, InputAction toggleCase, InputAction cycleCaseFilter)
         {
             toggleLogAction = toggleLog != null ? InputActionReference.Create(toggleLog) : null;
             toggleArtifactAction = toggleArtifact != null ? InputActionReference.Create(toggleArtifact) : null;
             toggleDebugAction = toggleDebug != null ? InputActionReference.Create(toggleDebug) : null;
             toggleCaseAction = toggleCase != null ? InputActionReference.Create(toggleCase) : null;
+            cycleCaseFilterAction = cycleCaseFilter != null ? InputActionReference.Create(cycleCaseFilter) : null;
         }
 #endif
     }

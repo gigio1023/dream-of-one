@@ -62,6 +62,9 @@ namespace DreamOfOne.Core
             var toggleCase = map.AddAction("ToggleCase", InputActionType.Button);
             toggleCase.AddBinding("<Keyboard>/c");
 
+            var cycleCaseFilter = map.AddAction("CycleCaseFilter", InputActionType.Button);
+            cycleCaseFilter.AddBinding("<Keyboard>/v");
+
             asset.AddActionMap(map);
             map.Enable();
 
@@ -69,7 +72,7 @@ namespace DreamOfOne.Core
             playerInput.defaultActionMap = "Player";
 
             playerController?.BindInputActions(move, interact, photo, jump);
-            uiShortcuts?.BindInputActions(openLog, inspect, debug, toggleCase);
+            uiShortcuts?.BindInputActions(openLog, inspect, debug, toggleCase, cycleCaseFilter);
         }
 #endif
     }

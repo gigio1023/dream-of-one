@@ -85,6 +85,8 @@ namespace DreamOfOne.UI
         private bool showLogPanel = true;
         private bool showCasePanel = false;
         private float lastDebugRefresh = -999f;
+        private CaseBundle currentCaseBundle = null;
+        private CaseViewFilter caseViewFilter = CaseViewFilter.All;
 
         [SerializeField]
         [Tooltip("디버그 패널 갱신 간격(초)")]
@@ -453,14 +455,41 @@ namespace DreamOfOne.UI
             coverStatusText.SetText(text);
         }
 
+        public void ShowCaseBundle(CaseBundle bundle)
+        {
+            currentCaseBundle = bundle;
+            caseViewFilter = CaseViewFilter.All;
+            string text = bundle != null ? CaseBundleFormatter.BuildSummary(bundle, caseViewFilter) : string.Empty;
+            SetCaseBundleText(text, true);
+        }
+
         public void ShowCaseBundle(string text)
+        {
+            currentCaseBundle = null;
+            caseViewFilter = CaseViewFilter.All;
+            SetCaseBundleText(text, !string.IsNullOrEmpty(text));
+        }
+
+        public void CycleCaseFilter()
+        {
+            if (currentCaseBundle == null)
+            {
+                return;
+            }
+
+            caseViewFilter = caseViewFilter.Next();
+            string text = CaseBundleFormatter.BuildSummary(currentCaseBundle, caseViewFilter);
+            SetCaseBundleText(text, true);
+        }
+
+        private void SetCaseBundleText(string text, bool revealPanel)
         {
             if (caseBundleText == null)
             {
                 return;
             }
 
-            if (!string.IsNullOrEmpty(text))
+            if (revealPanel && !string.IsNullOrEmpty(text))
             {
                 showCasePanel = true;
             }

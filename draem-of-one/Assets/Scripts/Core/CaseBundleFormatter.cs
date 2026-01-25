@@ -1,11 +1,12 @@
 using System.Text;
+using DreamOfOne.Localization;
 using UnityEngine;
 
 namespace DreamOfOne.Core
 {
     public static class CaseBundleFormatter
     {
-        public static string BuildSummary(CaseBundle bundle)
+        public static string BuildSummary(CaseBundle bundle, CaseViewFilter filter = CaseViewFilter.All)
         {
             if (bundle == null)
             {
@@ -13,7 +14,9 @@ namespace DreamOfOne.Core
             }
 
             var sb = new StringBuilder();
-            sb.Append("사건 묶음");
+            string title = LocalizationManager.Text(LocalizationKey.CaseSummaryTitle);
+            string filterLabel = LocalizationManager.Text(LocalizationKey.CaseSummaryFilterLabel);
+            sb.Append(title);
             if (!string.IsNullOrEmpty(bundle.placeId))
             {
                 sb.Append($" [{bundle.placeId}]");
@@ -25,34 +28,55 @@ namespace DreamOfOne.Core
             }
 
             sb.Append("\n");
-            sb.Append($"신고:{bundle.reports.Count}  위반:{bundle.violations.Count}  증거:{bundle.evidence.Count}");
+            string reportsLabel = LocalizationManager.Text(LocalizationKey.CaseSummaryReportsLabel);
+            string violationsLabel = LocalizationManager.Text(LocalizationKey.CaseSummaryViolationsLabel);
+            string evidenceLabel = LocalizationManager.Text(LocalizationKey.CaseSummaryEvidenceLabel);
+            string proceduresLabel = LocalizationManager.Text(LocalizationKey.CaseSummaryProceduresLabel);
+            string statementsLabel = LocalizationManager.Text(LocalizationKey.CaseSummaryStatementsLabel);
+            string explanationsLabel = LocalizationManager.Text(LocalizationKey.CaseSummaryExplanationsLabel);
+            string rebuttalsLabel = LocalizationManager.Text(LocalizationKey.CaseSummaryRebuttalsLabel);
+            string scoreLabel = LocalizationManager.Text(LocalizationKey.CaseSummaryScoreLabel);
+
+            sb.Append($"{reportsLabel}:{bundle.reports.Count}  {violationsLabel}:{bundle.violations.Count}  {evidenceLabel}:{bundle.evidence.Count}");
             if (bundle.procedures.Count > 0)
             {
-                sb.Append($"  절차:{bundle.procedures.Count}");
+                sb.Append($"  {proceduresLabel}:{bundle.procedures.Count}");
             }
             if (bundle.statements.Count > 0)
             {
-                sb.Append($"  진술:{bundle.statements.Count}");
+                sb.Append($"  {statementsLabel}:{bundle.statements.Count}");
             }
             if (bundle.explanations.Count > 0)
             {
-                sb.Append($"  해명:{bundle.explanations.Count}");
+                sb.Append($"  {explanationsLabel}:{bundle.explanations.Count}");
             }
             if (bundle.rebuttals.Count > 0)
             {
-                sb.Append($"  반박:{bundle.rebuttals.Count}");
+                sb.Append($"  {rebuttalsLabel}:{bundle.rebuttals.Count}");
             }
 
-            sb.Append($"  점수:{bundle.Score}");
+            sb.Append($"  {scoreLabel}:{bundle.Score}");
+
+            sb.Append($"\n{filterLabel}: {GetFilterLabel(filter)}");
 
             AppendRuleSummary(sb, bundle);
 
-            AppendDetailLines(sb, "증거", bundle.evidence, 2);
-            AppendDetailLines(sb, "신고", bundle.reports, 2);
-            AppendDetailLines(sb, "위반", bundle.violations, 2);
-            AppendDetailLines(sb, "진술", bundle.statements, 1);
-            AppendDetailLines(sb, "해명", bundle.explanations, 1);
-            AppendDetailLines(sb, "반박", bundle.rebuttals, 1);
+            bool showAll = filter == CaseViewFilter.All;
+            if (showAll || filter == CaseViewFilter.Evidence)
+            {
+                AppendDetailLines(sb, evidenceLabel, bundle.evidence, 3);
+            }
+            if (showAll || filter == CaseViewFilter.Violations)
+            {
+                AppendDetailLines(sb, violationsLabel, bundle.violations, 3);
+                AppendDetailLines(sb, reportsLabel, bundle.reports, 2);
+            }
+            if (showAll || filter == CaseViewFilter.Witnesses)
+            {
+                AppendDetailLines(sb, statementsLabel, bundle.statements, 2);
+                AppendDetailLines(sb, explanationsLabel, bundle.explanations, 2);
+                AppendDetailLines(sb, rebuttalsLabel, bundle.rebuttals, 2);
+            }
 
             return sb.ToString();
         }
@@ -74,7 +98,8 @@ namespace DreamOfOne.Core
                 return;
             }
 
-            sb.Append("\n규칙: ");
+            string rulesLabel = LocalizationManager.Text(LocalizationKey.CaseSummaryRulesLabel);
+            sb.Append($"\n{rulesLabel}: ");
             int count = 0;
             foreach (var rule in rules)
             {
@@ -132,8 +157,21 @@ namespace DreamOfOne.Core
                 string actor = string.IsNullOrEmpty(record.actorRole) ? record.actorId : $"{record.actorId}({record.actorRole})";
                 string rule = string.IsNullOrEmpty(record.ruleId) ? "-" : record.ruleId;
                 string note = string.IsNullOrEmpty(record.note) ? record.eventType.ToString() : record.note;
-                sb.Append($"\n{label}: [{rule}] {actor} - {note}");
+                string eventLabel = record.eventType.ToString();
+                sb.Append($"\n{label}: [{rule}] {actor} -> {eventLabel} ({note})");
             }
+        }
+
+        public static string GetFilterLabel(CaseViewFilter filter)
+        {
+            return filter switch
+            {
+                CaseViewFilter.All => LocalizationManager.Text(LocalizationKey.CaseFilterAll),
+                CaseViewFilter.Evidence => LocalizationManager.Text(LocalizationKey.CaseFilterEvidence),
+                CaseViewFilter.Violations => LocalizationManager.Text(LocalizationKey.CaseFilterViolations),
+                CaseViewFilter.Witnesses => LocalizationManager.Text(LocalizationKey.CaseFilterWitnesses),
+                _ => LocalizationManager.Text(LocalizationKey.CaseFilterAll)
+            };
         }
     }
 }

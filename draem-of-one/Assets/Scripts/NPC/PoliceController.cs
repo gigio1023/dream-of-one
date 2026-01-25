@@ -384,8 +384,7 @@ namespace DreamOfOne.NPC
 
             if (uiManager != null)
             {
-                string bundleText = CaseBundleFormatter.BuildSummary(currentCase);
-                uiManager.ShowCaseBundle(bundleText);
+                uiManager.ShowCaseBundle(currentCase);
             }
 
             var artifactSystem = FindFirstObjectByType<ArtifactSystem>();

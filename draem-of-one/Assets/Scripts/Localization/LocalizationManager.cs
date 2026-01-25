@@ -35,7 +35,22 @@ namespace DreamOfOne.Localization
         CameraPrompt,
         MissingFontToast,
         BlackboardTitle,
-        LanguageChangedToast
+        LanguageChangedToast,
+        CaseSummaryTitle,
+        CaseSummaryFilterLabel,
+        CaseSummaryReportsLabel,
+        CaseSummaryViolationsLabel,
+        CaseSummaryEvidenceLabel,
+        CaseSummaryProceduresLabel,
+        CaseSummaryStatementsLabel,
+        CaseSummaryExplanationsLabel,
+        CaseSummaryRebuttalsLabel,
+        CaseSummaryScoreLabel,
+        CaseSummaryRulesLabel,
+        CaseFilterAll,
+        CaseFilterEvidence,
+        CaseFilterViolations,
+        CaseFilterWitnesses
     }
 
     [Serializable]

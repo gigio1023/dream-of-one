@@ -141,6 +141,111 @@
       "zh": "黑板[{0}]"
     },
     {
+      "key": "CaseSummaryTitle",
+      "ko": "사건 묶음",
+      "en": "Case Bundle",
+      "it": "Caso",
+      "zh": "案件摘要"
+    },
+    {
+      "key": "CaseSummaryFilterLabel",
+      "ko": "필터",
+      "en": "Filter",
+      "it": "Filtro",
+      "zh": "筛选"
+    },
+    {
+      "key": "CaseSummaryReportsLabel",
+      "ko": "신고",
+      "en": "Reports",
+      "it": "Segnalazioni",
+      "zh": "举报"
+    },
+    {
+      "key": "CaseSummaryViolationsLabel",
+      "ko": "위반",
+      "en": "Violations",
+      "it": "Violazioni",
+      "zh": "违规"
+    },
+    {
+      "key": "CaseSummaryEvidenceLabel",
+      "ko": "증거",
+      "en": "Evidence",
+      "it": "Prove",
+      "zh": "证据"
+    },
+    {
+      "key": "CaseSummaryProceduresLabel",
+      "ko": "절차",
+      "en": "Procedures",
+      "it": "Procedure",
+      "zh": "流程"
+    },
+    {
+      "key": "CaseSummaryStatementsLabel",
+      "ko": "진술",
+      "en": "Statements",
+      "it": "Testimonianze",
+      "zh": "证言"
+    },
+    {
+      "key": "CaseSummaryExplanationsLabel",
+      "ko": "해명",
+      "en": "Explanations",
+      "it": "Spiegazioni",
+      "zh": "说明"
+    },
+    {
+      "key": "CaseSummaryRebuttalsLabel",
+      "ko": "반박",
+      "en": "Rebuttals",
+      "it": "Confutazioni",
+      "zh": "反驳"
+    },
+    {
+      "key": "CaseSummaryScoreLabel",
+      "ko": "점수",
+      "en": "Score",
+      "it": "Punteggio",
+      "zh": "得分"
+    },
+    {
+      "key": "CaseSummaryRulesLabel",
+      "ko": "규칙",
+      "en": "Rules",
+      "it": "Regole",
+      "zh": "规则"
+    },
+    {
+      "key": "CaseFilterAll",
+      "ko": "전체",
+      "en": "All",
+      "it": "Tutto",
+      "zh": "全部"
+    },
+    {
+      "key": "CaseFilterEvidence",
+      "ko": "증거",
+      "en": "Evidence",
+      "it": "Prove",
+      "zh": "证据"
+    },
+    {
+      "key": "CaseFilterViolations",
+      "ko": "위반",
+      "en": "Violations",
+      "it": "Violazioni",
+      "zh": "违规"
+    },
+    {
+      "key": "CaseFilterWitnesses",
+      "ko": "증언",
+      "en": "Witness",
+      "it": "Testimoni",
+      "zh": "证言"
+    },
+    {
       "key": "LanguageChangedToast",
       "ko": "언어: {0}",
       "en": "Language: {0}",

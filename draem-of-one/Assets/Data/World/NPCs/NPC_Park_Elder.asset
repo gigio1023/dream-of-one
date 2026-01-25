@@ -24,7 +24,7 @@ MonoBehaviour:
   dialogueStyle: Short
   authorityProfile: High
   anchorName: ParkArea
-  prefab: {fileID: 7423431579312459003, guid: 42d95ae4d63db4f2c9e4cc360cd37779, type: 3}
+  prefab: {fileID: 3573425565936748780, guid: f73d0db036d7d4979834ade8f116bf4c, type: 3}
   spawnOffset: {x: -1.1, y: 0, z: -0.6}
   isPolice: 0
   spawnCount: 2

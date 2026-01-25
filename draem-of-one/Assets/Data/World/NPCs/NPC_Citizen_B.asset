@@ -16,12 +16,13 @@ MonoBehaviour:
   roleName: Citizen
   organization: City
   routine: Wander
+  routineAnchors: []
   perceptionProfile: Default
   injectionProfile: Default
   dialogueStyle: Short
   authorityProfile: Low
   anchorName: ParkArea
-  prefab: {fileID: 7423431579312459003, guid: 42d95ae4d63db4f2c9e4cc360cd37779, type: 3}
+  prefab: {fileID: 2239405783504244200, guid: 7b473d31cea924558902b87f2eb78828, type: 3}
   spawnOffset: {x: -2, y: 0, z: 1}
   isPolice: 0
   spawnCount: 2

@@ -25,7 +25,7 @@ MonoBehaviour:
   dialogueStyle: Short
   authorityProfile: High
   anchorName: StoreBuilding
-  prefab: {fileID: 7423431579312459003, guid: 42d95ae4d63db4f2c9e4cc360cd37779, type: 3}
+  prefab: {fileID: 894074032528092366, guid: 802d0e5f7445e45a1848e5f03e15871c, type: 3}
   spawnOffset: {x: -1.2, y: 0, z: -0.4}
   isPolice: 0
   spawnCount: 2

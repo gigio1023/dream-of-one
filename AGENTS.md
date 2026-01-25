@@ -4,6 +4,8 @@
 
 - **Work SoT:** Linear issues. Do not use Markdown TODO lists as a task system.
 - **Execution graph:** Beads (`bd`) is an internal dependency/work decomposition tool for Codex CLI (may create epics/tasks/deps), but it is **not** mirrored to Linear.
+- **Default workflow (strict):** Unless a task explicitly says otherwise, always pull **one Linear issue at a time** and work it to completion before moving on.
+- **Beads usage (strict):** Regardless of the Linear issue granularity, you must record **detailed, atomic work items** in Beads and define dependencies between them (e.g., “boil water” → “cook pasta” → “mix sauce”). Beads is a local graph for fine‑grained planning and must be populated for every task.
 - **Beads storage:** `.beads/` should be tracked in git; do not hand-edit its files. Use the `bd` CLI. Local runtime artifacts are ignored by `.beads/.gitignore`.
 - **Writer:** Codex CLI only. The user gives natural-language instructions and reviews PRs.
 - **Codex Cloud:** Optional “worker” triggered from Linear (`@Codex`) for cloud-safe tasks (no Unity MCP / no serialized Unity assets).

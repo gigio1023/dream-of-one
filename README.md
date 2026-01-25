@@ -69,6 +69,5 @@ In a 10–12 minute session you should be able to:
 ## Documentation
 - Project definition (source of truth): `project.md`
 - Detailed implementation spec (long-form): `docs/spec/new-plan.md`
-- Codex Web (headless Unity CI setup): [`docs/codex-web-unity-ci.md`](docs/codex-web-unity-ci.md)
 - Historical snapshots (completed checklist + past status): `docs/archive/`
 - Agent notes: `AGENTS.md`

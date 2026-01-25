@@ -1,3 +1,4 @@
+using DreamOfOne.Localization;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -110,7 +111,7 @@ namespace DreamOfOne.Core
             if (showPrompt)
             {
                 uiManager ??= UnityEngine.Object.FindFirstObjectByType<DreamOfOne.UI.UIManager>();
-                uiManager?.ShowPrompt("RMB:회전  휠:줌  R:뒤로");
+                uiManager?.ShowPrompt(LocalizationManager.Text(LocalizationKey.CameraPrompt));
             }
         }
 

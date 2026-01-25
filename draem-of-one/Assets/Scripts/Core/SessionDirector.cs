@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using DreamOfOne.Localization;
 using DreamOfOne.UI;
 using UnityEngine;
 using UnityEngine.AI;
@@ -665,8 +666,8 @@ namespace DreamOfOne.Core
 
         private void ShowStartHints()
         {
-            uiManager?.ShowPrompt("Goal: observe rules, avoid suspicion, and survive the investigation.");
-            uiManager?.ShowToast("WASD 이동 / E 상호작용 / I 증거 / L 로그 / C 케이스 / F1 디버그", 4f);
+            uiManager?.ShowPrompt(LocalizationManager.Text(LocalizationKey.GoalPrompt));
+            uiManager?.ShowToast(LocalizationManager.Text(LocalizationKey.ControlsToast), 4f);
         }
     }
 }

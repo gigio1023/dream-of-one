@@ -1,3 +1,4 @@
+using DreamOfOne.Localization;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -22,6 +23,9 @@ namespace DreamOfOne.UI
 
         [SerializeField]
         private InputActionReference toggleCaseAction = null;
+
+        [SerializeField]
+        private InputActionReference cycleLanguageAction = null;
 #endif
 
         [SerializeField]
@@ -35,6 +39,9 @@ namespace DreamOfOne.UI
 
         [SerializeField]
         private KeyCode toggleCaseKey = KeyCode.C;
+
+        [SerializeField]
+        private KeyCode cycleLanguageKey = KeyCode.F2;
 
         private void Awake()
         {
@@ -51,6 +58,7 @@ namespace DreamOfOne.UI
             toggleArtifactAction?.action.Enable();
             toggleDebugAction?.action.Enable();
             toggleCaseAction?.action.Enable();
+            cycleLanguageAction?.action.Enable();
 #endif
         }
 
@@ -61,6 +69,7 @@ namespace DreamOfOne.UI
             toggleArtifactAction?.action.Disable();
             toggleDebugAction?.action.Disable();
             toggleCaseAction?.action.Disable();
+            cycleLanguageAction?.action.Disable();
 #endif
         }
 
@@ -89,6 +98,16 @@ namespace DreamOfOne.UI
             if (WasToggleCasePressed())
             {
                 uiManager.ToggleCasePanel();
+            }
+
+            if (WasCycleLanguagePressed())
+            {
+                var localization = LocalizationManager.Instance;
+                if (localization != null)
+                {
+                    var lang = localization.CycleLanguage();
+                    uiManager?.ShowToast(LocalizationManager.Text(LocalizationKey.LanguageChangedToast, localization.GetLanguageDisplayName(lang)), 2f);
+                }
             }
         }
 
@@ -143,6 +162,20 @@ namespace DreamOfOne.UI
             }
 
             return IsKeyPressed(toggleCaseKey);
+#else
+            return false;
+#endif
+        }
+
+        private bool WasCycleLanguagePressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (cycleLanguageAction != null)
+            {
+                return cycleLanguageAction.action.WasPerformedThisFrame();
+            }
+
+            return IsKeyPressed(cycleLanguageKey);
 #else
             return false;
 #endif

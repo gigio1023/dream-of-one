@@ -1,3 +1,4 @@
+using DreamOfOne.Localization;
 using TMPro;
 using UnityEngine;
 
@@ -61,7 +62,7 @@ namespace DreamOfOne.Core
                 string missingChars = new string(missing.ToArray());
                 Debug.LogWarning($"[Diag] 한글 글리프 누락: {missingChars}");
                 var ui = FindFirstObjectByType<DreamOfOne.UI.UIManager>();
-                ui?.ShowToast("한글 폰트 누락. FontBootstrap 확인.");
+                ui?.ShowToast(LocalizationManager.Text(LocalizationKey.MissingFontToast));
                 return;
             }
 

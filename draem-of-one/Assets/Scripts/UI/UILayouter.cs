@@ -1,3 +1,4 @@
+using DreamOfOne.Localization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,6 +23,21 @@ namespace DreamOfOne.UI
             {
                 Apply();
             }
+        }
+
+        private void OnEnable()
+        {
+            LocalizationManager.LanguageChanged += HandleLanguageChanged;
+        }
+
+        private void OnDisable()
+        {
+            LocalizationManager.LanguageChanged -= HandleLanguageChanged;
+        }
+
+        private void HandleLanguageChanged()
+        {
+            Apply();
         }
 
         public void Apply()
@@ -62,6 +78,7 @@ namespace DreamOfOne.UI
             TMP_Text blackboard = null;
             TMP_Text artifact = null;
             TMP_Text devOverlay = null;
+            TMP_Text languageText = null;
             Image eventLogPanel = null;
             Image dialoguePanel = null;
             Image promptPanel = null;
@@ -125,6 +142,9 @@ namespace DreamOfOne.UI
                         break;
                     case "DevOverlayText":
                         devOverlay ??= label;
+                        break;
+                    case "LanguageText":
+                        languageText ??= label;
                         break;
                 }
             }
@@ -326,8 +346,36 @@ namespace DreamOfOne.UI
                 controls.fontSize = 30f;
                 controls.alignment = TextAlignmentOptions.BottomRight;
                 controls.raycastTarget = false;
-                controls.SetText("WASD 이동 / E 상호작용 / F 촬영");
-                Place(controls.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(480f, 40f), new Vector2(-20f, 26f));
+                string languageList = LocalizationManager.Instance != null
+                    ? LocalizationManager.Instance.GetLanguageListShort()
+                    : "KO/EN/IT/ZH";
+                controls.SetText(LocalizationManager.Text(LocalizationKey.ControlsHint, languageList));
+                Place(controls.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(700f, 60f), new Vector2(-20f, 28f));
+            }
+
+            if (languageText == null)
+            {
+                var languageObject = new GameObject("LanguageText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                languageObject.transform.SetParent(canvas.transform, false);
+                languageText = languageObject.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (languageText != null)
+            {
+                languageText.gameObject.SetActive(!showExtendedHud);
+            }
+
+            if (languageText != null && !showExtendedHud)
+            {
+                languageText.name = "LanguageText";
+                languageText.fontSize = 26f;
+                languageText.alignment = TextAlignmentOptions.BottomRight;
+                languageText.raycastTarget = false;
+                string languageList = LocalizationManager.Instance != null
+                    ? LocalizationManager.Instance.GetLanguageListShort()
+                    : "KO/EN/IT/ZH";
+                languageText.SetText(LocalizationManager.Text(LocalizationKey.LanguageChangedToast, languageList));
+                Place(languageText.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(320f, 32f), new Vector2(-20f, 28f));
             }
 
             if (coverStatus == null)
@@ -348,7 +396,7 @@ namespace DreamOfOne.UI
                 coverStatus.fontSize = 30f;
                 coverStatus.alignment = TextAlignmentOptions.TopRight;
                 coverStatus.raycastTarget = false;
-                coverStatus.SetText("Cover: -");
+                coverStatus.SetText(LocalizationManager.Text(LocalizationKey.CoverPlaceholder));
                 Place(coverStatus.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(460f, 40f), new Vector2(-20f, -76f));
             }
 

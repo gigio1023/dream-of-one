@@ -1,4 +1,5 @@
 using System;
+using DreamOfOne.Localization;
 using UnityEngine;
 
 namespace DreamOfOne.Core
@@ -152,7 +153,7 @@ namespace DreamOfOne.Core
         {
             string coverName = coverProfile != null ? coverProfile.CoverName : "Cover";
             float g = globalSuspicion != null ? globalSuspicion.GlobalSuspicion : 0f;
-            return $"Cover:{coverName}  o:{outsiderness:0}  p:{OutsiderProbability:0.00}  G:{g:0.00}";
+            return LocalizationManager.Text(LocalizationKey.CoverStatusLine, coverName, outsiderness, OutsiderProbability, g);
         }
     }
 }

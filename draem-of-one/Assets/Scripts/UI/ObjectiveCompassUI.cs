@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DreamOfOne.Core;
+using DreamOfOne.Localization;
 using TMPro;
 using UnityEngine;
 
@@ -205,7 +206,7 @@ namespace DreamOfOne.UI
                 if (dist <= visitRadius)
                 {
                     visited.Add(entry.Key);
-                    uiManager?.ShowToast($"Visited {entry.Key}", 2f);
+                    uiManager?.ShowToast(LocalizationManager.Text(LocalizationKey.LandmarkVisitedToast, entry.Key), 2f);
                     RecordVisit(entry.Key, entry.Value.position);
                 }
             }
@@ -213,7 +214,7 @@ namespace DreamOfOne.UI
             if (!completed && visited.Count >= anchors.Count)
             {
                 completed = true;
-                uiManager?.ShowToast("All landmarks visited. Proceed to closure.", 4f);
+                uiManager?.ShowToast(LocalizationManager.Text(LocalizationKey.AllLandmarksVisitedToast), 4f);
             }
         }
 
@@ -257,13 +258,13 @@ namespace DreamOfOne.UI
             string target = GetCurrentTarget();
             if (string.IsNullOrEmpty(target) || completed)
             {
-                outputText.SetText("Objective: all landmarks visited");
+                outputText.SetText(LocalizationManager.Text(LocalizationKey.ObjectiveAllVisited));
                 return;
             }
 
             if (!anchors.TryGetValue(target, out var targetTransform) || targetTransform == null || player == null)
             {
-                outputText.SetText($"Objective: {target}");
+                outputText.SetText(LocalizationManager.Text(LocalizationKey.ObjectiveTarget, target));
                 return;
             }
 
@@ -272,7 +273,7 @@ namespace DreamOfOne.UI
             float distance = delta.magnitude;
             string direction = ToCardinal(delta);
             string remaining = BuildRemainingList();
-            outputText.SetText($"Objective: {target} ({direction}, {distance:0}m)\nRemaining: {remaining}");
+            outputText.SetText(LocalizationManager.Text(LocalizationKey.ObjectiveTargetWithDirection, target, direction, distance, remaining));
         }
 
         private string GetCurrentTarget()

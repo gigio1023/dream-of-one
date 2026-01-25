@@ -1,5 +1,6 @@
 using System.Text;
 using DreamOfOne.Core;
+using DreamOfOne.Localization;
 using TMPro;
 using UnityEngine;
 
@@ -78,7 +79,8 @@ namespace DreamOfOne.UI
 
             var entries = board.GetEntries(now);
             var builder = new StringBuilder();
-            builder.Append($"Blackboard [{board.BoardId}]\n");
+            builder.Append(LocalizationManager.Text(LocalizationKey.BlackboardTitle, board.BoardId));
+            builder.Append("\n");
             int count = Mathf.Min(maxLines, entries.Count);
             for (int i = 0; i < count; i++)
             {

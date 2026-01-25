@@ -1,0 +1,109 @@
+{
+  "entries": [
+    {
+      "key": "ControlsHint",
+      "ko": "WASD 이동 / E 상호작용 / F 촬영 | 언어: {0} (F2)",
+      "en": "WASD move / E interact / F capture | Lang: {0} (F2)",
+      "it": "WASD muovi / E interagisci / F scatta | Lingua: {0} (F2)",
+      "zh": "WASD移动 / E互动 / F拍摄 | 语言: {0} (F2)"
+    },
+    {
+      "key": "CoverPlaceholder",
+      "ko": "Cover: -",
+      "en": "Cover: -",
+      "it": "Copertura: -",
+      "zh": "身份: -"
+    },
+    {
+      "key": "CoverStatusLine",
+      "ko": "커버:{0}  o:{1:0}  p:{2:0.00}  G:{3:0.00}",
+      "en": "Cover:{0}  o:{1:0}  p:{2:0.00}  G:{3:0.00}",
+      "it": "Copertura:{0}  o:{1:0}  p:{2:0.00}  G:{3:0.00}",
+      "zh": "身份:{0}  o:{1:0}  p:{2:0.00}  G:{3:0.00}"
+    },
+    {
+      "key": "ObjectiveAllVisited",
+      "ko": "목표: 모든 랜드마크 방문 완료",
+      "en": "Objective: all landmarks visited",
+      "it": "Obiettivo: tutti i punti di riferimento visitati",
+      "zh": "目标：所有地标已访问"
+    },
+    {
+      "key": "ObjectiveTarget",
+      "ko": "목표: {0}",
+      "en": "Objective: {0}",
+      "it": "Obiettivo: {0}",
+      "zh": "目标：{0}"
+    },
+    {
+      "key": "ObjectiveTargetWithDirection",
+      "ko": "목표: {0} ({1}, {2:0}m)\n남은 곳: {3}",
+      "en": "Objective: {0} ({1}, {2:0}m)\nRemaining: {3}",
+      "it": "Obiettivo: {0} ({1}, {2:0}m)\nRimanenti: {3}",
+      "zh": "目标：{0}（{1}，{2:0}米）\n剩余：{3}"
+    },
+    {
+      "key": "LandmarkVisitedToast",
+      "ko": "방문: {0}",
+      "en": "Visited {0}",
+      "it": "Visitato: {0}",
+      "zh": "已访问：{0}"
+    },
+    {
+      "key": "AllLandmarksVisitedToast",
+      "ko": "모든 랜드마크 방문 완료. 사건 종료로 진행하세요.",
+      "en": "All landmarks visited. Proceed to closure.",
+      "it": "Tutti i punti visitati. Procedi alla chiusura.",
+      "zh": "所有地标已访问。请进行结案。"
+    },
+    {
+      "key": "GoalPrompt",
+      "ko": "목표: 규칙을 지키고 의심을 피하며 수사를 버텨라.",
+      "en": "Goal: observe rules, avoid suspicion, and survive the investigation.",
+      "it": "Obiettivo: rispetta le regole, evita sospetti e supera l'indagine.",
+      "zh": "目标：遵守规则，避免怀疑，并撑过调查。"
+    },
+    {
+      "key": "ControlsToast",
+      "ko": "WASD 이동 / E 상호작용 / I 증거 / L 로그 / C 케이스 / F1 디버그 / F2 언어",
+      "en": "WASD move / E interact / I artifact / L log / C case / F1 debug / F2 language",
+      "it": "WASD muovi / E interagisci / I prove / L log / C caso / F1 debug / F2 lingua",
+      "zh": "WASD移动 / E互动 / I证据 / L日志 / C案件 / F1调试 / F2语言"
+    },
+    {
+      "key": "LoopCompleteToast",
+      "ko": "루프 완료: 위반 → 가십/신고 → 판정",
+      "en": "Loop complete: violation → rumor/report → verdict",
+      "it": "Loop completato: violazione → pettegolezzo/rapporto → verdetto",
+      "zh": "循环完成：违规 → 谣言/举报 → 判决"
+    },
+    {
+      "key": "CameraPrompt",
+      "ko": "RMB:회전  휠:줌  R:뒤로",
+      "en": "RMB: rotate  Wheel: zoom  R: snap",
+      "it": "Tasto destro: ruota  Rotella: zoom  R: dietro",
+      "zh": "右键：旋转  滚轮：缩放  R：回到身后"
+    },
+    {
+      "key": "MissingFontToast",
+      "ko": "한글 폰트 누락. FontBootstrap 확인.",
+      "en": "CJK font missing. Check FontBootstrap.",
+      "it": "Font CJK mancante. Controlla FontBootstrap.",
+      "zh": "缺少CJK字体。检查FontBootstrap。"
+    },
+    {
+      "key": "BlackboardTitle",
+      "ko": "블랙보드 [{0}]",
+      "en": "Blackboard [{0}]",
+      "it": "Lavagna [{0}]",
+      "zh": "黑板[{0}]"
+    },
+    {
+      "key": "LanguageChangedToast",
+      "ko": "언어: {0}",
+      "en": "Language: {0}",
+      "it": "Lingua: {0}",
+      "zh": "语言：{0}"
+    }
+  ]
+}

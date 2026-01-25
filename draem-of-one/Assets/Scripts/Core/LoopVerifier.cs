@@ -1,3 +1,4 @@
+using DreamOfOne.Localization;
 using DreamOfOne.UI;
 using UnityEngine;
 
@@ -77,7 +78,7 @@ namespace DreamOfOne.Core
             {
                 announced = true;
                 Debug.Log("[LoopVerifier] WEL→가십/신고→판정 루프 완료");
-                uiManager?.ShowToast("루프 완료: 위반 → 가십/신고 → 판정");
+                uiManager?.ShowToast(LocalizationManager.Text(LocalizationKey.LoopCompleteToast));
             }
         }
 

@@ -19,6 +19,7 @@ namespace DreamOfOne.Core
             EventType.NoiseObserved,
             EventType.ReportFiled,
             EventType.RumorConfirmed,
+            EventType.StatementGiven,
             EventType.ExplanationGiven,
             EventType.RebuttalGiven
         };

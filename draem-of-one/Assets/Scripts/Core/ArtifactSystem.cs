@@ -92,6 +92,9 @@ namespace DreamOfOne.Core
                     EventType.QueueUpdated => new Color(0.7f, 0.7f, 0.7f),
                     EventType.SeatClaimed => new Color(0.5f, 0.8f, 0.5f),
                     EventType.NoiseObserved => new Color(0.9f, 0.4f, 0.6f),
+                    EventType.StatementGiven => new Color(0.8f, 0.6f, 0.9f),
+                    EventType.ExplanationGiven => new Color(0.6f, 0.6f, 0.9f),
+                    EventType.RebuttalGiven => new Color(0.9f, 0.6f, 0.4f),
                     _ => new Color(0.7f, 0.7f, 0.7f)
                 };
             }

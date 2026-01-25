@@ -38,6 +38,17 @@ namespace DreamOfOne.NPC
         public string Role => persona != null ? persona.Role : "Citizen";
         public RoleId RoleId => persona != null ? persona.RoleId : RoleId.Citizen;
         public string NpcId => persona != null ? persona.NpcId : name;
+        public bool TryGetLatestEntry(out BlackboardEntry entry)
+        {
+            if (memory.Count == 0)
+            {
+                entry = default;
+                return false;
+            }
+
+            entry = memory[memory.Count - 1];
+            return true;
+        }
 
         private void Awake()
         {

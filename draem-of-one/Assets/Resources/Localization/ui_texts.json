@@ -37,10 +37,52 @@
     },
     {
       "key": "ObjectiveTargetWithDirection",
-      "ko": "목표: {0} ({1}, {2:0}m)\n남은 곳: {3}",
-      "en": "Objective: {0} ({1}, {2:0}m)\nRemaining: {3}",
-      "it": "Obiettivo: {0} ({1}, {2:0}m)\nRimanenti: {3}",
-      "zh": "目标：{0}（{1}，{2:0}米）\n剩余：{3}"
+      "ko": "목표: {0} ({1}, {2:0}m)",
+      "en": "Objective: {0} ({1}, {2:0}m)",
+      "it": "Obiettivo: {0} ({1}, {2:0}m)",
+      "zh": "目标：{0}（{1}，{2:0}米）"
+    },
+    {
+      "key": "ObjectiveReasonLine",
+      "ko": "이유: {0}",
+      "en": "Why: {0}",
+      "it": "Motivo: {0}",
+      "zh": "理由：{0}"
+    },
+    {
+      "key": "ObjectiveRemainingLine",
+      "ko": "남은 곳: {0}",
+      "en": "Remaining: {0}",
+      "it": "Rimanenti: {0}",
+      "zh": "剩余：{0}"
+    },
+    {
+      "key": "ObjectiveReasonStore",
+      "ko": "스토어 절차(줄/라벨)를 확인하자.",
+      "en": "Check store procedures (queue/label).",
+      "it": "Controlla le procedure del negozio (fila/etichetta).",
+      "zh": "确认商店流程（排队/标签）。"
+    },
+    {
+      "key": "ObjectiveReasonStudio",
+      "ko": "스튜디오 승인/RC 흐름을 확인하자.",
+      "en": "Review studio approval/RC flow.",
+      "it": "Rivedi il flusso di approvazione/RC dello studio.",
+      "zh": "检查工作室的审批/RC流程。"
+    },
+    {
+      "key": "ObjectiveReasonPark",
+      "ko": "공원 규정(소음/촬영)을 확인하자.",
+      "en": "Check park rules (noise/photo).",
+      "it": "Controlla le regole del parco (rumore/foto).",
+      "zh": "确认公园规则（噪音/拍照）。"
+    },
+    {
+      "key": "ObjectiveReasonStation",
+      "ko": "경찰에 보고할 단서를 정리하자.",
+      "en": "Prepare evidence for the police report.",
+      "it": "Prepara le prove per la segnalazione alla polizia.",
+      "zh": "整理证据以向警方报告。"
     },
     {
       "key": "LandmarkVisitedToast",

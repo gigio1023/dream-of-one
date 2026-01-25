@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Text;
 using DreamOfOne.Core;
 using DreamOfOne.Localization;
 using TMPro;
@@ -36,6 +38,28 @@ namespace DreamOfOne.UI
         [SerializeField]
         private float markerScale = 0.6f;
 
+        [Serializable]
+        private struct ObjectiveReason
+        {
+            public string anchorName;
+            public LocalizationKey reasonKey;
+        }
+
+        [SerializeField]
+        private ObjectiveReason[] objectiveReasons =
+        {
+            new ObjectiveReason { anchorName = "StoreBuilding", reasonKey = LocalizationKey.ObjectiveReasonStore },
+            new ObjectiveReason { anchorName = "StudioBuilding_L1", reasonKey = LocalizationKey.ObjectiveReasonStudio },
+            new ObjectiveReason { anchorName = "ParkArea", reasonKey = LocalizationKey.ObjectiveReasonPark },
+            new ObjectiveReason { anchorName = "Station", reasonKey = LocalizationKey.ObjectiveReasonStation }
+        };
+
+        [SerializeField]
+        private bool allowMarkerToggle = true;
+
+        [SerializeField]
+        private KeyCode toggleMarkersKey = KeyCode.M;
+
         private readonly Dictionary<string, Transform> anchors = new();
         private readonly HashSet<string> visited = new();
         private readonly Dictionary<string, Renderer> markers = new();
@@ -45,6 +69,7 @@ namespace DreamOfOne.UI
         private WorldEventLog eventLog = null;
         private float nextUpdate = 0f;
         private bool completed = false;
+        private bool markersVisible = true;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void EnsureInstance()
@@ -70,6 +95,12 @@ namespace DreamOfOne.UI
 
         private void Update()
         {
+            if (allowMarkerToggle && WasToggleMarkersPressed())
+            {
+                markersVisible = !markersVisible;
+                SetMarkersActive(markersVisible);
+            }
+
             if (Time.time < nextUpdate)
             {
                 return;
@@ -172,6 +203,7 @@ namespace DreamOfOne.UI
                 marker.transform.SetParent(root.transform);
                 marker.transform.position = entry.Value.position + Vector3.up * markerHeight;
                 marker.transform.localScale = new Vector3(markerScale, markerScale, markerScale);
+                marker.SetActive(markersVisible);
 
                 var collider = marker.GetComponent<Collider>();
                 if (collider != null)
@@ -262,9 +294,11 @@ namespace DreamOfOne.UI
                 return;
             }
 
+            string reason = GetReasonFor(target);
             if (!anchors.TryGetValue(target, out var targetTransform) || targetTransform == null || player == null)
             {
-                outputText.SetText(LocalizationManager.Text(LocalizationKey.ObjectiveTarget, target));
+                string header = LocalizationManager.Text(LocalizationKey.ObjectiveTarget, target);
+                outputText.SetText(BuildOutput(header, reason, string.Empty));
                 return;
             }
 
@@ -273,7 +307,9 @@ namespace DreamOfOne.UI
             float distance = delta.magnitude;
             string direction = ToCardinal(delta);
             string remaining = BuildRemainingList();
-            outputText.SetText(LocalizationManager.Text(LocalizationKey.ObjectiveTargetWithDirection, target, direction, distance, remaining));
+            string headerLine = LocalizationManager.Text(LocalizationKey.ObjectiveTargetWithDirection, target, direction, distance);
+            string remainingLine = LocalizationManager.Text(LocalizationKey.ObjectiveRemainingLine, remaining);
+            outputText.SetText(BuildOutput(headerLine, reason, remainingLine));
         }
 
         private string GetCurrentTarget()
@@ -319,6 +355,94 @@ namespace DreamOfOne.UI
             }
 
             return builder.ToString();
+        }
+
+        private string GetReasonFor(string target)
+        {
+            if (string.IsNullOrEmpty(target))
+            {
+                return string.Empty;
+            }
+
+            for (int i = 0; i < objectiveReasons.Length; i++)
+            {
+                var entry = objectiveReasons[i];
+                if (string.Equals(entry.anchorName, target, StringComparison.OrdinalIgnoreCase))
+                {
+                    return LocalizationManager.Text(entry.reasonKey);
+                }
+            }
+
+            return string.Empty;
+        }
+
+        private string BuildOutput(string header, string reason, string remaining)
+        {
+            var builder = new StringBuilder();
+            if (!string.IsNullOrWhiteSpace(header))
+            {
+                builder.Append(header.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(reason))
+            {
+                string reasonLine = LocalizationManager.Text(LocalizationKey.ObjectiveReasonLine, reason);
+                if (!string.IsNullOrWhiteSpace(reasonLine))
+                {
+                    if (builder.Length > 0)
+                    {
+                        builder.Append('\n');
+                    }
+                    builder.Append(reasonLine.Trim());
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(remaining))
+            {
+                if (builder.Length > 0)
+                {
+                    builder.Append('\n');
+                }
+                builder.Append(remaining.Trim());
+            }
+
+            return builder.Length == 0 ? string.Empty : builder.ToString();
+        }
+
+        private void SetMarkersActive(bool active)
+        {
+            foreach (var marker in markers.Values)
+            {
+                if (marker != null)
+                {
+                    marker.gameObject.SetActive(active);
+                }
+            }
+        }
+
+        private bool WasToggleMarkersPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (UnityEngine.InputSystem.Keyboard.current == null)
+            {
+                return false;
+            }
+
+            UnityEngine.InputSystem.Key key = toggleMarkersKey switch
+            {
+                KeyCode.M => UnityEngine.InputSystem.Key.M,
+                _ => UnityEngine.InputSystem.Key.None
+            };
+
+            if (key == UnityEngine.InputSystem.Key.None)
+            {
+                return false;
+            }
+
+            return UnityEngine.InputSystem.Keyboard.current[key].wasPressedThisFrame;
+#else
+            return Input.GetKeyDown(toggleMarkersKey);
+#endif
         }
 
         private void RecordVisit(string anchorName, Vector3 position)

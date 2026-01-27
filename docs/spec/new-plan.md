@@ -141,20 +141,20 @@ Within one run (time-limited or “demo mode”):
 
 * Automated Play Mode tests cover the core loop; Play Mode tests can run as coroutines with `UnityTest`. ([Unity Documentation][4])
 
-#### MCSS DoD 체크리스트 (10–12분)
+#### MCSS DoD Checklist (10–12 min)
 
-**성공 기준**
-- 4 랜드마크(Store/Studio/Park/Station) 방문이 UI로 유도/확인
-- 의미 있는 이벤트 12개 이상(Entered/ExitedZone 제외)
-- NPC 사회 반응 이벤트 6회 이상(Report/Rumor/Statement/Explanation/Rebuttal 등)
-- Artifacts 3개 이상 생성 + Artifact 패널 확인
-- `VerdictGiven` 1회 이상 발생
-- 세션 종료 화면에 “왜 끝났는지/결과/리플레이 이유” 표시
+**Success criteria**
+- UI guides/confirms visits to 4 landmarks (Store/Studio/Park/Station)
+- 12+ meaningful events (exclude Entered/ExitedZone)
+- 6+ NPC social reaction events (Report/Rumor/Statement/Explanation/Rebuttal, etc.)
+- 3+ artifacts created + verify Artifact panel
+- `VerdictGiven` occurs at least once
+- Session end screen shows “why it ended / outcome / replay reason”
 
-**검증 절차**
-- Unity: `Tools > DreamOfOne > Run Diagnostics` 실행 → 콘솔 에러 0
-- PlayMode smoke: `SessionPlayModeTests.DoDChecklistSignals` 통과
-- 실제 플레이 10–12분 run으로 위 지표 확인
+**Verification steps**
+- Unity: run `Tools > DreamOfOne > Run Diagnostics` → console errors = 0
+- PlayMode smoke: `SessionPlayModeTests.DoDChecklistSignals` passes
+- Confirm the above metrics in a 10–12 minute play run
 
 ---
 

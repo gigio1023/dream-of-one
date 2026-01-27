@@ -49,40 +49,40 @@ Each organization table captures the current design intent in the same shape as 
 
 | Field | Spec |
 | --- | --- |
-| Goal | Keep `품절 0/라벨 갱신/거래 질서 유지` stable under load. |
-| Procedure steps (6) | 1) Open counter + confirm `라벨 시스템` state. 2) Sweep `StoreQueue` for rule risk (`R_QUEUE`). 3) Verify high-risk labels (`R_LABEL`) and update where needed. 4) Resolve counter conflicts (order, refunds, mislabels). 5) Emit evidence artifacts (tickets/receipts/memos) for any dispute. 6) Close with a short “status line” for the next cycle (what changed, why). |
-| Resources | `라벨 시스템`, `카운터`, `Store_QueueMarker`, `Store_LabelBoard`, `Store_Printer`, `Store_CounterBell`. |
-| Artifacts (examples) | `가격/품절 라벨`, `거래 메모`, `Violation Ticket`, `Complaint Memo`, `Defense Memo`. |
+| Goal | Keep `out-of-stock=0 / label refresh / transaction order` stable under load. |
+| Procedure steps (6) | 1) Open counter + confirm `label system` state. 2) Sweep `StoreQueue` for rule risk (`R_QUEUE`). 3) Verify high-risk labels (`R_LABEL`) and update where needed. 4) Resolve counter conflicts (order, refunds, mislabels). 5) Emit evidence artifacts (tickets/receipts/memos) for any dispute. 6) Close with a short “status line” for the next cycle (what changed, why). |
+| Resources | `label system`, `counter`, `Store_QueueMarker`, `Store_LabelBoard`, `Store_Printer`, `Store_CounterBell`. |
+| Artifacts (examples) | `price/out-of-stock labels`, `transaction memo`, `Violation Ticket`, `Complaint Memo`, `Defense Memo`. |
 | Roles | `Clerk`, `Manager`, plus supporting `Customer` archetypes. |
 
 ### Studio (`Studio`)
 
 | Field | Spec |
 | --- | --- |
-| Goal | Deliver `RC 제출/릴리즈 안정화` while keeping procedure integrity visible. |
-| Procedure steps (7) | 1) Pull current work into visible state (`칸반 갱신`). 2) Verify scope against release target (what counts as RC). 3) Draft/refresh `패치노트` based on actual work. 4) Run approval pass at `Studio_ApprovalDesk`. 5) Insert RC at `Studio_RCInsert` only after approval evidence exists. 6) Broadcast release outcome (approval granted vs. slip). 7) Log any procedure slips as explicit incidents, not silent failures. |
-| Resources | `칸반 보드`, `라운지`, `서버 슬롯`, `Studio_Kanban`, `Studio_ApprovalDesk`, `Studio_RCInsert`. |
-| Artifacts (examples) | `칸반 로그`, `패치노트`, `승인 노트`, `RC 스트립`, `Approval Note`. |
+| Goal | Deliver `RC submission / release stabilization` while keeping procedure integrity visible. |
+| Procedure steps (7) | 1) Pull current work into visible state (`kanban refresh`). 2) Verify scope against release target (what counts as RC). 3) Draft/refresh `patch notes` based on actual work. 4) Run approval pass at `Studio_ApprovalDesk`. 5) Insert RC at `Studio_RCInsert` only after approval evidence exists. 6) Broadcast release outcome (approval granted vs. slip). 7) Log any procedure slips as explicit incidents, not silent failures. |
+| Resources | `kanban board`, `lounge`, `server slot`, `Studio_Kanban`, `Studio_ApprovalDesk`, `Studio_RCInsert`. |
+| Artifacts (examples) | `kanban log`, `patch notes`, `approval note`, `RC strip`, `Approval Note`. |
 | Roles | `PM`, `Developer`, `QA`, `Release`. |
 
 ### Park (`Park`)
 
 | Field | Spec |
 | --- | --- |
-| Goal | Maintain `좌석/소음/촬영 규범 유지` without feeling over-policed. |
-| Procedure steps (5) | 1) Patrol anchor loop around `ParkArea` and `ParkSeat`. 2) Detect visible rule pressure: noise clusters, seat monopolies, unauthorized photo setups. 3) Issue graded interventions: soft warning → directive → escalation call. 4) Record the intervention outcome as a lightweight report/memo. 5) Update public signals (`게시판 공지`) when norms change. |
-| Resources | `게시판`, `조치 권한`, `Park_Bench`, `Park_NoticeBoard`, `Park_NoiseSpot`, `Park_PhotoSpot`. |
-| Artifacts (examples) | `조치 보고`, `게시판 공지`, `민원 메모`, `Rumor Card`, `Complaint Memo`. |
+| Goal | Maintain `seat / noise / photo rules` without feeling over-policed. |
+| Procedure steps (5) | 1) Patrol anchor loop around `ParkArea` and `ParkSeat`. 2) Detect visible rule pressure: noise clusters, seat monopolies, unauthorized photo setups. 3) Issue graded interventions: soft warning → directive → escalation call. 4) Record the intervention outcome as a lightweight report/memo. 5) Update public signals (`notice board announcement`) when norms change. |
+| Resources | `notice board`, `enforcement authority`, `Park_Bench`, `Park_NoticeBoard`, `Park_NoiseSpot`, `Park_PhotoSpot`. |
+| Artifacts (examples) | `enforcement report`, `notice board announcement`, `complaint memo`, `Rumor Card`, `Complaint Memo`. |
 | Roles | `Elder`, `Caretaker`, plus supporting `Visitor` archetypes. |
 
 ### Police outpost (`Station`)
 
 | Field | Spec |
 | --- | --- |
-| Goal | Execute `신고 접수 → 현장 확인 → 증거 수집 → 심문 → 판정` with legible truth transitions. |
+| Goal | Execute `report intake → on-site verification → evidence collection → interrogation → verdict` with legible truth transitions. |
 | Procedure steps (8) | 1) Intake report at `Police_ReportDesk` (who/what/where). 2) Create/refresh case bundle (report + suspects + initial artifacts). 3) Visit scene anchor and confirm rule context (what rule exists here). 4) Collect evidence artifacts (captures, tickets, statements). 5) Interrogate key actors at `Police_InterrogationSpot`. 6) Reconcile contradictions on the evidence board (`Police_EvidenceBoard`). 7) Emit a deterministic verdict line (clear / guilty / unresolved / escalation). 8) Publish resolution artifacts and close or escalate the case. |
-| Resources | `티켓 발부`, `프린터`, `캡처 보드`, `Police_ReportDesk`, `Police_EvidenceBoard`, `Police_Printer`, `Police_InterrogationSpot`. |
-| Artifacts (examples) | `위반 티켓`, `CCTV 캡처`, `사건 로그 스트립`, `Violation Ticket`, `CCTV Capture`, `Approval Note`. |
+| Resources | `ticket issuance`, `printer`, `capture board`, `Police_ReportDesk`, `Police_EvidenceBoard`, `Police_Printer`, `Police_InterrogationSpot`. |
+| Artifacts (examples) | `violation ticket`, `CCTV capture`, `case log strip`, `Violation Ticket`, `CCTV Capture`, `Approval Note`. |
 | Roles | `Police`, `Officer`, `Investigator`. |
 
 ## NPC archetypes and routines
@@ -221,8 +221,8 @@ Each template includes: trigger, observers/witnesses, evidence generation, and o
   - Primary: `PM`, `QA`.
   - Secondary: `Developer` who performed the insert.
 - Evidence generation:
-  - Missing or out-of-order `Approval Note` vs. `RC 스트립` timing.
-  - `칸반 로그` and `패치노트` inconsistencies.
+  - Missing or out-of-order `Approval Note` vs. `RC strip` timing.
+  - `kanban log` and `patch notes` inconsistencies.
   - Station follow-up can produce `CCTV Capture`-style timeline proof.
 - Possible outcomes:
   - Guilty: approval absent or clearly post-dated.

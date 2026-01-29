@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.Reflection;
 using DreamOfOne.Core;
+using DreamOfOne.LucidCover;
 using DreamOfOne.NPC;
 using DreamOfOne.World;
 using UnityEditor;
@@ -66,6 +67,7 @@ namespace DreamOfOne.Editor
             var spawner = root.AddComponent<ContentSpawner>();
             var buildingsRoot = CreateChild(root, "Buildings");
             var interactablesRoot = CreateChild(root, "Interactables");
+            var textSurfacesRoot = CreateChild(root, "TextSurfaces");
             var npcSpawnRoot = CreateChild(root, "NPCSpawns");
             var npcRoot = CreateChild(root, "NPCs");
 
@@ -79,6 +81,7 @@ namespace DreamOfOne.Editor
             int buildingCount = 0;
             int interiorCount = 0;
             int interactableCount = 0;
+            int textSurfaceCount = 0;
             int portalCount = 0;
             int npcSpawnCount = 0;
             int npcInstanceCount = 0;
@@ -289,6 +292,69 @@ namespace DreamOfOne.Editor
                 }
             }
 
+            if (world.TextSurfaceDatabase == null)
+            {
+                report.AddInfo("WorldDefinition.TextSurfaceDatabase is null (LucidCover content disabled).");
+            }
+            else
+            {
+                var surfaces = world.TextSurfaceDatabase.TextSurfaces;
+                for (int i = 0; i < surfaces.Count; i++)
+                {
+                    var surface = surfaces[i];
+                    if (surface == null)
+                    {
+                        continue;
+                    }
+
+                    var anchor = GameObject.Find($"CITY_Anchors/{surface.AnchorName}");
+                    if (anchor == null)
+                    {
+                        report.AddWarning($"Missing anchor for text surface {surface.TextSurfaceId}: {surface.AnchorName}");
+                        continue;
+                    }
+
+                    GameObject instance = null;
+                    if (surface.Prefab != null)
+                    {
+                        instance = (GameObject)PrefabUtility.InstantiatePrefab(surface.Prefab);
+                    }
+                    else
+                    {
+                        instance = new GameObject($"TextSurface_{surface.TextSurfaceId}");
+                    }
+
+                    instance.name = $"TextSurface_{surface.TextSurfaceId}";
+                    instance.transform.SetParent(textSurfacesRoot.transform);
+                    instance.transform.position = anchor.transform.position + surface.LocalOffset;
+                    instance.transform.rotation = anchor.transform.rotation * Quaternion.Euler(surface.LocalRotationEuler);
+                    spawner.Register(instance);
+
+                    var collider = instance.GetComponent<Collider>();
+                    if (collider == null)
+                    {
+                        collider = instance.AddComponent<BoxCollider>();
+                    }
+                    collider.isTrigger = true;
+                    if (collider is BoxCollider box)
+                    {
+                        box.size = surface.TriggerSize;
+                        box.center = Vector3.zero;
+                    }
+
+                    var runtimeSurface = instance.GetComponent<TextSurface>();
+                    if (runtimeSurface == null)
+                    {
+                        runtimeSurface = instance.AddComponent<TextSurface>();
+                    }
+
+                    string placeId = string.IsNullOrEmpty(surface.PlaceId) ? surface.AnchorName : surface.PlaceId;
+                    runtimeSurface.Configure(surface, placeId);
+
+                    textSurfaceCount++;
+                }
+            }
+
             SpawnZones(world, root.transform, report);
 
             for (int i = 0; i < world.Npcs.Count; i++)
@@ -380,7 +446,7 @@ namespace DreamOfOne.Editor
                 }
             }
 
-            report.LogSummary($"Rebuild complete: Buildings={buildingCount}, Interiors={interiorCount}, Interactables={interactableCount}, Portals={portalCount}, NPCSpawns={npcSpawnCount}");
+            report.LogSummary($"Rebuild complete: Buildings={buildingCount}, Interiors={interiorCount}, Interactables={interactableCount}, TextSurfaces={textSurfaceCount}, Portals={portalCount}, NPCSpawns={npcSpawnCount}");
             BakeNavMesh(report);
         }
 

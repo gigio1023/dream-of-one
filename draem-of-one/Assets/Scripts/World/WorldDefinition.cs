@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DreamOfOne.LucidCover;
 using UnityEngine;
 
 namespace DreamOfOne.World
@@ -36,6 +37,16 @@ namespace DreamOfOne.World
         [SerializeField]
         private List<PolicyPackDefinition> policyPacks = new();
 
+        [Header("Lucid Cover v1 (optional)")]
+        [SerializeField]
+        private DreamLawDatabase dreamLawDatabase = null;
+
+        [SerializeField]
+        private TextSurfaceDatabase textSurfaceDatabase = null;
+
+        [SerializeField]
+        private CoverTestDatabase coverTestDatabase = null;
+
         [SerializeField]
         private WorldBudgetDefinition budgets = null;
 
@@ -57,6 +68,9 @@ namespace DreamOfOne.World
         public IReadOnlyList<IncidentDefinition> Incidents => incidents;
         public RulesetDefinition Ruleset => ruleset;
         public IReadOnlyList<PolicyPackDefinition> PolicyPacks => policyPacks;
+        public DreamLawDatabase DreamLawDatabase => dreamLawDatabase;
+        public TextSurfaceDatabase TextSurfaceDatabase => textSurfaceDatabase;
+        public CoverTestDatabase CoverTestDatabase => coverTestDatabase;
         public WorldBudgetDefinition Budgets => budgets;
         public Vector3 InteriorRootPosition => interiorRootPosition;
         public float InteriorSpacing => interiorSpacing;

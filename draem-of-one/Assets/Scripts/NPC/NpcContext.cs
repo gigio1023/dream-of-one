@@ -105,7 +105,10 @@ namespace DreamOfOne.NPC
             if (suspicion != null && entry.category is EventCategory.Rule or EventCategory.Gossip or EventCategory.Evidence)
             {
                 float trustFactor = Mathf.Clamp01(0.5f + entry.trust);
-                float delta = (injectedSuspicionDelta + entry.severity * 2f) * trustFactor;
+                float baseDelta = Mathf.Abs(entry.delta) > 0.001f
+                    ? entry.delta
+                    : injectedSuspicionDelta + entry.severity * 2f;
+                float delta = baseDelta * trustFactor;
                 suspicion.AddSuspicion(delta, entry.topic, entry.eventId);
             }
         }

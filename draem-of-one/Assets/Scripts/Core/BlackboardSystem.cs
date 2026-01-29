@@ -109,6 +109,7 @@ namespace DreamOfOne.Core
                 topic = string.IsNullOrEmpty(record.topic) ? record.eventType.ToString() : record.topic,
                 category = record.category,
                 severity = record.severity,
+                delta = record.delta,
                 position = record.position,
                 trust = record.trust,
                 sourceId = record.sourceId

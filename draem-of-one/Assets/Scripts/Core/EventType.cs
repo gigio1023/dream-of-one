@@ -31,6 +31,7 @@ namespace DreamOfOne.Core
         QueueUpdated,
         SeatClaimed,
         NoiseObserved,
-        CctvCaptured
+        CctvCaptured,
+        ExposureUpdated
     }
 }

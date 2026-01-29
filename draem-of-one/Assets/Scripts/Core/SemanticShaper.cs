@@ -34,6 +34,10 @@ namespace DreamOfOne.Core
                     builder.Append($"{record.actorId} 의심도 변화: {record.note}");
                     AppendLocation(builder, record);
                     break;
+                case EventType.ExposureUpdated:
+                    builder.Append($"노출도 변화: {record.note}");
+                    AppendLocation(builder, record);
+                    break;
                 case EventType.ReportFiled:
                     builder.Append($"{record.actorId}이(가) {record.ruleId} 관련 신고를 제출했습니다.");
                     AppendLocation(builder, record);

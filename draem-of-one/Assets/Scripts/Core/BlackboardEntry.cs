@@ -15,6 +15,7 @@ namespace DreamOfOne.Core
         public string topic;
         public EventCategory category;
         public int severity;
+        public float delta;
         public float timestamp;
         public Vector3 position;
         public float trust;

@@ -61,7 +61,7 @@ Optional tooling:
 
 Minimum Complete Simulation Slice (MCSS) target:
 - 10–12 minute session
-- Player can visit: Store / Studio / Park / Police
+- Player can visit: Store / Studio / Park / Station
 - Meaningful events, social reactions, artifacts, and at least one procedural closure
 - No hard locks; session ends cleanly
 - “LLM off” mode remains functional (deterministic fallback)

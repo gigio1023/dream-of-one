@@ -15,6 +15,7 @@ namespace DreamOfOne.Core
         Gossip,
         Evidence,
         Procedure,
-        Organization
+        Organization,
+        Exposure
     }
 }

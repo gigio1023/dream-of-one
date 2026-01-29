@@ -20,6 +20,7 @@ namespace DreamOfOne.Core
         {
             TimeLimit,
             Suspicion,
+            Exposure,
             Verdict
         }
 
@@ -41,11 +42,15 @@ namespace DreamOfOne.Core
             public int artifacts;
             public int verdicts;
             public float globalSuspicion;
+            public int exposure;
             public float elapsedSeconds;
         }
 
         [SerializeField]
         private GlobalSuspicionSystem globalSuspicionSystem = null;
+
+        [SerializeField]
+        private ExposureSystem exposureSystem = null;
 
         [SerializeField]
         private WorldEventLog eventLog = null;
@@ -97,6 +102,11 @@ namespace DreamOfOne.Core
             if (globalSuspicionSystem == null)
             {
                 globalSuspicionSystem = FindFirstObjectByType<GlobalSuspicionSystem>();
+            }
+
+            if (exposureSystem == null)
+            {
+                exposureSystem = FindFirstObjectByType<ExposureSystem>();
             }
 
             if (eventLog == null)
@@ -166,6 +176,11 @@ namespace DreamOfOne.Core
             {
                 EndSession(SessionEndTrigger.Suspicion, "G reached critical. You were flagged.");
             }
+
+            if (exposureSystem != null && exposureSystem.IsExposed)
+            {
+                EndSession(SessionEndTrigger.Exposure, "Exposed. Forced wake.");
+            }
         }
 
         public void ProcessEvent(EventRecord record)
@@ -215,6 +230,7 @@ namespace DreamOfOne.Core
                 rumors = 0,
                 artifacts = 0,
                 globalSuspicion = globalSuspicionSystem != null ? globalSuspicionSystem.GlobalSuspicion : 0f,
+                exposure = exposureSystem != null ? exposureSystem.Exposure : 0,
                 elapsedSeconds = elapsedSeconds
             };
 
@@ -266,7 +282,7 @@ namespace DreamOfOne.Core
 
         private string BuildSummaryLine(SessionMetrics metrics)
         {
-            return $"Summary: events {metrics.totalEvents}, violations {metrics.violations}, reports {metrics.reports}, evidence {metrics.evidence}, rumors {metrics.rumors}, artifacts {metrics.artifacts}, verdicts {metrics.verdicts}.";
+            return $"Summary: events {metrics.totalEvents}, violations {metrics.violations}, reports {metrics.reports}, evidence {metrics.evidence}, rumors {metrics.rumors}, artifacts {metrics.artifacts}, verdicts {metrics.verdicts}, exposure {metrics.exposure}.";
         }
 
         private string BuildEndSummary(SessionEndTrigger trigger, string reason, SessionMetrics metrics)
@@ -295,6 +311,11 @@ namespace DreamOfOne.Core
             if (trigger == SessionEndTrigger.Suspicion || metrics.globalSuspicion >= suspicionEndThreshold)
             {
                 return SessionEnding.Escalation;
+            }
+
+            if (trigger == SessionEndTrigger.Exposure)
+            {
+                return SessionEnding.Guilty;
             }
 
             if (metrics.verdicts > 0)
@@ -329,6 +350,11 @@ namespace DreamOfOne.Core
             if (trigger == SessionEndTrigger.Suspicion)
             {
                 score -= 10;
+            }
+
+            if (trigger == SessionEndTrigger.Exposure)
+            {
+                score -= 20;
             }
 
             return Mathf.Clamp(score, 0, 100);
@@ -396,6 +422,11 @@ namespace DreamOfOne.Core
             if (metrics.globalSuspicion >= suspicionEndThreshold)
             {
                 candidates.Add(("Suspicion peaked", -8));
+            }
+
+            if (trigger == SessionEndTrigger.Exposure || metrics.exposure >= 100)
+            {
+                candidates.Add(("Exposed", -10));
             }
 
             if (trigger == SessionEndTrigger.TimeLimit)

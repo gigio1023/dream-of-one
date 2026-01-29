@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using DreamOfOne.Core;
+using DreamOfOne.LucidCover;
 using DreamOfOne.NPC;
 using TMPro;
 using UnityEngine;
@@ -106,6 +107,7 @@ namespace DreamOfOne.UI
         {
             ResolveUiReferences();
             EnsureSessionEndUi();
+            EnsureDevOverlayUi();
             if (globalSuspicionSystem == null)
             {
                 globalSuspicionSystem = FindFirstObjectByType<GlobalSuspicionSystem>();
@@ -165,12 +167,18 @@ namespace DreamOfOne.UI
             {
                 gameObject.AddComponent<UIShortcutController>();
             }
+
+            if (GetComponent<TextSurfaceInteractionController>() == null)
+            {
+                gameObject.AddComponent<TextSurfaceInteractionController>();
+            }
         }
 
         private void Start()
         {
             ResolveUiReferences();
             EnsureSessionEndUi();
+            EnsureDevOverlayUi();
             if (globalSuspicionSystem == null)
             {
                 globalSuspicionSystem = FindFirstObjectByType<GlobalSuspicionSystem>();
@@ -270,7 +278,7 @@ namespace DreamOfOne.UI
             {
                 sessionEndText.fontSize = 32f;
                 sessionEndText.alignment = TextAlignmentOptions.Center;
-                sessionEndText.enableWordWrapping = true;
+                sessionEndText.textWrappingMode = TextWrappingModes.Normal;
                 sessionEndText.raycastTarget = false;
 
                 var rect = sessionEndText.rectTransform;
@@ -286,6 +294,54 @@ namespace DreamOfOne.UI
                 sessionEndPanel.transform.SetSiblingIndex(sessionEndText.transform.GetSiblingIndex());
                 sessionEndText.transform.SetSiblingIndex(sessionEndPanel.transform.GetSiblingIndex() + 1);
             }
+        }
+
+        private void EnsureDevOverlayUi()
+        {
+            if (devOverlayText != null)
+            {
+                return;
+            }
+
+            var canvas = GetComponentInChildren<Canvas>(true);
+            if (canvas == null)
+            {
+                canvas = FindFirstObjectByType<Canvas>();
+            }
+
+            if (canvas == null)
+            {
+                return;
+            }
+
+            foreach (var label in canvas.GetComponentsInChildren<TMP_Text>(true))
+            {
+                if (label != null && label.name == "DevOverlayText")
+                {
+                    devOverlayText = label;
+                    break;
+                }
+            }
+
+            if (devOverlayText == null)
+            {
+                var overlayObject = new GameObject("DevOverlayText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                overlayObject.transform.SetParent(canvas.transform, false);
+                devOverlayText = overlayObject.GetComponent<TextMeshProUGUI>();
+            }
+
+            devOverlayText.fontSize = 24f;
+            devOverlayText.alignment = TextAlignmentOptions.TopLeft;
+            devOverlayText.textWrappingMode = TextWrappingModes.Normal;
+            devOverlayText.raycastTarget = false;
+            devOverlayText.color = new Color(1f, 1f, 1f, 0.95f);
+
+            var rect = devOverlayText.rectTransform;
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = new Vector2(24f, -24f);
+            rect.sizeDelta = new Vector2(880f, 360f);
         }
 
         private void ResolveUiReferences()
@@ -703,6 +759,14 @@ namespace DreamOfOne.UI
             }
 
             builder.AppendLine();
+            builder.AppendLine("Lucid Cover WHY");
+            var whyLines = LucidCoverWhyLog.GetLines();
+            for (int i = 0; i < whyLines.Count; i++)
+            {
+                builder.AppendLine(whyLines[i]);
+            }
+
+            builder.AppendLine();
             string reason = policeController != null ? policeController.LastVerdictReason : "N/A";
             builder.Append($"Verdict Reason: {reason}");
 
@@ -898,6 +962,7 @@ namespace DreamOfOne.UI
         {
             logLines.Clear();
             dialogueLines.Clear();
+            LucidCoverWhyLog.Clear();
             selectedArtifactIndex = -1;
             selectedArtifactId = string.Empty;
             showArtifactPanel = false;

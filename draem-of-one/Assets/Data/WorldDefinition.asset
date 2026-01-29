@@ -69,6 +69,9 @@ MonoBehaviour:
   ruleset: {fileID: 11400000, guid: afa682a84a06f460a8cb1f973a6dc1f3, type: 2}
   policyPacks:
   - {fileID: 11400000, guid: 11d41f94a3ea940d495f0a14d218cee3, type: 2}
+  dreamLawDatabase: {fileID: 11400000, guid: d7c5121c50b5b46c19e7102b4e1d735c, type: 2}
+  textSurfaceDatabase: {fileID: 11400000, guid: 0c14d8db09c5c4b768ce9044e37fde4a, type: 2}
+  coverTestDatabase: {fileID: 11400000, guid: 3d3318d04a9864a7987f2f22b8551c47, type: 2}
   budgets: {fileID: 11400000, guid: 353be058fce0e42b5b133a39ae60369d, type: 2}
   interiorRootPosition: {x: 0, y: 0, z: 80}
   interiorSpacing: 18

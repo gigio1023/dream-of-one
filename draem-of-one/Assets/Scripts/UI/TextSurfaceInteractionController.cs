@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using DreamOfOne.Core;
 using DreamOfOne.LucidCover;
 using DreamOfOne.NPC;
@@ -193,6 +195,8 @@ namespace DreamOfOne.UI
                 ? activeSurface.PlaceId
                 : activeSurface.TextSurfaceId;
 
+            var allowedLawIds = BuildLawIdFilter(activeSurface);
+
             applier.ApplySpeech(
                 database,
                 eventLog,
@@ -202,7 +206,8 @@ namespace DreamOfOne.UI
                 placeId,
                 activeWitnessId,
                 activeWitnessRole,
-                activeSurface.transform.position);
+                activeSurface.transform.position,
+                allowedLawIds);
 
             RecordWhyLines(placeId);
 
@@ -374,6 +379,32 @@ namespace DreamOfOne.UI
                 SpeechAct.Break => "이거 꿈이죠? 현실체크를 해볼게요.",
                 _ => string.Empty
             };
+        }
+
+        private static HashSet<string> BuildLawIdFilter(TextSurface surface)
+        {
+            if (surface == null)
+            {
+                return null;
+            }
+
+            var ids = surface.DreamLawIds;
+            if (ids == null)
+            {
+                return null;
+            }
+
+            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            for (int i = 0; i < ids.Length; i++)
+            {
+                string id = ids[i];
+                if (!string.IsNullOrEmpty(id))
+                {
+                    set.Add(id);
+                }
+            }
+
+            return set;
         }
 
         private void EndInteraction()

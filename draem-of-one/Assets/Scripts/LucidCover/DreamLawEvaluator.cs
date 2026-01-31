@@ -20,7 +20,8 @@ namespace DreamOfOne.LucidCover
             SpeechAct speechAct,
             string utterance,
             string placeId,
-            List<DreamLawHit> results)
+            List<DreamLawHit> results,
+            ISet<string> allowedLawIds)
         {
             if (results == null)
             {
@@ -47,6 +48,11 @@ namespace DreamOfOne.LucidCover
             {
                 var law = laws[i];
                 if (law == null)
+                {
+                    continue;
+                }
+
+                if (allowedLawIds != null && !allowedLawIds.Contains(law.DreamLawId))
                 {
                     continue;
                 }
@@ -147,4 +153,3 @@ namespace DreamOfOne.LucidCover
         }
     }
 }
-

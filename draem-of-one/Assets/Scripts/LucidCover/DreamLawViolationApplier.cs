@@ -26,7 +26,8 @@ namespace DreamOfOne.LucidCover
             string placeId,
             string witnessId,
             string witnessRole,
-            Vector3 position)
+            Vector3 position,
+            ISet<string> allowedLawIds)
         {
             hits.Clear();
 
@@ -35,7 +36,7 @@ namespace DreamOfOne.LucidCover
                 return;
             }
 
-            evaluator.Evaluate(database, speechAct, utterance, placeId, hits);
+            evaluator.Evaluate(database, speechAct, utterance, placeId, hits, allowedLawIds);
             if (hits.Count == 0)
             {
                 return;

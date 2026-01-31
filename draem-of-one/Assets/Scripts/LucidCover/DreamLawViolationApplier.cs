@@ -68,27 +68,19 @@ namespace DreamOfOne.LucidCover
             }
 
             // Minimal evidence: create a witness statement artifact event and link it from the violation record.
-            string statementEventId = Guid.NewGuid().ToString("N");
             string statementNote = string.IsNullOrEmpty(law.CanonicalLineTemplate)
                 ? $"Witness statement for {law.DreamLawId}."
                 : law.CanonicalLineTemplate;
 
-            eventLog.RecordEvent(new EventRecord
-            {
-                id = statementEventId,
-                actorId = witnessId,
-                actorRole = witnessRole,
-                targetId = "PLAYER",
-                eventType = CoreEventType.StatementGiven,
-                ruleId = law.DreamLawId,
-                sourceId = hit.DetectorId,
-                topic = law.DreamLawId,
-                note = statementNote,
-                severity = Mathf.Clamp(hit.EventSeverity, 1, 3),
-                trust = 1f,
-                placeId = placeId,
-                position = position
-            });
+            string statementEventId = ArtifactFactory.RecordWitnessStatement(
+                eventLog,
+                witnessId,
+                witnessRole,
+                law.DreamLawId,
+                hit.DetectorId,
+                placeId,
+                statementNote,
+                position);
 
             string violationNote = $"det={hit.DetectorId}; stmt={statementEventId}";
             if (hit.StationMultiplierApplied)

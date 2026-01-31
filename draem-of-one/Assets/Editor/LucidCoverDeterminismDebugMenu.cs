@@ -132,7 +132,7 @@ namespace DreamOfOne.Editor
 
             // Contains both detector keyword sets.
             string utterance = "dream reality check";
-            applier.ApplySpeech(db, harness.Log, harness.Exposure, SpeechAct.Inquire, utterance, placeId, witnessId, witnessRole, position);
+            applier.ApplySpeech(db, harness.Log, harness.Exposure, SpeechAct.Inquire, utterance, placeId, witnessId, witnessRole, position, allowedLawIds: null);
 
             return Snapshot.From(harness.Log, harness.Exposure, applier.LastHits);
         }
@@ -292,4 +292,3 @@ namespace DreamOfOne.Editor
         }
     }
 }
-

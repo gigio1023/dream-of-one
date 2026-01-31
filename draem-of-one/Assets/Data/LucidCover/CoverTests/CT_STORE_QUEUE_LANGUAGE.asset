@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe20d3d0ffcc24093a50f48f6650d872, type: 3}
+  m_Name: CT_STORE_QUEUE_LANGUAGE
+  m_EditorClassIdentifier: DreamOfOne::DreamOfOne.LucidCover.CoverTestDefinition
+  coverTestId: CT_STORE_QUEUE_LANGUAGE
+  location: Store / StoreQueue / Counter area
+  purpose: Queue language mismatch triggers suspicion/exposure.
+  dreamLawIds:
+  - DL_S1_QUEUE_SANCTITY
+  - DL_G1_NO_DREAM_TALK
+  - DL_G2_NO_REALITY_TEST
+  requiredActors:
+  - StoreClerk
+  - StoreCustomer
+  requiredTextSurfaces:
+  - TS_STORE_QUEUE_SIGN
+  - TS_STORE_COUNTER_POLICY
+  playerChecklistStep: "Store\uC5D0\uC11C Queue procedure \uD655\uC778/\uC815\uC0C1
+    \uC218\uD589"
+  triggerDetectorIds:
+  - DET_SPEECH_DREAM_TALK
+  - DET_SPEECH_REALITY_TEST
+  - DET_PROC_QUEUE_SKIP
+  - DET_REPEAT_LOOP
+  escalationLadder: "Suspicious: \uD45C\uD604 \uC774\uC0C1. Challenging: \uADDC\uC815
+    \uBB38\uAD6C \uC7AC\uC694\uAD6C. Reporting: \uC9C4\uC220+\uC2E0\uACE0."
+  artifactsGenerated: Witness Statement, Complaint Memo(conditional), Ticket/Receipt
+  defuseOptions: "SA_COMPLY\uB85C \uADDC\uC815 \uBB38\uAD6C \uC7AC\uC9C4\uC220 +
+    Queue \uC808\uCC28 \uC815\uC0C1 \uC218\uD589. Receipt \uC81C\uCD9C."
+  failureCondition: Exposure +40 in one test or Lucid identified verdict.
+  expectedCanonicalLines: '[DL_S1][Queue] Procedure language mismatch at Store Counter.
+
+    [DL_G1][Speech]
+    Dream-related phrasing detected.'
+  mcssValidation: CT-01 alone reaches suspicious->challenging; reporting possible
+    on conditions.

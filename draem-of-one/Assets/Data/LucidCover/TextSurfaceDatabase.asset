@@ -14,3 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: DreamOfOne::DreamOfOne.LucidCover.TextSurfaceDatabase
   textSurfaces:
   - {fileID: 11400000, guid: e4303fb52e3924850a4e6f552636c44a, type: 2}
+  - {fileID: 11400000, guid: 4b08ab6a471384577a0fa9ac7e6e1a65, type: 2}
+  - {fileID: 11400000, guid: dbfb954c3692f4ecba81b4ff8878c742, type: 2}
+  - {fileID: 11400000, guid: c1b8d5a506cd14f62bae5cc9355042e7, type: 2}
+  - {fileID: 11400000, guid: 2e70aeb44142447b9a9b1e153f799ff2, type: 2}
+  - {fileID: 11400000, guid: d4d5bc122b31b4164919ab765e1681d9, type: 2}
+  - {fileID: 11400000, guid: 38381f99b75cc4a8185fa94651d5aaf4, type: 2}

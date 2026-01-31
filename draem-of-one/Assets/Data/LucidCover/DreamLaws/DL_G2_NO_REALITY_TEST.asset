@@ -10,18 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c4534a2488b54772b6c969917f0158e, type: 3}
-  m_Name: DL_G1_NO_DREAM_TALK
+  m_Name: DL_G2_NO_REALITY_TEST
   m_EditorClassIdentifier: DreamOfOne::DreamOfOne.LucidCover.DreamLawDefinition
-  dreamLawId: DL_G1_NO_DREAM_TALK
-  category: 0
+  dreamLawId: DL_G2_NO_REALITY_TEST
+  category: 2
   scopeKind: 0
   scopeId: 
-  severity: 0.9
-  suspicionDelta: 10
-  exposureDelta: 25
+  severity: 1
+  suspicionDelta: 12
+  exposureDelta: 30
   detectorIds:
-  - DET_SPEECH_DREAM_TALK
-  evidencePolicy: '1st hit: Witness Statement. 2nd hit: Reporting weight up.'
-  canonicalLineTemplate: '[DL_G1][Speech] Dream-related phrasing detected.'
-  defuseHints: "\uC808\uCC28 \uC6A9\uC5B4\uB85C \uC7AC\uC9C4\uC220. \uADDC\uC815
-    \uBB38\uAD6C\uB97C \uC778\uC6A9."
+  - DET_SPEECH_REALITY_TEST
+  - DET_SPEECH_TIMELINE_PROBE
+  evidencePolicy: Always Witness Statement. Station context 1.5x.
+  canonicalLineTemplate: '[DL_G2][Global] Reality-check behavior detected.'
+  defuseHints: "\uD655\uC778/\uD14C\uC2A4\uD2B8 \uB300\uC2E0 \uC808\uCC28 \uC218\uD589\uC73C\uB85C
+    \uC804\uD658."

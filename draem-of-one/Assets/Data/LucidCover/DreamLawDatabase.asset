@@ -14,3 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: DreamOfOne::DreamOfOne.LucidCover.DreamLawDatabase
   dreamLaws:
   - {fileID: 11400000, guid: 3ae7bca52e370421a88dc303d27f9279, type: 2}
+  - {fileID: 11400000, guid: fbed86d08af584efe8edca069d873993, type: 2}
+  - {fileID: 11400000, guid: 5015bfabc3bac4e6a976fc94fada4cf6, type: 2}
+  - {fileID: 11400000, guid: 92c0419aef2884530b9ab76181fe16e0, type: 2}
+  - {fileID: 11400000, guid: 21af612adb0c64f828fa0f01bf9d425b, type: 2}
+  - {fileID: 11400000, guid: b64969add043442dfaf0d2e2da05c57b, type: 2}
+  - {fileID: 11400000, guid: e09b2bebedccd46a580cefcc7c1de298, type: 2}
+  - {fileID: 11400000, guid: 4db4a0a7a00cc452ba5a060e0e119c0d, type: 2}
+  - {fileID: 11400000, guid: 51031a8d8d66c4ac19443be3f4c5df4b, type: 2}
+  - {fileID: 11400000, guid: 1735b582a50ee425685f0d0d7dfdb887, type: 2}

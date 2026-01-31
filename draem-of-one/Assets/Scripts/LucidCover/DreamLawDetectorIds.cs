@@ -21,6 +21,8 @@ namespace DreamOfOne.LucidCover
         // Repetition / authority detectors (Phase 3+).
         public const string RepeatLoop = "DET_REPEAT_LOOP";
         public const string AuthorityMismatch = "DET_AUTHORITY_MISMATCH";
+
+        // NPC-driven contagion triggers.
+        public const string NpcRealityCheckContagion = "DET_NPC_UTTERANCE_REALITY_TEST";
     }
 }
-

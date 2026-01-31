@@ -195,6 +195,9 @@ namespace DreamOfOne.UI
                 ? activeSurface.PlaceId
                 : activeSurface.TextSurfaceId;
 
+            TryRecordNoticeSnapshot(placeId);
+            TryRecordDefenseMemo(act, placeId, utterance);
+
             var allowedLawIds = BuildLawIdFilter(activeSurface);
 
             applier.ApplySpeech(
@@ -212,6 +215,66 @@ namespace DreamOfOne.UI
             RecordWhyLines(placeId);
 
             EndInteraction();
+        }
+
+        private void TryRecordNoticeSnapshot(string placeId)
+        {
+            if (eventLog == null || activeSurface == null)
+            {
+                return;
+            }
+
+            string note = $"Notice snapshot: {BuildSurfaceHeader(activeSurface)}";
+            ArtifactFactory.RecordNoticeSnapshot(
+                eventLog,
+                "System",
+                "System",
+                activeSurface.TextSurfaceId,
+                placeId,
+                note,
+                activeSurface.transform.position);
+        }
+
+        private void TryRecordDefenseMemo(SpeechAct act, string placeId, string utterance)
+        {
+            if (eventLog == null || activeSurface == null)
+            {
+                return;
+            }
+
+            if (act != SpeechAct.Frame)
+            {
+                return;
+            }
+
+            string relatedLawId = ResolvePrimaryLawId(activeSurface);
+            ArtifactFactory.RecordDefenseMemo(
+                eventLog,
+                "PLAYER",
+                "Player",
+                relatedLawId,
+                placeId,
+                utterance,
+                activeSurface.transform.position);
+        }
+
+        private static string ResolvePrimaryLawId(TextSurface surface)
+        {
+            if (surface == null || surface.DreamLawIds == null)
+            {
+                return string.Empty;
+            }
+
+            var ids = surface.DreamLawIds;
+            for (int i = 0; i < ids.Length; i++)
+            {
+                if (!string.IsNullOrEmpty(ids[i]))
+                {
+                    return ids[i];
+                }
+            }
+
+            return string.Empty;
         }
 
         private void RecordWhyLines(string placeId)

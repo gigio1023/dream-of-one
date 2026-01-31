@@ -37,6 +37,12 @@ namespace DreamOfOne.NPC
         private WorldEventLog eventLog = null;
 
         [SerializeField]
+        private ExposureSystem exposureSystem = null;
+
+        [SerializeField]
+        private GlobalSuspicionSystem globalSuspicionSystem = null;
+
+        [SerializeField]
         private SemanticShaper semanticShaper = null;
 
         [SerializeField]
@@ -97,6 +103,7 @@ namespace DreamOfOne.NPC
         private float stateTimer = 0f;
         private ReportEnvelope currentReport = null;
         private CaseBundle currentCase = null;
+        private InquestDossier currentDossier = null;
         private Vector3 investigationTarget = Vector3.zero;
         private string lastVerdictReason = string.Empty;
 
@@ -341,21 +348,23 @@ namespace DreamOfOne.NPC
 
             if (eventLog != null && currentReport != null)
             {
-                var builder = new CaseBundleBuilder(eventLog);
-                currentCase = builder.Build(currentReport);
+                var builder = new InquestDossierBuilder(eventLog, exposureSystem, globalSuspicionSystem);
+                currentDossier = builder.Build(currentReport);
+                currentCase = currentDossier != null ? currentDossier.CaseBundle : null;
             }
 
-            string verdict = DetermineVerdict();
-            string topic = currentCase != null && !string.IsNullOrEmpty(currentCase.topic) ? currentCase.topic : "Verdict";
-            string placeId = currentCase != null ? currentCase.placeId : string.Empty;
-            string zoneId = currentCase != null ? currentCase.zoneId : string.Empty;
+            InquestVerdict verdict = DetermineVerdict();
+            string verdictText = FormatVerdict(verdict);
+            string topic = currentDossier != null && !string.IsNullOrEmpty(currentDossier.topic) ? currentDossier.topic : "Verdict";
+            string placeId = currentDossier != null ? currentDossier.placeId : string.Empty;
+            string zoneId = currentDossier != null ? currentDossier.zoneId : string.Empty;
             eventLog?.RecordEvent(new EventRecord
             {
                 actorId = name,
                 actorRole = "Police",
                 eventType = CoreEventType.VerdictGiven,
                 category = EventCategory.Verdict,
-                note = verdict,
+                note = verdictText,
                 severity = 2,
                 position = transform.position,
                 topic = topic,
@@ -369,7 +378,7 @@ namespace DreamOfOne.NPC
                 actorRole = "Police",
                 eventType = CoreEventType.ExplanationGiven,
                 category = EventCategory.Verdict,
-                note = string.IsNullOrEmpty(lastVerdictReason) ? verdict : lastVerdictReason,
+                note = string.IsNullOrEmpty(lastVerdictReason) ? verdictText : lastVerdictReason,
                 severity = 1,
                 position = transform.position,
                 topic = topic,
@@ -378,16 +387,26 @@ namespace DreamOfOne.NPC
             });
 
             string text = semanticShaper != null
-                ? semanticShaper.ToText(new EventRecord { eventType = CoreEventType.VerdictGiven, note = verdict })
-                : $"판정: {verdict}";
+                ? semanticShaper.ToText(new EventRecord { eventType = CoreEventType.VerdictGiven, note = verdictText })
+                : $"판정: {verdictText}";
             text = DialogueLineLimiter.ClampLine(text, maxInterrogationChars);
+
+            var artifactSystem = FindFirstObjectByType<ArtifactSystem>();
 
             if (uiManager != null)
             {
-                uiManager.ShowCaseBundle(currentCase);
+                string dossierText = currentDossier != null
+                    ? InquestDossierFormatter.BuildSummary(currentDossier, artifactSystem)
+                    : string.Empty;
+                if (!string.IsNullOrEmpty(dossierText))
+                {
+                    uiManager.ShowCaseBundle(dossierText);
+                }
+                else
+                {
+                    uiManager.ShowCaseBundle(currentCase);
+                }
             }
-
-            var artifactSystem = FindFirstObjectByType<ArtifactSystem>();
             if (artifactSystem != null)
             {
                 artifactSystem.HighlightCase(currentCase);
@@ -399,7 +418,7 @@ namespace DreamOfOne.NPC
                 {
                     role = "Police",
                     persona = "경찰, 단호하고 간결한 말투",
-                    situation = $"판정 {verdict}. 근거: {lastVerdictReason}",
+                    situation = $"판정 {verdictText}. 근거: {lastVerdictReason}",
                     tone = "firm",
                     constraints = "한 줄, 80자 이내"
                 };
@@ -484,34 +503,29 @@ namespace DreamOfOne.NPC
         }
 
         /// <summary>
-        /// 최근 WEL 이벤트만으로 간단한 if-else 판정을 수행한다.
+        /// Deterministic verdict based on dossier evidence + exposure/suspicion.
         /// </summary>
-        private string DetermineVerdict()
+        private InquestVerdict DetermineVerdict()
         {
-            if (currentCase == null)
+            if (currentDossier == null)
             {
-                lastVerdictReason = "기록 부족";
-                return "꿈 속 시민";
+                lastVerdictReason = "insufficient records";
+                return InquestVerdict.Cleared;
             }
 
-            int score = currentCase.Score;
-            lastVerdictReason = $"신고{currentCase.reports.Count}/증거{currentCase.evidence.Count}/위반{currentCase.violations.Count}";
-            if (score >= 6)
-            {
-                return "퇴출";
-            }
+            lastVerdictReason = string.Join(" | ", currentDossier.Reasons);
+            return currentDossier.Verdict;
+        }
 
-            if (score >= 3)
+        private static string FormatVerdict(InquestVerdict verdict)
+        {
+            return verdict switch
             {
-                return "의심 강화";
-            }
-
-            if (score >= 2)
-            {
-                return "보류";
-            }
-
-            return "무혐의";
+                InquestVerdict.LucidIdentified => "Lucid identified",
+                InquestVerdict.Detained => "Detained",
+                InquestVerdict.Warning => "Warning",
+                _ => "Cleared"
+            };
         }
 
         private bool HasNavMeshAgent()
@@ -544,6 +558,16 @@ namespace DreamOfOne.NPC
             if (eventLog == null)
             {
                 eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+
+            if (exposureSystem == null)
+            {
+                exposureSystem = FindFirstObjectByType<ExposureSystem>();
+            }
+
+            if (globalSuspicionSystem == null)
+            {
+                globalSuspicionSystem = FindFirstObjectByType<GlobalSuspicionSystem>();
             }
 
             if (semanticShaper == null)
@@ -595,6 +619,7 @@ namespace DreamOfOne.NPC
             stateTimer = 0f;
             currentReport = null;
             currentCase = null;
+            currentDossier = null;
             investigationTarget = Vector3.zero;
             lastVerdictReason = string.Empty;
             jumpTimer = 0f;

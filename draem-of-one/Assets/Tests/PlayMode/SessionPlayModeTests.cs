@@ -2,7 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using DreamOfOne.Core;
+using DreamOfOne.LucidCover;
+using DreamOfOne.LLM;
 using DreamOfOne.NPC;
 using DreamOfOne.UI;
 using NUnit.Framework;
@@ -194,6 +197,226 @@ namespace DreamOfOne.PlayModeTests
             bool hasNonMovement = log.Events.Any(e => e != null && e.eventType != CoreEventType.EnteredZone && e.eventType != CoreEventType.ExitedZone);
             Assert.IsTrue(hasNonMovement, "No non-movement events recorded during short run");
             Assert.IsTrue(errors.Count == 0, $"Errors during short run: {string.Join("\\n", errors)}");
+        }
+
+        [UnityTest]
+        public IEnumerator SessionEndsAfterShortDurationWithoutErrors()
+        {
+            var errors = new List<string>();
+            void HandleLog(string condition, string stackTrace, LogType type)
+            {
+                if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert)
+                {
+                    errors.Add(condition);
+                }
+            }
+
+            var root = new GameObject("TestSessionDirector");
+            var log = new GameObject("TestSessionLog").AddComponent<WorldEventLog>();
+            var suspicion = new GameObject("TestSuspicion").AddComponent<GlobalSuspicionSystem>();
+            var exposure = new GameObject("TestExposure").AddComponent<ExposureSystem>();
+            var director = root.AddComponent<SessionDirector>();
+
+            SetPrivateField(director, "eventLog", log);
+            SetPrivateField(director, "globalSuspicionSystem", suspicion);
+            SetPrivateField(director, "exposureSystem", exposure);
+            SetPrivateField(director, "sessionDurationSeconds", 0.1f);
+
+            Application.logMessageReceived += HandleLog;
+            try
+            {
+                director.Tick(0.2f);
+                yield return null;
+            }
+            finally
+            {
+                Application.logMessageReceived -= HandleLog;
+            }
+
+            Assert.IsTrue(director.IsEnded, $"Session did not end. Reason='{director.EndReason}'");
+            Assert.IsTrue(errors.Count == 0, $"Errors during session end: {string.Join("\\n", errors)}");
+
+            Object.Destroy(root);
+            Object.Destroy(log.gameObject);
+            Object.Destroy(suspicion.gameObject);
+            Object.Destroy(exposure.gameObject);
+        }
+
+        [UnityTest]
+        public IEnumerator CoverTestEscalatesToReporting()
+        {
+            yield return null;
+
+            var log = Object.FindFirstObjectByType<WorldEventLog>();
+            var reportManager = Object.FindFirstObjectByType<ReportManager>();
+            var coverRuntime = Object.FindFirstObjectByType<CoverTestRuntime>();
+
+            Assert.NotNull(log, "WorldEventLog missing");
+            Assert.NotNull(reportManager, "ReportManager missing");
+            Assert.NotNull(coverRuntime, "CoverTestRuntime missing");
+
+            log.ResetLog();
+            reportManager.ResetReports();
+            SetPrivateField(log, "enableDeduplication", false);
+
+            SetPrivateField(coverRuntime, "triggerCooldownSeconds", 0f);
+
+            void RecordQueueViolation()
+            {
+                log.RecordEvent(new EventRecord
+                {
+                    actorId = "Tester",
+                    actorRole = "Test",
+                    eventType = CoreEventType.ViolationDetected,
+                    category = EventCategory.Rule,
+                    ruleId = "R_QUEUE",
+                    topic = "R_QUEUE",
+                    placeId = "Store",
+                    zoneId = "StoreQueue",
+                    position = Vector3.zero,
+                    severity = 2,
+                    note = "test"
+                });
+            }
+
+            RecordQueueViolation();
+            RecordQueueViolation();
+            RecordQueueViolation();
+            yield return null;
+
+            string debug = BuildEventDebug(log.Events);
+            bool hasReportingStage = log.Events.Any(e =>
+                e != null
+                && e.eventType == CoreEventType.NpcUtterance
+                && e.topic == "CT_STORE_QUEUE_LANGUAGE"
+                && e.note.Contains("Reporting"));
+
+            bool hasReport = log.Events.Any(e =>
+                e != null
+                && e.eventType == CoreEventType.ReportFiled
+                && e.ruleId == DreamLawDetectorIds.ProcQueueSkip);
+
+            bool hasStatement = log.Events.Any(e =>
+                e != null
+                && e.eventType == CoreEventType.StatementGiven
+                && e.ruleId == "DL_S1_QUEUE_SANCTITY"
+                && e.sourceId == DreamLawDetectorIds.ProcQueueSkip);
+
+            Assert.IsTrue(hasReportingStage, $"CoverTest did not reach Reporting stage.\n{debug}");
+            Assert.IsTrue(hasReport, $"CoverTest did not file report (detector={DreamLawDetectorIds.ProcQueueSkip}).\n{debug}");
+            Assert.IsTrue(hasStatement, $"CoverTest did not create witness statement (law=DL_S1_QUEUE_SANCTITY).\n{debug}");
+        }
+
+        [UnityTest]
+        public IEnumerator InquestDossierBuildsAndIsDeterministic()
+        {
+            var root = new GameObject("InquestDossierTest");
+            var log = root.AddComponent<WorldEventLog>();
+            var exposure = root.AddComponent<ExposureSystem>();
+            var suspicion = root.AddComponent<GlobalSuspicionSystem>();
+
+            log.ResetLog();
+            exposure.AddExposure(30, "Tester", "Station", "DL_G1_NO_DREAM_TALK", DreamLawDetectorIds.SpeechDreamTalk, Vector3.zero);
+            SetPrivateField(suspicion, "globalSuspicion", 0.4f);
+
+            var violation = new EventRecord
+            {
+                actorId = "Tester",
+                actorRole = "Citizen",
+                eventType = CoreEventType.ViolationDetected,
+                category = EventCategory.Rule,
+                ruleId = "DL_G1_NO_DREAM_TALK",
+                topic = "DL_G1_NO_DREAM_TALK",
+                placeId = "Station",
+                zoneId = "StationDesk",
+                severity = 2,
+                note = "test violation"
+            };
+            log.RecordEvent(violation);
+
+            var statement = new EventRecord
+            {
+                actorId = "WitnessA",
+                actorRole = "Officer",
+                eventType = CoreEventType.StatementGiven,
+                category = EventCategory.Verdict,
+                ruleId = "DL_G1_NO_DREAM_TALK",
+                sourceId = DreamLawDetectorIds.SpeechDreamTalk,
+                topic = "DL_G1_NO_DREAM_TALK",
+                placeId = "Station",
+                zoneId = "StationDesk",
+                severity = 2,
+                note = "statement"
+            };
+            log.RecordEvent(statement);
+
+            var report = new ReportEnvelope
+            {
+                reportId = "INQUEST_TEST",
+                ruleId = "DL_G1_NO_DREAM_TALK",
+                topic = "DL_G1_NO_DREAM_TALK",
+                placeId = "Station",
+                zoneId = "StationDesk"
+            };
+            report.attachedEventIds.Add(violation.id);
+
+            var builder = new InquestDossierBuilder(log, exposure, suspicion);
+            var dossierA = builder.Build(report);
+            var dossierB = builder.Build(report);
+
+            Object.Destroy(root);
+
+            Assert.NotNull(dossierA, "Inquest dossier missing");
+            Assert.NotNull(dossierA.CaseBundle, "Case bundle missing");
+            Assert.Greater(dossierA.Reasons.Count, 0, "Inquest reasons missing");
+            Assert.AreEqual(dossierA.Score, dossierB.Score, $"Inquest score not deterministic: {string.Join(" | ", dossierA.Reasons)}");
+            Assert.AreEqual(dossierA.Verdict, dossierB.Verdict, $"Inquest verdict not deterministic: {string.Join(" | ", dossierA.Reasons)}");
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator LlmDisabledFallsBackForNpcDialogue()
+        {
+            var root = new GameObject("LlmDisabledTest");
+            var log = root.AddComponent<WorldEventLog>();
+            var shaper = root.AddComponent<SemanticShaper>();
+
+            var llmHost = new GameObject("LLMClient");
+            var llmClient = llmHost.AddComponent<LLMClient>();
+            SetPrivateField(llmClient, "llmEnabled", false);
+
+            var npc = new GameObject("NpcPersona");
+            npc.AddComponent<NpcPersona>().Configure("NpcA", "Clerk", "테스트 페르소나", "neutral");
+
+            var dialogue = root.AddComponent<NpcDialogueSystem>();
+            SetPrivateField(dialogue, "eventLog", log);
+            SetPrivateField(dialogue, "semanticShaper", shaper);
+            SetPrivateField(dialogue, "llmClient", llmClient);
+            SetPrivateField(dialogue, "showToast", false);
+
+            log.RecordEvent(new EventRecord
+            {
+                actorId = "NpcA",
+                actorRole = "Clerk",
+                eventType = CoreEventType.ReportFiled,
+                category = EventCategory.Report,
+                ruleId = "DL_G1_NO_DREAM_TALK",
+                topic = "DL_G1_NO_DREAM_TALK",
+                placeId = "Store",
+                zoneId = "StoreQueue",
+                severity = 2,
+                note = "trigger"
+            });
+
+            yield return null;
+
+            bool hasUtterance = log.Events.Any(e => e != null && e.eventType == CoreEventType.NpcUtterance);
+            Object.Destroy(root);
+            Object.Destroy(llmHost);
+            Object.Destroy(npc);
+
+            Assert.IsTrue(hasUtterance, "LLM disabled did not emit fallback NPC utterance");
         }
 
         [UnityTest]
@@ -449,6 +672,30 @@ namespace DreamOfOne.PlayModeTests
             {
                 field.SetValue(target, value);
             }
+        }
+
+        private static string BuildEventDebug(IEnumerable<EventRecord> events)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine("Event debug (type/rule/source/actor/note):");
+            foreach (var record in events)
+            {
+                if (record == null)
+                {
+                    continue;
+                }
+
+                if (record.eventType == CoreEventType.NpcUtterance
+                    || record.eventType == CoreEventType.ReportFiled
+                    || record.eventType == CoreEventType.StatementGiven
+                    || record.eventType == CoreEventType.ExposureUpdated
+                    || record.eventType == CoreEventType.ViolationDetected)
+                {
+                    builder.AppendLine($"{record.eventType} rule={record.ruleId} source={record.sourceId} actor={record.actorId} note={record.note}");
+                }
+            }
+
+            return builder.ToString();
         }
     }
 }

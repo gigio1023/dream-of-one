@@ -65,6 +65,12 @@ namespace DreamOfOne.Editor
 
             var root = new GameObject("World_Built");
             var spawner = root.AddComponent<ContentSpawner>();
+            var lucidCoverRoot = CreateChild(root, "LucidCover");
+            var lucidCoverRuntime = lucidCoverRoot.AddComponent<LucidCoverRuntime>();
+            if (lucidCoverRuntime != null)
+            {
+                lucidCoverRuntime.Configure(world.DreamLawDatabase);
+            }
             var buildingsRoot = CreateChild(root, "Buildings");
             var interactablesRoot = CreateChild(root, "Interactables");
             var textSurfacesRoot = CreateChild(root, "TextSurfaces");
@@ -350,6 +356,13 @@ namespace DreamOfOne.Editor
 
                     string placeId = string.IsNullOrEmpty(surface.PlaceId) ? surface.AnchorName : surface.PlaceId;
                     runtimeSurface.Configure(surface, placeId);
+
+                    var surfaceInteractable = instance.GetComponent<TextSurfaceInteractable>();
+                    if (surfaceInteractable == null)
+                    {
+                        surfaceInteractable = instance.AddComponent<TextSurfaceInteractable>();
+                    }
+                    surfaceInteractable.ConfigurePrompt(surface.Prompt);
 
                     textSurfaceCount++;
                 }

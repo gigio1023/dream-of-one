@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 47711b5e8795b420589916a4790195cc, type: 3}
-  m_Name: TS_STORE_QUEUE_SIGN
+  m_Name: TS_STORE_COUNTER_POLICY
   m_EditorClassIdentifier: DreamOfOne::DreamOfOne.LucidCover.TextSurfaceDefinition
-  textSurfaceId: TS_STORE_QUEUE_SIGN
-  kind: 0
+  textSurfaceId: TS_STORE_COUNTER_POLICY
+  kind: 1
   anchorName: StoreBuilding
   prefab: {fileID: 0}
-  localOffset: {x: 0, y: 0, z: 0}
+  localOffset: {x: 0.6, y: 0, z: -0.3}
   localRotationEuler: {x: 0, y: 0, z: 0}
   prompt: 'E: Read'
-  surfaceText: "\uC21C\uC11C \uD655\uC778\uC740 \uB9D0\uB85C \uD558\uC9C0 \uB9C8\uC138\uC694."
+  surfaceText: "\uD638\uCD9C\uC740 \uC9C0\uC815\uB41C \uBB38\uAD6C\uB85C\uB9CC \uC9C4\uD589\uD569\uB2C8\uB2E4."
   dreamLawIds:
   - DL_S1_QUEUE_SANCTITY
   - DL_G1_NO_DREAM_TALK

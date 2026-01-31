@@ -71,6 +71,11 @@ namespace DreamOfOne.Editor
             {
                 lucidCoverRuntime.Configure(world.DreamLawDatabase);
             }
+            var coverTestRuntime = lucidCoverRoot.AddComponent<CoverTestRuntime>();
+            if (coverTestRuntime != null)
+            {
+                coverTestRuntime.Configure(world.CoverTestDatabase, world.DreamLawDatabase);
+            }
             var buildingsRoot = CreateChild(root, "Buildings");
             var interactablesRoot = CreateChild(root, "Interactables");
             var textSurfacesRoot = CreateChild(root, "TextSurfaces");

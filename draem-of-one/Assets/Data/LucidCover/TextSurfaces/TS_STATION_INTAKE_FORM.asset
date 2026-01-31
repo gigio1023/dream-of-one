@@ -10,19 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 47711b5e8795b420589916a4790195cc, type: 3}
-  m_Name: TS_STORE_QUEUE_SIGN
+  m_Name: TS_STATION_INTAKE_FORM
   m_EditorClassIdentifier: DreamOfOne::DreamOfOne.LucidCover.TextSurfaceDefinition
-  textSurfaceId: TS_STORE_QUEUE_SIGN
-  kind: 0
-  anchorName: StoreBuilding
+  textSurfaceId: TS_STATION_INTAKE_FORM
+  kind: 2
+  anchorName: Station
   prefab: {fileID: 0}
-  localOffset: {x: 0, y: 0, z: 0}
+  localOffset: {x: 0.6, y: 0, z: -0.4}
   localRotationEuler: {x: 0, y: 0, z: 0}
   prompt: 'E: Read'
-  surfaceText: "\uC21C\uC11C \uD655\uC778\uC740 \uB9D0\uB85C \uD558\uC9C0 \uB9C8\uC138\uC694."
+  surfaceText: "\uC9C4\uC220\uC740 \uC808\uCC28 \uC6A9\uC5B4\uB85C\uB9CC \uC791\uC131\uD569\uB2C8\uB2E4."
   dreamLawIds:
-  - DL_S1_QUEUE_SANCTITY
+  - DL_N1_PROCEDURE_SPEECH_ONLY
   - DL_G1_NO_DREAM_TALK
-  - DL_G2_NO_REALITY_TEST
-  placeId: Store
+  placeId: Station
   triggerSize: {x: 2, y: 2, z: 2}

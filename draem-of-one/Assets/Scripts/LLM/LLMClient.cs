@@ -120,6 +120,25 @@ namespace DreamOfOne.LLM
             }
         }
 
+        public Provider CurrentProvider => provider;
+        public bool LlmEnabled => llmEnabled;
+        public string Endpoint => endpoint;
+
+        public void ConfigureProvider(Provider nextProvider, bool enabled, string endpointOverride = null)
+        {
+            provider = nextProvider;
+            llmEnabled = enabled;
+            if (!string.IsNullOrEmpty(endpointOverride))
+            {
+                endpoint = endpointOverride;
+            }
+
+            if (IsLocalProvider())
+            {
+                timeoutSeconds = Mathf.Max(timeoutSeconds, LocalLlmMinTimeoutSeconds);
+            }
+        }
+
         [Serializable]
         public struct LineRequest
         {

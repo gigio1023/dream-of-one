@@ -107,8 +107,18 @@ namespace DreamOfOne.LLM
         [Tooltip("실패/오류를 콘솔에 출력")]
         private bool logErrors = true;
 
+        private const float LocalLlmMinTimeoutSeconds = 8f;
+
         private readonly Queue<float> callTimestamps = new();
         private float lastCallTime = -999f;
+
+        private void Awake()
+        {
+            if (IsLocalProvider())
+            {
+                timeoutSeconds = Mathf.Max(timeoutSeconds, LocalLlmMinTimeoutSeconds);
+            }
+        }
 
         [Serializable]
         public struct LineRequest
@@ -486,6 +496,33 @@ namespace DreamOfOne.LLM
             }
 
             return apiKey;
+        }
+
+        private bool IsLocalProvider()
+        {
+            if (provider == Provider.LocalEndpoint)
+            {
+                return IsLocalUrl(endpoint);
+            }
+
+            if (provider == Provider.OpenAIChatCompletions)
+            {
+                return IsLocalUrl(openAiEndpoint);
+            }
+
+            return false;
+        }
+
+        private static bool IsLocalUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+            {
+                return false;
+            }
+
+            return url.Contains("localhost", StringComparison.OrdinalIgnoreCase)
+                || url.Contains("127.0.0.1", StringComparison.OrdinalIgnoreCase)
+                || url.Contains("0.0.0.0", StringComparison.OrdinalIgnoreCase);
         }
 
         private string BuildDeveloperPrompt(LineRequest request)

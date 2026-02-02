@@ -62,6 +62,12 @@ Delegation protocol:
 3. When Codex posts a PR, review locally and run the appropriate verification.
 4. Close the Linear issue after merge/verification (leave PR link in the issue).
 
+## Game design rails (Lucid Cover Social Stealth v1)
+
+- **Player is not an investigator**: NPCs/Station investigate the player; player performs cover work to avoid exposure.
+- **Deterministic core**: Suspicion/Exposure changes, reports, verdicts, and artifacts are rule-based; LLM is style only.
+- **Text is the danger surface**: Dream Laws are revealed via text surfaces and Cover Tests, not meta exposition.
+
 ## Unity authoring / verification
 
 - Unity project root: `draem-of-one/` (all `Assets/...` paths are relative to this folder).
@@ -95,4 +101,6 @@ Verification mandate:
 
 - Developer guide: `docs/dev.md`
 - Codex runbook: `docs/agent/runbook.md`
-- Project definition: `project.md`
+- Project definition (SoT): `project.md`
+- Dream laws library (SoT): `docs/design/dream-laws.md`
+- Cover tests library (SoT): `docs/design/cover-tests.md`

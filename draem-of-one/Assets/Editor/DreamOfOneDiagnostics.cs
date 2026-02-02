@@ -316,6 +316,9 @@ namespace DreamOfOne.Editor
                 errors.Add($"DreamLawDatabase duplicate ids: {string.Join(", ", lawDuplicates.Distinct())}");
             }
 
+            bool hasLawDb = lawDb != null;
+            bool hasLawIds = lawIds.Count > 0;
+
             var surfaceIds = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
             var surfaceDuplicates = new List<string>();
             if (surfaceDb != null && surfaceDb.TextSurfaces != null)
@@ -342,7 +345,11 @@ namespace DreamOfOne.Editor
                     {
                         warnings.Add($"TextSurfaceDefinition {surface.TextSurfaceId} has no DreamLawIds.");
                     }
-                    else if (lawIds.Count > 0)
+                    else if (!hasLawIds)
+                    {
+                        errors.Add($"TextSurfaceDefinition {surface.TextSurfaceId} references DreamLawIds, but DreamLawDatabase is empty.");
+                    }
+                    else
                     {
                         foreach (var lawId in surface.DreamLawIds)
                         {
@@ -386,7 +393,11 @@ namespace DreamOfOne.Editor
                     {
                         warnings.Add($"CoverTestDefinition {cover.CoverTestId} has no DreamLawIds.");
                     }
-                    else if (lawIds.Count > 0)
+                    else if (!hasLawIds)
+                    {
+                        errors.Add($"CoverTestDefinition {cover.CoverTestId} references DreamLawIds, but DreamLawDatabase is empty.");
+                    }
+                    else
                     {
                         foreach (var lawId in cover.DreamLawIds)
                         {
@@ -413,6 +424,39 @@ namespace DreamOfOne.Editor
             if (coverDuplicates.Count > 0)
             {
                 errors.Add($"CoverTestDatabase duplicate ids: {string.Join(", ", coverDuplicates.Distinct())}");
+            }
+
+            if (hasLawDb && !hasLawIds)
+            {
+                bool hasLawRefs = false;
+                if (surfaceDb != null && surfaceDb.TextSurfaces != null)
+                {
+                    foreach (var surface in surfaceDb.TextSurfaces)
+                    {
+                        if (surface != null && surface.DreamLawIds != null && surface.DreamLawIds.Length > 0)
+                        {
+                            hasLawRefs = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!hasLawRefs && coverDb != null && coverDb.CoverTests != null)
+                {
+                    foreach (var cover in coverDb.CoverTests)
+                    {
+                        if (cover != null && cover.DreamLawIds != null && cover.DreamLawIds.Length > 0)
+                        {
+                            hasLawRefs = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (hasLawRefs)
+                {
+                    errors.Add("DreamLawDatabase is empty while TextSurfaces/CoverTests reference DreamLawIds.");
+                }
             }
         }
 #endif

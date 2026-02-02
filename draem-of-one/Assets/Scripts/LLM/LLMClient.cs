@@ -123,6 +123,7 @@ namespace DreamOfOne.LLM
         public Provider CurrentProvider => provider;
         public bool LlmEnabled => llmEnabled;
         public string Endpoint => endpoint;
+        public float RequestTimeoutSeconds => timeoutSeconds;
 
         public void ConfigureProvider(Provider nextProvider, bool enabled, string endpointOverride = null)
         {

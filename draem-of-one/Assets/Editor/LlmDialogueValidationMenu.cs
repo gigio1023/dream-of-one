@@ -11,7 +11,8 @@ namespace DreamOfOne.Editor
     public static class LlmDialogueValidationMenu
     {
         private const string LocalEndpoint = "http://localhost:11434/utterance";
-        private const double TimeoutSeconds = 6.0;
+        private const float FallbackTimeoutSeconds = 6f;
+        private const float TimeoutSlackSeconds = 0.5f;
         private const string ValidationRuleId = "DL_G1_NO_DREAM_TALK";
         private const string ValidationPlaceId = "Station";
 
@@ -116,7 +117,7 @@ namespace DreamOfOne.Editor
                 return;
             }
 
-            if (EditorApplication.timeSinceStartup - startedAt > TimeoutSeconds)
+            if (EditorApplication.timeSinceStartup - startedAt > GetTimeoutSeconds())
             {
                 Finish("Timed out waiting for NPC utterance");
                 return;
@@ -192,6 +193,22 @@ namespace DreamOfOne.Editor
         private static LLMClient FindClient()
         {
             return Object.FindFirstObjectByType<LLMClient>();
+        }
+
+        private static double GetTimeoutSeconds()
+        {
+            if (client == null)
+            {
+                return FallbackTimeoutSeconds;
+            }
+
+            float configuredTimeout = client.RequestTimeoutSeconds;
+            if (configuredTimeout <= 0f)
+            {
+                return FallbackTimeoutSeconds;
+            }
+
+            return Mathf.Max(FallbackTimeoutSeconds, configuredTimeout + TimeoutSlackSeconds);
         }
 
         private static void ApplyClientConfig(LLMClient llmClient, LLMClient.Provider provider, bool enabled, string endpointOverride)

@@ -90,6 +90,14 @@ Verification mandate:
 - After Unity code/scene changes, run `Tools/DreamOfOne/Run Diagnostics` via Unity MCP until the console is clean.
 - If MCP is unavailable, document what checks are blocked and what would be run.
 
+## Local LLM QA (NPC dialogue sanity)
+
+- Use Ollama local endpoint for NPC dialogue checks when requested.
+- Recommended model: `qwen3:4b-instruct` (OpenAI-compatible endpoint).
+- LLMClient config (scene): Provider `LocalEndpoint`, endpoint `http://localhost:11434/v1/chat/completions`, model `qwen3:4b-instruct`, `llmEnabled=true`.
+- If timeouts occur, keep `timeoutSeconds >= 8` for local runs.
+- Quick trigger: `Tools > DreamOfOne > LucidCover > Debug > Simulate First TextSurface (SA_BREAK)` and confirm `NpcUtterance` in WEL.
+
 ## GitHub / git
 
 - Use GitHub MCP (personal account) or local git CLI for GitHub actions (branches/commits/pushes/PRs).

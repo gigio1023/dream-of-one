@@ -8,6 +8,7 @@ Dream of One is a **lucid cover social stealth** game set inside a dream. The pl
 - **Staged suspicion**: Suspicious -> Challenging -> Reporting -> Inquest.
 - **Deterministic core**: outcomes are rule-based; LLMs only style surface text.
 - **Log-first world**: meaningful actions become WEL entries that NPCs react to.
+- **Player is not an investigator**: NPCs/Station investigate the player; you survive by staying procedural.
 
 ## What the Player Does
 You act as a cover-role member inside organizations (Store, Studio, Park, Station). Follow procedures, use safe speech acts, and avoid dream/reality talk. The goal is to survive the session without a "Lucid identified" verdict.
@@ -65,8 +66,11 @@ In a 10-12 minute session you should be able to:
   - In the scene, set `LLMClient` Provider to `OpenAIChatCompletions`
   - Choose the model name in the inspector
 - To use a local endpoint:
+  - Start Ollama: `ollama serve`
+  - Pull model: `ollama pull qwen3:4b-instruct`
   - Set `LLMClient` Provider to `LocalEndpoint`
-  - Configure endpoint URL + model in the inspector
+  - Configure endpoint URL: `http://localhost:11434/v1/chat/completions`
+  - Set model: `qwen3:4b-instruct`
 - To run fully deterministic / template-only mode:
   - Disable `LLMClient.llmEnabled`
 

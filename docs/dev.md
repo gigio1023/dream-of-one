@@ -83,11 +83,11 @@ OpenAI:
 - Set `OPENAI_API_KEY` in your environment.
 - Configure `LLMClient` provider/model in the scene.
 
-Local endpoint (Ollama, OpenAI-compatible):
+Local endpoint (Ollama, utterance endpoint):
 - Start server: `ollama serve`
 - Pull model: `ollama pull qwen3:4b-instruct`
 - Configure `LLMClient` Provider = `LocalEndpoint`
-- Endpoint: `http://localhost:11434/v1/chat/completions`
+- Endpoint: `http://localhost:11434/utterance`
 - Model: `qwen3:4b-instruct`
 
 ---

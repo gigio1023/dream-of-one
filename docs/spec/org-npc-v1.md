@@ -1,6 +1,12 @@
 # Org + NPC spec v1 (MCSS: Store/Studio/Park/Station)
 
-This document is the v1 spec baseline for organization procedures, NPC roles/routines, incident templates, and artifact expectations for the MCSS vertical slice. It is designed to align with existing runtime terminology in `OrganizationCatalog`, `WorldDefinitionSeeder`, and `NpcDefinition`.
+Revision date: 2026-02-02  
+Status: Active (Lucid Cover Social Stealth v1)  
+SoT references: `project.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`
+
+This document is the v1 spec baseline for organization procedures, NPC roles/routines, incident templates, and artifact expectations for the MCSS vertical slice. It aligns with runtime terminology in `OrganizationCatalog`, `WorldDefinitionSeeder`, and `NpcDefinition`.
+
+**Design rail:** The player is **not** an investigator. NPCs/Station investigate the player’s procedural deviations and dream‑law violations.
 
 ## Terminology alignment (code SoT)
 
@@ -75,15 +81,15 @@ Each organization table captures the current design intent in the same shape as 
 | Artifacts (examples) | `enforcement report`, `notice board announcement`, `complaint memo`, `Rumor Card`, `Complaint Memo`. |
 | Roles | `Elder`, `Caretaker`, plus supporting `Visitor` archetypes. |
 
-### Police outpost (`Station`)
+### Station (`Station`)
 
 | Field | Spec |
 | --- | --- |
-| Goal | Execute `report intake → on-site verification → evidence collection → interrogation → verdict` with legible truth transitions. |
-| Procedure steps (8) | 1) Intake report at `Police_ReportDesk` (who/what/where). 2) Create/refresh case bundle (report + suspects + initial artifacts). 3) Visit scene anchor and confirm rule context (what rule exists here). 4) Collect evidence artifacts (captures, tickets, statements). 5) Interrogate key actors at `Police_InterrogationSpot`. 6) Reconcile contradictions on the evidence board (`Police_EvidenceBoard`). 7) Emit a deterministic verdict line (clear / guilty / unresolved / escalation). 8) Publish resolution artifacts and close or escalate the case. |
+| Goal | Execute `report intake → evidence bundling → soft inquest → deterministic verdict` for the **PLAYER** suspect with legible truth transitions. |
+| Procedure steps (7) | 1) Intake report at `Police_ReportDesk` (who/what/where about PLAYER). 2) Create/refresh Inquest Dossier (suspect=PLAYER, initial artifacts). 3) Collect evidence artifacts (witness statements, tickets, notice snapshots). 4) Run a soft inquest at `Police_InterrogationSpot` using **procedure speech only**. 5) Reconcile contradictions on the evidence board (`Police_EvidenceBoard`). 6) Emit a deterministic verdict line (cleared / warning / detained / lucid identified). 7) Publish resolution artifacts and close or escalate the dossier. |
 | Resources | `ticket issuance`, `printer`, `capture board`, `Police_ReportDesk`, `Police_EvidenceBoard`, `Police_Printer`, `Police_InterrogationSpot`. |
-| Artifacts (examples) | `violation ticket`, `CCTV capture`, `case log strip`, `Violation Ticket`, `CCTV Capture`, `Approval Note`. |
-| Roles | `Police`, `Officer`, `Investigator`. |
+| Artifacts (examples) | `witness statement`, `violation ticket`, `notice snapshot`, `case log strip`, `Defense Memo`. |
+| Roles | `Officer`, `Investigator`. |
 
 ## NPC archetypes and routines
 
@@ -195,7 +201,8 @@ Each organization defines at least two NPC archetypes. Archetypes are expressed 
 
 ## Incident templates (minimum 1 per organization)
 
-Each template includes: trigger, observers/witnesses, evidence generation, and outcomes (at least two of clear/guilty/unresolved/escalation).
+Each template includes: trigger, observers/witnesses, evidence generation, and outcomes mapped to v1 verdict types.  
+**Canonical triggers live in Cover Tests (CT-01..CT-06); these are narrative examples only.**
 
 ### Store incident: Queue cutting + label dispute
 
@@ -209,9 +216,9 @@ Each template includes: trigger, observers/witnesses, evidence generation, and o
   - Label state snapshot from `Store_LabelBoard`.
   - Optional `Complaint Memo` / `Defense Memo` statements.
 - Possible outcomes:
-  - Clear: label was actually wrong; queue violation downgraded.
-  - Guilty: label was correct and queue violation confirmed.
-  - Escalation: conflict becomes a Station case due to refusal.
+  - Cleared: label was actually wrong; queue violation downgraded.
+  - Warning: label was correct; report filed with witness statement.
+  - Detained: refusal + repeat violation triggers Station inquest.
 
 ### Studio incident: RC inserted without approval
 
@@ -225,9 +232,9 @@ Each template includes: trigger, observers/witnesses, evidence generation, and o
   - `kanban log` and `patch notes` inconsistencies.
   - Station follow-up can produce `CCTV Capture`-style timeline proof.
 - Possible outcomes:
-  - Guilty: approval absent or clearly post-dated.
-  - Clear: approval exists but was not surfaced; PM validates it.
-  - Unresolved: contradictory artifacts require Station escalation.
+  - Cleared: approval exists but was not surfaced; PM validates it.
+  - Warning: approval absent or post-dated; report filed.
+  - Detained: contempt speech + procedure breach triggers inquest.
 
 ### Park incident: Noise complaint vs. permitted performance
 
@@ -241,9 +248,9 @@ Each template includes: trigger, observers/witnesses, evidence generation, and o
   - Current norm snapshot from `Park_NoticeBoard`.
   - Optional rumor artifacts if players rely on hearsay.
 - Possible outcomes:
-  - Clear: notice board indicates the performance window is allowed.
-  - Guilty: no allowance exists; warnings were ignored.
-  - Escalation: repeated conflict routed to Station.
+  - Cleared: notice board indicates the performance window is allowed.
+  - Warning: no allowance exists; report filed after warning.
+  - Detained: repeated conflict + procedure refusal triggers inquest.
 
 ### Station incident: Conflicting testimonies across orgs
 
@@ -256,10 +263,10 @@ Each template includes: trigger, observers/witnesses, evidence generation, and o
   - Case bundle artifacts: `Violation Ticket`, `CCTV Capture`, `Approval Note`, memos.
   - Evidence-board reconciliation artifacts (“contradiction resolved” notes).
 - Possible outcomes:
-  - Clear: contradictions explained by timeline + policy context.
-  - Guilty: one claim is disproven by harder artifacts.
-  - Unresolved: insufficient artifacts; case remains open.
-  - Escalation: policy conflict requires higher authority.
+  - Cleared: contradictions explained by timeline + policy context.
+  - Warning: insufficient artifacts; warning issued with follow‑up.
+  - Detained: hard evidence confirms PLAYER violation.
+  - Lucid identified: explicit dream‑talk evidence meets verdict threshold.
 
 ## Player question checklist (must always be answerable)
 

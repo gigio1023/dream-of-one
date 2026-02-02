@@ -2,7 +2,7 @@
 doc: project.md
 project: Dream of One
 variant: Lucid Cover Social Stealth
-revision: 2026-01-25
+revision: 2026-02-02
 status: Locked v1 (Design SoT + Implementation Contract)
 owner: You
 ---
@@ -261,18 +261,7 @@ NPC가 플레이어를 “이상하다”고 판단하면:
 
 ---
 
-## 15) Document policy (SoT)
-- `project.md` is the **single source of truth** for gameplay promise, loops, variables, and acceptance.
-- `dream-laws.md` is the SoT for forbidden/normal rules and detectors.
-- `cover-tests.md` is the SoT for scenario templates that exercise those laws.
-
-**WP7 — UI Completion**
-- Artifact UI, case view, debug overlay
-
-**WP8 — Performance & QA Gate**
-- Play Mode tests, diagnostics expansion, GC profiling
-
-## 15) Roadmap (how we evolve the game)
+## 15) Roadmap (non-binding, guides v0.1 → v1)
 **Goal:** Extend the current MCSS slice into a replayable, choice-driven “casework” loop without breaking determinism.
 
 ### Phase 0 — Immediate (stability + feel, 1–3 days)
@@ -287,8 +276,8 @@ NPC가 플레이어를 “이상하다”고 판단하면:
   - Link: event ↔ artifact ↔ witness ↔ rule
   - Filter/pin/highlight for quick reasoning
 - Add navigation UX (mini-map/compass + landmark markers + current objective)
-- Move NPC behavior from “wander” → “role + routine” (store/studio/park/police)
-- Add 3+ end states (cleared / guilty / unresolved / escalation) + a score/replay reason
+- Move NPC behavior from “wander” → “role + routine” (store/studio/park/station)
+- Add 3+ end states (cleared / warning / detained / lucid identified) + a score/replay reason
 
 ### Phase 2 — Core Expansion (social depth, 3–6 weeks)
 - Rumor network: trust/authority-weighted propagation + rebuttal/confirmation travel
@@ -306,14 +295,17 @@ NPC가 플레이어를 “이상하다”고 판단하면:
 - 6 incidents / 3 endings / 4+ NPC routines
 - Player can always answer: “What happened, why, and what evidence supports it?”
 
-## 16) Document policy
+## 16) Document policy (SoT)
 **Single source of truth**
 - `project.md`: decisions, scope, roadmap, and non-negotiables
-- `docs/spec/new-plan.md`: detailed implementation contract (long-form)
+- `docs/design/dream-laws.md`: Dream Laws + detectors
+- `docs/design/cover-tests.md`: Cover Test templates
+- `docs/plan/week-2026-02-02-v0.1.md`: weekly execution focus
 
-**Archive**
-- `docs/archive/`: historical snapshots (completed checklists, older status notes)
+**Historical / legacy**
+- `docs/spec/*`: historical implementation notes unless explicitly marked Active
+- `docs/archive/*`: completed checklists and snapshots
 
 **Rule**
 - Update `project.md` when decisions/scope/roadmap change.
-- Update `docs/spec/new-plan.md` when execution details change.
+- Update `docs/design/*` when rule content changes.

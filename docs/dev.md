@@ -1,6 +1,6 @@
 # Developer Guide
 
-Revision date: 2026-01-24
+Revision date: 2026-02-02
 
 This guide is the practical “how to run / how to verify” reference for the Unity project in this repo.
 
@@ -74,14 +74,21 @@ Beads (`bd`) is optional and used internally by Codex CLI for dependency trackin
 
 ## LLM Setup (Optional)
 
-The project supports running without an LLM (deterministic fallback). When enabled, the LLM is treated as an **untrusted planner**:
-- it proposes JSON actions,
-- the engine validates allowed skills and executes deterministically,
-- only validated execution writes to WEL.
+The project supports running without an LLM (deterministic fallback). When enabled, the LLM is **styling-only**:
+- It can paraphrase or add tone to surface text.
+- It **cannot** decide truth transitions, evidence creation, or verdicts.
+- Deterministic systems always own event truth and scoring.
 
 OpenAI:
-- set `OPENAI_API_KEY` in your environment
-- configure `LLMClient` provider/model in the scene
+- Set `OPENAI_API_KEY` in your environment.
+- Configure `LLMClient` provider/model in the scene.
+
+Local endpoint (Ollama, OpenAI-compatible):
+- Start server: `ollama serve`
+- Pull model: `ollama pull qwen3:4b-instruct`
+- Configure `LLMClient` Provider = `LocalEndpoint`
+- Endpoint: `http://localhost:11434/v1/chat/completions`
+- Model: `qwen3:4b-instruct`
 
 ---
 

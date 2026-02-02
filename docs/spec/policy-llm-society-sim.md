@@ -1,8 +1,11 @@
-# Dream of One — Policy-Driven LLM Society Simulation (Design + Implementation Plan)
+# Dream of One — Policy-Driven LLM Society Simulation (Deprecated)
 
 Revision date: 2026-01-23  
-Status: Draft (implementation started)  
+Status: Deprecated (pre–Lucid Cover Social Stealth v1)  
 Primary scene: `draem-of-one/Assets/Scenes/Prototype.unity`
+
+**Why deprecated:** The v1 contract treats LLM as **styling-only**. It does not plan actions or write truth.  
+**Current SoT:** `project.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`.
 
 ## 1) Problem Statement
 We want the world to behave like a society: organizations operate, members perform work, and decisions respond to observations. We do **not** want to hardcode every scenario. Instead:
@@ -195,4 +198,3 @@ This plan is intentionally staged: we build rails first, then add depth.
 Initial scaffolding has begun in codebase:
 - Dialogue feed UI supports persistent text-first communication.
 - Next step is to introduce policy assets + agent memory + action planning pipeline.
-

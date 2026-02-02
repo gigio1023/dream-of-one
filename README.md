@@ -60,6 +60,7 @@ In a 10-12 minute session you should be able to:
   - Unity Test Runner (EditMode + PlayMode)
 
 ## LLM Setup (optional)
+- LLM is **styling-only** (surface text). All outcomes, evidence, and verdicts are deterministic.
 - Default mode: Mock or LocalEndpoint
 - To use OpenAI:
   - Set environment variable `OPENAI_API_KEY`
@@ -78,6 +79,7 @@ In a 10-12 minute session you should be able to:
 - Project definition (SoT): `project.md`
 - Dream laws library (SoT): `docs/design/dream-laws.md`
 - Cover tests library (SoT): `docs/design/cover-tests.md`
+- Developer guide: `docs/dev.md`
 - Weekly plan (Prototype v0.1): `docs/plan/week-2026-02-02-v0.1.md`
 - Historical snapshots (past status): `docs/archive/`
 - Agent notes: `AGENTS.md`

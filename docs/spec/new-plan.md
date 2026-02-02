@@ -1,8 +1,16 @@
-# AI Implementation Spec (Ultra‑Detailed) — **Dream of One**
+# AI Implementation Spec (Ultra‑Detailed) — **Dream of One** (Deprecated)
 
-**Document type:** Implementation Contract for an autonomous Unity‑builder AI (Unity MCP‑only)
-**Revision date:** 2026‑01‑23
-**Primary sources:** current project status + Dream of One design (v6.2)  
+**Status:** Deprecated (pre–Lucid Cover Social Stealth v1).  
+**Do not implement new work from this doc without reconciling with the v1 SoT.**
+
+**Document type:** Historical implementation contract (Unity MCP‑only)  
+**Revision date:** 2026‑01‑23  
+**Primary sources (current SoT):** `project.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`
+
+**Superseded by**
+- `project.md` (v1 contract, scope, acceptance)
+- `docs/design/dream-laws.md` (Dream Law definitions)
+- `docs/design/cover-tests.md` (Cover Test templates)
 
 ---
 

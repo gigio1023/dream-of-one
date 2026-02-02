@@ -67,6 +67,7 @@ Delegation protocol:
 - **Player is not an investigator**: NPCs/Station investigate the player; player performs cover work to avoid exposure.
 - **Deterministic core**: Suspicion/Exposure changes, reports, verdicts, and artifacts are rule-based; LLM is style only.
 - **Text is the danger surface**: Dream Laws are revealed via text surfaces and Cover Tests, not meta exposition.
+- **SoT docs**: `project.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`.
 
 ## Unity authoring / verification
 

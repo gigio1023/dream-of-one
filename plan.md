@@ -1,6 +1,6 @@
 # Dream of One — Execution Plan (Lucid Cover Social Stealth v1)
 
-Revision date: 2026-01-29  
+Revision date: 2026-02-02  
 Plan sources: `project.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`  
 Work tracking: Linear (Dream-of-one team). This file is a roadmap (not a task tracker).
 
@@ -100,4 +100,5 @@ Verification
 - 2026-01-29: v1 contract docs saved + plan synced (Linear: DRE-60).
 
 ## 5) Next run focus
-- Build Phase 1 schemas and hook *one* Dream Law to *one* Text Surface end-to-end (law hit -> log -> evidence -> UI “why”).
+- Follow `docs/plan/week-2026-02-02-v0.1.md` for v0.1 execution order.
+- Prioritize: deterministic DreamLaw → CoverTest → Inquest → UI “why” loop with Diagnostics clean.

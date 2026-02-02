@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DreamOfOne.LLM;
 using DreamOfOne.Core;
+using DreamOfOne.LucidCover;
 using DreamOfOne.NPC;
 using DreamOfOne.UI;
 using DreamOfOne.World;
@@ -244,8 +245,177 @@ namespace DreamOfOne.Editor
             {
                 warnings.Add("WorldDefinition incidents < 2 (MCSS incidents not fully defined).");
             }
+
+            ValidateLucidCoverData(world, warnings, errors);
 #endif
         }
+
+#if UNITY_EDITOR
+        private static void ValidateLucidCoverData(WorldDefinition world, List<string> warnings, List<string> errors)
+        {
+            if (world == null)
+            {
+                return;
+            }
+
+            var lawDb = world.DreamLawDatabase;
+            var surfaceDb = world.TextSurfaceDatabase;
+            var coverDb = world.CoverTestDatabase;
+
+            if (lawDb == null)
+            {
+                warnings.Add("WorldDefinition DreamLawDatabase is null (LucidCover laws disabled).");
+            }
+
+            if (surfaceDb == null)
+            {
+                warnings.Add("WorldDefinition TextSurfaceDatabase is null (LucidCover text surfaces disabled).");
+            }
+
+            if (coverDb == null)
+            {
+                warnings.Add("WorldDefinition CoverTestDatabase is null (LucidCover cover tests disabled).");
+            }
+
+            var lawIds = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+            var lawDuplicates = new List<string>();
+            if (lawDb != null && lawDb.DreamLaws != null)
+            {
+                foreach (var law in lawDb.DreamLaws)
+                {
+                    if (law == null)
+                    {
+                        continue;
+                    }
+
+                    if (string.IsNullOrEmpty(law.DreamLawId))
+                    {
+                        errors.Add("DreamLawDefinition missing DreamLawId.");
+                        continue;
+                    }
+
+                    if (!lawIds.Add(law.DreamLawId))
+                    {
+                        lawDuplicates.Add(law.DreamLawId);
+                    }
+
+                    if (law.DetectorIds == null || law.DetectorIds.Length == 0)
+                    {
+                        warnings.Add($"DreamLawDefinition {law.DreamLawId} has no detectorIds.");
+                    }
+
+                    if (law.ScopeKind == DreamLawScopeKind.Landmark && string.IsNullOrEmpty(law.ScopeId))
+                    {
+                        warnings.Add($"DreamLawDefinition {law.DreamLawId} is Landmark-scoped but missing ScopeId.");
+                    }
+                }
+            }
+
+            if (lawDuplicates.Count > 0)
+            {
+                errors.Add($"DreamLawDatabase duplicate ids: {string.Join(", ", lawDuplicates.Distinct())}");
+            }
+
+            var surfaceIds = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+            var surfaceDuplicates = new List<string>();
+            if (surfaceDb != null && surfaceDb.TextSurfaces != null)
+            {
+                foreach (var surface in surfaceDb.TextSurfaces)
+                {
+                    if (surface == null)
+                    {
+                        continue;
+                    }
+
+                    if (string.IsNullOrEmpty(surface.TextSurfaceId))
+                    {
+                        errors.Add("TextSurfaceDefinition missing TextSurfaceId.");
+                        continue;
+                    }
+
+                    if (!surfaceIds.Add(surface.TextSurfaceId))
+                    {
+                        surfaceDuplicates.Add(surface.TextSurfaceId);
+                    }
+
+                    if (surface.DreamLawIds == null || surface.DreamLawIds.Length == 0)
+                    {
+                        warnings.Add($"TextSurfaceDefinition {surface.TextSurfaceId} has no DreamLawIds.");
+                    }
+                    else if (lawIds.Count > 0)
+                    {
+                        foreach (var lawId in surface.DreamLawIds)
+                        {
+                            if (!string.IsNullOrEmpty(lawId) && !lawIds.Contains(lawId))
+                            {
+                                errors.Add($"TextSurfaceDefinition {surface.TextSurfaceId} references missing DreamLawId: {lawId}");
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (surfaceDuplicates.Count > 0)
+            {
+                errors.Add($"TextSurfaceDatabase duplicate ids: {string.Join(", ", surfaceDuplicates.Distinct())}");
+            }
+
+            var coverIds = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+            var coverDuplicates = new List<string>();
+            if (coverDb != null && coverDb.CoverTests != null)
+            {
+                foreach (var cover in coverDb.CoverTests)
+                {
+                    if (cover == null)
+                    {
+                        continue;
+                    }
+
+                    if (string.IsNullOrEmpty(cover.CoverTestId))
+                    {
+                        errors.Add("CoverTestDefinition missing CoverTestId.");
+                        continue;
+                    }
+
+                    if (!coverIds.Add(cover.CoverTestId))
+                    {
+                        coverDuplicates.Add(cover.CoverTestId);
+                    }
+
+                    if (cover.DreamLawIds == null || cover.DreamLawIds.Length == 0)
+                    {
+                        warnings.Add($"CoverTestDefinition {cover.CoverTestId} has no DreamLawIds.");
+                    }
+                    else if (lawIds.Count > 0)
+                    {
+                        foreach (var lawId in cover.DreamLawIds)
+                        {
+                            if (!string.IsNullOrEmpty(lawId) && !lawIds.Contains(lawId))
+                            {
+                                errors.Add($"CoverTestDefinition {cover.CoverTestId} references missing DreamLawId: {lawId}");
+                            }
+                        }
+                    }
+
+                    if (cover.RequiredTextSurfaces != null && surfaceIds.Count > 0)
+                    {
+                        foreach (var surfaceId in cover.RequiredTextSurfaces)
+                        {
+                            if (!string.IsNullOrEmpty(surfaceId) && !surfaceIds.Contains(surfaceId))
+                            {
+                                errors.Add($"CoverTestDefinition {cover.CoverTestId} references missing TextSurfaceId: {surfaceId}");
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (coverDuplicates.Count > 0)
+            {
+                errors.Add($"CoverTestDatabase duplicate ids: {string.Join(", ", coverDuplicates.Distinct())}");
+            }
+        }
+#endif
 
         private static void ValidateWorldRuntime(List<string> warnings, List<string> errors, List<string> info)
         {

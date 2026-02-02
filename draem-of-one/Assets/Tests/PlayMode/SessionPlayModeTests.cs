@@ -379,6 +379,7 @@ namespace DreamOfOne.PlayModeTests
         public IEnumerator LlmDisabledFallsBackForNpcDialogue()
         {
             var root = new GameObject("LlmDisabledTest");
+            root.SetActive(false);
             var log = root.AddComponent<WorldEventLog>();
             var shaper = root.AddComponent<SemanticShaper>();
 
@@ -394,6 +395,7 @@ namespace DreamOfOne.PlayModeTests
             SetPrivateField(dialogue, "semanticShaper", shaper);
             SetPrivateField(dialogue, "llmClient", llmClient);
             SetPrivateField(dialogue, "showToast", false);
+            root.SetActive(true);
 
             log.RecordEvent(new EventRecord
             {

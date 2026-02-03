@@ -5,6 +5,7 @@ using DreamOfOne.LucidCover;
 using DreamOfOne.NPC;
 using UnityEditor;
 using UnityEngine;
+using EventType = DreamOfOne.Core.EventType;
 
 namespace DreamOfOne.Editor
 {

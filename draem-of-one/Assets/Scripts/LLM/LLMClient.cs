@@ -150,11 +150,28 @@ namespace DreamOfOne.LLM
         public bool LlmEnabled => llmEnabled;
         public string Endpoint => endpoint;
         public float RequestTimeoutSeconds => timeoutSeconds;
+        public LocalEndpointMode CurrentLocalEndpointMode => localEndpointMode;
+        public LocalModel CurrentLocalModel => localModel;
 
         public void ConfigureProvider(Provider nextProvider, bool enabled, string endpointOverride = null)
         {
             provider = nextProvider;
             llmEnabled = enabled;
+            if (!string.IsNullOrEmpty(endpointOverride))
+            {
+                endpoint = endpointOverride;
+            }
+
+            if (IsLocalProvider())
+            {
+                timeoutSeconds = Mathf.Max(timeoutSeconds, LocalLlmMinTimeoutSeconds);
+            }
+        }
+
+        public void ConfigureLocalEndpoint(LocalEndpointMode mode, LocalModel model, string endpointOverride = null)
+        {
+            localEndpointMode = mode;
+            localModel = model;
             if (!string.IsNullOrEmpty(endpointOverride))
             {
                 endpoint = endpointOverride;

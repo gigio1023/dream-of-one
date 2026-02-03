@@ -11,7 +11,7 @@ namespace DreamOfOne.Editor
 {
     public static class LlmDialogueValidationMenu
     {
-        private const string LocalEndpoint = "http://localhost:11434/utterance";
+        private const string LocalEndpoint = "http://localhost:11434/v1/chat/completions";
         private const float FallbackTimeoutSeconds = 6f;
         private const float TimeoutSlackSeconds = 0.5f;
         private const string ValidationRuleId = "DL_G1_NO_DREAM_TALK";
@@ -34,6 +34,7 @@ namespace DreamOfOne.Editor
             }
 
             ApplyClientConfig(llmClient, LLMClient.Provider.LocalEndpoint, true, LocalEndpoint);
+            ApplyLocalEndpointConfig(llmClient, LLMClient.LocalEndpointMode.OpenAIChatCompletions, LLMClient.LocalModel.Qwen3_4B_Instruct, LocalEndpoint);
         }
 
         [MenuItem("Tools/DreamOfOne/LLM/Disable LLM (Mock)")]
@@ -233,6 +234,29 @@ namespace DreamOfOne.Editor
 
             string endpoint = string.IsNullOrEmpty(endpointOverride) ? llmClient.Endpoint : endpointOverride;
             Debug.Log($"[LLM] LLMClient configured: Provider={provider} Enabled={enabled} Endpoint={endpoint}");
+        }
+
+        private static void ApplyLocalEndpointConfig(LLMClient llmClient, LLMClient.LocalEndpointMode mode, LLMClient.LocalModel model, string endpointOverride)
+        {
+            if (llmClient == null)
+            {
+                return;
+            }
+
+            if (!EditorApplication.isPlaying)
+            {
+                Undo.RecordObject(llmClient, "Configure Local Endpoint");
+            }
+
+            llmClient.ConfigureLocalEndpoint(mode, model, endpointOverride);
+
+            if (!EditorApplication.isPlaying)
+            {
+                EditorUtility.SetDirty(llmClient);
+            }
+
+            string endpoint = string.IsNullOrEmpty(endpointOverride) ? llmClient.Endpoint : endpointOverride;
+            Debug.Log($"[LLM] LocalEndpoint configured: Mode={mode} Model={model} Endpoint={endpoint}");
         }
     }
 }

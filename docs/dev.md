@@ -81,14 +81,20 @@ The project supports running without an LLM (deterministic fallback). When enabl
 
 OpenAI:
 - Set `OPENAI_API_KEY` in your environment.
-- Configure `LLMClient` provider/model in the scene.
+- Configure `LLMClient` provider/model enums in the scene.
 
-Local endpoint (Ollama, utterance endpoint):
+Local endpoint (Ollama, OpenAI-compatible):
 - Start server: `ollama serve`
 - Pull model: `ollama pull qwen3:4b-instruct`
 - Configure `LLMClient` Provider = `LocalEndpoint`
-- Endpoint: `http://localhost:11434/utterance`
-- Model: `qwen3:4b-instruct`
+- LocalEndpointMode = `OpenAIChatCompletions`
+- Endpoint: `http://localhost:11434/v1/chat/completions`
+- LocalModel = `Qwen3_4B_Instruct`
+
+Local endpoint (utterance proxy):
+- Configure `LLMClient` Provider = `LocalEndpoint`
+- LocalEndpointMode = `UtteranceProxy`
+- Endpoint: `http://localhost:11434/utterance` (or your custom proxy)
 
 ---
 

@@ -28,6 +28,17 @@ namespace DreamOfOne.LLM
             Gpt4o
         }
 
+        public enum LocalEndpointMode
+        {
+            UtteranceProxy,
+            OpenAIChatCompletions
+        }
+
+        public enum LocalModel
+        {
+            Qwen3_4B_Instruct
+        }
+
         [SerializeField]
         [Tooltip("LLM 제공자 선택")]
         private Provider provider = Provider.Mock;
@@ -85,6 +96,14 @@ namespace DreamOfOne.LLM
         [SerializeField]
         [Tooltip("로컬 LLM 서버 또는 프록시 엔드포인트")]
         private string endpoint = "http://localhost:11434/utterance";
+
+        [SerializeField]
+        [Tooltip("LocalEndpoint 요청 방식")]
+        private LocalEndpointMode localEndpointMode = LocalEndpointMode.UtteranceProxy;
+
+        [SerializeField]
+        [Tooltip("LocalEndpoint 모델 선택(OpenAI 호환 모드에서 사용)")]
+        private LocalModel localModel = LocalModel.Qwen3_4B_Instruct;
 
         [SerializeField]
         [Tooltip("네트워크 요청 타임아웃(초). UnityWebRequest는 정수만 허용하므로 반올림 적용.")]
@@ -263,7 +282,13 @@ namespace DreamOfOne.LLM
                 case Provider.OpenAIChatCompletions:
                     yield return RequestOpenAi(request, onResult);
                     yield break;
-                default:
+                case Provider.LocalEndpoint:
+                    if (localEndpointMode == LocalEndpointMode.OpenAIChatCompletions)
+                    {
+                        yield return RequestLocalOpenAi(request, onResult);
+                        yield break;
+                    }
+
                     yield return RequestLocal(request, onResult);
                     yield break;
             }
@@ -285,7 +310,13 @@ namespace DreamOfOne.LLM
                 case Provider.OpenAIChatCompletions:
                     yield return RequestOpenAiText(request, onResult);
                     yield break;
-                default:
+                case Provider.LocalEndpoint:
+                    if (localEndpointMode == LocalEndpointMode.OpenAIChatCompletions)
+                    {
+                        yield return RequestLocalOpenAiText(request, onResult);
+                        yield break;
+                    }
+
                     yield return RequestLocalText(request, onResult);
                     yield break;
             }
@@ -442,6 +473,57 @@ namespace DreamOfOne.LLM
             onResult?.Invoke(sanitized);
         }
 
+        private IEnumerator RequestLocalOpenAi(LineRequest request, Action<string> onResult)
+        {
+            string systemText = BuildDeveloperPrompt(request);
+            string userText = BuildUserPrompt(request);
+            string role = useDeveloperRole ? "developer" : "system";
+
+            var payload = new ChatCompletionRequest
+            {
+                model = ResolveLocalModelName(localModel),
+                messages = new[]
+                {
+                    new ChatMessage { role = role, content = systemText },
+                    new ChatMessage { role = "user", content = userText }
+                },
+                temperature = temperature,
+                max_tokens = maxTokens,
+                store = storeResponses
+            };
+
+            string json = JsonUtility.ToJson(payload);
+
+            using UnityWebRequest requestWeb = new(endpoint, "POST");
+            byte[] body = Encoding.UTF8.GetBytes(json);
+            requestWeb.timeout = Mathf.CeilToInt(timeoutSeconds);
+            requestWeb.uploadHandler = new UploadHandlerRaw(body);
+            requestWeb.downloadHandler = new DownloadHandlerBuffer();
+            requestWeb.SetRequestHeader("Content-Type", "application/json");
+
+            yield return requestWeb.SendWebRequest();
+
+            if (requestWeb.result != UnityWebRequest.Result.Success)
+            {
+                HandleFailure(requestWeb.error, onResult, request);
+                yield break;
+            }
+
+            if (!TryParseOpenAiResponse(requestWeb.downloadHandler.text, out string line))
+            {
+                HandleFailure("Local OpenAI response parse failed", onResult, request);
+                yield break;
+            }
+
+            string sanitized = DialogueLineLimiter.ClampLine(line, maxChars);
+            if (string.IsNullOrEmpty(sanitized))
+            {
+                sanitized = DialogueLineLimiter.ClampLine(fallbackLine, maxChars);
+            }
+
+            onResult?.Invoke(sanitized);
+        }
+
         private IEnumerator RequestOpenAiText(TextRequest request, Action<string> onResult)
         {
             string apiKeyResolved = ResolveApiKey();
@@ -511,6 +593,62 @@ namespace DreamOfOne.LLM
             onResult?.Invoke(text ?? string.Empty);
         }
 
+        private IEnumerator RequestLocalOpenAiText(TextRequest request, Action<string> onResult)
+        {
+            string role = useDeveloperRole ? "developer" : "system";
+
+            int resolvedMaxTokens = request.maxTokens > 0 ? request.maxTokens : Mathf.Max(80, maxTokens);
+            float resolvedTemperature = request.temperature > 0f ? request.temperature : temperature;
+
+            var payload = new ChatCompletionRequest
+            {
+                model = ResolveLocalModelName(localModel),
+                messages = new[]
+                {
+                    new ChatMessage { role = role, content = request.system ?? string.Empty },
+                    new ChatMessage { role = "user", content = request.user ?? string.Empty }
+                },
+                temperature = resolvedTemperature,
+                max_tokens = resolvedMaxTokens,
+                store = storeResponses
+            };
+
+            string json = JsonUtility.ToJson(payload);
+
+            using UnityWebRequest requestWeb = new(endpoint, "POST");
+            byte[] body = Encoding.UTF8.GetBytes(json);
+            requestWeb.timeout = Mathf.CeilToInt(timeoutSeconds);
+            requestWeb.uploadHandler = new UploadHandlerRaw(body);
+            requestWeb.downloadHandler = new DownloadHandlerBuffer();
+            requestWeb.SetRequestHeader("Content-Type", "application/json");
+
+            yield return requestWeb.SendWebRequest();
+
+            if (requestWeb.result != UnityWebRequest.Result.Success)
+            {
+                if (logErrors && !string.IsNullOrEmpty(requestWeb.error))
+                {
+                    Debug.LogWarning($"[LLM] {requestWeb.error}");
+                }
+
+                onResult?.Invoke(BuildMockText(request));
+                yield break;
+            }
+
+            if (!TryParseOpenAiResponse(requestWeb.downloadHandler.text, out string text))
+            {
+                if (logErrors)
+                {
+                    Debug.LogWarning("[LLM] Local OpenAI response parse failed");
+                }
+
+                onResult?.Invoke(BuildMockText(request));
+                yield break;
+            }
+
+            onResult?.Invoke(text ?? string.Empty);
+        }
+
         private string ResolveApiKey()
         {
             if (preferEnvironmentKey)
@@ -523,6 +661,15 @@ namespace DreamOfOne.LLM
             }
 
             return apiKey;
+        }
+
+        private static string ResolveLocalModelName(LocalModel model)
+        {
+            return model switch
+            {
+                LocalModel.Qwen3_4B_Instruct => "qwen3:4b-instruct",
+                _ => "qwen3:4b-instruct"
+            };
         }
 
         private static string ResolveOpenAiModelName(OpenAiModel model)

@@ -21,6 +21,13 @@ namespace DreamOfOne.LLM
             OpenAIChatCompletions
         }
 
+        public enum OpenAiModel
+        {
+            Gpt41Mini,
+            Gpt4oMini,
+            Gpt4o
+        }
+
         [SerializeField]
         [Tooltip("LLM 제공자 선택")]
         private Provider provider = Provider.Mock;
@@ -43,8 +50,8 @@ namespace DreamOfOne.LLM
         private string openAiEndpoint = "https://api.openai.com/v1/chat/completions";
 
         [SerializeField]
-        [Tooltip("OpenAI 모델 이름")]
-        private string openAiModel = "gpt-4.1-mini";
+        [Tooltip("OpenAI 모델 선택")]
+        private OpenAiModel openAiModel = OpenAiModel.Gpt41Mini;
 
         [SerializeField]
         [Tooltip("API 키 환경 변수 이름")]
@@ -391,7 +398,7 @@ namespace DreamOfOne.LLM
 
             var payload = new ChatCompletionRequest
             {
-                model = openAiModel,
+                model = ResolveOpenAiModelName(openAiModel),
                 messages = new[]
                 {
                     new ChatMessage { role = role, content = systemText },
@@ -456,7 +463,7 @@ namespace DreamOfOne.LLM
 
             var payload = new ChatCompletionRequest
             {
-                model = openAiModel,
+                model = ResolveOpenAiModelName(openAiModel),
                 messages = new[]
                 {
                     new ChatMessage { role = role, content = request.system ?? string.Empty },
@@ -516,6 +523,16 @@ namespace DreamOfOne.LLM
             }
 
             return apiKey;
+        }
+
+        private static string ResolveOpenAiModelName(OpenAiModel model)
+        {
+            return model switch
+            {
+                OpenAiModel.Gpt4oMini => "gpt-4o-mini",
+                OpenAiModel.Gpt4o => "gpt-4o",
+                _ => "gpt-4.1-mini"
+            };
         }
 
         private bool IsLocalProvider()

@@ -1,9 +1,6 @@
 ---
 name: auto-pr-merge
-description: >
-  Automatically drive PR flow: open PR, request Codex review, validate, wait for checks,
-  merge via GitHub MCP, update Linear, and continue. Use when asked to proceed without
-  human approval or to auto-merge PRs.
+description: "Automatically drive PR flow: open PR, request Codex review, validate, wait for checks, merge via GitHub MCP, update Linear, and continue. Use when asked to proceed without human approval or to auto-merge PRs."
 ---
 
 # Auto PR Merge

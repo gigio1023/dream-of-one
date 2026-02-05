@@ -45,7 +45,7 @@ namespace DreamOfOne.Tests
         }
 
         [Test]
-        public void ProcessEvent_VerdictEndsSession()
+        public void ProcessEvent_LucidVerdictEndsSession()
         {
             var go = new GameObject("SessionDirector");
             var director = go.AddComponent<SessionDirector>();
@@ -53,13 +53,32 @@ namespace DreamOfOne.Tests
             var record = new EventRecord
             {
                 eventType = CoreEventType.VerdictGiven,
-                note = "Test verdict"
+                note = "Lucid identified"
             };
 
             director.ProcessEvent(record);
 
             Assert.IsTrue(director.IsEnded);
             StringAssert.Contains("Verdict", director.EndReason);
+
+            Object.DestroyImmediate(go);
+        }
+
+        [Test]
+        public void ProcessEvent_WarningVerdict_DoesNotEndSession()
+        {
+            var go = new GameObject("SessionDirector");
+            var director = go.AddComponent<SessionDirector>();
+
+            var record = new EventRecord
+            {
+                eventType = CoreEventType.VerdictGiven,
+                note = "Warning"
+            };
+
+            director.ProcessEvent(record);
+
+            Assert.IsFalse(director.IsEnded);
 
             Object.DestroyImmediate(go);
         }

@@ -70,22 +70,23 @@ In a 10-12 minute session you should be able to:
   - Start Ollama: `ollama serve`
   - Pull model: `ollama pull qwen3:4b-instruct`
   - Set `LLMClient` Provider to `LocalEndpoint`
-  - Set LocalEndpointMode: `OpenAIChatCompletions`
-  - Configure endpoint URL: `http://localhost:11434/v1/chat/completions`
+  - LocalEndpointMode:
+    - `UtteranceProxy` (default): endpoint `http://localhost:11434/utterance`
+    - `OpenAIChatCompletions`: endpoint `http://localhost:11434/v1/chat/completions`
   - Choose LocalModel enum: `Qwen3_4B_Instruct`
-  - (If using a custom utterance proxy instead, set LocalEndpointMode to `UtteranceProxy` and use `http://localhost:11434/utterance`)
 - To run fully deterministic / template-only mode:
   - Disable `LLMClient.llmEnabled`
 
 ## Documentation
 - Project definition (SoT): `project.md`
+- Game design bible: `docs/design/game-design.md`
 - Dream laws library (SoT): `docs/design/dream-laws.md`
 - Cover tests library (SoT): `docs/design/cover-tests.md`
 - Developer guide: `docs/dev.md`
-- Weekly plan (Prototype v0.1): `docs/plan/week-2026-02-02-v0.1.md`
+- Weekly plan (Prototype v0.1): `docs/plan/week-2026-02-05-v0.1.md`
 - Historical snapshots (past status): `docs/archive/`
 - Agent notes: `AGENTS.md`
 
 ## This Week (Prototype v0.1)
 Weekly development plan and deliverables:
-- `docs/plan/week-2026-02-02-v0.1.md`
+- `docs/plan/week-2026-02-05-v0.1.md`

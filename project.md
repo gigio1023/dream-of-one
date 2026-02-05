@@ -2,7 +2,7 @@
 doc: project.md
 project: Dream of One
 variant: Lucid Cover Social Stealth
-revision: 2026-02-02
+revision: 2026-02-05
 status: Locked v1 (Design SoT + Implementation Contract)
 owner: You
 ---
@@ -295,12 +295,17 @@ NPC가 플레이어를 “이상하다”고 판단하면:
 - 6 incidents / 3 endings / 4+ NPC routines
 - Player can always answer: “What happened, why, and what evidence supports it?”
 
-## 16) Document policy (SoT)
+## 16) Design bible (expanded reference)
+- Detailed design bible: `docs/design/game-design.md`
+- The bible expands on systems, UX, and production but does not override the v1 contract above.
+
+## 17) Document policy (SoT)
 **Single source of truth**
 - `project.md`: decisions, scope, roadmap, and non-negotiables
 - `docs/design/dream-laws.md`: Dream Laws + detectors
 - `docs/design/cover-tests.md`: Cover Test templates
-- `docs/plan/week-2026-02-02-v0.1.md`: weekly execution focus
+- `docs/design/game-design.md`: expanded design bible (reference)
+- `docs/plan/week-2026-02-05-v0.1.md`: weekly execution focus
 
 **Historical / legacy**
 - `docs/spec/*`: historical implementation notes unless explicitly marked Active

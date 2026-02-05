@@ -192,9 +192,23 @@ namespace DreamOfOne.Core
 
             if (endOnVerdict && record.eventType == EventType.VerdictGiven)
             {
-                string verdict = string.IsNullOrEmpty(record.note) ? "Verdict delivered." : record.note;
-                EndSession(SessionEndTrigger.Verdict, $"Verdict: {verdict}");
+                if (IsTerminalVerdict(record.note))
+                {
+                    string verdict = string.IsNullOrEmpty(record.note) ? "Verdict delivered." : record.note;
+                    EndSession(SessionEndTrigger.Verdict, $"Verdict: {verdict}");
+                }
             }
+        }
+
+        private static bool IsTerminalVerdict(string verdictNote)
+        {
+            if (string.IsNullOrWhiteSpace(verdictNote))
+            {
+                return false;
+            }
+
+            return verdictNote.IndexOf("Lucid identified", StringComparison.OrdinalIgnoreCase) >= 0
+                || verdictNote.IndexOf("Detained", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private void EndSession(SessionEndTrigger trigger, string reason)

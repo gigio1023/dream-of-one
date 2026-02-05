@@ -52,6 +52,34 @@ namespace DreamOfOne.LucidCover
             }
         }
 
+        public void AppendManualHit(
+            DreamLawDefinition law,
+            WorldEventLog eventLog,
+            ExposureSystem exposureSystem,
+            string detectorId,
+            string placeId,
+            string witnessId,
+            string witnessRole,
+            Vector3 position)
+        {
+            if (law == null || eventLog == null)
+            {
+                return;
+            }
+
+            int severity = ToEventSeverity(law.Severity);
+            var hit = new DreamLawHit(
+                law,
+                detectorId,
+                law.SuspicionDelta,
+                law.ExposureDelta,
+                severity,
+                stationMultiplierApplied: false);
+
+            hits.Add(hit);
+            ApplyHit(hit, eventLog, exposureSystem, placeId ?? string.Empty, witnessId, witnessRole, position);
+        }
+
         private static void ApplyHit(
             DreamLawHit hit,
             WorldEventLog eventLog,
@@ -109,6 +137,26 @@ namespace DreamOfOne.LucidCover
             {
                 exposureSystem.AddExposure(hit.ExposureDelta, witnessId, placeId, law.DreamLawId, hit.DetectorId, position);
             }
+        }
+
+        private static int ToEventSeverity(float severity01)
+        {
+            if (severity01 >= 0.85f)
+            {
+                return 3;
+            }
+
+            if (severity01 >= 0.55f)
+            {
+                return 2;
+            }
+
+            if (severity01 > 0f)
+            {
+                return 1;
+            }
+
+            return 0;
         }
     }
 }

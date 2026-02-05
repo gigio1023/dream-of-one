@@ -19,11 +19,20 @@
 - **Fast feedback**: Ask sub-agents to return summaries + file paths, not long prose.
 - **Tooling**: Use `multi_tool_use.parallel` for independent tool calls; prefer batch operations when possible.
 
+## Auto PR workflow (no human gating)
+
+- **Default**: open PR → request Codex review → run checks → auto-merge via GitHub MCP → update Linear → continue.
+- **No gh CLI**: use GitHub MCP only.
+- **Merge condition**: checks must be green; never merge on failure.
+
 ## Skills (mandatory)
 
 - **Use skills aggressively**: If a request matches any skill trigger, apply that skill for the current turn.
 - **Explicit callout**: State which skill(s) you are using and why.
 - **Progressive disclosure**: Open only the skill files you need; do not bulk-load.
+- **Repo skills to prefer**:
+  - `auto-pr-merge` (automatic PR lifecycle + merge)
+  - `swarm-execution` (aggressive parallelization)
 
 ## Session loop (Codex must follow)
 

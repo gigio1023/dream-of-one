@@ -30,6 +30,9 @@ namespace DreamOfOne.UI
         private LucidCoverRuntime lucidCoverRuntime = null;
 
         [SerializeField]
+        private CoverProfile coverProfile = null;
+
+        [SerializeField]
         [Tooltip("Witness lookup radius (meters). Fallback witness is used when no NPC is nearby.")]
         private float witnessSearchRadius = 8f;
 
@@ -70,6 +73,11 @@ namespace DreamOfOne.UI
             if (lucidCoverRuntime == null)
             {
                 lucidCoverRuntime = FindFirstObjectByType<LucidCoverRuntime>();
+            }
+
+            if (coverProfile == null)
+            {
+                coverProfile = FindFirstObjectByType<CoverProfile>();
             }
         }
 
@@ -212,6 +220,8 @@ namespace DreamOfOne.UI
                 activeSurface.transform.position,
                 allowedLawIds);
 
+            TryApplyCoverConsistency(database, placeId);
+
             RecordWhyLines(placeId);
 
             EndInteraction();
@@ -309,7 +319,36 @@ namespace DreamOfOne.UI
                 {
                     uiManager.ShowToast(line, 2f);
                 }
+
+                AppendHintLine(hit.Law, lawId);
+                AppendEvidencePolicyLine(hit.Law, lawId);
             }
+        }
+
+        private void AppendHintLine(DreamLawDefinition law, string lawId)
+        {
+            if (law == null || string.IsNullOrEmpty(law.DefuseHints))
+            {
+                return;
+            }
+
+            string line = $"HINT law={lawId}: {law.DefuseHints}";
+            LucidCoverWhyLog.Remember(line);
+            if (showWhyAsToast && uiManager != null)
+            {
+                uiManager.ShowToast(line, 2f);
+            }
+        }
+
+        private void AppendEvidencePolicyLine(DreamLawDefinition law, string lawId)
+        {
+            if (law == null || string.IsNullOrEmpty(law.EvidencePolicy))
+            {
+                return;
+            }
+
+            string line = $"EVID law={lawId}: {law.EvidencePolicy}";
+            LucidCoverWhyLog.Remember(line);
         }
 
         private string TryFindLatestStatementId(string lawId, string detectorId, string witnessId)
@@ -442,6 +481,95 @@ namespace DreamOfOne.UI
                 SpeechAct.Break => "이거 꿈이죠? 현실체크를 해볼게요.",
                 _ => string.Empty
             };
+        }
+
+        private void TryApplyCoverConsistency(DreamLawDatabase database, string placeId)
+        {
+            if (database == null || activeSurface == null)
+            {
+                return;
+            }
+
+            if (coverProfile == null)
+            {
+                coverProfile = FindFirstObjectByType<CoverProfile>();
+            }
+
+            if (coverProfile == null)
+            {
+                return;
+            }
+
+            bool placeMismatch = !coverProfile.IsPlaceAllowed(placeId);
+            bool topicMismatch = IsDreamLawTopicMismatch(coverProfile, activeSurface);
+
+            if (!placeMismatch && !topicMismatch)
+            {
+                return;
+            }
+
+            if (!database.TryGet("DL_G5_COVER_CONSISTENCY", out var law) || law == null)
+            {
+                return;
+            }
+
+            applier.AppendManualHit(
+                law,
+                eventLog,
+                exposureSystem,
+                DreamLawDetectorIds.AuthorityMismatch,
+                placeId,
+                activeWitnessId,
+                activeWitnessRole,
+                activeSurface.transform.position);
+        }
+
+        private static bool IsDreamLawTopicMismatch(CoverProfile profile, TextSurface surface)
+        {
+            if (profile == null || surface == null)
+            {
+                return false;
+            }
+
+            var allowed = profile.AllowedTopics;
+            if (allowed == null || allowed.Count == 0)
+            {
+                return false;
+            }
+
+            bool usesDreamLawTopics = false;
+            for (int i = 0; i < allowed.Count; i++)
+            {
+                var topic = allowed[i];
+                if (!string.IsNullOrEmpty(topic)
+                    && topic.StartsWith("DL_", StringComparison.OrdinalIgnoreCase))
+                {
+                    usesDreamLawTopics = true;
+                    break;
+                }
+            }
+
+            if (!usesDreamLawTopics)
+            {
+                return false;
+            }
+
+            var lawIds = surface.DreamLawIds;
+            if (lawIds == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < lawIds.Length; i++)
+            {
+                var lawId = lawIds[i];
+                if (!string.IsNullOrEmpty(lawId) && !profile.IsTopicAllowed(lawId))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static HashSet<string> BuildLawIdFilter(TextSurface surface)

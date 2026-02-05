@@ -65,13 +65,15 @@ In a 10-12 minute session you should be able to:
 - To use OpenAI:
   - Set environment variable `OPENAI_API_KEY`
   - In the scene, set `LLMClient` Provider to `OpenAIChatCompletions`
-  - Choose the model name in the inspector
+  - Choose the model enum in the inspector
 - To use a local endpoint:
   - Start Ollama: `ollama serve`
   - Pull model: `ollama pull qwen3:4b-instruct`
   - Set `LLMClient` Provider to `LocalEndpoint`
+  - Set LocalEndpointMode: `OpenAIChatCompletions`
   - Configure endpoint URL: `http://localhost:11434/v1/chat/completions`
-  - Set model: `qwen3:4b-instruct`
+  - Choose LocalModel enum: `Qwen3_4B_Instruct`
+  - (If using a custom utterance proxy instead, set LocalEndpointMode to `UtteranceProxy` and use `http://localhost:11434/utterance`)
 - To run fully deterministic / template-only mode:
   - Disable `LLMClient.llmEnabled`
 

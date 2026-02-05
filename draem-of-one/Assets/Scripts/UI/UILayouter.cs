@@ -67,6 +67,9 @@ namespace DreamOfOne.UI
             }
 
             TMP_Text globalLabel = null;
+            TMP_Text exposureLabel = null;
+            TMP_Text orgSuspicion = null;
+            TMP_Text checklist = null;
             TMP_Text eventLog = null;
             TMP_Text dialogue = null;
             TMP_Text toast = null;
@@ -115,6 +118,15 @@ namespace DreamOfOne.UI
                 {
                     case "GlobalSuspicionLabel":
                         globalLabel ??= label;
+                        break;
+                    case "ExposureLabel":
+                        exposureLabel ??= label;
+                        break;
+                    case "OrgSuspicionText":
+                        orgSuspicion ??= label;
+                        break;
+                    case "ChecklistText":
+                        checklist ??= label;
                         break;
                     case "EventLogText":
                         eventLog ??= label;
@@ -194,6 +206,57 @@ namespace DreamOfOne.UI
                 globalLabel.fontSize = 34f;
                 globalLabel.raycastTarget = false;
                 Place(globalLabel.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(120f, 28f), new Vector2(20f, -20f));
+            }
+
+            if (exposureLabel == null)
+            {
+                var exposureObject = new GameObject("ExposureLabel", typeof(RectTransform), typeof(TextMeshProUGUI));
+                exposureObject.transform.SetParent(canvas.transform, false);
+                exposureLabel = exposureObject.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (exposureLabel != null)
+            {
+                exposureLabel.name = "ExposureLabel";
+                exposureLabel.fontSize = 28f;
+                exposureLabel.alignment = TextAlignmentOptions.TopLeft;
+                exposureLabel.raycastTarget = false;
+                exposureLabel.SetText("Exposure 0/100");
+                Place(exposureLabel.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(200f, 26f), new Vector2(20f, -50f));
+            }
+
+            if (orgSuspicion == null)
+            {
+                var orgObject = new GameObject("OrgSuspicionText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                orgObject.transform.SetParent(canvas.transform, false);
+                orgSuspicion = orgObject.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (orgSuspicion != null)
+            {
+                orgSuspicion.name = "OrgSuspicionText";
+                orgSuspicion.fontSize = 24f;
+                orgSuspicion.alignment = TextAlignmentOptions.TopRight;
+                orgSuspicion.raycastTarget = false;
+                orgSuspicion.SetText(string.Empty);
+                Place(orgSuspicion.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(260f, 120f), new Vector2(-20f, -20f));
+            }
+
+            if (checklist == null)
+            {
+                var checklistObject = new GameObject("ChecklistText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                checklistObject.transform.SetParent(canvas.transform, false);
+                checklist = checklistObject.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (checklist != null)
+            {
+                checklist.name = "ChecklistText";
+                checklist.fontSize = 24f;
+                checklist.alignment = TextAlignmentOptions.TopRight;
+                checklist.raycastTarget = false;
+                checklist.SetText("Checklist: [Store–] [Studio–] [Park–] [Station–]");
+                Place(checklist.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(360f, 28f), new Vector2(-20f, -148f));
             }
 
             if (eventLog != null)
@@ -397,7 +460,7 @@ namespace DreamOfOne.UI
                 coverStatus.alignment = TextAlignmentOptions.TopRight;
                 coverStatus.raycastTarget = false;
                 coverStatus.SetText(LocalizationManager.Text(LocalizationKey.CoverPlaceholder));
-                Place(coverStatus.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(460f, 40f), new Vector2(-20f, -76f));
+                Place(coverStatus.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(460f, 40f), new Vector2(-20f, -200f));
             }
 
             if (caseBundle == null)
@@ -419,7 +482,7 @@ namespace DreamOfOne.UI
                 caseBundle.alignment = TextAlignmentOptions.TopRight;
                 caseBundle.raycastTarget = false;
                 caseBundle.SetText(string.Empty);
-                Place(caseBundle.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(460f, 200f), new Vector2(-20f, -140f));
+                Place(caseBundle.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(460f, 220f), new Vector2(-20f, -250f));
             }
 
             if (blackboard == null)

@@ -7,6 +7,7 @@ using DreamOfOne.NPC;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using CoreEventType = DreamOfOne.Core.EventType;
 
 namespace DreamOfOne.UI
 {
@@ -24,6 +25,18 @@ namespace DreamOfOne.UI
 
         [SerializeField]
         private TMP_Text globalSuspicionLabel = null;
+
+        [SerializeField]
+        private ExposureSystem exposureSystem = null;
+
+        [SerializeField]
+        private TMP_Text exposureLabel = null;
+
+        [SerializeField]
+        private TMP_Text orgSuspicionText = null;
+
+        [SerializeField]
+        private TMP_Text checklistText = null;
 
         [SerializeField]
         private TMP_Text eventLogText = null;
@@ -76,6 +89,7 @@ namespace DreamOfOne.UI
         private CoverStatus coverStatus = null;
         private float targetSuspicion = 0f;
         private float currentSuspicion = 0f;
+        private int currentExposure = 0;
         private string fallbackToast = string.Empty;
         private float fallbackToastExpire = -1f;
         private bool useFallback = false;
@@ -92,14 +106,22 @@ namespace DreamOfOne.UI
         private readonly StringBuilder devOverlayBuilder = new StringBuilder(512);
         private string lastArtifactPanelText = string.Empty;
         private string lastDevOverlayText = string.Empty;
+        private string lastOrgSuspicionText = string.Empty;
+        private string lastChecklistText = string.Empty;
 
         [SerializeField]
         [Tooltip("디버그 패널 갱신 간격(초)")]
         private float debugRefreshSeconds = 0.5f;
 
+        [SerializeField]
+        [Tooltip("조직 의심도 HUD 갱신 간격(초)")]
+        private float orgSuspicionRefreshSeconds = 1.0f;
+
         private ArtifactSystem artifactSystem = null;
         private PoliceController policeController = null;
         private WorldEventLog eventLog = null;
+        private float lastOrgSuspicionRefresh = -999f;
+        private readonly HashSet<string> visitedPlaces = new();
         private int selectedArtifactIndex = -1;
         private string selectedArtifactId = string.Empty;
 
@@ -111,6 +133,16 @@ namespace DreamOfOne.UI
             if (globalSuspicionSystem == null)
             {
                 globalSuspicionSystem = FindFirstObjectByType<GlobalSuspicionSystem>();
+            }
+
+            if (exposureSystem == null)
+            {
+                exposureSystem = FindFirstObjectByType<ExposureSystem>();
+            }
+
+            if (exposureSystem == null)
+            {
+                exposureSystem = FindFirstObjectByType<ExposureSystem>();
             }
 
             UpdateGlobalSuspicion(0f);
@@ -163,6 +195,13 @@ namespace DreamOfOne.UI
             policeController = FindFirstObjectByType<PoliceController>();
             eventLog = FindFirstObjectByType<WorldEventLog>();
 
+            if (exposureSystem != null)
+            {
+                UpdateExposure(exposureSystem.Exposure);
+            }
+
+            UpdateChecklistText();
+
             if (GetComponent<UIShortcutController>() == null)
             {
                 gameObject.AddComponent<UIShortcutController>();
@@ -207,6 +246,47 @@ namespace DreamOfOne.UI
             if (eventLog == null)
             {
                 eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+
+            if (exposureSystem != null)
+            {
+                UpdateExposure(exposureSystem.Exposure);
+            }
+        }
+
+        private void OnEnable()
+        {
+            if (exposureSystem == null)
+            {
+                exposureSystem = FindFirstObjectByType<ExposureSystem>();
+            }
+
+            if (eventLog == null)
+            {
+                eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+
+            if (exposureSystem != null)
+            {
+                exposureSystem.OnExposureChanged += UpdateExposure;
+            }
+
+            if (eventLog != null)
+            {
+                eventLog.OnEventRecorded += HandleEvent;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (exposureSystem != null)
+            {
+                exposureSystem.OnExposureChanged -= UpdateExposure;
+            }
+
+            if (eventLog != null)
+            {
+                eventLog.OnEventRecorded -= HandleEvent;
             }
         }
 
@@ -377,6 +457,15 @@ namespace DreamOfOne.UI
                         case "GlobalSuspicionLabel":
                             globalSuspicionLabel ??= label;
                             break;
+                        case "ExposureLabel":
+                            exposureLabel ??= label;
+                            break;
+                        case "OrgSuspicionText":
+                            orgSuspicionText ??= label;
+                            break;
+                        case "ChecklistText":
+                            checklistText ??= label;
+                            break;
                         case "EventLogText":
                             eventLogText ??= label;
                             break;
@@ -458,6 +547,12 @@ namespace DreamOfOne.UI
                 globalSuspicionBar.SetValueWithoutNotify(currentSuspicion);
             }
 
+            if (Time.time - lastOrgSuspicionRefresh >= orgSuspicionRefreshSeconds)
+            {
+                lastOrgSuspicionRefresh = Time.time;
+                RefreshOrgSuspicionText();
+            }
+
             if ((showArtifactPanel || showDevOverlay) && Time.time - lastDebugRefresh >= debugRefreshSeconds)
             {
                 lastDebugRefresh = Time.time;
@@ -493,6 +588,16 @@ namespace DreamOfOne.UI
                 boundSuspicionSystem.OnGlobalSuspicionChanged -= UpdateGlobalSuspicion;
             }
 
+            if (exposureSystem != null)
+            {
+                exposureSystem.OnExposureChanged -= UpdateExposure;
+            }
+
+            if (eventLog != null)
+            {
+                eventLog.OnEventRecorded -= HandleEvent;
+            }
+
             if (coverStatus != null)
             {
                 coverStatus.OnCoverStatusChanged -= HandleCoverStatus;
@@ -505,6 +610,15 @@ namespace DreamOfOne.UI
             globalSuspicionLabel?.SetText($"G {value:P0}");
         }
 
+        private void UpdateExposure(int value)
+        {
+            currentExposure = value;
+            if (exposureLabel != null)
+            {
+                exposureLabel.SetText($"Exposure {value}/100");
+            }
+        }
+
         public void UpdateCoverStatus(string text)
         {
             if (coverStatusText == null)
@@ -513,6 +627,191 @@ namespace DreamOfOne.UI
             }
 
             coverStatusText.SetText(text);
+        }
+
+        private void RefreshOrgSuspicionText()
+        {
+            if (orgSuspicionText == null)
+            {
+                return;
+            }
+
+            var components = FindObjectsByType<SuspicionComponent>(FindObjectsSortMode.None);
+            if (components == null || components.Length == 0)
+            {
+                return;
+            }
+
+            var totals = new Dictionary<string, (float sum, int count)>(System.StringComparer.OrdinalIgnoreCase);
+            for (int i = 0; i < components.Length; i++)
+            {
+                var component = components[i];
+                if (component == null)
+                {
+                    continue;
+                }
+
+                string org = ResolveOrg(component.NpcId);
+                if (!totals.TryGetValue(org, out var entry))
+                {
+                    entry = (0f, 0);
+                }
+
+                entry.sum += component.CurrentSuspicionNormalized;
+                entry.count += 1;
+                totals[org] = entry;
+            }
+
+            var builder = new StringBuilder();
+            AppendOrgSuspicion(builder, totals, "Store");
+            AppendOrgSuspicion(builder, totals, "Studio");
+            AppendOrgSuspicion(builder, totals, "Park");
+            AppendOrgSuspicion(builder, totals, "Station");
+            AppendOrgSuspicion(builder, totals, "Other");
+
+            string output = builder.ToString().TrimEnd();
+            if (!string.Equals(output, lastOrgSuspicionText, System.StringComparison.Ordinal))
+            {
+                lastOrgSuspicionText = output;
+                orgSuspicionText.SetText(output);
+            }
+        }
+
+        private static void AppendOrgSuspicion(StringBuilder builder, Dictionary<string, (float sum, int count)> totals, string org)
+        {
+            if (!totals.TryGetValue(org, out var entry) || entry.count <= 0)
+            {
+                return;
+            }
+
+            int percent = Mathf.RoundToInt(Mathf.Clamp01(entry.sum / Mathf.Max(1, entry.count)) * 100f);
+            builder.Append($"{org}: {percent}%");
+            builder.AppendLine();
+        }
+
+        private static string ResolveOrg(string npcId)
+        {
+            if (string.IsNullOrEmpty(npcId))
+            {
+                return "Other";
+            }
+
+            if (npcId.StartsWith("Store", System.StringComparison.OrdinalIgnoreCase))
+            {
+                return "Store";
+            }
+
+            if (npcId.StartsWith("Studio", System.StringComparison.OrdinalIgnoreCase))
+            {
+                return "Studio";
+            }
+
+            if (npcId.StartsWith("Park", System.StringComparison.OrdinalIgnoreCase))
+            {
+                return "Park";
+            }
+
+            if (npcId.StartsWith("Station", System.StringComparison.OrdinalIgnoreCase))
+            {
+                return "Station";
+            }
+
+            if (npcId.StartsWith("Police", System.StringComparison.OrdinalIgnoreCase) ||
+                npcId.StartsWith("Officer", System.StringComparison.OrdinalIgnoreCase) ||
+                npcId.StartsWith("Investigator", System.StringComparison.OrdinalIgnoreCase))
+            {
+                return "Station";
+            }
+
+            return "Other";
+        }
+
+        private void HandleEvent(EventRecord record)
+        {
+            if (record == null)
+            {
+                return;
+            }
+
+            if (record.eventType == CoreEventType.EnteredZone &&
+                string.Equals(record.actorId, "Player", System.StringComparison.OrdinalIgnoreCase))
+            {
+                RegisterVisitedPlace(record.zoneId);
+            }
+        }
+
+        private void RegisterVisitedPlace(string zoneId)
+        {
+            string place = ResolvePlace(zoneId);
+            if (string.IsNullOrEmpty(place))
+            {
+                return;
+            }
+
+            if (visitedPlaces.Add(place))
+            {
+                UpdateChecklistText();
+            }
+        }
+
+        private void UpdateChecklistText()
+        {
+            if (checklistText == null)
+            {
+                return;
+            }
+
+            string[] required = { "Store", "Studio", "Park", "Station" };
+            var builder = new StringBuilder();
+            builder.Append("Checklist: ");
+            for (int i = 0; i < required.Length; i++)
+            {
+                string item = required[i];
+                bool done = visitedPlaces.Contains(item);
+                builder.Append(done ? $"[{item}✓]" : $"[{item}–]");
+                if (i < required.Length - 1)
+                {
+                    builder.Append(' ');
+                }
+            }
+
+            string output = builder.ToString();
+            if (!string.Equals(output, lastChecklistText, System.StringComparison.Ordinal))
+            {
+                lastChecklistText = output;
+                checklistText.SetText(output);
+            }
+        }
+
+        private static string ResolvePlace(string zoneId)
+        {
+            if (string.IsNullOrEmpty(zoneId))
+            {
+                return string.Empty;
+            }
+
+            if (zoneId.IndexOf("Store", System.StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Store";
+            }
+
+            if (zoneId.IndexOf("Studio", System.StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Studio";
+            }
+
+            if (zoneId.IndexOf("Park", System.StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Park";
+            }
+
+            if (zoneId.IndexOf("Police", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                zoneId.IndexOf("Station", System.StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Station";
+            }
+
+            return string.Empty;
         }
 
         public void ShowCaseBundle(CaseBundle bundle)
@@ -654,16 +953,24 @@ namespace DreamOfOne.UI
             else
             {
                 var artifacts = artifactSystem.GetArtifacts();
-                int count = Mathf.Min(6, artifacts.Count);
-                for (int i = 0; i < count; i++)
+                int total = artifacts.Count;
+                int window = Mathf.Min(6, total);
+                int startIndex = 0;
+                if (selectedArtifactIndex >= 0 && total > window)
                 {
-                    var artifact = artifacts[i];
-                    string marker = (i == selectedArtifactIndex) ? ">" : "-";
+                    startIndex = Mathf.Clamp(selectedArtifactIndex - 2, 0, Mathf.Max(0, total - window));
+                }
+
+                for (int i = 0; i < window; i++)
+                {
+                    int index = startIndex + i;
+                    var artifact = artifacts[index];
+                    string marker = (index == selectedArtifactIndex) ? ">" : "-";
                     builder.AppendLine($"{marker} {artifact.ArtifactId} [{artifact.PlaceId}] {artifact.Summary}");
                 }
-                if (artifacts.Count > count)
+                if (total > window)
                 {
-                    builder.AppendLine($"... +{artifacts.Count - count}");
+                    builder.AppendLine($"... {startIndex + 1}-{startIndex + window} / {total}");
                 }
 
                 if (selectedArtifactIndex >= 0 && selectedArtifactIndex < artifacts.Count)
@@ -699,12 +1006,14 @@ namespace DreamOfOne.UI
             if (eventLog != null && eventLog.TryGetEventById(record.Id, out var source))
             {
                 string detail = $"{source.eventType} {source.actorId} {source.note}";
+                string link = $"rule={source.ruleId} det={source.sourceId}";
+                string location = $"place={source.placeId} zone={source.zoneId}";
                 if (!string.IsNullOrEmpty(baseText))
                 {
-                    return $"{baseText}\n{detail}";
+                    return $"{baseText}\n{detail}\n{link}\n{location}";
                 }
 
-                return detail;
+                return $"{detail}\n{link}\n{location}";
             }
 
             return baseText;
@@ -975,6 +1284,9 @@ namespace DreamOfOne.UI
             fallbackPrompt = string.Empty;
 
             UpdateGlobalSuspicion(0f);
+            UpdateExposure(0);
+            visitedPlaces.Clear();
+            UpdateChecklistText();
 
             if (eventLogText != null)
             {
@@ -1008,6 +1320,11 @@ namespace DreamOfOne.UI
                 devOverlayText.gameObject.SetActive(false);
             }
 
+            if (orgSuspicionText != null)
+            {
+                orgSuspicionText.SetText(string.Empty);
+            }
+
             HidePrompt();
             HideSessionEnd();
         }
@@ -1022,6 +1339,20 @@ namespace DreamOfOne.UI
             float y = 10f;
             GUI.Label(new Rect(10f, y, 400f, 24f), $"G {currentSuspicion:P0}", fallbackStyle);
             y += 26f;
+            GUI.Label(new Rect(10f, y, 400f, 24f), $"Exposure {currentExposure}/100", fallbackStyle);
+            y += 26f;
+
+            if (!string.IsNullOrEmpty(lastChecklistText))
+            {
+                GUI.Label(new Rect(10f, y, 600f, 24f), lastChecklistText, fallbackStyle);
+                y += 26f;
+            }
+
+            if (!string.IsNullOrEmpty(lastOrgSuspicionText))
+            {
+                GUI.Label(new Rect(10f, y, 600f, 120f), lastOrgSuspicionText, fallbackStyle);
+                y += 120f;
+            }
 
             string logText = string.Join("\n", logLines);
             GUI.Label(new Rect(10f, y, 600f, 140f), logText, fallbackStyle);

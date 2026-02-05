@@ -1,7 +1,7 @@
 # Dream of One — Execution Plan (Lucid Cover Social Stealth v1)
 
-Revision date: 2026-02-02  
-Plan sources: `project.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`  
+Revision date: 2026-02-05  
+Plan sources: `project.md`, `docs/design/game-design.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`  
 Work tracking: Linear (Dream-of-one team). This file is a roadmap (not a task tracker).
 
 ## 0) Constraints (must stay true)
@@ -26,6 +26,14 @@ Work tracking: Linear (Dream-of-one team). This file is a roadmap (not a task tr
 - Always visible: “what raised suspicion/exposure and why” (lawId + detectorId + witness + record).
 
 ## 2) Implementation plan (recommended order)
+
+### Phase 0 — Design alignment (docs + data contracts)
+Deliverables
+- Expanded design bible with system map and UX contract.
+- SoT docs updated (project.md + plan.md).
+
+Verification
+- Doc references resolve and remain consistent with v1 contract.
 
 ### Phase 1 — Data schemas + IDs (no gameplay change)
 Deliverables
@@ -91,6 +99,16 @@ Deliverables
 Verification
 - Local batch scripts pass where available (`scripts/unity/run_all_checks.sh`).
 
+### Phase 7 — Expansion (v0.2 → v1)
+Deliverables
+- NPC routines per organization (role + schedule + patrol zones).
+- Organization policy packs (same action judged differently).
+- Rumor propagation (trust-weighted, rebuttal paths).
+- Evidence UI improvements (pin, filter, timeline).
+
+Verification
+- Replay sessions show meaningful variability without breaking determinism.
+
 ## 3) Supporting passes (non-blocking unless they break MCSS)
 - World readability: landmark silhouettes + road navigation clarity.
 - Portal + NavMesh stability: no hard locks, no stuck agents.
@@ -100,5 +118,5 @@ Verification
 - 2026-01-29: v1 contract docs saved + plan synced (Linear: DRE-60).
 
 ## 5) Next run focus
-- Follow `docs/plan/week-2026-02-02-v0.1.md` for v0.1 execution order.
+- Follow `docs/plan/week-2026-02-05-v0.1.md` for v0.1 execution order.
 - Prioritize: deterministic DreamLaw → CoverTest → Inquest → UI “why” loop with Diagnostics clean.

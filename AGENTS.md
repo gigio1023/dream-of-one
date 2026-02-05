@@ -10,6 +10,21 @@
 - **Writer:** Codex CLI only. The user gives natural-language instructions and reviews PRs.
 - **Codex Cloud:** Optional “worker” triggered from Linear (`@Codex`) for cloud-safe tasks (no Unity MCP / no serialized Unity assets).
 
+## Collaboration mode (aggressive agent swarm)
+
+- **Default to swarm**: If a task is non-trivial or spans multiple files/systems, spawn sub-agents immediately.
+- **Use explorers first**: For codebase questions, always spawn an `explorer` agent to locate relevant code and report back.
+- **Parallelize**: Use multiple agents to split work (docs vs code vs tests), then integrate results.
+- **Clear ownership**: When using `worker` agents, assign explicit file/area ownership and avoid overlapping edits.
+- **Fast feedback**: Ask sub-agents to return summaries + file paths, not long prose.
+- **Tooling**: Use `multi_tool_use.parallel` for independent tool calls; prefer batch operations when possible.
+
+## Skills (mandatory)
+
+- **Use skills aggressively**: If a request matches any skill trigger, apply that skill for the current turn.
+- **Explicit callout**: State which skill(s) you are using and why.
+- **Progressive disclosure**: Open only the skill files you need; do not bulk-load.
+
 ## Session loop (Codex must follow)
 
 1. Pick a Linear issue to work on (or create one first).
@@ -94,8 +109,13 @@ Verification mandate:
 ## Local LLM QA (NPC dialogue sanity)
 
 - Use Ollama local endpoint for NPC dialogue checks when requested.
-- Recommended model: `qwen3:4b-instruct` (OpenAI-compatible endpoint).
-- LLMClient config (scene): Provider `LocalEndpoint`, endpoint `http://localhost:11434/v1/chat/completions`, model `qwen3:4b-instruct`, `llmEnabled=true`.
+- Recommended model: `qwen3:4b-instruct`.
+- LLMClient config (scene):
+  - Provider `LocalEndpoint`, `llmEnabled=true`.
+  - LocalEndpointMode:
+    - `UtteranceProxy` (default): endpoint `http://localhost:11434/utterance`
+    - `OpenAIChatCompletions`: endpoint `http://localhost:11434/v1/chat/completions`
+  - LocalModel enum: `Qwen3_4B_Instruct`.
 - If timeouts occur, keep `timeoutSeconds >= 8` for local runs.
 - Quick trigger: `Tools > DreamOfOne > LucidCover > Debug > Simulate First TextSurface (SA_BREAK)` and confirm `NpcUtterance` in WEL.
 
@@ -111,5 +131,6 @@ Verification mandate:
 - Developer guide: `docs/dev.md`
 - Codex runbook: `docs/agent/runbook.md`
 - Project definition (SoT): `project.md`
+- Game design bible: `docs/design/game-design.md`
 - Dream laws library (SoT): `docs/design/dream-laws.md`
 - Cover tests library (SoT): `docs/design/cover-tests.md`

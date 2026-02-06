@@ -58,6 +58,9 @@ namespace DreamOfOne.Core
         private UIManager uiManager = null;
 
         [SerializeField]
+        private SessionArcDirector sessionArcDirector = null;
+
+        [SerializeField]
         private float sessionDurationSeconds = 12f * 60f;
 
         [SerializeField]
@@ -80,6 +83,8 @@ namespace DreamOfOne.Core
         private bool ended = false;
         private bool freezeApplied = false;
         private string endReason = string.Empty;
+        private SessionCarryoverState currentCarryoverState = SessionCarryoverRules.DefaultState;
+        private SessionPressureProfile currentPressureProfile = SessionCarryoverRules.ResolveProfile(SessionCarryoverRules.DefaultState);
 
         public bool IsEnded => ended;
         public string EndReason => endReason;
@@ -119,6 +124,11 @@ namespace DreamOfOne.Core
             {
                 uiManager = FindFirstObjectByType<UIManager>();
             }
+
+            if (sessionArcDirector == null)
+            {
+                sessionArcDirector = FindFirstObjectByType<SessionArcDirector>();
+            }
         }
 
         private void OnEnable()
@@ -139,6 +149,7 @@ namespace DreamOfOne.Core
 
         private void Start()
         {
+            ApplyCarryoverProfile();
             ShowStartHints();
         }
 
@@ -222,8 +233,10 @@ namespace DreamOfOne.Core
             ended = true;
             endReason = reason;
             var metrics = BuildMetrics();
+            var ending = ResolveEnding(trigger, metrics);
+            PersistCarryoverState(ending);
             var summary = BuildSummaryLine(metrics);
-            var endText = BuildEndSummary(trigger, reason, metrics);
+            var endText = BuildEndSummary(trigger, reason, metrics, ending);
             if (uiManager != null)
             {
                 uiManager.ShowSessionEnd(endText);
@@ -300,9 +313,8 @@ namespace DreamOfOne.Core
             return $"Summary: events {metrics.totalEvents}, violations {metrics.violations}, reports {metrics.reports}, evidence {metrics.evidence}, rumors {metrics.rumors}, artifacts {metrics.artifacts}, verdicts {metrics.verdicts}, exposure {metrics.exposure}.";
         }
 
-        private string BuildEndSummary(SessionEndTrigger trigger, string reason, SessionMetrics metrics)
+        private string BuildEndSummary(SessionEndTrigger trigger, string reason, SessionMetrics metrics, SessionEnding ending)
         {
-            var ending = ResolveEnding(trigger, metrics);
             int score = ComputeScore(trigger, metrics);
             string grade = GetGrade(score);
             var why = BuildWhyReasons(trigger, metrics);
@@ -496,6 +508,7 @@ namespace DreamOfOne.Core
             elapsedSeconds = 0f;
             RestoreActors();
             ResetRuntimeState();
+            ApplyCarryoverProfile();
             ShowStartHints();
         }
 
@@ -706,6 +719,71 @@ namespace DreamOfOne.Core
         {
             uiManager?.ShowPrompt(LocalizationManager.Text(LocalizationKey.GoalPrompt));
             uiManager?.ShowToast(LocalizationManager.Text(LocalizationKey.ControlsToast), 4f);
+        }
+
+        private void ApplyCarryoverProfile()
+        {
+            currentCarryoverState = SessionCarryoverStore.Load();
+            currentPressureProfile = SessionCarryoverRules.ResolveProfile(currentCarryoverState);
+
+            if (sessionArcDirector == null)
+            {
+                sessionArcDirector = FindFirstObjectByType<SessionArcDirector>();
+            }
+
+            sessionArcDirector?.ConfigureCarryoverProfile(currentPressureProfile);
+
+            if (eventLog != null)
+            {
+                eventLog.RecordEvent(new EventRecord
+                {
+                    actorId = "SessionCarryover",
+                    actorRole = "System",
+                    eventType = EventType.ExplanationGiven,
+                    category = EventCategory.Verdict,
+                    topic = "DailyBriefing",
+                    note = $"day={currentCarryoverState.dayIndex}; pressure={currentCarryoverState.pressureTier}; profile={currentPressureProfile.profileId}; last={currentCarryoverState.lastEnding}",
+                    severity = 1,
+                    placeId = "Session",
+                    zoneId = "Session"
+                });
+            }
+
+            if (uiManager != null && !string.IsNullOrEmpty(currentPressureProfile.briefingLine))
+            {
+                uiManager.ShowToast($"Day {currentCarryoverState.dayIndex}: {currentPressureProfile.briefingLine}", 4f);
+            }
+        }
+
+        private void PersistCarryoverState(SessionEnding ending)
+        {
+            SessionCarryoverEnding carryoverEnding = ending switch
+            {
+                SessionEnding.CleanPass => SessionCarryoverEnding.CleanPass,
+                SessionEnding.NarrowEscape => SessionCarryoverEnding.NarrowEscape,
+                _ => SessionCarryoverEnding.Exposed
+            };
+
+            var next = SessionCarryoverRules.Advance(currentCarryoverState, carryoverEnding);
+            SessionCarryoverStore.Save(next);
+            currentCarryoverState = next;
+            currentPressureProfile = SessionCarryoverRules.ResolveProfile(next);
+
+            if (eventLog != null)
+            {
+                eventLog.RecordEvent(new EventRecord
+                {
+                    actorId = "SessionCarryover",
+                    actorRole = "System",
+                    eventType = EventType.ExplanationGiven,
+                    category = EventCategory.Verdict,
+                    topic = "SessionCarryover",
+                    note = $"ending={carryoverEnding}; nextDay={next.dayIndex}; nextPressure={next.pressureTier}; nextProfile={currentPressureProfile.profileId}",
+                    severity = 1,
+                    placeId = "Session",
+                    zoneId = "Session"
+                });
+            }
         }
     }
 }

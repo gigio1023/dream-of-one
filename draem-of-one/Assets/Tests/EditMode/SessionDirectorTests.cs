@@ -7,6 +7,18 @@ namespace DreamOfOne.Tests
 {
     public class SessionDirectorTests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            SessionCarryoverStore.Clear();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            SessionCarryoverStore.Clear();
+        }
+
         [Test]
         public void Tick_WhenTimeLimitReached_EndsSession()
         {
@@ -79,6 +91,44 @@ namespace DreamOfOne.Tests
             director.ProcessEvent(record);
 
             Assert.IsFalse(director.IsEnded);
+
+            Object.DestroyImmediate(go);
+        }
+
+        [Test]
+        public void Tick_TimeLimit_PersistsCarryoverForCleanPass()
+        {
+            var go = new GameObject("SessionDirector");
+            var director = go.AddComponent<SessionDirector>();
+            TestHelpers.SetPrivateField(director, "sessionDurationSeconds", 0.1f);
+
+            director.Tick(0.2f);
+
+            var state = SessionCarryoverStore.Load();
+            Assert.AreEqual(2, state.dayIndex);
+            Assert.AreEqual(0, state.pressureTier);
+            Assert.AreEqual(SessionCarryoverEnding.CleanPass, state.lastEnding);
+
+            Object.DestroyImmediate(go);
+        }
+
+        [Test]
+        public void ProcessEvent_TerminalVerdict_PersistsExposedCarryover()
+        {
+            var go = new GameObject("SessionDirector");
+            var director = go.AddComponent<SessionDirector>();
+            var record = new EventRecord
+            {
+                eventType = CoreEventType.VerdictGiven,
+                note = "Lucid identified"
+            };
+
+            director.ProcessEvent(record);
+
+            var state = SessionCarryoverStore.Load();
+            Assert.AreEqual(2, state.dayIndex);
+            Assert.AreEqual(SessionCarryoverRules.MaxPressureTier, state.pressureTier);
+            Assert.AreEqual(SessionCarryoverEnding.Exposed, state.lastEnding);
 
             Object.DestroyImmediate(go);
         }

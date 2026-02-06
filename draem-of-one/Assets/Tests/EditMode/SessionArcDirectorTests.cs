@@ -140,6 +140,52 @@ namespace DreamOfOne.Tests
             Object.DestroyImmediate(sessionGo);
         }
 
+        [Test]
+        public void TickArc_AppliesCarryoverProfileOverlay()
+        {
+            var violationGo = new GameObject("ViolationResponseSystem");
+            var violation = violationGo.AddComponent<ViolationResponseSystem>();
+            var reportGo = new GameObject("ReportManager");
+            var reportManager = reportGo.AddComponent<ReportManager>();
+            var arcGo = new GameObject("SessionArcDirector");
+            var arc = arcGo.AddComponent<SessionArcDirector>();
+
+            TestHelpers.SetPrivateField(arc, "violationResponseSystem", violation);
+            TestHelpers.SetPrivateField(arc, "reportManager", reportManager);
+            arc.SetPhaseConfigsForTesting(new[]
+            {
+                new SessionArcDirector.ArcPhaseConfig
+                {
+                    phaseId = "base",
+                    startRatio = 0f,
+                    suspicionDeltaMultiplier = 1.0f,
+                    reportsRequired = 2,
+                    globalSuspicionThreshold = 0.20f,
+                    socialPressureThreshold = 0.60f
+                }
+            });
+
+            arc.ConfigureCarryoverProfile(new SessionPressureProfile
+            {
+                profileId = "Strict",
+                suspicionMultiplier = 1.15f,
+                reportsRequiredOffset = -1,
+                globalSuspicionThresholdOffset = -0.04f,
+                socialPressureThresholdOffset = -0.05f
+            });
+
+            arc.TickArc(10f, 100f);
+
+            Assert.AreEqual(1.15f, violation.CurrentDeltaMultiplier, 0.0001f);
+            Assert.AreEqual(1, reportManager.EffectiveReportsRequired);
+            Assert.AreEqual(0.16f, reportManager.EffectiveGlobalSuspicionThreshold, 0.0001f);
+            Assert.AreEqual(0.55f, reportManager.EffectiveSocialPressureThreshold, 0.0001f);
+
+            Object.DestroyImmediate(arcGo);
+            Object.DestroyImmediate(reportGo);
+            Object.DestroyImmediate(violationGo);
+        }
+
         private static T GetField<T>(object target, string fieldName) where T : class
         {
             var field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);

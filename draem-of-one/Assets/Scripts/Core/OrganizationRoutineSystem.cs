@@ -62,6 +62,33 @@ namespace DreamOfOne.Core
         [Tooltip("조직 이벤트 발생 시 해당 NPC를 앵커 근처로 이동시킴")]
         private bool snapActorsToAnchor = true;
 
+        [SerializeField]
+        [Tooltip("루틴 이벤트를 결정론적으로 분산시켜 동시 폭주를 줄임")]
+        private bool enableDeterministicPacing = true;
+
+        [SerializeField]
+        [Min(0.1f)]
+        private float pacingWindowSeconds = 1.5f;
+
+        [SerializeField]
+        [Min(1)]
+        private int maxPerLaneEventsPerWindow = 2;
+
+        [SerializeField]
+        [Min(1)]
+        private int maxGlobalEventsPerWindow = 4;
+
+        [SerializeField]
+        [Min(0f)]
+        private float pacingJitterSeconds = 0.4f;
+
+        [SerializeField]
+        private int pacingSeed = 9301;
+
+        [SerializeField]
+        [Min(1)]
+        private int maxRoutineEmitsPerFrame = 4;
+
         private float nextStudioTime = 0f;
         private float nextStoreTime = 0f;
         private float nextParkTime = 0f;
@@ -87,6 +114,28 @@ namespace DreamOfOne.Core
         private int deliveryViolationCounter = 0;
         private int facilityViolationCounter = 0;
         private int mediaViolationCounter = 0;
+        private readonly System.Collections.Generic.List<ScheduledRoutineEvent> pendingEvents = new();
+        private DeterministicEventPacer eventPacer = null;
+        private int routineOrderCounter = 0;
+
+        private struct ScheduledRoutineEvent
+        {
+            public RoutineLane lane;
+            public float dueTime;
+            public int order;
+        }
+
+        private enum RoutineLane
+        {
+            Studio,
+            Store,
+            Park,
+            Station,
+            Cafe,
+            Delivery,
+            Facility,
+            Media
+        }
 
         private enum StudioStep
         {
@@ -112,6 +161,14 @@ namespace DreamOfOne.Core
             nextDeliveryTime = Time.time + 14f;
             nextFacilityTime = Time.time + 16f;
             nextMediaTime = Time.time + 18f;
+            RebuildPacer();
+        }
+
+        private void OnEnable()
+        {
+            pendingEvents.Clear();
+            eventPacer?.Reset();
+            routineOrderCounter = 0;
         }
 
         private void Update()
@@ -124,51 +181,53 @@ namespace DreamOfOne.Core
             float now = Time.time;
             if (now >= nextStudioTime)
             {
-                EmitStudioEvent();
+                QueueRoutineEvent(RoutineLane.Studio, now);
                 nextStudioTime = now + studioStepInterval;
             }
 
             if (now >= nextStoreTime)
             {
-                EmitStoreEvent();
+                QueueRoutineEvent(RoutineLane.Store, now);
                 nextStoreTime = now + storeInterval;
             }
 
             if (now >= nextParkTime)
             {
-                EmitParkEvent();
+                QueueRoutineEvent(RoutineLane.Park, now);
                 nextParkTime = now + parkInterval;
             }
 
             if (now >= nextStationTime)
             {
-                EmitStationEvent();
+                QueueRoutineEvent(RoutineLane.Station, now);
                 nextStationTime = now + stationInterval;
             }
 
             if (now >= nextCafeTime)
             {
-                EmitCafeEvent();
+                QueueRoutineEvent(RoutineLane.Cafe, now);
                 nextCafeTime = now + cafeInterval;
             }
 
             if (now >= nextDeliveryTime)
             {
-                EmitDeliveryEvent();
+                QueueRoutineEvent(RoutineLane.Delivery, now);
                 nextDeliveryTime = now + deliveryInterval;
             }
 
             if (now >= nextFacilityTime)
             {
-                EmitFacilityEvent();
+                QueueRoutineEvent(RoutineLane.Facility, now);
                 nextFacilityTime = now + facilityInterval;
             }
 
             if (now >= nextMediaTime)
             {
-                EmitMediaEvent();
+                QueueRoutineEvent(RoutineLane.Media, now);
                 nextMediaTime = now + mediaInterval;
             }
+
+            FlushPendingEvents(now);
         }
 
         private void EmitStudioEvent()
@@ -483,6 +542,110 @@ namespace DreamOfOne.Core
 
             var zoned = GameObject.Find($"{zoneId}Zone");
             return zoned != null ? zoned.transform : null;
+        }
+
+        private void QueueRoutineEvent(RoutineLane lane, float now)
+        {
+            if (!enableDeterministicPacing)
+            {
+                EmitRoutineEvent(lane);
+                return;
+            }
+
+            if (eventPacer == null)
+            {
+                RebuildPacer();
+            }
+
+            float due = eventPacer != null ? eventPacer.Schedule(lane.ToString(), now) : now;
+            pendingEvents.Add(new ScheduledRoutineEvent
+            {
+                lane = lane,
+                dueTime = due,
+                order = routineOrderCounter++
+            });
+        }
+
+        private void FlushPendingEvents(float now)
+        {
+            if (pendingEvents.Count == 0)
+            {
+                return;
+            }
+
+            pendingEvents.Sort(ComparePending);
+            int emitBudget = Mathf.Max(1, maxRoutineEmitsPerFrame);
+            int emitted = 0;
+            while (pendingEvents.Count > 0 && emitted < emitBudget)
+            {
+                var pending = pendingEvents[0];
+                if (pending.dueTime > now)
+                {
+                    break;
+                }
+
+                pendingEvents.RemoveAt(0);
+                EmitRoutineEvent(pending.lane);
+                emitted++;
+            }
+        }
+
+        private static int ComparePending(ScheduledRoutineEvent left, ScheduledRoutineEvent right)
+        {
+            int dueComparison = left.dueTime.CompareTo(right.dueTime);
+            if (dueComparison != 0)
+            {
+                return dueComparison;
+            }
+
+            return left.order.CompareTo(right.order);
+        }
+
+        private void EmitRoutineEvent(RoutineLane lane)
+        {
+            switch (lane)
+            {
+                case RoutineLane.Studio:
+                    EmitStudioEvent();
+                    break;
+                case RoutineLane.Store:
+                    EmitStoreEvent();
+                    break;
+                case RoutineLane.Park:
+                    EmitParkEvent();
+                    break;
+                case RoutineLane.Station:
+                    EmitStationEvent();
+                    break;
+                case RoutineLane.Cafe:
+                    EmitCafeEvent();
+                    break;
+                case RoutineLane.Delivery:
+                    EmitDeliveryEvent();
+                    break;
+                case RoutineLane.Facility:
+                    EmitFacilityEvent();
+                    break;
+                case RoutineLane.Media:
+                    EmitMediaEvent();
+                    break;
+            }
+        }
+
+        private void RebuildPacer()
+        {
+            if (!enableDeterministicPacing)
+            {
+                eventPacer = null;
+                return;
+            }
+
+            eventPacer = new DeterministicEventPacer(
+                pacingWindowSeconds,
+                maxPerLaneEventsPerWindow,
+                maxGlobalEventsPerWindow,
+                pacingJitterSeconds,
+                pacingSeed);
         }
     }
 }

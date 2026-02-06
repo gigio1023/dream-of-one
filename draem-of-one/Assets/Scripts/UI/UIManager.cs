@@ -7,7 +7,6 @@ using DreamOfOne.NPC;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using CoreEventType = DreamOfOne.Core.EventType;
 
 namespace DreamOfOne.UI
 {
@@ -120,8 +119,8 @@ namespace DreamOfOne.UI
         private ArtifactSystem artifactSystem = null;
         private PoliceController policeController = null;
         private WorldEventLog eventLog = null;
+        private ObjectiveCompassUI objectiveCompass = null;
         private float lastOrgSuspicionRefresh = -999f;
-        private readonly HashSet<string> visitedPlaces = new();
         private int selectedArtifactIndex = -1;
         private string selectedArtifactId = string.Empty;
 
@@ -194,6 +193,7 @@ namespace DreamOfOne.UI
             artifactSystem = FindFirstObjectByType<ArtifactSystem>();
             policeController = FindFirstObjectByType<PoliceController>();
             eventLog = FindFirstObjectByType<WorldEventLog>();
+            objectiveCompass = FindFirstObjectByType<ObjectiveCompassUI>();
 
             if (exposureSystem != null)
             {
@@ -248,6 +248,11 @@ namespace DreamOfOne.UI
                 eventLog = FindFirstObjectByType<WorldEventLog>();
             }
 
+            if (objectiveCompass == null)
+            {
+                objectiveCompass = FindFirstObjectByType<ObjectiveCompassUI>();
+            }
+
             if (exposureSystem != null)
             {
                 UpdateExposure(exposureSystem.Exposure);
@@ -271,10 +276,6 @@ namespace DreamOfOne.UI
                 exposureSystem.OnExposureChanged += UpdateExposure;
             }
 
-            if (eventLog != null)
-            {
-                eventLog.OnEventRecorded += HandleEvent;
-            }
         }
 
         private void OnDisable()
@@ -284,10 +285,6 @@ namespace DreamOfOne.UI
                 exposureSystem.OnExposureChanged -= UpdateExposure;
             }
 
-            if (eventLog != null)
-            {
-                eventLog.OnEventRecorded -= HandleEvent;
-            }
         }
 
         private void EnsureSessionEndUi()
@@ -593,11 +590,6 @@ namespace DreamOfOne.UI
                 exposureSystem.OnExposureChanged -= UpdateExposure;
             }
 
-            if (eventLog != null)
-            {
-                eventLog.OnEventRecorded -= HandleEvent;
-            }
-
             if (coverStatus != null)
             {
                 coverStatus.OnCoverStatusChanged -= HandleCoverStatus;
@@ -726,34 +718,6 @@ namespace DreamOfOne.UI
             return "Other";
         }
 
-        private void HandleEvent(EventRecord record)
-        {
-            if (record == null)
-            {
-                return;
-            }
-
-            if (record.eventType == CoreEventType.EnteredZone &&
-                string.Equals(record.actorId, "Player", System.StringComparison.OrdinalIgnoreCase))
-            {
-                RegisterVisitedPlace(record.zoneId);
-            }
-        }
-
-        private void RegisterVisitedPlace(string zoneId)
-        {
-            string place = ResolvePlace(zoneId);
-            if (string.IsNullOrEmpty(place))
-            {
-                return;
-            }
-
-            if (visitedPlaces.Add(place))
-            {
-                UpdateChecklistText();
-            }
-        }
-
         private void UpdateChecklistText()
         {
             if (checklistText == null)
@@ -761,15 +725,19 @@ namespace DreamOfOne.UI
                 return;
             }
 
-            string[] required = { "Store", "Studio", "Park", "Station" };
+            if (objectiveCompass == null)
+            {
+                objectiveCompass = FindFirstObjectByType<ObjectiveCompassUI>();
+            }
+
             var builder = new StringBuilder();
             builder.Append("Checklist: ");
-            for (int i = 0; i < required.Length; i++)
+            for (int i = 0; i < LandmarkChecklistRules.RequiredPlaces.Length; i++)
             {
-                string item = required[i];
-                bool done = visitedPlaces.Contains(item);
+                string item = LandmarkChecklistRules.RequiredPlaces[i];
+                bool done = objectiveCompass != null && objectiveCompass.IsLandmarkCompleted(item);
                 builder.Append(done ? $"[{item}✓]" : $"[{item}–]");
-                if (i < required.Length - 1)
+                if (i < LandmarkChecklistRules.RequiredPlaces.Length - 1)
                 {
                     builder.Append(' ');
                 }
@@ -781,37 +749,6 @@ namespace DreamOfOne.UI
                 lastChecklistText = output;
                 checklistText.SetText(output);
             }
-        }
-
-        private static string ResolvePlace(string zoneId)
-        {
-            if (string.IsNullOrEmpty(zoneId))
-            {
-                return string.Empty;
-            }
-
-            if (zoneId.IndexOf("Store", System.StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Store";
-            }
-
-            if (zoneId.IndexOf("Studio", System.StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Studio";
-            }
-
-            if (zoneId.IndexOf("Park", System.StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Park";
-            }
-
-            if (zoneId.IndexOf("Police", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
-                zoneId.IndexOf("Station", System.StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Station";
-            }
-
-            return string.Empty;
         }
 
         public void ShowCaseBundle(CaseBundle bundle)
@@ -1285,7 +1222,6 @@ namespace DreamOfOne.UI
 
             UpdateGlobalSuspicion(0f);
             UpdateExposure(0);
-            visitedPlaces.Clear();
             UpdateChecklistText();
 
             if (eventLogText != null)

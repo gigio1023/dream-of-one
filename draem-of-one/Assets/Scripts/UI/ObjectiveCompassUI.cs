@@ -61,7 +61,9 @@ namespace DreamOfOne.UI
         private KeyCode toggleMarkersKey = KeyCode.M;
 
         private readonly Dictionary<string, Transform> anchors = new();
+        private readonly List<string> objectiveOrder = new();
         private readonly HashSet<string> visited = new();
+        private readonly HashSet<string> proximityNotified = new();
         private readonly Dictionary<string, Renderer> markers = new();
         private TMP_Text outputText = null;
         private Transform player = null;
@@ -96,6 +98,27 @@ namespace DreamOfOne.UI
             EnsureMarkers();
         }
 
+        private void OnEnable()
+        {
+            if (eventLog == null)
+            {
+                eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+
+            if (eventLog != null)
+            {
+                eventLog.OnEventRecorded += HandleEvent;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (eventLog != null)
+            {
+                eventLog.OnEventRecorded -= HandleEvent;
+            }
+        }
+
         private void Update()
         {
             if (allowMarkerToggle && WasToggleMarkersPressed())
@@ -123,6 +146,7 @@ namespace DreamOfOne.UI
         private void ResolveAnchors()
         {
             anchors.Clear();
+            objectiveOrder.Clear();
             var anchorRoot = GameObject.Find("CITY_Anchors");
             if (anchorRoot == null)
             {
@@ -137,10 +161,17 @@ namespace DreamOfOne.UI
                     continue;
                 }
 
-                var anchor = GameObject.Find($"CITY_Anchors/{name}");
-                if (anchor != null && !anchors.ContainsKey(name))
+                string place = LandmarkChecklistRules.ResolvePlaceFromAnchor(name);
+                if (string.IsNullOrEmpty(place))
                 {
-                    anchors.Add(name, anchor.transform);
+                    continue;
+                }
+
+                var anchor = GameObject.Find($"CITY_Anchors/{name}");
+                if (anchor != null && !anchors.ContainsKey(place))
+                {
+                    anchors.Add(place, anchor.transform);
+                    objectiveOrder.Add(place);
                 }
             }
         }
@@ -240,17 +271,61 @@ namespace DreamOfOne.UI
                 float dist = Vector3.Distance(player.position, entry.Value.position);
                 if (dist <= visitRadius)
                 {
-                    visited.Add(entry.Key);
-                    uiManager?.ShowToast(LocalizationManager.Text(LocalizationKey.LandmarkVisitedToast, entry.Key), 2f);
-                    RecordVisit(entry.Key, entry.Value.position);
+                    if (proximityNotified.Add(entry.Key))
+                    {
+                        uiManager?.ShowToast(LocalizationManager.Text(LocalizationKey.LandmarkVisitedToast, entry.Key), 2f);
+                    }
                 }
             }
+        }
 
-            if (!completed && visited.Count >= anchors.Count)
+        private void HandleEvent(EventRecord record)
+        {
+            if (record == null)
+            {
+                return;
+            }
+
+            if (TryCompleteCurrentTargetFromEvent(record))
+            {
+                UpdateMarkers();
+                UpdateOutput();
+            }
+        }
+
+        private bool TryCompleteCurrentTargetFromEvent(EventRecord record)
+        {
+            if (!LandmarkChecklistRules.TryGetCompletionPlace(record, out string place))
+            {
+                return false;
+            }
+
+            string currentTarget = GetCurrentTarget();
+            if (string.IsNullOrEmpty(currentTarget))
+            {
+                return false;
+            }
+
+            if (!string.Equals(place, currentTarget, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (!visited.Add(currentTarget))
+            {
+                return false;
+            }
+
+            proximityNotified.Add(currentTarget);
+            uiManager?.ShowToast(LocalizationManager.Text(LocalizationKey.LandmarkVisitedToast, currentTarget), 2f);
+
+            if (!completed && visited.Count >= objectiveOrder.Count)
             {
                 completed = true;
                 uiManager?.ShowToast(LocalizationManager.Text(LocalizationKey.AllLandmarksVisitedToast), 4f);
             }
+
+            return true;
         }
 
         private void UpdateMarkers()
@@ -318,11 +393,12 @@ namespace DreamOfOne.UI
 
         private string GetCurrentTarget()
         {
-            foreach (var entry in anchors)
+            for (int i = 0; i < objectiveOrder.Count; i++)
             {
-                if (!visited.Contains(entry.Key))
+                string place = objectiveOrder[i];
+                if (!visited.Contains(place))
                 {
-                    return entry.Key;
+                    return place;
                 }
             }
 
@@ -333,9 +409,10 @@ namespace DreamOfOne.UI
         {
             var builder = new System.Text.StringBuilder();
             int count = 0;
-            foreach (var entry in anchors)
+            for (int i = 0; i < objectiveOrder.Count; i++)
             {
-                if (visited.Contains(entry.Key))
+                string place = objectiveOrder[i];
+                if (visited.Contains(place))
                 {
                     continue;
                 }
@@ -345,7 +422,7 @@ namespace DreamOfOne.UI
                     builder.Append(", ");
                 }
 
-                builder.Append(entry.Key);
+                builder.Append(place);
                 count++;
                 if (count >= 3)
                 {
@@ -371,7 +448,8 @@ namespace DreamOfOne.UI
             for (int i = 0; i < objectiveReasons.Length; i++)
             {
                 var entry = objectiveReasons[i];
-                if (string.Equals(entry.anchorName, target, StringComparison.OrdinalIgnoreCase))
+                string place = LandmarkChecklistRules.ResolvePlaceFromAnchor(entry.anchorName);
+                if (string.Equals(place, target, StringComparison.OrdinalIgnoreCase))
                 {
                     return LocalizationManager.Text(entry.reasonKey);
                 }
@@ -475,28 +553,6 @@ namespace DreamOfOne.UI
 #endif
         }
 
-        private void RecordVisit(string anchorName, Vector3 position)
-        {
-            if (eventLog == null)
-            {
-                return;
-            }
-
-            var record = new EventRecord
-            {
-                actorId = "Player",
-                actorRole = "Player",
-                eventType = DreamOfOne.Core.EventType.TaskCompleted,
-                placeId = anchorName,
-                zoneId = anchorName,
-                topic = "LandmarkVisit",
-                note = $"Visited {anchorName}",
-                position = position
-            };
-
-            eventLog.RecordEvent(record);
-        }
-
         private static string ToCardinal(Vector3 delta)
         {
             if (delta.sqrMagnitude <= 0.001f)
@@ -515,6 +571,21 @@ namespace DreamOfOne.UI
             return labels[index];
         }
 
+        public bool IsLandmarkCompleted(string place)
+        {
+            if (string.IsNullOrEmpty(place))
+            {
+                return false;
+            }
+
+            return visited.Contains(place);
+        }
+
+        public bool ProcessCompletionEventForTesting(EventRecord record)
+        {
+            return TryCompleteCurrentTargetFromEvent(record);
+        }
+
         public void ResetObjective()
         {
             foreach (var entry in markers.Values)
@@ -527,6 +598,7 @@ namespace DreamOfOne.UI
 
             markers.Clear();
             visited.Clear();
+            proximityNotified.Clear();
             completed = false;
             nextUpdate = 0f;
             ResolveAnchors();

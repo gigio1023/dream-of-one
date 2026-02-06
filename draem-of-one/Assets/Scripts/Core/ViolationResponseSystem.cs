@@ -26,6 +26,10 @@ namespace DreamOfOne.Core
         private float defaultSuspicionDelta = 20f;
 
         [SerializeField]
+        [Tooltip("규칙 위반 반응 전역 배율(기본값)")]
+        private float baseDeltaMultiplier = 1f;
+
+        [SerializeField]
         [Tooltip("거리 감쇠 적용 여부")]
         private bool useDistanceFalloff = false;
 
@@ -61,6 +65,7 @@ namespace DreamOfOne.Core
         private readonly Dictionary<string, Transform> zoneLookup = new();
         private readonly Dictionary<string, SuspicionComponent> witnessLookup = new(StringComparer.OrdinalIgnoreCase);
         private readonly List<SuspicionComponent> witnessBuffer = new();
+        private float runtimeDeltaMultiplier = 1f;
 
         private void Awake()
         {
@@ -107,7 +112,7 @@ namespace DreamOfOne.Core
 
         public void HandleViolation(EventRecord record)
         {
-            float delta = GetDelta(record.ruleId);
+            float delta = GetDelta(record.ruleId) * Mathf.Max(0f, baseDeltaMultiplier) * Mathf.Max(0f, runtimeDeltaMultiplier);
             if (delta <= 0f)
             {
                 return;
@@ -213,6 +218,13 @@ namespace DreamOfOne.Core
 
             ruleDeltaLookup[ruleId] = delta;
         }
+
+        public void SetRuntimeDeltaMultiplier(float multiplier)
+        {
+            runtimeDeltaMultiplier = Mathf.Max(0f, multiplier);
+        }
+
+        public float CurrentDeltaMultiplier => Mathf.Max(0f, baseDeltaMultiplier) * Mathf.Max(0f, runtimeDeltaMultiplier);
 
         public void Configure(WorldEventLog log)
         {

@@ -26,10 +26,9 @@ namespace DreamOfOne.Core
 
         private enum SessionEnding
         {
-            Cleared,
-            Guilty,
-            Unresolved,
-            Escalation
+            CleanPass,
+            NarrowEscape,
+            Exposed
         }
 
         private struct SessionMetrics
@@ -309,7 +308,7 @@ namespace DreamOfOne.Core
             var summary = BuildSummaryLine(metrics);
 
             var builder = new StringBuilder();
-            builder.AppendLine($"SESSION END — {ending}");
+            builder.AppendLine($"SESSION END — {FormatEnding(ending)}");
             builder.AppendLine($"Reason: {reason}");
             builder.AppendLine($"Score: {score} ({grade})");
             builder.AppendLine($"Why: {string.Join(", ", why)}");
@@ -322,32 +321,18 @@ namespace DreamOfOne.Core
 
         private SessionEnding ResolveEnding(SessionEndTrigger trigger, SessionMetrics metrics)
         {
-            if (trigger == SessionEndTrigger.Suspicion || metrics.globalSuspicion >= suspicionEndThreshold)
+            if (trigger == SessionEndTrigger.Exposure || trigger == SessionEndTrigger.Verdict)
             {
-                return SessionEnding.Escalation;
+                return SessionEnding.Exposed;
             }
 
-            if (trigger == SessionEndTrigger.Exposure)
+            if (metrics.verdicts > 0 || metrics.reports > 0 || metrics.violations > 0
+                || metrics.globalSuspicion >= suspicionEndThreshold)
             {
-                return SessionEnding.Guilty;
+                return SessionEnding.NarrowEscape;
             }
 
-            if (metrics.verdicts > 0)
-            {
-                if (metrics.evidence >= 2 && metrics.violations <= 1)
-                {
-                    return SessionEnding.Cleared;
-                }
-
-                return SessionEnding.Guilty;
-            }
-
-            if (metrics.evidence >= 3 && metrics.reports >= 2)
-            {
-                return SessionEnding.Cleared;
-            }
-
-            return SessionEnding.Unresolved;
+            return SessionEnding.CleanPass;
         }
 
         private int ComputeScore(SessionEndTrigger trigger, SessionMetrics metrics)
@@ -397,6 +382,16 @@ namespace DreamOfOne.Core
             }
 
             return "D";
+        }
+
+        private static string FormatEnding(SessionEnding ending)
+        {
+            return ending switch
+            {
+                SessionEnding.CleanPass => "Clean Pass",
+                SessionEnding.NarrowEscape => "Narrow Escape",
+                _ => "Exposed"
+            };
         }
 
         private List<string> BuildWhyReasons(SessionEndTrigger trigger, SessionMetrics metrics)
@@ -470,21 +465,17 @@ namespace DreamOfOne.Core
 
             switch (ending)
             {
-                case SessionEnding.Cleared:
+                case SessionEnding.CleanPass:
                     replay.Add("Push for a riskier ending");
                     replay.Add("Chase different incidents");
                     break;
-                case SessionEnding.Guilty:
-                    replay.Add("Gather more evidence before verdict");
-                    replay.Add("Reduce violations to clear suspicion");
+                case SessionEnding.NarrowEscape:
+                    replay.Add("Reduce violations to stay cleaner");
+                    replay.Add("Lower suspicion before reports stack");
                     break;
-                case SessionEnding.Unresolved:
-                    replay.Add("Trigger more incidents to reach a verdict");
-                    replay.Add("File reports to increase clarity");
-                    break;
-                case SessionEnding.Escalation:
-                    replay.Add("Keep suspicion low");
-                    replay.Add("Resolve incidents earlier");
+                case SessionEnding.Exposed:
+                    replay.Add("Avoid taboo speech or reality checks");
+                    replay.Add("Defuse with procedural compliance");
                     break;
             }
 

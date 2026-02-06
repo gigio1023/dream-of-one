@@ -9,6 +9,7 @@ using DreamOfOne.LLM;
 using DreamOfOne.NPC;
 using DreamOfOne.UI;
 using NUnit.Framework;
+using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SceneManagement;
@@ -197,6 +198,154 @@ namespace DreamOfOne.PlayModeTests
             bool hasNonMovement = log.Events.Any(e => e != null && e.eventType != CoreEventType.EnteredZone && e.eventType != CoreEventType.ExitedZone);
             Assert.IsTrue(hasNonMovement, "No non-movement events recorded during short run");
             Assert.IsTrue(errors.Count == 0, $"Errors during short run: {string.Join("\\n", errors)}");
+        }
+
+        [UnityTest]
+        public IEnumerator McssAutomationRunnerCompletesCheckpoints()
+        {
+            yield return null;
+
+            var log = Object.FindFirstObjectByType<WorldEventLog>();
+            var reports = Object.FindFirstObjectByType<ReportManager>();
+            var artifacts = Object.FindFirstObjectByType<ArtifactSystem>();
+            var session = Object.FindFirstObjectByType<SessionDirector>();
+            var ui = Object.FindFirstObjectByType<UIManager>();
+
+            Assert.NotNull(log, "WorldEventLog missing");
+            Assert.NotNull(reports, "ReportManager missing");
+            Assert.NotNull(artifacts, "ArtifactSystem missing");
+            Assert.NotNull(session, "SessionDirector missing");
+            Assert.NotNull(ui, "UIManager missing");
+
+            log.ResetLog();
+            artifacts.ResetArtifacts();
+
+            RecordLandmark(log, "StoreQueue", ZoneType.Queue);
+            RecordLandmark(log, "StudioPhoto", ZoneType.Photo);
+            RecordLandmark(log, "ParkSeat", ZoneType.Seat);
+            RecordLandmark(log, "PoliceReport", ZoneType.Queue);
+
+            var storeViolation = new EventRecord
+            {
+                actorId = "Player",
+                actorRole = "Player",
+                eventType = CoreEventType.ViolationDetected,
+                ruleId = "DL_S1_QUEUE_SANCTITY",
+                placeId = "Store",
+                zoneId = "StoreQueue",
+                note = "mcss-auto",
+                severity = 2
+            };
+            log.RecordEvent(storeViolation);
+            log.RecordEvent(new EventRecord
+            {
+                actorId = "Store_Clerk_A",
+                actorRole = "Clerk",
+                eventType = CoreEventType.StatementGiven,
+                ruleId = storeViolation.ruleId,
+                placeId = "Store",
+                zoneId = "StoreQueue",
+                note = "statement",
+                severity = 2
+            });
+
+            var studioViolation = new EventRecord
+            {
+                actorId = "Player",
+                actorRole = "Player",
+                eventType = CoreEventType.ViolationDetected,
+                ruleId = "DL_ST1_APPROVAL_GATE",
+                placeId = "Studio",
+                zoneId = "StudioPhoto",
+                note = "mcss-auto",
+                severity = 2
+            };
+            log.RecordEvent(studioViolation);
+            log.RecordEvent(new EventRecord
+            {
+                actorId = "Studio_PM",
+                actorRole = "PM",
+                eventType = CoreEventType.StatementGiven,
+                ruleId = studioViolation.ruleId,
+                placeId = "Studio",
+                zoneId = "StudioPhoto",
+                note = "statement",
+                severity = 2
+            });
+
+            log.RecordEvent(new EventRecord
+            {
+                actorId = "Store_Clerk_A",
+                actorRole = "Clerk",
+                eventType = CoreEventType.TicketIssued,
+                ruleId = "DL_S1_QUEUE_SANCTITY",
+                placeId = "Store",
+                zoneId = "StoreQueue",
+                note = "ticket",
+                severity = 1
+            });
+            log.RecordEvent(new EventRecord
+            {
+                actorId = "Studio_QA",
+                actorRole = "QA",
+                eventType = CoreEventType.ApprovalGranted,
+                ruleId = "DL_ST1_APPROVAL_GATE",
+                placeId = "Studio",
+                zoneId = "StudioPhoto",
+                note = "approval",
+                severity = 1
+            });
+
+            for (int i = 0; i < 6; i++)
+            {
+                log.RecordEvent(new EventRecord
+                {
+                    actorId = $"NPC_{i}",
+                    actorRole = "Citizen",
+                    eventType = CoreEventType.NpcUtterance,
+                    placeId = "Store",
+                    zoneId = "StoreQueue",
+                    note = "reaction",
+                    severity = 1
+                });
+            }
+
+            reports.FileReport("Store_Clerk_A", storeViolation.ruleId, 30f, storeViolation.id);
+            reports.FileReport("Studio_PM", studioViolation.ruleId, 35f, studioViolation.id);
+
+            log.RecordEvent(new EventRecord
+            {
+                actorId = "Station",
+                actorRole = "Officer",
+                eventType = CoreEventType.VerdictGiven,
+                ruleId = "INQUEST",
+                placeId = "Station",
+                zoneId = "PoliceReport",
+                note = "Lucid identified",
+                severity = 3
+            });
+
+            yield return null;
+
+            var events = log.Events.Where(e => e != null).ToList();
+            var requiredZones = new HashSet<string> { "StoreQueue", "StudioPhoto", "ParkSeat", "PoliceReport" };
+            int landmarkCount = events.Count(e => e.eventType == CoreEventType.EnteredZone && requiredZones.Contains(e.zoneId));
+            int reactions = events.Count(e => e.eventType == CoreEventType.NpcUtterance);
+            int reportsFiled = events.Count(e => e.eventType == CoreEventType.ReportFiled);
+            int violations = events.Count(e => e.eventType == CoreEventType.ViolationDetected);
+
+            Assert.GreaterOrEqual(events.Count, 12, $"Event count below target: {events.Count}\n{BuildEventDebug(events)}");
+            Assert.GreaterOrEqual(landmarkCount, 4, $"Landmark visits below target: {landmarkCount}");
+            Assert.GreaterOrEqual(reactions, 6, $"Social reactions below target: {reactions}");
+            Assert.GreaterOrEqual(violations, 2, $"Cover test violations below target: {violations}");
+            Assert.GreaterOrEqual(reportsFiled, 1, $"Reports below target: {reportsFiled}");
+            Assert.GreaterOrEqual(artifacts.GetArtifacts().Count, 3, "Artifacts below target");
+            Assert.IsTrue(session.IsEnded, "Session did not end after verdict");
+
+            var endText = GetPrivateField<TMP_Text>(ui, "sessionEndText");
+            Assert.NotNull(endText, "Session end text missing");
+            Assert.IsTrue(endText.gameObject.activeSelf, "Session end text not shown");
+            Assert.IsFalse(string.IsNullOrEmpty(endText.text), "Session end text empty");
         }
 
         [UnityTest]
@@ -698,6 +847,17 @@ namespace DreamOfOne.PlayModeTests
             }
 
             return builder.ToString();
+        }
+
+        private static T GetPrivateField<T>(object target, string fieldName) where T : class
+        {
+            var field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+            return field != null ? field.GetValue(target) as T : null;
+        }
+
+        private static void RecordLandmark(WorldEventLog log, string zoneId, ZoneType type)
+        {
+            log.RecordZoneEvent("Player", zoneId, type, true, Vector3.zero);
         }
     }
 }

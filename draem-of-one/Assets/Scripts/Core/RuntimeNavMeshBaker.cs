@@ -37,6 +37,13 @@ namespace DreamOfOne.Core
                 return;
             }
 
+            // When the scene already has baked NavMeshData on the surface,
+            // avoid runtime rebuild to prevent unreadable source-mesh spam.
+            if (HasAssignedNavMeshData(resolvedSurface))
+            {
+                return;
+            }
+
             if (HasNavMeshData())
             {
                 return;
@@ -52,6 +59,34 @@ namespace DreamOfOne.Core
         {
             var triangulation = NavMesh.CalculateTriangulation();
             return triangulation.vertices != null && triangulation.vertices.Length > 0;
+        }
+
+        private static bool HasAssignedNavMeshData(MonoBehaviour resolvedSurface)
+        {
+            if (resolvedSurface == null)
+            {
+                return false;
+            }
+
+            var surfaceType = resolvedSurface.GetType();
+            var navMeshDataProperty = surfaceType.GetProperty("navMeshData", BindingFlags.Instance | BindingFlags.Public);
+            if (navMeshDataProperty != null)
+            {
+                var navMeshData = navMeshDataProperty.GetValue(resolvedSurface);
+                if (navMeshData != null)
+                {
+                    return true;
+                }
+            }
+
+            // Fallback for package versions that expose only backing field.
+            var navMeshDataField = surfaceType.GetField("m_NavMeshData", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (navMeshDataField == null)
+            {
+                return false;
+            }
+
+            return navMeshDataField.GetValue(resolvedSurface) != null;
         }
 
         private static MonoBehaviour ResolveSurface()

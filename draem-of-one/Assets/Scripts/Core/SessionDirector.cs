@@ -83,6 +83,8 @@ namespace DreamOfOne.Core
 
         public bool IsEnded => ended;
         public string EndReason => endReason;
+        public float ElapsedSeconds => elapsedSeconds;
+        public float SessionDurationSeconds => sessionDurationSeconds;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void EnsureDirector()

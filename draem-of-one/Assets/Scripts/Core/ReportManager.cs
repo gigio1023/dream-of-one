@@ -88,6 +88,13 @@ namespace DreamOfOne.Core
         private readonly List<ReportEntry> recentReports = new();
         private readonly Dictionary<string, float> reporterEventLastTimestamp = new();
         private float lastInterrogationTime = -999f;
+        private int runtimeReportsRequiredOverride = -1;
+        private float runtimeGlobalSuspicionThresholdOverride = -1f;
+        private float runtimeSocialPressureThresholdOverride = -1f;
+
+        public int EffectiveReportsRequired => ResolveReportsRequired();
+        public float EffectiveGlobalSuspicionThreshold => ResolveGlobalSuspicionThreshold();
+        public float EffectiveSocialPressureThreshold => ResolveSocialPressureThreshold();
 
         private void Awake()
         {
@@ -190,13 +197,13 @@ namespace DreamOfOne.Core
                 return false;
             }
 
-            int takeCount = Mathf.Min(reportsRequired, recentReports.Count);
+            int takeCount = Mathf.Min(ResolveReportsRequired(), recentReports.Count);
             int startIndex = Mathf.Max(0, recentReports.Count - takeCount);
 
             envelope = new ReportEnvelope
             {
                 reportId = Guid.NewGuid().ToString("N"),
-                reason = globalSuspicion != null && globalSuspicion.GlobalSuspicion >= globalSuspicionThreshold
+                reason = globalSuspicion != null && globalSuspicion.GlobalSuspicion >= ResolveGlobalSuspicionThreshold()
                     ? ReportReason.HighGlobalG
                     : ReportReason.RepeatedRuleBreak
             };
@@ -238,10 +245,10 @@ namespace DreamOfOne.Core
 
             PruneExpiredReports(now);
 
-            int required = reportsRequired;
-            if (globalSuspicion != null && globalSuspicion.GlobalSuspicion >= socialPressureThreshold)
+            int required = ResolveReportsRequired();
+            if (globalSuspicion != null && globalSuspicion.GlobalSuspicion >= ResolveSocialPressureThreshold())
             {
-                required = Mathf.Max(1, reportsRequired - 1);
+                required = Mathf.Max(1, required - 1);
             }
 
             if (recentReports.Count < required)
@@ -249,7 +256,7 @@ namespace DreamOfOne.Core
                 return false;
             }
 
-            if (globalSuspicion != null && globalSuspicion.GlobalSuspicion < globalSuspicionThreshold)
+            if (globalSuspicion != null && globalSuspicion.GlobalSuspicion < ResolveGlobalSuspicionThreshold())
             {
                 return false;
             }
@@ -274,11 +281,41 @@ namespace DreamOfOne.Core
             globalSuspicion = suspicion;
         }
 
+        public void SetRuntimeThresholdOverrides(int? reportsRequiredOverride, float? globalSuspicionThresholdOverride, float? socialPressureThresholdOverride)
+        {
+            runtimeReportsRequiredOverride = reportsRequiredOverride.HasValue ? Mathf.Max(1, reportsRequiredOverride.Value) : -1;
+            runtimeGlobalSuspicionThresholdOverride = globalSuspicionThresholdOverride.HasValue
+                ? Mathf.Clamp01(globalSuspicionThresholdOverride.Value)
+                : -1f;
+            runtimeSocialPressureThresholdOverride = socialPressureThresholdOverride.HasValue
+                ? Mathf.Clamp01(socialPressureThresholdOverride.Value)
+                : -1f;
+        }
+
         public void ResetReports()
         {
             recentReports.Clear();
             reporterEventLastTimestamp.Clear();
             lastInterrogationTime = -999f;
+        }
+
+        private int ResolveReportsRequired()
+        {
+            return runtimeReportsRequiredOverride > 0 ? runtimeReportsRequiredOverride : reportsRequired;
+        }
+
+        private float ResolveGlobalSuspicionThreshold()
+        {
+            return runtimeGlobalSuspicionThresholdOverride >= 0f
+                ? runtimeGlobalSuspicionThresholdOverride
+                : globalSuspicionThreshold;
+        }
+
+        private float ResolveSocialPressureThreshold()
+        {
+            return runtimeSocialPressureThresholdOverride >= 0f
+                ? runtimeSocialPressureThresholdOverride
+                : socialPressureThreshold;
         }
 
         private static string BuildEventKey(string ruleId, string eventId, string placeId, string zoneId)

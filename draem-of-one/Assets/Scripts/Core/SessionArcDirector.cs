@@ -66,6 +66,11 @@ namespace DreamOfOne.Core
             }
         };
 
+        private string carryoverProfileId = "Standard";
+        private float carryoverSuspicionMultiplier = 1f;
+        private int carryoverReportsOffset = 0;
+        private float carryoverGlobalSuspicionOffset = 0f;
+        private float carryoverSocialPressureOffset = 0f;
         private int currentPhaseIndex = -1;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -144,6 +149,16 @@ namespace DreamOfOne.Core
             NormalizePhaseConfigs();
         }
 
+        public void ConfigureCarryoverProfile(SessionPressureProfile profile)
+        {
+            carryoverProfileId = string.IsNullOrEmpty(profile.profileId) ? "Standard" : profile.profileId;
+            carryoverSuspicionMultiplier = Mathf.Max(0f, profile.suspicionMultiplier);
+            carryoverReportsOffset = profile.reportsRequiredOffset;
+            carryoverGlobalSuspicionOffset = profile.globalSuspicionThresholdOffset;
+            carryoverSocialPressureOffset = profile.socialPressureThresholdOffset;
+            currentPhaseIndex = -1;
+        }
+
         private int ResolvePhaseIndex(float ratio)
         {
             int selected = 0;
@@ -160,11 +175,16 @@ namespace DreamOfOne.Core
 
         private void ApplyPhase(ArcPhaseConfig phase, float ratio)
         {
-            violationResponseSystem?.SetRuntimeDeltaMultiplier(phase.suspicionDeltaMultiplier);
+            float effectiveSuspicionMultiplier = phase.suspicionDeltaMultiplier * Mathf.Max(0f, carryoverSuspicionMultiplier);
+            int effectiveReportsRequired = Mathf.Max(1, phase.reportsRequired + carryoverReportsOffset);
+            float effectiveGlobalThreshold = Mathf.Clamp01(phase.globalSuspicionThreshold + carryoverGlobalSuspicionOffset);
+            float effectiveSocialThreshold = Mathf.Clamp01(phase.socialPressureThreshold + carryoverSocialPressureOffset);
+
+            violationResponseSystem?.SetRuntimeDeltaMultiplier(effectiveSuspicionMultiplier);
             reportManager?.SetRuntimeThresholdOverrides(
-                reportsRequiredOverride: phase.reportsRequired,
-                globalSuspicionThresholdOverride: phase.globalSuspicionThreshold,
-                socialPressureThresholdOverride: phase.socialPressureThreshold);
+                reportsRequiredOverride: effectiveReportsRequired,
+                globalSuspicionThresholdOverride: effectiveGlobalThreshold,
+                socialPressureThresholdOverride: effectiveSocialThreshold);
 
             if (eventLog != null)
             {
@@ -175,7 +195,7 @@ namespace DreamOfOne.Core
                     eventType = EventType.ExplanationGiven,
                     category = EventCategory.Verdict,
                     topic = "SessionArc",
-                    note = $"phase={phase.phaseId}; ratio={ratio:0.00}; mult={phase.suspicionDeltaMultiplier:0.00}; rr={phase.reportsRequired}; g={phase.globalSuspicionThreshold:0.00}; sp={phase.socialPressureThreshold:0.00}",
+                    note = $"phase={phase.phaseId}; profile={carryoverProfileId}; ratio={ratio:0.00}; mult={effectiveSuspicionMultiplier:0.00}; rr={effectiveReportsRequired}; g={effectiveGlobalThreshold:0.00}; sp={effectiveSocialThreshold:0.00}",
                     severity = 1,
                     placeId = "Session",
                     zoneId = "Session"

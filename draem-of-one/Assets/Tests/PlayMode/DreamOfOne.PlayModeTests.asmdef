@@ -2,7 +2,8 @@
   "name": "DreamOfOne.PlayModeTests",
   "rootNamespace": "DreamOfOne.PlayModeTests",
   "references": [
-    "DreamOfOne"
+    "DreamOfOne",
+    "Unity.TextMeshPro"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

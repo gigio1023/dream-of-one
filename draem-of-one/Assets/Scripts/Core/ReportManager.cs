@@ -63,6 +63,14 @@ namespace DreamOfOne.Core
         [Tooltip("심문에 첨부할 최대 이벤트 수")]
         private int maxAttachedEvents = 3;
 
+        [SerializeField]
+        [Tooltip("같은 이벤트 키에 대해 허용할 최대 신고 수")]
+        private int maxReportsPerEvent = 3;
+
+        [SerializeField]
+        [Tooltip("동일 reporter/event 조합 재신고 최소 간격(초)")]
+        private float reporterEventCooldownSeconds = 10f;
+
         private struct ReportEntry
         {
             public float timestamp;
@@ -72,11 +80,13 @@ namespace DreamOfOne.Core
             public string placeId;
             public string zoneId;
             public string topic;
+            public string eventKey;
             public Vector3 position;
         }
 
         /// <summary>최근 신고를 시간순으로 저장한다.</summary>
         private readonly List<ReportEntry> recentReports = new();
+        private readonly Dictionary<string, float> reporterEventLastTimestamp = new();
         private float lastInterrogationTime = -999f;
 
         private void Awake()
@@ -98,6 +108,9 @@ namespace DreamOfOne.Core
         public void FileReport(string reporterId, string ruleId, float suspicionSnapshot, string eventId = "", Vector3 position = default)
         {
             float now = Time.time;
+            PruneExpiredReports(now);
+            PruneReporterCooldown(now);
+
             string placeId = string.Empty;
             string zoneId = string.Empty;
             string topic = ruleId;
@@ -114,6 +127,19 @@ namespace DreamOfOne.Core
                 }
             }
 
+            string eventKey = BuildEventKey(ruleId, eventId, placeId, zoneId);
+            if (IsReporterEventCoolingDown(reporterId, eventKey, now))
+            {
+                return;
+            }
+
+            int existingEventReportCount = CountReportsForEvent(eventKey);
+            if (maxReportsPerEvent > 0 && existingEventReportCount >= maxReportsPerEvent)
+            {
+                return;
+            }
+
+            reporterEventLastTimestamp[BuildReporterEventKey(reporterId, eventKey)] = now;
             recentReports.Add(new ReportEntry
             {
                 timestamp = now,
@@ -123,13 +149,13 @@ namespace DreamOfOne.Core
                 placeId = placeId,
                 zoneId = zoneId,
                 topic = topic,
+                eventKey = eventKey,
                 position = eventPosition
             });
 
-            PruneExpiredReports(now);
-
             if (eventLog != null)
             {
+                int eventSequence = existingEventReportCount + 1;
                 eventLog.RecordEvent(new EventRecord
                 {
                     actorId = reporterId,
@@ -137,7 +163,7 @@ namespace DreamOfOne.Core
                     eventType = EventType.ReportFiled,
                     category = EventCategory.Report,
                     ruleId = ruleId,
-                    note = $"s={suspicionSnapshot:0}",
+                    note = $"s={suspicionSnapshot:0}; key={eventKey}; n={eventSequence}",
                     severity = 2,
                     position = eventPosition,
                     topic = topic,
@@ -251,7 +277,76 @@ namespace DreamOfOne.Core
         public void ResetReports()
         {
             recentReports.Clear();
+            reporterEventLastTimestamp.Clear();
             lastInterrogationTime = -999f;
+        }
+
+        private static string BuildEventKey(string ruleId, string eventId, string placeId, string zoneId)
+        {
+            if (!string.IsNullOrEmpty(eventId))
+            {
+                return eventId;
+            }
+
+            return $"{ruleId}|{placeId}|{zoneId}";
+        }
+
+        private static string BuildReporterEventKey(string reporterId, string eventKey)
+        {
+            return $"{reporterId}|{eventKey}";
+        }
+
+        private bool IsReporterEventCoolingDown(string reporterId, string eventKey, float now)
+        {
+            if (reporterEventCooldownSeconds <= 0f || string.IsNullOrEmpty(reporterId))
+            {
+                return false;
+            }
+
+            string key = BuildReporterEventKey(reporterId, eventKey);
+            if (!reporterEventLastTimestamp.TryGetValue(key, out float last))
+            {
+                return false;
+            }
+
+            return now - last < reporterEventCooldownSeconds;
+        }
+
+        private int CountReportsForEvent(string eventKey)
+        {
+            int count = 0;
+            for (int i = 0; i < recentReports.Count; i++)
+            {
+                if (string.Equals(recentReports[i].eventKey, eventKey, StringComparison.Ordinal))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private void PruneReporterCooldown(float now)
+        {
+            if (reporterEventLastTimestamp.Count == 0)
+            {
+                return;
+            }
+
+            float retention = Mathf.Max(reportWindowSeconds, reporterEventCooldownSeconds);
+            var staleKeys = new List<string>();
+            foreach (var pair in reporterEventLastTimestamp)
+            {
+                if (now - pair.Value > retention)
+                {
+                    staleKeys.Add(pair.Key);
+                }
+            }
+
+            for (int i = 0; i < staleKeys.Count; i++)
+            {
+                reporterEventLastTimestamp.Remove(staleKeys[i]);
+            }
         }
     }
 }

@@ -45,6 +45,7 @@ namespace DreamOfOne.NPC
         private float lastReportTimestamp = -999f;
         private bool reported = false;
         private string lastEventId = string.Empty;
+        private NpcPersona persona = null;
 
         public float CurrentSuspicion => suspicion;
         public float CurrentSuspicionNormalized => Mathf.Clamp01(suspicion / Mathf.Max(1f, maxSuspicion));
@@ -65,6 +66,11 @@ namespace DreamOfOne.NPC
             if (eventLog == null)
             {
                 eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
+
+            if (persona == null)
+            {
+                persona = GetComponent<NpcPersona>();
             }
         }
 
@@ -105,16 +111,18 @@ namespace DreamOfOne.NPC
 
             if (eventLog != null)
             {
+                string role = persona != null ? persona.Role : "Citizen";
+                string noteText = string.IsNullOrEmpty(eventId) ? $"{suspicion:0}" : $"{suspicion:0}; src={eventId}";
                 eventLog.RecordEvent(new EventRecord
                 {
                     actorId = NpcId,
-                    actorRole = "Citizen",
+                    actorRole = role,
                     eventType = CoreEventType.SuspicionUpdated,
                     category = EventCategory.Suspicion,
                     ruleId = ruleId,
                     topic = ruleId,
                     delta = delta,
-                    note = $"{suspicion:0}",
+                    note = noteText,
                     severity = suspicion >= reportThreshold ? 2 : 0,
                     position = transform.position
                 });

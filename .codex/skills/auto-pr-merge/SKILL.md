@@ -6,37 +6,57 @@ description: "Automatically drive PR flow: open PR, request Codex review, valida
 # Auto PR Merge
 
 ## Purpose
-Automate the PR lifecycle with GitHub MCP (no gh CLI): request Codex review, validate feedback, ensure checks pass, merge, and update Linear.
+Automate the PR lifecycle with GitHub MCP (no gh CLI): request Codex review, track bot feedback, validate and apply fixes, ensure checks pass, merge, and continue to the next issue.
 
 ## Workflow
-1) Open or locate PR
-- If no PR exists for the current branch, create one via GitHub MCP.
-- Record the PR URL in the Linear issue.
+1) Locate or open PR
+- If no PR exists for the current branch, create one via `mcp__github__create_pull_request`.
+- Immediately post `@codex review` using `mcp__github__add_issue_comment`.
+- Link PR URL to Linear issue (comment + state transition).
 
-2) Request automated review
-- Add a PR comment: `@codex review`.
-- If validate-ai-review is applicable, run it and apply fixes.
+2) Track review bots explicitly
+- Poll PR review comments via `mcp__github__pull_request_read` (`get_review_comments`) and issue comments via `get_comments`.
+- Track at least these bot sources:
+  - `chatgpt-codex-connector`
+  - `codex` / `codex[bot]`
+- For each unresolved actionable comment, run the `validate-ai-review` workflow:
+  - verify against code context
+  - classify `valid / partial / invalid`
+  - apply only valid (or approved partial) fixes
+  - rerun relevant tests/diagnostics
+  - push and comment with fix summary + commit link
 
-3) Run checks
-- Execute relevant tests/diagnostics for the change.
-- If no tests apply (docs-only), note in PR description.
+3) Enforce merge gates
+- Poll checks via `mcp__github__pull_request_read` (`get_status`).
+- Merge only when:
+  - PR is open
+  - no unresolved high/medium bot findings remain
+  - checks are green (`state=success`), or no required checks exist
+- If checks fail or new review appears, return to step 2.
 
-4) Wait for checks
-- Use GitHub MCP `pull_request_read` (get_status) to confirm checks are successful.
-- If checks are pending, poll until success or failure.
-- If checks fail, fix and re-run.
+4) Merge via MCP
+- Merge with `mcp__github__merge_pull_request`.
+- Prefer repo policy merge method (use `squash` if merge commits are disabled).
 
-5) Merge
-- Use `mcp__github__merge_pull_request` with `merge_method` set to the repo default (omit if unknown).
+5) Post-merge finalize
+- Update Linear issue to `Done` and add merged PR link + verification summary.
+- Sync local branch:
+  - switch to `main`
+  - pull latest
+- Continue with next ready Linear/Beads issue without waiting for user prompt.
 
-6) Post-merge
-- Update Linear issue to Done and leave the merge/commit link.
-- Move to the next Linear issue without asking.
+6) Failure loop
+- If merge is blocked by conflicts/outdated branch:
+  - update PR branch (`mcp__github__update_pull_request_branch`) or rebase locally
+  - rerun tests
+  - resume from step 2
+- Never force-merge on red checks.
 
 ## Guardrails
 - Do not use gh CLI.
-- Never merge if checks are failing.
+- Never merge if checks are failing or review feedback is unresolved.
 - Keep deterministic boundaries intact (no LLM truth transitions).
+- Use GitHub MCP for all PR lifecycle operations.
 
 ## Examples
-- “PR opened and Codex reviewed. Checks green → auto-merge → Linear Done.”
+- “PR opened → @codex review requested → bot feedback validated/fixed → checks green → auto-merge → Linear Done → next issue.”

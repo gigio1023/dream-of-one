@@ -23,7 +23,11 @@
 
 - **Default**: open PR → request Codex review → run checks → auto-merge via GitHub MCP → update Linear → continue.
 - **No gh CLI**: use GitHub MCP only.
-- **Merge condition**: checks must be green; never merge on failure.
+- **Decision ledger required**: track each bot comment with `decision/action/commit/status`.
+- **Merge condition**:
+  - if `status.total_count > 0`, require checks green (`state=success`)
+  - if `status.total_count == 0`, treat checks gate as pass (no required checks configured)
+  - unresolved actionable bot findings block merge
 
 ## Skills (mandatory)
 

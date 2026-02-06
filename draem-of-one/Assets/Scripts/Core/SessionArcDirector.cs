@@ -68,6 +68,18 @@ namespace DreamOfOne.Core
 
         private int currentPhaseIndex = -1;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void EnsureDirector()
+        {
+            if (FindFirstObjectByType<SessionArcDirector>() != null)
+            {
+                return;
+            }
+
+            var host = new GameObject("SessionArcDirector");
+            host.AddComponent<SessionArcDirector>();
+        }
+
         public string CurrentPhaseId
         {
             get
@@ -83,37 +95,28 @@ namespace DreamOfOne.Core
 
         private void Awake()
         {
-            if (sessionDirector == null)
-            {
-                sessionDirector = FindFirstObjectByType<SessionDirector>();
-            }
-
-            if (violationResponseSystem == null)
-            {
-                violationResponseSystem = FindFirstObjectByType<ViolationResponseSystem>();
-            }
-
-            if (reportManager == null)
-            {
-                reportManager = FindFirstObjectByType<ReportManager>();
-            }
-
-            if (eventLog == null)
-            {
-                eventLog = FindFirstObjectByType<WorldEventLog>();
-            }
-
+            TryResolveReferences();
             NormalizePhaseConfigs();
         }
 
         private void Update()
         {
+            if (!HasResolvedReferences())
+            {
+                TryResolveReferences();
+            }
+
             if (sessionDirector == null || sessionDirector.IsEnded)
             {
                 return;
             }
 
             TickArc(sessionDirector.ElapsedSeconds, sessionDirector.SessionDurationSeconds);
+        }
+
+        public void ResolveDependenciesForTesting()
+        {
+            TryResolveReferences();
         }
 
         public void TickArc(float elapsedSeconds, float sessionDurationSeconds)
@@ -204,6 +207,37 @@ namespace DreamOfOne.Core
             }
 
             Array.Sort(phaseConfigs, (left, right) => left.startRatio.CompareTo(right.startRatio));
+        }
+
+        private bool HasResolvedReferences()
+        {
+            return sessionDirector != null
+                && violationResponseSystem != null
+                && reportManager != null
+                && eventLog != null;
+        }
+
+        private void TryResolveReferences()
+        {
+            if (sessionDirector == null)
+            {
+                sessionDirector = FindFirstObjectByType<SessionDirector>();
+            }
+
+            if (violationResponseSystem == null)
+            {
+                violationResponseSystem = FindFirstObjectByType<ViolationResponseSystem>();
+            }
+
+            if (reportManager == null)
+            {
+                reportManager = FindFirstObjectByType<ReportManager>();
+            }
+
+            if (eventLog == null)
+            {
+                eventLog = FindFirstObjectByType<WorldEventLog>();
+            }
         }
     }
 }

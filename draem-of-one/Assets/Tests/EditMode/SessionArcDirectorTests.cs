@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Linq;
 using DreamOfOne.Core;
 using NUnit.Framework;
@@ -103,6 +104,47 @@ namespace DreamOfOne.Tests
 
             Object.DestroyImmediate(arcGo);
             Object.DestroyImmediate(welGo);
+        }
+
+        [Test]
+        public void ResolveDependenciesForTesting_BindsLateCreatedSystems()
+        {
+            var arcGo = new GameObject("SessionArcDirector");
+            var arc = arcGo.AddComponent<SessionArcDirector>();
+
+            TestHelpers.SetPrivateField<SessionDirector>(arc, "sessionDirector", null);
+            TestHelpers.SetPrivateField<ViolationResponseSystem>(arc, "violationResponseSystem", null);
+            TestHelpers.SetPrivateField<ReportManager>(arc, "reportManager", null);
+            TestHelpers.SetPrivateField<WorldEventLog>(arc, "eventLog", null);
+
+            var sessionGo = new GameObject("SessionDirector");
+            var session = sessionGo.AddComponent<SessionDirector>();
+            var violationGo = new GameObject("ViolationResponseSystem");
+            var violation = violationGo.AddComponent<ViolationResponseSystem>();
+            var reportGo = new GameObject("ReportManager");
+            var report = reportGo.AddComponent<ReportManager>();
+            var welGo = new GameObject("WEL");
+            var log = welGo.AddComponent<WorldEventLog>();
+
+            arc.ResolveDependenciesForTesting();
+
+            Assert.AreSame(session, GetField<SessionDirector>(arc, "sessionDirector"));
+            Assert.AreSame(violation, GetField<ViolationResponseSystem>(arc, "violationResponseSystem"));
+            Assert.AreSame(report, GetField<ReportManager>(arc, "reportManager"));
+            Assert.AreSame(log, GetField<WorldEventLog>(arc, "eventLog"));
+
+            Object.DestroyImmediate(arcGo);
+            Object.DestroyImmediate(welGo);
+            Object.DestroyImmediate(reportGo);
+            Object.DestroyImmediate(violationGo);
+            Object.DestroyImmediate(sessionGo);
+        }
+
+        private static T GetField<T>(object target, string fieldName) where T : class
+        {
+            var field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.IsNotNull(field, $"Field not found: {fieldName}");
+            return field.GetValue(target) as T;
         }
     }
 }

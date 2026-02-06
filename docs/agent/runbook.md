@@ -1,6 +1,6 @@
 # Codex Runbook (Linear SoT + Beads Execution + Codex Cloud)
 
-Revision date: 2026-01-24
+Revision date: 2026-02-06
 
 This document defines the operating runbook for **Codex CLI**.  
 The goal is to ensure: users provide only natural-language instructions; Codex CLI organizes and tracks Linear issues; implementations are done locally (with Beads when needed); and cloud-safe work is delegated to Codex Cloud via Linear.
@@ -133,7 +133,8 @@ bd create "Implement X" --type task --parent <epic-id> --labels "agent:codex"
 bd create "Write tests for X" --type task --parent <epic-id> --labels "agent:codex"
 
 # dependency (A depends on B)
-bd dep add <impl-task-id> --blocked-by <setup-task-id>
+# meaning: <blocked> depends on <blocker>
+bd dep add <impl-task-id> <setup-task-id>
 ```
 
 > Check exact flags via `bd <cmd> --help`.
@@ -151,6 +152,28 @@ Especially for Unity MCP work, WIP=1 yields the lowest operational cost.
 3. Implement → run local tests/checks.
 4. Create/update PR → comment in Linear with PR link + move to `In Review`.
 5. Merge + verify → set Linear to `Done`.
+
+### 7.1.1 Autonomous PR loop (GitHub MCP only)
+
+Use this loop when running without human gating:
+
+1. Create PR (if needed), then comment `@codex review`.
+2. Build and maintain a review ledger for bot comments:
+   - `comment_id`, `source`, `author`, `severity`, `decision`, `action`, `commit`, `status`, `reason`
+3. Validate each bot finding as `valid|partial|invalid` before changing code.
+4. Enforce merge gates:
+   - PR is open and mergeable
+   - no unresolved actionable bot findings
+   - checks gate:
+     - `status.total_count > 0` -> require `status.state=success`
+     - `status.total_count == 0` -> pass (no required checks configured)
+5. Merge via GitHub MCP and post merged SHA to Linear.
+6. Sync local branch to latest `main` and continue next issue.
+
+Hard rules:
+- Do not use `gh` CLI for PR lifecycle.
+- Never merge on red/pending checks when checks exist.
+- Never merge while actionable medium-or-higher feedback remains unresolved.
 
 ### 7.2 Unity MCP mutex (single Unity Editor session)
 

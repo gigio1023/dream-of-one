@@ -11,16 +11,18 @@ using CoreEventType = DreamOfOne.Core.EventType;
 namespace DreamOfOne.Society
 {
     /// <summary>
-    /// Minimal policy-driven LLM "brain" loop:
-    /// observe -> plan(JSON) -> validate -> execute(skill) -> emit WEL.
+    /// Policy-driven LLM brain loop:
+    /// observe(payload) -> decide(JSON) -> validate -> execute -> emit WEL.
     /// </summary>
     public sealed class SocietyBrain : MonoBehaviour
     {
-        private static readonly string[] DefaultAllowedSkills =
+        private static readonly string[] DefaultAllowedActionTypes =
         {
-            "Speak",
-            "MoveToAnchor",
-            "FileReport"
+            "Talk",
+            "Move",
+            "Report",
+            "Observe",
+            "Idle"
         };
 
         [SerializeField]
@@ -111,14 +113,23 @@ namespace DreamOfOne.Society
 
             nextDecisionTime = Time.time + decisionIntervalSeconds + Random.Range(-0.5f, 0.8f);
 
-            var observations = CollectObservations();
-            if (observations.Count > 0)
+            string[] allowedActions = ResolveAllowedActionTypes();
+            List<EventRecord> observationRecords = ExtractObservationRecords();
+            List<string> observationLines = BuildObservationLines(observationRecords);
+            if (observationLines.Count > 0)
             {
-                for (int i = 0; i < observations.Count; i++)
+                for (int i = 0; i < observationLines.Count; i++)
                 {
-                    memory.Add($"OBS: {observations[i]}");
+                    memory.Add($"OBS: {observationLines[i]}");
                 }
             }
+
+            SocietyObservationPayload observationPayload = SocietyRuntimeContract.BuildObservationPayload(
+                persona,
+                transform,
+                observationRecords,
+                CopyMemoryEntries(),
+                allowedActions);
 
             if (!enableLlmPlanning)
             {
@@ -126,28 +137,39 @@ namespace DreamOfOne.Society
                 return;
             }
 
-            var allowed = ResolveAllowedSkills();
-            var request = BuildPlanRequest(allowed, observations);
+            var request = BuildPlanRequest(allowedActions, observationPayload);
 
             llmClient.RequestText(request, raw =>
             {
-                if (!SocietyJson.TryParsePlan(raw, out var plan, out string error))
+                if (!SocietyJson.TryParseDecision(raw, out var decision, out string error))
                 {
                     if (verbose)
                     {
-                        Debug.LogWarning($"[SocietyBrain:{persona.NpcId}] plan parse failed: {error}");
+                        Debug.LogWarning($"[SocietyBrain:{persona.NpcId}] decision parse failed: {error}");
                     }
                     DeterministicFallback();
                     return;
                 }
 
-                ExecutePlan(plan, allowed);
+                if (!SocietyDecisionValidator.TryValidate(decision, allowedActions, out string rejectReason))
+                {
+                    if (verbose)
+                    {
+                        Debug.LogWarning($"[SocietyBrain:{persona.NpcId}] decision rejected: {rejectReason}");
+                    }
+
+                    memory.Add($"REJECT: {rejectReason}");
+                    DeterministicFallback();
+                    return;
+                }
+
+                ExecuteDecision(decision, allowedActions);
             });
         }
 
-        private List<string> CollectObservations()
+        private List<EventRecord> ExtractObservationRecords()
         {
-            var results = new List<string>();
+            var results = new List<EventRecord>();
 
             int count = Mathf.Clamp(observeRecentEvents, 0, 32);
             if (count == 0 || eventLog == null)
@@ -180,32 +202,74 @@ namespace DreamOfOne.Society
                     seenEventIds.Add(record.id);
                 }
 
+                results.Add(record);
+            }
+
+            return results;
+        }
+
+        private List<string> BuildObservationLines(List<EventRecord> records)
+        {
+            var lines = new List<string>();
+            if (records == null || records.Count == 0)
+            {
+                return lines;
+            }
+
+            for (int i = 0; i < records.Count; i++)
+            {
+                EventRecord record = records[i];
                 string text = semanticShaper != null ? semanticShaper.ToText(record) : record.eventType.ToString();
                 if (record.eventType == CoreEventType.NpcUtterance && !string.IsNullOrEmpty(record.note))
                 {
                     text = $"{record.actorId}: {record.note}";
                 }
 
-                results.Add(text);
+                lines.Add(text);
             }
 
-            return results;
+            return lines;
         }
 
-        private string[] ResolveAllowedSkills()
+        private string[] ResolveAllowedActionTypes()
         {
             if (persona == null)
             {
-                return DefaultAllowedSkills;
+                return DefaultAllowedActionTypes;
             }
 
             var roleDef = ResolveRoleDefinition(persona.RoleId);
             if (roleDef != null && roleDef.AllowedSkillIds != null && roleDef.AllowedSkillIds.Length > 0)
             {
-                return roleDef.AllowedSkillIds;
+                var mapped = new List<string>(roleDef.AllowedSkillIds.Length + 2);
+                for (int i = 0; i < roleDef.AllowedSkillIds.Length; i++)
+                {
+                    string normalized = SocietyRuntimeContract.NormalizeActionType(roleDef.AllowedSkillIds[i]);
+                    if (!SocietyRuntimeContract.IsKnownActionType(normalized))
+                    {
+                        continue;
+                    }
+
+                    if (!mapped.Contains(normalized))
+                    {
+                        mapped.Add(normalized);
+                    }
+                }
+
+                if (!mapped.Contains("Observe"))
+                {
+                    mapped.Add("Observe");
+                }
+
+                if (!mapped.Contains("Idle"))
+                {
+                    mapped.Add("Idle");
+                }
+
+                return mapped.ToArray();
             }
 
-            return DefaultAllowedSkills;
+            return DefaultAllowedActionTypes;
         }
 
         private RoleDefinition ResolveRoleDefinition(RoleId roleId)
@@ -232,7 +296,7 @@ namespace DreamOfOne.Society
             return null;
         }
 
-        private LLMClient.TextRequest BuildPlanRequest(string[] allowedSkills, List<string> observations)
+        private LLMClient.TextRequest BuildPlanRequest(string[] allowedActions, SocietyObservationPayload observationPayload)
         {
             var system = new StringBuilder();
             system.AppendLine("You are an untrusted planner for an NPC in a social simulation game.");
@@ -240,29 +304,15 @@ namespace DreamOfOne.Society
             system.AppendLine("Your job is to propose 0-2 safe actions that the engine will validate and execute deterministically.");
             system.AppendLine("Do NOT invent evidence. Do NOT change the world directly.");
             system.AppendLine("Schema:");
-            system.AppendLine("{\"intent\":\"...\",\"speak\":\"optional\",\"actions\":[{\"type\":\"SkillId\",\"targetId\":\"\",\"placeId\":\"\",\"zoneId\":\"\",\"ruleId\":\"\",\"text\":\"\",\"anchorName\":\"\"}],\"memoryWrite\":\"optional\"}");
+            system.AppendLine("{\"schemaVersion\":\"society.decision.v1\",\"intent\":\"...\",\"utterance\":\"optional\",\"actions\":[{\"actionType\":\"Move|Talk|Ask|Observe|Work|Report|Escort|Idle\",\"targetId\":\"\",\"locationId\":\"\",\"placeId\":\"\",\"zoneId\":\"\",\"ruleId\":\"\",\"text\":\"\",\"anchorName\":\"\",\"confidence\":0.0}],\"memoryWrite\":\"optional\"}");
 
             var user = new StringBuilder();
             user.AppendLine($"NPC: {persona.NpcId}");
             user.AppendLine($"Role: {persona.Role}");
-            user.AppendLine("Allowed skills: " + string.Join(", ", allowedSkills ?? DefaultAllowedSkills));
-            user.AppendLine("Recent observations:");
-            if (observations != null && observations.Count > 0)
-            {
-                for (int i = 0; i < observations.Count; i++)
-                {
-                    user.AppendLine($"- {observations[i]}");
-                }
-            }
-            else
-            {
-                user.AppendLine("- None");
-            }
-
-            user.AppendLine("Your memory:");
-            user.AppendLine(memory != null ? memory.BuildSummary(maxLines: 6) : "None.");
-
-            user.AppendLine("Prefer short Korean for speak text when you speak.");
+            user.AppendLine("Allowed actions: " + string.Join(", ", allowedActions ?? DefaultAllowedActionTypes));
+            user.AppendLine("Observation payload JSON:");
+            user.AppendLine(SocietyRuntimeContract.ToObservationJson(observationPayload));
+            user.AppendLine("Prefer short Korean utterance when the action includes dialogue.");
 
             return new LLMClient.TextRequest
             {
@@ -273,69 +323,76 @@ namespace DreamOfOne.Society
             };
         }
 
-        private void ExecutePlan(SocietyActionPlan plan, string[] allowedSkills)
+        private void ExecuteDecision(SocietyDecisionPayload decision, string[] allowedActions)
         {
-            if (plan == null)
+            if (decision == null)
             {
                 DeterministicFallback();
                 return;
             }
 
-            if (!string.IsNullOrEmpty(plan.memoryWrite))
+            if (!string.IsNullOrEmpty(decision.memoryWrite))
             {
-                memory.Add($"MEM: {plan.memoryWrite}");
+                memory.Add($"MEM: {decision.memoryWrite}");
             }
 
-            // Convenience: allow a top-level "speak" without needing a Speak action.
-            if (!string.IsNullOrEmpty(plan.speak))
+            // Convenience: allow a top-level utterance without needing explicit action.
+            if (!string.IsNullOrEmpty(decision.utterance))
             {
-                if (IsSkillAllowed("Speak", allowedSkills))
+                if (IsActionAllowed("Talk", allowedActions))
                 {
-                    ExecuteSpeak(plan.speak);
+                    ExecuteSpeak(decision.utterance);
                 }
                 return;
             }
 
-            if (plan.actions == null || plan.actions.Length == 0)
+            if (decision.actions == null || decision.actions.Length == 0)
             {
                 return;
             }
 
-            int max = Mathf.Min(plan.actions.Length, 2);
+            int max = Mathf.Min(decision.actions.Length, 2);
             for (int i = 0; i < max; i++)
             {
-                var action = plan.actions[i];
-                if (action == null || string.IsNullOrEmpty(action.type))
+                var action = decision.actions[i];
+                if (action == null)
                 {
                     continue;
                 }
 
-                if (!IsSkillAllowed(action.type, allowedSkills))
+                string actionType = SocietyRuntimeContract.NormalizeActionType(action.actionType);
+                if (!IsActionAllowed(actionType, allowedActions))
                 {
                     if (verbose)
                     {
-                        Debug.LogWarning($"[SocietyBrain:{persona.NpcId}] skill not allowed: {action.type}");
+                        Debug.LogWarning($"[SocietyBrain:{persona.NpcId}] action not allowed: {actionType}");
                     }
                     continue;
                 }
 
-                if (TryExecuteAction(action))
+                if (TryExecuteAction(actionType, action, decision.utterance))
                 {
                     return;
                 }
             }
         }
 
-        private bool TryExecuteAction(SocietyAction action)
+        private bool TryExecuteAction(string actionType, SocietyDecisionAction action, string defaultUtterance)
         {
-            switch (action.type)
+            switch (actionType)
             {
-                case "Speak":
-                    return ExecuteSpeak(action.text);
-                case "MoveToAnchor":
-                    return ExecuteMoveToAnchor(action.anchorName);
-                case "FileReport":
+                case "Talk":
+                case "Ask":
+                    return ExecuteSpeak(string.IsNullOrWhiteSpace(action.text) ? defaultUtterance : action.text);
+                case "Move":
+                case "Work":
+                case "Escort":
+                    return ExecuteMoveToAnchor(action.anchorName, action.locationId);
+                case "Report":
                     return ExecuteFileReport(action.ruleId, action.targetId);
+                case "Observe":
+                case "Idle":
+                    return true;
                 default:
                     return false;
             }
@@ -365,19 +422,20 @@ namespace DreamOfOne.Society
             return true;
         }
 
-        private bool ExecuteMoveToAnchor(string anchorName)
+        private bool ExecuteMoveToAnchor(string anchorName, string locationId)
         {
             if (agent == null || !agent.enabled || !agent.isOnNavMesh)
             {
                 return false;
             }
 
-            if (string.IsNullOrEmpty(anchorName))
+            string resolvedAnchor = !string.IsNullOrWhiteSpace(locationId) ? locationId : anchorName;
+            if (string.IsNullOrEmpty(resolvedAnchor))
             {
-                anchorName = "ParkArea";
+                resolvedAnchor = "ParkArea";
             }
 
-            var anchor = GameObject.Find($"CITY_Anchors/{anchorName}");
+            var anchor = GameObject.Find($"CITY_Anchors/{resolvedAnchor}");
             if (anchor == null)
             {
                 return false;
@@ -422,22 +480,39 @@ namespace DreamOfOne.Society
             ExecuteSpeak("음... 상황을 좀 더 봐야겠네요.");
         }
 
-        private static bool IsSkillAllowed(string skillId, string[] allowed)
+        private static bool IsActionAllowed(string actionType, string[] allowed)
         {
-            if (allowed == null || allowed.Length == 0 || string.IsNullOrEmpty(skillId))
+            if (allowed == null || allowed.Length == 0 || string.IsNullOrEmpty(actionType))
             {
                 return false;
             }
 
             for (int i = 0; i < allowed.Length; i++)
             {
-                if (string.Equals(allowed[i], skillId, System.StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(allowed[i], actionType, System.StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
             }
 
             return false;
+        }
+
+        private string[] CopyMemoryEntries()
+        {
+            if (memory == null || memory.Entries == null || memory.Entries.Count == 0)
+            {
+                return System.Array.Empty<string>();
+            }
+
+            int count = memory.Entries.Count;
+            var copied = new string[count];
+            for (int i = 0; i < count; i++)
+            {
+                copied[i] = memory.Entries[i] ?? string.Empty;
+            }
+
+            return copied;
         }
     }
 }

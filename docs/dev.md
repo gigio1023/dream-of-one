@@ -66,7 +66,7 @@ Minimum Complete Simulation Slice (MCSS) target:
 - No hard locks; session ends cleanly
 - “LLM off” mode remains functional (deterministic fallback)
 
-The high-level definition and roadmap live in `project.md`.
+The high-level definition and roadmap live in `project.md` and `plan.md`.
 Actionable work items (issues/status/PR links) live in Linear.
 Beads (`bd`) is optional and used internally by Codex CLI for dependency tracking while implementing.
 
@@ -74,10 +74,10 @@ Beads (`bd`) is optional and used internally by Codex CLI for dependency trackin
 
 ## LLM Setup (Optional)
 
-The project supports running without an LLM (deterministic fallback). When enabled, the LLM is **styling-only**:
-- It can paraphrase or add tone to surface text.
-- It **cannot** decide truth transitions, evidence creation, or verdicts.
-- Deterministic systems always own event truth and scoring.
+The project supports running without an LLM (deterministic fallback). In v2, LLM is used for NPC action proposals under strict runtime validation:
+- LLM proposes constrained action JSON.
+- Unity validates and executes (or safely falls back).
+- End-state gates and failure handling remain runtime-authoritative.
 
 OpenAI:
 - Set `OPENAI_API_KEY` in your environment.
@@ -95,6 +95,21 @@ Local endpoint (utterance proxy):
 - Configure `LLMClient` Provider = `LocalEndpoint`
 - LocalEndpointMode = `UtteranceProxy`
 - Endpoint: `http://localhost:11434/utterance` (or your custom proxy)
+
+### Runtime Contract (Observe -> Decide -> Act)
+
+Unity now enforces a versioned NPC decision boundary in `Assets/Scripts/Society/`:
+- Observation payload DTOs: `SocietyRuntimeContract.cs`
+- Decision parser/normalizer: `SocietyJson.cs`
+- Decision validator: `SocietyDecisionValidator.cs`
+- Runtime execution bridge: `SocietyBrain.cs`
+
+Contract summary:
+- Unity builds `society.observe.v1` payload from WEL + NPC state.
+- LLM must return `society.decision.v1` JSON.
+- Every action is validated against allowed action taxonomy:
+  - `Move`, `Talk`, `Ask`, `Observe`, `Work`, `Report`, `Escort`, `Idle`
+- Invalid or disallowed decisions are rejected and routed to deterministic fallback.
 
 ---
 

@@ -36,9 +36,9 @@ namespace DreamOfOne.Society
             return true;
         }
 
-        public static bool TryParsePlan(string raw, out SocietyActionPlan plan, out string error)
+        public static bool TryParseDecision(string raw, out SocietyDecisionPayload decision, out string error)
         {
-            plan = null;
+            decision = null;
             error = string.Empty;
 
             if (!TryExtractJsonObject(raw, out string json, out error))
@@ -48,8 +48,8 @@ namespace DreamOfOne.Society
 
             try
             {
-                plan = UnityEngine.JsonUtility.FromJson<SocietyActionPlan>(json);
-                if (plan == null)
+                decision = UnityEngine.JsonUtility.FromJson<SocietyDecisionPayload>(json);
+                if (decision == null)
                 {
                     error = "JsonUtility returned null";
                     return false;
@@ -61,8 +61,105 @@ namespace DreamOfOne.Society
                 return false;
             }
 
+            NormalizeDecision(decision);
+            if (!IsSupportedSchema(decision.schemaVersion))
+            {
+                error = $"unsupported schemaVersion: {decision.schemaVersion}";
+                decision = null;
+                return false;
+            }
+
             return true;
+        }
+
+        public static bool TryParsePlan(string raw, out SocietyActionPlan plan, out string error)
+        {
+            plan = null;
+            error = string.Empty;
+
+            if (!TryParseDecision(raw, out var decision, out error))
+            {
+                return false;
+            }
+
+            var mappedActions = new SocietyAction[decision.actions.Length];
+            for (int i = 0; i < decision.actions.Length; i++)
+            {
+                var source = decision.actions[i];
+                mappedActions[i] = new SocietyAction
+                {
+                    type = source.actionType,
+                    targetId = source.targetId,
+                    placeId = source.placeId,
+                    zoneId = source.zoneId,
+                    ruleId = source.ruleId,
+                    text = source.text,
+                    anchorName = string.IsNullOrEmpty(source.anchorName) ? source.locationId : source.anchorName
+                };
+            }
+
+            plan = new SocietyActionPlan
+            {
+                intent = decision.intent,
+                speak = decision.utterance,
+                actions = mappedActions,
+                memoryWrite = decision.memoryWrite
+            };
+
+            return true;
+        }
+
+        private static void NormalizeDecision(SocietyDecisionPayload decision)
+        {
+            if (decision == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(decision.schemaVersion))
+            {
+                decision.schemaVersion = SocietyRuntimeContract.DecisionSchemaVersion;
+            }
+
+            if (string.IsNullOrWhiteSpace(decision.utterance))
+            {
+                decision.utterance = decision.speak ?? string.Empty;
+            }
+
+            if (decision.actions == null)
+            {
+                decision.actions = Array.Empty<SocietyDecisionAction>();
+                return;
+            }
+
+            for (int i = 0; i < decision.actions.Length; i++)
+            {
+                var action = decision.actions[i];
+                if (action == null)
+                {
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(action.actionType))
+                {
+                    action.actionType = action.type ?? string.Empty;
+                }
+
+                if (string.IsNullOrWhiteSpace(action.locationId) && !string.IsNullOrWhiteSpace(action.anchorName))
+                {
+                    action.locationId = action.anchorName;
+                }
+            }
+        }
+
+        private static bool IsSupportedSchema(string schemaVersion)
+        {
+            if (string.IsNullOrWhiteSpace(schemaVersion))
+            {
+                return true;
+            }
+
+            return schemaVersion.Equals(SocietyRuntimeContract.DecisionSchemaVersion, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
-

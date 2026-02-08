@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using DreamOfOne.Core;
 using DreamOfOne.LLM;
@@ -23,6 +25,24 @@ namespace DreamOfOne.Society
             "FileReport"
         };
 
+        private static readonly string[] BaselineAllowedActionTypes =
+        {
+            "Observe",
+            "Work",
+            "Idle"
+        };
+
+        private static readonly string[] ReportingAuthorityRoleKeywords =
+        {
+            "police",
+            "officer",
+            "investigator",
+            "manager",
+            "pm",
+            "qa",
+            "clerk"
+        };
+
         [SerializeField]
         [Tooltip("Decision interval per agent (seconds).")]
         private float decisionIntervalSeconds = 7f;
@@ -36,14 +56,29 @@ namespace DreamOfOne.Society
         private bool enableLlmPlanning = true;
 
         [SerializeField]
+        [Tooltip("If true, tries backend npc-runtime decision path before local LLM planning.")]
+        private bool useBackendDecisionRuntime = true;
+
+        [SerializeField]
+        [Tooltip("If backend request fails, optionally fallback to local LLM planning instead of deterministic fallback.")]
+        private bool allowLocalLlmFallbackOnBackendError = false;
+
+        [SerializeField]
         [Tooltip("Debug logs for plan parse/validation.")]
         private bool verbose = false;
 
         private PolicyPackDefinition policyPack = null;
         private WorldEventLog eventLog = null;
         private LLMClient llmClient = null;
+        private SocietyRuntimeClient runtimeClient = null;
         private ReportManager reportManager = null;
         private SemanticShaper semanticShaper = null;
+        private SessionDirector sessionDirector = null;
+        private GlobalSuspicionSystem globalSuspicionSystem = null;
+        private ExposureSystem exposureSystem = null;
+        private SessionArcDirector sessionArcDirector = null;
+        private string sessionId = string.Empty;
+        private string backendThreadId = string.Empty;
 
         private NpcPersona persona = null;
         private NavMeshAgent agent = null;
@@ -51,14 +86,22 @@ namespace DreamOfOne.Society
 
         private float nextDecisionTime = -999f;
         private readonly HashSet<string> seenEventIds = new();
+        private ActionOutcome lastOutcome = new();
 
-        public void Configure(PolicyPackDefinition pack, WorldEventLog log, LLMClient llm, ReportManager reports, SemanticShaper shaper)
+        public void Configure(
+            PolicyPackDefinition pack,
+            WorldEventLog log,
+            LLMClient llm,
+            ReportManager reports,
+            SemanticShaper shaper,
+            SocietyRuntimeClient runtime = null)
         {
             policyPack = pack;
             eventLog = log;
             llmClient = llm;
             reportManager = reports;
             semanticShaper = shaper;
+            runtimeClient = runtime;
         }
 
         private void Awake()
@@ -90,16 +133,46 @@ namespace DreamOfOne.Society
             {
                 semanticShaper = FindFirstObjectByType<SemanticShaper>();
             }
+
+            if (sessionDirector == null)
+            {
+                sessionDirector = FindFirstObjectByType<SessionDirector>();
+            }
+
+            if (runtimeClient == null)
+            {
+                runtimeClient = FindFirstObjectByType<SocietyRuntimeClient>();
+            }
+
+            if (globalSuspicionSystem == null)
+            {
+                globalSuspicionSystem = FindFirstObjectByType<GlobalSuspicionSystem>();
+            }
+
+            if (exposureSystem == null)
+            {
+                exposureSystem = FindFirstObjectByType<ExposureSystem>();
+            }
+
+            if (sessionArcDirector == null)
+            {
+                sessionArcDirector = FindFirstObjectByType<SessionArcDirector>();
+            }
+
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                sessionId = Guid.NewGuid().ToString("N");
+            }
         }
 
         private void Start()
         {
-            nextDecisionTime = Time.time + Random.Range(1f, decisionIntervalSeconds);
+            nextDecisionTime = Time.time + UnityEngine.Random.Range(1f, decisionIntervalSeconds);
         }
 
         private void Update()
         {
-            if (persona == null || eventLog == null || llmClient == null)
+            if (persona == null || eventLog == null)
             {
                 return;
             }
@@ -109,7 +182,7 @@ namespace DreamOfOne.Society
                 return;
             }
 
-            nextDecisionTime = Time.time + decisionIntervalSeconds + Random.Range(-0.5f, 0.8f);
+            nextDecisionTime = Time.time + decisionIntervalSeconds + UnityEngine.Random.Range(-0.5f, 0.8f);
 
             var observations = CollectObservations();
             if (observations.Count > 0)
@@ -122,26 +195,108 @@ namespace DreamOfOne.Society
 
             if (!enableLlmPlanning)
             {
-                DeterministicFallback();
+                DeterministicFallback("llm_planning_disabled");
                 return;
             }
 
             var allowed = ResolveAllowedSkills();
-            var request = BuildPlanRequest(allowed, observations);
-
-            llmClient.RequestText(request, raw =>
+            var packet = BuildPerceptionPacket(allowed, observations);
+            if (TryRequestBackendDecision(packet, allowed, observations))
             {
-                if (!SocietyJson.TryParsePlan(raw, out var plan, out string error))
+                return;
+            }
+
+            RequestLocalLlmDecision(packet, observations);
+        }
+
+        public bool TryApplyIntentJson(string rawIntentJson, out string blockedReason)
+        {
+            blockedReason = string.Empty;
+
+            if (!SocietyJson.TryParseIntent(rawIntentJson, persona != null ? persona.NpcId : string.Empty, out var intent, out string parseError))
+            {
+                blockedReason = $"invalid_intent:{parseError}";
+                RecordContractEvent(CoreEventType.IntentRejected, blockedReason, actionType: string.Empty);
+                DeterministicFallback(blockedReason);
+                return false;
+            }
+
+            return TryApplyIntent(intent, ResolveAllowedSkills(), out blockedReason);
+        }
+
+        private bool TryRequestBackendDecision(PerceptionPacket packet, string[] allowedSkills, List<string> observations)
+        {
+            if (!useBackendDecisionRuntime || runtimeClient == null || !runtimeClient.BackendEnabled)
+            {
+                return false;
+            }
+
+            packet.cognitionPath = string.IsNullOrEmpty(backendThreadId) ? "codex" : "codex-reply";
+            packet.threadId = backendThreadId ?? string.Empty;
+
+            runtimeClient.RequestDecision(packet, (envelope, error) =>
+            {
+                if (this == null || !isActiveAndEnabled)
                 {
-                    if (verbose)
-                    {
-                        Debug.LogWarning($"[SocietyBrain:{persona.NpcId}] plan parse failed: {error}");
-                    }
-                    DeterministicFallback();
                     return;
                 }
 
-                ExecutePlan(plan, allowed);
+                if (!string.IsNullOrEmpty(error))
+                {
+                    if (verbose)
+                    {
+                        Debug.LogWarning($"[SocietyBrain:{persona.NpcId}] backend decision failed: {error}");
+                    }
+
+                    if (allowLocalLlmFallbackOnBackendError)
+                    {
+                        RequestLocalLlmDecision(packet, observations);
+                    }
+                    else
+                    {
+                        DeterministicFallback(error);
+                    }
+
+                    return;
+                }
+
+                if (envelope == null || envelope.intent == null)
+                {
+                    DeterministicFallback("runtime_empty_envelope");
+                    return;
+                }
+
+                if (envelope.meta != null && !string.IsNullOrWhiteSpace(envelope.meta.threadId))
+                {
+                    backendThreadId = envelope.meta.threadId;
+                }
+
+                RecordBackendDecisionMeta(envelope.meta, envelope.intent);
+
+                if (!TryApplyIntent(envelope.intent, allowedSkills, out string blockedReason) && verbose)
+                {
+                    Debug.LogWarning($"[SocietyBrain:{persona.NpcId}] backend intent rejected: {blockedReason}");
+                }
+            });
+
+            return true;
+        }
+
+        private void RequestLocalLlmDecision(PerceptionPacket packet, List<string> observations)
+        {
+            if (llmClient == null)
+            {
+                DeterministicFallback("local_llm_missing");
+                return;
+            }
+
+            var request = BuildPlanRequest(packet, observations);
+            llmClient.RequestText(request, raw =>
+            {
+                if (!TryApplyIntentJson(raw, out string blockedReason) && verbose)
+                {
+                    Debug.LogWarning($"[SocietyBrain:{persona.NpcId}] intent rejected: {blockedReason}");
+                }
             });
         }
 
@@ -232,37 +387,22 @@ namespace DreamOfOne.Society
             return null;
         }
 
-        private LLMClient.TextRequest BuildPlanRequest(string[] allowedSkills, List<string> observations)
+        private LLMClient.TextRequest BuildPlanRequest(PerceptionPacket packet, List<string> observations)
         {
             var system = new StringBuilder();
             system.AppendLine("You are an untrusted planner for an NPC in a social simulation game.");
             system.AppendLine("Return JSON only. No markdown. No extra commentary.");
-            system.AppendLine("Your job is to propose 0-2 safe actions that the engine will validate and execute deterministically.");
+            system.AppendLine("Propose one safe intent that the engine will validate and execute deterministically.");
             system.AppendLine("Do NOT invent evidence. Do NOT change the world directly.");
             system.AppendLine("Schema:");
-            system.AppendLine("{\"intent\":\"...\",\"speak\":\"optional\",\"actions\":[{\"type\":\"SkillId\",\"targetId\":\"\",\"placeId\":\"\",\"zoneId\":\"\",\"ruleId\":\"\",\"text\":\"\",\"anchorName\":\"\"}],\"memoryWrite\":\"optional\"}");
+            system.AppendLine("{\"schemaVersion\":\"society.intent.v1\",\"npcId\":\"...\",\"actionType\":\"Move|Talk|Ask|Observe|Work|Report|Escort|Idle\",\"targetId\":\"optional\",\"locationId\":\"optional\",\"utterance\":\"optional\",\"reasonCodes\":[\"required_reason\"],\"confidence\":0.0}");
 
             var user = new StringBuilder();
-            user.AppendLine($"NPC: {persona.NpcId}");
-            user.AppendLine($"Role: {persona.Role}");
-            user.AppendLine("Allowed skills: " + string.Join(", ", allowedSkills ?? DefaultAllowedSkills));
-            user.AppendLine("Recent observations:");
-            if (observations != null && observations.Count > 0)
-            {
-                for (int i = 0; i < observations.Count; i++)
-                {
-                    user.AppendLine($"- {observations[i]}");
-                }
-            }
-            else
-            {
-                user.AppendLine("- None");
-            }
-
-            user.AppendLine("Your memory:");
+            user.AppendLine("PerceptionPacket JSON:");
+            user.AppendLine(JsonUtility.ToJson(packet));
+            user.AppendLine("NPC memory summary:");
             user.AppendLine(memory != null ? memory.BuildSummary(maxLines: 6) : "None.");
-
-            user.AppendLine("Prefer short Korean for speak text when you speak.");
+            user.AppendLine("When actionType is Talk or Ask, utterance must be short Korean text.");
 
             return new LLMClient.TextRequest
             {
@@ -273,72 +413,188 @@ namespace DreamOfOne.Society
             };
         }
 
-        private void ExecutePlan(SocietyActionPlan plan, string[] allowedSkills)
+        private PerceptionPacket BuildPerceptionPacket(string[] allowedSkills, List<string> observations)
         {
-            if (plan == null)
+            string[] recentEvents = observations != null
+                ? observations.Where(item => !string.IsNullOrWhiteSpace(item)).Take(8).ToArray()
+                : Array.Empty<string>();
+
+            string[] nearbyActors = eventLog != null
+                ? eventLog.GetRecent(16)
+                    .Where(record => record != null && !string.IsNullOrWhiteSpace(record.actorId))
+                    .Select(record => record.actorId)
+                    .Where(actorId => !string.Equals(actorId, persona.NpcId, StringComparison.Ordinal))
+                    .Distinct()
+                    .Take(8)
+                    .ToArray()
+                : Array.Empty<string>();
+
+            string[] allowedActionTypes = ResolveAllowedActionTypes(allowedSkills);
+            float elapsedSeconds = sessionDirector != null ? sessionDirector.ElapsedSeconds : 0f;
+            string phaseId = sessionArcDirector != null ? sessionArcDirector.CurrentPhaseId : string.Empty;
+            float globalSuspicion = globalSuspicionSystem != null ? globalSuspicionSystem.GlobalSuspicion : 0f;
+            int exposure = exposureSystem != null ? exposureSystem.Exposure : 0;
+
+            var organizationContext = new OrganizationContextPayload
             {
-                DeterministicFallback();
-                return;
-            }
+                role = persona != null ? persona.Role : string.Empty,
+                roleId = persona != null ? persona.RoleId.ToString() : string.Empty,
+                organizationId = gameObject.scene.name,
+                allowedActionTypes = allowedActionTypes
+            };
 
-            if (!string.IsNullOrEmpty(plan.memoryWrite))
+            var playerSignals = new PlayerSignalsPayload
             {
-                memory.Add($"MEM: {plan.memoryWrite}");
-            }
+                phase = phaseId,
+                elapsedSeconds = elapsedSeconds,
+                globalSuspicion = globalSuspicion,
+                exposure = exposure
+            };
 
-            // Convenience: allow a top-level "speak" without needing a Speak action.
-            if (!string.IsNullOrEmpty(plan.speak))
+            return new PerceptionPacket
             {
-                if (IsSkillAllowed("Speak", allowedSkills))
-                {
-                    ExecuteSpeak(plan.speak);
-                }
-                return;
-            }
-
-            if (plan.actions == null || plan.actions.Length == 0)
-            {
-                return;
-            }
-
-            int max = Mathf.Min(plan.actions.Length, 2);
-            for (int i = 0; i < max; i++)
-            {
-                var action = plan.actions[i];
-                if (action == null || string.IsNullOrEmpty(action.type))
-                {
-                    continue;
-                }
-
-                if (!IsSkillAllowed(action.type, allowedSkills))
-                {
-                    if (verbose)
-                    {
-                        Debug.LogWarning($"[SocietyBrain:{persona.NpcId}] skill not allowed: {action.type}");
-                    }
-                    continue;
-                }
-
-                if (TryExecuteAction(action))
-                {
-                    return;
-                }
-            }
+                schemaVersion = SocietyRuntimeContract.PerceptionSchemaVersion,
+                sessionId = sessionId,
+                npcId = persona.NpcId,
+                landmarkId = gameObject.scene.name,
+                nearbyActors = nearbyActors,
+                recentEvents = recentEvents,
+                organizationContext = organizationContext,
+                playerSignals = playerSignals,
+                allowedActionTypes = allowedActionTypes,
+                cognitionPath = string.Empty,
+                threadId = string.Empty
+            };
         }
 
-        private bool TryExecuteAction(SocietyAction action)
+        private static string[] ResolveAllowedActionTypes(string[] allowedSkills)
         {
-            switch (action.type)
+            var allowed = new HashSet<string>(StringComparer.Ordinal);
+            for (int i = 0; i < BaselineAllowedActionTypes.Length; i++)
             {
-                case "Speak":
-                    return ExecuteSpeak(action.text);
-                case "MoveToAnchor":
-                    return ExecuteMoveToAnchor(action.anchorName);
-                case "FileReport":
-                    return ExecuteFileReport(action.ruleId, action.targetId);
-                default:
-                    return false;
+                allowed.Add(BaselineAllowedActionTypes[i]);
             }
+
+            if (allowedSkills != null)
+            {
+                for (int i = 0; i < allowedSkills.Length; i++)
+                {
+                    switch (allowedSkills[i])
+                    {
+                        case "Speak":
+                            allowed.Add("Talk");
+                            allowed.Add("Ask");
+                            break;
+                        case "MoveToAnchor":
+                            allowed.Add("Move");
+                            allowed.Add("Escort");
+                            break;
+                        case "FileReport":
+                            allowed.Add("Report");
+                            break;
+                    }
+                }
+            }
+
+            return allowed.ToArray();
+        }
+
+        private bool TryApplyIntent(NpcIntentPayload intent, string[] allowedSkills, out string blockedReason)
+        {
+            blockedReason = string.Empty;
+            lastOutcome = new ActionOutcome
+            {
+                success = false,
+                blockedReason = string.Empty,
+                executedActionType = intent.actionType,
+                reasonCodes = intent.reasonCodes ?? Array.Empty<string>()
+            };
+
+            string skillId = ResolveSkillId(intent.actionType);
+            if (!string.IsNullOrEmpty(skillId) && !IsSkillAllowed(skillId, allowedSkills))
+            {
+                blockedReason = $"skill_not_allowed:{intent.actionType}";
+                lastOutcome.blockedReason = blockedReason;
+                RecordContractEvent(CoreEventType.IntentRejected, blockedReason, intent.actionType);
+                DeterministicFallback(blockedReason);
+                return false;
+            }
+
+            if (!HasAuthorityForIntent(intent))
+            {
+                blockedReason = $"authority_blocked:{intent.actionType}";
+                lastOutcome.blockedReason = blockedReason;
+                RecordContractEvent(CoreEventType.IntentRejected, blockedReason, intent.actionType);
+                DeterministicFallback(blockedReason);
+                return false;
+            }
+
+            bool success = intent.actionType switch
+            {
+                "Talk" => ExecuteSpeak(intent.utterance),
+                "Ask" => ExecuteSpeak(intent.utterance),
+                "Move" => ExecuteMoveToAnchor(intent.locationId),
+                "Escort" => ExecuteMoveToAnchor(intent.locationId),
+                "Report" => ExecuteFileReport(intent.reasonCodes != null && intent.reasonCodes.Length > 0 ? intent.reasonCodes[0] : string.Empty, intent.targetId),
+                "Observe" => true,
+                "Work" => true,
+                "Idle" => true,
+                _ => false
+            };
+
+            if (!success)
+            {
+                blockedReason = $"execution_failed:{intent.actionType}";
+                lastOutcome.blockedReason = blockedReason;
+                RecordContractEvent(CoreEventType.IntentRejected, blockedReason, intent.actionType);
+                DeterministicFallback(blockedReason);
+                return false;
+            }
+
+            lastOutcome.success = true;
+            return true;
+        }
+
+        private static string ResolveSkillId(string actionType)
+        {
+            return actionType switch
+            {
+                "Talk" => "Speak",
+                "Ask" => "Speak",
+                "Move" => "MoveToAnchor",
+                "Escort" => "MoveToAnchor",
+                "Report" => "FileReport",
+                _ => string.Empty
+            };
+        }
+
+        private bool HasAuthorityForIntent(NpcIntentPayload intent)
+        {
+            if (intent == null)
+            {
+                return false;
+            }
+
+            if (intent.actionType != "Report")
+            {
+                return true;
+            }
+
+            string role = persona != null ? persona.Role : string.Empty;
+            if (string.IsNullOrWhiteSpace(role))
+            {
+                return false;
+            }
+
+            for (int i = 0; i < ReportingAuthorityRoleKeywords.Length; i++)
+            {
+                if (role.IndexOf(ReportingAuthorityRoleKeywords[i], StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private bool ExecuteSpeak(string text)
@@ -411,15 +667,54 @@ namespace DreamOfOne.Society
             return true;
         }
 
-        private void DeterministicFallback()
+        private void DeterministicFallback(string reasonCode)
         {
             if (persona == null)
             {
                 return;
             }
 
+            RecordContractEvent(CoreEventType.IntentFallbackApplied, reasonCode, actionType: "Observe");
             // Keep fallback low-noise: only occasionally speak.
             ExecuteSpeak("음... 상황을 좀 더 봐야겠네요.");
+        }
+
+        private void RecordBackendDecisionMeta(DecisionMetaPayload meta, NpcIntentPayload intent)
+        {
+            if (eventLog == null || persona == null || meta == null)
+            {
+                return;
+            }
+
+            string actionType = intent != null ? intent.actionType : string.Empty;
+            string note = $"transport={meta.transport}; usedFallback={meta.usedFallback}; reason={meta.reason}; threadId={meta.threadId}";
+            eventLog.RecordEvent(new EventRecord
+            {
+                actorId = persona.NpcId,
+                actorRole = persona.Role,
+                eventType = CoreEventType.ExplanationGiven,
+                topic = string.IsNullOrWhiteSpace(actionType) ? "backend-decision" : $"backend-decision:{actionType}",
+                note = note,
+                severity = meta.usedFallback ? 2 : 1
+            });
+        }
+
+        private void RecordContractEvent(CoreEventType eventType, string reasonCode, string actionType)
+        {
+            if (eventLog == null || persona == null)
+            {
+                return;
+            }
+
+            eventLog.RecordEvent(new EventRecord
+            {
+                actorId = persona.NpcId,
+                actorRole = persona.Role,
+                eventType = eventType,
+                topic = string.IsNullOrWhiteSpace(actionType) ? "runtime-contract" : actionType,
+                note = reasonCode ?? string.Empty,
+                severity = 1
+            });
         }
 
         private static bool IsSkillAllowed(string skillId, string[] allowed)

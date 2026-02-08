@@ -2,201 +2,137 @@
 doc: plan.md
 project: Dream of One
 revision: 2026-02-08
-status: Active (Master Execution Plan v5, Post-v0.1 Transition)
+status: Active (Master Execution Plan v5, Intent-First)
 source_of_truth: project.md
 ---
 
-# Dream of One - Master Execution Plan (Codex-CLI-First v0.1)
+# Dream of One - Master Execution Plan (Unity Intent-First v0.1)
 
 This file is the active execution roadmap.
-`project.md` defines what the product is and what is fixed.
-This document defines how delivery is sequenced, validated, and governed.
-Linear remains the issue tracking source of truth.
+`project.md` defines product intent and acceptance priorities.
+Linear is the issue tracking source of truth.
 
 ## 0) Planning objective
-Prove, in Unity play, that a Codex CLI-driven NPC society produces the core social-stealth experience while deterministic safeguards keep sessions stable.
+Prove in Unity play that Codex CLI-driven NPC society is the real gameplay driver, while deterministic safety keeps sessions stable and explainable.
 
-## 1) Intent-first execution premise (from project contract)
-Primary proof order for v0.1:
-- Unity playable loop must show social pressure driven by NPC society behavior.
-- NPC cognition must remain Codex-thread-driven (`codex` / `codex-reply`) with continuity by `sessionId+npcId`.
-- Report -> intake -> verdict closure and ending causality must be readable in play/logs.
-- Deterministic fallback must preserve session continuity under Codex/tool failure.
+## 1) Current state review (lightweight)
+### 1.1 Confirmed strengths
+- Unity social simulation loop exists and runs.
+- Pressure/escalation systems exist (`Suspicion`, `Exposure`, report/verdict).
+- TS `npc-runtime` backend is implemented with schema/fallback/thread policy.
+- Unity bridge path for backend decision envelope is implemented.
 
-Supporting technical profile (secondary, but still required during v0.1):
-- Backend implementation profile: Node.js 24 LTS + Fastify 5.x + TypeScript 5.9.
-- Schema-first validation before Unity execution.
-- Single backend service boundary until v0.1 definition of done.
+### 1.2 Primary remaining gap
+- Runtime proof in connected editor is still pending:
+  - diagnostics clean run,
+  - PlayMode evidence for transport visibility and failure continuity.
 
-## 2) v0.1 success scoreboard (measurable, intent-first)
-Core intent proof:
-- Session in Unity is playable for 10-12 minutes.
-- NPC society behavior materially affects player cover work and escalation pressure.
-- `Report -> Station Intake -> Verdict` closure path is playable end-to-end.
-- Three consecutive runs produce non-identical social trajectories.
-- Survival/failure cause chain is visible to player and logs.
+### 1.3 Execution meaning
+- Next work should prioritize proof gates and evidence over additional feature breadth.
 
-Supporting stability proof:
-- Codex timeout/failure does not freeze progression.
-- Fallback/transport/reason telemetry is observable.
-- Contract and diagnostics gates are reproducible.
+## 2) Primary proof order (must stay in this order)
+1. **Unity core loop proof**
+   Show stable playable loop with social pressure and closure.
+2. **Codex bridge proof in live runtime**
+   Show Unity decisions are actually supplied by `npc-runtime` Codex path during play.
+3. **Fallback continuity proof**
+   Show timeout/parse/tool failures remain playable with deterministic outcomes.
+4. **Causality readability proof**
+   Show players can explain why a run ended (survival/exposure) using on-screen/WEL signals.
+5. **Technical conformance proof (supporting)**
+   Keep schema/readiness/thread continuity green.
 
-## 3) Rules for execution
-- If there is a tradeoff, prioritize proving the Unity social-simulation intent over low-impact technical refinement.
-- No major system expansion beyond v0.1 scope.
-- Keep LLM output schema-constrained before world execution.
-- Keep fallback deterministic and always available.
-- Keep `project.md` and `plan.md` synchronized whenever intent or gate language changes.
+## 3) Workstreams
+- **WS-1 Unity Playable Core**
+  Maintain and validate session loop, pressure loop, and closure flow.
+- **WS-2 Unity <-> TS Runtime Bridge Proof**
+  Verify and harden decision ingestion from `/v1/npc/decision` in real play.
+- **WS-3 Deterministic Safety**
+  Keep fallback, authority validation, and blocked-reason reporting deterministic.
+- **WS-4 Intent Evidence Gates**
+  Add reproducible evidence for codex-driven ratio, trajectory diversity, and readable causality.
+- **WS-5 Supporting Platform Conformance**
+  Keep readiness/health/thread/schema gates green without expanding scope.
 
-## 4) Workstreams and outcomes (priority order)
-- **WS-1 Unity Core Playable Loop**
-  Outcome: playable cover-pressure session loop with deterministic end conditions.
-- **WS-2 Codex Society Runtime**
-  Outcome: Codex-driven NPC decisions with thread continuity and safe Unity execution handoff.
-- **WS-3 Escalation Readability**
-  Outcome: report/intake/verdict chain is legible and explainable in run outputs.
-- **WS-4 Reliability and Observability**
-  Outcome: fallback, timeout, parse failure, and transport traces are visible and enforceable.
-- **WS-5 Technical Conformance (supporting)**
-  Outcome: implementation profile and contracts remain consistent with project governance.
+## 4) Phase plan
 
-## 5) Sequential phase plan (intent-first)
+## Phase A - Runtime proof gate
+### Goal
+Prove already-implemented bridge path in connected Unity runtime.
 
-## Phase 1 - Unity playable proof
-### Objective
-Confirm that the social-stealth loop is genuinely playable in Unity.
-
-### Exit criteria
-- Session starts, progresses, and ends without deadlock.
-- Player pressure loop and ending transitions are visible in runtime.
-
-## Phase 2 - Codex society behavior proof
-### Objective
-Prove NPC cognition is Codex-thread-driven and materially drives social interactions.
+### Deliverables
+- Diagnostics clean run after bridge integration.
+- PlayMode evidence for `codex`/`codex-reply`/`fallback` transport visibility.
 
 ### Exit criteria
-- `codex`/`codex-reply` path and thread continuity are verifiable.
-- Non-identical trajectories are reproduced across repeated runs.
+- No runtime deadlock/crash on backend and fallback paths.
 
-## Phase 3 - Escalation closure proof
-### Objective
-Make report/intake/verdict flow operational and understandable.
+## Phase B - Causality and diversity proof
+### Goal
+Prove the simulation is alive and legible.
 
-### Exit criteria
-- `Report -> Intake -> Verdict` path is replayable.
-- Survival/failure explanations are readable in UI/log outputs.
-
-## Phase 4 - Reliability hardening
-### Objective
-Guarantee deterministic continuity under runtime and tool failures.
+### Deliverables
+- Three-run diversity evidence pack.
+- Cause-chain evidence for report/intake/verdict outcomes.
 
 ### Exit criteria
-- Timeout/parse/tool failures fail closed to deterministic fallback.
-- Diagnostics and contract checks are green and repeatable.
+- Reviewers can explain run outcomes from evidence without hidden assumptions.
 
-## Phase 5 - DoD evidence pack
-### Objective
-Collect reproducible evidence that v0.1 intent criteria are met.
+## Phase C - Supporting conformance lock
+### Goal
+Keep technical contract quality stable while avoiding scope creep.
 
-### Exit criteria
-- Evidence covers session length, trajectory diversity, and closure readability.
-- Evidence can be rerun without ad-hoc manual interpretation.
-
-## Phase 6 - Technical conformance cleanup (supporting)
-### Objective
-Align implementation details with locked technical profile without overshadowing product intent.
+### Deliverables
+- Readiness/health checks remain stable.
+- Schema/thread continuity tests remain green.
 
 ### Exit criteria
-- Stack/profile drift items are explicitly reconciled or reclassified in docs.
-- No change in authority boundaries or core playable proof outcomes.
+- No regressions in quality gates.
 
-## 6) Linear blueprint (execution mapping)
+## 5) Linear execution queue (one issue at a time)
+Queue policy:
+- Always execute one Linear issue to completion before starting the next.
+- Each issue must carry clear goal, AC, do-not, and verification evidence.
 
-## Epic A - Unity playable proof
-- A1: session start/end integrity and deterministic end conditions.
-- A2: cover-task loop and speech-act pressure integration.
-- A3: in-play readability of suspicion/exposure/escalation signals.
+Priority queue:
+1. `runtime-proof-gate-for-bridge` (next creation)
+2. `three-run-trajectory-diversity-evidence` (next creation)
+3. `causality-readable-ending-evidence` (next creation)
+4. `backend-readiness-thread-conformance-maintenance` (next creation)
 
-## Epic B - Codex society runtime proof
-- B1: Codex decision path continuity (`codex`/`codex-reply`, thread continuity).
-- B2: safe Unity execution handoff and blocked-reason behavior.
-- B3: non-idle behavior evidence that Codex cognition is materially active.
+## 6) Verification standard
+For any issue that touches Unity runtime behavior:
+- Run Unity diagnostics until console is clean.
+- Validate report -> intake -> verdict closure still functions.
+- Validate fallback continuity path under failure injection.
 
-## Epic C - Escalation closure proof
-- C1: report -> intake -> verdict pipeline stability.
-- C2: evidence artifacts and causal end-summary visibility.
-- C3: outcome reproducibility across repeated sessions.
+For any issue that touches backend runtime behavior:
+- Run backend contract tests (decision/fallback/thread/readiness).
+- Keep API envelope compatibility with Unity bridge contract.
 
-## Epic D - Reliability and observability gates
-- D1: deterministic fallback policy and failure continuity checks.
-- D2: transport/reason/request correlation telemetry visibility.
-- D3: diagnostics and PlayMode smoke gates for regression prevention.
+## 7) Risk register (intent-focused)
+- **R1 Runtime proof remains incomplete**
+  - Mitigation: make runtime proof gate the immediate next issue.
+- **R2 Codex instability causes play interruption**
+  - Mitigation: strict fallback continuity and reason-coded diagnostics.
+- **R3 Simulation appears scripted/repetitive**
+  - Mitigation: trajectory diversity gate with repeatable evidence.
+- **R4 Causality is unclear to player**
+  - Mitigation: enforce readable reason/event chain in UI and WEL.
 
-## Epic E - Technical conformance (supporting)
-- E1: implementation-profile drift review (stack/governance alignment).
-- E2: contract/test/runbook updates that support intent proof.
+## 8) Definition of done (v0.1)
+All conditions below are required:
+- Unity session loop is playable end-to-end.
+- Codex CLI path is proven as active NPC cognition source in Unity runtime.
+- Failure path remains deterministic and non-blocking.
+- Outcome causality is readable by non-author reviewers.
+- Diagnostics and contract tests are green.
 
-## 7) Cadence and governance rhythm
-- Day 1-2: contract/runtime integrity updates only.
-- Day 3-5: feature integration and behavior tuning.
-- Day 6-7: escalation loop closure and readability pass.
-- Day 8-10: diagnostics/tests/fallback hardening.
+## 9) Document sync policy
+- Intent/priority changes update both `project.md` and `plan.md` in the same change.
+- Detailed engineering notes live in implementation docs/runbooks, not in top-level intent sections.
 
-At each cycle boundary:
-- verify phase exit criteria before scope expansion,
-- update Linear status and risk notes,
-- sync `plan.md` if contract constraints changed.
-
-## 8) Risk register and mitigations
-- **R1 Codex latency spikes**
-  - Mitigation: cadence tiering, timeout policy, deterministic fallback.
-- **R2 Output drift from schema**
-  - Mitigation: strict parser, single retry policy, safe default action.
-- **R3 Context bloat in NPC memory**
-  - Mitigation: bounded episodic memory and compaction intervals.
-- **R4 Debug opacity**
-  - Mitigation: reason codes, transport tagging, artifact links per escalation.
-- **R5 Scope drift**
-  - Mitigation: phase gate enforcement and explicit deferred list.
-- **R6 Platform drift during v0.1**
-  - Mitigation: backend platform lock; no framework migration before v0.1 done.
-
-## 9) Definition of done (v0.1)
-All must hold:
-- Codex-driven NPC society operates throughout the session.
-- Player loop and escalation closure are fully playable.
-- Failure/survival is explainable with concrete causes.
-- Fallback path keeps session alive when Codex fails.
-- Backend contract tests and Unity diagnostics are green.
-- Release gate evidence is documented and reproducible.
-
-## 10) Document consolidation policy
-- Active roadmap only in `plan.md`.
-- Product/runtime contract only in `project.md`.
-- Deprecated historical plan docs remain reference-only and are not updated.
-- Any backend platform/contract change must update both docs in the same change.
-
-## 11) Execution snapshot and next queue (2026-02-08)
-### 11.1 Newly closed gates
-- `DRE-124` correlation-id contract gate is completed and merged.
-- `DRE-125` trajectory diversity gate is completed and merged.
-- `DRE-126` reliability threshold gate is completed and merged.
-- `DRE-127` runtime reliability summary endpoint gate is completed and merged.
-- `DRE-128` reliability min-sample gate is completed and merged (`insufficient_sample` semantics added).
-- `DRE-129` runtime operator runbook gate is completed and merged.
-- `DRE-130` Unity correlation consumption gate is completed and merged.
-- `DRE-131` project/plan execution snapshot synchronization gate is completed and merged.
-- `DRE-132` intent-first project/plan refocus gate is completed and merged.
-
-### 11.2 Accepted immediate focus
-- Close the v0.1 DoD evidence-pack gate centered on Unity playable proof of Codex social simulation.
-- Keep authority boundaries unchanged while resolving only high-impact technical conformance gaps.
-
-### 11.3 Next Linear issue queue (ordered)
-1. `DoD-release-evidence-pack` (next creation): capture reproducible Unity evidence for session length, social trajectory diversity, and readable ending causality.
-2. `codex-society-proof-gate` (next creation): measure and report whether NPC non-idle behavior is materially Codex-driven in runtime.
-3. `backend-platform-lock-conformance` (next creation): reconcile runtime stack/profile drift items that materially affect reliability/governance.
-
-### 11.4 Sequencing rule for this queue
-- Execute one Linear issue at a time.
-- For each issue: implement -> verify -> close in Linear -> then pick the next item.
+## 10) Execution snapshot (2026-02-08)
+- Completed: bridge implementation and merge (`DRE-134`, PR #71).
+- Current top priority: connected-editor runtime proof gate for the implemented bridge.
+- Immediate action: create and execute runtime proof issue.

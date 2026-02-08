@@ -10,6 +10,8 @@ import type { PerceptionPacket } from "../../src/contracts/types.js";
 import type { RuntimeConfig } from "../../src/config.js";
 import type { CodexBroker } from "../../src/broker/codex-broker.js";
 import { DecisionService } from "../../src/runtime/decision-service.js";
+import { ReliabilityTelemetry } from "../../src/runtime/reliability-telemetry.js";
+import { DEFAULT_RELIABILITY_THRESHOLDS } from "../../src/runtime/reliability-threshold-gate.js";
 
 async function getFreePort(): Promise<number> {
   return await new Promise((resolve, reject) => {
@@ -64,7 +66,10 @@ function buildConfig(port: number, overrides: Partial<RuntimeConfig> = {}): Runt
     codexCommand: "unused",
     codexArgs: [],
     codexTimeoutMs: 1000,
+    codexGlobalBudgetMs: 2000,
+    promptCharBudget: 4000,
     threadStorePath: join(tmpdir(), `npc-runtime-thread-store-${port}.json`),
+    reliabilityThresholds: DEFAULT_RELIABILITY_THRESHOLDS,
     ...overrides,
   };
 }
@@ -170,6 +175,111 @@ test("liveness endpoint remains lightweight", async () => {
       status: "ok",
       service: "npc-runtime",
     });
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test("reliability endpoint returns pass with counters and threshold summary", async () => {
+  const port = await getFreePort();
+  const config = buildConfig(port);
+  const telemetry = new ReliabilityTelemetry();
+  const server = startHttpServer(config, new DecisionService(buildNoopBroker(), telemetry));
+
+  try {
+    const decisionRes = await fetch(`http://${config.host}:${config.port}/v1/npc/decision`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(buildPacket("npc-pass")),
+    });
+    assert.equal(decisionRes.status, 200);
+
+    const res = await fetch(`http://${config.host}:${config.port}/health/reliability`);
+    const body = (await res.json()) as {
+      status: string;
+      snapshot: {
+        counters: { decisionRequests: number; fallbackResponses: number };
+        rates: { fallbackRate: number };
+      };
+      gate: {
+        pass: boolean;
+        thresholds: { fallbackRateMax: number };
+        violations: Array<{ metric: string }>;
+        summary: string;
+      };
+    };
+
+    assert.equal(res.status, 200);
+    assert.equal(body.status, "pass");
+    assert.equal(body.gate.pass, true);
+    assert.equal(body.snapshot.counters.decisionRequests, 1);
+    assert.equal(body.snapshot.counters.fallbackResponses, 0);
+    assert.equal(body.snapshot.rates.fallbackRate, 0);
+    assert.equal(body.gate.violations.length, 0);
+    assert.equal(typeof body.gate.summary, "string");
+    assert.ok(body.gate.summary.includes("PASS"));
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test("reliability endpoint returns fail when threshold is violated", async () => {
+  const port = await getFreePort();
+  const config = buildConfig(port, {
+    reliabilityThresholds: {
+      ...DEFAULT_RELIABILITY_THRESHOLDS,
+      fallbackRateMax: 0,
+    },
+  });
+  const telemetry = new ReliabilityTelemetry();
+  const fallbackBroker: CodexBroker = {
+    async decide(packet) {
+      return {
+        intent: {
+          npcId: packet.npcId,
+          actionType: "Observe",
+          reasonCodes: ["fallback:tool_failure"],
+          confidence: 0,
+        },
+        meta: {
+          usedFallback: true,
+          reason: "tool_failure",
+          transport: "fallback",
+        },
+      };
+    },
+  };
+
+  const server = startHttpServer(config, new DecisionService(fallbackBroker, telemetry));
+
+  try {
+    const decisionRes = await fetch(`http://${config.host}:${config.port}/v1/npc/decision`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(buildPacket("npc-fail")),
+    });
+    assert.equal(decisionRes.status, 200);
+
+    const res = await fetch(`http://${config.host}:${config.port}/health/reliability`);
+    const body = (await res.json()) as {
+      status: string;
+      snapshot: {
+        counters: { decisionRequests: number; fallbackResponses: number };
+      };
+      gate: {
+        pass: boolean;
+        violations: Array<{ metric: string; actual: number; max: number }>;
+        summary: string;
+      };
+    };
+
+    assert.equal(res.status, 503);
+    assert.equal(body.status, "fail");
+    assert.equal(body.gate.pass, false);
+    assert.equal(body.snapshot.counters.decisionRequests, 1);
+    assert.equal(body.snapshot.counters.fallbackResponses, 1);
+    assert.ok(body.gate.violations.some(violation => violation.metric === "fallbackRate"));
+    assert.ok(body.gate.summary.includes("FAIL"));
   } finally {
     await closeServer(server);
   }

@@ -2,13 +2,17 @@ import type { DecisionEnvelope } from "../contracts/types.js";
 import { createFallbackIntent } from "./fallback.js";
 import { parsePerceptionPacket, SchemaValidationError } from "./schema.js";
 import type { CodexBroker } from "../broker/codex-broker.js";
-import type { ReliabilityTelemetry } from "./reliability-telemetry.js";
+import type { ReliabilitySnapshot, ReliabilityTelemetry } from "./reliability-telemetry.js";
 
 export class DecisionService {
   constructor(
     private readonly broker: CodexBroker,
     private readonly telemetry?: ReliabilityTelemetry,
   ) {}
+
+  getReliabilitySnapshot(): ReliabilitySnapshot | undefined {
+    return this.telemetry?.snapshot();
+  }
 
   async decide(payload: unknown): Promise<DecisionEnvelope> {
     this.telemetry?.recordDecisionRequest();

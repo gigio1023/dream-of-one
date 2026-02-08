@@ -3,6 +3,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import type { RuntimeConfig } from "../config.js";
 import type { DecisionService } from "../runtime/decision-service.js";
 import { evaluateRuntimeReadiness, type RuntimeReadinessReport } from "../runtime/readiness.js";
+import { evaluateReliabilityThresholdGate } from "../runtime/reliability-threshold-gate.js";
 
 async function readJsonBody(req: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
@@ -50,6 +51,30 @@ export function startHttpServer(
       if (req.method === "GET" && req.url === "/health/ready") {
         const readiness = await readinessEvaluator(config);
         writeJson(res, readiness.status === "ready" ? 200 : 503, readiness);
+        return;
+      }
+
+      if (req.method === "GET" && req.url === "/health/reliability") {
+        const snapshot = decisionService.getReliabilitySnapshot();
+        if (!snapshot) {
+          writeJson(res, 503, {
+            status: "not_available",
+            reason: "reliability_telemetry_not_configured",
+          });
+          return;
+        }
+
+        const gate = evaluateReliabilityThresholdGate(snapshot, config.reliabilityThresholds);
+        writeJson(res, gate.pass ? 200 : 503, {
+          status: gate.pass ? "pass" : "fail",
+          snapshot: gate.snapshot,
+          gate: {
+            pass: gate.pass,
+            thresholds: gate.thresholds,
+            violations: gate.violations,
+            summary: gate.summary,
+          },
+        });
         return;
       }
 

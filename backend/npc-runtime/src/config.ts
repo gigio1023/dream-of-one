@@ -1,3 +1,8 @@
+import {
+  DEFAULT_RELIABILITY_THRESHOLDS,
+  type ReliabilityThresholds,
+} from "./runtime/reliability-threshold-gate.js";
+
 export interface RuntimeConfig {
   host: string;
   port: number;
@@ -7,6 +12,7 @@ export interface RuntimeConfig {
   codexGlobalBudgetMs: number;
   promptCharBudget: number;
   threadStorePath: string;
+  reliabilityThresholds: ReliabilityThresholds;
 }
 
 function parseNumber(value: string | undefined, fallback: number): number {
@@ -29,6 +35,13 @@ function parsePath(value: string | undefined, fallback: string): string {
   return value.trim();
 }
 
+function parseRate(value: string | undefined, fallback: number): number {
+  if (!value) return fallback;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 1) return fallback;
+  return parsed;
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig {
   return {
     host: env.NPC_RUNTIME_HOST ?? "0.0.0.0",
@@ -39,5 +52,19 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig 
     codexGlobalBudgetMs: parseNumber(env.CODEX_GLOBAL_BUDGET_MS, 16000),
     promptCharBudget: parseNumber(env.NPC_RUNTIME_PROMPT_CHAR_BUDGET, 3600),
     threadStorePath: parsePath(env.NPC_RUNTIME_THREAD_STORE_PATH, "data/thread-store.json"),
+    reliabilityThresholds: {
+      fallbackRateMax: parseRate(
+        env.NPC_RUNTIME_FALLBACK_RATE_MAX,
+        DEFAULT_RELIABILITY_THRESHOLDS.fallbackRateMax,
+      ),
+      timeoutRateMax: parseRate(
+        env.NPC_RUNTIME_TIMEOUT_RATE_MAX,
+        DEFAULT_RELIABILITY_THRESHOLDS.timeoutRateMax,
+      ),
+      parseFailureRateMax: parseRate(
+        env.NPC_RUNTIME_PARSE_FAILURE_RATE_MAX,
+        DEFAULT_RELIABILITY_THRESHOLDS.parseFailureRateMax,
+      ),
+    },
   };
 }

@@ -11,6 +11,7 @@ namespace DreamOfOne.UI
 {
     public static class FontFallbackResolver
     {
+        private const string HangulProbe = "한글";
         private const string DefaultFontResource = "Fonts & Materials/LiberationSans SDF";
         private const string SourceFontResource = "Fonts/NotoSansCJKkr-Regular";
         private const string FallbackFontAssetResource = "Fonts/NotoSansCJKkr-Regular_SDF";
@@ -160,7 +161,7 @@ namespace DreamOfOne.UI
             runtimeFallback.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
             MarkAssetPersistent(runtimeFallback);
-            runtimeFallback.TryAddCharacters("한글", out _);
+            runtimeFallback.TryAddCharacters(HangulProbe, out _);
 
             return runtimeFallback;
         }
@@ -328,7 +329,19 @@ namespace DreamOfOne.UI
                 return false;
             }
 
-            return asset.HasCharacters("한글", out _);
+            if (asset.HasCharacters(HangulProbe, out _))
+            {
+                return true;
+            }
+
+            if (asset.atlasPopulationMode == AtlasPopulationMode.Dynamic ||
+                asset.atlasPopulationMode == AtlasPopulationMode.DynamicOS)
+            {
+                asset.TryAddCharacters(HangulProbe, out _);
+                return asset.HasCharacters(HangulProbe, out _);
+            }
+
+            return false;
         }
 
         private static bool IsFontAssetValid(TMP_FontAsset asset)

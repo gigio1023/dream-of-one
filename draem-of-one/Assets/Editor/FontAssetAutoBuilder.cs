@@ -11,6 +11,7 @@ namespace DreamOfOne.Editor
     [InitializeOnLoad]
     public static class FontAssetAutoBuilder
     {
+        private const string HangulProbe = "한글";
         private const string SourceFontPath = "Assets/Resources/Fonts/NotoSansCJKkr-Regular.otf";
         private const string FontAssetPath = "Assets/Resources/Fonts/NotoSansCJKkr-Regular_SDF.asset";
         private const string FontAssetName = "NotoSansCJKkr-Regular_SDF";
@@ -23,7 +24,18 @@ namespace DreamOfOne.Editor
             EditorApplication.delayCall += EnsureFontAssets;
         }
 
+        [MenuItem("Tools/DreamOfOne/Rebuild Hangul TMP Font Asset")]
+        public static void RebuildHangulFontAsset()
+        {
+            EnsureFontAssetsInternal(forceRebuild: true);
+        }
+
         private static void EnsureFontAssets()
+        {
+            EnsureFontAssetsInternal(forceRebuild: false);
+        }
+
+        private static void EnsureFontAssetsInternal(bool forceRebuild)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
             {
@@ -44,8 +56,9 @@ namespace DreamOfOne.Editor
             }
 
             var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontAssetPath);
-            if (IsFontAssetValid(existing))
+            if (!forceRebuild && IsFontAssetValid(existing) && HasHangul(existing))
             {
+                FontFallbackResolver.EnsureDefaultAndFallback(existing);
                 return;
             }
 
@@ -87,7 +100,7 @@ namespace DreamOfOne.Editor
             }
 
             fontAsset.ReadFontAssetDefinition();
-            fontAsset.TryAddCharacters("한글", out _);
+            fontAsset.TryAddCharacters(HangulProbe, out _);
             EditorUtility.SetDirty(fontAsset);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -134,6 +147,27 @@ namespace DreamOfOne.Editor
             }
 
             return asset.material != null && asset.material.mainTexture != null;
+        }
+
+        private static bool HasHangul(TMP_FontAsset asset)
+        {
+            if (asset == null)
+            {
+                return false;
+            }
+
+            if (asset.HasCharacters(HangulProbe, out _))
+            {
+                return true;
+            }
+
+            if (asset.atlasPopulationMode == AtlasPopulationMode.Dynamic)
+            {
+                asset.TryAddCharacters(HangulProbe, out _);
+                return asset.HasCharacters(HangulProbe, out _);
+            }
+
+            return false;
         }
     }
 }

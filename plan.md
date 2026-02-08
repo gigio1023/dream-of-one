@@ -294,16 +294,17 @@ All must hold:
 - `DRE-125` trajectory diversity gate is completed and merged.
 - `DRE-126` reliability threshold gate is completed and merged.
 - `DRE-127` runtime reliability summary endpoint gate is completed and merged.
-- Current active Linear queue is empty (`Todo`, `In Progress`, `In Review` all zero).
+- `DRE-128` reliability min-sample gate is completed and merged (`insufficient_sample` semantics added).
+- New active queue is reopened with `DRE-129` to close Phase 5 / Epic E4 documentation gate.
 
 ### 11.2 Accepted immediate focus
-- Close the remaining Phase 6 enforceability gap: prevent false `PASS` results under low decision sample sizes.
-- Keep Unity/gameplay scope fixed while finalizing backend reliability gate semantics.
+- Close Phase 5 / Epic E4 with an operator-grade local runbook and deterministic incident response notes.
+- Keep backend runtime behavior unchanged while finalizing docs and execution governance alignment.
 
 ### 11.3 Next Linear issue queue (ordered)
-1. `P6-reliability-min-sample-gate`: require minimum decision sample size before reliability gate can return `PASS`, with deterministic `insufficient_sample` signaling.
-2. `P6-reliability-gate-runbook`: document threshold/min-sample env knobs and operational interpretation for local/CI use.
-3. `B4-unity-correlation-consumption`: consume backend `requestId`/transport traces in Unity-side event records after backend gate semantics are finalized.
+1. `DRE-129` (`E4-runtime-runbook`): document local runtime operation and deterministic triage for readiness/reliability/fallback incidents.
+2. `B4-unity-correlation-consumption` (next creation): consume backend `meta.requestId` and transport traces into Unity-side event records.
+3. `DoD-release-evidence-pack` (next creation): capture reproducible evidence for session length, population coverage, and ending diversity gates.
 
 ### 11.4 Sequencing rule for this queue
 - Execute one Linear issue at a time.

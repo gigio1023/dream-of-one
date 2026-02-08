@@ -1,6 +1,6 @@
 # Codex Runbook (Linear SoT + Beads Execution + Codex Cloud)
 
-Revision date: 2026-02-07
+Revision date: 2026-02-08
 
 This document defines the operating runbook for **Codex CLI**.  
 The goal is to ensure: users provide only natural-language instructions; Codex CLI organizes and tracks Linear issues; implementations are done locally (with Beads when needed); and cloud-safe work is delegated to Codex Cloud via Linear.
@@ -213,7 +213,13 @@ Tracking policy:
 - `CODEX_TOOL_COMMAND` (default: `codex-tool-runner`)
 - `CODEX_TOOL_ARGS` (default: empty; space-separated)
 - `CODEX_TOOL_TIMEOUT_MS` (default: `8000`)
+- `CODEX_GLOBAL_BUDGET_MS` (default: `16000`)
+- `NPC_RUNTIME_PROMPT_CHAR_BUDGET` (default: `3600`)
 - `NPC_RUNTIME_THREAD_STORE_PATH` (default: `data/thread-store.json`)
+- `NPC_RUNTIME_RELIABILITY_MIN_DECISIONS` (default: `10`)
+- `NPC_RUNTIME_FALLBACK_RATE_MAX` (default: `0.35`)
+- `NPC_RUNTIME_TIMEOUT_RATE_MAX` (default: `0.2`)
+- `NPC_RUNTIME_PARSE_FAILURE_RATE_MAX` (default: `0.2`)
 
 ### 9.2 Local commands
 
@@ -242,13 +248,45 @@ Expected startup log:
 - Non-codex values are rejected deterministically with fallback reason `policy_reject_non_codex_path`.
 - Tool failures (timeout/tool/parse) follow retry-once then fallback.
 
-### 9.4 Smoke checks
+### 9.4 Smoke checks and endpoint interpretation
 
-Health:
+Liveness:
 
 ```bash
 curl -s http://127.0.0.1:8787/health
 ```
+
+Expected:
+- HTTP `200`
+- Body: `{"status":"ok","service":"npc-runtime"}`
+
+Readiness:
+
+```bash
+curl -s http://127.0.0.1:8787/health/ready
+```
+
+Expected:
+- HTTP `200` when ready, HTTP `503` when not ready.
+- `status` is `ready` or `not_ready`.
+- `reasons` contains deterministic codes when not ready:
+  - `codex_command_not_resolvable`
+  - `thread_store_path_not_accessible`
+- `checks.codexCommand` and `checks.threadStorePath` provide per-check details.
+
+Reliability:
+
+```bash
+curl -s http://127.0.0.1:8787/health/reliability
+```
+
+Expected:
+- HTTP `200` only when gate status is `pass`.
+- HTTP `503` when status is `fail`, `insufficient_sample`, or `not_available`.
+- Body shape:
+  - `status`: `pass` | `fail` | `insufficient_sample` | `not_available`
+  - `snapshot`: reliability counters/rates
+  - `gate`: `pass`, `status`, `reason`, `thresholds`, `violations`, `summary`
 
 Decision endpoint:
 
@@ -278,3 +316,33 @@ Response-only fields:
 - `transport` (`codex` | `codex-reply` | `fallback`)
 - `usedFallback`
 - `reason` (when fallback is used)
+
+### 9.5 Incident triage matrix (deterministic)
+
+| Signal | Where to check | Meaning | Immediate action |
+| --- | --- | --- | --- |
+| `status=not_ready` + `codex_command_not_resolvable` | `/health/ready` | Runtime cannot resolve Codex command path | Fix `CODEX_TOOL_COMMAND` / PATH, then recheck `/health/ready` |
+| `status=not_ready` + `thread_store_path_not_accessible` | `/health/ready` | Thread store parent path is not writable/readable | Fix `NPC_RUNTIME_THREAD_STORE_PATH` permissions/path, then recheck |
+| `status=insufficient_sample` | `/health/reliability` | Decision count below `minimumDecisions`; reliability gate is intentionally non-passable | Generate more decision traffic or lower `NPC_RUNTIME_RELIABILITY_MIN_DECISIONS` only if policy allows |
+| `status=fail` with `metric=fallbackRate` | `/health/reliability` `gate.violations` | Too many fallback responses | Inspect decision logs for repeated fallback reasons and reduce upstream failures |
+| `status=fail` with `metric=timeoutRate` | `/health/reliability` `gate.violations` | Too many codex timeouts | Tune timeout/budget or lower request pressure; verify Codex command health |
+| `status=fail` with `metric=parseFailureRate` | `/health/reliability` `gate.violations` | Too many parse failures | Inspect prompt/output schema compatibility and recent contract changes |
+| `reason=policy_reject_non_codex_path` in decision response log | `npc_decision_response` log | Request attempted non-codex cognition path and was rejected by policy | Fix caller payload (`cognitionPath`) to `codex`/`codex-reply` or omit it |
+| `reason=policy_required_field_missing` in decision response log | `npc_decision_response` log | Perception packet failed required-field pre-hook checks | Fix payload shape before request |
+| `reason=parse_failure` in decision response log | `npc_decision_response` log | Codex output could not be parsed to `NpcIntent` after retry policy | Inspect output/prompt schema drift and parser constraints |
+| `reason=codex_timeout` in decision response log | `npc_decision_response` log | Tool call exceeded timeout | Tune `CODEX_TOOL_TIMEOUT_MS` / `CODEX_GLOBAL_BUDGET_MS`, inspect command latency |
+| `reason=tool_failure` in decision response log | `npc_decision_response` log | Tool call failed for non-timeout reason | Inspect codex tool invocation and stderr behavior |
+
+### 9.6 Verification bundle
+
+Run the baseline gate:
+
+```bash
+cd backend/npc-runtime
+npm run check
+```
+
+Review output for:
+- build success
+- integration tests green
+- no regressions in readiness/reliability endpoint behavior

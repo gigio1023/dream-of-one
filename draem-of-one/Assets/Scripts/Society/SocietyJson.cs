@@ -1,9 +1,22 @@
 using System;
+using System.Linq;
 
 namespace DreamOfOne.Society
 {
     public static class SocietyJson
     {
+        private static readonly string[] KnownActionTypes =
+        {
+            "Move",
+            "Talk",
+            "Ask",
+            "Observe",
+            "Work",
+            "Report",
+            "Escort",
+            "Idle"
+        };
+
         /// <summary>
         /// Extract the first top-level JSON object from a possibly noisy LLM response.
         /// </summary>
@@ -36,9 +49,9 @@ namespace DreamOfOne.Society
             return true;
         }
 
-        public static bool TryParseDecision(string raw, out SocietyDecisionPayload decision, out string error)
+        public static bool TryParsePlan(string raw, out SocietyActionPlan plan, out string error)
         {
-            decision = null;
+            plan = null;
             error = string.Empty;
 
             if (!TryExtractJsonObject(raw, out string json, out error))
@@ -48,8 +61,8 @@ namespace DreamOfOne.Society
 
             try
             {
-                decision = UnityEngine.JsonUtility.FromJson<SocietyDecisionPayload>(json);
-                if (decision == null)
+                plan = UnityEngine.JsonUtility.FromJson<SocietyActionPlan>(json);
+                if (plan == null)
                 {
                     error = "JsonUtility returned null";
                     return false;
@@ -61,170 +74,163 @@ namespace DreamOfOne.Society
                 return false;
             }
 
-            NormalizeDecision(decision);
-            if (!IsSupportedSchema(decision.schemaVersion))
-            {
-                error = $"unsupported schemaVersion: {decision.schemaVersion}";
-                decision = null;
-                return false;
-            }
-
             return true;
         }
 
-        /// <summary>
-        /// Compatibility parser for legacy runtime contract diagnostics.
-        /// Maps society decision payload into a single-action intent view.
-        /// </summary>
         public static bool TryParseIntent(string raw, string expectedNpcId, out NpcIntentPayload intent, out string error)
         {
             intent = null;
             error = string.Empty;
 
-            if (!TryParseDecision(raw, out SocietyDecisionPayload decision, out error))
+            if (!TryExtractJsonObject(raw, out string json, out error))
             {
                 return false;
             }
 
-            SocietyDecisionAction primaryAction = null;
-            if (decision.actions != null && decision.actions.Length > 0)
+            try
             {
-                primaryAction = decision.actions[0];
+                intent = UnityEngine.JsonUtility.FromJson<NpcIntentPayload>(json);
+                if (intent == null)
+                {
+                    error = "JsonUtility returned null";
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
             }
 
-            string actionType = primaryAction != null
-                ? SocietyRuntimeContract.NormalizeActionType(primaryAction.actionType)
-                : "Observe";
-
-            intent = new NpcIntentPayload
-            {
-                schemaVersion = SocietyRuntimeContract.IntentSchemaVersion,
-                npcId = string.IsNullOrWhiteSpace(expectedNpcId) ? "UnknownNpc" : expectedNpcId.Trim(),
-                actionType = string.IsNullOrWhiteSpace(actionType) ? "Observe" : actionType,
-                targetId = primaryAction?.targetId ?? string.Empty,
-                locationId = primaryAction?.locationId ?? string.Empty,
-                placeId = primaryAction?.placeId ?? string.Empty,
-                zoneId = primaryAction?.zoneId ?? string.Empty,
-                ruleId = primaryAction?.ruleId ?? string.Empty,
-                utterance = decision.utterance ?? string.Empty,
-                reasonCodes = new[] { "compat_mapped" },
-                confidence = primaryAction != null && primaryAction.confidence >= 0f ? primaryAction.confidence : 0f,
-                meta = decision.meta ?? new SocietyDecisionMeta
-                {
-                    requestId = "missing-request-id",
-                    transport = "unknown"
-                }
-            };
-
-            return true;
+            return TryValidateIntent(intent, expectedNpcId, out error);
         }
 
-        public static bool TryParsePlan(string raw, out SocietyActionPlan plan, out string error)
+        public static bool TryParseDecisionEnvelope(string raw, string expectedNpcId, out DecisionEnvelopePayload envelope, out string error)
         {
-            plan = null;
+            envelope = null;
             error = string.Empty;
 
-            if (!TryParseDecision(raw, out var decision, out error))
+            if (!TryExtractJsonObject(raw, out string json, out error))
             {
                 return false;
             }
 
-            var mappedActions = new SocietyAction[decision.actions.Length];
-            for (int i = 0; i < decision.actions.Length; i++)
+            try
             {
-                var source = decision.actions[i];
-                mappedActions[i] = new SocietyAction
+                envelope = UnityEngine.JsonUtility.FromJson<DecisionEnvelopePayload>(json);
+                if (envelope == null)
                 {
-                    type = source.actionType,
-                    targetId = source.targetId,
-                    placeId = source.placeId,
-                    zoneId = source.zoneId,
-                    ruleId = source.ruleId,
-                    text = source.text,
-                    anchorName = string.IsNullOrEmpty(source.anchorName) ? source.locationId : source.anchorName
-                };
+                    error = "JsonUtility returned null";
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
             }
 
-            plan = new SocietyActionPlan
+            if (envelope.intent == null)
             {
-                intent = decision.intent,
-                speak = decision.utterance,
-                actions = mappedActions,
-                memoryWrite = decision.memoryWrite
-            };
+                error = "intent is required";
+                return false;
+            }
+
+            if (envelope.meta == null)
+            {
+                error = "meta is required";
+                return false;
+            }
+
+            if (!TryValidateIntent(envelope.intent, expectedNpcId, out error))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(envelope.meta.transport))
+            {
+                error = "meta.transport is required";
+                return false;
+            }
+
+            if (envelope.meta.transport != "codex"
+                && envelope.meta.transport != "codex-reply"
+                && envelope.meta.transport != "fallback")
+            {
+                error = $"unknown meta.transport: {envelope.meta.transport}";
+                return false;
+            }
 
             return true;
         }
 
-        private static void NormalizeDecision(SocietyDecisionPayload decision)
+        private static bool TryValidateIntent(NpcIntentPayload intent, string expectedNpcId, out string error)
         {
-            if (decision == null)
+            error = string.Empty;
+
+            if (intent == null)
             {
-                return;
+                error = "intent is required";
+                return false;
             }
 
-            if (decision.meta == null)
+            if (string.IsNullOrWhiteSpace(intent.schemaVersion))
             {
-                decision.meta = new SocietyDecisionMeta();
+                // Backend contract omits schemaVersion on intent; normalize to runtime contract value.
+                intent.schemaVersion = SocietyRuntimeContract.IntentSchemaVersion;
             }
 
-            decision.meta.requestId = NormalizeMetaField(decision.meta.requestId, "missing-request-id");
-            decision.meta.transport = NormalizeMetaField(decision.meta.transport, "unknown");
-
-            if (string.IsNullOrWhiteSpace(decision.schemaVersion))
+            if (!string.Equals(intent.schemaVersion, SocietyRuntimeContract.IntentSchemaVersion, StringComparison.Ordinal))
             {
-                decision.schemaVersion = SocietyRuntimeContract.DecisionSchemaVersion;
+                error = $"unsupported schemaVersion: {intent.schemaVersion}";
+                return false;
             }
 
-            if (string.IsNullOrWhiteSpace(decision.utterance))
+            if (string.IsNullOrWhiteSpace(intent.npcId))
             {
-                decision.utterance = decision.speak ?? string.Empty;
+                error = "npcId is required";
+                return false;
             }
 
-            if (decision.actions == null)
+            if (!string.IsNullOrEmpty(expectedNpcId) &&
+                !string.Equals(intent.npcId, expectedNpcId, StringComparison.Ordinal))
             {
-                decision.actions = Array.Empty<SocietyDecisionAction>();
-                return;
+                error = $"npcId mismatch: expected={expectedNpcId}, got={intent.npcId}";
+                return false;
             }
 
-            for (int i = 0; i < decision.actions.Length; i++)
+            if (string.IsNullOrWhiteSpace(intent.actionType))
             {
-                var action = decision.actions[i];
-                if (action == null)
-                {
-                    continue;
-                }
-
-                if (string.IsNullOrWhiteSpace(action.actionType))
-                {
-                    action.actionType = action.type ?? string.Empty;
-                }
-
-                if (string.IsNullOrWhiteSpace(action.locationId) && !string.IsNullOrWhiteSpace(action.anchorName))
-                {
-                    action.locationId = action.anchorName;
-                }
-            }
-        }
-
-        private static string NormalizeMetaField(string value, string fallback)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return fallback;
+                error = "actionType is required";
+                return false;
             }
 
-            return value.Trim();
-        }
-
-        private static bool IsSupportedSchema(string schemaVersion)
-        {
-            if (string.IsNullOrWhiteSpace(schemaVersion))
+            if (!KnownActionTypes.Contains(intent.actionType, StringComparer.Ordinal))
             {
-                return true;
+                error = $"unknown actionType: {intent.actionType}";
+                return false;
             }
 
-            return schemaVersion.Equals(SocietyRuntimeContract.DecisionSchemaVersion, StringComparison.OrdinalIgnoreCase);
+            if (intent.reasonCodes == null || intent.reasonCodes.Length == 0)
+            {
+                error = "reasonCodes is required";
+                return false;
+            }
+
+            if (intent.confidence < 0f || intent.confidence > 1f)
+            {
+                error = "confidence must be between 0 and 1";
+                return false;
+            }
+
+            if ((intent.actionType == "Talk" || intent.actionType == "Ask") &&
+                string.IsNullOrWhiteSpace(intent.utterance))
+            {
+                error = $"{intent.actionType} requires utterance";
+                return false;
+            }
+
+            return true;
         }
     }
 }

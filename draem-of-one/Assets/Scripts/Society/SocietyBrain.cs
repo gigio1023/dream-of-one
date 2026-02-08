@@ -16,6 +16,10 @@ namespace DreamOfOne.Society
     /// </summary>
     public sealed class SocietyBrain : MonoBehaviour
     {
+        private const string MissingDecisionRequestId = "missing-request-id";
+        private const string UnknownDecisionTransport = "unknown";
+        private const string UnityFallbackTransport = "unity-fallback";
+
         private static readonly string[] DefaultAllowedActionTypes =
         {
             "Talk",
@@ -359,6 +363,31 @@ namespace DreamOfOne.Society
             };
         }
 
+        /// <summary>
+        /// Compatibility entrypoint used by diagnostics to verify intent-application contract shape.
+        /// </summary>
+        public bool TryApplyIntentJson(string raw, out string error)
+        {
+            error = string.Empty;
+
+            string[] allowedActions = ResolveAllowedActionTypes();
+            if (!SocietyJson.TryParseDecision(raw, out var decision, out error))
+            {
+                DeterministicFallback();
+                return false;
+            }
+
+            if (!SocietyDecisionValidator.TryValidate(decision, allowedActions, out string rejectReason))
+            {
+                error = rejectReason;
+                DeterministicFallback();
+                return false;
+            }
+
+            ExecuteDecision(decision, allowedActions);
+            return true;
+        }
+
         private void ExecuteDecision(SocietyDecisionPayload decision, string[] allowedActions)
         {
             if (decision == null)
@@ -382,7 +411,7 @@ namespace DreamOfOne.Society
             {
                 if (IsActionAllowed("Talk", allowedActions))
                 {
-                    ExecuteSpeak(decision.utterance);
+                    ExecuteSpeak(decision.utterance, decision);
                 }
                 return;
             }
@@ -411,20 +440,24 @@ namespace DreamOfOne.Society
                     continue;
                 }
 
-                if (TryExecuteAction(actionType, action, decision.utterance))
+                if (TryExecuteAction(actionType, action, decision.utterance, decision))
                 {
                     return;
                 }
             }
         }
 
-        private bool TryExecuteAction(string actionType, SocietyDecisionAction action, string defaultUtterance)
+        private bool TryExecuteAction(
+            string actionType,
+            SocietyDecisionAction action,
+            string defaultUtterance,
+            SocietyDecisionPayload decision)
         {
             switch (actionType)
             {
                 case "Talk":
                 case "Ask":
-                    return ExecuteSpeak(string.IsNullOrWhiteSpace(action.text) ? defaultUtterance : action.text);
+                    return ExecuteSpeak(string.IsNullOrWhiteSpace(action.text) ? defaultUtterance : action.text, decision);
                 case "Move":
                 case "Work":
                 case "Escort":
@@ -439,7 +472,7 @@ namespace DreamOfOne.Society
             }
         }
 
-        private bool ExecuteSpeak(string text)
+        private bool ExecuteSpeak(string text, SocietyDecisionPayload decision)
         {
             if (string.IsNullOrWhiteSpace(text) || eventLog == null || persona == null)
             {
@@ -452,14 +485,16 @@ namespace DreamOfOne.Society
             }
 
             persona.MarkSpoke(Time.time);
-            eventLog.RecordEvent(new EventRecord
+            var record = new EventRecord
             {
                 actorId = persona.NpcId,
                 actorRole = persona.Role,
                 eventType = CoreEventType.NpcUtterance,
                 note = text.Trim(),
                 severity = 0
-            });
+            };
+            ApplyDecisionTrace(record, decision);
+            eventLog.RecordEvent(record);
             return true;
         }
 
@@ -518,7 +553,30 @@ namespace DreamOfOne.Society
             }
 
             // Keep fallback low-noise: only occasionally speak.
-            ExecuteSpeak("음... 상황을 좀 더 봐야겠네요.");
+            ExecuteSpeak("음... 상황을 좀 더 봐야겠네요.", null);
+        }
+
+        private static void ApplyDecisionTrace(EventRecord record, SocietyDecisionPayload decision)
+        {
+            if (record == null)
+            {
+                return;
+            }
+
+            if (decision == null || decision.meta == null)
+            {
+                record.decisionRequestId = MissingDecisionRequestId;
+                record.decisionTransport = UnityFallbackTransport;
+                return;
+            }
+
+            record.decisionRequestId = NormalizeOrFallback(decision.meta.requestId, MissingDecisionRequestId);
+            record.decisionTransport = NormalizeOrFallback(decision.meta.transport, UnknownDecisionTransport);
+        }
+
+        private static string NormalizeOrFallback(string value, string fallback)
+        {
+            return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
         }
 
         private static bool IsActionAllowed(string actionType, string[] allowed)

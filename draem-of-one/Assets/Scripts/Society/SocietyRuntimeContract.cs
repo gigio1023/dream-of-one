@@ -10,6 +10,9 @@ namespace DreamOfOne.Society
     {
         public const string ObservationSchemaVersion = "society.observe.v1";
         public const string DecisionSchemaVersion = "society.decision.v1";
+        // Compatibility aliases kept for diagnostics/runtime contract reflection.
+        public const string PerceptionSchemaVersion = "society.perception.v1";
+        public const string IntentSchemaVersion = "society.intent.v1";
 
         private static readonly string[] KnownActionTypes =
         {
@@ -176,6 +179,30 @@ namespace DreamOfOne.Society
     }
 
     [Serializable]
+    public sealed class NpcIntentPayload
+    {
+        public string schemaVersion = string.Empty;
+        public string npcId = string.Empty;
+        public string actionType = string.Empty;
+        public string targetId = string.Empty;
+        public string locationId = string.Empty;
+        public string placeId = string.Empty;
+        public string zoneId = string.Empty;
+        public string ruleId = string.Empty;
+        public string utterance = string.Empty;
+        public string[] reasonCodes = Array.Empty<string>();
+        public float confidence = -1f;
+        public SocietyDecisionMeta meta = new();
+    }
+
+    [Serializable]
+    public sealed class SocietyDecisionMeta
+    {
+        public string requestId = string.Empty;
+        public string transport = string.Empty;
+    }
+
+    [Serializable]
     public sealed class SocietyDecisionPayload
     {
         public string schemaVersion = string.Empty;
@@ -184,6 +211,7 @@ namespace DreamOfOne.Society
         public string speak = string.Empty; // legacy alias
         public SocietyDecisionAction[] actions = Array.Empty<SocietyDecisionAction>();
         public string memoryWrite = string.Empty;
+        public SocietyDecisionMeta meta = new();
     }
 
     [Serializable]

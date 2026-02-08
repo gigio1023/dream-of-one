@@ -32,6 +32,8 @@ namespace DreamOfOne.Core
         SeatClaimed,
         NoiseObserved,
         CctvCaptured,
-        ExposureUpdated
+        ExposureUpdated,
+        IntentRejected,
+        IntentFallbackApplied
     }
 }

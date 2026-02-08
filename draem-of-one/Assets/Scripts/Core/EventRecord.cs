@@ -49,6 +49,12 @@ namespace DreamOfOne.Core
         /// <summary>출처(가십 원문/증거 생성자 등).</summary>
         public string sourceId = string.Empty;
 
+        /// <summary>LLM/백엔드 결정 상관관계 추적 ID.</summary>
+        public string decisionRequestId = string.Empty;
+
+        /// <summary>결정 생성 경로(예: codex, codex-reply, fallback).</summary>
+        public string decisionTransport = string.Empty;
+
         /// <summary>표준 payload(규칙/수치/추가 노트).</summary>
         public EventPayload payload = new();
 

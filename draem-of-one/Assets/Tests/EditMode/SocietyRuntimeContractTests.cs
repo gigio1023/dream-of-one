@@ -32,6 +32,34 @@ namespace DreamOfOne.Tests
         }
 
         [Test]
+        public void TryParseDecision_ParsesMetaRequestIdAndTransport()
+        {
+            const string raw = "{\"schemaVersion\":\"society.decision.v1\",\"intent\":\"trace\",\"meta\":{\"requestId\":\"req-123\",\"transport\":\"codex-reply\"}}";
+
+            bool ok = SocietyJson.TryParseDecision(raw, out SocietyDecisionPayload decision, out string error);
+
+            Assert.IsTrue(ok, error);
+            Assert.IsNotNull(decision);
+            Assert.IsNotNull(decision.meta);
+            Assert.AreEqual("req-123", decision.meta.requestId);
+            Assert.AreEqual("codex-reply", decision.meta.transport);
+        }
+
+        [Test]
+        public void TryParseDecision_NormalizesMissingMetaToDeterministicFallbacks()
+        {
+            const string raw = "{\"schemaVersion\":\"society.decision.v1\",\"intent\":\"trace\"}";
+
+            bool ok = SocietyJson.TryParseDecision(raw, out SocietyDecisionPayload decision, out string error);
+
+            Assert.IsTrue(ok, error);
+            Assert.IsNotNull(decision);
+            Assert.IsNotNull(decision.meta);
+            Assert.AreEqual("missing-request-id", decision.meta.requestId);
+            Assert.AreEqual("unknown", decision.meta.transport);
+        }
+
+        [Test]
         public void TryParseDecision_RejectsUnsupportedSchema()
         {
             const string raw = "{\"schemaVersion\":\"society.decision.v9\",\"intent\":\"x\"}";

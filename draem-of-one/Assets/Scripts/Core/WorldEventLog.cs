@@ -65,6 +65,8 @@ namespace DreamOfOne.Core
             public string note;
             public int severity;
             public float trust;
+            public string decisionRequestId;
+            public string decisionTransport;
         }
 
         private void Awake()
@@ -207,7 +209,9 @@ namespace DreamOfOne.Core
                 topic = record.topic,
                 note = record.note,
                 severity = record.severity,
-                trust = record.trust
+                trust = record.trust,
+                decisionRequestId = record.decisionRequestId,
+                decisionTransport = record.decisionTransport
             });
             lock (fileWriteQueue)
             {

@@ -72,6 +72,53 @@ namespace DreamOfOne.Society
             return true;
         }
 
+        /// <summary>
+        /// Compatibility parser for legacy runtime contract diagnostics.
+        /// Maps society decision payload into a single-action intent view.
+        /// </summary>
+        public static bool TryParseIntent(string raw, string expectedNpcId, out NpcIntentPayload intent, out string error)
+        {
+            intent = null;
+            error = string.Empty;
+
+            if (!TryParseDecision(raw, out SocietyDecisionPayload decision, out error))
+            {
+                return false;
+            }
+
+            SocietyDecisionAction primaryAction = null;
+            if (decision.actions != null && decision.actions.Length > 0)
+            {
+                primaryAction = decision.actions[0];
+            }
+
+            string actionType = primaryAction != null
+                ? SocietyRuntimeContract.NormalizeActionType(primaryAction.actionType)
+                : "Observe";
+
+            intent = new NpcIntentPayload
+            {
+                schemaVersion = SocietyRuntimeContract.IntentSchemaVersion,
+                npcId = string.IsNullOrWhiteSpace(expectedNpcId) ? "UnknownNpc" : expectedNpcId.Trim(),
+                actionType = string.IsNullOrWhiteSpace(actionType) ? "Observe" : actionType,
+                targetId = primaryAction?.targetId ?? string.Empty,
+                locationId = primaryAction?.locationId ?? string.Empty,
+                placeId = primaryAction?.placeId ?? string.Empty,
+                zoneId = primaryAction?.zoneId ?? string.Empty,
+                ruleId = primaryAction?.ruleId ?? string.Empty,
+                utterance = decision.utterance ?? string.Empty,
+                reasonCodes = new[] { "compat_mapped" },
+                confidence = primaryAction != null && primaryAction.confidence >= 0f ? primaryAction.confidence : 0f,
+                meta = decision.meta ?? new SocietyDecisionMeta
+                {
+                    requestId = "missing-request-id",
+                    transport = "unknown"
+                }
+            };
+
+            return true;
+        }
+
         public static bool TryParsePlan(string raw, out SocietyActionPlan plan, out string error)
         {
             plan = null;
@@ -116,6 +163,14 @@ namespace DreamOfOne.Society
                 return;
             }
 
+            if (decision.meta == null)
+            {
+                decision.meta = new SocietyDecisionMeta();
+            }
+
+            decision.meta.requestId = NormalizeMetaField(decision.meta.requestId, "missing-request-id");
+            decision.meta.transport = NormalizeMetaField(decision.meta.transport, "unknown");
+
             if (string.IsNullOrWhiteSpace(decision.schemaVersion))
             {
                 decision.schemaVersion = SocietyRuntimeContract.DecisionSchemaVersion;
@@ -150,6 +205,16 @@ namespace DreamOfOne.Society
                     action.locationId = action.anchorName;
                 }
             }
+        }
+
+        private static string NormalizeMetaField(string value, string fallback)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return fallback;
+            }
+
+            return value.Trim();
         }
 
         private static bool IsSupportedSchema(string schemaVersion)

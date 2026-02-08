@@ -8,6 +8,7 @@ import { DefaultCodexBroker } from "../../src/broker/codex-broker.js";
 import { CodexToolTimeoutError, type CodexToolGateway, type CodexToolResponse } from "../../src/broker/codex-tool-gateway.js";
 import { FileThreadStore, InMemoryThreadStore } from "../../src/broker/thread-store.js";
 import type { PerceptionPacket } from "../../src/contracts/types.js";
+import { ReliabilityTelemetry } from "../../src/runtime/reliability-telemetry.js";
 
 function buildPacket(): PerceptionPacket {
   return {
@@ -29,9 +30,14 @@ class FakeGateway implements CodexToolGateway {
   codexReplySequence: Array<{ response?: CodexToolResponse; error?: Error }> = [];
   codexError?: Error;
   codexReplyError?: Error;
+  codexDelayMs = 0;
+  codexReplyDelayMs = 0;
 
   async codex(prompt: string): Promise<CodexToolResponse> {
     this.calls.push({ tool: "codex", prompt });
+    if (this.codexDelayMs > 0) {
+      await new Promise(resolve => setTimeout(resolve, this.codexDelayMs));
+    }
     const step = this.codexSequence.shift();
     if (step?.error) throw step.error;
     if (step?.response) return step.response;
@@ -42,6 +48,9 @@ class FakeGateway implements CodexToolGateway {
 
   async codexReply(threadId: string, prompt: string): Promise<CodexToolResponse> {
     this.calls.push({ tool: "codex-reply", prompt, threadId });
+    if (this.codexReplyDelayMs > 0) {
+      await new Promise(resolve => setTimeout(resolve, this.codexReplyDelayMs));
+    }
     const step = this.codexReplySequence.shift();
     if (step?.error) throw step.error;
     if (step?.response) return step.response;
@@ -186,7 +195,7 @@ test("codex timeout triggers deterministic fallback", async () => {
   assert.equal(result.meta.reason, "codex_timeout");
   assert.equal(result.intent.actionType, "Observe");
   assert.deepEqual(result.intent.reasonCodes, ["fallback:codex_timeout"]);
-  assert.deepEqual(gateway.calls.map(c => c.tool), ["codex", "codex"]);
+  assert.deepEqual(gateway.calls.map(c => c.tool), ["codex"]);
 });
 
 test("pre-hook rejects non-codex cognition path before calling gateway", async () => {
@@ -269,4 +278,41 @@ test("tool-hook retries once and succeeds on second codex call", async () => {
   assert.equal(result.intent.actionType, "Work");
   assert.deepEqual(result.intent.reasonCodes, ["retry_success"]);
   assert.deepEqual(gateway.calls.map(c => c.tool), ["codex", "codex"]);
+});
+
+test("global runtime budget can short-circuit retry with budget fallback", async () => {
+  const store = new InMemoryThreadStore();
+  const gateway = new FakeGateway();
+  const telemetry = new ReliabilityTelemetry();
+  gateway.codexDelayMs = 5;
+  gateway.codexSequence.push({
+    response: {
+      threadId: "thread-budget",
+      content: "not-json",
+    },
+  });
+  gateway.codexSequence.push({
+    response: {
+      threadId: "thread-budget",
+      content: JSON.stringify({
+        npcId: "npc-1",
+        actionType: "Observe",
+        reasonCodes: ["unexpected_second_try"],
+        confidence: 0.8,
+      }),
+    },
+  });
+
+  const broker = new DefaultCodexBroker(gateway, store, {
+    maxToolRuntimeMs: 1,
+    telemetry,
+  });
+  const result = await broker.decide(buildPacket());
+  const metrics = telemetry.snapshot();
+
+  assert.equal(result.meta.usedFallback, true);
+  assert.equal(result.meta.reason, "codex_budget_exceeded");
+  assert.deepEqual(gateway.calls.map(c => c.tool), ["codex"]);
+  assert.equal(metrics.counters.budgetExceeded, 1);
+  assert.equal(metrics.counters.retryAttempts, 1);
 });

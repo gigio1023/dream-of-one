@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { RuntimeConfig } from "../config.js";
 import type { DecisionService } from "../runtime/decision-service.js";
+import type { ReliabilityTelemetry } from "../runtime/reliability-telemetry.js";
 
 async function readJsonBody(req: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
@@ -29,7 +30,11 @@ function asStringField(value: unknown): string | undefined {
   return value;
 }
 
-export function startHttpServer(config: RuntimeConfig, decisionService: DecisionService): Server {
+export function startHttpServer(
+  config: RuntimeConfig,
+  decisionService: DecisionService,
+  telemetry?: ReliabilityTelemetry,
+): Server {
   const server = createServer(async (req, res) => {
     try {
       if (req.method === "GET" && req.url === "/health") {
@@ -38,7 +43,13 @@ export function startHttpServer(config: RuntimeConfig, decisionService: Decision
           service: "npc-runtime",
           codexCommand: config.codexCommand,
           codexTimeoutMs: config.codexTimeoutMs,
+          codexGlobalBudgetMs: config.codexGlobalBudgetMs,
         });
+        return;
+      }
+
+      if (req.method === "GET" && req.url === "/v1/npc/metrics") {
+        writeJson(res, 200, telemetry?.snapshot() ?? { counters: {}, rates: {} });
         return;
       }
 

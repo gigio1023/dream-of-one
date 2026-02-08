@@ -2,12 +2,14 @@ import type { PerceptionPacket, NpcIntent } from "../contracts/types.js";
 import type { CodexToolGateway, CodexToolResponse } from "../broker/codex-tool-gateway.js";
 import { CodexToolError, CodexToolTimeoutError } from "../broker/codex-tool-gateway.js";
 import { IntentParseError, parseNpcIntent } from "../runtime/schema.js";
+import type { ReliabilityTelemetry } from "../runtime/reliability-telemetry.js";
 
 export const HOOK_REASONS = {
   nonCodexPath: "policy_reject_non_codex_path",
   requiredFieldMissing: "policy_required_field_missing",
   parseFailure: "parse_failure",
   toolTimeout: "codex_timeout",
+  toolBudgetExceeded: "codex_budget_exceeded",
   toolFailure: "tool_failure",
 } as const;
 
@@ -34,6 +36,8 @@ export interface ToolHookOptions {
   prompt: string;
   expectedNpcId: string;
   maxAttempts: number;
+  maxTotalMs?: number;
+  telemetry?: ReliabilityTelemetry;
 }
 
 export function runPreHook(packet: PerceptionPacket): PreHookResult {
@@ -51,8 +55,19 @@ export function runPreHook(packet: PerceptionPacket): PreHookResult {
 export async function runToolHook(options: ToolHookOptions): Promise<ToolHookSuccess | ToolHookFailure> {
   const transport: "codex" | "codex-reply" = options.currentThreadId ? "codex-reply" : "codex";
   const attempts = Math.max(options.maxAttempts, 1);
+  const startedAt = Date.now();
 
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    if (options.maxTotalMs !== undefined && options.maxTotalMs > 0) {
+      const elapsed = Date.now() - startedAt;
+      if (elapsed >= options.maxTotalMs) {
+        options.telemetry?.recordFailure(HOOK_REASONS.toolBudgetExceeded);
+        return { reason: HOOK_REASONS.toolBudgetExceeded };
+      }
+    }
+
+    options.telemetry?.recordToolAttempt();
+
     try {
       const response = transport === "codex-reply"
         ? await options.gateway.codexReply(options.currentThreadId!, options.prompt)
@@ -65,9 +80,17 @@ export async function runToolHook(options: ToolHookOptions): Promise<ToolHookSuc
       };
     } catch (error) {
       const reason = classifyToolError(error);
+      options.telemetry?.recordFailure(reason);
       if (attempt >= attempts) {
         return { reason };
       }
+
+      // Reliability policy: retry parse/schema failures only.
+      if (reason !== HOOK_REASONS.parseFailure) {
+        return { reason };
+      }
+
+      options.telemetry?.recordRetryAttempt();
     }
   }
 

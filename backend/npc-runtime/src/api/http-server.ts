@@ -65,11 +65,13 @@ export function startHttpServer(
         }
 
         const gate = evaluateReliabilityThresholdGate(snapshot, config.reliabilityThresholds);
-        writeJson(res, gate.pass ? 200 : 503, {
-          status: gate.pass ? "pass" : "fail",
+        writeJson(res, gate.status === "pass" ? 200 : 503, {
+          status: gate.status,
           snapshot: gate.snapshot,
           gate: {
             pass: gate.pass,
+            status: gate.status,
+            reason: gate.reason,
             thresholds: gate.thresholds,
             violations: gate.violations,
             summary: gate.summary,

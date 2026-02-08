@@ -7,12 +7,15 @@ status: Locked v5 (v0.1 Complete + v0.2 Transition Contract)
 owner: You
 ---
 
-# Dream of One - Project Definition (Codex-CLI-First v5)
+# Dream of One - Project Definition (Unity + Codex Social Sim v5)
 
 ## 0) One-line definition
-A 3D social-stealth simulation where NPC society is driven by Codex CLI reasoning, while the player survives by behaving procedurally normal and avoiding lucid identification.
+A Unity 3D social-stealth simulation where NPC society is driven by Codex CLI reasoning, while the player survives by behaving procedurally normal and avoiding lucid identification.
 
 ## 1) Product goal (simple, fixed)
+Primary evaluation question:
+- In Unity play, does a Codex-driven NPC society actually run the social pressure loop against the player?
+
 Ship a playable v0.1 prototype where:
 - Unity controls the 3D world and action execution.
 - NPC cognition is produced by Codex CLI (not hardcoded behavior trees).
@@ -20,7 +23,9 @@ Ship a playable v0.1 prototype where:
 
 This project is not a content-heavy RPG. It is a focused proof that an LLM-agent society can run as the core gameplay loop.
 
-## 2) Platform and architecture decision
+## 2) Technical architecture (supporting, not primary)
+These choices support delivery and reliability. They are secondary to proving the Unity social-simulation intent above.
+
 ### 2.1 Chosen platform (locked for v0.1)
 - Runtime client: Unity (required for 3D environment control).
 - Backend runtime: Node.js 24 LTS.
@@ -90,19 +95,22 @@ This project is not a content-heavy RPG. It is a focused proof that an LLM-agent
 - Decision telemetry must include transport path (`codex`, `codex-reply`, `fallback`) and reason trace.
 
 ## 5) Core fantasy and player promise
+- The world is simulated in Unity while NPC cognition is Codex-driven.
 - The player is the only lucid dreamer.
 - NPCs treat dream rules as normal social procedure.
 - The player is the target of social scrutiny, not the investigator.
 - If the player is identified as lucid, the session ends immediately.
 
 ## 6) Design pillars
-1. **Codex cognition first**: NPC decisions come from Codex CLI threads.
-2. **Unity execution authority**: world state and action execution remain deterministic.
+1. **Unity execution authority**: world state and action execution remain deterministic.
+2. **Codex cognition first**: NPC decisions come from Codex CLI threads.
 3. **Dream-cover pressure**: social suspicion and exposure drive tension.
 4. **Readable causality**: every escalation is explainable.
 5. **Small system, deep behavior**: fewer mechanics, stronger agent behavior.
 
 ## 7) System boundary
+Unity simulation and Codex cognition are the product intent; backend/runtime tooling exists to support this loop.
+
 ### 7.1 Unity responsibilities
 - Observe world and produce `PerceptionPacket`.
 - Validate intent against world and authority constraints.
@@ -255,6 +263,10 @@ Each major pressure event must show:
 
 ## 14) Acceptance criteria (prototype v0.1)
 All must hold:
+Priority interpretation:
+- `1`-`4`: core intent proof in Unity (must be visibly true in play).
+- `5`-`10`: supporting technical/runtime gates that keep the core loop stable.
+
 1. Most non-idle NPC actions are Codex-generated (target >= 70%).
 2. Session completes in 10-12 minutes with one of 3 endings.
 3. Three consecutive runs show non-identical social trajectories.

@@ -42,6 +42,13 @@ function parseRate(value: string | undefined, fallback: number): number {
   return parsed;
 }
 
+function parseInteger(value: string | undefined, fallback: number): number {
+  if (!value) return fallback;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return Math.floor(parsed);
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig {
   return {
     host: env.NPC_RUNTIME_HOST ?? "0.0.0.0",
@@ -53,6 +60,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig 
     promptCharBudget: parseNumber(env.NPC_RUNTIME_PROMPT_CHAR_BUDGET, 3600),
     threadStorePath: parsePath(env.NPC_RUNTIME_THREAD_STORE_PATH, "data/thread-store.json"),
     reliabilityThresholds: {
+      minimumDecisions: parseInteger(
+        env.NPC_RUNTIME_RELIABILITY_MIN_DECISIONS,
+        DEFAULT_RELIABILITY_THRESHOLDS.minimumDecisions,
+      ),
       fallbackRateMax: parseRate(
         env.NPC_RUNTIME_FALLBACK_RATE_MAX,
         DEFAULT_RELIABILITY_THRESHOLDS.fallbackRateMax,

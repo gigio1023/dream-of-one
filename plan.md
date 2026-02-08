@@ -290,19 +290,20 @@ All must hold:
 
 ## 11) Execution snapshot and next queue (2026-02-08)
 ### 11.1 Newly closed gates
-- `DRE-111` master vertical-slice issue is completed.
-- `DRE-123` continuity stability gate is completed and merged.
-- `DRE-112` runtime build-health closure is completed and merged.
+- `DRE-124` correlation-id contract gate is completed and merged.
+- `DRE-125` trajectory diversity gate is completed and merged.
+- `DRE-126` reliability threshold gate is completed and merged.
+- `DRE-127` runtime reliability summary endpoint gate is completed and merged.
 - Current active Linear queue is empty (`Todo`, `In Progress`, `In Review` all zero).
 
 ### 11.2 Accepted immediate focus
-- Start Phase 6 hardening with backend-first observability evidence.
-- Keep Unity/gameplay scope fixed while adding measurable replayability and runtime traceability signals.
+- Close the remaining Phase 6 enforceability gap: prevent false `PASS` results under low decision sample sizes.
+- Keep Unity/gameplay scope fixed while finalizing backend reliability gate semantics.
 
 ### 11.3 Next Linear issue queue (ordered)
-1. `P6-correlation-id-contract`: return and log `requestId` in decision envelope meta for end-to-end traceability.
-2. `P6-trajectory-diversity-gate`: add executable gate proving three consecutive non-identical social trajectories.
-3. `P6-reliability-threshold-gate`: enforce run-level timeout/fallback/parse-failure threshold checks.
+1. `P6-reliability-min-sample-gate`: require minimum decision sample size before reliability gate can return `PASS`, with deterministic `insufficient_sample` signaling.
+2. `P6-reliability-gate-runbook`: document threshold/min-sample env knobs and operational interpretation for local/CI use.
+3. `B4-unity-correlation-consumption`: consume backend `requestId`/transport traces in Unity-side event records after backend gate semantics are finalized.
 
 ### 11.4 Sequencing rule for this queue
 - Execute one Linear issue at a time.

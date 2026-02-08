@@ -1,8 +1,10 @@
 import type { ReliabilitySnapshot } from "./reliability-telemetry.js";
 
 export type ReliabilityRateMetric = "fallbackRate" | "timeoutRate" | "parseFailureRate";
+export type ReliabilityGateStatus = "pass" | "fail" | "insufficient_sample";
 
 export interface ReliabilityThresholds {
+  minimumDecisions: number;
   fallbackRateMax: number;
   timeoutRateMax: number;
   parseFailureRateMax: number;
@@ -16,6 +18,8 @@ export interface ReliabilityThresholdViolation {
 
 export interface ReliabilityThresholdResult {
   pass: boolean;
+  status: ReliabilityGateStatus;
+  reason?: "insufficient_sample";
   thresholds: ReliabilityThresholds;
   snapshot: ReliabilitySnapshot;
   violations: ReliabilityThresholdViolation[];
@@ -23,6 +27,7 @@ export interface ReliabilityThresholdResult {
 }
 
 export const DEFAULT_RELIABILITY_THRESHOLDS: ReliabilityThresholds = {
+  minimumDecisions: 10,
   fallbackRateMax: 0.35,
   timeoutRateMax: 0.2,
   parseFailureRateMax: 0.2,
@@ -40,6 +45,21 @@ export function evaluateReliabilityThresholdGate(
     ...DEFAULT_RELIABILITY_THRESHOLDS,
     ...overrides,
   };
+  const counters = snapshot.counters;
+
+  if (counters.decisionRequests < thresholds.minimumDecisions) {
+    const summary = `[ReliabilityGate] INSUFFICIENT_SAMPLE decisions=${counters.decisionRequests}` +
+      ` minimum=${thresholds.minimumDecisions}`;
+    return {
+      pass: false,
+      status: "insufficient_sample",
+      reason: "insufficient_sample",
+      thresholds,
+      snapshot,
+      violations: [],
+      summary,
+    };
+  }
 
   const checks: Array<{ metric: ReliabilityRateMetric; actual: number; max: number }> = [
     { metric: "fallbackRate", actual: snapshot.rates.fallbackRate, max: thresholds.fallbackRateMax },
@@ -56,7 +76,6 @@ export function evaluateReliabilityThresholdGate(
     }));
 
   const pass = violations.length === 0;
-  const counters = snapshot.counters;
   const violationText = violations.length > 0
     ? ` violations=${violations.map(item => formatMetric(item.metric, item.actual, item.max)).join(",")}`
     : "";
@@ -68,6 +87,7 @@ export function evaluateReliabilityThresholdGate(
 
   return {
     pass,
+    status: pass ? "pass" : "fail",
     thresholds,
     snapshot,
     violations,

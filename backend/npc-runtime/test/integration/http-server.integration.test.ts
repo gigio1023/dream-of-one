@@ -182,7 +182,12 @@ test("liveness endpoint remains lightweight", async () => {
 
 test("reliability endpoint returns pass with counters and threshold summary", async () => {
   const port = await getFreePort();
-  const config = buildConfig(port);
+  const config = buildConfig(port, {
+    reliabilityThresholds: {
+      ...DEFAULT_RELIABILITY_THRESHOLDS,
+      minimumDecisions: 1,
+    },
+  });
   const telemetry = new ReliabilityTelemetry();
   const server = startHttpServer(config, new DecisionService(buildNoopBroker(), telemetry));
 
@@ -203,6 +208,8 @@ test("reliability endpoint returns pass with counters and threshold summary", as
       };
       gate: {
         pass: boolean;
+        status: string;
+        reason?: string;
         thresholds: { fallbackRateMax: number };
         violations: Array<{ metric: string }>;
         summary: string;
@@ -212,6 +219,8 @@ test("reliability endpoint returns pass with counters and threshold summary", as
     assert.equal(res.status, 200);
     assert.equal(body.status, "pass");
     assert.equal(body.gate.pass, true);
+    assert.equal(body.gate.status, "pass");
+    assert.equal(body.gate.reason, undefined);
     assert.equal(body.snapshot.counters.decisionRequests, 1);
     assert.equal(body.snapshot.counters.fallbackResponses, 0);
     assert.equal(body.snapshot.rates.fallbackRate, 0);
@@ -228,6 +237,7 @@ test("reliability endpoint returns fail when threshold is violated", async () =>
   const config = buildConfig(port, {
     reliabilityThresholds: {
       ...DEFAULT_RELIABILITY_THRESHOLDS,
+      minimumDecisions: 1,
       fallbackRateMax: 0,
     },
   });
@@ -268,6 +278,8 @@ test("reliability endpoint returns fail when threshold is violated", async () =>
       };
       gate: {
         pass: boolean;
+        status: string;
+        reason?: string;
         violations: Array<{ metric: string; actual: number; max: number }>;
         summary: string;
       };
@@ -276,10 +288,57 @@ test("reliability endpoint returns fail when threshold is violated", async () =>
     assert.equal(res.status, 503);
     assert.equal(body.status, "fail");
     assert.equal(body.gate.pass, false);
+    assert.equal(body.gate.status, "fail");
+    assert.equal(body.gate.reason, undefined);
     assert.equal(body.snapshot.counters.decisionRequests, 1);
     assert.equal(body.snapshot.counters.fallbackResponses, 1);
     assert.ok(body.gate.violations.some(violation => violation.metric === "fallbackRate"));
     assert.ok(body.gate.summary.includes("FAIL"));
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test("reliability endpoint returns insufficient_sample when decision count is below minimum", async () => {
+  const port = await getFreePort();
+  const config = buildConfig(port, {
+    reliabilityThresholds: {
+      ...DEFAULT_RELIABILITY_THRESHOLDS,
+      minimumDecisions: 5,
+    },
+  });
+  const telemetry = new ReliabilityTelemetry();
+  const server = startHttpServer(config, new DecisionService(buildNoopBroker(), telemetry));
+
+  try {
+    const decisionRes = await fetch(`http://${config.host}:${config.port}/v1/npc/decision`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(buildPacket("npc-insufficient")),
+    });
+    assert.equal(decisionRes.status, 200);
+
+    const res = await fetch(`http://${config.host}:${config.port}/health/reliability`);
+    const body = (await res.json()) as {
+      status: string;
+      gate: {
+        pass: boolean;
+        status: string;
+        reason?: string;
+        summary: string;
+      };
+      snapshot: {
+        counters: { decisionRequests: number };
+      };
+    };
+
+    assert.equal(res.status, 503);
+    assert.equal(body.status, "insufficient_sample");
+    assert.equal(body.gate.pass, false);
+    assert.equal(body.gate.status, "insufficient_sample");
+    assert.equal(body.gate.reason, "insufficient_sample");
+    assert.equal(body.snapshot.counters.decisionRequests, 1);
+    assert.ok(body.gate.summary.includes("INSUFFICIENT_SAMPLE"));
   } finally {
     await closeServer(server);
   }

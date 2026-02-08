@@ -304,15 +304,20 @@ Do not add new gameplay systems until Codex-driven NPC society is stable, observ
   - readiness/health split and deterministic readiness reasons are implemented.
   - thread continuity fail-closed guard is implemented for invalid `codex-reply` thread IDs.
   - `backend/npc-runtime` check suite passes (`build + integration tests`).
+- Phase 6 observability and replayability hardening gates are merged:
+  - decision-level `requestId` correlation contract (`DRE-124`)
+  - trajectory diversity executable gate (`DRE-125`)
+  - reliability threshold evaluator (`DRE-126`)
+  - runtime reliability summary endpoint (`DRE-127`)
 
 ### 19.2 Accepted next milestone
-- Immediate milestone: v0.2 replayability and operational visibility hardening.
+- Immediate milestone: close remaining Phase 6 reliability enforceability gap, then transition to Phase 2 Unity bridge closure.
 - Required outcomes:
-  - decision-level correlation identity is returned and logged consistently.
-  - acceptance criterion #3 evidence is automated (three non-identical trajectories).
-  - reliability thresholds (timeout/fallback/parse-failure) are reviewable per run.
+  - reliability gate cannot return false `PASS` under low sample conditions.
+  - threshold/min-sample behavior is explicit and operationally documented.
+  - Unity-side telemetry consumption can proceed with stable backend gate semantics.
 
 ### 19.3 v0.2 execution guardrails
-- Keep the current world/mechanics scope fixed while hardening observability and replayability.
-- Prioritize measurable evidence and deterministic gates over new feature breadth.
+- Keep the current world/mechanics scope fixed while completing reliability gate hardening.
+- Prioritize deterministic gate semantics and measurable evidence over new feature breadth.
 - Continue one-issue-at-a-time execution with Linear as work source of truth.

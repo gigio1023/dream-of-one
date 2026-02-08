@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 
 import { startHttpServer } from "../../src/api/http-server.js";
@@ -54,15 +57,127 @@ function buildPacket(npcId: string): PerceptionPacket {
   };
 }
 
-test("decision API smoke handles two NPC IDs and emits request/response logs", async () => {
-  const port = await getFreePort();
-  const config: RuntimeConfig = {
+function buildConfig(port: number, overrides: Partial<RuntimeConfig> = {}): RuntimeConfig {
+  return {
     host: "127.0.0.1",
     port,
     codexCommand: "unused",
     codexArgs: [],
     codexTimeoutMs: 1000,
+    threadStorePath: join(tmpdir(), `npc-runtime-thread-store-${port}.json`),
+    ...overrides,
   };
+}
+
+function buildNoopBroker(): CodexBroker {
+  return {
+    async decide(packet) {
+      return {
+        intent: {
+          npcId: packet.npcId,
+          actionType: "Observe",
+          reasonCodes: ["noop"],
+          confidence: 1,
+        },
+        meta: {
+          usedFallback: false,
+          threadId: "thread-noop",
+          transport: "codex",
+        },
+      };
+    },
+  };
+}
+
+test("readiness endpoint returns ready when command resolves and thread-store path is accessible", async () => {
+  const port = await getFreePort();
+  const threadStoreDir = await mkdtemp(join(tmpdir(), "npc-runtime-ready-"));
+  const config = buildConfig(port, {
+    codexCommand: process.execPath,
+    threadStorePath: join(threadStoreDir, "thread-store.json"),
+  });
+  const server = startHttpServer(config, new DecisionService(buildNoopBroker()));
+
+  try {
+    const res = await fetch(`http://${config.host}:${config.port}/health/ready`);
+    const body = (await res.json()) as {
+      status: string;
+      reasons: string[];
+      checks: {
+        codexCommand: { ok: boolean };
+        threadStorePath: { ok: boolean };
+      };
+    };
+
+    assert.equal(res.status, 200);
+    assert.equal(body.status, "ready");
+    assert.deepEqual(body.reasons, []);
+    assert.equal(body.checks.codexCommand.ok, true);
+    assert.equal(body.checks.threadStorePath.ok, true);
+  } finally {
+    await closeServer(server);
+    await rm(threadStoreDir, { recursive: true, force: true });
+  }
+});
+
+test("readiness endpoint returns deterministic explicit reasons when not ready", async () => {
+  const port = await getFreePort();
+  const tempDir = await mkdtemp(join(tmpdir(), "npc-runtime-not-ready-"));
+  const blockedParent = join(tempDir, "blocked-parent");
+  await writeFile(blockedParent, "not-a-directory", "utf8");
+
+  const config = buildConfig(port, {
+    codexCommand: "definitely-missing-codex-command",
+    threadStorePath: join(blockedParent, "thread-store.json"),
+  });
+  const server = startHttpServer(config, new DecisionService(buildNoopBroker()));
+
+  try {
+    const res = await fetch(`http://${config.host}:${config.port}/health/ready`);
+    const body = (await res.json()) as {
+      status: string;
+      reasons: string[];
+      checks: {
+        codexCommand: { ok: boolean; reason?: string };
+        threadStorePath: { ok: boolean; reason?: string };
+      };
+    };
+
+    assert.equal(res.status, 503);
+    assert.equal(body.status, "not_ready");
+    assert.deepEqual(body.reasons, ["codex_command_not_resolvable", "thread_store_path_not_accessible"]);
+    assert.equal(body.checks.codexCommand.ok, false);
+    assert.equal(body.checks.codexCommand.reason, "codex_command_not_resolvable");
+    assert.equal(body.checks.threadStorePath.ok, false);
+    assert.equal(body.checks.threadStorePath.reason, "thread_store_path_not_accessible");
+  } finally {
+    await closeServer(server);
+    await rm(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("liveness endpoint remains lightweight", async () => {
+  const port = await getFreePort();
+  const config = buildConfig(port);
+  const server = startHttpServer(config, new DecisionService(buildNoopBroker()));
+
+  try {
+    const res = await fetch(`http://${config.host}:${config.port}/health`);
+    const body = (await res.json()) as Record<string, unknown>;
+
+    assert.equal(res.status, 200);
+    assert.deepEqual(body, {
+      status: "ok",
+      service: "npc-runtime",
+    });
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test("decision API smoke handles two NPC IDs and emits request/response logs", async () => {
+  const port = await getFreePort();
+  const config = buildConfig(port);
 
   const broker: CodexBroker = {
     async decide(packet) {
@@ -154,13 +269,7 @@ test("decision API smoke handles two NPC IDs and emits request/response logs", a
 
 test("response log includes deterministic reject reason on fallback", async () => {
   const port = await getFreePort();
-  const config: RuntimeConfig = {
-    host: "127.0.0.1",
-    port,
-    codexCommand: "unused",
-    codexArgs: [],
-    codexTimeoutMs: 1000,
-  };
+  const config = buildConfig(port);
 
   const broker: CodexBroker = {
     async decide(packet) {

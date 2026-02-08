@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { RuntimeConfig } from "../config.js";
 import type { DecisionService } from "../runtime/decision-service.js";
+import { evaluateRuntimeReadiness, type RuntimeReadinessReport } from "../runtime/readiness.js";
 
 async function readJsonBody(req: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
@@ -29,16 +30,26 @@ function asStringField(value: unknown): string | undefined {
   return value;
 }
 
-export function startHttpServer(config: RuntimeConfig, decisionService: DecisionService): Server {
+export type ReadinessEvaluator = (config: RuntimeConfig) => Promise<RuntimeReadinessReport>;
+
+export function startHttpServer(
+  config: RuntimeConfig,
+  decisionService: DecisionService,
+  readinessEvaluator: ReadinessEvaluator = evaluateRuntimeReadiness,
+): Server {
   const server = createServer(async (req, res) => {
     try {
       if (req.method === "GET" && req.url === "/health") {
         writeJson(res, 200, {
           status: "ok",
           service: "npc-runtime",
-          codexCommand: config.codexCommand,
-          codexTimeoutMs: config.codexTimeoutMs,
         });
+        return;
+      }
+
+      if (req.method === "GET" && req.url === "/health/ready") {
+        const readiness = await readinessEvaluator(config);
+        writeJson(res, readiness.status === "ready" ? 200 : 503, readiness);
         return;
       }
 

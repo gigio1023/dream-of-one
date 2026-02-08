@@ -7,6 +7,7 @@ import type { PerceptionPacket } from "../../src/contracts/types.js";
 import type { RuntimeConfig } from "../../src/config.js";
 import type { CodexBroker } from "../../src/broker/codex-broker.js";
 import { DecisionService } from "../../src/runtime/decision-service.js";
+import { ReliabilityTelemetry } from "../../src/runtime/reliability-telemetry.js";
 
 async function getFreePort(): Promise<number> {
   return await new Promise((resolve, reject) => {
@@ -62,6 +63,9 @@ test("decision API smoke handles two NPC IDs and emits request/response logs", a
     codexCommand: "unused",
     codexArgs: [],
     codexTimeoutMs: 1000,
+    codexGlobalBudgetMs: 2000,
+    promptCharBudget: 3600,
+    threadStorePath: "data/thread-store.json",
   };
 
   const broker: CodexBroker = {
@@ -82,14 +86,15 @@ test("decision API smoke handles two NPC IDs and emits request/response logs", a
     },
   };
 
-  const service = new DecisionService(broker);
+  const telemetry = new ReliabilityTelemetry();
+  const service = new DecisionService(broker, telemetry);
   const originalLog = console.log;
   const capturedLogs: string[] = [];
   console.log = (...args: unknown[]) => {
     capturedLogs.push(args.map(String).join(" "));
   };
 
-  const server = startHttpServer(config, service);
+  const server = startHttpServer(config, service, telemetry);
 
   try {
     const payloadNpc1 = buildPacket("npc-1");
@@ -146,6 +151,12 @@ test("decision API smoke handles two NPC IDs and emits request/response logs", a
       assert.equal(typeof log.latencyMs, "number");
       assert.ok((log.latencyMs as number) >= 0);
     }
+
+    const metricsRes = await fetch(`http://${config.host}:${config.port}/v1/npc/metrics`);
+    const metrics = await metricsRes.json();
+    assert.equal(metricsRes.status, 200);
+    assert.equal(metrics.counters.decisionRequests, 2);
+    assert.equal(metrics.counters.fallbackResponses, 0);
   } finally {
     await closeServer(server);
     console.log = originalLog;
@@ -160,6 +171,9 @@ test("response log includes deterministic reject reason on fallback", async () =
     codexCommand: "unused",
     codexArgs: [],
     codexTimeoutMs: 1000,
+    codexGlobalBudgetMs: 2000,
+    promptCharBudget: 3600,
+    threadStorePath: "data/thread-store.json",
   };
 
   const broker: CodexBroker = {
@@ -180,14 +194,15 @@ test("response log includes deterministic reject reason on fallback", async () =
     },
   };
 
-  const service = new DecisionService(broker);
+  const telemetry = new ReliabilityTelemetry();
+  const service = new DecisionService(broker, telemetry);
   const originalLog = console.log;
   const capturedLogs: string[] = [];
   console.log = (...args: unknown[]) => {
     capturedLogs.push(args.map(String).join(" "));
   };
 
-  const server = startHttpServer(config, service);
+  const server = startHttpServer(config, service, telemetry);
 
   try {
     const res = await fetch(`http://${config.host}:${config.port}/v1/npc/decision`, {
@@ -211,6 +226,12 @@ test("response log includes deterministic reject reason on fallback", async () =
     assert.equal(responseLog.transport, "fallback");
     assert.equal(responseLog.usedFallback, true);
     assert.equal(responseLog.threadId, null);
+
+    const metricsRes = await fetch(`http://${config.host}:${config.port}/v1/npc/metrics`);
+    const metrics = await metricsRes.json();
+    assert.equal(metricsRes.status, 200);
+    assert.equal(metrics.counters.fallbackResponses, 1);
+    assert.equal(metrics.counters.decisionRequests, 1);
   } finally {
     await closeServer(server);
     console.log = originalLog;

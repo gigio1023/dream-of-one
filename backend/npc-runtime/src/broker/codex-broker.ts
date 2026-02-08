@@ -3,29 +3,27 @@ import { createFallbackIntent } from "../runtime/fallback.js";
 import type { CodexToolGateway } from "./codex-tool-gateway.js";
 import type { ThreadStore } from "./thread-store.js";
 import { runPreHook, runToolHook } from "../policy/hook-policy.js";
+import { composeDecisionPrompt } from "../policy/prompt-policy.js";
 
 export interface CodexBroker {
   decide(packet: PerceptionPacket): Promise<DecisionEnvelope>;
 }
 
-function buildPrompt(packet: PerceptionPacket): string {
-  return [
-    "You are an NPC runtime agent. Return JSON only.",
-    "Required fields: npcId, actionType, reasonCodes (non-empty), confidence (0..1).",
-    "Optional fields: targetId, locationId, utterance.",
-    "Allowed actionType values: Move, Talk, Ask, Observe, Work, Report, Escort, Idle.",
-    "Input packet:",
-    JSON.stringify(packet),
-  ].join("\n");
+export interface CodexBrokerOptions {
+  promptCharBudget?: number;
 }
 
 export class DefaultCodexBroker implements CodexBroker {
   private readonly maxAttempts = 2;
+  private readonly promptCharBudget: number | undefined;
 
   constructor(
     private readonly gateway: CodexToolGateway,
     private readonly threadStore: ThreadStore,
-  ) {}
+    options: CodexBrokerOptions = {},
+  ) {
+    this.promptCharBudget = options.promptCharBudget;
+  }
 
   async decide(packet: PerceptionPacket): Promise<DecisionEnvelope> {
     const preHookResult = runPreHook(packet);
@@ -34,11 +32,13 @@ export class DefaultCodexBroker implements CodexBroker {
     }
 
     const currentThreadId = this.threadStore.get(packet.sessionId, packet.npcId);
-    const prompt = buildPrompt(packet);
+    const promptResult = composeDecisionPrompt(packet, {
+      promptCharBudget: this.promptCharBudget,
+    });
     const toolResult = await runToolHook({
       gateway: this.gateway,
       currentThreadId,
-      prompt,
+      prompt: promptResult.prompt,
       expectedNpcId: packet.npcId,
       maxAttempts: this.maxAttempts,
     });

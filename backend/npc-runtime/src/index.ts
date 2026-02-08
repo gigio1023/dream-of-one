@@ -12,7 +12,9 @@ const gateway = new CommandCodexToolGateway({
   timeoutMs: config.codexTimeoutMs,
 });
 const threadStore = new FileThreadStore(config.threadStorePath);
-const broker = new DefaultCodexBroker(gateway, threadStore);
+const broker = new DefaultCodexBroker(gateway, threadStore, {
+  promptCharBudget: config.promptCharBudget,
+});
 const decisionService = new DecisionService(broker);
 
 startHttpServer(config, decisionService);

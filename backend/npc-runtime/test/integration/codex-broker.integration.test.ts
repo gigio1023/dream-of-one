@@ -73,6 +73,9 @@ test("first decision call starts a new codex thread", async () => {
   assert.equal(result.intent.actionType, "Work");
   assert.equal(store.get("session-1", "npc-1"), "thread-1");
   assert.deepEqual(gateway.calls.map(c => c.tool), ["codex"]);
+  assert.match(gateway.calls[0].prompt, /Policy version: dre-115-v1/);
+  assert.match(gateway.calls[0].prompt, /Organization template:/);
+  assert.match(gateway.calls[0].prompt, /Role card:/);
 });
 
 test("second decision call reuses existing thread via codex-reply", async () => {

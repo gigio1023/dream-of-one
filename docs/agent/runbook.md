@@ -1,6 +1,6 @@
 # Codex Runbook (Linear SoT + Beads Execution + Codex Cloud)
 
-Revision date: 2026-02-06
+Revision date: 2026-02-07
 
 This document defines the operating runbook for **Codex CLI**.  
 The goal is to ensure: users provide only natural-language instructions; Codex CLI organizes and tracks Linear issues; implementations are done locally (with Beads when needed); and cloud-safe work is delegated to Codex Cloud via Linear.
@@ -195,3 +195,86 @@ Operations (local):
 
 - If Beads grows large, close/compact old internal issues to reduce overhead.
 - If a Codex Cloud PR fails locally, record cause/repro/next steps in Linear and handle locally.
+
+---
+
+## 9) TS NPC runtime local operation (`DRE-112`)
+
+Use this when working the Codex-first backend runtime at `backend/npc-runtime`.
+
+Tracking policy:
+- Progress is tracked in Linear + Beads only.
+- Do not maintain `progress.md`-style local progress files.
+
+### 9.1 Environment variables
+
+- `NPC_RUNTIME_HOST` (default: `0.0.0.0`)
+- `NPC_RUNTIME_PORT` (default: `8787`)
+- `CODEX_TOOL_COMMAND` (default: `codex-tool-runner`)
+- `CODEX_TOOL_ARGS` (default: empty; space-separated)
+- `CODEX_TOOL_TIMEOUT_MS` (default: `8000`)
+- `NPC_RUNTIME_THREAD_STORE_PATH` (default: `data/thread-store.json`)
+
+### 9.2 Local commands
+
+From repo root:
+
+```bash
+cd backend/npc-runtime
+npm install
+npm run check
+```
+
+Run the service:
+
+```bash
+cd backend/npc-runtime
+npm run build
+node dist/index.js
+```
+
+Expected startup log:
+- `npc-runtime listening on http://<host>:<port>`
+
+### 9.3 Hook policy behavior (DRE-114)
+
+- Runtime decision path is codex-only. If request includes `cognitionPath`, only `codex` or `codex-reply` is accepted.
+- Non-codex values are rejected deterministically with fallback reason `policy_reject_non_codex_path`.
+- Tool failures (timeout/tool/parse) follow retry-once then fallback.
+
+### 9.4 Smoke checks
+
+Health:
+
+```bash
+curl -s http://127.0.0.1:8787/health
+```
+
+Decision endpoint:
+
+```bash
+curl -s http://127.0.0.1:8787/v1/npc/decision \
+  -H 'content-type: application/json' \
+  -d '{
+    "sessionId":"smoke-session",
+    "npcId":"npc-1",
+    "landmarkId":"Store",
+    "nearbyActors":["player"],
+    "recentEvents":["shift_start"],
+    "organizationContext":{"org":"Store"},
+    "playerSignals":{"suspicion":0.1}
+  }'
+```
+
+Expected runtime decision log fields:
+- `event` (`npc_decision_request` | `npc_decision_response`)
+- `requestId`
+- `sessionId`
+- `npcId`
+- `threadId` (nullable on request, expected on response)
+- `latencyMs`
+
+Response-only fields:
+- `transport` (`codex` | `codex-reply` | `fallback`)
+- `usedFallback`
+- `reason` (when fallback is used)

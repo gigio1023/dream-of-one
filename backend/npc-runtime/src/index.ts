@@ -21,4 +21,4 @@ const broker = new DefaultCodexBroker(gateway, threadStore, {
 });
 const decisionService = new DecisionService(broker, telemetry);
 
-startHttpServer(config, decisionService, telemetry);
+startHttpServer(config, decisionService);

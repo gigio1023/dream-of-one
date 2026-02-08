@@ -14,239 +14,127 @@ This document defines how delivery is sequenced, validated, and governed.
 Linear remains the issue tracking source of truth.
 
 ## 0) Planning objective
-Deliver a stable, replayable 10-12 minute social-stealth session with Codex-driven NPC society, while preserving strict deterministic safety at runtime boundaries.
+Prove, in Unity play, that a Codex CLI-driven NPC society produces the core social-stealth experience while deterministic safeguards keep sessions stable.
 
-## 1) Locked execution premise (from project contract)
-The following are fixed for v0.1 and are not open for redesign during implementation:
-- Unity runtime authority for world execution.
-- Backend platform lock: Node.js 24 LTS + Fastify 5.x + TypeScript 5.9.
-- Codex tool path lock: `codex` and `codex-reply` with `sessionId+npcId` thread continuity.
-- Strict schema-first contract validation before Unity action execution.
-- Deterministic fallback as mandatory safety path.
+## 1) Intent-first execution premise (from project contract)
+Primary proof order for v0.1:
+- Unity playable loop must show social pressure driven by NPC society behavior.
+- NPC cognition must remain Codex-thread-driven (`codex` / `codex-reply`) with continuity by `sessionId+npcId`.
+- Report -> intake -> verdict closure and ending causality must be readable in play/logs.
+- Deterministic fallback must preserve session continuity under Codex/tool failure.
 
-## 2) v0.1 success scoreboard (measurable)
-By completion:
-- Session duration: 10-12 minutes.
-- World coverage: 4 active landmarks (`Store`, `Studio`, `Park`, `Station`).
-- Population: 8-12 NPCs with role-card distinctions.
-- Social closure path: `Report -> Station Intake -> Verdict` is playable end-to-end.
-- Behavior diversity: 3 consecutive runs produce non-identical social trajectories.
-- Runtime resilience: Codex timeout/failure does not freeze progression.
-- Explainability: survival/failure cause chain is visible to the player and logs.
+Supporting technical profile (secondary, but still required during v0.1):
+- Backend implementation profile: Node.js 24 LTS + Fastify 5.x + TypeScript 5.9.
+- Schema-first validation before Unity execution.
+- Single backend service boundary until v0.1 definition of done.
+
+## 2) v0.1 success scoreboard (measurable, intent-first)
+Core intent proof:
+- Session in Unity is playable for 10-12 minutes.
+- NPC society behavior materially affects player cover work and escalation pressure.
+- `Report -> Station Intake -> Verdict` closure path is playable end-to-end.
+- Three consecutive runs produce non-identical social trajectories.
+- Survival/failure cause chain is visible to player and logs.
+
+Supporting stability proof:
+- Codex timeout/failure does not freeze progression.
+- Fallback/transport/reason telemetry is observable.
+- Contract and diagnostics gates are reproducible.
 
 ## 3) Rules for execution
+- If there is a tradeoff, prioritize proving the Unity social-simulation intent over low-impact technical refinement.
 - No major system expansion beyond v0.1 scope.
-- Prefer contract clarity and observability over feature count.
-- Keep all LLM outputs schema-constrained before world execution.
+- Keep LLM output schema-constrained before world execution.
 - Keep fallback deterministic and always available.
-- Keep backend as one service until v0.1 definition of done is met.
-- Keep plan updates synchronized with any project contract changes.
+- Keep `project.md` and `plan.md` synchronized whenever intent or gate language changes.
 
-## 4) Workstreams and outcomes
-- **WS-A Backend Runtime Core**
-  Outcome: a stable decision service that enforces contracts and fallback behavior.
-- **WS-B Unity Bridge and Authority Gate**
-  Outcome: Unity ingestion/execution path that accepts only validated intents.
-- **WS-C NPC Society Baseline**
-  Outcome: persistent role-consistent social behavior across cadence tiers.
-- **WS-D Player Cover and Pressure Loop**
-  Outcome: playable cover-task loop with legible suspicion/exposure feedback.
-- **WS-E Escalation and Resolution Flow**
-  Outcome: report/intake/verdict closure with readable causal evidence.
-- **WS-F Reliability, Diagnostics, and Release Gates**
-  Outcome: repeatable checks and quality signals that prevent regression.
+## 4) Workstreams and outcomes (priority order)
+- **WS-1 Unity Core Playable Loop**
+  Outcome: playable cover-pressure session loop with deterministic end conditions.
+- **WS-2 Codex Society Runtime**
+  Outcome: Codex-driven NPC decisions with thread continuity and safe Unity execution handoff.
+- **WS-3 Escalation Readability**
+  Outcome: report/intake/verdict chain is legible and explainable in run outputs.
+- **WS-4 Reliability and Observability**
+  Outcome: fallback, timeout, parse failure, and transport traces are visible and enforceable.
+- **WS-5 Technical Conformance (supporting)**
+  Outcome: implementation profile and contracts remain consistent with project governance.
 
-## 5) Sequential phase plan
+## 5) Sequential phase plan (intent-first)
 
-## Phase 0 - Contract and platform lock alignment (WS-A)
+## Phase 1 - Unity playable proof
 ### Objective
-Eliminate ambiguity in architecture and delivery constraints before implementation scale-up.
-
-### Scope
-- Normalize project contract and execution plan wording.
-- Lock backend runtime platform assumptions.
-- Define mandatory runtime signals and fallback semantics.
-
-### Required outputs
-- Contract-level document alignment (`project.md`, `plan.md`).
-- Clear acceptance and out-of-scope lines for v0.1.
-- Execution gate checklist for later phases.
+Confirm that the social-stealth loop is genuinely playable in Unity.
 
 ### Exit criteria
-- No conflicting statements between contract and plan.
-- Platform lock and fallback policy are explicit and reviewable.
+- Session starts, progresses, and ends without deadlock.
+- Player pressure loop and ending transitions are visible in runtime.
 
-## Phase 1 - Codex runtime foundation (WS-A, WS-B)
+## Phase 2 - Codex society behavior proof
 ### Objective
-Establish a robust Codex-first NPC decision loop with deterministic safety.
-
-### Scope
-- Backend runtime service baseline and health visibility.
-- Codex broker path (`codex`, `codex-reply`) and thread lifecycle continuity.
-- Ingress/egress contract validation rules.
-- Fallback reason mapping and telemetry tagging.
-
-### Required outputs
-- Versioned `PerceptionPacket`, `NpcIntent`, and decision envelope contract definitions.
-- Decision endpoint that always returns a valid envelope shape.
-- Thread continuity policy (`sessionId+npcId`) proven by tests.
-
-### Validation evidence
-- Runtime starts reliably and health endpoint is reachable.
-- Malformed Codex outputs are rejected to deterministic fallback.
-- Timeout and parse failure paths are observable in logs/telemetry.
+Prove NPC cognition is Codex-thread-driven and materially drives social interactions.
 
 ### Exit criteria
-- Two NPCs run for 5 minutes without freeze.
-- Contract and fallback tests pass locally.
+- `codex`/`codex-reply` path and thread continuity are verifiable.
+- Non-identical trajectories are reproduced across repeated runs.
 
-## Phase 2 - Unity bridge closure (WS-B)
+## Phase 3 - Escalation closure proof
 ### Objective
-Ensure only safe, validated intents are executable in world runtime.
-
-### Scope
-- Observation packet emission completeness and consistency.
-- Intent ingestion adapter and blocked-reason handling.
-- Unity-side validator and fallback execution integration.
-
-### Required outputs
-- Stable observe/decide/act handshake between Unity and backend.
-- Clear blocked-reason reporting for rejected actions.
-- Telemetry links from request to action outcome.
-
-### Validation evidence
-- Replayable sample runs show request/response/action trace continuity.
-- No direct world mutation from unvalidated LLM output.
+Make report/intake/verdict flow operational and understandable.
 
 ### Exit criteria
-- Unity can process backend fallback and continue session.
-- Contract mismatch surfaces as readable runtime signal, not crash.
+- `Report -> Intake -> Verdict` path is replayable.
+- Survival/failure explanations are readable in UI/log outputs.
 
-## Phase 3 - NPC society baseline (WS-C)
+## Phase 4 - Reliability hardening
 ### Objective
-Create a believable minimal society without adding new systems.
-
-### Scope
-- 8-12 NPC role cards across 4 organizations.
-- Memory model operation (`Identity`, `Episodic`, `Social`).
-- Active/background scheduler cadence behavior.
-- Organization-specific instruction policy.
-
-### Required outputs
-- Role and instruction packs for all baseline NPC archetypes.
-- Memory update and compaction policy.
-- Scheduler telemetry for activity continuity.
-
-### Validation evidence
-- No-player-input 5-minute run shows continuous social actions.
-- Report tendency appears naturally in run logs.
+Guarantee deterministic continuity under runtime and tool failures.
 
 ### Exit criteria
-- NPC behavior remains role-consistent under repeated runs.
-- Memory growth remains bounded for session length target.
+- Timeout/parse/tool failures fail closed to deterministic fallback.
+- Diagnostics and contract checks are green and repeatable.
 
-## Phase 4 - Player cover loop and escalation closure (WS-D, WS-E)
+## Phase 5 - DoD evidence pack
 ### Objective
-Make player pressure loop and session resolution fully understandable.
-
-### Scope
-- Cover checklist completion flow.
-- Speech act integration (`COMPLY`, `INQUIRE`, `FRAME`, `BREAK`).
-- Pressure feedback readability (`suspicion`, `exposure`, reason hints).
-- Report -> intake -> verdict pipeline and ending transition.
-
-### Required outputs
-- Playable route from session start to one of defined endings.
-- Minimum escalation artifacts (witness statement, report memo, intake record).
-- End summary with causal references.
-
-### Validation evidence
-- Risky speech reliably increases exposure pressure.
-- Three ending outcomes are reproducible with visible cause chain.
+Collect reproducible evidence that v0.1 intent criteria are met.
 
 ### Exit criteria
-- Players can explain why a run ended in survival or exposure.
-- No hidden mechanics are required to complete baseline route.
+- Evidence covers session length, trajectory diversity, and closure readability.
+- Evidence can be rerun without ad-hoc manual interpretation.
 
-## Phase 5 - Hardening and QA gates (WS-F)
+## Phase 6 - Technical conformance cleanup (supporting)
 ### Objective
-Lock reliability and prevent regressions before v0.1 sign-off.
-
-### Scope
-- Diagnostics rules for contract/content mismatches.
-- Core PlayMode smoke coverage.
-- Codex unavailable/timeout resilience checks.
-- Session reliability counters and review cadence.
-
-### Required outputs
-- Automated baseline test suite and contract test suite.
-- Reliability counters: timeout rate, fallback rate, parse failure rate.
-- Operational runbook for local execution and triage.
-
-### Validation evidence
-- Diagnostics clean.
-- Core tests green.
-- Codex failure path remains playable.
+Align implementation details with locked technical profile without overshadowing product intent.
 
 ### Exit criteria
-- Release gate checklist passes without manual exception.
-- Remaining risk items are documented with owners and mitigations.
-
-## Phase 6 - Replayability and operational visibility hardening (WS-A, WS-F)
-### Objective
-Convert v0.1 completion evidence into repeatable operational gates for continued delivery.
-
-### Scope
-- Decision-level correlation identity contract (`requestId`) across API response and logs.
-- Automated evidence gate for three non-identical social trajectories.
-- Reliability threshold review for timeout/fallback/parse-failure counters.
-
-### Required outputs
-- Runtime contract update for decision correlation identity.
-- Test or harness evidence proving trajectory diversity acceptance criterion.
-- Run-level reliability summary with explicit threshold check results.
-
-### Validation evidence
-- API smoke confirms every decision response includes correlation identity.
-- Three-run evidence gate produces deterministic pass/fail output.
-- Reliability review output is captured in CI/local check workflow.
-
-### Exit criteria
-- Correlation ID contract is consumed by tests and visible in logs.
-- Trajectory diversity evidence gate is executable on demand.
-- Reliability thresholds are documented and enforceable.
+- Stack/profile drift items are explicitly reconciled or reclassified in docs.
+- No change in authority boundaries or core playable proof outcomes.
 
 ## 6) Linear blueprint (execution mapping)
 
-## Epic A - Codex cognition runtime
-- A1: backend runtime bootstrap and health/operability baseline.
-- A2: Codex broker with thread lifecycle continuity.
-- A3: Claude hook policy layer enforcing Codex-only cognition path.
-- A4: schema validation and deterministic fallback governance.
+## Epic A - Unity playable proof
+- A1: session start/end integrity and deterministic end conditions.
+- A2: cover-task loop and speech-act pressure integration.
+- A3: in-play readability of suspicion/exposure/escalation signals.
 
-## Epic B - Unity runtime bridge
-- B1: observation packet emission.
-- B2: intent ingestion and validation.
-- B3: action execution adapter and blocked-reason handling.
-- B4: telemetry integration (`request`, `response`, `latency`, `fallback`).
+## Epic B - Codex society runtime proof
+- B1: Codex decision path continuity (`codex`/`codex-reply`, thread continuity).
+- B2: safe Unity execution handoff and blocked-reason behavior.
+- B3: non-idle behavior evidence that Codex cognition is materially active.
 
-## Epic C - NPC society content
-- C1: role cards for 8-12 NPCs.
-- C2: organization instruction templates.
-- C3: memory update/compaction policy.
-- C4: scheduler tuning and social activity verification.
+## Epic C - Escalation closure proof
+- C1: report -> intake -> verdict pipeline stability.
+- C2: evidence artifacts and causal end-summary visibility.
+- C3: outcome reproducibility across repeated sessions.
 
-## Epic D - Player and escalation loop
-- D1: cover checklist and speech acts.
-- D2: pressure UI readability.
-- D3: report -> intake -> verdict pipeline.
-- D4: ending summary and cause-line integration.
+## Epic D - Reliability and observability gates
+- D1: deterministic fallback policy and failure continuity checks.
+- D2: transport/reason/request correlation telemetry visibility.
+- D3: diagnostics and PlayMode smoke gates for regression prevention.
 
-## Epic E - Reliability and release gates
-- E1: diagnostics updates for Codex-first contracts.
-- E2: PlayMode tests for core loop.
-- E3: Codex-off/failure smoke path.
-- E4: local runtime runbook and incident response notes.
+## Epic E - Technical conformance (supporting)
+- E1: implementation-profile drift review (stack/governance alignment).
+- E2: contract/test/runbook updates that support intent proof.
 
 ## 7) Cadence and governance rhythm
 - Day 1-2: contract/runtime integrity updates only.
@@ -297,15 +185,17 @@ All must hold:
 - `DRE-128` reliability min-sample gate is completed and merged (`insufficient_sample` semantics added).
 - `DRE-129` runtime operator runbook gate is completed and merged.
 - `DRE-130` Unity correlation consumption gate is completed and merged.
+- `DRE-131` project/plan execution snapshot synchronization gate is completed and merged.
+- `DRE-132` intent-first project/plan refocus gate is completed and merged.
 
 ### 11.2 Accepted immediate focus
-- Close the v0.1 DoD evidence-pack gate with reproducible artifacts for session outcomes and replayability acceptance.
-- Keep authority boundaries unchanged while aligning runtime implementation with locked platform/contract constraints.
+- Close the v0.1 DoD evidence-pack gate centered on Unity playable proof of Codex social simulation.
+- Keep authority boundaries unchanged while resolving only high-impact technical conformance gaps.
 
 ### 11.3 Next Linear issue queue (ordered)
-1. `DRE-131` (`post-dre130-plan-sync`): sync `project.md`/`plan.md` execution snapshots and queue ordering after merged gates.
-2. `DoD-release-evidence-pack` (next creation): capture reproducible evidence for session length, population coverage, and ending diversity gates.
-3. `backend-platform-lock-conformance` (next creation): reconcile runtime stack with locked contract (`Node 24 LTS`, `Fastify 5.x`, strict JSON-schema validation model).
+1. `DoD-release-evidence-pack` (next creation): capture reproducible Unity evidence for session length, social trajectory diversity, and readable ending causality.
+2. `codex-society-proof-gate` (next creation): measure and report whether NPC non-idle behavior is materially Codex-driven in runtime.
+3. `backend-platform-lock-conformance` (next creation): reconcile runtime stack/profile drift items that materially affect reliability/governance.
 
 ### 11.4 Sequencing rule for this queue
 - Execute one Linear issue at a time.

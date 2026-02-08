@@ -228,6 +228,9 @@ test("decision API smoke handles two NPC IDs and emits request/response logs", a
     assert.equal(res2.status, 200);
     assert.equal(body1.meta.threadId, "thread-npc-1");
     assert.equal(body2.meta.threadId, "thread-npc-2");
+    assert.equal(typeof body1.meta.requestId, "string");
+    assert.equal(typeof body2.meta.requestId, "string");
+    assert.notEqual(body1.meta.requestId, body2.meta.requestId);
 
     const jsonLogs = capturedLogs.flatMap(line => {
       try {
@@ -258,9 +261,20 @@ test("decision API smoke handles two NPC IDs and emits request/response logs", a
 
     for (const log of responseLogs) {
       assert.equal(typeof log.threadId, "string");
+      assert.equal(typeof log.requestId, "string");
       assert.equal(typeof log.latencyMs, "number");
       assert.ok((log.latencyMs as number) >= 0);
     }
+
+    const responseLogByRequestId = new Map(
+      responseLogs.map(log => [String(log.requestId), log]),
+    );
+    const body1Log = responseLogByRequestId.get(String(body1.meta.requestId));
+    const body2Log = responseLogByRequestId.get(String(body2.meta.requestId));
+    assert.ok(body1Log, "expected response log matching body1 requestId");
+    assert.ok(body2Log, "expected response log matching body2 requestId");
+    assert.equal(body1Log.npcId, "npc-1");
+    assert.equal(body2Log.npcId, "npc-2");
   } finally {
     await closeServer(server);
     console.log = originalLog;
@@ -305,6 +319,8 @@ test("response log includes deterministic reject reason on fallback", async () =
       body: JSON.stringify(buildPacket("npc-reject")),
     });
     assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(typeof body.meta.requestId, "string");
 
     const jsonLogs = capturedLogs.flatMap(line => {
       try {
@@ -320,6 +336,7 @@ test("response log includes deterministic reject reason on fallback", async () =
     assert.equal(responseLog.transport, "fallback");
     assert.equal(responseLog.usedFallback, true);
     assert.equal(responseLog.threadId, null);
+    assert.equal(responseLog.requestId, body.meta.requestId);
   } finally {
     await closeServer(server);
     console.log = originalLog;

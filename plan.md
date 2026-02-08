@@ -2,7 +2,7 @@
 doc: plan.md
 project: Dream of One
 revision: 2026-02-08
-status: Active (Master Execution Plan v4, Platform-Locked)
+status: Active (Master Execution Plan v5, Post-v0.1 Transition)
 source_of_truth: project.md
 ---
 
@@ -192,6 +192,30 @@ Lock reliability and prevent regressions before v0.1 sign-off.
 - Release gate checklist passes without manual exception.
 - Remaining risk items are documented with owners and mitigations.
 
+## Phase 6 - Replayability and operational visibility hardening (WS-A, WS-F)
+### Objective
+Convert v0.1 completion evidence into repeatable operational gates for continued delivery.
+
+### Scope
+- Decision-level correlation identity contract (`requestId`) across API response and logs.
+- Automated evidence gate for three non-identical social trajectories.
+- Reliability threshold review for timeout/fallback/parse-failure counters.
+
+### Required outputs
+- Runtime contract update for decision correlation identity.
+- Test or harness evidence proving trajectory diversity acceptance criterion.
+- Run-level reliability summary with explicit threshold check results.
+
+### Validation evidence
+- API smoke confirms every decision response includes correlation identity.
+- Three-run evidence gate produces deterministic pass/fail output.
+- Reliability review output is captured in CI/local check workflow.
+
+### Exit criteria
+- Correlation ID contract is consumed by tests and visible in logs.
+- Trajectory diversity evidence gate is executable on demand.
+- Reliability thresholds are documented and enforceable.
+
 ## 6) Linear blueprint (execution mapping)
 
 ## Epic A - Codex cognition runtime
@@ -266,21 +290,19 @@ All must hold:
 
 ## 11) Execution snapshot and next queue (2026-02-08)
 ### 11.1 Newly closed gates
-- Phase 5 / Epic E1 completed baseline:
-  - diagnostics now validate Codex-first runtime contract invariants.
-- Phase 5 / Epic E2 completed baseline:
-  - PlayMode gate verified green (`18/18`) with escalation and fallback paths.
-- Active linear queue is empty after `DRE-120` closure.
+- `DRE-111` master vertical-slice issue is completed.
+- `DRE-123` continuity stability gate is completed and merged.
+- `DRE-112` runtime build-health closure is completed and merged.
+- Current active Linear queue is empty (`Todo`, `In Progress`, `In Review` all zero).
 
 ### 11.2 Accepted immediate focus
-- Resume from Phase 1 / Epic A1:
-  - backend runtime operability and readiness visibility.
-- This is the next mandatory gate before expanding gameplay scope.
+- Start Phase 6 hardening with backend-first observability evidence.
+- Keep Unity/gameplay scope fixed while adding measurable replayability and runtime traceability signals.
 
 ### 11.3 Next Linear issue queue (ordered)
-1. `A1-readiness-gate`: split health/readiness endpoints, expose deterministic not-ready reasons, verify integration behavior.
-2. `A2-thread-continuity-stability`: prove `sessionId+npcId` continuity under repeated broker calls and restart scenarios.
-3. `DoD-trajectory-diversity-gate`: add evidence/test gate for three consecutive non-identical social trajectories.
+1. `P6-correlation-id-contract`: return and log `requestId` in decision envelope meta for end-to-end traceability.
+2. `P6-trajectory-diversity-gate`: add executable gate proving three consecutive non-identical social trajectories.
+3. `P6-reliability-threshold-gate`: enforce run-level timeout/fallback/parse-failure threshold checks.
 
 ### 11.4 Sequencing rule for this queue
 - Execute one Linear issue at a time.

@@ -36,6 +36,7 @@ export interface NpcIntent {
 export interface DecisionEnvelope {
   intent: NpcIntent;
   meta: {
+    requestId?: string;
     usedFallback: boolean;
     reason?: string;
     threadId?: string;

@@ -3,11 +3,11 @@ doc: project.md
 project: Dream of One
 variant: Lucid Cover Social Stealth
 revision: 2026-02-08
-status: Locked v4 (Codex-CLI-First Runtime + Backend Platform Contract)
+status: Locked v5 (v0.1 Complete + v0.2 Transition Contract)
 owner: You
 ---
 
-# Dream of One - Project Definition (Codex-CLI-First v4)
+# Dream of One - Project Definition (Codex-CLI-First v5)
 
 ## 0) One-line definition
 A 3D social-stealth simulation where NPC society is driven by Codex CLI reasoning, while the player survives by behaving procedurally normal and avoiding lucid identification.
@@ -298,20 +298,21 @@ Do not add new gameplay systems until Codex-driven NPC society is stable, observ
 
 ## 19) Execution snapshot (2026-02-08)
 ### 19.1 Confirmed completed gates
-- Unity diagnostics include Codex-first runtime contract checks and pass clean.
-- PlayMode baseline gate is green (`18/18`), including:
-  - session start/end coverage
-  - escalation closure coverage
-  - Codex-unavailable fallback coverage
+- Master vertical slice issue `DRE-111` is closed with all phase children complete.
+- Unity diagnostics pass clean (`[Diagnostics] OK: no issues found.`).
+- Backend runtime closure is complete:
+  - readiness/health split and deterministic readiness reasons are implemented.
+  - thread continuity fail-closed guard is implemented for invalid `codex-reply` thread IDs.
+  - `backend/npc-runtime` check suite passes (`build + integration tests`).
 
 ### 19.2 Accepted next milestone
-- Immediate milestone: backend runtime readiness gate closure in `backend/npc-runtime`.
+- Immediate milestone: v0.2 replayability and operational visibility hardening.
 - Required outcomes:
-  - explicit readiness endpoint (health vs ready separation)
-  - deterministic readiness failure reason surface
-  - integration evidence for ready/not-ready behavior
+  - decision-level correlation identity is returned and logged consistently.
+  - acceptance criterion #3 evidence is automated (three non-identical trajectories).
+  - reliability thresholds (timeout/fallback/parse-failure) are reviewable per run.
 
-### 19.3 Immediate follow-up after readiness
-- Evidence gate for acceptance criterion #3:
-  - three consecutive runs must show non-identical social trajectories
-  - results must be reproducible and reviewable in tests/logs
+### 19.3 v0.2 execution guardrails
+- Keep the current world/mechanics scope fixed while hardening observability and replayability.
+- Prioritize measurable evidence and deterministic gates over new feature breadth.
+- Continue one-issue-at-a-time execution with Linear as work source of truth.

@@ -295,16 +295,17 @@ All must hold:
 - `DRE-126` reliability threshold gate is completed and merged.
 - `DRE-127` runtime reliability summary endpoint gate is completed and merged.
 - `DRE-128` reliability min-sample gate is completed and merged (`insufficient_sample` semantics added).
-- New active queue is reopened with `DRE-129` to close Phase 5 / Epic E4 documentation gate.
+- `DRE-129` runtime operator runbook gate is completed and merged.
+- `DRE-130` Unity correlation consumption gate is completed and merged.
 
 ### 11.2 Accepted immediate focus
-- Close Phase 5 / Epic E4 with an operator-grade local runbook and deterministic incident response notes.
-- Keep backend runtime behavior unchanged while finalizing docs and execution governance alignment.
+- Close the v0.1 DoD evidence-pack gate with reproducible artifacts for session outcomes and replayability acceptance.
+- Keep authority boundaries unchanged while aligning runtime implementation with locked platform/contract constraints.
 
 ### 11.3 Next Linear issue queue (ordered)
-1. `DRE-129` (`E4-runtime-runbook`): document local runtime operation and deterministic triage for readiness/reliability/fallback incidents.
-2. `B4-unity-correlation-consumption` (next creation): consume backend `meta.requestId` and transport traces into Unity-side event records.
-3. `DoD-release-evidence-pack` (next creation): capture reproducible evidence for session length, population coverage, and ending diversity gates.
+1. `DRE-131` (`post-dre130-plan-sync`): sync `project.md`/`plan.md` execution snapshots and queue ordering after merged gates.
+2. `DoD-release-evidence-pack` (next creation): capture reproducible evidence for session length, population coverage, and ending diversity gates.
+3. `backend-platform-lock-conformance` (next creation): reconcile runtime stack with locked contract (`Node 24 LTS`, `Fastify 5.x`, strict JSON-schema validation model).
 
 ### 11.4 Sequencing rule for this queue
 - Execute one Linear issue at a time.

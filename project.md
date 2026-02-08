@@ -310,15 +310,18 @@ Do not add new gameplay systems until Codex-driven NPC society is stable, observ
   - reliability threshold evaluator (`DRE-126`)
   - runtime reliability summary endpoint (`DRE-127`)
   - min-sample reliability guard with deterministic `insufficient_sample` status (`DRE-128`)
+- Phase 5 and Unity bridge transition gates are merged:
+  - operator-grade runtime runbook and deterministic triage playbook (`DRE-129`)
+  - Unity-side decision correlation consumption for `meta.requestId` and `meta.transport` (`DRE-130`)
 
 ### 19.2 Accepted next milestone
-- Immediate milestone: close Phase 5 / Epic E4 local runbook gate (`DRE-129`), then transition to Phase 2 Unity bridge closure.
+- Immediate milestone: close v0.1 DoD evidence-pack gates with reproducible checks and current-state contract/plan alignment.
 - Required outcomes:
   - runtime operator guide covers `/health`, `/health/ready`, `/health/reliability` with deterministic interpretation.
-  - timeout/parse/tool/policy failure reasons have explicit triage notes.
-  - `project.md` and `plan.md` execution snapshots stay synchronized on gate status and queue order.
+  - decision telemetry correlation (`requestId`, `transport`) is visible end-to-end in backend and Unity runtime logs.
+  - `project.md` and `plan.md` execution snapshots stay synchronized on gate status and queue order after each merged issue.
 
 ### 19.3 v0.2 execution guardrails
-- Keep the current world/mechanics scope fixed while closing runbook/governance tasks.
+- Keep the current world/mechanics scope fixed while closing DoD evidence and contract-conformance tasks.
 - Prioritize deterministic operability evidence and telemetry clarity over new feature breadth.
 - Continue one-issue-at-a-time execution with Linear as work source of truth.

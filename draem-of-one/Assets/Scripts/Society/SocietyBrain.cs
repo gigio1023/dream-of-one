@@ -26,8 +26,20 @@ namespace DreamOfOne.Society
         };
 
         [SerializeField]
-        [Tooltip("Decision interval per agent (seconds).")]
-        private float decisionIntervalSeconds = 7f;
+        [Tooltip("Decision interval in active cadence (seconds).")]
+        private float activeDecisionIntervalSeconds = 6f;
+
+        [SerializeField]
+        [Tooltip("Decision interval in background cadence (seconds).")]
+        private float backgroundDecisionIntervalSeconds = 12f;
+
+        [SerializeField]
+        [Tooltip("Minimum observed events required to keep active cadence.")]
+        private int activeObservationThreshold = 1;
+
+        [SerializeField]
+        [Tooltip("Consecutive low-signal cycles before switching to background cadence.")]
+        private int idleCyclesBeforeBackground = 2;
 
         [SerializeField]
         [Tooltip("How many recent WEL events to consider as observations.")]
@@ -41,6 +53,18 @@ namespace DreamOfOne.Society
         [Tooltip("Debug logs for plan parse/validation.")]
         private bool verbose = false;
 
+        [SerializeField]
+        [Tooltip("Emit cadence and memory metrics periodically.")]
+        private bool emitCadenceMetrics = true;
+
+        [SerializeField]
+        [Tooltip("Emit cadence metrics every N decision ticks.")]
+        private int emitMetricsEveryTicks = 12;
+
+        [SerializeField]
+        [Tooltip("Max working/episodic/social entries exported to prompt context.")]
+        private int maxPromptMemoryLinesPerLayer = 6;
+
         private PolicyPackDefinition policyPack = null;
         private WorldEventLog eventLog = null;
         private LLMClient llmClient = null;
@@ -52,6 +76,10 @@ namespace DreamOfOne.Society
         private SocietyMemory memory = null;
 
         private float nextDecisionTime = -999f;
+        private int idleObservationCycles = 0;
+        private int totalDecisionTicks = 0;
+        private int activeDecisionTicks = 0;
+        private int backgroundDecisionTicks = 0;
         private readonly HashSet<string> seenEventIds = new();
 
         public void Configure(PolicyPackDefinition pack, WorldEventLog log, LLMClient llm, ReportManager reports, SemanticShaper shaper)
@@ -71,6 +99,11 @@ namespace DreamOfOne.Society
             if (memory == null)
             {
                 memory = gameObject.AddComponent<SocietyMemory>();
+            }
+
+            if (persona != null && memory != null)
+            {
+                memory.InitializeIdentity(persona.NpcId, persona.Role, ResolveOrganizationIdFromNpc(persona.NpcId));
             }
 
             if (eventLog == null)
@@ -96,7 +129,7 @@ namespace DreamOfOne.Society
 
         private void Start()
         {
-            nextDecisionTime = Time.time + Random.Range(1f, decisionIntervalSeconds);
+            ScheduleNextDecision(activeDecisionIntervalSeconds);
         }
 
         private void Update()
@@ -111,18 +144,21 @@ namespace DreamOfOne.Society
                 return;
             }
 
-            nextDecisionTime = Time.time + decisionIntervalSeconds + Random.Range(-0.5f, 0.8f);
-
             string[] allowedActions = ResolveAllowedActionTypes();
             List<EventRecord> observationRecords = ExtractObservationRecords();
             List<string> observationLines = BuildObservationLines(observationRecords);
-            if (observationLines.Count > 0)
-            {
-                for (int i = 0; i < observationLines.Count; i++)
-                {
-                    memory.Add($"OBS: {observationLines[i]}");
-                }
-            }
+            IngestObservationMemory(observationRecords, observationLines);
+
+            SocietyCadenceDecision cadenceDecision = SocietyCadencePolicy.Next(
+                observationLines.Count,
+                idleObservationCycles,
+                activeObservationThreshold,
+                idleCyclesBeforeBackground,
+                activeDecisionIntervalSeconds,
+                backgroundDecisionIntervalSeconds);
+            idleObservationCycles = cadenceDecision.NextIdleCycles;
+            ScheduleNextDecision(cadenceDecision.IntervalSeconds);
+            EmitCadenceMetrics(cadenceDecision.IsActive);
 
             SocietyObservationPayload observationPayload = SocietyRuntimeContract.BuildObservationPayload(
                 persona,
@@ -334,6 +370,11 @@ namespace DreamOfOne.Society
             if (!string.IsNullOrEmpty(decision.memoryWrite))
             {
                 memory.Add($"MEM: {decision.memoryWrite}");
+                memory.AddEpisodic(
+                    $"memory_write:{decision.memoryWrite}",
+                    $"mem:{Time.frameCount}",
+                    persona != null ? persona.NpcId : "unknown",
+                    Time.time);
             }
 
             // Convenience: allow a top-level utterance without needing explicit action.
@@ -500,19 +541,109 @@ namespace DreamOfOne.Society
 
         private string[] CopyMemoryEntries()
         {
-            if (memory == null || memory.Entries == null || memory.Entries.Count == 0)
+            if (memory == null)
             {
                 return System.Array.Empty<string>();
             }
 
-            int count = memory.Entries.Count;
-            var copied = new string[count];
-            for (int i = 0; i < count; i++)
+            int perLayer = Mathf.Clamp(maxPromptMemoryLinesPerLayer, 1, 12);
+            return memory.BuildPromptEntries(perLayer, perLayer, perLayer);
+        }
+
+        private void IngestObservationMemory(List<EventRecord> records, List<string> lines)
+        {
+            if (memory == null || records == null || lines == null || records.Count == 0 || lines.Count == 0)
             {
-                copied[i] = memory.Entries[i] ?? string.Empty;
+                return;
             }
 
-            return copied;
+            int count = Mathf.Min(records.Count, lines.Count);
+            for (int i = 0; i < count; i++)
+            {
+                EventRecord record = records[i];
+                string line = lines[i];
+                if (record == null || string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                memory.Add($"OBS: {line}");
+
+                string eventId = !string.IsNullOrWhiteSpace(record.id)
+                    ? record.id
+                    : $"{record.eventType}:{record.actorId}:{record.stamp:F2}";
+
+                memory.AddEpisodic(line, eventId, record.actorId, record.stamp);
+
+                bool isSelf = persona != null && string.Equals(record.actorId, persona.NpcId, System.StringComparison.Ordinal);
+                if (!isSelf)
+                {
+                    memory.UpdateSocial(record.eventType, record.actorId, record.stamp, line);
+                }
+            }
+        }
+
+        private void ScheduleNextDecision(float intervalSeconds)
+        {
+            nextDecisionTime = Time.time + Mathf.Max(0.5f, intervalSeconds);
+        }
+
+        private void EmitCadenceMetrics(bool activeCadence)
+        {
+            totalDecisionTicks += 1;
+            if (activeCadence)
+            {
+                activeDecisionTicks += 1;
+            }
+            else
+            {
+                backgroundDecisionTicks += 1;
+            }
+
+            if (!emitCadenceMetrics || memory == null || persona == null)
+            {
+                return;
+            }
+
+            int emitEvery = Mathf.Max(1, emitMetricsEveryTicks);
+            if (totalDecisionTicks % emitEvery != 0)
+            {
+                return;
+            }
+
+            Debug.Log(
+                $"[SocietyBrain:{persona.NpcId}] cadence(total={totalDecisionTicks}, active={activeDecisionTicks}, background={backgroundDecisionTicks}) memory({memory.BuildMetricsSummary()})");
+        }
+
+        private static string ResolveOrganizationIdFromNpc(string npcId)
+        {
+            if (string.IsNullOrWhiteSpace(npcId))
+            {
+                return "UnknownOrg";
+            }
+
+            string normalized = npcId.ToLowerInvariant();
+            if (normalized.Contains("store"))
+            {
+                return "Store";
+            }
+
+            if (normalized.Contains("studio"))
+            {
+                return "Studio";
+            }
+
+            if (normalized.Contains("park"))
+            {
+                return "Park";
+            }
+
+            if (normalized.Contains("station") || normalized.Contains("police"))
+            {
+                return "Station";
+            }
+
+            return "UnknownOrg";
         }
     }
 }

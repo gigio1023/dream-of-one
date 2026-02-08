@@ -309,15 +309,16 @@ Do not add new gameplay systems until Codex-driven NPC society is stable, observ
   - trajectory diversity executable gate (`DRE-125`)
   - reliability threshold evaluator (`DRE-126`)
   - runtime reliability summary endpoint (`DRE-127`)
+  - min-sample reliability guard with deterministic `insufficient_sample` status (`DRE-128`)
 
 ### 19.2 Accepted next milestone
-- Immediate milestone: close remaining Phase 6 reliability enforceability gap, then transition to Phase 2 Unity bridge closure.
+- Immediate milestone: close Phase 5 / Epic E4 local runbook gate (`DRE-129`), then transition to Phase 2 Unity bridge closure.
 - Required outcomes:
-  - reliability gate cannot return false `PASS` under low sample conditions.
-  - threshold/min-sample behavior is explicit and operationally documented.
-  - Unity-side telemetry consumption can proceed with stable backend gate semantics.
+  - runtime operator guide covers `/health`, `/health/ready`, `/health/reliability` with deterministic interpretation.
+  - timeout/parse/tool/policy failure reasons have explicit triage notes.
+  - `project.md` and `plan.md` execution snapshots stay synchronized on gate status and queue order.
 
 ### 19.3 v0.2 execution guardrails
-- Keep the current world/mechanics scope fixed while completing reliability gate hardening.
-- Prioritize deterministic gate semantics and measurable evidence over new feature breadth.
+- Keep the current world/mechanics scope fixed while closing runbook/governance tasks.
+- Prioritize deterministic operability evidence and telemetry clarity over new feature breadth.
 - Continue one-issue-at-a-time execution with Linear as work source of truth.

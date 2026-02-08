@@ -56,16 +56,31 @@ namespace DreamOfOne.Society
         {
             var eventLog = FindFirstObjectByType<WorldEventLog>();
             var llmClient = FindFirstObjectByType<LLMClient>();
+            var runtimeClient = FindFirstObjectByType<SocietyRuntimeClient>();
             var reportManager = FindFirstObjectByType<ReportManager>();
             var shaper = FindFirstObjectByType<SemanticShaper>();
 
-            if (eventLog == null || llmClient == null)
+            if (eventLog == null)
             {
                 if (verbose)
                 {
-                    Debug.LogWarning("[SocietyDirector] Missing WorldEventLog or LLMClient; society planning disabled.");
+                    Debug.LogWarning("[SocietyDirector] Missing WorldEventLog; society planning disabled.");
                 }
                 return;
+            }
+
+            if (runtimeClient == null)
+            {
+                runtimeClient = gameObject.GetComponent<SocietyRuntimeClient>();
+                if (runtimeClient == null)
+                {
+                    runtimeClient = gameObject.AddComponent<SocietyRuntimeClient>();
+                }
+            }
+
+            if (llmClient == null && verbose)
+            {
+                Debug.LogWarning("[SocietyDirector] LLMClient not found; backend bridge/fallback only.");
             }
 
             var personas = FindObjectsByType<NpcPersona>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
@@ -96,7 +111,7 @@ namespace DreamOfOne.Society
                 }
 
                 var brain = persona.gameObject.AddComponent<SocietyBrain>();
-                brain.Configure(policyPack, eventLog, llmClient, reportManager, shaper);
+                brain.Configure(policyPack, eventLog, llmClient, reportManager, shaper, runtimeClient);
             }
         }
     }

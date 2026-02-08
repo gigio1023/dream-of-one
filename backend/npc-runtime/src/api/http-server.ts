@@ -75,6 +75,13 @@ export function startHttpServer(
         );
 
         const decision = await decisionService.decide(payload);
+        const responseEnvelope = {
+          ...decision,
+          meta: {
+            ...decision.meta,
+            requestId,
+          },
+        };
         const latencyMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
 
         console.log(
@@ -83,15 +90,15 @@ export function startHttpServer(
             requestId,
             sessionId: asStringField(payloadObj?.sessionId),
             npcId: asStringField(payloadObj?.npcId),
-            transport: decision.meta.transport,
-            threadId: decision.meta.threadId ?? requestThreadId ?? null,
-            usedFallback: decision.meta.usedFallback,
-            reason: decision.meta.reason,
+            transport: responseEnvelope.meta.transport,
+            threadId: responseEnvelope.meta.threadId ?? requestThreadId ?? null,
+            usedFallback: responseEnvelope.meta.usedFallback,
+            reason: responseEnvelope.meta.reason,
             latencyMs: Number(latencyMs.toFixed(3)),
           }),
         );
 
-        writeJson(res, 200, decision);
+        writeJson(res, 200, responseEnvelope);
         return;
       }
 

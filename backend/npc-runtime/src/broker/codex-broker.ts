@@ -16,6 +16,8 @@ export interface CodexBrokerOptions {
   telemetry?: ReliabilityTelemetry;
 }
 
+const THREAD_CONTINUITY_FAILURE_REASON = "invalid_thread_continuity";
+
 export class DefaultCodexBroker implements CodexBroker {
   private readonly maxAttempts = 2;
   private readonly promptCharBudget: number | undefined;
@@ -56,16 +58,42 @@ export class DefaultCodexBroker implements CodexBroker {
       return this.asFallback(packet, toolResult.reason);
     }
 
-    this.threadStore.set(packet.sessionId, packet.npcId, toolResult.threadId);
+    const continuityCheck = this.validateThreadContinuity(
+      currentThreadId,
+      toolResult.threadId,
+      toolResult.transport,
+    );
+    if (!continuityCheck.ok) {
+      return this.asFallback(packet, THREAD_CONTINUITY_FAILURE_REASON);
+    }
+
+    this.threadStore.set(packet.sessionId, packet.npcId, continuityCheck.threadId);
 
     return {
       intent: toolResult.intent,
       meta: {
         usedFallback: false,
-        threadId: toolResult.threadId,
+        threadId: continuityCheck.threadId,
         transport: toolResult.transport,
       },
     };
+  }
+
+  private validateThreadContinuity(
+    currentThreadId: string | undefined,
+    nextThreadId: string,
+    transport: "codex" | "codex-reply",
+  ): { ok: true; threadId: string } | { ok: false } {
+    const normalizedThreadId = typeof nextThreadId === "string" ? nextThreadId.trim() : "";
+    if (normalizedThreadId.length === 0) {
+      return { ok: false };
+    }
+
+    if (transport === "codex-reply" && currentThreadId && normalizedThreadId !== currentThreadId) {
+      return { ok: false };
+    }
+
+    return { ok: true, threadId: normalizedThreadId };
   }
 
   private asFallback(packet: PerceptionPacket, reason: string): DecisionEnvelope {

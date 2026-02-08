@@ -10,7 +10,7 @@ import { FileThreadStore, InMemoryThreadStore } from "../../src/broker/thread-st
 import type { PerceptionPacket } from "../../src/contracts/types.js";
 import { ReliabilityTelemetry } from "../../src/runtime/reliability-telemetry.js";
 
-function buildPacket(): PerceptionPacket {
+function buildPacket(overrides: Partial<PerceptionPacket> = {}): PerceptionPacket {
   return {
     sessionId: "session-1",
     npcId: "npc-1",
@@ -19,6 +19,7 @@ function buildPacket(): PerceptionPacket {
     recentEvents: ["checklist_start"],
     organizationContext: { organization: "Store", role: "Clerk" },
     playerSignals: { suspicion: 0.2, exposure: 0.1 },
+    ...overrides,
   };
 }
 
@@ -121,6 +122,123 @@ test("second decision call reuses existing thread via codex-reply", async () => 
   assert.equal(second.intent.actionType, "Report");
   assert.deepEqual(gateway.calls.map(c => c.tool), ["codex", "codex-reply"]);
   assert.equal(gateway.calls[1].threadId, "thread-1");
+});
+
+test("thread continuity is isolated by session and npc keys", async () => {
+  const store = new InMemoryThreadStore();
+  const gateway = new FakeGateway();
+
+  gateway.codexSequence.push(
+    {
+      response: {
+        threadId: "thread-s1-n1",
+        content: JSON.stringify({
+          npcId: "npc-1",
+          actionType: "Observe",
+          reasonCodes: ["seed_s1_n1"],
+          confidence: 0.7,
+        }),
+      },
+    },
+    {
+      response: {
+        threadId: "thread-s2-n1",
+        content: JSON.stringify({
+          npcId: "npc-1",
+          actionType: "Work",
+          reasonCodes: ["seed_s2_n1"],
+          confidence: 0.73,
+        }),
+      },
+    },
+    {
+      response: {
+        threadId: "thread-s1-n2",
+        content: JSON.stringify({
+          npcId: "npc-2",
+          actionType: "Ask",
+          reasonCodes: ["seed_s1_n2"],
+          confidence: 0.76,
+        }),
+      },
+    },
+  );
+
+  gateway.codexReplyResponse = {
+    threadId: "thread-s1-n1",
+    content: JSON.stringify({
+      npcId: "npc-1",
+      actionType: "Report",
+      reasonCodes: ["reuse_s1_n1"],
+      confidence: 0.9,
+    }),
+  };
+
+  const broker = new DefaultCodexBroker(gateway, store);
+
+  await broker.decide(buildPacket({ sessionId: "session-1", npcId: "npc-1" }));
+  await broker.decide(buildPacket({ sessionId: "session-2", npcId: "npc-1" }));
+  await broker.decide(buildPacket({ sessionId: "session-1", npcId: "npc-2" }));
+  const reused = await broker.decide(buildPacket({ sessionId: "session-1", npcId: "npc-1" }));
+
+  assert.equal(reused.meta.transport, "codex-reply");
+  assert.equal(reused.meta.threadId, "thread-s1-n1");
+  assert.deepEqual(gateway.calls.map(call => call.tool), ["codex", "codex", "codex", "codex-reply"]);
+  assert.equal(gateway.calls[3].threadId, "thread-s1-n1");
+
+  assert.equal(store.get("session-1", "npc-1"), "thread-s1-n1");
+  assert.equal(store.get("session-2", "npc-1"), "thread-s2-n1");
+  assert.equal(store.get("session-1", "npc-2"), "thread-s1-n2");
+});
+
+test("blank codex-reply thread id fails closed and keeps stored continuity", async () => {
+  const store = new InMemoryThreadStore();
+  const gateway = new FakeGateway();
+  store.set("session-1", "npc-1", "thread-stable");
+
+  gateway.codexReplyResponse = {
+    threadId: "   ",
+    content: JSON.stringify({
+      npcId: "npc-1",
+      actionType: "Observe",
+      reasonCodes: ["bad_reply_thread"],
+      confidence: 0.8,
+    }),
+  };
+
+  const broker = new DefaultCodexBroker(gateway, store);
+  const result = await broker.decide(buildPacket());
+
+  assert.equal(result.meta.usedFallback, true);
+  assert.equal(result.meta.reason, "invalid_thread_continuity");
+  assert.deepEqual(result.intent.reasonCodes, ["fallback:invalid_thread_continuity"]);
+  assert.equal(store.get("session-1", "npc-1"), "thread-stable");
+  assert.deepEqual(gateway.calls.map(call => call.tool), ["codex-reply"]);
+});
+
+test("mismatched codex-reply thread id fails closed and keeps stored continuity", async () => {
+  const store = new InMemoryThreadStore();
+  const gateway = new FakeGateway();
+  store.set("session-1", "npc-1", "thread-stable");
+
+  gateway.codexReplyResponse = {
+    threadId: "thread-unexpected",
+    content: JSON.stringify({
+      npcId: "npc-1",
+      actionType: "Observe",
+      reasonCodes: ["bad_reply_thread"],
+      confidence: 0.8,
+    }),
+  };
+
+  const broker = new DefaultCodexBroker(gateway, store);
+  const result = await broker.decide(buildPacket());
+
+  assert.equal(result.meta.usedFallback, true);
+  assert.equal(result.meta.reason, "invalid_thread_continuity");
+  assert.deepEqual(result.intent.reasonCodes, ["fallback:invalid_thread_continuity"]);
+  assert.equal(store.get("session-1", "npc-1"), "thread-stable");
+  assert.deepEqual(gateway.calls.map(call => call.tool), ["codex-reply"]);
 });
 
 test("restored store reuses persisted thread across process restart", async t => {

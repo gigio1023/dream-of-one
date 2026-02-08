@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { RuntimeConfig } from "../config.js";
 import type { DecisionService } from "../runtime/decision-service.js";
-import type { ReliabilityTelemetry } from "../runtime/reliability-telemetry.js";
+import { evaluateRuntimeReadiness, type RuntimeReadinessReport } from "../runtime/readiness.js";
 
 async function readJsonBody(req: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
@@ -30,10 +30,12 @@ function asStringField(value: unknown): string | undefined {
   return value;
 }
 
+export type ReadinessEvaluator = (config: RuntimeConfig) => Promise<RuntimeReadinessReport>;
+
 export function startHttpServer(
   config: RuntimeConfig,
   decisionService: DecisionService,
-  telemetry?: ReliabilityTelemetry,
+  readinessEvaluator: ReadinessEvaluator = evaluateRuntimeReadiness,
 ): Server {
   const server = createServer(async (req, res) => {
     try {
@@ -41,15 +43,13 @@ export function startHttpServer(
         writeJson(res, 200, {
           status: "ok",
           service: "npc-runtime",
-          codexCommand: config.codexCommand,
-          codexTimeoutMs: config.codexTimeoutMs,
-          codexGlobalBudgetMs: config.codexGlobalBudgetMs,
         });
         return;
       }
 
-      if (req.method === "GET" && req.url === "/v1/npc/metrics") {
-        writeJson(res, 200, telemetry?.snapshot() ?? { counters: {}, rates: {} });
+      if (req.method === "GET" && req.url === "/health/ready") {
+        const readiness = await readinessEvaluator(config);
+        writeJson(res, readiness.status === "ready" ? 200 : 503, readiness);
         return;
       }
 

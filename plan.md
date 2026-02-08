@@ -1,122 +1,287 @@
-# Dream of One — Execution Plan (Lucid Cover Social Stealth v1)
+---
+doc: plan.md
+project: Dream of One
+revision: 2026-02-08
+status: Active (Master Execution Plan v4, Platform-Locked)
+source_of_truth: project.md
+---
 
-Revision date: 2026-02-05  
-Plan sources: `project.md`, `docs/design/game-design.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`  
-Work tracking: Linear (Dream-of-one team). This file is a roadmap (not a task tracker).
+# Dream of One - Master Execution Plan (Codex-CLI-First v0.1)
 
-## 0) Constraints (must stay true)
-- Unity project root: `draem-of-one/`
-- Scene authority: `Assets/Scenes/Prototype.unity`
-- Determinism boundary:
-  - Truth transitions (Suspicion/Exposure deltas, Report generation, Inquest verdicts, Artifact creation) are deterministic.
-  - LLM is styling-only and must have a deterministic fallback.
-- Rebuildability: `Tools/DreamOfOne/Rebuild World From Data` produces a playable world.
-- Diagnostics gate: `Tools/DreamOfOne/Run Diagnostics` must be clean.
-- Performance: steady-state allocations 0B per frame (excluding loads/transitions).
+This file is the active execution roadmap.
+`project.md` defines what the product is and what is fixed.
+This document defines how delivery is sequenced, validated, and governed.
+Linear remains the issue tracking source of truth.
 
-## 1) MCSS target (what “done” means for v1 slice)
-- Session length: 10–12 minutes.
-- Landmarks: Store / Studio / Park / Station.
-- Must occur in one run:
-  - >= 2 Cover Tests trigger (CT-01..CT-06).
-  - >= 3 artifacts about `PLAYER` are created and inspectable.
-  - >= 1 report OR >= 1 near-miss (enter Reporting stage).
-  - End summary: Clean Pass / Narrow Escape / Exposed.
-- Immediate lose: Verdict == “Lucid identified”.
-- Always visible: “what raised suspicion/exposure and why” (lawId + detectorId + witness + record).
+## 0) Planning objective
+Deliver a stable, replayable 10-12 minute social-stealth session with Codex-driven NPC society, while preserving strict deterministic safety at runtime boundaries.
 
-## 2) Implementation plan (recommended order)
+## 1) Locked execution premise (from project contract)
+The following are fixed for v0.1 and are not open for redesign during implementation:
+- Unity runtime authority for world execution.
+- Backend platform lock: Node.js 24 LTS + Fastify 5.x + TypeScript 5.9.
+- Codex tool path lock: `codex` and `codex-reply` with `sessionId+npcId` thread continuity.
+- Strict schema-first contract validation before Unity action execution.
+- Deterministic fallback as mandatory safety path.
 
-### Phase 0 — Design alignment (docs + data contracts)
-Deliverables
-- Expanded design bible with system map and UX contract.
-- SoT docs updated (project.md + plan.md).
+## 2) v0.1 success scoreboard (measurable)
+By completion:
+- Session duration: 10-12 minutes.
+- World coverage: 4 active landmarks (`Store`, `Studio`, `Park`, `Station`).
+- Population: 8-12 NPCs with role-card distinctions.
+- Social closure path: `Report -> Station Intake -> Verdict` is playable end-to-end.
+- Behavior diversity: 3 consecutive runs produce non-identical social trajectories.
+- Runtime resilience: Codex timeout/failure does not freeze progression.
+- Explainability: survival/failure cause chain is visible to the player and logs.
 
-Verification
-- Doc references resolve and remain consistent with v1 contract.
+## 3) Rules for execution
+- No major system expansion beyond v0.1 scope.
+- Prefer contract clarity and observability over feature count.
+- Keep all LLM outputs schema-constrained before world execution.
+- Keep fallback deterministic and always available.
+- Keep backend as one service until v0.1 definition of done is met.
+- Keep plan updates synchronized with any project contract changes.
 
-### Phase 1 — Data schemas + IDs (no gameplay change)
-Deliverables
-- ScriptableObject schemas for v1 content:
-  - DreamLawDefinition (DL_*)
-  - CoverTestDefinition (CT_*)
-  - TextSurfaceDefinition (TS_*)
-  - ArtifactDefinition (Witness Statement / Memo / Ticket / Notice Snapshot / Approval Note)
-- Keyword sets (KO/EN) for speech detectors.
-- World rebuild pipeline can place/instantiate TextSurfaces and bind DreamLawIds deterministically.
+## 4) Workstreams and outcomes
+- **WS-A Backend Runtime Core**
+  Outcome: a stable decision service that enforces contracts and fallback behavior.
+- **WS-B Unity Bridge and Authority Gate**
+  Outcome: Unity ingestion/execution path that accepts only validated intents.
+- **WS-C NPC Society Baseline**
+  Outcome: persistent role-consistent social behavior across cadence tiers.
+- **WS-D Player Cover and Pressure Loop**
+  Outcome: playable cover-task loop with legible suspicion/exposure feedback.
+- **WS-E Escalation and Resolution Flow**
+  Outcome: report/intake/verdict closure with readable causal evidence.
+- **WS-F Reliability, Diagnostics, and Release Gates**
+  Outcome: repeatable checks and quality signals that prevent regression.
 
-Verification
-- Rebuild produces all 4 landmarks and required text surfaces exist.
+## 5) Sequential phase plan
+
+## Phase 0 - Contract and platform lock alignment (WS-A)
+### Objective
+Eliminate ambiguity in architecture and delivery constraints before implementation scale-up.
+
+### Scope
+- Normalize project contract and execution plan wording.
+- Lock backend runtime platform assumptions.
+- Define mandatory runtime signals and fallback semantics.
+
+### Required outputs
+- Contract-level document alignment (`project.md`, `plan.md`).
+- Clear acceptance and out-of-scope lines for v0.1.
+- Execution gate checklist for later phases.
+
+### Exit criteria
+- No conflicting statements between contract and plan.
+- Platform lock and fallback policy are explicit and reviewable.
+
+## Phase 1 - Codex runtime foundation (WS-A, WS-B)
+### Objective
+Establish a robust Codex-first NPC decision loop with deterministic safety.
+
+### Scope
+- Backend runtime service baseline and health visibility.
+- Codex broker path (`codex`, `codex-reply`) and thread lifecycle continuity.
+- Ingress/egress contract validation rules.
+- Fallback reason mapping and telemetry tagging.
+
+### Required outputs
+- Versioned `PerceptionPacket`, `NpcIntent`, and decision envelope contract definitions.
+- Decision endpoint that always returns a valid envelope shape.
+- Thread continuity policy (`sessionId+npcId`) proven by tests.
+
+### Validation evidence
+- Runtime starts reliably and health endpoint is reachable.
+- Malformed Codex outputs are rejected to deterministic fallback.
+- Timeout and parse failure paths are observable in logs/telemetry.
+
+### Exit criteria
+- Two NPCs run for 5 minutes without freeze.
+- Contract and fallback tests pass locally.
+
+## Phase 2 - Unity bridge closure (WS-B)
+### Objective
+Ensure only safe, validated intents are executable in world runtime.
+
+### Scope
+- Observation packet emission completeness and consistency.
+- Intent ingestion adapter and blocked-reason handling.
+- Unity-side validator and fallback execution integration.
+
+### Required outputs
+- Stable observe/decide/act handshake between Unity and backend.
+- Clear blocked-reason reporting for rejected actions.
+- Telemetry links from request to action outcome.
+
+### Validation evidence
+- Replayable sample runs show request/response/action trace continuity.
+- No direct world mutation from unvalidated LLM output.
+
+### Exit criteria
+- Unity can process backend fallback and continue session.
+- Contract mismatch surfaces as readable runtime signal, not crash.
+
+## Phase 3 - NPC society baseline (WS-C)
+### Objective
+Create a believable minimal society without adding new systems.
+
+### Scope
+- 8-12 NPC role cards across 4 organizations.
+- Memory model operation (`Identity`, `Episodic`, `Social`).
+- Active/background scheduler cadence behavior.
+- Organization-specific instruction policy.
+
+### Required outputs
+- Role and instruction packs for all baseline NPC archetypes.
+- Memory update and compaction policy.
+- Scheduler telemetry for activity continuity.
+
+### Validation evidence
+- No-player-input 5-minute run shows continuous social actions.
+- Report tendency appears naturally in run logs.
+
+### Exit criteria
+- NPC behavior remains role-consistent under repeated runs.
+- Memory growth remains bounded for session length target.
+
+## Phase 4 - Player cover loop and escalation closure (WS-D, WS-E)
+### Objective
+Make player pressure loop and session resolution fully understandable.
+
+### Scope
+- Cover checklist completion flow.
+- Speech act integration (`COMPLY`, `INQUIRE`, `FRAME`, `BREAK`).
+- Pressure feedback readability (`suspicion`, `exposure`, reason hints).
+- Report -> intake -> verdict pipeline and ending transition.
+
+### Required outputs
+- Playable route from session start to one of defined endings.
+- Minimum escalation artifacts (witness statement, report memo, intake record).
+- End summary with causal references.
+
+### Validation evidence
+- Risky speech reliably increases exposure pressure.
+- Three ending outcomes are reproducible with visible cause chain.
+
+### Exit criteria
+- Players can explain why a run ended in survival or exposure.
+- No hidden mechanics are required to complete baseline route.
+
+## Phase 5 - Hardening and QA gates (WS-F)
+### Objective
+Lock reliability and prevent regressions before v0.1 sign-off.
+
+### Scope
+- Diagnostics rules for contract/content mismatches.
+- Core PlayMode smoke coverage.
+- Codex unavailable/timeout resilience checks.
+- Session reliability counters and review cadence.
+
+### Required outputs
+- Automated baseline test suite and contract test suite.
+- Reliability counters: timeout rate, fallback rate, parse failure rate.
+- Operational runbook for local execution and triage.
+
+### Validation evidence
 - Diagnostics clean.
+- Core tests green.
+- Codex failure path remains playable.
 
-### Phase 2 — Suspicion + Exposure + detectors (deterministic)
-Deliverables
-- Global Exposure (0–100) with thresholds (60 attention, 100 exposed).
-- Detector evaluation that maps (speech act + keywords + context) -> (law hits + deltas + evidence policy).
-- “Why visibility contract” is enforced in UI/logs: trigger + witness + created record linkage.
+### Exit criteria
+- Release gate checklist passes without manual exception.
+- Remaining risk items are documented with owners and mitigations.
 
-Verification
-- Same input yields same deltas/evidence in LLM-off mode.
+## 6) Linear blueprint (execution mapping)
 
-### Phase 3 — Text interaction model (Speech Acts)
-Deliverables
-- Player input constrained to Speech Acts (SA_COMPLY / SA_INQUIRE / SA_FRAME / SA_BREAK).
-- Optional 1-line text input for styling only (LLM or template).
-- Station multiplier rules apply for speech violations at intake.
+## Epic A - Codex cognition runtime
+- A1: backend runtime bootstrap and health/operability baseline.
+- A2: Codex broker with thread lifecycle continuity.
+- A3: Claude hook policy layer enforcing Codex-only cognition path.
+- A4: schema validation and deterministic fallback governance.
 
-Verification
-- “Break” immediately spikes Exposure per rules; non-break stays within deterministic bounds.
+## Epic B - Unity runtime bridge
+- B1: observation packet emission.
+- B2: intent ingestion and validation.
+- B3: action execution adapter and blocked-reason handling.
+- B4: telemetry integration (`request`, `response`, `latency`, `fallback`).
 
-### Phase 4 — Artifacts + Inquest Dossier (player case)
-Deliverables
-- Artifact generation policies:
-  - Witness Statement as default for law hits.
-  - Defense Memo creation path (fairness/defuse).
-  - Ticket/Receipt and Notice Snapshot when procedural/text surface context exists.
-- Report -> Station flow opens an Inquest Dossier for suspect `PLAYER`.
-- Deterministic verdict scoring and thresholds:
-  - Cleared / Warning / Detained / Lucid identified (immediate end).
+## Epic C - NPC society content
+- C1: role cards for 8-12 NPCs.
+- C2: organization instruction templates.
+- C3: memory update/compaction policy.
+- C4: scheduler tuning and social activity verification.
 
-Verification
-- Dossier UI shows evidence list + readable reason lines for the verdict.
+## Epic D - Player and escalation loop
+- D1: cover checklist and speech acts.
+- D2: pressure UI readability.
+- D3: report -> intake -> verdict pipeline.
+- D4: ending summary and cause-line integration.
 
-### Phase 5 — Cover Tests v1 (CT-01..CT-06)
-Deliverables
-- Implement Cover Test triggers, escalation ladders, evidence outputs, and defuse options as deterministic templates.
-- Ensure at least 2 Cover Tests can occur in a 10–12 min run (including CT-06 as optional pressure).
+## Epic E - Reliability and release gates
+- E1: diagnostics updates for Codex-first contracts.
+- E2: PlayMode tests for core loop.
+- E3: Codex-off/failure smoke path.
+- E4: local runtime runbook and incident response notes.
 
-Verification
-- One run can produce: “suspicious -> challenging -> reporting -> dossier -> verdict” and also a “narrow escape” route.
+## 7) Cadence and governance rhythm
+- Day 1-2: contract/runtime integrity updates only.
+- Day 3-5: feature integration and behavior tuning.
+- Day 6-7: escalation loop closure and readability pass.
+- Day 8-10: diagnostics/tests/fallback hardening.
 
-### Phase 6 — QA automation (gates)
-Deliverables
-- PlayMode tests (minimum):
-  1) Session start/end without errors.
-  2) At least one CoverTest triggers escalation.
-  3) Inquest dossier can form and verdict is deterministic.
-  4) LLM disabled still passes.
+At each cycle boundary:
+- verify phase exit criteria before scope expansion,
+- update Linear status and risk notes,
+- sync `plan.md` if contract constraints changed.
 
-Verification
-- Local batch scripts pass where available (`scripts/unity/run_all_checks.sh`).
+## 8) Risk register and mitigations
+- **R1 Codex latency spikes**
+  - Mitigation: cadence tiering, timeout policy, deterministic fallback.
+- **R2 Output drift from schema**
+  - Mitigation: strict parser, single retry policy, safe default action.
+- **R3 Context bloat in NPC memory**
+  - Mitigation: bounded episodic memory and compaction intervals.
+- **R4 Debug opacity**
+  - Mitigation: reason codes, transport tagging, artifact links per escalation.
+- **R5 Scope drift**
+  - Mitigation: phase gate enforcement and explicit deferred list.
+- **R6 Platform drift during v0.1**
+  - Mitigation: backend platform lock; no framework migration before v0.1 done.
 
-### Phase 7 — Expansion (v0.2 → v1)
-Deliverables
-- NPC routines per organization (role + schedule + patrol zones).
-- Organization policy packs (same action judged differently).
-- Rumor propagation (trust-weighted, rebuttal paths).
-- Evidence UI improvements (pin, filter, timeline).
+## 9) Definition of done (v0.1)
+All must hold:
+- Codex-driven NPC society operates throughout the session.
+- Player loop and escalation closure are fully playable.
+- Failure/survival is explainable with concrete causes.
+- Fallback path keeps session alive when Codex fails.
+- Backend contract tests and Unity diagnostics are green.
+- Release gate evidence is documented and reproducible.
 
-Verification
-- Replay sessions show meaningful variability without breaking determinism.
+## 10) Document consolidation policy
+- Active roadmap only in `plan.md`.
+- Product/runtime contract only in `project.md`.
+- Deprecated historical plan docs remain reference-only and are not updated.
+- Any backend platform/contract change must update both docs in the same change.
 
-## 3) Supporting passes (non-blocking unless they break MCSS)
-- World readability: landmark silhouettes + road navigation clarity.
-- Portal + NavMesh stability: no hard locks, no stuck agents.
-- HUD clarity: Suspicion (local/org) + Exposure + checklist + last reason codes always readable.
+## 11) Execution snapshot and next queue (2026-02-08)
+### 11.1 Newly closed gates
+- Phase 5 / Epic E1 completed baseline:
+  - diagnostics now validate Codex-first runtime contract invariants.
+- Phase 5 / Epic E2 completed baseline:
+  - PlayMode gate verified green (`18/18`) with escalation and fallback paths.
+- Active linear queue is empty after `DRE-120` closure.
 
-## 4) Progress log
-- 2026-01-29: v1 contract docs saved + plan synced (Linear: DRE-60).
+### 11.2 Accepted immediate focus
+- Resume from Phase 1 / Epic A1:
+  - backend runtime operability and readiness visibility.
+- This is the next mandatory gate before expanding gameplay scope.
 
-## 5) Next run focus
-- Follow `docs/plan/week-2026-02-05-v0.1.md` for v0.1 execution order.
-- Prioritize: deterministic DreamLaw → CoverTest → Inquest → UI “why” loop with Diagnostics clean.
+### 11.3 Next Linear issue queue (ordered)
+1. `A1-readiness-gate`: split health/readiness endpoints, expose deterministic not-ready reasons, verify integration behavior.
+2. `A2-thread-continuity-stability`: prove `sessionId+npcId` continuity under repeated broker calls and restart scenarios.
+3. `DoD-trajectory-diversity-gate`: add evidence/test gate for three consecutive non-identical social trajectories.
+
+### 11.4 Sequencing rule for this queue
+- Execute one Linear issue at a time.
+- For each issue: implement -> verify -> close in Linear -> then pick the next item.

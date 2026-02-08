@@ -2,315 +2,316 @@
 doc: project.md
 project: Dream of One
 variant: Lucid Cover Social Stealth
-revision: 2026-02-05
-status: Locked v1 (Design SoT + Implementation Contract)
+revision: 2026-02-08
+status: Locked v4 (Codex-CLI-First Runtime + Backend Platform Contract)
 owner: You
 ---
 
-# Dream of One — Project Doc (Lucid Cover Social Stealth v1)
+# Dream of One - Project Definition (Codex-CLI-First v4)
 
 ## 0) One-line definition
-A **social stealth** game set inside a dream: the player is the only lucid dreamer and must **perform normal-looking organizational procedures** while avoiding **Suspicion** and **Exposure**. NPCs treat dream-only rules as normal; if the player behaves “too aware” or “procedurally weird,” NPCs generate records, file reports, and the Station runs an **Inquest Dossier** on the player. **If you are identified as lucid, the session ends immediately.**
+A 3D social-stealth simulation where NPC society is driven by Codex CLI reasoning, while the player survives by behaving procedurally normal and avoiding lucid identification.
 
-> 핵심 전제: 플레이어는 “사건을 해결”하지 않는다.  
-> 플레이어는 “정상처럼 일/대화/절차 수행”을 하며 **발각을 피하는 대상**이다.
+## 1) Product goal (simple, fixed)
+Ship a playable v0.1 prototype where:
+- Unity controls the 3D world and action execution.
+- NPC cognition is produced by Codex CLI (not hardcoded behavior trees).
+- The player loop remains "cover work under social pressure, do not get identified as lucid."
 
----
+This project is not a content-heavy RPG. It is a focused proof that an LLM-agent society can run as the core gameplay loop.
 
-## 1) Scope and non-goals
+## 2) Platform and architecture decision
+### 2.1 Chosen platform (locked for v0.1)
+- Runtime client: Unity (required for 3D environment control).
+- Backend runtime: Node.js 24 LTS.
+- Backend framework: Fastify 5.x.
+- Backend language: TypeScript 5.9.
+- Backend validation model: strict JSON Schema validation (Ajv strict mode).
+- Agent framework: Claude Agent SDK (TypeScript) for session/hook orchestration.
+- NPC reasoning engine: Codex CLI via Codex MCP tools (`codex`, `codex-reply`).
 
-### In scope (v1)
-- **Lucid cover loop**: “업무/절차 수행 → 의심/노출 관리 → 신고/조사 회피 → 세션 종료”
-- **Dream Laws**: 꿈 세계에서만 통하는 규칙(전역/로컬). 텍스트 표면(text surfaces)로 자연스럽게 드러남.
-- **Suspicion / Exposure**: 단계적 반응(수상→추궁→신고→조사→판정)으로 누적.
-- **Cover Tests**: 랜드마크별로 “발각 위험이 발생하는 상황 템플릿” 6개.
-- **Inquest Dossier (player case)**: Station이 플레이어를 대상으로 케이스를 번들링하고 deterministic verdict를 내림.
-- **Log-first**: 의미 있는 변화는 StructuredEvent → WEL → Canonical Lines로 남음.
-- **Artifacts as records**: Witness Statement / Memo / Ticket / Notice / Approval Note 등이 “플레이어 이상행동”의 증거가 됨.
-- **LLM optional styling**: 문장 톤/말투만(표면 레이어). 결과/판정/증거는 deterministic.
+### 2.2 Why this split
+- Unity gives deterministic world execution, navigation, and authority.
+- Fastify + TypeScript keeps the service small, explicit, and low-latency for NPC cadence.
+- JSON Schema-first validation gives contract safety before Unity execution.
+- Claude SDK provides orchestration and policy hooks around tool calls.
+- Codex CLI provides high-agency, context-aware NPC intent generation.
 
-### Out of scope (v1)
-- 플레이어가 외부 사건을 “수사/해결”하는 전통적 investigation loop
-- 범죄 사건/살인 사건 등 대규모 케이스 시스템 확장
-- LLM이 행동 계획/사실 판정을 결정하는 구조
-- 장기 저장/영속 월드(세션 간 영구 월드 상태는 v1에서 최소화)
+### 2.3 Backend architecture commitments (v0.1)
+- One backend service is authoritative for NPC decision brokerage (`backend/npc-runtime`).
+- No microservice split during v0.1.
+- Thread continuity key is fixed: `sessionId + npcId`.
+- Every decision request must end in one of two outcomes only:
+  - validated `NpcIntent`
+  - deterministic fallback `NpcIntent`
+- Backend returns data contracts only; Unity remains action execution authority.
 
----
+### 2.4 Explicit non-adoptions for v0.1
+- No GraphQL gateway.
+- No event-bus-first runtime dependency.
+- No persistence-heavy redesign before core loop stability is proven.
+- No additional backend framework migration during v0.1 execution.
 
-## 2) Non-negotiables (implementation rails)
-- **Unity MCP only**: 모든 콘텐츠는 ScriptableObjects / prefabs / addressables / editor tools로 재현 가능해야 함.
-- **Determinism boundary**:
-  - **Truth transitions**(Suspicion/Exposure 변경, Report 생성, Inquest verdict, Artifact 생성)은 deterministic.
-  - LLM은 **오직 스타일링**(표현 문장)만. 실패 시 템플릿으로 즉시 폴백.
-- **Rebuildability**: `Tools/DreamOfOne/Rebuild World From Data`로 즉시 플레이 가능한 월드 생성.
-- **Diagnostics gate**: `Tools/DreamOfOne/Run Diagnostics` clean (콘솔 에러 0).
-- **Performance truthiness**: steady-state per-frame allocations 0B 목표(로딩/전환 제외).
+## 3) What this game is / is not
+### 3.1 This game is
+- A simulation-first social stealth game.
+- A small society simulation across organizations and procedures.
+- A game where NPC decision outputs are mostly LLM-generated.
 
----
+### 3.2 This game is not
+- A player-driven detective game solving external crimes.
+- A combat/progression/economy RPG.
+- A fully authored deterministic narrative.
 
-## 3) Player fantasy & promise
-- 플레이어는 유일한 **lucid dreamer(자각자)**.
-- NPC들은 꿈임을 모르며, 꿈의 규칙을 “정상/상식/절차”로 취급.
-- 플레이어는 **커버(cover)**를 가진 조직 구성원처럼 행동해야 함.
-- 텍스트 상호작용(대화/게시판/메모/티켓/승인노트)에서 꿈 규칙이 드러날 때,
-  - 플레이어가 “꿈을 아는 티”를 내면 **Exposure**가 오르고,
-  - 절차/사회적 어색함을 보이면 **Suspicion**이 오름.
-- Suspicion이 충분히 쌓이면 NPC는 **Report**를 생성하고 Station이 **Inquest Dossier**를 열며,
-  - “Lucid identified” 판정이 나면 **즉시 세션 종료**.
+## 4) Non-negotiable constraints
+### 4.1 Simplicity constraints
+- Session target: 10-12 minutes.
+- Fixed landmarks in v0.1: `Store`, `Studio`, `Park`, `Station`.
+- NPC action set fixed to 8:
+  - `Move`, `Talk`, `Ask`, `Observe`, `Work`, `Report`, `Escort`, `Idle`.
+- Player speech acts fixed to 4:
+  - `SA_COMPLY`, `SA_INQUIRE`, `SA_FRAME`, `SA_BREAK`.
 
----
+### 4.2 Runtime authority constraints
+- Unity is authoritative for physics, navigation, and executable actions.
+- Backend is authoritative for NPC intent generation and memory policy.
+- Codex output is never executed directly without Unity validation.
 
-## 4) Design pillars (v1 contract)
-1) **Hide in plain sight**: 존재 자체는 허용되나, “행동/말/절차”가 튀면 끝.
-2) **Dream laws feel normal**: 규칙은 NPC에게 정상 문장으로 제시된다(플레이어만 이상함을 느낌).
-3) **Staged suspicion**: 즉시 발각이 아니라 단계적으로 압박이 증가한다.
-4) **Text is the danger surface**: 텍스트 표면과 텍스트 반응이 핵심 플레이.
-5) **Artifacts outweigh words**: 말은 약하고 기록(artifact)이 무겁다.
-6) **Deterministic, readable feedback**: 왜 의심/노출이 올랐는지 UI/로그로 항상 추적 가능.
+### 4.3 Reliability constraints
+- Codex timeout/failure must not deadlock session progress.
+- Every NPC decision response must pass strict schema validation.
+- Invalid decisions fail closed to deterministic fallback action.
 
----
+### 4.4 Backend operational constraints
+- `/v1/npc/decision` contract is request-response and deterministic under failure.
+- Timeout budget for Codex call is bounded and configurable.
+- Fallback shape is stable across all failure reasons.
+- Health endpoint and runtime readiness visibility are mandatory.
+- Decision telemetry must include transport path (`codex`, `codex-reply`, `fallback`) and reason trace.
 
-## 5) Core loop: Work-as-Cover Loop (no investigation)
-### Loop sentence
-**Do your cover work → respond to dream-law text surfaces → manage suspicion/exposure → avoid report/inquest → survive the session.**
+## 5) Core fantasy and player promise
+- The player is the only lucid dreamer.
+- NPCs treat dream rules as normal social procedure.
+- The player is the target of social scrutiny, not the investigator.
+- If the player is identified as lucid, the session ends immediately.
 
-### Session rhythm (10–12 min)
-- 0:00–1:00: Cover briefing + today’s checklist
-- 1:00–9:00: 4 landmarks 방문 + 절차 수행 중 Cover Tests 발생(최소 2회)
-- 9:00–12:00:
-  - 신고/인퀘스트가 열리면 압박 상태에서 버티기/탈출/소명
-  - 신고가 없으면 마지막 “soft check”로 마무리
-- End: summary + score + next hook
+## 6) Design pillars
+1. **Codex cognition first**: NPC decisions come from Codex CLI threads.
+2. **Unity execution authority**: world state and action execution remain deterministic.
+3. **Dream-cover pressure**: social suspicion and exposure drive tension.
+4. **Readable causality**: every escalation is explainable.
+5. **Small system, deep behavior**: fewer mechanics, stronger agent behavior.
 
----
+## 7) System boundary
+### 7.1 Unity responsibilities
+- Observe world and produce `PerceptionPacket`.
+- Validate intent against world and authority constraints.
+- Execute approved actions and write `WorldEventLog`.
+- Enforce end-state (`Lucid identified` => immediate end).
 
-## 6) Win / Lose states
-### Win (success)
-- 세션 종료 시점에 **Exposure < EXPOSED threshold**이고,
-- Inquest가 열려도 **“Lucid identified” verdict가 아닌 상태**로 종료.
+### 7.2 TypeScript backend responsibilities
+- Manage NPC sessions, memory policy, and instruction context assembly.
+- Build Codex prompts from role, organization, and recent event context.
+- Call Codex MCP tools and parse structured outputs.
+- Return normalized `NpcIntent` to Unity, or deterministic fallback.
 
-### Lose (immediate)
-- **Lucid identified verdict** 발생 → 즉시 세션 종료 (Forced Wake / Collapse)
+### 7.3 Claude Agent SDK responsibilities
+- Hook policy layer (`pre`, `tool`, `post`) for consistency and safety.
+- Session orchestration and tool routing.
+- Enforce that cognition path always goes through Codex tools.
 
-### Endings (v1 recommended)
-- **Clean Pass**: 신고 없음 또는 조사 없음, checklist 완료
-- **Narrow Escape**: 신고/조사 있었으나 “Lucid identified”는 피함 (경고/유예)
-- **Exposed**: Lucid identified (즉시 종료)
+### 7.4 Codex CLI responsibilities
+- Generate NPC intent and optional utterance under strict output schema.
+- Maintain per-NPC thread continuity (`threadId`).
+- Use provided memory/context, not direct world mutation.
 
----
+## 8) Runtime contract
+### 8.1 Observe -> Decide -> Act
+1. Unity sends `PerceptionPacket` for active NPCs.
+2. Backend validates ingress schema before any tool call.
+3. Backend maps NPC to Codex `threadId` (`sessionId+npcId`).
+4. Backend calls `codex` (new thread) or `codex-reply` (existing thread).
+5. Backend parses/normalizes tool output into `NpcIntent`.
+6. If parse/tool failure occurs, backend emits deterministic fallback intent.
+7. Unity validates and executes action or applies Unity-side safety fallback.
+8. Unity writes outcomes to WEL; backend updates memory state.
 
-## 7) Core variables (tuning contract)
-### 7.1 Suspicion (사회적 의심)
-- 범위: 0–100 (NPC별 + 조직/존 별 aggregate)
-- 단계(기본):
-  - 0–24: At Ease
-  - 25–49: Suspicious (가벼운 확인/눈치)
-  - 50–74: Challenging (추궁/증빙 요구)
-  - 75–89: Reporting (Station 신고 생성)
-  - 90+: Inquest pressure (즉시 조사 트리거 후보)
-- 주요 상승 원인:
-  - 절차/규범 위반 (Procedure detectors)
-  - 어색한 반복/회피 (Repetition detectors)
-  - 권한 불일치 (Authority detectors)
-- 주요 감소 원인(Defuse):
-  - 절차를 “정상 순서”로 재수행
-  - Comply/Frame 발화 + 적절한 산출물(artifact) 제출
-  - 현장 이탈(쿨다운) + 다음 체크리스트 정상 수행
+### 8.2 Tick policy (v0.1)
+- Active NPCs: 1-2 second cadence.
+- Background NPCs: 4-8 second cadence.
+- Max decision budget per frame to avoid frame spikes.
 
-### 7.2 Exposure (자각 노출)
-- 범위: 0–100 (global)
-- 기본 임계치:
-  - 60: Station 관심 증가(특정 NPC가 “꿈 관련” 기록을 만들기 시작)
-  - 100: **Exposed (즉시 종료)**
-- 주요 상승 원인:
-  - Dream talk: “꿈”, “자각”, “깬다”, “현실”, “시뮬레이션” 등 금기 키워드/프레이밍
-  - Reality testing: 현실체크 행동/질문(시간/글자/거울/손가락/호흡 등 점검적 표현)
-  - “이상하다/모순이다”를 메타로 확정하는 발화
-- 주요 감소(선택): v1에서는 **Exposure는 원칙적으로 감소하지 않음**(긴장 유지).
-  - 단, 특정 Cover/아이템/조직 지원으로 “-small offset” 허용 가능(후순위).
+### 8.3 Deterministic fallback contract
+- Fallback action must stay safe (`Observe`) unless explicitly revised by project contract.
+- Fallback reason must be surfaced in `reasonCodes`.
+- Fallback confidence is constrained to the minimum safe value.
 
-### 7.3 Optional: Dream Stability (v2)
-- v1에서는 핵심 변수에서 제외(필요 시 확장).
+### 8.4 Runtime observability requirements
+- Every decision includes transport path and fallback usage flag.
+- Every escalation-relevant decision carries non-empty `reasonCodes`.
+- Failure counters (timeout, parse failure, tool failure) are tracked per session.
 
----
+## 9) Data contracts (strict)
+### 9.1 `PerceptionPacket` (Unity -> backend)
+Required fields:
+- `sessionId`
+- `npcId`
+- `landmarkId`
+- `nearbyActors`
+- `recentEvents`
+- `organizationContext`
+- `playerSignals`
 
-## 8) Interaction model (text-first, deterministic)
-### 8.1 Player speech model (Speech Acts)
-플레이어의 텍스트 상호작용은 4개 Speech Act로 제한/분류된다.
-- **SA_COMPLY**: 순응/수용/예절
-- **SA_INQUIRE**: 질문/확인(절차 용어로 안전하게)
-- **SA_FRAME**: 설명/정당화(“절차상 이렇게 했다”)
-- **SA_BREAK**: 금기(꿈/현실체크/메타 발화) → Exposure 급상승
+Contract rules:
+- No missing required fields.
+- Unknown optional fields are ignored unless explicitly adopted in plan.
 
-**입력 방식 권장(v1)**  
-- UI에서 Speech Act를 먼저 선택하고, 선택적으로 1줄 텍스트를 입력(스타일링).
-- 판정/증감은 Speech Act + 키워드 룰로 deterministic.
+### 9.2 `NpcIntent` (backend -> Unity)
+Required fields:
+- `npcId`
+- `actionType` (8-action whitelist)
+- `reasonCodes` (non-empty array)
+- `confidence` (0.0-1.0)
 
-### 8.2 Text surfaces (Rule revealers)
-Dream laws는 “NPC가 이상하게 말한다”가 아니라,
-- 표지판(signage)
-- 게시판(notice)
-- 양식(form)
-- 티켓/메모(ticket/memo)
-- 승인노트(approval note)
-처럼 **정상적인 문서/텍스트 표면**에서 드러난다.
+Optional fields:
+- `targetId`
+- `locationId`
+- `utterance` (short)
 
-각 text surface는 최소 1개 DreamLawId를 참조한다.
+Contract rules:
+- `npcId` must match request target NPC.
+- Out-of-whitelist action values are rejected to fallback.
 
----
+### 9.3 `DecisionEnvelope` (backend internal response wrapper)
+- `intent` (`NpcIntent`)
+- `meta.usedFallback` (boolean)
+- `meta.reason` (optional fallback reason)
+- `meta.threadId` (optional when tool path succeeds)
+- `meta.transport` (`codex` | `codex-reply` | `fallback`)
 
-## 9) Organizations & landmarks (v1 slice)
-### Landmarks (must exist)
-- Store
-- Studio
-- Park
-- Station (Police outpost)
+### 9.4 `ActionOutcome` (Unity -> backend)
+- `success`
+- `blockedReason` (optional)
+- `effects`
+- `eventRefs`
 
-### Organizations (IDs)
-- `Store`, `Studio`, `Park`, `Station`
+## 10) NPC memory and instruction model
+### 10.1 Memory layers
+- `IdentityMemory`: role, org, authority, tone.
+- `EpisodicMemory`: rolling window of recent events.
+- `SocialMemory`: trust/suspicion vectors for key actors.
 
-각 조직은 “업무 절차”를 통해 “정상성”을 유지한다.
-플레이어는 그 절차를 수행하며 자연스럽게 위장해야 한다.
+### 10.2 Instruction layers
+- Global policy (dream-cover rules).
+- Organization policy (`Store/Studio/Park/Station`).
+- Role card (job, limits, priorities).
+- Immediate task context (current shift objective).
 
----
+## 11) Player loop and endings
+### 11.1 Loop
+- Receive cover checklist.
+- Execute procedural tasks.
+- Respond to NPC pressure via 4 speech acts.
+- Survive reporting/inquest pressure.
 
-## 10) Inquest system (player-focused Case)
-### 10.1 What triggers a report
-NPC가 플레이어를 “이상하다”고 판단하면:
-1) Witness Statement 생성(artifact)
-2) 필요 시 Complaint Memo / Ticket / Notice 등 추가 artifact 생성
-3) Station으로 Report event가 전송됨
-4) Station은 Inquest Dossier를 열고, 일정 조건에서 Verdict를 발행
+### 11.2 Win/Lose
+- Win: session reaches end without `Lucid identified`.
+- Lose: `Lucid identified` verdict/event fires.
 
-### 10.2 Inquest dossier content
-- suspect: `PLAYER`
-- evidence:
-  - Witness Statements (누가 무엇을 봤는가)
-  - Procedure Violation records (룰/절차 위반 로그)
-  - Text violations (금기 발화 기록)
-  - Supporting artifacts (ticket, memo, notice snapshot, approval note)
-- verdict types:
-  - **Cleared** (의심 해소)
-  - **Warning** (경고 + 다음 세션 페널티/훅)
-  - **Detained** (강제 종료에 준하는 탈출/중단)
-  - **Lucid identified** (**즉시 종료**)
+### 11.3 Endings
+- `Clean Pass`
+- `Narrow Escape`
+- `Exposed`
 
-### 10.3 Verdict (deterministic rules)
-(개념 스키마)
-- score = w1 * Exposure + w2 * SuspicionAggregate + w3 * HardEvidenceCount + w4 * SeveritySum - w5 * DefenseArtifacts
-- thresholds로 verdict 결정
-- LLM은 verdict 라인의 “말투”만 스타일링 가능
+## 12) Exposure model
+### 12.1 Signals
+- `Suspicion`: social/procedural irregularity.
+- `Exposure`: lucid reveal pressure.
 
----
+### 12.2 Gate rule
+- NPC behavior generation is LLM-driven.
+- Terminal transition gates remain deterministic for testability.
+- `Exposure >= 100` forces `Exposed`.
 
-## 11) Content contracts (v1)
-### Required artifact types (v1)
-- Witness Statement (핵심)
-- Complaint Memo
-- Defense Memo (플레이어의 정당화 기록)
-- Notice Snapshot (게시판/표지판 캡처)
-- Ticket / Receipt (절차 기록)
-- Approval Note (Studio 절차 증빙)
+### 12.3 Why visibility
+Each major pressure event must show:
+- trigger source
+- witness/source actor
+- resulting record/report reference
 
-### Required UI surfaces (v1)
-- HUD: Suspicion(지역/조직) + Exposure + current cover + checklist
-- Artifact inventory + inspection
-- Inquest Dossier UI (“why verdict happened”)
-- Dev overlay(선택): last detectors fired + last reason codes
+## 13) Scope boundaries for v0.1
+### 13.1 Required
+- 4 landmarks operational.
+- 8-12 NPCs with distinct role cards.
+- 10-12 minute playable session.
+- Report -> intake -> verdict closure path.
 
----
+### 13.2 Deferred
+- combat/economy/progression trees
+- large authored quest chains
+- multi-district streaming world
+- long-term meta progression
+- backend architecture expansion beyond single service
 
-## 12) Minimum Complete Session Slice (MCSS) — v1 acceptance
-### Runtime target
-- 10–12 minutes per session
+## 14) Acceptance criteria (prototype v0.1)
+All must hold:
+1. Most non-idle NPC actions are Codex-generated (target >= 70%).
+2. Session completes in 10-12 minutes with one of 3 endings.
+3. Three consecutive runs show non-identical social trajectories.
+4. Failure/survival causes are readable in UI/logs.
+5. Codex timeout/failure does not freeze simulation.
+6. Backend always returns valid decision envelope shape.
+7. Thread continuity holds for repeated `sessionId+npcId` requests.
+8. Fallback path is deterministic and reason-traceable.
+9. Unity diagnostics pass.
+10. Runtime contract tests pass for schema validation and fallback policy.
 
-### Must happen in one run
-- Player visits 4 landmarks: Store, Studio, Park, Station
-- ≥12 meaningful events (movement 제외)
-- ≥6 social reactions (NPC의 수상/추궁/소문/신고 행동)
-- ≥3 artifacts about the player are created and inspectable
-- ≥1 report OR ≥1 near-miss (Reporting 단계 진입) 발생
-- Session ends gracefully with summary (Clean Pass / Narrow Escape / Exposed)
+## 15) Engineering quality gates
+- `Tools/DreamOfOne/Run Diagnostics` clean.
+- PlayMode baseline:
+  - session start/end
+  - Codex unavailable fallback
+  - report -> intake -> verdict path
+- Backend contract tests:
+  - schema validation
+  - thread continuity
+  - fallback policy
+  - transport-path telemetry tags
+- Runtime operability checks:
+  - health endpoint reachable
+  - timeout path observable
+  - parse failure path observable
 
-### Definition of done (MCSS)
-- Start → cover work loop → escalation or survival → end summary works reliably
-- Portals/NavMesh never permanently break NPC state
-- Diagnostics clean; no console errors
-- UI always explains: “what raised suspicion/exposure and why”
-- LLM disabled mode still fully functional
+## 16) Change governance for this contract
+- Backend platform lock (Node/Fastify/TS) is fixed for v0.1.
+- Any changes to contracts or authority boundaries require synchronized update to `plan.md` in the same change.
+- New systems are prohibited unless existing v0.1 exit criteria are already green.
 
----
+## 17) Document role map
+- Product + architecture contract: `project.md` (this doc)
+- Execution roadmap: `plan.md`
+- Design details and examples: `docs/design/game-design.md`
+- Rule packs: `docs/design/dream-laws.md`, `docs/design/cover-tests.md`
 
-## 13) Tooling & QA gates (must stay)
-- `Rebuild World From Data` produces playable world
-- `Run Diagnostics` clean
-- PlayMode tests cover:
-  1) Session start/end without errors
-  2) At least one CoverTest triggers escalation
-  3) Inquest dossier can form and verdict is deterministic
-  4) LLM disabled still passes
+## 18) Implementation principle
+Do not add new gameplay systems until Codex-driven NPC society is stable, observable, and replayable in the existing 4-landmark slice.
 
----
+## 19) Execution snapshot (2026-02-08)
+### 19.1 Confirmed completed gates
+- Unity diagnostics include Codex-first runtime contract checks and pass clean.
+- PlayMode baseline gate is green (`18/18`), including:
+  - session start/end coverage
+  - escalation closure coverage
+  - Codex-unavailable fallback coverage
 
-## 14) References to v1 content packs
-- Dream laws library: `docs/design/dream-laws.md`
-- Cover tests library: `docs/design/cover-tests.md`
-- IDs:
-  - Organization: Store / Studio / Park / Station
-  - Player suspect: PLAYER
+### 19.2 Accepted next milestone
+- Immediate milestone: backend runtime readiness gate closure in `backend/npc-runtime`.
+- Required outcomes:
+  - explicit readiness endpoint (health vs ready separation)
+  - deterministic readiness failure reason surface
+  - integration evidence for ready/not-ready behavior
 
----
-
-## 15) Roadmap (non-binding, guides v0.1 → v1)
-**Goal:** Extend the current MCSS slice into a replayable, choice-driven “casework” loop without breaking determinism.
-
-### Phase 0 — Immediate (stability + feel, 1–3 days)
-- Ensure runtime-only spawning (avoid edit-time NavMeshAgent errors during rebuild/compile)
-- Make interaction UX consistent (one interaction model, one prompt model)
-- Reduce always-on debug text; show only when toggled
-- Lock in quality gates: errors 0, softlocks 0, repeatable session 0 failures
-
-### Phase 1 — Vertical Slice v1 (repeatable loop, 1–2 weeks)
-- Expand from 2 incidents → 4–6 incidents with meaningful branches
-- Upgrade case UI for “why this verdict happened”
-  - Link: event ↔ artifact ↔ witness ↔ rule
-  - Filter/pin/highlight for quick reasoning
-- Add navigation UX (mini-map/compass + landmark markers + current objective)
-- Move NPC behavior from “wander” → “role + routine” (store/studio/park/station)
-- Add 3+ end states (cleared / warning / detained / lucid identified) + a score/replay reason
-
-### Phase 2 — Core Expansion (social depth, 3–6 weeks)
-- Rumor network: trust/authority-weighted propagation + rebuttal/confirmation travel
-- Organization policy packs: same action judged differently by org/zone/time
-- Interiors become purpose-built spaces (visibility, choke points, evidence stations)
-- WEL-driven replay harness for debugging/balancing (reproduce a session from logs)
-
-### Phase 3 — Productization (scale + meta, 2–3 months)
-- Chunk streaming (3x3 district), addressables handles discipline, portal + nav safety at scale
-- Meta progression (rank/permissions/tools) that unlocks new cases/areas
-- Build/release pipeline + automated gates (tests/diagnostics) for every release
-
-### Success criteria (clear “it got better” signals)
-- 15–20 minute session remains stable (no errors, no hard locks)
-- 6 incidents / 3 endings / 4+ NPC routines
-- Player can always answer: “What happened, why, and what evidence supports it?”
-
-## 16) Design bible (expanded reference)
-- Detailed design bible: `docs/design/game-design.md`
-- The bible expands on systems, UX, and production but does not override the v1 contract above.
-
-## 17) Document policy (SoT)
-**Single source of truth**
-- `project.md`: decisions, scope, roadmap, and non-negotiables
-- `docs/design/dream-laws.md`: Dream Laws + detectors
-- `docs/design/cover-tests.md`: Cover Test templates
-- `docs/design/game-design.md`: expanded design bible (reference)
-- `docs/plan/week-2026-02-05-v0.1.md`: weekly execution focus
-
-**Historical / legacy**
-- `docs/spec/*`: historical implementation notes unless explicitly marked Active
-- `docs/archive/*`: completed checklists and snapshots
-
-**Rule**
-- Update `project.md` when decisions/scope/roadmap change.
-- Update `docs/design/*` when rule content changes.
+### 19.3 Immediate follow-up after readiness
+- Evidence gate for acceptance criterion #3:
+  - three consecutive runs must show non-identical social trajectories
+  - results must be reproducible and reviewable in tests/logs

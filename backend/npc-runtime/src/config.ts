@@ -4,6 +4,7 @@ export interface RuntimeConfig {
   codexCommand: string;
   codexArgs: string[];
   codexTimeoutMs: number;
+  codexGlobalBudgetMs: number;
   promptCharBudget: number;
   threadStorePath: string;
 }
@@ -35,6 +36,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig 
     codexCommand: env.CODEX_TOOL_COMMAND ?? "codex-tool-runner",
     codexArgs: parseArgs(env.CODEX_TOOL_ARGS),
     codexTimeoutMs: parseNumber(env.CODEX_TOOL_TIMEOUT_MS, 8000),
+    codexGlobalBudgetMs: parseNumber(env.CODEX_GLOBAL_BUDGET_MS, 16000),
     promptCharBudget: parseNumber(env.NPC_RUNTIME_PROMPT_CHAR_BUDGET, 3600),
     threadStorePath: parsePath(env.NPC_RUNTIME_THREAD_STORE_PATH, "data/thread-store.json"),
   };

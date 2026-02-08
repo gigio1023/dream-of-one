@@ -4,6 +4,7 @@ import type { CodexToolGateway } from "./codex-tool-gateway.js";
 import type { ThreadStore } from "./thread-store.js";
 import { runPreHook, runToolHook } from "../policy/hook-policy.js";
 import { composeDecisionPrompt } from "../policy/prompt-policy.js";
+import type { ReliabilityTelemetry } from "../runtime/reliability-telemetry.js";
 
 export interface CodexBroker {
   decide(packet: PerceptionPacket): Promise<DecisionEnvelope>;
@@ -11,11 +12,15 @@ export interface CodexBroker {
 
 export interface CodexBrokerOptions {
   promptCharBudget?: number;
+  maxToolRuntimeMs?: number;
+  telemetry?: ReliabilityTelemetry;
 }
 
 export class DefaultCodexBroker implements CodexBroker {
   private readonly maxAttempts = 2;
   private readonly promptCharBudget: number | undefined;
+  private readonly maxToolRuntimeMs: number | undefined;
+  private readonly telemetry: ReliabilityTelemetry | undefined;
 
   constructor(
     private readonly gateway: CodexToolGateway,
@@ -23,6 +28,8 @@ export class DefaultCodexBroker implements CodexBroker {
     options: CodexBrokerOptions = {},
   ) {
     this.promptCharBudget = options.promptCharBudget;
+    this.maxToolRuntimeMs = options.maxToolRuntimeMs;
+    this.telemetry = options.telemetry;
   }
 
   async decide(packet: PerceptionPacket): Promise<DecisionEnvelope> {
@@ -41,6 +48,8 @@ export class DefaultCodexBroker implements CodexBroker {
       prompt: promptResult.prompt,
       expectedNpcId: packet.npcId,
       maxAttempts: this.maxAttempts,
+      maxTotalMs: this.maxToolRuntimeMs,
+      telemetry: this.telemetry,
     });
 
     if ("reason" in toolResult) {

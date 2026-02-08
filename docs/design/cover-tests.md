@@ -1,8 +1,8 @@
 ---
 doc: docs/design/cover-tests.md
 project: Dream of One
-revision: 2026-01-25
-status: Locked v1
+revision: 2026-02-08
+status: Locked v1 (Codex contract synced)
 ---
 
 # Dream of One — Cover Tests (v1)
@@ -24,6 +24,21 @@ Cover Test는 아래 5요소로 구성된다.
 4) **Evidence outputs**: 어떤 artifact가 생성되어 Inquest에 들어가는가  
 5) **Defuse options**: 플레이어가 정상으로 복귀하는 방법(공정성 확보)
 
+## 0.1) Observe -> Decide -> Act runtime envelope (required)
+Cover Test는 narrative 템플릿이 아니라 runtime contract를 따라야 한다.
+
+1) **Observe (Unity -> Backend)**
+   `PerceptionPacket` + `society.observe.v1` 컨텍스트로 입력된다.
+2) **Decide (Codex-only)**
+   Backend는 `codex`/`codex-reply` 경로만 허용하며 `NpcIntent`를 반환한다.
+   필수: `actionType`, non-empty `reasonCodes`.
+3) **Act (Unity authoritative)**
+   Unity가 action whitelist/authority를 검증 후 실행하고, Suspicion/Exposure/Artifact/Inquest 전이는 deterministic rule로만 발생한다.
+
+Fallback policy
+- parse/schema/timeout/budget/tool failure 시 fallback intent(`actionType=Observe`)를 사용한다.
+- fallback이라도 Cover Test stage와 artifact rule은 deterministic하게 계속 평가/기록한다.
+
 ---
 
 ## 1) Standard template (copy for new tests)
@@ -41,7 +56,23 @@ Cover Test는 아래 5요소로 구성된다.
 - **defuse options**:
 - **failure condition**:
 - **expected canonical lines (examples)**:
+- **reasonCode examples**:
+- **fallback behavior**:
 - **MCSS validation**:
+
+### Contract mapping examples (CT -> reason codes)
+| Cover Test | Observe focus | Decide output examples | Act/evidence notes |
+| --- | --- | --- | --- |
+| CT-01 Store Queue | `landmarkId=Store`, queue surfaces, nearby witnesses | `law:DL_S1_QUEUE_SANCTITY`, `detector:DET_PROC_QUEUE_SKIP`, `stage:suspicious` | queue 위반 누적 시 Statement + Ticket |
+| CT-02 Store Label | label board surface + manager context | `law:DL_S2_LABEL_AUTHORITY`, `detector:DET_PROC_LABEL_TAMPER`, `stage:challenging` | tamper 시 Notice Snapshot + Statement |
+| CT-03 Studio Approval | approval desk/RC context | `law:DL_ST1_APPROVAL_GATE`, `detector:DET_PROC_RC_BEFORE_APPROVAL`, `artifact:Approval Note` | 승인노트 누락/불일치 기록 |
+| CT-04 Park Observation | notice/photo policy context | `law:DL_P1_OBSERVATION_ETIQUETTE`, `detector:DET_PROC_UNAUTHORIZED_PHOTO` | Caretaker statement + notice snapshot |
+| CT-05 Station Intake | intake form + procedure speech context | `law:DL_N1_PROCEDURE_SPEECH_ONLY`, `detector:DET_SPEECH_META_LOGIC`, `stage:inquest` | dossier open 후보 |
+| CT-06 Global Contagion | cross-landmark social tension signals | `law:DL_G2_NO_REALITY_TEST`, `detector:DET_SPEECH_REALITY_TEST` | report escalation or near-miss branch |
+
+Fallback logging example
+- `fallback:parse_failure` + `law:<id>` + `detector:<id>`를 함께 남겨 "왜 fallback이었는지"와 "무슨 법이 맞았는지"를 동시에 추적한다.
+- 이 규칙은 `project.md`의 determinism rail과 `plan.md`의 QA gate(LLM unavailable playable)를 만족시킨다.
 
 ---
 

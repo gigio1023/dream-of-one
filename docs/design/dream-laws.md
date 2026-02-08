@@ -1,8 +1,8 @@
 ---
 doc: docs/design/dream-laws.md
 project: Dream of One
-revision: 2026-01-25
-status: Locked v1
+revision: 2026-02-08
+status: Locked v1 (Codex contract synced)
 ---
 
 # Dream of One — Dream Laws Library (v1)
@@ -24,6 +24,29 @@ Dream Law는 **deterministic rule definition**으로 취급하며, 최소 아래
 - **evidencePolicy**: 어떤 artifact를 만들고 어디에 링크하는지
 - **canonicalLineTemplate**: 로그 라인 템플릿(<= 80 chars)
 - **defuseHints**: 플레이어가 안전하게 복귀하는 힌트(절차 언어)
+
+## 0.1) Runtime contract mapping (Codex-CLI-first)
+- **Observe**: Unity runtime이 versioned observation을 보낸다.
+  - TS backend contract: `PerceptionPacket` (`backend/npc-runtime/src/contracts/types.ts`)
+  - Unity runtime contract: `society.observe.v1` (`Assets/Scripts/Society/SocietyRuntimeContract.cs`)
+- **Decide**: Backend는 `codex`/`codex-reply` 경로만 허용하고 `NpcIntent`를 생성한다.
+  - `reasonCodes`는 비어 있으면 안 된다.
+  - `actionType`은 whitelist(`Move/Talk/Ask/Observe/Work/Report/Escort/Idle`)에 맞아야 한다.
+- **Act**: Unity는 intent를 검증 후 실행하고, Suspicion/Exposure/Artifact/Inquest 판정은 deterministic rule로만 전이한다.
+
+## 0.2) Reliability reason code taxonomy (v1)
+Dream Law/cover 기록은 아래 reason code 분류를 공통으로 사용한다.
+
+| Layer | Code | Meaning |
+| --- | --- | --- |
+| policy | `policy_reject_non_codex_path` | non-codex cognition path 차단 |
+| policy | `policy_required_field_missing` | observation 필수 필드 누락 |
+| decide | `parse_failure` | Codex 응답 JSON/schema 파싱 실패 |
+| decide | `codex_timeout` | request timeout |
+| decide | `codex_budget_exceeded` | global budget timeout |
+| decide | `tool_failure` | 기타 tool 실행 실패 |
+| observe | `invalid_perception_packet` | 수신 payload schema 오류 |
+| fallback | `fallback:<reason>` | fallback intent 실행 사유 |
 
 ---
 
@@ -70,6 +93,16 @@ Dream Law는 **deterministic rule definition**으로 취급하며, 최소 아래
 - dream, lucid, wake up, reality, reality check, test this, simulation, bug, glitch, contradiction, impossible, why did it change
 
 > 판정 방식: Speech Act + keyword hit + detector context로 deterministic.
+
+### Dream Law reason code linkage rule
+Dream Law hit가 기록될 때는 아래 최소 세트를 남긴다.
+- `law:<dreamLawId>` (예: `law:DL_G1_NO_DREAM_TALK`)
+- `detector:<detectorId>` (예: `detector:DET_SPEECH_DREAM_TALK`)
+- `stage:<suspicious|challenging|reporting|inquest>`
+- `artifact:<artifactType|none>`
+- fallback 경로인 경우 `fallback:<hookReason>` 추가
+
+이 규칙은 `project.md`의 "Deterministic, readable feedback"과 `plan.md`의 "Always visible why" 계약을 직접 만족시키는 근거 라인이다.
 
 ---
 

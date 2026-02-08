@@ -1,14 +1,17 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using DreamOfOne.LLM;
 using DreamOfOne.Core;
 using DreamOfOne.LucidCover;
 using DreamOfOne.NPC;
+using DreamOfOne.Society;
 using DreamOfOne.UI;
 using DreamOfOne.World;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using CoreEventType = DreamOfOne.Core.EventType;
 
 namespace DreamOfOne.Editor
 {
@@ -188,6 +191,7 @@ namespace DreamOfOne.Editor
 
             ValidateWorldData(warnings, errors);
             ValidateWorldRuntime(warnings, errors, info);
+            ValidateSocietyContractRuntime(errors, info);
 
             return new DiagnosticResults
             {
@@ -525,6 +529,53 @@ namespace DreamOfOne.Editor
             }
 
             info.Add($"World_Built: Interactables={interactables.Length}, Portals={portals.Length}");
+        }
+
+        private static void ValidateSocietyContractRuntime(List<string> errors, List<string> info)
+        {
+            const string expectedPerceptionSchema = "society.perception.v1";
+            const string expectedIntentSchema = "society.intent.v1";
+
+            if (!string.Equals(SocietyRuntimeContract.PerceptionSchemaVersion, expectedPerceptionSchema, System.StringComparison.Ordinal))
+            {
+                errors.Add($"SocietyRuntimeContract.PerceptionSchemaVersion mismatch: expected={expectedPerceptionSchema}, actual={SocietyRuntimeContract.PerceptionSchemaVersion}");
+            }
+
+            if (!string.Equals(SocietyRuntimeContract.IntentSchemaVersion, expectedIntentSchema, System.StringComparison.Ordinal))
+            {
+                errors.Add($"SocietyRuntimeContract.IntentSchemaVersion mismatch: expected={expectedIntentSchema}, actual={SocietyRuntimeContract.IntentSchemaVersion}");
+            }
+
+            bool hasIntentRejected = System.Enum.GetNames(typeof(CoreEventType)).Contains(nameof(CoreEventType.IntentRejected));
+            bool hasIntentFallback = System.Enum.GetNames(typeof(CoreEventType)).Contains(nameof(CoreEventType.IntentFallbackApplied));
+            if (!hasIntentRejected || !hasIntentFallback)
+            {
+                errors.Add("EventType missing IntentRejected/IntentFallbackApplied required for society runtime contract.");
+            }
+
+            MethodInfo parseIntent = typeof(SocietyJson).GetMethod(
+                "TryParseIntent",
+                BindingFlags.Public | BindingFlags.Static,
+                binder: null,
+                types: new[] { typeof(string), typeof(string), typeof(NpcIntentPayload).MakeByRefType(), typeof(string).MakeByRefType() },
+                modifiers: null);
+            if (parseIntent == null)
+            {
+                errors.Add("SocietyJson.TryParseIntent(string,string,out NpcIntentPayload,out string) missing.");
+            }
+
+            MethodInfo applyIntent = typeof(SocietyBrain).GetMethod(
+                "TryApplyIntentJson",
+                BindingFlags.Public | BindingFlags.Instance,
+                binder: null,
+                types: new[] { typeof(string), typeof(string).MakeByRefType() },
+                modifiers: null);
+            if (applyIntent == null || applyIntent.ReturnType != typeof(bool))
+            {
+                errors.Add("SocietyBrain.TryApplyIntentJson(string,out string) contract entrypoint missing.");
+            }
+
+            info.Add("Society runtime contract diagnostics: schema/events/entrypoints validated.");
         }
 
         private static bool HasValidAtlas(TMP_FontAsset asset)

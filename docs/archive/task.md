@@ -69,7 +69,7 @@
 
 ### WP5 — Organization Procedures & Two Incidents
 - [x] Store queue/label incident (violation → gossip → report → artifact)
-- [x] Studio RC procedure incident (procedure → evidence → closure)
+- [x] Studio Release Candidate (RC) procedure incident (procedure → evidence → closure)
 - [x] Ensure both can occur in a 10–12 min run without manual staging
 - [x] Emit structured events + canonical lines for each step
 
@@ -109,7 +109,7 @@
 
 ### Interactables (≥20 total)
 - [x] Store: queue marker, label board, printer, shelf stock, complaint form
-- [x] Studio: kanban, RC terminal, approval stamp, lounge hotspot
+- [x] Studio: kanban, Release Candidate terminal, approval stamp, lounge hotspot
 - [x] Park: bench rule marker, bulletin, quiet zone sign
 - [x] Police: report desk, evidence board, ticket printer, interrogation spot
 

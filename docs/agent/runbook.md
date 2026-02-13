@@ -1,9 +1,11 @@
 # Codex Runbook (Linear SoT + Beads Execution + Codex Cloud)
 
-Revision date: 2026-02-07
+Revision date: 2026-02-13
 
 This document defines the operating runbook for **Codex CLI**.  
 The goal is to ensure: users provide only natural-language instructions; Codex CLI organizes and tracks Linear issues; implementations are done locally (with Beads when needed); and cloud-safe work is delegated to Codex Cloud via Linear.
+
+Terminology rule: all operational docs/comments should follow `terminology.md` canonical terms.
 
 ---
 
@@ -161,10 +163,10 @@ Use this loop when running without human gating:
 2. Build and maintain a review ledger for bot comments:
    - `comment_id`, `source`, `author`, `severity`, `decision`, `action`, `commit`, `status`, `reason`
 3. Validate each bot finding as `valid|partial|invalid` before changing code.
-4. Enforce merge gates:
+4. Enforce merge criteria:
    - PR is open and mergeable
    - no unresolved actionable bot findings
-   - checks gate:
+   - checks criteria:
      - `status.total_count > 0` -> require `status.state=success`
      - `status.total_count == 0` -> pass (no required checks configured)
 5. Merge via GitHub MCP and post merged SHA to Linear.
@@ -210,10 +212,15 @@ Tracking policy:
 
 - `NPC_RUNTIME_HOST` (default: `0.0.0.0`)
 - `NPC_RUNTIME_PORT` (default: `8787`)
-- `CODEX_TOOL_COMMAND` (default: `codex-tool-runner`)
-- `CODEX_TOOL_ARGS` (default: empty; space-separated)
-- `CODEX_TOOL_TIMEOUT_MS` (default: `8000`)
+- `CODEX_TOOL_COMMAND` (default: Node executable path + repo runner script)
+- `CODEX_TOOL_ARGS` (default: auto-set to `scripts/codex-tool-runner.mjs` when command is not overridden)
+- `CODEX_CLI_COMMAND` (optional: override Codex binary used by the runner, default: `codex`)
+- `CODEX_TOOL_TIMEOUT_MS` (default: `20000`)
+- `NPC_RUNTIME_MAX_BROKER_INFLIGHT` (default: `4`, global Codex broker concurrency cap)
+- `NPC_RUNTIME_DECISION_DEADLINE_MS` (default: `8000`, per-request runtime deadline budget)
+- `NPC_RUNTIME_WORKSPACE_ROOT` (default: `data/workspaces`, actor workspace artifact root)
 - `NPC_RUNTIME_THREAD_STORE_PATH` (default: `data/thread-store.json`)
+- mailbox metrics include `skippedBeforeBroker` for limiter-wait stale-job skip tracking
 
 ### 9.2 Local commands
 
@@ -236,19 +243,70 @@ node dist/index.js
 Expected startup log:
 - `npc-runtime listening on http://<host>:<port>`
 
+Response telemetry notes:
+- response evidence event: `npc_decision_response`
+- client-aborted response event: `npc_decision_response_dropped` (noise channel; excluded from evidence aggregation)
+
+Long-session stability trend (DRE-154):
+
+```bash
+scripts/unity/run_stability_trend.sh
+```
+
+Key outputs:
+- `logs/stability-trend.json`
+- run summary includes codex ratio, fallback reason distribution, and mailbox peaks (`skippedBeforeBroker/cancelled/deadlineExceeded/globalQueued`)
+
 ### 9.3 Hook policy behavior (DRE-114)
 
 - Runtime decision path is codex-only. If request includes `cognitionPath`, only `codex` or `codex-reply` is accepted.
 - Non-codex values are rejected deterministically with fallback reason `policy_reject_non_codex_path`.
-- Tool failures (timeout/tool/parse) follow retry-once then fallback.
+- Tool failures:
+  - timeout: immediate fallback (`codex_timeout`, no retry to avoid load amplification)
+  - cancel/abort: immediate fallback (`request_cancelled`)
+  - parse/tool failure: retry-once then fallback
 
-### 9.4 Smoke checks
+### 9.4 Workspace continuity specification (`DRE-141`)
+
+Per actor key (`sessionId+npcId`), runtime persists the following artifacts:
+- `persona.json`
+- `policy.json`
+- `memory.json`
+- `summary.json`
+- `thread.json`
+
+Lifecycle:
+- Load artifacts before each decision and include them in Codex prompt context.
+- After each decision (including fallback), append memory entry + update summary/thread.
+- Thread continuity uses `threadStore` and `thread.threadId` to continue `codex -> codex-reply`.
+
+Rotation / compaction policy:
+- `memory.entries` retains last 50 records.
+- `thread.transportHistory` retains last 20 records.
+- `memory.recentEvents` retains last 20 events.
+
+Failure behavior:
+- Missing or invalid artifact file falls back to default empty artifact shape (no crash).
+- Fallback decisions are also persisted so continuity remains auditable.
+
+### 9.5 Smoke checks
 
 Health:
 
 ```bash
 curl -s http://127.0.0.1:8787/health
 ```
+
+Readiness:
+
+```bash
+curl -s http://127.0.0.1:8787/health/ready
+```
+
+If not ready, `reasons` may include:
+- `codex_command_not_resolvable`
+- `thread_store_path_not_accessible`
+- `workspace_root_path_not_accessible`
 
 Decision endpoint:
 
@@ -272,9 +330,11 @@ Expected runtime decision log fields:
 - `sessionId`
 - `npcId`
 - `threadId` (nullable on request, expected on response)
+- `deadlineMs`
 - `latencyMs`
 
 Response-only fields:
 - `transport` (`codex` | `codex-reply` | `fallback`)
 - `usedFallback`
 - `reason` (when fallback is used)
+- `mailbox` (`queued`, `inflight`, `coalesced`, `dropped`, `cancelled`, `deadlineExceeded`, `globalCap`, `globalInFlight`, `globalQueued`)

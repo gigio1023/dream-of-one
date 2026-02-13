@@ -1,7 +1,7 @@
 ---
 doc: docs/design/dream-laws.md
 project: Dream of One
-revision: 2026-01-25
+revision: 2026-02-13
 status: Locked v1
 ---
 
@@ -39,7 +39,7 @@ Dream Law는 **deterministic rule definition**으로 취급하며, 최소 아래
 
 ---
 
-## 2) Detectors (ID contract)
+## 2) Detectors (ID specification)
 아래는 설계 상 “유형”이며, 실제 구현은 프로젝트 룰셋/디텍터 시스템에 매핑한다.
 
 ### Speech detectors
@@ -204,7 +204,7 @@ Dream Law는 **deterministic rule definition**으로 취급하며, 최소 아래
 ---
 
 ### Studio Laws (DL_ST*)
-#### DL_ST1: Approval Gate (승인 게이트)
+#### DL_ST1: Approval Criteria (승인 기준)
 - **dreamLawId**: DL_ST1_APPROVAL_GATE
 - **category**: Procedure / Speech
 - **scope**: Studio
@@ -212,9 +212,9 @@ Dream Law는 **deterministic rule definition**으로 취급하며, 최소 아래
 - **suspicionDelta**: +15
 - **exposureDelta**: +0 (단, 경멸 발화 시 +)
 - **detectorIds**: DET_PROC_RC_BEFORE_APPROVAL
-- **evidencePolicy**: Approval Note/RC Strip mismatch + Statement
+- **evidencePolicy**: Approval Note/Release Candidate strip mismatch + Statement
 - **canonicalLineTemplate**:
-  - “[DL_ST1][Studio] Approval gate mismatch recorded.”
+  - “[DL_ST1][Studio] Approval criteria mismatch recorded.”
 - **defuseHints**: 승인노트 확보/제시(증빙 우선)
 
 ---
@@ -251,7 +251,7 @@ Dream Law는 **deterministic rule definition**으로 취급하며, 최소 아래
 
 ---
 
-## 6) “Why” visibility contract (must be legible)
+## 6) “Why” visibility specification (must be legible)
 Dream Laws는 항상 아래 3가지를 UI/로그로 설명할 수 있어야 한다.
 1) **What triggered** (detectorId + lawId)
 2) **Who witnessed** (actorId)
@@ -259,3 +259,18 @@ Dream Laws는 항상 아래 3가지를 UI/로그로 설명할 수 있어야 한�
 
 이 3개가 보이면, 플레이어는 “공정하게 들켰다/아니면 운이 없었다”를 판단할 수 있고,
 게임은 ‘아이디어’가 아니라 ‘규칙이 있는 게임’으로 완결된다.
+
+## 7) 대체 경로 인과 체크리스트 (WP-2)
+`fallback` 발생 시 아래 6가지를 한 번에 읽을 수 있어야 한다.
+
+1. `transport`
+2. `usedFallback`
+3. `reason`
+4. `reasonCategory`
+5. `warningTier`
+6. `threadId` (필요 경로에서)
+
+판정 규칙:
+- `usedFallback=true`인데 `reason`이 비어 있으면 실패
+- `transport in {codex,codex-reply}`인데 `threadId`가 비어 있으면 실패
+- `warningTier=blocking`은 즉시 조치 대상

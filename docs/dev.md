@@ -1,8 +1,10 @@
 # Developer Guide
 
-Revision date: 2026-02-02
+Revision date: 2026-02-13
 
 This guide is the practical “how to run / how to verify” reference for the Unity project in this repo.
+
+Terminology rule: use canonical terms from `terminology.md` for docs and user-facing runtime text.
 
 ---
 
@@ -112,6 +114,34 @@ Use the repo scripts:
 - `scripts/unity/run_editor_diagnostics.sh`
 - `scripts/unity/run_playmode_smoke.sh`
 - `scripts/unity/run_all_checks.sh`
+
+Runtime evidence tooling:
+- `scripts/unity/analyze_runtime_evidence.mjs` (증거 필드 점검)
+- `scripts/unity/collect_regression_metrics.mjs` (회귀 지표 생성)
+- `scripts/unity/package_release_candidate.mjs` (릴리즈 후보 산출물 묶음)
+- `scripts/unity/collect_stability_trend.mjs` (3회 이상 run 기반 장시간 안정성 추세 집계)
+- `scripts/unity/run_stability_trend.sh` (기본 3-run 프로파일 실행)
+
+Mock runtime option for deterministic validation:
+- `backend/npc-runtime/scripts/mock-codex-tool-runner.mjs`
+- Example:
+  - `CODEX_TOOL_COMMAND=node`
+  - `CODEX_TOOL_ARGS='scripts/mock-codex-tool-runner.mjs'`
+  - `MOCK_CODEX_MODE=normal|parse-failure|timeout|tool-failure`
+
+Real runner acceptance option:
+- use default repo runner (`scripts/codex-tool-runner.mjs`) without mock env overrides
+- example service env:
+  - `NPC_RUNTIME_DECISION_DEADLINE_MS=30000`
+  - `CODEX_TOOL_TIMEOUT_MS=30000`
+
+Generated outputs:
+- `logs/runtime-evidence-summary.json`
+- `logs/regression-metrics.json`
+- `logs/rc/<run-id>/manifest.json`
+- `logs/unity-live-play.log` (Unity Editor.log에서 추출한 라이브 메타 라인)
+- `logs/npc-runtime-live-evidence.log` (회귀 지표용 backend decision 응답 샘플 로그)
+  - 참고: 클라이언트 중단 요청은 `npc_decision_response_dropped`로 별도 기록되며 증거 집계에서 제외됨
 
 ## Work management (Linear SoT + Beads execution)
 

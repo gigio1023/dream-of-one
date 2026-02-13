@@ -1,7 +1,7 @@
 ---
 doc: docs/design/cover-tests.md
 project: Dream of One
-revision: 2026-01-25
+revision: 2026-02-13
 status: Locked v1
 ---
 
@@ -124,7 +124,7 @@ Cover Test는 아래 5요소로 구성된다.
 
 ---
 
-### CT-03: Studio — “Approval Gate Speech” Test
+### CT-03: Studio — “Approval Criteria Speech” Test
 - **coverTestId**: CT_STUDIO_APPROVAL_GATE_SPEECH
 - **location**: Studio / ApprovalDesk / RCInsert
 - **purpose**: “승인/릴리즈 절차를 ‘놀이/의미없음’처럼 말하는 순간”을 위험으로 만든다.
@@ -134,8 +134,8 @@ Cover Test는 아래 5요소로 구성된다.
   - QA (observer)
 - **requiredTextSurfaces**:
   - TS_STUDIO_APPROVAL_NOTICE (“승인 없는 변경은 존재하지 않습니다.”)
-  - TS_STUDIO_RC_FORM (“RC 삽입은 승인노트와 쌍입니다.”)
-- **playerChecklistStep**: “승인 절차 확인 + RC 관련 업무 수행(정상 동작)”
+  - TS_STUDIO_RC_FORM (“릴리즈 후보(RC) 삽입은 승인노트와 쌍입니다.”)
+- **playerChecklistStep**: “승인 절차 확인 + 릴리즈 후보 관련 업무 수행(정상 동작)”
 - **triggers (detectorIds)**:
   - DET_PROC_RC_BEFORE_APPROVAL
   - DET_SPEECH_META_LOGIC
@@ -152,9 +152,9 @@ Cover Test는 아래 5요소로 구성된다.
   - SA_COMPLY 후 “승인노트 확보/제시”로 정상 복귀
   - SA_FRAME: “절차를 오해했습니다” + 실제 승인노트 생성/제출
 - **failure condition**:
-  - RC insert 위반 + meta logic 발화가 겹치면 Reporting으로 직행 가능
+  - 릴리즈 후보 삽입 위반 + meta logic 발화가 겹치면 Reporting으로 직행 가능
 - **expected canonical lines (examples)**:
-  - “[DL_ST1][Procedure] Approval gate violation or contempt speech detected.”
+  - “[DL_ST1][Procedure] Approval criteria violation or contempt speech detected.”
 - **MCSS validation**:
   - Studio에서 최소 1회는 “증빙 요구(Challenging)”가 발생해야 한다
 
@@ -259,3 +259,40 @@ Cover Test는 아래 5요소로 구성된다.
   - “[DL_G2][Global] Reality-check framing escalated by PLAYER.”
 - **MCSS validation**:
   - v1의 ‘예상치 못한 압박’ 역할. 세션마다 0~1회 랜덤/조건부로 발생.
+
+---
+
+## 3) 경고 등급 기준 (WP-3)
+테스트/검증 로그는 아래 등급으로 분류한다.
+
+- `blocking`
+  - 정책/규격 위반으로 즉시 조치가 필요한 상태
+  - 예: 필수 필드 누락, 비허용 경로
+- `attention`
+  - 세션 지속은 가능하지만 원인 분석이 필요한 상태
+  - 예: timeout, parse, tool 실패
+- `reference`
+  - 정상 동작 정보 기록
+  - 예: codex/codex-reply 정상 응답
+
+노이즈 관리 규칙:
+- 동일 원인 반복 경고는 묶어서 집계한다.
+- 종료 판정은 `blocking=0`을 필수로 한다.
+- `attention`은 허용 상한을 지정해 추적한다.
+
+---
+
+## 4) 릴리즈 후보 체크리스트 (WP-4)
+기본 실행:
+- 정상 실행 3회
+- 실패 주입 실행 2회 이상
+
+필수 산출물:
+- `logs/runtime-evidence-summary.json`
+- `logs/regression-metrics.json`
+- `logs/rc/<run-id>/manifest.json`
+
+합격 조건:
+- 필수 산출물 누락 0건
+- 증거 위반(`violations`) 0건
+- 회귀 지표 `pass.all=true`

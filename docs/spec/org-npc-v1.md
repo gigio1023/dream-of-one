@@ -1,6 +1,6 @@
 # Org + NPC spec v1 (MCSS: Store/Studio/Park/Station)
 
-Revision date: 2026-02-02  
+Revision date: 2026-02-13
 Status: Active (Lucid Cover Social Stealth v1)  
 SoT references: `project.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`
 
@@ -65,10 +65,10 @@ Each organization table captures the current design intent in the same shape as 
 
 | Field | Spec |
 | --- | --- |
-| Goal | Deliver `RC submission / release stabilization` while keeping procedure integrity visible. |
-| Procedure steps (7) | 1) Pull current work into visible state (`kanban refresh`). 2) Verify scope against release target (what counts as RC). 3) Draft/refresh `patch notes` based on actual work. 4) Run approval pass at `Studio_ApprovalDesk`. 5) Insert RC at `Studio_RCInsert` only after approval evidence exists. 6) Broadcast release outcome (approval granted vs. slip). 7) Log any procedure slips as explicit incidents, not silent failures. |
+| Goal | Deliver `Release Candidate (RC, 릴리즈 후보) submission / release stabilization` while keeping procedure integrity visible. |
+| Procedure steps (7) | 1) Pull current work into visible state (`kanban refresh`). 2) Verify scope against release target (what counts as Release Candidate). 3) Draft/refresh `patch notes` based on actual work. 4) Run approval pass at `Studio_ApprovalDesk`. 5) Insert Release Candidate at `Studio_RCInsert` only after approval evidence exists. 6) Broadcast release outcome (approval granted vs. slip). 7) Log any procedure slips as explicit incidents, not silent failures. |
 | Resources | `kanban board`, `lounge`, `server slot`, `Studio_Kanban`, `Studio_ApprovalDesk`, `Studio_RCInsert`. |
-| Artifacts (examples) | `kanban log`, `patch notes`, `approval note`, `RC strip`, `Approval Note`. |
+| Artifacts (examples) | `kanban log`, `patch notes`, `approval note`, `Release Candidate strip`, `Approval Note`. |
 | Roles | `PM`, `Developer`, `QA`, `Release`. |
 
 ### Park (`Park`)
@@ -126,13 +126,13 @@ Each organization defines at least two NPC archetypes. Archetypes are expressed 
 #### 1) Studio PM (`roleName: PM`)
 
 - Organization: `Studio`
-- Authority profile: `High` (controls approval gates and RC readiness decisions)
+- Authority profile: `High` (controls approval criteria and Release Candidate readiness decisions)
 - Anchor: `StudioBuilding_L1`
 - Routine anchors (primary loop):
   - `Studio_Kanban` → `Studio_ApprovalDesk` → `Studio_RCInsert`
 - Major interactions:
-  - Requests proof that work exists before allowing approval.
-  - Blocks RC insertion when artifacts do not support claims.
+  - Requests evidence that work exists before allowing approval.
+  - Blocks Release Candidate insertion when artifacts do not support claims.
   - Generates approval artifacts that become police-grade evidence later.
 
 #### 2) Studio QA (`roleName: QA`)
@@ -143,7 +143,7 @@ Each organization defines at least two NPC archetypes. Archetypes are expressed 
 - Routine anchors (primary loop):
   - `Studio_Kanban` → `Studio_Terminal` → `Studio_ApprovalDesk`
 - Major interactions:
-  - Turns rumors (“RC is ready”) into verifiable claims (“show patch notes / approvals”).
+  - Turns rumors (“Release Candidate is ready”) into verifiable claims (“show patch notes / approvals”).
   - Produces `Defense Memo`-style artifacts when blocking a release.
   - Serves as a frequent witness for “what was missing?”
 
@@ -220,17 +220,17 @@ Each template includes: trigger, observers/witnesses, evidence generation, and o
   - Warning: label was correct; report filed with witness statement.
   - Detained: refusal + repeat violation triggers Station inquest.
 
-### Studio incident: RC inserted without approval
+### Studio incident: Release Candidate inserted without approval
 
 - Trigger:
-  - RC is inserted at `Studio_RCInsert` without a matching approval artifact.
+  - Release Candidate is inserted at `Studio_RCInsert` without a matching approval artifact.
 - Observers / witnesses:
   - Primary: `PM`, `QA`.
   - Secondary: `Developer` who performed the insert.
 - Evidence generation:
-  - Missing or out-of-order `Approval Note` vs. `RC strip` timing.
+  - Missing or out-of-order `Approval Note` vs. `Release Candidate strip` timing.
   - `kanban log` and `patch notes` inconsistencies.
-  - Station follow-up can produce `CCTV Capture`-style timeline proof.
+  - Station follow-up can produce `CCTV Capture`-style timeline evidence.
 - Possible outcomes:
   - Cleared: approval exists but was not surfaced; PM validates it.
   - Warning: approval absent or post-dated; report filed.
@@ -283,6 +283,27 @@ For any active incident/case, the player should be able to answer these three qu
 3) What evidence supports the claim?
 - Provide at least one artifact that is harder than rumor (ticket, capture, approval note, signed memo).
 - Ensure at least one witness can point to the same artifact.
+
+## Fallback causality fields (runtime trace)
+
+For report -> intake -> verdict readability, decision traces should expose:
+- `transport`
+- `usedFallback`
+- `reason`
+- `reasonCategory`
+- `warningTier`
+- `threadId`
+
+Recommended failure-code groupings:
+- `policy_*`: policy rejection
+- `invalid_perception_packet`: schema/input validation
+- `codex_timeout` / `decision_deadline_exceeded`: timeout
+- `request_cancelled`: cancellation
+- `parse_failure` / `tool_failure`: tool/parse path
+
+Operational rule:
+- If `usedFallback=true`, `reason` must be non-empty.
+- If `transport` is `codex` or `codex-reply`, `threadId` must be non-empty.
 
 ## ID / enum candidates (for follow-up refactors)
 

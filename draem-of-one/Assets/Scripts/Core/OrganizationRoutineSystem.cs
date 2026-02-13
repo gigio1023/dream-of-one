@@ -249,8 +249,8 @@ namespace DreamOfOne.Core
                     studioStep = StudioStep.RcInsert;
                     break;
                 case StudioStep.RcInsert:
-                    RecordProcedure("Release", "Studio", "StudioPhoto", EventType.RcInserted, "RC 삽입", studioAnchor, "PROC_STUDIO_RC");
-                    EmitViolationEvery("Studio", "StudioPhoto", "PROC_RC_SKIP", "RC 절차 누락 의심", studioAnchor, ref studioViolationCounter, 5);
+                    RecordProcedure("Release", "Studio", "StudioPhoto", EventType.RcInserted, "릴리즈 후보 삽입", studioAnchor, "PROC_STUDIO_RC");
+                    EmitViolationEvery("Studio", "StudioPhoto", "PROC_RC_SKIP", "릴리즈 후보 절차 누락 의심", studioAnchor, ref studioViolationCounter, 5);
                     studioStep = StudioStep.Kanban;
                     break;
             }

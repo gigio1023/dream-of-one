@@ -102,7 +102,7 @@ namespace DreamOfOne.Core
                     AppendLocation(builder, record);
                     break;
                 case EventType.RcInserted:
-                    builder.Append($"RC 반영: {record.note}");
+                    builder.Append($"릴리즈 후보 반영: {record.note}");
                     AppendLocation(builder, record);
                     break;
                 case EventType.LabelChanged:

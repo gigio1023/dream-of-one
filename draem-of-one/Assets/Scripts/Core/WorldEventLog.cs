@@ -279,6 +279,8 @@ namespace DreamOfOne.Core
                 EventType.SeatClaimed => EventCategory.Organization,
                 EventType.NoiseObserved => EventCategory.Organization,
                 EventType.ExposureUpdated => EventCategory.Exposure,
+                EventType.IntentRejected => EventCategory.Procedure,
+                EventType.IntentFallbackApplied => EventCategory.Procedure,
                 _ => EventCategory.Rule
             };
         }

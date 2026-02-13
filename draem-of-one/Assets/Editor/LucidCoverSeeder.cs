@@ -293,7 +293,7 @@ namespace DreamOfOne.Editor
                     offset = new Vector3(-0.4f, 0f, -0.2f),
                     rotation = Vector3.zero,
                     prompt = "E: Read",
-                    text = "RC 삽입은 승인노트와 쌍입니다.",
+                    text = "릴리즈 후보(RC) 삽입은 승인노트와 쌍입니다.",
                     dreamLawIds = new[] { "DL_ST1_APPROVAL_GATE", "DL_G1_NO_DREAM_TALK" },
                     placeId = "Studio"
                 },
@@ -421,7 +421,7 @@ namespace DreamOfOne.Editor
                     dreamLawIds = new[] { "DL_ST1_APPROVAL_GATE", "DL_G1_NO_DREAM_TALK", "DL_G3_NO_META_LOGIC" },
                     requiredActors = new[] { "StudioPM", "QA" },
                     requiredTextSurfaces = new[] { "TS_STUDIO_APPROVAL_NOTICE", "TS_STUDIO_RC_FORM" },
-                    playerChecklistStep = "승인 절차 확인 + RC 관련 업무",
+                    playerChecklistStep = "승인 절차 확인 + 릴리즈 후보 관련 업무",
                     triggerDetectorIds = new[]
                     {
                         DreamLawDetectorIds.ProcRcBeforeApproval,
@@ -431,7 +431,7 @@ namespace DreamOfOne.Editor
                     escalationLadder = "Suspicious: 표현 부적절. Challenging: 승인노트 요구. Reporting: 절차 경멸.",
                     artifactsGenerated = "Witness Statement, Approval Note, Complaint/Defense Memo",
                     defuseOptions = "승인노트 확보/제시 + SA_COMPLY",
-                    failureCondition = "RC insert 위반 + meta logic 동시 발생 시 reporting 직행",
+                    failureCondition = "릴리즈 후보 insert 위반 + meta logic 동시 발생 시 reporting 직행",
                     expectedCanonicalLines = "[DL_ST1][Procedure] Approval gate violation detected.",
                     mcssValidation = "Studio에서 최소 1회 증빙 요구 발생."
                 },

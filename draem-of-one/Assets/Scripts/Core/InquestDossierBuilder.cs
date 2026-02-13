@@ -37,14 +37,15 @@ namespace DreamOfOne.Core
             dossier.EvidenceCount = CountEvidence(bundle);
             dossier.DefenseCount = CountDefense(bundle);
             dossier.SeveritySum = SumSeverity(bundle);
-
-            dossier.Score = InquestVerdictRules.ComputeScore(
+            dossier.Breakdown = InquestVerdictRules.BuildBreakdown(
                 dossier.Exposure,
                 dossier.GlobalSuspicion,
                 dossier.EvidenceCount,
                 dossier.SeveritySum,
                 dossier.DefenseCount);
 
+            dossier.Score = dossier.Breakdown.TotalScore;
+            dossier.ExposureOverride = InquestVerdictRules.IsExposureOverride(dossier.Exposure, dossier.Score);
             dossier.Verdict = InquestVerdictRules.ResolveVerdict(dossier.Exposure, dossier.Score);
 
             BuildReasons(dossier);
@@ -119,12 +120,22 @@ namespace DreamOfOne.Core
             }
 
             dossier.Reasons.Clear();
-            dossier.Reasons.Add($"Exposure {dossier.Exposure}");
-            dossier.Reasons.Add($"GlobalSuspicion {(dossier.GlobalSuspicion * 100f):0}%");
-            dossier.Reasons.Add($"Evidence {dossier.EvidenceCount}");
-            dossier.Reasons.Add($"Defense {dossier.DefenseCount}");
-            dossier.Reasons.Add($"Severity {dossier.SeveritySum}");
-            dossier.Reasons.Add($"Score {dossier.Score}");
+            dossier.Reasons.Add($"Score {dossier.Score} (band {dossier.Breakdown.ScoreBand})");
+            dossier.Reasons.Add($"Terms ex+{dossier.Breakdown.ExposureContribution} sus+{dossier.Breakdown.SuspicionContribution} ev+{dossier.Breakdown.EvidenceContribution} sev+{dossier.Breakdown.SeverityContribution} def{dossier.Breakdown.DefenseContribution}");
+
+            if (dossier.ExposureOverride)
+            {
+                dossier.Reasons.Add("Exposure override: exposure >= 100");
+            }
+
+            if (dossier.Breakdown.NextThresholdValue > 0)
+            {
+                dossier.Reasons.Add($"Next {dossier.Breakdown.NextThresholdLabel} in {dossier.Breakdown.DeltaToNextThreshold}");
+            }
+            else
+            {
+                dossier.Reasons.Add("At highest threshold");
+            }
         }
     }
 }

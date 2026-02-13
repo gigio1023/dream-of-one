@@ -15,7 +15,7 @@ namespace DreamOfOne.Core
         private string affiliation = "외부";
 
         [SerializeField]
-        private string role = "계약직";
+        private string role = "임시직";
 
         [SerializeField]
         [Tooltip("허용 장소(PlaceId/ZoneId) 목록")]

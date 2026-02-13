@@ -60,6 +60,9 @@ namespace DreamOfOne.Society
     {
         public bool usedFallback = false;
         public string reason = string.Empty;
+        public string reasonDetail = string.Empty;
+        public string reasonCategory = string.Empty;
+        public string warningTier = string.Empty;
         public string threadId = string.Empty;
         public string transport = string.Empty;
     }
@@ -80,7 +83,7 @@ namespace DreamOfOne.Society
         public string[] reasonCodes = Array.Empty<string>();
     }
 
-    // Legacy action plan payload retained for compatibility while contract v1 rolls out.
+    // Legacy action plan payload retained for compatibility while runtime spec v1 rolls out.
     [Serializable]
     public sealed class SocietyActionPlan
     {

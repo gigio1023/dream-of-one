@@ -18,6 +18,8 @@ namespace DreamOfOne.Core
         public int DefenseCount { get; set; }
         public int SeveritySum { get; set; }
         public int Score { get; set; }
+        public bool ExposureOverride { get; set; }
+        public InquestScoreBreakdown Breakdown { get; set; }
         public InquestVerdict Verdict { get; set; }
 
         public List<string> Reasons { get; } = new();

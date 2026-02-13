@@ -805,12 +805,35 @@ namespace DreamOfOne.LLM
 
         private string BuildMockText(TextRequest request)
         {
-            // For planning calls we return a minimal valid JSON object.
+            // For planning calls we return a minimal valid runtime-intent JSON object.
             // This keeps downstream validators deterministic even without a live model.
-            string speak = "알겠어요. 주변 상황을 좀 더 볼게요.";
-            string mem = "Observed recent events; staying cautious.";
+            string npcId = ExtractNpcIdFromRequest(request.user);
+            return
+                $"{{\"schemaVersion\":\"society.intent.v1\",\"npcId\":\"{EscapeJson(npcId)}\",\"actionType\":\"Observe\",\"reasonCodes\":[\"mock.observe\"],\"confidence\":0.2}}";
+        }
 
-            return $"{{\"intent\":\"observe\",\"speak\":\"{EscapeJson(speak)}\",\"actions\":[],\"memoryWrite\":\"{EscapeJson(mem)}\"}}";
+        private static string ExtractNpcIdFromRequest(string userPrompt)
+        {
+            if (string.IsNullOrEmpty(userPrompt))
+            {
+                return "UNKNOWN_NPC";
+            }
+
+            const string marker = "\"npcId\":\"";
+            int index = userPrompt.IndexOf(marker, StringComparison.Ordinal);
+            if (index < 0)
+            {
+                return "UNKNOWN_NPC";
+            }
+
+            int start = index + marker.Length;
+            int end = userPrompt.IndexOf('"', start);
+            if (end <= start)
+            {
+                return "UNKNOWN_NPC";
+            }
+
+            return userPrompt.Substring(start, end - start);
         }
 
         private static string EscapeJson(string value)

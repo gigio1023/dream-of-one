@@ -90,10 +90,10 @@ namespace DreamOfOne.Core
             FileReport("Elder", "R_QUEUE", act1EventId, queueZone);
 
             yield return new WaitForSeconds(act2Delay);
-            var act2EventId = EmitViolation("Player", "Studio", "StudioPhoto", "PROC_RC_SKIP", "RC 절차 누락 의심", studioZone);
+            var act2EventId = EmitViolation("Player", "Studio", "StudioPhoto", "PROC_RC_SKIP", "릴리즈 후보 절차 누락 의심", studioZone);
             yield return new WaitForSeconds(2f);
             EmitProcedure("Studio", "Studio", "StudioPhoto", EventType.ApprovalGranted, "PM 승인", studioZone);
-            EmitProcedure("Studio", "Studio", "StudioPhoto", EventType.RcInserted, "RC 삽입", studioZone);
+            EmitProcedure("Studio", "Studio", "StudioPhoto", EventType.RcInserted, "릴리즈 후보 삽입", studioZone);
             EmitEvidence("QA", "Studio", "StudioPhoto", EventType.EvidenceCaptured, "로그 증거", studioZone);
             EmitOrganization("PM", "Studio", "StudioPhoto", EventType.TaskStarted, "검수 시작", studioZone);
             EmitOrganization("PM", "Studio", "StudioPhoto", EventType.TaskCompleted, "검수 완료", studioZone);

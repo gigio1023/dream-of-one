@@ -513,7 +513,7 @@ namespace DreamOfOne.NPC
                 return InquestVerdict.Cleared;
             }
 
-            lastVerdictReason = string.Join(" | ", currentDossier.Reasons);
+            lastVerdictReason = InquestDossierFormatter.BuildOneLineReason(currentDossier);
             return currentDossier.Verdict;
         }
 

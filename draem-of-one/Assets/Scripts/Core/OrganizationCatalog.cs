@@ -26,10 +26,10 @@ namespace DreamOfOne.Core
             Add(new OrganizationDefinition
             {
                 id = OrganizationId.Studio,
-                goal = "RC 제출/릴리즈 안정화",
-                procedures = new[] { "칸반 갱신", "패치노트", "승인", "RC 삽입" },
+                goal = "릴리즈 후보(RC) 제출/릴리즈 안정화",
+                procedures = new[] { "칸반 갱신", "패치노트", "승인", "릴리즈 후보 삽입" },
                 resources = new[] { "칸반 보드", "라운지", "서버 슬롯" },
-                artifacts = new[] { "칸반 로그", "패치노트", "승인 노트", "RC 스트립" },
+                artifacts = new[] { "칸반 로그", "패치노트", "승인 노트", "릴리즈 후보 스트립" },
                 roles = new[] { RoleId.PM, RoleId.Developer, RoleId.QA, RoleId.Release }
             });
 

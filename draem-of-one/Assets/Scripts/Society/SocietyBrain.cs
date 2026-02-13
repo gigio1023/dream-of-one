@@ -67,6 +67,10 @@ namespace DreamOfOne.Society
         [Tooltip("Debug logs for plan parse/validation.")]
         private bool verbose = false;
 
+        [SerializeField]
+        [Tooltip("Suppress repeated fallback metadata logs with same reason within this window (seconds).")]
+        private float fallbackMetaSuppressWindowSeconds = 2f;
+
         private PolicyPackDefinition policyPack = null;
         private WorldEventLog eventLog = null;
         private LLMClient llmClient = null;
@@ -87,6 +91,9 @@ namespace DreamOfOne.Society
         private float nextDecisionTime = -999f;
         private readonly HashSet<string> seenEventIds = new();
         private ActionOutcome lastOutcome = new();
+        private string lastFallbackMetaSignature = string.Empty;
+        private float lastFallbackMetaLoggedAt = -999f;
+        private int suppressedFallbackMetaCount = 0;
 
         public void Configure(
             PolicyPackDefinition pack,
@@ -183,7 +190,24 @@ namespace DreamOfOne.Society
             }
 
             nextDecisionTime = Time.time + decisionIntervalSeconds + UnityEngine.Random.Range(-0.5f, 0.8f);
+            RunDecisionCycle();
+        }
 
+        /// <summary>
+        /// Debug entrypoint used by editor tools to trigger one decision cycle immediately.
+        /// </summary>
+        public void DebugRunDecisionCycle()
+        {
+            if (persona == null || eventLog == null)
+            {
+                return;
+            }
+
+            RunDecisionCycle();
+        }
+
+        private void RunDecisionCycle()
+        {
             var observations = CollectObservations();
             if (observations.Count > 0)
             {
@@ -687,7 +711,31 @@ namespace DreamOfOne.Society
             }
 
             string actionType = intent != null ? intent.actionType : string.Empty;
-            string note = $"transport={meta.transport}; usedFallback={meta.usedFallback}; reason={meta.reason}; threadId={meta.threadId}";
+            if (meta.usedFallback)
+            {
+                string signature = $"{meta.reason}|{meta.reasonCategory}|{meta.warningTier}|{actionType}";
+                float suppressWindow = Mathf.Max(0f, fallbackMetaSuppressWindowSeconds);
+                if (suppressWindow > 0f
+                    && string.Equals(signature, lastFallbackMetaSignature, StringComparison.Ordinal)
+                    && (Time.time - lastFallbackMetaLoggedAt) < suppressWindow)
+                {
+                    suppressedFallbackMetaCount++;
+                    return;
+                }
+
+                FlushSuppressedFallbackMeta();
+                lastFallbackMetaSignature = signature;
+                lastFallbackMetaLoggedAt = Time.time;
+            }
+            else
+            {
+                FlushSuppressedFallbackMeta();
+                lastFallbackMetaSignature = string.Empty;
+                lastFallbackMetaLoggedAt = -999f;
+            }
+
+            string note = $"transport={meta.transport}; usedFallback={meta.usedFallback}; reason={meta.reason}; reasonCategory={meta.reasonCategory}; warningTier={meta.warningTier}; threadId={meta.threadId}";
+            int severity = ResolveMetaSeverity(meta.warningTier, meta.usedFallback);
             eventLog.RecordEvent(new EventRecord
             {
                 actorId = persona.NpcId,
@@ -695,8 +743,48 @@ namespace DreamOfOne.Society
                 eventType = CoreEventType.ExplanationGiven,
                 topic = string.IsNullOrWhiteSpace(actionType) ? "backend-decision" : $"backend-decision:{actionType}",
                 note = note,
-                severity = meta.usedFallback ? 2 : 1
+                severity = severity
             });
+        }
+
+        private void FlushSuppressedFallbackMeta()
+        {
+            if (suppressedFallbackMetaCount <= 0 || eventLog == null || persona == null)
+            {
+                suppressedFallbackMetaCount = 0;
+                return;
+            }
+
+            eventLog.RecordEvent(new EventRecord
+            {
+                actorId = persona.NpcId,
+                actorRole = persona.Role,
+                eventType = CoreEventType.ExplanationGiven,
+                topic = "backend-decision:noise-suppressed",
+                note = $"suppressedFallbackMeta={suppressedFallbackMetaCount}; signature={lastFallbackMetaSignature}",
+                severity = 1
+            });
+            suppressedFallbackMetaCount = 0;
+        }
+
+        private static int ResolveMetaSeverity(string warningTier, bool usedFallback)
+        {
+            if (string.Equals(warningTier, "blocking", StringComparison.Ordinal))
+            {
+                return 3;
+            }
+
+            if (string.Equals(warningTier, "attention", StringComparison.Ordinal))
+            {
+                return 2;
+            }
+
+            if (usedFallback)
+            {
+                return 2;
+            }
+
+            return 1;
         }
 
         private void RecordContractEvent(CoreEventType eventType, string reasonCode, string actionType)
@@ -711,7 +799,7 @@ namespace DreamOfOne.Society
                 actorId = persona.NpcId,
                 actorRole = persona.Role,
                 eventType = eventType,
-                topic = string.IsNullOrWhiteSpace(actionType) ? "runtime-contract" : actionType,
+                topic = string.IsNullOrWhiteSpace(actionType) ? "runtime-spec" : actionType,
                 note = reasonCode ?? string.Empty,
                 severity = 1
             });

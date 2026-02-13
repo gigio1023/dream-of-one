@@ -164,7 +164,7 @@ namespace DreamOfOne.Core
                 new[] { "Studio", "StudioPhoto", "StoreQueue", "ParkSeat", "CafeQueue", "CafeSeat" },
                 new[] { "PROC_NOTE_MISSING", "PROC_APPROVAL_DELAY", "PROC_RC_SKIP" },
                 new[] { "R_QUEUE", "R_LABEL", "R_NOISE" },
-                new[] { "칸반", "패치노트", "RC" });
+                new[] { "칸반", "패치노트", "릴리즈 후보" });
 
             player.AddComponent<CoverStatus>();
             return player;

@@ -572,10 +572,28 @@ namespace DreamOfOne.Editor
                 modifiers: null);
             if (applyIntent == null || applyIntent.ReturnType != typeof(bool))
             {
-                errors.Add("SocietyBrain.TryApplyIntentJson(string,out string) contract entrypoint missing.");
+                errors.Add("SocietyBrain.TryApplyIntentJson(string,out string) spec entrypoint missing.");
             }
 
-            info.Add("Society runtime contract diagnostics: schema/events/entrypoints validated.");
+            var metaType = typeof(DecisionMetaPayload);
+            string[] requiredMetaFields =
+            {
+                "usedFallback",
+                "reason",
+                "reasonCategory",
+                "warningTier",
+                "threadId",
+                "transport"
+            };
+            for (int i = 0; i < requiredMetaFields.Length; i++)
+            {
+                if (metaType.GetField(requiredMetaFields[i]) == null)
+                {
+                    errors.Add($"DecisionMetaPayload missing required field: {requiredMetaFields[i]}");
+                }
+            }
+
+            info.Add("Society runtime spec diagnostics: schema/events/entrypoints validated.");
         }
 
         private static bool HasValidAtlas(TMP_FontAsset asset)

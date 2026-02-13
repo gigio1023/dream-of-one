@@ -161,6 +161,21 @@ namespace DreamOfOne.Society
                 return false;
             }
 
+            if (envelope.meta.usedFallback && string.IsNullOrWhiteSpace(envelope.meta.reason))
+            {
+                error = "meta.reason is required when usedFallback=true";
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(envelope.meta.warningTier)
+                && envelope.meta.warningTier != "blocking"
+                && envelope.meta.warningTier != "attention"
+                && envelope.meta.warningTier != "reference")
+            {
+                error = $"unknown meta.warningTier: {envelope.meta.warningTier}";
+                return false;
+            }
+
             return true;
         }
 
@@ -176,7 +191,7 @@ namespace DreamOfOne.Society
 
             if (string.IsNullOrWhiteSpace(intent.schemaVersion))
             {
-                // Backend contract omits schemaVersion on intent; normalize to runtime contract value.
+                // Backend spec omits schemaVersion on intent; normalize to runtime spec value.
                 intent.schemaVersion = SocietyRuntimeContract.IntentSchemaVersion;
             }
 

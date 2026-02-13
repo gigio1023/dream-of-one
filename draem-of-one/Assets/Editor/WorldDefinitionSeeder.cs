@@ -43,7 +43,7 @@ namespace DreamOfOne.Editor
                 CreateRule("R_QUEUE", 2, 30f, "Queue", "줄 규칙 위반이 감지됨"),
                 CreateRule("R_LABEL", 2, 20f, "Label", "라벨 규정 위반이 감지됨"),
                 CreateRule("R_NOISE", 2, 20f, "Noise", "소음 규정 위반이 감지됨"),
-                CreateRule("PROC_RC_SKIP", 2, 25f, "Procedure", "RC 절차 누락이 감지됨")
+                CreateRule("PROC_RC_SKIP", 2, 25f, "Procedure", "릴리즈 후보 절차 누락이 감지됨")
             };
 
             var ruleset = CreateRuleset("Main", rules);
@@ -90,7 +90,7 @@ namespace DreamOfOne.Editor
                 CreateInteractable("Studio_PatchTerminal", "StudioBuilding_L1", interactablePrefab, new Vector3(-1.2f, 0f, 0.8f), CoreEventType.TaskCompleted, EventCategory.Organization, ZoneType.None, "PROC_PATCH", "Patch note", "Studio"),
                 CreateInteractable("Studio_Terminal", "StudioBuilding_L1", interactablePrefab, new Vector3(-1.6f, 0f, 0.6f), CoreEventType.TaskCompleted, EventCategory.Organization, ZoneType.None, "PROC_PATCH", "Terminal log", "Studio"),
                 CreateInteractable("Studio_ApprovalDesk", "StudioBuilding_L1", interactablePrefab, new Vector3(0.6f, 0f, -0.6f), CoreEventType.ApprovalGranted, EventCategory.Procedure, ZoneType.None, "PROC_APPROVAL", "Approval granted", "Studio"),
-                CreateInteractable("Studio_RCInsert", "StudioBuilding_L1", interactablePrefab, new Vector3(-0.6f, 0f, -0.6f), CoreEventType.RcInserted, EventCategory.Procedure, ZoneType.None, "PROC_RC", "RC inserted", "Studio"),
+                CreateInteractable("Studio_RCInsert", "StudioBuilding_L1", interactablePrefab, new Vector3(-0.6f, 0f, -0.6f), CoreEventType.RcInserted, EventCategory.Procedure, ZoneType.None, "PROC_RC", "Release Candidate inserted", "Studio"),
                 CreateInteractable("Studio_Lounge", "StudioBuilding_L1", interactablePrefab, new Vector3(0f, 0f, 1.6f), CoreEventType.RumorShared, EventCategory.Gossip, ZoneType.None, "GOSSIP", "Lounge gossip", "Studio"),
 
                 // Park
@@ -127,13 +127,13 @@ namespace DreamOfOne.Editor
                     }),
                 CreateIncident(
                     "Incident_StudioRC",
-                    "RC inserted without approval. Verify kanban/approval trail and RC insert timing.",
+                    "Release Candidate inserted without approval. Verify kanban/approval trail and Release Candidate insert timing.",
                     new [] { "Studio_Kanban", "Studio_ApprovalDesk", "Studio_RCInsert" },
                     new [] { "ApprovalGranted", "RcInserted", "CctvCaptured" },
                     new []
                     {
-                        Branch("Guilty", "RC insert precedes approval or approval missing."),
-                        Branch("Cleared", "Approval artifact precedes RC insert."),
+                        Branch("Guilty", "Release Candidate insert precedes approval or approval missing."),
+                        Branch("Cleared", "Approval artifact precedes Release Candidate insert."),
                         Branch("Unresolved", "Artifacts conflict; requires Station escalation.")
                     }),
                 CreateIncident(

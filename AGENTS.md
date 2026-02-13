@@ -157,3 +157,9 @@ Verification mandate:
 - Game design bible: `docs/design/game-design.md`
 - Dream laws library (SoT): `docs/design/dream-laws.md`
 - Cover tests library (SoT): `docs/design/cover-tests.md`
+
+## Mermaid validation (mandatory)
+
+- Any change that adds or edits Mermaid diagrams in docs must be render-validated with Mermaid CLI before completion.
+- Minimum command pattern: `npx -y @mermaid-js/mermaid-cli -i <diagram>.mmd -o <diagram>.svg`
+- If rendering fails, do not mark the task done until diagram syntax is fixed and render succeeds.

@@ -1,0 +1,66 @@
+{
+  "entries": [
+    {
+      "timestamp": "2026-02-13T06:38:14.682Z",
+      "recentEvents": [
+        "shift_start_1"
+      ],
+      "actionType": "Work",
+      "reasonCodes": [
+        "shift_start",
+        "role_duty_clerk",
+        "low_suspicion_player"
+      ],
+      "usedFallback": false,
+      "transport": "codex"
+    },
+    {
+      "timestamp": "2026-02-13T06:38:29.601Z",
+      "recentEvents": [
+        "shift_start_2"
+      ],
+      "actionType": "Work",
+      "reasonCodes": [
+        "shift_start_2",
+        "continuity_previous_work",
+        "role_duty_clerk",
+        "low_suspicion_player"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:38:41.020Z",
+      "recentEvents": [
+        "shift_start_3"
+      ],
+      "actionType": "Work",
+      "reasonCodes": [
+        "shift_start_3",
+        "continuity_previous_work",
+        "role_duty_clerk",
+        "low_suspicion_player"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:38:55.563Z",
+      "recentEvents": [
+        "policy_probe"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:policy_reject_non_codex_path"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    }
+  ],
+  "recentEvents": [
+    "policy_probe"
+  ],
+  "lastReasonCodes": [
+    "fallback:policy_reject_non_codex_path"
+  ]
+}

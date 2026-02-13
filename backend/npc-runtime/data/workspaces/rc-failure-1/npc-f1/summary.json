@@ -1,0 +1,4 @@
+{
+  "text": "npc:npc-f1 | landmark:Store | action:Observe | fallback:yes | reasons:fallback:parse_failure | transport:fallback",
+  "updatedAt": "2026-02-13T06:12:02.387Z"
+}

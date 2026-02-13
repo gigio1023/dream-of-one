@@ -3,7 +3,10 @@ import { access, mkdir } from "node:fs/promises";
 import { delimiter, dirname, join, resolve } from "node:path";
 import type { RuntimeConfig } from "../config.js";
 
-export type ReadinessReason = "codex_command_not_resolvable" | "thread_store_path_not_accessible";
+export type ReadinessReason =
+  | "codex_command_not_resolvable"
+  | "thread_store_path_not_accessible"
+  | "workspace_root_path_not_accessible";
 
 interface CodexCommandReadiness {
   ok: boolean;
@@ -19,6 +22,13 @@ interface ThreadStorePathReadiness {
   reason?: "thread_store_path_not_accessible";
 }
 
+interface WorkspaceRootPathReadiness {
+  ok: boolean;
+  path: string;
+  resolvedPath: string;
+  reason?: "workspace_root_path_not_accessible";
+}
+
 export interface RuntimeReadinessReport {
   status: "ready" | "not_ready";
   service: "npc-runtime";
@@ -26,6 +36,7 @@ export interface RuntimeReadinessReport {
   checks: {
     codexCommand: CodexCommandReadiness;
     threadStorePath: ThreadStorePathReadiness;
+    workspaceRootPath: WorkspaceRootPathReadiness;
   };
 }
 
@@ -132,9 +143,30 @@ async function checkThreadStorePath(path: string): Promise<ThreadStorePathReadin
   }
 }
 
+async function checkWorkspaceRootPath(path: string): Promise<WorkspaceRootPathReadiness> {
+  const resolvedPath = resolve(path);
+  try {
+    await mkdir(resolvedPath, { recursive: true });
+    await access(resolvedPath, constants.R_OK | constants.W_OK);
+    return {
+      ok: true,
+      path,
+      resolvedPath,
+    };
+  } catch {
+    return {
+      ok: false,
+      path,
+      resolvedPath,
+      reason: "workspace_root_path_not_accessible",
+    };
+  }
+}
+
 export async function evaluateRuntimeReadiness(config: RuntimeConfig): Promise<RuntimeReadinessReport> {
   const codexCommand = await checkCodexCommand(config.codexCommand);
   const threadStorePath = await checkThreadStorePath(config.threadStorePath);
+  const workspaceRootPath = await checkWorkspaceRootPath(config.workspaceRootPath);
 
   const reasons: ReadinessReason[] = [];
   if (!codexCommand.ok && codexCommand.reason) {
@@ -142,6 +174,9 @@ export async function evaluateRuntimeReadiness(config: RuntimeConfig): Promise<R
   }
   if (!threadStorePath.ok && threadStorePath.reason) {
     reasons.push(threadStorePath.reason);
+  }
+  if (!workspaceRootPath.ok && workspaceRootPath.reason) {
+    reasons.push(workspaceRootPath.reason);
   }
 
   return {
@@ -151,6 +186,7 @@ export async function evaluateRuntimeReadiness(config: RuntimeConfig): Promise<R
     checks: {
       codexCommand,
       threadStorePath,
+      workspaceRootPath,
     },
   };
 }

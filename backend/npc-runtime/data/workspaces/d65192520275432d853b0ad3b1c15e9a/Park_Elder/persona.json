@@ -1,0 +1,18 @@
+{
+  "npcId": "Park_Elder",
+  "organizationContext": {
+    "role": "Elder",
+    "roleId": "Elder",
+    "organizationId": "Prototype",
+    "allowedActionTypes": [
+      "Observe",
+      "Work",
+      "Idle",
+      "Talk",
+      "Ask",
+      "Move",
+      "Escort",
+      "Report"
+    ]
+  }
+}

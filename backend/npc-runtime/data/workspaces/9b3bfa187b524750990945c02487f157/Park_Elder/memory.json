@@ -1,0 +1,36 @@
+{
+  "entries": [
+    {
+      "timestamp": "2026-02-13T04:43:27.187Z",
+      "recentEvents": [
+        "NPC_Citizen_A이(가) 티켓 발행 관련 신고를 제출했습니다. [Store] (s=32; key=a689af8d3cc346588b5969",
+        "NPC_Store_Clerk_A 의심도 변화: 16; src=a689af8d3cc346588b5969879c338295",
+        "NPC_Studio_QA 의심도 변화: 5; src=bffd8160cd234381936224fa6a94c29f",
+        "NPC_Studio_PM 의심도 변화: 5; src=bffd8160cd234381936224fa6a94c29f",
+        "Store_Clerk_A: 점원: Player 규칙 위반 R_QUEUE 감지. [Store] (새치기 의심)",
+        "업무 시작: 칸반 갱신 [Studio] (칸반 갱신)",
+        "Clerk이(가) R_QUEUE 관련 신고를 제출했습니다. [Store] (s=50; key=b4e42ab297e045499c155b0bd06c",
+        "Elder이(가) R_QUEUE 관련 신고를 제출했습니다. [Store] (s=50; key=b4e42ab297e045499c155b0bd06c"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:request_cancelled"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    }
+  ],
+  "recentEvents": [
+    "NPC_Citizen_A이(가) 티켓 발행 관련 신고를 제출했습니다. [Store] (s=32; key=a689af8d3cc346588b5969",
+    "NPC_Store_Clerk_A 의심도 변화: 16; src=a689af8d3cc346588b5969879c338295",
+    "NPC_Studio_QA 의심도 변화: 5; src=bffd8160cd234381936224fa6a94c29f",
+    "NPC_Studio_PM 의심도 변화: 5; src=bffd8160cd234381936224fa6a94c29f",
+    "Store_Clerk_A: 점원: Player 규칙 위반 R_QUEUE 감지. [Store] (새치기 의심)",
+    "업무 시작: 칸반 갱신 [Studio] (칸반 갱신)",
+    "Clerk이(가) R_QUEUE 관련 신고를 제출했습니다. [Store] (s=50; key=b4e42ab297e045499c155b0bd06c",
+    "Elder이(가) R_QUEUE 관련 신고를 제출했습니다. [Store] (s=50; key=b4e42ab297e045499c155b0bd06c"
+  ],
+  "lastReasonCodes": [
+    "fallback:request_cancelled"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "npcId": "Station_Investigator",
+  "organizationContext": {
+    "role": "Investigator",
+    "roleId": "Investigator",
+    "organizationId": "Prototype",
+    "allowedActionTypes": [
+      "Observe",
+      "Work",
+      "Idle",
+      "Talk",
+      "Ask",
+      "Move",
+      "Escort",
+      "Report"
+    ]
+  }
+}

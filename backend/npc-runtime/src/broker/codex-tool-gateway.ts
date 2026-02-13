@@ -8,9 +8,14 @@ export interface CodexToolResponse {
   content: string;
 }
 
+export interface CodexToolRunOptions {
+  signal?: AbortSignal;
+  deadlineMs?: number;
+}
+
 export interface CodexToolGateway {
-  codex(prompt: string): Promise<CodexToolResponse>;
-  codexReply(threadId: string, prompt: string): Promise<CodexToolResponse>;
+  codex(prompt: string, options?: CodexToolRunOptions): Promise<CodexToolResponse>;
+  codexReply(threadId: string, prompt: string, options?: CodexToolRunOptions): Promise<CodexToolResponse>;
 }
 
 export interface CommandCodexToolGatewayOptions {
@@ -20,6 +25,7 @@ export interface CommandCodexToolGatewayOptions {
 }
 
 export class CodexToolTimeoutError extends Error {}
+export class CodexToolCancelledError extends Error {}
 export class CodexToolError extends Error {}
 
 export class CommandCodexToolGateway implements CodexToolGateway {
@@ -33,22 +39,28 @@ export class CommandCodexToolGateway implements CodexToolGateway {
     this.timeoutMs = options.timeoutMs;
   }
 
-  codex(prompt: string): Promise<CodexToolResponse> {
-    return this.run("codex", { prompt });
+  codex(prompt: string, options?: CodexToolRunOptions): Promise<CodexToolResponse> {
+    return this.run("codex", { prompt }, options);
   }
 
-  codexReply(threadId: string, prompt: string): Promise<CodexToolResponse> {
-    return this.run("codex-reply", { threadId, prompt });
+  codexReply(threadId: string, prompt: string, options?: CodexToolRunOptions): Promise<CodexToolResponse> {
+    return this.run("codex-reply", { threadId, prompt }, options);
   }
 
-  private async run(toolName: "codex" | "codex-reply", payload: Record<string, string>): Promise<CodexToolResponse> {
+  private async run(
+    toolName: "codex" | "codex-reply",
+    payload: Record<string, string>,
+    options?: CodexToolRunOptions,
+  ): Promise<CodexToolResponse> {
+    const timeout = this.resolveTimeout(options?.deadlineMs);
     try {
       const { stdout } = await execFileAsync(
         this.command,
         [...this.args, toolName, JSON.stringify(payload)],
         {
-          timeout: this.timeoutMs,
+          timeout,
           maxBuffer: 1024 * 1024,
+          signal: options?.signal,
         },
       );
 
@@ -56,9 +68,13 @@ export class CommandCodexToolGateway implements CodexToolGateway {
       return parsed;
     } catch (error) {
       const err = error as NodeJS.ErrnoException;
+      if (err.name === "AbortError" || err.code === "ABORT_ERR") {
+        throw new CodexToolCancelledError(`tool ${toolName} cancelled`);
+      }
+
       const maybeKilled = (err as NodeJS.ErrnoException & { killed?: boolean }).killed;
       if (err.name === "TimeoutError" || maybeKilled === true) {
-        throw new CodexToolTimeoutError(`${toolName} timed out after ${this.timeoutMs}ms`);
+        throw new CodexToolTimeoutError(`${toolName} timed out after ${timeout}ms`);
       }
 
       if (err.code === "ENOENT") {
@@ -67,6 +83,14 @@ export class CommandCodexToolGateway implements CodexToolGateway {
 
       throw new CodexToolError(`tool ${toolName} failed: ${err.message}`);
     }
+  }
+
+  private resolveTimeout(deadlineMs?: number): number {
+    if (!Number.isFinite(deadlineMs) || deadlineMs === undefined) {
+      return this.timeoutMs;
+    }
+    const normalized = Math.max(1, Math.floor(deadlineMs));
+    return Math.min(this.timeoutMs, normalized);
   }
 
   private parseToolResponse(raw: string): CodexToolResponse {

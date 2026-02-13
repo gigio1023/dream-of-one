@@ -1,0 +1,36 @@
+{
+  "entries": [
+    {
+      "timestamp": "2026-02-13T04:45:30.240Z",
+      "recentEvents": [
+        "Studio_QA 의심도 변화: 5; src=13c1f2903b22465e8bd27ad1e1e20790",
+        "NPC_Store_Clerk_A 의심도 변화: 16; src=d9e90fb76ae747a9b2422d82bfe0c626",
+        "Store_Manager: 점장: Player 규칙 위반 R_QUEUE 감지. [Store] (새치기 의심)",
+        "업무 시작: 칸반 갱신 [Studio] (칸반 갱신)",
+        "소문: Player 규칙 위반 R_QUEUE 감지. [Store] (새치기 의심) [Store]",
+        "Clerk이(가) R_QUEUE 관련 신고를 제출했습니다. [Store] (s=50; key=deb3a6ad10e94f1e938998a2372f",
+        "Elder이(가) R_QUEUE 관련 신고를 제출했습니다. [Store] (s=50; key=deb3a6ad10e94f1e938998a2372f",
+        "NPC_Citizen_C 의심도 변화: 5; src=13c1f2903b22465e8bd27ad1e1e20790"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:request_cancelled"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    }
+  ],
+  "recentEvents": [
+    "Studio_QA 의심도 변화: 5; src=13c1f2903b22465e8bd27ad1e1e20790",
+    "NPC_Store_Clerk_A 의심도 변화: 16; src=d9e90fb76ae747a9b2422d82bfe0c626",
+    "Store_Manager: 점장: Player 규칙 위반 R_QUEUE 감지. [Store] (새치기 의심)",
+    "업무 시작: 칸반 갱신 [Studio] (칸반 갱신)",
+    "소문: Player 규칙 위반 R_QUEUE 감지. [Store] (새치기 의심) [Store]",
+    "Clerk이(가) R_QUEUE 관련 신고를 제출했습니다. [Store] (s=50; key=deb3a6ad10e94f1e938998a2372f",
+    "Elder이(가) R_QUEUE 관련 신고를 제출했습니다. [Store] (s=50; key=deb3a6ad10e94f1e938998a2372f",
+    "NPC_Citizen_C 의심도 변화: 5; src=13c1f2903b22465e8bd27ad1e1e20790"
+  ],
+  "lastReasonCodes": [
+    "fallback:request_cancelled"
+  ]
+}

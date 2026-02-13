@@ -1,0 +1,891 @@
+{
+  "entries": [
+    {
+      "timestamp": "2026-02-13T06:20:19.791Z",
+      "recentEvents": [
+        "해명: day=2; pressure=0; profile=Calm; last=CleanPass [Session]",
+        "해명: phase=baseline; profile=Calm; ratio=0.00; mult=0.90; rr=3; g=0.24; sp=0.65 [",
+        "해명: transport=codex; usedFallback=False; reason=; reasonCategory=none; warningTi",
+        "해명: transport=codex; usedFallback=False; reason=; reasonCategory=none; warningTi",
+        "해명: transport=codex; usedFallback=False; reason=; reasonCategory=none; warningTi",
+        "해명: transport=codex; usedFallback=False; reason=; reasonCategory=none; warningTi",
+        "해명: transport=codex; usedFallback=False; reason=; reasonCategory=none; warningTi",
+        "해명: transport=codex; usedFallback=False; reason=; reasonCategory=none; warningTi"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex"
+      ],
+      "usedFallback": false,
+      "transport": "codex"
+    },
+    {
+      "timestamp": "2026-02-13T06:20:26.277Z",
+      "recentEvents": [
+        "Store_Clerk_A: Suspicious (det=DET_REPEAT_LOOP)",
+        "진술: DL_S2_LABEL_AUTHORITY witness statement. [Store]",
+        "Store_Clerk_A: Challenging (det=DET_PROC_LABEL_TAMPER)",
+        "해명: transport=codex; usedFallback=False; reason=; reasonCategory=none; warningTi",
+        "해명: transport=codex; usedFallback=False; reason=; reasonCategory=none; warningTi",
+        "업무 시작: 순찰 [Park] (순찰)",
+        "소문: Store_Clerk_A 규칙 위반 DL_S2_LABEL_AUTHORITY 감지. [Store] (det=DET_PROC_LABEL_TA",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:20:33.070Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "업무 시작: 출입 확인 [Delivery] (출입 확인)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:20:40.436Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "업무 완료: 패치노트 작성 [Studio] (패치노트 작성)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:20:48.082Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "NPC_Store_Clerk_A 의심도 변화: 23; src=8ebb27a49feb4b0ea41d76483131546d",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:20:54.695Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "좌석 사용: 좌석 안내 [Cafe] (좌석 안내)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:21:01.646Z",
+      "recentEvents": [
+        "Tourist이(가) PROC_RC_SKIP 관련 신고를 제출했습니다. [Studio] (s=50; key=d365678395a042ba9dbe",
+        "업무 완료: 수취 서명 [Delivery] (수취 서명)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "NPC_Studio_QA 의심도 변화: 7; src=aea172db495a46af89a2a0287779004c",
+        "Park_Caretaker 의심도 변화: 5; src=69169fd04b634331abd22613abfd4cca",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:21:08.709Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "Studio_QA 의심도 변화: 10; src=8ebb27a49feb4b0ea41d76483131546d",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "줄 정리: 줄 안내 [Store] (줄 안내)",
+        "업무 완료: Defuse [Store] (Defuse)"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:21:16.111Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "RC 반영: RC 삽입 [Studio] (RC 삽입)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:21:23.127Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:21:30.329Z",
+      "recentEvents": [
+        "라벨 갱신: 가격 라벨 갱신 [Store] (가격 라벨 갱신)",
+        "진술: DL_S2_LABEL_AUTHORITY witness statement. [Store]",
+        "Studio_QA 규칙 위반 DL_S2_LABEL_AUTHORITY 감지. [Store] (det=DET_PROC_LABEL_TAMPER)",
+        "Studio_QA 의심도 변화: 24; src=6ad99471da694e8ca3195d4b1e3e1fa0",
+        "NPC_Studio_QA 의심도 변화: 26; src=6ad99471da694e8ca3195d4b1e3e1fa0",
+        "진술: DL_S2_LABEL_AUTHORITY witness statement. [Store]",
+        "Studio_QA: Reporting (det=DET_PROC_LABEL_TAMPER)",
+        "Studio_QA이(가) DET_PROC_LABEL_TAMPER 관련 신고를 제출했습니다. (s=60; key=DET_PROC_LABEL_TAM"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:21:38.097Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "업무 시작: 정기 점검 [Facility] (정기 점검)"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:21:45.851Z",
+      "recentEvents": [
+        "증거 확보: 촬영 진행 [Media] (촬영 진행)",
+        "Park_Caretaker: 관리인: 증거 확보: 촬영 진행 [Media] (촬영 진행)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "NPC_Park_Caretaker 의심도 변화: 7; src=aea172db495a46af89a2a0287779004c",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:21:53.372Z",
+      "recentEvents": [
+        "Store_Clerk_A 의심도 변화: 38; src=7c6d6fc681044ef69e82e0ec6678614d",
+        "Store_Clerk_A: 점원: Store_Clerk_A 의심도 변화: 38; src=7c6d6fc681044ef69e82e0ec6678614d",
+        "Store_Clerk_A이(가) PROC_NOTE_MISSING 관련 신고를 제출했습니다. [Studio] (s=38; key=7c6d6fc68",
+        "Studio_PM 의심도 변화: 19; src=7c6d6fc681044ef69e82e0ec6678614d",
+        "NPC_Studio_PM 의심도 변화: 7; src=aea172db495a46af89a2a0287779004c",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:22:00.073Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "CCTV 캡처: CCTV 캡처 [Station] (CCTV 캡처)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:22:06.612Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "NPC_Station_Investigator 의심도 변화: 5; src=6ad99471da694e8ca3195d4b1e3e1fa0",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "좌석 사용: 좌석 안내 [Cafe] (좌석 안내)"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:22:13.618Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:22:20.345Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:22:28.126Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:22:35.288Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:22:41.967Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:22:49.095Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:23:00.217Z",
+      "recentEvents": [],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:23:07.454Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "업무 시작: 순찰 [Park] (순찰)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:23:11.011Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:23:11.180Z",
+      "recentEvents": [],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:23:14.381Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:23:22.180Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "좌석 사용: 좌석 안내 [Cafe] (좌석 안내)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:23:29.046Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:23:36.691Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:23:43.438Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:23:50.678Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "업무 시작: 정기 점검 [Facility] (정기 점검)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:23:57.388Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:24:05.109Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "증거 확보: 촬영 진행 [Media] (촬영 진행)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:24:12.462Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:24:20.169Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "업무 시작: 출입 확인 [Delivery] (출입 확인)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "업무 완료: 패치노트 작성 [Studio] (패치노트 작성)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:24:27.573Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:24:48.215Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "업무 완료: 수취 서명 [Delivery] (수취 서명)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:24:55.259Z",
+      "recentEvents": [
+        "업무 시작: 정기 점검 [Facility] (정기 점검)",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:25:09.207Z",
+      "recentEvents": [
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory="
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:parse_failure"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    },
+    {
+      "timestamp": "2026-02-13T06:25:16.557Z",
+      "recentEvents": [
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "업무 완료: 조치 보고 [Park] (조치 보고)",
+        "업무 시작: 출입 확인 [Delivery] (출입 확인)",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "NPC: Something feels off. Stay procedural.",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory="
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:parse_failure"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    },
+    {
+      "timestamp": "2026-02-13T06:25:24.042Z",
+      "recentEvents": [
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory="
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:parse_failure"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    },
+    {
+      "timestamp": "2026-02-13T06:25:31.773Z",
+      "recentEvents": [
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory="
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:parse_failure"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    },
+    {
+      "timestamp": "2026-02-13T06:26:30.884Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "NPC: Something feels off. Stay procedural.",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "업무 완료: 수리 완료 [Facility] (수리 완료)",
+        "Citizen 규칙 위반 R_FACILITY_SAFETY 감지. [Facility] (안전 점검 누락)",
+        "Store_Manager 의심도 변화: 21; src=09da152ac71a4597b8ba29b61e9fe2b4",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:26:37.765Z",
+      "recentEvents": [
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war",
+        "해명: transport=codex-reply; usedFallback=False; reason=; reasonCategory=none; war"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex-reply"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T06:26:58.696Z",
+      "recentEvents": [
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "좌석 사용: 좌석 안내 [Cafe] (좌석 안내)",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory="
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:parse_failure"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    },
+    {
+      "timestamp": "2026-02-13T06:27:05.149Z",
+      "recentEvents": [
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "라벨 갱신: 가격 라벨 갱신 [Store] (가격 라벨 갱신)",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory="
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:parse_failure"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    }
+  ],
+  "recentEvents": [
+    "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+    "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+    "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+    "라벨 갱신: 가격 라벨 갱신 [Store] (가격 라벨 갱신)",
+    "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+    "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+    "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory=",
+    "해명: transport=fallback; usedFallback=True; reason=parse_failure; reasonCategory="
+  ],
+  "lastReasonCodes": [
+    "fallback:parse_failure"
+  ]
+}

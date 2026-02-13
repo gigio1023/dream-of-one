@@ -16,3 +16,10 @@ mkdir -p "$LOG_DIR"
   -executeMethod DreamOfOne.Editor.CLIRunner.RunEditorDiagnostics \
   -logFile "$LOG_DIR/editor-diagnostics.log" \
   -quit
+
+STRICT="${DREAM_EVIDENCE_STRICT:-0}"
+node "$ROOT_DIR/scripts/unity/analyze_runtime_evidence.mjs" \
+  --unity-log "$LOG_DIR/editor-diagnostics.log" \
+  --backend-log "$LOG_DIR/npc-runtime.log" \
+  --out "$LOG_DIR/runtime-evidence-editor.json" \
+  --strict "$STRICT"

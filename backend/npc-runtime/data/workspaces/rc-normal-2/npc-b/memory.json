@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "timestamp": "2026-02-13T06:11:48.534Z",
+      "recentEvents": [
+        "normal-3"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "mock.codex"
+      ],
+      "usedFallback": false,
+      "transport": "codex"
+    }
+  ],
+  "recentEvents": [
+    "normal-3"
+  ],
+  "lastReasonCodes": [
+    "mock.codex"
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "text": "npc:npc-c | landmark:Store | action:Observe | fallback:no | reasons:mock.codex-reply | transport:codex-reply",
+  "updatedAt": "2026-02-13T06:13:43.141Z"
+}

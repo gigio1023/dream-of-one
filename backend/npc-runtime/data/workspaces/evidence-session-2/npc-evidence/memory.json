@@ -1,0 +1,51 @@
+{
+  "entries": [
+    {
+      "timestamp": "2026-02-13T04:41:33.905Z",
+      "recentEvents": [
+        "evidence_step1"
+      ],
+      "actionType": "Ask",
+      "reasonCodes": [
+        "EVENT_EVIDENCE_STEP1",
+        "PLAYER_NEARBY",
+        "ROLE_CLERK_INFORMATION_GATHERING"
+      ],
+      "usedFallback": false,
+      "transport": "codex"
+    },
+    {
+      "timestamp": "2026-02-13T04:41:50.769Z",
+      "recentEvents": [
+        "evidence_step2"
+      ],
+      "actionType": "Ask",
+      "reasonCodes": [
+        "EVENT_EVIDENCE_STEP2",
+        "PLAYER_NEARBY",
+        "CONTINUITY_FOLLOWUP",
+        "ROLE_CLERK_INFORMATION_GATHERING"
+      ],
+      "usedFallback": false,
+      "transport": "codex-reply"
+    },
+    {
+      "timestamp": "2026-02-13T04:42:02.845Z",
+      "recentEvents": [
+        "evidence_step3"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:policy_reject_non_codex_path"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    }
+  ],
+  "recentEvents": [
+    "evidence_step3"
+  ],
+  "lastReasonCodes": [
+    "fallback:policy_reject_non_codex_path"
+  ]
+}

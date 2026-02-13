@@ -1,14 +1,16 @@
 import type { PerceptionPacket, NpcIntent } from "../contracts/types.js";
 import type { CodexToolGateway, CodexToolResponse } from "../broker/codex-tool-gateway.js";
-import { CodexToolError, CodexToolTimeoutError } from "../broker/codex-tool-gateway.js";
+import { CodexToolCancelledError, CodexToolError, CodexToolTimeoutError } from "../broker/codex-tool-gateway.js";
 import { IntentParseError, parseNpcIntent } from "../runtime/schema.js";
+import { FALLBACK_REASON_CODES } from "./reason-taxonomy.js";
 
 export const HOOK_REASONS = {
-  nonCodexPath: "policy_reject_non_codex_path",
-  requiredFieldMissing: "policy_required_field_missing",
-  parseFailure: "parse_failure",
-  toolTimeout: "codex_timeout",
-  toolFailure: "tool_failure",
+  nonCodexPath: FALLBACK_REASON_CODES.policyRejectNonCodexPath,
+  requiredFieldMissing: FALLBACK_REASON_CODES.policyRequiredFieldMissing,
+  parseFailure: FALLBACK_REASON_CODES.parseFailure,
+  toolTimeout: FALLBACK_REASON_CODES.codexTimeout,
+  toolCancelled: FALLBACK_REASON_CODES.requestCancelled,
+  toolFailure: FALLBACK_REASON_CODES.toolFailure,
 } as const;
 
 export type HookReason = (typeof HOOK_REASONS)[keyof typeof HOOK_REASONS];
@@ -34,6 +36,8 @@ export interface ToolHookOptions {
   prompt: string;
   expectedNpcId: string;
   maxAttempts: number;
+  signal?: AbortSignal;
+  deadlineMs?: number;
 }
 
 export function runPreHook(packet: PerceptionPacket): PreHookResult {
@@ -55,8 +59,14 @@ export async function runToolHook(options: ToolHookOptions): Promise<ToolHookSuc
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
       const response = transport === "codex-reply"
-        ? await options.gateway.codexReply(options.currentThreadId!, options.prompt)
-        : await options.gateway.codex(options.prompt);
+        ? await options.gateway.codexReply(options.currentThreadId!, options.prompt, {
+            signal: options.signal,
+            deadlineMs: options.deadlineMs,
+          })
+        : await options.gateway.codex(options.prompt, {
+            signal: options.signal,
+            deadlineMs: options.deadlineMs,
+          });
       const intent = runPostHook(response, options.expectedNpcId);
       return {
         intent,
@@ -65,6 +75,9 @@ export async function runToolHook(options: ToolHookOptions): Promise<ToolHookSuc
       };
     } catch (error) {
       const reason = classifyToolError(error);
+      if (reason === HOOK_REASONS.toolTimeout || reason === HOOK_REASONS.toolCancelled) {
+        return { reason };
+      }
       if (attempt >= attempts) {
         return { reason };
       }
@@ -135,6 +148,10 @@ function dedupeReasonCodes(reasonCodes: string[]): string[] {
 function classifyToolError(error: unknown): HookReason {
   if (error instanceof CodexToolTimeoutError) {
     return HOOK_REASONS.toolTimeout;
+  }
+
+  if (error instanceof CodexToolCancelledError) {
+    return HOOK_REASONS.toolCancelled;
   }
 
   if (error instanceof IntentParseError) {

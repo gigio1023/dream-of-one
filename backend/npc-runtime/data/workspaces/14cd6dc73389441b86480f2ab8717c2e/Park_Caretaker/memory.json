@@ -1,0 +1,112 @@
+{
+  "entries": [
+    {
+      "timestamp": "2026-02-13T06:36:42.424Z",
+      "recentEvents": [
+        "Store_Clerk_A 의심도 변화: 16; src=b053823038034b59a6a9c78cce549216",
+        "Store_Manager 의심도 변화: 16; src=b053823038034b59a6a9c78cce549216",
+        "Store_Clerk_A: 점원: Store_Clerk_A 규칙 위반 DL_S2_LABEL_AUTHORITY 감지. [Store] (det=DET_PROC_LABEL_TA",
+        "Store_Clerk_A: Suspicious (det=DET_REPEAT_LOOP)",
+        "Store_Clerk_A: Suspicious (det=DET_REPEAT_LOOP)",
+        "진술: DL_S2_LABEL_AUTHORITY witness statement. [Store]",
+        "Store_Clerk_A: Challenging (det=DET_PROC_LABEL_TAMPER)",
+        "NPC_Store_Manager 의심도 변화: 15; src=b053823038034b59a6a9c78cce549216"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:request_cancelled"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    },
+    {
+      "timestamp": "2026-02-13T06:36:49.140Z",
+      "recentEvents": [
+        "Store_Manager: 음... 상황을 좀 더 봐야겠네요.",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "Studio_PM: 음... 상황을 좀 더 봐야겠네요."
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:request_cancelled"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    },
+    {
+      "timestamp": "2026-02-13T06:36:55.962Z",
+      "recentEvents": [
+        "해명: transport=fallback; usedFallback=True; reason=codex_timeout; reasonCategory=",
+        "해명: transport=fallback; usedFallback=True; reason=codex_timeout; reasonCategory=",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "Citizen_F: 음... 상황을 좀 더 봐야겠네요.",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "Studio_QA: 음... 상황을 좀 더 봐야겠네요.",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "Citizen_C: 음... 상황을 좀 더 봐야겠네요."
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:request_cancelled"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    },
+    {
+      "timestamp": "2026-02-13T06:37:02.774Z",
+      "recentEvents": [
+        "Studio_QA: 음... 상황을 좀 더 봐야겠네요.",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "Citizen_C: 음... 상황을 좀 더 봐야겠네요.",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "Citizen_A: 음... 상황을 좀 더 봐야겠네요.",
+        "NPC_Citizen_A 의심도 변화: 40; src=b053823038034b59a6a9c78cce549216",
+        "Park_Caretaker 의심도 변화: 5; src=b053823038034b59a6a9c78cce549216",
+        "Studio_PM: PM: NPC_Citizen_A 의심도 변화: 40; src=b053823038034b59a6a9c78cce549216"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:request_cancelled"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    },
+    {
+      "timestamp": "2026-02-13T06:37:10.092Z",
+      "recentEvents": [
+        "Citizen_A: 음... 상황을 좀 더 봐야겠네요.",
+        "소음 민원: 소음 점검 [Park] (소음 점검)",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "Studio_QA: 음... 상황을 좀 더 봐야겠네요.",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "Citizen_C: 음... 상황을 좀 더 봐야겠네요.",
+        "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+        "Citizen_D: 음... 상황을 좀 더 봐야겠네요."
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:request_cancelled"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    }
+  ],
+  "recentEvents": [
+    "Citizen_A: 음... 상황을 좀 더 봐야겠네요.",
+    "소음 민원: 소음 점검 [Park] (소음 점검)",
+    "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+    "Studio_QA: 음... 상황을 좀 더 봐야겠네요.",
+    "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+    "Citizen_C: 음... 상황을 좀 더 봐야겠네요.",
+    "IntentFallbackApplied 이벤트 (runtime_http_error:0:Request timeout)",
+    "Citizen_D: 음... 상황을 좀 더 봐야겠네요."
+  ],
+  "lastReasonCodes": [
+    "fallback:request_cancelled"
+  ]
+}

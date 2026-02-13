@@ -64,6 +64,8 @@ function buildConfig(port: number, overrides: Partial<RuntimeConfig> = {}): Runt
     codexCommand: "unused",
     codexArgs: [],
     codexTimeoutMs: 1000,
+    decisionDeadlineMs: 1000,
+    workspaceRootPath: join(tmpdir(), `npc-runtime-workspaces-${port}`),
     threadStorePath: join(tmpdir(), `npc-runtime-thread-store-${port}.json`),
     ...overrides,
   };
@@ -89,7 +91,7 @@ function buildNoopBroker(): CodexBroker {
   };
 }
 
-test("readiness endpoint returns ready when command resolves and thread-store path is accessible", async () => {
+test("readiness endpoint returns ready when command resolves and storage paths are accessible", async () => {
   const port = await getFreePort();
   const threadStoreDir = await mkdtemp(join(tmpdir(), "npc-runtime-ready-"));
   const config = buildConfig(port, {
@@ -106,6 +108,7 @@ test("readiness endpoint returns ready when command resolves and thread-store pa
       checks: {
         codexCommand: { ok: boolean };
         threadStorePath: { ok: boolean };
+        workspaceRootPath: { ok: boolean };
       };
     };
 
@@ -114,6 +117,7 @@ test("readiness endpoint returns ready when command resolves and thread-store pa
     assert.deepEqual(body.reasons, []);
     assert.equal(body.checks.codexCommand.ok, true);
     assert.equal(body.checks.threadStorePath.ok, true);
+    assert.equal(body.checks.workspaceRootPath.ok, true);
   } finally {
     await closeServer(server);
     await rm(threadStoreDir, { recursive: true, force: true });
@@ -129,6 +133,7 @@ test("readiness endpoint returns deterministic explicit reasons when not ready",
   const config = buildConfig(port, {
     codexCommand: "definitely-missing-codex-command",
     threadStorePath: join(blockedParent, "thread-store.json"),
+    workspaceRootPath: join(blockedParent, "workspaces"),
   });
   const server = startHttpServer(config, new DecisionService(buildNoopBroker()));
 
@@ -140,16 +145,22 @@ test("readiness endpoint returns deterministic explicit reasons when not ready",
       checks: {
         codexCommand: { ok: boolean; reason?: string };
         threadStorePath: { ok: boolean; reason?: string };
+        workspaceRootPath: { ok: boolean; reason?: string };
       };
     };
 
     assert.equal(res.status, 503);
     assert.equal(body.status, "not_ready");
-    assert.deepEqual(body.reasons, ["codex_command_not_resolvable", "thread_store_path_not_accessible"]);
+    assert.deepEqual(
+      body.reasons,
+      ["codex_command_not_resolvable", "thread_store_path_not_accessible", "workspace_root_path_not_accessible"],
+    );
     assert.equal(body.checks.codexCommand.ok, false);
     assert.equal(body.checks.codexCommand.reason, "codex_command_not_resolvable");
     assert.equal(body.checks.threadStorePath.ok, false);
     assert.equal(body.checks.threadStorePath.reason, "thread_store_path_not_accessible");
+    assert.equal(body.checks.workspaceRootPath.ok, false);
+    assert.equal(body.checks.workspaceRootPath.reason, "workspace_root_path_not_accessible");
   } finally {
     await closeServer(server);
     await rm(tempDir, { recursive: true, force: true });
@@ -260,6 +271,10 @@ test("decision API smoke handles two NPC IDs and emits request/response logs", a
       assert.equal(typeof log.threadId, "string");
       assert.equal(typeof log.latencyMs, "number");
       assert.ok((log.latencyMs as number) >= 0);
+      assert.equal(typeof log.mailbox, "object");
+      assert.ok(log.mailbox !== null);
+      assert.equal(log.warningTier, "reference");
+      assert.equal(log.reasonCategory, "none");
     }
   } finally {
     await closeServer(server);
@@ -317,9 +332,83 @@ test("response log includes deterministic reject reason on fallback", async () =
     const responseLog = jsonLogs.find(log => log.event === "npc_decision_response");
     assert.ok(responseLog, "expected npc_decision_response log");
     assert.equal(responseLog.reason, "policy_reject_non_codex_path");
+    assert.equal(responseLog.reasonCategory, "policy");
+    assert.equal(responseLog.warningTier, "blocking");
     assert.equal(responseLog.transport, "fallback");
     assert.equal(responseLog.usedFallback, true);
     assert.equal(responseLog.threadId, null);
+    assert.equal(typeof responseLog.mailbox, "object");
+  } finally {
+    await closeServer(server);
+    console.log = originalLog;
+  }
+});
+
+test("aborted client request is logged as dropped response without response evidence noise", async () => {
+  const port = await getFreePort();
+  const config = buildConfig(port, { decisionDeadlineMs: 2000 });
+
+  const broker: CodexBroker = {
+    async decide(packet) {
+      await new Promise(resolve => setTimeout(resolve, 120));
+      return {
+        intent: {
+          npcId: packet.npcId,
+          actionType: "Observe",
+          reasonCodes: ["delayed"],
+          confidence: 0.5,
+        },
+        meta: {
+          usedFallback: false,
+          threadId: `thread-${packet.npcId}`,
+          transport: "codex",
+        },
+      };
+    },
+  };
+
+  const service = new DecisionService(broker, { maxBrokerInFlight: 1 });
+  const originalLog = console.log;
+  const capturedLogs: string[] = [];
+  console.log = (...args: unknown[]) => {
+    capturedLogs.push(args.map(String).join(" "));
+  };
+
+  const server = startHttpServer(config, service);
+
+  try {
+    const controller = new AbortController();
+    const request = fetch(`http://${config.host}:${config.port}/v1/npc/decision`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(buildPacket("npc-abort")),
+      signal: controller.signal,
+    });
+    setTimeout(() => controller.abort(), 10);
+
+    await assert.rejects(request, error => {
+      const maybeError = error as Error | undefined;
+      return !!maybeError && (maybeError.name === "AbortError" || /aborted/i.test(maybeError.message));
+    });
+    await new Promise(resolve => setTimeout(resolve, 180));
+
+    const jsonLogs = capturedLogs.flatMap(line => {
+      try {
+        return [JSON.parse(line) as Record<string, unknown>];
+      } catch {
+        return [];
+      }
+    });
+
+    const requestLogs = jsonLogs.filter(log => log.event === "npc_decision_request");
+    const responseLogs = jsonLogs.filter(log => log.event === "npc_decision_response");
+    const droppedLogs = jsonLogs.filter(log => log.event === "npc_decision_response_dropped");
+
+    assert.equal(requestLogs.length, 1);
+    assert.equal(responseLogs.length, 0);
+    assert.equal(droppedLogs.length, 1);
+    assert.equal(droppedLogs[0]?.droppedReason, "client_aborted");
+    assert.equal(droppedLogs[0]?.npcId, "npc-abort");
   } finally {
     await closeServer(server);
     console.log = originalLog;

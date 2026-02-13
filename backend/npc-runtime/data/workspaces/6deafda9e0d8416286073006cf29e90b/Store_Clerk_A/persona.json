@@ -1,0 +1,16 @@
+{
+  "npcId": "Store_Clerk_A",
+  "organizationContext": {
+    "role": "Clerk",
+    "roleId": "Clerk",
+    "organizationId": "Prototype",
+    "allowedActionTypes": [
+      "Observe",
+      "Work",
+      "Idle",
+      "Talk",
+      "Ask",
+      "Report"
+    ]
+  }
+}

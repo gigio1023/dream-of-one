@@ -4,6 +4,7 @@ import { FileThreadStore } from "./broker/thread-store.js";
 import { loadConfig } from "./config.js";
 import { startHttpServer } from "./api/http-server.js";
 import { DecisionService } from "./runtime/decision-service.js";
+import { FileActorWorkspaceStore } from "./memory/actor-workspace-store.js";
 
 const config = loadConfig();
 const gateway = new CommandCodexToolGateway({
@@ -12,7 +13,10 @@ const gateway = new CommandCodexToolGateway({
   timeoutMs: config.codexTimeoutMs,
 });
 const threadStore = new FileThreadStore(config.threadStorePath);
-const broker = new DefaultCodexBroker(gateway, threadStore);
-const decisionService = new DecisionService(broker);
+const workspaceStore = new FileActorWorkspaceStore(config.workspaceRootPath);
+const broker = new DefaultCodexBroker(gateway, threadStore, workspaceStore);
+const decisionService = new DecisionService(broker, {
+  maxBrokerInFlight: config.maxBrokerInFlight,
+});
 
 startHttpServer(config, decisionService);

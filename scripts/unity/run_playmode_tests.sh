@@ -18,3 +18,10 @@ mkdir -p "$LOG_DIR"
   -testResults "$LOG_DIR/playmode-tests.xml" \
   -logFile "$LOG_DIR/playmode-tests.log" \
   -quit
+
+STRICT="${DREAM_EVIDENCE_STRICT:-0}"
+node "$ROOT_DIR/scripts/unity/analyze_runtime_evidence.mjs" \
+  --unity-log "$LOG_DIR/playmode-tests.log" \
+  --backend-log "$LOG_DIR/npc-runtime.log" \
+  --out "$LOG_DIR/runtime-evidence-playmode-tests.json" \
+  --strict "$STRICT"

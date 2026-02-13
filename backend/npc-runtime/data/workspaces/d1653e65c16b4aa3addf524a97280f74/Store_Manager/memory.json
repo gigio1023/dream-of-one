@@ -1,0 +1,34 @@
+{
+  "entries": [
+    {
+      "timestamp": "2026-02-13T04:45:28.166Z",
+      "recentEvents": [
+        "티켓 발부: 티켓 발행 [Store] (티켓 발행)",
+        "업무 완료: Defuse [Store] (Defuse)",
+        "NPC_Store_Manager 의심도 변화: 16; src=d9e90fb76ae747a9b2422d82bfe0c626",
+        "NPC_Citizen_A 의심도 변화: 32; src=d9e90fb76ae747a9b2422d82bfe0c626",
+        "NPC_Citizen_A이(가) 티켓 발행 관련 신고를 제출했습니다. [Store] (s=32; key=d9e90fb76ae747a9b2422d",
+        "Studio_QA 의심도 변화: 5; src=13c1f2903b22465e8bd27ad1e1e20790",
+        "NPC_Store_Clerk_A 의심도 변화: 16; src=d9e90fb76ae747a9b2422d82bfe0c626"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:request_cancelled"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    }
+  ],
+  "recentEvents": [
+    "티켓 발부: 티켓 발행 [Store] (티켓 발행)",
+    "업무 완료: Defuse [Store] (Defuse)",
+    "NPC_Store_Manager 의심도 변화: 16; src=d9e90fb76ae747a9b2422d82bfe0c626",
+    "NPC_Citizen_A 의심도 변화: 32; src=d9e90fb76ae747a9b2422d82bfe0c626",
+    "NPC_Citizen_A이(가) 티켓 발행 관련 신고를 제출했습니다. [Store] (s=32; key=d9e90fb76ae747a9b2422d",
+    "Studio_QA 의심도 변화: 5; src=13c1f2903b22465e8bd27ad1e1e20790",
+    "NPC_Store_Clerk_A 의심도 변화: 16; src=d9e90fb76ae747a9b2422d82bfe0c626"
+  ],
+  "lastReasonCodes": [
+    "fallback:request_cancelled"
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "text": "npc:npc-f2 | landmark:Store | action:Observe | fallback:yes | reasons:fallback:codex_timeout | transport:fallback",
+  "updatedAt": "2026-02-13T06:12:17.107Z"
+}

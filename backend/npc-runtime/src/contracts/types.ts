@@ -38,6 +38,9 @@ export interface DecisionEnvelope {
   meta: {
     usedFallback: boolean;
     reason?: string;
+    reasonDetail?: string;
+    reasonCategory?: "none" | "policy" | "schema" | "timeout" | "cancelled" | "parse" | "tool" | "runtime" | "unknown";
+    warningTier?: "blocking" | "attention" | "reference";
     threadId?: string;
     transport: "codex" | "codex-reply" | "fallback";
   };

@@ -1,0 +1,24 @@
+{
+  "entries": [
+    {
+      "timestamp": "2026-02-13T04:39:56.733Z",
+      "recentEvents": [
+        "해명: day=2; pressure=0; profile=Calm; last=CleanPass [Session]",
+        "해명: phase=baseline; profile=Calm; ratio=0.00; mult=0.90; rr=3; g=0.24; sp=0.65 ["
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:request_cancelled"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    }
+  ],
+  "recentEvents": [
+    "해명: day=2; pressure=0; profile=Calm; last=CleanPass [Session]",
+    "해명: phase=baseline; profile=Calm; ratio=0.00; mult=0.90; rr=3; g=0.24; sp=0.65 ["
+  ],
+  "lastReasonCodes": [
+    "fallback:request_cancelled"
+  ]
+}

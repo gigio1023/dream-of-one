@@ -1,0 +1,18 @@
+{
+  "npcId": "Park_Caretaker",
+  "organizationContext": {
+    "role": "Caretaker",
+    "roleId": "Caretaker",
+    "organizationId": "Prototype",
+    "allowedActionTypes": [
+      "Observe",
+      "Work",
+      "Idle",
+      "Talk",
+      "Ask",
+      "Move",
+      "Escort",
+      "Report"
+    ]
+  }
+}

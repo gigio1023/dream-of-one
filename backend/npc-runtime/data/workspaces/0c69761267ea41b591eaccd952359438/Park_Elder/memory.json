@@ -1,0 +1,36 @@
+{
+  "entries": [
+    {
+      "timestamp": "2026-02-13T04:45:52.417Z",
+      "recentEvents": [
+        "NPC_Studio_PM 의심도 변화: 5; src=218fba9c6cf1498e8c1780e285afb20e",
+        "NPC_Citizen_A 의심도 변화: 32; src=7482e3e7d3d4478abbd909b388947c73",
+        "NPC_Citizen_A이(가) 티켓 발행 관련 신고를 제출했습니다. [Store] (s=32; key=7482e3e7d3d4478abbd909",
+        "NPC_Studio_QA 의심도 변화: 5; src=218fba9c6cf1498e8c1780e285afb20e",
+        "NPC_Citizen_B 의심도 변화: 32; src=7482e3e7d3d4478abbd909b388947c73",
+        "NPC_Citizen_B이(가) 티켓 발행 관련 신고를 제출했습니다. [Store] (s=32; key=7482e3e7d3d4478abbd909",
+        "NPC_Store_Clerk_A 의심도 변화: 16; src=7482e3e7d3d4478abbd909b388947c73",
+        "Store_Clerk_A: 점원: Player 규칙 위반 R_QUEUE 감지. [Store] (새치기 의심)"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:request_cancelled"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    }
+  ],
+  "recentEvents": [
+    "NPC_Studio_PM 의심도 변화: 5; src=218fba9c6cf1498e8c1780e285afb20e",
+    "NPC_Citizen_A 의심도 변화: 32; src=7482e3e7d3d4478abbd909b388947c73",
+    "NPC_Citizen_A이(가) 티켓 발행 관련 신고를 제출했습니다. [Store] (s=32; key=7482e3e7d3d4478abbd909",
+    "NPC_Studio_QA 의심도 변화: 5; src=218fba9c6cf1498e8c1780e285afb20e",
+    "NPC_Citizen_B 의심도 변화: 32; src=7482e3e7d3d4478abbd909b388947c73",
+    "NPC_Citizen_B이(가) 티켓 발행 관련 신고를 제출했습니다. [Store] (s=32; key=7482e3e7d3d4478abbd909",
+    "NPC_Store_Clerk_A 의심도 변화: 16; src=7482e3e7d3d4478abbd909b388947c73",
+    "Store_Clerk_A: 점원: Player 규칙 위반 R_QUEUE 감지. [Store] (새치기 의심)"
+  ],
+  "lastReasonCodes": [
+    "fallback:request_cancelled"
+  ]
+}

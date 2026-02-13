@@ -1,0 +1,4 @@
+{
+  "text": "npc:npc-real-1 | landmark:Store | action:Observe | fallback:yes | reasons:fallback:policy_reject_non_codex_path | transport:fallback",
+  "updatedAt": "2026-02-13T06:38:55.563Z"
+}

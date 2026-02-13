@@ -1,0 +1,36 @@
+{
+  "entries": [
+    {
+      "timestamp": "2026-02-13T04:43:28.599Z",
+      "recentEvents": [
+        "Store_Clerk_A 규칙 위반 DL_S2_LABEL_AUTHORITY 감지. [Store] (det=DET_PROC_LABEL_TAMPER",
+        "Store_Clerk_A 의심도 변화: 16; src=4930fc3aac0d4802b7c3087f0d88f266",
+        "Store_Manager 의심도 변화: 16; src=4930fc3aac0d4802b7c3087f0d88f266",
+        "Store_Clerk_A: Suspicious (det=DET_REPEAT_LOOP)",
+        "Store_Clerk_A: Suspicious (det=DET_REPEAT_LOOP)",
+        "진술: DL_S2_LABEL_AUTHORITY witness statement. [Store]",
+        "Store_Clerk_A: Challenging (det=DET_PROC_LABEL_TAMPER)",
+        "NPC_Store_Manager 의심도 변화: 15; src=4930fc3aac0d4802b7c3087f0d88f266"
+      ],
+      "actionType": "Observe",
+      "reasonCodes": [
+        "fallback:request_cancelled"
+      ],
+      "usedFallback": true,
+      "transport": "fallback"
+    }
+  ],
+  "recentEvents": [
+    "Store_Clerk_A 규칙 위반 DL_S2_LABEL_AUTHORITY 감지. [Store] (det=DET_PROC_LABEL_TAMPER",
+    "Store_Clerk_A 의심도 변화: 16; src=4930fc3aac0d4802b7c3087f0d88f266",
+    "Store_Manager 의심도 변화: 16; src=4930fc3aac0d4802b7c3087f0d88f266",
+    "Store_Clerk_A: Suspicious (det=DET_REPEAT_LOOP)",
+    "Store_Clerk_A: Suspicious (det=DET_REPEAT_LOOP)",
+    "진술: DL_S2_LABEL_AUTHORITY witness statement. [Store]",
+    "Store_Clerk_A: Challenging (det=DET_PROC_LABEL_TAMPER)",
+    "NPC_Store_Manager 의심도 변화: 15; src=4930fc3aac0d4802b7c3087f0d88f266"
+  ],
+  "lastReasonCodes": [
+    "fallback:request_cancelled"
+  ]
+}

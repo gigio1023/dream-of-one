@@ -1,13 +1,19 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
 import { DefaultCodexBroker } from "../../src/broker/codex-broker.js";
-import { CodexToolTimeoutError, type CodexToolGateway, type CodexToolResponse } from "../../src/broker/codex-tool-gateway.js";
+import {
+  CodexToolCancelledError,
+  CodexToolTimeoutError,
+  type CodexToolGateway,
+  type CodexToolResponse,
+} from "../../src/broker/codex-tool-gateway.js";
 import { FileThreadStore, InMemoryThreadStore } from "../../src/broker/thread-store.js";
 import type { PerceptionPacket } from "../../src/contracts/types.js";
+import { FileActorWorkspaceStore } from "../../src/memory/actor-workspace-store.js";
 
 function buildPacket(): PerceptionPacket {
   return {
@@ -30,7 +36,7 @@ class FakeGateway implements CodexToolGateway {
   codexError?: Error;
   codexReplyError?: Error;
 
-  async codex(prompt: string): Promise<CodexToolResponse> {
+  async codex(prompt: string, _options?: { signal?: AbortSignal; deadlineMs?: number }): Promise<CodexToolResponse> {
     this.calls.push({ tool: "codex", prompt });
     const step = this.codexSequence.shift();
     if (step?.error) throw step.error;
@@ -40,7 +46,11 @@ class FakeGateway implements CodexToolGateway {
     return this.codexResponse;
   }
 
-  async codexReply(threadId: string, prompt: string): Promise<CodexToolResponse> {
+  async codexReply(
+    threadId: string,
+    prompt: string,
+    _options?: { signal?: AbortSignal; deadlineMs?: number },
+  ): Promise<CodexToolResponse> {
     this.calls.push({ tool: "codex-reply", prompt, threadId });
     const step = this.codexReplySequence.shift();
     if (step?.error) throw step.error;
@@ -70,6 +80,8 @@ test("first decision call starts a new codex thread", async () => {
   assert.equal(result.meta.usedFallback, false);
   assert.equal(result.meta.transport, "codex");
   assert.equal(result.meta.threadId, "thread-1");
+  assert.equal(result.meta.warningTier, "reference");
+  assert.equal(result.meta.reasonCategory, "none");
   assert.equal(result.intent.actionType, "Work");
   assert.equal(store.get("session-1", "npc-1"), "thread-1");
   assert.deepEqual(gateway.calls.map(c => c.tool), ["codex"]);
@@ -152,6 +164,111 @@ test("restored store reuses persisted thread across process restart", async t =>
   assert.equal(secondGateway.calls[0].threadId, "thread-persisted");
 });
 
+test("workspace artifacts are persisted and reused across calls", async t => {
+  const tmpPath = mkdtempSync(join(tmpdir(), "npc-runtime-workspace-"));
+  t.after(() => {
+    rmSync(tmpPath, { recursive: true, force: true });
+  });
+
+  const storePath = join(tmpPath, "threads.json");
+  const workspaceRoot = join(tmpPath, "workspaces");
+
+  const gateway = new FakeGateway();
+  gateway.codexResponse = {
+    threadId: "thread-ws",
+    content: JSON.stringify({
+      npcId: "npc-1",
+      actionType: "Work",
+      reasonCodes: ["first_memory"],
+      confidence: 0.9,
+    }),
+  };
+  gateway.codexReplyResponse = {
+    threadId: "thread-ws",
+    content: JSON.stringify({
+      npcId: "npc-1",
+      actionType: "Report",
+      reasonCodes: ["second_memory"],
+      confidence: 0.91,
+    }),
+  };
+
+  const broker = new DefaultCodexBroker(
+    gateway,
+    new FileThreadStore(storePath),
+    new FileActorWorkspaceStore(workspaceRoot),
+  );
+
+  await broker.decide(buildPacket());
+  await broker.decide(buildPacket());
+
+  const actorDir = join(workspaceRoot, "session-1", "npc-1");
+  assert.equal(existsSync(join(actorDir, "persona.json")), true);
+  assert.equal(existsSync(join(actorDir, "policy.json")), true);
+  assert.equal(existsSync(join(actorDir, "memory.json")), true);
+  assert.equal(existsSync(join(actorDir, "summary.json")), true);
+  assert.equal(existsSync(join(actorDir, "thread.json")), true);
+
+  const thread = JSON.parse(readFileSync(join(actorDir, "thread.json"), "utf8")) as {
+    threadId: string;
+    transportHistory: string[];
+  };
+  const memory = JSON.parse(readFileSync(join(actorDir, "memory.json"), "utf8")) as {
+    entries: Array<{ reasonCodes: string[] }>;
+    lastReasonCodes: string[];
+  };
+
+  assert.equal(thread.threadId, "thread-ws");
+  assert.deepEqual(thread.transportHistory, ["codex", "codex-reply"]);
+  assert.equal(memory.entries.length, 2);
+  assert.deepEqual(memory.lastReasonCodes, ["second_memory"]);
+  assert.ok(
+    gateway.calls[1].prompt.includes("first_memory"),
+    "expected second prompt to include prior workspace memory",
+  );
+});
+
+test("fallback evidence is persisted when codex fails", async t => {
+  const tmpPath = mkdtempSync(join(tmpdir(), "npc-runtime-fallback-"));
+  t.after(() => {
+    rmSync(tmpPath, { recursive: true, force: true });
+  });
+
+  const storePath = join(tmpPath, "threads.json");
+  const workspaceRoot = join(tmpPath, "workspaces");
+
+  const gateway = new FakeGateway();
+  gateway.codexError = new CodexToolTimeoutError("codex timed out");
+
+  const broker = new DefaultCodexBroker(
+    gateway,
+    new FileThreadStore(storePath),
+    new FileActorWorkspaceStore(workspaceRoot),
+  );
+
+  const fallback = await broker.decide(buildPacket());
+
+  const actorDir = join(workspaceRoot, "session-1", "npc-1");
+  const thread = JSON.parse(readFileSync(join(actorDir, "thread.json"), "utf8")) as {
+    transportHistory: string[];
+  };
+  const memory = JSON.parse(readFileSync(join(actorDir, "memory.json"), "utf8")) as {
+    entries: Array<{ usedFallback: boolean; transport: string; reasonCodes: string[] }>;
+    lastReasonCodes: string[];
+  };
+
+  assert.equal(fallback.meta.usedFallback, true);
+  assert.equal(fallback.meta.transport, "fallback");
+  assert.equal(fallback.meta.reasonCategory, "timeout");
+  assert.equal(fallback.meta.warningTier, "attention");
+  assert.ok(thread.transportHistory.includes("fallback"));
+  const lastEntry = memory.entries.at(-1);
+  assert.ok(lastEntry, "expected fallback memory entry");
+  assert.equal(lastEntry.usedFallback, true);
+  assert.equal(lastEntry.transport, "fallback");
+  assert.deepEqual(memory.lastReasonCodes, ["fallback:codex_timeout"]);
+});
+
 test("invalid codex response triggers parse fallback", async () => {
   const store = new InMemoryThreadStore();
   const gateway = new FakeGateway();
@@ -183,7 +300,22 @@ test("codex timeout triggers deterministic fallback", async () => {
   assert.equal(result.meta.reason, "codex_timeout");
   assert.equal(result.intent.actionType, "Observe");
   assert.deepEqual(result.intent.reasonCodes, ["fallback:codex_timeout"]);
-  assert.deepEqual(gateway.calls.map(c => c.tool), ["codex", "codex"]);
+  assert.deepEqual(gateway.calls.map(c => c.tool), ["codex"]);
+});
+
+test("request cancellation propagates deterministic fallback without retry", async () => {
+  const store = new InMemoryThreadStore();
+  const gateway = new FakeGateway();
+  gateway.codexError = new CodexToolCancelledError("cancelled");
+
+  const broker = new DefaultCodexBroker(gateway, store);
+  const result = await broker.decide(buildPacket());
+
+  assert.equal(result.meta.usedFallback, true);
+  assert.equal(result.meta.reason, "request_cancelled");
+  assert.equal(result.intent.actionType, "Observe");
+  assert.deepEqual(result.intent.reasonCodes, ["fallback:request_cancelled"]);
+  assert.deepEqual(gateway.calls.map(c => c.tool), ["codex"]);
 });
 
 test("pre-hook rejects non-codex cognition path before calling gateway", async () => {
@@ -207,6 +339,8 @@ test("pre-hook rejects non-codex cognition path before calling gateway", async (
 
   assert.equal(result.meta.usedFallback, true);
   assert.equal(result.meta.reason, "policy_reject_non_codex_path");
+  assert.equal(result.meta.reasonCategory, "policy");
+  assert.equal(result.meta.warningTier, "blocking");
   assert.deepEqual(gateway.calls, []);
 });
 

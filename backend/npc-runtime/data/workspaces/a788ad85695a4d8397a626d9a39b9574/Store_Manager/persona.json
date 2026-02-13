@@ -1,0 +1,16 @@
+{
+  "npcId": "Store_Manager",
+  "organizationContext": {
+    "role": "Manager",
+    "roleId": "Manager",
+    "organizationId": "Prototype",
+    "allowedActionTypes": [
+      "Observe",
+      "Work",
+      "Idle",
+      "Talk",
+      "Ask",
+      "Report"
+    ]
+  }
+}

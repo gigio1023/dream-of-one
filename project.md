@@ -2,7 +2,7 @@
 doc: project.md
 project: Dream of One
 variant: Lucid Cover Social Stealth
-revision: 2026-02-13
+revision: 2026-02-14
 status: Locked v9 (Intent-First, Direct Codex Actor Runtime)
 owner: You
 ---
@@ -62,7 +62,7 @@ Platform/framework detail is supporting.
 - v0.1 critical runtime path must not depend on Claude Agent SDK/OpenAI Agent SDK orchestration.
 - External SDK research/docs may exist, but acceptance evidence must come from direct Codex runtime path.
 
-## 5) Current implementation truth (2026-02-13)
+## 5) Current implementation truth (2026-02-14)
 ### 5.1 Implemented and evidenced
 - Unity has a working society loop (`observe -> plan -> validate -> execute -> WEL`).
 - Unity has pressure/escalation components (`Suspicion`, `Exposure`, report flow, verdict flow).
@@ -73,7 +73,7 @@ Platform/framework detail is supporting.
 - Actor workspace structure (`persona/policy/memory/summary/thread`) is persisted and reused across repeated decisions.
 - Decision metadata now includes normalized causality fields (`reason`, `reasonCategory`, `warningTier`) for fallback readability.
 - Backend inputs are validated by hook policy and reason taxonomy (`backend/npc-runtime/src/policy/hook-policy.ts`, `backend/npc-runtime/src/policy/reason-taxonomy.ts`), with integration coverage in `backend/npc-runtime/test/integration/reason-taxonomy.integration.test.ts`.
-- Runtime evidence/regression/Release Candidate (RC, 릴리즈 후보) packaging scripts are wired (`scripts/unity/analyze_runtime_evidence.mjs`, `collect_regression_metrics.mjs`, `package_release_candidate.mjs`).
+- Runtime evidence/regression/Release Candidate (RC) packaging scripts are wired (`scripts/unity/analyze_runtime_evidence.mjs`, `collect_regression_metrics.mjs`, `package_release_candidate.mjs`).
 - Release Candidate validation profile run is executed and packaged (`DRE-148`, `logs/rc/rc-dre-148/manifest.json`, checklist `ready=true`).
 - Live-play telemetry accumulation run is executed and packaged (`DRE-149`, `logs/unity-live-play.log`, `logs/npc-runtime-live-evidence.log`, `logs/rc/rc-dre-149/manifest.json`, checklist `ready=true`).
 - Real runner acceptance profile is executed with repo-owned Codex runner (`DRE-150`, `logs/npc-runtime-real-evidence.log`, `logs/runtime-evidence-summary-real.json`, `logs/regression-metrics-real.json`, `logs/rc/rc-dre-150/manifest.json`, checklist `ready=true`).
@@ -84,6 +84,8 @@ Platform/framework detail is supporting.
 - Runtime now separates client-aborted requests into `npc_decision_response_dropped` (excluded from response evidence stream).
 - Unity runtime now suppresses repeated fallback metadata noise in WEL within a configurable window (`fallbackMetaSuppressWindowSeconds`).
 - Long-session stability trend automation is available (`DRE-154`, `scripts/unity/run_stability_trend.sh`, output: `logs/stability-trend.json`).
+- Prototype Simple Verification Mode is implemented for rapid core-loop validation (`DRE-155`): `Build City (POLYGON, Simple Verification)`, `Seed World Definition (Simple Verification)`, and `Apply Simple Verification Mode`.
+- Simple Verification Mode validation evidence is captured: Diagnostics clean after apply, EditMode targeted tests passed (`2/2`), and PlayMode regression passed (`22/22`).
 - Evidence criteria for trajectory diversity and causality readability were captured and attached in Linear (`DRE-143`, `DRE-144`).
 - Intent hardening verification (`DRE-137`) was re-verified on 2026-02-13:
   - backend `npm run check` passed (`build + 30 integration tests`);

@@ -130,7 +130,7 @@ Platform/framework detail is supporting.
 ## 8) Governance
 - No new gameplay systems before core intent verification (Section 7.1) is green.
 - Backend stack migration is out of scope for v0.1.
-- `project.md` and `plan.md` must be updated together when intent/priority changes.
+- When Intent or priority changes, update `project.md` and the related Linear issue state/acceptance notes in the same workstream.
 - Terminology must follow `terminology.md` canonical vocabulary for docs and user-facing runtime text.
 - Temporary/mock runner may be used only for triage, never as final acceptance evidence.
 - "One NPC = one permanent Codex process" is not required; "one NPC = one persistent actor state" is required.
@@ -139,6 +139,6 @@ Platform/framework detail is supporting.
 
 ## 9) Document roles
 - Product definition and priorities: `project.md`.
-- Execution order and issue sequencing: `plan.md`.
+- Execution order and issue sequencing: Linear issues (Source of Truth), governed by this document.
 - Design details: `docs/design/game-design.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`.
 - Runtime evidence operations: `docs/design/runtime-evidence.md`.

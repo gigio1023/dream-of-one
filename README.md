@@ -191,7 +191,7 @@ Primary outputs:
 Single Source of Truth (SSOT) documents:
 
 - Product definition: `project.md`
-- Master execution plan: `plan.md`
+- Execution order and issue sequencing: Linear issues (governed by `project.md`)
 - Canonical terminology: `terminology.md`
 
 Design documents:

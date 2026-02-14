@@ -44,7 +44,7 @@
 - Use the exact canonical term first; do not invent local aliases when `terminology.md` already defines one.
 - For first mention in Korean text, use `English term (Korean meaning)` where clarity helps.
 - Keep internal identifiers unchanged (for example `PROC_RC_SKIP`, `threadId`), but prefer canonical wording in human-readable messages.
-- Do not use `계약` for technical API/data semantics; use `Specification` or `Schema`.
+- Do not use informal `contract` wording for technical API/data semantics; use `Specification` or `Schema`.
 
 ## Session loop (Codex must follow)
 
@@ -104,7 +104,7 @@ Delegation protocol:
 - **LLM-first NPC society**: most NPC actions are proposed by LLM agents from role/memory/org context.
 - **Deterministic safety/adjudication**: runtime validation, fallback, and end-state gates remain rule-driven.
 - **Text is the danger surface**: Dream Laws are revealed via text surfaces and Cover Tests, not meta exposition.
-- **SoT docs**: `project.md`, `plan.md`, `docs/design/game-design.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`.
+- **SoT docs**: `project.md`, `docs/design/game-design.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`.
 
 ## Unity authoring / verification
 
@@ -153,7 +153,7 @@ Verification mandate:
 - Developer guide: `docs/dev.md`
 - Codex runbook: `docs/agent/runbook.md`
 - Project definition (SoT): `project.md`
-- Master execution plan (SoT): `plan.md`
+- Execution sequencing (SoT): Linear issues (governed by `project.md`)
 - Game design bible: `docs/design/game-design.md`
 - Dream laws library (SoT): `docs/design/dream-laws.md`
 - Cover tests library (SoT): `docs/design/cover-tests.md`

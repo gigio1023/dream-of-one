@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Incident_Incident_StudioRC
   m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.IncidentDefinition
   incidentId: Incident_StudioRC
-  description: RC inserted without approval. Verify kanban/approval trail and RC
-    insert timing.
+  description: Release Candidate inserted without approval. Verify kanban/approval
+    trail and Release Candidate insert timing.
   requiredInteractables:
   - Studio_Kanban
   - Studio_ApprovalDesk
@@ -25,8 +25,8 @@ MonoBehaviour:
   - CctvCaptured
   branches:
   - ending: Guilty
-    condition: RC insert precedes approval or approval missing.
+    condition: Release Candidate insert precedes approval or approval missing.
   - ending: Cleared
-    condition: Approval artifact precedes RC insert.
+    condition: Approval artifact precedes Release Candidate insert.
   - ending: Unresolved
     condition: Artifacts conflict; requires Station escalation.

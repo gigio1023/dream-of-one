@@ -17,4 +17,5 @@ MonoBehaviour:
   severity: 2
   suspicionDelta: 25
   artifactPolicy: Procedure
-  canonicalLineTemplate: "RC \uC808\uCC28 \uB204\uB77D\uC774 \uAC10\uC9C0\uB428"
+  canonicalLineTemplate: "\uB9B4\uB9AC\uC988 \uD6C4\uBCF4 \uC808\uCC28 \uB204\uB77D\uC774
+    \uAC10\uC9C0\uB428"

@@ -7,6 +7,12 @@ namespace DreamOfOne.Editor
 {
     public static class CityPackageSceneBuilder
     {
+        private enum BuildProfile
+        {
+            Default,
+            SimpleVerification
+        }
+
         private const string ScenePath = "Assets/Scenes/Prototype.unity";
         private const float WorldScale = 1.6f;
         private const float BuildingScale = 1.25f;
@@ -39,6 +45,18 @@ namespace DreamOfOne.Editor
         [MenuItem("Tools/DreamOfOne/Build City (POLYGON)")]
         public static void BuildCity()
         {
+            BuildCityInternal(BuildProfile.Default);
+        }
+
+        [MenuItem("Tools/DreamOfOne/Build City (POLYGON, Simple Verification)")]
+        public static void BuildCitySimpleVerification()
+        {
+            BuildCityInternal(BuildProfile.SimpleVerification);
+        }
+
+        private static void BuildCityInternal(BuildProfile profile)
+        {
+            bool isSimpleVerification = profile == BuildProfile.SimpleVerification;
             var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             var root = GetOrCreateRoot("CITY_Package");
             ClearChildren(root);
@@ -46,26 +64,45 @@ namespace DreamOfOne.Editor
             var anchors = GetOrCreateRoot("CITY_Anchors");
             ClearChildren(anchors);
 
-            BuildRoadGrid(root);
+            BuildRoadGrid(root, isSimpleVerification ? 1 : 2);
 
             PlaceBuilding(root, anchors, PrefabStore, "StoreBuilding", new Vector3(-12f, 0f, 8f), 180f);
             PlaceBuilding(root, anchors, PrefabStudio, "StudioBuilding_L1", new Vector3(0f, 0f, -12f), 0f);
             PlaceBuilding(root, anchors, PrefabStation, "Station", new Vector3(0f, 0f, -18f), 0f);
-            PlaceBuilding(root, anchors, PrefabCafe, "Cafe", new Vector3(-12f, 0f, -8f), 90f);
-            PlaceBuilding(root, anchors, PrefabDelivery, "DeliveryBay", new Vector3(12f, 0f, -8f), -90f);
-            PlaceBuilding(root, anchors, PrefabFacility, "Facility", new Vector3(8f, 0f, -12f), 45f);
-            PlaceBuilding(root, anchors, PrefabMedia, "MediaZone", new Vector3(0f, 0f, 12f), 0f);
+            if (!isSimpleVerification)
+            {
+                PlaceBuilding(root, anchors, PrefabCafe, "Cafe", new Vector3(-12f, 0f, -8f), 90f);
+                PlaceBuilding(root, anchors, PrefabDelivery, "DeliveryBay", new Vector3(12f, 0f, -8f), -90f);
+                PlaceBuilding(root, anchors, PrefabFacility, "Facility", new Vector3(8f, 0f, -12f), 45f);
+                PlaceBuilding(root, anchors, PrefabMedia, "MediaZone", new Vector3(0f, 0f, 12f), 0f);
+            }
 
             PlacePark(root, anchors, new Vector3(12f, 0f, 8f));
-            PlaceProps(root);
-            PlaceExtraBuildings(root);
-            PlaceCctv(root);
+            if (!isSimpleVerification)
+            {
+                PlaceProps(root);
+                PlaceExtraBuildings(root);
+                PlaceCctv(root);
+            }
+
+            if (isSimpleVerification)
+            {
+                DeactivateWorldV2IfPresent();
+            }
+
             EnsureLighting();
             EnsureNavMesh(root);
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
-            Debug.Log("[CityBuilder] POLYGON city pack layout applied to Prototype scene.");
+            if (isSimpleVerification)
+            {
+                Debug.Log("[CityBuilder] POLYGON city pack simple verification layout applied to Prototype scene.");
+            }
+            else
+            {
+                Debug.Log("[CityBuilder] POLYGON city pack layout applied to Prototype scene.");
+            }
         }
 
         private static GameObject GetOrCreateRoot(string name)
@@ -88,11 +125,10 @@ namespace DreamOfOne.Editor
             }
         }
 
-        private static void BuildRoadGrid(GameObject root)
+        private static void BuildRoadGrid(GameObject root, int extent)
         {
             float tile = RoadTileSize * WorldScale;
             float half = tile * 0.5f;
-            int extent = 2;
 
             for (int i = -extent; i <= extent; i++)
             {
@@ -248,6 +284,15 @@ namespace DreamOfOne.Editor
 
             var buildMethod = surfaceType.GetMethod("BuildNavMesh");
             buildMethod?.Invoke(existing, null);
+        }
+
+        private static void DeactivateWorldV2IfPresent()
+        {
+            var worldV2 = GameObject.Find("World_v2");
+            if (worldV2 != null)
+            {
+                worldV2.SetActive(false);
+            }
         }
 
         private static System.Type ResolveType(string typeName)

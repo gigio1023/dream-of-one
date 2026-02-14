@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4caafaef2f69348e8a0a32629689e310, type: 3}
   m_Name: WorldBudget_Default
   m_EditorClassIdentifier: DreamOfOne::DreamOfOne.World.WorldBudgetDefinition
-  npcMax: 16
+  npcMax: 10
   eventRateBaseline: 3
   eventRatePeak: 10
   blackboardCapacity: 10

@@ -18,6 +18,8 @@ namespace DreamOfOne.Editor
     [InitializeOnLoad]
     public static class DreamOfOneDiagnostics
     {
+        private const string WorldDefinitionAssetPath = "Assets/Data/WorldDefinition.asset";
+
         public struct DiagnosticResults
         {
             public List<string> errors;
@@ -53,6 +55,51 @@ namespace DreamOfOne.Editor
             }
 
             return results;
+        }
+
+        public static IReadOnlyList<string> CollectRequiredAnchorNames(WorldDefinition world)
+        {
+            var requiredAnchors = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+            if (world == null)
+            {
+                return new List<string>();
+            }
+
+            if (world.Buildings != null)
+            {
+                for (int i = 0; i < world.Buildings.Count; i++)
+                {
+                    AddRequiredAnchor(requiredAnchors, world.Buildings[i] != null ? world.Buildings[i].AnchorName : null);
+                }
+            }
+
+            if (world.Interactables != null)
+            {
+                for (int i = 0; i < world.Interactables.Count; i++)
+                {
+                    AddRequiredAnchor(requiredAnchors, world.Interactables[i] != null ? world.Interactables[i].AnchorName : null);
+                }
+            }
+
+            if (world.Npcs != null)
+            {
+                for (int i = 0; i < world.Npcs.Count; i++)
+                {
+                    AddRequiredAnchor(requiredAnchors, world.Npcs[i] != null ? world.Npcs[i].AnchorName : null);
+                }
+            }
+
+            if (world.TextSurfaceDatabase != null && world.TextSurfaceDatabase.TextSurfaces != null)
+            {
+                for (int i = 0; i < world.TextSurfaceDatabase.TextSurfaces.Count; i++)
+                {
+                    AddRequiredAnchor(requiredAnchors, world.TextSurfaceDatabase.TextSurfaces[i] != null ? world.TextSurfaceDatabase.TextSurfaces[i].AnchorName : null);
+                }
+            }
+
+            var orderedAnchors = requiredAnchors.ToList();
+            orderedAnchors.Sort(System.StringComparer.OrdinalIgnoreCase);
+            return orderedAnchors;
         }
 
         private static DiagnosticResults CollectDiagnostics()
@@ -119,18 +166,9 @@ namespace DreamOfOne.Editor
                 ValidateCityRenderers(cityRoot, warnings);
             }
 
-            string[] anchors =
-            {
-                "StoreBuilding",
-                "ParkArea",
-                "StudioBuilding_L1",
-                "Station",
-                "Cafe",
-                "DeliveryBay",
-                "Facility",
-                "MediaZone"
-            };
-            foreach (var anchor in anchors)
+            var worldDefinition = AssetDatabase.LoadAssetAtPath<WorldDefinition>(WorldDefinitionAssetPath);
+            var requiredAnchors = CollectRequiredAnchorNames(worldDefinition);
+            foreach (var anchor in requiredAnchors)
             {
                 if (GameObject.Find(anchor) == null)
                 {
@@ -228,10 +266,10 @@ namespace DreamOfOne.Editor
         private static void ValidateWorldData(List<string> warnings, List<string> errors)
         {
 #if UNITY_EDITOR
-            var world = AssetDatabase.LoadAssetAtPath<WorldDefinition>("Assets/Data/WorldDefinition.asset");
+            var world = AssetDatabase.LoadAssetAtPath<WorldDefinition>(WorldDefinitionAssetPath);
             if (world == null)
             {
-                warnings.Add("WorldDefinition asset missing: Assets/Data/WorldDefinition.asset");
+                warnings.Add($"WorldDefinition asset missing: {WorldDefinitionAssetPath}");
                 return;
             }
 
@@ -464,6 +502,16 @@ namespace DreamOfOne.Editor
             }
         }
 #endif
+
+        private static void AddRequiredAnchor(HashSet<string> requiredAnchors, string anchorName)
+        {
+            if (requiredAnchors == null || string.IsNullOrWhiteSpace(anchorName))
+            {
+                return;
+            }
+
+            requiredAnchors.Add(anchorName.Trim());
+        }
 
         private static void ValidateWorldRuntime(List<string> warnings, List<string> errors, List<string> info)
         {

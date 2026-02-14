@@ -21,6 +21,42 @@ namespace DreamOfOne.Editor
         private const string ZonesRoot = "Assets/Data/World/Zones";
         private const string ArtifactRoot = "Assets/Resources/Artifacts";
         private const string IncidentRoot = "Assets/Resources/Incidents";
+        public const int DefaultNpcMax = 16;
+        public const int SimpleVerificationNpcMax = 10;
+        public const int DefaultNonPoliceSpawnCount = 2;
+        public const int SimpleVerificationNonPoliceSpawnCount = 1;
+        public const int SimpleVerificationBuildingCount = 4;
+        public const int SimpleVerificationInteractableCount = 20;
+        public const int SimpleVerificationMinimumIncidentCount = 2;
+        private static readonly string[] s_simpleVerificationBuildingIds = { "Store", "Studio", "Police", "Park" };
+        private static readonly string[] s_simpleVerificationInteractableIds =
+        {
+            "Store_QueueMarker",
+            "Store_LabelBoard",
+            "Store_Printer",
+            "Store_CounterBell",
+            "Store_StockShelf",
+            "Studio_Kanban",
+            "Studio_Terminal",
+            "Studio_ApprovalDesk",
+            "Studio_RCInsert",
+            "Studio_Lounge",
+            "Park_Bench",
+            "Park_QuietSign",
+            "Park_NoiseSpot",
+            "Park_NoticeBoard",
+            "Police_ReportDesk",
+            "Police_EvidenceBoard",
+            "Police_Printer",
+            "Police_CCTVConsole",
+            "Police_InterrogationSpot",
+            "Police_CaseBoard"
+        };
+
+        public static IReadOnlyList<string> SimpleVerificationBuildingIds => s_simpleVerificationBuildingIds;
+        public static IReadOnlyList<string> SimpleVerificationInteractableIds => s_simpleVerificationInteractableIds;
+        public static bool IsSimpleVerificationBuildingId(string buildingId) => System.Array.IndexOf(s_simpleVerificationBuildingIds, buildingId) >= 0;
+        public static bool IsSimpleVerificationInteractableId(string interactableId) => System.Array.IndexOf(s_simpleVerificationInteractableIds, interactableId) >= 0;
 
         [MenuItem("Tools/DreamOfOne/Seed World Definition (Default)")]
         public static void SeedDefaultWorld()
@@ -48,7 +84,7 @@ namespace DreamOfOne.Editor
 
             var ruleset = CreateRuleset("Main", rules);
             var policyPack = CreatePolicyPack("Default", "Baseline policy pack for MCSS slice.");
-            var budget = CreateBudget(16, 3f, 10f, 10, "0B");
+            var budget = CreateBudget(DefaultNpcMax, 3f, 10f, 10, "0B");
             var artifacts = new List<ArtifactDefinition>
             {
                 CreateArtifact("CCTV Capture", CoreEventType.CctvCaptured, "CCTV Capture", "CCTV clip from {place}: {note}"),
@@ -172,6 +208,7 @@ namespace DreamOfOne.Editor
                     "StoreBuilding",
                     new Vector3(1.4f, 0f, 0.6f),
                     false,
+                    DefaultNonPoliceSpawnCount,
                     1.2f,
                     0.2f,
                     60,
@@ -186,6 +223,7 @@ namespace DreamOfOne.Editor
                     "StoreBuilding",
                     new Vector3(-1.2f, 0f, -0.4f),
                     false,
+                    DefaultNonPoliceSpawnCount,
                     1.2f,
                     0.2f,
                     58,
@@ -201,6 +239,7 @@ namespace DreamOfOne.Editor
                     "StudioBuilding_L1",
                     new Vector3(1.2f, 0f, 0.6f),
                     false,
+                    DefaultNonPoliceSpawnCount,
                     1.25f,
                     0.2f,
                     58,
@@ -215,6 +254,7 @@ namespace DreamOfOne.Editor
                     "StudioBuilding_L1",
                     new Vector3(-1.2f, 0f, 0.4f),
                     false,
+                    DefaultNonPoliceSpawnCount,
                     1.2f,
                     0.2f,
                     58,
@@ -230,6 +270,7 @@ namespace DreamOfOne.Editor
                     "ParkArea",
                     new Vector3(1.2f, 0f, 0.8f),
                     false,
+                    DefaultNonPoliceSpawnCount,
                     1.2f,
                     0.2f,
                     60,
@@ -244,6 +285,7 @@ namespace DreamOfOne.Editor
                     "ParkArea",
                     new Vector3(-1.1f, 0f, -0.6f),
                     false,
+                    DefaultNonPoliceSpawnCount,
                     1.15f,
                     0.2f,
                     60,
@@ -259,6 +301,7 @@ namespace DreamOfOne.Editor
                     "Station",
                     new Vector3(1.0f, 0f, 0.8f),
                     true,
+                    1,
                     1.5f,
                     0.35f,
                     45,
@@ -273,6 +316,7 @@ namespace DreamOfOne.Editor
                     "Station",
                     new Vector3(-1.0f, 0f, 0.8f),
                     true,
+                    1,
                     1.45f,
                     0.35f,
                     47,
@@ -287,6 +331,290 @@ namespace DreamOfOne.Editor
             AssetDatabase.Refresh();
             Selection.activeObject = world;
             Debug.Log("[WorldSeeder] Default world data seeded.");
+        }
+
+        [MenuItem("Tools/DreamOfOne/Seed World Definition (Simple Verification)")]
+        public static void SeedSimpleVerificationWorld()
+        {
+            EnsureFolders();
+
+            var world = AssetDatabase.LoadAssetAtPath<WorldDefinition>(WorldAssetPath);
+            if (world == null)
+            {
+                world = ScriptableObject.CreateInstance<WorldDefinition>();
+                AssetDatabase.CreateAsset(world, WorldAssetPath);
+            }
+
+            var interactablePrefab = EnsureInteractablePrefab();
+            var citizenPrefab = EnsureNpcPrefab("NPC_Citizen", new Color(0.35f, 0.9f, 0.35f, 1f), false);
+            var policePrefab = EnsureNpcPrefab("NPC_Police", new Color(0.2f, 0.45f, 0.95f, 1f), true);
+
+            var rules = new List<RuleDefinition>
+            {
+                CreateRule("R_QUEUE", 2, 30f, "Queue", "줄 규칙 위반이 감지됨"),
+                CreateRule("R_LABEL", 2, 20f, "Label", "라벨 규정 위반이 감지됨"),
+                CreateRule("R_NOISE", 2, 20f, "Noise", "소음 규정 위반이 감지됨"),
+                CreateRule("PROC_RC_SKIP", 2, 25f, "Procedure", "릴리즈 후보 절차 누락이 감지됨")
+            };
+
+            var ruleset = CreateRuleset("Main", rules);
+            var policyPack = CreatePolicyPack("Default", "Baseline policy pack for MCSS slice.");
+            var budget = CreateBudget(SimpleVerificationNpcMax, 3f, 10f, 10, "0B");
+            var artifacts = new List<ArtifactDefinition>
+            {
+                CreateArtifact("CCTV Capture", CoreEventType.CctvCaptured, "CCTV Capture", "CCTV clip from {place}: {note}"),
+                CreateArtifact("Violation Ticket", CoreEventType.TicketIssued, "Violation Ticket", "Ticket issued at {place}: {note}"),
+                CreateArtifact("Rumor Card", CoreEventType.RumorConfirmed, "Rumor Card", "Rumor confirmed about {topic} at {place}."),
+                CreateArtifact("Complaint Memo", CoreEventType.ReportFiled, "Complaint Memo", "Complaint filed by {actor} at {place}."),
+                CreateArtifact("Defense Memo", CoreEventType.ExplanationGiven, "Defense Memo", "Defense note: {note}"),
+                CreateArtifact("Approval Note", CoreEventType.ApprovalGranted, "Approval Note", "Approval granted at {place}.")
+            };
+
+            var buildings = new List<BuildingDefinition>
+            {
+                CreateBuilding("Store", "StoreBuilding", CreateInteriorPrefab("Interior_Store_SimpleVerification", new Vector3(10f, 3f, 10f), InteriorStyle.Store, InteriorPropProfile.Minimal)),
+                CreateBuilding("Studio", "StudioBuilding_L1", CreateInteriorPrefab("Interior_Studio_SimpleVerification", new Vector3(12f, 3f, 10f), InteriorStyle.Studio, InteriorPropProfile.Minimal)),
+                CreateBuilding("Police", "Station", CreateInteriorPrefab("Interior_Police_SimpleVerification", new Vector3(9f, 3f, 9f), InteriorStyle.Police, InteriorPropProfile.Minimal)),
+                CreateBuilding("Park", "ParkArea", null)
+            };
+
+            var zones = new List<ZoneDefinition>
+            {
+                CreateZone("StoreQueue", ZoneType.Queue, new Vector3(-10f, 0f, 6f)),
+                CreateZone("StudioPhoto", ZoneType.Photo, new Vector3(0f, 0f, -10f)),
+                CreateZone("ParkSeat", ZoneType.Seat, new Vector3(12f, 0f, 8f)),
+                CreateZone("PoliceReport", ZoneType.None, new Vector3(0f, 0f, -18f))
+            };
+
+            var interactables = new List<InteractableDefinition>
+            {
+                // Store
+                CreateInteractable("Store_QueueMarker", "StoreBuilding", interactablePrefab, new Vector3(1.5f, 0f, -1.5f), CoreEventType.ViolationDetected, EventCategory.Rule, ZoneType.Queue, "R_QUEUE", "Queue marker", "Store"),
+                CreateInteractable("Store_LabelBoard", "StoreBuilding", interactablePrefab, new Vector3(-1.5f, 0f, -0.5f), CoreEventType.LabelChanged, EventCategory.Evidence, ZoneType.None, "R_LABEL", "Label update", "Store"),
+                CreateInteractable("Store_Printer", "StoreBuilding", interactablePrefab, new Vector3(0.5f, 0f, 0.5f), CoreEventType.TicketIssued, EventCategory.Evidence, ZoneType.None, "R_QUEUE", "Receipt/ticket", "Store"),
+                CreateInteractable("Store_CounterBell", "StoreBuilding", interactablePrefab, new Vector3(0.5f, 0f, -0.5f), CoreEventType.QueueUpdated, EventCategory.Organization, ZoneType.None, "R_QUEUE", "Queue update", "Store"),
+                CreateInteractable("Store_StockShelf", "StoreBuilding", interactablePrefab, new Vector3(-0.5f, 0f, 0.8f), CoreEventType.TaskCompleted, EventCategory.Organization, ZoneType.None, "R_LABEL", "Stock update", "Store"),
+
+                // Studio
+                CreateInteractable("Studio_Kanban", "StudioBuilding_L1", interactablePrefab, new Vector3(1.2f, 0f, 0.8f), CoreEventType.TaskStarted, EventCategory.Organization, ZoneType.None, "PROC_KANBAN", "Kanban moved", "Studio"),
+                CreateInteractable("Studio_Terminal", "StudioBuilding_L1", interactablePrefab, new Vector3(-1.6f, 0f, 0.6f), CoreEventType.TaskCompleted, EventCategory.Organization, ZoneType.None, "PROC_PATCH", "Terminal log", "Studio"),
+                CreateInteractable("Studio_ApprovalDesk", "StudioBuilding_L1", interactablePrefab, new Vector3(0.6f, 0f, -0.6f), CoreEventType.ApprovalGranted, EventCategory.Procedure, ZoneType.None, "PROC_APPROVAL", "Approval granted", "Studio"),
+                CreateInteractable("Studio_RCInsert", "StudioBuilding_L1", interactablePrefab, new Vector3(-0.6f, 0f, -0.6f), CoreEventType.RcInserted, EventCategory.Procedure, ZoneType.None, "PROC_RC", "Release Candidate inserted", "Studio"),
+                CreateInteractable("Studio_Lounge", "StudioBuilding_L1", interactablePrefab, new Vector3(0f, 0f, 1.6f), CoreEventType.RumorShared, EventCategory.Gossip, ZoneType.None, "GOSSIP", "Lounge gossip", "Studio"),
+
+                // Park
+                CreateInteractable("Park_Bench", "ParkArea", interactablePrefab, new Vector3(1.5f, 0f, 1f), CoreEventType.SeatClaimed, EventCategory.Zone, ZoneType.Seat, "R_SEAT", "Seat claimed", "Park"),
+                CreateInteractable("Park_QuietSign", "ParkArea", interactablePrefab, new Vector3(-1.5f, 0f, 1f), CoreEventType.NoiseObserved, EventCategory.Rule, ZoneType.None, "R_NOISE", "Noise warning", "Park"),
+                CreateInteractable("Park_NoiseSpot", "ParkArea", interactablePrefab, new Vector3(-1.2f, 0f, 0.6f), CoreEventType.NoiseObserved, EventCategory.Rule, ZoneType.None, "R_NOISE", "Noise spot", "Park"),
+                CreateInteractable("Park_NoticeBoard", "ParkArea", interactablePrefab, new Vector3(0.2f, 0f, -1.6f), CoreEventType.RumorShared, EventCategory.Gossip, ZoneType.None, "GOSSIP", "Notice board", "Park"),
+
+                // Police
+                CreateInteractable("Police_ReportDesk", "Station", interactablePrefab, new Vector3(1f, 0f, -0.6f), CoreEventType.ReportFiled, EventCategory.Report, ZoneType.None, "R_QUEUE", "Report filed", "Police"),
+                CreateInteractable("Police_EvidenceBoard", "Station", interactablePrefab, new Vector3(-1f, 0f, -0.6f), CoreEventType.EvidenceCaptured, EventCategory.Evidence, ZoneType.None, "EVIDENCE", "Evidence attached", "Police"),
+                CreateInteractable("Police_Printer", "Station", interactablePrefab, new Vector3(0.9f, 0f, 0.2f), CoreEventType.TicketIssued, EventCategory.Evidence, ZoneType.None, "R_QUEUE", "Printer output", "Police"),
+                CreateInteractable("Police_CCTVConsole", "Station", interactablePrefab, new Vector3(-0.6f, 0f, 0.6f), CoreEventType.CctvCaptured, EventCategory.Evidence, ZoneType.None, "CCTV", "CCTV capture", "Police"),
+                CreateInteractable("Police_InterrogationSpot", "Station", interactablePrefab, new Vector3(-0.2f, 0f, 1.0f), CoreEventType.InterrogationStarted, EventCategory.Procedure, ZoneType.None, "PROC_INTERROGATION", "Interrogation spot", "Police"),
+                CreateInteractable("Police_CaseBoard", "Station", interactablePrefab, new Vector3(0f, 0f, -1.2f), CoreEventType.TaskCompleted, EventCategory.Procedure, ZoneType.None, "PROC_CASE", "Case review", "Police")
+            };
+
+            var incidents = new List<IncidentDefinition>
+            {
+                CreateIncident(
+                    "Incident_StoreQueue",
+                    "Store queue cutting + label dispute. Collect queue/label evidence and file a report.",
+                    new [] { "Store_QueueMarker", "Store_LabelBoard", "Police_ReportDesk" },
+                    new [] { "TicketIssued", "CctvCaptured", "ReportFiled", "StatementGiven" },
+                    new []
+                    {
+                        Branch("Cleared", "Label mismatch confirmed; violation downgraded."),
+                        Branch("Guilty", "Ticket + CCTV confirm queue violation."),
+                        Branch("Escalation", "Conflicting statements require Station review.")
+                    }),
+                CreateIncident(
+                    "Incident_StudioRC",
+                    "Release Candidate inserted without approval. Verify kanban/approval trail and Release Candidate insert timing.",
+                    new [] { "Studio_Kanban", "Studio_ApprovalDesk", "Studio_RCInsert" },
+                    new [] { "ApprovalGranted", "RcInserted", "CctvCaptured" },
+                    new []
+                    {
+                        Branch("Guilty", "Release Candidate insert precedes approval or approval missing."),
+                        Branch("Cleared", "Approval artifact precedes Release Candidate insert."),
+                        Branch("Unresolved", "Artifacts conflict; requires Station escalation.")
+                    }),
+                CreateIncident(
+                    "Incident_ParkNoise",
+                    "Noise complaint vs permitted performance. Check notice board + noise spot.",
+                    new [] { "Park_NoiseSpot", "Park_NoticeBoard", "Park_QuietSign" },
+                    new [] { "NoiseObserved", "ReportFiled", "RumorConfirmed" },
+                    new []
+                    {
+                        Branch("Cleared", "Notice board allows performance window."),
+                        Branch("Guilty", "No allowance; warnings ignored."),
+                        Branch("Escalation", "Repeated complaints routed to Station.")
+                    }),
+                CreateIncident(
+                    "Incident_StationConflict",
+                    "Conflicting testimonies across orgs. Reconcile with evidence board + interrogation.",
+                    new [] { "Police_ReportDesk", "Police_EvidenceBoard", "Police_InterrogationSpot" },
+                    new [] { "ReportFiled", "EvidenceCaptured", "CctvCaptured", "StatementGiven" },
+                    new []
+                    {
+                        Branch("Cleared", "Timeline + policy context resolve contradictions."),
+                        Branch("Guilty", "Hard artifact disproves one claim."),
+                        Branch("Unresolved", "Insufficient artifacts; case remains open."),
+                        Branch("Escalation", "Policy conflict requires higher authority.")
+                    })
+            };
+
+            var npcs = new List<NpcDefinition>
+            {
+                CreateNpc(
+                    "Store_Clerk_A",
+                    "Clerk",
+                    "Store",
+                    "Store_Clerk",
+                    "Medium",
+                    "StoreBuilding",
+                    new Vector3(1.4f, 0f, 0.6f),
+                    false,
+                    SimpleVerificationNonPoliceSpawnCount,
+                    1.2f,
+                    0.2f,
+                    60,
+                    citizenPrefab,
+                    new [] { "Store_LabelBoard", "Store_QueueMarker", "Store_CounterBell", "Store_Printer" }),
+                CreateNpc(
+                    "Store_Manager",
+                    "Manager",
+                    "Store",
+                    "Store_Manager",
+                    "High",
+                    "StoreBuilding",
+                    new Vector3(-1.2f, 0f, -0.4f),
+                    false,
+                    SimpleVerificationNonPoliceSpawnCount,
+                    1.2f,
+                    0.2f,
+                    58,
+                    citizenPrefab,
+                    new [] { "Store_CounterBell", "Store_LabelBoard", "Store_Printer" }),
+
+                CreateNpc(
+                    "Studio_PM",
+                    "PM",
+                    "Studio",
+                    "Studio_PM",
+                    "High",
+                    "StudioBuilding_L1",
+                    new Vector3(1.2f, 0f, 0.6f),
+                    false,
+                    SimpleVerificationNonPoliceSpawnCount,
+                    1.25f,
+                    0.2f,
+                    58,
+                    citizenPrefab,
+                    new [] { "Studio_Kanban", "Studio_ApprovalDesk", "Studio_RCInsert" }),
+                CreateNpc(
+                    "Studio_QA",
+                    "QA",
+                    "Studio",
+                    "Studio_QA",
+                    "Medium",
+                    "StudioBuilding_L1",
+                    new Vector3(-1.2f, 0f, 0.4f),
+                    false,
+                    SimpleVerificationNonPoliceSpawnCount,
+                    1.2f,
+                    0.2f,
+                    58,
+                    citizenPrefab,
+                    new [] { "Studio_Kanban", "Studio_Terminal", "Studio_ApprovalDesk" }),
+
+                CreateNpc(
+                    "Park_Caretaker",
+                    "Caretaker",
+                    "Park",
+                    "Park_Caretaker",
+                    "Medium",
+                    "ParkArea",
+                    new Vector3(1.2f, 0f, 0.8f),
+                    false,
+                    SimpleVerificationNonPoliceSpawnCount,
+                    1.2f,
+                    0.2f,
+                    60,
+                    citizenPrefab,
+                    new [] { "Park_Bench", "Park_NoiseSpot", "Park_NoticeBoard" }),
+                CreateNpc(
+                    "Park_Elder",
+                    "Elder",
+                    "Park",
+                    "Park_Elder",
+                    "High",
+                    "ParkArea",
+                    new Vector3(-1.1f, 0f, -0.6f),
+                    false,
+                    SimpleVerificationNonPoliceSpawnCount,
+                    1.15f,
+                    0.2f,
+                    60,
+                    citizenPrefab,
+                    new [] { "Park_NoticeBoard", "Park_Bench" }),
+
+                CreateNpc(
+                    "Station_Officer",
+                    "Officer",
+                    "Station",
+                    "Station_Officer",
+                    "High",
+                    "Station",
+                    new Vector3(1.0f, 0f, 0.8f),
+                    true,
+                    1,
+                    1.5f,
+                    0.35f,
+                    45,
+                    policePrefab,
+                    new [] { "Police_ReportDesk", "Police_EvidenceBoard", "Police_InterrogationSpot", "Police_Printer" }),
+                CreateNpc(
+                    "Station_Investigator",
+                    "Investigator",
+                    "Station",
+                    "Station_Investigator",
+                    "Medium",
+                    "Station",
+                    new Vector3(-1.0f, 0f, 0.8f),
+                    true,
+                    1,
+                    1.45f,
+                    0.35f,
+                    47,
+                    policePrefab,
+                    new [] { "Police_EvidenceBoard", "StoreBuilding", "StudioBuilding_L1", "ParkArea", "Police_EvidenceBoard" })
+            };
+
+            if (buildings.Count != SimpleVerificationBuildingCount)
+            {
+                throw new System.InvalidOperationException($"[WorldSeeder] Simple profile must contain exactly {SimpleVerificationBuildingCount} buildings.");
+            }
+
+            if (interactables.Count != SimpleVerificationInteractableCount)
+            {
+                throw new System.InvalidOperationException($"[WorldSeeder] Simple profile must contain exactly {SimpleVerificationInteractableCount} interactables.");
+            }
+
+            if (incidents.Count < SimpleVerificationMinimumIncidentCount)
+            {
+                throw new System.InvalidOperationException($"[WorldSeeder] Simple profile must contain at least {SimpleVerificationMinimumIncidentCount} incidents.");
+            }
+
+            ApplyWorldAsset(world, buildings, interactables, incidents, npcs);
+            ApplyWorldSettings(world, ruleset, policyPack, budget, zones);
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Selection.activeObject = world;
+            Debug.Log("[WorldSeeder] Simple verification world data seeded.");
         }
 
         private static void ApplyWorldAsset(
@@ -477,6 +805,7 @@ namespace DreamOfOne.Editor
             string anchorName,
             Vector3 spawnOffset,
             bool isPolice,
+            int spawnCount,
             float speed,
             float stoppingDistance,
             int avoidancePriority,
@@ -505,7 +834,7 @@ namespace DreamOfOne.Editor
             so.FindProperty("anchorName").stringValue = anchorName;
             so.FindProperty("spawnOffset").vector3Value = spawnOffset;
             so.FindProperty("isPolice").boolValue = isPolice;
-            so.FindProperty("spawnCount").intValue = isPolice ? 1 : 2;
+            so.FindProperty("spawnCount").intValue = isPolice ? 1 : Mathf.Max(1, spawnCount);
             so.FindProperty("speed").floatValue = speed;
             so.FindProperty("stoppingDistance").floatValue = stoppingDistance;
             so.FindProperty("avoidancePriority").intValue = avoidancePriority;
@@ -716,7 +1045,7 @@ namespace DreamOfOne.Editor
             return prefabAsset;
         }
 
-        private static GameObject CreateInteriorPrefab(string name, Vector3 size, InteriorStyle style)
+        private static GameObject CreateInteriorPrefab(string name, Vector3 size, InteriorStyle style, InteriorPropProfile propProfile = InteriorPropProfile.Full)
         {
             EnsureFolder(InteriorRoot);
             string path = $"{InteriorRoot}/{name}.prefab";
@@ -748,15 +1077,39 @@ namespace DreamOfOne.Editor
             propsRoot.transform.SetParent(root.transform);
             propsRoot.transform.localPosition = Vector3.zero;
 
-            CreateInteriorProps(propsRoot.transform, style);
+            CreateInteriorProps(propsRoot.transform, style, propProfile);
 
             var prefabAsset = PrefabUtility.SaveAsPrefabAsset(root, path);
             Object.DestroyImmediate(root);
             return prefabAsset;
         }
 
-        private static void CreateInteriorProps(Transform parent, InteriorStyle style)
+        private static void CreateInteriorProps(Transform parent, InteriorStyle style, InteriorPropProfile propProfile)
         {
+            if (propProfile == InteriorPropProfile.Minimal)
+            {
+                switch (style)
+                {
+                    case InteriorStyle.Store:
+                        CreateProp(parent, "Counter", new Vector3(0f, 0.5f, -1f), new Vector3(2.2f, 0.8f, 0.8f));
+                        CreateProp(parent, "LabelBoard", new Vector3(-1.0f, 1.1f, -0.6f), new Vector3(1.2f, 0.6f, 0.1f));
+                        break;
+                    case InteriorStyle.Studio:
+                        CreateProp(parent, "WorkDesk", new Vector3(0f, 0.5f, -0.7f), new Vector3(2f, 0.8f, 0.8f));
+                        CreateProp(parent, "Kanban", new Vector3(0.8f, 1.2f, -1f), new Vector3(1.2f, 0.6f, 0.1f));
+                        break;
+                    case InteriorStyle.Police:
+                        CreateProp(parent, "ReportDesk", new Vector3(0f, 0.5f, -1f), new Vector3(2f, 0.8f, 0.8f));
+                        CreateProp(parent, "EvidenceBoard", new Vector3(-0.9f, 1.2f, -0.5f), new Vector3(1.4f, 0.8f, 0.1f));
+                        break;
+                    case InteriorStyle.Cafe:
+                        CreateProp(parent, "OrderDesk", new Vector3(0f, 0.5f, -1f), new Vector3(2.2f, 0.8f, 0.8f));
+                        break;
+                }
+
+                return;
+            }
+
             switch (style)
             {
                 case InteriorStyle.Store:
@@ -898,6 +1251,12 @@ namespace DreamOfOne.Editor
             Studio,
             Police,
             Cafe
+        }
+
+        private enum InteriorPropProfile
+        {
+            Full,
+            Minimal
         }
     }
 }

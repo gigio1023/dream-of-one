@@ -20,7 +20,7 @@ MonoBehaviour:
   keyProps: []
   exteriorOffset: {x: 0, y: 0, z: 0}
   exteriorRotationEuler: {x: 0, y: 0, z: 0}
-  interiorPrefab: {fileID: 7996232624914077395, guid: bd658fcc7ddae43529ba507d6fb90758, type: 3}
+  interiorPrefab: {fileID: 2300615992376153476, guid: fe993bdad29094e14ae2f0b87aa77677, type: 3}
   interiorLocalOffset: {x: 0, y: 0, z: 0}
   interiorPortalLocalOffset: {x: 0, y: 0.1, z: -3}
   exteriorPortalOffset: {x: 0, y: 0, z: 2.2}

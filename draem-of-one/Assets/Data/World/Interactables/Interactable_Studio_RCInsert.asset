@@ -30,7 +30,7 @@ MonoBehaviour:
   emittedEvents:
   - RcInserted
   artifactRules: []
-  note: RC inserted
+  note: Release Candidate inserted
   severity: 2
   placeId: Studio
   triggerSize: {x: 2, y: 2, z: 2}

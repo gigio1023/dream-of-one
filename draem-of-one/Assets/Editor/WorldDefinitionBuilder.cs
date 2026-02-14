@@ -18,8 +18,21 @@ namespace DreamOfOne.Editor
         private const float DefaultNavMeshSampleRadius = 1.2f;
         private const float InteractableNavMeshSampleRadius = 1.8f;
         private const float NpcNavMeshSampleRadius = 2.2f;
+        private const float ZoneNavMeshSampleRadius = 4f;
         private const int OverlapBufferSize = 16;
         private static readonly Collider[] OverlapBuffer = new Collider[OverlapBufferSize];
+
+        private sealed class SpawnedZoneInfo
+        {
+            public SpawnedZoneInfo(string zoneId, Transform transform)
+            {
+                ZoneId = zoneId;
+                Transform = transform;
+            }
+
+            public string ZoneId { get; }
+            public Transform Transform { get; }
+        }
 
         [MenuItem("Tools/DreamOfOne/Create World Definition Asset")]
         public static void CreateWorldDefinitionAsset()
@@ -373,7 +386,7 @@ namespace DreamOfOne.Editor
                 }
             }
 
-            SpawnZones(world, root.transform, report);
+            var spawnedZones = SpawnZones(world, root.transform, report);
 
             for (int i = 0; i < world.Npcs.Count; i++)
             {
@@ -464,8 +477,9 @@ namespace DreamOfOne.Editor
                 }
             }
 
-            report.LogSummary($"Rebuild complete: Buildings={buildingCount}, Interiors={interiorCount}, Interactables={interactableCount}, TextSurfaces={textSurfaceCount}, Portals={portalCount}, NPCSpawns={npcSpawnCount}");
             BakeNavMesh(report);
+            ValidateAndSnapZonesOnNavMesh(spawnedZones, report);
+            report.LogSummary($"Rebuild complete: Buildings={buildingCount}, Interiors={interiorCount}, Interactables={interactableCount}, TextSurfaces={textSurfaceCount}, Portals={portalCount}, NPCSpawns={npcSpawnCount}");
         }
 
         private static void CacheRoutineAnchors(Transform anchorsRoot, Dictionary<string, Transform> lookup)
@@ -888,11 +902,12 @@ namespace DreamOfOne.Editor
             light.color = new Color(1f, 0.96f, 0.9f);
         }
 
-        private static void SpawnZones(WorldDefinition world, Transform root, WorldBuildReport report)
+        private static List<SpawnedZoneInfo> SpawnZones(WorldDefinition world, Transform root, WorldBuildReport report)
         {
+            var spawnedZones = new List<SpawnedZoneInfo>();
             if (world == null || world.Zones == null || world.Zones.Count == 0)
             {
-                return;
+                return spawnedZones;
             }
 
             var zonesRoot = CreateChild(root.gameObject, "Zones");
@@ -947,10 +962,39 @@ namespace DreamOfOne.Editor
                     board = zoneObject.AddComponent<SpatialBlackboard>();
                 }
                 board.Configure(zoneDef.ZoneId, zoneDef.TtlSeconds, zoneDef.BlackboardCapacity);
+                spawnedZones.Add(new SpawnedZoneInfo(zoneDef.ZoneId, zoneObject.transform));
+            }
 
-                if (!IsNavMeshReachable(zoneObject.transform.position))
+            return spawnedZones;
+        }
+
+        private static void ValidateAndSnapZonesOnNavMesh(IReadOnlyList<SpawnedZoneInfo> spawnedZones, WorldBuildReport report)
+        {
+            if (spawnedZones == null || spawnedZones.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < spawnedZones.Count; i++)
+            {
+                var zone = spawnedZones[i];
+                if (zone == null || zone.Transform == null)
                 {
-                    report.AddWarning($"Zone {zoneDef.ZoneId} not on NavMesh.");
+                    continue;
+                }
+
+                var originalPosition = zone.Transform.position;
+                bool snappedToNavMesh = TrySnapToNavMesh(originalPosition, ZoneNavMeshSampleRadius, out Vector3 snappedPosition);
+                if (!snappedToNavMesh)
+                {
+                    report.AddWarning($"Zone {zone.ZoneId} not on NavMesh.");
+                    continue;
+                }
+
+                zone.Transform.position = snappedPosition;
+                if ((snappedPosition - originalPosition).sqrMagnitude > 0.0001f)
+                {
+                    report.AddInfo($"Zone {zone.ZoneId} snapped to NavMesh.");
                 }
             }
         }

@@ -151,9 +151,15 @@ ollama pull qwen3:4b-instruct
 
 ### Editor-first checks
 
-- `Tools > DreamOfOne > Rebuild World From Data`
+Recommended for the 4-landmark rapid verification loop:
+- `Tools > DreamOfOne > Apply Simple Verification Mode`
 - `Tools > DreamOfOne > Run Diagnostics` until the console is clean.
 - Unity Test Runner: `EditMode` and `PlayMode`.
+
+Manual equivalent (if needed):
+- `Tools > DreamOfOne > Build City (POLYGON, Simple Verification)`
+- `Tools > DreamOfOne > Seed World Definition (Simple Verification)`
+- `Tools > DreamOfOne > Rebuild World From Data`
 
 ### Headless checks
 
@@ -182,7 +188,7 @@ Primary outputs:
 
 ## Documentation Map
 
-Source-of-truth documents:
+Single Source of Truth (SSOT) documents:
 
 - Product definition: `project.md`
 - Master execution plan: `plan.md`

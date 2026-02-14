@@ -1,6 +1,6 @@
 # Developer Guide
 
-Revision date: 2026-02-13
+Revision date: 2026-02-14
 
 This guide is the practical “how to run / how to verify” reference for the Unity project in this repo.
 
@@ -51,11 +51,16 @@ If MCP is not connected, stop scene/asset authoring work and ask the user to:
 ## Required Menu Tools (Use These)
 
 World build and verification:
-- `Tools > DreamOfOne > Rebuild World From Data`
+- `Tools > DreamOfOne > Apply Simple Verification Mode` (recommended for rapid 4-landmark validation loops)
 - `Tools > DreamOfOne > Run Diagnostics` (repeat until the console is clean)
 
-Optional tooling:
-- `Tools > DreamOfOne > Seed World Definition (Default)` (only if a fresh baseline is needed)
+Manual equivalent for the same simple profile:
+- `Tools > DreamOfOne > Build City (POLYGON, Simple Verification)`
+- `Tools > DreamOfOne > Seed World Definition (Simple Verification)`
+- `Tools > DreamOfOne > Rebuild World From Data`
+
+Optional baseline tooling:
+- `Tools > DreamOfOne > Seed World Definition (Default)` (only if a full default baseline is required)
 
 ---
 
@@ -116,11 +121,11 @@ Use the repo scripts:
 - `scripts/unity/run_all_checks.sh`
 
 Runtime evidence tooling:
-- `scripts/unity/analyze_runtime_evidence.mjs` (증거 필드 점검)
-- `scripts/unity/collect_regression_metrics.mjs` (회귀 지표 생성)
-- `scripts/unity/package_release_candidate.mjs` (릴리즈 후보 산출물 묶음)
-- `scripts/unity/collect_stability_trend.mjs` (3회 이상 run 기반 장시간 안정성 추세 집계)
-- `scripts/unity/run_stability_trend.sh` (기본 3-run 프로파일 실행)
+- `scripts/unity/analyze_runtime_evidence.mjs` (validates required Evidence fields and transport continuity)
+- `scripts/unity/collect_regression_metrics.mjs` (builds Regression Monitoring metrics)
+- `scripts/unity/package_release_candidate.mjs` (packages the Evidence Pack for Release Candidate decisions)
+- `scripts/unity/collect_stability_trend.mjs` (aggregates multi-run stability trends)
+- `scripts/unity/run_stability_trend.sh` (runs the default 3-run stability profile)
 
 Mock runtime option for deterministic validation:
 - `backend/npc-runtime/scripts/mock-codex-tool-runner.mjs`
@@ -139,11 +144,11 @@ Generated outputs:
 - `logs/runtime-evidence-summary.json`
 - `logs/regression-metrics.json`
 - `logs/rc/<run-id>/manifest.json`
-- `logs/unity-live-play.log` (Unity Editor.log에서 추출한 라이브 메타 라인)
-- `logs/npc-runtime-live-evidence.log` (회귀 지표용 backend decision 응답 샘플 로그)
-  - 참고: 클라이언트 중단 요청은 `npc_decision_response_dropped`로 별도 기록되며 증거 집계에서 제외됨
+- `logs/unity-live-play.log` (live metadata lines extracted from Unity Editor.log)
+- `logs/npc-runtime-live-evidence.log` (backend decision response sample logs for regression metrics)
+  - Note: client-aborted requests are recorded as `npc_decision_response_dropped` and excluded from response Evidence aggregation
 
-## Work management (Linear SoT + Beads execution)
+## Work management (Linear SSOT + Beads execution graph)
 
 This repo uses **Linear issues as the single source of truth** for work items and status.
 

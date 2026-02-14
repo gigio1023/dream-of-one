@@ -149,7 +149,7 @@ A candidate build is valid if:
 
 ## 17) Dependencies and doc roles
 - Product definition: `project.md`
-- Master execution plan: `plan.md`
+- Execution order and issue sequencing: Linear issues (Source of Truth), governed by `project.md`
 - Rule content pack: `docs/design/dream-laws.md`
 - Scenario content pack: `docs/design/cover-tests.md`
 - Runtime evidence operations: `docs/design/runtime-evidence.md`

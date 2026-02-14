@@ -1,55 +1,56 @@
 ---
 doc: docs/design/runtime-evidence.md
 project: Dream of One
-revision: 2026-02-13
+revision: 2026-02-14
 status: Active
 ---
 
-# Runtime Evidence 운영 기준
+# Runtime Evidence Operations Guide
 
-이 문서는 `plan.md`의 WP-1~WP-5를 실제 운영 절차로 고정한다.
+This document defines the operational procedure for runtime Evidence collection and Validation Criteria for Dream of One.
+Execution sequencing Source of Truth is Linear issues, governed by `project.md`.
 
-## 1) 목표
-- Unity/Backend 실행 결과에서 `transport`, `threadId`, `usedFallback`을 자동 점검한다.
-- 대체 경로(`fallback`) 발생 시 실패 사유 코드와 분류(`reasonCategory`, `warningTier`)를 함께 남긴다.
-- 회귀 지표와 Release Candidate (RC, 릴리즈 후보) 판정 결과를 재현 가능한 산출물로 보관한다.
+## 1) Goal
+- Automatically validate `transport`, `threadId`, and `usedFallback` from Unity and Backend runtime outputs.
+- Record deterministic fallback causality with `reason`, `reasonCategory`, and `warningTier` (Severity Tier).
+- Preserve Regression Monitoring outputs and Release Candidate (RC) decisions as reproducible Evidence artifacts.
 
-## 2) 증거 필드 기준
-- 필수 필드:
+## 2) Evidence Field Specification
+- Required fields:
   - `transport`: `codex | codex-reply | fallback`
   - `usedFallback`: `true | false`
-  - `threadId`: `transport`가 `codex|codex-reply`일 때 필수
-- 인과/안정화 필드:
-  - `reason`: 실패 사유 코드
+  - `threadId`: required when `transport` is `codex` or `codex-reply`
+- Causality and Hardening fields:
+  - `reason`: Reason Code
   - `reasonCategory`: `none|policy|schema|timeout|cancelled|parse|tool|runtime|unknown`
   - `warningTier`: `blocking|attention|reference`
-- Backend 로그 이벤트 구분:
-  - 증거 집계 대상: `npc_decision_response`
-  - 클라이언트 중단 노이즈: `npc_decision_response_dropped` (응답 증거 집계에서 제외)
+- Backend log event split:
+  - Evidence aggregation target: `npc_decision_response`
+  - Client-aborted noise lane: `npc_decision_response_dropped` (excluded from response Evidence aggregation)
 
-## 3) 실행 명령
-기본 점검:
+## 3) Execution Commands
+Baseline checks:
 ```bash
 scripts/unity/run_editor_diagnostics.sh
 scripts/unity/run_playmode_smoke.sh
 ```
 
-전체 점검 + 릴리즈 후보 묶음:
+Full checks with Release Candidate packaging:
 ```bash
 scripts/unity/run_all_checks.sh
 ```
 
-릴리즈 프로파일(권장 반복):
+Recommended Release Candidate profile:
 ```bash
 RC_PROFILE=release RC_NORMAL_RUNS=3 RC_FAILURE_RUNS=2 scripts/unity/run_all_checks.sh
 ```
 
-장시간 부하 추세 프로파일(3-run 비교):
+Long-session stability trend profile (3-run comparison):
 ```bash
 scripts/unity/run_stability_trend.sh
 ```
 
-라이브 플레이 누적 프로파일(비테스트 루프):
+Live-play accumulation profile (non-test loop):
 ```bash
 rg --no-line-number "transport=" "$HOME/Library/Logs/Unity/Editor.log" | tail -n 300 > logs/unity-live-play.log
 node scripts/unity/analyze_runtime_evidence.mjs \
@@ -72,38 +73,38 @@ node scripts/unity/package_release_candidate.mjs \
   --playmode-tests-log logs/playmode-tests.log
 ```
 
-## 4) 자동 생성 산출물
+## 4) Generated Artifacts
 - `logs/runtime-evidence-summary.json`
-  - 필드 누락/불일치(위반)과 분포 통계
+  - field presence violations and distribution metrics
 - `logs/regression-metrics.json`
-  - 경로 비중, 대체 경로 비율, 연속성 손실 지표
+  - Runtime Path ratio, fallback rate, and continuity-loss indicators
 - `logs/rc/<run-id>/manifest.json`
-  - Release Candidate 체크리스트와 참조 로그 파일 경로
+  - Release Candidate checklist decision and referenced log paths
 
-## 5) 판정 기준
-- 위반(`violations`) 0건
-- `codexPathRatio`가 목표 이상(기본 0.7 이상)
-- `codexReplyMissingThreadId` 0건
-- `fallbackWithoutReason` 0건
+## 5) Decision Criteria
+- `violations` must be `0`
+- `codexPathRatio` must meet target (`>= 0.7` by default)
+- `codexReplyMissingThreadId` must be `0`
+- `fallbackWithoutReason` must be `0`
 
-## 6) 운영 메모
-- Unity/Backend 로그가 비어 있으면 지표는 실패로 기록될 수 있다.
-- 엄격 모드는 `DREAM_EVIDENCE_STRICT=1`로 활성화한다.
-- Unity/Backend 증거 엔트리 필수화는 아래 변수로 제어한다.
+## 6) Operations Notes
+- Empty Unity or Backend logs can force metric failures by design.
+- Enable strict mode with `DREAM_EVIDENCE_STRICT=1`.
+- Enforce Evidence entry presence with:
   - `DREAM_REQUIRE_UNITY_EVIDENCE=1`
   - `DREAM_REQUIRE_BACKEND_EVIDENCE=1`
-- 부하 안정화 점검 시 `mailbox.skippedBeforeBroker`를 함께 기록하면 취소/마감 요청의 불필요 브로커 실행 감소 여부를 추적할 수 있다.
+- During load Hardening runs, monitor `mailbox.skippedBeforeBroker` to track reduced unnecessary broker execution for canceled/deadline-expired jobs.
 
-## 7) 추세 임계치와 실패 대응
-- 기본 임계치(`scripts/unity/run_stability_trend.sh`):
+## 7) Stability Thresholds and Failure Response
+- Default thresholds in `scripts/unity/run_stability_trend.sh`:
   - `runCount >= 3`
   - `codexPathRatio >= 0.7`
   - `cancelledRate <= 0.35`
   - `deadlineExceededRate <= 0.25`
-- 결과 파일:
+- Output file:
   - `logs/stability-trend.json`
-- 실패 시 대응 순서:
-  1. `summary.pass.runCount=false`이면 run 입력 세트를 3회 이상으로 확장한다.
-  2. `codexPathRatio` 실패면 backend 로그에서 `transport=fallback` 급증 사유(`fallbackReasonDistribution`)를 우선 분류한다.
-  3. `cancelledRate`/`deadlineExceededRate` 실패면 run별 `mailboxMax`와 `globalQueued` 피크를 확인하고 deadline/Global Cap 조합을 재조정한다.
-  4. `droppedResponses` 증가 시 클라이언트 측 timeout/취소 정책과 backend deadline 정렬 여부를 점검한다.
+- Failure response order:
+  1. If `summary.pass.runCount=false`, expand the run set to at least three runs.
+  2. If `codexPathRatio` fails, classify top fallback spikes from backend `fallbackReasonDistribution`.
+  3. If `cancelledRate` or `deadlineExceededRate` fails, inspect per-run `mailboxMax` and `globalQueued` peaks, then retune deadline and Global Cap together.
+  4. If `droppedResponses` increases, align Unity timeout/cancel policy with backend deadline behavior.

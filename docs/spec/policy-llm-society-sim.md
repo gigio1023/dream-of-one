@@ -8,7 +8,7 @@ It is retained only for historical context.
 
 Use these active documents:
 - `project.md` (product and architecture definition)
-- `plan.md` (master execution plan)
+- Linear issues (execution sequencing Source of Truth, governed by `project.md`)
 - `docs/design/game-design.md` (design bible)
 - `docs/design/dream-laws.md` (rule content pack)
 - `docs/design/cover-tests.md` (scenario content pack)

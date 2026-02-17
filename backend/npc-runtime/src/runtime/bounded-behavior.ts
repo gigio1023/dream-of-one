@@ -1,5 +1,6 @@
 import {
   PLAYER_SPEECH_ACTS,
+  SOCIAL_LOOP_STAGES,
   type ActionType,
   type DecisionEnvelope,
   type MineflayerCommandType,
@@ -14,10 +15,7 @@ import { mapIntentToMineflayerCommand } from "./decision-bridge.js";
 const CHAT_MAX_LENGTH = 256;
 const SIGN_TEXT_MAX_LENGTH = 800;
 const SPEECH_ACT_SET = new Set<string>(PLAYER_SPEECH_ACTS);
-
-const VERDICT_TOKENS = ["verdict", "detained", "cleared", "lucid_identified", "case_closed"] as const;
-const INTAKE_TOKENS = ["intake", "inquest", "dossier", "report_desk", "interrogation"] as const;
-const REPORT_TOKENS = ["report", "statement", "complaint", "ticket", "memo"] as const;
+const SOCIAL_LOOP_STAGE_SET = new Set<string>(SOCIAL_LOOP_STAGES);
 
 const ALLOWED_COMMANDS_BY_ACTION: Record<ActionType, readonly MineflayerCommandType[]> = {
   Move: ["noop"],
@@ -32,7 +30,7 @@ const ALLOWED_COMMANDS_BY_ACTION: Record<ActionType, readonly MineflayerCommandT
 
 export interface SocialLoopObservation {
   stage: SocialLoopStage;
-  trigger: "event" | "landmark" | "default";
+  trigger: "context" | "default";
   landmarkId: string;
   nearbyNpcCount: number;
   matchedEvents: string[];
@@ -45,10 +43,6 @@ export interface BoundedBehaviorEvaluation {
   appliedFallback: boolean;
 }
 
-function normalizeEventToken(value: string): string {
-  return value.trim().toLowerCase().replace(/[^a-z0-9_]+/g, "_");
-}
-
 function asRecord(value: unknown): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return {};
@@ -56,49 +50,37 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
+function normalizeSocialLoopStage(value: string): SocialLoopStage | undefined {
+  const normalized = value.trim().toLowerCase();
+  if (!SOCIAL_LOOP_STAGE_SET.has(normalized)) {
+    return undefined;
+  }
+  return normalized as SocialLoopStage;
+}
+
+function resolveSocialLoopStageFromRecord(record: Record<string, unknown>): SocialLoopStage | undefined {
+  const keys = ["socialLoopStage", "social_loop_stage", "stage", "phase"] as const;
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value !== "string" || value.trim().length === 0) {
+      continue;
+    }
+    const stage = normalizeSocialLoopStage(value);
+    if (stage) {
+      return stage;
+    }
+  }
+  return undefined;
+}
+
 function toSocialLoopObservation(packet: PerceptionPacket): SocialLoopObservation {
-  const normalizedEvents = packet.recentEvents.map(normalizeEventToken);
-  const hasToken = (tokens: readonly string[]) => {
-    const matched = normalizedEvents.filter(eventName => tokens.some(token => eventName.includes(token)));
-    return matched;
-  };
-
-  const verdictMatches = hasToken(VERDICT_TOKENS);
-  if (verdictMatches.length > 0) {
-    return {
-      stage: "verdict",
-      trigger: "event",
-      landmarkId: packet.landmarkId,
-      nearbyNpcCount: countNearbyNpcs(packet.nearbyActors),
-      matchedEvents: verdictMatches,
-    };
-  }
-
-  const intakeMatches = hasToken(INTAKE_TOKENS);
-  if (packet.landmarkId === "Station" || intakeMatches.length > 0) {
-    return {
-      stage: "intake",
-      trigger: intakeMatches.length > 0 ? "event" : "landmark",
-      landmarkId: packet.landmarkId,
-      nearbyNpcCount: countNearbyNpcs(packet.nearbyActors),
-      matchedEvents: intakeMatches,
-    };
-  }
-
-  const reportMatches = hasToken(REPORT_TOKENS);
-  if (reportMatches.length > 0) {
-    return {
-      stage: "report",
-      trigger: "event",
-      landmarkId: packet.landmarkId,
-      nearbyNpcCount: countNearbyNpcs(packet.nearbyActors),
-      matchedEvents: reportMatches,
-    };
-  }
+  const stageHint =
+    resolveSocialLoopStageFromRecord(asRecord(packet.playerSignals))
+    ?? resolveSocialLoopStageFromRecord(asRecord(packet.organizationContext));
 
   return {
-    stage: "ambient",
-    trigger: "default",
+    stage: stageHint ?? "ambient",
+    trigger: stageHint ? "context" : "default",
     landmarkId: packet.landmarkId,
     nearbyNpcCount: countNearbyNpcs(packet.nearbyActors),
     matchedEvents: [],
@@ -206,22 +188,6 @@ export function enforceBoundedBehavior(packet: PerceptionPacket, decision: Decis
         socialLoop,
         "policy_command_not_allowed",
         `${decision.intent.actionType} cannot execute ${command.type}`,
-        playerSpeechAct,
-      ),
-      socialLoop,
-      commandType: command.type,
-      appliedFallback: true,
-    };
-  }
-
-  if (socialLoop.stage === "intake" && playerSpeechAct === "SA_BREAK") {
-    return {
-      decision: toFallbackDecision(
-        packet,
-        decision,
-        socialLoop,
-        "policy_station_intake_requires_procedural_speech",
-        "SA_BREAK is rejected during intake stage",
         playerSpeechAct,
       ),
       socialLoop,

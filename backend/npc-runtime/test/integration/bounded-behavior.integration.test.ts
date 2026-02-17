@@ -36,16 +36,34 @@ function buildDecision(overrides: Partial<DecisionEnvelope> = {}): DecisionEnvel
   };
 }
 
-test("bounded behavior keeps valid decision and annotates social loop stage", () => {
+test("bounded behavior keeps valid decision and defaults social loop stage to ambient", () => {
   const evaluated = enforceBoundedBehavior(buildPacket(), buildDecision());
 
   assert.equal(evaluated.appliedFallback, false);
-  assert.equal(evaluated.socialLoop.stage, "report");
+  assert.equal(evaluated.socialLoop.stage, "ambient");
+  assert.equal(evaluated.socialLoop.trigger, "default");
   assert.equal(evaluated.socialLoop.nearbyNpcCount, 1);
   assert.equal(evaluated.commandType, "chat");
-  assert.equal(evaluated.decision.meta.socialLoopStage, "report");
+  assert.equal(evaluated.decision.meta.socialLoopStage, "ambient");
   assert.equal(evaluated.decision.meta.playerSpeechAct, "SA_COMPLY");
   assert.equal(evaluated.decision.meta.warningTier, "reference");
+});
+
+test("bounded behavior uses explicit context stage hints without scripted stage order", () => {
+  const evaluated = enforceBoundedBehavior(
+    buildPacket({
+      organizationContext: {
+        org: "Store",
+        socialLoopStage: "verdict",
+      },
+    }),
+    buildDecision(),
+  );
+
+  assert.equal(evaluated.appliedFallback, false);
+  assert.equal(evaluated.socialLoop.stage, "verdict");
+  assert.equal(evaluated.socialLoop.trigger, "context");
+  assert.equal(evaluated.decision.meta.socialLoopStage, "verdict");
 });
 
 test("bounded behavior rejects invalid player speech act deterministically", () => {
@@ -79,18 +97,21 @@ test("bounded behavior rejects disallowed command for action type", () => {
   assert.equal(evaluated.decision.meta.reasonCategory, "policy");
 });
 
-test("bounded behavior rejects SA_BREAK during intake stage", () => {
+test("bounded behavior does not enforce scripted intake speech rejection", () => {
   const evaluated = enforceBoundedBehavior(
     buildPacket({
       landmarkId: "Station",
       recentEvents: ["intake_started"],
-      playerSignals: { speechAct: "SA_BREAK" },
+      playerSignals: {
+        speechAct: "SA_BREAK",
+        socialLoopStage: "intake",
+      },
     }),
     buildDecision(),
   );
 
-  assert.equal(evaluated.appliedFallback, true);
+  assert.equal(evaluated.appliedFallback, false);
   assert.equal(evaluated.socialLoop.stage, "intake");
-  assert.equal(evaluated.decision.meta.reason, "policy_station_intake_requires_procedural_speech");
-  assert.equal(evaluated.decision.meta.reasonCategory, "policy");
+  assert.equal(evaluated.decision.meta.socialLoopStage, "intake");
+  assert.equal(evaluated.decision.meta.playerSpeechAct, "SA_BREAK");
 });

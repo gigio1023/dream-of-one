@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 LOG_DIR="$ROOT_DIR/logs"
 mkdir -p "$LOG_DIR"
 
@@ -11,7 +11,7 @@ CODEX_RATIO_MIN="${STABILITY_TREND_CODEX_RATIO_MIN:-0.7}"
 CANCELLED_RATE_MAX="${STABILITY_TREND_CANCELLED_RATE_MAX:-0.35}"
 DEADLINE_EXCEEDED_RATE_MAX="${STABILITY_TREND_DEADLINE_RATE_MAX:-0.25}"
 
-node "$ROOT_DIR/scripts/unity/collect_stability_trend.mjs" \
+node "$ROOT_DIR/deprecated/unity/scripts/collect_stability_trend.mjs" \
   --run "rc-dre-149" \
   --metrics "$LOG_DIR/rc/rc-dre-149/regression-metrics.json" \
   --evidence "$LOG_DIR/rc/rc-dre-149/runtime-evidence-summary.json" \

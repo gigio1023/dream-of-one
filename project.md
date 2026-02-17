@@ -48,7 +48,11 @@ Platform/framework detail is supporting.
 ### 4.2 Runtime model (authoritative)
 - NPC logic model: one logical bot state per `sessionId+npcId` (not one always-running OS process per NPC).
 - Continuity model: Codex session continuity via `codex exec` -> `codex exec resume`, synchronized with Mineflayer lifecycle events.
-- Memory model: bot-scoped workspace data (`persona/policy/memory/summary/thread` artifacts) is durable and queryable.
+- Memory model: bot-scoped Actor Workspace data is durable and queryable, with game-specific file layering:
+  - `MEMORY.md` (Long-term Facts),
+  - `memory/YYYY-MM-DD.md` (append-only episodic logs),
+  - runtime JSON artifacts (`persona/policy/memory/summary/thread`) for deterministic transport state.
+- Memory policy is simulation-oriented: preserve natural NPC continuity and durable player suspicion signals, without enforcing a fixed internal thought pipeline.
 - Execution model: bounded Codex worker pool + per-NPC action queue with one in-flight action to prevent unbounded child-process fan-out.
 - Failure model: timeout/tool/parse errors fall back deterministically without freezing the simulation.
 

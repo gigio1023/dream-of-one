@@ -68,6 +68,13 @@ The player does not need free-form command systems in v0.1.
 - trust/suspicion score toward known actors
 - recent cooperation or conflict traces
 
+## 6.4 Memory persistence policy
+- Per-NPC memory is file-backed in the Actor Workspace (`data/workspaces/<sessionId>/<npcId>/`).
+- Long-term Facts are persisted in `MEMORY.md`.
+- Daily episodic logs are append-only in `memory/YYYY-MM-DD.md`.
+- Promotion policy favors durable social facts, especially player suspicion trends.
+- Runtime integration is implemented in `DefaultCodexBroker.recordWorkspace(...)` with `FileActorWorkspaceStore.appendNpcMemory(...)`.
+
 ## 7) Organization behavior specifications
 ## Store
 - Prioritizes order and procedural phrasing.
@@ -143,7 +150,7 @@ Every major outcome should include:
 A candidate build is valid if:
 - NPC society runs autonomously for 5 minutes.
 - player loop can be completed in 10-12 minutes.
-- at least one report/intake/verdict path appears in normal play.
+- at least one coherent social escalation trajectory appears in normal play.
 - failure/survival reason is readable.
 - LLM-off fallback run remains playable.
 
@@ -163,11 +170,11 @@ A candidate build is valid if:
 2. Capture per-run Evidence from:
    - `/v1/telemetry/evidence-pack`
    - `/v1/telemetry/events?limit=200`
-   - report/intake/verdict outputs shown to the player
+   - social process outputs shown to the player
 3. Compare trajectory markers across runs:
    - witness/source composition in report artifacts,
-   - intake rationale wording and Reason Category distribution,
-   - verdict path (`survival`, `escalation`, `lucid identified`) and timing.
+   - rationale wording and Reason Category distribution,
+   - outcome path (`survival`, `escalation`, `lucid identified`) and timing.
 4. Confirm bounded rules remain unchanged:
    - NPC action whitelist from Section 4,
    - player speech acts from Section 5.
@@ -175,7 +182,7 @@ A candidate build is valid if:
 
 ### Acceptance Criteria
 - Three-run set contains at least one meaningful trajectory delta in social process outputs.
-- Every run preserves readable report -> intake -> verdict causality.
+- Every run preserves readable cause-effect social trajectory in player-visible outputs.
 - No run violates the bounded behavior Specification.
 
 ### Validation Criteria

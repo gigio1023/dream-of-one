@@ -286,7 +286,7 @@ For any active incident/case, the player should be able to answer these three qu
 
 ## Fallback causality fields (runtime trace)
 
-For report -> intake -> verdict readability, decision traces should expose:
+For social trajectory readability, decision traces should expose:
 - `transport`
 - `usedFallback`
 - `reason`

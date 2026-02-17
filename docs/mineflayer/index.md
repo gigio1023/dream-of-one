@@ -80,4 +80,4 @@ mineflayer/
 - Migration execution plan:
   - `plan.md`
 - Architecture visualization:
-  - `viz.md`
+  - `README.md` (Mermaid sections: `Unified Runtime and Social Escalation Loop`, `Runtime Path Sequence`)

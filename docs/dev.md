@@ -1,163 +1,161 @@
 # Developer Guide
 
-Revision date: 2026-02-14
+Revision date: 2026-02-17
 
-This guide is the practical “how to run / how to verify” reference for the Unity project in this repo.
+This guide is the practical run/verify reference for the current Mineflayer + TypeScript Runtime Path.
 
 Terminology rule: use canonical terms from `terminology.md` for docs and user-facing runtime text.
 
 ---
 
-## Project Root / Scene Authority
+## Runtime Authority
 
-- Unity project root (deprecated path): `deprecated/unity/draem-of-one/`
-- Playable prototype scene: `Assets/Scenes/Prototype.unity`
-- Render pipeline: URP (`Assets/Settings/UniversalRP.asset` → `Assets/Settings/UniversalRenderer.asset`)
+Primary Runtime Path:
+- Backend runtime: `backend/npc-runtime/`
+- Minecraft runtime client: Mineflayer Bot
+- Decision interface: `POST /v1/npc/decision`
+- Evidence interface: `/v1/telemetry/*`, `/health/queue`
+
+Legacy Runtime Path (deprecated, rollback only):
+- Unity project root: `deprecated/unity/draem-of-one/`
+- Unity scripts: `deprecated/unity/scripts/`
 
 ---
 
-## Quick Start (Local)
+## Quick Start (Mineflayer Runtime Path)
+
+### 1) Install and baseline verification
+
+```bash
+npm install --prefix backend/npc-runtime
+npm run check --prefix backend/npc-runtime
+```
+
+### 2) Start runtime
+
+```bash
+NPC_RUNTIME_MINEFLAYER_ENABLED=1 \
+NPC_RUNTIME_TELEMETRY_ENABLED=1 \
+NPC_RUNTIME_MINEFLAYER_HOST=127.0.0.1 \
+NPC_RUNTIME_MINEFLAYER_PORT=25565 \
+NPC_RUNTIME_MINEFLAYER_USERNAME=npc-runtime-bot \
+npm run dev --prefix backend/npc-runtime
+```
+
+### 3) Probe health and telemetry
+
+```bash
+curl -s http://127.0.0.1:8787/health | jq .
+curl -s http://127.0.0.1:8787/health/ready | jq .
+curl -s http://127.0.0.1:8787/health/queue | jq .
+curl -s "http://127.0.0.1:8787/v1/telemetry/events?limit=20" | jq .
+curl -s http://127.0.0.1:8787/v1/telemetry/evidence-pack | jq .
+```
+
+---
+
+## Runtime Configuration (selected)
+
+From `backend/npc-runtime/src/config.ts`:
+
+- Runtime toggles:
+  - `NPC_RUNTIME_MINEFLAYER_ENABLED`
+  - `NPC_RUNTIME_TELEMETRY_ENABLED`
+- Mineflayer connection:
+  - `NPC_RUNTIME_MINEFLAYER_HOST`
+  - `NPC_RUNTIME_MINEFLAYER_PORT`
+  - `NPC_RUNTIME_MINEFLAYER_USERNAME`
+  - `NPC_RUNTIME_MINEFLAYER_PASSWORD`
+  - `NPC_RUNTIME_MINEFLAYER_AUTH` (`offline|microsoft|mojang`)
+  - `NPC_RUNTIME_MINEFLAYER_VERSION`
+  - `NPC_RUNTIME_MINEFLAYER_LIFECYCLE_TIMEOUT_MS`
+- Scheduler and deadlines:
+  - `NPC_RUNTIME_MAX_BROKER_INFLIGHT`
+  - `NPC_RUNTIME_SCHEDULER_MAX_PENDING_PER_BOT`
+  - `NPC_RUNTIME_SCHEDULER_MAX_PENDING_GLOBAL`
+  - `NPC_RUNTIME_SCHEDULER_SNAPSHOT_INTERVAL_MS`
+  - `NPC_RUNTIME_DECISION_DEADLINE_MS`
+- Evidence output:
+  - `NPC_RUNTIME_TELEMETRY_MAX_RECORDS`
+  - `NPC_RUNTIME_EVIDENCE_OUTPUT_DIR`
+
+---
+
+## Validation and Evidence
+
+### Integration checks
+
+```bash
+npm run check --prefix backend/npc-runtime
+```
+
+### Gate H automation (Mineflayer-only)
+
+```bash
+npm run ws8:release-gate:backend --prefix backend/npc-runtime -- --run-id rc-ws8-run-a --strict
+npm run ws8:events:snapshot --prefix backend/npc-runtime -- --out data/evidence/ws8/gate-h/run-a-events.json
+```
+
+Repeat for `run-b` and `run-c`, then:
+
+```bash
+npm run ws8:trajectory:verify --prefix backend/npc-runtime -- \
+  --evidence data/evidence/ws8/gate-h/run-a-evidence-pack.json \
+  --evidence data/evidence/ws8/gate-h/run-b-evidence-pack.json \
+  --evidence data/evidence/ws8/gate-h/run-c-evidence-pack.json \
+  --out data/evidence/ws8/gate-h/trajectory-diversity.json --strict
+```
+
+### Key script entrypoints
+
+- `npm run ws8:evidence:backend --prefix backend/npc-runtime`
+- `npm run ws8:metrics:backend --prefix backend/npc-runtime`
+- `npm run ws8:rc:backend --prefix backend/npc-runtime`
+- `npm run ws8:rollback-drill --prefix backend/npc-runtime`
+
+### Key outputs
+
+- `logs/runtime-evidence-summary-backend.json`
+- `logs/regression-metrics-backend.json`
+- `logs/rc/<run-id>/manifest.json`
+- `data/evidence/ws8/gate-h/*`
+
+---
+
+## Legacy Unity Path (deprecated)
+
+Use this section only for rollback drills, archive integrity checks, or historical comparison.
+
+### Legacy quick start
 
 1. Open Unity Hub and add `deprecated/unity/draem-of-one/`.
 2. Open `Assets/Scenes/Prototype.unity`.
 3. Press Play.
 
----
+### Legacy verification scripts
 
-## Authoring Rules (Safety)
-
-### Prefer Unity Editor / AssetDatabase authoring (Unity MCP-first)
-
-Unity assets are not “just files”. They are serialized objects tied to `.meta` GUIDs and importer state.
-
-When creating or modifying:
-- `.unity`, `.prefab`, `.asset`, `.meta`
-
-Prefer Editor-driven creation:
-- Unity menus / CreateAssetMenu flows, or
-- Editor scripts that call `AssetDatabase.CreateAsset`, `PrefabUtility.SaveAsPrefabAsset`, etc.
-
-Avoid hand-editing these files unless explicitly approved (high risk of GUID/reference/import corruption).
-
-### If Unity MCP is unavailable
-
-If MCP is not connected, stop scene/asset authoring work and ask the user to:
-- open Unity,
-- connect MCP,
-- and re-run the required menu tools below.
-
----
-
-## Required Menu Tools (Use These)
-
-World build and verification:
-- `Tools > DreamOfOne > Apply Simple Verification Mode` (recommended for rapid 4-landmark validation loops)
-- `Tools > DreamOfOne > Run Diagnostics` (repeat until the console is clean)
-
-Manual equivalent for the same simple profile:
-- `Tools > DreamOfOne > Build City (POLYGON, Simple Verification)`
-- `Tools > DreamOfOne > Seed World Definition (Simple Verification)`
-- `Tools > DreamOfOne > Rebuild World From Data`
-
-Optional baseline tooling:
-- `Tools > DreamOfOne > Seed World Definition (Default)` (only if a full default baseline is required)
-
----
-
-## Playtest Contract (What “works” means)
-
-Minimum Complete Simulation Slice (MCSS) target:
-- 10–12 minute session
-- Player can visit: Store / Studio / Park / Station
-- Meaningful events, social reactions, artifacts, and at least one procedural closure
-- No hard locks; session ends cleanly
-- “LLM off” mode remains functional (deterministic fallback)
-
-The high-level definition and roadmap live in `project.md`.
-Actionable work items (issues/status/PR links) live in Linear.
-Beads (`bd`) is optional and used internally by Codex CLI for dependency tracking while implementing.
-
----
-
-## LLM Setup (Optional)
-
-The project supports running without an LLM (deterministic fallback). When enabled, the LLM is **styling-only**:
-- It can paraphrase or add tone to surface text.
-- It **cannot** decide truth transitions, evidence creation, or verdicts.
-- Deterministic systems always own event truth and scoring.
-
-OpenAI:
-- Set `OPENAI_API_KEY` in your environment.
-- Configure `LLMClient` provider/model enums in the scene.
-
-Local endpoint (Ollama, OpenAI-compatible):
-- Start server: `ollama serve`
-- Pull model: `ollama pull qwen3:4b-instruct`
-- Configure `LLMClient` Provider = `LocalEndpoint`
-- LocalEndpointMode = `OpenAIChatCompletions`
-- Endpoint: `http://localhost:11434/v1/chat/completions`
-- LocalModel = `Qwen3_4B_Instruct`
-
-Local endpoint (utterance proxy):
-- Configure `LLMClient` Provider = `LocalEndpoint`
-- LocalEndpointMode = `UtteranceProxy`
-- Endpoint: `http://localhost:11434/utterance` (or your custom proxy)
-
----
-
-## Headless Verification (Local / CI)
-
-If you run Unity in batchmode/headless, you typically need:
-- a Unity editor binary available in your environment,
-- a clean `Library/` regeneration when switching OS/editor versions.
-
-The recommended entry points are:
-- editor preflight/diagnostics (compile + scene/resource checks),
-- an optional short playmode smoke run.
-
-Use the repo scripts:
 - `deprecated/unity/scripts/run_editor_diagnostics.sh`
 - `deprecated/unity/scripts/run_playmode_smoke.sh`
 - `deprecated/unity/scripts/run_all_checks.sh`
+- `deprecated/unity/scripts/run_stability_trend.sh`
 
-Runtime evidence tooling:
-- `deprecated/unity/scripts/analyze_runtime_evidence.mjs` (validates required Evidence fields and transport continuity)
-- `deprecated/unity/scripts/collect_regression_metrics.mjs` (builds Regression Monitoring metrics)
-- `deprecated/unity/scripts/package_release_candidate.mjs` (packages the Evidence Pack for Release Candidate decisions)
-- `deprecated/unity/scripts/collect_stability_trend.mjs` (aggregates multi-run stability trends)
-- `deprecated/unity/scripts/run_stability_trend.sh` (runs the default 3-run stability profile)
+### Unity authoring safety
 
-Mock runtime option for deterministic validation:
-- `backend/npc-runtime/scripts/mock-codex-tool-runner.mjs`
-- Example:
-  - `CODEX_TOOL_COMMAND=node`
-  - `CODEX_TOOL_ARGS='scripts/mock-codex-tool-runner.mjs'`
-  - `MOCK_CODEX_MODE=normal|parse-failure|timeout|tool-failure`
+- Prefer Unity Editor/AssetDatabase authoring for `.unity`, `.prefab`, `.asset`, `.meta`.
+- Avoid hand-editing serialized Unity files unless explicitly approved.
+- If Unity MCP is unavailable, stop Unity authoring and reconnect MCP first.
 
-Real runner acceptance option:
-- use default repo runner (`scripts/codex-tool-runner.mjs`) without mock env overrides
-- example service env:
-  - `NPC_RUNTIME_DECISION_DEADLINE_MS=30000`
-  - `CODEX_TOOL_TIMEOUT_MS=30000`
+---
 
-Generated outputs:
-- `logs/runtime-evidence-summary.json`
-- `logs/regression-metrics.json`
-- `logs/rc/<run-id>/manifest.json`
-- `logs/unity-live-play.log` (live metadata lines extracted from Unity Editor.log)
-- `logs/npc-runtime-live-evidence.log` (backend decision response sample logs for regression metrics)
-  - Note: client-aborted requests are recorded as `npc_decision_response_dropped` and excluded from response Evidence aggregation
+## Work management (Linear SSOT + Beads graph)
 
-## Work management (Linear SSOT + Beads execution graph)
+This repo uses **Linear issues as the single source of truth** for work status.
 
-This repo uses **Linear issues as the single source of truth** for work items and status.
+Beads (`bd`) is the local execution graph for detailed dependency tracking:
+- break down a Linear issue into atomic tasks and dependencies,
+- track local WIP sequencing,
+- keep local execution context stable across sessions.
 
-Beads (`bd`) is an optional, internal tool used by Codex CLI to:
-- break down a Linear issue into an execution graph (epic/tasks/dependencies),
-- track local WIP (especially for Unity MCP mutex work),
-- keep local reasoning state stable across sessions.
-
-Beads data lives in `.beads/` (should be tracked); local runtime artifacts are ignored by `.beads/.gitignore`.
-
+References:
 - Agent runbook: [`docs/agent/runbook.md`](agent/runbook.md)
-- Agent skills (repo-local): [`docs/agent-skills.md`](agent-skills.md)
+- Agent skills: [`docs/agent-skills.md`](agent-skills.md)

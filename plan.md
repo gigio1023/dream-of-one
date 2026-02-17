@@ -41,6 +41,16 @@
 - Existing backend already enforces key guardrails: Schema validation, deterministic Fallback Path, session continuity tracking (`sessionId+npcId` + `threadId`), one in-flight action per bot (Single-flight), and global concurrency limit (Global Cap).
 - Mineflayer documentation and source analysis are now available as canonical input under `docs/mineflayer/**`.
 - Existing Unity runtime remains valuable as historical Evidence baseline and rollback safety path.
+- NPC memory design is game-oriented (simulation continuity), not assistant-oriented (user secretary).
+
+## Game Memory System Baseline
+- Specification authority: `memory.md`.
+- Storage scope: per-NPC Actor Workspace (`data/workspaces/<sessionId>/<npcId>/`).
+- Layer model:
+  - `MEMORY.md` for Long-term Facts,
+  - `memory/YYYY-MM-DD.md` for append-only episodic logs.
+- Behavior goal: preserve natural NPC action continuity while making player suspicion accumulation durable and traceable.
+- Runtime guardrail: memory persistence does not prescribe a fixed cognition sequence and does not bypass Schema/Fallback safety.
 
 ## Source Baseline and Authority
 
@@ -221,7 +231,7 @@
 ### Tasks
 - P4-1: Map existing bounded NPC action whitelist into Mineflayer executable action set.
 - P4-2: Map bounded player speech acts into chat/pattern pathways.
-- P4-3: Recreate report -> intake -> verdict causality flow on event model with nearby-NPC context evidence.
+- P4-3: Preserve emergent social trajectory behavior without enforcing fixed stage order in policy rules.
 - P4-4: Preserve Dream Law and Cover Test trigger surfaces using text-first interactions.
 - P4-5: Define non-goals to prevent gameplay expansion during migration.
 
@@ -381,8 +391,8 @@
     - added `deprecated/unity/README.md` and updated docs path references.
   - implemented WS4 bounded NPC behavior policy in `backend/npc-runtime`:
     - `runtime/bounded-behavior.ts` for action/command whitelist enforcement;
-    - report/intake/verdict social-loop stage mapping from event + landmark context;
-    - Station intake procedural speech guard (`SA_BREAK` rejection) with deterministic Reason Code fallback.
+    - context-hinted social-loop stage annotation without event-sequence hardcoding;
+    - removed fixed-stage speech guard so NPC behavior remains simulation-driven within bounded safety rules.
   - implemented WS5 Mineflayer-native telemetry and Evidence Pack pipeline:
     - `runtime/telemetry.ts` for event/decision/scheduler record collection and summarization;
     - HTTP endpoints: `/v1/telemetry/events`, `/v1/telemetry/evidence-pack`, `/v1/telemetry/evidence-pack/export`;

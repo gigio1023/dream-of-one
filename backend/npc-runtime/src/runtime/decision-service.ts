@@ -3,6 +3,7 @@ import type { CodexBroker } from "../broker/codex-broker.js";
 import { createFallbackIntent } from "./fallback.js";
 import { parsePerceptionPacket, SchemaValidationError } from "./schema.js";
 import { annotateDecisionMeta, FALLBACK_REASON_CODES, normalizeReasonCode } from "../policy/reason-taxonomy.js";
+import { MultiBotScheduler, type SchedulerSnapshot } from "./multi-bot-scheduler.js";
 
 interface Deferred<T> {
   resolve: (value: T) => void;
@@ -40,10 +41,18 @@ export interface DecisionMailboxMetrics {
   globalCap: number;
   globalInFlight: number;
   globalQueued: number;
+  backpressureRejected: number;
+  actorQueueSaturated: number;
+  globalQueueSaturated: number;
+  perBotPendingLimit: number;
+  globalPendingLimit: number;
+  currentGlobalPending: number;
 }
 
 export interface DecisionServiceOptions {
   maxBrokerInFlight?: number;
+  maxPendingPerBot?: number;
+  maxPendingGlobal?: number;
 }
 
 export interface DecisionRequestOptions {
@@ -108,6 +117,7 @@ class GlobalDecisionLimiter {
 export class DecisionService {
   private readonly mailboxes = new Map<string, MailboxState>();
   private readonly limiter: GlobalDecisionLimiter;
+  private readonly scheduler: MultiBotScheduler;
   private readonly metrics: DecisionMailboxMetrics = {
     queued: 0,
     inflight: 0,
@@ -119,6 +129,12 @@ export class DecisionService {
     globalCap: 1,
     globalInFlight: 0,
     globalQueued: 0,
+    backpressureRejected: 0,
+    actorQueueSaturated: 0,
+    globalQueueSaturated: 0,
+    perBotPendingLimit: 0,
+    globalPendingLimit: 0,
+    currentGlobalPending: 0,
   };
 
   constructor(
@@ -126,12 +142,31 @@ export class DecisionService {
     options: DecisionServiceOptions = {},
   ) {
     this.limiter = new GlobalDecisionLimiter(options.maxBrokerInFlight ?? 4);
+    this.scheduler = new MultiBotScheduler({
+      maxPendingPerBot: options.maxPendingPerBot,
+      maxPendingGlobal: options.maxPendingGlobal,
+    });
+    const limits = this.scheduler.getLimits();
+    this.metrics.perBotPendingLimit = limits.maxPendingPerBot;
+    this.metrics.globalPendingLimit = limits.maxPendingGlobal;
     this.refreshGlobalLimiterMetrics();
   }
 
   getMailboxMetrics(): DecisionMailboxMetrics {
     this.refreshGlobalLimiterMetrics();
     return { ...this.metrics };
+  }
+
+  getSchedulerSnapshot(maxActors = 20): SchedulerSnapshot {
+    const limiterSnapshot = this.limiter.snapshot();
+    const actors = this.collectActorSnapshots(maxActors);
+    return this.scheduler.snapshot({
+      globalPending: this.resolveGlobalPending(),
+      globalQueued: limiterSnapshot.queued,
+      globalInFlight: limiterSnapshot.inFlight,
+      globalCap: limiterSnapshot.cap,
+      actors,
+    });
   }
 
   async decide(payload: unknown, options: DecisionRequestOptions = {}): Promise<DecisionEnvelope> {
@@ -161,6 +196,32 @@ export class DecisionService {
     const mailbox = this.mailboxes.get(actorKey) ?? { running: false };
     this.mailboxes.set(actorKey, mailbox);
 
+    const actorPending = this.resolveActorPending(mailbox);
+    const globalPending = this.resolveGlobalPending();
+    const admission = this.scheduler.evaluateAdmission({
+      actorKey,
+      actorPending,
+      globalPending,
+    });
+    if (!admission.allowed) {
+      this.metrics.backpressureRejected += 1;
+      if (admission.reasonCode === "runtime_actor_queue_saturated") {
+        this.metrics.actorQueueSaturated += 1;
+      }
+      if (admission.reasonCode === "runtime_global_queue_saturated") {
+        this.metrics.globalQueueSaturated += 1;
+      }
+      this.refreshGlobalLimiterMetrics();
+      return annotateDecisionMeta({
+        intent: createFallbackIntent(packet, admission.reasonCode ?? "runtime_global_queue_saturated"),
+        meta: {
+          usedFallback: true,
+          reason: admission.reasonCode ?? "runtime_global_queue_saturated",
+          transport: "fallback",
+        },
+      });
+    }
+
     return await new Promise<DecisionEnvelope>((resolve, reject) => {
       const waiter: MailboxWaiter = {
         packet,
@@ -188,6 +249,7 @@ export class DecisionService {
         mailbox.running = true;
         this.bindWaiterToJob(actorKey, mailbox, job, waiter);
         void this.runMailbox(actorKey, mailbox, job);
+        this.refreshGlobalLimiterMetrics();
         return;
       }
 
@@ -196,6 +258,7 @@ export class DecisionService {
         mailbox.pending = job;
         this.bindWaiterToJob(actorKey, mailbox, job, waiter);
         this.metrics.queued += 1;
+        this.refreshGlobalLimiterMetrics();
         return;
       }
 
@@ -204,6 +267,7 @@ export class DecisionService {
       this.bindWaiterToJob(actorKey, mailbox, mailbox.pending, waiter);
       this.metrics.coalesced += 1;
       this.metrics.dropped += 1;
+      this.refreshGlobalLimiterMetrics();
     });
   }
 
@@ -289,6 +353,7 @@ export class DecisionService {
       if (!mailbox.pending) {
         this.mailboxes.delete(actorKey);
       }
+      this.refreshGlobalLimiterMetrics();
     }
   }
 
@@ -324,6 +389,7 @@ export class DecisionService {
       if (!mailbox.running && !mailbox.pending) {
         this.mailboxes.delete(actorKey);
       }
+      this.refreshGlobalLimiterMetrics();
     };
 
     waiter.detachAbort = () => {
@@ -421,5 +487,35 @@ export class DecisionService {
     this.metrics.globalCap = snapshot.cap;
     this.metrics.globalInFlight = snapshot.inFlight;
     this.metrics.globalQueued = snapshot.queued;
+    this.metrics.currentGlobalPending = this.resolveGlobalPending();
+  }
+
+  private resolveGlobalPending(): number {
+    let total = 0;
+    for (const mailbox of this.mailboxes.values()) {
+      total += this.resolveActorPending(mailbox);
+    }
+    return total;
+  }
+
+  private resolveActorPending(mailbox: MailboxState): number {
+    const running = mailbox.running ? 1 : 0;
+    const pendingWaiters = mailbox.pending
+      ? mailbox.pending.waiters.reduce((count, waiter) => count + (waiter.active ? 1 : 0), 0)
+      : 0;
+    return running + pendingWaiters;
+  }
+
+  private collectActorSnapshots(maxActors: number): Array<{ actorKey: string; pending: number }> {
+    const normalizedMax = Number.isFinite(maxActors) ? Math.max(1, Math.floor(maxActors)) : 20;
+    const snapshots: Array<{ actorKey: string; pending: number }> = [];
+    for (const [actorKey, mailbox] of this.mailboxes.entries()) {
+      snapshots.push({
+        actorKey,
+        pending: this.resolveActorPending(mailbox),
+      });
+    }
+    snapshots.sort((left, right) => right.pending - left.pending || left.actorKey.localeCompare(right.actorKey));
+    return snapshots.slice(0, normalizedMax);
   }
 }

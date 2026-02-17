@@ -45,7 +45,7 @@
 - [x] Every previous document has mapped new owner(s)
 - [x] Every major topic domain has one canonical owner
 - [x] Non-owner documents link instead of deep restatement
-- [x] Reconstructed index points to all canonical owners
+- [x] Canonical index points to all canonical owners
 - [x] Section-level legacy coverage evidence is published
 
 ## Reader Transition Path

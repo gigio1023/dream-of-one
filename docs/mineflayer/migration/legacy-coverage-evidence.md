@@ -1,7 +1,7 @@
 # Migration Evidence: Legacy Coverage
 
 ## Intent
-- Provide detailed, auditable evidence that all legacy Mineflayer documentation topics are preserved in the reconstructed hierarchy.
+- Provide detailed, auditable evidence that all legacy Mineflayer documentation topics are preserved in the canonical hierarchy.
 - Confirm canonical ownership before legacy file removal.
 
 ## Scope
@@ -14,11 +14,11 @@
   - `docs/spec/mineflayer/mineflayer-typescript-tutorial-deep-dive.md`
   - `docs/spec/mineflayer/mineflayer-typescript-index.md`
   - `docs/spec/mineflayer/mineflayer-documentation-hierarchy.md`
-- Reconstructed target set:
+- Canonical target set:
   - `docs/mineflayer/**`
 
 ## File-Level Coverage Matrix
-| Legacy document | Primary reconstructed owner(s) | Coverage status |
+| Legacy document | Primary canonical owner(s) | Coverage status |
 |---|---|---|
 | `mineflayer-research-analysis.md` | `foundation/context.md`, `foundation/constraint-trace.md` | complete |
 | `mineflayer-typescript-runtime-spec.md` | `spec/runtime.md`, `spec/event-lifecycle.md` | complete |

@@ -1,11 +1,14 @@
 # Codex Runbook (Linear SSOT + Beads Execution + Codex Cloud)
 
-Revision date: 2026-02-14
+Revision date: 2026-02-17
 
 This document defines the operating runbook for **Codex CLI**.  
 The goal is to ensure: users provide only natural-language instructions; Codex CLI organizes and tracks Linear issues; implementations are done locally (with Beads when needed); and cloud-safe work is delegated to Codex Cloud via Linear.
 
 Terminology rule: all operational docs/comments should follow `terminology.md` canonical terms.
+
+For command-level step-by-step execution, use:
+- `docs/agent/codex-cli-workflow.md`
 
 ---
 
@@ -190,6 +193,9 @@ Operations (local):
 2. Add `lock:unity-mcp` to the active issue.
 3. After Unity changes, run `Tools > DreamOfOne > Run Diagnostics` until console is clean.
 4. Remove `lock:unity-mcp` when done.
+
+Deprecated Unity docs:
+- `docs/deprecated/unity/index.md`
 
 For prototype simplification validation loops:
 1. Run `Tools > DreamOfOne > Apply Simple Verification Mode`.

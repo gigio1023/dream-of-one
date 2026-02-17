@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { isAbsolute, join, relative } from "node:path";
 import test from "node:test";
 import type { DecisionEnvelope } from "../../src/contracts/types.js";
 import { RuntimeTelemetryCollector } from "../../src/runtime/telemetry.js";
@@ -251,5 +252,18 @@ test("telemetry collector exports evidence pack JSON file", async () => {
   assert.equal(parsed.trajectorySummary.actorSignatures[0]?.sessionId, "session-2");
   assert.equal(parsed.trajectorySummary.actorSignatures[0]?.npcId, "npc-2");
   assert.equal(parsed.trajectorySummary.actorSignatures[0]?.decisions, 1);
+
+  const traversalName = `../${randomUUID()}.json`;
+  const traversalOutputPath = await collector.writeEvidencePack(traversalName);
+  const traversalRelative = relative(tempDir, traversalOutputPath);
+  assert.equal(traversalRelative, traversalName.slice(3));
+  assert.equal(traversalRelative.startsWith(".."), false);
+  assert.equal(isAbsolute(traversalRelative), false);
+
+  const absoluteName = join(tmpdir(), `${randomUUID()}.json`);
+  const absoluteOutputPath = await collector.writeEvidencePack(absoluteName);
+  const absoluteRelative = relative(tempDir, absoluteOutputPath);
+  assert.equal(absoluteRelative.startsWith(".."), false);
+  assert.equal(isAbsolute(absoluteRelative), false);
   await rm(tempDir, { recursive: true, force: true });
 });

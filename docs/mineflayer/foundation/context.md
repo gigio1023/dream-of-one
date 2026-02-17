@@ -106,7 +106,7 @@
 ### Phase 4: Release Readiness
 - Rebuild Validation Criteria and release gates on Mineflayer runtime.
 - Produce Mineflayer-native Evidence Pack for release decisions.
-- Complete Unity deprecation gates after stability thresholds are met.
+- Complete Unity deprecation gates (see `docs/deprecated/unity/index.md`) after stability thresholds are met.
 
 ## Immediate Technical Recommendations
 - Standardize Node runtime to `22.x` in development, CI, and deployment.

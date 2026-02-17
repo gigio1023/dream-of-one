@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { basename, isAbsolute, relative, resolve } from "node:path";
 import type { DecisionEnvelope } from "../contracts/types.js";
 import type { DecisionDispatchResult } from "./decision-bridge.js";
 import type { NormalizedMineflayerEvent } from "./event-normalizer.js";
@@ -73,6 +73,8 @@ export interface RuntimeEvidencePack {
 const DEFAULT_MAX_RECORDS = 4_000;
 const DEFAULT_EVIDENCE_OUTPUT_DIR = "data/evidence";
 
+const EVIDENCE_PACK_FILE_NAME_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,200}\.json$/;
+
 function incrementCounter(bucket: Record<string, number>, key: string | undefined): void {
   const normalized = key && key.trim().length > 0 ? key.trim() : "unknown";
   bucket[normalized] = (bucket[normalized] ?? 0) + 1;
@@ -128,6 +130,36 @@ function buildTrajectoryStep(payload: Record<string, unknown>): string {
   const fallbackMode = payload.usedFallback === true ? "fallback" : "primary";
   const transport = typeof payload.transport === "string" ? payload.transport : "unknown";
   return `${socialLoopStage}|${playerSpeechAct}|${actionType}|${actionOutcome}|${reasonCategory}|${fallbackMode}|${transport}`;
+}
+
+function resolveEvidencePackFileName(requestedFileName: string | undefined, fallbackName: string): string {
+  if (!requestedFileName) {
+    return fallbackName;
+  }
+
+  const baseName = basename(requestedFileName);
+  if (baseName.length === 0 || baseName === "." || baseName === "..") {
+    return fallbackName;
+  }
+
+  const ensuredJson = baseName.endsWith(".json") ? baseName : `${baseName}.json`;
+  if (!EVIDENCE_PACK_FILE_NAME_PATTERN.test(ensuredJson)) {
+    return fallbackName;
+  }
+
+  return ensuredJson;
+}
+
+function resolveEvidencePackOutputPath(evidenceOutputDir: string, fileName: string): string {
+  const root = resolve(evidenceOutputDir);
+  const outputPath = resolve(root, fileName);
+  const relativePath = relative(root, outputPath);
+
+  if (relativePath.startsWith("..") || isAbsolute(relativePath)) {
+    throw new Error("invalid_evidence_pack_file_name");
+  }
+
+  return outputPath;
 }
 
 export class RuntimeTelemetryCollector {
@@ -333,9 +365,10 @@ export class RuntimeTelemetryCollector {
 
   async writeEvidencePack(fileName?: string): Promise<string> {
     const evidencePack = this.buildEvidencePack();
-    const resolvedName = fileName ?? `evidence-pack-${this.now().toISOString().replaceAll(":", "-")}.json`;
+    const fallbackName = `evidence-pack-${this.now().toISOString().replaceAll(":", "-")}.json`;
+    const resolvedName = resolveEvidencePackFileName(fileName, fallbackName);
     await mkdir(this.evidenceOutputDir, { recursive: true });
-    const outputPath = join(this.evidenceOutputDir, resolvedName);
+    const outputPath = resolveEvidencePackOutputPath(this.evidenceOutputDir, resolvedName);
     await writeFile(outputPath, `${JSON.stringify(evidencePack, null, 2)}\n`, "utf8");
     return outputPath;
   }

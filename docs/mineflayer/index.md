@@ -69,6 +69,14 @@ mineflayer/
 - Need event normalization patterns:
   - Use `guides/events.md`
 
+## Recommended Reading Order
+- First-time runtime contributor:
+  - `foundation/context.md` -> `spec/runtime.md` -> `guides/implementation.md`
+- Action semantics implementation:
+  - `spec/action-api.md` -> `reference/api-catalog.md` -> `guides/events.md`
+- Lifecycle/reconnect troubleshooting:
+  - `spec/event-lifecycle.md` -> `guides/events.md` -> `foundation/constraint-trace.md`
+
 ## Non-Duplication Rules (Enforced)
 1. One topic has one canonical owner.
 2. Non-owner docs summarize in up to 3 bullets and link to owner.
@@ -80,4 +88,6 @@ mineflayer/
 - Migration execution plan:
   - `plan.md`
 - Architecture visualization:
-  - `viz.md`
+  - `README.md` (Mermaid sections: `Unified Runtime and Social Escalation Loop`, `Runtime Path Sequence`)
+- Project overview and documentation map:
+  - `docs/overview.md`

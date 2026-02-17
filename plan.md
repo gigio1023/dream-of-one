@@ -25,7 +25,7 @@
 |---|---|---|
 | Mineflayer-only Gate H workflow | complete | `docs/design/runtime-evidence.md` |
 | Trajectory diversity verification procedure | complete | `docs/design/game-design.md` |
-| Rollback drill procedure and log index | complete | `docs/design/runtime-evidence.md`, `docs/design/ws8-rollback-drill-log.md` |
+| Rollback drill procedure and log index | complete | `docs/design/runtime-evidence.md`, `docs/deprecated/unity/ws8-rollback-drill-log.md` |
 | Final migration report with residual risk backlog | complete | `docs/design/ws8-final-migration-report.md` |
 | Gate H run Evidence Pack set (`runCount >= 3`) | complete | `data/evidence/ws8/gate-h/run-a-evidence-pack.json`, `data/evidence/ws8/gate-h/run-b-evidence-pack.json`, `data/evidence/ws8/gate-h/run-c-evidence-pack.json` |
 | Gate H events snapshot set | complete | `data/evidence/ws8/gate-h/run-a-events.json`, `data/evidence/ws8/gate-h/run-b-events.json`, `data/evidence/ws8/gate-h/run-c-events.json` |
@@ -325,7 +325,7 @@
 
 ### Validation Criteria
 - Gate checklist is recorded in `docs/design/ws8-final-migration-report.md` with reproducible artifact links.
-- Rollback drill log is recorded in `docs/design/ws8-rollback-drill-log.md` and raw outputs are archived.
+- Rollback drill log is recorded in `docs/deprecated/unity/ws8-rollback-drill-log.md` and raw outputs are archived.
 - Any criterion remains `pending` until the linked artifact path exists.
 
 ## Dependency and sequencing model
@@ -409,7 +409,7 @@
     - explicit Mineflayer-only Gate H workflow and rollback drill procedure in `docs/design/runtime-evidence.md`;
     - trajectory diversity verification procedure in `docs/design/game-design.md`;
     - migration report and residual risk backlog in `docs/design/ws8-final-migration-report.md`;
-    - rollback drill log index and template in `docs/design/ws8-rollback-drill-log.md`.
+    - rollback drill log index and template in `docs/deprecated/unity/ws8-rollback-drill-log.md`.
   - implemented WS8 Mineflayer-only gate tooling in `backend/npc-runtime/scripts`:
     - `analyze_ws8_backend_evidence.mjs`, `collect_ws8_regression_metrics.mjs`, `package_ws8_rc_artifacts.mjs`, `run_ws8_release_gate.mjs`;
     - `export_ws8_events_snapshot.mjs`, `verify_ws8_trajectory_diversity.mjs`, `run_ws8_rollback_drill.mjs`.
@@ -425,5 +425,5 @@
 
 ## Next-Run Focus
 - Keep RC cadence by refreshing Gate H artifact trio (`run-a/b/c`) and `trajectory-diversity.json` for each release cycle.
-- Keep rollback drill cadence by appending new entries to `docs/design/ws8-rollback-drill-log.md`.
+- Keep rollback drill cadence by appending new entries to `docs/deprecated/unity/ws8-rollback-drill-log.md`.
 - Close residual risk backlog entries only with linked Evidence in `docs/design/ws8-final-migration-report.md`.

@@ -20,6 +20,18 @@ Can a Codex-driven NPC society run pressure against the player in a live Minecra
 - Fixed player speech acts: `SA_COMPLY`, `SA_INQUIRE`, `SA_FRAME`, `SA_BREAK`.
 - Endings: `Clean Pass`, `Narrow Escape`, `Exposed`.
 
+## Start Here
+
+Use this quick path based on your role:
+
+| Role | Start doc | Why |
+|---|---|---|
+| First-time contributor | `docs/overview.md` | One-page project explanation and visual map |
+| Runtime developer | `docs/dev.md` | Local run, validation, evidence commands |
+| Codex operator | `docs/agent/codex-cli-workflow.md` | End-to-end Codex CLI execution workflow |
+| Product/design reviewer | `project.md` | Product goals, constraints, acceptance criteria |
+| Mineflayer implementer | `docs/mineflayer/index.md` | Structured Mineflayer Specification/guides |
+
 ## Game Design Overview
 
 The loop is designed as one integrated system where Codex transport, Schema validation, deterministic Fallback Path, and social escalation stay connected in one Runtime Path.
@@ -39,11 +51,12 @@ flowchart LR
   Service -->|Fallback Path| Fallback["Deterministic Fallback"]
   Codex --> Service
   Fallback --> Service
-  Service --> Memory["NPC Memory Layer\nMEMORY.md + memory/YYYY-MM-DD.md"]
+  Service --> MemoryWriter["NPC Memory Persistence Service"]
+  MemoryWriter --> MemoryFiles["NPC Memory Files\nMEMORY.md + memory/YYYY-MM-DD.md"]
+  MemoryFiles --> Service
   Service --> Adapter
   Adapter --> Bot
   Bot --> Social["NPC social escalation\n(emergent trajectory)"]
-  Memory --> Social
   Social --> Player
 ```
 
@@ -67,10 +80,11 @@ flowchart LR
     Taxonomy["Reason Taxonomy"]
     Fallback["Deterministic Fallback Builder"]
     Workspace["Actor Workspace Store"]
+    MemoryWriter["NPC Memory Persistence Service"]
     Thread["Thread Store"]
     WorkspaceJson["Workspace JSON\npersona/policy/memory/summary/thread"]
-    MemoryLong["MEMORY.md\n(Long-term Facts)"]
-    MemoryDaily["memory/YYYY-MM-DD.md\n(Daily Log)"]
+    MemoryLong["Long-term Memory File\n(MEMORY.md)"]
+    MemoryDaily["Daily Memory Log File\n(memory/YYYY-MM-DD.md)"]
   end
 
   subgraph CognitionPlane["Cognition Plane"]
@@ -97,9 +111,10 @@ flowchart LR
   Gateway --> Codex
   Broker <--> Workspace
   Broker <--> Thread
+  Workspace --> MemoryWriter
   Workspace --> WorkspaceJson
-  Workspace --> MemoryLong
-  Workspace --> MemoryDaily
+  MemoryWriter --> MemoryLong
+  MemoryWriter --> MemoryDaily
   Decision --> Taxonomy
   Policy -->|invalid / timeout / parse / policy| Fallback
   Fallback --> Decision
@@ -129,7 +144,8 @@ sequenceDiagram
   participant Gateway as Codex Tool Gateway
   participant Codex as Codex CLI
   participant Store as Thread + Workspace Store
-  participant Memory as MEMORY.md + Daily Log
+  participant MemoryWriter as NPC Memory Persistence Service
+  participant MemoryFiles as MEMORY.md + Daily Log Files
   participant Obs as Telemetry + Evidence
 
   Player->>Server: Speech act or interaction
@@ -149,11 +165,13 @@ sequenceDiagram
     Broker->>Gate: Post-hook parse and normalize
     Gate-->>Service: Valid DecisionEnvelope
     Service->>Store: Save workspace and thread
-    Store->>Memory: Append long-term and daily memory
+    Store->>MemoryWriter: Persist memory payload
+    MemoryWriter->>MemoryFiles: Write long-term and daily files
   else invalid / timeout / parse / tool failure
     Gate-->>Service: Deterministic fallback reason
     Service->>Store: Save fallback workspace decision
-    Store->>Memory: Append fallback memory evidence
+    Store->>MemoryWriter: Persist fallback memory payload
+    MemoryWriter->>MemoryFiles: Write fallback evidence files
   end
 
   Service-->>API: DecisionEnvelope + meta
@@ -174,6 +192,7 @@ sequenceDiagram
 
 - Game-oriented NPC memory Specification: `memory.md`
 - Design Bible memory model: `docs/design/game-design.md`
+- `memory.md` is a documentation Specification file, not a runtime component.
 
 ## Quick Start
 
@@ -184,6 +203,20 @@ sequenceDiagram
 - Backend runtime source at `backend/npc-runtime/`.
 - Codex CLI available for Runtime Path execution.
 - Optional local LLM runtime (`ollama`) for custom tool runner experiments.
+
+### Environment sanity checks
+
+Run these before starting the runtime:
+
+```bash
+node -v
+codex --version
+nc -z 127.0.0.1 25565
+```
+
+Note:
+- Port `25565` must be reachable by the Mineflayer Bot runtime.
+- If your Minecraft server uses different host/port/version, set the corresponding `NPC_RUNTIME_MINEFLAYER_*` variables.
 
 ### Install and Validate
 
@@ -214,11 +247,9 @@ curl -s "http://127.0.0.1:8787/v1/telemetry/events?limit=20" | jq .
 
 ### Legacy Unity Path (deprecated)
 
-Use this path only for rollback drills and archive verification:
-
-1. Open Unity Hub and add `deprecated/unity/draem-of-one/`.
-2. Open `Assets/Scenes/Prototype.unity`.
-3. Run Unity diagnostics/check scripts under `deprecated/unity/scripts/`.
+Rollback drill and Unity archive docs:
+- `docs/deprecated/unity/index.md`
+- `docs/deprecated/unity/dev.md`
 
 ## Optional LLM Configuration
 
@@ -260,11 +291,8 @@ npm run ws8:trajectory:verify --prefix backend/npc-runtime -- \
 
 ### Legacy Unity Checks (deprecated rollback path)
 
-```bash
-deprecated/unity/scripts/run_editor_diagnostics.sh
-deprecated/unity/scripts/run_playmode_smoke.sh
-deprecated/unity/scripts/run_all_checks.sh
-```
+See:
+- `docs/deprecated/unity/dev.md`
 
 ## Evidence and Release Candidate Workflow
 
@@ -300,6 +328,7 @@ Design documents:
 - Cover Tests library: `docs/design/cover-tests.md`
 - Runtime evidence guide: `docs/design/runtime-evidence.md`
 - Mineflayer Specification and guides: `docs/mineflayer/index.md`
+- Visual overview: `docs/overview.md`
 
 Developer and agent operations:
 

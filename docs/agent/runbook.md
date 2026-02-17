@@ -194,6 +194,9 @@ Operations (local):
 3. After Unity changes, run `Tools > DreamOfOne > Run Diagnostics` until console is clean.
 4. Remove `lock:unity-mcp` when done.
 
+Deprecated Unity docs:
+- `docs/deprecated/unity/index.md`
+
 For prototype simplification validation loops:
 1. Run `Tools > DreamOfOne > Apply Simple Verification Mode`.
 2. Run `Tools > DreamOfOne > Run Diagnostics` and ensure the console is clean.

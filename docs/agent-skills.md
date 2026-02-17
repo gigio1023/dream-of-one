@@ -47,6 +47,9 @@ Unity workflows (MCP-first) live under:
 - `.codex/skills/urp-material-fixer`
 - `.codex/skills/tmp-font-stability`
 
+Unity is a deprecated Runtime Path in this repo; legacy Unity docs live under:
+- `docs/deprecated/unity/index.md`
+
 ## Adding a new skill
 
 1. Create a new folder under `.codex/skills/<skill-name>/`.

@@ -1,5 +1,7 @@
 # Verifying Unity (Headless) in Codex Web
 
+> Deprecated Unity archive document. Retained for rollback and historical CI reference only.
+
 This document describes a CI-style workflow to validate that the Unity project:
 - compiles (including packages),
 - passes editor diagnostics/preflight checks,

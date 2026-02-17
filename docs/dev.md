@@ -17,8 +17,8 @@ Primary Runtime Path:
 - Evidence interface: `/v1/telemetry/*`, `/health/queue`
 
 Legacy Runtime Path (deprecated, rollback only):
-- Unity project root: `deprecated/unity/draem-of-one/`
-- Unity scripts: `deprecated/unity/scripts/`
+- Unity runtime operations: `docs/deprecated/unity/dev.md`
+- Unity archive index: `docs/deprecated/unity/index.md`
 
 ---
 
@@ -124,26 +124,9 @@ npm run ws8:trajectory:verify --prefix backend/npc-runtime -- \
 
 ## Legacy Unity Path (deprecated)
 
-Use this section only for rollback drills, archive integrity checks, or historical comparison.
-
-### Legacy quick start
-
-1. Open Unity Hub and add `deprecated/unity/draem-of-one/`.
-2. Open `Assets/Scenes/Prototype.unity`.
-3. Press Play.
-
-### Legacy verification scripts
-
-- `deprecated/unity/scripts/run_editor_diagnostics.sh`
-- `deprecated/unity/scripts/run_playmode_smoke.sh`
-- `deprecated/unity/scripts/run_all_checks.sh`
-- `deprecated/unity/scripts/run_stability_trend.sh`
-
-### Unity authoring safety
-
-- Prefer Unity Editor/AssetDatabase authoring for `.unity`, `.prefab`, `.asset`, `.meta`.
-- Avoid hand-editing serialized Unity files unless explicitly approved.
-- If Unity MCP is unavailable, stop Unity authoring and reconnect MCP first.
+Rollback drills and Unity archive integrity checks live under:
+- `docs/deprecated/unity/dev.md`
+- `docs/deprecated/unity/index.md`
 
 ---
 
@@ -157,6 +140,7 @@ Beads (`bd`) is the local execution graph for detailed dependency tracking:
 - keep local execution context stable across sessions.
 
 References:
+- Project overview: [`docs/overview.md`](overview.md)
 - Agent runbook: [`docs/agent/runbook.md`](agent/runbook.md)
 - Codex CLI workflow playbook: [`docs/agent/codex-cli-workflow.md`](agent/codex-cli-workflow.md)
 - Agent skills: [`docs/agent-skills.md`](agent-skills.md)

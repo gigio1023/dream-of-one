@@ -158,4 +158,5 @@ Beads (`bd`) is the local execution graph for detailed dependency tracking:
 
 References:
 - Agent runbook: [`docs/agent/runbook.md`](agent/runbook.md)
+- Codex CLI workflow playbook: [`docs/agent/codex-cli-workflow.md`](agent/codex-cli-workflow.md)
 - Agent skills: [`docs/agent-skills.md`](agent-skills.md)

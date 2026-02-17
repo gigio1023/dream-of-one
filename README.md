@@ -39,9 +39,11 @@ flowchart LR
   Service -->|Fallback Path| Fallback["Deterministic Fallback"]
   Codex --> Service
   Fallback --> Service
+  Service --> Memory["NPC Memory Layer\nMEMORY.md + memory/YYYY-MM-DD.md"]
   Service --> Adapter
   Adapter --> Bot
   Bot --> Social["NPC social escalation\n(emergent trajectory)"]
+  Memory --> Social
   Social --> Player
 ```
 
@@ -66,6 +68,9 @@ flowchart LR
     Fallback["Deterministic Fallback Builder"]
     Workspace["Actor Workspace Store"]
     Thread["Thread Store"]
+    WorkspaceJson["Workspace JSON\npersona/policy/memory/summary/thread"]
+    MemoryLong["MEMORY.md\n(Long-term Facts)"]
+    MemoryDaily["memory/YYYY-MM-DD.md\n(Daily Log)"]
   end
 
   subgraph CognitionPlane["Cognition Plane"]
@@ -92,6 +97,9 @@ flowchart LR
   Gateway --> Codex
   Broker <--> Workspace
   Broker <--> Thread
+  Workspace --> WorkspaceJson
+  Workspace --> MemoryLong
+  Workspace --> MemoryDaily
   Decision --> Taxonomy
   Policy -->|invalid / timeout / parse / policy| Fallback
   Fallback --> Decision
@@ -121,6 +129,7 @@ sequenceDiagram
   participant Gateway as Codex Tool Gateway
   participant Codex as Codex CLI
   participant Store as Thread + Workspace Store
+  participant Memory as MEMORY.md + Daily Log
   participant Obs as Telemetry + Evidence
 
   Player->>Server: Speech act or interaction
@@ -140,8 +149,11 @@ sequenceDiagram
     Broker->>Gate: Post-hook parse and normalize
     Gate-->>Service: Valid DecisionEnvelope
     Service->>Store: Save workspace and thread
+    Store->>Memory: Append long-term and daily memory
   else invalid / timeout / parse / tool failure
     Gate-->>Service: Deterministic fallback reason
+    Service->>Store: Save fallback workspace decision
+    Store->>Memory: Append fallback memory evidence
   end
 
   Service-->>API: DecisionEnvelope + meta
@@ -293,6 +305,7 @@ Developer and agent operations:
 
 - Developer guide: `docs/dev.md`
 - Agent runbook: `docs/agent/runbook.md`
+- Codex CLI workflow playbook: `docs/agent/codex-cli-workflow.md`
 - Agent policy: `AGENTS.md`
 
 ## Work Management Model

@@ -15,7 +15,7 @@
   - `docs/spec/mineflayer/mineflayer-typescript-index.md`
   - `docs/spec/mineflayer/mineflayer-documentation-hierarchy.md`
 - Reconstructed target set:
-  - `docs/spec/mineflayer/reconstructed/**`
+  - `docs/mineflayer/**`
 
 ## File-Level Coverage Matrix
 | Legacy document | Primary reconstructed owner(s) | Coverage status |
@@ -26,8 +26,8 @@
 | `mineflayer-typescript-api-reference.md` | `reference/api-catalog.md` | complete |
 | `mineflayer-typescript-implementation-guide.md` | `guides/implementation.md`, `guides/events.md` | complete |
 | `mineflayer-typescript-tutorial-deep-dive.md` | `guides/tutorial.md`, `guides/implementation.md` | complete |
-| `mineflayer-typescript-index.md` | `reconstructed/index.md` | complete |
-| `mineflayer-documentation-hierarchy.md` | `reconstructed/index.md`, `migration/crosswalk.md` | complete |
+| `mineflayer-typescript-index.md` | `index.md` | complete |
+| `mineflayer-documentation-hierarchy.md` | `index.md`, `migration/crosswalk.md` | complete |
 
 ## Section-Level Preservation Map
 
@@ -134,15 +134,15 @@
 
 ### `mineflayer-typescript-index.md`
 - Document map and ownership quick map:
-  - preserved in `reconstructed/index.md` (`Hierarchy`, `Ownership Matrix`, `Usage by Reader Goal`).
+  - preserved in `index.md` (`Hierarchy`, `Ownership Matrix`, `Usage by Reader Goal`).
 - Scope note and entrypoint role:
-  - preserved in `reconstructed/index.md` (`Intent`, `Scope`).
+  - preserved in `index.md` (`Intent`, `Scope`).
 
 ### `mineflayer-documentation-hierarchy.md`
 - Layer hierarchy and ownership matrix:
-  - preserved in `reconstructed/index.md` (`Hierarchy`, `Ownership Matrix`).
+  - preserved in `index.md` (`Hierarchy`, `Ownership Matrix`).
 - Non-duplication rules and authoring workflow:
-  - preserved in `reconstructed/index.md` (`Non-Duplication Rules`);
+  - preserved in `index.md` (`Non-Duplication Rules`);
   - migration governance in `migration/crosswalk.md`.
 - Review checklist and change management:
   - preserved in `migration/crosswalk.md` (`Validation Checklist`);

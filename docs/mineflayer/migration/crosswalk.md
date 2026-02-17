@@ -1,11 +1,11 @@
-# Migration Crosswalk: Previous Docs -> Reconstructed Docs
+# Migration Crosswalk: Previous Docs -> Canonical Docs
 
 ## Intent
 - Prove content preservation while switching to a newly structured hierarchy.
 - Make ownership transition explicit so future edits avoid duplication.
 
 ## Scope
-- Maps previous Mineflayer documents under `docs/spec/mineflayer/*.md` to reconstructed documents under `docs/spec/mineflayer/reconstructed/**`.
+- Maps previous Mineflayer documents under `docs/spec/mineflayer/*.md` to canonical documents under `docs/mineflayer/**`.
 - Legacy documents are deprecated and removed after coverage migration is validated.
 
 ## Previous -> New Ownership Mapping
@@ -17,8 +17,8 @@
 | `mineflayer-typescript-api-reference.md` | `reference/api-catalog.md` | signature/options/event catalog preserved in Reference layer |
 | `mineflayer-typescript-implementation-guide.md` | `guides/implementation.md`, `guides/events.md` | procedural integration and normalization patterns preserved in Guide layer |
 | `mineflayer-typescript-tutorial-deep-dive.md` | `guides/tutorial.md` | tutorial narrative and staged onboarding preserved in Guide layer |
-| `mineflayer-typescript-index.md` | `reconstructed/index.md` | navigation and entrypoint intent preserved with layered map |
-| `mineflayer-documentation-hierarchy.md` | `reconstructed/index.md` + this crosswalk | hierarchy governance preserved and merged into new navigation + migration governance |
+| `mineflayer-typescript-index.md` | `index.md` | navigation and entrypoint intent preserved with layered map |
+| `mineflayer-documentation-hierarchy.md` | `index.md` + this crosswalk | hierarchy governance preserved and merged into new navigation + migration governance |
 
 ## Topic-Level Preservation Map
 | Topic domain | New canonical owner |
@@ -32,7 +32,7 @@
 | Implementation workflow | `guides/implementation.md` |
 | Tutorial onboarding sequence | `guides/tutorial.md` |
 | Event normalization procedures | `guides/events.md` |
-| Entrypoint navigation | `reconstructed/index.md` |
+| Entrypoint navigation | `index.md` |
 | Section-level legacy coverage evidence | `migration/legacy-coverage-evidence.md` |
 
 ## Duplication Removal Outcomes
@@ -50,7 +50,7 @@
 
 ## Reader Transition Path
 1. Start at:
-   - `docs/spec/mineflayer/reconstructed/index.md`
+   - `docs/mineflayer/index.md`
 2. Choose layer by need:
    - context -> foundation
    - rules -> spec

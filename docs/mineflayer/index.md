@@ -1,8 +1,8 @@
-# Mineflayer Reconstructed Documentation Set
+# Mineflayer Documentation Set
 
 ## Status Snapshot
 - Date: 2026-02-17
-- Scope root: `docs/spec/mineflayer/reconstructed`
+- Scope root: `docs/mineflayer`
 - Source baseline: latest original `/Users/user/git/gigio1023/mineflayer`
 - Intent: provide a newly structured, detailed, non-duplicative Mineflayer documentation hierarchy
 
@@ -22,7 +22,7 @@
 
 ## Hierarchy
 ```text
-reconstructed/
+mineflayer/
   index.md
   foundation/
     context.md

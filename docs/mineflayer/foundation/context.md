@@ -117,10 +117,10 @@
 
 ## Links to Canonical Owners
 - Runtime rules and safety gates:
-  - `docs/spec/mineflayer/reconstructed/spec/runtime.md`
+  - `docs/mineflayer/spec/runtime.md`
 - High-risk action semantics:
-  - `docs/spec/mineflayer/reconstructed/spec/action-api.md`
+  - `docs/mineflayer/spec/action-api.md`
 - Event lifecycle rules:
-  - `docs/spec/mineflayer/reconstructed/spec/event-lifecycle.md`
+  - `docs/mineflayer/spec/event-lifecycle.md`
 - Signature and options catalog:
-  - `docs/spec/mineflayer/reconstructed/reference/api-catalog.md`
+  - `docs/mineflayer/reference/api-catalog.md`

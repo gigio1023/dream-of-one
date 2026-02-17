@@ -58,8 +58,8 @@
 
 ## Links
 - Runtime normative rules:
-  - `docs/spec/mineflayer/reconstructed/spec/runtime.md`
+  - `docs/mineflayer/spec/runtime.md`
 - Action normative rules:
-  - `docs/spec/mineflayer/reconstructed/spec/action-api.md`
+  - `docs/mineflayer/spec/action-api.md`
 - Event lifecycle normative rules:
-  - `docs/spec/mineflayer/reconstructed/spec/event-lifecycle.md`
+  - `docs/mineflayer/spec/event-lifecycle.md`

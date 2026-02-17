@@ -1,0 +1,95 @@
+{
+  "generatedAt": "2026-02-17T09:48:58.142Z",
+  "scope": "mineflayer-backend-only",
+  "terminology": {
+    "fallbackPath": "Fallback Path",
+    "reasonCode": "Reason Code",
+    "globalCap": "Global Cap"
+  },
+  "source": {
+    "evidencePath": "/Users/user/git/gigio1023/dream-of-one/data/evidence/ws8/gate-h/run-c-evidence-pack.json"
+  },
+  "totals": {
+    "totalDecisions": 1008,
+    "droppedResponses": 0,
+    "totalObservedResponses": 1008,
+    "codex": 31,
+    "codexReply": 975,
+    "fallbackPath": 2
+  },
+  "ratios": {
+    "codexPathRatio": 0.998,
+    "fallbackPathRatio": 0.002,
+    "cancelledRate": 0,
+    "deadlineExceededRate": 0.001,
+    "backpressureRejectedRate": 0,
+    "droppedResponseRate": 0
+  },
+  "continuity": {
+    "codexMissingThreadId": 0,
+    "codexReplyMissingThreadId": 0
+  },
+  "fallbackPath": {
+    "usedCount": 2,
+    "missingReasonCode": 0,
+    "missingReasonCategory": 0
+  },
+  "reasonCode": {
+    "counts": {
+      "none": 1006,
+      "parse_failure": 1,
+      "codex_timeout": 1
+    },
+    "cancelledCount": 0,
+    "deadlineExceededCount": 1,
+    "backpressureRejectedCount": 0,
+    "top": [
+      {
+        "reasonCode": "none",
+        "count": 1006
+      },
+      {
+        "reasonCode": "parse_failure",
+        "count": 1
+      },
+      {
+        "reasonCode": "codex_timeout",
+        "count": 1
+      }
+    ]
+  },
+  "globalCap": {
+    "observed": true,
+    "samples": 1008,
+    "min": 4,
+    "max": 4,
+    "avg": 4,
+    "maxInFlight": 4,
+    "maxQueued": 4,
+    "atCapSamples": 22,
+    "atCapRate": 0.0218
+  },
+  "thresholds": {
+    "codexPathRatioMin": 0.7,
+    "cancelledRateMax": 0.35,
+    "deadlineExceededRateMax": 0.25,
+    "backpressureRejectedRateMax": 0.15,
+    "droppedResponseRateMax": 0.15,
+    "threadContinuityMax": 0,
+    "fallbackPathReasonCodeMax": 0,
+    "fallbackPathReasonCategoryMax": 0
+  },
+  "pass": {
+    "evidencePass": true,
+    "codexPathRatio": true,
+    "threadContinuity": true,
+    "fallbackPathReasonCode": true,
+    "fallbackPathReasonCategory": true,
+    "cancelledRate": true,
+    "deadlineExceededRate": true,
+    "backpressureRejectedRate": true,
+    "droppedResponseRate": true,
+    "globalCapObserved": true,
+    "all": true
+  }
+}

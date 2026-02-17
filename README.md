@@ -27,64 +27,138 @@ The loop is designed as one integrated system where Codex output transport, sche
 ### Unified Runtime and Social Escalation Loop
 
 ```mermaid
-flowchart TD
-    subgraph U["Unity Runtime Authority"]
-        P["Player action or speech act"]
-        O["PerceptionPacket from WEL, nearby actors, and player signals"]
-        X["Execute validated intent in world systems"]
-        W["World Event Log and HUD pressure update"]
-    end
-
-    subgraph B["npc-runtime Authority"]
-        M["Mailbox dispatch per sessionId+npcId (single-flight)"]
-        R["codex-tool-runner output: threadId + content only"]
-        G["Schema gate parses intent and validates envelope"]
-        F["Deterministic fallback intent: Observe"]
-    end
-
-    subgraph S["NPC Society and Institution Loop"]
-        N1["NPC-to-NPC interaction (Talk Ask Observe)"]
-        N2["Artifact and report creation"]
-        N3["Station intake and verdict"]
-    end
-
-    P --> O --> M --> R --> G
-    G -->|Valid schema| X
-    G -->|Invalid timeout tool error| F --> X
-    X --> N1 --> N2 --> N3 --> W --> O
+flowchart LR
+  Player["Player"] --> McServer["Minecraft Server"]
+  McServer --> Bot["Mineflayer Bot"]
+  Bot --> Adapter["Runtime Adapter"]
+  Adapter --> API["Decision API"]
+  API --> Service["Decision Service"]
+  Service -->|Runtime Path| Codex["Codex CLI"]
+  Service -->|Fallback Path| Fallback["Deterministic Fallback"]
+  Codex --> Service
+  Fallback --> Service
+  Service --> Memory["NPC Memory Layer\nMEMORY.md + memory/YYYY-MM-DD.md"]
+  Service --> Adapter
+  Adapter --> Bot
+  Bot --> Social["NPC social escalation\n(emergent trajectory)"]
+  Memory --> Social
+  Social --> Player
 ```
 
-### Codex Transport Boundary and Schema Gate Sequence
+#### Detailed View
+
+```mermaid
+flowchart LR
+  subgraph GameplayPlane["Minecraft Session Plane"]
+    Player["Player"]
+    McServer["Minecraft Server"]
+    BotA["Mineflayer Bot: NPC Agent A"]
+    BotN["Mineflayer Bot: NPC Agent N"]
+    Adapter["Runtime Adapter: Perception Builder + Intent Executor"]
+  end
+
+  subgraph RuntimePlane["TypeScript Backend Plane (dream-of-one)"]
+    Http["Decision API: /v1/npc/decision"]
+    Decision["Decision Service: Mailbox + MultiBotScheduler"]
+    Policy["Policy Hooks + Schema Gate"]
+    Broker["Codex Broker"]
+    Taxonomy["Reason Taxonomy"]
+    Fallback["Deterministic Fallback Builder"]
+    Workspace["Actor Workspace Store"]
+    Thread["Thread Store"]
+    WorkspaceJson["Workspace JSON\npersona/policy/memory/summary/thread"]
+    MemoryLong["MEMORY.md\n(Long-term Facts)"]
+    MemoryDaily["memory/YYYY-MM-DD.md\n(Daily Log)"]
+  end
+
+  subgraph CognitionPlane["Cognition Plane"]
+    Gateway["Codex Tool Gateway"]
+    Codex["Codex CLI: codex / codex-reply"]
+  end
+
+  subgraph OpsPlane["Operations Plane"]
+    Telemetry["Runtime Telemetry Stream"]
+    Evidence["Evidence Pack Builder: RC + Regression"]
+    Release["Validation Gates + Release Decision"]
+  end
+
+  Player --> McServer
+  McServer --> BotA
+  McServer --> BotN
+  BotA --> Adapter
+  BotN --> Adapter
+  Adapter --> Http
+  Http --> Decision
+  Decision --> Policy
+  Policy --> Broker
+  Broker --> Gateway
+  Gateway --> Codex
+  Broker <--> Workspace
+  Broker <--> Thread
+  Workspace --> WorkspaceJson
+  Workspace --> MemoryLong
+  Workspace --> MemoryDaily
+  Decision --> Taxonomy
+  Policy -->|invalid / timeout / parse / policy| Fallback
+  Fallback --> Decision
+  Decision --> Http
+  Http --> Adapter
+  Adapter --> BotA
+  Adapter --> BotN
+  Adapter --> Telemetry
+  Taxonomy --> Telemetry
+  Telemetry --> Evidence
+  Evidence --> Release
+```
+
+### Runtime Path Sequence
 
 ```mermaid
 sequenceDiagram
-    autonumber
-    participant Player
-    participant Unity
-    participant Runtime as npc-runtime
-    participant Runner as codex-tool-runner
-    participant Schema as schema gate
-    participant Fallback
-    participant NPCA as NPC A
-    participant NPCB as NPC B
-    participant Station
+  autonumber
+  participant Player as Player
+  participant Server as Minecraft Server
+  participant Bot as Mineflayer NPC Bot
+  participant Adapter as Runtime Adapter
+  participant API as Decision API
+  participant Service as Decision Service
+  participant Gate as Policy + Schema Gate
+  participant Broker as Codex Broker
+  participant Gateway as Codex Tool Gateway
+  participant Codex as Codex CLI
+  participant Store as Thread + Workspace Store
+  participant Memory as MEMORY.md + Daily Log
+  participant Obs as Telemetry + Evidence
 
-    Player->>Unity: Perform action or speech act
-    Unity->>Runtime: Send PerceptionPacket for npcId
-    Runtime->>Runner: Call codex exec or codex exec resume
-    Runner-->>Runtime: Return threadId and content text
-    Runtime->>Schema: Parse and validate intent schema
-    alt Schema valid
-        Schema-->>Unity: DecisionEnvelope with validated intent
-    else Schema invalid or runtime failure
-        Schema->>Fallback: Build deterministic fallback intent
-        Fallback-->>Unity: DecisionEnvelope with usedFallback true
-    end
-    Unity->>NPCA: Execute action
-    NPCA->>NPCB: Social reaction and witness chain
-    NPCB->>Station: Report or artifact handoff
-    Station-->>Unity: Intake result and verdict context
-    Unity-->>Player: Show reason visibility and pressure
+  Player->>Server: Speech act or interaction
+  Server->>Bot: Event update
+  Bot->>Adapter: Perception snapshot
+  Adapter->>API: POST PerceptionPacket
+  API->>Service: decide(packet, deadline)
+  Service->>Gate: Pre-hook + Schema validation
+
+  alt valid packet and tool path
+    Gate->>Broker: Build prompt and dispatch
+    Broker->>Store: Load thread and actor workspace
+    Broker->>Gateway: codex or codex-reply
+    Gateway->>Codex: Execute prompt
+    Codex-->>Gateway: content + threadId
+    Gateway-->>Broker: tool response
+    Broker->>Gate: Post-hook parse and normalize
+    Gate-->>Service: Valid DecisionEnvelope
+    Service->>Store: Save workspace and thread
+    Store->>Memory: Append long-term and daily memory
+  else invalid / timeout / parse / tool failure
+    Gate-->>Service: Deterministic fallback reason
+    Service->>Store: Save fallback workspace decision
+    Store->>Memory: Append fallback memory evidence
+  end
+
+  Service-->>API: DecisionEnvelope + meta
+  API-->>Adapter: Envelope result
+  Adapter->>Bot: Execute allowed Bot Command
+  Bot->>Server: World action and dialogue
+  Adapter->>Obs: Emit transport + threadId + reasonCategory + warningTier
 ```
 
 ## Architecture Boundaries
@@ -206,6 +280,7 @@ Developer and agent operations:
 
 - Developer guide: `docs/dev.md`
 - Agent runbook: `docs/agent/runbook.md`
+- Codex CLI workflow playbook: `docs/agent/codex-cli-workflow.md`
 - Agent policy: `AGENTS.md`
 
 ## Work Management Model

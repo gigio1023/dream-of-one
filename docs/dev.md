@@ -160,4 +160,5 @@ Beads (`bd`) is an optional, internal tool used by Codex CLI to:
 Beads data lives in `.beads/` (should be tracked); local runtime artifacts are ignored by `.beads/.gitignore`.
 
 - Agent runbook: [`docs/agent/runbook.md`](agent/runbook.md)
-- Agent skills (repo-local): [`docs/agent-skills.md`](agent-skills.md)
+- Codex CLI workflow playbook: [`docs/agent/codex-cli-workflow.md`](agent/codex-cli-workflow.md)
+- Agent skills: [`docs/agent-skills.md`](agent-skills.md)

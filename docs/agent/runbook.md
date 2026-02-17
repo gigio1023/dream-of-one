@@ -254,7 +254,7 @@ Response telemetry notes:
 Long-session stability trend (DRE-154):
 
 ```bash
-scripts/unity/run_stability_trend.sh
+deprecated/unity/scripts/run_stability_trend.sh
 ```
 
 Key outputs:

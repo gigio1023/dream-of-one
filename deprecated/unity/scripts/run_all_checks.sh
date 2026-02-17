@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 LOG_DIR="$ROOT_DIR/logs"
 mkdir -p "$LOG_DIR"
 
@@ -23,11 +23,11 @@ run_normal_pass() {
   DREAM_EVIDENCE_STRICT=1 \
   DREAM_REQUIRE_UNITY_EVIDENCE="${DREAM_REQUIRE_UNITY_EVIDENCE:-0}" \
   DREAM_REQUIRE_BACKEND_EVIDENCE="${DREAM_REQUIRE_BACKEND_EVIDENCE:-0}" \
-    "$ROOT_DIR/scripts/unity/run_editor_diagnostics.sh"
+    "$ROOT_DIR/deprecated/unity/scripts/run_editor_diagnostics.sh"
   DREAM_EVIDENCE_STRICT=1 \
   DREAM_REQUIRE_UNITY_EVIDENCE="${DREAM_REQUIRE_UNITY_EVIDENCE:-0}" \
   DREAM_REQUIRE_BACKEND_EVIDENCE="${DREAM_REQUIRE_BACKEND_EVIDENCE:-0}" \
-    "$ROOT_DIR/scripts/unity/run_playmode_smoke.sh"
+    "$ROOT_DIR/deprecated/unity/scripts/run_playmode_smoke.sh"
 }
 
 run_failure_injection_pass() {
@@ -38,7 +38,7 @@ run_failure_injection_pass() {
   DREAM_EVIDENCE_STRICT=1 \
   DREAM_REQUIRE_UNITY_EVIDENCE="${DREAM_REQUIRE_UNITY_EVIDENCE:-0}" \
   DREAM_REQUIRE_BACKEND_EVIDENCE="${DREAM_REQUIRE_BACKEND_EVIDENCE:-0}" \
-    "$ROOT_DIR/scripts/unity/run_playmode_smoke.sh"
+    "$ROOT_DIR/deprecated/unity/scripts/run_playmode_smoke.sh"
 }
 
 for ((i = 1; i <= NORMAL_RUNS; i++)); do
@@ -50,15 +50,15 @@ for ((i = 1; i <= FAILURE_RUNS; i++)); do
 done
 
 if [[ "$RUN_PLAYMODE_TESTS" == "1" ]]; then
-  DREAM_EVIDENCE_STRICT=0 "$ROOT_DIR/scripts/unity/run_playmode_tests.sh"
+  DREAM_EVIDENCE_STRICT=0 "$ROOT_DIR/deprecated/unity/scripts/run_playmode_tests.sh"
 fi
 
-node "$ROOT_DIR/scripts/unity/collect_regression_metrics.mjs" \
+node "$ROOT_DIR/deprecated/unity/scripts/collect_regression_metrics.mjs" \
   --evidence "$LOG_DIR/runtime-evidence-summary.json" \
   --backend-log "$LOG_DIR/npc-runtime.log" \
   --out "$LOG_DIR/regression-metrics.json"
 
-node "$ROOT_DIR/scripts/unity/package_release_candidate.mjs" \
+node "$ROOT_DIR/deprecated/unity/scripts/package_release_candidate.mjs" \
   --run-id "$RC_RUN_ID" \
   --out-dir "$LOG_DIR/rc" \
   --evidence "$LOG_DIR/runtime-evidence-summary.json" \

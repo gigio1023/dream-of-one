@@ -1,0 +1,109 @@
+{
+  "generatedAt": "2026-02-17T09:49:05.933Z",
+  "source": {
+    "backendLog": "/Users/user/git/gigio1023/dream-of-one/logs/npc-runtime-real-evidence.log"
+  },
+  "scope": "mineflayer-backend-only",
+  "limit": 200,
+  "totalMatched": 4,
+  "returned": 4,
+  "events": [
+    {
+      "event": "npc_decision_response",
+      "requestId": "e4f3373d-7410-4073-a4b2-1647c8fa8e5c",
+      "sessionId": "acceptance-real-1",
+      "npcId": "npc-real-1",
+      "transport": "codex",
+      "threadId": "019c55b8-856b-7472-8dc7-a325950ffaab",
+      "usedFallback": false,
+      "reasonCategory": "none",
+      "warningTier": "reference",
+      "deadlineMs": 30000,
+      "latencyMs": 13013.676,
+      "mailbox": {
+        "queued": 0,
+        "inflight": 0,
+        "coalesced": 0,
+        "dropped": 0,
+        "cancelled": 0,
+        "deadlineExceeded": 0,
+        "globalCap": 4,
+        "globalInFlight": 0,
+        "globalQueued": 0
+      }
+    },
+    {
+      "event": "npc_decision_response",
+      "requestId": "5e0ca976-2a79-458b-80f3-cde81c1fe412",
+      "sessionId": "acceptance-real-1",
+      "npcId": "npc-real-1",
+      "transport": "codex-reply",
+      "threadId": "019c55b8-856b-7472-8dc7-a325950ffaab",
+      "usedFallback": false,
+      "reasonCategory": "none",
+      "warningTier": "reference",
+      "deadlineMs": 30000,
+      "latencyMs": 14879.033,
+      "mailbox": {
+        "queued": 0,
+        "inflight": 0,
+        "coalesced": 0,
+        "dropped": 0,
+        "cancelled": 0,
+        "deadlineExceeded": 0,
+        "globalCap": 4,
+        "globalInFlight": 0,
+        "globalQueued": 0
+      }
+    },
+    {
+      "event": "npc_decision_response",
+      "requestId": "df9fbbb5-722a-4735-b26b-0b5d2db4e306",
+      "sessionId": "acceptance-real-1",
+      "npcId": "npc-real-1",
+      "transport": "codex-reply",
+      "threadId": "019c55b8-856b-7472-8dc7-a325950ffaab",
+      "usedFallback": false,
+      "reasonCategory": "none",
+      "warningTier": "reference",
+      "deadlineMs": 30000,
+      "latencyMs": 11382.542,
+      "mailbox": {
+        "queued": 0,
+        "inflight": 0,
+        "coalesced": 0,
+        "dropped": 0,
+        "cancelled": 0,
+        "deadlineExceeded": 0,
+        "globalCap": 4,
+        "globalInFlight": 0,
+        "globalQueued": 0
+      }
+    },
+    {
+      "event": "npc_decision_response",
+      "requestId": "8378fca5-2f32-4d6a-bf37-2d2640a3fb4b",
+      "sessionId": "acceptance-real-1",
+      "npcId": "npc-real-1",
+      "transport": "fallback",
+      "threadId": null,
+      "usedFallback": true,
+      "reason": "policy_reject_non_codex_path",
+      "reasonCategory": "policy",
+      "warningTier": "blocking",
+      "deadlineMs": 30000,
+      "latencyMs": 2.956,
+      "mailbox": {
+        "queued": 0,
+        "inflight": 0,
+        "coalesced": 0,
+        "dropped": 0,
+        "cancelled": 0,
+        "deadlineExceeded": 0,
+        "globalCap": 4,
+        "globalInFlight": 0,
+        "globalQueued": 0
+      }
+    }
+  ]
+}

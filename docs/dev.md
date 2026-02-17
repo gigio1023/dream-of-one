@@ -10,7 +10,7 @@ Terminology rule: use canonical terms from `terminology.md` for docs and user-fa
 
 ## Project Root / Scene Authority
 
-- Unity project root: `draem-of-one/`
+- Unity project root (deprecated path): `deprecated/unity/draem-of-one/`
 - Playable prototype scene: `Assets/Scenes/Prototype.unity`
 - Render pipeline: URP (`Assets/Settings/UniversalRP.asset` → `Assets/Settings/UniversalRenderer.asset`)
 
@@ -18,7 +18,7 @@ Terminology rule: use canonical terms from `terminology.md` for docs and user-fa
 
 ## Quick Start (Local)
 
-1. Open Unity Hub and add `draem-of-one/`.
+1. Open Unity Hub and add `deprecated/unity/draem-of-one/`.
 2. Open `Assets/Scenes/Prototype.unity`.
 3. Press Play.
 
@@ -116,16 +116,16 @@ The recommended entry points are:
 - an optional short playmode smoke run.
 
 Use the repo scripts:
-- `scripts/unity/run_editor_diagnostics.sh`
-- `scripts/unity/run_playmode_smoke.sh`
-- `scripts/unity/run_all_checks.sh`
+- `deprecated/unity/scripts/run_editor_diagnostics.sh`
+- `deprecated/unity/scripts/run_playmode_smoke.sh`
+- `deprecated/unity/scripts/run_all_checks.sh`
 
 Runtime evidence tooling:
-- `scripts/unity/analyze_runtime_evidence.mjs` (validates required Evidence fields and transport continuity)
-- `scripts/unity/collect_regression_metrics.mjs` (builds Regression Monitoring metrics)
-- `scripts/unity/package_release_candidate.mjs` (packages the Evidence Pack for Release Candidate decisions)
-- `scripts/unity/collect_stability_trend.mjs` (aggregates multi-run stability trends)
-- `scripts/unity/run_stability_trend.sh` (runs the default 3-run stability profile)
+- `deprecated/unity/scripts/analyze_runtime_evidence.mjs` (validates required Evidence fields and transport continuity)
+- `deprecated/unity/scripts/collect_regression_metrics.mjs` (builds Regression Monitoring metrics)
+- `deprecated/unity/scripts/package_release_candidate.mjs` (packages the Evidence Pack for Release Candidate decisions)
+- `deprecated/unity/scripts/collect_stability_trend.mjs` (aggregates multi-run stability trends)
+- `deprecated/unity/scripts/run_stability_trend.sh` (runs the default 3-run stability profile)
 
 Mock runtime option for deterministic validation:
 - `backend/npc-runtime/scripts/mock-codex-tool-runner.mjs`

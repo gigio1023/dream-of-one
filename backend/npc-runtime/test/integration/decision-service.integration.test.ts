@@ -363,3 +363,84 @@ test("global limiter waiting job skips broker execution when deadline elapses", 
   assert.ok(metrics.skippedBeforeBroker >= 1);
   assert.equal(metrics.inflight, 0);
 });
+
+test("per-bot pending limit rejects with deterministic backpressure fallback", async () => {
+  let releaseFirst: (() => void) | undefined;
+  let callCount = 0;
+
+  const broker: CodexBroker = {
+    async decide(packet) {
+      callCount += 1;
+      if (packet.recentEvents[0] === "hold") {
+        await new Promise<void>(resolve => {
+          releaseFirst = resolve;
+        });
+      }
+      return envelopeFromPacket(packet);
+    },
+  };
+
+  const service = new DecisionService(broker, {
+    maxBrokerInFlight: 1,
+    maxPendingPerBot: 1,
+    maxPendingGlobal: 10,
+  });
+  const first = service.decide(buildPacket("npc-saturated", "hold"));
+  await sleep(10);
+
+  const second = await service.decide(buildPacket("npc-saturated", "overflow"));
+  const metrics = service.getMailboxMetrics();
+
+  assert.equal(second.meta.usedFallback, true);
+  assert.equal(second.meta.reason, "runtime_actor_queue_saturated");
+  assert.equal(second.meta.reasonCategory, "runtime");
+  assert.equal(second.meta.warningTier, "attention");
+  assert.equal(metrics.backpressureRejected, 1);
+  assert.equal(metrics.actorQueueSaturated, 1);
+  assert.equal(callCount, 1, "overflow request must not call broker");
+
+  releaseFirst?.();
+  await first;
+});
+
+test("global pending limit rejects cross-bot overload deterministically", async () => {
+  let releaseFirst: (() => void) | undefined;
+  let callCount = 0;
+
+  const broker: CodexBroker = {
+    async decide(packet) {
+      callCount += 1;
+      if (packet.recentEvents[0] === "hold") {
+        await new Promise<void>(resolve => {
+          releaseFirst = resolve;
+        });
+      }
+      return envelopeFromPacket(packet);
+    },
+  };
+
+  const service = new DecisionService(broker, {
+    maxBrokerInFlight: 1,
+    maxPendingPerBot: 10,
+    maxPendingGlobal: 1,
+  });
+
+  const first = service.decide(buildPacket("npc-global-1", "hold"));
+  await sleep(10);
+  const second = await service.decide(buildPacket("npc-global-2", "hold-second"));
+
+  const metrics = service.getMailboxMetrics();
+  const scheduler = service.getSchedulerSnapshot();
+
+  assert.equal(second.meta.usedFallback, true);
+  assert.equal(second.meta.reason, "runtime_global_queue_saturated");
+  assert.equal(second.meta.reasonCategory, "runtime");
+  assert.equal(metrics.backpressureRejected, 1);
+  assert.equal(metrics.globalQueueSaturated, 1);
+  assert.equal(callCount, 1, "global overflow request must not call broker");
+  assert.equal(scheduler.global.maxPendingGlobal, 1);
+  assert.ok(scheduler.global.pending >= 1);
+
+  releaseFirst?.();
+  await first;
+});

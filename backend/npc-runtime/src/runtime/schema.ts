@@ -1,4 +1,11 @@
-import { ACTION_TYPES, type ActionType, type NpcIntent, type PerceptionPacket } from "../contracts/types.js";
+import {
+  ACTION_TYPES,
+  MINEFLAYER_COMMAND_TYPES,
+  type ActionType,
+  type MineflayerCommandType,
+  type NpcIntent,
+  type PerceptionPacket,
+} from "../contracts/types.js";
 
 export class SchemaValidationError extends Error {}
 export class IntentParseError extends Error {}
@@ -29,6 +36,13 @@ function asActionType(value: string): ActionType {
     return value as ActionType;
   }
   throw new IntentParseError(`unknown actionType: ${value}`);
+}
+
+function asMineflayerCommandType(value: string): MineflayerCommandType {
+  if (MINEFLAYER_COMMAND_TYPES.includes(value as MineflayerCommandType)) {
+    return value as MineflayerCommandType;
+  }
+  throw new IntentParseError(`unknown command: ${value}`);
 }
 
 function ensureConfidence(value: unknown): number {
@@ -143,6 +157,14 @@ export function parseNpcIntent(rawContent: string, expectedNpcId: string): NpcIn
 
   if (obj.utterance !== undefined) {
     intent.utterance = ensureString(obj.utterance, "utterance");
+  }
+
+  if (obj.command !== undefined) {
+    intent.command = asMineflayerCommandType(ensureString(obj.command, "command"));
+  }
+
+  if (obj.commandArgs !== undefined) {
+    intent.commandArgs = ensureObject(obj.commandArgs, "commandArgs");
   }
 
   return intent;

@@ -108,7 +108,7 @@ Delegation protocol:
 
 ## Unity authoring / verification
 
-- Unity project root: `draem-of-one/` (all `Assets/...` paths are relative to this folder).
+- Unity project root: `deprecated/unity/draem-of-one/` (all `Assets/...` paths are relative to this folder).
 - Scene authority: `Assets/Scenes/Prototype.unity`.
 - Rendering: URP via `Assets/Settings/UniversalRP.asset` → `Assets/Settings/UniversalRenderer.asset`.
 - Runtime helpers: `RuntimeNavMeshBaker` builds NavMesh on play; `UILayouter` arranges HUD at runtime.

@@ -12,7 +12,7 @@ Goal: not "Unity GUI editing", but fast signal on "does the project build/run cl
 ## Assumptions
 
 - Unity version: `6000.2.10f1` (project pinned)
-- Project path (repo root relative): `draem-of-one/`
+- Project path (repo root relative): `deprecated/unity/draem-of-one/`
 - Prototype scene: `Assets/Scenes/Prototype.unity`
 - In Codex Web, network may be disabled after Setup, so package restore/resolve must finish during Setup.
 
@@ -30,7 +30,7 @@ If you later need Linux builds:
 
 ### Environment variables
 
-- `UNITY_PROJECT_PATH=/workspace/draem-of-one`
+- `UNITY_PROJECT_PATH=/workspace/deprecated/unity/draem-of-one`
 - `UNITY_LOGS_DIR=/workspace/unity-logs`
 
 ### Secrets (sensitive)
@@ -57,7 +57,7 @@ This script:
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-PROJECT_PATH="${UNITY_PROJECT_PATH:-/workspace/draem-of-one}"
+PROJECT_PATH="${UNITY_PROJECT_PATH:-/workspace/deprecated/unity/draem-of-one}"
 LOGS_DIR="${UNITY_LOGS_DIR:-/workspace/unity-logs}"
 
 apt-get update
@@ -117,8 +117,8 @@ xvfb-run -a "$UNITY_BIN" -batchmode -nographics \
 
 Code locations:
 
-- `draem-of-one/Assets/Editor/CLI/CLIRunner.cs`
-- `draem-of-one/Assets/Editor/PreflightValidator.cs`
+- `deprecated/unity/draem-of-one/Assets/Editor/CLI/CLIRunner.cs`
+- `deprecated/unity/draem-of-one/Assets/Editor/PreflightValidator.cs`
 
 ## Logs / troubleshooting
 
@@ -127,4 +127,3 @@ Code locations:
   - `unity-logs/playmode-smoke.log`
 - If Codex Web disables network after Setup, ensure package resolve/import completes during Setup and is cached.
 - If you depend on Git-based UPM packages (e.g. `com.coplaydev.unity-mcp`), Setup must run with network enabled.
-

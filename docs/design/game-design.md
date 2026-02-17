@@ -1,7 +1,7 @@
 ---
 doc: docs/design/game-design.md
 project: Dream of One
-revision: 2026-02-13
+revision: 2026-02-17
 status: Active (Design Bible v2)
 ---
 
@@ -113,13 +113,13 @@ Every major outcome should include:
 - Runtime orchestration is implemented directly in repo-owned Codex control plane (no external Agent SDK mediation).
 - LLM output must follow strict schema.
 - Invalid response results in fallback action.
-- Unity remains execution authority.
+- Minecraft Server remains execution authority via Mineflayer Bot commands.
 
 ## 12) Technical runtime map
-- Unity sensor emits observation packets.
+- Mineflayer Bot emits observation packets (`blockUpdate`, `entitySpawn`, `diggingCompleted`, lifecycle events).
 - TypeScript backend orchestrates NPC sessions and calls Codex (`codex`, `codex-reply`).
-- Unity validates and executes decisions.
-- World Event Log stores outcomes.
+- Mineflayer adapter validates and executes Bot Commands (`bot.dig`, `bot.placeBlock`, `bot.activateBlock`, `bot.updateSign`).
+- Runtime telemetry and Evidence Pack outputs store outcomes.
 
 ## 13) UX requirements
 - HUD shows current suspicion/exposure pressure.
@@ -153,3 +153,31 @@ A candidate build is valid if:
 - Rule content pack: `docs/design/dream-laws.md`
 - Scenario content pack: `docs/design/cover-tests.md`
 - Runtime evidence operations: `docs/design/runtime-evidence.md`
+
+## 18) Trajectory diversity verification procedure
+### Goal
+- Verify that repeated runs produce non-identical social trajectories while staying inside the bounded behavior Specification.
+
+### Procedure
+1. Execute at least three consecutive runs for the same scenario setup and Runtime Path configuration.
+2. Capture per-run Evidence from:
+   - `/v1/telemetry/evidence-pack`
+   - `/v1/telemetry/events?limit=200`
+   - report/intake/verdict outputs shown to the player
+3. Compare trajectory markers across runs:
+   - witness/source composition in report artifacts,
+   - intake rationale wording and Reason Category distribution,
+   - verdict path (`survival`, `escalation`, `lucid identified`) and timing.
+4. Confirm bounded rules remain unchanged:
+   - NPC action whitelist from Section 4,
+   - player speech acts from Section 5.
+5. Record findings in `docs/design/ws8-final-migration-report.md`.
+
+### Acceptance Criteria
+- Three-run set contains at least one meaningful trajectory delta in social process outputs.
+- Every run preserves readable report -> intake -> verdict causality.
+- No run violates the bounded behavior Specification.
+
+### Validation Criteria
+- Migration report links each run to reproducible Evidence artifacts.
+- If diversity is insufficient, add a residual risk item to the WS8 backlog instead of forcing synthetic variation.

@@ -10,6 +10,7 @@ import type { PerceptionPacket } from "../../src/contracts/types.js";
 import type { RuntimeConfig } from "../../src/config.js";
 import type { CodexBroker } from "../../src/broker/codex-broker.js";
 import { DecisionService } from "../../src/runtime/decision-service.js";
+import { RuntimeTelemetryCollector } from "../../src/runtime/telemetry.js";
 
 async function getFreePort(): Promise<number> {
   return await new Promise((resolve, reject) => {
@@ -186,6 +187,29 @@ test("liveness endpoint remains lightweight", async () => {
   }
 });
 
+test("queue health endpoint returns mailbox and scheduler snapshot", async () => {
+  const port = await getFreePort();
+  const config = buildConfig(port);
+  const service = new DecisionService(buildNoopBroker());
+  const server = startHttpServer(config, service, undefined, undefined, undefined, () => service.getSchedulerSnapshot());
+
+  try {
+    const res = await fetch(`http://${config.host}:${config.port}/health/queue`);
+    const body = (await res.json()) as {
+      status: string;
+      mailbox: Record<string, unknown>;
+      scheduler: { global: { cap: number } };
+    };
+
+    assert.equal(res.status, 200);
+    assert.equal(body.status, "ok");
+    assert.equal(typeof body.mailbox, "object");
+    assert.equal(body.scheduler.global.cap, 4);
+  } finally {
+    await closeServer(server);
+  }
+});
+
 test("decision API smoke handles two NPC IDs and emits request/response logs", async () => {
   const port = await getFreePort();
   const config = buildConfig(port);
@@ -341,6 +365,39 @@ test("response log includes deterministic reject reason on fallback", async () =
   } finally {
     await closeServer(server);
     console.log = originalLog;
+  }
+});
+
+test("telemetry endpoints return decision evidence pack artifacts", async () => {
+  const port = await getFreePort();
+  const config = buildConfig(port);
+  const telemetry = new RuntimeTelemetryCollector({ maxRecords: 200 });
+  const service = new DecisionService(buildNoopBroker());
+  const server = startHttpServer(config, service, undefined, undefined, telemetry, () => service.getSchedulerSnapshot());
+
+  try {
+    const decisionResponse = await fetch(`http://${config.host}:${config.port}/v1/npc/decision`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(buildPacket("npc-telemetry")),
+    });
+    assert.equal(decisionResponse.status, 200);
+
+    const eventsResponse = await fetch(`http://${config.host}:${config.port}/v1/telemetry/events?limit=5`);
+    assert.equal(eventsResponse.status, 200);
+    const eventsPayload = (await eventsResponse.json()) as { records: Array<Record<string, unknown>> };
+    assert.ok(eventsPayload.records.length >= 1);
+
+    const evidenceResponse = await fetch(`http://${config.host}:${config.port}/v1/telemetry/evidence-pack`);
+    assert.equal(evidenceResponse.status, 200);
+    const evidencePayload = (await evidenceResponse.json()) as {
+      decisionSummary: { total: number };
+      countsByType: { decision_cycle: number };
+    };
+    assert.ok(evidencePayload.decisionSummary.total >= 1);
+    assert.ok(evidencePayload.countsByType.decision_cycle >= 1);
+  } finally {
+    await closeServer(server);
   }
 });
 

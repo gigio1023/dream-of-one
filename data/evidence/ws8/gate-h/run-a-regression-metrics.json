@@ -1,0 +1,90 @@
+{
+  "generatedAt": "2026-02-17T09:48:58.094Z",
+  "scope": "mineflayer-backend-only",
+  "terminology": {
+    "fallbackPath": "Fallback Path",
+    "reasonCode": "Reason Code",
+    "globalCap": "Global Cap"
+  },
+  "source": {
+    "evidencePath": "/Users/user/git/gigio1023/dream-of-one/data/evidence/ws8/gate-h/run-a-evidence-pack.json"
+  },
+  "totals": {
+    "totalDecisions": 4,
+    "droppedResponses": 0,
+    "totalObservedResponses": 4,
+    "codex": 1,
+    "codexReply": 2,
+    "fallbackPath": 1
+  },
+  "ratios": {
+    "codexPathRatio": 0.75,
+    "fallbackPathRatio": 0.25,
+    "cancelledRate": 0,
+    "deadlineExceededRate": 0,
+    "backpressureRejectedRate": 0,
+    "droppedResponseRate": 0
+  },
+  "continuity": {
+    "codexMissingThreadId": 0,
+    "codexReplyMissingThreadId": 0
+  },
+  "fallbackPath": {
+    "usedCount": 1,
+    "missingReasonCode": 0,
+    "missingReasonCategory": 0
+  },
+  "reasonCode": {
+    "counts": {
+      "none": 3,
+      "policy_reject_non_codex_path": 1
+    },
+    "cancelledCount": 0,
+    "deadlineExceededCount": 0,
+    "backpressureRejectedCount": 0,
+    "top": [
+      {
+        "reasonCode": "none",
+        "count": 3
+      },
+      {
+        "reasonCode": "policy_reject_non_codex_path",
+        "count": 1
+      }
+    ]
+  },
+  "globalCap": {
+    "observed": true,
+    "samples": 4,
+    "min": 4,
+    "max": 4,
+    "avg": 4,
+    "maxInFlight": 0,
+    "maxQueued": 0,
+    "atCapSamples": 0,
+    "atCapRate": 0
+  },
+  "thresholds": {
+    "codexPathRatioMin": 0.7,
+    "cancelledRateMax": 0.35,
+    "deadlineExceededRateMax": 0.25,
+    "backpressureRejectedRateMax": 0.15,
+    "droppedResponseRateMax": 0.15,
+    "threadContinuityMax": 0,
+    "fallbackPathReasonCodeMax": 0,
+    "fallbackPathReasonCategoryMax": 0
+  },
+  "pass": {
+    "evidencePass": true,
+    "codexPathRatio": true,
+    "threadContinuity": true,
+    "fallbackPathReasonCode": true,
+    "fallbackPathReasonCategory": true,
+    "cancelledRate": true,
+    "deadlineExceededRate": true,
+    "backpressureRejectedRate": true,
+    "droppedResponseRate": true,
+    "globalCapObserved": true,
+    "all": true
+  }
+}

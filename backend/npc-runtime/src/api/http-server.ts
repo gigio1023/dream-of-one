@@ -4,6 +4,12 @@ import type { RuntimeConfig } from "../config.js";
 import type { DecisionService } from "../runtime/decision-service.js";
 import { evaluateRuntimeReadiness, type RuntimeReadinessReport } from "../runtime/readiness.js";
 import { annotateDecisionMeta } from "../policy/reason-taxonomy.js";
+import type { DecisionDispatchResult } from "../runtime/decision-bridge.js";
+import type { DecisionEnvelope } from "../contracts/types.js";
+import { parsePerceptionPacket, SchemaValidationError } from "../runtime/schema.js";
+import { enforceBoundedBehavior } from "../runtime/bounded-behavior.js";
+import type { RuntimeTelemetryCollector } from "../runtime/telemetry.js";
+import type { SchedulerSnapshot } from "../runtime/multi-bot-scheduler.js";
 
 async function readJsonBody(req: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
@@ -58,16 +64,40 @@ function resolveDeadlineMs(config: RuntimeConfig, payloadObj: Record<string, unk
   return Math.max(1, Math.min(config.decisionDeadlineMs, requested));
 }
 
+function tryParsePerceptionPacket(payload: unknown) {
+  try {
+    return parsePerceptionPacket(payload);
+  } catch (error) {
+    if (error instanceof SchemaValidationError) {
+      return undefined;
+    }
+    return undefined;
+  }
+}
+
+function resolveRequestUrl(req: IncomingMessage, config: RuntimeConfig): URL {
+  const host = asHeaderString(req.headers.host) ?? `${config.host}:${config.port}`;
+  return new URL(req.url ?? "/", `http://${host}`);
+}
+
 export type ReadinessEvaluator = (config: RuntimeConfig) => Promise<RuntimeReadinessReport>;
+export type DecisionDispatcher = (decision: DecisionEnvelope, actionId: string) => Promise<DecisionDispatchResult>;
+export type SchedulerSnapshotProvider = () => SchedulerSnapshot;
 
 export function startHttpServer(
   config: RuntimeConfig,
   decisionService: DecisionService,
   readinessEvaluator: ReadinessEvaluator = evaluateRuntimeReadiness,
+  decisionDispatcher?: DecisionDispatcher,
+  telemetryCollector?: RuntimeTelemetryCollector,
+  schedulerSnapshotProvider?: SchedulerSnapshotProvider,
 ): Server {
   const server = createServer(async (req, res) => {
     try {
-      if (req.method === "GET" && req.url === "/health") {
+      const requestUrl = resolveRequestUrl(req, config);
+      const requestPath = requestUrl.pathname;
+
+      if (req.method === "GET" && requestPath === "/health") {
         writeJson(res, 200, {
           status: "ok",
           service: "npc-runtime",
@@ -75,13 +105,64 @@ export function startHttpServer(
         return;
       }
 
-      if (req.method === "GET" && req.url === "/health/ready") {
+      if (req.method === "GET" && requestPath === "/health/ready") {
         const readiness = await readinessEvaluator(config);
         writeJson(res, readiness.status === "ready" ? 200 : 503, readiness);
         return;
       }
 
-      if (req.method === "POST" && req.url === "/v1/npc/decision") {
+      if (req.method === "GET" && requestPath === "/health/queue") {
+        const schedulerSnapshot = schedulerSnapshotProvider?.();
+        writeJson(res, 200, {
+          status: "ok",
+          mailbox: decisionService.getMailboxMetrics(),
+          scheduler: schedulerSnapshot ?? null,
+        });
+        return;
+      }
+
+      if (req.method === "GET" && requestPath === "/v1/telemetry/events") {
+        if (!telemetryCollector) {
+          writeJson(res, 503, { error: "telemetry_disabled" });
+          return;
+        }
+        const requestedLimit = asPositiveNumber(requestUrl.searchParams.get("limit"));
+        const limit = requestedLimit ?? 100;
+        writeJson(res, 200, {
+          records: telemetryCollector.listRecords(limit),
+        });
+        return;
+      }
+
+      if (req.method === "GET" && requestPath === "/v1/telemetry/evidence-pack") {
+        if (!telemetryCollector) {
+          writeJson(res, 503, { error: "telemetry_disabled" });
+          return;
+        }
+        writeJson(res, 200, telemetryCollector.buildEvidencePack());
+        return;
+      }
+
+      if (req.method === "POST" && requestPath === "/v1/telemetry/evidence-pack/export") {
+        if (!telemetryCollector) {
+          writeJson(res, 503, { error: "telemetry_disabled" });
+          return;
+        }
+        const payload = await readJsonBody(req);
+        const payloadObj =
+          payload && typeof payload === "object" && !Array.isArray(payload)
+            ? (payload as Record<string, unknown>)
+            : {};
+        const fileName = asStringField(payloadObj.fileName);
+        const outputPath = await telemetryCollector.writeEvidencePack(fileName);
+        writeJson(res, 200, {
+          status: "ok",
+          outputPath,
+        });
+        return;
+      }
+
+      if (req.method === "POST" && requestPath === "/v1/npc/decision") {
         const requestId = randomUUID();
         const startedAt = process.hrtime.bigint();
         const abortController = new AbortController();
@@ -121,9 +202,29 @@ export function startHttpServer(
           signal: abortController.signal,
           deadlineMs,
         });
-        const decision = annotateDecisionMeta(rawDecision);
+        const parsedPacket = tryParsePerceptionPacket(payload);
+        const bounded = parsedPacket ? enforceBoundedBehavior(parsedPacket, rawDecision) : undefined;
+        const decision = bounded ? bounded.decision : annotateDecisionMeta(rawDecision);
+        let dispatchResult: DecisionDispatchResult | undefined;
+        if (decisionDispatcher) {
+          dispatchResult = await decisionDispatcher(decision, requestId);
+        }
+        const dispatchReasonCode =
+          dispatchResult && !dispatchResult.result.ok
+            ? dispatchResult.result.reasonCode
+            : undefined;
         const latencyMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
         const mailbox = decisionService.getMailboxMetrics();
+        telemetryCollector?.recordDecisionCycle({
+          requestId,
+          sessionId: asStringField(payloadObj?.sessionId),
+          npcId: asStringField(payloadObj?.npcId),
+          deadlineMs,
+          latencyMs,
+          decision,
+          mailbox,
+          dispatchResult,
+        });
         const responseClosedByClient = abortController.signal.aborted || req.aborted || res.destroyed;
 
         if (responseClosedByClient) {
@@ -143,6 +244,11 @@ export function startHttpServer(
               deadlineMs,
               latencyMs: Number(latencyMs.toFixed(3)),
               mailbox,
+              actionType: dispatchResult?.command.type,
+              actionOk: dispatchResult?.result.ok,
+              actionReason: dispatchReasonCode,
+              socialLoopStage: decision.meta.socialLoopStage ?? null,
+              playerSpeechAct: decision.meta.playerSpeechAct ?? null,
             }),
           );
           return;
@@ -163,10 +269,24 @@ export function startHttpServer(
             deadlineMs,
             latencyMs: Number(latencyMs.toFixed(3)),
             mailbox,
+            actionType: dispatchResult?.command.type,
+            actionOk: dispatchResult?.result.ok,
+            actionReason: dispatchReasonCode,
+            socialLoopStage: decision.meta.socialLoopStage ?? null,
+            playerSpeechAct: decision.meta.playerSpeechAct ?? null,
           }),
         );
 
-        writeJson(res, 200, decision);
+        writeJson(
+          res,
+          200,
+          dispatchResult
+            ? {
+                ...decision,
+                execution: dispatchResult,
+              }
+            : decision,
+        );
         return;
       }
 

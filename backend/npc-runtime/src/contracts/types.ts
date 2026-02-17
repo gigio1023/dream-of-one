@@ -11,6 +11,36 @@ export const ACTION_TYPES = [
 
 export type ActionType = (typeof ACTION_TYPES)[number];
 
+export const SOCIAL_LOOP_STAGES = [
+  "ambient",
+  "report",
+  "intake",
+  "verdict",
+] as const;
+
+export type SocialLoopStage = (typeof SOCIAL_LOOP_STAGES)[number];
+
+export const PLAYER_SPEECH_ACTS = [
+  "SA_COMPLY",
+  "SA_INQUIRE",
+  "SA_FRAME",
+  "SA_BREAK",
+] as const;
+
+export type PlayerSpeechAct = (typeof PLAYER_SPEECH_ACTS)[number];
+
+export const MINEFLAYER_COMMAND_TYPES = [
+  "noop",
+  "chat",
+  "dig",
+  "placeBlock",
+  "placeEntity",
+  "activateBlock",
+  "updateSign",
+] as const;
+
+export type MineflayerCommandType = (typeof MINEFLAYER_COMMAND_TYPES)[number];
+
 export interface PerceptionPacket {
   sessionId: string;
   npcId: string;
@@ -29,6 +59,8 @@ export interface NpcIntent {
   targetId?: string;
   locationId?: string;
   utterance?: string;
+  command?: MineflayerCommandType;
+  commandArgs?: Record<string, unknown>;
   reasonCodes: string[];
   confidence: number;
 }
@@ -43,5 +75,7 @@ export interface DecisionEnvelope {
     warningTier?: "blocking" | "attention" | "reference";
     threadId?: string;
     transport: "codex" | "codex-reply" | "fallback";
+    socialLoopStage?: SocialLoopStage;
+    playerSpeechAct?: PlayerSpeechAct;
   };
 }

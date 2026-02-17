@@ -16,8 +16,8 @@ _Archived snapshot. For current scope/roadmap, see `project.md`._
 - On session end, player input and NPC AI stop, and a final prompt/toast is shown.
 
 ## World & Scene
-- Playable scene: `draem-of-one/Assets/Scenes/Prototype.unity`.
-- Rendering: URP asset at `draem-of-one/Assets/Settings/UniversalRP.asset` with renderer `draem-of-one/Assets/Settings/UniversalRenderer.asset`.
+- Playable scene: `deprecated/unity/draem-of-one/Assets/Scenes/Prototype.unity`.
+- Rendering: URP asset at `deprecated/unity/draem-of-one/Assets/Settings/UniversalRP.asset` with renderer `deprecated/unity/draem-of-one/Assets/Settings/UniversalRenderer.asset`.
 - Runtime helpers expected in scene:
   - `RuntimeNavMeshBaker` (builds NavMesh at play).
   - `UILayouter` (HUD layout at runtime).

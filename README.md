@@ -89,7 +89,7 @@ sequenceDiagram
 
 ## Architecture Boundaries
 
-- Unity authority: world sensing, action validation, action execution, ending rules.
+- Minecraft server + Mineflayer authority: world sensing, action validation, action execution, ending rules.
 - Backend authority: NPC intent brokerage, thread continuity, schema validation.
 - Codex authority: intent proposal only; no direct world mutation.
 - Safety authority: deterministic fallback for timeout, tool, and parse failures.
@@ -98,13 +98,14 @@ sequenceDiagram
 
 ### Prerequisites
 
-- Unity Hub with the local project path `draem-of-one/`.
-- Unity scene `Assets/Scenes/Prototype.unity`.
+- Node.js `>=22`.
+- Backend runtime in `backend/npc-runtime/`.
 - Optional local LLM runtime (`ollama`) or OpenAI API key.
+- Legacy Unity project (deprecated path) at `deprecated/unity/draem-of-one/`.
 
 ### Run
 
-1. Open Unity Hub and add `draem-of-one/`.
+1. Open Unity Hub and add `deprecated/unity/draem-of-one/` (legacy/manual verification path).
 2. Open `Assets/Scenes/Prototype.unity`.
 3. Press Play.
 
@@ -164,20 +165,20 @@ Manual equivalent (if needed):
 ### Headless checks
 
 ```bash
-scripts/unity/run_editor_diagnostics.sh
-scripts/unity/run_playmode_smoke.sh
-scripts/unity/run_all_checks.sh
+deprecated/unity/scripts/run_editor_diagnostics.sh
+deprecated/unity/scripts/run_playmode_smoke.sh
+deprecated/unity/scripts/run_all_checks.sh
 ```
 
 ## Evidence and Release Candidate Workflow
 
 Runtime evidence scripts:
 
-- `scripts/unity/analyze_runtime_evidence.mjs`
-- `scripts/unity/collect_regression_metrics.mjs`
-- `scripts/unity/package_release_candidate.mjs`
-- `scripts/unity/collect_stability_trend.mjs`
-- `scripts/unity/run_stability_trend.sh`
+- `deprecated/unity/scripts/analyze_runtime_evidence.mjs`
+- `deprecated/unity/scripts/collect_regression_metrics.mjs`
+- `deprecated/unity/scripts/package_release_candidate.mjs`
+- `deprecated/unity/scripts/collect_stability_trend.mjs`
+- `deprecated/unity/scripts/run_stability_trend.sh`
 
 Primary outputs:
 

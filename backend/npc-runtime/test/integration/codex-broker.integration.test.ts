@@ -208,6 +208,7 @@ test("workspace artifacts are persisted and reused across calls", async t => {
   assert.equal(existsSync(join(actorDir, "memory.json")), true);
   assert.equal(existsSync(join(actorDir, "summary.json")), true);
   assert.equal(existsSync(join(actorDir, "thread.json")), true);
+  assert.equal(existsSync(join(actorDir, "MEMORY.md")), true);
 
   const thread = JSON.parse(readFileSync(join(actorDir, "thread.json"), "utf8")) as {
     threadId: string;
@@ -217,11 +218,21 @@ test("workspace artifacts are persisted and reused across calls", async t => {
     entries: Array<{ reasonCodes: string[] }>;
     lastReasonCodes: string[];
   };
+  const expectedDate = new Date().toISOString().slice(0, 10);
+  const durableMemory = readFileSync(join(actorDir, "MEMORY.md"), "utf8");
+  const dailyMemory = readFileSync(join(actorDir, "memory", `${expectedDate}.md`), "utf8");
 
   assert.equal(thread.threadId, "thread-ws");
   assert.deepEqual(thread.transportHistory, ["codex", "codex-reply"]);
   assert.equal(memory.entries.length, 2);
   assert.deepEqual(memory.lastReasonCodes, ["second_memory"]);
+  assert.ok(durableMemory.includes("## Simulation Memory Policy"));
+  assert.ok(durableMemory.includes("Player suspicion snapshot: suspicion=0.2, exposure=0.1"));
+  assert.ok(durableMemory.includes("Organization context reference: organization=Store, role=Clerk"));
+  assert.ok(dailyMemory.includes(`# NPC Daily Memory (npc-1) - ${expectedDate}`));
+  assert.ok(dailyMemory.includes("- actionType: Work"));
+  assert.ok(dailyMemory.includes("- actionType: Report"));
+  assert.ok(dailyMemory.includes("- reasonCodes: second_memory"));
   assert.ok(
     gateway.calls[1].prompt.includes("first_memory"),
     "expected second prompt to include prior workspace memory",
@@ -256,6 +267,9 @@ test("fallback evidence is persisted when codex fails", async t => {
     entries: Array<{ usedFallback: boolean; transport: string; reasonCodes: string[] }>;
     lastReasonCodes: string[];
   };
+  const expectedDate = new Date().toISOString().slice(0, 10);
+  const durableMemory = readFileSync(join(actorDir, "MEMORY.md"), "utf8");
+  const dailyMemory = readFileSync(join(actorDir, "memory", `${expectedDate}.md`), "utf8");
 
   assert.equal(fallback.meta.usedFallback, true);
   assert.equal(fallback.meta.transport, "fallback");
@@ -267,6 +281,10 @@ test("fallback evidence is persisted when codex fails", async t => {
   assert.equal(lastEntry.usedFallback, true);
   assert.equal(lastEntry.transport, "fallback");
   assert.deepEqual(memory.lastReasonCodes, ["fallback:codex_timeout"]);
+  assert.ok(durableMemory.includes("Player suspicion snapshot: suspicion=0.2, exposure=0.1"));
+  assert.ok(dailyMemory.includes("- usedFallback: true"));
+  assert.ok(dailyMemory.includes("- transport: fallback"));
+  assert.ok(dailyMemory.includes("- reasonCodes: fallback:codex_timeout"));
 });
 
 test("invalid codex response triggers parse fallback", async () => {

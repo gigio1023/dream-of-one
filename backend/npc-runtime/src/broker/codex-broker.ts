@@ -1,6 +1,6 @@
 import { ACTION_TYPES, type DecisionEnvelope, type PerceptionPacket } from "../contracts/types.js";
 import { createFallbackIntent } from "../runtime/fallback.js";
-import type { ActorWorkspaceArtifacts, ActorWorkspaceStore } from "../memory/actor-workspace-store.js";
+import type { ActorWorkspaceArtifacts, ActorWorkspaceStore, NpcMemoryWriteInput } from "../memory/actor-workspace-store.js";
 import { InMemoryActorWorkspaceStore } from "../memory/actor-workspace-store.js";
 import type { CodexToolGateway } from "./codex-tool-gateway.js";
 import type { ThreadStore } from "./thread-store.js";
@@ -136,7 +136,38 @@ export class DefaultCodexBroker implements CodexBroker {
     workspace.summary.text = this.buildSummary(packet, decision);
     workspace.summary.updatedAt = now;
 
+    this.workspaceStore.appendNpcMemory?.(
+      packet.sessionId,
+      packet.npcId,
+      this.buildNpcMemoryWriteInput(packet, decision, workspace.summary.text, now),
+    );
     this.workspaceStore.save(packet.sessionId, packet.npcId, workspace);
+  }
+
+  private buildNpcMemoryWriteInput(
+    packet: PerceptionPacket,
+    decision: DecisionEnvelope,
+    summary: string,
+    timestamp: string,
+  ): NpcMemoryWriteInput {
+    return {
+      timestamp,
+      sessionId: packet.sessionId,
+      npcId: packet.npcId,
+      landmarkId: packet.landmarkId,
+      actionType: decision.intent.actionType,
+      reasonCodes: [...decision.intent.reasonCodes],
+      usedFallback: decision.meta.usedFallback,
+      transport: decision.meta.transport,
+      reasonCategory: decision.meta.reasonCategory,
+      warningTier: decision.meta.warningTier,
+      socialLoopStage: decision.meta.socialLoopStage,
+      summary,
+      recentEvents: [...packet.recentEvents],
+      nearbyActors: [...packet.nearbyActors],
+      playerSignals: cloneRecord(packet.playerSignals),
+      organizationContext: cloneRecord(packet.organizationContext),
+    };
   }
 
   private buildSummary(packet: PerceptionPacket, decision: DecisionEnvelope): string {
@@ -149,4 +180,8 @@ export class DefaultCodexBroker implements CodexBroker {
       `transport:${decision.meta.transport}`,
     ].join(" | ");
   }
+}
+
+function cloneRecord(value: Record<string, unknown>): Record<string, unknown> {
+  return JSON.parse(JSON.stringify(value)) as Record<string, unknown>;
 }

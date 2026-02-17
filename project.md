@@ -95,7 +95,7 @@ Platform/framework detail is supporting.
 |---|---|---|
 | Mineflayer-only Gate H workflow exists | complete | `docs/design/runtime-evidence.md` |
 | Trajectory diversity verification procedure exists | complete | `docs/design/game-design.md` |
-| Rollback drill procedure and log index exist | complete | `docs/design/runtime-evidence.md`, `docs/design/ws8-rollback-drill-log.md` |
+| Rollback drill procedure and log index exist | complete | `docs/design/runtime-evidence.md`, `docs/deprecated/unity/ws8-rollback-drill-log.md` |
 | Final migration report with residual risk backlog exists | complete | `docs/design/ws8-final-migration-report.md` |
 | Gate H run Evidence Pack set (`runCount >= 3`) | complete | `data/evidence/ws8/gate-h/run-a-evidence-pack.json`, `data/evidence/ws8/gate-h/run-b-evidence-pack.json`, `data/evidence/ws8/gate-h/run-c-evidence-pack.json` |
 | Gate H events snapshot set | complete | `data/evidence/ws8/gate-h/run-a-events.json`, `data/evidence/ws8/gate-h/run-b-events.json`, `data/evidence/ws8/gate-h/run-c-events.json` |
@@ -151,7 +151,7 @@ Platform/framework detail is supporting.
 15. Rollback drill result is recorded with reproducible logs and linked from the migration report.
 
 Validation Criteria for 7.3:
-- `docs/design/ws8-final-migration-report.md` and `docs/design/ws8-rollback-drill-log.md` must exist and include current-cycle entries.
+- `docs/design/ws8-final-migration-report.md` and `docs/deprecated/unity/ws8-rollback-drill-log.md` must exist and include current-cycle entries.
 - Gate H and rollback criteria must remain `pending` until linked runtime artifacts exist at the declared paths.
 
 ## 8) Governance

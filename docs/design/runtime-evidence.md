@@ -191,7 +191,7 @@ deprecated/unity/scripts/run_playmode_smoke.sh
    - `cd backend/npc-runtime && npm run ws8:rollback-drill -- --strict`
 3. Record command outputs and timestamps under:
    - `logs/ws8/rollback-drill/<YYYYMMDD-HHMM>/`
-4. Add a drill entry to `docs/design/ws8-rollback-drill-log.md` with:
+4. Add a drill entry to `docs/deprecated/unity/ws8-rollback-drill-log.md` with:
    - run timestamp,
    - operator,
    - command list,
@@ -204,5 +204,5 @@ deprecated/unity/scripts/run_playmode_smoke.sh
 - Drill result is reproducible through linked command outputs.
 
 ### Validation Criteria
-- `docs/design/ws8-rollback-drill-log.md` contains the latest drill record.
+- `docs/deprecated/unity/ws8-rollback-drill-log.md` contains the latest drill record.
 - Drill artifacts are present under `logs/ws8/rollback-drill/` and linked from the drill record.

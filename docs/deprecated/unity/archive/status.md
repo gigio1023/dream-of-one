@@ -1,5 +1,7 @@
 # Project Status (2026-01-23)
 
+> Deprecated Unity archive document. Retained for historical reference only.
+
 _Archived snapshot. For current scope/roadmap, see `project.md`._
 
 ## Summary

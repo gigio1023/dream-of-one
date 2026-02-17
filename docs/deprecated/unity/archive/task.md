@@ -1,5 +1,7 @@
 # Dream of One — Task Plan (Derived from docs/spec/new-plan.md)
 
+> Deprecated Unity archive document. Retained for historical reference only.
+
 **Purpose:** Provide an execution-ready checklist to implement the MCSS slice defined in docs/spec/new-plan.md.
 **Revision date:** 2026-01-23
 

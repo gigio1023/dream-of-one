@@ -18,7 +18,7 @@ status: Complete (Gate H passed, 2026-02-17)
 | Mineflayer-only Gate H workflow documented | complete | `docs/design/runtime-evidence.md` |
 | Trajectory diversity verification procedure documented | complete | `docs/design/game-design.md` |
 | Rollback drill procedure documented | complete | `docs/design/runtime-evidence.md` |
-| Rollback drill log location documented | complete | `docs/design/ws8-rollback-drill-log.md` |
+| Rollback drill log location documented | complete | `docs/deprecated/unity/ws8-rollback-drill-log.md` |
 | Gate H Mineflayer Evidence Pack run set (`runCount >= 3`) | complete | `data/evidence/ws8/gate-h/run-a-evidence-pack.json`, `data/evidence/ws8/gate-h/run-b-evidence-pack.json`, `data/evidence/ws8/gate-h/run-c-evidence-pack.json` |
 | Gate H events snapshot set | complete | `data/evidence/ws8/gate-h/run-a-events.json`, `data/evidence/ws8/gate-h/run-b-events.json`, `data/evidence/ws8/gate-h/run-c-events.json` |
 | Trajectory diversity verification (`runCount >= 3`) | complete | `data/evidence/ws8/gate-h/trajectory-diversity.json` |
@@ -37,7 +37,7 @@ status: Complete (Gate H passed, 2026-02-17)
 
 ## 5) Rollback Drill Reference
 - Authoritative workflow: `docs/design/runtime-evidence.md` Section 9.
-- Drill record index: `docs/design/ws8-rollback-drill-log.md`.
+- Drill record index: `docs/deprecated/unity/ws8-rollback-drill-log.md`.
 
 ## 6) Gate H Decision Record
 | Field | Value |
@@ -55,7 +55,7 @@ status: Complete (Gate H passed, 2026-02-17)
 |---|---|---|---|
 | RR-WS8-001 | Trajectory diversity may collapse under repeated identical scenario setup | monitoring | Keep refreshing `data/evidence/ws8/gate-h/trajectory-diversity.json` in each RC cycle |
 | RR-WS8-002 | Backpressure fallback share may exceed target envelope during peak multi-bot load | monitoring | Keep collecting `/health/queue` and RC metrics trend (`data/evidence/ws8/gate-h/*-regression-metrics.json`) |
-| RR-WS8-003 | Rollback drill reproducibility may degrade if Unity deprecated-path scripts drift | monitoring | Keep latest drill report under `logs/ws8/rollback-drill/` and sync `docs/design/ws8-rollback-drill-log.md` |
+| RR-WS8-003 | Rollback drill reproducibility may degrade if Unity deprecated-path scripts drift | monitoring | Keep latest drill report under `logs/ws8/rollback-drill/` and sync `docs/deprecated/unity/ws8-rollback-drill-log.md` |
 
 ## 8) Next Update Rule
 - Do not change any `pending` criterion to `complete` without adding the linked artifact path in this report and in the rollback drill log when applicable.

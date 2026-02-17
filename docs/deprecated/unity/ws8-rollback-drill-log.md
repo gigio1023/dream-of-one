@@ -1,11 +1,13 @@
 ---
-doc: docs/design/ws8-rollback-drill-log.md
+doc: docs/deprecated/unity/ws8-rollback-drill-log.md
 project: Dream of One
 revision: 2026-02-17
 status: Active
 ---
 
 # WS8 Rollback Drill Log
+
+> Deprecated Unity archive log. Current primary Runtime Path remains Mineflayer + TypeScript backend.
 
 ## 1) Purpose
 - Keep a reproducible log of rollback drills for the deprecated Unity path.
@@ -15,7 +17,7 @@ status: Active
 - Archive directory for raw command outputs:
   - `logs/ws8/rollback-drill/<YYYYMMDD-HHMM>/`
 - Summary index (this file):
-  - `docs/design/ws8-rollback-drill-log.md`
+  - `docs/deprecated/unity/ws8-rollback-drill-log.md`
 
 ## 3) Entry Format (required fields)
 - `timestamp`

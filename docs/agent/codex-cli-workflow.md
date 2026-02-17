@@ -22,6 +22,24 @@ It is aligned with `AGENTS.md` and the operating runbook in `docs/agent/runbook.
 
 ## 2) End-to-end workflow
 
+### Workflow visualization
+
+```mermaid
+flowchart TD
+  Intake["Linear issue intake"] --> Classify{"Execution lane"}
+  Classify -->|Local non-Unity| Local["Local implementation"]
+  Classify -->|Local Unity MCP| Unity["Unity MCP implementation"]
+  Classify -->|Cloud-safe| Cloud["Codex Cloud delegation"]
+  Local --> Beads["Beads atomic task graph"]
+  Unity --> Beads
+  Cloud --> Review["Review returned PR locally"]
+  Beads --> Validate["Validation checks + Mermaid render checks"]
+  Validate --> PR["GitHub MCP PR lifecycle"]
+  Review --> PR
+  PR --> Linear["Linear sync: In Review -> Done"]
+  Linear --> Close["Close Beads graph"]
+```
+
 ### Step 1: Intake and issue selection
 
 1. Open the target Linear issue or create one first.
@@ -44,6 +62,8 @@ Use this decision matrix:
 | Cloud (Codex Cloud) | Cloud-safe and no Unity serialized assets/MCP dependency | `agent:codex-cloud` |
 
 Cloud delegation must never include Unity serialized asset edits.
+Deprecated Unity docs live under:
+- `docs/deprecated/unity/index.md`
 
 ### Step 3: Build Beads execution graph
 

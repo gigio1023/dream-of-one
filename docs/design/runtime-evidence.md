@@ -1,7 +1,7 @@
 ---
 doc: docs/design/runtime-evidence.md
 project: Dream of One
-revision: 2026-02-17
+revision: 2026-02-18
 status: Active
 ---
 
@@ -9,6 +9,7 @@ status: Active
 
 This document defines the operational procedure for runtime Evidence collection and Validation Criteria for Dream of One.
 Execution sequencing Source of Truth is Linear issues, governed by `project.md`.
+Authority boundary for active vs deprecated references is defined in `docs/authority-map.md`.
 
 ## 1) Goal
 - Automatically validate `transport`, `threadId`, and `usedFallback` from Mineflayer + backend runtime outputs.
@@ -108,6 +109,12 @@ Legacy Unity historical comparison workflow (optional, deprecated path):
 deprecated/unity/scripts/run_editor_diagnostics.sh
 deprecated/unity/scripts/run_playmode_smoke.sh
 ```
+
+CI automation references:
+- Runtime conformance workflow: `.github/workflows/backend-runtime.yml`
+- Evidence gate workflow: `.github/workflows/backend-evidence-gate.yml`
+  - CI validates the declared Gate H artifact set and trajectory diversity from per-run Evidence Packs.
+  - CI must not regenerate all run artifacts from a single backend log source because that collapses run-signature diversity.
 
 ## 4) Generated Artifacts
 - `data/evidence/evidence-pack-*.json` or custom export filename

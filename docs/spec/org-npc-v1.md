@@ -1,40 +1,46 @@
 # Org + NPC spec v1 (MCSS: Store/Studio/Park/Station)
 
-Revision date: 2026-02-13
+Revision date: 2026-02-18
 Status: Active (Lucid Cover Social Stealth v1)  
 SoT references: `project.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`
 
-This document is the v1 spec baseline for organization procedures, NPC roles/routines, incident templates, and artifact expectations for the MCSS vertical slice. It aligns with runtime terminology in `OrganizationCatalog`, `WorldDefinitionSeeder`, and `NpcDefinition`.
+This document is the v1 Specification baseline for organization procedures, NPC roles/routines, incident templates, and artifact expectations for the MCSS vertical slice. It aligns with the active Runtime Path terminology from:
+- `project.md`
+- `docs/design/game-design.md`
+- `docs/design/dream-laws.md`
+- `docs/design/cover-tests.md`
+- `backend/npc-runtime/src/contracts/types.ts`
 
 **Design rail:** The player is **not** an investigator. NPCs/Station investigate the player’s procedural deviations and dream‑law violations.
 
-## Terminology alignment (code SoT)
+## Terminology alignment (Runtime Path SoT)
 
 ### Organization IDs
 
-`OrganizationCatalog` currently uses the following organization IDs for this slice:
+The following organization IDs are canonical for this slice:
 
 - `Store`
 - `Studio`
 - `Park`
 - `Station` (police outpost)
 
-For design text, “Police” refers to the `Station` organization ID. When an enum is introduced later, prefer `OrganizationId.Station` for police.
+For design text, “Police” refers to the `Station` organization ID.
 
-### NPC definition fields (design-relevant)
+### Runtime entity fields (design-relevant)
 
-`NpcDefinition` fields this spec references most often:
+Active Runtime Path fields this spec references most often:
 
 - `npcId`: stable NPC identity key (e.g., `Police_Officer`)
 - `roleName`: role/archetype name used by UI/dialogue
 - `organization`: organization ID string (`Store`, `Studio`, `Park`, `Station`)
-- `routine`: routine profile key (anchors + schedule logic)
-- `authorityProfile`: governs what commands are legitimate
-- `anchorName`: primary home anchor (e.g., `StoreBuilding`, `Station`)
+- `recentEvents`: social/rule context for escalation and causality
+- `organizationContext`: role/procedure context used by decision policy
+- `playerSignals`: bounded player behavior context (including speech-act signals)
 
 ### Anchors and zones already seeded
 
-Anchors and zones referenced below are grounded in `WorldDefinitionSeeder`:
+Anchors and zones referenced below are scenario identifiers for cross-document consistency and telemetry interpretation.
+They are design/runtime labels, not a normative dependency on deprecated Unity seeders:
 
 - Building anchors:
   - `StoreBuilding`
@@ -49,7 +55,12 @@ Anchors and zones referenced below are grounded in `WorldDefinitionSeeder`:
 
 ## Organization procedures (spec tables)
 
-Each organization table captures the current design intent in the same shape as `OrganizationDefinition`: `goal`, `procedures`, `resources`, `artifacts`, and `roles`.
+Each organization table captures current design intent in this shape:
+- `goal`
+- `procedures`
+- `resources`
+- `artifacts`
+- `roles`
 
 ### Store (`Store`)
 
@@ -93,7 +104,7 @@ Each organization table captures the current design intent in the same shape as 
 
 ## NPC archetypes and routines
 
-Each organization defines at least two NPC archetypes. Archetypes are expressed in terms of `NpcDefinition`-compatible keys (`roleName`, `organization`, `routine`, `authorityProfile`, `anchorName`).
+Each organization defines at least two NPC archetypes. Archetypes are expressed with Runtime Path fields (`roleName`, `organization`) and spec-level descriptors (`routine`, `authorityProfile`, `anchorName`) for consistent design and validation language.
 
 ### Store archetypes
 

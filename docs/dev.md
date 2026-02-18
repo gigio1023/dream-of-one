@@ -1,10 +1,11 @@
 # Developer Guide
 
-Revision date: 2026-02-17
+Revision date: 2026-02-18
 
 This guide is the practical run/verify reference for the current Mineflayer + TypeScript Runtime Path.
 
 Terminology rule: use canonical terms from `terminology.md` for docs and user-facing runtime text.
+Authority map: `docs/authority-map.md`.
 
 ---
 
@@ -20,6 +21,12 @@ Primary Runtime Path:
 Legacy Runtime Path (deprecated, rollback only):
 - Unity runtime operations: `docs/deprecated/unity/dev.md`
 - Unity archive index: `docs/deprecated/unity/index.md`
+- These Unity references are archival only and are not active runtime authority.
+
+v0.1 status labels for reporting:
+- `runtime-complete`
+- `design-complete`
+- `release-complete`
 
 ---
 
@@ -151,8 +158,16 @@ Beads (`bd`) is the local execution graph for detailed dependency tracking:
 - track local WIP sequencing,
 - keep local execution context stable across sessions.
 
+Use these status labels in issue updates and release notes:
+- `runtime-complete`
+- `design-complete`
+- `release-complete`
+
 References:
 - Project overview: [`docs/overview.md`](overview.md)
 - Agent runbook: [`docs/agent/runbook.md`](agent/runbook.md)
 - Codex CLI workflow playbook: [`docs/agent/codex-cli-workflow.md`](agent/codex-cli-workflow.md)
+- Authority map: [`docs/authority-map.md`](authority-map.md)
+- Runtime CI gate: [`.github/workflows/backend-runtime.yml`](../.github/workflows/backend-runtime.yml)
+- Evidence gate CI: [`.github/workflows/backend-evidence-gate.yml`](../.github/workflows/backend-evidence-gate.yml)
 - Agent skills: [`docs/agent-skills.md`](agent-skills.md)

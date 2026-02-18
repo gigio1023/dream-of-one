@@ -24,11 +24,11 @@ flowchart LR
   Bot --> Adapter["Runtime Adapter"]
   Adapter --> Api["Decision API"]
   Api --> Service["Decision Service"]
-  Service --> Broker["Codex Broker"]
-  Broker --> Codex["Codex CLI"]
+  Service --> Broker["Codex Broker\n(prompt builder)"]
+  Broker --> Codex["Codex CLI\n(stateless tool)"]
   Service --> Fallback["Deterministic Fallback Path"]
-  Service --> MemoryWriter["NPC Memory Persistence Service"]
-  MemoryWriter --> MemoryFiles["MEMORY.md + memory/YYYY-MM-DD.md"]
+  Broker <-->|prompt context + updates| Workspace["Actor Workspace\n(persistent)"]
+  Broker <-->|thread continuity| Thread["Thread Store\n(threadId)"]
   Service --> Evidence["Telemetry + Evidence Pack"]
 ```
 
@@ -42,20 +42,27 @@ sequenceDiagram
   participant Service as Decision Service
   participant Gate as Schema + Policy Gate
   participant Broker as Codex Broker
-  participant Memory as Memory Persistence Service
+  participant Workspace as Actor Workspace Store
+  participant Thread as Thread Store
+  participant Codex as Codex CLI (stateless tool)
   participant Evidence as Telemetry/Evidence
 
   Bot->>Api: PerceptionPacket
   Api->>Service: decide(packet)
   Service->>Gate: validate packet + policy
-  alt valid Runtime Path
-    Gate->>Broker: request intent
-    Broker-->>Service: DecisionEnvelope
-  else invalid/timeout/parse/tool
-    Gate-->>Service: fallback reason
-    Service->>Service: build fallback intent
+  Gate->>Broker: decide(packet)
+  Broker->>Workspace: load(sessionId,npcId)
+  Broker->>Thread: get(sessionId,npcId)
+  Note over Broker,Codex: Broker builds prompt from packet + Actor Workspace. Codex CLI never reads/writes workspace files directly.
+  alt Runtime Path (Codex)
+    Broker->>Codex: execute (prompt)
+    Codex-->>Broker: JSON intent + threadId
+  else Fallback Path (deterministic)
+    Broker-->>Broker: build fallback intent
   end
-  Service->>Memory: persist workspace + memory files
+  Broker->>Thread: set(sessionId,npcId,threadId)
+  Broker->>Workspace: save(sessionId,npcId,workspace update)
+  Broker-->>Service: DecisionEnvelope
   Service->>Evidence: emit decision/evidence record
   Service-->>Api: DecisionEnvelope
 ```

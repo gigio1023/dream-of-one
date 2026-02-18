@@ -1,6 +1,6 @@
 # Codex CLI Workflow Playbook (Dream of One)
 
-Revision date: 2026-02-17
+Revision date: 2026-02-18
 
 This playbook is the detailed execution workflow for running Codex CLI in this repository.  
 It is aligned with `AGENTS.md` and the operating runbook in `docs/agent/runbook.md`.
@@ -124,6 +124,7 @@ For Unity MCP work:
 2. Request Codex/Copilot review.
 3. Track bot feedback with a decision ledger:
    - `comment_id`, `severity`, `decision(valid|partial|invalid)`, `action`, `commit`, `status`, `reason`.
+   - Ledger schema and required date/owner/evidence fields: `docs/agent/decision-ledger.md`.
 4. Enforce merge gate:
    - if `status.total_count > 0`, checks must be `success`;
    - if `status.total_count == 0`, checks gate passes;

@@ -1,17 +1,23 @@
 ---
 name: 문서 개선
-about: 문서 오타, 누락, 개선 제안
+about: 문서 정확성/정합성/가독성 개선 제안
 labels: documentation
 ---
 
-## 대상 문서
+## Goal
+<!-- 문서 변경으로 달성할 목표 -->
 
-<!-- 어떤 문서를 개선하나요? -->
-- 파일 경로: 
+## Scope & Constraints
+<!-- 변경 대상 문서, 제외 범위, 용어/권한 제약 -->
+- 파일 경로:
 
-## 문제점
+## Acceptance Criteria
+- [ ]
 
-<!-- 현재 문서의 문제점은 무엇인가요? -->
+## Validation Criteria
+- [ ]
+
+## 대상 문서 상세
 - [ ] 오타/맞춤법
 - [ ] 정보 누락
 - [ ] 오래된 정보
@@ -21,17 +27,13 @@ labels: documentation
 
 ## 제안하는 개선 내용
 
-<!-- 어떻게 개선하면 좋을까요? -->
-
 ## 영향 범위
-
-<!-- 이 문서 변경이 다른 문서에도 영향을 주나요? -->
 - [ ] 다른 문서 링크 업데이트 필요
 - [ ] 관련 문서 동기화 필요
-- [ ] ADR 작성 필요
+- [ ] Specification/Schema 정합성 점검 필요
 - [ ] 영향 없음
 
 ## 추가 노트
 
-<!-- 기타 고려사항 -->
-
+## Decision Ledger Link
+<!-- Optional: docs/agent/decision-ledger.md 기반 기록 링크 -->

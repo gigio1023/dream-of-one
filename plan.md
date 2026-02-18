@@ -1,419 +1,352 @@
-# plan.md
+---
+doc: plan.md
+project: Dream of One
+revision: 2026-02-18
+status: Complete (v4 Gap Closure Plan delivered)
+owner: You
+---
 
-## Status Snapshot
-- Date: 2026-02-17
-- Plan revision: v3 (Minecraft system-aligned)
-- Runtime Path target: Mineflayer + TypeScript backend
-- Legacy Runtime Path: Unity (deprecated, retained)
-- Mineflayer source baseline: `/Users/user/git/gigio1023/mineflayer`
-- Canonical Mineflayer docs baseline: `docs/mineflayer/index.md`
-- Project definition alignment: `project.md` v10 (Minecraft Intent-First)
+# Dream of One - Execution Plan (Gap Closure v4)
 
-## Execution Status
-- Phase 0: completed (governance lock + exclusion/deprecation policy)
-- Phase 1: completed (baseline implementation)
-- Phase 2: completed (baseline implementation)
-- Phase 3: completed (baseline implementation)
-- Phase 4: completed (baseline implementation)
-- Phase 5: completed (baseline implementation)
-- Phase 6: completed (baseline implementation)
-- Phase 7: completed (Unity relocation to deprecated namespace)
-- Phase 8: completed (Gate H artifacts, rollback drill archive, migration decision record)
+## 0) Status Snapshot
+- Date: 2026-02-18
+- Planning source: repository feasibility review findings (2026-02-18)
+- Product target: playable v0.1 slice with deterministic social-stealth pressure loop
+- Runtime Path: Mineflayer Bot + TypeScript backend
+- Legacy runtime: Unity deprecated path retained for rollback/reference
+- Work Source of Truth: Linear issues
+- Local execution graph: Beads (`bd`)
 
-## WS8 Completion Criteria Status (artifact-gated)
-| Criterion | Status | Artifact |
-|---|---|---|
-| Mineflayer-only Gate H workflow | complete | `docs/design/runtime-evidence.md` |
-| Trajectory diversity verification procedure | complete | `docs/design/game-design.md` |
-| Rollback drill procedure and log index | complete | `docs/design/runtime-evidence.md`, `docs/deprecated/unity/ws8-rollback-drill-log.md` |
-| Final migration report with residual risk backlog | complete | `docs/design/ws8-final-migration-report.md` |
-| Gate H run Evidence Pack set (`runCount >= 3`) | complete | `data/evidence/ws8/gate-h/run-a-evidence-pack.json`, `data/evidence/ws8/gate-h/run-b-evidence-pack.json`, `data/evidence/ws8/gate-h/run-c-evidence-pack.json` |
-| Gate H events snapshot set | complete | `data/evidence/ws8/gate-h/run-a-events.json`, `data/evidence/ws8/gate-h/run-b-events.json`, `data/evidence/ws8/gate-h/run-c-events.json` |
-| Rollback drill execution output archive | complete | `logs/ws8/rollback-drill/20260217-0949/rollback-drill-report.json` |
-| Gate H final decision record | complete | `docs/design/ws8-final-migration-report.md` |
+## 1) Intent
+Close the documented gap between current runtime readiness and the design-complete v0.1 gameplay promise by aligning scope language, making Dream Law/Cover Test behavior executable, enforcing runtime gates in CI, clarifying Specification authority, and institutionalizing end-to-end Acceptance Criteria verification.
 
-## Intent
-- Complete migration execution so Mineflayer + TypeScript backend becomes the active Minecraft Runtime Path while preserving the same AI-native NPC world behavior (social pressure loop, deterministic adjudication, bounded actions/speech).
-- Focus engineering on AI-native NPC society quality rather than Unity gameplay production overhead.
-- Keep all Unity code and assets in repository history and working tree by moving them to a deprecated location instead of deleting them.
+## 2) Background
+Current repository state is strong on runtime hardening and Evidence operations (Schema, Fallback Path, queue control, telemetry endpoints, Gate H artifacts). The remaining gap is not baseline runtime safety; the gap is design-to-runtime closure and release governance automation.
 
-## Context
-- Existing backend already enforces key guardrails: Schema validation, deterministic Fallback Path, session continuity tracking (`sessionId+npcId` + `threadId`), one in-flight action per bot (Single-flight), and global concurrency limit (Global Cap).
-- Mineflayer documentation and source analysis are now available as canonical input under `docs/mineflayer/**`.
-- Existing Unity runtime remains valuable as historical Evidence baseline and rollback safety path.
+Key baseline strengths already present:
+- Deterministic runtime guardrails and bounded execution.
+- Evidence Pack pipeline and migration artifacts.
+- Clear primary Runtime Path and deprecated Unity policy.
 
-## Source Baseline and Authority
+Key gap themes from the feasibility review:
+1. Scope narrative can be misread as full-game complete when target is v0.1 slice.
+2. Dream Law/Cover Test design breadth exceeds executable runtime enforcement breadth.
+3. Runtime quality gates are local-first and not enforced by CI.
+4. Some active Specification text still references deprecated Unity implementation as alignment anchor.
+5. End-to-end Acceptance Criteria verification is not yet systematized as a repeatable release routine.
 
-### Canonical references for this plan
-- Runtime Specification: `docs/mineflayer/spec/runtime.md`
-- Action API Specification: `docs/mineflayer/spec/action-api.md`
-- Event Lifecycle Specification: `docs/mineflayer/spec/event-lifecycle.md`
-- API catalog: `docs/mineflayer/reference/api-catalog.md`
-- Implementation guide: `docs/mineflayer/guides/implementation.md`
-- Constraint context: `docs/mineflayer/foundation/context.md`, `docs/mineflayer/foundation/constraint-trace.md`
+## 3) Goals
+- Goal 1: Make v0.1 scope boundary explicit and non-ambiguous across core docs and execution governance.
+- Goal 2: Convert design-defined social pressure rules into executable and verifiable runtime behavior.
+- Goal 3: Enforce runtime verification and release Evidence gates in CI and release workflow.
+- Goal 4: Resolve Specification authority ambiguity between active Runtime Path and deprecated Unity references.
+- Goal 5: Establish repeatable end-to-end acceptance validation for the 10-12 minute session loop.
 
-### Explicit exclusion
-- This plan does **not** use `/Users/user/git/gigio1023/minecraft-llm-agent-community` as input or dependency.
-
-## Goals
-- Goal 1: Establish Mineflayer as primary Runtime Path for active development and release validation.
-- Goal 2: Preserve product Intent and social-stealth logic without expanding game scope.
-- Goal 3: Port bounded action/speech behavior using Mineflayer event/action semantics.
-- Goal 4: Maintain deterministic safety behavior (Reason Code, Reason Category, Fallback Path).
-- Goal 5: Move Unity runtime to deprecated location while retaining full rollback capability.
-
-## Scope
-
+## 4) Scope
 ### In Scope
-- Mineflayer runtime foundation and backend integration.
-- Event normalization and decision loop bridging.
-- High-risk action orchestration using documented Action API semantics.
-- Validation Criteria and Evidence Pack migration to Mineflayer runtime.
-- Unity deprecation process (move to deprecated path, no deletion).
+- Planning, governance, and sequencing needed to close the five audit findings.
+- Runtime-facing behavior closure for Dream Laws, Cover Tests, and report/intake/verdict causality.
+- CI/release gate planning for check automation and Evidence artifact verification.
+- Documentation authority realignment and deprecated-reference hygiene.
+- End-to-end acceptance validation process design (automated + human-in-loop protocol).
 
 ### Out of Scope
-- Rewriting Mineflayer upstream internals as a long-term fork.
-- Visual parity effort with Unity presentation quality.
-- New gameplay systems (economy, progression, combat expansion).
-- Any dependency on old community repos.
+- New gameplay systems outside `project.md` v0.1 boundary.
+- Stack migration away from current TypeScript backend.
+- Expansion to economy/combat/progression systems.
+- Deletion of deprecated Unity assets.
 
-## Non-Negotiable Constraints
-- Node runtime baseline for Mineflayer services: `>=22` (operational target `22.x`).
-- Action dispatch starts only after lifecycle readiness gates (`connect/login/game/spawn/inject_allowed` path).
-- Critical world mutations (dig/place/interact) enforce per-bot one in-flight action and global concurrency limit.
-- Action success requires Evidence (event/state confirmation), not packet-send completion only.
-- All fallback outputs must include deterministic Reason Code and Reason Category.
-- Unity code must be retained and moved to deprecated path; deletion is prohibited in migration scope.
+## 5) Non-Negotiable Constraints
+- Keep `project.md` as primary product definition.
+- Keep Linear as execution Source of Truth.
+- Keep Mineflayer Runtime Path as release authority.
+- Keep Fallback Path deterministic and Evidence-traceable.
+- Keep bounded NPC actions and player speech acts.
+- Keep deprecated Unity path retained, not deleted.
+- Keep terminology aligned with `terminology.md` canonical vocabulary.
 
-## Minecraft-Native Observation Model
-- Prioritize nearby-NPC observability using Minecraft-native signals:
-  - block/entity updates around active NPCs,
-  - entity and block events (`entitySpawn`, `blockUpdate`, `diggingCompleted`, `blockPlaced`, `windowOpen`),
-  - structured runtime evidence fields (`transport`, `threadId`, `usedFallback`, `reasonCategory`, `warningTier`).
-- Treat this observation model as primary over Unity-specific telemetry assumptions.
-- Require perception and validation logic to operate from runtime events near each active NPC context window.
+## 6) Workstream Overview
+| Workstream | Purpose | Primary gap addressed |
+|---|---|---|
+| WS1 Scope Alignment | Remove ambiguity between v0.1 slice and full-game interpretation | Finding 1 |
+| WS2 Design Executability Closure | Align Dream Laws/Cover Tests with executable runtime Specification | Finding 2 |
+| WS3 CI and Release Gates | Enforce runtime checks and Evidence gates in automation | Finding 3 |
+| WS4 Specification Authority Cleanup | Remove active dependency on deprecated Unity alignment anchors | Finding 4 |
+| WS5 End-to-End Acceptance System | Standardize run-level verification for session loop and social outcomes | Finding 5 |
+| WS6 Governance and Tracking | Keep execution traceable and auditable across cycles | Cross-cutting |
 
-## Target Runtime Architecture (Migration Outcome)
+## 6.1) Completion status (2026-02-18)
+| Workstream | Status | Delivered artifacts |
+|---|---|---|
+| WS1 Scope Alignment | complete | `project.md`, `README.md`, `docs/overview.md` scope/status label alignment |
+| WS2 Design Executability Closure | complete | `docs/design/rule-runtime-trace-matrix.md`, `docs/design/social-causality-verification.md` |
+| WS3 CI and Release Gates | complete | `.github/workflows/backend-runtime.yml`, `.github/workflows/backend-evidence-gate.yml` |
+| WS4 Specification Authority Cleanup | complete | `docs/authority-map.md`, `docs/spec/org-npc-v1.md`, `docs/design/runtime-evidence.md` cleanup |
+| WS5 End-to-End Acceptance System | complete | `docs/design/acceptance-session-protocol.md`, `docs/agent/templates/acceptance-review-template.md` |
+| WS6 Governance and Tracking | complete | `docs/agent/decision-ledger.md`, `.github/ISSUE_TEMPLATE/*.md`, runbook/workflow ledger linkage |
 
-### Runtime Path (new primary)
-- Mineflayer bot layer (event ingestion, action execution).
-- Runtime adapter layer (typed wrappers, lifecycle gates, action runner).
-- Decision bridge layer (perception schema -> backend decision payload -> executable `bot.*` commands).
-- Backend orchestration layer (Schema, session continuity, per-bot action queue limits, global concurrency limits, Fallback Path).
-- Evidence layer (telemetry, regression metrics, Release Candidate Evidence Pack).
+## 7) Detailed Plan
 
-### Deprecated Path (legacy retained)
-- Unity runtime is now under `deprecated/unity/draem-of-one/`.
-- Unity scripts are now under `deprecated/unity/scripts/`.
-- Deprecated namespace is maintenance-only and retained for rollback.
+## WS1 - Scope Alignment (v0.1 clarity)
+### Phase WS1.1 - Canonical scope statement
+- Define a single canonical statement describing v0.1 as a vertical slice, not full content-complete game.
+- Place this statement in all top-level reader entry points.
 
-## Workstream Matrix
+Acceptance Criteria:
+- Scope statement appears consistently in `project.md`, `README.md`, and `plan.md`.
+- No conflicting wording implies full content-complete delivery in current cycle.
 
-| ID | Workstream | Primary outputs | Depends on |
+Validation Criteria:
+- Documentation review confirms one consistent scope narrative across primary entry docs.
+
+### Phase WS1.2 - Scope split model
+- Create explicit split between:
+  - v0.1 completion criteria,
+  - post-v0.1 expansion backlog.
+- Define what is “must-have now” versus “future expansion.”
+
+Acceptance Criteria:
+- Every major design requirement is tagged as either v0.1 mandatory or post-v0.1 backlog.
+
+Validation Criteria:
+- Linear roadmap reflects the same split without mixed-priority wording.
+
+### Phase WS1.3 - Stakeholder-facing status model
+- Define a simple release language for status reporting:
+  - runtime-complete,
+  - design-complete,
+  - release-complete.
+
+Acceptance Criteria:
+- Status reports and release comments use the standardized labels.
+
+Validation Criteria:
+- Two consecutive reporting cycles show no label drift.
+
+## WS2 - Design Executability Closure (Dream Laws/Cover Tests)
+### Phase WS2.1 - Rule-to-runtime trace matrix
+- Build a trace matrix linking Dream Law and Cover Test definitions to runtime-observable behavior and Evidence fields.
+- Identify non-executable design clauses and classify them by criticality.
+
+Acceptance Criteria:
+- Matrix exists for all global and landmark rule groups.
+- Non-executable clauses are classified as blocking or backlog.
+
+Validation Criteria:
+- Review confirms each mandatory v0.1 rule has a runtime-observable trace point.
+
+### Phase WS2.2 - Social process causality closure
+- Standardize report/intake/verdict causality requirements for runtime outputs and player-facing interpretation.
+- Define minimum “why-line” and artifact linkage expectations.
+
+Acceptance Criteria:
+- Every escalation stage has deterministic causality requirements.
+- Required artifact categories are defined for each stage.
+
+Validation Criteria:
+- Sample run reviews show readable “what triggered / who witnessed / what record was created” structure.
+
+### Phase WS2.3 - Landmark scenario closure
+- Define mandatory scenario coverage for `Store`, `Studio`, `Park`, `Station` within session target.
+- Establish per-landmark minimum trigger and evidence expectations.
+
+Acceptance Criteria:
+- Each landmark has defined mandatory trigger and evidence conditions.
+- Session choreography remains within 10-12 minute target boundaries.
+
+Validation Criteria:
+- Scenario verification report demonstrates all landmarks are covered in planned run sets.
+
+### Phase WS2.4 - Deterministic bounded-behavior consistency
+- Reconcile design intent with bounded action/speech constraints.
+- Explicitly prohibit design additions that violate current bounded model during v0.1.
+
+Acceptance Criteria:
+- Design docs and runtime constraints use the same bounded vocabulary.
+
+Validation Criteria:
+- Policy review confirms no v0.1 requirement requires unbounded behavior.
+
+## WS3 - CI and Release Gates
+### Phase WS3.1 - Runtime quality gate in CI
+- Define required CI checks for build, integration tests, and essential runtime conformance.
+- Mark these checks as release-blocking for Runtime Path changes.
+
+Acceptance Criteria:
+- CI policy defines blocking versus non-blocking checks.
+- Runtime Path changes cannot merge without passing required gates.
+
+Validation Criteria:
+- Pull request checks demonstrate required gate enforcement in practice.
+
+### Phase WS3.2 - Evidence gate automation
+- Define automation that validates required Evidence Pack and trajectory artifacts for release decisions.
+- Include deterministic pass/fail interpretation rules.
+
+Acceptance Criteria:
+- Release gate policy references only Mineflayer Runtime Path Evidence artifacts.
+- Required artifact set is machine-verifiable.
+
+Validation Criteria:
+- Dry-run release gate produces pass/fail output with explicit reason summary.
+
+### Phase WS3.3 - Failure escalation protocol
+- Define action policy for gate failures (owner, SLA target, rollback decision path).
+- Separate blocking failures from attention-level follow-up.
+
+Acceptance Criteria:
+- Gate failures produce deterministic issue routing and decision ownership.
+
+Validation Criteria:
+- Failure simulation run confirms escalation protocol is followed without ambiguity.
+
+## WS4 - Specification Authority Cleanup
+### Phase WS4.1 - Authority map publication
+- Publish a clear authority map for each doc class:
+  - product definition,
+  - runtime Specification,
+  - deprecated historical reference.
+
+Acceptance Criteria:
+- Every active doc declares authority type and scope.
+
+Validation Criteria:
+- Cross-doc review finds no unresolved authority conflicts.
+
+### Phase WS4.2 - Deprecated reference isolation
+- Remove or downgrade active alignment statements that depend on deprecated Unity implementation.
+- Keep deprecated docs as archive/reference only.
+
+Acceptance Criteria:
+- Active Runtime Path docs no longer require deprecated Unity code as normative anchor.
+
+Validation Criteria:
+- Documentation lint/review confirms active docs point to Runtime Path authority sources.
+
+### Phase WS4.3 - Terminology and naming consistency
+- Align canonical terms across plan/design/runbook/release materials.
+- Ensure terms like `Specification`, `Acceptance Criteria`, and `Validation Criteria` remain consistent.
+
+Acceptance Criteria:
+- Canonical terminology is used in updated docs without conflicting aliases.
+
+Validation Criteria:
+- Terminology review checklist passes for all modified planning/governance docs.
+
+## WS5 - End-to-End Acceptance System
+### Phase WS5.1 - Acceptance scenario specification
+- Define standard acceptance run scenarios for v0.1 loop verification.
+- Include expected session length, social pressure trajectory expectations, and fallback tolerance.
+
+Acceptance Criteria:
+- Scenario set covers core session loop and social causality outcomes.
+
+Validation Criteria:
+- Scenario pack review confirms alignment with `project.md` Section 7 criteria.
+
+### Phase WS5.2 - Run orchestration and evidence capture protocol
+- Define repeatable run procedure for collecting telemetry, Evidence Pack, and run summary artifacts.
+- Standardize run identifiers and artifact indexing.
+
+Acceptance Criteria:
+- Run protocol yields reproducible artifacts for each acceptance scenario.
+
+Validation Criteria:
+- Three consecutive run sets produce complete artifact bundles without missing required fields.
+
+### Phase WS5.3 - Human-in-loop review gate
+- Add explicit human review step for player-facing readability criteria:
+  - pressure legibility,
+  - report/intake/verdict readability,
+  - outcome fairness explanation.
+
+Acceptance Criteria:
+- Review template exists and is required before release decision finalization.
+
+Validation Criteria:
+- Acceptance cycle logs include reviewer sign-off and linked Evidence references.
+
+## WS6 - Governance and Tracking
+### Phase WS6.1 - Linear issue quality standard
+- Standardize issue template requirements (Goal, Scope, Acceptance Criteria, Validation Criteria, constraints).
+- Require alignment with current workstream/phase context.
+
+Acceptance Criteria:
+- New execution issues include all required planning fields.
+
+Validation Criteria:
+- Issue sampling across one cycle shows compliance with template requirements.
+
+### Phase WS6.2 - Beads graph hygiene
+- Keep atomic local execution decomposition aligned with Linear sequencing.
+- Track discovered follow-up work explicitly with dependency links.
+
+Acceptance Criteria:
+- Each active Linear issue has corresponding atomic Beads coverage when local execution is ongoing.
+
+Validation Criteria:
+- Beads dependency graph shows no orphan high-priority local tasks.
+
+### Phase WS6.3 - Decision ledger discipline
+- Record planning decisions, deferrals, and risk posture changes with dated rationale.
+
+Acceptance Criteria:
+- Every scope or gate decision includes date, owner, and linked Evidence.
+
+Validation Criteria:
+- Decision review can reconstruct why release posture changed between cycles.
+
+## 8) Dependency Sequence
+1. WS1 scope alignment starts immediately and gates phrasing in all downstream work.
+2. WS4 authority cleanup runs in parallel with WS1, and must complete before final WS2 sign-off.
+3. WS2 design executability closure defines behavior targets for WS5 acceptance scenarios.
+4. WS3 CI/gate automation must be ready before release-complete status can be claimed.
+5. WS5 end-to-end acceptance system must pass at least one full cycle before milestone closure.
+6. WS6 governance runs continuously across all phases.
+
+## 9) Milestone Model
+### Milestone A - Planning lock
+- WS1 + WS4 baseline complete.
+- Scope and authority ambiguity resolved.
+
+### Milestone B - Executability lock
+- WS2 matrix and causality closure complete.
+- Mandatory v0.1 social process criteria are executable and verifiable.
+
+### Milestone C - Automation lock
+- WS3 CI/release gates active.
+- WS5 acceptance protocol operational with reproducible artifacts.
+
+### Milestone D - Release readiness lock
+- All milestone criteria satisfied.
+- Residual risk backlog explicitly categorized as non-blocking or blocking.
+
+## 10) Risk Register
+| Risk ID | Risk | Impact | Mitigation plan |
 |---|---|---|---|
-| WS0 | Governance lock | migration policy, scope lock, deprecation policy | - |
-| WS1 | Mineflayer runtime foundation | typed bot bootstrap, lifecycle gate layer | WS0 |
-| WS2 | Decision bridge integration | event normalization, decision payload mapping | WS1 |
-| WS3 | Action execution safety | dig/place/interact runner + deterministic fallback | WS1 |
-| WS4 | NPC society parity | social loop mapping, bounded speech/action mapping | WS2, WS3 |
-| WS5 | Observability migration | Mineflayer telemetry + Evidence Pack pipeline | WS2, WS3 |
-| WS6 | Reliability hardening | multi-bot scheduler, backpressure, incident handling | WS3, WS5 |
-| WS7 | Unity deprecation move | path relocation to deprecated, docs/CI updates | WS4, WS5 |
-| WS8 | Cutover and release gating | final cutover, release checklist, rollback gate | WS6, WS7 |
+| R-01 | Scope re-expansion during v0.1 closure | schedule churn, acceptance instability | enforce WS1 scope split and change-control rule |
+| R-02 | Design clauses remain non-executable | design/runtime divergence | complete WS2 trace matrix before release claims |
+| R-03 | CI gates remain optional in practice | regression leakage | WS3 release-blocking gate policy |
+| R-04 | Deprecated references re-enter active docs | authority ambiguity | WS4 authority map and review checklist |
+| R-05 | End-to-end runs become ad-hoc | non-reproducible acceptance | WS5 standardized scenario and artifact protocol |
 
-## Detailed Phase Plan
+## 11) Completion Criteria for this Plan Cycle
+This plan cycle is complete when:
+- All five audit findings are mapped to completed Workstream outputs.
+- v0.1 scope narrative is consistent across all top-level entry docs.
+- Design-required social process behavior is executable and verifiable.
+- CI and release gates enforce runtime quality and Evidence requirements.
+- End-to-end acceptance verification runs as a repeatable process.
 
-## Phase 0 - Governance and baseline lock
-### Objective
-- Freeze migration Intent, Scope, and Safety constraints before implementation.
+## 12) Execution Rule
+- Execute one Linear issue at a time unless explicitly decomposed for parallel work.
+- Use Beads for atomic local decomposition and dependency tracking.
+- Any newly discovered blocking gap must be captured as a new issue with explicit dependency linkage.
 
-### Tasks
-- P0-1: Publish migration governance note in `plan.md` and align terminology with `terminology.md`.
-- P0-2: Define source authority order for Mineflayer behavior:
-  1) runtime implementation,
-  2) type declarations,
-  3) docs.
-- P0-3: Lock explicit repo exclusion (`minecraft-llm-agent-community`).
-- P0-4: Define deprecation principle: Unity retained and moved, never deleted.
-- P0-5: Audit `docs/mineflayer/migration/crosswalk.md` and `docs/mineflayer/migration/legacy-coverage-evidence.md` as baseline evidence sources for migration execution.
-
-### Acceptance Criteria
-- Governance rules are explicit, measurable, and versioned.
-- Exclusion and deprecation principles are present in plan and referenced in execution tickets.
-
-### Validation Criteria
-- Review checklist confirms all new migration tickets include:
-  - Mineflayer source baseline,
-  - exclusion statement,
-  - deprecation retention statement.
-
-## Phase 1 - Mineflayer runtime foundation
-### Objective
-- Establish a production-safe TypeScript Mineflayer runtime skeleton.
-
-### Tasks
-- P1-1: Bootstrap runtime service structure (config, runtime, plugins, types).
-- P1-2: Implement strict typed configuration schema and environment validation.
-- P1-3: Implement lifecycle gate module according to Event Lifecycle Specification.
-- P1-4: Register early `error/end` handling and readiness state transitions.
-- P1-5: Add plugin composition layer (`loadPlugin/loadPlugins` strategy).
-- P1-6: Enforce TypeScript runtime baseline from implementation guide (`strict`, `NodeNext`, stable output layout).
-- P1-7: Materialize Runtime Path/Fallback Path split in code structure (`runtime/lifecycle-gates`, `runtime/action-runner`, `runtime/event-normalizer`).
-
-### Acceptance Criteria
-- Bot boot path reaches ready state only after lifecycle gates pass.
-- Plugin injection behavior is deterministic and documented.
-
-### Validation Criteria
-- Automated checks verify lifecycle transitions under normal connect/login/spawn flow.
-- Simulated failure runs verify fail-closed behavior on gate timeout.
-
-## Phase 2 - Decision bridge integration
-### Objective
-- Connect Mineflayer event intake to backend decision orchestration without schema drift.
-
-### Tasks
-- P2-1: Implement event normalizer for world/entity/chat/action events.
-- P2-2: Define perception payload schema and correlation identifiers.
-- P2-3: Map backend decision payload to executable runtime actions (`bot.dig`, `bot.placeBlock`, `bot.activateBlock`, `bot.chat`).
-- P2-4: Preserve `sessionId+npcId` session continuity metadata propagation with lifecycle event context (`login`, `spawn`, `respawn`, `end`).
-- P2-5: Keep decision path bounded by per-bot action queue limits and global concurrency limits.
-- P2-6: Add nearby-NPC perception windows so observation and decision inputs prioritize local entity/block change context around each active NPC.
-
-### Acceptance Criteria
-- Decision requests are schema-valid and fully correlated to runtime context.
-- Backend responses can be executed or deterministically downgraded via Fallback Path.
-
-### Validation Criteria
-- Integration tests cover success, parse error, timeout, and broker failure lanes.
-- Replay tests confirm `sessionId+npcId` continuity stability across repeated NPC turns.
-
-## Phase 3 - Action execution safety (dig/place/interact focus)
-### Objective
-- Operationalize high-risk world mutation APIs with deterministic behavior.
-
-### Tasks
-- P3-1: Implement action runner wrappers for:
-  - `canDigBlock`, `dig`, `stopDigging`, `digTime`,
-  - `placeBlock`, `placeEntity`, `activateBlock`, `updateSign`.
-- P3-2: Enforce precondition checks per API (block validity, reachability, direction vector, held item).
-- P3-3: Enforce bounded timeout + retry policy with deterministic Reason Code mapping.
-- P3-4: Require success Evidence per API:
-  - `diggingCompleted` or air-state confirmation,
-  - block state change / `blockPlaced`,
-  - `entitySpawn` correlation,
-  - `windowOpen` or state confirmation,
-  - sign readback verification.
-- P3-5: Add drift register for docs/type/runtime mismatches discovered during implementation.
-
-### Acceptance Criteria
-- All covered APIs have explicit Runtime Path and Fallback Path behavior.
-- No ambiguous action result is returned without reason classification.
-
-### Validation Criteria
-- Action conformance suite covers representative success/failure scenarios per API.
-- Determinism checks verify Reason Code/Reason Category consistency across repeats.
-
-## Phase 4 - NPC society parity and bounded behavior
-### Objective
-- Preserve AI-native NPC world pressure loop semantics on Minecraft runtime.
-
-### Tasks
-- P4-1: Map existing bounded NPC action whitelist into Mineflayer executable action set.
-- P4-2: Map bounded player speech acts into chat/pattern pathways.
-- P4-3: Recreate report -> intake -> verdict causality flow on event model with nearby-NPC context evidence.
-- P4-4: Preserve Dream Law and Cover Test trigger surfaces using text-first interactions.
-- P4-5: Define non-goals to prevent gameplay expansion during migration.
-
-### Acceptance Criteria
-- Session loop remains within target duration and bounded behavior limits.
-- Causality remains legible in runtime logs and evidence outputs.
-
-### Validation Criteria
-- Scenario tests confirm escalation behavior and deterministic adjudication.
-- Repeated runs show non-identical but bounded social trajectories.
-
-## Phase 5 - Observability and Evidence migration
-### Objective
-- Replace Unity-dependent evidence flow with Mineflayer-native evidence flow.
-
-### Tasks
-- P5-1: Define Mineflayer telemetry schema for lifecycle, decisions, actions, fallback.
-- P5-2: Add runtime evidence summarizers and regression metric calculators for nearby-NPC behavior deltas and action outcomes.
-- P5-3: Build Release Candidate (RC) Evidence Pack pipeline for Mineflayer runs.
-- P5-4: Add drift and failure taxonomy dashboards based on Reason Category.
-- P5-5: Add structured observation logs that correlate NPC-local world changes with decision/action results in the same evidence record.
-
-### Acceptance Criteria
-- Release decision artifacts are generated from Mineflayer sessions.
-- Failure lanes are observable with deterministic classification.
-
-### Validation Criteria
-- Evidence pipeline smoke tests produce complete artifacts on CI/local runs.
-- Regression trends are comparable to existing baseline methodology.
-
-## Phase 6 - Reliability hardening and multi-bot operations
-### Objective
-- Achieve stable multi-bot operation within bounded concurrency limits.
-
-### Tasks
-- P6-1: Implement per-bot action queue and global scheduler with explicit backpressure.
-- P6-2: Add cancellation and deadline propagation across decision/action chain.
-- P6-3: Stress-test bot counts and action concurrency under synthetic load.
-- P6-4: Define operational runbook for incident response and safe degradation.
-
-### Acceptance Criteria
-- Multi-bot sessions sustain target load without uncontrolled backlog.
-- System remains fail-safe when individual bot/session failures occur.
-
-### Validation Criteria
-- Load tests confirm global concurrency limit enforcement and stable throughput.
-- Failure injection tests confirm loop continuation via Fallback Path.
-
-## Phase 7 - Unity deprecation relocation (retain, do not delete)
-### Objective
-- Move Unity runtime and related tooling into an explicit deprecated namespace and mark it maintenance-only.
-
-### Target relocation
-- `draem-of-one/` -> `deprecated/unity/draem-of-one/`
-- `scripts/unity/` -> `deprecated/unity/scripts/`
-
-### Tasks
-- P7-1: Relocate Unity directories using `git mv` to preserve history.
-- P7-2: Add deprecation markers:
-  - `deprecated/unity/README.md` (status, rationale, rollback guidance),
-  - notices in root `README.md` and developer docs.
-- P7-3: Update CI so Unity legacy checks are manual/opt-in (not release-critical).
-- P7-4: Freeze Unity feature development policy (bugfix-only for archive integrity).
-- P7-5: Keep legacy evidence scripts executable for historical comparison windows.
-
-### Acceptance Criteria
-- Unity code remains present and buildable in deprecated location.
-- Primary docs and CI default paths point to Mineflayer runtime.
-
-### Validation Criteria
-- Path migration checks confirm no Unity file deletion.
-- Legacy Unity smoke run can still execute via documented manual workflow.
-
-## Phase 8 - Cutover and release governance
-### Objective
-- Complete cutover with explicit gates and rollback posture.
-
-### Tasks
-- P8-1: Run full release gate suite on Mineflayer Runtime Path.
-- P8-2: Confirm Unity is no longer on release-critical path.
-- P8-3: Execute rollback drill to confirm deprecated Unity path remains recoverable.
-- P8-4: Finalize migration report with risks, known drift, and follow-up backlog.
-- P8-5: Publish explicit Mineflayer-only Gate H workflow and artifact map.
-- P8-6: Publish trajectory diversity verification procedure.
-- P8-7: Publish rollback drill log index and reporting template.
-
-### Acceptance Criteria
-- Release Candidate decision can be made from Mineflayer Evidence Pack only.
-- Trajectory diversity verification criteria are defined and tied to reproducible Evidence.
-- Rollback to deprecated Unity path remains technically possible and drill-ready.
-
-### Validation Criteria
-- Gate checklist is recorded in `docs/design/ws8-final-migration-report.md` with reproducible artifact links.
-- Rollback drill log is recorded in `docs/deprecated/unity/ws8-rollback-drill-log.md` and raw outputs are archived.
-- Any criterion remains `pending` until the linked artifact path exists.
-
-## Dependency and sequencing model
-- Sequence spine: WS0 -> WS1 -> (WS2, WS3) -> WS4 -> WS5 -> WS6 -> WS7 -> WS8
-- Parallel lanes:
-  - WS2 and WS3 may run in parallel after WS1.
-  - WS5 can start once WS2 and WS3 emit stable event/action telemetry.
-- Hard blocks:
-  - WS7 (Unity move) must not start before WS4 + WS5 baseline parity is confirmed.
-  - WS8 requires WS6 and WS7 completion.
-
-## Risk Register
-- Risk R1: Behavior drift from original social loop.
-  - Mitigation: lock bounded action/speech mapping and parity scenarios before cutover.
-- Risk R2: Non-deterministic action outcomes in high-risk APIs.
-  - Mitigation: enforce action Evidence requirements and deterministic Reason Codes.
-- Risk R3: Multi-bot saturation and queue backlog.
-  - Mitigation: explicit global concurrency limit, backpressure, and incident degradation policy.
-- Risk R4: Loss of historical reproducibility after Unity deprecation.
-  - Mitigation: retain Unity code/scripts in deprecated path and keep manual legacy smoke workflow.
-- Risk R5: Hidden dependency on old community artifacts.
-  - Mitigation: enforce explicit exclusion and source authority checks on all tickets.
-
-## Gate Model (must pass in order)
-- Gate A: Governance lock complete.
-- Gate B: Runtime foundation and lifecycle conformance complete.
-- Gate C: Action API conformance complete.
-- Gate D: NPC behavior parity complete.
-- Gate E: Mineflayer Evidence pipeline complete.
-- Gate F: Multi-bot reliability hardening complete.
-- Gate G: Unity relocated to deprecated path with no deletion.
-- Gate H: Release Candidate decision from Mineflayer-only Evidence Pack.
-
-## Execution Output Checklist
-- Updated runtime docs and runbooks for Mineflayer primary path.
-- Action conformance test suite and failure taxonomy report.
-- Multi-bot reliability report with cap/backpressure evidence.
-- Deprecated Unity namespace with preservation markers and manual validation path.
-- Final migration report including rollback and residual-risk backlog.
-
-## Definition of Done
-- Mineflayer Runtime Path is primary for development, validation, and release decisions.
-- Unity runtime is preserved under deprecated namespace and not part of default release pipeline.
-- Safety and determinism guarantees (Schema, Reason Code/Reason Category, Fallback Path, `sessionId+npcId` continuity, one in-flight action per bot, global concurrency limit) are verified on Mineflayer runtime.
-- Plan constraints are reflected in execution issues and validation artifacts.
-
-## Progress Log
-- 2026-02-17:
-  - synchronized to `project.md` v10 (Minecraft Intent-First);
-  - added Minecraft-native observation model and nearby-NPC evidence requirements;
-  - expanded Phase 1/2/5 tasks for implementation-guide conformance and event-local observability;
-  - preserved Unity relocation as deprecated (retained, not deleted).
-  - implemented Mineflayer runtime foundation in `backend/npc-runtime`:
-    - `runtime/lifecycle-gates.ts`, `runtime/plugin-composer.ts`, `runtime/event-normalizer.ts`, `runtime/mineflayer-runtime.ts`;
-    - Node baseline updated to `>=22` and Mineflayer dependency added.
-  - implemented decision/action bridge in `backend/npc-runtime`:
-    - `runtime/action-runner.ts` with dig/place/interact/sign wrappers and deterministic failure outputs;
-    - `runtime/decision-bridge.ts` for decision payload -> executable command dispatch;
-    - optional dispatch hook wired into `api/http-server.ts`.
-  - completed Unity relocation with history preserved:
-    - `draem-of-one/` -> `deprecated/unity/draem-of-one/`
-    - `scripts/unity/` -> `deprecated/unity/scripts/`
-    - added `deprecated/unity/README.md` and updated docs path references.
-  - implemented WS4 bounded NPC behavior policy in `backend/npc-runtime`:
-    - `runtime/bounded-behavior.ts` for action/command whitelist enforcement;
-    - report/intake/verdict social-loop stage mapping from event + landmark context;
-    - Station intake procedural speech guard (`SA_BREAK` rejection) with deterministic Reason Code fallback.
-  - implemented WS5 Mineflayer-native telemetry and Evidence Pack pipeline:
-    - `runtime/telemetry.ts` for event/decision/scheduler record collection and summarization;
-    - HTTP endpoints: `/v1/telemetry/events`, `/v1/telemetry/evidence-pack`, `/v1/telemetry/evidence-pack/export`;
-    - scheduler snapshot ingestion into evidence output.
-  - implemented WS6 scheduler hardening and queue visibility:
-    - `runtime/multi-bot-scheduler.ts` and `DecisionService` admission gates;
-    - deterministic backpressure fallback (`runtime_actor_queue_saturated`, `runtime_global_queue_saturated`);
-    - `/health/queue` endpoint for mailbox + scheduler snapshot visibility.
-  - added migration validation suite expansion:
-    - `bounded-behavior.integration.test.ts`, `event-normalizer.integration.test.ts`, `telemetry.integration.test.ts`;
-    - `decision-service.integration.test.ts` backpressure scenarios;
-    - `http-server.integration.test.ts` queue/telemetry endpoint coverage.
-  - completed WS8 documentation baseline artifacts:
-    - explicit Mineflayer-only Gate H workflow and rollback drill procedure in `docs/design/runtime-evidence.md`;
-    - trajectory diversity verification procedure in `docs/design/game-design.md`;
-    - migration report and residual risk backlog in `docs/design/ws8-final-migration-report.md`;
-    - rollback drill log index and template in `docs/deprecated/unity/ws8-rollback-drill-log.md`.
-  - implemented WS8 Mineflayer-only gate tooling in `backend/npc-runtime/scripts`:
-    - `analyze_ws8_backend_evidence.mjs`, `collect_ws8_regression_metrics.mjs`, `package_ws8_rc_artifacts.mjs`, `run_ws8_release_gate.mjs`;
-    - `export_ws8_events_snapshot.mjs`, `verify_ws8_trajectory_diversity.mjs`, `run_ws8_rollback_drill.mjs`.
-  - generated Gate H run artifacts and RC manifests:
-    - `data/evidence/ws8/gate-h/run-a-evidence-pack.json`, `run-b-evidence-pack.json`, `run-c-evidence-pack.json`;
-    - `data/evidence/ws8/gate-h/run-a-events.json`, `run-b-events.json`, `run-c-events.json`;
-    - `data/evidence/ws8/gate-h/trajectory-diversity.json`;
-    - `logs/rc/rc-ws8-run-a/manifest.json`, `logs/rc/rc-ws8-run-b/manifest.json`, `logs/rc/rc-ws8-run-c/manifest.json`.
-  - executed rollback drill archive generation:
-    - `logs/ws8/rollback-drill/20260217-0949/rollback-drill-report.json`;
-    - `logs/ws8/rollback-drill/20260217-0949/rollback-drill-summary.md`.
-  - completed WS8 decision recording with Mineflayer-only evidence references in `docs/design/ws8-final-migration-report.md`.
-
-## Next-Run Focus
-- Keep RC cadence by refreshing Gate H artifact trio (`run-a/b/c`) and `trajectory-diversity.json` for each release cycle.
-- Keep rollback drill cadence by appending new entries to `docs/deprecated/unity/ws8-rollback-drill-log.md`.
-- Close residual risk backlog entries only with linked Evidence in `docs/design/ws8-final-migration-report.md`.
+## 13) Document Linkage
+- Product definition: `project.md`
+- Design details: `docs/design/game-design.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`
+- Runtime Evidence operations: `docs/design/runtime-evidence.md`
+- Migration and release record: `docs/design/ws8-final-migration-report.md`
+- Terminology authority: `terminology.md`
+- Execution Source of Truth: Linear issues

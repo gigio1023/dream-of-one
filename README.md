@@ -21,6 +21,21 @@ Can a Codex-driven NPC society run pressure against the player in a live Minecra
 - Endings: `Clean Pass`, `Narrow Escape`, `Exposed`.
 - Human player uses a Minecraft Java client in the same server session and is the primary social-pressure target.
 
+Release status model for v0.1:
+- `runtime-complete`: Runtime Path guardrails and required backend checks are green.
+- `design-complete`: Dream Law/Cover Test causality is executable and verifiable.
+- `release-complete`: Acceptance run protocol and release Evidence gates are satisfied.
+
+Scope split model:
+| Requirement area | v0.1 classification | Notes |
+|---|---|---|
+| 10-12 minute session loop in fixed four landmarks | v0.1 mandatory | Current release boundary |
+| Bounded NPC/player language and deterministic Fallback Path | v0.1 mandatory | Runtime guardrail |
+| Runtime Evidence and acceptance/release gates | v0.1 mandatory | Release decision basis |
+| Economy/combat/progression expansion systems | post-v0.1 backlog | Not part of this cycle |
+| Additional landmarks and freeform sandbox content | post-v0.1 backlog | Not part of this cycle |
+| Unbounded action/speech generation requirements | post-v0.1 backlog | Explicitly disallowed in v0.1 |
+
 ## Human Player Setup (Session Entry)
 
 Before running scenarios, connect a human Minecraft Java client to the same server used by Mineflayer:
@@ -266,6 +281,8 @@ Rollback drill and Unity archive docs:
 - `docs/deprecated/unity/index.md`
 - `docs/deprecated/unity/dev.md`
 
+These links are archival references only. They are not active Runtime Path authority.
+
 Note: GitHub may display C# as the primary language due to the Unity archive; the archive is excluded from Linguist language stats via `.gitattributes`.
 
 ## Optional LLM Configuration
@@ -311,6 +328,8 @@ npm run ws8:trajectory:verify --prefix backend/npc-runtime -- \
 See:
 - `docs/deprecated/unity/dev.md`
 
+These checks are optional archival rollback verification and never release-blocking for Mineflayer Runtime Path decisions.
+
 ## Evidence and Release Candidate Workflow
 
 Mineflayer/backend evidence scripts (`backend/npc-runtime/package.json`):
@@ -336,6 +355,7 @@ Single Source of Truth (SSOT) documents:
 
 - Product definition: `project.md`
 - Execution order and issue sequencing: Linear issues (governed by `project.md`)
+- Authority map: `docs/authority-map.md`
 - Canonical terminology: `terminology.md`
 
 Design documents:
@@ -343,6 +363,9 @@ Design documents:
 - Design bible: `docs/design/game-design.md`
 - Dream Laws library: `docs/design/dream-laws.md`
 - Cover Tests library: `docs/design/cover-tests.md`
+- Rule-to-runtime trace matrix: `docs/design/rule-runtime-trace-matrix.md`
+- Social causality verification: `docs/design/social-causality-verification.md`
+- Acceptance session protocol: `docs/design/acceptance-session-protocol.md`
 - Runtime evidence guide: `docs/design/runtime-evidence.md`
 - Mineflayer Specification and guides: `docs/mineflayer/index.md`
 - Visual overview: `docs/overview.md`
@@ -352,6 +375,8 @@ Developer and agent operations:
 - Developer guide: `docs/dev.md`
 - Agent runbook: `docs/agent/runbook.md`
 - Codex CLI workflow playbook: `docs/agent/codex-cli-workflow.md`
+- Decision ledger guide: `docs/agent/decision-ledger.md`
+- Acceptance review template: `docs/agent/templates/acceptance-review-template.md`
 - Agent policy: `AGENTS.md`
 
 ## Work Management Model

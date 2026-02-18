@@ -1,6 +1,6 @@
 # Project Overview and Visual Guide
 
-Revision date: 2026-02-17
+Revision date: 2026-02-18
 
 This document is the shortest path to understand what this repository does, how Runtime Path works, and where each document belongs.
 
@@ -12,6 +12,15 @@ Dream of One is a Minecraft social-stealth simulation:
 - Mineflayer + TypeScript backend is the active Runtime Path.
 - Human player joins the same Minecraft Server session and is evaluated by NPC social process outputs.
 - Unity is retained only as a deprecated rollback path (`docs/deprecated/unity/index.md`).
+
+v0.1 status labels used across planning/release updates:
+- `runtime-complete`
+- `design-complete`
+- `release-complete`
+
+v0.1 scope split labels:
+- `v0.1 mandatory`: required for the current playable slice release.
+- `post-v0.1 backlog`: intentionally deferred expansion work.
 
 Canonical product definition:
 - `project.md`
@@ -100,5 +109,6 @@ flowchart TD
 
 - Work Source of Truth: Linear issues.
 - Product Source of Truth: `project.md`.
+- Authority map: `docs/authority-map.md`.
 - Canonical terminology: `terminology.md`.
 - This overview summarizes and links; canonical rules stay in owner documents.

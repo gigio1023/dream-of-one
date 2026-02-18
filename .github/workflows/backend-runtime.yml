@@ -1,0 +1,37 @@
+name: Backend Runtime Check
+
+on:
+  push:
+    paths:
+      - "backend/npc-runtime/**"
+      - ".github/workflows/backend-runtime.yml"
+  pull_request:
+    paths:
+      - "backend/npc-runtime/**"
+      - ".github/workflows/backend-runtime.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-check:
+    runs-on: doo-arc-runner-set
+    defaults:
+      run:
+        working-directory: backend/npc-runtime
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: backend/npc-runtime/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run backend conformance checks
+        run: npm run check

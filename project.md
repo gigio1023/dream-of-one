@@ -2,7 +2,7 @@
 doc: project.md
 project: Dream of One
 variant: Lucid Cover Social Stealth
-revision: 2026-02-17
+revision: 2026-02-18
 status: Locked v10 (Minecraft Intent-First, Direct Codex Actor Runtime)
 owner: You
 ---
@@ -20,6 +20,22 @@ In Minecraft runtime play, does a Codex-driven NPC society actually run the pres
 
 This question is primary.
 Platform/framework detail is supporting.
+
+### Release status model (v0.1)
+- `runtime-complete`: Runtime Path guardrails and required backend checks are green.
+- `design-complete`: Dream Law/Cover Test causality requirements are executable and verifiable.
+- `release-complete`: Acceptance Criteria and Validation Criteria are satisfied with linked Evidence artifacts.
+
+### Scope split model (v0.1 vs post-v0.1 backlog)
+| Requirement area | v0.1 classification | Notes |
+|---|---|---|
+| 10-12 minute loop across `Store/Studio/Park/Station` | v0.1 mandatory | Core slice boundary |
+| Bounded NPC action language and bounded player speech acts | v0.1 mandatory | Guardrail for deterministic runtime |
+| Report -> intake -> verdict social closure readability | v0.1 mandatory | Player-facing causality requirement |
+| Runtime Evidence and release gate automation | v0.1 mandatory | `runtime-complete` and `release-complete` gate basis |
+| Extended economy/combat/progression systems | post-v0.1 backlog | Out of scope for current release cycle |
+| Additional landmarks outside fixed four | post-v0.1 backlog | Out of scope for current release cycle |
+| Unbounded NPC action or speech generation | post-v0.1 backlog | Explicitly prohibited during v0.1 |
 
 ## 2) Core product promise
 - Player is not an investigator.
@@ -168,6 +184,9 @@ Validation Criteria for 7.3:
 - Product definition and priorities: `project.md`.
 - Execution order and issue sequencing: Linear issues (Source of Truth), governed by this document.
 - Runtime migration strategy and sequencing: `plan.md`.
+- Document authority boundary map: `docs/authority-map.md`.
 - Mineflayer runtime Specification and guides: `docs/mineflayer/**`.
 - Design details: `docs/design/game-design.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`.
+- Design executability closure: `docs/design/rule-runtime-trace-matrix.md`, `docs/design/social-causality-verification.md`.
+- Acceptance protocol: `docs/design/acceptance-session-protocol.md`.
 - Runtime evidence operations: `docs/design/runtime-evidence.md`.

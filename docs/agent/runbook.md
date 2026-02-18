@@ -1,6 +1,6 @@
 # Codex Runbook (Linear SSOT + Beads Execution + Codex Cloud)
 
-Revision date: 2026-02-17
+Revision date: 2026-02-18
 
 This document defines the operating runbook for **Codex CLI**.  
 The goal is to ensure: users provide only natural-language instructions; Codex CLI organizes and tracks Linear issues; implementations are done locally (with Beads when needed); and cloud-safe work is delegated to Codex Cloud via Linear.
@@ -165,6 +165,7 @@ Use this loop when running without human gating:
 1. Create PR (if needed), then comment `@codex review`.
 2. Build and maintain a review ledger for bot comments:
    - `comment_id`, `source`, `author`, `severity`, `decision`, `action`, `commit`, `status`, `reason`
+   - Use `docs/agent/decision-ledger.md` for required `decision_date`, `owner`, and `evidence_links` fields (WS6.3 discipline).
 3. Validate each bot finding as `valid|partial|invalid` before changing code.
 4. Enforce merge criteria:
    - PR is open and mergeable

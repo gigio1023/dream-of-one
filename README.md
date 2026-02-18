@@ -47,13 +47,14 @@ flowchart LR
   Bot --> Adapter["Runtime Adapter"]
   Adapter --> API["Decision API"]
   API --> Service["Decision Service"]
-  Service -->|Runtime Path| Codex["Codex CLI"]
-  Service -->|Fallback Path| Fallback["Deterministic Fallback"]
-  Codex --> Service
+  Service --> Broker["Codex Broker\n(prompt builder)"]
+  Broker -->|Runtime Path| Codex["Codex CLI\n(stateless tool)"]
+  Service -->|Fallback Path| Fallback["Deterministic Fallback Path"]
+  Codex --> Broker
+  Broker --> Service
   Fallback --> Service
-  Service --> MemoryWriter["NPC Memory Persistence Service"]
-  MemoryWriter --> MemoryFiles["NPC Memory Files\nMEMORY.md + memory/YYYY-MM-DD.md"]
-  MemoryFiles --> Service
+  Broker <-->|prompt context + updates| Workspace["Actor Workspace\n(persistent)"]
+  Broker <-->|thread continuity| Thread["Thread Store\n(threadId)"]
   Service --> Adapter
   Adapter --> Bot
   Bot --> Social["NPC social escalation\n(emergent trajectory)"]
@@ -80,11 +81,9 @@ flowchart LR
     Taxonomy["Reason Taxonomy"]
     Fallback["Deterministic Fallback Builder"]
     Workspace["Actor Workspace Store"]
-    MemoryWriter["NPC Memory Persistence Service"]
     Thread["Thread Store"]
-    WorkspaceJson["Workspace JSON\npersona/policy/memory/summary/thread"]
-    MemoryLong["Long-term Memory File\n(MEMORY.md)"]
-    MemoryDaily["Daily Memory Log File\n(memory/YYYY-MM-DD.md)"]
+    WorkspaceFiles["Actor Workspace Files\n(data/workspaces/{sessionId}/{npcId}/*.json)"]
+    ThreadFile["Thread Store File\n(data/thread-store.json)"]
   end
 
   subgraph CognitionPlane["Cognition Plane"]
@@ -109,12 +108,10 @@ flowchart LR
   Policy --> Broker
   Broker --> Gateway
   Gateway --> Codex
-  Broker <--> Workspace
-  Broker <--> Thread
-  Workspace --> MemoryWriter
-  Workspace --> WorkspaceJson
-  MemoryWriter --> MemoryLong
-  MemoryWriter --> MemoryDaily
+  Broker <-->|prompt context + updates| Workspace
+  Broker <-->|thread continuity| Thread
+  Workspace --> WorkspaceFiles
+  Thread --> ThreadFile
   Decision --> Taxonomy
   Policy -->|invalid / timeout / parse / policy| Fallback
   Fallback --> Decision
@@ -141,11 +138,10 @@ sequenceDiagram
   participant Service as Decision Service
   participant Gate as Policy + Schema Gate
   participant Broker as Codex Broker
+  participant Workspace as Actor Workspace Store
+  participant Thread as Thread Store
   participant Gateway as Codex Tool Gateway
-  participant Codex as Codex CLI
-  participant Store as Thread + Workspace Store
-  participant MemoryWriter as NPC Memory Persistence Service
-  participant MemoryFiles as MEMORY.md + Daily Log Files
+  participant Codex as Codex CLI (stateless tool)
   participant Obs as Telemetry + Evidence
 
   Player->>Server: Speech act or interaction
@@ -155,24 +151,23 @@ sequenceDiagram
   API->>Service: decide(packet, deadline)
   Service->>Gate: Pre-hook + Schema validation
 
-  alt valid packet and tool path
-    Gate->>Broker: Build prompt and dispatch
-    Broker->>Store: Load thread and actor workspace
-    Broker->>Gateway: codex or codex-reply
+  Gate->>Broker: Build prompt and dispatch
+  Broker->>Workspace: Load Actor Workspace (memory)
+  Broker->>Thread: Load threadId (if any)
+  Note over Broker,Codex: Broker builds prompt from packet + Actor Workspace. Codex CLI never reads/writes workspace files directly.
+
+  alt Runtime Path (Codex)
+    Broker->>Gateway: codex or codex-reply (prompt)
     Gateway->>Codex: Execute prompt
-    Codex-->>Gateway: content + threadId
+    Codex-->>Gateway: JSON intent + threadId
     Gateway-->>Broker: tool response
-    Broker->>Gate: Post-hook parse and normalize
-    Gate-->>Service: Valid DecisionEnvelope
-    Service->>Store: Save workspace and thread
-    Store->>MemoryWriter: Persist memory payload
-    MemoryWriter->>MemoryFiles: Write long-term and daily files
-  else invalid / timeout / parse / tool failure
-    Gate-->>Service: Deterministic fallback reason
-    Service->>Store: Save fallback workspace decision
-    Store->>MemoryWriter: Persist fallback memory payload
-    MemoryWriter->>MemoryFiles: Write fallback evidence files
+  else Fallback Path (deterministic)
+    Broker-->>Broker: Build deterministic fallback intent
   end
+  Broker->>Thread: Persist threadId (if updated)
+  Broker->>Workspace: Persist Actor Workspace (memory update)
+  Broker-->>Gate: DecisionEnvelope
+  Gate-->>Service: DecisionEnvelope
 
   Service-->>API: DecisionEnvelope + meta
   API-->>Adapter: Envelope result
@@ -190,9 +185,11 @@ sequenceDiagram
 
 ## Memory Design
 
-- Game-oriented NPC memory Specification: `memory.md`
-- Design Bible memory model: `docs/design/game-design.md`
-- `memory.md` is a documentation Specification file, not a runtime component.
+Runtime NPC memory is persisted as **Actor Workspace** artifacts (JSON) per `sessionId+npcId` and injected into the Codex prompt by the Codex Broker.
+
+- Implementation: `backend/npc-runtime/src/memory/actor-workspace-store.ts`
+- Prompt context injection: `backend/npc-runtime/src/broker/codex-broker.ts`
+- Design model: `docs/design/game-design.md`
 
 ## Quick Start
 

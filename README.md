@@ -248,6 +248,8 @@ Rollback drill and Unity archive docs:
 - `docs/deprecated/unity/index.md`
 - `docs/deprecated/unity/dev.md`
 
+Note: GitHub may display C# as the primary language due to the Unity archive; the archive is excluded from Linguist language stats via `.gitattributes`.
+
 ## Optional LLM Configuration
 
 OpenAI:

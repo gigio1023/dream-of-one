@@ -10,10 +10,17 @@ Dream of One is a Minecraft social-stealth simulation:
 - NPC society behavior is proposed by Codex.
 - Runtime safety remains deterministic (Schema + Fallback Path).
 - Mineflayer + TypeScript backend is the active Runtime Path.
+- Human player joins the same Minecraft Server session and is evaluated by NPC social process outputs.
 - Unity is retained only as a deprecated rollback path (`docs/deprecated/unity/index.md`).
 
 Canonical product definition:
 - `project.md`
+
+## 1.1) Human player baseline
+
+- The `Player` in architecture diagrams is a real human using Minecraft Java client.
+- Connect the player to the same host/port used by Mineflayer Bot runtime (`NPC_RUNTIME_MINEFLAYER_HOST`, `NPC_RUNTIME_MINEFLAYER_PORT`).
+- Scenario loop starts only after player join, because cover-work outcomes are evaluated from player utterances and interactions.
 
 ## 2) Runtime context visualization
 

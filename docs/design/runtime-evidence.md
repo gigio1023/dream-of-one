@@ -42,6 +42,11 @@ NPC_RUNTIME_TELEMETRY_ENABLED=1 \
 npm run dev --prefix backend/npc-runtime
 ```
 
+Human player session entry (required for player-driven scenario Evidence):
+1. Open Minecraft Java client.
+2. Join the same server as runtime (`NPC_RUNTIME_MINEFLAYER_HOST:NPC_RUNTIME_MINEFLAYER_PORT`).
+3. Use a username different from runtime bot accounts.
+
 Collect recent telemetry records:
 ```bash
 curl -s "http://127.0.0.1:8787/v1/telemetry/events?limit=200" | jq .

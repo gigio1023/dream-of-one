@@ -19,6 +19,16 @@ Can a Codex-driven NPC society run pressure against the player in a live Minecra
 - Fixed NPC action language: `Move`, `Talk`, `Ask`, `Observe`, `Work`, `Report`, `Escort`, `Idle`.
 - Fixed player speech acts: `SA_COMPLY`, `SA_INQUIRE`, `SA_FRAME`, `SA_BREAK`.
 - Endings: `Clean Pass`, `Narrow Escape`, `Exposed`.
+- Human player uses a Minecraft Java client in the same server session and is the primary social-pressure target.
+
+## Human Player Setup (Session Entry)
+
+Before running scenarios, connect a human Minecraft Java client to the same server used by Mineflayer:
+
+1. Start or identify the Minecraft server host and port (`NPC_RUNTIME_MINEFLAYER_HOST`, `NPC_RUNTIME_MINEFLAYER_PORT`).
+2. In Minecraft Java Multiplayer, add `<host>:<port>` and join with a username different from `npc-runtime-bot`.
+3. Keep client/server compatibility aligned with runtime settings (`NPC_RUNTIME_MINEFLAYER_AUTH`, `NPC_RUNTIME_MINEFLAYER_VERSION`).
+4. Start scenario evaluation only after the player appears in-world.
 
 ## Start Here
 
@@ -232,6 +242,14 @@ NPC_RUNTIME_MINEFLAYER_PORT=25565 \
 NPC_RUNTIME_MINEFLAYER_USERNAME=npc-runtime-bot \
 npm run dev --prefix backend/npc-runtime
 ```
+
+### Join Human Player (Minecraft Java client)
+
+After runtime startup, connect a human player to the same Minecraft server:
+
+1. Open Minecraft Java client.
+2. Join `NPC_RUNTIME_MINEFLAYER_HOST:NPC_RUNTIME_MINEFLAYER_PORT` (default `127.0.0.1:25565`).
+3. Use a username that is not the bot username (`npc-runtime-bot`).
 
 ### Runtime Endpoint Smoke Check
 

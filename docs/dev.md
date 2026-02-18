@@ -13,6 +13,7 @@ Terminology rule: use canonical terms from `terminology.md` for docs and user-fa
 Primary Runtime Path:
 - Backend runtime: `backend/npc-runtime/`
 - Minecraft runtime client: Mineflayer Bot
+- Human player client: Minecraft Java client connected to the same server session
 - Decision interface: `POST /v1/npc/decision`
 - Evidence interface: `/v1/telemetry/*`, `/health/queue`
 
@@ -42,7 +43,16 @@ NPC_RUNTIME_MINEFLAYER_USERNAME=npc-runtime-bot \
 npm run dev --prefix backend/npc-runtime
 ```
 
-### 3) Probe health and telemetry
+### 3) Join human player
+
+After the runtime starts, connect a human player to the same Minecraft server:
+
+1. Open Minecraft Java client.
+2. Join `NPC_RUNTIME_MINEFLAYER_HOST:NPC_RUNTIME_MINEFLAYER_PORT` (default `127.0.0.1:25565`).
+3. Use a username different from `npc-runtime-bot`.
+4. Confirm client version/auth compatibility with `NPC_RUNTIME_MINEFLAYER_VERSION` and `NPC_RUNTIME_MINEFLAYER_AUTH`.
+
+### 4) Probe health and telemetry
 
 ```bash
 curl -s http://127.0.0.1:8787/health | jq .
@@ -51,6 +61,8 @@ curl -s http://127.0.0.1:8787/health/queue | jq .
 curl -s "http://127.0.0.1:8787/v1/telemetry/events?limit=20" | jq .
 curl -s http://127.0.0.1:8787/v1/telemetry/evidence-pack | jq .
 ```
+
+Run telemetry checks after player join so Evidence includes player-driven scenario interaction.
 
 ---
 

@@ -12,6 +12,10 @@ Dream Law는 “꿈 속 사회가 정상으로 믿는 규칙”이다.
 NPC는 이를 이상하다고 부르지 않는다.  
 플레이어가 이 규칙을 **꿈/메타/현실체크**로 해석하거나, 규칙을 공격/무시/왜곡하면 **Exposure/Suspicion**이 오른다.
 
+Runtime context:
+- Dream Law evaluation assumes a human player is connected through Minecraft Java client in the same server session as Mineflayer Bot runtime.
+- If the player is not connected, Dream Law detector outputs should not be treated as gameplay Evidence.
+
 Dream Law는 **deterministic rule definition**으로 취급하며, 최소 아래 필드를 가진다.
 
 - **dreamLawId**: stable id

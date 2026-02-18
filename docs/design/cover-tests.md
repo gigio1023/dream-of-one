@@ -16,6 +16,9 @@ Cover Test는 “플레이어가 **정상처럼 보일 것인지**를 시험하�
 - Suspicion/Exposure를 누적시키며,
 - 일정 수준을 넘으면 NPC가 Report를 생성하고 Station이 Inquest를 연다.
 
+Runtime precondition:
+- Human Player must join the same Minecraft Java server session as Mineflayer Bot before trigger evaluation starts.
+
 Cover Test는 아래 5요소로 구성된다.
 
 1) **Setup**: 장소/필수 NPC/필수 텍스트 표면  
@@ -34,6 +37,7 @@ Cover Test는 아래 5요소로 구성된다.
 - **dreamLawIds**:
 - **requiredActors**:
 - **requiredTextSurfaces**:
+- **playerConnectionChecklist**:
 - **playerChecklistStep**:
 - **triggers (detectorIds)**:
 - **escalation ladder**:

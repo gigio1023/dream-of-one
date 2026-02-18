@@ -53,6 +53,12 @@ Player speech acts:
 
 The player does not need free-form command systems in v0.1.
 
+Speech act usage intent:
+- `SA_COMPLY`: follow procedural language to reduce immediate suspicion.
+- `SA_INQUIRE`: ask bounded clarification without escalating into reality-test framing.
+- `SA_FRAME`: provide procedural justification when challenged.
+- `SA_BREAK`: intentionally non-procedural behavior with high escalation risk.
+
 ## 6) Agent cognition model
 ## 6.1 Identity memory
 - role title
@@ -86,6 +92,7 @@ The player does not need free-form command systems in v0.1.
 - Converts social suspicion into formal escalation.
 
 ## 8) Session choreography (10-12 min)
+- Precondition: a human player has joined the same Minecraft Server session as Mineflayer Bot runtime.
 - `0:00-1:00` brief + checklist
 - `1:00-8:00` active society + player cover work
 - `8:00-11:00` report/intake pressure zone
@@ -117,6 +124,7 @@ Every major outcome should include:
 
 ## 12) Technical runtime map
 - Mineflayer Bot emits observation packets (`blockUpdate`, `entitySpawn`, `diggingCompleted`, lifecycle events).
+- Player actions and utterances come from a human Minecraft Java client in the same world session.
 - TypeScript backend orchestrates NPC sessions and calls Codex (`codex`, `codex-reply`).
 - Mineflayer adapter validates and executes Bot Commands (`bot.dig`, `bot.placeBlock`, `bot.activateBlock`, `bot.updateSign`).
 - Runtime telemetry and Evidence Pack outputs store outcomes.

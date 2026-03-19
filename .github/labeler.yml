@@ -3,27 +3,27 @@
 # 영역별 라벨
 'area: core':
   - changed-files:
-    - any-glob-to-any-file: 'draem-of-one/Assets/Scripts/Core/**'
+    - any-glob-to-any-file: 'Assets/Scripts/Core/**'
 
 'area: gameplay':
   - changed-files:
-    - any-glob-to-any-file: 'draem-of-one/Assets/Scripts/Gameplay/**'
+    - any-glob-to-any-file: 'Assets/Scripts/Gameplay/**'
 
 'area: ui':
   - changed-files:
-    - any-glob-to-any-file: 'draem-of-one/Assets/Scripts/UI/**'
+    - any-glob-to-any-file: 'Assets/Scripts/UI/**'
 
 'area: rules':
   - changed-files:
-    - any-glob-to-any-file: 'draem-of-one/Assets/Data/Rules/**'
+    - any-glob-to-any-file: 'Assets/Data/Rules/**'
 
 'area: scenes':
   - changed-files:
-    - any-glob-to-any-file: 'draem-of-one/Assets/Scenes/**'
+    - any-glob-to-any-file: 'Assets/Scenes/**'
 
 'area: prefabs':
   - changed-files:
-    - any-glob-to-any-file: 'draem-of-one/Assets/Prefabs/**'
+    - any-glob-to-any-file: 'Assets/Prefabs/**'
 
 # 문서 라벨
 'area: docs':
@@ -39,8 +39,8 @@
 'area: project-settings':
   - changed-files:
     - any-glob-to-any-file:
-      - 'draem-of-one/ProjectSettings/**'
-      - 'draem-of-one/Packages/**'
+      - 'ProjectSettings/**'
+      - 'Packages/**'
 
 # GitHub 관련
 'area: github':

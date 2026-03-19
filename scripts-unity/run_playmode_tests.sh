@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "$0")/.." ROOT_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"ROOT_DIR="$(cd "$(dirname "$0")/../../.." && pwd)" pwd)"
 UNITY="${UNITY_PATH:-}"
 if [[ -z "$UNITY" ]]; then
   UNITY="$($ROOT_DIR/deprecated/unity/scripts/_find_unity.sh)"
@@ -12,7 +12,7 @@ mkdir -p "$LOG_DIR"
 
 "$UNITY" \
   -batchmode \
-  -projectPath "$ROOT_DIR/deprecated/unity/draem-of-one" \
+  -projectPath "$ROOT_DIR" \
   -runTests \
   -testPlatform PlayMode \
   -testResults "$LOG_DIR/playmode-tests.xml" \

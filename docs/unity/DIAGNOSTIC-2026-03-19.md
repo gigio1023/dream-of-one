@@ -1,7 +1,7 @@
 # Unity Project Diagnostic — 2026-03-19
 
 > Post-restructure diagnosis after 120+ GPT Codex commits.
-> Project: `draem-of-one/` (153 C# files, 23,610 LOC)
+> Project: Unity project at repo root (153 C# files, 23,610 LOC)
 
 ---
 

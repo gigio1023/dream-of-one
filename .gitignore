@@ -1,31 +1,3 @@
-# Unity project artifacts (scoped under draem-of-one/)
-draem-of-one/[Ll]ibrary/
-draem-of-one/[Tt]emp/
-draem-of-one/[Oo]bj/
-draem-of-one/[Bb]uild/
-draem-of-one/[Bb]uilds/
-draem-of-one/[Ll]ogs/
-draem-of-one/[Uu]ser[Ss]ettings/
-draem-of-one/[Mm]emoryCaptures/
-draem-of-one/[Rr]ecordings/
-deprecated/unity/draem-of-one/[Ll]ibrary/
-deprecated/unity/draem-of-one/[Tt]emp/
-deprecated/unity/draem-of-one/[Oo]bj/
-deprecated/unity/draem-of-one/[Bb]uild/
-deprecated/unity/draem-of-one/[Bb]uilds/
-deprecated/unity/draem-of-one/[Ll]ogs/
-deprecated/unity/draem-of-one/[Uu]ser[Ss]ettings/
-deprecated/unity/draem-of-one/[Mm]emoryCaptures/
-deprecated/unity/draem-of-one/[Rr]ecordings/
-
-# Crashlytics (scoped)
-draem-of-one/[Cc]rashlytics-build.properties
-deprecated/unity/draem-of-one/[Cc]rashlytics-build.properties
-
-# Addressables (scoped)
-draem-of-one/Assets/AddressableAssetsData/
-deprecated/unity/draem-of-one/Assets/AddressableAssetsData/
-
 # Unity gitignore (standard)
 .utmp/
 /[Ll]ibrary/

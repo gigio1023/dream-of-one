@@ -56,6 +56,21 @@ namespace DreamOfOne.Core
 
             var uiRoot = new GameObject("UI");
             uiRoot.transform.SetParent(root);
+
+            // Create Canvas for UGUI elements
+            var canvasGo = new GameObject("HUDCanvas");
+            canvasGo.transform.SetParent(uiRoot.transform);
+            var canvas = canvasGo.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 100;
+            var scaler = canvasGo.AddComponent<UnityEngine.UI.CanvasScaler>();
+            scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            canvasGo.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+
+            // UILayouter creates all TMP_Text children on the Canvas
+            canvasGo.AddComponent<UILayouter>();
+
             var uiManager = uiRoot.AddComponent<UIManager>();
             uiManager.Bind(global);
             uiRoot.AddComponent<UIShortcutController>();

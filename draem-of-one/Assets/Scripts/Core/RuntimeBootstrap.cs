@@ -76,6 +76,20 @@ namespace DreamOfOne.Core
             ground.transform.SetParent(root);
             ground.transform.localScale = new Vector3(7f, 1f, 7f);
 
+            // --- NavMesh: bake at runtime using physics colliders ---
+            if (ground != null)
+            {
+                var surfaceType = RuntimeNavMeshBaker.ResolveSurfaceType();
+                if (surfaceType != null && ground.GetComponent(surfaceType) == null)
+                {
+                    ground.AddComponent(surfaceType);
+                }
+                if (ground.GetComponent<RuntimeNavMeshBaker>() == null)
+                {
+                    ground.AddComponent<RuntimeNavMeshBaker>();
+                }
+            }
+
             var anchorsRoot = new GameObject("Anchors");
             anchorsRoot.transform.SetParent(root);
 

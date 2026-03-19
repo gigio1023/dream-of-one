@@ -101,7 +101,7 @@ namespace DreamOfOne.Core
             return surfaceObject as MonoBehaviour;
         }
 
-        private static Type ResolveSurfaceType()
+        internal static Type ResolveSurfaceType()
         {
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {

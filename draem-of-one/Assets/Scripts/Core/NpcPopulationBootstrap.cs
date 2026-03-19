@@ -218,6 +218,15 @@ namespace DreamOfOne.Core
 
             EnsureGrounding(npc);
             WarpToGround(npc);
+
+            var citizenRenderer = npc.GetComponent<Renderer>();
+            if (citizenRenderer != null)
+            {
+                citizenRenderer.material = new Material(Shader.Find("Universal Render Pipeline/Lit"))
+                {
+                    color = new Color(0.5f, 0.7f, 0.5f)
+                };
+            }
         }
 
         private void SpawnPolice(Transform parent, string name, Vector3 position)
@@ -239,6 +248,15 @@ namespace DreamOfOne.Core
 
             EnsureGrounding(npc);
             WarpToGround(npc);
+
+            var policeRenderer = npc.GetComponent<Renderer>();
+            if (policeRenderer != null)
+            {
+                policeRenderer.material = new Material(Shader.Find("Universal Render Pipeline/Lit"))
+                {
+                    color = new Color(0.1f, 0.15f, 0.3f)
+                };
+            }
         }
 
         private void ApplyNpcScale(Transform target)

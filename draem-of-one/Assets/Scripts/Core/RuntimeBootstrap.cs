@@ -105,7 +105,7 @@ namespace DreamOfOne.Core
                 }
             }
 
-            var anchorsRoot = new GameObject("Anchors");
+            var anchorsRoot = new GameObject("CITY_Anchors");
             anchorsRoot.transform.SetParent(root);
 
             var storePos = new Vector3(-12f, 0f, 8f);
@@ -204,6 +204,7 @@ namespace DreamOfOne.Core
                 new[] { "칸반", "패치노트", "릴리즈 후보" });
 
             player.AddComponent<CoverStatus>();
+            ApplyRoleColor(player, new Color(0.9f, 0.2f, 0.2f));
             return player;
         }
 
@@ -254,6 +255,46 @@ namespace DreamOfOne.Core
             response.ConfigureRuleDelta(ruleId, type == ZoneType.Queue ? 30f : type == ZoneType.Seat ? 20f : 15f);
         }
 
+        private static void ApplyRoleColor(GameObject obj, Color color)
+        {
+            var renderer = obj.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.material = new Material(Shader.Find("Universal Render Pipeline/Lit"))
+                {
+                    color = color
+                };
+            }
+        }
+
+        private static Color RoleToColor(RoleId roleId)
+        {
+            switch (roleId)
+            {
+                // Store roles: blue tones
+                case RoleId.Clerk:    return new Color(0.2f, 0.4f, 0.9f);
+                case RoleId.Manager:  return new Color(0.1f, 0.3f, 0.8f);
+                // Park roles: green/gold tones
+                case RoleId.Elder:    return new Color(0.6f, 0.8f, 0.2f);
+                case RoleId.Caretaker: return new Color(0.4f, 0.7f, 0.1f);
+                // Studio roles: purple/teal tones
+                case RoleId.Student:  return new Color(0.5f, 0.2f, 0.8f);
+                case RoleId.PM:       return new Color(0.3f, 0.7f, 0.8f);
+                case RoleId.Developer: return new Color(0.4f, 0.3f, 0.9f);
+                case RoleId.QA:       return new Color(0.6f, 0.3f, 0.8f);
+                case RoleId.Release:  return new Color(0.2f, 0.6f, 0.7f);
+                // Cafe roles: brown tones
+                case RoleId.Barista:  return new Color(0.6f, 0.35f, 0.1f);
+                case RoleId.CafeHost: return new Color(0.75f, 0.45f, 0.15f);
+                // Station roles: navy/dark tones
+                case RoleId.Officer:       return new Color(0.1f, 0.15f, 0.4f);
+                case RoleId.Investigator:  return new Color(0.15f, 0.2f, 0.45f);
+                case RoleId.Reporter:      return new Color(0.2f, 0.2f, 0.5f);
+                // Others: gray/neutral
+                default: return new Color(0.5f, 0.5f, 0.5f);
+            }
+        }
+
         private SuspicionComponent CreateNpc(Transform root, RoleId roleId, Vector3 position, ReportManager reports, GlobalSuspicionSystem global, WorldEventLog log)
         {
             string name = roleId != RoleId.None ? roleId.ToString() : "Citizen";
@@ -283,14 +324,16 @@ namespace DreamOfOne.Core
             var persona = npc.AddComponent<NpcPersona>();
             ConfigurePersona(persona, roleId);
 
+            ApplyRoleColor(npc, RoleToColor(roleId));
+
             var suspicion = npc.AddComponent<SuspicionComponent>();
             suspicion.Configure(reports, global, log);
 
             npc.AddComponent<NpcContext>();
 
             var patrol = npc.AddComponent<DreamOfOne.NPC.SimplePatrol>();
-            var left = CreateWaypoint(root, $"{name}_WP_A", position + new Vector3(-1.5f, 0f, -1.5f));
-            var right = CreateWaypoint(root, $"{name}_WP_B", position + new Vector3(1.5f, 0f, 1.5f));
+            var left = CreateWaypoint(root, $"{name}_WP_A", position + new Vector3(-4f, 0f, -3f));
+            var right = CreateWaypoint(root, $"{name}_WP_B", position + new Vector3(4f, 0f, 3f));
             patrol.Configure(new[] { left, right }, speed: 1.2f, arrivalThreshold: 0.2f);
 
             return suspicion;
@@ -332,6 +375,8 @@ namespace DreamOfOne.Core
             var wpC = CreateWaypoint(root, "Police_WP_C", new Vector3(4f, 0f, 0f));
             var wpD = CreateWaypoint(root, "Police_WP_D", new Vector3(-4f, 0f, 0f));
             patrol.Configure(new[] { wpA, wpB, wpC, wpD }, speed: 1.5f, arrivalThreshold: 0.3f);
+
+            ApplyRoleColor(police, new Color(0.1f, 0.15f, 0.3f));
 
             var controller = police.AddComponent<PoliceController>();
             controller.Configure(player, reports, log, shaper, uiManager, llmClient);

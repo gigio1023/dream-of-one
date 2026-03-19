@@ -326,6 +326,13 @@ namespace DreamOfOne.Core
                 agent.enabled = false;
             }
 
+            var patrol = police.AddComponent<DreamOfOne.NPC.SimplePatrol>();
+            var wpA = CreateWaypoint(root, "Police_WP_A", new Vector3(-4f, 0f, -6f));
+            var wpB = CreateWaypoint(root, "Police_WP_B", new Vector3(4f, 0f, -6f));
+            var wpC = CreateWaypoint(root, "Police_WP_C", new Vector3(4f, 0f, 0f));
+            var wpD = CreateWaypoint(root, "Police_WP_D", new Vector3(-4f, 0f, 0f));
+            patrol.Configure(new[] { wpA, wpB, wpC, wpD }, speed: 1.5f, arrivalThreshold: 0.3f);
+
             var controller = police.AddComponent<PoliceController>();
             controller.Configure(player, reports, log, shaper, uiManager, llmClient);
         }

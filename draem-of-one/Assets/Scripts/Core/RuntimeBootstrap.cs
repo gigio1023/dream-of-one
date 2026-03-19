@@ -204,6 +204,10 @@ namespace DreamOfOne.Core
             collider.isTrigger = true;
             collider.size = new Vector3(3f, 2f, 3f);
 
+            var rb = zoneObject.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity = false;
+
             var zone = zoneObject.AddComponent<Zone>();
             zone.Configure(zoneId, type, log);
 

@@ -203,6 +203,7 @@ namespace DreamOfOne.Core
             npc.name = name;
             npc.transform.SetParent(parent);
             npc.transform.position = position;
+            Object.Destroy(npc.GetComponent<CapsuleCollider>());
 
             ApplyNpcScale(npc.transform);
 
@@ -225,6 +226,7 @@ namespace DreamOfOne.Core
             npc.name = name;
             npc.transform.SetParent(parent);
             npc.transform.position = position;
+            Object.Destroy(npc.GetComponent<CapsuleCollider>());
 
             ApplyNpcScale(npc.transform);
 

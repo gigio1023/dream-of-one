@@ -126,24 +126,32 @@ namespace DreamOfOne.Core
 
             var witnesses = new System.Collections.Generic.List<SuspicionComponent>
             {
-                CreateNpc(root, RoleId.Clerk, storePos + new Vector3(1f, 0f, -1f), reports, global, log),
-                CreateNpc(root, RoleId.Manager, storePos + new Vector3(-1f, 0f, 1f), reports, global, log),
-                CreateNpc(root, RoleId.Elder, parkPos + new Vector3(1f, 0f, -1f), reports, global, log),
-                CreateNpc(root, RoleId.Caretaker, parkPos + new Vector3(-1f, 0f, 1f), reports, global, log),
+                // Store (6x6): half-extents 3 on X/Z -> offset must exceed 4 units
+                CreateNpc(root, RoleId.Clerk, storePos + new Vector3(4f, 0f, 0f), reports, global, log),
+                CreateNpc(root, RoleId.Manager, storePos + new Vector3(-4f, 0f, 0f), reports, global, log),
+                // Park (7x7): half-extents 3.5 on X/Z -> offset must exceed 4.5 units
+                CreateNpc(root, RoleId.Elder, parkPos + new Vector3(0f, 0f, -5f), reports, global, log),
+                CreateNpc(root, RoleId.Caretaker, parkPos + new Vector3(0f, 0f, 5f), reports, global, log),
                 CreateNpc(root, RoleId.Tourist, new Vector3(0f, 0f, 6f), reports, global, log),
                 CreateNpc(root, RoleId.Resident, new Vector3(2f, 0f, 2f), reports, global, log),
                 CreateNpc(root, RoleId.Student, new Vector3(-2f, 0f, 2f), reports, global, log),
-                CreateNpc(root, RoleId.PM, studioPos + new Vector3(1f, 0f, 1f), reports, global, log),
-                CreateNpc(root, RoleId.Developer, studioPos + new Vector3(-1f, 0f, 1f), reports, global, log),
-                CreateNpc(root, RoleId.QA, studioPos + new Vector3(1f, 0f, -1f), reports, global, log),
-                CreateNpc(root, RoleId.Release, studioPos + new Vector3(-1f, 0f, -1f), reports, global, log),
-                CreateNpc(root, RoleId.Barista, cafePos + new Vector3(1f, 0f, 0.5f), reports, global, log),
-                CreateNpc(root, RoleId.CafeHost, cafePos + new Vector3(-1f, 0f, -0.5f), reports, global, log),
-                CreateNpc(root, RoleId.Courier, deliveryPos + new Vector3(1f, 0f, 0.5f), reports, global, log),
-                CreateNpc(root, RoleId.FacilityTech, facilityPos + new Vector3(-1f, 0f, 0.5f), reports, global, log),
-                CreateNpc(root, RoleId.Officer, stationPos + new Vector3(1f, 0f, 1f), reports, global, log),
-                CreateNpc(root, RoleId.Investigator, stationPos + new Vector3(-1f, 0f, 1f), reports, global, log),
-                CreateNpc(root, RoleId.Reporter, mediaPos + new Vector3(0.5f, 0f, -0.5f), reports, global, log)
+                // Studio (7x7): half-extents 3.5 on X/Z -> offset must exceed 4.5 units
+                CreateNpc(root, RoleId.PM, studioPos + new Vector3(5f, 0f, 0f), reports, global, log),
+                CreateNpc(root, RoleId.Developer, studioPos + new Vector3(-5f, 0f, 0f), reports, global, log),
+                CreateNpc(root, RoleId.QA, studioPos + new Vector3(0f, 0f, 5f), reports, global, log),
+                CreateNpc(root, RoleId.Release, studioPos + new Vector3(0f, 0f, -5f), reports, global, log),
+                // Cafe (5x5): half-extents 2.5 on X/Z -> offset must exceed 3.5 units
+                CreateNpc(root, RoleId.Barista, cafePos + new Vector3(4f, 0f, 0f), reports, global, log),
+                CreateNpc(root, RoleId.CafeHost, cafePos + new Vector3(-4f, 0f, 0f), reports, global, log),
+                // DeliveryBay (5x5): half-extents 2.5 on X/Z -> offset must exceed 3.5 units
+                CreateNpc(root, RoleId.Courier, deliveryPos + new Vector3(-4f, 0f, 0f), reports, global, log),
+                // Facility (5x5): half-extents 2.5 on X/Z -> offset must exceed 3.5 units
+                CreateNpc(root, RoleId.FacilityTech, facilityPos + new Vector3(0f, 0f, 4f), reports, global, log),
+                // Station (5x5): half-extents 2.5 on X/Z -> offset must exceed 3.5 units
+                CreateNpc(root, RoleId.Officer, stationPos + new Vector3(4f, 0f, 0f), reports, global, log),
+                CreateNpc(root, RoleId.Investigator, stationPos + new Vector3(-4f, 0f, 0f), reports, global, log),
+                // MediaZone (6x6): half-extents 3 on X/Z -> offset must exceed 4 units
+                CreateNpc(root, RoleId.Reporter, mediaPos + new Vector3(0f, 0f, -5f), reports, global, log)
             };
 
             for (int i = 0; i < witnesses.Count; i++)
@@ -238,6 +246,7 @@ namespace DreamOfOne.Core
             npc.name = name;
             npc.transform.SetParent(root);
             npc.transform.position = position;
+            Object.Destroy(npc.GetComponent<CapsuleCollider>());
 
             var agent = npc.AddComponent<NavMeshAgent>();
             NavMeshAgentTuning.Apply(agent, new NavMeshAgentTuning.Settings
@@ -278,6 +287,7 @@ namespace DreamOfOne.Core
             police.name = "Police";
             police.transform.SetParent(root);
             police.transform.position = new Vector3(0f, 0f, -6f);
+            Object.Destroy(police.GetComponent<CapsuleCollider>());
 
             var persona = police.AddComponent<NpcPersona>();
             ConfigurePersona(persona, RoleId.Police);

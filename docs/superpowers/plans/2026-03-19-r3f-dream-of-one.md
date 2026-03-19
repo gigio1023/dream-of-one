@@ -98,6 +98,11 @@ npm install three @react-three/fiber @react-three/drei @react-three/rapier ecctr
 npm install -D @types/three vitest @testing-library/react jsdom
 ```
 
+If `@types/pathfinding` is not available, create `game/src/pathfinding.d.ts`:
+```typescript
+declare module 'pathfinding'
+```
+
 - [ ] **Step 3: Configure vitest**
 
 Create `game/vitest.config.ts`:
@@ -229,6 +234,7 @@ export interface ReportEntry {
 export enum ReportReason {
   RepeatedRuleBreak = 'RepeatedRuleBreak',
   HighGlobalG = 'HighGlobalG',
+  Scripted = 'Scripted',
 }
 
 export interface ReportEnvelope {
@@ -273,7 +279,9 @@ export const REPORT_COOLDOWN_SECONDS = 20
 
 // === Global Suspicion ===
 export const GLOBAL_SUSPICION_INTERROGATION_THRESHOLD = 0.3
-export const GLOBAL_SUSPICION_END_THRESHOLD = 0.3
+// End threshold is higher than interrogation — game doesn't end on first interrogation
+// Tune this in Task 19 after playtesting
+export const GLOBAL_SUSPICION_END_THRESHOLD = 0.7
 
 // === Reports ===
 export const REPORTS_REQUIRED = 2
@@ -472,7 +480,7 @@ describe('eventStore', () => {
   test('subscribers are notified on new event', () => {
     const store = useEventStore.getState()
     const received: string[] = []
-    store.subscribe((event) => received.push(event.actorId))
+    store.onEvent((event) => received.push(event.actorId))
 
     store.recordEvent({ eventType: EventType.ViolationDetected, actorId: 'test-actor', actorRole: 'Player' })
 
@@ -524,7 +532,7 @@ interface EventStore {
 
   recordEvent: (partial: Partial<EventRecord> & { eventType: EventType; actorId: string; actorRole: string }) => void
   getRecent: (count: number) => EventRecord[]
-  subscribe: (listener: EventListener) => () => void
+  onEvent: (listener: EventListener) => () => void
   reset: () => void
 }
 
@@ -537,7 +545,7 @@ export const useEventStore = create<EventStore>((set, get) => ({
   recordEvent: (partial) => {
     const state = get()
     const record: EventRecord = {
-      id: partial.id || crypto.randomUUID(),
+      id: partial.id || Math.random().toString(36).slice(2),
       stamp: (Date.now() - state._startTime) / 1000,
       eventType: partial.eventType,
       category: partial.category || CATEGORY_MAP[partial.eventType],
@@ -568,7 +576,8 @@ export const useEventStore = create<EventStore>((set, get) => ({
     return events.slice(-count)
   },
 
-  subscribe: (listener) => {
+  // Named "onEvent" to avoid collision with Zustand's built-in "subscribe"
+  onEvent: (listener) => {
     set((s) => ({ _listeners: [...s._listeners, listener] }))
     return () => {
       set((s) => ({ _listeners: s._listeners.filter((fn) => fn !== listener) }))
@@ -874,7 +883,7 @@ describe('reportStore', () => {
     const store = useReportStore.getState()
     store.fileReport('clerk', 'R4', 55, 'e1', 10)
     store.fileReport('elder', 'R5', 60, 'e2', 11)
-    store.consumeReports(12) // consumes at time=12
+    store.consumeReports(12, 0.5) // consumes at time=12
 
     store.fileReport('clerk', 'R4', 55, 'e3', 15)
     store.fileReport('elder', 'R5', 60, 'e4', 16)
@@ -897,7 +906,7 @@ describe('reportStore', () => {
     store.fileReport('clerk', 'R4', 55, 'e1', 10)
     store.fileReport('elder', 'R5', 60, 'e2', 11)
 
-    const envelope = store.consumeReports(12)
+    const envelope = store.consumeReports(12, 0.5)
     expect(envelope).not.toBeNull()
     expect(envelope!.reporterIds).toContain('clerk')
     expect(envelope!.reporterIds).toContain('elder')
@@ -933,7 +942,7 @@ interface ReportStore {
 
   fileReport: (reporterId: string, ruleId: string, suspicion: number, eventId: string, now: number) => void
   canTriggerInterrogation: (globalG: number, now: number) => boolean
-  consumeReports: (now: number) => ReportEnvelope | null
+  consumeReports: (now: number, globalG: number) => ReportEnvelope | null
   reset: () => void
 }
 
@@ -960,7 +969,7 @@ export const useReportStore = create<ReportStore>((set, get) => ({
     return true
   },
 
-  consumeReports: (now) => {
+  consumeReports: (now, globalG) => {
     const s = get()
     const valid = pruneExpired(s.recentReports, now)
     if (valid.length < REPORTS_REQUIRED) return null
@@ -968,10 +977,12 @@ export const useReportStore = create<ReportStore>((set, get) => ({
     const consumed = valid.slice(-REPORTS_REQUIRED)
     const reporterIds = [...new Set(consumed.map((r) => r.reporterId))]
     const eventIds = consumed.map((r) => r.eventId).slice(-MAX_ATTACHED_EVENTS)
-    const reason = s.lastInterrogationTime > 0 ? ReportReason.RepeatedRuleBreak : ReportReason.HighGlobalG
+    const reason = globalG >= GLOBAL_SUSPICION_INTERROGATION_THRESHOLD
+      ? ReportReason.HighGlobalG
+      : ReportReason.RepeatedRuleBreak
 
     const envelope: ReportEnvelope = {
-      reportId: crypto.randomUUID(),
+      reportId: Math.random().toString(36).slice(2),
       reporterIds,
       attachedEventIds: eventIds,
       reason,
@@ -1448,13 +1459,13 @@ export default function App() {
 
 Create `game/src/entities/ConvenienceStore.tsx`:
 ```tsx
-import { RigidBody } from '@react-three/rapier'
+import { RigidBody, CuboidCollider } from '@react-three/rapier'
 import { GROUND_SIZE, WALL_HEIGHT, WALL_THICKNESS } from '../constants'
 
 function Wall({ position, args }: { position: [number, number, number]; args: [number, number, number] }) {
   return (
-    <RigidBody type="fixed">
-      <mesh position={position} castShadow receiveShadow>
+    <RigidBody type="fixed" position={position}>
+      <mesh castShadow receiveShadow>
         <boxGeometry args={args} />
         <meshStandardMaterial color="#d4c5a9" />
       </mesh>
@@ -1468,8 +1479,8 @@ function Shelf({ position, args, color = '#8B4513' }: {
   color?: string
 }) {
   return (
-    <RigidBody type="fixed">
-      <mesh position={position} castShadow>
+    <RigidBody type="fixed" position={position}>
+      <mesh castShadow>
         <boxGeometry args={args} />
         <meshStandardMaterial color={color} />
       </mesh>
@@ -1482,8 +1493,9 @@ export function ConvenienceStore() {
 
   return (
     <group>
-      {/* Floor */}
+      {/* Floor — explicit CuboidCollider instead of auto-collider from plane */}
       <RigidBody type="fixed">
+        <CuboidCollider args={[GROUND_SIZE / 2, 0.01, GROUND_SIZE / 2]} />
         <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[GROUND_SIZE, GROUND_SIZE]} />
           <meshStandardMaterial color="#b8a88a" />
@@ -1569,12 +1581,11 @@ Create `game/src/entities/Player.tsx`:
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useKeyboardControls } from '@react-three/drei'
-import Ecctrl, { EcctrlAnimation } from 'ecctrl'
+import Ecctrl from 'ecctrl'
 import { useGameStore } from '../stores/gameStore'
 import { useEventStore } from '../stores/eventStore'
-import { useUIStore } from '../stores/uiStore'
 import { EventType, GamePhase } from '../types'
-import { INTERACTION_COOLDOWN_SECONDS } from '../constants'
+import { INTERACTION_COOLDOWN_SECONDS, ZONES } from '../constants'
 
 export function Player() {
   const lastInteractTime = useRef(0)
@@ -1595,20 +1606,23 @@ export function Player() {
     const keys = getKeys()
     const now = elapsedSeconds
 
-    // E key: interact with zone
+    // E key: interact with zone (look up ruleId from zone config)
     if (keys.interact && playerCurrentZone && now - lastInteractTime.current >= INTERACTION_COOLDOWN_SECONDS) {
       lastInteractTime.current = now
-      useEventStore.getState().recordEvent({
-        eventType: EventType.ViolationDetected,
-        actorId: 'player',
-        actorRole: 'Player',
-        zoneId: playerCurrentZone,
-        ruleId: '', // filled by zone config lookup
-        severity: 2,
-      })
+      const zone = ZONES.find((z) => z.id === playerCurrentZone)
+      if (zone) {
+        useEventStore.getState().recordEvent({
+          eventType: EventType.ViolationDetected,
+          actorId: 'player',
+          actorRole: 'Player',
+          zoneId: zone.id,
+          ruleId: zone.ruleId,
+          severity: 2,
+        })
+      }
     }
 
-    // F key: photo (always R10)
+    // F key: photo (always R10) — no manual toast, EventLogPresenter handles it
     if (keys.photo && now - lastInteractTime.current >= INTERACTION_COOLDOWN_SECONDS) {
       lastInteractTime.current = now
       useEventStore.getState().recordEvent({
@@ -1619,7 +1633,6 @@ export function Player() {
         severity: 2,
         note: '사진 촬영',
       })
-      useUIStore.getState().showToast('사진을 촬영했습니다.')
     }
   })
 
@@ -1793,7 +1806,6 @@ Create `game/src/entities/NPC.tsx`:
 ```tsx
 import { useRef, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { RigidBody } from '@react-three/rapier'
 import * as THREE from 'three'
 import { NPCConfig } from '../types'
 import { useSuspicionStore } from '../stores/suspicionStore'
@@ -1827,15 +1839,12 @@ export function NPC({ config }: { config: NPCConfig }) {
     meshRef.current.lookAt(target.x, current.y, target.z)
   })
 
+  // No RigidBody needed — NPCs are visual-only, no physics collisions
   return (
-    <group>
-      <RigidBody type="kinematicPosition" name={config.id}>
-        <mesh ref={meshRef} position={config.position} castShadow>
-          <capsuleGeometry args={[0.3, 0.8, 8, 16]} />
-          <meshStandardMaterial color={config.color} />
-        </mesh>
-      </RigidBody>
-    </group>
+    <mesh ref={meshRef} name={config.id} position={config.position} castShadow>
+      <capsuleGeometry args={[0.3, 0.8, 8, 16]} />
+      <meshStandardMaterial color={config.color} />
+    </mesh>
   )
 }
 ```
@@ -1879,13 +1888,11 @@ git commit -m "feat: add NPC entities with waypoint patrol behavior"
 Create `game/src/entities/Police.tsx`. The police follows the same patrol logic as NPCs but switches to path-following when in `MoveToPlayer` state. The PoliceAI system (Task 15) drives its state — this component just renders and moves.
 
 ```tsx
-import { useRef, useEffect } from 'react'
+import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { RigidBody } from '@react-three/rapier'
 import * as THREE from 'three'
 import { POLICE_CONFIG, NPC_ARRIVAL_THRESHOLD } from '../constants'
 import { PoliceState } from '../types'
-import { useSuspicionStore } from '../stores/suspicionStore'
 
 // Police state is read from a shared ref set by PoliceAI system
 export const policeStateRef = { current: PoliceState.Patrol }
@@ -1896,10 +1903,7 @@ export function Police() {
   const meshRef = useRef<THREE.Mesh>(null)
   const waypointIndex = useRef(0)
   const pathIndex = useRef(0)
-
-  useEffect(() => {
-    useSuspicionStore.getState().registerNPC(POLICE_CONFIG.id)
-  }, [])
+  // Police does NOT register as an NPC in suspicionStore — police is not a witness
 
   useFrame((_, delta) => {
     if (!meshRef.current) return
@@ -1941,12 +1945,10 @@ export function Police() {
   })
 
   return (
-    <RigidBody type="kinematicPosition" name="police">
-      <mesh ref={meshRef} position={POLICE_CONFIG.position} castShadow>
-        <capsuleGeometry args={[0.35, 1, 8, 16]} />
-        <meshStandardMaterial color={POLICE_CONFIG.color} />
-      </mesh>
-    </RigidBody>
+    <mesh ref={meshRef} name="police" position={POLICE_CONFIG.position} castShadow>
+      <capsuleGeometry args={[0.35, 1, 8, 16]} />
+      <meshStandardMaterial color={POLICE_CONFIG.color} />
+    </mesh>
   )
 }
 ```
@@ -1989,7 +1991,9 @@ import { GamePhase } from '../types'
 export function SuspicionDecay() {
   useFrame((_, delta) => {
     if (useGameStore.getState().phase !== GamePhase.Playing) return
-    useSuspicionStore.getState().decayAll(delta)
+    // Clamp delta to prevent suspicion wipe on tab-switch (delta can be huge)
+    const clampedDelta = Math.min(delta, 0.1)
+    useSuspicionStore.getState().decayAll(clampedDelta)
   })
   return null
 }
@@ -2007,7 +2011,7 @@ import { RULE_DELTAS, DEFAULT_SUSPICION_DELTA, ZONES } from '../constants'
 
 export function ViolationResponse() {
   useEffect(() => {
-    const unsub = useEventStore.getState().subscribe((event) => {
+    const unsub = useEventStore.getState().onEvent((event) => {
       if (event.eventType !== EventType.ViolationDetected) return
 
       // Determine rule ID: from event or from zone config
@@ -2020,22 +2024,9 @@ export function ViolationResponse() {
       const delta = RULE_DELTAS[ruleId] ?? DEFAULT_SUSPICION_DELTA
       const store = useSuspicionStore.getState()
 
-      // Apply suspicion to ALL NPCs (witnesses)
+      // Apply suspicion to ALL witness NPCs (police is not in the store)
       for (const npcId of Object.keys(store.npcs)) {
         store.addSuspicion(npcId, delta, ruleId, event.id)
-      }
-
-      // Record suspicion update events
-      for (const npcId of Object.keys(store.npcs)) {
-        useEventStore.getState().recordEvent({
-          eventType: EventType.SuspicionUpdated,
-          actorId: npcId,
-          actorRole: 'Citizen',
-          ruleId,
-          delta,
-          note: `+${delta}`,
-          severity: 1,
-        })
       }
     })
     return unsub
@@ -2146,7 +2137,7 @@ Create `game/src/systems/PoliceAI.tsx`:
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { PoliceState, EventType, GamePhase } from '../types'
+import { PoliceState, EventType, GamePhase, ReportEnvelope } from '../types'
 import { useReportStore } from '../stores/reportStore'
 import { useSuspicionStore } from '../stores/suspicionStore'
 import { useGameStore } from '../stores/gameStore'
@@ -2173,7 +2164,7 @@ export function shouldStartInterrogation(distance: number): boolean {
 
 export function PoliceAI() {
   const stateTimer = useRef(0)
-  const currentEnvelope = useRef<ReturnType<typeof useReportStore.getState.consumeReports>>(null)
+  const currentEnvelope = useRef<ReportEnvelope | null>(null)
   const grid = useRef(createStoreGrid([]))
 
   useFrame((_, delta) => {
@@ -2191,7 +2182,7 @@ export function PoliceAI() {
         const reportStore = useReportStore.getState()
         const suspStore = useSuspicionStore.getState()
         if (reportStore.canTriggerInterrogation(suspStore.globalG, now)) {
-          const envelope = reportStore.consumeReports(now)
+          const envelope = reportStore.consumeReports(now, suspStore.globalG)
           if (envelope) {
             currentEnvelope.current = envelope
             policeStateRef.current = PoliceState.MoveToPlayer
@@ -2344,7 +2335,7 @@ export function EventLogPresenter() {
     if (initialized.current) return
     initialized.current = true
 
-    useEventStore.getState().subscribe((event) => {
+    useEventStore.getState().onEvent((event) => {
       const text = eventToText(event)
       useUIStore.getState().addLogLine(text)
 

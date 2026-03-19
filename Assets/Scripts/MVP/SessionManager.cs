@@ -18,6 +18,12 @@ public class SessionManager : MonoBehaviour
 
     public static bool CheckLoseCondition(int exposure) => exposure >= 100;
 
+    void Start()
+    {
+        if (exposureSystem == null) exposureSystem = FindFirstObjectByType<ExposureSystem>();
+        if (globalSuspicion == null) globalSuspicion = FindFirstObjectByType<GlobalSuspicionSystem>();
+    }
+
     void Update()
     {
         if (gameOver) return;

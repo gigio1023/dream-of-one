@@ -11,6 +11,7 @@ public class ZoneSuspicionBridge : MonoBehaviour
     {
         { "staff_only", 30f },
         { "queue_cut", 15f },
+        { "queue", 15f },
         { "running", 10f }
     };
 

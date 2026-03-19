@@ -11,6 +11,8 @@ public class ConversationUI : MonoBehaviour
     NPCInteraction currentNPC;
     bool waitingForResponse;
 
+    public bool IsActive => panel != null && panel.activeSelf;
+
     void Awake()
     {
         if (panel != null) panel.SetActive(false);
@@ -27,6 +29,8 @@ public class ConversationUI : MonoBehaviour
             inputField.text = "";
             inputField.ActivateInputField();
         }
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void Hide()
@@ -34,6 +38,8 @@ public class ConversationUI : MonoBehaviour
         if (panel != null) panel.SetActive(false);
         currentNPC?.EndConversation();
         currentNPC = null;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     void Update()

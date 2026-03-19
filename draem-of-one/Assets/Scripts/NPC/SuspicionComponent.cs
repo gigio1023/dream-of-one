@@ -142,6 +142,13 @@ namespace DreamOfOne.NPC
             }
 
             float now = Time.time;
+
+            // Reset reported flag after cooldown (was permanently true before)
+            if (reported && (now - lastReportTimestamp) >= reportCooldownSeconds)
+            {
+                reported = false;
+            }
+
             if (reported || suspicion < reportThreshold || now - lastReportTimestamp < reportCooldownSeconds)
             {
                 return;

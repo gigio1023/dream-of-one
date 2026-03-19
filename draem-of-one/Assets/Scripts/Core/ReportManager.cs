@@ -45,7 +45,7 @@ namespace DreamOfOne.Core
 
         [SerializeField]
         [Tooltip("심문 조건으로 사용하는 전역 G 임계값")]
-        private float globalSuspicionThreshold = 0.2f;
+        private float globalSuspicionThreshold = 0.04f;
 
         [SerializeField]
         [Tooltip("사회 압력 강화 임계값 (G가 높을 때 요구 신고 수 감소)")]

@@ -49,6 +49,7 @@ public class SessionManager : MonoBehaviour
         gameOver = true;
         result = msg;
         Time.timeScale = 0f;
+        GameStateManager.SetState(GameState.GameOver);
         Debug.Log($"[Session] {msg}");
     }
 
@@ -58,5 +59,6 @@ public class SessionManager : MonoBehaviour
         elapsed = 0f;
         gameOver = false;
         result = "";
+        GameStateManager.Reset();
     }
 }

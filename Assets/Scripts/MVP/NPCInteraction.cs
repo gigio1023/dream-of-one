@@ -4,7 +4,7 @@ using DreamOfOne.NPC;
 
 public class NPCInteraction : MonoBehaviour
 {
-    [SerializeField] float interactionRange = 3f;
+    [SerializeField] float interactionRange = 5f;
     [SerializeField] string npcRole = "Store Clerk";
     [SerializeField] string[] dreamLaws = new string[]
     {
@@ -23,45 +23,48 @@ public class NPCInteraction : MonoBehaviour
         Vector3.Distance(transform.position, playerTransform.position) <= interactionRange;
 
     public bool IsInConversation => isInConversation;
+    public string NpcRole => npcRole;
 
     void Start()
     {
         suspicion = GetComponent<SuspicionComponent>();
-        // Try CodexExec first, then Ollama as fallback
         llmBackend = FindFirstObjectByType<CodexExecBackend>() as ILLMBackend
                   ?? FindFirstObjectByType<OllamaBackend>() as ILLMBackend;
         conversationUI = FindFirstObjectByType<ConversationUI>();
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
+
+        Debug.Log($"[NPCInteraction] {name}: llm={llmBackend != null}, convUI={conversationUI != null}, player={playerTransform != null}");
     }
 
-    void Update()
-    {
-        if (isInConversation) return;
+    // E-key polling removed — PlayerController now owns E-key input
 
-        if (IsInRange && Input.GetKeyDown(KeyCode.E))
-        {
-            StartConversation();
-        }
-    }
-
-    void StartConversation()
+    public void StartConversation()
     {
         isInConversation = true;
-        conversationUI?.Show(this, npcRole);
+        if (conversationUI != null)
+        {
+            conversationUI.Show(this, npcRole);
+            Debug.Log($"[NPCInteraction] Conversation started with {npcRole}");
+        }
+        else
+        {
+            Debug.LogError("[NPCInteraction] ConversationUI is null!");
+            isInConversation = false;
+        }
     }
 
     public async Task<string> ProcessPlayerMessage(string playerMessage)
     {
+        Debug.Log($"[NPCInteraction] Processing: '{playerMessage}'");
         string prompt = BuildPrompt(playerMessage);
         var response = llmBackend != null
             ? await llmBackend.SendAsync(prompt)
             : LLMResponse.Fallback();
 
-        // Apply suspicion
+        Debug.Log($"[NPCInteraction] LLM response: '{response.text}' (suspicion={response.suspicionDelta})");
+
         if (suspicion != null && response.suspicionDelta != 0)
-        {
             suspicion.AddSuspicion(response.suspicionDelta, "conversation", "");
-        }
 
         return response.text;
     }
@@ -69,6 +72,7 @@ public class NPCInteraction : MonoBehaviour
     public void EndConversation()
     {
         isInConversation = false;
+        Debug.Log($"[NPCInteraction] Conversation ended with {npcRole}");
     }
 
     string BuildPrompt(string playerMessage)
@@ -81,7 +85,7 @@ public class NPCInteraction : MonoBehaviour
 
 손님이 말했습니다: ""{playerMessage}""
 
-다음 JSON 형식으로 응답하세요:
+다음 JSON 형식으로만 응답하세요 (다른 텍스트 없이 JSON만):
 {{""text"": ""당신의 인캐릭터 응답 (1-2문장, 한국어)"", ""suspicionDelta"": 0, ""success"": true}}
 
 suspicionDelta 규칙:

@@ -185,9 +185,26 @@ namespace DreamOfOne.Core
 
         private void Update()
         {
+            // Block all player input unless roaming
+            if (GameStateManager.CurrentState != GameState.Roaming)
+            {
+                HandleGravityOnly();
+                return;
+            }
+
             HandleMovement();
             UpdateInteractionFocus();
             HandleInteraction();
+            HandleNPCInteraction();
+        }
+
+        private void HandleGravityOnly()
+        {
+            if (characterController == null) return;
+            verticalVelocity += gravity * Time.deltaTime;
+            characterController.Move(new Vector3(0, verticalVelocity, 0) * Time.deltaTime);
+            if (characterController.isGrounded && verticalVelocity < 0)
+                verticalVelocity = groundedSnapVelocity;
         }
 
         /// <summary>
@@ -254,6 +271,29 @@ namespace DreamOfOne.Core
             if (WasPhotoPressed())
             {
                 RecordPhotoEvent();
+            }
+        }
+
+        /// <summary>
+        /// E키로 범위 내 NPC와 대화를 시작한다.
+        /// NPCInteraction.Update()에서 제거된 E키 폴링을 여기서 담당.
+        /// </summary>
+        private void HandleNPCInteraction()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current == null) return;
+            if (!Keyboard.current.eKey.wasPressedThisFrame) return;
+#else
+            if (!Input.GetKeyDown(KeyCode.E)) return;
+#endif
+            var npcs = FindObjectsByType<NPCInteraction>(FindObjectsSortMode.None);
+            foreach (var npc in npcs)
+            {
+                if (npc.IsInRange && !npc.IsInConversation)
+                {
+                    npc.StartConversation();
+                    return;
+                }
             }
         }
 

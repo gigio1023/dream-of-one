@@ -286,11 +286,16 @@ namespace DreamOfOne.Core
                 // Cafe roles: brown tones
                 case RoleId.Barista:  return new Color(0.6f, 0.35f, 0.1f);
                 case RoleId.CafeHost: return new Color(0.75f, 0.45f, 0.15f);
+                // General roles
+                case RoleId.Tourist:      return new Color(0.9f, 0.5f, 0.2f);
+                case RoleId.Resident:     return new Color(0.6f, 0.6f, 0.6f);
+                case RoleId.Courier:      return new Color(0.8f, 0.6f, 0.1f);
+                case RoleId.FacilityTech: return new Color(0.4f, 0.4f, 0.55f);
                 // Station roles: navy/dark tones
                 case RoleId.Officer:       return new Color(0.1f, 0.15f, 0.4f);
                 case RoleId.Investigator:  return new Color(0.15f, 0.2f, 0.45f);
                 case RoleId.Reporter:      return new Color(0.2f, 0.2f, 0.5f);
-                // Others: gray/neutral
+                // Fallback
                 default: return new Color(0.5f, 0.5f, 0.5f);
             }
         }

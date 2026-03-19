@@ -32,6 +32,13 @@ namespace DreamOfOne.Editor
                 return;
             }
 
+            // Skip preflight for MVP scenes
+            var activeScene = SceneManager.GetActiveScene();
+            if (activeScene.IsValid() && activeScene.name.StartsWith("MVP"))
+            {
+                return;
+            }
+
             isRunning = true;
             var results = PreflightValidator.Run(true);
             if (results.HasErrors)

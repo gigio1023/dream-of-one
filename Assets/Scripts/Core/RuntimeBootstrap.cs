@@ -383,7 +383,7 @@ namespace DreamOfOne.Core
             ApplyRoleColor(police, new Color(0.1f, 0.15f, 0.3f));
 
             var controller = police.AddComponent<PoliceController>();
-            controller.Configure(player, reports, log, shaper, uiManager, llmClient);
+            controller.Configure(player, reports, log);
 
             // Inject patrol points via reflection (patrolPoints is private)
             var ppField = typeof(PoliceController).GetField("patrolPoints",

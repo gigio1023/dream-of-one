@@ -116,7 +116,7 @@ namespace DreamOfOne.NPC
             {
                 eventLog.RecordEvent(new EventRecord
                 {
-                    eventType = EventType.InterrogationStarted,
+                    eventType = DreamOfOne.Core.EventType.InterrogationStarted,
                     actorId = "police",
                     targetId = "player",
                     timestamp = Time.time,

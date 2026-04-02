@@ -27,6 +27,19 @@ public class MVPBootstrap : MonoBehaviour
             police.Configure(playerTransform, reports, wel, exposure);
         }
 
+        // New MVP systems
+        FindOrCreate<DramaManagerMB>("DramaManagerMB");
+        FindOrCreate<CoverWorkTracker>("CoverWorkTracker");
+        FindOrCreate<DialogueScheduler>("DialogueScheduler");
+        FindOrCreate<MVPAudioService>("MVPAudioService");
+
+        // Suspicion FloatVariable bridge
+        var suspicionVar = Resources.Load<FloatVariable>("MVP/SuspicionLevel");
+        if (suspicionVar != null && gss != null)
+        {
+            gss.OnGlobalSuspicionChanged += v => suspicionVar.SetValue(v);
+        }
+
         Debug.Log("[MVPBootstrap] All systems wired.");
     }
 

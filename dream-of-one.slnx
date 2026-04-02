@@ -1,0 +1,7 @@
+﻿<Solution>
+  <Project Path="DreamOfOne.csproj" />
+  <Project Path="DreamOfOne.EditModeTests.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="DreamOfOne.PlayModeTests.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+</Solution>

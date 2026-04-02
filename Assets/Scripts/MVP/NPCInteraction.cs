@@ -82,7 +82,9 @@ public class NPCInteraction : MonoBehaviour
         string preoccupationBlock = preoccupation != null
             ? preoccupation.ToPromptBlock() + "\n\n"
             : "";
-        return $@"{preoccupationBlock}당신은 편의점의 {npcRole}입니다.
+        DramaManagerMB drama = FindFirstObjectByType<DramaManagerMB>();
+        string toneDirective = drama != null ? drama.Logic.GetToneDirective() + "\n\n" : "";
+        return $@"{preoccupationBlock}{toneDirective}당신은 편의점의 {npcRole}입니다.
 
 규칙:
 {laws}

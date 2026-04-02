@@ -6,6 +6,7 @@ public class NPCInteraction : MonoBehaviour
 {
     [SerializeField] float interactionRange = 5f;
     [SerializeField] string npcRole = "Store Clerk";
+    [SerializeField] NPCPreoccupation preoccupation;
     [SerializeField] string[] dreamLaws = new string[]
     {
         "꿈에 대해 언급하면 안 됨",
@@ -78,7 +79,10 @@ public class NPCInteraction : MonoBehaviour
     string BuildPrompt(string playerMessage)
     {
         string laws = string.Join("\n", dreamLaws);
-        return $@"당신은 편의점의 {npcRole}입니다.
+        string preoccupationBlock = preoccupation != null
+            ? preoccupation.ToPromptBlock() + "\n\n"
+            : "";
+        return $@"{preoccupationBlock}당신은 편의점의 {npcRole}입니다.
 
 규칙:
 {laws}

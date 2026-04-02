@@ -93,8 +93,11 @@ public class CodexExecBackend : MonoBehaviour, ILLMBackend
             }
         });
 
+        process.ErrorDataReceived += (sender, args) => { };
+
         process.Start();
         process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
 
         return tcs.Task;
     }

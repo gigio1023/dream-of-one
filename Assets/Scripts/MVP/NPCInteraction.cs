@@ -29,8 +29,9 @@ public class NPCInteraction : MonoBehaviour
     void Start()
     {
         suspicion = GetComponent<SuspicionComponent>();
-        llmBackend = FindFirstObjectByType<CodexExecBackend>() as ILLMBackend
-                  ?? FindFirstObjectByType<OllamaBackend>() as ILLMBackend;
+        var codex = FindFirstObjectByType<CodexExecBackend>();
+        llmBackend = (codex != null && codex.IsAvailable) ? codex as ILLMBackend : null;
+        llmBackend ??= FindFirstObjectByType<OllamaBackend>() as ILLMBackend;
         conversationUI = FindFirstObjectByType<ConversationUI>();
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
 

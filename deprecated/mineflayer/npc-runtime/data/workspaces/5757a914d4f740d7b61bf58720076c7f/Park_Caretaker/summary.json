@@ -1,4 +1,0 @@
-{
-  "text": "npc:Park_Caretaker | landmark:Prototype | action:Observe | fallback:yes | reasons:fallback:parse_failure | transport:fallback",
-  "updatedAt": "2026-02-13T06:27:03.067Z"
-}

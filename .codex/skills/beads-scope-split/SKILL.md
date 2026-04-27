@@ -22,5 +22,5 @@ description: Split a large/ambiguous request into an internal Beads Epic + Tasks
 
 ## Guardrails
 
-- If a task requires Unity scene/prefab/asset authoring, add `needs:unity-mcp`.
-- Never schedule Unity MCP work in parallel; treat it as WIP=1 and use `lock:unity-mcp`.
+- If a task requires local Godot import or scene smoke verification, add `needs:godot-local`.
+- Keep Godot scene/data ownership explicit when splitting parallel work.

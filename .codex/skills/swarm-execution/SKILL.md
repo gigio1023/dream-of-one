@@ -20,7 +20,7 @@ Split non-trivial work across sub-agents to accelerate discovery, implementation
 
 3) Parallelize tools
 - Use `multi_tool_use.parallel` for independent tool calls.
-- Batch repetitive Unity MCP/file operations and PR polling when possible.
+- Batch repetitive Godot CLI/file operations and PR polling when possible.
 
 4) Integrate
 - Collect summaries + file paths.

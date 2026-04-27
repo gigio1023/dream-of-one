@@ -1,3 +1,2 @@
 # GitHub Linguist attributes
-# Keep the Mineflayer archive in-repo, but exclude it from language stats.
-deprecated/mineflayer/** linguist-vendored
+godot/.godot/** linguist-generated

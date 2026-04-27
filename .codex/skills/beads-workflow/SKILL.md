@@ -4,7 +4,7 @@ description: >
   Use Beads (bd) as an internal execution graph (epic/task/dep) for local work.
   Covers session start (bd prime/ready), create/update/close, dependencies/labels,
   and writing bodies with real newlines. Use when asked about beads/bd, internal
-  task breakdown, or managing Unity MCP WIP.
+  task breakdown, or managing local Godot verification WIP.
 ---
 
 # Beads Workflow (Internal Execution Graph)
@@ -44,11 +44,10 @@ description: >
 ## Labels (recommended in this repo)
 
 - `agent:codex` / `agent:human`
-- `needs:unity-mcp` (Unity Editor + MCP required)
-- `lock:unity-mcp` (mutex: only one active issue may hold this while using Unity MCP)
+- `needs:godot-local` (local Godot CLI/editor import required)
 
 ## Guardrails
 
 - Don’t manage execution steps via Markdown TODO lists — if you need structure, create internal Beads issues.
-- Prefer WIP=1 when `needs:unity-mcp` is involved (single Unity Editor session).
+- Keep local Godot verification ownership explicit when multiple agents work in parallel.
 - Keep Linear up-to-date manually (status + PR link) since Linear is the work SoT.

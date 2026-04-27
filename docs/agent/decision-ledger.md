@@ -43,7 +43,7 @@ Use this table row structure in issue comments or PR notes:
 
 | decision_date | owner | comment_id | source | author | severity | decision | action | commit | status | reason | evidence_links |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 2026-02-18T16:00:00Z | user | PR-123#review-1 | codex-review | codex | blocking | valid | Added guard to intake policy | abcdef1 | resolved | `SA_BREAK` during intake violates Specification | `data/evidence/ws8/gate-h/run-a-evidence-pack.json` |
+| 2026-04-27T00:00:00Z | user | DRE-171 | codex-review | codex | blocking | valid | Added Godot intake policy guard and Evidence validation | local | resolved | `SA_BREAK` during intake violates Specification | `data/evidence/godot/runtime-slice/dre_171_runtime_slice_evidence.json` |
 
 ## 5) Operating protocol
 1. Open a ledger entry when a review/gate/scope decision is made.

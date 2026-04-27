@@ -1,0 +1,108 @@
+{
+	"adapter": "godot",
+	"createdAtMs": 1777287091918,
+	"events": [
+		{
+			"adapter": "godot",
+			"eventFamily": "domain",
+			"eventId": "event-domain-shell-1777287091918",
+			"eventName": "shell_domain_surfaces_loaded",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-shell-session",
+			"socialLoopStage": "intake",
+			"summary": "Godot shell loaded canonical text surfaces and Station intake metadata.",
+			"timestampMs": 1777287091918,
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		},
+		{
+			"adapter": "godot",
+			"artifactPath": "data/evidence/godot/shell/dre_171_shell_evidence.json",
+			"eventFamily": "evidence_export",
+			"eventId": "event-export-shell-1777287091918",
+			"eventName": "evidence_pack_created",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-shell-session",
+			"summary": "Godot shell Evidence Pack exported.",
+			"timestampMs": 1777287091918,
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		}
+	],
+	"inspection": {
+		"failures": [],
+		"generation_failures": [],
+		"group_counts": {
+			"interaction_zones": 4,
+			"landmarks": 4,
+			"npc_placeholders": 4,
+			"routes": 3,
+			"text_surfaces": 4
+		},
+		"has_camera": true,
+		"has_player": true,
+		"landmark_ids": [
+			"Park",
+			"Station",
+			"Store",
+			"Studio"
+		],
+		"npc_ids": [
+			"NPC_Park_Witness",
+			"NPC_Station_Officer",
+			"NPC_Store_Clerk",
+			"NPC_Studio_PM"
+		],
+		"ok": true,
+		"route_ids": [
+			"CivicLoop",
+			"StationIntake",
+			"StoreQueue"
+		],
+		"runtime_path": "Godot 4.x shell",
+		"text_surface_ids": [
+			"TS_Park_NoticeBoard",
+			"TS_Station_IntakeRules",
+			"TS_Store_QueueRules",
+			"TS_Studio_ApprovalCriteria"
+		],
+		"world_id": "dre_171_godot_shell",
+		"world_revision": "rev-social-stealth-v1",
+		"zone_ids": [
+			"ParkObservationZone",
+			"StationIntakeZone",
+			"StoreCounterZone",
+			"StudioApprovalZone"
+		]
+	},
+	"issueId": "DRE-171",
+	"mainScene": "res://scenes/main.tscn",
+	"runId": "dre-171-shell-run",
+	"runtimePath": "Godot 4.x shell",
+	"schemaVersion": "godot-runtime-v1",
+	"sessionId": "dre-171-shell-session",
+	"summaries": {
+		"actorSignatures": {
+			"NPC_Park_Witness": "dre_171_godot_shell:NPC_Park_Witness",
+			"NPC_Station_Officer": "dre_171_godot_shell:NPC_Station_Officer",
+			"NPC_Store_Clerk": "dre_171_godot_shell:NPC_Store_Clerk",
+			"NPC_Studio_PM": "dre_171_godot_shell:NPC_Studio_PM"
+		},
+		"blockedChecks": [],
+		"commandOutcomeCounts": {
+			"rejected": 0,
+			"validated": 0
+		},
+		"domainTriggerCounts": {
+			"shell_domain_surfaces_loaded": 1
+		},
+		"fallbackCounters": {
+			"total": 0
+		},
+		"runSignature": "dre-171-shell-run:dre_171_godot_shell:rev-social-stealth-v1",
+		"verdictEndStateTrace": "Trigger -> ShellInspector -> TextSurface registry -> intake -> blocked until playable domain controller"
+	},
+	"verdict": "pass",
+	"worldId": "dre_171_godot_shell",
+	"worldRevision": "rev-social-stealth-v1"
+}

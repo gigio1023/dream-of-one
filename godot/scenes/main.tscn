@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/world_shell.gd" id="1_world_shell"]
+[ext_resource type="PackedScene" path="res://scenes/actors/player.tscn" id="2_player"]
+
+[node name="DreamOfOneShell" type="Node3D"]
+script = ExtResource("1_world_shell")
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="Actors" type="Node3D" parent="."]
+
+[node name="Player" parent="Actors" instance=ExtResource("2_player")]
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.942478, 0.628319, 0)
+light_energy = 2.2
+
+[node name="DebugMapCamera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 34, -5)
+projection = 1
+size = 36.0
+far = 100.0
+

@@ -1,0 +1,6 @@
+node_modules/
+dist/
+coverage/
+*.log
+data/thread-store.json
+data/workspaces/

@@ -1,0 +1,211 @@
+{
+  "version": 1,
+  "world_id": "dre_171_godot_shell",
+  "world_revision": "rev-social-stealth-v1",
+  "units": "meters",
+  "runtime_path": "Godot 4.x shell",
+  "player_start": {
+    "position": [0, 0.05, 13],
+    "yaw_degrees": 180,
+    "near_landmark": "Station"
+  },
+  "landmarks": [
+    {
+      "id": "Store",
+      "label": "Store",
+      "position": [-11, 0, 0],
+      "size": [8, 3, 6],
+      "color": [0.24, 0.52, 0.82, 1.0],
+      "anchors": {
+        "front_door": [-11, 0, 3.7],
+        "counter": [-13.5, 0, -1.6],
+        "label_board": [-8.2, 1.45, -2.7],
+        "queue_start": [-10.4, 0, 1.4],
+        "npc_spawn": [-13.4, 0, 0.7]
+      }
+    },
+    {
+      "id": "Studio",
+      "label": "Studio",
+      "position": [11, 0, 0],
+      "size": [8, 3, 6],
+      "color": [0.66, 0.44, 0.78, 1.0],
+      "anchors": {
+        "front_door": [11, 0, 3.7],
+        "approval_desk": [8.4, 0, -1.2],
+        "criteria_wall": [13.8, 1.45, -2.7],
+        "review_queue": [10.4, 0, 1.4],
+        "npc_spawn": [8.9, 0, 0.4]
+      }
+    },
+    {
+      "id": "Park",
+      "label": "Park",
+      "position": [-11, 0, -12],
+      "size": [9, 0.35, 7],
+      "color": [0.25, 0.66, 0.45, 1.0],
+      "anchors": {
+        "gate": [-11, 0, -8.0],
+        "notice_board": [-14.2, 1.25, -14.7],
+        "photo_spot": [-9.1, 0, -12.2],
+        "bench": [-12.8, 0, -11.4],
+        "npc_spawn": [-10.2, 0, -10.4]
+      }
+    },
+    {
+      "id": "Station",
+      "label": "Station",
+      "position": [11, 0, -12],
+      "size": [9, 3.4, 7],
+      "color": [0.78, 0.72, 0.43, 1.0],
+      "anchors": {
+        "front_door": [11, 0, -8.0],
+        "report_desk": [8.4, 0, -13.0],
+        "intake_board": [13.8, 1.6, -14.8],
+        "waiting_line": [10.2, 0, -10.4],
+        "npc_spawn": [8.8, 0, -11.2]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "id": "CivicLoop",
+      "label": "Civic Loop",
+      "points": [
+        "Station.front_door",
+        "Store.front_door",
+        "Park.gate",
+        "Studio.front_door",
+        "Station.front_door"
+      ]
+    },
+    {
+      "id": "StoreQueue",
+      "label": "Store Queue",
+      "points": ["Store.queue_start", "Store.counter", "Store.label_board"]
+    },
+    {
+      "id": "StationIntake",
+      "label": "Station Intake",
+      "points": ["Station.waiting_line", "Station.report_desk", "Station.intake_board"]
+    }
+  ],
+  "interaction_zones": [
+    {
+      "id": "StoreCounterZone",
+      "kind": "Cover Test",
+      "landmark": "Store",
+      "anchor": "Store.counter",
+      "radius": 2.1,
+      "cover_test_id": "CT_STORE_QUEUE_LANGUAGE"
+    },
+    {
+      "id": "StudioApprovalZone",
+      "kind": "Cover Test",
+      "landmark": "Studio",
+      "anchor": "Studio.approval_desk",
+      "radius": 2.2,
+      "cover_test_id": "CT_STUDIO_APPROVAL_GATE_SPEECH"
+    },
+    {
+      "id": "ParkObservationZone",
+      "kind": "Cover Test",
+      "landmark": "Park",
+      "anchor": "Park.photo_spot",
+      "radius": 2.4,
+      "cover_test_id": "CT_PARK_OBSERVATION_PRESSURE"
+    },
+    {
+      "id": "StationIntakeZone",
+      "kind": "Cover Test",
+      "landmark": "Station",
+      "anchor": "Station.report_desk",
+      "radius": 2.0,
+      "cover_test_id": "CT_STATION_SOFT_INQUEST"
+    }
+  ],
+  "text_surfaces": [
+    {
+      "id": "TS_Store_QueueRules",
+      "label": "Queue Rules",
+      "landmark": "Store",
+      "anchor": "Store.label_board",
+      "law_id": "DL_S1_QUEUE_SANCTITY",
+      "law_alias": "DL_S1",
+      "cover_test_id": "CT_STORE_QUEUE_LANGUAGE",
+      "purpose": "TextSurface equivalent for Store queue language.",
+      "body": "Queue procedure: wait at the mark, state item count, confirm the label aloud.",
+      "evidence_outputs": ["QueueMismatchEvent", "WitnessStatement"]
+    },
+    {
+      "id": "TS_Studio_ApprovalCriteria",
+      "label": "Approval Criteria",
+      "landmark": "Studio",
+      "anchor": "Studio.criteria_wall",
+      "law_id": "DL_ST1_APPROVAL_GATE",
+      "law_alias": "DL_ST1",
+      "cover_test_id": "CT_STUDIO_APPROVAL_GATE_SPEECH",
+      "purpose": "TextSurface equivalent for approval criteria speech.",
+      "body": "Approval criteria: cite source, owner, and reason before requesting review.",
+      "evidence_outputs": ["ApprovalMismatchEvent", "ReviewArtifact"]
+    },
+    {
+      "id": "TS_Park_NoticeBoard",
+      "label": "Notice Board",
+      "landmark": "Park",
+      "anchor": "Park.notice_board",
+      "law_id": "DL_P1_OBSERVATION_ETIQUETTE",
+      "law_alias": "DL_P1",
+      "cover_test_id": "CT_PARK_OBSERVATION_PRESSURE",
+      "purpose": "TextSurface equivalent for observation pressure.",
+      "body": "Observation notice: remain in public flow and do not narrate the dream state.",
+      "evidence_outputs": ["NoticeSnapshot", "Statement"]
+    },
+    {
+      "id": "TS_Station_IntakeRules",
+      "label": "Intake Rules",
+      "landmark": "Station",
+      "anchor": "Station.intake_board",
+      "law_id": "DL_N1_PROCEDURE_SPEECH_ONLY",
+      "law_alias": "DL_N1",
+      "cover_test_id": "CT_STATION_SOFT_INQUEST",
+      "purpose": "TextSurface equivalent for soft Inquest intake.",
+      "body": "Station intake: answer only procedural questions and keep reports internally consistent.",
+      "evidence_outputs": ["StationReport", "InquestDossier"]
+    }
+  ],
+  "actors": [
+    {
+      "id": "NPC_Store_Clerk",
+      "label": "Store Clerk",
+      "role": "Store Clerk",
+      "home_landmark": "Store",
+      "spawn_anchor": "Store.npc_spawn",
+      "route_id": "StoreQueue"
+    },
+    {
+      "id": "NPC_Studio_PM",
+      "label": "Studio PM",
+      "role": "Studio PM",
+      "home_landmark": "Studio",
+      "spawn_anchor": "Studio.npc_spawn",
+      "route_id": "CivicLoop"
+    },
+    {
+      "id": "NPC_Park_Witness",
+      "label": "Park Witness",
+      "role": "Park Witness",
+      "home_landmark": "Park",
+      "spawn_anchor": "Park.npc_spawn",
+      "route_id": "CivicLoop"
+    },
+    {
+      "id": "NPC_Station_Officer",
+      "label": "Station Officer",
+      "role": "Station Officer",
+      "home_landmark": "Station",
+      "spawn_anchor": "Station.npc_spawn",
+      "route_id": "StationIntake"
+    }
+  ]
+}

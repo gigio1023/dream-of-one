@@ -17,12 +17,12 @@ description: >
    - Apply routing labels:
      - `agent:codex` (local Codex CLI execution)
      - `agent:codex-cloud` (delegate to Codex Cloud via Linear; must be cloud-safe)
-     - `needs:unity-mcp` (Unity Editor/MCP required; local-only)
+     - `needs:godot-local` (local Godot CLI/editor import required)
 3. During execution:
    - Update status (e.g., In Progress / In Review / Done) and leave progress comments.
    - Add PR link(s) to the issue when a PR exists.
 4. For Codex Cloud delegation:
-   - Ensure constraints are explicit (no Unity serialized assets; no Unity MCP).
+   - Ensure constraints are explicit, including whether Godot local import/smoke checks are required.
    - Assign to Codex or mention `@Codex` in a comment with any extra constraints.
 5. Re-read after writes to confirm final state (title/state/labels/body formatting).
 

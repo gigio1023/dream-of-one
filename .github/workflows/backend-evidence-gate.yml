@@ -2,8 +2,11 @@ name: Backend Evidence Gate
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 3 * * 1"
+  pull_request:
+    paths:
+      - "backend/npc-runtime/**"
+      - "data/evidence/godot/**"
+      - ".github/workflows/backend-evidence-gate.yml"
 
 permissions:
   contents: read
@@ -28,81 +31,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate required gate artifacts
+      - name: Validate backend and Godot Evidence Schema
         run: |
-          node <<'NODE'
-          const fs = require("node:fs");
-          const base = "../../data/evidence/ws8/gate-h";
-          const required = [
-            "run-a-evidence-pack.json",
-            "run-b-evidence-pack.json",
-            "run-c-evidence-pack.json",
-            "run-a-regression-metrics.json",
-            "run-b-regression-metrics.json",
-            "run-c-regression-metrics.json",
-            "run-a-events.json",
-            "run-b-events.json",
-            "run-c-events.json",
+          npm run check
+          node --import tsx --input-type=module <<'NODE'
+          import { readFile } from "node:fs/promises";
+          import { validateGodotEvidencePack, validateGodotObservationFrame } from "./src/godot/runtime-schema.ts";
+          const shell = JSON.parse(await readFile("../../data/evidence/godot/shell/dre_171_shell_evidence.json", "utf8"));
+          const runtime = JSON.parse(await readFile("../../data/evidence/godot/runtime-slice/dre_171_runtime_slice_evidence.json", "utf8"));
+          const checks = [
+            validateGodotEvidencePack(shell),
+            validateGodotEvidencePack(runtime),
+            validateGodotObservationFrame(runtime.observationFrame),
           ];
-          const missing = required.filter((file) => !fs.existsSync(base + "/" + file));
-          if (missing.length > 0) {
-            console.error("Missing artifacts:\n" + missing.join("\n"));
+          const failed = checks.filter((check) => !check.ok);
+          if (failed.length > 0) {
+            console.error(JSON.stringify(failed, null, 2));
             process.exit(1);
           }
-          console.log("All required artifacts exist.");
+          console.log("Godot Evidence Packs validated.");
           NODE
-
-      - name: Validate per-run gate metrics
-        run: |
-          node <<'NODE'
-          const fs = require("node:fs");
-          const base = "../../data/evidence/ws8/gate-h";
-          for (const run of ["a", "b", "c"]) {
-            const evidencePath = base + "/run-" + run + "-evidence-pack.json";
-            const metricsPath = base + "/run-" + run + "-regression-metrics.json";
-            const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
-            const metrics = JSON.parse(fs.readFileSync(metricsPath, "utf8"));
-            if (evidence.pass !== true) {
-              throw new Error("run-" + run + " evidence pass=false");
-            }
-            if (Array.isArray(evidence.violations) && evidence.violations.length > 0) {
-              throw new Error("run-" + run + " has violations");
-            }
-            if (metrics.pass?.all !== true) {
-              throw new Error("run-" + run + " metrics pass.all=false");
-            }
-            if ((metrics.continuity?.codexReplyMissingThreadId ?? 1) !== 0) {
-              throw new Error("run-" + run + " continuity codexReplyMissingThreadId != 0");
-            }
-            if (
-              (metrics.fallbackPath?.missingReasonCode ?? 1) !== 0 ||
-              (metrics.fallbackPath?.missingReasonCategory ?? 1) !== 0
-            ) {
-              throw new Error("run-" + run + " fallback path reason fields missing");
-            }
-            console.log("run-" + run + " metrics validated");
-          }
-          NODE
-
-      - name: Verify trajectory diversity
-        run: |
-          mkdir -p ../../logs/ws8
-          npm run ws8:trajectory:verify -- \
-            --evidence ../../data/evidence/ws8/gate-h/run-a-evidence-pack.json \
-            --evidence ../../data/evidence/ws8/gate-h/run-b-evidence-pack.json \
-            --evidence ../../data/evidence/ws8/gate-h/run-c-evidence-pack.json \
-            --out ../../logs/ws8/ci-trajectory-diversity.json \
-            --min-runs 3 \
-            --strict
-
-      - name: Summarize gate output
-        run: |
-          node -e "const fs=require('node:fs');const p='../../logs/ws8/ci-trajectory-diversity.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));console.log('runCount='+j.totals.runCount+' uniqueTrajectorySignatures='+j.totals.uniqueTrajectorySignatures+' pass='+j.pass);"
-
-      - name: Upload evidence artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ws8-backend-evidence-gate
-          path: |
-            data/evidence/ws8/gate-h/*.json
-            logs/ws8/ci-trajectory-diversity.json

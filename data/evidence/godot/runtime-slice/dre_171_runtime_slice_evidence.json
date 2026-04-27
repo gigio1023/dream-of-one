@@ -1,0 +1,365 @@
+{
+	"adapter": "godot",
+	"createdAtMs": 1777287683007,
+	"duplicateCommandResult": {
+		"fallback": {
+			"actionType": "Idle",
+			"commandId": "cmd-godot-move-1-fallback",
+			"expectedStage": "intake",
+			"issuedAtMs": 1777287683007,
+			"npcId": "NPC_Station_Officer",
+			"reasonCodes": [
+				"schema_duplicate_command"
+			],
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-runtime-slice-session",
+			"source": "fallback",
+			"target": {
+
+			},
+			"timeoutMs": 1000,
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		},
+		"ok": false,
+		"reasonCodes": [
+			"schema_duplicate_command"
+		],
+		"status": "rejected"
+	},
+	"events": [
+		{
+			"actorId": "NPC_Station_Officer",
+			"adapter": "godot",
+			"eventFamily": "observation",
+			"eventId": "observation_frame_emitted-1777287683007",
+			"eventName": "observation_frame_emitted",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-runtime-slice-session",
+			"socialLoopStage": "intake",
+			"summary": "Godot runtime slice emitted Station intake ObservationFrame.",
+			"timestampMs": 1777287683007,
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		},
+		{
+			"actorId": "NPC_Station_Officer",
+			"adapter": "godot",
+			"commandId": "cmd-godot-move-1",
+			"eventFamily": "command",
+			"eventId": "command_executed-1777287683007",
+			"eventName": "command_executed",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-runtime-slice-session",
+			"socialLoopStage": "intake",
+			"summary": "Godot runtime slice executed a bounded Move command.",
+			"timestampMs": 1777287683007,
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		},
+		{
+			"actorId": "NPC_Missing",
+			"adapter": "godot",
+			"commandId": "cmd-godot-invalid-1",
+			"eventFamily": "command",
+			"eventId": "command_rejected-1777287683007",
+			"eventName": "command_rejected",
+			"reasonCategory": "schema",
+			"reasonCode": "schema_unknown_actor",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-runtime-slice-session",
+			"socialLoopStage": "intake",
+			"summary": "Godot runtime slice rejected an invalid command before world mutation.",
+			"timestampMs": 1777287683007,
+			"warningTier": "blocking",
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		},
+		{
+			"actorId": "NPC_Missing",
+			"adapter": "godot",
+			"commandId": "cmd-godot-invalid-1-fallback",
+			"eventFamily": "fallback",
+			"eventId": "fallback_selected-1777287683007",
+			"eventName": "fallback_selected",
+			"reasonCategory": "schema",
+			"reasonCode": "schema_unknown_actor",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-runtime-slice-session",
+			"socialLoopStage": "intake",
+			"summary": "Godot runtime slice selected deterministic Idle fallback for the rejected command.",
+			"timestampMs": 1777287683007,
+			"usedFallback": true,
+			"warningTier": "blocking",
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		},
+		{
+			"actorId": "NPC_Station_Officer",
+			"adapter": "godot",
+			"commandId": "cmd-godot-move-1",
+			"eventFamily": "command",
+			"eventId": "command_rejected-1777287683007",
+			"eventName": "command_rejected",
+			"reasonCategory": "schema",
+			"reasonCode": "schema_duplicate_command",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-runtime-slice-session",
+			"socialLoopStage": "intake",
+			"summary": "Godot runtime slice rejected a replayed commandId before world mutation.",
+			"timestampMs": 1777287683007,
+			"warningTier": "blocking",
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		},
+		{
+			"actorId": "NPC_Station_Officer",
+			"adapter": "godot",
+			"commandId": "cmd-godot-unknown-zone-1",
+			"eventFamily": "command",
+			"eventId": "command_rejected-1777287683007",
+			"eventName": "command_rejected",
+			"reasonCategory": "schema",
+			"reasonCode": "schema_unknown_zone",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-runtime-slice-session",
+			"socialLoopStage": "intake",
+			"summary": "Godot runtime slice rejected an unregistered zone target before world mutation.",
+			"timestampMs": 1777287683007,
+			"warningTier": "blocking",
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		},
+		{
+			"actorId": "NPC_Station_Officer",
+			"adapter": "godot",
+			"eventFamily": "domain",
+			"eventId": "station_intake_sa_break_rejected-1777287683007",
+			"eventName": "station_intake_sa_break_rejected",
+			"reasonCategory": "policy",
+			"reasonCode": "policy_station_intake_requires_procedural_speech",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-runtime-slice-session",
+			"socialLoopStage": "intake",
+			"summary": "Station intake rejected SA_BREAK with deterministic procedural speech policy.",
+			"timestampMs": 1777287683007,
+			"usedFallback": true,
+			"warningTier": "blocking",
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		},
+		{
+			"adapter": "godot",
+			"artifactPath": "data/evidence/godot/runtime-slice/dre_171_runtime_slice_evidence.json",
+			"eventFamily": "evidence_export",
+			"eventId": "evidence_pack_created-1777287683007",
+			"eventName": "evidence_pack_created",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-runtime-slice-session",
+			"summary": "Godot runtime slice Evidence Pack exported.",
+			"timestampMs": 1777287683007,
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		}
+	],
+	"invalidCommandResult": {
+		"fallback": {
+			"actionType": "Idle",
+			"commandId": "cmd-godot-invalid-1-fallback",
+			"expectedStage": "intake",
+			"issuedAtMs": 1777287683007,
+			"npcId": "NPC_Missing",
+			"reasonCodes": [
+				"schema_unknown_actor",
+				"schema_invalid_action_target"
+			],
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-runtime-slice-session",
+			"source": "fallback",
+			"target": {
+
+			},
+			"timeoutMs": 1000,
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		},
+		"ok": false,
+		"reasonCodes": [
+			"schema_unknown_actor",
+			"schema_invalid_action_target"
+		],
+		"status": "rejected"
+	},
+	"observationFrame": {
+		"deltaMs": 16,
+		"evidence": [
+			{
+				"id": "godot-runtime-intake-dossier",
+				"stage": "intake",
+				"summary": "Station intake dossier opened from runtime slice observation.",
+				"type": "intake_dossier"
+			}
+		],
+		"exposure": {
+			"score": 85,
+			"thresholds": {
+				"inquest": 80,
+				"stationInterest": 60,
+				"verdict": 100
+			}
+		},
+		"frameId": "godot-runtime-slice-frame-1",
+		"landmarkId": "Station",
+		"nearbyActors": [
+			"player",
+			"NPC_Station_Officer"
+		],
+		"npcId": "NPC_Station_Officer",
+		"organizationContext": {
+			"org": "Station",
+			"role": "Station Officer"
+		},
+		"playerId": "player",
+		"playerSignals": {
+			"exposureDelta": 25,
+			"rawText": "This is a dream.",
+			"speechAct": "SA_BREAK"
+		},
+		"position": {
+			"x": 8.80000019073486,
+			"y": 0.0,
+			"z": -11.1999998092651
+		},
+		"recentEvents": [
+			"intake_started",
+			"dossier_open"
+		],
+		"schemaVersion": "godot-runtime-v1",
+		"sessionId": "dre-171-runtime-slice-session",
+		"socialLoopStage": "intake",
+		"station": {
+			"inquestOpen": true,
+			"intakeOpen": true,
+			"sessionTerminationAllowed": false,
+			"verdictReady": false
+		},
+		"timestampMs": 1777287683007,
+		"velocity": {
+			"x": 0.0,
+			"y": 0.0,
+			"z": 0.0
+		},
+		"visibleLandmarks": [
+			"Park",
+			"Station",
+			"Store",
+			"Studio"
+		],
+		"visibleTextSurfaces": [
+			{
+				"coverTestIds": [
+					"CT_STORE_QUEUE_LANGUAGE"
+				],
+				"dreamLawIds": [
+					"DL_S1_QUEUE_SANCTITY"
+				],
+				"id": "TS_Store_QueueRules",
+				"landmarkId": "Store",
+				"text": "Queue procedure: wait at the mark, state item count, confirm the label aloud."
+			},
+			{
+				"coverTestIds": [
+					"CT_STUDIO_APPROVAL_GATE_SPEECH"
+				],
+				"dreamLawIds": [
+					"DL_ST1_APPROVAL_GATE"
+				],
+				"id": "TS_Studio_ApprovalCriteria",
+				"landmarkId": "Studio",
+				"text": "Approval criteria: cite source, owner, and reason before requesting review."
+			},
+			{
+				"coverTestIds": [
+					"CT_PARK_OBSERVATION_PRESSURE"
+				],
+				"dreamLawIds": [
+					"DL_P1_OBSERVATION_ETIQUETTE"
+				],
+				"id": "TS_Park_NoticeBoard",
+				"landmarkId": "Park",
+				"text": "Observation notice: remain in public flow and do not narrate the dream state."
+			},
+			{
+				"coverTestIds": [
+					"CT_STATION_SOFT_INQUEST"
+				],
+				"dreamLawIds": [
+					"DL_N1_PROCEDURE_SPEECH_ONLY"
+				],
+				"id": "TS_Station_IntakeRules",
+				"landmarkId": "Station",
+				"text": "Station intake: answer only procedural questions and keep reports internally consistent."
+			}
+		],
+		"worldId": "dre_171_godot_shell",
+		"worldRevision": "rev-social-stealth-v1",
+		"zoneId": "StationIntakeZone"
+	},
+	"runId": "dre-171-runtime-slice-run",
+	"schemaVersion": "godot-runtime-v1",
+	"sessionId": "dre-171-runtime-slice-session",
+	"summaries": {
+		"actorSignatures": {
+			"NPC_Station_Officer": "dre_171_godot_shell:NPC_Station_Officer:intake"
+		},
+		"blockedChecks": [],
+		"commandOutcomeCounts": {
+			"executed": 1,
+			"rejected": 3,
+			"validated": 1
+		},
+		"domainTriggerCounts": {
+			"station_intake_sa_break_rejected": 1
+		},
+		"fallbackCounters": {
+			"total": 1
+		},
+		"runSignature": "dre-171-runtime-slice:dre_171_godot_shell:rev-social-stealth-v1",
+		"verdictEndStateTrace": "Trigger -> Station Officer -> Intake Dossier -> intake rejection -> blocked before verdict"
+	},
+	"unknownZoneCommandResult": {
+		"fallback": {
+			"actionType": "Idle",
+			"commandId": "cmd-godot-unknown-zone-1-fallback",
+			"expectedStage": "intake",
+			"issuedAtMs": 1777287683007,
+			"npcId": "NPC_Station_Officer",
+			"reasonCodes": [
+				"schema_unknown_zone"
+			],
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-runtime-slice-session",
+			"source": "fallback",
+			"target": {
+
+			},
+			"timeoutMs": 1000,
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		},
+		"ok": false,
+		"reasonCodes": [
+			"schema_unknown_zone"
+		],
+		"status": "rejected"
+	},
+	"validCommandResult": {
+		"ok": true,
+		"reasonCodes": [
+			"godot_runtime_slice_move"
+		],
+		"status": "executed"
+	},
+	"worldId": "dre_171_godot_shell",
+	"worldRevision": "rev-social-stealth-v1"
+}

@@ -1,74 +1,18 @@
-# 자동 라벨링 설정
-
-# 영역별 라벨
-'area: core':
+'area: godot':
   - changed-files:
-    - any-glob-to-any-file: 'Assets/Scripts/Core/**'
+    - any-glob-to-any-file: 'godot/**'
 
-'area: gameplay':
+'area: backend':
   - changed-files:
-    - any-glob-to-any-file: 'Assets/Scripts/Gameplay/**'
+    - any-glob-to-any-file: 'backend/npc-runtime/**'
 
-'area: ui':
-  - changed-files:
-    - any-glob-to-any-file: 'Assets/Scripts/UI/**'
-
-'area: rules':
-  - changed-files:
-    - any-glob-to-any-file: 'Assets/Data/Rules/**'
-
-'area: scenes':
-  - changed-files:
-    - any-glob-to-any-file: 'Assets/Scenes/**'
-
-'area: prefabs':
-  - changed-files:
-    - any-glob-to-any-file: 'Assets/Prefabs/**'
-
-# 문서 라벨
 'area: docs':
   - changed-files:
     - any-glob-to-any-file:
       - 'docs/**'
       - '*.md'
       - 'README.md'
-      - 'CONTRIBUTING.md'
-      - 'CHANGELOG.md'
 
-# 프로젝트 설정
-'area: project-settings':
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'ProjectSettings/**'
-      - 'Packages/**'
-
-# GitHub 관련
 'area: github':
   - changed-files:
     - any-glob-to-any-file: '.github/**'
-
-# 디자인 문서
-'design':
-  - changed-files:
-    - any-glob-to-any-file: 'docs/Design/**'
-
-# 기술 문서
-'tech':
-  - changed-files:
-    - any-glob-to-any-file: 'docs/Tech/**'
-
-# UX 문서
-'ux':
-  - changed-files:
-    - any-glob-to-any-file: 'docs/UX/**'
-
-# 플레이테스트
-'playtest':
-  - changed-files:
-    - any-glob-to-any-file: 'docs/Playtest/**'
-
-# ADR
-'adr':
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'docs/ADR/**'

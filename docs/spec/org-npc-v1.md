@@ -40,7 +40,7 @@ Active Runtime Path fields this spec references most often:
 ### Anchors and zones already seeded
 
 Anchors and zones referenced below are scenario identifiers for cross-document consistency and telemetry interpretation.
-They are design/runtime labels, not a normative dependency on deprecated Unity seeders:
+They are design/runtime labels, not a dependency on previous engine seeders:
 
 - Building anchors:
   - `StoreBuilding`

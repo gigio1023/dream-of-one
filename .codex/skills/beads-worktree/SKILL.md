@@ -19,6 +19,5 @@ Beads can manage worktrees safely by creating a redirect so all worktrees share 
 
 ## Guardrails
 
-- Avoid running multiple Unity Editor instances across multiple worktrees (Unity caches + asset safety).
-- If Unity MCP is involved, treat it as WIP=1 and use `lock:unity-mcp`.
-
+- Avoid running multiple Godot imports against the same generated cache directory at the same time.
+- If Godot scene generation is involved, assign a single owner for generated `.tscn` and data files.

@@ -144,6 +144,56 @@ test("OpenAI proposal gateway falls back to first configured available model aft
   assert.deepEqual(responseModels, ["gpt-5-nano"]);
 });
 
+test("OpenAI proposal gateway shares one decision deadline across model check and response", async () => {
+  const realNow = Date.now;
+  const realSetTimeout = globalThis.setTimeout;
+  const realClearTimeout = globalThis.clearTimeout;
+  const requestedTimeouts: number[] = [];
+  const timeoutHandles: ReturnType<typeof setTimeout>[] = [];
+  let nowMs = 10_000;
+
+  Date.now = () => nowMs;
+  globalThis.setTimeout = ((callback: Parameters<typeof setTimeout>[0], timeout?: number, ...args: unknown[]) => {
+    requestedTimeouts.push(Number(timeout));
+    const handle = realSetTimeout(callback, 60_000, ...args);
+    timeoutHandles.push(handle);
+    return handle;
+  }) as typeof setTimeout;
+
+  try {
+    const fetchImpl: FetchLike = async (url) => {
+      if (url.endsWith("/models")) {
+        nowMs += 80;
+        return jsonResponse(200, {
+          data: [{ id: "gpt-5.4-nano" }],
+        });
+      }
+
+      return jsonResponse(200, {
+        id: "resp-shared-deadline",
+        output_text: JSON.stringify(proposal()),
+      });
+    };
+
+    const gateway = new OpenAiProposalGateway(buildOpenAiConfig({
+      modelCheckTimeoutMs: 1000,
+      requestTimeoutMs: 1000,
+    }), { fetch: fetchImpl });
+    const broker = new DefaultCodexBroker(gateway, new InMemoryThreadStore());
+
+    const result = await broker.decide(buildPacket(), { deadlineMs: 100 });
+
+    assert.equal(result.meta.usedFallback, false);
+    assert.deepEqual(requestedTimeouts.slice(0, 2), [100, 20]);
+  } finally {
+    Date.now = realNow;
+    globalThis.setTimeout = realSetTimeout;
+    for (const handle of timeoutHandles) {
+      realClearTimeout(handle);
+    }
+  }
+});
+
 test("OpenAI proposal wording cannot select backend action type", async () => {
   const fetchImpl: FetchLike = async (url) => {
     if (url.endsWith("/models")) {

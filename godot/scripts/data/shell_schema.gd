@@ -25,7 +25,8 @@ const REQUIRED_GROUP_COUNTS := {
 	"text_surfaces": 4,
 	"npc_placeholders": 4,
 	"routes": 3,
-	"interaction_zones": 4
+	"interaction_zones": 4,
+	"free_visual_assets": 100
 }
 
 static func missing_values(required: Array[String], actual: Array[String]) -> Array[String]:

@@ -1,17 +1,17 @@
 {
 	"adapter": "godot",
-	"createdAtMs": 1777287682468,
+	"createdAtMs": 1778041627246,
 	"events": [
 		{
 			"adapter": "godot",
 			"eventFamily": "domain",
-			"eventId": "event-domain-shell-1777287682468",
+			"eventId": "event-domain-shell-1778041627246",
 			"eventName": "shell_domain_surfaces_loaded",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-shell-session",
 			"socialLoopStage": "intake",
 			"summary": "Godot shell loaded canonical text surfaces and Station intake metadata.",
-			"timestampMs": 1777287682468,
+			"timestampMs": 1778041627246,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
 		},
@@ -19,12 +19,12 @@
 			"adapter": "godot",
 			"artifactPath": "data/evidence/godot/shell/dre_171_shell_evidence.json",
 			"eventFamily": "evidence_export",
-			"eventId": "event-export-shell-1777287682468",
+			"eventId": "event-export-shell-1778041627246",
 			"eventName": "evidence_pack_created",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-shell-session",
 			"summary": "Godot shell Evidence Pack exported.",
-			"timestampMs": 1777287682468,
+			"timestampMs": 1778041627246,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
 		}
@@ -33,6 +33,7 @@
 		"failures": [],
 		"generation_failures": [],
 		"group_counts": {
+			"free_visual_assets": 126,
 			"interaction_zones": 4,
 			"landmarks": 4,
 			"npc_placeholders": 4,
@@ -40,6 +41,8 @@
 			"text_surfaces": 4
 		},
 		"has_camera": true,
+		"has_hud": true,
+		"has_playable_session": true,
 		"has_player": true,
 		"landmark_ids": [
 			"Park",
@@ -100,7 +103,7 @@
 			"total": 0
 		},
 		"runSignature": "dre-171-shell-run:dre_171_godot_shell:rev-social-stealth-v1",
-		"verdictEndStateTrace": "Trigger -> ShellInspector -> TextSurface registry -> intake -> blocked until playable domain controller"
+		"verdictEndStateTrace": "Trigger -> ShellInspector -> TextSurface registry -> playable prototype slice owns local HUD loop until live backend bridge"
 	},
 	"verdict": "pass",
 	"worldId": "dre_171_godot_shell",

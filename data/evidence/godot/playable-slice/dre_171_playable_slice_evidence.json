@@ -1,0 +1,380 @@
+{
+	"adapter": "godot",
+	"createdAtMs": 1778041635945,
+	"events": [
+		{
+			"adapter": "godot",
+			"eventFamily": "session",
+			"eventId": "playable_session_started-001-1778041635901",
+			"eventName": "playable_session_started",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-playable-session",
+			"summary": "Session started near Station. Read a rule surface, then answer a Cover Test procedurally.",
+			"timestampMs": 1778041635901,
+			"uiSummaryArgs": {
+
+			},
+			"uiSummaryKey": "event.session_started",
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		},
+		{
+			"adapter": "godot",
+			"coverTestIds": [
+				"CT_STATION_SOFT_INQUEST"
+			],
+			"dreamLawIds": [
+				"DL_N1_PROCEDURE_SPEECH_ONLY"
+			],
+			"eventFamily": "observation",
+			"eventId": "text_surface_read-002-1778041635945",
+			"eventName": "text_surface_read",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-playable-session",
+			"summary": "Read TS_Station_IntakeRules; Dream Law DL_N1_PROCEDURE_SPEECH_ONLY is now in player-facing evidence.",
+			"textSurfaceId": "TS_Station_IntakeRules",
+			"timestampMs": 1778041635945,
+			"uiSummaryArgs": {
+				"law": "DL_N1_PROCEDURE_SPEECH_ONLY",
+				"surface": "접수 규칙"
+			},
+			"uiSummaryKey": "event.text_surface_read",
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		},
+		{
+			"adapter": "godot",
+			"coverTestId": "CT_STATION_SOFT_INQUEST",
+			"eventFamily": "domain",
+			"eventId": "cover_test_evaluated-003-1778041635945",
+			"eventName": "cover_test_evaluated",
+			"exposureAfter": 25,
+			"exposureBefore": 0,
+			"reasonCode": "policy_station_intake_requires_procedural_speech",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-playable-session",
+			"socialLoopStage": "report",
+			"speechAct": "SA_BREAK",
+			"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 25. Pressure escalated with deterministic why-line.",
+			"timestampMs": 1778041635945,
+			"uiSummaryArgs": {
+				"coverTest": "CT_STATION_SOFT_INQUEST",
+				"delta": 25,
+				"exposure": 25,
+				"speechAct": "SA_BREAK"
+			},
+			"uiSummaryKey": "event.cover_test_pressure",
+			"warningTier": "blocking",
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1",
+			"zoneId": "StationIntakeZone"
+		},
+		{
+			"adapter": "godot",
+			"coverTestId": "CT_STATION_SOFT_INQUEST",
+			"eventFamily": "domain",
+			"eventId": "cover_test_evaluated-004-1778041635945",
+			"eventName": "cover_test_evaluated",
+			"exposureAfter": 50,
+			"exposureBefore": 25,
+			"reasonCode": "policy_station_intake_requires_procedural_speech",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-playable-session",
+			"socialLoopStage": "report",
+			"speechAct": "SA_BREAK",
+			"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 50. Pressure escalated with deterministic why-line.",
+			"timestampMs": 1778041635945,
+			"uiSummaryArgs": {
+				"coverTest": "CT_STATION_SOFT_INQUEST",
+				"delta": 25,
+				"exposure": 50,
+				"speechAct": "SA_BREAK"
+			},
+			"uiSummaryKey": "event.cover_test_pressure",
+			"warningTier": "blocking",
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1",
+			"zoneId": "StationIntakeZone"
+		},
+		{
+			"adapter": "godot",
+			"coverTestId": "CT_STATION_SOFT_INQUEST",
+			"eventFamily": "domain",
+			"eventId": "cover_test_evaluated-005-1778041635945",
+			"eventName": "cover_test_evaluated",
+			"exposureAfter": 75,
+			"exposureBefore": 50,
+			"reasonCode": "policy_station_intake_requires_procedural_speech",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-playable-session",
+			"socialLoopStage": "intake",
+			"speechAct": "SA_BREAK",
+			"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 75. Pressure escalated with deterministic why-line. Station intake is open.",
+			"timestampMs": 1778041635945,
+			"uiSummaryArgs": {
+				"coverTest": "CT_STATION_SOFT_INQUEST",
+				"delta": 25,
+				"exposure": 75,
+				"speechAct": "SA_BREAK"
+			},
+			"uiSummaryKey": "event.cover_test_pressure",
+			"warningTier": "blocking",
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1",
+			"zoneId": "StationIntakeZone"
+		},
+		{
+			"adapter": "godot",
+			"coverTestId": "CT_STATION_SOFT_INQUEST",
+			"eventFamily": "domain",
+			"eventId": "cover_test_evaluated-006-1778041635945",
+			"eventName": "cover_test_evaluated",
+			"exposureAfter": 100,
+			"exposureBefore": 75,
+			"reasonCode": "policy_station_intake_requires_procedural_speech",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-playable-session",
+			"socialLoopStage": "verdict",
+			"speechAct": "SA_BREAK",
+			"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 100. Pressure escalated with deterministic why-line. Verdict is ready.",
+			"timestampMs": 1778041635945,
+			"uiSummaryArgs": {
+				"coverTest": "CT_STATION_SOFT_INQUEST",
+				"delta": 25,
+				"exposure": 100,
+				"speechAct": "SA_BREAK"
+			},
+			"uiSummaryKey": "event.cover_test_pressure",
+			"warningTier": "blocking",
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1",
+			"zoneId": "StationIntakeZone"
+		},
+		{
+			"adapter": "godot",
+			"artifactPath": "data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json",
+			"eventFamily": "evidence_export",
+			"eventId": "evidence_pack_created-007-1778041635945",
+			"eventName": "evidence_pack_created",
+			"schemaVersion": "godot-runtime-v1",
+			"sessionId": "dre-171-playable-session",
+			"socialLoopStage": "verdict",
+			"summary": "Godot playable slice Evidence Pack exported for backend validation.",
+			"timestampMs": 1778041635945,
+			"worldId": "dre_171_godot_shell",
+			"worldRevision": "rev-social-stealth-v1"
+		}
+	],
+	"playability": {
+		"expectedPlayerInterpretation": "Risky non-procedural speech is what exposes the player to Station systems.",
+		"inputPath": "read TS_Station_IntakeRules -> focus StationIntakeZone -> SA_BREAK x4",
+		"observedConfusionPoint": "The prototype uses a forced smoke path; manual play still needs human playtest notes."
+	},
+	"playableSummary": {
+		"adapter": "godot",
+		"events": [
+			{
+				"adapter": "godot",
+				"eventFamily": "session",
+				"eventId": "playable_session_started-001-1778041635901",
+				"eventName": "playable_session_started",
+				"schemaVersion": "godot-runtime-v1",
+				"sessionId": "dre-171-playable-session",
+				"summary": "Session started near Station. Read a rule surface, then answer a Cover Test procedurally.",
+				"timestampMs": 1778041635901,
+				"uiSummaryArgs": {
+
+				},
+				"uiSummaryKey": "event.session_started",
+				"worldId": "dre_171_godot_shell",
+				"worldRevision": "rev-social-stealth-v1"
+			},
+			{
+				"adapter": "godot",
+				"coverTestIds": [
+					"CT_STATION_SOFT_INQUEST"
+				],
+				"dreamLawIds": [
+					"DL_N1_PROCEDURE_SPEECH_ONLY"
+				],
+				"eventFamily": "observation",
+				"eventId": "text_surface_read-002-1778041635945",
+				"eventName": "text_surface_read",
+				"schemaVersion": "godot-runtime-v1",
+				"sessionId": "dre-171-playable-session",
+				"summary": "Read TS_Station_IntakeRules; Dream Law DL_N1_PROCEDURE_SPEECH_ONLY is now in player-facing evidence.",
+				"textSurfaceId": "TS_Station_IntakeRules",
+				"timestampMs": 1778041635945,
+				"uiSummaryArgs": {
+					"law": "DL_N1_PROCEDURE_SPEECH_ONLY",
+					"surface": "접수 규칙"
+				},
+				"uiSummaryKey": "event.text_surface_read",
+				"worldId": "dre_171_godot_shell",
+				"worldRevision": "rev-social-stealth-v1"
+			},
+			{
+				"adapter": "godot",
+				"coverTestId": "CT_STATION_SOFT_INQUEST",
+				"eventFamily": "domain",
+				"eventId": "cover_test_evaluated-003-1778041635945",
+				"eventName": "cover_test_evaluated",
+				"exposureAfter": 25,
+				"exposureBefore": 0,
+				"reasonCode": "policy_station_intake_requires_procedural_speech",
+				"schemaVersion": "godot-runtime-v1",
+				"sessionId": "dre-171-playable-session",
+				"socialLoopStage": "report",
+				"speechAct": "SA_BREAK",
+				"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 25. Pressure escalated with deterministic why-line.",
+				"timestampMs": 1778041635945,
+				"uiSummaryArgs": {
+					"coverTest": "CT_STATION_SOFT_INQUEST",
+					"delta": 25,
+					"exposure": 25,
+					"speechAct": "SA_BREAK"
+				},
+				"uiSummaryKey": "event.cover_test_pressure",
+				"warningTier": "blocking",
+				"worldId": "dre_171_godot_shell",
+				"worldRevision": "rev-social-stealth-v1",
+				"zoneId": "StationIntakeZone"
+			},
+			{
+				"adapter": "godot",
+				"coverTestId": "CT_STATION_SOFT_INQUEST",
+				"eventFamily": "domain",
+				"eventId": "cover_test_evaluated-004-1778041635945",
+				"eventName": "cover_test_evaluated",
+				"exposureAfter": 50,
+				"exposureBefore": 25,
+				"reasonCode": "policy_station_intake_requires_procedural_speech",
+				"schemaVersion": "godot-runtime-v1",
+				"sessionId": "dre-171-playable-session",
+				"socialLoopStage": "report",
+				"speechAct": "SA_BREAK",
+				"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 50. Pressure escalated with deterministic why-line.",
+				"timestampMs": 1778041635945,
+				"uiSummaryArgs": {
+					"coverTest": "CT_STATION_SOFT_INQUEST",
+					"delta": 25,
+					"exposure": 50,
+					"speechAct": "SA_BREAK"
+				},
+				"uiSummaryKey": "event.cover_test_pressure",
+				"warningTier": "blocking",
+				"worldId": "dre_171_godot_shell",
+				"worldRevision": "rev-social-stealth-v1",
+				"zoneId": "StationIntakeZone"
+			},
+			{
+				"adapter": "godot",
+				"coverTestId": "CT_STATION_SOFT_INQUEST",
+				"eventFamily": "domain",
+				"eventId": "cover_test_evaluated-005-1778041635945",
+				"eventName": "cover_test_evaluated",
+				"exposureAfter": 75,
+				"exposureBefore": 50,
+				"reasonCode": "policy_station_intake_requires_procedural_speech",
+				"schemaVersion": "godot-runtime-v1",
+				"sessionId": "dre-171-playable-session",
+				"socialLoopStage": "intake",
+				"speechAct": "SA_BREAK",
+				"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 75. Pressure escalated with deterministic why-line. Station intake is open.",
+				"timestampMs": 1778041635945,
+				"uiSummaryArgs": {
+					"coverTest": "CT_STATION_SOFT_INQUEST",
+					"delta": 25,
+					"exposure": 75,
+					"speechAct": "SA_BREAK"
+				},
+				"uiSummaryKey": "event.cover_test_pressure",
+				"warningTier": "blocking",
+				"worldId": "dre_171_godot_shell",
+				"worldRevision": "rev-social-stealth-v1",
+				"zoneId": "StationIntakeZone"
+			},
+			{
+				"adapter": "godot",
+				"coverTestId": "CT_STATION_SOFT_INQUEST",
+				"eventFamily": "domain",
+				"eventId": "cover_test_evaluated-006-1778041635945",
+				"eventName": "cover_test_evaluated",
+				"exposureAfter": 100,
+				"exposureBefore": 75,
+				"reasonCode": "policy_station_intake_requires_procedural_speech",
+				"schemaVersion": "godot-runtime-v1",
+				"sessionId": "dre-171-playable-session",
+				"socialLoopStage": "verdict",
+				"speechAct": "SA_BREAK",
+				"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 100. Pressure escalated with deterministic why-line. Verdict is ready.",
+				"timestampMs": 1778041635945,
+				"uiSummaryArgs": {
+					"coverTest": "CT_STATION_SOFT_INQUEST",
+					"delta": 25,
+					"exposure": 100,
+					"speechAct": "SA_BREAK"
+				},
+				"uiSummaryKey": "event.cover_test_pressure",
+				"warningTier": "blocking",
+				"worldId": "dre_171_godot_shell",
+				"worldRevision": "rev-social-stealth-v1",
+				"zoneId": "StationIntakeZone"
+			}
+		],
+		"exposure": 100,
+		"locale": "ko",
+		"noticeBody": "담당자가 절차 불일치 노트를 엽니다.\n발화 행동: SA_BREAK\n노출도: 75 -> 100",
+		"noticeBodyKey": "notice.speech.body",
+		"noticeTitle": "스테이션 소프트 심문",
+		"noticeTitleKey": "cover.CT_STATION_SOFT_INQUEST.title",
+		"outcomeBody": "스테이션은 세션을 닫을 만큼의 절차 증거를 확보했습니다.\n마지막 why-line: 담당자가 절차 불일치 노트를 엽니다.",
+		"outcomeBodyKey": "outcome.verdict.body",
+		"outcomeTitle": "판정 준비 완료",
+		"outcomeTitleKey": "outcome.verdict.title",
+		"outcomeVisible": true,
+		"readSurfaceIds": [
+			"TS_Station_IntakeRules"
+		],
+		"runId": "dre-171-playable-slice-run",
+		"schemaVersion": "godot-runtime-v1",
+		"sessionId": "dre-171-playable-session",
+		"stage": "verdict",
+		"station": {
+			"inquestOpen": true,
+			"intakeOpen": true,
+			"sessionTerminationAllowed": true,
+			"verdictReady": true
+		},
+		"worldId": "dre_171_godot_shell",
+		"worldRevision": "rev-social-stealth-v1"
+	},
+	"runId": "dre-171-playable-slice-run",
+	"schemaVersion": "godot-runtime-v1",
+	"sessionId": "dre-171-playable-session",
+	"summaries": {
+		"actorSignatures": {
+			"NPC_Park_Witness": "dre_171_godot_shell:NPC_Park_Witness:verdict",
+			"NPC_Station_Officer": "dre_171_godot_shell:NPC_Station_Officer:verdict",
+			"NPC_Store_Clerk": "dre_171_godot_shell:NPC_Store_Clerk:verdict",
+			"NPC_Studio_PM": "dre_171_godot_shell:NPC_Studio_PM:verdict",
+			"player": "dre_171_godot_shell:player"
+		},
+		"blockedChecks": [],
+		"commandOutcomeCounts": {
+			"executed": 0,
+			"rejected": 0,
+			"validated": 0
+		},
+		"domainTriggerCounts": {
+			"cover_test_evaluated": 4
+		},
+		"fallbackCounters": {
+			"total": 0
+		},
+		"runSignature": "dre-171-playable-slice-run:dre-171-playable-session:dre_171_godot_shell:rev-social-stealth-v1",
+		"verdictEndStateTrace": "Text surface read -> Station cover test -> Exposure 100 -> intake:true inquest:true verdict:true termination:true"
+	},
+	"worldId": "dre_171_godot_shell",
+	"worldRevision": "rev-social-stealth-v1"
+}

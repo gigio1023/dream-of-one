@@ -10,8 +10,11 @@ static func inspect(root: Node) -> Dictionary:
 	var npc_ids := _metadata_values(tree.get_nodes_in_group("npc_placeholders"), "npc_id")
 	var route_ids := _metadata_values(tree.get_nodes_in_group("routes"), "route_id")
 	var zone_ids := _metadata_values(tree.get_nodes_in_group("interaction_zones"), "zone_id")
+	var free_visual_assets := tree.get_nodes_in_group("free_visual_assets")
 	var player_nodes := tree.get_nodes_in_group("player")
+	var playable_sessions := tree.get_nodes_in_group("playable_sessions")
 	var camera := root.find_child("Camera3D", true, false)
+	var hud := root.find_child("SocialStealthHud", true, false)
 
 	var failures: Array[String] = []
 	var generation_failures: Array = root.get_meta("generation_failures", [])
@@ -27,7 +30,8 @@ static func inspect(root: Node) -> Dictionary:
 		"text_surfaces": text_surface_ids.size(),
 		"npc_placeholders": npc_ids.size(),
 		"routes": route_ids.size(),
-		"interaction_zones": zone_ids.size()
+		"interaction_zones": zone_ids.size(),
+		"free_visual_assets": free_visual_assets.size()
 	}
 	for group_name in ShellSchema.REQUIRED_GROUP_COUNTS.keys():
 		var actual_count := int(group_counts.get(group_name, 0))
@@ -39,6 +43,10 @@ static func inspect(root: Node) -> Dictionary:
 
 	if player_nodes.is_empty():
 		failures.append("Missing player node")
+	if playable_sessions.is_empty():
+		failures.append("Missing PlayableSession node")
+	if hud == null:
+		failures.append("Missing SocialStealthHud")
 	if camera == null:
 		failures.append("Missing Camera3D")
 	if str(root.get_meta("world_revision", "")).is_empty():
@@ -58,6 +66,8 @@ static func inspect(root: Node) -> Dictionary:
 		"group_counts": group_counts,
 		"generation_failures": generation_failures,
 		"has_player": not player_nodes.is_empty(),
+		"has_playable_session": not playable_sessions.is_empty(),
+		"has_hud": hud != null,
 		"has_camera": camera != null
 	}
 

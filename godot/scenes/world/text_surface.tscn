@@ -3,10 +3,10 @@
 [ext_resource type="Script" path="res://scripts/world/text_surface.gd" id="1_text_surface"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_text_surface"]
-size = Vector3(2.8, 1.6, 0.15)
+size = Vector3(3.35, 1.9, 0.15)
 
 [sub_resource type="BoxMesh" id="BoxMesh_text_surface"]
-size = Vector3(2.8, 1.6, 0.08)
+size = Vector3(3.35, 1.9, 0.08)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_panel"]
 albedo_color = Color(0.08, 0.09, 0.1, 1)
@@ -27,17 +27,16 @@ mesh = SubResource("BoxMesh_text_surface")
 surface_material_override/0 = SubResource("StandardMaterial3D_panel")
 
 [node name="ReadableText" type="Label3D" parent="."]
-position = Vector3(0, 0.04, 0.08)
-pixel_size = 0.005
+position = Vector3(0, 0.02, 0.1)
+pixel_size = 0.0045
 billboard = 1
 text = "TextSurface"
-font_size = 26
-outline_size = 6
-width = 520.0
+font_size = 30
+outline_size = 8
+width = 680.0
 
 [node name="HeaderMarker" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0.86, 0.09)
+position = Vector3(0, 1, 0.09)
 scale = Vector3(1, 0.04, 1)
 mesh = SubResource("BoxMesh_text_surface")
 surface_material_override/0 = SubResource("StandardMaterial3D_header")
-

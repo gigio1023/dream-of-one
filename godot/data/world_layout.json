@@ -5,14 +5,15 @@
   "units": "meters",
   "runtime_path": "Godot 4.x shell",
   "player_start": {
-    "position": [0, 0.05, 13],
-    "yaw_degrees": 180,
+    "position": [0, 0.05, 7],
+    "yaw_degrees": 0,
     "near_landmark": "Station"
   },
   "landmarks": [
     {
       "id": "Store",
       "label": "Store",
+      "hint": "Queue speech only",
       "position": [-11, 0, 0],
       "size": [8, 3, 6],
       "color": [0.24, 0.52, 0.82, 1.0],
@@ -27,6 +28,7 @@
     {
       "id": "Studio",
       "label": "Studio",
+      "hint": "Source owner reason",
       "position": [11, 0, 0],
       "size": [8, 3, 6],
       "color": [0.66, 0.44, 0.78, 1.0],
@@ -41,6 +43,7 @@
     {
       "id": "Park",
       "label": "Park",
+      "hint": "Public flow",
       "position": [-11, 0, -12],
       "size": [9, 0.35, 7],
       "color": [0.25, 0.66, 0.45, 1.0],
@@ -55,6 +58,7 @@
     {
       "id": "Station",
       "label": "Station",
+      "hint": "Procedural intake",
       "position": [11, 0, -12],
       "size": [9, 3.4, 7],
       "color": [0.78, 0.72, 0.43, 1.0],

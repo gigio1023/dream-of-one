@@ -13,6 +13,7 @@ extends Area3D
 
 func _ready() -> void:
 	add_to_group("text_surfaces")
+	add_to_group("localized_nodes")
 	_apply_text()
 	_apply_metadata()
 
@@ -33,7 +34,11 @@ func configure(surface_data: Dictionary) -> void:
 		_apply_text()
 
 func _apply_text() -> void:
-	_readable_text.text = "%s\n%s\n%s" % [display_name, law_id, body]
+	_readable_text.text = "%s\n%s\n%s" % [
+		_localized("text_surface.%s.label" % String(surface_id), display_name),
+		law_id,
+		_localized("text_surface.%s.body" % String(surface_id), body)
+	]
 
 func _apply_metadata() -> void:
 	set_meta("surface_id", String(surface_id))
@@ -43,3 +48,19 @@ func _apply_metadata() -> void:
 	set_meta("purpose", purpose)
 	set_meta("body", body)
 	set_meta("evidence_outputs", evidence_outputs)
+
+func interaction_summary() -> String:
+	return "%s: %s" % [String(surface_id), body]
+
+func refresh_locale() -> void:
+	_apply_text()
+
+func localized_display_name() -> String:
+	return _localized("text_surface.%s.label" % String(surface_id), display_name)
+
+func localized_body() -> String:
+	return _localized("text_surface.%s.body" % String(surface_id), body)
+
+func _localized(key: String, fallback: String) -> String:
+	var translated := str(TranslationServer.translate(StringName(key)))
+	return fallback if translated == key else translated

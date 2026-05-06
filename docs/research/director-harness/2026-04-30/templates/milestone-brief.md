@@ -16,10 +16,10 @@ What the player must understand or feel.
 ## Scope
 
 In:
-- 
+-
 
 Out:
-- 
+-
 
 ## Evidence Required
 
@@ -34,7 +34,7 @@ Out:
 
 ## Council Lanes
 
-- 
+-
 
 ## Exit Verdict
 

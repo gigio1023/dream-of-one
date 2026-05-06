@@ -47,4 +47,3 @@ Dream of One should sound like a public notice, intake desk, and case log collid
 - [Netflix Korean Timed Text Style Guide](https://partnerhelp.netflixstudios.com/hc/en-us/articles/216001127-Korean-Timed-Text-Style-Guide)
 - [INLINGO Korean localization guide](https://inlingogames.com/blog/korean-localization-a-guide-for-game-developers/)
 - [LocalizeDirect Korean factsheet](https://www.localizedirect.com/posts/korean-game-localization-factsheet)
-

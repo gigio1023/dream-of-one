@@ -12,18 +12,18 @@ What this stage proves.
 ## Scope
 
 In:
-- 
+-
 
 Out:
-- 
+-
 
 ## Required Inputs
 
-- 
+-
 
 ## Deliverables
 
-- 
+-
 
 ## Role Reviews Required
 
@@ -40,7 +40,7 @@ Out:
 
 ## Acceptance Criteria
 
-- 
+-
 
 ## Verification Commands
 
@@ -54,7 +54,7 @@ npm run check --prefix backend/npc-runtime
 
 ## Evidence Artifacts
 
-- 
+-
 
 ## Exit Gate
 

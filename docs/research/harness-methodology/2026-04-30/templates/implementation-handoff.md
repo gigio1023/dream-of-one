@@ -18,18 +18,18 @@ What the executor must make true.
 ## Scope
 
 Implement:
-- 
+-
 
 Do not:
-- 
+-
 
 ## Source Docs
 
-- 
+-
 
 ## Acceptance Criteria
 
-- 
+-
 
 ## Verification
 
@@ -39,7 +39,7 @@ Commands:
 ```
 
 Expected artifacts:
-- 
+-
 
 ## Handoff Output Required
 

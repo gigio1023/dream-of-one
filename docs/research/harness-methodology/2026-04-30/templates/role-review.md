@@ -8,11 +8,11 @@ Result: APPROVE | CONDITIONAL | BLOCK
 
 ## Files Read
 
-- 
+-
 
 ## What Works
 
-- 
+-
 
 ## Blockers
 
@@ -22,7 +22,7 @@ Result: APPROVE | CONDITIONAL | BLOCK
 
 ## Conditional Notes
 
-- 
+-
 
 ## Seed Drift Check
 
@@ -36,4 +36,4 @@ Does this work preserve the game seed?
 
 ## Evidence Needed
 
-- 
+-

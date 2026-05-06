@@ -15,7 +15,7 @@ Why this decision supports the game thesis.
 
 ## Affected Pillars
 
-- 
+-
 
 ## Alternatives Considered
 
@@ -36,7 +36,7 @@ Why this decision supports the game thesis.
 
 ## Required Evidence
 
-- 
+-
 
 ## Review Date
 

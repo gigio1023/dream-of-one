@@ -107,7 +107,7 @@ Answer:
 
 ## Confusion Points
 
-- 
+-
 
 ## Verdict
 

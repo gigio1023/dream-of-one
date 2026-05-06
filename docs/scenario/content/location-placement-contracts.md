@@ -80,4 +80,3 @@ Each scenario implementation must define:
 | Rule-before-risk | Text surface readable before Cover Test trigger. |
 | Witness line | Examiner NPC can plausibly observe the player. |
 | Verdict state | HUD, final why-line, and Station surface remain readable. |
-

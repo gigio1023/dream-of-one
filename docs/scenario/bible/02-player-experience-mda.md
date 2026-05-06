@@ -40,4 +40,3 @@ The game should not ask the player to master many verbs. It should ask the playe
 > In this world, imprecise speech is physical evidence.
 
 The first slice therefore needs fewer mechanics and sharper consequences.
-

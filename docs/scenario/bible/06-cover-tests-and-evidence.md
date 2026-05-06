@@ -73,4 +73,3 @@ Korean player-facing why-lines should be shorter and colder:
 | Studio | `승인 요청의 출처/담당/사유가 확인되지 않았습니다. 노출 {before}->{after}.` |
 | Park | `공공 동선 밖의 관찰 발화가 진술로 전환되었습니다. 노출 {before}->{after}.` |
 | Station | `접수 답변이 절차형 진술로 인정되지 않았습니다. 노출 {before}->{after}.` |
-

@@ -63,4 +63,3 @@ Barks are not flavor chatter. They are short social signals that:
 - Prefer concrete record words: `기록`, `진술`, `접수`, `대조`, `정정`, `판정`.
 - Avoid filler: `수상하군`, `이상하네요`, `무슨 일이죠`.
 - A bark may hint, pressure, or confirm. It must not explain the whole world.
-

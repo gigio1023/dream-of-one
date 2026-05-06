@@ -24,16 +24,16 @@ What the player should experience.
 
 ## Non-Goals
 
-- 
-- 
-- 
+-
+-
+-
 
 ## Core Loop
 
-1. 
-2. 
-3. 
-4. 
+1.
+2.
+3.
+4.
 
 ## Authority Boundaries
 
@@ -59,4 +59,4 @@ What the player should experience.
 
 List things the project repeatedly risks becoming.
 
-- 
+-

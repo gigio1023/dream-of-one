@@ -49,4 +49,3 @@ A fresh player should understand:
 - why Exposure changed;
 - which NPC or system witnessed the change;
 - whether the session is still repairable.
-

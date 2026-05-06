@@ -73,4 +73,3 @@ Use this as the first authoring pool for barks, overheard lines, interrogation p
 | `CT_STUDIO_APPROVAL_GATE_SPEECH` | `승인 전이면 보류로 기록해 주세요.` | `SA_FRAME` | `보류 기록 생성. 위반은 아닙니다.` | `이미 된 걸로 치죠.` |
 | `CT_PARK_OBSERVATION_PRESSURE` | `공공 흐름 안에서 이동하겠습니다. 촬영은 중지합니다.` | `SA_COMPLY` | `흐름 복귀 확인했습니다.` | `여기가 꿈 같아서요.` |
 | `CT_STATION_SOFT_INQUEST` | `접수 형식으로 답하겠습니다. 장소는 StoreQueue, 시각은 영수증 기준입니다.` | `SA_COMPLY` | `형식 일치. 진술 유지합니다.` | `제가 설명할게요, 사실은...` |
-

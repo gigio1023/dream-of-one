@@ -46,4 +46,3 @@ This source map captures the research spine used to rebuild the Dream of One sce
 - Keep immediate rules legible and cosmology partially withheld.
 - Make every failure produce forward motion: a record, a witness, a restriction, a rumor, or a Station threshold crossing.
 - Treat Korean as the authored source language for UI and institutional voice.
-

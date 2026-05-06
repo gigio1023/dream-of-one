@@ -28,13 +28,13 @@ Date:
 Path tested:
 
 Observed:
-- 
+-
 
 Confusion:
-- 
+-
 
 Decision:
-- 
+-
 
 ## Final Verdict
 

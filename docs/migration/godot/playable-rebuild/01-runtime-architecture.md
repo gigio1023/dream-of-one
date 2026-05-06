@@ -59,4 +59,3 @@ Godot ObservationFrame
   -> Godot command executor
   -> Evidence Pack
 ```
-

@@ -56,4 +56,3 @@ A Dream of One scenario is game-ready only when it proves the playable loop, not
 - [SFWA: QA and Storytelling in Video Games](https://www.sfwa.org/2024/10/01/qa-and-storytelling-in-video-games/)
 - [Game Developer: What You Should Take Out of Pre-Production](https://www.gamedeveloper.com/game-platforms/what-you-should-take-out-of-pre-production)
 - [Unity testing and QA tips](https://unity.com/how-to/testing-and-quality-assurance-tips-unity-projects)
-

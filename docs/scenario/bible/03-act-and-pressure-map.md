@@ -35,4 +35,3 @@
 - Do not stack a new rule and a major NPC interruption at the same time.
 - If a player fails, the next beat should clarify the system rather than hide information.
 - The final Station sequence should feel inevitable only because earlier records were visible.
-

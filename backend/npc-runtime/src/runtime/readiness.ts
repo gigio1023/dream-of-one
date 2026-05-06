@@ -2,9 +2,18 @@ import { constants } from "node:fs";
 import { access, mkdir } from "node:fs/promises";
 import { delimiter, dirname, join, resolve } from "node:path";
 import type { RuntimeConfig } from "../config.js";
+import {
+  checkOpenAiProposalProviderHealth,
+  type FetchLike,
+  type OpenAiProposalHealth,
+} from "../broker/codex-tool-gateway.js";
 
 export type ReadinessReason =
   | "codex_command_not_resolvable"
+  | "openai_api_key_missing"
+  | "openai_model_unavailable"
+  | "openai_model_check_timeout"
+  | "openai_provider_unavailable"
   | "thread_store_path_not_accessible"
   | "workspace_root_path_not_accessible";
 
@@ -29,15 +38,28 @@ interface WorkspaceRootPathReadiness {
   reason?: "workspace_root_path_not_accessible";
 }
 
+interface ProviderReadiness {
+  ok: boolean;
+  provider: RuntimeConfig["proposalProvider"];
+  reason?: ReadinessReason;
+  codexCommand?: CodexCommandReadiness;
+  openAi?: OpenAiProposalHealth;
+}
+
 export interface RuntimeReadinessReport {
   status: "ready" | "not_ready";
   service: "npc-runtime";
   reasons: ReadinessReason[];
   checks: {
+    provider: ProviderReadiness;
     codexCommand: CodexCommandReadiness;
     threadStorePath: ThreadStorePathReadiness;
     workspaceRootPath: WorkspaceRootPathReadiness;
   };
+}
+
+export interface RuntimeReadinessOptions {
+  fetch?: FetchLike;
 }
 
 function hasPathSeparator(value: string): boolean {
@@ -163,14 +185,45 @@ async function checkWorkspaceRootPath(path: string): Promise<WorkspaceRootPathRe
   }
 }
 
-export async function evaluateRuntimeReadiness(config: RuntimeConfig): Promise<RuntimeReadinessReport> {
+async function checkProvider(config: RuntimeConfig, options: RuntimeReadinessOptions): Promise<ProviderReadiness> {
+  if (config.proposalProvider === "openai-api") {
+    const openAi = await checkOpenAiProposalProviderHealth(config.openAiProposal, {
+      fetch: options.fetch,
+      timeoutMs: config.openAiProposal.modelCheckTimeoutMs,
+    });
+    return {
+      ok: openAi.ok,
+      provider: "openai-api",
+      reason: openAi.reason,
+      openAi,
+    };
+  }
+
   const codexCommand = await checkCodexCommand(config.codexCommand);
+  return {
+    ok: codexCommand.ok,
+    provider: "codex-cli",
+    reason: codexCommand.reason,
+    codexCommand,
+  };
+}
+
+export async function evaluateRuntimeReadiness(
+  config: RuntimeConfig,
+  options: RuntimeReadinessOptions = {},
+): Promise<RuntimeReadinessReport> {
+  const provider = await checkProvider(config, options);
+  const codexCommand = provider.codexCommand ?? {
+    ok: true,
+    command: config.codexCommand,
+    resolvedPath: config.proposalProvider,
+  };
   const threadStorePath = await checkThreadStorePath(config.threadStorePath);
   const workspaceRootPath = await checkWorkspaceRootPath(config.workspaceRootPath);
 
   const reasons: ReadinessReason[] = [];
-  if (!codexCommand.ok && codexCommand.reason) {
-    reasons.push(codexCommand.reason);
+  if (!provider.ok && provider.reason) {
+    reasons.push(provider.reason);
   }
   if (!threadStorePath.ok && threadStorePath.reason) {
     reasons.push(threadStorePath.reason);
@@ -184,6 +237,7 @@ export async function evaluateRuntimeReadiness(config: RuntimeConfig): Promise<R
     service: "npc-runtime",
     reasons,
     checks: {
+      provider,
       codexCommand,
       threadStorePath,
       workspaceRootPath,

@@ -127,6 +127,29 @@ export interface GodotEvidencePack {
   };
 }
 
+export interface GodotEvidencePackTrajectoryDiversityRun {
+  index: number;
+  runId: string;
+  sessionId: string;
+  eventCount: number;
+  socialEventCount: number;
+  behaviorSignature: string;
+}
+
+export interface GodotEvidencePackTrajectoryDiversityReport {
+  requiredRuns: number;
+  minDistinctTrajectories: number;
+  runCount: number;
+  distinctTrajectories: number;
+  pass: boolean;
+  runs: GodotEvidencePackTrajectoryDiversityRun[];
+}
+
+export interface GodotEvidencePackTrajectoryDiversityOptions {
+  requiredRuns?: number;
+  minDistinctTrajectories?: number;
+}
+
 export interface GodotExposureState {
   score: number;
   thresholds: {
@@ -360,6 +383,54 @@ function readStringRecord(
     result[key] = item;
   }
   return result;
+}
+
+function normalizePositiveInteger(value: number | undefined, fallback: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return fallback;
+  }
+  return Math.max(1, Math.floor(value));
+}
+
+function serializeNumberRecord(record: Record<string, number>): string {
+  return Object.entries(record)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, value]) => `${key}:${value}`)
+    .join(",");
+}
+
+function buildEvidencePackBehaviorSignature(pack: GodotEvidencePack): {
+  behaviorSignature: string;
+  socialEventCount: number;
+} {
+  const socialEvents = pack.events.filter(event => event.eventFamily !== "session" && event.eventFamily !== "evidence_export");
+  const eventSignature = socialEvents
+    .map(event =>
+      [
+        event.eventFamily,
+        event.eventName,
+        event.socialLoopStage ?? "none",
+        event.actorId ?? "none",
+        event.reasonCode ?? "none",
+        event.reasonCategory ?? "none",
+        event.warningTier ?? "none",
+        event.transport ?? "none",
+        event.usedFallback === undefined ? "none" : event.usedFallback ? "true" : "false",
+      ].join("|"),
+    )
+    .join(">");
+
+  return {
+    socialEventCount: socialEvents.length,
+    behaviorSignature: [
+      `events=${eventSignature}`,
+      `actors=${Object.keys(pack.summaries.actorSignatures).sort((left, right) => left.localeCompare(right)).join(",")}`,
+      `fallback=${serializeNumberRecord(pack.summaries.fallbackCounters)}`,
+      `commands=${serializeNumberRecord(pack.summaries.commandOutcomeCounts)}`,
+      `domain=${serializeNumberRecord(pack.summaries.domainTriggerCounts)}`,
+      `trace=${pack.summaries.verdictEndStateTrace}`,
+    ].join("\n"),
+  };
 }
 
 function readVector3(
@@ -959,6 +1030,77 @@ export function validateGodotEvidencePack(input: unknown): GodotValidationResult
         verdictEndStateTrace: verdictEndStateTrace as string,
         blockedChecks: blockedChecks as string[],
       },
+    },
+    failures: [],
+  };
+}
+
+export function validateGodotEvidencePackTrajectoryDiversity(
+  inputs: readonly unknown[],
+  options: GodotEvidencePackTrajectoryDiversityOptions = {},
+): GodotValidationResult<GodotEvidencePackTrajectoryDiversityReport> {
+  const requiredRuns = normalizePositiveInteger(options.requiredRuns, 3);
+  const minDistinctTrajectories = normalizePositiveInteger(options.minDistinctTrajectories, requiredRuns);
+  const failures: GodotValidationFailure[] = [];
+
+  if (inputs.length < requiredRuns) {
+    pushFailure(
+      failures,
+      "schema_invalid_evidence_pack",
+      "packs",
+      `must include at least ${requiredRuns} Evidence Packs for trajectory diversity verification`,
+    );
+  }
+
+  const packs: GodotEvidencePack[] = [];
+  inputs.forEach((input, index) => {
+    const result = validateGodotEvidencePack(input);
+    if (result.ok) {
+      packs.push(result.value);
+      return;
+    }
+    for (const failure of result.failures) {
+      failures.push({ ...failure, path: `packs[${index}].${failure.path}` });
+    }
+  });
+
+  if (failures.length > 0) {
+    return { ok: false, failures };
+  }
+
+  const runs = packs.map((pack, index) => {
+    const signature = buildEvidencePackBehaviorSignature(pack);
+    return {
+      index,
+      runId: pack.runId,
+      sessionId: pack.sessionId,
+      eventCount: pack.events.length,
+      socialEventCount: signature.socialEventCount,
+      behaviorSignature: signature.behaviorSignature,
+    };
+  });
+  const distinctTrajectories = new Set(runs.map(run => run.behaviorSignature)).size;
+  const pass = distinctTrajectories >= minDistinctTrajectories;
+
+  if (!pass) {
+    pushFailure(
+      failures,
+      "schema_invalid_evidence_pack",
+      "packs",
+      `must include at least ${minDistinctTrajectories} behaviorally distinct social trajectories; got ${distinctTrajectories}`,
+    );
+    return { ok: false, failures };
+  }
+
+  return {
+    ok: true,
+    value: {
+      requiredRuns,
+      minDistinctTrajectories,
+      runCount: runs.length,
+      distinctTrajectories,
+      pass,
+      runs,
     },
     failures: [],
   };

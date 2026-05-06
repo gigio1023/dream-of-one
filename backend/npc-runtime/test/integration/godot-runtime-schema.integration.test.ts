@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
   GODOT_COORDINATE_SPACE,
@@ -251,4 +252,15 @@ test("Godot Evidence Pack validates release-comparable summaries and event ident
 
   assert.equal(pack.ok, true);
   assert.equal(pack.ok ? pack.value.summaries.blockedChecks[0] : "", "godot_cli_missing");
+});
+
+test("Generated playable slice Evidence Pack validates against backend schema", () => {
+  const artifactUrl = new URL("../../../../data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json", import.meta.url);
+  const artifact = JSON.parse(readFileSync(artifactUrl, "utf8")) as unknown;
+  const pack = validateGodotEvidencePack(artifact);
+
+  assert.equal(pack.ok, true, pack.ok ? undefined : JSON.stringify(pack.failures, null, 2));
+  assert.equal(pack.ok ? pack.value.runId : "", "dre-171-playable-slice-run");
+  assert.equal(pack.ok ? pack.value.adapter : "", "godot");
+  assert.equal(pack.ok ? pack.value.events.some(event => event.eventFamily === "evidence_export") : false, true);
 });

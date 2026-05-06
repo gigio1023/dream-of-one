@@ -715,6 +715,9 @@ func _end_controls() -> Dictionary:
 func _session_locked() -> bool:
 	return bool(station.get("sessionTerminationAllowed", false))
 
+func is_session_locked() -> bool:
+	return _session_locked()
+
 func _authority_mode() -> String:
 	return "godot_local_smoke_runtime"
 

@@ -23,6 +23,7 @@ func _run() -> void:
 	if session == null or not session.has_method("run_smoke_sequence"):
 		_fail(["PlayableSession is missing or does not expose run_smoke_sequence"])
 		return
+	var player := scene.find_child("Player", true, false)
 
 	var summary: Dictionary = session.run_smoke_sequence()
 	var failures: Array[String] = []
@@ -84,6 +85,8 @@ func _run() -> void:
 			failures.append("Expected post-verdict speech to leave Exposure unchanged")
 		if post_lock_summary.get("events", []).size() != event_count_before:
 			failures.append("Expected post-verdict speech to add no Evidence events")
+	if player != null and player.has_method("_controls_locked") and not bool(player.call("_controls_locked")):
+		failures.append("Expected player controller controls to lock after deterministic session end")
 	if failures.size() > 0:
 		_fail(failures)
 		return

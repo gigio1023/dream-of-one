@@ -1,18 +1,18 @@
 {
 	"adapter": "godot",
-	"createdAtMs": 1778049403752,
+	"createdAtMs": 1778049932364,
 	"events": [
 		{
 			"adapter": "godot",
 			"eventFamily": "session",
-			"eventId": "playable_session_started-001-1778049403706",
+			"eventId": "playable_session_started-001-1778049932304",
 			"eventName": "playable_session_started",
 			"prologueStep": "beginning",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-playable-session",
 			"sessionOutcome": "running",
 			"summary": "Station intake prologue started. Read the rule surface, prove a safe answer, then expose the risky speech path.",
-			"timestampMs": 1778049403706,
+			"timestampMs": 1778049932304,
 			"uiSummaryArgs": {
 
 			},
@@ -29,7 +29,7 @@
 				"DL_N1_PROCEDURE_SPEECH_ONLY"
 			],
 			"eventFamily": "observation",
-			"eventId": "text_surface_read-002-1778049403752",
+			"eventId": "text_surface_read-002-1778049932364",
 			"eventName": "text_surface_read",
 			"evidenceAdded": [
 				"intake_dossier:TS_Station_IntakeRules"
@@ -39,7 +39,7 @@
 			"sessionId": "dre-171-playable-session",
 			"summary": "Read TS_Station_IntakeRules; Dream Law DL_N1_PROCEDURE_SPEECH_ONLY is now in player-facing evidence.",
 			"textSurfaceId": "TS_Station_IntakeRules",
-			"timestampMs": 1778049403752,
+			"timestampMs": 1778049932364,
 			"uiSummaryArgs": {
 				"law": "DL_N1_PROCEDURE_SPEECH_ONLY",
 				"surface": "접수 규칙"
@@ -51,14 +51,14 @@
 		{
 			"adapter": "godot",
 			"eventFamily": "domain",
-			"eventId": "cover_test_focused-003-1778049403752",
+			"eventId": "cover_test_focused-003-1778049932364",
 			"eventName": "cover_test_focused",
 			"prologueStep": "cover_test_prompt",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-playable-session",
 			"socialLoopStage": "report",
 			"summary": "Focused CT_STATION_SOFT_INQUEST. Choose a bounded speech act.",
-			"timestampMs": 1778049403752,
+			"timestampMs": 1778049932364,
 			"uiSummaryArgs": {
 				"coverTest": "CT_STATION_SOFT_INQUEST"
 			},
@@ -72,7 +72,7 @@
 			"adapter": "godot",
 			"coverTestId": "CT_STATION_SOFT_INQUEST",
 			"eventFamily": "domain",
-			"eventId": "cover_test_defused-004-1778049403752",
+			"eventId": "cover_test_defused-004-1778049932364",
 			"eventName": "cover_test_defused",
 			"evidenceAdded": [
 				"procedural_speech_log:procedural_speech_log.SA_COMPLY.004"
@@ -89,7 +89,7 @@
 			"socialLoopStage": "report",
 			"speechAct": "SA_COMPLY",
 			"summary": "CT_STATION_SOFT_INQUEST used SA_COMPLY in StationIntakeZone: Exposure -10 -> 0. Cover held through procedural speech; Evidence added: procedural_speech_log.",
-			"timestampMs": 1778049403752,
+			"timestampMs": 1778049932364,
 			"uiLine": "절차적 답변이 접수되었습니다.",
 			"uiLineKey": "cover.CT_STATION_SOFT_INQUEST.defuse",
 			"uiSummaryArgs": {
@@ -109,7 +109,7 @@
 			"adapter": "godot",
 			"coverTestId": "CT_STATION_SOFT_INQUEST",
 			"eventFamily": "domain",
-			"eventId": "cover_test_pressure-005-1778049403752",
+			"eventId": "cover_test_pressure-005-1778049932364",
 			"eventName": "cover_test_pressure",
 			"evidenceAdded": [
 				"why_line:why_line.SA_BREAK.005"
@@ -126,7 +126,7 @@
 			"socialLoopStage": "report",
 			"speechAct": "SA_BREAK",
 			"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 25. Pressure escalated with deterministic why-line Evidence: 담당자가 절차 불일치 노트를 엽니다.",
-			"timestampMs": 1778049403752,
+			"timestampMs": 1778049932364,
 			"uiLine": "담당자가 절차 불일치 노트를 엽니다.",
 			"uiLineKey": "cover.CT_STATION_SOFT_INQUEST.pressure",
 			"uiSummaryArgs": {
@@ -150,7 +150,7 @@
 			"adapter": "godot",
 			"coverTestId": "CT_STATION_SOFT_INQUEST",
 			"eventFamily": "domain",
-			"eventId": "cover_test_pressure-006-1778049403752",
+			"eventId": "cover_test_pressure-006-1778049932364",
 			"eventName": "cover_test_pressure",
 			"evidenceAdded": [
 				"why_line:why_line.SA_BREAK.006"
@@ -167,7 +167,7 @@
 			"socialLoopStage": "report",
 			"speechAct": "SA_BREAK",
 			"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 50. Pressure escalated with deterministic why-line Evidence: 담당자가 절차 불일치 노트를 엽니다.",
-			"timestampMs": 1778049403752,
+			"timestampMs": 1778049932364,
 			"uiLine": "담당자가 절차 불일치 노트를 엽니다.",
 			"uiLineKey": "cover.CT_STATION_SOFT_INQUEST.pressure",
 			"uiSummaryArgs": {
@@ -191,7 +191,7 @@
 			"adapter": "godot",
 			"coverTestId": "CT_STATION_SOFT_INQUEST",
 			"eventFamily": "domain",
-			"eventId": "cover_test_pressure-007-1778049403752",
+			"eventId": "cover_test_pressure-007-1778049932364",
 			"eventName": "cover_test_pressure",
 			"evidenceAdded": [
 				"why_line:why_line.SA_BREAK.007"
@@ -208,7 +208,7 @@
 			"socialLoopStage": "intake",
 			"speechAct": "SA_BREAK",
 			"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 75. Pressure escalated with deterministic why-line Evidence: 담당자가 절차 불일치 노트를 엽니다. Station intake is open.",
-			"timestampMs": 1778049403752,
+			"timestampMs": 1778049932364,
 			"uiLine": "담당자가 절차 불일치 노트를 엽니다.",
 			"uiLineKey": "cover.CT_STATION_SOFT_INQUEST.pressure",
 			"uiSummaryArgs": {
@@ -232,7 +232,7 @@
 			"adapter": "godot",
 			"coverTestId": "CT_STATION_SOFT_INQUEST",
 			"eventFamily": "domain",
-			"eventId": "cover_test_pressure-008-1778049403752",
+			"eventId": "cover_test_pressure-008-1778049932364",
 			"eventName": "cover_test_pressure",
 			"evidenceAdded": [
 				"why_line:why_line.SA_BREAK.008"
@@ -249,7 +249,7 @@
 			"socialLoopStage": "verdict",
 			"speechAct": "SA_BREAK",
 			"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 100. Pressure escalated with deterministic why-line Evidence: 담당자가 절차 불일치 노트를 엽니다. Verdict is ready.",
-			"timestampMs": 1778049403752,
+			"timestampMs": 1778049932364,
 			"uiLine": "담당자가 절차 불일치 노트를 엽니다.",
 			"uiLineKey": "cover.CT_STATION_SOFT_INQUEST.pressure",
 			"uiSummaryArgs": {
@@ -273,7 +273,7 @@
 			"adapter": "godot",
 			"coverTestId": "CT_STATION_SOFT_INQUEST",
 			"eventFamily": "domain",
-			"eventId": "verdict_reached-009-1778049403752",
+			"eventId": "verdict_reached-009-1778049932364",
 			"eventName": "verdict_reached",
 			"evidenceAdded": [
 				"verdict:verdict.CT_STATION_SOFT_INQUEST.009"
@@ -287,7 +287,7 @@
 			"sessionOutcome": "case_closed",
 			"socialLoopStage": "verdict",
 			"summary": "Deterministic Station outcome case_closed: Exposure 100, why-line '담당자가 절차 불일치 노트를 엽니다.', session termination allowed.",
-			"timestampMs": 1778049403752,
+			"timestampMs": 1778049932364,
 			"uiWhyLine": "담당자가 절차 불일치 노트를 엽니다.",
 			"uiWhyLineKey": "cover.CT_STATION_SOFT_INQUEST.pressure",
 			"warningTier": "blocking",
@@ -301,13 +301,13 @@
 			"adapter": "godot",
 			"artifactPath": "data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json",
 			"eventFamily": "evidence_export",
-			"eventId": "evidence_pack_created-010-1778049403752",
+			"eventId": "evidence_pack_created-010-1778049932364",
 			"eventName": "evidence_pack_created",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-playable-session",
 			"socialLoopStage": "verdict",
 			"summary": "Godot playable slice Evidence Pack exported for backend validation.",
-			"timestampMs": 1778049403752,
+			"timestampMs": 1778049932364,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
 		}
@@ -333,14 +333,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1778049403706",
+				"eventId": "playable_session_started-001-1778049932304",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Station intake prologue started. Read the rule surface, prove a safe answer, then expose the risky speech path.",
-				"timestampMs": 1778049403706,
+				"timestampMs": 1778049932304,
 				"uiSummaryArgs": {
 
 				},
@@ -357,7 +357,7 @@
 					"DL_N1_PROCEDURE_SPEECH_ONLY"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-002-1778049403752",
+				"eventId": "text_surface_read-002-1778049932364",
 				"eventName": "text_surface_read",
 				"evidenceAdded": [
 					"intake_dossier:TS_Station_IntakeRules"
@@ -367,7 +367,7 @@
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Station_IntakeRules; Dream Law DL_N1_PROCEDURE_SPEECH_ONLY is now in player-facing evidence.",
 				"textSurfaceId": "TS_Station_IntakeRules",
-				"timestampMs": 1778049403752,
+				"timestampMs": 1778049932364,
 				"uiSummaryArgs": {
 					"law": "DL_N1_PROCEDURE_SPEECH_ONLY",
 					"surface": "접수 규칙"
@@ -379,14 +379,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "domain",
-				"eventId": "cover_test_focused-003-1778049403752",
+				"eventId": "cover_test_focused-003-1778049932364",
 				"eventName": "cover_test_focused",
 				"prologueStep": "cover_test_prompt",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"socialLoopStage": "report",
 				"summary": "Focused CT_STATION_SOFT_INQUEST. Choose a bounded speech act.",
-				"timestampMs": 1778049403752,
+				"timestampMs": 1778049932364,
 				"uiSummaryArgs": {
 					"coverTest": "CT_STATION_SOFT_INQUEST"
 				},
@@ -400,7 +400,7 @@
 				"adapter": "godot",
 				"coverTestId": "CT_STATION_SOFT_INQUEST",
 				"eventFamily": "domain",
-				"eventId": "cover_test_defused-004-1778049403752",
+				"eventId": "cover_test_defused-004-1778049932364",
 				"eventName": "cover_test_defused",
 				"evidenceAdded": [
 					"procedural_speech_log:procedural_speech_log.SA_COMPLY.004"
@@ -417,7 +417,7 @@
 				"socialLoopStage": "report",
 				"speechAct": "SA_COMPLY",
 				"summary": "CT_STATION_SOFT_INQUEST used SA_COMPLY in StationIntakeZone: Exposure -10 -> 0. Cover held through procedural speech; Evidence added: procedural_speech_log.",
-				"timestampMs": 1778049403752,
+				"timestampMs": 1778049932364,
 				"uiLine": "절차적 답변이 접수되었습니다.",
 				"uiLineKey": "cover.CT_STATION_SOFT_INQUEST.defuse",
 				"uiSummaryArgs": {
@@ -437,7 +437,7 @@
 				"adapter": "godot",
 				"coverTestId": "CT_STATION_SOFT_INQUEST",
 				"eventFamily": "domain",
-				"eventId": "cover_test_pressure-005-1778049403752",
+				"eventId": "cover_test_pressure-005-1778049932364",
 				"eventName": "cover_test_pressure",
 				"evidenceAdded": [
 					"why_line:why_line.SA_BREAK.005"
@@ -454,7 +454,7 @@
 				"socialLoopStage": "report",
 				"speechAct": "SA_BREAK",
 				"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 25. Pressure escalated with deterministic why-line Evidence: 담당자가 절차 불일치 노트를 엽니다.",
-				"timestampMs": 1778049403752,
+				"timestampMs": 1778049932364,
 				"uiLine": "담당자가 절차 불일치 노트를 엽니다.",
 				"uiLineKey": "cover.CT_STATION_SOFT_INQUEST.pressure",
 				"uiSummaryArgs": {
@@ -478,7 +478,7 @@
 				"adapter": "godot",
 				"coverTestId": "CT_STATION_SOFT_INQUEST",
 				"eventFamily": "domain",
-				"eventId": "cover_test_pressure-006-1778049403752",
+				"eventId": "cover_test_pressure-006-1778049932364",
 				"eventName": "cover_test_pressure",
 				"evidenceAdded": [
 					"why_line:why_line.SA_BREAK.006"
@@ -495,7 +495,7 @@
 				"socialLoopStage": "report",
 				"speechAct": "SA_BREAK",
 				"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 50. Pressure escalated with deterministic why-line Evidence: 담당자가 절차 불일치 노트를 엽니다.",
-				"timestampMs": 1778049403752,
+				"timestampMs": 1778049932364,
 				"uiLine": "담당자가 절차 불일치 노트를 엽니다.",
 				"uiLineKey": "cover.CT_STATION_SOFT_INQUEST.pressure",
 				"uiSummaryArgs": {
@@ -519,7 +519,7 @@
 				"adapter": "godot",
 				"coverTestId": "CT_STATION_SOFT_INQUEST",
 				"eventFamily": "domain",
-				"eventId": "cover_test_pressure-007-1778049403752",
+				"eventId": "cover_test_pressure-007-1778049932364",
 				"eventName": "cover_test_pressure",
 				"evidenceAdded": [
 					"why_line:why_line.SA_BREAK.007"
@@ -536,7 +536,7 @@
 				"socialLoopStage": "intake",
 				"speechAct": "SA_BREAK",
 				"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 75. Pressure escalated with deterministic why-line Evidence: 담당자가 절차 불일치 노트를 엽니다. Station intake is open.",
-				"timestampMs": 1778049403752,
+				"timestampMs": 1778049932364,
 				"uiLine": "담당자가 절차 불일치 노트를 엽니다.",
 				"uiLineKey": "cover.CT_STATION_SOFT_INQUEST.pressure",
 				"uiSummaryArgs": {
@@ -560,7 +560,7 @@
 				"adapter": "godot",
 				"coverTestId": "CT_STATION_SOFT_INQUEST",
 				"eventFamily": "domain",
-				"eventId": "cover_test_pressure-008-1778049403752",
+				"eventId": "cover_test_pressure-008-1778049932364",
 				"eventName": "cover_test_pressure",
 				"evidenceAdded": [
 					"why_line:why_line.SA_BREAK.008"
@@ -577,7 +577,7 @@
 				"socialLoopStage": "verdict",
 				"speechAct": "SA_BREAK",
 				"summary": "CT_STATION_SOFT_INQUEST used SA_BREAK in StationIntakeZone: Exposure +25 -> 100. Pressure escalated with deterministic why-line Evidence: 담당자가 절차 불일치 노트를 엽니다. Verdict is ready.",
-				"timestampMs": 1778049403752,
+				"timestampMs": 1778049932364,
 				"uiLine": "담당자가 절차 불일치 노트를 엽니다.",
 				"uiLineKey": "cover.CT_STATION_SOFT_INQUEST.pressure",
 				"uiSummaryArgs": {
@@ -601,7 +601,7 @@
 				"adapter": "godot",
 				"coverTestId": "CT_STATION_SOFT_INQUEST",
 				"eventFamily": "domain",
-				"eventId": "verdict_reached-009-1778049403752",
+				"eventId": "verdict_reached-009-1778049932364",
 				"eventName": "verdict_reached",
 				"evidenceAdded": [
 					"verdict:verdict.CT_STATION_SOFT_INQUEST.009"
@@ -615,7 +615,7 @@
 				"sessionOutcome": "case_closed",
 				"socialLoopStage": "verdict",
 				"summary": "Deterministic Station outcome case_closed: Exposure 100, why-line '담당자가 절차 불일치 노트를 엽니다.', session termination allowed.",
-				"timestampMs": 1778049403752,
+				"timestampMs": 1778049932364,
 				"uiWhyLine": "담당자가 절차 불일치 노트를 엽니다.",
 				"uiWhyLineKey": "cover.CT_STATION_SOFT_INQUEST.pressure",
 				"warningTier": "blocking",

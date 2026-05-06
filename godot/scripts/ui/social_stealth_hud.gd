@@ -292,9 +292,14 @@ func _extract_why_line(body: String) -> String:
 		var clean_line := line.strip_edges()
 		if clean_line.is_empty():
 			continue
-		if body.find("Exposure:") >= 0 or body.find("노출도:") >= 0:
+		if _is_pressure_notice(body):
 			return clean_line
 	return ""
+
+func _is_pressure_notice(body: String) -> bool:
+	if body.find("SA_COMPLY") >= 0:
+		return false
+	return body.find("Speech act:") >= 0 or body.find("발화 행동:") >= 0
 
 func _ui_text(key: String, args: Dictionary = {}) -> String:
 	var fallback_messages: Dictionary = UI_COPY["ko"]

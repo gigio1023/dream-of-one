@@ -67,7 +67,7 @@ func _run() -> void:
 			"fallbackCounters": {"total": 0},
 			"commandOutcomeCounts": {"validated": 0, "rejected": 0},
 			"domainTriggerCounts": {"shell_domain_surfaces_loaded": 1},
-			"verdictEndStateTrace": "Trigger -> ShellInspector -> TextSurface registry -> intake -> blocked until playable domain controller",
+			"verdictEndStateTrace": "Trigger -> ShellInspector -> TextSurface registry -> playable prototype slice owns local HUD loop until live backend bridge",
 			"blockedChecks": [] if inspection["ok"] else inspection.get("failures", [])
 		},
 		"issueId": ShellSchema.ISSUE_ID,

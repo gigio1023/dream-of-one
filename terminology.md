@@ -17,5 +17,7 @@ Use these canonical terms in docs, issue bodies, PR text, and user-facing runtim
 | Inquest | Escalated Station investigation stage. |
 | Verdict | Deterministic end-state decision after enough Evidence exists. |
 | Session termination | Rule-owned end of the current run. |
+| Scenario Bible | Active scenario source under `docs/scenario/`; defines player fantasy, episode beats, Cover Test text, NPC pressure, placement contracts, localization tone, and playtest quality. |
+| why-line | Short state-change reason line that explains trigger, witness, record, Exposure delta, and Station transition when applicable. |
 
 Avoid legacy engine terms in new work. Use `Schema` or `Specification` for API/data semantics, not informal contract wording.

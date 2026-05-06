@@ -1,12 +1,21 @@
 # Org + NPC spec v1 (MCSS: Store/Studio/Park/Station)
 
 Revision date: 2026-02-18
-Status: Active (Lucid Cover Social Stealth v1)  
-SoT references: `project.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`
+Status: Superseded scenario reference
+SoT references: `project.md`, `docs/scenario/`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`
 
-This document is the v1 Specification baseline for organization procedures, NPC roles/routines, incident templates, and artifact expectations for the MCSS vertical slice. It aligns with the active Runtime Path terminology from:
+This document is the v1 organization/NPC reference baseline for procedures, NPC roles/routines, incident templates, and artifact expectations. Active scenario source now lives in `docs/scenario/`, and active Godot runtime IDs live in `godot/data/world_layout.json`.
+
+Historical IDs such as `Police_*`, `StoreBuilding`, `StudioBuilding_L1`, `ParkArea`, `PoliceReport`, and `CT-01..CT-06` below are reference vocabulary only. New work must use the current IDs in:
+
+- `docs/scenario/bible/00-index.md`
+- `docs/scenario/bible/06-cover-tests-and-evidence.md`
+- `godot/data/world_layout.json`
+
+This document aligns with the active Runtime Path terminology from:
 - `project.md`
 - `docs/design/game-design.md`
+- `docs/scenario/`
 - `docs/design/dream-laws.md`
 - `docs/design/cover-tests.md`
 - `backend/npc-runtime/src/contracts/types.ts`

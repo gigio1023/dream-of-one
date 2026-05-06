@@ -168,11 +168,18 @@ static func execute_command(root: Node, command: Dictionary, context: Dictionary
 				"reasonCodes": move_result["reasonCodes"],
 				"fallback": _fallback_command(command, move_result["reasonCodes"])
 			}
+		return {
+			"ok": true,
+			"status": "executed",
+			"reasonCodes": command.get("reasonCodes", []),
+			"observedResult": move_result
+		}
 
 	return {
 		"ok": true,
 		"status": "executed",
-		"reasonCodes": command.get("reasonCodes", [])
+		"reasonCodes": command.get("reasonCodes", []),
+		"observedResult": {}
 	}
 
 static func evaluate_station_intake(observation: Dictionary) -> Dictionary:
@@ -277,6 +284,7 @@ static func _execute_bounded_move(root: Node, actor: CharacterBody3D, target: Di
 		return destination_result
 
 	var destination: Vector3 = destination_result["position"]
+	var start_position := actor.global_position
 	var motion := destination - actor.global_position
 	var horizontal_distance := Vector2(motion.x, motion.z).length()
 	if horizontal_distance > MAX_SINGLE_MOVE_METERS:
@@ -286,7 +294,15 @@ static func _execute_bounded_move(root: Node, actor: CharacterBody3D, target: Di
 			"message": "Move exceeds bounded single-command distance"
 		}
 	if motion.length() <= 0.01:
-		return {"ok": true, "reasonCodes": []}
+		return {
+			"ok": true,
+			"reasonCodes": [],
+			"requestedPosition": _vector_dict(destination),
+			"observedStartPosition": _vector_dict(start_position),
+			"observedEndPosition": _vector_dict(actor.global_position),
+			"movedMeters": 0.0,
+			"collisionObserved": false
+		}
 
 	var collision := actor.move_and_collide(motion, true)
 	if collision != null:
@@ -296,7 +312,15 @@ static func _execute_bounded_move(root: Node, actor: CharacterBody3D, target: Di
 			"message": "Move path is blocked by collision"
 		}
 	actor.move_and_collide(motion)
-	return {"ok": true, "reasonCodes": []}
+	return {
+		"ok": true,
+		"reasonCodes": [],
+		"requestedPosition": _vector_dict(destination),
+		"observedStartPosition": _vector_dict(start_position),
+		"observedEndPosition": _vector_dict(actor.global_position),
+		"movedMeters": actor.global_position.distance_to(start_position),
+		"collisionObserved": false
+	}
 
 static func _resolve_target_position(root: Node, target: Dictionary) -> Dictionary:
 	if target.has("position"):

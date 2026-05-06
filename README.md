@@ -1,7 +1,8 @@
 # Dream of One
 
 Dream of One is a Godot 4.x 3D social-stealth game prototype.
-NPC social pressure is proposed by AI-facing systems, validated by a TypeScript backend, and expressed through a bounded Godot world runtime.
+NPC social pressure is proposed by an API-based proposal provider when available, validated by a TypeScript backend, and expressed through a bounded Godot world runtime.
+The current checked-in build proves the Godot/backend runtime slice, playable Evidence export, trajectory diversity verification, and bridge fallback smoke. It does not yet prove a shipped live API proposal-provider loop.
 
 ## Current Runtime Path
 
@@ -19,6 +20,14 @@ New implementation work should target the Godot project and TypeScript backend o
 Godot owns visible 3D scene state, player and NPC bodies, collision observations, text-surface visibility, routes, zones, and bounded command execution results.
 
 Godot does not own deterministic end-state adjudication. The TypeScript backend and deterministic product-rule controller own Schema validation, command admission/rejection, Exposure threshold crossing, Station intake/Inquest transitions, verdict readiness, session termination, fallback selection, and Evidence Pack validation.
+
+## AI Proposal Provider
+
+- AI output is a proposal source, not product authority.
+- The intended release path is an API-based proposal provider behind backend/runtime validation, not a player-installed Codex CLI prerequisite.
+- Provider and GPT model availability must be checked at runtime before enabling live AI text.
+- `gpt-5.4-nano` is not assumed. No fixed GPT model name is release truth unless the configured provider verifies it at runtime.
+- If the provider is unavailable, deterministic fallback owns line selection, consequence, and Evidence.
 
 ## Run Checks
 
@@ -42,6 +51,9 @@ bash /Users/user/.agents/skills/godot-best-practice/scripts/check_gd_syntax.sh g
 godot --headless --path godot --script res://tools/scene_load_smoke.gd
 godot --headless --path godot --script res://tools/evidence_run.gd
 godot --headless --path godot --script res://tools/runtime_slice_smoke.gd
+godot --headless --path godot --script res://tools/playable_slice_smoke.gd
+godot --headless --path godot --script res://tools/live_backend_bridge_smoke.gd
+godot --headless --path godot --script res://tools/localization_smoke.gd
 godot --path godot --script res://tools/visual_capture.gd
 ```
 
@@ -49,7 +61,7 @@ Validate the checked-in Godot Evidence Packs against the backend Schema:
 
 ```bash
 cd backend/npc-runtime
-node --import tsx -e 'import { readFileSync } from "node:fs"; import { validateGodotEvidencePack } from "./src/godot/runtime-schema.ts"; for (const path of ["../../data/evidence/godot/shell/dre_171_shell_evidence.json", "../../data/evidence/godot/runtime-slice/dre_171_runtime_slice_evidence.json"]) { const result = validateGodotEvidencePack(JSON.parse(readFileSync(path, "utf8"))); if (!result.ok) { console.error(path, JSON.stringify(result.failures, null, 2)); process.exit(1); } console.log(JSON.stringify({ ok: true, path, events: result.value.events.length })); }'
+node --import tsx -e 'import { readFileSync } from "node:fs"; import { validateGodotEvidencePack } from "./src/godot/runtime-schema.ts"; for (const path of ["../../data/evidence/godot/shell/dre_171_shell_evidence.json", "../../data/evidence/godot/runtime-slice/dre_171_runtime_slice_evidence.json", "../../data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json"]) { const result = validateGodotEvidencePack(JSON.parse(readFileSync(path, "utf8"))); if (!result.ok) { console.error(path, JSON.stringify(result.failures, null, 2)); process.exit(1); } console.log(JSON.stringify({ ok: true, path, events: result.value.events.length })); }'
 ```
 
 ## Runtime Evidence
@@ -59,6 +71,9 @@ The current migration slice validates:
 - Godot 3D scene shell loads with player, landmarks, NPC placeholders, routes, zones, and text surfaces.
 - Godot runtime Schema validates ObservationFrame, NpcCommandEnvelope, EvidenceEvent, and EvidencePack fixtures.
 - Runtime slice emits Station intake, command validation/rejection, fallback selection, bounded `CharacterBody3D` movement, and text-pressure Evidence.
+- Playable slice exports backend-valid Evidence Pack for a forced Station intake/verdict proof path.
+- Three-run trajectory diversity verification fails identity-only replay and passes safe/risky/verdict Evidence Pack variation.
+- Godot bridge smoke proves provider-readiness fallback semantics without requiring a live API key.
 - Missing semantic anchors fail shell inspection through `generation_failures`.
 - Visual evidence is captured at `data/evidence/godot/screenshots/main-shell.png`.
 
@@ -72,7 +87,8 @@ The current migration slice validates:
 
 ## Pending Gates
 
-- Live Godot-to-backend bridge.
+- Live API proposal-provider preflight, model availability check, validation, fallback, and Evidence from a configured provider.
+- Live Godot-to-backend provider integration beyond fixture/fallback bridge smoke.
 - Full report-intake-Inquest-verdict domain loop.
-- Multi-run trajectory diversity Evidence.
+- External player comprehension evidence for the M1 product gate.
 - Exported build smoke after export presets exist.

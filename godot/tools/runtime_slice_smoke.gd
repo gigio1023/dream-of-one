@@ -54,7 +54,12 @@ func _run() -> void:
 		"command_executed",
 		context,
 		"Godot runtime slice executed a bounded Move command.",
-		{"actorId": "NPC_Station_Officer", "commandId": "cmd-godot-move-1", "socialLoopStage": "intake"}
+		{
+			"actorId": "NPC_Station_Officer",
+			"commandId": "cmd-godot-move-1",
+			"socialLoopStage": "intake",
+			"observedResult": valid_result.get("observedResult", {})
+		}
 	))
 
 	var invalid_command := valid_command.duplicate(true)
@@ -116,6 +121,32 @@ func _run() -> void:
 			"actorId": "NPC_Station_Officer",
 			"commandId": "cmd-godot-move-1",
 			"reasonCode": "schema_duplicate_command",
+			"reasonCategory": "schema",
+			"warningTier": "blocking",
+			"socialLoopStage": "intake"
+		}
+	))
+
+	var busy_context := context.duplicate(true)
+	busy_context["inFlightActorIds"] = ["NPC_Station_Officer"]
+	var busy_command := valid_command.duplicate(true)
+	busy_command["commandId"] = "cmd-godot-busy-actor-1"
+	var busy_result := GodotRuntimeSlice.execute_command(scene, busy_command, busy_context)
+	if busy_result["ok"]:
+		_fail(["Expected in-flight actor command to reject, got: %s" % JSON.stringify(busy_result)])
+		return
+	if not busy_result["reasonCodes"].has("schema_actor_busy"):
+		_fail(["Expected schema_actor_busy, got: %s" % JSON.stringify(busy_result)])
+		return
+	events.append(GodotRuntimeSlice.evidence_event(
+		"command",
+		"command_rejected",
+		context,
+		"Godot runtime slice rejected an in-flight actor command before world mutation.",
+		{
+			"actorId": "NPC_Station_Officer",
+			"commandId": "cmd-godot-busy-actor-1",
+			"reasonCode": "schema_actor_busy",
 			"reasonCategory": "schema",
 			"warningTier": "blocking",
 			"socialLoopStage": "intake"
@@ -187,7 +218,7 @@ func _run() -> void:
 			"runSignature": "dre-171-runtime-slice:%s:%s" % [context["worldId"], context["worldRevision"]],
 			"actorSignatures": {"NPC_Station_Officer": "%s:NPC_Station_Officer:intake" % context["worldId"]},
 			"fallbackCounters": {"total": 1},
-			"commandOutcomeCounts": {"validated": 1, "executed": 1, "rejected": 3},
+			"commandOutcomeCounts": {"validated": 1, "executed": 1, "rejected": 4},
 			"domainTriggerCounts": {"station_intake_sa_break_rejected": 1},
 			"verdictEndStateTrace": "Trigger -> Station Officer -> Intake Dossier -> intake rejection -> blocked before verdict",
 			"blockedChecks": []
@@ -196,6 +227,7 @@ func _run() -> void:
 		"validCommandResult": valid_result,
 		"invalidCommandResult": invalid_result,
 		"duplicateCommandResult": duplicate_result,
+		"busyCommandResult": busy_result,
 		"unknownZoneCommandResult": unknown_zone_result
 	}
 

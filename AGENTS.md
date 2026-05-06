@@ -7,6 +7,13 @@
 - Writer: Codex CLI.
 - Default execution: work one Linear issue to completion before moving to the next.
 
+## Game Studio Overlay
+
+- Project-local Game Studio guidance lives in `.game-studio/`.
+- Current Game Studio routing and state live in `.game-studio/project-state.md`.
+- Framework review and proof gates live in `docs/framework/`.
+- `.game-harness/` remains the current M1 execution harness; do not replace or migrate it without an explicit decision.
+
 ## Godot Runtime
 
 - Active engine root: `godot/`

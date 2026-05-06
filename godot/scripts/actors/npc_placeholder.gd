@@ -6,10 +6,16 @@ extends CharacterBody3D
 @export var home_landmark := ""
 @export var route_id := ""
 
+var _pressure_line := ""
+var _pressure_line_key := ""
+var _pressure_line_args: Dictionary = {}
+
 @onready var _name_label: Label3D = $NameLabel
+@onready var _pressure_label: Label3D = $PressureLabel
 
 func _ready() -> void:
 	add_to_group("npc_placeholders")
+	add_to_group("localized_nodes")
 	set_meta("npc_id", String(npc_id))
 	set_meta("role", role)
 	set_meta("home_landmark", home_landmark)
@@ -31,5 +37,41 @@ func configure(actor_data: Dictionary) -> void:
 		_apply_label()
 
 func _apply_label() -> void:
-	_name_label.text = "%s\n%s" % [display_name, role]
+	_name_label.text = "%s\n%s" % [
+		_localized("npc.%s.label" % String(npc_id), {}, display_name),
+		_localized("npc.%s.role" % String(npc_id), {}, role)
+	]
 
+func say(line: String) -> void:
+	_pressure_line = line
+	_pressure_line_key = ""
+	_pressure_line_args = {}
+	_pressure_label.text = line
+
+func say_key(line_key: String, args: Dictionary = {}) -> void:
+	_pressure_line = ""
+	_pressure_line_key = line_key
+	_pressure_line_args = args.duplicate(true)
+	_pressure_label.text = _localized(line_key, args)
+
+func refresh_locale() -> void:
+	_apply_label()
+	if not _pressure_line_key.is_empty():
+		_pressure_label.text = _localized(_pressure_line_key, _pressure_line_args)
+	elif not _pressure_line.is_empty():
+		_pressure_label.text = _pressure_line
+
+func _localized(key: String, args: Dictionary = {}, fallback := "") -> String:
+	var localization := _localization()
+	if localization != null and localization.has_method("text"):
+		return str(localization.text(key, args, fallback))
+	var translated := str(TranslationServer.translate(StringName(key)))
+	if translated == key and not fallback.is_empty():
+		translated = fallback
+	return translated.format(args)
+
+func _localization() -> Node:
+	var nodes := get_tree().get_nodes_in_group("localization_services")
+	if nodes.is_empty():
+		return null
+	return nodes[0]

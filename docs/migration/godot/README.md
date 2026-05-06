@@ -14,3 +14,4 @@ Migration guidance does not live in `godot-best-practice` or any other reusable 
 - `parity-matrix.md`: runtime parity status.
 - `evidence-cutover.md`: Evidence artifact ownership and cutover requirements.
 - `inventory.md`: migrated runtime inventory.
+- `playable-rebuild/`: playable 3D social-stealth rebuild architecture, scenario, execution plan, and validation gates.

@@ -3,10 +3,18 @@ extends RefCounted
 
 const NPC_SCENE := preload("res://scenes/actors/npc_placeholder.tscn")
 const TEXT_SURFACE_SCENE := preload("res://scenes/world/text_surface.tscn")
+const COVER_TEST_ZONE_SCENE := preload("res://scenes/world/cover_test_zone.tscn")
 
 const KENNEY_ROADS := "res://assets/kenney/city-kit-roads/"
 const KENNEY_COMMERCIAL := "res://assets/kenney/city-kit-commercial/"
 const KENNEY_SUBURBAN := "res://assets/kenney/city-kit-suburban/"
+
+const COVER_TEST_TITLE_FALLBACKS := {
+	"CT_STORE_QUEUE_LANGUAGE": "Store Queue Test",
+	"CT_STUDIO_APPROVAL_GATE_SPEECH": "Studio Approval Test",
+	"CT_PARK_OBSERVATION_PRESSURE": "Park Observation Test",
+	"CT_STATION_SOFT_INQUEST": "Station Soft Inquest"
+}
 
 static func build_world(
 	layout: Dictionary,
@@ -49,7 +57,7 @@ static func build_world(
 	for actor in layout.get("actors", []):
 		_create_actor(actors_root, actor, anchors, generation_failures)
 
-	_create_free_asset_pass(assets_root, anchors, generation_failures)
+	_create_free_asset_pass(assets_root, anchors, generation_failures, layout.get("player_start", {}))
 	_place_player(player, layout.get("player_start", {}))
 	world_root.set_meta("generation_failures", generation_failures)
 
@@ -102,7 +110,12 @@ static func _create_ground(parent: Node3D) -> void:
 	collision.shape = shape
 	body.add_child(collision)
 
-static func _create_free_asset_pass(parent: Node3D, anchors: Dictionary, generation_failures: Array[String]) -> void:
+static func _create_free_asset_pass(
+	parent: Node3D,
+	anchors: Dictionary,
+	generation_failures: Array[String],
+	player_start: Dictionary
+) -> void:
 	var street_root := _node3d("Kenney_StreetSet", parent)
 	_spawn_asset(street_root, KENNEY_ROADS + "road-crossroad.glb", "Road_Civic_Center", Vector3(0, 0.02, -2), Vector3.ONE * 2.0, 0.0)
 	_spawn_asset(street_root, KENNEY_ROADS + "road-straight.glb", "Road_North_Segment", Vector3(0, 0.025, 5), Vector3.ONE * 2.0, 0.0)
@@ -160,6 +173,8 @@ static func _create_free_asset_pass(parent: Node3D, anchors: Dictionary, generat
 	_create_anchor_set_dressing(parent, anchors, generation_failures)
 	_create_route_visual_cues(parent, anchors, generation_failures)
 	_create_zone_visual_cues(parent, anchors, generation_failures)
+	_create_opening_station_route(parent, anchors, generation_failures, player_start)
+	_create_station_surveillance_cues(parent, anchors, generation_failures)
 
 static func _create_anchor_set_dressing(parent: Node3D, anchors: Dictionary, generation_failures: Array[String]) -> void:
 	var root := _node3d("Procedural_AnchorSetDressing", parent)
@@ -218,7 +233,7 @@ static func _create_route_visual_cues(parent: Node3D, anchors: Dictionary, gener
 		{
 			"id": "CivicLoop",
 			"anchors": ["Station.front_door", "Store.front_door", "Park.gate", "Studio.front_door", "Station.front_door"],
-			"color": Color(0.98, 0.95, 0.58, 1.0)
+			"color": Color(0.70, 0.74, 0.64, 0.46)
 		},
 		{
 			"id": "StoreQueue",
@@ -228,7 +243,7 @@ static func _create_route_visual_cues(parent: Node3D, anchors: Dictionary, gener
 		{
 			"id": "StationIntake",
 			"anchors": ["Station.waiting_line", "Station.report_desk", "Station.intake_board"],
-			"color": Color(1.0, 0.72, 0.34, 1.0)
+			"color": Color(1.0, 0.76, 0.24, 1.0)
 		}
 	]
 	for route in routes:
@@ -253,27 +268,106 @@ static func _create_route_visual_cues(parent: Node3D, anchors: Dictionary, gener
 			var length: float = minf(segment.length() * 0.55, 3.2)
 			_spawn_procedural_box(root, "%s_PathStripe_%02d" % [route_id, index], middle, Vector3(0.16, 0.055, length), Color(color.r, color.g, color.b, 0.58), atan2(segment.x, segment.z))
 
+static func _create_opening_station_route(
+	parent: Node3D,
+	anchors: Dictionary,
+	generation_failures: Array[String],
+	player_start: Dictionary
+) -> void:
+	var door_result := _resolve_anchor(anchors, "Station.front_door", generation_failures)
+	var waiting_result := _resolve_anchor(anchors, "Station.waiting_line", generation_failures)
+	var report_result := _resolve_anchor(anchors, "Station.report_desk", generation_failures)
+	if not door_result["ok"] or not waiting_result["ok"] or not report_result["ok"]:
+		return
+
+	var start := _vec3(player_start.get("position", [0, 0.05, 7.0]))
+	var door: Vector3 = door_result["position"]
+	var waiting: Vector3 = waiting_result["position"]
+	var report: Vector3 = report_result["position"]
+	var root := _node3d("Procedural_OpeningStationRoute", parent)
+	var points: Array[Vector3] = []
+	points.append(Vector3(start.x, 0.0, start.z - 1.0))
+	points.append(Vector3(0.0, 0.0, 3.2))
+	points.append(Vector3(0.8, 0.0, 0.8))
+	points.append(Vector3(2.6, 0.0, -2.4))
+	points.append(Vector3(5.2, 0.0, -5.5))
+	points.append(door + Vector3(-1.25, 0.0, 0.25))
+	points.append(waiting)
+	points.append(report + Vector3(0.45, 0.0, 0.95))
+
+	var color := Color(1.0, 0.82, 0.26, 1.0)
+	for index in range(points.size() - 1):
+		var from_position := points[index]
+		var to_position := points[index + 1]
+		var segment := to_position - from_position
+		var yaw := atan2(segment.x, segment.z)
+		var middle := from_position + segment * 0.5 + Vector3(0, 0.085, 0)
+		_spawn_procedural_box(
+			root,
+			"OpeningStationRoute_Spine_%02d" % index,
+			middle,
+			Vector3(0.22, 0.07, maxf(segment.length() * 0.72, 0.65)),
+			Color(color.r, color.g, color.b, 0.68),
+			yaw
+		)
+		_spawn_chevron(root, "OpeningStationRoute_Chevron_%02d" % index, middle + Vector3(0, 0.075, 0), yaw, color)
+
+static func _create_station_surveillance_cues(
+	parent: Node3D,
+	anchors: Dictionary,
+	generation_failures: Array[String]
+) -> void:
+	var door_result := _resolve_anchor(anchors, "Station.front_door", generation_failures)
+	var waiting_result := _resolve_anchor(anchors, "Station.waiting_line", generation_failures)
+	var report_result := _resolve_anchor(anchors, "Station.report_desk", generation_failures)
+	var board_result := _resolve_anchor(anchors, "Station.intake_board", generation_failures)
+	if not door_result["ok"] or not waiting_result["ok"] or not report_result["ok"] or not board_result["ok"]:
+		return
+
+	var door: Vector3 = door_result["position"]
+	var waiting: Vector3 = waiting_result["position"]
+	var report: Vector3 = report_result["position"]
+	var board: Vector3 = board_result["position"]
+	var root := _node3d("Procedural_StationSurveillance", parent)
+	var amber := Color(1.0, 0.72, 0.20, 1.0)
+	var signal_color := Color(1.0, 0.35, 0.24, 1.0)
+
+	_spawn_procedural_cylinder(root, "Station_Gateway_Post_Left", door + Vector3(-2.25, 1.25, 0.2), 0.09, 2.5, Color(0.12, 0.13, 0.13, 1.0))
+	_spawn_procedural_cylinder(root, "Station_Gateway_Post_Right", door + Vector3(2.25, 1.25, 0.2), 0.09, 2.5, Color(0.12, 0.13, 0.13, 1.0))
+	_spawn_procedural_box(root, "Station_Gateway_Header", door + Vector3(0, 2.55, 0.2), Vector3(4.9, 0.16, 0.22), amber, 0.0)
+	_spawn_light_pool(root, "Station_IntakeThreshold_LightPool", door + Vector3(0, 0.02, 0.2), 2.6, Color(1.0, 0.68, 0.24, 0.34))
+
+	var mast_base := door + Vector3(-3.2, 0.0, 1.15)
+	_spawn_procedural_cylinder(root, "Station_WatchMast_Pole", mast_base + Vector3(0, 1.65, 0), 0.07, 3.3, Color(0.08, 0.09, 0.10, 1.0))
+	_spawn_procedural_box(root, "Station_WatchMast_SensorBar", mast_base + Vector3(0.1, 3.25, -0.2), Vector3(1.05, 0.18, 0.26), Color(0.06, 0.065, 0.07, 1.0), atan2((waiting - mast_base).x, (waiting - mast_base).z))
+	_spawn_procedural_cylinder(root, "Station_WatchMast_Signal", mast_base + Vector3(0, 3.55, 0), 0.16, 0.18, signal_color)
+
+	_spawn_watchline(root, "Station_Watchline_Waiting", mast_base, waiting, Color(1.0, 0.32, 0.22, 0.34))
+	_spawn_watchline(root, "Station_Watchline_ReportDesk", mast_base, report, Color(1.0, 0.32, 0.22, 0.28))
+	_spawn_watchline(root, "Station_Watchline_IntakeBoard", mast_base, board + Vector3(0, 0.0, 1.2), Color(1.0, 0.32, 0.22, 0.22))
+
+	_spawn_procedural_box(root, "Station_ReportDesk_AttentionRail", report + Vector3(0, 0.14, 1.05), Vector3(2.3, 0.12, 0.18), signal_color, 0.0)
+	_spawn_procedural_box(root, "Station_IntakeBoard_FocusRail", board + Vector3(0, -1.18, 0.1), Vector3(2.6, 0.11, 0.18), amber, 0.0)
+
 static func _create_zone_visual_cues(parent: Node3D, anchors: Dictionary, generation_failures: Array[String]) -> void:
 	var root := _node3d("Procedural_ZoneCues", parent)
 	var zones := [
-		{"id": "StoreCounterZone", "anchor": "Store.counter", "radius": 2.1, "color": Color(0.22, 0.78, 1.0, 0.32)},
-		{"id": "StudioApprovalZone", "anchor": "Studio.approval_desk", "radius": 2.2, "color": Color(0.82, 0.52, 1.0, 0.32)},
-		{"id": "ParkObservationZone", "anchor": "Park.photo_spot", "radius": 2.4, "color": Color(0.38, 0.92, 0.54, 0.30)},
-		{"id": "StationIntakeZone", "anchor": "Station.report_desk", "radius": 2.0, "color": Color(1.0, 0.78, 0.32, 0.34)}
+		{"id": "StoreCounterZone", "anchor": "Store.counter", "radius": 2.1, "landmark": "Store"},
+		{"id": "StudioApprovalZone", "anchor": "Studio.approval_desk", "radius": 2.2, "landmark": "Studio"},
+		{"id": "ParkObservationZone", "anchor": "Park.photo_spot", "radius": 2.4, "landmark": "Park"},
+		{"id": "StationIntakeZone", "anchor": "Station.report_desk", "radius": 2.0, "landmark": "Station"}
 	]
 	for zone in zones:
 		var zone_id := str(zone["id"])
-		var color := zone["color"] as Color
+		var color := _zone_color(str(zone["landmark"]))
 		var radius := float(zone["radius"])
 		var center_result := _resolve_anchor(anchors, str(zone["anchor"]), generation_failures)
 		if not center_result["ok"]:
 			continue
 		var center: Vector3 = center_result["position"]
-		_spawn_procedural_cylinder(root, "%s_OuterLightPool" % zone_id, center + Vector3(0, 0.025, 0), radius + 0.55, 0.035, color)
-		_spawn_procedural_box(root, "%s_NorthTick" % zone_id, center + Vector3(0, 0.075, -radius), Vector3(0.22, 0.08, 0.72), Color(color.r, color.g, color.b, 0.95), 0.0)
-		_spawn_procedural_box(root, "%s_EastTick" % zone_id, center + Vector3(radius, 0.075, 0), Vector3(0.22, 0.08, 0.72), Color(color.r, color.g, color.b, 0.95), deg_to_rad(90.0))
-		_spawn_procedural_box(root, "%s_SouthTick" % zone_id, center + Vector3(0, 0.075, radius), Vector3(0.22, 0.08, 0.72), Color(color.r, color.g, color.b, 0.95), 0.0)
-		_spawn_procedural_box(root, "%s_WestTick" % zone_id, center + Vector3(-radius, 0.075, 0), Vector3(0.22, 0.08, 0.72), Color(color.r, color.g, color.b, 0.95), deg_to_rad(90.0))
+		_spawn_procedural_cylinder(root, "%s_WatchedFloorSheen" % zone_id, center + Vector3(0, 0.025, 0), radius + 0.42, 0.028, Color(color.r, color.g, color.b, 0.12))
+		_spawn_procedural_box(root, "%s_ProcedureRail_A" % zone_id, center + Vector3(0, 0.085, -radius * 0.7), Vector3(radius * 1.35, 0.065, 0.12), Color(color.r, color.g, color.b, 0.58), 0.0)
+		_spawn_procedural_box(root, "%s_ProcedureRail_B" % zone_id, center + Vector3(0, 0.085, radius * 0.7), Vector3(radius * 1.35, 0.065, 0.12), Color(color.r, color.g, color.b, 0.42), 0.0)
 
 static func _spawn_procedural_box(
 	parent: Node3D,
@@ -330,6 +424,20 @@ static func _spawn_light_pool(parent: Node3D, node_name: String, position: Vecto
 static func _spawn_route_step(parent: Node3D, node_name: String, position: Vector3, color: Color) -> void:
 	_spawn_procedural_box(parent, "%s_Base" % node_name, position, Vector3(0.72, 0.07, 0.72), Color(color.r, color.g, color.b, 0.36), deg_to_rad(45.0))
 	_spawn_procedural_box(parent, "%s_Line" % node_name, position + Vector3(0, 0.055, 0), Vector3(0.12, 0.055, 0.62), color, 0.0)
+
+static func _spawn_chevron(parent: Node3D, node_name: String, position: Vector3, yaw_radians: float, color: Color) -> void:
+	_spawn_procedural_box(parent, "%s_Left" % node_name, position, Vector3(0.12, 0.06, 0.78), color, yaw_radians + deg_to_rad(31.0))
+	_spawn_procedural_box(parent, "%s_Right" % node_name, position, Vector3(0.12, 0.06, 0.78), color, yaw_radians - deg_to_rad(31.0))
+
+static func _spawn_watchline(parent: Node3D, node_name: String, source: Vector3, target: Vector3, color: Color) -> void:
+	var from_position := Vector3(source.x, 0.16, source.z)
+	var to_position := Vector3(target.x, 0.16, target.z)
+	var segment := to_position - from_position
+	var length := segment.length()
+	if length <= 0.01:
+		return
+	var middle := from_position + segment * 0.5
+	_spawn_procedural_box(parent, node_name, middle, Vector3(0.08, 0.045, length), color, atan2(segment.x, segment.z))
 
 static func _spawn_asset(
 	parent: Node3D,
@@ -497,50 +605,127 @@ static func _create_route(parent: Node3D, route: Dictionary, anchors: Dictionary
 static func _create_zone(parent: Node3D, zone: Dictionary, anchors: Dictionary, generation_failures: Array[String]) -> void:
 	var zone_id := str(zone.get("id", "Zone"))
 	var radius := float(zone.get("radius", 1.5))
+	var landmark := str(zone.get("landmark", ""))
+	var cover_test_id := str(zone.get("cover_test_id", ""))
 	var anchor_result := _resolve_anchor(anchors, str(zone.get("anchor", "")), generation_failures)
 	if not anchor_result["ok"]:
 		return
-	var area := Area3D.new()
+	var area := COVER_TEST_ZONE_SCENE.instantiate() as Area3D
+	if area == null:
+		area = Area3D.new()
 	area.name = "Zone_%s" % _safe_name(zone_id)
 	area.position = anchor_result["position"] + Vector3(0, 0.04, 0)
 	area.add_to_group("interaction_zones")
 	area.set_meta("zone_id", zone_id)
 	area.set_meta("kind", str(zone.get("kind", "")))
-	area.set_meta("landmark", str(zone.get("landmark", "")))
-	area.set_meta("cover_test_id", str(zone.get("cover_test_id", "")))
+	area.set_meta("landmark", landmark)
+	area.set_meta("cover_test_id", cover_test_id)
 	parent.add_child(area)
 
-	var collision := CollisionShape3D.new()
-	collision.name = "ZoneCollision"
+	var collision := area.get_node_or_null("ZoneCollision") as CollisionShape3D
+	if collision == null:
+		collision = CollisionShape3D.new()
+		collision.name = "ZoneCollision"
+		area.add_child(collision)
 	var shape := CylinderShape3D.new()
 	shape.radius = radius
-	shape.height = 0.2
+	shape.height = 0.24
 	collision.shape = shape
-	area.add_child(collision)
 
-	var mesh := MeshInstance3D.new()
-	mesh.name = "ZoneDisc"
-	var cylinder := CylinderMesh.new()
-	cylinder.top_radius = radius
-	cylinder.bottom_radius = radius
-	cylinder.height = 0.04
-	mesh.mesh = cylinder
-	mesh.material_override = _material("ZoneMaterial", Color(0.2, 0.8, 0.95, 0.28))
-	area.add_child(mesh)
+	_configure_cover_zone_visuals(area, zone_id, radius, landmark, cover_test_id)
 
-	var label := Label3D.new()
+static func _configure_cover_zone_visuals(
+	area: Area3D,
+	zone_id: String,
+	radius: float,
+	landmark: String,
+	cover_test_id: String
+) -> void:
+	var color := _zone_color(landmark)
+	_configure_cylinder_node(
+		area,
+		"BoundaryDisc",
+		radius,
+		0.035,
+		Vector3(0, 0.005, 0),
+		Color(color.r, color.g, color.b, 0.18)
+	)
+	_configure_cylinder_node(
+		area,
+		"BoundaryCore",
+		maxf(radius * 0.22, 0.36),
+		0.055,
+		Vector3(0, 0.045, 0),
+		Color(color.r, color.g, color.b, 0.42)
+	)
+	_configure_box_node(area, "NorthTick", Vector3(0, 0.095, -radius), Vector3(0.18, 0.08, 0.82), Color(color.r, color.g, color.b, 0.95), 0.0)
+	_configure_box_node(area, "EastTick", Vector3(radius, 0.095, 0), Vector3(0.18, 0.08, 0.82), Color(color.r, color.g, color.b, 0.95), deg_to_rad(90.0))
+	_configure_box_node(area, "SouthTick", Vector3(0, 0.095, radius), Vector3(0.18, 0.08, 0.82), Color(color.r, color.g, color.b, 0.95), 0.0)
+	_configure_box_node(area, "WestTick", Vector3(-radius, 0.095, 0), Vector3(0.18, 0.08, 0.82), Color(color.r, color.g, color.b, 0.95), deg_to_rad(90.0))
+	_configure_box_node(area, "LabelBack", Vector3(0, 1.34, -0.04), Vector3(3.1, 0.78, 0.08), Color(0.035, 0.038, 0.04, 0.88), 0.0)
+
+	var label := area.get_node_or_null("ZoneLabel") as Label3D
+	if label == null:
+		label = Label3D.new()
+		label.name = "ZoneLabel"
+		area.add_child(label)
 	label.name = "ZoneLabel_%s" % _safe_name(zone_id)
-	var label_args := {"coverTest": str(zone.get("cover_test_id", ""))}
-	label.text = _localized("zone.cover_test", "COVER TEST\n%s" % str(zone.get("cover_test_id", "")), label_args)
+	var label_args := {"coverTestKey": "cover.%s.title" % cover_test_id}
+	label.text = _localized("zone.cover_test", "COVER TEST\n%s" % _cover_test_title_fallback(cover_test_id), label_args)
 	label.add_to_group("localized_meta_text")
 	label.set_meta("translation_key", "zone.cover_test")
 	label.set_meta("translation_args", label_args)
 	label.set_meta("translation_fallback", label.text)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.font_size = 24
-	label.outline_size = 6
-	label.position = Vector3(0, 1.25, 0)
-	area.add_child(label)
+	label.font_size = 30
+	label.outline_size = 8
+	label.width = 720.0
+	label.modulate = Color(1.0, 0.95, 0.74, 1.0)
+	label.outline_modulate = Color(0.02, 0.02, 0.02, 1.0)
+	label.position = Vector3(0, 1.34, 0.04)
+
+static func _configure_cylinder_node(
+	parent: Node3D,
+	node_name: String,
+	radius: float,
+	height: float,
+	position: Vector3,
+	color: Color
+) -> MeshInstance3D:
+	var mesh_instance := parent.get_node_or_null(node_name) as MeshInstance3D
+	if mesh_instance == null:
+		mesh_instance = MeshInstance3D.new()
+		mesh_instance.name = node_name
+		parent.add_child(mesh_instance)
+	var cylinder := CylinderMesh.new()
+	cylinder.top_radius = radius
+	cylinder.bottom_radius = radius
+	cylinder.height = height
+	mesh_instance.mesh = cylinder
+	mesh_instance.position = position
+	mesh_instance.material_override = _material("%sMaterial" % node_name, color)
+	return mesh_instance
+
+static func _configure_box_node(
+	parent: Node3D,
+	node_name: String,
+	position: Vector3,
+	size: Vector3,
+	color: Color,
+	yaw_radians: float
+) -> MeshInstance3D:
+	var mesh_instance := parent.get_node_or_null(node_name) as MeshInstance3D
+	if mesh_instance == null:
+		mesh_instance = MeshInstance3D.new()
+		mesh_instance.name = node_name
+		parent.add_child(mesh_instance)
+	var box := BoxMesh.new()
+	box.size = size
+	mesh_instance.mesh = box
+	mesh_instance.position = position
+	mesh_instance.rotation.y = yaw_radians
+	mesh_instance.material_override = _material("%sMaterial" % node_name, color)
+	return mesh_instance
 
 static func _create_text_surface(parent: Node3D, surface: Dictionary, anchors: Dictionary, generation_failures: Array[String]) -> void:
 	var anchor_result := _resolve_anchor(anchors, str(surface.get("anchor", "")), generation_failures)
@@ -590,6 +775,22 @@ static func _color(values: Variant) -> Color:
 	if values is Array and values.size() >= 4:
 		return Color(float(values[0]), float(values[1]), float(values[2]), float(values[3]))
 	return Color(0.45, 0.45, 0.45, 1.0)
+
+static func _zone_color(landmark: String) -> Color:
+	match landmark:
+		"Store":
+			return Color(0.34, 0.72, 1.0, 1.0)
+		"Studio":
+			return Color(0.80, 0.56, 1.0, 1.0)
+		"Park":
+			return Color(0.42, 0.88, 0.54, 1.0)
+		"Station":
+			return Color(1.0, 0.76, 0.24, 1.0)
+		_:
+			return Color(0.88, 0.80, 0.52, 1.0)
+
+static func _cover_test_title_fallback(cover_test_id: String) -> String:
+	return str(COVER_TEST_TITLE_FALLBACKS.get(cover_test_id, cover_test_id))
 
 static func _material(material_name: String, color: Color) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()

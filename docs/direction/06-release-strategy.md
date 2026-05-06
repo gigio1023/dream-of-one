@@ -11,6 +11,24 @@ Primary purpose:
 - collect player comprehension data.
 - avoid overpromising AI behavior.
 
+## M1 Proof vs Complete Demo
+
+M1 technical proof and a small complete prologue/demo are different claims.
+
+M1 technical proof means:
+- local backend, Godot, Evidence, bridge fallback, localization, keyboard, trajectory diversity, and visual-capture checks can pass.
+- the text -> Evidence -> Exposure -> consequence protocol is technically credible.
+- product and release blockers can still stop demo movement.
+
+A small complete prologue/demo means:
+- the player can complete one short Station Soft Inquest route from start to inquest/verdict/session end.
+- safe, risky, and repair/defuse choices have visible deterministic differences.
+- UI and visual hierarchy let the player read objective, text risk, consequence, provider/fallback state, and end state without debug interpretation.
+- external testers can explain that Station/NPC systems investigated them and that their text changed Evidence/Exposure.
+- exported build/setup, provider mode, fallback behavior, screenshots, and public copy match the verified build.
+
+`feat/prologue-demo-completion` targets the second claim. It may use M1 technical proof as a baseline, but it must not present that baseline as demo completion.
+
 ## API Proposal Provider Premise
 
 Release direction no longer treats player-installed Codex CLI as a public prerequisite.
@@ -56,6 +74,7 @@ The current checked-in build may claim only what fresh evidence proves:
 The current checked-in build must not claim:
 - live API-backed NPC proposal flow.
 - full playable prologue.
+- small complete prologue/demo.
 - exported platform support.
 - included AI hosting.
 - fixed GPT model availability.
@@ -82,6 +101,12 @@ The public demo may claim only what the build proves:
 - backend/runtime owns deterministic consequence.
 - Korean-first with English selectable.
 
+Before any public demo claim, proof must include:
+- current-build gameplay capture for route readability, interactable text surfaces, consequence UI, and verdict/session-end state.
+- provider preflight or fallback-only disclosure in setup and in-game UI.
+- external comprehension notes showing players understand the investigated-player role and text-to-consequence link.
+- exported build/install evidence or an explicit decision that the artifact is not public-release ready.
+
 Provider access must be disclosed in:
 - install guide.
 - demo page.
@@ -94,7 +119,7 @@ Initial target:
 - itch.io or direct demo build for proof and team recruiting.
 
 Steam page:
-- wait until M3 3D Value Gate and M4 Vertical Slice are plausible.
+- wait until M3 3D Value Gate and M4 Complete Prologue Loop are plausible.
 - screenshots must come from actual build.
 - tags must avoid misleading player-investigator expectations.
 
@@ -117,5 +142,8 @@ Do not publish public-facing material if:
 - runtime model availability check is missing.
 - generated text appears to own rules or verdict.
 - text consequence is not visible.
+- UI requires debug knowledge to understand Evidence, Exposure, fallback state, or verdict.
+- visual captures do not show route, interactable, pressure, consequence, and end-state readability.
+- external player comprehension evidence is missing or failed.
 - screenshots imply features not in build.
 - install path is not tested.

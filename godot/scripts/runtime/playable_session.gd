@@ -80,6 +80,8 @@ var station := {
 	"sessionTerminationAllowed": false
 }
 var evidence_events: Array[Dictionary] = []
+var prologue_evidence: Array[Dictionary] = []
+var speech_outcome_counts := {"validated": 0, "executed": 0, "rejected": 0}
 var read_surface_ids: Dictionary = {}
 var current_focus: Node3D = null
 var current_focus_kind := ""
@@ -92,6 +94,11 @@ var outcome_title_key := ""
 var outcome_title_args: Dictionary = {}
 var outcome_body_key := ""
 var outcome_body_args: Dictionary = {}
+var last_why_line_key := ""
+var last_why_line := ""
+var last_speech_act := ""
+var last_reason_code := ""
+var verdict_recorded := false
 var _event_sequence := 0
 
 @onready var _root: Node = get_parent()
@@ -103,8 +110,10 @@ func _ready() -> void:
 	_record_event(
 		"session",
 		"playable_session_started",
-		"Session started near Station. Read a rule surface, then answer a Cover Test procedurally.",
+		"Station intake prologue started. Read the rule surface, prove a safe answer, then expose the risky speech path.",
 		{
+			"prologueStep": "beginning",
+			"sessionOutcome": _session_outcome(),
 			"uiSummaryKey": "event.session_started",
 			"uiSummaryArgs": {}
 		}
@@ -117,6 +126,17 @@ func _process(_delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_pressed() or event.is_echo():
+		return
+	if _session_locked():
+		if event.is_action_pressed(&"restart_session"):
+			get_tree().reload_current_scene()
+			get_viewport().set_input_as_handled()
+			return
+		if event.is_action_pressed(&"quit_session"):
+			get_tree().quit()
+			get_viewport().set_input_as_handled()
+			return
+		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed(&"interact"):
 		_interact()
@@ -132,6 +152,8 @@ func run_smoke_sequence() -> Dictionary:
 	_force_focus_text_surface("TS_Station_IntakeRules")
 	_interact()
 	_force_focus_zone("StationIntakeZone")
+	_interact()
+	_apply_speech_act("speech_comply")
 	_apply_speech_act("speech_break")
 	_apply_speech_act("speech_break")
 	_apply_speech_act("speech_break")
@@ -160,6 +182,22 @@ func build_summary() -> Dictionary:
 		"outcomeTitleKey": outcome_title_key,
 		"outcomeBodyKey": outcome_body_key,
 		"readSurfaceIds": read_surface_ids.keys(),
+		"sessionOutcome": _session_outcome(),
+		"lastWhyLine": last_why_line,
+		"lastWhyLineKey": last_why_line_key,
+		"lastSpeechAct": last_speech_act,
+		"lastReasonCode": last_reason_code,
+		"inputLocked": _session_locked(),
+		"authorityMode": _authority_mode(),
+		"releaseAuthorityRequirement": _release_authority_requirement(),
+		"prologueEvidence": prologue_evidence.duplicate(true),
+		"prologueLoop": {
+			"beginning": "read TS_Station_IntakeRules and focus StationIntakeZone",
+			"safePath": "SA_COMPLY keeps Exposure at 0 and records procedural speech evidence",
+			"riskyPath": "SA_BREAK adds why-line evidence until Station verdict",
+			"outcome": _session_outcome(),
+			"endControls": _end_controls()
+		},
 		"events": evidence_events.duplicate(true)
 	}
 
@@ -190,20 +228,28 @@ func build_evidence_pack(artifact_path: String) -> Dictionary:
 			"runSignature": "%s:%s:%s:%s" % [RUN_ID, SESSION_ID, _world_id(), _world_revision()],
 			"actorSignatures": _actor_signatures(),
 			"fallbackCounters": {"total": 0},
-			"commandOutcomeCounts": {"validated": 0, "executed": 0, "rejected": 0},
+			"commandOutcomeCounts": speech_outcome_counts.duplicate(true),
 			"domainTriggerCounts": _event_family_counts("domain"),
 			"verdictEndStateTrace": _verdict_end_state_trace(summary),
 			"blockedChecks": []
 		},
 		"playableSummary": summary,
 		"playability": {
-			"inputPath": "read TS_Station_IntakeRules -> focus StationIntakeZone -> SA_BREAK x4",
-			"expectedPlayerInterpretation": "Risky non-procedural speech is what exposes the player to Station systems.",
+			"inputPath": "read TS_Station_IntakeRules -> focus StationIntakeZone -> SA_COMPLY -> SA_BREAK x4",
+			"expectedPlayerInterpretation": "Safe procedural speech holds cover; risky non-procedural speech exposes the player to Station systems.",
+			"deterministicOutcome": _session_outcome(),
+			"endControls": _end_controls(),
+			"visibleWhyLine": last_why_line,
+			"inputLocked": _session_locked(),
+			"authorityMode": _authority_mode(),
+			"releaseAuthorityRequirement": _release_authority_requirement(),
 			"observedConfusionPoint": "The prototype uses a forced smoke path; manual play still needs human playtest notes."
 		}
 	}
 
 func _interact() -> void:
+	if _session_locked():
+		return
 	if current_focus == null:
 		_set_notice("notice.no_focus.title", "notice.no_focus.body")
 		_record_event(
@@ -241,6 +287,8 @@ func _interact() -> void:
 				str(current_focus.get_meta("law_id", ""))
 			],
 			{
+				"prologueStep": "read_station_rules",
+				"evidenceAdded": ["intake_dossier:%s" % surface_id],
 				"textSurfaceId": surface_id,
 				"dreamLawIds": [str(current_focus.get_meta("law_id", ""))],
 				"coverTestIds": [str(current_focus.get_meta("cover_test_id", ""))],
@@ -250,6 +298,15 @@ func _interact() -> void:
 					"law": str(current_focus.get_meta("law_id", ""))
 				}
 			}
+		)
+		_add_prologue_evidence(
+			"intake_dossier.%s" % surface_id,
+			"intake_dossier",
+			stage,
+			"Station intake rules linked Dream Law %s to Cover Test %s." % [
+				str(current_focus.get_meta("law_id", "")),
+				str(current_focus.get_meta("cover_test_id", ""))
+			]
 		)
 		return
 
@@ -267,6 +324,7 @@ func _interact() -> void:
 			"cover_test_focused",
 			"Focused %s. Choose a bounded speech act." % cover_test_id,
 			{
+				"prologueStep": "cover_test_prompt",
 				"zoneId": str(current_focus.get_meta("zone_id", "")),
 				"uiSummaryKey": "event.cover_test_focused",
 				"uiSummaryArgs": {"coverTest": cover_test_id}
@@ -274,6 +332,8 @@ func _interact() -> void:
 		)
 
 func _apply_speech_act(action_name: String) -> void:
+	if _session_locked():
+		return
 	if current_focus == null or current_focus_kind != "zone":
 		_set_notice("notice.no_cover_test.title", "notice.no_cover_test.body")
 		_record_event(
@@ -300,6 +360,28 @@ func _apply_speech_act(action_name: String) -> void:
 	var pressure_line_key := str(test.get("defuseKey", "")) if defused else str(test.get("pressureKey", ""))
 	var pressure_line := _text(pressure_line_key)
 	_set_actor_line_key(str(test.get("actorId", "")), pressure_line_key)
+	last_speech_act = str(speech["id"])
+	last_reason_code = str(speech["reason"])
+	if not defused:
+		last_why_line_key = pressure_line_key
+		last_why_line = pressure_line
+	var evidence_type := "procedural_speech_log" if defused else "why_line"
+	var evidence_id := "%s.%s.%03d" % [evidence_type, str(speech["id"]), evidence_events.size() + 1]
+	_add_prologue_evidence(
+		evidence_id,
+		evidence_type,
+		stage,
+		"%s used %s in %s: Exposure %d -> %d. Line: %s" % [
+			cover_test_id,
+			str(speech["id"]),
+			zone_id,
+			previous_exposure,
+			exposure,
+			pressure_line
+		]
+	)
+	var speech_outcome_key := "validated" if defused else "rejected"
+	speech_outcome_counts[speech_outcome_key] = int(speech_outcome_counts.get(speech_outcome_key, 0)) + 1
 	_set_notice(
 		str(test.get("titleKey", "")),
 		"notice.speech.body",
@@ -320,9 +402,9 @@ func _apply_speech_act(action_name: String) -> void:
 		exposure
 	]
 	if defused:
-		summary += " Cover held through procedural speech."
+		summary += " Cover held through procedural speech; Evidence added: procedural_speech_log."
 	else:
-		summary += " Pressure escalated with deterministic why-line."
+		summary += " Pressure escalated with deterministic why-line Evidence: %s" % pressure_line
 	if station["verdictReady"]:
 		summary += " Verdict is ready."
 		outcome_visible = true
@@ -335,28 +417,44 @@ func _apply_speech_act(action_name: String) -> void:
 	elif station["intakeOpen"]:
 		summary += " Station intake is open."
 
+	var event_extra := {
+		"prologueStep": "safe_contrast" if defused else "risky_contrast",
+		"actorId": str(test.get("actorId", "")),
+		"zoneId": zone_id,
+		"coverTestId": cover_test_id,
+		"speechAct": speech["id"],
+		"reasonCode": str(speech["reason"]),
+		"reasonCategory": "none" if defused else "policy",
+		"warningTier": str(speech["tier"]),
+		"exposureBefore": previous_exposure,
+		"exposureAfter": exposure,
+		"exposureDelta": exposure - previous_exposure,
+		"evidenceAdded": ["%s:%s" % [evidence_type, evidence_id]],
+		"uiLineKey": pressure_line_key,
+		"uiLine": pressure_line,
+		"sessionOutcome": _session_outcome(),
+		"socialLoopStage": stage,
+		"uiSummaryKey": "event.cover_test_defused" if defused else "event.cover_test_pressure",
+		"uiSummaryArgs": {
+			"coverTest": cover_test_id,
+			"speechAct": speech["id"],
+			"delta": delta,
+			"exposure": exposure
+		}
+	}
+	if not defused:
+		event_extra["whyLineKey"] = pressure_line_key
+		event_extra["whyLine"] = pressure_line
+		event_extra["uiWhyLineKey"] = pressure_line_key
+		event_extra["uiWhyLine"] = pressure_line
 	_record_event(
 		"domain",
-		"cover_test_evaluated",
+		"cover_test_defused" if defused else "cover_test_pressure",
 		summary,
-		{
-			"zoneId": zone_id,
-			"coverTestId": cover_test_id,
-			"speechAct": speech["id"],
-			"reasonCode": str(speech["reason"]),
-			"warningTier": str(speech["tier"]),
-			"exposureBefore": previous_exposure,
-			"exposureAfter": exposure,
-			"socialLoopStage": stage,
-			"uiSummaryKey": "event.cover_test_defused" if defused else "event.cover_test_pressure",
-			"uiSummaryArgs": {
-				"coverTest": cover_test_id,
-				"speechAct": speech["id"],
-				"delta": delta,
-				"exposure": exposure
-			}
-		}
+		event_extra
 	)
+	if station["verdictReady"] and not verdict_recorded:
+		_record_verdict_event(cover_test_id, zone_id, pressure_line_key, pressure_line)
 
 func _update_focus() -> void:
 	var best_node: Node3D = null
@@ -448,6 +546,50 @@ func _recent_events() -> Array:
 
 func _record_event(event_family: String, event_name: String, summary: String, extra: Dictionary) -> void:
 	evidence_events.append(_make_event(event_family, event_name, summary, extra))
+
+func _record_verdict_event(cover_test_id: String, zone_id: String, why_line_key: String, why_line: String) -> void:
+	verdict_recorded = true
+	var evidence_id := "verdict.%s.%03d" % [cover_test_id, evidence_events.size() + 1]
+	_add_prologue_evidence(
+		evidence_id,
+		"verdict",
+		stage,
+		"Station outcome %s reached at Exposure %d from why-line: %s" % [_session_outcome(), exposure, why_line]
+	)
+	_record_event(
+		"domain",
+		"verdict_reached",
+		"Deterministic Station outcome %s: Exposure %d, why-line '%s', session termination allowed." % [
+			_session_outcome(),
+			exposure,
+			why_line
+		],
+		{
+			"prologueStep": "deterministic_outcome",
+			"actorId": "NPC_Station_Officer",
+			"zoneId": zone_id,
+			"coverTestId": cover_test_id,
+			"reasonCode": "policy_station_evidence_threshold_met",
+			"reasonCategory": "policy",
+			"warningTier": "blocking",
+			"exposureAfter": exposure,
+			"sessionOutcome": _session_outcome(),
+			"whyLineKey": why_line_key,
+			"whyLine": why_line,
+			"uiWhyLineKey": why_line_key,
+			"uiWhyLine": why_line,
+			"evidenceAdded": ["verdict:%s" % evidence_id],
+			"socialLoopStage": stage
+		}
+	)
+
+func _add_prologue_evidence(id: String, artifact_type: String, artifact_stage: String, summary: String) -> void:
+	prologue_evidence.append({
+		"id": id,
+		"type": artifact_type,
+		"stage": artifact_stage,
+		"summary": summary
+	})
 
 func _make_event(event_family: String, event_name: String, summary: String, extra: Dictionary) -> Dictionary:
 	_event_sequence += 1
@@ -548,13 +690,39 @@ func _event_family_counts(event_family: String) -> Dictionary:
 	return counts
 
 func _verdict_end_state_trace(summary: Dictionary) -> String:
-	return "Text surface read -> Station cover test -> Exposure %d -> intake:%s inquest:%s verdict:%s termination:%s" % [
+	return "Station intake prologue -> safe SA_COMPLY -> risky SA_BREAK why-lines -> Exposure %d -> intake:%s inquest:%s verdict:%s termination:%s outcome:%s" % [
 		int(summary.get("exposure", 0)),
 		str(station.get("intakeOpen", false)),
 		str(station.get("inquestOpen", false)),
 		str(station.get("verdictReady", false)),
-		str(station.get("sessionTerminationAllowed", false))
+		str(station.get("sessionTerminationAllowed", false)),
+		_session_outcome()
 	]
+
+func _session_outcome() -> String:
+	if _session_locked():
+		return "case_closed"
+	return "running"
+
+func _end_controls() -> Dictionary:
+	if not _session_locked():
+		return {}
+	return {
+		"restart": "restart_session",
+		"quit": "quit_session"
+	}
+
+func _session_locked() -> bool:
+	return bool(station.get("sessionTerminationAllowed", false))
+
+func is_session_locked() -> bool:
+	return _session_locked()
+
+func _authority_mode() -> String:
+	return "godot_local_smoke_runtime"
+
+func _release_authority_requirement() -> String:
+	return "Public demo authority must be live backend/runtime integration or an explicit fallback-only product decision; API/provider text remains wording-only."
 
 func _now_ms() -> int:
 	return int(Time.get_unix_time_from_system() * 1000.0)

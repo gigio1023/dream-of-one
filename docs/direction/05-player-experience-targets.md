@@ -4,6 +4,24 @@
 
 This document defines what the player must understand or feel at key points. It turns "make it game-like" into observable targets.
 
+M1 technical proof is not enough for this document's target. M1 proves the protocol can work locally. A small complete prologue/demo must prove that a player can read the situation, act, see consequence, reach closure, and explain what happened.
+
+## Game-Like Completion Bar
+
+The prologue/demo feels complete when:
+- the player always knows the immediate available action.
+- text response creates visible risk, feedback, and consequence.
+- the Station or NPC system acts on prior Evidence without making the player the investigator.
+- the player reaches inquest/verdict/session end because the loop resolves, not because content stops.
+- replaying at least one safe/risky/repair path changes the outcome in a readable way.
+
+It is not complete when:
+- command evidence passes but the player cannot read the goal.
+- consequence exists only in backend logs.
+- visual staging does not show pressure or route intent.
+- UI labels expose debug state without player meaning.
+- a tester cannot explain why Exposure or verdict changed.
+
 ## First 60 Seconds
 
 Target:
@@ -65,6 +83,28 @@ Failure:
 - verdict feels authored rather than caused.
 - provider text seems to invent the result.
 
+## Visual And UI Gates
+
+Visual gates:
+- route landmarks, interactables, NPC/system pressure, consequence surface, and end-state view are visible in current-build captures.
+- readable text survives normal play distance and screenshot review.
+- camera/input framing does not make the player feel like a detective searching for clues.
+- surveillance pressure is visible through staging, not only written in HUD text.
+
+UI gates:
+- the prompt and available response action are clear before input.
+- selected or entered player text is connected to Evidence/Exposure consequence.
+- why-line reads as diegetic/system pressure, not debug output.
+- provider/fallback state is disclosed when relevant.
+- Korean and English consequence states preserve the same meaning.
+- verdict/session-end UI names the deterministic result and why it happened.
+
+Failure:
+- player-facing text overlaps, clips, or requires debug knowledge.
+- fallback/live-provider state is invisible when it changes player expectations.
+- Exposure changes without a visible reason.
+- end state appears as a generic stop screen.
+
 ## Confusion Budget
 
 Allowed:
@@ -86,3 +126,11 @@ Use:
 - text surface ledger.
 - Evidence why-lines.
 - player paraphrase: "What is happening to you?"
+
+Pass threshold for demo-completion work:
+- player can state they are being investigated, not investigating.
+- player can connect at least one text response to Evidence/Exposure consequence.
+- player can identify whether the provider is live or fallback-only when that affects the build promise.
+- player can explain the verdict/session-end cause in ordinary language.
+
+M1 forced/proxy smoke evidence may support implementation, but it cannot replace external comprehension evidence.

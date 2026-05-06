@@ -1,0 +1,161 @@
+{
+	"assetSourceDoc": "godot/assets/kenney/README.md",
+	"blockedChecks": [],
+	"captures": [
+		{
+			"artifactPath": "data/evidence/godot/screenshots/01-opening-station-framing.png",
+			"automatedChecks": [
+				"viewport_size",
+				"nonblank_pixels",
+				"scripted_session_state"
+			],
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"opening Station framing visible from current generated world",
+				"HUD objective points player toward rule-surface reading",
+				"Kenney free asset city dressing visible without owning gameplay authority"
+			],
+			"height": 720,
+			"legacyAliasArtifactPath": "data/evidence/godot/screenshots/main-shell.png",
+			"requiresHumanReadabilityReview": true,
+			"role": "opening-station-framing",
+			"width": 1280
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/02-station-rule-surface-readable.png",
+			"automatedChecks": [
+				"viewport_size",
+				"nonblank_pixels",
+				"scripted_session_state"
+			],
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"Station intake rule surface has been interacted with",
+				"Dream Law and Cover Test identifiers are visible in player-facing notice",
+				"HUD remains readable while Station board is in range"
+			],
+			"height": 720,
+			"requiresHumanReadabilityReview": true,
+			"role": "station-rule-surface-readable",
+			"width": 1280
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/03-active-cover-test-hud.png",
+			"automatedChecks": [
+				"viewport_size",
+				"nonblank_pixels",
+				"scripted_session_state"
+			],
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"Station Cover Test prompt is active",
+				"bounded speech choices are visible",
+				"consequence HUD distinguishes safe procedural speech from risky break"
+			],
+			"height": 720,
+			"requiresHumanReadabilityReview": true,
+			"role": "active-cover-test-hud",
+			"width": 1280
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/04-exposure-why-line.png",
+			"automatedChecks": [
+				"viewport_size",
+				"nonblank_pixels",
+				"scripted_session_state"
+			],
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"Exposure has increased from a risky speech act",
+				"player-facing why-line is visible",
+				"recent Evidence explains the consequence"
+			],
+			"height": 720,
+			"requiresHumanReadabilityReview": true,
+			"role": "exposure-why-line",
+			"width": 1280
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/05-verdict-session-end.png",
+			"automatedChecks": [
+				"viewport_size",
+				"nonblank_pixels",
+				"scripted_session_state"
+			],
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"verdict outcome panel is visible",
+				"Exposure, Station verdict, and session termination state are visible",
+				"why-line remains visible as session-end basis"
+			],
+			"height": 720,
+			"legacyAliasArtifactPath": "data/evidence/godot/screenshots/playable-verdict.png",
+			"requiresHumanReadabilityReview": true,
+			"role": "verdict-session-end",
+			"width": 1280
+		}
+	],
+	"contactSheet": {
+		"artifactPath": "data/evidence/godot/visual-capture/contact-sheet.png",
+		"height": 1080,
+		"width": 1280
+	},
+	"ok": true,
+	"screenshotExpectations": [
+		{
+			"artifactPath": "data/evidence/godot/screenshots/01-opening-station-framing.png",
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"opening Station framing visible from current generated world",
+				"HUD objective points player toward rule-surface reading",
+				"Kenney free asset city dressing visible without owning gameplay authority"
+			],
+			"role": "opening-station-framing"
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/02-station-rule-surface-readable.png",
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"Station intake rule surface has been interacted with",
+				"Dream Law and Cover Test identifiers are visible in player-facing notice",
+				"HUD remains readable while Station board is in range"
+			],
+			"role": "station-rule-surface-readable"
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/03-active-cover-test-hud.png",
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"Station Cover Test prompt is active",
+				"bounded speech choices are visible",
+				"consequence HUD distinguishes safe procedural speech from risky break"
+			],
+			"role": "active-cover-test-hud"
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/04-exposure-why-line.png",
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"Exposure has increased from a risky speech act",
+				"player-facing why-line is visible",
+				"recent Evidence explains the consequence"
+			],
+			"role": "exposure-why-line"
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/05-verdict-session-end.png",
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"verdict outcome panel is visible",
+				"Exposure, Station verdict, and session termination state are visible",
+				"why-line remains visible as session-end basis"
+			],
+			"role": "verdict-session-end"
+		}
+	],
+	"validationScope": "Automated capture validates scene load, session state, viewport size, and nonblank pixels. It records expected visual content for human review; it is not OCR or taste validation.",
+	"viewport": {
+		"height": 720,
+		"width": 1280
+	}
+}

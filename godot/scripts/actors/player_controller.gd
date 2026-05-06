@@ -22,6 +22,8 @@ func _ready() -> void:
 	_camera_pivot.rotation.x = _pitch
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _controls_locked():
+		return
 	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 		_apply_look_delta(
 			event.relative.x * look_sensitivity,
@@ -29,6 +31,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		)
 
 func _process(delta: float) -> void:
+	if _controls_locked():
+		return
 	var look_vector := Input.get_vector(
 		&"look_left",
 		&"look_right",
@@ -42,6 +46,9 @@ func _process(delta: float) -> void:
 	_apply_look_delta(look_vector.x * keyboard_delta, look_vector.y * keyboard_delta)
 
 func _physics_process(delta: float) -> void:
+	if _controls_locked():
+		velocity = Vector3.ZERO
+		return
 	var input_vector := Input.get_vector(
 		&"move_left",
 		&"move_right",
@@ -80,3 +87,11 @@ func _apply_look_delta(horizontal_delta: float, vertical_delta: float) -> void:
 	)
 	rotation.y = _yaw
 	_camera_pivot.rotation.x = _pitch
+
+func _controls_locked() -> bool:
+	if not is_inside_tree():
+		return false
+	for node in get_tree().get_nodes_in_group("playable_sessions"):
+		if node.has_method("is_session_locked") and bool(node.call("is_session_locked")):
+			return true
+	return false

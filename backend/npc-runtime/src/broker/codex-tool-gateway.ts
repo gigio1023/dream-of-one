@@ -439,6 +439,34 @@ function parseModelIds(payload: unknown): string[] {
   });
 }
 
+class OpenAiDecisionBudget {
+  private readonly requestTimeoutMs: number;
+  private readonly deadlineAtMs: number | undefined;
+
+  constructor(requestTimeoutMs: number, deadlineMs: number | undefined) {
+    this.requestTimeoutMs = Math.max(1, Math.floor(requestTimeoutMs));
+    if (!Number.isFinite(deadlineMs) || deadlineMs === undefined) {
+      this.deadlineAtMs = undefined;
+      return;
+    }
+
+    this.deadlineAtMs = Date.now() + Math.max(1, Math.floor(deadlineMs));
+  }
+
+  remainingTimeoutMs(): number {
+    if (this.deadlineAtMs === undefined) {
+      return this.requestTimeoutMs;
+    }
+
+    const remainingMs = this.deadlineAtMs - Date.now();
+    if (remainingMs <= 0) {
+      throw new CodexToolTimeoutError("OpenAI API decision deadline exhausted");
+    }
+
+    return Math.min(this.requestTimeoutMs, Math.max(1, Math.floor(remainingMs)));
+  }
+}
+
 export class OpenAiProposalGateway implements CodexToolGateway {
   private readonly fetchImpl: FetchLike;
   private readonly timeoutMs: number;
@@ -518,7 +546,8 @@ export class OpenAiProposalGateway implements CodexToolGateway {
       throw new CodexToolError("OpenAI API key is not configured");
     }
 
-    const selectedModel = await this.resolveAvailableModel(options);
+    const budget = this.createDecisionBudget(options?.deadlineMs);
+    const selectedModel = await this.resolveAvailableModel(budget, options?.signal);
     const prompt = this.buildProposalPrompt(frame);
     const body: Record<string, unknown> = {
       model: selectedModel,
@@ -549,7 +578,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
       body.previous_response_id = previousResponseId;
     }
 
-    const timeout = this.resolveRequestTimeout(options?.deadlineMs);
+    const timeout = budget.remainingTimeoutMs();
     const payload = await this.fetchJson("responses", {
       method: "POST",
       body: JSON.stringify(body),
@@ -576,14 +605,14 @@ export class OpenAiProposalGateway implements CodexToolGateway {
     ].join("\n");
   }
 
-  private async resolveAvailableModel(options?: CodexToolRunOptions): Promise<string> {
+  private async resolveAvailableModel(budget: OpenAiDecisionBudget, signal?: AbortSignal): Promise<string> {
     const checkedModels = uniqueModels(this.config.preferredModel, this.config.fallbackModels);
     if (checkedModels.length === 0) {
       throw new CodexToolError("OpenAI proposal model list is empty");
     }
 
-    const timeout = Math.min(this.config.modelCheckTimeoutMs, this.resolveRequestTimeout(options?.deadlineMs));
-    const availableModels = await this.listAvailableModelIds(timeout, options?.signal);
+    const timeout = Math.min(this.config.modelCheckTimeoutMs, budget.remainingTimeoutMs());
+    const availableModels = await this.listAvailableModelIds(timeout, signal);
     const selected = checkedModels.find(model => availableModels.has(model));
     if (!selected) {
       throw new CodexToolError(`OpenAI proposal models unavailable: ${checkedModels.join(", ")}`);
@@ -647,13 +676,14 @@ export class OpenAiProposalGateway implements CodexToolGateway {
     }
   }
 
-  private resolveRequestTimeout(deadlineMs?: number): number {
+  private createDecisionBudget(deadlineMs?: number): OpenAiDecisionBudget {
+    return new OpenAiDecisionBudget(this.resolveRequestTimeout(), deadlineMs);
+  }
+
+  private resolveRequestTimeout(): number {
     const configured = Math.max(1, Math.floor(this.config.requestTimeoutMs));
     const gatewayTimeout = Math.max(1, Math.floor(this.timeoutMs));
-    if (!Number.isFinite(deadlineMs) || deadlineMs === undefined) {
-      return Math.min(configured, gatewayTimeout);
-    }
-    return Math.min(configured, gatewayTimeout, Math.max(1, Math.floor(deadlineMs)));
+    return Math.min(configured, gatewayTimeout);
   }
 }
 

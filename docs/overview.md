@@ -7,6 +7,7 @@ Dream of One now targets a Godot 4.x 3D Runtime Path with a TypeScript NPC backe
 - `godot/`: 3D scene, runtime slice scripts, world layout data, smoke/evidence tools.
 - `backend/npc-runtime/`: NPC decision service, scheduling, bounded behavior, Godot runtime Schema, Evidence validation.
 - `docs/design/`: product and social-stealth design rails.
+- `docs/scenario/`: active scenario bible, line bank, placement contracts, localization voice, and playtest rubric.
 - `docs/migration/godot/`: migration validation gates and evidence cutover notes.
 - `data/evidence/godot/`: generated Godot Evidence Packs.
 

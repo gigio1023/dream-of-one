@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Game Studio Project State",
+  "type": "object",
+  "required": [
+    "project",
+    "entryMode",
+    "conceptStatus",
+    "directionSource",
+    "currentStage",
+    "profiles",
+    "reviewMode",
+    "decisionMode",
+    "gameDevFluency",
+    "explanationMode",
+    "currentProofTarget",
+    "nextRequiredDecision",
+    "lastReviewedGate",
+    "lastGateVerdict"
+  ],
+  "properties": {
+    "project": { "type": "string", "minLength": 1 },
+    "entryMode": {
+      "enum": ["direction-carry-in", "taste-to-game", "brownfield-unknown"]
+    },
+    "conceptStatus": {
+      "enum": [
+        "UNROUTED",
+        "TASTE_DISCOVERY",
+        "CONCEPT_SLATE",
+        "CREATIVE_BRIEF",
+        "FIRST_PROOF_PLANNED",
+        "DIRECTION_LOCKED",
+        "PARKED"
+      ]
+    },
+    "directionSource": { "type": "string", "minLength": 1 },
+    "currentStage": {
+      "enum": [
+        "DISCOVERY",
+        "DIRECTION_LOCK",
+        "PROTOCOL_PROOF",
+        "CORE_LOOP_PROTOTYPE",
+        "PRE_PRODUCTION_EXIT",
+        "PRESENTATION_VALUE_GATE",
+        "VERTICAL_SLICE",
+        "PUBLIC_DEMO_CANDIDATE",
+        "SMALL_RELEASE_CANDIDATE"
+      ]
+    },
+    "profiles": {
+      "type": "object",
+      "required": ["engine", "scope", "genres"],
+      "properties": {
+        "engine": { "type": "string", "minLength": 1 },
+        "scope": { "type": "string", "minLength": 1 },
+        "genres": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "reviewMode": { "enum": ["full", "lean", "solo"] },
+    "decisionMode": { "enum": ["consultative", "agentic", "audit"] },
+    "gameDevFluency": { "enum": ["novice", "intermediate", "expert", "unknown"] },
+    "explanationMode": { "enum": ["plain", "standard", "terse"] },
+    "currentProofTarget": { "type": "string", "minLength": 1 },
+    "nextRequiredDecision": { "type": "string", "minLength": 1 },
+    "lastReviewedGate": { "type": "string", "minLength": 1 },
+    "lastGateVerdict": { "enum": ["READY", "CONCERNS", "NOT_READY", "NONE"] }
+  },
+  "additionalProperties": true
+}

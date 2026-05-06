@@ -1,5 +1,5 @@
 ---
-status: Godot migration active
+status: M1 technical conditional pass; product gate open
 runtime_path: Godot 4.x + TypeScript NPC backend
 ---
 
@@ -11,8 +11,10 @@ Dream of One is a Godot 4.x 3D social-stealth game where NPC society pressures t
 
 - Player is not an investigator. NPCs and Station systems investigate the player.
 - Text is the danger surface. Dream Laws are exposed through diegetic text and Cover Tests.
-- LLM-first NPC society proposes actions from role, memory, and organization context.
+- API proposal-provider-backed NPC society proposes bounded wording only: NPC line candidates, Station pressure wording, localized variants, and fallback text variants.
+- GPT model availability is checked at runtime. `gpt-5.4-nano` is not assumed by design, docs, or release planning.
 - Deterministic adjudication owns validation, fallback selection, Exposure thresholds, Station intake/inquest, verdict, and session termination.
+- Deterministic adjudication also owns action choice, risk tags, Evidence type, reason codes, why-line authority, and session-end authority.
 - Godot owns world presentation, player/NPC movement, 3D collision/navigation observations, visuals, and scene-local interaction surfaces.
 
 ## Active Runtime Path
@@ -24,6 +26,24 @@ Dream of One is a Godot 4.x 3D social-stealth game where NPC society pressures t
 - Godot runtime Schema: `backend/npc-runtime/src/godot/runtime-schema.ts`
 - Evidence output: `data/evidence/godot/`
 
+## Scenario Source Of Truth
+
+- Active scenario docs: `docs/scenario/`
+- First complete scenario: `docs/scenario/bible/05-episode-station-soft-inquest.md`
+- Scenario line bank: `docs/scenario/content/dialogue-line-bank.md`
+- Scenario placement contract: `docs/scenario/content/location-placement-contracts.md`
+- Scenario QA rubric: `docs/scenario/playtest/scenario-qa-rubric.md`
+
+`docs/migration/godot/` is migration-only. Do not store scenario canon there.
+
+## Current Build Truth
+
+- The current build proves a Godot shell/runtime/playable slice, backend Schema validation path, trajectory diversity verification, and Godot bridge readiness fallback smoke.
+- The current build does not yet prove a live API proposal-provider loop, exported demo, or full report-intake-verdict controller.
+- M1 is technical-conditional: product closure still requires council/product review and external player comprehension evidence.
+- The first public promise is a small honest prologue/demo after those gates pass.
+- Public copy must not imply open-ended conversation, included AI hosting, a fixed GPT model, or final campaign scope.
+
 ## Migration Acceptance
 
 The branch is PR-ready only when:
@@ -32,7 +52,7 @@ The branch is PR-ready only when:
 2. Godot import and scene smoke checks pass.
 3. Godot Evidence Packs validate against backend Schema.
 4. Repository search shows no active previous-engine/runtime references outside intentional historical git deletion records.
-5. Follow-up issues for live Godot backend bridge, full playable report-intake-verdict controller, runtime selector removal, and trajectory diversity are explicit if not implemented in the same PR.
+5. Follow-up issues for live Godot backend/provider integration, full playable report-intake-verdict controller, runtime selector removal, exported provider UX, and player comprehension evidence are explicit if not implemented in the same PR.
 
 ## Verification
 
@@ -42,4 +62,7 @@ godot --headless --import --path godot
 godot --headless --path godot --script res://tools/scene_load_smoke.gd
 godot --headless --path godot --script res://tools/evidence_run.gd
 godot --headless --path godot --script res://tools/runtime_slice_smoke.gd
+godot --headless --path godot --script res://tools/playable_slice_smoke.gd
+godot --headless --path godot --script res://tools/live_backend_bridge_smoke.gd
+godot --headless --path godot --script res://tools/localization_smoke.gd
 ```

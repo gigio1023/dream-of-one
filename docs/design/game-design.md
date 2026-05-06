@@ -1,5 +1,8 @@
 # Game Design
 
+Scenario source of truth lives in `docs/scenario/`.
+Use `docs/scenario/bible/05-episode-station-soft-inquest.md` for the first complete episode and `docs/scenario/content/dialogue-line-bank.md` for authored NPC pressure text.
+
 ## Core Loop
 
 The player moves through Store, Studio, Park, and Station while NPCs and Station systems pressure the player through procedural text, observation, intake, and verdict logic.

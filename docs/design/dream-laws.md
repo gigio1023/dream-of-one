@@ -2,6 +2,12 @@
 
 Dream Laws are diegetic social rules. They should appear through readable Godot text surfaces and be referenced by Cover Tests and Evidence artifacts.
 
+Scenario-facing text and placement details live in:
+
+- `docs/scenario/bible/06-cover-tests-and-evidence.md`
+- `docs/scenario/bible/09-barks-and-text-surfaces.md`
+- `docs/scenario/content/location-placement-contracts.md`
+
 ## Baseline Laws
 
 | ID | Law | Primary Surface |

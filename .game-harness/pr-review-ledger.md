@@ -23,10 +23,19 @@ Track long-running PR bot feedback, review threads, and release-truth blockers w
 
 ## Bot Feedback Ledger
 
-No bot feedback recorded yet. Start the first real row at `PR-BOT-001`.
+PR #92 bot feedback recorded below.
 
 | ID | Source | Feedback | Status | Owner | Response / Evidence |
 |---|---|---|---|---|---|
+| PR-BOT-001 | `chatgpt-codex-connector` review comment `PRRC_kwDOQLiFZs6-WQKd` | Post-verdict input lock did not stop player controller polling. | resolved | Codex | Valid P2. Fixed in `3313a5f`: player controller now checks `is_session_locked()` and playable smoke asserts controller lock. |
+| PR-BOT-002 | `chatgpt-codex-connector` review comment `PRRC_kwDOQLiFZs6-WQKm` | Safe `SA_COMPLY` notice could be labeled as a WHY-LINE. | resolved | Codex | Valid P2. Fixed in `3313a5f`: HUD only derives fallback why-line from non-`SA_COMPLY` pressure notices. |
+
+## PR #92 Decision Ledger
+
+| comment_id | source | author | severity | decision | action | commit | status | reason |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| PRRC_kwDOQLiFZs6-WQKd | review_comment | chatgpt-codex-connector | p2 | valid | fix | 3313a5f | fixed | Player controller also needed terminal lock. |
+| PRRC_kwDOQLiFZs6-WQKm | review_comment | chatgpt-codex-connector | p2 | valid | fix | 3313a5f | fixed | Safe speech should not populate why-line. |
 
 ## Review Thread Template
 

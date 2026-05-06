@@ -1,5 +1,5 @@
 ---
-status: M1 technical conditional pass; product gate open
+status: M1 technical proof pass; prologue/demo completion gate open
 runtime_path: Godot 4.x + TypeScript NPC backend
 ---
 
@@ -38,11 +38,24 @@ Dream of One is a Godot 4.x 3D social-stealth game where NPC society pressures t
 
 ## Current Build Truth
 
-- The current build proves a Godot shell/runtime/playable slice, backend Schema validation path, trajectory diversity verification, and Godot bridge readiness fallback smoke.
-- The current build does not yet prove a live API proposal-provider loop, exported demo, or full report-intake-verdict controller.
-- M1 is technical-conditional: product closure still requires council/product review and external player comprehension evidence.
-- The first public promise is a small honest prologue/demo after those gates pass.
+- The current build proves M1 technical proof only: Godot shell/runtime/playable slice, backend Schema validation path, trajectory diversity verification, and Godot bridge readiness fallback smoke.
+- The current branch also proves an internal Station Soft Inquest prologue path with current-build visual captures: rule read, Cover Test focus, safe/risky consequence contrast, Exposure/why-line, deterministic verdict/session end, locked post-verdict input, and restart/quit end controls.
+- The current build does not yet prove a public small complete prologue/demo, live API proposal-provider loop, live backend/runtime authority, exported demo, external player comprehension, or repair/replay outcome contrast.
+- M1 product closure still requires council/product review and external player comprehension evidence.
+- The first public promise is a small honest prologue/demo only after completion gates pass.
 - Public copy must not imply open-ended conversation, included AI hosting, a fixed GPT model, or final campaign scope.
+
+## Branch Target
+
+`feat/prologue-demo-completion` targets a small complete prologue/demo candidate. It must not treat M1 technical proof as the same thing as demo completion.
+
+The branch target is:
+- keep the verified M1 technical proof passing as the baseline.
+- make the remaining product blockers explicit before expanding scope.
+- reach one game-like Station Soft Inquest loop only after visual, UI, player-comprehension, provider, and exported-build gates pass.
+- produce truthful evidence for whether the branch can continue toward demo completion, should merge as an M1-only proof, or should stop for product fixes.
+
+A small complete prologue/demo means the player can start, understand they are being investigated, move through the selected route, make risky/safe text responses, see Evidence/Exposure consequences, reach deterministic inquest/verdict/session end, and replay with at least one meaningfully different outcome or repair path.
 
 ## Migration Acceptance
 
@@ -52,7 +65,7 @@ The branch is PR-ready only when:
 2. Godot import and scene smoke checks pass.
 3. Godot Evidence Packs validate against backend Schema.
 4. Repository search shows no active previous-engine/runtime references outside intentional historical git deletion records.
-5. Follow-up issues for live Godot backend/provider integration, full playable report-intake-verdict controller, runtime selector removal, exported provider UX, and player comprehension evidence are explicit if not implemented in the same PR.
+5. Follow-up issues for live Godot backend/provider integration, full playable report-intake-verdict controller, runtime selector removal, exported provider UX, visual/UI proof, and player comprehension evidence are explicit if not implemented in the same PR.
 
 ## Verification
 

@@ -1,13 +1,14 @@
 # Creative Pillars
 
-## Pillar 1: Text Is the Danger Surface
+## Pillar 1: Dialogue Is the Danger Surface
 
 Statement:
-- Text is not flavor. Text is where the player exposes themselves.
+- Dialogue is not flavor. Dialogue is where the player exposes themselves.
 
 Strengthens:
-- dialogue choices with risk tags.
-- Station notices that classify player statements.
+- three diegetic dialogue choices and optional recorded free input.
+- NPC prompts that contain local assumptions.
+- Station notices that classify player statements after deterministic rules fire.
 - Evidence why-lines.
 - Korean-first phrasing with preserved legal/system meaning.
 
@@ -18,9 +19,9 @@ Rejects:
 - English source text translated into Korean after the fact.
 
 Evidence:
-- text surface table with condition, risk, consequence.
+- conversation prompt/choice table with condition, signal, risk, consequence.
 - backend Evidence output.
-- player screenshot showing consequence attached to text.
+- player screenshot showing NPC reaction and consequence attached to dialogue.
 
 ## Pillar 2: The Station Investigates You
 
@@ -31,6 +32,7 @@ Strengthens:
 - intake procedures.
 - inquest prompts.
 - NPC suspicion and procedural follow-up.
+- suspicion sharing and report handoff before formal Station action.
 - spatial layouts that put the player under observation.
 
 Rejects:
@@ -75,7 +77,7 @@ Statement:
 Strengthens:
 - readable Station authority.
 - NPC sightline and route pressure.
-- text surfaces positioned in the player's movement path.
+- conversation staging, overhearing, and report handoff positioned in the player's movement path.
 - contact sheets showing player view and system view.
 
 Rejects:
@@ -94,6 +96,6 @@ Evidence:
 
 When pillars conflict:
 1. Deterministic authority wins over generated text variety.
-2. Text danger wins over lore clarity.
+2. Dialogue danger wins over lore clarity.
 3. Being investigated wins over player empowerment.
 4. 3D value must be proven; otherwise simplify presentation.

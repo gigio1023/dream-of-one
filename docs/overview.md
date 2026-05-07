@@ -2,6 +2,10 @@
 
 Dream of One now targets a Godot 4.x 3D Runtime Path with a TypeScript NPC backend.
 
+The active design direction is conversation-first suspicion: NPC prompts,
+three dialogue choices, optional recorded free input, deterministic suspicion
+signals, social reports, Station intake, inquest, and verdict.
+
 ## Active Areas
 
 - `godot/`: 3D scene, runtime slice scripts, world layout data, smoke/evidence tools.
@@ -13,6 +17,6 @@ Dream of One now targets a Godot 4.x 3D Runtime Path with a TypeScript NPC backe
 
 ## Runtime Authority
 
-- Godot owns world presentation, collision/navigation observation, scene state, and visual/text surfaces.
-- Backend owns deterministic validation, Fallback Path, action bounding, Evidence semantics, and end-state adjudication.
-- Product authority for Dream Law, Cover Test, Exposure, Station intake, inquest, verdict, and session termination remains deterministic.
+- Godot owns world presentation, collision/navigation observation, scene state, dialogue UI, and player input capture.
+- Backend owns deterministic validation, Fallback Path, action bounding, conversation memory, suspicion signals, Evidence semantics, and end-state adjudication.
+- Product authority for Dream Law, suspicion, reports, Exposure, Station intake, inquest, verdict, and session termination remains deterministic.

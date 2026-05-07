@@ -97,7 +97,7 @@
   "interaction_zones": [
     {
       "id": "StoreCounterZone",
-      "kind": "Cover Test",
+      "kind": "Conversation",
       "landmark": "Store",
       "anchor": "Store.counter",
       "radius": 2.1,

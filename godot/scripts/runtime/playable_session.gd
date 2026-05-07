@@ -3,75 +3,119 @@ extends Node
 const ShellSchema := preload("res://scripts/data/shell_schema.gd")
 
 const FOCUS_RADIUS := 3.0
-const STATION_INTEREST_THRESHOLD := 60
-const INQUEST_THRESHOLD := 80
-const VERDICT_THRESHOLD := 100
 const RUN_ID := "dre-171-playable-slice-run"
 const SESSION_ID := "dre-171-playable-session"
+const CONVERSATION_ID := "conv-same-order"
+const RECORDED_STATEMENT_LINE := "저는 이 꿈에 방금 들어왔어요."
+const RECORDED_STATEMENT_SCOPE := "key_4_explicit_recorded_statement_no_typed_ui"
+const SHARE_THRESHOLD := 50
+const REPORT_THRESHOLD := 70
+const INQUEST_THRESHOLD := 80
 
-const SPEECH_ACTS := {
-	"speech_comply": {
-		"id": "SA_COMPLY",
-		"labelKey": "speech.SA_COMPLY.label",
-		"delta": -10,
-		"reason": "cover_test_defused",
-		"tier": "reference"
-	},
-	"speech_inquire": {
-		"id": "SA_INQUIRE",
-		"labelKey": "speech.SA_INQUIRE.label",
-		"delta": 5,
-		"reason": "cover_test_minor_pressure",
-		"tier": "attention"
-	},
-	"speech_frame": {
-		"id": "SA_FRAME",
-		"labelKey": "speech.SA_FRAME.label",
-		"delta": 15,
-		"reason": "cover_test_context_pressure",
-		"tier": "attention"
-	},
-	"speech_break": {
-		"id": "SA_BREAK",
-		"labelKey": "speech.SA_BREAK.label",
-		"delta": 25,
-		"reason": "policy_station_intake_requires_procedural_speech",
-		"tier": "blocking"
-	}
+const SIGNAL_SUSPICION_WEIGHT := {
+	"local_routine_mismatch": 35,
+	"dream_language_leak": 60,
+	"memory_gap_admission": 20,
+	"role_script_break": 20,
+	"prior_statement_contradiction": 40,
+	"authority_evasion": 25,
+	"over_explanation": 15
 }
 
-const COVER_TESTS := {
-	"CT_STORE_QUEUE_LANGUAGE": {
+const SIGNAL_REPORT_WEIGHT := {
+	"local_routine_mismatch": 30,
+	"dream_language_leak": 55,
+	"memory_gap_admission": 10,
+	"role_script_break": 15,
+	"prior_statement_contradiction": 35,
+	"authority_evasion": 25,
+	"over_explanation": 10
+}
+
+const SIGNAL_WHY_LINES := {
+	"local_routine_mismatch": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
+	"dream_language_leak": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
+	"memory_gap_admission": "그 말은 알고 있어야 할 지역 기억이 비어 있음을 인정합니다.",
+	"role_script_break": "그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.",
+	"prior_statement_contradiction": "그 말은 앞선 대화 기록과 충돌합니다.",
+	"authority_evasion": "그 말은 직접적인 절차 질문을 피합니다.",
+	"over_explanation": "그 말은 일상 루틴에 비해 지나치게 길게 해명합니다."
+}
+
+const CONVERSATION_BEATS := {
+	"store.same_order.routine": {
 		"actorId": "NPC_Store_Clerk",
-		"titleKey": "cover.CT_STORE_QUEUE_LANGUAGE.title",
-		"promptKey": "cover.CT_STORE_QUEUE_LANGUAGE.prompt",
-		"defuseKey": "cover.CT_STORE_QUEUE_LANGUAGE.defuse",
-		"pressureKey": "cover.CT_STORE_QUEUE_LANGUAGE.pressure"
+		"choiceSetId": "store.same_order.routine.choices",
+		"npcLine": "오늘도 같은 걸로 드릴까요?",
+		"choices": [
+			{
+				"id": "store.same_order.safe",
+				"line": "네, 같은 걸로 부탁해요.",
+				"intent": "safe/local",
+				"signals": [],
+				"npcResponse": "네. 표식 하나, 같은 봉투로 처리하겠습니다.",
+				"nextPromptId": "store.same_order.probe"
+			},
+			{
+				"id": "store.same_order.repair",
+				"line": "제가 보통 뭘 시켰죠?",
+				"intent": "uncertain/repair",
+				"signals": ["memory_gap_admission"],
+				"npcResponse": "보통은 표식 하나라고 하셨죠. 오늘은 왜 확인하시나요?",
+				"nextPromptId": "store.same_order.probe"
+			},
+			{
+				"id": "store.same_order.risky",
+				"line": "오늘 처음 왔는데요.",
+				"intent": "risky/weird",
+				"signals": ["local_routine_mismatch"],
+				"npcResponse": "처음이라고요? 어제도 같은 자리에서 같은 말을 하셨는데요.",
+				"nextPromptId": "store.same_order.probe"
+			}
+		]
 	},
-	"CT_STUDIO_APPROVAL_GATE_SPEECH": {
-		"actorId": "NPC_Studio_PM",
-		"titleKey": "cover.CT_STUDIO_APPROVAL_GATE_SPEECH.title",
-		"promptKey": "cover.CT_STUDIO_APPROVAL_GATE_SPEECH.prompt",
-		"defuseKey": "cover.CT_STUDIO_APPROVAL_GATE_SPEECH.defuse",
-		"pressureKey": "cover.CT_STUDIO_APPROVAL_GATE_SPEECH.pressure"
-	},
-	"CT_PARK_OBSERVATION_PRESSURE": {
-		"actorId": "NPC_Park_Witness",
-		"titleKey": "cover.CT_PARK_OBSERVATION_PRESSURE.title",
-		"promptKey": "cover.CT_PARK_OBSERVATION_PRESSURE.prompt",
-		"defuseKey": "cover.CT_PARK_OBSERVATION_PRESSURE.defuse",
-		"pressureKey": "cover.CT_PARK_OBSERVATION_PRESSURE.pressure"
-	},
-	"CT_STATION_SOFT_INQUEST": {
-		"actorId": "NPC_Station_Officer",
-		"titleKey": "cover.CT_STATION_SOFT_INQUEST.title",
-		"promptKey": "cover.CT_STATION_SOFT_INQUEST.prompt",
-		"defuseKey": "cover.CT_STATION_SOFT_INQUEST.defuse",
-		"pressureKey": "cover.CT_STATION_SOFT_INQUEST.pressure"
+	"store.same_order.probe": {
+		"actorId": "NPC_Store_Clerk",
+		"choiceSetId": "store.same_order.probe.choices",
+		"npcLine": "어제 기록에는 같은 주문이라고 적혀 있습니다. 맞습니까?",
+		"choices": [
+			{
+				"id": "store.same_order.probe.safe",
+				"line": "맞습니다. 제가 착각했습니다.",
+				"intent": "safe/local",
+				"signals": [],
+				"npcResponse": "그럼 같은 봉투로 두겠습니다.",
+				"nextPromptId": ""
+			},
+			{
+				"id": "store.same_order.probe.repair",
+				"line": "어제 일이 조금 흐릿해서 확인했습니다.",
+				"intent": "uncertain/repair",
+				"signals": ["memory_gap_admission"],
+				"npcResponse": "흐릿하다고요. 기록에는 남겨두겠습니다.",
+				"nextPromptId": ""
+			},
+			{
+				"id": "store.same_order.probe.risky",
+				"line": "저는 여기 사람이 아닙니다.",
+				"intent": "risky/weird",
+				"signals": ["role_script_break"],
+				"npcResponse": "그 말은 그냥 넘길 수 없습니다.",
+				"nextPromptId": ""
+			}
+		]
 	}
 }
 
-var stage := "ambient"
+const DIALOGUE_ACTIONS := {
+	"dialogue_choice_1": 0,
+	"dialogue_choice_2": 1,
+	"dialogue_choice_3": 2
+}
+
+var stage := "normal"
+var suspicion := 0
+var report_weight := 0
 var exposure := 0
 var station := {
 	"intakeOpen": false,
@@ -81,24 +125,26 @@ var station := {
 }
 var evidence_events: Array[Dictionary] = []
 var prologue_evidence: Array[Dictionary] = []
-var speech_outcome_counts := {"validated": 0, "executed": 0, "rejected": 0}
+var command_outcome_counts := {"validated": 0, "executed": 0, "rejected": 0}
 var read_surface_ids: Dictionary = {}
 var current_focus: Node3D = null
 var current_focus_kind := ""
-var notice_title_key := "notice.opening.title"
-var notice_title_args: Dictionary = {}
-var notice_body_key := "notice.opening.body"
-var notice_body_args: Dictionary = {}
+var conversation_active := false
+var current_prompt_id := "store.same_order.routine"
+var current_turn_number := 0
+var current_turn_id := "turn-0"
+var conversation_history: Array[Dictionary] = []
+var choice_catalog: Array = []
+var notice_title := "시작 절차"
+var notice_body := "상점 카운터에서 점원의 평범한 질문에 답하세요. 대화가 위험 표면입니다."
 var outcome_visible := false
-var outcome_title_key := ""
-var outcome_title_args: Dictionary = {}
-var outcome_body_key := ""
-var outcome_body_args: Dictionary = {}
-var last_why_line_key := ""
+var outcome_title := ""
+var outcome_body := ""
 var last_why_line := ""
-var last_speech_act := ""
+var last_why_line_key := ""
+var last_dialogue_choice := ""
 var last_reason_code := ""
-var verdict_recorded := false
+var session_outcome := "running"
 var _event_sequence := 0
 
 @onready var _root: Node = get_parent()
@@ -110,10 +156,10 @@ func _ready() -> void:
 	_record_event(
 		"session",
 		"playable_session_started",
-		"Station intake prologue started. Read the rule surface, prove a safe answer, then expose the risky speech path.",
+		"Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
 		{
 			"prologueStep": "beginning",
-			"sessionOutcome": _session_outcome(),
+			"sessionOutcome": session_outcome,
 			"uiSummaryKey": "event.session_started",
 			"uiSummaryArgs": {}
 		}
@@ -142,22 +188,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		_interact()
 		get_viewport().set_input_as_handled()
 		return
-	for action_name in SPEECH_ACTS.keys():
+	for action_name in DIALOGUE_ACTIONS.keys():
 		if event.is_action_pressed(StringName(action_name)):
-			_apply_speech_act(action_name)
+			_select_dialogue_index(int(DIALOGUE_ACTIONS[action_name]))
 			get_viewport().set_input_as_handled()
 			return
+	if event.is_action_pressed(&"dialogue_recorded_statement"):
+		submit_recorded_statement()
+		get_viewport().set_input_as_handled()
 
 func run_smoke_sequence() -> Dictionary:
-	_force_focus_text_surface("TS_Station_IntakeRules")
+	_force_focus_zone("StoreCounterZone")
 	_interact()
-	_force_focus_zone("StationIntakeZone")
-	_interact()
-	_apply_speech_act("speech_comply")
-	_apply_speech_act("speech_break")
-	_apply_speech_act("speech_break")
-	_apply_speech_act("speech_break")
-	_apply_speech_act("speech_break")
+	_select_dialogue_choice("store.same_order.risky")
+	submit_recorded_statement()
 	return build_summary()
 
 func build_summary() -> Dictionary:
@@ -171,30 +215,38 @@ func build_summary() -> Dictionary:
 		"locale": _current_locale(),
 		"stage": stage,
 		"exposure": exposure,
+		"suspicion": suspicion,
+		"reportWeight": report_weight,
 		"station": station.duplicate(true),
-		"noticeTitle": _text(notice_title_key, notice_title_args),
-		"noticeBody": _text(notice_body_key, notice_body_args),
-		"noticeTitleKey": notice_title_key,
-		"noticeBodyKey": notice_body_key,
+		"noticeTitle": notice_title,
+		"noticeBody": notice_body,
 		"outcomeVisible": outcome_visible,
-		"outcomeTitle": _text(outcome_title_key, outcome_title_args) if not outcome_title_key.is_empty() else "",
-		"outcomeBody": _text(outcome_body_key, outcome_body_args) if not outcome_body_key.is_empty() else "",
-		"outcomeTitleKey": outcome_title_key,
-		"outcomeBodyKey": outcome_body_key,
+		"outcomeTitle": outcome_title,
+		"outcomeBody": outcome_body,
 		"readSurfaceIds": read_surface_ids.keys(),
 		"sessionOutcome": _session_outcome(),
 		"lastWhyLine": last_why_line,
 		"lastWhyLineKey": last_why_line_key,
-		"lastSpeechAct": last_speech_act,
+		"lastDialogueChoice": last_dialogue_choice,
 		"lastReasonCode": last_reason_code,
 		"inputLocked": _session_locked(),
 		"authorityMode": _authority_mode(),
 		"releaseAuthorityRequirement": _release_authority_requirement(),
 		"prologueEvidence": prologue_evidence.duplicate(true),
+		"conversation": {
+			"conversationId": CONVERSATION_ID,
+			"currentPromptId": current_prompt_id,
+			"currentTurnId": current_turn_id,
+			"history": conversation_history.duplicate(true),
+			"availableChoices": _current_choice_lines(),
+			"recordedStatementLine": RECORDED_STATEMENT_LINE,
+			"recordedStatementScope": RECORDED_STATEMENT_SCOPE,
+			"recordedStatementAction": "dialogue_recorded_statement"
+		},
 		"prologueLoop": {
-			"beginning": "read TS_Station_IntakeRules and focus StationIntakeZone",
-			"safePath": "SA_COMPLY keeps Exposure at 0 and records procedural speech evidence",
-			"riskyPath": "SA_BREAK adds why-line evidence until Station verdict",
+			"beginning": "focus StoreCounterZone and start the Store Clerk conversation",
+			"defaultVerb": "three diegetic dialogue choices",
+			"recordedStatement": "key 4 submits the displayed recorded statement; typed text entry is not implemented in this slice",
 			"outcome": _session_outcome(),
 			"endControls": _end_controls()
 		},
@@ -209,10 +261,9 @@ func build_evidence_pack(artifact_path: String) -> Dictionary:
 	events.append(_make_event(
 		"evidence_export",
 		"evidence_pack_created",
-		"Godot playable slice Evidence Pack exported for backend validation.",
+		"Godot conversation playable Evidence Pack exported for backend validation.",
 		{
-			"artifactPath": artifact_path,
-			"socialLoopStage": stage
+			"artifactPath": artifact_path
 		}
 	))
 	return {
@@ -228,22 +279,22 @@ func build_evidence_pack(artifact_path: String) -> Dictionary:
 			"runSignature": "%s:%s:%s:%s" % [RUN_ID, SESSION_ID, _world_id(), _world_revision()],
 			"actorSignatures": _actor_signatures(),
 			"fallbackCounters": {"total": 0},
-			"commandOutcomeCounts": speech_outcome_counts.duplicate(true),
+			"commandOutcomeCounts": command_outcome_counts.duplicate(true),
 			"domainTriggerCounts": _event_family_counts("domain"),
 			"verdictEndStateTrace": _verdict_end_state_trace(summary),
 			"blockedChecks": []
 		},
 		"playableSummary": summary,
 		"playability": {
-			"inputPath": "read TS_Station_IntakeRules -> focus StationIntakeZone -> SA_COMPLY -> SA_BREAK x4",
-			"expectedPlayerInterpretation": "Safe procedural speech holds cover; risky non-procedural speech exposes the player to Station systems.",
+			"inputPath": "focus StoreCounterZone -> E start Same Order -> 3 risky choice -> 4 explicit recorded statement",
+			"expectedPlayerInterpretation": "Odd dialogue creates NPC suspicion, a report, and Station inquest pressure.",
 			"deterministicOutcome": _session_outcome(),
 			"endControls": _end_controls(),
 			"visibleWhyLine": last_why_line,
 			"inputLocked": _session_locked(),
 			"authorityMode": _authority_mode(),
 			"releaseAuthorityRequirement": _release_authority_requirement(),
-			"observedConfusionPoint": "The prototype uses a forced smoke path; manual play still needs human playtest notes."
+			"observedConfusionPoint": "Typed text entry is outside this slice. Key 4 is explicitly labeled as a recorded statement while backend Evidence keeps the freeInputHash contract."
 		}
 	}
 
@@ -251,11 +302,11 @@ func _interact() -> void:
 	if _session_locked():
 		return
 	if current_focus == null:
-		_set_notice("notice.no_focus.title", "notice.no_focus.body")
+		_set_notice("초점 없음", "범위 안에 말을 걸 수 있는 상점 카운터나 읽을 수 있는 표면이 없습니다.")
 		_record_event(
 			"observation",
 			"no_focus",
-			"No readable rule or Cover Test zone is in range.",
+			"No conversation prompt or readable text surface is in range.",
 			{
 				"uiSummaryKey": "event.no_focus",
 				"uiSummaryArgs": {}
@@ -267,278 +318,362 @@ func _interact() -> void:
 		var surface_id := str(current_focus.get_meta("surface_id", ""))
 		var surface_label := _localized_text_surface_label(current_focus, surface_id)
 		read_surface_ids[surface_id] = true
-		if stage == "ambient":
-			stage = "report"
 		_set_notice(
-			"text_surface.%s.label" % surface_id,
-			"notice.text_surface.body",
-			{},
-			{
-				"bodyKey": "text_surface.%s.body" % surface_id,
-				"law": str(current_focus.get_meta("law_id", "")),
-				"coverTest": str(current_focus.get_meta("cover_test_id", ""))
-			}
+			surface_label,
+			"%s\n이 표면은 대화 중 무엇이 이상하게 들리는지 판단하는 맥락입니다." % _text("text_surface.%s.body" % surface_id, {}, surface_id)
 		)
 		_record_event(
 			"observation",
 			"text_surface_read",
-			"Read %s; Dream Law %s is now in player-facing evidence." % [
-				surface_id,
-				str(current_focus.get_meta("law_id", ""))
-			],
+			"Read %s as local context before speaking." % surface_id,
 			{
-				"prologueStep": "read_station_rules",
-				"evidenceAdded": ["intake_dossier:%s" % surface_id],
 				"textSurfaceId": surface_id,
 				"dreamLawIds": [str(current_focus.get_meta("law_id", ""))],
 				"coverTestIds": [str(current_focus.get_meta("cover_test_id", ""))],
 				"uiSummaryKey": "event.text_surface_read",
-				"uiSummaryArgs": {
-					"surface": surface_label,
-					"law": str(current_focus.get_meta("law_id", ""))
-				}
+				"uiSummaryArgs": {"surface": surface_label, "law": str(current_focus.get_meta("law_id", ""))}
 			}
-		)
-		_add_prologue_evidence(
-			"intake_dossier.%s" % surface_id,
-			"intake_dossier",
-			stage,
-			"Station intake rules linked Dream Law %s to Cover Test %s." % [
-				str(current_focus.get_meta("law_id", "")),
-				str(current_focus.get_meta("cover_test_id", ""))
-			]
 		)
 		return
 
 	if current_focus_kind == "zone":
-		var cover_test_id := str(current_focus.get_meta("cover_test_id", ""))
-		var test: Dictionary = COVER_TESTS.get(cover_test_id, {})
-		_set_notice(
-			str(test.get("titleKey", "")),
-			"notice.cover_test.body",
-			{},
-			{"promptKey": str(test.get("promptKey", ""))}
-		)
+		var zone_id := str(current_focus.get_meta("zone_id", ""))
+		if zone_id == "StoreCounterZone":
+			_start_conversation()
+			return
+		_set_notice("대화 없음", "이 구역은 아직 대화 프롤로그에 연결되지 않았습니다. 상점 카운터로 가세요.")
 		_record_event(
 			"domain",
-			"cover_test_focused",
-			"Focused %s. Choose a bounded speech act." % cover_test_id,
-			{
-				"prologueStep": "cover_test_prompt",
-				"zoneId": str(current_focus.get_meta("zone_id", "")),
-				"uiSummaryKey": "event.cover_test_focused",
-				"uiSummaryArgs": {"coverTest": cover_test_id}
-			}
+			"conversation_zone_unavailable",
+			"Focused %s, but the conversation-first prologue starts at StoreCounterZone." % zone_id,
+			{"zoneId": zone_id, "socialLoopStage": stage}
 		)
 
-func _apply_speech_act(action_name: String) -> void:
-	if _session_locked():
+func _start_conversation() -> void:
+	if conversation_active:
+		_show_current_prompt()
 		return
-	if current_focus == null or current_focus_kind != "zone":
-		_set_notice("notice.no_cover_test.title", "notice.no_cover_test.body")
-		_record_event(
-			"domain",
-			"speech_without_cover_test",
-			"Speech choice ignored because no Cover Test zone is focused.",
-			{
-				"uiSummaryKey": "event.speech_without_cover_test",
-				"uiSummaryArgs": {}
-			}
-		)
-		return
-
-	var speech: Dictionary = SPEECH_ACTS[action_name]
-	var cover_test_id := str(current_focus.get_meta("cover_test_id", ""))
-	var test: Dictionary = COVER_TESTS.get(cover_test_id, {})
-	var zone_id := str(current_focus.get_meta("zone_id", ""))
-	var delta := int(speech["delta"])
-	var previous_exposure := exposure
-	exposure = clampi(exposure + delta, 0, 125)
-	_update_station_state()
-
-	var defused := delta <= 0
-	var pressure_line_key := str(test.get("defuseKey", "")) if defused else str(test.get("pressureKey", ""))
-	var pressure_line := _text(pressure_line_key)
-	_set_actor_line_key(str(test.get("actorId", "")), pressure_line_key)
-	last_speech_act = str(speech["id"])
-	last_reason_code = str(speech["reason"])
-	if not defused:
-		last_why_line_key = pressure_line_key
-		last_why_line = pressure_line
-	var evidence_type := "procedural_speech_log" if defused else "why_line"
-	var evidence_id := "%s.%s.%03d" % [evidence_type, str(speech["id"]), evidence_events.size() + 1]
-	_add_prologue_evidence(
-		evidence_id,
-		evidence_type,
-		stage,
-		"%s used %s in %s: Exposure %d -> %d. Line: %s" % [
-			cover_test_id,
-			str(speech["id"]),
-			zone_id,
-			previous_exposure,
-			exposure,
-			pressure_line
-		]
-	)
-	var speech_outcome_key := "validated" if defused else "rejected"
-	speech_outcome_counts[speech_outcome_key] = int(speech_outcome_counts.get(speech_outcome_key, 0)) + 1
-	_set_notice(
-		str(test.get("titleKey", "")),
-		"notice.speech.body",
-		{},
-		{
-			"pressureKey": pressure_line_key,
-			"speechAct": speech["id"],
-			"before": previous_exposure,
-			"after": exposure
-		}
-	)
-	var summary := "%s used %s in %s: Exposure %s%d -> %d." % [
-		cover_test_id,
-		speech["id"],
-		zone_id,
-		"+" if delta >= 0 else "",
-		delta,
-		exposure
-	]
-	if defused:
-		summary += " Cover held through procedural speech; Evidence added: procedural_speech_log."
-	else:
-		summary += " Pressure escalated with deterministic why-line Evidence: %s" % pressure_line
-	if station["verdictReady"]:
-		summary += " Verdict is ready."
-		outcome_visible = true
-		outcome_title_key = "outcome.verdict.title"
-		outcome_title_args = {}
-		outcome_body_key = "outcome.verdict.body"
-		outcome_body_args = {"pressureKey": pressure_line_key}
-	elif station["inquestOpen"]:
-		summary += " Inquest is open."
-	elif station["intakeOpen"]:
-		summary += " Station intake is open."
-
-	var event_extra := {
-		"prologueStep": "safe_contrast" if defused else "risky_contrast",
-		"actorId": str(test.get("actorId", "")),
-		"zoneId": zone_id,
-		"coverTestId": cover_test_id,
-		"speechAct": speech["id"],
-		"reasonCode": str(speech["reason"]),
-		"reasonCategory": "none" if defused else "policy",
-		"warningTier": str(speech["tier"]),
-		"exposureBefore": previous_exposure,
-		"exposureAfter": exposure,
-		"exposureDelta": exposure - previous_exposure,
-		"evidenceAdded": ["%s:%s" % [evidence_type, evidence_id]],
-		"uiLineKey": pressure_line_key,
-		"uiLine": pressure_line,
-		"sessionOutcome": _session_outcome(),
-		"socialLoopStage": stage,
-		"uiSummaryKey": "event.cover_test_defused" if defused else "event.cover_test_pressure",
-		"uiSummaryArgs": {
-			"coverTest": cover_test_id,
-			"speechAct": speech["id"],
-			"delta": delta,
-			"exposure": exposure
-		}
-	}
-	if not defused:
-		event_extra["whyLineKey"] = pressure_line_key
-		event_extra["whyLine"] = pressure_line
-		event_extra["uiWhyLineKey"] = pressure_line_key
-		event_extra["uiWhyLine"] = pressure_line
+	conversation_active = true
+	current_prompt_id = "store.same_order.routine"
+	current_turn_number = 1
+	current_turn_id = "turn-%d" % current_turn_number
+	_show_current_prompt()
 	_record_event(
 		"domain",
-		"cover_test_defused" if defused else "cover_test_pressure",
-		summary,
-		event_extra
+		"conversation_started",
+		"Store Clerk opened the Same Order conversation.",
+		{
+			"actorId": "NPC_Store_Clerk",
+			"conversationId": CONVERSATION_ID,
+			"turnId": current_turn_id,
+			"promptId": current_prompt_id,
+			"choiceSetId": _current_choice_set_id(),
+			"speakerId": "NPC_Store_Clerk",
+			"conversationStage": stage,
+			"outcome": _session_outcome(),
+			"socialLoopStage": stage
+		}
 	)
-	if station["verdictReady"] and not verdict_recorded:
-		_record_verdict_event(cover_test_id, zone_id, pressure_line_key, pressure_line)
 
-func _update_focus() -> void:
-	var best_node: Node3D = null
-	var best_kind := ""
-	var best_distance := FOCUS_RADIUS
-	for node in get_tree().get_nodes_in_group("text_surfaces"):
-		if node is Node3D:
-			var distance := _player.global_position.distance_to((node as Node3D).global_position)
-			if distance < best_distance:
-				best_node = node as Node3D
-				best_kind = "text_surface"
-				best_distance = distance
-	for node in get_tree().get_nodes_in_group("interaction_zones"):
-		if node is Node3D:
-			var distance := _player.global_position.distance_to((node as Node3D).global_position)
-			if distance < best_distance:
-				best_node = node as Node3D
-				best_kind = "zone"
-				best_distance = distance
-	current_focus = best_node
-	current_focus_kind = best_kind
+func _select_dialogue_index(index: int) -> void:
+	if not conversation_active:
+		_set_notice("대화 전", "상점 카운터에서 E를 눌러 대화를 시작하세요.")
+		return
+	var choices := _current_choices()
+	if index < 0 or index >= choices.size():
+		return
+	_apply_dialogue_turn(choices[index], "")
 
-func _force_focus_text_surface(surface_id: String) -> void:
-	for node in get_tree().get_nodes_in_group("text_surfaces"):
-		if str(node.get_meta("surface_id", "")) == surface_id and node is Node3D:
-			current_focus = node as Node3D
-			current_focus_kind = "text_surface"
+func _select_dialogue_choice(choice_id: String) -> void:
+	for choice in _current_choices():
+		if str(choice.get("id", "")) == choice_id:
+			_apply_dialogue_turn(choice, "")
 			return
 
-func _force_focus_zone(zone_id: String) -> void:
-	for node in get_tree().get_nodes_in_group("interaction_zones"):
-		if str(node.get_meta("zone_id", "")) == zone_id and node is Node3D:
-			current_focus = node as Node3D
-			current_focus_kind = "zone"
-			return
+func submit_free_input(line: String) -> void:
+	if not conversation_active:
+		_start_conversation()
+	_apply_dialogue_turn({}, line, "typed_free_input")
 
-func _update_station_state() -> void:
-	if exposure >= STATION_INTEREST_THRESHOLD:
+func submit_recorded_statement() -> void:
+	if not conversation_active:
+		_start_conversation()
+	_apply_dialogue_turn({}, RECORDED_STATEMENT_LINE, "explicit_recorded_statement")
+
+func _apply_dialogue_turn(choice: Dictionary, free_line: String, input_mode := "choice") -> void:
+	if _session_locked():
+		return
+	var free_input := not free_line.strip_edges().is_empty()
+	var selected_choice_id := ""
+	var player_line := free_line.strip_edges()
+	var authored_signals: Array[String] = []
+	var intent := "free/recorded"
+	if not free_input:
+		selected_choice_id = str(choice.get("id", ""))
+		player_line = str(choice.get("line", ""))
+		authored_signals = _string_array(choice.get("signals", []))
+		intent = str(choice.get("intent", ""))
+	if player_line.is_empty():
+		return
+
+	var evaluation := _evaluate_dialogue_turn(player_line, selected_choice_id, _free_input_hash(player_line) if free_input else "", authored_signals, intent, input_mode)
+	last_dialogue_choice = selected_choice_id if not selected_choice_id.is_empty() else "free_input"
+	var evaluation_signals: Array = evaluation.get("suspicionSignals", [])
+	last_reason_code = str(evaluation_signals[0]) if not evaluation_signals.is_empty() else "none"
+	if not str(evaluation["whyLine"]).is_empty():
+		last_why_line = str(evaluation["whyLine"])
+		last_why_line_key = str(evaluation.get("whyLineKey", ""))
+
+	conversation_history.append({
+		"turnId": current_turn_id,
+		"promptId": current_prompt_id,
+		"choiceSetId": _current_choice_set_id(),
+		"selectedChoiceId": selected_choice_id,
+		"freeInputHash": evaluation.get("freeInputHash", ""),
+		"inputMode": evaluation.get("inputMode", ""),
+		"recordedStatementScope": evaluation.get("recordedStatementScope", ""),
+		"playerLine": player_line,
+		"suspicionSignals": evaluation["suspicionSignals"],
+		"suspicionBefore": evaluation["suspicionBefore"],
+		"suspicionAfter": evaluation["suspicionAfter"],
+		"reportWeightBefore": evaluation["reportWeightBefore"],
+		"reportWeightAfter": evaluation["reportWeightAfter"],
+		"whyLine": evaluation["whyLine"]
+	})
+	_add_prologue_evidence(
+		"dialogue_turn.%s" % current_turn_id,
+		"procedural_speech_log",
+		stage,
+		"%s: %s. Signals: %s." % [current_turn_id, player_line, ", ".join(evaluation["suspicionSignals"])]
+	)
+
+	_record_event(
+		"domain",
+		"free_input_submitted" if free_input else "dialogue_choice_selected",
+		"Player answered the Store Clerk: %s" % player_line,
+		_conversation_event_extra(evaluation)
+	)
+	if not evaluation["suspicionSignals"].is_empty():
+		_record_event(
+			"domain",
+			"conversation_anomaly_detected",
+			"Deterministic conversation signals fired: %s." % ", ".join(evaluation["suspicionSignals"]),
+			_conversation_event_extra(evaluation)
+		)
+	_record_event(
+		"domain",
+		"npc_suspicion_changed",
+		"NPC suspicion changed from %d to %d." % [int(evaluation["suspicionBefore"]), int(evaluation["suspicionAfter"])],
+		_conversation_event_extra(evaluation)
+	)
+
+	_apply_social_consequence(evaluation)
+	_apply_npc_response(choice, free_input, evaluation)
+	if _session_locked():
+		return
+	_advance_prompt(choice)
+
+func _evaluate_dialogue_turn(
+	player_line: String,
+	selected_choice_id: String,
+	free_input_hash: String,
+	authored_signals: Array[String],
+	intent: String,
+	input_mode: String
+) -> Dictionary:
+	var signals := _unique_signals(authored_signals)
+	if player_line.contains("꿈") or player_line.to_lower().contains("dream") or player_line.contains("세계") or player_line.contains("세이브") or player_line.contains("로드"):
+		signals = _append_signal(signals, "dream_language_leak")
+	if current_prompt_id.contains("same_order") and (player_line.contains("처음") or player_line.contains("방금")):
+		signals = _append_signal(signals, "local_routine_mismatch")
+	if player_line.contains("보통") and (player_line.contains("뭘") or player_line.contains("무엇")):
+		signals = _append_signal(signals, "memory_gap_admission")
+	if player_line.contains("중요하지 않") or player_line.contains("말할 수 없"):
+		signals = _append_signal(signals, "authority_evasion")
+	if player_line.length() > 80:
+		signals = _append_signal(signals, "over_explanation")
+	if intent == "risky/weird" and signals.is_empty():
+		signals = _append_signal(signals, "role_script_break")
+
+	var suspicion_before := suspicion
+	var report_before := report_weight
+	var suspicion_delta := 0
+	var report_delta := 0
+	for signal_id in signals:
+		suspicion_delta += int(SIGNAL_SUSPICION_WEIGHT.get(signal_id, 0))
+		report_delta += int(SIGNAL_REPORT_WEIGHT.get(signal_id, 0))
+	suspicion = clampi(suspicion + suspicion_delta, 0, 125)
+	report_weight = clampi(report_weight + report_delta, 0, 125)
+	exposure = max(suspicion, report_weight)
+	_update_stage_from_pressure()
+
+	return {
+		"conversationId": CONVERSATION_ID,
+		"turnId": current_turn_id,
+		"promptId": current_prompt_id,
+		"choiceSetId": _current_choice_set_id(),
+		"speakerId": "player",
+		"selectedChoiceId": selected_choice_id,
+		"freeInputHash": free_input_hash,
+		"inputMode": input_mode,
+		"recordedStatementScope": RECORDED_STATEMENT_SCOPE if input_mode == "explicit_recorded_statement" else "",
+		"displayedPlayerLine": player_line,
+		"priorTurnIds": _prior_turn_ids(),
+		"suspicionSignals": signals,
+		"suspicionBefore": suspicion_before,
+		"suspicionAfter": suspicion,
+		"suspicionDelta": suspicion - suspicion_before,
+		"reportWeightBefore": report_before,
+		"reportWeightAfter": report_weight,
+		"reportDelta": report_weight - report_before,
+		"whyLine": _why_line_for_signals(signals),
+		"whyLineKey": str(signals[0]) if not signals.is_empty() else "none",
+		"conversationStage": stage,
+		"outcome": _session_outcome()
+	}
+
+func _apply_social_consequence(evaluation: Dictionary) -> void:
+	var report_before := int(evaluation["reportWeightBefore"])
+	var report_after := int(evaluation["reportWeightAfter"])
+	if report_before < SHARE_THRESHOLD and report_after >= SHARE_THRESHOLD:
+		_record_event(
+			"domain",
+			"suspicion_shared",
+			"The clerk shared the odd statement with the nearby route record.",
+			_conversation_event_extra(evaluation)
+		)
+	if report_after >= REPORT_THRESHOLD and not bool(station["intakeOpen"]):
 		station["intakeOpen"] = true
-		stage = "intake"
-	if exposure >= INQUEST_THRESHOLD:
-		station["inquestOpen"] = true
-		stage = "intake"
-	if exposure >= VERDICT_THRESHOLD:
-		station["verdictReady"] = true
+		stage = "reported"
+		_record_event(
+			"domain",
+			"station_report_created",
+			"Station received a report from the Store Clerk conversation.",
+			_conversation_event_extra(evaluation)
+		)
+		_add_prologue_evidence(
+			"witness_reference.%s" % current_turn_id,
+			"witness_reference",
+			stage,
+			"Store Clerk report: %s" % str(evaluation["whyLine"])
+		)
+	if report_after >= INQUEST_THRESHOLD and not bool(station["inquestOpen"]):
+		_open_inquest(evaluation)
+
+func _open_inquest(evaluation: Dictionary) -> void:
+	station["intakeOpen"] = true
+	station["inquestOpen"] = true
+	station["sessionTerminationAllowed"] = true
+	stage = "inquest"
+	session_outcome = "inquest_opened"
+	outcome_visible = true
+	outcome_title = "스테이션 심문 개시"
+	outcome_body = "상점 대화 기록이 접수되었습니다.\n기록된 why-line: %s\nR 다시 시작 / Q 종료" % str(evaluation["whyLine"])
+	_record_event(
+		"domain",
+		"station_inquest_opened",
+		"Station opened formal questioning from accumulated conversation Evidence.",
+		_conversation_event_extra(evaluation)
+	)
+	_add_prologue_evidence(
+		"intake_dossier.%s" % current_turn_id,
+		"intake_dossier",
+		stage,
+		"Station opened inquest from conversation %s." % CONVERSATION_ID
+	)
+
+func _apply_npc_response(choice: Dictionary, free_input: bool, evaluation: Dictionary) -> void:
+	var actor_id := "NPC_Store_Clerk"
+	var response := str(choice.get("npcResponse", "")) if not free_input else "그 말은 상점 기록에 그대로 남기겠습니다."
+	if bool(station["inquestOpen"]):
+		response = "잠시만요. 이 대화는 스테이션으로 넘기겠습니다."
+	elif int(evaluation["reportWeightAfter"]) >= REPORT_THRESHOLD:
+		response = "기록과 다릅니다. 담당자에게 전달하겠습니다."
+	elif int(evaluation["suspicionAfter"]) >= SHARE_THRESHOLD:
+		response = "잠깐만요. 방금 말은 확인이 필요합니다."
+	elif int(evaluation["suspicionAfter"]) > 0 and response.is_empty():
+		response = "그렇게 말씀하신 이유가 있나요?"
+	elif response.is_empty():
+		response = "알겠습니다."
+	_set_actor_line(actor_id, response)
+	_set_notice(actor_id, "%s\n플레이어 발화: %s\nwhy-line: %s" % [
+		response,
+		str(evaluation["displayedPlayerLine"]),
+		str(evaluation["whyLine"])
+	])
+
+func _advance_prompt(choice: Dictionary) -> void:
+	var next_prompt := str(choice.get("nextPromptId", "")) if not choice.is_empty() else ""
+	if next_prompt.is_empty():
+		if suspicion == 0:
+			session_outcome = "cover_held"
+		elif bool(station["intakeOpen"]):
+			session_outcome = "soft_report"
+		else:
+			session_outcome = "cover_held"
 		station["sessionTerminationAllowed"] = true
-		stage = "verdict"
+		outcome_visible = true
+		outcome_title = "대화 종료"
+		outcome_body = "결과: %s\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % [_session_outcome(), last_why_line]
+		return
+	current_prompt_id = next_prompt
+	current_turn_number += 1
+	current_turn_id = "turn-%d" % current_turn_number
+	_show_current_prompt()
+
+func _show_current_prompt() -> void:
+	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
+	var npc_line := str(beat.get("npcLine", ""))
+	choice_catalog = _current_choices()
+	_set_actor_line(str(beat.get("actorId", "NPC_Store_Clerk")), npc_line)
+	_set_notice("상점 점원", npc_line)
+
+func _update_stage_from_pressure() -> void:
+	if report_weight >= REPORT_THRESHOLD:
+		stage = "reported"
+	elif suspicion >= SHARE_THRESHOLD:
+		stage = "probing"
+	elif suspicion > 0:
+		stage = "uneasy"
+	else:
+		stage = "normal"
 
 func _refresh_hud() -> void:
 	if _hud == null:
 		return
-	var prompt := _text("prompt.default")
+	var prompt := "WASD로 이동. 상점 카운터에 접근해 E로 대화를 시작하세요."
 	var choices_enabled := false
-	if current_focus != null and current_focus_kind == "text_surface":
-		var surface_id := str(current_focus.get_meta("surface_id", ""))
-		prompt = _text("prompt.read_surface", {"surface": _localized_text_surface_label(current_focus, surface_id)})
-	elif current_focus != null and current_focus_kind == "zone":
-		prompt = _text("prompt.cover_test", {"coverTest": str(current_focus.get_meta("cover_test_id", ""))})
+	if conversation_active and not _session_locked():
+		var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
+		prompt = str(beat.get("npcLine", prompt))
 		choices_enabled = true
+	elif current_focus != null and current_focus_kind == "text_surface":
+		var surface_id := str(current_focus.get_meta("surface_id", ""))
+		prompt = "E: %s 읽기" % _localized_text_surface_label(current_focus, surface_id)
+	elif current_focus != null and current_focus_kind == "zone":
+		var zone_id := str(current_focus.get_meta("zone_id", ""))
+		prompt = "E: 상점 점원과 대화 시작" if zone_id == "StoreCounterZone" else "상점 카운터가 현재 대화 프롤로그입니다."
 	if _hud.has_method("set_status"):
 		_hud.set_status(stage, exposure, station, _objective())
-	if _hud.has_method("set_focus"):
+	if _hud.has_method("set_conversation"):
+		_hud.set_conversation(prompt, _current_choice_lines(), RECORDED_STATEMENT_LINE, _conversation_history_lines(), choices_enabled)
+	elif _hud.has_method("set_focus"):
 		_hud.set_focus(prompt, choices_enabled)
 	if _hud.has_method("set_notice"):
-		_hud.set_notice(_text(notice_title_key, notice_title_args), _text(notice_body_key, notice_body_args), true)
+		_hud.set_notice(notice_title, notice_body, true)
 	if _hud.has_method("set_outcome"):
-		_hud.set_outcome(
-			outcome_visible,
-			_text(outcome_title_key, outcome_title_args) if not outcome_title_key.is_empty() else "",
-			_text(outcome_body_key, outcome_body_args) if not outcome_body_key.is_empty() else ""
-		)
+		_hud.set_outcome(outcome_visible, outcome_title, outcome_body)
 	if _hud.has_method("set_evidence"):
 		_hud.set_evidence(_recent_events())
 
 func _objective() -> String:
-	if station["verdictReady"]:
-		return _text("objective.verdict")
-	if station["inquestOpen"]:
-		return _text("objective.inquest")
-	if station["intakeOpen"]:
-		return _text("objective.intake")
-	if read_surface_ids.is_empty():
-		return _text("objective.read_rule")
-	return _text("objective.enter_cover_test")
+	if _session_locked():
+		return "현재 대화 결과: %s. R로 다시 시작하거나 Q로 종료하세요." % _session_outcome()
+	if bool(station["intakeOpen"]):
+		return "상점 대화 기록이 스테이션에 접수되었습니다. 답변의 일관성을 유지하세요."
+	if conversation_active:
+		return "점원의 질문에 맞는 말을 고르세요. 4는 화면의 진술을 기록합니다."
+	return "상점 카운터에서 점원과 대화하세요. 플레이어는 조사자가 아니라 조사받는 대상입니다."
 
 func _recent_events() -> Array:
 	var start_index: int = max(0, evidence_events.size() - 6)
@@ -546,42 +681,6 @@ func _recent_events() -> Array:
 
 func _record_event(event_family: String, event_name: String, summary: String, extra: Dictionary) -> void:
 	evidence_events.append(_make_event(event_family, event_name, summary, extra))
-
-func _record_verdict_event(cover_test_id: String, zone_id: String, why_line_key: String, why_line: String) -> void:
-	verdict_recorded = true
-	var evidence_id := "verdict.%s.%03d" % [cover_test_id, evidence_events.size() + 1]
-	_add_prologue_evidence(
-		evidence_id,
-		"verdict",
-		stage,
-		"Station outcome %s reached at Exposure %d from why-line: %s" % [_session_outcome(), exposure, why_line]
-	)
-	_record_event(
-		"domain",
-		"verdict_reached",
-		"Deterministic Station outcome %s: Exposure %d, why-line '%s', session termination allowed." % [
-			_session_outcome(),
-			exposure,
-			why_line
-		],
-		{
-			"prologueStep": "deterministic_outcome",
-			"actorId": "NPC_Station_Officer",
-			"zoneId": zone_id,
-			"coverTestId": cover_test_id,
-			"reasonCode": "policy_station_evidence_threshold_met",
-			"reasonCategory": "policy",
-			"warningTier": "blocking",
-			"exposureAfter": exposure,
-			"sessionOutcome": _session_outcome(),
-			"whyLineKey": why_line_key,
-			"whyLine": why_line,
-			"uiWhyLineKey": why_line_key,
-			"uiWhyLine": why_line,
-			"evidenceAdded": ["verdict:%s" % evidence_id],
-			"socialLoopStage": stage
-		}
-	)
 
 func _add_prologue_evidence(id: String, artifact_type: String, artifact_stage: String, summary: String) -> void:
 	prologue_evidence.append({
@@ -612,11 +711,44 @@ func _make_event(event_family: String, event_name: String, summary: String, extr
 		event[key] = extra[key]
 	return event
 
-func _set_notice(title_key: String, body_key: String, title_args: Dictionary = {}, body_args: Dictionary = {}) -> void:
-	notice_title_key = title_key
-	notice_title_args = title_args.duplicate(true)
-	notice_body_key = body_key
-	notice_body_args = body_args.duplicate(true)
+func _conversation_event_extra(evaluation: Dictionary) -> Dictionary:
+	var extra := {
+		"actorId": "NPC_Store_Clerk",
+		"conversationId": CONVERSATION_ID,
+		"turnId": str(evaluation["turnId"]),
+		"promptId": str(evaluation["promptId"]),
+		"choiceSetId": str(evaluation["choiceSetId"]),
+		"speakerId": "player",
+		"displayedPlayerLine": str(evaluation["displayedPlayerLine"]),
+		"inputMode": str(evaluation["inputMode"]),
+		"priorTurnIds": evaluation["priorTurnIds"],
+		"suspicionSignals": evaluation["suspicionSignals"],
+		"suspicionBefore": int(evaluation["suspicionBefore"]),
+		"suspicionAfter": int(evaluation["suspicionAfter"]),
+		"suspicionDelta": int(evaluation["suspicionDelta"]),
+		"reportWeightBefore": int(evaluation["reportWeightBefore"]),
+		"reportWeightAfter": int(evaluation["reportWeightAfter"]),
+		"reportDelta": int(evaluation["reportDelta"]),
+		"whyLine": str(evaluation["whyLine"]),
+		"whyLineKey": str(evaluation["whyLineKey"]),
+		"conversationStage": stage,
+		"outcome": _session_outcome(),
+		"socialLoopStage": stage
+	}
+	var selected_choice_id := str(evaluation["selectedChoiceId"])
+	if not selected_choice_id.is_empty():
+		extra["selectedChoiceId"] = selected_choice_id
+	var free_input_hash := str(evaluation["freeInputHash"])
+	if not free_input_hash.is_empty():
+		extra["freeInputHash"] = free_input_hash
+	var recorded_statement_scope := str(evaluation["recordedStatementScope"])
+	if not recorded_statement_scope.is_empty():
+		extra["recordedStatementScope"] = recorded_statement_scope
+	return extra
+
+func _set_notice(title: String, body: String) -> void:
+	notice_title = title
+	notice_body = body
 
 func _set_actor_line(actor_id: String, line: String) -> void:
 	if actor_id.is_empty():
@@ -626,15 +758,92 @@ func _set_actor_line(actor_id: String, line: String) -> void:
 			node.say(line)
 			return
 
-func _set_actor_line_key(actor_id: String, line_key: String) -> void:
-	if actor_id.is_empty():
-		return
-	for node in get_tree().get_nodes_in_group("npc_placeholders"):
-		if str(node.get_meta("npc_id", "")) == actor_id:
-			if node.has_method("say_key"):
-				node.say_key(line_key)
-			elif node.has_method("say"):
-				node.say(_text(line_key))
+func _current_choices() -> Array:
+	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
+	return beat.get("choices", [])
+
+func _current_choice_set_id() -> String:
+	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
+	return str(beat.get("choiceSetId", "store.same_order.choices"))
+
+func _current_choice_lines() -> Array[String]:
+	var lines: Array[String] = []
+	for choice in _current_choices():
+		lines.append(str(choice.get("line", "")))
+	return lines
+
+func _conversation_history_lines() -> Array[String]:
+	var lines: Array[String] = []
+	for item in conversation_history:
+		lines.append("%s: %s" % [str(item.get("turnId", "")), str(item.get("playerLine", ""))])
+	return lines
+
+func _prior_turn_ids() -> Array[String]:
+	var ids: Array[String] = []
+	for item in conversation_history:
+		ids.append(str(item.get("turnId", "")))
+	return ids
+
+func _unique_signals(values: Array[String]) -> Array[String]:
+	var result: Array[String] = []
+	for value in values:
+		result = _append_signal(result, value)
+	return result
+
+func _append_signal(values: Array[String], value: String) -> Array[String]:
+	if value.is_empty() or values.has(value):
+		return values
+	values.append(value)
+	return values
+
+func _string_array(value: Variant) -> Array[String]:
+	var result: Array[String] = []
+	if value is Array:
+		for item in value:
+			result.append(str(item))
+	return result
+
+func _why_line_for_signals(signals: Array[String]) -> String:
+	if signals.is_empty():
+		return "이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
+	return str(SIGNAL_WHY_LINES.get(signals[0], "이 발화는 대화 기록에 이상 신호로 남았습니다."))
+
+func _free_input_hash(line: String) -> String:
+	return "free-%d-%d" % [line.length(), abs(hash(line))]
+
+func _update_focus() -> void:
+	var best_node: Node3D = null
+	var best_kind := ""
+	var best_distance := FOCUS_RADIUS
+	for node in get_tree().get_nodes_in_group("text_surfaces"):
+		if node is Node3D:
+			var distance := _player.global_position.distance_to((node as Node3D).global_position)
+			if distance < best_distance:
+				best_node = node as Node3D
+				best_kind = "text_surface"
+				best_distance = distance
+	for node in get_tree().get_nodes_in_group("interaction_zones"):
+		if node is Node3D:
+			var distance := _player.global_position.distance_to((node as Node3D).global_position)
+			if distance < best_distance:
+				best_node = node as Node3D
+				best_kind = "zone"
+				best_distance = distance
+	current_focus = best_node
+	current_focus_kind = best_kind
+
+func _force_focus_zone(zone_id: String) -> void:
+	for node in get_tree().get_nodes_in_group("interaction_zones"):
+		if str(node.get_meta("zone_id", "")) == zone_id and node is Node3D:
+			current_focus = node as Node3D
+			current_focus_kind = "zone"
+			return
+
+func _force_focus_text_surface(surface_id: String) -> void:
+	for node in get_tree().get_nodes_in_group("text_surfaces"):
+		if str(node.get_meta("surface_id", "")) == surface_id and node is Node3D:
+			current_focus = node as Node3D
+			current_focus_kind = "text_surface"
 			return
 
 func _text(key: String, args: Dictionary = {}, fallback := "") -> String:
@@ -673,7 +882,7 @@ func _world_revision() -> String:
 	return str(_root.get_meta("world_revision", ShellSchema.WORLD_REVISION))
 
 func _actor_signatures() -> Dictionary:
-	var signatures := {"player": "%s:player" % _world_id()}
+	var signatures := {"player": "%s:player:%s" % [_world_id(), stage]}
 	for node in get_tree().get_nodes_in_group("npc_placeholders"):
 		var npc_id := str(node.get_meta("npc_id", ""))
 		if not npc_id.is_empty():
@@ -690,18 +899,22 @@ func _event_family_counts(event_family: String) -> Dictionary:
 	return counts
 
 func _verdict_end_state_trace(summary: Dictionary) -> String:
-	return "Station intake prologue -> safe SA_COMPLY -> risky SA_BREAK why-lines -> Exposure %d -> intake:%s inquest:%s verdict:%s termination:%s outcome:%s" % [
-		int(summary.get("exposure", 0)),
+	return "Same Order conversation -> suspicion %d -> report %d -> intake:%s inquest:%s termination:%s outcome:%s" % [
+		int(summary.get("suspicion", 0)),
+		int(summary.get("reportWeight", 0)),
 		str(station.get("intakeOpen", false)),
 		str(station.get("inquestOpen", false)),
-		str(station.get("verdictReady", false)),
 		str(station.get("sessionTerminationAllowed", false)),
 		_session_outcome()
 	]
 
 func _session_outcome() -> String:
-	if _session_locked():
-		return "case_closed"
+	if not session_outcome.is_empty() and session_outcome != "running":
+		return session_outcome
+	if bool(station.get("inquestOpen", false)):
+		return "inquest_opened"
+	if bool(station.get("intakeOpen", false)):
+		return "soft_report"
 	return "running"
 
 func _end_controls() -> Dictionary:
@@ -719,10 +932,10 @@ func is_session_locked() -> bool:
 	return _session_locked()
 
 func _authority_mode() -> String:
-	return "godot_local_smoke_runtime"
+	return "godot_local_conversation_runtime"
 
 func _release_authority_requirement() -> String:
-	return "Public demo authority must be live backend/runtime integration or an explicit fallback-only product decision; API/provider text remains wording-only."
+	return "Public demo authority must keep suspicion, report, inquest, verdict, and session end deterministic; API/provider text remains wording-only."
 
 func _now_ms() -> int:
 	return int(Time.get_unix_time_from_system() * 1000.0)

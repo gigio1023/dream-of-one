@@ -1,5 +1,13 @@
 # Episode: Station Soft Inquest
 
+Status: legacy route episode, retained for source material and internal harness.
+
+The replacement first playable scenario is
+`12-conversation-suspicion-prologue.md`. Do not use this route-first Cover Test
+episode as the player-facing implementation target until it has been rewritten
+around NPC prompts, three dialogue choices, optional free input, suspicion
+signals, social report, and Station consequence.
+
 ## Premise
 
 The player starts near the Station after procedure has already begun. The world does not ask the player to discover what happened. It asks whether the player can still behave like someone who belongs in the record.

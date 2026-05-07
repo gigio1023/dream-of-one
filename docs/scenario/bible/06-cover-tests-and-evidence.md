@@ -1,5 +1,12 @@
 # Cover Tests And Evidence
 
+Status: legacy/internal harness reference.
+
+The current player-facing design uses conversation prompts, three dialogue
+choices, optional free input, deterministic suspicion signals, social reports,
+and Station consequence. Keep this file for old Cover Test source material until
+it is rewritten as conversation Evidence.
+
 ## Global Pattern
 
 Each Cover Test must define:

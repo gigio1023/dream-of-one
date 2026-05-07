@@ -671,9 +671,11 @@ static func _configure_cover_zone_visuals(
 		area.add_child(label)
 	label.name = "ZoneLabel_%s" % _safe_name(zone_id)
 	var label_args := {"coverTestKey": "cover.%s.title" % cover_test_id}
-	label.text = _localized("zone.cover_test", "COVER TEST\n%s" % _cover_test_title_fallback(cover_test_id), label_args)
+	var translation_key := "zone.conversation" if str(area.get_meta("kind", "")).to_lower().contains("conversation") else "zone.cover_test"
+	var fallback_label := "CONVERSATION\nSame Order" if translation_key == "zone.conversation" else "COVER TEST\n%s" % _cover_test_title_fallback(cover_test_id)
+	label.text = _localized(translation_key, fallback_label, label_args)
 	label.add_to_group("localized_meta_text")
-	label.set_meta("translation_key", "zone.cover_test")
+	label.set_meta("translation_key", translation_key)
 	label.set_meta("translation_args", label_args)
 	label.set_meta("translation_fallback", label.text)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED

@@ -5,12 +5,14 @@ runtime_path: Godot 4.x + TypeScript NPC backend
 
 # Dream of One - Project Definition
 
-Dream of One is a Godot 4.x 3D social-stealth game where NPC society pressures the player through text surfaces, Cover Tests, Station intake, inquest, verdict, and deterministic session end states.
+Dream of One is a Godot 4.x 3D conversation social-stealth game where NPC society pressures the player through dialogue choices, bounded typed free input that can become recorded statements, social suspicion, Station intake, inquest, verdict, and deterministic session end states.
 
 ## Product Rails
 
 - Player is not an investigator. NPCs and Station systems investigate the player.
-- Text is the danger surface. Dream Laws are exposed through diegetic text and Cover Tests.
+- Dialogue is the main danger surface. Dream Laws are exposed through NPC prompts, prior conversation memory, diegetic records, and Station pressure.
+- Default interaction is three diegetic dialogue choices plus optional typed free input when deterministic classification and UI are proven. Recorded statements are Evidence artifacts, not open-ended chat.
+- Suspicion starts socially: an NPC notices conversational weirdness, probes, shares a report, and only then can Station pressure formalize it.
 - API proposal-provider-backed NPC society proposes bounded wording only: NPC line candidates, Station pressure wording, localized variants, and fallback text variants.
 - GPT model availability is checked at runtime. `gpt-5.4-nano` is not assumed by design, docs, or release planning.
 - Deterministic adjudication owns validation, fallback selection, Exposure thresholds, Station intake/inquest, verdict, and session termination.
@@ -39,8 +41,9 @@ Dream of One is a Godot 4.x 3D social-stealth game where NPC society pressures t
 ## Current Build Truth
 
 - The current build proves M1 technical proof only: Godot shell/runtime/playable slice, backend Schema validation path, trajectory diversity verification, and Godot bridge readiness fallback smoke.
-- The current branch also proves an internal Station Soft Inquest prologue path with current-build visual captures: rule read, Cover Test focus, safe/risky consequence contrast, Exposure/why-line, deterministic verdict/session end, locked post-verdict input, and restart/quit end controls.
-- The current build does not yet prove a public small complete prologue/demo, live API proposal-provider loop, live backend/runtime authority, exported demo, external player comprehension, or repair/replay outcome contrast.
+- The current branch now proves a local conversation-first `Same Order` path: Store Clerk prompt, three choices, preset recorded statement, deterministic suspicion signals, Station report/inquest, locked session end, and backend-valid playable Evidence Pack.
+- The old Station Soft Inquest path is internal harness evidence only. It remains in runtime-slice authority tests, not as the player-facing playable loop.
+- The current build does not yet prove a public small complete prologue/demo, live API proposal-provider loop, live backend/runtime authority, exported demo, manual typed free-input UI, external player comprehension, human visual readability, or repair/replay outcome contrast.
 - M1 product closure still requires council/product review and external player comprehension evidence.
 - The first public promise is a small honest prologue/demo only after completion gates pass.
 - Public copy must not imply open-ended conversation, included AI hosting, a fixed GPT model, or final campaign scope.
@@ -51,11 +54,10 @@ Dream of One is a Godot 4.x 3D social-stealth game where NPC society pressures t
 
 The branch target is:
 - keep the verified M1 technical proof passing as the baseline.
-- make the remaining product blockers explicit before expanding scope.
-- reach one game-like Station Soft Inquest loop only after visual, UI, player-comprehension, provider, and exported-build gates pass.
+- keep the conversation-first proof honest by adding manual typed-input UI if needed, repair/replay, human readability review, player-comprehension, provider, and exported-build gates before expanding scope.
 - produce truthful evidence for whether the branch can continue toward demo completion, should merge as an M1-only proof, or should stop for product fixes.
 
-A small complete prologue/demo means the player can start, understand they are being investigated, move through the selected route, make risky/safe text responses, see Evidence/Exposure consequences, reach deterministic inquest/verdict/session end, and replay with at least one meaningfully different outcome or repair path.
+A small complete prologue/demo means the player can start, understand they are being investigated, answer NPC prompts through three dialogue choices or optional typed free input, see NPC suspicion and Evidence/Exposure consequences, reach deterministic report/inquest/verdict/session end, and replay with at least one meaningfully different outcome or repair path.
 
 ## Migration Acceptance
 

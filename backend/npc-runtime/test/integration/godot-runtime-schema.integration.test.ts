@@ -7,6 +7,7 @@ import {
   GODOT_TIME_UNITS,
   validateGodotEvidenceEvent,
   validateGodotEvidencePack,
+  validateGodotEvidencePackConversationSuspicionProof,
   validateGodotNpcCommandEnvelope,
   validateGodotObservationFrame,
   type GodotRuntimeContext,
@@ -254,6 +255,187 @@ test("Godot Evidence Pack validates release-comparable summaries and event ident
   assert.equal(pack.ok ? pack.value.summaries.blockedChecks[0] : "", "godot_cli_missing");
 });
 
+test("Godot Evidence events preserve required conversation suspicion fields", () => {
+  const event = validateGodotEvidenceEvent({
+    schemaVersion: GODOT_SCHEMA_VERSION,
+    eventId: "event-conversation-1",
+    eventName: "conversation_anomaly_detected",
+    eventFamily: "domain",
+    adapter: "godot",
+    sessionId: "session-1",
+    worldId: "godot-main",
+    worldRevision: "rev-social-stealth-v1",
+    timestampMs: 1_775_000_000_090,
+    socialLoopStage: "uneasy",
+    actorId: "npc-clerk-1",
+    conversationId: "conv-same-order",
+    turnId: "turn-1",
+    promptId: "store.same_order.routine",
+    choiceSetId: "store.same_order.choices",
+    speakerId: "player",
+    selectedChoiceId: "store.same_order.risky",
+    displayedPlayerLine: "오늘 처음 왔는데요.",
+    priorTurnIds: [],
+    suspicionSignals: ["local_routine_mismatch"],
+    suspicionBefore: 0,
+    suspicionAfter: 35,
+    suspicionDelta: 35,
+    reportWeightBefore: 0,
+    reportWeightAfter: 30,
+    reportDelta: 30,
+    whyLine: "The line contradicted the local routine the NPC assumed.",
+    conversationStage: "uneasy",
+    outcome: "running",
+    summary: "The clerk noticed a local routine mismatch.",
+  });
+
+  assert.equal(event.ok, true, event.ok ? undefined : JSON.stringify(event.failures, null, 2));
+  assert.equal(event.ok ? event.value.conversationId : "", "conv-same-order");
+  assert.deepEqual(event.ok ? event.value.suspicionSignals : [], ["local_routine_mismatch"]);
+  assert.equal(event.ok ? event.value.reportDelta : 0, 30);
+  assert.equal(event.ok ? event.value.displayedPlayerLine : "", "오늘 처음 왔는데요.");
+});
+
+test("Godot conversation anomaly events fail without deterministic signal trace", () => {
+  const event = validateGodotEvidenceEvent({
+    schemaVersion: GODOT_SCHEMA_VERSION,
+    eventId: "event-conversation-invalid",
+    eventName: "conversation_anomaly_detected",
+    eventFamily: "domain",
+    adapter: "godot",
+    sessionId: "session-1",
+    worldId: "godot-main",
+    worldRevision: "rev-social-stealth-v1",
+    timestampMs: 1_775_000_000_090,
+    socialLoopStage: "uneasy",
+    actorId: "npc-clerk-1",
+    conversationId: "conv-same-order",
+    turnId: "turn-1",
+    promptId: "store.same_order.routine",
+    displayedPlayerLine: "오늘 처음 왔는데요.",
+    summary: "The clerk noticed something.",
+  });
+
+  assert.equal(event.ok, false);
+  assert.equal(
+    event.ok ? "" : event.failures.some(failure => failure.path === "suspicionSignals"),
+    true,
+  );
+});
+
+test("Godot conversation evidence rejects impossible suspicion and report deltas", () => {
+  const event = validateGodotEvidenceEvent({
+    schemaVersion: GODOT_SCHEMA_VERSION,
+    eventId: "event-conversation-impossible-delta",
+    eventName: "conversation_anomaly_detected",
+    eventFamily: "domain",
+    adapter: "godot",
+    sessionId: "session-1",
+    worldId: "godot-main",
+    worldRevision: "rev-social-stealth-v1",
+    timestampMs: 1_775_000_000_091,
+    socialLoopStage: "uneasy",
+    actorId: "npc-clerk-1",
+    conversationId: "conv-same-order",
+    turnId: "turn-1",
+    promptId: "store.same_order.routine",
+    choiceSetId: "store.same_order.choices",
+    speakerId: "player",
+    selectedChoiceId: "store.same_order.risky",
+    displayedPlayerLine: "오늘 처음 왔는데요.",
+    suspicionSignals: ["local_routine_mismatch"],
+    suspicionBefore: 0,
+    suspicionAfter: 70,
+    suspicionDelta: 35,
+    reportWeightBefore: 0,
+    reportWeightAfter: 10,
+    reportDelta: 30,
+    whyLine: "The line contradicted the local routine the NPC assumed.",
+    whyLineKey: "local_routine_mismatch",
+    conversationStage: "uneasy",
+    summary: "The clerk noticed an impossible delta.",
+  });
+
+  assert.equal(event.ok, false);
+  assert.equal(event.ok ? "" : event.failures.some(failure => failure.path === "suspicionDelta"), true);
+  assert.equal(event.ok ? "" : event.failures.some(failure => failure.path === "reportDelta"), true);
+});
+
+test("Godot conversation evidence rejects impossible threshold state", () => {
+  const event = validateGodotEvidenceEvent({
+    schemaVersion: GODOT_SCHEMA_VERSION,
+    eventId: "event-conversation-impossible-threshold",
+    eventName: "station_inquest_opened",
+    eventFamily: "domain",
+    adapter: "godot",
+    sessionId: "session-1",
+    worldId: "godot-main",
+    worldRevision: "rev-social-stealth-v1",
+    timestampMs: 1_775_000_000_092,
+    socialLoopStage: "reported",
+    actorId: "npc-clerk-1",
+    conversationId: "conv-same-order",
+    turnId: "turn-2",
+    promptId: "store.same_order.probe",
+    choiceSetId: "store.same_order.probe.choices",
+    speakerId: "player",
+    freeInputHash: "free-dream-line",
+    displayedPlayerLine: "저는 이 꿈에 방금 들어왔어요.",
+    priorTurnIds: ["turn-1"],
+    suspicionSignals: ["dream_language_leak", "local_routine_mismatch"],
+    suspicionBefore: 35,
+    suspicionAfter: 100,
+    suspicionDelta: 65,
+    reportWeightBefore: 30,
+    reportWeightAfter: 70,
+    reportDelta: 40,
+    whyLine: "The line used dream or outside-world language.",
+    whyLineKey: "dream_language_leak",
+    conversationStage: "reported",
+    summary: "Station inquest opened below threshold.",
+  });
+
+  assert.equal(event.ok, false);
+  assert.equal(event.ok ? "" : event.failures.some(failure => failure.path === "reportWeightAfter"), true);
+  assert.equal(event.ok ? "" : event.failures.some(failure => failure.path === "conversationStage"), true);
+});
+
+test("Generated playable slice passes Same Order conversation suspicion proof", () => {
+  const artifactUrl = new URL("../../../../data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json", import.meta.url);
+  const artifact = JSON.parse(readFileSync(artifactUrl, "utf8")) as unknown;
+  const proof = validateGodotEvidencePackConversationSuspicionProof(artifact);
+
+  assert.equal(proof.ok, true, proof.ok ? undefined : JSON.stringify(proof.failures, null, 2));
+  assert.equal(proof.ok ? proof.value.conversationId : "", "conv-same-order");
+  assert.deepEqual(
+    proof.ok ? proof.value.chainEventNames : [],
+    [
+      "conversation_started",
+      "dialogue_choice_selected",
+      "conversation_anomaly_detected",
+      "npc_suspicion_changed",
+      "free_input_submitted",
+      "suspicion_shared",
+      "station_report_created",
+      "station_inquest_opened",
+    ],
+  );
+  assert.equal(proof.ok ? proof.value.finalConversationStage : "", "inquest");
+});
+
+test("Same Order conversation suspicion proof rejects mixed conversation ids", () => {
+  const artifactUrl = new URL("../../../../data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json", import.meta.url);
+  const artifact = JSON.parse(readFileSync(artifactUrl, "utf8")) as { events: Array<Record<string, unknown>> };
+  const stationReport = artifact.events.find(event => event.eventName === "station_report_created");
+  assert.ok(stationReport);
+  stationReport.conversationId = "conv-other";
+
+  const proof = validateGodotEvidencePackConversationSuspicionProof(artifact);
+
+  assert.equal(proof.ok, false);
+  assert.equal(proof.ok ? "" : proof.failures.some(failure => failure.path === "events"), true);
+});
+
 test("Generated playable slice Evidence Pack validates against backend schema", () => {
   const artifactUrl = new URL("../../../../data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json", import.meta.url);
   const artifact = JSON.parse(readFileSync(artifactUrl, "utf8")) as unknown;
@@ -263,4 +445,7 @@ test("Generated playable slice Evidence Pack validates against backend schema", 
   assert.equal(pack.ok ? pack.value.runId : "", "dre-171-playable-slice-run");
   assert.equal(pack.ok ? pack.value.adapter : "", "godot");
   assert.equal(pack.ok ? pack.value.events.some(event => event.eventFamily === "evidence_export") : false, true);
+  assert.equal(pack.ok ? pack.value.events.some(event => event.eventName === "dialogue_choice_selected" && event.conversationId === "conv-same-order") : false, true);
+  assert.equal(pack.ok ? pack.value.events.some(event => event.eventName === "free_input_submitted" && event.freeInputHash !== undefined) : false, true);
+  assert.equal(pack.ok ? pack.value.events.some(event => event.eventName === "station_inquest_opened" && (event.suspicionSignals?.length ?? 0) > 0) : false, true);
 });

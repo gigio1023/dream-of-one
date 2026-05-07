@@ -14,6 +14,7 @@ Use this before planning large features, changing the game loop, expanding story
 - [Player Experience Targets](05-player-experience-targets.md)
 - [Release Strategy](06-release-strategy.md)
 - [Team and Role Model](07-team-and-role-model.md)
+- [Conversation Suspicion Redesign](08-conversation-suspicion-redesign.md)
 
 ## Relationship to Other Docs
 
@@ -38,8 +39,8 @@ Start from:
 
 ## Current Strategic Position
 
-Dream of One is still before a trustworthy vertical slice. The next director-level target is M1 Protocol Proof: prove text -> Evidence -> Exposure -> consequence with backend-owned authority and Godot-visible feedback.
+Dream of One is still before a trustworthy vertical slice. The next director-level target is a conversation-first M1 proof: prove NPC prompt -> three dialogue choices or optional free input -> deterministic suspicion signal -> Evidence/Exposure/report consequence with backend-owned authority and Godot-visible feedback.
 
 Current verdict:
-- ready for M1 council review and implementation handoff.
+- ready for conversation-first redesign implementation planning.
 - not ready for broad vertical-slice implementation.

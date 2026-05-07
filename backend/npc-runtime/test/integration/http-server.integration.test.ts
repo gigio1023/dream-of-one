@@ -316,6 +316,61 @@ test("decision API smoke handles two NPC IDs and emits request/response logs", a
   }
 });
 
+test("decision API rejects caller-authored conversation suspicion authority before broker", async () => {
+  const port = await getFreePort();
+  const config = buildConfig(port);
+  let brokerCalled = false;
+
+  const broker: CodexBroker = {
+    async decide() {
+      brokerCalled = true;
+      throw new Error("broker must not receive caller-authored suspicion state");
+    },
+  };
+
+  const service = new DecisionService(broker);
+  const server = startHttpServer(config, service);
+
+  try {
+    const payload: Record<string, unknown> = {
+      ...buildPacket("npc-api-authority"),
+      conversation: {
+        conversationId: "conv-same-order",
+        turnId: "turn-1",
+        promptId: "store.same_order.routine",
+        choiceSetId: "store.same_order.routine.choices",
+        speakerId: "player",
+        selectedChoiceId: "store.same_order.risky",
+        displayedPlayerLine: "오늘 처음 왔는데요.",
+        suspicionSignals: ["local_routine_mismatch"],
+        suspicionBefore: 0,
+        suspicionAfter: 35,
+        reportWeightBefore: 0,
+        reportWeightAfter: 30,
+        whyLine: "caller-supplied why-line",
+      },
+    };
+
+    const res = await fetch(`http://${config.host}:${config.port}/v1/npc/decision`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const body = (await res.json()) as {
+      meta: { usedFallback: boolean; reason?: string; reasonDetail?: string; transport: string };
+    };
+
+    assert.equal(res.status, 200);
+    assert.equal(brokerCalled, false);
+    assert.equal(body.meta.usedFallback, true);
+    assert.equal(body.meta.transport, "fallback");
+    assert.equal(body.meta.reason, "invalid_perception_packet");
+    assert.match(body.meta.reasonDetail ?? "", /backend-authored/);
+  } finally {
+    await closeServer(server);
+  }
+});
+
 test("response log includes deterministic reject reason on fallback", async () => {
   const port = await getFreePort();
   const config = buildConfig(port);

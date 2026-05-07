@@ -1,5 +1,13 @@
 # Player Experience MDA
 
+Status: requires conversation-first rewrite.
+
+Use `docs/direction/08-conversation-suspicion-redesign.md` and
+`docs/scenario/bible/12-conversation-suspicion-prologue.md` for the current
+player-facing proof target. The tables below preserve useful experience goals,
+but rows that center text surfaces, Cover Test zones, or abstract speech-act
+buttons are legacy implementation language.
+
 ## Target Aesthetics
 
 | Aesthetic | Player Feeling | Avoid |
@@ -15,8 +23,8 @@
 | Dynamic | How It Works |
 |---|---|
 | Cover performance | Player must match expected language and behavior per location. |
-| Public procedure | Each landmark has a visible rule surface that teaches the local script. |
-| Accumulating record | NPC pressure turns speech acts into artifacts and Station state. |
+| Public procedure | Each NPC prompt carries a local script the player must infer. |
+| Accumulating record | NPC pressure turns dialogue choices and recorded statements into artifacts and Station state. |
 | Threshold narrowing | Exposure crosses intake, Inquest, and verdict bands. |
 | Polite correction | NPCs correct before they accuse; correction is still evidence. |
 | Return pressure | The player must eventually return to Station with all prior claims exposed to comparison. |
@@ -25,9 +33,9 @@
 
 | Mechanic | Scenario Role |
 |---|---|
-| Read text surface | Reveals Dream Law and puts the player under a known rule. |
-| Enter Cover Test zone | Activates a local social examination. |
-| Choose bounded speech act | Converts player intent into deterministic Exposure and artifact outcomes. |
+| Read NPC prompt | Reveals the local assumption and puts the player under a social rule. |
+| Choose dialogue line | Converts player speech into deterministic suspicion and artifact outcomes. |
+| Optional free input | Records a player-authored statement for deterministic classification. |
 | Evidence feed | Shows why a state changed without breaking diegesis. |
 | NPC barks | Provide social pressure, hints, and changing public mood. |
 | Station thresholds | Convert local mistakes into formal procedure. |

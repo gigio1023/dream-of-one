@@ -3,7 +3,7 @@
 	"blockedChecks": [],
 	"captures": [
 		{
-			"artifactPath": "data/evidence/godot/screenshots/01-opening-station-framing.png",
+			"artifactPath": "data/evidence/godot/screenshots/01-opening-store-framing.png",
 			"automatedChecks": [
 				"viewport_size",
 				"nonblank_pixels",
@@ -11,18 +11,18 @@
 			],
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
-				"opening Station framing visible from current generated world",
-				"HUD objective points player toward rule-surface reading",
+				"opening Store framing visible from current generated world",
+				"HUD objective points player toward the Store Clerk conversation",
 				"Kenney free asset city dressing visible without owning gameplay authority"
 			],
 			"height": 720,
 			"legacyAliasArtifactPath": "data/evidence/godot/screenshots/main-shell.png",
 			"requiresHumanReadabilityReview": true,
-			"role": "opening-station-framing",
+			"role": "opening-store-framing",
 			"width": 1280
 		},
 		{
-			"artifactPath": "data/evidence/godot/screenshots/02-station-rule-surface-readable.png",
+			"artifactPath": "data/evidence/godot/screenshots/02-store-rule-surface-readable.png",
 			"automatedChecks": [
 				"viewport_size",
 				"nonblank_pixels",
@@ -30,17 +30,17 @@
 			],
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
-				"Station intake rule surface has been interacted with",
-				"Dream Law and Cover Test identifiers are visible in player-facing notice",
-				"HUD remains readable while Station board is in range"
+				"Store queue rule surface has been interacted with",
+				"local routine context is visible before speaking",
+				"HUD remains readable while Store board is in range"
 			],
 			"height": 720,
 			"requiresHumanReadabilityReview": true,
-			"role": "station-rule-surface-readable",
+			"role": "store-rule-surface-readable",
 			"width": 1280
 		},
 		{
-			"artifactPath": "data/evidence/godot/screenshots/03-active-cover-test-hud.png",
+			"artifactPath": "data/evidence/godot/screenshots/03-active-conversation-hud.png",
 			"automatedChecks": [
 				"viewport_size",
 				"nonblank_pixels",
@@ -48,17 +48,17 @@
 			],
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
-				"Station Cover Test prompt is active",
-				"bounded speech choices are visible",
-				"consequence HUD distinguishes safe procedural speech from risky break"
+				"Store Clerk prompt is active",
+				"three diegetic dialogue choices are visible",
+				"key 4 is explicitly scoped as a displayed recorded statement"
 			],
 			"height": 720,
 			"requiresHumanReadabilityReview": true,
-			"role": "active-cover-test-hud",
+			"role": "active-conversation-hud",
 			"width": 1280
 		},
 		{
-			"artifactPath": "data/evidence/godot/screenshots/04-exposure-why-line.png",
+			"artifactPath": "data/evidence/godot/screenshots/04-conversation-why-line.png",
 			"automatedChecks": [
 				"viewport_size",
 				"nonblank_pixels",
@@ -66,17 +66,17 @@
 			],
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
-				"Exposure has increased from a risky speech act",
+				"suspicion has increased from a risky dialogue line",
 				"player-facing why-line is visible",
 				"recent Evidence explains the consequence"
 			],
 			"height": 720,
 			"requiresHumanReadabilityReview": true,
-			"role": "exposure-why-line",
+			"role": "conversation-why-line",
 			"width": 1280
 		},
 		{
-			"artifactPath": "data/evidence/godot/screenshots/05-verdict-session-end.png",
+			"artifactPath": "data/evidence/godot/screenshots/05-inquest-session-end.png",
 			"automatedChecks": [
 				"viewport_size",
 				"nonblank_pixels",
@@ -84,14 +84,14 @@
 			],
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
-				"verdict outcome panel is visible",
-				"Exposure, Station verdict, and session termination state are visible",
+				"Station inquest outcome panel is visible",
+				"suspicion, report pressure, and session termination state are visible",
 				"why-line remains visible as session-end basis"
 			],
 			"height": 720,
-			"legacyAliasArtifactPath": "data/evidence/godot/screenshots/playable-verdict.png",
+			"legacyAliasArtifactPath": "data/evidence/godot/screenshots/playable-inquest.png",
 			"requiresHumanReadabilityReview": true,
-			"role": "verdict-session-end",
+			"role": "inquest-session-end",
 			"width": 1280
 		}
 	],
@@ -103,56 +103,125 @@
 	"ok": true,
 	"screenshotExpectations": [
 		{
-			"artifactPath": "data/evidence/godot/screenshots/01-opening-station-framing.png",
+			"artifactPath": "data/evidence/godot/screenshots/01-opening-store-framing.png",
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
-				"opening Station framing visible from current generated world",
-				"HUD objective points player toward rule-surface reading",
+				"opening Store framing visible from current generated world",
+				"HUD objective points player toward the Store Clerk conversation",
 				"Kenney free asset city dressing visible without owning gameplay authority"
 			],
-			"role": "opening-station-framing"
+			"role": "opening-store-framing"
 		},
 		{
-			"artifactPath": "data/evidence/godot/screenshots/02-station-rule-surface-readable.png",
+			"artifactPath": "data/evidence/godot/screenshots/02-store-rule-surface-readable.png",
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
-				"Station intake rule surface has been interacted with",
-				"Dream Law and Cover Test identifiers are visible in player-facing notice",
-				"HUD remains readable while Station board is in range"
+				"Store queue rule surface has been interacted with",
+				"local routine context is visible before speaking",
+				"HUD remains readable while Store board is in range"
 			],
-			"role": "station-rule-surface-readable"
+			"role": "store-rule-surface-readable"
 		},
 		{
-			"artifactPath": "data/evidence/godot/screenshots/03-active-cover-test-hud.png",
+			"artifactPath": "data/evidence/godot/screenshots/03-active-conversation-hud.png",
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
-				"Station Cover Test prompt is active",
-				"bounded speech choices are visible",
-				"consequence HUD distinguishes safe procedural speech from risky break"
+				"Store Clerk prompt is active",
+				"three diegetic dialogue choices are visible",
+				"key 4 is explicitly scoped as a displayed recorded statement"
 			],
-			"role": "active-cover-test-hud"
+			"role": "active-conversation-hud"
 		},
 		{
-			"artifactPath": "data/evidence/godot/screenshots/04-exposure-why-line.png",
+			"artifactPath": "data/evidence/godot/screenshots/04-conversation-why-line.png",
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
-				"Exposure has increased from a risky speech act",
+				"suspicion has increased from a risky dialogue line",
 				"player-facing why-line is visible",
 				"recent Evidence explains the consequence"
 			],
-			"role": "exposure-why-line"
+			"role": "conversation-why-line"
 		},
 		{
-			"artifactPath": "data/evidence/godot/screenshots/05-verdict-session-end.png",
+			"artifactPath": "data/evidence/godot/screenshots/05-inquest-session-end.png",
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
-				"verdict outcome panel is visible",
-				"Exposure, Station verdict, and session termination state are visible",
+				"Station inquest outcome panel is visible",
+				"suspicion, report pressure, and session termination state are visible",
 				"why-line remains visible as session-end basis"
 			],
-			"role": "verdict-session-end"
+			"role": "inquest-session-end"
 		}
 	],
+	"storeConversationEvidence": {
+		"conversationId": "conv-same-order",
+		"currentPromptId": "store.same_order.probe",
+		"eventNames": [
+			"playable_session_started",
+			"text_surface_read",
+			"conversation_started",
+			"dialogue_choice_selected",
+			"conversation_anomaly_detected",
+			"npc_suspicion_changed",
+			"free_input_submitted",
+			"conversation_anomaly_detected",
+			"npc_suspicion_changed",
+			"suspicion_shared",
+			"station_report_created",
+			"station_inquest_opened"
+		],
+		"history": [
+			{
+				"choiceSetId": "store.same_order.routine.choices",
+				"freeInputHash": "",
+				"inputMode": "choice",
+				"playerLine": "오늘 처음 왔는데요.",
+				"promptId": "store.same_order.routine",
+				"recordedStatementScope": "",
+				"reportWeightAfter": 30,
+				"reportWeightBefore": 0,
+				"selectedChoiceId": "store.same_order.risky",
+				"suspicionAfter": 35,
+				"suspicionBefore": 0,
+				"suspicionSignals": [
+					"local_routine_mismatch"
+				],
+				"turnId": "turn-1",
+				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다."
+			},
+			{
+				"choiceSetId": "store.same_order.probe.choices",
+				"freeInputHash": "free-17-3317429208",
+				"inputMode": "explicit_recorded_statement",
+				"playerLine": "저는 이 꿈에 방금 들어왔어요.",
+				"promptId": "store.same_order.probe",
+				"recordedStatementScope": "key_4_explicit_recorded_statement_no_typed_ui",
+				"reportWeightAfter": 115,
+				"reportWeightBefore": 30,
+				"selectedChoiceId": "",
+				"suspicionAfter": 125,
+				"suspicionBefore": 35,
+				"suspicionSignals": [
+					"dream_language_leak",
+					"local_routine_mismatch"
+				],
+				"turnId": "turn-2",
+				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
+			}
+		],
+		"lastWhyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
+		"recordedStatementAction": "dialogue_recorded_statement",
+		"recordedStatementScope": "key_4_explicit_recorded_statement_no_typed_ui",
+		"reportWeight": 115,
+		"stage": "inquest",
+		"station": {
+			"inquestOpen": true,
+			"intakeOpen": true,
+			"sessionTerminationAllowed": true,
+			"verdictReady": false
+		},
+		"suspicion": 125
+	},
 	"validationScope": "Automated capture validates scene load, session state, viewport size, and nonblank pixels. It records expected visual content for human review; it is not OCR or taste validation.",
 	"viewport": {
 		"height": 720,

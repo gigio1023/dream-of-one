@@ -1,5 +1,14 @@
 # State Model
 
+Status: legacy state model with conversation redesign additions required.
+
+The active redesign needs first-class conversation fields:
+`conversationId`, `turnId`, `promptId`, `choiceSetId`, `selectedChoiceId`,
+`freeInputHash`, displayed player line, deterministic `suspicionSignals`,
+NPC suspicion tier, social report weight, and prior-turn references. Existing
+`SA_*` speech acts may remain as internal classifiers during migration, but the
+player-facing UI should expose dialogue choices and optional recorded free input.
+
 ## Core State
 
 | Field | Type | Owner | Meaning |

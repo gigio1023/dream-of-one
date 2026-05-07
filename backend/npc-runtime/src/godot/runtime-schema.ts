@@ -1,11 +1,17 @@
 import {
   ACTION_TYPES,
+  CONVERSATION_SUSPICION_SIGNALS,
   PLAYER_SPEECH_ACTS,
   SOCIAL_LOOP_STAGES,
   type ActionType,
+  type ConversationSuspicionSignal,
   type PlayerSpeechAct,
   type SocialLoopStage,
 } from "../contracts/types.js";
+import {
+  CONVERSATION_SUSPICION_MAX_SCORE,
+  resolveConversationNpcStage,
+} from "../runtime/conversation-suspicion.js";
 
 export const GODOT_SCHEMA_VERSION = "godot-runtime-v1" as const;
 
@@ -104,6 +110,26 @@ export interface GodotEvidenceEvent {
   threadId?: string;
   usedFallback?: boolean;
   artifactPath?: string;
+  conversationId?: string;
+  turnId?: string;
+  promptId?: string;
+  choiceSetId?: string;
+  speakerId?: string;
+  selectedChoiceId?: string;
+  freeInputHash?: string;
+  displayedPlayerLine?: string;
+  priorTurnIds?: string[];
+  suspicionSignals?: ConversationSuspicionSignal[];
+  suspicionBefore?: number;
+  suspicionAfter?: number;
+  suspicionDelta?: number;
+  reportWeightBefore?: number;
+  reportWeightAfter?: number;
+  reportDelta?: number;
+  whyLine?: string;
+  whyLineKey?: string;
+  conversationStage?: SocialLoopStage;
+  outcome?: string;
   summary: string;
 }
 
@@ -148,6 +174,16 @@ export interface GodotEvidencePackTrajectoryDiversityReport {
 export interface GodotEvidencePackTrajectoryDiversityOptions {
   requiredRuns?: number;
   minDistinctTrajectories?: number;
+}
+
+export interface GodotConversationSuspicionProofReport {
+  runId: string;
+  conversationId: string;
+  chainEventNames: string[];
+  turnIds: string[];
+  finalConversationStage: SocialLoopStage;
+  finalSuspicion: number;
+  finalReportWeight: number;
 }
 
 export interface GodotExposureState {
@@ -275,13 +311,14 @@ function readNumber(
   key: string,
   failures: GodotValidationFailure[],
   path: string,
-  options: { integer?: boolean; min?: number } = {},
+  options: { integer?: boolean; min?: number; max?: number } = {},
 ): number | undefined {
   const value = obj[key];
   const invalidNumber = typeof value !== "number" || !Number.isFinite(value);
   const invalidInteger = options.integer === true && !Number.isInteger(value);
   const invalidMin = typeof options.min === "number" && typeof value === "number" && value < options.min;
-  if (invalidNumber || invalidInteger || invalidMin) {
+  const invalidMax = typeof options.max === "number" && typeof value === "number" && value > options.max;
+  if (invalidNumber || invalidInteger || invalidMin || invalidMax) {
     pushFailure(failures, "schema_invalid_payload", `${path}.${key}`, "must be a finite number with the expected bounds");
     return undefined;
   }
@@ -326,6 +363,31 @@ function readOptionalString(
     return undefined;
   }
   return readString(obj, key, failures, path);
+}
+
+function readOptionalNumber(
+  obj: Record<string, unknown>,
+  key: string,
+  failures: GodotValidationFailure[],
+  path: string,
+  options: { integer?: boolean; min?: number; max?: number } = { min: 0 },
+): number | undefined {
+  if (obj[key] === undefined) {
+    return undefined;
+  }
+  return readNumber(obj, key, failures, path, options);
+}
+
+function readOptionalStringArray(
+  obj: Record<string, unknown>,
+  key: string,
+  failures: GodotValidationFailure[],
+  path: string,
+): string[] | undefined {
+  if (obj[key] === undefined) {
+    return undefined;
+  }
+  return readStringArray(obj, key, failures, path);
 }
 
 function readOptionalBoolean(
@@ -431,6 +493,168 @@ function buildEvidencePackBehaviorSignature(pack: GodotEvidencePack): {
       `trace=${pack.summaries.verdictEndStateTrace}`,
     ].join("\n"),
   };
+}
+
+const CONVERSATION_EVENT_NAMES = [
+  "conversation_started",
+  "dialogue_choice_selected",
+  "free_input_submitted",
+  "conversation_anomaly_detected",
+  "npc_suspicion_changed",
+  "suspicion_shared",
+  "station_report_created",
+  "station_inquest_opened",
+] as const;
+
+const CONVERSATION_SIGNAL_TRACE_EVENT_NAMES = [
+  "conversation_anomaly_detected",
+  "npc_suspicion_changed",
+  "suspicion_shared",
+  "station_report_created",
+  "station_inquest_opened",
+] as const;
+
+const SAME_ORDER_PROOF_EVENT_NAMES = [
+  "conversation_started",
+  "dialogue_choice_selected",
+  "conversation_anomaly_detected",
+  "npc_suspicion_changed",
+  "free_input_submitted",
+  "suspicion_shared",
+  "station_report_created",
+  "station_inquest_opened",
+] as const;
+
+function isConversationEventName(eventName: string): boolean {
+  return CONVERSATION_EVENT_NAMES.includes(eventName as (typeof CONVERSATION_EVENT_NAMES)[number]);
+}
+
+function requiresConversationSignalTrace(eventName: string): boolean {
+  return CONVERSATION_SIGNAL_TRACE_EVENT_NAMES.includes(eventName as (typeof CONVERSATION_SIGNAL_TRACE_EVENT_NAMES)[number]);
+}
+
+function hasConversationSuspicionState(fields: {
+  suspicionBefore?: number;
+  suspicionAfter?: number;
+  suspicionDelta?: number;
+  reportWeightBefore?: number;
+  reportWeightAfter?: number;
+  reportDelta?: number;
+}): boolean {
+  return (
+    fields.suspicionBefore !== undefined
+    || fields.suspicionAfter !== undefined
+    || fields.suspicionDelta !== undefined
+    || fields.reportWeightBefore !== undefined
+    || fields.reportWeightAfter !== undefined
+    || fields.reportDelta !== undefined
+  );
+}
+
+function resolveExpectedConversationStage(eventName: string, suspicionAfter: number, reportWeightAfter: number): SocialLoopStage {
+  if (eventName === "station_inquest_opened") {
+    return "inquest";
+  }
+  if (eventName === "suspicion_shared" && reportWeightAfter >= 50 && reportWeightAfter < 70) {
+    return "shared";
+  }
+  return resolveConversationNpcStage(suspicionAfter, reportWeightAfter);
+}
+
+function validateCompleteConversationSuspicionState(
+  fields: {
+    eventName: string;
+    socialLoopStage?: SocialLoopStage;
+    conversationStage?: SocialLoopStage;
+    suspicionSignals?: readonly ConversationSuspicionSignal[];
+    suspicionBefore?: number;
+    suspicionAfter?: number;
+    suspicionDelta?: number;
+    reportWeightBefore?: number;
+    reportWeightAfter?: number;
+    reportDelta?: number;
+    whyLineKey?: string;
+  },
+  failures: GodotValidationFailure[],
+): void {
+  if (fields.whyLineKey !== undefined && !(fields.suspicionSignals ?? []).includes(fields.whyLineKey as ConversationSuspicionSignal)) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "whyLineKey", "must reference one of suspicionSignals");
+  }
+
+  const stateFieldEntries = [
+    ["suspicionBefore", fields.suspicionBefore],
+    ["suspicionAfter", fields.suspicionAfter],
+    ["suspicionDelta", fields.suspicionDelta],
+    ["reportWeightBefore", fields.reportWeightBefore],
+    ["reportWeightAfter", fields.reportWeightAfter],
+    ["reportDelta", fields.reportDelta],
+  ] as const;
+  const anyStateField = stateFieldEntries.some(([, value]) => value !== undefined);
+  if (!anyStateField) {
+    return;
+  }
+
+  for (const [path, value] of stateFieldEntries) {
+    if (value === undefined) {
+      pushFailure(failures, "schema_invalid_evidence_pack", path, "conversation suspicion state must include before, after, and delta fields together");
+    }
+  }
+
+  const {
+    suspicionBefore,
+    suspicionAfter,
+    suspicionDelta,
+    reportWeightBefore,
+    reportWeightAfter,
+    reportDelta,
+  } = fields;
+  if (
+    suspicionBefore === undefined
+    || suspicionAfter === undefined
+    || suspicionDelta === undefined
+    || reportWeightBefore === undefined
+    || reportWeightAfter === undefined
+    || reportDelta === undefined
+  ) {
+    return;
+  }
+
+  if (suspicionAfter < suspicionBefore) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "suspicionAfter", "conversation suspicion cannot decrease in one deterministic event");
+  }
+  if (suspicionDelta !== suspicionAfter - suspicionBefore) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "suspicionDelta", "must equal suspicionAfter - suspicionBefore");
+  }
+  if (reportWeightAfter < reportWeightBefore) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "reportWeightAfter", "conversation report weight cannot decrease in one deterministic event");
+  }
+  if (reportDelta !== reportWeightAfter - reportWeightBefore) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "reportDelta", "must equal reportWeightAfter - reportWeightBefore");
+  }
+
+  if (fields.eventName === "suspicion_shared" && reportWeightAfter < 50) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "reportWeightAfter", "suspicion_shared requires report weight at least 50");
+  }
+  if (fields.eventName === "station_report_created" && reportWeightAfter < 70) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "reportWeightAfter", "station_report_created requires report weight at least 70");
+  }
+  if (fields.eventName === "station_inquest_opened" && reportWeightAfter < 100) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "reportWeightAfter", "station_inquest_opened requires report weight at least 100");
+  }
+
+  const expectedStage = resolveExpectedConversationStage(fields.eventName, suspicionAfter, reportWeightAfter);
+  if (fields.conversationStage !== undefined && fields.conversationStage !== expectedStage) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "conversationStage", `must be ${expectedStage} for the conversation suspicion state`);
+  }
+  if (fields.socialLoopStage !== undefined && fields.conversationStage !== undefined && fields.socialLoopStage !== fields.conversationStage) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "socialLoopStage", "must match conversationStage for conversation evidence events");
+  }
+}
+
+function isSameOrderEvent(event: GodotEvidenceEvent): boolean {
+  return [event.conversationId, event.promptId, event.choiceSetId]
+    .filter((value): value is string => typeof value === "string")
+    .some(value => /same[-_. ]order/i.test(value));
 }
 
 function readVector3(
@@ -899,6 +1123,36 @@ export function validateGodotEvidenceEvent(input: unknown): GodotValidationResul
   const commandId = readOptionalString(input, "commandId", failures, "$");
   const threadId = readOptionalString(input, "threadId", failures, "$");
   const artifactPath = readOptionalString(input, "artifactPath", failures, "$");
+  const conversationId = readOptionalString(input, "conversationId", failures, "$");
+  const turnId = readOptionalString(input, "turnId", failures, "$");
+  const promptId = readOptionalString(input, "promptId", failures, "$");
+  const choiceSetId = readOptionalString(input, "choiceSetId", failures, "$");
+  const speakerId = readOptionalString(input, "speakerId", failures, "$");
+  const selectedChoiceId = readOptionalString(input, "selectedChoiceId", failures, "$");
+  const freeInputHash = readOptionalString(input, "freeInputHash", failures, "$");
+  const displayedPlayerLine = readOptionalString(input, "displayedPlayerLine", failures, "$");
+  const priorTurnIds = readOptionalStringArray(input, "priorTurnIds", failures, "$");
+  const suspicionSignals = readOptionalStringArray(input, "suspicionSignals", failures, "$");
+  const conversationScoreBounds = { min: 0, max: CONVERSATION_SUSPICION_MAX_SCORE };
+  const suspicionBefore = readOptionalNumber(input, "suspicionBefore", failures, "$", conversationScoreBounds);
+  const suspicionAfter = readOptionalNumber(input, "suspicionAfter", failures, "$", conversationScoreBounds);
+  const suspicionDelta = readOptionalNumber(input, "suspicionDelta", failures, "$", conversationScoreBounds);
+  const reportWeightBefore = readOptionalNumber(input, "reportWeightBefore", failures, "$", conversationScoreBounds);
+  const reportWeightAfter = readOptionalNumber(input, "reportWeightAfter", failures, "$", conversationScoreBounds);
+  const reportDelta = readOptionalNumber(input, "reportDelta", failures, "$", conversationScoreBounds);
+  const whyLine = readOptionalString(input, "whyLine", failures, "$");
+  const whyLineKey = readOptionalString(input, "whyLineKey", failures, "$");
+  const conversationStage =
+    input.conversationStage === undefined
+      ? undefined
+      : readEnum(input.conversationStage, SOCIAL_LOOP_STAGES, failures, "conversationStage", "schema_invalid_social_loop_stage");
+  const outcome = readOptionalString(input, "outcome", failures, "$");
+
+  for (const signal of suspicionSignals ?? []) {
+    if (!CONVERSATION_SUSPICION_SIGNALS.includes(signal as ConversationSuspicionSignal)) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "suspicionSignals", `unsupported conversation signal: ${signal}`);
+    }
+  }
 
   if ((eventFamily === "fallback" || usedFallback === true) && (reasonCode === undefined || reasonCategory === undefined)) {
     pushFailure(failures, "schema_invalid_evidence_pack", "reasonCode", "fallback events require reasonCode and reasonCategory");
@@ -911,6 +1165,70 @@ export function validateGodotEvidenceEvent(input: unknown): GodotValidationResul
   }
   if (eventFamily === "domain" && socialLoopStage === undefined) {
     pushFailure(failures, "schema_invalid_evidence_pack", "socialLoopStage", "domain events require socialLoopStage");
+  }
+  if (isConversationEventName(String(input.eventName))) {
+    if (conversationId === undefined || turnId === undefined || promptId === undefined) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "conversationId", "conversation events require conversationId, turnId, and promptId");
+    }
+    if (
+      ["dialogue_choice_selected", "free_input_submitted", "conversation_anomaly_detected", "npc_suspicion_changed"].includes(String(input.eventName))
+      && displayedPlayerLine === undefined
+    ) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "displayedPlayerLine", "turn-level conversation events require displayedPlayerLine");
+    }
+    if (String(input.eventName) === "dialogue_choice_selected" && selectedChoiceId === undefined) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "selectedChoiceId", "dialogue_choice_selected requires selectedChoiceId");
+    }
+    if (String(input.eventName) === "free_input_submitted" && freeInputHash === undefined) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "freeInputHash", "free_input_submitted requires freeInputHash");
+    }
+    if (
+      requiresConversationSignalTrace(String(input.eventName))
+      && (suspicionSignals === undefined || suspicionSignals.length === 0)
+    ) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "suspicionSignals", `${String(input.eventName)} requires deterministic suspicionSignals`);
+    }
+    if (
+      ["conversation_anomaly_detected", "npc_suspicion_changed", "suspicion_shared", "station_report_created", "station_inquest_opened"].includes(String(input.eventName))
+      && whyLine === undefined
+    ) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "whyLine", `${String(input.eventName)} requires a deterministic whyLine`);
+    }
+    if (
+      requiresConversationSignalTrace(String(input.eventName))
+      && !hasConversationSuspicionState({
+        suspicionBefore,
+        suspicionAfter,
+        suspicionDelta,
+        reportWeightBefore,
+        reportWeightAfter,
+        reportDelta,
+      })
+    ) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "suspicionBefore", `${String(input.eventName)} requires deterministic suspicion/report state`);
+    }
+    validateCompleteConversationSuspicionState(
+      {
+        eventName: String(input.eventName),
+        socialLoopStage,
+        conversationStage,
+        suspicionSignals: suspicionSignals as ConversationSuspicionSignal[] | undefined,
+        suspicionBefore,
+        suspicionAfter,
+        suspicionDelta,
+        reportWeightBefore,
+        reportWeightAfter,
+        reportDelta,
+        whyLineKey,
+      },
+      failures,
+    );
+    if (String(input.eventName) === "conversation_started" && conversationStage !== undefined && conversationStage !== "normal") {
+      pushFailure(failures, "schema_invalid_evidence_pack", "conversationStage", "conversation_started must begin in normal stage");
+    }
+    if (socialLoopStage !== undefined && conversationStage !== undefined && socialLoopStage !== conversationStage) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "socialLoopStage", "must match conversationStage for conversation evidence events");
+    }
   }
 
   if (failures.length > 0) {
@@ -939,6 +1257,26 @@ export function validateGodotEvidenceEvent(input: unknown): GodotValidationResul
       threadId,
       usedFallback,
       artifactPath,
+      conversationId,
+      turnId,
+      promptId,
+      choiceSetId,
+      speakerId,
+      selectedChoiceId,
+      freeInputHash,
+      displayedPlayerLine,
+      priorTurnIds,
+      suspicionSignals: suspicionSignals as ConversationSuspicionSignal[] | undefined,
+      suspicionBefore,
+      suspicionAfter,
+      suspicionDelta,
+      reportWeightBefore,
+      reportWeightAfter,
+      reportDelta,
+      whyLine,
+      whyLineKey,
+      conversationStage,
+      outcome,
       summary: summary as string,
     },
     failures: [],
@@ -1030,6 +1368,123 @@ export function validateGodotEvidencePack(input: unknown): GodotValidationResult
         verdictEndStateTrace: verdictEndStateTrace as string,
         blockedChecks: blockedChecks as string[],
       },
+    },
+    failures: [],
+  };
+}
+
+export function validateGodotEvidencePackConversationSuspicionProof(
+  input: unknown,
+): GodotValidationResult<GodotConversationSuspicionProofReport> {
+  const parsed = validateGodotEvidencePack(input);
+  if (!parsed.ok) {
+    return { ok: false, failures: parsed.failures };
+  }
+
+  const failures: GodotValidationFailure[] = [];
+  const pack = parsed.value;
+  const sameOrderEvents = pack.events
+    .map((event, index) => ({ event, index }))
+    .filter(item => isConversationEventName(item.event.eventName) && isSameOrderEvent(item.event));
+
+  if (sameOrderEvents.length === 0) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "events", "must include Same Order conversation evidence events");
+  }
+
+  const sameOrderConversationIds = new Set(sameOrderEvents.map(item => item.event.conversationId).filter((value): value is string => value !== undefined));
+  if (sameOrderConversationIds.size !== 1) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "events", "Same Order conversation events must share one conversationId");
+  }
+
+  const chain: Array<{ event: GodotEvidenceEvent; index: number }> = [];
+  let cursor = -1;
+  for (const eventName of SAME_ORDER_PROOF_EVENT_NAMES) {
+    const index = pack.events.findIndex((event, eventIndex) =>
+      eventIndex > cursor
+      && event.eventName === eventName
+      && event.conversationId !== undefined
+      && isSameOrderEvent(event),
+    );
+    if (index < 0) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "events", `Same Order proof chain is missing ordered event ${eventName}`);
+      continue;
+    }
+    const event = pack.events[index];
+    if (event !== undefined) {
+      chain.push({ event, index });
+      cursor = index;
+    }
+  }
+
+  const chainConversationIds = new Set(chain.map(item => item.event.conversationId).filter((value): value is string => value !== undefined));
+  if (chain.length === SAME_ORDER_PROOF_EVENT_NAMES.length && chainConversationIds.size !== 1) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "events", "Same Order proof chain must use one conversationId");
+  }
+
+  for (const item of chain) {
+    if (
+      item.event.eventName !== "conversation_started"
+      && (
+        item.event.suspicionBefore === undefined
+        || item.event.suspicionAfter === undefined
+        || item.event.suspicionDelta === undefined
+        || item.event.reportWeightBefore === undefined
+        || item.event.reportWeightAfter === undefined
+        || item.event.reportDelta === undefined
+        || item.event.conversationStage === undefined
+      )
+    ) {
+      pushFailure(failures, "schema_invalid_evidence_pack", `events[${item.index}]`, "Same Order proof events must include deterministic suspicion/report state");
+    }
+  }
+
+  const selectedChoice = chain.find(item => item.event.eventName === "dialogue_choice_selected")?.event;
+  const freeInput = chain.find(item => item.event.eventName === "free_input_submitted")?.event;
+  if (selectedChoice !== undefined && freeInput !== undefined) {
+    if (selectedChoice.turnId === freeInput.turnId) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "events", "Same Order proof must include a later free-input turn after the selected choice");
+    }
+    if (selectedChoice.turnId !== undefined && !(freeInput.priorTurnIds ?? []).includes(selectedChoice.turnId)) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "priorTurnIds", "free-input proof turn must reference the selected-choice turn");
+    }
+    if (selectedChoice.suspicionAfter !== undefined && freeInput.suspicionBefore !== undefined && selectedChoice.suspicionAfter !== freeInput.suspicionBefore) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "suspicionBefore", "free-input turn must continue from the selected-choice suspicion state");
+    }
+    if (
+      selectedChoice.reportWeightAfter !== undefined
+      && freeInput.reportWeightBefore !== undefined
+      && selectedChoice.reportWeightAfter !== freeInput.reportWeightBefore
+    ) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "reportWeightBefore", "free-input turn must continue from the selected-choice report state");
+    }
+  }
+
+  const finalInquest = chain.find(item => item.event.eventName === "station_inquest_opened")?.event;
+  if (finalInquest !== undefined) {
+    if (finalInquest.conversationStage !== "inquest" || finalInquest.socialLoopStage !== "inquest") {
+      pushFailure(failures, "schema_invalid_evidence_pack", "conversationStage", "Same Order proof must end with an inquest conversation state");
+    }
+    if (finalInquest.reportWeightAfter === undefined || finalInquest.reportWeightAfter < 100) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "reportWeightAfter", "Same Order proof must end over the inquest report threshold");
+    }
+  }
+
+  if (failures.length > 0) {
+    return { ok: false, failures };
+  }
+
+  const conversationId = chain[0]?.event.conversationId as string;
+  const turnIds = [...new Set(chain.map(item => item.event.turnId).filter((value): value is string => value !== undefined))];
+  return {
+    ok: true,
+    value: {
+      runId: pack.runId,
+      conversationId,
+      chainEventNames: chain.map(item => item.event.eventName),
+      turnIds,
+      finalConversationStage: finalInquest?.conversationStage as SocialLoopStage,
+      finalSuspicion: finalInquest?.suspicionAfter as number,
+      finalReportWeight: finalInquest?.reportWeightAfter as number,
     },
     failures: [],
   };

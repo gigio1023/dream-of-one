@@ -1,6 +1,7 @@
 import {
   ACTION_TYPES,
   type ActionType,
+  type ConversationTurnSignal,
   type NpcIntent,
   type PerceptionPacket,
 } from "../contracts/types.js";
@@ -27,6 +28,68 @@ function ensureStringArray(value: unknown, label: string): string[] {
     throw new SchemaValidationError(`${label} must be a string[]`);
   }
   return value;
+}
+
+function ensureOptionalStringArray(value: unknown, label: string): string[] | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  return ensureStringArray(value, label);
+}
+
+function ensureOptionalString(value: unknown, label: string): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  return ensureString(value, label);
+}
+
+const BACKEND_AUTHORED_CONVERSATION_FIELDS = [
+  "suspicionSignals",
+  "suspicionBefore",
+  "suspicionAfter",
+  "suspicionDelta",
+  "reportWeightBefore",
+  "reportWeightAfter",
+  "reportDelta",
+  "whyLine",
+  "whyLineKey",
+  "conversationStage",
+] as const;
+
+function rejectCallerAuthoredConversationAuthority(obj: Record<string, unknown>): void {
+  for (const field of BACKEND_AUTHORED_CONVERSATION_FIELDS) {
+    if (Object.hasOwn(obj, field)) {
+      throw new SchemaValidationError(`conversation.${field} is backend-authored and must not be supplied by API callers`);
+    }
+  }
+}
+
+function parseConversationTurnSignal(value: unknown): ConversationTurnSignal {
+  const obj = ensureObject(value, "conversation");
+  rejectCallerAuthoredConversationAuthority(obj);
+
+  const selectedChoiceId = ensureOptionalString(obj.selectedChoiceId, "conversation.selectedChoiceId");
+  const freeInputHash = ensureOptionalString(obj.freeInputHash, "conversation.freeInputHash");
+  if ((selectedChoiceId === undefined && freeInputHash === undefined) || (selectedChoiceId !== undefined && freeInputHash !== undefined)) {
+    throw new SchemaValidationError("conversation must include exactly one of selectedChoiceId or freeInputHash");
+  }
+
+  const conversation: ConversationTurnSignal = {
+    conversationId: ensureString(obj.conversationId, "conversation.conversationId"),
+    turnId: ensureString(obj.turnId, "conversation.turnId"),
+    promptId: ensureString(obj.promptId, "conversation.promptId"),
+    choiceSetId: ensureString(obj.choiceSetId, "conversation.choiceSetId"),
+    speakerId: ensureString(obj.speakerId, "conversation.speakerId"),
+    displayedPlayerLine: ensureString(obj.displayedPlayerLine, "conversation.displayedPlayerLine"),
+  };
+
+  if (selectedChoiceId !== undefined) conversation.selectedChoiceId = selectedChoiceId;
+  if (freeInputHash !== undefined) conversation.freeInputHash = freeInputHash;
+  const priorTurnIds = ensureOptionalStringArray(obj.priorTurnIds, "conversation.priorTurnIds");
+  if (priorTurnIds !== undefined) conversation.priorTurnIds = priorTurnIds;
+
+  return conversation;
 }
 
 function asActionType(value: string): ActionType {
@@ -100,6 +163,9 @@ export function parsePerceptionPacket(input: unknown): PerceptionPacket {
 
   if (obj.cognitionPath !== undefined) {
     packet.cognitionPath = ensureString(obj.cognitionPath, "cognitionPath");
+  }
+  if (obj.conversation !== undefined) {
+    packet.conversation = parseConversationTurnSignal(obj.conversation);
   }
 
   return packet;

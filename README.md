@@ -1,7 +1,7 @@
 # Dream of One
 
-Dream of One is a Godot 4.x 3D social-stealth game prototype.
-NPC social pressure is proposed by an API-based proposal provider when available, validated by a TypeScript backend, and expressed through a bounded Godot world runtime.
+Dream of One is a Godot 4.x 3D conversation social-stealth game prototype.
+NPC social pressure is expressed through dialogue choices, a bounded typed-free-input path that can record statements as Evidence, deterministic suspicion signals, and Station reports. An API-based proposal provider may propose wording when available, but a TypeScript backend validates and owns consequence.
 The current checked-in build proves the Godot/backend runtime slice, playable Evidence export, trajectory diversity verification, and bridge fallback smoke. It does not yet prove a shipped live API proposal-provider loop.
 
 ## Current Runtime Path
@@ -10,7 +10,7 @@ The current checked-in build proves the Godot/backend runtime slice, playable Ev
 - Backend: TypeScript NPC runtime under `backend/npc-runtime/`
 - Evidence: Godot Evidence Packs under `data/evidence/godot/`
 - Migration source of truth: `docs/migration/godot/`
-- Canonical design docs: `project.md`, `docs/design/game-design.md`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`
+- Canonical design docs: `project.md`, `docs/direction/08-conversation-suspicion-redesign.md`, `docs/design/game-design.md`, `docs/design/dream-laws.md`, `docs/design/social-causality-verification.md`
 
 Previous Unity and Mineflayer runtime trees have been removed from this branch.
 New implementation work should target the Godot project and TypeScript backend only.
@@ -28,6 +28,7 @@ Godot does not own deterministic end-state adjudication. The TypeScript backend 
 - Provider and GPT model availability must be checked at runtime before enabling live AI text.
 - `gpt-5.4-nano` is not assumed. No fixed GPT model name is release truth unless the configured provider verifies it at runtime.
 - If the provider is unavailable, deterministic fallback owns line selection, consequence, and Evidence.
+- The target player-facing loop is three dialogue choices plus optional typed free input. Recorded statements are Evidence artifacts, not open-ended NPC chat. The provider may vary wording, but deterministic rules own suspicion signals, report thresholds, Exposure, Evidence, verdict, and session end.
 
 ## Run Checks
 
@@ -71,11 +72,12 @@ The current migration slice validates:
 - Godot 3D scene shell loads with player, landmarks, NPC placeholders, routes, zones, and text surfaces.
 - Godot runtime Schema validates ObservationFrame, NpcCommandEnvelope, EvidenceEvent, and EvidencePack fixtures.
 - Runtime slice emits Station intake, command validation/rejection, fallback selection, bounded `CharacterBody3D` movement, and text-pressure Evidence.
-- Playable slice exports backend-valid Evidence Pack for a forced Station intake/verdict proof path.
+- Playable slice exports backend-valid Evidence Pack for a forced `Same Order` conversation path: risky dialogue choice, preset recorded statement carried through the free-input Evidence contract, suspicion/report, and Station inquest.
+- The old forced Station intake/verdict proof path is internal harness evidence, not the target conversation-first player-facing loop.
 - Three-run trajectory diversity verification fails identity-only replay and passes safe/risky/verdict Evidence Pack variation.
 - Godot bridge smoke proves provider-readiness fallback semantics without requiring a live API key.
 - Missing semantic anchors fail shell inspection through `generation_failures`.
-- Visual evidence is captured at `data/evidence/godot/screenshots/main-shell.png`.
+- Renderer-backed visual capture now produces Store conversation screenshots and a contact sheet; human readability review is still pending.
 
 ## Migration Docs
 
@@ -89,6 +91,8 @@ The current migration slice validates:
 
 - Live API proposal-provider preflight, model availability check, validation, fallback, and Evidence from a configured provider.
 - Live Godot-to-backend provider integration beyond fixture/fallback bridge smoke.
-- Full report-intake-Inquest-verdict domain loop.
+- Live provider-backed conversation wording in Godot; current playable proof is deterministic fallback/local runtime.
+- Manual typed free-input UI if free input stays in the demo promise.
+- Repair/replay contrast for safe, uncertain, and risky conversation routes beyond the forced risky plus preset-free-input smoke path.
 - External player comprehension evidence for the M1 product gate.
 - Exported build smoke after export presets exist.

@@ -1,10 +1,16 @@
 # Scenario Bible Index
 
-Status: Active scenario source of truth.
+Status: Needs conversation-first rewrite before use as player-facing canon.
 
 ## One-Sentence Game
 
-Dream of One is a 3D social-stealth game where a player tries to pass as procedurally normal while NPC society and the Station convert imprecise words, movements, and text interactions into Evidence.
+Dream of One is a 3D conversation social-stealth game where a player tries to sound locally normal while NPC society and the Station convert conversational weirdness, reports, and recorded statements into Evidence.
+
+## Redesign Notice
+
+The active director-level redesign is `docs/direction/08-conversation-suspicion-redesign.md`.
+
+This bible still contains useful NPC, location, Dream Law, voice, and Station material, but its player-facing loop is outdated where it centers abstract `SA_*` buttons, Cover Test zone activation, or repeated risky inputs. Future scenario work should rewrite these documents around NPC prompts, three dialogue choices, optional free input, deterministic suspicion signals, social sharing/report, and Station consequence.
 
 ## Documents
 
@@ -21,6 +27,7 @@ Dream of One is a 3D social-stealth game where a player tries to pass as procedu
 | `09-barks-and-text-surfaces.md` | Reactive bark system and diegetic text-surface content rules. |
 | `10-localization-style-guide.md` | Korean-first terminology and English localization constraints. |
 | `11-quality-bar-and-validation.md` | Scenario readiness, playtest, and implementation validation gates. |
+| `12-conversation-suspicion-prologue.md` | Replacement first playable scenario for the conversation-first redesign. |
 
 ## Content Banks
 
@@ -37,11 +44,13 @@ Dream of One is a 3D social-stealth game where a player tries to pass as procedu
 |---|---|
 | Landmarks | `Store`, `Studio`, `Park`, `Station` |
 | Routes | `CivicLoop`, `StoreQueue`, `StationIntake` |
-| Speech acts | `SA_COMPLY`, `SA_INQUIRE`, `SA_FRAME`, `SA_BREAK` |
+| Internal speech-act classifiers | `SA_COMPLY`, `SA_INQUIRE`, `SA_FRAME`, `SA_BREAK` |
+| Player-facing dialogue model | three diegetic choices plus optional free input |
+| Conversation signals | `local_routine_mismatch`, `dream_language_leak`, `memory_gap_admission`, `role_script_break`, `prior_statement_contradiction`, `authority_evasion`, `over_explanation` |
 | Dream Laws | `DL_S1_QUEUE_SANCTITY`, `DL_ST1_APPROVAL_GATE`, `DL_P1_OBSERVATION_ETIQUETTE`, `DL_N1_PROCEDURE_SPEECH_ONLY` |
 | Cover Tests | `CT_STORE_QUEUE_LANGUAGE`, `CT_STUDIO_APPROVAL_GATE_SPEECH`, `CT_PARK_OBSERVATION_PRESSURE`, `CT_STATION_SOFT_INQUEST` |
 | Actors | `NPC_Store_Clerk`, `NPC_Studio_PM`, `NPC_Park_Witness`, `NPC_Station_Officer` |
 
 ## Scenario Promise
 
-The player should feel that every harmless phrase can become a record, every public sign has procedural force, and every NPC is polite enough to make the accusation worse.
+The player should feel that every harmless phrase can become a record, every NPC can notice when the player sounds like an outsider, and every polite follow-up can become the start of a report.

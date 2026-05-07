@@ -2,6 +2,12 @@
 
 Detailed placement contracts live in `docs/scenario/content/location-placement-contracts.md`.
 
+Status: location material retained, interaction framing needs conversation-first rewrite.
+
+Future placement should prioritize NPC prompt staging, overhearing, report
+handoff, and Station record visibility. Text surfaces and Cover Test zones may
+remain as supporting props or internal harness objects, not the main player verb.
+
 ## Environment Rule
 
 Every visible object should answer one question:
@@ -23,8 +29,8 @@ Free assets are dressing only when they reinforce route, role, pressure, or read
 
 | Element | Rule |
 |---|---|
-| Text surfaces | Place on approach path before the Cover Test zone, not after it. |
-| NPCs | Place examiner NPC so the player sees them before the first prompt. |
+| Dialogue prompts | Stage NPCs so the player sees who is asking before the first choice appears. |
+| Text surfaces | Use as supporting records near the conversation, not as the main verb. |
 | Routes | Use `CivicLoop` as the visible public path; make side wandering feel socially exposed. |
 | Props | Cluster props around the rule they support; avoid random decoration. |
 | Sightlines | Station should be visible from at least one point near each landmark. |

@@ -23,6 +23,22 @@ function buildPacket(npcId: string, eventCode: string, sessionId = "session-smok
   };
 }
 
+function buildConversationPacket(npcId: string, turnId: string, sessionId = "session-conversation"): PerceptionPacket {
+  const packet = buildPacket(npcId, turnId, sessionId);
+  return {
+    ...packet,
+    conversation: {
+      conversationId: "conv-same-order",
+      turnId,
+      promptId: "store.same_order.routine",
+      choiceSetId: "store.same_order.choices",
+      speakerId: "player",
+      selectedChoiceId: `choice-${turnId}`,
+      displayedPlayerLine: `line ${turnId}`,
+    },
+  };
+}
+
 function envelopeFromPacket(packet: PerceptionPacket): DecisionEnvelope {
   const reasonCode = packet.recentEvents[0] ?? "none";
   return {
@@ -92,6 +108,40 @@ test("same actor burst uses single-flight with latest-wins coalescing", async ()
   assert.equal(metrics.queued, 1);
   assert.equal(metrics.coalesced, 1);
   assert.equal(metrics.dropped, 1);
+});
+
+test("same actor conversation turns are ordered and never coalesced", async () => {
+  const callOrder: string[] = [];
+  let activeCalls = 0;
+  let maxActiveCalls = 0;
+
+  const broker: CodexBroker = {
+    async decide(packet) {
+      const turnId = packet.conversation?.turnId ?? "none";
+      callOrder.push(turnId);
+      activeCalls += 1;
+      maxActiveCalls = Math.max(maxActiveCalls, activeCalls);
+      await sleep(25);
+      activeCalls -= 1;
+      return envelopeFromPacket(packet);
+    },
+  };
+
+  const service = new DecisionService(broker);
+  const first = service.decide(buildConversationPacket("npc-1", "turn-1"));
+  const second = service.decide(buildConversationPacket("npc-1", "turn-2"));
+  const third = service.decide(buildConversationPacket("npc-1", "turn-3"));
+
+  const [firstResult, secondResult, thirdResult] = await Promise.all([first, second, third]);
+  const metrics = service.getMailboxMetrics();
+
+  assert.equal(maxActiveCalls, 1);
+  assert.deepEqual(callOrder, ["turn-1", "turn-2", "turn-3"]);
+  assert.deepEqual(firstResult.intent.reasonCodes, ["turn-1"]);
+  assert.deepEqual(secondResult.intent.reasonCodes, ["turn-2"]);
+  assert.deepEqual(thirdResult.intent.reasonCodes, ["turn-3"]);
+  assert.equal(metrics.coalesced, 0);
+  assert.equal(metrics.dropped, 0);
 });
 
 test("different actors remain isolated and can execute concurrently", async () => {

@@ -12,6 +12,7 @@
 - Project-local Game Studio guidance lives in `.game-studio/`.
 - Current Game Studio routing and state live in `.game-studio/project-state.md`.
 - Framework review and proof gates live in `docs/framework/`.
+- GPT review policy lives in `docs/framework/gpt-code-review.md`; meaningful reviews use GPT-5.5 high/xhigh lanes and Game Studio proof gates.
 - `.game-harness/` remains the current M1 execution harness; do not replace or migrate it without an explicit decision.
 
 ## Godot Runtime

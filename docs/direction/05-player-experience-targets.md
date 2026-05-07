@@ -4,13 +4,14 @@
 
 This document defines what the player must understand or feel at key points. It turns "make it game-like" into observable targets.
 
-M1 technical proof is not enough for this document's target. M1 proves the protocol can work locally. A small complete prologue/demo must prove that a player can read the situation, act, see consequence, reach closure, and explain what happened.
+M1 technical proof is not enough for this document's target. M1 proves the protocol can work locally. A small complete prologue/demo must prove that a player can hold a short conversation, choose or enter a line, see NPC suspicion change, reach a report/inquest consequence, and explain what happened.
 
 ## Game-Like Completion Bar
 
 The prologue/demo feels complete when:
 - the player always knows the immediate available action.
-- text response creates visible risk, feedback, and consequence.
+- dialogue response creates visible risk, feedback, and consequence.
+- the default interaction is three readable dialogue choices, with optional free input only when deterministic classification and fallback are proven.
 - the Station or NPC system acts on prior Evidence without making the player the investigator.
 - the player reaches inquest/verdict/session end because the loop resolves, not because content stops.
 - replaying at least one safe/risky/repair path changes the outcome in a readable way.
@@ -21,17 +22,18 @@ It is not complete when:
 - visual staging does not show pressure or route intent.
 - UI labels expose debug state without player meaning.
 - a tester cannot explain why Exposure or verdict changed.
+- the player believes they are pressing abstract risk buttons rather than speaking in a social scene.
 
 ## First 60 Seconds
 
 Target:
 - Player understands they are entering a controlled Station space.
-- Player sees text as an action surface, not only UI description.
+- Player sees dialogue as the primary action surface, not only UI description.
 
 Required signals:
 - Station authority visible without exposition wall.
-- one readable text surface.
-- one NPC/system prompt directed at the player.
+- one readable NPC/system prompt directed at the player.
+- three dialogue choices that sound like speech.
 
 Failure:
 - player wanders through an empty scene.
@@ -41,10 +43,11 @@ Failure:
 ## First 5 Minutes
 
 Target:
-- Player realizes ordinary explanation can become Evidence.
+- Player realizes ordinary conversation can become Evidence.
 
 Required signals:
-- player response or selected text is classified.
+- player response or selected text is classified from conversation context.
+- NPC reaction changes from normal to uneasy, corrective, or probing.
 - Exposure or pressure changes.
 - why-line or system surface explains consequence without sounding like debug output.
 
@@ -59,9 +62,10 @@ Target:
 - Player understands NPC/Station systems are investigating them.
 
 Required signals:
-- intake or probe follows up on prior text.
+- intake or probe follows up on prior conversation.
 - NPC/Station behavior changes from the Evidence.
 - player has at least one defuse/cover attempt.
+- at least one suspicion share or report shows social propagation before Station pressure.
 
 Failure:
 - NPCs only deliver lore.
@@ -74,7 +78,7 @@ Target:
 - A small session closes through deterministic inquest/verdict pressure.
 
 Required signals:
-- Cover Test or equivalent pressure state resolves.
+- conversation pressure resolves into report, inquest, soft verdict, or session end.
 - verdict or soft-verdict preview appears.
 - session consequence is tied to Evidence.
 
@@ -92,7 +96,8 @@ Visual gates:
 - surveillance pressure is visible through staging, not only written in HUD text.
 
 UI gates:
-- the prompt and available response action are clear before input.
+- the NPC prompt and three available dialogue choices are clear before input.
+- optional free input is framed as a recorded statement, not a safe chatbot box.
 - selected or entered player text is connected to Evidence/Exposure consequence.
 - why-line reads as diegetic/system pressure, not debug output.
 - provider/fallback state is disclosed when relevant.
@@ -129,7 +134,8 @@ Use:
 
 Pass threshold for demo-completion work:
 - player can state they are being investigated, not investigating.
-- player can connect at least one text response to Evidence/Exposure consequence.
+- player can connect at least one dialogue response to NPC suspicion and Evidence/Exposure consequence.
+- player can explain why one choice sounded safer or stranger than another without reading internal risk labels.
 - player can identify whether the provider is live or fallback-only when that affects the build promise.
 - player can explain the verdict/session-end cause in ordinary language.
 

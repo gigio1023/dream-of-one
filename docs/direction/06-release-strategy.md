@@ -5,8 +5,8 @@
 Dream of One should first ship as a small truthful demo/prologue, not a broad commercial release.
 
 Primary purpose:
-- prove one short Station Soft Inquest.
-- prove text pressure and deterministic consequence visibility.
+- prove one short conversation-suspicion loop.
+- prove dialogue pressure and deterministic consequence visibility.
 - recruit collaborators or supporters.
 - collect player comprehension data.
 - avoid overpromising AI behavior.
@@ -17,14 +17,14 @@ M1 technical proof and a small complete prologue/demo are different claims.
 
 M1 technical proof means:
 - local backend, Godot, Evidence, bridge fallback, localization, keyboard, trajectory diversity, and visual-capture checks can pass.
-- the text -> Evidence -> Exposure -> consequence protocol is technically credible.
+- the dialogue -> suspicion signal -> Evidence/Exposure/report -> consequence protocol is technically credible.
 - product and release blockers can still stop demo movement.
 
 A small complete prologue/demo means:
-- the player can complete one short Station Soft Inquest route from start to inquest/verdict/session end.
-- safe, risky, and repair/defuse choices have visible deterministic differences.
-- UI and visual hierarchy let the player read objective, text risk, consequence, provider/fallback state, and end state without debug interpretation.
-- external testers can explain that Station/NPC systems investigated them and that their text changed Evidence/Exposure.
+- the player can complete one short NPC conversation route from ordinary prompt to suspicion, report/inquest, and session resolution.
+- safe, uncertain/repair, risky, and optional free-input responses have visible deterministic differences.
+- UI and visual hierarchy let the player read objective, dialogue risk, consequence, provider/fallback state, and end state without debug interpretation.
+- external testers can explain that Station/NPC systems investigated them and that their dialogue changed suspicion/Evidence/Exposure.
 - exported build/setup, provider mode, fallback behavior, screenshots, and public copy match the verified build.
 
 `feat/prologue-demo-completion` targets the second claim. It may use M1 technical proof as a baseline, but it must not present that baseline as demo completion.
@@ -96,7 +96,9 @@ The public demo must not claim:
 - `gpt-5.4-nano` availability.
 
 The public demo may claim only what the build proves:
-- Station systems investigate player text.
+- NPCs and Station systems investigate player dialogue.
+- three-choice dialogue is the default interaction.
+- optional free input is a recorded risky statement only if the build proves deterministic classification and fallback.
 - API proposal providers can propose bounded NPC text when configured and verified.
 - backend/runtime owns deterministic consequence.
 - Korean-first with English selectable.
@@ -141,7 +143,9 @@ Do not publish public-facing material if:
 - provider access mode is ambiguous.
 - runtime model availability check is missing.
 - generated text appears to own rules or verdict.
-- text consequence is not visible.
+- dialogue consequence is not visible.
+- choices read like abstract risk/debug buttons instead of plausible speech.
+- optional free input is described as open chatbot play.
 - UI requires debug knowledge to understand Evidence, Exposure, fallback state, or verdict.
 - visual captures do not show route, interactable, pressure, consequence, and end-state readability.
 - external player comprehension evidence is missing or failed.

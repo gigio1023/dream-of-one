@@ -2,7 +2,7 @@
 doc: docs/design/social-causality-verification.md
 project: Dream of One
 revision: 2026-02-18
-status: Active
+status: Active, conversation redesign required
 ---
 
 # Social Causality Verification (WS2.2-WS2.4)
@@ -11,38 +11,43 @@ status: Active
 - Standardize deterministic report/intake/verdict causality requirements.
 - Guarantee player-readable “why” lines and artifact linkage for each escalation stage.
 - Keep v0.1 behavior within bounded Runtime Path constraints.
+- Align the next proof with conversation-first suspicion: prompt, player line,
+  anomaly signal, NPC suspicion, social share/report, Station consequence.
 
 ## 2) Causality line Specification
 Each escalation record must be reconstructable as a single causality line:
 
-`Trigger -> Witness -> Record -> Stage transition -> Outcome`
+`Conversation trigger -> Witness -> Record -> Social transition -> Stage transition -> Outcome`
 
 Minimum required fields:
-- `trigger`: event token or landmark trigger source.
+- `conversation trigger`: conversation id, prompt id, selected choice id or free-input hash, and displayed player line.
 - `witness`: at least one NPC role or organization witness source.
-- `record`: artifact type (`ticket`, `memo`, `statement`, `notice snapshot`, `case log`).
-- `stage transition`: `ambient|report|intake|verdict`.
+- `record`: artifact type (`conversation log`, `anomaly record`, `witness memo`, `Station report`, `case log`).
+- `social transition`: `normal|uneasy|probing|shared|reported`.
+- `stage transition`: `ambient|report|intake|inquest|verdict`.
 - `outcome`: `cleared|warning|detained|lucid_identified|case_closed` mapped into runtime reason and warning metadata.
 
 ## 3) Stage-by-stage deterministic requirements
 | Stage | Trigger requirements | Witness requirements | Record requirements | Runtime fields that must exist |
 |---|---|---|---|---|
-| `report` | Trigger must come from recent event tokens (`report`, `statement`, `complaint`, `ticket`, `memo`) | Witness organization must be inferable from NPC context | At least one report artifact must be emitted | `socialLoopStage=report`, `reasonCategory`, `warningTier` |
-| `intake` | Trigger must come from `Station` landmark or intake tokens (`intake`, `inquest`, `dossier`, `report_desk`, `interrogation`) | Station witness role must be identifiable | Intake dossier update or procedural statement record is required | `socialLoopStage=intake`, `playerSpeechAct`, policy reason when fallback occurs |
+| `report` | Trigger must come from conversation anomaly signals or social share events | Witness NPC must be identifiable | At least one report artifact must be emitted | `socialLoopStage=report`, `conversationId`, `suspicionSignals`, `reasonCategory`, `warningTier` |
+| `intake` | Trigger must come from Station receiving or observing a report | Station witness role must be identifiable | Intake dossier update or procedural statement record is required | `socialLoopStage=intake`, `conversationId`, `selectedChoiceId/freeInputHash`, policy reason when fallback occurs |
+| `inquest` | Trigger must compare current answer with prior conversation records | Station or formal witness must be identifiable | Inquest dossier references prior turns and contradiction predicates | `socialLoopStage=inquest`, `priorTurnIds`, `suspicionSignals`, `whyLine` |
 | `verdict` | Trigger must include verdict tokens (`verdict`, `detained`, `cleared`, `lucid_identified`, `case_closed`) | Final authority witness must be identifiable (`Officer` path) | Verdict record must include final outcome reason | `socialLoopStage=verdict`, `reason`, `reasonCategory`, `transport` |
 
 ## 4) Artifact categories by escalation stage
 | Stage | Required artifact categories | Optional artifact categories |
 |---|---|---|
-| `report` | complaint/ticket/memo line, witness reference | notice snapshot, defense memo |
-| `intake` | intake dossier line, procedural speech log | cross-landmark witness memo |
+| `report` | conversation anomaly record, witness reference, social share report | notice snapshot, defense memo |
+| `intake` | intake dossier line, conversation turn log | cross-landmark witness memo |
+| `inquest` | contradiction comparison, prior-turn references, why-line | repair attempt note |
 | `verdict` | final verdict line, reason/why summary | fairness explanation note |
 
 ## 5) Landmark scenario closure requirements
 ### Store
-- Minimum trigger set: queue dispute or label dispute.
-- Required records: `Violation Ticket` and either `Complaint Memo` or `Defense Memo`.
-- Required runtime trace: at least one `report` stage transition in the run set.
+- Minimum trigger set: routine conversation mismatch, memory gap admission, dream-language leak, or over-explanation.
+- Required records: `ConversationTurnLog`, `AnomalyRecord`, and either `SocialShareReport` or `RepairNote`.
+- Required runtime trace: at least one social transition from `normal` to `uneasy` or `reported` in the run set.
 
 ### Studio
 - Minimum trigger set: Release Candidate approval mismatch claim.
@@ -55,15 +60,15 @@ Minimum required fields:
 - Required runtime trace: report-stage pressure record with witness link.
 
 ### Station
-- Minimum trigger set: inquest intake plus one procedural speech test.
-- Required records: intake dossier line and verdict line.
-- Required runtime trace: `policy_station_intake_requires_procedural_speech` appears when `SA_BREAK` is attempted during intake.
+- Minimum trigger set: a report or contradiction from prior conversation records.
+- Required records: intake dossier line, prior turn reference, and verdict or repair line.
+- Required runtime trace: Station consequence is reconstructable from conversation trigger -> witness -> record -> transition -> outcome.
 
 ## 6) Bounded behavior consistency policy
-v0.1 runtime behavior must remain within these bounded constraints:
+Current runtime behavior must remain within these bounded constraints until the conversation schema replaces the old player-facing loop:
 - NPC Action Type must remain inside `Move|Talk|Ask|Observe|Work|Report|Escort|Idle`.
-- Player speech acts must remain inside `SA_COMPLY|SA_INQUIRE|SA_FRAME|SA_BREAK`.
-- Station intake must reject `SA_BREAK` with deterministic Fallback Path reasoning.
+- Existing player speech acts may remain as internal classification results, but the UI should expose dialogue choices and optional free input, not abstract speech-act buttons.
+- Station intake must reject or escalate risky dialogue with deterministic Fallback Path reasoning.
 - Release planning must not require unbounded natural-language reasoning outside Runtime Path validation.
 
 ## 7) Acceptance Criteria

@@ -120,3 +120,32 @@ Required evidence:
 - verification ledger with technical pass and product blockers separated.
 - PR bot-feedback ledger with each review item resolved, blocked, or deferred.
 - release strategy that does not promise live API access or fixed GPT availability without runtime verification.
+
+## DDR-006: Conversation Choices Are The Primary Player Verb
+
+Status: accepted
+Date: 2026-05-06
+
+Decision:
+- Dream of One's player-facing loop is conversation-first.
+- Default interaction is three diegetic dialogue choices, plus optional free input only where deterministic classification and fallback behavior are proven.
+- NPC suspicion begins when conversation history contains local routine mismatch, dream-language leak, memory gap, contradiction, evasion, or over-explanation.
+- Suspicion should escalate socially through unease, probing, sharing, report, Station intake, inquest, and verdict.
+- The current `SA_COMPLY`/`SA_BREAK` Station Soft Inquest loop remains an internal authority/Evidence harness, not the target player-facing design.
+
+Rationale:
+- The previous Cover Test button loop proved deterministic authority but drifted away from the intended game: most interaction should be dialogue, and the player should be exposed by sounding socially wrong.
+- Three choices reduce free-chat fatigue while keeping conversation as the core verb.
+- Optional free input preserves expressive risk without promising an open-ended chatbot sandbox.
+
+Risks:
+- Choices may become obvious safe/risky buttons if wording is too blunt.
+- Free input can overpromise if release copy calls it open conversation.
+- NPC suspicion may feel arbitrary unless the why-line references the exact conversational mismatch.
+
+Required evidence:
+- conversation prompt/choice schema.
+- deterministic suspicion signal fixtures.
+- Godot UI capture with NPC prompt, three choices, optional free input, NPC reaction, why-line, and report/inquest consequence.
+- safe, risky, repair, and report route Evidence Packs.
+- external comprehension note proving players understand that NPCs suspect them because of dialogue history.

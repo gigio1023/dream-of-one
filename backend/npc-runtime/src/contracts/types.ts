@@ -15,6 +15,12 @@ export const SOCIAL_LOOP_STAGES = [
   "ambient",
   "report",
   "intake",
+  "normal",
+  "uneasy",
+  "probing",
+  "shared",
+  "reported",
+  "inquest",
   "verdict",
 ] as const;
 
@@ -29,6 +35,44 @@ export const PLAYER_SPEECH_ACTS = [
 
 export type PlayerSpeechAct = (typeof PLAYER_SPEECH_ACTS)[number];
 
+export const CONVERSATION_SUSPICION_SIGNALS = [
+  "local_routine_mismatch",
+  "dream_language_leak",
+  "memory_gap_admission",
+  "role_script_break",
+  "prior_statement_contradiction",
+  "authority_evasion",
+  "over_explanation",
+] as const;
+
+export type ConversationSuspicionSignal = (typeof CONVERSATION_SUSPICION_SIGNALS)[number];
+
+export const CONVERSATION_CHOICE_INTENTS = [
+  "safe/local",
+  "uncertain/repair",
+  "risky/weird",
+] as const;
+
+export type ConversationChoiceIntent = (typeof CONVERSATION_CHOICE_INTENTS)[number];
+
+export interface ConversationTurnSignal {
+  conversationId: string;
+  turnId: string;
+  promptId: string;
+  choiceSetId: string;
+  speakerId: string;
+  selectedChoiceId?: string;
+  freeInputHash?: string;
+  displayedPlayerLine: string;
+  priorTurnIds?: string[];
+  suspicionSignals?: ConversationSuspicionSignal[];
+  suspicionBefore?: number;
+  suspicionAfter?: number;
+  reportWeightBefore?: number;
+  reportWeightAfter?: number;
+  whyLine?: string;
+}
+
 export interface PerceptionPacket {
   sessionId: string;
   npcId: string;
@@ -39,6 +83,7 @@ export interface PerceptionPacket {
   recentEvents: string[];
   organizationContext: Record<string, unknown>;
   playerSignals: Record<string, unknown>;
+  conversation?: ConversationTurnSignal;
 }
 
 export interface NpcIntent {

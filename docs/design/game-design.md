@@ -1,11 +1,11 @@
 # Game Design
 
-Scenario source of truth lives in `docs/scenario/`.
-Use `docs/scenario/bible/05-episode-station-soft-inquest.md` for the first complete episode and `docs/scenario/content/dialogue-line-bank.md` for authored NPC pressure text.
+Director source of truth starts in `docs/direction/08-conversation-suspicion-redesign.md`.
+Scenario source of truth lives in `docs/scenario/`, but the current scenario bible still needs a conversation-first rewrite before it can be treated as player-facing canon again.
 
 ## Core Loop
 
-The player moves through Store, Studio, Park, and Station while NPCs and Station systems pressure the player through procedural text, observation, intake, and verdict logic.
+The player talks to NPCs while trying to sound locally normal. Each prompt offers three diegetic dialogue choices and, when proven safe enough for the build, optional free input. The runtime records the line, deterministic rules classify conversational weirdness, NPC suspicion changes, and reports can propagate to Station intake, inquest, and verdict logic.
 
 ## Player Role
 
@@ -13,16 +13,21 @@ The player is not an investigator. The player performs cover work while NPC soci
 
 ## Danger Surface
 
-Text is the danger surface:
+Dialogue is the danger surface:
 
-- Dream Laws appear as diegetic rules and notices.
-- Cover Tests trigger from player utterances, proximity, interaction, and route context.
-- Generated artifacts such as tickets, reports, memos, and why-lines become Evidence.
+- NPC prompts carry local assumptions.
+- Dialogue choices express safe, uncertain/repair, or risky/weird intent without exposing debug labels.
+- Optional free input is a recorded statement, not an open chatbot promise.
+- Dream Laws appear through diegetic records, prior statements, NPC memory, and Station pressure.
+- Generated artifacts such as conversation logs, anomaly records, reports, memos, and why-lines become Evidence.
 
 ## Deterministic Authority
 
 Rule-driven systems own:
 
+- Conversation identity and memory
+- Suspicion signal classification
+- Social sharing and report thresholds
 - Exposure thresholds
 - Station intake
 - Inquest escalation
@@ -30,4 +35,8 @@ Rule-driven systems own:
 - Session termination
 - Fallback Path selection
 
-Godot owns scene presentation and observed world state. Backend Schema and validation keep the loop auditable.
+Godot owns scene presentation, dialogue UI, observed world state, and player input capture. Backend Schema and validation keep the loop auditable.
+
+## Current Internal Harness
+
+The existing Godot Station Soft Inquest smoke proves deterministic authority with text surfaces and abstract speech acts. Preserve it as internal harness evidence until the conversation-first loop replaces it with a playable prompt/choice/free-input proof.

@@ -10,67 +10,67 @@ const PRESSURE_VERDICT := 100
 const UI_COPY := {
 	"ko": {
 		"case_title": "스테이션 사건 파일",
-		"case_meta": "플레이 가능한 프롤로그 | 텍스트가 위험 표면입니다",
-		"pressure": "사건 압박: {exposure} / 100 | {band}",
+		"case_meta": "대화 프롤로그 | 말이 위험 표면입니다",
+		"pressure": "의심/보고 압박: {exposure} / 100 | {band}",
 		"pressure_band_low": "관찰 중",
 		"pressure_band_warning": "접수 압박",
 		"pressure_band_verdict": "판정 임박",
-		"consequence_opening": "먼저 규칙 표면을 읽고, 말하기 전에 절차를 확보하세요.",
-		"consequence_default": "스테이션은 말보다 기록을 먼저 봅니다. Evidence가 다음 압박을 설명합니다.",
-		"consequence_choices": "발화 선택은 커버를 보존하거나 Exposure를 올립니다.",
-		"consequence_intake": "접수가 열렸습니다. 내부 일관성이 안전선입니다.",
-		"consequence_inquest": "심문 압박입니다. 절차 밖의 설명은 Evidence로 남습니다.",
-		"consequence_verdict": "판정 준비 완료. why-line이 세션 종료 근거가 됩니다.",
-		"safe_opening": "SAFE: E로 규칙을 읽고 제한된 답변만 사용",
-		"safe_default": "SAFE: 절차형 문장으로 보고를 유지",
-		"safe_choices": "SAFE: 1/2/3은 커버를 절차 안에 둠",
-		"safe_intake": "SAFE: 접수 질문에만 짧게 답변",
-		"safe_inquest": "SAFE: 이전 보고와 같은 절차 언어 유지",
-		"safe_verdict": "SAFE: 다음 시도에서는 커버 경로를 보존",
-		"risky_opening": "RISK: 규칙 없이 말하면 스테이션이 이유를 만듦",
-		"risky_default": "RISK: 커버 밖의 설명은 Exposure로 기록",
-		"risky_choices": "RISK: 4는 커버를 깨고 압박을 상승",
-		"risky_intake": "RISK: 불일치는 심문을 엶",
-		"risky_inquest": "RISK: 자기해명은 판정 근거가 됨",
-		"risky_verdict": "RISK: 스테이션이 세션 종료를 허가",
+		"consequence_opening": "상점 점원의 질문은 평범하지만 기록됩니다.",
+		"consequence_default": "NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다.",
+		"consequence_choices": "1/2/3 중 하나를 말하세요. 4는 화면에 표시된 진술을 기록합니다.",
+		"consequence_intake": "대화 기록이 접수되었습니다. 앞선 말과 충돌하지 않아야 합니다.",
+		"consequence_inquest": "심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다.",
+		"consequence_verdict": "세션 결과가 고정되었습니다. why-line이 근거입니다.",
+		"safe_opening": "상점 카운터에서 E로 대화 시작",
+		"safe_default": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
+		"safe_choices": "선택지 1",
+		"safe_intake": "스테이션은 상점 대화 기록을 참고합니다.",
+		"safe_inquest": "이전 발화와 같은 전제를 유지하세요.",
+		"safe_verdict": "R 다시 시작 / Q 종료",
+		"risky_opening": "4는 화면에 표시된 진술만 기록합니다.",
+		"risky_default": "기록된 진술도 deterministic signal로만 판정됩니다.",
+		"risky_choices": "선택지 2",
+		"risky_intake": "보고 압박이 올라가면 심문이 열립니다.",
+		"risky_inquest": "점원이 이상하다고 느낀 말이 증거가 됩니다.",
+		"risky_verdict": "다음 시도에서는 말의 전제를 맞추세요.",
 		"why_empty": "WHY-LINE: 아직 기록된 모순 없음",
 		"why": "WHY-LINE: {line}",
 		"evidence_count": "최근 Evidence {shown} / 전체 {total}",
 		"evidence_empty": "Evidence가 아직 기록되지 않았습니다.",
-		"outcome_stamp": "STATION VERDICT",
-		"outcome_trace": "Trace: 규칙 표면 -> 커버 테스트 -> Exposure {exposure} -> 접수 {intake} / 심문 {inquest} / 판정 {verdict} / 종료 {termination}"
+		"outcome_stamp": "STATION INQUEST",
+		"outcome_trace": "Trace: 상점 대화 -> 의심/보고 {exposure} -> 접수 {intake} / 심문 {inquest} / 판정 {verdict} / 종료 {termination}"
 	},
 	"en": {
 		"case_title": "STATION CASE FILE",
-		"case_meta": "Playable prologue | Text is the danger surface",
-		"pressure": "Case pressure: {exposure} / 100 | {band}",
+		"case_meta": "Conversation prologue | Speech is the danger surface",
+		"pressure": "Suspicion/report pressure: {exposure} / 100 | {band}",
 		"pressure_band_low": "observing",
 		"pressure_band_warning": "intake pressure",
 		"pressure_band_verdict": "verdict imminent",
-		"consequence_opening": "Read a rule surface first, then secure procedure before speaking.",
-		"consequence_default": "The Station reads records before speech. Evidence explains the next pressure.",
-		"consequence_choices": "Speech choices either preserve cover or raise Exposure.",
-		"consequence_intake": "Intake is open. Internal consistency is the safe line.",
-		"consequence_inquest": "Inquest pressure. Explanations outside procedure become Evidence.",
-		"consequence_verdict": "Verdict ready. The why-line is the session-closure basis.",
-		"safe_opening": "SAFE: read rules with E and use bounded answers",
-		"safe_default": "SAFE: keep the report procedural",
-		"safe_choices": "SAFE: 1/2/3 keep cover inside procedure",
-		"safe_intake": "SAFE: answer only the intake question",
-		"safe_inquest": "SAFE: match the prior report language",
-		"safe_verdict": "SAFE: preserve the cover route on the next pass",
-		"risky_opening": "RISK: speaking without rules gives the Station a reason",
-		"risky_default": "RISK: explanations outside cover become Exposure",
-		"risky_choices": "RISK: 4 breaks cover and escalates pressure",
-		"risky_intake": "RISK: inconsistency opens inquest",
-		"risky_inquest": "RISK: self-explanation supports verdict",
-		"risky_verdict": "RISK: the Station may close the session",
+		"consequence_opening": "The clerk's ordinary question is still recorded.",
+		"consequence_default": "NPCs notice conversational mismatch first; the Station reads the record later.",
+		"consequence_choices": "Speak with 1/2/3. 4 records the displayed statement.",
+		"consequence_intake": "Conversation record filed. Do not contradict earlier speech.",
+		"consequence_inquest": "Inquest pressure. Earlier dialogue signals are the basis.",
+		"consequence_verdict": "Session outcome is fixed. The why-line is the basis.",
+		"safe_opening": "Press E at the store counter to start conversation",
+		"safe_default": "Choices are shown as speech, not risk labels.",
+		"safe_choices": "Choice 1",
+		"safe_intake": "The Station references the store conversation.",
+		"safe_inquest": "Keep the same premise as prior lines.",
+		"safe_verdict": "R restart / Q quit",
+		"risky_opening": "4 records only the displayed statement.",
+		"risky_default": "The recorded statement is judged only by deterministic signals.",
+		"risky_choices": "Choice 2",
+		"risky_intake": "Report pressure can open inquest.",
+		"risky_inquest": "The suspicious line becomes evidence.",
+		"risky_verdict": "On the next pass, match the premise.",
 		"why_empty": "WHY-LINE: no contradiction recorded yet",
 		"why": "WHY-LINE: {line}",
 		"evidence_count": "Recent Evidence {shown} / total {total}",
 		"evidence_empty": "No Evidence recorded yet.",
-		"outcome_stamp": "STATION VERDICT",
-		"outcome_trace": "Trace: rule surface -> cover test -> Exposure {exposure} -> intake {intake} / inquest {inquest} / verdict {verdict} / end {termination}"
+		"outcome_stamp": "STATION INQUEST",
+		"outcome_trace": "Trace: Store conversation -> suspicion/report {exposure} -> intake {intake} / inquest {inquest} / verdict {verdict} / end {termination}"
 	}
 }
 
@@ -108,6 +108,8 @@ var _exposure := 0
 var _station: Dictionary = {}
 var _choices_enabled := false
 var _last_why_line := ""
+var _active_choice_lines: Array[String] = []
+var _recorded_statement_line := ""
 
 func _ready() -> void:
 	add_to_group("localized_nodes")
@@ -160,9 +162,47 @@ func set_status(
 
 func set_focus(prompt: String, choices_enabled: bool) -> void:
 	_choices_enabled = choices_enabled
+	_active_choice_lines = []
+	_recorded_statement_line = ""
 	_focus_label.text = prompt
 	_choices_label.visible = choices_enabled
 	_refresh_consequence_text()
+
+func set_conversation(
+	npc_prompt: String,
+	choices: Array,
+	recorded_statement_line: String,
+	history: Array,
+	choices_enabled: bool
+) -> void:
+	_choices_enabled = choices_enabled
+	_active_choice_lines = _string_array(choices)
+	_recorded_statement_line = recorded_statement_line
+	_focus_label.text = npc_prompt
+	_choices_label.visible = choices_enabled
+	_safe_line_label.visible = choices_enabled
+	_risky_line_label.visible = choices_enabled
+	var history_text := ""
+	if not history.is_empty():
+		history_text = "\n최근 발화: %s" % str(history[history.size() - 1])
+	_consequence_label.text = "%s\n4  기록된 진술 제출: %s%s" % [
+		_ui_text("consequence_choices") if choices_enabled else _ui_text("consequence_default"),
+		recorded_statement_line,
+		history_text
+	]
+	_refresh_consequence_text()
+
+func debug_snapshot() -> Dictionary:
+	return {
+		"focusLabel": _focus_label.text,
+		"choicesLabel": _choices_label.text,
+		"safeLineLabel": _safe_line_label.text,
+		"riskyLineLabel": _risky_line_label.text,
+		"consequenceLabel": _consequence_label.text,
+		"whyLineLabel": _why_line_label.text,
+		"outcomeVisible": _outcome_panel.visible,
+		"noticeVisible": _notice_panel.visible
+	}
 
 func set_notice(title: String, body: String, visible: bool) -> void:
 	_notice_panel.visible = visible
@@ -261,8 +301,24 @@ func _refresh_consequence_text() -> void:
 	elif _exposure <= 0:
 		state_key = "opening"
 	_consequence_label.text = _ui_text("consequence_%s" % state_key)
-	_safe_line_label.text = _ui_text("safe_%s" % state_key)
-	_risky_line_label.text = _ui_text("risky_%s" % state_key)
+	if _choices_enabled and _active_choice_lines.size() >= 3:
+		_apply_active_choice_labels()
+	else:
+		_safe_line_label.text = _ui_text("safe_%s" % state_key)
+		_risky_line_label.text = _ui_text("risky_%s" % state_key)
+
+func _apply_active_choice_labels() -> void:
+	_choices_label.visible = true
+	_safe_line_label.visible = true
+	_risky_line_label.visible = true
+	_choices_label.text = "1  %s" % _active_choice_lines[0]
+	_safe_line_label.text = "2  %s" % _active_choice_lines[1]
+	_risky_line_label.text = "3  %s" % _active_choice_lines[2]
+	if not _recorded_statement_line.is_empty():
+		_consequence_label.text = "%s\n4  기록된 진술 제출: %s" % [
+			_ui_text("consequence_choices"),
+			_recorded_statement_line
+		]
 
 func _refresh_why_line() -> void:
 	_why_line_label.text = _ui_text("why_empty") if _last_why_line.is_empty() else _ui_text("why", {
@@ -300,6 +356,12 @@ func _is_pressure_notice(body: String) -> bool:
 	if body.find("SA_COMPLY") >= 0:
 		return false
 	return body.find("Speech act:") >= 0 or body.find("발화 행동:") >= 0
+
+func _string_array(value: Array) -> Array[String]:
+	var result: Array[String] = []
+	for item in value:
+		result.append(str(item))
+	return result
 
 func _ui_text(key: String, args: Dictionary = {}) -> String:
 	var fallback_messages: Dictionary = UI_COPY["ko"]

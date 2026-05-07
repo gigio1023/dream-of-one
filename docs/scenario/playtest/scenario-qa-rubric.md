@@ -6,9 +6,9 @@ A Dream of One scenario is game-ready only when it proves the playable loop, not
 
 | Gate | Requirement |
 |---|---|
-| Canon | Player is not investigator; NPCs/Station investigate; text is danger surface. |
-| Critical path | Spawn near Station, read Dream Law text, enter Cover Test, choose bounded speech act, update Exposure/Station state, reach defuse or verdict-ready. |
-| Runtime mapping | Every beat maps to a text surface, trigger zone, detector, speech act, Exposure delta, Evidence event, or verdict/defuse result. |
+| Canon | Player is not investigator; NPCs/Station investigate; dialogue is danger surface. |
+| Critical path | NPC prompt, three dialogue choices, optional recorded free input if enabled, deterministic suspicion signal, NPC reaction, social report or repair, Station consequence. |
+| Runtime mapping | Every beat maps to a conversation id, prompt id, choice/free-input record, suspicion signal, suspicion/report delta, Evidence event, or verdict/defuse result. |
 | No lore-only pass | Any beat that cannot be observed, triggered, logged, or validated fails review. |
 | Fresh-player comprehension | Testers can explain who they are, what pressure they are under, next action, and why Exposure changed. |
 | Narrative QA | No canon drift, proper-noun drift, unexplained logic jump, missing line, inconsistent Station authority, or meta Dream Law exposition. |
@@ -29,10 +29,10 @@ A Dream of One scenario is game-ready only when it proves the playable loop, not
 ## Review Checklist
 
 - Can the player infer the objective from the game, not docs?
-- Is danger delivered through readable text surfaces and NPC/Station pressure?
-- Does each Cover Test have trigger, escalation ladder, defuse option, generated artifact, and why-line?
-- Are all player inputs bounded speech acts?
-- Does Exposure change for a concrete reason visible in Evidence?
+- Is danger delivered through NPC dialogue, conversation memory, and NPC/Station pressure?
+- Does each conversation pressure beat have prompt, choice set, optional free-input policy, suspicion signal, escalation ladder, repair option, generated artifact, and why-line?
+- Do player-facing inputs read as speech instead of abstract speech-act buttons?
+- Does suspicion/Exposure/report pressure change for a concrete reason visible in Evidence?
 - Are Station intake, Inquest, verdict, and termination deterministic?
 - Does the scenario produce testable artifacts, not just story notes?
 - Do screenshots prove legibility and end-state feedback?
@@ -42,11 +42,11 @@ A Dream of One scenario is game-ready only when it proves the playable loop, not
 
 | Step | Facilitator Instruction | Observe |
 |---|---|---|
-| Launch | Do not explain premise beyond controls. | Does player face Station and notice first text? |
-| First text | Let player read or skip. | Can they describe the rule? |
-| First Cover Test | Let player choose any speech act. | Do they understand why Exposure changed? |
-| Route loop | Let player visit Store, Studio, Park. | Does each location feel socially different? |
-| Return Station | Do not explain artifacts. | Does player understand intake/Inquest pressure? |
+| Launch | Do not explain premise beyond controls. | Does player identify who is talking to them and what response is available? |
+| First prompt | Let player pick any dialogue choice. | Can they tell which answer sounded locally normal or strange? |
+| Optional input | If enabled, let player type one statement. | Do they understand it becomes a recorded statement, not safe chat? |
+| Social reaction | Let the NPC probe or share suspicion. | Does the player notice NPC unease before Station pressure? |
+| Return Station | Do not explain artifacts. | Does player understand intake/Inquest pressure references prior conversation? |
 | End state | Ask what caused the outcome. | Can player name witness, artifact, or rule? |
 
 ## External References

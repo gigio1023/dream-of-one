@@ -28,6 +28,7 @@ interface MailboxJob {
 interface MailboxState {
   running: boolean;
   pending?: MailboxJob;
+  orderedPending: MailboxJob[];
 }
 
 export interface DecisionMailboxMetrics {
@@ -193,7 +194,7 @@ export class DecisionService {
 
   private async enqueue(packet: PerceptionPacket, options: DecisionRequestOptions): Promise<DecisionEnvelope> {
     const actorKey = `${packet.sessionId}::${packet.npcId}`;
-    const mailbox = this.mailboxes.get(actorKey) ?? { running: false };
+    const mailbox = this.mailboxes.get(actorKey) ?? { running: false, orderedPending: [] };
     this.mailboxes.set(actorKey, mailbox);
 
     const actorPending = this.resolveActorPending(mailbox);
@@ -253,6 +254,15 @@ export class DecisionService {
         return;
       }
 
+      if (this.requiresOrderedDelivery(packet)) {
+        const job = this.createJob(packet, waiter);
+        mailbox.orderedPending.push(job);
+        this.bindWaiterToJob(actorKey, mailbox, job, waiter);
+        this.metrics.queued += 1;
+        this.refreshGlobalLimiterMetrics();
+        return;
+      }
+
       if (!mailbox.pending) {
         const job = this.createJob(packet, waiter);
         mailbox.pending = job;
@@ -281,8 +291,7 @@ export class DecisionService {
         this.expireDeadlineWaiters(job);
         if (this.activeWaiterCount(job) === 0) {
           this.cleanupWaiterBindings(job);
-          currentJob = mailbox.pending;
-          mailbox.pending = undefined;
+          currentJob = this.shiftNextPendingJob(mailbox);
           continue;
         }
 
@@ -290,8 +299,7 @@ export class DecisionService {
         if (remainingDeadlineMs !== undefined && remainingDeadlineMs <= 0) {
           this.expireDeadlineWaiters(job);
           this.cleanupWaiterBindings(job);
-          currentJob = mailbox.pending;
-          mailbox.pending = undefined;
+          currentJob = this.shiftNextPendingJob(mailbox);
           continue;
         }
 
@@ -345,12 +353,11 @@ export class DecisionService {
         }
 
         this.cleanupWaiterBindings(job);
-        currentJob = mailbox.pending;
-        mailbox.pending = undefined;
+        currentJob = this.shiftNextPendingJob(mailbox);
       }
     } finally {
       mailbox.running = false;
-      if (!mailbox.pending) {
+      if (!mailbox.pending && mailbox.orderedPending.length === 0) {
         this.mailboxes.delete(actorKey);
       }
       this.refreshGlobalLimiterMetrics();
@@ -364,6 +371,20 @@ export class DecisionService {
       running: false,
       abortController: new AbortController(),
     };
+  }
+
+  private requiresOrderedDelivery(packet: PerceptionPacket): boolean {
+    return typeof packet.conversation?.turnId === "string" && packet.conversation.turnId.trim().length > 0;
+  }
+
+  private shiftNextPendingJob(mailbox: MailboxState): MailboxJob | undefined {
+    const ordered = mailbox.orderedPending.shift();
+    if (ordered) {
+      return ordered;
+    }
+    const pending = mailbox.pending;
+    mailbox.pending = undefined;
+    return pending;
   }
 
   private bindWaiterToJob(actorKey: string, mailbox: MailboxState, job: MailboxJob, waiter: MailboxWaiter): void {
@@ -384,9 +405,12 @@ export class DecisionService {
       if (!job.running && mailbox.pending === job && this.activeWaiterCount(job) === 0) {
         mailbox.pending = undefined;
       }
+      if (!job.running && this.activeWaiterCount(job) === 0) {
+        mailbox.orderedPending = mailbox.orderedPending.filter(item => item !== job);
+      }
 
       // Keep mailbox map clean if this actor has no remaining work.
-      if (!mailbox.running && !mailbox.pending) {
+      if (!mailbox.running && !mailbox.pending && mailbox.orderedPending.length === 0) {
         this.mailboxes.delete(actorKey);
       }
       this.refreshGlobalLimiterMetrics();
@@ -503,7 +527,11 @@ export class DecisionService {
     const pendingWaiters = mailbox.pending
       ? mailbox.pending.waiters.reduce((count, waiter) => count + (waiter.active ? 1 : 0), 0)
       : 0;
-    return running + pendingWaiters;
+    const orderedWaiters = mailbox.orderedPending.reduce(
+      (total, job) => total + job.waiters.reduce((count, waiter) => count + (waiter.active ? 1 : 0), 0),
+      0,
+    );
+    return running + pendingWaiters + orderedWaiters;
   }
 
   private collectActorSnapshots(maxActors: number): Array<{ actorKey: string; pending: number }> {

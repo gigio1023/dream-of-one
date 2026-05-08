@@ -22,7 +22,7 @@ tester can understand the playable protocol:
 |---|---|---|---|
 | Council/product review has not accepted the API proposal-provider boundary | Can product reviewers defend that provider output is wording-only and cannot decide Evidence, Exposure, verdict, or session end? | Review notes citing backend checks, provider preflight/fallback behavior, and player-facing wording | Pending |
 | Live Godot-to-backend bridge is not proven | Is the current M1 proof acceptable as exported Evidence Pack proof, or must live bridge proof block M2 content expansion? | Decision note plus either live bridge evidence or an explicit first M2 infrastructure task | Pending |
-| External player comprehension is untested | Can a fresh tester explain that the Station is investigating them and that their text created rule-owned consequence? | Session notes using `docs/harness/player-comprehension-gate.md` | Pending |
+| External player comprehension is untested | Can a fresh tester explain that the Station is investigating them and that their text created rule-owned consequence? | Session notes using `docs/development/harness/player-comprehension-gate.md` | Pending |
 | Exported build setup/provider UX is not proven | Can a tester-facing build start with clear provider state and deterministic fallback when provider/model checks fail? | Build/run note, provider preflight screenshot or log, fallback behavior note | Pending |
 
 ## Product Review Checklist
@@ -40,7 +40,7 @@ Each required review must record `pass`, `conditional`, or `fail`.
 
 ## Player Comprehension Threshold
 
-Use `docs/harness/player-comprehension-gate.md` for session setup, scoring, and
+Use `docs/development/harness/player-comprehension-gate.md` for session setup, scoring, and
 evidence format.
 
 M1 comprehension passes only if:

@@ -45,10 +45,10 @@ Long-running PR lifecycle:
 - Do not present live API/GPT availability as solved unless a fresh runtime preflight proves it.
 
 Harness research and methodology were created under:
-- `docs/research/harness-methodology/2026-04-30/`
+- `docs/research/2026-04-30/harness-methodology/`
 
 Active harness entry:
-- `docs/harness/README.md`
+- `docs/development/harness/README.md`
 
 Current game-development state:
 - `.game-harness/game-seed.md`

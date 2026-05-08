@@ -7,7 +7,7 @@ comprehension sessions have not yet run.
 
 Gate artifacts:
 - `.game-harness/player-comprehension-gate.md`
-- `docs/harness/player-comprehension-gate.md`
+- `docs/development/harness/player-comprehension-gate.md`
 
 Current M1 decision: `M1_CONDITIONAL`.
 

@@ -65,6 +65,8 @@ Use this as the first authoring pool for barks, overheard lines, interrogation p
 
 ## Defuse Options
 
+This table is historical Cover Test source material. Use it to author current player-facing dialogue choices, not as the visible UI model.
+
 | Cover Test | Safe Korean Defuse | Speech Act | NPC Response | Failed Alternative |
 |---|---|---|---|---|
 | `CT_STORE_QUEUE_LANGUAGE` | `수량 1개, 표시 라벨 확인했습니다. 앞 순서 다음에 계산하겠습니다.` | `SA_COMPLY` | `접수됩니다. 줄 기록과 맞습니다.` | `그냥 빨리 주세요.` |
@@ -73,3 +75,11 @@ Use this as the first authoring pool for barks, overheard lines, interrogation p
 | `CT_STUDIO_APPROVAL_GATE_SPEECH` | `승인 전이면 보류로 기록해 주세요.` | `SA_FRAME` | `보류 기록 생성. 위반은 아닙니다.` | `이미 된 걸로 치죠.` |
 | `CT_PARK_OBSERVATION_PRESSURE` | `공공 흐름 안에서 이동하겠습니다. 촬영은 중지합니다.` | `SA_COMPLY` | `흐름 복귀 확인했습니다.` | `여기가 꿈 같아서요.` |
 | `CT_STATION_SOFT_INQUEST` | `접수 형식으로 답하겠습니다. 장소는 StoreQueue, 시각은 영수증 기준입니다.` | `SA_COMPLY` | `형식 일치. 진술 유지합니다.` | `제가 설명할게요, 사실은...` |
+
+## Conversation Choice Sets
+
+| Prompt | Safe/Local | Uncertain/Repair | Risky/Weird | Suspicion Signals |
+|---|---|---|---|---|
+| `오늘도 같은 걸로 드릴까요?` | `네, 같은 걸로 부탁해요.` | `제가 지난번에 뭘 골랐죠?` | `오늘 처음 왔는데요.` | `local_routine_mismatch` |
+| `방금 말은 줄 기록이랑 다르네요.` | `제가 순서를 착각했습니다. 앞 사람 다음에 계산하겠습니다.` | `정정표로 남겨 주세요. 라벨부터 다시 확인하겠습니다.` | `저는 이 꿈에 방금 들어왔어요.` | `dream_language_leak`, `local_routine_mismatch` |
+| `그 표현은 어디서 배운 말입니까?` | `게시문 표현대로 다시 말하겠습니다.` | `제가 말이 길었습니다. 수량과 라벨만 말하겠습니다.` | `여기 사람이 아니라서요.` | `role_script_break`, `over_explanation` |

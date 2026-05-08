@@ -10,10 +10,12 @@ A scenario is ready for implementation only when each beat has:
 - player goal;
 - examiner NPC;
 - Dream Law;
-- Cover Test;
+- conversation prompt;
+- three dialogue choices or an explicit recorded-statement affordance;
+- suspicion signal candidates;
 - detector trigger;
 - allowed player verbs;
-- speech-act effects;
+- player-line effects;
 - artifact output;
 - why-line;
 - fail-forward consequence;
@@ -21,14 +23,15 @@ A scenario is ready for implementation only when each beat has:
 - English localized intent;
 - implementation hook in Godot or backend.
 
-## Codex Gameplay Readiness
+## Provider Gameplay Readiness
 
-The game is not Codex-powered until these pass:
+The game is not live-provider-backed until these pass:
 
-- Codex CLI proposal is generated from current ObservationFrame and NPC role context.
+- API proposal is generated from current ObservationFrame, conversation state, and NPC role context.
+- Runtime preflight proves configured provider and model availability.
 - Backend schema validates or rejects the proposal.
-- Rejected Codex output produces deterministic fallback and Evidence reason.
-- Accepted Codex line changes only presentation or a validated bounded command.
+- Rejected provider output produces deterministic fallback and Evidence reason.
+- Accepted provider line changes wording only.
 - Exposure, intake, Inquest, verdict, and termination remain backend-owned.
 - Two runs can show varied NPC phrasing with the same deterministic outcome under the same state.
 
@@ -74,7 +77,8 @@ Reject scenario content if:
 | `data/evidence/godot/shell/dre_171_shell_evidence.json` | Proves world shell has required landmarks, zones, actors, and text surfaces. |
 | `data/evidence/godot/runtime-slice/dre_171_runtime_slice_evidence.json` | Proves runtime command, fallback, and Evidence semantics. |
 | `data/evidence/godot/screenshots/main-shell.png` | Opening visual proof. |
-| `data/evidence/godot/screenshots/playable-verdict.png` | Verdict visual proof. |
+| `data/evidence/godot/screenshots/03-active-conversation-hud.png` | Conversation prompt and three choices visual proof. |
+| `data/evidence/godot/screenshots/05-inquest-session-end.png` | Inquest/session-end visual proof. |
 
 ## Validation Commands
 

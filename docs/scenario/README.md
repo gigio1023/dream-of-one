@@ -1,71 +1,37 @@
-# Dream of One Scenario Docs
+# Scenario Docs
 
-This directory is the scenario source of truth for the active Godot 3D social-stealth game.
-
-## Purpose
-
-Dream of One needs to feel like an authored indie game, not a tutorial scene. The scenario docs define:
-
-- what the player is trying to perform;
-- how NPC society investigates the player;
-- how text surfaces become danger and Evidence;
-- how Store, Studio, Park, and Station pressure the player;
-- how Korean-first writing, barks, spaces, and verdict lines should ship.
+This directory is the active scenario source for Dream of One.
 
 ## Canon Boundary
 
-Use these docs for scenario, writing, pacing, character voice, and level-story decisions.
+Use these docs for scenario, writing, pacing, character voice, locations, and playtest expectations.
 
-Use `docs/migration/godot/` only for migration, runtime gates, and Godot cutover evidence. Migration docs are not the scenario bible.
+Do not use archived Codex CLI pitch or release packs as active release truth. They live under [archive/scenario](../archive/scenario/) and preserve history only.
 
 ## Reading Order
 
-1. `plan/2026-04-29-scenario-rebuild-plan.md`
-2. `pitch/README.md`
-3. `pitch/01-product-thesis.md`
-4. `pitch/02-ai-gameplay-architecture.md`
-5. `pitch/03-vertical-slice-plan.md`
-6. `pitch/04-team-and-production-plan.md`
-7. `pitch/05-funding-and-publisher-readiness.md`
-8. `pitch/06-risk-register.md`
-9. `pitch/07-codex-cli-npc-runtime.md`
-10. `release/small-release-definition.md`
-11. `release/small-release-readiness-report.md`
-12. `release/game-design/README.md`
-13. `release/game-design/00-authoring-method.md`
-14. `release/game-design/01-small-release-game-design-bible.md`
-15. `release/game-design/02-beat-to-runtime-matrix.md`
-16. `release/game-design/03-codex-npc-interaction-contract.md`
-17. `release/game-design/04-level-and-environment-design.md`
-18. `release/game-design/05-onboarding-localization-accessibility.md`
-19. `release/game-design/06-polish-release-quality-bar.md`
-20. `release/game-design/07-research-source-map.md`
-21. `release/small-release-team-execution-plan.md`
-22. `research/source-map.md`
-23. `bible/00-index.md`
-24. `bible/01-premise-and-rails.md`
-25. `bible/02-player-experience-mda.md`
-26. `bible/03-act-and-pressure-map.md`
-27. `bible/04-state-model.md`
-28. `bible/05-episode-station-soft-inquest.md`
-29. `bible/06-cover-tests-and-evidence.md`
-30. `bible/07-characters-and-dialogue.md`
-31. `bible/08-locations-and-environmental-story.md`
-32. `bible/09-barks-and-text-surfaces.md`
-33. `bible/10-localization-style-guide.md`
-34. `bible/11-quality-bar-and-validation.md`
-35. `content/dialogue-line-bank.md`
-36. `content/location-placement-contracts.md`
-37. `content/korean-voice-notes.md`
-38. `playtest/scenario-qa-rubric.md`
+| Order | Document | Purpose |
+|---:|---|---|
+| 1 | [Bible index](bible/README.md) | Scenario bible map and canon IDs. |
+| 2 | [Conversation suspicion prologue](bible/12-conversation-suspicion-prologue.md) | Active first playable scenario direction. |
+| 3 | [Premise and rails](bible/01-premise-and-rails.md) | Core fantasy, constraints, and authority boundary. |
+| 4 | [Player experience MDA](bible/02-player-experience-mda.md) | Target feelings and mechanics. |
+| 5 | [State model](bible/04-state-model.md) | Thresholds, transitions, and deterministic ownership. |
+| 6 | [Characters and dialogue](bible/07-characters-and-dialogue.md) | NPC roles, voice constraints, and line samples. |
+| 7 | [Barks and text surfaces](bible/09-barks-and-text-surfaces.md) | Reactive bark and text-surface rules. |
+| 8 | [Localization style guide](bible/10-localization-style-guide.md) | Korean-first terminology and English localization. |
+| 9 | [Quality bar and validation](bible/11-quality-bar-and-validation.md) | Scenario readiness and playtest gates. |
 
-## Current Vertical Slice
+## Supporting Content
 
-`Station Soft Inquest` is the first complete scenario target:
+| File | Use |
+|---|---|
+| [dialogue-line-bank.md](content/dialogue-line-bank.md) | Bark, overheard, interrogation, defuse, and why-line source lines. |
+| [location-placement-contracts.md](content/location-placement-contracts.md) | Placement schema for routes, props, text surfaces, lighting, sightlines, and audio motifs. |
+| [korean-voice-notes.md](content/korean-voice-notes.md) | Korean-first institutional tone notes and term variants. |
+| [scenario-qa-rubric.md](playtest/scenario-qa-rubric.md) | Scenario QA and blind playtest rubric. |
+| [source-map.md](research/source-map.md) | Scenario research source map. |
 
-- 20-30 minute compact social-stealth loop.
-- Korean-first, English-localizable.
-- Player starts near Station.
-- Player must stay socially legible through Store, Studio, Park, and Station.
-- Each imprecise action creates durable Evidence.
-- Verdict is deterministic, not NPC whim.
+## Current Scenario Promise
+
+The player should feel that every harmless phrase can become a record, every NPC can notice when the player sounds like an outsider, and every polite follow-up can become the start of a report.

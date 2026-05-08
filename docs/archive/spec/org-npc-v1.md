@@ -1,0 +1,366 @@
+# Org + NPC spec v1 (MCSS: Store/Studio/Park/Station)
+
+Revision date: 2026-02-18
+Status: Superseded scenario reference
+SoT references: `project.md`, `docs/scenario/`, `docs/design/dream-laws.md`, `docs/design/cover-tests.md`
+
+This document is the v1 organization/NPC reference baseline for procedures, NPC roles/routines, incident templates, and artifact expectations. Active scenario source now lives in `docs/scenario/`, and active Godot runtime IDs live in `godot/data/world_layout.json`.
+
+Historical IDs such as `Police_*`, `StoreBuilding`, `StudioBuilding_L1`, `ParkArea`, `PoliceReport`, and `CT-01..CT-06` below are reference vocabulary only. New work must use the current IDs in:
+
+- `docs/scenario/bible/README.md`
+- `docs/scenario/bible/06-cover-tests-and-evidence.md`
+- `godot/data/world_layout.json`
+
+This document aligns with the active Runtime Path terminology from:
+- `project.md`
+- `docs/design/game-design.md`
+- `docs/scenario/`
+- `docs/design/dream-laws.md`
+- `docs/design/cover-tests.md`
+- `backend/npc-runtime/src/contracts/types.ts`
+
+**Design rail:** The player is **not** an investigator. NPCs/Station investigate the player’s procedural deviations and dream‑law violations.
+
+## Terminology alignment (Runtime Path SoT)
+
+### Organization IDs
+
+The following organization IDs are canonical for this slice:
+
+- `Store`
+- `Studio`
+- `Park`
+- `Station` (police outpost)
+
+For design text, “Police” refers to the `Station` organization ID.
+
+### Runtime entity fields (design-relevant)
+
+Active Runtime Path fields this spec references most often:
+
+- `npcId`: stable NPC identity key (e.g., `Police_Officer`)
+- `roleName`: role/archetype name used by UI/dialogue
+- `organization`: organization ID string (`Store`, `Studio`, `Park`, `Station`)
+- `recentEvents`: social/rule context for escalation and causality
+- `organizationContext`: role/procedure context used by decision policy
+- `playerSignals`: bounded player behavior context (including speech-act signals)
+
+### Anchors and zones already seeded
+
+Anchors and zones referenced below are scenario identifiers for cross-document consistency and telemetry interpretation.
+They are design/runtime labels, not a dependency on previous engine seeders:
+
+- Building anchors:
+  - `StoreBuilding`
+  - `StudioBuilding_L1`
+  - `ParkArea`
+  - `Station`
+- Key zones:
+  - `StoreQueue`
+  - `StudioPhoto`
+  - `ParkSeat`
+  - `PoliceReport`
+
+## Organization procedures (spec tables)
+
+Each organization table captures current design intent in this shape:
+- `goal`
+- `procedures`
+- `resources`
+- `artifacts`
+- `roles`
+
+### Store (`Store`)
+
+| Field | Spec |
+| --- | --- |
+| Goal | Keep `out-of-stock=0 / label refresh / transaction order` stable under load. |
+| Procedure steps (6) | 1) Open counter + confirm `label system` state. 2) Sweep `StoreQueue` for rule risk (`R_QUEUE`). 3) Verify high-risk labels (`R_LABEL`) and update where needed. 4) Resolve counter conflicts (order, refunds, mislabels). 5) Emit evidence artifacts (tickets/receipts/memos) for any dispute. 6) Close with a short “status line” for the next cycle (what changed, why). |
+| Resources | `label system`, `counter`, `Store_QueueMarker`, `Store_LabelBoard`, `Store_Printer`, `Store_CounterBell`. |
+| Artifacts (examples) | `price/out-of-stock labels`, `transaction memo`, `Violation Ticket`, `Complaint Memo`, `Defense Memo`. |
+| Roles | `Clerk`, `Manager`, plus supporting `Customer` archetypes. |
+
+### Studio (`Studio`)
+
+| Field | Spec |
+| --- | --- |
+| Goal | Deliver `Release Candidate (RC, 릴리즈 후보) submission / release stabilization` while keeping procedure integrity visible. |
+| Procedure steps (7) | 1) Pull current work into visible state (`kanban refresh`). 2) Verify scope against release target (what counts as Release Candidate). 3) Draft/refresh `patch notes` based on actual work. 4) Run approval pass at `Studio_ApprovalDesk`. 5) Insert Release Candidate at `Studio_RCInsert` only after approval evidence exists. 6) Broadcast release outcome (approval granted vs. slip). 7) Log any procedure slips as explicit incidents, not silent failures. |
+| Resources | `kanban board`, `lounge`, `server slot`, `Studio_Kanban`, `Studio_ApprovalDesk`, `Studio_RCInsert`. |
+| Artifacts (examples) | `kanban log`, `patch notes`, `approval note`, `Release Candidate strip`, `Approval Note`. |
+| Roles | `PM`, `Developer`, `QA`, `Release`. |
+
+### Park (`Park`)
+
+| Field | Spec |
+| --- | --- |
+| Goal | Maintain `seat / noise / photo rules` without feeling over-policed. |
+| Procedure steps (5) | 1) Patrol anchor loop around `ParkArea` and `ParkSeat`. 2) Detect visible rule pressure: noise clusters, seat monopolies, unauthorized photo setups. 3) Issue graded interventions: soft warning → directive → escalation call. 4) Record the intervention outcome as a lightweight report/memo. 5) Update public signals (`notice board announcement`) when norms change. |
+| Resources | `notice board`, `enforcement authority`, `Park_Bench`, `Park_NoticeBoard`, `Park_NoiseSpot`, `Park_PhotoSpot`. |
+| Artifacts (examples) | `enforcement report`, `notice board announcement`, `complaint memo`, `Rumor Card`, `Complaint Memo`. |
+| Roles | `Elder`, `Caretaker`, plus supporting `Visitor` archetypes. |
+
+### Station (`Station`)
+
+| Field | Spec |
+| --- | --- |
+| Goal | Execute `report intake → evidence bundling → soft inquest → deterministic verdict` for the **PLAYER** suspect with legible truth transitions. |
+| Procedure steps (7) | 1) Intake report at `Police_ReportDesk` (who/what/where about PLAYER). 2) Create/refresh Inquest Dossier (suspect=PLAYER, initial artifacts). 3) Collect evidence artifacts (witness statements, tickets, notice snapshots). 4) Run a soft inquest at `Police_InterrogationSpot` using **procedure speech only**. 5) Reconcile contradictions on the evidence board (`Police_EvidenceBoard`). 6) Emit a deterministic verdict line (cleared / warning / detained / lucid identified). 7) Publish resolution artifacts and close or escalate the dossier. |
+| Resources | `ticket issuance`, `printer`, `capture board`, `Police_ReportDesk`, `Police_EvidenceBoard`, `Police_Printer`, `Police_InterrogationSpot`. |
+| Artifacts (examples) | `witness statement`, `violation ticket`, `notice snapshot`, `case log strip`, `Defense Memo`. |
+| Roles | `Officer`, `Investigator`. |
+
+## NPC archetypes and routines
+
+Each organization defines at least two NPC archetypes. Archetypes are expressed with Runtime Path fields (`roleName`, `organization`) and spec-level descriptors (`routine`, `authorityProfile`, `anchorName`) for consistent design and validation language.
+
+### Store archetypes
+
+#### 1) Store Clerk (`roleName: Clerk`)
+
+- Organization: `Store`
+- Authority profile: `Medium` (can warn, correct labels, and issue store-level tickets/receipts)
+- Anchor: `StoreBuilding`
+- Routine anchors (primary loop):
+  - `Store_LabelBoard` → `Store_QueueMarker` → `Store_CounterBell` → `Store_Printer`
+- Major interactions:
+  - Resolves queue disputes and label mismatches.
+  - Produces artifacts when forced to arbitrate (ticket/memo/receipt).
+  - Defers bans/escalations to `Manager` or `Station`.
+
+#### 2) Store Manager (`roleName: Manager`)
+
+- Organization: `Store`
+- Authority profile: `High` (can overrule clerk decisions, authorize exceptions, escalate to Station)
+- Anchor: `StoreBuilding`
+- Routine anchors (primary loop):
+  - `Store_CounterBell` → `Store_LabelBoard` → `Store_Printer`
+- Major interactions:
+  - Converts ambiguous disputes into explicit rulings.
+  - Signs off on artifacts that change future policy (e.g., “label freeze”).
+  - Acts as a reliable witness for “why was this exception made?”
+
+### Studio archetypes
+
+#### 1) Studio PM (`roleName: PM`)
+
+- Organization: `Studio`
+- Authority profile: `High` (controls approval criteria and Release Candidate readiness decisions)
+- Anchor: `StudioBuilding_L1`
+- Routine anchors (primary loop):
+  - `Studio_Kanban` → `Studio_ApprovalDesk` → `Studio_RCInsert`
+- Major interactions:
+  - Requests evidence that work exists before allowing approval.
+  - Blocks Release Candidate insertion when artifacts do not support claims.
+  - Generates approval artifacts that become police-grade evidence later.
+
+#### 2) Studio QA (`roleName: QA`)
+
+- Organization: `Studio`
+- Authority profile: `Medium` (can delay but not finalize release)
+- Anchor: `StudioBuilding_L1`
+- Routine anchors (primary loop):
+  - `Studio_Kanban` → `Studio_Terminal` → `Studio_ApprovalDesk`
+- Major interactions:
+  - Turns rumors (“Release Candidate is ready”) into verifiable claims (“show patch notes / approvals”).
+  - Produces `Defense Memo`-style artifacts when blocking a release.
+  - Serves as a frequent witness for “what was missing?”
+
+### Park archetypes
+
+#### 1) Park Caretaker (`roleName: Caretaker`)
+
+- Organization: `Park`
+- Authority profile: `Medium` (can warn and redirect; escalates repeat offenses)
+- Anchor: `ParkArea`
+- Routine anchors (primary loop):
+  - `Park_Bench` → `Park_NoiseSpot` → `Park_NoticeBoard`
+- Major interactions:
+  - Converts diffuse discomfort into explicit, logged interventions.
+  - Issues soft-to-hard escalations that create artifacts players can cite.
+  - Requests Station help for high-friction conflicts.
+
+#### 2) Park Elder (`roleName: Elder`)
+
+- Organization: `Park`
+- Authority profile: `High` (sets norms; can redefine what is considered acceptable)
+- Anchor: `ParkArea`
+- Routine anchors (primary loop):
+  - `Park_NoticeBoard` → `Park_Bench`
+- Major interactions:
+  - Publishes norm updates that change interpretation of future events.
+  - Acts as a “policy witness” rather than an “event witness.”
+  - Creates powerful “why” evidence via public notices.
+
+### Station archetypes
+
+#### 1) Station Officer (`roleName: Officer`)
+
+- Organization: `Station`
+- Authority profile: `High` (can issue tickets, open cases, and deliver verdicts)
+- Anchor: `Station`
+- Routine anchors (primary loop):
+  - `Police_ReportDesk` → `Police_EvidenceBoard` → `Police_InterrogationSpot`
+- Major interactions:
+  - Anchors the case loop for the player.
+  - Translates organizational incidents into formal cases.
+  - Produces the final verdict artifacts.
+
+#### 2) Station Investigator (`roleName: Investigator`)
+
+- Organization: `Station`
+- Authority profile: `Medium-High` (can gather/interpret evidence but defers verdict)
+- Anchor: `Station`
+- Routine anchors (primary loop):
+  - `Police_EvidenceBoard` → scene anchors (`StoreBuilding` / `StudioBuilding_L1` / `ParkArea`) → `Police_EvidenceBoard`
+- Major interactions:
+  - Performs cross-org evidence reconciliation.
+  - Requests missing artifacts explicitly (“I need a capture, not a rumor.”)
+  - Serves as a structured hint system for evidence gaps.
+
+## Incident templates (minimum 1 per organization)
+
+Each template includes: trigger, observers/witnesses, evidence generation, and outcomes mapped to v1 verdict types.  
+**Canonical triggers live in Cover Tests (CT-01..CT-06); these are narrative examples only.**
+
+### Store incident: Queue cutting + label dispute
+
+- Trigger:
+  - A customer skips `StoreQueue` order and claims a mislabel discount.
+- Observers / witnesses:
+  - Primary: `Clerk`, nearby `Customer` archetypes.
+  - Secondary: `Manager` (if escalated).
+- Evidence generation:
+  - `Violation Ticket` from `Store_Printer` tied to `R_QUEUE`.
+  - Label state snapshot from `Store_LabelBoard`.
+  - Optional `Complaint Memo` / `Defense Memo` statements.
+- Possible outcomes:
+  - Cleared: label was actually wrong; queue violation downgraded.
+  - Warning: label was correct; report filed with witness statement.
+  - Detained: refusal + repeat violation triggers Station inquest.
+
+### Studio incident: Release Candidate inserted without approval
+
+- Trigger:
+  - Release Candidate is inserted at `Studio_RCInsert` without a matching approval artifact.
+- Observers / witnesses:
+  - Primary: `PM`, `QA`.
+  - Secondary: `Developer` who performed the insert.
+- Evidence generation:
+  - Missing or out-of-order `Approval Note` vs. `Release Candidate strip` timing.
+  - `kanban log` and `patch notes` inconsistencies.
+  - Station follow-up can produce `CCTV Capture`-style timeline evidence.
+- Possible outcomes:
+  - Cleared: approval exists but was not surfaced; PM validates it.
+  - Warning: approval absent or post-dated; report filed.
+  - Detained: contempt speech + procedure breach triggers inquest.
+
+### Park incident: Noise complaint vs. permitted performance
+
+- Trigger:
+  - Noise complaint filed at `Park_NoiseSpot` during a claimed permitted activity.
+- Observers / witnesses:
+  - Primary: `Caretaker`, nearby `Visitor` archetypes.
+  - Secondary: `Elder` (policy witness).
+- Evidence generation:
+  - `Complaint Memo` from the caretaker.
+  - Current norm snapshot from `Park_NoticeBoard`.
+  - Optional rumor artifacts if players rely on hearsay.
+- Possible outcomes:
+  - Cleared: notice board indicates the performance window is allowed.
+  - Warning: no allowance exists; report filed after warning.
+  - Detained: repeated conflict + procedure refusal triggers inquest.
+
+### Station incident: Conflicting testimonies across orgs
+
+- Trigger:
+  - A report at `Police_ReportDesk` includes two incompatible claims about the same event.
+- Observers / witnesses:
+  - Primary: `Officer`, `Investigator`.
+  - Secondary: org-specific witnesses (`Manager`, `PM`, `Elder`, etc.).
+- Evidence generation:
+  - Case bundle artifacts: `Violation Ticket`, `CCTV Capture`, `Approval Note`, memos.
+  - Evidence-board reconciliation artifacts (“contradiction resolved” notes).
+- Possible outcomes:
+  - Cleared: contradictions explained by timeline + policy context.
+  - Warning: insufficient artifacts; warning issued with follow‑up.
+  - Detained: hard evidence confirms PLAYER violation.
+  - Lucid identified: explicit dream‑talk evidence meets verdict threshold.
+
+## Player question checklist (must always be answerable)
+
+For any active incident/case, the player should be able to answer these three questions from artifacts and world state:
+
+1) What happened?
+- Identify the triggering event in concrete terms (who did what, where).
+- Anchor it to a rule, procedure step, or explicit policy signal.
+
+2) Why is it a problem (or not)?
+- Show the governing rule/procedure/policy context.
+- Distinguish “norm discomfort” from a formal violation.
+
+3) What evidence supports the claim?
+- Provide at least one artifact that is harder than rumor (ticket, capture, approval note, signed memo).
+- Ensure at least one witness can point to the same artifact.
+
+## Fallback causality fields (runtime trace)
+
+For report -> intake -> verdict readability, decision traces should expose:
+- `transport`
+- `usedFallback`
+- `reason`
+- `reasonCategory`
+- `warningTier`
+- `threadId`
+
+Recommended failure-code groupings:
+- `policy_*`: policy rejection
+- `invalid_perception_packet`: schema/input validation
+- `codex_timeout` / `decision_deadline_exceeded`: timeout
+- `request_cancelled`: cancellation
+- `parse_failure` / `tool_failure`: tool/parse path
+
+Operational rule:
+- If `usedFallback=true`, `reason` must be non-empty.
+- If `transport` is `codex` or `codex-reply`, `threadId` must be non-empty.
+
+## ID / enum candidates (for follow-up refactors)
+
+These candidates are intentionally aligned with current string IDs and anchor names so the eventual enum migration can be mostly mechanical.
+
+### OrganizationId candidates
+
+- `Store`
+- `Studio`
+- `Park`
+- `Station`
+
+### RoutineId candidates
+
+- Store:
+  - `StoreClerk_LabelQueueCounter`
+  - `StoreManager_CounterLabelAudit`
+- Studio:
+  - `StudioPm_KanbanApprovalRc`
+  - `StudioQa_KanbanTerminalApproval`
+- Park:
+  - `ParkCaretaker_PatrolIntervene`
+  - `ParkElder_NoticePolicyLoop`
+- Station:
+  - `StationOfficer_CaseLoop`
+  - `StationInvestigator_CrossOrgEvidence`
+
+### AnchorId candidates (subset)
+
+- Buildings: `StoreBuilding`, `StudioBuilding_L1`, `ParkArea`, `Station`
+- Store: `Store_LabelBoard`, `Store_QueueMarker`, `Store_Printer`, `Store_CounterBell`
+- Studio: `Studio_Kanban`, `Studio_Terminal`, `Studio_ApprovalDesk`, `Studio_RCInsert`
+- Park: `Park_Bench`, `Park_NoticeBoard`, `Park_NoiseSpot`, `Park_PhotoSpot`
+- Station: `Police_ReportDesk`, `Police_EvidenceBoard`, `Police_Printer`, `Police_InterrogationSpot`
+
+## Design guardrails carried forward
+
+- Determinism boundary: truth transitions and verdicts remain rule/policy driven; LLM output styles canonical lines only.
+- Evidence-first resolution: incidents should become easier to resolve as artifacts accumulate, not as dialogue length increases.
+- Org visibility: each organization should “do work” in public, leaving artifacts that make the procedure legible.

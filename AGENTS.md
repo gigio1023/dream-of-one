@@ -9,6 +9,7 @@
 
 ## Game Studio Overlay
 
+- Documentation entry point lives in `docs/README.md`.
 - Project-local Game Studio guidance lives in `.game-studio/`.
 - Current Game Studio routing and state live in `.game-studio/project-state.md`.
 - Framework review and proof gates live in `docs/framework/`.

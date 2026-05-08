@@ -16,7 +16,8 @@ player-facing UI should expose dialogue choices and optional recorded free input
 | `exposure` | integer `0..100+` | Backend/product rules | Formal pressure score. |
 | `socialLoopStage` | enum | Backend/product rules | `ambient`, `report`, `intake`, `inquest`, `verdict`. |
 | `readTextSurfaceIds` | string set | Godot observed, backend validated | Dream Law surfaces the player has read. |
-| `activeCoverTestId` | string or null | Godot observed, backend validated | Cover Test currently in range/focus. |
+| `activeConversationId` | string or null | Godot observed, backend validated | Conversation currently in focus. |
+| `activePromptId` | string or null | Backend/product rules | NPC prompt currently awaiting a player line. |
 | `artifactLedger` | list | Backend/product rules | Admissible records created by social pressure. |
 | `witnessLedger` | list | Backend/product rules | NPC/system witnesses attached to artifacts. |
 | `station.intakeOpen` | boolean | Backend/product rules | Station can accept formal reports. |
@@ -24,16 +25,16 @@ player-facing UI should expose dialogue choices and optional recorded free input
 | `station.verdictReady` | boolean | Backend/product rules | Verdict can be presented. |
 | `station.sessionTerminationAllowed` | boolean | Backend/product rules | Session can end. |
 
-## Codex Runtime State
+## Provider Runtime State
 
 | Field | Type | Owner | Meaning |
 |---|---|---|---|
-| `codexProposalId` | string | Backend | Stable ID for one Codex pressure proposal. |
-| `proposalIntent` | enum | Backend | Bounded Codex purpose: ask, warn, report, clarify, idle. |
-| `surfaceLineKo` | string | Codex proposes, backend validates | Korean line candidate shown only after validation. |
-| `evidenceClaim` | string | Codex proposes, backend validates | Claimed observation the NPC wants to record. |
+| `providerProposalId` | string | Backend | Stable ID for one provider wording proposal. |
+| `proposalIntent` | enum | Backend | Bounded provider purpose: ask, warn, report, clarify, idle. |
+| `surfaceLineKo` | string | Provider proposes, backend validates | Korean line candidate shown only after validation. |
+| `evidenceClaim` | string | Provider proposes, backend validates | Claimed observation text that must not become Evidence without deterministic validation. |
 | `validationResult` | enum | Backend | accepted, rejected, fallback. |
-| `fallbackReason` | string | Backend | Why invalid Codex output was replaced. |
+| `fallbackReason` | string | Backend | Why invalid provider output was replaced. |
 
 ## Speech Acts
 
@@ -61,7 +62,7 @@ Defuse does not erase records. It changes interpretation.
 
 | Defuse Type | Effect |
 |---|---|
-| Procedural compliance | Lowers Exposure and marks the current Cover Test as held. |
+| Procedural compliance | Lowers or stabilizes pressure and marks the current conversation turn as locally legible. |
 | Clarification | Adds a small Exposure cost but makes the next compliant answer more legible. |
 | Context framing | Keeps the scene moving but creates a stronger artifact for Station comparison. |
 | Repair phrase | Converts one hard accusation into a warning if used before Inquest. |

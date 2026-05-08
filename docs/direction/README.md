@@ -24,8 +24,8 @@ Use this before planning large features, changing the game loop, expanding story
 | Execution harness | `.game-harness/` | current stage, tasks, evidence, drift |
 | Scenario bible | `docs/scenario/` | story, beat, dialogue, locations |
 | Runtime design | `docs/design/` | rules, authority, evidence |
-| Research basis | `docs/research/director-harness/2026-04-30/` | source-backed director methodology |
-| Harness engineering | `docs/harness/` | operating contracts and readiness gates |
+| Research basis | `docs/research/2026-04-30/director-harness/` | source-backed director methodology |
+| Harness engineering | `docs/development/harness/` | operating contracts and readiness gates |
 
 ## Operating Principle
 
@@ -42,5 +42,6 @@ Start from:
 Dream of One is still before a trustworthy vertical slice. The next director-level target is a conversation-first M1 proof: prove NPC prompt -> three dialogue choices or optional free input -> deterministic suspicion signal -> Evidence/Exposure/report consequence with backend-owned authority and Godot-visible feedback.
 
 Current verdict:
-- ready for conversation-first redesign implementation planning.
+- M1 technical proof passes locally for the `Same Order` conversation path.
+- product closure still needs provider, replay/repair, external comprehension, export, and human visual readability evidence.
 - not ready for broad vertical-slice implementation.

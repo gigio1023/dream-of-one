@@ -29,11 +29,11 @@ Barks are not flavor chatter. They are short social signals that:
 | ID | Trigger | Stage | Korean | English |
 |---|---|---|---|---|
 | `bark.store.order` | Enter Store counter | ambient | `먼저 수량입니다.` | `Quantity first.` |
-| `bark.store.mismatch` | Store `SA_BREAK` | report | `방금 발화는 대기 기록과 맞지 않습니다.` | `That statement does not match the queue record.` |
+| `bark.store.mismatch` | Store risky dialogue line | report | `방금 발화는 대기 기록과 맞지 않습니다.` | `That statement does not match the queue record.` |
 | `bark.studio.fields` | Enter Studio zone | ambient | `출처, 담당, 사유가 있어야 검토됩니다.` | `Review needs source, owner, and reason.` |
-| `bark.studio.provisional` | Studio `SA_FRAME` | report | `임시 검토로만 남기겠습니다.` | `I will leave that as provisional review.` |
+| `bark.studio.provisional` | Studio uncertain/repair line | report | `임시 검토로만 남기겠습니다.` | `I will leave that as provisional review.` |
 | `bark.park.flow` | Enter Park photo spot | ambient | `관찰은 동선 안에서만 가능합니다.` | `Observation stays inside public flow.` |
-| `bark.park.statement` | Park `SA_BREAK` | report | `그 표현은 진술로 남습니다.` | `That wording remains as a statement.` |
+| `bark.park.statement` | Park risky recorded statement | report | `그 표현은 진술로 남습니다.` | `That wording remains as a statement.` |
 | `bark.station.intake_open` | Exposure 60 | intake | `접수 가능한 기록이 생겼습니다.` | `There is now a record eligible for intake.` |
 | `bark.station.inquest_open` | Exposure 80 | inquest | `이전 기록과 대조하겠습니다.` | `I will compare this against prior records.` |
 | `bark.station.verdict` | Exposure 100 | verdict | `판정 가능한 상태입니다.` | `This is now ready for verdict.` |
@@ -42,10 +42,10 @@ Barks are not flavor chatter. They are short social signals that:
 
 | Rule | Reason |
 |---|---|
-| One readable rule per Cover Test entry path. | Player must be able to learn before failure. |
+| One readable rule per conversation-risk path. | Player must be able to learn before failure. |
 | Body text under 140 Korean characters. | Diegetic text should be readable in 3D. |
 | Use procedure verbs, not lore nouns. | The surface must tell the player how to behave. |
-| Attach law ID and Cover Test ID in data. | Evidence must remain auditable. |
+| Attach law ID and conversation/signal context in data. | Evidence must remain auditable. |
 | Text must be cited by at least one bark or why-line. | No isolated lore signs. |
 
 ## Text Surface Set

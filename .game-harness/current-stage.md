@@ -33,7 +33,7 @@ Out:
 - `backend/npc-runtime/src/godot/runtime-schema.ts`
 - `godot/data/world_layout.json`
 - `godot/scenes/main.tscn`
-- `docs/research/harness-methodology/2026-04-30/`
+- `docs/research/2026-04-30/harness-methodology/`
 
 ## Deliverables
 

@@ -28,8 +28,8 @@ godot --path godot --script res://tools/visual_capture.gd
 - Backend tests pass.
 - Godot scene loads in headless smoke.
 - Evidence Packs validate against Schema.
-- Text-pressure surfaces include Dream Law and Cover Test ids.
+- Text-pressure surfaces include Dream Law, conversation, and Evidence context.
 - Rejected commands produce deterministic Fallback Path Evidence.
-- Playable slice proves a player can read a rule, trigger a Cover Test, change Exposure, open Station states, and reach a visible defuse or verdict-ready state.
-- Korean-first HUD and text surfaces can switch to English without losing Station, Cover Test, or why-line meaning.
-- Visual capture proves opening and verdict states are readable, not just non-empty.
+- Playable slice proves a player can receive an NPC prompt, choose one of three diegetic answers or submit an explicitly recorded statement, create deterministic suspicion signals, change report/Exposure pressure, open Station states, and reach a visible inquest or session-end state.
+- Korean-first HUD and text surfaces can switch to English without losing Station, conversation, suspicion, or why-line meaning.
+- Visual capture proves opening, active conversation, why-line, and inquest/session-end states are readable, not just non-empty.

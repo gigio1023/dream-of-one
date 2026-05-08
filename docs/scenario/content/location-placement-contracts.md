@@ -3,7 +3,7 @@
 Scenario docs must be placement contracts, not prose-only art briefs. Every placed thing must answer:
 
 - what procedure it teaches;
-- which Cover Test it pressures;
+- which conversation prompt or suspicion signal it pressures;
 - which route exposes it;
 - which NPC or Station system can observe it;
 - which Evidence can result.
@@ -52,7 +52,7 @@ locations:
 
 | Layer | Required Instruction | Quality Bar |
 |---|---|---|
-| Text surface | `id`, `anchor`, `law_id`, `cover_test_id`, body, evidence outputs, readable approach angle. | Visible before the player enters the related Cover Test zone. One Dream Law, one procedure, no meta exposition. |
+| Text surface | `id`, `anchor`, `law_id`, conversation context, body, evidence outputs, readable approach angle. | Visible before the player reaches the related NPC prompt or recorded-statement risk. One Dream Law, one procedure, no meta exposition. |
 | Route | Ordered anchor list, purpose, intended first and second read, NPC route overlap. | Route teaches procedure through movement. No important rule is off-route. |
 | Landmark | Silhouette, front door, work anchor, evidence anchor, color/material cue. | Player can identify Store, Studio, Park, and Station from spawn or first loop without docs. |
 | Sightline | `from`, `to`, expected distance, obstruction rule, narrative purpose. | At least one rule-before-risk line, one witness-to-player line, one Station-pull line. |
@@ -77,6 +77,6 @@ Each scenario implementation must define:
 | View | Purpose |
 |---|---|
 | Spawn overview | Player sees Station pull, public route, and first rule direction. |
-| Rule-before-risk | Text surface readable before Cover Test trigger. |
+| Rule-before-risk | Text surface readable before the related conversation prompt or suspicion risk. |
 | Witness line | Examiner NPC can plausibly observe the player. |
 | Verdict state | HUD, final why-line, and Station surface remain readable. |

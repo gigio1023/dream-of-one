@@ -33,4 +33,4 @@ It is the game-development memory layer:
 
 ## Research Source
 
-See `docs/research/harness-methodology/2026-04-30/`.
+See `docs/research/2026-04-30/harness-methodology/`.

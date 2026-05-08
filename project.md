@@ -31,12 +31,13 @@ Dream of One is a Godot 4.x 3D conversation social-stealth game where NPC societ
 ## Scenario Source Of Truth
 
 - Active scenario docs: `docs/scenario/`
-- First complete scenario: `docs/scenario/bible/05-episode-station-soft-inquest.md`
+- First conversation-first scenario: `docs/scenario/bible/12-conversation-suspicion-prologue.md`
+- Historical Station material: `docs/scenario/bible/05-episode-station-soft-inquest.md`
 - Scenario line bank: `docs/scenario/content/dialogue-line-bank.md`
 - Scenario placement contract: `docs/scenario/content/location-placement-contracts.md`
 - Scenario QA rubric: `docs/scenario/playtest/scenario-qa-rubric.md`
 
-`docs/migration/godot/` is migration-only. Do not store scenario canon there.
+`docs/runtime/godot/` is runtime and cutover evidence. Do not store scenario canon there.
 
 ## Current Build Truth
 

@@ -132,13 +132,13 @@ Still pending before calling this a small complete prologue/demo:
 
 ## Full Verification
 
-Use this set before claiming the local proof is still healthy:
+Use this set before claiming the local proof is still healthy.
+
+Repo-local checks:
 
 ```bash
-node /Users/user/git/gigio1023/game-studio/tools/check-project.mjs /Users/user/git/gigio1023/dream-of-one
 npm run check --prefix backend/npc-runtime
 godot --headless --import --path godot
-bash /Users/user/.agents/skills/godot-best-practice/scripts/check_gd_syntax.sh godot
 godot --headless --path godot --script res://tools/scene_load_smoke.gd
 godot --headless --path godot --script res://tools/evidence_run.gd
 godot --headless --path godot --script res://tools/runtime_slice_smoke.gd
@@ -146,6 +146,16 @@ godot --headless --path godot --script res://tools/playable_slice_smoke.gd
 godot --headless --path godot --script res://tools/live_backend_bridge_smoke.gd
 godot --headless --path godot --script res://tools/localization_smoke.gd
 godot --path godot --script res://tools/visual_capture.gd
+```
+
+Optional local workspace helper checks:
+
+```bash
+export GAME_STUDIO_ROOT=/path/to/game-studio
+export GODOT_BEST_PRACTICE_SKILL=/path/to/godot-best-practice
+
+node "$GAME_STUDIO_ROOT/tools/check-project.mjs" "$PWD"
+bash "$GODOT_BEST_PRACTICE_SKILL/scripts/check_gd_syntax.sh" godot
 ```
 
 ## License

@@ -21,14 +21,11 @@ Use this page as the documentation map. README.md is the project entry point; th
 | [.game-studio](../.game-studio/README.md) | Project-local Game Studio routing, rubrics, roles, gates, and state. |
 | [data/evidence/godot](../data/evidence/godot/) | Generated Godot Evidence Packs and visual captures. |
 
-## Archives
+## Archive And Research
 
 | Directory | Contents |
 |---|---|
-| [archive/spec](archive/spec/new-plan.md) | Deprecated specification snapshots. |
-| [archive/planning](archive/planning/week-2026-02-02-v0.1.md) | Deprecated weekly planning snapshots. |
-| [archive/scenario](archive/scenario/) | Superseded Codex CLI pitch and release packs. |
-| [archive/legacy-unity-mvp](archive/legacy-unity-mvp/MANUAL_TASKS.md) | Legacy Unity/Ollama MVP plans and manual tasks. |
+| [archive](archive/README.md) | Superseded material for historical lookup only. Not an active implementation path. |
 | [research](research/) | Source-backed methodology and director-harness research. |
 
 ## Reading Order

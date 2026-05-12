@@ -94,12 +94,13 @@ The checked-in proof covers:
 - Godot import, scene-load, runtime, playable, bridge fallback, localization, keyboard, and visual capture smokes.
 - Backend validation for shell, runtime, and playable Godot Evidence Packs.
 - `Same Order` conversation chain with shared conversation identity, selected line, recorded statement hash, suspicion signals, report pressure, why-line, and Station inquest.
+- Internal `Same Order` route contrast for clean cover, repair recovery, soft report, and inquest, validated by backend internal route-proof checks.
 
 Still pending before calling this a small complete prologue/demo:
 
 - Live provider preflight and provider-backed wording in Godot.
 - Manual typed free-input UI if free input remains in the public promise.
-- Safe, uncertain, risky, repair, and replay outcome contrast.
+- Manual replay/readability evidence for the internally proven route contrast.
 - External player comprehension evidence.
 - Exported build setup and exported-build smoke.
 - Human visual/readability review.

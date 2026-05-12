@@ -1,6 +1,6 @@
 # Conversation Suspicion Prologue
 
-Status: proposed replacement first playable scenario  
+Status: active first playable scenario; internally route-proven; product closure pending
 Depends on: `docs/direction/08-conversation-suspicion-redesign.md`
 
 ## Working Title
@@ -96,8 +96,17 @@ chance before inquest or soft outcome.
 | Outcome | Condition | Player-facing result |
 | --- | --- | --- |
 | `cover_held` | No serious signal, or repair succeeds before share. | Clerk accepts routine. No Station intake. |
-| `soft_report` | One report exists but contradiction threshold is not met. | Report filed. Player continues under warning. |
+| `soft_report` | One report exists but contradiction threshold is not met. | Report filed. Continued play after report is not demo-complete until Godot continuation is proven. |
 | `inquest_opened` | Repeated mismatch, dream leak, or contradiction with prior record. | Station opens formal questioning. |
+
+Current internal proof routes:
+
+| Route | Path | Outcome |
+| --- | --- | --- |
+| `clean_cover` | Safe routine answer, then safe probe answer. | `cover_held` with no suspicion or report. |
+| `repair_recovered` | Memory-gap repair, then accepts the clerk's premise. | `cover_held` with bounded unease. |
+| `soft_report` | Routine mismatch, then outsider insistence. | `soft_report` with Station report but no inquest. |
+| `inquest_opened` | Routine mismatch, then preset recorded dream statement. | `inquest_opened`. |
 
 ## Evidence Requirements
 

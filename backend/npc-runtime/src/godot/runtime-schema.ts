@@ -186,6 +186,38 @@ export interface GodotConversationSuspicionProofReport {
   finalReportWeight: number;
 }
 
+export interface GodotSameOrderRouteProofEvent {
+  eventId: string;
+  eventName: string;
+  conversationStage?: SocialLoopStage;
+  socialLoopStage?: SocialLoopStage;
+  suspicionAfter?: number;
+  reportWeightAfter?: number;
+  suspicionSignals?: string[];
+  outcome?: string;
+  routeOutcome?: string;
+}
+
+export interface GodotSameOrderRouteProof {
+  routeId: string;
+  sessionOutcome: string;
+  routeOutcome: string;
+  stage: SocialLoopStage;
+  suspicion: number;
+  reportWeight: number;
+  eventNames: string[];
+  signals: string[];
+  events: GodotSameOrderRouteProofEvent[];
+}
+
+export interface GodotSameOrderRouteProofsReport {
+  runId: string;
+  routeIds: string[];
+  sessionOutcomes: string[];
+  routeOutcomes: string[];
+  proofs: GodotSameOrderRouteProof[];
+}
+
 export interface GodotExposureState {
   score: number;
   thresholds: {
@@ -1485,6 +1517,353 @@ export function validateGodotEvidencePackConversationSuspicionProof(
       finalConversationStage: finalInquest?.conversationStage as SocialLoopStage,
       finalSuspicion: finalInquest?.suspicionAfter as number,
       finalReportWeight: finalInquest?.reportWeightAfter as number,
+    },
+    failures: [],
+  };
+}
+
+function routeProofHasEvent(proof: GodotSameOrderRouteProof, eventName: string): boolean {
+  return proof.events.some(event => event.eventName === eventName);
+}
+
+function routeProofHasSignal(proof: GodotSameOrderRouteProof, signal: string): boolean {
+  return proof.signals.includes(signal);
+}
+
+function parseSameOrderRouteProofEvent(
+  value: unknown,
+  index: number,
+  path: string,
+  failures: GodotValidationFailure[],
+): GodotSameOrderRouteProofEvent | undefined {
+  const eventPath = `${path}[${index}]`;
+  if (!isObject(value)) {
+    pushFailure(failures, "schema_invalid_evidence_pack", eventPath, "Same Order route proof event must be an object");
+    return undefined;
+  }
+
+  const eventId = readString(value, "eventId", failures, eventPath);
+  const eventName = readString(value, "eventName", failures, eventPath);
+  const conversationStage = value.conversationStage === undefined
+    ? undefined
+    : readEnum(value.conversationStage, SOCIAL_LOOP_STAGES, failures, `${eventPath}.conversationStage`, "schema_invalid_social_loop_stage");
+  const socialLoopStage = value.socialLoopStage === undefined
+    ? undefined
+    : readEnum(value.socialLoopStage, SOCIAL_LOOP_STAGES, failures, `${eventPath}.socialLoopStage`, "schema_invalid_social_loop_stage");
+  const suspicionAfter = readOptionalNumber(value, "suspicionAfter", failures, eventPath, {
+    integer: true,
+    min: 0,
+    max: CONVERSATION_SUSPICION_MAX_SCORE,
+  });
+  const reportWeightAfter = readOptionalNumber(value, "reportWeightAfter", failures, eventPath, {
+    integer: true,
+    min: 0,
+    max: CONVERSATION_SUSPICION_MAX_SCORE,
+  });
+  const suspicionSignals = readOptionalStringArray(value, "suspicionSignals", failures, eventPath);
+  const outcome = readOptionalString(value, "outcome", failures, eventPath);
+  const routeOutcome = readOptionalString(value, "routeOutcome", failures, eventPath);
+
+  if (eventId === undefined || eventName === undefined) {
+    return undefined;
+  }
+
+  return {
+    eventId,
+    eventName,
+    conversationStage,
+    socialLoopStage,
+    suspicionAfter,
+    reportWeightAfter,
+    suspicionSignals,
+    outcome,
+    routeOutcome,
+  };
+}
+
+function parseSameOrderRouteProof(
+  value: unknown,
+  index: number,
+  failures: GodotValidationFailure[],
+): GodotSameOrderRouteProof | undefined {
+  const path = `playability.routeProofs[${index}]`;
+  if (!isObject(value)) {
+    pushFailure(failures, "schema_invalid_evidence_pack", path, "Same Order route proof must be an object");
+    return undefined;
+  }
+
+  const routeId = readString(value, "routeId", failures, path);
+  const sessionOutcome = readString(value, "sessionOutcome", failures, path);
+  const routeOutcome = readString(value, "routeOutcome", failures, path);
+  const stage = readEnum(value.stage, SOCIAL_LOOP_STAGES, failures, `${path}.stage`, "schema_invalid_social_loop_stage");
+  const suspicion = readNumber(value, "suspicion", failures, path, { integer: true, min: 0, max: CONVERSATION_SUSPICION_MAX_SCORE });
+  const reportWeight = readNumber(value, "reportWeight", failures, path, { integer: true, min: 0, max: CONVERSATION_SUSPICION_MAX_SCORE });
+  const eventNames = readStringArray(value, "eventNames", failures, path);
+  const signals = readStringArray(value, "signals", failures, path);
+  const eventPath = routeId === undefined ? `${path}.events` : `playability.routeProofs.${routeId}.events`;
+  const rawEvents = value.events;
+  const events: GodotSameOrderRouteProofEvent[] = [];
+  if (!Array.isArray(rawEvents) || rawEvents.length === 0) {
+    pushFailure(failures, "schema_invalid_evidence_pack", eventPath, "must include canonical Same Order route events");
+  } else {
+    rawEvents.forEach((event, eventIndex) => {
+      const parsedEvent = parseSameOrderRouteProofEvent(event, eventIndex, eventPath, failures);
+      if (parsedEvent !== undefined) {
+        events.push(parsedEvent);
+      }
+    });
+  }
+
+  if (
+    routeId === undefined
+    || sessionOutcome === undefined
+    || routeOutcome === undefined
+    || stage === undefined
+    || suspicion === undefined
+    || reportWeight === undefined
+    || eventNames === undefined
+    || signals === undefined
+    || events.length === 0
+  ) {
+    return undefined;
+  }
+
+  return {
+    routeId,
+    sessionOutcome,
+    routeOutcome,
+    stage,
+    suspicion,
+    reportWeight,
+    eventNames,
+    signals,
+    events,
+  };
+}
+
+function sameOrderedStrings(left: readonly string[], right: readonly string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function sameStringSet(left: readonly string[], right: readonly string[]): boolean {
+  if (left.length !== right.length) {
+    return false;
+  }
+  const rightSet = new Set(right);
+  return left.every(value => rightSet.has(value));
+}
+
+function uniqueStrings(values: readonly string[]): string[] {
+  return [...new Set(values)];
+}
+
+function findLastRouteEventValue<T>(
+  events: readonly GodotSameOrderRouteProofEvent[],
+  readValue: (event: GodotSameOrderRouteProofEvent) => T | undefined,
+): T | undefined {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const value = readValue(events[index] as GodotSameOrderRouteProofEvent);
+    if (value !== undefined) {
+      return value;
+    }
+  }
+  return undefined;
+}
+
+function validateSameOrderRouteProofEventEvidence(
+  proof: GodotSameOrderRouteProof,
+  failures: GodotValidationFailure[],
+): void {
+  const path = `playability.routeProofs.${proof.routeId}`;
+  const canonicalEventNames = proof.events.map(event => event.eventName);
+  if (!sameOrderedStrings(proof.eventNames, canonicalEventNames)) {
+    pushFailure(failures, "schema_invalid_evidence_pack", `${path}.eventNames`, "must exactly match canonical route event names");
+  }
+
+  const eventIds = proof.events.map(event => event.eventId);
+  if (uniqueStrings(eventIds).length !== eventIds.length) {
+    pushFailure(failures, "schema_invalid_evidence_pack", `${path}.events`, "canonical route eventIds must be unique");
+  }
+
+  const canonicalSignals = uniqueStrings(proof.events.flatMap(event => event.suspicionSignals ?? []));
+  if (!sameStringSet(proof.signals, canonicalSignals)) {
+    pushFailure(failures, "schema_invalid_evidence_pack", `${path}.signals`, "must match canonical route event suspicion signals");
+  }
+
+  const finalStage = findLastRouteEventValue(proof.events, event => event.conversationStage ?? event.socialLoopStage);
+  if (finalStage === undefined) {
+    pushFailure(failures, "schema_invalid_evidence_pack", `${path}.events`, "canonical route events must include final stage");
+  } else if (proof.stage !== finalStage) {
+    pushFailure(failures, "schema_invalid_evidence_pack", `${path}.stage`, "must match canonical route event final stage");
+  }
+
+  const finalSuspicion = findLastRouteEventValue(proof.events, event => event.suspicionAfter);
+  if (finalSuspicion === undefined) {
+    pushFailure(failures, "schema_invalid_evidence_pack", `${path}.events`, "canonical route events must include final suspicion");
+  } else if (proof.suspicion !== finalSuspicion) {
+    pushFailure(failures, "schema_invalid_evidence_pack", `${path}.suspicion`, "must match canonical route event final suspicion");
+  }
+
+  const finalReportWeight = findLastRouteEventValue(proof.events, event => event.reportWeightAfter);
+  if (finalReportWeight === undefined) {
+    pushFailure(failures, "schema_invalid_evidence_pack", `${path}.events`, "canonical route events must include final report weight");
+  } else if (proof.reportWeight !== finalReportWeight) {
+    pushFailure(failures, "schema_invalid_evidence_pack", `${path}.reportWeight`, "must match canonical route event final report weight");
+  }
+
+  const finalOutcome = findLastRouteEventValue(proof.events, event => event.routeOutcome ?? event.outcome);
+  if (finalOutcome === undefined) {
+    pushFailure(failures, "schema_invalid_evidence_pack", `${path}.events`, "canonical route events must include final route outcome");
+  } else if (proof.routeOutcome !== finalOutcome) {
+    pushFailure(failures, "schema_invalid_evidence_pack", `${path}.routeOutcome`, "must match canonical route event final outcome");
+  }
+}
+
+function validateSameOrderRouteProofSemantics(
+  proof: GodotSameOrderRouteProof,
+  failures: GodotValidationFailure[],
+): void {
+  const path = `playability.routeProofs.${proof.routeId}`;
+  if (!routeProofHasEvent(proof, "conversation_started") || !routeProofHasEvent(proof, "dialogue_choice_selected")) {
+    pushFailure(failures, "schema_invalid_evidence_pack", path, "route proof must include started conversation and selected dialogue");
+  }
+
+  if (proof.routeId === "clean_cover") {
+    if (proof.sessionOutcome !== "cover_held" || proof.routeOutcome !== "clean_cover" || proof.stage !== "normal") {
+      pushFailure(failures, "schema_invalid_evidence_pack", path, "clean cover must end as normal cover_held/clean_cover");
+    }
+    if (proof.suspicion !== 0 || proof.reportWeight !== 0 || proof.signals.length !== 0) {
+      pushFailure(failures, "schema_invalid_evidence_pack", path, "clean cover must preserve zero suspicion/report and no anomaly signals");
+    }
+    for (const forbiddenEvent of ["conversation_anomaly_detected", "station_report_created", "station_inquest_opened"]) {
+      if (routeProofHasEvent(proof, forbiddenEvent)) {
+        pushFailure(failures, "schema_invalid_evidence_pack", path, `clean cover must not include ${forbiddenEvent}`);
+      }
+    }
+    return;
+  }
+
+  if (proof.routeId === "repair_recovered") {
+    if (proof.sessionOutcome !== "cover_held" || proof.routeOutcome !== "repair_recovered" || proof.stage !== "uneasy") {
+      pushFailure(failures, "schema_invalid_evidence_pack", path, "repair route must end as uneasy cover_held/repair_recovered");
+    }
+    if (proof.suspicion <= 0 || proof.reportWeight >= 50 || !routeProofHasSignal(proof, "memory_gap_admission")) {
+      pushFailure(failures, "schema_invalid_evidence_pack", path, "repair route must keep a bounded memory-gap record below share threshold");
+    }
+    for (const forbiddenEvent of ["station_report_created", "station_inquest_opened"]) {
+      if (routeProofHasEvent(proof, forbiddenEvent)) {
+        pushFailure(failures, "schema_invalid_evidence_pack", path, `repair route must not include ${forbiddenEvent}`);
+      }
+    }
+    return;
+  }
+
+  if (proof.routeId === "soft_report") {
+    if (proof.sessionOutcome !== "soft_report" || proof.routeOutcome !== "soft_report" || proof.stage !== "reported") {
+      pushFailure(failures, "schema_invalid_evidence_pack", path, "soft report must end as reported soft_report");
+    }
+    if (proof.reportWeight < 70 || proof.reportWeight >= 100) {
+      pushFailure(failures, "schema_invalid_evidence_pack", path, "soft report must cross report threshold without crossing inquest threshold");
+    }
+    for (const requiredEvent of ["conversation_anomaly_detected", "suspicion_shared", "station_report_created"]) {
+      if (!routeProofHasEvent(proof, requiredEvent)) {
+        pushFailure(failures, "schema_invalid_evidence_pack", path, `soft report must include ${requiredEvent}`);
+      }
+    }
+    if (routeProofHasEvent(proof, "station_inquest_opened")) {
+      pushFailure(failures, "schema_invalid_evidence_pack", path, "soft report must not include station_inquest_opened");
+    }
+    return;
+  }
+
+  if (proof.routeId === "inquest_opened") {
+    if (proof.sessionOutcome !== "inquest_opened" || proof.routeOutcome !== "inquest_opened" || proof.stage !== "inquest") {
+      pushFailure(failures, "schema_invalid_evidence_pack", path, "inquest route must end as inquest_opened");
+    }
+    if (proof.reportWeight < 100) {
+      pushFailure(failures, "schema_invalid_evidence_pack", path, "inquest route must cross the inquest report threshold");
+    }
+    for (const requiredEvent of ["free_input_submitted", "conversation_anomaly_detected", "suspicion_shared", "station_report_created", "station_inquest_opened"]) {
+      if (!routeProofHasEvent(proof, requiredEvent)) {
+        pushFailure(failures, "schema_invalid_evidence_pack", path, `inquest route must include ${requiredEvent}`);
+      }
+    }
+    if (!routeProofHasSignal(proof, "dream_language_leak")) {
+      pushFailure(failures, "schema_invalid_evidence_pack", path, "inquest route must include dream_language_leak");
+    }
+  }
+}
+
+export function validateGodotEvidencePackSameOrderRouteProofs(
+  input: unknown,
+): GodotValidationResult<GodotSameOrderRouteProofsReport> {
+  const parsed = validateGodotEvidencePack(input);
+  if (!parsed.ok) {
+    return { ok: false, failures: parsed.failures };
+  }
+  const failures: GodotValidationFailure[] = [];
+  if (!isObject(input)) {
+    return {
+      ok: false,
+      failures: [{ reasonCode: "schema_invalid_evidence_pack", path: "$", message: "GodotEvidencePack must be an object" }],
+    };
+  }
+
+  const playability = readRecord(input, "playability", failures, "$");
+  const rawRouteProofs = playability?.routeProofs;
+  if (!Array.isArray(rawRouteProofs)) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "playability.routeProofs", "must include Same Order route proofs");
+  }
+
+  const proofs: GodotSameOrderRouteProof[] = [];
+  if (Array.isArray(rawRouteProofs)) {
+    rawRouteProofs.forEach((proof, index) => {
+      const parsedProof = parseSameOrderRouteProof(proof, index, failures);
+      if (parsedProof !== undefined) {
+        proofs.push(parsedProof);
+      }
+    });
+  }
+
+  const requiredRouteIds = ["clean_cover", "repair_recovered", "soft_report", "inquest_opened"];
+  const routeIds = new Set(proofs.map(proof => proof.routeId));
+  for (const proof of proofs) {
+    if (!requiredRouteIds.includes(proof.routeId)) {
+      pushFailure(failures, "schema_invalid_evidence_pack", `playability.routeProofs.${proof.routeId}`, `unknown Same Order route proof: ${proof.routeId}`);
+    }
+  }
+  for (const routeId of requiredRouteIds) {
+    if (!routeIds.has(routeId)) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "playability.routeProofs", `missing Same Order route proof: ${routeId}`);
+    }
+  }
+  if (routeIds.size !== proofs.length) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "playability.routeProofs", "route proofs must have unique routeIds");
+  }
+
+  for (const proof of proofs) {
+    validateSameOrderRouteProofEventEvidence(proof, failures);
+    validateSameOrderRouteProofSemantics(proof, failures);
+  }
+
+  const routeOutcomes = new Set(proofs.map(proof => proof.routeOutcome));
+  const sessionOutcomes = new Set(proofs.map(proof => proof.sessionOutcome));
+  if (routeOutcomes.size < 4 || sessionOutcomes.size < 3) {
+    pushFailure(failures, "schema_invalid_evidence_pack", "playability.routeProofs", "Same Order proof must show four route outcomes and three session outcomes");
+  }
+
+  if (failures.length > 0) {
+    return { ok: false, failures };
+  }
+
+  return {
+    ok: true,
+    value: {
+      runId: parsed.value.runId,
+      routeIds: [...routeIds].sort((left, right) => left.localeCompare(right)),
+      sessionOutcomes: [...sessionOutcomes].sort((left, right) => left.localeCompare(right)),
+      routeOutcomes: [...routeOutcomes].sort((left, right) => left.localeCompare(right)),
+      proofs,
     },
     failures: [],
   };

@@ -1,5 +1,5 @@
 ---
-status: M1 technical proof pass; prologue/demo completion gate open
+status: M1 technical proof pass; visual readability lane active; prologue/demo completion gate open
 runtime_path: Godot 4.x + TypeScript NPC backend
 ---
 
@@ -42,21 +42,21 @@ Dream of One is a Godot 4.x 3D conversation social-stealth game where NPC societ
 ## Current Build Truth
 
 - The current build proves M1 technical proof only: Godot shell/runtime/playable slice, backend Schema validation path, trajectory diversity verification, and Godot bridge readiness fallback smoke.
-- The current branch now proves a local conversation-first `Same Order` path: Store Clerk prompt, three choices, preset recorded statement, deterministic suspicion signals, Station report/inquest, locked session end, and backend-valid playable Evidence Pack.
+- The current lane `feat/ui-visual-readability-pass` proves local conversation-first `Same Order` route contrast internally: clean cover, repair recovery, soft report, and hard inquest from the same Store Clerk prompt set. The hard route includes a preset recorded statement, deterministic suspicion signals, Station report/inquest, locked session end, and backend-valid playable Evidence Pack.
 - The old Station Soft Inquest path is internal harness evidence only. It remains in runtime-slice authority tests, not as the player-facing playable loop.
-- The current build does not yet prove a public small complete prologue/demo, live API proposal-provider loop, live backend/runtime authority, exported demo, manual typed free-input UI, external player comprehension, human visual readability, or repair/replay outcome contrast.
+- The current build does not yet prove a public small complete prologue/demo, live API proposal-provider loop, live backend/runtime authority, exported demo, manual typed free-input UI, external player comprehension, human visual readability, or manual replay/readability of the internally proven route contrast.
 - M1 product closure still requires council/product review and external player comprehension evidence.
 - The first public promise is a small honest prologue/demo only after completion gates pass.
 - Public copy must not imply open-ended conversation, included AI hosting, a fixed GPT model, or final campaign scope.
 
-## Branch Target
+## Current Lane And Umbrella Target
 
-`feat/prologue-demo-completion` targets a small complete prologue/demo candidate. It must not treat M1 technical proof as the same thing as demo completion.
+`feat/ui-visual-readability-pass` is the current scoped lane. It sits under the broader `feat/prologue-demo-completion` umbrella, which targets a small complete prologue/demo candidate. Neither lane may treat M1 technical proof as the same thing as demo completion.
 
-The branch target is:
+The current lane target is:
 - keep the verified M1 technical proof passing as the baseline.
-- keep the conversation-first proof honest by adding manual typed-input UI if needed, repair/replay, human readability review, player-comprehension, provider, and exported-build gates before expanding scope.
-- produce truthful evidence for whether the branch can continue toward demo completion, should merge as an M1-only proof, or should stop for product fixes.
+- keep the conversation-first proof honest by adding manual typed-input UI if needed, manual replay/readability/comprehension validation, human readability review, player-comprehension, provider, and exported-build gates before expanding scope.
+- produce truthful evidence for whether the umbrella can continue toward demo completion, should merge current work as M1-only proof, or should stop for product fixes.
 
 A small complete prologue/demo means the player can start, understand they are being investigated, answer NPC prompts through three dialogue choices or optional typed free input, see NPC suspicion and Evidence/Exposure consequences, reach deterministic report/inquest/verdict/session end, and replay with at least one meaningfully different outcome or repair path.
 

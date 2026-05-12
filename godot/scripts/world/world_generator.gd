@@ -368,6 +368,35 @@ static func _create_zone_visual_cues(parent: Node3D, anchors: Dictionary, genera
 		_spawn_procedural_cylinder(root, "%s_WatchedFloorSheen" % zone_id, center + Vector3(0, 0.025, 0), radius + 0.42, 0.028, Color(color.r, color.g, color.b, 0.12))
 		_spawn_procedural_box(root, "%s_ProcedureRail_A" % zone_id, center + Vector3(0, 0.085, -radius * 0.7), Vector3(radius * 1.35, 0.065, 0.12), Color(color.r, color.g, color.b, 0.58), 0.0)
 		_spawn_procedural_box(root, "%s_ProcedureRail_B" % zone_id, center + Vector3(0, 0.085, radius * 0.7), Vector3(radius * 1.35, 0.065, 0.12), Color(color.r, color.g, color.b, 0.42), 0.0)
+		if zone_id == "StoreCounterZone":
+			_create_store_conversation_cues(root, anchors, center, generation_failures)
+
+static func _create_store_conversation_cues(
+	parent: Node3D,
+	anchors: Dictionary,
+	counter: Vector3,
+	generation_failures: Array[String]
+) -> void:
+	var clerk_result := _resolve_anchor(anchors, "Store.npc_spawn", generation_failures)
+	var queue_result := _resolve_anchor(anchors, "Store.queue_start", generation_failures)
+	var station_result := _resolve_anchor(anchors, "Station.front_door", generation_failures)
+	var gold := Color(1.0, 0.82, 0.32, 1.0)
+	var amber := Color(1.0, 0.56, 0.24, 1.0)
+	_spawn_procedural_box(parent, "StoreConversation_CounterFocus", counter + Vector3(0, 0.16, 0.95), Vector3(2.8, 0.09, 0.18), gold, 0.0)
+	_spawn_procedural_box(parent, "StoreConversation_RecordRail", counter + Vector3(0, 0.2, -0.72), Vector3(2.2, 0.1, 0.12), amber, 0.0)
+	for index in range(3):
+		_spawn_procedural_box(
+			parent,
+			"StoreConversation_ChoicePad_%d" % (index + 1),
+			counter + Vector3(-0.9 + float(index) * 0.9, 0.09, 1.45),
+			Vector3(0.52, 0.06, 0.38),
+			Color(0.94, 0.98, 0.86, 0.46) if index < 2 else Color(1.0, 0.50, 0.28, 0.54),
+			0.0
+		)
+	if clerk_result["ok"] and queue_result["ok"]:
+		_spawn_watchline(parent, "StoreConversation_ClerkSightline", clerk_result["position"], queue_result["position"], Color(1.0, 0.64, 0.24, 0.30))
+	if clerk_result["ok"] and station_result["ok"]:
+		_spawn_watchline(parent, "StoreConversation_ReportRouteHint", clerk_result["position"], station_result["position"], Color(1.0, 0.36, 0.22, 0.18))
 
 static func _spawn_procedural_box(
 	parent: Node3D,

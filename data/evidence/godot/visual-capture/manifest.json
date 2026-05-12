@@ -49,7 +49,7 @@
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
 				"Store Clerk prompt is active",
-				"three diegetic dialogue choices are visible",
+				"three large diegetic dialogue choices are visible in the conversation panel",
 				"key 4 is explicitly scoped as a displayed recorded statement"
 			],
 			"height": 720,
@@ -67,6 +67,7 @@
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
 				"suspicion has increased from a risky dialogue line",
+				"Store Clerk reaction marker is active",
 				"player-facing why-line is visible",
 				"recent Evidence explains the consequence"
 			],
@@ -127,7 +128,7 @@
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
 				"Store Clerk prompt is active",
-				"three diegetic dialogue choices are visible",
+				"three large diegetic dialogue choices are visible in the conversation panel",
 				"key 4 is explicitly scoped as a displayed recorded statement"
 			],
 			"role": "active-conversation-hud"
@@ -137,6 +138,7 @@
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
 				"suspicion has increased from a risky dialogue line",
+				"Store Clerk reaction marker is active",
 				"player-facing why-line is visible",
 				"recent Evidence explains the consequence"
 			],
@@ -175,6 +177,7 @@
 				"choiceSetId": "store.same_order.routine.choices",
 				"freeInputHash": "",
 				"inputMode": "choice",
+				"intent": "risky/weird",
 				"playerLine": "오늘 처음 왔는데요.",
 				"promptId": "store.same_order.routine",
 				"recordedStatementScope": "",
@@ -193,6 +196,7 @@
 				"choiceSetId": "store.same_order.probe.choices",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "explicit_recorded_statement",
+				"intent": "free/recorded",
 				"playerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"promptId": "store.same_order.probe",
 				"recordedStatementScope": "key_4_explicit_recorded_statement_no_typed_ui",

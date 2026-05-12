@@ -10,7 +10,7 @@ const RECORDED_STATEMENT_LINE := "저는 이 꿈에 방금 들어왔어요."
 const RECORDED_STATEMENT_SCOPE := "key_4_explicit_recorded_statement_no_typed_ui"
 const SHARE_THRESHOLD := 50
 const REPORT_THRESHOLD := 70
-const INQUEST_THRESHOLD := 80
+const INQUEST_THRESHOLD := 100
 
 const SIGNAL_SUSPICION_WEIGHT := {
 	"local_routine_mismatch": 35,
@@ -99,7 +99,7 @@ const CONVERSATION_BEATS := {
 				"id": "store.same_order.probe.risky",
 				"line": "저는 여기 사람이 아닙니다.",
 				"intent": "risky/weird",
-				"signals": ["role_script_break"],
+				"signals": ["role_script_break", "prior_statement_contradiction"],
 				"npcResponse": "그 말은 그냥 넘길 수 없습니다.",
 				"nextPromptId": ""
 			}
@@ -143,8 +143,12 @@ var outcome_body := ""
 var last_why_line := ""
 var last_why_line_key := ""
 var last_dialogue_choice := ""
+var last_choice_intent := ""
 var last_reason_code := ""
 var session_outcome := "running"
+var route_outcome := "running"
+var repair_attempt_count := 0
+var repair_state := "unused"
 var _event_sequence := 0
 
 @onready var _root: Node = get_parent()
@@ -228,7 +232,11 @@ func build_summary() -> Dictionary:
 		"lastWhyLine": last_why_line,
 		"lastWhyLineKey": last_why_line_key,
 		"lastDialogueChoice": last_dialogue_choice,
+		"lastChoiceIntent": last_choice_intent,
 		"lastReasonCode": last_reason_code,
+		"routeOutcome": route_outcome,
+		"repairAttemptCount": repair_attempt_count,
+		"repairState": repair_state,
 		"inputLocked": _session_locked(),
 		"authorityMode": _authority_mode(),
 		"releaseAuthorityRequirement": _release_authority_requirement(),
@@ -248,6 +256,8 @@ func build_summary() -> Dictionary:
 			"defaultVerb": "three diegetic dialogue choices",
 			"recordedStatement": "key 4 submits the displayed recorded statement; typed text entry is not implemented in this slice",
 			"outcome": _session_outcome(),
+			"routeOutcome": route_outcome,
+			"repairState": repair_state,
 			"endControls": _end_controls()
 		},
 		"events": evidence_events.duplicate(true)
@@ -289,6 +299,8 @@ func build_evidence_pack(artifact_path: String) -> Dictionary:
 			"inputPath": "focus StoreCounterZone -> E start Same Order -> 3 risky choice -> 4 explicit recorded statement",
 			"expectedPlayerInterpretation": "Odd dialogue creates NPC suspicion, a report, and Station inquest pressure.",
 			"deterministicOutcome": _session_outcome(),
+			"routeOutcome": route_outcome,
+			"repairState": repair_state,
 			"endControls": _end_controls(),
 			"visibleWhyLine": last_why_line,
 			"inputLocked": _session_locked(),
@@ -397,7 +409,8 @@ func submit_free_input(line: String) -> void:
 
 func submit_recorded_statement() -> void:
 	if not conversation_active:
-		_start_conversation()
+		_set_notice("대화 전", "기록된 진술은 상점 점원과 대화를 시작한 뒤에만 제출할 수 있습니다.")
+		return
 	_apply_dialogue_turn({}, RECORDED_STATEMENT_LINE, "explicit_recorded_statement")
 
 func _apply_dialogue_turn(choice: Dictionary, free_line: String, input_mode := "choice") -> void:
@@ -418,6 +431,10 @@ func _apply_dialogue_turn(choice: Dictionary, free_line: String, input_mode := "
 
 	var evaluation := _evaluate_dialogue_turn(player_line, selected_choice_id, _free_input_hash(player_line) if free_input else "", authored_signals, intent, input_mode)
 	last_dialogue_choice = selected_choice_id if not selected_choice_id.is_empty() else "free_input"
+	last_choice_intent = intent
+	if intent == "uncertain/repair":
+		repair_attempt_count += 1
+		repair_state = "used_pending"
 	var evaluation_signals: Array = evaluation.get("suspicionSignals", [])
 	last_reason_code = str(evaluation_signals[0]) if not evaluation_signals.is_empty() else "none"
 	if not str(evaluation["whyLine"]).is_empty():
@@ -430,6 +447,7 @@ func _apply_dialogue_turn(choice: Dictionary, free_line: String, input_mode := "
 		"choiceSetId": _current_choice_set_id(),
 		"selectedChoiceId": selected_choice_id,
 		"freeInputHash": evaluation.get("freeInputHash", ""),
+		"intent": intent,
 		"inputMode": evaluation.get("inputMode", ""),
 		"recordedStatementScope": evaluation.get("recordedStatementScope", ""),
 		"playerLine": player_line,
@@ -460,12 +478,13 @@ func _apply_dialogue_turn(choice: Dictionary, free_line: String, input_mode := "
 			"Deterministic conversation signals fired: %s." % ", ".join(evaluation["suspicionSignals"]),
 			_conversation_event_extra(evaluation)
 		)
-	_record_event(
-		"domain",
-		"npc_suspicion_changed",
-		"NPC suspicion changed from %d to %d." % [int(evaluation["suspicionBefore"]), int(evaluation["suspicionAfter"])],
-		_conversation_event_extra(evaluation)
-	)
+	if int(evaluation["suspicionDelta"]) > 0 or int(evaluation["reportDelta"]) > 0:
+		_record_event(
+			"domain",
+			"npc_suspicion_changed",
+			"NPC suspicion changed from %d to %d." % [int(evaluation["suspicionBefore"]), int(evaluation["suspicionAfter"])],
+			_conversation_event_extra(evaluation)
+		)
 
 	_apply_social_consequence(evaluation)
 	_apply_npc_response(choice, free_input, evaluation)
@@ -527,7 +546,7 @@ func _evaluate_dialogue_turn(
 		"reportWeightAfter": report_weight,
 		"reportDelta": report_weight - report_before,
 		"whyLine": _why_line_for_signals(signals),
-		"whyLineKey": str(signals[0]) if not signals.is_empty() else "none",
+		"whyLineKey": str(signals[0]) if not signals.is_empty() else "",
 		"conversationStage": stage,
 		"outcome": _session_outcome()
 	}
@@ -539,9 +558,10 @@ func _apply_social_consequence(evaluation: Dictionary) -> void:
 		_record_event(
 			"domain",
 			"suspicion_shared",
-			"The clerk shared the odd statement with the nearby route record.",
+			"The clerk shared the odd statement with the nearby witness route.",
 			_conversation_event_extra(evaluation)
 		)
+		_set_actor_line("NPC_Park_Witness", "상점 쪽 말이 기록과 맞지 않는다고요?")
 	if report_after >= REPORT_THRESHOLD and not bool(station["intakeOpen"]):
 		station["intakeOpen"] = true
 		stage = "reported"
@@ -551,6 +571,7 @@ func _apply_social_consequence(evaluation: Dictionary) -> void:
 			"Station received a report from the Store Clerk conversation.",
 			_conversation_event_extra(evaluation)
 		)
+		_set_actor_line("NPC_Station_Officer", "상점 기록을 접수했습니다. 이전 발화와 대조합니다.")
 		_add_prologue_evidence(
 			"witness_reference.%s" % current_turn_id,
 			"witness_reference",
@@ -566,15 +587,17 @@ func _open_inquest(evaluation: Dictionary) -> void:
 	station["sessionTerminationAllowed"] = true
 	stage = "inquest"
 	session_outcome = "inquest_opened"
+	route_outcome = "inquest_opened"
 	outcome_visible = true
 	outcome_title = "스테이션 심문 개시"
-	outcome_body = "상점 대화 기록이 접수되었습니다.\n기록된 why-line: %s\nR 다시 시작 / Q 종료" % str(evaluation["whyLine"])
+	outcome_body = "상점 대화 기록이 접수되었습니다.\n스테이션 대조: 이전 발화와 기록된 진술이 함께 접수되었습니다.\n기록된 why-line: %s\nR 다시 시작 / Q 종료" % str(evaluation["whyLine"])
 	_record_event(
 		"domain",
 		"station_inquest_opened",
 		"Station opened formal questioning from accumulated conversation Evidence.",
 		_conversation_event_extra(evaluation)
 	)
+	_set_actor_line("NPC_Station_Officer", "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.")
 	_add_prologue_evidence(
 		"intake_dossier.%s" % current_turn_id,
 		"intake_dossier",
@@ -605,16 +628,28 @@ func _apply_npc_response(choice: Dictionary, free_input: bool, evaluation: Dicti
 func _advance_prompt(choice: Dictionary) -> void:
 	var next_prompt := str(choice.get("nextPromptId", "")) if not choice.is_empty() else ""
 	if next_prompt.is_empty():
-		if suspicion == 0:
-			session_outcome = "cover_held"
-		elif bool(station["intakeOpen"]):
-			session_outcome = "soft_report"
-		else:
-			session_outcome = "cover_held"
+		_resolve_terminal_outcome()
 		station["sessionTerminationAllowed"] = true
 		outcome_visible = true
-		outcome_title = "대화 종료"
-		outcome_body = "결과: %s\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % [_session_outcome(), last_why_line]
+		outcome_title = _terminal_outcome_title()
+		outcome_body = _terminal_outcome_body()
+		_record_event(
+			"domain",
+			"conversation_outcome_reached",
+			"Same Order route ended as %s." % _session_outcome(),
+			{
+				"actorId": "NPC_Store_Clerk",
+				"conversationId": CONVERSATION_ID,
+				"turnId": current_turn_id,
+				"promptId": current_prompt_id,
+				"choiceSetId": _current_choice_set_id(),
+				"speakerId": "system",
+				"conversationStage": stage,
+				"outcome": _session_outcome(),
+				"routeOutcome": route_outcome,
+				"socialLoopStage": stage
+			}
+		)
 		return
 	current_prompt_id = next_prompt
 	current_turn_number += 1
@@ -623,7 +658,7 @@ func _advance_prompt(choice: Dictionary) -> void:
 
 func _show_current_prompt() -> void:
 	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
-	var npc_line := str(beat.get("npcLine", ""))
+	var npc_line := _current_npc_line(beat)
 	choice_catalog = _current_choices()
 	_set_actor_line(str(beat.get("actorId", "NPC_Store_Clerk")), npc_line)
 	_set_notice("상점 점원", npc_line)
@@ -645,7 +680,7 @@ func _refresh_hud() -> void:
 	var choices_enabled := false
 	if conversation_active and not _session_locked():
 		var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
-		prompt = str(beat.get("npcLine", prompt))
+		prompt = _current_npc_line(beat)
 		choices_enabled = true
 	elif current_focus != null and current_focus_kind == "text_surface":
 		var surface_id := str(current_focus.get_meta("surface_id", ""))
@@ -665,6 +700,9 @@ func _refresh_hud() -> void:
 		_hud.set_outcome(outcome_visible, outcome_title, outcome_body)
 	if _hud.has_method("set_evidence"):
 		_hud.set_evidence(_recent_events())
+	_set_actor_reaction_state("NPC_Store_Clerk", stage, exposure)
+	_set_actor_reaction_state("NPC_Park_Witness", "reported" if ["reported", "inquest"].has(stage) else "normal", exposure)
+	_set_actor_reaction_state("NPC_Station_Officer", "inquest" if bool(station["inquestOpen"]) else ("reported" if bool(station["intakeOpen"]) else "normal"), exposure)
 
 func _objective() -> String:
 	if _session_locked():
@@ -730,11 +768,14 @@ func _conversation_event_extra(evaluation: Dictionary) -> Dictionary:
 		"reportWeightAfter": int(evaluation["reportWeightAfter"]),
 		"reportDelta": int(evaluation["reportDelta"]),
 		"whyLine": str(evaluation["whyLine"]),
-		"whyLineKey": str(evaluation["whyLineKey"]),
 		"conversationStage": stage,
 		"outcome": _session_outcome(),
+		"routeOutcome": route_outcome,
 		"socialLoopStage": stage
 	}
+	var why_line_key := str(evaluation["whyLineKey"])
+	if not why_line_key.is_empty():
+		extra["whyLineKey"] = why_line_key
 	var selected_choice_id := str(evaluation["selectedChoiceId"])
 	if not selected_choice_id.is_empty():
 		extra["selectedChoiceId"] = selected_choice_id
@@ -758,9 +799,28 @@ func _set_actor_line(actor_id: String, line: String) -> void:
 			node.say(line)
 			return
 
+func _set_actor_reaction_state(actor_id: String, reaction_stage: String, reaction_exposure: int) -> void:
+	if actor_id.is_empty():
+		return
+	for node in get_tree().get_nodes_in_group("npc_placeholders"):
+		if str(node.get_meta("npc_id", "")) == actor_id and node.has_method("set_reaction_state"):
+			node.set_reaction_state(reaction_stage, reaction_exposure)
+			return
+
 func _current_choices() -> Array:
 	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
 	return beat.get("choices", [])
+
+func _current_npc_line(beat: Dictionary) -> String:
+	if current_prompt_id == "store.same_order.probe":
+		match last_choice_intent:
+			"safe/local":
+				return "네. 어제 기록처럼 같은 주문 맞으시죠?"
+			"uncertain/repair":
+				return "보통은 표식 하나라고 하셨죠. 오늘은 왜 확인하시나요?"
+			"risky/weird":
+				return "처음이라고요? 어제도 같은 자리에서 같은 말을 하셨는데요."
+	return str(beat.get("npcLine", ""))
 
 func _current_choice_set_id() -> String:
 	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
@@ -899,13 +959,14 @@ func _event_family_counts(event_family: String) -> Dictionary:
 	return counts
 
 func _verdict_end_state_trace(summary: Dictionary) -> String:
-	return "Same Order conversation -> suspicion %d -> report %d -> intake:%s inquest:%s termination:%s outcome:%s" % [
+	return "Same Order conversation -> suspicion %d -> report %d -> intake:%s inquest:%s termination:%s outcome:%s route:%s" % [
 		int(summary.get("suspicion", 0)),
 		int(summary.get("reportWeight", 0)),
 		str(station.get("intakeOpen", false)),
 		str(station.get("inquestOpen", false)),
 		str(station.get("sessionTerminationAllowed", false)),
-		_session_outcome()
+		_session_outcome(),
+		route_outcome
 	]
 
 func _session_outcome() -> String:
@@ -936,6 +997,41 @@ func _authority_mode() -> String:
 
 func _release_authority_requirement() -> String:
 	return "Public demo authority must keep suspicion, report, inquest, verdict, and session end deterministic; API/provider text remains wording-only."
+
+func _resolve_terminal_outcome() -> void:
+	if bool(station["inquestOpen"]):
+		session_outcome = "inquest_opened"
+		route_outcome = "inquest_opened"
+		return
+	if bool(station["intakeOpen"]):
+		session_outcome = "soft_report"
+		route_outcome = "soft_report"
+		if repair_attempt_count > 0:
+			repair_state = "used_failed"
+		stage = "reported"
+		return
+	session_outcome = "cover_held"
+	if repair_attempt_count > 0:
+		route_outcome = "repair_recovered"
+		repair_state = "used_success"
+	elif suspicion > 0:
+		route_outcome = "cover_held_under_suspicion"
+	else:
+		route_outcome = "clean_cover"
+
+func _terminal_outcome_title() -> String:
+	if session_outcome == "soft_report":
+		return "스테이션 경고 접수"
+	if route_outcome == "repair_recovered":
+		return "대화 수습"
+	return "대화 종료"
+
+func _terminal_outcome_body() -> String:
+	if session_outcome == "soft_report":
+		return "결과: soft_report\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
+	if route_outcome == "repair_recovered":
+		return "결과: cover_held\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
+	return "결과: cover_held\n상점 대화가 지역 루틴 안에서 닫혔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 
 func _now_ms() -> int:
 	return int(Time.get_unix_time_from_system() * 1000.0)

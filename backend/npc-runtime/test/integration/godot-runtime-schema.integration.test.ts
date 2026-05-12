@@ -8,6 +8,7 @@ import {
   validateGodotEvidenceEvent,
   validateGodotEvidencePack,
   validateGodotEvidencePackConversationSuspicionProof,
+  validateGodotEvidencePackSameOrderRouteProofs,
   validateGodotNpcCommandEnvelope,
   validateGodotObservationFrame,
   type GodotRuntimeContext,
@@ -86,6 +87,17 @@ function buildCommand(overrides: Record<string, unknown> = {}): Record<string, u
     expectedStage: "intake",
     source: "codex",
     ...overrides,
+  };
+}
+
+function loadPlayableSliceWithCanonicalRouteEvents(): {
+  playability: { routeProofs: Array<Record<string, unknown>> };
+  events: Array<Record<string, unknown>>;
+} {
+  const artifactUrl = new URL("../../../../data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json", import.meta.url);
+  return JSON.parse(readFileSync(artifactUrl, "utf8")) as {
+    playability: { routeProofs: Array<Record<string, unknown>> };
+    events: Array<Record<string, unknown>>;
   };
 }
 
@@ -421,6 +433,92 @@ test("Generated playable slice passes Same Order conversation suspicion proof", 
     ],
   );
   assert.equal(proof.ok ? proof.value.finalConversationStage : "", "inquest");
+});
+
+test("Generated playable slice proves Same Order route outcome contrast", () => {
+  const artifact = loadPlayableSliceWithCanonicalRouteEvents();
+  const proof = validateGodotEvidencePackSameOrderRouteProofs(artifact);
+
+  assert.equal(proof.ok, true, proof.ok ? undefined : JSON.stringify(proof.failures, null, 2));
+  assert.deepEqual(
+    proof.ok ? proof.value.routeIds : [],
+    ["clean_cover", "inquest_opened", "repair_recovered", "soft_report"],
+  );
+  assert.deepEqual(
+    proof.ok ? proof.value.sessionOutcomes : [],
+    ["cover_held", "inquest_opened", "soft_report"],
+  );
+  assert.deepEqual(
+    proof.ok ? proof.value.routeOutcomes : [],
+    ["clean_cover", "inquest_opened", "repair_recovered", "soft_report"],
+  );
+});
+
+test("Same Order route proof rejects soft report that jumps into inquest", () => {
+  const artifact = loadPlayableSliceWithCanonicalRouteEvents();
+  const softReport = artifact.playability.routeProofs.find(proof => proof.routeId === "soft_report");
+  assert.ok(softReport);
+  softReport.eventNames = [...(softReport.eventNames as string[]), "station_inquest_opened"];
+  softReport.reportWeight = 115;
+
+  const proof = validateGodotEvidencePackSameOrderRouteProofs(artifact);
+
+  assert.equal(proof.ok, false);
+  assert.equal(proof.ok ? "" : proof.failures.some(failure => failure.path.includes("soft_report")), true);
+});
+
+test("Same Order route proof rejects stale or forged summary state", () => {
+  const artifact = loadPlayableSliceWithCanonicalRouteEvents();
+  const softReport = artifact.playability.routeProofs.find(proof => proof.routeId === "soft_report");
+  assert.ok(softReport);
+  softReport.reportWeight = 10;
+  softReport.suspicion = 20;
+
+  const proof = validateGodotEvidencePackSameOrderRouteProofs(artifact);
+
+  assert.equal(proof.ok, false);
+  assert.equal(proof.ok ? "" : proof.failures.some(failure => failure.path.includes("soft_report") && failure.path.includes("reportWeight")), true);
+  assert.equal(proof.ok ? "" : proof.failures.some(failure => failure.path.includes("soft_report") && failure.path.includes("suspicion")), true);
+});
+
+test("Same Order route proof rejects missing canonical route events", () => {
+  const artifact = loadPlayableSliceWithCanonicalRouteEvents();
+  const cleanCover = artifact.playability.routeProofs.find(proof => proof.routeId === "clean_cover");
+  assert.ok(cleanCover);
+  delete cleanCover.events;
+
+  const proof = validateGodotEvidencePackSameOrderRouteProofs(artifact);
+
+  assert.equal(proof.ok, false);
+  assert.equal(proof.ok ? "" : proof.failures.some(failure => failure.path.includes("clean_cover") && failure.path.includes("events")), true);
+});
+
+test("Same Order route proof rejects eventNames that contradict canonical events", () => {
+  const artifact = loadPlayableSliceWithCanonicalRouteEvents();
+  const inquest = artifact.playability.routeProofs.find(proof => proof.routeId === "inquest_opened");
+  assert.ok(inquest);
+  inquest.eventNames = ["conversation_started", "dialogue_choice_selected", "station_report_created"];
+
+  const proof = validateGodotEvidencePackSameOrderRouteProofs(artifact);
+
+  assert.equal(proof.ok, false);
+  assert.equal(proof.ok ? "" : proof.failures.some(failure => failure.path.includes("inquest_opened") && failure.path.includes("eventNames")), true);
+});
+
+test("Same Order route proof rejects unknown extra route ids", () => {
+  const artifact = loadPlayableSliceWithCanonicalRouteEvents();
+  const cleanCover = artifact.playability.routeProofs.find(proof => proof.routeId === "clean_cover");
+  assert.ok(cleanCover);
+  artifact.playability.routeProofs.push({
+    ...cleanCover,
+    routeId: "provider_reported",
+    routeOutcome: "provider_reported",
+  });
+
+  const proof = validateGodotEvidencePackSameOrderRouteProofs(artifact);
+
+  assert.equal(proof.ok, false);
+  assert.equal(proof.ok ? "" : proof.failures.some(failure => failure.message.includes("unknown Same Order route proof")), true);
 });
 
 test("Same Order conversation suspicion proof rejects mixed conversation ids", () => {

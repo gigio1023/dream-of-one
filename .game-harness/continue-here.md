@@ -1,6 +1,6 @@
 # Continue Here
 
-Last Updated: 2026-05-07
+Last Updated: 2026-05-12
 
 ## Current State
 
@@ -19,18 +19,23 @@ Direction pivot:
 - NPC suspicion starts from conversation weirdness, then escalates through probing, sharing/report, Station intake, inquest, and verdict.
 - The current Station Soft Inquest smoke remains internal authority/Evidence harness evidence only.
 
-Branch target for `feat/prologue-demo-completion`:
+Current lane and umbrella target:
+- current scoped lane: `feat/ui-visual-readability-pass`.
+- umbrella target: `feat/prologue-demo-completion`.
 - keep M1 technical proof green as the baseline.
 - distinguish M1 proof from a small complete prologue/demo in all PR and planning updates.
-- close or explicitly block conversation/UI/player-comprehension/provider/export gates before claiming a demo-complete branch.
+- close or explicitly block conversation/UI/player-comprehension/provider/export gates before claiming the umbrella is demo-complete.
 - treat broader route, inquest, verdict, and replay work as demo-completion work only after the conversation-first loop is proven.
 
-Current branch progress:
-- the playable smoke now proves `Same Order`: Store Clerk prompt -> three dialogue choices -> risky line -> preset recorded statement -> deterministic suspicion signals -> Station report/inquest -> locked session end.
+Current lane progress:
+- the playable smoke now proves `Same Order` route contrast with fresh scenes: clean cover, repair recovery, soft report, and hard inquest.
+- the hard inquest route still proves Store Clerk prompt -> risky line -> preset recorded statement -> deterministic suspicion signals -> Station report/inquest -> locked session end.
 - player-facing controls are now `dialogue_choice_1/2/3` plus `dialogue_free_input`; `dialogue_free_input` submits a preset line in the smoke. `SA_COMPLY/SA_BREAK` remain only in legacy runtime-slice authority tests.
 - backend Evidence validation now preserves conversation identity, selected line, free-input hash, suspicion signals, suspicion/report deltas, and why-line fields.
+- backend Evidence validation now also checks Same Order route proofs through `validateGodotEvidencePackSameOrderRouteProofs`.
 - DecisionService preserves ordered same-NPC conversation turns instead of latest-wins coalescing when `conversation.turnId` is present.
 - HUD now shows NPC prompt, three diegetic choices, free-input affordance, recorded-statement result, why-line, Evidence count, suspicion/report pressure, and end controls.
+- UI/visual readability pass added a compact traversal HUD, larger conversation choice rows, explicit recorded-statement label, localized record summaries, Store Clerk reaction marker, and Store conversation staging cues. This improves presentation proof but does not close human readability or player comprehension.
 - playable smoke declares `godot_local_conversation_runtime`, so public/demo authority still requires live backend/runtime integration or an explicit fallback-only product decision.
 
 Small complete prologue/demo bar:
@@ -61,12 +66,12 @@ Current game-development state:
 
 ## Next Best Action
 
-Advance the conversation-first proof from forced engineering path to product evidence. Do not expand content before the small "Same Order" proof has repair/replay and comprehension evidence.
+Advance the conversation-first proof from forced engineering path to product evidence. Do not expand content before the small "Same Order" proof has manual replay/readability validation and comprehension evidence.
 
 Already implemented:
 - conversation prompt/choice/free-input schema
 - deterministic suspicion signal taxonomy and fixtures
-- one NPC `Same Order` risky plus preset-free-input micro-scenario reaching Station inquest
+- one NPC `Same Order` micro-scenario with clean cover, repair recovery, soft report, and inquest paths
 - headless HUD state path with three dialogue choices and a recorded-statement result
 - renderer-backed Store conversation screenshots and contact sheet
 - Evidence Pack with conversation identity, selected line, free-input hash, signals, suspicion/report deltas, and why-line
@@ -78,7 +83,8 @@ Remaining required outputs:
 - runtime provider verification result before naming any live GPT model as available
 - manual typed free-input UI if free input stays in the demo promise
 - visual/UI gate evidence for provider/fallback state once live-provider or fallback-only demo mode is selected
-- repair/replay outcome contrast beyond the current forced risky plus preset-free-input Store smoke
+- human visual/readability review of the refreshed Store conversation contact sheet
+- manual replay/readability validation for the internally proven route contrast
 - live backend/runtime authority proof or explicit fallback-only product decision
 - player comprehension/playtest note
 - exported build/setup plan

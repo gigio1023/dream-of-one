@@ -4,7 +4,7 @@ This checklist is not the issue source of truth. Use Linear for issue ownership 
 
 ## Active
 
-- [x] Define `feat/prologue-demo-completion` as a small complete prologue/demo target, not an M1 technical-proof synonym.
+- [x] Define umbrella `feat/prologue-demo-completion` as a small complete prologue/demo target, not an M1 technical-proof synonym.
 - [x] Define the game-like completion bar for a small complete prologue/demo.
 - [x] Define visual/UI/player-comprehension gates in active docs.
 - [x] Record remaining demo-completion blockers in active docs.
@@ -15,6 +15,7 @@ This checklist is not the issue source of truth. Use Linear for issue ownership 
 - [x] Add conversation prompt/choice/free-input schema and fixtures.
 - [x] Build "Same Order" or equivalent conversation-first micro-scenario.
 - [x] Replace player-facing abstract `SA_*` controls with diegetic dialogue choices.
+- [x] Add first UI/visual readability pass: conversation-centered HUD, recorded-statement label, NPC reaction marker, and Store conversation staging cues.
 - [x] Add Evidence Pack fields for conversation identity, selected line, free-input hash, suspicion signals, social report weight, and why-line.
 - [x] Record typed free input as a player action and recorded statement as the Evidence artifact.
 - [ ] Prove manual typed free-input UI if free input remains in the demo promise.
@@ -22,12 +23,13 @@ This checklist is not the issue source of truth. Use Linear for issue ownership 
 - [ ] Run M1 council reviews.
 - [ ] Run external player comprehension protocol and record evidence.
 - [ ] Record M1/M2 go/no-go decision after product review and comprehension evidence.
-- [ ] Decide whether `feat/prologue-demo-completion` continues toward demo completion or narrows to M1-only proof.
+- [ ] Decide whether umbrella `feat/prologue-demo-completion` continues toward demo completion or narrows to M1-only proof after the current `feat/ui-visual-readability-pass` lane lands.
 - [x] Add Godot bridge readiness fallback smoke before M2 content expansion.
 - [ ] Decide live Godot-to-backend provider integration requirement before M2 content expansion.
 - [ ] Prove exported build setup/provider UX before tester-facing M2 gate.
 - [ ] Prove provider/fallback state in-game once live-provider or fallback-only demo mode is selected.
-- [ ] Prove repair/replay outcome contrast beyond the forced risky plus preset-free-input Store smoke.
+- [x] Prove internal Same Order route contrast for clean cover, repair recovery, soft report, and inquest through headless playable smoke and backend validation.
+- [x] Prove backend canonical route event validation for the internal route-proof gate.
 - [ ] Prove live backend/runtime authority or record an explicit fallback-only product decision before public demo claims.
 - [x] Draft M1 content/runtime contract.
 - [x] Produce M1 implementation handoff with exact file ownership.

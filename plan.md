@@ -6,11 +6,11 @@ Dream of One is no longer scoped as a Godot migration alone. The release target 
 
 The AI path is an API proposal provider. The provider may propose wording only: NPC line candidates, Station pressure wording, localized variants, and fallback text variants. It must not decide action type, risk tag, Evidence type, reason codes, why-line authority, Exposure delta, Inquest state, Verdict, or session termination.
 
-## Branch Completion Target
+## Current Lane And Umbrella Target
 
-`feat/prologue-demo-completion` is aimed at a small complete prologue/demo candidate, not just the M1 technical proof. M1 proof is the technical baseline: it says the protocol and Evidence contract can pass local checks. Demo completion is a higher product bar: it says a player can start, hold a short conversation, choose or enter a line, understand NPC suspicion and consequence, reach deterministic closure, and replay a meaningfully different path without misleading release claims.
+`feat/ui-visual-readability-pass` is the current scoped lane. It sits under the broader `feat/prologue-demo-completion` umbrella, which is aimed at a small complete prologue/demo candidate, not just the M1 technical proof. M1 proof is the technical baseline: it says the protocol and Evidence contract can pass local checks. Demo completion is a higher product bar: it says a player can start, hold a short conversation, choose or enter a line, understand NPC suspicion and consequence, reach deterministic closure, and replay a meaningfully different path without misleading release claims.
 
-The branch may advance toward demo completion only while these facts remain true:
+The umbrella may advance toward demo completion only while these facts remain true:
 - M1 technical checks stay green.
 - product blockers are tracked as blockers, not release caveats.
 - visual, UI, comprehension, provider, and exported-build gates have evidence in `.game-harness/verification-ledger.md`.
@@ -53,15 +53,16 @@ Current implementation work has reached M1 technical proof pass. Product work mu
 7. Close the M1 product/comprehension gate before M2 content expansion.
 8. Record the exact pass/fail state in `.game-harness/verification-ledger.md`.
 
-Current `feat/prologue-demo-completion` progress:
-- playable smoke now proves the new player-facing `Same Order` runtime path: NPC prompt, three dialogue choices, risky line, preset recorded statement, deterministic suspicion signals, Station report/inquest, locked session end, and backend-valid Evidence Pack.
+Current `feat/ui-visual-readability-pass` lane progress:
+- playable smoke now proves the new player-facing `Same Order` runtime path with four internal route outcomes: clean cover, repair recovery, soft report, and hard inquest.
+- the hard inquest route still proves NPC prompt, three dialogue choices, risky line, preset recorded statement, deterministic suspicion signals, Station report/inquest, locked session end, and backend-valid Evidence Pack.
+- backend validation now checks both the ordered Same Order inquest chain and the Same Order route-proof set.
 - internal Station Soft Inquest smoke remains legacy authority evidence in runtime-slice tests only. It is no longer the player-facing playable smoke.
 - HUD now exposes NPC prompt, three diegetic choices, free-input affordance, recorded-statement result, suspicion/report pressure, why-line, Evidence count, and deterministic end controls. Manual text-entry UI remains pending.
 - visual capture expectations have been realigned to the Store conversation path; renderer-backed `godot --path godot --script res://tools/visual_capture.gd` now produces nonblank PNGs and a contact sheet. Human readability review remains pending.
-- these are internal proof gates only; they do not replace external comprehension, provider truth, exported build, or repair/replay proof.
+- these are internal proof gates only; they do not replace manual replay/readability/comprehension validation, external comprehension, provider truth, or exported build proof.
 
-Remaining blockers before the branch can claim a small complete prologue/demo:
-- safe, uncertain, risky, repair, and replay outcome contrast beyond the current forced risky plus preset-free-input `Same Order` smoke.
+Remaining blockers before the umbrella can claim a small complete prologue/demo:
 - manual typed free-input UI if free input remains in the demo promise.
 - council/product review acceptance of the API proposal-provider wording-only boundary.
 - live Godot/backend/provider integration or an explicit deterministic fallback-only demo decision.
@@ -70,6 +71,7 @@ Remaining blockers before the branch can claim a small complete prologue/demo:
 - provider/fallback UI proof for the selected live-provider or fallback-only demo mode.
 - live backend/runtime authority proof before public demo authority claims; the current playable smoke identifies itself as `godot_local_conversation_runtime`.
 - external player comprehension evidence.
+- manual replay/readability evidence for the internally proven route contrast.
 - release-truth copy and asset review against actual build behavior.
 
 ## Required Checks

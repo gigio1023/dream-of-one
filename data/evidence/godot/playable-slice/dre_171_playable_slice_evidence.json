@@ -1,18 +1,18 @@
 {
 	"adapter": "godot",
-	"createdAtMs": 1778125271308,
+	"createdAtMs": 1778571500565,
 	"events": [
 		{
 			"adapter": "godot",
 			"eventFamily": "session",
-			"eventId": "playable_session_started-001-1778125271130",
+			"eventId": "playable_session_started-001-1778571500377",
 			"eventName": "playable_session_started",
 			"prologueStep": "beginning",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-playable-session",
 			"sessionOutcome": "running",
 			"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-			"timestampMs": 1778125271130,
+			"timestampMs": 1778571500377,
 			"uiSummaryArgs": {
 
 			},
@@ -27,7 +27,7 @@
 			"conversationId": "conv-same-order",
 			"conversationStage": "normal",
 			"eventFamily": "domain",
-			"eventId": "conversation_started-002-1778125271198",
+			"eventId": "conversation_started-002-1778571500460",
 			"eventName": "conversation_started",
 			"outcome": "running",
 			"promptId": "store.same_order.routine",
@@ -36,7 +36,7 @@
 			"socialLoopStage": "normal",
 			"speakerId": "NPC_Store_Clerk",
 			"summary": "Store Clerk opened the Same Order conversation.",
-			"timestampMs": 1778125271198,
+			"timestampMs": 1778571500460,
 			"turnId": "turn-1",
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
@@ -49,7 +49,7 @@
 			"conversationStage": "uneasy",
 			"displayedPlayerLine": "오늘 처음 왔는데요.",
 			"eventFamily": "domain",
-			"eventId": "dialogue_choice_selected-003-1778125271233",
+			"eventId": "dialogue_choice_selected-003-1778571500495",
 			"eventName": "dialogue_choice_selected",
 			"inputMode": "choice",
 			"outcome": "running",
@@ -58,6 +58,7 @@
 			"reportDelta": 30,
 			"reportWeightAfter": 30,
 			"reportWeightBefore": 0,
+			"routeOutcome": "running",
 			"schemaVersion": "godot-runtime-v1",
 			"selectedChoiceId": "store.same_order.risky",
 			"sessionId": "dre-171-playable-session",
@@ -70,7 +71,7 @@
 			"suspicionSignals": [
 				"local_routine_mismatch"
 			],
-			"timestampMs": 1778125271233,
+			"timestampMs": 1778571500495,
 			"turnId": "turn-1",
 			"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 			"whyLineKey": "local_routine_mismatch",
@@ -85,7 +86,7 @@
 			"conversationStage": "uneasy",
 			"displayedPlayerLine": "오늘 처음 왔는데요.",
 			"eventFamily": "domain",
-			"eventId": "conversation_anomaly_detected-004-1778125271233",
+			"eventId": "conversation_anomaly_detected-004-1778571500495",
 			"eventName": "conversation_anomaly_detected",
 			"inputMode": "choice",
 			"outcome": "running",
@@ -94,6 +95,7 @@
 			"reportDelta": 30,
 			"reportWeightAfter": 30,
 			"reportWeightBefore": 0,
+			"routeOutcome": "running",
 			"schemaVersion": "godot-runtime-v1",
 			"selectedChoiceId": "store.same_order.risky",
 			"sessionId": "dre-171-playable-session",
@@ -106,7 +108,7 @@
 			"suspicionSignals": [
 				"local_routine_mismatch"
 			],
-			"timestampMs": 1778125271233,
+			"timestampMs": 1778571500495,
 			"turnId": "turn-1",
 			"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 			"whyLineKey": "local_routine_mismatch",
@@ -121,7 +123,7 @@
 			"conversationStage": "uneasy",
 			"displayedPlayerLine": "오늘 처음 왔는데요.",
 			"eventFamily": "domain",
-			"eventId": "npc_suspicion_changed-005-1778125271233",
+			"eventId": "npc_suspicion_changed-005-1778571500495",
 			"eventName": "npc_suspicion_changed",
 			"inputMode": "choice",
 			"outcome": "running",
@@ -130,6 +132,7 @@
 			"reportDelta": 30,
 			"reportWeightAfter": 30,
 			"reportWeightBefore": 0,
+			"routeOutcome": "running",
 			"schemaVersion": "godot-runtime-v1",
 			"selectedChoiceId": "store.same_order.risky",
 			"sessionId": "dre-171-playable-session",
@@ -142,7 +145,7 @@
 			"suspicionSignals": [
 				"local_routine_mismatch"
 			],
-			"timestampMs": 1778125271233,
+			"timestampMs": 1778571500495,
 			"turnId": "turn-1",
 			"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 			"whyLineKey": "local_routine_mismatch",
@@ -157,7 +160,7 @@
 			"conversationStage": "reported",
 			"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 			"eventFamily": "domain",
-			"eventId": "free_input_submitted-006-1778125271268",
+			"eventId": "free_input_submitted-006-1778571500530",
 			"eventName": "free_input_submitted",
 			"freeInputHash": "free-17-3317429208",
 			"inputMode": "explicit_recorded_statement",
@@ -170,6 +173,7 @@
 			"reportDelta": 85,
 			"reportWeightAfter": 115,
 			"reportWeightBefore": 30,
+			"routeOutcome": "running",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-playable-session",
 			"socialLoopStage": "reported",
@@ -182,7 +186,7 @@
 				"dream_language_leak",
 				"local_routine_mismatch"
 			],
-			"timestampMs": 1778125271268,
+			"timestampMs": 1778571500530,
 			"turnId": "turn-2",
 			"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 			"whyLineKey": "dream_language_leak",
@@ -197,7 +201,7 @@
 			"conversationStage": "reported",
 			"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 			"eventFamily": "domain",
-			"eventId": "conversation_anomaly_detected-007-1778125271268",
+			"eventId": "conversation_anomaly_detected-007-1778571500530",
 			"eventName": "conversation_anomaly_detected",
 			"freeInputHash": "free-17-3317429208",
 			"inputMode": "explicit_recorded_statement",
@@ -210,6 +214,7 @@
 			"reportDelta": 85,
 			"reportWeightAfter": 115,
 			"reportWeightBefore": 30,
+			"routeOutcome": "running",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-playable-session",
 			"socialLoopStage": "reported",
@@ -222,7 +227,7 @@
 				"dream_language_leak",
 				"local_routine_mismatch"
 			],
-			"timestampMs": 1778125271268,
+			"timestampMs": 1778571500530,
 			"turnId": "turn-2",
 			"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 			"whyLineKey": "dream_language_leak",
@@ -237,7 +242,7 @@
 			"conversationStage": "reported",
 			"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 			"eventFamily": "domain",
-			"eventId": "npc_suspicion_changed-008-1778125271268",
+			"eventId": "npc_suspicion_changed-008-1778571500530",
 			"eventName": "npc_suspicion_changed",
 			"freeInputHash": "free-17-3317429208",
 			"inputMode": "explicit_recorded_statement",
@@ -250,6 +255,7 @@
 			"reportDelta": 85,
 			"reportWeightAfter": 115,
 			"reportWeightBefore": 30,
+			"routeOutcome": "running",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-playable-session",
 			"socialLoopStage": "reported",
@@ -262,7 +268,7 @@
 				"dream_language_leak",
 				"local_routine_mismatch"
 			],
-			"timestampMs": 1778125271268,
+			"timestampMs": 1778571500530,
 			"turnId": "turn-2",
 			"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 			"whyLineKey": "dream_language_leak",
@@ -277,7 +283,7 @@
 			"conversationStage": "reported",
 			"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 			"eventFamily": "domain",
-			"eventId": "suspicion_shared-009-1778125271268",
+			"eventId": "suspicion_shared-009-1778571500530",
 			"eventName": "suspicion_shared",
 			"freeInputHash": "free-17-3317429208",
 			"inputMode": "explicit_recorded_statement",
@@ -290,11 +296,12 @@
 			"reportDelta": 85,
 			"reportWeightAfter": 115,
 			"reportWeightBefore": 30,
+			"routeOutcome": "running",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-playable-session",
 			"socialLoopStage": "reported",
 			"speakerId": "player",
-			"summary": "The clerk shared the odd statement with the nearby route record.",
+			"summary": "The clerk shared the odd statement with the nearby witness route.",
 			"suspicionAfter": 125,
 			"suspicionBefore": 35,
 			"suspicionDelta": 90,
@@ -302,7 +309,7 @@
 				"dream_language_leak",
 				"local_routine_mismatch"
 			],
-			"timestampMs": 1778125271268,
+			"timestampMs": 1778571500530,
 			"turnId": "turn-2",
 			"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 			"whyLineKey": "dream_language_leak",
@@ -317,7 +324,7 @@
 			"conversationStage": "reported",
 			"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 			"eventFamily": "domain",
-			"eventId": "station_report_created-010-1778125271268",
+			"eventId": "station_report_created-010-1778571500530",
 			"eventName": "station_report_created",
 			"freeInputHash": "free-17-3317429208",
 			"inputMode": "explicit_recorded_statement",
@@ -330,6 +337,7 @@
 			"reportDelta": 85,
 			"reportWeightAfter": 115,
 			"reportWeightBefore": 30,
+			"routeOutcome": "running",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-playable-session",
 			"socialLoopStage": "reported",
@@ -342,7 +350,7 @@
 				"dream_language_leak",
 				"local_routine_mismatch"
 			],
-			"timestampMs": 1778125271268,
+			"timestampMs": 1778571500530,
 			"turnId": "turn-2",
 			"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 			"whyLineKey": "dream_language_leak",
@@ -357,7 +365,7 @@
 			"conversationStage": "inquest",
 			"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 			"eventFamily": "domain",
-			"eventId": "station_inquest_opened-011-1778125271268",
+			"eventId": "station_inquest_opened-011-1778571500530",
 			"eventName": "station_inquest_opened",
 			"freeInputHash": "free-17-3317429208",
 			"inputMode": "explicit_recorded_statement",
@@ -370,6 +378,7 @@
 			"reportDelta": 85,
 			"reportWeightAfter": 115,
 			"reportWeightBefore": 30,
+			"routeOutcome": "inquest_opened",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-playable-session",
 			"socialLoopStage": "inquest",
@@ -382,7 +391,7 @@
 				"dream_language_leak",
 				"local_routine_mismatch"
 			],
-			"timestampMs": 1778125271268,
+			"timestampMs": 1778571500530,
 			"turnId": "turn-2",
 			"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 			"whyLineKey": "dream_language_leak",
@@ -393,12 +402,12 @@
 			"adapter": "godot",
 			"artifactPath": "data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json",
 			"eventFamily": "evidence_export",
-			"eventId": "evidence_pack_created-012-1778125271308",
+			"eventId": "evidence_pack_created-012-1778571500565",
 			"eventName": "evidence_pack_created",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-playable-session",
 			"summary": "Godot conversation playable Evidence Pack exported for backend validation.",
-			"timestampMs": 1778125271308,
+			"timestampMs": 1778571500565,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
 		}
@@ -415,6 +424,510 @@
 		"inputPath": "focus StoreCounterZone -> E start Same Order -> 3 risky choice -> 4 explicit recorded statement",
 		"observedConfusionPoint": "Typed text entry is outside this slice. Key 4 is explicitly labeled as a recorded statement while backend Evidence keeps the freeInputHash contract.",
 		"releaseAuthorityRequirement": "Public demo authority must keep suspicion, report, inquest, verdict, and session end deterministic; API/provider text remains wording-only.",
+		"repairState": "unused",
+		"routeContrastSummary": "Same Order now proves clean cover, repair recovery, soft report, and inquest outcomes from the same prompt set, with a separate guard route ensuring suspicious cover is not mislabeled as repair.",
+		"routeOutcome": "inquest_opened",
+		"routeProofs": [
+			{
+				"eventNames": [
+					"playable_session_started",
+					"conversation_started",
+					"dialogue_choice_selected",
+					"dialogue_choice_selected",
+					"conversation_outcome_reached"
+				],
+				"events": [
+					{
+						"eventId": "playable_session_started-001-1778571499561",
+						"eventName": "playable_session_started"
+					},
+					{
+						"conversationStage": "normal",
+						"eventId": "conversation_started-002-1778571499654",
+						"eventName": "conversation_started",
+						"outcome": "running",
+						"socialLoopStage": "normal"
+					},
+					{
+						"conversationStage": "normal",
+						"eventId": "dialogue_choice_selected-003-1778571499689",
+						"eventName": "dialogue_choice_selected",
+						"outcome": "running",
+						"reportWeightAfter": 0,
+						"routeOutcome": "running",
+						"socialLoopStage": "normal",
+						"suspicionAfter": 0,
+						"suspicionSignals": []
+					},
+					{
+						"conversationStage": "normal",
+						"eventId": "dialogue_choice_selected-004-1778571499724",
+						"eventName": "dialogue_choice_selected",
+						"outcome": "running",
+						"reportWeightAfter": 0,
+						"routeOutcome": "running",
+						"socialLoopStage": "normal",
+						"suspicionAfter": 0,
+						"suspicionSignals": []
+					},
+					{
+						"conversationStage": "normal",
+						"eventId": "conversation_outcome_reached-005-1778571499724",
+						"eventName": "conversation_outcome_reached",
+						"outcome": "cover_held",
+						"routeOutcome": "clean_cover",
+						"socialLoopStage": "normal"
+					}
+				],
+				"inputPath": "focus StoreCounterZone -> E -> 1 safe routine -> 1 safe probe",
+				"lastWhyLine": "이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.",
+				"reportWeight": 0,
+				"routeId": "clean_cover",
+				"routeOutcome": "clean_cover",
+				"sessionOutcome": "cover_held",
+				"signals": [],
+				"stage": "normal",
+				"station": {
+					"inquestOpen": false,
+					"intakeOpen": false,
+					"sessionTerminationAllowed": true,
+					"verdictReady": false
+				},
+				"suspicion": 0
+			},
+			{
+				"eventNames": [
+					"playable_session_started",
+					"conversation_started",
+					"dialogue_choice_selected",
+					"conversation_anomaly_detected",
+					"npc_suspicion_changed",
+					"dialogue_choice_selected",
+					"conversation_outcome_reached"
+				],
+				"events": [
+					{
+						"eventId": "playable_session_started-001-1778571499770",
+						"eventName": "playable_session_started"
+					},
+					{
+						"conversationStage": "normal",
+						"eventId": "conversation_started-002-1778571499854",
+						"eventName": "conversation_started",
+						"outcome": "running",
+						"socialLoopStage": "normal"
+					},
+					{
+						"conversationStage": "uneasy",
+						"eventId": "dialogue_choice_selected-003-1778571499890",
+						"eventName": "dialogue_choice_selected",
+						"outcome": "running",
+						"reportWeightAfter": 10,
+						"routeOutcome": "running",
+						"socialLoopStage": "uneasy",
+						"suspicionAfter": 20,
+						"suspicionSignals": [
+							"memory_gap_admission"
+						]
+					},
+					{
+						"conversationStage": "uneasy",
+						"eventId": "conversation_anomaly_detected-004-1778571499890",
+						"eventName": "conversation_anomaly_detected",
+						"outcome": "running",
+						"reportWeightAfter": 10,
+						"routeOutcome": "running",
+						"socialLoopStage": "uneasy",
+						"suspicionAfter": 20,
+						"suspicionSignals": [
+							"memory_gap_admission"
+						]
+					},
+					{
+						"conversationStage": "uneasy",
+						"eventId": "npc_suspicion_changed-005-1778571499890",
+						"eventName": "npc_suspicion_changed",
+						"outcome": "running",
+						"reportWeightAfter": 10,
+						"routeOutcome": "running",
+						"socialLoopStage": "uneasy",
+						"suspicionAfter": 20,
+						"suspicionSignals": [
+							"memory_gap_admission"
+						]
+					},
+					{
+						"conversationStage": "uneasy",
+						"eventId": "dialogue_choice_selected-006-1778571499924",
+						"eventName": "dialogue_choice_selected",
+						"outcome": "running",
+						"reportWeightAfter": 10,
+						"routeOutcome": "running",
+						"socialLoopStage": "uneasy",
+						"suspicionAfter": 20,
+						"suspicionSignals": []
+					},
+					{
+						"conversationStage": "uneasy",
+						"eventId": "conversation_outcome_reached-007-1778571499924",
+						"eventName": "conversation_outcome_reached",
+						"outcome": "cover_held",
+						"routeOutcome": "repair_recovered",
+						"socialLoopStage": "uneasy"
+					}
+				],
+				"inputPath": "focus StoreCounterZone -> E -> 2 memory-gap repair -> 1 accept clerk premise",
+				"lastWhyLine": "이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.",
+				"reportWeight": 10,
+				"routeId": "repair_recovered",
+				"routeOutcome": "repair_recovered",
+				"sessionOutcome": "cover_held",
+				"signals": [
+					"memory_gap_admission"
+				],
+				"stage": "uneasy",
+				"station": {
+					"inquestOpen": false,
+					"intakeOpen": false,
+					"sessionTerminationAllowed": true,
+					"verdictReady": false
+				},
+				"suspicion": 20
+			},
+			{
+				"eventNames": [
+					"playable_session_started",
+					"conversation_started",
+					"dialogue_choice_selected",
+					"conversation_anomaly_detected",
+					"npc_suspicion_changed",
+					"dialogue_choice_selected",
+					"conversation_anomaly_detected",
+					"npc_suspicion_changed",
+					"suspicion_shared",
+					"station_report_created",
+					"conversation_outcome_reached"
+				],
+				"events": [
+					{
+						"eventId": "playable_session_started-001-1778571500172",
+						"eventName": "playable_session_started"
+					},
+					{
+						"conversationStage": "normal",
+						"eventId": "conversation_started-002-1778571500261",
+						"eventName": "conversation_started",
+						"outcome": "running",
+						"socialLoopStage": "normal"
+					},
+					{
+						"conversationStage": "uneasy",
+						"eventId": "dialogue_choice_selected-003-1778571500297",
+						"eventName": "dialogue_choice_selected",
+						"outcome": "running",
+						"reportWeightAfter": 30,
+						"routeOutcome": "running",
+						"socialLoopStage": "uneasy",
+						"suspicionAfter": 35,
+						"suspicionSignals": [
+							"local_routine_mismatch"
+						]
+					},
+					{
+						"conversationStage": "uneasy",
+						"eventId": "conversation_anomaly_detected-004-1778571500297",
+						"eventName": "conversation_anomaly_detected",
+						"outcome": "running",
+						"reportWeightAfter": 30,
+						"routeOutcome": "running",
+						"socialLoopStage": "uneasy",
+						"suspicionAfter": 35,
+						"suspicionSignals": [
+							"local_routine_mismatch"
+						]
+					},
+					{
+						"conversationStage": "uneasy",
+						"eventId": "npc_suspicion_changed-005-1778571500297",
+						"eventName": "npc_suspicion_changed",
+						"outcome": "running",
+						"reportWeightAfter": 30,
+						"routeOutcome": "running",
+						"socialLoopStage": "uneasy",
+						"suspicionAfter": 35,
+						"suspicionSignals": [
+							"local_routine_mismatch"
+						]
+					},
+					{
+						"conversationStage": "reported",
+						"eventId": "dialogue_choice_selected-006-1778571500332",
+						"eventName": "dialogue_choice_selected",
+						"outcome": "running",
+						"reportWeightAfter": 80,
+						"routeOutcome": "running",
+						"socialLoopStage": "reported",
+						"suspicionAfter": 95,
+						"suspicionSignals": [
+							"role_script_break",
+							"prior_statement_contradiction"
+						]
+					},
+					{
+						"conversationStage": "reported",
+						"eventId": "conversation_anomaly_detected-007-1778571500332",
+						"eventName": "conversation_anomaly_detected",
+						"outcome": "running",
+						"reportWeightAfter": 80,
+						"routeOutcome": "running",
+						"socialLoopStage": "reported",
+						"suspicionAfter": 95,
+						"suspicionSignals": [
+							"role_script_break",
+							"prior_statement_contradiction"
+						]
+					},
+					{
+						"conversationStage": "reported",
+						"eventId": "npc_suspicion_changed-008-1778571500332",
+						"eventName": "npc_suspicion_changed",
+						"outcome": "running",
+						"reportWeightAfter": 80,
+						"routeOutcome": "running",
+						"socialLoopStage": "reported",
+						"suspicionAfter": 95,
+						"suspicionSignals": [
+							"role_script_break",
+							"prior_statement_contradiction"
+						]
+					},
+					{
+						"conversationStage": "reported",
+						"eventId": "suspicion_shared-009-1778571500332",
+						"eventName": "suspicion_shared",
+						"outcome": "running",
+						"reportWeightAfter": 80,
+						"routeOutcome": "running",
+						"socialLoopStage": "reported",
+						"suspicionAfter": 95,
+						"suspicionSignals": [
+							"role_script_break",
+							"prior_statement_contradiction"
+						]
+					},
+					{
+						"conversationStage": "reported",
+						"eventId": "station_report_created-010-1778571500332",
+						"eventName": "station_report_created",
+						"outcome": "soft_report",
+						"reportWeightAfter": 80,
+						"routeOutcome": "running",
+						"socialLoopStage": "reported",
+						"suspicionAfter": 95,
+						"suspicionSignals": [
+							"role_script_break",
+							"prior_statement_contradiction"
+						]
+					},
+					{
+						"conversationStage": "reported",
+						"eventId": "conversation_outcome_reached-011-1778571500332",
+						"eventName": "conversation_outcome_reached",
+						"outcome": "soft_report",
+						"routeOutcome": "soft_report",
+						"socialLoopStage": "reported"
+					}
+				],
+				"inputPath": "focus StoreCounterZone -> E -> 3 routine mismatch -> 3 outsider insistence",
+				"lastWhyLine": "그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.",
+				"reportWeight": 80,
+				"routeId": "soft_report",
+				"routeOutcome": "soft_report",
+				"sessionOutcome": "soft_report",
+				"signals": [
+					"local_routine_mismatch",
+					"role_script_break",
+					"prior_statement_contradiction"
+				],
+				"stage": "reported",
+				"station": {
+					"inquestOpen": false,
+					"intakeOpen": true,
+					"sessionTerminationAllowed": true,
+					"verdictReady": false
+				},
+				"suspicion": 95
+			},
+			{
+				"eventNames": [
+					"playable_session_started",
+					"conversation_started",
+					"dialogue_choice_selected",
+					"conversation_anomaly_detected",
+					"npc_suspicion_changed",
+					"free_input_submitted",
+					"conversation_anomaly_detected",
+					"npc_suspicion_changed",
+					"suspicion_shared",
+					"station_report_created",
+					"station_inquest_opened"
+				],
+				"events": [
+					{
+						"eventId": "playable_session_started-001-1778571500377",
+						"eventName": "playable_session_started"
+					},
+					{
+						"conversationStage": "normal",
+						"eventId": "conversation_started-002-1778571500460",
+						"eventName": "conversation_started",
+						"outcome": "running",
+						"socialLoopStage": "normal"
+					},
+					{
+						"conversationStage": "uneasy",
+						"eventId": "dialogue_choice_selected-003-1778571500495",
+						"eventName": "dialogue_choice_selected",
+						"outcome": "running",
+						"reportWeightAfter": 30,
+						"routeOutcome": "running",
+						"socialLoopStage": "uneasy",
+						"suspicionAfter": 35,
+						"suspicionSignals": [
+							"local_routine_mismatch"
+						]
+					},
+					{
+						"conversationStage": "uneasy",
+						"eventId": "conversation_anomaly_detected-004-1778571500495",
+						"eventName": "conversation_anomaly_detected",
+						"outcome": "running",
+						"reportWeightAfter": 30,
+						"routeOutcome": "running",
+						"socialLoopStage": "uneasy",
+						"suspicionAfter": 35,
+						"suspicionSignals": [
+							"local_routine_mismatch"
+						]
+					},
+					{
+						"conversationStage": "uneasy",
+						"eventId": "npc_suspicion_changed-005-1778571500495",
+						"eventName": "npc_suspicion_changed",
+						"outcome": "running",
+						"reportWeightAfter": 30,
+						"routeOutcome": "running",
+						"socialLoopStage": "uneasy",
+						"suspicionAfter": 35,
+						"suspicionSignals": [
+							"local_routine_mismatch"
+						]
+					},
+					{
+						"conversationStage": "reported",
+						"eventId": "free_input_submitted-006-1778571500530",
+						"eventName": "free_input_submitted",
+						"outcome": "running",
+						"reportWeightAfter": 115,
+						"routeOutcome": "running",
+						"socialLoopStage": "reported",
+						"suspicionAfter": 125,
+						"suspicionSignals": [
+							"dream_language_leak",
+							"local_routine_mismatch"
+						]
+					},
+					{
+						"conversationStage": "reported",
+						"eventId": "conversation_anomaly_detected-007-1778571500530",
+						"eventName": "conversation_anomaly_detected",
+						"outcome": "running",
+						"reportWeightAfter": 115,
+						"routeOutcome": "running",
+						"socialLoopStage": "reported",
+						"suspicionAfter": 125,
+						"suspicionSignals": [
+							"dream_language_leak",
+							"local_routine_mismatch"
+						]
+					},
+					{
+						"conversationStage": "reported",
+						"eventId": "npc_suspicion_changed-008-1778571500530",
+						"eventName": "npc_suspicion_changed",
+						"outcome": "running",
+						"reportWeightAfter": 115,
+						"routeOutcome": "running",
+						"socialLoopStage": "reported",
+						"suspicionAfter": 125,
+						"suspicionSignals": [
+							"dream_language_leak",
+							"local_routine_mismatch"
+						]
+					},
+					{
+						"conversationStage": "reported",
+						"eventId": "suspicion_shared-009-1778571500530",
+						"eventName": "suspicion_shared",
+						"outcome": "running",
+						"reportWeightAfter": 115,
+						"routeOutcome": "running",
+						"socialLoopStage": "reported",
+						"suspicionAfter": 125,
+						"suspicionSignals": [
+							"dream_language_leak",
+							"local_routine_mismatch"
+						]
+					},
+					{
+						"conversationStage": "reported",
+						"eventId": "station_report_created-010-1778571500530",
+						"eventName": "station_report_created",
+						"outcome": "soft_report",
+						"reportWeightAfter": 115,
+						"routeOutcome": "running",
+						"socialLoopStage": "reported",
+						"suspicionAfter": 125,
+						"suspicionSignals": [
+							"dream_language_leak",
+							"local_routine_mismatch"
+						]
+					},
+					{
+						"conversationStage": "inquest",
+						"eventId": "station_inquest_opened-011-1778571500530",
+						"eventName": "station_inquest_opened",
+						"outcome": "inquest_opened",
+						"reportWeightAfter": 115,
+						"routeOutcome": "inquest_opened",
+						"socialLoopStage": "inquest",
+						"suspicionAfter": 125,
+						"suspicionSignals": [
+							"dream_language_leak",
+							"local_routine_mismatch"
+						]
+					}
+				],
+				"inputPath": "focus StoreCounterZone -> E -> 3 routine mismatch -> 4 explicit recorded statement",
+				"lastWhyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
+				"reportWeight": 115,
+				"routeId": "inquest_opened",
+				"routeOutcome": "inquest_opened",
+				"sessionOutcome": "inquest_opened",
+				"signals": [
+					"local_routine_mismatch",
+					"dream_language_leak"
+				],
+				"stage": "inquest",
+				"station": {
+					"inquestOpen": true,
+					"intakeOpen": true,
+					"sessionTerminationAllowed": true,
+					"verdictReady": false
+				},
+				"suspicion": 125
+			}
+		],
 		"visibleWhyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
 	},
 	"playableSummary": {
@@ -434,6 +947,7 @@
 					"choiceSetId": "store.same_order.routine.choices",
 					"freeInputHash": "",
 					"inputMode": "choice",
+					"intent": "risky/weird",
 					"playerLine": "오늘 처음 왔는데요.",
 					"promptId": "store.same_order.routine",
 					"recordedStatementScope": "",
@@ -452,6 +966,7 @@
 					"choiceSetId": "store.same_order.probe.choices",
 					"freeInputHash": "free-17-3317429208",
 					"inputMode": "explicit_recorded_statement",
+					"intent": "free/recorded",
 					"playerLine": "저는 이 꿈에 방금 들어왔어요.",
 					"promptId": "store.same_order.probe",
 					"recordedStatementScope": "key_4_explicit_recorded_statement_no_typed_ui",
@@ -476,14 +991,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1778125271130",
+				"eventId": "playable_session_started-001-1778571500377",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1778125271130,
+				"timestampMs": 1778571500377,
 				"uiSummaryArgs": {
 
 				},
@@ -498,7 +1013,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-002-1778125271198",
+				"eventId": "conversation_started-002-1778571500460",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -507,7 +1022,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1778125271198,
+				"timestampMs": 1778571500460,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -520,7 +1035,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-003-1778125271233",
+				"eventId": "dialogue_choice_selected-003-1778571500495",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -529,6 +1044,7 @@
 				"reportDelta": 30,
 				"reportWeightAfter": 30,
 				"reportWeightBefore": 0,
+				"routeOutcome": "running",
 				"schemaVersion": "godot-runtime-v1",
 				"selectedChoiceId": "store.same_order.risky",
 				"sessionId": "dre-171-playable-session",
@@ -541,7 +1057,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1778125271233,
+				"timestampMs": 1778571500495,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -556,7 +1072,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-004-1778125271233",
+				"eventId": "conversation_anomaly_detected-004-1778571500495",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -565,6 +1081,7 @@
 				"reportDelta": 30,
 				"reportWeightAfter": 30,
 				"reportWeightBefore": 0,
+				"routeOutcome": "running",
 				"schemaVersion": "godot-runtime-v1",
 				"selectedChoiceId": "store.same_order.risky",
 				"sessionId": "dre-171-playable-session",
@@ -577,7 +1094,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1778125271233,
+				"timestampMs": 1778571500495,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -592,7 +1109,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-005-1778125271233",
+				"eventId": "npc_suspicion_changed-005-1778571500495",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -601,6 +1118,7 @@
 				"reportDelta": 30,
 				"reportWeightAfter": 30,
 				"reportWeightBefore": 0,
+				"routeOutcome": "running",
 				"schemaVersion": "godot-runtime-v1",
 				"selectedChoiceId": "store.same_order.risky",
 				"sessionId": "dre-171-playable-session",
@@ -613,7 +1131,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1778125271233,
+				"timestampMs": 1778571500495,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -628,7 +1146,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-006-1778125271268",
+				"eventId": "free_input_submitted-006-1778571500530",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "explicit_recorded_statement",
@@ -641,6 +1159,7 @@
 				"reportDelta": 85,
 				"reportWeightAfter": 115,
 				"reportWeightBefore": 30,
+				"routeOutcome": "running",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"socialLoopStage": "reported",
@@ -653,7 +1172,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1778125271268,
+				"timestampMs": 1778571500530,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -668,7 +1187,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-007-1778125271268",
+				"eventId": "conversation_anomaly_detected-007-1778571500530",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "explicit_recorded_statement",
@@ -681,6 +1200,7 @@
 				"reportDelta": 85,
 				"reportWeightAfter": 115,
 				"reportWeightBefore": 30,
+				"routeOutcome": "running",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"socialLoopStage": "reported",
@@ -693,7 +1213,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1778125271268,
+				"timestampMs": 1778571500530,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -708,7 +1228,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-008-1778125271268",
+				"eventId": "npc_suspicion_changed-008-1778571500530",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "explicit_recorded_statement",
@@ -721,6 +1241,7 @@
 				"reportDelta": 85,
 				"reportWeightAfter": 115,
 				"reportWeightBefore": 30,
+				"routeOutcome": "running",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"socialLoopStage": "reported",
@@ -733,7 +1254,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1778125271268,
+				"timestampMs": 1778571500530,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -748,7 +1269,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-009-1778125271268",
+				"eventId": "suspicion_shared-009-1778571500530",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "explicit_recorded_statement",
@@ -761,11 +1282,12 @@
 				"reportDelta": 85,
 				"reportWeightAfter": 115,
 				"reportWeightBefore": 30,
+				"routeOutcome": "running",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"socialLoopStage": "reported",
 				"speakerId": "player",
-				"summary": "The clerk shared the odd statement with the nearby route record.",
+				"summary": "The clerk shared the odd statement with the nearby witness route.",
 				"suspicionAfter": 125,
 				"suspicionBefore": 35,
 				"suspicionDelta": 90,
@@ -773,7 +1295,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1778125271268,
+				"timestampMs": 1778571500530,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -788,7 +1310,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-010-1778125271268",
+				"eventId": "station_report_created-010-1778571500530",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "explicit_recorded_statement",
@@ -801,6 +1323,7 @@
 				"reportDelta": 85,
 				"reportWeightAfter": 115,
 				"reportWeightBefore": 30,
+				"routeOutcome": "running",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"socialLoopStage": "reported",
@@ -813,7 +1336,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1778125271268,
+				"timestampMs": 1778571500530,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -828,7 +1351,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-011-1778125271268",
+				"eventId": "station_inquest_opened-011-1778571500530",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "explicit_recorded_statement",
@@ -841,6 +1364,7 @@
 				"reportDelta": 85,
 				"reportWeightAfter": 115,
 				"reportWeightBefore": 30,
+				"routeOutcome": "inquest_opened",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"socialLoopStage": "inquest",
@@ -853,7 +1377,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1778125271268,
+				"timestampMs": 1778571500530,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -863,6 +1387,7 @@
 		],
 		"exposure": 125,
 		"inputLocked": true,
+		"lastChoiceIntent": "free/recorded",
 		"lastDialogueChoice": "free_input",
 		"lastReasonCode": "dream_language_leak",
 		"lastWhyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
@@ -870,7 +1395,7 @@
 		"locale": "ko",
 		"noticeBody": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\n플레이어 발화: 저는 이 꿈에 방금 들어왔어요.\nwhy-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 		"noticeTitle": "NPC_Store_Clerk",
-		"outcomeBody": "상점 대화 기록이 접수되었습니다.\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
+		"outcomeBody": "상점 대화 기록이 접수되었습니다.\n스테이션 대조: 이전 발화와 기록된 진술이 함께 접수되었습니다.\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
 		"outcomeTitle": "스테이션 심문 개시",
 		"outcomeVisible": true,
 		"prologueEvidence": [
@@ -907,11 +1432,16 @@
 				"restart": "restart_session"
 			},
 			"outcome": "inquest_opened",
-			"recordedStatement": "key 4 submits the displayed recorded statement; typed text entry is not implemented in this slice"
+			"recordedStatement": "key 4 submits the displayed recorded statement; typed text entry is not implemented in this slice",
+			"repairState": "unused",
+			"routeOutcome": "inquest_opened"
 		},
 		"readSurfaceIds": [],
 		"releaseAuthorityRequirement": "Public demo authority must keep suspicion, report, inquest, verdict, and session end deterministic; API/provider text remains wording-only.",
+		"repairAttemptCount": 0,
+		"repairState": "unused",
 		"reportWeight": 115,
+		"routeOutcome": "inquest_opened",
 		"runId": "dre-171-playable-slice-run",
 		"schemaVersion": "godot-runtime-v1",
 		"sessionId": "dre-171-playable-session",
@@ -958,7 +1488,7 @@
 			"total": 0
 		},
 		"runSignature": "dre-171-playable-slice-run:dre-171-playable-session:dre_171_godot_shell:rev-social-stealth-v1",
-		"verdictEndStateTrace": "Same Order conversation -> suspicion 125 -> report 115 -> intake:true inquest:true termination:true outcome:inquest_opened"
+		"verdictEndStateTrace": "Same Order conversation -> suspicion 125 -> report 115 -> intake:true inquest:true termination:true outcome:inquest_opened route:inquest_opened"
 	},
 	"worldId": "dre_171_godot_shell",
 	"worldRevision": "rev-social-stealth-v1"

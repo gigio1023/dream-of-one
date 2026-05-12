@@ -6,18 +6,22 @@ const LOCALE_BY_ITEM := ["ko", "en"]
 const MAX_VISIBLE_EVIDENCE_EVENTS := 3
 const PRESSURE_WARNING := 60
 const PRESSURE_VERDICT := 100
+const BOTTOM_COMPACT_TOP := -126.0
+const BOTTOM_RECORD_TOP := -188.0
+const BOTTOM_CONVERSATION_TOP := -260.0
 
 const UI_COPY := {
 	"ko": {
-		"case_title": "스테이션 사건 파일",
+		"case_title": "스테이션 기록",
 		"case_meta": "대화 프롤로그 | 말이 위험 표면입니다",
-		"pressure": "의심/보고 압박: {exposure} / 100 | {band}",
+		"exposure_compact": "노출도: {exposureLabel}",
+		"pressure": "의심/보고 압박: {exposureLabel} | {band}",
 		"pressure_band_low": "관찰 중",
-		"pressure_band_warning": "접수 압박",
-		"pressure_band_verdict": "판정 임박",
+		"pressure_band_warning": "보고 직전",
+		"pressure_band_verdict": "심문 개시",
 		"consequence_opening": "상점 점원의 질문은 평범하지만 기록됩니다.",
 		"consequence_default": "NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다.",
-		"consequence_choices": "1/2/3 중 하나를 말하세요. 4는 화면에 표시된 진술을 기록합니다.",
+		"consequence_choices": "말은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.",
 		"consequence_intake": "대화 기록이 접수되었습니다. 앞선 말과 충돌하지 않아야 합니다.",
 		"consequence_inquest": "심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다.",
 		"consequence_verdict": "세션 결과가 고정되었습니다. why-line이 근거입니다.",
@@ -35,21 +39,36 @@ const UI_COPY := {
 		"risky_verdict": "다음 시도에서는 말의 전제를 맞추세요.",
 		"why_empty": "WHY-LINE: 아직 기록된 모순 없음",
 		"why": "WHY-LINE: {line}",
-		"evidence_count": "최근 Evidence {shown} / 전체 {total}",
-		"evidence_empty": "Evidence가 아직 기록되지 않았습니다.",
-		"outcome_stamp": "STATION INQUEST",
+		"recorded_statement": "4  기록된 진술: {line}",
+		"recorded_statement_submit": "4  기록된 진술 제출: {line}",
+		"recent_line": "최근 발화: {line}",
+		"evidence_count": "최근 기록 {shown} / 전체 {total}",
+		"evidence_empty": "아직 기록 없음",
+		"record.playable_session_started": "대화 프롤로그 시작",
+		"record.text_surface_read": "상점 규칙을 읽음",
+		"record.conversation_started": "점원이 질문함",
+		"record.dialogue_choice_selected": "플레이어 발화 기록",
+		"record.free_input_submitted": "기록된 진술 제출",
+		"record.conversation_anomaly_detected": "어긋난 말 감지",
+		"record.npc_suspicion_changed": "점원 의심 변화",
+		"record.suspicion_shared": "의심 공유",
+		"record.station_report_created": "스테이션 보고 접수",
+		"record.station_inquest_opened": "스테이션 심문 개시",
+		"record.conversation_outcome_reached": "대화 결과 확정",
+		"outcome_stamp": "세션 기록",
 		"outcome_trace": "Trace: 상점 대화 -> 의심/보고 {exposure} -> 접수 {intake} / 심문 {inquest} / 판정 {verdict} / 종료 {termination}"
 	},
 	"en": {
-		"case_title": "STATION CASE FILE",
+		"case_title": "STATION RECORD",
 		"case_meta": "Conversation prologue | Speech is the danger surface",
-		"pressure": "Suspicion/report pressure: {exposure} / 100 | {band}",
+		"exposure_compact": "Exposure: {exposureLabel}",
+		"pressure": "Suspicion/report pressure: {exposureLabel} | {band}",
 		"pressure_band_low": "observing",
-		"pressure_band_warning": "intake pressure",
-		"pressure_band_verdict": "verdict imminent",
+		"pressure_band_warning": "near report",
+		"pressure_band_verdict": "inquest open",
 		"consequence_opening": "The clerk's ordinary question is still recorded.",
 		"consequence_default": "NPCs notice conversational mismatch first; the Station reads the record later.",
-		"consequence_choices": "Speak with 1/2/3. 4 records the displayed statement.",
+		"consequence_choices": "Speech is recorded. The clerk notices mismatch first; the Station reads the basis later.",
 		"consequence_intake": "Conversation record filed. Do not contradict earlier speech.",
 		"consequence_inquest": "Inquest pressure. Earlier dialogue signals are the basis.",
 		"consequence_verdict": "Session outcome is fixed. The why-line is the basis.",
@@ -67,9 +86,23 @@ const UI_COPY := {
 		"risky_verdict": "On the next pass, match the premise.",
 		"why_empty": "WHY-LINE: no contradiction recorded yet",
 		"why": "WHY-LINE: {line}",
-		"evidence_count": "Recent Evidence {shown} / total {total}",
-		"evidence_empty": "No Evidence recorded yet.",
-		"outcome_stamp": "STATION INQUEST",
+		"recorded_statement": "4  Recorded statement: {line}",
+		"recorded_statement_submit": "4  Submit recorded statement: {line}",
+		"recent_line": "Recent line: {line}",
+		"evidence_count": "Recent record {shown} / total {total}",
+		"evidence_empty": "No record yet.",
+		"record.playable_session_started": "Conversation prologue started",
+		"record.text_surface_read": "Store rule read",
+		"record.conversation_started": "Clerk asked",
+		"record.dialogue_choice_selected": "Player speech recorded",
+		"record.free_input_submitted": "Recorded statement submitted",
+		"record.conversation_anomaly_detected": "Speech mismatch detected",
+		"record.npc_suspicion_changed": "Clerk suspicion changed",
+		"record.suspicion_shared": "Suspicion shared",
+		"record.station_report_created": "Station report filed",
+		"record.station_inquest_opened": "Station inquest opened",
+		"record.conversation_outcome_reached": "Conversation outcome fixed",
+		"outcome_stamp": "SESSION RECORD",
 		"outcome_trace": "Trace: Store conversation -> suspicion/report {exposure} -> intake {intake} / inquest {inquest} / verdict {verdict} / end {termination}"
 	}
 }
@@ -94,10 +127,13 @@ const UI_COPY := {
 @onready var _outcome_title: Label = $Root/OutcomePanel/OutcomeMargin/OutcomeRows/OutcomeTitle
 @onready var _outcome_body: Label = $Root/OutcomePanel/OutcomeMargin/OutcomeRows/OutcomeBody
 @onready var _outcome_trace: Label = $Root/OutcomePanel/OutcomeMargin/OutcomeRows/OutcomeTrace
+@onready var _bottom_panel: PanelContainer = $Root/BottomPanel
 @onready var _focus_label: Label = $Root/BottomPanel/BottomMargin/BottomRows/FocusLabel
-@onready var _choices_label: Label = $Root/BottomPanel/BottomMargin/BottomRows/ChoicesLabel
-@onready var _safe_line_label: Label = $Root/BottomPanel/BottomMargin/BottomRows/SafeLineLabel
-@onready var _risky_line_label: Label = $Root/BottomPanel/BottomMargin/BottomRows/RiskyLineLabel
+@onready var _choice_rows: VBoxContainer = $Root/BottomPanel/BottomMargin/BottomRows/ChoiceRows
+@onready var _choices_label: Label = $Root/BottomPanel/BottomMargin/BottomRows/ChoiceRows/ChoiceOnePanel/ChoiceOneMargin/ChoicesLabel
+@onready var _safe_line_label: Label = $Root/BottomPanel/BottomMargin/BottomRows/ChoiceRows/ChoiceTwoPanel/ChoiceTwoMargin/SafeLineLabel
+@onready var _risky_line_label: Label = $Root/BottomPanel/BottomMargin/BottomRows/ChoiceRows/ChoiceThreePanel/ChoiceThreeMargin/RiskyLineLabel
+@onready var _recorded_statement_label: Label = $Root/BottomPanel/BottomMargin/BottomRows/RecordedStatementLabel
 @onready var _evidence_title: Label = $Root/BottomPanel/BottomMargin/BottomRows/EvidenceTitle
 @onready var _evidence_count: Label = $Root/BottomPanel/BottomMargin/BottomRows/EvidenceCountLabel
 @onready var _evidence_list: VBoxContainer = $Root/BottomPanel/BottomMargin/BottomRows/EvidenceList
@@ -110,6 +146,7 @@ var _choices_enabled := false
 var _last_why_line := ""
 var _active_choice_lines: Array[String] = []
 var _recorded_statement_line := ""
+var _recent_dialogue_line := ""
 
 func _ready() -> void:
 	add_to_group("localized_nodes")
@@ -149,7 +186,7 @@ func set_status(
 	_station = station.duplicate(true)
 	_objective_label.text = objective
 	_stage_label.text = _text("hud.stage", {"stageKey": "stage.%s" % stage})
-	_exposure_label.text = _text("hud.exposure", {"exposure": exposure})
+	_exposure_label.text = _ui_text("exposure_compact", {"exposureLabel": _pressure_label_value()})
 	_station_label.text = _text("hud.station_compact", {
 		"intake": _flag(station.get("intakeOpen", false)),
 		"inquest": _flag(station.get("inquestOpen", false)),
@@ -164,8 +201,14 @@ func set_focus(prompt: String, choices_enabled: bool) -> void:
 	_choices_enabled = choices_enabled
 	_active_choice_lines = []
 	_recorded_statement_line = ""
+	_recent_dialogue_line = ""
 	_focus_label.text = prompt
+	_choice_rows.visible = choices_enabled
 	_choices_label.visible = choices_enabled
+	_safe_line_label.visible = choices_enabled
+	_risky_line_label.visible = choices_enabled
+	_recorded_statement_label.visible = false
+	_refresh_bottom_panel_layout()
 	_refresh_consequence_text()
 
 func set_conversation(
@@ -178,18 +221,17 @@ func set_conversation(
 	_choices_enabled = choices_enabled
 	_active_choice_lines = _string_array(choices)
 	_recorded_statement_line = recorded_statement_line
+	_recent_dialogue_line = ""
 	_focus_label.text = npc_prompt
+	_choice_rows.visible = choices_enabled
 	_choices_label.visible = choices_enabled
 	_safe_line_label.visible = choices_enabled
 	_risky_line_label.visible = choices_enabled
-	var history_text := ""
+	_recorded_statement_label.visible = choices_enabled and not recorded_statement_line.is_empty()
 	if not history.is_empty():
-		history_text = "\n최근 발화: %s" % str(history[history.size() - 1])
-	_consequence_label.text = "%s\n4  기록된 진술 제출: %s%s" % [
-		_ui_text("consequence_choices") if choices_enabled else _ui_text("consequence_default"),
-		recorded_statement_line,
-		history_text
-	]
+		_recent_dialogue_line = str(history[history.size() - 1])
+	_recorded_statement_label.text = _ui_text("recorded_statement", {"line": recorded_statement_line})
+	_refresh_bottom_panel_layout()
 	_refresh_consequence_text()
 
 func debug_snapshot() -> Dictionary:
@@ -198,6 +240,7 @@ func debug_snapshot() -> Dictionary:
 		"choicesLabel": _choices_label.text,
 		"safeLineLabel": _safe_line_label.text,
 		"riskyLineLabel": _risky_line_label.text,
+		"recordedStatementLabel": _recorded_statement_label.text,
 		"consequenceLabel": _consequence_label.text,
 		"whyLineLabel": _why_line_label.text,
 		"outcomeVisible": _outcome_panel.visible,
@@ -222,6 +265,7 @@ func set_outcome(visible: bool, title: String, body: String) -> void:
 			_last_why_line = why_line
 	_outcome_title.text = title
 	_outcome_body.text = body
+	_refresh_bottom_panel_layout()
 	_refresh_why_line()
 	_refresh_consequence_text()
 	_refresh_outcome_trace()
@@ -261,13 +305,19 @@ func _flag(value: Variant) -> String:
 func _event_summary_text(event: Dictionary) -> String:
 	var ui_key := str(event.get("uiSummaryKey", ""))
 	if ui_key.is_empty():
-		return str(event.get("summary", ""))
+		var event_name := str(event.get("eventName", ""))
+		var record_key := "record.%s" % event_name
+		var record_text := _ui_text(record_key)
+		if record_text != record_key:
+			var line := str(event.get("displayedPlayerLine", ""))
+			return "%s: %s" % [record_text, line] if not line.is_empty() else record_text
+		return event_name
 	var ui_args: Dictionary = event.get("uiSummaryArgs", {})
 	return _text(ui_key, ui_args)
 
 func _refresh_pressure_presentation() -> void:
 	_pressure_label.text = _ui_text("pressure", {
-		"exposure": _exposure,
+		"exposureLabel": _pressure_label_value(),
 		"band": _pressure_band()
 	})
 	_exposure_meter.value = clamp(float(_exposure), 0.0, 100.0)
@@ -302,12 +352,21 @@ func _refresh_consequence_text() -> void:
 		state_key = "opening"
 	_consequence_label.text = _ui_text("consequence_%s" % state_key)
 	if _choices_enabled and _active_choice_lines.size() >= 3:
+		var consequence_lines := PackedStringArray([_ui_text("consequence_choices")])
+		if not _recorded_statement_line.is_empty():
+			consequence_lines.append(_ui_text("recorded_statement_submit", {"line": _recorded_statement_line}))
+		if not _recent_dialogue_line.is_empty():
+			consequence_lines.append(_ui_text("recent_line", {"line": _recent_dialogue_line}))
+		_consequence_label.text = "\n".join(consequence_lines)
 		_apply_active_choice_labels()
 	else:
 		_safe_line_label.text = _ui_text("safe_%s" % state_key)
 		_risky_line_label.text = _ui_text("risky_%s" % state_key)
+		_recorded_statement_label.visible = false
+	_refresh_bottom_panel_layout()
 
 func _apply_active_choice_labels() -> void:
+	_choice_rows.visible = true
 	_choices_label.visible = true
 	_safe_line_label.visible = true
 	_risky_line_label.visible = true
@@ -315,10 +374,25 @@ func _apply_active_choice_labels() -> void:
 	_safe_line_label.text = "2  %s" % _active_choice_lines[1]
 	_risky_line_label.text = "3  %s" % _active_choice_lines[2]
 	if not _recorded_statement_line.is_empty():
-		_consequence_label.text = "%s\n4  기록된 진술 제출: %s" % [
-			_ui_text("consequence_choices"),
-			_recorded_statement_line
-		]
+		_recorded_statement_label.text = _ui_text("recorded_statement", {"line": _recorded_statement_line})
+		_recorded_statement_label.visible = true
+
+func _pressure_label_value() -> String:
+	if _exposure > PRESSURE_VERDICT:
+		return "100+"
+	return "%d / 100" % _exposure
+
+func _refresh_bottom_panel_layout() -> void:
+	_bottom_panel.anchor_left = 0.0
+	_bottom_panel.anchor_right = 1.0
+	_bottom_panel.offset_left = 16.0
+	_bottom_panel.offset_right = -16.0
+	if _choices_enabled:
+		_bottom_panel.offset_top = BOTTOM_CONVERSATION_TOP
+	elif _outcome_panel.visible:
+		_bottom_panel.offset_top = BOTTOM_RECORD_TOP
+	else:
+		_bottom_panel.offset_top = BOTTOM_COMPACT_TOP
 
 func _refresh_why_line() -> void:
 	_why_line_label.text = _ui_text("why_empty") if _last_why_line.is_empty() else _ui_text("why", {

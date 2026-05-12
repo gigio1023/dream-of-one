@@ -47,7 +47,7 @@ const CAPTURE_DEFINITIONS := [
 		"expectedContent": [
 			"non-empty 1280x720 viewport",
 			"Store Clerk prompt is active",
-			"three diegetic dialogue choices are visible",
+			"three large diegetic dialogue choices are visible in the conversation panel",
 			"key 4 is explicitly scoped as a displayed recorded statement"
 		]
 	},
@@ -59,6 +59,7 @@ const CAPTURE_DEFINITIONS := [
 		"expectedContent": [
 			"non-empty 1280x720 viewport",
 			"suspicion has increased from a risky dialogue line",
+			"Store Clerk reaction marker is active",
 			"player-facing why-line is visible",
 			"recent Evidence explains the consequence"
 		]
@@ -219,6 +220,13 @@ func _capture_conversation_why_line(
 		blockers.append("Conversation why-line capture did not raise suspicion after risky dialogue.")
 	if str(summary.get("lastWhyLine", "")).is_empty():
 		blockers.append("Conversation why-line capture did not expose a visible why-line.")
+	var reaction := _npc_reaction_snapshot(session, "NPC_Store_Clerk")
+	if not bool(reaction.get("markerVisible", false)):
+		blockers.append("Conversation why-line capture did not show Store Clerk reaction marker.")
+	if float(reaction.get("materialAlpha", -1.0)) <= 0.16:
+		blockers.append("Conversation why-line capture did not update Store Clerk reaction material alpha.")
+	if float(reaction.get("emissionEnergy", -1.0)) <= 0.2:
+		blockers.append("Conversation why-line capture did not update Store Clerk reaction material emission.")
 	var snapshot := _hud_snapshot(hud)
 	if not str(snapshot.get("whyLineLabel", "")).contains("WHY-LINE"):
 		blockers.append("Conversation why-line capture did not expose the HUD why-line label.")
@@ -400,6 +408,8 @@ func _active_hud_blockers(hud: Node, summary: Dictionary, prefix: String) -> Arr
 		blockers.append("%s HUD did not preserve active choice label 3." % prefix)
 	if not str(snapshot.get("consequenceLabel", "")).contains("4  기록된 진술 제출"):
 		blockers.append("%s HUD did not scope key 4 as an explicit recorded statement." % prefix)
+	if not str(snapshot.get("recordedStatementLabel", "")).contains("기록된 진술"):
+		blockers.append("%s HUD did not expose key 4 as a recorded statement label." % prefix)
 	return blockers
 
 func _store_conversation_blockers(summary: Dictionary) -> Array[String]:
@@ -466,6 +476,18 @@ func _hud_snapshot(hud: Node) -> Dictionary:
 		var snapshot: Variant = hud.call("debug_snapshot")
 		if snapshot is Dictionary:
 			return snapshot
+	return {}
+
+func _npc_reaction_snapshot(context_node: Node, npc_id: String) -> Dictionary:
+	if context_node == null:
+		return {}
+	for node in context_node.get_tree().get_nodes_in_group("npc_placeholders"):
+		if str(node.get_meta("npc_id", "")) != npc_id:
+			continue
+		if node.has_method("debug_reaction_snapshot"):
+			var snapshot: Variant = node.call("debug_reaction_snapshot")
+			if snapshot is Dictionary:
+				return snapshot
 	return {}
 
 func _scene_build_blockers(scene: Node) -> Array[String]:

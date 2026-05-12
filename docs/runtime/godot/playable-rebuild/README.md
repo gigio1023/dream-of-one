@@ -12,6 +12,8 @@ Scenario canon has moved to `docs/scenario/`. Files in this directory are migrat
 - `04-validation-and-evidence.md`: commands, artifacts, visual checks, and pass/fail gates.
 - `05-free-asset-pass.md`: free 3D asset source, license, placement, and validation notes.
 - `06-localization.md`: Korean-first localization, English selection, and localized UI validation.
+- `07-ui-visual-readability-pass.md`: Game Studio-based plan for making the Store conversation proof read as a small playable conversation rather than a debug harness.
+- `08-same-order-route-contrast.md`: route contrast pass proving clean cover, repair recovery, soft report, and inquest paths.
 
 ## Rebuild Rule
 

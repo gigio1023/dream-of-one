@@ -1,9 +1,9 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/social_stealth_hud.gd" id="1_hud"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.035, 0.043, 0.05, 0.76)
+bg_color = Color(0.026, 0.032, 0.036, 0.72)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -17,7 +17,7 @@ shadow_color = Color(0, 0, 0, 0.22)
 shadow_size = 10
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_notice"]
-bg_color = Color(0.055, 0.062, 0.066, 0.82)
+bg_color = Color(0.038, 0.045, 0.048, 0.9)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -43,6 +43,42 @@ corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 shadow_color = Color(0, 0, 0, 0.36)
 shadow_size = 18
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_choice"]
+bg_color = Color(0.034, 0.04, 0.043, 0.91)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.72, 0.84, 0.86, 0.22)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_choice_warning"]
+bg_color = Color(0.052, 0.044, 0.037, 0.93)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.98, 0.64, 0.36, 0.34)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_recorded"]
+bg_color = Color(0.055, 0.047, 0.034, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.98, 0.82, 0.42, 0.38)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_select"]
 bg_color = Color(0.1, 0.12, 0.13, 0.9)
@@ -83,22 +119,22 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="TopPanel" type="PanelContainer" parent="Root"]
-custom_minimum_size = Vector2(560, 0)
+custom_minimum_size = Vector2(500, 0)
 layout_mode = 1
 anchors_preset = 0
 offset_left = 16.0
 offset_top = 16.0
-offset_right = 576.0
-offset_bottom = 218.0
+offset_right = 516.0
+offset_bottom = 178.0
 mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="TopMargin" type="MarginContainer" parent="Root/TopPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 10
+theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_bottom = 8
 
 [node name="TopRows" type="VBoxContainer" parent="Root/TopPanel/TopMargin"]
 layout_mode = 2
@@ -146,7 +182,7 @@ layout_mode = 2
 text = "월드 안의 규칙 표면을 읽으세요. 텍스트가 위험 표면입니다."
 autowrap_mode = 3
 theme_override_colors/font_color = Color(0.94, 0.97, 0.98, 0.98)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 
 [node name="StatusRows" type="HBoxContainer" parent="Root/TopPanel/TopMargin/TopRows"]
 layout_mode = 2
@@ -188,7 +224,7 @@ layout_mode = 2
 text = "Station: intake closed | inquest closed | verdict closed | termination closed"
 autowrap_mode = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.85, 0.9)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 
 [node name="ConsequenceLabel" type="Label" parent="Root/TopPanel/TopMargin/TopRows"]
 unique_name_in_owner = true
@@ -206,7 +242,7 @@ anchor_right = 1.0
 offset_left = -432.0
 offset_top = 16.0
 offset_right = -16.0
-offset_bottom = 246.0
+offset_bottom = 194.0
 grow_horizontal = 0
 mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_notice")
@@ -227,14 +263,14 @@ layout_mode = 2
 text = "No active pressure"
 autowrap_mode = 3
 theme_override_colors/font_color = Color(0.98, 0.86, 0.48, 0.98)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
 
 [node name="NoticeBody" type="Label" parent="Root/NoticePanel/NoticeMargin/NoticeRows"]
 layout_mode = 2
 text = "규칙 표면이나 커버 테스트 구역에 접근하세요."
 autowrap_mode = 3
 theme_override_colors/font_color = Color(0.9, 0.94, 0.95, 0.95)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 
 [node name="NoticeDivider" type="ColorRect" parent="Root/NoticePanel/NoticeMargin/NoticeRows"]
 custom_minimum_size = Vector2(0, 1)
@@ -310,27 +346,27 @@ theme_override_colors/font_color = Color(0.78, 0.85, 0.87, 0.9)
 theme_override_font_sizes/font_size = 13
 
 [node name="BottomPanel" type="PanelContainer" parent="Root"]
-custom_minimum_size = Vector2(720, 0)
+custom_minimum_size = Vector2(0, 0)
 layout_mode = 1
-anchors_preset = 2
+anchors_preset = 12
 anchor_top = 1.0
-anchor_right = 0.0
+anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -194.0
-offset_right = 736.0
+offset_top = -260.0
+offset_right = -16.0
 offset_bottom = -16.0
-grow_horizontal = 1
+grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="BottomMargin" type="MarginContainer" parent="Root/BottomPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
 
 [node name="BottomRows" type="VBoxContainer" parent="Root/BottomPanel/BottomMargin"]
 layout_mode = 2
@@ -342,35 +378,80 @@ layout_mode = 2
 text = "WASD로 이동. 방향키로 시점 전환. 규칙 게시판이나 커버 테스트 구역에 접근하세요."
 autowrap_mode = 3
 theme_override_colors/font_color = Color(0.94, 0.97, 0.98, 0.98)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 18
 
-[node name="ChoicesLabel" type="Label" parent="Root/BottomPanel/BottomMargin/BottomRows"]
+[node name="ChoiceRows" type="VBoxContainer" parent="Root/BottomPanel/BottomMargin/BottomRows"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="ChoiceOnePanel" type="PanelContainer" parent="Root/BottomPanel/BottomMargin/BottomRows/ChoiceRows"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_choice")
+
+[node name="ChoiceOneMargin" type="MarginContainer" parent="Root/BottomPanel/BottomMargin/BottomRows/ChoiceRows/ChoiceOnePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="ChoicesLabel" type="Label" parent="Root/BottomPanel/BottomMargin/BottomRows/ChoiceRows/ChoiceOnePanel/ChoiceOneMargin"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "1 절차대로 답하기   2 절차 묻기   3 맥락 맞추기   4 커버 깨기"
 autowrap_mode = 3
-theme_override_colors/font_color = Color(0.98, 0.84, 0.46, 0.96)
-theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.95, 0.99, 1, 0.98)
+theme_override_font_sizes/font_size = 15
 
-[node name="SafeLineLabel" type="Label" parent="Root/BottomPanel/BottomMargin/BottomRows"]
+[node name="ChoiceTwoPanel" type="PanelContainer" parent="Root/BottomPanel/BottomMargin/BottomRows/ChoiceRows"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_choice")
+
+[node name="ChoiceTwoMargin" type="MarginContainer" parent="Root/BottomPanel/BottomMargin/BottomRows/ChoiceRows/ChoiceTwoPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="SafeLineLabel" type="Label" parent="Root/BottomPanel/BottomMargin/BottomRows/ChoiceRows/ChoiceTwoPanel/ChoiceTwoMargin"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "SAFE: E로 규칙을 읽고 제한된 답변만 사용"
 autowrap_mode = 3
-theme_override_colors/font_color = Color(0.62, 0.84, 0.78, 0.92)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.8, 0.92, 0.89, 0.97)
+theme_override_font_sizes/font_size = 15
 
-[node name="RiskyLineLabel" type="Label" parent="Root/BottomPanel/BottomMargin/BottomRows"]
+[node name="ChoiceThreePanel" type="PanelContainer" parent="Root/BottomPanel/BottomMargin/BottomRows/ChoiceRows"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_choice_warning")
+
+[node name="ChoiceThreeMargin" type="MarginContainer" parent="Root/BottomPanel/BottomMargin/BottomRows/ChoiceRows/ChoiceThreePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="RiskyLineLabel" type="Label" parent="Root/BottomPanel/BottomMargin/BottomRows/ChoiceRows/ChoiceThreePanel/ChoiceThreeMargin"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "RISK: 규칙 없이 말하면 스테이션이 이유를 만듦"
 autowrap_mode = 3
-theme_override_colors/font_color = Color(0.98, 0.62, 0.45, 0.92)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.84, 0.68, 0.98)
+theme_override_font_sizes/font_size = 15
+
+[node name="RecordedStatementLabel" type="Label" parent="Root/BottomPanel/BottomMargin/BottomRows"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "4  기록된 진술: 저는 이 꿈에 방금 들어왔어요."
+autowrap_mode = 3
+theme_override_colors/font_color = Color(0.98, 0.84, 0.46, 0.96)
+theme_override_font_sizes/font_size = 13
 
 [node name="EvidenceTitle" type="Label" parent="Root/BottomPanel/BottomMargin/BottomRows"]
 layout_mode = 2
-text = "증거"
+text = "스테이션 기록"
 theme_override_colors/font_color = Color(0.75, 0.82, 0.85, 0.92)
 theme_override_font_sizes/font_size = 12
 

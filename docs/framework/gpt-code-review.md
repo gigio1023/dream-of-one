@@ -61,9 +61,11 @@ For Dream of One specifically, reviewers must protect these boundaries:
 - AI/API providers may propose NPC or Station wording only.
 - Backend/runtime authority owns deterministic suspicion signals, Exposure,
   Evidence, report, inquest, verdict, and session termination.
-- The current conversation-first `Same Order` proof is M1 technical evidence
-  until visual capture, repair/replay contrast, player comprehension,
-  provider/export truth, and role review gates are closed.
+- The current conversation-first `Same Order` proof is M1 technical evidence.
+  Renderer-backed visual capture may be cited as internal evidence, but public
+  route/playability claims still require backend canonical route event
+  validation, manual replay/readability/comprehension validation,
+  provider/export truth, and role review gates.
 
 ## Output
 

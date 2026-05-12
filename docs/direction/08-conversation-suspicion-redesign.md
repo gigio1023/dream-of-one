@@ -207,7 +207,7 @@ Playable route:
 7. Player gets one repair chance.
 8. Session ends with one of three deterministic outcomes:
    - `cover_held`: suspicion decays, player leaves.
-   - `soft_report`: report filed, session continues with warning.
+   - `soft_report`: report filed, current micro-scenario closes with warning; continued play after report requires a later playable proof.
    - `inquest_opened`: Station opens formal questioning.
 
 This is smaller and more honest than a broad Station route. It proves the actual

@@ -1,6 +1,6 @@
 # Game Studio Project State
 
-Last updated: 2026-05-07
+Last updated: 2026-05-12
 
 This file records how Game Studio guidance is applied to Dream of One. It does not replace `.game-harness/`, which remains the current execution harness for M1 handoffs, reviews, evidence, and drift.
 
@@ -56,12 +56,12 @@ Current M1 carry-in:
 - dirty worktree scope is recorded.
 - required role reviews remain pending in the current stage record.
 - Station Soft Inquest smoke is internal authority/Evidence harness evidence, not the target player-facing conversation loop.
-- `Same Order` playable smoke now proves Store Clerk prompt -> risky choice -> preset recorded statement -> deterministic suspicion/report -> Station inquest/session end.
+- `Same Order` playable smoke now proves clean cover, repair recovery, soft report, and hard inquest routes. The hard route still uses a preset recorded statement to prove deterministic suspicion/report -> Station inquest -> session end.
 - backend tests preserve conversation Evidence fields and prevent same-NPC conversation turn coalescing.
 
 ## M1 Proof Target
 
-M1 must prove one NPC conversation with three dialogue choices, optional typed free-input contract if available, one safe/local response, one uncertain/repair response, one risky/weird response, one deterministic suspicion/report consequence, one Evidence why-line, and one Godot-visible result. The current smoke records a preset free-input statement; it does not prove manual text-entry UI.
+M1 must prove one NPC conversation with three dialogue choices, optional typed free-input contract if available, one safe/local response, one uncertain/repair response, one risky/weird response, one deterministic suspicion/report consequence, one Evidence why-line, and one Godot-visible result. The current smoke proves internal route contrast for clean cover, repair recovery, soft report, and inquest. It still records a preset free-input statement and does not prove manual text-entry UI.
 
 Required proof:
 
@@ -104,7 +104,7 @@ Dream of One supersedes the Codex CLI player-prerequisite decision.
 ## Open Blockers
 
 - M1 role reviews are still pending in the current stage record.
-- M1 has fresh conversation-first Godot/backend proof artifacts, but product closure still needs role review, visual recapture, external comprehension, and provider/export decisions.
+- M1 has fresh conversation-first Godot/backend proof artifacts, canonical route-event validation for the internal route-proof gate, and renderer-backed Store conversation visual recapture. Product closure still needs role review, human visual/readability review, external comprehension, and provider/export decisions.
 - Manual typed free-input UI remains pending if free input stays in the demo promise.
 - Live Godot backend bridge remains a follow-up path unless implemented in the same scoped issue.
 - Broad vertical-slice implementation remains blocked until M1 product closure, not merely technical proof.

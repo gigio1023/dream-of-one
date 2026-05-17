@@ -200,7 +200,8 @@ Current M1 carry-in:
 - Codex gameplay QA now runs the active proof cell through public
   `PlayableSession.debug_codex_gameplay_action` and
   `debug_codex_gameplay_snapshot` APIs. The probe can list callable player
-  actions, execute hesitation, authored dialogue, and typed free input, inspect
+  actions, execute hesitation, authored dialogue, typed free input, focus a
+  visible world-record prop, press the focused interaction, inspect
   HUD/world/ledger/NPC role-action state, and write JSON plus Markdown gameplay
   reports. This is internal AI-play setup proof, not external player
   comprehension.

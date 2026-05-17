@@ -12,7 +12,8 @@ const PROBE_STEPS := [
 	{"actionId": "player.wait.hesitation_record", "payload": {}},
 	{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.risky"}},
 	{"actionId": "player.type.free_input", "payload": {"line": TYPED_LINE}},
-	{"actionId": "inspect.world_record_prop", "payload": {"objectId": "park_notice_board"}}
+	{"actionId": "focus.world_record_prop", "payload": {"objectId": "park_notice_board"}},
+	{"actionId": "player.interact.focused", "payload": {}}
 ]
 const ROUTE_PROBE_PLANS := [
 	{
@@ -754,6 +755,10 @@ func _action_player_meaning(action_id: String, payload: Dictionary) -> String:
 			return "choose dialogue index %d" % int(payload.get("index", -1))
 		"player.type.free_input":
 			return "type player speech: %s" % str(payload.get("line", ""))
+		"focus.world_record_prop":
+			return "look at environment record prop: %s" % str(payload.get("objectId", ""))
+		"player.interact.focused":
+			return "press the focused interaction"
 		"inspect.world_record_prop":
 			return "inspect environment record prop: %s" % str(payload.get("objectId", ""))
 		_:

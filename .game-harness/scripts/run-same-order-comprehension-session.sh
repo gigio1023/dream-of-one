@@ -384,6 +384,8 @@ const requiredActionIds = [
   "dialogue.choice.by_id",
   "dialogue.choice.by_index",
   "player.type.free_input",
+  "focus.world_record_prop",
+  "player.interact.focused",
 ];
 const facilitatorPrePlayFiles = [
   "facilitator-pack.md",

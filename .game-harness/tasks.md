@@ -99,6 +99,11 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   `inspect.world_record_prop`, proving the Park notice board can be read as a
   public record in the running HUD notice instead of only existing in summary
   data.
+- [x] Let Codex/player read a visible environment record prop through actual
+  focus plus interact: `focus.world_record_prop` on the Park notice board
+  followed by `player.interact.focused` now opens the same HUD notice, and
+  normal focus scanning treats operation record props as readable targets when
+  no conversation zone is closer.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

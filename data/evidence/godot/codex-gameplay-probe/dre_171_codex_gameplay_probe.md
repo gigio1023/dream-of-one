@@ -13,7 +13,8 @@
 - player.wait.hesitation_record -> let hesitation become a record
 - dialogue.choice.by_id -> choose dialogue id store.same_order.risky
 - player.type.free_input -> type player speech: 저는 이 꿈에 방금 들어왔어요.
-- inspect.world_record_prop -> inspect environment record prop: park_notice_board
+- focus.world_record_prop -> look at environment record prop: park_notice_board
+- player.interact.focused -> press the focused interaction
 
 ## Player-Readable Cause Chain
 

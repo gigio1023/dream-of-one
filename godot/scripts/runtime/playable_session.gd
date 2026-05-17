@@ -518,6 +518,16 @@ func debug_codex_gameplay_action_catalog() -> Array[Dictionary]:
 			"playerMeaning": "Submit typed player speech through the same deterministic consequence path used by the HUD."
 		},
 		{
+			"actionId": "focus.world_record_prop",
+			"payloadSchema": {"objectId": "string"},
+			"playerMeaning": "Move Codex/player attention to one visible environment record prop."
+		},
+		{
+			"actionId": "player.interact.focused",
+			"payloadSchema": {},
+			"playerMeaning": "Press the current focused interaction in the running scene."
+		},
+		{
 			"actionId": "inspect.world_record_prop",
 			"payloadSchema": {"objectId": "string"},
 			"playerMeaning": "Read one visible environment record prop, such as the Park notice board, through the same HUD notice area a player uses."
@@ -569,6 +579,20 @@ func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) ->
 				reason = "line_required"
 			else:
 				submit_free_input(line)
+		"focus.world_record_prop":
+			var object_id := str(payload.get("objectId", "")).strip_edges()
+			if object_id.is_empty():
+				accepted = false
+				reason = "object_id_required"
+			elif not _force_focus_record_prop(object_id):
+				accepted = false
+				reason = "record_prop_unavailable"
+		"player.interact.focused":
+			if current_focus == null:
+				accepted = false
+				reason = "focus_required"
+			else:
+				_interact()
 		"inspect.world_record_prop":
 			var object_id := str(payload.get("objectId", "")).strip_edges()
 			if object_id.is_empty():
@@ -728,8 +752,16 @@ func build_evidence_pack(artifact_path: String) -> Dictionary:
 	}
 
 func _interact() -> void:
+	if current_focus != null and current_focus_kind == "record_prop":
+		var object_id := str(current_focus.get_meta("record_object_id", ""))
+		var result := _inspect_world_record_prop(object_id)
+		if not bool(result.get("ok", false)):
+			_set_notice("기록 없음", "이 환경 기록물은 아직 읽을 수 있는 상태가 아닙니다.")
+		return
+
 	if _session_locked():
 		return
+
 	if current_focus == null:
 		_set_notice("초점 없음", "범위 안에 말을 걸 수 있는 상점 카운터나 읽을 수 있는 안내문이 없습니다.")
 		_record_event(
@@ -1285,6 +1317,9 @@ func _refresh_hud() -> void:
 		var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
 		prompt = _current_npc_line(beat)
 		choices_enabled = true
+	elif current_focus != null and current_focus_kind == "record_prop":
+		var object_id := str(current_focus.get_meta("record_object_id", ""))
+		prompt = "E: %s 읽기" % _world_record_prop_title(object_id)
 	elif current_focus != null and current_focus_kind == "text_surface":
 		var surface_id := str(current_focus.get_meta("surface_id", ""))
 		prompt = "E: %s 읽기" % _localized_text_surface_label(current_focus, surface_id)
@@ -2648,13 +2683,6 @@ func _update_focus() -> void:
 	var best_node: Node3D = null
 	var best_kind := ""
 	var best_distance := FOCUS_RADIUS
-	for node in get_tree().get_nodes_in_group("text_surfaces"):
-		if node is Node3D:
-			var distance := _player.global_position.distance_to((node as Node3D).global_position)
-			if distance < best_distance:
-				best_node = node as Node3D
-				best_kind = "text_surface"
-				best_distance = distance
 	for node in get_tree().get_nodes_in_group("interaction_zones"):
 		if node is Node3D:
 			var distance := _player.global_position.distance_to((node as Node3D).global_position)
@@ -2662,8 +2690,38 @@ func _update_focus() -> void:
 				best_node = node as Node3D
 				best_kind = "zone"
 				best_distance = distance
+	if best_node == null:
+		for node in get_tree().get_nodes_in_group("operation_record_props"):
+			if node is Node3D:
+				var distance := _player.global_position.distance_to((node as Node3D).global_position)
+				if distance < best_distance:
+					best_node = node as Node3D
+					best_kind = "record_prop"
+					best_distance = distance
+	if best_node == null:
+		for node in get_tree().get_nodes_in_group("text_surfaces"):
+			if node is Node3D:
+				var distance := _player.global_position.distance_to((node as Node3D).global_position)
+				if distance < best_distance:
+					best_node = node as Node3D
+					best_kind = "text_surface"
+					best_distance = distance
 	current_focus = best_node
 	current_focus_kind = best_kind
+
+func _force_focus_record_prop(object_id: String) -> bool:
+	_refresh_world_record_props()
+	for node in get_tree().get_nodes_in_group("operation_record_props"):
+		if node is Node3D:
+			if str(node.get_meta("record_object_id", "")) == object_id:
+				current_focus = node as Node3D
+				current_focus_kind = "record_prop"
+				if _player != null:
+					var focus_position := (node as Node3D).global_position + Vector3(0, 0, 1.15)
+					focus_position.y = _player.global_position.y
+					_player.global_position = focus_position
+				return true
+	return false
 
 func _force_focus_zone(zone_id: String) -> void:
 	for node in get_tree().get_nodes_in_group("interaction_zones"):

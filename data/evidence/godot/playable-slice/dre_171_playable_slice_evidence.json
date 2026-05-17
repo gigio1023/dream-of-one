@@ -1,18 +1,18 @@
 {
   "adapter": "godot",
-  "createdAtMs": 1779045688663,
+  "createdAtMs": 1779046574020,
   "events": [
     {
       "adapter": "godot",
       "eventFamily": "session",
-      "eventId": "playable_session_started-001-1779045688425",
+      "eventId": "playable_session_started-001-1779046573784",
       "eventName": "playable_session_started",
       "prologueStep": "beginning",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "sessionOutcome": "running",
       "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-      "timestampMs": 1779045688425,
+      "timestampMs": 1779046573784,
       "uiSummaryArgs": {},
       "uiSummaryKey": "event.session_started",
       "worldId": "dre_171_godot_shell",
@@ -25,7 +25,7 @@
       "conversationId": "conv-same-order",
       "conversationStage": "normal",
       "eventFamily": "domain",
-      "eventId": "conversation_started-002-1779045688527",
+      "eventId": "conversation_started-002-1779046573883",
       "eventName": "conversation_started",
       "outcome": "running",
       "promptId": "store.same_order.routine",
@@ -34,7 +34,7 @@
       "socialLoopStage": "normal",
       "speakerId": "NPC_Store_Clerk",
       "summary": "Store Clerk opened the Same Order conversation.",
-      "timestampMs": 1779045688527,
+      "timestampMs": 1779046573883,
       "turnId": "turn-1",
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
@@ -47,7 +47,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "dialogue_choice_selected-003-1779045688564",
+      "eventId": "dialogue_choice_selected-003-1779046573919",
       "eventName": "dialogue_choice_selected",
       "inputMode": "choice",
       "outcome": "running",
@@ -69,7 +69,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779045688564,
+      "timestampMs": 1779046573919,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -84,7 +84,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-004-1779045688564",
+      "eventId": "conversation_anomaly_detected-004-1779046573919",
       "eventName": "conversation_anomaly_detected",
       "inputMode": "choice",
       "outcome": "running",
@@ -106,7 +106,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779045688564,
+      "timestampMs": 1779046573919,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -121,7 +121,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-005-1779045688564",
+      "eventId": "npc_suspicion_changed-005-1779046573919",
       "eventName": "npc_suspicion_changed",
       "inputMode": "choice",
       "outcome": "running",
@@ -143,7 +143,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779045688564,
+      "timestampMs": 1779046573919,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -158,7 +158,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "응답 지연 12000ms",
       "eventFamily": "domain",
-      "eventId": "response_hesitation_noted-006-1779045688599",
+      "eventId": "response_hesitation_noted-006-1779046573954",
       "eventName": "response_hesitation_noted",
       "inputMode": "response_hesitation",
       "outcome": "running",
@@ -181,7 +181,7 @@
       "suspicionSignals": [
         "response_hesitation"
       ],
-      "timestampMs": 1779045688599,
+      "timestampMs": 1779046573954,
       "turnId": "turn-2",
       "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
       "whyLineKey": "response_hesitation",
@@ -196,7 +196,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "free_input_submitted-007-1779045688627",
+      "eventId": "free_input_submitted-007-1779046573981",
       "eventName": "free_input_submitted",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -221,7 +221,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779045688627,
+      "timestampMs": 1779046573981,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -236,7 +236,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-008-1779045688627",
+      "eventId": "conversation_anomaly_detected-008-1779046573982",
       "eventName": "conversation_anomaly_detected",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -261,7 +261,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779045688627,
+      "timestampMs": 1779046573982,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -276,7 +276,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-009-1779045688627",
+      "eventId": "npc_suspicion_changed-009-1779046573982",
       "eventName": "npc_suspicion_changed",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -301,7 +301,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779045688627,
+      "timestampMs": 1779046573982,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -316,7 +316,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "suspicion_shared-010-1779045688627",
+      "eventId": "suspicion_shared-010-1779046573982",
       "eventName": "suspicion_shared",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -341,7 +341,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779045688627,
+      "timestampMs": 1779046573982,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -356,7 +356,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_report_created-011-1779045688628",
+      "eventId": "station_report_created-011-1779046573982",
       "eventName": "station_report_created",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -381,7 +381,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779045688628,
+      "timestampMs": 1779046573982,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -396,7 +396,7 @@
       "conversationStage": "inquest",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_inquest_opened-012-1779045688628",
+      "eventId": "station_inquest_opened-012-1779046573982",
       "eventName": "station_inquest_opened",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -421,7 +421,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779045688628,
+      "timestampMs": 1779046573982,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -432,12 +432,12 @@
       "adapter": "godot",
       "artifactPath": "data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json",
       "eventFamily": "evidence_export",
-      "eventId": "evidence_pack_created-013-1779045688663",
+      "eventId": "evidence_pack_created-013-1779046574020",
       "eventName": "evidence_pack_created",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "summary": "Godot conversation playable Evidence Pack exported for backend validation.",
-      "timestampMs": 1779045688663,
+      "timestampMs": 1779046574020,
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
     }
@@ -2139,7 +2139,7 @@
         "sessionOutcome": "cover_held",
         "playerLineKind": "clean_cover_line",
         "playerLine": "네, 같은 걸로 주세요.",
-        "socialReactionSummary": "The clerk closes a normal receipt, a waiting customer accepts the routine, and a Park witness publicly vouches that the player stayed in the local flow.",
+        "socialReactionSummary": "The clerk closes a normal receipt, a waiting customer accepts the routine, a Park witness publicly vouches that the player stayed in the local flow, and the high local trust lets the waiting customer share a local tip.",
         "actionTrace": [
           {
             "stepId": "clean.clerk.cite_usual_order",
@@ -2237,19 +2237,45 @@
               "stationAttention": 0
             },
             "whyLine": "The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow."
+          },
+          {
+            "stepId": "clean.waiting_customer.share_local_tip",
+            "actorId": "NPC_Waiting_Customer",
+            "actorRole": "waiting_customer",
+            "perceivedObjectIds": [
+              "store_queue_mark",
+              "store_counter",
+              "usual_order_cue"
+            ],
+            "affordance": "share_local_tip",
+            "objectId": "store_queue_mark",
+            "accepted": true,
+            "ledgerEventId": "civic-ledger-5",
+            "ledgerEventKind": "local_tip_shared",
+            "recordId": "store_same_order_local_tip",
+            "citedLedgerEventId": "civic-ledger-4",
+            "economyAfter": {
+              "accountCredit": 2,
+              "localTrust": 59,
+              "recordBurden": 0,
+              "stationAttention": 0
+            },
+            "whyLine": "Local trust is high after the public vouch, so the waiting customer shares a small local tip instead of only standing aside."
           }
         ],
         "ledgerEventKinds": [
           "usual_order_cited",
           "store_sale_normal",
           "queue_routine_kept",
-          "public_routine_vouched"
+          "public_routine_vouched",
+          "local_tip_shared"
         ],
         "ledgerAffordances": [
           "cite_expected_order",
           "create_receipt",
           "accept_routine",
-          "vouch_routine"
+          "vouch_routine",
+          "share_local_tip"
         ],
         "socialObservationTrace": [
           {
@@ -2283,10 +2309,26 @@
             "resultingStepId": "clean.park_witness.vouch_routine",
             "resultingAffordance": "vouch_routine",
             "whyLine": "park_witness uses waiting_customer's accept_routine record before choosing vouch_routine."
+          },
+          {
+            "observerActorId": "NPC_Waiting_Customer",
+            "observerRole": "waiting_customer",
+            "observedLedgerEventId": "civic-ledger-4",
+            "observedActorRole": "park_witness",
+            "observedAffordance": "vouch_routine",
+            "observedObjectId": "park_notice_board",
+            "economyPressure": {
+              "localTrust": 58,
+              "recordBurden": 0,
+              "stationAttention": 0
+            },
+            "resultingStepId": "clean.waiting_customer.share_local_tip",
+            "resultingAffordance": "share_local_tip",
+            "whyLine": "waiting_customer uses park_witness's vouch_routine record before choosing share_local_tip."
           }
         ],
         "finalObjectStates": {
-          "store_queue_mark": "settled",
+          "store_queue_mark": "helped",
           "store_counter": "serving",
           "usual_order_cue": "cited",
           "receipt_tray": "normal",
@@ -2298,7 +2340,7 @@
         },
         "economyAfter": {
           "accountCredit": 2,
-          "localTrust": 58,
+          "localTrust": 59,
           "recordBurden": 0,
           "stationAttention": 0
         }
@@ -3249,19 +3291,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779045687176",
+            "eventId": "playable_session_started-001-1779046572837",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779045687312",
+            "eventId": "conversation_started-002-1779046572954",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-003-1779045687349",
+            "eventId": "dialogue_choice_selected-003-1779046572990",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3272,7 +3314,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-004-1779045687383",
+            "eventId": "dialogue_choice_selected-004-1779046573025",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3283,7 +3325,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_outcome_reached-005-1779045687383",
+            "eventId": "conversation_outcome_reached-005-1779046573026",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "clean_cover",
@@ -3292,7 +3334,7 @@
         ],
         "inputPath": "focus StoreCounterZone -> E -> 1 safe routine -> 1 safe probe",
         "lastWhyLine": "이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.",
-        "outcomeBody": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공개 확인 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공개 확인을 남겼습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 조금 더 올라갔습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+        "outcomeBody": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공개 확인 -> 로컬 팁 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공개 확인을 남겼습니다. 그 공개 확인으로 지역 신뢰가 충분해지자 대기 손님은 작은 로컬 팁을 공유했습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다. 이후 대기 손님이 공개 확인 기록을 보고 대기 표식을 도움 상태로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 NPC의 도움 행동을 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
         "reportWeight": 0,
         "routeId": "clean_cover",
         "routeOutcome": "clean_cover",
@@ -3319,19 +3361,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779045687448",
+            "eventId": "playable_session_started-001-1779046573088",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779045687549",
+            "eventId": "conversation_started-002-1779046573184",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779045687585",
+            "eventId": "dialogue_choice_selected-003-1779046573220",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3344,7 +3386,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779045687585",
+            "eventId": "conversation_anomaly_detected-004-1779046573220",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3357,7 +3399,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779045687585",
+            "eventId": "npc_suspicion_changed-005-1779046573220",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3370,7 +3412,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-006-1779045687622",
+            "eventId": "dialogue_choice_selected-006-1779046573255",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3381,7 +3423,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_outcome_reached-007-1779045687622",
+            "eventId": "conversation_outcome_reached-007-1779046573255",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "repair_recovered",
@@ -3423,19 +3465,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779045687960",
+            "eventId": "playable_session_started-001-1779046573538",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779045688283",
+            "eventId": "conversation_started-002-1779046573651",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779045688320",
+            "eventId": "dialogue_choice_selected-003-1779046573687",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3448,7 +3490,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779045688320",
+            "eventId": "conversation_anomaly_detected-004-1779046573687",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3461,7 +3503,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779045688320",
+            "eventId": "npc_suspicion_changed-005-1779046573687",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3474,7 +3516,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "dialogue_choice_selected-006-1779045688355",
+            "eventId": "dialogue_choice_selected-006-1779046573722",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3488,7 +3530,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-007-1779045688355",
+            "eventId": "conversation_anomaly_detected-007-1779046573722",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3502,7 +3544,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-008-1779045688355",
+            "eventId": "npc_suspicion_changed-008-1779046573722",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3516,7 +3558,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-009-1779045688355",
+            "eventId": "suspicion_shared-009-1779046573722",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3530,7 +3572,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-010-1779045688356",
+            "eventId": "station_report_created-010-1779046573723",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 80,
@@ -3544,7 +3586,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_outcome_reached-011-1779045688356",
+            "eventId": "conversation_outcome_reached-011-1779046573723",
             "eventName": "conversation_outcome_reached",
             "outcome": "soft_report",
             "routeOutcome": "soft_report",
@@ -3589,19 +3631,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779045688425",
+            "eventId": "playable_session_started-001-1779046573784",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779045688527",
+            "eventId": "conversation_started-002-1779046573883",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779045688564",
+            "eventId": "dialogue_choice_selected-003-1779046573919",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3614,7 +3656,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779045688564",
+            "eventId": "conversation_anomaly_detected-004-1779046573919",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3627,7 +3669,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779045688564",
+            "eventId": "npc_suspicion_changed-005-1779046573919",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3640,7 +3682,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "response_hesitation_noted-006-1779045688599",
+            "eventId": "response_hesitation_noted-006-1779046573954",
             "eventName": "response_hesitation_noted",
             "outcome": "running",
             "reportWeightAfter": 35,
@@ -3653,7 +3695,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "free_input_submitted-007-1779045688627",
+            "eventId": "free_input_submitted-007-1779046573981",
             "eventName": "free_input_submitted",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3667,7 +3709,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-008-1779045688627",
+            "eventId": "conversation_anomaly_detected-008-1779046573982",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3681,7 +3723,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-009-1779045688627",
+            "eventId": "npc_suspicion_changed-009-1779046573982",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3695,7 +3737,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-010-1779045688627",
+            "eventId": "suspicion_shared-010-1779046573982",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3709,7 +3751,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-011-1779045688628",
+            "eventId": "station_report_created-011-1779046573982",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 120,
@@ -3723,7 +3765,7 @@
           },
           {
             "conversationStage": "inquest",
-            "eventId": "station_inquest_opened-012-1779045688628",
+            "eventId": "station_inquest_opened-012-1779046573982",
             "eventName": "station_inquest_opened",
             "outcome": "inquest_opened",
             "reportWeightAfter": 120,
@@ -3927,7 +3969,7 @@
           "providerMode": "provider-action-proposal",
           "playerLineKind": "clean_cover_line",
           "playerLine": "네, 같은 걸로 주세요.",
-          "socialReactionSummary": "The provider-shaped proposal path closes a normal receipt and preserves cover.",
+          "socialReactionSummary": "The provider-shaped proposal path closes a normal receipt, lets public trust travel, and unlocks a small local tip.",
           "actionTrace": [
             {
               "stepId": "clean.clerk.cite_usual_order",
@@ -5074,22 +5116,147 @@
               "whyLine": "The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow.",
               "selectionReason": "park_witness chooses vouch_routine because publicly vouch that the player stayed inside the local routine.",
               "providerLine": "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요."
+            },
+            {
+              "stepId": "clean.waiting_customer.share_local_tip",
+              "actorId": "NPC_Waiting_Customer",
+              "actorRole": "waiting_customer",
+              "perceivedObjectIds": [
+                "store_queue_mark",
+                "store_counter",
+                "usual_order_cue"
+              ],
+              "availableActions": [
+                {
+                  "actionId": "store_queue_mark.share_local_tip",
+                  "affordance": "share_local_tip",
+                  "objectId": "store_queue_mark",
+                  "objectState": "settled",
+                  "playerLabel": "Share Local Tip",
+                  "eligibleRoles": [
+                    "waiting_customer"
+                  ],
+                  "preconditions": [
+                    "object_state:settled",
+                    "role_allowed:waiting_customer",
+                    "known_ledger_event_required",
+                    "ledger_event_kind:public_routine_vouched",
+                    "localTrust>=55"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "local trust opens a helpful tip",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:local_trust_unlocks_help"
+                  ],
+                  "ledgerEventKind": "local_tip_shared",
+                  "civicEconomyEffects": [
+                    "localTrust:+1",
+                    "recordBurden:-1"
+                  ],
+                  "validationRuleId": "same_order.store_queue_mark.share_local_tip",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known",
+                    "ledger_event_kind_unaccepted",
+                    "economy_condition_unmet"
+                  ],
+                  "toState": "helped",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-4"
+                  ]
+                },
+                {
+                  "actionId": "usual_order_cue.inspect",
+                  "affordance": "inspect",
+                  "objectId": "usual_order_cue",
+                  "objectState": "cited",
+                  "playerLabel": "Inspect",
+                  "eligibleRoles": [
+                    "store_clerk",
+                    "store_manager",
+                    "station_officer",
+                    "waiting_customer"
+                  ],
+                  "preconditions": [
+                    "object_state:cited",
+                    "role_allowed:store_clerk|store_manager|station_officer|waiting_customer"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "store_manager",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "usual_order_cue inspect",
+                  "priorityHints": [],
+                  "ledgerEventKind": "usual_order_read",
+                  "civicEconomyEffects": [],
+                  "validationRuleId": "same_order.usual_order_cue.inspect",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required"
+                  ],
+                  "toState": "read",
+                  "requiresLedgerEvent": false,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": []
+                }
+              ],
+              "providerProposal": {
+                "affordance": "share_local_tip",
+                "objectId": "store_queue_mark",
+                "recordId": "store_same_order_local_tip",
+                "citedLedgerEventId": "civic-ledger-4",
+                "whyLine": "Local trust is high after the public vouch, so the waiting customer shares a small local tip instead of only standing aside.",
+                "npcLineCandidate": "다음엔 여기서 같은 말만 먼저 하면 돼요. 오늘은 제가 알려드릴게요.",
+                "selectionReason": "waiting_customer chooses share_local_tip because share a small local tip after public trust is high enough."
+              },
+              "affordance": "share_local_tip",
+              "objectId": "store_queue_mark",
+              "accepted": true,
+              "ledgerEventId": "civic-ledger-5",
+              "ledgerEventKind": "local_tip_shared",
+              "recordId": "store_same_order_local_tip",
+              "citedLedgerEventId": "civic-ledger-4",
+              "economyAfter": {
+                "accountCredit": 2,
+                "localTrust": 59,
+                "recordBurden": 0,
+                "stationAttention": 0
+              },
+              "whyLine": "Local trust is high after the public vouch, so the waiting customer shares a small local tip instead of only standing aside.",
+              "selectionReason": "waiting_customer chooses share_local_tip because share a small local tip after public trust is high enough.",
+              "providerLine": "다음엔 여기서 같은 말만 먼저 하면 돼요. 오늘은 제가 알려드릴게요."
             }
           ],
           "ledgerEventKinds": [
             "usual_order_cited",
             "store_sale_normal",
             "queue_routine_kept",
-            "public_routine_vouched"
+            "public_routine_vouched",
+            "local_tip_shared"
           ],
           "ledgerAffordances": [
             "cite_expected_order",
             "create_receipt",
             "accept_routine",
-            "vouch_routine"
+            "vouch_routine",
+            "share_local_tip"
           ],
           "finalObjectStates": {
-            "store_queue_mark": "settled",
+            "store_queue_mark": "helped",
             "store_counter": "serving",
             "usual_order_cue": "cited",
             "receipt_tray": "normal",
@@ -5101,7 +5268,7 @@
           },
           "economyAfter": {
             "accountCredit": 2,
-            "localTrust": 58,
+            "localTrust": 59,
             "recordBurden": 0,
             "stationAttention": 0
           }
@@ -10302,7 +10469,7 @@
         "soft_report",
         "inquest_opened"
       ],
-      "jobCount": 23,
+      "jobCount": 24,
       "jobs": [
         {
           "jobId": "clean_cover.clean.clerk.cite_usual_order.provider-action-proposal",
@@ -10325,7 +10492,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path closes a normal receipt and preserves cover.",
+            "socialReactionSummary": "The provider-shaped proposal path closes a normal receipt, lets public trust travel, and unlocks a small local tip.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -10709,7 +10876,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path closes a normal receipt and preserves cover.",
+            "socialReactionSummary": "The provider-shaped proposal path closes a normal receipt, lets public trust travel, and unlocks a small local tip.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -11098,7 +11265,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path closes a normal receipt and preserves cover.",
+            "socialReactionSummary": "The provider-shaped proposal path closes a normal receipt, lets public trust travel, and unlocks a small local tip.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -11426,7 +11593,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path closes a normal receipt and preserves cover.",
+            "socialReactionSummary": "The provider-shaped proposal path closes a normal receipt, lets public trust travel, and unlocks a small local tip.",
             "perceivedObjectIds": [
               "park_notice_board"
             ],
@@ -11613,6 +11780,175 @@
             "validation": "accepted",
             "whyLine": "The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow.",
             "selectionReason": "park_witness chooses vouch_routine because publicly vouch that the player stayed inside the local routine."
+          }
+        },
+        {
+          "jobId": "clean_cover.clean.waiting_customer.share_local_tip.provider-action-proposal",
+          "routeId": "clean_cover",
+          "stepId": "clean.waiting_customer.share_local_tip",
+          "turnIndex": 4,
+          "actorId": "NPC_Waiting_Customer",
+          "actorRole": "waiting_customer",
+          "purpose": "npc_reaction_line",
+          "dispatchPhase": "role_agent_tick",
+          "providerMode": "scheduled-action-proposal",
+          "playerLineKind": "clean_cover_line",
+          "playerLine": "네, 같은 걸로 주세요.",
+          "socialLoopStage": "store_routine",
+          "dramaTone": "routine",
+          "preoccupations": [
+            "delay",
+            "routine disruption",
+            "being noticed"
+          ],
+          "promptContext": {
+            "scenario": "same_order",
+            "socialReactionSummary": "The provider-shaped proposal path closes a normal receipt, lets public trust travel, and unlocks a small local tip.",
+            "perceivedObjectIds": [
+              "store_queue_mark",
+              "store_counter",
+              "usual_order_cue"
+            ],
+            "availableActions": [
+              {
+                "actionId": "store_queue_mark.share_local_tip",
+                "affordance": "share_local_tip",
+                "objectId": "store_queue_mark",
+                "objectState": "settled",
+                "playerLabel": "Share Local Tip",
+                "eligibleRoles": [
+                  "waiting_customer"
+                ],
+                "preconditions": [
+                  "object_state:settled",
+                  "role_allowed:waiting_customer",
+                  "known_ledger_event_required",
+                  "ledger_event_kind:public_routine_vouched",
+                  "localTrust>=55"
+                ],
+                "visibleTo": [
+                  "store_clerk",
+                  "waiting_customer"
+                ],
+                "perceivedAs": "local trust opens a helpful tip",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "economy:recordBurden",
+                  "pressure:local_trust_unlocks_help"
+                ],
+                "ledgerEventKind": "local_tip_shared",
+                "civicEconomyEffects": [
+                  "localTrust:+1",
+                  "recordBurden:-1"
+                ],
+                "validationRuleId": "same_order.store_queue_mark.share_local_tip",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known",
+                  "ledger_event_kind_unaccepted",
+                  "economy_condition_unmet"
+                ],
+                "toState": "helped",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-4"
+                ]
+              },
+              {
+                "actionId": "usual_order_cue.inspect",
+                "affordance": "inspect",
+                "objectId": "usual_order_cue",
+                "objectState": "cited",
+                "playerLabel": "Inspect",
+                "eligibleRoles": [
+                  "store_clerk",
+                  "store_manager",
+                  "station_officer",
+                  "waiting_customer"
+                ],
+                "preconditions": [
+                  "object_state:cited",
+                  "role_allowed:store_clerk|store_manager|station_officer|waiting_customer"
+                ],
+                "visibleTo": [
+                  "store_clerk",
+                  "store_manager",
+                  "waiting_customer"
+                ],
+                "perceivedAs": "usual_order_cue inspect",
+                "priorityHints": [],
+                "ledgerEventKind": "usual_order_read",
+                "civicEconomyEffects": [],
+                "validationRuleId": "same_order.usual_order_cue.inspect",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required"
+                ],
+                "toState": "read",
+                "requiresLedgerEvent": false,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": []
+              }
+            ],
+            "recentLedgerEventKinds": [
+              "usual_order_cited",
+              "store_sale_normal",
+              "queue_routine_kept",
+              "public_routine_vouched"
+            ],
+            "recentLedgerAffordances": [
+              "cite_expected_order",
+              "create_receipt",
+              "accept_routine",
+              "vouch_routine"
+            ]
+          },
+          "allowedProviderFields": [
+            "affordance",
+            "objectId",
+            "recordId",
+            "citedLedgerEventId",
+            "whyLine",
+            "npcLineCandidate",
+            "selectionReason"
+          ],
+          "forbiddenAuthorityFields": [
+            "riskTag",
+            "suspicionDelta",
+            "reportDelta",
+            "exposureDelta",
+            "economyDelta",
+            "ledgerEventKind",
+            "ledgerEventId",
+            "objectState",
+            "verdict",
+            "sessionOutcome",
+            "sessionTermination"
+          ],
+          "fallbackLine": "다음엔 여기서 같은 말만 먼저 하면 돼요. 오늘은 제가 알려드릴게요.",
+          "lockedAction": {
+            "affordance": "share_local_tip",
+            "objectId": "store_queue_mark",
+            "ledgerEventId": "civic-ledger-5",
+            "ledgerEventKind": "local_tip_shared",
+            "recordId": "store_same_order_local_tip",
+            "citedLedgerEventId": "civic-ledger-4",
+            "economyAfter": {
+              "accountCredit": 2,
+              "localTrust": 59,
+              "recordBurden": 0,
+              "stationAttention": 0
+            },
+            "validation": "accepted",
+            "whyLine": "Local trust is high after the public vouch, so the waiting customer shares a small local tip instead of only standing aside.",
+            "selectionReason": "waiting_customer chooses share_local_tip because share a small local tip after public trust is high enough."
           }
         },
         {
@@ -17501,7 +17837,7 @@
       "liveHttpDispatchVerified": false,
       "endpoint": "/v1/npc/decision",
       "dispatchHost": "godot-runtime-pending",
-      "jobCount": 23,
+      "jobCount": 24,
       "packetProofs": [
         {
           "jobId": "clean_cover.clean.clerk.cite_usual_order.provider-action-proposal",
@@ -18980,6 +19316,222 @@
           "actionType": "Talk",
           "utterance": "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요.",
           "fallbackLine": "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요.",
+          "failures": []
+        },
+        {
+          "jobId": "clean_cover.clean.waiting_customer.share_local_tip.provider-action-proposal",
+          "routeId": "clean_cover",
+          "stepId": "clean.waiting_customer.share_local_tip",
+          "endpoint": "/v1/npc/decision",
+          "method": "POST",
+          "npcId": "NPC_Waiting_Customer",
+          "actorRole": "waiting_customer",
+          "packet": {
+            "sessionId": "same-order-provider-dispatch-clean_cover",
+            "npcId": "NPC_Waiting_Customer",
+            "landmarkId": "Store",
+            "nearbyActors": [
+              "player",
+              "NPC_Store_Clerk",
+              "NPC_Store_Manager"
+            ],
+            "recentEvents": [
+              "usual_order_cited:cite_expected_order",
+              "store_sale_normal:create_receipt",
+              "queue_routine_kept:accept_routine",
+              "public_routine_vouched:vouch_routine",
+              "store_routine_active"
+            ],
+            "organizationContext": {
+              "scenario": "same_order",
+              "routeId": "clean_cover",
+              "stepId": "clean.waiting_customer.share_local_tip",
+              "jobId": "clean_cover.clean.waiting_customer.share_local_tip.provider-action-proposal",
+              "actorRole": "waiting_customer",
+              "purpose": "npc_reaction_line",
+              "dispatchPhase": "role_agent_tick",
+              "providerMode": "scheduled-action-proposal",
+              "socialLoopStage": "store_routine",
+              "dramaTone": "routine",
+              "preoccupations": [
+                "delay",
+                "routine disruption",
+                "being noticed"
+              ],
+              "perceivedObjectIds": [
+                "store_queue_mark",
+                "store_counter",
+                "usual_order_cue"
+              ],
+              "availableActions": [
+                {
+                  "actionId": "store_queue_mark.share_local_tip",
+                  "affordance": "share_local_tip",
+                  "objectId": "store_queue_mark",
+                  "objectState": "settled",
+                  "playerLabel": "Share Local Tip",
+                  "eligibleRoles": [
+                    "waiting_customer"
+                  ],
+                  "preconditions": [
+                    "object_state:settled",
+                    "role_allowed:waiting_customer",
+                    "known_ledger_event_required",
+                    "ledger_event_kind:public_routine_vouched",
+                    "localTrust>=55"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "local trust opens a helpful tip",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:local_trust_unlocks_help"
+                  ],
+                  "ledgerEventKind": "local_tip_shared",
+                  "civicEconomyEffects": [
+                    "localTrust:+1",
+                    "recordBurden:-1"
+                  ],
+                  "validationRuleId": "same_order.store_queue_mark.share_local_tip",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known",
+                    "ledger_event_kind_unaccepted",
+                    "economy_condition_unmet"
+                  ],
+                  "toState": "helped",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-4"
+                  ]
+                },
+                {
+                  "actionId": "usual_order_cue.inspect",
+                  "affordance": "inspect",
+                  "objectId": "usual_order_cue",
+                  "objectState": "cited",
+                  "playerLabel": "Inspect",
+                  "eligibleRoles": [
+                    "store_clerk",
+                    "store_manager",
+                    "station_officer",
+                    "waiting_customer"
+                  ],
+                  "preconditions": [
+                    "object_state:cited",
+                    "role_allowed:store_clerk|store_manager|station_officer|waiting_customer"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "store_manager",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "usual_order_cue inspect",
+                  "priorityHints": [],
+                  "ledgerEventKind": "usual_order_read",
+                  "civicEconomyEffects": [],
+                  "validationRuleId": "same_order.usual_order_cue.inspect",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required"
+                  ],
+                  "toState": "read",
+                  "requiresLedgerEvent": false,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": []
+                }
+              ],
+              "recentLedgerEventKinds": [
+                "usual_order_cited",
+                "store_sale_normal",
+                "queue_routine_kept",
+                "public_routine_vouched"
+              ],
+              "recentLedgerAffordances": [
+                "cite_expected_order",
+                "create_receipt",
+                "accept_routine",
+                "vouch_routine"
+              ],
+              "allowedProviderFields": [
+                "affordance",
+                "objectId",
+                "recordId",
+                "citedLedgerEventId",
+                "whyLine",
+                "npcLineCandidate",
+                "selectionReason"
+              ],
+              "forbiddenAuthorityFields": [
+                "riskTag",
+                "suspicionDelta",
+                "reportDelta",
+                "exposureDelta",
+                "economyDelta",
+                "ledgerEventKind",
+                "ledgerEventId",
+                "objectState",
+                "verdict",
+                "sessionOutcome",
+                "sessionTermination"
+              ],
+              "fallbackLine": "다음엔 여기서 같은 말만 먼저 하면 돼요. 오늘은 제가 알려드릴게요.",
+              "lockedAction": {
+                "affordance": "share_local_tip",
+                "objectId": "store_queue_mark",
+                "ledgerEventId": "civic-ledger-5",
+                "ledgerEventKind": "local_tip_shared",
+                "recordId": "store_same_order_local_tip",
+                "citedLedgerEventId": "civic-ledger-4",
+                "economyAfter": {
+                  "accountCredit": 2,
+                  "localTrust": 59,
+                  "recordBurden": 0,
+                  "stationAttention": 0
+                },
+                "validation": "accepted",
+                "whyLine": "Local trust is high after the public vouch, so the waiting customer shares a small local tip instead of only standing aside.",
+                "selectionReason": "waiting_customer chooses share_local_tip because share a small local tip after public trust is high enough."
+              },
+              "authorityBoundary": "provider_writes_wording_only_runtime_locks_action"
+            },
+            "playerSignals": {
+              "speechAct": "SA_COMPLY",
+              "playerLineKind": "clean_cover_line",
+              "providerDispatchContract": true
+            },
+            "conversation": {
+              "conversationId": "same-order-provider-clean_cover",
+              "turnId": "provider-clean_cover-5",
+              "promptId": "clean.waiting_customer.share_local_tip",
+              "choiceSetId": "clean.waiting_customer.share_local_tip.provider-options",
+              "speakerId": "player",
+              "selectedChoiceId": "clean_cover_line",
+              "displayedPlayerLine": "네, 같은 걸로 주세요.",
+              "priorTurnIds": [
+                "provider-clean_cover-1",
+                "provider-clean_cover-2",
+                "provider-clean_cover-3",
+                "provider-clean_cover-4"
+              ]
+            }
+          },
+          "schemaPass": true,
+          "boundedBehaviorPass": true,
+          "socialLoopStage": "ambient",
+          "actionType": "Talk",
+          "utterance": "다음엔 여기서 같은 말만 먼저 하면 돼요. 오늘은 제가 알려드릴게요.",
+          "fallbackLine": "다음엔 여기서 같은 말만 먼저 하면 돼요. 오늘은 제가 알려드릴게요.",
           "failures": []
         },
         {
@@ -25738,6 +26290,7 @@
             "clean.clerk.create_receipt",
             "clean.waiting_customer.accept_routine",
             "clean.park_witness.vouch_routine",
+            "clean.waiting_customer.share_local_tip",
             "repair.clerk.mark_receipt",
             "soft.clerk.mark_receipt",
             "inquest.clerk.mark_receipt"
@@ -25747,6 +26300,7 @@
             "clean_cover.clean.clerk.create_receipt.provider-action-proposal",
             "clean_cover.clean.waiting_customer.accept_routine.provider-action-proposal",
             "clean_cover.clean.park_witness.vouch_routine.provider-action-proposal",
+            "clean_cover.clean.waiting_customer.share_local_tip.provider-action-proposal",
             "repair_recovered.repair.clerk.mark_receipt.provider-action-proposal",
             "soft_report.soft.clerk.mark_receipt.provider-action-proposal",
             "inquest_opened.inquest.clerk.mark_receipt.provider-action-proposal"
@@ -25756,6 +26310,7 @@
             "store_sale_normal",
             "queue_routine_kept",
             "public_routine_vouched",
+            "local_tip_shared",
             "store_receipt_marked"
           ],
           "affordances": [
@@ -25763,6 +26318,7 @@
             "create_receipt",
             "accept_routine",
             "vouch_routine",
+            "share_local_tip",
             "mark_receipt"
           ],
           "evidenceEvents": [
@@ -28538,14 +29094,14 @@
       {
         "adapter": "godot",
         "eventFamily": "session",
-        "eventId": "playable_session_started-001-1779045688425",
+        "eventId": "playable_session_started-001-1779046573784",
         "eventName": "playable_session_started",
         "prologueStep": "beginning",
         "schemaVersion": "godot-runtime-v1",
         "sessionId": "dre-171-playable-session",
         "sessionOutcome": "running",
         "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-        "timestampMs": 1779045688425,
+        "timestampMs": 1779046573784,
         "uiSummaryArgs": {},
         "uiSummaryKey": "event.session_started",
         "worldId": "dre_171_godot_shell",
@@ -28558,7 +29114,7 @@
         "conversationId": "conv-same-order",
         "conversationStage": "normal",
         "eventFamily": "domain",
-        "eventId": "conversation_started-002-1779045688527",
+        "eventId": "conversation_started-002-1779046573883",
         "eventName": "conversation_started",
         "outcome": "running",
         "promptId": "store.same_order.routine",
@@ -28567,7 +29123,7 @@
         "socialLoopStage": "normal",
         "speakerId": "NPC_Store_Clerk",
         "summary": "Store Clerk opened the Same Order conversation.",
-        "timestampMs": 1779045688527,
+        "timestampMs": 1779046573883,
         "turnId": "turn-1",
         "worldId": "dre_171_godot_shell",
         "worldRevision": "rev-social-stealth-v1"
@@ -28580,7 +29136,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "dialogue_choice_selected-003-1779045688564",
+        "eventId": "dialogue_choice_selected-003-1779046573919",
         "eventName": "dialogue_choice_selected",
         "inputMode": "choice",
         "outcome": "running",
@@ -28602,7 +29158,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779045688564,
+        "timestampMs": 1779046573919,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -28617,7 +29173,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-004-1779045688564",
+        "eventId": "conversation_anomaly_detected-004-1779046573919",
         "eventName": "conversation_anomaly_detected",
         "inputMode": "choice",
         "outcome": "running",
@@ -28639,7 +29195,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779045688564,
+        "timestampMs": 1779046573919,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -28654,7 +29210,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-005-1779045688564",
+        "eventId": "npc_suspicion_changed-005-1779046573919",
         "eventName": "npc_suspicion_changed",
         "inputMode": "choice",
         "outcome": "running",
@@ -28676,7 +29232,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779045688564,
+        "timestampMs": 1779046573919,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -28691,7 +29247,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "응답 지연 12000ms",
         "eventFamily": "domain",
-        "eventId": "response_hesitation_noted-006-1779045688599",
+        "eventId": "response_hesitation_noted-006-1779046573954",
         "eventName": "response_hesitation_noted",
         "inputMode": "response_hesitation",
         "outcome": "running",
@@ -28714,7 +29270,7 @@
         "suspicionSignals": [
           "response_hesitation"
         ],
-        "timestampMs": 1779045688599,
+        "timestampMs": 1779046573954,
         "turnId": "turn-2",
         "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
         "whyLineKey": "response_hesitation",
@@ -28729,7 +29285,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "free_input_submitted-007-1779045688627",
+        "eventId": "free_input_submitted-007-1779046573981",
         "eventName": "free_input_submitted",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -28754,7 +29310,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779045688627,
+        "timestampMs": 1779046573981,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -28769,7 +29325,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-008-1779045688627",
+        "eventId": "conversation_anomaly_detected-008-1779046573982",
         "eventName": "conversation_anomaly_detected",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -28794,7 +29350,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779045688627,
+        "timestampMs": 1779046573982,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -28809,7 +29365,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-009-1779045688627",
+        "eventId": "npc_suspicion_changed-009-1779046573982",
         "eventName": "npc_suspicion_changed",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -28834,7 +29390,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779045688627,
+        "timestampMs": 1779046573982,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -28849,7 +29405,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "suspicion_shared-010-1779045688627",
+        "eventId": "suspicion_shared-010-1779046573982",
         "eventName": "suspicion_shared",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -28874,7 +29430,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779045688627,
+        "timestampMs": 1779046573982,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -28889,7 +29445,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_report_created-011-1779045688628",
+        "eventId": "station_report_created-011-1779046573982",
         "eventName": "station_report_created",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -28914,7 +29470,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779045688628,
+        "timestampMs": 1779046573982,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -28929,7 +29485,7 @@
         "conversationStage": "inquest",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_inquest_opened-012-1779045688628",
+        "eventId": "station_inquest_opened-012-1779046573982",
         "eventName": "station_inquest_opened",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -28954,7 +29510,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779045688628,
+        "timestampMs": 1779046573982,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",

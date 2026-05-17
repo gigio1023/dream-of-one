@@ -35,7 +35,7 @@
 ## Route Outcomes
 
 - `clean_cover`: pass `true`, stage `normal`, outcome `clean_cover`, suspicion/report `0/0`
-  - Clean cover: Codex accepted the routine and the Store Clerk closed a normal receipt. normal/clean_cover, suspicion 0, report 0.
+  - Clean cover: Codex accepted the routine, the Store Clerk closed a normal receipt, public trust rose, and the waiting customer shared a local tip. normal/clean_cover, suspicion 0, report 0.
 - `repair_recovered`: pass `true`, stage `uneasy`, outcome `repair_recovered`, suspicion/report `20/10`
   - Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, and the Park witness posted that the mismatch was repaired. uneasy/repair_recovered, suspicion 20, report 10.
 - `cover_held_under_suspicion`: pass `true`, stage `uneasy`, outcome `cover_held_under_suspicion`, suspicion/report `35/30`

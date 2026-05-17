@@ -27,7 +27,7 @@ Store entrance / queue
 
 | Object | States | Affordances | Visible to | Ledger events |
 |---|---|---|---|---|
-| `store_queue_mark` | empty, player_waiting, delayed, disrupted | wait, observe delay, complain, leave | player, clerk, waiting customer | `queue_state_observed`, `queue_delay_noted` |
+| `store_queue_mark` | empty, player_waiting, delayed, disrupted, settled, helped | wait, observe delay, accept routine, note wary, complain, leave, refuse contact, share local tip | player, clerk, waiting customer | `queue_state_observed`, `queue_routine_kept`, `queue_wary_noted`, `queue_delay_noted`, `queue_left`, `queue_contact_refused`, `local_tip_shared` |
 | `store_counter` | idle, serving, paused, closed | speak, serve, pause service, resume service, request correction | player, clerk, manager, waiting customer | `service_started`, `service_paused`, `service_resumed` |
 | `usual_order_cue` | unread, read, cited | inspect, compare statement, cite expectation | player, clerk, manager | `usual_order_read`, `usual_order_cited` |
 | `receipt_tray` | blank, normal, marked, corrected | create receipt, mark receipt, attach correction, inspect | player, clerk, manager | `store_sale_normal`, `store_sale_corrected` |
@@ -61,7 +61,7 @@ Required fields for M1:
 | Value | Starts | Changes when | Agent use |
 |---|---:|---|---|
 | `account_credit` | 1-3 | normal or corrected Store sale consumes credit | low credit makes service more formal. |
-| `local_trust` | 50 | normal receipt raises; mismatch/report lowers | low trust makes agents rely on records. |
+| `local_trust` | 50 | normal receipt and public routine vouch raise; mismatch/report lowers | low trust makes agents rely on records; high trust can unlock small help such as `share_local_tip`. |
 | `record_burden` | 0 | correction/report/inquest adds cleanup burden | high burden makes manager/Station prioritize action. |
 | `station_attention` | 0 | forwarded report or hard contradiction raises | high attention opens Station citation/intake. |
 
@@ -87,7 +87,7 @@ These are tendencies, not branch scripts.
 | Agent | Stable goals | Priority shifts |
 |---|---|---|
 | Store Clerk | finish service, keep receipt clean, reduce queue delay | if record burden rises, correction or note becomes more attractive. |
-| Waiting Customer | keep queue moving, avoid public disruption | if service pauses, complain/leave/witness note becomes more attractive. |
+| Waiting Customer | keep queue moving, avoid public disruption | if service pauses, complain/leave/witness note becomes more attractive; if a public vouch raises local trust enough, a small help action can become available. |
 | Store Manager | reduce store liability, keep reports orderly | if burden or attention rises, promote note or file report becomes more attractive. |
 | Station Officer | reconcile records, reduce contradiction | if attention rises, cite exact ledger event and narrow answer shape. |
 
@@ -99,6 +99,8 @@ Runtime should reject proposed actions when:
 - the actor cannot perceive the required fact;
 - the action exceeds the actor's authority;
 - the action would mutate a record without a ledger event;
+- the action requires a specific ledger event kind and cites another kind;
+- the action requires a simple economy threshold and the visible value is too low;
 - the action would erase a prior record;
 - the provider invents a new object, record, or authority;
 - the action bypasses deterministic Exposure/report/inquest gates.
@@ -121,10 +123,12 @@ Implemented now:
 - validated action application with immutable result state;
 - rejection for actor mismatch, unseen objects, unavailable affordances,
   over-authority actions, missing why-lines, invalid record mutations, unknown
-  ledger citations, hidden citations, and non-Store Station citations;
+  ledger citations, hidden citations, wrong-kind ledger citations, unmet toy
+  economy thresholds, and non-Store Station citations;
 - integration tests for clean receipt, unavailable affordance rejection,
   available-action scoping, visible queue pressure, exact Store ledger
-  citation, Station citation availability, and invalid citation.
+  citation, trust-gated local tip sharing, Station citation availability, and
+  invalid citation.
 - generated agentic route proofs for `clean_cover`, `repair_recovered`,
   `soft_report`, and `inquest_opened`, including action trace, perceived
   objects, ledger events, final object states, civic economy, and exact Station
@@ -144,7 +148,7 @@ Implemented now:
 - current playable slice evidence field
   `playability.providerSchedulingPlan`, generated from
   `backend/npc-runtime/src/runtime/same-order-provider-scheduling.ts`, turning
-  the provider-shaped route comparison into 12 bounded role-agent jobs with
+  the provider-shaped route comparison into 24 bounded role-agent jobs with
   available action context, deterministic fallback wording, allowed provider
   fields, forbidden authority fields, and accepted locked actions. This is not
   live Godot dispatch evidence.

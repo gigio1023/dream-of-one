@@ -334,8 +334,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("clean_cover must not open Station intake or inquest")
 			if str(record_objects.get("receipt_tray", "")) != "normal":
 				failures.append("clean_cover expected normal receipt")
-			if str(record_objects.get("store_queue_mark", "")) != "settled":
-				failures.append("clean_cover expected queue mark to settle through routine acceptance")
+			if str(record_objects.get("store_queue_mark", "")) != "helped":
+				failures.append("clean_cover expected queue mark to show help after public trust")
 			if str(record_objects.get("park_notice_board", "")) != "vouched":
 				failures.append("clean_cover expected public routine vouch")
 			if not _action_exists(summary, "store_clerk", "create_receipt"):
@@ -344,8 +344,12 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("clean_cover expected Waiting Customer routine acceptance")
 			if not _action_exists(summary, "park_witness", "vouch_routine"):
 				failures.append("clean_cover expected Park Witness routine vouch")
+			if not _action_exists(summary, "waiting_customer", "share_local_tip"):
+				failures.append("clean_cover expected Waiting Customer local tip after public vouch")
 			if not _observation_exists(summary, "park_witness", "waiting_customer", "accept_routine", "vouch_routine"):
 				failures.append("clean_cover expected Park Witness to read routine queue record")
+			if not _observation_exists(summary, "waiting_customer", "park_witness", "vouch_routine", "share_local_tip"):
+				failures.append("clean_cover expected Waiting Customer to read public vouch before sharing a tip")
 		"repair_recovered":
 			if int(summary.get("reportWeight", 0)) > 49:
 				failures.append("repair_recovered must stay below report threshold")
@@ -452,7 +456,7 @@ func _route_player_readable_summary(route_id: String, summary: Dictionary, hud_s
 	]
 	match route_id:
 		"clean_cover":
-			return "Clean cover: Codex accepted the routine and the Store Clerk closed a normal receipt. %s." % state
+			return "Clean cover: Codex accepted the routine, the Store Clerk closed a normal receipt, public trust rose, and the waiting customer shared a local tip. %s." % state
 		"repair_recovered":
 			return "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, and the Park witness posted that the mismatch was repaired. %s." % state
 		"soft_report":

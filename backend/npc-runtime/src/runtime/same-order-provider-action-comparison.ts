@@ -142,7 +142,7 @@ const ROUTE_SPECS: RouteSpec[] = [
     sessionOutcome: "cover_held",
     playerLineKind: "clean_cover_line",
     playerLine: "네, 같은 걸로 주세요.",
-    socialReactionSummary: "The provider-shaped proposal path closes a normal receipt and preserves cover.",
+    socialReactionSummary: "The provider-shaped proposal path closes a normal receipt, lets public trust travel, and unlocks a small local tip.",
     steps: [
       {
         stepId: "clean.clerk.cite_usual_order",
@@ -190,6 +190,19 @@ const ROUTE_SPECS: RouteSpec[] = [
         knownLedgerEventFromStepIds: ["clean.waiting_customer.accept_routine"],
         whyLine: "The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow.",
         npcLineCandidate: "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요.",
+      },
+      {
+        stepId: "clean.waiting_customer.share_local_tip",
+        actorId: "NPC_Waiting_Customer",
+        actorRole: "waiting_customer",
+        stepGoal: "share a small local tip after public trust is high enough",
+        affordance: "share_local_tip",
+        objectId: "store_queue_mark",
+        recordId: "store_same_order_local_tip",
+        citedLedgerEventFromStepId: "clean.park_witness.vouch_routine",
+        knownLedgerEventFromStepIds: ["clean.park_witness.vouch_routine"],
+        whyLine: "Local trust is high after the public vouch, so the waiting customer shares a small local tip instead of only standing aside.",
+        npcLineCandidate: "다음엔 여기서 같은 말만 먼저 하면 돼요. 오늘은 제가 알려드릴게요.",
       },
     ],
   },

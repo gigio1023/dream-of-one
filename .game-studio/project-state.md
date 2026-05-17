@@ -117,7 +117,7 @@ Current M1 carry-in:
   object-state, and civic economy outcomes.
 - backend provider scheduling seed
   `backend/npc-runtime/src/runtime/same-order-provider-scheduling.ts` now
-  turns that comparison into 23 bounded Store Clerk, Waiting Customer, Park
+  turns that comparison into 24 bounded Store Clerk, Waiting Customer, Park
   Witness, Store Manager, and Station Officer role-agent provider jobs. Each
   job carries available action context,
   allowed provider fields, forbidden authority fields, deterministic fallback
@@ -185,7 +185,9 @@ Current M1 carry-in:
   adding toy queue pressure, read an attached correction slip and accept the
   repair, read a paused-service record and leave the queue, or read a Station
   citation and refuse contact with the player;
-  a Park Witness can turn a routine queue record into public social trust,
+  a Park Witness can turn a routine queue record into public social trust, a
+  Waiting Customer can read that public vouch and share a local tip only after
+  `localTrust >= 55`,
   turn a Store note into public rumor, turn a correction record into a public
   repair notice, or turn a wary queue record into an informal public warning
   before any Station report; Store Manager follows up on a soft report, pauses

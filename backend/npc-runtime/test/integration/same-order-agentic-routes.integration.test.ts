@@ -28,10 +28,10 @@ test("Same Order agentic route proofs cover clean, repair, soft report, and inqu
 
   const clean = proofs.find(proof => proof.routeId === "clean_cover");
   assert.ok(clean);
-  assert.deepEqual(clean.ledgerEventKinds, ["usual_order_cited", "store_sale_normal", "queue_routine_kept", "public_routine_vouched"]);
-  assert.deepEqual(clean.ledgerAffordances, ["cite_expected_order", "create_receipt", "accept_routine", "vouch_routine"]);
+  assert.deepEqual(clean.ledgerEventKinds, ["usual_order_cited", "store_sale_normal", "queue_routine_kept", "public_routine_vouched", "local_tip_shared"]);
+  assert.deepEqual(clean.ledgerAffordances, ["cite_expected_order", "create_receipt", "accept_routine", "vouch_routine", "share_local_tip"]);
   assert.equal(clean.finalObjectStates.receipt_tray, "normal");
-  assert.equal(clean.finalObjectStates.store_queue_mark, "settled");
+  assert.equal(clean.finalObjectStates.store_queue_mark, "helped");
   assert.equal(clean.economyAfter.recordBurden, 0);
   assert.equal(
     clean.socialObservationTrace.some(observation =>
@@ -48,6 +48,16 @@ test("Same Order agentic route proofs cover clean, repair, soft report, and inqu
       && observation.observedActorRole === "waiting_customer"
       && observation.observedAffordance === "accept_routine"
       && observation.resultingAffordance === "vouch_routine"
+    ),
+    true,
+  );
+  assert.equal(
+    clean.socialObservationTrace.some(observation =>
+      observation.observerRole === "waiting_customer"
+      && observation.observedActorRole === "park_witness"
+      && observation.observedAffordance === "vouch_routine"
+      && observation.resultingAffordance === "share_local_tip"
+      && observation.economyPressure.localTrust >= 55
     ),
     true,
   );

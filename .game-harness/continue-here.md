@@ -302,7 +302,7 @@ Already implemented:
 - backend provider-shaped action comparison proving scripted proposals must
   choose available affordances and preserve provider-off ledger outcomes plus
   affordance provenance
-- backend provider scheduling contract proving 12 bounded role-agent provider
+- backend provider scheduling contract proving 24 bounded role-agent provider
   jobs across clean, repair, soft report, and inquest routes, with deterministic
   fallback wording, recent ledger affordance context, and exact Station citation
   while keeping live Godot dispatch explicitly open

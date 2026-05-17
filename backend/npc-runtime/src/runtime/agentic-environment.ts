@@ -31,6 +31,7 @@ export const ENVIRONMENT_AFFORDANCES = [
   "accept_repair",
   "leave_queue",
   "refuse_contact",
+  "share_local_tip",
   "speak",
   "serve",
   "pause_service",
@@ -64,6 +65,7 @@ export const LEDGER_EVENT_KINDS = [
   "queue_repair_accepted",
   "queue_left",
   "queue_contact_refused",
+  "local_tip_shared",
   "service_started",
   "service_paused",
   "service_resumed",
@@ -93,6 +95,7 @@ export type EnvironmentObjectState =
   | "delayed"
   | "disrupted"
   | "settled"
+  | "helped"
   | "idle"
   | "serving"
   | "paused"
@@ -214,8 +217,10 @@ export interface EnvironmentValidationRejected {
     | "role_authority_exceeded"
     | "ledger_event_unknown"
     | "ledger_event_not_known"
+    | "ledger_event_kind_unaccepted"
     | "invalid_record_mutation"
     | "station_citation_requires_store_record"
+    | "economy_condition_unmet"
     | "why_line_required";
   detail: string;
   environment: AgenticEnvironmentState;
@@ -233,6 +238,8 @@ interface AffordanceRule {
   economyDelta: Partial<CivicEconomyState>;
   requiresLedgerEvent?: boolean;
   requiresStoreLedgerEvent?: boolean;
+  requiresLedgerEventKinds?: LedgerEventKind[];
+  minimumLocalTrust?: number;
 }
 
 const AFFORDANCE_RULES: AffordanceRule[] = [
@@ -306,6 +313,18 @@ const AFFORDANCE_RULES: AffordanceRule[] = [
     allowedRoles: ["waiting_customer"],
     economyDelta: { localTrust: -8, recordBurden: 5 },
     requiresLedgerEvent: true,
+  },
+  {
+    objectId: "store_queue_mark",
+    affordance: "share_local_tip",
+    fromStates: ["settled"],
+    toState: "helped",
+    eventKind: "local_tip_shared",
+    allowedRoles: ["waiting_customer"],
+    economyDelta: { localTrust: 1, recordBurden: -1 },
+    requiresLedgerEvent: true,
+    requiresLedgerEventKinds: ["public_routine_vouched"],
+    minimumLocalTrust: 55,
   },
   {
     objectId: "store_counter",
@@ -525,6 +544,7 @@ export function listAvailableEnvironmentActions(
       || !perceivedObjectIds.has(object.objectId)
       || !rule.allowedRoles.includes(actor.role)
       || !rule.fromStates.includes(object.state)
+      || !economyConditionMet(environment.economy, rule)
     ) {
       return [];
     }
@@ -588,6 +608,13 @@ export function validateAndApplyEnvironmentAction(
       `${actor.role} cannot apply ${action.affordance} to ${action.objectId}`,
     );
   }
+  if (!economyConditionMet(cloned.economy, rule)) {
+    return reject(
+      cloned,
+      "economy_condition_unmet",
+      `${action.affordance} requires localTrust >= ${rule.minimumLocalTrust}`,
+    );
+  }
 
   const citedEvent = action.citedLedgerEventId
     ? cloned.ledger.find(event => event.eventId === action.citedLedgerEventId)
@@ -601,11 +628,22 @@ export function validateAndApplyEnvironmentAction(
   if (action.citedLedgerEventId && !actor.knownLedgerEventIds.includes(action.citedLedgerEventId)) {
     return reject(cloned, "ledger_event_not_known", `${actor.role} cannot cite an unobserved ledger event`);
   }
+  if (
+    citedEvent
+    && rule.requiresLedgerEventKinds !== undefined
+    && !rule.requiresLedgerEventKinds.includes(citedEvent.kind)
+  ) {
+    return reject(
+      cloned,
+      "ledger_event_kind_unaccepted",
+      `${action.affordance} cannot cite ${citedEvent.kind}`,
+    );
+  }
   if (rule.requiresStoreLedgerEvent && citedEvent && !STORE_LEDGER_EVENT_KINDS.has(citedEvent.kind)) {
     return reject(cloned, "station_citation_requires_store_record", "Station citation must cite a Store ledger event");
   }
 
-  if (["create_receipt", "mark_receipt", "attach_correction", "place_note", "post_rumor", "vouch_routine", "post_warning", "post_repair_notice", "forward_report", "cite_record"].includes(action.affordance)) {
+  if (["create_receipt", "mark_receipt", "attach_correction", "place_note", "post_rumor", "vouch_routine", "post_warning", "post_repair_notice", "share_local_tip", "forward_report", "cite_record"].includes(action.affordance)) {
     const recordId = action.recordId ?? object.recordId;
     if (!recordId || recordId.trim().length === 0) {
       return reject(cloned, "invalid_record_mutation", `${action.affordance} requires a record id`);
@@ -655,6 +693,7 @@ function getCitableLedgerEventIds(
   return environment.ledger
     .filter(event => knownLedgerEventIds.has(event.eventId))
     .filter(event => !rule.requiresStoreLedgerEvent || STORE_LEDGER_EVENT_KINDS.has(event.kind))
+    .filter(event => rule.requiresLedgerEventKinds === undefined || rule.requiresLedgerEventKinds.includes(event.kind))
     .map(event => event.eventId);
 }
 
@@ -692,6 +731,12 @@ function preconditionsForRule(rule: AffordanceRule, object: EnvironmentObject): 
   if (rule.requiresStoreLedgerEvent) {
     preconditions.push("known_store_ledger_event_required");
   }
+  if (rule.requiresLedgerEventKinds !== undefined) {
+    preconditions.push(`ledger_event_kind:${rule.requiresLedgerEventKinds.join("|")}`);
+  }
+  if (typeof rule.minimumLocalTrust === "number") {
+    preconditions.push(`localTrust>=${rule.minimumLocalTrust}`);
+  }
 
   return preconditions;
 }
@@ -709,6 +754,12 @@ function failureReasonsForRule(rule: AffordanceRule): string[] {
   }
   if (rule.requiresStoreLedgerEvent) {
     reasons.push("station_citation_requires_store_record");
+  }
+  if (rule.requiresLedgerEventKinds !== undefined) {
+    reasons.push("ledger_event_kind_unaccepted");
+  }
+  if (typeof rule.minimumLocalTrust === "number") {
+    reasons.push("economy_condition_unmet");
   }
 
   return reasons;
@@ -753,6 +804,9 @@ function priorityHintsForRule(rule: AffordanceRule): string[] {
   if (rule.affordance === "refuse_contact") {
     hints.push("pressure:authority_seen");
   }
+  if (rule.affordance === "share_local_tip") {
+    hints.push("pressure:local_trust_unlocks_help");
+  }
 
   return hints;
 }
@@ -784,6 +838,8 @@ function perceivedAs(rule: AffordanceRule): string {
       return "queue leaves paused service";
     case "refuse_contact":
       return "queue refuses contact after citation";
+    case "share_local_tip":
+      return "local trust opens a helpful tip";
     case "post_rumor":
       return "public notice rumor";
     case "vouch_routine":
@@ -814,6 +870,13 @@ function applyEconomyDelta(
     recordBurden: clamp(economy.recordBurden + (delta.recordBurden ?? 0), 0, 100),
     stationAttention: clamp(economy.stationAttention + (delta.stationAttention ?? 0), 0, 100),
   };
+}
+
+function economyConditionMet(economy: CivicEconomyState, rule: AffordanceRule): boolean {
+  if (typeof rule.minimumLocalTrust === "number" && economy.localTrust < rule.minimumLocalTrust) {
+    return false;
+  }
+  return true;
 }
 
 function clamp(value: number, min: number, max: number): number {

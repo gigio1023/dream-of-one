@@ -63,6 +63,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Add the next smallest routine-side public reaction: Park Witness reads the
   routine queue record, uses `vouch_routine`, posts a public routine vouch, and
   lets clean social trust travel beyond the queue.
+- [x] Add the smallest trust-gated help reaction: Waiting Customer reads the
+  public routine vouch, uses `share_local_tip` only when `localTrust >= 55`,
+  changes the queue mark to `helped`, and proves a toy economy value can unlock
+  an NPC help action.
 - [x] Add the smallest report-side environment reaction: Store Manager reads
   the pending Store note, uses `pause_service`, changes the counter to
   `paused`, adds `service_paused`, and makes a soft report visibly interrupt

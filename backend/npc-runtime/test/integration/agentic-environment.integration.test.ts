@@ -487,6 +487,93 @@ test("Park witness can publicly vouch for a kept routine record", () => {
   assert.equal(vouched.environment.economy.recordBurden, 0);
 });
 
+test("High local trust unlocks a helpful waiting-customer tip after a public routine vouch", () => {
+  let environment = createSameOrderAgenticEnvironment();
+  const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);
+  const receipt = requireAccepted(validateAndApplyEnvironmentAction(environment, clerk, {
+    actorId: clerk.actorId,
+    role: clerk.role,
+    affordance: "create_receipt",
+    objectId: "receipt_tray",
+    recordId: "store_same_order_receipt",
+    whyLine: "The accepted line matches the Store routine and creates a normal receipt.",
+  }));
+  environment = receipt.environment;
+
+  const customer = actor({
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    knownLedgerEventIds: [receipt.event.eventId],
+  }, environment);
+  const routine = requireAccepted(validateAndApplyEnvironmentAction(environment, customer, {
+    actorId: customer.actorId,
+    role: customer.role,
+    affordance: "accept_routine",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_queue_routine",
+    citedLedgerEventId: receipt.event.eventId,
+    whyLine: "The waiting customer sees the normal receipt and keeps the queue routine intact.",
+  }));
+  environment = routine.environment;
+
+  assert.equal(
+    listAvailableEnvironmentActions(environment, actor({
+      actorId: "NPC_Waiting_Customer",
+      role: "waiting_customer",
+      knownLedgerEventIds: [routine.event.eventId],
+    }, environment)).some(candidate => candidate.affordance === "share_local_tip"),
+    false,
+  );
+
+  const witness = actor({
+    actorId: "NPC_Park_Witness",
+    role: "park_witness",
+    knownLedgerEventIds: [routine.event.eventId],
+  }, environment);
+  const vouch = requireAccepted(validateAndApplyEnvironmentAction(environment, witness, {
+    actorId: witness.actorId,
+    role: witness.role,
+    affordance: "vouch_routine",
+    objectId: "park_notice_board",
+    recordId: "park_public_routine_vouch",
+    citedLedgerEventId: routine.event.eventId,
+    whyLine: "The kept queue routine is visible enough for the witness to vouch for the player in public.",
+  }));
+  environment = vouch.environment;
+
+  const helpfulCustomer = actor({
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    knownLedgerEventIds: [vouch.event.eventId],
+  }, environment);
+  const action = listAvailableEnvironmentActions(environment, helpfulCustomer)
+    .find(candidate => candidate.affordance === "share_local_tip");
+
+  assert.ok(action);
+  assert.equal(action.objectId, "store_queue_mark");
+  assert.equal(action.toState, "helped");
+  assert.deepEqual(action.citableLedgerEventIds, [vouch.event.eventId]);
+  assert.equal(action.preconditions.includes("localTrust>=55"), true);
+  assert.equal(action.preconditions.includes("ledger_event_kind:public_routine_vouched"), true);
+  assert.deepEqual(action.civicEconomyEffects, ["localTrust:+1", "recordBurden:-1"]);
+
+  const tip = requireAccepted(validateAndApplyEnvironmentAction(environment, helpfulCustomer, {
+    actorId: helpfulCustomer.actorId,
+    role: helpfulCustomer.role,
+    affordance: "share_local_tip",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_local_tip",
+    citedLedgerEventId: vouch.event.eventId,
+    whyLine: "Public trust is high enough that the waiting customer shares a local tip.",
+  }));
+
+  assert.equal(tip.event.kind, "local_tip_shared");
+  assert.equal(tip.event.citedLedgerEventId, vouch.event.eventId);
+  assert.equal(tip.environment.objects.find(item => item.objectId === "store_queue_mark")?.state, "helped");
+  assert.equal(tip.environment.economy.localTrust, 59);
+  assert.equal(tip.environment.economy.recordBurden, 0);
+});
+
 test("Park witness can post a public warning from a wary queue record", () => {
   let environment = createSameOrderAgenticEnvironment();
   const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);

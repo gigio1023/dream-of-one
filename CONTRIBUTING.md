@@ -4,6 +4,12 @@
 
 - Make small, revertable commits. A commit should have one reason to exist and one clear rollback meaning.
 - Prefer committing after each coherent slice passes its narrow proof check, then push the branch while the context is still fresh.
+- For Codex/agent work, the default is to commit and push every finished slice
+  before starting a different slice. Do not save several unrelated improvements
+  for one large end-of-session commit.
+- Group generated evidence with the code or content that produced it when that
+  evidence is required to prove the change. Do not split proof artifacts into a
+  later commit unless the proof refresh is the only change.
 - Use short imperative subjects:
   - `docs: clarify gameplay goal`
   - `godot: add park notice affordance`
@@ -21,5 +27,9 @@
 - Inspect `git status --short --branch` before and after each slice.
 - Stage explicit paths. Avoid `git add -A` when unrelated local files are present.
 - Commit and push each finished slice before starting the next one.
+- If a task naturally splits into docs, runtime, evidence, and harness state,
+  make separate commits when each part can be reverted independently. Keep them
+  together only when reverting one without the others would leave the repo
+  misleading or broken.
 - Preserve user edits. If a file contains mixed authorship, read the diff and stage only the relevant hunks when needed.
 - Leave generated local caches, editor files, and engine scratch directories untracked unless the repo already treats them as source.

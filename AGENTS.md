@@ -5,6 +5,9 @@
 - Work SoT: Linear issues.
 - Writer: Codex CLI.
 - Default execution: work one Linear issue to completion before moving to the next.
+- Commit cadence: follow `CONTRIBUTING.md`. For Codex work, finish one coherent
+  slice, run the narrow proof for that slice, commit it, and push before moving
+  to a different slice.
 - Game-first priority: the highest-value work is improving the actual Dream of
   One game design and implementation. Tests, Evidence, AI-play probes, session
   kits, and harness scripts exist to support that work; they are not the game.

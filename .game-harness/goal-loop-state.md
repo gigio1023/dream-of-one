@@ -96,14 +96,21 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `a7b7c59e61ae743960547be1db314f0feac6abddb73f61cfd6b9002065f35207`
+  - JSON SHA-256: `c6be4d3a283023d7f5747f821f8ce61cc0b01fda3de3df34951d7b0b4c975cd7`
   - Markdown SHA-256: `842d07a342544ebf00861c4018aadd3a5fe8c584ac55cfcb74a43b709d9b4ddf`
-  - playable Evidence Pack SHA-256: `4dad630acbd31a963b32f2e0db8129f02422d06dabbb5963ebafe2159bf9f6dc`
+  - playable Evidence Pack SHA-256: `5564ce226c3e5a1a46a94167920649fe189d8ca5b4bbc84dd25aa98fa5b74b3f`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `7 / 7`, and `routeReportPassCount=5 / 5`.
+- latest game increment: Park Witness public-record actions are now visible NPC
+  reactions in the running scene. Clean cover marks `NPC_Park_Witness` as
+  `vouched` with a `공개 확인` marker, repair recovery marks the same actor as
+  `repaired` with a `수습 게시` marker, and suspicious cover marks the actor as
+  `warned` with a `공개 경고` marker. Playable smoke and Codex route reports now
+  fail if those public notice actions remain ledger-only instead of
+  player-readable NPC state.
 - latest game increment: Studio PM's clean-route invitation is now visible as
   an NPC reaction, not only a ledger/prop state. When `invite_review` succeeds,
   the Studio PM gets a Korean/English `invited` reaction label, a visible
@@ -244,7 +251,7 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `a7b7c59e61ae743960547be1db314f0feac6abddb73f61cfd6b9002065f35207`
+  `c6be4d3a283023d7f5747f821f8ce61cc0b01fda3de3df34951d7b0b4c975cd7`
 - Markdown SHA-256:
   `842d07a342544ebf00861c4018aadd3a5fe8c584ac55cfcb74a43b709d9b4ddf`
 - new proof: artifact now includes `aiPlayerReport` with action path, final

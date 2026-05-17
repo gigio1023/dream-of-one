@@ -680,6 +680,23 @@ func _validate_visible_social_actors(route: Dictionary, summary: Dictionary, ses
 			failures.append("clean_cover expected NPC_Studio_PM reaction marker after review invitation")
 		if not str(studio_state.get("reactionText", "")).contains("리뷰"):
 			failures.append("clean_cover expected NPC_Studio_PM reaction label to mention review")
+	if route_id == "clean_cover" and _agent_action_exists(action_log, "park_witness", "vouch_routine"):
+		failures.append_array(_validate_park_witness_reaction(visible_states, route_id, "vouched", "공개"))
+	if route_id == "repair_recovered" and _agent_action_exists(action_log, "park_witness", "post_repair_notice"):
+		failures.append_array(_validate_park_witness_reaction(visible_states, route_id, "repaired", "수습"))
+	if route_id == "cover_held_under_suspicion" and _agent_action_exists(action_log, "park_witness", "post_warning"):
+		failures.append_array(_validate_park_witness_reaction(visible_states, route_id, "warned", "경고"))
+	return failures
+
+func _validate_park_witness_reaction(visible_states: Dictionary, route_id: String, expected_state: String, expected_label: String) -> Array[String]:
+	var failures: Array[String] = []
+	var park_state: Dictionary = visible_states.get("NPC_Park_Witness", {})
+	if str(park_state.get("state", "")) != expected_state:
+		failures.append("%s expected NPC_Park_Witness visible state %s" % [route_id, expected_state])
+	if not bool(park_state.get("markerVisible", false)):
+		failures.append("%s expected NPC_Park_Witness reaction marker after public notice action" % route_id)
+	if not str(park_state.get("reactionText", "")).contains(expected_label):
+		failures.append("%s expected NPC_Park_Witness reaction label to mention %s" % [route_id, expected_label])
 	return failures
 
 func _available_actions_include_action(action: Dictionary) -> bool:

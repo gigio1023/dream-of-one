@@ -1372,8 +1372,27 @@ func _refresh_hud() -> void:
 	_refresh_world_record_props()
 	_set_actor_reaction_state("NPC_Store_Clerk", stage, exposure)
 	_set_actor_reaction_state("NPC_Store_Manager", "reported" if int(civic_economy.get("recordBurden", 0)) >= 50 else "normal", exposure)
-	_set_actor_reaction_state("NPC_Park_Witness", "reported" if ["reported", "inquest"].has(stage) else "normal", exposure)
+	_set_actor_reaction_state("NPC_Park_Witness", _park_witness_reaction_stage(stage), exposure)
 	_set_actor_reaction_state("NPC_Station_Officer", "inquest" if bool(station["inquestOpen"]) else ("reported" if bool(station["intakeOpen"]) else "normal"), exposure)
+
+func _park_witness_reaction_stage(stage: String) -> String:
+	if ["reported", "inquest"].has(stage):
+		return "reported"
+	for index in range(agent_action_log.size()):
+		var reverse_index := agent_action_log.size() - 1 - index
+		var action: Dictionary = agent_action_log[reverse_index]
+		if str(action.get("actorId", "")) != "NPC_Park_Witness" or not bool(action.get("accepted", false)):
+			continue
+		match str(action.get("affordance", "")):
+			"vouch_routine":
+				return "vouched"
+			"post_repair_notice":
+				return "repaired"
+			"post_warning":
+				return "warned"
+			"post_rumor":
+				return "reported"
+	return "normal"
 
 func _objective() -> String:
 	if _session_locked():
@@ -1488,6 +1507,7 @@ func _post_repair_notice(correction_event_id: String) -> void:
 	)
 	if bool(result.get("ok", false)):
 		_set_actor_line("NPC_Park_Witness", "정정 기록이 붙었으니 소문으로 돌릴 일은 아니겠네요.")
+		_set_actor_reaction_state("NPC_Park_Witness", "repaired", 20)
 
 func _note_wary_after_marked_receipt(marked_receipt_event_id: String) -> void:
 	if marked_receipt_event_id.is_empty():
@@ -1528,6 +1548,7 @@ func _post_public_warning_after_wary(wary_event_id: String) -> void:
 	)
 	if bool(result.get("ok", false)):
 		_set_actor_line("NPC_Park_Witness", "줄이 늦춰진 건 남겨둘게요. 아직 보고는 아니고, 조심하라는 표시입니다.")
+		_set_actor_reaction_state("NPC_Park_Witness", "warned", 35)
 		var event: Dictionary = result.get("event", {})
 		_keep_distance_after_warning(str(event.get("eventId", "")))
 
@@ -3006,6 +3027,7 @@ func _vouch_routine_after_acceptance(routine_event_id: String) -> void:
 	)
 	if bool(result.get("ok", false)):
 		_set_actor_line("NPC_Park_Witness", "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요.")
+		_set_actor_reaction_state("NPC_Park_Witness", "vouched", 20)
 		var event: Dictionary = result.get("event", {})
 		_share_local_tip_after_vouch(str(event.get("eventId", "")))
 

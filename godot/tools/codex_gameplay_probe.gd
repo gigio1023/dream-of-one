@@ -367,6 +367,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("clean_cover expected Codex/player to inspect the invited Studio review queue")
 			if not _visible_studio_pm_invitation(summary):
 				failures.append("clean_cover expected visible Studio PM invitation reaction")
+			if not _visible_park_witness_reaction(summary, "vouched", "공개"):
+				failures.append("clean_cover expected visible Park Witness public vouch reaction")
 			if not _observation_exists(summary, "park_witness", "waiting_customer", "accept_routine", "vouch_routine"):
 				failures.append("clean_cover expected Park Witness to read routine queue record")
 			if not _observation_exists(summary, "waiting_customer", "park_witness", "vouch_routine", "share_local_tip"):
@@ -388,6 +390,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("repair_recovered expected Waiting Customer repair acceptance")
 			if not _action_exists(summary, "park_witness", "post_repair_notice"):
 				failures.append("repair_recovered expected Park Witness repair notice")
+			if not _visible_park_witness_reaction(summary, "repaired", "수습"):
+				failures.append("repair_recovered expected visible Park Witness repair-post reaction")
 			if not _observation_exists(summary, "park_witness", "store_clerk", "attach_correction", "post_repair_notice"):
 				failures.append("repair_recovered expected Park Witness to read the correction record")
 		"cover_held_under_suspicion":
@@ -407,6 +411,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("cover_held_under_suspicion expected Waiting Customer wary note")
 			if not _action_exists(summary, "park_witness", "post_warning"):
 				failures.append("cover_held_under_suspicion expected Park Witness public warning")
+			if not _visible_park_witness_reaction(summary, "warned", "경고"):
+				failures.append("cover_held_under_suspicion expected visible Park Witness warning reaction")
 			if not _action_exists(summary, "waiting_customer", "keep_distance"):
 				failures.append("cover_held_under_suspicion expected Waiting Customer distance after warning")
 			if not _action_perceives(summary, "waiting_customer", "keep_distance", "park_notice_board"):
@@ -898,6 +904,17 @@ func _visible_studio_pm_invitation(summary: Dictionary) -> bool:
 		and bool(state.get("markerVisible", false))
 		and str(state.get("pressureText", "")).contains("리뷰")
 		and str(state.get("reactionText", "")).contains("리뷰")
+	)
+
+func _visible_park_witness_reaction(summary: Dictionary, expected_state: String, expected_label: String) -> bool:
+	var states: Dictionary = summary.get("visibleNpcStates", {})
+	var state: Dictionary = states.get("NPC_Park_Witness", {})
+	return (
+		str(state.get("npcId", "")) == "NPC_Park_Witness"
+		and str(state.get("state", "")) == expected_state
+		and bool(state.get("markerVisible", false))
+		and not str(state.get("pressureText", "")).strip_edges().is_empty()
+		and str(state.get("reactionText", "")).contains(expected_label)
 	)
 
 func _visible_npc_has_line(summary: Dictionary, npc_id: String) -> bool:

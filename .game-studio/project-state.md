@@ -203,6 +203,11 @@ Current M1 carry-in:
   `visibleNpcStates` so Codex can inspect the same player-readable NPC reaction
   text that appears in the scene. Playable/Codex probes now reject hidden-only
   social reactions for acting roles.
+- `NPC_Park_Witness` now exposes public notice actions as visible NPC state:
+  clean cover shows `vouched`/`공개 확인`, repair recovery shows
+  `repaired`/`수습 게시`, and suspicious cover shows `warned`/`공개 경고`.
+  Playable/Codex route probes reject those Park actions if they remain only
+  ledger entries or prop state.
 - `NPC_Studio_PM` now also exposes the clean-route review invitation as visible
   NPC state: when public trust opens `studio_review_queue`, the spawned Studio
   PM is marked `invited` with a review-open reaction label and player-readable

@@ -117,6 +117,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Make the Studio PM invitation visible as NPC state: clean route now marks
   `NPC_Studio_PM` as `invited`, shows a review-open reaction label/marker, and
   keeps Codex route probes scoped to the correct live scene.
+- [x] Make Park Witness public notices visible as NPC state: clean, repair, and
+  suspicious-cover routes now show `NPC_Park_Witness` reaction markers for
+  public vouch, repair notice, and public warning instead of leaving those
+  actions as ledger-only state.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

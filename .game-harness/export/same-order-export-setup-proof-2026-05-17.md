@@ -107,6 +107,11 @@ now requires `outcomeChecks.liveRecordChain = true` for the full speech/delay
 to contact-refusal chain, and tester preflight accepts the refreshed app-route
 evidence.
 
+Refresh note, 2026-05-18 KST: the PCK, macOS zip, unpacked app, and packaged
+route evidence were regenerated after NPC reaction inspection gained
+`ledger / role -> action` labels for reaction records and cited records. Tester
+preflight accepts the refreshed app-route evidence.
+
 ## Command Evidence
 
 Import:

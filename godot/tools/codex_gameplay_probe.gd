@@ -1011,22 +1011,30 @@ func _inspected_waiting_customer(summary: Dictionary) -> bool:
 		and str(inspected.get("reactionText", "")).contains("거부")
 		and str(inspected.get("body", "")).contains("접촉 거부")
 		and str(inspected.get("basisLedgerEventId", "")) == "civic-ledger-8"
-		and str(inspected.get("citedLedgerEventId", "")) == "civic-ledger-6"
-		and str(inspected.get("basisAffordance", "")) == "refuse_contact"
-		and str(inspected.get("body", "")).contains("근거 행동")
-		and str(inspected.get("body", "")).contains("civic-ledger-8")
-		and str(inspected.get("body", "")).contains("civic-ledger-6")
-	)
+			and str(inspected.get("citedLedgerEventId", "")) == "civic-ledger-6"
+			and str(inspected.get("basisAffordance", "")) == "refuse_contact"
+			and str(inspected.get("basisLedgerEventLabel", "")).contains("대기 손님")
+			and str(inspected.get("citedLedgerEventLabel", "")).contains("스테이션 직원")
+			and str(inspected.get("body", "")).contains("대기 손님 -> 접촉 거부")
+			and str(inspected.get("body", "")).contains("스테이션 직원 -> 기록 인용")
+			and str(inspected.get("body", "")).contains("근거 행동")
+			and str(inspected.get("body", "")).contains("civic-ledger-8")
+			and str(inspected.get("body", "")).contains("civic-ledger-6")
+		)
 
 func _inspected_studio_pm_block(summary: Dictionary) -> bool:
 	var inspected := _inspected_npc_candidate(summary, "NPC_Studio_PM", "blocked")
 	return not inspected.is_empty() and (
-		str(inspected.get("reactionText", "")).contains("리뷰")
-		and str(inspected.get("body", "")).contains("리뷰 차단")
-		and str(inspected.get("basisLedgerEventId", "")) == "civic-ledger-7"
-		and str(inspected.get("citedLedgerEventId", "")) == "civic-ledger-6"
-		and str(inspected.get("basisAffordance", "")) == "block_review"
-	)
+			str(inspected.get("reactionText", "")).contains("리뷰")
+			and str(inspected.get("body", "")).contains("리뷰 차단")
+			and str(inspected.get("basisLedgerEventId", "")) == "civic-ledger-7"
+			and str(inspected.get("citedLedgerEventId", "")) == "civic-ledger-6"
+			and str(inspected.get("basisAffordance", "")) == "block_review"
+			and str(inspected.get("basisLedgerEventLabel", "")).contains("스튜디오 PM")
+			and str(inspected.get("citedLedgerEventLabel", "")).contains("스테이션 직원")
+			and str(inspected.get("body", "")).contains("스튜디오 PM -> 리뷰 차단")
+			and str(inspected.get("body", "")).contains("스테이션 직원 -> 기록 인용")
+		)
 
 func _inspected_npc_candidate(summary: Dictionary, npc_id: String, state: String) -> Dictionary:
 	var candidates: Array = summary.get("inspectedNpcHistory", [])

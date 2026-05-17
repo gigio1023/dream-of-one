@@ -2399,11 +2399,15 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		basis_event_id = str(basis_action.get("ledgerEventId", ""))
 		basis_affordance = str(basis_action.get("affordance", ""))
 		basis_affordance_label = _affordance_label(basis_affordance)
-		if not basis_event_id.is_empty() or not basis_affordance_label.is_empty():
+		var basis_event_label := _civic_ledger_event_compact_label(basis_event_id)
+		if not basis_event_label.is_empty():
+			body_lines.append("근거 행동: %s" % basis_event_label)
+		elif not basis_event_id.is_empty() or not basis_affordance_label.is_empty():
 			body_lines.append("근거 행동: %s / %s" % [basis_event_id, basis_affordance_label])
 		cited_event_id = str(basis_action.get("citedLedgerEventId", ""))
 		if not cited_event_id.is_empty():
-			body_lines.append("읽은 기록: %s" % cited_event_id)
+			var cited_event_label := _civic_ledger_event_compact_label(cited_event_id)
+			body_lines.append("읽은 기록: %s" % (cited_event_label if not cited_event_label.is_empty() else cited_event_id))
 		basis_object_id = str(basis_action.get("objectId", ""))
 		if not basis_object_id.is_empty():
 			basis_object_label = _world_record_prop_title(basis_object_id)
@@ -2413,11 +2417,13 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 	if not basis_action.is_empty():
 		inspected_npc_state["basisAction"] = basis_action.duplicate(true)
 		inspected_npc_state["basisLedgerEventId"] = basis_event_id
+		inspected_npc_state["basisLedgerEventLabel"] = _civic_ledger_event_compact_label(basis_event_id)
 		inspected_npc_state["basisAffordance"] = basis_affordance
 		inspected_npc_state["basisAffordanceLabel"] = basis_affordance_label
 		inspected_npc_state["basisObjectId"] = basis_object_id
 		inspected_npc_state["basisObjectLabel"] = basis_object_label
 		inspected_npc_state["citedLedgerEventId"] = cited_event_id
+		inspected_npc_state["citedLedgerEventLabel"] = _civic_ledger_event_compact_label(cited_event_id)
 	inspected_npc_state["body"] = "\n".join(body_lines)
 	inspected_npc_history.append(inspected_npc_state.duplicate(true))
 	_set_notice(title, str(inspected_npc_state.get("body", "")))
@@ -2442,6 +2448,20 @@ func _latest_accepted_action_for_actor(actor_id: String) -> Dictionary:
 		if str(action.get("actorId", "")) == actor_id and bool(action.get("accepted", false)):
 			return action.duplicate(true)
 	return {}
+
+func _civic_ledger_event_compact_label(event_id: String) -> String:
+	var event := _civic_ledger_event_by_id(event_id)
+	if event.is_empty():
+		return ""
+	var actor_label := _actor_role_label(str(event.get("actorRole", "")))
+	var affordance_label := _affordance_label(str(event.get("affordance", "")))
+	if actor_label.is_empty() and affordance_label.is_empty():
+		return event_id
+	if actor_label.is_empty():
+		return "%s / %s" % [event_id, affordance_label]
+	if affordance_label.is_empty():
+		return "%s / %s" % [event_id, actor_label]
+	return "%s / %s -> %s" % [event_id, actor_label, affordance_label]
 
 func _refresh_world_record_props() -> void:
 	for prop_value in _local_group_nodes(&"operation_record_props"):

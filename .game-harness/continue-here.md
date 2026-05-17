@@ -47,11 +47,12 @@ Last Updated: 2026-05-18
 - If `--status` is already pass and no watched Godot/HUD/probe/session-helper
   source changed, do not rerun Codex probe or regenerate setup kits merely to
   show activity. The next useful move is human play, not more preparation.
-- Latest implementation slice: the live HUD consequence chain now includes the
-  post-citation social result. Inquest reads as player speech/delay -> Store
-  record -> queue reaction -> Park notice -> report handoff -> Station citation
-  -> Studio review block -> contact refusal, so the player can read the current
-  social consequence before opening detailed record or NPC inspection.
+- Latest implementation slice: NPC reaction inspection now spells out the
+  ledger actor/action behind a social stance. Studio PM inspection reads
+  `civic-ledger-7 / 스튜디오 PM -> 리뷰 차단` and the cited Station record
+  `civic-ledger-6 / 스테이션 직원 -> 기록 인용`; Waiting Customer inspection
+  reads `civic-ledger-8 / 대기 손님 -> 접촉 거부` and the same Station citation
+  source.
 
 2026-05-17 lightweight Ralph-style loop note:
 - Use `.game-harness/goal-loop-state.md` as the compact resume state for

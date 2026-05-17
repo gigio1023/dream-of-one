@@ -96,17 +96,24 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `24fcb5357a5d0a96e68bf30f9b03e68176bff17e3e2588d224f2f2bfedfb0d9e`
-  - Markdown SHA-256: `460bc003f312b16aae0a3049e925aa9a9abd1ee4e6c92c210005ea9e4413b436`
-  - playable Evidence Pack SHA-256: `d4243d6dca3826bbbc41e6eb435871a80acc72ee4737641783021dcdb6b877fb`
+  - JSON SHA-256: `0c5b8f710eadbf2d6b13d863c1e86bba59558c34d0891a76509da0a474e0d4b3`
+  - Markdown SHA-256: `f50e5848a2e32e369a31cbd3cc7904a80bc5b8818fb570aef1c6ea08b7e24ffb`
+  - playable Evidence Pack SHA-256: `08a16d292d99eaa53bd3a6afa5e6634330e78a5331c44e068a38ffeaf77d5b70`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
-  - packaged app zip SHA-256: `2771b4adfe8148f54abaaf2f463ada513fe919c5cd2f2570096e9e6e101371f4`
+  - packaged app zip SHA-256: `4bed4636eb9637a9b4a3ef83736ecbe2c5af5a89bd45a2673b5e070f6f02e30f`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `13 / 13`, `explainability=13/13`, and
   `routeReportPassCount=5 / 5`.
+- latest game increment: NPC reaction inspection now names the ledger actor and
+  validated action for both the reaction record and the cited record. In the
+  inquest Codex run, inspecting Studio PM reads `근거 행동: civic-ledger-7 /
+  스튜디오 PM -> 리뷰 차단` and `읽은 기록: civic-ledger-6 / 스테이션 직원 ->
+  기록 인용`; inspecting Waiting Customer reads `근거 행동: civic-ledger-8 /
+  대기 손님 -> 접촉 거부` and the same Station citation source. This makes the
+  playable NPC reaction explain who used which record without opening JSON.
 - latest game increment: the live HUD consequence line now follows the current
   social chain all the way through post-citation consequences. When the inquest
   route reaches `studio_review_queue=blocked` and `store_queue_mark=refused`,
@@ -135,12 +142,13 @@ Latest AI-play interface check:
 - latest game increment: NPC inspection now shows the record basis behind the
   visible social stance. In the inquest Codex run, inspecting
   `NPC_Waiting_Customer` opens a HUD notice with `현재 반응: 접촉 거부`,
-  `근거 행동: civic-ledger-8 / 접촉 거부`, `읽은 기록: civic-ledger-6`,
-  and `대상 기록물: 대기 표식`; the same fields are exported as
-  `basisLedgerEventId`, `citedLedgerEventId`, `basisAffordance`, and
+  `근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부`, `읽은 기록:
+  civic-ledger-6 / 스테이션 직원 -> 기록 인용`, and `대상 기록물: 대기 표식`; the
+  same fields are exported as `basisLedgerEventId`, `basisLedgerEventLabel`,
+  `citedLedgerEventId`, `citedLedgerEventLabel`, `basisAffordance`, and
   `basisObjectLabel` in `inspectedNpcState`. This keeps the proof focused on a
   small player-readable social chain: Station citation -> Waiting Customer
-  refusal -> player can inspect the reason.
+  refusal -> player can inspect who used which record.
 - latest game increment: player/Codex can now focus a visible NPC and press the
   same interaction key to read that NPC's current social reaction in the HUD
   notice. The inquest Codex run focuses `NPC_Waiting_Customer`, reads
@@ -194,16 +202,15 @@ Latest AI-play interface check:
   pattern: public record -> another place's role sees it -> one visible
   opportunity opens.
 - latest packaged proof refresh: the PCK, macOS debug app, unpacked app, and
-  packaged route evidence were re-exported with Godot 4.7-beta2 after the live
-  HUD consequence chain was extended through Studio review block and contact
-  refusal. PCK SHA-256 is
-  `0f81c01057ca95f7bd06aac66b071bb0f79b8538ed567d2a64deecd7a97c3623`, zip
+  packaged route evidence were re-exported with Godot 4.7-beta2 after NPC
+  reaction inspection gained ledger actor/action labels. PCK SHA-256 is
+  `b0e304824a189fb332cbbc671c43906fdb35edbb549137e536a2ae4fd2c30b9d`, zip
   SHA-256 is
-  `2771b4adfe8148f54abaaf2f463ada513fe919c5cd2f2570096e9e6e101371f4`, main-pack
+  `4bed4636eb9637a9b4a3ef83736ecbe2c5af5a89bd45a2673b5e070f6f02e30f`, main-pack
   smoke evidence SHA-256 is
-  `8a17f90cfd1f782c12dfdd588110bf963a10d148e2dd063bcf7a6cc772215c22`, and app
+  `05e2f3cf16423d421ce2bd6670f02fdc68712f9cf63582b2e17a26cca5d1d74c`, and app
   route evidence SHA-256 is
-  `4474f93fa8f7980cb6ba5b88d7006882d404b7be23b7e542be26fc2f2f84a99d`.
+  `ab140c5024f6ecbe6d1fb43bc72bbbc5c86c818676c083e585776fabfcd42687`.
   Packaged launch, packaged route smoke, and comprehension preflight all passed
   against `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json`.
 - prior game increment: visible world-record props are reachable through a

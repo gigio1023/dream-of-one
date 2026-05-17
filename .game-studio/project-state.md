@@ -215,9 +215,10 @@ Current M1 carry-in:
   `inspectedNpcState` alongside visible NPC states and record-prop inspection.
 - NPC inspection now also exposes the current social reaction's basis as
   player-readable record chain data. The Waiting Customer inquest inspection
-  shows `근거 행동: civic-ledger-8 / 접촉 거부`, `읽은 기록: civic-ledger-6`,
-  and `대상 기록물: 대기 표식`, while the snapshot exports the same basis as
-  structured `inspectedNpcState` fields for Codex QA.
+  shows `근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부`, `읽은 기록:
+  civic-ledger-6 / 스테이션 직원 -> 기록 인용`, and `대상 기록물: 대기 표식`, while
+  the snapshot exports the same basis as structured `inspectedNpcState` fields
+  for Codex QA.
 - `NPC_Park_Witness` now exposes public notice actions as visible NPC state:
   clean cover shows `vouched`/`공개 확인`, repair recovery shows
   `repaired`/`수습 게시`, and suspicious cover shows `warned`/`공개 경고`.
@@ -255,6 +256,12 @@ Current M1 carry-in:
   Studio review block, and contact refusal. This makes the current proof easier
   to understand during play without adding a new Store, Station, or Studio
   subsystem.
+- NPC reaction inspection now names the social record as `ledger / role ->
+  action`, not only as an ID. Inquest inspection shows Studio PM's review block
+  as `civic-ledger-7 / 스튜디오 PM -> 리뷰 차단`, Waiting Customer's refusal as
+  `civic-ledger-8 / 대기 손님 -> 접촉 거부`, and both cite `civic-ledger-6 /
+  스테이션 직원 -> 기록 인용`. This keeps the improvement focused on the player
+  reading a social chain in the running scene.
 - Codex gameplay QA now runs the active proof cell through public
   `PlayableSession.debug_codex_gameplay_action` and
   `debug_codex_gameplay_snapshot` APIs. The probe can list callable player

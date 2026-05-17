@@ -139,6 +139,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   notice now names `civic-ledger-8`, its cited `civic-ledger-6`, the
   `refuse_contact` affordance, and the queue-mark record object so the player
   can read why the refusal happened.
+- [x] Make NPC reaction inspection name ledger actors and validated actions:
+  Studio PM and Waiting Customer inspection now show both the current reaction
+  record and cited Station record as `ledger / role -> action` lines.
 - [x] Show the role/action map inside world-record prop inspection: the blocked
   Studio review queue HUD notice now names who can read it, which actions that
   record supports, and the latest ledger event that changed it.

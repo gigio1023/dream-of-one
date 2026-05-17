@@ -546,6 +546,7 @@ test("High local trust unlocks a helpful waiting-customer tip after a public rou
     role: "waiting_customer",
     knownLedgerEventIds: [vouch.event.eventId],
   }, environment);
+  assert.equal(helpfulCustomer.perceivedObjectIds.includes("park_notice_board"), true);
   const action = listAvailableEnvironmentActions(environment, helpfulCustomer)
     .find(candidate => candidate.affordance === "share_local_tip");
 
@@ -692,6 +693,7 @@ test("Public warning and low local trust make a waiting customer keep distance",
     role: "waiting_customer",
     knownLedgerEventIds: [warning.event.eventId],
   }, environment);
+  assert.equal(distancingCustomer.perceivedObjectIds.includes("park_notice_board"), true);
   const action = listAvailableEnvironmentActions(environment, distancingCustomer)
     .find(candidate => candidate.affordance === "keep_distance");
 

@@ -1154,7 +1154,8 @@
 				"perceivedObjectIds": [
 					"store_queue_mark",
 					"store_counter",
-					"usual_order_cue"
+					"usual_order_cue",
+					"park_notice_board"
 				],
 				"recordId": "store_same_order_queue_delay",
 				"selectedActionDescriptor": {
@@ -1255,7 +1256,8 @@
 						"toState": "rumored",
 						"validationRuleId": "same_order.park_notice_board.post_rumor",
 						"visibleTo": [
-							"park_witness"
+							"park_witness",
+							"waiting_customer"
 						]
 					},
 					{
@@ -1299,7 +1301,8 @@
 						"toState": "vouched",
 						"validationRuleId": "same_order.park_notice_board.vouch_routine",
 						"visibleTo": [
-							"park_witness"
+							"park_witness",
+							"waiting_customer"
 						]
 					},
 					{
@@ -1345,7 +1348,8 @@
 						"toState": "warned",
 						"validationRuleId": "same_order.park_notice_board.post_warning",
 						"visibleTo": [
-							"park_witness"
+							"park_witness",
+							"waiting_customer"
 						]
 					},
 					{
@@ -1394,7 +1398,8 @@
 						"toState": "clear",
 						"validationRuleId": "same_order.park_notice_board.post_repair_notice",
 						"visibleTo": [
-							"park_witness"
+							"park_witness",
+							"waiting_customer"
 						]
 					}
 				],
@@ -1453,7 +1458,8 @@
 					"toState": "rumored",
 					"validationRuleId": "same_order.park_notice_board.post_rumor",
 					"visibleTo": [
-						"park_witness"
+						"park_witness",
+						"waiting_customer"
 					]
 				},
 				"selectionReason": "The Park witness can see the Store note becoming public talk and pins a small notice outside the queue.",
@@ -2017,7 +2023,8 @@
 				"perceivedObjectIds": [
 					"store_queue_mark",
 					"store_counter",
-					"usual_order_cue"
+					"usual_order_cue",
+					"park_notice_board"
 				],
 				"recordId": "store_same_order_contact_refused",
 				"selectedActionDescriptor": {
@@ -2250,14 +2257,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779047338590",
+				"eventId": "playable_session_started-001-1779048101166",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779047338590,
+				"timestampMs": 1779048101166,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -2270,7 +2277,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-002-1779047338664",
+				"eventId": "conversation_started-002-1779048101321",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -2279,7 +2286,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779047338664,
+				"timestampMs": 1779048101321,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -2292,7 +2299,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-003-1779047338679",
+				"eventId": "response_hesitation_noted-003-1779048101334",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -2313,7 +2320,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779047338679,
+				"timestampMs": 1779048101334,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -2328,7 +2335,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-004-1779047338693",
+				"eventId": "dialogue_choice_selected-004-1779048101349",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2350,7 +2357,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779047338693,
+				"timestampMs": 1779048101349,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2365,7 +2372,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-005-1779047338693",
+				"eventId": "conversation_anomaly_detected-005-1779048101349",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2387,7 +2394,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779047338693,
+				"timestampMs": 1779048101349,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2402,7 +2409,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-006-1779047338693",
+				"eventId": "npc_suspicion_changed-006-1779048101349",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2424,7 +2431,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779047338693,
+				"timestampMs": 1779048101349,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2439,7 +2446,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-007-1779047338706",
+				"eventId": "free_input_submitted-007-1779048101362",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2464,7 +2471,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779047338706,
+				"timestampMs": 1779048101362,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2479,7 +2486,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779047338706",
+				"eventId": "conversation_anomaly_detected-008-1779048101362",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2504,7 +2511,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779047338706,
+				"timestampMs": 1779048101362,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2519,7 +2526,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779047338706",
+				"eventId": "npc_suspicion_changed-009-1779048101362",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2544,7 +2551,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779047338706,
+				"timestampMs": 1779048101362,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2559,7 +2566,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-010-1779047338706",
+				"eventId": "suspicion_shared-010-1779048101362",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2584,7 +2591,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779047338706,
+				"timestampMs": 1779048101362,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2599,7 +2606,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-011-1779047338706",
+				"eventId": "station_report_created-011-1779048101363",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2624,7 +2631,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779047338706,
+				"timestampMs": 1779048101363,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2639,7 +2646,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-012-1779047338707",
+				"eventId": "station_inquest_opened-012-1779048101363",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2664,7 +2671,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779047338707,
+				"timestampMs": 1779048101363,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -3487,7 +3494,8 @@
 					"perceivedObjectIds": [
 						"store_queue_mark",
 						"store_counter",
-						"usual_order_cue"
+						"usual_order_cue",
+						"park_notice_board"
 					],
 					"recordId": "store_same_order_queue_delay",
 					"selectedActionDescriptor": {
@@ -3588,7 +3596,8 @@
 							"toState": "rumored",
 							"validationRuleId": "same_order.park_notice_board.post_rumor",
 							"visibleTo": [
-								"park_witness"
+								"park_witness",
+								"waiting_customer"
 							]
 						},
 						{
@@ -3632,7 +3641,8 @@
 							"toState": "vouched",
 							"validationRuleId": "same_order.park_notice_board.vouch_routine",
 							"visibleTo": [
-								"park_witness"
+								"park_witness",
+								"waiting_customer"
 							]
 						},
 						{
@@ -3678,7 +3688,8 @@
 							"toState": "warned",
 							"validationRuleId": "same_order.park_notice_board.post_warning",
 							"visibleTo": [
-								"park_witness"
+								"park_witness",
+								"waiting_customer"
 							]
 						},
 						{
@@ -3727,7 +3738,8 @@
 							"toState": "clear",
 							"validationRuleId": "same_order.park_notice_board.post_repair_notice",
 							"visibleTo": [
-								"park_witness"
+								"park_witness",
+								"waiting_customer"
 							]
 						}
 					],
@@ -3786,7 +3798,8 @@
 						"toState": "rumored",
 						"validationRuleId": "same_order.park_notice_board.post_rumor",
 						"visibleTo": [
-							"park_witness"
+							"park_witness",
+							"waiting_customer"
 						]
 					},
 					"selectionReason": "The Park witness can see the Store note becoming public talk and pins a small notice outside the queue.",
@@ -4350,7 +4363,8 @@
 					"perceivedObjectIds": [
 						"store_queue_mark",
 						"store_counter",
-						"usual_order_cue"
+						"usual_order_cue",
+						"park_notice_board"
 					],
 					"recordId": "store_same_order_contact_refused",
 					"selectedActionDescriptor": {

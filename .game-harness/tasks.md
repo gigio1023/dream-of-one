@@ -85,6 +85,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   the public warning, uses `keep_distance` only after local trust drops, changes
   the queue mark to `distanced`, and proves the warning can alter NPC behavior
   without Station escalation.
+- [x] Make public notices truly visible to the next NPC reaction: Waiting
+  Customer now perceives `park_notice_board` before `share_local_tip` or
+  `keep_distance`, and playable/Codex probes fail if those reactions happen
+  without that public environment cue.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

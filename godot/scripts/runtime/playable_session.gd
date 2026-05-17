@@ -69,7 +69,7 @@ const OBJECT_VISIBILITY := {
 	"receipt_tray": ["store_clerk", "store_manager"],
 	"correction_slip": ["store_clerk", "store_manager"],
 	"report_tray": ["store_clerk", "store_manager", "station_officer"],
-	"park_notice_board": ["park_witness"],
+	"park_notice_board": ["park_witness", "waiting_customer"],
 	"station_dossier": ["station_officer"],
 	"civic_ledger": ["station_officer"]
 }

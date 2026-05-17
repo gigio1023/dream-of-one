@@ -676,6 +676,13 @@ function validateCleanCover(
   )) {
     failures.push({ routeId: proof.routeId, path: "socialObservationTrace", message: "clean cover must prove local trust can unlock a helpful NPC action" });
   }
+  if (!proof.actionTrace.some(trace =>
+    trace.actorRole === "waiting_customer"
+    && trace.affordance === "share_local_tip"
+    && trace.perceivedObjectIds.includes("park_notice_board")
+  )) {
+    failures.push({ routeId: proof.routeId, path: "actionTrace", message: "clean cover must prove the helpful customer can perceive the public notice board" });
+  }
 }
 
 function validateRepairRecovered(

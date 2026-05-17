@@ -346,6 +346,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("clean_cover expected Park Witness routine vouch")
 			if not _action_exists(summary, "waiting_customer", "share_local_tip"):
 				failures.append("clean_cover expected Waiting Customer local tip after public vouch")
+			if not _action_perceives(summary, "waiting_customer", "share_local_tip", "park_notice_board"):
+				failures.append("clean_cover expected Waiting Customer to perceive public notice board before sharing a tip")
 			if not _observation_exists(summary, "park_witness", "waiting_customer", "accept_routine", "vouch_routine"):
 				failures.append("clean_cover expected Park Witness to read routine queue record")
 			if not _observation_exists(summary, "waiting_customer", "park_witness", "vouch_routine", "share_local_tip"):
@@ -386,6 +388,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("cover_held_under_suspicion expected Park Witness public warning")
 			if not _action_exists(summary, "waiting_customer", "keep_distance"):
 				failures.append("cover_held_under_suspicion expected Waiting Customer distance after warning")
+			if not _action_perceives(summary, "waiting_customer", "keep_distance", "park_notice_board"):
+				failures.append("cover_held_under_suspicion expected Waiting Customer to perceive public notice board before keeping distance")
 			if not _observation_exists(summary, "waiting_customer", "store_clerk", "mark_receipt", "note_wary"):
 				failures.append("cover_held_under_suspicion expected Waiting Customer to read marked receipt")
 			if not _observation_exists(summary, "park_witness", "waiting_customer", "note_wary", "post_warning"):
@@ -778,6 +782,14 @@ func _action_exists(summary: Dictionary, actor_role: String, affordance: String)
 			continue
 		if str(action.get("actorRole", "")) == actor_role and str(action.get("affordance", "")) == affordance:
 			return true
+	return false
+
+func _action_perceives(summary: Dictionary, actor_role: String, affordance: String, object_id: String) -> bool:
+	for action in summary.get("agentActionLog", []):
+		if not (action is Dictionary):
+			continue
+		if str(action.get("actorRole", "")) == actor_role and str(action.get("affordance", "")) == affordance:
+			return action.get("perceivedObjectIds", []).has(object_id)
 	return false
 
 func _observation_exists(summary: Dictionary, observer_role: String, observed_role: String, observed_affordance: String, resulting_affordance: String) -> bool:

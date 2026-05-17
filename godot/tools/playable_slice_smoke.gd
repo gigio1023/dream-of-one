@@ -580,10 +580,14 @@ func _validate_agent_action_log(route: Dictionary, summary: Dictionary) -> Array
 		failures.append("cover_held_under_suspicion expected Park Witness post_warning action in agentActionLog")
 	if route_id == "cover_held_under_suspicion" and not _agent_action_exists(action_log, "waiting_customer", "keep_distance"):
 		failures.append("cover_held_under_suspicion expected Waiting Customer keep_distance action after public warning")
+	if route_id == "cover_held_under_suspicion" and not _agent_action_perceives(action_log, "waiting_customer", "keep_distance", "park_notice_board"):
+		failures.append("cover_held_under_suspicion expected Waiting Customer to perceive park_notice_board before keeping distance")
 	if route_id == "clean_cover" and not _agent_action_exists(action_log, "park_witness", "vouch_routine"):
 		failures.append("clean_cover expected Park Witness vouch_routine action in agentActionLog")
 	if route_id == "clean_cover" and not _agent_action_exists(action_log, "waiting_customer", "share_local_tip"):
 		failures.append("clean_cover expected Waiting Customer share_local_tip action in agentActionLog")
+	if route_id == "clean_cover" and not _agent_action_perceives(action_log, "waiting_customer", "share_local_tip", "park_notice_board"):
+		failures.append("clean_cover expected Waiting Customer to perceive park_notice_board before sharing a tip")
 	if route_id == "clean_cover" and not str(summary.get("outcomeBody", "")).contains("로컬 팁"):
 		failures.append("clean_cover outcome must show routine trust unlocking a helpful local tip")
 	if route_id == "repair_recovered":
@@ -1222,6 +1226,14 @@ func _agent_action_exists(action_log: Array, role: String, affordance: String) -
 			and str(action.get("actorRole", "")) == role \
 			and str(action.get("affordance", "")) == affordance:
 			return true
+	return false
+
+func _agent_action_perceives(action_log: Array, role: String, affordance: String, object_id: String) -> bool:
+	for action in action_log:
+		if action is Dictionary \
+			and str(action.get("actorRole", "")) == role \
+			and str(action.get("affordance", "")) == affordance:
+			return action.get("perceivedObjectIds", []).has(object_id)
 	return false
 
 func _ledger_has_event_kind(civic_ledger: Array, kind: String) -> bool:

@@ -1,18 +1,18 @@
 {
   "adapter": "godot",
-  "createdAtMs": 1779047331720,
+  "createdAtMs": 1779048088468,
   "events": [
     {
       "adapter": "godot",
       "eventFamily": "session",
-      "eventId": "playable_session_started-001-1779047331480",
+      "eventId": "playable_session_started-001-1779048088228",
       "eventName": "playable_session_started",
       "prologueStep": "beginning",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "sessionOutcome": "running",
       "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-      "timestampMs": 1779047331480,
+      "timestampMs": 1779048088228,
       "uiSummaryArgs": {},
       "uiSummaryKey": "event.session_started",
       "worldId": "dre_171_godot_shell",
@@ -25,7 +25,7 @@
       "conversationId": "conv-same-order",
       "conversationStage": "normal",
       "eventFamily": "domain",
-      "eventId": "conversation_started-002-1779047331586",
+      "eventId": "conversation_started-002-1779048088330",
       "eventName": "conversation_started",
       "outcome": "running",
       "promptId": "store.same_order.routine",
@@ -34,7 +34,7 @@
       "socialLoopStage": "normal",
       "speakerId": "NPC_Store_Clerk",
       "summary": "Store Clerk opened the Same Order conversation.",
-      "timestampMs": 1779047331586,
+      "timestampMs": 1779048088330,
       "turnId": "turn-1",
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
@@ -47,7 +47,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "dialogue_choice_selected-003-1779047331622",
+      "eventId": "dialogue_choice_selected-003-1779048088366",
       "eventName": "dialogue_choice_selected",
       "inputMode": "choice",
       "outcome": "running",
@@ -69,7 +69,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779047331622,
+      "timestampMs": 1779048088366,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -84,7 +84,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-004-1779047331622",
+      "eventId": "conversation_anomaly_detected-004-1779048088366",
       "eventName": "conversation_anomaly_detected",
       "inputMode": "choice",
       "outcome": "running",
@@ -106,7 +106,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779047331622,
+      "timestampMs": 1779048088366,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -121,7 +121,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-005-1779047331622",
+      "eventId": "npc_suspicion_changed-005-1779048088366",
       "eventName": "npc_suspicion_changed",
       "inputMode": "choice",
       "outcome": "running",
@@ -143,7 +143,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779047331622,
+      "timestampMs": 1779048088366,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -158,7 +158,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "응답 지연 12000ms",
       "eventFamily": "domain",
-      "eventId": "response_hesitation_noted-006-1779047331657",
+      "eventId": "response_hesitation_noted-006-1779048088401",
       "eventName": "response_hesitation_noted",
       "inputMode": "response_hesitation",
       "outcome": "running",
@@ -181,7 +181,7 @@
       "suspicionSignals": [
         "response_hesitation"
       ],
-      "timestampMs": 1779047331657,
+      "timestampMs": 1779048088401,
       "turnId": "turn-2",
       "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
       "whyLineKey": "response_hesitation",
@@ -196,7 +196,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "free_input_submitted-007-1779047331684",
+      "eventId": "free_input_submitted-007-1779048088430",
       "eventName": "free_input_submitted",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -221,7 +221,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779047331684,
+      "timestampMs": 1779048088430,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -236,7 +236,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-008-1779047331684",
+      "eventId": "conversation_anomaly_detected-008-1779048088430",
       "eventName": "conversation_anomaly_detected",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -261,7 +261,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779047331684,
+      "timestampMs": 1779048088430,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -276,7 +276,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-009-1779047331684",
+      "eventId": "npc_suspicion_changed-009-1779048088430",
       "eventName": "npc_suspicion_changed",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -301,7 +301,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779047331684,
+      "timestampMs": 1779048088430,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -316,7 +316,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "suspicion_shared-010-1779047331684",
+      "eventId": "suspicion_shared-010-1779048088430",
       "eventName": "suspicion_shared",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -341,7 +341,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779047331684,
+      "timestampMs": 1779048088430,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -356,7 +356,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_report_created-011-1779047331685",
+      "eventId": "station_report_created-011-1779048088430",
       "eventName": "station_report_created",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -381,7 +381,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779047331685,
+      "timestampMs": 1779048088430,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -396,7 +396,7 @@
       "conversationStage": "inquest",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_inquest_opened-012-1779047331685",
+      "eventId": "station_inquest_opened-012-1779048088431",
       "eventName": "station_inquest_opened",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -421,7 +421,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779047331685,
+      "timestampMs": 1779048088431,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -432,12 +432,12 @@
       "adapter": "godot",
       "artifactPath": "data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json",
       "eventFamily": "evidence_export",
-      "eventId": "evidence_pack_created-013-1779047331720",
+      "eventId": "evidence_pack_created-013-1779048088468",
       "eventName": "evidence_pack_created",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "summary": "Godot conversation playable Evidence Pack exported for backend validation.",
-      "timestampMs": 1779047331720,
+      "timestampMs": 1779048088468,
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
     }
@@ -1212,7 +1212,8 @@
         "perceivedObjectIds": [
           "store_queue_mark",
           "store_counter",
-          "usual_order_cue"
+          "usual_order_cue",
+          "park_notice_board"
         ],
         "recordId": "store_same_order_queue_delay",
         "selectedActionDescriptor": {
@@ -1313,7 +1314,8 @@
             "toState": "rumored",
             "validationRuleId": "same_order.park_notice_board.post_rumor",
             "visibleTo": [
-              "park_witness"
+              "park_witness",
+              "waiting_customer"
             ]
           },
           {
@@ -1357,7 +1359,8 @@
             "toState": "vouched",
             "validationRuleId": "same_order.park_notice_board.vouch_routine",
             "visibleTo": [
-              "park_witness"
+              "park_witness",
+              "waiting_customer"
             ]
           },
           {
@@ -1403,7 +1406,8 @@
             "toState": "warned",
             "validationRuleId": "same_order.park_notice_board.post_warning",
             "visibleTo": [
-              "park_witness"
+              "park_witness",
+              "waiting_customer"
             ]
           },
           {
@@ -1452,7 +1456,8 @@
             "toState": "clear",
             "validationRuleId": "same_order.park_notice_board.post_repair_notice",
             "visibleTo": [
-              "park_witness"
+              "park_witness",
+              "waiting_customer"
             ]
           }
         ],
@@ -1511,7 +1516,8 @@
           "toState": "rumored",
           "validationRuleId": "same_order.park_notice_board.post_rumor",
           "visibleTo": [
-            "park_witness"
+            "park_witness",
+            "waiting_customer"
           ]
         },
         "selectionReason": "The Park witness can see the Store note becoming public talk and pins a small notice outside the queue.",
@@ -2075,7 +2081,8 @@
         "perceivedObjectIds": [
           "store_queue_mark",
           "store_counter",
-          "usual_order_cue"
+          "usual_order_cue",
+          "park_notice_board"
         ],
         "recordId": "store_same_order_contact_refused",
         "selectedActionDescriptor": {
@@ -2199,7 +2206,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "affordance": "accept_routine",
             "objectId": "store_queue_mark",
@@ -2245,7 +2253,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "affordance": "share_local_tip",
             "objectId": "store_queue_mark",
@@ -2438,7 +2447,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "affordance": "accept_repair",
             "objectId": "store_queue_mark",
@@ -2611,7 +2621,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "affordance": "complain_delay",
             "objectId": "store_queue_mark",
@@ -2706,7 +2717,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "affordance": "leave_queue",
             "objectId": "store_queue_mark",
@@ -2893,7 +2905,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "affordance": "complain_delay",
             "objectId": "store_queue_mark",
@@ -2988,7 +3001,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "affordance": "refuse_contact",
             "objectId": "store_queue_mark",
@@ -3291,19 +3305,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779047330323",
+            "eventId": "playable_session_started-001-1779048087201",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779047330476",
+            "eventId": "conversation_started-002-1779048087362",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-003-1779047330513",
+            "eventId": "dialogue_choice_selected-003-1779048087399",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3314,7 +3328,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-004-1779047330547",
+            "eventId": "dialogue_choice_selected-004-1779048087432",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3325,7 +3339,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_outcome_reached-005-1779047330547",
+            "eventId": "conversation_outcome_reached-005-1779048087433",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "clean_cover",
@@ -3361,19 +3375,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779047330669",
+            "eventId": "playable_session_started-001-1779048087497",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779047330767",
+            "eventId": "conversation_started-002-1779048087597",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779047330814",
+            "eventId": "dialogue_choice_selected-003-1779048087633",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3386,7 +3400,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779047330814",
+            "eventId": "conversation_anomaly_detected-004-1779048087633",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3399,7 +3413,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779047330814",
+            "eventId": "npc_suspicion_changed-005-1779048087633",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3412,7 +3426,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-006-1779047330856",
+            "eventId": "dialogue_choice_selected-006-1779048087668",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3423,7 +3437,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_outcome_reached-007-1779047330856",
+            "eventId": "conversation_outcome_reached-007-1779048087668",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "repair_recovered",
@@ -3465,19 +3479,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779047331224",
+            "eventId": "playable_session_started-001-1779048087973",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779047331339",
+            "eventId": "conversation_started-002-1779048088070",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779047331376",
+            "eventId": "dialogue_choice_selected-003-1779048088131",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3490,7 +3504,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779047331376",
+            "eventId": "conversation_anomaly_detected-004-1779048088131",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3503,7 +3517,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779047331376",
+            "eventId": "npc_suspicion_changed-005-1779048088131",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3516,7 +3530,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "dialogue_choice_selected-006-1779047331412",
+            "eventId": "dialogue_choice_selected-006-1779048088162",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3530,7 +3544,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-007-1779047331412",
+            "eventId": "conversation_anomaly_detected-007-1779048088162",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3544,7 +3558,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-008-1779047331412",
+            "eventId": "npc_suspicion_changed-008-1779048088162",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3558,7 +3572,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-009-1779047331412",
+            "eventId": "suspicion_shared-009-1779048088162",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3572,7 +3586,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-010-1779047331413",
+            "eventId": "station_report_created-010-1779048088163",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 80,
@@ -3586,7 +3600,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_outcome_reached-011-1779047331413",
+            "eventId": "conversation_outcome_reached-011-1779048088163",
             "eventName": "conversation_outcome_reached",
             "outcome": "soft_report",
             "routeOutcome": "soft_report",
@@ -3631,19 +3645,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779047331480",
+            "eventId": "playable_session_started-001-1779048088228",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779047331586",
+            "eventId": "conversation_started-002-1779048088330",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779047331622",
+            "eventId": "dialogue_choice_selected-003-1779048088366",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3656,7 +3670,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779047331622",
+            "eventId": "conversation_anomaly_detected-004-1779048088366",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3669,7 +3683,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779047331622",
+            "eventId": "npc_suspicion_changed-005-1779048088366",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3682,7 +3696,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "response_hesitation_noted-006-1779047331657",
+            "eventId": "response_hesitation_noted-006-1779048088401",
             "eventName": "response_hesitation_noted",
             "outcome": "running",
             "reportWeightAfter": 35,
@@ -3695,7 +3709,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "free_input_submitted-007-1779047331684",
+            "eventId": "free_input_submitted-007-1779048088430",
             "eventName": "free_input_submitted",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3709,7 +3723,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-008-1779047331684",
+            "eventId": "conversation_anomaly_detected-008-1779048088430",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3723,7 +3737,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-009-1779047331684",
+            "eventId": "npc_suspicion_changed-009-1779048088430",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3737,7 +3751,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-010-1779047331684",
+            "eventId": "suspicion_shared-010-1779048088430",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3751,7 +3765,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-011-1779047331685",
+            "eventId": "station_report_created-011-1779048088430",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 120,
@@ -3765,7 +3779,7 @@
           },
           {
             "conversationStage": "inquest",
-            "eventId": "station_inquest_opened-012-1779047331685",
+            "eventId": "station_inquest_opened-012-1779048088431",
             "eventName": "station_inquest_opened",
             "outcome": "inquest_opened",
             "reportWeightAfter": 120,
@@ -4672,7 +4686,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -4974,7 +4989,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public notice rumor",
                   "priorityHints": [
@@ -5017,7 +5033,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public routine vouch",
                   "priorityHints": [
@@ -5060,7 +5077,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public warning notice",
                   "priorityHints": [
@@ -5124,7 +5142,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -6177,7 +6196,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -6479,7 +6499,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public notice rumor",
                   "priorityHints": [
@@ -6522,7 +6543,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public routine vouch",
                   "priorityHints": [
@@ -6565,7 +6587,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public warning notice",
                   "priorityHints": [
@@ -6611,7 +6634,8 @@
                     "known_store_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public repair notice",
                   "priorityHints": [
@@ -7334,7 +7358,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -7636,7 +7661,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public notice rumor",
                   "priorityHints": [
@@ -7679,7 +7705,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public routine vouch",
                   "priorityHints": [
@@ -7722,7 +7749,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public warning notice",
                   "priorityHints": [
@@ -7768,7 +7796,8 @@
                     "known_store_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public repair notice",
                   "priorityHints": [
@@ -8380,7 +8409,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -9325,7 +9355,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -9627,7 +9658,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public notice rumor",
                   "priorityHints": [
@@ -9670,7 +9702,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public routine vouch",
                   "priorityHints": [
@@ -9713,7 +9746,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public warning notice",
                   "priorityHints": [
@@ -9759,7 +9793,8 @@
                     "known_store_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public repair notice",
                   "priorityHints": [
@@ -10178,7 +10213,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -11269,7 +11305,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "availableActions": [
               {
@@ -11613,7 +11650,8 @@
                   "known_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public notice rumor",
                 "priorityHints": [
@@ -11656,7 +11694,8 @@
                   "known_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public routine vouch",
                 "priorityHints": [
@@ -11699,7 +11738,8 @@
                   "known_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public warning notice",
                 "priorityHints": [
@@ -11807,7 +11847,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "availableActions": [
               {
@@ -12985,7 +13026,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "availableActions": [
               {
@@ -13331,7 +13373,8 @@
                   "known_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public notice rumor",
                 "priorityHints": [
@@ -13374,7 +13417,8 @@
                   "known_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public routine vouch",
                 "priorityHints": [
@@ -13417,7 +13461,8 @@
                   "known_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public warning notice",
                 "priorityHints": [
@@ -13463,7 +13508,8 @@
                   "known_store_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public repair notice",
                 "priorityHints": [
@@ -14268,7 +14314,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "availableActions": [
               {
@@ -14612,7 +14659,8 @@
                   "known_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public notice rumor",
                 "priorityHints": [
@@ -14655,7 +14703,8 @@
                   "known_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public routine vouch",
                 "priorityHints": [
@@ -14698,7 +14747,8 @@
                   "known_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public warning notice",
                 "priorityHints": [
@@ -14744,7 +14794,8 @@
                   "known_store_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public repair notice",
                 "priorityHints": [
@@ -15497,7 +15548,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "availableActions": [
               {
@@ -16524,7 +16576,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "availableActions": [
               {
@@ -16868,7 +16921,8 @@
                   "known_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public notice rumor",
                 "priorityHints": [
@@ -16911,7 +16965,8 @@
                   "known_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public routine vouch",
                 "priorityHints": [
@@ -16954,7 +17009,8 @@
                   "known_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public warning notice",
                 "priorityHints": [
@@ -17000,7 +17056,8 @@
                   "known_store_ledger_event_required"
                 ],
                 "visibleTo": [
-                  "park_witness"
+                  "park_witness",
+                  "waiting_customer"
                 ],
                 "perceivedAs": "public repair notice",
                 "priorityHints": [
@@ -17558,7 +17615,8 @@
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
-              "usual_order_cue"
+              "usual_order_cue",
+              "park_notice_board"
             ],
             "availableActions": [
               {
@@ -18732,7 +18790,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -19121,7 +19180,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public notice rumor",
                   "priorityHints": [
@@ -19164,7 +19224,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public routine vouch",
                   "priorityHints": [
@@ -19207,7 +19268,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public warning notice",
                   "priorityHints": [
@@ -19361,7 +19423,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -20707,7 +20770,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -21100,7 +21164,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public notice rumor",
                   "priorityHints": [
@@ -21143,7 +21208,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public routine vouch",
                   "priorityHints": [
@@ -21186,7 +21252,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public warning notice",
                   "priorityHints": [
@@ -21232,7 +21299,8 @@
                     "known_store_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public repair notice",
                   "priorityHints": [
@@ -22161,7 +22229,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -22550,7 +22619,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public notice rumor",
                   "priorityHints": [
@@ -22593,7 +22663,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public routine vouch",
                   "priorityHints": [
@@ -22636,7 +22707,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public warning notice",
                   "priorityHints": [
@@ -22682,7 +22754,8 @@
                     "known_store_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public repair notice",
                   "priorityHints": [
@@ -23579,7 +23652,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -24732,7 +24806,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -25121,7 +25196,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public notice rumor",
                   "priorityHints": [
@@ -25164,7 +25240,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public routine vouch",
                   "priorityHints": [
@@ -25207,7 +25284,8 @@
                     "known_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public warning notice",
                   "priorityHints": [
@@ -25253,7 +25331,8 @@
                     "known_store_ledger_event_required"
                   ],
                   "visibleTo": [
-                    "park_witness"
+                    "park_witness",
+                    "waiting_customer"
                   ],
                   "perceivedAs": "public repair notice",
                   "priorityHints": [
@@ -25954,7 +26033,8 @@
               "perceivedObjectIds": [
                 "store_queue_mark",
                 "store_counter",
-                "usual_order_cue"
+                "usual_order_cue",
+                "park_notice_board"
               ],
               "availableActions": [
                 {
@@ -27998,7 +28078,8 @@
         "perceivedObjectIds": [
           "store_queue_mark",
           "store_counter",
-          "usual_order_cue"
+          "usual_order_cue",
+          "park_notice_board"
         ],
         "recordId": "store_same_order_queue_delay",
         "selectedActionDescriptor": {
@@ -28099,7 +28180,8 @@
             "toState": "rumored",
             "validationRuleId": "same_order.park_notice_board.post_rumor",
             "visibleTo": [
-              "park_witness"
+              "park_witness",
+              "waiting_customer"
             ]
           },
           {
@@ -28143,7 +28225,8 @@
             "toState": "vouched",
             "validationRuleId": "same_order.park_notice_board.vouch_routine",
             "visibleTo": [
-              "park_witness"
+              "park_witness",
+              "waiting_customer"
             ]
           },
           {
@@ -28189,7 +28272,8 @@
             "toState": "warned",
             "validationRuleId": "same_order.park_notice_board.post_warning",
             "visibleTo": [
-              "park_witness"
+              "park_witness",
+              "waiting_customer"
             ]
           },
           {
@@ -28238,7 +28322,8 @@
             "toState": "clear",
             "validationRuleId": "same_order.park_notice_board.post_repair_notice",
             "visibleTo": [
-              "park_witness"
+              "park_witness",
+              "waiting_customer"
             ]
           }
         ],
@@ -28297,7 +28382,8 @@
           "toState": "rumored",
           "validationRuleId": "same_order.park_notice_board.post_rumor",
           "visibleTo": [
-            "park_witness"
+            "park_witness",
+            "waiting_customer"
           ]
         },
         "selectionReason": "The Park witness can see the Store note becoming public talk and pins a small notice outside the queue.",
@@ -28861,7 +28947,8 @@
         "perceivedObjectIds": [
           "store_queue_mark",
           "store_counter",
-          "usual_order_cue"
+          "usual_order_cue",
+          "park_notice_board"
         ],
         "recordId": "store_same_order_contact_refused",
         "selectedActionDescriptor": {
@@ -29094,14 +29181,14 @@
       {
         "adapter": "godot",
         "eventFamily": "session",
-        "eventId": "playable_session_started-001-1779047331480",
+        "eventId": "playable_session_started-001-1779048088228",
         "eventName": "playable_session_started",
         "prologueStep": "beginning",
         "schemaVersion": "godot-runtime-v1",
         "sessionId": "dre-171-playable-session",
         "sessionOutcome": "running",
         "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-        "timestampMs": 1779047331480,
+        "timestampMs": 1779048088228,
         "uiSummaryArgs": {},
         "uiSummaryKey": "event.session_started",
         "worldId": "dre_171_godot_shell",
@@ -29114,7 +29201,7 @@
         "conversationId": "conv-same-order",
         "conversationStage": "normal",
         "eventFamily": "domain",
-        "eventId": "conversation_started-002-1779047331586",
+        "eventId": "conversation_started-002-1779048088330",
         "eventName": "conversation_started",
         "outcome": "running",
         "promptId": "store.same_order.routine",
@@ -29123,7 +29210,7 @@
         "socialLoopStage": "normal",
         "speakerId": "NPC_Store_Clerk",
         "summary": "Store Clerk opened the Same Order conversation.",
-        "timestampMs": 1779047331586,
+        "timestampMs": 1779048088330,
         "turnId": "turn-1",
         "worldId": "dre_171_godot_shell",
         "worldRevision": "rev-social-stealth-v1"
@@ -29136,7 +29223,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "dialogue_choice_selected-003-1779047331622",
+        "eventId": "dialogue_choice_selected-003-1779048088366",
         "eventName": "dialogue_choice_selected",
         "inputMode": "choice",
         "outcome": "running",
@@ -29158,7 +29245,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779047331622,
+        "timestampMs": 1779048088366,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -29173,7 +29260,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-004-1779047331622",
+        "eventId": "conversation_anomaly_detected-004-1779048088366",
         "eventName": "conversation_anomaly_detected",
         "inputMode": "choice",
         "outcome": "running",
@@ -29195,7 +29282,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779047331622,
+        "timestampMs": 1779048088366,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -29210,7 +29297,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-005-1779047331622",
+        "eventId": "npc_suspicion_changed-005-1779048088366",
         "eventName": "npc_suspicion_changed",
         "inputMode": "choice",
         "outcome": "running",
@@ -29232,7 +29319,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779047331622,
+        "timestampMs": 1779048088366,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -29247,7 +29334,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "응답 지연 12000ms",
         "eventFamily": "domain",
-        "eventId": "response_hesitation_noted-006-1779047331657",
+        "eventId": "response_hesitation_noted-006-1779048088401",
         "eventName": "response_hesitation_noted",
         "inputMode": "response_hesitation",
         "outcome": "running",
@@ -29270,7 +29357,7 @@
         "suspicionSignals": [
           "response_hesitation"
         ],
-        "timestampMs": 1779047331657,
+        "timestampMs": 1779048088401,
         "turnId": "turn-2",
         "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
         "whyLineKey": "response_hesitation",
@@ -29285,7 +29372,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "free_input_submitted-007-1779047331684",
+        "eventId": "free_input_submitted-007-1779048088430",
         "eventName": "free_input_submitted",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -29310,7 +29397,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779047331684,
+        "timestampMs": 1779048088430,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -29325,7 +29412,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-008-1779047331684",
+        "eventId": "conversation_anomaly_detected-008-1779048088430",
         "eventName": "conversation_anomaly_detected",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -29350,7 +29437,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779047331684,
+        "timestampMs": 1779048088430,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -29365,7 +29452,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-009-1779047331684",
+        "eventId": "npc_suspicion_changed-009-1779048088430",
         "eventName": "npc_suspicion_changed",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -29390,7 +29477,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779047331684,
+        "timestampMs": 1779048088430,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -29405,7 +29492,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "suspicion_shared-010-1779047331684",
+        "eventId": "suspicion_shared-010-1779048088430",
         "eventName": "suspicion_shared",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -29430,7 +29517,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779047331684,
+        "timestampMs": 1779048088430,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -29445,7 +29532,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_report_created-011-1779047331685",
+        "eventId": "station_report_created-011-1779048088430",
         "eventName": "station_report_created",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -29470,7 +29557,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779047331685,
+        "timestampMs": 1779048088430,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -29485,7 +29572,7 @@
         "conversationStage": "inquest",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_inquest_opened-012-1779047331685",
+        "eventId": "station_inquest_opened-012-1779048088431",
         "eventName": "station_inquest_opened",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -29510,7 +29597,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779047331685,
+        "timestampMs": 1779048088431,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -30333,7 +30420,8 @@
           "perceivedObjectIds": [
             "store_queue_mark",
             "store_counter",
-            "usual_order_cue"
+            "usual_order_cue",
+            "park_notice_board"
           ],
           "recordId": "store_same_order_queue_delay",
           "selectedActionDescriptor": {
@@ -30434,7 +30522,8 @@
               "toState": "rumored",
               "validationRuleId": "same_order.park_notice_board.post_rumor",
               "visibleTo": [
-                "park_witness"
+                "park_witness",
+                "waiting_customer"
               ]
             },
             {
@@ -30478,7 +30567,8 @@
               "toState": "vouched",
               "validationRuleId": "same_order.park_notice_board.vouch_routine",
               "visibleTo": [
-                "park_witness"
+                "park_witness",
+                "waiting_customer"
               ]
             },
             {
@@ -30524,7 +30614,8 @@
               "toState": "warned",
               "validationRuleId": "same_order.park_notice_board.post_warning",
               "visibleTo": [
-                "park_witness"
+                "park_witness",
+                "waiting_customer"
               ]
             },
             {
@@ -30573,7 +30664,8 @@
               "toState": "clear",
               "validationRuleId": "same_order.park_notice_board.post_repair_notice",
               "visibleTo": [
-                "park_witness"
+                "park_witness",
+                "waiting_customer"
               ]
             }
           ],
@@ -30632,7 +30724,8 @@
             "toState": "rumored",
             "validationRuleId": "same_order.park_notice_board.post_rumor",
             "visibleTo": [
-              "park_witness"
+              "park_witness",
+              "waiting_customer"
             ]
           },
           "selectionReason": "The Park witness can see the Store note becoming public talk and pins a small notice outside the queue.",
@@ -31196,7 +31289,8 @@
           "perceivedObjectIds": [
             "store_queue_mark",
             "store_counter",
-            "usual_order_cue"
+            "usual_order_cue",
+            "park_notice_board"
           ],
           "recordId": "store_same_order_contact_refused",
           "selectedActionDescriptor": {

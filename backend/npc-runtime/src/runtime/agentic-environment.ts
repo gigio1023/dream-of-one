@@ -515,7 +515,7 @@ export function createSameOrderAgenticEnvironment(): AgenticEnvironmentState {
       {
         objectId: "park_notice_board",
         state: "clear",
-        visibleTo: ["park_witness"],
+        visibleTo: ["park_witness", "waiting_customer"],
         recordId: "park_public_rumor",
       },
       {

@@ -100,7 +100,14 @@ Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `5 / 5`, and `routeReportPassCount=5 / 5`.
-- latest game increment: a public warning can now change another NPC's
+- latest game increment: public notices are now actually public to the next
+  NPC that acts from them. `park_notice_board` is visible to the Waiting
+  Customer in both the backend environment and the Godot proof cell, so the
+  clean-route local tip and suspicious-route distance reaction no longer rely
+  on an invisible board. The playable smoke and Codex gameplay probe now fail
+  if the Waiting Customer shares a local tip or keeps distance without
+  perceiving the public notice board first.
+- prior game increment: a public warning can change another NPC's
   immediate behavior without Station escalation. After the Clerk marks a
   suspicious receipt, the Waiting Customer notes a wary queue, and the Park
   Witness posts a public warning, local trust is low enough to unlock
@@ -178,7 +185,7 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `97a1e7b946b14ce934321c709ba5578cd70a548f5324a244a13cc452200c6e4d`
+  `a938d94a78e324c5c6044f01a44aac8de6b760fc548514fe3b371b54654dd7d8`
 - Markdown SHA-256:
   `09dd032d03dd92f2e20cbc4904aa7b595555be63fe9748ca550c3c85a9062edf`
 - new proof: artifact now includes `aiPlayerReport` with action path, final

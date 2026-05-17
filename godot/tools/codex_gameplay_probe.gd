@@ -366,12 +366,18 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("cover_held_under_suspicion expected marked receipt")
 			if str(record_objects.get("store_queue_mark", "")) != "delayed":
 				failures.append("cover_held_under_suspicion expected queue mark to slow locally")
+			if str(record_objects.get("park_notice_board", "")) != "warned":
+				failures.append("cover_held_under_suspicion expected public warning notice")
 			if not _action_exists(summary, "store_clerk", "mark_receipt"):
 				failures.append("cover_held_under_suspicion expected Store Clerk marked receipt")
 			if not _action_exists(summary, "waiting_customer", "note_wary"):
 				failures.append("cover_held_under_suspicion expected Waiting Customer wary note")
+			if not _action_exists(summary, "park_witness", "post_warning"):
+				failures.append("cover_held_under_suspicion expected Park Witness public warning")
 			if not _observation_exists(summary, "waiting_customer", "store_clerk", "mark_receipt", "note_wary"):
 				failures.append("cover_held_under_suspicion expected Waiting Customer to read marked receipt")
+			if not _observation_exists(summary, "park_witness", "waiting_customer", "note_wary", "post_warning"):
+				failures.append("cover_held_under_suspicion expected Park Witness to read wary queue note")
 		"soft_report":
 			if not bool(station.get("intakeOpen", false)) or bool(station.get("inquestOpen", false)):
 				failures.append("soft_report must open Station intake but stop before inquest")

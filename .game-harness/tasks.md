@@ -71,6 +71,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   reads the Station citation, uses `refuse_contact`, changes the queue/contact
   state to `refused`, and makes authority citation change local NPC behavior
   without deepening Store/Station scope.
+- [x] Add the next smallest informal-warning reaction: Park Witness reads a
+  wary queue note, uses `post_warning`, and posts a public warning without a
+  formal report.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

@@ -44,6 +44,7 @@ export const ENVIRONMENT_AFFORDANCES = [
   "attach_correction",
   "place_note",
   "post_rumor",
+  "post_warning",
   "post_repair_notice",
   "forward_report",
   "open_intake",
@@ -75,6 +76,7 @@ export const LEDGER_EVENT_KINDS = [
   "store_sale_corrected",
   "store_exception_reported",
   "public_rumor_posted",
+  "public_warning_posted",
   "public_repair_noted",
   "store_report_escalated",
   "station_record_cited",
@@ -107,6 +109,7 @@ export type EnvironmentObjectState =
   | "attached"
   | "pending"
   | "clear"
+  | "warned"
   | "rumored"
   | "filed"
   | "forwarded"
@@ -394,6 +397,16 @@ const AFFORDANCE_RULES: AffordanceRule[] = [
   },
   {
     objectId: "park_notice_board",
+    affordance: "post_warning",
+    fromStates: ["clear", "warned"],
+    toState: "warned",
+    eventKind: "public_warning_posted",
+    allowedRoles: ["park_witness"],
+    economyDelta: { localTrust: -1, recordBurden: 3 },
+    requiresLedgerEvent: true,
+  },
+  {
+    objectId: "park_notice_board",
     affordance: "post_repair_notice",
     fromStates: ["clear", "rumored"],
     toState: "clear",
@@ -579,7 +592,7 @@ export function validateAndApplyEnvironmentAction(
     return reject(cloned, "station_citation_requires_store_record", "Station citation must cite a Store ledger event");
   }
 
-  if (["create_receipt", "mark_receipt", "attach_correction", "place_note", "post_rumor", "post_repair_notice", "forward_report", "cite_record"].includes(action.affordance)) {
+  if (["create_receipt", "mark_receipt", "attach_correction", "place_note", "post_rumor", "post_warning", "post_repair_notice", "forward_report", "cite_record"].includes(action.affordance)) {
     const recordId = action.recordId ?? object.recordId;
     if (!recordId || recordId.trim().length === 0) {
       return reject(cloned, "invalid_record_mutation", `${action.affordance} requires a record id`);
@@ -715,6 +728,9 @@ function priorityHintsForRule(rule: AffordanceRule): string[] {
   if (rule.affordance === "post_rumor") {
     hints.push("pressure:public_talk");
   }
+  if (rule.affordance === "post_warning") {
+    hints.push("pressure:public_warning");
+  }
   if (rule.affordance === "post_repair_notice") {
     hints.push("pressure:repair_seen_publicly");
   }
@@ -754,6 +770,8 @@ function perceivedAs(rule: AffordanceRule): string {
       return "queue refuses contact after citation";
     case "post_rumor":
       return "public notice rumor";
+    case "post_warning":
+      return "public warning notice";
     case "post_repair_notice":
       return "public repair notice";
     default:

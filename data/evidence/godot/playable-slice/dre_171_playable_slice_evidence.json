@@ -1,18 +1,18 @@
 {
   "adapter": "godot",
-  "createdAtMs": 1779044019705,
+  "createdAtMs": 1779044810955,
   "events": [
     {
       "adapter": "godot",
       "eventFamily": "session",
-      "eventId": "playable_session_started-001-1779044019476",
+      "eventId": "playable_session_started-001-1779044810721",
       "eventName": "playable_session_started",
       "prologueStep": "beginning",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "sessionOutcome": "running",
       "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-      "timestampMs": 1779044019476,
+      "timestampMs": 1779044810721,
       "uiSummaryArgs": {},
       "uiSummaryKey": "event.session_started",
       "worldId": "dre_171_godot_shell",
@@ -25,7 +25,7 @@
       "conversationId": "conv-same-order",
       "conversationStage": "normal",
       "eventFamily": "domain",
-      "eventId": "conversation_started-002-1779044019570",
+      "eventId": "conversation_started-002-1779044810820",
       "eventName": "conversation_started",
       "outcome": "running",
       "promptId": "store.same_order.routine",
@@ -34,7 +34,7 @@
       "socialLoopStage": "normal",
       "speakerId": "NPC_Store_Clerk",
       "summary": "Store Clerk opened the Same Order conversation.",
-      "timestampMs": 1779044019570,
+      "timestampMs": 1779044810820,
       "turnId": "turn-1",
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
@@ -47,7 +47,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "dialogue_choice_selected-003-1779044019607",
+      "eventId": "dialogue_choice_selected-003-1779044810856",
       "eventName": "dialogue_choice_selected",
       "inputMode": "choice",
       "outcome": "running",
@@ -69,7 +69,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044019607,
+      "timestampMs": 1779044810856,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -84,7 +84,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-004-1779044019607",
+      "eventId": "conversation_anomaly_detected-004-1779044810856",
       "eventName": "conversation_anomaly_detected",
       "inputMode": "choice",
       "outcome": "running",
@@ -106,7 +106,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044019607,
+      "timestampMs": 1779044810856,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -121,7 +121,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-005-1779044019607",
+      "eventId": "npc_suspicion_changed-005-1779044810856",
       "eventName": "npc_suspicion_changed",
       "inputMode": "choice",
       "outcome": "running",
@@ -143,7 +143,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044019607,
+      "timestampMs": 1779044810856,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -158,7 +158,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "응답 지연 12000ms",
       "eventFamily": "domain",
-      "eventId": "response_hesitation_noted-006-1779044019641",
+      "eventId": "response_hesitation_noted-006-1779044810890",
       "eventName": "response_hesitation_noted",
       "inputMode": "response_hesitation",
       "outcome": "running",
@@ -181,7 +181,7 @@
       "suspicionSignals": [
         "response_hesitation"
       ],
-      "timestampMs": 1779044019641,
+      "timestampMs": 1779044810890,
       "turnId": "turn-2",
       "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
       "whyLineKey": "response_hesitation",
@@ -196,7 +196,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "free_input_submitted-007-1779044019669",
+      "eventId": "free_input_submitted-007-1779044810918",
       "eventName": "free_input_submitted",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -221,7 +221,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044019669,
+      "timestampMs": 1779044810918,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -236,7 +236,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-008-1779044019669",
+      "eventId": "conversation_anomaly_detected-008-1779044810918",
       "eventName": "conversation_anomaly_detected",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -261,7 +261,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044019669,
+      "timestampMs": 1779044810918,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -276,7 +276,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-009-1779044019669",
+      "eventId": "npc_suspicion_changed-009-1779044810918",
       "eventName": "npc_suspicion_changed",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -301,7 +301,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044019669,
+      "timestampMs": 1779044810918,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -316,7 +316,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "suspicion_shared-010-1779044019669",
+      "eventId": "suspicion_shared-010-1779044810918",
       "eventName": "suspicion_shared",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -341,7 +341,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044019669,
+      "timestampMs": 1779044810918,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -356,7 +356,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_report_created-011-1779044019670",
+      "eventId": "station_report_created-011-1779044810918",
       "eventName": "station_report_created",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -381,7 +381,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044019670,
+      "timestampMs": 1779044810918,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -396,7 +396,7 @@
       "conversationStage": "inquest",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_inquest_opened-012-1779044019670",
+      "eventId": "station_inquest_opened-012-1779044810919",
       "eventName": "station_inquest_opened",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -421,7 +421,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044019670,
+      "timestampMs": 1779044810919,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -432,12 +432,12 @@
       "adapter": "godot",
       "artifactPath": "data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json",
       "eventFamily": "evidence_export",
-      "eventId": "evidence_pack_created-013-1779044019705",
+      "eventId": "evidence_pack_created-013-1779044810955",
       "eventName": "evidence_pack_created",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "summary": "Godot conversation playable Evidence Pack exported for backend validation.",
-      "timestampMs": 1779044019705,
+      "timestampMs": 1779044810955,
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
     }
@@ -1312,6 +1312,52 @@
             "requiresStoreLedgerEvent": false,
             "toState": "rumored",
             "validationRuleId": "same_order.park_notice_board.post_rumor",
+            "visibleTo": [
+              "park_witness"
+            ]
+          },
+          {
+            "actionId": "park_notice_board.post_warning",
+            "affordance": "post_warning",
+            "citableLedgerEventIds": [
+              "civic-ledger-2"
+            ],
+            "civicEconomyEffects": [
+              "localTrust:-1",
+              "recordBurden:+3"
+            ],
+            "eligibleRoles": [
+              "park_witness"
+            ],
+            "failureReasons": [
+              "object_not_perceived",
+              "affordance_unavailable",
+              "role_authority_exceeded",
+              "why_line_required",
+              "ledger_event_unknown",
+              "ledger_event_not_known"
+            ],
+            "ledgerEventKind": "public_warning_posted",
+            "objectId": "park_notice_board",
+            "objectState": "clear",
+            "perceivedAs": "public warning notice",
+            "playerLabel": "Post Warning",
+            "preconditions": [
+              "object_state:clear",
+              "role_allowed:park_witness",
+              "known_ledger_event_required",
+              "record_id:park_public_rumor"
+            ],
+            "priorityHints": [
+              "economy:localTrust",
+              "economy:recordBurden",
+              "pressure:public_warning"
+            ],
+            "recordId": "park_public_rumor",
+            "requiresLedgerEvent": true,
+            "requiresStoreLedgerEvent": false,
+            "toState": "warned",
+            "validationRuleId": "same_order.park_notice_board.post_warning",
             "visibleTo": [
               "park_witness"
             ]
@@ -3119,19 +3165,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779044018526",
+            "eventId": "playable_session_started-001-1779044809772",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779044018664",
+            "eventId": "conversation_started-002-1779044809906",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-003-1779044018701",
+            "eventId": "dialogue_choice_selected-003-1779044809943",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3142,7 +3188,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-004-1779044018735",
+            "eventId": "dialogue_choice_selected-004-1779044809978",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3153,7 +3199,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_outcome_reached-005-1779044018735",
+            "eventId": "conversation_outcome_reached-005-1779044809978",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "clean_cover",
@@ -3189,19 +3235,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779044018793",
+            "eventId": "playable_session_started-001-1779044810037",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779044018888",
+            "eventId": "conversation_started-002-1779044810134",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779044018924",
+            "eventId": "dialogue_choice_selected-003-1779044810171",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3214,7 +3260,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779044018924",
+            "eventId": "conversation_anomaly_detected-004-1779044810171",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3227,7 +3273,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779044018924",
+            "eventId": "npc_suspicion_changed-005-1779044810171",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3240,7 +3286,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-006-1779044018958",
+            "eventId": "dialogue_choice_selected-006-1779044810205",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3251,7 +3297,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_outcome_reached-007-1779044018959",
+            "eventId": "conversation_outcome_reached-007-1779044810205",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "repair_recovered",
@@ -3293,19 +3339,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779044019241",
+            "eventId": "playable_session_started-001-1779044810493",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779044019342",
+            "eventId": "conversation_started-002-1779044810589",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779044019379",
+            "eventId": "dialogue_choice_selected-003-1779044810625",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3318,7 +3364,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779044019379",
+            "eventId": "conversation_anomaly_detected-004-1779044810625",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3331,7 +3377,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779044019379",
+            "eventId": "npc_suspicion_changed-005-1779044810625",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3344,7 +3390,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "dialogue_choice_selected-006-1779044019413",
+            "eventId": "dialogue_choice_selected-006-1779044810659",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3358,7 +3404,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-007-1779044019413",
+            "eventId": "conversation_anomaly_detected-007-1779044810659",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3372,7 +3418,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-008-1779044019413",
+            "eventId": "npc_suspicion_changed-008-1779044810659",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3386,7 +3432,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-009-1779044019413",
+            "eventId": "suspicion_shared-009-1779044810659",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3400,7 +3446,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-010-1779044019414",
+            "eventId": "station_report_created-010-1779044810660",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 80,
@@ -3414,7 +3460,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_outcome_reached-011-1779044019414",
+            "eventId": "conversation_outcome_reached-011-1779044810660",
             "eventName": "conversation_outcome_reached",
             "outcome": "soft_report",
             "routeOutcome": "soft_report",
@@ -3459,19 +3505,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779044019476",
+            "eventId": "playable_session_started-001-1779044810721",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779044019570",
+            "eventId": "conversation_started-002-1779044810820",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779044019607",
+            "eventId": "dialogue_choice_selected-003-1779044810856",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3484,7 +3530,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779044019607",
+            "eventId": "conversation_anomaly_detected-004-1779044810856",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3497,7 +3543,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779044019607",
+            "eventId": "npc_suspicion_changed-005-1779044810856",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3510,7 +3556,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "response_hesitation_noted-006-1779044019641",
+            "eventId": "response_hesitation_noted-006-1779044810890",
             "eventName": "response_hesitation_noted",
             "outcome": "running",
             "reportWeightAfter": 35,
@@ -3523,7 +3569,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "free_input_submitted-007-1779044019669",
+            "eventId": "free_input_submitted-007-1779044810918",
             "eventName": "free_input_submitted",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3537,7 +3583,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-008-1779044019669",
+            "eventId": "conversation_anomaly_detected-008-1779044810918",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3551,7 +3597,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-009-1779044019669",
+            "eventId": "npc_suspicion_changed-009-1779044810918",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3565,7 +3611,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-010-1779044019669",
+            "eventId": "suspicion_shared-010-1779044810918",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3579,7 +3625,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-011-1779044019670",
+            "eventId": "station_report_created-011-1779044810918",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 120,
@@ -3593,7 +3639,7 @@
           },
           {
             "conversationStage": "inquest",
-            "eventId": "station_inquest_opened-012-1779044019670",
+            "eventId": "station_inquest_opened-012-1779044810919",
             "eventName": "station_inquest_opened",
             "outcome": "inquest_opened",
             "reportWeightAfter": 120,
@@ -6043,6 +6089,51 @@
                   ]
                 },
                 {
+                  "actionId": "park_notice_board.post_warning",
+                  "affordance": "post_warning",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Warning",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public warning notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:public_warning"
+                  ],
+                  "ledgerEventKind": "public_warning_posted",
+                  "civicEconomyEffects": [
+                    "localTrust:-1",
+                    "recordBurden:+3"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_warning",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "warned",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                },
+                {
                   "actionId": "park_notice_board.post_repair_notice",
                   "affordance": "post_repair_notice",
                   "objectId": "park_notice_board",
@@ -7104,6 +7195,51 @@
                     "ledger_event_not_known"
                   ],
                   "toState": "rumored",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-2"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.post_warning",
+                  "affordance": "post_warning",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Warning",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public warning notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:public_warning"
+                  ],
+                  "ledgerEventKind": "public_warning_posted",
+                  "civicEconomyEffects": [
+                    "localTrust:-1",
+                    "recordBurden:+3"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_warning",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "warned",
                   "recordId": "park_public_rumor",
                   "requiresLedgerEvent": true,
                   "requiresStoreLedgerEvent": false,
@@ -9007,6 +9143,51 @@
                     "ledger_event_not_known"
                   ],
                   "toState": "rumored",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-2"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.post_warning",
+                  "affordance": "post_warning",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Warning",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public warning notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:public_warning"
+                  ],
+                  "ledgerEventKind": "public_warning_posted",
+                  "civicEconomyEffects": [
+                    "localTrust:-1",
+                    "recordBurden:+3"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_warning",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "warned",
                   "recordId": "park_public_rumor",
                   "requiresLedgerEvent": true,
                   "requiresStoreLedgerEvent": false,
@@ -12252,6 +12433,51 @@
                 ]
               },
               {
+                "actionId": "park_notice_board.post_warning",
+                "affordance": "post_warning",
+                "objectId": "park_notice_board",
+                "objectState": "clear",
+                "playerLabel": "Post Warning",
+                "eligibleRoles": [
+                  "park_witness"
+                ],
+                "preconditions": [
+                  "object_state:clear",
+                  "role_allowed:park_witness",
+                  "known_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "park_witness"
+                ],
+                "perceivedAs": "public warning notice",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "economy:recordBurden",
+                  "pressure:public_warning"
+                ],
+                "ledgerEventKind": "public_warning_posted",
+                "civicEconomyEffects": [
+                  "localTrust:-1",
+                  "recordBurden:+3"
+                ],
+                "validationRuleId": "same_order.park_notice_board.post_warning",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known"
+                ],
+                "toState": "warned",
+                "recordId": "park_public_rumor",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-3"
+                ]
+              },
+              {
                 "actionId": "park_notice_board.post_repair_notice",
                 "affordance": "post_repair_notice",
                 "objectId": "park_notice_board",
@@ -13437,6 +13663,51 @@
                   "ledger_event_not_known"
                 ],
                 "toState": "rumored",
+                "recordId": "park_public_rumor",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-2"
+                ]
+              },
+              {
+                "actionId": "park_notice_board.post_warning",
+                "affordance": "post_warning",
+                "objectId": "park_notice_board",
+                "objectState": "clear",
+                "playerLabel": "Post Warning",
+                "eligibleRoles": [
+                  "park_witness"
+                ],
+                "preconditions": [
+                  "object_state:clear",
+                  "role_allowed:park_witness",
+                  "known_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "park_witness"
+                ],
+                "perceivedAs": "public warning notice",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "economy:recordBurden",
+                  "pressure:public_warning"
+                ],
+                "ledgerEventKind": "public_warning_posted",
+                "civicEconomyEffects": [
+                  "localTrust:-1",
+                  "recordBurden:+3"
+                ],
+                "validationRuleId": "same_order.park_notice_board.post_warning",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known"
+                ],
+                "toState": "warned",
                 "recordId": "park_public_rumor",
                 "requiresLedgerEvent": true,
                 "requiresStoreLedgerEvent": false,
@@ -15605,6 +15876,51 @@
                   "ledger_event_not_known"
                 ],
                 "toState": "rumored",
+                "recordId": "park_public_rumor",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-2"
+                ]
+              },
+              {
+                "actionId": "park_notice_board.post_warning",
+                "affordance": "post_warning",
+                "objectId": "park_notice_board",
+                "objectState": "clear",
+                "playerLabel": "Post Warning",
+                "eligibleRoles": [
+                  "park_witness"
+                ],
+                "preconditions": [
+                  "object_state:clear",
+                  "role_allowed:park_witness",
+                  "known_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "park_witness"
+                ],
+                "perceivedAs": "public warning notice",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "economy:recordBurden",
+                  "pressure:public_warning"
+                ],
+                "ledgerEventKind": "public_warning_posted",
+                "civicEconomyEffects": [
+                  "localTrust:-1",
+                  "recordBurden:+3"
+                ],
+                "validationRuleId": "same_order.park_notice_board.post_warning",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known"
+                ],
+                "toState": "warned",
                 "recordId": "park_public_rumor",
                 "requiresLedgerEvent": true,
                 "requiresStoreLedgerEvent": false,
@@ -19285,6 +19601,51 @@
                   ]
                 },
                 {
+                  "actionId": "park_notice_board.post_warning",
+                  "affordance": "post_warning",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Warning",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public warning notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:public_warning"
+                  ],
+                  "ledgerEventKind": "public_warning_posted",
+                  "civicEconomyEffects": [
+                    "localTrust:-1",
+                    "recordBurden:+3"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_warning",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "warned",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                },
+                {
                   "actionId": "park_notice_board.post_repair_notice",
                   "affordance": "post_repair_notice",
                   "objectId": "park_notice_board",
@@ -20639,6 +21000,51 @@
                     "ledger_event_not_known"
                   ],
                   "toState": "rumored",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-2"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.post_warning",
+                  "affordance": "post_warning",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Warning",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public warning notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:public_warning"
+                  ],
+                  "ledgerEventKind": "public_warning_posted",
+                  "civicEconomyEffects": [
+                    "localTrust:-1",
+                    "recordBurden:+3"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_warning",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "warned",
                   "recordId": "park_public_rumor",
                   "requiresLedgerEvent": true,
                   "requiresStoreLedgerEvent": false,
@@ -23122,6 +23528,51 @@
                     "ledger_event_not_known"
                   ],
                   "toState": "rumored",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-2"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.post_warning",
+                  "affordance": "post_warning",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Warning",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public warning notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:public_warning"
+                  ],
+                  "ledgerEventKind": "public_warning_posted",
+                  "civicEconomyEffects": [
+                    "localTrust:-1",
+                    "recordBurden:+3"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_warning",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "warned",
                   "recordId": "park_public_rumor",
                   "requiresLedgerEvent": true,
                   "requiresStoreLedgerEvent": false,
@@ -25987,6 +26438,52 @@
             ]
           },
           {
+            "actionId": "park_notice_board.post_warning",
+            "affordance": "post_warning",
+            "citableLedgerEventIds": [
+              "civic-ledger-2"
+            ],
+            "civicEconomyEffects": [
+              "localTrust:-1",
+              "recordBurden:+3"
+            ],
+            "eligibleRoles": [
+              "park_witness"
+            ],
+            "failureReasons": [
+              "object_not_perceived",
+              "affordance_unavailable",
+              "role_authority_exceeded",
+              "why_line_required",
+              "ledger_event_unknown",
+              "ledger_event_not_known"
+            ],
+            "ledgerEventKind": "public_warning_posted",
+            "objectId": "park_notice_board",
+            "objectState": "clear",
+            "perceivedAs": "public warning notice",
+            "playerLabel": "Post Warning",
+            "preconditions": [
+              "object_state:clear",
+              "role_allowed:park_witness",
+              "known_ledger_event_required",
+              "record_id:park_public_rumor"
+            ],
+            "priorityHints": [
+              "economy:localTrust",
+              "economy:recordBurden",
+              "pressure:public_warning"
+            ],
+            "recordId": "park_public_rumor",
+            "requiresLedgerEvent": true,
+            "requiresStoreLedgerEvent": false,
+            "toState": "warned",
+            "validationRuleId": "same_order.park_notice_board.post_warning",
+            "visibleTo": [
+              "park_witness"
+            ]
+          },
+          {
             "actionId": "park_notice_board.post_repair_notice",
             "affordance": "post_repair_notice",
             "citableLedgerEventIds": [
@@ -26888,14 +27385,14 @@
       {
         "adapter": "godot",
         "eventFamily": "session",
-        "eventId": "playable_session_started-001-1779044019476",
+        "eventId": "playable_session_started-001-1779044810721",
         "eventName": "playable_session_started",
         "prologueStep": "beginning",
         "schemaVersion": "godot-runtime-v1",
         "sessionId": "dre-171-playable-session",
         "sessionOutcome": "running",
         "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-        "timestampMs": 1779044019476,
+        "timestampMs": 1779044810721,
         "uiSummaryArgs": {},
         "uiSummaryKey": "event.session_started",
         "worldId": "dre_171_godot_shell",
@@ -26908,7 +27405,7 @@
         "conversationId": "conv-same-order",
         "conversationStage": "normal",
         "eventFamily": "domain",
-        "eventId": "conversation_started-002-1779044019570",
+        "eventId": "conversation_started-002-1779044810820",
         "eventName": "conversation_started",
         "outcome": "running",
         "promptId": "store.same_order.routine",
@@ -26917,7 +27414,7 @@
         "socialLoopStage": "normal",
         "speakerId": "NPC_Store_Clerk",
         "summary": "Store Clerk opened the Same Order conversation.",
-        "timestampMs": 1779044019570,
+        "timestampMs": 1779044810820,
         "turnId": "turn-1",
         "worldId": "dre_171_godot_shell",
         "worldRevision": "rev-social-stealth-v1"
@@ -26930,7 +27427,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "dialogue_choice_selected-003-1779044019607",
+        "eventId": "dialogue_choice_selected-003-1779044810856",
         "eventName": "dialogue_choice_selected",
         "inputMode": "choice",
         "outcome": "running",
@@ -26952,7 +27449,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044019607,
+        "timestampMs": 1779044810856,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -26967,7 +27464,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-004-1779044019607",
+        "eventId": "conversation_anomaly_detected-004-1779044810856",
         "eventName": "conversation_anomaly_detected",
         "inputMode": "choice",
         "outcome": "running",
@@ -26989,7 +27486,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044019607,
+        "timestampMs": 1779044810856,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -27004,7 +27501,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-005-1779044019607",
+        "eventId": "npc_suspicion_changed-005-1779044810856",
         "eventName": "npc_suspicion_changed",
         "inputMode": "choice",
         "outcome": "running",
@@ -27026,7 +27523,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044019607,
+        "timestampMs": 1779044810856,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -27041,7 +27538,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "응답 지연 12000ms",
         "eventFamily": "domain",
-        "eventId": "response_hesitation_noted-006-1779044019641",
+        "eventId": "response_hesitation_noted-006-1779044810890",
         "eventName": "response_hesitation_noted",
         "inputMode": "response_hesitation",
         "outcome": "running",
@@ -27064,7 +27561,7 @@
         "suspicionSignals": [
           "response_hesitation"
         ],
-        "timestampMs": 1779044019641,
+        "timestampMs": 1779044810890,
         "turnId": "turn-2",
         "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
         "whyLineKey": "response_hesitation",
@@ -27079,7 +27576,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "free_input_submitted-007-1779044019669",
+        "eventId": "free_input_submitted-007-1779044810918",
         "eventName": "free_input_submitted",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -27104,7 +27601,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044019669,
+        "timestampMs": 1779044810918,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -27119,7 +27616,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-008-1779044019669",
+        "eventId": "conversation_anomaly_detected-008-1779044810918",
         "eventName": "conversation_anomaly_detected",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -27144,7 +27641,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044019669,
+        "timestampMs": 1779044810918,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -27159,7 +27656,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-009-1779044019669",
+        "eventId": "npc_suspicion_changed-009-1779044810918",
         "eventName": "npc_suspicion_changed",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -27184,7 +27681,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044019669,
+        "timestampMs": 1779044810918,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -27199,7 +27696,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "suspicion_shared-010-1779044019669",
+        "eventId": "suspicion_shared-010-1779044810918",
         "eventName": "suspicion_shared",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -27224,7 +27721,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044019669,
+        "timestampMs": 1779044810918,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -27239,7 +27736,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_report_created-011-1779044019670",
+        "eventId": "station_report_created-011-1779044810918",
         "eventName": "station_report_created",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -27264,7 +27761,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044019670,
+        "timestampMs": 1779044810918,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -27279,7 +27776,7 @@
         "conversationStage": "inquest",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_inquest_opened-012-1779044019670",
+        "eventId": "station_inquest_opened-012-1779044810919",
         "eventName": "station_inquest_opened",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -27304,7 +27801,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044019670,
+        "timestampMs": 1779044810919,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -28227,6 +28724,52 @@
               "requiresStoreLedgerEvent": false,
               "toState": "rumored",
               "validationRuleId": "same_order.park_notice_board.post_rumor",
+              "visibleTo": [
+                "park_witness"
+              ]
+            },
+            {
+              "actionId": "park_notice_board.post_warning",
+              "affordance": "post_warning",
+              "citableLedgerEventIds": [
+                "civic-ledger-2"
+              ],
+              "civicEconomyEffects": [
+                "localTrust:-1",
+                "recordBurden:+3"
+              ],
+              "eligibleRoles": [
+                "park_witness"
+              ],
+              "failureReasons": [
+                "object_not_perceived",
+                "affordance_unavailable",
+                "role_authority_exceeded",
+                "why_line_required",
+                "ledger_event_unknown",
+                "ledger_event_not_known"
+              ],
+              "ledgerEventKind": "public_warning_posted",
+              "objectId": "park_notice_board",
+              "objectState": "clear",
+              "perceivedAs": "public warning notice",
+              "playerLabel": "Post Warning",
+              "preconditions": [
+                "object_state:clear",
+                "role_allowed:park_witness",
+                "known_ledger_event_required",
+                "record_id:park_public_rumor"
+              ],
+              "priorityHints": [
+                "economy:localTrust",
+                "economy:recordBurden",
+                "pressure:public_warning"
+              ],
+              "recordId": "park_public_rumor",
+              "requiresLedgerEvent": true,
+              "requiresStoreLedgerEvent": false,
+              "toState": "warned",
+              "validationRuleId": "same_order.park_notice_board.post_warning",
               "visibleTo": [
                 "park_witness"
               ]

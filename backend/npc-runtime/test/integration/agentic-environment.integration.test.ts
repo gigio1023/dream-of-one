@@ -428,6 +428,65 @@ test("Park witness can turn a correction record into public repair notice", () =
   assert.equal(repairNotice.environment.economy.recordBurden, 15);
 });
 
+test("Park witness can post a public warning from a wary queue record", () => {
+  let environment = createSameOrderAgenticEnvironment();
+  const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);
+  const marked = requireAccepted(validateAndApplyEnvironmentAction(environment, clerk, {
+    actorId: clerk.actorId,
+    role: clerk.role,
+    affordance: "mark_receipt",
+    objectId: "receipt_tray",
+    recordId: "store_same_order_receipt",
+    whyLine: "The player line does not match the local routine, so the clerk marks the receipt.",
+  }));
+  environment = marked.environment;
+
+  const customer = actor({
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    knownLedgerEventIds: [marked.event.eventId],
+  }, environment);
+  const wary = requireAccepted(validateAndApplyEnvironmentAction(environment, customer, {
+    actorId: customer.actorId,
+    role: customer.role,
+    affordance: "note_wary",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_queue_wary",
+    citedLedgerEventId: marked.event.eventId,
+    whyLine: "The waiting customer sees the marked receipt and slows the queue without filing a report.",
+  }));
+  environment = wary.environment;
+
+  const witness = actor({
+    actorId: "NPC_Park_Witness",
+    role: "park_witness",
+    knownLedgerEventIds: [wary.event.eventId],
+  }, environment);
+  const action = listAvailableEnvironmentActions(environment, witness)
+    .find(candidate => candidate.affordance === "post_warning");
+
+  assert.ok(action);
+  assert.equal(action.objectId, "park_notice_board");
+  assert.deepEqual(action.citableLedgerEventIds, [wary.event.eventId]);
+  assert.deepEqual(action.civicEconomyEffects, ["localTrust:-1", "recordBurden:+3"]);
+
+  const warning = requireAccepted(validateAndApplyEnvironmentAction(environment, witness, {
+    actorId: witness.actorId,
+    role: witness.role,
+    affordance: "post_warning",
+    objectId: "park_notice_board",
+    recordId: "park_public_warning",
+    citedLedgerEventId: wary.event.eventId,
+    whyLine: "The wary queue record is visible enough for the witness to warn the player without formal reporting.",
+  }));
+
+  assert.equal(warning.event.kind, "public_warning_posted");
+  assert.equal(warning.event.citedLedgerEventId, wary.event.eventId);
+  assert.equal(warning.environment.objects.find(item => item.objectId === "park_notice_board")?.state, "warned");
+  assert.equal(warning.environment.economy.localTrust, 42);
+  assert.equal(warning.environment.economy.recordBurden, 23);
+});
+
 test("Station citation only becomes available after the Station knows a Store ledger event", () => {
   let environment = createSameOrderAgenticEnvironment();
   const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);

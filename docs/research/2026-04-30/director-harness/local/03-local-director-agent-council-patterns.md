@@ -20,7 +20,7 @@ Dream of One에서는 이를 `Director Council`로 바꿀 수 있다.
 
 - `Drama Lens`: NPC가 플레이어를 조사하는 압력이 충분한가.
 - `Dream Law Lens`: Dream Law, Cover Test, Exposure, inquest, verdict 권위가 흔들리지 않는가.
-- `Text Danger Lens`: 텍스트가 단순 설명이 아니라 위험 표면으로 작동하는가.
+- `Text Danger Lens`: 텍스트가 단순 설명이 아니라 위험해지는 지점으로 작동하는가.
 - `Pacing Lens`: 세션 진행이 조사/압박/판정으로 수렴하는가.
 - `Taste Lens`: 세계가 generic mystery가 아니라 Dream of One 고유의 감각을 갖는가.
 
@@ -63,7 +63,7 @@ Game Director에는 긴 design doc보다 짧은 `Director Decision Record`가 �
 Dream of One에 맞게 바꾸면 adversarial reviewer는 다음 질문을 해야 한다.
 
 - 이 scene은 플레이어를 조사받는 대상으로 만들고 있는가, 아니면 플레이어를 탐정으로 만들고 있는가.
-- NPC 말풍선이 danger surface인가, 아니면 lore 설명인가.
+- NPC 말풍선이 place where danger starts인가, 아니면 lore 설명인가.
 - Dream Law authority가 텍스트 생성에 밀려 약해졌는가.
 - Exposure 변화가 deterministic evidence 없이 기분으로 움직였는가.
 - verdict/session termination이 narrative flourish 때문에 불명확해졌는가.
@@ -130,7 +130,7 @@ Dream of One용 persona는 권한을 분리해야 한다.
 - `Rules Counsel`: deterministic authority만 본다. write 권한 없음.
 - `NPC Pressure Designer`: NPC가 플레이어를 어떻게 의심/압박하는지 설계한다.
 - `Station Prosecutor`: intake, inquest, verdict 흐름을 담당한다.
-- `Text Hazard Reviewer`: 대사/기록/통지가 위험 표면인지 검토한다.
+- `Text Hazard Reviewer`: 대사/기록/통지가 위험해지는 지점인지 검토한다.
 - `Taste Reviewer`: generic mystery, generic surrealism, generic noir를 걸러낸다.
 - `Verifier`: runtime schema, smoke checks, evidence를 확인한다.
 

@@ -64,7 +64,7 @@ Director-level implication:
 Dream of One audience hypothesis:
 - 1차 태그 후보: `Text-Based`, `Story Rich`, `Psychological`, `Investigation`, `Mystery`, `Immersive Sim`, `Choices Matter`.
 - 주의: "player is not an investigator"라는 디자인 레일과 Steam의 `Investigation` 기대가 충돌할 수 있음. 태그는 "NPCs investigate the player"를 전달할 수 있을 때만 전면 배치.
-- 비교군은 장르 이름보다 "텍스트가 위험 표면인 게임", "시스템이 플레이어 진술을 심문하는 게임", "정체성/커버 유지가 코어 루프인 게임"으로 잡아야 함.
+- 비교군은 장르 이름보다 "텍스트가 위험해지는 지점인 게임", "시스템이 플레이어 진술을 심문하는 게임", "정체성/커버 유지가 코어 루프인 게임"으로 잡아야 함.
 
 ### 3. Funding and Team Pitch
 
@@ -103,7 +103,7 @@ Dream of One vertical slice definition:
 - 범위: 한 세션의 deterministic investigation arc.
 - 포함: Station intake, text risk surface, Dream Law violation detection, Cover Test, Exposure update, NPC/system response, inquest/verdict preview, session termination condition.
 - 제외: 전체 월드, 다수 지역, 방대한 NPC schedule, procedural narrative expansion, cosmetic breadth.
-- 품질 기준: 텍스트가 "설명 UI"가 아니라 실제 위험 표면으로 작동해야 함.
+- 품질 기준: 텍스트가 "설명 UI"가 아니라 실제 위험해지는 지점으로 작동해야 함.
 
 ### 5. Milestone Roadmap and Scope Control
 
@@ -181,7 +181,7 @@ Demo acceptance criteria:
 
 Dream of One store truth checks:
 - "NPCs investigate the player"가 실제 빌드에서 UI/AI/system consequence로 보이는가.
-- "Text is the danger surface"가 trailer 첫 10초 안에 보이는가.
+- "Text is where danger starts"가 trailer 첫 10초 안에 보이는가.
 - "Dream Law / Cover Test / Exposure"가 이름만 있는 lore가 아니라 deterministic loop인가.
 - "Investigation" 태그가 플레이어 역할 오해를 만들지 않는가.
 - demo와 store screenshots가 같은 interaction vocabulary를 쓰는가.
@@ -207,4 +207,4 @@ Dream of One에 맞는 한 줄 전략:
 - public demo는 Next Fest/press/showcase용 이전에 "구매 판단에 내놓아도 되는 품질"인지 판정.
 - store copy, tags, trailer, screenshots, demo build가 같은 제품 약속을 말하지 않으면 공개하지 않는다.
 - funding pitch에서 필요한 도움을 명시한다: prototype grant, publishing/marketing partner, platform featuring, QA/localization/porting 중 무엇인지 분리.
-- scope는 "텍스트 위험 표면을 강화하는가"를 기준으로 자른다. 세계/콘텐츠 확장은 vertical slice가 이 기준을 통과한 뒤에만 추가.
+- scope는 "텍스트가 위험해지는 지점을 강화하는가"를 기준으로 자른다. 세계/콘텐츠 확장은 vertical slice가 이 기준을 통과한 뒤에만 추가.

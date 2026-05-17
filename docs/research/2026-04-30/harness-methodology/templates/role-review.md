@@ -30,7 +30,7 @@ Does this work preserve the game seed?
 
 - Player is not investigator:
 - NPC/Station investigate player:
-- Text is danger surface:
+- Text is where danger starts:
 - Deterministic authority preserved:
 - Korean-first preserved:
 

@@ -11,7 +11,7 @@ This project currently uses Codex as a force multiplier. The harness must still 
 | Game Director | thesis, pillars, final reducer decisions | task-level implementation detail |
 | Producer | milestone scope, schedule, cut/defer/keep | creative authority by default |
 | Systems Designer | Dream Law, Cover Test, Exposure semantics | NPC prose style |
-| Narrative Designer | beats, text surfaces, NPC/Station voice | verdict authority |
+| Narrative Designer | beats, in-world text, NPC/Station voice | verdict authority |
 | Godot Engineer | scene/runtime presentation, input, UI, evidence scripts | backend rule truth |
 | Backend Runtime Engineer | schema, validation, Evidence, fallback | visual staging |
 | UX/QA | playability, comprehension, accessibility, regression | rewriting thesis |

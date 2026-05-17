@@ -26,7 +26,7 @@
 
 ### UI/UX
 
-**Game Usability** 와 **Game User Experience And Player-Centered Design** 은 game UX 를 일반 앱 UX 와 분리해 본다. Dream of One 의 UI 는 정보를 친절하게 정리하는 표면이 아니라, 텍스트가 위험 표면이라는 핵심 규칙을 드러내는 interface contract 여야 한다.
+**Game Usability** 와 **Game User Experience And Player-Centered Design** 은 game UX 를 일반 앱 UX 와 분리해 본다. Dream of One 의 UI 는 정보를 친절하게 정리하는 표면이 아니라, 텍스트가 위험해지는 지점이라는 핵심 규칙을 드러내는 interface contract 여야 한다.
 
 검증 기준은 버튼 존재, menu completeness, input reachability 에서 끝나면 안 된다. player intent, system response, uncertainty, consequence visibility 가 UI 상태 전환마다 보존되는지 확인해야 한다.
 
@@ -34,7 +34,7 @@
 
 **Xbox Accessibility Guidelines** 는 접근성을 아이디어 촉진, 개발 guardrail, test checklist 로 사용하게 설계된 platform-holder 기준이다. **Accessible Player Experiences** 는 access, challenge, presentation barrier 를 팀의 공통 언어로 바꾸는 design pattern 체계다.
 
-Dream of One 에서는 텍스트가 위험 표면이므로 accessibility 는 텍스트를 약화시키는 옵션이 아니다. 대신 clear text, remapping, subtitle/caption structure, readable timing, alternative feedback 을 통해 같은 위험을 더 많은 플레이어가 해석할 수 있게 해야 한다.
+Dream of One 에서는 텍스트가 위험해지는 지점이므로 accessibility 는 텍스트를 약화시키는 옵션이 아니다. 대신 clear text, remapping, subtitle/caption structure, readable timing, alternative feedback 을 통해 같은 위험을 더 많은 플레이어가 해석할 수 있게 해야 한다.
 
 ### Localization
 

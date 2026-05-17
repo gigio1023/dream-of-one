@@ -38,7 +38,7 @@ Reads:
 Checks:
 - beat causality
 - speaker motive
-- text as danger surface
+- text as the start of risk
 - repeated line fatigue
 - Korean-first meaning
 - fallback line safety

@@ -24,8 +24,8 @@
 
 권장 패턴:
 - `docs/design/game-design.md`와 `project.md`의 상위 문장을 "제품 명제"와 "creative pillars"로 분리한다.
-- 각 pillar마다 침해 시나리오를 붙인다. 예: "Text is the danger surface"가 깨지는 경우는 위험이 UI 숫자나 combat meter로 이전되는 경우다.
-- 모든 slice, Linear issue, Beads task는 적어도 하나의 pillar에 연결되어야 한다. 연결이 없으면 product debt로 본다.
+- 각 pillar마다 침해 시나리오를 붙인다. 예: "Text is where the danger starts"가 깨지는 경우는 위험이 UI 숫자나 combat meter로 이전되는 경우다.
+- 모든 slice와 Linear issue는 적어도 하나의 pillar에 연결되어야 한다. 연결이 없으면 product debt로 본다.
 
 ## 3. Stage Roadmap과 마일스톤 운영
 
@@ -40,7 +40,7 @@ Dream of One에 맞춘 stage roadmap은 다음 구조가 적합하다.
 | Thesis Lock | 이 게임은 무엇을 감시하고 무엇을 절대 하지 않는가 | product thesis, creative pillars | pillar 위반 없음 |
 | Protocol Slice | Dream Law, Cover Test, Exposure가 한 세션에서 닫히는가 | deterministic protocol slice | evidence_run + runtime slice smoke |
 | Social Pressure Slice | NPC와 Station systems가 player를 조사하는가 | intake/inquest/verdict loop | player가 investigator가 아님 |
-| Text Danger Slice | 텍스트가 실제 위험 표면인가 | text surface + evidence semantics | backend check + Godot smoke |
+| Text Danger Slice | 텍스트가 실제 위험을 만드는가 | visible text + evidence semantics | backend check + Godot smoke |
 | Playable Verdict | session termination이 제품 권위로 작동하는가 | playable verdict evidence | inquest/verdict deterministic |
 | Retro / Re-scope | 무엇을 배웠고 무엇을 잘라야 하는가 | director retro + decision ledger | 다음 milestone의 thesis drift 확인 |
 
@@ -113,7 +113,7 @@ Dream of One의 director context restoration은 단순 요약이 아니라 다�
 - 다음 decision needed.
 - scope cuts and deferred ideas.
 
-이 구조는 `docs/research`가 아니라 active director 문서에 있어야 한다. research 결과는 참고 자료이고, 실제 복원 파일은 `project.md`, `plan.md`, `docs/design/*`, Beads/Linear state와 맞물려야 한다.
+이 구조는 `docs/research`가 아니라 active director 문서에 있어야 한다. research 결과는 참고 자료이고, 실제 복원 파일은 `project.md`, `plan.md`, `docs/design/*`, Linear state와 맞물려야 한다.
 
 ## 8. Bounded Autonomous Loops at Milestone Scale
 
@@ -132,7 +132,7 @@ Dream of One의 bounded autonomous loop 원칙:
 
 ## 9. Dream of One 적용 결론
 
-Dream of One은 일반 앱보다 director governance가 더 중요하다. 이유는 제품 권위가 코드 품질만으로 유지되지 않기 때문이다. `Player is not an investigator`, `NPCs and Station systems investigate the player`, `Text is the danger surface`, deterministic Dream Law와 verdict는 설계 rails다. 구현이 성공해도 rails를 침식하면 실패다.
+Dream of One은 일반 앱보다 director governance가 더 중요하다. 이유는 제품 권위가 코드 품질만으로 유지되지 않기 때문이다. `Player is not an investigator`, `NPCs and Station systems investigate the player`, `Text is where the danger starts`, deterministic Dream Law와 verdict는 설계 rails다. 구현이 성공해도 rails를 침식하면 실패다.
 
 따라서 local harness에서 가져올 상위 패턴은 다음 7개다.
 

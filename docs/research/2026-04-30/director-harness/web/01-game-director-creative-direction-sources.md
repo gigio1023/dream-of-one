@@ -46,7 +46,7 @@
 - 일정, 예산, 기술 제약 아래에서도 양보하면 안 되는 품질 기준은 무엇인가?
 - 빌드 리뷰에서 “통과”와 “보류”를 가르는 증거는 무엇인가?
 
-Dream of One 관점에서는 비전 소유권이 특히 중요하다. 이 프로젝트의 디자인 레일은 “플레이어는 조사자가 아니며, NPC와 Station systems가 플레이어를 조사한다”는 것이다. 그러므로 Director Harness는 새 기능이 재미있어 보이는지만 보는 장치가 아니라, 기능이 플레이어를 수사 주체로 되돌리지 않는지, 텍스트가 위험 표면으로 작동하는지, Dream Law / Cover Test / Exposure / Station intake / inquest / verdict / session termination의 결정 권위를 흐리지 않는지 검증해야 한다.
+Dream of One 관점에서는 비전 소유권이 특히 중요하다. 이 프로젝트의 디자인 레일은 “플레이어는 조사자가 아니며, NPC와 Station systems가 플레이어를 조사한다”는 것이다. 그러므로 Director Harness는 새 기능이 재미있어 보이는지만 보는 장치가 아니라, 기능이 플레이어를 수사 주체로 되돌리지 않는지, 텍스트가 위험해지는 지점으로 작동하는지, Dream Law / Cover Test / Exposure / Station intake / inquest / verdict / session termination의 결정 권위를 흐리지 않는지 검증해야 한다.
 
 ## Creative Pillars
 
@@ -131,7 +131,7 @@ Dream of One에서는 다음 정렬 산출물이 필요하다.
 - Creative Director 책임은 Dream of One에서 Dream Law, Cover Test, Exposure, Station intake, inquest, verdict, session termination의 경험 일관성을 지키는 역할로 번역된다.
 - Producer 책임은 harness 내부에서 scope, milestone, evidence completeness, risk, owner를 추적하는 실행 레이어로 분리해야 한다.
 - Lead Designer 책임은 pillar를 core loop, text surface, NPC behavior, Station procedure, progression rule로 낮추는 설계 레이어로 분리해야 한다.
-- Game Vision Document는 짧고 판정 가능해야 한다. 특히 “플레이어는 조사자가 아니다”와 “텍스트가 위험 표면이다”는 non-goal과 rejection criteria로 들어가야 한다.
+- Game Vision Document는 짧고 판정 가능해야 한다. 특히 “플레이어는 조사자가 아니다”와 “텍스트가 위험해지는 지점이다”는 non-goal과 rejection criteria로 들어가야 한다.
 - 각 milestone은 날짜가 아니라 증거 묶음이다. Godot 빌드, backend check, runtime evidence, screenshot, schema validation이 gate별 통과 조건에 연결되어야 한다.
 - Dream of One의 director harness가 통과시켜야 하는 것은 더 많은 콘텐츠가 아니라, 플레이어를 조사하는 Station 권위와 deterministic verdict가 실제 빌드에서 흔들리지 않는 상태다.
 

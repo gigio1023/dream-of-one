@@ -48,10 +48,11 @@ Provider preflight must check:
 - timeout and retry behavior.
 - deterministic fallback behavior.
 
-GPT model names are not public promises. Do not assume `gpt-5.4-nano` or any fixed GPT model unless runtime verification proves it for the configured provider.
+GPT model names are not public promises. Do not assume `gpt-5.4-mini` or any fixed GPT model unless runtime verification proves it for the configured provider.
 
 Model preference:
-- `gpt-5.4-nano` is the preferred GPT model only for configured providers that pass runtime verification.
+- `gpt-5.4-mini` is the preferred GPT model only for configured providers that pass runtime verification and the preconfigured request budget.
+- `gpt-5.4-nano` and `gpt-5-nano` are fallback candidates, not public promises.
 - If runtime verification fails, release truth must say live GPT access is unavailable or must name the verified fallback mode.
 - Public copy must describe the access mode, not the aspirational model target.
 
@@ -62,6 +63,14 @@ No-provider fallback:
 - uses deterministic fallback lines.
 - clearly marks live AI text as unavailable.
 - preserves Dream Law, Evidence, Exposure, inquest, verdict, and session termination.
+
+Current M1 provider mode:
+- Same Order M1 is fallback-only until live API preflight and Godot-to-backend
+  provider dispatch both pass.
+- Provider-shaped backend contracts may be cited as boundary evidence only, not
+  as live provider proof.
+- Tester-facing setup and in-game UI still need to show the verified
+  provider/fallback state before demo-complete claims.
 
 ## Current Build Truth
 
@@ -93,7 +102,7 @@ The public demo must not claim:
 - full campaign.
 - final art/audio quality.
 - live API provider access unless the build proves it.
-- `gpt-5.4-nano` availability.
+- `gpt-5.4-mini` availability.
 
 The public demo may claim only what the build proves:
 - NPCs and Station systems investigate player dialogue.
@@ -104,7 +113,7 @@ The public demo may claim only what the build proves:
 - Korean-first with English selectable.
 
 Before any public demo claim, proof must include:
-- current-build gameplay capture for route readability, interactable text surfaces, consequence UI, and verdict/session-end state.
+- current-build gameplay capture for route readability, readable in-world text, consequence UI, and verdict/session-end state.
 - provider preflight or fallback-only disclosure in setup and in-game UI.
 - external comprehension notes showing players understand the investigated-player role and text-to-consequence link.
 - exported build/install evidence or an explicit decision that the artifact is not public-release ready.

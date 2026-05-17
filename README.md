@@ -12,17 +12,20 @@ The screenshot is a current internal Godot capture of the `Same Order` Store Cle
 
 | Area | Status |
 |---|---|
-| Engine | Godot 4.x 3D project under `godot/`. |
+| Engine | Godot 4.x 3D project under `godot/`; current proof uses Godot 4.7-beta2 through `godot-latest`. |
 | Backend | TypeScript NPC runtime under `backend/npc-runtime/`. |
 | Playable proof | Store Clerk prompt, three choices, preset recorded statement, deterministic suspicion/report, Station inquest. |
 | Evidence | Godot Evidence Packs validate through the backend Schema. |
-| AI provider | Designed as an optional wording proposal layer. Live provider completion is still pending. |
-| Release | No public demo, exported build, or fixed GPT model promise yet. |
+| AI provider | Optional wording proposal layer. Current M1 proof is `fallback_only_m1`, not live GPT. |
+| Release | Packaged app export is proven for local testing. No public demo or fixed GPT model promise yet. |
 
 ## Quick Start
 
 Prerequisites:
-- Godot 4.6.x.
+- Latest published Godot for this repo proof: `4.7.beta2.official.777579205`
+  through `/opt/homebrew/bin/godot-latest`.
+- Stable Homebrew `godot` may still be `4.6.2`; prefer `godot-latest` unless
+  a task explicitly asks for stable-only verification.
 - Node.js and npm.
 - OpenAI/API credentials only if you are working on live proposal-provider paths.
 
@@ -41,13 +44,13 @@ npm run check --prefix backend/npc-runtime
 Open the game in Godot:
 
 ```bash
-godot --path godot
+/opt/homebrew/bin/godot-latest --path godot
 ```
 
 Run the current playable proof:
 
 ```bash
-godot --headless --path godot --script res://tools/playable_slice_smoke.gd
+/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/playable_slice_smoke.gd
 ```
 
 ## Game Loop
@@ -84,7 +87,7 @@ flowchart LR
 | Backend/runtime | Validation, deterministic suspicion, report thresholds, fallback, Evidence, Station state. | Final art, player camera feel, scene composition. |
 | API provider | NPC line candidates, Station wording, localized variants, fallback text variants. | Risk tags, Exposure delta, Evidence type, why-line authority, inquest, verdict, session end. |
 
-GPT model availability is checked at runtime. `gpt-5.4-nano` is a preferred configured candidate only when the provider verifies it; the game must fall back to an available configured model or deterministic text.
+GPT model availability is checked at runtime. `gpt-5.4-mini` is the preferred configured candidate only when the provider verifies it; the game must fall back to an available configured model or deterministic text. Live proposal smoke tests must pass the configured request budget before calling the Responses API.
 
 ## Current Proof
 
@@ -98,12 +101,9 @@ The checked-in proof covers:
 
 Still pending before calling this a small complete prologue/demo:
 
-- Live provider preflight and provider-backed wording in Godot.
-- Manual typed free-input UI if free input remains in the public promise.
-- Manual replay/readability evidence for the internally proven route contrast.
+- Live provider preflight only if provider-backed wording becomes part of the public promise.
 - External player comprehension evidence.
-- Exported build setup and exported-build smoke.
-- Human visual/readability review.
+- Manual replay notes from a fresh player using the packaged app.
 
 ## Documentation
 
@@ -139,14 +139,14 @@ Repo-local checks:
 
 ```bash
 npm run check --prefix backend/npc-runtime
-godot --headless --import --path godot
-godot --headless --path godot --script res://tools/scene_load_smoke.gd
-godot --headless --path godot --script res://tools/evidence_run.gd
-godot --headless --path godot --script res://tools/runtime_slice_smoke.gd
-godot --headless --path godot --script res://tools/playable_slice_smoke.gd
-godot --headless --path godot --script res://tools/live_backend_bridge_smoke.gd
-godot --headless --path godot --script res://tools/localization_smoke.gd
-godot --path godot --script res://tools/visual_capture.gd
+/opt/homebrew/bin/godot-latest --headless --import --path godot
+/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/scene_load_smoke.gd
+/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/evidence_run.gd
+/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/runtime_slice_smoke.gd
+/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/playable_slice_smoke.gd
+/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/live_backend_bridge_smoke.gd
+/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/localization_smoke.gd
+/opt/homebrew/bin/godot-latest --quit-after 2400 --path godot --script res://tools/visual_capture.gd
 ```
 
 Optional local workspace helper checks:

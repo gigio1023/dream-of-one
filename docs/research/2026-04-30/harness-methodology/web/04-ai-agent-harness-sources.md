@@ -25,7 +25,7 @@ OpenAI Harness Engineering의 가장 직접적인 교훈은 `AGENTS.md`를 거�
 
 게임 개발에 적용:
 - `AGENTS.md`: 실행자 규칙, 검증 명령, 핵심 design rails.
-- `docs/scenario/`: 게임 정체성, 플레이어 경험, 캐릭터, 텍스트 위험 표면.
+- `docs/scenario/`: 게임 정체성, 플레이어 경험, 캐릭터, 텍스트가 위험해지는 지점.
 - `docs/design/`: 시스템 규칙, deterministic authority, runtime evidence.
 - `docs/development/harness/` 또는 `docs/research/harness-methodology/`: Codex에게 작업을 맡기는 운영 방식.
 - `.game-harness/`: 현재 stage, task ledger, drift log, verification ledger.

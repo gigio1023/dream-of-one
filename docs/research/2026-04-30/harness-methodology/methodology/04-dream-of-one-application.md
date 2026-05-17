@@ -21,7 +21,7 @@ Dream of One should be treated as:
 - Korean-first 3D social-stealth prologue.
 - Player is the subject of investigation.
 - NPCs and Station systems investigate the player.
-- Text is the danger surface.
+- Text is where danger starts.
 - Codex CLI generates bounded NPC text proposals.
 - Backend/runtime owns deterministic rules, thresholds, Evidence, verdict, and session termination.
 
@@ -51,7 +51,7 @@ Example:
 | Layer | Example |
 |---|---|
 | Experience goal | Player feels that ordinary answers can become evidence. |
-| Design pillar | Text is the danger surface. |
+| Design pillar | Text is where danger starts. |
 | Scenario beat | Station intake asks for a harmless reason for arrival. |
 | Runtime contract | response text is classified into risk tags; backend computes Exposure delta. |
 | Content table | Korean default line, English line, speaker, condition, repeat policy. |

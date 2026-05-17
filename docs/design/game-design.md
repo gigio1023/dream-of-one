@@ -13,7 +13,7 @@ The player is not an investigator. The player performs cover work while NPC soci
 
 ## Danger Surface
 
-Dialogue is the danger surface:
+Dialogue is where danger starts:
 
 - NPC prompts carry local assumptions.
 - Dialogue choices express safe, uncertain/repair, or risky/weird intent without exposing debug labels.

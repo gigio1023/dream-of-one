@@ -32,7 +32,7 @@
 
 디렉터용 하네스는 따라서 “Godot으로 멋진 장면을 만들 수 있나?”가 아니라 “이번 주에 무엇을 실패 가능하게 증명할 것인가?”를 먼저 물어야 한다. `/Users/user/git/harness/funplay-skill/skills/gameplay-prototyping/SKILL.md`도 같은 방향이다. 첫 플레이어블을 방해하지 않는 것만 남기고, 장식적이거나 비핵심인 것은 명시적으로 미룬다.
 
-Dream of One에 적용하면 첫 엔진 증거는 완성된 챕터가 아니라, “텍스트가 위험 표면으로 작동하는가”, “Station 시스템이 플레이어를 조사하는 느낌이 60초 안에 드러나는가”, “Cover Test 실패가 플레이어에게 읽히는가” 같은 작은 가설이어야 한다.
+Dream of One에 적용하면 첫 엔진 증거는 완성된 챕터가 아니라, “텍스트가 위험해지는 지점으로 작동하는가”, “Station 시스템이 플레이어를 조사하는 느낌이 60초 안에 드러나는가”, “Cover Test 실패가 플레이어에게 읽히는가” 같은 작은 가설이어야 한다.
 
 ## 2. 3D vs 2D는 취향이 아니라 증거 비용의 선택이다
 
@@ -73,7 +73,7 @@ Godot 쪽도 같은 원칙을 가져올 수 있다. `/Users/user/git/harness/god
 Dream of One의 scene quality gate는 다음 네 단계면 충분하다.
 
 1. 열림: `godot --headless --import --path godot`와 scene load smoke가 통과한다.
-2. 보임: main scene screenshot이 비어 있지 않고, 텍스트 위험 표면과 Station/NPC 권력이 첫 화면에서 읽힌다.
+2. 보임: main scene screenshot이 비어 있지 않고, 텍스트가 위험해지는 지점과 Station/NPC 권력이 첫 화면에서 읽힌다.
 3. 반응함: 입력 시퀀스가 player state, Exposure, Cover Test, verdict/session 상태를 바꾼다.
 4. 기록됨: JSON evidence, console log, screenshot이 같은 실행 ID로 남아 디렉터가 다시 볼 수 있다.
 

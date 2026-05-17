@@ -44,7 +44,7 @@ The API proposal provider may propose:
 - dialogue choice wording for already-authored choice intents
 - NPC reaction wording for known suspicion states
 - localized variants
-- fallback surface text
+- fallback wording
 
 The API proposal provider must not decide:
 - action type

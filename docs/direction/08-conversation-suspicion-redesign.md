@@ -80,7 +80,7 @@ Optional free input:
 
 The third choice and the free input can both be risky, but for different
 reasons. The authored choice is controlled and testable. The free input is a
-high-risk expressive surface.
+high-risk expressive statement.
 
 ### Optional Free Input
 
@@ -170,7 +170,7 @@ Evidence records should include:
 
 The player-facing UI should emphasize conversation, not meters.
 
-Required UI surfaces:
+Required UI elements:
 
 - current NPC prompt
 - three dialogue choices
@@ -299,7 +299,7 @@ Deprecated for player-facing design:
 - risk labels shown as the choice identity.
 - Cover Test zone activation as the main verb.
 - repeated identical risky input to reach verdict.
-- text surfaces as the primary proof that text is dangerous.
+- in-world notices as the primary proof that text is dangerous.
 
 Preserved as internal harness:
 

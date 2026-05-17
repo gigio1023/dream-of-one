@@ -98,7 +98,7 @@ QA source들은 QA를 final bug sweep로 축소하지 않는다. QA는 early ris
 ## Game Harness Takeaways for Dream of One
 
 - **Gate를 phase별로 둔다**: prototype, vertical slice, alpha, beta, release candidate, launch, post-launch를 같은 “done”으로 취급하지 않는다.
-- **Vertical slice는 product authority gate다**: core loop, text danger surface, Station investigation flow, deterministic Evidence semantics, content pipeline, QA evidence를 한 번에 검증한다.
+- **Vertical slice는 product authority gate다**: core loop, text-to-record danger chain, Station investigation flow, deterministic Evidence semantics, content pipeline, QA evidence를 한 번에 검증한다.
 - **Pitch readiness는 playable evidence 중심이다**: route to market, audience, team capacity, budget/schedule, external feedback을 source-backed checklist로 만든다.
 - **QA는 early embedded function이다**: runtime smoke, scene load, evidence run, backend schema check, regression notes를 milestone마다 붙인다.
 - **Release gate는 store promise와 build truth를 맞춘다**: store copy, screenshots, feature claims, supported platforms, save/load, content disclosure가 실제 build와 일치해야 한다.

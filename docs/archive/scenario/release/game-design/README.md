@@ -37,7 +37,7 @@ An API proposal provider may generate bounded NPC pressure wording and surface p
 | Rail | Requirement |
 |---|---|
 | Player role | The player is examined, not deputized as an investigator. |
-| Core danger | Text is the danger surface. Signs, barks, speech acts, records, and why-lines matter more than lore dumps. |
+| Core danger | Text is where danger starts. Signs, barks, speech acts, records, and why-lines matter more than lore dumps. |
 | AI role | Provider proposes NPC/Station wording only. Backend validation and deterministic rules remain authority. |
 | Scope | One complete 20-30 minute civic ritual: Station, Store, Studio, Park, Station. |
 | Failure | Failure creates records and repair pressure; it does not become a dead end. |

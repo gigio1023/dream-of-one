@@ -1,12 +1,15 @@
 # Player Experience MDA
 
-Status: requires conversation-first rewrite.
+Status: retained experience map; current design spine lives in
+`docs/direction/09-game-design-spine.md`.
 
 Use `docs/direction/08-conversation-suspicion-redesign.md` and
 `docs/scenario/bible/12-conversation-suspicion-prologue.md` for the current
-player-facing proof target. The tables below preserve useful experience goals,
-but rows that center text surfaces, Cover Test zones, or abstract speech-act
-buttons are legacy implementation language.
+player-facing proof target. Use `docs/direction/09-game-design-spine.md` for
+the mechanic-dynamic-experience chain that should drive new development. The
+tables below preserve useful experience goals, but rows that center text
+notices, Cover Test zones, or abstract speech-act buttons are legacy
+implementation language.
 
 ## Target Aesthetics
 

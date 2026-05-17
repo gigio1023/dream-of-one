@@ -119,7 +119,7 @@ loop형 harness는 "계속 해"를 자동화하지만, 종료 조건이 약하�
 - Linear issue 하나마다 짧은 seed/spec를 먼저 둔다. goal, non-goal, deterministic product law, acceptance criteria, verification commands를 포함한다.
 - plan과 execution을 분리한다. research/design 단계는 `godot/`, `backend/npc-runtime/`, `godot/data/world_layout.json`의 근거를 수집하고, execution 단계는 승인된 plan만 구현한다.
 - Dream Law, Cover Test, Exposure, Station intake, inquest, verdict, session termination은 AC의 최상위 invariant로 둔다.
-- text danger surface를 검증 항목으로 만든다. "어떤 NPC/system text가 플레이어를 조사하는가"와 "그 텍스트가 어떤 deterministic evidence를 남기는가"를 AC에 적는다.
+- 텍스트-기록 위험 흐름을 검증 항목으로 만든다. "어떤 NPC/system text가 플레이어를 조사하는가"와 "그 텍스트가 어떤 deterministic evidence를 남기는가"를 AC에 적는다.
 - game 작업 완료는 two-layer로 판정한다. Engineering Done은 `godot --headless --import --path godot`, scene smoke, evidence run, runtime slice smoke, `npm run check --prefix backend/npc-runtime` 통과다. Design Done은 플레이어가 investigator가 아니고 Station/NPC가 player를 조사한다는 경험이 유지되는지 확인하는 별도 review다.
 - context save는 필수다. issue별로 decisions, modified files, verification output, blockers, next action을 남겨 다른 Worker가 같은 방향으로 이어받게 한다.
 - persistent loop를 쓸 때는 task queue, max iteration, abort signal, no-progress detector, verification script를 함께 둔다.

@@ -81,7 +81,7 @@ Decision:
 - Dream of One uses an API-based proposal provider as the release premise for live AI NPC text.
 - Player-installed Codex CLI is not assumed as a release prerequisite.
 - The game must check configured provider access and GPT model availability at runtime.
-- `gpt-5.4-nano` is preferred only when runtime verification proves it for the configured provider.
+- `gpt-5.4-mini` is preferred only when runtime verification proves it for the configured provider and the configured request budget.
 - Design, docs, release copy, and tests must not treat any GPT model as available before runtime verification.
 
 Rationale:
@@ -149,3 +149,158 @@ Required evidence:
 - Godot UI capture with NPC prompt, three choices, optional free input, NPC reaction, why-line, and report/inquest consequence.
 - safe, risky, repair, and report route Evidence Packs.
 - external comprehension note proving players understand that NPCs suspect them because of dialogue history.
+
+## DDR-007: Design Spine Is The Development Basis
+
+Status: accepted
+Date: 2026-05-14
+
+Decision:
+- Dream of One development should use `docs/direction/09-game-design-spine.md`
+  as the design basis before planning new gameplay work.
+- New NPC, location, conversation, provider, and UI work should be shaped with
+  `docs/scenario/content/social-simulation-cards.md` before implementation.
+- The project should deepen the game through procedure, pressure, record,
+  repair, and Station reconciliation rather than through broad content volume or
+  unconstrained AI dialogue.
+
+Rationale:
+- The thesis and M1 proof are strong, but development can still drift if the
+  team only follows proof tasks.
+- A thicker design spine lets agents and humans judge whether work strengthens
+  the actual game: pressured cover performance under social and institutional
+  record comparison.
+- Social simulation should be created through NPC preoccupations, shared
+  context, storylet state, and deterministic artifacts, not through an expensive
+  or opaque AI society simulation.
+
+Risks:
+- Design cards can become paperwork if they do not feed implementation.
+- The game may still overfit to the Store `Same Order` cell unless the content
+  ladder is reused for Studio, Park, and Station.
+- LLM/provider work may be overvalued unless deterministic authority remains
+  the design boundary.
+
+Required evidence:
+- Same Order design cell implemented or explicitly cut down using the design
+  spine.
+- New storylets name location procedure, examiner NPC, player action, signal,
+  artifact, repair window, and future Station consequence.
+- Comprehension notes show players understand cover performance, not
+  investigation fantasy.
+- Provider prompts use NPC role, preoccupation, local procedure, recent
+  records, drama act, deterministic signal state, and forbidden authority.
+
+## DDR-008: Same Order Is The Current Team Prototype
+
+Status: accepted
+Date: 2026-05-14
+
+Decision:
+- The current team-operable scope is the Same Order M1 prototype, not broad
+  prologue production.
+- Team work should follow `docs/direction/10-team-operating-brief.md`,
+  `docs/scenario/content/same-order-storylet-packet.md`, and
+  `.game-harness/milestones/M1-same-order-four-week-prototype-plan.md`.
+- M2 content expansion, playable Studio/Park work, public demo copy, live AI
+  claims, and vertical slice language remain blocked until the Same Order proof
+  passes product review and player comprehension.
+
+Rationale:
+- Parallel Game Studio council review found that the direction is strong enough
+  for a narrow planning team but not yet enough for broad production.
+- The fastest way to make the design operational is to complete one Store to
+  Station design cell with readable proof, not to add more world content.
+
+Risks:
+- The team may treat the four-week plan as a release schedule instead of a proof
+  budget.
+- Free-input and provider decisions may expand scope unless cut rules are used.
+- Art/audio/UX work may drift into mood polish unless tied to first-read and
+  comprehension proof.
+
+Required evidence:
+- Week 1 recorded-statement or cut decision.
+- readable Store consequence capture.
+- visible report handoff and Station reconciliation prompt.
+- external comprehension notes.
+- provider/fallback decision and setup truth.
+- M1/M2 go/no-go review.
+
+## DDR-009: Simulator Benchmarks Are The Planning Scaffold
+
+Status: accepted
+Date: 2026-05-14
+
+Decision:
+- Dream of One should use simulator benchmark research as the next planning
+  scaffold.
+- The active benchmark method is recorded in
+  `docs/direction/11-simulator-benchmark-adoption-brief.md`,
+  `docs/direction/12-simulator-reference-map.md`, and
+  `docs/research/simulator-benchmarks/2026-05-14/`.
+- Same Order should first prove a mundane Store-to-Station procedure simulator:
+  normal procedure, player line, clerk comparison, visible record,
+  exact Station citation, and deterministic outcome.
+- Dream fiction, broad society simulation, and OpenAI/provider wording should be
+  layered only after that cause chain is readable.
+
+Rationale:
+- The creator does not need to judge a blank-page game design document from
+  taste alone.
+- Benchmarking proven simulator grammar makes design review concrete: each
+  feature must name player job, judgment cues, watcher, record,
+  repair cost, formal citation, and proof.
+- This keeps the project away from an unbounded AI chat demo while preserving
+  the intended fantasy of being investigated through speech.
+
+Risks:
+- Reference games can confuse direction if treated as genre templates rather
+  than pattern sources.
+- Procedure can become dry if dream tone and social pressure are never layered
+  back in.
+- LLM/provider novelty can still distract from simulator readability.
+
+Required evidence:
+- Store procedure guide screenshot or capture.
+- visible receipt, correction slip, report, or dossier artifact.
+- Station prompt citing the exact Store record.
+- backend Evidence JSON with captured line, watcher, mismatch code, and route.
+- provider-off fallback parity for the same route outcomes.
+- fresh-player or proxy comprehension note.
+
+## DDR-010: Same Order M1 Uses Fallback-Only Provider Truth
+
+Status: accepted
+Date: 2026-05-17
+
+Decision:
+- The current Same Order M1 product proof is deterministic fallback-only.
+- Provider-shaped backend contracts, scheduling, and dispatch packets remain
+  valid internal evidence for the future live provider boundary.
+- Live provider behavior is not part of the current demo claim until budgeted
+  API preflight and Godot-to-backend provider dispatch are both proven.
+- `gpt-5.4-mini` remains a preferred configured model only after runtime
+  verification and budget checks pass.
+
+Rationale:
+- The current work proves the important authority rule: generated wording must
+  not own records, risk, Exposure, Evidence, inquest, verdict, or session end.
+- The current local machine has Codex CLI login but no game runtime API key, so
+  live provider access remains unproven.
+- A fallback-only M1 keeps the Store/Station cell honest while the game proves
+  conversation, records, role actions, and Station citation.
+
+Risks:
+- Public copy may sound less novel without live AI wording.
+- Later live-provider work can still distract from readable procedure proof.
+- In-game UI still needs to show the selected provider/fallback state before a
+  tester-facing build.
+
+Required evidence:
+- `.game-harness/provider/same-order-provider-mode-decision-2026-05-17.md`.
+- budgeted live smoke result remains recorded as skipped without
+  `OPENAI_API_KEY`.
+- provider-shaped backend tests keep rejecting forbidden authority fields.
+- future live provider claims require successful runtime preflight and Godot
+  dispatch evidence.

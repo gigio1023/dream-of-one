@@ -155,7 +155,7 @@ Agent에게 level을 맡길 때는 "멋진 공간"보다 "player가 무심코 �
 
 `Game User Experience And Player-Centered Design`과 `Game UX Mindset: Principles and Methods`는 UX를 UI polish가 아니라 cognition, attention, learning, motivation, flow, ethics로 다룬다. Director는 UX를 creative direction의 하위 실행으로 두지 말고 creative direction 자체의 일부로 다뤄야 한다.
 
-`Xbox Accessibility Guideline 101: Text display`와 `Full list - Game Accessibility Guidelines`는 text readability, contrast, subtitle/caption access, objective reminder, control reminder, interface resize 같은 항목을 game access의 기본으로 둔다. Dream of One은 text가 danger surface이므로 accessibility는 선택지가 아니다. 텍스트를 읽을 수 없으면 위험도 경험할 수 없다.
+`Xbox Accessibility Guideline 101: Text display`와 `Full list - Game Accessibility Guidelines`는 text readability, contrast, subtitle/caption access, objective reminder, control reminder, interface resize 같은 항목을 game access의 기본으로 둔다. Dream of One은 text가 place where danger starts이므로 accessibility는 선택지가 아니다. 텍스트를 읽을 수 없으면 위험도 경험할 수 없다.
 
 `Best Practices for Game Localization`은 localization을 late translation이 아니라 internationalization, culturalization, testing, style guide, glossary, context sharing으로 본다. Dream of One은 deterministic text semantics가 중요한 게임이므로 localized string도 rule state와 연결되어야 한다.
 
@@ -195,7 +195,7 @@ Do Not:
 
 - Dream of One의 director harness는 feature backlog보다 먼저 product law를 유지해야 한다.
 - "NPCs and Station systems investigate the player"는 narrative, level, UX, evidence semantics 전체의 pillar다.
-- "Text is the danger surface"는 UI readability, localization context, accessibility settings까지 지배한다.
+- "Text is where danger starts"는 UI readability, localization context, accessibility settings까지 지배한다.
 - MDA chain은 모든 agent task의 번역층이다. Aesthetics 없는 mechanics는 보류한다.
 - Playcentric loop는 deterministic evidence로 대체 가능하다. 단, evidence는 player experience goal과 연결되어야 한다.
 - Art direction은 dark mood가 아니라 authority, surveillance, intake, exposure를 읽히게 하는 grammar다.

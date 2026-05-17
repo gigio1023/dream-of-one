@@ -7,6 +7,7 @@ Detailed source lines live in `docs/scenario/content/dialogue-line-bank.md`.
 | NPC | Role | Wants | Notices | Reports |
 |---|---|---|---|---|
 | `NPC_Store_Clerk` | Store Clerk | Queue and label speech stay orderly. | skipped order, wrong item count, vague label claims. | queue mismatch, witness statement. |
+| `NPC_Store_Manager` | Store Manager | Store exceptions are recorded before they become liability. | marked receipts, pending report tray, record burden. | manager follow-up, forwarded Store report. |
 | `NPC_Studio_PM` | Studio PM | Approval claims have source, owner, reason. | vibe-based approval requests, missing ownership, post-hoc excuses. | approval mismatch, review artifact. |
 | `NPC_Park_Witness` | Park Witness | Public flow remains ordinary. | dream narration, staring, over-explaining, stepping out of flow. | notice snapshot, statement. |
 | `NPC_Station_Officer` | Station Officer | Reports become consistent procedure. | contradictions, non-procedural speech, too much private knowledge. | Station report, Inquest dossier, verdict line. |

@@ -6,7 +6,7 @@ A Dream of One scenario is game-ready only when it proves the playable loop, not
 
 | Gate | Requirement |
 |---|---|
-| Canon | Player is not investigator; NPCs/Station investigate; dialogue is danger surface. |
+| Canon | Player is not investigator; NPCs/Station investigate; dialogue is where danger starts. |
 | Critical path | NPC prompt, three dialogue choices, optional recorded free input if enabled, deterministic suspicion signal, NPC reaction, social report or repair, Station consequence. |
 | Runtime mapping | Every beat maps to a conversation id, prompt id, choice/free-input record, suspicion signal, suspicion/report delta, Evidence event, or verdict/defuse result. |
 | No lore-only pass | Any beat that cannot be observed, triggered, logged, or validated fails review. |

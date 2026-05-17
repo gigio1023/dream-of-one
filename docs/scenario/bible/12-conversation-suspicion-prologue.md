@@ -1,7 +1,9 @@
 # Conversation Suspicion Prologue
 
 Status: active first playable scenario; internally route-proven; product closure pending
-Depends on: `docs/direction/08-conversation-suspicion-redesign.md`
+Depends on: `docs/direction/08-conversation-suspicion-redesign.md`,
+`docs/direction/09-game-design-spine.md`, and
+`docs/scenario/content/social-simulation-cards.md`
 
 ## Working Title
 
@@ -26,6 +28,7 @@ The player is not investigating. The player is being socially checked.
 | Actor | Role | Function |
 | --- | --- | --- |
 | `NPC_Store_Clerk` | Clerk | Starts with normal routine, then grows uneasy. |
+| `NPC_Store_Manager` | Manager | Turns visible Store burden into a follow-up note or forwarded report. |
 | `NPC_Park_Witness` | Nearby witness | Can receive or overhear the clerk's concern. |
 | `NPC_Station_Officer` | Officer | Formalizes a report into intake/inquest. |
 | Player | Suspect outsider | Must pass through conversation pressure. |

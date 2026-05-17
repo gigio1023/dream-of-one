@@ -109,7 +109,7 @@ Dream of One 적용:
 
 Dream of One 적용:
 - multi-worker game harness는 `godot-scene`, `runtime-schema`, `world-layout`, `docs-evidence` lane을 분리하되, 같은 파일을 만지는 task는 같은 owner에 배정.
-- Beads id와 Linear issue id를 plan symbol로 쓰더라도 runtime claim 상태는 concrete task id로 유지.
+- Linear issue id를 plan symbol로 쓰더라도 runtime claim 상태는 concrete task id로 유지.
 - worker inbox에는 owned path, dependency, acceptance check, verification command를 함께 넣어야 함.
 
 ## 7. Context Hygiene는 "작고 검증 가능한 기억"만 남김
@@ -129,7 +129,7 @@ Dream of One 적용:
 
 Dream of One 적용:
 - `Dream Harness Memory`는 narrative fact 전체가 아니라 "검증된 authority decision"만 저장.
-- context injection은 최근 읽은 파일 8개 이하, active Linear/Beads task, 마지막 verification result로 제한.
+- context injection은 최근 읽은 파일 8개 이하, active Linear issue, 마지막 verification result로 제한.
 - stale memory가 Dream Law나 runtime schema보다 우선하지 않도록 "repo/file authority wins" 규칙 필요.
 
 ## 8. Review Loop는 structured review + adversarial review를 분리
@@ -147,7 +147,7 @@ Dream of One 적용:
 
 Dream of One 적용:
 - structured review: changed paths, deterministic checks, schema compatibility, missing tests.
-- adversarial review: "이 변경이 Dream of One의 핵심 design rails를 약화하는가", "player를 investigator로 되돌리는가", "text danger surface가 흐려지는가".
+- adversarial review: "이 변경이 Dream of One의 핵심 design rails를 약화하는가", "player를 investigator로 되돌리는가", "말이 위험해지는 구조가 흐려지는가".
 - stop gate는 critical/high만 block하고 low-level style은 final notes로 남김.
 
 ## 9. Registry / Catalog는 taxonomy와 metadata schema만 차용
@@ -180,6 +180,6 @@ Dream of One 적용:
 2. read-only `runtime-explorer`, `dream-law-critic`, `evidence-verifier` agent persona 정의.
 3. Stop gate: edit-producing turn + missing verification만 block.
 4. compact context: active task, touched authority, latest evidence만 남기는 state summary.
-5. DAG handoff: Beads/Linear planning id와 runtime task id remap 기록.
+5. DAG handoff: Linear planning id와 runtime task id remap 기록.
 
 Game Harness Takeaways for Dream of One

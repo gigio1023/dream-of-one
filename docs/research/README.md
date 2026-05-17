@@ -7,3 +7,4 @@ Research is not active product truth. Stable conclusions should be reflected int
 | Date | Contents |
 |---|---|
 | [2026-04-30](2026-04-30/README.md) | Director-harness and harness-methodology research packs. |
+| [simulator-benchmarks](simulator-benchmarks/README.md) | Simulator-first benchmark research for Dream of One planning and reference extraction. |

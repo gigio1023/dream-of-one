@@ -28,7 +28,7 @@ It is not complete when:
 
 Target:
 - Player understands they are entering a controlled Station space.
-- Player sees dialogue as the primary action surface, not only UI description.
+- Player sees dialogue as the primary action, not only UI description.
 
 Required signals:
 - Station authority visible without exposition wall.
@@ -49,7 +49,7 @@ Required signals:
 - player response or selected text is classified from conversation context.
 - NPC reaction changes from normal to uneasy, corrective, or probing.
 - Exposure or pressure changes.
-- why-line or system surface explains consequence without sounding like debug output.
+- why-line or system message explains consequence without sounding like debug output.
 
 Failure:
 - text feels like flavor.
@@ -90,14 +90,14 @@ Failure:
 ## Visual And UI Gates
 
 Visual gates:
-- route landmarks, interactables, NPC/system pressure, consequence surface, and end-state view are visible in current-build captures.
+- route landmarks, interactables, NPC/system pressure, consequence UI, and end-state view are visible in current-build captures.
 - readable text survives normal play distance and screenshot review.
 - camera/input framing does not make the player feel like a detective searching for clues.
 - surveillance pressure is visible through staging, not only written in HUD text.
 
 UI gates:
 - the NPC prompt and three available dialogue choices are clear before input.
-- optional free input is framed as a recorded statement, not a safe chatbot box.
+- optional free input is framed as typed recorded speech, not a safe chatbot box.
 - selected or entered player text is connected to Evidence/Exposure consequence.
 - why-line reads as diegetic/system pressure, not debug output.
 - provider/fallback state is disclosed when relevant.
@@ -128,7 +128,7 @@ Not allowed:
 Use:
 - screenshot or video timeline.
 - playtest observation.
-- text surface ledger.
+- visible-text ledger.
 - Evidence why-lines.
 - player paraphrase: "What is happening to you?"
 

@@ -27,19 +27,50 @@ Use this page as the documentation map. README.md is the project entry point; th
 |---|---|
 | [archive](archive/README.md) | Superseded material for historical lookup only. Not an active implementation path. |
 | [research](research/) | Source-backed methodology and director-harness research. |
+| [research/simulator-benchmarks](research/simulator-benchmarks/README.md) | Source-backed benchmark research for simulator-first Dream of One planning. |
 
 ## Reading Order
 
 1. [Project definition](../project.md)
 2. [Completion plan](../plan.md)
 3. [Conversation suspicion redesign](direction/08-conversation-suspicion-redesign.md)
-4. [Game design](design/game-design.md)
-5. [Scenario docs](scenario/README.md)
-6. [Godot runtime path](runtime/godot/README.md)
-7. [Verification ledger](../.game-harness/verification-ledger.md)
+4. [Game design spine](direction/09-game-design-spine.md)
+5. [Team operating brief](direction/10-team-operating-brief.md)
+6. [Simulator benchmark adoption brief](direction/11-simulator-benchmark-adoption-brief.md)
+7. [Simulator reference games map](direction/12-simulator-reference-map.md)
+8. [Operation sim quality floor](direction/13-operation-sim-quality-floor.md)
+9. [Minimal civic economy model](direction/14-minimal-civic-economy-model.md)
+10. [Agentic social simulation model](direction/15-agentic-social-simulation-model.md)
+11. [Agentic prototype target](direction/16-agentic-prototype-target.md)
+12. [Game design](design/game-design.md)
+13. [Scenario docs](scenario/README.md)
+14. [Godot runtime path](runtime/godot/README.md)
+15. [Verification ledger](../.game-harness/verification-ledger.md)
 
 ## Current Truth
 
 Dream of One is a conversation-first suspicion game. The player is investigated through dialogue, recorded statements, suspicion signals, social reports, Station intake, inquest, and deterministic session end states.
 
 The checked-in build proves an M1 technical slice. It does not yet prove a public demo, exported build, live provider-backed wording loop, or fixed GPT model availability.
+
+The current planning method is benchmark-first: build a readable Store-to-Station
+procedure simulator before expanding dream fiction, broad social simulation, or
+OpenAI/provider-led wording claims.
+
+The current quality-floor method is operation-sim-first: Same Order must show a
+visible workplace, usable Store/Station objects, record state changes, NPC
+pressure, and exact Station citation before broad content or provider-forward
+claims.
+
+The current economy method is civic-ledger-first: Same Order needs one normal
+transaction, one possible correction, one report burden, and one Station audit
+before broad shop or staff systems.
+
+The current social simulation method is environment-first: author places,
+records, affordances, visibility, and civic pressure, then let NPC role agents
+choose validated actions inside that world instead of hand-authoring every
+reaction branch.
+
+The current prototype target is one small Store/Station environment where
+conversation changes records, environment affordances become available, role
+agents react, and Station later cites the ledger.

@@ -48,7 +48,7 @@ Required fields:
 Dream of One invariant:
 - Player is not investigator.
 - NPCs and Station investigate the player.
-- Text is the danger surface.
+- Text is where danger starts.
 - Dream Law, Cover Test, Exposure, Station intake, Inquest, verdict, session termination are deterministic product authority.
 - Codex CLI can propose NPC text, but cannot own rules or verdicts.
 
@@ -112,7 +112,7 @@ Drift examples:
 - Player is framed as investigator.
 - Codex-generated NPC text changes verdict semantics.
 - Korean default weakens or English becomes the real source.
-- Godot scene looks valid but text danger surface is invisible.
+- Godot scene looks valid but text-to-record danger chain is invisible.
 - Release docs claim a feature that build does not contain.
 
 ## Recommended Repo Shape

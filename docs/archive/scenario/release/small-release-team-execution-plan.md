@@ -56,7 +56,7 @@ Do not use `docs/runtime/godot/` as scenario canon. Use it only for migration/ru
 | Backend / Codex Systems Engineer | Codex preflight, `codex exec` worker, validator, Evidence. | Godot Engineer |
 | Narrative Designer / Korean Writer | Beat matrix, barks, why-lines, setup/failure Korean text. | Game Director |
 | 3D Environment / Technical Artist | Free asset pass, lighting, route readability, screenshots. | Godot Engineer |
-| Producer / QA Coordinator | Linear/Beads hygiene, build checklist, playtests, store page. | Game Director |
+| Producer / QA Coordinator | Linear hygiene, build checklist, playtests, store page. | Game Director |
 | Marketing / Trailer Contractor | Gameplay GIF/trailer, itch cover, Steam capsules when approved. | Producer |
 
 ## Operating Model
@@ -64,7 +64,7 @@ Do not use `docs/runtime/godot/` as scenario canon. Use it only for migration/ru
 | Rule | Practice |
 |---|---|
 | Work SoT | One Linear issue at a time as external planning source. |
-| Local decomposition | Use Beads (`bd`) for internal task graph and dependencies. |
+| Local decomposition | Keep decomposition inside the selected Linear issue or PR notes. |
 | Branching | One release branch for the demo, with small reviewable commits. |
 | Review | Every P0 issue needs implementation evidence and run commands. |
 | Scope control | Anything not required by this plan moves to `Deferred`, not into the demo. |
@@ -74,7 +74,7 @@ Do not use `docs/runtime/godot/` as scenario canon. Use it only for migration/ru
 
 A task can enter implementation only when it has:
 
-- Linear issue link or Beads task ID.
+- Linear issue link.
 - Owner and backup.
 - Files to touch.
 - Acceptance criteria.
@@ -135,7 +135,7 @@ A task is done only when:
 **Steps:**
 
 - [ ] Create Linear epic: `Dream of One Codex CLI Demo Release`.
-- [ ] Create Beads epic mirroring the Linear epic.
+- [ ] Break P0 work into Linear child issues or scoped implementation notes.
 - [ ] Create P0 tasks from the `P0 Backlog` section below.
 - [ ] Assign one owner and one backup per P0 task.
 - [ ] Add `small-release-definition.md` and `small-release-readiness-report.md` as source docs to every issue.
@@ -426,7 +426,7 @@ godot --headless --path godot --script res://tools/runtime_slice_smoke.gd
 
 **Acceptance Criteria:**
 
-- Every beat has location, player goal, examiner, trigger, text surface, speech acts, Exposure delta, artifact, why-line, failure result.
+- Every beat has location, player goal, examiner, trigger, visible text, speech acts, Exposure delta, artifact, why-line, failure result.
 - Store, Studio, Park, Station each include Codex prompt role notes.
 - Korean setup/failure text exists for Codex missing/login/timeout/invalid output.
 

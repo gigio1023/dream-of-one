@@ -52,4 +52,4 @@ Agent skill은 인터페이스일 뿐이다. Codex에게 게임 기획, 설계, 
 6. 완료는 fresh evidence로만 주장한다.
 7. drift는 별도 log에 남기고 다음 stage 전에 해소한다.
 
-Dream of One의 핵심은 `Codex가 게임을 알아서 잘 만들게 하는 것`이 아니라 `Codex가 반복 실행해도 플레이어 약속, deterministic authority, text danger surface를 잃지 않게 하는 것`이다.
+Dream of One의 핵심은 `Codex가 게임을 알아서 잘 만들게 하는 것`이 아니라 `Codex가 반복 실행해도 플레이어 약속, deterministic authority, 텍스트-기록 위험 흐름을 잃지 않게 하는 것`이다.

@@ -100,6 +100,6 @@
 - addon 설치형 도구는 repo 오염 위험이 있다. Dream of One에서는 `godot/tools/evidence_run.gd`, `runtime_slice_smoke.gd`처럼 프로젝트가 소유한 headless script를 SoT로 두고, 외부 MCP는 임시 보조 계층으로만 취급한다.
 - bridge/autoload를 임시 주입하는 방식은 유용하지만 `project.godot`, `.gitignore`, `.mcp/`, generated bridge file 변경을 남길 수 있다. 실행 후 cleanup 검사가 필수다.
 - ClassDB/API reflection을 하네스에 포함한다. Godot 3 API 환각, 잘못된 property, resource property JSON 주입을 사전에 막는다.
-- runtime evidence는 "재미"가 아니라 "결정적 상태가 실제 화면/노드에 반영됐는가"를 증명해야 한다. Dream of One의 텍스트 위험 표면은 screenshot보다 log, label text, verdict node state, session termination path가 더 중요하다.
+- runtime evidence는 "재미"가 아니라 "결정적 상태가 실제 화면/노드에 반영됐는가"를 증명해야 한다. Dream of One의 텍스트가 위험해지는 지점은 screenshot보다 log, label text, verdict node state, session termination path가 더 중요하다.
 
 Game Harness Takeaways for Dream of One

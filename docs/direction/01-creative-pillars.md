@@ -1,6 +1,6 @@
 # Creative Pillars
 
-## Pillar 1: Dialogue Is the Danger Surface
+## Pillar 1: Dialogue Is Where The Danger Starts
 
 Statement:
 - Dialogue is not flavor. Dialogue is where the player exposes themselves.

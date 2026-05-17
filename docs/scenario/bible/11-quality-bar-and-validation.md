@@ -78,7 +78,7 @@ Reject scenario content if:
 | `data/evidence/godot/runtime-slice/dre_171_runtime_slice_evidence.json` | Proves runtime command, fallback, and Evidence semantics. |
 | `data/evidence/godot/screenshots/main-shell.png` | Opening visual proof. |
 | `data/evidence/godot/screenshots/03-active-conversation-hud.png` | Conversation prompt and three choices visual proof. |
-| `data/evidence/godot/screenshots/05-inquest-session-end.png` | Inquest/session-end visual proof. |
+| `data/evidence/godot/screenshots/06-inquest-session-end.png` | Inquest/session-end visual proof. |
 
 ## Validation Commands
 

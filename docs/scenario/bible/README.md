@@ -49,7 +49,7 @@ This bible still contains useful NPC, location, Dream Law, voice, and Station ma
 | Conversation signals | `local_routine_mismatch`, `dream_language_leak`, `memory_gap_admission`, `role_script_break`, `prior_statement_contradiction`, `authority_evasion`, `over_explanation` |
 | Dream Laws | `DL_S1_QUEUE_SANCTITY`, `DL_ST1_APPROVAL_GATE`, `DL_P1_OBSERVATION_ETIQUETTE`, `DL_N1_PROCEDURE_SPEECH_ONLY` |
 | Cover Tests | `CT_STORE_QUEUE_LANGUAGE`, `CT_STUDIO_APPROVAL_GATE_SPEECH`, `CT_PARK_OBSERVATION_PRESSURE`, `CT_STATION_SOFT_INQUEST` |
-| Actors | `NPC_Store_Clerk`, `NPC_Studio_PM`, `NPC_Park_Witness`, `NPC_Station_Officer` |
+| Actors | `NPC_Store_Clerk`, `NPC_Store_Manager`, `NPC_Studio_PM`, `NPC_Park_Witness`, `NPC_Station_Officer` |
 
 ## Scenario Promise
 

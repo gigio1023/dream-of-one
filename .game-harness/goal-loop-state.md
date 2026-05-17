@@ -96,14 +96,20 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `8315747189aa2581e93c5bfbe65acaeb07ca300b6bd27202c721e70f009bf3d1`
-  - Markdown SHA-256: `842d07a342544ebf00861c4018aadd3a5fe8c584ac55cfcb74a43b709d9b4ddf`
-  - playable Evidence Pack SHA-256: `e9bad63c1c73b1880db695c7b4f95a3dddbccfb6133663032e89c4592c6f4318`
+  - JSON SHA-256: `ea597206fe3b6ffec0a083cd7ec66ff004d6e141a86e3b52b153bb8f8b483231`
+  - Markdown SHA-256: `85d11c389ed5c2755d7c428b41cade0c9b80f7a47ad22c827042d1be8c5c88df`
+  - playable Evidence Pack SHA-256: `ab79a2b6e547f10b09bbd792489593e19eb46aa11297b6f3398de52171fff19d`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `7 / 7`, and `routeReportPassCount=5 / 5`.
+  player actions `9 / 9`, and `routeReportPassCount=5 / 5`.
+- latest game increment: player/Codex can now focus a visible NPC and press the
+  same interaction key to read that NPC's current social reaction in the HUD
+  notice. The inquest Codex run focuses `NPC_Waiting_Customer`, reads
+  `접촉 거부`, and records `inspectedNpcState` with the actor's pressure line.
+  This makes an NPC's social decision directly inspectable in the running game
+  instead of leaving it as a marker plus hidden summary data.
 - latest game increment: Waiting Customer final social decisions are now
   visible NPC reactions in every Codex route report, not only ledger or pressure
   text. Clean cover marks `NPC_Waiting_Customer` as `helped` with `도움`, repair
@@ -139,8 +145,8 @@ Latest AI-play interface check:
   spawned NPC state or player-readable pressure text; Codex gameplay QA now
   requires `visibleWaitingCustomerReaction=true` and marks
   `canReadVisibleNpcReaction=true`. The current AI-play report reaches
-  `inquest`, accepts `7 / 7` public player actions, passes `routeReports=5/5`,
-  and scores `explainability=10/10`.
+  `inquest`, accepts `9 / 9` public player actions, passes `routeReports=5/5`,
+  and scores `explainability=11/11`.
 - latest game increment: public trust now reaches a second place, not only the
   Store queue. On the clean route, the Studio PM sees the Park public routine
   vouch, uses `invite_review`, changes `studio_review_queue` from `open` to
@@ -258,9 +264,9 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `8315747189aa2581e93c5bfbe65acaeb07ca300b6bd27202c721e70f009bf3d1`
+  `ea597206fe3b6ffec0a083cd7ec66ff004d6e141a86e3b52b153bb8f8b483231`
 - Markdown SHA-256:
-  `842d07a342544ebf00861c4018aadd3a5fe8c584ac55cfcb74a43b709d9b4ddf`
+  `85d11c389ed5c2755d7c428b41cade0c9b80f7a47ad22c827042d1be8c5c88df`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
   player-visible state, player-readable cause chain, role-action explanation,
   NPC-to-NPC observation explanation, and the explicit boundary that this is

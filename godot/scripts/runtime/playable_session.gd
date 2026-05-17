@@ -403,6 +403,7 @@ var choice_catalog: Array = []
 var notice_title := "시작 절차"
 var notice_body := "상점 카운터에서 점원의 평범한 질문에 답하세요. 말이 기록이 될 수 있습니다."
 var inspected_world_record_prop: Dictionary = {}
+var inspected_npc_state: Dictionary = {}
 var outcome_visible := false
 var outcome_title := ""
 var outcome_body := ""
@@ -543,6 +544,11 @@ func debug_codex_gameplay_action_catalog() -> Array[Dictionary]:
 			"playerMeaning": "Move Codex/player attention to one visible environment record prop."
 		},
 		{
+			"actionId": "focus.npc",
+			"payloadSchema": {"npcId": "string"},
+			"playerMeaning": "Move Codex/player attention to one visible NPC so their current social reaction can be read."
+		},
+		{
 			"actionId": "player.interact.focused",
 			"payloadSchema": {},
 			"playerMeaning": "Press the current focused interaction in the running scene."
@@ -551,6 +557,11 @@ func debug_codex_gameplay_action_catalog() -> Array[Dictionary]:
 			"actionId": "inspect.world_record_prop",
 			"payloadSchema": {"objectId": "string"},
 			"playerMeaning": "Read one visible environment record prop, such as the Park notice board, through the same HUD notice area a player uses."
+		},
+		{
+			"actionId": "inspect.npc",
+			"payloadSchema": {"npcId": "string"},
+			"playerMeaning": "Read one visible NPC reaction through the same HUD notice area a player uses."
 		}
 	]
 
@@ -562,6 +573,7 @@ func debug_codex_gameplay_snapshot() -> Dictionary:
 		"summary": summary,
 		"worldRecordProps": _world_record_prop_snapshot(),
 		"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
+		"inspectedNpcState": inspected_npc_state.duplicate(true),
 		"hud": _codex_hud_snapshot()
 	}
 
@@ -609,6 +621,16 @@ func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) ->
 				reason = "record_prop_unavailable"
 			else:
 				codex_focus_hold_frames = 4
+		"focus.npc":
+			var npc_id := str(payload.get("npcId", "")).strip_edges()
+			if npc_id.is_empty():
+				accepted = false
+				reason = "npc_id_required"
+			elif not _force_focus_npc(npc_id):
+				accepted = false
+				reason = "npc_unavailable"
+			else:
+				codex_focus_hold_frames = 4
 		"player.interact.focused":
 			if current_focus == null:
 				accepted = false
@@ -625,6 +647,16 @@ func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) ->
 				if not bool(action_result.get("ok", false)):
 					accepted = false
 					reason = str(action_result.get("reason", "record_prop_unavailable"))
+		"inspect.npc":
+			var npc_id := str(payload.get("npcId", "")).strip_edges()
+			if npc_id.is_empty():
+				accepted = false
+				reason = "npc_id_required"
+			else:
+				action_result = _inspect_npc(npc_id)
+				if not bool(action_result.get("ok", false)):
+					accepted = false
+					reason = str(action_result.get("reason", "npc_unavailable"))
 		_:
 			accepted = false
 			reason = "unsupported_action"
@@ -661,6 +693,7 @@ func build_summary() -> Dictionary:
 		"outcomeBody": outcome_body,
 		"readSurfaceIds": read_surface_ids.keys(),
 		"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
+		"inspectedNpcState": inspected_npc_state.duplicate(true),
 		"sessionOutcome": _session_outcome(),
 		"lastWhyLine": last_why_line,
 		"lastWhyLineKey": last_why_line_key,
@@ -713,6 +746,7 @@ func build_summary() -> Dictionary:
 			"visibleNpcStates": _visible_npc_states(),
 			"worldRecordProps": _world_record_prop_snapshot(),
 			"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
+			"inspectedNpcState": inspected_npc_state.duplicate(true),
 			"providerState": _provider_state(),
 			"endControls": _end_controls()
 		},
@@ -766,6 +800,7 @@ func build_evidence_pack(artifact_path: String) -> Dictionary:
 			"visibleNpcStates": _visible_npc_states(),
 			"worldRecordProps": _world_record_prop_snapshot(),
 			"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
+			"inspectedNpcState": inspected_npc_state.duplicate(true),
 			"providerState": _provider_state(),
 			"endControls": _end_controls(),
 			"visibleWhyLine": last_why_line,
@@ -782,6 +817,13 @@ func _interact() -> void:
 		var result := _inspect_world_record_prop(object_id)
 		if not bool(result.get("ok", false)):
 			_set_notice("기록 없음", "이 환경 기록물은 아직 읽을 수 있는 상태가 아닙니다.")
+		return
+
+	if current_focus != null and current_focus_kind == "npc":
+		var npc_id := str(current_focus.get_meta("npc_id", ""))
+		var result := _inspect_npc(npc_id)
+		if not bool(result.get("ok", false)):
+			_set_notice("NPC 없음", "이 NPC의 현재 반응은 아직 읽을 수 없습니다.")
 		return
 
 	if _session_locked():
@@ -1350,6 +1392,8 @@ func _refresh_hud() -> void:
 	elif current_focus != null and current_focus_kind == "text_surface":
 		var surface_id := str(current_focus.get_meta("surface_id", ""))
 		prompt = "E: %s 읽기" % _localized_text_surface_label(current_focus, surface_id)
+	elif current_focus != null and current_focus_kind == "npc":
+		prompt = "E: %s 반응 읽기" % str(current_focus.get_meta("role", "NPC"))
 	elif current_focus != null and current_focus_kind == "zone":
 		var zone_id := str(current_focus.get_meta("zone_id", ""))
 		prompt = "E: 상점 점원과 대화 시작" if zone_id == "StoreCounterZone" else "상점 카운터가 현재 대화 프롤로그입니다."
@@ -1617,6 +1661,7 @@ func _codex_small_summary(summary: Dictionary) -> Dictionary:
 		"lastDialogueChoice": summary.get("lastDialogueChoice", ""),
 		"lastReasonCode": summary.get("lastReasonCode", ""),
 		"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {}),
+		"inspectedNpcState": summary.get("inspectedNpcState", {}),
 		"inputLocked": summary.get("inputLocked", false)
 	}
 
@@ -2232,6 +2277,40 @@ func _inspect_world_record_prop(object_id: String) -> Dictionary:
 	)
 	return {"ok": true, "inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true)}
 
+func _inspect_npc(npc_id: String) -> Dictionary:
+	var states := _visible_npc_states()
+	if not states.has(npc_id):
+		return {"ok": false, "reason": "npc_unknown", "npcId": npc_id}
+
+	var snapshot: Dictionary = states.get(npc_id, {})
+	var display_name := str(snapshot.get("displayName", npc_id))
+	var role := str(snapshot.get("role", ""))
+	var reaction_text := str(snapshot.get("reactionText", "")).strip_edges()
+	var pressure_text := str(snapshot.get("pressureText", "")).strip_edges()
+	var state := str(snapshot.get("state", "normal"))
+	var title := "%s / %s" % [display_name, role]
+	var body_lines := PackedStringArray()
+	body_lines.append("현재 반응: %s" % (reaction_text if not reaction_text.is_empty() else _record_state_value(state)))
+	if not pressure_text.is_empty():
+		body_lines.append("말/태도: %s" % pressure_text)
+	body_lines.append("이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.")
+	inspected_npc_state = snapshot.duplicate(true)
+	inspected_npc_state["body"] = "\n".join(body_lines)
+	_set_notice(title, str(inspected_npc_state.get("body", "")))
+	_record_event(
+		"observation",
+		"npc_reaction_inspected",
+		"Inspected NPC reaction %s in state %s." % [npc_id, state],
+		{
+			"npcId": npc_id,
+			"state": state,
+			"reactionText": reaction_text,
+			"uiSummaryKey": "event.npc_reaction_inspected",
+			"uiSummaryArgs": {"npc": display_name, "state": reaction_text if not reaction_text.is_empty() else state}
+		}
+	)
+	return {"ok": true, "inspectedNpcState": inspected_npc_state.duplicate(true)}
+
 func _refresh_world_record_props() -> void:
 	for prop_value in _local_group_nodes(&"operation_record_props"):
 		var prop_node := prop_value as Node3D
@@ -2835,6 +2914,14 @@ func _update_focus() -> void:
 					best_kind = "record_prop"
 					best_distance = distance
 	if best_node == null:
+		for node in _local_group_nodes(&"npc_placeholders"):
+			if node is Node3D:
+				var distance := _player.global_position.distance_to((node as Node3D).global_position)
+				if distance < best_distance:
+					best_node = node as Node3D
+					best_kind = "npc"
+					best_distance = distance
+	if best_node == null:
 		for node in _local_group_nodes(&"text_surfaces"):
 			if node is Node3D:
 				var distance := _player.global_position.distance_to((node as Node3D).global_position)
@@ -2858,6 +2945,19 @@ func _force_focus_record_prop(object_id: String) -> bool:
 					_player.global_position = focus_position
 				_refresh_hud()
 				return true
+	return false
+
+func _force_focus_npc(npc_id: String) -> bool:
+	for node in _local_group_nodes(&"npc_placeholders"):
+		if node is Node3D and str(node.get_meta("npc_id", "")) == npc_id:
+			current_focus = node as Node3D
+			current_focus_kind = "npc"
+			if _player != null:
+				var focus_position := (node as Node3D).global_position + Vector3(0, 0, 1.25)
+				focus_position.y = _player.global_position.y
+				_player.global_position = focus_position
+			_refresh_hud()
+			return true
 	return false
 
 func _force_focus_zone(zone_id: String) -> void:

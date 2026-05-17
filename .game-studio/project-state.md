@@ -208,6 +208,10 @@ Current M1 carry-in:
   `distanced`/`거리두기`, `left`/`줄 이탈`, and `refused`/`접촉 거부`.
   Playable/Codex route probes reject those decisions if they remain only ledger
   entries or pressure lines.
+- Player/Codex can now focus an NPC and press the same interact action to read
+  the actor's current social reaction in the HUD notice. The Codex inquest run
+  inspects `NPC_Waiting_Customer`, reads `접촉 거부`, and stores
+  `inspectedNpcState` alongside visible NPC states and record-prop inspection.
 - `NPC_Park_Witness` now exposes public notice actions as visible NPC state:
   clean cover shows `vouched`/`공개 확인`, repair recovery shows
   `repaired`/`수습 게시`, and suspicious cover shows `warned`/`공개 경고`.

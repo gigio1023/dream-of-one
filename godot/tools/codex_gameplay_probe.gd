@@ -13,6 +13,8 @@ const PROBE_STEPS := [
 	{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.risky"}},
 	{"actionId": "player.type.free_input", "payload": {"line": TYPED_LINE}},
 	{"actionId": "focus.world_record_prop", "payload": {"objectId": "park_notice_board"}},
+	{"actionId": "player.interact.focused", "payload": {}},
+	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Waiting_Customer"}},
 	{"actionId": "player.interact.focused", "payload": {}}
 ]
 const ROUTE_PROBE_PLANS := [
@@ -159,6 +161,7 @@ func _run() -> void:
 			"civicEconomy": final_summary.get("civicEconomy", {}),
 			"recordObjects": final_summary.get("recordObjects", {}),
 			"worldRecordProps": record_props,
+			"inspectedNpcState": final_summary.get("inspectedNpcState", {}),
 			"hud": hud_snapshot
 		},
 		"npcInteractionChecks": checks,
@@ -306,7 +309,8 @@ func _route_report_from_current_run(plan: Dictionary, summary: Dictionary, hud_s
 			"recordState": hud_snapshot.get("recordStateLabel", ""),
 			"whyLine": hud_snapshot.get("whyLineLabel", ""),
 			"notice": "%s / %s" % [str(hud_snapshot.get("noticeTitleLabel", "")), _one_line(hud_snapshot.get("noticeBodyLabel", ""))],
-			"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {})
+			"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {}),
+			"inspectedNpcState": summary.get("inspectedNpcState", {})
 		},
 		"playerReadableSummary": _route_player_readable_summary(route_id, summary, hud_snapshot),
 		"roleActionExplanation": _role_action_explanation(summary),
@@ -585,12 +589,12 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("World record props do not show forwarded report and cited Station dossier")
 	if not bool(checks.get("codexInspectedPublicNotice", false)):
 		failures.append("Codex/player did not inspect the Park notice board as a public environment record")
+	if not bool(checks.get("codexInspectedWaitingCustomer", false)):
+		failures.append("Codex/player did not inspect the Waiting Customer as a visible NPC reaction")
 	if not bool(checks.get("visibleWaitingCustomerReaction", false)):
 		failures.append("Waiting Customer reaction is not visible on a spawned NPC")
-	if not str(hud_snapshot.get("noticeTitleLabel", "")).contains("공원 게시판"):
-		failures.append("HUD notice does not show the inspected Park notice board")
-	if not str(hud_snapshot.get("noticeBodyLabel", "")).contains("소문"):
-		failures.append("HUD notice does not explain the current public Park notice state")
+	if not str(hud_snapshot.get("noticeBodyLabel", "")).contains("접촉 거부"):
+		failures.append("HUD notice does not explain the inspected Waiting Customer contact refusal")
 	return failures
 
 func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary) -> Dictionary:
@@ -611,6 +615,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary) -> D
 		"visibleWaitingCustomerReaction": _visible_npc_has_line(summary, "NPC_Waiting_Customer"),
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"codexInspectedPublicNotice": _inspected_public_notice(summary),
+		"codexInspectedWaitingCustomer": _inspected_waiting_customer(summary),
 		"economyPanelReadable": _economy_panel_readable(record_props),
 		"worldPropsReachInquest": _world_props_reach_inquest(record_props),
 		"latestLedger": latest_ledger
@@ -631,6 +636,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)) and bool(checks.get("waitingCustomerObservedStation", false)),
 		"canReadVisibleNpcReaction": bool(checks.get("visibleWaitingCustomerReaction", false)),
 		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
+		"canInspectNpcReaction": bool(checks.get("codexInspectedWaitingCustomer", false)),
 		"canReadExactStationCitation": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"canReadCivicEconomyPressure": bool(checks.get("economyPanelReadable", false)),
 		"canReadFinalOutcome": str(summary.get("stage", "")) == "inquest" and outcome_body.contains("심문"),
@@ -656,6 +662,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"recordState": hud_snapshot.get("recordStateLabel", ""),
 			"visibleNpcStates": summary.get("visibleNpcStates", {}),
 			"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {}),
+			"inspectedNpcState": summary.get("inspectedNpcState", {}),
 			"notice": "%s / %s" % [str(hud_snapshot.get("noticeTitleLabel", "")), _one_line(hud_snapshot.get("noticeBodyLabel", ""))],
 			"whyLine": hud_snapshot.get("whyLineLabel", ""),
 			"civicEconomyPanel": economy_panel.get("label", "")
@@ -667,6 +674,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"Codex/player typed a dream-language line, causing a Store report, waiting-customer queue reaction, Park notice, Manager forwarding, and Station citation.",
 			"The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.",
 			"Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.",
+			"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state.",
 			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest, and the waiting customer refused contact in civic-ledger-7."
 		],
 		"roleActionExplanation": _role_action_explanation(summary),
@@ -717,6 +725,7 @@ func _markdown_report(artifact: Dictionary) -> String:
 	lines.append("- Investigation trail: %s" % _one_line(final_state.get("investigationTrail", "")))
 	lines.append("- Consequence: %s" % _one_line(final_state.get("consequence", "")))
 	lines.append("- Inspected record: %s" % _one_line(final_state.get("notice", "")))
+	lines.append("- Inspected NPC: %s" % _one_line(final_state.get("inspectedNpcState", {})))
 	lines.append("- Civic economy: %s" % _one_line(final_state.get("civicEconomyPanel", "")))
 	lines.append("- Why-line: %s" % _one_line(final_state.get("whyLine", "")))
 	lines.append("")
@@ -798,10 +807,14 @@ func _action_player_meaning(action_id: String, payload: Dictionary) -> String:
 			return "type player speech: %s" % str(payload.get("line", ""))
 		"focus.world_record_prop":
 			return "look at environment record prop: %s" % str(payload.get("objectId", ""))
+		"focus.npc":
+			return "look at visible NPC: %s" % str(payload.get("npcId", ""))
 		"player.interact.focused":
 			return "press the focused interaction"
 		"inspect.world_record_prop":
 			return "inspect environment record prop: %s" % str(payload.get("objectId", ""))
+		"inspect.npc":
+			return "inspect visible NPC reaction: %s" % str(payload.get("npcId", ""))
 		_:
 			return "unsupported or unknown player action"
 
@@ -894,6 +907,15 @@ func _inspected_public_notice(summary: Dictionary) -> bool:
 		str(inspected.get("objectId", "")) == "park_notice_board"
 		and str(inspected.get("state", "")) == "rumored"
 		and str(inspected.get("body", "")).contains("소문")
+	)
+
+func _inspected_waiting_customer(summary: Dictionary) -> bool:
+	var inspected: Dictionary = summary.get("inspectedNpcState", {})
+	return (
+		str(inspected.get("npcId", "")) == "NPC_Waiting_Customer"
+		and str(inspected.get("state", "")) == "refused"
+		and str(inspected.get("reactionText", "")).contains("거부")
+		and str(inspected.get("body", "")).contains("접촉 거부")
 	)
 
 func _inspected_studio_review_invite(summary: Dictionary) -> bool:

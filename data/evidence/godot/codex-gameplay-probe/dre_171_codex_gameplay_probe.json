@@ -7,6 +7,8 @@
 			"dialogue.choice.by_id",
 			"player.type.free_input",
 			"focus.world_record_prop",
+			"player.interact.focused",
+			"focus.npc",
 			"player.interact.focused"
 		],
 		"actionPath": [
@@ -16,9 +18,12 @@
 			"dialogue.choice.by_id -> choose dialogue id store.same_order.risky",
 			"player.type.free_input -> type player speech: 저는 이 꿈에 방금 들어왔어요.",
 			"focus.world_record_prop -> look at environment record prop: park_notice_board",
+			"player.interact.focused -> press the focused interaction",
+			"focus.npc -> look at visible NPC: NPC_Waiting_Customer",
 			"player.interact.focused -> press the focused interaction"
 		],
 		"explainabilityChecks": {
+			"canInspectNpcReaction": true,
 			"canInspectPublicEnvironmentRecord": true,
 			"canReadCivicEconomyPressure": true,
 			"canReadExactStationCitation": true,
@@ -33,6 +38,19 @@
 		"finalPlayerVisibleState": {
 			"civicEconomyPanel": "시민 경제\n잔액 3 | 신뢰 0 | 부담 90 | 주목 70",
 			"consequence": "심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다.\n흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용",
+			"inspectedNpcState": {
+				"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"displayName": "Waiting Customer",
+				"emissionEnergy": 0.616666674613953,
+				"exposure": 125,
+				"markerVisible": true,
+				"materialAlpha": 0.3980952501297,
+				"npcId": "NPC_Waiting_Customer",
+				"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+				"reactionText": "접촉 거부",
+				"role": "Waiting Customer",
+				"state": "refused"
+			},
 			"inspectedWorldRecordProp": {
 				"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
 				"label": "공개판\n소문 게시",
@@ -42,7 +60,7 @@
 				"title": "공원 게시판"
 			},
 			"investigationTrail": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-7 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-			"notice": "공원 게시판 / 소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+			"notice": "Waiting Customer / Waiting Customer / 현재 반응: 접촉 거부 / 말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다. / 이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 			"outcomeBody": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 대기 손님이 그 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
 			"recordState": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 전달 | 스테이션 인용됨 | 잔액 3 신뢰 0 부담 90 주목 70 | 장부 7 최근 civic-ledger-7 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6 | 사회 반응 대기 손님가 스테이션 직원의 기록 인용 기록을 보고 접촉 거부, 부담 85",
 			"reportWeight": 120,
@@ -136,6 +154,7 @@
 			"Codex/player typed a dream-language line, causing a Store report, waiting-customer queue reaction, Park notice, Manager forwarding, and Station citation.",
 			"The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.",
 			"Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.",
+			"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state.",
 			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest, and the waiting customer refused contact in civic-ledger-7."
 		],
 		"purpose": "Readable AI-play report: what Codex did as the player, what changed in the running scene, and what a human still has to verify.",
@@ -237,12 +256,12 @@
 		"hud": {
 			"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
 			"consequenceLabel": "심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다.\n흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용",
-			"focusLabel": "E: 공원 게시판 읽기",
+			"focusLabel": "E: Waiting Customer 반응 읽기",
 			"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 			"freeInputVisible": false,
 			"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-7 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-			"noticeBodyLabel": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
-			"noticeTitleLabel": "공원 게시판",
+			"noticeBodyLabel": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+			"noticeTitleLabel": "Waiting Customer / Waiting Customer",
 			"noticeVisible": false,
 			"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 대기 손님이 그 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
 			"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 125 -> 접수 열림 / 심문 열림 / 판정 닫힘 / 종료 열림",
@@ -253,6 +272,19 @@
 			"riskyLineLabel": "점원이 이상하다고 느낀 말이 증거가 됩니다.",
 			"safeLineLabel": "이전 발화와 같은 전제를 유지하세요.",
 			"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
+		},
+		"inspectedNpcState": {
+			"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+			"displayName": "Waiting Customer",
+			"emissionEnergy": 0.616666674613953,
+			"exposure": 125,
+			"markerVisible": true,
+			"materialAlpha": 0.3980952501297,
+			"npcId": "NPC_Waiting_Customer",
+			"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+			"reactionText": "접촉 거부",
+			"role": "Waiting Customer",
+			"state": "refused"
 		},
 		"recordObjects": {
 			"civic_ledger": "append_only",
@@ -343,6 +375,7 @@
 			"actionResult": {},
 			"after": {
 				"inputLocked": false,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "",
 				"lastReasonCode": "",
@@ -355,6 +388,7 @@
 			},
 			"before": {
 				"inputLocked": false,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "",
 				"lastReasonCode": "",
@@ -374,6 +408,7 @@
 			"actionResult": {},
 			"after": {
 				"inputLocked": false,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "",
 				"lastReasonCode": "",
@@ -386,6 +421,7 @@
 			},
 			"before": {
 				"inputLocked": false,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "",
 				"lastReasonCode": "",
@@ -405,6 +441,7 @@
 			"actionResult": {},
 			"after": {
 				"inputLocked": false,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "",
 				"lastReasonCode": "response_hesitation",
@@ -417,6 +454,7 @@
 			},
 			"before": {
 				"inputLocked": false,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "",
 				"lastReasonCode": "",
@@ -436,6 +474,7 @@
 			"actionResult": {},
 			"after": {
 				"inputLocked": false,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "store.same_order.risky",
 				"lastReasonCode": "local_routine_mismatch",
@@ -448,6 +487,7 @@
 			},
 			"before": {
 				"inputLocked": false,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "",
 				"lastReasonCode": "response_hesitation",
@@ -469,6 +509,7 @@
 			"actionResult": {},
 			"after": {
 				"inputLocked": true,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "free_input",
 				"lastReasonCode": "dream_language_leak",
@@ -481,6 +522,7 @@
 			},
 			"before": {
 				"inputLocked": false,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "store.same_order.risky",
 				"lastReasonCode": "local_routine_mismatch",
@@ -502,6 +544,7 @@
 			"actionResult": {},
 			"after": {
 				"inputLocked": true,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "free_input",
 				"lastReasonCode": "dream_language_leak",
@@ -514,6 +557,7 @@
 			},
 			"before": {
 				"inputLocked": true,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "free_input",
 				"lastReasonCode": "dream_language_leak",
@@ -535,6 +579,7 @@
 			"actionResult": {},
 			"after": {
 				"inputLocked": true,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
 					"label": "공개판\n소문 게시",
@@ -554,7 +599,116 @@
 			},
 			"before": {
 				"inputLocked": true,
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
+				"lastDialogueChoice": "free_input",
+				"lastReasonCode": "dream_language_leak",
+				"reportWeight": 120,
+				"responseHesitationCount": 1,
+				"routeOutcome": "inquest_opened",
+				"sessionOutcome": "inquest_opened",
+				"stage": "inquest",
+				"suspicion": 125
+			},
+			"payload": {},
+			"reason": "accepted"
+		},
+		{
+			"accepted": true,
+			"actionId": "focus.npc",
+			"actionResult": {},
+			"after": {
+				"inputLocked": true,
+				"inspectedNpcState": {},
+				"inspectedWorldRecordProp": {
+					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+					"label": "공개판\n소문 게시",
+					"objectId": "park_notice_board",
+					"state": "rumored",
+					"stateLabel": "소문 게시",
+					"title": "공원 게시판"
+				},
+				"lastDialogueChoice": "free_input",
+				"lastReasonCode": "dream_language_leak",
+				"reportWeight": 120,
+				"responseHesitationCount": 1,
+				"routeOutcome": "inquest_opened",
+				"sessionOutcome": "inquest_opened",
+				"stage": "inquest",
+				"suspicion": 125
+			},
+			"before": {
+				"inputLocked": true,
+				"inspectedNpcState": {},
+				"inspectedWorldRecordProp": {
+					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+					"label": "공개판\n소문 게시",
+					"objectId": "park_notice_board",
+					"state": "rumored",
+					"stateLabel": "소문 게시",
+					"title": "공원 게시판"
+				},
+				"lastDialogueChoice": "free_input",
+				"lastReasonCode": "dream_language_leak",
+				"reportWeight": 120,
+				"responseHesitationCount": 1,
+				"routeOutcome": "inquest_opened",
+				"sessionOutcome": "inquest_opened",
+				"stage": "inquest",
+				"suspicion": 125
+			},
+			"payload": {
+				"npcId": "NPC_Waiting_Customer"
+			},
+			"reason": "accepted"
+		},
+		{
+			"accepted": true,
+			"actionId": "player.interact.focused",
+			"actionResult": {},
+			"after": {
+				"inputLocked": true,
+				"inspectedNpcState": {
+					"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"displayName": "Waiting Customer",
+					"emissionEnergy": 0.616666674613953,
+					"exposure": 125,
+					"markerVisible": true,
+					"materialAlpha": 0.3980952501297,
+					"npcId": "NPC_Waiting_Customer",
+					"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+					"reactionText": "접촉 거부",
+					"role": "Waiting Customer",
+					"state": "refused"
+				},
+				"inspectedWorldRecordProp": {
+					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+					"label": "공개판\n소문 게시",
+					"objectId": "park_notice_board",
+					"state": "rumored",
+					"stateLabel": "소문 게시",
+					"title": "공원 게시판"
+				},
+				"lastDialogueChoice": "free_input",
+				"lastReasonCode": "dream_language_leak",
+				"reportWeight": 120,
+				"responseHesitationCount": 1,
+				"routeOutcome": "inquest_opened",
+				"sessionOutcome": "inquest_opened",
+				"stage": "inquest",
+				"suspicion": 125
+			},
+			"before": {
+				"inputLocked": true,
+				"inspectedNpcState": {},
+				"inspectedWorldRecordProp": {
+					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+					"label": "공개판\n소문 게시",
+					"objectId": "park_notice_board",
+					"state": "rumored",
+					"stateLabel": "소문 게시",
+					"title": "공원 게시판"
+				},
 				"lastDialogueChoice": "free_input",
 				"lastReasonCode": "dream_language_leak",
 				"reportWeight": 120,
@@ -2448,14 +2602,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779053394208",
+				"eventId": "playable_session_started-001-1779054069946",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779053394208,
+				"timestampMs": 1779054069946,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -2468,7 +2622,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-002-1779053394296",
+				"eventId": "conversation_started-002-1779054070039",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -2477,7 +2631,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779053394296,
+				"timestampMs": 1779054070039,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -2490,7 +2644,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-003-1779053394311",
+				"eventId": "response_hesitation_noted-003-1779054070053",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -2511,7 +2665,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779053394311,
+				"timestampMs": 1779054070053,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -2526,7 +2680,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-004-1779053394325",
+				"eventId": "dialogue_choice_selected-004-1779054070068",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2548,7 +2702,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779053394325,
+				"timestampMs": 1779054070068,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2563,7 +2717,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-005-1779053394325",
+				"eventId": "conversation_anomaly_detected-005-1779054070068",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2585,7 +2739,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779053394325,
+				"timestampMs": 1779054070068,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2600,7 +2754,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-006-1779053394325",
+				"eventId": "npc_suspicion_changed-006-1779054070068",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2622,7 +2776,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779053394325,
+				"timestampMs": 1779054070068,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2637,7 +2791,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-007-1779053394337",
+				"eventId": "free_input_submitted-007-1779054070082",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2662,7 +2816,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779053394337,
+				"timestampMs": 1779054070082,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2677,7 +2831,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779053394337",
+				"eventId": "conversation_anomaly_detected-008-1779054070082",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2702,7 +2856,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779053394337,
+				"timestampMs": 1779054070082,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2717,7 +2871,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779053394337",
+				"eventId": "npc_suspicion_changed-009-1779054070082",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2742,7 +2896,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779053394337,
+				"timestampMs": 1779054070082,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2757,7 +2911,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-010-1779053394337",
+				"eventId": "suspicion_shared-010-1779054070082",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2782,7 +2936,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779053394337,
+				"timestampMs": 1779054070082,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2797,7 +2951,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-011-1779053394337",
+				"eventId": "station_report_created-011-1779054070083",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2822,7 +2976,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779053394337,
+				"timestampMs": 1779054070083,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2837,7 +2991,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-012-1779053394337",
+				"eventId": "station_inquest_opened-012-1779054070083",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2862,7 +3016,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779053394337,
+				"timestampMs": 1779054070083,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2872,7 +3026,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-013-1779053394375",
+				"eventId": "world_record_prop_inspected-013-1779054070127",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -2880,7 +3034,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779053394375,
+				"timestampMs": 1779054070127,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -2888,10 +3042,43 @@
 				"uiSummaryKey": "event.world_record_prop_inspected",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
+			},
+			{
+				"adapter": "godot",
+				"eventFamily": "observation",
+				"eventId": "npc_reaction_inspected-014-1779054070151",
+				"eventName": "npc_reaction_inspected",
+				"npcId": "NPC_Waiting_Customer",
+				"reactionText": "접촉 거부",
+				"schemaVersion": "godot-runtime-v1",
+				"sessionId": "dre-171-playable-session",
+				"state": "refused",
+				"summary": "Inspected NPC reaction NPC_Waiting_Customer in state refused.",
+				"timestampMs": 1779054070151,
+				"uiSummaryArgs": {
+					"npc": "Waiting Customer",
+					"state": "접촉 거부"
+				},
+				"uiSummaryKey": "event.npc_reaction_inspected",
+				"worldId": "dre_171_godot_shell",
+				"worldRevision": "rev-social-stealth-v1"
 			}
 		],
 		"exposure": 125,
 		"inputLocked": true,
+		"inspectedNpcState": {
+			"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+			"displayName": "Waiting Customer",
+			"emissionEnergy": 0.616666674613953,
+			"exposure": 125,
+			"markerVisible": true,
+			"materialAlpha": 0.3980952501297,
+			"npcId": "NPC_Waiting_Customer",
+			"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+			"reactionText": "접촉 거부",
+			"role": "Waiting Customer",
+			"state": "refused"
+		},
 		"inspectedWorldRecordProp": {
 			"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
 			"label": "공개판\n소문 게시",
@@ -2906,8 +3093,8 @@
 		"lastWhyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 		"lastWhyLineKey": "dream_language_leak",
 		"locale": "ko",
-		"noticeBody": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
-		"noticeTitle": "공원 게시판",
+		"noticeBody": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+		"noticeTitle": "Waiting Customer / Waiting Customer",
 		"outcomeBody": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 대기 손님이 그 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
 		"outcomeTitle": "스테이션 심문 개시",
 		"outcomeVisible": true,
@@ -4765,6 +4952,19 @@
 				"quit": "quit_session",
 				"restart": "restart_session"
 			},
+			"inspectedNpcState": {
+				"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"displayName": "Waiting Customer",
+				"emissionEnergy": 0.616666674613953,
+				"exposure": 125,
+				"markerVisible": true,
+				"materialAlpha": 0.3980952501297,
+				"npcId": "NPC_Waiting_Customer",
+				"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+				"reactionText": "접촉 거부",
+				"role": "Waiting Customer",
+				"state": "refused"
+			},
 			"inspectedWorldRecordProp": {
 				"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
 				"label": "공개판\n소문 게시",
@@ -5293,6 +5493,7 @@
 	"markdownArtifactPath": "data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md",
 	"npcInteractionChecks": {
 		"codexInspectedPublicNotice": true,
+		"codexInspectedWaitingCustomer": true,
 		"economyPanelReadable": true,
 		"latestLedger": {
 			"actorId": "NPC_Waiting_Customer",
@@ -5372,6 +5573,13 @@
 			"playerMeaning": "Move Codex/player attention to one visible environment record prop."
 		},
 		{
+			"actionId": "focus.npc",
+			"payloadSchema": {
+				"npcId": "string"
+			},
+			"playerMeaning": "Move Codex/player attention to one visible NPC so their current social reaction can be read."
+		},
+		{
 			"actionId": "player.interact.focused",
 			"payloadSchema": {},
 			"playerMeaning": "Press the current focused interaction in the running scene."
@@ -5382,6 +5590,13 @@
 				"objectId": "string"
 			},
 			"playerMeaning": "Read one visible environment record prop, such as the Park notice board, through the same HUD notice area a player uses."
+		},
+		{
+			"actionId": "inspect.npc",
+			"payloadSchema": {
+				"npcId": "string"
+			},
+			"playerMeaning": "Read one visible NPC reaction through the same HUD notice area a player uses."
 		}
 	],
 	"purpose": "Codex gameplay QA interface for running the actual Same Order Godot scene, applying bounded player inputs, reading environment state, and checking NPC-to-NPC social reactions.",
@@ -5417,6 +5632,7 @@
 					"stationAttention": 0
 				},
 				"consequence": "당신은 검사 대상입니다. 상점 점원의 평범한 질문도 기록됩니다.",
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "스튜디오 리뷰 줄이 초대 상태입니다. 스튜디오 PM은 공원 게시판의 공개 확인을 읽고 플레이어에게 작은 기회를 열어뒀습니다.",
 					"label": "리뷰\n초대",
@@ -5526,6 +5742,7 @@
 			},
 			"npcInteractionChecks": {
 				"codexInspectedPublicNotice": false,
+				"codexInspectedWaitingCustomer": false,
 				"economyPanelReadable": false,
 				"latestLedger": {
 					"actorId": "NPC_Studio_PM",
@@ -6617,6 +6834,7 @@
 					"stationAttention": 5
 				},
 				"consequence": "NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다.",
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"investigationTrail": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
 				"notice": "NPC_Store_Clerk / 그럼 같은 봉투로 두겠습니다. / 플레이어 발화: 맞습니다. 제가 착각했습니다. / why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.",
@@ -6719,6 +6937,7 @@
 			},
 			"npcInteractionChecks": {
 				"codexInspectedPublicNotice": false,
+				"codexInspectedWaitingCustomer": false,
 				"economyPanelReadable": false,
 				"latestLedger": {
 					"actorId": "NPC_Park_Witness",
@@ -7529,6 +7748,7 @@
 					"stationAttention": 0
 				},
 				"consequence": "NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다.",
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"investigationTrail": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
 				"notice": "NPC_Store_Clerk / 그럼 같은 봉투로 두겠습니다. / 플레이어 발화: 맞습니다. 제가 착각했습니다. / why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.",
@@ -7631,6 +7851,7 @@
 			},
 			"npcInteractionChecks": {
 				"codexInspectedPublicNotice": false,
+				"codexInspectedWaitingCustomer": false,
 				"economyPanelReadable": false,
 				"latestLedger": {
 					"actorId": "NPC_Waiting_Customer",
@@ -8442,6 +8663,7 @@
 					"stationAttention": 60
 				},
 				"consequence": "대화 기록이 접수되었습니다. 앞선 말과 충돌하지 않아야 합니다.\n흐름: 플레이어 발화 -> 상점 기록 -> 보고 접수",
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"investigationTrail": "검사자: 상점 매니저 -> 스테이션 직원 | 대상: 플레이어 | 근거: 상점 보고 기록",
 				"notice": "NPC_Store_Clerk / 기록과 다릅니다. 담당자에게 전달하겠습니다. / 플레이어 발화: 저는 여기 사람이 아닙니다. / why-line: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.",
@@ -8544,6 +8766,7 @@
 			},
 			"npcInteractionChecks": {
 				"codexInspectedPublicNotice": false,
+				"codexInspectedWaitingCustomer": false,
 				"economyPanelReadable": false,
 				"latestLedger": {
 					"actorId": "NPC_Waiting_Customer",
@@ -9340,6 +9563,8 @@
 				"dialogue.choice.by_id",
 				"player.type.free_input",
 				"focus.world_record_prop",
+				"player.interact.focused",
+				"focus.npc",
 				"player.interact.focused"
 			],
 			"actionPath": [
@@ -9349,6 +9574,8 @@
 				"dialogue.choice.by_id -> choose dialogue id store.same_order.risky",
 				"player.type.free_input -> type player speech: 저는 이 꿈에 방금 들어왔어요.",
 				"focus.world_record_prop -> look at environment record prop: park_notice_board",
+				"player.interact.focused -> press the focused interaction",
+				"focus.npc -> look at visible NPC: NPC_Waiting_Customer",
 				"player.interact.focused -> press the focused interaction"
 			],
 			"expected": {
@@ -9365,6 +9592,19 @@
 					"stationAttention": 70
 				},
 				"consequence": "심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다.\n흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용",
+				"inspectedNpcState": {
+					"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"displayName": "Waiting Customer",
+					"emissionEnergy": 0.616666674613953,
+					"exposure": 125,
+					"markerVisible": true,
+					"materialAlpha": 0.3980952501297,
+					"npcId": "NPC_Waiting_Customer",
+					"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+					"reactionText": "접촉 거부",
+					"role": "Waiting Customer",
+					"state": "refused"
+				},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
 					"label": "공개판\n소문 게시",
@@ -9374,7 +9614,7 @@
 					"title": "공원 게시판"
 				},
 				"investigationTrail": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-7 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-				"notice": "공원 게시판 / 소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+				"notice": "Waiting Customer / Waiting Customer / 현재 반응: 접촉 거부 / 말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다. / 이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"outcomeBody": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 대기 손님이 그 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
 				"recordObjects": {
 					"civic_ledger": "append_only",
@@ -9474,6 +9714,7 @@
 			},
 			"npcInteractionChecks": {
 				"codexInspectedPublicNotice": true,
+				"codexInspectedWaitingCustomer": true,
 				"economyPanelReadable": true,
 				"latestLedger": {
 					"actorId": "NPC_Waiting_Customer",
@@ -10555,6 +10796,304 @@
 				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-7 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
 				"noticeBodyLabel": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
 				"noticeTitleLabel": "공원 게시판",
+				"noticeVisible": false,
+				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 대기 손님이 그 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
+				"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 125 -> 접수 열림 / 심문 열림 / 판정 닫힘 / 종료 열림",
+				"outcomeVisible": true,
+				"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
+				"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 전달 | 스테이션 인용됨 | 잔액 3 신뢰 0 부담 90 주목 70 | 장부 7 최근 civic-ledger-7 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6 | 사회 반응 대기 손님가 스테이션 직원의 기록 인용 기록을 보고 접촉 거부, 부담 85",
+				"recordedStatementLabel": "직접 입력도 기록됩니다.",
+				"riskyLineLabel": "점원이 이상하다고 느낀 말이 증거가 됩니다.",
+				"safeLineLabel": "이전 발화와 같은 전제를 유지하세요.",
+				"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
+			},
+			"inspectedWorldRecordProp": {
+				"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+				"label": "공개판\n소문 게시",
+				"objectId": "park_notice_board",
+				"state": "rumored",
+				"stateLabel": "소문 게시",
+				"title": "공원 게시판"
+			},
+			"label": "player.interact.focused",
+			"latestLedger": {
+				"actorId": "NPC_Waiting_Customer",
+				"actorRole": "waiting_customer",
+				"affordance": "refuse_contact",
+				"citedLedgerEventId": "civic-ledger-6",
+				"economyDelta": {
+					"localTrust": -8,
+					"recordBurden": 5
+				},
+				"eventId": "civic-ledger-7",
+				"kind": "queue_contact_refused",
+				"objectId": "store_queue_mark",
+				"recordId": "store_same_order_contact_refused",
+				"validation": "accepted",
+				"whyLine": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open."
+			},
+			"recordObjects": {
+				"civic_ledger": "append_only",
+				"correction_slip": "absent",
+				"park_notice_board": "rumored",
+				"receipt_tray": "marked",
+				"report_tray": "forwarded",
+				"station_dossier": "cited",
+				"store_counter": "serving",
+				"store_queue_mark": "refused",
+				"studio_review_queue": "open",
+				"usual_order_cue": "read"
+			},
+			"summary": {
+				"inputLocked": true,
+				"lastDialogueChoice": "free_input",
+				"lastReasonCode": "dream_language_leak",
+				"reportWeight": 120,
+				"responseHesitationCount": 1,
+				"routeOutcome": "inquest_opened",
+				"sessionOutcome": "inquest_opened",
+				"stage": "inquest",
+				"suspicion": 125
+			},
+			"worldRecordProps": {
+				"civic_economy_panel": {
+					"hasBody": true,
+					"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 90 | 주목 70",
+					"state": "attention",
+					"visible": true
+				},
+				"civic_ledger": {
+					"hasBody": true,
+					"label": "시민 장부 7건\ncivic-ledger-7 -> civic-ledger-6\n접촉 거부",
+					"state": "append_only",
+					"visible": true
+				},
+				"correction_slip": {
+					"hasBody": true,
+					"label": "정정\n없음",
+					"state": "absent",
+					"visible": true
+				},
+				"park_notice_board": {
+					"hasBody": true,
+					"label": "공개판\n소문 게시",
+					"state": "rumored",
+					"visible": true
+				},
+				"receipt_tray": {
+					"hasBody": true,
+					"label": "영수증\n표시됨",
+					"state": "marked",
+					"visible": true
+				},
+				"report_tray": {
+					"hasBody": true,
+					"label": "보고\n전달",
+					"state": "forwarded",
+					"visible": true
+				},
+				"station_dossier": {
+					"hasBody": true,
+					"label": "스테이션 문서\n인용됨",
+					"state": "cited",
+					"visible": true
+				},
+				"store_counter": {
+					"hasBody": true,
+					"label": "카운터\n응대 중",
+					"state": "serving",
+					"visible": true
+				},
+				"store_queue_mark": {
+					"hasBody": true,
+					"label": "대기 표식\nrefused",
+					"state": "refused",
+					"visible": true
+				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
+					"visible": true
+				},
+				"usual_order_cue": {
+					"hasBody": true,
+					"label": "늘 같은 주문\n읽힘",
+					"state": "read",
+					"visible": true
+				}
+			}
+		},
+		{
+			"availableChoices": [
+				"맞습니다. 제가 착각했습니다.",
+				"어제 일이 조금 흐릿해서 확인했습니다.",
+				"저는 여기 사람이 아닙니다."
+			],
+			"civicEconomy": {
+				"accountCredit": 3,
+				"localTrust": 0,
+				"recordBurden": 90,
+				"stationAttention": 70
+			},
+			"hud": {
+				"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
+				"consequenceLabel": "심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다.\n흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용",
+				"focusLabel": "E: Waiting Customer 반응 읽기",
+				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
+				"freeInputVisible": false,
+				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-7 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
+				"noticeBodyLabel": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+				"noticeTitleLabel": "공원 게시판",
+				"noticeVisible": false,
+				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 대기 손님이 그 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
+				"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 125 -> 접수 열림 / 심문 열림 / 판정 닫힘 / 종료 열림",
+				"outcomeVisible": true,
+				"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
+				"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 전달 | 스테이션 인용됨 | 잔액 3 신뢰 0 부담 90 주목 70 | 장부 7 최근 civic-ledger-7 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6 | 사회 반응 대기 손님가 스테이션 직원의 기록 인용 기록을 보고 접촉 거부, 부담 85",
+				"recordedStatementLabel": "직접 입력도 기록됩니다.",
+				"riskyLineLabel": "점원이 이상하다고 느낀 말이 증거가 됩니다.",
+				"safeLineLabel": "이전 발화와 같은 전제를 유지하세요.",
+				"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
+			},
+			"inspectedWorldRecordProp": {
+				"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+				"label": "공개판\n소문 게시",
+				"objectId": "park_notice_board",
+				"state": "rumored",
+				"stateLabel": "소문 게시",
+				"title": "공원 게시판"
+			},
+			"label": "focus.npc",
+			"latestLedger": {
+				"actorId": "NPC_Waiting_Customer",
+				"actorRole": "waiting_customer",
+				"affordance": "refuse_contact",
+				"citedLedgerEventId": "civic-ledger-6",
+				"economyDelta": {
+					"localTrust": -8,
+					"recordBurden": 5
+				},
+				"eventId": "civic-ledger-7",
+				"kind": "queue_contact_refused",
+				"objectId": "store_queue_mark",
+				"recordId": "store_same_order_contact_refused",
+				"validation": "accepted",
+				"whyLine": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open."
+			},
+			"recordObjects": {
+				"civic_ledger": "append_only",
+				"correction_slip": "absent",
+				"park_notice_board": "rumored",
+				"receipt_tray": "marked",
+				"report_tray": "forwarded",
+				"station_dossier": "cited",
+				"store_counter": "serving",
+				"store_queue_mark": "refused",
+				"studio_review_queue": "open",
+				"usual_order_cue": "read"
+			},
+			"summary": {
+				"inputLocked": true,
+				"lastDialogueChoice": "free_input",
+				"lastReasonCode": "dream_language_leak",
+				"reportWeight": 120,
+				"responseHesitationCount": 1,
+				"routeOutcome": "inquest_opened",
+				"sessionOutcome": "inquest_opened",
+				"stage": "inquest",
+				"suspicion": 125
+			},
+			"worldRecordProps": {
+				"civic_economy_panel": {
+					"hasBody": true,
+					"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 90 | 주목 70",
+					"state": "attention",
+					"visible": true
+				},
+				"civic_ledger": {
+					"hasBody": true,
+					"label": "시민 장부 7건\ncivic-ledger-7 -> civic-ledger-6\n접촉 거부",
+					"state": "append_only",
+					"visible": true
+				},
+				"correction_slip": {
+					"hasBody": true,
+					"label": "정정\n없음",
+					"state": "absent",
+					"visible": true
+				},
+				"park_notice_board": {
+					"hasBody": true,
+					"label": "공개판\n소문 게시",
+					"state": "rumored",
+					"visible": true
+				},
+				"receipt_tray": {
+					"hasBody": true,
+					"label": "영수증\n표시됨",
+					"state": "marked",
+					"visible": true
+				},
+				"report_tray": {
+					"hasBody": true,
+					"label": "보고\n전달",
+					"state": "forwarded",
+					"visible": true
+				},
+				"station_dossier": {
+					"hasBody": true,
+					"label": "스테이션 문서\n인용됨",
+					"state": "cited",
+					"visible": true
+				},
+				"store_counter": {
+					"hasBody": true,
+					"label": "카운터\n응대 중",
+					"state": "serving",
+					"visible": true
+				},
+				"store_queue_mark": {
+					"hasBody": true,
+					"label": "대기 표식\nrefused",
+					"state": "refused",
+					"visible": true
+				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
+					"visible": true
+				},
+				"usual_order_cue": {
+					"hasBody": true,
+					"label": "늘 같은 주문\n읽힘",
+					"state": "read",
+					"visible": true
+				}
+			}
+		},
+		{
+			"availableChoices": [
+				"맞습니다. 제가 착각했습니다.",
+				"어제 일이 조금 흐릿해서 확인했습니다.",
+				"저는 여기 사람이 아닙니다."
+			],
+			"civicEconomy": {
+				"accountCredit": 3,
+				"localTrust": 0,
+				"recordBurden": 90,
+				"stationAttention": 70
+			},
+			"hud": {
+				"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
+				"consequenceLabel": "심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다.\n흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용",
+				"focusLabel": "E: Waiting Customer 반응 읽기",
+				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
+				"freeInputVisible": false,
+				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-7 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
+				"noticeBodyLabel": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"noticeTitleLabel": "Waiting Customer / Waiting Customer",
 				"noticeVisible": false,
 				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 대기 손님이 그 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
 				"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 125 -> 접수 열림 / 심문 열림 / 판정 닫힘 / 종료 열림",

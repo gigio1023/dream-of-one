@@ -256,6 +256,74 @@ test("Store manager can pause counter service after a local report", () => {
   assert.equal(paused.environment.economy.recordBurden, 40);
 });
 
+test("Waiting customer can leave after paused service becomes visible", () => {
+  let environment = createSameOrderAgenticEnvironment();
+  const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);
+  const report = requireAccepted(validateAndApplyEnvironmentAction(environment, clerk, {
+    actorId: clerk.actorId,
+    role: clerk.role,
+    affordance: "place_note",
+    objectId: "report_tray",
+    recordId: "store_same_order_clerk_statement",
+    whyLine: "The unresolved line creates a Store note that makes the line unstable.",
+  }));
+  environment = report.environment;
+
+  const customer = actor({
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    knownLedgerEventIds: [report.event.eventId],
+  }, environment);
+  const delayed = requireAccepted(validateAndApplyEnvironmentAction(environment, customer, {
+    actorId: customer.actorId,
+    role: customer.role,
+    affordance: "complain_delay",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_queue_delay",
+    citedLedgerEventId: report.event.eventId,
+    whyLine: "The Store note slows the line, so the waiting customer complains.",
+  }));
+  environment = delayed.environment;
+
+  const manager = actor({ actorId: "NPC_Store_Manager", role: "store_manager" }, environment);
+  const paused = requireAccepted(validateAndApplyEnvironmentAction(environment, manager, {
+    actorId: manager.actorId,
+    role: manager.role,
+    affordance: "pause_service",
+    objectId: "store_counter",
+    whyLine: "The pending report makes normal counter service unsafe to continue.",
+  }));
+  environment = paused.environment;
+
+  const leavingCustomer = actor({
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    knownLedgerEventIds: [paused.event.eventId],
+  }, environment);
+  const action = listAvailableEnvironmentActions(environment, leavingCustomer)
+    .find(candidate => candidate.affordance === "leave_queue");
+
+  assert.ok(action);
+  assert.equal(action.objectId, "store_queue_mark");
+  assert.deepEqual(action.citableLedgerEventIds, [paused.event.eventId]);
+
+  const left = requireAccepted(validateAndApplyEnvironmentAction(environment, leavingCustomer, {
+    actorId: leavingCustomer.actorId,
+    role: leavingCustomer.role,
+    affordance: "leave_queue",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_queue_left",
+    citedLedgerEventId: paused.event.eventId,
+    whyLine: "Counter service is paused, so the waiting customer leaves instead of waiting for the unresolved report.",
+  }));
+
+  assert.equal(left.event.kind, "queue_left");
+  assert.equal(left.event.citedLedgerEventId, paused.event.eventId);
+  assert.equal(left.environment.objects.find(item => item.objectId === "store_queue_mark")?.state, "empty");
+  assert.equal(left.environment.economy.localTrust, 27);
+  assert.equal(left.environment.economy.recordBurden, 50);
+});
+
 test("Waiting customer can accept a correction record and settle queue pressure", () => {
   let environment = createSameOrderAgenticEnvironment();
   const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);

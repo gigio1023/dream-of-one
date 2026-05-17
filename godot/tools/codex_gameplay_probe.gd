@@ -375,12 +375,18 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("soft_report expected pending report tray")
 			if str(record_objects.get("store_counter", "")) != "paused":
 				failures.append("soft_report expected counter service to pause")
+			if str(record_objects.get("store_queue_mark", "")) != "empty":
+				failures.append("soft_report expected waiting customer to leave paused service")
 			if not _action_exists(summary, "store_manager", "place_note"):
 				failures.append("soft_report expected Store Manager follow-up note")
 			if not _action_exists(summary, "store_manager", "pause_service"):
 				failures.append("soft_report expected Store Manager pause_service action")
+			if not _action_exists(summary, "waiting_customer", "leave_queue"):
+				failures.append("soft_report expected Waiting Customer leave_queue action")
 			if not _observation_exists(summary, "store_manager", "store_clerk", "place_note", "place_note"):
 				failures.append("soft_report expected Manager to act from Clerk note")
+			if not _observation_exists(summary, "waiting_customer", "store_manager", "pause_service", "leave_queue"):
+				failures.append("soft_report expected Waiting Customer to react to Manager service pause")
 		"inquest_opened":
 			if not bool(station.get("inquestOpen", false)):
 				failures.append("inquest_opened must open Station inquest")

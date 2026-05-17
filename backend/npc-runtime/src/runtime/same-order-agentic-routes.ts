@@ -294,13 +294,24 @@ function buildSoftReportProof(): SameOrderAgenticRouteProof {
     recordId: "store_same_order_manager_followup",
     whyLine: "The manager can see the pending Store note and adds a liability note without citing private Station facts.",
   });
-  applyAction(build, {
+  const servicePausedEvent = applyAction(build, {
     stepId: "soft.manager.pause_service",
     actorId: "NPC_Store_Manager",
     role: "store_manager",
     affordance: "pause_service",
     objectId: "store_counter",
     whyLine: "The manager pauses counter service because the pending Store note has made normal service unsafe to continue.",
+  });
+  applyAction(build, {
+    stepId: "soft.waiting_customer.leave_queue",
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    affordance: "leave_queue",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_queue_left",
+    citedLedgerEventId: servicePausedEvent.eventId,
+    knownLedgerEventIds: [servicePausedEvent.eventId],
+    whyLine: "A waiting customer sees counter service pause and leaves the line instead of waiting for the unresolved report.",
   });
 
   return routeProof({
@@ -309,7 +320,7 @@ function buildSoftReportProof(): SameOrderAgenticRouteProof {
     sessionOutcome: "soft_report",
     playerLineKind: "soft_report_line",
     playerLine: "오늘은 그냥 지나가는 중인데, 늘 먹던 게 뭔지는 모르겠네요.",
-    socialReactionSummary: "The clerk creates a note, the queue reacts, a Park witness posts a public rumor, and the manager pauses service after adding a pending follow-up; Station inquest is not opened.",
+    socialReactionSummary: "The clerk creates a note, the queue reacts, a Park witness posts a public rumor, the manager pauses service, and a waiting customer leaves the line; Station inquest is not opened.",
   });
 }
 
@@ -653,6 +664,9 @@ function validateSoftReport(
   if (!proof.actionTrace.some(trace => trace.actorRole === "store_manager" && trace.affordance === "pause_service")) {
     failures.push({ routeId: proof.routeId, path: "actionTrace", message: "soft report must pause local counter service before broader escalation" });
   }
+  if (!proof.actionTrace.some(trace => trace.actorRole === "waiting_customer" && trace.affordance === "leave_queue")) {
+    failures.push({ routeId: proof.routeId, path: "actionTrace", message: "soft report must show a waiting customer leaving paused service" });
+  }
   if (!proof.socialObservationTrace.some(observation =>
     observation.observerRole === "store_manager"
     && observation.observedActorRole === "store_clerk"
@@ -667,6 +681,9 @@ function validateSoftReport(
   }
   if (proof.finalObjectStates.store_counter !== "paused") {
     failures.push({ routeId: proof.routeId, path: "finalObjectStates.store_counter", message: "soft report must visibly pause the local counter" });
+  }
+  if (proof.finalObjectStates.store_queue_mark !== "empty") {
+    failures.push({ routeId: proof.routeId, path: "finalObjectStates.store_queue_mark", message: "soft report must visibly empty the queue after service pauses" });
   }
 }
 

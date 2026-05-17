@@ -91,6 +91,7 @@ const ENVIRONMENT_AFFORDANCE_ORDER := [
 	"note_wary",
 	"complain_delay",
 	"accept_repair",
+	"leave_queue",
 	"pause_service",
 	"cite_expected_order",
 	"create_receipt",
@@ -107,6 +108,7 @@ const STORE_LEDGER_EVENT_KINDS := [
 	"store_sale_normal",
 	"store_sale_corrected",
 	"queue_repair_accepted",
+	"queue_left",
 	"store_exception_reported",
 	"store_report_escalated",
 	"service_paused",
@@ -154,6 +156,14 @@ const ENVIRONMENT_ACTION_RULES := {
 			"eventKind": "queue_repair_accepted",
 			"allowedRoles": ["waiting_customer"],
 			"requiresLedgerEvent": true
+		},
+		"leave_queue": {
+			"fromStates": ["disrupted"],
+			"toState": "empty",
+			"eventKind": "queue_left",
+			"allowedRoles": ["waiting_customer"],
+			"requiresLedgerEvent": true,
+			"requiresStoreLedgerEvent": true
 		}
 	},
 	"usual_order_cue": {
@@ -1018,7 +1028,7 @@ func _apply_social_consequence(evaluation: Dictionary) -> void:
 				"store_same_order_manager_followup",
 				"The manager can see the pending Store note and adds a liability note without citing private Station facts."
 			)
-			_apply_role_agent_action(
+			var pause_result := _apply_role_agent_action(
 				"report.manager.pause_service",
 				"NPC_Store_Manager",
 				"store_manager",
@@ -1027,6 +1037,21 @@ func _apply_social_consequence(evaluation: Dictionary) -> void:
 				"",
 				"The manager pauses counter service because the pending Store note has made normal service unsafe to continue."
 			)
+			var pause_event: Dictionary = pause_result.get("event", {})
+			var pause_event_id := str(pause_event.get("eventId", ""))
+			if bool(pause_result.get("ok", false)) and not pause_event_id.is_empty():
+				_apply_role_agent_action(
+					"report.waiting_customer.leave_queue",
+					"NPC_Waiting_Customer",
+					"waiting_customer",
+					"leave_queue",
+					"store_queue_mark",
+					"store_same_order_queue_left",
+					"A waiting customer sees counter service pause and leaves the line instead of waiting for the unresolved report.",
+					pause_event_id,
+					[pause_event_id]
+				)
+				_set_actor_line("NPC_Waiting_Customer", "카운터까지 멈추면 저는 빠질게요.")
 			_set_actor_line("NPC_Store_Manager", "보고가 붙은 동안 카운터를 잠시 멈춥니다.")
 		_record_event(
 			"domain",
@@ -1652,6 +1677,8 @@ func _action_priority_hints(affordance: String, rule: Dictionary) -> Array[Strin
 		hints.append("pressure:repair_accepted")
 	if affordance == "pause_service":
 		hints.append("pressure:service_paused")
+	if affordance == "leave_queue":
+		hints.append("pressure:queue_left")
 	if affordance == "post_rumor":
 		hints.append("pressure:public_talk")
 	return hints
@@ -1670,6 +1697,8 @@ func _action_perceived_as(object_id: String, affordance: String) -> String:
 			return "local wary queue note"
 		"pause_service":
 			return "paused local service"
+		"leave_queue":
+			return "queue leaves paused service"
 		"place_note":
 			return "Store report note"
 		"forward_report":
@@ -1715,6 +1744,7 @@ func _record_mutation_affordances() -> Array[String]:
 		"note_wary",
 		"accept_repair",
 		"complain_delay",
+		"leave_queue",
 		"post_rumor",
 		"place_note",
 		"forward_report",
@@ -1796,6 +1826,8 @@ func _civic_economy_delta(event_kind: String) -> Dictionary:
 			return {"localTrust": 5, "recordBurden": -5}
 		"queue_delay_noted":
 			return {"recordBurden": 5}
+		"queue_left":
+			return {"localTrust": -3, "recordBurden": 5}
 		"public_rumor_posted":
 			return {"recordBurden": 5}
 		"store_exception_reported":
@@ -1939,6 +1971,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"correction_offered": "정정 제안",
 		"store_sale_corrected": "정정 처리",
 		"queue_repair_accepted": "줄 수습",
+		"queue_left": "대기 이탈",
 		"queue_delay_noted": "대기줄 불평",
 		"public_rumor_posted": "공개 소문",
 		"store_exception_reported": "상점 보고",
@@ -1954,6 +1987,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"correction_offered": "correction offered",
 		"store_sale_corrected": "correction accepted",
 		"queue_repair_accepted": "queue repair accepted",
+		"queue_left": "queue left",
 		"queue_delay_noted": "queue delay noted",
 		"public_rumor_posted": "public rumor posted",
 		"store_exception_reported": "Store report",
@@ -1990,6 +2024,7 @@ func _affordance_label(affordance: String) -> String:
 		"mark_receipt": "영수증 표시",
 		"attach_correction": "정정 첨부",
 		"accept_repair": "수습 수락",
+		"leave_queue": "줄 이탈",
 		"pause_service": "응대 중단",
 		"complain_delay": "대기 불평",
 		"post_rumor": "공개 게시",
@@ -2004,6 +2039,7 @@ func _affordance_label(affordance: String) -> String:
 		"mark_receipt": "mark receipt",
 		"attach_correction": "attach correction",
 		"accept_repair": "accept repair",
+		"leave_queue": "leave queue",
 		"pause_service": "pause service",
 		"complain_delay": "complain delay",
 		"post_rumor": "post public rumor",
@@ -2482,7 +2518,7 @@ func _terminal_outcome_title() -> String:
 
 func _terminal_outcome_body() -> String:
 	if session_outcome == "soft_report":
-		return "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 카운터 중단 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 상점 관리자가 기록 부담을 보고 후속 메모를 붙인 뒤 카운터 응대를 잠시 멈췄습니다.\n역할 행동: 상점 관리자가 보고 트레이에 후속 기록을 남기고 카운터를 중단 상태로 바꿨습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
+		return "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 카운터 중단 -> 대기 이탈 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 상점 관리자가 기록 부담을 보고 후속 메모를 붙인 뒤 카운터 응대를 잠시 멈췄습니다. 그 중단을 본 대기 손님은 줄에서 빠졌습니다.\n역할 행동: 상점 관리자가 보고 트레이에 후속 기록을 남기고 카운터를 중단 상태로 바꿨고, 대기 손님이 중단 기록을 보고 대기 표식을 비웠습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	if route_outcome == "repair_recovered":
 		return "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	if route_outcome == "cover_held_under_suspicion":

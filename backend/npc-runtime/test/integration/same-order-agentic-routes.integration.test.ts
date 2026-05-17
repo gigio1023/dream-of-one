@@ -64,7 +64,9 @@ test("Same Order agentic route proofs cover clean, repair, soft report, and inqu
   assert.ok(softReport);
   assert.equal(softReport.actionTrace.some(trace => trace.actorRole === "store_manager"), true);
   assert.equal(softReport.actionTrace.some(trace => trace.actorRole === "store_manager" && trace.affordance === "pause_service"), true);
+  assert.equal(softReport.actionTrace.some(trace => trace.actorRole === "waiting_customer" && trace.affordance === "leave_queue"), true);
   assert.equal(softReport.finalObjectStates.store_counter, "paused");
+  assert.equal(softReport.finalObjectStates.store_queue_mark, "empty");
   assert.equal(softReport.ledgerEventKinds.includes("store_exception_reported"), true);
   assert.equal(softReport.ledgerEventKinds.includes("station_record_cited"), false);
   assert.equal(

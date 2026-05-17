@@ -240,7 +240,7 @@ const ROUTE_SPECS: RouteSpec[] = [
     sessionOutcome: "soft_report",
     playerLineKind: "soft_report_line",
     playerLine: "오늘은 그냥 지나가는 중인데, 늘 먹던 게 뭔지는 모르겠네요.",
-    socialReactionSummary: "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, and a manager follow-up plus service pause without Station citation.",
+    socialReactionSummary: "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, a manager follow-up plus service pause, and a waiting-customer exit without Station citation.",
     steps: [
       {
         stepId: "soft.clerk.mark_receipt",
@@ -310,6 +310,19 @@ const ROUTE_SPECS: RouteSpec[] = [
         objectId: "store_counter",
         whyLine: "The manager pauses counter service because the pending Store note has made normal service unsafe to continue.",
         npcLineCandidate: "보고가 붙은 동안 카운터를 잠시 멈춥니다.",
+      },
+      {
+        stepId: "soft.waiting_customer.leave_queue",
+        actorId: "NPC_Waiting_Customer",
+        actorRole: "waiting_customer",
+        stepGoal: "leave the queue after counter service pauses",
+        affordance: "leave_queue",
+        objectId: "store_queue_mark",
+        recordId: "store_same_order_queue_left",
+        citedLedgerEventFromStepId: "soft.manager.pause_service",
+        knownLedgerEventFromStepIds: ["soft.manager.pause_service"],
+        whyLine: "A waiting customer sees counter service pause and leaves the line instead of waiting for the unresolved report.",
+        npcLineCandidate: "카운터까지 멈추면 저는 빠질게요.",
       },
     ],
   },

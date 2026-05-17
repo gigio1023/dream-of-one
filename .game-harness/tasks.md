@@ -61,6 +61,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   the pending Store note, uses `pause_service`, changes the counter to
   `paused`, adds `service_paused`, and makes a soft report visibly interrupt
   local service without opening inquest.
+- [x] Add the next smallest report-side NPC reaction: Waiting Customer reads
+  the paused-service record, uses `leave_queue`, empties the queue mark, and
+  makes the soft report affect a second role without adding a larger shop sim.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

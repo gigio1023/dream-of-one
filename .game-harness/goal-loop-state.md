@@ -100,14 +100,14 @@ Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `5 / 5`, and `routeReportPassCount=5 / 5`.
-- latest game increment: soft report now changes the environment immediately
-  instead of remaining only a report record. When the Clerk note crosses the
-  report threshold but stays below inquest, the Store Manager adds a follow-up
-  note, uses `pause_service` on `store_counter`, changes the counter state to
-  `paused`, adds `service_paused`, and the outcome copy explains that service
-  stops because the local report made normal counter flow unsafe. This proves a
-  reusable pattern: a social record can interrupt an environment affordance
-  without expanding Store/Station into a larger management sim.
+- latest game increment: soft report now creates one more local social
+  consequence before the Station path. When the Clerk note crosses the report
+  threshold but stays below inquest, the Store Manager adds a follow-up note and
+  pauses counter service; the Waiting Customer then reads that pause record,
+  uses `leave_queue` on `store_queue_mark`, changes the queue state to `empty`,
+  and adds `queue_left`. This proves the smallest useful pattern for the broader
+  game: one NPC's record-backed environment change can make another NPC choose a
+  different visible action.
 - prior suspicious-cover increment remains current: suspicious cover now leaves a small local social
   residue without becoming a report. When the player says a risky line and then
   returns to the clerk's premise, the Clerk marks the receipt; the Waiting
@@ -140,7 +140,7 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `3757cc1ccf73ebcc7d77eeb867b0a8a0bbe260104c80a01e6753ea739fb9eb9c`
+  `46aaa89d81be5dabe39c12b5dd51ef87e8d6c974fa64707a889de7ab017ffe1c`
 - Markdown SHA-256:
   `ffedc48789449c36b24d54b464fb9a2e0487797abce9479143f7faadcec677d4`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
@@ -262,6 +262,17 @@ Latest AI-play interface check:
   freshness pass, copied probe cross-check pass, route reports pass, and
   `README live-session handoff: pass`. This is still setup proof only; raw
   session notes remain `0 / 3`.
+- 2026-05-18 playable paused-service queue-exit increment: added the next
+  smallest environment reaction after a soft report. The soft-report route now
+  proves `place_note -> complain_delay -> post_rumor -> place_followup_note ->
+  pause_service -> leave_queue`; final soft-report state includes
+  `store_counter=paused`, `store_queue_mark=empty`, `service_paused`,
+  `queue_left`, local trust 2, record burden 100, and Station attention 60.
+  The terminal copy now says the Waiting Customer leaves after seeing counter
+  service pause. Verified with latest Godot playable smoke, Codex gameplay
+  probe, backend playability report attachment, full backend check, runtime
+  slice smoke, session-kit generation, and comprehension guards. This is
+  internal playable proof only; external fresh-player notes remain `0 / 3`.
 - 2026-05-18 playable repair-response increment: added the smallest positive
   NPC-to-NPC social reaction. The repair route now proves
   `mark_receipt -> offer_correction -> attach_correction -> accept_repair`;

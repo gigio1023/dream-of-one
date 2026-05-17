@@ -1,18 +1,18 @@
 {
   "adapter": "godot",
-  "createdAtMs": 1779041650239,
+  "createdAtMs": 1779042396916,
   "events": [
     {
       "adapter": "godot",
       "eventFamily": "session",
-      "eventId": "playable_session_started-001-1779041650008",
+      "eventId": "playable_session_started-001-1779042396688",
       "eventName": "playable_session_started",
       "prologueStep": "beginning",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "sessionOutcome": "running",
       "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-      "timestampMs": 1779041650008,
+      "timestampMs": 1779042396688,
       "uiSummaryArgs": {},
       "uiSummaryKey": "event.session_started",
       "worldId": "dre_171_godot_shell",
@@ -25,7 +25,7 @@
       "conversationId": "conv-same-order",
       "conversationStage": "normal",
       "eventFamily": "domain",
-      "eventId": "conversation_started-002-1779041650104",
+      "eventId": "conversation_started-002-1779042396783",
       "eventName": "conversation_started",
       "outcome": "running",
       "promptId": "store.same_order.routine",
@@ -34,7 +34,7 @@
       "socialLoopStage": "normal",
       "speakerId": "NPC_Store_Clerk",
       "summary": "Store Clerk opened the Same Order conversation.",
-      "timestampMs": 1779041650104,
+      "timestampMs": 1779042396783,
       "turnId": "turn-1",
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
@@ -47,7 +47,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "dialogue_choice_selected-003-1779041650140",
+      "eventId": "dialogue_choice_selected-003-1779042396820",
       "eventName": "dialogue_choice_selected",
       "inputMode": "choice",
       "outcome": "running",
@@ -69,7 +69,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779041650140,
+      "timestampMs": 1779042396820,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -84,7 +84,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-004-1779041650140",
+      "eventId": "conversation_anomaly_detected-004-1779042396820",
       "eventName": "conversation_anomaly_detected",
       "inputMode": "choice",
       "outcome": "running",
@@ -106,7 +106,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779041650140,
+      "timestampMs": 1779042396820,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -121,7 +121,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-005-1779041650140",
+      "eventId": "npc_suspicion_changed-005-1779042396820",
       "eventName": "npc_suspicion_changed",
       "inputMode": "choice",
       "outcome": "running",
@@ -143,7 +143,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779041650140,
+      "timestampMs": 1779042396820,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -158,7 +158,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "응답 지연 12000ms",
       "eventFamily": "domain",
-      "eventId": "response_hesitation_noted-006-1779041650174",
+      "eventId": "response_hesitation_noted-006-1779042396853",
       "eventName": "response_hesitation_noted",
       "inputMode": "response_hesitation",
       "outcome": "running",
@@ -181,7 +181,7 @@
       "suspicionSignals": [
         "response_hesitation"
       ],
-      "timestampMs": 1779041650174,
+      "timestampMs": 1779042396853,
       "turnId": "turn-2",
       "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
       "whyLineKey": "response_hesitation",
@@ -196,7 +196,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "free_input_submitted-007-1779041650203",
+      "eventId": "free_input_submitted-007-1779042396882",
       "eventName": "free_input_submitted",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -221,7 +221,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779041650203,
+      "timestampMs": 1779042396882,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -236,7 +236,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-008-1779041650203",
+      "eventId": "conversation_anomaly_detected-008-1779042396882",
       "eventName": "conversation_anomaly_detected",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -261,7 +261,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779041650203,
+      "timestampMs": 1779042396882,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -276,7 +276,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-009-1779041650203",
+      "eventId": "npc_suspicion_changed-009-1779042396882",
       "eventName": "npc_suspicion_changed",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -301,7 +301,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779041650203,
+      "timestampMs": 1779042396882,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -316,7 +316,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "suspicion_shared-010-1779041650203",
+      "eventId": "suspicion_shared-010-1779042396882",
       "eventName": "suspicion_shared",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -341,7 +341,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779041650203,
+      "timestampMs": 1779042396882,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -356,7 +356,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_report_created-011-1779041650203",
+      "eventId": "station_report_created-011-1779042396882",
       "eventName": "station_report_created",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -381,7 +381,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779041650203,
+      "timestampMs": 1779042396882,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -396,7 +396,7 @@
       "conversationStage": "inquest",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_inquest_opened-012-1779041650203",
+      "eventId": "station_inquest_opened-012-1779042396882",
       "eventName": "station_inquest_opened",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -421,7 +421,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779041650203,
+      "timestampMs": 1779042396882,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -432,12 +432,12 @@
       "adapter": "godot",
       "artifactPath": "data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json",
       "eventFamily": "evidence_export",
-      "eventId": "evidence_pack_created-013-1779041650239",
+      "eventId": "evidence_pack_created-013-1779042396916",
       "eventName": "evidence_pack_created",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "summary": "Godot conversation playable Evidence Pack exported for backend validation.",
-      "timestampMs": 1779041650239,
+      "timestampMs": 1779042396916,
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
     }
@@ -2074,7 +2074,7 @@
         "sessionOutcome": "soft_report",
         "playerLineKind": "soft_report_line",
         "playerLine": "오늘은 그냥 지나가는 중인데, 늘 먹던 게 뭔지는 모르겠네요.",
-        "socialReactionSummary": "The clerk creates a note, the queue reacts, a Park witness posts a public rumor, and the manager pauses service after adding a pending follow-up; Station inquest is not opened.",
+        "socialReactionSummary": "The clerk creates a note, the queue reacts, a Park witness posts a public rumor, the manager pauses service, and a waiting customer leaves the line; Station inquest is not opened.",
         "actionTrace": [
           {
             "stepId": "soft.clerk.mark_receipt",
@@ -2222,6 +2222,30 @@
               "stationAttention": 60
             },
             "whyLine": "The manager pauses counter service because the pending Store note has made normal service unsafe to continue."
+          },
+          {
+            "stepId": "soft.waiting_customer.leave_queue",
+            "actorId": "NPC_Waiting_Customer",
+            "actorRole": "waiting_customer",
+            "perceivedObjectIds": [
+              "store_queue_mark",
+              "store_counter",
+              "usual_order_cue"
+            ],
+            "affordance": "leave_queue",
+            "objectId": "store_queue_mark",
+            "accepted": true,
+            "ledgerEventId": "civic-ledger-7",
+            "ledgerEventKind": "queue_left",
+            "recordId": "store_same_order_queue_left",
+            "citedLedgerEventId": "civic-ledger-6",
+            "economyAfter": {
+              "accountCredit": 3,
+              "localTrust": 2,
+              "recordBurden": 100,
+              "stationAttention": 60
+            },
+            "whyLine": "A waiting customer sees counter service pause and leaves the line instead of waiting for the unresolved report."
           }
         ],
         "ledgerEventKinds": [
@@ -2230,7 +2254,8 @@
           "queue_delay_noted",
           "public_rumor_posted",
           "store_exception_reported",
-          "service_paused"
+          "service_paused",
+          "queue_left"
         ],
         "ledgerAffordances": [
           "mark_receipt",
@@ -2238,7 +2263,8 @@
           "complain_delay",
           "post_rumor",
           "place_note",
-          "pause_service"
+          "pause_service",
+          "leave_queue"
         ],
         "socialObservationTrace": [
           {
@@ -2288,10 +2314,26 @@
             "resultingStepId": "soft.manager.place_followup_note",
             "resultingAffordance": "place_note",
             "whyLine": "store_manager uses store_clerk's place_note record before choosing place_note."
+          },
+          {
+            "observerActorId": "NPC_Waiting_Customer",
+            "observerRole": "waiting_customer",
+            "observedLedgerEventId": "civic-ledger-6",
+            "observedActorRole": "store_manager",
+            "observedAffordance": "pause_service",
+            "observedObjectId": "store_counter",
+            "economyPressure": {
+              "localTrust": 5,
+              "recordBurden": 100,
+              "stationAttention": 60
+            },
+            "resultingStepId": "soft.waiting_customer.leave_queue",
+            "resultingAffordance": "leave_queue",
+            "whyLine": "waiting_customer uses store_manager's pause_service record before choosing leave_queue."
           }
         ],
         "finalObjectStates": {
-          "store_queue_mark": "disrupted",
+          "store_queue_mark": "empty",
           "store_counter": "paused",
           "usual_order_cue": "read",
           "receipt_tray": "marked",
@@ -2303,7 +2345,7 @@
         },
         "economyAfter": {
           "accountCredit": 3,
-          "localTrust": 5,
+          "localTrust": 2,
           "recordBurden": 100,
           "stationAttention": 60
         }
@@ -2715,19 +2757,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779041649091",
+            "eventId": "playable_session_started-001-1779042395750",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779041649213",
+            "eventId": "conversation_started-002-1779042395871",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-003-1779041649249",
+            "eventId": "dialogue_choice_selected-003-1779042395907",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -2738,7 +2780,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-004-1779041649283",
+            "eventId": "dialogue_choice_selected-004-1779042395941",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -2749,7 +2791,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_outcome_reached-005-1779041649284",
+            "eventId": "conversation_outcome_reached-005-1779042395942",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "clean_cover",
@@ -2785,19 +2827,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779041649340",
+            "eventId": "playable_session_started-001-1779042396001",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779041649436",
+            "eventId": "conversation_started-002-1779042396101",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779041649473",
+            "eventId": "dialogue_choice_selected-003-1779042396137",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -2810,7 +2852,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779041649473",
+            "eventId": "conversation_anomaly_detected-004-1779042396137",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -2823,7 +2865,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779041649473",
+            "eventId": "npc_suspicion_changed-005-1779042396137",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -2836,7 +2878,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-006-1779041649507",
+            "eventId": "dialogue_choice_selected-006-1779042396172",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -2847,7 +2889,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_outcome_reached-007-1779041649507",
+            "eventId": "conversation_outcome_reached-007-1779042396172",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "repair_recovered",
@@ -2889,19 +2931,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779041649783",
+            "eventId": "playable_session_started-001-1779042396452",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779041649877",
+            "eventId": "conversation_started-002-1779042396555",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779041649913",
+            "eventId": "dialogue_choice_selected-003-1779042396591",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -2914,7 +2956,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779041649913",
+            "eventId": "conversation_anomaly_detected-004-1779042396591",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -2927,7 +2969,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779041649913",
+            "eventId": "npc_suspicion_changed-005-1779042396591",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -2940,7 +2982,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "dialogue_choice_selected-006-1779041649948",
+            "eventId": "dialogue_choice_selected-006-1779042396626",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -2954,7 +2996,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-007-1779041649948",
+            "eventId": "conversation_anomaly_detected-007-1779042396626",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -2968,7 +3010,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-008-1779041649948",
+            "eventId": "npc_suspicion_changed-008-1779042396626",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -2982,7 +3024,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-009-1779041649948",
+            "eventId": "suspicion_shared-009-1779042396626",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -2996,7 +3038,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-010-1779041649948",
+            "eventId": "station_report_created-010-1779042396627",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 80,
@@ -3010,7 +3052,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_outcome_reached-011-1779041649948",
+            "eventId": "conversation_outcome_reached-011-1779042396627",
             "eventName": "conversation_outcome_reached",
             "outcome": "soft_report",
             "routeOutcome": "soft_report",
@@ -3019,7 +3061,7 @@
         ],
         "inputPath": "focus StoreCounterZone -> E -> 3 routine mismatch -> 3 outsider insistence",
         "lastWhyLine": "그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.",
-        "outcomeBody": "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 카운터 중단 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 상점 관리자가 기록 부담을 보고 후속 메모를 붙인 뒤 카운터 응대를 잠시 멈췄습니다.\n역할 행동: 상점 관리자가 보고 트레이에 후속 기록을 남기고 카운터를 중단 상태로 바꿨습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.\nR 다시 시작 / Q 종료",
+        "outcomeBody": "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 카운터 중단 -> 대기 이탈 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 상점 관리자가 기록 부담을 보고 후속 메모를 붙인 뒤 카운터 응대를 잠시 멈췄습니다. 그 중단을 본 대기 손님은 줄에서 빠졌습니다.\n역할 행동: 상점 관리자가 보고 트레이에 후속 기록을 남기고 카운터를 중단 상태로 바꿨고, 대기 손님이 중단 기록을 보고 대기 표식을 비웠습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.\nR 다시 시작 / Q 종료",
         "reportWeight": 80,
         "routeId": "soft_report",
         "routeOutcome": "soft_report",
@@ -3055,19 +3097,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779041650008",
+            "eventId": "playable_session_started-001-1779042396688",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779041650104",
+            "eventId": "conversation_started-002-1779042396783",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779041650140",
+            "eventId": "dialogue_choice_selected-003-1779042396820",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3080,7 +3122,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779041650140",
+            "eventId": "conversation_anomaly_detected-004-1779042396820",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3093,7 +3135,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779041650140",
+            "eventId": "npc_suspicion_changed-005-1779042396820",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3106,7 +3148,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "response_hesitation_noted-006-1779041650174",
+            "eventId": "response_hesitation_noted-006-1779042396853",
             "eventName": "response_hesitation_noted",
             "outcome": "running",
             "reportWeightAfter": 35,
@@ -3119,7 +3161,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "free_input_submitted-007-1779041650203",
+            "eventId": "free_input_submitted-007-1779042396882",
             "eventName": "free_input_submitted",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3133,7 +3175,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-008-1779041650203",
+            "eventId": "conversation_anomaly_detected-008-1779042396882",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3147,7 +3189,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-009-1779041650203",
+            "eventId": "npc_suspicion_changed-009-1779042396882",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3161,7 +3203,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-010-1779041650203",
+            "eventId": "suspicion_shared-010-1779042396882",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3175,7 +3217,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-011-1779041650203",
+            "eventId": "station_report_created-011-1779042396882",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 120,
@@ -3189,7 +3231,7 @@
           },
           {
             "conversationStage": "inquest",
-            "eventId": "station_inquest_opened-012-1779041650203",
+            "eventId": "station_inquest_opened-012-1779042396882",
             "eventName": "station_inquest_opened",
             "outcome": "inquest_opened",
             "reportWeightAfter": 120,
@@ -5609,7 +5651,7 @@
           "providerMode": "provider-action-proposal",
           "playerLineKind": "soft_report_line",
           "playerLine": "오늘은 그냥 지나가는 중인데, 늘 먹던 게 뭔지는 모르겠네요.",
-          "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, and a manager follow-up plus service pause without Station citation.",
+          "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, a manager follow-up plus service pause, and a waiting-customer exit without Station citation.",
           "actionTrace": [
             {
               "stepId": "soft.clerk.mark_receipt",
@@ -7135,6 +7177,245 @@
               "whyLine": "The manager pauses counter service because the pending Store note has made normal service unsafe to continue.",
               "selectionReason": "store_manager chooses pause_service because pause counter service while the local report is unresolved.",
               "providerLine": "보고가 붙은 동안 카운터를 잠시 멈춥니다."
+            },
+            {
+              "stepId": "soft.waiting_customer.leave_queue",
+              "actorId": "NPC_Waiting_Customer",
+              "actorRole": "waiting_customer",
+              "perceivedObjectIds": [
+                "store_queue_mark",
+                "store_counter",
+                "usual_order_cue"
+              ],
+              "availableActions": [
+                {
+                  "actionId": "store_queue_mark.observe_queue",
+                  "affordance": "observe_queue",
+                  "objectId": "store_queue_mark",
+                  "objectState": "disrupted",
+                  "playerLabel": "Observe Queue",
+                  "eligibleRoles": [
+                    "store_clerk",
+                    "waiting_customer",
+                    "store_manager"
+                  ],
+                  "preconditions": [
+                    "object_state:disrupted",
+                    "role_allowed:store_clerk|waiting_customer|store_manager"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "store_queue_mark observe_queue",
+                  "priorityHints": [],
+                  "ledgerEventKind": "queue_state_observed",
+                  "civicEconomyEffects": [],
+                  "validationRuleId": "same_order.store_queue_mark.observe_queue",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required"
+                  ],
+                  "toState": "player_waiting",
+                  "requiresLedgerEvent": false,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": []
+                },
+                {
+                  "actionId": "store_queue_mark.complain_delay",
+                  "affordance": "complain_delay",
+                  "objectId": "store_queue_mark",
+                  "objectState": "disrupted",
+                  "playerLabel": "Complain Delay",
+                  "eligibleRoles": [
+                    "waiting_customer"
+                  ],
+                  "preconditions": [
+                    "object_state:disrupted",
+                    "role_allowed:waiting_customer"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "public queue pressure",
+                  "priorityHints": [
+                    "economy:recordBurden",
+                    "pressure:queue_delay"
+                  ],
+                  "ledgerEventKind": "queue_delay_noted",
+                  "civicEconomyEffects": [
+                    "recordBurden:+5"
+                  ],
+                  "validationRuleId": "same_order.store_queue_mark.complain_delay",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required"
+                  ],
+                  "toState": "disrupted",
+                  "requiresLedgerEvent": false,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": []
+                },
+                {
+                  "actionId": "store_queue_mark.accept_repair",
+                  "affordance": "accept_repair",
+                  "objectId": "store_queue_mark",
+                  "objectState": "disrupted",
+                  "playerLabel": "Accept Repair",
+                  "eligibleRoles": [
+                    "waiting_customer"
+                  ],
+                  "preconditions": [
+                    "object_state:disrupted",
+                    "role_allowed:waiting_customer",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "public repair acceptance",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:repair_accepted"
+                  ],
+                  "ledgerEventKind": "queue_repair_accepted",
+                  "civicEconomyEffects": [
+                    "localTrust:+5",
+                    "recordBurden:-5"
+                  ],
+                  "validationRuleId": "same_order.store_queue_mark.accept_repair",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "settled",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-6"
+                  ]
+                },
+                {
+                  "actionId": "store_queue_mark.leave_queue",
+                  "affordance": "leave_queue",
+                  "objectId": "store_queue_mark",
+                  "objectState": "disrupted",
+                  "playerLabel": "Leave Queue",
+                  "eligibleRoles": [
+                    "waiting_customer"
+                  ],
+                  "preconditions": [
+                    "object_state:disrupted",
+                    "role_allowed:waiting_customer",
+                    "known_ledger_event_required",
+                    "known_store_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "store_queue_mark leave_queue",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "requires:store_record_citation"
+                  ],
+                  "ledgerEventKind": "queue_left",
+                  "civicEconomyEffects": [
+                    "localTrust:-3",
+                    "recordBurden:+5"
+                  ],
+                  "validationRuleId": "same_order.store_queue_mark.leave_queue",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known",
+                    "station_citation_requires_store_record"
+                  ],
+                  "toState": "empty",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": true,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-6"
+                  ]
+                },
+                {
+                  "actionId": "usual_order_cue.inspect",
+                  "affordance": "inspect",
+                  "objectId": "usual_order_cue",
+                  "objectState": "read",
+                  "playerLabel": "Inspect",
+                  "eligibleRoles": [
+                    "store_clerk",
+                    "store_manager",
+                    "station_officer",
+                    "waiting_customer"
+                  ],
+                  "preconditions": [
+                    "object_state:read",
+                    "role_allowed:store_clerk|store_manager|station_officer|waiting_customer"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "store_manager",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "usual_order_cue inspect",
+                  "priorityHints": [],
+                  "ledgerEventKind": "usual_order_read",
+                  "civicEconomyEffects": [],
+                  "validationRuleId": "same_order.usual_order_cue.inspect",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required"
+                  ],
+                  "toState": "read",
+                  "requiresLedgerEvent": false,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": []
+                }
+              ],
+              "providerProposal": {
+                "affordance": "leave_queue",
+                "objectId": "store_queue_mark",
+                "recordId": "store_same_order_queue_left",
+                "citedLedgerEventId": "civic-ledger-6",
+                "whyLine": "A waiting customer sees counter service pause and leaves the line instead of waiting for the unresolved report.",
+                "npcLineCandidate": "카운터까지 멈추면 저는 빠질게요.",
+                "selectionReason": "waiting_customer chooses leave_queue because leave the queue after counter service pauses."
+              },
+              "affordance": "leave_queue",
+              "objectId": "store_queue_mark",
+              "accepted": true,
+              "ledgerEventId": "civic-ledger-7",
+              "ledgerEventKind": "queue_left",
+              "recordId": "store_same_order_queue_left",
+              "citedLedgerEventId": "civic-ledger-6",
+              "economyAfter": {
+                "accountCredit": 3,
+                "localTrust": 2,
+                "recordBurden": 100,
+                "stationAttention": 60
+              },
+              "whyLine": "A waiting customer sees counter service pause and leaves the line instead of waiting for the unresolved report.",
+              "selectionReason": "waiting_customer chooses leave_queue because leave the queue after counter service pauses.",
+              "providerLine": "카운터까지 멈추면 저는 빠질게요."
             }
           ],
           "ledgerEventKinds": [
@@ -7143,7 +7424,8 @@
             "queue_delay_noted",
             "public_rumor_posted",
             "store_exception_reported",
-            "service_paused"
+            "service_paused",
+            "queue_left"
           ],
           "ledgerAffordances": [
             "mark_receipt",
@@ -7151,10 +7433,11 @@
             "complain_delay",
             "post_rumor",
             "place_note",
-            "pause_service"
+            "pause_service",
+            "leave_queue"
           ],
           "finalObjectStates": {
-            "store_queue_mark": "disrupted",
+            "store_queue_mark": "empty",
             "store_counter": "paused",
             "usual_order_cue": "read",
             "receipt_tray": "marked",
@@ -7166,7 +7449,7 @@
           },
           "economyAfter": {
             "accountCredit": 3,
-            "localTrust": 5,
+            "localTrust": 2,
             "recordBurden": 100,
             "stationAttention": 60
           }
@@ -8571,7 +8854,7 @@
         "soft_report",
         "inquest_opened"
       ],
-      "jobCount": 19,
+      "jobCount": 20,
       "jobs": [
         {
           "jobId": "clean_cover.clean.clerk.cite_usual_order.provider-action-proposal",
@@ -11034,7 +11317,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, and a manager follow-up plus service pause without Station citation.",
+            "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, a manager follow-up plus service pause, and a waiting-customer exit without Station citation.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -11419,7 +11702,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, and a manager follow-up plus service pause without Station citation.",
+            "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, a manager follow-up plus service pause, and a waiting-customer exit without Station citation.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -11727,7 +12010,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, and a manager follow-up plus service pause without Station citation.",
+            "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, a manager follow-up plus service pause, and a waiting-customer exit without Station citation.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -12055,7 +12338,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, and a manager follow-up plus service pause without Station citation.",
+            "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, a manager follow-up plus service pause, and a waiting-customer exit without Station citation.",
             "perceivedObjectIds": [
               "park_notice_board"
             ],
@@ -12177,7 +12460,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, and a manager follow-up plus service pause without Station citation.",
+            "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, a manager follow-up plus service pause, and a waiting-customer exit without Station citation.",
             "perceivedObjectIds": [
               "store_counter",
               "usual_order_cue",
@@ -12498,7 +12781,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, and a manager follow-up plus service pause without Station citation.",
+            "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, a manager follow-up plus service pause, and a waiting-customer exit without Station citation.",
             "perceivedObjectIds": [
               "store_counter",
               "usual_order_cue",
@@ -12797,6 +13080,295 @@
             "validation": "accepted",
             "whyLine": "The manager pauses counter service because the pending Store note has made normal service unsafe to continue.",
             "selectionReason": "store_manager chooses pause_service because pause counter service while the local report is unresolved."
+          }
+        },
+        {
+          "jobId": "soft_report.soft.waiting_customer.leave_queue.provider-action-proposal",
+          "routeId": "soft_report",
+          "stepId": "soft.waiting_customer.leave_queue",
+          "turnIndex": 6,
+          "actorId": "NPC_Waiting_Customer",
+          "actorRole": "waiting_customer",
+          "purpose": "npc_reaction_line",
+          "dispatchPhase": "role_agent_tick",
+          "providerMode": "scheduled-action-proposal",
+          "playerLineKind": "soft_report_line",
+          "playerLine": "오늘은 그냥 지나가는 중인데, 늘 먹던 게 뭔지는 모르겠네요.",
+          "socialLoopStage": "store_report",
+          "dramaTone": "watchful",
+          "preoccupations": [
+            "delay",
+            "routine disruption",
+            "being noticed"
+          ],
+          "promptContext": {
+            "scenario": "same_order",
+            "socialReactionSummary": "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, a manager follow-up plus service pause, and a waiting-customer exit without Station citation.",
+            "perceivedObjectIds": [
+              "store_queue_mark",
+              "store_counter",
+              "usual_order_cue"
+            ],
+            "availableActions": [
+              {
+                "actionId": "store_queue_mark.observe_queue",
+                "affordance": "observe_queue",
+                "objectId": "store_queue_mark",
+                "objectState": "disrupted",
+                "playerLabel": "Observe Queue",
+                "eligibleRoles": [
+                  "store_clerk",
+                  "waiting_customer",
+                  "store_manager"
+                ],
+                "preconditions": [
+                  "object_state:disrupted",
+                  "role_allowed:store_clerk|waiting_customer|store_manager"
+                ],
+                "visibleTo": [
+                  "store_clerk",
+                  "waiting_customer"
+                ],
+                "perceivedAs": "store_queue_mark observe_queue",
+                "priorityHints": [],
+                "ledgerEventKind": "queue_state_observed",
+                "civicEconomyEffects": [],
+                "validationRuleId": "same_order.store_queue_mark.observe_queue",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required"
+                ],
+                "toState": "player_waiting",
+                "requiresLedgerEvent": false,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": []
+              },
+              {
+                "actionId": "store_queue_mark.complain_delay",
+                "affordance": "complain_delay",
+                "objectId": "store_queue_mark",
+                "objectState": "disrupted",
+                "playerLabel": "Complain Delay",
+                "eligibleRoles": [
+                  "waiting_customer"
+                ],
+                "preconditions": [
+                  "object_state:disrupted",
+                  "role_allowed:waiting_customer"
+                ],
+                "visibleTo": [
+                  "store_clerk",
+                  "waiting_customer"
+                ],
+                "perceivedAs": "public queue pressure",
+                "priorityHints": [
+                  "economy:recordBurden",
+                  "pressure:queue_delay"
+                ],
+                "ledgerEventKind": "queue_delay_noted",
+                "civicEconomyEffects": [
+                  "recordBurden:+5"
+                ],
+                "validationRuleId": "same_order.store_queue_mark.complain_delay",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required"
+                ],
+                "toState": "disrupted",
+                "requiresLedgerEvent": false,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": []
+              },
+              {
+                "actionId": "store_queue_mark.accept_repair",
+                "affordance": "accept_repair",
+                "objectId": "store_queue_mark",
+                "objectState": "disrupted",
+                "playerLabel": "Accept Repair",
+                "eligibleRoles": [
+                  "waiting_customer"
+                ],
+                "preconditions": [
+                  "object_state:disrupted",
+                  "role_allowed:waiting_customer",
+                  "known_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "store_clerk",
+                  "waiting_customer"
+                ],
+                "perceivedAs": "public repair acceptance",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "economy:recordBurden",
+                  "pressure:repair_accepted"
+                ],
+                "ledgerEventKind": "queue_repair_accepted",
+                "civicEconomyEffects": [
+                  "localTrust:+5",
+                  "recordBurden:-5"
+                ],
+                "validationRuleId": "same_order.store_queue_mark.accept_repair",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known"
+                ],
+                "toState": "settled",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-6"
+                ]
+              },
+              {
+                "actionId": "store_queue_mark.leave_queue",
+                "affordance": "leave_queue",
+                "objectId": "store_queue_mark",
+                "objectState": "disrupted",
+                "playerLabel": "Leave Queue",
+                "eligibleRoles": [
+                  "waiting_customer"
+                ],
+                "preconditions": [
+                  "object_state:disrupted",
+                  "role_allowed:waiting_customer",
+                  "known_ledger_event_required",
+                  "known_store_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "store_clerk",
+                  "waiting_customer"
+                ],
+                "perceivedAs": "store_queue_mark leave_queue",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "economy:recordBurden",
+                  "requires:store_record_citation"
+                ],
+                "ledgerEventKind": "queue_left",
+                "civicEconomyEffects": [
+                  "localTrust:-3",
+                  "recordBurden:+5"
+                ],
+                "validationRuleId": "same_order.store_queue_mark.leave_queue",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known",
+                  "station_citation_requires_store_record"
+                ],
+                "toState": "empty",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": true,
+                "citableLedgerEventIds": [
+                  "civic-ledger-6"
+                ]
+              },
+              {
+                "actionId": "usual_order_cue.inspect",
+                "affordance": "inspect",
+                "objectId": "usual_order_cue",
+                "objectState": "read",
+                "playerLabel": "Inspect",
+                "eligibleRoles": [
+                  "store_clerk",
+                  "store_manager",
+                  "station_officer",
+                  "waiting_customer"
+                ],
+                "preconditions": [
+                  "object_state:read",
+                  "role_allowed:store_clerk|store_manager|station_officer|waiting_customer"
+                ],
+                "visibleTo": [
+                  "store_clerk",
+                  "store_manager",
+                  "waiting_customer"
+                ],
+                "perceivedAs": "usual_order_cue inspect",
+                "priorityHints": [],
+                "ledgerEventKind": "usual_order_read",
+                "civicEconomyEffects": [],
+                "validationRuleId": "same_order.usual_order_cue.inspect",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required"
+                ],
+                "toState": "read",
+                "requiresLedgerEvent": false,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": []
+              }
+            ],
+            "recentLedgerEventKinds": [
+              "store_receipt_marked",
+              "store_exception_reported",
+              "queue_delay_noted",
+              "public_rumor_posted",
+              "store_exception_reported",
+              "service_paused"
+            ],
+            "recentLedgerAffordances": [
+              "mark_receipt",
+              "place_note",
+              "complain_delay",
+              "post_rumor",
+              "place_note",
+              "pause_service"
+            ]
+          },
+          "allowedProviderFields": [
+            "affordance",
+            "objectId",
+            "recordId",
+            "citedLedgerEventId",
+            "whyLine",
+            "npcLineCandidate",
+            "selectionReason"
+          ],
+          "forbiddenAuthorityFields": [
+            "riskTag",
+            "suspicionDelta",
+            "reportDelta",
+            "exposureDelta",
+            "economyDelta",
+            "ledgerEventKind",
+            "ledgerEventId",
+            "objectState",
+            "verdict",
+            "sessionOutcome",
+            "sessionTermination"
+          ],
+          "fallbackLine": "카운터까지 멈추면 저는 빠질게요.",
+          "lockedAction": {
+            "affordance": "leave_queue",
+            "objectId": "store_queue_mark",
+            "ledgerEventId": "civic-ledger-7",
+            "ledgerEventKind": "queue_left",
+            "recordId": "store_same_order_queue_left",
+            "citedLedgerEventId": "civic-ledger-6",
+            "economyAfter": {
+              "accountCredit": 3,
+              "localTrust": 2,
+              "recordBurden": 100,
+              "stationAttention": 60
+            },
+            "validation": "accepted",
+            "whyLine": "A waiting customer sees counter service pause and leaves the line instead of waiting for the unresolved report.",
+            "selectionReason": "waiting_customer chooses leave_queue because leave the queue after counter service pauses."
           }
         },
         {
@@ -14407,7 +14979,7 @@
       "liveHttpDispatchVerified": false,
       "endpoint": "/v1/npc/decision",
       "dispatchHost": "godot-runtime-pending",
-      "jobCount": 19,
+      "jobCount": 20,
       "packetProofs": [
         {
           "jobId": "clean_cover.clean.clerk.cite_usual_order.provider-action-proposal",
@@ -19189,6 +19761,346 @@
           "failures": []
         },
         {
+          "jobId": "soft_report.soft.waiting_customer.leave_queue.provider-action-proposal",
+          "routeId": "soft_report",
+          "stepId": "soft.waiting_customer.leave_queue",
+          "endpoint": "/v1/npc/decision",
+          "method": "POST",
+          "npcId": "NPC_Waiting_Customer",
+          "actorRole": "waiting_customer",
+          "packet": {
+            "sessionId": "same-order-provider-dispatch-soft_report",
+            "npcId": "NPC_Waiting_Customer",
+            "landmarkId": "Store",
+            "nearbyActors": [
+              "player",
+              "NPC_Store_Clerk",
+              "NPC_Store_Manager"
+            ],
+            "recentEvents": [
+              "store_receipt_marked:mark_receipt",
+              "store_exception_reported:place_note",
+              "queue_delay_noted:complain_delay",
+              "public_rumor_posted:post_rumor",
+              "store_exception_reported:place_note",
+              "service_paused:pause_service",
+              "store_report_pending"
+            ],
+            "organizationContext": {
+              "scenario": "same_order",
+              "routeId": "soft_report",
+              "stepId": "soft.waiting_customer.leave_queue",
+              "jobId": "soft_report.soft.waiting_customer.leave_queue.provider-action-proposal",
+              "actorRole": "waiting_customer",
+              "purpose": "npc_reaction_line",
+              "dispatchPhase": "role_agent_tick",
+              "providerMode": "scheduled-action-proposal",
+              "socialLoopStage": "store_report",
+              "dramaTone": "watchful",
+              "preoccupations": [
+                "delay",
+                "routine disruption",
+                "being noticed"
+              ],
+              "perceivedObjectIds": [
+                "store_queue_mark",
+                "store_counter",
+                "usual_order_cue"
+              ],
+              "availableActions": [
+                {
+                  "actionId": "store_queue_mark.observe_queue",
+                  "affordance": "observe_queue",
+                  "objectId": "store_queue_mark",
+                  "objectState": "disrupted",
+                  "playerLabel": "Observe Queue",
+                  "eligibleRoles": [
+                    "store_clerk",
+                    "waiting_customer",
+                    "store_manager"
+                  ],
+                  "preconditions": [
+                    "object_state:disrupted",
+                    "role_allowed:store_clerk|waiting_customer|store_manager"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "store_queue_mark observe_queue",
+                  "priorityHints": [],
+                  "ledgerEventKind": "queue_state_observed",
+                  "civicEconomyEffects": [],
+                  "validationRuleId": "same_order.store_queue_mark.observe_queue",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required"
+                  ],
+                  "toState": "player_waiting",
+                  "requiresLedgerEvent": false,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": []
+                },
+                {
+                  "actionId": "store_queue_mark.complain_delay",
+                  "affordance": "complain_delay",
+                  "objectId": "store_queue_mark",
+                  "objectState": "disrupted",
+                  "playerLabel": "Complain Delay",
+                  "eligibleRoles": [
+                    "waiting_customer"
+                  ],
+                  "preconditions": [
+                    "object_state:disrupted",
+                    "role_allowed:waiting_customer"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "public queue pressure",
+                  "priorityHints": [
+                    "economy:recordBurden",
+                    "pressure:queue_delay"
+                  ],
+                  "ledgerEventKind": "queue_delay_noted",
+                  "civicEconomyEffects": [
+                    "recordBurden:+5"
+                  ],
+                  "validationRuleId": "same_order.store_queue_mark.complain_delay",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required"
+                  ],
+                  "toState": "disrupted",
+                  "requiresLedgerEvent": false,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": []
+                },
+                {
+                  "actionId": "store_queue_mark.accept_repair",
+                  "affordance": "accept_repair",
+                  "objectId": "store_queue_mark",
+                  "objectState": "disrupted",
+                  "playerLabel": "Accept Repair",
+                  "eligibleRoles": [
+                    "waiting_customer"
+                  ],
+                  "preconditions": [
+                    "object_state:disrupted",
+                    "role_allowed:waiting_customer",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "public repair acceptance",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:repair_accepted"
+                  ],
+                  "ledgerEventKind": "queue_repair_accepted",
+                  "civicEconomyEffects": [
+                    "localTrust:+5",
+                    "recordBurden:-5"
+                  ],
+                  "validationRuleId": "same_order.store_queue_mark.accept_repair",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "settled",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-6"
+                  ]
+                },
+                {
+                  "actionId": "store_queue_mark.leave_queue",
+                  "affordance": "leave_queue",
+                  "objectId": "store_queue_mark",
+                  "objectState": "disrupted",
+                  "playerLabel": "Leave Queue",
+                  "eligibleRoles": [
+                    "waiting_customer"
+                  ],
+                  "preconditions": [
+                    "object_state:disrupted",
+                    "role_allowed:waiting_customer",
+                    "known_ledger_event_required",
+                    "known_store_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "store_queue_mark leave_queue",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "requires:store_record_citation"
+                  ],
+                  "ledgerEventKind": "queue_left",
+                  "civicEconomyEffects": [
+                    "localTrust:-3",
+                    "recordBurden:+5"
+                  ],
+                  "validationRuleId": "same_order.store_queue_mark.leave_queue",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known",
+                    "station_citation_requires_store_record"
+                  ],
+                  "toState": "empty",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": true,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-6"
+                  ]
+                },
+                {
+                  "actionId": "usual_order_cue.inspect",
+                  "affordance": "inspect",
+                  "objectId": "usual_order_cue",
+                  "objectState": "read",
+                  "playerLabel": "Inspect",
+                  "eligibleRoles": [
+                    "store_clerk",
+                    "store_manager",
+                    "station_officer",
+                    "waiting_customer"
+                  ],
+                  "preconditions": [
+                    "object_state:read",
+                    "role_allowed:store_clerk|store_manager|station_officer|waiting_customer"
+                  ],
+                  "visibleTo": [
+                    "store_clerk",
+                    "store_manager",
+                    "waiting_customer"
+                  ],
+                  "perceivedAs": "usual_order_cue inspect",
+                  "priorityHints": [],
+                  "ledgerEventKind": "usual_order_read",
+                  "civicEconomyEffects": [],
+                  "validationRuleId": "same_order.usual_order_cue.inspect",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required"
+                  ],
+                  "toState": "read",
+                  "requiresLedgerEvent": false,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": []
+                }
+              ],
+              "recentLedgerEventKinds": [
+                "store_receipt_marked",
+                "store_exception_reported",
+                "queue_delay_noted",
+                "public_rumor_posted",
+                "store_exception_reported",
+                "service_paused"
+              ],
+              "recentLedgerAffordances": [
+                "mark_receipt",
+                "place_note",
+                "complain_delay",
+                "post_rumor",
+                "place_note",
+                "pause_service"
+              ],
+              "allowedProviderFields": [
+                "affordance",
+                "objectId",
+                "recordId",
+                "citedLedgerEventId",
+                "whyLine",
+                "npcLineCandidate",
+                "selectionReason"
+              ],
+              "forbiddenAuthorityFields": [
+                "riskTag",
+                "suspicionDelta",
+                "reportDelta",
+                "exposureDelta",
+                "economyDelta",
+                "ledgerEventKind",
+                "ledgerEventId",
+                "objectState",
+                "verdict",
+                "sessionOutcome",
+                "sessionTermination"
+              ],
+              "fallbackLine": "카운터까지 멈추면 저는 빠질게요.",
+              "lockedAction": {
+                "affordance": "leave_queue",
+                "objectId": "store_queue_mark",
+                "ledgerEventId": "civic-ledger-7",
+                "ledgerEventKind": "queue_left",
+                "recordId": "store_same_order_queue_left",
+                "citedLedgerEventId": "civic-ledger-6",
+                "economyAfter": {
+                  "accountCredit": 3,
+                  "localTrust": 2,
+                  "recordBurden": 100,
+                  "stationAttention": 60
+                },
+                "validation": "accepted",
+                "whyLine": "A waiting customer sees counter service pause and leaves the line instead of waiting for the unresolved report.",
+                "selectionReason": "waiting_customer chooses leave_queue because leave the queue after counter service pauses."
+              },
+              "authorityBoundary": "provider_writes_wording_only_runtime_locks_action"
+            },
+            "playerSignals": {
+              "speechAct": "SA_INQUIRE",
+              "playerLineKind": "soft_report_line",
+              "providerDispatchContract": true
+            },
+            "conversation": {
+              "conversationId": "same-order-provider-soft_report",
+              "turnId": "provider-soft_report-7",
+              "promptId": "soft.waiting_customer.leave_queue",
+              "choiceSetId": "soft.waiting_customer.leave_queue.provider-options",
+              "speakerId": "player",
+              "selectedChoiceId": "soft_report_line",
+              "displayedPlayerLine": "오늘은 그냥 지나가는 중인데, 늘 먹던 게 뭔지는 모르겠네요.",
+              "priorTurnIds": [
+                "provider-soft_report-1",
+                "provider-soft_report-2",
+                "provider-soft_report-3",
+                "provider-soft_report-4",
+                "provider-soft_report-5",
+                "provider-soft_report-6"
+              ]
+            }
+          },
+          "schemaPass": true,
+          "boundedBehaviorPass": true,
+          "socialLoopStage": "report",
+          "actionType": "Talk",
+          "utterance": "카운터까지 멈추면 저는 빠질게요.",
+          "fallbackLine": "카운터까지 멈추면 저는 빠질게요.",
+          "failures": []
+        },
+        {
           "jobId": "inquest_opened.inquest.clerk.mark_receipt.provider-action-proposal",
           "routeId": "inquest_opened",
           "stepId": "inquest.clerk.mark_receipt",
@@ -21187,6 +22099,7 @@
             "soft.park_witness.post_rumor",
             "soft.manager.place_followup_note",
             "soft.manager.pause_service",
+            "soft.waiting_customer.leave_queue",
             "inquest.waiting_customer.complain_delay",
             "inquest.park_witness.post_rumor",
             "inquest.manager.forward_report"
@@ -21196,6 +22109,7 @@
             "soft_report.soft.park_witness.post_rumor.provider-action-proposal",
             "soft_report.soft.manager.place_followup_note.provider-action-proposal",
             "soft_report.soft.manager.pause_service.provider-action-proposal",
+            "soft_report.soft.waiting_customer.leave_queue.provider-action-proposal",
             "inquest_opened.inquest.waiting_customer.complain_delay.provider-action-proposal",
             "inquest_opened.inquest.park_witness.post_rumor.provider-action-proposal",
             "inquest_opened.inquest.manager.forward_report.provider-action-proposal"
@@ -21205,6 +22119,7 @@
             "public_rumor_posted",
             "store_exception_reported",
             "service_paused",
+            "queue_left",
             "store_report_escalated"
           ],
           "affordances": [
@@ -21212,6 +22127,7 @@
             "post_rumor",
             "place_note",
             "pause_service",
+            "leave_queue",
             "forward_report"
           ],
           "evidenceEvents": [
@@ -23497,14 +24413,14 @@
       {
         "adapter": "godot",
         "eventFamily": "session",
-        "eventId": "playable_session_started-001-1779041650008",
+        "eventId": "playable_session_started-001-1779042396688",
         "eventName": "playable_session_started",
         "prologueStep": "beginning",
         "schemaVersion": "godot-runtime-v1",
         "sessionId": "dre-171-playable-session",
         "sessionOutcome": "running",
         "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-        "timestampMs": 1779041650008,
+        "timestampMs": 1779042396688,
         "uiSummaryArgs": {},
         "uiSummaryKey": "event.session_started",
         "worldId": "dre_171_godot_shell",
@@ -23517,7 +24433,7 @@
         "conversationId": "conv-same-order",
         "conversationStage": "normal",
         "eventFamily": "domain",
-        "eventId": "conversation_started-002-1779041650104",
+        "eventId": "conversation_started-002-1779042396783",
         "eventName": "conversation_started",
         "outcome": "running",
         "promptId": "store.same_order.routine",
@@ -23526,7 +24442,7 @@
         "socialLoopStage": "normal",
         "speakerId": "NPC_Store_Clerk",
         "summary": "Store Clerk opened the Same Order conversation.",
-        "timestampMs": 1779041650104,
+        "timestampMs": 1779042396783,
         "turnId": "turn-1",
         "worldId": "dre_171_godot_shell",
         "worldRevision": "rev-social-stealth-v1"
@@ -23539,7 +24455,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "dialogue_choice_selected-003-1779041650140",
+        "eventId": "dialogue_choice_selected-003-1779042396820",
         "eventName": "dialogue_choice_selected",
         "inputMode": "choice",
         "outcome": "running",
@@ -23561,7 +24477,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779041650140,
+        "timestampMs": 1779042396820,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -23576,7 +24492,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-004-1779041650140",
+        "eventId": "conversation_anomaly_detected-004-1779042396820",
         "eventName": "conversation_anomaly_detected",
         "inputMode": "choice",
         "outcome": "running",
@@ -23598,7 +24514,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779041650140,
+        "timestampMs": 1779042396820,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -23613,7 +24529,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-005-1779041650140",
+        "eventId": "npc_suspicion_changed-005-1779042396820",
         "eventName": "npc_suspicion_changed",
         "inputMode": "choice",
         "outcome": "running",
@@ -23635,7 +24551,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779041650140,
+        "timestampMs": 1779042396820,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -23650,7 +24566,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "응답 지연 12000ms",
         "eventFamily": "domain",
-        "eventId": "response_hesitation_noted-006-1779041650174",
+        "eventId": "response_hesitation_noted-006-1779042396853",
         "eventName": "response_hesitation_noted",
         "inputMode": "response_hesitation",
         "outcome": "running",
@@ -23673,7 +24589,7 @@
         "suspicionSignals": [
           "response_hesitation"
         ],
-        "timestampMs": 1779041650174,
+        "timestampMs": 1779042396853,
         "turnId": "turn-2",
         "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
         "whyLineKey": "response_hesitation",
@@ -23688,7 +24604,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "free_input_submitted-007-1779041650203",
+        "eventId": "free_input_submitted-007-1779042396882",
         "eventName": "free_input_submitted",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -23713,7 +24629,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779041650203,
+        "timestampMs": 1779042396882,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -23728,7 +24644,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-008-1779041650203",
+        "eventId": "conversation_anomaly_detected-008-1779042396882",
         "eventName": "conversation_anomaly_detected",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -23753,7 +24669,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779041650203,
+        "timestampMs": 1779042396882,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -23768,7 +24684,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-009-1779041650203",
+        "eventId": "npc_suspicion_changed-009-1779042396882",
         "eventName": "npc_suspicion_changed",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -23793,7 +24709,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779041650203,
+        "timestampMs": 1779042396882,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -23808,7 +24724,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "suspicion_shared-010-1779041650203",
+        "eventId": "suspicion_shared-010-1779042396882",
         "eventName": "suspicion_shared",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -23833,7 +24749,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779041650203,
+        "timestampMs": 1779042396882,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -23848,7 +24764,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_report_created-011-1779041650203",
+        "eventId": "station_report_created-011-1779042396882",
         "eventName": "station_report_created",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -23873,7 +24789,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779041650203,
+        "timestampMs": 1779042396882,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -23888,7 +24804,7 @@
         "conversationStage": "inquest",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_inquest_opened-012-1779041650203",
+        "eventId": "station_inquest_opened-012-1779042396882",
         "eventName": "station_inquest_opened",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -23913,7 +24829,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779041650203,
+        "timestampMs": 1779042396882,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",

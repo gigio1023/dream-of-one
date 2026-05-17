@@ -288,7 +288,9 @@ func debug_snapshot() -> Dictionary:
 		"outcomeBodyLabel": _outcome_body.text,
 		"outcomeTraceLabel": _outcome_trace.text,
 		"outcomeVisible": _outcome_panel.visible,
-		"noticeVisible": _notice_panel.visible
+		"noticeVisible": _notice_panel.visible,
+		"noticeTitleLabel": _notice_title.text,
+		"noticeBodyLabel": _notice_body.text
 	}
 
 func set_notice(title: String, body: String, visible: bool) -> void:

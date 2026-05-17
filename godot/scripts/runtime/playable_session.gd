@@ -386,6 +386,7 @@ var conversation_history: Array[Dictionary] = []
 var choice_catalog: Array = []
 var notice_title := "시작 절차"
 var notice_body := "상점 카운터에서 점원의 평범한 질문에 답하세요. 말이 기록이 될 수 있습니다."
+var inspected_world_record_prop: Dictionary = {}
 var outcome_visible := false
 var outcome_title := ""
 var outcome_body := ""
@@ -515,6 +516,11 @@ func debug_codex_gameplay_action_catalog() -> Array[Dictionary]:
 			"actionId": "player.type.free_input",
 			"payloadSchema": {"line": "string"},
 			"playerMeaning": "Submit typed player speech through the same deterministic consequence path used by the HUD."
+		},
+		{
+			"actionId": "inspect.world_record_prop",
+			"payloadSchema": {"objectId": "string"},
+			"playerMeaning": "Read one visible environment record prop, such as the Park notice board, through the same HUD notice area a player uses."
 		}
 	]
 
@@ -525,6 +531,7 @@ func debug_codex_gameplay_snapshot() -> Dictionary:
 		"actionCatalog": debug_codex_gameplay_action_catalog(),
 		"summary": summary,
 		"worldRecordProps": _world_record_prop_snapshot(),
+		"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
 		"hud": _codex_hud_snapshot()
 	}
 
@@ -532,6 +539,7 @@ func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) ->
 	var before := _codex_small_summary(build_summary())
 	var accepted := true
 	var reason := "accepted"
+	var action_result := {}
 
 	match action_id:
 		"focus.store_counter":
@@ -561,6 +569,16 @@ func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) ->
 				reason = "line_required"
 			else:
 				submit_free_input(line)
+		"inspect.world_record_prop":
+			var object_id := str(payload.get("objectId", "")).strip_edges()
+			if object_id.is_empty():
+				accepted = false
+				reason = "object_id_required"
+			else:
+				action_result = _inspect_world_record_prop(object_id)
+				if not bool(action_result.get("ok", false)):
+					accepted = false
+					reason = str(action_result.get("reason", "record_prop_unavailable"))
 		_:
 			accepted = false
 			reason = "unsupported_action"
@@ -570,6 +588,7 @@ func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) ->
 		"payload": payload.duplicate(true),
 		"accepted": accepted,
 		"reason": reason,
+		"actionResult": action_result,
 		"before": before,
 		"after": _codex_small_summary(build_summary())
 	}
@@ -595,6 +614,7 @@ func build_summary() -> Dictionary:
 		"outcomeTitle": outcome_title,
 		"outcomeBody": outcome_body,
 		"readSurfaceIds": read_surface_ids.keys(),
+		"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
 		"sessionOutcome": _session_outcome(),
 		"lastWhyLine": last_why_line,
 		"lastWhyLineKey": last_why_line_key,
@@ -644,6 +664,7 @@ func build_summary() -> Dictionary:
 			"agentActionLog": agent_action_log.duplicate(true),
 			"socialObservationTrace": _social_observation_trace(),
 			"worldRecordProps": _world_record_prop_snapshot(),
+			"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
 			"providerState": _provider_state(),
 			"endControls": _end_controls()
 		},
@@ -695,6 +716,7 @@ func build_evidence_pack(artifact_path: String) -> Dictionary:
 			"agentActionLog": agent_action_log.duplicate(true),
 			"socialObservationTrace": _social_observation_trace(),
 			"worldRecordProps": _world_record_prop_snapshot(),
+			"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
 			"providerState": _provider_state(),
 			"endControls": _end_controls(),
 			"visibleWhyLine": last_why_line,
@@ -1487,6 +1509,7 @@ func _codex_small_summary(summary: Dictionary) -> Dictionary:
 		"responseHesitationCount": summary.get("responseHesitationCount", 0),
 		"lastDialogueChoice": summary.get("lastDialogueChoice", ""),
 		"lastReasonCode": summary.get("lastReasonCode", ""),
+		"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {}),
 		"inputLocked": summary.get("inputLocked", false)
 	}
 
@@ -2060,6 +2083,39 @@ func debug_record_prop_snapshot() -> Dictionary:
 	_refresh_world_record_props()
 	return _world_record_prop_snapshot()
 
+func _inspect_world_record_prop(object_id: String) -> Dictionary:
+	_refresh_world_record_props()
+	var snapshot := _world_record_prop_snapshot()
+	if not snapshot.has(object_id):
+		return {"ok": false, "reason": "record_prop_unknown", "objectId": object_id}
+
+	var prop: Dictionary = snapshot.get(object_id, {})
+	var state := str(prop.get("state", _world_record_prop_state(object_id)))
+	var title := _world_record_prop_title(object_id)
+	var body := _world_record_prop_inspection_body(object_id, state)
+	inspected_world_record_prop = {
+		"objectId": object_id,
+		"title": title,
+		"state": state,
+		"stateLabel": _record_state_value(state),
+		"label": str(prop.get("label", "")),
+		"body": body
+	}
+	_set_notice(title, body)
+	_record_event(
+		"observation",
+		"world_record_prop_inspected",
+		"Inspected world record prop %s in state %s." % [object_id, state],
+		{
+			"objectId": object_id,
+			"state": state,
+			"stateLabel": _record_state_value(state),
+			"uiSummaryKey": "event.world_record_prop_inspected",
+			"uiSummaryArgs": {"object": title, "state": _record_state_value(state)}
+		}
+	)
+	return {"ok": true, "inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true)}
+
 func _refresh_world_record_props() -> void:
 	for prop_value in get_tree().get_nodes_in_group("operation_record_props"):
 		var prop_node := prop_value as Node3D
@@ -2135,6 +2191,33 @@ func _world_record_prop_label(object_id: String, state: String) -> String:
 	if not compact_label.is_empty():
 		return compact_label
 	return "%s\n%s" % [_world_record_prop_title(object_id), _record_state_value(state)]
+
+func _world_record_prop_inspection_body(object_id: String, state: String) -> String:
+	if object_id == "park_notice_board":
+		match state:
+			"vouched":
+				return "공개 확인이 붙어 있습니다. 대기 손님은 이 확인을 읽고 플레이어에게 로컬 팁을 공유했습니다."
+			"warned":
+				return "공개 경고가 붙어 있습니다. 대기 손님은 이 경고를 읽고 플레이어와 거리를 두었습니다."
+			"rumored":
+				return "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다."
+			"clear":
+				return "아직 공개 기록이 없습니다. 누군가의 말이나 정정 기록이 여기로 옮겨오면 다른 NPC가 읽을 수 있습니다."
+	if object_id == "store_queue_mark":
+		match state:
+			"helped":
+				return "대기 표식이 도움 상태입니다. 누군가가 공개 확인을 읽고 플레이어에게 작은 도움을 줬습니다."
+			"distanced":
+				return "대기 표식이 거리두기 상태입니다. 공개 경고와 낮은 신뢰가 NPC의 접촉 방식을 바꿨습니다."
+			"refused":
+				return "대기 표식이 접촉 거부 상태입니다. 스테이션 인용을 본 NPC가 플레이어와 말 섞기를 거부했습니다."
+			"empty":
+				return "대기줄이 비었습니다. 보고 부담 때문에 카운터가 멈추자 대기 손님이 빠져나갔습니다."
+	if object_id == "civic_economy_panel":
+		return "현재 작은 사회 값입니다. 신뢰, 부담, 주목 같은 값은 한 NPC의 다음 선택을 바꾸는 데만 쓰입니다."
+	if object_id == "civic_ledger":
+		return "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어집니다."
+	return "%s 상태입니다. 이 기록은 NPC가 볼 수 있는 환경 단서이며, 다음 역할 행동의 근거가 될 수 있습니다." % _record_state_value(state)
 
 func _latest_civic_ledger_label() -> String:
 	if civic_ledger.is_empty():

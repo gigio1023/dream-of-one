@@ -11,7 +11,8 @@ const PROBE_STEPS := [
 	{"actionId": "conversation.start", "payload": {}},
 	{"actionId": "player.wait.hesitation_record", "payload": {}},
 	{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.risky"}},
-	{"actionId": "player.type.free_input", "payload": {"line": TYPED_LINE}}
+	{"actionId": "player.type.free_input", "payload": {"line": TYPED_LINE}},
+	{"actionId": "inspect.world_record_prop", "payload": {"objectId": "park_notice_board"}}
 ]
 const ROUTE_PROBE_PLANS := [
 	{
@@ -484,6 +485,7 @@ func _snapshot(label: String, session: Node) -> Dictionary:
 		"recordObjects": summary.get("recordObjects", {}),
 		"civicEconomy": summary.get("civicEconomy", {}),
 		"latestLedger": _latest_ledger(summary),
+		"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {}),
 		"worldRecordProps": codex_snapshot.get("worldRecordProps", {}),
 		"hud": codex_snapshot.get("hud", {})
 	}
@@ -545,6 +547,12 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Civic economy panel is not readable with credit/trust/burden/attention")
 	if not bool(checks.get("worldPropsReachInquest", false)):
 		failures.append("World record props do not show forwarded report and cited Station dossier")
+	if not bool(checks.get("codexInspectedPublicNotice", false)):
+		failures.append("Codex/player did not inspect the Park notice board as a public environment record")
+	if not str(hud_snapshot.get("noticeTitleLabel", "")).contains("공원 게시판"):
+		failures.append("HUD notice does not show the inspected Park notice board")
+	if not str(hud_snapshot.get("noticeBodyLabel", "")).contains("소문"):
+		failures.append("HUD notice does not explain the current public Park notice state")
 	return failures
 
 func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary) -> Dictionary:
@@ -563,6 +571,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary) -> D
 		"stationObservedManager": _observation_exists(summary, "station_officer", "store_manager", "forward_report", "cite_record"),
 		"waitingCustomerObservedStation": _observation_exists(summary, "waiting_customer", "station_officer", "cite_record", "refuse_contact"),
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
+		"codexInspectedPublicNotice": _inspected_public_notice(summary),
 		"economyPanelReadable": _economy_panel_readable(record_props),
 		"worldPropsReachInquest": _world_props_reach_inquest(record_props),
 		"latestLedger": latest_ledger
@@ -581,6 +590,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadExaminedPlayerRole": investigation_trail.contains("대상: 플레이어") or investigation_trail.to_lower().contains("player"),
 		"canReadInputToRecordChain": consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용"),
 		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)) and bool(checks.get("waitingCustomerObservedStation", false)),
+		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
 		"canReadExactStationCitation": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"canReadCivicEconomyPressure": bool(checks.get("economyPanelReadable", false)),
 		"canReadFinalOutcome": str(summary.get("stage", "")) == "inquest" and outcome_body.contains("심문"),
@@ -604,6 +614,8 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"consequence": consequence_label,
 			"outcomeBody": outcome_body,
 			"recordState": hud_snapshot.get("recordStateLabel", ""),
+			"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {}),
+			"notice": "%s / %s" % [str(hud_snapshot.get("noticeTitleLabel", "")), _one_line(hud_snapshot.get("noticeBodyLabel", ""))],
 			"whyLine": hud_snapshot.get("whyLineLabel", ""),
 			"civicEconomyPanel": economy_panel.get("label", "")
 		},
@@ -612,6 +624,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"Codex/player waited long enough to create a response hesitation record.",
 			"Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.",
 			"Codex/player typed a dream-language line, causing a Store report, waiting-customer queue reaction, Park notice, Manager forwarding, and Station citation.",
+			"Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.",
 			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest, and the waiting customer refused contact in civic-ledger-7."
 		],
 		"roleActionExplanation": _role_action_explanation(summary),
@@ -661,6 +674,7 @@ func _markdown_report(artifact: Dictionary) -> String:
 	lines.append("- Suspicion/report: `%s` / `%s`" % [str(final_state.get("suspicion", "")), str(final_state.get("reportWeight", ""))])
 	lines.append("- Investigation trail: %s" % _one_line(final_state.get("investigationTrail", "")))
 	lines.append("- Consequence: %s" % _one_line(final_state.get("consequence", "")))
+	lines.append("- Inspected record: %s" % _one_line(final_state.get("notice", "")))
 	lines.append("- Civic economy: %s" % _one_line(final_state.get("civicEconomyPanel", "")))
 	lines.append("- Why-line: %s" % _one_line(final_state.get("whyLine", "")))
 	lines.append("")
@@ -740,6 +754,8 @@ func _action_player_meaning(action_id: String, payload: Dictionary) -> String:
 			return "choose dialogue index %d" % int(payload.get("index", -1))
 		"player.type.free_input":
 			return "type player speech: %s" % str(payload.get("line", ""))
+		"inspect.world_record_prop":
+			return "inspect environment record prop: %s" % str(payload.get("objectId", ""))
 		_:
 			return "unsupported or unknown player action"
 
@@ -824,6 +840,14 @@ func _world_props_reach_inquest(record_props: Dictionary) -> bool:
 		and str(record_props.get("park_notice_board", {}).get("state", "")) == "rumored"
 		and str(record_props.get("station_dossier", {}).get("state", "")) == "cited"
 		and str(record_props.get("civic_ledger", {}).get("state", "")) == "append_only"
+	)
+
+func _inspected_public_notice(summary: Dictionary) -> bool:
+	var inspected: Dictionary = summary.get("inspectedWorldRecordProp", {})
+	return (
+		str(inspected.get("objectId", "")) == "park_notice_board"
+		and str(inspected.get("state", "")) == "rumored"
+		and str(inspected.get("body", "")).contains("소문")
 	)
 
 func _latest_ledger(summary: Dictionary) -> Dictionary:

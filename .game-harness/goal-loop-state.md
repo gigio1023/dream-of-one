@@ -99,15 +99,27 @@ Latest status check:
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `5 / 5`, and `routeReportPassCount=5 / 5`.
-- latest game increment: clean and warning outcomes now tell the player that
+  player actions `6 / 6`, and `routeReportPassCount=5 / 5`.
+- latest game increment: Codex/player can now inspect a visible world-record
+  prop through the public gameplay action `inspect.world_record_prop`. The
+  current probe uses it on `park_notice_board` after the inquest route, the HUD
+  notice reads "공원 게시판" with the current "소문 게시" public-record body, and
+  the AI-play report marks `canInspectPublicEnvironmentRecord=true`. This keeps
+  the sample small while making the public environment record a player-readable
+  object, not only a hidden summary field.
+- latest packaged proof refresh: the macOS debug app was re-exported with
+  Godot 4.7-beta2 after the record-prop inspection action and HUD debug notice
+  change, then packaged launch, packaged route smoke, backend schema
+  validation, and comprehension preflight all passed against
+  `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json`.
+- prior game increment: clean and warning outcomes now tell the player that
   the Waiting Customer is acting from the Park notice board. The clean route
   says the Park board's public vouch opened the local tip, and the suspicious
   route says the Park board's public warning caused distance. This keeps the
   same tiny Store/Station cell but makes the reusable social-sim chain more
   readable: public record -> another NPC sees it -> toy trust gate changes a
   role action.
-- latest packaged proof refresh: the macOS debug app was re-exported with
+- prior packaged proof refresh: the macOS debug app was re-exported with
   Godot 4.7-beta2 after the public-board wording change, then packaged launch,
   packaged route smoke, backend schema validation, and comprehension preflight
   all passed against `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json`.
@@ -196,9 +208,9 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `7e823e39c82cabbb758e967e694767a42b84c109b437af050be71cae0ed8529b`
+  `7c3d29c2cd20e3b6f1c0b75b8d8404c42428553baa96441e2308a78a11b721db`
 - Markdown SHA-256:
-  `09dd032d03dd92f2e20cbc4904aa7b595555be63fe9748ca550c3c85a9062edf`
+  `186751ac7a930f2deabb6c18cfe49553f168ed80d6b5667778cd1b4ed40a753a`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
   player-visible state, player-readable cause chain, role-action explanation,
   NPC-to-NPC observation explanation, and the explicit boundary that this is

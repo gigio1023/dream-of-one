@@ -13,6 +13,7 @@
 - player.wait.hesitation_record -> let hesitation become a record
 - dialogue.choice.by_id -> choose dialogue id store.same_order.risky
 - player.type.free_input -> type player speech: 저는 이 꿈에 방금 들어왔어요.
+- inspect.world_record_prop -> inspect environment record prop: park_notice_board
 
 ## Player-Readable Cause Chain
 
@@ -20,6 +21,7 @@
 - Codex/player waited long enough to create a response hesitation record.
 - Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.
 - Codex/player typed a dream-language line, causing a Store report, waiting-customer queue reaction, Park notice, Manager forwarding, and Station citation.
+- Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.
 - The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest, and the waiting customer refused contact in civic-ledger-7.
 
 ## Final Player-Visible State
@@ -29,6 +31,7 @@
 - Suspicion/report: `125` / `120`
 - Investigation trail: 검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-7 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6
 - Consequence: 심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다. / 흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용
+- Inspected record: 공원 게시판 / 소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.
 - Civic economy: 시민 경제 / 잔액 3 | 신뢰 0 | 부담 90 | 주목 70
 - Why-line: WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.
 
@@ -69,6 +72,7 @@
 - `canReadExaminedPlayerRole`: `true`
 - `canReadInputToRecordChain`: `true`
 - `canReadNpcToNpcChain`: `true`
+- `canInspectPublicEnvironmentRecord`: `true`
 - `canReadExactStationCitation`: `true`
 - `canReadCivicEconomyPressure`: `true`
 - `canReadFinalOutcome`: `true`

@@ -95,6 +95,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Re-export the packaged macOS app after the public-board wording change
   and rerun packaged launch, packaged route smoke, backend schema validation,
   and comprehension preflight.
+- [x] Let Codex/player inspect visible environment record props through
+  `inspect.world_record_prop`, proving the Park notice board can be read as a
+  public record in the running HUD notice instead of only existing in summary
+  data.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

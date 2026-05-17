@@ -633,6 +633,93 @@ test("Park witness can post a public warning from a wary queue record", () => {
   assert.equal(warning.environment.economy.recordBurden, 23);
 });
 
+test("Public warning and low local trust make a waiting customer keep distance", () => {
+  let environment = createSameOrderAgenticEnvironment();
+  const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);
+  const marked = requireAccepted(validateAndApplyEnvironmentAction(environment, clerk, {
+    actorId: clerk.actorId,
+    role: clerk.role,
+    affordance: "mark_receipt",
+    objectId: "receipt_tray",
+    recordId: "store_same_order_receipt",
+    whyLine: "The player line does not match the local routine, so the clerk marks the receipt.",
+  }));
+  environment = marked.environment;
+
+  const customer = actor({
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    knownLedgerEventIds: [marked.event.eventId],
+  }, environment);
+  const wary = requireAccepted(validateAndApplyEnvironmentAction(environment, customer, {
+    actorId: customer.actorId,
+    role: customer.role,
+    affordance: "note_wary",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_queue_wary",
+    citedLedgerEventId: marked.event.eventId,
+    whyLine: "The marked receipt makes the waiting customer slow down without making a formal report.",
+  }));
+  environment = wary.environment;
+
+  assert.equal(
+    listAvailableEnvironmentActions(environment, actor({
+      actorId: "NPC_Waiting_Customer",
+      role: "waiting_customer",
+      knownLedgerEventIds: [wary.event.eventId],
+    }, environment)).some(candidate => candidate.affordance === "keep_distance"),
+    false,
+  );
+
+  const witness = actor({
+    actorId: "NPC_Park_Witness",
+    role: "park_witness",
+    knownLedgerEventIds: [wary.event.eventId],
+  }, environment);
+  const warning = requireAccepted(validateAndApplyEnvironmentAction(environment, witness, {
+    actorId: witness.actorId,
+    role: witness.role,
+    affordance: "post_warning",
+    objectId: "park_notice_board",
+    recordId: "park_public_warning",
+    citedLedgerEventId: wary.event.eventId,
+    whyLine: "The wary queue record is visible enough for the witness to warn the player without formal reporting.",
+  }));
+  environment = warning.environment;
+
+  const distancingCustomer = actor({
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    knownLedgerEventIds: [warning.event.eventId],
+  }, environment);
+  const action = listAvailableEnvironmentActions(environment, distancingCustomer)
+    .find(candidate => candidate.affordance === "keep_distance");
+
+  assert.ok(action);
+  assert.equal(action.objectId, "store_queue_mark");
+  assert.equal(action.toState, "distanced");
+  assert.deepEqual(action.citableLedgerEventIds, [warning.event.eventId]);
+  assert.equal(action.preconditions.includes("localTrust<=45"), true);
+  assert.equal(action.preconditions.includes("ledger_event_kind:public_warning_posted"), true);
+  assert.deepEqual(action.civicEconomyEffects, ["localTrust:-1", "recordBurden:+2"]);
+
+  const distanced = requireAccepted(validateAndApplyEnvironmentAction(environment, distancingCustomer, {
+    actorId: distancingCustomer.actorId,
+    role: distancingCustomer.role,
+    affordance: "keep_distance",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_queue_distance",
+    citedLedgerEventId: warning.event.eventId,
+    whyLine: "The public warning has lowered local trust enough that the waiting customer keeps distance.",
+  }));
+
+  assert.equal(distanced.event.kind, "queue_distance_kept");
+  assert.equal(distanced.event.citedLedgerEventId, warning.event.eventId);
+  assert.equal(distanced.environment.objects.find(item => item.objectId === "store_queue_mark")?.state, "distanced");
+  assert.equal(distanced.environment.economy.localTrust, 41);
+  assert.equal(distanced.environment.economy.recordBurden, 25);
+});
+
 test("Station citation only becomes available after the Station knows a Store ledger event", () => {
   let environment = createSameOrderAgenticEnvironment();
   const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);

@@ -94,6 +94,7 @@ const ENVIRONMENT_AFFORDANCE_ORDER := [
 	"leave_queue",
 	"refuse_contact",
 	"share_local_tip",
+	"keep_distance",
 	"pause_service",
 	"cite_expected_order",
 	"create_receipt",
@@ -186,6 +187,15 @@ const ENVIRONMENT_ACTION_RULES := {
 			"requiresLedgerEvent": true,
 			"requiresLedgerEventKinds": ["public_routine_vouched"],
 			"minimumLocalTrust": 55
+		},
+		"keep_distance": {
+			"fromStates": ["delayed"],
+			"toState": "distanced",
+			"eventKind": "queue_distance_kept",
+			"allowedRoles": ["waiting_customer"],
+			"requiresLedgerEvent": true,
+			"requiresLedgerEventKinds": ["public_warning_posted"],
+			"maximumLocalTrust": 45
 		}
 	},
 	"usual_order_cue": {
@@ -1434,6 +1444,27 @@ func _post_public_warning_after_wary(wary_event_id: String) -> void:
 	)
 	if bool(result.get("ok", false)):
 		_set_actor_line("NPC_Park_Witness", "줄이 늦춰진 건 남겨둘게요. 아직 보고는 아니고, 조심하라는 표시입니다.")
+		var event: Dictionary = result.get("event", {})
+		_keep_distance_after_warning(str(event.get("eventId", "")))
+
+func _keep_distance_after_warning(warning_event_id: String) -> void:
+	if warning_event_id.is_empty():
+		return
+	if str(record_objects.get("store_queue_mark", "")) != "delayed":
+		return
+	var result := _apply_role_agent_action(
+		"wary.waiting_customer.keep_distance",
+		"NPC_Waiting_Customer",
+		"waiting_customer",
+		"keep_distance",
+		"store_queue_mark",
+		"store_same_order_queue_distance",
+		"The public warning has lowered local trust enough that the waiting customer keeps distance.",
+		warning_event_id,
+		[warning_event_id]
+	)
+	if bool(result.get("ok", false)):
+		_set_actor_line("NPC_Waiting_Customer", "경고가 붙었으니 조금 떨어져 있을게요. 보고까지는 아니지만 가까이 서지는 않겠습니다.")
 
 func debug_agent_action_log() -> Array:
 	return agent_action_log.duplicate(true)
@@ -1625,7 +1656,7 @@ func _validate_role_agent_action(
 	if not allowed_roles.has(actor_role):
 		return _agent_action_rejection("role_authority_exceeded", "%s cannot apply %s to %s" % [actor_role, affordance, object_id])
 	if not _economy_condition_met(rule):
-		return _agent_action_rejection("economy_condition_unmet", "%s requires localTrust >= %d" % [affordance, int(rule.get("minimumLocalTrust", 0))])
+		return _agent_action_rejection("economy_condition_unmet", _economy_condition_failure(affordance, rule))
 
 	var requires_ledger_event := bool(rule.get("requiresLedgerEvent", false))
 	var cited_event := _civic_ledger_event_by_id(cited_ledger_event_id)
@@ -1742,6 +1773,8 @@ func _action_preconditions(object_id: String, object_state: String, rule: Dictio
 		preconditions.append("ledger_event_kind:%s" % "|".join(PackedStringArray(required_event_kinds)))
 	if rule.has("minimumLocalTrust"):
 		preconditions.append("localTrust>=%d" % int(rule.get("minimumLocalTrust", 0)))
+	if rule.has("maximumLocalTrust"):
+		preconditions.append("localTrust<=%d" % int(rule.get("maximumLocalTrust", 0)))
 	if not _record_id_for_object(object_id).is_empty():
 		preconditions.append("record_id:%s" % _record_id_for_object(object_id))
 	return preconditions
@@ -1762,6 +1795,8 @@ func _action_failure_reasons(rule: Dictionary) -> Array[String]:
 	if not required_event_kinds.is_empty():
 		reasons.append("ledger_event_kind_unaccepted")
 	if rule.has("minimumLocalTrust"):
+		reasons.append("economy_condition_unmet")
+	if rule.has("maximumLocalTrust"):
 		reasons.append("economy_condition_unmet")
 	return reasons
 
@@ -1805,6 +1840,8 @@ func _action_priority_hints(affordance: String, rule: Dictionary) -> Array[Strin
 		hints.append("pressure:repair_seen_publicly")
 	if affordance == "share_local_tip":
 		hints.append("pressure:local_trust_unlocks_help")
+	if affordance == "keep_distance":
+		hints.append("pressure:low_trust_creates_distance")
 	return hints
 
 func _action_perceived_as(object_id: String, affordance: String) -> String:
@@ -1827,6 +1864,8 @@ func _action_perceived_as(object_id: String, affordance: String) -> String:
 			return "queue refuses contact after citation"
 		"share_local_tip":
 			return "local trust opens a helpful tip"
+		"keep_distance":
+			return "public warning makes the queue keep distance"
 		"place_note":
 			return "Store report note"
 		"forward_report":
@@ -1879,7 +1918,16 @@ func _ledger_event_kind_allowed(event_kind: String, rule: Dictionary) -> bool:
 func _economy_condition_met(rule: Dictionary) -> bool:
 	if rule.has("minimumLocalTrust") and int(civic_economy.get("localTrust", 0)) < int(rule.get("minimumLocalTrust", 0)):
 		return false
+	if rule.has("maximumLocalTrust") and int(civic_economy.get("localTrust", 0)) > int(rule.get("maximumLocalTrust", 0)):
+		return false
 	return true
+
+func _economy_condition_failure(affordance: String, rule: Dictionary) -> String:
+	if rule.has("minimumLocalTrust"):
+		return "%s requires localTrust >= %d" % [affordance, int(rule.get("minimumLocalTrust", 0))]
+	if rule.has("maximumLocalTrust"):
+		return "%s requires localTrust <= %d" % [affordance, int(rule.get("maximumLocalTrust", 0))]
+	return "%s economy condition is unmet" % affordance
 
 func _record_mutation_affordances() -> Array[String]:
 	return [
@@ -1893,6 +1941,7 @@ func _record_mutation_affordances() -> Array[String]:
 		"leave_queue",
 		"refuse_contact",
 		"share_local_tip",
+		"keep_distance",
 		"post_rumor",
 		"vouch_routine",
 		"post_warning",
@@ -1983,6 +2032,8 @@ func _civic_economy_delta(event_kind: String) -> Dictionary:
 			return {"localTrust": -8, "recordBurden": 5}
 		"local_tip_shared":
 			return {"localTrust": 1, "recordBurden": -1}
+		"queue_distance_kept":
+			return {"localTrust": -1, "recordBurden": 2}
 		"public_rumor_posted":
 			return {"recordBurden": 5}
 		"public_routine_vouched":
@@ -2135,6 +2186,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"queue_left": "대기 이탈",
 		"queue_contact_refused": "접촉 거부",
 		"local_tip_shared": "로컬 팁",
+		"queue_distance_kept": "거리두기",
 		"public_routine_vouched": "공개 확인",
 		"public_repair_noted": "공개 수습",
 		"public_warning_posted": "공개 경고",
@@ -2156,6 +2208,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"queue_left": "queue left",
 		"queue_contact_refused": "contact refused",
 		"local_tip_shared": "local tip shared",
+		"queue_distance_kept": "distance kept",
 		"public_routine_vouched": "public routine vouched",
 		"public_repair_noted": "public repair noted",
 		"public_warning_posted": "public warning posted",
@@ -2198,6 +2251,7 @@ func _affordance_label(affordance: String) -> String:
 		"leave_queue": "줄 이탈",
 		"refuse_contact": "접촉 거부",
 		"share_local_tip": "로컬 팁",
+		"keep_distance": "거리두기",
 		"pause_service": "응대 중단",
 		"complain_delay": "대기 불평",
 		"post_rumor": "공개 게시",
@@ -2218,6 +2272,7 @@ func _affordance_label(affordance: String) -> String:
 		"leave_queue": "leave queue",
 		"refuse_contact": "refuse contact",
 		"share_local_tip": "share local tip",
+		"keep_distance": "keep distance",
 		"pause_service": "pause service",
 		"complain_delay": "complain delay",
 		"post_rumor": "post public rumor",
@@ -2277,6 +2332,7 @@ func _record_state_value(state: String) -> String:
 		"delayed": "조금 지연",
 		"settled": "줄 안정",
 		"helped": "도움 공유",
+		"distanced": "거리 둠",
 		"append_only": "추가됨",
 		"stable": "안정",
 		"burden": "부담 증가",
@@ -2307,6 +2363,7 @@ func _record_state_value(state: String) -> String:
 		"delayed": "slowed",
 		"settled": "settled",
 		"helped": "help shared",
+		"distanced": "distance kept",
 		"append_only": "append only",
 		"stable": "stable",
 		"burden": "burden rising",
@@ -2329,7 +2386,7 @@ func _world_record_prop_material(object_id: String, state: String) -> StandardMa
 	material.roughness = 0.82
 	if color.a < 1.0:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	if ["pending", "forwarded", "cited", "attention", "rumored", "vouched", "warned", "settled", "helped", "paused"].has(state):
+	if ["pending", "forwarded", "cited", "attention", "rumored", "vouched", "warned", "settled", "helped", "distanced", "paused"].has(state):
 		material.emission_enabled = true
 		material.emission = Color(color.r, color.g, color.b, 1.0)
 		material.emission_energy_multiplier = 0.35
@@ -2339,7 +2396,7 @@ func _world_record_prop_color(object_id: String, state: String) -> Color:
 	match state:
 		"normal", "read", "serving", "player_waiting", "stable":
 			return Color(0.34, 0.76, 0.82, 0.94)
-		"marked", "offered", "delayed", "warned", "burden", "trust_low":
+		"marked", "offered", "delayed", "distanced", "warned", "burden", "trust_low":
 			return Color(1.0, 0.68, 0.28, 0.94)
 		"attached", "corrected", "settled", "helped", "vouched":
 			return Color(0.42, 0.86, 0.58, 0.96)
@@ -2751,7 +2808,7 @@ func _terminal_outcome_body() -> String:
 	if route_outcome == "repair_recovered":
 		return "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 공개 수습 게시 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였고, 공원 목격자는 정정 기록을 보고 소문으로 돌릴 일이 아니라고 남겼습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 같은 정정 기록을 공개 수습 게시로 바꿨습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	if route_outcome == "cover_held_under_suspicion":
-		return "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 공개 경고 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄고, 공원 목격자는 그 경계 기록을 보고 정식 보고 대신 공개 경고를 남겼습니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨으며, 공원 목격자가 그 경계 기록을 공개 경고로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 지역 신뢰가 낮아지고 기록 부담이 조금 남았습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
+		return "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 공개 경고 -> 거리두기 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄고, 공원 목격자는 그 경계 기록을 보고 정식 보고 대신 공개 경고를 남겼습니다. 경고 뒤 지역 신뢰가 낮아지자 대기 손님은 플레이어와 거리를 둡니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨고, 공원 목격자가 그 경계 기록을 공개 경고로 바꿨습니다. 이후 대기 손님이 공개 경고 기록을 보고 대기 표식을 거리두기 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 낮아진 지역 신뢰가 NPC의 거리두기 행동을 열었습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	return "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공개 확인 -> 로컬 팁 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공개 확인을 남겼습니다. 그 공개 확인으로 지역 신뢰가 충분해지자 대기 손님은 작은 로컬 팁을 공유했습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다. 이후 대기 손님이 공개 확인 기록을 보고 대기 표식을 도움 상태로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 NPC의 도움 행동을 열었습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 
 func _now_ms() -> int:

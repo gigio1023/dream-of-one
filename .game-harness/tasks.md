@@ -81,6 +81,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Add the next smallest informal-warning reaction: Park Witness reads a
   wary queue note, uses `post_warning`, and posts a public warning without a
   formal report.
+- [x] Add the smallest low-trust distancing reaction: Waiting Customer reads
+  the public warning, uses `keep_distance` only after local trust drops, changes
+  the queue mark to `distanced`, and proves the warning can alter NPC behavior
+  without Station escalation.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

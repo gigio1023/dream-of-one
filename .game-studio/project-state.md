@@ -187,10 +187,12 @@ Current M1 carry-in:
   citation and refuse contact with the player;
   a Park Witness can turn a routine queue record into public social trust, a
   Waiting Customer can read that public vouch and share a local tip only after
-  `localTrust >= 55`,
-  turn a Store note into public rumor, turn a correction record into a public
-  repair notice, or turn a wary queue record into an informal public warning
-  before any Station report; Store Manager follows up on a soft report, pauses
+  `localTrust >= 55`, or read a public warning and keep distance only after
+  local trust is low,
+  a Park Witness can turn a Store note into public rumor, turn a correction
+  record into a public repair notice, or turn a wary queue record into an
+  informal public warning before any Station report; Store Manager follows up
+  on a soft report, pauses
   counter service when the local report makes
   normal flow unsafe, or forwards the report on the inquest route; Station
   Officer cites the exact forwarded ledger event. Each log entry now includes the available action candidates and

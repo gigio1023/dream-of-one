@@ -100,21 +100,30 @@ Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `5 / 5`, and `routeReportPassCount=5 / 5`.
-- latest game increment: clean routine records can now unlock help through a
-  toy economy gate. After the Clerk creates a normal receipt, the Waiting
-  Customer accepts the routine, and the Park Witness publicly vouches for it,
-  local trust reaches the threshold for `share_local_tip`. The Waiting
-  Customer reads the public vouch, changes `store_queue_mark` to `helped`, and
-  adds `local_tip_shared`. This proves a reusable open-environment pattern:
-  a simple social value can make an NPC choose help, not only punishment or
-  avoidance.
+- latest game increment: a public warning can now change another NPC's
+  immediate behavior without Station escalation. After the Clerk marks a
+  suspicious receipt, the Waiting Customer notes a wary queue, and the Park
+  Witness posts a public warning, local trust is low enough to unlock
+  `keep_distance`. The Waiting Customer reads the warning, changes
+  `store_queue_mark` to `distanced`, and adds `queue_distance_kept`. This
+  proves the reusable open-environment pattern opposite to the clean-route tip:
+  a crude social value can open avoidance or help through validated role
+  actions.
+- prior clean routine increment remains current: clean routine records can
+  unlock help through a toy economy gate. After the Clerk creates a normal
+  receipt, the Waiting Customer accepts the routine, and the Park Witness
+  publicly vouches for it, local trust reaches the threshold for
+  `share_local_tip`. The Waiting Customer reads the public vouch, changes
+  `store_queue_mark` to `helped`, and adds `local_tip_shared`.
 - prior public-warning increment remains current: wary local records can become an informal public
   warning before any formal report. After the Clerk marks a suspicious receipt
   and the Waiting Customer notes a wary queue, the Park Witness reads that
   queue record, uses `post_warning` on `park_notice_board`, changes the board
-  to `warned`, and adds `public_warning_posted`. This keeps the current sample
-  tiny while proving a reusable social-sim step: NPCs can warn, slow, and mark
-  the player in public without jumping straight to Station authority.
+  to `warned`, and adds `public_warning_posted`. The current follow-up can now
+  let a Waiting Customer keep distance from that public warning when local
+  trust is low. This keeps the current sample tiny while proving a reusable
+  social-sim step: NPCs can warn, slow, and avoid the player in public without
+  jumping straight to Station authority.
 - prior repair-public increment remains current: repair travels through a
   public social relay. After the Clerk attaches the correction slip and the
   Waiting Customer accepts the repair, the Park Witness reads that correction
@@ -141,8 +150,9 @@ Latest AI-play interface check:
   receipt; the Waiting Customer reads that marked receipt, uses `note_wary` on
   the queue mark, changes the queue state to `delayed`, adds
   `queue_wary_noted`, lowers local trust by 2, and raises record burden by 5.
-  The Park Witness can now read that wary queue record and post a public
-  warning without opening formal escalation.
+  The Park Witness can read that wary queue record and post a public warning;
+  the Waiting Customer can then read the warning and change the queue mark to
+  `distanced` without formal escalation.
 - prior clean increment remains current: clean cover has a visible social
   consequence too. When the player answers inside the local routine, the Clerk
   cites the usual order and creates a normal receipt; the Waiting Customer reads
@@ -168,7 +178,7 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `7b794ccba4b5d467d7e4cb1a7d66e3264373b09159b6673267834be26ea19aa1`
+  `97a1e7b946b14ce934321c709ba5578cd70a548f5324a244a13cc452200c6e4d`
 - Markdown SHA-256:
   `09dd032d03dd92f2e20cbc4904aa7b595555be63fe9748ca550c3c85a9062edf`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
@@ -177,8 +187,8 @@ Latest AI-play interface check:
   not external comprehension evidence. The same run also writes a Markdown
   sidecar for fast human/Codex review. The probe also now starts fresh scenes
   and drives public Codex/player actions through clean cover, repair recovery,
-  soft report, and inquest outcomes, proving AI-play route coverage without
-  replacing human comprehension notes.
+  suspicious cover, soft report, and inquest outcomes, proving AI-play route
+  coverage without replacing human comprehension notes.
 - session kit manifests now bind the current Codex action catalog
   (`focus.store_counter`, `conversation.start`,
   `player.wait.hesitation_record`, `dialogue.choice.by_id`,
@@ -352,20 +362,20 @@ Latest AI-play interface check:
   internal playable proof only; external fresh-player notes remain `0 / 3`.
 - 2026-05-18 playable suspicious-cover increment: added the smallest contained
   risk reaction. The suspicious cover guard route now proves
-  `mark_receipt -> note_wary -> post_warning`; final state includes
-  `store_queue_mark=delayed`, `receipt_tray=marked`,
+  `mark_receipt -> note_wary -> post_warning -> keep_distance`; final state includes
+  `store_queue_mark=distanced`, `receipt_tray=marked`,
   `park_notice_board=warned`, `queue_wary_noted`,
-  `public_warning_posted`, local trust 42, record burden 23, and Station
-  attention 0. This keeps the example environment tiny while making a
-  non-binary social consequence playable: fitting in calms the room, repair
-  settles it, and unresolved weirdness lets another NPC slow the queue while a
-  witness warns publicly without formal escalation. Verified with latest Godot
-  playable smoke, refreshed playability reports, full backend check, GDScript
-  syntax check, Codex gameplay probe with `routeReportPassCount=5 / 5`,
-  runtime slice smoke, latest PCK export/main-pack smoke, macOS app export,
-  packaged app launch/route smoke, session-kit self-check, comprehension guard,
-  and comprehension gate status. This is internal playable proof only;
-  external fresh-player notes remain `0 / 3`.
+  `public_warning_posted`, `queue_distance_kept`, local trust 41, record burden
+  25, and Station attention 0. This keeps the example environment tiny while
+  making a non-binary social consequence playable: fitting in can open help,
+  repair can settle the room, and unresolved weirdness can make nearby NPCs
+  keep distance after a public warning without formal escalation. Verified with
+  latest Godot playable smoke, refreshed playability reports, full backend
+  check, GDScript syntax check, Codex gameplay probe with
+  `routeReportPassCount=5 / 5`, runtime slice smoke, latest PCK
+  export/main-pack smoke, macOS app export, packaged app launch/route smoke,
+  Codex probe status, and comprehension note review. This is internal playable
+  proof only; external fresh-player notes remain `0 / 3`.
 
 ## Loop State
 

@@ -32,6 +32,7 @@ export const ENVIRONMENT_AFFORDANCES = [
   "leave_queue",
   "refuse_contact",
   "share_local_tip",
+  "keep_distance",
   "speak",
   "serve",
   "pause_service",
@@ -66,6 +67,7 @@ export const LEDGER_EVENT_KINDS = [
   "queue_left",
   "queue_contact_refused",
   "local_tip_shared",
+  "queue_distance_kept",
   "service_started",
   "service_paused",
   "service_resumed",
@@ -96,6 +98,7 @@ export type EnvironmentObjectState =
   | "disrupted"
   | "settled"
   | "helped"
+  | "distanced"
   | "idle"
   | "serving"
   | "paused"
@@ -240,6 +243,7 @@ interface AffordanceRule {
   requiresStoreLedgerEvent?: boolean;
   requiresLedgerEventKinds?: LedgerEventKind[];
   minimumLocalTrust?: number;
+  maximumLocalTrust?: number;
 }
 
 const AFFORDANCE_RULES: AffordanceRule[] = [
@@ -325,6 +329,18 @@ const AFFORDANCE_RULES: AffordanceRule[] = [
     requiresLedgerEvent: true,
     requiresLedgerEventKinds: ["public_routine_vouched"],
     minimumLocalTrust: 55,
+  },
+  {
+    objectId: "store_queue_mark",
+    affordance: "keep_distance",
+    fromStates: ["delayed"],
+    toState: "distanced",
+    eventKind: "queue_distance_kept",
+    allowedRoles: ["waiting_customer"],
+    economyDelta: { localTrust: -1, recordBurden: 2 },
+    requiresLedgerEvent: true,
+    requiresLedgerEventKinds: ["public_warning_posted"],
+    maximumLocalTrust: 45,
   },
   {
     objectId: "store_counter",
@@ -612,7 +628,7 @@ export function validateAndApplyEnvironmentAction(
     return reject(
       cloned,
       "economy_condition_unmet",
-      `${action.affordance} requires localTrust >= ${rule.minimumLocalTrust}`,
+      economyConditionFailure(rule),
     );
   }
 
@@ -643,7 +659,7 @@ export function validateAndApplyEnvironmentAction(
     return reject(cloned, "station_citation_requires_store_record", "Station citation must cite a Store ledger event");
   }
 
-  if (["create_receipt", "mark_receipt", "attach_correction", "place_note", "post_rumor", "vouch_routine", "post_warning", "post_repair_notice", "share_local_tip", "forward_report", "cite_record"].includes(action.affordance)) {
+  if (["create_receipt", "mark_receipt", "attach_correction", "place_note", "post_rumor", "vouch_routine", "post_warning", "post_repair_notice", "share_local_tip", "keep_distance", "forward_report", "cite_record"].includes(action.affordance)) {
     const recordId = action.recordId ?? object.recordId;
     if (!recordId || recordId.trim().length === 0) {
       return reject(cloned, "invalid_record_mutation", `${action.affordance} requires a record id`);
@@ -737,6 +753,9 @@ function preconditionsForRule(rule: AffordanceRule, object: EnvironmentObject): 
   if (typeof rule.minimumLocalTrust === "number") {
     preconditions.push(`localTrust>=${rule.minimumLocalTrust}`);
   }
+  if (typeof rule.maximumLocalTrust === "number") {
+    preconditions.push(`localTrust<=${rule.maximumLocalTrust}`);
+  }
 
   return preconditions;
 }
@@ -759,6 +778,9 @@ function failureReasonsForRule(rule: AffordanceRule): string[] {
     reasons.push("ledger_event_kind_unaccepted");
   }
   if (typeof rule.minimumLocalTrust === "number") {
+    reasons.push("economy_condition_unmet");
+  }
+  if (typeof rule.maximumLocalTrust === "number") {
     reasons.push("economy_condition_unmet");
   }
 
@@ -807,6 +829,9 @@ function priorityHintsForRule(rule: AffordanceRule): string[] {
   if (rule.affordance === "share_local_tip") {
     hints.push("pressure:local_trust_unlocks_help");
   }
+  if (rule.affordance === "keep_distance") {
+    hints.push("pressure:low_trust_creates_distance");
+  }
 
   return hints;
 }
@@ -840,6 +865,8 @@ function perceivedAs(rule: AffordanceRule): string {
       return "queue refuses contact after citation";
     case "share_local_tip":
       return "local trust opens a helpful tip";
+    case "keep_distance":
+      return "public warning makes the queue keep distance";
     case "post_rumor":
       return "public notice rumor";
     case "vouch_routine":
@@ -876,7 +903,20 @@ function economyConditionMet(economy: CivicEconomyState, rule: AffordanceRule): 
   if (typeof rule.minimumLocalTrust === "number" && economy.localTrust < rule.minimumLocalTrust) {
     return false;
   }
+  if (typeof rule.maximumLocalTrust === "number" && economy.localTrust > rule.maximumLocalTrust) {
+    return false;
+  }
   return true;
+}
+
+function economyConditionFailure(rule: AffordanceRule): string {
+  if (typeof rule.minimumLocalTrust === "number") {
+    return `${rule.affordance} requires localTrust >= ${rule.minimumLocalTrust}`;
+  }
+  if (typeof rule.maximumLocalTrust === "number") {
+    return `${rule.affordance} requires localTrust <= ${rule.maximumLocalTrust}`;
+  }
+  return `${rule.affordance} economy condition is unmet`;
 }
 
 function clamp(value: number, min: number, max: number): number {

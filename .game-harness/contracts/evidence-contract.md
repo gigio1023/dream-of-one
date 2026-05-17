@@ -9,10 +9,10 @@ All M1 implementation work must produce a bundle with these parts.
 Required:
 
 ```bash
-godot --headless --import --path godot
-godot --headless --path godot --script res://tools/scene_load_smoke.gd
-godot --headless --path godot --script res://tools/evidence_run.gd
-godot --headless --path godot --script res://tools/runtime_slice_smoke.gd
+/opt/homebrew/bin/godot-latest --headless --import --path godot
+/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/scene_load_smoke.gd
+/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/evidence_run.gd
+/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/runtime_slice_smoke.gd
 npm run check --prefix backend/npc-runtime
 ```
 
@@ -51,7 +51,7 @@ Required:
 ## Pass/Fail Rule
 
 M1 fails if:
-- Evidence exists only in logs but not in player-facing surface.
+- Evidence exists only in logs but not in player-facing UI.
 - text appears but has no deterministic consequence.
 - provider text changes outcome without backend validation.
 - screenshot does not show the risk/consequence relation.

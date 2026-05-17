@@ -46,10 +46,15 @@ The director level decides what is worth making. The execution level makes the a
 Current working state lives in:
 - `.game-harness/`
 
-This does not replace Linear or Beads:
+This does not replace Linear:
 - Linear remains work SoT.
-- Beads remains internal execution graph.
 - `.game-harness/` records game-development context, stage evidence, and drift.
+
+For long-running Codex goal work, use
+`.game-harness/goal-loop-state.md` as the compact resume checkpoint. It is a
+small Ralph-inspired layer over the existing harness: prompt, task list, state,
+proof, and exit gate. Do not create a separate `.ralph/` tree unless that is an
+explicit project decision.
 
 ## Research Basis
 
@@ -60,6 +65,9 @@ Key source-backed conclusions:
 - `AGENTS.md` should be a short map, not a giant manual.
 - scenario must become runtime contract, not stay prose.
 - Godot checks are necessary but not sufficient for game quality.
+- AI-built game work needs an AI-play interface: Codex should be able to run the
+  current proof cell, take bounded player actions, inspect player-visible state,
+  and write a gameplay artifact before human comprehension testing.
 - role review is required because engineering correctness and game quality are different.
 - API/provider-generated NPC text can propose wording, but backend/runtime owns actions, rules, Evidence, Exposure, and verdicts.
 
@@ -80,17 +88,21 @@ After implementation:
 - `.game-harness/verification-ledger.md`
 - `.game-harness/drift-log.md`
 - `.game-harness/continue-here.md`
+- `.game-harness/goal-loop-state.md`
 
 ## Minimum Evidence
 
 Use the repo commands from `AGENTS.md`:
 
 ```bash
-godot --headless --import --path godot
-godot --headless --path godot --script res://tools/scene_load_smoke.gd
-godot --headless --path godot --script res://tools/evidence_run.gd
-godot --headless --path godot --script res://tools/runtime_slice_smoke.gd
+/opt/homebrew/bin/godot-latest --headless --import --path godot
+/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/scene_load_smoke.gd
+/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/evidence_run.gd
+/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/runtime_slice_smoke.gd
 npm run check --prefix backend/npc-runtime
 ```
 
 For visual/UI/game-feel changes, also require a screenshot or playable capture artifact.
+For player-flow, comprehension, or social-simulation changes, prefer a
+Codex-driven play probe against the running Godot scene over adding tests that
+only inspect private implementation.

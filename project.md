@@ -10,14 +10,14 @@ Dream of One is a Godot 4.x 3D conversation social-stealth game where NPC societ
 ## Product Rails
 
 - Player is not an investigator. NPCs and Station systems investigate the player.
-- Dialogue is the main danger surface. Dream Laws are exposed through NPC prompts, prior conversation memory, diegetic records, and Station pressure.
+- Dialogue is where the danger starts. Dream Laws are exposed through NPC prompts, prior conversation memory, diegetic records, and Station pressure.
 - Default interaction is three diegetic dialogue choices plus optional typed free input when deterministic classification and UI are proven. Recorded statements are Evidence artifacts, not open-ended chat.
 - Suspicion starts socially: an NPC notices conversational weirdness, probes, shares a report, and only then can Station pressure formalize it.
 - API proposal-provider-backed NPC society proposes bounded wording only: NPC line candidates, Station pressure wording, localized variants, and fallback text variants.
 - GPT model availability is checked at runtime. `gpt-5.4-nano` is not assumed by design, docs, or release planning.
 - Deterministic adjudication owns validation, fallback selection, Exposure thresholds, Station intake/inquest, verdict, and session termination.
 - Deterministic adjudication also owns action choice, risk tags, Evidence type, reason codes, why-line authority, and session-end authority.
-- Godot owns world presentation, player/NPC movement, 3D collision/navigation observations, visuals, and scene-local interaction surfaces.
+- Godot owns world presentation, player/NPC movement, 3D collision/navigation observations, visuals, and scene-local interaction points.
 
 ## Active Runtime Path
 
@@ -31,7 +31,20 @@ Dream of One is a Godot 4.x 3D conversation social-stealth game where NPC societ
 ## Scenario Source Of Truth
 
 - Active scenario docs: `docs/scenario/`
+- Design spine: `docs/direction/09-game-design-spine.md`
+- Team operating brief: `docs/direction/10-team-operating-brief.md`
+- Simulator benchmark adoption brief: `docs/direction/11-simulator-benchmark-adoption-brief.md`
+- Simulator reference games map: `docs/direction/12-simulator-reference-map.md`
+- Operation sim quality floor: `docs/direction/13-operation-sim-quality-floor.md`
+- Minimal civic economy model: `docs/direction/14-minimal-civic-economy-model.md`
+- Agentic social simulation model: `docs/direction/15-agentic-social-simulation-model.md`
+- Agentic prototype target: `docs/direction/16-agentic-prototype-target.md`
+- Simulator benchmark research: `docs/research/simulator-benchmarks/2026-05-14/`
+- Low-budget operation sim research: `docs/research/simulator-benchmarks/2026-05-15/`
 - First conversation-first scenario: `docs/scenario/bible/12-conversation-suspicion-prologue.md`
+- Social simulation cards: `docs/scenario/content/social-simulation-cards.md`
+- Same Order storylet packet: `docs/scenario/content/same-order-storylet-packet.md`
+- Environment affordance map: `docs/scenario/content/environment-affordance-map.md`
 - Historical Station material: `docs/scenario/bible/05-episode-station-soft-inquest.md`
 - Scenario line bank: `docs/scenario/content/dialogue-line-bank.md`
 - Scenario placement contract: `docs/scenario/content/location-placement-contracts.md`
@@ -55,6 +68,18 @@ Dream of One is a Godot 4.x 3D conversation social-stealth game where NPC societ
 
 The current lane target is:
 - keep the verified M1 technical proof passing as the baseline.
+- treat Same Order as a mundane Store-to-Station procedure simulator before
+  adding dream/LLM flourish.
+- meet the low-budget operation sim floor with visible Store/Station objects,
+  record state changes, and exact Station citation before broader content.
+- define society through a minimal civic economy: account credit, local trust,
+  record burden, Station attention, and an append-only ledger.
+- grow society by defining environments, affordances, records, visibility, and
+  civic pressure, then letting role agents choose validated actions instead of
+  manually scripting every reaction.
+- target the next prototype at one affordance-rich Store/Station environment
+  where conversation changes records, agents react, and Station cites the
+  ledger.
 - keep the conversation-first proof honest by adding manual typed-input UI if needed, manual replay/readability/comprehension validation, human readability review, player-comprehension, provider, and exported-build gates before expanding scope.
 - produce truthful evidence for whether the umbrella can continue toward demo completion, should merge current work as M1-only proof, or should stop for product fixes.
 

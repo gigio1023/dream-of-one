@@ -13,6 +13,13 @@ The AI path is an API proposal provider. The provider may propose wording only: 
 The umbrella may advance toward demo completion only while these facts remain true:
 - M1 technical checks stay green.
 - product blockers are tracked as blockers, not release caveats.
+- new NPC, location, storylet, provider, and UI work follows `docs/direction/09-game-design-spine.md` and `docs/scenario/content/social-simulation-cards.md`.
+- the active team scope follows `docs/direction/10-team-operating-brief.md` and `.game-harness/milestones/M1-same-order-four-week-prototype-plan.md`.
+- simulator-first planning follows `docs/direction/11-simulator-benchmark-adoption-brief.md` and `docs/direction/12-simulator-reference-map.md`.
+- agentic prototype planning follows `docs/direction/15-agentic-social-simulation-model.md`,
+  `docs/direction/16-agentic-prototype-target.md`,
+  `docs/scenario/content/environment-affordance-map.md`, and
+  `.game-harness/milestones/M1-agentic-social-sim-prototype-plan.md`.
 - visual, UI, comprehension, provider, and exported-build gates have evidence in `.game-harness/verification-ledger.md`.
 - public/demo copy can state the actual provider and fallback mode without guessing model availability.
 
@@ -22,7 +29,8 @@ The umbrella may advance toward demo completion only while these facts remain tr
 |---|---|---|
 | M0 | Release Truth Lock | One AI access premise is reflected across active docs: API proposal provider with runtime model availability checks and deterministic fallback. Public/release docs must not contradict `project.md`. |
 | M1 | Conversation Protocol Proof | One NPC conversation proves prompt -> three choices plus typed-free-input contract -> deterministic suspicion signal -> Evidence/Exposure/report consequence. Gate requires backend check, valid Evidence Pack, renderer-backed Godot screenshot/capture, safe/uncertain/risky contrast, Korean/English parity, provider preflight/fallback contract, and non-blocking role reviews. |
-| M2 | Social Propagation Prototype | Player completes a short route with NPC unease, probing, suspicion sharing, report, defuse/repair, and soft Station preview. Gate is player-facing: a tester/proxy can say "the NPCs are investigating my words." |
+| M1A | Agentic Environment Prototype | One Store/Station environment exposes affordances, records, visibility, and civic pressure; 2-3 role agents use validated actions after player conversation changes state. Gate requires ledger replay, agent action log, screenshots, and comprehension proof. |
+| M2 | Social Propagation Prototype | Player completes a short route with NPC unease, probing, suspicion sharing, report, defuse/repair, and soft Station preview. Gate is player-facing: a tester/proxy can say "the NPCs are investigating my words through the environment and records." |
 | M3 | 3D Value Gate | 3D earns its cost. Require contact sheet, readable text at play distance, keyboard-only route, route/sightline review, camera/input proof, and visual capture showing surveillance pressure. |
 | M4 | Complete Conversation Prologue | One 15-30 minute conversation suspicion loop: ordinary NPC prompt -> social suspicion -> report -> Station intake/inquest, with three deterministic outcomes, repair paths, why-lines, localization, and backend-owned intake/inquest/verdict. |
 | M5 | Export And Setup Proof | Exported build launches outside editor, writes evidence to an appropriate user/app-data path, provider preflight/fallback failures are controlled, and screenshots/captures come from the exported build. |
@@ -35,7 +43,7 @@ The small complete prologue/demo bar is not satisfied by command success alone. 
 
 1. A complete loop: start, NPC prompt, dialogue choice or typed free input, suspicion classification, Evidence/Exposure/report consequence, inquest or soft inquest, verdict or session end, and restart/replay.
 2. A playable choice contrast: at least one safe/uncertain/risky response set and at least one repair or defuse path that changes the outcome.
-3. Visual proof: current-build captures showing route readability, interactable text surfaces, surveillance pressure, HUD consequence, and verdict/session-end state.
+3. Visual proof: current-build captures showing route readability, readable in-world text, surveillance pressure, HUD consequence, and verdict/session-end state.
 4. UI proof: player-facing prompts, why-lines, Exposure/Evidence changes, fallback/live-provider status, localization state, and failure/recovery messaging are readable without debug framing.
 5. Player comprehension proof: external testers can explain that Station/NPC systems are investigating them, that their dialogue changed suspicion/Evidence/Exposure, and why the session outcome happened.
 6. Release truth proof: exported build/setup, provider preflight, fallback behavior, limitations, screenshots, and public copy all match the verified build.
@@ -52,8 +60,18 @@ Current implementation work has reached M1 technical proof pass. Product work mu
 6. Keep three-run trajectory diversity verification passing.
 7. Close the M1 product/comprehension gate before M2 content expansion.
 8. Record the exact pass/fail state in `.game-harness/verification-ledger.md`.
+9. Reframe the next prototype as one affordance-rich Store/Station environment,
+   not a manually branched dialogue scene.
+10. Prove role agents react to environment state, ledger entries, and civic
+   pressure while conversation remains the central player action.
 
 Current `feat/ui-visual-readability-pass` lane progress:
+- benchmark research now reframes Same Order as a Store-to-Station procedure
+  simulator first: normal Store procedure, player line, clerk comparison,
+  visible record, Station citation, deterministic outcome.
+- active prototype target now reframes Same Order as an environment-first
+  agentic social simulation: conversation changes records, affordances become
+  available, role agents react, and Station cites the ledger.
 - playable smoke now proves the new player-facing `Same Order` runtime path with four internal route outcomes: clean cover, repair recovery, soft report, and hard inquest.
 - the hard inquest route still proves NPC prompt, three dialogue choices, risky line, preset recorded statement, deterministic suspicion signals, Station report/inquest, locked session end, and backend-valid Evidence Pack.
 - backend validation now checks both the ordered Same Order inquest chain and the Same Order route-proof set.
@@ -63,6 +81,13 @@ Current `feat/ui-visual-readability-pass` lane progress:
 - these are internal proof gates only; they do not replace manual replay/readability/comprehension validation, external comprehension, provider truth, or exported build proof.
 
 Remaining blockers before the umbrella can claim a small complete prologue/demo:
+- simulator adoption proof: fresh player can explain the Store procedure,
+  captured line, record, and Station citation without reading docs.
+- agentic environment proof: fresh player or proxy can explain which
+  environment object changed, which social actor reacted, and how the Station
+  cited the ledger.
+- civic ledger proof: route evidence shows object state, economy delta, agent
+  perception/action, validation result, and ledger event.
 - manual typed free-input UI if free input remains in the demo promise.
 - council/product review acceptance of the API proposal-provider wording-only boundary.
 - live Godot/backend/provider integration or an explicit deterministic fallback-only demo decision.

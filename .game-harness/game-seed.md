@@ -16,7 +16,7 @@ The player should feel that speech, hesitation, and explanation are not safe UI 
 
 - Player role: subject of investigation, not investigator.
 - Investigation authority: NPCs and Station systems investigate the player.
-- Text role: text is the danger surface.
+- Text role: text is where danger starts.
 - AI role: API proposal provider proposes bounded wording only.
 - Deterministic authority: backend/runtime owns Dream Law, Cover Test, Exposure, Evidence, Station intake, Inquest, verdict, and session termination.
 - Language default: Korean-first; English selectable.
@@ -67,6 +67,6 @@ The player should feel that speech, hesitation, and explanation are not safe UI 
 - Player becomes investigator.
 - AI text starts controlling rules.
 - Korean becomes translation of English instead of source language.
-- Godot scene looks better but weakens text danger surface.
+- Godot scene looks better but weakens the text-to-record danger chain.
 - Runtime evidence exists but player cannot perceive consequence.
 - Release docs promise broader AI than current provider preflight and build evidence support.

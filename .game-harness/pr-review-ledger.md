@@ -17,7 +17,7 @@ Track long-running PR bot feedback, review threads, and release-truth blockers w
 
 - M1 technical pass does not mean product closure.
 - Live API-backed NPC proposals are not available until runtime provider preflight proves access.
-- `gpt-5.4-nano` is preferred only when runtime provider verification confirms availability for the configured provider.
+- `gpt-5.4-mini` is preferred only when runtime provider verification confirms availability for the configured provider and the configured request budget.
 - Deterministic fallback remains valid release truth when live provider access is unavailable.
 - PR summaries must state product blockers separately from technical verification.
 
@@ -59,5 +59,5 @@ PR #92 bot feedback recorded below.
 | M1 product closure | open | Council/product review and player comprehension evidence. |
 | Live Godot-to-backend bridge | open | Runtime evidence from Godot calling backend, not fixture-only smoke. |
 | Provider preflight UX | open | Runtime check for config, model, schema shape, timeout, retry, and fallback. |
-| `gpt-5.4-nano` availability | open | Runtime provider verification for the configured provider. |
+| `gpt-5.4-mini` availability | open | Runtime provider verification and budgeted live smoke for the configured provider. |
 | Exported build/setup path | open | Tested install or setup flow with truthful fallback mode. |

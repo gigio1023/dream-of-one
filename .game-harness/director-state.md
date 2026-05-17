@@ -1,6 +1,6 @@
 # Director State
 
-Last Updated: 2026-05-06
+Last Updated: 2026-05-14
 
 ## Active Director Layer
 
@@ -9,6 +9,8 @@ Entry:
 
 Active thesis:
 - Player is investigated by Station systems through text that becomes Evidence.
+- The next planning scaffold is simulator-first: prove a mundane
+  Store-to-Station procedure before adding dream/LLM texture.
 
 Active milestone:
 - M1 Protocol Proof
@@ -18,6 +20,9 @@ Current state:
 - M1 implementation handoff drafted.
 - M1 content/runtime contract drafted.
 - initial council review completed with conditions.
+- parallel simulator benchmark research completed under
+  `docs/research/simulator-benchmarks/2026-05-14/`.
+- simulator adoption brief and reference map accepted as direction addenda.
 - dirty worktree scope recorded.
 
 ## Decisions Already Accepted
@@ -25,14 +30,20 @@ Current state:
 - API proposal provider is the live AI premise; player-installed Codex CLI is not a release prerequisite.
 - Provider proposes wording only; backend/runtime decides actions, rules, Evidence, Exposure, verdict, and session end.
 - 3D must pass a value gate before vertical slice expansion.
+- Simulator benchmarks are the planning scaffold for Same Order M1; references
+  are pattern sources, not genre templates.
 
 ## Next Director Decision Needed
 
-Close M1 Protocol Proof with provider preflight, model availability, backend-valid Evidence, and playable proof.
+Close M1 Protocol Proof by proving the Same Order simulator adoption chain:
+Store procedure -> player line -> visible record -> exact Station citation,
+plus provider/fallback truth and player comprehension.
 
 ## Current Blockers
 
 - broad vertical-slice implementation remains blocked until M1 evidence passes.
+- broad dream-society or LLM-forward claims remain blocked until simulator
+  adoption proof passes.
 
 ## Restart Rule
 
@@ -40,5 +51,7 @@ Next Codex session should read:
 1. `AGENTS.md`
 2. `docs/direction/README.md`
 3. `.game-harness/director-state.md`
-4. `.game-harness/milestones/M1-protocol-proof.md`
-5. `.game-harness/contracts/evidence-contract.md`
+4. `docs/direction/11-simulator-benchmark-adoption-brief.md`
+5. `docs/scenario/content/same-order-storylet-packet.md`
+6. `.game-harness/milestones/M1-protocol-proof.md`
+7. `.game-harness/contracts/evidence-contract.md`

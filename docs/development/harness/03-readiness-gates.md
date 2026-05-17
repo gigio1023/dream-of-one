@@ -57,7 +57,7 @@ Current status:
 Pass criteria:
 - council reviews are not blocking.
 - implementation handoff exists.
-- Beads/Linear task is selected.
+- Linear issue is selected.
 - dirty worktree is understood.
 
 Current status:

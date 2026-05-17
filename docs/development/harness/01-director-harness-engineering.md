@@ -17,7 +17,6 @@ The harness exists to prevent three failures:
 | Director layer | what game is worth making | `docs/direction/` |
 | Harness state | current milestone and gates | `.game-harness/` |
 | Design/runtime source | rules, scenario, evidence | `docs/scenario/`, `docs/design/` |
-| Execution graph | local task dependencies | Beads |
 | Work source of truth | issue ownership | Linear |
 
 ## State Machine
@@ -100,7 +99,7 @@ Block work when:
 - player becomes investigator.
 - provider-generated prose decides state.
 - 3D scene work lacks a playable consequence.
-- text is lore but not a risk surface.
+- text is lore but does not create risk.
 - Korean is not the source meaning.
 - public promise hides the provider access mode, model availability limit, or fallback behavior.
 - evidence cannot be reproduced from command output or artifact paths.

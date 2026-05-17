@@ -64,6 +64,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Add the next smallest report-side NPC reaction: Waiting Customer reads
   the paused-service record, uses `leave_queue`, empties the queue mark, and
   makes the soft report affect a second role without adding a larger shop sim.
+- [x] Add the next smallest formal-record social reaction: Waiting Customer
+  reads the Station citation, uses `refuse_contact`, changes the queue/contact
+  state to `refused`, and makes authority citation change local NPC behavior
+  without deepening Store/Station scope.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

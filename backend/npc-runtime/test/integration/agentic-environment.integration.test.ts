@@ -444,6 +444,80 @@ test("Station Officer can cite an exact known Store ledger event", () => {
   assert.equal(citation.environment.objects.find(item => item.objectId === "station_dossier")?.state, "cited");
 });
 
+test("Waiting customer can refuse contact after Station citation becomes visible", () => {
+  let environment = createSameOrderAgenticEnvironment();
+  const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);
+  const report = requireAccepted(validateAndApplyEnvironmentAction(environment, clerk, {
+    actorId: clerk.actorId,
+    role: clerk.role,
+    affordance: "place_note",
+    objectId: "report_tray",
+    recordId: "store_same_order_clerk_statement",
+    whyLine: "The player line creates a Store note that unsettles the line.",
+  }));
+  environment = report.environment;
+
+  const firstCustomer = actor({
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    knownLedgerEventIds: [report.event.eventId],
+  }, environment);
+  const delayed = requireAccepted(validateAndApplyEnvironmentAction(environment, firstCustomer, {
+    actorId: firstCustomer.actorId,
+    role: firstCustomer.role,
+    affordance: "complain_delay",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_queue_delay",
+    citedLedgerEventId: report.event.eventId,
+    whyLine: "The waiting customer sees the Store note slow the line.",
+  }));
+  environment = delayed.environment;
+
+  const station = actor({
+    actorId: "NPC_Station_Officer",
+    role: "station_officer",
+    knownLedgerEventIds: [report.event.eventId],
+  }, environment);
+  const citation = requireAccepted(validateAndApplyEnvironmentAction(environment, station, {
+    actorId: station.actorId,
+    role: station.role,
+    affordance: "cite_record",
+    objectId: "station_dossier",
+    recordId: "station_same_order_dossier",
+    citedLedgerEventId: report.event.eventId,
+    whyLine: "The Station cites the Store note before questioning the player.",
+  }));
+  environment = citation.environment;
+
+  const reactingCustomer = actor({
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    knownLedgerEventIds: [citation.event.eventId],
+  }, environment);
+  const action = listAvailableEnvironmentActions(environment, reactingCustomer)
+    .find(candidate => candidate.affordance === "refuse_contact");
+
+  assert.ok(action);
+  assert.equal(action.objectId, "store_queue_mark");
+  assert.deepEqual(action.citableLedgerEventIds, [citation.event.eventId]);
+
+  const refused = requireAccepted(validateAndApplyEnvironmentAction(environment, reactingCustomer, {
+    actorId: reactingCustomer.actorId,
+    role: reactingCustomer.role,
+    affordance: "refuse_contact",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_contact_refused",
+    citedLedgerEventId: citation.event.eventId,
+    whyLine: "The waiting customer sees the Station citation and refuses casual contact with the examined player.",
+  }));
+
+  assert.equal(refused.event.kind, "queue_contact_refused");
+  assert.equal(refused.event.citedLedgerEventId, citation.event.eventId);
+  assert.equal(refused.environment.objects.find(item => item.objectId === "store_queue_mark")?.state, "refused");
+  assert.equal(refused.environment.economy.localTrust, 22);
+  assert.equal(refused.environment.economy.recordBurden, 45);
+});
+
 test("Station Officer cannot cite hidden or non-Store ledger events", () => {
   let environment = createSameOrderAgenticEnvironment();
   const customer = actor({ actorId: "NPC_Waiting_Customer", role: "waiting_customer" }, environment);

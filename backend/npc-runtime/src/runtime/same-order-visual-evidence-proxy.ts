@@ -175,12 +175,15 @@ function checkLedgerAffordanceVisibility(repoRoot: string): SameOrderVisualEvide
   const worldRecordProps = asRecord(playableSummary.worldRecordProps);
   const civicLedgerProp = asRecord(worldRecordProps.civic_ledger);
   const civicLedgerLabel = readString(civicLedgerProp.label);
-  const requiredContent = ["affordance", "actorRole", "civic-ledger-", "기록 인용"];
+  const expectedAffordanceLabel = readString(latestLedger.affordance) === "refuse_contact"
+    ? ["접촉 거부", "refuse contact"]
+    : ["기록 인용", "cite record"];
+  const requiredContent = ["affordance", "actorRole", "civic-ledger-", expectedAffordanceLabel[0]];
   const implementedInScripts = fileContains(resolve(repoRoot, "godot/scripts/runtime/playable_session.gd"), "\"affordance\": affordance")
     && fileContains(resolve(repoRoot, "godot/scripts/ui/social_stealth_hud.gd"), "_affordance_label");
   const currentArtifactHasAffordance = readString(latestLedger.affordance).length > 0
     && civicLedgerLabel.includes("civic-ledger-")
-    && (civicLedgerLabel.includes("기록 인용") || civicLedgerLabel.includes("cite record"));
+    && expectedAffordanceLabel.some(label => civicLedgerLabel.includes(label));
 
   return {
     implementedInScripts,

@@ -92,6 +92,7 @@ const ENVIRONMENT_AFFORDANCE_ORDER := [
 	"complain_delay",
 	"accept_repair",
 	"leave_queue",
+	"refuse_contact",
 	"pause_service",
 	"cite_expected_order",
 	"create_receipt",
@@ -109,6 +110,7 @@ const STORE_LEDGER_EVENT_KINDS := [
 	"store_sale_corrected",
 	"queue_repair_accepted",
 	"queue_left",
+	"queue_contact_refused",
 	"store_exception_reported",
 	"store_report_escalated",
 	"service_paused",
@@ -164,6 +166,13 @@ const ENVIRONMENT_ACTION_RULES := {
 			"allowedRoles": ["waiting_customer"],
 			"requiresLedgerEvent": true,
 			"requiresStoreLedgerEvent": true
+		},
+		"refuse_contact": {
+			"fromStates": ["disrupted"],
+			"toState": "refused",
+			"eventKind": "queue_contact_refused",
+			"allowedRoles": ["waiting_customer"],
+			"requiresLedgerEvent": true
 		}
 	},
 	"usual_order_cue": {
@@ -1088,7 +1097,7 @@ func _open_inquest(evaluation: Dictionary) -> void:
 	var escalated_event: Dictionary = escalated_result.get("event", {})
 	var escalated_event_id := str(escalated_event.get("eventId", ""))
 	var cited_store_record := escalated_event_id if not escalated_event_id.is_empty() else "상점 전달 기록"
-	_apply_role_agent_action(
+	var station_citation := _apply_role_agent_action(
 		"inquest.station.cite_store_report",
 		"NPC_Station_Officer",
 		"station_officer",
@@ -1099,9 +1108,24 @@ func _open_inquest(evaluation: Dictionary) -> void:
 		escalated_event_id,
 		[escalated_event_id]
 	)
+	var station_citation_event: Dictionary = station_citation.get("event", {})
+	var station_citation_event_id := str(station_citation_event.get("eventId", ""))
+	if bool(station_citation.get("ok", false)) and not station_citation_event_id.is_empty():
+		_apply_role_agent_action(
+			"inquest.waiting_customer.refuse_contact",
+			"NPC_Waiting_Customer",
+			"waiting_customer",
+			"refuse_contact",
+			"store_queue_mark",
+			"store_same_order_contact_refused",
+			"A waiting customer sees the Station cite the player and refuses contact while the inquest is open.",
+			station_citation_event_id,
+			[station_citation_event_id]
+		)
+		_set_actor_line("NPC_Waiting_Customer", "스테이션이 인용했으면 저는 말 섞지 않겠습니다.")
 	outcome_visible = true
 	outcome_title = "스테이션 심문 개시"
-	outcome_body = "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 %s\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: %s\nR 다시 시작 / Q 종료" % [cited_store_record, str(evaluation["whyLine"])]
+	outcome_body = "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 %s\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 대기 손님이 그 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: %s\nR 다시 시작 / Q 종료" % [cited_store_record, str(evaluation["whyLine"])]
 	_record_event(
 		"domain",
 		"station_inquest_opened",
@@ -1679,6 +1703,8 @@ func _action_priority_hints(affordance: String, rule: Dictionary) -> Array[Strin
 		hints.append("pressure:service_paused")
 	if affordance == "leave_queue":
 		hints.append("pressure:queue_left")
+	if affordance == "refuse_contact":
+		hints.append("pressure:authority_seen")
 	if affordance == "post_rumor":
 		hints.append("pressure:public_talk")
 	return hints
@@ -1699,6 +1725,8 @@ func _action_perceived_as(object_id: String, affordance: String) -> String:
 			return "paused local service"
 		"leave_queue":
 			return "queue leaves paused service"
+		"refuse_contact":
+			return "queue refuses contact after citation"
 		"place_note":
 			return "Store report note"
 		"forward_report":
@@ -1745,6 +1773,7 @@ func _record_mutation_affordances() -> Array[String]:
 		"accept_repair",
 		"complain_delay",
 		"leave_queue",
+		"refuse_contact",
 		"post_rumor",
 		"place_note",
 		"forward_report",
@@ -1828,6 +1857,8 @@ func _civic_economy_delta(event_kind: String) -> Dictionary:
 			return {"recordBurden": 5}
 		"queue_left":
 			return {"localTrust": -3, "recordBurden": 5}
+		"queue_contact_refused":
+			return {"localTrust": -8, "recordBurden": 5}
 		"public_rumor_posted":
 			return {"recordBurden": 5}
 		"store_exception_reported":
@@ -1972,6 +2003,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"store_sale_corrected": "정정 처리",
 		"queue_repair_accepted": "줄 수습",
 		"queue_left": "대기 이탈",
+		"queue_contact_refused": "접촉 거부",
 		"queue_delay_noted": "대기줄 불평",
 		"public_rumor_posted": "공개 소문",
 		"store_exception_reported": "상점 보고",
@@ -1988,6 +2020,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"store_sale_corrected": "correction accepted",
 		"queue_repair_accepted": "queue repair accepted",
 		"queue_left": "queue left",
+		"queue_contact_refused": "contact refused",
 		"queue_delay_noted": "queue delay noted",
 		"public_rumor_posted": "public rumor posted",
 		"store_exception_reported": "Store report",
@@ -2025,6 +2058,7 @@ func _affordance_label(affordance: String) -> String:
 		"attach_correction": "정정 첨부",
 		"accept_repair": "수습 수락",
 		"leave_queue": "줄 이탈",
+		"refuse_contact": "접촉 거부",
 		"pause_service": "응대 중단",
 		"complain_delay": "대기 불평",
 		"post_rumor": "공개 게시",
@@ -2040,6 +2074,7 @@ func _affordance_label(affordance: String) -> String:
 		"attach_correction": "attach correction",
 		"accept_repair": "accept repair",
 		"leave_queue": "leave queue",
+		"refuse_contact": "refuse contact",
 		"pause_service": "pause service",
 		"complain_delay": "complain delay",
 		"post_rumor": "post public rumor",

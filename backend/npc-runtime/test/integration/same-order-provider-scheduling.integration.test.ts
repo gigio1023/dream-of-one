@@ -19,7 +19,7 @@ test("Same Order provider scheduling contract builds bounded role-agent jobs", (
   assert.equal(report.contractPass, true, JSON.stringify(report.failures, null, 2));
   assert.equal(report.verdict, "SCHEDULING_CONTRACT_PASS_LIVE_GODOT_REQUIRED");
   assert.equal(report.liveGodotDispatchVerified, false);
-  assert.equal(report.jobCount, 20);
+  assert.equal(report.jobCount, 21);
   assert.deepEqual(report.routeIds, ["clean_cover", "repair_recovered", "soft_report", "inquest_opened"]);
   assert.equal(report.jobs.every(job => job.allowedProviderFields.includes("npcLineCandidate")), true);
   assert.equal(report.jobs.every(job => job.forbiddenAuthorityFields.includes("verdict")), true);

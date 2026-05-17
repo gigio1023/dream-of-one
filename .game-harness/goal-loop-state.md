@@ -100,14 +100,19 @@ Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `5 / 5`, and `routeReportPassCount=5 / 5`.
-- latest game increment: soft report now creates one more local social
-  consequence before the Station path. When the Clerk note crosses the report
-  threshold but stays below inquest, the Store Manager adds a follow-up note and
-  pauses counter service; the Waiting Customer then reads that pause record,
-  uses `leave_queue` on `store_queue_mark`, changes the queue state to `empty`,
-  and adds `queue_left`. This proves the smallest useful pattern for the broader
-  game: one NPC's record-backed environment change can make another NPC choose a
-  different visible action.
+- latest game increment: inquest now sends one formal record back into local
+  social space. After the Station Officer cites the forwarded Store report, the
+  Waiting Customer reads that Station citation, uses `refuse_contact` on
+  `store_queue_mark`, changes the queue state to `refused`, and adds
+  `queue_contact_refused`. This proves a reusable pattern for the broader game:
+  formal authority can alter ordinary NPC contact without adding bespoke player
+  branches or a larger Store/Station system.
+- prior soft-report increment remains current: soft report creates one more
+  local social consequence before the Station path. When the Clerk note crosses
+  the report threshold but stays below inquest, the Store Manager adds a
+  follow-up note and pauses counter service; the Waiting Customer then reads
+  that pause record, uses `leave_queue` on `store_queue_mark`, changes the
+  queue state to `empty`, and adds `queue_left`.
 - prior suspicious-cover increment remains current: suspicious cover now leaves a small local social
   residue without becoming a report. When the player says a risky line and then
   returns to the clerk's premise, the Clerk marks the receipt; the Waiting
@@ -140,9 +145,9 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `46aaa89d81be5dabe39c12b5dd51ef87e8d6c974fa64707a889de7ab017ffe1c`
+  `892c2b249328030aa34f33c469f67258378b573d38c0cf88f7cab8dfc4b35282`
 - Markdown SHA-256:
-  `ffedc48789449c36b24d54b464fb9a2e0487797abce9479143f7faadcec677d4`
+  `2550cd7d6489e4ed95aee4a7d564b00213d853e23997fbe8c3dd443a28b9a6c2`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
   player-visible state, player-readable cause chain, role-action explanation,
   NPC-to-NPC observation explanation, and the explicit boundary that this is
@@ -262,6 +267,17 @@ Latest AI-play interface check:
   freshness pass, copied probe cross-check pass, route reports pass, and
   `README live-session handoff: pass`. This is still setup proof only; raw
   session notes remain `0 / 3`.
+- 2026-05-18 playable Station-citation contact-refusal increment: added the
+  next smallest inquest reaction after formal citation. The inquest route now
+  proves `place_note -> complain_delay -> post_rumor -> forward_report ->
+  cite_record -> refuse_contact`; final inquest state includes
+  `store_queue_mark=refused`, `queue_contact_refused`, local trust 0, record
+  burden 90, and Station attention 70. The terminal copy now says the Waiting
+  Customer refuses contact after seeing the Station citation. Verified with
+  latest Godot playable smoke, Codex gameplay probe, backend playability report
+  attachment, full backend check, runtime slice smoke, session-kit generation,
+  and comprehension guards. This is internal playable proof only; external
+  fresh-player notes remain `0 / 3`.
 - 2026-05-18 playable paused-service queue-exit increment: added the next
   smallest environment reaction after a soft report. The soft-report route now
   proves `place_note -> complain_delay -> post_rumor -> place_followup_note ->

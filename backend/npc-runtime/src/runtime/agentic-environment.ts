@@ -30,6 +30,7 @@ export const ENVIRONMENT_AFFORDANCES = [
   "complain_delay",
   "accept_repair",
   "leave_queue",
+  "refuse_contact",
   "speak",
   "serve",
   "pause_service",
@@ -59,6 +60,7 @@ export const LEDGER_EVENT_KINDS = [
   "queue_delay_noted",
   "queue_repair_accepted",
   "queue_left",
+  "queue_contact_refused",
   "service_started",
   "service_paused",
   "service_resumed",
@@ -286,6 +288,16 @@ const AFFORDANCE_RULES: AffordanceRule[] = [
     economyDelta: { localTrust: -3, recordBurden: 5 },
     requiresLedgerEvent: true,
     requiresStoreLedgerEvent: true,
+  },
+  {
+    objectId: "store_queue_mark",
+    affordance: "refuse_contact",
+    fromStates: ["disrupted"],
+    toState: "refused",
+    eventKind: "queue_contact_refused",
+    allowedRoles: ["waiting_customer"],
+    economyDelta: { localTrust: -8, recordBurden: 5 },
+    requiresLedgerEvent: true,
   },
   {
     objectId: "store_counter",
@@ -690,6 +702,9 @@ function priorityHintsForRule(rule: AffordanceRule): string[] {
   if (rule.affordance === "post_rumor") {
     hints.push("pressure:public_talk");
   }
+  if (rule.affordance === "refuse_contact") {
+    hints.push("pressure:authority_seen");
+  }
 
   return hints;
 }
@@ -717,6 +732,10 @@ function perceivedAs(rule: AffordanceRule): string {
       return "local wary queue note";
     case "accept_repair":
       return "public repair acceptance";
+    case "leave_queue":
+      return "queue leaves paused service";
+    case "refuse_contact":
+      return "queue refuses contact after citation";
     case "post_rumor":
       return "public notice rumor";
     default:

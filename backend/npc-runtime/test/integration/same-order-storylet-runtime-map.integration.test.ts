@@ -40,11 +40,13 @@ test("Same Order storylet runtime map binds beats to route actions and provider 
 
   const station = report.beats.find(beat => beat.beatId === "station_reconciliation");
   assert.ok(station);
-  assert.equal(station.providerPurpose, "station_intake_line");
-  assert.deepEqual(station.ledgerEventKinds, ["station_record_cited"]);
-  assert.deepEqual(station.affordances, ["cite_record"]);
+  assert.equal(station.providerPurpose, "mixed");
+  assert.deepEqual(station.ledgerEventKinds, ["station_record_cited", "queue_contact_refused"]);
+  assert.deepEqual(station.affordances, ["cite_record", "refuse_contact"]);
   assert.equal(station.actionStepIds[0], "inquest.station.cite_store_report");
+  assert.equal(station.actionStepIds[1], "inquest.waiting_customer.refuse_contact");
   assert.equal(station.providerJobIds[0], "inquest_opened.inquest.station.cite_store_report.provider-action-proposal");
+  assert.equal(station.providerJobIds[1], "inquest_opened.inquest.waiting_customer.refuse_contact.provider-action-proposal");
 });
 
 test("Same Order storylet runtime map fails when a provider job disappears", () => {

@@ -396,6 +396,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("inquest_opened expected typed player speech")
 			if not bool(checks.get("stationOfficerCitedRecord", false)):
 				failures.append("inquest_opened expected Station Officer citation")
+			if not bool(checks.get("waitingCustomerRefusedContact", false)):
+				failures.append("inquest_opened expected Waiting Customer refuse_contact action")
 			if not bool(checks.get("worldPropsReachInquest", false)):
 				failures.append("inquest_opened expected inquest world record props")
 		_:
@@ -509,6 +511,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Station Officer did not observe the manager record before acting")
 	if not bool(checks.get("stationCitedExactLedger", false)):
 		failures.append("Station citation did not point at civic-ledger-5")
+	if not bool(checks.get("waitingCustomerObservedStation", false)):
+		failures.append("Waiting Customer did not react to the Station citation")
 	if not bool(checks.get("economyPanelReadable", false)):
 		failures.append("Civic economy panel is not readable with credit/trust/burden/attention")
 	if not bool(checks.get("worldPropsReachInquest", false)):
@@ -524,11 +528,13 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary) -> D
 		"parkWitnessReacted": _action_exists(summary, "park_witness", "post_rumor"),
 		"storeManagerForwardedReport": _action_exists(summary, "store_manager", "forward_report"),
 		"stationOfficerCitedRecord": _action_exists(summary, "station_officer", "cite_record"),
+		"waitingCustomerRefusedContact": _action_exists(summary, "waiting_customer", "refuse_contact"),
 		"waitingCustomerObservedClerk": _observation_exists(summary, "waiting_customer", "store_clerk", "place_note", "complain_delay"),
 		"parkWitnessObservedClerk": _observation_exists(summary, "park_witness", "store_clerk", "place_note", "post_rumor"),
 		"managerObservedClerk": _observation_exists(summary, "store_manager", "store_clerk", "place_note", "forward_report"),
 		"stationObservedManager": _observation_exists(summary, "station_officer", "store_manager", "forward_report", "cite_record"),
-		"stationCitedExactLedger": str(latest_ledger.get("citedLedgerEventId", "")) == "civic-ledger-5",
+		"waitingCustomerObservedStation": _observation_exists(summary, "waiting_customer", "station_officer", "cite_record", "refuse_contact"),
+		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"economyPanelReadable": _economy_panel_readable(record_props),
 		"worldPropsReachInquest": _world_props_reach_inquest(record_props),
 		"latestLedger": latest_ledger
@@ -546,8 +552,8 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"codexPlayedThroughPublicActions": accepted_actions.size() == PROBE_STEPS.size() and rejected_actions.is_empty(),
 		"canReadExaminedPlayerRole": investigation_trail.contains("대상: 플레이어") or investigation_trail.to_lower().contains("player"),
 		"canReadInputToRecordChain": consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용"),
-		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)),
-		"canReadExactStationCitation": str(latest_ledger.get("citedLedgerEventId", "")) == "civic-ledger-5",
+		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)) and bool(checks.get("waitingCustomerObservedStation", false)),
+		"canReadExactStationCitation": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"canReadCivicEconomyPressure": bool(checks.get("economyPanelReadable", false)),
 		"canReadFinalOutcome": str(summary.get("stage", "")) == "inquest" and outcome_body.contains("심문"),
 		"notHumanEvidence": true
@@ -578,7 +584,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"Codex/player waited long enough to create a response hesitation record.",
 			"Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.",
 			"Codex/player typed a dream-language line, causing a Store report, waiting-customer queue reaction, Park notice, Manager forwarding, and Station citation.",
-			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest."
+			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest, and the waiting customer refused contact in civic-ledger-7."
 		],
 		"roleActionExplanation": _role_action_explanation(summary),
 		"socialObservationExplanation": _social_observation_explanation(summary),
@@ -778,6 +784,7 @@ func _economy_panel_readable(record_props: Dictionary) -> bool:
 func _world_props_reach_inquest(record_props: Dictionary) -> bool:
 	return (
 		str(record_props.get("report_tray", {}).get("state", "")) == "forwarded"
+		and str(record_props.get("store_queue_mark", {}).get("state", "")) == "refused"
 		and str(record_props.get("park_notice_board", {}).get("state", "")) == "rumored"
 		and str(record_props.get("station_dossier", {}).get("state", "")) == "cited"
 		and str(record_props.get("civic_ledger", {}).get("state", "")) == "append_only"
@@ -791,6 +798,14 @@ func _latest_ledger(summary: Dictionary) -> Dictionary:
 	if latest is Dictionary:
 		return latest
 	return {}
+
+func _ledger_event_cites(summary: Dictionary, kind: String, cited_id: String) -> bool:
+	for event in summary.get("civicLedger", []):
+		if event is Dictionary \
+			and str(event.get("kind", "")) == kind \
+			and str(event.get("citedLedgerEventId", "")) == cited_id:
+			return true
+	return false
 
 func _has_event(summary: Dictionary, event_name: String) -> bool:
 	for event in summary.get("events", []):

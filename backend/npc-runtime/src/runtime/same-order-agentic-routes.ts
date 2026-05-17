@@ -386,6 +386,17 @@ function buildInquestOpenedProof(): SameOrderAgenticRouteProof {
     knownLedgerEventIds: [escalatedEvent.eventId],
     whyLine: "The Station cites the exact forwarded Store ledger event before narrowing the player's answer.",
   });
+  applyAction(build, {
+    stepId: "inquest.waiting_customer.refuse_contact",
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    affordance: "refuse_contact",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_contact_refused",
+    citedLedgerEventId: citationEvent.eventId,
+    knownLedgerEventIds: [citationEvent.eventId],
+    whyLine: "A waiting customer sees the Station cite the player and refuses contact while the inquest is open.",
+  });
 
   return routeProof({
     build,
@@ -393,7 +404,7 @@ function buildInquestOpenedProof(): SameOrderAgenticRouteProof {
     sessionOutcome: "inquest_opened",
     playerLineKind: "inquest_line",
     playerLine: "저는 이 꿈에 방금 들어왔어요.",
-    socialReactionSummary: "The Store report slows the queue, a public Park notice appears, then the manager forwards a record and the Station cites the exact ledger event instead of inventing suspicion.",
+    socialReactionSummary: "The Store report slows the queue, a public Park notice appears, the manager forwards a record, the Station cites the exact ledger event, and a waiting customer refuses contact while the inquest is open.",
     stationCitation: {
       stationEventId: citationEvent.eventId,
       citedLedgerEventId: escalatedEvent.eventId,
@@ -727,6 +738,17 @@ function validateInquestOpened(
     && observation.resultingAffordance === "cite_record"
   )) {
     failures.push({ routeId: proof.routeId, path: "socialObservationTrace", message: "inquest route must prove the Station cited a forwarded social record" });
+  }
+  if (!proof.socialObservationTrace.some(observation =>
+    observation.observerRole === "waiting_customer"
+    && observation.observedActorRole === "station_officer"
+    && observation.observedAffordance === "cite_record"
+    && observation.resultingAffordance === "refuse_contact"
+  )) {
+    failures.push({ routeId: proof.routeId, path: "socialObservationTrace", message: "inquest route must prove a local NPC reacts to the Station citation" });
+  }
+  if (proof.finalObjectStates.store_queue_mark !== "refused") {
+    failures.push({ routeId: proof.routeId, path: "finalObjectStates.store_queue_mark", message: "inquest route must visibly change local contact after Station citation" });
   }
 }
 

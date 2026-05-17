@@ -550,6 +550,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("World record props do not show forwarded report and cited Station dossier")
 	if not bool(checks.get("codexInspectedPublicNotice", false)):
 		failures.append("Codex/player did not inspect the Park notice board as a public environment record")
+	if not bool(checks.get("visibleWaitingCustomerReaction", false)):
+		failures.append("Waiting Customer reaction is not visible on a spawned NPC")
 	if not str(hud_snapshot.get("noticeTitleLabel", "")).contains("공원 게시판"):
 		failures.append("HUD notice does not show the inspected Park notice board")
 	if not str(hud_snapshot.get("noticeBodyLabel", "")).contains("소문"):
@@ -571,6 +573,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary) -> D
 		"managerObservedClerk": _observation_exists(summary, "store_manager", "store_clerk", "place_note", "forward_report"),
 		"stationObservedManager": _observation_exists(summary, "station_officer", "store_manager", "forward_report", "cite_record"),
 		"waitingCustomerObservedStation": _observation_exists(summary, "waiting_customer", "station_officer", "cite_record", "refuse_contact"),
+		"visibleWaitingCustomerReaction": _visible_npc_has_line(summary, "NPC_Waiting_Customer"),
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"codexInspectedPublicNotice": _inspected_public_notice(summary),
 		"economyPanelReadable": _economy_panel_readable(record_props),
@@ -591,6 +594,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadExaminedPlayerRole": investigation_trail.contains("대상: 플레이어") or investigation_trail.to_lower().contains("player"),
 		"canReadInputToRecordChain": consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용"),
 		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)) and bool(checks.get("waitingCustomerObservedStation", false)),
+		"canReadVisibleNpcReaction": bool(checks.get("visibleWaitingCustomerReaction", false)),
 		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
 		"canReadExactStationCitation": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"canReadCivicEconomyPressure": bool(checks.get("economyPanelReadable", false)),
@@ -615,6 +619,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"consequence": consequence_label,
 			"outcomeBody": outcome_body,
 			"recordState": hud_snapshot.get("recordStateLabel", ""),
+			"visibleNpcStates": summary.get("visibleNpcStates", {}),
 			"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {}),
 			"notice": "%s / %s" % [str(hud_snapshot.get("noticeTitleLabel", "")), _one_line(hud_snapshot.get("noticeBodyLabel", ""))],
 			"whyLine": hud_snapshot.get("whyLineLabel", ""),
@@ -625,6 +630,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"Codex/player waited long enough to create a response hesitation record.",
 			"Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.",
 			"Codex/player typed a dream-language line, causing a Store report, waiting-customer queue reaction, Park notice, Manager forwarding, and Station citation.",
+			"The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.",
 			"Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.",
 			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest, and the waiting customer refused contact in civic-ledger-7."
 		],
@@ -853,6 +859,14 @@ func _inspected_public_notice(summary: Dictionary) -> bool:
 		str(inspected.get("objectId", "")) == "park_notice_board"
 		and str(inspected.get("state", "")) == "rumored"
 		and str(inspected.get("body", "")).contains("소문")
+	)
+
+func _visible_npc_has_line(summary: Dictionary, npc_id: String) -> bool:
+	var states: Dictionary = summary.get("visibleNpcStates", {})
+	var state: Dictionary = states.get(npc_id, {})
+	return (
+		str(state.get("npcId", "")) == npc_id
+		and not str(state.get("pressureText", "")).strip_edges().is_empty()
 	)
 
 func _latest_ledger(summary: Dictionary) -> Dictionary:

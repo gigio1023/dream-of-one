@@ -207,6 +207,7 @@ func _run_route(route: Dictionary) -> Dictionary:
 	var summary := _build_summary(session)
 	failures.append_array(_validate_route_summary(route, summary))
 	failures.append_array(_validate_agent_action_log(route, summary))
+	failures.append_array(_validate_visible_social_actors(route, summary, session))
 	failures.append_array(_validate_hud_record_state(route, summary, hud))
 	failures.append_array(_validate_world_record_props(route, summary, session))
 	failures.append_array(_validate_post_lock_noop(session, summary, player))
@@ -632,6 +633,35 @@ func _validate_agent_action_log(route: Dictionary, summary: Dictionary) -> Array
 			failures.append("inquest_opened expected playable summary socialObservationTrace to show Station citing manager record")
 		if not _social_observation_exists(social_observations, "waiting_customer", "station_officer", "cite_record", "refuse_contact"):
 			failures.append("inquest_opened expected Waiting Customer to react to Station citation")
+	return failures
+
+func _validate_visible_social_actors(route: Dictionary, summary: Dictionary, session: Node) -> Array[String]:
+	var failures: Array[String] = []
+	var route_id := str(route.get("id", ""))
+	var visible_states: Dictionary = summary.get("visibleNpcStates", {})
+	var action_log: Array = summary.get("agentActionLog", [])
+	var acted_actor_ids: Array[String] = []
+	for action in action_log:
+		if not (action is Dictionary):
+			continue
+		var actor_id := str(action.get("actorId", ""))
+		if actor_id.is_empty() or acted_actor_ids.has(actor_id):
+			continue
+		acted_actor_ids.append(actor_id)
+	for actor_id in acted_actor_ids:
+		if not visible_states.has(actor_id):
+			failures.append("%s expected visible NPC state for acting role %s" % [route_id, actor_id])
+			continue
+		var reaction := _npc_reaction_snapshot(session, actor_id)
+		if reaction.is_empty():
+			failures.append("%s expected a spawned NPC node for acting role %s" % [route_id, actor_id])
+			continue
+		if str(reaction.get("pressureText", "")).strip_edges().is_empty():
+			failures.append("%s expected acting role %s to show a player-readable line above the NPC" % [route_id, actor_id])
+	if _agent_action_actor_exists(action_log, "NPC_Waiting_Customer"):
+		var waiting_state: Dictionary = visible_states.get("NPC_Waiting_Customer", {})
+		if str(waiting_state.get("role", "")) != "Waiting Customer":
+			failures.append("%s expected NPC_Waiting_Customer to be a visible Waiting Customer role" % route_id)
 	return failures
 
 func _available_actions_include_action(action: Dictionary) -> bool:
@@ -1229,6 +1259,12 @@ func _agent_action_exists(action_log: Array, role: String, affordance: String) -
 		if action is Dictionary \
 			and str(action.get("actorRole", "")) == role \
 			and str(action.get("affordance", "")) == affordance:
+			return true
+	return false
+
+func _agent_action_actor_exists(action_log: Array, actor_id: String) -> bool:
+	for action in action_log:
+		if action is Dictionary and str(action.get("actorId", "")) == actor_id:
 			return true
 	return false
 

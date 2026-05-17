@@ -16,6 +16,8 @@
   stage explicit paths, commit, and push without waiting for another reminder.
 - Treat an unpushed finished slice as incomplete agent work unless the user
   explicitly asks to hold it locally.
+- If commit or push fails, diagnose and retry immediately instead of carrying
+  the verified slice forward as local-only work.
 - If the next slice would require a different rollback decision, push the
   current slice first. A later revert should be able to remove one coherent
   behavior change, one documentation-only adjustment, or one proof refresh.

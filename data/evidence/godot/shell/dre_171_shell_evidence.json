@@ -1,17 +1,17 @@
 {
 	"adapter": "godot",
-	"createdAtMs": 1779016882755,
+	"createdAtMs": 1779050278987,
 	"events": [
 		{
 			"adapter": "godot",
 			"eventFamily": "domain",
-			"eventId": "event-domain-shell-1779016882755",
+			"eventId": "event-domain-shell-1779050278987",
 			"eventName": "shell_domain_surfaces_loaded",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-shell-session",
 			"socialLoopStage": "intake",
 			"summary": "Godot shell loaded canonical text surfaces and Station intake metadata.",
-			"timestampMs": 1779016882755,
+			"timestampMs": 1779050278987,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
 		},
@@ -19,12 +19,12 @@
 			"adapter": "godot",
 			"artifactPath": "data/evidence/godot/shell/dre_171_shell_evidence.json",
 			"eventFamily": "evidence_export",
-			"eventId": "event-export-shell-1779016882755",
+			"eventId": "event-export-shell-1779050278987",
 			"eventName": "evidence_pack_created",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-shell-session",
 			"summary": "Godot shell Evidence Pack exported.",
-			"timestampMs": 1779016882755,
+			"timestampMs": 1779050278987,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
 		}
@@ -33,10 +33,10 @@
 		"failures": [],
 		"generation_failures": [],
 		"group_counts": {
-			"free_visual_assets": 185,
+			"free_visual_assets": 188,
 			"interaction_zones": 4,
 			"landmarks": 4,
-			"npc_placeholders": 5,
+			"npc_placeholders": 6,
 			"routes": 3,
 			"text_surfaces": 4
 		},
@@ -55,7 +55,8 @@
 			"NPC_Station_Officer",
 			"NPC_Store_Clerk",
 			"NPC_Store_Manager",
-			"NPC_Studio_PM"
+			"NPC_Studio_PM",
+			"NPC_Waiting_Customer"
 		],
 		"ok": true,
 		"route_ids": [
@@ -91,7 +92,8 @@
 			"NPC_Station_Officer": "dre_171_godot_shell:NPC_Station_Officer",
 			"NPC_Store_Clerk": "dre_171_godot_shell:NPC_Store_Clerk",
 			"NPC_Store_Manager": "dre_171_godot_shell:NPC_Store_Manager",
-			"NPC_Studio_PM": "dre_171_godot_shell:NPC_Studio_PM"
+			"NPC_Studio_PM": "dre_171_godot_shell:NPC_Studio_PM",
+			"NPC_Waiting_Customer": "dre_171_godot_shell:NPC_Waiting_Customer"
 		},
 		"blockedChecks": [],
 		"commandOutcomeCounts": {

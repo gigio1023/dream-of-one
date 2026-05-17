@@ -654,6 +654,7 @@ func build_summary() -> Dictionary:
 		"civicLedger": civic_ledger.duplicate(true),
 		"agentActionLog": agent_action_log.duplicate(true),
 		"socialObservationTrace": _social_observation_trace(),
+		"visibleNpcStates": _visible_npc_states(),
 		"worldRecordProps": _world_record_prop_snapshot(),
 		"providerState": _provider_state(),
 		"inputLocked": _session_locked(),
@@ -687,6 +688,7 @@ func build_summary() -> Dictionary:
 			"civicLedger": civic_ledger.duplicate(true),
 			"agentActionLog": agent_action_log.duplicate(true),
 			"socialObservationTrace": _social_observation_trace(),
+			"visibleNpcStates": _visible_npc_states(),
 			"worldRecordProps": _world_record_prop_snapshot(),
 			"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
 			"providerState": _provider_state(),
@@ -739,6 +741,7 @@ func build_evidence_pack(artifact_path: String) -> Dictionary:
 			"civicLedger": civic_ledger.duplicate(true),
 			"agentActionLog": agent_action_log.duplicate(true),
 			"socialObservationTrace": _social_observation_trace(),
+			"visibleNpcStates": _visible_npc_states(),
 			"worldRecordProps": _world_record_prop_snapshot(),
 			"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
 			"providerState": _provider_state(),
@@ -1196,6 +1199,8 @@ func _open_inquest(evaluation: Dictionary) -> void:
 	var escalated_event: Dictionary = escalated_result.get("event", {})
 	var escalated_event_id := str(escalated_event.get("eventId", ""))
 	var cited_store_record := escalated_event_id if not escalated_event_id.is_empty() else "상점 전달 기록"
+	if bool(escalated_result.get("ok", false)):
+		_set_actor_line("NPC_Store_Manager", "이 상점 기록은 스테이션이 대조해야 합니다.")
 	var station_citation := _apply_role_agent_action(
 		"inquest.station.cite_store_report",
 		"NPC_Station_Officer",
@@ -2614,6 +2619,24 @@ func _set_actor_reaction_state(actor_id: String, reaction_stage: String, reactio
 		if str(node.get_meta("npc_id", "")) == actor_id and node.has_method("set_reaction_state"):
 			node.set_reaction_state(reaction_stage, reaction_exposure)
 			return
+
+func _visible_npc_states() -> Dictionary:
+	var states := {}
+	for node in get_tree().get_nodes_in_group("npc_placeholders"):
+		var npc_id := str(node.get_meta("npc_id", ""))
+		if npc_id.is_empty():
+			continue
+		if node.has_method("debug_reaction_snapshot"):
+			var snapshot: Variant = node.call("debug_reaction_snapshot")
+			if snapshot is Dictionary:
+				states[npc_id] = snapshot
+				continue
+		states[npc_id] = {
+			"npcId": npc_id,
+			"role": str(node.get_meta("role", "")),
+			"homeLandmark": str(node.get_meta("home_landmark", ""))
+		}
+	return states
 
 func _current_choices() -> Array:
 	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})

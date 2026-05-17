@@ -197,6 +197,11 @@ Current M1 carry-in:
   normal flow unsafe, or forwards the report on the inquest route; Station
   Officer cites the exact forwarded ledger event. Each log entry now includes the available action candidates and
   selection reason used before the mutation.
+- `NPC_Waiting_Customer` now exists as a spawned Store actor in
+  `godot/data/world_layout.json`, and Godot session summaries export
+  `visibleNpcStates` so Codex can inspect the same player-readable NPC reaction
+  text that appears in the scene. Playable/Codex probes now reject hidden-only
+  social reactions for acting roles.
 - Codex gameplay QA now runs the active proof cell through public
   `PlayableSession.debug_codex_gameplay_action` and
   `debug_codex_gameplay_snapshot` APIs. The probe can list callable player

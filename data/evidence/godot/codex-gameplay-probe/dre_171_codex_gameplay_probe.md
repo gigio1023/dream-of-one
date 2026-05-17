@@ -22,6 +22,7 @@
 - Codex/player waited long enough to create a response hesitation record.
 - Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.
 - Codex/player typed a dream-language line, causing a Store report, waiting-customer queue reaction, Park notice, Manager forwarding, and Station citation.
+- The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.
 - Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.
 - The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest, and the waiting customer refused contact in civic-ledger-7.
 
@@ -73,6 +74,7 @@
 - `canReadExaminedPlayerRole`: `true`
 - `canReadInputToRecordChain`: `true`
 - `canReadNpcToNpcChain`: `true`
+- `canReadVisibleNpcReaction`: `true`
 - `canInspectPublicEnvironmentRecord`: `true`
 - `canReadExactStationCitation`: `true`
 - `canReadCivicEconomyPressure`: `true`

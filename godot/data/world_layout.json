@@ -197,6 +197,14 @@
       "route_id": "StoreQueue"
     },
     {
+      "id": "NPC_Waiting_Customer",
+      "label": "Waiting Customer",
+      "role": "Waiting Customer",
+      "home_landmark": "Store",
+      "spawn_anchor": "Store.queue_start",
+      "route_id": "StoreQueue"
+    },
+    {
       "id": "NPC_Studio_PM",
       "label": "Studio PM",
       "role": "Studio PM",

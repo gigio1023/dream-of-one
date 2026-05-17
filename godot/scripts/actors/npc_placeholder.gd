@@ -82,8 +82,12 @@ func set_reaction_state(state: String, exposure: int) -> void:
 func debug_reaction_snapshot() -> Dictionary:
 	var material := _reaction_material()
 	return {
+		"npcId": String(npc_id),
+		"displayName": display_name,
+		"role": role,
 		"state": _reaction_state,
 		"exposure": _reaction_exposure,
+		"pressureText": _pressure_label.text,
 		"markerVisible": _attention_disc.visible,
 		"reactionText": _reaction_label.text,
 		"materialAlpha": material.albedo_color.a if material != null else -1.0,

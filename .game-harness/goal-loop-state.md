@@ -100,18 +100,26 @@ Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `7 / 7`, and `routeReportPassCount=5 / 5`.
-- latest game increment: visible world-record props are now reachable through a
+- latest game increment: the Waiting Customer is now an actual spawned Store
+  NPC, not just an id in `agentActionLog`. Godot summaries and Evidence Packs
+  include `visibleNpcStates`; playable smoke fails if an acting role lacks a
+  spawned NPC state or player-readable pressure text; Codex gameplay QA now
+  requires `visibleWaitingCustomerReaction=true` and marks
+  `canReadVisibleNpcReaction=true`. The current AI-play report reaches
+  `inquest`, accepts `7 / 7` public player actions, passes `routeReports=5/5`,
+  and scores `explainability=10/10`.
+- latest packaged proof refresh: the macOS debug app was re-exported with
+  Godot 4.7-beta2 after the visible Waiting Customer change, then
+  packaged launch, packaged route smoke, backend schema validation, and
+  comprehension preflight all passed against
+  `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json`.
+- prior game increment: visible world-record props are reachable through a
   focused player interaction path, not only a direct inspect helper. Codex/player
   can use `focus.world_record_prop` on `park_notice_board`, then press
   `player.interact.focused`; the HUD notice reads "공원 게시판" with the current
   "소문 게시" public-record body, and the AI-play report marks
   `canInspectPublicEnvironmentRecord=true`. The normal focus scan also treats
   operation record props as readable targets when no conversation zone is closer.
-- latest packaged proof refresh: the macOS debug app was re-exported with
-  Godot 4.7-beta2 after the record-prop focused-interaction change, then
-  packaged launch, packaged route smoke, backend schema validation, and
-  comprehension preflight all passed against
-  `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json`.
 - prior game increment: clean and warning outcomes now tell the player that
   the Waiting Customer is acting from the Park notice board. The clean route
   says the Park board's public vouch opened the local tip, and the suspicious
@@ -208,9 +216,9 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `f2b79f6d2601da4471aed3f528e82890864e3a6099efb30176db0d7d6134871a`
+  `d20f437af55362e30886f04b90256ec57c8e1622e830c4a843fe2db8ebc9c97d`
 - Markdown SHA-256:
-  `6d75ba1a2c187e173e08ee71a420fbbcd30d9a54faeafd606f650683e3ea5564`
+  `2083ddf38c3cb10d83415b92154927aa5e1e6d4c513d0e7dea227716f18a3847`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
   player-visible state, player-readable cause chain, role-action explanation,
   NPC-to-NPC observation explanation, and the explicit boundary that this is

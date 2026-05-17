@@ -89,6 +89,12 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   Customer now perceives `park_notice_board` before `share_local_tip` or
   `keep_distance`, and playable/Codex probes fail if those reactions happen
   without that public environment cue.
+- [x] Make public-board reactions more readable in the running game: clean and
+  suspicious terminal outcomes now state that the Waiting Customer acts after
+  seeing the Park notice board's public vouch or warning.
+- [x] Re-export the packaged macOS app after the public-board wording change
+  and rerun packaged launch, packaged route smoke, backend schema validation,
+  and comprehension preflight.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

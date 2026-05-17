@@ -89,9 +89,9 @@ const CAPTURE_DEFINITIONS := [
 			"non-empty 1280x720 viewport",
 			"Station inquest outcome panel is visible",
 			"suspicion, report pressure, and session termination state are visible",
-			"live HUD consequence line shows speech/delay -> Store record -> report handoff -> Station citation",
+			"live HUD consequence line shows speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation",
 			"outcome names the exact Store ledger entry cited by the Station",
-			"outcome shows speech/delay to record to Station role-action chain",
+			"outcome shows speech/delay to record to queue reaction to Park notice to Station role-action chain",
 			"outcome names the NPC-to-NPC social reaction behind the Station citation",
 			"why-line remains visible as session-end basis"
 		]
@@ -314,7 +314,7 @@ func _capture_inquest_session_end(
 	if not bool(snapshot.get("outcomeVisible", false)):
 		blockers.append("Inquest capture did not expose the HUD outcome panel.")
 	var outcome_body := str(snapshot.get("outcomeBodyLabel", ""))
-	if not outcome_body.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 심문"):
+	if not outcome_body.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문"):
 		blockers.append("Inquest capture did not show the dialogue/delay-to-record-to-role-action chain.")
 	if not str(snapshot.get("consequenceLabel", "")).contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용"):
 		blockers.append("Inquest capture did not show the live HUD record chain before the outcome proof.")

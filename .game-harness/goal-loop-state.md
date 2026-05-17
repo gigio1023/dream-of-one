@@ -100,7 +100,18 @@ Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `5 / 5`, and `routeReportPassCount=5 / 5`.
-- latest game increment: public notices are now actually public to the next
+- latest game increment: clean and warning outcomes now tell the player that
+  the Waiting Customer is acting from the Park notice board. The clean route
+  says the Park board's public vouch opened the local tip, and the suspicious
+  route says the Park board's public warning caused distance. This keeps the
+  same tiny Store/Station cell but makes the reusable social-sim chain more
+  readable: public record -> another NPC sees it -> toy trust gate changes a
+  role action.
+- latest packaged proof refresh: the macOS debug app was re-exported with
+  Godot 4.7-beta2 after the public-board wording change, then packaged launch,
+  packaged route smoke, backend schema validation, and comprehension preflight
+  all passed against `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json`.
+- prior game increment: public notices are now actually public to the next
   NPC that acts from them. `park_notice_board` is visible to the Waiting
   Customer in both the backend environment and the Godot proof cell, so the
   clean-route local tip and suspicious-route distance reaction no longer rely
@@ -185,7 +196,7 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `a938d94a78e324c5c6044f01a44aac8de6b760fc548514fe3b371b54654dd7d8`
+  `7e823e39c82cabbb758e967e694767a42b84c109b437af050be71cae0ed8529b`
 - Markdown SHA-256:
   `09dd032d03dd92f2e20cbc4904aa7b595555be63fe9748ca550c3c85a9062edf`
 - new proof: artifact now includes `aiPlayerReport` with action path, final

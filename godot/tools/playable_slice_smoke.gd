@@ -399,6 +399,8 @@ func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[St
 		failures.append("repair_recovered outcome must name waiting-customer repair acceptance")
 	if route_id == "clean_cover" and not str(summary.get("outcomeBody", "")).contains("역할 행동: 상점 점원"):
 		failures.append("clean_cover outcome must name Store Clerk role action")
+	if route_id == "clean_cover" and not str(summary.get("outcomeBody", "")).contains("공원 게시판의 공개 확인"):
+		failures.append("clean_cover outcome must show the waiting customer reacting to the park notice board")
 	if route_id == "cover_held_under_suspicion":
 		if int(summary.get("repairAttemptCount", 0)) != 0:
 			failures.append("cover_held_under_suspicion must not record a repair attempt")
@@ -408,10 +410,12 @@ func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[St
 			failures.append("cover_held_under_suspicion outcome must name the local wary queue reaction")
 		if not str(summary.get("outcomeBody", "")).contains("공개 경고"):
 			failures.append("cover_held_under_suspicion outcome must show informal public warning")
-		if not str(summary.get("outcomeBody", "")).contains("정식 보고 대신 공개 경고"):
+		if not str(summary.get("outcomeBody", "")).contains("정식 보고 대신") or not str(summary.get("outcomeBody", "")).contains("공원 게시판에 공개 경고"):
 			failures.append("cover_held_under_suspicion outcome must show suspicion stayed local")
 		if not str(summary.get("outcomeBody", "")).contains("거리두기"):
 			failures.append("cover_held_under_suspicion outcome must show low trust causing distance")
+		if not str(summary.get("outcomeBody", "")).contains("공원 게시판의 공개 경고"):
+			failures.append("cover_held_under_suspicion outcome must show the waiting customer reacting to the park notice board")
 	return failures
 
 func _validate_pack_shape(pack: Dictionary) -> Array[String]:
@@ -962,7 +966,7 @@ func _agentic_route_proof(route_id: String) -> Dictionary:
 			_agentic_trace("clean.clerk.create_receipt", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "create_receipt", "receipt_tray", "civic-ledger-2", "store_sale_normal", {"recordId": "store_same_order_receipt"}, _economy(2, 55, 0, 0), "The accepted line matches the Store routine and creates a normal receipt."),
 			_agentic_trace("clean.waiting_customer.accept_routine", "NPC_Waiting_Customer", "waiting_customer", ["store_queue_mark", "store_counter", "usual_order_cue"], "accept_routine", "store_queue_mark", "civic-ledger-3", "queue_routine_kept", {"recordId": "store_same_order_queue_routine", "citedLedgerEventId": "civic-ledger-2"}, _economy(2, 57, 0, 0), "A waiting customer sees the normal receipt and keeps the line moving instead of creating pressure."),
 			_agentic_trace("clean.park_witness.vouch_routine", "NPC_Park_Witness", "park_witness", ["park_notice_board"], "vouch_routine", "park_notice_board", "civic-ledger-4", "public_routine_vouched", {"recordId": "park_public_routine_vouch", "citedLedgerEventId": "civic-ledger-3"}, _economy(2, 58, 0, 0), "The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow."),
-			_agentic_trace("clean.waiting_customer.share_local_tip", "NPC_Waiting_Customer", "waiting_customer", ["store_queue_mark", "store_counter", "usual_order_cue"], "share_local_tip", "store_queue_mark", "civic-ledger-5", "local_tip_shared", {"recordId": "store_same_order_local_tip", "citedLedgerEventId": "civic-ledger-4"}, _economy(2, 59, 0, 0), "Local trust is high after the public vouch, so the waiting customer shares a small local tip instead of only standing aside.")
+			_agentic_trace("clean.waiting_customer.share_local_tip", "NPC_Waiting_Customer", "waiting_customer", ["store_queue_mark", "store_counter", "usual_order_cue", "park_notice_board"], "share_local_tip", "store_queue_mark", "civic-ledger-5", "local_tip_shared", {"recordId": "store_same_order_local_tip", "citedLedgerEventId": "civic-ledger-4"}, _economy(2, 59, 0, 0), "Local trust is high after the public vouch, so the waiting customer reads the notice board and shares a small local tip instead of only standing aside.")
 		]
 		return _agentic_route_result(route_id, "cover_held", "clean_cover_line", "네, 같은 걸로 주세요.", "The clerk closes a normal receipt, a waiting customer accepts the routine, a Park witness publicly vouches that the player stayed in the local flow, and the high local trust lets the waiting customer share a local tip.", clean_trace, _agentic_final_states({"store_queue_mark": "helped", "usual_order_cue": "cited", "receipt_tray": "normal", "park_notice_board": "vouched"}))
 	if route_id == "repair_recovered":

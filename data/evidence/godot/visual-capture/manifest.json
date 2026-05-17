@@ -109,9 +109,9 @@
 				"non-empty 1280x720 viewport",
 				"Station inquest outcome panel is visible",
 				"suspicion, report pressure, and session termination state are visible",
-				"live HUD consequence line shows speech/delay -> Store record -> report handoff -> Station citation",
+				"live HUD consequence line shows speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation",
 				"outcome names the exact Store ledger entry cited by the Station",
-				"outcome shows speech/delay to record to Station role-action chain",
+				"outcome shows speech/delay to record to queue reaction to Park notice to Station role-action chain",
 				"outcome names the NPC-to-NPC social reaction behind the Station citation",
 				"why-line remains visible as session-end basis"
 			],
@@ -227,9 +227,9 @@
 				"non-empty 1280x720 viewport",
 				"Station inquest outcome panel is visible",
 				"suspicion, report pressure, and session termination state are visible",
-				"live HUD consequence line shows speech/delay -> Store record -> report handoff -> Station citation",
+				"live HUD consequence line shows speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation",
 				"outcome names the exact Store ledger entry cited by the Station",
-				"outcome shows speech/delay to record to Station role-action chain",
+				"outcome shows speech/delay to record to queue reaction to Park notice to Station role-action chain",
 				"outcome names the NPC-to-NPC social reaction behind the Station citation",
 				"why-line remains visible as session-end basis"
 			],
@@ -327,17 +327,50 @@
 		"recordObjects": {
 			"civic_ledger": "append_only",
 			"correction_slip": "absent",
+			"park_notice_board": "rumored",
 			"receipt_tray": "marked",
 			"report_tray": "forwarded",
 			"station_dossier": "cited",
 			"store_counter": "serving",
-			"store_queue_mark": "player_waiting",
+			"store_queue_mark": "refused",
 			"usual_order_cue": "read"
 		},
 		"recordedStatementAction": "",
 		"recordedStatementScope": "",
 		"reportWeight": 115,
 		"socialObservationTrace": [
+			{
+				"economyPressure": {
+					"localTrust": 25,
+					"recordBurden": 50,
+					"stationAttention": 30
+				},
+				"observedActorRole": "store_clerk",
+				"observedAffordance": "place_note",
+				"observedLedgerEventId": "civic-ledger-2",
+				"observedObjectId": "report_tray",
+				"observerActorId": "NPC_Waiting_Customer",
+				"observerRole": "waiting_customer",
+				"resultingAffordance": "complain_delay",
+				"resultingStepId": "report.waiting_customer.complain_delay",
+				"whyLine": "waiting_customer reads store_clerk's place_note record before choosing complain_delay."
+			},
+			{
+				"economyPressure": {
+					"localTrust": 25,
+					"recordBurden": 50,
+					"stationAttention": 30
+				},
+				"observedActorRole": "store_clerk",
+				"observedAffordance": "place_note",
+				"observedLedgerEventId": "civic-ledger-2",
+				"observedObjectId": "report_tray",
+				"observerActorId": "NPC_Park_Witness",
+				"observerRole": "park_witness",
+				"resultingAffordance": "post_rumor",
+				"resultingStepId": "report.park_witness.post_rumor",
+				"whyLine": "park_witness reads store_clerk's place_note record before choosing post_rumor."
+			},
 			{
 				"economyPressure": {
 					"localTrust": 25,
@@ -357,18 +390,34 @@
 			{
 				"economyPressure": {
 					"localTrust": 5,
-					"recordBurden": 75,
+					"recordBurden": 85,
 					"stationAttention": 70
 				},
 				"observedActorRole": "store_manager",
 				"observedAffordance": "forward_report",
-				"observedLedgerEventId": "civic-ledger-3",
+				"observedLedgerEventId": "civic-ledger-5",
 				"observedObjectId": "report_tray",
 				"observerActorId": "NPC_Station_Officer",
 				"observerRole": "station_officer",
 				"resultingAffordance": "cite_record",
 				"resultingStepId": "inquest.station.cite_store_report",
 				"whyLine": "station_officer reads store_manager's forward_report record before choosing cite_record."
+			},
+			{
+				"economyPressure": {
+					"localTrust": 5,
+					"recordBurden": 85,
+					"stationAttention": 70
+				},
+				"observedActorRole": "station_officer",
+				"observedAffordance": "cite_record",
+				"observedLedgerEventId": "civic-ledger-6",
+				"observedObjectId": "station_dossier",
+				"observerActorId": "NPC_Waiting_Customer",
+				"observerRole": "waiting_customer",
+				"resultingAffordance": "refuse_contact",
+				"resultingStepId": "inquest.waiting_customer.refuse_contact",
+				"whyLine": "waiting_customer reads station_officer's cite_record record before choosing refuse_contact."
 			}
 		],
 		"stage": "inquest",
@@ -385,13 +434,13 @@
 		"worldRecordProps": {
 			"civic_economy_panel": {
 				"hasBody": true,
-				"label": "시민 경제\n잔액 3 | 신뢰 5 | 부담 75 | 주목 70",
+				"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 90 | 주목 70",
 				"state": "attention",
 				"visible": true
 			},
 			"civic_ledger": {
 				"hasBody": true,
-				"label": "시민 장부 4건\ncivic-ledger-4 -> civic-ledger-3\n기록 인용",
+				"label": "시민 장부 7건\ncivic-ledger-7 -> civic-ledger-6\n접촉 거부",
 				"state": "append_only",
 				"visible": true
 			},
@@ -399,6 +448,12 @@
 				"hasBody": true,
 				"label": "정정\n없음",
 				"state": "absent",
+				"visible": true
+			},
+			"park_notice_board": {
+				"hasBody": true,
+				"label": "공개판\n소문 게시",
+				"state": "rumored",
 				"visible": true
 			},
 			"receipt_tray": {
@@ -421,14 +476,14 @@
 			},
 			"store_counter": {
 				"hasBody": true,
-				"label": "카운터\n응대",
+				"label": "카운터\n응대 중",
 				"state": "serving",
 				"visible": true
 			},
 			"store_queue_mark": {
 				"hasBody": true,
-				"label": "대기 표식\n플레이어 대기",
-				"state": "player_waiting",
+				"label": "대기 표식\nrefused",
+				"state": "refused",
 				"visible": true
 			},
 			"usual_order_cue": {

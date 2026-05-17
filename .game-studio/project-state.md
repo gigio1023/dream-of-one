@@ -117,7 +117,7 @@ Current M1 carry-in:
   object-state, and civic economy outcomes.
 - backend provider scheduling seed
   `backend/npc-runtime/src/runtime/same-order-provider-scheduling.ts` now
-  turns that comparison into 12 bounded Store Clerk, Store Manager, and Station
+  turns that comparison into 18 bounded Store Clerk, Waiting Customer, Store Manager, and Station
   Officer role-agent provider jobs. Each job carries available action context,
   allowed provider fields, forbidden authority fields, deterministic fallback
   wording, and the accepted locked action; live Godot dispatch remains
@@ -178,13 +178,13 @@ Current M1 carry-in:
   world prop snapshot.
 - Godot Same Order state changes now pass through deterministic role-agent
   validation and export `agentActionLog`: Store Clerk mutates receipt,
-  correction, and report records; a Waiting Customer can react to the clerk
-  note by adding toy queue pressure, and can also read an attached correction
-  slip and accept the repair so the queue settles; a Park Witness can turn a
-  Store note into public rumor; Store Manager follows up or forwards the
-  report; Station Officer cites the exact forwarded ledger event. Each log
-  entry now includes the available action candidates and selection reason used
-  before the mutation.
+  correction, and report records; a Waiting Customer can read a normal receipt
+  and accept the routine so the queue settles, react to a clerk note by adding
+  toy queue pressure, or read an attached correction slip and accept the repair;
+  a Park Witness can turn a Store note into public rumor; Store Manager follows
+  up or forwards the report; Station Officer cites the exact forwarded ledger
+  event. Each log entry now includes the available action candidates and
+  selection reason used before the mutation.
 - Codex gameplay QA now runs the active proof cell through public
   `PlayableSession.debug_codex_gameplay_action` and
   `debug_codex_gameplay_snapshot` APIs. The probe can list callable player

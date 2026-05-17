@@ -322,8 +322,12 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("clean_cover must not open Station intake or inquest")
 			if str(record_objects.get("receipt_tray", "")) != "normal":
 				failures.append("clean_cover expected normal receipt")
+			if str(record_objects.get("store_queue_mark", "")) != "settled":
+				failures.append("clean_cover expected queue mark to settle through routine acceptance")
 			if not _action_exists(summary, "store_clerk", "create_receipt"):
 				failures.append("clean_cover expected Store Clerk receipt creation")
+			if not _action_exists(summary, "waiting_customer", "accept_routine"):
+				failures.append("clean_cover expected Waiting Customer routine acceptance")
 		"repair_recovered":
 			if int(summary.get("reportWeight", 0)) > 49:
 				failures.append("repair_recovered must stay below report threshold")

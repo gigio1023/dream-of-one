@@ -87,6 +87,7 @@ const ENVIRONMENT_OBJECT_ORDER := [
 ]
 
 const ENVIRONMENT_AFFORDANCE_ORDER := [
+	"accept_routine",
 	"complain_delay",
 	"accept_repair",
 	"cite_expected_order",
@@ -113,6 +114,14 @@ const STORE_LEDGER_EVENT_KINDS := [
 
 const ENVIRONMENT_ACTION_RULES := {
 	"store_queue_mark": {
+		"accept_routine": {
+			"fromStates": ["player_waiting", "delayed"],
+			"toState": "settled",
+			"eventKind": "queue_routine_kept",
+			"allowedRoles": ["waiting_customer"],
+			"requiresLedgerEvent": true,
+			"requiresStoreLedgerEvent": true
+		},
 		"complain_delay": {
 			"fromStates": ["player_waiting", "delayed", "disrupted"],
 			"toState": "disrupted",
@@ -1583,6 +1592,8 @@ func _action_priority_hints(affordance: String, rule: Dictionary) -> Array[Strin
 		hints.append("requires:store_record_citation")
 	if affordance == "complain_delay":
 		hints.append("pressure:queue_delay")
+	if affordance == "accept_routine":
+		hints.append("pressure:routine_kept")
 	if affordance == "accept_repair":
 		hints.append("pressure:repair_accepted")
 	if affordance == "post_rumor":
@@ -1607,6 +1618,8 @@ func _action_perceived_as(object_id: String, affordance: String) -> String:
 			return "Station dossier citation"
 		"complain_delay":
 			return "public queue pressure"
+		"accept_routine":
+			return "routine queue acceptance"
 		"post_rumor":
 			return "public notice rumor"
 	return "%s %s" % [object_id, affordance]
@@ -1638,6 +1651,7 @@ func _record_mutation_affordances() -> Array[String]:
 		"create_receipt",
 		"mark_receipt",
 		"attach_correction",
+		"accept_routine",
 		"accept_repair",
 		"complain_delay",
 		"post_rumor",
@@ -1649,7 +1663,7 @@ func _record_mutation_affordances() -> Array[String]:
 func _record_id_for_object(object_id: String) -> String:
 	match object_id:
 		"store_queue_mark":
-			return "store_same_order_queue_delay"
+			return "store_same_order_queue_state"
 		"receipt_tray":
 			return "store_same_order_receipt"
 		"correction_slip":
@@ -1707,6 +1721,8 @@ func _civic_economy_delta(event_kind: String) -> Dictionary:
 	match event_kind:
 		"store_sale_normal":
 			return {"accountCredit": -1, "localTrust": 5}
+		"queue_routine_kept":
+			return {"localTrust": 2}
 		"store_receipt_marked":
 			return {"localTrust": -5, "recordBurden": 15}
 		"correction_offered":
@@ -1852,6 +1868,7 @@ func _compact_world_record_prop_label(object_id: String, state: String) -> Strin
 func _civic_ledger_kind_label(kind: String) -> String:
 	var ko := {
 		"store_sale_normal": "정상 영수증",
+		"queue_routine_kept": "일상 유지",
 		"store_receipt_marked": "영수증 표시",
 		"correction_offered": "정정 제안",
 		"store_sale_corrected": "정정 처리",
@@ -1864,6 +1881,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 	}
 	var en := {
 		"store_sale_normal": "normal receipt",
+		"queue_routine_kept": "routine kept",
 		"store_receipt_marked": "marked receipt",
 		"correction_offered": "correction offered",
 		"store_sale_corrected": "correction accepted",
@@ -1898,6 +1916,7 @@ func _actor_role_label(actor_role: String) -> String:
 func _affordance_label(affordance: String) -> String:
 	var ko := {
 		"create_receipt": "영수증 작성",
+		"accept_routine": "일상 수락",
 		"mark_receipt": "영수증 표시",
 		"attach_correction": "정정 첨부",
 		"accept_repair": "수습 수락",
@@ -1909,6 +1928,7 @@ func _affordance_label(affordance: String) -> String:
 	}
 	var en := {
 		"create_receipt": "create receipt",
+		"accept_routine": "accept routine",
 		"mark_receipt": "mark receipt",
 		"attach_correction": "attach correction",
 		"accept_repair": "accept repair",
@@ -2344,7 +2364,7 @@ func _resolve_terminal_outcome() -> void:
 			"",
 			"The clerk cites the usual order as the accepted local routine."
 		)
-		_apply_role_agent_action(
+		var receipt_result := _apply_role_agent_action(
 			"clean.clerk.create_receipt",
 			"NPC_Store_Clerk",
 			"store_clerk",
@@ -2353,6 +2373,27 @@ func _resolve_terminal_outcome() -> void:
 			"store_same_order_receipt",
 			"The accepted line matches the Store routine and creates a normal receipt."
 		)
+		var receipt_event: Dictionary = receipt_result.get("event", {})
+		_accept_routine_after_receipt(str(receipt_event.get("eventId", "")))
+
+func _accept_routine_after_receipt(receipt_event_id: String) -> void:
+	if receipt_event_id.is_empty():
+		return
+	if str(record_objects.get("store_queue_mark", "")) == "settled":
+		return
+	var result := _apply_role_agent_action(
+		"clean.waiting_customer.accept_routine",
+		"NPC_Waiting_Customer",
+		"waiting_customer",
+		"accept_routine",
+		"store_queue_mark",
+		"store_same_order_queue_routine",
+		"A waiting customer sees the normal receipt and keeps the line moving instead of creating pressure.",
+		receipt_event_id,
+		[receipt_event_id]
+	)
+	if bool(result.get("ok", false)):
+		_set_actor_line("NPC_Waiting_Customer", "정상 영수증이면 줄은 그대로 가면 되겠네요.")
 
 func _terminal_outcome_title() -> String:
 	if session_outcome == "soft_report":
@@ -2366,7 +2407,7 @@ func _terminal_outcome_body() -> String:
 		return "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 상점 관리자가 기록 부담을 보고 후속 메모를 붙였습니다.\n역할 행동: 상점 관리자가 보고 트레이에 점원 기록을 전달했습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	if route_outcome == "repair_recovered":
 		return "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
-	return "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 스테이션 인용 없음\n역할 행동: 상점 점원이 정상 영수증을 만들고 추가 보고를 열지 않았습니다.\n상점 대화가 지역 루틴 안에서 닫혔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
+	return "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰습니다.\n상점 대화가 지역 루틴 안에서 닫혔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 
 func _now_ms() -> int:
 	return int(Time.get_unix_time_from_system() * 1000.0)

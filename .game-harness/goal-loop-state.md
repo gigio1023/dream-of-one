@@ -100,7 +100,14 @@ Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `5 / 5`, and `routeReportPassCount=4 / 4`.
-- latest game increment: repair now has a visible social consequence, not only
+- latest game increment: clean cover now has a visible social consequence too.
+  When the player answers inside the local routine, the Clerk cites the usual
+  order and creates a normal receipt; the Waiting Customer reads that normal
+  receipt, uses `accept_routine` on the queue mark, changes the queue state to
+  `settled`, adds `queue_routine_kept` to the civic ledger, and raises local
+  trust by 2. This proves that the social field reacts to fitting in, not only
+  to risk or repair.
+- prior repair increment remains current: repair has a visible social consequence, not only
   a clerk-internal correction. When the player admits uncertainty and then
   returns to the Clerk's premise, the Clerk attaches a correction slip and the
   Waiting Customer reads that correction record, uses `accept_repair` on the
@@ -118,7 +125,7 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `c0369b57915b65af87f41e8f56fa81c25e267095b93b85609ac28ee94c406628`
+  `f3767775cb393b577c7c58b844a906c0aab6be5588c406ee597b6b793e436934`
 - Markdown SHA-256:
   `9f0d0ed934d757b053f80b6fbd5cc4154010504093c5ea02a376c1546324c889`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
@@ -250,6 +257,17 @@ Latest AI-play interface check:
   with latest Godot playable smoke, Codex gameplay probe, backend playability
   report attachment, full backend check, and GDScript syntax check. This is
   internal playable proof only; external fresh-player notes remain `0 / 3`.
+- 2026-05-18 playable routine-response increment: added the smallest safe-route
+  NPC-to-NPC social reaction. The clean route now proves
+  `cite_expected_order -> create_receipt -> accept_routine`; final clean state
+  includes `store_queue_mark=settled`, `receipt_tray=normal`,
+  `queue_routine_kept`, local trust 57, record burden 0, and Station attention
+  0. This keeps Store/Station thin while making the broader social-sim rule
+  clearer: another NPC can read a normal record and keep the environment calm.
+  Verified with latest Godot playable smoke, Codex gameplay probe, backend
+  playability report attachment, full backend check, GDScript syntax check, and
+  comprehension gate status. This is internal playable proof only; external
+  fresh-player notes remain `0 / 3`.
 
 ## Loop State
 

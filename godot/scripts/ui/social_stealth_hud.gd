@@ -519,6 +519,7 @@ func _latest_social_observation_label(social_observations: Array) -> String:
 func _civic_ledger_kind_label(kind: String) -> String:
 	var ko := {
 		"store_sale_normal": "정상 영수증",
+		"queue_routine_kept": "일상 유지",
 		"store_receipt_marked": "영수증 표시",
 		"correction_offered": "정정 제안",
 		"store_sale_corrected": "정정 처리",
@@ -531,6 +532,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 	}
 	var en := {
 		"store_sale_normal": "normal receipt",
+		"queue_routine_kept": "routine kept",
 		"store_receipt_marked": "marked receipt",
 		"correction_offered": "correction offered",
 		"store_sale_corrected": "correction accepted",
@@ -565,6 +567,7 @@ func _actor_role_label(actor_role: String) -> String:
 func _affordance_label(affordance: String) -> String:
 	var ko := {
 		"create_receipt": "영수증 작성",
+		"accept_routine": "일상 수락",
 		"mark_receipt": "영수증 표시",
 		"attach_correction": "정정 첨부",
 		"accept_repair": "수습 수락",
@@ -576,6 +579,7 @@ func _affordance_label(affordance: String) -> String:
 	}
 	var en := {
 		"create_receipt": "create receipt",
+		"accept_routine": "accept routine",
 		"mark_receipt": "mark receipt",
 		"attach_correction": "attach correction",
 		"accept_repair": "accept repair",

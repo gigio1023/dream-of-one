@@ -97,6 +97,7 @@ function buildBeats(): SameOrderStoryletRuntimeBeat[] {
       actionStepIds: [
         "clean.clerk.cite_usual_order",
         "clean.clerk.create_receipt",
+        "clean.waiting_customer.accept_routine",
         "repair.clerk.mark_receipt",
         "soft.clerk.mark_receipt",
         "inquest.clerk.mark_receipt",
@@ -104,12 +105,13 @@ function buildBeats(): SameOrderStoryletRuntimeBeat[] {
       providerJobIds: [
         "clean_cover.clean.clerk.cite_usual_order.provider-action-proposal",
         "clean_cover.clean.clerk.create_receipt.provider-action-proposal",
+        "clean_cover.clean.waiting_customer.accept_routine.provider-action-proposal",
         "repair_recovered.repair.clerk.mark_receipt.provider-action-proposal",
         "soft_report.soft.clerk.mark_receipt.provider-action-proposal",
         "inquest_opened.inquest.clerk.mark_receipt.provider-action-proposal",
       ],
-      ledgerEventKinds: ["usual_order_cited", "store_sale_normal", "store_receipt_marked"],
-      affordances: ["cite_expected_order", "create_receipt", "mark_receipt"],
+      ledgerEventKinds: ["usual_order_cited", "store_sale_normal", "queue_routine_kept", "store_receipt_marked"],
+      affordances: ["cite_expected_order", "create_receipt", "accept_routine", "mark_receipt"],
       evidenceEvents: ["conversation_started", "dialogue_choice_selected", "conversation_anomaly_detected"],
       providerPurpose: "npc_reaction_line",
       runtimeProof: "The first Store prompt maps to visible routine cues and validated clerk actions, not a freeform branch.",

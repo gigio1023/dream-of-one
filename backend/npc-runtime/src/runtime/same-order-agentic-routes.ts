@@ -161,7 +161,7 @@ function buildCleanCoverProof(): SameOrderAgenticRouteProof {
     objectId: "usual_order_cue",
     whyLine: "The player accepted the usual order, so the clerk can cite the routine before closing the sale.",
   });
-  applyAction(build, {
+  const receiptEvent = applyAction(build, {
     stepId: "clean.clerk.create_receipt",
     actorId: "NPC_Store_Clerk",
     role: "store_clerk",
@@ -170,6 +170,17 @@ function buildCleanCoverProof(): SameOrderAgenticRouteProof {
     recordId: "store_same_order_receipt",
     whyLine: "The accepted line matches the Store routine and creates a normal receipt.",
   });
+  applyAction(build, {
+    stepId: "clean.waiting_customer.accept_routine",
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    affordance: "accept_routine",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_queue_routine",
+    citedLedgerEventId: receiptEvent.eventId,
+    knownLedgerEventIds: [receiptEvent.eventId],
+    whyLine: "A waiting customer sees the normal receipt and keeps the line moving instead of creating pressure.",
+  });
 
   return routeProof({
     build,
@@ -177,7 +188,7 @@ function buildCleanCoverProof(): SameOrderAgenticRouteProof {
     sessionOutcome: "cover_held",
     playerLineKind: "clean_cover_line",
     playerLine: "네, 같은 걸로 주세요.",
-    socialReactionSummary: "The clerk closes a normal receipt; no other actor needs to escalate the record.",
+    socialReactionSummary: "The clerk closes a normal receipt, and a waiting customer accepts the routine so the queue stays calm.",
   });
 }
 
@@ -574,8 +585,16 @@ function validateCleanCover(
   if (!proof.ledgerEventKinds.includes("store_sale_normal") || proof.ledgerEventKinds.includes("store_exception_reported")) {
     failures.push({ routeId: proof.routeId, path: "ledgerEventKinds", message: "clean cover must close a normal sale without a Store report" });
   }
-  if (proof.finalObjectStates.receipt_tray !== "normal" || proof.economyAfter.recordBurden !== 0 || proof.stationCitation !== undefined) {
+  if (proof.finalObjectStates.receipt_tray !== "normal" || proof.finalObjectStates.store_queue_mark !== "settled" || proof.economyAfter.recordBurden !== 0 || proof.stationCitation !== undefined) {
     failures.push({ routeId: proof.routeId, path: "finalObjectStates", message: "clean cover must leave a normal receipt and no citation burden" });
+  }
+  if (!proof.socialObservationTrace.some(observation =>
+    observation.observerRole === "waiting_customer"
+    && observation.observedActorRole === "store_clerk"
+    && observation.observedAffordance === "create_receipt"
+    && observation.resultingAffordance === "accept_routine"
+  )) {
+    failures.push({ routeId: proof.routeId, path: "socialObservationTrace", message: "clean cover must prove another NPC accepted the routine record" });
   }
 }
 

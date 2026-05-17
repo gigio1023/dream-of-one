@@ -19,8 +19,8 @@ const ROUTE_DEFINITIONS := [
 		"expectedReportWeight": 0,
 		"expectedStationIntake": false,
 		"expectedStationInquest": false,
-		"expectedRecordStates": {"receipt_tray": "normal", "correction_slip": "absent", "report_tray": "empty", "station_dossier": "absent"},
-		"expectedCivicLedgerCount": 2,
+		"expectedRecordStates": {"store_queue_mark": "settled", "receipt_tray": "normal", "correction_slip": "absent", "report_tray": "empty", "station_dossier": "absent"},
+		"expectedCivicLedgerCount": 3,
 		"expectedEvents": ["conversation_started", "dialogue_choice_selected", "conversation_outcome_reached"],
 		"forbiddenEvents": ["conversation_anomaly_detected", "station_report_created", "station_inquest_opened"],
 		"expectedSignals": []
@@ -733,6 +733,8 @@ func _affordance_label(affordance: String) -> String:
 	match affordance:
 		"create_receipt":
 			return "영수증 작성"
+		"accept_routine":
+			return "일상 수락"
 		"mark_receipt":
 			return "영수증 표시"
 		"attach_correction":
@@ -874,9 +876,10 @@ func _agentic_route_proof(route_id: String) -> Dictionary:
 	if route_id == "clean_cover":
 		var clean_trace := [
 			_agentic_trace("clean.clerk.cite_usual_order", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "cite_expected_order", "usual_order_cue", "civic-ledger-1", "usual_order_cited", {}, _economy(3, 50, 0, 0), "The player accepted the usual order, so the clerk can cite the routine before closing the sale."),
-			_agentic_trace("clean.clerk.create_receipt", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "create_receipt", "receipt_tray", "civic-ledger-2", "store_sale_normal", {"recordId": "store_same_order_receipt"}, _economy(2, 55, 0, 0), "The accepted line matches the Store routine and creates a normal receipt.")
+			_agentic_trace("clean.clerk.create_receipt", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "create_receipt", "receipt_tray", "civic-ledger-2", "store_sale_normal", {"recordId": "store_same_order_receipt"}, _economy(2, 55, 0, 0), "The accepted line matches the Store routine and creates a normal receipt."),
+			_agentic_trace("clean.waiting_customer.accept_routine", "NPC_Waiting_Customer", "waiting_customer", ["store_queue_mark", "store_counter", "usual_order_cue"], "accept_routine", "store_queue_mark", "civic-ledger-3", "queue_routine_kept", {"recordId": "store_same_order_queue_routine", "citedLedgerEventId": "civic-ledger-2"}, _economy(2, 57, 0, 0), "A waiting customer sees the normal receipt and keeps the line moving instead of creating pressure.")
 		]
-		return _agentic_route_result(route_id, "cover_held", "clean_cover_line", "네, 같은 걸로 주세요.", "The clerk closes a normal receipt; no other actor needs to escalate the record.", clean_trace, _agentic_final_states({"usual_order_cue": "cited", "receipt_tray": "normal"}))
+		return _agentic_route_result(route_id, "cover_held", "clean_cover_line", "네, 같은 걸로 주세요.", "The clerk closes a normal receipt, and a waiting customer accepts the routine so the queue stays calm.", clean_trace, _agentic_final_states({"store_queue_mark": "settled", "usual_order_cue": "cited", "receipt_tray": "normal"}))
 	if route_id == "repair_recovered":
 		var repair_trace := [
 			_agentic_trace("repair.clerk.mark_receipt", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "mark_receipt", "receipt_tray", "civic-ledger-1", "store_receipt_marked", {"recordId": "store_same_order_receipt"}, _economy(3, 45, 15, 0), "The player admits uncertainty, so the clerk marks the receipt before offering repair."),

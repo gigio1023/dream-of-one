@@ -393,6 +393,7 @@ var command_outcome_counts := {"validated": 0, "executed": 0, "rejected": 0}
 var read_surface_ids: Dictionary = {}
 var current_focus: Node3D = null
 var current_focus_kind := ""
+var codex_focus_hold_frames := 0
 var conversation_active := false
 var current_prompt_id := "store.same_order.routine"
 var current_turn_number := 0
@@ -463,7 +464,10 @@ func _ready() -> void:
 	_refresh_hud()
 
 func _process(_delta: float) -> void:
-	_update_focus()
+	if codex_focus_hold_frames > 0:
+		codex_focus_hold_frames -= 1
+	else:
+		_update_focus()
 	_maybe_record_response_hesitation()
 	_refresh_hud()
 
@@ -603,6 +607,8 @@ func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) ->
 			elif not _force_focus_record_prop(object_id):
 				accepted = false
 				reason = "record_prop_unavailable"
+			else:
+				codex_focus_hold_frames = 4
 		"player.interact.focused":
 			if current_focus == null:
 				accepted = false
@@ -2790,6 +2796,7 @@ func _force_focus_record_prop(object_id: String) -> bool:
 					var focus_position := (node as Node3D).global_position + Vector3(0, 0, 1.15)
 					focus_position.y = _player.global_position.y
 					_player.global_position = focus_position
+				_refresh_hud()
 				return true
 	return false
 

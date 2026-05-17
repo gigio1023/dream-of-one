@@ -95,11 +95,22 @@ Latest status check:
   player action catalog entries, copied-probe schema/API/report flags, manifest
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
+- latest Codex gameplay QA hashes:
+  - JSON SHA-256: `95eb17d3438012ffe24a9d9a7342a2bc425fb7fc8600a8391cd14413aa389fc2`
+  - Markdown SHA-256: `842d07a342544ebf00861c4018aadd3a5fe8c584ac55cfcb74a43b709d9b4ddf`
+  - playable Evidence Pack SHA-256: `4997c25cc484fc42b54a25e41428236dcc1c6df847ee5e596d844fa29b505aaa`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `7 / 7`, and `routeReportPassCount=5 / 5`.
+- latest game increment: the clean route now proves the new Studio review
+  invitation is actually player/Codex-readable in the running scene. After the
+  Store/Park public-trust chain opens `studio_review_queue=invited`, Codex uses
+  `focus.world_record_prop` on `studio_review_queue` and
+  `player.interact.focused`; the HUD notice opens the review invitation body
+  instead of only reporting it in summary data. This keeps Studio as a tiny
+  cross-place opportunity example, not a new system.
 - latest game increment: the Waiting Customer is now an actual spawned Store
   NPC, not just an id in `agentActionLog`. Godot summaries and Evidence Packs
   include `visibleNpcStates`; playable smoke fails if an acting role lacks a
@@ -225,9 +236,9 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `40e9d0d08a037ac998c723d1d6a14c1905e89411354d9e7de780a1e499b0ec5f`
+  `95eb17d3438012ffe24a9d9a7342a2bc425fb7fc8600a8391cd14413aa389fc2`
 - Markdown SHA-256:
-  `592545df35aa0efe90a0accf002d4e6bb50b3d34a2a600a72ae7ca36ed86bc66`
+  `842d07a342544ebf00861c4018aadd3a5fe8c584ac55cfcb74a43b709d9b4ddf`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
   player-visible state, player-readable cause chain, role-action explanation,
   NPC-to-NPC observation explanation, and the explicit boundary that this is

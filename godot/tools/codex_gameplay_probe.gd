@@ -25,7 +25,9 @@ const ROUTE_PROBE_PLANS := [
 			{"actionId": "focus.store_counter", "payload": {}},
 			{"actionId": "conversation.start", "payload": {}},
 			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.safe"}},
-			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.probe.safe"}}
+			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.probe.safe"}},
+			{"actionId": "focus.world_record_prop", "payload": {"objectId": "studio_review_queue"}},
+			{"actionId": "player.interact.focused", "payload": {}}
 		]
 	},
 	{
@@ -301,7 +303,9 @@ func _route_report_from_current_run(plan: Dictionary, summary: Dictionary, hud_s
 			"consequence": hud_snapshot.get("consequenceLabel", ""),
 			"outcomeBody": hud_snapshot.get("outcomeBodyLabel", ""),
 			"recordState": hud_snapshot.get("recordStateLabel", ""),
-			"whyLine": hud_snapshot.get("whyLineLabel", "")
+			"whyLine": hud_snapshot.get("whyLineLabel", ""),
+			"notice": "%s / %s" % [str(hud_snapshot.get("noticeTitleLabel", "")), _one_line(hud_snapshot.get("noticeBodyLabel", ""))],
+			"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {})
 		},
 		"playerReadableSummary": _route_player_readable_summary(route_id, summary, hud_snapshot),
 		"roleActionExplanation": _role_action_explanation(summary),
@@ -358,6 +362,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("clean_cover expected Studio PM to perceive review queue before inviting review")
 			if not _action_perceives(summary, "studio_pm", "invite_review", "park_notice_board"):
 				failures.append("clean_cover expected Studio PM to perceive public notice board before inviting review")
+			if not _inspected_studio_review_invite(summary):
+				failures.append("clean_cover expected Codex/player to inspect the invited Studio review queue")
 			if not _observation_exists(summary, "park_witness", "waiting_customer", "accept_routine", "vouch_routine"):
 				failures.append("clean_cover expected Park Witness to read routine queue record")
 			if not _observation_exists(summary, "waiting_customer", "park_witness", "vouch_routine", "share_local_tip"):
@@ -476,7 +482,7 @@ func _route_player_readable_summary(route_id: String, summary: Dictionary, hud_s
 	]
 	match route_id:
 		"clean_cover":
-			return "Clean cover: Codex accepted the routine, the Store Clerk closed a normal receipt, public trust rose, the waiting customer shared a local tip, and the Studio PM opened a review invitation from the public record. %s." % state
+			return "Clean cover: Codex accepted the routine, the Store Clerk closed a normal receipt, public trust rose, the waiting customer shared a local tip, the Studio PM opened a review invitation from the public record, and Codex inspected that invited review queue as a visible world prop. %s." % state
 		"repair_recovered":
 			return "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, and the Park witness posted that the mismatch was repaired. %s." % state
 		"soft_report":
@@ -869,6 +875,15 @@ func _inspected_public_notice(summary: Dictionary) -> bool:
 		str(inspected.get("objectId", "")) == "park_notice_board"
 		and str(inspected.get("state", "")) == "rumored"
 		and str(inspected.get("body", "")).contains("소문")
+	)
+
+func _inspected_studio_review_invite(summary: Dictionary) -> bool:
+	var inspected: Dictionary = summary.get("inspectedWorldRecordProp", {})
+	return (
+		str(inspected.get("objectId", "")) == "studio_review_queue"
+		and str(inspected.get("state", "")) == "invited"
+		and str(inspected.get("body", "")).contains("리뷰")
+		and str(inspected.get("body", "")).contains("공개 확인")
 	)
 
 func _visible_npc_has_line(summary: Dictionary, npc_id: String) -> bool:

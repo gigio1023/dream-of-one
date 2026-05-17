@@ -110,6 +110,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   reads the Park public routine vouch, uses `invite_review`, changes
   `studio_review_queue` to `invited`, and proves a public social record can
   open a tiny opportunity in another place.
+- [x] Make the Studio review invitation player/Codex-readable through actual
+  focus plus interact: `focus.world_record_prop` on `studio_review_queue`
+  followed by `player.interact.focused` now opens the invited review queue in
+  the HUD notice on the clean route.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

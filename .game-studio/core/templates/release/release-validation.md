@@ -1,15 +1,15 @@
 # Release Validation
 
 Use this for release candidate, public demo, store page, trailer, or press kit
-validation. The goal is to decide whether public surfaces match build truth.
+validation. The goal is to decide whether public docs match build truth.
 
 ## Release Candidate
 
 -
 
-## Surfaces In Scope
+## Release Materials In Scope
 
-| Surface | Owner | Status |
+| Release material | Owner | Status |
 | --- | --- | --- |
 | Build | | |
 | Store page | | |
@@ -22,7 +22,7 @@ validation. The goal is to decide whether public surfaces match build truth.
 
 ## Claim To Artifact Map
 
-| Public claim | Surface | Internal evidence artifact | Decision |
+| Public claim | Release material | Internal evidence artifact | Decision |
 | --- | --- | --- | --- |
 | | | | `publish | revise | remove | block` |
 

@@ -33,7 +33,6 @@ description: >
 
 ## Guardrails
 
-- Never sync Linear → Beads.
 - Never mass-edit issues without explicit confirmation (and a dry-run/list-first step).
 - Don’t invent workflow states/labels/projects—query what exists or ask the user.
 - Preserve formatting: write real newlines in `description`/comments (avoid literal `\\n`; if it appears in source text, normalize before writing).

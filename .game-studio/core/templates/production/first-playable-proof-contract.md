@@ -30,7 +30,7 @@ What the player should understand without a production-quality tutorial:
 Verb -> read -> risk -> response -> learning -> next choice
 ```
 
-## Build Surface
+## Build Target
 
 - Engine or runtime:
 - Platform:

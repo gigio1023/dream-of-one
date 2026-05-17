@@ -14,6 +14,13 @@ level readability, visual hierarchy, animation, VFX, sound, music, or ambience.
 - What happens after a mistake?
 - Which accessibility setting or fallback is needed for this moment?
 
+## Operational Guides
+
+- Use `core/references/operational/game-feel.md` for primary verbs, response,
+  confirmation, camera, audio, and recovery.
+- Use `core/references/operational/level-flow.md` for first read, teaching
+  order, attention conflicts, pacing, and recovery.
+
 ## Blocking Concerns
 
 - The player cannot read the immediate goal.

@@ -40,7 +40,7 @@ What must be proven by the end of this milestone:
 | --- | --- | --- |
 | Calendar time | | |
 | People | | |
-| Build surface | | |
+| Build target | | |
 | Mechanics | | |
 | Content | | |
 | Capture and review | | |
@@ -111,8 +111,8 @@ claim checks.
 
 ## Expected Media
 
-List required screenshots, video captures, GIFs, replay files, logs, or store
-surface checks.
+List required screenshots, video captures, GIFs, replay files, logs, or release
+material checks.
 
 -
 

@@ -57,7 +57,7 @@ Reviewers must apply Game Studio's proof-first rule:
 For Dream of One specifically, reviewers must protect these boundaries:
 
 - Player is investigated by NPCs and Station systems.
-- Conversation text is the danger surface.
+- Conversation text is where danger starts.
 - AI/API providers may propose NPC or Station wording only.
 - Backend/runtime authority owns deterministic suspicion signals, Exposure,
   Evidence, report, inquest, verdict, and session termination.

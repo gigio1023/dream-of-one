@@ -14,6 +14,13 @@ experience targets, presentation, AI authority, or release shape.
 - What tempting direction should be rejected?
 - What playable proof shows the game works as play?
 
+## Operational Guides
+
+- Use `core/references/operational/mda.md` when the review depends on the
+  mechanic-dynamic-experience chain.
+- Use `core/references/operational/level-flow.md` when the direction depends on
+  teaching, spatial comprehension, or first-session pacing.
+
 ## Blocking Concerns
 
 - The thesis describes theme but not play.

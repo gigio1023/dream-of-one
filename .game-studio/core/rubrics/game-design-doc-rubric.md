@@ -13,7 +13,7 @@ This rubric checks whether a design document can guide production.
 - Success and failure states
 - Inputs and outputs
 - Progression or session structure
-- Feedback surfaces
+- Feedback channels
 - First-session learning
 - Edge cases
 - Tuning knobs

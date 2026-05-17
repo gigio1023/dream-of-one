@@ -2,7 +2,7 @@
 
 Use this before public demo, store page, trailer, press kit, or release copy changes.
 
-| Public claim | Surface | Internal evidence artifact | Limitation | Decision |
+| Public claim | Release material | Internal evidence artifact | Limitation | Decision |
 | --- | --- | --- | --- | --- |
 | | README | | | |
 | | Store page | | | |
@@ -25,7 +25,7 @@ Use this before public demo, store page, trailer, press kit, or release copy cha
 
 ## Required Captures
 
-| Surface | Capture or check | Path or URL | Owner |
+| Release material | Capture or check | Path or URL | Owner |
 | --- | --- | --- | --- |
 | Store page | | | |
 | Trailer | | | |

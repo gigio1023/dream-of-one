@@ -17,7 +17,7 @@ expanding beyond the smallest useful proof.
 | --- | --- | --- | --- |
 | Calendar time | | | |
 | Team capacity | | | |
-| Technical surface | | | |
+| Technical area | | | |
 | Core verbs | | | |
 | Rules or systems | | | |
 | Content | | | |

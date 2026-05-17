@@ -1,4 +1,4 @@
-# Release Surface Checks
+# Release Material Checks
 
 Use this when a project prepares a public demo, store page, trailer, press kit,
 README, website, or release candidate.
@@ -14,7 +14,7 @@ Every public claim should map to:
 - review verdict
 - update trigger
 
-## Required Surfaces
+## Required Release Materials
 
 - store or download page
 - screenshots and trailer
@@ -37,7 +37,7 @@ Every public claim should map to:
 ## Output
 
 ```text
-Surface:
+Release material:
 Claim checked:
 Build truth:
 Internal evidence artifact:

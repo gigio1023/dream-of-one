@@ -14,6 +14,13 @@ characters, barks, text systems, or AI-assisted narrative content.
 - What is the branch, word, VO, localization, and QA cost?
 - What may AI draft, and what may AI never decide?
 
+## Operational Guides
+
+- Use `core/references/operational/storylets.md` when narrative content has
+  preconditions, branches, repeated beats, or state consequences.
+- Use `core/references/operational/mda.md` when story claims depend on a
+  mechanic creating a specific player experience.
+
 ## Blocking Concerns
 
 - Story replaces interaction instead of motivating it.

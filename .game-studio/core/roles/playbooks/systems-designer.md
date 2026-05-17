@@ -14,6 +14,13 @@ simulation, AI authority, balancing, or systemic consequence.
 - What is deterministic, stochastic, authored, or generated?
 - What playtest result would show the system is not working?
 
+## Operational Guides
+
+- Use `core/references/operational/mda.md` to check whether rules create the
+  target dynamic instead of only existing as features.
+- Use `core/references/operational/game-feel.md` when the system depends on
+  real-time control, feedback, timing, or recovery.
+
 ## Blocking Concerns
 
 - A mechanic has no target dynamic.

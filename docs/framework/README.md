@@ -5,6 +5,7 @@ This directory contains project-local Game Studio review and proof guidance for 
 | File | Use |
 |---|---|
 | `evidence-gates.md` | Define internal artifact gates for playable proof, captures, test output, playtest notes, and release-claim checks. |
+| `game-studio-usage.md` | Define how Codex should apply project-local Game Studio skills, gates, and checks in this repository. |
 | `gpt-code-review.md` | Adapt the multi-agent code-review pattern to GPT-5.5 high/xhigh lanes grounded in Game Studio proof gates. |
 | `substantive-review.md` | Shape Codex-led role reviews that judge game substance instead of template completion. |
 

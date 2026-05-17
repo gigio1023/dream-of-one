@@ -8,15 +8,11 @@ Thumbs.db
 
 .dolt/
 *.db
-.beads-credential-key
-.beads/backup/
-.beads/embeddeddolt/
-.beads/export-state.json
-.beads/.local_version
 
 node_modules/
 dist/
 coverage/
+build/
 
 backend/npc-runtime/node_modules/
 backend/npc-runtime/dist/

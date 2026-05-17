@@ -4,6 +4,11 @@ Evidence gates are internal validation points. They convert game-development
 claims into observable proof by requiring concrete artifacts such as captures,
 build IDs, playtest notes, QA results, release checks, and decision records.
 
+Evidence gates do not define the game. They should follow a playable design or
+implementation change and prove the player-visible consequence. When a gap is
+found, prefer building the smallest running-game result before expanding
+evidence machinery.
+
 Public-facing product language should use proof, playable proof, proof target,
 proof budget, and validation. Use evidence only for internal artifact ledgers
 and concrete captures.

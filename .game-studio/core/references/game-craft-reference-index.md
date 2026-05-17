@@ -1,6 +1,21 @@
-# Game Craft Source Map
+# Game Craft Reference Index
 
-Use this source map when a role needs craft judgment, not just artifact checks.
+Use this craft reference index when a role needs craft judgment, not just artifact checks.
+
+## Operational Guides
+
+Read these first when a role needs to apply craft knowledge to a build, brief,
+or review. The source tables below explain where the vocabulary comes from; the
+operational guides explain how to use it.
+
+| Guide | Use |
+| --- | --- |
+| [MDA Operational Guide](operational/mda.md) | Check whether a mechanic creates the intended dynamic and player experience. |
+| [Game Feel Operational Guide](operational/game-feel.md) | Review primary verbs, input response, confirmation, camera, audio, and recovery. |
+| [Storylets Operational Guide](operational/storylets.md) | Review branching narrative state, content budget, coverage, and contradiction risk. |
+| [Level Flow Operational Guide](operational/level-flow.md) | Review first read, teaching sequence, pacing, attention, and recovery. |
+| [Godot Playable Build Guide](operational/godot-playable-build.md) | Plan and check Godot first playable, prototype, vertical-slice, and brownfield adoption work. |
+| [Godot Reference Patterns](operational/godot-reference-patterns.md) | Select official demos and starter-kit patterns before implementing Godot scenes, resources, input, save/load, or camera work. |
 
 ## Design Foundations
 
@@ -20,7 +35,7 @@ Use this source map when a role needs craft judgment, not just artifact checks.
 | [The Game Production Toolbox](https://www.routledge.com/The-Game-Production-Toolbox/Chandler/p/book/9781138341708) | Producer-facing lifecycle, milestone discipline, team structure, launch work. |
 | [A Playful Production Process](https://mitpress.mit.edu/9780262045513/a-playful-production-process/) | Playcentric production stages and deliverable-driven collaboration. |
 | [Agile Game Development with Scrum](https://www.mountaingoatsoftware.com/books/agile-game-development-with-scrum) | Iterative planning and cross-discipline feedback in game teams. |
-| [Steamworks Release Process](https://partner.steamgames.com/doc/store/releasing) | Public release surfaces, store review, build review, and launch control. |
+| [Steamworks Release Process](https://partner.steamgames.com/doc/store/releasing) | Public release materials, store review, build review, and launch control. |
 | [itch.io Limited Releases](https://itch.io/docs/creators/limited-releases) | Closed playtests, staged release, and early audience feedback. |
 
 ## Narrative

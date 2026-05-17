@@ -26,9 +26,9 @@ Use this before demo, press, store, or release publication.
 
 -
 
-## Public Surface Checked
+## Public Docs Checked
 
-| Surface | Path or URL | Status |
+| Release material | Path or URL | Status |
 | --- | --- | --- |
 | In-game credits | | |
 | Store page | | |

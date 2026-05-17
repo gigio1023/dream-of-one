@@ -18,7 +18,7 @@ dependencies, release work, public promise, or team coordination.
 
 - The milestone is a task list, not a product hypothesis.
 - The scope has no cut candidates.
-- A release surface changes without a promise audit.
+- A release material changes without a promise audit.
 - Playtest or QA work is scheduled after the decision that depends on it.
 - Credits, support, localization, or accessibility are deferred past release planning.
 

@@ -24,5 +24,5 @@
 
 Required for Direction Lock: `GS-PLAYER-EXPERIENCE`
 
-Run `GS-RELEASE-PROMISE` only before changing public release surfaces such as
+Run `GS-RELEASE-PROMISE` only before changing public release materials such as
 store copy, trailers, screenshots, demo pages, or support promises.

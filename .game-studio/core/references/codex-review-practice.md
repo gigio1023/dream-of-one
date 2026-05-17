@@ -17,7 +17,7 @@ or ready to promise publicly.
 
 ## What Codex Must Decide
 
-Codex reviews the substance:
+Codex reviews the game quality:
 
 - The game thesis creates a specific playable promise.
 - Mechanics produce dynamics that support the intended experience.

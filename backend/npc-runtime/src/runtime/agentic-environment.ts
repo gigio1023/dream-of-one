@@ -44,6 +44,7 @@ export const ENVIRONMENT_AFFORDANCES = [
   "attach_correction",
   "place_note",
   "post_rumor",
+  "post_repair_notice",
   "forward_report",
   "open_intake",
   "cite_record",
@@ -74,6 +75,7 @@ export const LEDGER_EVENT_KINDS = [
   "store_sale_corrected",
   "store_exception_reported",
   "public_rumor_posted",
+  "public_repair_noted",
   "store_report_escalated",
   "station_record_cited",
   "station_correction_recorded",
@@ -391,6 +393,17 @@ const AFFORDANCE_RULES: AffordanceRule[] = [
     requiresLedgerEvent: true,
   },
   {
+    objectId: "park_notice_board",
+    affordance: "post_repair_notice",
+    fromStates: ["clear", "rumored"],
+    toState: "clear",
+    eventKind: "public_repair_noted",
+    allowedRoles: ["park_witness"],
+    economyDelta: { localTrust: 3, recordBurden: -5 },
+    requiresLedgerEvent: true,
+    requiresStoreLedgerEvent: true,
+  },
+  {
     objectId: "station_dossier",
     affordance: "cite_record",
     fromStates: ["absent", "opened", "cited"],
@@ -566,7 +579,7 @@ export function validateAndApplyEnvironmentAction(
     return reject(cloned, "station_citation_requires_store_record", "Station citation must cite a Store ledger event");
   }
 
-  if (["create_receipt", "mark_receipt", "attach_correction", "place_note", "post_rumor", "forward_report", "cite_record"].includes(action.affordance)) {
+  if (["create_receipt", "mark_receipt", "attach_correction", "place_note", "post_rumor", "post_repair_notice", "forward_report", "cite_record"].includes(action.affordance)) {
     const recordId = action.recordId ?? object.recordId;
     if (!recordId || recordId.trim().length === 0) {
       return reject(cloned, "invalid_record_mutation", `${action.affordance} requires a record id`);
@@ -702,6 +715,9 @@ function priorityHintsForRule(rule: AffordanceRule): string[] {
   if (rule.affordance === "post_rumor") {
     hints.push("pressure:public_talk");
   }
+  if (rule.affordance === "post_repair_notice") {
+    hints.push("pressure:repair_seen_publicly");
+  }
   if (rule.affordance === "refuse_contact") {
     hints.push("pressure:authority_seen");
   }
@@ -738,6 +754,8 @@ function perceivedAs(rule: AffordanceRule): string {
       return "queue refuses contact after citation";
     case "post_rumor":
       return "public notice rumor";
+    case "post_repair_notice":
+      return "public repair notice";
     default:
       return `${rule.objectId} ${rule.affordance}`;
   }

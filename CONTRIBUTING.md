@@ -7,6 +7,8 @@
 - For Codex/agent work, the default is to commit and push every finished slice
   before starting a different slice. Do not save several unrelated improvements
   for one large end-of-session commit.
+- Treat an unpushed finished slice as incomplete agent work unless the user
+  explicitly asks to hold it locally.
 - Group generated evidence with the code or content that produced it when that
   evidence is required to prove the change. Do not split proof artifacts into a
   later commit unless the proof refresh is the only change.

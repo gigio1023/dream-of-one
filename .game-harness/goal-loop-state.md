@@ -100,13 +100,20 @@ Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `5 / 5`, and `routeReportPassCount=5 / 5`.
-- latest game increment: inquest now sends one formal record back into local
-  social space. After the Station Officer cites the forwarded Store report, the
-  Waiting Customer reads that Station citation, uses `refuse_contact` on
-  `store_queue_mark`, changes the queue state to `refused`, and adds
-  `queue_contact_refused`. This proves a reusable pattern for the broader game:
-  formal authority can alter ordinary NPC contact without adding bespoke player
-  branches or a larger Store/Station system.
+- latest game increment: repair now travels through a public social relay.
+  After the Clerk attaches the correction slip and the Waiting Customer accepts
+  the repair, the Park Witness reads that correction record, uses
+  `post_repair_notice` on `park_notice_board`, keeps the board `clear`, and
+  adds `public_repair_noted`. This proves a reusable pattern for the broader
+  game: social recovery can spread through records and witnesses, not only
+  through punishment or formal escalation.
+- prior inquest increment remains current: inquest sends one formal record back
+  into local social space. After the Station Officer cites the forwarded Store
+  report, the Waiting Customer reads that Station citation, uses
+  `refuse_contact` on `store_queue_mark`, changes the queue state to `refused`,
+  and adds `queue_contact_refused`. This proves that formal authority can alter
+  ordinary NPC contact without adding bespoke player branches or a larger
+  Store/Station system.
 - prior soft-report increment remains current: soft report creates one more
   local social consequence before the Station path. When the Clerk note crosses
   the report threshold but stays below inquest, the Store Manager adds a
@@ -145,9 +152,9 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `892c2b249328030aa34f33c469f67258378b573d38c0cf88f7cab8dfc4b35282`
+  `887e6358eab0788766f35e6ba742f46b473528f4d0e6c7a8e2f2430b4505f2d5`
 - Markdown SHA-256:
-  `2550cd7d6489e4ed95aee4a7d564b00213d853e23997fbe8c3dd443a28b9a6c2`
+  `f12bdfa1e2e1d55f2057ff3ea28aa1777f044480411e9817af9fa96ebbb25569`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
   player-visible state, player-readable cause chain, role-action explanation,
   NPC-to-NPC observation explanation, and the explicit boundary that this is
@@ -259,6 +266,19 @@ Latest AI-play interface check:
   the current watched proof-cell files. If a kit was generated before a
   Godot/HUD/probe source change, re-verification fails instead of trusting the
   old manifest text.
+- 2026-05-18 playable public-repair increment: added the next smallest repair
+  propagation. The repair route now proves `mark_receipt -> offer_correction ->
+  attach_correction -> accept_repair -> post_repair_notice`; final repair state
+  includes `store_queue_mark=settled`, `correction_slip=attached`,
+  `park_notice_board=clear`, `queue_repair_accepted`,
+  `public_repair_noted`, local trust 48, record burden 25, and Station
+  attention 5. The Park Witness reads the correction record and posts that the
+  mismatch was repaired instead of becoming a rumor. Verified with latest
+  Godot playable smoke, Codex gameplay probe, backend playability report
+  attachment, full backend check, runtime slice smoke, PCK export/main-pack
+  smoke, macOS app export, packaged launch/route smoke, session-kit
+  generation, comprehension guards, and raw-note review. External fresh-player
+  notes remain `0 / 3`.
 - 2026-05-18 resume readiness recheck kept the scope intentionally narrow:
   reran the Godot Codex gameplay probe and generated/verified a temporary
   session kit. The probe still passes with `stage=inquest`, accepted public

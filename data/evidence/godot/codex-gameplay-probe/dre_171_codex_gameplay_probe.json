@@ -1257,6 +1257,55 @@
 						"visibleTo": [
 							"park_witness"
 						]
+					},
+					{
+						"actionId": "park_notice_board.post_repair_notice",
+						"affordance": "post_repair_notice",
+						"citableLedgerEventIds": [
+							"civic-ledger-2"
+						],
+						"civicEconomyEffects": [
+							"localTrust:+3",
+							"recordBurden:-5"
+						],
+						"eligibleRoles": [
+							"park_witness"
+						],
+						"failureReasons": [
+							"object_not_perceived",
+							"affordance_unavailable",
+							"role_authority_exceeded",
+							"why_line_required",
+							"ledger_event_unknown",
+							"ledger_event_not_known",
+							"station_citation_requires_store_record"
+						],
+						"ledgerEventKind": "public_repair_noted",
+						"objectId": "park_notice_board",
+						"objectState": "clear",
+						"perceivedAs": "public repair notice",
+						"playerLabel": "Post Repair Notice",
+						"preconditions": [
+							"object_state:clear",
+							"role_allowed:park_witness",
+							"known_ledger_event_required",
+							"known_store_ledger_event_required",
+							"record_id:park_public_rumor"
+						],
+						"priorityHints": [
+							"economy:localTrust",
+							"economy:recordBurden",
+							"requires:store_record_citation",
+							"pressure:repair_seen_publicly"
+						],
+						"recordId": "park_public_rumor",
+						"requiresLedgerEvent": true,
+						"requiresStoreLedgerEvent": true,
+						"toState": "clear",
+						"validationRuleId": "same_order.park_notice_board.post_repair_notice",
+						"visibleTo": [
+							"park_witness"
+						]
 					}
 				],
 				"citedLedgerEventId": "civic-ledger-2",
@@ -2111,14 +2160,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779043256521",
+				"eventId": "playable_session_started-001-1779044038936",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779043256521,
+				"timestampMs": 1779044038936,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -2131,7 +2180,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-002-1779043256602",
+				"eventId": "conversation_started-002-1779044039020",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -2140,7 +2189,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779043256602,
+				"timestampMs": 1779044039020,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -2153,7 +2202,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-003-1779043256617",
+				"eventId": "response_hesitation_noted-003-1779044039035",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -2174,7 +2223,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779043256617,
+				"timestampMs": 1779044039035,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -2189,7 +2238,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-004-1779043256630",
+				"eventId": "dialogue_choice_selected-004-1779044039048",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2211,7 +2260,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779043256630,
+				"timestampMs": 1779044039048,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2226,7 +2275,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-005-1779043256630",
+				"eventId": "conversation_anomaly_detected-005-1779044039048",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2248,7 +2297,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779043256630,
+				"timestampMs": 1779044039048,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2263,7 +2312,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-006-1779043256631",
+				"eventId": "npc_suspicion_changed-006-1779044039048",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2285,7 +2334,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779043256631,
+				"timestampMs": 1779044039048,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2300,7 +2349,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-007-1779043256646",
+				"eventId": "free_input_submitted-007-1779044039062",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2325,7 +2374,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779043256646,
+				"timestampMs": 1779044039062,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2340,7 +2389,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779043256646",
+				"eventId": "conversation_anomaly_detected-008-1779044039062",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2365,7 +2414,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779043256646,
+				"timestampMs": 1779044039062,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2380,7 +2429,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779043256646",
+				"eventId": "npc_suspicion_changed-009-1779044039062",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2405,7 +2454,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779043256646,
+				"timestampMs": 1779044039062,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2420,7 +2469,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-010-1779043256646",
+				"eventId": "suspicion_shared-010-1779044039062",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2445,7 +2494,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779043256646,
+				"timestampMs": 1779044039062,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2460,7 +2509,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-011-1779043256646",
+				"eventId": "station_report_created-011-1779044039062",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2485,7 +2534,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779043256646,
+				"timestampMs": 1779044039062,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2500,7 +2549,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-012-1779043256647",
+				"eventId": "station_inquest_opened-012-1779044039063",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2525,7 +2574,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779043256647,
+				"timestampMs": 1779044039063,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -3448,6 +3497,55 @@
 							"requiresStoreLedgerEvent": false,
 							"toState": "rumored",
 							"validationRuleId": "same_order.park_notice_board.post_rumor",
+							"visibleTo": [
+								"park_witness"
+							]
+						},
+						{
+							"actionId": "park_notice_board.post_repair_notice",
+							"affordance": "post_repair_notice",
+							"citableLedgerEventIds": [
+								"civic-ledger-2"
+							],
+							"civicEconomyEffects": [
+								"localTrust:+3",
+								"recordBurden:-5"
+							],
+							"eligibleRoles": [
+								"park_witness"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known",
+								"station_citation_requires_store_record"
+							],
+							"ledgerEventKind": "public_repair_noted",
+							"objectId": "park_notice_board",
+							"objectState": "clear",
+							"perceivedAs": "public repair notice",
+							"playerLabel": "Post Repair Notice",
+							"preconditions": [
+								"object_state:clear",
+								"role_allowed:park_witness",
+								"known_ledger_event_required",
+								"known_store_ledger_event_required",
+								"record_id:park_public_rumor"
+							],
+							"priorityHints": [
+								"economy:localTrust",
+								"economy:recordBurden",
+								"requires:store_record_citation",
+								"pressure:repair_seen_publicly"
+							],
+							"recordId": "park_public_rumor",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": true,
+							"toState": "clear",
+							"validationRuleId": "same_order.park_notice_board.post_repair_notice",
 							"visibleTo": [
 								"park_witness"
 							]
@@ -5460,13 +5558,13 @@
 			"finalPlayerVisibleState": {
 				"civicEconomy": {
 					"accountCredit": 2,
-					"localTrust": 45,
-					"recordBurden": 30,
+					"localTrust": 48,
+					"recordBurden": 25,
 					"stationAttention": 5
 				},
 				"consequence": "NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다.",
 				"investigationTrail": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
-				"outcomeBody": "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+				"outcomeBody": "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 공개 수습 게시 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였고, 공원 목격자는 정정 기록을 보고 소문으로 돌릴 일이 아니라고 남겼습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 같은 정정 기록을 공개 수습 게시로 바꿨습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
 				"recordObjects": {
 					"civic_ledger": "append_only",
 					"correction_slip": "attached",
@@ -5478,7 +5576,7 @@
 					"store_queue_mark": "settled",
 					"usual_order_cue": "read"
 				},
-				"recordState": "상점 기록: 영수증 표시됨 | 정정 첨부됨 | 보고 비어 있음 | 스테이션 없음 | 잔액 2 신뢰 45 부담 30 주목 5 | 장부 4 최근 civic-ledger-4 대기 손님 / 수습 수락 / 줄 수습 -> civic-ledger-3 | 사회 반응 대기 손님가 상점 점원의 정정 첨부 기록을 보고 수습 수락, 부담 35",
+				"recordState": "상점 기록: 영수증 표시됨 | 정정 첨부됨 | 보고 비어 있음 | 스테이션 없음 | 잔액 2 신뢰 48 부담 25 주목 5 | 장부 5 최근 civic-ledger-5 공원 목격자 / 수습 게시 / 공개 수습 -> civic-ledger-3 | 사회 반응 공원 목격자가 상점 점원의 정정 첨부 기록을 보고 수습 게시, 부담 35",
 				"reportWeight": 10,
 				"routeOutcome": "repair_recovered",
 				"sessionOutcome": "cover_held",
@@ -5491,20 +5589,20 @@
 			"npcInteractionChecks": {
 				"economyPanelReadable": false,
 				"latestLedger": {
-					"actorId": "NPC_Waiting_Customer",
-					"actorRole": "waiting_customer",
-					"affordance": "accept_repair",
+					"actorId": "NPC_Park_Witness",
+					"actorRole": "park_witness",
+					"affordance": "post_repair_notice",
 					"citedLedgerEventId": "civic-ledger-3",
 					"economyDelta": {
-						"localTrust": 5,
+						"localTrust": 3,
 						"recordBurden": -5
 					},
-					"eventId": "civic-ledger-4",
-					"kind": "queue_repair_accepted",
-					"objectId": "store_queue_mark",
-					"recordId": "store_same_order_queue_repair",
+					"eventId": "civic-ledger-5",
+					"kind": "public_repair_noted",
+					"objectId": "park_notice_board",
+					"recordId": "park_public_repair_notice",
 					"validation": "accepted",
-					"whyLine": "A waiting customer sees the correction slip attach and lets the line settle instead of turning it into a complaint."
+					"whyLine": "The Park witness sees the correction record and posts that the mismatch was repaired instead of becoming a rumor."
 				},
 				"managerObservedClerk": false,
 				"parkWitnessObservedClerk": false,
@@ -5522,13 +5620,14 @@
 				"worldPropsReachInquest": false
 			},
 			"pass": true,
-			"playerReadableSummary": "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, and the waiting customer let the queue settle. uneasy/repair_recovered, suspicion 20, report 10.",
+			"playerReadableSummary": "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, and the Park witness posted that the mismatch was repaired. uneasy/repair_recovered, suspicion 20, report 10.",
 			"rejectedActions": [],
 			"roleActionExplanation": [
 				"store_clerk used mark_receipt on receipt_tray -> civic-ledger-1",
 				"store_clerk used offer_correction on correction_slip -> civic-ledger-2",
 				"store_clerk used attach_correction on correction_slip -> civic-ledger-3",
-				"waiting_customer used accept_repair on store_queue_mark -> civic-ledger-4"
+				"waiting_customer used accept_repair on store_queue_mark -> civic-ledger-4",
+				"park_witness used post_repair_notice on park_notice_board -> civic-ledger-5"
 			],
 			"routeId": "repair_recovered",
 			"schemaVersion": "codex-route-play-report-v1",
@@ -6022,8 +6121,8 @@
 					],
 					"civicEconomy": {
 						"accountCredit": 2,
-						"localTrust": 45,
-						"recordBurden": 30,
+						"localTrust": 48,
+						"recordBurden": 25,
 						"stationAttention": 5
 					},
 					"hud": {
@@ -6034,11 +6133,11 @@
 						"freeInputVisible": false,
 						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
 						"noticeVisible": false,
-						"outcomeBodyLabel": "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+						"outcomeBodyLabel": "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 공개 수습 게시 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였고, 공원 목격자는 정정 기록을 보고 소문으로 돌릴 일이 아니라고 남겼습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 같은 정정 기록을 공개 수습 게시로 바꿨습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
 						"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 20 -> 접수 닫힘 / 심문 닫힘 / 판정 닫힘 / 종료 열림",
 						"outcomeVisible": true,
 						"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
-						"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 첨부됨 | 보고 비어 있음 | 스테이션 없음 | 잔액 2 신뢰 45 부담 30 주목 5 | 장부 4 최근 civic-ledger-4 대기 손님 / 수습 수락 / 줄 수습 -> civic-ledger-3 | 사회 반응 대기 손님가 상점 점원의 정정 첨부 기록을 보고 수습 수락, 부담 35",
+						"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 첨부됨 | 보고 비어 있음 | 스테이션 없음 | 잔액 2 신뢰 48 부담 25 주목 5 | 장부 5 최근 civic-ledger-5 공원 목격자 / 수습 게시 / 공개 수습 -> civic-ledger-3 | 사회 반응 공원 목격자가 상점 점원의 정정 첨부 기록을 보고 수습 게시, 부담 35",
 						"recordedStatementLabel": "직접 입력도 기록됩니다.",
 						"riskyLineLabel": "직접 입력도 deterministic signal로만 판정됩니다.",
 						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
@@ -6046,20 +6145,20 @@
 					},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
-						"actorId": "NPC_Waiting_Customer",
-						"actorRole": "waiting_customer",
-						"affordance": "accept_repair",
+						"actorId": "NPC_Park_Witness",
+						"actorRole": "park_witness",
+						"affordance": "post_repair_notice",
 						"citedLedgerEventId": "civic-ledger-3",
 						"economyDelta": {
-							"localTrust": 5,
+							"localTrust": 3,
 							"recordBurden": -5
 						},
-						"eventId": "civic-ledger-4",
-						"kind": "queue_repair_accepted",
-						"objectId": "store_queue_mark",
-						"recordId": "store_same_order_queue_repair",
+						"eventId": "civic-ledger-5",
+						"kind": "public_repair_noted",
+						"objectId": "park_notice_board",
+						"recordId": "park_public_repair_notice",
 						"validation": "accepted",
-						"whyLine": "A waiting customer sees the correction slip attach and lets the line settle instead of turning it into a complaint."
+						"whyLine": "The Park witness sees the correction record and posts that the mismatch was repaired instead of becoming a rumor."
 					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
@@ -6086,13 +6185,13 @@
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
-							"label": "시민 경제\n잔액 2 | 신뢰 45 | 부담 30 | 주목 5",
+							"label": "시민 경제\n잔액 2 | 신뢰 48 | 부담 25 | 주목 5",
 							"state": "trust_low",
 							"visible": true
 						},
 						"civic_ledger": {
 							"hasBody": true,
-							"label": "시민 장부 4건\ncivic-ledger-4 -> civic-ledger-3\n수습 수락",
+							"label": "시민 장부 5건\ncivic-ledger-5 -> civic-ledger-3\n수습 게시",
 							"state": "append_only",
 							"visible": true
 						},
@@ -6148,18 +6247,19 @@
 				}
 			],
 			"socialObservationExplanation": [
-				"waiting_customer saw store_clerk attach_correction at civic-ledger-3, then chose accept_repair"
+				"waiting_customer saw store_clerk attach_correction at civic-ledger-3, then chose accept_repair",
+				"park_witness saw store_clerk attach_correction at civic-ledger-3, then chose post_repair_notice"
 			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
-					"label": "시민 경제\n잔액 2 | 신뢰 45 | 부담 30 | 주목 5",
+					"label": "시민 경제\n잔액 2 | 신뢰 48 | 부담 25 | 주목 5",
 					"state": "trust_low",
 					"visible": true
 				},
 				"civic_ledger": {
 					"hasBody": true,
-					"label": "시민 장부 4건\ncivic-ledger-4 -> civic-ledger-3\n수습 수락",
+					"label": "시민 장부 5건\ncivic-ledger-5 -> civic-ledger-3\n수습 게시",
 					"state": "append_only",
 					"visible": true
 				},

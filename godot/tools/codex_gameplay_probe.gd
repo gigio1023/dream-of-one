@@ -353,6 +353,10 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("repair_recovered expected Store Clerk correction attachment")
 			if not _action_exists(summary, "waiting_customer", "accept_repair"):
 				failures.append("repair_recovered expected Waiting Customer repair acceptance")
+			if not _action_exists(summary, "park_witness", "post_repair_notice"):
+				failures.append("repair_recovered expected Park Witness repair notice")
+			if not _observation_exists(summary, "park_witness", "store_clerk", "attach_correction", "post_repair_notice"):
+				failures.append("repair_recovered expected Park Witness to read the correction record")
 		"cover_held_under_suspicion":
 			if int(summary.get("reportWeight", 0)) > 49:
 				failures.append("cover_held_under_suspicion must stay below report threshold")
@@ -438,7 +442,7 @@ func _route_player_readable_summary(route_id: String, summary: Dictionary, hud_s
 		"clean_cover":
 			return "Clean cover: Codex accepted the routine and the Store Clerk closed a normal receipt. %s." % state
 		"repair_recovered":
-			return "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, and the waiting customer let the queue settle. %s." % state
+			return "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, and the Park witness posted that the mismatch was repaired. %s." % state
 		"soft_report":
 			return "Soft report: Codex broke routine twice, causing a pending Store report and Manager follow-up without opening inquest. %s." % state
 		"inquest_opened":

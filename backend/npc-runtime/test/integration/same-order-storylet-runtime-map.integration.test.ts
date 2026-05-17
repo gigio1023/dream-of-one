@@ -28,6 +28,13 @@ test("Same Order storylet runtime map binds beats to route actions and provider 
   assert.equal(routine.actionStepIds.includes("clean.clerk.create_receipt"), true);
   assert.equal(routine.providerJobIds.includes("clean_cover.clean.clerk.create_receipt.provider-action-proposal"), true);
 
+  const softProbe = report.beats.find(beat => beat.beatId === "soft_probe");
+  assert.ok(softProbe);
+  assert.equal(softProbe.actionStepIds.includes("repair.park_witness.post_repair_notice"), true);
+  assert.equal(softProbe.providerJobIds.includes("repair_recovered.repair.park_witness.post_repair_notice.provider-action-proposal"), true);
+  assert.equal(softProbe.ledgerEventKinds.includes("public_repair_noted"), true);
+  assert.equal(softProbe.affordances.includes("post_repair_notice"), true);
+
   const handoff = report.beats.find(beat => beat.beatId === "social_handoff");
   assert.ok(handoff);
   assert.deepEqual(handoff.routeIds, ["soft_report", "inquest_opened"]);

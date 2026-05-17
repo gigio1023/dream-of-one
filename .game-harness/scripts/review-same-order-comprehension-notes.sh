@@ -161,6 +161,13 @@ const events = summary.events || pack.events || [];
 const ledger = summary.civicLedger || pack.playability?.civicLedger || [];
 const latestLedger = ledger[ledger.length - 1] || {};
 const latestLedgerId = latestLedger.id || latestLedger.eventId;
+function ledgerEventCites(kind, eventId, citedLedgerEventId) {
+  return ledger.some((event) =>
+    event?.kind === kind &&
+    (event.id || event.eventId) === eventId &&
+    event.citedLedgerEventId === citedLedgerEventId
+  );
+}
 const packagedProof = pack.playability?.packagedRouteSmokeProof || {};
 const hudChecks = packagedProof.hudChecks || {};
 const outcomeChecks = packagedProof.outcomeChecks || {};
@@ -179,8 +186,10 @@ if (
   providerMode !== "fallback_only_m1" ||
   !hasTypedFreeInput ||
   !hasResponseHesitation ||
-  latestLedgerId !== "civic-ledger-4" ||
-  latestLedger.citedLedgerEventId !== "civic-ledger-3" ||
+  !ledgerEventCites("station_record_cited", "civic-ledger-6", "civic-ledger-5") ||
+  latestLedgerId !== "civic-ledger-7" ||
+  latestLedger.kind !== "queue_contact_refused" ||
+  latestLedger.citedLedgerEventId !== "civic-ledger-6" ||
   packagedProof.pass !== true ||
   hudChecks.examinerWording !== true ||
   hudChecks.playerAsExaminedSubject !== true ||
@@ -189,10 +198,12 @@ if (
   !hudTrail.includes("대상: 플레이어") ||
   !hudTrail.includes("스테이션 직원") ||
   outcomeChecks.liveRecordChain !== true ||
-  !consequenceLabel.includes("플레이어 발화/응답 지연 -> 상점 기록 -> 보고 전달 -> 스테이션 인용") ||
+  !consequenceLabel.includes("플레이어 발화/응답 지연 -> 상점 기록") ||
+  !consequenceLabel.includes("스테이션 인용") ||
   outcomeChecks.speechDelayRecordChain !== true ||
   outcomeChecks.stationOfficerRoleAction !== true ||
-  !outcomeBody.includes("플레이어 발화/응답 지연 -> 상점 기록 -> 보고 전달 -> 스테이션 인용 -> 심문") ||
+  !outcomeBody.includes("플레이어 발화/응답 지연 -> 상점 기록") ||
+  !outcomeBody.includes("스테이션 인용 -> 접촉 거부 -> 심문") ||
   !outcomeBody.includes("역할 행동: 스테이션 직원") ||
   civicEconomyChecks.attentionState !== true ||
   civicEconomyPanelState !== "attention" ||

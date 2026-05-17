@@ -232,6 +232,17 @@ function buildRepairRecoveredProof(): SameOrderAgenticRouteProof {
     knownLedgerEventIds: [correctionEvent.eventId],
     whyLine: "A waiting customer sees the correction slip attach and lets the line settle instead of turning it into a complaint.",
   });
+  applyAction(build, {
+    stepId: "repair.park_witness.post_repair_notice",
+    actorId: "NPC_Park_Witness",
+    role: "park_witness",
+    affordance: "post_repair_notice",
+    objectId: "park_notice_board",
+    recordId: "park_public_repair_notice",
+    citedLedgerEventId: correctionEvent.eventId,
+    knownLedgerEventIds: [correctionEvent.eventId],
+    whyLine: "The Park witness sees the correction record and posts that the mismatch was repaired instead of becoming a rumor.",
+  });
 
   return routeProof({
     build,
@@ -239,7 +250,7 @@ function buildRepairRecoveredProof(): SameOrderAgenticRouteProof {
     sessionOutcome: "cover_held",
     playerLineKind: "repair_line",
     playerLine: "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.",
-    socialReactionSummary: "The clerk contains the mismatch through a correction, and a waiting customer accepts the repair so the queue settles instead of becoming a report.",
+    socialReactionSummary: "The clerk contains the mismatch through a correction, a waiting customer accepts the repair, and a Park witness posts that the mismatch was repaired instead of becoming a rumor.",
   });
 }
 
@@ -650,6 +661,14 @@ function validateRepairRecovered(
     && observation.resultingAffordance === "accept_repair"
   )) {
     failures.push({ routeId: proof.routeId, path: "socialObservationTrace", message: "repair route must prove another NPC accepted the correction record" });
+  }
+  if (!proof.socialObservationTrace.some(observation =>
+    observation.observerRole === "park_witness"
+    && observation.observedActorRole === "store_clerk"
+    && observation.observedAffordance === "attach_correction"
+    && observation.resultingAffordance === "post_repair_notice"
+  )) {
+    failures.push({ routeId: proof.routeId, path: "socialObservationTrace", message: "repair route must prove a public witness can spread the repair record" });
   }
   if (proof.finalObjectStates.store_queue_mark !== "settled") {
     failures.push({ routeId: proof.routeId, path: "finalObjectStates.store_queue_mark", message: "repair route must visibly settle the queue after correction" });

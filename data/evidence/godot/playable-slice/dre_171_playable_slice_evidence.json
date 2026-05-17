@@ -1,18 +1,18 @@
 {
   "adapter": "godot",
-  "createdAtMs": 1779043186663,
+  "createdAtMs": 1779044019705,
   "events": [
     {
       "adapter": "godot",
       "eventFamily": "session",
-      "eventId": "playable_session_started-001-1779043186429",
+      "eventId": "playable_session_started-001-1779044019476",
       "eventName": "playable_session_started",
       "prologueStep": "beginning",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "sessionOutcome": "running",
       "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-      "timestampMs": 1779043186429,
+      "timestampMs": 1779044019476,
       "uiSummaryArgs": {},
       "uiSummaryKey": "event.session_started",
       "worldId": "dre_171_godot_shell",
@@ -25,7 +25,7 @@
       "conversationId": "conv-same-order",
       "conversationStage": "normal",
       "eventFamily": "domain",
-      "eventId": "conversation_started-002-1779043186526",
+      "eventId": "conversation_started-002-1779044019570",
       "eventName": "conversation_started",
       "outcome": "running",
       "promptId": "store.same_order.routine",
@@ -34,7 +34,7 @@
       "socialLoopStage": "normal",
       "speakerId": "NPC_Store_Clerk",
       "summary": "Store Clerk opened the Same Order conversation.",
-      "timestampMs": 1779043186526,
+      "timestampMs": 1779044019570,
       "turnId": "turn-1",
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
@@ -47,7 +47,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "dialogue_choice_selected-003-1779043186563",
+      "eventId": "dialogue_choice_selected-003-1779044019607",
       "eventName": "dialogue_choice_selected",
       "inputMode": "choice",
       "outcome": "running",
@@ -69,7 +69,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779043186563,
+      "timestampMs": 1779044019607,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -84,7 +84,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-004-1779043186563",
+      "eventId": "conversation_anomaly_detected-004-1779044019607",
       "eventName": "conversation_anomaly_detected",
       "inputMode": "choice",
       "outcome": "running",
@@ -106,7 +106,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779043186563,
+      "timestampMs": 1779044019607,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -121,7 +121,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-005-1779043186563",
+      "eventId": "npc_suspicion_changed-005-1779044019607",
       "eventName": "npc_suspicion_changed",
       "inputMode": "choice",
       "outcome": "running",
@@ -143,7 +143,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779043186563,
+      "timestampMs": 1779044019607,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -158,7 +158,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "응답 지연 12000ms",
       "eventFamily": "domain",
-      "eventId": "response_hesitation_noted-006-1779043186597",
+      "eventId": "response_hesitation_noted-006-1779044019641",
       "eventName": "response_hesitation_noted",
       "inputMode": "response_hesitation",
       "outcome": "running",
@@ -181,7 +181,7 @@
       "suspicionSignals": [
         "response_hesitation"
       ],
-      "timestampMs": 1779043186597,
+      "timestampMs": 1779044019641,
       "turnId": "turn-2",
       "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
       "whyLineKey": "response_hesitation",
@@ -196,7 +196,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "free_input_submitted-007-1779043186625",
+      "eventId": "free_input_submitted-007-1779044019669",
       "eventName": "free_input_submitted",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -221,7 +221,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779043186625,
+      "timestampMs": 1779044019669,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -236,7 +236,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-008-1779043186625",
+      "eventId": "conversation_anomaly_detected-008-1779044019669",
       "eventName": "conversation_anomaly_detected",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -261,7 +261,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779043186625,
+      "timestampMs": 1779044019669,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -276,7 +276,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-009-1779043186625",
+      "eventId": "npc_suspicion_changed-009-1779044019669",
       "eventName": "npc_suspicion_changed",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -301,7 +301,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779043186625,
+      "timestampMs": 1779044019669,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -316,7 +316,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "suspicion_shared-010-1779043186625",
+      "eventId": "suspicion_shared-010-1779044019669",
       "eventName": "suspicion_shared",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -341,7 +341,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779043186625,
+      "timestampMs": 1779044019669,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -356,7 +356,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_report_created-011-1779043186626",
+      "eventId": "station_report_created-011-1779044019670",
       "eventName": "station_report_created",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -381,7 +381,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779043186626,
+      "timestampMs": 1779044019670,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -396,7 +396,7 @@
       "conversationStage": "inquest",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_inquest_opened-012-1779043186626",
+      "eventId": "station_inquest_opened-012-1779044019670",
       "eventName": "station_inquest_opened",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -421,7 +421,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779043186626,
+      "timestampMs": 1779044019670,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -432,12 +432,12 @@
       "adapter": "godot",
       "artifactPath": "data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json",
       "eventFamily": "evidence_export",
-      "eventId": "evidence_pack_created-013-1779043186663",
+      "eventId": "evidence_pack_created-013-1779044019705",
       "eventName": "evidence_pack_created",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "summary": "Godot conversation playable Evidence Pack exported for backend validation.",
-      "timestampMs": 1779043186663,
+      "timestampMs": 1779044019705,
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
     }
@@ -1315,6 +1315,55 @@
             "visibleTo": [
               "park_witness"
             ]
+          },
+          {
+            "actionId": "park_notice_board.post_repair_notice",
+            "affordance": "post_repair_notice",
+            "citableLedgerEventIds": [
+              "civic-ledger-2"
+            ],
+            "civicEconomyEffects": [
+              "localTrust:+3",
+              "recordBurden:-5"
+            ],
+            "eligibleRoles": [
+              "park_witness"
+            ],
+            "failureReasons": [
+              "object_not_perceived",
+              "affordance_unavailable",
+              "role_authority_exceeded",
+              "why_line_required",
+              "ledger_event_unknown",
+              "ledger_event_not_known",
+              "station_citation_requires_store_record"
+            ],
+            "ledgerEventKind": "public_repair_noted",
+            "objectId": "park_notice_board",
+            "objectState": "clear",
+            "perceivedAs": "public repair notice",
+            "playerLabel": "Post Repair Notice",
+            "preconditions": [
+              "object_state:clear",
+              "role_allowed:park_witness",
+              "known_ledger_event_required",
+              "known_store_ledger_event_required",
+              "record_id:park_public_rumor"
+            ],
+            "priorityHints": [
+              "economy:localTrust",
+              "economy:recordBurden",
+              "requires:store_record_citation",
+              "pressure:repair_seen_publicly"
+            ],
+            "recordId": "park_public_rumor",
+            "requiresLedgerEvent": true,
+            "requiresStoreLedgerEvent": true,
+            "toState": "clear",
+            "validationRuleId": "same_order.park_notice_board.post_repair_notice",
+            "visibleTo": [
+              "park_witness"
+            ]
           }
         ],
         "citedLedgerEventId": "civic-ledger-2",
@@ -2130,7 +2179,7 @@
         "sessionOutcome": "cover_held",
         "playerLineKind": "repair_line",
         "playerLine": "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.",
-        "socialReactionSummary": "The clerk contains the mismatch through a correction, and a waiting customer accepts the repair so the queue settles instead of becoming a report.",
+        "socialReactionSummary": "The clerk contains the mismatch through a correction, a waiting customer accepts the repair, and a Park witness posts that the mismatch was repaired instead of becoming a rumor.",
         "actionTrace": [
           {
             "stepId": "repair.clerk.mark_receipt",
@@ -2233,19 +2282,43 @@
               "stationAttention": 5
             },
             "whyLine": "A waiting customer sees the correction slip attach and lets the line settle instead of turning it into a complaint."
+          },
+          {
+            "stepId": "repair.park_witness.post_repair_notice",
+            "actorId": "NPC_Park_Witness",
+            "actorRole": "park_witness",
+            "perceivedObjectIds": [
+              "park_notice_board"
+            ],
+            "affordance": "post_repair_notice",
+            "objectId": "park_notice_board",
+            "accepted": true,
+            "ledgerEventId": "civic-ledger-5",
+            "ledgerEventKind": "public_repair_noted",
+            "recordId": "park_public_repair_notice",
+            "citedLedgerEventId": "civic-ledger-3",
+            "economyAfter": {
+              "accountCredit": 2,
+              "localTrust": 48,
+              "recordBurden": 25,
+              "stationAttention": 5
+            },
+            "whyLine": "The Park witness sees the correction record and posts that the mismatch was repaired instead of becoming a rumor."
           }
         ],
         "ledgerEventKinds": [
           "store_receipt_marked",
           "correction_offered",
           "store_sale_corrected",
-          "queue_repair_accepted"
+          "queue_repair_accepted",
+          "public_repair_noted"
         ],
         "ledgerAffordances": [
           "mark_receipt",
           "offer_correction",
           "attach_correction",
-          "accept_repair"
+          "accept_repair",
+          "post_repair_notice"
         ],
         "socialObservationTrace": [
           {
@@ -2263,6 +2336,22 @@
             "resultingStepId": "repair.waiting_customer.accept_repair",
             "resultingAffordance": "accept_repair",
             "whyLine": "waiting_customer uses store_clerk's attach_correction record before choosing accept_repair."
+          },
+          {
+            "observerActorId": "NPC_Park_Witness",
+            "observerRole": "park_witness",
+            "observedLedgerEventId": "civic-ledger-3",
+            "observedActorRole": "store_clerk",
+            "observedAffordance": "attach_correction",
+            "observedObjectId": "correction_slip",
+            "economyPressure": {
+              "localTrust": 40,
+              "recordBurden": 35,
+              "stationAttention": 5
+            },
+            "resultingStepId": "repair.park_witness.post_repair_notice",
+            "resultingAffordance": "post_repair_notice",
+            "whyLine": "park_witness uses store_clerk's attach_correction record before choosing post_repair_notice."
           }
         ],
         "finalObjectStates": {
@@ -2278,8 +2367,8 @@
         },
         "economyAfter": {
           "accountCredit": 2,
-          "localTrust": 45,
-          "recordBurden": 30,
+          "localTrust": 48,
+          "recordBurden": 25,
           "stationAttention": 5
         }
       },
@@ -3030,19 +3119,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779043185296",
+            "eventId": "playable_session_started-001-1779044018526",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779043185428",
+            "eventId": "conversation_started-002-1779044018664",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-003-1779043185464",
+            "eventId": "dialogue_choice_selected-003-1779044018701",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3053,7 +3142,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-004-1779043185498",
+            "eventId": "dialogue_choice_selected-004-1779044018735",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3064,7 +3153,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_outcome_reached-005-1779043185499",
+            "eventId": "conversation_outcome_reached-005-1779044018735",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "clean_cover",
@@ -3100,19 +3189,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779043185557",
+            "eventId": "playable_session_started-001-1779044018793",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779043185652",
+            "eventId": "conversation_started-002-1779044018888",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779043185689",
+            "eventId": "dialogue_choice_selected-003-1779044018924",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3125,7 +3214,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779043185689",
+            "eventId": "conversation_anomaly_detected-004-1779044018924",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3138,7 +3227,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779043185689",
+            "eventId": "npc_suspicion_changed-005-1779044018924",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3151,7 +3240,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-006-1779043185724",
+            "eventId": "dialogue_choice_selected-006-1779044018958",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3162,7 +3251,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_outcome_reached-007-1779043185724",
+            "eventId": "conversation_outcome_reached-007-1779044018959",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "repair_recovered",
@@ -3171,7 +3260,7 @@
         ],
         "inputPath": "focus StoreCounterZone -> E -> 2 memory-gap repair -> 1 accept clerk premise",
         "lastWhyLine": "이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.",
-        "outcomeBody": "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+        "outcomeBody": "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 공개 수습 게시 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였고, 공원 목격자는 정정 기록을 보고 소문으로 돌릴 일이 아니라고 남겼습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 같은 정정 기록을 공개 수습 게시로 바꿨습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
         "reportWeight": 10,
         "routeId": "repair_recovered",
         "routeOutcome": "repair_recovered",
@@ -3204,19 +3293,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779043186139",
+            "eventId": "playable_session_started-001-1779044019241",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779043186290",
+            "eventId": "conversation_started-002-1779044019342",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779043186326",
+            "eventId": "dialogue_choice_selected-003-1779044019379",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3229,7 +3318,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779043186326",
+            "eventId": "conversation_anomaly_detected-004-1779044019379",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3242,7 +3331,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779043186326",
+            "eventId": "npc_suspicion_changed-005-1779044019379",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3255,7 +3344,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "dialogue_choice_selected-006-1779043186360",
+            "eventId": "dialogue_choice_selected-006-1779044019413",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3269,7 +3358,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-007-1779043186360",
+            "eventId": "conversation_anomaly_detected-007-1779044019413",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3283,7 +3372,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-008-1779043186360",
+            "eventId": "npc_suspicion_changed-008-1779044019413",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3297,7 +3386,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-009-1779043186360",
+            "eventId": "suspicion_shared-009-1779044019413",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3311,7 +3400,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-010-1779043186361",
+            "eventId": "station_report_created-010-1779044019414",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 80,
@@ -3325,7 +3414,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_outcome_reached-011-1779043186361",
+            "eventId": "conversation_outcome_reached-011-1779044019414",
             "eventName": "conversation_outcome_reached",
             "outcome": "soft_report",
             "routeOutcome": "soft_report",
@@ -3370,19 +3459,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779043186429",
+            "eventId": "playable_session_started-001-1779044019476",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779043186526",
+            "eventId": "conversation_started-002-1779044019570",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779043186563",
+            "eventId": "dialogue_choice_selected-003-1779044019607",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3395,7 +3484,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779043186563",
+            "eventId": "conversation_anomaly_detected-004-1779044019607",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3408,7 +3497,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779043186563",
+            "eventId": "npc_suspicion_changed-005-1779044019607",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3421,7 +3510,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "response_hesitation_noted-006-1779043186597",
+            "eventId": "response_hesitation_noted-006-1779044019641",
             "eventName": "response_hesitation_noted",
             "outcome": "running",
             "reportWeightAfter": 35,
@@ -3434,7 +3523,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "free_input_submitted-007-1779043186625",
+            "eventId": "free_input_submitted-007-1779044019669",
             "eventName": "free_input_submitted",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3448,7 +3537,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-008-1779043186625",
+            "eventId": "conversation_anomaly_detected-008-1779044019669",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3462,7 +3551,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-009-1779043186625",
+            "eventId": "npc_suspicion_changed-009-1779044019669",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3476,7 +3565,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-010-1779043186625",
+            "eventId": "suspicion_shared-010-1779044019669",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3490,7 +3579,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-011-1779043186626",
+            "eventId": "station_report_created-011-1779044019670",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 120,
@@ -3504,7 +3593,7 @@
           },
           {
             "conversationStage": "inquest",
-            "eventId": "station_inquest_opened-012-1779043186626",
+            "eventId": "station_inquest_opened-012-1779044019670",
             "eventName": "station_inquest_opened",
             "outcome": "inquest_opened",
             "reportWeightAfter": 120,
@@ -4726,7 +4815,7 @@
           "providerMode": "provider-action-proposal",
           "playerLineKind": "repair_line",
           "playerLine": "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.",
-          "socialReactionSummary": "The provider-shaped proposal path keeps the mismatch local through a correction slip and a visible queue settlement.",
+          "socialReactionSummary": "The provider-shaped proposal path keeps the mismatch local through a correction slip, visible queue settlement, and a public repair notice.",
           "actionTrace": [
             {
               "stepId": "repair.clerk.mark_receipt",
@@ -5901,19 +5990,147 @@
               "whyLine": "A waiting customer sees the correction slip attach and lets the line settle instead of turning it into a complaint.",
               "selectionReason": "waiting_customer chooses accept_repair because accept the correction record and let the queue settle.",
               "providerLine": "정정됐으면 줄은 계속 가도 되겠네요."
+            },
+            {
+              "stepId": "repair.park_witness.post_repair_notice",
+              "actorId": "NPC_Park_Witness",
+              "actorRole": "park_witness",
+              "perceivedObjectIds": [
+                "park_notice_board"
+              ],
+              "availableActions": [
+                {
+                  "actionId": "park_notice_board.post_rumor",
+                  "affordance": "post_rumor",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Rumor",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public notice rumor",
+                  "priorityHints": [
+                    "economy:recordBurden",
+                    "pressure:public_talk"
+                  ],
+                  "ledgerEventKind": "public_rumor_posted",
+                  "civicEconomyEffects": [
+                    "recordBurden:+5"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_rumor",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "rumored",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.post_repair_notice",
+                  "affordance": "post_repair_notice",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Repair Notice",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required",
+                    "known_store_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public repair notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "requires:store_record_citation",
+                    "pressure:repair_seen_publicly"
+                  ],
+                  "ledgerEventKind": "public_repair_noted",
+                  "civicEconomyEffects": [
+                    "localTrust:+3",
+                    "recordBurden:-5"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_repair_notice",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known",
+                    "station_citation_requires_store_record"
+                  ],
+                  "toState": "clear",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": true,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                }
+              ],
+              "providerProposal": {
+                "affordance": "post_repair_notice",
+                "objectId": "park_notice_board",
+                "recordId": "park_public_repair_notice",
+                "citedLedgerEventId": "civic-ledger-3",
+                "whyLine": "The Park witness sees the correction record and posts that the mismatch was repaired instead of becoming a rumor.",
+                "npcLineCandidate": "정정 기록이 붙었으니 소문으로 돌릴 일은 아니겠네요.",
+                "selectionReason": "park_witness chooses post_repair_notice because post a small public note that the mismatch was repaired."
+              },
+              "affordance": "post_repair_notice",
+              "objectId": "park_notice_board",
+              "accepted": true,
+              "ledgerEventId": "civic-ledger-5",
+              "ledgerEventKind": "public_repair_noted",
+              "recordId": "park_public_repair_notice",
+              "citedLedgerEventId": "civic-ledger-3",
+              "economyAfter": {
+                "accountCredit": 2,
+                "localTrust": 48,
+                "recordBurden": 25,
+                "stationAttention": 5
+              },
+              "whyLine": "The Park witness sees the correction record and posts that the mismatch was repaired instead of becoming a rumor.",
+              "selectionReason": "park_witness chooses post_repair_notice because post a small public note that the mismatch was repaired.",
+              "providerLine": "정정 기록이 붙었으니 소문으로 돌릴 일은 아니겠네요."
             }
           ],
           "ledgerEventKinds": [
             "store_receipt_marked",
             "correction_offered",
             "store_sale_corrected",
-            "queue_repair_accepted"
+            "queue_repair_accepted",
+            "public_repair_noted"
           ],
           "ledgerAffordances": [
             "mark_receipt",
             "offer_correction",
             "attach_correction",
-            "accept_repair"
+            "accept_repair",
+            "post_repair_notice"
           ],
           "finalObjectStates": {
             "store_queue_mark": "settled",
@@ -5928,8 +6145,8 @@
           },
           "economyAfter": {
             "accountCredit": 2,
-            "localTrust": 45,
-            "recordBurden": 30,
+            "localTrust": 48,
+            "recordBurden": 25,
             "stationAttention": 5
           }
         },
@@ -6890,6 +7107,54 @@
                   "recordId": "park_public_rumor",
                   "requiresLedgerEvent": true,
                   "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-2"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.post_repair_notice",
+                  "affordance": "post_repair_notice",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Repair Notice",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required",
+                    "known_store_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public repair notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "requires:store_record_citation",
+                    "pressure:repair_seen_publicly"
+                  ],
+                  "ledgerEventKind": "public_repair_noted",
+                  "civicEconomyEffects": [
+                    "localTrust:+3",
+                    "recordBurden:-5"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_repair_notice",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known",
+                    "station_citation_requires_store_record"
+                  ],
+                  "toState": "clear",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": true,
                   "citableLedgerEventIds": [
                     "civic-ledger-2"
                   ]
@@ -8748,6 +9013,54 @@
                   "citableLedgerEventIds": [
                     "civic-ledger-2"
                   ]
+                },
+                {
+                  "actionId": "park_notice_board.post_repair_notice",
+                  "affordance": "post_repair_notice",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Repair Notice",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required",
+                    "known_store_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public repair notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "requires:store_record_citation",
+                    "pressure:repair_seen_publicly"
+                  ],
+                  "ledgerEventKind": "public_repair_noted",
+                  "civicEconomyEffects": [
+                    "localTrust:+3",
+                    "recordBurden:-5"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_repair_notice",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known",
+                    "station_citation_requires_store_record"
+                  ],
+                  "toState": "clear",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": true,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-2"
+                  ]
                 }
               ],
               "providerProposal": {
@@ -9427,7 +9740,7 @@
         "soft_report",
         "inquest_opened"
       ],
-      "jobCount": 21,
+      "jobCount": 22,
       "jobs": [
         {
           "jobId": "clean_cover.clean.clerk.cite_usual_order.provider-action-proposal",
@@ -10551,7 +10864,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path keeps the mismatch local through a correction slip and a visible queue settlement.",
+            "socialReactionSummary": "The provider-shaped proposal path keeps the mismatch local through a correction slip, visible queue settlement, and a public repair notice.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -10936,7 +11249,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path keeps the mismatch local through a correction slip and a visible queue settlement.",
+            "socialReactionSummary": "The provider-shaped proposal path keeps the mismatch local through a correction slip, visible queue settlement, and a public repair notice.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -11244,7 +11557,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path keeps the mismatch local through a correction slip and a visible queue settlement.",
+            "socialReactionSummary": "The provider-shaped proposal path keeps the mismatch local through a correction slip, visible queue settlement, and a public repair notice.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -11560,7 +11873,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path keeps the mismatch local through a correction slip and a visible queue settlement.",
+            "socialReactionSummary": "The provider-shaped proposal path keeps the mismatch local through a correction slip, visible queue settlement, and a public repair notice.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -11867,6 +12180,178 @@
             "validation": "accepted",
             "whyLine": "A waiting customer sees the correction slip attach and lets the line settle instead of turning it into a complaint.",
             "selectionReason": "waiting_customer chooses accept_repair because accept the correction record and let the queue settle."
+          }
+        },
+        {
+          "jobId": "repair_recovered.repair.park_witness.post_repair_notice.provider-action-proposal",
+          "routeId": "repair_recovered",
+          "stepId": "repair.park_witness.post_repair_notice",
+          "turnIndex": 4,
+          "actorId": "NPC_Park_Witness",
+          "actorRole": "park_witness",
+          "purpose": "npc_reaction_line",
+          "dispatchPhase": "role_agent_tick",
+          "providerMode": "scheduled-action-proposal",
+          "playerLineKind": "repair_line",
+          "playerLine": "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.",
+          "socialLoopStage": "store_repair",
+          "dramaTone": "corrective",
+          "preoccupations": [
+            "public notice",
+            "local talk",
+            "who becomes visible"
+          ],
+          "promptContext": {
+            "scenario": "same_order",
+            "socialReactionSummary": "The provider-shaped proposal path keeps the mismatch local through a correction slip, visible queue settlement, and a public repair notice.",
+            "perceivedObjectIds": [
+              "park_notice_board"
+            ],
+            "availableActions": [
+              {
+                "actionId": "park_notice_board.post_rumor",
+                "affordance": "post_rumor",
+                "objectId": "park_notice_board",
+                "objectState": "clear",
+                "playerLabel": "Post Rumor",
+                "eligibleRoles": [
+                  "park_witness"
+                ],
+                "preconditions": [
+                  "object_state:clear",
+                  "role_allowed:park_witness",
+                  "known_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "park_witness"
+                ],
+                "perceivedAs": "public notice rumor",
+                "priorityHints": [
+                  "economy:recordBurden",
+                  "pressure:public_talk"
+                ],
+                "ledgerEventKind": "public_rumor_posted",
+                "civicEconomyEffects": [
+                  "recordBurden:+5"
+                ],
+                "validationRuleId": "same_order.park_notice_board.post_rumor",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known"
+                ],
+                "toState": "rumored",
+                "recordId": "park_public_rumor",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-3"
+                ]
+              },
+              {
+                "actionId": "park_notice_board.post_repair_notice",
+                "affordance": "post_repair_notice",
+                "objectId": "park_notice_board",
+                "objectState": "clear",
+                "playerLabel": "Post Repair Notice",
+                "eligibleRoles": [
+                  "park_witness"
+                ],
+                "preconditions": [
+                  "object_state:clear",
+                  "role_allowed:park_witness",
+                  "known_ledger_event_required",
+                  "known_store_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "park_witness"
+                ],
+                "perceivedAs": "public repair notice",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "economy:recordBurden",
+                  "requires:store_record_citation",
+                  "pressure:repair_seen_publicly"
+                ],
+                "ledgerEventKind": "public_repair_noted",
+                "civicEconomyEffects": [
+                  "localTrust:+3",
+                  "recordBurden:-5"
+                ],
+                "validationRuleId": "same_order.park_notice_board.post_repair_notice",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known",
+                  "station_citation_requires_store_record"
+                ],
+                "toState": "clear",
+                "recordId": "park_public_rumor",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": true,
+                "citableLedgerEventIds": [
+                  "civic-ledger-3"
+                ]
+              }
+            ],
+            "recentLedgerEventKinds": [
+              "store_receipt_marked",
+              "correction_offered",
+              "store_sale_corrected",
+              "queue_repair_accepted"
+            ],
+            "recentLedgerAffordances": [
+              "mark_receipt",
+              "offer_correction",
+              "attach_correction",
+              "accept_repair"
+            ]
+          },
+          "allowedProviderFields": [
+            "affordance",
+            "objectId",
+            "recordId",
+            "citedLedgerEventId",
+            "whyLine",
+            "npcLineCandidate",
+            "selectionReason"
+          ],
+          "forbiddenAuthorityFields": [
+            "riskTag",
+            "suspicionDelta",
+            "reportDelta",
+            "exposureDelta",
+            "economyDelta",
+            "ledgerEventKind",
+            "ledgerEventId",
+            "objectState",
+            "verdict",
+            "sessionOutcome",
+            "sessionTermination"
+          ],
+          "fallbackLine": "정정 기록이 붙었으니 소문으로 돌릴 일은 아니겠네요.",
+          "lockedAction": {
+            "affordance": "post_repair_notice",
+            "objectId": "park_notice_board",
+            "ledgerEventId": "civic-ledger-5",
+            "ledgerEventKind": "public_repair_noted",
+            "recordId": "park_public_repair_notice",
+            "citedLedgerEventId": "civic-ledger-3",
+            "economyAfter": {
+              "accountCredit": 2,
+              "localTrust": 48,
+              "recordBurden": 25,
+              "stationAttention": 5
+            },
+            "validation": "accepted",
+            "whyLine": "The Park witness sees the correction record and posts that the mismatch was repaired instead of becoming a rumor.",
+            "selectionReason": "park_witness chooses post_repair_notice because post a small public note that the mismatch was repaired."
           }
         },
         {
@@ -12955,6 +13440,54 @@
                 "recordId": "park_public_rumor",
                 "requiresLedgerEvent": true,
                 "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-2"
+                ]
+              },
+              {
+                "actionId": "park_notice_board.post_repair_notice",
+                "affordance": "post_repair_notice",
+                "objectId": "park_notice_board",
+                "objectState": "clear",
+                "playerLabel": "Post Repair Notice",
+                "eligibleRoles": [
+                  "park_witness"
+                ],
+                "preconditions": [
+                  "object_state:clear",
+                  "role_allowed:park_witness",
+                  "known_ledger_event_required",
+                  "known_store_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "park_witness"
+                ],
+                "perceivedAs": "public repair notice",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "economy:recordBurden",
+                  "requires:store_record_citation",
+                  "pressure:repair_seen_publicly"
+                ],
+                "ledgerEventKind": "public_repair_noted",
+                "civicEconomyEffects": [
+                  "localTrust:+3",
+                  "recordBurden:-5"
+                ],
+                "validationRuleId": "same_order.park_notice_board.post_repair_notice",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known",
+                  "station_citation_requires_store_record"
+                ],
+                "toState": "clear",
+                "recordId": "park_public_rumor",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": true,
                 "citableLedgerEventIds": [
                   "civic-ledger-2"
                 ]
@@ -15078,6 +15611,54 @@
                 "citableLedgerEventIds": [
                   "civic-ledger-2"
                 ]
+              },
+              {
+                "actionId": "park_notice_board.post_repair_notice",
+                "affordance": "post_repair_notice",
+                "objectId": "park_notice_board",
+                "objectState": "clear",
+                "playerLabel": "Post Repair Notice",
+                "eligibleRoles": [
+                  "park_witness"
+                ],
+                "preconditions": [
+                  "object_state:clear",
+                  "role_allowed:park_witness",
+                  "known_ledger_event_required",
+                  "known_store_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "park_witness"
+                ],
+                "perceivedAs": "public repair notice",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "economy:recordBurden",
+                  "requires:store_record_citation",
+                  "pressure:repair_seen_publicly"
+                ],
+                "ledgerEventKind": "public_repair_noted",
+                "civicEconomyEffects": [
+                  "localTrust:+3",
+                  "recordBurden:-5"
+                ],
+                "validationRuleId": "same_order.park_notice_board.post_repair_notice",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known",
+                  "station_citation_requires_store_record"
+                ],
+                "toState": "clear",
+                "recordId": "park_public_rumor",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": true,
+                "citableLedgerEventIds": [
+                  "civic-ledger-2"
+                ]
               }
             ],
             "recentLedgerEventKinds": [
@@ -15884,7 +16465,7 @@
       "liveHttpDispatchVerified": false,
       "endpoint": "/v1/npc/decision",
       "dispatchHost": "godot-runtime-pending",
-      "jobCount": 21,
+      "jobCount": 22,
       "packetProofs": [
         {
           "jobId": "clean_cover.clean.clerk.cite_usual_order.provider-action-proposal",
@@ -18616,6 +19197,226 @@
           "failures": []
         },
         {
+          "jobId": "repair_recovered.repair.park_witness.post_repair_notice.provider-action-proposal",
+          "routeId": "repair_recovered",
+          "stepId": "repair.park_witness.post_repair_notice",
+          "endpoint": "/v1/npc/decision",
+          "method": "POST",
+          "npcId": "NPC_Park_Witness",
+          "actorRole": "park_witness",
+          "packet": {
+            "sessionId": "same-order-provider-dispatch-repair_recovered",
+            "npcId": "NPC_Park_Witness",
+            "landmarkId": "Store",
+            "nearbyActors": [
+              "player",
+              "NPC_Store_Clerk",
+              "NPC_Store_Manager",
+              "NPC_Waiting_Customer"
+            ],
+            "recentEvents": [
+              "store_receipt_marked:mark_receipt",
+              "correction_offered:offer_correction",
+              "store_sale_corrected:attach_correction",
+              "queue_repair_accepted:accept_repair",
+              "store_correction_offered"
+            ],
+            "organizationContext": {
+              "scenario": "same_order",
+              "routeId": "repair_recovered",
+              "stepId": "repair.park_witness.post_repair_notice",
+              "jobId": "repair_recovered.repair.park_witness.post_repair_notice.provider-action-proposal",
+              "actorRole": "park_witness",
+              "purpose": "npc_reaction_line",
+              "dispatchPhase": "role_agent_tick",
+              "providerMode": "scheduled-action-proposal",
+              "socialLoopStage": "store_repair",
+              "dramaTone": "corrective",
+              "preoccupations": [
+                "public notice",
+                "local talk",
+                "who becomes visible"
+              ],
+              "perceivedObjectIds": [
+                "park_notice_board"
+              ],
+              "availableActions": [
+                {
+                  "actionId": "park_notice_board.post_rumor",
+                  "affordance": "post_rumor",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Rumor",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public notice rumor",
+                  "priorityHints": [
+                    "economy:recordBurden",
+                    "pressure:public_talk"
+                  ],
+                  "ledgerEventKind": "public_rumor_posted",
+                  "civicEconomyEffects": [
+                    "recordBurden:+5"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_rumor",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "rumored",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.post_repair_notice",
+                  "affordance": "post_repair_notice",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Repair Notice",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required",
+                    "known_store_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public repair notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "requires:store_record_citation",
+                    "pressure:repair_seen_publicly"
+                  ],
+                  "ledgerEventKind": "public_repair_noted",
+                  "civicEconomyEffects": [
+                    "localTrust:+3",
+                    "recordBurden:-5"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_repair_notice",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known",
+                    "station_citation_requires_store_record"
+                  ],
+                  "toState": "clear",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": true,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                }
+              ],
+              "recentLedgerEventKinds": [
+                "store_receipt_marked",
+                "correction_offered",
+                "store_sale_corrected",
+                "queue_repair_accepted"
+              ],
+              "recentLedgerAffordances": [
+                "mark_receipt",
+                "offer_correction",
+                "attach_correction",
+                "accept_repair"
+              ],
+              "allowedProviderFields": [
+                "affordance",
+                "objectId",
+                "recordId",
+                "citedLedgerEventId",
+                "whyLine",
+                "npcLineCandidate",
+                "selectionReason"
+              ],
+              "forbiddenAuthorityFields": [
+                "riskTag",
+                "suspicionDelta",
+                "reportDelta",
+                "exposureDelta",
+                "economyDelta",
+                "ledgerEventKind",
+                "ledgerEventId",
+                "objectState",
+                "verdict",
+                "sessionOutcome",
+                "sessionTermination"
+              ],
+              "fallbackLine": "정정 기록이 붙었으니 소문으로 돌릴 일은 아니겠네요.",
+              "lockedAction": {
+                "affordance": "post_repair_notice",
+                "objectId": "park_notice_board",
+                "ledgerEventId": "civic-ledger-5",
+                "ledgerEventKind": "public_repair_noted",
+                "recordId": "park_public_repair_notice",
+                "citedLedgerEventId": "civic-ledger-3",
+                "economyAfter": {
+                  "accountCredit": 2,
+                  "localTrust": 48,
+                  "recordBurden": 25,
+                  "stationAttention": 5
+                },
+                "validation": "accepted",
+                "whyLine": "The Park witness sees the correction record and posts that the mismatch was repaired instead of becoming a rumor.",
+                "selectionReason": "park_witness chooses post_repair_notice because post a small public note that the mismatch was repaired."
+              },
+              "authorityBoundary": "provider_writes_wording_only_runtime_locks_action"
+            },
+            "playerSignals": {
+              "speechAct": "SA_INQUIRE",
+              "playerLineKind": "repair_line",
+              "providerDispatchContract": true
+            },
+            "conversation": {
+              "conversationId": "same-order-provider-repair_recovered",
+              "turnId": "provider-repair_recovered-5",
+              "promptId": "repair.park_witness.post_repair_notice",
+              "choiceSetId": "repair.park_witness.post_repair_notice.provider-options",
+              "speakerId": "player",
+              "selectedChoiceId": "repair_line",
+              "displayedPlayerLine": "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.",
+              "priorTurnIds": [
+                "provider-repair_recovered-1",
+                "provider-repair_recovered-2",
+                "provider-repair_recovered-3",
+                "provider-repair_recovered-4"
+              ]
+            }
+          },
+          "schemaPass": true,
+          "boundedBehaviorPass": true,
+          "socialLoopStage": "ambient",
+          "actionType": "Talk",
+          "utterance": "정정 기록이 붙었으니 소문으로 돌릴 일은 아니겠네요.",
+          "fallbackLine": "정정 기록이 붙었으니 소문으로 돌릴 일은 아니겠네요.",
+          "failures": []
+        },
+        {
           "jobId": "soft_report.soft.clerk.mark_receipt.provider-action-proposal",
           "routeId": "soft_report",
           "stepId": "soft.clerk.mark_receipt",
@@ -19841,6 +20642,54 @@
                   "recordId": "park_public_rumor",
                   "requiresLedgerEvent": true,
                   "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-2"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.post_repair_notice",
+                  "affordance": "post_repair_notice",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Repair Notice",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required",
+                    "known_store_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public repair notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "requires:store_record_citation",
+                    "pressure:repair_seen_publicly"
+                  ],
+                  "ledgerEventKind": "public_repair_noted",
+                  "civicEconomyEffects": [
+                    "localTrust:+3",
+                    "recordBurden:-5"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_repair_notice",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known",
+                    "station_citation_requires_store_record"
+                  ],
+                  "toState": "clear",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": true,
                   "citableLedgerEventIds": [
                     "civic-ledger-2"
                   ]
@@ -22279,6 +23128,54 @@
                   "citableLedgerEventIds": [
                     "civic-ledger-2"
                   ]
+                },
+                {
+                  "actionId": "park_notice_board.post_repair_notice",
+                  "affordance": "post_repair_notice",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Repair Notice",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required",
+                    "known_store_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public repair notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "requires:store_record_citation",
+                    "pressure:repair_seen_publicly"
+                  ],
+                  "ledgerEventKind": "public_repair_noted",
+                  "civicEconomyEffects": [
+                    "localTrust:+3",
+                    "recordBurden:-5"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_repair_notice",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known",
+                    "station_citation_requires_store_record"
+                  ],
+                  "toState": "clear",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": true,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-2"
+                  ]
                 }
               ],
               "recentLedgerEventKinds": [
@@ -23330,12 +24227,14 @@
             "store_queue_mark",
             "receipt_tray",
             "correction_slip",
-            "report_tray"
+            "report_tray",
+            "park_notice_board"
           ],
           "actionStepIds": [
             "repair.clerk.offer_correction",
             "repair.clerk.attach_correction",
             "repair.waiting_customer.accept_repair",
+            "repair.park_witness.post_repair_notice",
             "soft.clerk.place_note",
             "inquest.clerk.place_note"
           ],
@@ -23343,6 +24242,7 @@
             "repair_recovered.repair.clerk.offer_correction.provider-action-proposal",
             "repair_recovered.repair.clerk.attach_correction.provider-action-proposal",
             "repair_recovered.repair.waiting_customer.accept_repair.provider-action-proposal",
+            "repair_recovered.repair.park_witness.post_repair_notice.provider-action-proposal",
             "soft_report.soft.clerk.place_note.provider-action-proposal",
             "inquest_opened.inquest.clerk.place_note.provider-action-proposal"
           ],
@@ -23350,12 +24250,14 @@
             "correction_offered",
             "store_sale_corrected",
             "queue_repair_accepted",
+            "public_repair_noted",
             "store_exception_reported"
           ],
           "affordances": [
             "offer_correction",
             "attach_correction",
             "accept_repair",
+            "post_repair_notice",
             "place_note"
           ],
           "evidenceEvents": [
@@ -25083,6 +25985,55 @@
             "visibleTo": [
               "park_witness"
             ]
+          },
+          {
+            "actionId": "park_notice_board.post_repair_notice",
+            "affordance": "post_repair_notice",
+            "citableLedgerEventIds": [
+              "civic-ledger-2"
+            ],
+            "civicEconomyEffects": [
+              "localTrust:+3",
+              "recordBurden:-5"
+            ],
+            "eligibleRoles": [
+              "park_witness"
+            ],
+            "failureReasons": [
+              "object_not_perceived",
+              "affordance_unavailable",
+              "role_authority_exceeded",
+              "why_line_required",
+              "ledger_event_unknown",
+              "ledger_event_not_known",
+              "station_citation_requires_store_record"
+            ],
+            "ledgerEventKind": "public_repair_noted",
+            "objectId": "park_notice_board",
+            "objectState": "clear",
+            "perceivedAs": "public repair notice",
+            "playerLabel": "Post Repair Notice",
+            "preconditions": [
+              "object_state:clear",
+              "role_allowed:park_witness",
+              "known_ledger_event_required",
+              "known_store_ledger_event_required",
+              "record_id:park_public_rumor"
+            ],
+            "priorityHints": [
+              "economy:localTrust",
+              "economy:recordBurden",
+              "requires:store_record_citation",
+              "pressure:repair_seen_publicly"
+            ],
+            "recordId": "park_public_rumor",
+            "requiresLedgerEvent": true,
+            "requiresStoreLedgerEvent": true,
+            "toState": "clear",
+            "validationRuleId": "same_order.park_notice_board.post_repair_notice",
+            "visibleTo": [
+              "park_witness"
+            ]
           }
         ],
         "citedLedgerEventId": "civic-ledger-2",
@@ -25937,14 +26888,14 @@
       {
         "adapter": "godot",
         "eventFamily": "session",
-        "eventId": "playable_session_started-001-1779043186429",
+        "eventId": "playable_session_started-001-1779044019476",
         "eventName": "playable_session_started",
         "prologueStep": "beginning",
         "schemaVersion": "godot-runtime-v1",
         "sessionId": "dre-171-playable-session",
         "sessionOutcome": "running",
         "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-        "timestampMs": 1779043186429,
+        "timestampMs": 1779044019476,
         "uiSummaryArgs": {},
         "uiSummaryKey": "event.session_started",
         "worldId": "dre_171_godot_shell",
@@ -25957,7 +26908,7 @@
         "conversationId": "conv-same-order",
         "conversationStage": "normal",
         "eventFamily": "domain",
-        "eventId": "conversation_started-002-1779043186526",
+        "eventId": "conversation_started-002-1779044019570",
         "eventName": "conversation_started",
         "outcome": "running",
         "promptId": "store.same_order.routine",
@@ -25966,7 +26917,7 @@
         "socialLoopStage": "normal",
         "speakerId": "NPC_Store_Clerk",
         "summary": "Store Clerk opened the Same Order conversation.",
-        "timestampMs": 1779043186526,
+        "timestampMs": 1779044019570,
         "turnId": "turn-1",
         "worldId": "dre_171_godot_shell",
         "worldRevision": "rev-social-stealth-v1"
@@ -25979,7 +26930,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "dialogue_choice_selected-003-1779043186563",
+        "eventId": "dialogue_choice_selected-003-1779044019607",
         "eventName": "dialogue_choice_selected",
         "inputMode": "choice",
         "outcome": "running",
@@ -26001,7 +26952,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779043186563,
+        "timestampMs": 1779044019607,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -26016,7 +26967,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-004-1779043186563",
+        "eventId": "conversation_anomaly_detected-004-1779044019607",
         "eventName": "conversation_anomaly_detected",
         "inputMode": "choice",
         "outcome": "running",
@@ -26038,7 +26989,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779043186563,
+        "timestampMs": 1779044019607,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -26053,7 +27004,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-005-1779043186563",
+        "eventId": "npc_suspicion_changed-005-1779044019607",
         "eventName": "npc_suspicion_changed",
         "inputMode": "choice",
         "outcome": "running",
@@ -26075,7 +27026,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779043186563,
+        "timestampMs": 1779044019607,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -26090,7 +27041,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "응답 지연 12000ms",
         "eventFamily": "domain",
-        "eventId": "response_hesitation_noted-006-1779043186597",
+        "eventId": "response_hesitation_noted-006-1779044019641",
         "eventName": "response_hesitation_noted",
         "inputMode": "response_hesitation",
         "outcome": "running",
@@ -26113,7 +27064,7 @@
         "suspicionSignals": [
           "response_hesitation"
         ],
-        "timestampMs": 1779043186597,
+        "timestampMs": 1779044019641,
         "turnId": "turn-2",
         "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
         "whyLineKey": "response_hesitation",
@@ -26128,7 +27079,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "free_input_submitted-007-1779043186625",
+        "eventId": "free_input_submitted-007-1779044019669",
         "eventName": "free_input_submitted",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -26153,7 +27104,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779043186625,
+        "timestampMs": 1779044019669,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -26168,7 +27119,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-008-1779043186625",
+        "eventId": "conversation_anomaly_detected-008-1779044019669",
         "eventName": "conversation_anomaly_detected",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -26193,7 +27144,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779043186625,
+        "timestampMs": 1779044019669,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -26208,7 +27159,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-009-1779043186625",
+        "eventId": "npc_suspicion_changed-009-1779044019669",
         "eventName": "npc_suspicion_changed",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -26233,7 +27184,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779043186625,
+        "timestampMs": 1779044019669,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -26248,7 +27199,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "suspicion_shared-010-1779043186625",
+        "eventId": "suspicion_shared-010-1779044019669",
         "eventName": "suspicion_shared",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -26273,7 +27224,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779043186625,
+        "timestampMs": 1779044019669,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -26288,7 +27239,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_report_created-011-1779043186626",
+        "eventId": "station_report_created-011-1779044019670",
         "eventName": "station_report_created",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -26313,7 +27264,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779043186626,
+        "timestampMs": 1779044019670,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -26328,7 +27279,7 @@
         "conversationStage": "inquest",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_inquest_opened-012-1779043186626",
+        "eventId": "station_inquest_opened-012-1779044019670",
         "eventName": "station_inquest_opened",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -26353,7 +27304,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779043186626,
+        "timestampMs": 1779044019670,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -27276,6 +28227,55 @@
               "requiresStoreLedgerEvent": false,
               "toState": "rumored",
               "validationRuleId": "same_order.park_notice_board.post_rumor",
+              "visibleTo": [
+                "park_witness"
+              ]
+            },
+            {
+              "actionId": "park_notice_board.post_repair_notice",
+              "affordance": "post_repair_notice",
+              "citableLedgerEventIds": [
+                "civic-ledger-2"
+              ],
+              "civicEconomyEffects": [
+                "localTrust:+3",
+                "recordBurden:-5"
+              ],
+              "eligibleRoles": [
+                "park_witness"
+              ],
+              "failureReasons": [
+                "object_not_perceived",
+                "affordance_unavailable",
+                "role_authority_exceeded",
+                "why_line_required",
+                "ledger_event_unknown",
+                "ledger_event_not_known",
+                "station_citation_requires_store_record"
+              ],
+              "ledgerEventKind": "public_repair_noted",
+              "objectId": "park_notice_board",
+              "objectState": "clear",
+              "perceivedAs": "public repair notice",
+              "playerLabel": "Post Repair Notice",
+              "preconditions": [
+                "object_state:clear",
+                "role_allowed:park_witness",
+                "known_ledger_event_required",
+                "known_store_ledger_event_required",
+                "record_id:park_public_rumor"
+              ],
+              "priorityHints": [
+                "economy:localTrust",
+                "economy:recordBurden",
+                "requires:store_record_citation",
+                "pressure:repair_seen_publicly"
+              ],
+              "recordId": "park_public_rumor",
+              "requiresLedgerEvent": true,
+              "requiresStoreLedgerEvent": true,
+              "toState": "clear",
+              "validationRuleId": "same_order.park_notice_board.post_repair_notice",
               "visibleTo": [
                 "park_witness"
               ]

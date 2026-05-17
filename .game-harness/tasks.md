@@ -54,6 +54,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Add the smallest repair-side NPC reaction: Waiting Customer reads the
   attached correction slip, uses `accept_repair`, settles the queue mark, adds
   `queue_repair_accepted`, raises local trust, and lowers record burden.
+- [x] Add the next smallest repair-side public reaction: Park Witness reads the
+  correction record, uses `post_repair_notice`, keeps the notice board clear,
+  adds `public_repair_noted`, raises local trust, and lowers record burden.
 - [x] Add the smallest routine-side NPC reaction: Waiting Customer reads the
   normal receipt, uses `accept_routine`, settles the queue mark, adds
   `queue_routine_kept`, and gives the safe route a visible social response.

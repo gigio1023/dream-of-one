@@ -29,8 +29,10 @@ test("Same Order provider action comparison preserves provider-off ledger outcom
   const repair = comparison.providerProofs.find(proof => proof.routeId === "repair_recovered");
   assert.ok(repair);
   assert.equal(repair.ledgerEventKinds.includes("queue_repair_accepted"), true);
+  assert.equal(repair.ledgerEventKinds.includes("public_repair_noted"), true);
   assert.equal(repair.finalObjectStates.store_queue_mark, "settled");
   assert.equal(repair.actionTrace.some(trace => trace.actorRole === "waiting_customer" && trace.affordance === "accept_repair"), true);
+  assert.equal(repair.actionTrace.some(trace => trace.actorRole === "park_witness" && trace.affordance === "post_repair_notice"), true);
 
   const inquest = comparison.providerProofs.find(proof => proof.routeId === "inquest_opened");
   assert.ok(inquest);

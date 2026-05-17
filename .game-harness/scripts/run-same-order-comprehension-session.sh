@@ -742,6 +742,13 @@ const events = summary.events || pack.events || [];
 const ledger = summary.civicLedger || pack.playability?.civicLedger || [];
 const latestLedger = ledger[ledger.length - 1] || {};
 const latestLedgerId = latestLedger.id || latestLedger.eventId;
+function ledgerEventCites(kind, eventId, citedLedgerEventId) {
+  return ledger.some((event) =>
+    event?.kind === kind &&
+    (event.id || event.eventId) === eventId &&
+    event.citedLedgerEventId === citedLedgerEventId
+  );
+}
 const packagedProof = pack.playability?.packagedRouteSmokeProof || {};
 const hudChecks = packagedProof.hudChecks || {};
 const outcomeChecks = packagedProof.outcomeChecks || {};
@@ -760,14 +767,14 @@ const checks = [
   ["providerState.mode", providerMode === "fallback_only_m1", providerMode],
   ["typed_free_input event", hasTypedFreeInput, hasTypedFreeInput],
   ["response_hesitation_noted event", hasResponseHesitation, hasResponseHesitation],
-  ["latest ledger is Station citation", latestLedger.kind === "station_record_cited", latestLedger.kind],
-  ["latest ledger citation exists", typeof latestLedger.citedLedgerEventId === "string" && latestLedger.citedLedgerEventId.length > 0, latestLedger.citedLedgerEventId],
+  ["Station citation cites forwarded Store record", ledgerEventCites("station_record_cited", "civic-ledger-6", "civic-ledger-5"), latestLedger.kind],
+  ["latest ledger is contact refusal after Station citation", latestLedger.kind === "queue_contact_refused" && latestLedgerId === "civic-ledger-7" && latestLedger.citedLedgerEventId === "civic-ledger-6", `${latestLedgerId} ${latestLedger.kind} -> ${latestLedger.citedLedgerEventId}`],
   ["packaged route smoke proof", packagedProof.pass === true, packagedProof.pass],
   ["HUD examiner wording", hudChecks.examinerWording === true && String(hudTrail).includes("검사자"), hudTrail],
   ["HUD player examined subject", hudChecks.playerAsExaminedSubject === true && String(hudTrail).includes("대상: 플레이어"), hudTrail],
   ["HUD Station Officer examiner", hudChecks.stationOfficerExaminer === true && String(hudTrail).includes("스테이션 직원"), hudTrail],
   ["live HUD record chain", outcomeChecks.liveRecordChain === true && String(consequenceLabel).includes("플레이어 발화/응답 지연 -> 상점 기록") && String(consequenceLabel).includes("스테이션 인용"), consequenceLabel],
-  ["outcome consequence chain", outcomeChecks.speechDelayRecordChain === true && String(outcomeBody).includes("플레이어 발화/응답 지연 -> 상점 기록") && String(outcomeBody).includes("스테이션 인용 -> 심문"), outcomeBody],
+  ["outcome consequence chain", outcomeChecks.speechDelayRecordChain === true && String(outcomeBody).includes("플레이어 발화/응답 지연 -> 상점 기록") && String(outcomeBody).includes("스테이션 인용 -> 접촉 거부 -> 심문"), outcomeBody],
   ["outcome Station role action", outcomeChecks.stationOfficerRoleAction === true && String(outcomeBody).includes("역할 행동: 스테이션 직원"), outcomeBody],
   ["civic economy panel attention state", civicEconomyChecks.attentionState === true && civicEconomyPanelState === "attention", civicEconomyPanelState],
   ["civic economy account credit", civicEconomyChecks.accountCreditVisible === true && String(civicEconomyPanelLabel).includes(String(summary.civicEconomy?.accountCredit)), civicEconomyPanelLabel],
@@ -789,7 +796,8 @@ console.log(`- sessionOutcome: ${summary.sessionOutcome}`);
 console.log(`- providerState.mode: ${providerMode}`);
 console.log(`- typed_free_input event: yes`);
 console.log(`- response_hesitation_noted event: yes`);
-console.log(`- latest ledger: ${latestLedgerId} cites ${latestLedger.citedLedgerEventId}`);
+console.log(`- Station citation: civic-ledger-6 cites civic-ledger-5`);
+console.log(`- latest ledger: ${latestLedgerId} ${latestLedger.kind} cites ${latestLedger.citedLedgerEventId}`);
 console.log(`- packaged HUD examiner/subject proof: yes`);
 console.log(`- packaged live HUD record-chain proof: yes`);
 console.log(`- packaged outcome chain proof: yes`);

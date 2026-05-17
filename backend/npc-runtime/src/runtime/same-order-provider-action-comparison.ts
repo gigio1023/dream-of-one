@@ -185,7 +185,7 @@ const ROUTE_SPECS: RouteSpec[] = [
     sessionOutcome: "cover_held",
     playerLineKind: "repair_line",
     playerLine: "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.",
-    socialReactionSummary: "The provider-shaped proposal path keeps the mismatch local through a correction slip and a visible queue settlement.",
+    socialReactionSummary: "The provider-shaped proposal path keeps the mismatch local through a correction slip, visible queue settlement, and a public repair notice.",
     steps: [
       {
         stepId: "repair.clerk.mark_receipt",
@@ -232,6 +232,19 @@ const ROUTE_SPECS: RouteSpec[] = [
         knownLedgerEventFromStepIds: ["repair.clerk.attach_correction"],
         whyLine: "A waiting customer sees the correction slip attach and lets the line settle instead of turning it into a complaint.",
         npcLineCandidate: "정정됐으면 줄은 계속 가도 되겠네요.",
+      },
+      {
+        stepId: "repair.park_witness.post_repair_notice",
+        actorId: "NPC_Park_Witness",
+        actorRole: "park_witness",
+        stepGoal: "post a small public note that the mismatch was repaired",
+        affordance: "post_repair_notice",
+        objectId: "park_notice_board",
+        recordId: "park_public_repair_notice",
+        citedLedgerEventFromStepId: "repair.clerk.attach_correction",
+        knownLedgerEventFromStepIds: ["repair.clerk.attach_correction"],
+        whyLine: "The Park witness sees the correction record and posts that the mismatch was repaired instead of becoming a rumor.",
+        npcLineCandidate: "정정 기록이 붙었으니 소문으로 돌릴 일은 아니겠네요.",
       },
     ],
   },

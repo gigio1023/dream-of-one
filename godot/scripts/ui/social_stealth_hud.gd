@@ -526,6 +526,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"store_sale_corrected": "정정 처리",
 		"queue_repair_accepted": "줄 수습",
 		"queue_contact_refused": "접촉 거부",
+		"public_repair_noted": "공개 수습",
 		"queue_delay_noted": "대기줄 불평",
 		"public_rumor_posted": "공개 소문",
 		"store_exception_reported": "상점 보고",
@@ -541,6 +542,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"store_sale_corrected": "correction accepted",
 		"queue_repair_accepted": "queue repair accepted",
 		"queue_contact_refused": "contact refused",
+		"public_repair_noted": "public repair noted",
 		"queue_delay_noted": "queue delay noted",
 		"public_rumor_posted": "public rumor posted",
 		"store_exception_reported": "Store report",
@@ -581,6 +583,7 @@ func _affordance_label(affordance: String) -> String:
 		"pause_service": "응대 중단",
 		"complain_delay": "대기 불평",
 		"post_rumor": "공개 게시",
+		"post_repair_notice": "수습 게시",
 		"place_note": "메모 배치",
 		"forward_report": "보고 전달",
 		"cite_record": "기록 인용"
@@ -597,6 +600,7 @@ func _affordance_label(affordance: String) -> String:
 		"pause_service": "pause service",
 		"complain_delay": "complain delay",
 		"post_rumor": "post public rumor",
+		"post_repair_notice": "post repair notice",
 		"place_note": "place note",
 		"forward_report": "forward report",
 		"cite_record": "cite record"

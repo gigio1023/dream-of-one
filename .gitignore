@@ -14,6 +14,13 @@ dist/
 coverage/
 build/
 
+.omx/
+Library/
+Logs/
+UserSettings/
+Assembly-CSharp*.csproj
+DreamOfOne*.csproj
+
 backend/npc-runtime/node_modules/
 backend/npc-runtime/dist/
 backend/npc-runtime/coverage/

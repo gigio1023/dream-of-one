@@ -79,34 +79,41 @@ Latest status check:
   proof yes.
 - raw session note files: `0 / 3 minimum`.
 - session setup now prints Codex route reports for clean cover, repair recovery,
-  soft report, and inquest in the facilitator pack, worksheet, and generated
-  session kit README, while still marking that proof as setup-only.
+  suspicious cover, soft report, and inquest in the facilitator pack, worksheet,
+  and generated session kit README, while still marking that proof as setup-only.
 - generated session kits now require the Codex gameplay QA status to pass and
   copy facilitator-only snapshots of the current Codex JSON/Markdown reports
   into the kit as `codex-gameplay-probe.json` and
   `codex-gameplay-report.md`.
 - generated session kits now also include `session-kit-manifest.json`, a
   machine-readable setup binding with app/evidence paths, hashes, copied Codex
-  QA artifacts, 4/4 Codex route reports, `humanEvidence=false`, and
+  QA artifacts, 5/5 Codex route reports, `humanEvidence=false`, and
   `closesGoal=false`.
 - session kits can now be checked with
   `.game-harness/scripts/run-same-order-comprehension-session.sh --verify-session-kit <dir>`,
   which verifies required files, copied Codex artifact hashes, required Codex
   player action catalog entries, copied-probe schema/API/report flags, manifest
-  action/route data against the copied Codex JSON, 4/4 route reports,
+  action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `5 / 5`, and `routeReportPassCount=4 / 4`.
-- latest game increment: clean cover now has a visible social consequence too.
-  When the player answers inside the local routine, the Clerk cites the usual
-  order and creates a normal receipt; the Waiting Customer reads that normal
-  receipt, uses `accept_routine` on the queue mark, changes the queue state to
-  `settled`, adds `queue_routine_kept` to the civic ledger, and raises local
-  trust by 2. This proves that the social field reacts to fitting in, not only
-  to risk or repair.
+  player actions `5 / 5`, and `routeReportPassCount=5 / 5`.
+- latest game increment: suspicious cover now leaves a small local social
+  residue without becoming a report. When the player says a risky line and then
+  returns to the clerk's premise, the Clerk marks the receipt; the Waiting
+  Customer reads that marked receipt, uses `note_wary` on the queue mark,
+  changes the queue state to `delayed`, adds `queue_wary_noted`, lowers local
+  trust by 2, and raises record burden by 5. This proves a reusable middle
+  state: another NPC can react to a record without opening formal escalation.
+- prior clean increment remains current: clean cover has a visible social
+  consequence too. When the player answers inside the local routine, the Clerk
+  cites the usual order and creates a normal receipt; the Waiting Customer reads
+  that normal receipt, uses `accept_routine` on the queue mark, changes the
+  queue state to `settled`, adds `queue_routine_kept` to the civic ledger, and
+  raises local trust by 2. This proves that the social field reacts to fitting
+  in, not only to risk or repair.
 - prior repair increment remains current: repair has a visible social consequence, not only
   a clerk-internal correction. When the player admits uncertainty and then
   returns to the Clerk's premise, the Clerk attaches a correction slip and the
@@ -242,7 +249,7 @@ Latest AI-play interface check:
 - 2026-05-18 resume readiness recheck kept the scope intentionally narrow:
   reran the Godot Codex gameplay probe and generated/verified a temporary
   session kit. The probe still passes with `stage=inquest`, accepted public
-  player actions `5 / 5`, `aiPlayerReportPass=true`, and route reports `4 / 4`;
+  player actions `5 / 5`, `aiPlayerReportPass=true`, and route reports `5 / 5`;
   the temporary kit verifier printed Codex source freshness pass, current kit
   freshness pass, copied probe cross-check pass, route reports pass, and
   `README live-session handoff: pass`. This is still setup proof only; raw
@@ -268,6 +275,18 @@ Latest AI-play interface check:
   playability report attachment, full backend check, GDScript syntax check, and
   comprehension gate status. This is internal playable proof only; external
   fresh-player notes remain `0 / 3`.
+- 2026-05-18 playable suspicious-cover increment: added the smallest contained
+  risk reaction. The suspicious cover guard route now proves
+  `mark_receipt -> note_wary`; final state includes
+  `store_queue_mark=delayed`, `receipt_tray=marked`, `queue_wary_noted`, local
+  trust 43, record burden 20, and Station attention 0. This keeps the example
+  environment tiny while making a non-binary social consequence playable:
+  fitting in calms the room, repair settles it, and unresolved weirdness makes
+  another NPC slow down without formal escalation. Verified with latest Godot
+  playable smoke, refreshed playability reports, full backend check, GDScript
+  syntax check, Codex gameplay probe with `routeReportPassCount=5 / 5`, and
+  comprehension gate status. This is internal playable proof only; external
+  fresh-player notes remain `0 / 3`.
 
 ## Loop State
 
@@ -278,7 +297,7 @@ Latest AI-play interface check:
 | Provider mode | `fallback_only_m1` |
 | Latest Godot command | `/opt/homebrew/bin/godot-latest` |
 | Packaged proof path | `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json` |
-| Codex gameplay QA | pass with JSON `aiPlayerReport`, Markdown sidecar, and 4/4 route reports; internal proof only |
+| Codex gameplay QA | pass with JSON `aiPlayerReport`, Markdown sidecar, and 5/5 route reports; internal proof only |
 | Codex action catalog | bound into status output and generated session kit manifests; internal setup proof only |
 | External comprehension | `PENDING_TESTER_NOTES` |
 
@@ -391,8 +410,8 @@ pre-launch reminder. If the packaged app or evidence fails, errors still print;
 if it passes, the fresh tester sees only the neutral first-run instruction.
 Raw notes written by the default live helper now also bind the session to the
 same Codex gameplay QA route summary used by the worksheet and session kit:
-clean cover, repair recovery, soft report, and inquest stay visible as setup
-context without counting as human comprehension evidence.
+clean cover, repair recovery, suspicious cover, soft report, and inquest stay
+visible as setup context without counting as human comprehension evidence.
 After the packaged app closes, the default live helper now prints a short
 after-play reminder before raw-note prompts: ask what happened to the tester,
 what changed after speech or typed input, and capture the tester's own wording

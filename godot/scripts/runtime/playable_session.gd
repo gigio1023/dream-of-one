@@ -88,6 +88,7 @@ const ENVIRONMENT_OBJECT_ORDER := [
 
 const ENVIRONMENT_AFFORDANCE_ORDER := [
 	"accept_routine",
+	"note_wary",
 	"complain_delay",
 	"accept_repair",
 	"cite_expected_order",
@@ -118,6 +119,14 @@ const ENVIRONMENT_ACTION_RULES := {
 			"fromStates": ["player_waiting", "delayed"],
 			"toState": "settled",
 			"eventKind": "queue_routine_kept",
+			"allowedRoles": ["waiting_customer"],
+			"requiresLedgerEvent": true,
+			"requiresStoreLedgerEvent": true
+		},
+		"note_wary": {
+			"fromStates": ["player_waiting", "delayed"],
+			"toState": "delayed",
+			"eventKind": "queue_wary_noted",
 			"allowedRoles": ["waiting_customer"],
 			"requiresLedgerEvent": true,
 			"requiresStoreLedgerEvent": true
@@ -1213,9 +1222,11 @@ func _apply_record_object_state(evaluation: Dictionary, intent: String) -> void:
 	if intent == "safe/local" and current_prompt_id == "store.same_order.probe" and repair_attempt_count > 0:
 		_attach_correction_if_needed("The player returns to the clerk's premise, so the Store attaches the correction instead of escalating.")
 
-func _mark_receipt_if_needed(why_line: String) -> void:
+func _mark_receipt_if_needed(why_line: String) -> String:
+	if str(record_objects.get("receipt_tray", "")) == "marked":
+		return _latest_civic_ledger_id("store_receipt_marked")
 	if str(record_objects.get("receipt_tray", "")) == "blank":
-		_apply_role_agent_action(
+		var result := _apply_role_agent_action(
 			"anomaly.clerk.mark_receipt",
 			"NPC_Store_Clerk",
 			"store_clerk",
@@ -1224,6 +1235,9 @@ func _mark_receipt_if_needed(why_line: String) -> void:
 			"store_same_order_receipt",
 			why_line
 		)
+		var event: Dictionary = result.get("event", {})
+		return str(event.get("eventId", ""))
+	return ""
 
 func _attach_correction_if_needed(why_line: String) -> void:
 	var correction_event_id := _latest_civic_ledger_id("store_sale_corrected")
@@ -1259,6 +1273,25 @@ func _settle_queue_after_repair(correction_event_id: String) -> void:
 	)
 	if bool(result.get("ok", false)):
 		_set_actor_line("NPC_Waiting_Customer", "정정됐으면 줄은 계속 가도 되겠네요.")
+
+func _note_wary_after_marked_receipt(marked_receipt_event_id: String) -> void:
+	if marked_receipt_event_id.is_empty():
+		return
+	if str(record_objects.get("store_queue_mark", "")) != "player_waiting":
+		return
+	var result := _apply_role_agent_action(
+		"wary.waiting_customer.note_wary",
+		"NPC_Waiting_Customer",
+		"waiting_customer",
+		"note_wary",
+		"store_queue_mark",
+		"store_same_order_queue_wary",
+		"A waiting customer sees the marked receipt and slows down without turning it into a formal complaint.",
+		marked_receipt_event_id,
+		[marked_receipt_event_id]
+	)
+	if bool(result.get("ok", false)):
+		_set_actor_line("NPC_Waiting_Customer", "정리됐어도 방금 표시는 남았죠. 줄은 조금 천천히 갑니다.")
 
 func debug_agent_action_log() -> Array:
 	return agent_action_log.duplicate(true)
@@ -1594,6 +1627,8 @@ func _action_priority_hints(affordance: String, rule: Dictionary) -> Array[Strin
 		hints.append("pressure:queue_delay")
 	if affordance == "accept_routine":
 		hints.append("pressure:routine_kept")
+	if affordance == "note_wary":
+		hints.append("pressure:wary_queue")
 	if affordance == "accept_repair":
 		hints.append("pressure:repair_accepted")
 	if affordance == "post_rumor":
@@ -1610,6 +1645,8 @@ func _action_perceived_as(object_id: String, affordance: String) -> String:
 			return "local correction path"
 		"accept_repair":
 			return "public repair acceptance"
+		"note_wary":
+			return "local wary queue note"
 		"place_note":
 			return "Store report note"
 		"forward_report":
@@ -1652,6 +1689,7 @@ func _record_mutation_affordances() -> Array[String]:
 		"mark_receipt",
 		"attach_correction",
 		"accept_routine",
+		"note_wary",
 		"accept_repair",
 		"complain_delay",
 		"post_rumor",
@@ -1723,6 +1761,8 @@ func _civic_economy_delta(event_kind: String) -> Dictionary:
 			return {"accountCredit": -1, "localTrust": 5}
 		"queue_routine_kept":
 			return {"localTrust": 2}
+		"queue_wary_noted":
+			return {"localTrust": -2, "recordBurden": 5}
 		"store_receipt_marked":
 			return {"localTrust": -5, "recordBurden": 15}
 		"correction_offered":
@@ -1869,6 +1909,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 	var ko := {
 		"store_sale_normal": "정상 영수증",
 		"queue_routine_kept": "일상 유지",
+		"queue_wary_noted": "대기줄 경계",
 		"store_receipt_marked": "영수증 표시",
 		"correction_offered": "정정 제안",
 		"store_sale_corrected": "정정 처리",
@@ -1882,6 +1923,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 	var en := {
 		"store_sale_normal": "normal receipt",
 		"queue_routine_kept": "routine kept",
+		"queue_wary_noted": "queue wary note",
 		"store_receipt_marked": "marked receipt",
 		"correction_offered": "correction offered",
 		"store_sale_corrected": "correction accepted",
@@ -1917,6 +1959,7 @@ func _affordance_label(affordance: String) -> String:
 	var ko := {
 		"create_receipt": "영수증 작성",
 		"accept_routine": "일상 수락",
+		"note_wary": "경계 메모",
 		"mark_receipt": "영수증 표시",
 		"attach_correction": "정정 첨부",
 		"accept_repair": "수습 수락",
@@ -1929,6 +1972,7 @@ func _affordance_label(affordance: String) -> String:
 	var en := {
 		"create_receipt": "create receipt",
 		"accept_routine": "accept routine",
+		"note_wary": "note wary",
 		"mark_receipt": "mark receipt",
 		"attach_correction": "attach correction",
 		"accept_repair": "accept repair",
@@ -1983,6 +2027,7 @@ func _record_state_value(state: String) -> String:
 		"read": "읽힘",
 		"serving": "응대 중",
 		"player_waiting": "플레이어 대기",
+		"delayed": "조금 지연",
 		"settled": "줄 안정",
 		"append_only": "추가됨",
 		"stable": "안정",
@@ -2008,6 +2053,7 @@ func _record_state_value(state: String) -> String:
 		"read": "read",
 		"serving": "serving",
 		"player_waiting": "player waiting",
+		"delayed": "slowed",
 		"settled": "settled",
 		"append_only": "append only",
 		"stable": "stable",
@@ -2039,7 +2085,7 @@ func _world_record_prop_color(object_id: String, state: String) -> Color:
 	match state:
 		"normal", "read", "serving", "player_waiting", "stable":
 			return Color(0.34, 0.76, 0.82, 0.94)
-		"marked", "offered", "burden", "trust_low":
+		"marked", "offered", "delayed", "burden", "trust_low":
 			return Color(1.0, 0.68, 0.28, 0.94)
 		"attached", "corrected", "settled":
 			return Color(0.42, 0.86, 0.58, 0.96)
@@ -2353,6 +2399,7 @@ func _resolve_terminal_outcome() -> void:
 		_attach_correction_if_needed("The repair answer returns to the local premise, so the correction slip closes the Store record.")
 	elif suspicion > 0:
 		route_outcome = "cover_held_under_suspicion"
+		_note_wary_after_marked_receipt(_latest_civic_ledger_id("store_receipt_marked"))
 	else:
 		route_outcome = "clean_cover"
 		_apply_role_agent_action(
@@ -2407,6 +2454,8 @@ func _terminal_outcome_body() -> String:
 		return "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 상점 관리자가 기록 부담을 보고 후속 메모를 붙였습니다.\n역할 행동: 상점 관리자가 보고 트레이에 점원 기록을 전달했습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	if route_outcome == "repair_recovered":
 		return "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
+	if route_outcome == "cover_held_under_suspicion":
+		return "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄지만 정식 불평이나 보고로 키우지는 않았습니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 지역 신뢰가 낮아지고 기록 부담이 조금 남았습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	return "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰습니다.\n상점 대화가 지역 루틴 안에서 닫혔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 
 func _now_ms() -> int:

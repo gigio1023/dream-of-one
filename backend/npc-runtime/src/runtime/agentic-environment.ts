@@ -26,6 +26,7 @@ export const ENVIRONMENT_AFFORDANCES = [
   "wait",
   "observe_queue",
   "accept_routine",
+  "note_wary",
   "complain_delay",
   "accept_repair",
   "leave_queue",
@@ -54,6 +55,7 @@ export type EnvironmentAffordance = (typeof ENVIRONMENT_AFFORDANCES)[number];
 export const LEDGER_EVENT_KINDS = [
   "queue_state_observed",
   "queue_routine_kept",
+  "queue_wary_noted",
   "queue_delay_noted",
   "queue_repair_accepted",
   "service_started",
@@ -240,6 +242,17 @@ const AFFORDANCE_RULES: AffordanceRule[] = [
     eventKind: "queue_routine_kept",
     allowedRoles: ["waiting_customer"],
     economyDelta: { localTrust: 2 },
+    requiresLedgerEvent: true,
+    requiresStoreLedgerEvent: true,
+  },
+  {
+    objectId: "store_queue_mark",
+    affordance: "note_wary",
+    fromStates: ["player_waiting", "delayed"],
+    toState: "delayed",
+    eventKind: "queue_wary_noted",
+    allowedRoles: ["waiting_customer"],
+    economyDelta: { localTrust: -2, recordBurden: 5 },
     requiresLedgerEvent: true,
     requiresStoreLedgerEvent: true,
   },
@@ -655,6 +668,9 @@ function priorityHintsForRule(rule: AffordanceRule): string[] {
   if (rule.affordance === "accept_routine") {
     hints.push("pressure:routine_kept");
   }
+  if (rule.affordance === "note_wary") {
+    hints.push("pressure:wary_queue");
+  }
   if (rule.affordance === "accept_repair") {
     hints.push("pressure:repair_accepted");
   }
@@ -684,6 +700,8 @@ function perceivedAs(rule: AffordanceRule): string {
       return "public queue pressure";
     case "accept_routine":
       return "routine queue acceptance";
+    case "note_wary":
+      return "local wary queue note";
     case "accept_repair":
       return "public repair acceptance";
     case "post_rumor":

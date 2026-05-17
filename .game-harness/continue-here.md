@@ -15,7 +15,7 @@ Last Updated: 2026-05-18
 - Codex gameplay QA is now part of the proof surface: session kits copy the
   Codex JSON and Markdown gameplay reports, verify the public action catalog,
   typed free-input execution, player-visible HUD/world/ledger/NPC role-action
-  state, 4/4 route reports, and readable Markdown report content.
+  state, 5/5 route reports, and readable Markdown report content.
 - The fastest correct next move is still an observed fresh-player session
   through the current packaged sample app. If a fresh tester is present, run
   `.game-harness/scripts/run-same-order-comprehension-session.sh` directly.

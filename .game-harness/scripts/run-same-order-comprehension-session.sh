@@ -376,7 +376,7 @@ const requiredFiles = [
   "codex-gameplay-report.md",
   "session-kit-manifest.json",
 ];
-const requiredRoutes = ["clean_cover", "repair_recovered", "soft_report", "inquest_opened"];
+const requiredRoutes = ["clean_cover", "repair_recovered", "cover_held_under_suspicion", "soft_report", "inquest_opened"];
 const requiredActionIds = [
   "focus.store_counter",
   "conversation.start",
@@ -504,6 +504,9 @@ if (fs.existsSync(copiedJson)) {
   const civicLedger = Array.isArray(copiedProbe.finalSummary?.civicLedger) ? copiedProbe.finalSummary.civicLedger : [];
   const roleActionExplanation = Array.isArray(copiedProbe.aiPlayerReport?.roleActionExplanation) ? copiedProbe.aiPlayerReport.roleActionExplanation : [];
   const socialObservationExplanation = Array.isArray(copiedProbe.aiPlayerReport?.socialObservationExplanation) ? copiedProbe.aiPlayerReport.socialObservationExplanation : [];
+  const stationCitationEvent = civicLedger.find((event) => event?.actorRole === "station_officer" && event?.affordance === "cite_record");
+  const stationCitationId = stationCitationEvent?.eventId || "";
+  const citedStoreLedgerId = stationCitationEvent?.citedLedgerEventId || "";
   checks.push(["copiedProbeSchema", copiedProbe.schemaVersion === "codex-gameplay-probe-v1", copiedProbe.schemaVersion]);
   checks.push(["copiedProbeOk", copiedProbe.ok === true, copiedProbe.ok]);
   checks.push(["copiedProbeAiPlayerReport", copiedProbe.aiPlayerReport?.pass === true && copiedProbe.aiPlayerReport?.notAReplacementForExternalComprehension === true, copiedProbe.aiPlayerReport?.pass]);
@@ -512,7 +515,8 @@ if (fs.existsSync(copiedJson)) {
   checks.push([
     "playerVisibleHudState",
     typeof playerVisibleState.recordState === "string" &&
-      playerVisibleState.recordState.includes("civic-ledger-4") &&
+      stationCitationId &&
+      playerVisibleState.recordState.includes(stationCitationId) &&
       typeof playerVisibleState.investigationTrail === "string" &&
       playerVisibleState.investigationTrail.includes("대상: 플레이어") &&
       typeof playerVisibleState.civicEconomyPanel === "string" &&
@@ -522,7 +526,8 @@ if (fs.existsSync(copiedJson)) {
   checks.push([
     "environmentHudSnapshot",
     typeof envHud.recordStateLabel === "string" &&
-      envHud.recordStateLabel.includes("civic-ledger-4") &&
+      stationCitationId &&
+      envHud.recordStateLabel.includes(stationCitationId) &&
       typeof envHud.consequenceLabel === "string" &&
       envHud.consequenceLabel.includes("스테이션 인용") &&
       typeof envHud.outcomeBodyLabel === "string" &&
@@ -542,15 +547,16 @@ if (fs.existsSync(copiedJson)) {
   ]);
   checks.push([
     "npcRoleActionState",
-    agentActionLog.some((action) => action?.actorRole === "store_manager" && action?.affordance === "forward_report" && action?.ledgerEventId === "civic-ledger-3") &&
-      agentActionLog.some((action) => action?.actorRole === "station_officer" && action?.affordance === "cite_record" && action?.citedLedgerEventId === "civic-ledger-3" && action?.ledgerEventId === "civic-ledger-4") &&
+    citedStoreLedgerId &&
+      agentActionLog.some((action) => action?.actorRole === "store_manager" && action?.affordance === "forward_report" && action?.ledgerEventId === citedStoreLedgerId) &&
+      agentActionLog.some((action) => action?.actorRole === "station_officer" && action?.affordance === "cite_record" && action?.citedLedgerEventId === citedStoreLedgerId && action?.ledgerEventId === stationCitationId) &&
       roleActionExplanation.some((line) => String(line).includes("station_officer used cite_record")) &&
       socialObservationExplanation.length >= 2,
     JSON.stringify({agentActionLog, roleActionExplanation, socialObservationExplanation}),
   ]);
   checks.push([
     "civicLedgerCitationState",
-    civicLedger.some((event) => event?.eventId === "civic-ledger-4" && event?.actorRole === "station_officer" && event?.citedLedgerEventId === "civic-ledger-3"),
+    Boolean(stationCitationId && citedStoreLedgerId),
     JSON.stringify(civicLedger),
   ]);
   for (const routeId of requiredRoutes) {

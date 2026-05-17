@@ -101,7 +101,7 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Promote Codex gameplay QA as a first-class goal: AI agents must be able to play, inspect, and explain the running proof cell through stable public interfaces.
 - [x] Add `aiPlayerReport` to the Codex gameplay QA artifact so AI-play checks summarize action path, player-visible state, cause chain, role actions, and human-comprehension boundary.
 - [x] Add a Markdown sidecar for the Codex gameplay QA report so AI-play proof is readable without opening the full JSON artifact.
-- [x] Add Codex route reports for clean cover, repair recovery, soft report, and inquest through public gameplay actions.
+- [x] Add Codex route reports for clean cover, repair recovery, suspicious cover, soft report, and inquest through public gameplay actions.
 - [x] Show Codex route report summaries in facilitator pack, worksheet, and session kit setup materials.
 - [x] Bundle facilitator-only Codex gameplay QA JSON and Markdown snapshots into generated session kits.
 - [x] Add session kit manifest JSON for AI-readable build, route, Codex QA, and external-gate binding.

@@ -39,6 +39,18 @@ const ROUTE_PROBE_PLANS := [
 		]
 	},
 	{
+		"routeId": "cover_held_under_suspicion",
+		"expectedStage": "uneasy",
+		"expectedRouteOutcome": "cover_held_under_suspicion",
+		"expectedSessionOutcome": "cover_held",
+		"steps": [
+			{"actionId": "focus.store_counter", "payload": {}},
+			{"actionId": "conversation.start", "payload": {}},
+			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.risky"}},
+			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.probe.safe"}}
+		]
+	},
+	{
 		"routeId": "soft_report",
 		"expectedStage": "reported",
 		"expectedRouteOutcome": "soft_report",
@@ -51,7 +63,7 @@ const ROUTE_PROBE_PLANS := [
 		]
 	}
 ]
-const REQUIRED_ROUTE_REPORT_IDS := ["clean_cover", "repair_recovered", "soft_report", "inquest_opened"]
+const REQUIRED_ROUTE_REPORT_IDS := ["clean_cover", "repair_recovered", "cover_held_under_suspicion", "soft_report", "inquest_opened"]
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -341,6 +353,21 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("repair_recovered expected Store Clerk correction attachment")
 			if not _action_exists(summary, "waiting_customer", "accept_repair"):
 				failures.append("repair_recovered expected Waiting Customer repair acceptance")
+		"cover_held_under_suspicion":
+			if int(summary.get("reportWeight", 0)) > 49:
+				failures.append("cover_held_under_suspicion must stay below report threshold")
+			if bool(station.get("intakeOpen", false)) or bool(station.get("inquestOpen", false)):
+				failures.append("cover_held_under_suspicion must stay local without Station intake")
+			if str(record_objects.get("receipt_tray", "")) != "marked":
+				failures.append("cover_held_under_suspicion expected marked receipt")
+			if str(record_objects.get("store_queue_mark", "")) != "delayed":
+				failures.append("cover_held_under_suspicion expected queue mark to slow locally")
+			if not _action_exists(summary, "store_clerk", "mark_receipt"):
+				failures.append("cover_held_under_suspicion expected Store Clerk marked receipt")
+			if not _action_exists(summary, "waiting_customer", "note_wary"):
+				failures.append("cover_held_under_suspicion expected Waiting Customer wary note")
+			if not _observation_exists(summary, "waiting_customer", "store_clerk", "mark_receipt", "note_wary"):
+				failures.append("cover_held_under_suspicion expected Waiting Customer to read marked receipt")
 		"soft_report":
 			if not bool(station.get("intakeOpen", false)) or bool(station.get("inquestOpen", false)):
 				failures.append("soft_report must open Station intake but stop before inquest")

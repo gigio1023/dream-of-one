@@ -139,6 +139,49 @@ test("Store-side actor reacts to visible queue pressure without omniscient Stati
   assert.equal(result.environment.economy.recordBurden, 5);
 });
 
+test("Waiting customer can keep a marked receipt locally wary without opening a report", () => {
+  let environment = createSameOrderAgenticEnvironment();
+  const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);
+  const marked = requireAccepted(validateAndApplyEnvironmentAction(environment, clerk, {
+    actorId: clerk.actorId,
+    role: clerk.role,
+    affordance: "mark_receipt",
+    objectId: "receipt_tray",
+    recordId: "store_same_order_receipt",
+    whyLine: "The player broke the usual routine, so the receipt gets marked without a report yet.",
+  }));
+  environment = marked.environment;
+
+  const customer = actor({
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    knownLedgerEventIds: [marked.event.eventId],
+  }, environment);
+  const action = listAvailableEnvironmentActions(environment, customer)
+    .find(candidate => candidate.affordance === "note_wary");
+
+  assert.ok(action);
+  assert.equal(action.objectId, "store_queue_mark");
+  assert.deepEqual(action.citableLedgerEventIds, [marked.event.eventId]);
+  assert.deepEqual(action.civicEconomyEffects, ["localTrust:-2", "recordBurden:+5"]);
+
+  const wary = requireAccepted(validateAndApplyEnvironmentAction(environment, customer, {
+    actorId: customer.actorId,
+    role: customer.role,
+    affordance: "note_wary",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_queue_wary",
+    citedLedgerEventId: marked.event.eventId,
+    whyLine: "The marked receipt is visible enough for the waiting customer to slow down without making a formal complaint.",
+  }));
+
+  assert.equal(wary.event.kind, "queue_wary_noted");
+  assert.equal(wary.event.citedLedgerEventId, marked.event.eventId);
+  assert.equal(wary.environment.objects.find(item => item.objectId === "store_queue_mark")?.state, "delayed");
+  assert.equal(wary.environment.economy.localTrust, 43);
+  assert.equal(wary.environment.economy.recordBurden, 20);
+});
+
 test("Park witness can post a public notice from a known Store record", () => {
   let environment = createSameOrderAgenticEnvironment();
   const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);

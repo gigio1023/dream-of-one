@@ -915,6 +915,56 @@
 						]
 					},
 					{
+						"actionId": "store_queue_mark.note_wary",
+						"affordance": "note_wary",
+						"citableLedgerEventIds": [
+							"civic-ledger-2"
+						],
+						"civicEconomyEffects": [
+							"localTrust:-2",
+							"recordBurden:+5"
+						],
+						"eligibleRoles": [
+							"waiting_customer"
+						],
+						"failureReasons": [
+							"object_not_perceived",
+							"affordance_unavailable",
+							"role_authority_exceeded",
+							"why_line_required",
+							"ledger_event_unknown",
+							"ledger_event_not_known",
+							"station_citation_requires_store_record"
+						],
+						"ledgerEventKind": "queue_wary_noted",
+						"objectId": "store_queue_mark",
+						"objectState": "player_waiting",
+						"perceivedAs": "local wary queue note",
+						"playerLabel": "Note Wary",
+						"preconditions": [
+							"object_state:player_waiting",
+							"role_allowed:waiting_customer",
+							"known_ledger_event_required",
+							"known_store_ledger_event_required",
+							"record_id:store_same_order_queue_state"
+						],
+						"priorityHints": [
+							"economy:localTrust",
+							"economy:recordBurden",
+							"requires:store_record_citation",
+							"pressure:wary_queue"
+						],
+						"recordId": "store_same_order_queue_state",
+						"requiresLedgerEvent": true,
+						"requiresStoreLedgerEvent": true,
+						"toState": "delayed",
+						"validationRuleId": "same_order.store_queue_mark.note_wary",
+						"visibleTo": [
+							"store_clerk",
+							"waiting_customer"
+						]
+					},
+					{
 						"actionId": "store_queue_mark.complain_delay",
 						"affordance": "complain_delay",
 						"citableLedgerEventIds": [
@@ -1705,14 +1755,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779040049085",
+				"eventId": "playable_session_started-001-1779040776115",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779040049085,
+				"timestampMs": 1779040776115,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -1725,7 +1775,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-002-1779040049162",
+				"eventId": "conversation_started-002-1779040776225",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -1734,7 +1784,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779040049162,
+				"timestampMs": 1779040776225,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -1747,7 +1797,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-003-1779040049177",
+				"eventId": "response_hesitation_noted-003-1779040776236",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -1768,7 +1818,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779040049177,
+				"timestampMs": 1779040776236,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -1783,7 +1833,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-004-1779040049191",
+				"eventId": "dialogue_choice_selected-004-1779040776250",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -1805,7 +1855,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779040049191,
+				"timestampMs": 1779040776250,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -1820,7 +1870,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-005-1779040049191",
+				"eventId": "conversation_anomaly_detected-005-1779040776250",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -1842,7 +1892,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779040049191,
+				"timestampMs": 1779040776250,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -1857,7 +1907,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-006-1779040049191",
+				"eventId": "npc_suspicion_changed-006-1779040776250",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -1879,7 +1929,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779040049191,
+				"timestampMs": 1779040776250,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -1894,7 +1944,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-007-1779040049204",
+				"eventId": "free_input_submitted-007-1779040776265",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -1919,7 +1969,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779040049204,
+				"timestampMs": 1779040776265,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -1934,7 +1984,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779040049204",
+				"eventId": "conversation_anomaly_detected-008-1779040776265",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -1959,7 +2009,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779040049204,
+				"timestampMs": 1779040776265,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -1974,7 +2024,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779040049204",
+				"eventId": "npc_suspicion_changed-009-1779040776265",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -1999,7 +2049,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779040049204,
+				"timestampMs": 1779040776265,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2014,7 +2064,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-010-1779040049204",
+				"eventId": "suspicion_shared-010-1779040776266",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2039,7 +2089,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779040049204,
+				"timestampMs": 1779040776266,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2054,7 +2104,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-011-1779040049205",
+				"eventId": "station_report_created-011-1779040776266",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2079,7 +2129,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779040049205,
+				"timestampMs": 1779040776266,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2094,7 +2144,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-012-1779040049205",
+				"eventId": "station_inquest_opened-012-1779040776266",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2119,7 +2169,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779040049205,
+				"timestampMs": 1779040776266,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2699,6 +2749,56 @@
 							"requiresStoreLedgerEvent": true,
 							"toState": "settled",
 							"validationRuleId": "same_order.store_queue_mark.accept_routine",
+							"visibleTo": [
+								"store_clerk",
+								"waiting_customer"
+							]
+						},
+						{
+							"actionId": "store_queue_mark.note_wary",
+							"affordance": "note_wary",
+							"citableLedgerEventIds": [
+								"civic-ledger-2"
+							],
+							"civicEconomyEffects": [
+								"localTrust:-2",
+								"recordBurden:+5"
+							],
+							"eligibleRoles": [
+								"waiting_customer"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known",
+								"station_citation_requires_store_record"
+							],
+							"ledgerEventKind": "queue_wary_noted",
+							"objectId": "store_queue_mark",
+							"objectState": "player_waiting",
+							"perceivedAs": "local wary queue note",
+							"playerLabel": "Note Wary",
+							"preconditions": [
+								"object_state:player_waiting",
+								"role_allowed:waiting_customer",
+								"known_ledger_event_required",
+								"known_store_ledger_event_required",
+								"record_id:store_same_order_queue_state"
+							],
+							"priorityHints": [
+								"economy:localTrust",
+								"economy:recordBurden",
+								"requires:store_record_citation",
+								"pressure:wary_queue"
+							],
+							"recordId": "store_same_order_queue_state",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": true,
+							"toState": "delayed",
+							"validationRuleId": "same_order.store_queue_mark.note_wary",
 							"visibleTo": [
 								"store_clerk",
 								"waiting_customer"
@@ -5352,6 +5452,778 @@
 					"hasBody": true,
 					"label": "대기 표식\n줄 안정",
 					"state": "settled",
+					"visible": true
+				},
+				"usual_order_cue": {
+					"hasBody": true,
+					"label": "늘 같은 주문\n읽힘",
+					"state": "read",
+					"visible": true
+				}
+			}
+		},
+		{
+			"acceptedActions": [
+				"focus.store_counter",
+				"conversation.start",
+				"dialogue.choice.by_id",
+				"dialogue.choice.by_id"
+			],
+			"actionPath": [
+				"focus.store_counter -> look at the Store counter",
+				"conversation.start -> start the clerk's Same Order question",
+				"dialogue.choice.by_id -> choose dialogue id store.same_order.risky",
+				"dialogue.choice.by_id -> choose dialogue id store.same_order.probe.safe"
+			],
+			"expected": {
+				"routeOutcome": "cover_held_under_suspicion",
+				"sessionOutcome": "cover_held",
+				"stage": "uneasy"
+			},
+			"failures": [],
+			"finalPlayerVisibleState": {
+				"civicEconomy": {
+					"accountCredit": 3,
+					"localTrust": 43,
+					"recordBurden": 20,
+					"stationAttention": 0
+				},
+				"consequence": "NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다.",
+				"investigationTrail": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
+				"outcomeBody": "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄지만 정식 불평이나 보고로 키우지는 않았습니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 지역 신뢰가 낮아지고 기록 부담이 조금 남았습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+				"recordObjects": {
+					"civic_ledger": "append_only",
+					"correction_slip": "absent",
+					"park_notice_board": "clear",
+					"receipt_tray": "marked",
+					"report_tray": "empty",
+					"station_dossier": "absent",
+					"store_counter": "serving",
+					"store_queue_mark": "delayed",
+					"usual_order_cue": "read"
+				},
+				"recordState": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 43 부담 20 주목 0 | 장부 2 최근 civic-ledger-2 대기 손님 / 경계 메모 / 대기줄 경계 -> civic-ledger-1 | 사회 반응 대기 손님가 상점 점원의 영수증 표시 기록을 보고 경계 메모, 부담 15",
+				"reportWeight": 30,
+				"routeOutcome": "cover_held_under_suspicion",
+				"sessionOutcome": "cover_held",
+				"stage": "uneasy",
+				"stationInquestOpen": false,
+				"stationIntakeOpen": false,
+				"suspicion": 35,
+				"whyLine": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
+			},
+			"npcInteractionChecks": {
+				"economyPanelReadable": false,
+				"latestLedger": {
+					"actorId": "NPC_Waiting_Customer",
+					"actorRole": "waiting_customer",
+					"affordance": "note_wary",
+					"citedLedgerEventId": "civic-ledger-1",
+					"economyDelta": {
+						"localTrust": -2,
+						"recordBurden": 5
+					},
+					"eventId": "civic-ledger-2",
+					"kind": "queue_wary_noted",
+					"objectId": "store_queue_mark",
+					"recordId": "store_same_order_queue_wary",
+					"validation": "accepted",
+					"whyLine": "A waiting customer sees the marked receipt and slows down without turning it into a formal complaint."
+				},
+				"managerObservedClerk": false,
+				"parkWitnessObservedClerk": false,
+				"parkWitnessReacted": false,
+				"stationCitedExactLedger": false,
+				"stationObservedManager": false,
+				"stationOfficerCitedRecord": false,
+				"storeClerkMarkedReceipt": true,
+				"storeClerkPlacedNote": false,
+				"storeManagerForwardedReport": false,
+				"waitingCustomerObservedClerk": false,
+				"waitingCustomerReacted": false,
+				"worldPropsReachInquest": false
+			},
+			"pass": true,
+			"playerReadableSummary": "Route cover_held_under_suspicion ended at uneasy/cover_held_under_suspicion, suspicion 35, report 30.",
+			"rejectedActions": [],
+			"roleActionExplanation": [
+				"store_clerk used mark_receipt on receipt_tray -> civic-ledger-1",
+				"waiting_customer used note_wary on store_queue_mark -> civic-ledger-2"
+			],
+			"routeId": "cover_held_under_suspicion",
+			"schemaVersion": "codex-route-play-report-v1",
+			"snapshots": [
+				{
+					"availableChoices": [
+						"네, 같은 걸로 부탁해요.",
+						"제가 보통 뭘 시켰죠?",
+						"오늘 처음 왔는데요."
+					],
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 50,
+						"recordBurden": 0,
+						"stationAttention": 0
+					},
+					"hud": {
+						"choicesLabel": "1/2/3 대화 선택지   직접 입력은 상점 기록",
+						"consequenceLabel": "당신은 검사 대상입니다. 상점 점원의 평범한 질문도 기록됩니다.",
+						"focusLabel": "WASD로 이동. 상점 카운터에 접근해 E로 대화를 시작하세요.",
+						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
+						"freeInputVisible": false,
+						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
+						"noticeVisible": true,
+						"outcomeBodyLabel": "",
+						"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 0 -> 접수 닫힘 / 심문 닫힘 / 판정 닫힘 / 종료 닫힘",
+						"outcomeVisible": false,
+						"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
+						"recordStateLabel": "상점 기록: 영수증 빈칸 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 50 부담 0 주목 0 | 장부 0 최근 - | 사회 반응 -",
+						"recordedStatementLabel": "직접 입력도 기록됩니다.",
+						"riskyLineLabel": "직접 입력한 말도 상점 기록으로 남습니다.",
+						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
+						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
+					},
+					"label": "initial",
+					"latestLedger": {},
+					"recordObjects": {
+						"civic_ledger": "append_only",
+						"correction_slip": "absent",
+						"park_notice_board": "clear",
+						"receipt_tray": "blank",
+						"report_tray": "empty",
+						"station_dossier": "absent",
+						"store_counter": "serving",
+						"store_queue_mark": "player_waiting",
+						"usual_order_cue": "read"
+					},
+					"summary": {
+						"inputLocked": false,
+						"lastDialogueChoice": "",
+						"lastReasonCode": "",
+						"reportWeight": 0,
+						"responseHesitationCount": 0,
+						"routeOutcome": "running",
+						"sessionOutcome": "running",
+						"stage": "normal",
+						"suspicion": 0
+					},
+					"worldRecordProps": {
+						"civic_economy_panel": {
+							"hasBody": true,
+							"label": "시민 경제\n잔액 3 | 신뢰 50 | 부담 0 | 주목 0",
+							"state": "stable",
+							"visible": true
+						},
+						"civic_ledger": {
+							"hasBody": true,
+							"label": "시민 장부 0건\n-",
+							"state": "append_only",
+							"visible": true
+						},
+						"correction_slip": {
+							"hasBody": true,
+							"label": "정정\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"park_notice_board": {
+							"hasBody": true,
+							"label": "공개판\n비어 있음",
+							"state": "clear",
+							"visible": true
+						},
+						"receipt_tray": {
+							"hasBody": true,
+							"label": "영수증\n빈칸",
+							"state": "blank",
+							"visible": true
+						},
+						"report_tray": {
+							"hasBody": true,
+							"label": "보고\n비어 있음",
+							"state": "empty",
+							"visible": true
+						},
+						"station_dossier": {
+							"hasBody": true,
+							"label": "스테이션 문서\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"store_counter": {
+							"hasBody": true,
+							"label": "카운터\n응대",
+							"state": "serving",
+							"visible": true
+						},
+						"store_queue_mark": {
+							"hasBody": true,
+							"label": "대기 표식\n플레이어 대기",
+							"state": "player_waiting",
+							"visible": true
+						},
+						"usual_order_cue": {
+							"hasBody": true,
+							"label": "늘 같은 주문\n읽힘",
+							"state": "read",
+							"visible": true
+						}
+					}
+				},
+				{
+					"availableChoices": [
+						"네, 같은 걸로 부탁해요.",
+						"제가 보통 뭘 시켰죠?",
+						"오늘 처음 왔는데요."
+					],
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 50,
+						"recordBurden": 0,
+						"stationAttention": 0
+					},
+					"hud": {
+						"choicesLabel": "1/2/3 대화 선택지   직접 입력은 상점 기록",
+						"consequenceLabel": "당신은 검사 대상입니다. 상점 점원의 평범한 질문도 기록됩니다.",
+						"focusLabel": "WASD로 이동. 상점 카운터에 접근해 E로 대화를 시작하세요.",
+						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
+						"freeInputVisible": false,
+						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
+						"noticeVisible": true,
+						"outcomeBodyLabel": "",
+						"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 0 -> 접수 닫힘 / 심문 닫힘 / 판정 닫힘 / 종료 닫힘",
+						"outcomeVisible": false,
+						"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
+						"recordStateLabel": "상점 기록: 영수증 빈칸 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 50 부담 0 주목 0 | 장부 0 최근 - | 사회 반응 -",
+						"recordedStatementLabel": "직접 입력도 기록됩니다.",
+						"riskyLineLabel": "직접 입력한 말도 상점 기록으로 남습니다.",
+						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
+						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
+					},
+					"label": "focus.store_counter",
+					"latestLedger": {},
+					"recordObjects": {
+						"civic_ledger": "append_only",
+						"correction_slip": "absent",
+						"park_notice_board": "clear",
+						"receipt_tray": "blank",
+						"report_tray": "empty",
+						"station_dossier": "absent",
+						"store_counter": "serving",
+						"store_queue_mark": "player_waiting",
+						"usual_order_cue": "read"
+					},
+					"summary": {
+						"inputLocked": false,
+						"lastDialogueChoice": "",
+						"lastReasonCode": "",
+						"reportWeight": 0,
+						"responseHesitationCount": 0,
+						"routeOutcome": "running",
+						"sessionOutcome": "running",
+						"stage": "normal",
+						"suspicion": 0
+					},
+					"worldRecordProps": {
+						"civic_economy_panel": {
+							"hasBody": true,
+							"label": "시민 경제\n잔액 3 | 신뢰 50 | 부담 0 | 주목 0",
+							"state": "stable",
+							"visible": true
+						},
+						"civic_ledger": {
+							"hasBody": true,
+							"label": "시민 장부 0건\n-",
+							"state": "append_only",
+							"visible": true
+						},
+						"correction_slip": {
+							"hasBody": true,
+							"label": "정정\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"park_notice_board": {
+							"hasBody": true,
+							"label": "공개판\n비어 있음",
+							"state": "clear",
+							"visible": true
+						},
+						"receipt_tray": {
+							"hasBody": true,
+							"label": "영수증\n빈칸",
+							"state": "blank",
+							"visible": true
+						},
+						"report_tray": {
+							"hasBody": true,
+							"label": "보고\n비어 있음",
+							"state": "empty",
+							"visible": true
+						},
+						"station_dossier": {
+							"hasBody": true,
+							"label": "스테이션 문서\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"store_counter": {
+							"hasBody": true,
+							"label": "카운터\n응대",
+							"state": "serving",
+							"visible": true
+						},
+						"store_queue_mark": {
+							"hasBody": true,
+							"label": "대기 표식\n플레이어 대기",
+							"state": "player_waiting",
+							"visible": true
+						},
+						"usual_order_cue": {
+							"hasBody": true,
+							"label": "늘 같은 주문\n읽힘",
+							"state": "read",
+							"visible": true
+						}
+					}
+				},
+				{
+					"availableChoices": [
+						"네, 같은 걸로 부탁해요.",
+						"제가 보통 뭘 시켰죠?",
+						"오늘 처음 왔는데요."
+					],
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 50,
+						"recordBurden": 0,
+						"stationAttention": 0
+					},
+					"hud": {
+						"choicesLabel": "1  네, 같은 걸로 부탁해요.",
+						"consequenceLabel": "말과 응답 지연은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.",
+						"focusLabel": "오늘도 같은 걸로 드릴까요?",
+						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
+						"freeInputVisible": true,
+						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 방금 발화",
+						"noticeVisible": true,
+						"outcomeBodyLabel": "",
+						"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 0 -> 접수 닫힘 / 심문 닫힘 / 판정 닫힘 / 종료 닫힘",
+						"outcomeVisible": false,
+						"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
+						"recordStateLabel": "상점 기록: 영수증 빈칸 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 50 부담 0 주목 0 | 장부 0 최근 - | 사회 반응 -",
+						"recordedStatementLabel": "직접 입력도 기록됩니다.",
+						"riskyLineLabel": "3  오늘 처음 왔는데요.",
+						"safeLineLabel": "2  제가 보통 뭘 시켰죠?",
+						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
+					},
+					"label": "conversation.start",
+					"latestLedger": {},
+					"recordObjects": {
+						"civic_ledger": "append_only",
+						"correction_slip": "absent",
+						"park_notice_board": "clear",
+						"receipt_tray": "blank",
+						"report_tray": "empty",
+						"station_dossier": "absent",
+						"store_counter": "serving",
+						"store_queue_mark": "player_waiting",
+						"usual_order_cue": "read"
+					},
+					"summary": {
+						"inputLocked": false,
+						"lastDialogueChoice": "",
+						"lastReasonCode": "",
+						"reportWeight": 0,
+						"responseHesitationCount": 0,
+						"routeOutcome": "running",
+						"sessionOutcome": "running",
+						"stage": "normal",
+						"suspicion": 0
+					},
+					"worldRecordProps": {
+						"civic_economy_panel": {
+							"hasBody": true,
+							"label": "시민 경제\n잔액 3 | 신뢰 50 | 부담 0 | 주목 0",
+							"state": "stable",
+							"visible": true
+						},
+						"civic_ledger": {
+							"hasBody": true,
+							"label": "시민 장부 0건\n-",
+							"state": "append_only",
+							"visible": true
+						},
+						"correction_slip": {
+							"hasBody": true,
+							"label": "정정\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"park_notice_board": {
+							"hasBody": true,
+							"label": "공개판\n비어 있음",
+							"state": "clear",
+							"visible": true
+						},
+						"receipt_tray": {
+							"hasBody": true,
+							"label": "영수증\n빈칸",
+							"state": "blank",
+							"visible": true
+						},
+						"report_tray": {
+							"hasBody": true,
+							"label": "보고\n비어 있음",
+							"state": "empty",
+							"visible": true
+						},
+						"station_dossier": {
+							"hasBody": true,
+							"label": "스테이션 문서\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"store_counter": {
+							"hasBody": true,
+							"label": "카운터\n응대",
+							"state": "serving",
+							"visible": true
+						},
+						"store_queue_mark": {
+							"hasBody": true,
+							"label": "대기 표식\n플레이어 대기",
+							"state": "player_waiting",
+							"visible": true
+						},
+						"usual_order_cue": {
+							"hasBody": true,
+							"label": "늘 같은 주문\n읽힘",
+							"state": "read",
+							"visible": true
+						}
+					}
+				},
+				{
+					"availableChoices": [
+						"맞습니다. 제가 착각했습니다.",
+						"어제 일이 조금 흐릿해서 확인했습니다.",
+						"저는 여기 사람이 아닙니다."
+					],
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 45,
+						"recordBurden": 15,
+						"stationAttention": 0
+					},
+					"hud": {
+						"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
+						"consequenceLabel": "말과 응답 지연은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.\n최근 발화: turn-1: 오늘 처음 왔는데요.",
+						"focusLabel": "처음이라고요? 어제도 같은 자리에서 같은 말을 하셨는데요.",
+						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
+						"freeInputVisible": true,
+						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 방금 발화",
+						"noticeVisible": true,
+						"outcomeBodyLabel": "",
+						"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 35 -> 접수 닫힘 / 심문 닫힘 / 판정 닫힘 / 종료 닫힘",
+						"outcomeVisible": false,
+						"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
+						"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 45 부담 15 주목 0 | 장부 1 최근 civic-ledger-1 상점 점원 / 영수증 표시 / 영수증 표시 | 사회 반응 -",
+						"recordedStatementLabel": "직접 입력도 기록됩니다.",
+						"riskyLineLabel": "3  저는 여기 사람이 아닙니다.",
+						"safeLineLabel": "2  어제 일이 조금 흐릿해서 확인했습니다.",
+						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
+					},
+					"label": "dialogue.choice.by_id",
+					"latestLedger": {
+						"actorId": "NPC_Store_Clerk",
+						"actorRole": "store_clerk",
+						"affordance": "mark_receipt",
+						"economyDelta": {
+							"localTrust": -5,
+							"recordBurden": 15
+						},
+						"eventId": "civic-ledger-1",
+						"kind": "store_receipt_marked",
+						"objectId": "receipt_tray",
+						"recordId": "store_same_order_receipt",
+						"validation": "accepted",
+						"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다."
+					},
+					"recordObjects": {
+						"civic_ledger": "append_only",
+						"correction_slip": "absent",
+						"park_notice_board": "clear",
+						"receipt_tray": "marked",
+						"report_tray": "empty",
+						"station_dossier": "absent",
+						"store_counter": "serving",
+						"store_queue_mark": "player_waiting",
+						"usual_order_cue": "read"
+					},
+					"summary": {
+						"inputLocked": false,
+						"lastDialogueChoice": "store.same_order.risky",
+						"lastReasonCode": "local_routine_mismatch",
+						"reportWeight": 30,
+						"responseHesitationCount": 0,
+						"routeOutcome": "running",
+						"sessionOutcome": "running",
+						"stage": "uneasy",
+						"suspicion": 35
+					},
+					"worldRecordProps": {
+						"civic_economy_panel": {
+							"hasBody": true,
+							"label": "시민 경제\n잔액 3 | 신뢰 45 | 부담 15 | 주목 0",
+							"state": "trust_low",
+							"visible": true
+						},
+						"civic_ledger": {
+							"hasBody": true,
+							"label": "시민 장부 1건\ncivic-ledger-1\n영수증 표시",
+							"state": "append_only",
+							"visible": true
+						},
+						"correction_slip": {
+							"hasBody": true,
+							"label": "정정\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"park_notice_board": {
+							"hasBody": true,
+							"label": "공개판\n비어 있음",
+							"state": "clear",
+							"visible": true
+						},
+						"receipt_tray": {
+							"hasBody": true,
+							"label": "영수증\n표시됨",
+							"state": "marked",
+							"visible": true
+						},
+						"report_tray": {
+							"hasBody": true,
+							"label": "보고\n비어 있음",
+							"state": "empty",
+							"visible": true
+						},
+						"station_dossier": {
+							"hasBody": true,
+							"label": "스테이션 문서\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"store_counter": {
+							"hasBody": true,
+							"label": "카운터\n응대",
+							"state": "serving",
+							"visible": true
+						},
+						"store_queue_mark": {
+							"hasBody": true,
+							"label": "대기 표식\n플레이어 대기",
+							"state": "player_waiting",
+							"visible": true
+						},
+						"usual_order_cue": {
+							"hasBody": true,
+							"label": "늘 같은 주문\n읽힘",
+							"state": "read",
+							"visible": true
+						}
+					}
+				},
+				{
+					"availableChoices": [
+						"맞습니다. 제가 착각했습니다.",
+						"어제 일이 조금 흐릿해서 확인했습니다.",
+						"저는 여기 사람이 아닙니다."
+					],
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 43,
+						"recordBurden": 20,
+						"stationAttention": 0
+					},
+					"hud": {
+						"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
+						"consequenceLabel": "NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다.",
+						"focusLabel": "WASD로 이동. 상점 카운터에 접근해 E로 대화를 시작하세요.",
+						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
+						"freeInputVisible": false,
+						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
+						"noticeVisible": false,
+						"outcomeBodyLabel": "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄지만 정식 불평이나 보고로 키우지는 않았습니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 지역 신뢰가 낮아지고 기록 부담이 조금 남았습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+						"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 35 -> 접수 닫힘 / 심문 닫힘 / 판정 닫힘 / 종료 열림",
+						"outcomeVisible": true,
+						"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
+						"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 43 부담 20 주목 0 | 장부 2 최근 civic-ledger-2 대기 손님 / 경계 메모 / 대기줄 경계 -> civic-ledger-1 | 사회 반응 대기 손님가 상점 점원의 영수증 표시 기록을 보고 경계 메모, 부담 15",
+						"recordedStatementLabel": "직접 입력도 기록됩니다.",
+						"riskyLineLabel": "직접 입력도 deterministic signal로만 판정됩니다.",
+						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
+						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
+					},
+					"label": "dialogue.choice.by_id",
+					"latestLedger": {
+						"actorId": "NPC_Waiting_Customer",
+						"actorRole": "waiting_customer",
+						"affordance": "note_wary",
+						"citedLedgerEventId": "civic-ledger-1",
+						"economyDelta": {
+							"localTrust": -2,
+							"recordBurden": 5
+						},
+						"eventId": "civic-ledger-2",
+						"kind": "queue_wary_noted",
+						"objectId": "store_queue_mark",
+						"recordId": "store_same_order_queue_wary",
+						"validation": "accepted",
+						"whyLine": "A waiting customer sees the marked receipt and slows down without turning it into a formal complaint."
+					},
+					"recordObjects": {
+						"civic_ledger": "append_only",
+						"correction_slip": "absent",
+						"park_notice_board": "clear",
+						"receipt_tray": "marked",
+						"report_tray": "empty",
+						"station_dossier": "absent",
+						"store_counter": "serving",
+						"store_queue_mark": "delayed",
+						"usual_order_cue": "read"
+					},
+					"summary": {
+						"inputLocked": true,
+						"lastDialogueChoice": "store.same_order.probe.safe",
+						"lastReasonCode": "none",
+						"reportWeight": 30,
+						"responseHesitationCount": 0,
+						"routeOutcome": "cover_held_under_suspicion",
+						"sessionOutcome": "cover_held",
+						"stage": "uneasy",
+						"suspicion": 35
+					},
+					"worldRecordProps": {
+						"civic_economy_panel": {
+							"hasBody": true,
+							"label": "시민 경제\n잔액 3 | 신뢰 43 | 부담 20 | 주목 0",
+							"state": "trust_low",
+							"visible": true
+						},
+						"civic_ledger": {
+							"hasBody": true,
+							"label": "시민 장부 2건\ncivic-ledger-2 -> civic-ledger-1\n경계 메모",
+							"state": "append_only",
+							"visible": true
+						},
+						"correction_slip": {
+							"hasBody": true,
+							"label": "정정\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"park_notice_board": {
+							"hasBody": true,
+							"label": "공개판\n비어 있음",
+							"state": "clear",
+							"visible": true
+						},
+						"receipt_tray": {
+							"hasBody": true,
+							"label": "영수증\n표시됨",
+							"state": "marked",
+							"visible": true
+						},
+						"report_tray": {
+							"hasBody": true,
+							"label": "보고\n비어 있음",
+							"state": "empty",
+							"visible": true
+						},
+						"station_dossier": {
+							"hasBody": true,
+							"label": "스테이션 문서\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"store_counter": {
+							"hasBody": true,
+							"label": "카운터\n응대",
+							"state": "serving",
+							"visible": true
+						},
+						"store_queue_mark": {
+							"hasBody": true,
+							"label": "대기 표식\n조금 지연",
+							"state": "delayed",
+							"visible": true
+						},
+						"usual_order_cue": {
+							"hasBody": true,
+							"label": "늘 같은 주문\n읽힘",
+							"state": "read",
+							"visible": true
+						}
+					}
+				}
+			],
+			"socialObservationExplanation": [
+				"waiting_customer saw store_clerk mark_receipt at civic-ledger-1, then chose note_wary"
+			],
+			"worldRecordProps": {
+				"civic_economy_panel": {
+					"hasBody": true,
+					"label": "시민 경제\n잔액 3 | 신뢰 43 | 부담 20 | 주목 0",
+					"state": "trust_low",
+					"visible": true
+				},
+				"civic_ledger": {
+					"hasBody": true,
+					"label": "시민 장부 2건\ncivic-ledger-2 -> civic-ledger-1\n경계 메모",
+					"state": "append_only",
+					"visible": true
+				},
+				"correction_slip": {
+					"hasBody": true,
+					"label": "정정\n없음",
+					"state": "absent",
+					"visible": true
+				},
+				"park_notice_board": {
+					"hasBody": true,
+					"label": "공개판\n비어 있음",
+					"state": "clear",
+					"visible": true
+				},
+				"receipt_tray": {
+					"hasBody": true,
+					"label": "영수증\n표시됨",
+					"state": "marked",
+					"visible": true
+				},
+				"report_tray": {
+					"hasBody": true,
+					"label": "보고\n비어 있음",
+					"state": "empty",
+					"visible": true
+				},
+				"station_dossier": {
+					"hasBody": true,
+					"label": "스테이션 문서\n없음",
+					"state": "absent",
+					"visible": true
+				},
+				"store_counter": {
+					"hasBody": true,
+					"label": "카운터\n응대",
+					"state": "serving",
+					"visible": true
+				},
+				"store_queue_mark": {
+					"hasBody": true,
+					"label": "대기 표식\n조금 지연",
+					"state": "delayed",
 					"visible": true
 				},
 				"usual_order_cue": {

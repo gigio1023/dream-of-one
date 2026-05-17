@@ -179,8 +179,9 @@ Current M1 carry-in:
 - Godot Same Order state changes now pass through deterministic role-agent
   validation and export `agentActionLog`: Store Clerk mutates receipt,
   correction, and report records; a Waiting Customer can read a normal receipt
-  and accept the routine so the queue settles, react to a clerk note by adding
-  toy queue pressure, or read an attached correction slip and accept the repair;
+  and accept the routine so the queue settles, read a marked receipt and keep
+  the queue locally wary without opening a report, react to a clerk note by
+  adding toy queue pressure, or read an attached correction slip and accept the repair;
   a Park Witness can turn a Store note into public rumor; Store Manager follows
   up or forwards the report; Station Officer cites the exact forwarded ledger
   event. Each log entry now includes the available action candidates and

@@ -55,8 +55,8 @@ const ROUTE_DEFINITIONS := [
 		"maxReportWeight": 49,
 		"expectedStationIntake": false,
 		"expectedStationInquest": false,
-		"expectedRecordStates": {"receipt_tray": "marked", "correction_slip": "absent", "report_tray": "empty", "station_dossier": "absent"},
-		"expectedCivicLedgerCount": 1,
+		"expectedRecordStates": {"store_queue_mark": "delayed", "receipt_tray": "marked", "correction_slip": "absent", "report_tray": "empty", "station_dossier": "absent"},
+		"expectedCivicLedgerCount": 2,
 		"expectedEvents": ["conversation_started", "dialogue_choice_selected", "conversation_anomaly_detected", "npc_suspicion_changed", "conversation_outcome_reached"],
 		"forbiddenEvents": ["station_report_created", "station_inquest_opened"],
 		"expectedSignals": ["local_routine_mismatch"],
@@ -402,6 +402,10 @@ func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[St
 			failures.append("cover_held_under_suspicion must not record a repair attempt")
 		if str(summary.get("repairState", "")) != "unused":
 			failures.append("cover_held_under_suspicion must leave repairState unused")
+		if not str(summary.get("outcomeBody", "")).contains("대기줄 경계"):
+			failures.append("cover_held_under_suspicion outcome must name the local wary queue reaction")
+		if not str(summary.get("outcomeBody", "")).contains("정식 불평이나 보고로 키우지는 않았습니다"):
+			failures.append("cover_held_under_suspicion outcome must show suspicion stayed local")
 	return failures
 
 func _validate_pack_shape(pack: Dictionary) -> Array[String]:
@@ -560,7 +564,11 @@ func _validate_agent_action_log(route: Dictionary, summary: Dictionary) -> Array
 				failures.append("%s expected action affordance to match civicLedger[%d]" % [route_id, index])
 	if route_id == "soft_report" and not _agent_action_has_role(action_log, "store_manager"):
 		failures.append("soft_report expected Store Manager validated action in agentActionLog")
+	if route_id == "cover_held_under_suspicion" and not _agent_action_exists(action_log, "waiting_customer", "note_wary"):
+		failures.append("cover_held_under_suspicion expected Waiting Customer note_wary action in agentActionLog")
 	var social_observations: Array = summary.get("socialObservationTrace", [])
+	if route_id == "cover_held_under_suspicion" and not _social_observation_exists(social_observations, "waiting_customer", "store_clerk", "mark_receipt", "note_wary"):
+		failures.append("cover_held_under_suspicion expected Waiting Customer reading the marked receipt")
 	if route_id == "soft_report" and not _social_observation_exists(social_observations, "store_manager", "store_clerk", "place_note", "place_note"):
 		failures.append("soft_report expected playable summary socialObservationTrace to show manager reading clerk note")
 	if route_id == "inquest_opened":
@@ -615,6 +623,8 @@ func _validate_hud_record_state(route: Dictionary, summary: Dictionary, hud: Nod
 		failures.append("repair_recovered expected HUD record state to show attached correction")
 	if route_id == "repair_recovered" and str(summary.get("recordObjects", {}).get("store_queue_mark", "")) != "settled":
 		failures.append("repair_recovered expected queue mark to settle after correction")
+	if route_id == "cover_held_under_suspicion" and not record_state_label.contains("경계"):
+		failures.append("cover_held_under_suspicion expected HUD record state to show a local wary queue note")
 	if route_id == "soft_report" and not record_state_label.contains("대기"):
 		failures.append("soft_report expected HUD record state to show pending report")
 	if route_id == "inquest_opened":
@@ -622,8 +632,10 @@ func _validate_hud_record_state(route: Dictionary, summary: Dictionary, hud: Nod
 			failures.append("inquest_opened expected HUD record state to show forwarded report")
 		if not record_state_label.contains("인용"):
 			failures.append("inquest_opened expected HUD record state to show cited Station dossier")
-	if ["soft_report", "inquest_opened"].has(route_id) and not record_state_label.contains("사회 반응"):
+	if ["cover_held_under_suspicion", "soft_report", "inquest_opened"].has(route_id) and not record_state_label.contains("사회 반응"):
 		failures.append("%s expected HUD record state to show NPC social reaction" % route_id)
+	if route_id == "cover_held_under_suspicion" and not record_state_label.contains("대기 손님"):
+		failures.append("cover_held_under_suspicion expected HUD social reaction to name Waiting Customer")
 	if route_id == "soft_report" and not record_state_label.contains("상점 매니저"):
 		failures.append("soft_report expected HUD social reaction to name Store Manager")
 	if route_id == "inquest_opened" and not record_state_label.contains("스테이션 직원"):
@@ -735,6 +747,8 @@ func _affordance_label(affordance: String) -> String:
 			return "영수증 작성"
 		"accept_routine":
 			return "일상 수락"
+		"note_wary":
+			return "경계 메모"
 		"mark_receipt":
 			return "영수증 표시"
 		"attach_correction":
@@ -1126,6 +1140,14 @@ func _social_observation_exists(social_observations: Array, observer_role: Strin
 func _agent_action_has_role(action_log: Array, role: String) -> bool:
 	for action in action_log:
 		if action is Dictionary and str(action.get("actorRole", "")) == role:
+			return true
+	return false
+
+func _agent_action_exists(action_log: Array, role: String, affordance: String) -> bool:
+	for action in action_log:
+		if action is Dictionary \
+			and str(action.get("actorRole", "")) == role \
+			and str(action.get("affordance", "")) == affordance:
 			return true
 	return false
 

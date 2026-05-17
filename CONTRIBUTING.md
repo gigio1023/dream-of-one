@@ -7,8 +7,14 @@
 - For Codex/agent work, the default is to commit and push every finished slice
   before starting a different slice. Do not save several unrelated improvements
   for one large end-of-session commit.
+- A finished slice means code/docs/evidence are internally consistent and the
+  narrow proof check for that slice has run. At that point, inspect status,
+  stage explicit paths, commit, and push without waiting for another reminder.
 - Treat an unpushed finished slice as incomplete agent work unless the user
   explicitly asks to hold it locally.
+- If the next slice would require a different rollback decision, push the
+  current slice first. A later revert should be able to remove one coherent
+  behavior change, one documentation-only adjustment, or one proof refresh.
 - Group generated evidence with the code or content that produced it when that
   evidence is required to prove the change. Do not split proof artifacts into a
   later commit unless the proof refresh is the only change.

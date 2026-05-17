@@ -96,17 +96,25 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `c0e9f337b882ab653955f231bf95f75fd658086e8187b13f7f046edc97abea50`
-  - Markdown SHA-256: `c66e591507f0650444739124c26d9dfb4c46cc7198b9c4097f9155ed86e8a4b8`
-  - playable Evidence Pack SHA-256: `c75e80c79d3c518b92ae6b5a9d6e44db183209805eccb0363d6504ba56a0d7c2`
-  - visual capture manifest SHA-256: `9fa4da15e17569cbc404ebc4e0aa2d3e00bfa256a1de690f9ad657f01e29dba2`
-  - packaged app zip SHA-256: `30f219a87666da21eb38a02dc4ae0725b55b49e1bedd5e433d73ee3c02d4544d`
+  - JSON SHA-256: `24fcb5357a5d0a96e68bf30f9b03e68176bff17e3e2588d224f2f2bfedfb0d9e`
+  - Markdown SHA-256: `460bc003f312b16aae0a3049e925aa9a9abd1ee4e6c92c210005ea9e4413b436`
+  - playable Evidence Pack SHA-256: `d4243d6dca3826bbbc41e6eb435871a80acc72ee4737641783021dcdb6b877fb`
+  - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
+  - packaged app zip SHA-256: `2771b4adfe8148f54abaaf2f463ada513fe919c5cd2f2570096e9e6e101371f4`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `13 / 13`, `explainability=13/13`, and
   `routeReportPassCount=5 / 5`.
+- latest game increment: the live HUD consequence line now follows the current
+  social chain all the way through post-citation consequences. When the inquest
+  route reaches `studio_review_queue=blocked` and `store_queue_mark=refused`,
+  the HUD reads `플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시
+  -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부`. This removes
+  a player-facing gap where the running HUD stopped at Station citation even
+  though the scene had already produced the Studio block and Waiting Customer
+  refusal.
 - latest game increment: inspecting a visible world-record prop now shows the
   small role/action map attached to that environment object. In the inquest
   Codex run, inspecting `studio_review_queue` shows `읽는 역할: 스튜디오 PM`,
@@ -185,12 +193,19 @@ Latest AI-play interface check:
   invitation. The point is not a Studio system; it is a reusable open-field
   pattern: public record -> another place's role sees it -> one visible
   opportunity opens.
-- latest packaged proof refresh: the macOS debug app was re-exported with
-  Godot 4.7-beta2 after the Studio review deferral change; zip SHA-256 is
-  `754475313d3c8013fc389de311182edec54c806e41b0078be5add0f23532186b`.
-  Packaged launch, packaged route smoke, backend schema validation, and
-  comprehension preflight all passed against
-  `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json`.
+- latest packaged proof refresh: the PCK, macOS debug app, unpacked app, and
+  packaged route evidence were re-exported with Godot 4.7-beta2 after the live
+  HUD consequence chain was extended through Studio review block and contact
+  refusal. PCK SHA-256 is
+  `0f81c01057ca95f7bd06aac66b071bb0f79b8538ed567d2a64deecd7a97c3623`, zip
+  SHA-256 is
+  `2771b4adfe8148f54abaaf2f463ada513fe919c5cd2f2570096e9e6e101371f4`, main-pack
+  smoke evidence SHA-256 is
+  `8a17f90cfd1f782c12dfdd588110bf963a10d148e2dd063bcf7a6cc772215c22`, and app
+  route evidence SHA-256 is
+  `4474f93fa8f7980cb6ba5b88d7006882d404b7be23b7e542be26fc2f2f84a99d`.
+  Packaged launch, packaged route smoke, and comprehension preflight all passed
+  against `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json`.
 - prior game increment: visible world-record props are reachable through a
   focused player interaction path, not only a direct inspect helper. Codex/player
   can use `focus.world_record_prop` on `park_notice_board`, then press

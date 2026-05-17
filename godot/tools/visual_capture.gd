@@ -89,7 +89,7 @@ const CAPTURE_DEFINITIONS := [
 			"non-empty 1280x720 viewport",
 			"Station inquest outcome panel is visible",
 			"suspicion, report pressure, and session termination state are visible",
-				"live HUD consequence line shows speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation -> Studio review block",
+				"live HUD consequence line shows speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation -> Studio review block -> contact refusal",
 			"outcome names the exact Store ledger entry cited by the Station",
 				"outcome shows speech/delay to record to queue reaction to Park notice to Station role-action to Studio review block chain",
 			"outcome names the NPC-to-NPC social reaction behind the Station citation",
@@ -316,8 +316,8 @@ func _capture_inquest_session_end(
 	var outcome_body := str(snapshot.get("outcomeBodyLabel", ""))
 	if not outcome_body.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문"):
 		blockers.append("Inquest capture did not show the dialogue/delay-to-record-to-role-action chain.")
-	if not str(snapshot.get("consequenceLabel", "")).contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용"):
-		blockers.append("Inquest capture did not show the live HUD record chain before the outcome proof.")
+	if not str(snapshot.get("consequenceLabel", "")).contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부"):
+		blockers.append("Inquest capture did not show the live HUD record-to-social-refusal chain before the outcome proof.")
 	if not outcome_body.contains("사회 반응"):
 		blockers.append("Inquest capture did not name the NPC-to-NPC social reaction in the outcome panel.")
 	if not outcome_body.contains("역할 행동: 스테이션 직원"):

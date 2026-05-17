@@ -142,7 +142,7 @@ func _validate_hud_snapshot(snapshot: Dictionary) -> Array[String]:
 	if not outcome_body.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문"):
 		failures.append("Packaged route smoke HUD did not show the outcome consequence chain.")
 	var consequence_label := str(snapshot.get("consequenceLabel", ""))
-	if not consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용"):
+	if not consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부"):
 		failures.append("Packaged route smoke HUD did not show the live record chain.")
 	if not outcome_body.contains("역할 행동: 스테이션 직원"):
 		failures.append("Packaged route smoke HUD did not name the Station Officer role action in the outcome.")
@@ -171,7 +171,7 @@ func _build_packaged_route_smoke_proof(summary: Dictionary, hud_snapshot: Dictio
 		"outcomeBody": outcome_body,
 		"consequenceLabel": consequence_label,
 		"outcomeChecks": {
-			"liveRecordChain": consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용"),
+			"liveRecordChain": consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부"),
 			"speechDelayRecordChain": outcome_body.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문"),
 			"stationOfficerRoleAction": outcome_body.contains("역할 행동: 스테이션 직원")
 		},

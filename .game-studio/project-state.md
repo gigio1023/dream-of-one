@@ -248,6 +248,13 @@ Current M1 carry-in:
   change came from `civic-ledger-7` citing `civic-ledger-6`. This supports the
   open-environment social-sim goal: records are readable social objects, not
   hidden debug state.
+- The live HUD consequence line now names the post-citation social result
+  directly. Once the Studio queue is blocked and the Waiting Customer refuses
+  contact, the inquest HUD chain continues from player speech and delay through
+  Store record, queue reaction, Park notice, report handoff, Station citation,
+  Studio review block, and contact refusal. This makes the current proof easier
+  to understand during play without adding a new Store, Station, or Studio
+  subsystem.
 - Codex gameplay QA now runs the active proof cell through public
   `PlayableSession.debug_codex_gameplay_action` and
   `debug_codex_gameplay_snapshot` APIs. The probe can list callable player

@@ -47,12 +47,11 @@ Last Updated: 2026-05-18
 - If `--status` is already pass and no watched Godot/HUD/probe/session-helper
   source changed, do not rerun Codex probe or regenerate setup kits merely to
   show activity. The next useful move is human play, not more preparation.
-- Latest implementation slice: formal Station citations now reach the Studio
-  PM. The PM reads `station_record_cited`, blocks `studio_review_queue`, shows
-  `리뷰 차단`, and Codex inspects both the blocked review queue and the PM's
-  basis record before the Waiting Customer refuses contact. Treat this as
-  another tiny open-environment proof, not as permission to build a Studio
-  subsystem.
+- Latest implementation slice: the live HUD consequence chain now includes the
+  post-citation social result. Inquest reads as player speech/delay -> Store
+  record -> queue reaction -> Park notice -> report handoff -> Station citation
+  -> Studio review block -> contact refusal, so the player can read the current
+  social consequence before opening detailed record or NPC inspection.
 
 2026-05-17 lightweight Ralph-style loop note:
 - Use `.game-harness/goal-loop-state.md` as the compact resume state for
@@ -76,9 +75,10 @@ Last Updated: 2026-05-18
   That proof is now written into `playability.packagedRouteSmokeProof`, and
   tester preflight fails if it is missing.
 - The same packaged proof now also stores and checks the inquest outcome body:
-  player speech/response delay -> Store record -> report handoff -> Station
-  citation -> inquest, plus Station Officer role action. Tester preflight fails
-  if this outcome-chain proof is missing.
+  player speech/response delay -> Store record -> queue reaction -> Park notice
+  -> report handoff -> Station citation -> Studio review block -> contact
+  refusal -> inquest, plus Station Officer role action. Tester preflight fails if
+  this outcome-chain proof is missing.
 - The latest playable/PCK route proof now stores `outcomeBody` for clean cover,
   repair recovery, soft report, and inquest; each terminal result names the role
   action that closed or escalated the record.

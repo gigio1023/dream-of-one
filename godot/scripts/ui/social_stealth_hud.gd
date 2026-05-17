@@ -28,6 +28,8 @@ const UI_COPY := {
 		"consequence_verdict": "세션 결과가 고정되었습니다. why-line이 근거입니다.",
 		"record_chain_intake": "흐름: 플레이어 발화 -> 상점 기록 -> 보고 접수",
 		"record_chain_inquest": "흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용",
+		"record_chain_inquest_review": "흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단",
+		"record_chain_inquest_contact": "흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부",
 		"safe_opening": "상점 카운터에서 E로 대화 시작",
 		"safe_default": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
 		"safe_choices": "선택지 1",
@@ -82,6 +84,8 @@ const UI_COPY := {
 		"consequence_verdict": "Session outcome is fixed. The why-line is the basis.",
 		"record_chain_intake": "Chain: player speech -> Store record -> report filed",
 		"record_chain_inquest": "Chain: player speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation",
+		"record_chain_inquest_review": "Chain: player speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation -> Studio review blocked",
+		"record_chain_inquest_contact": "Chain: player speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation -> Studio review blocked -> contact refused",
 		"safe_opening": "Press E at the store counter to start conversation",
 		"safe_default": "Choices are shown as speech, not risk labels.",
 		"safe_choices": "Choice 1",
@@ -353,6 +357,7 @@ func set_record_state(record_objects: Dictionary, civic_economy: Dictionary, civ
 	_latest_social_observation_text = _latest_social_observation_label(social_observations)
 	_refresh_record_state_label()
 	_refresh_investigation_trail_label()
+	_refresh_consequence_text()
 
 func set_provider_state(provider_state: Dictionary) -> void:
 	_provider_mode = str(provider_state.get("modeLabel", provider_state.get("mode", _provider_mode)))
@@ -448,6 +453,10 @@ func _refresh_record_state_label() -> void:
 
 func _record_chain_text(state_key: String) -> String:
 	if bool(_station.get("inquestOpen", false)) or state_key == "inquest":
+		if str(_record_objects.get("store_queue_mark", "")) == "refused":
+			return _ui_text("record_chain_inquest_contact")
+		if str(_record_objects.get("studio_review_queue", "")) == "blocked":
+			return _ui_text("record_chain_inquest_review")
 		return _ui_text("record_chain_inquest")
 	if bool(_station.get("intakeOpen", false)) or state_key == "intake":
 		return _ui_text("record_chain_intake")

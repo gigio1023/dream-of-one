@@ -142,6 +142,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Show the role/action map inside world-record prop inspection: the blocked
   Studio review queue HUD notice now names who can read it, which actions that
   record supports, and the latest ledger event that changed it.
+- [x] Extend the live HUD consequence chain through post-citation social
+  consequences: inquest now shows Station citation -> Studio review block ->
+  Waiting Customer contact refusal before the player opens inspection detail.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

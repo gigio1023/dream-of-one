@@ -100,6 +100,13 @@ packaged app route smoke still preserves fallback-only mode, typed free input,
 response hesitation, exact Station citation, live HUD record-chain proof,
 outcome-chain proof, and civic economy proof.
 
+Refresh note, 2026-05-18 KST: the PCK, macOS zip, unpacked app, and packaged
+route evidence were regenerated after the live HUD consequence line was
+extended through Studio review block and contact refusal. Packaged route smoke
+now requires `outcomeChecks.liveRecordChain = true` for the full speech/delay
+to contact-refusal chain, and tester preflight accepts the refreshed app-route
+evidence.
+
 ## Command Evidence
 
 Import:
@@ -182,8 +189,9 @@ The latest PCK `--main-pack` smoke and packaged app route smoke preserved:
   during inquest, now recorded in `playability.packagedRouteSmokeProof`
 - packaged live HUD consequence wording:
   `playability.packagedRouteSmokeProof.outcomeChecks.liveRecordChain` is true,
-  proving the exported build shows the speech/delay -> Store record -> report
-  handoff -> Station citation chain before the result panel
+  proving the exported build shows the speech/delay -> Store record -> queue
+  reaction -> Park notice -> report handoff -> Station citation -> Studio review
+  block -> contact refusal chain before the result panel
 - packaged outcome wording:
   `playability.packagedRouteSmokeProof.outcomeChecks.speechDelayRecordChain`
   and `stationOfficerRoleAction` are true, proving the exported result panel

@@ -353,6 +353,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("clean_cover expected Park Witness routine vouch")
 			if not _action_exists(summary, "waiting_customer", "share_local_tip"):
 				failures.append("clean_cover expected Waiting Customer local tip after public vouch")
+			if not _visible_waiting_customer_reaction(summary, "helped", "도움"):
+				failures.append("clean_cover expected visible Waiting Customer help reaction")
 			if not _action_perceives(summary, "waiting_customer", "share_local_tip", "park_notice_board"):
 				failures.append("clean_cover expected Waiting Customer to perceive public notice board before sharing a tip")
 			if str(record_objects.get("studio_review_queue", "")) != "invited":
@@ -388,6 +390,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("repair_recovered expected Store Clerk correction attachment")
 			if not _action_exists(summary, "waiting_customer", "accept_repair"):
 				failures.append("repair_recovered expected Waiting Customer repair acceptance")
+			if not _visible_waiting_customer_reaction(summary, "repair_accepted", "수습"):
+				failures.append("repair_recovered expected visible Waiting Customer repair acceptance")
 			if not _action_exists(summary, "park_witness", "post_repair_notice"):
 				failures.append("repair_recovered expected Park Witness repair notice")
 			if not _visible_park_witness_reaction(summary, "repaired", "수습"):
@@ -415,6 +419,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("cover_held_under_suspicion expected visible Park Witness warning reaction")
 			if not _action_exists(summary, "waiting_customer", "keep_distance"):
 				failures.append("cover_held_under_suspicion expected Waiting Customer distance after warning")
+			if not _visible_waiting_customer_reaction(summary, "distanced", "거리"):
+				failures.append("cover_held_under_suspicion expected visible Waiting Customer distance reaction")
 			if not _action_perceives(summary, "waiting_customer", "keep_distance", "park_notice_board"):
 				failures.append("cover_held_under_suspicion expected Waiting Customer to perceive public notice board before keeping distance")
 			if not _observation_exists(summary, "waiting_customer", "store_clerk", "mark_receipt", "note_wary"):
@@ -438,6 +444,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("soft_report expected Store Manager pause_service action")
 			if not _action_exists(summary, "waiting_customer", "leave_queue"):
 				failures.append("soft_report expected Waiting Customer leave_queue action")
+			if not _visible_waiting_customer_reaction(summary, "left", "이탈"):
+				failures.append("soft_report expected visible Waiting Customer queue-exit reaction")
 			if not _observation_exists(summary, "store_manager", "store_clerk", "place_note", "place_note"):
 				failures.append("soft_report expected Manager to act from Clerk note")
 			if not _observation_exists(summary, "waiting_customer", "store_manager", "pause_service", "leave_queue"):
@@ -453,6 +461,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("inquest_opened expected Station Officer citation")
 			if not bool(checks.get("waitingCustomerRefusedContact", false)):
 				failures.append("inquest_opened expected Waiting Customer refuse_contact action")
+			if not _visible_waiting_customer_reaction(summary, "refused", "거부"):
+				failures.append("inquest_opened expected visible Waiting Customer contact-refusal reaction")
 			if not bool(checks.get("worldPropsReachInquest", false)):
 				failures.append("inquest_opened expected inquest world record props")
 		_:
@@ -911,6 +921,17 @@ func _visible_park_witness_reaction(summary: Dictionary, expected_state: String,
 	var state: Dictionary = states.get("NPC_Park_Witness", {})
 	return (
 		str(state.get("npcId", "")) == "NPC_Park_Witness"
+		and str(state.get("state", "")) == expected_state
+		and bool(state.get("markerVisible", false))
+		and not str(state.get("pressureText", "")).strip_edges().is_empty()
+		and str(state.get("reactionText", "")).contains(expected_label)
+	)
+
+func _visible_waiting_customer_reaction(summary: Dictionary, expected_state: String, expected_label: String) -> bool:
+	var states: Dictionary = summary.get("visibleNpcStates", {})
+	var state: Dictionary = states.get("NPC_Waiting_Customer", {})
+	return (
+		str(state.get("npcId", "")) == "NPC_Waiting_Customer"
 		and str(state.get("state", "")) == expected_state
 		and bool(state.get("markerVisible", false))
 		and not str(state.get("pressureText", "")).strip_edges().is_empty()

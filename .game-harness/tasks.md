@@ -121,6 +121,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   suspicious-cover routes now show `NPC_Park_Witness` reaction markers for
   public vouch, repair notice, and public warning instead of leaving those
   actions as ledger-only state.
+- [x] Make Waiting Customer social decisions visible as NPC state: clean help,
+  repair acceptance, public-warning distance, soft-report queue exit, and
+  inquest contact refusal now show reaction markers instead of line-only state.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

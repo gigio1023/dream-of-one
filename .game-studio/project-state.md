@@ -203,6 +203,11 @@ Current M1 carry-in:
   `visibleNpcStates` so Codex can inspect the same player-readable NPC reaction
   text that appears in the scene. Playable/Codex probes now reject hidden-only
   social reactions for acting roles.
+- `NPC_Waiting_Customer` now exposes route social decisions as visible NPC
+  state: `helped`/`도움`, `repair_accepted`/`수습 수락`,
+  `distanced`/`거리두기`, `left`/`줄 이탈`, and `refused`/`접촉 거부`.
+  Playable/Codex route probes reject those decisions if they remain only ledger
+  entries or pressure lines.
 - `NPC_Park_Witness` now exposes public notice actions as visible NPC state:
   clean cover shows `vouched`/`공개 확인`, repair recovery shows
   `repaired`/`수습 게시`, and suspicious cover shows `warned`/`공개 경고`.

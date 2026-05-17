@@ -672,6 +672,16 @@ func _validate_visible_social_actors(route: Dictionary, summary: Dictionary, ses
 		var waiting_state: Dictionary = visible_states.get("NPC_Waiting_Customer", {})
 		if str(waiting_state.get("role", "")) != "Waiting Customer":
 			failures.append("%s expected NPC_Waiting_Customer to be a visible Waiting Customer role" % route_id)
+	if route_id == "clean_cover" and _agent_action_exists(action_log, "waiting_customer", "share_local_tip"):
+		failures.append_array(_validate_waiting_customer_reaction(visible_states, route_id, "helped", "도움"))
+	if route_id == "repair_recovered" and _agent_action_exists(action_log, "waiting_customer", "accept_repair"):
+		failures.append_array(_validate_waiting_customer_reaction(visible_states, route_id, "repair_accepted", "수습"))
+	if route_id == "cover_held_under_suspicion" and _agent_action_exists(action_log, "waiting_customer", "keep_distance"):
+		failures.append_array(_validate_waiting_customer_reaction(visible_states, route_id, "distanced", "거리"))
+	if route_id == "soft_report" and _agent_action_exists(action_log, "waiting_customer", "leave_queue"):
+		failures.append_array(_validate_waiting_customer_reaction(visible_states, route_id, "left", "이탈"))
+	if route_id == "inquest_opened" and _agent_action_exists(action_log, "waiting_customer", "refuse_contact"):
+		failures.append_array(_validate_waiting_customer_reaction(visible_states, route_id, "refused", "거부"))
 	if route_id == "clean_cover" and _agent_action_actor_exists(action_log, "NPC_Studio_PM"):
 		var studio_state: Dictionary = visible_states.get("NPC_Studio_PM", {})
 		if str(studio_state.get("state", "")) != "invited":
@@ -686,6 +696,17 @@ func _validate_visible_social_actors(route: Dictionary, summary: Dictionary, ses
 		failures.append_array(_validate_park_witness_reaction(visible_states, route_id, "repaired", "수습"))
 	if route_id == "cover_held_under_suspicion" and _agent_action_exists(action_log, "park_witness", "post_warning"):
 		failures.append_array(_validate_park_witness_reaction(visible_states, route_id, "warned", "경고"))
+	return failures
+
+func _validate_waiting_customer_reaction(visible_states: Dictionary, route_id: String, expected_state: String, expected_label: String) -> Array[String]:
+	var failures: Array[String] = []
+	var waiting_state: Dictionary = visible_states.get("NPC_Waiting_Customer", {})
+	if str(waiting_state.get("state", "")) != expected_state:
+		failures.append("%s expected NPC_Waiting_Customer visible state %s" % [route_id, expected_state])
+	if not bool(waiting_state.get("markerVisible", false)):
+		failures.append("%s expected NPC_Waiting_Customer reaction marker after social action" % route_id)
+	if not str(waiting_state.get("reactionText", "")).contains(expected_label):
+		failures.append("%s expected NPC_Waiting_Customer reaction label to mention %s" % [route_id, expected_label])
 	return failures
 
 func _validate_park_witness_reaction(visible_states: Dictionary, route_id: String, expected_state: String, expected_label: String) -> Array[String]:

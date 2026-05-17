@@ -96,14 +96,21 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `c6be4d3a283023d7f5747f821f8ce61cc0b01fda3de3df34951d7b0b4c975cd7`
+  - JSON SHA-256: `8315747189aa2581e93c5bfbe65acaeb07ca300b6bd27202c721e70f009bf3d1`
   - Markdown SHA-256: `842d07a342544ebf00861c4018aadd3a5fe8c584ac55cfcb74a43b709d9b4ddf`
-  - playable Evidence Pack SHA-256: `5564ce226c3e5a1a46a94167920649fe189d8ca5b4bbc84dd25aa98fa5b74b3f`
+  - playable Evidence Pack SHA-256: `e9bad63c1c73b1880db695c7b4f95a3dddbccfb6133663032e89c4592c6f4318`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `7 / 7`, and `routeReportPassCount=5 / 5`.
+- latest game increment: Waiting Customer final social decisions are now
+  visible NPC reactions in every Codex route report, not only ledger or pressure
+  text. Clean cover marks `NPC_Waiting_Customer` as `helped` with `도움`, repair
+  recovery marks `repair_accepted` with `수습 수락`, suspicious cover marks
+  `distanced` with `거리두기`, soft report marks `left` with `줄 이탈`, and
+  inquest marks `refused` with `접촉 거부`. Playable smoke and Codex route reports
+  now fail if those final social choices remain line-only state.
 - latest game increment: Park Witness public-record actions are now visible NPC
   reactions in the running scene. Clean cover marks `NPC_Park_Witness` as
   `vouched` with a `공개 확인` marker, repair recovery marks the same actor as
@@ -251,7 +258,7 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `c6be4d3a283023d7f5747f821f8ce61cc0b01fda3de3df34951d7b0b4c975cd7`
+  `8315747189aa2581e93c5bfbe65acaeb07ca300b6bd27202c721e70f009bf3d1`
 - Markdown SHA-256:
   `842d07a342544ebf00861c4018aadd3a5fe8c584ac55cfcb74a43b709d9b4ddf`
 - new proof: artifact now includes `aiPlayerReport` with action path, final

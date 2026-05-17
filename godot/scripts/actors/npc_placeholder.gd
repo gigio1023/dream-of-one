@@ -80,6 +80,24 @@ func set_reaction_state(state: String, exposure: int) -> void:
 		"warned":
 			reaction_text = _localized("npc.reaction.warned", {}, "warning posted")
 			reaction_color = Color(1.0, 0.62, 0.28, 1.0)
+		"helped":
+			reaction_text = _localized("npc.reaction.helped", {}, "helped")
+			reaction_color = Color(0.50, 0.86, 0.66, 1.0)
+		"repair_accepted":
+			reaction_text = _localized("npc.reaction.repair_accepted", {}, "repair accepted")
+			reaction_color = Color(0.62, 0.82, 1.0, 1.0)
+		"distanced":
+			reaction_text = _localized("npc.reaction.distanced", {}, "keeping distance")
+			reaction_color = Color(1.0, 0.70, 0.30, 1.0)
+		"left":
+			reaction_text = _localized("npc.reaction.left", {}, "left queue")
+			reaction_color = Color(1.0, 0.54, 0.38, 1.0)
+		"refused":
+			reaction_text = _localized("npc.reaction.refused", {}, "refused contact")
+			reaction_color = Color(1.0, 0.36, 0.32, 1.0)
+		"delayed":
+			reaction_text = _localized("npc.reaction.delayed", {}, "queue delayed")
+			reaction_color = Color(1.0, 0.78, 0.36, 1.0)
 		_:
 			reaction_text = ""
 	_reaction_label.text = reaction_text

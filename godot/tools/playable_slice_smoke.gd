@@ -93,8 +93,8 @@ const ROUTE_DEFINITIONS := [
 		"minReportWeight": 100,
 		"expectedStationIntake": true,
 		"expectedStationInquest": true,
-		"expectedRecordStates": {"store_queue_mark": "refused", "receipt_tray": "marked", "report_tray": "forwarded", "park_notice_board": "rumored", "studio_review_queue": "open", "station_dossier": "cited"},
-		"expectedCivicLedgerCount": 7,
+		"expectedRecordStates": {"store_queue_mark": "refused", "receipt_tray": "marked", "report_tray": "forwarded", "park_notice_board": "rumored", "studio_review_queue": "blocked", "station_dossier": "cited"},
+		"expectedCivicLedgerCount": 8,
 		"expectedEvents": ["conversation_started", "dialogue_choice_selected", "response_hesitation_noted", "free_input_submitted", "conversation_anomaly_detected", "npc_suspicion_changed", "suspicion_shared", "station_report_created", "station_inquest_opened"],
 		"forbiddenEvents": ["conversation_outcome_reached"],
 		"expectedSignals": ["local_routine_mismatch", "response_hesitation", "dream_language_leak"],
@@ -365,14 +365,18 @@ func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[St
 			failures.append("inquest_opened expected final civic ledger event queue_contact_refused")
 		if not _ledger_has_event_kind(civic_ledger, "station_record_cited"):
 			failures.append("inquest_opened expected Station citation ledger event before local refusal")
+		if not _ledger_has_event_kind(civic_ledger, "studio_review_blocked"):
+			failures.append("inquest_opened expected formal citation to block Studio review")
 		if not str(summary.get("outcomeBody", "")).contains("civic-ledger-"):
 			failures.append("inquest_opened outcome must show the cited Store ledger id")
 		if not str(summary.get("outcomeBody", "")).contains("스테이션 인용"):
 			failures.append("inquest_opened outcome must explain the Station citation")
-		if not str(summary.get("outcomeBody", "")).contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문"):
+		if not str(summary.get("outcomeBody", "")).contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문"):
 			failures.append("inquest_opened outcome must show speech/delay-to-record-to-role-action chain")
 		if not str(summary.get("outcomeBody", "")).contains("역할 행동: 스테이션 직원"):
 			failures.append("inquest_opened outcome must name Station Officer role action")
+		if not str(summary.get("outcomeBody", "")).contains("스튜디오 PM"):
+			failures.append("inquest_opened outcome must name Studio PM review block")
 		if not str(summary.get("lastWhyLine", "")).contains("꿈"):
 			failures.append("inquest_opened expected final why-line to explain dream language")
 		var prologue_loop: Dictionary = summary.get("prologueLoop", {})
@@ -647,10 +651,16 @@ func _validate_agent_action_log(route: Dictionary, summary: Dictionary) -> Array
 			failures.append("inquest_opened expected local refusal to cite the Station ledger event")
 		if not _agent_action_exists(action_log, "station_officer", "cite_record"):
 			failures.append("inquest_opened expected Station Officer cite_record before local refusal")
+		if not _agent_action_exists(action_log, "studio_pm", "block_review"):
+			failures.append("inquest_opened expected Studio PM block_review after Station citation")
+		if not _agent_action_perceives(action_log, "studio_pm", "block_review", "studio_review_queue"):
+			failures.append("inquest_opened expected Studio PM to perceive studio_review_queue before blocking review")
 		if not _social_observation_exists(social_observations, "store_manager", "store_clerk", "place_note", "forward_report"):
 			failures.append("inquest_opened expected playable summary socialObservationTrace to show manager forwarding clerk record")
 		if not _social_observation_exists(social_observations, "station_officer", "store_manager", "forward_report", "cite_record"):
 			failures.append("inquest_opened expected playable summary socialObservationTrace to show Station citing manager record")
+		if not _social_observation_exists(social_observations, "studio_pm", "station_officer", "cite_record", "block_review"):
+			failures.append("inquest_opened expected Studio PM to react to Station citation")
 		if not _social_observation_exists(social_observations, "waiting_customer", "station_officer", "cite_record", "refuse_contact"):
 			failures.append("inquest_opened expected Waiting Customer to react to Station citation")
 	return failures
@@ -700,6 +710,14 @@ func _validate_visible_social_actors(route: Dictionary, summary: Dictionary, ses
 			failures.append("clean_cover expected NPC_Studio_PM reaction marker after review invitation")
 		if not str(studio_state.get("reactionText", "")).contains("리뷰"):
 			failures.append("clean_cover expected NPC_Studio_PM reaction label to mention review")
+	if route_id == "inquest_opened" and _agent_action_exists(action_log, "studio_pm", "block_review"):
+		var studio_state: Dictionary = visible_states.get("NPC_Studio_PM", {})
+		if str(studio_state.get("state", "")) != "blocked":
+			failures.append("inquest_opened expected NPC_Studio_PM visible state to show blocked review")
+		if not bool(studio_state.get("markerVisible", false)):
+			failures.append("inquest_opened expected NPC_Studio_PM reaction marker after review block")
+		if not str(studio_state.get("reactionText", "")).contains("리뷰"):
+			failures.append("inquest_opened expected NPC_Studio_PM reaction label to mention review block")
 	if route_id == "clean_cover" and _agent_action_exists(action_log, "park_witness", "vouch_routine"):
 		failures.append_array(_validate_park_witness_reaction(visible_states, route_id, "vouched", "공개"))
 	if route_id == "repair_recovered" and _agent_action_exists(action_log, "park_witness", "post_repair_notice"):
@@ -1109,9 +1127,10 @@ func _agentic_route_proof(route_id: String) -> Dictionary:
 			_agentic_trace("inquest.park_witness.post_rumor", "NPC_Park_Witness", "park_witness", ["park_notice_board"], "post_rumor", "park_notice_board", "civic-ledger-4", "public_rumor_posted", {"recordId": "park_public_rumor", "citedLedgerEventId": "civic-ledger-2"}, _economy(3, 25, 60, 30), "The Park witness sees the Store note becoming public talk and pins a small notice outside the queue."),
 			_agentic_trace("inquest.manager.forward_report", "NPC_Store_Manager", "store_manager", ["store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "forward_report", "report_tray", "civic-ledger-5", "store_report_escalated", {"recordId": "store_same_order_clerk_statement"}, _economy(3, 5, 85, 70), "The manager sees the report tray and forwards the Store record for Station reconciliation."),
 			_agentic_trace("inquest.station.cite_store_report", "NPC_Station_Officer", "station_officer", ["report_tray", "station_dossier", "civic_ledger"], "cite_record", "station_dossier", "civic-ledger-6", "station_record_cited", {"recordId": "station_same_order_dossier", "citedLedgerEventId": "civic-ledger-5"}, _economy(3, 5, 85, 70), "The Station cites the exact forwarded Store ledger event before narrowing the player's answer."),
-			_agentic_trace("inquest.waiting_customer.refuse_contact", "NPC_Waiting_Customer", "waiting_customer", ["store_queue_mark", "store_counter", "usual_order_cue"], "refuse_contact", "store_queue_mark", "civic-ledger-7", "queue_contact_refused", {"recordId": "store_same_order_contact_refused", "citedLedgerEventId": "civic-ledger-6"}, _economy(3, 0, 90, 70), "A waiting customer sees the Station cite the player and refuses contact while the inquest is open.")
+			_agentic_trace("inquest.studio_pm.block_review", "NPC_Studio_PM", "studio_pm", ["park_notice_board", "studio_review_queue"], "block_review", "studio_review_queue", "civic-ledger-7", "studio_review_blocked", {"recordId": "studio_public_review_blocked", "citedLedgerEventId": "civic-ledger-6"}, _economy(3, 3, 88, 70), "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record."),
+			_agentic_trace("inquest.waiting_customer.refuse_contact", "NPC_Waiting_Customer", "waiting_customer", ["store_queue_mark", "store_counter", "usual_order_cue"], "refuse_contact", "store_queue_mark", "civic-ledger-8", "queue_contact_refused", {"recordId": "store_same_order_contact_refused", "citedLedgerEventId": "civic-ledger-6"}, _economy(3, 0, 93, 70), "A waiting customer sees the Station cite the player and refuses contact while the inquest is open.")
 		]
-		var proof := _agentic_route_result(route_id, "inquest_opened", "inquest_line", "저는 이 꿈에 방금 들어왔어요.", "The Store report slows the queue, a public Park notice appears, the manager forwards a record, the Station cites the exact ledger event, and a waiting customer refuses contact while the inquest is open.", inquest_trace, _agentic_final_states({"store_queue_mark": "refused", "receipt_tray": "marked", "report_tray": "forwarded", "park_notice_board": "rumored", "station_dossier": "cited"}))
+		var proof := _agentic_route_result(route_id, "inquest_opened", "inquest_line", "저는 이 꿈에 방금 들어왔어요.", "The Store report slows the queue, a public Park notice appears, the manager forwards a record, the Station cites the exact ledger event, the Studio PM blocks a review opportunity, and a waiting customer refuses contact while the inquest is open.", inquest_trace, _agentic_final_states({"store_queue_mark": "refused", "receipt_tray": "marked", "report_tray": "forwarded", "park_notice_board": "rumored", "studio_review_queue": "blocked", "station_dossier": "cited"}))
 		proof["stationCitation"] = {
 			"stationEventId": "civic-ledger-6",
 			"citedLedgerEventId": "civic-ledger-5",

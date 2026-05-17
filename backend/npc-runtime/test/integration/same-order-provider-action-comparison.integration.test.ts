@@ -50,6 +50,7 @@ test("Same Order provider action comparison preserves provider-off ledger outcom
     "public_rumor_posted",
     "store_report_escalated",
     "station_record_cited",
+    "studio_review_blocked",
     "queue_contact_refused",
   ]);
   assert.deepEqual(inquest.ledgerAffordances, [
@@ -59,8 +60,10 @@ test("Same Order provider action comparison preserves provider-off ledger outcom
     "post_rumor",
     "forward_report",
     "cite_record",
+    "block_review",
     "refuse_contact",
   ]);
+  assert.equal(inquest.finalObjectStates.studio_review_queue, "blocked");
   assert.equal(inquest.stationCitation?.citedLedgerEventKind, "store_report_escalated");
   const stationTrace = inquest.actionTrace.find(trace => trace.actorRole === "station_officer" && trace.affordance === "cite_record");
   assert.equal(stationTrace?.providerProposal.citedLedgerEventId, inquest.stationCitation?.citedLedgerEventId);

@@ -96,28 +96,29 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `da11727be3fed6576dd999bb3732f9927a222df82e9dbcc476f7f85b0d870a5c`
-  - Markdown SHA-256: `13069f5169068c3b6efe7aec2a1a2591e2a067ceebc657cd4d6c76dc95727437`
-  - playable Evidence Pack SHA-256: `ca740a67c300ec9cad29798e548bcb64b7811cc69939d29e7aabce586e98b3cb`
+  - JSON SHA-256: `85f03303c59de180e0560ad9a1223746bc6473ca99f15d2ef063531643750a9a`
+  - Markdown SHA-256: `4467cbd1176d2e066b2a1aa2bea1c08b98161edc77fae3859d20ffa3fa71d353`
+  - playable Evidence Pack SHA-256: `24bf03bb7c2ff1c86397845e6c7deea10797f50e9268936801947fbec323c83e`
+  - visual capture manifest SHA-256: `9fa4da15e17569cbc404ebc4e0aa2d3e00bfa256a1de690f9ad657f01e29dba2`
+  - packaged app zip SHA-256: `30f219a87666da21eb38a02dc4ae0725b55b49e1bedd5e433d73ee3c02d4544d`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `9 / 9`, and `routeReportPassCount=5 / 5`.
-- latest game increment: the suspicious-cover public warning now travels to a
-  different place and closes a tiny opportunity. After Park Witness posts
-  `public_warning_posted`, the Studio PM reads the Park notice board and
-  `studio_review_queue`, uses `defer_review`, changes the queue from `open` to
-  `deferred`, writes `studio_review_deferred`, and becomes visible as
-  `NPC_Studio_PM` with `리뷰 보류`. Codex/player now focus and interact with the
-  Studio review queue on the suspicious route and read the deferred body in the
-  HUD. This mirrors the clean-route invitation in the opposite direction:
-  public record -> another place's role sees it -> one small opportunity opens
-  or closes.
+  player actions `13 / 13`, `explainability=12/12`, and
+  `routeReportPassCount=5 / 5`.
+- latest game increment: the formal Station citation now travels to a different
+  place and closes a tiny opportunity. After `station_record_cited`, the Studio
+  PM reads the citation and `studio_review_queue`, uses `block_review`, changes
+  the queue from `open` to `blocked`, writes `studio_review_blocked`, and
+  becomes visible as `NPC_Studio_PM` with `리뷰 차단`. Codex/player now inspect
+  the blocked Studio review queue and the Studio PM basis before inspecting the
+  Waiting Customer refusal. This keeps the proof small: formal record ->
+  another place's role sees it -> one opportunity closes.
 - latest game increment: NPC inspection now shows the record basis behind the
   visible social stance. In the inquest Codex run, inspecting
   `NPC_Waiting_Customer` opens a HUD notice with `현재 반응: 접촉 거부`,
-  `근거 행동: civic-ledger-7 / 접촉 거부`, `읽은 기록: civic-ledger-6`,
+  `근거 행동: civic-ledger-8 / 접촉 거부`, `읽은 기록: civic-ledger-6`,
   and `대상 기록물: 대기 표식`; the same fields are exported as
   `basisLedgerEventId`, `citedLedgerEventId`, `basisAffordance`, and
   `basisObjectLabel` in `inspectedNpcState`. This keeps the proof focused on a
@@ -164,8 +165,8 @@ Latest AI-play interface check:
   spawned NPC state or player-readable pressure text; Codex gameplay QA now
   requires `visibleWaitingCustomerReaction=true` and marks
   `canReadVisibleNpcReaction=true`. The current AI-play report reaches
-  `inquest`, accepts `9 / 9` public player actions, passes `routeReports=5/5`,
-  and scores `explainability=11/11`.
+  `inquest`, accepts `13 / 13` public player actions, passes `routeReports=5/5`,
+  and scores `explainability=12/12`.
 - latest game increment: public trust now reaches a second place, not only the
   Store queue. On the clean route, the Studio PM sees the Park public routine
   vouch, uses `invite_review`, changes `studio_review_queue` from `open` to
@@ -424,10 +425,12 @@ Latest AI-play interface check:
 - 2026-05-18 playable Station-citation contact-refusal increment: added the
   next smallest inquest reaction after formal citation. The inquest route now
   proves `place_note -> complain_delay -> post_rumor -> forward_report ->
-  cite_record -> refuse_contact`; final inquest state includes
-  `store_queue_mark=refused`, `queue_contact_refused`, local trust 0, record
-  burden 90, and Station attention 70. The terminal copy now says the Waiting
-  Customer refuses contact after seeing the Station citation. Verified with
+  cite_record -> block_review -> refuse_contact`; final inquest state includes
+  `studio_review_queue=blocked`, `store_queue_mark=refused`,
+  `studio_review_blocked`, `queue_contact_refused`, local trust 0, record
+  burden 93, and Station attention 70. The terminal copy now says the Studio
+  PM blocks review before the Waiting Customer refuses contact after seeing the
+  Station citation. Verified with
   latest Godot playable smoke, Codex gameplay probe, backend playability report
   attachment, full backend check, runtime slice smoke, session-kit generation,
   and comprehension guards. This is internal playable proof only; external

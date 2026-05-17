@@ -431,6 +431,17 @@ function buildInquestOpenedProof(): SameOrderAgenticRouteProof {
     whyLine: "The Station cites the exact forwarded Store ledger event before narrowing the player's answer.",
   });
   applyAction(build, {
+    stepId: "inquest.studio_pm.block_review",
+    actorId: "NPC_Studio_PM",
+    role: "studio_pm",
+    affordance: "block_review",
+    objectId: "studio_review_queue",
+    recordId: "studio_public_review_blocked",
+    citedLedgerEventId: citationEvent.eventId,
+    knownLedgerEventIds: [citationEvent.eventId],
+    whyLine: "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record.",
+  });
+  applyAction(build, {
     stepId: "inquest.waiting_customer.refuse_contact",
     actorId: "NPC_Waiting_Customer",
     role: "waiting_customer",
@@ -448,7 +459,7 @@ function buildInquestOpenedProof(): SameOrderAgenticRouteProof {
     sessionOutcome: "inquest_opened",
     playerLineKind: "inquest_line",
     playerLine: "저는 이 꿈에 방금 들어왔어요.",
-    socialReactionSummary: "The Store report slows the queue, a public Park notice appears, the manager forwards a record, the Station cites the exact ledger event, and a waiting customer refuses contact while the inquest is open.",
+    socialReactionSummary: "The Store report slows the queue, a public Park notice appears, the manager forwards a record, the Station cites the exact ledger event, the Studio PM blocks a review opportunity, and a waiting customer refuses contact while the inquest is open.",
     stationCitation: {
       stationEventId: citationEvent.eventId,
       citedLedgerEventId: escalatedEvent.eventId,
@@ -781,7 +792,7 @@ function validateInquestOpened(
   if (proof.sessionOutcome !== "inquest_opened") {
     failures.push({ routeId: proof.routeId, path: "sessionOutcome", message: "inquest route must open inquest" });
   }
-  for (const eventKind of ["store_exception_reported", "store_report_escalated", "station_record_cited"] as const) {
+  for (const eventKind of ["store_exception_reported", "store_report_escalated", "station_record_cited", "studio_review_blocked"] as const) {
     if (!proof.ledgerEventKinds.includes(eventKind)) {
       failures.push({ routeId: proof.routeId, path: "ledgerEventKinds", message: `inquest route must include ${eventKind}` });
     }
@@ -823,8 +834,19 @@ function validateInquestOpened(
   )) {
     failures.push({ routeId: proof.routeId, path: "socialObservationTrace", message: "inquest route must prove a local NPC reacts to the Station citation" });
   }
+  if (!proof.socialObservationTrace.some(observation =>
+    observation.observerRole === "studio_pm"
+    && observation.observedActorRole === "station_officer"
+    && observation.observedAffordance === "cite_record"
+    && observation.resultingAffordance === "block_review"
+  )) {
+    failures.push({ routeId: proof.routeId, path: "socialObservationTrace", message: "inquest route must prove another-place opportunity can close from the Station citation" });
+  }
   if (proof.finalObjectStates.store_queue_mark !== "refused") {
     failures.push({ routeId: proof.routeId, path: "finalObjectStates.store_queue_mark", message: "inquest route must visibly change local contact after Station citation" });
+  }
+  if (proof.finalObjectStates.studio_review_queue !== "blocked") {
+    failures.push({ routeId: proof.routeId, path: "finalObjectStates.studio_review_queue", message: "inquest route must visibly block a Studio opportunity after Station citation" });
   }
 }
 

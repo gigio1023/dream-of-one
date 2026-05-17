@@ -87,7 +87,9 @@ func _validate_summary(summary: Dictionary) -> Array[String]:
 	var civic_ledger := _array(summary.get("civicLedger", []))
 	if not _ledger_event_cites(civic_ledger, "station_record_cited", "civic-ledger-6", "civic-ledger-5"):
 		failures.append("Packaged route smoke did not preserve exact Station ledger citation.")
-	if not _ledger_event_cites(civic_ledger, "queue_contact_refused", "civic-ledger-7", "civic-ledger-6"):
+	if not _ledger_event_cites(civic_ledger, "studio_review_blocked", "civic-ledger-7", "civic-ledger-6"):
+		failures.append("Packaged route smoke did not preserve the Studio review block after Station citation.")
+	if not _ledger_event_cites(civic_ledger, "queue_contact_refused", "civic-ledger-8", "civic-ledger-6"):
 		failures.append("Packaged route smoke did not preserve the contact refusal after Station citation.")
 	var economy_panel := _dict(_dict(summary.get("worldRecordProps", {})).get("civic_economy_panel", {}))
 	var economy_panel_label := str(economy_panel.get("label", ""))
@@ -137,7 +139,7 @@ func _validate_hud_snapshot(snapshot: Dictionary) -> Array[String]:
 	if not trail.contains("스테이션 직원"):
 		failures.append("Packaged route smoke HUD did not name Station Officer during inquest.")
 	var outcome_body := str(snapshot.get("outcomeBodyLabel", ""))
-	if not outcome_body.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문"):
+	if not outcome_body.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문"):
 		failures.append("Packaged route smoke HUD did not show the outcome consequence chain.")
 	var consequence_label := str(snapshot.get("consequenceLabel", ""))
 	if not consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용"):
@@ -170,7 +172,7 @@ func _build_packaged_route_smoke_proof(summary: Dictionary, hud_snapshot: Dictio
 		"consequenceLabel": consequence_label,
 		"outcomeChecks": {
 			"liveRecordChain": consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용"),
-			"speechDelayRecordChain": outcome_body.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문"),
+			"speechDelayRecordChain": outcome_body.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문"),
 			"stationOfficerRoleAction": outcome_body.contains("역할 행동: 스테이션 직원")
 		},
 		"civicEconomy": civic_economy.duplicate(true),

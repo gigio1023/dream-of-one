@@ -111,6 +111,7 @@ const ENVIRONMENT_AFFORDANCE_ORDER := [
 	"post_repair_notice",
 	"invite_review",
 	"defer_review",
+	"block_review",
 	"forward_report",
 	"cite_record"
 ]
@@ -302,6 +303,14 @@ const ENVIRONMENT_ACTION_RULES := {
 			"requiresLedgerEvent": true,
 			"requiresLedgerEventKinds": ["public_warning_posted"],
 			"maximumLocalTrust": 45
+		},
+		"block_review": {
+			"fromStates": ["open"],
+			"toState": "blocked",
+			"eventKind": "studio_review_blocked",
+			"allowedRoles": ["studio_pm"],
+			"requiresLedgerEvent": true,
+			"requiresLedgerEventKinds": ["station_record_cited"]
 		}
 	},
 	"station_dossier": {
@@ -413,7 +422,9 @@ var choice_catalog: Array = []
 var notice_title := "시작 절차"
 var notice_body := "상점 카운터에서 점원의 평범한 질문에 답하세요. 말이 기록이 될 수 있습니다."
 var inspected_world_record_prop: Dictionary = {}
+var inspected_world_record_history: Array[Dictionary] = []
 var inspected_npc_state: Dictionary = {}
+var inspected_npc_history: Array[Dictionary] = []
 var outcome_visible := false
 var outcome_title := ""
 var outcome_body := ""
@@ -583,7 +594,9 @@ func debug_codex_gameplay_snapshot() -> Dictionary:
 		"summary": summary,
 		"worldRecordProps": _world_record_prop_snapshot(),
 		"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
+		"inspectedWorldRecordHistory": inspected_world_record_history.duplicate(true),
 		"inspectedNpcState": inspected_npc_state.duplicate(true),
+		"inspectedNpcHistory": inspected_npc_history.duplicate(true),
 		"hud": _codex_hud_snapshot()
 	}
 
@@ -703,7 +716,9 @@ func build_summary() -> Dictionary:
 		"outcomeBody": outcome_body,
 		"readSurfaceIds": read_surface_ids.keys(),
 		"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
+		"inspectedWorldRecordHistory": inspected_world_record_history.duplicate(true),
 		"inspectedNpcState": inspected_npc_state.duplicate(true),
+		"inspectedNpcHistory": inspected_npc_history.duplicate(true),
 		"sessionOutcome": _session_outcome(),
 		"lastWhyLine": last_why_line,
 		"lastWhyLineKey": last_why_line_key,
@@ -756,7 +771,9 @@ func build_summary() -> Dictionary:
 			"visibleNpcStates": _visible_npc_states(),
 			"worldRecordProps": _world_record_prop_snapshot(),
 			"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
+			"inspectedWorldRecordHistory": inspected_world_record_history.duplicate(true),
 			"inspectedNpcState": inspected_npc_state.duplicate(true),
+			"inspectedNpcHistory": inspected_npc_history.duplicate(true),
 			"providerState": _provider_state(),
 			"endControls": _end_controls()
 		},
@@ -810,7 +827,9 @@ func build_evidence_pack(artifact_path: String) -> Dictionary:
 			"visibleNpcStates": _visible_npc_states(),
 			"worldRecordProps": _world_record_prop_snapshot(),
 			"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
+			"inspectedWorldRecordHistory": inspected_world_record_history.duplicate(true),
 			"inspectedNpcState": inspected_npc_state.duplicate(true),
+			"inspectedNpcHistory": inspected_npc_history.duplicate(true),
 			"providerState": _provider_state(),
 			"endControls": _end_controls(),
 			"visibleWhyLine": last_why_line,
@@ -1289,6 +1308,7 @@ func _open_inquest(evaluation: Dictionary) -> void:
 	var station_citation_event: Dictionary = station_citation.get("event", {})
 	var station_citation_event_id := str(station_citation_event.get("eventId", ""))
 	if bool(station_citation.get("ok", false)) and not station_citation_event_id.is_empty():
+		_block_studio_review_after_station_citation(station_citation_event_id)
 		_apply_role_agent_action(
 			"inquest.waiting_customer.refuse_contact",
 			"NPC_Waiting_Customer",
@@ -1303,7 +1323,7 @@ func _open_inquest(evaluation: Dictionary) -> void:
 		_set_actor_line("NPC_Waiting_Customer", "스테이션이 인용했으면 저는 말 섞지 않겠습니다.")
 	outcome_visible = true
 	outcome_title = "스테이션 심문 개시"
-	outcome_body = "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 %s\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 대기 손님이 그 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: %s\nR 다시 시작 / Q 종료" % [cited_store_record, str(evaluation["whyLine"])]
+	outcome_body = "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 %s\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: %s\nR 다시 시작 / Q 종료" % [cited_store_record, str(evaluation["whyLine"])]
 	_record_event(
 		"domain",
 		"station_inquest_opened",
@@ -1317,6 +1337,26 @@ func _open_inquest(evaluation: Dictionary) -> void:
 		stage,
 		"Station opened inquest from conversation %s." % CONVERSATION_ID
 	)
+
+func _block_studio_review_after_station_citation(station_citation_event_id: String) -> void:
+	if station_citation_event_id.is_empty():
+		return
+	if str(record_objects.get("studio_review_queue", "")) != "open":
+		return
+	var result := _apply_role_agent_action(
+		"inquest.studio_pm.block_review",
+		"NPC_Studio_PM",
+		"studio_pm",
+		"block_review",
+		"studio_review_queue",
+		"studio_public_review_blocked",
+		"The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record.",
+		station_citation_event_id,
+		[station_citation_event_id]
+	)
+	if bool(result.get("ok", false)):
+		_set_actor_line("NPC_Studio_PM", "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.")
+		_set_actor_reaction_state("NPC_Studio_PM", "blocked", 45)
 
 func _apply_npc_response(choice: Dictionary, free_input: bool, evaluation: Dictionary) -> void:
 	var actor_id := "NPC_Store_Clerk"
@@ -2048,6 +2088,8 @@ func _action_priority_hints(affordance: String, rule: Dictionary) -> Array[Strin
 		hints.append("pressure:public_trust_opens_review")
 	if affordance == "defer_review":
 		hints.append("pressure:public_warning_blocks_review")
+	if affordance == "block_review":
+		hints.append("pressure:station_citation_blocks_review")
 	if affordance == "share_local_tip":
 		hints.append("pressure:local_trust_unlocks_help")
 	if affordance == "keep_distance":
@@ -2098,6 +2140,8 @@ func _action_perceived_as(object_id: String, affordance: String) -> String:
 			return "public trust opens another local review"
 		"defer_review":
 			return "public warning defers another local review"
+		"block_review":
+			return "formal citation blocks another local review"
 	return "%s %s" % [object_id, affordance]
 
 func _action_player_label(affordance: String) -> String:
@@ -2162,6 +2206,7 @@ func _record_mutation_affordances() -> Array[String]:
 		"post_repair_notice",
 		"invite_review",
 		"defer_review",
+		"block_review",
 		"place_note",
 		"forward_report",
 		"cite_record"
@@ -2264,6 +2309,8 @@ func _civic_economy_delta(event_kind: String) -> Dictionary:
 			return {"localTrust": 1, "recordBurden": -1}
 		"studio_review_deferred":
 			return {"localTrust": -1, "recordBurden": 1}
+		"studio_review_blocked":
+			return {"localTrust": -2, "recordBurden": 3}
 		"store_exception_reported":
 			return {"localTrust": -20, "recordBurden": 35, "stationAttention": 30}
 		"store_report_escalated":
@@ -2300,6 +2347,7 @@ func _inspect_world_record_prop(object_id: String) -> Dictionary:
 		"label": str(prop.get("label", "")),
 		"body": body
 	}
+	inspected_world_record_history.append(inspected_world_record_prop.duplicate(true))
 	_set_notice(title, body)
 	_record_event(
 		"observation",
@@ -2362,6 +2410,7 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		inspected_npc_state["basisObjectLabel"] = basis_object_label
 		inspected_npc_state["citedLedgerEventId"] = cited_event_id
 	inspected_npc_state["body"] = "\n".join(body_lines)
+	inspected_npc_history.append(inspected_npc_state.duplicate(true))
 	_set_notice(title, str(inspected_npc_state.get("body", "")))
 	_record_event(
 		"observation",
@@ -2478,6 +2527,8 @@ func _world_record_prop_inspection_body(object_id: String, state: String) -> Str
 				return "스튜디오 리뷰 줄이 초대 상태입니다. 스튜디오 PM은 공원 게시판의 공개 확인을 읽고 플레이어에게 작은 기회를 열어뒀습니다."
 			"deferred":
 				return "스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다."
+			"blocked":
+				return "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다."
 			"open":
 				return "스튜디오 리뷰 줄은 아직 열려만 있습니다. 공개 확인 같은 사회 기록이 들어오면 다른 장소의 역할도 움직일 수 있습니다."
 	if object_id == "store_queue_mark":
@@ -2556,6 +2607,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"public_warning_posted": "공개 경고",
 		"studio_review_invited": "리뷰 초대",
 		"studio_review_deferred": "리뷰 보류",
+		"studio_review_blocked": "리뷰 차단",
 		"queue_delay_noted": "대기줄 불평",
 		"public_rumor_posted": "공개 소문",
 		"store_exception_reported": "상점 보고",
@@ -2580,6 +2632,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"public_warning_posted": "public warning posted",
 		"studio_review_invited": "review invited",
 		"studio_review_deferred": "review deferred",
+		"studio_review_blocked": "review blocked",
 		"queue_delay_noted": "queue delay noted",
 		"public_rumor_posted": "public rumor posted",
 		"store_exception_reported": "Store report",
@@ -2630,6 +2683,7 @@ func _affordance_label(affordance: String) -> String:
 		"post_repair_notice": "수습 게시",
 		"invite_review": "리뷰 초대",
 		"defer_review": "리뷰 보류",
+		"block_review": "리뷰 차단",
 		"place_note": "메모 배치",
 		"forward_report": "보고 전달",
 		"cite_record": "기록 인용"
@@ -2653,6 +2707,7 @@ func _affordance_label(affordance: String) -> String:
 		"post_repair_notice": "post repair notice",
 		"invite_review": "invite review",
 		"defer_review": "defer review",
+		"block_review": "block review",
 		"place_note": "place note",
 		"forward_report": "forward report",
 		"cite_record": "cite record"
@@ -2721,6 +2776,7 @@ func _record_state_value(state: String) -> String:
 		"open": "열림",
 		"invited": "초대",
 		"deferred": "보류",
+		"blocked": "차단",
 		"unknown": "미확인"
 	}
 	var en := {
@@ -2755,6 +2811,7 @@ func _record_state_value(state: String) -> String:
 		"open": "open",
 		"invited": "invited",
 		"deferred": "deferred",
+		"blocked": "blocked",
 		"unknown": "unknown"
 	}
 	var table: Dictionary = en if _current_locale() == "en" else ko
@@ -2768,7 +2825,7 @@ func _world_record_prop_material(object_id: String, state: String) -> StandardMa
 	material.roughness = 0.82
 	if color.a < 1.0:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	if ["pending", "forwarded", "cited", "attention", "rumored", "vouched", "warned", "invited", "deferred", "settled", "helped", "distanced", "paused"].has(state):
+	if ["pending", "forwarded", "cited", "attention", "rumored", "vouched", "warned", "invited", "deferred", "blocked", "settled", "helped", "distanced", "paused"].has(state):
 		material.emission_enabled = true
 		material.emission = Color(color.r, color.g, color.b, 1.0)
 		material.emission_energy_multiplier = 0.35
@@ -2778,7 +2835,7 @@ func _world_record_prop_color(object_id: String, state: String) -> Color:
 	match state:
 		"normal", "read", "serving", "player_waiting", "stable", "open":
 			return Color(0.34, 0.76, 0.82, 0.94)
-		"marked", "offered", "delayed", "distanced", "warned", "deferred", "burden", "trust_low":
+		"marked", "offered", "delayed", "distanced", "warned", "deferred", "blocked", "burden", "trust_low":
 			return Color(1.0, 0.68, 0.28, 0.94)
 		"attached", "corrected", "settled", "helped", "vouched", "invited":
 			return Color(0.42, 0.86, 0.58, 0.96)

@@ -906,6 +906,38 @@ test("Waiting customer can refuse contact after Station citation becomes visible
   }));
   environment = citation.environment;
 
+  const studioPm = actor({
+    actorId: "NPC_Studio_PM",
+    role: "studio_pm",
+    knownLedgerEventIds: [citation.event.eventId],
+  }, environment);
+  const blockAction = listAvailableEnvironmentActions(environment, studioPm)
+    .find(candidate => candidate.affordance === "block_review");
+
+  assert.ok(blockAction);
+  assert.equal(blockAction.objectId, "studio_review_queue");
+  assert.equal(blockAction.toState, "blocked");
+  assert.deepEqual(blockAction.citableLedgerEventIds, [citation.event.eventId]);
+  assert.equal(blockAction.preconditions.includes("ledger_event_kind:station_record_cited"), true);
+  assert.deepEqual(blockAction.civicEconomyEffects, ["localTrust:-2", "recordBurden:+3"]);
+
+  const blocked = requireAccepted(validateAndApplyEnvironmentAction(environment, studioPm, {
+    actorId: studioPm.actorId,
+    role: studioPm.role,
+    affordance: "block_review",
+    objectId: "studio_review_queue",
+    recordId: "studio_public_review_blocked",
+    citedLedgerEventId: citation.event.eventId,
+    whyLine: "The Studio PM sees the formal Station citation and blocks the local review queue.",
+  }));
+
+  assert.equal(blocked.event.kind, "studio_review_blocked");
+  assert.equal(blocked.event.citedLedgerEventId, citation.event.eventId);
+  assert.equal(blocked.environment.objects.find(item => item.objectId === "studio_review_queue")?.state, "blocked");
+  assert.equal(blocked.environment.economy.localTrust, 28);
+  assert.equal(blocked.environment.economy.recordBurden, 43);
+  environment = blocked.environment;
+
   const reactingCustomer = actor({
     actorId: "NPC_Waiting_Customer",
     role: "waiting_customer",
@@ -931,8 +963,8 @@ test("Waiting customer can refuse contact after Station citation becomes visible
   assert.equal(refused.event.kind, "queue_contact_refused");
   assert.equal(refused.event.citedLedgerEventId, citation.event.eventId);
   assert.equal(refused.environment.objects.find(item => item.objectId === "store_queue_mark")?.state, "refused");
-  assert.equal(refused.environment.economy.localTrust, 22);
-  assert.equal(refused.environment.economy.recordBurden, 45);
+  assert.equal(refused.environment.economy.localTrust, 20);
+  assert.equal(refused.environment.economy.recordBurden, 48);
 });
 
 test("Station Officer cannot cite hidden or non-Store ledger events", () => {

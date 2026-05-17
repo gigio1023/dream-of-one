@@ -14,6 +14,10 @@ const PROBE_STEPS := [
 	{"actionId": "player.type.free_input", "payload": {"line": TYPED_LINE}},
 	{"actionId": "focus.world_record_prop", "payload": {"objectId": "park_notice_board"}},
 	{"actionId": "player.interact.focused", "payload": {}},
+	{"actionId": "focus.world_record_prop", "payload": {"objectId": "studio_review_queue"}},
+	{"actionId": "player.interact.focused", "payload": {}},
+	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Studio_PM"}},
+	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Waiting_Customer"}},
 	{"actionId": "player.interact.focused", "payload": {}}
 ]
@@ -483,6 +487,20 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("inquest_opened expected Waiting Customer refuse_contact action")
 			if not _visible_waiting_customer_reaction(summary, "refused", "거부"):
 				failures.append("inquest_opened expected visible Waiting Customer contact-refusal reaction")
+			if str(record_objects.get("studio_review_queue", "")) != "blocked":
+				failures.append("inquest_opened expected Studio review queue to block after Station citation")
+			if not _action_exists(summary, "studio_pm", "block_review"):
+				failures.append("inquest_opened expected Studio PM block_review after Station citation")
+			if not _action_perceives(summary, "studio_pm", "block_review", "studio_review_queue"):
+				failures.append("inquest_opened expected Studio PM to perceive review queue before blocking review")
+			if not _visible_studio_pm_block(summary):
+				failures.append("inquest_opened expected visible Studio PM review block reaction")
+			if not _inspected_studio_review_block(summary):
+				failures.append("inquest_opened expected Codex/player to inspect blocked Studio review queue")
+			if not _inspected_studio_pm_block(summary):
+				failures.append("inquest_opened expected Codex/player to inspect Studio PM review block basis")
+			if not _observation_exists(summary, "studio_pm", "station_officer", "cite_record", "block_review"):
+				failures.append("inquest_opened expected Studio PM to read Station citation before blocking review")
 			if not bool(checks.get("worldPropsReachInquest", false)):
 				failures.append("inquest_opened expected inquest world record props")
 		_:
@@ -633,7 +651,9 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary) -> D
 		"visibleWaitingCustomerReaction": _visible_npc_has_line(summary, "NPC_Waiting_Customer"),
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"codexInspectedPublicNotice": _inspected_public_notice(summary),
+		"codexInspectedBlockedReview": _inspected_studio_review_block(summary),
 		"codexInspectedWaitingCustomer": _inspected_waiting_customer(summary),
+		"codexInspectedStudioPm": _inspected_studio_pm_block(summary),
 		"economyPanelReadable": _economy_panel_readable(record_props),
 		"worldPropsReachInquest": _world_props_reach_inquest(record_props),
 		"latestLedger": latest_ledger
@@ -654,6 +674,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)) and bool(checks.get("waitingCustomerObservedStation", false)),
 		"canReadVisibleNpcReaction": bool(checks.get("visibleWaitingCustomerReaction", false)),
 		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
+		"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
 		"canInspectNpcReaction": bool(checks.get("codexInspectedWaitingCustomer", false)),
 		"canReadExactStationCitation": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"canReadCivicEconomyPressure": bool(checks.get("economyPanelReadable", false)),
@@ -680,7 +701,9 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"recordState": hud_snapshot.get("recordStateLabel", ""),
 			"visibleNpcStates": summary.get("visibleNpcStates", {}),
 			"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {}),
+			"inspectedWorldRecordHistory": summary.get("inspectedWorldRecordHistory", []),
 			"inspectedNpcState": summary.get("inspectedNpcState", {}),
+			"inspectedNpcHistory": summary.get("inspectedNpcHistory", []),
 			"notice": "%s / %s" % [str(hud_snapshot.get("noticeTitleLabel", "")), _one_line(hud_snapshot.get("noticeBodyLabel", ""))],
 			"whyLine": hud_snapshot.get("whyLineLabel", ""),
 			"civicEconomyPanel": economy_panel.get("label", "")
@@ -692,8 +715,9 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"Codex/player typed a dream-language line, causing a Store report, waiting-customer queue reaction, Park notice, Manager forwarding, and Station citation.",
 			"The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.",
 			"Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.",
+			"Codex/player inspected the Studio review queue and Studio PM to read that the Station citation blocked a small opportunity in another place.",
 			"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state and its cited ledger basis.",
-			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest, and the waiting customer refused contact in civic-ledger-7."
+			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
 		],
 		"roleActionExplanation": _role_action_explanation(summary),
 		"socialObservationExplanation": _social_observation_explanation(summary),
@@ -920,27 +944,63 @@ func _world_props_reach_inquest(record_props: Dictionary) -> bool:
 	)
 
 func _inspected_public_notice(summary: Dictionary) -> bool:
-	var inspected: Dictionary = summary.get("inspectedWorldRecordProp", {})
-	return (
-		str(inspected.get("objectId", "")) == "park_notice_board"
-		and str(inspected.get("state", "")) == "rumored"
-		and str(inspected.get("body", "")).contains("소문")
-	)
+	return _inspected_world_record_exists(summary, "park_notice_board", "rumored", "소문")
+
+func _inspected_studio_review_block(summary: Dictionary) -> bool:
+	return _inspected_world_record_exists(summary, "studio_review_queue", "blocked", "스테이션 인용")
+
+func _inspected_world_record_exists(summary: Dictionary, object_id: String, state: String, body_fragment: String) -> bool:
+	var candidates: Array = summary.get("inspectedWorldRecordHistory", [])
+	var latest: Dictionary = summary.get("inspectedWorldRecordProp", {})
+	if not latest.is_empty():
+		candidates.append(latest)
+	for candidate in candidates:
+		if not candidate is Dictionary:
+			continue
+		var inspected: Dictionary = candidate
+		if str(inspected.get("objectId", "")) == object_id \
+			and str(inspected.get("state", "")) == state \
+			and str(inspected.get("body", "")).contains(body_fragment):
+			return true
+	return false
 
 func _inspected_waiting_customer(summary: Dictionary) -> bool:
-	var inspected: Dictionary = summary.get("inspectedNpcState", {})
-	return (
+	var inspected := _inspected_npc_candidate(summary, "NPC_Waiting_Customer", "refused")
+	return not inspected.is_empty() and (
 		str(inspected.get("npcId", "")) == "NPC_Waiting_Customer"
 		and str(inspected.get("state", "")) == "refused"
 		and str(inspected.get("reactionText", "")).contains("거부")
 		and str(inspected.get("body", "")).contains("접촉 거부")
-		and str(inspected.get("basisLedgerEventId", "")) == "civic-ledger-7"
+		and str(inspected.get("basisLedgerEventId", "")) == "civic-ledger-8"
 		and str(inspected.get("citedLedgerEventId", "")) == "civic-ledger-6"
 		and str(inspected.get("basisAffordance", "")) == "refuse_contact"
 		and str(inspected.get("body", "")).contains("근거 행동")
-		and str(inspected.get("body", "")).contains("civic-ledger-7")
+		and str(inspected.get("body", "")).contains("civic-ledger-8")
 		and str(inspected.get("body", "")).contains("civic-ledger-6")
 	)
+
+func _inspected_studio_pm_block(summary: Dictionary) -> bool:
+	var inspected := _inspected_npc_candidate(summary, "NPC_Studio_PM", "blocked")
+	return not inspected.is_empty() and (
+		str(inspected.get("reactionText", "")).contains("리뷰")
+		and str(inspected.get("body", "")).contains("리뷰 차단")
+		and str(inspected.get("basisLedgerEventId", "")) == "civic-ledger-7"
+		and str(inspected.get("citedLedgerEventId", "")) == "civic-ledger-6"
+		and str(inspected.get("basisAffordance", "")) == "block_review"
+	)
+
+func _inspected_npc_candidate(summary: Dictionary, npc_id: String, state: String) -> Dictionary:
+	var candidates: Array = summary.get("inspectedNpcHistory", [])
+	var latest: Dictionary = summary.get("inspectedNpcState", {})
+	if not latest.is_empty():
+		candidates.append(latest)
+	for candidate in candidates:
+		if not candidate is Dictionary:
+			continue
+		var inspected: Dictionary = candidate
+		if str(inspected.get("npcId", "")) == npc_id and str(inspected.get("state", "")) == state:
+			return inspected
+	return {}
 
 func _inspected_studio_review_invite(summary: Dictionary) -> bool:
 	var inspected: Dictionary = summary.get("inspectedWorldRecordProp", {})
@@ -977,6 +1037,17 @@ func _visible_studio_pm_deferral(summary: Dictionary) -> bool:
 	return (
 		str(state.get("npcId", "")) == "NPC_Studio_PM"
 		and str(state.get("state", "")) == "deferred"
+		and bool(state.get("markerVisible", false))
+		and str(state.get("pressureText", "")).contains("리뷰")
+		and str(state.get("reactionText", "")).contains("리뷰")
+	)
+
+func _visible_studio_pm_block(summary: Dictionary) -> bool:
+	var states: Dictionary = summary.get("visibleNpcStates", {})
+	var state: Dictionary = states.get("NPC_Studio_PM", {})
+	return (
+		str(state.get("npcId", "")) == "NPC_Studio_PM"
+		and str(state.get("state", "")) == "blocked"
 		and bool(state.get("markerVisible", false))
 		and str(state.get("pressureText", "")).contains("리뷰")
 		and str(state.get("reactionText", "")).contains("리뷰")

@@ -117,7 +117,7 @@ Current M1 carry-in:
   object-state, and civic economy outcomes.
 - backend provider scheduling seed
   `backend/npc-runtime/src/runtime/same-order-provider-scheduling.ts` now
-  turns that comparison into 25 bounded Store Clerk, Waiting Customer, Park
+  turns that comparison into 26 bounded Store Clerk, Waiting Customer, Park
   Witness, Studio PM, Store Manager, and Station Officer role-agent provider jobs. Each
   job carries available action context,
   allowed provider fields, forbidden authority fields, deterministic fallback
@@ -215,7 +215,7 @@ Current M1 carry-in:
   `inspectedNpcState` alongside visible NPC states and record-prop inspection.
 - NPC inspection now also exposes the current social reaction's basis as
   player-readable record chain data. The Waiting Customer inquest inspection
-  shows `근거 행동: civic-ledger-7 / 접촉 거부`, `읽은 기록: civic-ledger-6`,
+  shows `근거 행동: civic-ledger-8 / 접촉 거부`, `읽은 기록: civic-ledger-6`,
   and `대상 기록물: 대기 표식`, while the snapshot exports the same basis as
   structured `inspectedNpcState` fields for Codex QA.
 - `NPC_Park_Witness` now exposes public notice actions as visible NPC state:
@@ -235,6 +235,12 @@ Current M1 carry-in:
   changes the queue to `deferred`, and shows a visible `리뷰 보류` reaction.
   This keeps Studio as a tiny cross-place example: public records can open or
   close one opportunity without turning the project into a Store/Station sim.
+- `NPC_Studio_PM` now also reacts to a formal Station citation on the inquest
+  route. The Studio PM reads `station_record_cited`, uses `block_review`,
+  changes `studio_review_queue` to `blocked`, writes `studio_review_blocked`,
+  and shows a visible `리뷰 차단` reaction before the Waiting Customer refuses
+  contact. This proves a formal record can close one small opportunity in
+  another place without expanding Store/Station into the game premise.
 - Codex gameplay QA now runs the active proof cell through public
   `PlayableSession.debug_codex_gameplay_action` and
   `debug_codex_gameplay_snapshot` APIs. The probe can list callable player

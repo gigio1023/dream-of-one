@@ -1,18 +1,18 @@
 {
   "adapter": "godot",
-  "createdAtMs": 1779055371904,
+  "createdAtMs": 1779056582704,
   "events": [
     {
       "adapter": "godot",
       "eventFamily": "session",
-      "eventId": "playable_session_started-001-1779055371665",
+      "eventId": "playable_session_started-001-1779056582472",
       "eventName": "playable_session_started",
       "prologueStep": "beginning",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "sessionOutcome": "running",
       "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-      "timestampMs": 1779055371665,
+      "timestampMs": 1779056582472,
       "uiSummaryArgs": {},
       "uiSummaryKey": "event.session_started",
       "worldId": "dre_171_godot_shell",
@@ -25,7 +25,7 @@
       "conversationId": "conv-same-order",
       "conversationStage": "normal",
       "eventFamily": "domain",
-      "eventId": "conversation_started-002-1779055371768",
+      "eventId": "conversation_started-002-1779056582568",
       "eventName": "conversation_started",
       "outcome": "running",
       "promptId": "store.same_order.routine",
@@ -34,7 +34,7 @@
       "socialLoopStage": "normal",
       "speakerId": "NPC_Store_Clerk",
       "summary": "Store Clerk opened the Same Order conversation.",
-      "timestampMs": 1779055371768,
+      "timestampMs": 1779056582568,
       "turnId": "turn-1",
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
@@ -47,7 +47,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "dialogue_choice_selected-003-1779055371805",
+      "eventId": "dialogue_choice_selected-003-1779056582604",
       "eventName": "dialogue_choice_selected",
       "inputMode": "choice",
       "outcome": "running",
@@ -69,7 +69,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779055371805,
+      "timestampMs": 1779056582604,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -84,7 +84,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-004-1779055371805",
+      "eventId": "conversation_anomaly_detected-004-1779056582604",
       "eventName": "conversation_anomaly_detected",
       "inputMode": "choice",
       "outcome": "running",
@@ -106,7 +106,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779055371805,
+      "timestampMs": 1779056582604,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -121,7 +121,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-005-1779055371805",
+      "eventId": "npc_suspicion_changed-005-1779056582604",
       "eventName": "npc_suspicion_changed",
       "inputMode": "choice",
       "outcome": "running",
@@ -143,7 +143,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779055371805,
+      "timestampMs": 1779056582604,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -158,7 +158,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "응답 지연 12000ms",
       "eventFamily": "domain",
-      "eventId": "response_hesitation_noted-006-1779055371840",
+      "eventId": "response_hesitation_noted-006-1779056582638",
       "eventName": "response_hesitation_noted",
       "inputMode": "response_hesitation",
       "outcome": "running",
@@ -181,7 +181,7 @@
       "suspicionSignals": [
         "response_hesitation"
       ],
-      "timestampMs": 1779055371840,
+      "timestampMs": 1779056582638,
       "turnId": "turn-2",
       "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
       "whyLineKey": "response_hesitation",
@@ -196,7 +196,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "free_input_submitted-007-1779055371866",
+      "eventId": "free_input_submitted-007-1779056582665",
       "eventName": "free_input_submitted",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -221,7 +221,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779055371866,
+      "timestampMs": 1779056582665,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -236,7 +236,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-008-1779055371866",
+      "eventId": "conversation_anomaly_detected-008-1779056582665",
       "eventName": "conversation_anomaly_detected",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -261,7 +261,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779055371866,
+      "timestampMs": 1779056582665,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -276,7 +276,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-009-1779055371866",
+      "eventId": "npc_suspicion_changed-009-1779056582665",
       "eventName": "npc_suspicion_changed",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -301,7 +301,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779055371866,
+      "timestampMs": 1779056582665,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -316,7 +316,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "suspicion_shared-010-1779055371866",
+      "eventId": "suspicion_shared-010-1779056582665",
       "eventName": "suspicion_shared",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -341,7 +341,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779055371866,
+      "timestampMs": 1779056582665,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -356,7 +356,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_report_created-011-1779055371867",
+      "eventId": "station_report_created-011-1779056582666",
       "eventName": "station_report_created",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -381,7 +381,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779055371867,
+      "timestampMs": 1779056582666,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -396,7 +396,7 @@
       "conversationStage": "inquest",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_inquest_opened-012-1779055371867",
+      "eventId": "station_inquest_opened-012-1779056582666",
       "eventName": "station_inquest_opened",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -421,7 +421,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779055371867,
+      "timestampMs": 1779056582666,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -432,12 +432,12 @@
       "adapter": "godot",
       "artifactPath": "data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json",
       "eventFamily": "evidence_export",
-      "eventId": "evidence_pack_created-013-1779055371904",
+      "eventId": "evidence_pack_created-013-1779056582704",
       "eventName": "evidence_pack_created",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "summary": "Godot conversation playable Evidence Pack exported for backend validation.",
-      "timestampMs": 1779055371904,
+      "timestampMs": 1779056582704,
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
     }
@@ -1929,6 +1929,130 @@
       },
       {
         "accepted": true,
+        "actorId": "NPC_Studio_PM",
+        "actorRole": "studio_pm",
+        "affordance": "block_review",
+        "availableActions": [
+          {
+            "actionId": "studio_review_queue.block_review",
+            "affordance": "block_review",
+            "citableLedgerEventIds": [
+              "civic-ledger-6"
+            ],
+            "civicEconomyEffects": [
+              "localTrust:-2",
+              "recordBurden:+3"
+            ],
+            "eligibleRoles": [
+              "studio_pm"
+            ],
+            "failureReasons": [
+              "object_not_perceived",
+              "affordance_unavailable",
+              "role_authority_exceeded",
+              "why_line_required",
+              "ledger_event_unknown",
+              "ledger_event_not_known",
+              "ledger_event_kind_unaccepted"
+            ],
+            "ledgerEventKind": "studio_review_blocked",
+            "objectId": "studio_review_queue",
+            "objectState": "open",
+            "perceivedAs": "formal citation blocks another local review",
+            "playerLabel": "Block Review",
+            "preconditions": [
+              "object_state:open",
+              "role_allowed:studio_pm",
+              "known_ledger_event_required",
+              "ledger_event_kind:station_record_cited",
+              "record_id:studio_public_review_invite"
+            ],
+            "priorityHints": [
+              "economy:localTrust",
+              "economy:recordBurden",
+              "pressure:station_citation_blocks_review"
+            ],
+            "recordId": "studio_public_review_invite",
+            "requiresLedgerEvent": true,
+            "requiresStoreLedgerEvent": false,
+            "toState": "blocked",
+            "validationRuleId": "same_order.studio_review_queue.block_review",
+            "visibleTo": [
+              "studio_pm"
+            ]
+          }
+        ],
+        "citedLedgerEventId": "civic-ledger-6",
+        "economyAfter": {
+          "accountCredit": 3,
+          "localTrust": 3,
+          "recordBurden": 88,
+          "stationAttention": 70
+        },
+        "ledgerEventId": "civic-ledger-7",
+        "ledgerEventKind": "studio_review_blocked",
+        "objectId": "studio_review_queue",
+        "perceivedObjectIds": [
+          "park_notice_board",
+          "studio_review_queue"
+        ],
+        "recordId": "studio_public_review_blocked",
+        "selectedActionDescriptor": {
+          "actionId": "studio_review_queue.block_review",
+          "affordance": "block_review",
+          "citableLedgerEventIds": [
+            "civic-ledger-6"
+          ],
+          "civicEconomyEffects": [
+            "localTrust:-2",
+            "recordBurden:+3"
+          ],
+          "eligibleRoles": [
+            "studio_pm"
+          ],
+          "failureReasons": [
+            "object_not_perceived",
+            "affordance_unavailable",
+            "role_authority_exceeded",
+            "why_line_required",
+            "ledger_event_unknown",
+            "ledger_event_not_known",
+            "ledger_event_kind_unaccepted"
+          ],
+          "ledgerEventKind": "studio_review_blocked",
+          "objectId": "studio_review_queue",
+          "objectState": "open",
+          "perceivedAs": "formal citation blocks another local review",
+          "playerLabel": "Block Review",
+          "preconditions": [
+            "object_state:open",
+            "role_allowed:studio_pm",
+            "known_ledger_event_required",
+            "ledger_event_kind:station_record_cited",
+            "record_id:studio_public_review_invite"
+          ],
+          "priorityHints": [
+            "economy:localTrust",
+            "economy:recordBurden",
+            "pressure:station_citation_blocks_review"
+          ],
+          "recordId": "studio_public_review_invite",
+          "requiresLedgerEvent": true,
+          "requiresStoreLedgerEvent": false,
+          "toState": "blocked",
+          "validationRuleId": "same_order.studio_review_queue.block_review",
+          "visibleTo": [
+            "studio_pm"
+          ]
+        },
+        "selectionReason": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record.",
+        "sequence": 7,
+        "stepId": "inquest.studio_pm.block_review",
+        "validation": "accepted",
+        "whyLine": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record."
+      },
+      {
+        "accepted": true,
         "actorId": "NPC_Waiting_Customer",
         "actorRole": "waiting_customer",
         "affordance": "refuse_contact",
@@ -2077,10 +2201,10 @@
         "economyAfter": {
           "accountCredit": 3,
           "localTrust": 0,
-          "recordBurden": 90,
+          "recordBurden": 93,
           "stationAttention": 70
         },
-        "ledgerEventId": "civic-ledger-7",
+        "ledgerEventId": "civic-ledger-8",
         "ledgerEventKind": "queue_contact_refused",
         "objectId": "store_queue_mark",
         "perceivedObjectIds": [
@@ -2138,7 +2262,7 @@
           ]
         },
         "selectionReason": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open.",
-        "sequence": 7,
+        "sequence": 8,
         "stepId": "inquest.waiting_customer.refuse_contact",
         "validation": "accepted",
         "whyLine": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open."
@@ -2893,7 +3017,7 @@
         "sessionOutcome": "inquest_opened",
         "playerLineKind": "inquest_line",
         "playerLine": "저는 이 꿈에 방금 들어왔어요.",
-        "socialReactionSummary": "The Store report slows the queue, a public Park notice appears, the manager forwards a record, the Station cites the exact ledger event, and a waiting customer refuses contact while the inquest is open.",
+        "socialReactionSummary": "The Store report slows the queue, a public Park notice appears, the manager forwards a record, the Station cites the exact ledger event, the Studio PM blocks a review opportunity, and a waiting customer refuses contact while the inquest is open.",
         "actionTrace": [
           {
             "stepId": "inquest.clerk.mark_receipt",
@@ -3044,6 +3168,29 @@
             "whyLine": "The Station cites the exact forwarded Store ledger event before narrowing the player's answer."
           },
           {
+            "stepId": "inquest.studio_pm.block_review",
+            "actorId": "NPC_Studio_PM",
+            "actorRole": "studio_pm",
+            "perceivedObjectIds": [
+              "park_notice_board",
+              "studio_review_queue"
+            ],
+            "affordance": "block_review",
+            "objectId": "studio_review_queue",
+            "accepted": true,
+            "ledgerEventId": "civic-ledger-7",
+            "ledgerEventKind": "studio_review_blocked",
+            "recordId": "studio_public_review_blocked",
+            "citedLedgerEventId": "civic-ledger-6",
+            "economyAfter": {
+              "accountCredit": 3,
+              "localTrust": 3,
+              "recordBurden": 88,
+              "stationAttention": 70
+            },
+            "whyLine": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record."
+          },
+          {
             "stepId": "inquest.waiting_customer.refuse_contact",
             "actorId": "NPC_Waiting_Customer",
             "actorRole": "waiting_customer",
@@ -3056,14 +3203,14 @@
             "affordance": "refuse_contact",
             "objectId": "store_queue_mark",
             "accepted": true,
-            "ledgerEventId": "civic-ledger-7",
+            "ledgerEventId": "civic-ledger-8",
             "ledgerEventKind": "queue_contact_refused",
             "recordId": "store_same_order_contact_refused",
             "citedLedgerEventId": "civic-ledger-6",
             "economyAfter": {
               "accountCredit": 3,
               "localTrust": 0,
-              "recordBurden": 90,
+              "recordBurden": 93,
               "stationAttention": 70
             },
             "whyLine": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open."
@@ -3076,6 +3223,7 @@
           "public_rumor_posted",
           "store_report_escalated",
           "station_record_cited",
+          "studio_review_blocked",
           "queue_contact_refused"
         ],
         "ledgerAffordances": [
@@ -3085,6 +3233,7 @@
           "post_rumor",
           "forward_report",
           "cite_record",
+          "block_review",
           "refuse_contact"
         ],
         "socialObservationTrace": [
@@ -3153,6 +3302,22 @@
             "whyLine": "station_officer uses store_manager's forward_report record before choosing cite_record."
           },
           {
+            "observerActorId": "NPC_Studio_PM",
+            "observerRole": "studio_pm",
+            "observedLedgerEventId": "civic-ledger-6",
+            "observedActorRole": "station_officer",
+            "observedAffordance": "cite_record",
+            "observedObjectId": "station_dossier",
+            "economyPressure": {
+              "localTrust": 5,
+              "recordBurden": 85,
+              "stationAttention": 70
+            },
+            "resultingStepId": "inquest.studio_pm.block_review",
+            "resultingAffordance": "block_review",
+            "whyLine": "studio_pm uses station_officer's cite_record record before choosing block_review."
+          },
+          {
             "observerActorId": "NPC_Waiting_Customer",
             "observerRole": "waiting_customer",
             "observedLedgerEventId": "civic-ledger-6",
@@ -3177,14 +3342,14 @@
           "correction_slip": "absent",
           "report_tray": "forwarded",
           "park_notice_board": "rumored",
-          "studio_review_queue": "open",
+          "studio_review_queue": "blocked",
           "station_dossier": "cited",
           "civic_ledger": "append_only"
         },
         "economyAfter": {
           "accountCredit": 3,
           "localTrust": 0,
-          "recordBurden": 90,
+          "recordBurden": 93,
           "stationAttention": 70
         },
         "stationCitation": {
@@ -3200,7 +3365,7 @@
     "civicEconomy": {
       "accountCredit": 3,
       "localTrust": 0,
-      "recordBurden": 90,
+      "recordBurden": 93,
       "stationAttention": 70
     },
     "civicLedger": [
@@ -3295,6 +3460,22 @@
         "whyLine": "The Station cites the exact forwarded Store ledger event before narrowing the player's answer."
       },
       {
+        "actorId": "NPC_Studio_PM",
+        "actorRole": "studio_pm",
+        "affordance": "block_review",
+        "citedLedgerEventId": "civic-ledger-6",
+        "economyDelta": {
+          "localTrust": -2,
+          "recordBurden": 3
+        },
+        "eventId": "civic-ledger-7",
+        "kind": "studio_review_blocked",
+        "objectId": "studio_review_queue",
+        "recordId": "studio_public_review_blocked",
+        "validation": "accepted",
+        "whyLine": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record."
+      },
+      {
         "actorId": "NPC_Waiting_Customer",
         "actorRole": "waiting_customer",
         "affordance": "refuse_contact",
@@ -3303,7 +3484,7 @@
           "localTrust": -8,
           "recordBurden": 5
         },
-        "eventId": "civic-ledger-7",
+        "eventId": "civic-ledger-8",
         "kind": "queue_contact_refused",
         "objectId": "store_queue_mark",
         "recordId": "store_same_order_contact_refused",
@@ -3319,7 +3500,9 @@
     "expectedPlayerInterpretation": "Odd dialogue creates NPC suspicion, a report, and Station inquest pressure.",
     "inputLocked": true,
     "inputPath": "focus StoreCounterZone -> E start Same Order -> 3 risky choice -> HUD typed line",
+    "inspectedNpcHistory": [],
     "inspectedNpcState": {},
+    "inspectedWorldRecordHistory": [],
     "inspectedWorldRecordProp": {},
     "observedConfusionPoint": "Smoke and capture now target HUD typed input; the legacy recorded-statement fallback remains internal.",
     "providerState": {
@@ -3339,7 +3522,7 @@
       "station_dossier": "cited",
       "store_counter": "serving",
       "store_queue_mark": "refused",
-      "studio_review_queue": "open",
+      "studio_review_queue": "blocked",
       "usual_order_cue": "read"
     },
     "releaseAuthorityRequirement": "Same Order M1 is fallback-only until budgeted API preflight and Godot provider dispatch pass; public demo authority must keep suspicion, report, inquest, verdict, and session end deterministic.",
@@ -3358,19 +3541,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779055370705",
+            "eventId": "playable_session_started-001-1779056581487",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779055370822",
+            "eventId": "conversation_started-002-1779056581635",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-003-1779055370859",
+            "eventId": "dialogue_choice_selected-003-1779056581672",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3381,7 +3564,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-004-1779055370892",
+            "eventId": "dialogue_choice_selected-004-1779056581706",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3392,7 +3575,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_outcome_reached-005-1779055370893",
+            "eventId": "conversation_outcome_reached-005-1779056581707",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "clean_cover",
@@ -3428,19 +3611,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779055370960",
+            "eventId": "playable_session_started-001-1779056581773",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779055371055",
+            "eventId": "conversation_started-002-1779056581870",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779055371092",
+            "eventId": "dialogue_choice_selected-003-1779056581907",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3453,7 +3636,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779055371092",
+            "eventId": "conversation_anomaly_detected-004-1779056581907",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3466,7 +3649,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779055371092",
+            "eventId": "npc_suspicion_changed-005-1779056581907",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3479,7 +3662,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-006-1779055371127",
+            "eventId": "dialogue_choice_selected-006-1779056581941",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3490,7 +3673,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_outcome_reached-007-1779055371127",
+            "eventId": "conversation_outcome_reached-007-1779056581941",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "repair_recovered",
@@ -3532,19 +3715,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779055371417",
+            "eventId": "playable_session_started-001-1779056582239",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779055371521",
+            "eventId": "conversation_started-002-1779056582337",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779055371557",
+            "eventId": "dialogue_choice_selected-003-1779056582374",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3557,7 +3740,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779055371557",
+            "eventId": "conversation_anomaly_detected-004-1779056582374",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3570,7 +3753,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779055371557",
+            "eventId": "npc_suspicion_changed-005-1779056582374",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3583,7 +3766,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "dialogue_choice_selected-006-1779055371592",
+            "eventId": "dialogue_choice_selected-006-1779056582408",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3597,7 +3780,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-007-1779055371592",
+            "eventId": "conversation_anomaly_detected-007-1779056582408",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3611,7 +3794,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-008-1779055371592",
+            "eventId": "npc_suspicion_changed-008-1779056582408",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3625,7 +3808,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-009-1779055371592",
+            "eventId": "suspicion_shared-009-1779056582408",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3639,7 +3822,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-010-1779055371593",
+            "eventId": "station_report_created-010-1779056582409",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 80,
@@ -3653,7 +3836,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_outcome_reached-011-1779055371593",
+            "eventId": "conversation_outcome_reached-011-1779056582409",
             "eventName": "conversation_outcome_reached",
             "outcome": "soft_report",
             "routeOutcome": "soft_report",
@@ -3698,19 +3881,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779055371665",
+            "eventId": "playable_session_started-001-1779056582472",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779055371768",
+            "eventId": "conversation_started-002-1779056582568",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779055371805",
+            "eventId": "dialogue_choice_selected-003-1779056582604",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3723,7 +3906,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779055371805",
+            "eventId": "conversation_anomaly_detected-004-1779056582604",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3736,7 +3919,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779055371805",
+            "eventId": "npc_suspicion_changed-005-1779056582604",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3749,7 +3932,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "response_hesitation_noted-006-1779055371840",
+            "eventId": "response_hesitation_noted-006-1779056582638",
             "eventName": "response_hesitation_noted",
             "outcome": "running",
             "reportWeightAfter": 35,
@@ -3762,7 +3945,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "free_input_submitted-007-1779055371866",
+            "eventId": "free_input_submitted-007-1779056582665",
             "eventName": "free_input_submitted",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3776,7 +3959,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-008-1779055371866",
+            "eventId": "conversation_anomaly_detected-008-1779056582665",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3790,7 +3973,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-009-1779055371866",
+            "eventId": "npc_suspicion_changed-009-1779056582665",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3804,7 +3987,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-010-1779055371866",
+            "eventId": "suspicion_shared-010-1779056582665",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3818,7 +4001,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-011-1779055371867",
+            "eventId": "station_report_created-011-1779056582666",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 120,
@@ -3832,7 +4015,7 @@
           },
           {
             "conversationStage": "inquest",
-            "eventId": "station_inquest_opened-012-1779055371867",
+            "eventId": "station_inquest_opened-012-1779056582666",
             "eventName": "station_inquest_opened",
             "outcome": "inquest_opened",
             "reportWeightAfter": 120,
@@ -3847,7 +4030,7 @@
         ],
         "inputPath": "focus StoreCounterZone -> E -> 3 routine mismatch -> response hesitation -> HUD typed line",
         "lastWhyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
-        "outcomeBody": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 대기 손님이 그 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
+        "outcomeBody": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
         "reportWeight": 120,
         "routeId": "inquest_opened",
         "routeOutcome": "inquest_opened",
@@ -3942,6 +4125,22 @@
         "observedAffordance": "cite_record",
         "observedLedgerEventId": "civic-ledger-6",
         "observedObjectId": "station_dossier",
+        "observerActorId": "NPC_Studio_PM",
+        "observerRole": "studio_pm",
+        "resultingAffordance": "block_review",
+        "resultingStepId": "inquest.studio_pm.block_review",
+        "whyLine": "studio_pm reads station_officer's cite_record record before choosing block_review."
+      },
+      {
+        "economyPressure": {
+          "localTrust": 5,
+          "recordBurden": 85,
+          "stationAttention": 70
+        },
+        "observedActorRole": "station_officer",
+        "observedAffordance": "cite_record",
+        "observedLedgerEventId": "civic-ledger-6",
+        "observedObjectId": "station_dossier",
         "observerActorId": "NPC_Waiting_Customer",
         "observerRole": "waiting_customer",
         "resultingAffordance": "refuse_contact",
@@ -4001,14 +4200,14 @@
       "NPC_Studio_PM": {
         "displayName": "Studio PM",
         "emissionEnergy": 0.616666674613953,
-        "exposure": 0,
-        "markerVisible": false,
+        "exposure": 45,
+        "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Studio_PM",
-        "pressureText": "",
-        "reactionText": "",
+        "pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
+        "reactionText": "리뷰 차단",
         "role": "Studio PM",
-        "state": "normal"
+        "state": "blocked"
       },
       "NPC_Waiting_Customer": {
         "displayName": "Waiting Customer",
@@ -4027,13 +4226,13 @@
     "worldRecordProps": {
       "civic_economy_panel": {
         "hasBody": true,
-        "label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 90 | 주목 70",
+        "label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
         "state": "attention",
         "visible": true
       },
       "civic_ledger": {
         "hasBody": true,
-        "label": "시민 장부 7건\ncivic-ledger-7 -> civic-ledger-6\n접촉 거부",
+        "label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
         "state": "append_only",
         "visible": true
       },
@@ -4081,8 +4280,8 @@
       },
       "studio_review_queue": {
         "hasBody": true,
-        "label": "리뷰\n열림",
-        "state": "open",
+        "label": "리뷰\n차단",
+        "state": "blocked",
         "visible": true
       },
       "usual_order_cue": {
@@ -8965,7 +9164,7 @@
           "providerMode": "provider-action-proposal",
           "playerLineKind": "inquest_line",
           "playerLine": "저는 이 꿈에 방금 들어왔어요.",
-          "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, and a waiting customer refuses contact.",
+          "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, Studio blocks a review opportunity, and a waiting customer refuses contact.",
           "actionTrace": [
             {
               "stepId": "inquest.clerk.mark_receipt",
@@ -10445,6 +10644,89 @@
               "providerLine": "상점에서 넘어온 기록 번호를 먼저 인용하겠습니다."
             },
             {
+              "stepId": "inquest.studio_pm.block_review",
+              "actorId": "NPC_Studio_PM",
+              "actorRole": "studio_pm",
+              "perceivedObjectIds": [
+                "park_notice_board",
+                "studio_review_queue"
+              ],
+              "availableActions": [
+                {
+                  "actionId": "studio_review_queue.block_review",
+                  "affordance": "block_review",
+                  "objectId": "studio_review_queue",
+                  "objectState": "open",
+                  "playerLabel": "Block Review",
+                  "eligibleRoles": [
+                    "studio_pm"
+                  ],
+                  "preconditions": [
+                    "object_state:open",
+                    "role_allowed:studio_pm",
+                    "known_ledger_event_required",
+                    "ledger_event_kind:station_record_cited"
+                  ],
+                  "visibleTo": [
+                    "studio_pm"
+                  ],
+                  "perceivedAs": "formal citation blocks another local review",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:station_citation_blocks_review"
+                  ],
+                  "ledgerEventKind": "studio_review_blocked",
+                  "civicEconomyEffects": [
+                    "localTrust:-2",
+                    "recordBurden:+3"
+                  ],
+                  "validationRuleId": "same_order.studio_review_queue.block_review",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known",
+                    "ledger_event_kind_unaccepted"
+                  ],
+                  "toState": "blocked",
+                  "recordId": "studio_public_review_invite",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-6"
+                  ]
+                }
+              ],
+              "providerProposal": {
+                "affordance": "block_review",
+                "objectId": "studio_review_queue",
+                "recordId": "studio_public_review_blocked",
+                "citedLedgerEventId": "civic-ledger-6",
+                "whyLine": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record.",
+                "npcLineCandidate": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
+                "selectionReason": "studio_pm chooses block_review because block the Studio review queue after the formal Station citation becomes visible."
+              },
+              "affordance": "block_review",
+              "objectId": "studio_review_queue",
+              "accepted": true,
+              "ledgerEventId": "civic-ledger-7",
+              "ledgerEventKind": "studio_review_blocked",
+              "recordId": "studio_public_review_blocked",
+              "citedLedgerEventId": "civic-ledger-6",
+              "economyAfter": {
+                "accountCredit": 3,
+                "localTrust": 3,
+                "recordBurden": 88,
+                "stationAttention": 70
+              },
+              "whyLine": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record.",
+              "selectionReason": "studio_pm chooses block_review because block the Studio review queue after the formal Station citation becomes visible.",
+              "providerLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다."
+            },
+            {
               "stepId": "inquest.waiting_customer.refuse_contact",
               "actorId": "NPC_Waiting_Customer",
               "actorRole": "waiting_customer",
@@ -10668,14 +10950,14 @@
               "affordance": "refuse_contact",
               "objectId": "store_queue_mark",
               "accepted": true,
-              "ledgerEventId": "civic-ledger-7",
+              "ledgerEventId": "civic-ledger-8",
               "ledgerEventKind": "queue_contact_refused",
               "recordId": "store_same_order_contact_refused",
               "citedLedgerEventId": "civic-ledger-6",
               "economyAfter": {
                 "accountCredit": 3,
                 "localTrust": 0,
-                "recordBurden": 90,
+                "recordBurden": 93,
                 "stationAttention": 70
               },
               "whyLine": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open.",
@@ -10690,6 +10972,7 @@
             "public_rumor_posted",
             "store_report_escalated",
             "station_record_cited",
+            "studio_review_blocked",
             "queue_contact_refused"
           ],
           "ledgerAffordances": [
@@ -10699,6 +10982,7 @@
             "post_rumor",
             "forward_report",
             "cite_record",
+            "block_review",
             "refuse_contact"
           ],
           "finalObjectStates": {
@@ -10709,14 +10993,14 @@
             "correction_slip": "absent",
             "report_tray": "forwarded",
             "park_notice_board": "rumored",
-            "studio_review_queue": "open",
+            "studio_review_queue": "blocked",
             "station_dossier": "cited",
             "civic_ledger": "append_only"
           },
           "economyAfter": {
             "accountCredit": 3,
             "localTrust": 0,
-            "recordBurden": 90,
+            "recordBurden": 93,
             "stationAttention": 70
           },
           "stationCitation": {
@@ -10744,7 +11028,7 @@
         "soft_report",
         "inquest_opened"
       ],
-      "jobCount": 25,
+      "jobCount": 26,
       "jobs": [
         {
           "jobId": "clean_cover.clean.clerk.cite_usual_order.provider-action-proposal",
@@ -16262,7 +16546,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, and a waiting customer refuses contact.",
+            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, Studio blocks a review opportunity, and a waiting customer refuses contact.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -16647,7 +16931,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, and a waiting customer refuses contact.",
+            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, Studio blocks a review opportunity, and a waiting customer refuses contact.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -16955,7 +17239,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, and a waiting customer refuses contact.",
+            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, Studio blocks a review opportunity, and a waiting customer refuses contact.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -17284,7 +17568,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, and a waiting customer refuses contact.",
+            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, Studio blocks a review opportunity, and a waiting customer refuses contact.",
             "perceivedObjectIds": [
               "park_notice_board"
             ],
@@ -17550,7 +17834,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, and a waiting customer refuses contact.",
+            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, Studio blocks a review opportunity, and a waiting customer refuses contact.",
             "perceivedObjectIds": [
               "store_counter",
               "usual_order_cue",
@@ -17871,7 +18155,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, and a waiting customer refuses contact.",
+            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, Studio blocks a review opportunity, and a waiting customer refuses contact.",
             "perceivedObjectIds": [
               "report_tray",
               "station_dossier",
@@ -17978,10 +18262,143 @@
           }
         },
         {
+          "jobId": "inquest_opened.inquest.studio_pm.block_review.provider-action-proposal",
+          "routeId": "inquest_opened",
+          "stepId": "inquest.studio_pm.block_review",
+          "turnIndex": 6,
+          "actorId": "NPC_Studio_PM",
+          "actorRole": "studio_pm",
+          "purpose": "npc_reaction_line",
+          "dispatchPhase": "role_agent_tick",
+          "providerMode": "scheduled-action-proposal",
+          "playerLineKind": "inquest_line",
+          "playerLine": "저는 이 꿈에 방금 들어왔어요.",
+          "socialLoopStage": "store_report",
+          "dramaTone": "watchful",
+          "preoccupations": [
+            "public trust",
+            "review queue",
+            "small opportunities"
+          ],
+          "promptContext": {
+            "scenario": "same_order",
+            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, Studio blocks a review opportunity, and a waiting customer refuses contact.",
+            "perceivedObjectIds": [
+              "park_notice_board",
+              "studio_review_queue"
+            ],
+            "availableActions": [
+              {
+                "actionId": "studio_review_queue.block_review",
+                "affordance": "block_review",
+                "objectId": "studio_review_queue",
+                "objectState": "open",
+                "playerLabel": "Block Review",
+                "eligibleRoles": [
+                  "studio_pm"
+                ],
+                "preconditions": [
+                  "object_state:open",
+                  "role_allowed:studio_pm",
+                  "known_ledger_event_required",
+                  "ledger_event_kind:station_record_cited"
+                ],
+                "visibleTo": [
+                  "studio_pm"
+                ],
+                "perceivedAs": "formal citation blocks another local review",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "economy:recordBurden",
+                  "pressure:station_citation_blocks_review"
+                ],
+                "ledgerEventKind": "studio_review_blocked",
+                "civicEconomyEffects": [
+                  "localTrust:-2",
+                  "recordBurden:+3"
+                ],
+                "validationRuleId": "same_order.studio_review_queue.block_review",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known",
+                  "ledger_event_kind_unaccepted"
+                ],
+                "toState": "blocked",
+                "recordId": "studio_public_review_invite",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-6"
+                ]
+              }
+            ],
+            "recentLedgerEventKinds": [
+              "store_receipt_marked",
+              "store_exception_reported",
+              "queue_delay_noted",
+              "public_rumor_posted",
+              "store_report_escalated",
+              "station_record_cited"
+            ],
+            "recentLedgerAffordances": [
+              "mark_receipt",
+              "place_note",
+              "complain_delay",
+              "post_rumor",
+              "forward_report",
+              "cite_record"
+            ]
+          },
+          "allowedProviderFields": [
+            "affordance",
+            "objectId",
+            "recordId",
+            "citedLedgerEventId",
+            "whyLine",
+            "npcLineCandidate",
+            "selectionReason"
+          ],
+          "forbiddenAuthorityFields": [
+            "riskTag",
+            "suspicionDelta",
+            "reportDelta",
+            "exposureDelta",
+            "economyDelta",
+            "ledgerEventKind",
+            "ledgerEventId",
+            "objectState",
+            "verdict",
+            "sessionOutcome",
+            "sessionTermination"
+          ],
+          "fallbackLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
+          "lockedAction": {
+            "affordance": "block_review",
+            "objectId": "studio_review_queue",
+            "ledgerEventId": "civic-ledger-7",
+            "ledgerEventKind": "studio_review_blocked",
+            "recordId": "studio_public_review_blocked",
+            "citedLedgerEventId": "civic-ledger-6",
+            "economyAfter": {
+              "accountCredit": 3,
+              "localTrust": 3,
+              "recordBurden": 88,
+              "stationAttention": 70
+            },
+            "validation": "accepted",
+            "whyLine": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record.",
+            "selectionReason": "studio_pm chooses block_review because block the Studio review queue after the formal Station citation becomes visible."
+          }
+        },
+        {
           "jobId": "inquest_opened.inquest.waiting_customer.refuse_contact.provider-action-proposal",
           "routeId": "inquest_opened",
           "stepId": "inquest.waiting_customer.refuse_contact",
-          "turnIndex": 6,
+          "turnIndex": 7,
           "actorId": "NPC_Waiting_Customer",
           "actorRole": "waiting_customer",
           "purpose": "npc_reaction_line",
@@ -17998,7 +18415,7 @@
           ],
           "promptContext": {
             "scenario": "same_order",
-            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, and a waiting customer refuses contact.",
+            "socialReactionSummary": "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, Studio blocks a review opportunity, and a waiting customer refuses contact.",
             "perceivedObjectIds": [
               "store_queue_mark",
               "store_counter",
@@ -18213,7 +18630,8 @@
               "queue_delay_noted",
               "public_rumor_posted",
               "store_report_escalated",
-              "station_record_cited"
+              "station_record_cited",
+              "studio_review_blocked"
             ],
             "recentLedgerAffordances": [
               "mark_receipt",
@@ -18221,7 +18639,8 @@
               "complain_delay",
               "post_rumor",
               "forward_report",
-              "cite_record"
+              "cite_record",
+              "block_review"
             ]
           },
           "allowedProviderFields": [
@@ -18250,14 +18669,14 @@
           "lockedAction": {
             "affordance": "refuse_contact",
             "objectId": "store_queue_mark",
-            "ledgerEventId": "civic-ledger-7",
+            "ledgerEventId": "civic-ledger-8",
             "ledgerEventKind": "queue_contact_refused",
             "recordId": "store_same_order_contact_refused",
             "citedLedgerEventId": "civic-ledger-6",
             "economyAfter": {
               "accountCredit": 3,
               "localTrust": 0,
-              "recordBurden": 90,
+              "recordBurden": 93,
               "stationAttention": 70
             },
             "validation": "accepted",
@@ -18282,7 +18701,7 @@
       "liveHttpDispatchVerified": false,
       "endpoint": "/v1/npc/decision",
       "dispatchHost": "godot-runtime-pending",
-      "jobCount": 25,
+      "jobCount": 26,
       "packetProofs": [
         {
           "jobId": "clean_cover.clean.clerk.cite_usual_order.provider-action-proposal",
@@ -26574,6 +26993,191 @@
           "failures": []
         },
         {
+          "jobId": "inquest_opened.inquest.studio_pm.block_review.provider-action-proposal",
+          "routeId": "inquest_opened",
+          "stepId": "inquest.studio_pm.block_review",
+          "endpoint": "/v1/npc/decision",
+          "method": "POST",
+          "npcId": "NPC_Studio_PM",
+          "actorRole": "studio_pm",
+          "packet": {
+            "sessionId": "same-order-provider-dispatch-inquest_opened",
+            "npcId": "NPC_Studio_PM",
+            "landmarkId": "Store",
+            "nearbyActors": [
+              "player",
+              "NPC_Store_Clerk",
+              "NPC_Store_Manager",
+              "NPC_Waiting_Customer"
+            ],
+            "recentEvents": [
+              "store_receipt_marked:mark_receipt",
+              "store_exception_reported:place_note",
+              "queue_delay_noted:complain_delay",
+              "public_rumor_posted:post_rumor",
+              "store_report_escalated:forward_report",
+              "station_record_cited:cite_record",
+              "store_report_pending"
+            ],
+            "organizationContext": {
+              "scenario": "same_order",
+              "routeId": "inquest_opened",
+              "stepId": "inquest.studio_pm.block_review",
+              "jobId": "inquest_opened.inquest.studio_pm.block_review.provider-action-proposal",
+              "actorRole": "studio_pm",
+              "purpose": "npc_reaction_line",
+              "dispatchPhase": "role_agent_tick",
+              "providerMode": "scheduled-action-proposal",
+              "socialLoopStage": "store_report",
+              "dramaTone": "watchful",
+              "preoccupations": [
+                "public trust",
+                "review queue",
+                "small opportunities"
+              ],
+              "perceivedObjectIds": [
+                "park_notice_board",
+                "studio_review_queue"
+              ],
+              "availableActions": [
+                {
+                  "actionId": "studio_review_queue.block_review",
+                  "affordance": "block_review",
+                  "objectId": "studio_review_queue",
+                  "objectState": "open",
+                  "playerLabel": "Block Review",
+                  "eligibleRoles": [
+                    "studio_pm"
+                  ],
+                  "preconditions": [
+                    "object_state:open",
+                    "role_allowed:studio_pm",
+                    "known_ledger_event_required",
+                    "ledger_event_kind:station_record_cited"
+                  ],
+                  "visibleTo": [
+                    "studio_pm"
+                  ],
+                  "perceivedAs": "formal citation blocks another local review",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:station_citation_blocks_review"
+                  ],
+                  "ledgerEventKind": "studio_review_blocked",
+                  "civicEconomyEffects": [
+                    "localTrust:-2",
+                    "recordBurden:+3"
+                  ],
+                  "validationRuleId": "same_order.studio_review_queue.block_review",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known",
+                    "ledger_event_kind_unaccepted"
+                  ],
+                  "toState": "blocked",
+                  "recordId": "studio_public_review_invite",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-6"
+                  ]
+                }
+              ],
+              "recentLedgerEventKinds": [
+                "store_receipt_marked",
+                "store_exception_reported",
+                "queue_delay_noted",
+                "public_rumor_posted",
+                "store_report_escalated",
+                "station_record_cited"
+              ],
+              "recentLedgerAffordances": [
+                "mark_receipt",
+                "place_note",
+                "complain_delay",
+                "post_rumor",
+                "forward_report",
+                "cite_record"
+              ],
+              "allowedProviderFields": [
+                "affordance",
+                "objectId",
+                "recordId",
+                "citedLedgerEventId",
+                "whyLine",
+                "npcLineCandidate",
+                "selectionReason"
+              ],
+              "forbiddenAuthorityFields": [
+                "riskTag",
+                "suspicionDelta",
+                "reportDelta",
+                "exposureDelta",
+                "economyDelta",
+                "ledgerEventKind",
+                "ledgerEventId",
+                "objectState",
+                "verdict",
+                "sessionOutcome",
+                "sessionTermination"
+              ],
+              "fallbackLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
+              "lockedAction": {
+                "affordance": "block_review",
+                "objectId": "studio_review_queue",
+                "ledgerEventId": "civic-ledger-7",
+                "ledgerEventKind": "studio_review_blocked",
+                "recordId": "studio_public_review_blocked",
+                "citedLedgerEventId": "civic-ledger-6",
+                "economyAfter": {
+                  "accountCredit": 3,
+                  "localTrust": 3,
+                  "recordBurden": 88,
+                  "stationAttention": 70
+                },
+                "validation": "accepted",
+                "whyLine": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record.",
+                "selectionReason": "studio_pm chooses block_review because block the Studio review queue after the formal Station citation becomes visible."
+              },
+              "authorityBoundary": "provider_writes_wording_only_runtime_locks_action"
+            },
+            "playerSignals": {
+              "speechAct": "SA_BREAK",
+              "playerLineKind": "inquest_line",
+              "providerDispatchContract": true
+            },
+            "conversation": {
+              "conversationId": "same-order-provider-inquest_opened",
+              "turnId": "provider-inquest_opened-7",
+              "promptId": "inquest.studio_pm.block_review",
+              "choiceSetId": "inquest.studio_pm.block_review.provider-options",
+              "speakerId": "player",
+              "selectedChoiceId": "inquest_line",
+              "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
+              "priorTurnIds": [
+                "provider-inquest_opened-1",
+                "provider-inquest_opened-2",
+                "provider-inquest_opened-3",
+                "provider-inquest_opened-4",
+                "provider-inquest_opened-5",
+                "provider-inquest_opened-6"
+              ]
+            }
+          },
+          "schemaPass": true,
+          "boundedBehaviorPass": true,
+          "socialLoopStage": "report",
+          "actionType": "Talk",
+          "utterance": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
+          "fallbackLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
+          "failures": []
+        },
+        {
           "jobId": "inquest_opened.inquest.waiting_customer.refuse_contact.provider-action-proposal",
           "routeId": "inquest_opened",
           "stepId": "inquest.waiting_customer.refuse_contact",
@@ -26597,6 +27201,7 @@
               "public_rumor_posted:post_rumor",
               "store_report_escalated:forward_report",
               "station_record_cited:cite_record",
+              "studio_review_blocked:block_review",
               "store_report_pending"
             ],
             "organizationContext": {
@@ -26829,7 +27434,8 @@
                 "queue_delay_noted",
                 "public_rumor_posted",
                 "store_report_escalated",
-                "station_record_cited"
+                "station_record_cited",
+                "studio_review_blocked"
               ],
               "recentLedgerAffordances": [
                 "mark_receipt",
@@ -26837,7 +27443,8 @@
                 "complain_delay",
                 "post_rumor",
                 "forward_report",
-                "cite_record"
+                "cite_record",
+                "block_review"
               ],
               "allowedProviderFields": [
                 "affordance",
@@ -26865,14 +27472,14 @@
               "lockedAction": {
                 "affordance": "refuse_contact",
                 "objectId": "store_queue_mark",
-                "ledgerEventId": "civic-ledger-7",
+                "ledgerEventId": "civic-ledger-8",
                 "ledgerEventKind": "queue_contact_refused",
                 "recordId": "store_same_order_contact_refused",
                 "citedLedgerEventId": "civic-ledger-6",
                 "economyAfter": {
                   "accountCredit": 3,
                   "localTrust": 0,
-                  "recordBurden": 90,
+                  "recordBurden": 93,
                   "stationAttention": 70
                 },
                 "validation": "accepted",
@@ -26888,7 +27495,7 @@
             },
             "conversation": {
               "conversationId": "same-order-provider-inquest_opened",
-              "turnId": "provider-inquest_opened-7",
+              "turnId": "provider-inquest_opened-8",
               "promptId": "inquest.waiting_customer.refuse_contact",
               "choiceSetId": "inquest.waiting_customer.refuse_contact.provider-options",
               "speakerId": "player",
@@ -26900,7 +27507,8 @@
                 "provider-inquest_opened-3",
                 "provider-inquest_opened-4",
                 "provider-inquest_opened-5",
-                "provider-inquest_opened-6"
+                "provider-inquest_opened-6",
+                "provider-inquest_opened-7"
               ]
             }
           },
@@ -27123,22 +27731,27 @@
           "requiredVisibleObjects": [
             "station_dossier",
             "civic_ledger",
-            "store_queue_mark"
+            "store_queue_mark",
+            "studio_review_queue"
           ],
           "actionStepIds": [
             "inquest.station.cite_store_report",
+            "inquest.studio_pm.block_review",
             "inquest.waiting_customer.refuse_contact"
           ],
           "providerJobIds": [
             "inquest_opened.inquest.station.cite_store_report.provider-action-proposal",
+            "inquest_opened.inquest.studio_pm.block_review.provider-action-proposal",
             "inquest_opened.inquest.waiting_customer.refuse_contact.provider-action-proposal"
           ],
           "ledgerEventKinds": [
             "station_record_cited",
+            "studio_review_blocked",
             "queue_contact_refused"
           ],
           "affordances": [
             "cite_record",
+            "block_review",
             "refuse_contact"
           ],
           "evidenceEvents": [
@@ -27146,7 +27759,7 @@
             "verdict_reached"
           ],
           "providerPurpose": "mixed",
-          "runtimeProof": "The Station beat maps to an exact cite-record action, then one local NPC reaction to that citation."
+          "runtimeProof": "The Station beat maps to an exact cite-record action, then one Studio opportunity closure and one local NPC reaction to that citation."
         }
       ],
       "failures": [],
@@ -27360,7 +27973,7 @@
         "expectedHeight": 1440,
         "actualWidth": 1280,
         "actualHeight": 1440,
-        "bytes": 874861,
+        "bytes": 883204,
         "pass": true,
         "missing": []
       },
@@ -27477,16 +28090,16 @@
           "expectedHeight": 720,
           "actualWidth": 1280,
           "actualHeight": 720,
-          "bytes": 298986,
+          "bytes": 309489,
           "pass": true,
           "requiresHumanReadabilityReview": true,
           "expectedContent": [
             "non-empty 1280x720 viewport",
             "Station inquest outcome panel is visible",
             "suspicion, report pressure, and session termination state are visible",
-            "live HUD consequence line shows speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation",
+            "live HUD consequence line shows speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation -> Studio review block",
             "outcome names the exact Store ledger entry cited by the Station",
-            "outcome shows speech/delay to record to queue reaction to Park notice to Station role-action chain",
+            "outcome shows speech/delay to record to queue reaction to Park notice to Station role-action to Studio review block chain",
             "outcome names the NPC-to-NPC social reaction behind the Station citation",
             "why-line remains visible as session-end basis"
           ],
@@ -27499,7 +28112,7 @@
           "expectedHeight": 720,
           "actualWidth": 1280,
           "actualHeight": 720,
-          "bytes": 96859,
+          "bytes": 96835,
           "pass": true,
           "requiresHumanReadabilityReview": true,
           "expectedContent": [
@@ -29384,6 +29997,130 @@
       },
       {
         "accepted": true,
+        "actorId": "NPC_Studio_PM",
+        "actorRole": "studio_pm",
+        "affordance": "block_review",
+        "availableActions": [
+          {
+            "actionId": "studio_review_queue.block_review",
+            "affordance": "block_review",
+            "citableLedgerEventIds": [
+              "civic-ledger-6"
+            ],
+            "civicEconomyEffects": [
+              "localTrust:-2",
+              "recordBurden:+3"
+            ],
+            "eligibleRoles": [
+              "studio_pm"
+            ],
+            "failureReasons": [
+              "object_not_perceived",
+              "affordance_unavailable",
+              "role_authority_exceeded",
+              "why_line_required",
+              "ledger_event_unknown",
+              "ledger_event_not_known",
+              "ledger_event_kind_unaccepted"
+            ],
+            "ledgerEventKind": "studio_review_blocked",
+            "objectId": "studio_review_queue",
+            "objectState": "open",
+            "perceivedAs": "formal citation blocks another local review",
+            "playerLabel": "Block Review",
+            "preconditions": [
+              "object_state:open",
+              "role_allowed:studio_pm",
+              "known_ledger_event_required",
+              "ledger_event_kind:station_record_cited",
+              "record_id:studio_public_review_invite"
+            ],
+            "priorityHints": [
+              "economy:localTrust",
+              "economy:recordBurden",
+              "pressure:station_citation_blocks_review"
+            ],
+            "recordId": "studio_public_review_invite",
+            "requiresLedgerEvent": true,
+            "requiresStoreLedgerEvent": false,
+            "toState": "blocked",
+            "validationRuleId": "same_order.studio_review_queue.block_review",
+            "visibleTo": [
+              "studio_pm"
+            ]
+          }
+        ],
+        "citedLedgerEventId": "civic-ledger-6",
+        "economyAfter": {
+          "accountCredit": 3,
+          "localTrust": 3,
+          "recordBurden": 88,
+          "stationAttention": 70
+        },
+        "ledgerEventId": "civic-ledger-7",
+        "ledgerEventKind": "studio_review_blocked",
+        "objectId": "studio_review_queue",
+        "perceivedObjectIds": [
+          "park_notice_board",
+          "studio_review_queue"
+        ],
+        "recordId": "studio_public_review_blocked",
+        "selectedActionDescriptor": {
+          "actionId": "studio_review_queue.block_review",
+          "affordance": "block_review",
+          "citableLedgerEventIds": [
+            "civic-ledger-6"
+          ],
+          "civicEconomyEffects": [
+            "localTrust:-2",
+            "recordBurden:+3"
+          ],
+          "eligibleRoles": [
+            "studio_pm"
+          ],
+          "failureReasons": [
+            "object_not_perceived",
+            "affordance_unavailable",
+            "role_authority_exceeded",
+            "why_line_required",
+            "ledger_event_unknown",
+            "ledger_event_not_known",
+            "ledger_event_kind_unaccepted"
+          ],
+          "ledgerEventKind": "studio_review_blocked",
+          "objectId": "studio_review_queue",
+          "objectState": "open",
+          "perceivedAs": "formal citation blocks another local review",
+          "playerLabel": "Block Review",
+          "preconditions": [
+            "object_state:open",
+            "role_allowed:studio_pm",
+            "known_ledger_event_required",
+            "ledger_event_kind:station_record_cited",
+            "record_id:studio_public_review_invite"
+          ],
+          "priorityHints": [
+            "economy:localTrust",
+            "economy:recordBurden",
+            "pressure:station_citation_blocks_review"
+          ],
+          "recordId": "studio_public_review_invite",
+          "requiresLedgerEvent": true,
+          "requiresStoreLedgerEvent": false,
+          "toState": "blocked",
+          "validationRuleId": "same_order.studio_review_queue.block_review",
+          "visibleTo": [
+            "studio_pm"
+          ]
+        },
+        "selectionReason": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record.",
+        "sequence": 7,
+        "stepId": "inquest.studio_pm.block_review",
+        "validation": "accepted",
+        "whyLine": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record."
+      },
+      {
+        "accepted": true,
         "actorId": "NPC_Waiting_Customer",
         "actorRole": "waiting_customer",
         "affordance": "refuse_contact",
@@ -29532,10 +30269,10 @@
         "economyAfter": {
           "accountCredit": 3,
           "localTrust": 0,
-          "recordBurden": 90,
+          "recordBurden": 93,
           "stationAttention": 70
         },
-        "ledgerEventId": "civic-ledger-7",
+        "ledgerEventId": "civic-ledger-8",
         "ledgerEventKind": "queue_contact_refused",
         "objectId": "store_queue_mark",
         "perceivedObjectIds": [
@@ -29593,7 +30330,7 @@
           ]
         },
         "selectionReason": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open.",
-        "sequence": 7,
+        "sequence": 8,
         "stepId": "inquest.waiting_customer.refuse_contact",
         "validation": "accepted",
         "whyLine": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open."
@@ -29603,7 +30340,7 @@
     "civicEconomy": {
       "accountCredit": 3,
       "localTrust": 0,
-      "recordBurden": 90,
+      "recordBurden": 93,
       "stationAttention": 70
     },
     "civicLedger": [
@@ -29698,6 +30435,22 @@
         "whyLine": "The Station cites the exact forwarded Store ledger event before narrowing the player's answer."
       },
       {
+        "actorId": "NPC_Studio_PM",
+        "actorRole": "studio_pm",
+        "affordance": "block_review",
+        "citedLedgerEventId": "civic-ledger-6",
+        "economyDelta": {
+          "localTrust": -2,
+          "recordBurden": 3
+        },
+        "eventId": "civic-ledger-7",
+        "kind": "studio_review_blocked",
+        "objectId": "studio_review_queue",
+        "recordId": "studio_public_review_blocked",
+        "validation": "accepted",
+        "whyLine": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record."
+      },
+      {
         "actorId": "NPC_Waiting_Customer",
         "actorRole": "waiting_customer",
         "affordance": "refuse_contact",
@@ -29706,7 +30459,7 @@
           "localTrust": -8,
           "recordBurden": 5
         },
-        "eventId": "civic-ledger-7",
+        "eventId": "civic-ledger-8",
         "kind": "queue_contact_refused",
         "objectId": "store_queue_mark",
         "recordId": "store_same_order_contact_refused",
@@ -29775,14 +30528,14 @@
       {
         "adapter": "godot",
         "eventFamily": "session",
-        "eventId": "playable_session_started-001-1779055371665",
+        "eventId": "playable_session_started-001-1779056582472",
         "eventName": "playable_session_started",
         "prologueStep": "beginning",
         "schemaVersion": "godot-runtime-v1",
         "sessionId": "dre-171-playable-session",
         "sessionOutcome": "running",
         "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-        "timestampMs": 1779055371665,
+        "timestampMs": 1779056582472,
         "uiSummaryArgs": {},
         "uiSummaryKey": "event.session_started",
         "worldId": "dre_171_godot_shell",
@@ -29795,7 +30548,7 @@
         "conversationId": "conv-same-order",
         "conversationStage": "normal",
         "eventFamily": "domain",
-        "eventId": "conversation_started-002-1779055371768",
+        "eventId": "conversation_started-002-1779056582568",
         "eventName": "conversation_started",
         "outcome": "running",
         "promptId": "store.same_order.routine",
@@ -29804,7 +30557,7 @@
         "socialLoopStage": "normal",
         "speakerId": "NPC_Store_Clerk",
         "summary": "Store Clerk opened the Same Order conversation.",
-        "timestampMs": 1779055371768,
+        "timestampMs": 1779056582568,
         "turnId": "turn-1",
         "worldId": "dre_171_godot_shell",
         "worldRevision": "rev-social-stealth-v1"
@@ -29817,7 +30570,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "dialogue_choice_selected-003-1779055371805",
+        "eventId": "dialogue_choice_selected-003-1779056582604",
         "eventName": "dialogue_choice_selected",
         "inputMode": "choice",
         "outcome": "running",
@@ -29839,7 +30592,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779055371805,
+        "timestampMs": 1779056582604,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -29854,7 +30607,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-004-1779055371805",
+        "eventId": "conversation_anomaly_detected-004-1779056582604",
         "eventName": "conversation_anomaly_detected",
         "inputMode": "choice",
         "outcome": "running",
@@ -29876,7 +30629,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779055371805,
+        "timestampMs": 1779056582604,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -29891,7 +30644,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-005-1779055371805",
+        "eventId": "npc_suspicion_changed-005-1779056582604",
         "eventName": "npc_suspicion_changed",
         "inputMode": "choice",
         "outcome": "running",
@@ -29913,7 +30666,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779055371805,
+        "timestampMs": 1779056582604,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -29928,7 +30681,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "응답 지연 12000ms",
         "eventFamily": "domain",
-        "eventId": "response_hesitation_noted-006-1779055371840",
+        "eventId": "response_hesitation_noted-006-1779056582638",
         "eventName": "response_hesitation_noted",
         "inputMode": "response_hesitation",
         "outcome": "running",
@@ -29951,7 +30704,7 @@
         "suspicionSignals": [
           "response_hesitation"
         ],
-        "timestampMs": 1779055371840,
+        "timestampMs": 1779056582638,
         "turnId": "turn-2",
         "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
         "whyLineKey": "response_hesitation",
@@ -29966,7 +30719,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "free_input_submitted-007-1779055371866",
+        "eventId": "free_input_submitted-007-1779056582665",
         "eventName": "free_input_submitted",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -29991,7 +30744,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779055371866,
+        "timestampMs": 1779056582665,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -30006,7 +30759,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-008-1779055371866",
+        "eventId": "conversation_anomaly_detected-008-1779056582665",
         "eventName": "conversation_anomaly_detected",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -30031,7 +30784,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779055371866,
+        "timestampMs": 1779056582665,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -30046,7 +30799,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-009-1779055371866",
+        "eventId": "npc_suspicion_changed-009-1779056582665",
         "eventName": "npc_suspicion_changed",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -30071,7 +30824,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779055371866,
+        "timestampMs": 1779056582665,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -30086,7 +30839,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "suspicion_shared-010-1779055371866",
+        "eventId": "suspicion_shared-010-1779056582665",
         "eventName": "suspicion_shared",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -30111,7 +30864,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779055371866,
+        "timestampMs": 1779056582665,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -30126,7 +30879,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_report_created-011-1779055371867",
+        "eventId": "station_report_created-011-1779056582666",
         "eventName": "station_report_created",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -30151,7 +30904,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779055371867,
+        "timestampMs": 1779056582666,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -30166,7 +30919,7 @@
         "conversationStage": "inquest",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_inquest_opened-012-1779055371867",
+        "eventId": "station_inquest_opened-012-1779056582666",
         "eventName": "station_inquest_opened",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -30191,7 +30944,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779055371867,
+        "timestampMs": 1779056582666,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -30201,7 +30954,9 @@
     ],
     "exposure": 125,
     "inputLocked": true,
+    "inspectedNpcHistory": [],
     "inspectedNpcState": {},
+    "inspectedWorldRecordHistory": [],
     "inspectedWorldRecordProp": {},
     "lastChoiceIntent": "free/recorded",
     "lastDialogueChoice": "free_input",
@@ -30211,7 +30966,7 @@
     "locale": "ko",
     "noticeBody": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\n플레이어 발화: 저는 이 꿈에 방금 들어왔어요.\nwhy-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
     "noticeTitle": "NPC_Store_Clerk",
-    "outcomeBody": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 대기 손님이 그 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
+    "outcomeBody": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
     "outcomeTitle": "스테이션 심문 개시",
     "outcomeVisible": true,
     "prologueEvidence": [
@@ -31733,6 +32488,130 @@
         },
         {
           "accepted": true,
+          "actorId": "NPC_Studio_PM",
+          "actorRole": "studio_pm",
+          "affordance": "block_review",
+          "availableActions": [
+            {
+              "actionId": "studio_review_queue.block_review",
+              "affordance": "block_review",
+              "citableLedgerEventIds": [
+                "civic-ledger-6"
+              ],
+              "civicEconomyEffects": [
+                "localTrust:-2",
+                "recordBurden:+3"
+              ],
+              "eligibleRoles": [
+                "studio_pm"
+              ],
+              "failureReasons": [
+                "object_not_perceived",
+                "affordance_unavailable",
+                "role_authority_exceeded",
+                "why_line_required",
+                "ledger_event_unknown",
+                "ledger_event_not_known",
+                "ledger_event_kind_unaccepted"
+              ],
+              "ledgerEventKind": "studio_review_blocked",
+              "objectId": "studio_review_queue",
+              "objectState": "open",
+              "perceivedAs": "formal citation blocks another local review",
+              "playerLabel": "Block Review",
+              "preconditions": [
+                "object_state:open",
+                "role_allowed:studio_pm",
+                "known_ledger_event_required",
+                "ledger_event_kind:station_record_cited",
+                "record_id:studio_public_review_invite"
+              ],
+              "priorityHints": [
+                "economy:localTrust",
+                "economy:recordBurden",
+                "pressure:station_citation_blocks_review"
+              ],
+              "recordId": "studio_public_review_invite",
+              "requiresLedgerEvent": true,
+              "requiresStoreLedgerEvent": false,
+              "toState": "blocked",
+              "validationRuleId": "same_order.studio_review_queue.block_review",
+              "visibleTo": [
+                "studio_pm"
+              ]
+            }
+          ],
+          "citedLedgerEventId": "civic-ledger-6",
+          "economyAfter": {
+            "accountCredit": 3,
+            "localTrust": 3,
+            "recordBurden": 88,
+            "stationAttention": 70
+          },
+          "ledgerEventId": "civic-ledger-7",
+          "ledgerEventKind": "studio_review_blocked",
+          "objectId": "studio_review_queue",
+          "perceivedObjectIds": [
+            "park_notice_board",
+            "studio_review_queue"
+          ],
+          "recordId": "studio_public_review_blocked",
+          "selectedActionDescriptor": {
+            "actionId": "studio_review_queue.block_review",
+            "affordance": "block_review",
+            "citableLedgerEventIds": [
+              "civic-ledger-6"
+            ],
+            "civicEconomyEffects": [
+              "localTrust:-2",
+              "recordBurden:+3"
+            ],
+            "eligibleRoles": [
+              "studio_pm"
+            ],
+            "failureReasons": [
+              "object_not_perceived",
+              "affordance_unavailable",
+              "role_authority_exceeded",
+              "why_line_required",
+              "ledger_event_unknown",
+              "ledger_event_not_known",
+              "ledger_event_kind_unaccepted"
+            ],
+            "ledgerEventKind": "studio_review_blocked",
+            "objectId": "studio_review_queue",
+            "objectState": "open",
+            "perceivedAs": "formal citation blocks another local review",
+            "playerLabel": "Block Review",
+            "preconditions": [
+              "object_state:open",
+              "role_allowed:studio_pm",
+              "known_ledger_event_required",
+              "ledger_event_kind:station_record_cited",
+              "record_id:studio_public_review_invite"
+            ],
+            "priorityHints": [
+              "economy:localTrust",
+              "economy:recordBurden",
+              "pressure:station_citation_blocks_review"
+            ],
+            "recordId": "studio_public_review_invite",
+            "requiresLedgerEvent": true,
+            "requiresStoreLedgerEvent": false,
+            "toState": "blocked",
+            "validationRuleId": "same_order.studio_review_queue.block_review",
+            "visibleTo": [
+              "studio_pm"
+            ]
+          },
+          "selectionReason": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record.",
+          "sequence": 7,
+          "stepId": "inquest.studio_pm.block_review",
+          "validation": "accepted",
+          "whyLine": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record."
+        },
+        {
+          "accepted": true,
           "actorId": "NPC_Waiting_Customer",
           "actorRole": "waiting_customer",
           "affordance": "refuse_contact",
@@ -31881,10 +32760,10 @@
           "economyAfter": {
             "accountCredit": 3,
             "localTrust": 0,
-            "recordBurden": 90,
+            "recordBurden": 93,
             "stationAttention": 70
           },
-          "ledgerEventId": "civic-ledger-7",
+          "ledgerEventId": "civic-ledger-8",
           "ledgerEventKind": "queue_contact_refused",
           "objectId": "store_queue_mark",
           "perceivedObjectIds": [
@@ -31942,7 +32821,7 @@
             ]
           },
           "selectionReason": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open.",
-          "sequence": 7,
+          "sequence": 8,
           "stepId": "inquest.waiting_customer.refuse_contact",
           "validation": "accepted",
           "whyLine": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open."
@@ -31952,7 +32831,7 @@
       "civicEconomy": {
         "accountCredit": 3,
         "localTrust": 0,
-        "recordBurden": 90,
+        "recordBurden": 93,
         "stationAttention": 70
       },
       "civicLedger": [
@@ -32047,6 +32926,22 @@
           "whyLine": "The Station cites the exact forwarded Store ledger event before narrowing the player's answer."
         },
         {
+          "actorId": "NPC_Studio_PM",
+          "actorRole": "studio_pm",
+          "affordance": "block_review",
+          "citedLedgerEventId": "civic-ledger-6",
+          "economyDelta": {
+            "localTrust": -2,
+            "recordBurden": 3
+          },
+          "eventId": "civic-ledger-7",
+          "kind": "studio_review_blocked",
+          "objectId": "studio_review_queue",
+          "recordId": "studio_public_review_blocked",
+          "validation": "accepted",
+          "whyLine": "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record."
+        },
+        {
           "actorId": "NPC_Waiting_Customer",
           "actorRole": "waiting_customer",
           "affordance": "refuse_contact",
@@ -32055,7 +32950,7 @@
             "localTrust": -8,
             "recordBurden": 5
           },
-          "eventId": "civic-ledger-7",
+          "eventId": "civic-ledger-8",
           "kind": "queue_contact_refused",
           "objectId": "store_queue_mark",
           "recordId": "store_same_order_contact_refused",
@@ -32068,7 +32963,9 @@
         "quit": "quit_session",
         "restart": "restart_session"
       },
+      "inspectedNpcHistory": [],
       "inspectedNpcState": {},
+      "inspectedWorldRecordHistory": [],
       "inspectedWorldRecordProp": {},
       "outcome": "inquest_opened",
       "providerState": {
@@ -32088,7 +32985,7 @@
         "station_dossier": "cited",
         "store_counter": "serving",
         "store_queue_mark": "refused",
-        "studio_review_queue": "open",
+        "studio_review_queue": "blocked",
         "usual_order_cue": "read"
       },
       "recordedStatement": "legacy recorded-statement fallback remains internal; tester-facing proof uses HUD typed input",
@@ -32170,6 +33067,22 @@
           "observedAffordance": "cite_record",
           "observedLedgerEventId": "civic-ledger-6",
           "observedObjectId": "station_dossier",
+          "observerActorId": "NPC_Studio_PM",
+          "observerRole": "studio_pm",
+          "resultingAffordance": "block_review",
+          "resultingStepId": "inquest.studio_pm.block_review",
+          "whyLine": "studio_pm reads station_officer's cite_record record before choosing block_review."
+        },
+        {
+          "economyPressure": {
+            "localTrust": 5,
+            "recordBurden": 85,
+            "stationAttention": 70
+          },
+          "observedActorRole": "station_officer",
+          "observedAffordance": "cite_record",
+          "observedLedgerEventId": "civic-ledger-6",
+          "observedObjectId": "station_dossier",
           "observerActorId": "NPC_Waiting_Customer",
           "observerRole": "waiting_customer",
           "resultingAffordance": "refuse_contact",
@@ -32230,14 +33143,14 @@
         "NPC_Studio_PM": {
           "displayName": "Studio PM",
           "emissionEnergy": 0.616666674613953,
-          "exposure": 0,
-          "markerVisible": false,
+          "exposure": 45,
+          "markerVisible": true,
           "materialAlpha": 0.3980952501297,
           "npcId": "NPC_Studio_PM",
-          "pressureText": "",
-          "reactionText": "",
+          "pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
+          "reactionText": "리뷰 차단",
           "role": "Studio PM",
-          "state": "normal"
+          "state": "blocked"
         },
         "NPC_Waiting_Customer": {
           "displayName": "Waiting Customer",
@@ -32255,13 +33168,13 @@
       "worldRecordProps": {
         "civic_economy_panel": {
           "hasBody": true,
-          "label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 90 | 주목 70",
+          "label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
           "state": "attention",
           "visible": true
         },
         "civic_ledger": {
           "hasBody": true,
-          "label": "시민 장부 7건\ncivic-ledger-7 -> civic-ledger-6\n접촉 거부",
+          "label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
           "state": "append_only",
           "visible": true
         },
@@ -32309,8 +33222,8 @@
         },
         "studio_review_queue": {
           "hasBody": true,
-          "label": "리뷰\n열림",
-          "state": "open",
+          "label": "리뷰\n차단",
+          "state": "blocked",
           "visible": true
         },
         "usual_order_cue": {
@@ -32339,7 +33252,7 @@
       "station_dossier": "cited",
       "store_counter": "serving",
       "store_queue_mark": "refused",
-      "studio_review_queue": "open",
+      "studio_review_queue": "blocked",
       "usual_order_cue": "read"
     },
     "releaseAuthorityRequirement": "Same Order M1 is fallback-only until budgeted API preflight and Godot provider dispatch pass; public demo authority must keep suspicion, report, inquest, verdict, and session end deterministic.",
@@ -32427,6 +33340,22 @@
         "observedAffordance": "cite_record",
         "observedLedgerEventId": "civic-ledger-6",
         "observedObjectId": "station_dossier",
+        "observerActorId": "NPC_Studio_PM",
+        "observerRole": "studio_pm",
+        "resultingAffordance": "block_review",
+        "resultingStepId": "inquest.studio_pm.block_review",
+        "whyLine": "studio_pm reads station_officer's cite_record record before choosing block_review."
+      },
+      {
+        "economyPressure": {
+          "localTrust": 5,
+          "recordBurden": 85,
+          "stationAttention": 70
+        },
+        "observedActorRole": "station_officer",
+        "observedAffordance": "cite_record",
+        "observedLedgerEventId": "civic-ledger-6",
+        "observedObjectId": "station_dossier",
         "observerActorId": "NPC_Waiting_Customer",
         "observerRole": "waiting_customer",
         "resultingAffordance": "refuse_contact",
@@ -32494,14 +33423,14 @@
       "NPC_Studio_PM": {
         "displayName": "Studio PM",
         "emissionEnergy": 0.616666674613953,
-        "exposure": 0,
-        "markerVisible": false,
+        "exposure": 45,
+        "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Studio_PM",
-        "pressureText": "",
-        "reactionText": "",
+        "pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
+        "reactionText": "리뷰 차단",
         "role": "Studio PM",
-        "state": "normal"
+        "state": "blocked"
       },
       "NPC_Waiting_Customer": {
         "displayName": "Waiting Customer",
@@ -32520,13 +33449,13 @@
     "worldRecordProps": {
       "civic_economy_panel": {
         "hasBody": true,
-        "label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 90 | 주목 70",
+        "label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
         "state": "attention",
         "visible": true
       },
       "civic_ledger": {
         "hasBody": true,
-        "label": "시민 장부 7건\ncivic-ledger-7 -> civic-ledger-6\n접촉 거부",
+        "label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
         "state": "append_only",
         "visible": true
       },
@@ -32574,8 +33503,8 @@
       },
       "studio_review_queue": {
         "hasBody": true,
-        "label": "리뷰\n열림",
-        "state": "open",
+        "label": "리뷰\n차단",
+        "state": "blocked",
         "visible": true
       },
       "usual_order_cue": {

@@ -121,6 +121,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   Park public warning, uses `defer_review`, changes `studio_review_queue` to
   `deferred`, and shows a visible `리뷰 보류` reaction so a public record can
   close a tiny opportunity outside Store/Station.
+- [x] Add the matching formal-citation cross-place reaction: Studio PM reads
+  the Station citation, uses `block_review`, changes `studio_review_queue` to
+  `blocked`, shows `리뷰 차단`, and Codex/player can inspect the blocked queue
+  and PM basis before the Waiting Customer refuses contact.
 - [x] Make Park Witness public notices visible as NPC state: clean, repair, and
   suspicious-cover routes now show `NPC_Park_Witness` reaction markers for
   public vouch, repair notice, and public warning instead of leaving those
@@ -132,7 +136,7 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   interact: the inquest path can read the Waiting Customer's `접촉 거부` state in
   the HUD notice and Codex report.
 - [x] Show the record basis inside NPC inspection: the Waiting Customer HUD
-  notice now names `civic-ledger-7`, its cited `civic-ledger-6`, the
+  notice now names `civic-ledger-8`, its cited `civic-ledger-6`, the
   `refuse_contact` affordance, and the queue-mark record object so the player
   can read why the refusal happened.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.

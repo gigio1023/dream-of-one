@@ -124,7 +124,7 @@ test("Same Order agentic route proofs cover clean, repair, soft report, and inqu
   const inquest = proofs.find(proof => proof.routeId === "inquest_opened");
   assert.ok(inquest);
   assert.equal(inquest.stationCitation?.citedLedgerEventKind, "store_report_escalated");
-  assert.deepEqual(inquest.ledgerAffordances, ["mark_receipt", "place_note", "complain_delay", "post_rumor", "forward_report", "cite_record", "refuse_contact"]);
+  assert.deepEqual(inquest.ledgerAffordances, ["mark_receipt", "place_note", "complain_delay", "post_rumor", "forward_report", "cite_record", "block_review", "refuse_contact"]);
   assert.deepEqual(
     inquest.socialObservationTrace.map(observation => [
       observation.observerRole,
@@ -137,11 +137,13 @@ test("Same Order agentic route proofs cover clean, repair, soft report, and inqu
       ["park_witness", "store_clerk", "place_note", "post_rumor"],
       ["store_manager", "store_clerk", "place_note", "forward_report"],
       ["station_officer", "store_manager", "forward_report", "cite_record"],
+      ["studio_pm", "station_officer", "cite_record", "block_review"],
       ["waiting_customer", "station_officer", "cite_record", "refuse_contact"],
     ],
   );
   assert.equal(inquest.finalObjectStates.station_dossier, "cited");
   assert.equal(inquest.finalObjectStates.store_queue_mark, "refused");
+  assert.equal(inquest.finalObjectStates.studio_review_queue, "blocked");
   assert.equal(
     inquest.actionTrace.some(trace =>
       trace.actorRole === "station_officer"
@@ -213,10 +215,11 @@ test("Generated playable slice includes Same Order agentic route proofs in the G
   assert.equal(playableSummary.recordObjects.report_tray, "forwarded");
   assert.equal(playableSummary.recordObjects.station_dossier, "cited");
   assert.equal(playableSummary.recordObjects.park_notice_board, "rumored");
+  assert.equal(playableSummary.recordObjects.studio_review_queue, "blocked");
   assert.equal(playableSummary.civicEconomy.localTrust, 0);
-  assert.equal(playableSummary.civicEconomy.recordBurden, 90);
+  assert.equal(playableSummary.civicEconomy.recordBurden, 93);
   assert.equal(playableSummary.civicEconomy.stationAttention, 70);
-  assert.equal(playableSummary.civicLedger.length, 7);
+  assert.equal(playableSummary.civicLedger.length, 8);
   assert.equal(playableSummary.civicLedger.at(-1)?.kind, "queue_contact_refused");
   assert.equal(playableSummary.agentActionLog.length, playableSummary.civicLedger.length);
   assert.deepEqual(
@@ -245,6 +248,7 @@ test("Generated playable slice includes Same Order agentic route proofs in the G
   assert.equal(playableSummary.agentActionLog.some(action => action.actorRole === "waiting_customer" && action.affordance === "complain_delay"), true);
   assert.equal(playableSummary.agentActionLog.some(action => action.actorRole === "waiting_customer" && action.affordance === "refuse_contact"), true);
   assert.equal(playableSummary.agentActionLog.some(action => action.actorRole === "park_witness" && action.affordance === "post_rumor"), true);
+  assert.equal(playableSummary.agentActionLog.some(action => action.actorRole === "studio_pm" && action.affordance === "block_review"), true);
   assert.equal(
     playability.agenticRouteProofs.some(proof =>
       proof.routeId === "inquest_opened"
@@ -262,13 +266,14 @@ test("Generated playable slice includes Same Order agentic route proofs in the G
   assert.equal(playableSummary.worldRecordProps.receipt_tray.state, "marked");
   assert.equal(playableSummary.worldRecordProps.store_queue_mark.state, "refused");
   assert.equal(playableSummary.worldRecordProps.park_notice_board.state, "rumored");
+  assert.equal(playableSummary.worldRecordProps.studio_review_queue.state, "blocked");
   assert.equal(playableSummary.worldRecordProps.report_tray.state, "forwarded");
   assert.equal(playableSummary.worldRecordProps.station_dossier.state, "cited");
   assert.equal(playableSummary.worldRecordProps.station_dossier.label.includes("인용"), true);
-  assert.equal(playableSummary.worldRecordProps.civic_ledger.label.includes("7"), true);
+  assert.equal(playableSummary.worldRecordProps.civic_ledger.label.includes("8"), true);
   assert.equal(playableSummary.worldRecordProps.civic_economy_panel.state, "attention");
   assert.equal(playableSummary.worldRecordProps.civic_economy_panel.label.includes(String(playableSummary.civicEconomy.accountCredit)), true);
-  assert.equal(playableSummary.worldRecordProps.civic_economy_panel.label.includes("90"), true);
+  assert.equal(playableSummary.worldRecordProps.civic_economy_panel.label.includes("93"), true);
   assert.equal(playableSummary.worldRecordProps.civic_economy_panel.label.includes("70"), true);
   assert.equal(Object.values(playableSummary.worldRecordProps).every(prop => prop.visible && prop.hasBody), true);
 });

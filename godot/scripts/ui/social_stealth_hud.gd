@@ -535,6 +535,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"public_warning_posted": "공개 경고",
 		"studio_review_invited": "리뷰 초대",
 		"studio_review_deferred": "리뷰 보류",
+		"studio_review_blocked": "리뷰 차단",
 		"queue_delay_noted": "대기줄 불평",
 		"public_rumor_posted": "공개 소문",
 		"store_exception_reported": "상점 보고",
@@ -557,6 +558,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"public_warning_posted": "public warning posted",
 		"studio_review_invited": "review invited",
 		"studio_review_deferred": "review deferred",
+		"studio_review_blocked": "review blocked",
 		"queue_delay_noted": "queue delay noted",
 		"public_rumor_posted": "public rumor posted",
 		"store_exception_reported": "Store report",
@@ -606,6 +608,7 @@ func _affordance_label(affordance: String) -> String:
 		"post_repair_notice": "수습 게시",
 		"invite_review": "리뷰 초대",
 		"defer_review": "리뷰 보류",
+		"block_review": "리뷰 차단",
 		"place_note": "메모 배치",
 		"forward_report": "보고 전달",
 		"cite_record": "기록 인용"
@@ -629,6 +632,7 @@ func _affordance_label(affordance: String) -> String:
 		"post_repair_notice": "post repair notice",
 		"invite_review": "invite review",
 		"defer_review": "defer review",
+		"block_review": "block review",
 		"place_note": "place note",
 		"forward_report": "forward report",
 		"cite_record": "cite record"
@@ -668,6 +672,7 @@ func _state_value(state: String) -> String:
 		"read": "읽힘",
 		"invited": "초대",
 		"deferred": "보류",
+		"blocked": "차단",
 		"append_only": "추가됨"
 	}
 	var en := {
@@ -685,6 +690,7 @@ func _state_value(state: String) -> String:
 		"read": "read",
 		"invited": "invited",
 		"deferred": "deferred",
+		"blocked": "blocked",
 		"append_only": "append"
 	}
 	var table: Dictionary = en if _current_locale() == "en" else ko

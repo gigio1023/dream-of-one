@@ -383,7 +383,7 @@ const ROUTE_SPECS: RouteSpec[] = [
     sessionOutcome: "inquest_opened",
     playerLineKind: "inquest_line",
     playerLine: "저는 이 꿈에 방금 들어왔어요.",
-    socialReactionSummary: "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, and a waiting customer refuses contact.",
+    socialReactionSummary: "The provider-shaped proposal path creates a queue reaction and public Park notice before the manager forwards the Store report, Station cites that exact ledger event, Studio blocks a review opportunity, and a waiting customer refuses contact.",
     steps: [
       {
         stepId: "inquest.clerk.mark_receipt",
@@ -456,6 +456,19 @@ const ROUTE_SPECS: RouteSpec[] = [
         knownLedgerEventFromStepIds: ["inquest.manager.forward_report"],
         whyLine: "The Station cites the exact forwarded Store ledger event before narrowing the player's answer.",
         npcLineCandidate: "상점에서 넘어온 기록 번호를 먼저 인용하겠습니다.",
+      },
+      {
+        stepId: "inquest.studio_pm.block_review",
+        actorId: "NPC_Studio_PM",
+        actorRole: "studio_pm",
+        stepGoal: "block the Studio review queue after the formal Station citation becomes visible",
+        affordance: "block_review",
+        objectId: "studio_review_queue",
+        recordId: "studio_public_review_blocked",
+        citedLedgerEventFromStepId: "inquest.station.cite_store_report",
+        knownLedgerEventFromStepIds: ["inquest.station.cite_store_report"],
+        whyLine: "The Studio PM sees the formal Station citation and blocks the review queue until the player has a cleaner record.",
+        npcLineCandidate: "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
       },
       {
         stepId: "inquest.waiting_customer.refuse_contact",

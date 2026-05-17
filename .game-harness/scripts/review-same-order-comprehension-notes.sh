@@ -187,7 +187,7 @@ if (
   !hasTypedFreeInput ||
   !hasResponseHesitation ||
   !ledgerEventCites("station_record_cited", "civic-ledger-6", "civic-ledger-5") ||
-  latestLedgerId !== "civic-ledger-7" ||
+  latestLedgerId !== "civic-ledger-8" ||
   latestLedger.kind !== "queue_contact_refused" ||
   latestLedger.citedLedgerEventId !== "civic-ledger-6" ||
   packagedProof.pass !== true ||
@@ -203,7 +203,7 @@ if (
   outcomeChecks.speechDelayRecordChain !== true ||
   outcomeChecks.stationOfficerRoleAction !== true ||
   !outcomeBody.includes("플레이어 발화/응답 지연 -> 상점 기록") ||
-  !outcomeBody.includes("스테이션 인용 -> 접촉 거부 -> 심문") ||
+  !outcomeBody.includes("스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문") ||
   !outcomeBody.includes("역할 행동: 스테이션 직원") ||
   civicEconomyChecks.attentionState !== true ||
   civicEconomyPanelState !== "attention" ||

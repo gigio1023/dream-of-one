@@ -47,11 +47,12 @@ Last Updated: 2026-05-18
 - If `--status` is already pass and no watched Godot/HUD/probe/session-helper
   source changed, do not rerun Codex probe or regenerate setup kits merely to
   show activity. The next useful move is human play, not more preparation.
-- Latest implementation slice: suspicious-cover public warnings now reach the
-  Studio PM. The PM reads the Park warning, defers `studio_review_queue`, shows
-  `리뷰 보류`, and Codex route reports inspect the deferred queue through the
-  same focus/interact path used by a player. Treat this as another tiny
-  open-environment proof, not as permission to build a Studio subsystem.
+- Latest implementation slice: formal Station citations now reach the Studio
+  PM. The PM reads `station_record_cited`, blocks `studio_review_queue`, shows
+  `리뷰 차단`, and Codex inspects both the blocked review queue and the PM's
+  basis record before the Waiting Customer refuses contact. Treat this as
+  another tiny open-environment proof, not as permission to build a Studio
+  subsystem.
 
 2026-05-17 lightweight Ralph-style loop note:
 - Use `.game-harness/goal-loop-state.md` as the compact resume state for

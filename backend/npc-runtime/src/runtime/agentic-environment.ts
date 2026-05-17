@@ -53,6 +53,7 @@ export const ENVIRONMENT_AFFORDANCES = [
   "post_repair_notice",
   "invite_review",
   "defer_review",
+  "block_review",
   "forward_report",
   "open_intake",
   "cite_record",
@@ -90,6 +91,7 @@ export const LEDGER_EVENT_KINDS = [
   "public_repair_noted",
   "studio_review_invited",
   "studio_review_deferred",
+  "studio_review_blocked",
   "store_report_escalated",
   "station_record_cited",
   "station_correction_recorded",
@@ -129,6 +131,7 @@ export type EnvironmentObjectState =
   | "open"
   | "invited"
   | "deferred"
+  | "blocked"
   | "filed"
   | "forwarded"
   | "opened"
@@ -498,6 +501,17 @@ const AFFORDANCE_RULES: AffordanceRule[] = [
     maximumLocalTrust: 45,
   },
   {
+    objectId: "studio_review_queue",
+    affordance: "block_review",
+    fromStates: ["open"],
+    toState: "blocked",
+    eventKind: "studio_review_blocked",
+    allowedRoles: ["studio_pm"],
+    economyDelta: { localTrust: -2, recordBurden: 3 },
+    requiresLedgerEvent: true,
+    requiresLedgerEventKinds: ["station_record_cited"],
+  },
+  {
     objectId: "station_dossier",
     affordance: "cite_record",
     fromStates: ["absent", "opened", "cited"],
@@ -698,7 +712,7 @@ export function validateAndApplyEnvironmentAction(
     return reject(cloned, "station_citation_requires_store_record", "Station citation must cite a Store ledger event");
   }
 
-  if (["create_receipt", "mark_receipt", "attach_correction", "place_note", "post_rumor", "vouch_routine", "post_warning", "post_repair_notice", "share_local_tip", "keep_distance", "invite_review", "defer_review", "forward_report", "cite_record"].includes(action.affordance)) {
+  if (["create_receipt", "mark_receipt", "attach_correction", "place_note", "post_rumor", "vouch_routine", "post_warning", "post_repair_notice", "share_local_tip", "keep_distance", "invite_review", "defer_review", "block_review", "forward_report", "cite_record"].includes(action.affordance)) {
     const recordId = action.recordId ?? object.recordId;
     if (!recordId || recordId.trim().length === 0) {
       return reject(cloned, "invalid_record_mutation", `${action.affordance} requires a record id`);
@@ -868,6 +882,9 @@ function priorityHintsForRule(rule: AffordanceRule): string[] {
   if (rule.affordance === "defer_review") {
     hints.push("pressure:public_warning_blocks_review");
   }
+  if (rule.affordance === "block_review") {
+    hints.push("pressure:station_citation_blocks_review");
+  }
   if (rule.affordance === "refuse_contact") {
     hints.push("pressure:authority_seen");
   }
@@ -924,6 +941,8 @@ function perceivedAs(rule: AffordanceRule): string {
       return "public trust opens another local review";
     case "defer_review":
       return "public warning defers another local review";
+    case "block_review":
+      return "formal citation blocks another local review";
     default:
       return `${rule.objectId} ${rule.affordance}`;
   }

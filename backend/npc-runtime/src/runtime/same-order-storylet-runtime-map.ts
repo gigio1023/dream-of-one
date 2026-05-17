@@ -189,17 +189,18 @@ function buildBeats(): SameOrderStoryletRuntimeBeat[] {
       promptId: "station.same_order.reconciliation",
       choiceSetId: "station.same_order.reconciliation.choices",
       routeIds: ["inquest_opened"],
-      requiredVisibleObjects: ["station_dossier", "civic_ledger", "store_queue_mark"],
-      actionStepIds: ["inquest.station.cite_store_report", "inquest.waiting_customer.refuse_contact"],
+      requiredVisibleObjects: ["station_dossier", "civic_ledger", "store_queue_mark", "studio_review_queue"],
+      actionStepIds: ["inquest.station.cite_store_report", "inquest.studio_pm.block_review", "inquest.waiting_customer.refuse_contact"],
       providerJobIds: [
         "inquest_opened.inquest.station.cite_store_report.provider-action-proposal",
+        "inquest_opened.inquest.studio_pm.block_review.provider-action-proposal",
         "inquest_opened.inquest.waiting_customer.refuse_contact.provider-action-proposal",
       ],
-      ledgerEventKinds: ["station_record_cited", "queue_contact_refused"],
-      affordances: ["cite_record", "refuse_contact"],
+      ledgerEventKinds: ["station_record_cited", "studio_review_blocked", "queue_contact_refused"],
+      affordances: ["cite_record", "block_review", "refuse_contact"],
       evidenceEvents: ["station_inquest_opened", "verdict_reached"],
       providerPurpose: "mixed",
-      runtimeProof: "The Station beat maps to an exact cite-record action, then one local NPC reaction to that citation.",
+      runtimeProof: "The Station beat maps to an exact cite-record action, then one Studio opportunity closure and one local NPC reaction to that citation.",
     },
   ];
 }

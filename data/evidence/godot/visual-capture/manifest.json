@@ -109,9 +109,9 @@
 				"non-empty 1280x720 viewport",
 				"Station inquest outcome panel is visible",
 				"suspicion, report pressure, and session termination state are visible",
-				"live HUD consequence line shows speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation",
+				"live HUD consequence line shows speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation -> Studio review block",
 				"outcome names the exact Store ledger entry cited by the Station",
-				"outcome shows speech/delay to record to queue reaction to Park notice to Station role-action chain",
+				"outcome shows speech/delay to record to queue reaction to Park notice to Station role-action to Studio review block chain",
 				"outcome names the NPC-to-NPC social reaction behind the Station citation",
 				"why-line remains visible as session-end basis"
 			],
@@ -227,9 +227,9 @@
 				"non-empty 1280x720 viewport",
 				"Station inquest outcome panel is visible",
 				"suspicion, report pressure, and session termination state are visible",
-				"live HUD consequence line shows speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation",
+				"live HUD consequence line shows speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation -> Studio review block",
 				"outcome names the exact Store ledger entry cited by the Station",
-				"outcome shows speech/delay to record to queue reaction to Park notice to Station role-action chain",
+				"outcome shows speech/delay to record to queue reaction to Park notice to Station role-action to Studio review block chain",
 				"outcome names the NPC-to-NPC social reaction behind the Station citation",
 				"why-line remains visible as session-end basis"
 			],
@@ -333,7 +333,7 @@
 			"station_dossier": "cited",
 			"store_counter": "serving",
 			"store_queue_mark": "refused",
-			"studio_review_queue": "open",
+			"studio_review_queue": "blocked",
 			"usual_order_cue": "read"
 		},
 		"recordedStatementAction": "",
@@ -414,6 +414,22 @@
 				"observedAffordance": "cite_record",
 				"observedLedgerEventId": "civic-ledger-6",
 				"observedObjectId": "station_dossier",
+				"observerActorId": "NPC_Studio_PM",
+				"observerRole": "studio_pm",
+				"resultingAffordance": "block_review",
+				"resultingStepId": "inquest.studio_pm.block_review",
+				"whyLine": "studio_pm reads station_officer's cite_record record before choosing block_review."
+			},
+			{
+				"economyPressure": {
+					"localTrust": 5,
+					"recordBurden": 85,
+					"stationAttention": 70
+				},
+				"observedActorRole": "station_officer",
+				"observedAffordance": "cite_record",
+				"observedLedgerEventId": "civic-ledger-6",
+				"observedObjectId": "station_dossier",
 				"observerActorId": "NPC_Waiting_Customer",
 				"observerRole": "waiting_customer",
 				"resultingAffordance": "refuse_contact",
@@ -435,13 +451,13 @@
 		"worldRecordProps": {
 			"civic_economy_panel": {
 				"hasBody": true,
-				"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 90 | 주목 70",
+				"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
 				"state": "attention",
 				"visible": true
 			},
 			"civic_ledger": {
 				"hasBody": true,
-				"label": "시민 장부 7건\ncivic-ledger-7 -> civic-ledger-6\n접촉 거부",
+				"label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
 				"state": "append_only",
 				"visible": true
 			},
@@ -489,8 +505,8 @@
 			},
 			"studio_review_queue": {
 				"hasBody": true,
-				"label": "리뷰\n열림",
-				"state": "open",
+				"label": "리뷰\n차단",
+				"state": "blocked",
 				"visible": true
 			},
 			"usual_order_cue": {

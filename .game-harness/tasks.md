@@ -139,6 +139,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   notice now names `civic-ledger-8`, its cited `civic-ledger-6`, the
   `refuse_contact` affordance, and the queue-mark record object so the player
   can read why the refusal happened.
+- [x] Show the role/action map inside world-record prop inspection: the blocked
+  Studio review queue HUD notice now names who can read it, which actions that
+  record supports, and the latest ledger event that changed it.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

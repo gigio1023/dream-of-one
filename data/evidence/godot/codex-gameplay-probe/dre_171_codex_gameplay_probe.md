@@ -31,6 +31,7 @@
 - The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.
 - Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.
 - Codex/player inspected the Studio review queue and Studio PM to read that the Station citation blocked a small opportunity in another place.
+- Codex/player read the Studio review queue's visible role/action map: Studio PM can invite, defer, or block review from shared records.
 - Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state and its cited ledger basis.
 - The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8.
 
@@ -88,6 +89,7 @@
 - `canReadVisibleNpcReaction`: `true`
 - `canInspectPublicEnvironmentRecord`: `true`
 - `canInspectCrossPlaceAuthorityConsequence`: `true`
+- `canInspectRecordRoleAffordanceMap`: `true`
 - `canInspectNpcReaction`: `true`
 - `canReadExactStationCitation`: `true`
 - `canReadCivicEconomyPressure`: `true`

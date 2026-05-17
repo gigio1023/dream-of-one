@@ -34,6 +34,7 @@
 			"canInspectCrossPlaceAuthorityConsequence": true,
 			"canInspectNpcReaction": true,
 			"canInspectPublicEnvironmentRecord": true,
+			"canInspectRecordRoleAffordanceMap": true,
 			"canReadCivicEconomyPressure": true,
 			"canReadExactStationCitation": true,
 			"canReadExaminedPlayerRole": true,
@@ -1369,50 +1370,201 @@
 			},
 			"inspectedWorldRecordHistory": [
 				{
-					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2",
 					"label": "공개판\n소문 게시",
 					"objectId": "park_notice_board",
+					"possibleAffordanceLabels": [
+						"공개 게시(공원 목격자)",
+						"일상 확인(공원 목격자)",
+						"공개 경고(공원 목격자)",
+						"수습 게시(공원 목격자)"
+					],
+					"readerRoleLabels": [
+						"공원 목격자",
+						"대기 손님",
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "park_witness",
+							"actorRoleLabel": "공원 목격자",
+							"affordance": "post_rumor",
+							"affordanceLabel": "공개 게시",
+							"citedLedgerEventId": "civic-ledger-2",
+							"eventId": "civic-ledger-4",
+							"kind": "public_rumor_posted",
+							"kindLabel": "공개 소문"
+						}
+					],
 					"state": "rumored",
 					"stateLabel": "소문 게시",
 					"title": "공원 게시판"
 				},
 				{
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
 				},
 				{
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
 				},
 				{
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
 				},
 				{
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
+					"state": "blocked",
+					"stateLabel": "차단",
+					"title": "스튜디오 리뷰 줄"
+				},
+				{
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
+					"label": "리뷰\n차단",
+					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
 				}
 			],
 			"inspectedWorldRecordProp": {
-				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 				"label": "리뷰\n차단",
 				"objectId": "studio_review_queue",
+				"possibleAffordanceLabels": [
+					"리뷰 초대(스튜디오 PM)",
+					"리뷰 보류(스튜디오 PM)",
+					"리뷰 차단(스튜디오 PM)"
+				],
+				"readerRoleLabels": [
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					}
+				],
 				"state": "blocked",
 				"stateLabel": "차단",
 				"title": "스튜디오 리뷰 줄"
@@ -1513,6 +1665,7 @@
 			"The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.",
 			"Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.",
 			"Codex/player inspected the Studio review queue and Studio PM to read that the Station citation blocked a small opportunity in another place.",
+			"Codex/player read the Studio review queue's visible role/action map: Studio PM can invite, defer, or block review from shared records.",
 			"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state and its cited ledger basis.",
 			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
 		],
@@ -2164,9 +2317,32 @@
 				"inputLocked": true,
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2",
 					"label": "공개판\n소문 게시",
 					"objectId": "park_notice_board",
+					"possibleAffordanceLabels": [
+						"공개 게시(공원 목격자)",
+						"일상 확인(공원 목격자)",
+						"공개 경고(공원 목격자)",
+						"수습 게시(공원 목격자)"
+					],
+					"readerRoleLabels": [
+						"공원 목격자",
+						"대기 손님",
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "park_witness",
+							"actorRoleLabel": "공원 목격자",
+							"affordance": "post_rumor",
+							"affordanceLabel": "공개 게시",
+							"citedLedgerEventId": "civic-ledger-2",
+							"eventId": "civic-ledger-4",
+							"kind": "public_rumor_posted",
+							"kindLabel": "공개 소문"
+						}
+					],
 					"state": "rumored",
 					"stateLabel": "소문 게시",
 					"title": "공원 게시판"
@@ -2204,9 +2380,32 @@
 				"inputLocked": true,
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2",
 					"label": "공개판\n소문 게시",
 					"objectId": "park_notice_board",
+					"possibleAffordanceLabels": [
+						"공개 게시(공원 목격자)",
+						"일상 확인(공원 목격자)",
+						"공개 경고(공원 목격자)",
+						"수습 게시(공원 목격자)"
+					],
+					"readerRoleLabels": [
+						"공원 목격자",
+						"대기 손님",
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "park_witness",
+							"actorRoleLabel": "공원 목격자",
+							"affordance": "post_rumor",
+							"affordanceLabel": "공개 게시",
+							"citedLedgerEventId": "civic-ledger-2",
+							"eventId": "civic-ledger-4",
+							"kind": "public_rumor_posted",
+							"kindLabel": "공개 소문"
+						}
+					],
 					"state": "rumored",
 					"stateLabel": "소문 게시",
 					"title": "공원 게시판"
@@ -2224,9 +2423,32 @@
 				"inputLocked": true,
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2",
 					"label": "공개판\n소문 게시",
 					"objectId": "park_notice_board",
+					"possibleAffordanceLabels": [
+						"공개 게시(공원 목격자)",
+						"일상 확인(공원 목격자)",
+						"공개 경고(공원 목격자)",
+						"수습 게시(공원 목격자)"
+					],
+					"readerRoleLabels": [
+						"공원 목격자",
+						"대기 손님",
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "park_witness",
+							"actorRoleLabel": "공원 목격자",
+							"affordance": "post_rumor",
+							"affordanceLabel": "공개 게시",
+							"citedLedgerEventId": "civic-ledger-2",
+							"eventId": "civic-ledger-4",
+							"kind": "public_rumor_posted",
+							"kindLabel": "공개 소문"
+						}
+					],
 					"state": "rumored",
 					"stateLabel": "소문 게시",
 					"title": "공원 게시판"
@@ -2253,9 +2475,29 @@
 				"inputLocked": true,
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
@@ -2273,9 +2515,32 @@
 				"inputLocked": true,
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2",
 					"label": "공개판\n소문 게시",
 					"objectId": "park_notice_board",
+					"possibleAffordanceLabels": [
+						"공개 게시(공원 목격자)",
+						"일상 확인(공원 목격자)",
+						"공개 경고(공원 목격자)",
+						"수습 게시(공원 목격자)"
+					],
+					"readerRoleLabels": [
+						"공원 목격자",
+						"대기 손님",
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "park_witness",
+							"actorRoleLabel": "공원 목격자",
+							"affordance": "post_rumor",
+							"affordanceLabel": "공개 게시",
+							"citedLedgerEventId": "civic-ledger-2",
+							"eventId": "civic-ledger-4",
+							"kind": "public_rumor_posted",
+							"kindLabel": "공개 소문"
+						}
+					],
 					"state": "rumored",
 					"stateLabel": "소문 게시",
 					"title": "공원 게시판"
@@ -2300,9 +2565,29 @@
 				"inputLocked": true,
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
@@ -2320,9 +2605,29 @@
 				"inputLocked": true,
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
@@ -2491,9 +2796,29 @@
 					"state": "blocked"
 				},
 				"inspectedWorldRecordProp": {
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
@@ -2511,9 +2836,29 @@
 				"inputLocked": true,
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
@@ -2680,9 +3025,29 @@
 					"state": "blocked"
 				},
 				"inspectedWorldRecordProp": {
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
@@ -2842,9 +3207,29 @@
 					"state": "blocked"
 				},
 				"inspectedWorldRecordProp": {
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
@@ -3105,9 +3490,29 @@
 					"state": "refused"
 				},
 				"inspectedWorldRecordProp": {
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
@@ -3267,9 +3672,29 @@
 					"state": "blocked"
 				},
 				"inspectedWorldRecordProp": {
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
@@ -5307,14 +5732,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779056589822",
+				"eventId": "playable_session_started-001-1779057296389",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779056589822,
+				"timestampMs": 1779057296389,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -5327,7 +5752,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-002-1779056589904",
+				"eventId": "conversation_started-002-1779057296456",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -5336,7 +5761,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779056589904,
+				"timestampMs": 1779057296456,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -5349,7 +5774,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-003-1779056589918",
+				"eventId": "response_hesitation_noted-003-1779057296472",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -5370,7 +5795,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779056589918,
+				"timestampMs": 1779057296472,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -5385,7 +5810,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-004-1779056589932",
+				"eventId": "dialogue_choice_selected-004-1779057296485",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -5407,7 +5832,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779056589932,
+				"timestampMs": 1779057296485,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -5422,7 +5847,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-005-1779056589932",
+				"eventId": "conversation_anomaly_detected-005-1779057296485",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -5444,7 +5869,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779056589932,
+				"timestampMs": 1779057296485,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -5459,7 +5884,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-006-1779056589932",
+				"eventId": "npc_suspicion_changed-006-1779057296485",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -5481,7 +5906,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779056589932,
+				"timestampMs": 1779057296485,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -5496,7 +5921,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-007-1779056589944",
+				"eventId": "free_input_submitted-007-1779057296497",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -5521,7 +5946,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779056589944,
+				"timestampMs": 1779057296497,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -5536,7 +5961,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779056589944",
+				"eventId": "conversation_anomaly_detected-008-1779057296497",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -5561,7 +5986,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779056589944,
+				"timestampMs": 1779057296497,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -5576,7 +6001,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779056589944",
+				"eventId": "npc_suspicion_changed-009-1779057296497",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -5601,7 +6026,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779056589944,
+				"timestampMs": 1779057296497,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -5616,7 +6041,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-010-1779056589944",
+				"eventId": "suspicion_shared-010-1779057296497",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -5641,7 +6066,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779056589944,
+				"timestampMs": 1779057296497,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -5656,7 +6081,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-011-1779056589945",
+				"eventId": "station_report_created-011-1779057296498",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -5681,7 +6106,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779056589945,
+				"timestampMs": 1779057296498,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -5696,7 +6121,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-012-1779056589945",
+				"eventId": "station_inquest_opened-012-1779057296498",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -5721,7 +6146,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779056589945,
+				"timestampMs": 1779057296498,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -5731,7 +6156,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-013-1779056589986",
+				"eventId": "world_record_prop_inspected-013-1779057296539",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -5739,7 +6164,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779056589986,
+				"timestampMs": 1779057296539,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -5751,7 +6176,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-014-1779056590010",
+				"eventId": "world_record_prop_inspected-014-1779057296562",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "studio_review_queue",
 				"schemaVersion": "godot-runtime-v1",
@@ -5759,7 +6184,7 @@
 				"state": "blocked",
 				"stateLabel": "차단",
 				"summary": "Inspected world record prop studio_review_queue in state blocked.",
-				"timestampMs": 1779056590010,
+				"timestampMs": 1779057296562,
 				"uiSummaryArgs": {
 					"object": "스튜디오 리뷰 줄",
 					"state": "차단"
@@ -5771,7 +6196,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-015-1779056590040",
+				"eventId": "npc_reaction_inspected-015-1779057296590",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Studio_PM",
 				"reactionText": "리뷰 차단",
@@ -5779,7 +6204,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "blocked",
 				"summary": "Inspected NPC reaction NPC_Studio_PM in state blocked.",
-				"timestampMs": 1779056590040,
+				"timestampMs": 1779057296590,
 				"uiSummaryArgs": {
 					"npc": "Studio PM",
 					"state": "리뷰 차단"
@@ -5791,7 +6216,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-016-1779056590068",
+				"eventId": "npc_reaction_inspected-016-1779057296618",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Waiting_Customer",
 				"reactionText": "접촉 거부",
@@ -5799,7 +6224,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "refused",
 				"summary": "Inspected NPC reaction NPC_Waiting_Customer in state refused.",
-				"timestampMs": 1779056590068,
+				"timestampMs": 1779057296618,
 				"uiSummaryArgs": {
 					"npc": "Waiting Customer",
 					"state": "접촉 거부"
@@ -7133,50 +7558,201 @@
 		},
 		"inspectedWorldRecordHistory": [
 			{
-				"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+				"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2",
 				"label": "공개판\n소문 게시",
 				"objectId": "park_notice_board",
+				"possibleAffordanceLabels": [
+					"공개 게시(공원 목격자)",
+					"일상 확인(공원 목격자)",
+					"공개 경고(공원 목격자)",
+					"수습 게시(공원 목격자)"
+				],
+				"readerRoleLabels": [
+					"공원 목격자",
+					"대기 손님",
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "park_witness",
+						"actorRoleLabel": "공원 목격자",
+						"affordance": "post_rumor",
+						"affordanceLabel": "공개 게시",
+						"citedLedgerEventId": "civic-ledger-2",
+						"eventId": "civic-ledger-4",
+						"kind": "public_rumor_posted",
+						"kindLabel": "공개 소문"
+					}
+				],
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"title": "공원 게시판"
 			},
 			{
-				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 				"label": "리뷰\n차단",
 				"objectId": "studio_review_queue",
+				"possibleAffordanceLabels": [
+					"리뷰 초대(스튜디오 PM)",
+					"리뷰 보류(스튜디오 PM)",
+					"리뷰 차단(스튜디오 PM)"
+				],
+				"readerRoleLabels": [
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					}
+				],
 				"state": "blocked",
 				"stateLabel": "차단",
 				"title": "스튜디오 리뷰 줄"
 			},
 			{
-				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 				"label": "리뷰\n차단",
 				"objectId": "studio_review_queue",
+				"possibleAffordanceLabels": [
+					"리뷰 초대(스튜디오 PM)",
+					"리뷰 보류(스튜디오 PM)",
+					"리뷰 차단(스튜디오 PM)"
+				],
+				"readerRoleLabels": [
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					}
+				],
 				"state": "blocked",
 				"stateLabel": "차단",
 				"title": "스튜디오 리뷰 줄"
 			},
 			{
-				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 				"label": "리뷰\n차단",
 				"objectId": "studio_review_queue",
+				"possibleAffordanceLabels": [
+					"리뷰 초대(스튜디오 PM)",
+					"리뷰 보류(스튜디오 PM)",
+					"리뷰 차단(스튜디오 PM)"
+				],
+				"readerRoleLabels": [
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					}
+				],
 				"state": "blocked",
 				"stateLabel": "차단",
 				"title": "스튜디오 리뷰 줄"
 			},
 			{
-				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 				"label": "리뷰\n차단",
 				"objectId": "studio_review_queue",
+				"possibleAffordanceLabels": [
+					"리뷰 초대(스튜디오 PM)",
+					"리뷰 보류(스튜디오 PM)",
+					"리뷰 차단(스튜디오 PM)"
+				],
+				"readerRoleLabels": [
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					}
+				],
+				"state": "blocked",
+				"stateLabel": "차단",
+				"title": "스튜디오 리뷰 줄"
+			},
+			{
+				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
+				"label": "리뷰\n차단",
+				"objectId": "studio_review_queue",
+				"possibleAffordanceLabels": [
+					"리뷰 초대(스튜디오 PM)",
+					"리뷰 보류(스튜디오 PM)",
+					"리뷰 차단(스튜디오 PM)"
+				],
+				"readerRoleLabels": [
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					}
+				],
 				"state": "blocked",
 				"stateLabel": "차단",
 				"title": "스튜디오 리뷰 줄"
 			}
 		],
 		"inspectedWorldRecordProp": {
-			"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+			"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 			"label": "리뷰\n차단",
 			"objectId": "studio_review_queue",
+			"possibleAffordanceLabels": [
+				"리뷰 초대(스튜디오 PM)",
+				"리뷰 보류(스튜디오 PM)",
+				"리뷰 차단(스튜디오 PM)"
+			],
+			"readerRoleLabels": [
+				"스튜디오 PM"
+			],
+			"recentLedgerEvents": [
+				{
+					"actorRole": "studio_pm",
+					"actorRoleLabel": "스튜디오 PM",
+					"affordance": "block_review",
+					"affordanceLabel": "리뷰 차단",
+					"citedLedgerEventId": "civic-ledger-6",
+					"eventId": "civic-ledger-7",
+					"kind": "studio_review_blocked",
+					"kindLabel": "리뷰 차단"
+				}
+			],
 			"state": "blocked",
 			"stateLabel": "차단",
 			"title": "스튜디오 리뷰 줄"
@@ -9803,26 +10379,89 @@
 			},
 			"inspectedWorldRecordHistory": [
 				{
-					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2",
 					"label": "공개판\n소문 게시",
 					"objectId": "park_notice_board",
+					"possibleAffordanceLabels": [
+						"공개 게시(공원 목격자)",
+						"일상 확인(공원 목격자)",
+						"공개 경고(공원 목격자)",
+						"수습 게시(공원 목격자)"
+					],
+					"readerRoleLabels": [
+						"공원 목격자",
+						"대기 손님",
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "park_witness",
+							"actorRoleLabel": "공원 목격자",
+							"affordance": "post_rumor",
+							"affordanceLabel": "공개 게시",
+							"citedLedgerEventId": "civic-ledger-2",
+							"eventId": "civic-ledger-4",
+							"kind": "public_rumor_posted",
+							"kindLabel": "공개 소문"
+						}
+					],
 					"state": "rumored",
 					"stateLabel": "소문 게시",
 					"title": "공원 게시판"
 				},
 				{
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
 				}
 			],
 			"inspectedWorldRecordProp": {
-				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 				"label": "리뷰\n차단",
 				"objectId": "studio_review_queue",
+				"possibleAffordanceLabels": [
+					"리뷰 초대(스튜디오 PM)",
+					"리뷰 보류(스튜디오 PM)",
+					"리뷰 차단(스튜디오 PM)"
+				],
+				"readerRoleLabels": [
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					}
+				],
 				"state": "blocked",
 				"stateLabel": "차단",
 				"title": "스튜디오 리뷰 줄"
@@ -10380,6 +11019,7 @@
 	"npcInteractionChecks": {
 		"codexInspectedBlockedReview": true,
 		"codexInspectedPublicNotice": true,
+		"codexInspectedRecordAffordanceMap": true,
 		"codexInspectedStudioPm": true,
 		"codexInspectedWaitingCustomer": true,
 		"economyPanelReadable": true,
@@ -10522,15 +11162,35 @@
 				"consequence": "당신은 검사 대상입니다. 상점 점원의 평범한 질문도 기록됩니다.",
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "스튜디오 리뷰 줄이 초대 상태입니다. 스튜디오 PM은 공원 게시판의 공개 확인을 읽고 플레이어에게 작은 기회를 열어뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 초대 상태입니다. 스튜디오 PM은 공원 게시판의 공개 확인을 읽고 플레이어에게 작은 기회를 열어뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-6 리뷰 초대 / 스튜디오 PM -> 리뷰 초대 / 인용 civic-ledger-4",
 					"label": "리뷰\n초대",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "invite_review",
+							"affordanceLabel": "리뷰 초대",
+							"citedLedgerEventId": "civic-ledger-4",
+							"eventId": "civic-ledger-6",
+							"kind": "studio_review_invited",
+							"kindLabel": "리뷰 초대"
+						}
+					],
 					"state": "invited",
 					"stateLabel": "초대",
 					"title": "스튜디오 리뷰 줄"
 				},
 				"investigationTrail": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
-				"notice": "스튜디오 리뷰 줄 / 스튜디오 리뷰 줄이 초대 상태입니다. 스튜디오 PM은 공원 게시판의 공개 확인을 읽고 플레이어에게 작은 기회를 열어뒀습니다.",
+				"notice": "스튜디오 리뷰 줄 / 스튜디오 리뷰 줄이 초대 상태입니다. 스튜디오 PM은 공원 게시판의 공개 확인을 읽고 플레이어에게 작은 기회를 열어뒀습니다. / 읽는 역할: 스튜디오 PM / 행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM) / 최근 장부: civic-ledger-6 리뷰 초대 / 스튜디오 PM -> 리뷰 초대 / 인용 civic-ledger-4",
 				"outcomeBody": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공원 게시판 공개 확인 -> 로컬 팁 -> 스튜디오 리뷰 초대 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공원 게시판에 공개 확인을 남겼습니다. 게시판 확인으로 지역 신뢰가 충분해지자 대기 손님은 작은 로컬 팁을 공유했고, 스튜디오 PM은 같은 공개 확인을 읽고 리뷰 줄을 열어둡니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 확인 기록을 보고 대기 표식을 도움 상태로 바꿨고, 스튜디오 PM이 공개 확인을 근거로 리뷰 대기열을 초대 상태로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 다른 장소의 작은 초대 행동까지 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
 				"recordObjects": {
 					"civic_ledger": "append_only",
@@ -10631,6 +11291,7 @@
 			"npcInteractionChecks": {
 				"codexInspectedBlockedReview": false,
 				"codexInspectedPublicNotice": false,
+				"codexInspectedRecordAffordanceMap": false,
 				"codexInspectedStudioPm": false,
 				"codexInspectedWaitingCustomer": false,
 				"economyPanelReadable": false,
@@ -11491,7 +12152,7 @@
 						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 						"freeInputVisible": false,
 						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
-						"noticeBodyLabel": "스튜디오 리뷰 줄이 초대 상태입니다. 스튜디오 PM은 공원 게시판의 공개 확인을 읽고 플레이어에게 작은 기회를 열어뒀습니다.",
+						"noticeBodyLabel": "스튜디오 리뷰 줄이 초대 상태입니다. 스튜디오 PM은 공원 게시판의 공개 확인을 읽고 플레이어에게 작은 기회를 열어뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-6 리뷰 초대 / 스튜디오 PM -> 리뷰 초대 / 인용 civic-ledger-4",
 						"noticeTitleLabel": "스튜디오 리뷰 줄",
 						"noticeVisible": false,
 						"outcomeBodyLabel": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공원 게시판 공개 확인 -> 로컬 팁 -> 스튜디오 리뷰 초대 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공원 게시판에 공개 확인을 남겼습니다. 게시판 확인으로 지역 신뢰가 충분해지자 대기 손님은 작은 로컬 팁을 공유했고, 스튜디오 PM은 같은 공개 확인을 읽고 리뷰 줄을 열어둡니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 확인 기록을 보고 대기 표식을 도움 상태로 바꿨고, 스튜디오 PM이 공개 확인을 근거로 리뷰 대기열을 초대 상태로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 다른 장소의 작은 초대 행동까지 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
@@ -11505,9 +12166,29 @@
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
 					"inspectedWorldRecordProp": {
-						"body": "스튜디오 리뷰 줄이 초대 상태입니다. 스튜디오 PM은 공원 게시판의 공개 확인을 읽고 플레이어에게 작은 기회를 열어뒀습니다.",
+						"body": "스튜디오 리뷰 줄이 초대 상태입니다. 스튜디오 PM은 공원 게시판의 공개 확인을 읽고 플레이어에게 작은 기회를 열어뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-6 리뷰 초대 / 스튜디오 PM -> 리뷰 초대 / 인용 civic-ledger-4",
 						"label": "리뷰\n초대",
 						"objectId": "studio_review_queue",
+						"possibleAffordanceLabels": [
+							"리뷰 초대(스튜디오 PM)",
+							"리뷰 보류(스튜디오 PM)",
+							"리뷰 차단(스튜디오 PM)"
+						],
+						"readerRoleLabels": [
+							"스튜디오 PM"
+						],
+						"recentLedgerEvents": [
+							{
+								"actorRole": "studio_pm",
+								"actorRoleLabel": "스튜디오 PM",
+								"affordance": "invite_review",
+								"affordanceLabel": "리뷰 초대",
+								"citedLedgerEventId": "civic-ledger-4",
+								"eventId": "civic-ledger-6",
+								"kind": "studio_review_invited",
+								"kindLabel": "리뷰 초대"
+							}
+						],
 						"state": "invited",
 						"stateLabel": "초대",
 						"title": "스튜디오 리뷰 줄"
@@ -11828,6 +12509,7 @@
 			"npcInteractionChecks": {
 				"codexInspectedBlockedReview": false,
 				"codexInspectedPublicNotice": false,
+				"codexInspectedRecordAffordanceMap": false,
 				"codexInspectedStudioPm": false,
 				"codexInspectedWaitingCustomer": false,
 				"economyPanelReadable": false,
@@ -12646,15 +13328,35 @@
 				"consequence": "NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다.",
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-5 리뷰 보류 / 스튜디오 PM -> 리뷰 보류 / 인용 civic-ledger-3",
 					"label": "리뷰\n보류",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "defer_review",
+							"affordanceLabel": "리뷰 보류",
+							"citedLedgerEventId": "civic-ledger-3",
+							"eventId": "civic-ledger-5",
+							"kind": "studio_review_deferred",
+							"kindLabel": "리뷰 보류"
+						}
+					],
 					"state": "deferred",
 					"stateLabel": "보류",
 					"title": "스튜디오 리뷰 줄"
 				},
 				"investigationTrail": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
-				"notice": "스튜디오 리뷰 줄 / 스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다.",
+				"notice": "스튜디오 리뷰 줄 / 스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다. / 읽는 역할: 스튜디오 PM / 행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM) / 최근 장부: civic-ledger-5 리뷰 보류 / 스튜디오 PM -> 리뷰 보류 / 인용 civic-ledger-3",
 				"outcomeBody": "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 공원 게시판 공개 경고 -> 거리두기 -> 스튜디오 리뷰 보류 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄고, 공원 목격자는 그 경계 기록을 보고 정식 보고 대신 공원 게시판에 공개 경고를 남겼습니다. 게시판 경고 뒤 지역 신뢰가 낮아지자 대기 손님은 플레이어와 거리를 두고, 스튜디오 PM은 같은 공개 경고를 읽고 리뷰 줄을 보류합니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨고, 공원 목격자가 그 경계 기록을 공개 경고로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 경고 기록을 보고 대기 표식을 거리두기 상태로 바꿨고, 스튜디오 PM은 같은 공개 기록을 근거로 리뷰 대기열을 보류 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 낮아진 지역 신뢰가 NPC의 거리두기와 다른 장소의 기회 보류를 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
 				"recordObjects": {
 					"civic_ledger": "append_only",
@@ -12755,6 +13457,7 @@
 			"npcInteractionChecks": {
 				"codexInspectedBlockedReview": false,
 				"codexInspectedPublicNotice": false,
+				"codexInspectedRecordAffordanceMap": false,
 				"codexInspectedStudioPm": false,
 				"codexInspectedWaitingCustomer": false,
 				"economyPanelReadable": false,
@@ -13628,7 +14331,7 @@
 						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 						"freeInputVisible": false,
 						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
-						"noticeBodyLabel": "스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다.",
+						"noticeBodyLabel": "스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-5 리뷰 보류 / 스튜디오 PM -> 리뷰 보류 / 인용 civic-ledger-3",
 						"noticeTitleLabel": "스튜디오 리뷰 줄",
 						"noticeVisible": false,
 						"outcomeBodyLabel": "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 공원 게시판 공개 경고 -> 거리두기 -> 스튜디오 리뷰 보류 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄고, 공원 목격자는 그 경계 기록을 보고 정식 보고 대신 공원 게시판에 공개 경고를 남겼습니다. 게시판 경고 뒤 지역 신뢰가 낮아지자 대기 손님은 플레이어와 거리를 두고, 스튜디오 PM은 같은 공개 경고를 읽고 리뷰 줄을 보류합니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨고, 공원 목격자가 그 경계 기록을 공개 경고로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 경고 기록을 보고 대기 표식을 거리두기 상태로 바꿨고, 스튜디오 PM은 같은 공개 기록을 근거로 리뷰 대기열을 보류 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 낮아진 지역 신뢰가 NPC의 거리두기와 다른 장소의 기회 보류를 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
@@ -13642,9 +14345,29 @@
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
 					"inspectedWorldRecordProp": {
-						"body": "스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다.",
+						"body": "스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-5 리뷰 보류 / 스튜디오 PM -> 리뷰 보류 / 인용 civic-ledger-3",
 						"label": "리뷰\n보류",
 						"objectId": "studio_review_queue",
+						"possibleAffordanceLabels": [
+							"리뷰 초대(스튜디오 PM)",
+							"리뷰 보류(스튜디오 PM)",
+							"리뷰 차단(스튜디오 PM)"
+						],
+						"readerRoleLabels": [
+							"스튜디오 PM"
+						],
+						"recentLedgerEvents": [
+							{
+								"actorRole": "studio_pm",
+								"actorRoleLabel": "스튜디오 PM",
+								"affordance": "defer_review",
+								"affordanceLabel": "리뷰 보류",
+								"citedLedgerEventId": "civic-ledger-3",
+								"eventId": "civic-ledger-5",
+								"kind": "studio_review_deferred",
+								"kindLabel": "리뷰 보류"
+							}
+						],
 						"state": "deferred",
 						"stateLabel": "보류",
 						"title": "스튜디오 리뷰 줄"
@@ -13965,6 +14688,7 @@
 			"npcInteractionChecks": {
 				"codexInspectedBlockedReview": false,
 				"codexInspectedPublicNotice": false,
+				"codexInspectedRecordAffordanceMap": false,
 				"codexInspectedStudioPm": false,
 				"codexInspectedWaitingCustomer": false,
 				"economyPanelReadable": false,
@@ -15036,9 +15760,29 @@
 					"state": "refused"
 				},
 				"inspectedWorldRecordProp": {
-					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 					"label": "리뷰\n차단",
 					"objectId": "studio_review_queue",
+					"possibleAffordanceLabels": [
+						"리뷰 초대(스튜디오 PM)",
+						"리뷰 보류(스튜디오 PM)",
+						"리뷰 차단(스튜디오 PM)"
+					],
+					"readerRoleLabels": [
+						"스튜디오 PM"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
 					"state": "blocked",
 					"stateLabel": "차단",
 					"title": "스튜디오 리뷰 줄"
@@ -15145,6 +15889,7 @@
 			"npcInteractionChecks": {
 				"codexInspectedBlockedReview": true,
 				"codexInspectedPublicNotice": true,
+				"codexInspectedRecordAffordanceMap": true,
 				"codexInspectedStudioPm": true,
 				"codexInspectedWaitingCustomer": true,
 				"economyPanelReadable": true,
@@ -16228,7 +16973,7 @@
 				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 				"freeInputVisible": false,
 				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-				"noticeBodyLabel": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+				"noticeBodyLabel": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2",
 				"noticeTitleLabel": "공원 게시판",
 				"noticeVisible": false,
 				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
@@ -16242,9 +16987,32 @@
 				"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
 			},
 			"inspectedWorldRecordProp": {
-				"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+				"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2",
 				"label": "공개판\n소문 게시",
 				"objectId": "park_notice_board",
+				"possibleAffordanceLabels": [
+					"공개 게시(공원 목격자)",
+					"일상 확인(공원 목격자)",
+					"공개 경고(공원 목격자)",
+					"수습 게시(공원 목격자)"
+				],
+				"readerRoleLabels": [
+					"공원 목격자",
+					"대기 손님",
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "park_witness",
+						"actorRoleLabel": "공원 목격자",
+						"affordance": "post_rumor",
+						"affordanceLabel": "공개 게시",
+						"citedLedgerEventId": "civic-ledger-2",
+						"eventId": "civic-ledger-4",
+						"kind": "public_rumor_posted",
+						"kindLabel": "공개 소문"
+					}
+				],
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"title": "공원 게시판"
@@ -16377,7 +17145,7 @@
 				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 				"freeInputVisible": false,
 				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-				"noticeBodyLabel": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+				"noticeBodyLabel": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2",
 				"noticeTitleLabel": "공원 게시판",
 				"noticeVisible": false,
 				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
@@ -16391,9 +17159,32 @@
 				"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
 			},
 			"inspectedWorldRecordProp": {
-				"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.",
+				"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2",
 				"label": "공개판\n소문 게시",
 				"objectId": "park_notice_board",
+				"possibleAffordanceLabels": [
+					"공개 게시(공원 목격자)",
+					"일상 확인(공원 목격자)",
+					"공개 경고(공원 목격자)",
+					"수습 게시(공원 목격자)"
+				],
+				"readerRoleLabels": [
+					"공원 목격자",
+					"대기 손님",
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "park_witness",
+						"actorRoleLabel": "공원 목격자",
+						"affordance": "post_rumor",
+						"affordanceLabel": "공개 게시",
+						"citedLedgerEventId": "civic-ledger-2",
+						"eventId": "civic-ledger-4",
+						"kind": "public_rumor_posted",
+						"kindLabel": "공개 소문"
+					}
+				],
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"title": "공원 게시판"
@@ -16526,7 +17317,7 @@
 				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 				"freeInputVisible": false,
 				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-				"noticeBodyLabel": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+				"noticeBodyLabel": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 				"noticeTitleLabel": "스튜디오 리뷰 줄",
 				"noticeVisible": false,
 				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
@@ -16540,9 +17331,29 @@
 				"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
 			},
 			"inspectedWorldRecordProp": {
-				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 				"label": "리뷰\n차단",
 				"objectId": "studio_review_queue",
+				"possibleAffordanceLabels": [
+					"리뷰 초대(스튜디오 PM)",
+					"리뷰 보류(스튜디오 PM)",
+					"리뷰 차단(스튜디오 PM)"
+				],
+				"readerRoleLabels": [
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					}
+				],
 				"state": "blocked",
 				"stateLabel": "차단",
 				"title": "스튜디오 리뷰 줄"
@@ -16675,7 +17486,7 @@
 				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 				"freeInputVisible": false,
 				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-				"noticeBodyLabel": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+				"noticeBodyLabel": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 				"noticeTitleLabel": "스튜디오 리뷰 줄",
 				"noticeVisible": false,
 				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
@@ -16689,9 +17500,29 @@
 				"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
 			},
 			"inspectedWorldRecordProp": {
-				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 				"label": "리뷰\n차단",
 				"objectId": "studio_review_queue",
+				"possibleAffordanceLabels": [
+					"리뷰 초대(스튜디오 PM)",
+					"리뷰 보류(스튜디오 PM)",
+					"리뷰 차단(스튜디오 PM)"
+				],
+				"readerRoleLabels": [
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					}
+				],
 				"state": "blocked",
 				"stateLabel": "차단",
 				"title": "스튜디오 리뷰 줄"
@@ -16838,9 +17669,29 @@
 				"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
 			},
 			"inspectedWorldRecordProp": {
-				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 				"label": "리뷰\n차단",
 				"objectId": "studio_review_queue",
+				"possibleAffordanceLabels": [
+					"리뷰 초대(스튜디오 PM)",
+					"리뷰 보류(스튜디오 PM)",
+					"리뷰 차단(스튜디오 PM)"
+				],
+				"readerRoleLabels": [
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					}
+				],
 				"state": "blocked",
 				"stateLabel": "차단",
 				"title": "스튜디오 리뷰 줄"
@@ -16987,9 +17838,29 @@
 				"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
 			},
 			"inspectedWorldRecordProp": {
-				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 				"label": "리뷰\n차단",
 				"objectId": "studio_review_queue",
+				"possibleAffordanceLabels": [
+					"리뷰 초대(스튜디오 PM)",
+					"리뷰 보류(스튜디오 PM)",
+					"리뷰 차단(스튜디오 PM)"
+				],
+				"readerRoleLabels": [
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					}
+				],
 				"state": "blocked",
 				"stateLabel": "차단",
 				"title": "스튜디오 리뷰 줄"
@@ -17136,9 +18007,29 @@
 				"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
 			},
 			"inspectedWorldRecordProp": {
-				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.",
+				"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6",
 				"label": "리뷰\n차단",
 				"objectId": "studio_review_queue",
+				"possibleAffordanceLabels": [
+					"리뷰 초대(스튜디오 PM)",
+					"리뷰 보류(스튜디오 PM)",
+					"리뷰 차단(스튜디오 PM)"
+				],
+				"readerRoleLabels": [
+					"스튜디오 PM"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					}
+				],
 				"state": "blocked",
 				"stateLabel": "차단",
 				"title": "스튜디오 리뷰 줄"

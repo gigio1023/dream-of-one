@@ -241,6 +241,13 @@ Current M1 carry-in:
   and shows a visible `리뷰 차단` reaction before the Waiting Customer refuses
   contact. This proves a formal record can close one small opportunity in
   another place without expanding Store/Station into the game premise.
+- Visible world-record prop inspection now names the role/action affordances
+  attached to that environment object. Inspecting the blocked
+  `studio_review_queue` tells the player that the Studio PM can read it, that
+  the queue supports invite/defer/block review actions, and that the latest
+  change came from `civic-ledger-7` citing `civic-ledger-6`. This supports the
+  open-environment social-sim goal: records are readable social objects, not
+  hidden debug state.
 - Codex gameplay QA now runs the active proof cell through public
   `PlayableSession.debug_codex_gameplay_action` and
   `debug_codex_gameplay_snapshot` APIs. The probe can list callable player

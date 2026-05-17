@@ -625,6 +625,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("World record props do not show forwarded report and cited Station dossier")
 	if not bool(checks.get("codexInspectedPublicNotice", false)):
 		failures.append("Codex/player did not inspect the Park notice board as a public environment record")
+	if not bool(checks.get("codexInspectedRecordAffordanceMap", false)):
+		failures.append("Codex/player did not inspect which role and action can use the Studio review record")
 	if not bool(checks.get("codexInspectedWaitingCustomer", false)):
 		failures.append("Codex/player did not inspect the Waiting Customer as a visible NPC reaction")
 	if not bool(checks.get("visibleWaitingCustomerReaction", false)):
@@ -652,6 +654,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary) -> D
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"codexInspectedPublicNotice": _inspected_public_notice(summary),
 		"codexInspectedBlockedReview": _inspected_studio_review_block(summary),
+		"codexInspectedRecordAffordanceMap": _inspected_record_affordance_map(summary),
 		"codexInspectedWaitingCustomer": _inspected_waiting_customer(summary),
 		"codexInspectedStudioPm": _inspected_studio_pm_block(summary),
 		"economyPanelReadable": _economy_panel_readable(record_props),
@@ -675,6 +678,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadVisibleNpcReaction": bool(checks.get("visibleWaitingCustomerReaction", false)),
 		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
 		"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
+		"canInspectRecordRoleAffordanceMap": bool(checks.get("codexInspectedRecordAffordanceMap", false)),
 		"canInspectNpcReaction": bool(checks.get("codexInspectedWaitingCustomer", false)),
 		"canReadExactStationCitation": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"canReadCivicEconomyPressure": bool(checks.get("economyPanelReadable", false)),
@@ -716,6 +720,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.",
 			"Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.",
 			"Codex/player inspected the Studio review queue and Studio PM to read that the Station citation blocked a small opportunity in another place.",
+			"Codex/player read the Studio review queue's visible role/action map: Studio PM can invite, defer, or block review from shared records.",
 			"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state and its cited ledger basis.",
 			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
 		],
@@ -949,7 +954,23 @@ func _inspected_public_notice(summary: Dictionary) -> bool:
 func _inspected_studio_review_block(summary: Dictionary) -> bool:
 	return _inspected_world_record_exists(summary, "studio_review_queue", "blocked", "스테이션 인용")
 
+func _inspected_record_affordance_map(summary: Dictionary) -> bool:
+	var inspected := _inspected_world_record_candidate(summary, "studio_review_queue", "blocked")
+	if inspected.is_empty():
+		return false
+	return (
+		_string_array_has_fragment(inspected.get("readerRoleLabels", []), "스튜디오 PM")
+		and _string_array_has_fragment(inspected.get("possibleAffordanceLabels", []), "리뷰 차단")
+		and _ledger_array_has_event(inspected.get("recentLedgerEvents", []), "civic-ledger-7", "studio_review_blocked")
+		and str(inspected.get("body", "")).contains("행동 가능성")
+		and str(inspected.get("body", "")).contains("최근 장부")
+	)
+
 func _inspected_world_record_exists(summary: Dictionary, object_id: String, state: String, body_fragment: String) -> bool:
+	var inspected := _inspected_world_record_candidate(summary, object_id, state)
+	return not inspected.is_empty() and str(inspected.get("body", "")).contains(body_fragment)
+
+func _inspected_world_record_candidate(summary: Dictionary, object_id: String, state: String) -> Dictionary:
 	var candidates: Array = summary.get("inspectedWorldRecordHistory", [])
 	var latest: Dictionary = summary.get("inspectedWorldRecordProp", {})
 	if not latest.is_empty():
@@ -959,8 +980,26 @@ func _inspected_world_record_exists(summary: Dictionary, object_id: String, stat
 			continue
 		var inspected: Dictionary = candidate
 		if str(inspected.get("objectId", "")) == object_id \
-			and str(inspected.get("state", "")) == state \
-			and str(inspected.get("body", "")).contains(body_fragment):
+			and str(inspected.get("state", "")) == state:
+			return inspected
+	return {}
+
+func _string_array_has_fragment(values: Variant, fragment: String) -> bool:
+	if not values is Array:
+		return false
+	for value in values:
+		if str(value).contains(fragment):
+			return true
+	return false
+
+func _ledger_array_has_event(values: Variant, event_id: String, kind: String) -> bool:
+	if not values is Array:
+		return false
+	for value in values:
+		if not value is Dictionary:
+			continue
+		var event: Dictionary = value
+		if str(event.get("eventId", "")) == event_id and str(event.get("kind", "")) == kind:
 			return true
 	return false
 

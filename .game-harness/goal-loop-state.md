@@ -96,17 +96,26 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `85f03303c59de180e0560ad9a1223746bc6473ca99f15d2ef063531643750a9a`
-  - Markdown SHA-256: `4467cbd1176d2e066b2a1aa2bea1c08b98161edc77fae3859d20ffa3fa71d353`
-  - playable Evidence Pack SHA-256: `24bf03bb7c2ff1c86397845e6c7deea10797f50e9268936801947fbec323c83e`
+  - JSON SHA-256: `c0e9f337b882ab653955f231bf95f75fd658086e8187b13f7f046edc97abea50`
+  - Markdown SHA-256: `c66e591507f0650444739124c26d9dfb4c46cc7198b9c4097f9155ed86e8a4b8`
+  - playable Evidence Pack SHA-256: `c75e80c79d3c518b92ae6b5a9d6e44db183209805eccb0363d6504ba56a0d7c2`
   - visual capture manifest SHA-256: `9fa4da15e17569cbc404ebc4e0aa2d3e00bfa256a1de690f9ad657f01e29dba2`
   - packaged app zip SHA-256: `30f219a87666da21eb38a02dc4ae0725b55b49e1bedd5e433d73ee3c02d4544d`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `13 / 13`, `explainability=12/12`, and
+  player actions `13 / 13`, `explainability=13/13`, and
   `routeReportPassCount=5 / 5`.
+- latest game increment: inspecting a visible world-record prop now shows the
+  small role/action map attached to that environment object. In the inquest
+  Codex run, inspecting `studio_review_queue` shows `읽는 역할: 스튜디오 PM`,
+  `행동 가능성: 리뷰 초대, 리뷰 보류, 리뷰 차단`, and `최근 장부:
+  civic-ledger-7 ... 인용 civic-ledger-6`; the same facts are exported as
+  `readerRoleLabels`, `possibleAffordanceLabels`, and `recentLedgerEvents`.
+  This keeps the player-facing improvement focused on environment affordances:
+  a shared record tells the player who can read it, what action it can support,
+  and what just happened, without expanding Store/Station scope.
 - latest game increment: the formal Station citation now travels to a different
   place and closes a tiny opportunity. After `station_record_cited`, the Studio
   PM reads the citation and `studio_review_queue`, uses `block_review`, changes
@@ -166,7 +175,7 @@ Latest AI-play interface check:
   requires `visibleWaitingCustomerReaction=true` and marks
   `canReadVisibleNpcReaction=true`. The current AI-play report reaches
   `inquest`, accepts `13 / 13` public player actions, passes `routeReports=5/5`,
-  and scores `explainability=12/12`.
+  and scores `explainability=13/13`.
 - latest game increment: public trust now reaches a second place, not only the
   Store queue. On the clean route, the Studio PM sees the Park public routine
   vouch, uses `invite_review`, changes `studio_review_queue` from `open` to

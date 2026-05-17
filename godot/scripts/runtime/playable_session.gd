@@ -2339,13 +2339,22 @@ func _inspect_world_record_prop(object_id: String) -> Dictionary:
 	var state := str(prop.get("state", _world_record_prop_state(object_id)))
 	var title := _world_record_prop_title(object_id)
 	var body := _world_record_prop_inspection_body(object_id, state)
+	var reader_role_labels := _world_record_prop_reader_role_labels(object_id)
+	var possible_affordance_labels := _world_record_prop_affordance_labels(object_id)
+	var recent_ledger_events := _world_record_prop_recent_ledger_events(object_id, 3)
+	var social_lines := _world_record_prop_social_lines(reader_role_labels, possible_affordance_labels, recent_ledger_events)
+	if not social_lines.is_empty():
+		body = "%s\n%s" % [body, "\n".join(social_lines)]
 	inspected_world_record_prop = {
 		"objectId": object_id,
 		"title": title,
 		"state": state,
 		"stateLabel": _record_state_value(state),
 		"label": str(prop.get("label", "")),
-		"body": body
+		"body": body,
+		"readerRoleLabels": reader_role_labels,
+		"possibleAffordanceLabels": possible_affordance_labels,
+		"recentLedgerEvents": recent_ledger_events
 	}
 	inspected_world_record_history.append(inspected_world_record_prop.duplicate(true))
 	_set_notice(title, body)
@@ -2546,6 +2555,77 @@ func _world_record_prop_inspection_body(object_id: String, state: String) -> Str
 	if object_id == "civic_ledger":
 		return "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어집니다."
 	return "%s 상태입니다. 이 기록은 NPC가 볼 수 있는 환경 단서이며, 다음 역할 행동의 근거가 될 수 있습니다." % _record_state_value(state)
+
+func _world_record_prop_social_lines(reader_role_labels: Array[String], possible_affordance_labels: Array[String], recent_ledger_events: Array[Dictionary]) -> PackedStringArray:
+	var lines := PackedStringArray()
+	if not reader_role_labels.is_empty():
+		lines.append("읽는 역할: %s" % ", ".join(reader_role_labels))
+	if not possible_affordance_labels.is_empty():
+		lines.append("행동 가능성: %s" % ", ".join(possible_affordance_labels))
+	if not recent_ledger_events.is_empty():
+		var compact_events := PackedStringArray()
+		for event in recent_ledger_events:
+			var event_id := str(event.get("eventId", ""))
+			var kind_label := str(event.get("kindLabel", ""))
+			var actor_label := str(event.get("actorRoleLabel", ""))
+			var affordance_label := str(event.get("affordanceLabel", ""))
+			var cited_id := str(event.get("citedLedgerEventId", ""))
+			var compact := "%s %s / %s -> %s" % [event_id, kind_label, actor_label, affordance_label]
+			if not cited_id.is_empty():
+				compact = "%s / 인용 %s" % [compact, cited_id]
+			compact_events.append(compact)
+		lines.append("최근 장부: %s" % " | ".join(compact_events))
+	return lines
+
+func _world_record_prop_reader_role_labels(object_id: String) -> Array[String]:
+	var labels: Array[String] = []
+	var roles: Array = OBJECT_VISIBILITY.get(object_id, [])
+	for role in roles:
+		labels.append(_actor_role_label(str(role)))
+	return labels
+
+func _world_record_prop_affordance_labels(object_id: String) -> Array[String]:
+	var labels: Array[String] = []
+	var rules: Dictionary = ENVIRONMENT_ACTION_RULES.get(object_id, {})
+	for affordance in ENVIRONMENT_AFFORDANCE_ORDER:
+		if not rules.has(affordance):
+			continue
+		var rule: Dictionary = rules.get(affordance, {})
+		var role_labels := PackedStringArray()
+		var roles: Array = rule.get("allowedRoles", [])
+		for role in roles:
+			role_labels.append(_actor_role_label(str(role)))
+		if role_labels.is_empty():
+			labels.append(_affordance_label(affordance))
+		else:
+			labels.append("%s(%s)" % [_affordance_label(affordance), ", ".join(role_labels)])
+	return labels
+
+func _world_record_prop_recent_ledger_events(object_id: String, limit: int) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	if limit <= 0:
+		return events
+	for index in range(civic_ledger.size() - 1, -1, -1):
+		var event: Dictionary = civic_ledger[index]
+		var event_object_id := str(event.get("objectId", ""))
+		if object_id != "civic_ledger" and event_object_id != object_id:
+			continue
+		var compact := {
+			"eventId": str(event.get("eventId", "")),
+			"kind": str(event.get("kind", "")),
+			"kindLabel": _civic_ledger_kind_label(str(event.get("kind", ""))),
+			"actorRole": str(event.get("actorRole", "")),
+			"actorRoleLabel": _actor_role_label(str(event.get("actorRole", ""))),
+			"affordance": str(event.get("affordance", "")),
+			"affordanceLabel": _affordance_label(str(event.get("affordance", "")))
+		}
+		var cited_id := str(event.get("citedLedgerEventId", ""))
+		if not cited_id.is_empty():
+			compact["citedLedgerEventId"] = cited_id
+		events.append(compact)
+		if events.size() >= limit:
+			break
+	return events
 
 func _latest_civic_ledger_label() -> String:
 	if civic_ledger.is_empty():

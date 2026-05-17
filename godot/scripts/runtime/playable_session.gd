@@ -2293,8 +2293,36 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 	body_lines.append("현재 반응: %s" % (reaction_text if not reaction_text.is_empty() else _record_state_value(state)))
 	if not pressure_text.is_empty():
 		body_lines.append("말/태도: %s" % pressure_text)
+	var basis_action := _latest_accepted_action_for_actor(npc_id)
+	var basis_event_id := ""
+	var basis_affordance := ""
+	var basis_affordance_label := ""
+	var cited_event_id := ""
+	var basis_object_id := ""
+	var basis_object_label := ""
+	if not basis_action.is_empty():
+		basis_event_id = str(basis_action.get("ledgerEventId", ""))
+		basis_affordance = str(basis_action.get("affordance", ""))
+		basis_affordance_label = _affordance_label(basis_affordance)
+		if not basis_event_id.is_empty() or not basis_affordance_label.is_empty():
+			body_lines.append("근거 행동: %s / %s" % [basis_event_id, basis_affordance_label])
+		cited_event_id = str(basis_action.get("citedLedgerEventId", ""))
+		if not cited_event_id.is_empty():
+			body_lines.append("읽은 기록: %s" % cited_event_id)
+		basis_object_id = str(basis_action.get("objectId", ""))
+		if not basis_object_id.is_empty():
+			basis_object_label = _world_record_prop_title(basis_object_id)
+			body_lines.append("대상 기록물: %s" % basis_object_label)
 	body_lines.append("이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.")
 	inspected_npc_state = snapshot.duplicate(true)
+	if not basis_action.is_empty():
+		inspected_npc_state["basisAction"] = basis_action.duplicate(true)
+		inspected_npc_state["basisLedgerEventId"] = basis_event_id
+		inspected_npc_state["basisAffordance"] = basis_affordance
+		inspected_npc_state["basisAffordanceLabel"] = basis_affordance_label
+		inspected_npc_state["basisObjectId"] = basis_object_id
+		inspected_npc_state["basisObjectLabel"] = basis_object_label
+		inspected_npc_state["citedLedgerEventId"] = cited_event_id
 	inspected_npc_state["body"] = "\n".join(body_lines)
 	_set_notice(title, str(inspected_npc_state.get("body", "")))
 	_record_event(
@@ -2310,6 +2338,14 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		}
 	)
 	return {"ok": true, "inspectedNpcState": inspected_npc_state.duplicate(true)}
+
+func _latest_accepted_action_for_actor(actor_id: String) -> Dictionary:
+	for index in range(agent_action_log.size()):
+		var reverse_index := agent_action_log.size() - 1 - index
+		var action: Dictionary = agent_action_log[reverse_index]
+		if str(action.get("actorId", "")) == actor_id and bool(action.get("accepted", false)):
+			return action.duplicate(true)
+	return {}
 
 func _refresh_world_record_props() -> void:
 	for prop_value in _local_group_nodes(&"operation_record_props"):

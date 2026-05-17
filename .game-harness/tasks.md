@@ -127,6 +127,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Let player/Codex inspect a visible NPC reaction through focus plus
   interact: the inquest path can read the Waiting Customer's `접촉 거부` state in
   the HUD notice and Codex report.
+- [x] Show the record basis inside NPC inspection: the Waiting Customer HUD
+  notice now names `civic-ledger-7`, its cited `civic-ledger-6`, the
+  `refuse_contact` affordance, and the queue-mark record object so the player
+  can read why the refusal happened.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

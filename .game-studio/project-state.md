@@ -212,6 +212,11 @@ Current M1 carry-in:
   the actor's current social reaction in the HUD notice. The Codex inquest run
   inspects `NPC_Waiting_Customer`, reads `접촉 거부`, and stores
   `inspectedNpcState` alongside visible NPC states and record-prop inspection.
+- NPC inspection now also exposes the current social reaction's basis as
+  player-readable record chain data. The Waiting Customer inquest inspection
+  shows `근거 행동: civic-ledger-7 / 접촉 거부`, `읽은 기록: civic-ledger-6`,
+  and `대상 기록물: 대기 표식`, while the snapshot exports the same basis as
+  structured `inspectedNpcState` fields for Codex QA.
 - `NPC_Park_Witness` now exposes public notice actions as visible NPC state:
   clean cover shows `vouched`/`공개 확인`, repair recovery shows
   `repaired`/`수습 게시`, and suspicious cover shows `warned`/`공개 경고`.

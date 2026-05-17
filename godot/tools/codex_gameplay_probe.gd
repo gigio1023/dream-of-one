@@ -674,7 +674,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"Codex/player typed a dream-language line, causing a Store report, waiting-customer queue reaction, Park notice, Manager forwarding, and Station citation.",
 			"The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.",
 			"Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.",
-			"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state.",
+			"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state and its cited ledger basis.",
 			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest, and the waiting customer refused contact in civic-ledger-7."
 		],
 		"roleActionExplanation": _role_action_explanation(summary),
@@ -916,6 +916,12 @@ func _inspected_waiting_customer(summary: Dictionary) -> bool:
 		and str(inspected.get("state", "")) == "refused"
 		and str(inspected.get("reactionText", "")).contains("거부")
 		and str(inspected.get("body", "")).contains("접촉 거부")
+		and str(inspected.get("basisLedgerEventId", "")) == "civic-ledger-7"
+		and str(inspected.get("citedLedgerEventId", "")) == "civic-ledger-6"
+		and str(inspected.get("basisAffordance", "")) == "refuse_contact"
+		and str(inspected.get("body", "")).contains("근거 행동")
+		and str(inspected.get("body", "")).contains("civic-ledger-7")
+		and str(inspected.get("body", "")).contains("civic-ledger-6")
 	)
 
 func _inspected_studio_review_invite(summary: Dictionary) -> bool:

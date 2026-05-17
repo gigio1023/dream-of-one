@@ -96,14 +96,23 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `ea597206fe3b6ffec0a083cd7ec66ff004d6e141a86e3b52b153bb8f8b483231`
-  - Markdown SHA-256: `85d11c389ed5c2755d7c428b41cade0c9b80f7a47ad22c827042d1be8c5c88df`
-  - playable Evidence Pack SHA-256: `ab79a2b6e547f10b09bbd792489593e19eb46aa11297b6f3398de52171fff19d`
+  - JSON SHA-256: `15e4ce3322a0c548b11ed60aa7f88715ab42631c4a8c0b7ebde84ffd578d868c`
+  - Markdown SHA-256: `34d8cf5376913ac38bdacb5ed35b01c66b8ca03658807da1b4954811db598b82`
+  - playable Evidence Pack SHA-256: `07674373507250e5861bbd8b0c7ad71bb2153d52a8f79b8f2962e5a0f96b636a`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `9 / 9`, and `routeReportPassCount=5 / 5`.
+- latest game increment: NPC inspection now shows the record basis behind the
+  visible social stance. In the inquest Codex run, inspecting
+  `NPC_Waiting_Customer` opens a HUD notice with `현재 반응: 접촉 거부`,
+  `근거 행동: civic-ledger-7 / 접촉 거부`, `읽은 기록: civic-ledger-6`,
+  and `대상 기록물: 대기 표식`; the same fields are exported as
+  `basisLedgerEventId`, `citedLedgerEventId`, `basisAffordance`, and
+  `basisObjectLabel` in `inspectedNpcState`. This keeps the proof focused on a
+  small player-readable social chain: Station citation -> Waiting Customer
+  refusal -> player can inspect the reason.
 - latest game increment: player/Codex can now focus a visible NPC and press the
   same interaction key to read that NPC's current social reaction in the HUD
   notice. The inquest Codex run focuses `NPC_Waiting_Customer`, reads
@@ -157,8 +166,9 @@ Latest AI-play interface check:
   pattern: public record -> another place's role sees it -> one visible
   opportunity opens.
 - latest packaged proof refresh: the macOS debug app was re-exported with
-  Godot 4.7-beta2 after the visible Waiting Customer change, then
-  packaged launch, packaged route smoke, backend schema validation, and
+  Godot 4.7-beta2 after the NPC basis-inspection change; zip SHA-256 is
+  `a409ed3e860f914e6b15d2a2763c269fe485ab1996f9f3a5b7a8b54d84061af6`.
+  Packaged launch, packaged route smoke, backend schema validation, and
   comprehension preflight all passed against
   `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json`.
 - prior game increment: visible world-record props are reachable through a
@@ -264,9 +274,9 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `ea597206fe3b6ffec0a083cd7ec66ff004d6e141a86e3b52b153bb8f8b483231`
+  `15e4ce3322a0c548b11ed60aa7f88715ab42631c4a8c0b7ebde84ffd578d868c`
 - Markdown SHA-256:
-  `85d11c389ed5c2755d7c428b41cade0c9b80f7a47ad22c827042d1be8c5c88df`
+  `34d8cf5376913ac38bdacb5ed35b01c66b8ca03658807da1b4954811db598b82`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
   player-visible state, player-readable cause chain, role-action explanation,
   NPC-to-NPC observation explanation, and the explicit boundary that this is

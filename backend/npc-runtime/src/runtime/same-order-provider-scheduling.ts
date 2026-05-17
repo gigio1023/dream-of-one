@@ -303,6 +303,8 @@ function preoccupations(actorRole: AgentRole): string[] {
       return ["delay", "routine disruption", "being noticed"];
     case "park_witness":
       return ["public notice", "local talk", "who becomes visible"];
+    case "studio_pm":
+      return ["public trust", "review queue", "small opportunities"];
     case "station_officer":
       return ["exact citations", "record reconciliation", "bounded answers"];
   }
@@ -318,6 +320,8 @@ function deterministicFallbackLine(actorRole: AgentRole): string {
       return "줄이 더 지연되고 있습니다.";
     case "park_witness":
       return "게시판에 작은 소문으로 남겨두겠습니다.";
+    case "studio_pm":
+      return "공개 기록을 보고 리뷰 줄을 열어두겠습니다.";
     case "station_officer":
       return "상점 기록을 기준으로 확인하겠습니다.";
   }

@@ -6,6 +6,7 @@ export const SAME_ORDER_OBJECT_IDS = [
   "correction_slip",
   "report_tray",
   "park_notice_board",
+  "studio_review_queue",
   "station_dossier",
   "civic_ledger",
 ] as const;
@@ -17,6 +18,7 @@ export const AGENT_ROLES = [
   "store_manager",
   "waiting_customer",
   "park_witness",
+  "studio_pm",
   "station_officer",
 ] as const;
 
@@ -49,6 +51,7 @@ export const ENVIRONMENT_AFFORDANCES = [
   "vouch_routine",
   "post_warning",
   "post_repair_notice",
+  "invite_review",
   "forward_report",
   "open_intake",
   "cite_record",
@@ -84,6 +87,7 @@ export const LEDGER_EVENT_KINDS = [
   "public_routine_vouched",
   "public_warning_posted",
   "public_repair_noted",
+  "studio_review_invited",
   "store_report_escalated",
   "station_record_cited",
   "station_correction_recorded",
@@ -120,6 +124,8 @@ export type EnvironmentObjectState =
   | "vouched"
   | "warned"
   | "rumored"
+  | "open"
+  | "invited"
   | "filed"
   | "forwarded"
   | "opened"
@@ -465,6 +471,18 @@ const AFFORDANCE_RULES: AffordanceRule[] = [
     requiresStoreLedgerEvent: true,
   },
   {
+    objectId: "studio_review_queue",
+    affordance: "invite_review",
+    fromStates: ["open"],
+    toState: "invited",
+    eventKind: "studio_review_invited",
+    allowedRoles: ["studio_pm"],
+    economyDelta: { localTrust: 1, recordBurden: -1 },
+    requiresLedgerEvent: true,
+    requiresLedgerEventKinds: ["public_routine_vouched"],
+    minimumLocalTrust: 55,
+  },
+  {
     objectId: "station_dossier",
     affordance: "cite_record",
     fromStates: ["absent", "opened", "cited"],
@@ -515,8 +533,14 @@ export function createSameOrderAgenticEnvironment(): AgenticEnvironmentState {
       {
         objectId: "park_notice_board",
         state: "clear",
-        visibleTo: ["park_witness", "waiting_customer"],
+        visibleTo: ["park_witness", "waiting_customer", "studio_pm"],
         recordId: "park_public_rumor",
+      },
+      {
+        objectId: "studio_review_queue",
+        state: "open",
+        visibleTo: ["studio_pm"],
+        recordId: "studio_public_review_invite",
       },
       {
         objectId: "station_dossier",
@@ -823,6 +847,9 @@ function priorityHintsForRule(rule: AffordanceRule): string[] {
   if (rule.affordance === "post_repair_notice") {
     hints.push("pressure:repair_seen_publicly");
   }
+  if (rule.affordance === "invite_review") {
+    hints.push("pressure:public_trust_opens_review");
+  }
   if (rule.affordance === "refuse_contact") {
     hints.push("pressure:authority_seen");
   }
@@ -875,6 +902,8 @@ function perceivedAs(rule: AffordanceRule): string {
       return "public warning notice";
     case "post_repair_notice":
       return "public repair notice";
+    case "invite_review":
+      return "public trust opens another local review";
     default:
       return `${rule.objectId} ${rule.affordance}`;
   }

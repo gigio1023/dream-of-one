@@ -108,6 +108,15 @@ Latest AI-play interface check:
   `canReadVisibleNpcReaction=true`. The current AI-play report reaches
   `inquest`, accepts `7 / 7` public player actions, passes `routeReports=5/5`,
   and scores `explainability=10/10`.
+- latest game increment: public trust now reaches a second place, not only the
+  Store queue. On the clean route, the Studio PM sees the Park public routine
+  vouch, uses `invite_review`, changes `studio_review_queue` from `open` to
+  `invited`, and adds `studio_review_invited` as `civic-ledger-6`. This keeps
+  the economy deliberately tiny: `localTrust` moves from 59 to 60, record
+  burden stays at 0, and the player can read the result as a small review
+  invitation. The point is not a Studio system; it is a reusable open-field
+  pattern: public record -> another place's role sees it -> one visible
+  opportunity opens.
 - latest packaged proof refresh: the macOS debug app was re-exported with
   Godot 4.7-beta2 after the visible Waiting Customer change, then
   packaged launch, packaged route smoke, backend schema validation, and
@@ -216,9 +225,9 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `d20f437af55362e30886f04b90256ec57c8e1622e830c4a843fe2db8ebc9c97d`
+  `40e9d0d08a037ac998c723d1d6a14c1905e89411354d9e7de780a1e499b0ec5f`
 - Markdown SHA-256:
-  `2083ddf38c3cb10d83415b92154927aa5e1e6d4c513d0e7dea227716f18a3847`
+  `592545df35aa0efe90a0accf002d4e6bb50b3d34a2a600a72ae7ca36ed86bc66`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
   player-visible state, player-readable cause chain, role-action explanation,
   NPC-to-NPC observation explanation, and the explicit boundary that this is

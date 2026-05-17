@@ -117,8 +117,8 @@ Current M1 carry-in:
   object-state, and civic economy outcomes.
 - backend provider scheduling seed
   `backend/npc-runtime/src/runtime/same-order-provider-scheduling.ts` now
-  turns that comparison into 24 bounded Store Clerk, Waiting Customer, Park
-  Witness, Store Manager, and Station Officer role-agent provider jobs. Each
+  turns that comparison into 25 bounded Store Clerk, Waiting Customer, Park
+  Witness, Studio PM, Store Manager, and Station Officer role-agent provider jobs. Each
   job carries available action context,
   allowed provider fields, forbidden authority fields, deterministic fallback
   wording, and the accepted locked action; live Godot dispatch remains
@@ -174,7 +174,7 @@ Current M1 carry-in:
   count.
 - Godot world generation now spawns Store/Station record prop slots for queue
   mark, counter, usual-order cue, receipt, correction, report tray, Station
-  dossier, civic ledger, and civic economy; the playable session updates their
+  dossier, civic ledger, civic economy, and a tiny Studio review queue; the playable session updates their
   labels, colors, and state metadata; playable slice smoke now validates the
   world prop snapshot.
 - Godot Same Order state changes now pass through deterministic role-agent
@@ -187,7 +187,8 @@ Current M1 carry-in:
   citation and refuse contact with the player;
   a Park Witness can turn a routine queue record into public social trust, a
   Waiting Customer can read that public vouch and share a local tip only after
-  `localTrust >= 55`, or read a public warning and keep distance only after
+  `localTrust >= 55`, a Studio PM can read that same public vouch and open a
+  review invitation, or a Waiting Customer can read a public warning and keep distance only after
   local trust is low,
   a Park Witness can turn a Store note into public rumor, turn a correction
   record into a public repair notice, or turn a wary queue record into an

@@ -333,6 +333,7 @@
 			"station_dossier": "cited",
 			"store_counter": "serving",
 			"store_queue_mark": "refused",
+			"studio_review_queue": "open",
 			"usual_order_cue": "read"
 		},
 		"recordedStatementAction": "",
@@ -484,6 +485,12 @@
 				"hasBody": true,
 				"label": "대기 표식\nrefused",
 				"state": "refused",
+				"visible": true
+			},
+			"studio_review_queue": {
+				"hasBody": true,
+				"label": "리뷰\n열림",
+				"state": "open",
 				"visible": true
 			},
 			"usual_order_cue": {

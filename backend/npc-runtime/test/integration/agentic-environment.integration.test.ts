@@ -573,6 +573,41 @@ test("High local trust unlocks a helpful waiting-customer tip after a public rou
   assert.equal(tip.environment.objects.find(item => item.objectId === "store_queue_mark")?.state, "helped");
   assert.equal(tip.environment.economy.localTrust, 59);
   assert.equal(tip.environment.economy.recordBurden, 0);
+
+  environment = tip.environment;
+  const studioPm = actor({
+    actorId: "NPC_Studio_PM",
+    role: "studio_pm",
+    knownLedgerEventIds: [vouch.event.eventId],
+  }, environment);
+  assert.equal(studioPm.perceivedObjectIds.includes("park_notice_board"), true);
+  assert.equal(studioPm.perceivedObjectIds.includes("studio_review_queue"), true);
+  const studioAction = listAvailableEnvironmentActions(environment, studioPm)
+    .find(candidate => candidate.affordance === "invite_review");
+
+  assert.ok(studioAction);
+  assert.equal(studioAction.objectId, "studio_review_queue");
+  assert.equal(studioAction.toState, "invited");
+  assert.deepEqual(studioAction.citableLedgerEventIds, [vouch.event.eventId]);
+  assert.equal(studioAction.preconditions.includes("localTrust>=55"), true);
+  assert.equal(studioAction.preconditions.includes("ledger_event_kind:public_routine_vouched"), true);
+  assert.deepEqual(studioAction.civicEconomyEffects, ["localTrust:+1", "recordBurden:-1"]);
+
+  const invite = requireAccepted(validateAndApplyEnvironmentAction(environment, studioPm, {
+    actorId: studioPm.actorId,
+    role: studioPm.role,
+    affordance: "invite_review",
+    objectId: "studio_review_queue",
+    recordId: "studio_public_review_invite",
+    citedLedgerEventId: vouch.event.eventId,
+    whyLine: "The Studio PM reads the public routine vouch and opens a tiny review invite.",
+  }));
+
+  assert.equal(invite.event.kind, "studio_review_invited");
+  assert.equal(invite.event.citedLedgerEventId, vouch.event.eventId);
+  assert.equal(invite.environment.objects.find(item => item.objectId === "studio_review_queue")?.state, "invited");
+  assert.equal(invite.environment.economy.localTrust, 60);
+  assert.equal(invite.environment.economy.recordBurden, 0);
 });
 
 test("Park witness can post a public warning from a wary queue record", () => {

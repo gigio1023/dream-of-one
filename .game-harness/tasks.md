@@ -106,6 +106,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   no conversation zone is closer.
 - [x] Spawn the Waiting Customer as an actual Store NPC and make playable/Codex
   probes require player-readable visible NPC reaction state for acting roles.
+- [x] Add the smallest non-Store/non-Station public-record reaction: Studio PM
+  reads the Park public routine vouch, uses `invite_review`, changes
+  `studio_review_queue` to `invited`, and proves a public social record can
+  open a tiny opportunity in another place.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

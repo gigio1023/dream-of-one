@@ -533,6 +533,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"public_routine_vouched": "공개 확인",
 		"public_repair_noted": "공개 수습",
 		"public_warning_posted": "공개 경고",
+		"studio_review_invited": "리뷰 초대",
 		"queue_delay_noted": "대기줄 불평",
 		"public_rumor_posted": "공개 소문",
 		"store_exception_reported": "상점 보고",
@@ -553,6 +554,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"public_routine_vouched": "public routine vouched",
 		"public_repair_noted": "public repair noted",
 		"public_warning_posted": "public warning posted",
+		"studio_review_invited": "review invited",
 		"queue_delay_noted": "queue delay noted",
 		"public_rumor_posted": "public rumor posted",
 		"store_exception_reported": "Store report",
@@ -568,6 +570,7 @@ func _actor_role_label(actor_role: String) -> String:
 		"store_manager": "상점 매니저",
 		"waiting_customer": "대기 손님",
 		"park_witness": "공원 목격자",
+		"studio_pm": "스튜디오 PM",
 		"station_officer": "스테이션 직원"
 	}
 	var en := {
@@ -575,6 +578,7 @@ func _actor_role_label(actor_role: String) -> String:
 		"store_manager": "Store Manager",
 		"waiting_customer": "Waiting Customer",
 		"park_witness": "Park Witness",
+		"studio_pm": "Studio PM",
 		"station_officer": "Station Officer"
 	}
 	var table: Dictionary = en if _current_locale() == "en" else ko
@@ -598,6 +602,7 @@ func _affordance_label(affordance: String) -> String:
 		"vouch_routine": "일상 확인",
 		"post_warning": "공개 경고",
 		"post_repair_notice": "수습 게시",
+		"invite_review": "리뷰 초대",
 		"place_note": "메모 배치",
 		"forward_report": "보고 전달",
 		"cite_record": "기록 인용"
@@ -619,6 +624,7 @@ func _affordance_label(affordance: String) -> String:
 		"vouch_routine": "vouch routine",
 		"post_warning": "post public warning",
 		"post_repair_notice": "post repair notice",
+		"invite_review": "invite review",
 		"place_note": "place note",
 		"forward_report": "forward report",
 		"cite_record": "cite record"

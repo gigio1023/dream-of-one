@@ -203,6 +203,17 @@ function buildCleanCoverProof(): SameOrderAgenticRouteProof {
     knownLedgerEventIds: [vouchEvent.eventId],
     whyLine: "Local trust is high after the public vouch, so the waiting customer shares a small local tip instead of only standing aside.",
   });
+  applyAction(build, {
+    stepId: "clean.studio_pm.invite_review",
+    actorId: "NPC_Studio_PM",
+    role: "studio_pm",
+    affordance: "invite_review",
+    objectId: "studio_review_queue",
+    recordId: "studio_public_review_invite",
+    citedLedgerEventId: vouchEvent.eventId,
+    knownLedgerEventIds: [vouchEvent.eventId],
+    whyLine: "The Studio PM reads the public routine vouch and opens a tiny review invitation instead of relying on a private Store branch.",
+  });
 
   return routeProof({
     build,
@@ -210,7 +221,7 @@ function buildCleanCoverProof(): SameOrderAgenticRouteProof {
     sessionOutcome: "cover_held",
     playerLineKind: "clean_cover_line",
     playerLine: "네, 같은 걸로 주세요.",
-    socialReactionSummary: "The clerk closes a normal receipt, a waiting customer accepts the routine, a Park witness publicly vouches that the player stayed in the local flow, and the high local trust lets the waiting customer share a local tip.",
+    socialReactionSummary: "The clerk closes a normal receipt, a waiting customer accepts the routine, a Park witness publicly vouches that the player stayed in the local flow, high local trust lets the waiting customer share a local tip, and the Studio PM opens a tiny review invite from that public vouch.",
   });
 }
 

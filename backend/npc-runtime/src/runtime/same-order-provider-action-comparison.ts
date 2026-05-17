@@ -142,7 +142,7 @@ const ROUTE_SPECS: RouteSpec[] = [
     sessionOutcome: "cover_held",
     playerLineKind: "clean_cover_line",
     playerLine: "네, 같은 걸로 주세요.",
-    socialReactionSummary: "The provider-shaped proposal path closes a normal receipt, lets public trust travel, and unlocks a small local tip.",
+    socialReactionSummary: "The provider-shaped proposal path closes a normal receipt, lets public trust travel, unlocks a small local tip, and opens a tiny Studio review invitation.",
     steps: [
       {
         stepId: "clean.clerk.cite_usual_order",
@@ -203,6 +203,19 @@ const ROUTE_SPECS: RouteSpec[] = [
         knownLedgerEventFromStepIds: ["clean.park_witness.vouch_routine"],
         whyLine: "Local trust is high after the public vouch, so the waiting customer shares a small local tip instead of only standing aside.",
         npcLineCandidate: "다음엔 여기서 같은 말만 먼저 하면 돼요. 오늘은 제가 알려드릴게요.",
+      },
+      {
+        stepId: "clean.studio_pm.invite_review",
+        actorId: "NPC_Studio_PM",
+        actorRole: "studio_pm",
+        stepGoal: "open a small Studio review invitation from the public routine vouch",
+        affordance: "invite_review",
+        objectId: "studio_review_queue",
+        recordId: "studio_public_review_invite",
+        citedLedgerEventFromStepId: "clean.park_witness.vouch_routine",
+        knownLedgerEventFromStepIds: ["clean.park_witness.vouch_routine"],
+        whyLine: "The Studio PM reads the public routine vouch and opens a tiny review invitation instead of relying on a private Store branch.",
+        npcLineCandidate: "공개 확인이 붙었네요. 리뷰 줄은 열어둘게요.",
       },
     ],
   },

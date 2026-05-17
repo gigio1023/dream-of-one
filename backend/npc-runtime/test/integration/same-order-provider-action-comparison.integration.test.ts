@@ -25,10 +25,13 @@ test("Same Order provider action comparison preserves provider-off ledger outcom
   assert.equal(clean.ledgerEventKinds.includes("queue_routine_kept"), true);
   assert.equal(clean.ledgerEventKinds.includes("public_routine_vouched"), true);
   assert.equal(clean.ledgerEventKinds.includes("local_tip_shared"), true);
+  assert.equal(clean.ledgerEventKinds.includes("studio_review_invited"), true);
   assert.equal(clean.finalObjectStates.store_queue_mark, "helped");
+  assert.equal(clean.finalObjectStates.studio_review_queue, "invited");
   assert.equal(clean.actionTrace.some(trace => trace.actorRole === "waiting_customer" && trace.affordance === "accept_routine"), true);
   assert.equal(clean.actionTrace.some(trace => trace.actorRole === "park_witness" && trace.affordance === "vouch_routine"), true);
   assert.equal(clean.actionTrace.some(trace => trace.actorRole === "waiting_customer" && trace.affordance === "share_local_tip"), true);
+  assert.equal(clean.actionTrace.some(trace => trace.actorRole === "studio_pm" && trace.affordance === "invite_review"), true);
 
   const repair = comparison.providerProofs.find(proof => proof.routeId === "repair_recovered");
   assert.ok(repair);

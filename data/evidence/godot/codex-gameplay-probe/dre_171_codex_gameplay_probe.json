@@ -263,6 +263,7 @@
 			"station_dossier": "cited",
 			"store_counter": "serving",
 			"store_queue_mark": "refused",
+			"studio_review_queue": "open",
 			"usual_order_cue": "read"
 		},
 		"stage": "inquest",
@@ -319,6 +320,12 @@
 				"hasBody": true,
 				"label": "대기 표식\nrefused",
 				"state": "refused",
+				"visible": true
+			},
+			"studio_review_queue": {
+				"hasBody": true,
+				"label": "리뷰\n열림",
+				"state": "open",
 				"visible": true
 			},
 			"usual_order_cue": {
@@ -1436,7 +1443,8 @@
 						"validationRuleId": "same_order.park_notice_board.post_rumor",
 						"visibleTo": [
 							"park_witness",
-							"waiting_customer"
+							"waiting_customer",
+							"studio_pm"
 						]
 					},
 					{
@@ -1481,7 +1489,8 @@
 						"validationRuleId": "same_order.park_notice_board.vouch_routine",
 						"visibleTo": [
 							"park_witness",
-							"waiting_customer"
+							"waiting_customer",
+							"studio_pm"
 						]
 					},
 					{
@@ -1528,7 +1537,8 @@
 						"validationRuleId": "same_order.park_notice_board.post_warning",
 						"visibleTo": [
 							"park_witness",
-							"waiting_customer"
+							"waiting_customer",
+							"studio_pm"
 						]
 					},
 					{
@@ -1578,7 +1588,8 @@
 						"validationRuleId": "same_order.park_notice_board.post_repair_notice",
 						"visibleTo": [
 							"park_witness",
-							"waiting_customer"
+							"waiting_customer",
+							"studio_pm"
 						]
 					}
 				],
@@ -1638,7 +1649,8 @@
 					"validationRuleId": "same_order.park_notice_board.post_rumor",
 					"visibleTo": [
 						"park_witness",
-						"waiting_customer"
+						"waiting_customer",
+						"studio_pm"
 					]
 				},
 				"selectionReason": "The Park witness can see the Store note becoming public talk and pins a small notice outside the queue.",
@@ -2436,14 +2448,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779050260046",
+				"eventId": "playable_session_started-001-1779051410996",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779050260046,
+				"timestampMs": 1779051410996,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -2456,7 +2468,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-002-1779050260115",
+				"eventId": "conversation_started-002-1779051411065",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -2465,7 +2477,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779050260115,
+				"timestampMs": 1779051411065,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -2478,7 +2490,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-003-1779050260128",
+				"eventId": "response_hesitation_noted-003-1779051411080",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -2499,7 +2511,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779050260128,
+				"timestampMs": 1779051411080,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -2514,7 +2526,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-004-1779050260143",
+				"eventId": "dialogue_choice_selected-004-1779051411093",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2536,7 +2548,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779050260143,
+				"timestampMs": 1779051411093,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2551,7 +2563,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-005-1779050260143",
+				"eventId": "conversation_anomaly_detected-005-1779051411093",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2573,7 +2585,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779050260143,
+				"timestampMs": 1779051411093,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2588,7 +2600,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-006-1779050260143",
+				"eventId": "npc_suspicion_changed-006-1779051411093",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2610,7 +2622,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779050260143,
+				"timestampMs": 1779051411093,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2625,7 +2637,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-007-1779050260157",
+				"eventId": "free_input_submitted-007-1779051411107",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2650,7 +2662,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779050260157,
+				"timestampMs": 1779051411107,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2665,7 +2677,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779050260157",
+				"eventId": "conversation_anomaly_detected-008-1779051411107",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2690,7 +2702,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779050260157,
+				"timestampMs": 1779051411107,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2705,7 +2717,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779050260157",
+				"eventId": "npc_suspicion_changed-009-1779051411107",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2730,7 +2742,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779050260157,
+				"timestampMs": 1779051411107,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2745,7 +2757,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-010-1779050260157",
+				"eventId": "suspicion_shared-010-1779051411107",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2770,7 +2782,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779050260157,
+				"timestampMs": 1779051411107,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2785,7 +2797,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-011-1779050260158",
+				"eventId": "station_report_created-011-1779051411107",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2810,7 +2822,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779050260158,
+				"timestampMs": 1779051411107,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2825,7 +2837,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-012-1779050260160",
+				"eventId": "station_inquest_opened-012-1779051411108",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2850,7 +2862,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779050260160,
+				"timestampMs": 1779051411108,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2860,7 +2872,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-013-1779050260204",
+				"eventId": "world_record_prop_inspected-013-1779051411144",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -2868,7 +2880,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779050260204,
+				"timestampMs": 1779051411144,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -3804,7 +3816,8 @@
 							"validationRuleId": "same_order.park_notice_board.post_rumor",
 							"visibleTo": [
 								"park_witness",
-								"waiting_customer"
+								"waiting_customer",
+								"studio_pm"
 							]
 						},
 						{
@@ -3849,7 +3862,8 @@
 							"validationRuleId": "same_order.park_notice_board.vouch_routine",
 							"visibleTo": [
 								"park_witness",
-								"waiting_customer"
+								"waiting_customer",
+								"studio_pm"
 							]
 						},
 						{
@@ -3896,7 +3910,8 @@
 							"validationRuleId": "same_order.park_notice_board.post_warning",
 							"visibleTo": [
 								"park_witness",
-								"waiting_customer"
+								"waiting_customer",
+								"studio_pm"
 							]
 						},
 						{
@@ -3946,7 +3961,8 @@
 							"validationRuleId": "same_order.park_notice_board.post_repair_notice",
 							"visibleTo": [
 								"park_witness",
-								"waiting_customer"
+								"waiting_customer",
+								"studio_pm"
 							]
 						}
 					],
@@ -4006,7 +4022,8 @@
 						"validationRuleId": "same_order.park_notice_board.post_rumor",
 						"visibleTo": [
 							"park_witness",
-							"waiting_customer"
+							"waiting_customer",
+							"studio_pm"
 						]
 					},
 					"selectionReason": "The Park witness can see the Store note becoming public talk and pins a small notice outside the queue.",
@@ -4774,6 +4791,7 @@
 				"station_dossier": "cited",
 				"store_counter": "serving",
 				"store_queue_mark": "refused",
+				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
 			"recordedStatement": "legacy recorded-statement fallback remains internal; tester-facing proof uses HUD typed input",
@@ -4992,6 +5010,12 @@
 					"state": "refused",
 					"visible": true
 				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
+					"visible": true
+				},
 				"usual_order_cue": {
 					"hasBody": true,
 					"label": "늘 같은 주문\n읽힘",
@@ -5018,6 +5042,7 @@
 			"station_dossier": "cited",
 			"store_counter": "serving",
 			"store_queue_mark": "refused",
+			"studio_review_queue": "open",
 			"usual_order_cue": "read"
 		},
 		"releaseAuthorityRequirement": "Same Order M1 is fallback-only until budgeted API preflight and Godot provider dispatch pass; public demo authority must keep suspicion, report, inquest, verdict, and session end deterministic.",
@@ -5250,6 +5275,12 @@
 				"state": "refused",
 				"visible": true
 			},
+			"studio_review_queue": {
+				"hasBody": true,
+				"label": "리뷰\n열림",
+				"state": "open",
+				"visible": true
+			},
 			"usual_order_cue": {
 				"hasBody": true,
 				"label": "늘 같은 주문\n읽힘",
@@ -5377,13 +5408,13 @@
 			"finalPlayerVisibleState": {
 				"civicEconomy": {
 					"accountCredit": 2,
-					"localTrust": 59,
+					"localTrust": 60,
 					"recordBurden": 0,
 					"stationAttention": 0
 				},
 				"consequence": "당신은 검사 대상입니다. 상점 점원의 평범한 질문도 기록됩니다.",
 				"investigationTrail": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
-				"outcomeBody": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공원 게시판 공개 확인 -> 로컬 팁 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공원 게시판에 공개 확인을 남겼습니다. 게시판 확인으로 지역 신뢰가 충분해지자 대기 손님은 작은 로컬 팁을 공유했습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 확인 기록을 보고 대기 표식을 도움 상태로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 NPC의 도움 행동을 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+				"outcomeBody": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공원 게시판 공개 확인 -> 로컬 팁 -> 스튜디오 리뷰 초대 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공원 게시판에 공개 확인을 남겼습니다. 게시판 확인으로 지역 신뢰가 충분해지자 대기 손님은 작은 로컬 팁을 공유했고, 스튜디오 PM은 같은 공개 확인을 읽고 리뷰 줄을 열어둡니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 확인 기록을 보고 대기 표식을 도움 상태로 바꿨고, 스튜디오 PM이 공개 확인을 근거로 리뷰 대기열을 초대 상태로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 다른 장소의 작은 초대 행동까지 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
 				"recordObjects": {
 					"civic_ledger": "append_only",
 					"correction_slip": "absent",
@@ -5393,9 +5424,10 @@
 					"station_dossier": "absent",
 					"store_counter": "serving",
 					"store_queue_mark": "helped",
+					"studio_review_queue": "invited",
 					"usual_order_cue": "cited"
 				},
-				"recordState": "상점 기록: 영수증 정상 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 2 신뢰 59 부담 0 주목 0 | 장부 5 최근 civic-ledger-5 대기 손님 / 로컬 팁 / 로컬 팁 -> civic-ledger-4 | 사회 반응 대기 손님가 공원 목격자의 일상 확인 기록을 보고 로컬 팁, 부담 0",
+				"recordState": "상점 기록: 영수증 정상 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 2 신뢰 60 부담 0 주목 0 | 장부 6 최근 civic-ledger-6 스튜디오 PM / 리뷰 초대 / 리뷰 초대 -> civic-ledger-4 | 사회 반응 스튜디오 PM가 공원 목격자의 일상 확인 기록을 보고 리뷰 초대, 부담 0",
 				"reportWeight": 0,
 				"routeOutcome": "clean_cover",
 				"sessionOutcome": "cover_held",
@@ -5409,20 +5441,20 @@
 				"codexInspectedPublicNotice": false,
 				"economyPanelReadable": false,
 				"latestLedger": {
-					"actorId": "NPC_Waiting_Customer",
-					"actorRole": "waiting_customer",
-					"affordance": "share_local_tip",
+					"actorId": "NPC_Studio_PM",
+					"actorRole": "studio_pm",
+					"affordance": "invite_review",
 					"citedLedgerEventId": "civic-ledger-4",
 					"economyDelta": {
 						"localTrust": 1,
 						"recordBurden": -1
 					},
-					"eventId": "civic-ledger-5",
-					"kind": "local_tip_shared",
-					"objectId": "store_queue_mark",
-					"recordId": "store_same_order_local_tip",
+					"eventId": "civic-ledger-6",
+					"kind": "studio_review_invited",
+					"objectId": "studio_review_queue",
+					"recordId": "studio_public_review_invite",
 					"validation": "accepted",
-					"whyLine": "Local trust is high after the public vouch, so the waiting customer shares a small local tip instead of only standing aside."
+					"whyLine": "The Studio PM reads the public routine vouch and opens a tiny review invitation instead of relying on a private Store branch."
 				},
 				"managerObservedClerk": false,
 				"parkWitnessObservedClerk": false,
@@ -5441,14 +5473,15 @@
 				"worldPropsReachInquest": false
 			},
 			"pass": true,
-			"playerReadableSummary": "Clean cover: Codex accepted the routine, the Store Clerk closed a normal receipt, public trust rose, and the waiting customer shared a local tip. normal/clean_cover, suspicion 0, report 0.",
+			"playerReadableSummary": "Clean cover: Codex accepted the routine, the Store Clerk closed a normal receipt, public trust rose, the waiting customer shared a local tip, and the Studio PM opened a review invitation from the public record. normal/clean_cover, suspicion 0, report 0.",
 			"rejectedActions": [],
 			"roleActionExplanation": [
 				"store_clerk used cite_expected_order on usual_order_cue -> civic-ledger-1",
 				"store_clerk used create_receipt on receipt_tray -> civic-ledger-2",
 				"waiting_customer used accept_routine on store_queue_mark -> civic-ledger-3",
 				"park_witness used vouch_routine on park_notice_board -> civic-ledger-4",
-				"waiting_customer used share_local_tip on store_queue_mark -> civic-ledger-5"
+				"waiting_customer used share_local_tip on store_queue_mark -> civic-ledger-5",
+				"studio_pm used invite_review on studio_review_queue -> civic-ledger-6"
 			],
 			"routeId": "clean_cover",
 			"schemaVersion": "codex-route-play-report-v1",
@@ -5497,6 +5530,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -5563,6 +5597,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -5617,6 +5657,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -5683,6 +5724,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -5737,6 +5784,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -5805,6 +5853,12 @@
 							"state": "player_waiting",
 							"visible": true
 						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
+							"visible": true
+						},
 						"usual_order_cue": {
 							"hasBody": true,
 							"label": "늘 같은 주문\n읽힘",
@@ -5857,6 +5911,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -5925,6 +5980,12 @@
 							"state": "player_waiting",
 							"visible": true
 						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
+							"visible": true
+						},
 						"usual_order_cue": {
 							"hasBody": true,
 							"label": "늘 같은 주문\n읽힘",
@@ -5941,7 +6002,7 @@
 					],
 					"civicEconomy": {
 						"accountCredit": 2,
-						"localTrust": 59,
+						"localTrust": 60,
 						"recordBurden": 0,
 						"stationAttention": 0
 					},
@@ -5955,11 +6016,11 @@
 						"noticeBodyLabel": "그럼 같은 봉투로 두겠습니다.\n플레이어 발화: 맞습니다. 제가 착각했습니다.\nwhy-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.",
 						"noticeTitleLabel": "NPC_Store_Clerk",
 						"noticeVisible": false,
-						"outcomeBodyLabel": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공원 게시판 공개 확인 -> 로컬 팁 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공원 게시판에 공개 확인을 남겼습니다. 게시판 확인으로 지역 신뢰가 충분해지자 대기 손님은 작은 로컬 팁을 공유했습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 확인 기록을 보고 대기 표식을 도움 상태로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 NPC의 도움 행동을 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+						"outcomeBodyLabel": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공원 게시판 공개 확인 -> 로컬 팁 -> 스튜디오 리뷰 초대 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공원 게시판에 공개 확인을 남겼습니다. 게시판 확인으로 지역 신뢰가 충분해지자 대기 손님은 작은 로컬 팁을 공유했고, 스튜디오 PM은 같은 공개 확인을 읽고 리뷰 줄을 열어둡니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 확인 기록을 보고 대기 표식을 도움 상태로 바꿨고, 스튜디오 PM이 공개 확인을 근거로 리뷰 대기열을 초대 상태로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 다른 장소의 작은 초대 행동까지 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
 						"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 0 -> 접수 닫힘 / 심문 닫힘 / 판정 닫힘 / 종료 열림",
 						"outcomeVisible": true,
 						"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
-						"recordStateLabel": "상점 기록: 영수증 정상 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 2 신뢰 59 부담 0 주목 0 | 장부 5 최근 civic-ledger-5 대기 손님 / 로컬 팁 / 로컬 팁 -> civic-ledger-4 | 사회 반응 대기 손님가 공원 목격자의 일상 확인 기록을 보고 로컬 팁, 부담 0",
+						"recordStateLabel": "상점 기록: 영수증 정상 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 2 신뢰 60 부담 0 주목 0 | 장부 6 최근 civic-ledger-6 스튜디오 PM / 리뷰 초대 / 리뷰 초대 -> civic-ledger-4 | 사회 반응 스튜디오 PM가 공원 목격자의 일상 확인 기록을 보고 리뷰 초대, 부담 0",
 						"recordedStatementLabel": "직접 입력도 기록됩니다.",
 						"riskyLineLabel": "직접 입력한 말도 상점 기록으로 남습니다.",
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
@@ -5968,20 +6029,20 @@
 					"inspectedWorldRecordProp": {},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
-						"actorId": "NPC_Waiting_Customer",
-						"actorRole": "waiting_customer",
-						"affordance": "share_local_tip",
+						"actorId": "NPC_Studio_PM",
+						"actorRole": "studio_pm",
+						"affordance": "invite_review",
 						"citedLedgerEventId": "civic-ledger-4",
 						"economyDelta": {
 							"localTrust": 1,
 							"recordBurden": -1
 						},
-						"eventId": "civic-ledger-5",
-						"kind": "local_tip_shared",
-						"objectId": "store_queue_mark",
-						"recordId": "store_same_order_local_tip",
+						"eventId": "civic-ledger-6",
+						"kind": "studio_review_invited",
+						"objectId": "studio_review_queue",
+						"recordId": "studio_public_review_invite",
 						"validation": "accepted",
-						"whyLine": "Local trust is high after the public vouch, so the waiting customer shares a small local tip instead of only standing aside."
+						"whyLine": "The Studio PM reads the public routine vouch and opens a tiny review invitation instead of relying on a private Store branch."
 					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
@@ -5992,6 +6053,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "helped",
+						"studio_review_queue": "invited",
 						"usual_order_cue": "cited"
 					},
 					"summary": {
@@ -6008,13 +6070,13 @@
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
-							"label": "시민 경제\n잔액 2 | 신뢰 59 | 부담 0 | 주목 0",
+							"label": "시민 경제\n잔액 2 | 신뢰 60 | 부담 0 | 주목 0",
 							"state": "stable",
 							"visible": true
 						},
 						"civic_ledger": {
 							"hasBody": true,
-							"label": "시민 장부 5건\ncivic-ledger-5 -> civic-ledger-4\n로컬 팁",
+							"label": "시민 장부 6건\ncivic-ledger-6 -> civic-ledger-4\n리뷰 초대",
 							"state": "append_only",
 							"visible": true
 						},
@@ -6060,6 +6122,12 @@
 							"state": "helped",
 							"visible": true
 						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n초대",
+							"state": "invited",
+							"visible": true
+						},
 						"usual_order_cue": {
 							"hasBody": true,
 							"label": "늘 같은 주문\n인용됨",
@@ -6072,18 +6140,19 @@
 			"socialObservationExplanation": [
 				"waiting_customer saw store_clerk create_receipt at civic-ledger-2, then chose accept_routine",
 				"park_witness saw waiting_customer accept_routine at civic-ledger-3, then chose vouch_routine",
-				"waiting_customer saw park_witness vouch_routine at civic-ledger-4, then chose share_local_tip"
+				"waiting_customer saw park_witness vouch_routine at civic-ledger-4, then chose share_local_tip",
+				"studio_pm saw park_witness vouch_routine at civic-ledger-4, then chose invite_review"
 			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
-					"label": "시민 경제\n잔액 2 | 신뢰 59 | 부담 0 | 주목 0",
+					"label": "시민 경제\n잔액 2 | 신뢰 60 | 부담 0 | 주목 0",
 					"state": "stable",
 					"visible": true
 				},
 				"civic_ledger": {
 					"hasBody": true,
-					"label": "시민 장부 5건\ncivic-ledger-5 -> civic-ledger-4\n로컬 팁",
+					"label": "시민 장부 6건\ncivic-ledger-6 -> civic-ledger-4\n리뷰 초대",
 					"state": "append_only",
 					"visible": true
 				},
@@ -6127,6 +6196,12 @@
 					"hasBody": true,
 					"label": "대기 표식\n도움 공유",
 					"state": "helped",
+					"visible": true
+				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n초대",
+					"state": "invited",
 					"visible": true
 				},
 				"usual_order_cue": {
@@ -6175,6 +6250,7 @@
 					"station_dossier": "absent",
 					"store_counter": "serving",
 					"store_queue_mark": "settled",
+					"studio_review_queue": "open",
 					"usual_order_cue": "read"
 				},
 				"recordState": "상점 기록: 영수증 표시됨 | 정정 첨부됨 | 보고 비어 있음 | 스테이션 없음 | 잔액 2 신뢰 48 부담 25 주목 5 | 장부 5 최근 civic-ledger-5 공원 목격자 / 수습 게시 / 공개 수습 -> civic-ledger-3 | 사회 반응 공원 목격자가 상점 점원의 정정 첨부 기록을 보고 수습 게시, 부담 35",
@@ -6279,6 +6355,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -6345,6 +6422,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -6399,6 +6482,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -6465,6 +6549,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -6519,6 +6609,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -6585,6 +6676,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -6652,6 +6749,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -6718,6 +6816,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -6787,6 +6891,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "settled",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -6853,6 +6958,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n줄 안정",
 							"state": "settled",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -6923,6 +7034,12 @@
 					"state": "settled",
 					"visible": true
 				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
+					"visible": true
+				},
 				"usual_order_cue": {
 					"hasBody": true,
 					"label": "늘 같은 주문\n읽힘",
@@ -6969,6 +7086,7 @@
 					"station_dossier": "absent",
 					"store_counter": "serving",
 					"store_queue_mark": "distanced",
+					"studio_review_queue": "open",
 					"usual_order_cue": "read"
 				},
 				"recordState": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 41 부담 25 주목 0 | 장부 4 최근 civic-ledger-4 대기 손님 / 거리두기 / 거리두기 -> civic-ledger-3 | 사회 반응 대기 손님가 공원 목격자의 공개 경고 기록을 보고 거리두기, 부담 23",
@@ -7072,6 +7190,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -7138,6 +7257,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -7192,6 +7317,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -7258,6 +7384,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -7312,6 +7444,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -7378,6 +7511,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -7446,6 +7585,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -7512,6 +7652,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -7581,6 +7727,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "distanced",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -7647,6 +7794,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n거리 둠",
 							"state": "distanced",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -7718,6 +7871,12 @@
 					"state": "distanced",
 					"visible": true
 				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
+					"visible": true
+				},
 				"usual_order_cue": {
 					"hasBody": true,
 					"label": "늘 같은 주문\n읽힘",
@@ -7764,6 +7923,7 @@
 					"station_dossier": "absent",
 					"store_counter": "paused",
 					"store_queue_mark": "empty",
+					"studio_review_queue": "open",
 					"usual_order_cue": "read"
 				},
 				"recordState": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 대기 | 스테이션 없음 | 잔액 3 신뢰 2 부담 100 주목 60 | 장부 7 최근 civic-ledger-7 대기 손님 / 줄 이탈 / queue_left -> civic-ledger-6 | 사회 반응 대기 손님가 상점 매니저의 응대 중단 기록을 보고 줄 이탈, 부담 100",
@@ -7870,6 +8030,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -7936,6 +8097,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -7990,6 +8157,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -8056,6 +8224,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -8110,6 +8284,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -8176,6 +8351,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -8244,6 +8425,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "player_waiting",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -8310,6 +8492,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n플레이어 대기",
 							"state": "player_waiting",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -8379,6 +8567,7 @@
 						"station_dossier": "absent",
 						"store_counter": "paused",
 						"store_queue_mark": "empty",
+						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -8445,6 +8634,12 @@
 							"hasBody": true,
 							"label": "대기 표식\n비어 있음",
 							"state": "empty",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n열림",
+							"state": "open",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -8517,6 +8712,12 @@
 					"state": "empty",
 					"visible": true
 				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
+					"visible": true
+				},
 				"usual_order_cue": {
 					"hasBody": true,
 					"label": "늘 같은 주문\n읽힘",
@@ -8569,6 +8770,7 @@
 					"station_dossier": "cited",
 					"store_counter": "serving",
 					"store_queue_mark": "refused",
+					"studio_review_queue": "open",
 					"usual_order_cue": "read"
 				},
 				"recordState": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 전달 | 스테이션 인용됨 | 잔액 3 신뢰 0 부담 90 주목 70 | 장부 7 최근 civic-ledger-7 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6 | 사회 반응 대기 손님가 스테이션 직원의 기록 인용 기록을 보고 접촉 거부, 부담 85",
@@ -8692,6 +8894,12 @@
 					"state": "refused",
 					"visible": true
 				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
+					"visible": true
+				},
 				"usual_order_cue": {
 					"hasBody": true,
 					"label": "늘 같은 주문\n읽힘",
@@ -8748,6 +8956,7 @@
 				"station_dossier": "absent",
 				"store_counter": "serving",
 				"store_queue_mark": "player_waiting",
+				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
 			"summary": {
@@ -8814,6 +9023,12 @@
 					"hasBody": true,
 					"label": "대기 표식\n플레이어 대기",
 					"state": "player_waiting",
+					"visible": true
+				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
 					"visible": true
 				},
 				"usual_order_cue": {
@@ -8868,6 +9083,7 @@
 				"station_dossier": "absent",
 				"store_counter": "serving",
 				"store_queue_mark": "player_waiting",
+				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
 			"summary": {
@@ -8934,6 +9150,12 @@
 					"hasBody": true,
 					"label": "대기 표식\n플레이어 대기",
 					"state": "player_waiting",
+					"visible": true
+				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
 					"visible": true
 				},
 				"usual_order_cue": {
@@ -8988,6 +9210,7 @@
 				"station_dossier": "absent",
 				"store_counter": "serving",
 				"store_queue_mark": "player_waiting",
+				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
 			"summary": {
@@ -9056,6 +9279,12 @@
 					"state": "player_waiting",
 					"visible": true
 				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
+					"visible": true
+				},
 				"usual_order_cue": {
 					"hasBody": true,
 					"label": "늘 같은 주문\n읽힘",
@@ -9108,6 +9337,7 @@
 				"station_dossier": "absent",
 				"store_counter": "serving",
 				"store_queue_mark": "player_waiting",
+				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
 			"summary": {
@@ -9176,6 +9406,12 @@
 					"state": "player_waiting",
 					"visible": true
 				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
+					"visible": true
+				},
 				"usual_order_cue": {
 					"hasBody": true,
 					"label": "늘 같은 주문\n읽힘",
@@ -9242,6 +9478,7 @@
 				"station_dossier": "absent",
 				"store_counter": "serving",
 				"store_queue_mark": "player_waiting",
+				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
 			"summary": {
@@ -9308,6 +9545,12 @@
 					"hasBody": true,
 					"label": "대기 표식\n플레이어 대기",
 					"state": "player_waiting",
+					"visible": true
+				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
 					"visible": true
 				},
 				"usual_order_cue": {
@@ -9377,6 +9620,7 @@
 				"station_dossier": "cited",
 				"store_counter": "serving",
 				"store_queue_mark": "refused",
+				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
 			"summary": {
@@ -9443,6 +9687,12 @@
 					"hasBody": true,
 					"label": "대기 표식\nrefused",
 					"state": "refused",
+					"visible": true
+				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
 					"visible": true
 				},
 				"usual_order_cue": {
@@ -9512,6 +9762,7 @@
 				"station_dossier": "cited",
 				"store_counter": "serving",
 				"store_queue_mark": "refused",
+				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
 			"summary": {
@@ -9578,6 +9829,12 @@
 					"hasBody": true,
 					"label": "대기 표식\nrefused",
 					"state": "refused",
+					"visible": true
+				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
 					"visible": true
 				},
 				"usual_order_cue": {
@@ -9654,6 +9911,7 @@
 				"station_dossier": "cited",
 				"store_counter": "serving",
 				"store_queue_mark": "refused",
+				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
 			"summary": {
@@ -9720,6 +9978,12 @@
 					"hasBody": true,
 					"label": "대기 표식\nrefused",
 					"state": "refused",
+					"visible": true
+				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n열림",
+					"state": "open",
 					"visible": true
 				},
 				"usual_order_cue": {

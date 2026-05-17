@@ -350,10 +350,20 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("clean_cover expected Waiting Customer local tip after public vouch")
 			if not _action_perceives(summary, "waiting_customer", "share_local_tip", "park_notice_board"):
 				failures.append("clean_cover expected Waiting Customer to perceive public notice board before sharing a tip")
+			if str(record_objects.get("studio_review_queue", "")) != "invited":
+				failures.append("clean_cover expected Studio review queue to open after public vouch")
+			if not _action_exists(summary, "studio_pm", "invite_review"):
+				failures.append("clean_cover expected Studio PM invite_review after public vouch")
+			if not _action_perceives(summary, "studio_pm", "invite_review", "studio_review_queue"):
+				failures.append("clean_cover expected Studio PM to perceive review queue before inviting review")
+			if not _action_perceives(summary, "studio_pm", "invite_review", "park_notice_board"):
+				failures.append("clean_cover expected Studio PM to perceive public notice board before inviting review")
 			if not _observation_exists(summary, "park_witness", "waiting_customer", "accept_routine", "vouch_routine"):
 				failures.append("clean_cover expected Park Witness to read routine queue record")
 			if not _observation_exists(summary, "waiting_customer", "park_witness", "vouch_routine", "share_local_tip"):
 				failures.append("clean_cover expected Waiting Customer to read public vouch before sharing a tip")
+			if not _observation_exists(summary, "studio_pm", "park_witness", "vouch_routine", "invite_review"):
+				failures.append("clean_cover expected Studio PM to read public vouch before inviting review")
 		"repair_recovered":
 			if int(summary.get("reportWeight", 0)) > 49:
 				failures.append("repair_recovered must stay below report threshold")
@@ -466,7 +476,7 @@ func _route_player_readable_summary(route_id: String, summary: Dictionary, hud_s
 	]
 	match route_id:
 		"clean_cover":
-			return "Clean cover: Codex accepted the routine, the Store Clerk closed a normal receipt, public trust rose, and the waiting customer shared a local tip. %s." % state
+			return "Clean cover: Codex accepted the routine, the Store Clerk closed a normal receipt, public trust rose, the waiting customer shared a local tip, and the Studio PM opened a review invitation from the public record. %s." % state
 		"repair_recovered":
 			return "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, and the Park witness posted that the mismatch was repaired. %s." % state
 		"soft_report":

@@ -404,6 +404,7 @@ static func _create_operation_record_props(parent: Node3D, anchors: Dictionary, 
 	var queue_result := _resolve_anchor(anchors, "Store.queue_start", generation_failures)
 	var board_result := _resolve_anchor(anchors, "Store.label_board", generation_failures)
 	var park_board_result := _resolve_anchor(anchors, "Park.notice_board", generation_failures)
+	var studio_review_result := _resolve_anchor(anchors, "Studio.approval_desk", generation_failures)
 	var report_result := _resolve_anchor(anchors, "Station.report_desk", generation_failures)
 	var root := _node3d("Procedural_OperationRecordProps", parent)
 	if queue_result["ok"]:
@@ -422,6 +423,9 @@ static func _create_operation_record_props(parent: Node3D, anchors: Dictionary, 
 	if park_board_result["ok"]:
 		var park_board: Vector3 = park_board_result["position"]
 		_spawn_operation_record_prop(root, "park_notice_board", "PUBLIC\nclear", park_board + Vector3(0.0, -0.02, 0.26), Vector3(1.28, 0.07, 0.36), Color(0.72, 0.78, 0.50, 0.88), 0.0)
+	if studio_review_result["ok"]:
+		var studio_review: Vector3 = studio_review_result["position"]
+		_spawn_operation_record_prop(root, "studio_review_queue", "REVIEW\nopen", studio_review + Vector3(0.0, 0.22, 0.58), Vector3(1.32, 0.10, 0.38), Color(0.50, 0.72, 0.88, 0.88), 0.0)
 	if report_result["ok"]:
 		var report: Vector3 = report_result["position"]
 		_spawn_operation_record_prop(root, "station_dossier", "DOSSIER\nabsent", report + Vector3(0, 0.32, 0.62), Vector3(0.84, 0.13, 0.46), Color(0.48, 0.50, 0.52, 0.76), 0.0)
@@ -471,6 +475,8 @@ static func _operation_record_label_font_size(object_id: String) -> int:
 			return 16
 		"park_notice_board":
 			return 16
+		"studio_review_queue":
+			return 16
 		"civic_economy_panel":
 			return 18
 		"store_counter":
@@ -489,6 +495,8 @@ static func _operation_record_label_width(object_id: String) -> float:
 			return 260.0
 		"park_notice_board":
 			return 300.0
+		"studio_review_queue":
+			return 320.0
 	return 320.0
 
 static func _operation_record_label_offset(object_id: String, size: Vector3) -> Vector3:
@@ -509,6 +517,8 @@ static func _operation_record_label_offset(object_id: String, size: Vector3) -> 
 			return Vector3(0.0, size.y + 0.24, 0.18)
 		"park_notice_board":
 			return Vector3(0.0, size.y + 0.42, 0.10)
+		"studio_review_queue":
+			return Vector3(0.0, size.y + 0.48, 0.08)
 	return Vector3(0, size.y + 0.42, 0)
 
 static func _spawn_procedural_box(

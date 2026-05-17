@@ -47,12 +47,11 @@ Last Updated: 2026-05-18
 - If `--status` is already pass and no watched Godot/HUD/probe/session-helper
   source changed, do not rerun Codex probe or regenerate setup kits merely to
   show activity. The next useful move is human play, not more preparation.
-- Latest implementation slice: NPC reaction inspection now spells out the
-  ledger actor/action behind a social stance. Studio PM inspection reads
-  `civic-ledger-7 / 스튜디오 PM -> 리뷰 차단` and the cited Station record
-  `civic-ledger-6 / 스테이션 직원 -> 기록 인용`; Waiting Customer inspection
-  reads `civic-ledger-8 / 대기 손님 -> 접촉 거부` and the same Station citation
-  source.
+- Latest implementation slice: Park Witness public rumor is now player-readable
+  NPC state. Soft report and inquest preserve `post_rumor` as a `rumored`
+  reaction with `소문 게시`, and the soft-report result now names
+  `공원 소문 게시` in the social chain before counter pause, queue exit, and
+  Station warning intake.
 
 2026-05-17 lightweight Ralph-style loop note:
 - Use `.game-harness/goal-loop-state.md` as the compact resume state for

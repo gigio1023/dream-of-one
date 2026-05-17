@@ -95,6 +95,9 @@ Current M1 carry-in:
   long-term content focus. Future work should extract reusable
   environment-agent patterns instead of deepening Store operations or Station
   procedure.
+- latest small-slice carry-in: Park Witness `post_rumor` is now visible as a
+  public NPC reaction (`rumored` / `소문 게시`) in soft-report and inquest paths,
+  and the soft-report result names that rumor as part of the social chain.
 - Station Soft Inquest smoke is internal authority/Evidence harness evidence, not the target player-facing conversation loop.
 - `Same Order` playable smoke now proves clean cover, repair recovery, soft
   report, and hard inquest routes. The hard route includes response hesitation,

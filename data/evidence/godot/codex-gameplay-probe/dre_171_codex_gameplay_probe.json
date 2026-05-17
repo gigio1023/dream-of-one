@@ -1599,9 +1599,9 @@
 					"materialAlpha": 0.3980952501297,
 					"npcId": "NPC_Park_Witness",
 					"pressureText": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
-					"reactionText": "보고됨",
+					"reactionText": "소문 게시",
 					"role": "Park Witness",
-					"state": "reported"
+					"state": "rumored"
 				},
 				"NPC_Station_Officer": {
 					"displayName": "Station Officer",
@@ -5756,14 +5756,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779058376683",
+				"eventId": "playable_session_started-001-1779059179579",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779058376683,
+				"timestampMs": 1779059179579,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -5776,7 +5776,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-002-1779058376777",
+				"eventId": "conversation_started-002-1779059179669",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -5785,7 +5785,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779058376777,
+				"timestampMs": 1779059179669,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -5798,7 +5798,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-003-1779058376791",
+				"eventId": "response_hesitation_noted-003-1779059179683",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -5819,7 +5819,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779058376791,
+				"timestampMs": 1779059179683,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -5834,7 +5834,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-004-1779058376805",
+				"eventId": "dialogue_choice_selected-004-1779059179697",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -5856,7 +5856,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779058376805,
+				"timestampMs": 1779059179697,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -5871,7 +5871,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-005-1779058376805",
+				"eventId": "conversation_anomaly_detected-005-1779059179697",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -5893,7 +5893,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779058376805,
+				"timestampMs": 1779059179697,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -5908,7 +5908,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-006-1779058376805",
+				"eventId": "npc_suspicion_changed-006-1779059179697",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -5930,7 +5930,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779058376805,
+				"timestampMs": 1779059179697,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -5945,7 +5945,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-007-1779058376817",
+				"eventId": "free_input_submitted-007-1779059179710",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -5970,7 +5970,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779058376817,
+				"timestampMs": 1779059179710,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -5985,7 +5985,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779058376817",
+				"eventId": "conversation_anomaly_detected-008-1779059179710",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -6010,7 +6010,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779058376817,
+				"timestampMs": 1779059179710,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -6025,7 +6025,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779058376817",
+				"eventId": "npc_suspicion_changed-009-1779059179710",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -6050,7 +6050,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779058376817,
+				"timestampMs": 1779059179710,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -6065,7 +6065,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-010-1779058376817",
+				"eventId": "suspicion_shared-010-1779059179710",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -6090,7 +6090,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779058376817,
+				"timestampMs": 1779059179710,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -6105,7 +6105,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-011-1779058376817",
+				"eventId": "station_report_created-011-1779059179710",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -6130,7 +6130,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779058376817,
+				"timestampMs": 1779059179710,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -6145,7 +6145,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-012-1779058376818",
+				"eventId": "station_inquest_opened-012-1779059179711",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -6170,7 +6170,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779058376818,
+				"timestampMs": 1779059179711,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -6180,7 +6180,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-013-1779058376859",
+				"eventId": "world_record_prop_inspected-013-1779059179762",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -6188,7 +6188,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779058376859,
+				"timestampMs": 1779059179762,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -6200,7 +6200,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-014-1779058376884",
+				"eventId": "world_record_prop_inspected-014-1779059179812",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "studio_review_queue",
 				"schemaVersion": "godot-runtime-v1",
@@ -6208,7 +6208,7 @@
 				"state": "blocked",
 				"stateLabel": "차단",
 				"summary": "Inspected world record prop studio_review_queue in state blocked.",
-				"timestampMs": 1779058376884,
+				"timestampMs": 1779059179812,
 				"uiSummaryArgs": {
 					"object": "스튜디오 리뷰 줄",
 					"state": "차단"
@@ -6220,7 +6220,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-015-1779058376911",
+				"eventId": "npc_reaction_inspected-015-1779059179961",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Studio_PM",
 				"reactionText": "리뷰 차단",
@@ -6228,7 +6228,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "blocked",
 				"summary": "Inspected NPC reaction NPC_Studio_PM in state blocked.",
-				"timestampMs": 1779058376911,
+				"timestampMs": 1779059179961,
 				"uiSummaryArgs": {
 					"npc": "Studio PM",
 					"state": "리뷰 차단"
@@ -6240,7 +6240,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-016-1779058376939",
+				"eventId": "npc_reaction_inspected-016-1779059180414",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Waiting_Customer",
 				"reactionText": "접촉 거부",
@@ -6248,7 +6248,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "refused",
 				"summary": "Inspected NPC reaction NPC_Waiting_Customer in state refused.",
-				"timestampMs": 1779058376939,
+				"timestampMs": 1779059180414,
 				"uiSummaryArgs": {
 					"npc": "Waiting Customer",
 					"state": "접촉 거부"
@@ -10641,9 +10641,9 @@
 					"materialAlpha": 0.3980952501297,
 					"npcId": "NPC_Park_Witness",
 					"pressureText": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
-					"reactionText": "보고됨",
+					"reactionText": "소문 게시",
 					"role": "Park Witness",
-					"state": "reported"
+					"state": "rumored"
 				},
 				"NPC_Station_Officer": {
 					"displayName": "Station Officer",
@@ -10921,9 +10921,9 @@
 				"materialAlpha": 0.3980952501297,
 				"npcId": "NPC_Park_Witness",
 				"pressureText": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
-				"reactionText": "보고됨",
+				"reactionText": "소문 게시",
 				"role": "Park Witness",
-				"state": "reported"
+				"state": "rumored"
 			},
 			"NPC_Station_Officer": {
 				"displayName": "Station Officer",
@@ -14630,7 +14630,7 @@
 				"inspectedWorldRecordProp": {},
 				"investigationTrail": "검사자: 상점 매니저 -> 스테이션 직원 | 대상: 플레이어 | 근거: 상점 보고 기록",
 				"notice": "NPC_Store_Clerk / 기록과 다릅니다. 담당자에게 전달하겠습니다. / 플레이어 발화: 저는 여기 사람이 아닙니다. / why-line: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.",
-				"outcomeBody": "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 카운터 중단 -> 대기 이탈 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 상점 관리자가 기록 부담을 보고 후속 메모를 붙인 뒤 카운터 응대를 잠시 멈췄습니다. 그 중단을 본 대기 손님은 줄에서 빠졌습니다.\n역할 행동: 상점 관리자가 보고 트레이에 후속 기록을 남기고 카운터를 중단 상태로 바꿨고, 대기 손님이 중단 기록을 보고 대기 표식을 비웠습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.\nR 다시 시작 / Q 종료",
+				"outcomeBody": "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 공원 소문 게시 -> 카운터 중단 -> 대기 이탈 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자는 같은 기록을 보고 게시판에 소문을 남겼습니다. 상점 관리자는 기록 부담을 보고 후속 메모를 붙인 뒤 카운터 응대를 잠시 멈췄고, 그 중단을 본 대기 손님은 줄에서 빠졌습니다.\n역할 행동: 공원 목격자가 상점 기록을 공개 소문으로 바꿨고, 상점 관리자가 보고 트레이에 후속 기록을 남기고 카운터를 중단 상태로 바꿨으며, 대기 손님이 중단 기록을 보고 대기 표식을 비웠습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.\nR 다시 시작 / Q 종료",
 				"recordObjects": {
 					"civic_ledger": "append_only",
 					"correction_slip": "absent",
@@ -14660,9 +14660,9 @@
 						"materialAlpha": 0.386190474033356,
 						"npcId": "NPC_Park_Witness",
 						"pressureText": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
-						"reactionText": "보고됨",
+						"reactionText": "소문 게시",
 						"role": "Park Witness",
-						"state": "reported"
+						"state": "rumored"
 					},
 					"NPC_Station_Officer": {
 						"displayName": "Station Officer",
@@ -15325,7 +15325,7 @@
 						"noticeBodyLabel": "기록과 다릅니다. 담당자에게 전달하겠습니다.\n플레이어 발화: 저는 여기 사람이 아닙니다.\nwhy-line: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.",
 						"noticeTitleLabel": "NPC_Store_Clerk",
 						"noticeVisible": false,
-						"outcomeBodyLabel": "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 카운터 중단 -> 대기 이탈 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 상점 관리자가 기록 부담을 보고 후속 메모를 붙인 뒤 카운터 응대를 잠시 멈췄습니다. 그 중단을 본 대기 손님은 줄에서 빠졌습니다.\n역할 행동: 상점 관리자가 보고 트레이에 후속 기록을 남기고 카운터를 중단 상태로 바꿨고, 대기 손님이 중단 기록을 보고 대기 표식을 비웠습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.\nR 다시 시작 / Q 종료",
+						"outcomeBodyLabel": "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 공원 소문 게시 -> 카운터 중단 -> 대기 이탈 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자는 같은 기록을 보고 게시판에 소문을 남겼습니다. 상점 관리자는 기록 부담을 보고 후속 메모를 붙인 뒤 카운터 응대를 잠시 멈췄고, 그 중단을 본 대기 손님은 줄에서 빠졌습니다.\n역할 행동: 공원 목격자가 상점 기록을 공개 소문으로 바꿨고, 상점 관리자가 보고 트레이에 후속 기록을 남기고 카운터를 중단 상태로 바꿨으며, 대기 손님이 중단 기록을 보고 대기 표식을 비웠습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.\nR 다시 시작 / Q 종료",
 						"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 95 -> 접수 열림 / 심문 닫힘 / 판정 닫힘 / 종료 열림",
 						"outcomeVisible": true,
 						"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
@@ -15863,9 +15863,9 @@
 						"materialAlpha": 0.3980952501297,
 						"npcId": "NPC_Park_Witness",
 						"pressureText": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
-						"reactionText": "보고됨",
+						"reactionText": "소문 게시",
 						"role": "Park Witness",
-						"state": "reported"
+						"state": "rumored"
 					},
 					"NPC_Station_Officer": {
 						"displayName": "Station Officer",

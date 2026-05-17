@@ -112,6 +112,13 @@ route evidence were regenerated after NPC reaction inspection gained
 `ledger / role -> action` labels for reaction records and cited records. Tester
 preflight accepts the refreshed app-route evidence.
 
+Refresh note, 2026-05-18 KST: the PCK, macOS zip, unpacked app, and packaged
+route evidence were regenerated after Park Witness public rumor became visible
+as a `rumored` / `소문 게시` NPC reaction. The soft-report route proof now names
+`공원 소문 게시` in the outcome chain before counter pause, queue exit, and
+Station warning intake. Packaged launch, packaged route smoke, and tester
+preflight accept the refreshed app-route evidence.
+
 ## Command Evidence
 
 Import:
@@ -184,8 +191,8 @@ The latest PCK `--main-pack` smoke and packaged app route smoke preserved:
 - `free_input_submitted.inputMode = typed_free_input`
 - `playableSummary.providerState.liveVerified = false`
 - `worldRecordProps.civic_economy_panel.label` shows account credit, trust,
-  burden, and attention: `잔액 3 | 신뢰 5 | 부담 75 | 주목 70`
-- latest civic ledger `civic-ledger-4`
+  burden, and attention: `잔액 3 | 신뢰 0 | 부담 93 | 주목 70`
+- latest civic ledger `civic-ledger-8`
 - route proofs for `clean_cover`, `repair_recovered`, `soft_report`, and
   `inquest_opened`
 - route proof `outcomeBody` text for all four terminal outcomes, including

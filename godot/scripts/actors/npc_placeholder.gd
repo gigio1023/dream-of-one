@@ -86,6 +86,9 @@ func set_reaction_state(state: String, exposure: int) -> void:
 		"warned":
 			reaction_text = _localized("npc.reaction.warned", {}, "warning posted")
 			reaction_color = Color(1.0, 0.62, 0.28, 1.0)
+		"rumored":
+			reaction_text = _localized("npc.reaction.rumored", {}, "rumor posted")
+			reaction_color = Color(1.0, 0.52, 0.34, 1.0)
 		"helped":
 			reaction_text = _localized("npc.reaction.helped", {}, "helped")
 			reaction_color = Color(0.50, 0.86, 0.66, 1.0)

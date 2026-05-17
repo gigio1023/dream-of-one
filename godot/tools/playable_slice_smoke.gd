@@ -390,12 +390,14 @@ func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[St
 			failures.append("soft_report must stop before inquest")
 		if not str(summary.get("outcomeBody", "")).contains("심문 기준에는 닿지 않았습니다"):
 			failures.append("soft_report outcome must explain report without inquest")
-		if not str(summary.get("outcomeBody", "")).contains("플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 카운터 중단 -> 대기 이탈 -> 스테이션 경고 접수"):
+		if not str(summary.get("outcomeBody", "")).contains("플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 공원 소문 게시 -> 카운터 중단 -> 대기 이탈 -> 스테이션 경고 접수"):
 			failures.append("soft_report outcome must show speech-to-record-to-warning chain")
 		if not str(summary.get("outcomeBody", "")).contains("사회 반응"):
 			failures.append("soft_report outcome must name the NPC-to-NPC social reaction")
-		if not str(summary.get("outcomeBody", "")).contains("역할 행동: 상점 관리자"):
+		if not str(summary.get("outcomeBody", "")).contains("상점 관리자"):
 			failures.append("soft_report outcome must name Store Manager role action")
+		if not str(summary.get("outcomeBody", "")).contains("공원 목격자") or not str(summary.get("outcomeBody", "")).contains("공개 소문"):
+			failures.append("soft_report outcome must name Park Witness public rumor action")
 	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("수습"):
 		failures.append("repair_recovered outcome must explain recovery")
 	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 공개 수습 게시 -> 상점 안에서 수습"):
@@ -702,6 +704,10 @@ func _validate_visible_social_actors(route: Dictionary, summary: Dictionary, ses
 		failures.append_array(_validate_waiting_customer_reaction(visible_states, route_id, "left", "이탈"))
 	if route_id == "inquest_opened" and _agent_action_exists(action_log, "waiting_customer", "refuse_contact"):
 		failures.append_array(_validate_waiting_customer_reaction(visible_states, route_id, "refused", "거부"))
+	if route_id == "soft_report" and _agent_action_exists(action_log, "park_witness", "post_rumor"):
+		failures.append_array(_validate_park_witness_reaction(visible_states, route_id, "rumored", "소문"))
+	if route_id == "inquest_opened" and _agent_action_exists(action_log, "park_witness", "post_rumor"):
+		failures.append_array(_validate_park_witness_reaction(visible_states, route_id, "rumored", "소문"))
 	if route_id == "clean_cover" and _agent_action_actor_exists(action_log, "NPC_Studio_PM"):
 		var studio_state: Dictionary = visible_states.get("NPC_Studio_PM", {})
 		if str(studio_state.get("state", "")) != "invited":

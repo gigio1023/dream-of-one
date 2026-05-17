@@ -119,6 +119,13 @@ as a `rumored` / `소문 게시` NPC reaction. The soft-report route proof now n
 Station warning intake. Packaged launch, packaged route smoke, and tester
 preflight accept the refreshed app-route evidence.
 
+Refresh note, 2026-05-18 KST: the PCK, macOS zip, unpacked app, and packaged
+route evidence were regenerated after Store Manager intermediary actions became
+visible as distinct NPC reactions. Soft report now shows the manager as
+`paused` / `응대 중단`; inquest shows the manager as `forwarded` / `보고 전달`.
+Packaged launch, packaged route smoke, and tester preflight accept the
+refreshed app-route evidence.
+
 ## Command Evidence
 
 Import:

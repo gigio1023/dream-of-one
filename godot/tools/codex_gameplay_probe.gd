@@ -472,6 +472,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("soft_report expected visible Waiting Customer queue-exit reaction")
 			if not _visible_park_witness_reaction(summary, "rumored", "소문"):
 				failures.append("soft_report expected visible Park Witness rumor-post reaction")
+			if not _visible_store_manager_reaction(summary, "paused", "중단"):
+				failures.append("soft_report expected visible Store Manager service-pause reaction")
 			if not _observation_exists(summary, "store_manager", "store_clerk", "place_note", "place_note"):
 				failures.append("soft_report expected Manager to act from Clerk note")
 			if not _observation_exists(summary, "waiting_customer", "store_manager", "pause_service", "leave_queue"):
@@ -491,6 +493,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("inquest_opened expected visible Waiting Customer contact-refusal reaction")
 			if not _visible_park_witness_reaction(summary, "rumored", "소문"):
 				failures.append("inquest_opened expected visible Park Witness rumor-post reaction")
+			if not _visible_store_manager_reaction(summary, "forwarded", "전달"):
+				failures.append("inquest_opened expected visible Store Manager report-forward reaction")
 			if str(record_objects.get("studio_review_queue", "")) != "blocked":
 				failures.append("inquest_opened expected Studio review queue to block after Station citation")
 			if not _action_exists(summary, "studio_pm", "block_review"):
@@ -1109,6 +1113,17 @@ func _visible_park_witness_reaction(summary: Dictionary, expected_state: String,
 	var state: Dictionary = states.get("NPC_Park_Witness", {})
 	return (
 		str(state.get("npcId", "")) == "NPC_Park_Witness"
+		and str(state.get("state", "")) == expected_state
+		and bool(state.get("markerVisible", false))
+		and not str(state.get("pressureText", "")).strip_edges().is_empty()
+		and str(state.get("reactionText", "")).contains(expected_label)
+	)
+
+func _visible_store_manager_reaction(summary: Dictionary, expected_state: String, expected_label: String) -> bool:
+	var states: Dictionary = summary.get("visibleNpcStates", {})
+	var state: Dictionary = states.get("NPC_Store_Manager", {})
+	return (
+		str(state.get("npcId", "")) == "NPC_Store_Manager"
 		and str(state.get("state", "")) == expected_state
 		and bool(state.get("markerVisible", false))
 		and not str(state.get("pressureText", "")).strip_edges().is_empty()

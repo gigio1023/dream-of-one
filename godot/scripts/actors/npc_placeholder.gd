@@ -68,6 +68,15 @@ func set_reaction_state(state: String, exposure: int) -> void:
 		"reported", "inquest":
 			reaction_text = _localized("npc.reaction.reported", {}, "reported")
 			reaction_color = Color(1.0, 0.38, 0.28, 1.0)
+		"noted":
+			reaction_text = _localized("npc.reaction.noted", {}, "note added")
+			reaction_color = Color(1.0, 0.66, 0.34, 1.0)
+		"paused":
+			reaction_text = _localized("npc.reaction.paused", {}, "service paused")
+			reaction_color = Color(1.0, 0.48, 0.28, 1.0)
+		"forwarded":
+			reaction_text = _localized("npc.reaction.forwarded", {}, "report forwarded")
+			reaction_color = Color(1.0, 0.34, 0.28, 1.0)
 		"invited":
 			reaction_text = _localized("npc.reaction.invited", {}, "review open")
 			reaction_color = Color(0.52, 0.78, 1.0, 1.0)

@@ -145,6 +145,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Make Park Witness public rumor visible as NPC state: soft-report and
   inquest paths now show `NPC_Park_Witness` as `rumored` with `소문 게시`, and
   the soft-report outcome chain names `공원 소문 게시`.
+- [x] Make Store Manager intermediary actions visible as distinct NPC state:
+  soft-report `pause_service` now shows `paused` / `응대 중단`, and inquest
+  `forward_report` now shows `forwarded` / `보고 전달`.
 - [x] Show the role/action map inside world-record prop inspection: the blocked
   Studio review queue HUD notice now names who can read it, which actions that
   record supports, and the latest ledger event that changed it.

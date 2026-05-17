@@ -96,17 +96,23 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `2de8d2d286f747669a4e360e7e87ea196c9da5b316905a7729cc547d739efdf1`
+  - JSON SHA-256: `fd6ceff13599dcecf8778a13bd95a6c630146d09880d0dbcb90523fc6605f23e`
   - Markdown SHA-256: `f50e5848a2e32e369a31cbd3cc7904a80bc5b8818fb570aef1c6ea08b7e24ffb`
-  - playable Evidence Pack SHA-256: `21cacf6cfe68d13c566cc5a6c7d46c3b2ee54ef3a109d84bfb3cff9fcddbae5a`
+  - playable Evidence Pack SHA-256: `f6f6ce65d1c78e47885049f21d7de31a5229d13f9dd39963a3f8284b78f2fd34`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
-  - packaged app zip SHA-256: `55a97bd6055c62ff46cdf3ebc1e1bff80cd97bf2093668029a15e9bbb16f0b9e`
+  - packaged app zip SHA-256: `9722bc4a6f42efee9df7a382052d4e93f7a694cd6d9582a8cc897471c61c4bf6`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `13 / 13`, `explainability=13/13`, and
   `routeReportPassCount=5 / 5`.
+- latest game increment: Store Manager's intermediary role action is now
+  visible as distinct NPC state instead of generic `reported`. In soft report,
+  `pause_service` shows `NPC_Store_Manager` as `paused` with `응대 중단`; in
+  inquest, `forward_report` shows the same actor as `forwarded` with
+  `보고 전달`. Playable smoke and Codex gameplay QA now fail if the manager's
+  local pause and formal handoff collapse back into one generic marker.
 - latest game increment: Park Witness public rumor is now visible as NPC state
   in the soft-report/inquest paths. When Park Witness uses `post_rumor`, the
   actor keeps a `rumored` reaction with `소문 게시`, and the soft-report outcome
@@ -208,15 +214,16 @@ Latest AI-play interface check:
   pattern: public record -> another place's role sees it -> one visible
   opportunity opens.
 - latest packaged proof refresh: the PCK, macOS debug app, unpacked app, and
-  packaged route evidence were re-exported with Godot 4.7-beta2 after Park
-  Witness public rumor became visible as NPC state. PCK SHA-256 is
-  `1146f6e13f19e1ad081d9a7631e8d720e3bf8f69e3b1c2394ca04c17f48da480`, zip
+  packaged route evidence were re-exported with Godot 4.7-beta2 after Store
+  Manager pause/forward actions became visible as distinct NPC states. PCK
   SHA-256 is
-  `55a97bd6055c62ff46cdf3ebc1e1bff80cd97bf2093668029a15e9bbb16f0b9e`,
+  `b079a81a16a8de8f6d3f10789015e073cb7eea029551f1776114ac9fa89e2f4b`, zip
+  SHA-256 is
+  `9722bc4a6f42efee9df7a382052d4e93f7a694cd6d9582a8cc897471c61c4bf6`,
   main-pack smoke evidence SHA-256 is
-  `66a43117b20787910cea12a6c1f0481021a76f175d4d41a982dbd0b3de1c4898`, and app
+  `5c0c8e78d3aeff976546c82b0b7f3f519127ecb2f380814a47cde3867d3d02b7`, and app
   route evidence SHA-256 is
-  `b9fdabf6d35f75bd5eff26786e9ad8130e064d8d5d9653666ff59b975d1a5de4`.
+  `d3576e719379d4b1e9ada2b9c9b945df33240f489133a082a492b19164335728`.
   Packaged launch, packaged route smoke, and comprehension preflight all passed
   against `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json`.
 - prior game increment: visible world-record props are reachable through a

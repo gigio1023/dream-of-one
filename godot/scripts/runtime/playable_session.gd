@@ -1465,10 +1465,27 @@ func _refresh_hud() -> void:
 		_hud.set_evidence(_recent_events())
 	_refresh_world_record_props()
 	_set_actor_reaction_state("NPC_Store_Clerk", stage, exposure)
-	_set_actor_reaction_state("NPC_Store_Manager", "reported" if int(civic_economy.get("recordBurden", 0)) >= 50 else "normal", exposure)
+	_set_actor_reaction_state("NPC_Store_Manager", _store_manager_reaction_stage(), exposure)
 	_set_actor_reaction_state("NPC_Waiting_Customer", _waiting_customer_reaction_stage(), exposure)
 	_set_actor_reaction_state("NPC_Park_Witness", _park_witness_reaction_stage(stage), exposure)
 	_set_actor_reaction_state("NPC_Station_Officer", "inquest" if bool(station["inquestOpen"]) else ("reported" if bool(station["intakeOpen"]) else "normal"), exposure)
+
+func _store_manager_reaction_stage() -> String:
+	for index in range(agent_action_log.size()):
+		var reverse_index := agent_action_log.size() - 1 - index
+		var action: Dictionary = agent_action_log[reverse_index]
+		if str(action.get("actorId", "")) != "NPC_Store_Manager" or not bool(action.get("accepted", false)):
+			continue
+		match str(action.get("affordance", "")):
+			"pause_service":
+				return "paused"
+			"forward_report":
+				return "forwarded"
+			"place_note":
+				return "noted"
+	if int(civic_economy.get("recordBurden", 0)) >= 50:
+		return "reported"
+	return "normal"
 
 func _waiting_customer_reaction_stage() -> String:
 	for index in range(agent_action_log.size()):

@@ -47,11 +47,11 @@ Last Updated: 2026-05-18
 - If `--status` is already pass and no watched Godot/HUD/probe/session-helper
   source changed, do not rerun Codex probe or regenerate setup kits merely to
   show activity. The next useful move is human play, not more preparation.
-- Latest implementation slice: Park Witness public rumor is now player-readable
-  NPC state. Soft report and inquest preserve `post_rumor` as a `rumored`
-  reaction with `소문 게시`, and the soft-report result now names
-  `공원 소문 게시` in the social chain before counter pause, queue exit, and
-  Station warning intake.
+- Latest implementation slice: Store Manager now shows the specific
+  intermediary action it took. Soft report shows `pause_service` as
+  `paused` / `응대 중단`; inquest shows `forward_report` as `forwarded` /
+  `보고 전달`, so the player can distinguish local service pause from formal
+  report handoff.
 
 2026-05-17 lightweight Ralph-style loop note:
 - Use `.game-harness/goal-loop-state.md` as the compact resume state for

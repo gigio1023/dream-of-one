@@ -708,6 +708,10 @@ func _validate_visible_social_actors(route: Dictionary, summary: Dictionary, ses
 		failures.append_array(_validate_park_witness_reaction(visible_states, route_id, "rumored", "소문"))
 	if route_id == "inquest_opened" and _agent_action_exists(action_log, "park_witness", "post_rumor"):
 		failures.append_array(_validate_park_witness_reaction(visible_states, route_id, "rumored", "소문"))
+	if route_id == "soft_report" and _agent_action_exists(action_log, "store_manager", "pause_service"):
+		failures.append_array(_validate_store_manager_reaction(visible_states, route_id, "paused", "중단"))
+	if route_id == "inquest_opened" and _agent_action_exists(action_log, "store_manager", "forward_report"):
+		failures.append_array(_validate_store_manager_reaction(visible_states, route_id, "forwarded", "전달"))
 	if route_id == "clean_cover" and _agent_action_actor_exists(action_log, "NPC_Studio_PM"):
 		var studio_state: Dictionary = visible_states.get("NPC_Studio_PM", {})
 		if str(studio_state.get("state", "")) != "invited":
@@ -760,6 +764,17 @@ func _validate_park_witness_reaction(visible_states: Dictionary, route_id: Strin
 		failures.append("%s expected NPC_Park_Witness reaction marker after public notice action" % route_id)
 	if not str(park_state.get("reactionText", "")).contains(expected_label):
 		failures.append("%s expected NPC_Park_Witness reaction label to mention %s" % [route_id, expected_label])
+	return failures
+
+func _validate_store_manager_reaction(visible_states: Dictionary, route_id: String, expected_state: String, expected_label: String) -> Array[String]:
+	var failures: Array[String] = []
+	var manager_state: Dictionary = visible_states.get("NPC_Store_Manager", {})
+	if str(manager_state.get("state", "")) != expected_state:
+		failures.append("%s expected NPC_Store_Manager visible state %s" % [route_id, expected_state])
+	if not bool(manager_state.get("markerVisible", false)):
+		failures.append("%s expected NPC_Store_Manager reaction marker after manager action" % route_id)
+	if not str(manager_state.get("reactionText", "")).contains(expected_label):
+		failures.append("%s expected NPC_Store_Manager reaction label to mention %s" % [route_id, expected_label])
 	return failures
 
 func _available_actions_include_action(action: Dictionary) -> bool:

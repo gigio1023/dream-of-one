@@ -2188,7 +2188,7 @@ func _inspect_world_record_prop(object_id: String) -> Dictionary:
 	return {"ok": true, "inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true)}
 
 func _refresh_world_record_props() -> void:
-	for prop_value in get_tree().get_nodes_in_group("operation_record_props"):
+	for prop_value in _local_group_nodes(&"operation_record_props"):
 		var prop_node := prop_value as Node3D
 		if prop_node == null:
 			continue
@@ -2209,7 +2209,7 @@ func _refresh_world_record_props() -> void:
 
 func _world_record_prop_snapshot() -> Dictionary:
 	var snapshot := {}
-	for prop_value in get_tree().get_nodes_in_group("operation_record_props"):
+	for prop_value in _local_group_nodes(&"operation_record_props"):
 		var prop_node := prop_value as Node3D
 		if prop_node == null:
 			continue
@@ -2657,10 +2657,25 @@ func _set_notice(title: String, body: String) -> void:
 	notice_title = title
 	notice_body = body
 
+func _local_group_nodes(group_name: StringName) -> Array:
+	var local_nodes := []
+	for node in get_tree().get_nodes_in_group(group_name):
+		if node is Node and _node_belongs_to_session_root(node as Node):
+			local_nodes.append(node)
+	return local_nodes
+
+func _node_belongs_to_session_root(node: Node) -> bool:
+	var current := node
+	while current != null:
+		if current == _root:
+			return true
+		current = current.get_parent()
+	return false
+
 func _set_actor_line(actor_id: String, line: String) -> void:
 	if actor_id.is_empty():
 		return
-	for node in get_tree().get_nodes_in_group("npc_placeholders"):
+	for node in _local_group_nodes(&"npc_placeholders"):
 		if str(node.get_meta("npc_id", "")) == actor_id and node.has_method("say"):
 			node.say(line)
 			return
@@ -2668,14 +2683,14 @@ func _set_actor_line(actor_id: String, line: String) -> void:
 func _set_actor_reaction_state(actor_id: String, reaction_stage: String, reaction_exposure: int) -> void:
 	if actor_id.is_empty():
 		return
-	for node in get_tree().get_nodes_in_group("npc_placeholders"):
+	for node in _local_group_nodes(&"npc_placeholders"):
 		if str(node.get_meta("npc_id", "")) == actor_id and node.has_method("set_reaction_state"):
 			node.set_reaction_state(reaction_stage, reaction_exposure)
 			return
 
 func _visible_npc_states() -> Dictionary:
 	var states := {}
-	for node in get_tree().get_nodes_in_group("npc_placeholders"):
+	for node in _local_group_nodes(&"npc_placeholders"):
 		var npc_id := str(node.get_meta("npc_id", ""))
 		if npc_id.is_empty():
 			continue
@@ -2759,7 +2774,7 @@ func _update_focus() -> void:
 	var best_node: Node3D = null
 	var best_kind := ""
 	var best_distance := FOCUS_RADIUS
-	for node in get_tree().get_nodes_in_group("interaction_zones"):
+	for node in _local_group_nodes(&"interaction_zones"):
 		if node is Node3D:
 			var distance := _player.global_position.distance_to((node as Node3D).global_position)
 			if distance < best_distance:
@@ -2767,7 +2782,7 @@ func _update_focus() -> void:
 				best_kind = "zone"
 				best_distance = distance
 	if best_node == null:
-		for node in get_tree().get_nodes_in_group("operation_record_props"):
+		for node in _local_group_nodes(&"operation_record_props"):
 			if node is Node3D:
 				var distance := _player.global_position.distance_to((node as Node3D).global_position)
 				if distance < best_distance:
@@ -2775,7 +2790,7 @@ func _update_focus() -> void:
 					best_kind = "record_prop"
 					best_distance = distance
 	if best_node == null:
-		for node in get_tree().get_nodes_in_group("text_surfaces"):
+		for node in _local_group_nodes(&"text_surfaces"):
 			if node is Node3D:
 				var distance := _player.global_position.distance_to((node as Node3D).global_position)
 				if distance < best_distance:
@@ -2787,7 +2802,7 @@ func _update_focus() -> void:
 
 func _force_focus_record_prop(object_id: String) -> bool:
 	_refresh_world_record_props()
-	for node in get_tree().get_nodes_in_group("operation_record_props"):
+	for node in _local_group_nodes(&"operation_record_props"):
 		if node is Node3D:
 			if str(node.get_meta("record_object_id", "")) == object_id:
 				current_focus = node as Node3D
@@ -2801,14 +2816,14 @@ func _force_focus_record_prop(object_id: String) -> bool:
 	return false
 
 func _force_focus_zone(zone_id: String) -> void:
-	for node in get_tree().get_nodes_in_group("interaction_zones"):
+	for node in _local_group_nodes(&"interaction_zones"):
 		if str(node.get_meta("zone_id", "")) == zone_id and node is Node3D:
 			current_focus = node as Node3D
 			current_focus_kind = "zone"
 			return
 
 func _force_focus_text_surface(surface_id: String) -> void:
-	for node in get_tree().get_nodes_in_group("text_surfaces"):
+	for node in _local_group_nodes(&"text_surfaces"):
 		if str(node.get_meta("surface_id", "")) == surface_id and node is Node3D:
 			current_focus = node as Node3D
 			current_focus_kind = "text_surface"
@@ -2829,7 +2844,7 @@ func _localized_text_surface_label(surface: Node, surface_id: String) -> String:
 	return _text("text_surface.%s.label" % surface_id, {}, surface_id)
 
 func _localization() -> Node:
-	var nodes := get_tree().get_nodes_in_group("localization_services")
+	var nodes := _local_group_nodes(&"localization_services")
 	if nodes.is_empty():
 		return null
 	return nodes[0]
@@ -2851,7 +2866,7 @@ func _world_revision() -> String:
 
 func _actor_signatures() -> Dictionary:
 	var signatures := {"player": "%s:player:%s" % [_world_id(), stage]}
-	for node in get_tree().get_nodes_in_group("npc_placeholders"):
+	for node in _local_group_nodes(&"npc_placeholders"):
 		var npc_id := str(node.get_meta("npc_id", ""))
 		if not npc_id.is_empty():
 			signatures[npc_id] = "%s:%s:%s" % [_world_id(), npc_id, stage]
@@ -3032,6 +3047,7 @@ func _invite_studio_review_after_vouch(vouch_event_id: String) -> void:
 	)
 	if bool(result.get("ok", false)):
 		_set_actor_line("NPC_Studio_PM", "공개 확인이 붙었네요. 리뷰 줄은 열어둘게요.")
+		_set_actor_reaction_state("NPC_Studio_PM", "invited", 20)
 
 func _terminal_outcome_title() -> String:
 	if session_outcome == "soft_report":

@@ -114,6 +114,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   focus plus interact: `focus.world_record_prop` on `studio_review_queue`
   followed by `player.interact.focused` now opens the invited review queue in
   the HUD notice on the clean route.
+- [x] Make the Studio PM invitation visible as NPC state: clean route now marks
+  `NPC_Studio_PM` as `invited`, shows a review-open reaction label/marker, and
+  keeps Codex route probes scoped to the correct live scene.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

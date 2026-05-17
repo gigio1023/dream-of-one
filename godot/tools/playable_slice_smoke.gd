@@ -672,6 +672,14 @@ func _validate_visible_social_actors(route: Dictionary, summary: Dictionary, ses
 		var waiting_state: Dictionary = visible_states.get("NPC_Waiting_Customer", {})
 		if str(waiting_state.get("role", "")) != "Waiting Customer":
 			failures.append("%s expected NPC_Waiting_Customer to be a visible Waiting Customer role" % route_id)
+	if route_id == "clean_cover" and _agent_action_actor_exists(action_log, "NPC_Studio_PM"):
+		var studio_state: Dictionary = visible_states.get("NPC_Studio_PM", {})
+		if str(studio_state.get("state", "")) != "invited":
+			failures.append("clean_cover expected NPC_Studio_PM visible state to show invited review")
+		if not bool(studio_state.get("markerVisible", false)):
+			failures.append("clean_cover expected NPC_Studio_PM reaction marker after review invitation")
+		if not str(studio_state.get("reactionText", "")).contains("리뷰"):
+			failures.append("clean_cover expected NPC_Studio_PM reaction label to mention review")
 	return failures
 
 func _available_actions_include_action(action: Dictionary) -> bool:

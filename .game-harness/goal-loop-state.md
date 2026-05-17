@@ -96,14 +96,22 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `95eb17d3438012ffe24a9d9a7342a2bc425fb7fc8600a8391cd14413aa389fc2`
+  - JSON SHA-256: `a7b7c59e61ae743960547be1db314f0feac6abddb73f61cfd6b9002065f35207`
   - Markdown SHA-256: `842d07a342544ebf00861c4018aadd3a5fe8c584ac55cfcb74a43b709d9b4ddf`
-  - playable Evidence Pack SHA-256: `4997c25cc484fc42b54a25e41428236dcc1c6df847ee5e596d844fa29b505aaa`
+  - playable Evidence Pack SHA-256: `4dad630acbd31a963b32f2e0db8129f02422d06dabbb5963ebafe2159bf9f6dc`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `7 / 7`, and `routeReportPassCount=5 / 5`.
+- latest game increment: Studio PM's clean-route invitation is now visible as
+  an NPC reaction, not only a ledger/prop state. When `invite_review` succeeds,
+  the Studio PM gets a Korean/English `invited` reaction label, a visible
+  marker, and the line "공개 확인이 붙었네요. 리뷰 줄은 열어둘게요." Codex route
+  reports now fail if the clean route cannot read that visible Studio PM
+  invitation state. `PlayableSession` also scopes grouped NPCs, props, zones,
+  and text surfaces to its own scene root, so multi-scene Codex route probes no
+  longer write actor lines into a different live scene.
 - latest game increment: the clean route now proves the new Studio review
   invitation is actually player/Codex-readable in the running scene. After the
   Store/Park public-trust chain opens `studio_review_queue=invited`, Codex uses
@@ -236,7 +244,7 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `95eb17d3438012ffe24a9d9a7342a2bc425fb7fc8600a8391cd14413aa389fc2`
+  `a7b7c59e61ae743960547be1db314f0feac6abddb73f61cfd6b9002065f35207`
 - Markdown SHA-256:
   `842d07a342544ebf00861c4018aadd3a5fe8c584ac55cfcb74a43b709d9b4ddf`
 - new proof: artifact now includes `aiPlayerReport` with action path, final

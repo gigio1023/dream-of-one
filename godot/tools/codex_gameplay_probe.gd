@@ -299,6 +299,7 @@ func _route_report_from_current_run(plan: Dictionary, summary: Dictionary, hud_s
 			"stationInquestOpen": station.get("inquestOpen", false),
 			"recordObjects": record_objects,
 			"civicEconomy": summary.get("civicEconomy", {}),
+			"visibleNpcStates": summary.get("visibleNpcStates", {}),
 			"investigationTrail": hud_snapshot.get("investigationTrailLabel", ""),
 			"consequence": hud_snapshot.get("consequenceLabel", ""),
 			"outcomeBody": hud_snapshot.get("outcomeBodyLabel", ""),
@@ -364,6 +365,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("clean_cover expected Studio PM to perceive public notice board before inviting review")
 			if not _inspected_studio_review_invite(summary):
 				failures.append("clean_cover expected Codex/player to inspect the invited Studio review queue")
+			if not _visible_studio_pm_invitation(summary):
+				failures.append("clean_cover expected visible Studio PM invitation reaction")
 			if not _observation_exists(summary, "park_witness", "waiting_customer", "accept_routine", "vouch_routine"):
 				failures.append("clean_cover expected Park Witness to read routine queue record")
 			if not _observation_exists(summary, "waiting_customer", "park_witness", "vouch_routine", "share_local_tip"):
@@ -884,6 +887,17 @@ func _inspected_studio_review_invite(summary: Dictionary) -> bool:
 		and str(inspected.get("state", "")) == "invited"
 		and str(inspected.get("body", "")).contains("리뷰")
 		and str(inspected.get("body", "")).contains("공개 확인")
+	)
+
+func _visible_studio_pm_invitation(summary: Dictionary) -> bool:
+	var states: Dictionary = summary.get("visibleNpcStates", {})
+	var state: Dictionary = states.get("NPC_Studio_PM", {})
+	return (
+		str(state.get("npcId", "")) == "NPC_Studio_PM"
+		and str(state.get("state", "")) == "invited"
+		and bool(state.get("markerVisible", false))
+		and str(state.get("pressureText", "")).contains("리뷰")
+		and str(state.get("reactionText", "")).contains("리뷰")
 	)
 
 func _visible_npc_has_line(summary: Dictionary, npc_id: String) -> bool:

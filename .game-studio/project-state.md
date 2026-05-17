@@ -203,6 +203,12 @@ Current M1 carry-in:
   `visibleNpcStates` so Codex can inspect the same player-readable NPC reaction
   text that appears in the scene. Playable/Codex probes now reject hidden-only
   social reactions for acting roles.
+- `NPC_Studio_PM` now also exposes the clean-route review invitation as visible
+  NPC state: when public trust opens `studio_review_queue`, the spawned Studio
+  PM is marked `invited` with a review-open reaction label and player-readable
+  line. Codex route probes also scope grouped actors/props/zones to the active
+  scene root so multi-scene AI-play checks cannot write visible state into the
+  wrong scene.
 - Codex gameplay QA now runs the active proof cell through public
   `PlayableSession.debug_codex_gameplay_action` and
   `debug_codex_gameplay_snapshot` APIs. The probe can list callable player

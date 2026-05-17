@@ -47,7 +47,11 @@ Last Updated: 2026-05-18
 - If `--status` is already pass and no watched Godot/HUD/probe/session-helper
   source changed, do not rerun Codex probe or regenerate setup kits merely to
   show activity. The next useful move is human play, not more preparation.
-- Latest implementation slice: Store Manager now shows the specific
+- Latest implementation slice: soft-report HUD consequence now shows the actual
+  local social chain before inquest: `플레이어 발화 -> 상점 기록 -> 공원 게시 ->
+  응대 중단 -> 줄 이탈 -> 보고 접수`. This keeps soft report readable as public
+  rumor, manager service pause, and queue exit instead of a generic report.
+- Previous implementation slice: Store Manager now shows the specific
   intermediary action it took. Soft report shows `pause_service` as
   `paused` / `응대 중단`; inquest shows `forward_report` as `forwarded` /
   `보고 전달`, so the player can distinguish local service pause from formal

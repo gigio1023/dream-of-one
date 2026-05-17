@@ -27,6 +27,7 @@ const UI_COPY := {
 		"consequence_inquest": "심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다.",
 		"consequence_verdict": "세션 결과가 고정되었습니다. why-line이 근거입니다.",
 		"record_chain_intake": "흐름: 플레이어 발화 -> 상점 기록 -> 보고 접수",
+		"record_chain_intake_social": "흐름: 플레이어 발화 -> 상점 기록 -> 공원 게시 -> 응대 중단 -> 줄 이탈 -> 보고 접수",
 		"record_chain_inquest": "흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용",
 		"record_chain_inquest_review": "흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단",
 		"record_chain_inquest_contact": "흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부",
@@ -83,6 +84,7 @@ const UI_COPY := {
 		"consequence_inquest": "Inquest pressure. Earlier dialogue signals are the basis.",
 		"consequence_verdict": "Session outcome is fixed. The why-line is the basis.",
 		"record_chain_intake": "Chain: player speech -> Store record -> report filed",
+		"record_chain_intake_social": "Chain: player speech -> Store record -> Park notice -> service paused -> queue left -> report filed",
 		"record_chain_inquest": "Chain: player speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation",
 		"record_chain_inquest_review": "Chain: player speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation -> Studio review blocked",
 		"record_chain_inquest_contact": "Chain: player speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation -> Studio review blocked -> contact refused",
@@ -459,6 +461,8 @@ func _record_chain_text(state_key: String) -> String:
 			return _ui_text("record_chain_inquest_review")
 		return _ui_text("record_chain_inquest")
 	if bool(_station.get("intakeOpen", false)) or state_key == "intake":
+		if str(_record_objects.get("park_notice_board", "")) == "rumored" and str(_record_objects.get("store_counter", "")) == "paused" and str(_record_objects.get("store_queue_mark", "")) == "empty":
+			return _ui_text("record_chain_intake_social")
 		return _ui_text("record_chain_intake")
 	return ""
 

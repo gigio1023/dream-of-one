@@ -819,6 +819,10 @@ func _validate_hud_record_state(route: Dictionary, summary: Dictionary, hud: Nod
 		failures.append("cover_held_under_suspicion expected HUD record state to show review deferral after public warning")
 	if route_id == "soft_report" and not record_state_label.contains("대기"):
 		failures.append("soft_report expected HUD record state to show pending report")
+	if route_id == "soft_report":
+		var consequence_label := str(snapshot.get("consequenceLabel", ""))
+		if not consequence_label.contains("공원 게시") or not consequence_label.contains("응대 중단") or not consequence_label.contains("줄 이탈"):
+			failures.append("soft_report expected HUD consequence chain to show public rumor, service pause, and queue exit")
 	if route_id == "soft_report" and str(summary.get("recordObjects", {}).get("store_counter", "")) != "paused":
 		failures.append("soft_report expected counter service to pause after manager action")
 	if route_id == "soft_report" and str(summary.get("recordObjects", {}).get("store_queue_mark", "")) != "empty":

@@ -102,6 +102,9 @@ Current M1 carry-in:
   action as player-readable NPC state. Soft report shows `pause_service` as
   `paused` / `응대 중단`, while inquest shows `forward_report` as `forwarded` /
   `보고 전달`.
+- latest small-slice carry-in: soft-report HUD consequence now names the
+  player-readable social chain that already exists in the running scene:
+  `플레이어 발화 -> 상점 기록 -> 공원 게시 -> 응대 중단 -> 줄 이탈 -> 보고 접수`.
 - Station Soft Inquest smoke is internal authority/Evidence harness evidence, not the target player-facing conversation loop.
 - `Same Order` playable smoke now proves clean cover, repair recovery, soft
   report, and hard inquest routes. The hard route includes response hesitation,

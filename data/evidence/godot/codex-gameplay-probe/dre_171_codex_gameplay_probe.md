@@ -56,7 +56,7 @@
 - `cover_held_under_suspicion`: pass `true`, stage `uneasy`, outcome `cover_held_under_suspicion`, suspicion/report `35/30`
   - Suspicious cover: Codex made a risky claim then returned to the Clerk premise; the Park public warning made the waiting customer keep distance, the Studio PM deferred review, and Codex inspected that deferred review queue. uneasy/cover_held_under_suspicion, suspicion 35, report 30.
 - `soft_report`: pass `true`, stage `reported`, outcome `soft_report`, suspicion/report `95/80`
-  - Soft report: Codex broke routine twice, causing a pending Store report and Manager follow-up without opening inquest. reported/soft_report, suspicion 95, report 80.
+  - Soft report: Codex broke routine twice, causing a pending Store report, public rumor, Manager service pause, and queue exit without opening inquest. reported/soft_report, suspicion 95, report 80. 대화 기록이 접수되었습니다. 앞선 말과 충돌하지 않아야 합니다. / 흐름: 플레이어 발화 -> 상점 기록 -> 공원 게시 -> 응대 중단 -> 줄 이탈 -> 보고 접수
 - `inquest_opened`: pass `true`, stage `inquest`, outcome `inquest_opened`, suspicion/report `125/120`
   - Inquest: Codex hesitated, chose the risky line, typed dream-language speech, and the Station cited the Store record. inquest/inquest_opened, suspicion 125, report 120. 심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다. / 흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부
 

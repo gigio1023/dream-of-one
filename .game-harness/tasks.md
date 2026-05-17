@@ -148,6 +148,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Make Store Manager intermediary actions visible as distinct NPC state:
   soft-report `pause_service` now shows `paused` / `응대 중단`, and inquest
   `forward_report` now shows `forwarded` / `보고 전달`.
+- [x] Extend the soft-report HUD consequence chain through local social
+  reactions: soft report now shows `플레이어 발화 -> 상점 기록 -> 공원 게시 ->
+  응대 중단 -> 줄 이탈 -> 보고 접수` instead of stopping at generic report
+  filing.
 - [x] Show the role/action map inside world-record prop inspection: the blocked
   Studio review queue HUD notice now names who can read it, which actions that
   record supports, and the latest ledger event that changed it.

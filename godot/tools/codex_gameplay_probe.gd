@@ -474,6 +474,9 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("soft_report expected visible Park Witness rumor-post reaction")
 			if not _visible_store_manager_reaction(summary, "paused", "중단"):
 				failures.append("soft_report expected visible Store Manager service-pause reaction")
+			var consequence_label := str(report.get("finalPlayerVisibleState", {}).get("consequence", ""))
+			if not consequence_label.contains("공원 게시") or not consequence_label.contains("응대 중단") or not consequence_label.contains("줄 이탈"):
+				failures.append("soft_report expected HUD consequence chain to show public rumor, service pause, and queue exit")
 			if not _observation_exists(summary, "store_manager", "store_clerk", "place_note", "place_note"):
 				failures.append("soft_report expected Manager to act from Clerk note")
 			if not _observation_exists(summary, "waiting_customer", "store_manager", "pause_service", "leave_queue"):
@@ -553,7 +556,7 @@ func _route_player_readable_summary(route_id: String, summary: Dictionary, hud_s
 		"cover_held_under_suspicion":
 			return "Suspicious cover: Codex made a risky claim then returned to the Clerk premise; the Park public warning made the waiting customer keep distance, the Studio PM deferred review, and Codex inspected that deferred review queue. %s." % state
 		"soft_report":
-			return "Soft report: Codex broke routine twice, causing a pending Store report and Manager follow-up without opening inquest. %s." % state
+			return "Soft report: Codex broke routine twice, causing a pending Store report, public rumor, Manager service pause, and queue exit without opening inquest. %s. %s" % [state, _one_line(hud_snapshot.get("consequenceLabel", ""))]
 		"inquest_opened":
 			return "Inquest: Codex hesitated, chose the risky line, typed dream-language speech, and the Station cited the Store record. %s. %s" % [state, _one_line(hud_snapshot.get("consequenceLabel", ""))]
 		_:

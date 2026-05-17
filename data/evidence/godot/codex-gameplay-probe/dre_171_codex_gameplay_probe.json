@@ -5756,14 +5756,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779059840946",
+				"eventId": "playable_session_started-001-1779060422571",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779059840946,
+				"timestampMs": 1779060422571,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -5776,7 +5776,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-002-1779059841063",
+				"eventId": "conversation_started-002-1779060422640",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -5785,7 +5785,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779059841063,
+				"timestampMs": 1779060422640,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -5798,7 +5798,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-003-1779059841075",
+				"eventId": "response_hesitation_noted-003-1779060422655",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -5819,7 +5819,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779059841075,
+				"timestampMs": 1779060422655,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -5834,7 +5834,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-004-1779059841088",
+				"eventId": "dialogue_choice_selected-004-1779060422669",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -5856,7 +5856,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779059841088,
+				"timestampMs": 1779060422669,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -5871,7 +5871,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-005-1779059841088",
+				"eventId": "conversation_anomaly_detected-005-1779060422669",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -5893,7 +5893,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779059841088,
+				"timestampMs": 1779060422669,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -5908,7 +5908,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-006-1779059841088",
+				"eventId": "npc_suspicion_changed-006-1779060422669",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -5930,7 +5930,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779059841088,
+				"timestampMs": 1779060422669,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -5945,7 +5945,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-007-1779059841102",
+				"eventId": "free_input_submitted-007-1779060422682",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -5970,7 +5970,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779059841102,
+				"timestampMs": 1779060422682,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -5985,7 +5985,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779059841102",
+				"eventId": "conversation_anomaly_detected-008-1779060422682",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -6010,7 +6010,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779059841102,
+				"timestampMs": 1779060422682,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -6025,7 +6025,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779059841102",
+				"eventId": "npc_suspicion_changed-009-1779060422682",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -6050,7 +6050,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779059841102,
+				"timestampMs": 1779060422682,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -6065,7 +6065,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-010-1779059841102",
+				"eventId": "suspicion_shared-010-1779060422682",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -6090,7 +6090,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779059841102,
+				"timestampMs": 1779060422682,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -6105,7 +6105,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-011-1779059841102",
+				"eventId": "station_report_created-011-1779060422682",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -6130,7 +6130,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779059841102,
+				"timestampMs": 1779060422682,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -6145,7 +6145,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-012-1779059841103",
+				"eventId": "station_inquest_opened-012-1779060422683",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -6170,7 +6170,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779059841103,
+				"timestampMs": 1779060422683,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -6180,7 +6180,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-013-1779059841149",
+				"eventId": "world_record_prop_inspected-013-1779060422725",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -6188,7 +6188,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779059841149,
+				"timestampMs": 1779060422725,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -6200,7 +6200,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-014-1779059841174",
+				"eventId": "world_record_prop_inspected-014-1779060422749",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "studio_review_queue",
 				"schemaVersion": "godot-runtime-v1",
@@ -6208,7 +6208,7 @@
 				"state": "blocked",
 				"stateLabel": "차단",
 				"summary": "Inspected world record prop studio_review_queue in state blocked.",
-				"timestampMs": 1779059841174,
+				"timestampMs": 1779060422749,
 				"uiSummaryArgs": {
 					"object": "스튜디오 리뷰 줄",
 					"state": "차단"
@@ -6220,7 +6220,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-015-1779059841200",
+				"eventId": "npc_reaction_inspected-015-1779060422777",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Studio_PM",
 				"reactionText": "리뷰 차단",
@@ -6228,7 +6228,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "blocked",
 				"summary": "Inspected NPC reaction NPC_Studio_PM in state blocked.",
-				"timestampMs": 1779059841200,
+				"timestampMs": 1779060422777,
 				"uiSummaryArgs": {
 					"npc": "Studio PM",
 					"state": "리뷰 차단"
@@ -6240,7 +6240,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-016-1779059841229",
+				"eventId": "npc_reaction_inspected-016-1779060422806",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Waiting_Customer",
 				"reactionText": "접촉 거부",
@@ -6248,7 +6248,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "refused",
 				"summary": "Inspected NPC reaction NPC_Waiting_Customer in state refused.",
-				"timestampMs": 1779059841229,
+				"timestampMs": 1779060422806,
 				"uiSummaryArgs": {
 					"npc": "Waiting Customer",
 					"state": "접촉 거부"
@@ -14625,7 +14625,7 @@
 					"recordBurden": 100,
 					"stationAttention": 60
 				},
-				"consequence": "대화 기록이 접수되었습니다. 앞선 말과 충돌하지 않아야 합니다.\n흐름: 플레이어 발화 -> 상점 기록 -> 보고 접수",
+				"consequence": "대화 기록이 접수되었습니다. 앞선 말과 충돌하지 않아야 합니다.\n흐름: 플레이어 발화 -> 상점 기록 -> 공원 게시 -> 응대 중단 -> 줄 이탈 -> 보고 접수",
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {},
 				"investigationTrail": "검사자: 상점 매니저 -> 스테이션 직원 | 대상: 플레이어 | 근거: 상점 보고 기록",
@@ -14767,7 +14767,7 @@
 				"worldPropsReachInquest": false
 			},
 			"pass": true,
-			"playerReadableSummary": "Soft report: Codex broke routine twice, causing a pending Store report and Manager follow-up without opening inquest. reported/soft_report, suspicion 95, report 80.",
+			"playerReadableSummary": "Soft report: Codex broke routine twice, causing a pending Store report, public rumor, Manager service pause, and queue exit without opening inquest. reported/soft_report, suspicion 95, report 80. 대화 기록이 접수되었습니다. 앞선 말과 충돌하지 않아야 합니다. / 흐름: 플레이어 발화 -> 상점 기록 -> 공원 게시 -> 응대 중단 -> 줄 이탈 -> 보고 접수",
 			"rejectedActions": [],
 			"roleActionExplanation": [
 				"store_clerk used mark_receipt on receipt_tray -> civic-ledger-1",
@@ -15317,7 +15317,7 @@
 					},
 					"hud": {
 						"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
-						"consequenceLabel": "대화 기록이 접수되었습니다. 앞선 말과 충돌하지 않아야 합니다.\n흐름: 플레이어 발화 -> 상점 기록 -> 보고 접수",
+						"consequenceLabel": "대화 기록이 접수되었습니다. 앞선 말과 충돌하지 않아야 합니다.\n흐름: 플레이어 발화 -> 상점 기록 -> 공원 게시 -> 응대 중단 -> 줄 이탈 -> 보고 접수",
 						"focusLabel": "WASD로 이동. 상점 카운터에 접근해 E로 대화를 시작하세요.",
 						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 						"freeInputVisible": false,

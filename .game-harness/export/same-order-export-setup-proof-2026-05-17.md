@@ -126,6 +126,12 @@ visible as distinct NPC reactions. Soft report now shows the manager as
 Packaged launch, packaged route smoke, and tester preflight accept the
 refreshed app-route evidence.
 
+Refresh note, 2026-05-18 KST: the PCK, macOS zip, unpacked app, and packaged
+route evidence were regenerated after soft-report HUD consequence copy began
+naming the local social chain `플레이어 발화 -> 상점 기록 -> 공원 게시 -> 응대
+중단 -> 줄 이탈 -> 보고 접수`. Packaged launch, packaged route smoke, and
+tester preflight accept the refreshed app-route evidence.
+
 ## Command Evidence
 
 Import:

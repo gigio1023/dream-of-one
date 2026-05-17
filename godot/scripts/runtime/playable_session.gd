@@ -88,6 +88,7 @@ const ENVIRONMENT_OBJECT_ORDER := [
 
 const ENVIRONMENT_AFFORDANCE_ORDER := [
 	"complain_delay",
+	"accept_repair",
 	"cite_expected_order",
 	"create_receipt",
 	"mark_receipt",
@@ -102,6 +103,7 @@ const ENVIRONMENT_AFFORDANCE_ORDER := [
 const STORE_LEDGER_EVENT_KINDS := [
 	"store_sale_normal",
 	"store_sale_corrected",
+	"queue_repair_accepted",
 	"store_exception_reported",
 	"store_report_escalated",
 	"store_receipt_marked",
@@ -115,6 +117,13 @@ const ENVIRONMENT_ACTION_RULES := {
 			"fromStates": ["player_waiting", "delayed", "disrupted"],
 			"toState": "disrupted",
 			"eventKind": "queue_delay_noted",
+			"allowedRoles": ["waiting_customer"],
+			"requiresLedgerEvent": true
+		},
+		"accept_repair": {
+			"fromStates": ["player_waiting", "delayed", "disrupted"],
+			"toState": "settled",
+			"eventKind": "queue_repair_accepted",
 			"allowedRoles": ["waiting_customer"],
 			"requiresLedgerEvent": true
 		}
@@ -1208,8 +1217,9 @@ func _mark_receipt_if_needed(why_line: String) -> void:
 		)
 
 func _attach_correction_if_needed(why_line: String) -> void:
+	var correction_event_id := _latest_civic_ledger_id("store_sale_corrected")
 	if str(record_objects.get("correction_slip", "")) != "attached":
-		_apply_role_agent_action(
+		var result := _apply_role_agent_action(
 			"repair.clerk.attach_correction",
 			"NPC_Store_Clerk",
 			"store_clerk",
@@ -1218,6 +1228,28 @@ func _attach_correction_if_needed(why_line: String) -> void:
 			"store_same_order_correction",
 			why_line
 		)
+		var event: Dictionary = result.get("event", {})
+		correction_event_id = str(event.get("eventId", correction_event_id))
+	_settle_queue_after_repair(correction_event_id)
+
+func _settle_queue_after_repair(correction_event_id: String) -> void:
+	if correction_event_id.is_empty():
+		return
+	if str(record_objects.get("store_queue_mark", "")) == "settled":
+		return
+	var result := _apply_role_agent_action(
+		"repair.waiting_customer.accept_repair",
+		"NPC_Waiting_Customer",
+		"waiting_customer",
+		"accept_repair",
+		"store_queue_mark",
+		"store_same_order_queue_repair",
+		"A waiting customer sees the correction slip attach and lets the line settle instead of turning it into a complaint.",
+		correction_event_id,
+		[correction_event_id]
+	)
+	if bool(result.get("ok", false)):
+		_set_actor_line("NPC_Waiting_Customer", "정정됐으면 줄은 계속 가도 되겠네요.")
 
 func debug_agent_action_log() -> Array:
 	return agent_action_log.duplicate(true)
@@ -1551,6 +1583,8 @@ func _action_priority_hints(affordance: String, rule: Dictionary) -> Array[Strin
 		hints.append("requires:store_record_citation")
 	if affordance == "complain_delay":
 		hints.append("pressure:queue_delay")
+	if affordance == "accept_repair":
+		hints.append("pressure:repair_accepted")
 	if affordance == "post_rumor":
 		hints.append("pressure:public_talk")
 	return hints
@@ -1563,6 +1597,8 @@ func _action_perceived_as(object_id: String, affordance: String) -> String:
 			return "marked receipt"
 		"offer_correction", "attach_correction":
 			return "local correction path"
+		"accept_repair":
+			return "public repair acceptance"
 		"place_note":
 			return "Store report note"
 		"forward_report":
@@ -1602,6 +1638,7 @@ func _record_mutation_affordances() -> Array[String]:
 		"create_receipt",
 		"mark_receipt",
 		"attach_correction",
+		"accept_repair",
 		"complain_delay",
 		"post_rumor",
 		"place_note",
@@ -1676,6 +1713,8 @@ func _civic_economy_delta(event_kind: String) -> Dictionary:
 			return {"recordBurden": 5}
 		"store_sale_corrected":
 			return {"accountCredit": -1, "localTrust": -5, "recordBurden": 15, "stationAttention": 5}
+		"queue_repair_accepted":
+			return {"localTrust": 5, "recordBurden": -5}
 		"queue_delay_noted":
 			return {"recordBurden": 5}
 		"public_rumor_posted":
@@ -1816,6 +1855,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"store_receipt_marked": "영수증 표시",
 		"correction_offered": "정정 제안",
 		"store_sale_corrected": "정정 처리",
+		"queue_repair_accepted": "줄 수습",
 		"queue_delay_noted": "대기줄 불평",
 		"public_rumor_posted": "공개 소문",
 		"store_exception_reported": "상점 보고",
@@ -1827,6 +1867,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"store_receipt_marked": "marked receipt",
 		"correction_offered": "correction offered",
 		"store_sale_corrected": "correction accepted",
+		"queue_repair_accepted": "queue repair accepted",
 		"queue_delay_noted": "queue delay noted",
 		"public_rumor_posted": "public rumor posted",
 		"store_exception_reported": "Store report",
@@ -1859,6 +1900,7 @@ func _affordance_label(affordance: String) -> String:
 		"create_receipt": "영수증 작성",
 		"mark_receipt": "영수증 표시",
 		"attach_correction": "정정 첨부",
+		"accept_repair": "수습 수락",
 		"complain_delay": "대기 불평",
 		"post_rumor": "공개 게시",
 		"place_note": "메모 배치",
@@ -1869,6 +1911,7 @@ func _affordance_label(affordance: String) -> String:
 		"create_receipt": "create receipt",
 		"mark_receipt": "mark receipt",
 		"attach_correction": "attach correction",
+		"accept_repair": "accept repair",
 		"complain_delay": "complain delay",
 		"post_rumor": "post public rumor",
 		"place_note": "place note",
@@ -1920,6 +1963,7 @@ func _record_state_value(state: String) -> String:
 		"read": "읽힘",
 		"serving": "응대 중",
 		"player_waiting": "플레이어 대기",
+		"settled": "줄 안정",
 		"append_only": "추가됨",
 		"stable": "안정",
 		"burden": "부담 증가",
@@ -1944,6 +1988,7 @@ func _record_state_value(state: String) -> String:
 		"read": "read",
 		"serving": "serving",
 		"player_waiting": "player waiting",
+		"settled": "settled",
 		"append_only": "append only",
 		"stable": "stable",
 		"burden": "burden rising",
@@ -1964,7 +2009,7 @@ func _world_record_prop_material(object_id: String, state: String) -> StandardMa
 	material.roughness = 0.82
 	if color.a < 1.0:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	if ["pending", "forwarded", "cited", "attention", "rumored"].has(state):
+	if ["pending", "forwarded", "cited", "attention", "rumored", "settled"].has(state):
 		material.emission_enabled = true
 		material.emission = Color(color.r, color.g, color.b, 1.0)
 		material.emission_energy_multiplier = 0.35
@@ -1976,7 +2021,7 @@ func _world_record_prop_color(object_id: String, state: String) -> Color:
 			return Color(0.34, 0.76, 0.82, 0.94)
 		"marked", "offered", "burden", "trust_low":
 			return Color(1.0, 0.68, 0.28, 0.94)
-		"attached", "corrected":
+		"attached", "corrected", "settled":
 			return Color(0.42, 0.86, 0.58, 0.96)
 		"pending", "rumored":
 			return Color(1.0, 0.52, 0.24, 0.96)
@@ -2320,7 +2365,7 @@ func _terminal_outcome_body() -> String:
 	if session_outcome == "soft_report":
 		return "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 상점 관리자가 기록 부담을 보고 후속 메모를 붙였습니다.\n역할 행동: 상점 관리자가 보고 트레이에 점원 기록을 전달했습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	if route_outcome == "repair_recovered":
-		return "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 상점 안에서 수습\n역할 행동: 상점 점원이 정정표를 붙여 지역 루틴 안에서 기록을 닫았습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
+		return "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	return "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 스테이션 인용 없음\n역할 행동: 상점 점원이 정상 영수증을 만들고 추가 보고를 열지 않았습니다.\n상점 대화가 지역 루틴 안에서 닫혔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 
 func _now_ms() -> int:

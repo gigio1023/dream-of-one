@@ -37,7 +37,7 @@
 - `clean_cover`: pass `true`, stage `normal`, outcome `clean_cover`, suspicion/report `0/0`
   - Clean cover: Codex accepted the routine and the Store Clerk closed a normal receipt. normal/clean_cover, suspicion 0, report 0.
 - `repair_recovered`: pass `true`, stage `uneasy`, outcome `repair_recovered`, suspicion/report `20/10`
-  - Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, and the correction slip contained the issue locally. uneasy/repair_recovered, suspicion 20, report 10.
+  - Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, and the waiting customer let the queue settle. uneasy/repair_recovered, suspicion 20, report 10.
 - `soft_report`: pass `true`, stage `reported`, outcome `soft_report`, suspicion/report `95/80`
   - Soft report: Codex broke routine twice, causing a pending Store report and Manager follow-up without opening inquest. reported/soft_report, suspicion 95, report 80.
 - `inquest_opened`: pass `true`, stage `inquest`, outcome `inquest_opened`, suspicion/report `125/120`

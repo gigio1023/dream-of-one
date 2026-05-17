@@ -20,6 +20,12 @@ test("Same Order provider action comparison preserves provider-off ledger outcom
   assert.equal(comparison.pass, true, JSON.stringify(comparison.failures, null, 2));
   assert.deepEqual(comparison.baselineRouteIds, comparison.providerRouteIds);
 
+  const repair = comparison.providerProofs.find(proof => proof.routeId === "repair_recovered");
+  assert.ok(repair);
+  assert.equal(repair.ledgerEventKinds.includes("queue_repair_accepted"), true);
+  assert.equal(repair.finalObjectStates.store_queue_mark, "settled");
+  assert.equal(repair.actionTrace.some(trace => trace.actorRole === "waiting_customer" && trace.affordance === "accept_repair"), true);
+
   const inquest = comparison.providerProofs.find(proof => proof.routeId === "inquest_opened");
   assert.ok(inquest);
   assert.deepEqual(inquest.ledgerEventKinds, [

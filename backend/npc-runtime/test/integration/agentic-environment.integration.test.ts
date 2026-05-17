@@ -178,6 +178,57 @@ test("Park witness can post a public notice from a known Store record", () => {
   assert.equal(rumor.environment.economy.recordBurden, 40);
 });
 
+test("Waiting customer can accept a correction record and settle queue pressure", () => {
+  let environment = createSameOrderAgenticEnvironment();
+  const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);
+  const offered = requireAccepted(validateAndApplyEnvironmentAction(environment, clerk, {
+    actorId: clerk.actorId,
+    role: clerk.role,
+    affordance: "offer_correction",
+    objectId: "correction_slip",
+    recordId: "store_same_order_correction",
+    whyLine: "The mismatch can still be repaired locally through a correction slip.",
+  }));
+  environment = offered.environment;
+
+  const attached = requireAccepted(validateAndApplyEnvironmentAction(environment, clerk, {
+    actorId: clerk.actorId,
+    role: clerk.role,
+    affordance: "attach_correction",
+    objectId: "correction_slip",
+    recordId: "store_same_order_correction",
+    whyLine: "The player accepts the correction, so the Store records a corrected sale instead of a report.",
+  }));
+  environment = attached.environment;
+
+  const customer = actor({
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    knownLedgerEventIds: [attached.event.eventId],
+  }, environment);
+  const action = listAvailableEnvironmentActions(environment, customer)
+    .find(candidate => candidate.affordance === "accept_repair");
+  assert.ok(action);
+  assert.equal(action.objectId, "store_queue_mark");
+  assert.deepEqual(action.civicEconomyEffects, ["localTrust:+5", "recordBurden:-5"]);
+
+  const settled = requireAccepted(validateAndApplyEnvironmentAction(environment, customer, {
+    actorId: customer.actorId,
+    role: customer.role,
+    affordance: "accept_repair",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_queue_repair",
+    citedLedgerEventId: attached.event.eventId,
+    whyLine: "The correction is visible enough for the queue to keep moving.",
+  }));
+
+  assert.equal(settled.event.kind, "queue_repair_accepted");
+  assert.equal(settled.event.citedLedgerEventId, attached.event.eventId);
+  assert.equal(settled.environment.objects.find(item => item.objectId === "store_queue_mark")?.state, "settled");
+  assert.equal(settled.environment.economy.localTrust, 50);
+  assert.equal(settled.environment.economy.recordBurden, 15);
+});
+
 test("Station citation only becomes available after the Station knows a Store ledger event", () => {
   let environment = createSameOrderAgenticEnvironment();
   const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);

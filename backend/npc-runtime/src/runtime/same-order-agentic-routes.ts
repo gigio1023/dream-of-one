@@ -201,7 +201,7 @@ function buildRepairRecoveredProof(): SameOrderAgenticRouteProof {
     recordId: "store_same_order_correction",
     whyLine: "The mismatch can still be repaired locally through a correction slip.",
   });
-  applyAction(build, {
+  const correctionEvent = applyAction(build, {
     stepId: "repair.clerk.attach_correction",
     actorId: "NPC_Store_Clerk",
     role: "store_clerk",
@@ -210,6 +210,17 @@ function buildRepairRecoveredProof(): SameOrderAgenticRouteProof {
     recordId: "store_same_order_correction",
     whyLine: "The player accepts the correction, so the Store records a corrected sale instead of a report.",
   });
+  applyAction(build, {
+    stepId: "repair.waiting_customer.accept_repair",
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    affordance: "accept_repair",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_queue_repair",
+    citedLedgerEventId: correctionEvent.eventId,
+    knownLedgerEventIds: [correctionEvent.eventId],
+    whyLine: "A waiting customer sees the correction slip attach and lets the line settle instead of turning it into a complaint.",
+  });
 
   return routeProof({
     build,
@@ -217,7 +228,7 @@ function buildRepairRecoveredProof(): SameOrderAgenticRouteProof {
     sessionOutcome: "cover_held",
     playerLineKind: "repair_line",
     playerLine: "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.",
-    socialReactionSummary: "The clerk contains the mismatch through a correction; trust drops, but Station citation is not enabled.",
+    socialReactionSummary: "The clerk contains the mismatch through a correction, and a waiting customer accepts the repair so the queue settles instead of becoming a report.",
   });
 }
 
@@ -582,6 +593,17 @@ function validateRepairRecovered(
   }
   if (proof.ledgerEventKinds.includes("store_report_escalated") || proof.stationCitation !== undefined) {
     failures.push({ routeId: proof.routeId, path: "stationCitation", message: "repair route must not create Station citation" });
+  }
+  if (!proof.socialObservationTrace.some(observation =>
+    observation.observerRole === "waiting_customer"
+    && observation.observedActorRole === "store_clerk"
+    && observation.observedAffordance === "attach_correction"
+    && observation.resultingAffordance === "accept_repair"
+  )) {
+    failures.push({ routeId: proof.routeId, path: "socialObservationTrace", message: "repair route must prove another NPC accepted the correction record" });
+  }
+  if (proof.finalObjectStates.store_queue_mark !== "settled") {
+    failures.push({ routeId: proof.routeId, path: "finalObjectStates.store_queue_mark", message: "repair route must visibly settle the queue after correction" });
   }
   if (proof.economyAfter.recordBurden <= 0 || proof.economyAfter.stationAttention >= 50) {
     failures.push({ routeId: proof.routeId, path: "economyAfter", message: "repair route must create bounded local burden below Station-report pressure" });

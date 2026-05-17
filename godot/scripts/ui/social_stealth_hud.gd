@@ -522,7 +522,9 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"store_receipt_marked": "영수증 표시",
 		"correction_offered": "정정 제안",
 		"store_sale_corrected": "정정 처리",
+		"queue_repair_accepted": "줄 수습",
 		"queue_delay_noted": "대기줄 불평",
+		"public_rumor_posted": "공개 소문",
 		"store_exception_reported": "상점 보고",
 		"store_report_escalated": "보고 전달",
 		"station_record_cited": "스테이션 인용"
@@ -532,7 +534,9 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"store_receipt_marked": "marked receipt",
 		"correction_offered": "correction offered",
 		"store_sale_corrected": "correction accepted",
+		"queue_repair_accepted": "queue repair accepted",
 		"queue_delay_noted": "queue delay noted",
+		"public_rumor_posted": "public rumor posted",
 		"store_exception_reported": "Store report",
 		"store_report_escalated": "report forwarded",
 		"station_record_cited": "Station cited"
@@ -545,12 +549,14 @@ func _actor_role_label(actor_role: String) -> String:
 		"store_clerk": "상점 점원",
 		"store_manager": "상점 매니저",
 		"waiting_customer": "대기 손님",
+		"park_witness": "공원 목격자",
 		"station_officer": "스테이션 직원"
 	}
 	var en := {
 		"store_clerk": "Store Clerk",
 		"store_manager": "Store Manager",
 		"waiting_customer": "Waiting Customer",
+		"park_witness": "Park Witness",
 		"station_officer": "Station Officer"
 	}
 	var table: Dictionary = en if _current_locale() == "en" else ko
@@ -561,7 +567,9 @@ func _affordance_label(affordance: String) -> String:
 		"create_receipt": "영수증 작성",
 		"mark_receipt": "영수증 표시",
 		"attach_correction": "정정 첨부",
+		"accept_repair": "수습 수락",
 		"complain_delay": "대기 불평",
+		"post_rumor": "공개 게시",
 		"place_note": "메모 배치",
 		"forward_report": "보고 전달",
 		"cite_record": "기록 인용"
@@ -570,7 +578,9 @@ func _affordance_label(affordance: String) -> String:
 		"create_receipt": "create receipt",
 		"mark_receipt": "mark receipt",
 		"attach_correction": "attach correction",
+		"accept_repair": "accept repair",
 		"complain_delay": "complain delay",
+		"post_rumor": "post public rumor",
 		"place_note": "place note",
 		"forward_report": "forward report",
 		"cite_record": "cite record"

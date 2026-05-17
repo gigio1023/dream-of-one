@@ -331,8 +331,12 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("repair_recovered must stay local to the Store")
 			if str(record_objects.get("correction_slip", "")) != "attached":
 				failures.append("repair_recovered expected attached correction slip")
+			if str(record_objects.get("store_queue_mark", "")) != "settled":
+				failures.append("repair_recovered expected queue mark to settle after correction")
 			if not _action_exists(summary, "store_clerk", "attach_correction"):
 				failures.append("repair_recovered expected Store Clerk correction attachment")
+			if not _action_exists(summary, "waiting_customer", "accept_repair"):
+				failures.append("repair_recovered expected Waiting Customer repair acceptance")
 		"soft_report":
 			if not bool(station.get("intakeOpen", false)) or bool(station.get("inquestOpen", false)):
 				failures.append("soft_report must open Station intake but stop before inquest")
@@ -391,7 +395,7 @@ func _route_player_readable_summary(route_id: String, summary: Dictionary, hud_s
 		"clean_cover":
 			return "Clean cover: Codex accepted the routine and the Store Clerk closed a normal receipt. %s." % state
 		"repair_recovered":
-			return "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, and the correction slip contained the issue locally. %s." % state
+			return "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, and the waiting customer let the queue settle. %s." % state
 		"soft_report":
 			return "Soft report: Codex broke routine twice, causing a pending Store report and Manager follow-up without opening inquest. %s." % state
 		"inquest_opened":

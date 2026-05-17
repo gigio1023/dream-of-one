@@ -37,8 +37,8 @@ const ROUTE_DEFINITIONS := [
 		"maxReportWeight": 49,
 		"expectedStationIntake": false,
 		"expectedStationInquest": false,
-		"expectedRecordStates": {"receipt_tray": "marked", "correction_slip": "attached", "report_tray": "empty", "station_dossier": "absent"},
-		"expectedCivicLedgerCount": 3,
+		"expectedRecordStates": {"store_queue_mark": "settled", "receipt_tray": "marked", "correction_slip": "attached", "report_tray": "empty", "station_dossier": "absent"},
+		"expectedCivicLedgerCount": 4,
 		"expectedEvents": ["conversation_started", "dialogue_choice_selected", "conversation_anomaly_detected", "npc_suspicion_changed", "conversation_outcome_reached"],
 		"forbiddenEvents": ["station_report_created", "station_inquest_opened"],
 		"expectedSignals": ["memory_gap_admission"]
@@ -391,10 +391,10 @@ func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[St
 			failures.append("soft_report outcome must name Store Manager role action")
 	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("수습"):
 		failures.append("repair_recovered outcome must explain recovery")
-	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("기억 공백 발화 -> 영수증 표시/정정표 -> 상점 안에서 수습"):
+	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 상점 안에서 수습"):
 		failures.append("repair_recovered outcome must show repair record chain")
-	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("역할 행동: 상점 점원"):
-		failures.append("repair_recovered outcome must name Store Clerk role action")
+	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("대기 손님"):
+		failures.append("repair_recovered outcome must name waiting-customer repair acceptance")
 	if route_id == "clean_cover" and not str(summary.get("outcomeBody", "")).contains("역할 행동: 상점 점원"):
 		failures.append("clean_cover outcome must name Store Clerk role action")
 	if route_id == "cover_held_under_suspicion":
@@ -613,6 +613,8 @@ func _validate_hud_record_state(route: Dictionary, summary: Dictionary, hud: Nod
 		failures.append("%s expected HUD record state line, got '%s'" % [route_id, record_state_label])
 	if route_id == "repair_recovered" and not record_state_label.contains("첨부"):
 		failures.append("repair_recovered expected HUD record state to show attached correction")
+	if route_id == "repair_recovered" and str(summary.get("recordObjects", {}).get("store_queue_mark", "")) != "settled":
+		failures.append("repair_recovered expected queue mark to settle after correction")
 	if route_id == "soft_report" and not record_state_label.contains("대기"):
 		failures.append("soft_report expected HUD record state to show pending report")
 	if route_id == "inquest_opened":
@@ -735,6 +737,8 @@ func _affordance_label(affordance: String) -> String:
 			return "영수증 표시"
 		"attach_correction":
 			return "정정 첨부"
+		"accept_repair":
+			return "수습 수락"
 		"complain_delay":
 			return "대기 불평"
 		"post_rumor":
@@ -877,9 +881,10 @@ func _agentic_route_proof(route_id: String) -> Dictionary:
 		var repair_trace := [
 			_agentic_trace("repair.clerk.mark_receipt", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "mark_receipt", "receipt_tray", "civic-ledger-1", "store_receipt_marked", {"recordId": "store_same_order_receipt"}, _economy(3, 45, 15, 0), "The player admits uncertainty, so the clerk marks the receipt before offering repair."),
 			_agentic_trace("repair.clerk.offer_correction", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "offer_correction", "correction_slip", "civic-ledger-2", "correction_offered", {"recordId": "store_same_order_correction"}, _economy(3, 45, 20, 0), "The mismatch can still be repaired locally through a correction slip."),
-			_agentic_trace("repair.clerk.attach_correction", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "attach_correction", "correction_slip", "civic-ledger-3", "store_sale_corrected", {"recordId": "store_same_order_correction"}, _economy(2, 40, 35, 5), "The player accepts the correction, so the Store records a corrected sale instead of a report.")
+			_agentic_trace("repair.clerk.attach_correction", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "attach_correction", "correction_slip", "civic-ledger-3", "store_sale_corrected", {"recordId": "store_same_order_correction"}, _economy(2, 40, 35, 5), "The player accepts the correction, so the Store records a corrected sale instead of a report."),
+			_agentic_trace("repair.waiting_customer.accept_repair", "NPC_Waiting_Customer", "waiting_customer", ["store_queue_mark", "store_counter", "usual_order_cue"], "accept_repair", "store_queue_mark", "civic-ledger-4", "queue_repair_accepted", {"recordId": "store_same_order_queue_repair", "citedLedgerEventId": "civic-ledger-3"}, _economy(2, 45, 30, 5), "A waiting customer sees the correction slip attach and lets the line settle instead of turning it into a complaint.")
 		]
-		return _agentic_route_result(route_id, "cover_held", "repair_line", "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.", "The clerk contains the mismatch through a correction; trust drops, but Station citation is not enabled.", repair_trace, _agentic_final_states({"receipt_tray": "marked", "correction_slip": "attached"}))
+		return _agentic_route_result(route_id, "cover_held", "repair_line", "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.", "The clerk contains the mismatch through a correction, and a waiting customer accepts the repair so the queue settles instead of becoming a report.", repair_trace, _agentic_final_states({"store_queue_mark": "settled", "receipt_tray": "marked", "correction_slip": "attached"}))
 	if route_id == "soft_report":
 		var soft_report_trace := [
 			_agentic_trace("soft.clerk.mark_receipt", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "mark_receipt", "receipt_tray", "civic-ledger-1", "store_receipt_marked", {"recordId": "store_same_order_receipt"}, _economy(3, 45, 15, 0), "The player breaks the expected routine, so the clerk marks the receipt as unresolved."),

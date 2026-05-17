@@ -100,21 +100,27 @@ Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `5 / 5`, and `routeReportPassCount=4 / 4`.
-- latest game increment: the current proof cell now includes one deliberately
-  tiny open-environment social reaction. A Waiting Customer reads the Clerk's
-  report note, uses the `complain_delay` affordance on the queue mark, changes
-  the queue state to `disrupted`, adds `queue_delay_noted` to the civic ledger,
-  and increases record burden by 5 before manager/Station actions continue.
-  This is a reusable NPC-to-NPC record-use pattern, not a reason to deepen
-  Store/Station content.
+- latest game increment: repair now has a visible social consequence, not only
+  a clerk-internal correction. When the player admits uncertainty and then
+  returns to the Clerk's premise, the Clerk attaches a correction slip and the
+  Waiting Customer reads that correction record, uses `accept_repair` on the
+  queue mark, changes the queue state to `settled`, adds
+  `queue_repair_accepted` to the civic ledger, increases local trust by 5, and
+  reduces record burden by 5. This proves the reusable pattern that repair can
+  calm a social situation through another NPC, not just avoid punishment.
+- prior small negative-reaction increment remains current: a Waiting Customer
+  reads the Clerk's report note, uses `complain_delay`, disrupts the queue, and
+  a Park Witness can post public rumor from the same Store note before
+  manager/Station actions continue. These are reusable NPC-to-NPC record-use
+  patterns, not reasons to deepen Store/Station content.
 - artifact:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.json`
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `821dc31d097e75f1cba97ba2dea23560fe82cb71f2f020b35ed9da1f48484fb5`
+  `c0369b57915b65af87f41e8f56fa81c25e267095b93b85609ac28ee94c406628`
 - Markdown SHA-256:
-  `d2d8017b82fe914d0b6f8c0c7310f5a8e832244f824c1e076a1e89b5db840cf3`
+  `9f0d0ed934d757b053f80b6fbd5cc4154010504093c5ea02a376c1546324c889`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
   player-visible state, player-readable cause chain, role-action explanation,
   NPC-to-NPC observation explanation, and the explicit boundary that this is
@@ -234,6 +240,16 @@ Latest AI-play interface check:
   freshness pass, copied probe cross-check pass, route reports pass, and
   `README live-session handoff: pass`. This is still setup proof only; raw
   session notes remain `0 / 3`.
+- 2026-05-18 playable repair-response increment: added the smallest positive
+  NPC-to-NPC social reaction. The repair route now proves
+  `mark_receipt -> offer_correction -> attach_correction -> accept_repair`;
+  final repair state includes `store_queue_mark=settled`,
+  `correction_slip=attached`, `queue_repair_accepted`, local trust 45, record
+  burden 30, and Station attention 5. The terminal repair copy now says the
+  Waiting Customer accepted the correction and let the line continue. Verified
+  with latest Godot playable smoke, Codex gameplay probe, backend playability
+  report attachment, full backend check, and GDScript syntax check. This is
+  internal playable proof only; external fresh-player notes remain `0 / 3`.
 
 ## Loop State
 

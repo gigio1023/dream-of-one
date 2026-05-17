@@ -37,6 +37,17 @@ test("Same Order agentic route proofs cover clean, repair, soft report, and inqu
   assert.ok(repair);
   assert.equal(repair.ledgerEventKinds.includes("correction_offered"), true);
   assert.equal(repair.ledgerEventKinds.includes("store_sale_corrected"), true);
+  assert.equal(repair.ledgerEventKinds.includes("queue_repair_accepted"), true);
+  assert.equal(repair.finalObjectStates.store_queue_mark, "settled");
+  assert.equal(
+    repair.socialObservationTrace.some(observation =>
+      observation.observerRole === "waiting_customer"
+      && observation.observedActorRole === "store_clerk"
+      && observation.observedAffordance === "attach_correction"
+      && observation.resultingAffordance === "accept_repair"
+    ),
+    true,
+  );
   assert.equal(repair.stationCitation, undefined);
 
   const softReport = proofs.find(proof => proof.routeId === "soft_report");

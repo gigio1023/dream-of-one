@@ -51,6 +51,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Add the smallest current-environment NPC-to-NPC reaction: Waiting Customer
   reads the Clerk note, uses `complain_delay`, disrupts the queue mark, and
   adds a toy `queue_delay_noted` burden before manager/Station actions.
+- [x] Add the smallest repair-side NPC reaction: Waiting Customer reads the
+  attached correction slip, uses `accept_repair`, settles the queue mark, adds
+  `queue_repair_accepted`, raises local trust, and lowers record burden.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

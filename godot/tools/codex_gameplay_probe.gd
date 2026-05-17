@@ -53,7 +53,9 @@ const ROUTE_PROBE_PLANS := [
 			{"actionId": "focus.store_counter", "payload": {}},
 			{"actionId": "conversation.start", "payload": {}},
 			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.risky"}},
-			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.probe.safe"}}
+			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.probe.safe"}},
+			{"actionId": "focus.world_record_prop", "payload": {"objectId": "studio_review_queue"}},
+			{"actionId": "player.interact.focused", "payload": {}}
 		]
 	},
 	{
@@ -413,6 +415,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("cover_held_under_suspicion expected queue mark to show distance after public warning")
 			if str(record_objects.get("park_notice_board", "")) != "warned":
 				failures.append("cover_held_under_suspicion expected public warning notice")
+			if str(record_objects.get("studio_review_queue", "")) != "deferred":
+				failures.append("cover_held_under_suspicion expected Studio review queue to defer after public warning")
 			if not _action_exists(summary, "store_clerk", "mark_receipt"):
 				failures.append("cover_held_under_suspicion expected Store Clerk marked receipt")
 			if not _action_exists(summary, "waiting_customer", "note_wary"):
@@ -427,12 +431,24 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("cover_held_under_suspicion expected visible Waiting Customer distance reaction")
 			if not _action_perceives(summary, "waiting_customer", "keep_distance", "park_notice_board"):
 				failures.append("cover_held_under_suspicion expected Waiting Customer to perceive public notice board before keeping distance")
+			if not _action_exists(summary, "studio_pm", "defer_review"):
+				failures.append("cover_held_under_suspicion expected Studio PM defer_review after public warning")
+			if not _action_perceives(summary, "studio_pm", "defer_review", "park_notice_board"):
+				failures.append("cover_held_under_suspicion expected Studio PM to perceive public notice board before deferring review")
+			if not _action_perceives(summary, "studio_pm", "defer_review", "studio_review_queue"):
+				failures.append("cover_held_under_suspicion expected Studio PM to perceive review queue before deferring review")
+			if not _visible_studio_pm_deferral(summary):
+				failures.append("cover_held_under_suspicion expected visible Studio PM review deferral reaction")
+			if not _inspected_studio_review_deferral(summary):
+				failures.append("cover_held_under_suspicion expected Codex/player to inspect deferred Studio review queue")
 			if not _observation_exists(summary, "waiting_customer", "store_clerk", "mark_receipt", "note_wary"):
 				failures.append("cover_held_under_suspicion expected Waiting Customer to read marked receipt")
 			if not _observation_exists(summary, "park_witness", "waiting_customer", "note_wary", "post_warning"):
 				failures.append("cover_held_under_suspicion expected Park Witness to read wary queue note")
 			if not _observation_exists(summary, "waiting_customer", "park_witness", "post_warning", "keep_distance"):
 				failures.append("cover_held_under_suspicion expected Waiting Customer to read public warning before keeping distance")
+			if not _observation_exists(summary, "studio_pm", "park_witness", "post_warning", "defer_review"):
+				failures.append("cover_held_under_suspicion expected Studio PM to read public warning before deferring review")
 		"soft_report":
 			if not bool(station.get("intakeOpen", false)) or bool(station.get("inquestOpen", false)):
 				failures.append("soft_report must open Station intake but stop before inquest")
@@ -508,6 +524,8 @@ func _route_player_readable_summary(route_id: String, summary: Dictionary, hud_s
 			return "Clean cover: Codex accepted the routine, the Store Clerk closed a normal receipt, public trust rose, the waiting customer shared a local tip, the Studio PM opened a review invitation from the public record, and Codex inspected that invited review queue as a visible world prop. %s." % state
 		"repair_recovered":
 			return "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, and the Park witness posted that the mismatch was repaired. %s." % state
+		"cover_held_under_suspicion":
+			return "Suspicious cover: Codex made a risky claim then returned to the Clerk premise; the Park public warning made the waiting customer keep distance, the Studio PM deferred review, and Codex inspected that deferred review queue. %s." % state
 		"soft_report":
 			return "Soft report: Codex broke routine twice, causing a pending Store report and Manager follow-up without opening inquest. %s." % state
 		"inquest_opened":
@@ -933,12 +951,32 @@ func _inspected_studio_review_invite(summary: Dictionary) -> bool:
 		and str(inspected.get("body", "")).contains("공개 확인")
 	)
 
+func _inspected_studio_review_deferral(summary: Dictionary) -> bool:
+	var inspected: Dictionary = summary.get("inspectedWorldRecordProp", {})
+	return (
+		str(inspected.get("objectId", "")) == "studio_review_queue"
+		and str(inspected.get("state", "")) == "deferred"
+		and str(inspected.get("body", "")).contains("리뷰")
+		and str(inspected.get("body", "")).contains("공개 경고")
+	)
+
 func _visible_studio_pm_invitation(summary: Dictionary) -> bool:
 	var states: Dictionary = summary.get("visibleNpcStates", {})
 	var state: Dictionary = states.get("NPC_Studio_PM", {})
 	return (
 		str(state.get("npcId", "")) == "NPC_Studio_PM"
 		and str(state.get("state", "")) == "invited"
+		and bool(state.get("markerVisible", false))
+		and str(state.get("pressureText", "")).contains("리뷰")
+		and str(state.get("reactionText", "")).contains("리뷰")
+	)
+
+func _visible_studio_pm_deferral(summary: Dictionary) -> bool:
+	var states: Dictionary = summary.get("visibleNpcStates", {})
+	var state: Dictionary = states.get("NPC_Studio_PM", {})
+	return (
+		str(state.get("npcId", "")) == "NPC_Studio_PM"
+		and str(state.get("state", "")) == "deferred"
 		and bool(state.get("markerVisible", false))
 		and str(state.get("pressureText", "")).contains("리뷰")
 		and str(state.get("reactionText", "")).contains("리뷰")

@@ -110,6 +110,7 @@ const ENVIRONMENT_AFFORDANCE_ORDER := [
 	"post_warning",
 	"post_repair_notice",
 	"invite_review",
+	"defer_review",
 	"forward_report",
 	"cite_record"
 ]
@@ -292,6 +293,15 @@ const ENVIRONMENT_ACTION_RULES := {
 			"requiresLedgerEvent": true,
 			"requiresLedgerEventKinds": ["public_routine_vouched"],
 			"minimumLocalTrust": 55
+		},
+		"defer_review": {
+			"fromStates": ["open"],
+			"toState": "deferred",
+			"eventKind": "studio_review_deferred",
+			"allowedRoles": ["studio_pm"],
+			"requiresLedgerEvent": true,
+			"requiresLedgerEventKinds": ["public_warning_posted"],
+			"maximumLocalTrust": 45
 		}
 	},
 	"station_dossier": {
@@ -1638,6 +1648,27 @@ func _keep_distance_after_warning(warning_event_id: String) -> void:
 	)
 	if bool(result.get("ok", false)):
 		_set_actor_line("NPC_Waiting_Customer", "공원 게시판에 경고가 붙었으니 조금 떨어져 있을게요. 보고까지는 아니지만 가까이 서지는 않겠습니다.")
+		_defer_studio_review_after_warning(warning_event_id)
+
+func _defer_studio_review_after_warning(warning_event_id: String) -> void:
+	if warning_event_id.is_empty():
+		return
+	if str(record_objects.get("studio_review_queue", "")) != "open":
+		return
+	var result := _apply_role_agent_action(
+		"wary.studio_pm.defer_review",
+		"NPC_Studio_PM",
+		"studio_pm",
+		"defer_review",
+		"studio_review_queue",
+		"studio_public_review_deferred",
+		"The Studio PM reads the public warning and keeps the review queue on hold instead of opening an opportunity.",
+		warning_event_id,
+		[warning_event_id]
+	)
+	if bool(result.get("ok", false)):
+		_set_actor_line("NPC_Studio_PM", "공개 경고가 붙었네요. 리뷰 줄은 오늘 보류하겠습니다.")
+		_set_actor_reaction_state("NPC_Studio_PM", "deferred", 25)
 
 func debug_agent_action_log() -> Array:
 	return agent_action_log.duplicate(true)
@@ -2015,6 +2046,8 @@ func _action_priority_hints(affordance: String, rule: Dictionary) -> Array[Strin
 		hints.append("pressure:repair_seen_publicly")
 	if affordance == "invite_review":
 		hints.append("pressure:public_trust_opens_review")
+	if affordance == "defer_review":
+		hints.append("pressure:public_warning_blocks_review")
 	if affordance == "share_local_tip":
 		hints.append("pressure:local_trust_unlocks_help")
 	if affordance == "keep_distance":
@@ -2063,6 +2096,8 @@ func _action_perceived_as(object_id: String, affordance: String) -> String:
 			return "public repair notice"
 		"invite_review":
 			return "public trust opens another local review"
+		"defer_review":
+			return "public warning defers another local review"
 	return "%s %s" % [object_id, affordance]
 
 func _action_player_label(affordance: String) -> String:
@@ -2126,6 +2161,7 @@ func _record_mutation_affordances() -> Array[String]:
 		"post_warning",
 		"post_repair_notice",
 		"invite_review",
+		"defer_review",
 		"place_note",
 		"forward_report",
 		"cite_record"
@@ -2226,6 +2262,8 @@ func _civic_economy_delta(event_kind: String) -> Dictionary:
 			return {"localTrust": 3, "recordBurden": -5}
 		"studio_review_invited":
 			return {"localTrust": 1, "recordBurden": -1}
+		"studio_review_deferred":
+			return {"localTrust": -1, "recordBurden": 1}
 		"store_exception_reported":
 			return {"localTrust": -20, "recordBurden": 35, "stationAttention": 30}
 		"store_report_escalated":
@@ -2438,6 +2476,8 @@ func _world_record_prop_inspection_body(object_id: String, state: String) -> Str
 		match state:
 			"invited":
 				return "스튜디오 리뷰 줄이 초대 상태입니다. 스튜디오 PM은 공원 게시판의 공개 확인을 읽고 플레이어에게 작은 기회를 열어뒀습니다."
+			"deferred":
+				return "스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다."
 			"open":
 				return "스튜디오 리뷰 줄은 아직 열려만 있습니다. 공개 확인 같은 사회 기록이 들어오면 다른 장소의 역할도 움직일 수 있습니다."
 	if object_id == "store_queue_mark":
@@ -2515,6 +2555,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"public_repair_noted": "공개 수습",
 		"public_warning_posted": "공개 경고",
 		"studio_review_invited": "리뷰 초대",
+		"studio_review_deferred": "리뷰 보류",
 		"queue_delay_noted": "대기줄 불평",
 		"public_rumor_posted": "공개 소문",
 		"store_exception_reported": "상점 보고",
@@ -2538,6 +2579,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"public_repair_noted": "public repair noted",
 		"public_warning_posted": "public warning posted",
 		"studio_review_invited": "review invited",
+		"studio_review_deferred": "review deferred",
 		"queue_delay_noted": "queue delay noted",
 		"public_rumor_posted": "public rumor posted",
 		"store_exception_reported": "Store report",
@@ -2587,6 +2629,7 @@ func _affordance_label(affordance: String) -> String:
 		"post_warning": "공개 경고",
 		"post_repair_notice": "수습 게시",
 		"invite_review": "리뷰 초대",
+		"defer_review": "리뷰 보류",
 		"place_note": "메모 배치",
 		"forward_report": "보고 전달",
 		"cite_record": "기록 인용"
@@ -2609,6 +2652,7 @@ func _affordance_label(affordance: String) -> String:
 		"post_warning": "post public warning",
 		"post_repair_notice": "post repair notice",
 		"invite_review": "invite review",
+		"defer_review": "defer review",
 		"place_note": "place note",
 		"forward_report": "forward report",
 		"cite_record": "cite record"
@@ -2676,6 +2720,7 @@ func _record_state_value(state: String) -> String:
 		"rumored": "소문 게시",
 		"open": "열림",
 		"invited": "초대",
+		"deferred": "보류",
 		"unknown": "미확인"
 	}
 	var en := {
@@ -2709,6 +2754,7 @@ func _record_state_value(state: String) -> String:
 		"rumored": "rumor posted",
 		"open": "open",
 		"invited": "invited",
+		"deferred": "deferred",
 		"unknown": "unknown"
 	}
 	var table: Dictionary = en if _current_locale() == "en" else ko
@@ -2722,7 +2768,7 @@ func _world_record_prop_material(object_id: String, state: String) -> StandardMa
 	material.roughness = 0.82
 	if color.a < 1.0:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	if ["pending", "forwarded", "cited", "attention", "rumored", "vouched", "warned", "invited", "settled", "helped", "distanced", "paused"].has(state):
+	if ["pending", "forwarded", "cited", "attention", "rumored", "vouched", "warned", "invited", "deferred", "settled", "helped", "distanced", "paused"].has(state):
 		material.emission_enabled = true
 		material.emission = Color(color.r, color.g, color.b, 1.0)
 		material.emission_energy_multiplier = 0.35
@@ -2732,7 +2778,7 @@ func _world_record_prop_color(object_id: String, state: String) -> Color:
 	match state:
 		"normal", "read", "serving", "player_waiting", "stable", "open":
 			return Color(0.34, 0.76, 0.82, 0.94)
-		"marked", "offered", "delayed", "distanced", "warned", "burden", "trust_low":
+		"marked", "offered", "delayed", "distanced", "warned", "deferred", "burden", "trust_low":
 			return Color(1.0, 0.68, 0.28, 0.94)
 		"attached", "corrected", "settled", "helped", "vouched", "invited":
 			return Color(0.42, 0.86, 0.58, 0.96)
@@ -3244,7 +3290,7 @@ func _terminal_outcome_body() -> String:
 	if route_outcome == "repair_recovered":
 		return "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 공개 수습 게시 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였고, 공원 목격자는 정정 기록을 보고 소문으로 돌릴 일이 아니라고 남겼습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 같은 정정 기록을 공개 수습 게시로 바꿨습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	if route_outcome == "cover_held_under_suspicion":
-		return "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 공원 게시판 공개 경고 -> 거리두기 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄고, 공원 목격자는 그 경계 기록을 보고 정식 보고 대신 공원 게시판에 공개 경고를 남겼습니다. 게시판 경고 뒤 지역 신뢰가 낮아지자 대기 손님은 플레이어와 거리를 둡니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨고, 공원 목격자가 그 경계 기록을 공개 경고로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 경고 기록을 보고 대기 표식을 거리두기 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 낮아진 지역 신뢰가 NPC의 거리두기 행동을 열었습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
+		return "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 공원 게시판 공개 경고 -> 거리두기 -> 스튜디오 리뷰 보류 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄고, 공원 목격자는 그 경계 기록을 보고 정식 보고 대신 공원 게시판에 공개 경고를 남겼습니다. 게시판 경고 뒤 지역 신뢰가 낮아지자 대기 손님은 플레이어와 거리를 두고, 스튜디오 PM은 같은 공개 경고를 읽고 리뷰 줄을 보류합니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨고, 공원 목격자가 그 경계 기록을 공개 경고로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 경고 기록을 보고 대기 표식을 거리두기 상태로 바꿨고, 스튜디오 PM은 같은 공개 기록을 근거로 리뷰 대기열을 보류 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 낮아진 지역 신뢰가 NPC의 거리두기와 다른 장소의 기회 보류를 열었습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	return "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공원 게시판 공개 확인 -> 로컬 팁 -> 스튜디오 리뷰 초대 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공원 게시판에 공개 확인을 남겼습니다. 게시판 확인으로 지역 신뢰가 충분해지자 대기 손님은 작은 로컬 팁을 공유했고, 스튜디오 PM은 같은 공개 확인을 읽고 리뷰 줄을 열어둡니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 확인 기록을 보고 대기 표식을 도움 상태로 바꿨고, 스튜디오 PM이 공개 확인을 근거로 리뷰 대기열을 초대 상태로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 다른 장소의 작은 초대 행동까지 열었습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 
 func _now_ms() -> int:

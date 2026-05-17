@@ -48,7 +48,7 @@
 - `repair_recovered`: pass `true`, stage `uneasy`, outcome `repair_recovered`, suspicion/report `20/10`
   - Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, and the Park witness posted that the mismatch was repaired. uneasy/repair_recovered, suspicion 20, report 10.
 - `cover_held_under_suspicion`: pass `true`, stage `uneasy`, outcome `cover_held_under_suspicion`, suspicion/report `35/30`
-  - Route cover_held_under_suspicion ended at uneasy/cover_held_under_suspicion, suspicion 35, report 30.
+  - Suspicious cover: Codex made a risky claim then returned to the Clerk premise; the Park public warning made the waiting customer keep distance, the Studio PM deferred review, and Codex inspected that deferred review queue. uneasy/cover_held_under_suspicion, suspicion 35, report 30.
 - `soft_report`: pass `true`, stage `reported`, outcome `soft_report`, suspicion/report `95/80`
   - Soft report: Codex broke routine twice, causing a pending Store report and Manager follow-up without opening inquest. reported/soft_report, suspicion 95, report 80.
 - `inquest_opened`: pass `true`, stage `inquest`, outcome `inquest_opened`, suspicion/report `125/120`

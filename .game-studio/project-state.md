@@ -188,7 +188,8 @@ Current M1 carry-in:
   a Park Witness can turn a routine queue record into public social trust, a
   Waiting Customer can read that public vouch and share a local tip only after
   `localTrust >= 55`, a Studio PM can read that same public vouch and open a
-  review invitation, or a Waiting Customer can read a public warning and keep distance only after
+  review invitation, a Studio PM can read a public warning and defer that
+  review queue, or a Waiting Customer can read a public warning and keep distance only after
   local trust is low,
   a Park Witness can turn a Store note into public rumor, turn a correction
   record into a public repair notice, or turn a wary queue record into an
@@ -228,6 +229,12 @@ Current M1 carry-in:
   line. Codex route probes also scope grouped actors/props/zones to the active
   scene root so multi-scene AI-play checks cannot write visible state into the
   wrong scene.
+- `NPC_Studio_PM` now also reacts to a Park public warning on the suspicious
+  route. The Studio PM reads `public_warning_posted`, sees the same
+  `studio_review_queue`, uses `defer_review`, writes `studio_review_deferred`,
+  changes the queue to `deferred`, and shows a visible `리뷰 보류` reaction.
+  This keeps Studio as a tiny cross-place example: public records can open or
+  close one opportunity without turning the project into a Store/Station sim.
 - Codex gameplay QA now runs the active proof cell through public
   `PlayableSession.debug_codex_gameplay_action` and
   `debug_codex_gameplay_snapshot` APIs. The probe can list callable player

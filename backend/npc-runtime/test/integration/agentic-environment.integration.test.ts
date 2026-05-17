@@ -755,6 +755,41 @@ test("Public warning and low local trust make a waiting customer keep distance",
   assert.equal(distanced.environment.objects.find(item => item.objectId === "store_queue_mark")?.state, "distanced");
   assert.equal(distanced.environment.economy.localTrust, 41);
   assert.equal(distanced.environment.economy.recordBurden, 25);
+
+  environment = distanced.environment;
+  const studioPm = actor({
+    actorId: "NPC_Studio_PM",
+    role: "studio_pm",
+    knownLedgerEventIds: [warning.event.eventId],
+  }, environment);
+  assert.equal(studioPm.perceivedObjectIds.includes("park_notice_board"), true);
+  assert.equal(studioPm.perceivedObjectIds.includes("studio_review_queue"), true);
+  const deferredAction = listAvailableEnvironmentActions(environment, studioPm)
+    .find(candidate => candidate.affordance === "defer_review");
+
+  assert.ok(deferredAction);
+  assert.equal(deferredAction.objectId, "studio_review_queue");
+  assert.equal(deferredAction.toState, "deferred");
+  assert.deepEqual(deferredAction.citableLedgerEventIds, [warning.event.eventId]);
+  assert.equal(deferredAction.preconditions.includes("localTrust<=45"), true);
+  assert.equal(deferredAction.preconditions.includes("ledger_event_kind:public_warning_posted"), true);
+  assert.deepEqual(deferredAction.civicEconomyEffects, ["localTrust:-1", "recordBurden:+1"]);
+
+  const deferred = requireAccepted(validateAndApplyEnvironmentAction(environment, studioPm, {
+    actorId: studioPm.actorId,
+    role: studioPm.role,
+    affordance: "defer_review",
+    objectId: "studio_review_queue",
+    recordId: "studio_public_review_deferred",
+    citedLedgerEventId: warning.event.eventId,
+    whyLine: "The Studio PM reads the public warning and keeps the review queue on hold.",
+  }));
+
+  assert.equal(deferred.event.kind, "studio_review_deferred");
+  assert.equal(deferred.event.citedLedgerEventId, warning.event.eventId);
+  assert.equal(deferred.environment.objects.find(item => item.objectId === "studio_review_queue")?.state, "deferred");
+  assert.equal(deferred.environment.economy.localTrust, 40);
+  assert.equal(deferred.environment.economy.recordBurden, 26);
 });
 
 test("Station citation only becomes available after the Station knows a Store ledger event", () => {

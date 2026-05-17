@@ -55,8 +55,8 @@ const ROUTE_DEFINITIONS := [
 		"maxReportWeight": 49,
 		"expectedStationIntake": false,
 		"expectedStationInquest": false,
-		"expectedRecordStates": {"store_queue_mark": "distanced", "receipt_tray": "marked", "correction_slip": "absent", "report_tray": "empty", "park_notice_board": "warned", "studio_review_queue": "open", "station_dossier": "absent"},
-		"expectedCivicLedgerCount": 4,
+		"expectedRecordStates": {"store_queue_mark": "distanced", "receipt_tray": "marked", "correction_slip": "absent", "report_tray": "empty", "park_notice_board": "warned", "studio_review_queue": "deferred", "station_dossier": "absent"},
+		"expectedCivicLedgerCount": 5,
 		"expectedEvents": ["conversation_started", "dialogue_choice_selected", "conversation_anomaly_detected", "npc_suspicion_changed", "conversation_outcome_reached"],
 		"forbiddenEvents": ["station_report_created", "station_inquest_opened"],
 		"expectedSignals": ["local_routine_mismatch"],
@@ -419,6 +419,8 @@ func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[St
 			failures.append("cover_held_under_suspicion outcome must show low trust causing distance")
 		if not str(summary.get("outcomeBody", "")).contains("공원 게시판의 공개 경고"):
 			failures.append("cover_held_under_suspicion outcome must show the waiting customer reacting to the park notice board")
+		if not str(summary.get("outcomeBody", "")).contains("스튜디오 리뷰 보류"):
+			failures.append("cover_held_under_suspicion outcome must show the public warning deferring the Studio review")
 	return failures
 
 func _validate_pack_shape(pack: Dictionary) -> Array[String]:
@@ -589,6 +591,12 @@ func _validate_agent_action_log(route: Dictionary, summary: Dictionary) -> Array
 		failures.append("cover_held_under_suspicion expected Waiting Customer keep_distance action after public warning")
 	if route_id == "cover_held_under_suspicion" and not _agent_action_perceives(action_log, "waiting_customer", "keep_distance", "park_notice_board"):
 		failures.append("cover_held_under_suspicion expected Waiting Customer to perceive park_notice_board before keeping distance")
+	if route_id == "cover_held_under_suspicion" and not _agent_action_exists(action_log, "studio_pm", "defer_review"):
+		failures.append("cover_held_under_suspicion expected Studio PM defer_review action after public warning")
+	if route_id == "cover_held_under_suspicion" and not _agent_action_perceives(action_log, "studio_pm", "defer_review", "park_notice_board"):
+		failures.append("cover_held_under_suspicion expected Studio PM to perceive park_notice_board before deferring review")
+	if route_id == "cover_held_under_suspicion" and not _agent_action_perceives(action_log, "studio_pm", "defer_review", "studio_review_queue"):
+		failures.append("cover_held_under_suspicion expected Studio PM to perceive studio_review_queue before deferring review")
 	if route_id == "clean_cover" and not _agent_action_exists(action_log, "park_witness", "vouch_routine"):
 		failures.append("clean_cover expected Park Witness vouch_routine action in agentActionLog")
 	if route_id == "clean_cover" and not _agent_action_exists(action_log, "waiting_customer", "share_local_tip"):
@@ -621,6 +629,8 @@ func _validate_agent_action_log(route: Dictionary, summary: Dictionary) -> Array
 		failures.append("cover_held_under_suspicion expected Park Witness reading the wary queue note")
 	if route_id == "cover_held_under_suspicion" and not _social_observation_exists(social_observations, "waiting_customer", "park_witness", "post_warning", "keep_distance"):
 		failures.append("cover_held_under_suspicion expected Waiting Customer reading the public warning before keeping distance")
+	if route_id == "cover_held_under_suspicion" and not _social_observation_exists(social_observations, "studio_pm", "park_witness", "post_warning", "defer_review"):
+		failures.append("cover_held_under_suspicion expected Studio PM reading the public warning before deferring review")
 	if route_id == "cover_held_under_suspicion" and not str(summary.get("outcomeBody", "")).contains("거리두기"):
 		failures.append("cover_held_under_suspicion outcome must show low trust causing distance")
 	if route_id == "repair_recovered" and not _social_observation_exists(social_observations, "park_witness", "store_clerk", "attach_correction", "post_repair_notice"):
@@ -696,6 +706,14 @@ func _validate_visible_social_actors(route: Dictionary, summary: Dictionary, ses
 		failures.append_array(_validate_park_witness_reaction(visible_states, route_id, "repaired", "수습"))
 	if route_id == "cover_held_under_suspicion" and _agent_action_exists(action_log, "park_witness", "post_warning"):
 		failures.append_array(_validate_park_witness_reaction(visible_states, route_id, "warned", "경고"))
+	if route_id == "cover_held_under_suspicion" and _agent_action_actor_exists(action_log, "NPC_Studio_PM"):
+		var studio_state: Dictionary = visible_states.get("NPC_Studio_PM", {})
+		if str(studio_state.get("state", "")) != "deferred":
+			failures.append("cover_held_under_suspicion expected NPC_Studio_PM visible state to show deferred review")
+		if not bool(studio_state.get("markerVisible", false)):
+			failures.append("cover_held_under_suspicion expected NPC_Studio_PM reaction marker after review deferral")
+		if not str(studio_state.get("reactionText", "")).contains("리뷰"):
+			failures.append("cover_held_under_suspicion expected NPC_Studio_PM reaction label to mention review deferral")
 	return failures
 
 func _validate_waiting_customer_reaction(visible_states: Dictionary, route_id: String, expected_state: String, expected_label: String) -> Array[String]:
@@ -758,8 +776,8 @@ func _validate_hud_record_state(route: Dictionary, summary: Dictionary, hud: Nod
 		failures.append("repair_recovered expected HUD record state to show attached correction")
 	if route_id == "repair_recovered" and str(summary.get("recordObjects", {}).get("store_queue_mark", "")) != "settled":
 		failures.append("repair_recovered expected queue mark to settle after correction")
-	if route_id == "cover_held_under_suspicion" and not record_state_label.contains("거리두기"):
-		failures.append("cover_held_under_suspicion expected HUD record state to show distance after public warning")
+	if route_id == "cover_held_under_suspicion" and not record_state_label.contains("리뷰 보류"):
+		failures.append("cover_held_under_suspicion expected HUD record state to show review deferral after public warning")
 	if route_id == "soft_report" and not record_state_label.contains("대기"):
 		failures.append("soft_report expected HUD record state to show pending report")
 	if route_id == "soft_report" and str(summary.get("recordObjects", {}).get("store_counter", "")) != "paused":
@@ -773,8 +791,8 @@ func _validate_hud_record_state(route: Dictionary, summary: Dictionary, hud: Nod
 			failures.append("inquest_opened expected HUD record state to show cited Station dossier")
 	if ["cover_held_under_suspicion", "soft_report", "inquest_opened"].has(route_id) and not record_state_label.contains("사회 반응"):
 		failures.append("%s expected HUD record state to show NPC social reaction" % route_id)
-	if route_id == "cover_held_under_suspicion" and not record_state_label.contains("대기 손님"):
-		failures.append("cover_held_under_suspicion expected HUD social reaction to name Waiting Customer")
+	if route_id == "cover_held_under_suspicion" and not record_state_label.contains("스튜디오 PM"):
+		failures.append("cover_held_under_suspicion expected HUD social reaction to name Studio PM")
 	if route_id == "soft_report" and not record_state_label.contains("상점 매니저"):
 		failures.append("soft_report expected HUD social reaction to name Store Manager")
 	if route_id == "soft_report" and not record_state_label.contains("대기 손님"):
@@ -923,6 +941,8 @@ func _affordance_label(affordance: String) -> String:
 			return "수습 게시"
 		"invite_review":
 			return "리뷰 초대"
+		"defer_review":
+			return "리뷰 보류"
 		"place_note":
 			return "메모 배치"
 		"forward_report":

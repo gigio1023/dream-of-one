@@ -96,14 +96,24 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `15e4ce3322a0c548b11ed60aa7f88715ab42631c4a8c0b7ebde84ffd578d868c`
-  - Markdown SHA-256: `34d8cf5376913ac38bdacb5ed35b01c66b8ca03658807da1b4954811db598b82`
-  - playable Evidence Pack SHA-256: `07674373507250e5861bbd8b0c7ad71bb2153d52a8f79b8f2962e5a0f96b636a`
+  - JSON SHA-256: `da11727be3fed6576dd999bb3732f9927a222df82e9dbcc476f7f85b0d870a5c`
+  - Markdown SHA-256: `13069f5169068c3b6efe7aec2a1a2591e2a067ceebc657cd4d6c76dc95727437`
+  - playable Evidence Pack SHA-256: `ca740a67c300ec9cad29798e548bcb64b7811cc69939d29e7aabce586e98b3cb`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `9 / 9`, and `routeReportPassCount=5 / 5`.
+- latest game increment: the suspicious-cover public warning now travels to a
+  different place and closes a tiny opportunity. After Park Witness posts
+  `public_warning_posted`, the Studio PM reads the Park notice board and
+  `studio_review_queue`, uses `defer_review`, changes the queue from `open` to
+  `deferred`, writes `studio_review_deferred`, and becomes visible as
+  `NPC_Studio_PM` with `리뷰 보류`. Codex/player now focus and interact with the
+  Studio review queue on the suspicious route and read the deferred body in the
+  HUD. This mirrors the clean-route invitation in the opposite direction:
+  public record -> another place's role sees it -> one small opportunity opens
+  or closes.
 - latest game increment: NPC inspection now shows the record basis behind the
   visible social stance. In the inquest Codex run, inspecting
   `NPC_Waiting_Customer` opens a HUD notice with `현재 반응: 접촉 거부`,
@@ -166,8 +176,8 @@ Latest AI-play interface check:
   pattern: public record -> another place's role sees it -> one visible
   opportunity opens.
 - latest packaged proof refresh: the macOS debug app was re-exported with
-  Godot 4.7-beta2 after the NPC basis-inspection change; zip SHA-256 is
-  `a409ed3e860f914e6b15d2a2763c269fe485ab1996f9f3a5b7a8b54d84061af6`.
+  Godot 4.7-beta2 after the Studio review deferral change; zip SHA-256 is
+  `754475313d3c8013fc389de311182edec54c806e41b0078be5add0f23532186b`.
   Packaged launch, packaged route smoke, backend schema validation, and
   comprehension preflight all passed against
   `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json`.
@@ -274,9 +284,9 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `15e4ce3322a0c548b11ed60aa7f88715ab42631c4a8c0b7ebde84ffd578d868c`
+  `da11727be3fed6576dd999bb3732f9927a222df82e9dbcc476f7f85b0d870a5c`
 - Markdown SHA-256:
-  `34d8cf5376913ac38bdacb5ed35b01c66b8ca03658807da1b4954811db598b82`
+  `13069f5169068c3b6efe7aec2a1a2591e2a067ceebc657cd4d6c76dc95727437`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
   player-visible state, player-readable cause chain, role-action explanation,
   NPC-to-NPC observation explanation, and the explicit boundary that this is
@@ -288,7 +298,9 @@ Latest AI-play interface check:
 - session kit manifests now bind the current Codex action catalog
   (`focus.store_counter`, `conversation.start`,
   `player.wait.hesitation_record`, `dialogue.choice.by_id`,
-  `dialogue.choice.by_index`, and `player.type.free_input`) so an AI coding
+  `dialogue.choice.by_index`, `player.type.free_input`,
+  `focus.world_record_prop`, `focus.npc`, `player.interact.focused`,
+  `inspect.world_record_prop`, and `inspect.npc`) so an AI coding
   tool can verify which player actions are callable before a human session.
 - session kit verification now requires both dialogue action surfaces:
   `dialogue.choice.by_id` and `dialogue.choice.by_index`, so Codex can drive

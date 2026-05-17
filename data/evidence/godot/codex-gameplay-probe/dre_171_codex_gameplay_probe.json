@@ -3268,14 +3268,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779054580673",
+				"eventId": "playable_session_started-001-1779055383884",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779054580673,
+				"timestampMs": 1779055383884,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -3288,7 +3288,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-002-1779054580754",
+				"eventId": "conversation_started-002-1779055383982",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -3297,7 +3297,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779054580754,
+				"timestampMs": 1779055383982,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -3310,7 +3310,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-003-1779054580770",
+				"eventId": "response_hesitation_noted-003-1779055383997",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -3331,7 +3331,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779054580770,
+				"timestampMs": 1779055383997,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -3346,7 +3346,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-004-1779054580783",
+				"eventId": "dialogue_choice_selected-004-1779055384010",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -3368,7 +3368,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779054580783,
+				"timestampMs": 1779055384010,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -3383,7 +3383,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-005-1779054580783",
+				"eventId": "conversation_anomaly_detected-005-1779055384010",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -3405,7 +3405,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779054580783,
+				"timestampMs": 1779055384010,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -3420,7 +3420,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-006-1779054580783",
+				"eventId": "npc_suspicion_changed-006-1779055384010",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -3442,7 +3442,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779054580783,
+				"timestampMs": 1779055384010,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -3457,7 +3457,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-007-1779054580796",
+				"eventId": "free_input_submitted-007-1779055384027",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -3482,7 +3482,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779054580796,
+				"timestampMs": 1779055384027,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -3497,7 +3497,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779054580796",
+				"eventId": "conversation_anomaly_detected-008-1779055384027",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -3522,7 +3522,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779054580796,
+				"timestampMs": 1779055384027,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -3537,7 +3537,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779054580796",
+				"eventId": "npc_suspicion_changed-009-1779055384027",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -3562,7 +3562,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779054580796,
+				"timestampMs": 1779055384027,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -3577,7 +3577,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-010-1779054580796",
+				"eventId": "suspicion_shared-010-1779055384027",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -3602,7 +3602,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779054580796,
+				"timestampMs": 1779055384027,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -3617,7 +3617,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-011-1779054580797",
+				"eventId": "station_report_created-011-1779055384028",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -3642,7 +3642,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779054580797,
+				"timestampMs": 1779055384028,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -3657,7 +3657,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-012-1779054580797",
+				"eventId": "station_inquest_opened-012-1779055384028",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -3682,7 +3682,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779054580797,
+				"timestampMs": 1779055384028,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -3692,7 +3692,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-013-1779054580838",
+				"eventId": "world_record_prop_inspected-013-1779055384079",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -3700,7 +3700,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779054580838,
+				"timestampMs": 1779055384079,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -3712,7 +3712,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-014-1779054580863",
+				"eventId": "npc_reaction_inspected-014-1779055384105",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Waiting_Customer",
 				"reactionText": "접촉 거부",
@@ -3720,7 +3720,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "refused",
 				"summary": "Inspected NPC reaction NPC_Waiting_Customer in state refused.",
-				"timestampMs": 1779054580863,
+				"timestampMs": 1779055384105,
 				"uiSummaryArgs": {
 					"npc": "Waiting Customer",
 					"state": "접촉 거부"
@@ -8836,13 +8836,17 @@
 				"focus.store_counter",
 				"conversation.start",
 				"dialogue.choice.by_id",
-				"dialogue.choice.by_id"
+				"dialogue.choice.by_id",
+				"focus.world_record_prop",
+				"player.interact.focused"
 			],
 			"actionPath": [
 				"focus.store_counter -> look at the Store counter",
 				"conversation.start -> start the clerk's Same Order question",
 				"dialogue.choice.by_id -> choose dialogue id store.same_order.risky",
-				"dialogue.choice.by_id -> choose dialogue id store.same_order.probe.safe"
+				"dialogue.choice.by_id -> choose dialogue id store.same_order.probe.safe",
+				"focus.world_record_prop -> look at environment record prop: studio_review_queue",
+				"player.interact.focused -> press the focused interaction"
 			],
 			"expected": {
 				"routeOutcome": "cover_held_under_suspicion",
@@ -8853,16 +8857,23 @@
 			"finalPlayerVisibleState": {
 				"civicEconomy": {
 					"accountCredit": 3,
-					"localTrust": 41,
-					"recordBurden": 25,
+					"localTrust": 40,
+					"recordBurden": 26,
 					"stationAttention": 0
 				},
 				"consequence": "NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다.",
 				"inspectedNpcState": {},
-				"inspectedWorldRecordProp": {},
+				"inspectedWorldRecordProp": {
+					"body": "스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다.",
+					"label": "리뷰\n보류",
+					"objectId": "studio_review_queue",
+					"state": "deferred",
+					"stateLabel": "보류",
+					"title": "스튜디오 리뷰 줄"
+				},
 				"investigationTrail": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
-				"notice": "NPC_Store_Clerk / 그럼 같은 봉투로 두겠습니다. / 플레이어 발화: 맞습니다. 제가 착각했습니다. / why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.",
-				"outcomeBody": "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 공원 게시판 공개 경고 -> 거리두기 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄고, 공원 목격자는 그 경계 기록을 보고 정식 보고 대신 공원 게시판에 공개 경고를 남겼습니다. 게시판 경고 뒤 지역 신뢰가 낮아지자 대기 손님은 플레이어와 거리를 둡니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨고, 공원 목격자가 그 경계 기록을 공개 경고로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 경고 기록을 보고 대기 표식을 거리두기 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 낮아진 지역 신뢰가 NPC의 거리두기 행동을 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+				"notice": "스튜디오 리뷰 줄 / 스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다.",
+				"outcomeBody": "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 공원 게시판 공개 경고 -> 거리두기 -> 스튜디오 리뷰 보류 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄고, 공원 목격자는 그 경계 기록을 보고 정식 보고 대신 공원 게시판에 공개 경고를 남겼습니다. 게시판 경고 뒤 지역 신뢰가 낮아지자 대기 손님은 플레이어와 거리를 두고, 스튜디오 PM은 같은 공개 경고를 읽고 리뷰 줄을 보류합니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨고, 공원 목격자가 그 경계 기록을 공개 경고로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 경고 기록을 보고 대기 표식을 거리두기 상태로 바꿨고, 스튜디오 PM은 같은 공개 기록을 근거로 리뷰 대기열을 보류 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 낮아진 지역 신뢰가 NPC의 거리두기와 다른 장소의 기회 보류를 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
 				"recordObjects": {
 					"civic_ledger": "append_only",
 					"correction_slip": "absent",
@@ -8872,10 +8883,10 @@
 					"station_dossier": "absent",
 					"store_counter": "serving",
 					"store_queue_mark": "distanced",
-					"studio_review_queue": "open",
+					"studio_review_queue": "deferred",
 					"usual_order_cue": "read"
 				},
-				"recordState": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 41 부담 25 주목 0 | 장부 4 최근 civic-ledger-4 대기 손님 / 거리두기 / 거리두기 -> civic-ledger-3 | 사회 반응 대기 손님가 공원 목격자의 공개 경고 기록을 보고 거리두기, 부담 23",
+				"recordState": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 40 부담 26 주목 0 | 장부 5 최근 civic-ledger-5 스튜디오 PM / 리뷰 보류 / 리뷰 보류 -> civic-ledger-3 | 사회 반응 스튜디오 PM가 공원 목격자의 공개 경고 기록을 보고 리뷰 보류, 부담 23",
 				"reportWeight": 30,
 				"routeOutcome": "cover_held_under_suspicion",
 				"sessionOutcome": "cover_held",
@@ -8935,14 +8946,14 @@
 					"NPC_Studio_PM": {
 						"displayName": "Studio PM",
 						"emissionEnergy": 0.345833331346512,
-						"exposure": 0,
-						"markerVisible": false,
+						"exposure": 25,
+						"markerVisible": true,
 						"materialAlpha": 0.243333339691162,
 						"npcId": "NPC_Studio_PM",
-						"pressureText": "",
-						"reactionText": "",
+						"pressureText": "공개 경고가 붙었네요. 리뷰 줄은 오늘 보류하겠습니다.",
+						"reactionText": "리뷰 보류",
 						"role": "Studio PM",
-						"state": "normal"
+						"state": "deferred"
 					},
 					"NPC_Waiting_Customer": {
 						"displayName": "Waiting Customer",
@@ -8964,20 +8975,20 @@
 				"codexInspectedWaitingCustomer": false,
 				"economyPanelReadable": false,
 				"latestLedger": {
-					"actorId": "NPC_Waiting_Customer",
-					"actorRole": "waiting_customer",
-					"affordance": "keep_distance",
+					"actorId": "NPC_Studio_PM",
+					"actorRole": "studio_pm",
+					"affordance": "defer_review",
 					"citedLedgerEventId": "civic-ledger-3",
 					"economyDelta": {
 						"localTrust": -1,
-						"recordBurden": 2
+						"recordBurden": 1
 					},
-					"eventId": "civic-ledger-4",
-					"kind": "queue_distance_kept",
-					"objectId": "store_queue_mark",
-					"recordId": "store_same_order_queue_distance",
+					"eventId": "civic-ledger-5",
+					"kind": "studio_review_deferred",
+					"objectId": "studio_review_queue",
+					"recordId": "studio_public_review_deferred",
 					"validation": "accepted",
-					"whyLine": "The public warning has lowered local trust enough that the waiting customer keeps distance."
+					"whyLine": "The Studio PM reads the public warning and keeps the review queue on hold instead of opening an opportunity."
 				},
 				"managerObservedClerk": false,
 				"parkWitnessObservedClerk": false,
@@ -8996,13 +9007,14 @@
 				"worldPropsReachInquest": false
 			},
 			"pass": true,
-			"playerReadableSummary": "Route cover_held_under_suspicion ended at uneasy/cover_held_under_suspicion, suspicion 35, report 30.",
+			"playerReadableSummary": "Suspicious cover: Codex made a risky claim then returned to the Clerk premise; the Park public warning made the waiting customer keep distance, the Studio PM deferred review, and Codex inspected that deferred review queue. uneasy/cover_held_under_suspicion, suspicion 35, report 30.",
 			"rejectedActions": [],
 			"roleActionExplanation": [
 				"store_clerk used mark_receipt on receipt_tray -> civic-ledger-1",
 				"waiting_customer used note_wary on store_queue_mark -> civic-ledger-2",
 				"park_witness used post_warning on park_notice_board -> civic-ledger-3",
-				"waiting_customer used keep_distance on store_queue_mark -> civic-ledger-4"
+				"waiting_customer used keep_distance on store_queue_mark -> civic-ledger-4",
+				"studio_pm used defer_review on studio_review_queue -> civic-ledger-5"
 			],
 			"routeId": "cover_held_under_suspicion",
 			"schemaVersion": "codex-route-play-report-v1",
@@ -9537,8 +9549,8 @@
 					],
 					"civicEconomy": {
 						"accountCredit": 3,
-						"localTrust": 41,
-						"recordBurden": 25,
+						"localTrust": 40,
+						"recordBurden": 26,
 						"stationAttention": 0
 					},
 					"hud": {
@@ -9551,11 +9563,11 @@
 						"noticeBodyLabel": "그럼 같은 봉투로 두겠습니다.\n플레이어 발화: 맞습니다. 제가 착각했습니다.\nwhy-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.",
 						"noticeTitleLabel": "NPC_Store_Clerk",
 						"noticeVisible": false,
-						"outcomeBodyLabel": "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 공원 게시판 공개 경고 -> 거리두기 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄고, 공원 목격자는 그 경계 기록을 보고 정식 보고 대신 공원 게시판에 공개 경고를 남겼습니다. 게시판 경고 뒤 지역 신뢰가 낮아지자 대기 손님은 플레이어와 거리를 둡니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨고, 공원 목격자가 그 경계 기록을 공개 경고로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 경고 기록을 보고 대기 표식을 거리두기 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 낮아진 지역 신뢰가 NPC의 거리두기 행동을 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+						"outcomeBodyLabel": "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 공원 게시판 공개 경고 -> 거리두기 -> 스튜디오 리뷰 보류 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄고, 공원 목격자는 그 경계 기록을 보고 정식 보고 대신 공원 게시판에 공개 경고를 남겼습니다. 게시판 경고 뒤 지역 신뢰가 낮아지자 대기 손님은 플레이어와 거리를 두고, 스튜디오 PM은 같은 공개 경고를 읽고 리뷰 줄을 보류합니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨고, 공원 목격자가 그 경계 기록을 공개 경고로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 경고 기록을 보고 대기 표식을 거리두기 상태로 바꿨고, 스튜디오 PM은 같은 공개 기록을 근거로 리뷰 대기열을 보류 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 낮아진 지역 신뢰가 NPC의 거리두기와 다른 장소의 기회 보류를 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
 						"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 35 -> 접수 닫힘 / 심문 닫힘 / 판정 닫힘 / 종료 열림",
 						"outcomeVisible": true,
 						"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
-						"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 41 부담 25 주목 0 | 장부 4 최근 civic-ledger-4 대기 손님 / 거리두기 / 거리두기 -> civic-ledger-3 | 사회 반응 대기 손님가 공원 목격자의 공개 경고 기록을 보고 거리두기, 부담 23",
+						"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 40 부담 26 주목 0 | 장부 5 최근 civic-ledger-5 스튜디오 PM / 리뷰 보류 / 리뷰 보류 -> civic-ledger-3 | 사회 반응 스튜디오 PM가 공원 목격자의 공개 경고 기록을 보고 리뷰 보류, 부담 23",
 						"recordedStatementLabel": "직접 입력도 기록됩니다.",
 						"riskyLineLabel": "직접 입력도 deterministic signal로만 판정됩니다.",
 						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
@@ -9564,20 +9576,20 @@
 					"inspectedWorldRecordProp": {},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
-						"actorId": "NPC_Waiting_Customer",
-						"actorRole": "waiting_customer",
-						"affordance": "keep_distance",
+						"actorId": "NPC_Studio_PM",
+						"actorRole": "studio_pm",
+						"affordance": "defer_review",
 						"citedLedgerEventId": "civic-ledger-3",
 						"economyDelta": {
 							"localTrust": -1,
-							"recordBurden": 2
+							"recordBurden": 1
 						},
-						"eventId": "civic-ledger-4",
-						"kind": "queue_distance_kept",
-						"objectId": "store_queue_mark",
-						"recordId": "store_same_order_queue_distance",
+						"eventId": "civic-ledger-5",
+						"kind": "studio_review_deferred",
+						"objectId": "studio_review_queue",
+						"recordId": "studio_public_review_deferred",
 						"validation": "accepted",
-						"whyLine": "The public warning has lowered local trust enough that the waiting customer keeps distance."
+						"whyLine": "The Studio PM reads the public warning and keeps the review queue on hold instead of opening an opportunity."
 					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
@@ -9588,7 +9600,7 @@
 						"station_dossier": "absent",
 						"store_counter": "serving",
 						"store_queue_mark": "distanced",
-						"studio_review_queue": "open",
+						"studio_review_queue": "deferred",
 						"usual_order_cue": "read"
 					},
 					"summary": {
@@ -9605,13 +9617,13 @@
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
-							"label": "시민 경제\n잔액 3 | 신뢰 41 | 부담 25 | 주목 0",
+							"label": "시민 경제\n잔액 3 | 신뢰 40 | 부담 26 | 주목 0",
 							"state": "trust_low",
 							"visible": true
 						},
 						"civic_ledger": {
 							"hasBody": true,
-							"label": "시민 장부 4건\ncivic-ledger-4 -> civic-ledger-3\n거리두기",
+							"label": "시민 장부 5건\ncivic-ledger-5 -> civic-ledger-3\n리뷰 보류",
 							"state": "append_only",
 							"visible": true
 						},
@@ -9659,8 +9671,299 @@
 						},
 						"studio_review_queue": {
 							"hasBody": true,
-							"label": "리뷰\n열림",
-							"state": "open",
+							"label": "리뷰\n보류",
+							"state": "deferred",
+							"visible": true
+						},
+						"usual_order_cue": {
+							"hasBody": true,
+							"label": "늘 같은 주문\n읽힘",
+							"state": "read",
+							"visible": true
+						}
+					}
+				},
+				{
+					"availableChoices": [
+						"맞습니다. 제가 착각했습니다.",
+						"어제 일이 조금 흐릿해서 확인했습니다.",
+						"저는 여기 사람이 아닙니다."
+					],
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 40,
+						"recordBurden": 26,
+						"stationAttention": 0
+					},
+					"hud": {
+						"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
+						"consequenceLabel": "NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다.",
+						"focusLabel": "E: 스튜디오 리뷰 줄 읽기",
+						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
+						"freeInputVisible": false,
+						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
+						"noticeBodyLabel": "그럼 같은 봉투로 두겠습니다.\n플레이어 발화: 맞습니다. 제가 착각했습니다.\nwhy-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.",
+						"noticeTitleLabel": "NPC_Store_Clerk",
+						"noticeVisible": false,
+						"outcomeBodyLabel": "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 공원 게시판 공개 경고 -> 거리두기 -> 스튜디오 리뷰 보류 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄고, 공원 목격자는 그 경계 기록을 보고 정식 보고 대신 공원 게시판에 공개 경고를 남겼습니다. 게시판 경고 뒤 지역 신뢰가 낮아지자 대기 손님은 플레이어와 거리를 두고, 스튜디오 PM은 같은 공개 경고를 읽고 리뷰 줄을 보류합니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨고, 공원 목격자가 그 경계 기록을 공개 경고로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 경고 기록을 보고 대기 표식을 거리두기 상태로 바꿨고, 스튜디오 PM은 같은 공개 기록을 근거로 리뷰 대기열을 보류 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 낮아진 지역 신뢰가 NPC의 거리두기와 다른 장소의 기회 보류를 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+						"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 35 -> 접수 닫힘 / 심문 닫힘 / 판정 닫힘 / 종료 열림",
+						"outcomeVisible": true,
+						"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
+						"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 40 부담 26 주목 0 | 장부 5 최근 civic-ledger-5 스튜디오 PM / 리뷰 보류 / 리뷰 보류 -> civic-ledger-3 | 사회 반응 스튜디오 PM가 공원 목격자의 공개 경고 기록을 보고 리뷰 보류, 부담 23",
+						"recordedStatementLabel": "직접 입력도 기록됩니다.",
+						"riskyLineLabel": "직접 입력도 deterministic signal로만 판정됩니다.",
+						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
+						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
+					},
+					"inspectedWorldRecordProp": {},
+					"label": "focus.world_record_prop",
+					"latestLedger": {
+						"actorId": "NPC_Studio_PM",
+						"actorRole": "studio_pm",
+						"affordance": "defer_review",
+						"citedLedgerEventId": "civic-ledger-3",
+						"economyDelta": {
+							"localTrust": -1,
+							"recordBurden": 1
+						},
+						"eventId": "civic-ledger-5",
+						"kind": "studio_review_deferred",
+						"objectId": "studio_review_queue",
+						"recordId": "studio_public_review_deferred",
+						"validation": "accepted",
+						"whyLine": "The Studio PM reads the public warning and keeps the review queue on hold instead of opening an opportunity."
+					},
+					"recordObjects": {
+						"civic_ledger": "append_only",
+						"correction_slip": "absent",
+						"park_notice_board": "warned",
+						"receipt_tray": "marked",
+						"report_tray": "empty",
+						"station_dossier": "absent",
+						"store_counter": "serving",
+						"store_queue_mark": "distanced",
+						"studio_review_queue": "deferred",
+						"usual_order_cue": "read"
+					},
+					"summary": {
+						"inputLocked": true,
+						"lastDialogueChoice": "store.same_order.probe.safe",
+						"lastReasonCode": "none",
+						"reportWeight": 30,
+						"responseHesitationCount": 0,
+						"routeOutcome": "cover_held_under_suspicion",
+						"sessionOutcome": "cover_held",
+						"stage": "uneasy",
+						"suspicion": 35
+					},
+					"worldRecordProps": {
+						"civic_economy_panel": {
+							"hasBody": true,
+							"label": "시민 경제\n잔액 3 | 신뢰 40 | 부담 26 | 주목 0",
+							"state": "trust_low",
+							"visible": true
+						},
+						"civic_ledger": {
+							"hasBody": true,
+							"label": "시민 장부 5건\ncivic-ledger-5 -> civic-ledger-3\n리뷰 보류",
+							"state": "append_only",
+							"visible": true
+						},
+						"correction_slip": {
+							"hasBody": true,
+							"label": "정정\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"park_notice_board": {
+							"hasBody": true,
+							"label": "공개판\n경고 게시",
+							"state": "warned",
+							"visible": true
+						},
+						"receipt_tray": {
+							"hasBody": true,
+							"label": "영수증\n표시됨",
+							"state": "marked",
+							"visible": true
+						},
+						"report_tray": {
+							"hasBody": true,
+							"label": "보고\n비어 있음",
+							"state": "empty",
+							"visible": true
+						},
+						"station_dossier": {
+							"hasBody": true,
+							"label": "스테이션 문서\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"store_counter": {
+							"hasBody": true,
+							"label": "카운터\n응대 중",
+							"state": "serving",
+							"visible": true
+						},
+						"store_queue_mark": {
+							"hasBody": true,
+							"label": "대기 표식\n거리 둠",
+							"state": "distanced",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n보류",
+							"state": "deferred",
+							"visible": true
+						},
+						"usual_order_cue": {
+							"hasBody": true,
+							"label": "늘 같은 주문\n읽힘",
+							"state": "read",
+							"visible": true
+						}
+					}
+				},
+				{
+					"availableChoices": [
+						"맞습니다. 제가 착각했습니다.",
+						"어제 일이 조금 흐릿해서 확인했습니다.",
+						"저는 여기 사람이 아닙니다."
+					],
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 40,
+						"recordBurden": 26,
+						"stationAttention": 0
+					},
+					"hud": {
+						"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
+						"consequenceLabel": "NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다.",
+						"focusLabel": "E: 스튜디오 리뷰 줄 읽기",
+						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
+						"freeInputVisible": false,
+						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
+						"noticeBodyLabel": "스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다.",
+						"noticeTitleLabel": "스튜디오 리뷰 줄",
+						"noticeVisible": false,
+						"outcomeBodyLabel": "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 공원 게시판 공개 경고 -> 거리두기 -> 스튜디오 리뷰 보류 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄고, 공원 목격자는 그 경계 기록을 보고 정식 보고 대신 공원 게시판에 공개 경고를 남겼습니다. 게시판 경고 뒤 지역 신뢰가 낮아지자 대기 손님은 플레이어와 거리를 두고, 스튜디오 PM은 같은 공개 경고를 읽고 리뷰 줄을 보류합니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨고, 공원 목격자가 그 경계 기록을 공개 경고로 바꿨습니다. 이후 대기 손님이 공원 게시판의 공개 경고 기록을 보고 대기 표식을 거리두기 상태로 바꿨고, 스튜디오 PM은 같은 공개 기록을 근거로 리뷰 대기열을 보류 상태로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 낮아진 지역 신뢰가 NPC의 거리두기와 다른 장소의 기회 보류를 열었습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+						"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 35 -> 접수 닫힘 / 심문 닫힘 / 판정 닫힘 / 종료 열림",
+						"outcomeVisible": true,
+						"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
+						"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 40 부담 26 주목 0 | 장부 5 최근 civic-ledger-5 스튜디오 PM / 리뷰 보류 / 리뷰 보류 -> civic-ledger-3 | 사회 반응 스튜디오 PM가 공원 목격자의 공개 경고 기록을 보고 리뷰 보류, 부담 23",
+						"recordedStatementLabel": "직접 입력도 기록됩니다.",
+						"riskyLineLabel": "직접 입력도 deterministic signal로만 판정됩니다.",
+						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
+						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
+					},
+					"inspectedWorldRecordProp": {
+						"body": "스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다.",
+						"label": "리뷰\n보류",
+						"objectId": "studio_review_queue",
+						"state": "deferred",
+						"stateLabel": "보류",
+						"title": "스튜디오 리뷰 줄"
+					},
+					"label": "player.interact.focused",
+					"latestLedger": {
+						"actorId": "NPC_Studio_PM",
+						"actorRole": "studio_pm",
+						"affordance": "defer_review",
+						"citedLedgerEventId": "civic-ledger-3",
+						"economyDelta": {
+							"localTrust": -1,
+							"recordBurden": 1
+						},
+						"eventId": "civic-ledger-5",
+						"kind": "studio_review_deferred",
+						"objectId": "studio_review_queue",
+						"recordId": "studio_public_review_deferred",
+						"validation": "accepted",
+						"whyLine": "The Studio PM reads the public warning and keeps the review queue on hold instead of opening an opportunity."
+					},
+					"recordObjects": {
+						"civic_ledger": "append_only",
+						"correction_slip": "absent",
+						"park_notice_board": "warned",
+						"receipt_tray": "marked",
+						"report_tray": "empty",
+						"station_dossier": "absent",
+						"store_counter": "serving",
+						"store_queue_mark": "distanced",
+						"studio_review_queue": "deferred",
+						"usual_order_cue": "read"
+					},
+					"summary": {
+						"inputLocked": true,
+						"lastDialogueChoice": "store.same_order.probe.safe",
+						"lastReasonCode": "none",
+						"reportWeight": 30,
+						"responseHesitationCount": 0,
+						"routeOutcome": "cover_held_under_suspicion",
+						"sessionOutcome": "cover_held",
+						"stage": "uneasy",
+						"suspicion": 35
+					},
+					"worldRecordProps": {
+						"civic_economy_panel": {
+							"hasBody": true,
+							"label": "시민 경제\n잔액 3 | 신뢰 40 | 부담 26 | 주목 0",
+							"state": "trust_low",
+							"visible": true
+						},
+						"civic_ledger": {
+							"hasBody": true,
+							"label": "시민 장부 5건\ncivic-ledger-5 -> civic-ledger-3\n리뷰 보류",
+							"state": "append_only",
+							"visible": true
+						},
+						"correction_slip": {
+							"hasBody": true,
+							"label": "정정\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"park_notice_board": {
+							"hasBody": true,
+							"label": "공개판\n경고 게시",
+							"state": "warned",
+							"visible": true
+						},
+						"receipt_tray": {
+							"hasBody": true,
+							"label": "영수증\n표시됨",
+							"state": "marked",
+							"visible": true
+						},
+						"report_tray": {
+							"hasBody": true,
+							"label": "보고\n비어 있음",
+							"state": "empty",
+							"visible": true
+						},
+						"station_dossier": {
+							"hasBody": true,
+							"label": "스테이션 문서\n없음",
+							"state": "absent",
+							"visible": true
+						},
+						"store_counter": {
+							"hasBody": true,
+							"label": "카운터\n응대 중",
+							"state": "serving",
+							"visible": true
+						},
+						"store_queue_mark": {
+							"hasBody": true,
+							"label": "대기 표식\n거리 둠",
+							"state": "distanced",
+							"visible": true
+						},
+						"studio_review_queue": {
+							"hasBody": true,
+							"label": "리뷰\n보류",
+							"state": "deferred",
 							"visible": true
 						},
 						"usual_order_cue": {
@@ -9675,18 +9978,19 @@
 			"socialObservationExplanation": [
 				"waiting_customer saw store_clerk mark_receipt at civic-ledger-1, then chose note_wary",
 				"park_witness saw waiting_customer note_wary at civic-ledger-2, then chose post_warning",
-				"waiting_customer saw park_witness post_warning at civic-ledger-3, then chose keep_distance"
+				"waiting_customer saw park_witness post_warning at civic-ledger-3, then chose keep_distance",
+				"studio_pm saw park_witness post_warning at civic-ledger-3, then chose defer_review"
 			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
-					"label": "시민 경제\n잔액 3 | 신뢰 41 | 부담 25 | 주목 0",
+					"label": "시민 경제\n잔액 3 | 신뢰 40 | 부담 26 | 주목 0",
 					"state": "trust_low",
 					"visible": true
 				},
 				"civic_ledger": {
 					"hasBody": true,
-					"label": "시민 장부 4건\ncivic-ledger-4 -> civic-ledger-3\n거리두기",
+					"label": "시민 장부 5건\ncivic-ledger-5 -> civic-ledger-3\n리뷰 보류",
 					"state": "append_only",
 					"visible": true
 				},
@@ -9734,8 +10038,8 @@
 				},
 				"studio_review_queue": {
 					"hasBody": true,
-					"label": "리뷰\n열림",
-					"state": "open",
+					"label": "리뷰\n보류",
+					"state": "deferred",
 					"visible": true
 				},
 				"usual_order_cue": {

@@ -240,7 +240,7 @@ const ROUTE_SPECS: RouteSpec[] = [
     sessionOutcome: "soft_report",
     playerLineKind: "soft_report_line",
     playerLine: "오늘은 그냥 지나가는 중인데, 늘 먹던 게 뭔지는 모르겠네요.",
-    socialReactionSummary: "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, and a manager follow-up without Station citation.",
+    socialReactionSummary: "The provider-shaped proposal path creates a Store report, a queue reaction, a Park notice, and a manager follow-up plus service pause without Station citation.",
     steps: [
       {
         stepId: "soft.clerk.mark_receipt",
@@ -300,6 +300,16 @@ const ROUTE_SPECS: RouteSpec[] = [
         recordId: "store_same_order_manager_followup",
         whyLine: "The manager can see the pending Store note and adds a liability note without citing private Station facts.",
         npcLineCandidate: "보고 트레이가 열린 이상 예외 기록을 하나 더 붙입니다.",
+      },
+      {
+        stepId: "soft.manager.pause_service",
+        actorId: "NPC_Store_Manager",
+        actorRole: "store_manager",
+        stepGoal: "pause counter service while the local report is unresolved",
+        affordance: "pause_service",
+        objectId: "store_counter",
+        whyLine: "The manager pauses counter service because the pending Store note has made normal service unsafe to continue.",
+        npcLineCandidate: "보고가 붙은 동안 카운터를 잠시 멈춥니다.",
       },
     ],
   },

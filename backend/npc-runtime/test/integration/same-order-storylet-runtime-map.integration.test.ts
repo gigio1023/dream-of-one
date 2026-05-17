@@ -31,6 +31,8 @@ test("Same Order storylet runtime map binds beats to route actions and provider 
   const handoff = report.beats.find(beat => beat.beatId === "social_handoff");
   assert.ok(handoff);
   assert.deepEqual(handoff.routeIds, ["soft_report", "inquest_opened"]);
+  assert.equal(handoff.actionStepIds.includes("soft.manager.pause_service"), true);
+  assert.equal(handoff.providerJobIds.includes("soft_report.soft.manager.pause_service.provider-action-proposal"), true);
   assert.equal(handoff.actionStepIds.includes("inquest.manager.forward_report"), true);
   assert.equal(handoff.providerJobIds.includes("inquest_opened.inquest.manager.forward_report.provider-action-proposal"), true);
 

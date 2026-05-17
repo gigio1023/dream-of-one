@@ -75,8 +75,8 @@ const ROUTE_DEFINITIONS := [
 		"maxReportWeight": 99,
 		"expectedStationIntake": true,
 		"expectedStationInquest": false,
-		"expectedRecordStates": {"store_queue_mark": "disrupted", "receipt_tray": "marked", "report_tray": "pending", "park_notice_board": "rumored", "station_dossier": "absent"},
-		"expectedCivicLedgerCount": 5,
+		"expectedRecordStates": {"store_queue_mark": "disrupted", "store_counter": "paused", "receipt_tray": "marked", "report_tray": "pending", "park_notice_board": "rumored", "station_dossier": "absent"},
+		"expectedCivicLedgerCount": 6,
 		"expectedEvents": ["conversation_started", "dialogue_choice_selected", "conversation_anomaly_detected", "npc_suspicion_changed", "suspicion_shared", "station_report_created", "conversation_outcome_reached"],
 		"forbiddenEvents": ["station_inquest_opened", "free_input_submitted"],
 		"expectedSignals": ["local_routine_mismatch", "prior_statement_contradiction"]
@@ -383,7 +383,7 @@ func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[St
 			failures.append("soft_report must stop before inquest")
 		if not str(summary.get("outcomeBody", "")).contains("심문 기준에는 닿지 않았습니다"):
 			failures.append("soft_report outcome must explain report without inquest")
-		if not str(summary.get("outcomeBody", "")).contains("플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 스테이션 경고 접수"):
+		if not str(summary.get("outcomeBody", "")).contains("플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 카운터 중단 -> 스테이션 경고 접수"):
 			failures.append("soft_report outcome must show speech-to-record-to-warning chain")
 		if not str(summary.get("outcomeBody", "")).contains("사회 반응"):
 			failures.append("soft_report outcome must name the NPC-to-NPC social reaction")
@@ -564,6 +564,8 @@ func _validate_agent_action_log(route: Dictionary, summary: Dictionary) -> Array
 				failures.append("%s expected action affordance to match civicLedger[%d]" % [route_id, index])
 	if route_id == "soft_report" and not _agent_action_has_role(action_log, "store_manager"):
 		failures.append("soft_report expected Store Manager validated action in agentActionLog")
+	if route_id == "soft_report" and not _agent_action_exists(action_log, "store_manager", "pause_service"):
+		failures.append("soft_report expected Store Manager to pause counter service")
 	if route_id == "cover_held_under_suspicion" and not _agent_action_exists(action_log, "waiting_customer", "note_wary"):
 		failures.append("cover_held_under_suspicion expected Waiting Customer note_wary action in agentActionLog")
 	var social_observations: Array = summary.get("socialObservationTrace", [])
@@ -627,6 +629,8 @@ func _validate_hud_record_state(route: Dictionary, summary: Dictionary, hud: Nod
 		failures.append("cover_held_under_suspicion expected HUD record state to show a local wary queue note")
 	if route_id == "soft_report" and not record_state_label.contains("대기"):
 		failures.append("soft_report expected HUD record state to show pending report")
+	if route_id == "soft_report" and str(summary.get("recordObjects", {}).get("store_counter", "")) != "paused":
+		failures.append("soft_report expected counter service to pause after manager action")
 	if route_id == "inquest_opened":
 		if not record_state_label.contains("전달"):
 			failures.append("inquest_opened expected HUD record state to show forwarded report")
@@ -755,6 +759,8 @@ func _affordance_label(affordance: String) -> String:
 			return "정정 첨부"
 		"accept_repair":
 			return "수습 수락"
+		"pause_service":
+			return "응대 중단"
 		"complain_delay":
 			return "대기 불평"
 		"post_rumor":
@@ -908,9 +914,10 @@ func _agentic_route_proof(route_id: String) -> Dictionary:
 			_agentic_trace("soft.clerk.place_note", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "place_note", "report_tray", "civic-ledger-2", "store_exception_reported", {"recordId": "store_same_order_clerk_statement"}, _economy(3, 25, 50, 30), "The unresolved line creates a local Store note without opening Station inquest yet."),
 			_agentic_trace("soft.waiting_customer.complain_delay", "NPC_Waiting_Customer", "waiting_customer", ["store_queue_mark", "store_counter", "usual_order_cue"], "complain_delay", "store_queue_mark", "civic-ledger-3", "queue_delay_noted", {"recordId": "store_same_order_queue_delay", "citedLedgerEventId": "civic-ledger-2"}, _economy(3, 25, 55, 30), "A waiting customer sees the clerk note slow the line and adds public queue pressure."),
 			_agentic_trace("soft.park_witness.post_rumor", "NPC_Park_Witness", "park_witness", ["park_notice_board"], "post_rumor", "park_notice_board", "civic-ledger-4", "public_rumor_posted", {"recordId": "park_public_rumor", "citedLedgerEventId": "civic-ledger-2"}, _economy(3, 25, 60, 30), "The Park witness sees the Store note becoming public talk and pins a small notice outside the queue."),
-			_agentic_trace("soft.manager.place_followup_note", "NPC_Store_Manager", "store_manager", ["store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "place_note", "report_tray", "civic-ledger-5", "store_exception_reported", {"recordId": "store_same_order_manager_followup"}, _economy(3, 5, 95, 60), "The manager can see the pending Store note and adds a liability note without citing private Station facts.")
+			_agentic_trace("soft.manager.place_followup_note", "NPC_Store_Manager", "store_manager", ["store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "place_note", "report_tray", "civic-ledger-5", "store_exception_reported", {"recordId": "store_same_order_manager_followup"}, _economy(3, 5, 95, 60), "The manager can see the pending Store note and adds a liability note without citing private Station facts."),
+			_agentic_trace("soft.manager.pause_service", "NPC_Store_Manager", "store_manager", ["store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "pause_service", "store_counter", "civic-ledger-6", "service_paused", {}, _economy(3, 5, 100, 60), "The manager pauses counter service because the pending Store note has made normal service unsafe to continue.")
 		]
-		return _agentic_route_result(route_id, "soft_report", "soft_report_line", "오늘은 그냥 지나가는 중인데, 늘 먹던 게 뭔지는 모르겠네요.", "The clerk creates a note, the queue reacts, a Park witness posts a public rumor, and the manager adds a pending follow-up; Station inquest is not opened.", soft_report_trace, _agentic_final_states({"store_queue_mark": "disrupted", "receipt_tray": "marked", "report_tray": "pending", "park_notice_board": "rumored"}))
+		return _agentic_route_result(route_id, "soft_report", "soft_report_line", "오늘은 그냥 지나가는 중인데, 늘 먹던 게 뭔지는 모르겠네요.", "The clerk creates a note, the queue reacts, a Park witness posts a public rumor, and the manager pauses service after adding a pending follow-up; Station inquest is not opened.", soft_report_trace, _agentic_final_states({"store_queue_mark": "disrupted", "store_counter": "paused", "receipt_tray": "marked", "report_tray": "pending", "park_notice_board": "rumored"}))
 	if route_id == "inquest_opened":
 		var inquest_trace := [
 			_agentic_trace("inquest.clerk.mark_receipt", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "mark_receipt", "receipt_tray", "civic-ledger-1", "store_receipt_marked", {"recordId": "store_same_order_receipt"}, _economy(3, 45, 15, 0), "The player contradicts the usual order, so the clerk marks the receipt."),

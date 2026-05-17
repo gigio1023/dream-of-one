@@ -100,7 +100,15 @@ Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `5 / 5`, and `routeReportPassCount=5 / 5`.
-- latest game increment: suspicious cover now leaves a small local social
+- latest game increment: soft report now changes the environment immediately
+  instead of remaining only a report record. When the Clerk note crosses the
+  report threshold but stays below inquest, the Store Manager adds a follow-up
+  note, uses `pause_service` on `store_counter`, changes the counter state to
+  `paused`, adds `service_paused`, and the outcome copy explains that service
+  stops because the local report made normal counter flow unsafe. This proves a
+  reusable pattern: a social record can interrupt an environment affordance
+  without expanding Store/Station into a larger management sim.
+- prior suspicious-cover increment remains current: suspicious cover now leaves a small local social
   residue without becoming a report. When the player says a risky line and then
   returns to the clerk's premise, the Clerk marks the receipt; the Waiting
   Customer reads that marked receipt, uses `note_wary` on the queue mark,
@@ -132,9 +140,9 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `f3767775cb393b577c7c58b844a906c0aab6be5588c406ee597b6b793e436934`
+  `3757cc1ccf73ebcc7d77eeb867b0a8a0bbe260104c80a01e6753ea739fb9eb9c`
 - Markdown SHA-256:
-  `9f0d0ed934d757b053f80b6fbd5cc4154010504093c5ea02a376c1546324c889`
+  `ffedc48789449c36b24d54b464fb9a2e0487797abce9479143f7faadcec677d4`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
   player-visible state, player-readable cause chain, role-action explanation,
   NPC-to-NPC observation explanation, and the explicit boundary that this is

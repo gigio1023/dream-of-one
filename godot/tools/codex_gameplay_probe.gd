@@ -373,8 +373,12 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("soft_report must open Station intake but stop before inquest")
 			if str(record_objects.get("report_tray", "")) != "pending":
 				failures.append("soft_report expected pending report tray")
+			if str(record_objects.get("store_counter", "")) != "paused":
+				failures.append("soft_report expected counter service to pause")
 			if not _action_exists(summary, "store_manager", "place_note"):
 				failures.append("soft_report expected Store Manager follow-up note")
+			if not _action_exists(summary, "store_manager", "pause_service"):
+				failures.append("soft_report expected Store Manager pause_service action")
 			if not _observation_exists(summary, "store_manager", "store_clerk", "place_note", "place_note"):
 				failures.append("soft_report expected Manager to act from Clerk note")
 		"inquest_opened":

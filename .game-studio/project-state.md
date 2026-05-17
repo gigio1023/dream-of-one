@@ -117,7 +117,7 @@ Current M1 carry-in:
   object-state, and civic economy outcomes.
 - backend provider scheduling seed
   `backend/npc-runtime/src/runtime/same-order-provider-scheduling.ts` now
-  turns that comparison into 18 bounded Store Clerk, Waiting Customer, Store Manager, and Station
+  turns that comparison into 19 bounded Store Clerk, Waiting Customer, Store Manager, and Station
   Officer role-agent provider jobs. Each job carries available action context,
   allowed provider fields, forbidden authority fields, deterministic fallback
   wording, and the accepted locked action; live Godot dispatch remains
@@ -183,8 +183,9 @@ Current M1 carry-in:
   the queue locally wary without opening a report, react to a clerk note by
   adding toy queue pressure, or read an attached correction slip and accept the repair;
   a Park Witness can turn a Store note into public rumor; Store Manager follows
-  up or forwards the report; Station Officer cites the exact forwarded ledger
-  event. Each log entry now includes the available action candidates and
+  up on a soft report, pauses counter service when the local report makes
+  normal flow unsafe, or forwards the report on the inquest route; Station
+  Officer cites the exact forwarded ledger event. Each log entry now includes the available action candidates and
   selection reason used before the mutation.
 - Codex gameplay QA now runs the active proof cell through public
   `PlayableSession.debug_codex_gameplay_action` and

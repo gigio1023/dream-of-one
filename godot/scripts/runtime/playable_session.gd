@@ -91,6 +91,7 @@ const ENVIRONMENT_AFFORDANCE_ORDER := [
 	"note_wary",
 	"complain_delay",
 	"accept_repair",
+	"pause_service",
 	"cite_expected_order",
 	"create_receipt",
 	"mark_receipt",
@@ -108,12 +109,21 @@ const STORE_LEDGER_EVENT_KINDS := [
 	"queue_repair_accepted",
 	"store_exception_reported",
 	"store_report_escalated",
+	"service_paused",
 	"store_receipt_marked",
 	"correction_offered",
 	"correction_attached"
 ]
 
 const ENVIRONMENT_ACTION_RULES := {
+	"store_counter": {
+		"pause_service": {
+			"fromStates": ["serving", "idle"],
+			"toState": "paused",
+			"eventKind": "service_paused",
+			"allowedRoles": ["store_clerk", "store_manager"]
+		}
+	},
 	"store_queue_mark": {
 		"accept_routine": {
 			"fromStates": ["player_waiting", "delayed"],
@@ -1008,7 +1018,16 @@ func _apply_social_consequence(evaluation: Dictionary) -> void:
 				"store_same_order_manager_followup",
 				"The manager can see the pending Store note and adds a liability note without citing private Station facts."
 			)
-			_set_actor_line("NPC_Store_Manager", "보고 트레이가 열린 이상 예외 기록을 하나 더 붙입니다.")
+			_apply_role_agent_action(
+				"report.manager.pause_service",
+				"NPC_Store_Manager",
+				"store_manager",
+				"pause_service",
+				"store_counter",
+				"",
+				"The manager pauses counter service because the pending Store note has made normal service unsafe to continue."
+			)
+			_set_actor_line("NPC_Store_Manager", "보고가 붙은 동안 카운터를 잠시 멈춥니다.")
 		_record_event(
 			"domain",
 			"station_report_created",
@@ -1631,6 +1650,8 @@ func _action_priority_hints(affordance: String, rule: Dictionary) -> Array[Strin
 		hints.append("pressure:wary_queue")
 	if affordance == "accept_repair":
 		hints.append("pressure:repair_accepted")
+	if affordance == "pause_service":
+		hints.append("pressure:service_paused")
 	if affordance == "post_rumor":
 		hints.append("pressure:public_talk")
 	return hints
@@ -1647,6 +1668,8 @@ func _action_perceived_as(object_id: String, affordance: String) -> String:
 			return "public repair acceptance"
 		"note_wary":
 			return "local wary queue note"
+		"pause_service":
+			return "paused local service"
 		"place_note":
 			return "Store report note"
 		"forward_report":
@@ -1779,6 +1802,8 @@ func _civic_economy_delta(event_kind: String) -> Dictionary:
 			return {"localTrust": -20, "recordBurden": 35, "stationAttention": 30}
 		"store_report_escalated":
 			return {"localTrust": -20, "recordBurden": 25, "stationAttention": 40}
+		"service_paused":
+			return {"recordBurden": 5}
 	return {}
 
 func _apply_civic_economy_delta(delta: Dictionary) -> void:
@@ -1882,7 +1907,7 @@ func _compact_world_record_prop_label(object_id: String, state: String) -> Strin
 	if _current_locale() == "en":
 		match object_id:
 			"store_counter":
-				return "COUNTER\nserving"
+				return "COUNTER\n%s" % _record_state_value(state)
 			"receipt_tray":
 				return "RECEIPT\n%s" % _record_state_value(state)
 			"correction_slip":
@@ -1894,7 +1919,7 @@ func _compact_world_record_prop_label(object_id: String, state: String) -> Strin
 		return ""
 	match object_id:
 		"store_counter":
-			return "카운터\n응대"
+			return "카운터\n%s" % _record_state_value(state)
 		"receipt_tray":
 			return "영수증\n%s" % _record_state_value(state)
 		"correction_slip":
@@ -1918,6 +1943,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"public_rumor_posted": "공개 소문",
 		"store_exception_reported": "상점 보고",
 		"store_report_escalated": "보고 전달",
+		"service_paused": "응대 중단",
 		"station_record_cited": "스테이션 인용"
 	}
 	var en := {
@@ -1932,6 +1958,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"public_rumor_posted": "public rumor posted",
 		"store_exception_reported": "Store report",
 		"store_report_escalated": "report forwarded",
+		"service_paused": "service paused",
 		"station_record_cited": "Station cited"
 	}
 	var table: Dictionary = en if _current_locale() == "en" else ko
@@ -1963,6 +1990,7 @@ func _affordance_label(affordance: String) -> String:
 		"mark_receipt": "영수증 표시",
 		"attach_correction": "정정 첨부",
 		"accept_repair": "수습 수락",
+		"pause_service": "응대 중단",
 		"complain_delay": "대기 불평",
 		"post_rumor": "공개 게시",
 		"place_note": "메모 배치",
@@ -1976,6 +2004,7 @@ func _affordance_label(affordance: String) -> String:
 		"mark_receipt": "mark receipt",
 		"attach_correction": "attach correction",
 		"accept_repair": "accept repair",
+		"pause_service": "pause service",
 		"complain_delay": "complain delay",
 		"post_rumor": "post public rumor",
 		"place_note": "place note",
@@ -2026,6 +2055,7 @@ func _record_state_value(state: String) -> String:
 		"cited": "인용됨",
 		"read": "읽힘",
 		"serving": "응대 중",
+		"paused": "응대 중단",
 		"player_waiting": "플레이어 대기",
 		"delayed": "조금 지연",
 		"settled": "줄 안정",
@@ -2052,6 +2082,7 @@ func _record_state_value(state: String) -> String:
 		"cited": "cited",
 		"read": "read",
 		"serving": "serving",
+		"paused": "paused",
 		"player_waiting": "player waiting",
 		"delayed": "slowed",
 		"settled": "settled",
@@ -2075,7 +2106,7 @@ func _world_record_prop_material(object_id: String, state: String) -> StandardMa
 	material.roughness = 0.82
 	if color.a < 1.0:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	if ["pending", "forwarded", "cited", "attention", "rumored", "settled"].has(state):
+	if ["pending", "forwarded", "cited", "attention", "rumored", "settled", "paused"].has(state):
 		material.emission_enabled = true
 		material.emission = Color(color.r, color.g, color.b, 1.0)
 		material.emission_energy_multiplier = 0.35
@@ -2089,7 +2120,7 @@ func _world_record_prop_color(object_id: String, state: String) -> Color:
 			return Color(1.0, 0.68, 0.28, 0.94)
 		"attached", "corrected", "settled":
 			return Color(0.42, 0.86, 0.58, 0.96)
-		"pending", "rumored":
+		"pending", "rumored", "paused":
 			return Color(1.0, 0.52, 0.24, 0.96)
 		"forwarded", "cited", "attention":
 			return Color(1.0, 0.34, 0.26, 0.98)
@@ -2451,7 +2482,7 @@ func _terminal_outcome_title() -> String:
 
 func _terminal_outcome_body() -> String:
 	if session_outcome == "soft_report":
-		return "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 상점 관리자가 기록 부담을 보고 후속 메모를 붙였습니다.\n역할 행동: 상점 관리자가 보고 트레이에 점원 기록을 전달했습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
+		return "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 카운터 중단 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 상점 관리자가 기록 부담을 보고 후속 메모를 붙인 뒤 카운터 응대를 잠시 멈췄습니다.\n역할 행동: 상점 관리자가 보고 트레이에 후속 기록을 남기고 카운터를 중단 상태로 바꿨습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	if route_outcome == "repair_recovered":
 		return "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	if route_outcome == "cover_held_under_suspicion":

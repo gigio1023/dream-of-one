@@ -221,6 +221,41 @@ test("Park witness can post a public notice from a known Store record", () => {
   assert.equal(rumor.environment.economy.recordBurden, 40);
 });
 
+test("Store manager can pause counter service after a local report", () => {
+  let environment = createSameOrderAgenticEnvironment();
+  const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);
+  const report = requireAccepted(validateAndApplyEnvironmentAction(environment, clerk, {
+    actorId: clerk.actorId,
+    role: clerk.role,
+    affordance: "place_note",
+    objectId: "report_tray",
+    recordId: "store_same_order_clerk_statement",
+    whyLine: "The unresolved line creates a Store note that makes normal service unsafe to continue.",
+  }));
+  environment = report.environment;
+
+  const manager = actor({ actorId: "NPC_Store_Manager", role: "store_manager" }, environment);
+  const action = listAvailableEnvironmentActions(environment, manager)
+    .find(candidate => candidate.affordance === "pause_service");
+
+  assert.ok(action);
+  assert.equal(action.objectId, "store_counter");
+  assert.deepEqual(action.civicEconomyEffects, ["recordBurden:+5"]);
+
+  const paused = requireAccepted(validateAndApplyEnvironmentAction(environment, manager, {
+    actorId: manager.actorId,
+    role: manager.role,
+    affordance: "pause_service",
+    objectId: "store_counter",
+    whyLine: "The report tray is pending, so the manager pauses counter service before taking more orders.",
+  }));
+
+  assert.equal(paused.event.kind, "service_paused");
+  assert.equal(paused.event.affordance, "pause_service");
+  assert.equal(paused.environment.objects.find(item => item.objectId === "store_counter")?.state, "paused");
+  assert.equal(paused.environment.economy.recordBurden, 40);
+});
+
 test("Waiting customer can accept a correction record and settle queue pressure", () => {
   let environment = createSameOrderAgenticEnvironment();
   const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);

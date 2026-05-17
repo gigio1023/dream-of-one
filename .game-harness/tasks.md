@@ -57,6 +57,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Add the smallest routine-side NPC reaction: Waiting Customer reads the
   normal receipt, uses `accept_routine`, settles the queue mark, adds
   `queue_routine_kept`, and gives the safe route a visible social response.
+- [x] Add the smallest report-side environment reaction: Store Manager reads
+  the pending Store note, uses `pause_service`, changes the counter to
+  `paused`, adds `service_paused`, and makes a soft report visibly interrupt
+  local service without opening inquest.
 - [x] Show the latest NPC social reaction in the HUD record line, terminal outcome text, playable summary, and visual capture evidence.
 - [x] Add `playability.agenticRouteProofs` to the playable slice Evidence Pack and export path.
 - [x] Add HUD-visible `recordObjects`, `civicEconomy`, and `civicLedger` state line for Same Order record pressure.

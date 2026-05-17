@@ -278,7 +278,7 @@ const ENVIRONMENT_ACTION_RULES := {
 		},
 		"post_repair_notice": {
 			"fromStates": ["clear", "rumored"],
-			"toState": "clear",
+			"toState": "repaired",
 			"eventKind": "public_repair_noted",
 			"allowedRoles": ["park_witness"],
 			"requiresLedgerEvent": true,
@@ -2563,6 +2563,8 @@ func _world_record_prop_inspection_body(object_id: String, state: String) -> Str
 				return "공개 확인이 붙어 있습니다. 대기 손님은 이 확인을 읽고 플레이어에게 로컬 팁을 공유했습니다."
 			"warned":
 				return "공개 경고가 붙어 있습니다. 대기 손님은 이 경고를 읽고 플레이어와 거리를 두었습니다."
+			"repaired":
+				return "공개 수습 게시가 붙어 있습니다. 공원 목격자는 정정표를 읽고 이 어긋남을 소문이 아니라 수습된 기록으로 남겼습니다."
 			"rumored":
 				return "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다."
 			"clear":
@@ -2889,6 +2891,7 @@ func _record_state_value(state: String) -> String:
 		"clear": "비어 있음",
 		"vouched": "일상 확인",
 		"warned": "경고 게시",
+		"repaired": "수습 게시",
 		"rumored": "소문 게시",
 		"open": "열림",
 		"invited": "초대",
@@ -2924,6 +2927,7 @@ func _record_state_value(state: String) -> String:
 		"clear": "clear",
 		"vouched": "routine vouched",
 		"warned": "warning posted",
+		"repaired": "repair posted",
 		"rumored": "rumor posted",
 		"open": "open",
 		"invited": "invited",
@@ -2942,7 +2946,7 @@ func _world_record_prop_material(object_id: String, state: String) -> StandardMa
 	material.roughness = 0.82
 	if color.a < 1.0:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	if ["pending", "forwarded", "cited", "attention", "rumored", "vouched", "warned", "invited", "deferred", "blocked", "settled", "helped", "distanced", "paused"].has(state):
+	if ["pending", "forwarded", "cited", "attention", "rumored", "vouched", "warned", "repaired", "invited", "deferred", "blocked", "settled", "helped", "distanced", "paused"].has(state):
 		material.emission_enabled = true
 		material.emission = Color(color.r, color.g, color.b, 1.0)
 		material.emission_energy_multiplier = 0.35
@@ -2954,7 +2958,7 @@ func _world_record_prop_color(object_id: String, state: String) -> Color:
 			return Color(0.34, 0.76, 0.82, 0.94)
 		"marked", "offered", "delayed", "distanced", "warned", "deferred", "blocked", "burden", "trust_low":
 			return Color(1.0, 0.68, 0.28, 0.94)
-		"attached", "corrected", "settled", "helped", "vouched", "invited":
+		"attached", "corrected", "settled", "helped", "vouched", "repaired", "invited":
 			return Color(0.42, 0.86, 0.58, 0.96)
 		"pending", "rumored", "paused":
 			return Color(1.0, 0.52, 0.24, 0.96)

@@ -52,7 +52,7 @@
 - `clean_cover`: pass `true`, stage `normal`, outcome `clean_cover`, suspicion/report `0/0`
   - Clean cover: Codex accepted the routine, the Store Clerk closed a normal receipt, public trust rose, the waiting customer shared a local tip, the Studio PM opened a review invitation from the public record, and Codex inspected that invited review queue as a visible world prop. normal/clean_cover, suspicion 0, report 0.
 - `repair_recovered`: pass `true`, stage `uneasy`, outcome `repair_recovered`, suspicion/report `20/10`
-  - Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, and the Park witness posted that the mismatch was repaired. uneasy/repair_recovered, suspicion 20, report 10.
+  - Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, the Park board showed a public repair notice, and Codex inspected that notice as a visible world prop. uneasy/repair_recovered, suspicion 20, report 10. NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다. / 흐름: 기억 공백 발화 -> 정정표 -> 대기줄 수습 -> 공개 수습 게시
 - `cover_held_under_suspicion`: pass `true`, stage `uneasy`, outcome `cover_held_under_suspicion`, suspicion/report `35/30`
   - Suspicious cover: Codex made a risky claim then returned to the Clerk premise; the Park public warning made the waiting customer keep distance, the Studio PM deferred review, and Codex inspected that deferred review queue. uneasy/cover_held_under_suspicion, suspicion 35, report 30.
 - `soft_report`: pass `true`, stage `reported`, outcome `soft_report`, suspicion/report `95/80`

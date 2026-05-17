@@ -423,7 +423,7 @@ test("Park witness can turn a correction record into public repair notice", () =
 
   assert.equal(repairNotice.event.kind, "public_repair_noted");
   assert.equal(repairNotice.event.citedLedgerEventId, attached.event.eventId);
-  assert.equal(repairNotice.environment.objects.find(item => item.objectId === "park_notice_board")?.state, "clear");
+  assert.equal(repairNotice.environment.objects.find(item => item.objectId === "park_notice_board")?.state, "repaired");
   assert.equal(repairNotice.environment.economy.localTrust, 48);
   assert.equal(repairNotice.environment.economy.recordBurden, 15);
 });

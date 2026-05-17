@@ -96,11 +96,11 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `2a2e98974b5bb83c3a9b0843ba6e38285db41327de159cd9941ab1af45f26135`
-  - Markdown SHA-256: `6883ab24cb9ee29d336cc6be9f77e52b124615ed0df4acdc5330dcba2a00c955`
-  - playable Evidence Pack SHA-256: `f5bb86d798d711307d31d0374cc79d06ca8c1280009f7292eded74773b4b1bd7`
+  - JSON SHA-256: `e2da3f0766d028d9097e63e30db973283af33ada1f3781ccf21899c180cea5b6`
+  - Markdown SHA-256: `b47549434397cd9dae7ab330f1d0cd03494e00be27384c7e3231fabbec0b61ab`
+  - playable Evidence Pack SHA-256: `1a1f45d6f37cdb258f4e7e732110d800c1eed1d5c2e32e0837cc3dd3e3e1711c`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
-  - packaged app zip SHA-256: `38d967a4c989f3d9321a3d30f0f0bf8436e5b7b08a2a0b3744145e76f149e40e`
+  - packaged app zip SHA-256: `11bbc6430c4f58258c4ac438f612c82cfa8d6b6a9f6071a4e66be72928a43f01`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
@@ -112,6 +112,11 @@ Latest AI-play interface check:
   상점 기록 -> 공원 게시 -> 응대 중단 -> 줄 이탈 -> 보고 접수`. Playable smoke and
   Codex gameplay QA now fail if soft report hides the public rumor, service
   pause, or queue exit behind a generic report-filed line.
+- latest game increment: repair recovery now creates a public environment
+  record that the player and Codex can read. `post_repair_notice` changes
+  `park_notice_board` to `repaired`; the HUD shows `기억 공백 발화 -> 정정표 ->
+  대기줄 수습 -> 공개 수습 게시`; Codex repair-route QA focuses and inspects the
+  Park notice board and fails if that repaired public notice is hidden.
 - latest game increment: Store Manager's intermediary role action is now
   visible as distinct NPC state instead of generic `reported`. In soft report,
   `pause_service` shows `NPC_Store_Manager` as `paused` with `응대 중단`; in
@@ -219,17 +224,16 @@ Latest AI-play interface check:
   pattern: public record -> another place's role sees it -> one visible
   opportunity opens.
 - latest packaged proof refresh: the PCK, macOS debug app, unpacked app, and
-  packaged route evidence were re-exported with Godot 4.7-beta2 after the
-  soft-report HUD consequence chain started naming public rumor, service pause,
-  and queue exit. PCK
+  packaged route evidence were re-exported with Godot 4.7-beta2 after repair
+  recovery started writing `park_notice_board=repaired` as a public
+  environment record. PCK SHA-256 is
+  `35d44fade6ea9a6645c3323fafdbae072dec0a84a09c1fea20304b4567a54294`, zip
   SHA-256 is
-  `390802eac887b0931120bff4655092e0fc1f777369df37b7a5a9b87fff036db6`, zip
-  SHA-256 is
-  `38d967a4c989f3d9321a3d30f0f0bf8436e5b7b08a2a0b3744145e76f149e40e`,
+  `11bbc6430c4f58258c4ac438f612c82cfa8d6b6a9f6071a4e66be72928a43f01`,
   main-pack smoke evidence SHA-256 is
-  `dac060e34779e53336cb8a320cc4d27ac025498f1447bd82d3404625cb4c58aa`, and app
+  `1474022966c7b7020d7cdf4d2e3a1ebe383baf3745b79ff23b9cfe519bae116f`, and app
   route evidence SHA-256 is
-  `4b48aada0f7edd7816e5c040967fac2283eaed22e97c39b7f0e69f918ec08eb8`.
+  `f86316825bc6c00a89eff13bcf9f4b34dd52ae2c70aa6ecd8c2be714fae3370d`.
   Packaged launch, packaged route smoke, and comprehension preflight all passed
   against `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json`.
 - prior game increment: visible world-record props are reachable through a
@@ -284,8 +288,8 @@ Latest AI-play interface check:
 - prior repair-public increment remains current: repair travels through a
   public social relay. After the Clerk attaches the correction slip and the
   Waiting Customer accepts the repair, the Park Witness reads that correction
-  record, uses `post_repair_notice` on `park_notice_board`, keeps the board
-  `clear`, and adds `public_repair_noted`. This proves a reusable pattern for
+  record, uses `post_repair_notice` on `park_notice_board`, changes the board
+  to `repaired`, and adds `public_repair_noted`. This proves a reusable pattern for
   the broader game: social recovery can spread through records and witnesses,
   not only through punishment or formal escalation.
 - prior inquest increment remains current: inquest sends one formal record back
@@ -455,7 +459,7 @@ Latest AI-play interface check:
   propagation. The repair route now proves `mark_receipt -> offer_correction ->
   attach_correction -> accept_repair -> post_repair_notice`; final repair state
   includes `store_queue_mark=settled`, `correction_slip=attached`,
-  `park_notice_board=clear`, `queue_repair_accepted`,
+  `park_notice_board=repaired`, `queue_repair_accepted`,
   `public_repair_noted`, local trust 48, record burden 25, and Station
   attention 5. The Park Witness reads the correction record and posts that the
   mismatch was repaired instead of becoming a rumor. Verified with latest

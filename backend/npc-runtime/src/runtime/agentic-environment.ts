@@ -127,6 +127,7 @@ export type EnvironmentObjectState =
   | "clear"
   | "vouched"
   | "warned"
+  | "repaired"
   | "rumored"
   | "open"
   | "invited"
@@ -469,7 +470,7 @@ const AFFORDANCE_RULES: AffordanceRule[] = [
     objectId: "park_notice_board",
     affordance: "post_repair_notice",
     fromStates: ["clear", "rumored"],
-    toState: "clear",
+    toState: "repaired",
     eventKind: "public_repair_noted",
     allowedRoles: ["park_witness"],
     economyDelta: { localTrust: 3, recordBurden: -5 },

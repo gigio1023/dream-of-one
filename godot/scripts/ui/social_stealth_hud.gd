@@ -28,6 +28,7 @@ const UI_COPY := {
 		"consequence_verdict": "세션 결과가 고정되었습니다. why-line이 근거입니다.",
 		"record_chain_intake": "흐름: 플레이어 발화 -> 상점 기록 -> 보고 접수",
 		"record_chain_intake_social": "흐름: 플레이어 발화 -> 상점 기록 -> 공원 게시 -> 응대 중단 -> 줄 이탈 -> 보고 접수",
+		"record_chain_repair": "흐름: 기억 공백 발화 -> 정정표 -> 대기줄 수습 -> 공개 수습 게시",
 		"record_chain_inquest": "흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용",
 		"record_chain_inquest_review": "흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단",
 		"record_chain_inquest_contact": "흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부",
@@ -85,6 +86,7 @@ const UI_COPY := {
 		"consequence_verdict": "Session outcome is fixed. The why-line is the basis.",
 		"record_chain_intake": "Chain: player speech -> Store record -> report filed",
 		"record_chain_intake_social": "Chain: player speech -> Store record -> Park notice -> service paused -> queue left -> report filed",
+		"record_chain_repair": "Chain: memory-gap speech -> correction slip -> queue repaired -> public repair notice",
 		"record_chain_inquest": "Chain: player speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation",
 		"record_chain_inquest_review": "Chain: player speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation -> Studio review blocked",
 		"record_chain_inquest_contact": "Chain: player speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation -> Studio review blocked -> contact refused",
@@ -454,6 +456,8 @@ func _refresh_record_state_label() -> void:
 	})
 
 func _record_chain_text(state_key: String) -> String:
+	if str(_record_objects.get("correction_slip", "")) == "attached" and str(_record_objects.get("store_queue_mark", "")) == "settled" and str(_record_objects.get("park_notice_board", "")) == "repaired":
+		return _ui_text("record_chain_repair")
 	if bool(_station.get("inquestOpen", false)) or state_key == "inquest":
 		if str(_record_objects.get("store_queue_mark", "")) == "refused":
 			return _ui_text("record_chain_inquest_contact")
@@ -686,6 +690,7 @@ func _state_value(state: String) -> String:
 		"invited": "초대",
 		"deferred": "보류",
 		"blocked": "차단",
+		"repaired": "수습 게시",
 		"append_only": "추가됨"
 	}
 	var en := {
@@ -704,6 +709,7 @@ func _state_value(state: String) -> String:
 		"invited": "invited",
 		"deferred": "deferred",
 		"blocked": "blocked",
+		"repaired": "repair posted",
 		"append_only": "append"
 	}
 	var table: Dictionary = en if _current_locale() == "en" else ko

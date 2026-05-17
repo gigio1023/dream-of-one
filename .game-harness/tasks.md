@@ -55,8 +55,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   attached correction slip, uses `accept_repair`, settles the queue mark, adds
   `queue_repair_accepted`, raises local trust, and lowers record burden.
 - [x] Add the next smallest repair-side public reaction: Park Witness reads the
-  correction record, uses `post_repair_notice`, keeps the notice board clear,
-  adds `public_repair_noted`, raises local trust, and lowers record burden.
+  correction record, uses `post_repair_notice`, sets the notice board to
+  `repaired`, adds `public_repair_noted`, raises local trust, and lowers
+  record burden.
 - [x] Add the smallest routine-side NPC reaction: Waiting Customer reads the
   normal receipt, uses `accept_routine`, settles the queue mark, adds
   `queue_routine_kept`, and gives the safe route a visible social response.
@@ -152,6 +153,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   reactions: soft report now shows `플레이어 발화 -> 상점 기록 -> 공원 게시 ->
   응대 중단 -> 줄 이탈 -> 보고 접수` instead of stopping at generic report
   filing.
+- [x] Make repair recovery leave a readable public environment record: repair
+  now sets `park_notice_board=repaired`, the live HUD names `기억 공백 발화 ->
+  정정표 -> 대기줄 수습 -> 공개 수습 게시`, and Codex inspects the Park notice
+  board as a repaired public notice.
 - [x] Show the role/action map inside world-record prop inspection: the blocked
   Studio review queue HUD notice now names who can read it, which actions that
   record supports, and the latest ledger event that changed it.

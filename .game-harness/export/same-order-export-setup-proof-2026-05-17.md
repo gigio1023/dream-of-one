@@ -132,6 +132,19 @@ naming the local social chain `플레이어 발화 -> 상점 기록 -> 공원 �
 중단 -> 줄 이탈 -> 보고 접수`. Packaged launch, packaged route smoke, and
 tester preflight accept the refreshed app-route evidence.
 
+Refresh note, 2026-05-18 KST: the PCK, macOS zip, unpacked app, and packaged
+route evidence were regenerated after repair recovery became a real public
+environment record. `post_repair_notice` now sets
+`park_notice_board=repaired`, the HUD names `기억 공백 발화 -> 정정표 ->
+대기줄 수습 -> 공개 수습 게시`, and Codex gameplay QA inspects the Park notice
+board as a repaired public notice. PCK SHA-256:
+`35d44fade6ea9a6645c3323fafdbae072dec0a84a09c1fea20304b4567a54294`; macOS
+zip SHA-256: `11bbc6430c4f58258c4ac438f612c82cfa8d6b6a9f6071a4e66be72928a43f01`;
+main-pack evidence SHA-256:
+`1474022966c7b7020d7cdf4d2e3a1ebe383baf3745b79ff23b9cfe519bae116f`; packaged
+app-route evidence SHA-256:
+`f86316825bc6c00a89eff13bcf9f4b34dd52ae2c70aa6ecd8c2be714fae3370d`.
+
 ## Command Evidence
 
 Import:

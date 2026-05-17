@@ -45,7 +45,9 @@ const ROUTE_PROBE_PLANS := [
 			{"actionId": "focus.store_counter", "payload": {}},
 			{"actionId": "conversation.start", "payload": {}},
 			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.repair"}},
-			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.probe.safe"}}
+			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.probe.safe"}},
+			{"actionId": "focus.world_record_prop", "payload": {"objectId": "park_notice_board"}},
+			{"actionId": "player.interact.focused", "payload": {}}
 		]
 	},
 	{
@@ -396,6 +398,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("repair_recovered expected attached correction slip")
 			if str(record_objects.get("store_queue_mark", "")) != "settled":
 				failures.append("repair_recovered expected queue mark to settle after correction")
+			if str(record_objects.get("park_notice_board", "")) != "repaired":
+				failures.append("repair_recovered expected public repair notice on Park board")
 			if not _action_exists(summary, "store_clerk", "attach_correction"):
 				failures.append("repair_recovered expected Store Clerk correction attachment")
 			if not _action_exists(summary, "waiting_customer", "accept_repair"):
@@ -408,6 +412,11 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("repair_recovered expected visible Park Witness repair-post reaction")
 			if not _observation_exists(summary, "park_witness", "store_clerk", "attach_correction", "post_repair_notice"):
 				failures.append("repair_recovered expected Park Witness to read the correction record")
+			var consequence_label := str(report.get("finalPlayerVisibleState", {}).get("consequence", ""))
+			if not consequence_label.contains("정정표") or not consequence_label.contains("대기줄 수습") or not consequence_label.contains("공개 수습 게시"):
+				failures.append("repair_recovered expected HUD consequence chain to show correction slip, queue repair, and public repair notice")
+			if not _inspected_public_repair_notice(summary):
+				failures.append("repair_recovered expected Codex/player to inspect the public repair notice")
 		"cover_held_under_suspicion":
 			if int(summary.get("reportWeight", 0)) > 49:
 				failures.append("cover_held_under_suspicion must stay below report threshold")
@@ -552,7 +561,7 @@ func _route_player_readable_summary(route_id: String, summary: Dictionary, hud_s
 		"clean_cover":
 			return "Clean cover: Codex accepted the routine, the Store Clerk closed a normal receipt, public trust rose, the waiting customer shared a local tip, the Studio PM opened a review invitation from the public record, and Codex inspected that invited review queue as a visible world prop. %s." % state
 		"repair_recovered":
-			return "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, and the Park witness posted that the mismatch was repaired. %s." % state
+			return "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, the Park board showed a public repair notice, and Codex inspected that notice as a visible world prop. %s. %s" % [state, _one_line(hud_snapshot.get("consequenceLabel", ""))]
 		"cover_held_under_suspicion":
 			return "Suspicious cover: Codex made a risky claim then returned to the Clerk premise; the Park public warning made the waiting customer keep distance, the Studio PM deferred review, and Codex inspected that deferred review queue. %s." % state
 		"soft_report":
@@ -961,6 +970,9 @@ func _world_props_reach_inquest(record_props: Dictionary) -> bool:
 
 func _inspected_public_notice(summary: Dictionary) -> bool:
 	return _inspected_world_record_exists(summary, "park_notice_board", "rumored", "소문")
+
+func _inspected_public_repair_notice(summary: Dictionary) -> bool:
+	return _inspected_world_record_exists(summary, "park_notice_board", "repaired", "공개 수습")
 
 func _inspected_studio_review_block(summary: Dictionary) -> bool:
 	return _inspected_world_record_exists(summary, "studio_review_queue", "blocked", "스테이션 인용")

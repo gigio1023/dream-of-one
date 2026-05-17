@@ -95,6 +95,11 @@ Current M1 carry-in:
   long-term content focus. Future work should extract reusable
   environment-agent patterns instead of deepening Store operations or Station
   procedure.
+- latest small-slice carry-in: repair recovery now leaves a player-readable
+  public environment record. Park Witness `post_repair_notice` sets
+  `park_notice_board=repaired`, the HUD names the repair chain through
+  `공개 수습 게시`, and Codex gameplay QA inspects the Park notice board as a
+  repaired public notice.
 - latest small-slice carry-in: Park Witness `post_rumor` is now visible as a
   public NPC reaction (`rumored` / `소문 게시`) in soft-report and inquest paths,
   and the soft-report result names that rumor as part of the social chain.

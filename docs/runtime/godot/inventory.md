@@ -15,5 +15,5 @@
 
 - Landmarks: Store, Studio, Park, Station
 - NPC placeholders: Store Clerk, Studio PM, Park Witness, Station Officer
-- Text surfaces: Store queue rules, Studio approval criteria, Park notice board, Station intake rules
+- In-world text panels: Store queue rules, Studio approval criteria, Park notice board, Station intake rules
 - Runtime slice: Station intake ObservationFrame, bounded command execution, rejected command fallback, text-pressure domain event

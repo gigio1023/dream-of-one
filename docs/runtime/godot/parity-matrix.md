@@ -4,7 +4,7 @@
 |---|---|---|
 | Scene shell loads | `scene_load_smoke.gd` | complete |
 | Four landmarks exist | shell Evidence Pack | complete |
-| Text surfaces preserve Dream Law and Cover Test ids | runtime slice ObservationFrame | complete |
+| In-world text panels preserve Dream Law and Cover Test ids | runtime slice ObservationFrame | complete |
 | ObservationFrame Schema validates | backend tests | complete |
 | NpcCommandEnvelope Schema validates | backend tests | complete |
 | Command rejection selects deterministic Fallback Path | runtime slice Evidence Pack | complete |

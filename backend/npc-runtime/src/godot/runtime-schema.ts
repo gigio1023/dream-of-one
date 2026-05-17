@@ -531,6 +531,7 @@ const CONVERSATION_EVENT_NAMES = [
   "conversation_started",
   "dialogue_choice_selected",
   "free_input_submitted",
+  "response_hesitation_noted",
   "conversation_anomaly_detected",
   "npc_suspicion_changed",
   "suspicion_shared",
@@ -539,6 +540,7 @@ const CONVERSATION_EVENT_NAMES = [
 ] as const;
 
 const CONVERSATION_SIGNAL_TRACE_EVENT_NAMES = [
+  "response_hesitation_noted",
   "conversation_anomaly_detected",
   "npc_suspicion_changed",
   "suspicion_shared",
@@ -551,6 +553,7 @@ const SAME_ORDER_PROOF_EVENT_NAMES = [
   "dialogue_choice_selected",
   "conversation_anomaly_detected",
   "npc_suspicion_changed",
+  "response_hesitation_noted",
   "free_input_submitted",
   "suspicion_shared",
   "station_report_created",
@@ -1203,7 +1206,7 @@ export function validateGodotEvidenceEvent(input: unknown): GodotValidationResul
       pushFailure(failures, "schema_invalid_evidence_pack", "conversationId", "conversation events require conversationId, turnId, and promptId");
     }
     if (
-      ["dialogue_choice_selected", "free_input_submitted", "conversation_anomaly_detected", "npc_suspicion_changed"].includes(String(input.eventName))
+      ["dialogue_choice_selected", "free_input_submitted", "response_hesitation_noted", "conversation_anomaly_detected", "npc_suspicion_changed"].includes(String(input.eventName))
       && displayedPlayerLine === undefined
     ) {
       pushFailure(failures, "schema_invalid_evidence_pack", "displayedPlayerLine", "turn-level conversation events require displayedPlayerLine");
@@ -1221,7 +1224,7 @@ export function validateGodotEvidenceEvent(input: unknown): GodotValidationResul
       pushFailure(failures, "schema_invalid_evidence_pack", "suspicionSignals", `${String(input.eventName)} requires deterministic suspicionSignals`);
     }
     if (
-      ["conversation_anomaly_detected", "npc_suspicion_changed", "suspicion_shared", "station_report_created", "station_inquest_opened"].includes(String(input.eventName))
+      ["response_hesitation_noted", "conversation_anomaly_detected", "npc_suspicion_changed", "suspicion_shared", "station_report_created", "station_inquest_opened"].includes(String(input.eventName))
       && whyLine === undefined
     ) {
       pushFailure(failures, "schema_invalid_evidence_pack", "whyLine", `${String(input.eventName)} requires a deterministic whyLine`);
@@ -1471,23 +1474,29 @@ export function validateGodotEvidencePackConversationSuspicionProof(
   }
 
   const selectedChoice = chain.find(item => item.event.eventName === "dialogue_choice_selected")?.event;
+  const responseHesitation = chain.find(item => item.event.eventName === "response_hesitation_noted")?.event;
   const freeInput = chain.find(item => item.event.eventName === "free_input_submitted")?.event;
   if (selectedChoice !== undefined && freeInput !== undefined) {
+    const freeInputPredecessor = responseHesitation ?? selectedChoice;
     if (selectedChoice.turnId === freeInput.turnId) {
       pushFailure(failures, "schema_invalid_evidence_pack", "events", "Same Order proof must include a later free-input turn after the selected choice");
     }
     if (selectedChoice.turnId !== undefined && !(freeInput.priorTurnIds ?? []).includes(selectedChoice.turnId)) {
       pushFailure(failures, "schema_invalid_evidence_pack", "priorTurnIds", "free-input proof turn must reference the selected-choice turn");
     }
-    if (selectedChoice.suspicionAfter !== undefined && freeInput.suspicionBefore !== undefined && selectedChoice.suspicionAfter !== freeInput.suspicionBefore) {
-      pushFailure(failures, "schema_invalid_evidence_pack", "suspicionBefore", "free-input turn must continue from the selected-choice suspicion state");
+    if (
+      freeInputPredecessor.suspicionAfter !== undefined
+      && freeInput.suspicionBefore !== undefined
+      && freeInputPredecessor.suspicionAfter !== freeInput.suspicionBefore
+    ) {
+      pushFailure(failures, "schema_invalid_evidence_pack", "suspicionBefore", "free-input turn must continue from the latest prior suspicion state");
     }
     if (
-      selectedChoice.reportWeightAfter !== undefined
+      freeInputPredecessor.reportWeightAfter !== undefined
       && freeInput.reportWeightBefore !== undefined
-      && selectedChoice.reportWeightAfter !== freeInput.reportWeightBefore
+      && freeInputPredecessor.reportWeightAfter !== freeInput.reportWeightBefore
     ) {
-      pushFailure(failures, "schema_invalid_evidence_pack", "reportWeightBefore", "free-input turn must continue from the selected-choice report state");
+      pushFailure(failures, "schema_invalid_evidence_pack", "reportWeightBefore", "free-input turn must continue from the latest prior report state");
     }
   }
 
@@ -1783,13 +1792,16 @@ function validateSameOrderRouteProofSemantics(
     if (proof.reportWeight < 100) {
       pushFailure(failures, "schema_invalid_evidence_pack", path, "inquest route must cross the inquest report threshold");
     }
-    for (const requiredEvent of ["free_input_submitted", "conversation_anomaly_detected", "suspicion_shared", "station_report_created", "station_inquest_opened"]) {
+    for (const requiredEvent of ["free_input_submitted", "response_hesitation_noted", "conversation_anomaly_detected", "suspicion_shared", "station_report_created", "station_inquest_opened"]) {
       if (!routeProofHasEvent(proof, requiredEvent)) {
         pushFailure(failures, "schema_invalid_evidence_pack", path, `inquest route must include ${requiredEvent}`);
       }
     }
     if (!routeProofHasSignal(proof, "dream_language_leak")) {
       pushFailure(failures, "schema_invalid_evidence_pack", path, "inquest route must include dream_language_leak");
+    }
+    if (!routeProofHasSignal(proof, "response_hesitation")) {
+      pushFailure(failures, "schema_invalid_evidence_pack", path, "inquest route must include response_hesitation");
     }
   }
 }

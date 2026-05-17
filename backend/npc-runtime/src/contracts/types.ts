@@ -43,6 +43,7 @@ export const CONVERSATION_SUSPICION_SIGNALS = [
   "prior_statement_contradiction",
   "authority_evasion",
   "over_explanation",
+  "response_hesitation",
 ] as const;
 
 export type ConversationSuspicionSignal = (typeof CONVERSATION_SUSPICION_SIGNALS)[number];

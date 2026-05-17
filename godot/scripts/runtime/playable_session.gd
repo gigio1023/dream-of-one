@@ -7,10 +7,19 @@ const RUN_ID := "dre-171-playable-slice-run"
 const SESSION_ID := "dre-171-playable-session"
 const CONVERSATION_ID := "conv-same-order"
 const RECORDED_STATEMENT_LINE := "저는 이 꿈에 방금 들어왔어요."
-const RECORDED_STATEMENT_SCOPE := "key_4_explicit_recorded_statement_no_typed_ui"
+const RECORDED_STATEMENT_SCOPE := "legacy_explicit_recorded_statement_internal"
+const RESPONSE_HESITATION_THRESHOLD_MS := 12000
 const SHARE_THRESHOLD := 50
 const REPORT_THRESHOLD := 70
 const INQUEST_THRESHOLD := 100
+const PROVIDER_STATE := {
+	"mode": "fallback_only_m1",
+	"modeLabel": "fallback-only M1",
+	"liveVerified": false,
+	"selectedModel": "none",
+	"authorityBoundary": "wording_only_when_later_enabled",
+	"decisionPath": "deterministic_fallback"
+}
 
 const SIGNAL_SUSPICION_WEIGHT := {
 	"local_routine_mismatch": 35,
@@ -19,7 +28,8 @@ const SIGNAL_SUSPICION_WEIGHT := {
 	"role_script_break": 20,
 	"prior_statement_contradiction": 40,
 	"authority_evasion": 25,
-	"over_explanation": 15
+	"over_explanation": 15,
+	"response_hesitation": 10
 }
 
 const SIGNAL_REPORT_WEIGHT := {
@@ -29,7 +39,8 @@ const SIGNAL_REPORT_WEIGHT := {
 	"role_script_break": 15,
 	"prior_statement_contradiction": 35,
 	"authority_evasion": 25,
-	"over_explanation": 10
+	"over_explanation": 10,
+	"response_hesitation": 5
 }
 
 const SIGNAL_WHY_LINES := {
@@ -39,7 +50,144 @@ const SIGNAL_WHY_LINES := {
 	"role_script_break": "그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.",
 	"prior_statement_contradiction": "그 말은 앞선 대화 기록과 충돌합니다.",
 	"authority_evasion": "그 말은 직접적인 절차 질문을 피합니다.",
-	"over_explanation": "그 말은 일상 루틴에 비해 지나치게 길게 해명합니다."
+	"over_explanation": "그 말은 일상 루틴에 비해 지나치게 길게 해명합니다.",
+	"response_hesitation": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다."
+}
+
+const ACTOR_AGENT_ROLES := {
+	"NPC_Store_Clerk": "store_clerk",
+	"NPC_Store_Manager": "store_manager",
+	"NPC_Waiting_Customer": "waiting_customer",
+	"NPC_Park_Witness": "park_witness",
+	"NPC_Station_Officer": "station_officer"
+}
+
+const OBJECT_VISIBILITY := {
+	"store_queue_mark": ["store_clerk", "waiting_customer"],
+	"store_counter": ["store_clerk", "waiting_customer", "store_manager"],
+	"usual_order_cue": ["store_clerk", "store_manager", "waiting_customer"],
+	"receipt_tray": ["store_clerk", "store_manager"],
+	"correction_slip": ["store_clerk", "store_manager"],
+	"report_tray": ["store_clerk", "store_manager", "station_officer"],
+	"park_notice_board": ["park_witness"],
+	"station_dossier": ["station_officer"],
+	"civic_ledger": ["station_officer"]
+}
+
+const ENVIRONMENT_OBJECT_ORDER := [
+	"store_queue_mark",
+	"store_counter",
+	"usual_order_cue",
+	"receipt_tray",
+	"correction_slip",
+	"report_tray",
+	"park_notice_board",
+	"station_dossier",
+	"civic_ledger"
+]
+
+const ENVIRONMENT_AFFORDANCE_ORDER := [
+	"complain_delay",
+	"cite_expected_order",
+	"create_receipt",
+	"mark_receipt",
+	"offer_correction",
+	"attach_correction",
+	"place_note",
+	"post_rumor",
+	"forward_report",
+	"cite_record"
+]
+
+const STORE_LEDGER_EVENT_KINDS := [
+	"store_sale_normal",
+	"store_sale_corrected",
+	"store_exception_reported",
+	"store_report_escalated",
+	"store_receipt_marked",
+	"correction_offered",
+	"correction_attached"
+]
+
+const ENVIRONMENT_ACTION_RULES := {
+	"store_queue_mark": {
+		"complain_delay": {
+			"fromStates": ["player_waiting", "delayed", "disrupted"],
+			"toState": "disrupted",
+			"eventKind": "queue_delay_noted",
+			"allowedRoles": ["waiting_customer"],
+			"requiresLedgerEvent": true
+		}
+	},
+	"usual_order_cue": {
+		"cite_expected_order": {
+			"fromStates": ["read", "cited"],
+			"toState": "cited",
+			"eventKind": "usual_order_cited",
+			"allowedRoles": ["store_clerk", "store_manager"]
+		}
+	},
+	"receipt_tray": {
+		"create_receipt": {
+			"fromStates": ["blank"],
+			"toState": "normal",
+			"eventKind": "store_sale_normal",
+			"allowedRoles": ["store_clerk"]
+		},
+		"mark_receipt": {
+			"fromStates": ["blank", "normal"],
+			"toState": "marked",
+			"eventKind": "store_receipt_marked",
+			"allowedRoles": ["store_clerk", "store_manager"]
+		}
+	},
+	"correction_slip": {
+		"offer_correction": {
+			"fromStates": ["absent"],
+			"toState": "offered",
+			"eventKind": "correction_offered",
+			"allowedRoles": ["store_clerk", "store_manager"]
+		},
+		"attach_correction": {
+			"fromStates": ["offered", "accepted"],
+			"toState": "attached",
+			"eventKind": "store_sale_corrected",
+			"allowedRoles": ["store_clerk", "store_manager"]
+		}
+	},
+	"report_tray": {
+		"place_note": {
+			"fromStates": ["empty", "pending"],
+			"toState": "pending",
+			"eventKind": "store_exception_reported",
+			"allowedRoles": ["store_clerk", "store_manager"]
+		},
+		"forward_report": {
+			"fromStates": ["pending", "filed"],
+			"toState": "forwarded",
+			"eventKind": "store_report_escalated",
+			"allowedRoles": ["store_manager"]
+		}
+	},
+	"park_notice_board": {
+		"post_rumor": {
+			"fromStates": ["clear", "rumored"],
+			"toState": "rumored",
+			"eventKind": "public_rumor_posted",
+			"allowedRoles": ["park_witness"],
+			"requiresLedgerEvent": true
+		}
+	},
+	"station_dossier": {
+		"cite_record": {
+			"fromStates": ["absent", "opened", "cited"],
+			"toState": "cited",
+			"eventKind": "station_record_cited",
+			"allowedRoles": ["station_officer"],
+			"requiresLedgerEvent": true,
+			"requiresStoreLedgerEvent": true
+		}
+	}
 }
 
 const CONVERSATION_BEATS := {
@@ -136,7 +284,7 @@ var current_turn_id := "turn-0"
 var conversation_history: Array[Dictionary] = []
 var choice_catalog: Array = []
 var notice_title := "시작 절차"
-var notice_body := "상점 카운터에서 점원의 평범한 질문에 답하세요. 대화가 위험 표면입니다."
+var notice_body := "상점 카운터에서 점원의 평범한 질문에 답하세요. 말이 기록이 될 수 있습니다."
 var outcome_visible := false
 var outcome_title := ""
 var outcome_body := ""
@@ -149,7 +297,31 @@ var session_outcome := "running"
 var route_outcome := "running"
 var repair_attempt_count := 0
 var repair_state := "unused"
+var response_hesitation_count := 0
+var _prompt_started_ms := 0
+var _hesitation_recorded_turn_ids: Dictionary = {}
+var record_objects := {
+	"store_queue_mark": "player_waiting",
+	"store_counter": "serving",
+	"usual_order_cue": "read",
+	"receipt_tray": "blank",
+	"correction_slip": "absent",
+	"report_tray": "empty",
+	"park_notice_board": "clear",
+	"station_dossier": "absent",
+	"civic_ledger": "append_only"
+}
+var civic_economy := {
+	"accountCredit": 3,
+	"localTrust": 50,
+	"recordBurden": 0,
+	"stationAttention": 0
+}
+var civic_ledger: Array[Dictionary] = []
+var agent_action_log: Array[Dictionary] = []
 var _event_sequence := 0
+var _civic_ledger_sequence := 0
+var _agent_action_sequence := 0
 
 @onready var _root: Node = get_parent()
 @onready var _hud: CanvasLayer = $"../SocialStealthHud"
@@ -157,6 +329,8 @@ var _event_sequence := 0
 
 func _ready() -> void:
 	add_to_group("playable_sessions")
+	if _hud != null and _hud.has_signal(&"free_input_submitted"):
+		_hud.connect(&"free_input_submitted", Callable(self, "submit_free_input"))
 	_record_event(
 		"session",
 		"playable_session_started",
@@ -172,6 +346,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	_update_focus()
+	_maybe_record_response_hesitation()
 	_refresh_hud()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -208,7 +383,98 @@ func run_smoke_sequence() -> Dictionary:
 	submit_recorded_statement()
 	return build_summary()
 
+func debug_codex_gameplay_action_catalog() -> Array[Dictionary]:
+	return [
+		{
+			"actionId": "focus.store_counter",
+			"payloadSchema": {},
+			"playerMeaning": "Move Codex/player attention to the Store counter interaction zone."
+		},
+		{
+			"actionId": "conversation.start",
+			"payloadSchema": {},
+			"playerMeaning": "Start the Store Clerk conversation inside the running scene."
+		},
+		{
+			"actionId": "player.wait.hesitation_record",
+			"payloadSchema": {},
+			"playerMeaning": "Record a delayed answer as player uncertainty."
+		},
+		{
+			"actionId": "dialogue.choice.by_id",
+			"payloadSchema": {"choiceId": "string"},
+			"playerMeaning": "Choose one currently available dialogue line by stable id."
+		},
+		{
+			"actionId": "dialogue.choice.by_index",
+			"payloadSchema": {"index": "int"},
+			"playerMeaning": "Choose one currently available dialogue line by zero-based position."
+		},
+		{
+			"actionId": "player.type.free_input",
+			"payloadSchema": {"line": "string"},
+			"playerMeaning": "Submit typed player speech through the same deterministic consequence path used by the HUD."
+		}
+	]
+
+func debug_codex_gameplay_snapshot() -> Dictionary:
+	var summary := build_summary()
+	return {
+		"schemaVersion": "codex-gameplay-snapshot-v1",
+		"actionCatalog": debug_codex_gameplay_action_catalog(),
+		"summary": summary,
+		"worldRecordProps": _world_record_prop_snapshot(),
+		"hud": _codex_hud_snapshot()
+	}
+
+func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) -> Dictionary:
+	var before := _codex_small_summary(build_summary())
+	var accepted := true
+	var reason := "accepted"
+
+	match action_id:
+		"focus.store_counter":
+			_force_focus_zone("StoreCounterZone")
+		"conversation.start":
+			_start_conversation()
+		"player.wait.hesitation_record":
+			debug_record_response_hesitation()
+		"dialogue.choice.by_id":
+			var choice_id := str(payload.get("choiceId", ""))
+			if choice_id.is_empty() or not _codex_choice_id_available(choice_id):
+				accepted = false
+				reason = "choice_id_unavailable"
+			else:
+				_select_dialogue_choice(choice_id)
+		"dialogue.choice.by_index":
+			var index := int(payload.get("index", -1))
+			if index < 0 or index >= _current_choices().size():
+				accepted = false
+				reason = "choice_index_unavailable"
+			else:
+				_select_dialogue_index(index)
+		"player.type.free_input":
+			var line := str(payload.get("line", "")).strip_edges()
+			if line.is_empty():
+				accepted = false
+				reason = "line_required"
+			else:
+				submit_free_input(line)
+		_:
+			accepted = false
+			reason = "unsupported_action"
+
+	return {
+		"actionId": action_id,
+		"payload": payload.duplicate(true),
+		"accepted": accepted,
+		"reason": reason,
+		"before": before,
+		"after": _codex_small_summary(build_summary())
+	}
+
 func build_summary() -> Dictionary:
+	_refresh_world_record_props()
 	return {
 		"schemaVersion": ShellSchema.EVIDENCE_SCHEMA,
 		"runId": RUN_ID,
@@ -237,6 +503,14 @@ func build_summary() -> Dictionary:
 		"routeOutcome": route_outcome,
 		"repairAttemptCount": repair_attempt_count,
 		"repairState": repair_state,
+		"responseHesitationCount": response_hesitation_count,
+		"recordObjects": record_objects.duplicate(true),
+		"civicEconomy": civic_economy.duplicate(true),
+		"civicLedger": civic_ledger.duplicate(true),
+		"agentActionLog": agent_action_log.duplicate(true),
+		"socialObservationTrace": _social_observation_trace(),
+		"worldRecordProps": _world_record_prop_snapshot(),
+		"providerState": _provider_state(),
 		"inputLocked": _session_locked(),
 		"authorityMode": _authority_mode(),
 		"releaseAuthorityRequirement": _release_authority_requirement(),
@@ -247,17 +521,29 @@ func build_summary() -> Dictionary:
 			"currentTurnId": current_turn_id,
 			"history": conversation_history.duplicate(true),
 			"availableChoices": _current_choice_lines(),
-			"recordedStatementLine": RECORDED_STATEMENT_LINE,
-			"recordedStatementScope": RECORDED_STATEMENT_SCOPE,
-			"recordedStatementAction": "dialogue_recorded_statement"
+			"recordedStatementLine": "",
+			"recordedStatementScope": "",
+			"recordedStatementAction": "",
+			"typedFreeInputLine": RECORDED_STATEMENT_LINE,
+			"typedFreeInputAction": "free_input_submitted",
+			"typedFreeInputAvailable": true
 		},
 		"prologueLoop": {
 			"beginning": "focus StoreCounterZone and start the Store Clerk conversation",
-			"defaultVerb": "three diegetic dialogue choices",
-			"recordedStatement": "key 4 submits the displayed recorded statement; typed text entry is not implemented in this slice",
+			"defaultVerb": "three diegetic dialogue choices plus optional typed free input; delayed answers can become records",
+			"recordedStatement": "legacy recorded-statement fallback remains internal; tester-facing proof uses HUD typed input",
+			"typedFreeInput": "HUD text entry submits the player's typed line into the same deterministic Evidence path",
+			"responseHesitation": "If the player waits too long during a prompt, the delay is recorded as uncertainty before any provider wording can act.",
 			"outcome": _session_outcome(),
 			"routeOutcome": route_outcome,
 			"repairState": repair_state,
+			"recordObjects": record_objects.duplicate(true),
+			"civicEconomy": civic_economy.duplicate(true),
+			"civicLedger": civic_ledger.duplicate(true),
+			"agentActionLog": agent_action_log.duplicate(true),
+			"socialObservationTrace": _social_observation_trace(),
+			"worldRecordProps": _world_record_prop_snapshot(),
+			"providerState": _provider_state(),
 			"endControls": _end_controls()
 		},
 		"events": evidence_events.duplicate(true)
@@ -296,17 +582,25 @@ func build_evidence_pack(artifact_path: String) -> Dictionary:
 		},
 		"playableSummary": summary,
 		"playability": {
-			"inputPath": "focus StoreCounterZone -> E start Same Order -> 3 risky choice -> 4 explicit recorded statement",
+			"inputPath": "focus StoreCounterZone -> E start Same Order -> 3 risky choice -> HUD typed line",
 			"expectedPlayerInterpretation": "Odd dialogue creates NPC suspicion, a report, and Station inquest pressure.",
 			"deterministicOutcome": _session_outcome(),
 			"routeOutcome": route_outcome,
 			"repairState": repair_state,
+			"responseHesitationCount": response_hesitation_count,
+			"recordObjects": record_objects.duplicate(true),
+			"civicEconomy": civic_economy.duplicate(true),
+			"civicLedger": civic_ledger.duplicate(true),
+			"agentActionLog": agent_action_log.duplicate(true),
+			"socialObservationTrace": _social_observation_trace(),
+			"worldRecordProps": _world_record_prop_snapshot(),
+			"providerState": _provider_state(),
 			"endControls": _end_controls(),
 			"visibleWhyLine": last_why_line,
 			"inputLocked": _session_locked(),
 			"authorityMode": _authority_mode(),
 			"releaseAuthorityRequirement": _release_authority_requirement(),
-			"observedConfusionPoint": "Typed text entry is outside this slice. Key 4 is explicitly labeled as a recorded statement while backend Evidence keeps the freeInputHash contract."
+			"observedConfusionPoint": "Smoke and capture now target HUD typed input; the legacy recorded-statement fallback remains internal."
 		}
 	}
 
@@ -314,7 +608,7 @@ func _interact() -> void:
 	if _session_locked():
 		return
 	if current_focus == null:
-		_set_notice("초점 없음", "범위 안에 말을 걸 수 있는 상점 카운터나 읽을 수 있는 표면이 없습니다.")
+		_set_notice("초점 없음", "범위 안에 말을 걸 수 있는 상점 카운터나 읽을 수 있는 안내문이 없습니다.")
 		_record_event(
 			"observation",
 			"no_focus",
@@ -332,7 +626,7 @@ func _interact() -> void:
 		read_surface_ids[surface_id] = true
 		_set_notice(
 			surface_label,
-			"%s\n이 표면은 대화 중 무엇이 이상하게 들리는지 판단하는 맥락입니다." % _text("text_surface.%s.body" % surface_id, {}, surface_id)
+			"%s\n이 안내문은 대화 중 무엇이 이상하게 들리는지 판단하는 맥락입니다." % _text("text_surface.%s.body" % surface_id, {}, surface_id)
 		)
 		_record_event(
 			"observation",
@@ -413,6 +707,81 @@ func submit_recorded_statement() -> void:
 		return
 	_apply_dialogue_turn({}, RECORDED_STATEMENT_LINE, "explicit_recorded_statement")
 
+func debug_record_response_hesitation() -> void:
+	_record_response_hesitation(RESPONSE_HESITATION_THRESHOLD_MS)
+
+func _maybe_record_response_hesitation() -> void:
+	if not conversation_active or _session_locked():
+		return
+	if _prompt_started_ms <= 0:
+		return
+	if _hesitation_recorded_turn_ids.has(current_turn_id):
+		return
+	var elapsed_ms := _now_ms() - _prompt_started_ms
+	if elapsed_ms < RESPONSE_HESITATION_THRESHOLD_MS:
+		return
+	_record_response_hesitation(elapsed_ms)
+
+func _record_response_hesitation(elapsed_ms: int) -> void:
+	if not conversation_active or _session_locked():
+		return
+	if _hesitation_recorded_turn_ids.has(current_turn_id):
+		return
+	_hesitation_recorded_turn_ids[current_turn_id] = true
+	response_hesitation_count += 1
+	var signals: Array[String] = ["response_hesitation"]
+	var suspicion_before := suspicion
+	var report_before := report_weight
+	var suspicion_delta := int(SIGNAL_SUSPICION_WEIGHT.get("response_hesitation", 0))
+	var report_delta := int(SIGNAL_REPORT_WEIGHT.get("response_hesitation", 0))
+	suspicion = clampi(suspicion + suspicion_delta, 0, 125)
+	report_weight = clampi(report_weight + report_delta, 0, 125)
+	exposure = max(suspicion, report_weight)
+	_update_stage_from_pressure()
+	last_reason_code = "response_hesitation"
+	last_why_line = str(SIGNAL_WHY_LINES.get("response_hesitation", "응답 지연이 기록되었습니다."))
+	last_why_line_key = "response_hesitation"
+	var evaluation := {
+		"conversationId": CONVERSATION_ID,
+		"turnId": current_turn_id,
+		"promptId": current_prompt_id,
+		"choiceSetId": _current_choice_set_id(),
+		"speakerId": "player",
+		"selectedChoiceId": "",
+		"freeInputHash": "",
+		"inputMode": "response_hesitation",
+		"recordedStatementScope": "",
+		"displayedPlayerLine": "응답 지연 %dms" % elapsed_ms,
+		"priorTurnIds": _prior_turn_ids(),
+		"suspicionSignals": signals,
+		"suspicionBefore": suspicion_before,
+		"suspicionAfter": suspicion,
+		"suspicionDelta": suspicion - suspicion_before,
+		"reportWeightBefore": report_before,
+		"reportWeightAfter": report_weight,
+		"reportDelta": report_weight - report_before,
+		"whyLine": last_why_line,
+		"whyLineKey": "response_hesitation",
+		"conversationStage": stage,
+		"outcome": _session_outcome()
+	}
+	_record_event(
+		"domain",
+		"response_hesitation_noted",
+		"The Store Clerk records a delayed answer before the player speaks.",
+		_conversation_event_extra(evaluation)
+	)
+	_add_prologue_evidence(
+		"response_hesitation.%s" % current_turn_id,
+		"procedural_speech_log",
+		stage,
+		"Response hesitation recorded on %s after %dms." % [current_turn_id, elapsed_ms]
+	)
+	_set_notice("상점 점원", "%s\nwhy-line: %s" % [
+		"답변이 늦었습니다. 점원이 불확실성으로 표시합니다.",
+		last_why_line
+	])
+
 func _apply_dialogue_turn(choice: Dictionary, free_line: String, input_mode := "choice") -> void:
 	if _session_locked():
 		return
@@ -440,6 +809,7 @@ func _apply_dialogue_turn(choice: Dictionary, free_line: String, input_mode := "
 	if not str(evaluation["whyLine"]).is_empty():
 		last_why_line = str(evaluation["whyLine"])
 		last_why_line_key = str(evaluation.get("whyLineKey", ""))
+	_apply_record_object_state(evaluation, intent)
 
 	conversation_history.append({
 		"turnId": current_turn_id,
@@ -565,6 +935,53 @@ func _apply_social_consequence(evaluation: Dictionary) -> void:
 	if report_after >= REPORT_THRESHOLD and not bool(station["intakeOpen"]):
 		station["intakeOpen"] = true
 		stage = "reported"
+		var clerk_note := _apply_role_agent_action(
+			"report.clerk.place_note",
+			"NPC_Store_Clerk",
+			"store_clerk",
+			"place_note",
+			"report_tray",
+			"store_same_order_clerk_statement",
+			"Report pressure crossed the Store threshold, so the clerk creates a reportable Store note."
+		)
+		var clerk_note_event: Dictionary = clerk_note.get("event", {})
+		var clerk_note_event_id := str(clerk_note_event.get("eventId", ""))
+		if bool(clerk_note.get("ok", false)) and not clerk_note_event_id.is_empty():
+			_apply_role_agent_action(
+				"report.waiting_customer.complain_delay",
+				"NPC_Waiting_Customer",
+				"waiting_customer",
+				"complain_delay",
+				"store_queue_mark",
+				"store_same_order_queue_delay",
+				"A waiting customer sees the clerk note slow the line and adds public queue pressure.",
+				clerk_note_event_id,
+				[clerk_note_event_id]
+			)
+			_set_actor_line("NPC_Waiting_Customer", "줄이 멈췄어요. 저 사람 말 때문에 기록이 붙었대요.")
+			_apply_role_agent_action(
+				"report.park_witness.post_rumor",
+				"NPC_Park_Witness",
+				"park_witness",
+				"post_rumor",
+				"park_notice_board",
+				"park_public_rumor",
+				"The Park witness can see the Store note becoming public talk and pins a small notice outside the queue.",
+				clerk_note_event_id,
+				[clerk_note_event_id]
+			)
+			_set_actor_line("NPC_Park_Witness", "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.")
+		if report_after < INQUEST_THRESHOLD and bool(clerk_note.get("ok", false)):
+			_apply_role_agent_action(
+				"report.manager.place_followup_note",
+				"NPC_Store_Manager",
+				"store_manager",
+				"place_note",
+				"report_tray",
+				"store_same_order_manager_followup",
+				"The manager can see the pending Store note and adds a liability note without citing private Station facts."
+			)
+			_set_actor_line("NPC_Store_Manager", "보고 트레이가 열린 이상 예외 기록을 하나 더 붙입니다.")
 		_record_event(
 			"domain",
 			"station_report_created",
@@ -588,9 +1005,32 @@ func _open_inquest(evaluation: Dictionary) -> void:
 	stage = "inquest"
 	session_outcome = "inquest_opened"
 	route_outcome = "inquest_opened"
+	var escalated_result := _apply_role_agent_action(
+		"inquest.manager.forward_report",
+		"NPC_Store_Manager",
+		"store_manager",
+		"forward_report",
+		"report_tray",
+		"store_same_order_clerk_statement",
+		"The manager forwards the Store report for Station reconciliation."
+	)
+	var escalated_event: Dictionary = escalated_result.get("event", {})
+	var escalated_event_id := str(escalated_event.get("eventId", ""))
+	var cited_store_record := escalated_event_id if not escalated_event_id.is_empty() else "상점 전달 기록"
+	_apply_role_agent_action(
+		"inquest.station.cite_store_report",
+		"NPC_Station_Officer",
+		"station_officer",
+		"cite_record",
+		"station_dossier",
+		"station_same_order_dossier",
+		"The Station cites the exact forwarded Store ledger event before narrowing the player's answer.",
+		escalated_event_id,
+		[escalated_event_id]
+	)
 	outcome_visible = true
 	outcome_title = "스테이션 심문 개시"
-	outcome_body = "상점 대화 기록이 접수되었습니다.\n스테이션 대조: 이전 발화와 기록된 진술이 함께 접수되었습니다.\n기록된 why-line: %s\nR 다시 시작 / Q 종료" % str(evaluation["whyLine"])
+	outcome_body = "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 %s\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: %s\nR 다시 시작 / Q 종료" % [cited_store_record, str(evaluation["whyLine"])]
 	_record_event(
 		"domain",
 		"station_inquest_opened",
@@ -660,6 +1100,7 @@ func _show_current_prompt() -> void:
 	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
 	var npc_line := _current_npc_line(beat)
 	choice_catalog = _current_choices()
+	_prompt_started_ms = _now_ms()
 	_set_actor_line(str(beat.get("actorId", "NPC_Store_Clerk")), npc_line)
 	_set_notice("상점 점원", npc_line)
 
@@ -698,9 +1139,15 @@ func _refresh_hud() -> void:
 		_hud.set_notice(notice_title, notice_body, true)
 	if _hud.has_method("set_outcome"):
 		_hud.set_outcome(outcome_visible, outcome_title, outcome_body)
+	if _hud.has_method("set_record_state"):
+		_hud.set_record_state(record_objects, civic_economy, civic_ledger, _social_observation_trace())
+	if _hud.has_method("set_provider_state"):
+		_hud.set_provider_state(_provider_state())
 	if _hud.has_method("set_evidence"):
 		_hud.set_evidence(_recent_events())
+	_refresh_world_record_props()
 	_set_actor_reaction_state("NPC_Store_Clerk", stage, exposure)
+	_set_actor_reaction_state("NPC_Store_Manager", "reported" if int(civic_economy.get("recordBurden", 0)) >= 50 else "normal", exposure)
 	_set_actor_reaction_state("NPC_Park_Witness", "reported" if ["reported", "inquest"].has(stage) else "normal", exposure)
 	_set_actor_reaction_state("NPC_Station_Officer", "inquest" if bool(station["inquestOpen"]) else ("reported" if bool(station["intakeOpen"]) else "normal"), exposure)
 
@@ -710,7 +1157,7 @@ func _objective() -> String:
 	if bool(station["intakeOpen"]):
 		return "상점 대화 기록이 스테이션에 접수되었습니다. 답변의 일관성을 유지하세요."
 	if conversation_active:
-		return "점원의 질문에 맞는 말을 고르세요. 4는 화면의 진술을 기록합니다."
+		return "점원의 질문에 맞는 말을 고르거나 직접 입력하세요. 말은 상점 기록에 남습니다."
 	return "상점 카운터에서 점원과 대화하세요. 플레이어는 조사자가 아니라 조사받는 대상입니다."
 
 func _recent_events() -> Array:
@@ -727,6 +1174,827 @@ func _add_prologue_evidence(id: String, artifact_type: String, artifact_stage: S
 		"stage": artifact_stage,
 		"summary": summary
 	})
+
+func _apply_record_object_state(evaluation: Dictionary, intent: String) -> void:
+	var signals: Array = evaluation.get("suspicionSignals", [])
+	var why_line := str(evaluation.get("whyLine", ""))
+	if signals.has("memory_gap_admission"):
+		_mark_receipt_if_needed(why_line)
+		if str(record_objects.get("correction_slip", "")) == "absent":
+			_apply_role_agent_action(
+				"repair.clerk.offer_correction",
+				"NPC_Store_Clerk",
+				"store_clerk",
+				"offer_correction",
+				"correction_slip",
+				"store_same_order_correction",
+				"The clerk offers a correction slip because the player's memory gap can still be repaired locally."
+			)
+	if signals.has("local_routine_mismatch") or signals.has("role_script_break") or signals.has("prior_statement_contradiction") or signals.has("dream_language_leak"):
+		_mark_receipt_if_needed(why_line)
+	if intent == "safe/local" and current_prompt_id == "store.same_order.probe" and repair_attempt_count > 0:
+		_attach_correction_if_needed("The player returns to the clerk's premise, so the Store attaches the correction instead of escalating.")
+
+func _mark_receipt_if_needed(why_line: String) -> void:
+	if str(record_objects.get("receipt_tray", "")) == "blank":
+		_apply_role_agent_action(
+			"anomaly.clerk.mark_receipt",
+			"NPC_Store_Clerk",
+			"store_clerk",
+			"mark_receipt",
+			"receipt_tray",
+			"store_same_order_receipt",
+			why_line
+		)
+
+func _attach_correction_if_needed(why_line: String) -> void:
+	if str(record_objects.get("correction_slip", "")) != "attached":
+		_apply_role_agent_action(
+			"repair.clerk.attach_correction",
+			"NPC_Store_Clerk",
+			"store_clerk",
+			"attach_correction",
+			"correction_slip",
+			"store_same_order_correction",
+			why_line
+		)
+
+func debug_agent_action_log() -> Array:
+	return agent_action_log.duplicate(true)
+
+func _codex_choice_id_available(choice_id: String) -> bool:
+	if not conversation_active or _session_locked():
+		return false
+	for choice in _current_choices():
+		if str(choice.get("id", "")) == choice_id:
+			return true
+	return false
+
+func _codex_small_summary(summary: Dictionary) -> Dictionary:
+	return {
+		"stage": summary.get("stage", ""),
+		"sessionOutcome": summary.get("sessionOutcome", ""),
+		"routeOutcome": summary.get("routeOutcome", ""),
+		"suspicion": summary.get("suspicion", 0),
+		"reportWeight": summary.get("reportWeight", 0),
+		"responseHesitationCount": summary.get("responseHesitationCount", 0),
+		"lastDialogueChoice": summary.get("lastDialogueChoice", ""),
+		"lastReasonCode": summary.get("lastReasonCode", ""),
+		"inputLocked": summary.get("inputLocked", false)
+	}
+
+func _codex_hud_snapshot() -> Dictionary:
+	if _hud != null and _hud.has_method("debug_snapshot"):
+		var snapshot: Variant = _hud.call("debug_snapshot")
+		if snapshot is Dictionary:
+			return snapshot
+	return {}
+
+func _social_observation_trace() -> Array[Dictionary]:
+	var observations: Array[Dictionary] = []
+	for index in range(1, agent_action_log.size()):
+		var action: Dictionary = agent_action_log[index]
+		if str(action.get("actorRole", "")) == "store_clerk":
+			continue
+		var observed := _observed_agent_action(action, agent_action_log.slice(0, index))
+		if observed.is_empty():
+			continue
+		var economy: Dictionary = observed.get("economyAfter", {})
+		observations.append({
+			"observerActorId": str(action.get("actorId", "")),
+			"observerRole": str(action.get("actorRole", "")),
+			"observedLedgerEventId": str(observed.get("ledgerEventId", "")),
+			"observedActorRole": str(observed.get("actorRole", "")),
+			"observedAffordance": str(observed.get("affordance", "")),
+			"observedObjectId": str(observed.get("objectId", "")),
+			"economyPressure": {
+				"localTrust": int(economy.get("localTrust", 0)),
+				"recordBurden": int(economy.get("recordBurden", 0)),
+				"stationAttention": int(economy.get("stationAttention", 0))
+			},
+			"resultingStepId": str(action.get("stepId", "")),
+			"resultingAffordance": str(action.get("affordance", "")),
+			"whyLine": "%s reads %s's %s record before choosing %s." % [
+				str(action.get("actorRole", "")),
+				str(observed.get("actorRole", "")),
+				str(observed.get("affordance", "")),
+				str(action.get("affordance", ""))
+			]
+		})
+	return observations
+
+func _observed_agent_action(action: Dictionary, previous_actions: Array) -> Dictionary:
+	var cited_ledger_event_id := str(action.get("citedLedgerEventId", ""))
+	if not cited_ledger_event_id.is_empty():
+		for previous in previous_actions:
+			if previous is Dictionary and str(previous.get("ledgerEventId", "")) == cited_ledger_event_id:
+				return previous
+	for offset in range(previous_actions.size()):
+		var previous_index := previous_actions.size() - 1 - offset
+		var previous: Variant = previous_actions[previous_index]
+		if not previous is Dictionary:
+			continue
+		var previous_action: Dictionary = previous
+		if str(previous_action.get("objectId", "")) == str(action.get("objectId", "")):
+			return previous_action
+		var previous_record_id := str(previous_action.get("recordId", ""))
+		if not previous_record_id.is_empty() and previous_record_id == str(action.get("recordId", "")):
+			return previous_action
+	return {}
+
+func _apply_role_agent_action(
+	step_id: String,
+	actor_id: String,
+	actor_role: String,
+	affordance: String,
+	object_id: String,
+	record_id: String,
+	why_line: String,
+	cited_ledger_event_id: String = "",
+	known_ledger_event_ids: Array = []
+) -> Dictionary:
+	_agent_action_sequence += 1
+	var available_actions := _available_role_agent_actions(actor_role, known_ledger_event_ids)
+	var selected_action_descriptor := _find_available_action_descriptor(
+		available_actions,
+		affordance,
+		object_id,
+		cited_ledger_event_id
+	)
+	var validation := _validate_role_agent_action(
+		actor_id,
+		actor_role,
+		affordance,
+		object_id,
+		record_id,
+		why_line,
+		cited_ledger_event_id,
+		known_ledger_event_ids
+	)
+	var trace := {
+		"sequence": _agent_action_sequence,
+		"stepId": step_id,
+		"actorId": actor_id,
+		"actorRole": actor_role,
+		"perceivedObjectIds": _visible_object_ids(actor_role),
+		"affordance": affordance,
+		"objectId": object_id,
+		"recordId": record_id,
+		"citedLedgerEventId": cited_ledger_event_id,
+		"availableActions": available_actions,
+		"selectedActionDescriptor": selected_action_descriptor,
+		"selectionReason": why_line,
+		"whyLine": why_line,
+		"accepted": bool(validation.get("ok", false)),
+		"validation": "accepted" if bool(validation.get("ok", false)) else "rejected"
+	}
+	if not bool(validation.get("ok", false)):
+		trace["reason"] = str(validation.get("reason", "unknown"))
+		trace["detail"] = str(validation.get("detail", ""))
+		trace["stateBefore"] = str(record_objects.get(object_id, "unknown"))
+		agent_action_log.append(trace)
+		return {"ok": false, "trace": trace, "reason": trace["reason"], "detail": trace["detail"]}
+
+	var rule: Dictionary = validation.get("rule", {})
+	var resolved_record_id := str(validation.get("recordId", ""))
+	var event_kind := str(rule.get("eventKind", ""))
+	record_objects[object_id] = str(rule.get("toState", record_objects.get(object_id, "")))
+	var event := _append_civic_ledger(
+		event_kind,
+		actor_id,
+		actor_role,
+		affordance,
+		object_id,
+		resolved_record_id,
+		cited_ledger_event_id,
+		why_line
+	)
+	trace["ledgerEventId"] = str(event.get("eventId", ""))
+	trace["ledgerEventKind"] = event_kind
+	trace["recordId"] = resolved_record_id
+	trace["economyAfter"] = civic_economy.duplicate(true)
+	agent_action_log.append(trace)
+	return {"ok": true, "trace": trace, "event": event}
+
+func _validate_role_agent_action(
+	actor_id: String,
+	actor_role: String,
+	affordance: String,
+	object_id: String,
+	record_id: String,
+	why_line: String,
+	cited_ledger_event_id: String,
+	known_ledger_event_ids: Array
+) -> Dictionary:
+	if str(ACTOR_AGENT_ROLES.get(actor_id, "")) != actor_role:
+		return _agent_action_rejection("agent_role_mismatch", "action actor identity does not match actor context")
+	if why_line.strip_edges().is_empty():
+		return _agent_action_rejection("why_line_required", "accepted environment actions must explain why")
+	if not record_objects.has(object_id):
+		return _agent_action_rejection("object_unknown", "unknown environment object: %s" % object_id)
+
+	var perceived_object_ids := _visible_object_ids(actor_role)
+	if not perceived_object_ids.has(object_id):
+		return _agent_action_rejection("object_not_perceived", "%s cannot currently perceive %s" % [actor_role, object_id])
+
+	var object_rules: Dictionary = ENVIRONMENT_ACTION_RULES.get(object_id, {})
+	var rule: Dictionary = object_rules.get(affordance, {})
+	if rule.is_empty():
+		return _agent_action_rejection("affordance_unavailable", "%s is unavailable on %s" % [affordance, object_id])
+	var current_state := str(record_objects.get(object_id, ""))
+	var from_states: Array = rule.get("fromStates", [])
+	if not from_states.has(current_state):
+		return _agent_action_rejection("affordance_unavailable", "%s is unavailable on %s while state is %s" % [affordance, object_id, current_state])
+	var allowed_roles: Array = rule.get("allowedRoles", [])
+	if not allowed_roles.has(actor_role):
+		return _agent_action_rejection("role_authority_exceeded", "%s cannot apply %s to %s" % [actor_role, affordance, object_id])
+
+	var requires_ledger_event := bool(rule.get("requiresLedgerEvent", false))
+	var cited_event := _civic_ledger_event_by_id(cited_ledger_event_id)
+	if requires_ledger_event and cited_ledger_event_id.is_empty():
+		return _agent_action_rejection("ledger_event_unknown", "%s requires a cited ledger event" % affordance)
+	if not cited_ledger_event_id.is_empty() and cited_event.is_empty():
+		return _agent_action_rejection("ledger_event_unknown", "unknown ledger event: %s" % cited_ledger_event_id)
+	if not cited_ledger_event_id.is_empty() and not known_ledger_event_ids.has(cited_ledger_event_id):
+		return _agent_action_rejection("ledger_event_not_known", "%s cannot cite an unobserved ledger event" % actor_role)
+	if bool(rule.get("requiresStoreLedgerEvent", false)) and not _is_store_ledger_event_kind(str(cited_event.get("kind", ""))):
+		return _agent_action_rejection("station_citation_requires_store_record", "Station citation must cite a Store ledger event")
+
+	var resolved_record_id := record_id
+	if resolved_record_id.is_empty():
+		resolved_record_id = _record_id_for_object(object_id)
+	if _record_mutation_affordances().has(affordance) and resolved_record_id.strip_edges().is_empty():
+		return _agent_action_rejection("invalid_record_mutation", "%s requires a record id" % affordance)
+
+	return {"ok": true, "rule": rule, "recordId": resolved_record_id}
+
+func _agent_action_rejection(reason: String, detail: String) -> Dictionary:
+	return {"ok": false, "reason": reason, "detail": detail}
+
+func _visible_object_ids(actor_role: String) -> Array[String]:
+	var ids: Array[String] = []
+	for object_id in ENVIRONMENT_OBJECT_ORDER:
+		var roles: Array = OBJECT_VISIBILITY.get(object_id, [])
+		if roles.has(actor_role):
+			ids.append(str(object_id))
+	return ids
+
+func _available_role_agent_actions(actor_role: String, known_ledger_event_ids: Array = []) -> Array[Dictionary]:
+	var actions: Array[Dictionary] = []
+	for object_id in ENVIRONMENT_OBJECT_ORDER:
+		var roles: Array = OBJECT_VISIBILITY.get(object_id, [])
+		if not roles.has(actor_role):
+			continue
+		if not record_objects.has(object_id):
+			continue
+		var object_rules: Dictionary = ENVIRONMENT_ACTION_RULES.get(object_id, {})
+		if object_rules.is_empty():
+			continue
+		var current_state := str(record_objects.get(object_id, ""))
+		for affordance in ENVIRONMENT_AFFORDANCE_ORDER:
+			var rule: Dictionary = object_rules.get(affordance, {})
+			if rule.is_empty():
+				continue
+			var from_states: Array = rule.get("fromStates", [])
+			var allowed_roles: Array = rule.get("allowedRoles", [])
+			if not from_states.has(current_state) or not allowed_roles.has(actor_role):
+				continue
+			var requires_ledger_event := bool(rule.get("requiresLedgerEvent", false))
+			var citable_ledger_event_ids := _citable_ledger_event_ids(known_ledger_event_ids, bool(rule.get("requiresStoreLedgerEvent", false)))
+			if requires_ledger_event and citable_ledger_event_ids.is_empty():
+				continue
+			var action := {
+				"actionId": "%s.%s" % [str(object_id), str(affordance)],
+				"objectId": str(object_id),
+				"objectState": current_state,
+				"affordance": str(affordance),
+				"playerLabel": _action_player_label(str(affordance)),
+				"eligibleRoles": allowed_roles.duplicate(true),
+				"preconditions": _action_preconditions(str(object_id), current_state, rule),
+				"visibleTo": roles.duplicate(true),
+				"perceivedAs": _action_perceived_as(str(object_id), str(affordance)),
+				"priorityHints": _action_priority_hints(str(affordance), rule),
+				"toState": str(rule.get("toState", current_state)),
+				"ledgerEventKind": str(rule.get("eventKind", "")),
+				"civicEconomyEffects": _civic_economy_effects(str(rule.get("eventKind", ""))),
+				"validationRuleId": "same_order.%s.%s" % [str(object_id), str(affordance)],
+				"failureReasons": _action_failure_reasons(rule),
+				"recordId": _record_id_for_object(str(object_id)),
+				"requiresLedgerEvent": requires_ledger_event,
+				"requiresStoreLedgerEvent": bool(rule.get("requiresStoreLedgerEvent", false)),
+				"citableLedgerEventIds": citable_ledger_event_ids
+			}
+			actions.append(action)
+	return actions
+
+func _find_available_action_descriptor(
+	available_actions: Array,
+	affordance: String,
+	object_id: String,
+	cited_ledger_event_id: String
+) -> Dictionary:
+	for available in available_actions:
+		if not available is Dictionary:
+			continue
+		if str(available.get("objectId", "")) != object_id:
+			continue
+		if str(available.get("affordance", "")) != affordance:
+			continue
+		if bool(available.get("requiresLedgerEvent", false)):
+			if cited_ledger_event_id.is_empty() or not available.get("citableLedgerEventIds", []).has(cited_ledger_event_id):
+				continue
+		return available.duplicate(true)
+	return {}
+
+func _action_preconditions(object_id: String, object_state: String, rule: Dictionary) -> Array[String]:
+	var preconditions: Array[String] = [
+		"object_state:%s" % object_state,
+		"role_allowed:%s" % "|".join(PackedStringArray(rule.get("allowedRoles", [])))
+	]
+	if bool(rule.get("requiresLedgerEvent", false)):
+		preconditions.append("known_ledger_event_required")
+	if bool(rule.get("requiresStoreLedgerEvent", false)):
+		preconditions.append("known_store_ledger_event_required")
+	if not _record_id_for_object(object_id).is_empty():
+		preconditions.append("record_id:%s" % _record_id_for_object(object_id))
+	return preconditions
+
+func _action_failure_reasons(rule: Dictionary) -> Array[String]:
+	var reasons: Array[String] = [
+		"object_not_perceived",
+		"affordance_unavailable",
+		"role_authority_exceeded",
+		"why_line_required"
+	]
+	if bool(rule.get("requiresLedgerEvent", false)):
+		reasons.append("ledger_event_unknown")
+		reasons.append("ledger_event_not_known")
+	if bool(rule.get("requiresStoreLedgerEvent", false)):
+		reasons.append("station_citation_requires_store_record")
+	return reasons
+
+func _civic_economy_effects(event_kind: String) -> Array[String]:
+	var effects: Array[String] = []
+	var delta := _civic_economy_delta(event_kind)
+	for key in delta.keys():
+		var value := int(delta.get(key, 0))
+		var prefix := "+" if value >= 0 else ""
+		effects.append("%s:%s%d" % [str(key), prefix, value])
+	return effects
+
+func _action_priority_hints(affordance: String, rule: Dictionary) -> Array[String]:
+	var hints: Array[String] = []
+	var delta := _civic_economy_delta(str(rule.get("eventKind", "")))
+	for key in delta.keys():
+		hints.append("economy:%s" % str(key))
+	if bool(rule.get("requiresStoreLedgerEvent", false)):
+		hints.append("requires:store_record_citation")
+	if affordance == "complain_delay":
+		hints.append("pressure:queue_delay")
+	if affordance == "post_rumor":
+		hints.append("pressure:public_talk")
+	return hints
+
+func _action_perceived_as(object_id: String, affordance: String) -> String:
+	match affordance:
+		"create_receipt":
+			return "normal sale record"
+		"mark_receipt":
+			return "marked receipt"
+		"offer_correction", "attach_correction":
+			return "local correction path"
+		"place_note":
+			return "Store report note"
+		"forward_report":
+			return "forwarded Store report"
+		"cite_record":
+			return "Station dossier citation"
+		"complain_delay":
+			return "public queue pressure"
+		"post_rumor":
+			return "public notice rumor"
+	return "%s %s" % [object_id, affordance]
+
+func _action_player_label(affordance: String) -> String:
+	var parts := affordance.split("_")
+	for index in range(parts.size()):
+		var part := str(parts[index])
+		if part.is_empty():
+			continue
+		parts[index] = part.substr(0, 1).to_upper() + part.substr(1)
+	return " ".join(PackedStringArray(parts))
+
+func _citable_ledger_event_ids(known_ledger_event_ids: Array, requires_store_ledger_event: bool) -> Array[String]:
+	var ids: Array[String] = []
+	for event in civic_ledger:
+		if not event is Dictionary:
+			continue
+		var event_id := str(event.get("eventId", ""))
+		if event_id.is_empty() or not known_ledger_event_ids.has(event_id):
+			continue
+		if requires_store_ledger_event and not _is_store_ledger_event_kind(str(event.get("kind", ""))):
+			continue
+		ids.append(event_id)
+	return ids
+
+func _record_mutation_affordances() -> Array[String]:
+	return [
+		"create_receipt",
+		"mark_receipt",
+		"attach_correction",
+		"complain_delay",
+		"post_rumor",
+		"place_note",
+		"forward_report",
+		"cite_record"
+	]
+
+func _record_id_for_object(object_id: String) -> String:
+	match object_id:
+		"store_queue_mark":
+			return "store_same_order_queue_delay"
+		"receipt_tray":
+			return "store_same_order_receipt"
+		"correction_slip":
+			return "store_same_order_correction"
+		"report_tray":
+			return "store_same_order_clerk_statement"
+		"park_notice_board":
+			return "park_public_rumor"
+		"station_dossier":
+			return "station_same_order_dossier"
+	return ""
+
+func _civic_ledger_event_by_id(event_id: String) -> Dictionary:
+	if event_id.is_empty():
+		return {}
+	for event in civic_ledger:
+		if str(event.get("eventId", "")) == event_id:
+			return event
+	return {}
+
+func _is_store_ledger_event_kind(event_kind: String) -> bool:
+	return STORE_LEDGER_EVENT_KINDS.has(event_kind)
+
+func _append_civic_ledger(
+	event_kind: String,
+	actor_id: String,
+	actor_role: String,
+	affordance: String,
+	object_id: String,
+	record_id: String,
+	cited_ledger_event_id: String,
+	why_line: String
+) -> Dictionary:
+	_civic_ledger_sequence += 1
+	var economy_delta := _civic_economy_delta(event_kind)
+	_apply_civic_economy_delta(economy_delta)
+	var event := {
+		"eventId": "civic-ledger-%d" % _civic_ledger_sequence,
+		"kind": event_kind,
+		"actorId": actor_id,
+		"actorRole": actor_role,
+		"affordance": affordance,
+		"objectId": object_id,
+		"recordId": record_id,
+		"economyDelta": economy_delta,
+		"validation": "accepted",
+		"whyLine": why_line
+	}
+	if not cited_ledger_event_id.is_empty():
+		event["citedLedgerEventId"] = cited_ledger_event_id
+	civic_ledger.append(event)
+	return event
+
+func _civic_economy_delta(event_kind: String) -> Dictionary:
+	match event_kind:
+		"store_sale_normal":
+			return {"accountCredit": -1, "localTrust": 5}
+		"store_receipt_marked":
+			return {"localTrust": -5, "recordBurden": 15}
+		"correction_offered":
+			return {"recordBurden": 5}
+		"store_sale_corrected":
+			return {"accountCredit": -1, "localTrust": -5, "recordBurden": 15, "stationAttention": 5}
+		"queue_delay_noted":
+			return {"recordBurden": 5}
+		"public_rumor_posted":
+			return {"recordBurden": 5}
+		"store_exception_reported":
+			return {"localTrust": -20, "recordBurden": 35, "stationAttention": 30}
+		"store_report_escalated":
+			return {"localTrust": -20, "recordBurden": 25, "stationAttention": 40}
+	return {}
+
+func _apply_civic_economy_delta(delta: Dictionary) -> void:
+	civic_economy["accountCredit"] = clampi(int(civic_economy.get("accountCredit", 0)) + int(delta.get("accountCredit", 0)), 0, 999)
+	civic_economy["localTrust"] = clampi(int(civic_economy.get("localTrust", 0)) + int(delta.get("localTrust", 0)), 0, 100)
+	civic_economy["recordBurden"] = clampi(int(civic_economy.get("recordBurden", 0)) + int(delta.get("recordBurden", 0)), 0, 100)
+	civic_economy["stationAttention"] = clampi(int(civic_economy.get("stationAttention", 0)) + int(delta.get("stationAttention", 0)), 0, 100)
+
+func debug_record_prop_snapshot() -> Dictionary:
+	_refresh_world_record_props()
+	return _world_record_prop_snapshot()
+
+func _refresh_world_record_props() -> void:
+	for prop_value in get_tree().get_nodes_in_group("operation_record_props"):
+		var prop_node := prop_value as Node3D
+		if prop_node == null:
+			continue
+		var object_id := str(prop_node.get_meta("record_object_id", ""))
+		var state := _world_record_prop_state(object_id)
+		var label_text := _world_record_prop_label(object_id, state)
+		prop_node.set_meta("record_state", state)
+		prop_node.set_meta("record_label", label_text)
+		var body := prop_node.get_node_or_null("StateBody") as MeshInstance3D
+		if body != null:
+			body.material_override = _world_record_prop_material(object_id, state)
+		var strip := prop_node.get_node_or_null("StateStrip") as MeshInstance3D
+		if strip != null:
+			strip.material_override = _world_record_prop_material(object_id, state)
+		var label := prop_node.get_node_or_null("StateLabel") as Label3D
+		if label != null:
+			label.text = label_text
+
+func _world_record_prop_snapshot() -> Dictionary:
+	var snapshot := {}
+	for prop_value in get_tree().get_nodes_in_group("operation_record_props"):
+		var prop_node := prop_value as Node3D
+		if prop_node == null:
+			continue
+		var object_id := str(prop_node.get_meta("record_object_id", ""))
+		if object_id.is_empty():
+			continue
+		var label := prop_node.get_node_or_null("StateLabel") as Label3D
+		var body := prop_node.get_node_or_null("StateBody") as MeshInstance3D
+		snapshot[object_id] = {
+			"state": str(prop_node.get_meta("record_state", _world_record_prop_state(object_id))),
+			"label": label.text if label != null else str(prop_node.get_meta("record_label", "")),
+			"visible": prop_node.visible,
+			"hasBody": body != null
+		}
+	return snapshot
+
+func _world_record_prop_state(object_id: String) -> String:
+	if object_id == "civic_economy_panel":
+		if int(civic_economy.get("stationAttention", 0)) >= 70:
+			return "attention"
+		if int(civic_economy.get("recordBurden", 0)) >= 50:
+			return "burden"
+		if int(civic_economy.get("localTrust", 50)) < 50:
+			return "trust_low"
+		return "stable"
+	return str(record_objects.get(object_id, "unknown"))
+
+func _world_record_prop_label(object_id: String, state: String) -> String:
+	if object_id == "civic_economy_panel":
+		if _current_locale() == "en":
+			return "CIVIC ECONOMY\ncredit %d | trust %d | burden %d | attention %d" % [
+				int(civic_economy.get("accountCredit", 3)),
+				int(civic_economy.get("localTrust", 50)),
+				int(civic_economy.get("recordBurden", 0)),
+				int(civic_economy.get("stationAttention", 0))
+			]
+		return "시민 경제\n잔액 %d | 신뢰 %d | 부담 %d | 주목 %d" % [
+			int(civic_economy.get("accountCredit", 3)),
+			int(civic_economy.get("localTrust", 50)),
+			int(civic_economy.get("recordBurden", 0)),
+			int(civic_economy.get("stationAttention", 0))
+		]
+	if object_id == "civic_ledger":
+		var ledger_count := civic_ledger.size()
+		var latest_entry := _latest_civic_ledger_label()
+		if _current_locale() == "en":
+			return "CIVIC LEDGER %d\n%s" % [ledger_count, latest_entry]
+		return "시민 장부 %d건\n%s" % [ledger_count, latest_entry]
+	var compact_label := _compact_world_record_prop_label(object_id, state)
+	if not compact_label.is_empty():
+		return compact_label
+	return "%s\n%s" % [_world_record_prop_title(object_id), _record_state_value(state)]
+
+func _latest_civic_ledger_label() -> String:
+	if civic_ledger.is_empty():
+		return "-"
+	var latest: Dictionary = civic_ledger[civic_ledger.size() - 1]
+	var event_id := str(latest.get("eventId", ""))
+	var affordance_label := _affordance_label(str(latest.get("affordance", "")))
+	var cited_id := str(latest.get("citedLedgerEventId", ""))
+	if not cited_id.is_empty():
+		return "%s -> %s\n%s" % [event_id, cited_id, affordance_label]
+	return "%s\n%s" % [event_id, affordance_label]
+
+func _compact_world_record_prop_label(object_id: String, state: String) -> String:
+	if _current_locale() == "en":
+		match object_id:
+			"store_counter":
+				return "COUNTER\nserving"
+			"receipt_tray":
+				return "RECEIPT\n%s" % _record_state_value(state)
+			"correction_slip":
+				return "FIX\n%s" % _record_state_value(state)
+			"report_tray":
+				return "REPORT\n%s" % _record_state_value(state)
+			"park_notice_board":
+				return "PUBLIC\n%s" % _record_state_value(state)
+		return ""
+	match object_id:
+		"store_counter":
+			return "카운터\n응대"
+		"receipt_tray":
+			return "영수증\n%s" % _record_state_value(state)
+		"correction_slip":
+			return "정정\n%s" % _record_state_value(state)
+		"report_tray":
+			return "보고\n%s" % _record_state_value(state)
+		"park_notice_board":
+			return "공개판\n%s" % _record_state_value(state)
+	return ""
+
+func _civic_ledger_kind_label(kind: String) -> String:
+	var ko := {
+		"store_sale_normal": "정상 영수증",
+		"store_receipt_marked": "영수증 표시",
+		"correction_offered": "정정 제안",
+		"store_sale_corrected": "정정 처리",
+		"queue_delay_noted": "대기줄 불평",
+		"public_rumor_posted": "공개 소문",
+		"store_exception_reported": "상점 보고",
+		"store_report_escalated": "보고 전달",
+		"station_record_cited": "스테이션 인용"
+	}
+	var en := {
+		"store_sale_normal": "normal receipt",
+		"store_receipt_marked": "marked receipt",
+		"correction_offered": "correction offered",
+		"store_sale_corrected": "correction accepted",
+		"queue_delay_noted": "queue delay noted",
+		"public_rumor_posted": "public rumor posted",
+		"store_exception_reported": "Store report",
+		"store_report_escalated": "report forwarded",
+		"station_record_cited": "Station cited"
+	}
+	var table: Dictionary = en if _current_locale() == "en" else ko
+	return str(table.get(kind, kind))
+
+func _actor_role_label(actor_role: String) -> String:
+	var ko := {
+		"store_clerk": "상점 점원",
+		"store_manager": "상점 매니저",
+		"waiting_customer": "대기 손님",
+		"park_witness": "공원 목격자",
+		"station_officer": "스테이션 직원"
+	}
+	var en := {
+		"store_clerk": "Store Clerk",
+		"store_manager": "Store Manager",
+		"waiting_customer": "Waiting Customer",
+		"park_witness": "Park Witness",
+		"station_officer": "Station Officer"
+	}
+	var table: Dictionary = en if _current_locale() == "en" else ko
+	return str(table.get(actor_role, actor_role))
+
+func _affordance_label(affordance: String) -> String:
+	var ko := {
+		"create_receipt": "영수증 작성",
+		"mark_receipt": "영수증 표시",
+		"attach_correction": "정정 첨부",
+		"complain_delay": "대기 불평",
+		"post_rumor": "공개 게시",
+		"place_note": "메모 배치",
+		"forward_report": "보고 전달",
+		"cite_record": "기록 인용"
+	}
+	var en := {
+		"create_receipt": "create receipt",
+		"mark_receipt": "mark receipt",
+		"attach_correction": "attach correction",
+		"complain_delay": "complain delay",
+		"post_rumor": "post public rumor",
+		"place_note": "place note",
+		"forward_report": "forward report",
+		"cite_record": "cite record"
+	}
+	var table: Dictionary = en if _current_locale() == "en" else ko
+	return str(table.get(affordance, affordance))
+
+func _world_record_prop_title(object_id: String) -> String:
+	var ko := {
+		"store_queue_mark": "대기 표식",
+		"store_counter": "상점 카운터",
+		"usual_order_cue": "늘 같은 주문",
+		"receipt_tray": "영수증 트레이",
+		"correction_slip": "정정 문서",
+		"report_tray": "보고 트레이",
+		"park_notice_board": "공원 게시판",
+		"station_dossier": "스테이션 문서",
+		"civic_ledger": "시민 장부"
+	}
+	var en := {
+		"store_queue_mark": "Queue mark",
+		"store_counter": "Store counter",
+		"usual_order_cue": "Usual order",
+		"receipt_tray": "Receipt tray",
+		"correction_slip": "Correction slip",
+		"report_tray": "Report tray",
+		"park_notice_board": "Park notice board",
+		"station_dossier": "Station dossier",
+		"civic_ledger": "Civic ledger"
+	}
+	var table: Dictionary = en if _current_locale() == "en" else ko
+	return str(table.get(object_id, object_id))
+
+func _record_state_value(state: String) -> String:
+	var ko := {
+		"blank": "빈칸",
+		"normal": "정상",
+		"marked": "표시됨",
+		"corrected": "정정됨",
+		"absent": "없음",
+		"offered": "제안됨",
+		"attached": "첨부됨",
+		"empty": "비어 있음",
+		"pending": "대기",
+		"forwarded": "전달",
+		"cited": "인용됨",
+		"read": "읽힘",
+		"serving": "응대 중",
+		"player_waiting": "플레이어 대기",
+		"append_only": "추가됨",
+		"stable": "안정",
+		"burden": "부담 증가",
+		"attention": "주목 상승",
+		"trust_low": "신뢰 하락",
+		"clear": "비어 있음",
+		"rumored": "소문 게시",
+		"unknown": "미확인"
+	}
+	var en := {
+		"blank": "blank",
+		"normal": "normal",
+		"marked": "marked",
+		"corrected": "corrected",
+		"absent": "absent",
+		"offered": "offered",
+		"attached": "attached",
+		"empty": "empty",
+		"pending": "pending",
+		"forwarded": "forwarded",
+		"cited": "cited",
+		"read": "read",
+		"serving": "serving",
+		"player_waiting": "player waiting",
+		"append_only": "append only",
+		"stable": "stable",
+		"burden": "burden rising",
+		"attention": "attention rising",
+		"trust_low": "trust low",
+		"clear": "clear",
+		"rumored": "rumor posted",
+		"unknown": "unknown"
+	}
+	var table: Dictionary = en if _current_locale() == "en" else ko
+	return str(table.get(state, state))
+
+func _world_record_prop_material(object_id: String, state: String) -> StandardMaterial3D:
+	var color := _world_record_prop_color(object_id, state)
+	var material := StandardMaterial3D.new()
+	material.resource_name = "RecordProp_%s_%s" % [object_id, state]
+	material.albedo_color = color
+	material.roughness = 0.82
+	if color.a < 1.0:
+		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	if ["pending", "forwarded", "cited", "attention", "rumored"].has(state):
+		material.emission_enabled = true
+		material.emission = Color(color.r, color.g, color.b, 1.0)
+		material.emission_energy_multiplier = 0.35
+	return material
+
+func _world_record_prop_color(object_id: String, state: String) -> Color:
+	match state:
+		"normal", "read", "serving", "player_waiting", "stable":
+			return Color(0.34, 0.76, 0.82, 0.94)
+		"marked", "offered", "burden", "trust_low":
+			return Color(1.0, 0.68, 0.28, 0.94)
+		"attached", "corrected":
+			return Color(0.42, 0.86, 0.58, 0.96)
+		"pending", "rumored":
+			return Color(1.0, 0.52, 0.24, 0.96)
+		"forwarded", "cited", "attention":
+			return Color(1.0, 0.34, 0.26, 0.98)
+		"append_only":
+			return Color(0.82, 0.76, 0.42, 0.94)
+		"absent", "empty", "blank":
+			return Color(0.42, 0.46, 0.48, 0.62)
+		_:
+			return Color(0.58, 0.60, 0.62, 0.7)
+
+func _latest_civic_ledger_id(event_kind: String) -> String:
+	for index in range(civic_ledger.size() - 1, -1, -1):
+		var event := civic_ledger[index]
+		if str(event.get("kind", "")) == event_kind:
+			return str(event.get("eventId", ""))
+	return ""
 
 func _make_event(event_family: String, event_name: String, summary: String, extra: Dictionary) -> Dictionary:
 	_event_sequence += 1
@@ -995,8 +2263,11 @@ func is_session_locked() -> bool:
 func _authority_mode() -> String:
 	return "godot_local_conversation_runtime"
 
+func _provider_state() -> Dictionary:
+	return PROVIDER_STATE.duplicate(true)
+
 func _release_authority_requirement() -> String:
-	return "Public demo authority must keep suspicion, report, inquest, verdict, and session end deterministic; API/provider text remains wording-only."
+	return "Same Order M1 is fallback-only until budgeted API preflight and Godot provider dispatch pass; public demo authority must keep suspicion, report, inquest, verdict, and session end deterministic."
 
 func _resolve_terminal_outcome() -> void:
 	if bool(station["inquestOpen"]):
@@ -1014,10 +2285,29 @@ func _resolve_terminal_outcome() -> void:
 	if repair_attempt_count > 0:
 		route_outcome = "repair_recovered"
 		repair_state = "used_success"
+		_attach_correction_if_needed("The repair answer returns to the local premise, so the correction slip closes the Store record.")
 	elif suspicion > 0:
 		route_outcome = "cover_held_under_suspicion"
 	else:
 		route_outcome = "clean_cover"
+		_apply_role_agent_action(
+			"clean.clerk.cite_usual_order",
+			"NPC_Store_Clerk",
+			"store_clerk",
+			"cite_expected_order",
+			"usual_order_cue",
+			"",
+			"The clerk cites the usual order as the accepted local routine."
+		)
+		_apply_role_agent_action(
+			"clean.clerk.create_receipt",
+			"NPC_Store_Clerk",
+			"store_clerk",
+			"create_receipt",
+			"receipt_tray",
+			"store_same_order_receipt",
+			"The accepted line matches the Store routine and creates a normal receipt."
+		)
 
 func _terminal_outcome_title() -> String:
 	if session_outcome == "soft_report":
@@ -1028,10 +2318,10 @@ func _terminal_outcome_title() -> String:
 
 func _terminal_outcome_body() -> String:
 	if session_outcome == "soft_report":
-		return "결과: soft_report\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
+		return "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 상점 관리자가 기록 부담을 보고 후속 메모를 붙였습니다.\n역할 행동: 상점 관리자가 보고 트레이에 점원 기록을 전달했습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	if route_outcome == "repair_recovered":
-		return "결과: cover_held\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
-	return "결과: cover_held\n상점 대화가 지역 루틴 안에서 닫혔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
+		return "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 상점 안에서 수습\n역할 행동: 상점 점원이 정정표를 붙여 지역 루틴 안에서 기록을 닫았습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
+	return "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 스테이션 인용 없음\n역할 행동: 상점 점원이 정상 영수증을 만들고 추가 보고를 열지 않았습니다.\n상점 대화가 지역 루틴 안에서 닫혔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 
 func _now_ms() -> int:
 	return int(Time.get_unix_time_from_system() * 1000.0)

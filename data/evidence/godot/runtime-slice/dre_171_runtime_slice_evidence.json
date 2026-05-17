@@ -5,7 +5,7 @@
 			"actionType": "Idle",
 			"commandId": "cmd-godot-busy-actor-1-fallback",
 			"expectedStage": "intake",
-			"issuedAtMs": 1778571492935,
+			"issuedAtMs": 1779016882688,
 			"npcId": "NPC_Station_Officer",
 			"reasonCodes": [
 				"schema_actor_busy"
@@ -13,9 +13,7 @@
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-runtime-slice-session",
 			"source": "fallback",
-			"target": {
-
-			},
+			"target": {},
 			"timeoutMs": 1000,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
@@ -26,13 +24,13 @@
 		],
 		"status": "rejected"
 	},
-	"createdAtMs": 1778571492935,
+	"createdAtMs": 1779016882688,
 	"duplicateCommandResult": {
 		"fallback": {
 			"actionType": "Idle",
 			"commandId": "cmd-godot-move-1-fallback",
 			"expectedStage": "intake",
-			"issuedAtMs": 1778571492935,
+			"issuedAtMs": 1779016882688,
 			"npcId": "NPC_Station_Officer",
 			"reasonCodes": [
 				"schema_duplicate_command"
@@ -40,9 +38,7 @@
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-runtime-slice-session",
 			"source": "fallback",
-			"target": {
-
-			},
+			"target": {},
 			"timeoutMs": 1000,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
@@ -58,13 +54,13 @@
 			"actorId": "NPC_Station_Officer",
 			"adapter": "godot",
 			"eventFamily": "observation",
-			"eventId": "observation_frame_emitted-1778571492935",
+			"eventId": "observation_frame_emitted-1779016882688",
 			"eventName": "observation_frame_emitted",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-runtime-slice-session",
 			"socialLoopStage": "intake",
 			"summary": "Godot runtime slice emitted Station intake ObservationFrame.",
-			"timestampMs": 1778571492935,
+			"timestampMs": 1779016882688,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
 		},
@@ -73,7 +69,7 @@
 			"adapter": "godot",
 			"commandId": "cmd-godot-move-1",
 			"eventFamily": "command",
-			"eventId": "command_executed-1778571492935",
+			"eventId": "command_executed-1779016882688",
 			"eventName": "command_executed",
 			"observedResult": {
 				"collisionObserved": false,
@@ -100,7 +96,7 @@
 			"sessionId": "dre-171-runtime-slice-session",
 			"socialLoopStage": "intake",
 			"summary": "Godot runtime slice executed a bounded Move command.",
-			"timestampMs": 1778571492935,
+			"timestampMs": 1779016882688,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
 		},
@@ -109,7 +105,7 @@
 			"adapter": "godot",
 			"commandId": "cmd-godot-invalid-1",
 			"eventFamily": "command",
-			"eventId": "command_rejected-1778571492935",
+			"eventId": "command_rejected-1779016882688",
 			"eventName": "command_rejected",
 			"reasonCategory": "schema",
 			"reasonCode": "schema_unknown_actor",
@@ -117,7 +113,7 @@
 			"sessionId": "dre-171-runtime-slice-session",
 			"socialLoopStage": "intake",
 			"summary": "Godot runtime slice rejected an invalid command before world mutation.",
-			"timestampMs": 1778571492935,
+			"timestampMs": 1779016882688,
 			"warningTier": "blocking",
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
@@ -127,7 +123,7 @@
 			"adapter": "godot",
 			"commandId": "cmd-godot-invalid-1-fallback",
 			"eventFamily": "fallback",
-			"eventId": "fallback_selected-1778571492935",
+			"eventId": "fallback_selected-1779016882688",
 			"eventName": "fallback_selected",
 			"reasonCategory": "schema",
 			"reasonCode": "schema_unknown_actor",
@@ -135,7 +131,7 @@
 			"sessionId": "dre-171-runtime-slice-session",
 			"socialLoopStage": "intake",
 			"summary": "Godot runtime slice selected deterministic Idle fallback for the rejected command.",
-			"timestampMs": 1778571492935,
+			"timestampMs": 1779016882688,
 			"usedFallback": true,
 			"warningTier": "blocking",
 			"worldId": "dre_171_godot_shell",
@@ -146,7 +142,7 @@
 			"adapter": "godot",
 			"commandId": "cmd-godot-move-1",
 			"eventFamily": "command",
-			"eventId": "command_rejected-1778571492935",
+			"eventId": "command_rejected-1779016882688",
 			"eventName": "command_rejected",
 			"reasonCategory": "schema",
 			"reasonCode": "schema_duplicate_command",
@@ -154,7 +150,7 @@
 			"sessionId": "dre-171-runtime-slice-session",
 			"socialLoopStage": "intake",
 			"summary": "Godot runtime slice rejected a replayed commandId before world mutation.",
-			"timestampMs": 1778571492935,
+			"timestampMs": 1779016882688,
 			"warningTier": "blocking",
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
@@ -164,7 +160,7 @@
 			"adapter": "godot",
 			"commandId": "cmd-godot-busy-actor-1",
 			"eventFamily": "command",
-			"eventId": "command_rejected-1778571492935",
+			"eventId": "command_rejected-1779016882688",
 			"eventName": "command_rejected",
 			"reasonCategory": "schema",
 			"reasonCode": "schema_actor_busy",
@@ -172,7 +168,7 @@
 			"sessionId": "dre-171-runtime-slice-session",
 			"socialLoopStage": "intake",
 			"summary": "Godot runtime slice rejected an in-flight actor command before world mutation.",
-			"timestampMs": 1778571492935,
+			"timestampMs": 1779016882688,
 			"warningTier": "blocking",
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
@@ -182,7 +178,7 @@
 			"adapter": "godot",
 			"commandId": "cmd-godot-unknown-zone-1",
 			"eventFamily": "command",
-			"eventId": "command_rejected-1778571492935",
+			"eventId": "command_rejected-1779016882688",
 			"eventName": "command_rejected",
 			"reasonCategory": "schema",
 			"reasonCode": "schema_unknown_zone",
@@ -190,7 +186,7 @@
 			"sessionId": "dre-171-runtime-slice-session",
 			"socialLoopStage": "intake",
 			"summary": "Godot runtime slice rejected an unregistered zone target before world mutation.",
-			"timestampMs": 1778571492935,
+			"timestampMs": 1779016882688,
 			"warningTier": "blocking",
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
@@ -199,7 +195,7 @@
 			"actorId": "NPC_Station_Officer",
 			"adapter": "godot",
 			"eventFamily": "domain",
-			"eventId": "station_intake_sa_break_rejected-1778571492935",
+			"eventId": "station_intake_sa_break_rejected-1779016882688",
 			"eventName": "station_intake_sa_break_rejected",
 			"reasonCategory": "policy",
 			"reasonCode": "policy_station_intake_requires_procedural_speech",
@@ -207,7 +203,7 @@
 			"sessionId": "dre-171-runtime-slice-session",
 			"socialLoopStage": "intake",
 			"summary": "Station intake rejected SA_BREAK with deterministic procedural speech policy.",
-			"timestampMs": 1778571492935,
+			"timestampMs": 1779016882688,
 			"usedFallback": true,
 			"warningTier": "blocking",
 			"worldId": "dre_171_godot_shell",
@@ -217,12 +213,12 @@
 			"adapter": "godot",
 			"artifactPath": "data/evidence/godot/runtime-slice/dre_171_runtime_slice_evidence.json",
 			"eventFamily": "evidence_export",
-			"eventId": "evidence_pack_created-1778571492935",
+			"eventId": "evidence_pack_created-1779016882688",
 			"eventName": "evidence_pack_created",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-runtime-slice-session",
 			"summary": "Godot runtime slice Evidence Pack exported.",
-			"timestampMs": 1778571492935,
+			"timestampMs": 1779016882688,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
 		}
@@ -232,7 +228,7 @@
 			"actionType": "Idle",
 			"commandId": "cmd-godot-invalid-1-fallback",
 			"expectedStage": "intake",
-			"issuedAtMs": 1778571492935,
+			"issuedAtMs": 1779016882688,
 			"npcId": "NPC_Missing",
 			"reasonCodes": [
 				"schema_unknown_actor",
@@ -241,9 +237,7 @@
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-runtime-slice-session",
 			"source": "fallback",
-			"target": {
-
-			},
+			"target": {},
 			"timeoutMs": 1000,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
@@ -308,7 +302,7 @@
 			"sessionTerminationAllowed": false,
 			"verdictReady": false
 		},
-		"timestampMs": 1778571492935,
+		"timestampMs": 1779016882688,
 		"velocity": {
 			"x": 0.0,
 			"y": 0.0,
@@ -330,7 +324,7 @@
 				],
 				"id": "TS_Store_QueueRules",
 				"landmarkId": "Store",
-				"text": "Queue procedure: wait at the mark, state item count, confirm the label aloud."
+				"text": "Store procedure: answer normally if this is your usual order. Uncertainty attaches a correction slip; mismatched speech moves to the report tray. Station cites only forwarded Store records."
 			},
 			{
 				"coverTestIds": [
@@ -363,7 +357,7 @@
 				],
 				"id": "TS_Station_IntakeRules",
 				"landmarkId": "Station",
-				"text": "Station intake: answer only procedural questions and keep reports internally consistent."
+				"text": "Station intake: procedural answers outrank explanation. The officer compares receipt, report tray, and ledger number before asking which statement stands."
 			}
 		],
 		"worldId": "dre_171_godot_shell",
@@ -397,7 +391,7 @@
 			"actionType": "Idle",
 			"commandId": "cmd-godot-unknown-zone-1-fallback",
 			"expectedStage": "intake",
-			"issuedAtMs": 1778571492935,
+			"issuedAtMs": 1779016882688,
 			"npcId": "NPC_Station_Officer",
 			"reasonCodes": [
 				"schema_unknown_zone"
@@ -405,9 +399,7 @@
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-runtime-slice-session",
 			"source": "fallback",
-			"target": {
-
-			},
+			"target": {},
 			"timeoutMs": 1000,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"

@@ -21,7 +21,7 @@ The playable rebuild must keep the current product rails:
 
 - Player is not an investigator.
 - NPCs and Station systems investigate the player.
-- Text is the danger surface.
+- Text is where danger starts.
 - Dream Law, Cover Test, Exposure, Station intake, Inquest, verdict, and session termination remain deterministic product authority.
 - Godot presents the 3D world, captures player interaction, emits observations, executes bounded commands, and records visible evidence.
 

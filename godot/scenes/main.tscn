@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/world_shell.gd" id="1_world_shell"]
 [ext_resource type="PackedScene" path="res://scenes/actors/player.tscn" id="2_player"]
 [ext_resource type="Script" path="res://scripts/runtime/playable_session.gd" id="3_playable_session"]
 [ext_resource type="PackedScene" path="res://scenes/ui/social_stealth_hud.tscn" id="4_hud"]
 [ext_resource type="Script" path="res://scripts/localization/localization_manager.gd" id="5_localization"]
+[ext_resource type="Script" path="res://scripts/runtime/packaged_route_smoke.gd" id="6_packaged_route_smoke"]
 
 [node name="DreamOfOneShell" type="Node3D"]
 script = ExtResource("1_world_shell")
@@ -35,3 +36,6 @@ far = 100.0
 
 [node name="PlayableSession" type="Node" parent="."]
 script = ExtResource("3_playable_session")
+
+[node name="PackagedRouteSmoke" type="Node" parent="."]
+script = ExtResource("6_packaged_route_smoke")

@@ -22,7 +22,8 @@
         "counter": [-13.5, 0, -1.6],
         "label_board": [-8.2, 1.45, -2.7],
         "queue_start": [-10.4, 0, 1.4],
-        "npc_spawn": [-13.4, 0, 0.7]
+        "npc_spawn": [-13.4, 0, 0.7],
+        "manager_spawn": [-12.4, 0, -2.6]
       }
     },
     {
@@ -138,7 +139,7 @@
       "law_alias": "DL_S1",
       "cover_test_id": "CT_STORE_QUEUE_LANGUAGE",
       "purpose": "TextSurface equivalent for Store queue language.",
-      "body": "Queue procedure: wait at the mark, state item count, confirm the label aloud.",
+      "body": "Store procedure: answer normally if this is your usual order. Uncertainty attaches a correction slip; mismatched speech moves to the report tray. Station cites only forwarded Store records.",
       "evidence_outputs": ["QueueMismatchEvent", "WitnessStatement"]
     },
     {
@@ -174,7 +175,7 @@
       "law_alias": "DL_N1",
       "cover_test_id": "CT_STATION_SOFT_INQUEST",
       "purpose": "TextSurface equivalent for soft Inquest intake.",
-      "body": "Station intake: answer only procedural questions and keep reports internally consistent.",
+      "body": "Station intake: procedural answers outrank explanation. The officer compares receipt, report tray, and ledger number before asking which statement stands.",
       "evidence_outputs": ["StationReport", "InquestDossier"]
     }
   ],
@@ -185,6 +186,14 @@
       "role": "Store Clerk",
       "home_landmark": "Store",
       "spawn_anchor": "Store.npc_spawn",
+      "route_id": "StoreQueue"
+    },
+    {
+      "id": "NPC_Store_Manager",
+      "label": "Store Manager",
+      "role": "Store Manager",
+      "home_landmark": "Store",
+      "spawn_anchor": "Store.manager_spawn",
       "route_id": "StoreQueue"
     },
     {

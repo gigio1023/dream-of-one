@@ -62,9 +62,26 @@ export interface OpenAiProposalHealth {
   preferredModel: string;
   fallbackModels: string[];
   checkedModels: string[];
+  budget: OpenAiProposalBudgetSummary;
   selectedModel?: string;
   reason?: OpenAiProposalHealthReason;
   detail?: string;
+}
+
+export interface OpenAiProposalBudgetSummary {
+  maxEstimatedInputTokens: number;
+  maxEstimatedTotalTokens: number;
+  maxEstimatedCostUsd: number;
+  inputUsdPerMillionTokens: number;
+  outputUsdPerMillionTokens: number;
+}
+
+interface OpenAiProposalBudgetEstimate {
+  model: string;
+  estimatedInputTokens: number;
+  maxOutputTokens: number;
+  estimatedTotalTokens: number;
+  estimatedCostUsd: number;
 }
 
 interface OpenAiProposalGatewayOptions {
@@ -439,6 +456,63 @@ function parseModelIds(payload: unknown): string[] {
   });
 }
 
+function summarizeBudget(config: OpenAiProposalConfig): OpenAiProposalBudgetSummary {
+  return {
+    maxEstimatedInputTokens: Math.max(1, Math.floor(config.budget.maxEstimatedInputTokens)),
+    maxEstimatedTotalTokens: Math.max(1, Math.floor(config.budget.maxEstimatedTotalTokens)),
+    maxEstimatedCostUsd: Math.max(0.000001, config.budget.maxEstimatedCostUsd),
+    inputUsdPerMillionTokens: Math.max(0.000001, config.budget.inputUsdPerMillionTokens),
+    outputUsdPerMillionTokens: Math.max(0.000001, config.budget.outputUsdPerMillionTokens),
+  };
+}
+
+function estimateTokens(text: string): number {
+  return Math.max(1, Math.ceil(text.length / 3));
+}
+
+function estimateProposalBudget(
+  config: OpenAiProposalConfig,
+  model: string,
+  proposalPrompt: string,
+): OpenAiProposalBudgetEstimate {
+  const budget = summarizeBudget(config);
+  const estimatedInputTokens = estimateTokens(`${OPENAI_PROPOSAL_INSTRUCTIONS}\n${proposalPrompt}`);
+  const maxOutputTokens = Math.max(1, Math.floor(config.maxOutputTokens));
+  const estimatedTotalTokens = estimatedInputTokens + maxOutputTokens;
+  const estimatedCostUsd = (estimatedInputTokens / 1_000_000 * budget.inputUsdPerMillionTokens)
+    + (maxOutputTokens / 1_000_000 * budget.outputUsdPerMillionTokens);
+
+  return {
+    model,
+    estimatedInputTokens,
+    maxOutputTokens,
+    estimatedTotalTokens,
+    estimatedCostUsd,
+  };
+}
+
+function assertProposalWithinBudget(config: OpenAiProposalConfig, estimate: OpenAiProposalBudgetEstimate): void {
+  const budget = summarizeBudget(config);
+  if (estimate.estimatedInputTokens > budget.maxEstimatedInputTokens) {
+    throw new CodexToolError(
+      `OpenAI proposal budget exceeded for ${estimate.model}: estimated input tokens `
+      + `${estimate.estimatedInputTokens} > ${budget.maxEstimatedInputTokens}`,
+    );
+  }
+  if (estimate.estimatedTotalTokens > budget.maxEstimatedTotalTokens) {
+    throw new CodexToolError(
+      `OpenAI proposal budget exceeded for ${estimate.model}: estimated total tokens `
+      + `${estimate.estimatedTotalTokens} > ${budget.maxEstimatedTotalTokens}`,
+    );
+  }
+  if (estimate.estimatedCostUsd > budget.maxEstimatedCostUsd) {
+    throw new CodexToolError(
+      `OpenAI proposal budget exceeded for ${estimate.model}: estimated cost `
+      + `$${estimate.estimatedCostUsd.toFixed(6)} > $${budget.maxEstimatedCostUsd.toFixed(6)}`,
+    );
+  }
+}
+
 class OpenAiDecisionBudget {
   private readonly requestTimeoutMs: number;
   private readonly deadlineAtMs: number | undefined;
@@ -491,6 +565,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
 
   async checkHealth(): Promise<OpenAiProposalHealth> {
     const checkedModels = uniqueModels(this.config.preferredModel, this.config.fallbackModels);
+    const budget = summarizeBudget(this.config);
     if (!this.config.apiKey.trim()) {
       return {
         ok: false,
@@ -498,6 +573,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
         preferredModel: this.config.preferredModel,
         fallbackModels: [...this.config.fallbackModels],
         checkedModels,
+        budget,
         reason: "openai_api_key_missing",
       };
     }
@@ -512,6 +588,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
           preferredModel: this.config.preferredModel,
           fallbackModels: [...this.config.fallbackModels],
           checkedModels,
+          budget,
           reason: "openai_model_unavailable",
         };
       }
@@ -522,6 +599,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
         preferredModel: this.config.preferredModel,
         fallbackModels: [...this.config.fallbackModels],
         checkedModels,
+        budget,
         selectedModel,
       };
     } catch (error) {
@@ -531,6 +609,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
         preferredModel: this.config.preferredModel,
         fallbackModels: [...this.config.fallbackModels],
         checkedModels,
+        budget,
         reason: error instanceof CodexToolTimeoutError ? "openai_model_check_timeout" : "openai_provider_unavailable",
         detail: errorMessage(error),
       };
@@ -549,6 +628,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
     const budget = this.createDecisionBudget(options?.deadlineMs);
     const selectedModel = await this.resolveAvailableModel(budget, options?.signal);
     const prompt = this.buildProposalPrompt(frame);
+    assertProposalWithinBudget(this.config, estimateProposalBudget(this.config, selectedModel, prompt));
     const body: Record<string, unknown> = {
       model: selectedModel,
       instructions: OPENAI_PROPOSAL_INSTRUCTIONS,
@@ -572,6 +652,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
         },
       },
       max_output_tokens: Math.max(1, Math.floor(this.config.maxOutputTokens)),
+      store: false,
     };
 
     if (previousResponseId) {

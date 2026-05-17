@@ -3,6 +3,7 @@ extends SceneTree
 const MAIN_SCENE := "res://scenes/main.tscn"
 const OUTPUT_PATH := "res://../data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json"
 const ARTIFACT_PATH := "data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json"
+const OUTPUT_ENV := "DREAM_OF_ONE_PLAYABLE_EVIDENCE_OUTPUT"
 const ROUTE_PROOF_IDS := ["clean_cover", "repair_recovered", "soft_report", "inquest_opened"]
 
 const ROUTE_DEFINITIONS := [
@@ -18,6 +19,8 @@ const ROUTE_DEFINITIONS := [
 		"expectedReportWeight": 0,
 		"expectedStationIntake": false,
 		"expectedStationInquest": false,
+		"expectedRecordStates": {"receipt_tray": "normal", "correction_slip": "absent", "report_tray": "empty", "station_dossier": "absent"},
+		"expectedCivicLedgerCount": 2,
 		"expectedEvents": ["conversation_started", "dialogue_choice_selected", "conversation_outcome_reached"],
 		"forbiddenEvents": ["conversation_anomaly_detected", "station_report_created", "station_inquest_opened"],
 		"expectedSignals": []
@@ -34,6 +37,8 @@ const ROUTE_DEFINITIONS := [
 		"maxReportWeight": 49,
 		"expectedStationIntake": false,
 		"expectedStationInquest": false,
+		"expectedRecordStates": {"receipt_tray": "marked", "correction_slip": "attached", "report_tray": "empty", "station_dossier": "absent"},
+		"expectedCivicLedgerCount": 3,
 		"expectedEvents": ["conversation_started", "dialogue_choice_selected", "conversation_anomaly_detected", "npc_suspicion_changed", "conversation_outcome_reached"],
 		"forbiddenEvents": ["station_report_created", "station_inquest_opened"],
 		"expectedSignals": ["memory_gap_admission"]
@@ -50,6 +55,8 @@ const ROUTE_DEFINITIONS := [
 		"maxReportWeight": 49,
 		"expectedStationIntake": false,
 		"expectedStationInquest": false,
+		"expectedRecordStates": {"receipt_tray": "marked", "correction_slip": "absent", "report_tray": "empty", "station_dossier": "absent"},
+		"expectedCivicLedgerCount": 1,
 		"expectedEvents": ["conversation_started", "dialogue_choice_selected", "conversation_anomaly_detected", "npc_suspicion_changed", "conversation_outcome_reached"],
 		"forbiddenEvents": ["station_report_created", "station_inquest_opened"],
 		"expectedSignals": ["local_routine_mismatch"],
@@ -68,14 +75,16 @@ const ROUTE_DEFINITIONS := [
 		"maxReportWeight": 99,
 		"expectedStationIntake": true,
 		"expectedStationInquest": false,
+		"expectedRecordStates": {"store_queue_mark": "disrupted", "receipt_tray": "marked", "report_tray": "pending", "park_notice_board": "rumored", "station_dossier": "absent"},
+		"expectedCivicLedgerCount": 5,
 		"expectedEvents": ["conversation_started", "dialogue_choice_selected", "conversation_anomaly_detected", "npc_suspicion_changed", "suspicion_shared", "station_report_created", "conversation_outcome_reached"],
 		"forbiddenEvents": ["station_inquest_opened", "free_input_submitted"],
 		"expectedSignals": ["local_routine_mismatch", "prior_statement_contradiction"]
 	},
 	{
 		"id": "inquest_opened",
-		"inputPath": "focus StoreCounterZone -> E -> 3 routine mismatch -> 4 explicit recorded statement",
-		"actions": ["dialogue_choice_3", "dialogue_recorded_statement"],
+		"inputPath": "focus StoreCounterZone -> E -> 3 routine mismatch -> response hesitation -> HUD typed line",
+		"actions": ["dialogue_choice_3", {"kind": "response_hesitation"}, {"kind": "typed_free_input", "line": "저는 이 꿈에 방금 들어왔어요."}],
 		"firstChoiceId": "store.same_order.risky",
 		"expectedOutcome": "inquest_opened",
 		"expectedRouteOutcome": "inquest_opened",
@@ -84,9 +93,11 @@ const ROUTE_DEFINITIONS := [
 		"minReportWeight": 100,
 		"expectedStationIntake": true,
 		"expectedStationInquest": true,
-		"expectedEvents": ["conversation_started", "dialogue_choice_selected", "free_input_submitted", "conversation_anomaly_detected", "npc_suspicion_changed", "suspicion_shared", "station_report_created", "station_inquest_opened"],
+		"expectedRecordStates": {"store_queue_mark": "disrupted", "receipt_tray": "marked", "report_tray": "forwarded", "park_notice_board": "rumored", "station_dossier": "cited"},
+		"expectedCivicLedgerCount": 6,
+		"expectedEvents": ["conversation_started", "dialogue_choice_selected", "response_hesitation_noted", "free_input_submitted", "conversation_anomaly_detected", "npc_suspicion_changed", "suspicion_shared", "station_report_created", "station_inquest_opened"],
 		"forbiddenEvents": ["conversation_outcome_reached"],
-		"expectedSignals": ["local_routine_mismatch", "dream_language_leak"],
+		"expectedSignals": ["local_routine_mismatch", "response_hesitation", "dream_language_leak"],
 		"exportEvidencePack": true
 	}
 ]
@@ -117,6 +128,7 @@ func _run() -> void:
 
 	var playability: Dictionary = inquest_pack.get("playability", {})
 	playability["routeProofs"] = route_proofs
+	playability["agenticRouteProofs"] = _agentic_route_proofs(route_proofs)
 	playability["routeContrastSummary"] = "Same Order now proves clean cover, repair recovery, soft report, and inquest outcomes from the same prompt set, with a separate guard route ensuring suspicious cover is not mislabeled as repair."
 	inquest_pack["playability"] = playability
 
@@ -125,7 +137,7 @@ func _run() -> void:
 		_fail(pack_failures)
 		return
 
-	var output_path := ProjectSettings.globalize_path(OUTPUT_PATH)
+	var output_path := _evidence_output_path()
 	DirAccess.make_dir_recursive_absolute(output_path.get_base_dir())
 	var file := FileAccess.open(output_path, FileAccess.WRITE)
 	if file == null:
@@ -137,7 +149,7 @@ func _run() -> void:
 	var primary_summary: Dictionary = inquest_pack.get("playableSummary", {})
 	print(JSON.stringify({
 		"ok": true,
-		"artifactPath": ARTIFACT_PATH,
+		"artifactPath": _evidence_artifact_path(output_path),
 		"runId": inquest_pack["runId"],
 		"stage": primary_summary.get("stage", ""),
 		"suspicion": primary_summary.get("suspicion", 0),
@@ -147,6 +159,20 @@ func _run() -> void:
 		"events": inquest_pack["events"].size()
 	}, "\t"))
 	quit(0)
+
+func _evidence_output_path() -> String:
+	var override_path := OS.get_environment(OUTPUT_ENV).strip_edges()
+	if override_path != "":
+		if override_path.begins_with("res://") or override_path.begins_with("user://"):
+			return ProjectSettings.globalize_path(override_path)
+		return override_path
+	return ProjectSettings.globalize_path(OUTPUT_PATH)
+
+func _evidence_artifact_path(output_path: String) -> String:
+	var override_path := OS.get_environment(OUTPUT_ENV).strip_edges()
+	if override_path != "":
+		return output_path
+	return ARTIFACT_PATH
 
 func _run_route(route: Dictionary) -> Dictionary:
 	var packed := load(MAIN_SCENE) as PackedScene
@@ -180,6 +206,9 @@ func _run_route(route: Dictionary) -> Dictionary:
 	failures.append_array(await _drive_route_input_path(route, player, session, hud))
 	var summary := _build_summary(session)
 	failures.append_array(_validate_route_summary(route, summary))
+	failures.append_array(_validate_agent_action_log(route, summary))
+	failures.append_array(_validate_hud_record_state(route, summary, hud))
+	failures.append_array(_validate_world_record_props(route, summary, session))
 	failures.append_array(_validate_post_lock_noop(session, summary, player))
 
 	var evidence_pack := {}
@@ -215,12 +244,51 @@ func _drive_route_input_path(route: Dictionary, player: Node, session: Node, hud
 
 	var action_index := 0
 	for action in route.get("actions", []):
-		await _press_action(session, StringName(str(action)))
+		failures.append_array(await _drive_route_action(action, session, hud))
 		await _settle_frames(3)
 		_call_session(session, "_refresh_hud")
 		if action_index == 0 and int(route.get("minSuspicion", 0)) > 0:
 			failures.append_array(_validate_mid_conversation_visibility(route, session, hud))
 		action_index += 1
+	return failures
+
+func _drive_route_action(action: Variant, session: Node, hud: Node) -> Array[String]:
+	if action is Dictionary:
+		var action_map: Dictionary = action
+		var kind := str(action_map.get("kind", ""))
+		if kind == "typed_free_input":
+			var failures := await _submit_hud_typed_input(hud, str(action_map.get("line", "")))
+			return failures
+		if kind == "response_hesitation":
+			if session == null or not session.has_method("debug_record_response_hesitation"):
+				return ["response_hesitation route action requires PlayableSession.debug_record_response_hesitation"]
+			session.call("debug_record_response_hesitation")
+			await _settle_frames(1)
+			return []
+		var unsupported_failures: Array[String] = ["Unsupported route action kind: %s" % kind]
+		return unsupported_failures
+	await _press_action(session, StringName(str(action)))
+	var ok_failures: Array[String] = []
+	return ok_failures
+
+func _submit_hud_typed_input(hud: Node, line: String) -> Array[String]:
+	var failures: Array[String] = []
+	var submitted := line.strip_edges()
+	if submitted.is_empty():
+		failures.append("typed_free_input route action must include a non-empty line")
+		return failures
+	if hud == null:
+		failures.append("typed_free_input route action requires SocialStealthHud")
+		return failures
+	var input := hud.find_child("FreeInputLine", true, false)
+	if input == null:
+		failures.append("SocialStealthHud is missing FreeInputLine")
+		return failures
+	if input is CanvasItem and not (input as CanvasItem).visible:
+		failures.append("FreeInputLine must be visible during active conversation")
+	input.set("text", submitted)
+	input.emit_signal("text_submitted", submitted)
+	await _settle_frames(1)
 	return failures
 
 func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[String]:
@@ -256,6 +324,11 @@ func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[St
 		failures.append("%s expected inputLocked after terminal outcome" % route_id)
 	if str(summary.get("authorityMode", "")) != "godot_local_conversation_runtime":
 		failures.append("%s expected local Godot conversation runtime authority mode" % route_id)
+	var provider_state: Dictionary = summary.get("providerState", {})
+	if str(provider_state.get("mode", "")) != "fallback_only_m1":
+		failures.append("%s expected fallback-only M1 provider mode" % route_id)
+	if bool(provider_state.get("liveVerified", true)):
+		failures.append("%s must not claim live provider verification in M1 smoke" % route_id)
 	if str(summary.get("locale", "")) != "ko":
 		failures.append("%s expected default locale ko" % route_id)
 
@@ -268,6 +341,15 @@ func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[St
 	for signal_id in route.get("expectedSignals", []):
 		if not _has_anomaly_signal(summary, str(signal_id)):
 			failures.append("%s expected anomaly signal %s" % [route_id, str(signal_id)])
+	var record_objects: Dictionary = summary.get("recordObjects", {})
+	var expected_record_states: Dictionary = route.get("expectedRecordStates", {})
+	for object_id in expected_record_states.keys():
+		if str(record_objects.get(object_id, "")) != str(expected_record_states[object_id]):
+			failures.append("%s expected record object %s=%s, got %s" % [route_id, str(object_id), str(expected_record_states[object_id]), str(record_objects.get(object_id, ""))])
+	if route.has("expectedCivicLedgerCount"):
+		var civic_ledger: Array = summary.get("civicLedger", [])
+		if civic_ledger.size() != int(route.get("expectedCivicLedgerCount", -1)):
+			failures.append("%s expected civicLedger count %d, got %d" % [route_id, int(route.get("expectedCivicLedgerCount", -1)), civic_ledger.size()])
 
 	var first_choice_id := str(route.get("firstChoiceId", ""))
 	if not first_choice_id.is_empty() and not _has_choice_event(summary, first_choice_id):
@@ -275,6 +357,19 @@ func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[St
 	if route_id == "inquest_opened":
 		if not _has_free_input_event(summary):
 			failures.append("inquest_opened expected explicit recorded-statement Evidence")
+		if not _has_event(summary, "response_hesitation_noted"):
+			failures.append("inquest_opened expected response hesitation Evidence")
+		var civic_ledger: Array = summary.get("civicLedger", [])
+		if civic_ledger.is_empty() or str(civic_ledger[civic_ledger.size() - 1].get("kind", "")) != "station_record_cited":
+			failures.append("inquest_opened expected final civic ledger event station_record_cited")
+		if not str(summary.get("outcomeBody", "")).contains("civic-ledger-"):
+			failures.append("inquest_opened outcome must show the cited Store ledger id")
+		if not str(summary.get("outcomeBody", "")).contains("스테이션 인용"):
+			failures.append("inquest_opened outcome must explain the Station citation")
+		if not str(summary.get("outcomeBody", "")).contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 심문"):
+			failures.append("inquest_opened outcome must show speech/delay-to-record-to-role-action chain")
+		if not str(summary.get("outcomeBody", "")).contains("역할 행동: 스테이션 직원"):
+			failures.append("inquest_opened outcome must name Station Officer role action")
 		if not str(summary.get("lastWhyLine", "")).contains("꿈"):
 			failures.append("inquest_opened expected final why-line to explain dream language")
 		var prologue_loop: Dictionary = summary.get("prologueLoop", {})
@@ -288,8 +383,20 @@ func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[St
 			failures.append("soft_report must stop before inquest")
 		if not str(summary.get("outcomeBody", "")).contains("심문 기준에는 닿지 않았습니다"):
 			failures.append("soft_report outcome must explain report without inquest")
+		if not str(summary.get("outcomeBody", "")).contains("플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 스테이션 경고 접수"):
+			failures.append("soft_report outcome must show speech-to-record-to-warning chain")
+		if not str(summary.get("outcomeBody", "")).contains("사회 반응"):
+			failures.append("soft_report outcome must name the NPC-to-NPC social reaction")
+		if not str(summary.get("outcomeBody", "")).contains("역할 행동: 상점 관리자"):
+			failures.append("soft_report outcome must name Store Manager role action")
 	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("수습"):
 		failures.append("repair_recovered outcome must explain recovery")
+	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("기억 공백 발화 -> 영수증 표시/정정표 -> 상점 안에서 수습"):
+		failures.append("repair_recovered outcome must show repair record chain")
+	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("역할 행동: 상점 점원"):
+		failures.append("repair_recovered outcome must name Store Clerk role action")
+	if route_id == "clean_cover" and not str(summary.get("outcomeBody", "")).contains("역할 행동: 상점 점원"):
+		failures.append("clean_cover outcome must name Store Clerk role action")
 	if route_id == "cover_held_under_suspicion":
 		if int(summary.get("repairAttemptCount", 0)) != 0:
 			failures.append("cover_held_under_suspicion must not record a repair attempt")
@@ -337,6 +444,10 @@ func _validate_pack_shape(pack: Dictionary) -> Array[String]:
 	for expected_route in ROUTE_PROOF_IDS:
 		if not _route_proofs_have(route_proofs, expected_route):
 			failures.append("Evidence Pack routeProofs missing %s" % expected_route)
+	var agentic_route_proofs: Array = playability.get("agenticRouteProofs", [])
+	if agentic_route_proofs.size() != ROUTE_PROOF_IDS.size():
+		failures.append("Evidence Pack playability must include agenticRouteProofs for all Same Order outcomes")
+	failures.append_array(_validate_agentic_route_proofs(agentic_route_proofs))
 	return failures
 
 func _validate_pre_conversation_recorded_statement_noop(session: Node) -> Array[String]:
@@ -383,8 +494,12 @@ func _validate_active_conversation_state(summary: Dictionary, hud: Node) -> Arra
 		failures.append("Expected HUD choice label 2 to preserve the active repair dialogue line, got '%s'" % str(snapshot.get("safeLineLabel", "")))
 	if not str(snapshot.get("riskyLineLabel", "")).begins_with("3  오늘 처음"):
 		failures.append("Expected HUD choice label 3 to preserve the active risky dialogue line, got '%s'" % str(snapshot.get("riskyLineLabel", "")))
-	if not str(snapshot.get("consequenceLabel", "")).contains("4  기록된 진술 제출"):
-		failures.append("Expected HUD to scope key 4 as an explicit recorded statement, got '%s'" % str(snapshot.get("consequenceLabel", "")))
+	if str(snapshot.get("consequenceLabel", "")).contains("4  기록"):
+		failures.append("Expected HUD active conversation copy to prioritize typed input instead of key 4, got '%s'" % str(snapshot.get("consequenceLabel", "")))
+	if not bool(snapshot.get("freeInputVisible", false)):
+		failures.append("Expected HUD typed input to be visible during active conversation")
+	if str(snapshot.get("freeInputPlaceholder", "")).strip_edges().is_empty():
+		failures.append("Expected HUD typed input to explain that speech becomes a Store record")
 	return failures
 
 func _validate_mid_conversation_visibility(route: Dictionary, session: Node, hud: Node) -> Array[String]:
@@ -406,6 +521,231 @@ func _validate_mid_conversation_visibility(route: Dictionary, session: Node, hud
 	if float(reaction.get("emissionEnergy", -1.0)) <= 0.2:
 		failures.append("%s expected Store Clerk reaction marker emission to increase" % route_id)
 	return failures
+
+func _validate_agent_action_log(route: Dictionary, summary: Dictionary) -> Array[String]:
+	var failures: Array[String] = []
+	var route_id := str(route.get("id", ""))
+	var action_log: Array = summary.get("agentActionLog", [])
+	var civic_ledger: Array = summary.get("civicLedger", [])
+	if action_log.size() != civic_ledger.size():
+		failures.append("%s expected agentActionLog count %d to match civicLedger count %d" % [route_id, action_log.size(), civic_ledger.size()])
+	if route.has("expectedCivicLedgerCount") and action_log.size() != int(route.get("expectedCivicLedgerCount", -1)):
+		failures.append("%s expected agentActionLog count %d, got %d" % [route_id, int(route.get("expectedCivicLedgerCount", -1)), action_log.size()])
+	for index in range(action_log.size()):
+		var action: Dictionary = action_log[index]
+		if not bool(action.get("accepted", false)):
+			failures.append("%s expected accepted agent action, got rejection %s" % [route_id, str(action.get("reason", ""))])
+		if str(action.get("validation", "")) != "accepted":
+			failures.append("%s expected accepted validation for action %s" % [route_id, str(action.get("stepId", ""))])
+		if str(action.get("whyLine", "")).strip_edges().is_empty():
+			failures.append("%s agent action %s is missing whyLine" % [route_id, str(action.get("stepId", ""))])
+		if not action.get("perceivedObjectIds", []).has(str(action.get("objectId", ""))):
+			failures.append("%s actor %s cannot perceive acted object %s" % [route_id, str(action.get("actorId", "")), str(action.get("objectId", ""))])
+		if not _available_actions_include_action(action):
+			failures.append("%s action %s was not present in availableActions" % [route_id, str(action.get("stepId", ""))])
+		var selected_descriptor: Dictionary = action.get("selectedActionDescriptor", {})
+		if selected_descriptor.is_empty():
+			failures.append("%s action %s is missing selectedActionDescriptor" % [route_id, str(action.get("stepId", ""))])
+		elif not _action_descriptor_is_complete(selected_descriptor):
+			failures.append("%s action %s has incomplete selectedActionDescriptor" % [route_id, str(action.get("stepId", ""))])
+		if str(action.get("selectionReason", "")).strip_edges().is_empty():
+			failures.append("%s action %s is missing selectionReason" % [route_id, str(action.get("stepId", ""))])
+		if index < civic_ledger.size():
+			var ledger_event: Dictionary = civic_ledger[index]
+			if str(action.get("ledgerEventId", "")) != str(ledger_event.get("eventId", "")):
+				failures.append("%s expected action ledgerEventId to match civicLedger[%d]" % [route_id, index])
+			if str(action.get("ledgerEventKind", "")) != str(ledger_event.get("kind", "")):
+				failures.append("%s expected action ledgerEventKind to match civicLedger[%d]" % [route_id, index])
+			if str(action.get("affordance", "")) != str(ledger_event.get("affordance", "")):
+				failures.append("%s expected action affordance to match civicLedger[%d]" % [route_id, index])
+	if route_id == "soft_report" and not _agent_action_has_role(action_log, "store_manager"):
+		failures.append("soft_report expected Store Manager validated action in agentActionLog")
+	var social_observations: Array = summary.get("socialObservationTrace", [])
+	if route_id == "soft_report" and not _social_observation_exists(social_observations, "store_manager", "store_clerk", "place_note", "place_note"):
+		failures.append("soft_report expected playable summary socialObservationTrace to show manager reading clerk note")
+	if route_id == "inquest_opened":
+		if not _agent_action_has_role(action_log, "station_officer"):
+			failures.append("inquest_opened expected Station Officer validated action in agentActionLog")
+		var final_action: Dictionary = action_log[action_log.size() - 1] if not action_log.is_empty() else {}
+		if str(final_action.get("affordance", "")) != "cite_record":
+			failures.append("inquest_opened expected final validated action to cite_record")
+		if str(final_action.get("citedLedgerEventId", "")).is_empty():
+			failures.append("inquest_opened expected Station action to cite exact ledger event")
+		if not _social_observation_exists(social_observations, "store_manager", "store_clerk", "place_note", "forward_report"):
+			failures.append("inquest_opened expected playable summary socialObservationTrace to show manager forwarding clerk record")
+		if not _social_observation_exists(social_observations, "station_officer", "store_manager", "forward_report", "cite_record"):
+			failures.append("inquest_opened expected playable summary socialObservationTrace to show Station citing manager record")
+	return failures
+
+func _available_actions_include_action(action: Dictionary) -> bool:
+	var available_actions: Array = action.get("availableActions", [])
+	for available in available_actions:
+		if not available is Dictionary:
+			continue
+		if str(available.get("objectId", "")) != str(action.get("objectId", "")):
+			continue
+		if str(available.get("affordance", "")) != str(action.get("affordance", "")):
+			continue
+		if bool(available.get("requiresLedgerEvent", false)):
+			var cited_id := str(action.get("citedLedgerEventId", ""))
+			if cited_id.is_empty() or not available.get("citableLedgerEventIds", []).has(cited_id):
+				continue
+		if not _action_descriptor_is_complete(available):
+			continue
+		return true
+	return false
+
+func _action_descriptor_is_complete(action: Dictionary) -> bool:
+	return not str(action.get("actionId", "")).is_empty() \
+		and not str(action.get("playerLabel", "")).is_empty() \
+		and not str(action.get("validationRuleId", "")).is_empty() \
+		and action.get("eligibleRoles", []).size() > 0 \
+		and action.get("preconditions", []).size() > 0 \
+		and action.get("visibleTo", []).size() > 0 \
+		and action.get("failureReasons", []).has("role_authority_exceeded")
+
+func _validate_hud_record_state(route: Dictionary, summary: Dictionary, hud: Node) -> Array[String]:
+	var failures: Array[String] = []
+	var route_id := str(route.get("id", ""))
+	var snapshot := _hud_snapshot(hud)
+	var record_state_label := str(snapshot.get("recordStateLabel", ""))
+	if not record_state_label.contains("상점 기록"):
+		failures.append("%s expected HUD record state line, got '%s'" % [route_id, record_state_label])
+	if route_id == "repair_recovered" and not record_state_label.contains("첨부"):
+		failures.append("repair_recovered expected HUD record state to show attached correction")
+	if route_id == "soft_report" and not record_state_label.contains("대기"):
+		failures.append("soft_report expected HUD record state to show pending report")
+	if route_id == "inquest_opened":
+		if not record_state_label.contains("전달"):
+			failures.append("inquest_opened expected HUD record state to show forwarded report")
+		if not record_state_label.contains("인용"):
+			failures.append("inquest_opened expected HUD record state to show cited Station dossier")
+	if ["soft_report", "inquest_opened"].has(route_id) and not record_state_label.contains("사회 반응"):
+		failures.append("%s expected HUD record state to show NPC social reaction" % route_id)
+	if route_id == "soft_report" and not record_state_label.contains("상점 매니저"):
+		failures.append("soft_report expected HUD social reaction to name Store Manager")
+	if route_id == "inquest_opened" and not record_state_label.contains("스테이션 직원"):
+		failures.append("inquest_opened expected HUD social reaction to name Station Officer")
+	var civic_ledger: Array = summary.get("civicLedger", [])
+	if civic_ledger.size() > 0 and not record_state_label.contains("장부"):
+		failures.append("%s expected HUD record state to expose civic ledger count" % route_id)
+	if civic_ledger.size() > 0:
+		var latest_event: Dictionary = civic_ledger[civic_ledger.size() - 1]
+		var latest_event_id := str(latest_event.get("eventId", ""))
+		if not latest_event_id.is_empty() and not record_state_label.contains(latest_event_id):
+			failures.append("%s expected HUD record state to show latest ledger event %s" % [route_id, latest_event_id])
+		var latest_role_label := _actor_role_label(str(latest_event.get("actorRole", "")))
+		if not latest_role_label.is_empty() and not record_state_label.contains(latest_role_label):
+			failures.append("%s expected HUD record state to show latest ledger actor role %s" % [route_id, latest_role_label])
+		var latest_affordance_label := _affordance_label(str(latest_event.get("affordance", "")))
+		if not latest_affordance_label.is_empty() and not record_state_label.contains(latest_affordance_label):
+			failures.append("%s expected HUD record state to show latest ledger affordance %s" % [route_id, latest_affordance_label])
+	var provider_state_label := str(snapshot.get("providerStateLabel", ""))
+	if not provider_state_label.contains("fallback-only M1"):
+		failures.append("%s expected HUD provider state to show fallback-only M1 mode" % route_id)
+	if not provider_state_label.contains("API 검증"):
+		failures.append("%s expected HUD provider state to show API verification status" % route_id)
+	var investigation_trail_label := str(snapshot.get("investigationTrailLabel", ""))
+	if not investigation_trail_label.contains("검사자"):
+		failures.append("%s expected HUD investigation trail line, got '%s'" % [route_id, investigation_trail_label])
+	if not investigation_trail_label.contains("플레이어"):
+		failures.append("%s expected HUD investigation trail to name player as subject" % route_id)
+	if route_id == "inquest_opened" and not investigation_trail_label.contains("스테이션 직원"):
+		failures.append("inquest_opened expected HUD investigation trail to name Station Officer as examiner")
+	return failures
+
+func _validate_world_record_props(route: Dictionary, summary: Dictionary, session: Node) -> Array[String]:
+	var failures: Array[String] = []
+	var route_id := str(route.get("id", ""))
+	var snapshot := _record_prop_snapshot(session)
+	var required_props := [
+		"store_queue_mark",
+		"store_counter",
+		"usual_order_cue",
+		"receipt_tray",
+		"correction_slip",
+		"report_tray",
+		"park_notice_board",
+		"station_dossier",
+		"civic_ledger",
+		"civic_economy_panel"
+	]
+	for object_id in required_props:
+		if not snapshot.has(object_id):
+			failures.append("%s expected world record prop %s" % [route_id, object_id])
+			continue
+		var required_prop: Dictionary = snapshot.get(object_id, {})
+		if str(required_prop.get("label", "")).strip_edges().is_empty():
+			failures.append("%s world record prop %s is missing a label" % [route_id, object_id])
+		if not bool(required_prop.get("hasBody", false)):
+			failures.append("%s world record prop %s is missing StateBody" % [route_id, object_id])
+		if not bool(required_prop.get("visible", false)):
+			failures.append("%s world record prop %s must remain visible as a state slot" % [route_id, object_id])
+
+	var expected_record_states: Dictionary = route.get("expectedRecordStates", {})
+	for object_id in expected_record_states.keys():
+		var expected_prop: Dictionary = snapshot.get(str(object_id), {})
+		if str(expected_prop.get("state", "")) != str(expected_record_states[object_id]):
+			failures.append("%s expected world prop %s=%s, got %s" % [route_id, str(object_id), str(expected_record_states[object_id]), str(expected_prop.get("state", ""))])
+
+	var civic_ledger: Array = summary.get("civicLedger", [])
+	var ledger_prop: Dictionary = snapshot.get("civic_ledger", {})
+	if civic_ledger.size() > 0 and not str(ledger_prop.get("label", "")).contains(str(civic_ledger.size())):
+		failures.append("%s expected civic ledger world prop to show ledger count %d" % [route_id, civic_ledger.size()])
+	if civic_ledger.size() > 0:
+		var latest_ledger_event: Dictionary = civic_ledger[civic_ledger.size() - 1]
+		var latest_ledger_event_id := str(latest_ledger_event.get("eventId", ""))
+		if not latest_ledger_event_id.is_empty() and not str(ledger_prop.get("label", "")).contains(latest_ledger_event_id):
+			failures.append("%s expected civic ledger world prop to show latest ledger event %s" % [route_id, latest_ledger_event_id])
+		var latest_ledger_affordance_label := _affordance_label(str(latest_ledger_event.get("affordance", "")))
+		if not latest_ledger_affordance_label.is_empty() and not str(ledger_prop.get("label", "")).contains(latest_ledger_affordance_label):
+			failures.append("%s expected civic ledger world prop to show latest ledger affordance %s" % [route_id, latest_ledger_affordance_label])
+	var civic_economy: Dictionary = summary.get("civicEconomy", {})
+	var economy_prop: Dictionary = snapshot.get("civic_economy_panel", {})
+	for number_value in [civic_economy.get("accountCredit", 0), civic_economy.get("localTrust", 0), civic_economy.get("recordBurden", 0), civic_economy.get("stationAttention", 0)]:
+		if not str(economy_prop.get("label", "")).contains(str(number_value)):
+			failures.append("%s expected civic economy world prop to show value %s" % [route_id, str(number_value)])
+	if route_id == "inquest_opened":
+		var dossier_prop: Dictionary = snapshot.get("station_dossier", {})
+		if not str(dossier_prop.get("label", "")).contains("인용"):
+			failures.append("inquest_opened expected Station dossier world prop to show cited state")
+		if str(economy_prop.get("state", "")) != "attention":
+			failures.append("inquest_opened expected civic economy world prop to show attention state")
+	return failures
+
+func _actor_role_label(actor_role: String) -> String:
+	match actor_role:
+		"store_clerk":
+			return "상점 점원"
+		"store_manager":
+			return "상점 매니저"
+		"waiting_customer":
+			return "대기 손님"
+		"park_witness":
+			return "공원 목격자"
+		"station_officer":
+			return "스테이션 직원"
+	return actor_role
+
+func _affordance_label(affordance: String) -> String:
+	match affordance:
+		"create_receipt":
+			return "영수증 작성"
+		"mark_receipt":
+			return "영수증 표시"
+		"attach_correction":
+			return "정정 첨부"
+		"complain_delay":
+			return "대기 불평"
+		"post_rumor":
+			return "공개 게시"
+		"place_note":
+			return "메모 배치"
+		"forward_report":
+			return "보고 전달"
+		"cite_record":
+			return "기록 인용"
+	return affordance
 
 func _validate_post_lock_noop(session: Node, summary: Dictionary, player: Node) -> Array[String]:
 	var failures: Array[String] = []
@@ -429,8 +769,9 @@ func _is_conversation_event(event: Dictionary) -> bool:
 	return [
 		"conversation_started",
 		"dialogue_choice_selected",
-		"free_input_submitted",
-		"conversation_anomaly_detected",
+	"free_input_submitted",
+	"response_hesitation_noted",
+	"conversation_anomaly_detected",
 		"npc_suspicion_changed",
 		"suspicion_shared",
 		"station_report_created",
@@ -448,6 +789,7 @@ func _route_proof(route: Dictionary, summary: Dictionary) -> Dictionary:
 		"reportWeight": int(summary.get("reportWeight", 0)),
 		"station": summary.get("station", {}),
 		"lastWhyLine": str(summary.get("lastWhyLine", "")),
+		"outcomeBody": str(summary.get("outcomeBody", "")),
 		"signals": _all_anomaly_signals(summary),
 		"eventNames": _event_names(summary),
 		"events": _route_events(summary)
@@ -464,6 +806,7 @@ func _empty_route_proof(route: Dictionary) -> Dictionary:
 		"reportWeight": 0,
 		"station": {},
 		"lastWhyLine": "",
+		"outcomeBody": "",
 		"signals": [],
 		"eventNames": [],
 		"events": []
@@ -474,7 +817,7 @@ func _all_anomaly_signals(summary: Dictionary) -> Array[String]:
 	for event in summary.get("events", []):
 		if not event is Dictionary:
 			continue
-		if str(event.get("eventName", "")) != "conversation_anomaly_detected":
+		if not ["conversation_anomaly_detected", "response_hesitation_noted"].has(str(event.get("eventName", ""))):
 			continue
 		for signal_value in event.get("suspicionSignals", []):
 			var signal_id := str(signal_value)
@@ -515,6 +858,269 @@ func _route_events(summary: Dictionary) -> Array[Dictionary]:
 		result.append(event_summary)
 	return result
 
+func _agentic_route_proofs(route_proofs: Array) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for route_id in ROUTE_PROOF_IDS:
+		if not _route_proofs_have(route_proofs, route_id):
+			continue
+		result.append(_agentic_route_proof(route_id))
+	return result
+
+func _agentic_route_proof(route_id: String) -> Dictionary:
+	if route_id == "clean_cover":
+		var clean_trace := [
+			_agentic_trace("clean.clerk.cite_usual_order", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "cite_expected_order", "usual_order_cue", "civic-ledger-1", "usual_order_cited", {}, _economy(3, 50, 0, 0), "The player accepted the usual order, so the clerk can cite the routine before closing the sale."),
+			_agentic_trace("clean.clerk.create_receipt", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "create_receipt", "receipt_tray", "civic-ledger-2", "store_sale_normal", {"recordId": "store_same_order_receipt"}, _economy(2, 55, 0, 0), "The accepted line matches the Store routine and creates a normal receipt.")
+		]
+		return _agentic_route_result(route_id, "cover_held", "clean_cover_line", "네, 같은 걸로 주세요.", "The clerk closes a normal receipt; no other actor needs to escalate the record.", clean_trace, _agentic_final_states({"usual_order_cue": "cited", "receipt_tray": "normal"}))
+	if route_id == "repair_recovered":
+		var repair_trace := [
+			_agentic_trace("repair.clerk.mark_receipt", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "mark_receipt", "receipt_tray", "civic-ledger-1", "store_receipt_marked", {"recordId": "store_same_order_receipt"}, _economy(3, 45, 15, 0), "The player admits uncertainty, so the clerk marks the receipt before offering repair."),
+			_agentic_trace("repair.clerk.offer_correction", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "offer_correction", "correction_slip", "civic-ledger-2", "correction_offered", {"recordId": "store_same_order_correction"}, _economy(3, 45, 20, 0), "The mismatch can still be repaired locally through a correction slip."),
+			_agentic_trace("repair.clerk.attach_correction", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "attach_correction", "correction_slip", "civic-ledger-3", "store_sale_corrected", {"recordId": "store_same_order_correction"}, _economy(2, 40, 35, 5), "The player accepts the correction, so the Store records a corrected sale instead of a report.")
+		]
+		return _agentic_route_result(route_id, "cover_held", "repair_line", "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.", "The clerk contains the mismatch through a correction; trust drops, but Station citation is not enabled.", repair_trace, _agentic_final_states({"receipt_tray": "marked", "correction_slip": "attached"}))
+	if route_id == "soft_report":
+		var soft_report_trace := [
+			_agentic_trace("soft.clerk.mark_receipt", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "mark_receipt", "receipt_tray", "civic-ledger-1", "store_receipt_marked", {"recordId": "store_same_order_receipt"}, _economy(3, 45, 15, 0), "The player breaks the expected routine, so the clerk marks the receipt as unresolved."),
+			_agentic_trace("soft.clerk.place_note", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "place_note", "report_tray", "civic-ledger-2", "store_exception_reported", {"recordId": "store_same_order_clerk_statement"}, _economy(3, 25, 50, 30), "The unresolved line creates a local Store note without opening Station inquest yet."),
+			_agentic_trace("soft.waiting_customer.complain_delay", "NPC_Waiting_Customer", "waiting_customer", ["store_queue_mark", "store_counter", "usual_order_cue"], "complain_delay", "store_queue_mark", "civic-ledger-3", "queue_delay_noted", {"recordId": "store_same_order_queue_delay", "citedLedgerEventId": "civic-ledger-2"}, _economy(3, 25, 55, 30), "A waiting customer sees the clerk note slow the line and adds public queue pressure."),
+			_agentic_trace("soft.park_witness.post_rumor", "NPC_Park_Witness", "park_witness", ["park_notice_board"], "post_rumor", "park_notice_board", "civic-ledger-4", "public_rumor_posted", {"recordId": "park_public_rumor", "citedLedgerEventId": "civic-ledger-2"}, _economy(3, 25, 60, 30), "The Park witness sees the Store note becoming public talk and pins a small notice outside the queue."),
+			_agentic_trace("soft.manager.place_followup_note", "NPC_Store_Manager", "store_manager", ["store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "place_note", "report_tray", "civic-ledger-5", "store_exception_reported", {"recordId": "store_same_order_manager_followup"}, _economy(3, 5, 95, 60), "The manager can see the pending Store note and adds a liability note without citing private Station facts.")
+		]
+		return _agentic_route_result(route_id, "soft_report", "soft_report_line", "오늘은 그냥 지나가는 중인데, 늘 먹던 게 뭔지는 모르겠네요.", "The clerk creates a note, the queue reacts, a Park witness posts a public rumor, and the manager adds a pending follow-up; Station inquest is not opened.", soft_report_trace, _agentic_final_states({"store_queue_mark": "disrupted", "receipt_tray": "marked", "report_tray": "pending", "park_notice_board": "rumored"}))
+	if route_id == "inquest_opened":
+		var inquest_trace := [
+			_agentic_trace("inquest.clerk.mark_receipt", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "mark_receipt", "receipt_tray", "civic-ledger-1", "store_receipt_marked", {"recordId": "store_same_order_receipt"}, _economy(3, 45, 15, 0), "The player contradicts the usual order, so the clerk marks the receipt."),
+			_agentic_trace("inquest.clerk.place_note", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "place_note", "report_tray", "civic-ledger-2", "store_exception_reported", {"recordId": "store_same_order_clerk_statement"}, _economy(3, 25, 50, 30), "The contradiction produces a Store reportable note."),
+			_agentic_trace("inquest.waiting_customer.complain_delay", "NPC_Waiting_Customer", "waiting_customer", ["store_queue_mark", "store_counter", "usual_order_cue"], "complain_delay", "store_queue_mark", "civic-ledger-3", "queue_delay_noted", {"recordId": "store_same_order_queue_delay", "citedLedgerEventId": "civic-ledger-2"}, _economy(3, 25, 55, 30), "A waiting customer sees the clerk note slow the line and adds public queue pressure."),
+			_agentic_trace("inquest.park_witness.post_rumor", "NPC_Park_Witness", "park_witness", ["park_notice_board"], "post_rumor", "park_notice_board", "civic-ledger-4", "public_rumor_posted", {"recordId": "park_public_rumor", "citedLedgerEventId": "civic-ledger-2"}, _economy(3, 25, 60, 30), "The Park witness sees the Store note becoming public talk and pins a small notice outside the queue."),
+			_agentic_trace("inquest.manager.forward_report", "NPC_Store_Manager", "store_manager", ["store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "forward_report", "report_tray", "civic-ledger-5", "store_report_escalated", {"recordId": "store_same_order_clerk_statement"}, _economy(3, 5, 85, 70), "The manager sees the report tray and forwards the Store record for Station reconciliation."),
+			_agentic_trace("inquest.station.cite_store_report", "NPC_Station_Officer", "station_officer", ["report_tray", "station_dossier", "civic_ledger"], "cite_record", "station_dossier", "civic-ledger-6", "station_record_cited", {"recordId": "station_same_order_dossier", "citedLedgerEventId": "civic-ledger-5"}, _economy(3, 5, 85, 70), "The Station cites the exact forwarded Store ledger event before narrowing the player's answer.")
+		]
+		var proof := _agentic_route_result(route_id, "inquest_opened", "inquest_line", "저는 이 꿈에 방금 들어왔어요.", "The Store report slows the queue, a public Park notice appears, then the manager forwards a record and the Station cites the exact ledger event instead of inventing suspicion.", inquest_trace, _agentic_final_states({"store_queue_mark": "disrupted", "receipt_tray": "marked", "report_tray": "forwarded", "park_notice_board": "rumored", "station_dossier": "cited"}))
+		proof["stationCitation"] = {
+			"stationEventId": "civic-ledger-6",
+			"citedLedgerEventId": "civic-ledger-5",
+			"citedLedgerEventKind": "store_report_escalated",
+			"recordId": "station_same_order_dossier",
+			"whyLine": "The Station cites the exact forwarded Store ledger event before narrowing the player's answer."
+		}
+		return proof
+	return {}
+
+func _agentic_route_result(route_id: String, session_outcome: String, player_line_kind: String, player_line: String, social_reaction_summary: String, action_trace: Array, final_object_states: Dictionary) -> Dictionary:
+	var economy_after: Dictionary = {}
+	if not action_trace.is_empty():
+		economy_after = action_trace[action_trace.size() - 1].get("economyAfter", {})
+	return {
+		"routeId": route_id,
+		"routeOutcome": route_id,
+		"sessionOutcome": session_outcome,
+		"playerLineKind": player_line_kind,
+		"playerLine": player_line,
+		"socialReactionSummary": social_reaction_summary,
+		"actionTrace": action_trace,
+		"ledgerEventKinds": _agentic_trace_event_kinds(action_trace),
+		"ledgerAffordances": _agentic_trace_affordances(action_trace),
+		"socialObservationTrace": _agentic_social_observations(action_trace),
+		"finalObjectStates": final_object_states,
+		"economyAfter": economy_after
+	}
+
+func _agentic_final_states(overrides: Dictionary) -> Dictionary:
+	var states := {
+		"store_queue_mark": "player_waiting",
+		"store_counter": "serving",
+		"usual_order_cue": "read",
+		"receipt_tray": "blank",
+		"correction_slip": "absent",
+		"report_tray": "empty",
+		"station_dossier": "absent",
+		"civic_ledger": "append_only"
+	}
+	for key in overrides.keys():
+		states[key] = overrides[key]
+	return states
+
+func _agentic_trace(step_id: String, actor_id: String, actor_role: String, perceived_object_ids: Array[String], affordance: String, object_id: String, ledger_event_id: String, ledger_event_kind: String, extra: Dictionary, economy_after: Dictionary, why_line: String) -> Dictionary:
+	var trace := {
+		"stepId": step_id,
+		"actorId": actor_id,
+		"actorRole": actor_role,
+		"perceivedObjectIds": perceived_object_ids,
+		"affordance": affordance,
+		"objectId": object_id,
+		"accepted": true,
+		"ledgerEventId": ledger_event_id,
+		"ledgerEventKind": ledger_event_kind,
+		"economyAfter": economy_after,
+		"whyLine": why_line
+	}
+	for key in extra.keys():
+		trace[key] = extra[key]
+	return trace
+
+func _agentic_trace_event_kinds(action_trace: Array) -> Array[String]:
+	var result: Array[String] = []
+	for trace in action_trace:
+		if trace is Dictionary:
+			result.append(str(trace.get("ledgerEventKind", "")))
+	return result
+
+func _agentic_trace_affordances(action_trace: Array) -> Array[String]:
+	var result: Array[String] = []
+	for trace in action_trace:
+		if trace is Dictionary:
+			result.append(str(trace.get("affordance", "")))
+	return result
+
+func _agentic_social_observations(action_trace: Array) -> Array[Dictionary]:
+	var observations: Array[Dictionary] = []
+	for index in range(1, action_trace.size()):
+		var trace: Dictionary = action_trace[index]
+		if str(trace.get("actorRole", "")) == "store_clerk":
+			continue
+		var observed := _agentic_observed_trace(trace, action_trace.slice(0, index))
+		if observed.is_empty():
+			continue
+		var economy: Dictionary = observed.get("economyAfter", {})
+		observations.append({
+			"observerActorId": str(trace.get("actorId", "")),
+			"observerRole": str(trace.get("actorRole", "")),
+			"observedLedgerEventId": str(observed.get("ledgerEventId", "")),
+			"observedActorRole": str(observed.get("actorRole", "")),
+			"observedAffordance": str(observed.get("affordance", "")),
+			"observedObjectId": str(observed.get("objectId", "")),
+			"economyPressure": {
+				"localTrust": int(economy.get("localTrust", 0)),
+				"recordBurden": int(economy.get("recordBurden", 0)),
+				"stationAttention": int(economy.get("stationAttention", 0))
+			},
+			"resultingStepId": str(trace.get("stepId", "")),
+			"resultingAffordance": str(trace.get("affordance", "")),
+			"whyLine": "%s uses %s's %s record before choosing %s." % [
+				str(trace.get("actorRole", "")),
+				str(observed.get("actorRole", "")),
+				str(observed.get("affordance", "")),
+				str(trace.get("affordance", ""))
+			]
+		})
+	return observations
+
+func _agentic_observed_trace(trace: Dictionary, previous_traces: Array) -> Dictionary:
+	var cited_ledger_event_id := str(trace.get("citedLedgerEventId", ""))
+	if not cited_ledger_event_id.is_empty():
+		for previous in previous_traces:
+			if previous is Dictionary and str(previous.get("ledgerEventId", "")) == cited_ledger_event_id:
+				return previous
+	for offset in range(previous_traces.size()):
+		var previous_index := previous_traces.size() - 1 - offset
+		var previous: Variant = previous_traces[previous_index]
+		if not previous is Dictionary:
+			continue
+		var previous_trace: Dictionary = previous
+		if str(previous_trace.get("objectId", "")) == str(trace.get("objectId", "")):
+			return previous_trace
+		var previous_record_id := str(previous_trace.get("recordId", ""))
+		if not previous_record_id.is_empty() and previous_record_id == str(trace.get("recordId", "")):
+			return previous_trace
+	return {}
+
+func _economy(account_credit: int, local_trust: int, record_burden: int, station_attention: int) -> Dictionary:
+	return {
+		"accountCredit": account_credit,
+		"localTrust": local_trust,
+		"recordBurden": record_burden,
+		"stationAttention": station_attention
+	}
+
+func _validate_agentic_route_proofs(agentic_route_proofs: Array) -> Array[String]:
+	var failures: Array[String] = []
+	for expected_route in ROUTE_PROOF_IDS:
+		var proof := _agentic_route_proof_by_id(agentic_route_proofs, expected_route)
+		if proof.is_empty():
+			failures.append("Evidence Pack agenticRouteProofs missing %s" % expected_route)
+			continue
+		var action_trace: Array = proof.get("actionTrace", [])
+		if action_trace.is_empty():
+			failures.append("%s agenticRouteProof must include actionTrace" % expected_route)
+		if not _same_string_array(proof.get("ledgerEventKinds", []), _agentic_trace_event_kinds(action_trace)):
+			failures.append("%s agenticRouteProof ledgerEventKinds must match actionTrace" % expected_route)
+		if not _same_string_array(proof.get("ledgerAffordances", []), _agentic_trace_affordances(action_trace)):
+			failures.append("%s agenticRouteProof ledgerAffordances must match actionTrace" % expected_route)
+		var social_observations: Array = proof.get("socialObservationTrace", [])
+		var final_states: Dictionary = proof.get("finalObjectStates", {})
+		var economy_after: Dictionary = proof.get("economyAfter", {})
+		if final_states.is_empty() or economy_after.is_empty():
+			failures.append("%s agenticRouteProof must include finalObjectStates and economyAfter" % expected_route)
+		for trace in action_trace:
+			if not trace is Dictionary:
+				failures.append("%s agenticRouteProof actionTrace contains non-dictionary item" % expected_route)
+				continue
+			if not bool(trace.get("accepted", false)):
+				failures.append("%s agenticRouteProof contains unaccepted action" % expected_route)
+			if not trace.get("perceivedObjectIds", []).has(str(trace.get("objectId", ""))):
+				failures.append("%s agenticRouteProof actor cannot perceive acted object %s" % [expected_route, str(trace.get("objectId", ""))])
+			if str(trace.get("whyLine", "")).is_empty():
+				failures.append("%s agenticRouteProof action is missing whyLine" % expected_route)
+		if expected_route == "soft_report" and not _agentic_trace_has_role(action_trace, "store_manager"):
+			failures.append("soft_report agenticRouteProof must include Store Manager reaction")
+		if expected_route == "soft_report" and not _social_observation_exists(social_observations, "store_manager", "store_clerk", "place_note", "place_note"):
+			failures.append("soft_report agenticRouteProof must prove manager acted from clerk record")
+		if expected_route == "inquest_opened":
+			var station_citation: Dictionary = proof.get("stationCitation", {})
+			if station_citation.is_empty():
+				failures.append("inquest_opened agenticRouteProof must include exact Station citation")
+			elif str(station_citation.get("citedLedgerEventKind", "")) != "store_report_escalated":
+				failures.append("inquest_opened Station citation must cite store_report_escalated")
+			if not _social_observation_exists(social_observations, "store_manager", "store_clerk", "place_note", "forward_report"):
+				failures.append("inquest_opened agenticRouteProof must prove manager forwarded clerk record")
+			if not _social_observation_exists(social_observations, "station_officer", "store_manager", "forward_report", "cite_record"):
+				failures.append("inquest_opened agenticRouteProof must prove Station cited forwarded social record")
+	return failures
+
+func _agentic_route_proof_by_id(agentic_route_proofs: Array, route_id: String) -> Dictionary:
+	for proof in agentic_route_proofs:
+		if proof is Dictionary and str(proof.get("routeId", "")) == route_id:
+			return proof
+	return {}
+
+func _same_string_array(left_value: Variant, right_value: Variant) -> bool:
+	if not left_value is Array or not right_value is Array:
+		return false
+	var left: Array = left_value
+	var right: Array = right_value
+	if left.size() != right.size():
+		return false
+	for index in range(left.size()):
+		if str(left[index]) != str(right[index]):
+			return false
+	return true
+
+func _agentic_trace_has_role(action_trace: Array, role: String) -> bool:
+	for trace in action_trace:
+		if trace is Dictionary and str(trace.get("actorRole", "")) == role:
+			return true
+	return false
+
+func _social_observation_exists(social_observations: Array, observer_role: String, observed_role: String, observed_affordance: String, resulting_affordance: String) -> bool:
+	for observation in social_observations:
+		if not observation is Dictionary:
+			continue
+		if str(observation.get("observerRole", "")) == observer_role \
+			and str(observation.get("observedActorRole", "")) == observed_role \
+			and str(observation.get("observedAffordance", "")) == observed_affordance \
+			and str(observation.get("resultingAffordance", "")) == resulting_affordance:
+			return true
+	return false
+
+func _agent_action_has_role(action_log: Array, role: String) -> bool:
+	for action in action_log:
+		if action is Dictionary and str(action.get("actorRole", "")) == role:
+			return true
+	return false
+
 func _route_proofs_have(route_proofs: Array, route_id: String) -> bool:
 	for item in route_proofs:
 		if item is Dictionary and str(item.get("routeId", "")) == route_id:
@@ -538,6 +1144,13 @@ func _npc_reaction_snapshot(context_node: Node, npc_id: String) -> Dictionary:
 			var snapshot: Variant = node.call("debug_reaction_snapshot")
 			if snapshot is Dictionary:
 				return snapshot
+	return {}
+
+func _record_prop_snapshot(session: Node) -> Dictionary:
+	if session != null and session.has_method("debug_record_prop_snapshot"):
+		var snapshot: Variant = session.call("debug_record_prop_snapshot")
+		if snapshot is Dictionary:
+			return snapshot
 	return {}
 
 func _build_summary(session: Node) -> Dictionary:
@@ -615,9 +1228,9 @@ func _has_free_input_event(summary: Dictionary) -> bool:
 			continue
 		if str(event.get("freeInputHash", "")).is_empty():
 			continue
-		if str(event.get("inputMode", "")) != "explicit_recorded_statement":
+		if str(event.get("inputMode", "")) != "typed_free_input":
 			continue
-		if str(event.get("recordedStatementScope", "")) != "key_4_explicit_recorded_statement_no_typed_ui":
+		if not str(event.get("recordedStatementScope", "")).is_empty():
 			continue
 		if not str(event.get("displayedPlayerLine", "")).contains("꿈"):
 			continue
@@ -628,7 +1241,7 @@ func _has_anomaly_signal(summary: Dictionary, signal_id: String) -> bool:
 	for event in summary.get("events", []):
 		if not event is Dictionary:
 			continue
-		if str(event.get("eventName", "")) != "conversation_anomaly_detected":
+		if not ["conversation_anomaly_detected", "response_hesitation_noted"].has(str(event.get("eventName", ""))):
 			continue
 		if not event.get("suspicionSignals", []).has(signal_id):
 			continue

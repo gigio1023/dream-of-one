@@ -32,9 +32,27 @@ export interface OpenAiProposalConfig {
   modelCheckTimeoutMs: number;
   requestTimeoutMs: number;
   maxOutputTokens: number;
+  budget: OpenAiProposalBudgetConfig;
+}
+
+export interface OpenAiProposalBudgetConfig {
+  maxEstimatedInputTokens: number;
+  maxEstimatedTotalTokens: number;
+  maxEstimatedCostUsd: number;
+  inputUsdPerMillionTokens: number;
+  outputUsdPerMillionTokens: number;
 }
 
 export const OPENAI_PROPOSAL_GATEWAY_COMMAND = "__openai_api_proposal_provider__";
+export const DEFAULT_OPENAI_PROPOSAL_MODEL = "gpt-5.4-mini";
+export const DEFAULT_OPENAI_PROPOSAL_FALLBACK_MODELS = ["gpt-5.4-nano", "gpt-5-nano"] as const;
+export const DEFAULT_OPENAI_PROPOSAL_BUDGET: OpenAiProposalBudgetConfig = {
+  maxEstimatedInputTokens: 6000,
+  maxEstimatedTotalTokens: 8000,
+  maxEstimatedCostUsd: 0.01,
+  inputUsdPerMillionTokens: 0.75,
+  outputUsdPerMillionTokens: 4.5,
+};
 
 function parseNumber(value: string | undefined, fallback: number): number {
   if (!value) return fallback;
@@ -90,6 +108,42 @@ function parseBaseUrl(value: string | undefined, fallback: string): string {
   return parsed.replace(/\/+$/, "");
 }
 
+function readPositiveNumber(value: unknown, fallback: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    return fallback;
+  }
+  return value;
+}
+
+function normalizeOpenAiProposalBudget(value: unknown): OpenAiProposalBudgetConfig {
+  const budget = typeof value === "object" && value !== null && !Array.isArray(value)
+    ? value as Partial<OpenAiProposalBudgetConfig>
+    : {};
+
+  return {
+    maxEstimatedInputTokens: readPositiveNumber(
+      budget.maxEstimatedInputTokens,
+      DEFAULT_OPENAI_PROPOSAL_BUDGET.maxEstimatedInputTokens,
+    ),
+    maxEstimatedTotalTokens: readPositiveNumber(
+      budget.maxEstimatedTotalTokens,
+      DEFAULT_OPENAI_PROPOSAL_BUDGET.maxEstimatedTotalTokens,
+    ),
+    maxEstimatedCostUsd: readPositiveNumber(
+      budget.maxEstimatedCostUsd,
+      DEFAULT_OPENAI_PROPOSAL_BUDGET.maxEstimatedCostUsd,
+    ),
+    inputUsdPerMillionTokens: readPositiveNumber(
+      budget.inputUsdPerMillionTokens,
+      DEFAULT_OPENAI_PROPOSAL_BUDGET.inputUsdPerMillionTokens,
+    ),
+    outputUsdPerMillionTokens: readPositiveNumber(
+      budget.outputUsdPerMillionTokens,
+      DEFAULT_OPENAI_PROPOSAL_BUDGET.outputUsdPerMillionTokens,
+    ),
+  };
+}
+
 export function encodeOpenAiProposalGatewayConfig(config: OpenAiProposalConfig): string {
   return Buffer.from(JSON.stringify(config), "utf8").toString("base64url");
 }
@@ -107,10 +161,10 @@ export function decodeOpenAiProposalGatewayConfig(encoded: string | undefined): 
       : "https://api.openai.com/v1",
     preferredModel: typeof parsed.preferredModel === "string" && parsed.preferredModel.trim().length > 0
       ? parsed.preferredModel.trim()
-      : "gpt-5.4-nano",
+      : DEFAULT_OPENAI_PROPOSAL_MODEL,
     fallbackModels: Array.isArray(parsed.fallbackModels)
       ? parsed.fallbackModels.filter((model): model is string => typeof model === "string" && model.trim().length > 0)
-      : ["gpt-5-nano"],
+      : [...DEFAULT_OPENAI_PROPOSAL_FALLBACK_MODELS],
     modelCheckTimeoutMs: typeof parsed.modelCheckTimeoutMs === "number" && parsed.modelCheckTimeoutMs > 0
       ? Math.floor(parsed.modelCheckTimeoutMs)
       : 3000,
@@ -120,6 +174,7 @@ export function decodeOpenAiProposalGatewayConfig(encoded: string | undefined): 
     maxOutputTokens: typeof parsed.maxOutputTokens === "number" && parsed.maxOutputTokens > 0
       ? Math.floor(parsed.maxOutputTokens)
       : 700,
+    budget: normalizeOpenAiProposalBudget(parsed.budget),
   };
 }
 
@@ -145,11 +200,33 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig 
   const openAiProposal: OpenAiProposalConfig = {
     apiKey: parsePath(env.OPENAI_API_KEY, ""),
     baseUrl: parseBaseUrl(env.OPENAI_BASE_URL, "https://api.openai.com/v1"),
-    preferredModel: parsePath(env.OPENAI_PROPOSAL_PREFERRED_MODEL, "gpt-5.4-nano"),
-    fallbackModels: parseList(env.OPENAI_PROPOSAL_MODEL_FALLBACKS, ["gpt-5-nano"]),
+    preferredModel: parsePath(env.OPENAI_PROPOSAL_PREFERRED_MODEL, DEFAULT_OPENAI_PROPOSAL_MODEL),
+    fallbackModels: parseList(env.OPENAI_PROPOSAL_MODEL_FALLBACKS, [...DEFAULT_OPENAI_PROPOSAL_FALLBACK_MODELS]),
     modelCheckTimeoutMs: parseNumber(env.OPENAI_MODEL_CHECK_TIMEOUT_MS, 3000),
     requestTimeoutMs: parseNumber(env.OPENAI_PROPOSAL_TIMEOUT_MS, 8000),
     maxOutputTokens: parseNumber(env.OPENAI_PROPOSAL_MAX_OUTPUT_TOKENS, 700),
+    budget: {
+      maxEstimatedInputTokens: parseNumber(
+        env.OPENAI_PROPOSAL_MAX_ESTIMATED_INPUT_TOKENS,
+        DEFAULT_OPENAI_PROPOSAL_BUDGET.maxEstimatedInputTokens,
+      ),
+      maxEstimatedTotalTokens: parseNumber(
+        env.OPENAI_PROPOSAL_MAX_ESTIMATED_TOTAL_TOKENS,
+        DEFAULT_OPENAI_PROPOSAL_BUDGET.maxEstimatedTotalTokens,
+      ),
+      maxEstimatedCostUsd: parseNumber(
+        env.OPENAI_PROPOSAL_MAX_ESTIMATED_COST_USD,
+        DEFAULT_OPENAI_PROPOSAL_BUDGET.maxEstimatedCostUsd,
+      ),
+      inputUsdPerMillionTokens: parseNumber(
+        env.OPENAI_PROPOSAL_INPUT_USD_PER_MILLION_TOKENS,
+        DEFAULT_OPENAI_PROPOSAL_BUDGET.inputUsdPerMillionTokens,
+      ),
+      outputUsdPerMillionTokens: parseNumber(
+        env.OPENAI_PROPOSAL_OUTPUT_USD_PER_MILLION_TOKENS,
+        DEFAULT_OPENAI_PROPOSAL_BUDGET.outputUsdPerMillionTokens,
+      ),
+    },
   };
   const hasCommandOverride = typeof env.CODEX_TOOL_COMMAND === "string" && env.CODEX_TOOL_COMMAND.trim().length > 0;
   const hasArgsOverride = typeof env.CODEX_TOOL_ARGS === "string" && env.CODEX_TOOL_ARGS.trim().length > 0;

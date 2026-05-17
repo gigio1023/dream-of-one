@@ -175,6 +175,7 @@ static func _create_free_asset_pass(
 	_create_zone_visual_cues(parent, anchors, generation_failures)
 	_create_opening_station_route(parent, anchors, generation_failures, player_start)
 	_create_station_surveillance_cues(parent, anchors, generation_failures)
+	_create_operation_record_props(parent, anchors, generation_failures)
 
 static func _create_anchor_set_dressing(parent: Node3D, anchors: Dictionary, generation_failures: Array[String]) -> void:
 	var root := _node3d("Procedural_AnchorSetDressing", parent)
@@ -397,6 +398,118 @@ static func _create_store_conversation_cues(
 		_spawn_watchline(parent, "StoreConversation_ClerkSightline", clerk_result["position"], queue_result["position"], Color(1.0, 0.64, 0.24, 0.30))
 	if clerk_result["ok"] and station_result["ok"]:
 		_spawn_watchline(parent, "StoreConversation_ReportRouteHint", clerk_result["position"], station_result["position"], Color(1.0, 0.36, 0.22, 0.18))
+
+static func _create_operation_record_props(parent: Node3D, anchors: Dictionary, generation_failures: Array[String]) -> void:
+	var counter_result := _resolve_anchor(anchors, "Store.counter", generation_failures)
+	var queue_result := _resolve_anchor(anchors, "Store.queue_start", generation_failures)
+	var board_result := _resolve_anchor(anchors, "Store.label_board", generation_failures)
+	var park_board_result := _resolve_anchor(anchors, "Park.notice_board", generation_failures)
+	var report_result := _resolve_anchor(anchors, "Station.report_desk", generation_failures)
+	var root := _node3d("Procedural_OperationRecordProps", parent)
+	if queue_result["ok"]:
+		var queue: Vector3 = queue_result["position"]
+		_spawn_operation_record_prop(root, "store_queue_mark", "QUEUE\nplayer_waiting", queue + Vector3(0, 0.08, 0), Vector3(0.78, 0.08, 0.78), Color(0.30, 0.68, 1.0, 0.92), 0.0)
+	if counter_result["ok"]:
+		var counter: Vector3 = counter_result["position"]
+		_spawn_operation_record_prop(root, "store_counter", "COUNTER\nserving", counter + Vector3(0, 0.18, 0.68), Vector3(2.15, 0.16, 0.24), Color(0.42, 0.74, 0.86, 0.94), 0.0)
+		_spawn_operation_record_prop(root, "receipt_tray", "RECEIPT\nblank", counter + Vector3(-1.12, 0.28, -0.58), Vector3(0.54, 0.12, 0.38), Color(0.62, 0.66, 0.68, 0.88), 0.0)
+		_spawn_operation_record_prop(root, "correction_slip", "CORRECTION\nabsent", counter + Vector3(0, 0.29, -0.58), Vector3(0.54, 0.05, 0.38), Color(0.44, 0.48, 0.50, 0.72), 0.0)
+		_spawn_operation_record_prop(root, "report_tray", "REPORT\nempty", counter + Vector3(1.12, 0.28, -0.58), Vector3(0.54, 0.13, 0.38), Color(0.54, 0.58, 0.60, 0.78), 0.0)
+		_spawn_operation_record_prop(root, "civic_ledger", "LEDGER\n0 entries", counter + Vector3(0, 0.42, -1.26), Vector3(1.68, 0.08, 0.24), Color(0.74, 0.70, 0.46, 0.88), 0.0)
+	if board_result["ok"]:
+		var board: Vector3 = board_result["position"]
+		_spawn_operation_record_prop(root, "usual_order_cue", "USUAL ORDER\nread", board + Vector3(0, 0.12, 0.12), Vector3(1.35, 0.08, 0.34), Color(0.70, 0.92, 0.72, 0.9), 0.0)
+	if park_board_result["ok"]:
+		var park_board: Vector3 = park_board_result["position"]
+		_spawn_operation_record_prop(root, "park_notice_board", "PUBLIC\nclear", park_board + Vector3(0.0, -0.02, 0.26), Vector3(1.28, 0.07, 0.36), Color(0.72, 0.78, 0.50, 0.88), 0.0)
+	if report_result["ok"]:
+		var report: Vector3 = report_result["position"]
+		_spawn_operation_record_prop(root, "station_dossier", "DOSSIER\nabsent", report + Vector3(0, 0.32, 0.62), Vector3(0.84, 0.13, 0.46), Color(0.48, 0.50, 0.52, 0.76), 0.0)
+		_spawn_operation_record_prop(root, "civic_economy_panel", "CIVIC ECONOMY\ncredit 3 trust 50 burden 0 attention 0", report + Vector3(0, 0.56, -0.72), Vector3(1.86, 0.10, 0.24), Color(0.54, 0.78, 0.86, 0.88), 0.0)
+
+static func _spawn_operation_record_prop(
+	parent: Node3D,
+	object_id: String,
+	label_text: String,
+	position: Vector3,
+	size: Vector3,
+	color: Color,
+	yaw_radians: float
+) -> Node3D:
+	var holder := _node3d("OperationRecordProp_%s" % _safe_name(object_id), parent)
+	holder.position = position
+	holder.rotation.y = yaw_radians
+	holder.add_to_group("operation_record_props")
+	holder.set_meta("record_object_id", object_id)
+	holder.set_meta("record_state", "uninitialized")
+	holder.set_meta("record_label", label_text)
+
+	_spawn_procedural_box(holder, "BasePlate", Vector3(0, 0, 0), Vector3(size.x + 0.16, 0.035, size.z + 0.16), Color(0.035, 0.04, 0.045, 0.86), 0.0)
+	_spawn_procedural_box(holder, "StateBody", Vector3(0, size.y * 0.5 + 0.035, 0), size, color, 0.0)
+	_spawn_procedural_box(holder, "StateStrip", Vector3(0, size.y + 0.095, size.z * 0.44), Vector3(maxf(size.x * 0.82, 0.32), 0.04, 0.055), color, 0.0)
+
+	var label := Label3D.new()
+	label.name = "StateLabel"
+	label.text = label_text
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.font_size = _operation_record_label_font_size(object_id)
+	label.outline_size = 6
+	label.width = _operation_record_label_width(object_id)
+	label.modulate = Color(1.0, 0.98, 0.86, 1.0)
+	label.outline_modulate = Color(0.015, 0.016, 0.018, 1.0)
+	label.position = _operation_record_label_offset(object_id, size)
+	holder.add_child(label)
+	return holder
+
+static func _operation_record_label_font_size(object_id: String) -> int:
+	match object_id:
+		"receipt_tray", "correction_slip", "report_tray":
+			return 14
+		"civic_ledger":
+			return 15
+		"station_dossier":
+			return 16
+		"park_notice_board":
+			return 16
+		"civic_economy_panel":
+			return 18
+		"store_counter":
+			return 14
+	return 20
+
+static func _operation_record_label_width(object_id: String) -> float:
+	match object_id:
+		"receipt_tray", "correction_slip", "report_tray":
+			return 230.0
+		"civic_ledger":
+			return 340.0
+		"civic_economy_panel":
+			return 460.0
+		"store_counter":
+			return 260.0
+		"park_notice_board":
+			return 300.0
+	return 320.0
+
+static func _operation_record_label_offset(object_id: String, size: Vector3) -> Vector3:
+	match object_id:
+		"receipt_tray":
+			return Vector3(-0.52, size.y + 0.34, -0.08)
+		"correction_slip":
+			return Vector3(0.0, size.y + 0.78, 0.04)
+		"report_tray":
+			return Vector3(0.52, size.y + 0.34, -0.08)
+		"civic_ledger":
+			return Vector3(0.0, size.y + 1.18, -0.22)
+		"station_dossier":
+			return Vector3(-0.72, size.y + 0.72, 0.10)
+		"civic_economy_panel":
+			return Vector3(0.24, size.y + 0.34, -0.18)
+		"store_counter":
+			return Vector3(0.0, size.y + 0.24, 0.18)
+		"park_notice_board":
+			return Vector3(0.0, size.y + 0.42, 0.10)
+	return Vector3(0, size.y + 0.42, 0)
 
 static func _spawn_procedural_box(
 	parent: Node3D,

@@ -1,17 +1,17 @@
 {
 	"adapter": "godot",
-	"createdAtMs": 1778571488339,
+	"createdAtMs": 1779016882755,
 	"events": [
 		{
 			"adapter": "godot",
 			"eventFamily": "domain",
-			"eventId": "event-domain-shell-1778571488339",
+			"eventId": "event-domain-shell-1779016882755",
 			"eventName": "shell_domain_surfaces_loaded",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-shell-session",
 			"socialLoopStage": "intake",
 			"summary": "Godot shell loaded canonical text surfaces and Station intake metadata.",
-			"timestampMs": 1778571488339,
+			"timestampMs": 1779016882755,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
 		},
@@ -19,12 +19,12 @@
 			"adapter": "godot",
 			"artifactPath": "data/evidence/godot/shell/dre_171_shell_evidence.json",
 			"eventFamily": "evidence_export",
-			"eventId": "event-export-shell-1778571488339",
+			"eventId": "event-export-shell-1779016882755",
 			"eventName": "evidence_pack_created",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-shell-session",
 			"summary": "Godot shell Evidence Pack exported.",
-			"timestampMs": 1778571488339,
+			"timestampMs": 1779016882755,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
 		}
@@ -33,10 +33,10 @@
 		"failures": [],
 		"generation_failures": [],
 		"group_counts": {
-			"free_visual_assets": 158,
+			"free_visual_assets": 185,
 			"interaction_zones": 4,
 			"landmarks": 4,
-			"npc_placeholders": 4,
+			"npc_placeholders": 5,
 			"routes": 3,
 			"text_surfaces": 4
 		},
@@ -54,6 +54,7 @@
 			"NPC_Park_Witness",
 			"NPC_Station_Officer",
 			"NPC_Store_Clerk",
+			"NPC_Store_Manager",
 			"NPC_Studio_PM"
 		],
 		"ok": true,
@@ -89,6 +90,7 @@
 			"NPC_Park_Witness": "dre_171_godot_shell:NPC_Park_Witness",
 			"NPC_Station_Officer": "dre_171_godot_shell:NPC_Station_Officer",
 			"NPC_Store_Clerk": "dre_171_godot_shell:NPC_Store_Clerk",
+			"NPC_Store_Manager": "dre_171_godot_shell:NPC_Store_Manager",
 			"NPC_Studio_PM": "dre_171_godot_shell:NPC_Studio_PM"
 		},
 		"blockedChecks": [],

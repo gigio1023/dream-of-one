@@ -77,6 +77,7 @@ export const CONVERSATION_SUSPICION_SIGNAL_WEIGHT: Record<ConversationSuspicionS
   prior_statement_contradiction: 40,
   authority_evasion: 25,
   over_explanation: 15,
+  response_hesitation: 10,
 };
 
 export const CONVERSATION_REPORT_SIGNAL_WEIGHT: Record<ConversationSuspicionSignal, number> = {
@@ -87,6 +88,7 @@ export const CONVERSATION_REPORT_SIGNAL_WEIGHT: Record<ConversationSuspicionSign
   prior_statement_contradiction: 35,
   authority_evasion: 25,
   over_explanation: 10,
+  response_hesitation: 5,
 };
 
 const WHY_LINES: Record<ConversationSuspicionSignal, string> = {
@@ -97,6 +99,7 @@ const WHY_LINES: Record<ConversationSuspicionSignal, string> = {
   prior_statement_contradiction: "The line conflicted with a prior conversation record.",
   authority_evasion: "The line avoided a direct procedural question.",
   over_explanation: "The line explained too much for an ordinary routine exchange.",
+  response_hesitation: "The delayed answer was recorded as uncertainty during a routine exchange.",
 };
 
 export function clampConversationScore(value: number): number {

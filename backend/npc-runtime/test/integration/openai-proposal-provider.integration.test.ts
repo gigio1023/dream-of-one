@@ -36,11 +36,18 @@ function buildOpenAiConfig(overrides: Partial<OpenAiProposalConfig> = {}): OpenA
   return {
     apiKey: "test-key",
     baseUrl: "https://api.openai.test/v1",
-    preferredModel: "gpt-5.4-nano",
-    fallbackModels: ["gpt-5-nano"],
+    preferredModel: "gpt-5.4-mini",
+    fallbackModels: ["gpt-5.4-nano", "gpt-5-nano"],
     modelCheckTimeoutMs: 1000,
     requestTimeoutMs: 1000,
     maxOutputTokens: 700,
+    budget: {
+      maxEstimatedInputTokens: 6000,
+      maxEstimatedTotalTokens: 8000,
+      maxEstimatedCostUsd: 0.01,
+      inputUsdPerMillionTokens: 0.75,
+      outputUsdPerMillionTokens: 4.5,
+    },
     ...overrides,
   };
 }
@@ -75,7 +82,7 @@ test("OpenAI proposal gateway uses preferred model and maps text proposal into b
   const fetchImpl: FetchLike = async (url, init) => {
     if (url.endsWith("/models")) {
       return jsonResponse(200, {
-        data: [{ id: "gpt-5.4-nano" }, { id: "gpt-5-nano" }],
+        data: [{ id: "gpt-5.4-mini" }, { id: "gpt-5.4-nano" }, { id: "gpt-5-nano" }],
       });
     }
 
@@ -102,7 +109,7 @@ test("OpenAI proposal gateway uses preferred model and maps text proposal into b
   assert.equal(result.intent.confidence, 0.5);
 
   assert.equal(responseBodies.length, 1);
-  assert.equal(responseBodies[0]?.model, "gpt-5.4-nano");
+  assert.equal(responseBodies[0]?.model, "gpt-5.4-mini");
   assert.match(String(responseBodies[0]?.instructions), /Do not decide Exposure delta/);
   const text = responseBodies[0]?.text as { format?: { schema?: { properties?: Record<string, unknown> } } };
   assert.deepEqual(
@@ -165,7 +172,7 @@ test("OpenAI proposal gateway shares one decision deadline across model check an
       if (url.endsWith("/models")) {
         nowMs += 80;
         return jsonResponse(200, {
-          data: [{ id: "gpt-5.4-nano" }],
+          data: [{ id: "gpt-5.4-mini" }],
         });
       }
 
@@ -198,7 +205,7 @@ test("OpenAI proposal wording cannot select backend action type", async () => {
   const fetchImpl: FetchLike = async (url) => {
     if (url.endsWith("/models")) {
       return jsonResponse(200, {
-        data: [{ id: "gpt-5.4-nano" }],
+        data: [{ id: "gpt-5.4-mini" }],
       });
     }
 
@@ -248,11 +255,46 @@ test("OpenAI model missing returns deterministic fallback without calling respon
   assert.equal(responseCallCount, 0);
 });
 
+test("OpenAI proposal budget blocks response calls before live spending", async () => {
+  let responseCallCount = 0;
+  const fetchImpl: FetchLike = async (url) => {
+    if (url.endsWith("/models")) {
+      return jsonResponse(200, {
+        data: [{ id: "gpt-5.4-mini" }],
+      });
+    }
+
+    responseCallCount += 1;
+    return jsonResponse(200, {
+      id: "unexpected",
+      output_text: JSON.stringify(proposal()),
+    });
+  };
+
+  const gateway = new OpenAiProposalGateway(buildOpenAiConfig({
+    budget: {
+      maxEstimatedInputTokens: 1,
+      maxEstimatedTotalTokens: 2,
+      maxEstimatedCostUsd: 0.000001,
+      inputUsdPerMillionTokens: 0.75,
+      outputUsdPerMillionTokens: 4.5,
+    },
+  }), { fetch: fetchImpl });
+  const broker = new DefaultCodexBroker(gateway, new InMemoryThreadStore());
+
+  const result = await broker.decide(buildPacket());
+
+  assert.equal(result.meta.usedFallback, true);
+  assert.equal(result.meta.transport, "fallback");
+  assert.equal(result.meta.reason, "tool_failure");
+  assert.equal(responseCallCount, 0);
+});
+
 test("OpenAI rate limit returns deterministic fallback", async () => {
   const fetchImpl: FetchLike = async (url) => {
     if (url.endsWith("/models")) {
       return jsonResponse(200, {
-        data: [{ id: "gpt-5.4-nano" }],
+        data: [{ id: "gpt-5.4-mini" }],
       });
     }
 
@@ -275,7 +317,7 @@ test("OpenAI response timeout returns deterministic timeout fallback", async () 
   const fetchImpl: FetchLike = async (url, init) => {
     if (url.endsWith("/models")) {
       return jsonResponse(200, {
-        data: [{ id: "gpt-5.4-nano" }],
+        data: [{ id: "gpt-5.4-mini" }],
       });
     }
 
@@ -302,7 +344,7 @@ test("OpenAI authority fields in proposal are rejected before intent mapping", a
   const fetchImpl: FetchLike = async (url) => {
     if (url.endsWith("/models")) {
       return jsonResponse(200, {
-        data: [{ id: "gpt-5.4-nano" }],
+        data: [{ id: "gpt-5.4-mini" }],
       });
     }
 
@@ -326,7 +368,7 @@ test("OpenAI authority wording in proposal text is rejected before display", asy
   const fetchImpl: FetchLike = async (url) => {
     if (url.endsWith("/models")) {
       return jsonResponse(200, {
-        data: [{ id: "gpt-5.4-nano" }],
+        data: [{ id: "gpt-5.4-mini" }],
       });
     }
 
@@ -372,8 +414,9 @@ test("runtime defaults to OpenAI API proposal provider, not direct Codex CLI", (
 
   assert.equal(config.proposalProvider, "openai-api");
   assert.equal(config.codexCommand, OPENAI_PROPOSAL_GATEWAY_COMMAND);
-  assert.equal(config.openAiProposal.preferredModel, "gpt-5.4-nano");
-  assert.deepEqual(config.openAiProposal.fallbackModels, ["gpt-5-nano"]);
+  assert.equal(config.openAiProposal.preferredModel, "gpt-5.4-mini");
+  assert.deepEqual(config.openAiProposal.fallbackModels, ["gpt-5.4-nano", "gpt-5-nano"]);
+  assert.equal(config.openAiProposal.budget.maxEstimatedCostUsd, 0.01);
 });
 
 test("readiness reports selected OpenAI fallback model when preferred model is unavailable", async t => {
@@ -386,14 +429,14 @@ test("readiness reports selected OpenAI fallback model when preferred model is u
     ...loadConfig({
       NPC_RUNTIME_PROPOSAL_PROVIDER: "openai-api",
       OPENAI_API_KEY: "ready-key",
-      OPENAI_PROPOSAL_PREFERRED_MODEL: "gpt-5.4-nano",
-      OPENAI_PROPOSAL_MODEL_FALLBACKS: "gpt-5-nano",
+      OPENAI_PROPOSAL_PREFERRED_MODEL: "gpt-5.4-mini",
+      OPENAI_PROPOSAL_MODEL_FALLBACKS: "gpt-5.4-nano,gpt-5-nano",
     }),
     threadStorePath: join(tempDir, "threads.json"),
     workspaceRootPath: join(tempDir, "workspaces"),
   };
   const fetchImpl: FetchLike = async () => jsonResponse(200, {
-    data: [{ id: "gpt-5-nano" }],
+    data: [{ id: "gpt-5.4-nano" }],
   });
 
   const readiness = await evaluateRuntimeReadiness(config, { fetch: fetchImpl });
@@ -401,7 +444,7 @@ test("readiness reports selected OpenAI fallback model when preferred model is u
   assert.equal(readiness.status, "ready");
   assert.deepEqual(readiness.reasons, []);
   assert.equal(readiness.checks.provider.ok, true);
-  assert.equal(readiness.checks.provider.openAi?.selectedModel, "gpt-5-nano");
+  assert.equal(readiness.checks.provider.openAi?.selectedModel, "gpt-5.4-nano");
   assert.equal(readiness.checks.codexCommand.ok, true);
 });
 

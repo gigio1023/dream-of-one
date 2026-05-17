@@ -13,6 +13,7 @@
 				"non-empty 1280x720 viewport",
 				"opening Store framing visible from current generated world",
 				"HUD objective points player toward the Store Clerk conversation",
+				"world civic ledger slot is visible before any entries are written",
 				"Kenney free asset city dressing visible without owning gameplay authority"
 			],
 			"height": 720,
@@ -22,7 +23,7 @@
 			"width": 1280
 		},
 		{
-			"artifactPath": "data/evidence/godot/screenshots/02-store-rule-surface-readable.png",
+			"artifactPath": "data/evidence/godot/screenshots/02-store-rule-guide-readable.png",
 			"automatedChecks": [
 				"viewport_size",
 				"nonblank_pixels",
@@ -30,13 +31,13 @@
 			],
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
-				"Store queue rule surface has been interacted with",
-				"local routine context is visible before speaking",
+				"Store procedure guide has been interacted with",
+				"receipt/correction/report/Station citation chain is visible before speaking",
 				"HUD remains readable while Store board is in range"
 			],
 			"height": 720,
 			"requiresHumanReadabilityReview": true,
-			"role": "store-rule-surface-readable",
+			"role": "store-rule-guide-readable",
 			"width": 1280
 		},
 		{
@@ -50,7 +51,8 @@
 				"non-empty 1280x720 viewport",
 				"Store Clerk prompt is active",
 				"three large diegetic dialogue choices are visible in the conversation panel",
-				"key 4 is explicitly scoped as a displayed recorded statement"
+				"optional typed input is visible as recorded Store speech",
+				"fallback-only provider state is visible"
 			],
 			"height": 720,
 			"requiresHumanReadabilityReview": true,
@@ -69,6 +71,8 @@
 				"suspicion has increased from a risky dialogue line",
 				"Store Clerk reaction marker is active",
 				"player-facing why-line is visible",
+				"HUD record line names the latest civic ledger entry, actor role, and validated action",
+				"HUD record line names the latest NPC social reaction when present",
 				"recent Evidence explains the consequence"
 			],
 			"height": 720,
@@ -77,7 +81,25 @@
 			"width": 1280
 		},
 		{
-			"artifactPath": "data/evidence/godot/screenshots/05-inquest-session-end.png",
+			"artifactPath": "data/evidence/godot/screenshots/05-store-record-props-closeup.png",
+			"automatedChecks": [
+				"viewport_size",
+				"nonblank_pixels",
+				"scripted_session_state"
+			],
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"Store counter record props are framed close enough for human review",
+				"receipt tray, correction slip, report tray, and civic ledger labels are present",
+				"prop states match the risky conversation record state"
+			],
+			"height": 720,
+			"requiresHumanReadabilityReview": true,
+			"role": "store-record-props-closeup",
+			"width": 1280
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/06-inquest-session-end.png",
 			"automatedChecks": [
 				"viewport_size",
 				"nonblank_pixels",
@@ -87,6 +109,10 @@
 				"non-empty 1280x720 viewport",
 				"Station inquest outcome panel is visible",
 				"suspicion, report pressure, and session termination state are visible",
+				"live HUD consequence line shows speech/delay -> Store record -> report handoff -> Station citation",
+				"outcome names the exact Store ledger entry cited by the Station",
+				"outcome shows speech/delay to record to Station role-action chain",
+				"outcome names the NPC-to-NPC social reaction behind the Station citation",
 				"why-line remains visible as session-end basis"
 			],
 			"height": 720,
@@ -94,11 +120,48 @@
 			"requiresHumanReadabilityReview": true,
 			"role": "inquest-session-end",
 			"width": 1280
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/07-station-record-props-closeup.png",
+			"automatedChecks": [
+				"viewport_size",
+				"nonblank_pixels",
+				"scripted_session_state"
+			],
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"Station record props are framed close enough for human review",
+				"Station dossier and civic economy panel labels are present",
+				"prop states match the inquest/citation outcome"
+			],
+			"height": 720,
+			"requiresHumanReadabilityReview": true,
+			"role": "station-record-props-closeup",
+			"width": 1280
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/08-repair-correction-slip-closeup.png",
+			"automatedChecks": [
+				"viewport_size",
+				"nonblank_pixels",
+				"scripted_session_state"
+			],
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"repair route reached from the Same Order prompt set",
+				"correction slip is attached before Station escalation",
+				"receipt tray, correction slip, and civic ledger labels are present",
+				"no Station dossier citation is required for the repaired Store record"
+			],
+			"height": 720,
+			"requiresHumanReadabilityReview": true,
+			"role": "repair-correction-slip-closeup",
+			"width": 1280
 		}
 	],
 	"contactSheet": {
 		"artifactPath": "data/evidence/godot/visual-capture/contact-sheet.png",
-		"height": 1080,
+		"height": 1440,
 		"width": 1280
 	},
 	"ok": true,
@@ -109,19 +172,20 @@
 				"non-empty 1280x720 viewport",
 				"opening Store framing visible from current generated world",
 				"HUD objective points player toward the Store Clerk conversation",
+				"world civic ledger slot is visible before any entries are written",
 				"Kenney free asset city dressing visible without owning gameplay authority"
 			],
 			"role": "opening-store-framing"
 		},
 		{
-			"artifactPath": "data/evidence/godot/screenshots/02-store-rule-surface-readable.png",
+			"artifactPath": "data/evidence/godot/screenshots/02-store-rule-guide-readable.png",
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
-				"Store queue rule surface has been interacted with",
-				"local routine context is visible before speaking",
+				"Store procedure guide has been interacted with",
+				"receipt/correction/report/Station citation chain is visible before speaking",
 				"HUD remains readable while Store board is in range"
 			],
-			"role": "store-rule-surface-readable"
+			"role": "store-rule-guide-readable"
 		},
 		{
 			"artifactPath": "data/evidence/godot/screenshots/03-active-conversation-hud.png",
@@ -129,7 +193,8 @@
 				"non-empty 1280x720 viewport",
 				"Store Clerk prompt is active",
 				"three large diegetic dialogue choices are visible in the conversation panel",
-				"key 4 is explicitly scoped as a displayed recorded statement"
+				"optional typed input is visible as recorded Store speech",
+				"fallback-only provider state is visible"
 			],
 			"role": "active-conversation-hud"
 		},
@@ -140,19 +205,56 @@
 				"suspicion has increased from a risky dialogue line",
 				"Store Clerk reaction marker is active",
 				"player-facing why-line is visible",
+				"HUD record line names the latest civic ledger entry, actor role, and validated action",
+				"HUD record line names the latest NPC social reaction when present",
 				"recent Evidence explains the consequence"
 			],
 			"role": "conversation-why-line"
 		},
 		{
-			"artifactPath": "data/evidence/godot/screenshots/05-inquest-session-end.png",
+			"artifactPath": "data/evidence/godot/screenshots/05-store-record-props-closeup.png",
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"Store counter record props are framed close enough for human review",
+				"receipt tray, correction slip, report tray, and civic ledger labels are present",
+				"prop states match the risky conversation record state"
+			],
+			"role": "store-record-props-closeup"
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/06-inquest-session-end.png",
 			"expectedContent": [
 				"non-empty 1280x720 viewport",
 				"Station inquest outcome panel is visible",
 				"suspicion, report pressure, and session termination state are visible",
+				"live HUD consequence line shows speech/delay -> Store record -> report handoff -> Station citation",
+				"outcome names the exact Store ledger entry cited by the Station",
+				"outcome shows speech/delay to record to Station role-action chain",
+				"outcome names the NPC-to-NPC social reaction behind the Station citation",
 				"why-line remains visible as session-end basis"
 			],
 			"role": "inquest-session-end"
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/07-station-record-props-closeup.png",
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"Station record props are framed close enough for human review",
+				"Station dossier and civic economy panel labels are present",
+				"prop states match the inquest/citation outcome"
+			],
+			"role": "station-record-props-closeup"
+		},
+		{
+			"artifactPath": "data/evidence/godot/screenshots/08-repair-correction-slip-closeup.png",
+			"expectedContent": [
+				"non-empty 1280x720 viewport",
+				"repair route reached from the Same Order prompt set",
+				"correction slip is attached before Station escalation",
+				"receipt tray, correction slip, and civic ledger labels are present",
+				"no Station dossier citation is required for the repaired Store record"
+			],
+			"role": "repair-correction-slip-closeup"
 		}
 	],
 	"storeConversationEvidence": {
@@ -195,11 +297,11 @@
 			{
 				"choiceSetId": "store.same_order.probe.choices",
 				"freeInputHash": "free-17-3317429208",
-				"inputMode": "explicit_recorded_statement",
+				"inputMode": "typed_free_input",
 				"intent": "free/recorded",
 				"playerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"promptId": "store.same_order.probe",
-				"recordedStatementScope": "key_4_explicit_recorded_statement_no_typed_ui",
+				"recordedStatementScope": "",
 				"reportWeightAfter": 115,
 				"reportWeightBefore": 30,
 				"selectedChoiceId": "",
@@ -214,9 +316,61 @@
 			}
 		],
 		"lastWhyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
-		"recordedStatementAction": "dialogue_recorded_statement",
-		"recordedStatementScope": "key_4_explicit_recorded_statement_no_typed_ui",
+		"providerState": {
+			"authorityBoundary": "wording_only_when_later_enabled",
+			"decisionPath": "deterministic_fallback",
+			"liveVerified": false,
+			"mode": "fallback_only_m1",
+			"modeLabel": "fallback-only M1",
+			"selectedModel": "none"
+		},
+		"recordObjects": {
+			"civic_ledger": "append_only",
+			"correction_slip": "absent",
+			"receipt_tray": "marked",
+			"report_tray": "forwarded",
+			"station_dossier": "cited",
+			"store_counter": "serving",
+			"store_queue_mark": "player_waiting",
+			"usual_order_cue": "read"
+		},
+		"recordedStatementAction": "",
+		"recordedStatementScope": "",
 		"reportWeight": 115,
+		"socialObservationTrace": [
+			{
+				"economyPressure": {
+					"localTrust": 25,
+					"recordBurden": 50,
+					"stationAttention": 30
+				},
+				"observedActorRole": "store_clerk",
+				"observedAffordance": "place_note",
+				"observedLedgerEventId": "civic-ledger-2",
+				"observedObjectId": "report_tray",
+				"observerActorId": "NPC_Store_Manager",
+				"observerRole": "store_manager",
+				"resultingAffordance": "forward_report",
+				"resultingStepId": "inquest.manager.forward_report",
+				"whyLine": "store_manager reads store_clerk's place_note record before choosing forward_report."
+			},
+			{
+				"economyPressure": {
+					"localTrust": 5,
+					"recordBurden": 75,
+					"stationAttention": 70
+				},
+				"observedActorRole": "store_manager",
+				"observedAffordance": "forward_report",
+				"observedLedgerEventId": "civic-ledger-3",
+				"observedObjectId": "report_tray",
+				"observerActorId": "NPC_Station_Officer",
+				"observerRole": "station_officer",
+				"resultingAffordance": "cite_record",
+				"resultingStepId": "inquest.station.cite_store_report",
+				"whyLine": "station_officer reads store_manager's forward_report record before choosing cite_record."
+			}
+		],
 		"stage": "inquest",
 		"station": {
 			"inquestOpen": true,
@@ -224,7 +378,66 @@
 			"sessionTerminationAllowed": true,
 			"verdictReady": false
 		},
-		"suspicion": 125
+		"suspicion": 125,
+		"typedFreeInputAction": "free_input_submitted",
+		"typedFreeInputAvailable": true,
+		"typedFreeInputLine": "저는 이 꿈에 방금 들어왔어요.",
+		"worldRecordProps": {
+			"civic_economy_panel": {
+				"hasBody": true,
+				"label": "시민 경제\n잔액 3 | 신뢰 5 | 부담 75 | 주목 70",
+				"state": "attention",
+				"visible": true
+			},
+			"civic_ledger": {
+				"hasBody": true,
+				"label": "시민 장부 4건\ncivic-ledger-4 -> civic-ledger-3\n기록 인용",
+				"state": "append_only",
+				"visible": true
+			},
+			"correction_slip": {
+				"hasBody": true,
+				"label": "정정\n없음",
+				"state": "absent",
+				"visible": true
+			},
+			"receipt_tray": {
+				"hasBody": true,
+				"label": "영수증\n표시됨",
+				"state": "marked",
+				"visible": true
+			},
+			"report_tray": {
+				"hasBody": true,
+				"label": "보고\n전달",
+				"state": "forwarded",
+				"visible": true
+			},
+			"station_dossier": {
+				"hasBody": true,
+				"label": "스테이션 문서\n인용됨",
+				"state": "cited",
+				"visible": true
+			},
+			"store_counter": {
+				"hasBody": true,
+				"label": "카운터\n응대",
+				"state": "serving",
+				"visible": true
+			},
+			"store_queue_mark": {
+				"hasBody": true,
+				"label": "대기 표식\n플레이어 대기",
+				"state": "player_waiting",
+				"visible": true
+			},
+			"usual_order_cue": {
+				"hasBody": true,
+				"label": "늘 같은 주문\n읽힘",
+				"state": "read",
+				"visible": true
+			}
+		}
 	},
 	"validationScope": "Automated capture validates scene load, session state, viewport size, and nonblank pixels. It records expected visual content for human review; it is not OCR or taste validation.",
 	"viewport": {

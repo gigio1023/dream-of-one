@@ -1,7 +1,8 @@
 # Godot Validation Gates
 
-Use `${GODOT:-godot}` for the editor-capable Godot binary. Current baseline:
-Godot `4.6.2.stable.official` with Forward+ rendering and Jolt Physics.
+Use `${GODOT:-/opt/homebrew/bin/godot-latest}` for the editor-capable Godot
+binary. Current proof baseline: Godot `4.7.beta2.official.777579205` with
+Forward+ rendering and Jolt Physics.
 
 ## G1 Backend Schema
 
@@ -41,13 +42,13 @@ Artifacts:
 Commands:
 
 ```bash
-${GODOT:-godot} --headless --import --path godot
-bash /Users/user/.agents/skills/godot-best-practice/scripts/check_gd_syntax.sh godot
-${GODOT:-godot} --headless --path godot --script res://tools/scene_load_smoke.gd
-${GODOT:-godot} --headless --path godot --script res://tools/playable_slice_smoke.gd
-${GODOT:-godot} --headless --path godot --script res://tools/localization_smoke.gd
-${GODOT:-godot} --headless --path godot --script res://tools/keyboard_look_smoke.gd
-${GODOT:-godot} --path godot --script res://tools/visual_capture.gd
+${GODOT:-/opt/homebrew/bin/godot-latest} --headless --import --path godot
+GODOT_PATH="${GODOT:-/opt/homebrew/bin/godot-latest}" bash "$HOME/.agents/skills/godot-best-practice/scripts/check_gd_syntax.sh" godot
+${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/scene_load_smoke.gd
+${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/playable_slice_smoke.gd
+${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/localization_smoke.gd
+${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/keyboard_look_smoke.gd
+${GODOT:-/opt/homebrew/bin/godot-latest} --quit-after 2400 --path godot --script res://tools/visual_capture.gd
 ```
 
 Visual capture must run with a renderer-capable Godot binary. It writes JSON to stdout with the expected `1280x720` viewport, artifact roles, and a pointer to `godot/assets/kenney/README.md` for free-asset source and license evidence.
@@ -61,12 +62,12 @@ Pass criteria:
 - arrow-key look changes player yaw and camera pitch without a mouse.
 - player and `Camera3D` exist independently of group-count checks.
 - `world_id` and `world_revision` metadata are present.
-- four landmarks, four text surfaces, four NPC placeholders, three routes, and four interaction zones exist by semantic id.
+- four landmarks, four text panels, four NPC placeholders, three routes, and four interaction zones exist by semantic id.
 - at least one hundred free visual assets are loaded from `godot/assets/kenney/`.
 - free visual assets are Kenney CC0 City Kit Roads, Commercial, and Suburban subsets documented in `godot/assets/kenney/README.md`; original license files remain preserved in each pack folder.
 - `generation_failures` is empty, so missing anchors cannot collapse content to the origin.
 - opening and verdict screenshot artifacts are created at `1280x720` and have non-zero image data.
-- `main-shell.png` shows the opening shell with visible HUD guidance, readable text-surface pressure, and free-asset city dressing.
+- `main-shell.png` shows the opening shell with visible HUD guidance, readable text-panel pressure, and free-asset city dressing.
 - `playable-verdict.png` shows the bounded speech-act loop reaching visible verdict feedback with Exposure, Station state, verdict, and why-line UI still legible.
 
 ## G3 Evidence Smoke
@@ -82,9 +83,9 @@ Artifacts:
 Commands:
 
 ```bash
-${GODOT:-godot} --headless --path godot --script res://tools/evidence_run.gd
-${GODOT:-godot} --headless --path godot --script res://tools/runtime_slice_smoke.gd
-${GODOT:-godot} --headless --path godot --script res://tools/playable_slice_smoke.gd
+${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/evidence_run.gd
+${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/runtime_slice_smoke.gd
+${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/playable_slice_smoke.gd
 ```
 
 Pass criteria:
@@ -103,7 +104,7 @@ Owner: domain systems executor.
 
 Required next artifacts:
 
-- Dream Law text-surface mapping.
+- Dream Law text-panel mapping.
 - Cover Test detector-trigger mapping.
 - Station intake/Inquest/verdict state trace.
 - generated dossier, why-line, or verdict artifact samples.
@@ -111,7 +112,7 @@ Required next artifacts:
 
 Pass criteria:
 
-- text surfaces remain visible/readable and expose Dream Law or Cover Test pressure.
+- text panels remain visible/readable and expose Dream Law or Cover Test pressure.
 - detector triggers come from runtime ObservationFrame data or the documented Godot playable prototype pending live bridge.
 - Exposure thresholds, Station intake/Inquest, verdict, and session termination remain deterministic product-rule outcomes.
 - generated artifacts reference source events and explain why the outcome occurred.

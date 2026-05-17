@@ -101,6 +101,7 @@ const ENVIRONMENT_AFFORDANCE_ORDER := [
 	"attach_correction",
 	"place_note",
 	"post_rumor",
+	"vouch_routine",
 	"post_warning",
 	"post_repair_notice",
 	"forward_report",
@@ -232,6 +233,13 @@ const ENVIRONMENT_ACTION_RULES := {
 			"fromStates": ["clear", "rumored"],
 			"toState": "rumored",
 			"eventKind": "public_rumor_posted",
+			"allowedRoles": ["park_witness"],
+			"requiresLedgerEvent": true
+		},
+		"vouch_routine": {
+			"fromStates": ["clear", "vouched"],
+			"toState": "vouched",
+			"eventKind": "public_routine_vouched",
 			"allowedRoles": ["park_witness"],
 			"requiresLedgerEvent": true
 		},
@@ -1763,6 +1771,8 @@ func _action_priority_hints(affordance: String, rule: Dictionary) -> Array[Strin
 		hints.append("pressure:authority_seen")
 	if affordance == "post_rumor":
 		hints.append("pressure:public_talk")
+	if affordance == "vouch_routine":
+		hints.append("pressure:routine_vouched_publicly")
 	if affordance == "post_warning":
 		hints.append("pressure:public_warning")
 	if affordance == "post_repair_notice":
@@ -1799,6 +1809,8 @@ func _action_perceived_as(object_id: String, affordance: String) -> String:
 			return "routine queue acceptance"
 		"post_rumor":
 			return "public notice rumor"
+		"vouch_routine":
+			return "public routine vouch"
 		"post_warning":
 			return "public warning notice"
 		"post_repair_notice":
@@ -1839,6 +1851,7 @@ func _record_mutation_affordances() -> Array[String]:
 		"leave_queue",
 		"refuse_contact",
 		"post_rumor",
+		"vouch_routine",
 		"post_warning",
 		"post_repair_notice",
 		"place_note",
@@ -1927,6 +1940,8 @@ func _civic_economy_delta(event_kind: String) -> Dictionary:
 			return {"localTrust": -8, "recordBurden": 5}
 		"public_rumor_posted":
 			return {"recordBurden": 5}
+		"public_routine_vouched":
+			return {"localTrust": 1}
 		"public_warning_posted":
 			return {"localTrust": -1, "recordBurden": 3}
 		"public_repair_noted":
@@ -2074,6 +2089,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"queue_repair_accepted": "줄 수습",
 		"queue_left": "대기 이탈",
 		"queue_contact_refused": "접촉 거부",
+		"public_routine_vouched": "공개 확인",
 		"public_repair_noted": "공개 수습",
 		"public_warning_posted": "공개 경고",
 		"queue_delay_noted": "대기줄 불평",
@@ -2093,6 +2109,7 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"queue_repair_accepted": "queue repair accepted",
 		"queue_left": "queue left",
 		"queue_contact_refused": "contact refused",
+		"public_routine_vouched": "public routine vouched",
 		"public_repair_noted": "public repair noted",
 		"public_warning_posted": "public warning posted",
 		"queue_delay_noted": "queue delay noted",
@@ -2136,6 +2153,7 @@ func _affordance_label(affordance: String) -> String:
 		"pause_service": "응대 중단",
 		"complain_delay": "대기 불평",
 		"post_rumor": "공개 게시",
+		"vouch_routine": "일상 확인",
 		"post_warning": "공개 경고",
 		"post_repair_notice": "수습 게시",
 		"place_note": "메모 배치",
@@ -2154,6 +2172,7 @@ func _affordance_label(affordance: String) -> String:
 		"pause_service": "pause service",
 		"complain_delay": "complain delay",
 		"post_rumor": "post public rumor",
+		"vouch_routine": "vouch routine",
 		"post_warning": "post public warning",
 		"post_repair_notice": "post repair notice",
 		"place_note": "place note",
@@ -2214,6 +2233,7 @@ func _record_state_value(state: String) -> String:
 		"attention": "주목 상승",
 		"trust_low": "신뢰 하락",
 		"clear": "비어 있음",
+		"vouched": "일상 확인",
 		"warned": "경고 게시",
 		"rumored": "소문 게시",
 		"unknown": "미확인"
@@ -2242,6 +2262,7 @@ func _record_state_value(state: String) -> String:
 		"attention": "attention rising",
 		"trust_low": "trust low",
 		"clear": "clear",
+		"vouched": "routine vouched",
 		"warned": "warning posted",
 		"rumored": "rumor posted",
 		"unknown": "unknown"
@@ -2257,7 +2278,7 @@ func _world_record_prop_material(object_id: String, state: String) -> StandardMa
 	material.roughness = 0.82
 	if color.a < 1.0:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	if ["pending", "forwarded", "cited", "attention", "rumored", "warned", "settled", "paused"].has(state):
+	if ["pending", "forwarded", "cited", "attention", "rumored", "vouched", "warned", "settled", "paused"].has(state):
 		material.emission_enabled = true
 		material.emission = Color(color.r, color.g, color.b, 1.0)
 		material.emission_energy_multiplier = 0.35
@@ -2269,7 +2290,7 @@ func _world_record_prop_color(object_id: String, state: String) -> Color:
 			return Color(0.34, 0.76, 0.82, 0.94)
 		"marked", "offered", "delayed", "warned", "burden", "trust_low":
 			return Color(1.0, 0.68, 0.28, 0.94)
-		"attached", "corrected", "settled":
+		"attached", "corrected", "settled", "vouched":
 			return Color(0.42, 0.86, 0.58, 0.96)
 		"pending", "rumored", "paused":
 			return Color(1.0, 0.52, 0.24, 0.96)
@@ -2623,6 +2644,27 @@ func _accept_routine_after_receipt(receipt_event_id: String) -> void:
 	)
 	if bool(result.get("ok", false)):
 		_set_actor_line("NPC_Waiting_Customer", "정상 영수증이면 줄은 그대로 가면 되겠네요.")
+		var event: Dictionary = result.get("event", {})
+		_vouch_routine_after_acceptance(str(event.get("eventId", "")))
+
+func _vouch_routine_after_acceptance(routine_event_id: String) -> void:
+	if routine_event_id.is_empty():
+		return
+	if str(record_objects.get("park_notice_board", "")) != "clear":
+		return
+	var result := _apply_role_agent_action(
+		"clean.park_witness.vouch_routine",
+		"NPC_Park_Witness",
+		"park_witness",
+		"vouch_routine",
+		"park_notice_board",
+		"park_public_routine_vouch",
+		"The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow.",
+		routine_event_id,
+		[routine_event_id]
+	)
+	if bool(result.get("ok", false)):
+		_set_actor_line("NPC_Park_Witness", "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요.")
 
 func _terminal_outcome_title() -> String:
 	if session_outcome == "soft_report":
@@ -2638,7 +2680,7 @@ func _terminal_outcome_body() -> String:
 		return "결과: cover_held\n사슬: 기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 공개 수습 게시 -> 상점 안에서 수습\n사회 반응: 대기 손님이 정정표를 보고 줄을 계속 진행해도 된다고 받아들였고, 공원 목격자는 정정 기록을 보고 소문으로 돌릴 일이 아니라고 남겼습니다.\n역할 행동: 상점 점원이 정정표를 붙이고, 대기 손님이 수습 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 같은 정정 기록을 공개 수습 게시로 바꿨습니다.\n수습: 기억 공백은 남았지만 다음 발화가 점원의 전제 안으로 돌아왔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 	if route_outcome == "cover_held_under_suspicion":
 		return "결과: cover_held\n사슬: 이상 발화 -> 영수증 표시 -> 대기줄 경계 -> 공개 경고 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 표시된 영수증을 보고 줄을 조금 늦췄고, 공원 목격자는 그 경계 기록을 보고 정식 보고 대신 공개 경고를 남겼습니다.\n역할 행동: 대기 손님이 상점 기록을 읽고 경계 메모를 남겨 대기 표식을 지연 상태로 바꿨으며, 공원 목격자가 그 경계 기록을 공개 경고로 바꿨습니다.\n수습: 답변은 상점 안에서 닫혔지만 지역 신뢰가 낮아지고 기록 부담이 조금 남았습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
-	return "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰습니다.\n상점 대화가 지역 루틴 안에서 닫혔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
+	return "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공개 확인 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공개 확인을 남겼습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 조금 더 올라갔습니다.\n마지막 why-line: %s\nR 다시 시작 / Q 종료" % last_why_line
 
 func _now_ms() -> int:
 	return int(Time.get_unix_time_from_system() * 1000.0)

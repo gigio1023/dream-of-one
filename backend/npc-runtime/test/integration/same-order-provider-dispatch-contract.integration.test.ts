@@ -22,7 +22,7 @@ test("Same Order provider dispatch contract builds backend decision packets for 
   assert.equal(report.verdict, "DISPATCH_PACKET_CONTRACT_PASS_LIVE_HTTP_REQUIRED");
   assert.equal(report.liveHttpDispatchVerified, false);
   assert.equal(report.endpoint, "/v1/npc/decision");
-  assert.equal(report.jobCount, 22);
+  assert.equal(report.jobCount, 23);
   assert.equal(report.packetProofs.every(proof => proof.schemaPass && proof.boundedBehaviorPass), true);
   assert.equal(report.packetProofs.every(proof => proof.packet.organizationContext.authorityBoundary === "provider_writes_wording_only_runtime_locks_action"), true);
 

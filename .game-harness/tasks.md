@@ -60,6 +60,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Add the smallest routine-side NPC reaction: Waiting Customer reads the
   normal receipt, uses `accept_routine`, settles the queue mark, adds
   `queue_routine_kept`, and gives the safe route a visible social response.
+- [x] Add the next smallest routine-side public reaction: Park Witness reads the
+  routine queue record, uses `vouch_routine`, posts a public routine vouch, and
+  lets clean social trust travel beyond the queue.
 - [x] Add the smallest report-side environment reaction: Store Manager reads
   the pending Store note, uses `pause_service`, changes the counter to
   `paused`, adds `service_paused`, and makes a soft report visibly interrupt

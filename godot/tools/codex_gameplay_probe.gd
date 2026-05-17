@@ -336,10 +336,16 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("clean_cover expected normal receipt")
 			if str(record_objects.get("store_queue_mark", "")) != "settled":
 				failures.append("clean_cover expected queue mark to settle through routine acceptance")
+			if str(record_objects.get("park_notice_board", "")) != "vouched":
+				failures.append("clean_cover expected public routine vouch")
 			if not _action_exists(summary, "store_clerk", "create_receipt"):
 				failures.append("clean_cover expected Store Clerk receipt creation")
 			if not _action_exists(summary, "waiting_customer", "accept_routine"):
 				failures.append("clean_cover expected Waiting Customer routine acceptance")
+			if not _action_exists(summary, "park_witness", "vouch_routine"):
+				failures.append("clean_cover expected Park Witness routine vouch")
+			if not _observation_exists(summary, "park_witness", "waiting_customer", "accept_routine", "vouch_routine"):
+				failures.append("clean_cover expected Park Witness to read routine queue record")
 		"repair_recovered":
 			if int(summary.get("reportWeight", 0)) > 49:
 				failures.append("repair_recovered must stay below report threshold")

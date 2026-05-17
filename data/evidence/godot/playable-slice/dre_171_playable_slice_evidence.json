@@ -1,18 +1,18 @@
 {
   "adapter": "godot",
-  "createdAtMs": 1779044810955,
+  "createdAtMs": 1779045688663,
   "events": [
     {
       "adapter": "godot",
       "eventFamily": "session",
-      "eventId": "playable_session_started-001-1779044810721",
+      "eventId": "playable_session_started-001-1779045688425",
       "eventName": "playable_session_started",
       "prologueStep": "beginning",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "sessionOutcome": "running",
       "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-      "timestampMs": 1779044810721,
+      "timestampMs": 1779045688425,
       "uiSummaryArgs": {},
       "uiSummaryKey": "event.session_started",
       "worldId": "dre_171_godot_shell",
@@ -25,7 +25,7 @@
       "conversationId": "conv-same-order",
       "conversationStage": "normal",
       "eventFamily": "domain",
-      "eventId": "conversation_started-002-1779044810820",
+      "eventId": "conversation_started-002-1779045688527",
       "eventName": "conversation_started",
       "outcome": "running",
       "promptId": "store.same_order.routine",
@@ -34,7 +34,7 @@
       "socialLoopStage": "normal",
       "speakerId": "NPC_Store_Clerk",
       "summary": "Store Clerk opened the Same Order conversation.",
-      "timestampMs": 1779044810820,
+      "timestampMs": 1779045688527,
       "turnId": "turn-1",
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
@@ -47,7 +47,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "dialogue_choice_selected-003-1779044810856",
+      "eventId": "dialogue_choice_selected-003-1779045688564",
       "eventName": "dialogue_choice_selected",
       "inputMode": "choice",
       "outcome": "running",
@@ -69,7 +69,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044810856,
+      "timestampMs": 1779045688564,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -84,7 +84,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-004-1779044810856",
+      "eventId": "conversation_anomaly_detected-004-1779045688564",
       "eventName": "conversation_anomaly_detected",
       "inputMode": "choice",
       "outcome": "running",
@@ -106,7 +106,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044810856,
+      "timestampMs": 1779045688564,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -121,7 +121,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-005-1779044810856",
+      "eventId": "npc_suspicion_changed-005-1779045688564",
       "eventName": "npc_suspicion_changed",
       "inputMode": "choice",
       "outcome": "running",
@@ -143,7 +143,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044810856,
+      "timestampMs": 1779045688564,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -158,7 +158,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "응답 지연 12000ms",
       "eventFamily": "domain",
-      "eventId": "response_hesitation_noted-006-1779044810890",
+      "eventId": "response_hesitation_noted-006-1779045688599",
       "eventName": "response_hesitation_noted",
       "inputMode": "response_hesitation",
       "outcome": "running",
@@ -181,7 +181,7 @@
       "suspicionSignals": [
         "response_hesitation"
       ],
-      "timestampMs": 1779044810890,
+      "timestampMs": 1779045688599,
       "turnId": "turn-2",
       "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
       "whyLineKey": "response_hesitation",
@@ -196,7 +196,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "free_input_submitted-007-1779044810918",
+      "eventId": "free_input_submitted-007-1779045688627",
       "eventName": "free_input_submitted",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -221,7 +221,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044810918,
+      "timestampMs": 1779045688627,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -236,7 +236,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-008-1779044810918",
+      "eventId": "conversation_anomaly_detected-008-1779045688627",
       "eventName": "conversation_anomaly_detected",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -261,7 +261,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044810918,
+      "timestampMs": 1779045688627,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -276,7 +276,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-009-1779044810918",
+      "eventId": "npc_suspicion_changed-009-1779045688627",
       "eventName": "npc_suspicion_changed",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -301,7 +301,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044810918,
+      "timestampMs": 1779045688627,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -316,7 +316,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "suspicion_shared-010-1779044810918",
+      "eventId": "suspicion_shared-010-1779045688627",
       "eventName": "suspicion_shared",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -341,7 +341,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044810918,
+      "timestampMs": 1779045688627,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -356,7 +356,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_report_created-011-1779044810918",
+      "eventId": "station_report_created-011-1779045688628",
       "eventName": "station_report_created",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -381,7 +381,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044810918,
+      "timestampMs": 1779045688628,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -396,7 +396,7 @@
       "conversationStage": "inquest",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_inquest_opened-012-1779044810919",
+      "eventId": "station_inquest_opened-012-1779045688628",
       "eventName": "station_inquest_opened",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -421,7 +421,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779044810919,
+      "timestampMs": 1779045688628,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -432,12 +432,12 @@
       "adapter": "godot",
       "artifactPath": "data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json",
       "eventFamily": "evidence_export",
-      "eventId": "evidence_pack_created-013-1779044810955",
+      "eventId": "evidence_pack_created-013-1779045688663",
       "eventName": "evidence_pack_created",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "summary": "Godot conversation playable Evidence Pack exported for backend validation.",
-      "timestampMs": 1779044810955,
+      "timestampMs": 1779045688663,
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
     }
@@ -1317,6 +1317,50 @@
             ]
           },
           {
+            "actionId": "park_notice_board.vouch_routine",
+            "affordance": "vouch_routine",
+            "citableLedgerEventIds": [
+              "civic-ledger-2"
+            ],
+            "civicEconomyEffects": [
+              "localTrust:+1"
+            ],
+            "eligibleRoles": [
+              "park_witness"
+            ],
+            "failureReasons": [
+              "object_not_perceived",
+              "affordance_unavailable",
+              "role_authority_exceeded",
+              "why_line_required",
+              "ledger_event_unknown",
+              "ledger_event_not_known"
+            ],
+            "ledgerEventKind": "public_routine_vouched",
+            "objectId": "park_notice_board",
+            "objectState": "clear",
+            "perceivedAs": "public routine vouch",
+            "playerLabel": "Vouch Routine",
+            "preconditions": [
+              "object_state:clear",
+              "role_allowed:park_witness",
+              "known_ledger_event_required",
+              "record_id:park_public_rumor"
+            ],
+            "priorityHints": [
+              "economy:localTrust",
+              "pressure:routine_vouched_publicly"
+            ],
+            "recordId": "park_public_rumor",
+            "requiresLedgerEvent": true,
+            "requiresStoreLedgerEvent": false,
+            "toState": "vouched",
+            "validationRuleId": "same_order.park_notice_board.vouch_routine",
+            "visibleTo": [
+              "park_witness"
+            ]
+          },
+          {
             "actionId": "park_notice_board.post_warning",
             "affordance": "post_warning",
             "citableLedgerEventIds": [
@@ -2095,7 +2139,7 @@
         "sessionOutcome": "cover_held",
         "playerLineKind": "clean_cover_line",
         "playerLine": "네, 같은 걸로 주세요.",
-        "socialReactionSummary": "The clerk closes a normal receipt, and a waiting customer accepts the routine so the queue stays calm.",
+        "socialReactionSummary": "The clerk closes a normal receipt, a waiting customer accepts the routine, and a Park witness publicly vouches that the player stayed in the local flow.",
         "actionTrace": [
           {
             "stepId": "clean.clerk.cite_usual_order",
@@ -2171,17 +2215,41 @@
               "stationAttention": 0
             },
             "whyLine": "A waiting customer sees the normal receipt and keeps the line moving instead of creating pressure."
+          },
+          {
+            "stepId": "clean.park_witness.vouch_routine",
+            "actorId": "NPC_Park_Witness",
+            "actorRole": "park_witness",
+            "perceivedObjectIds": [
+              "park_notice_board"
+            ],
+            "affordance": "vouch_routine",
+            "objectId": "park_notice_board",
+            "accepted": true,
+            "ledgerEventId": "civic-ledger-4",
+            "ledgerEventKind": "public_routine_vouched",
+            "recordId": "park_public_routine_vouch",
+            "citedLedgerEventId": "civic-ledger-3",
+            "economyAfter": {
+              "accountCredit": 2,
+              "localTrust": 58,
+              "recordBurden": 0,
+              "stationAttention": 0
+            },
+            "whyLine": "The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow."
           }
         ],
         "ledgerEventKinds": [
           "usual_order_cited",
           "store_sale_normal",
-          "queue_routine_kept"
+          "queue_routine_kept",
+          "public_routine_vouched"
         ],
         "ledgerAffordances": [
           "cite_expected_order",
           "create_receipt",
-          "accept_routine"
+          "accept_routine",
+          "vouch_routine"
         ],
         "socialObservationTrace": [
           {
@@ -2199,6 +2267,22 @@
             "resultingStepId": "clean.waiting_customer.accept_routine",
             "resultingAffordance": "accept_routine",
             "whyLine": "waiting_customer uses store_clerk's create_receipt record before choosing accept_routine."
+          },
+          {
+            "observerActorId": "NPC_Park_Witness",
+            "observerRole": "park_witness",
+            "observedLedgerEventId": "civic-ledger-3",
+            "observedActorRole": "waiting_customer",
+            "observedAffordance": "accept_routine",
+            "observedObjectId": "store_queue_mark",
+            "economyPressure": {
+              "localTrust": 57,
+              "recordBurden": 0,
+              "stationAttention": 0
+            },
+            "resultingStepId": "clean.park_witness.vouch_routine",
+            "resultingAffordance": "vouch_routine",
+            "whyLine": "park_witness uses waiting_customer's accept_routine record before choosing vouch_routine."
           }
         ],
         "finalObjectStates": {
@@ -2208,13 +2292,13 @@
           "receipt_tray": "normal",
           "correction_slip": "absent",
           "report_tray": "empty",
-          "park_notice_board": "clear",
+          "park_notice_board": "vouched",
           "station_dossier": "absent",
           "civic_ledger": "append_only"
         },
         "economyAfter": {
           "accountCredit": 2,
-          "localTrust": 57,
+          "localTrust": 58,
           "recordBurden": 0,
           "stationAttention": 0
         }
@@ -3165,19 +3249,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779044809772",
+            "eventId": "playable_session_started-001-1779045687176",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779044809906",
+            "eventId": "conversation_started-002-1779045687312",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-003-1779044809943",
+            "eventId": "dialogue_choice_selected-003-1779045687349",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3188,7 +3272,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-004-1779044809978",
+            "eventId": "dialogue_choice_selected-004-1779045687383",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3199,7 +3283,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_outcome_reached-005-1779044809978",
+            "eventId": "conversation_outcome_reached-005-1779045687383",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "clean_cover",
@@ -3208,7 +3292,7 @@
         ],
         "inputPath": "focus StoreCounterZone -> E -> 1 safe routine -> 1 safe probe",
         "lastWhyLine": "이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.",
-        "outcomeBody": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰습니다.\n상점 대화가 지역 루틴 안에서 닫혔습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+        "outcomeBody": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공개 확인 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공개 확인을 남겼습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 조금 더 올라갔습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
         "reportWeight": 0,
         "routeId": "clean_cover",
         "routeOutcome": "clean_cover",
@@ -3235,19 +3319,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779044810037",
+            "eventId": "playable_session_started-001-1779045687448",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779044810134",
+            "eventId": "conversation_started-002-1779045687549",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779044810171",
+            "eventId": "dialogue_choice_selected-003-1779045687585",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3260,7 +3344,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779044810171",
+            "eventId": "conversation_anomaly_detected-004-1779045687585",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3273,7 +3357,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779044810171",
+            "eventId": "npc_suspicion_changed-005-1779045687585",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3286,7 +3370,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-006-1779044810205",
+            "eventId": "dialogue_choice_selected-006-1779045687622",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3297,7 +3381,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_outcome_reached-007-1779044810205",
+            "eventId": "conversation_outcome_reached-007-1779045687622",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "repair_recovered",
@@ -3339,19 +3423,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779044810493",
+            "eventId": "playable_session_started-001-1779045687960",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779044810589",
+            "eventId": "conversation_started-002-1779045688283",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779044810625",
+            "eventId": "dialogue_choice_selected-003-1779045688320",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3364,7 +3448,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779044810625",
+            "eventId": "conversation_anomaly_detected-004-1779045688320",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3377,7 +3461,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779044810625",
+            "eventId": "npc_suspicion_changed-005-1779045688320",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3390,7 +3474,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "dialogue_choice_selected-006-1779044810659",
+            "eventId": "dialogue_choice_selected-006-1779045688355",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3404,7 +3488,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-007-1779044810659",
+            "eventId": "conversation_anomaly_detected-007-1779045688355",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3418,7 +3502,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-008-1779044810659",
+            "eventId": "npc_suspicion_changed-008-1779045688355",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3432,7 +3516,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-009-1779044810659",
+            "eventId": "suspicion_shared-009-1779045688355",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3446,7 +3530,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-010-1779044810660",
+            "eventId": "station_report_created-010-1779045688356",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 80,
@@ -3460,7 +3544,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_outcome_reached-011-1779044810660",
+            "eventId": "conversation_outcome_reached-011-1779045688356",
             "eventName": "conversation_outcome_reached",
             "outcome": "soft_report",
             "routeOutcome": "soft_report",
@@ -3505,19 +3589,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779044810721",
+            "eventId": "playable_session_started-001-1779045688425",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779044810820",
+            "eventId": "conversation_started-002-1779045688527",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779044810856",
+            "eventId": "dialogue_choice_selected-003-1779045688564",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3530,7 +3614,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779044810856",
+            "eventId": "conversation_anomaly_detected-004-1779045688564",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3543,7 +3627,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779044810856",
+            "eventId": "npc_suspicion_changed-005-1779045688564",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3556,7 +3640,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "response_hesitation_noted-006-1779044810890",
+            "eventId": "response_hesitation_noted-006-1779045688599",
             "eventName": "response_hesitation_noted",
             "outcome": "running",
             "reportWeightAfter": 35,
@@ -3569,7 +3653,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "free_input_submitted-007-1779044810918",
+            "eventId": "free_input_submitted-007-1779045688627",
             "eventName": "free_input_submitted",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3583,7 +3667,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-008-1779044810918",
+            "eventId": "conversation_anomaly_detected-008-1779045688627",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3597,7 +3681,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-009-1779044810918",
+            "eventId": "npc_suspicion_changed-009-1779045688627",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3611,7 +3695,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-010-1779044810918",
+            "eventId": "suspicion_shared-010-1779045688627",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -3625,7 +3709,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-011-1779044810918",
+            "eventId": "station_report_created-011-1779045688628",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 120,
@@ -3639,7 +3723,7 @@
           },
           {
             "conversationStage": "inquest",
-            "eventId": "station_inquest_opened-012-1779044810919",
+            "eventId": "station_inquest_opened-012-1779045688628",
             "eventName": "station_inquest_opened",
             "outcome": "inquest_opened",
             "reportWeightAfter": 120,
@@ -4824,17 +4908,185 @@
               "whyLine": "A waiting customer sees the normal receipt and keeps the line moving instead of creating pressure.",
               "selectionReason": "waiting_customer chooses accept_routine because accept the normal receipt and keep the queue moving.",
               "providerLine": "정상 영수증이면 줄은 그대로 가면 되겠네요."
+            },
+            {
+              "stepId": "clean.park_witness.vouch_routine",
+              "actorId": "NPC_Park_Witness",
+              "actorRole": "park_witness",
+              "perceivedObjectIds": [
+                "park_notice_board"
+              ],
+              "availableActions": [
+                {
+                  "actionId": "park_notice_board.post_rumor",
+                  "affordance": "post_rumor",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Rumor",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public notice rumor",
+                  "priorityHints": [
+                    "economy:recordBurden",
+                    "pressure:public_talk"
+                  ],
+                  "ledgerEventKind": "public_rumor_posted",
+                  "civicEconomyEffects": [
+                    "recordBurden:+5"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_rumor",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "rumored",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.vouch_routine",
+                  "affordance": "vouch_routine",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Vouch Routine",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public routine vouch",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "pressure:routine_vouched_publicly"
+                  ],
+                  "ledgerEventKind": "public_routine_vouched",
+                  "civicEconomyEffects": [
+                    "localTrust:+1"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.vouch_routine",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "vouched",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.post_warning",
+                  "affordance": "post_warning",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Warning",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public warning notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:public_warning"
+                  ],
+                  "ledgerEventKind": "public_warning_posted",
+                  "civicEconomyEffects": [
+                    "localTrust:-1",
+                    "recordBurden:+3"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_warning",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "warned",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                }
+              ],
+              "providerProposal": {
+                "affordance": "vouch_routine",
+                "objectId": "park_notice_board",
+                "recordId": "park_public_routine_vouch",
+                "citedLedgerEventId": "civic-ledger-3",
+                "whyLine": "The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow.",
+                "npcLineCandidate": "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요.",
+                "selectionReason": "park_witness chooses vouch_routine because publicly vouch that the player stayed inside the local routine."
+              },
+              "affordance": "vouch_routine",
+              "objectId": "park_notice_board",
+              "accepted": true,
+              "ledgerEventId": "civic-ledger-4",
+              "ledgerEventKind": "public_routine_vouched",
+              "recordId": "park_public_routine_vouch",
+              "citedLedgerEventId": "civic-ledger-3",
+              "economyAfter": {
+                "accountCredit": 2,
+                "localTrust": 58,
+                "recordBurden": 0,
+                "stationAttention": 0
+              },
+              "whyLine": "The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow.",
+              "selectionReason": "park_witness chooses vouch_routine because publicly vouch that the player stayed inside the local routine.",
+              "providerLine": "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요."
             }
           ],
           "ledgerEventKinds": [
             "usual_order_cited",
             "store_sale_normal",
-            "queue_routine_kept"
+            "queue_routine_kept",
+            "public_routine_vouched"
           ],
           "ledgerAffordances": [
             "cite_expected_order",
             "create_receipt",
-            "accept_routine"
+            "accept_routine",
+            "vouch_routine"
           ],
           "finalObjectStates": {
             "store_queue_mark": "settled",
@@ -4843,13 +5095,13 @@
             "receipt_tray": "normal",
             "correction_slip": "absent",
             "report_tray": "empty",
-            "park_notice_board": "clear",
+            "park_notice_board": "vouched",
             "station_dossier": "absent",
             "civic_ledger": "append_only"
           },
           "economyAfter": {
             "accountCredit": 2,
-            "localTrust": 57,
+            "localTrust": 58,
             "recordBurden": 0,
             "stationAttention": 0
           }
@@ -6089,6 +6341,49 @@
                   ]
                 },
                 {
+                  "actionId": "park_notice_board.vouch_routine",
+                  "affordance": "vouch_routine",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Vouch Routine",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public routine vouch",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "pressure:routine_vouched_publicly"
+                  ],
+                  "ledgerEventKind": "public_routine_vouched",
+                  "civicEconomyEffects": [
+                    "localTrust:+1"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.vouch_routine",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "vouched",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                },
+                {
                   "actionId": "park_notice_board.post_warning",
                   "affordance": "post_warning",
                   "objectId": "park_notice_board",
@@ -7195,6 +7490,49 @@
                     "ledger_event_not_known"
                   ],
                   "toState": "rumored",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-2"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.vouch_routine",
+                  "affordance": "vouch_routine",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Vouch Routine",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public routine vouch",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "pressure:routine_vouched_publicly"
+                  ],
+                  "ledgerEventKind": "public_routine_vouched",
+                  "civicEconomyEffects": [
+                    "localTrust:+1"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.vouch_routine",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "vouched",
                   "recordId": "park_public_rumor",
                   "requiresLedgerEvent": true,
                   "requiresStoreLedgerEvent": false,
@@ -9151,6 +9489,49 @@
                   ]
                 },
                 {
+                  "actionId": "park_notice_board.vouch_routine",
+                  "affordance": "vouch_routine",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Vouch Routine",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public routine vouch",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "pressure:routine_vouched_publicly"
+                  ],
+                  "ledgerEventKind": "public_routine_vouched",
+                  "civicEconomyEffects": [
+                    "localTrust:+1"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.vouch_routine",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "vouched",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-2"
+                  ]
+                },
+                {
                   "actionId": "park_notice_board.post_warning",
                   "affordance": "post_warning",
                   "objectId": "park_notice_board",
@@ -9921,7 +10302,7 @@
         "soft_report",
         "inquest_opened"
       ],
-      "jobCount": 22,
+      "jobCount": 23,
       "jobs": [
         {
           "jobId": "clean_cover.clean.clerk.cite_usual_order.provider-action-proposal",
@@ -11022,6 +11403,216 @@
             "validation": "accepted",
             "whyLine": "A waiting customer sees the normal receipt and keeps the line moving instead of creating pressure.",
             "selectionReason": "waiting_customer chooses accept_routine because accept the normal receipt and keep the queue moving."
+          }
+        },
+        {
+          "jobId": "clean_cover.clean.park_witness.vouch_routine.provider-action-proposal",
+          "routeId": "clean_cover",
+          "stepId": "clean.park_witness.vouch_routine",
+          "turnIndex": 3,
+          "actorId": "NPC_Park_Witness",
+          "actorRole": "park_witness",
+          "purpose": "npc_reaction_line",
+          "dispatchPhase": "role_agent_tick",
+          "providerMode": "scheduled-action-proposal",
+          "playerLineKind": "clean_cover_line",
+          "playerLine": "네, 같은 걸로 주세요.",
+          "socialLoopStage": "store_routine",
+          "dramaTone": "routine",
+          "preoccupations": [
+            "public notice",
+            "local talk",
+            "who becomes visible"
+          ],
+          "promptContext": {
+            "scenario": "same_order",
+            "socialReactionSummary": "The provider-shaped proposal path closes a normal receipt and preserves cover.",
+            "perceivedObjectIds": [
+              "park_notice_board"
+            ],
+            "availableActions": [
+              {
+                "actionId": "park_notice_board.post_rumor",
+                "affordance": "post_rumor",
+                "objectId": "park_notice_board",
+                "objectState": "clear",
+                "playerLabel": "Post Rumor",
+                "eligibleRoles": [
+                  "park_witness"
+                ],
+                "preconditions": [
+                  "object_state:clear",
+                  "role_allowed:park_witness",
+                  "known_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "park_witness"
+                ],
+                "perceivedAs": "public notice rumor",
+                "priorityHints": [
+                  "economy:recordBurden",
+                  "pressure:public_talk"
+                ],
+                "ledgerEventKind": "public_rumor_posted",
+                "civicEconomyEffects": [
+                  "recordBurden:+5"
+                ],
+                "validationRuleId": "same_order.park_notice_board.post_rumor",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known"
+                ],
+                "toState": "rumored",
+                "recordId": "park_public_rumor",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-3"
+                ]
+              },
+              {
+                "actionId": "park_notice_board.vouch_routine",
+                "affordance": "vouch_routine",
+                "objectId": "park_notice_board",
+                "objectState": "clear",
+                "playerLabel": "Vouch Routine",
+                "eligibleRoles": [
+                  "park_witness"
+                ],
+                "preconditions": [
+                  "object_state:clear",
+                  "role_allowed:park_witness",
+                  "known_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "park_witness"
+                ],
+                "perceivedAs": "public routine vouch",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "pressure:routine_vouched_publicly"
+                ],
+                "ledgerEventKind": "public_routine_vouched",
+                "civicEconomyEffects": [
+                  "localTrust:+1"
+                ],
+                "validationRuleId": "same_order.park_notice_board.vouch_routine",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known"
+                ],
+                "toState": "vouched",
+                "recordId": "park_public_rumor",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-3"
+                ]
+              },
+              {
+                "actionId": "park_notice_board.post_warning",
+                "affordance": "post_warning",
+                "objectId": "park_notice_board",
+                "objectState": "clear",
+                "playerLabel": "Post Warning",
+                "eligibleRoles": [
+                  "park_witness"
+                ],
+                "preconditions": [
+                  "object_state:clear",
+                  "role_allowed:park_witness",
+                  "known_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "park_witness"
+                ],
+                "perceivedAs": "public warning notice",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "economy:recordBurden",
+                  "pressure:public_warning"
+                ],
+                "ledgerEventKind": "public_warning_posted",
+                "civicEconomyEffects": [
+                  "localTrust:-1",
+                  "recordBurden:+3"
+                ],
+                "validationRuleId": "same_order.park_notice_board.post_warning",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known"
+                ],
+                "toState": "warned",
+                "recordId": "park_public_rumor",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-3"
+                ]
+              }
+            ],
+            "recentLedgerEventKinds": [
+              "usual_order_cited",
+              "store_sale_normal",
+              "queue_routine_kept"
+            ],
+            "recentLedgerAffordances": [
+              "cite_expected_order",
+              "create_receipt",
+              "accept_routine"
+            ]
+          },
+          "allowedProviderFields": [
+            "affordance",
+            "objectId",
+            "recordId",
+            "citedLedgerEventId",
+            "whyLine",
+            "npcLineCandidate",
+            "selectionReason"
+          ],
+          "forbiddenAuthorityFields": [
+            "riskTag",
+            "suspicionDelta",
+            "reportDelta",
+            "exposureDelta",
+            "economyDelta",
+            "ledgerEventKind",
+            "ledgerEventId",
+            "objectState",
+            "verdict",
+            "sessionOutcome",
+            "sessionTermination"
+          ],
+          "fallbackLine": "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요.",
+          "lockedAction": {
+            "affordance": "vouch_routine",
+            "objectId": "park_notice_board",
+            "ledgerEventId": "civic-ledger-4",
+            "ledgerEventKind": "public_routine_vouched",
+            "recordId": "park_public_routine_vouch",
+            "citedLedgerEventId": "civic-ledger-3",
+            "economyAfter": {
+              "accountCredit": 2,
+              "localTrust": 58,
+              "recordBurden": 0,
+              "stationAttention": 0
+            },
+            "validation": "accepted",
+            "whyLine": "The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow.",
+            "selectionReason": "park_witness chooses vouch_routine because publicly vouch that the player stayed inside the local routine."
           }
         },
         {
@@ -12433,6 +13024,49 @@
                 ]
               },
               {
+                "actionId": "park_notice_board.vouch_routine",
+                "affordance": "vouch_routine",
+                "objectId": "park_notice_board",
+                "objectState": "clear",
+                "playerLabel": "Vouch Routine",
+                "eligibleRoles": [
+                  "park_witness"
+                ],
+                "preconditions": [
+                  "object_state:clear",
+                  "role_allowed:park_witness",
+                  "known_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "park_witness"
+                ],
+                "perceivedAs": "public routine vouch",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "pressure:routine_vouched_publicly"
+                ],
+                "ledgerEventKind": "public_routine_vouched",
+                "civicEconomyEffects": [
+                  "localTrust:+1"
+                ],
+                "validationRuleId": "same_order.park_notice_board.vouch_routine",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known"
+                ],
+                "toState": "vouched",
+                "recordId": "park_public_rumor",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-3"
+                ]
+              },
+              {
                 "actionId": "park_notice_board.post_warning",
                 "affordance": "post_warning",
                 "objectId": "park_notice_board",
@@ -13663,6 +14297,49 @@
                   "ledger_event_not_known"
                 ],
                 "toState": "rumored",
+                "recordId": "park_public_rumor",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-2"
+                ]
+              },
+              {
+                "actionId": "park_notice_board.vouch_routine",
+                "affordance": "vouch_routine",
+                "objectId": "park_notice_board",
+                "objectState": "clear",
+                "playerLabel": "Vouch Routine",
+                "eligibleRoles": [
+                  "park_witness"
+                ],
+                "preconditions": [
+                  "object_state:clear",
+                  "role_allowed:park_witness",
+                  "known_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "park_witness"
+                ],
+                "perceivedAs": "public routine vouch",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "pressure:routine_vouched_publicly"
+                ],
+                "ledgerEventKind": "public_routine_vouched",
+                "civicEconomyEffects": [
+                  "localTrust:+1"
+                ],
+                "validationRuleId": "same_order.park_notice_board.vouch_routine",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known"
+                ],
+                "toState": "vouched",
                 "recordId": "park_public_rumor",
                 "requiresLedgerEvent": true,
                 "requiresStoreLedgerEvent": false,
@@ -15884,6 +16561,49 @@
                 ]
               },
               {
+                "actionId": "park_notice_board.vouch_routine",
+                "affordance": "vouch_routine",
+                "objectId": "park_notice_board",
+                "objectState": "clear",
+                "playerLabel": "Vouch Routine",
+                "eligibleRoles": [
+                  "park_witness"
+                ],
+                "preconditions": [
+                  "object_state:clear",
+                  "role_allowed:park_witness",
+                  "known_ledger_event_required"
+                ],
+                "visibleTo": [
+                  "park_witness"
+                ],
+                "perceivedAs": "public routine vouch",
+                "priorityHints": [
+                  "economy:localTrust",
+                  "pressure:routine_vouched_publicly"
+                ],
+                "ledgerEventKind": "public_routine_vouched",
+                "civicEconomyEffects": [
+                  "localTrust:+1"
+                ],
+                "validationRuleId": "same_order.park_notice_board.vouch_routine",
+                "failureReasons": [
+                  "object_not_perceived",
+                  "affordance_unavailable",
+                  "role_authority_exceeded",
+                  "why_line_required",
+                  "ledger_event_unknown",
+                  "ledger_event_not_known"
+                ],
+                "toState": "vouched",
+                "recordId": "park_public_rumor",
+                "requiresLedgerEvent": true,
+                "requiresStoreLedgerEvent": false,
+                "citableLedgerEventIds": [
+                  "civic-ledger-2"
+                ]
+              },
+              {
                 "actionId": "park_notice_board.post_warning",
                 "affordance": "post_warning",
                 "objectId": "park_notice_board",
@@ -16781,7 +17501,7 @@
       "liveHttpDispatchVerified": false,
       "endpoint": "/v1/npc/decision",
       "dispatchHost": "godot-runtime-pending",
-      "jobCount": 22,
+      "jobCount": 23,
       "packetProofs": [
         {
           "jobId": "clean_cover.clean.clerk.cite_usual_order.provider-action-proposal",
@@ -18004,6 +18724,262 @@
           "actionType": "Talk",
           "utterance": "정상 영수증이면 줄은 그대로 가면 되겠네요.",
           "fallbackLine": "정상 영수증이면 줄은 그대로 가면 되겠네요.",
+          "failures": []
+        },
+        {
+          "jobId": "clean_cover.clean.park_witness.vouch_routine.provider-action-proposal",
+          "routeId": "clean_cover",
+          "stepId": "clean.park_witness.vouch_routine",
+          "endpoint": "/v1/npc/decision",
+          "method": "POST",
+          "npcId": "NPC_Park_Witness",
+          "actorRole": "park_witness",
+          "packet": {
+            "sessionId": "same-order-provider-dispatch-clean_cover",
+            "npcId": "NPC_Park_Witness",
+            "landmarkId": "Store",
+            "nearbyActors": [
+              "player",
+              "NPC_Store_Clerk",
+              "NPC_Store_Manager",
+              "NPC_Waiting_Customer"
+            ],
+            "recentEvents": [
+              "usual_order_cited:cite_expected_order",
+              "store_sale_normal:create_receipt",
+              "queue_routine_kept:accept_routine",
+              "store_routine_active"
+            ],
+            "organizationContext": {
+              "scenario": "same_order",
+              "routeId": "clean_cover",
+              "stepId": "clean.park_witness.vouch_routine",
+              "jobId": "clean_cover.clean.park_witness.vouch_routine.provider-action-proposal",
+              "actorRole": "park_witness",
+              "purpose": "npc_reaction_line",
+              "dispatchPhase": "role_agent_tick",
+              "providerMode": "scheduled-action-proposal",
+              "socialLoopStage": "store_routine",
+              "dramaTone": "routine",
+              "preoccupations": [
+                "public notice",
+                "local talk",
+                "who becomes visible"
+              ],
+              "perceivedObjectIds": [
+                "park_notice_board"
+              ],
+              "availableActions": [
+                {
+                  "actionId": "park_notice_board.post_rumor",
+                  "affordance": "post_rumor",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Rumor",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public notice rumor",
+                  "priorityHints": [
+                    "economy:recordBurden",
+                    "pressure:public_talk"
+                  ],
+                  "ledgerEventKind": "public_rumor_posted",
+                  "civicEconomyEffects": [
+                    "recordBurden:+5"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_rumor",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "rumored",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.vouch_routine",
+                  "affordance": "vouch_routine",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Vouch Routine",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public routine vouch",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "pressure:routine_vouched_publicly"
+                  ],
+                  "ledgerEventKind": "public_routine_vouched",
+                  "civicEconomyEffects": [
+                    "localTrust:+1"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.vouch_routine",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "vouched",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.post_warning",
+                  "affordance": "post_warning",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Post Warning",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public warning notice",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "economy:recordBurden",
+                    "pressure:public_warning"
+                  ],
+                  "ledgerEventKind": "public_warning_posted",
+                  "civicEconomyEffects": [
+                    "localTrust:-1",
+                    "recordBurden:+3"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.post_warning",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "warned",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                }
+              ],
+              "recentLedgerEventKinds": [
+                "usual_order_cited",
+                "store_sale_normal",
+                "queue_routine_kept"
+              ],
+              "recentLedgerAffordances": [
+                "cite_expected_order",
+                "create_receipt",
+                "accept_routine"
+              ],
+              "allowedProviderFields": [
+                "affordance",
+                "objectId",
+                "recordId",
+                "citedLedgerEventId",
+                "whyLine",
+                "npcLineCandidate",
+                "selectionReason"
+              ],
+              "forbiddenAuthorityFields": [
+                "riskTag",
+                "suspicionDelta",
+                "reportDelta",
+                "exposureDelta",
+                "economyDelta",
+                "ledgerEventKind",
+                "ledgerEventId",
+                "objectState",
+                "verdict",
+                "sessionOutcome",
+                "sessionTermination"
+              ],
+              "fallbackLine": "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요.",
+              "lockedAction": {
+                "affordance": "vouch_routine",
+                "objectId": "park_notice_board",
+                "ledgerEventId": "civic-ledger-4",
+                "ledgerEventKind": "public_routine_vouched",
+                "recordId": "park_public_routine_vouch",
+                "citedLedgerEventId": "civic-ledger-3",
+                "economyAfter": {
+                  "accountCredit": 2,
+                  "localTrust": 58,
+                  "recordBurden": 0,
+                  "stationAttention": 0
+                },
+                "validation": "accepted",
+                "whyLine": "The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow.",
+                "selectionReason": "park_witness chooses vouch_routine because publicly vouch that the player stayed inside the local routine."
+              },
+              "authorityBoundary": "provider_writes_wording_only_runtime_locks_action"
+            },
+            "playerSignals": {
+              "speechAct": "SA_COMPLY",
+              "playerLineKind": "clean_cover_line",
+              "providerDispatchContract": true
+            },
+            "conversation": {
+              "conversationId": "same-order-provider-clean_cover",
+              "turnId": "provider-clean_cover-4",
+              "promptId": "clean.park_witness.vouch_routine",
+              "choiceSetId": "clean.park_witness.vouch_routine.provider-options",
+              "speakerId": "player",
+              "selectedChoiceId": "clean_cover_line",
+              "displayedPlayerLine": "네, 같은 걸로 주세요.",
+              "priorTurnIds": [
+                "provider-clean_cover-1",
+                "provider-clean_cover-2",
+                "provider-clean_cover-3"
+              ]
+            }
+          },
+          "schemaPass": true,
+          "boundedBehaviorPass": true,
+          "socialLoopStage": "ambient",
+          "actionType": "Talk",
+          "utterance": "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요.",
+          "fallbackLine": "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요.",
           "failures": []
         },
         {
@@ -19601,6 +20577,49 @@
                   ]
                 },
                 {
+                  "actionId": "park_notice_board.vouch_routine",
+                  "affordance": "vouch_routine",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Vouch Routine",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public routine vouch",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "pressure:routine_vouched_publicly"
+                  ],
+                  "ledgerEventKind": "public_routine_vouched",
+                  "civicEconomyEffects": [
+                    "localTrust:+1"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.vouch_routine",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "vouched",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-3"
+                  ]
+                },
+                {
                   "actionId": "park_notice_board.post_warning",
                   "affordance": "post_warning",
                   "objectId": "park_notice_board",
@@ -21000,6 +22019,49 @@
                     "ledger_event_not_known"
                   ],
                   "toState": "rumored",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-2"
+                  ]
+                },
+                {
+                  "actionId": "park_notice_board.vouch_routine",
+                  "affordance": "vouch_routine",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Vouch Routine",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public routine vouch",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "pressure:routine_vouched_publicly"
+                  ],
+                  "ledgerEventKind": "public_routine_vouched",
+                  "civicEconomyEffects": [
+                    "localTrust:+1"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.vouch_routine",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "vouched",
                   "recordId": "park_public_rumor",
                   "requiresLedgerEvent": true,
                   "requiresStoreLedgerEvent": false,
@@ -23536,6 +24598,49 @@
                   ]
                 },
                 {
+                  "actionId": "park_notice_board.vouch_routine",
+                  "affordance": "vouch_routine",
+                  "objectId": "park_notice_board",
+                  "objectState": "clear",
+                  "playerLabel": "Vouch Routine",
+                  "eligibleRoles": [
+                    "park_witness"
+                  ],
+                  "preconditions": [
+                    "object_state:clear",
+                    "role_allowed:park_witness",
+                    "known_ledger_event_required"
+                  ],
+                  "visibleTo": [
+                    "park_witness"
+                  ],
+                  "perceivedAs": "public routine vouch",
+                  "priorityHints": [
+                    "economy:localTrust",
+                    "pressure:routine_vouched_publicly"
+                  ],
+                  "ledgerEventKind": "public_routine_vouched",
+                  "civicEconomyEffects": [
+                    "localTrust:+1"
+                  ],
+                  "validationRuleId": "same_order.park_notice_board.vouch_routine",
+                  "failureReasons": [
+                    "object_not_perceived",
+                    "affordance_unavailable",
+                    "role_authority_exceeded",
+                    "why_line_required",
+                    "ledger_event_unknown",
+                    "ledger_event_not_known"
+                  ],
+                  "toState": "vouched",
+                  "recordId": "park_public_rumor",
+                  "requiresLedgerEvent": true,
+                  "requiresStoreLedgerEvent": false,
+                  "citableLedgerEventIds": [
+                    "civic-ledger-2"
+                  ]
+                },
+                {
                   "actionId": "park_notice_board.post_warning",
                   "affordance": "post_warning",
                   "objectId": "park_notice_board",
@@ -24632,6 +25737,7 @@
             "clean.clerk.cite_usual_order",
             "clean.clerk.create_receipt",
             "clean.waiting_customer.accept_routine",
+            "clean.park_witness.vouch_routine",
             "repair.clerk.mark_receipt",
             "soft.clerk.mark_receipt",
             "inquest.clerk.mark_receipt"
@@ -24640,6 +25746,7 @@
             "clean_cover.clean.clerk.cite_usual_order.provider-action-proposal",
             "clean_cover.clean.clerk.create_receipt.provider-action-proposal",
             "clean_cover.clean.waiting_customer.accept_routine.provider-action-proposal",
+            "clean_cover.clean.park_witness.vouch_routine.provider-action-proposal",
             "repair_recovered.repair.clerk.mark_receipt.provider-action-proposal",
             "soft_report.soft.clerk.mark_receipt.provider-action-proposal",
             "inquest_opened.inquest.clerk.mark_receipt.provider-action-proposal"
@@ -24648,12 +25755,14 @@
             "usual_order_cited",
             "store_sale_normal",
             "queue_routine_kept",
+            "public_routine_vouched",
             "store_receipt_marked"
           ],
           "affordances": [
             "cite_expected_order",
             "create_receipt",
             "accept_routine",
+            "vouch_routine",
             "mark_receipt"
           ],
           "evidenceEvents": [
@@ -26438,6 +27547,50 @@
             ]
           },
           {
+            "actionId": "park_notice_board.vouch_routine",
+            "affordance": "vouch_routine",
+            "citableLedgerEventIds": [
+              "civic-ledger-2"
+            ],
+            "civicEconomyEffects": [
+              "localTrust:+1"
+            ],
+            "eligibleRoles": [
+              "park_witness"
+            ],
+            "failureReasons": [
+              "object_not_perceived",
+              "affordance_unavailable",
+              "role_authority_exceeded",
+              "why_line_required",
+              "ledger_event_unknown",
+              "ledger_event_not_known"
+            ],
+            "ledgerEventKind": "public_routine_vouched",
+            "objectId": "park_notice_board",
+            "objectState": "clear",
+            "perceivedAs": "public routine vouch",
+            "playerLabel": "Vouch Routine",
+            "preconditions": [
+              "object_state:clear",
+              "role_allowed:park_witness",
+              "known_ledger_event_required",
+              "record_id:park_public_rumor"
+            ],
+            "priorityHints": [
+              "economy:localTrust",
+              "pressure:routine_vouched_publicly"
+            ],
+            "recordId": "park_public_rumor",
+            "requiresLedgerEvent": true,
+            "requiresStoreLedgerEvent": false,
+            "toState": "vouched",
+            "validationRuleId": "same_order.park_notice_board.vouch_routine",
+            "visibleTo": [
+              "park_witness"
+            ]
+          },
+          {
             "actionId": "park_notice_board.post_warning",
             "affordance": "post_warning",
             "citableLedgerEventIds": [
@@ -27385,14 +28538,14 @@
       {
         "adapter": "godot",
         "eventFamily": "session",
-        "eventId": "playable_session_started-001-1779044810721",
+        "eventId": "playable_session_started-001-1779045688425",
         "eventName": "playable_session_started",
         "prologueStep": "beginning",
         "schemaVersion": "godot-runtime-v1",
         "sessionId": "dre-171-playable-session",
         "sessionOutcome": "running",
         "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-        "timestampMs": 1779044810721,
+        "timestampMs": 1779045688425,
         "uiSummaryArgs": {},
         "uiSummaryKey": "event.session_started",
         "worldId": "dre_171_godot_shell",
@@ -27405,7 +28558,7 @@
         "conversationId": "conv-same-order",
         "conversationStage": "normal",
         "eventFamily": "domain",
-        "eventId": "conversation_started-002-1779044810820",
+        "eventId": "conversation_started-002-1779045688527",
         "eventName": "conversation_started",
         "outcome": "running",
         "promptId": "store.same_order.routine",
@@ -27414,7 +28567,7 @@
         "socialLoopStage": "normal",
         "speakerId": "NPC_Store_Clerk",
         "summary": "Store Clerk opened the Same Order conversation.",
-        "timestampMs": 1779044810820,
+        "timestampMs": 1779045688527,
         "turnId": "turn-1",
         "worldId": "dre_171_godot_shell",
         "worldRevision": "rev-social-stealth-v1"
@@ -27427,7 +28580,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "dialogue_choice_selected-003-1779044810856",
+        "eventId": "dialogue_choice_selected-003-1779045688564",
         "eventName": "dialogue_choice_selected",
         "inputMode": "choice",
         "outcome": "running",
@@ -27449,7 +28602,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044810856,
+        "timestampMs": 1779045688564,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -27464,7 +28617,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-004-1779044810856",
+        "eventId": "conversation_anomaly_detected-004-1779045688564",
         "eventName": "conversation_anomaly_detected",
         "inputMode": "choice",
         "outcome": "running",
@@ -27486,7 +28639,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044810856,
+        "timestampMs": 1779045688564,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -27501,7 +28654,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-005-1779044810856",
+        "eventId": "npc_suspicion_changed-005-1779045688564",
         "eventName": "npc_suspicion_changed",
         "inputMode": "choice",
         "outcome": "running",
@@ -27523,7 +28676,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044810856,
+        "timestampMs": 1779045688564,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -27538,7 +28691,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "응답 지연 12000ms",
         "eventFamily": "domain",
-        "eventId": "response_hesitation_noted-006-1779044810890",
+        "eventId": "response_hesitation_noted-006-1779045688599",
         "eventName": "response_hesitation_noted",
         "inputMode": "response_hesitation",
         "outcome": "running",
@@ -27561,7 +28714,7 @@
         "suspicionSignals": [
           "response_hesitation"
         ],
-        "timestampMs": 1779044810890,
+        "timestampMs": 1779045688599,
         "turnId": "turn-2",
         "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
         "whyLineKey": "response_hesitation",
@@ -27576,7 +28729,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "free_input_submitted-007-1779044810918",
+        "eventId": "free_input_submitted-007-1779045688627",
         "eventName": "free_input_submitted",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -27601,7 +28754,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044810918,
+        "timestampMs": 1779045688627,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -27616,7 +28769,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-008-1779044810918",
+        "eventId": "conversation_anomaly_detected-008-1779045688627",
         "eventName": "conversation_anomaly_detected",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -27641,7 +28794,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044810918,
+        "timestampMs": 1779045688627,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -27656,7 +28809,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-009-1779044810918",
+        "eventId": "npc_suspicion_changed-009-1779045688627",
         "eventName": "npc_suspicion_changed",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -27681,7 +28834,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044810918,
+        "timestampMs": 1779045688627,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -27696,7 +28849,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "suspicion_shared-010-1779044810918",
+        "eventId": "suspicion_shared-010-1779045688627",
         "eventName": "suspicion_shared",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -27721,7 +28874,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044810918,
+        "timestampMs": 1779045688627,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -27736,7 +28889,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_report_created-011-1779044810918",
+        "eventId": "station_report_created-011-1779045688628",
         "eventName": "station_report_created",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -27761,7 +28914,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044810918,
+        "timestampMs": 1779045688628,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -27776,7 +28929,7 @@
         "conversationStage": "inquest",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_inquest_opened-012-1779044810919",
+        "eventId": "station_inquest_opened-012-1779045688628",
         "eventName": "station_inquest_opened",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -27801,7 +28954,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779044810919,
+        "timestampMs": 1779045688628,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -28724,6 +29877,50 @@
               "requiresStoreLedgerEvent": false,
               "toState": "rumored",
               "validationRuleId": "same_order.park_notice_board.post_rumor",
+              "visibleTo": [
+                "park_witness"
+              ]
+            },
+            {
+              "actionId": "park_notice_board.vouch_routine",
+              "affordance": "vouch_routine",
+              "citableLedgerEventIds": [
+                "civic-ledger-2"
+              ],
+              "civicEconomyEffects": [
+                "localTrust:+1"
+              ],
+              "eligibleRoles": [
+                "park_witness"
+              ],
+              "failureReasons": [
+                "object_not_perceived",
+                "affordance_unavailable",
+                "role_authority_exceeded",
+                "why_line_required",
+                "ledger_event_unknown",
+                "ledger_event_not_known"
+              ],
+              "ledgerEventKind": "public_routine_vouched",
+              "objectId": "park_notice_board",
+              "objectState": "clear",
+              "perceivedAs": "public routine vouch",
+              "playerLabel": "Vouch Routine",
+              "preconditions": [
+                "object_state:clear",
+                "role_allowed:park_witness",
+                "known_ledger_event_required",
+                "record_id:park_public_rumor"
+              ],
+              "priorityHints": [
+                "economy:localTrust",
+                "pressure:routine_vouched_publicly"
+              ],
+              "recordId": "park_public_rumor",
+              "requiresLedgerEvent": true,
+              "requiresStoreLedgerEvent": false,
+              "toState": "vouched",
+              "validationRuleId": "same_order.park_notice_board.vouch_routine",
               "visibleTo": [
                 "park_witness"
               ]

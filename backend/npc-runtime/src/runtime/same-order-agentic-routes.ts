@@ -170,7 +170,7 @@ function buildCleanCoverProof(): SameOrderAgenticRouteProof {
     recordId: "store_same_order_receipt",
     whyLine: "The accepted line matches the Store routine and creates a normal receipt.",
   });
-  applyAction(build, {
+  const routineEvent = applyAction(build, {
     stepId: "clean.waiting_customer.accept_routine",
     actorId: "NPC_Waiting_Customer",
     role: "waiting_customer",
@@ -181,6 +181,17 @@ function buildCleanCoverProof(): SameOrderAgenticRouteProof {
     knownLedgerEventIds: [receiptEvent.eventId],
     whyLine: "A waiting customer sees the normal receipt and keeps the line moving instead of creating pressure.",
   });
+  applyAction(build, {
+    stepId: "clean.park_witness.vouch_routine",
+    actorId: "NPC_Park_Witness",
+    role: "park_witness",
+    affordance: "vouch_routine",
+    objectId: "park_notice_board",
+    recordId: "park_public_routine_vouch",
+    citedLedgerEventId: routineEvent.eventId,
+    knownLedgerEventIds: [routineEvent.eventId],
+    whyLine: "The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow.",
+  });
 
   return routeProof({
     build,
@@ -188,7 +199,7 @@ function buildCleanCoverProof(): SameOrderAgenticRouteProof {
     sessionOutcome: "cover_held",
     playerLineKind: "clean_cover_line",
     playerLine: "네, 같은 걸로 주세요.",
-    socialReactionSummary: "The clerk closes a normal receipt, and a waiting customer accepts the routine so the queue stays calm.",
+    socialReactionSummary: "The clerk closes a normal receipt, a waiting customer accepts the routine, and a Park witness publicly vouches that the player stayed in the local flow.",
   });
 }
 
@@ -636,6 +647,14 @@ function validateCleanCover(
     && observation.resultingAffordance === "accept_routine"
   )) {
     failures.push({ routeId: proof.routeId, path: "socialObservationTrace", message: "clean cover must prove another NPC accepted the routine record" });
+  }
+  if (!proof.socialObservationTrace.some(observation =>
+    observation.observerRole === "park_witness"
+    && observation.observedActorRole === "waiting_customer"
+    && observation.observedAffordance === "accept_routine"
+    && observation.resultingAffordance === "vouch_routine"
+  )) {
+    failures.push({ routeId: proof.routeId, path: "socialObservationTrace", message: "clean cover must prove a public witness can vouch for routine behavior" });
   }
 }
 

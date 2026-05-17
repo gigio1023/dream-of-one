@@ -100,7 +100,14 @@ Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `5 / 5`, and `routeReportPassCount=5 / 5`.
-- latest game increment: wary local records can become an informal public
+- latest game increment: clean routine records can travel as public social
+  trust, not just avoid trouble. After the Clerk creates a normal receipt and
+  the Waiting Customer accepts the routine, the Park Witness reads that queue
+  record, uses `vouch_routine` on `park_notice_board`, changes the board to
+  `vouched`, and adds `public_routine_vouched`. This proves a reusable
+  positive social-sim step: fitting into local conversation can create a
+  public ally-style record, not only avoid suspicion.
+- prior public-warning increment remains current: wary local records can become an informal public
   warning before any formal report. After the Clerk marks a suspicious receipt
   and the Waiting Customer notes a wary queue, the Park Witness reads that
   queue record, uses `post_warning` on `park_notice_board`, changes the board
@@ -160,7 +167,7 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `29a5eae86d10da62c775ee3ccf03164997843193404874bc9bc710be2a25af58`
+  `5edc8cd9bc42dc800c9f19b2bfc7491f17407b5990c58df7629fd49cdc6af8ff`
 - Markdown SHA-256:
   `f12bdfa1e2e1d55f2057ff3ea28aa1777f044480411e9817af9fa96ebbb25569`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
@@ -328,16 +335,19 @@ Latest AI-play interface check:
   report attachment, full backend check, and GDScript syntax check. This is
   internal playable proof only; external fresh-player notes remain `0 / 3`.
 - 2026-05-18 playable routine-response increment: added the smallest safe-route
-  NPC-to-NPC social reaction. The clean route now proves
-  `cite_expected_order -> create_receipt -> accept_routine`; final clean state
-  includes `store_queue_mark=settled`, `receipt_tray=normal`,
-  `queue_routine_kept`, local trust 57, record burden 0, and Station attention
-  0. This keeps Store/Station thin while making the broader social-sim rule
-  clearer: another NPC can read a normal record and keep the environment calm.
+  NPC-to-NPC and public social reaction. The clean route now proves
+  `cite_expected_order -> create_receipt -> accept_routine -> vouch_routine`;
+  final clean state includes `store_queue_mark=settled`,
+  `receipt_tray=normal`, `park_notice_board=vouched`, `queue_routine_kept`,
+  `public_routine_vouched`, local trust 58, record burden 0, and Station
+  attention 0. This keeps Store/Station thin while making the broader
+  social-sim rule clearer: another NPC can read a normal record, keep the
+  environment calm, and let routine behavior become public social trust.
   Verified with latest Godot playable smoke, Codex gameplay probe, backend
-  playability report attachment, full backend check, GDScript syntax check, and
-  comprehension gate status. This is internal playable proof only; external
-  fresh-player notes remain `0 / 3`.
+  playability report attachment, full backend check, GDScript syntax check,
+  runtime slice smoke, latest PCK export/main-pack smoke, macOS app export,
+  packaged app launch/route smoke, and comprehension gate status. This is
+  internal playable proof only; external fresh-player notes remain `0 / 3`.
 - 2026-05-18 playable suspicious-cover increment: added the smallest contained
   risk reaction. The suspicious cover guard route now proves
   `mark_receipt -> note_wary -> post_warning`; final state includes

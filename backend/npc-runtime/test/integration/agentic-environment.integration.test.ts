@@ -428,6 +428,65 @@ test("Park witness can turn a correction record into public repair notice", () =
   assert.equal(repairNotice.environment.economy.recordBurden, 15);
 });
 
+test("Park witness can publicly vouch for a kept routine record", () => {
+  let environment = createSameOrderAgenticEnvironment();
+  const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);
+  const receipt = requireAccepted(validateAndApplyEnvironmentAction(environment, clerk, {
+    actorId: clerk.actorId,
+    role: clerk.role,
+    affordance: "create_receipt",
+    objectId: "receipt_tray",
+    recordId: "store_same_order_receipt",
+    whyLine: "The accepted line matches the Store routine and creates a normal receipt.",
+  }));
+  environment = receipt.environment;
+
+  const customer = actor({
+    actorId: "NPC_Waiting_Customer",
+    role: "waiting_customer",
+    knownLedgerEventIds: [receipt.event.eventId],
+  }, environment);
+  const routine = requireAccepted(validateAndApplyEnvironmentAction(environment, customer, {
+    actorId: customer.actorId,
+    role: customer.role,
+    affordance: "accept_routine",
+    objectId: "store_queue_mark",
+    recordId: "store_same_order_queue_routine",
+    citedLedgerEventId: receipt.event.eventId,
+    whyLine: "The waiting customer sees the normal receipt and keeps the queue routine intact.",
+  }));
+  environment = routine.environment;
+
+  const witness = actor({
+    actorId: "NPC_Park_Witness",
+    role: "park_witness",
+    knownLedgerEventIds: [routine.event.eventId],
+  }, environment);
+  const action = listAvailableEnvironmentActions(environment, witness)
+    .find(candidate => candidate.affordance === "vouch_routine");
+
+  assert.ok(action);
+  assert.equal(action.objectId, "park_notice_board");
+  assert.deepEqual(action.citableLedgerEventIds, [routine.event.eventId]);
+  assert.deepEqual(action.civicEconomyEffects, ["localTrust:+1"]);
+
+  const vouched = requireAccepted(validateAndApplyEnvironmentAction(environment, witness, {
+    actorId: witness.actorId,
+    role: witness.role,
+    affordance: "vouch_routine",
+    objectId: "park_notice_board",
+    recordId: "park_public_routine_vouch",
+    citedLedgerEventId: routine.event.eventId,
+    whyLine: "The kept queue routine is visible enough for the witness to vouch for the player in public.",
+  }));
+
+  assert.equal(vouched.event.kind, "public_routine_vouched");
+  assert.equal(vouched.event.citedLedgerEventId, routine.event.eventId);
+  assert.equal(vouched.environment.objects.find(item => item.objectId === "park_notice_board")?.state, "vouched");
+  assert.equal(vouched.environment.economy.localTrust, 58);
+  assert.equal(vouched.environment.economy.recordBurden, 0);
+});
+
 test("Park witness can post a public warning from a wary queue record", () => {
   let environment = createSameOrderAgenticEnvironment();
   const clerk = actor({ actorId: "NPC_Store_Clerk", role: "store_clerk" }, environment);

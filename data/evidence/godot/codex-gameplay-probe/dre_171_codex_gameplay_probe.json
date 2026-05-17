@@ -1259,6 +1259,50 @@
 						]
 					},
 					{
+						"actionId": "park_notice_board.vouch_routine",
+						"affordance": "vouch_routine",
+						"citableLedgerEventIds": [
+							"civic-ledger-2"
+						],
+						"civicEconomyEffects": [
+							"localTrust:+1"
+						],
+						"eligibleRoles": [
+							"park_witness"
+						],
+						"failureReasons": [
+							"object_not_perceived",
+							"affordance_unavailable",
+							"role_authority_exceeded",
+							"why_line_required",
+							"ledger_event_unknown",
+							"ledger_event_not_known"
+						],
+						"ledgerEventKind": "public_routine_vouched",
+						"objectId": "park_notice_board",
+						"objectState": "clear",
+						"perceivedAs": "public routine vouch",
+						"playerLabel": "Vouch Routine",
+						"preconditions": [
+							"object_state:clear",
+							"role_allowed:park_witness",
+							"known_ledger_event_required",
+							"record_id:park_public_rumor"
+						],
+						"priorityHints": [
+							"economy:localTrust",
+							"pressure:routine_vouched_publicly"
+						],
+						"recordId": "park_public_rumor",
+						"requiresLedgerEvent": true,
+						"requiresStoreLedgerEvent": false,
+						"toState": "vouched",
+						"validationRuleId": "same_order.park_notice_board.vouch_routine",
+						"visibleTo": [
+							"park_witness"
+						]
+					},
+					{
 						"actionId": "park_notice_board.post_warning",
 						"affordance": "post_warning",
 						"citableLedgerEventIds": [
@@ -2206,14 +2250,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779044818580",
+				"eventId": "playable_session_started-001-1779045695148",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779044818580,
+				"timestampMs": 1779045695148,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -2226,7 +2270,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-002-1779044818656",
+				"eventId": "conversation_started-002-1779045695216",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -2235,7 +2279,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779044818656,
+				"timestampMs": 1779045695216,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -2248,7 +2292,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-003-1779044818669",
+				"eventId": "response_hesitation_noted-003-1779045695231",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -2269,7 +2313,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779044818669,
+				"timestampMs": 1779045695231,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -2284,7 +2328,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-004-1779044818683",
+				"eventId": "dialogue_choice_selected-004-1779045695245",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2306,7 +2350,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779044818683,
+				"timestampMs": 1779045695245,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2321,7 +2365,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-005-1779044818683",
+				"eventId": "conversation_anomaly_detected-005-1779045695245",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2343,7 +2387,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779044818683,
+				"timestampMs": 1779045695245,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2358,7 +2402,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-006-1779044818683",
+				"eventId": "npc_suspicion_changed-006-1779045695245",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -2380,7 +2424,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779044818683,
+				"timestampMs": 1779045695245,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -2395,7 +2439,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-007-1779044818697",
+				"eventId": "free_input_submitted-007-1779045695258",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2420,7 +2464,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779044818697,
+				"timestampMs": 1779045695258,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2435,7 +2479,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779044818697",
+				"eventId": "conversation_anomaly_detected-008-1779045695258",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2460,7 +2504,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779044818697,
+				"timestampMs": 1779045695258,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2475,7 +2519,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779044818697",
+				"eventId": "npc_suspicion_changed-009-1779045695258",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2500,7 +2544,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779044818697,
+				"timestampMs": 1779045695258,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2515,7 +2559,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-010-1779044818697",
+				"eventId": "suspicion_shared-010-1779045695258",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2540,7 +2584,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779044818697,
+				"timestampMs": 1779045695258,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2555,7 +2599,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-011-1779044818698",
+				"eventId": "station_report_created-011-1779045695258",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2580,7 +2624,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779044818698,
+				"timestampMs": 1779045695258,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -2595,7 +2639,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-012-1779044818698",
+				"eventId": "station_inquest_opened-012-1779045695259",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -2620,7 +2664,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779044818698,
+				"timestampMs": 1779045695259,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -3543,6 +3587,50 @@
 							"requiresStoreLedgerEvent": false,
 							"toState": "rumored",
 							"validationRuleId": "same_order.park_notice_board.post_rumor",
+							"visibleTo": [
+								"park_witness"
+							]
+						},
+						{
+							"actionId": "park_notice_board.vouch_routine",
+							"affordance": "vouch_routine",
+							"citableLedgerEventIds": [
+								"civic-ledger-2"
+							],
+							"civicEconomyEffects": [
+								"localTrust:+1"
+							],
+							"eligibleRoles": [
+								"park_witness"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known"
+							],
+							"ledgerEventKind": "public_routine_vouched",
+							"objectId": "park_notice_board",
+							"objectState": "clear",
+							"perceivedAs": "public routine vouch",
+							"playerLabel": "Vouch Routine",
+							"preconditions": [
+								"object_state:clear",
+								"role_allowed:park_witness",
+								"known_ledger_event_required",
+								"record_id:park_public_rumor"
+							],
+							"priorityHints": [
+								"economy:localTrust",
+								"pressure:routine_vouched_publicly"
+							],
+							"recordId": "park_public_rumor",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": false,
+							"toState": "vouched",
+							"validationRuleId": "same_order.park_notice_board.vouch_routine",
 							"visibleTo": [
 								"park_witness"
 							]
@@ -4891,17 +4979,17 @@
 			"finalPlayerVisibleState": {
 				"civicEconomy": {
 					"accountCredit": 2,
-					"localTrust": 57,
+					"localTrust": 58,
 					"recordBurden": 0,
 					"stationAttention": 0
 				},
 				"consequence": "당신은 검사 대상입니다. 상점 점원의 평범한 질문도 기록됩니다.",
 				"investigationTrail": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
-				"outcomeBody": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰습니다.\n상점 대화가 지역 루틴 안에서 닫혔습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+				"outcomeBody": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공개 확인 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공개 확인을 남겼습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 조금 더 올라갔습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
 				"recordObjects": {
 					"civic_ledger": "append_only",
 					"correction_slip": "absent",
-					"park_notice_board": "clear",
+					"park_notice_board": "vouched",
 					"receipt_tray": "normal",
 					"report_tray": "empty",
 					"station_dossier": "absent",
@@ -4909,7 +4997,7 @@
 					"store_queue_mark": "settled",
 					"usual_order_cue": "cited"
 				},
-				"recordState": "상점 기록: 영수증 정상 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 2 신뢰 57 부담 0 주목 0 | 장부 3 최근 civic-ledger-3 대기 손님 / 일상 수락 / 일상 유지 -> civic-ledger-2 | 사회 반응 대기 손님가 상점 점원의 영수증 작성 기록을 보고 일상 수락, 부담 0",
+				"recordState": "상점 기록: 영수증 정상 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 2 신뢰 58 부담 0 주목 0 | 장부 4 최근 civic-ledger-4 공원 목격자 / 일상 확인 / 공개 확인 -> civic-ledger-3 | 사회 반응 공원 목격자가 대기 손님의 일상 수락 기록을 보고 일상 확인, 부담 0",
 				"reportWeight": 0,
 				"routeOutcome": "clean_cover",
 				"sessionOutcome": "cover_held",
@@ -4922,19 +5010,19 @@
 			"npcInteractionChecks": {
 				"economyPanelReadable": false,
 				"latestLedger": {
-					"actorId": "NPC_Waiting_Customer",
-					"actorRole": "waiting_customer",
-					"affordance": "accept_routine",
-					"citedLedgerEventId": "civic-ledger-2",
+					"actorId": "NPC_Park_Witness",
+					"actorRole": "park_witness",
+					"affordance": "vouch_routine",
+					"citedLedgerEventId": "civic-ledger-3",
 					"economyDelta": {
-						"localTrust": 2
+						"localTrust": 1
 					},
-					"eventId": "civic-ledger-3",
-					"kind": "queue_routine_kept",
-					"objectId": "store_queue_mark",
-					"recordId": "store_same_order_queue_routine",
+					"eventId": "civic-ledger-4",
+					"kind": "public_routine_vouched",
+					"objectId": "park_notice_board",
+					"recordId": "park_public_routine_vouch",
 					"validation": "accepted",
-					"whyLine": "A waiting customer sees the normal receipt and keeps the line moving instead of creating pressure."
+					"whyLine": "The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow."
 				},
 				"managerObservedClerk": false,
 				"parkWitnessObservedClerk": false,
@@ -4957,7 +5045,8 @@
 			"roleActionExplanation": [
 				"store_clerk used cite_expected_order on usual_order_cue -> civic-ledger-1",
 				"store_clerk used create_receipt on receipt_tray -> civic-ledger-2",
-				"waiting_customer used accept_routine on store_queue_mark -> civic-ledger-3"
+				"waiting_customer used accept_routine on store_queue_mark -> civic-ledger-3",
+				"park_witness used vouch_routine on park_notice_board -> civic-ledger-4"
 			],
 			"routeId": "clean_cover",
 			"schemaVersion": "codex-route-play-report-v1",
@@ -5438,7 +5527,7 @@
 					],
 					"civicEconomy": {
 						"accountCredit": 2,
-						"localTrust": 57,
+						"localTrust": 58,
 						"recordBurden": 0,
 						"stationAttention": 0
 					},
@@ -5450,11 +5539,11 @@
 						"freeInputVisible": false,
 						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 단골 주문 절차",
 						"noticeVisible": false,
-						"outcomeBodyLabel": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰습니다.\n상점 대화가 지역 루틴 안에서 닫혔습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
+						"outcomeBodyLabel": "결과: cover_held\n사슬: 일상 답변 -> 정상 영수증 -> 대기줄 유지 -> 공개 확인 -> 스테이션 인용 없음\n사회 반응: 대기 손님이 정상 영수증을 보고 줄이 그대로 가도 된다고 받아들였고, 공원 목격자는 그 일상 기록을 보고 플레이어가 지역 흐름 안에 있었다고 공개 확인을 남겼습니다.\n역할 행동: 상점 점원이 정상 영수증을 만들고, 대기 손님이 일상 기록을 받아들여 줄 표식을 안정시켰으며, 공원 목격자가 그 기록을 공개 확인으로 바꿨습니다.\n상점 대화가 지역 루틴 안에서 닫혔고 지역 신뢰가 조금 더 올라갔습니다.\n마지막 why-line: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다.\nR 다시 시작 / Q 종료",
 						"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 0 -> 접수 닫힘 / 심문 닫힘 / 판정 닫힘 / 종료 열림",
 						"outcomeVisible": true,
 						"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
-						"recordStateLabel": "상점 기록: 영수증 정상 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 2 신뢰 57 부담 0 주목 0 | 장부 3 최근 civic-ledger-3 대기 손님 / 일상 수락 / 일상 유지 -> civic-ledger-2 | 사회 반응 대기 손님가 상점 점원의 영수증 작성 기록을 보고 일상 수락, 부담 0",
+						"recordStateLabel": "상점 기록: 영수증 정상 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 2 신뢰 58 부담 0 주목 0 | 장부 4 최근 civic-ledger-4 공원 목격자 / 일상 확인 / 공개 확인 -> civic-ledger-3 | 사회 반응 공원 목격자가 대기 손님의 일상 수락 기록을 보고 일상 확인, 부담 0",
 						"recordedStatementLabel": "직접 입력도 기록됩니다.",
 						"riskyLineLabel": "직접 입력한 말도 상점 기록으로 남습니다.",
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
@@ -5462,24 +5551,24 @@
 					},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
-						"actorId": "NPC_Waiting_Customer",
-						"actorRole": "waiting_customer",
-						"affordance": "accept_routine",
-						"citedLedgerEventId": "civic-ledger-2",
+						"actorId": "NPC_Park_Witness",
+						"actorRole": "park_witness",
+						"affordance": "vouch_routine",
+						"citedLedgerEventId": "civic-ledger-3",
 						"economyDelta": {
-							"localTrust": 2
+							"localTrust": 1
 						},
-						"eventId": "civic-ledger-3",
-						"kind": "queue_routine_kept",
-						"objectId": "store_queue_mark",
-						"recordId": "store_same_order_queue_routine",
+						"eventId": "civic-ledger-4",
+						"kind": "public_routine_vouched",
+						"objectId": "park_notice_board",
+						"recordId": "park_public_routine_vouch",
 						"validation": "accepted",
-						"whyLine": "A waiting customer sees the normal receipt and keeps the line moving instead of creating pressure."
+						"whyLine": "The Park witness sees the routine queue record and publicly vouches that the player stayed in the local flow."
 					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
-						"park_notice_board": "clear",
+						"park_notice_board": "vouched",
 						"receipt_tray": "normal",
 						"report_tray": "empty",
 						"station_dossier": "absent",
@@ -5501,13 +5590,13 @@
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
-							"label": "시민 경제\n잔액 2 | 신뢰 57 | 부담 0 | 주목 0",
+							"label": "시민 경제\n잔액 2 | 신뢰 58 | 부담 0 | 주목 0",
 							"state": "stable",
 							"visible": true
 						},
 						"civic_ledger": {
 							"hasBody": true,
-							"label": "시민 장부 3건\ncivic-ledger-3 -> civic-ledger-2\n일상 수락",
+							"label": "시민 장부 4건\ncivic-ledger-4 -> civic-ledger-3\n일상 확인",
 							"state": "append_only",
 							"visible": true
 						},
@@ -5519,8 +5608,8 @@
 						},
 						"park_notice_board": {
 							"hasBody": true,
-							"label": "공개판\n비어 있음",
-							"state": "clear",
+							"label": "공개판\n일상 확인",
+							"state": "vouched",
 							"visible": true
 						},
 						"receipt_tray": {
@@ -5563,18 +5652,19 @@
 				}
 			],
 			"socialObservationExplanation": [
-				"waiting_customer saw store_clerk create_receipt at civic-ledger-2, then chose accept_routine"
+				"waiting_customer saw store_clerk create_receipt at civic-ledger-2, then chose accept_routine",
+				"park_witness saw waiting_customer accept_routine at civic-ledger-3, then chose vouch_routine"
 			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
-					"label": "시민 경제\n잔액 2 | 신뢰 57 | 부담 0 | 주목 0",
+					"label": "시민 경제\n잔액 2 | 신뢰 58 | 부담 0 | 주목 0",
 					"state": "stable",
 					"visible": true
 				},
 				"civic_ledger": {
 					"hasBody": true,
-					"label": "시민 장부 3건\ncivic-ledger-3 -> civic-ledger-2\n일상 수락",
+					"label": "시민 장부 4건\ncivic-ledger-4 -> civic-ledger-3\n일상 확인",
 					"state": "append_only",
 					"visible": true
 				},
@@ -5586,8 +5676,8 @@
 				},
 				"park_notice_board": {
 					"hasBody": true,
-					"label": "공개판\n비어 있음",
-					"state": "clear",
+					"label": "공개판\n일상 확인",
+					"state": "vouched",
 					"visible": true
 				},
 				"receipt_tray": {
@@ -6445,7 +6535,7 @@
 					"store_queue_mark": "delayed",
 					"usual_order_cue": "read"
 				},
-				"recordState": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 42 부담 23 주목 0 | 장부 3 최근 civic-ledger-3 공원 목격자 / post_warning / 공개 경고 -> civic-ledger-2 | 사회 반응 공원 목격자가 대기 손님의 경계 메모 기록을 보고 post_warning, 부담 20",
+				"recordState": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 42 부담 23 주목 0 | 장부 3 최근 civic-ledger-3 공원 목격자 / 공개 경고 / 공개 경고 -> civic-ledger-2 | 사회 반응 공원 목격자가 대기 손님의 경계 메모 기록을 보고 공개 경고, 부담 20",
 				"reportWeight": 30,
 				"routeOutcome": "cover_held_under_suspicion",
 				"sessionOutcome": "cover_held",
@@ -7005,7 +7095,7 @@
 						"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 35 -> 접수 닫힘 / 심문 닫힘 / 판정 닫힘 / 종료 열림",
 						"outcomeVisible": true,
 						"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
-						"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 42 부담 23 주목 0 | 장부 3 최근 civic-ledger-3 공원 목격자 / post_warning / 공개 경고 -> civic-ledger-2 | 사회 반응 공원 목격자가 대기 손님의 경계 메모 기록을 보고 post_warning, 부담 20",
+						"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 비어 있음 | 스테이션 없음 | 잔액 3 신뢰 42 부담 23 주목 0 | 장부 3 최근 civic-ledger-3 공원 목격자 / 공개 경고 / 공개 경고 -> civic-ledger-2 | 사회 반응 공원 목격자가 대기 손님의 경계 메모 기록을 보고 공개 경고, 부담 20",
 						"recordedStatementLabel": "직접 입력도 기록됩니다.",
 						"riskyLineLabel": "직접 입력도 deterministic signal로만 판정됩니다.",
 						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",

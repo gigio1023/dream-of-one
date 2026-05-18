@@ -102,6 +102,9 @@ Latest completion audit:
   `fresh player comprehension tester notes`. Recent ticket lookup confirmed
   the repo's Linear team is `Dream-of-one` with key `DRE`; create the GI-04
   issue there, letting Linear assign the identifier.
+- Linear label/state lookup found existing DRE labels `codex-managed` and
+  `agent:codex`; `needs:godot-local` was not found and should not be invented.
+  Suggested initial state for the future GI-04 issue is `Backlog`.
 - A copy-ready Linear draft now lives at
   `.game-harness/linear-issue-drafts/gi-04-external-comprehension-fresh-player.md`.
   It is not the SoT issue; it exists only so a future session with Linear

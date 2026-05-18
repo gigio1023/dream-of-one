@@ -3,6 +3,8 @@
 Status: draft for Linear creation
 Date: 2026-05-18
 Target Linear team: `Dream-of-one` (`DRE`)
+Suggested initial state: `Backlog`
+Suggested labels: `codex-managed`, `agent:codex`
 
 ## Goal
 
@@ -100,3 +102,11 @@ notes`; no open matching issue was found. Recent Linear tickets confirm the
 repo team is `Dream-of-one` with key `DRE`. Create this as a new DRE issue from
 a session with issue-create permission; do not hardcode the future identifier
 before Linear assigns it.
+
+Label/state lookup:
+
+- `codex-managed` label exists in DRE.
+- `agent:codex` label exists in DRE.
+- `needs:godot-local` was not found in DRE during lookup; do not invent it.
+- Workflow states include `Backlog`, `Todo`, `In Progress`, `In Review`,
+  `Done`, `Duplicate`, and `Canceled`.

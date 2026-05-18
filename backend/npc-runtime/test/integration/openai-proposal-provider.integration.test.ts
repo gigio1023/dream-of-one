@@ -232,6 +232,12 @@ test("OpenAI proposal prompt separates role voice from player choices", async ()
           },
         ],
       },
+      actorPolicy: {
+        stableGoals: ["keep_queue_moving", "avoid_public_disruption"],
+        priorityShifts: ["station_citation_can_unlock_refusal"],
+        actionSelectionPolicy: "react only to visible queue, public records, actorMemory, and current tool catalog",
+        forbiddenClaims: ["do_not_infer_private_player_intent", "do_not_create_records_or_ledger_events"],
+      },
     },
     playerSignals: { suspicion: 0, exposure: 0 },
   };
@@ -249,6 +255,9 @@ test("OpenAI proposal prompt separates role voice from player choices", async ()
   assert.match(prompts[0] ?? "", /availableChoices, when present, are player speech options, not NPC lines to repeat/);
   assert.match(prompts[0] ?? "", /actorMemory, when present, is bounded observed memory only/);
   assert.match(prompts[0] ?? "", /do not infer hidden events, private intent, or unobserved ledger facts/);
+  assert.match(prompts[0] ?? "", /actorPolicy, when present, defines stable goals, priority shifts, action-selection policy, and forbidden claims/);
+  assert.match(prompts[0] ?? "", /must not be used to invent new affordances, authority, records, or state mutations/);
+  assert.match(prompts[0] ?? "", /station_citation_can_unlock_refusal/);
   assert.match(prompts[0] ?? "", /observedRecentActions/);
   assert.match(prompts[0] ?? "", /Use waiting-customer observer voice/);
 });

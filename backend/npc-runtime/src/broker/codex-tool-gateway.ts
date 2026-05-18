@@ -874,6 +874,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
       "Use only the requested npcId's role and organizationContext.roleVoicePolicy.",
       "availableChoices, when present, are player speech options, not NPC lines to repeat.",
       "actorMemory, when present, is bounded observed memory only: use ownRecentActions and observedRecentActions as context, and do not infer hidden events, private intent, or unobserved ledger facts.",
+      "actorPolicy, when present, defines stable goals, priority shifts, action-selection policy, and forbidden claims; it must not be used to invent new affordances, authority, records, or state mutations.",
       "PerceptionPacket:",
       JSON.stringify(frame.packet),
       "WorkspaceArtifacts:",

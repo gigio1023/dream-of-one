@@ -113,6 +113,19 @@ Latest AI-play interface check:
   player actions `23 / 23`, `explainability=22/22`, and
   `routeReportPassCount=5 / 5` with Godot
   `4.6.2.stable.official.71f334935` from a temporary local `GODOT_BIN`.
+- latest local pack-route check: `$GODOT_BIN --headless --path godot
+  --export-pack "macOS PCK" build/macos/dream-of-one-same-order.pck` passed,
+  then `DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_OUTPUT=data/evidence/godot/packaged-route/dre_171_packaged_route_evidence.json
+  $GODOT_BIN --headless --main-pack build/macos/dream-of-one-same-order.pck`
+  passed with `stage=inquest`, `sessionOutcome=inquest_opened`,
+  `providerMode=fallback_only_m1`, `packagedRouteSmokeProof=true`, and
+  `canReadEnvironmentToolCatalog=true`. Evidence SHA-256:
+  `8946fb36b55f184c834345f40771b6bde4b60df2859da2d7b9e9a4c68a239bd1`.
+  PCK SHA-256:
+  `15c549f6e5fb96def19ec1bd0a353a8c3dfb80f09b46148fbb529484fedcf86a`.
+  This is current pack-route engineering evidence only; it is not a packaged
+  `.app`, not a fresh-player session, and it does not close the comprehension
+  gate.
 - latest correction: dialogue choices are speech inputs, not hardcoded NPC
   consequence branches. The active Store prompt should expose the Store Clerk's
   current environment tool catalog from object affordances while the choices

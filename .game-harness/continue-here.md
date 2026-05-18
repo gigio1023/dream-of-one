@@ -82,8 +82,8 @@ Last Updated: 2026-05-18
   cross-place social rules before the Store line. Codex gameplay QA focuses
   `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard`, interacts with both,
   and verifies `canReadCrossPlaceSocialRules=true`; current proof passes with
-  27/27 accepted public actions, 25/25 explainability checks, and 5/5 route
-  reports after the Station Officer inspection update. This is a game-facing
+  29/29 accepted public actions, 26/26 explainability checks, and 5/5 route
+  reports after the Park Witness public-spread inspection update. This is a game-facing
   legibility slice toward the broader
   open-environment social sim, not another product-closure claim.
 - Latest implementation slice: Codex gameplay QA and live provider packets now
@@ -123,6 +123,11 @@ Last Updated: 2026-05-18
   Store handoff and player speech, inquest authority, visible environment
   context, and spoken intake line before inspecting Studio PM or Waiting
   Customer.
+- Latest implementation slice: Park Witness can now be inspected as the
+  public-spread actor after inquest. Codex gameplay QA focuses the Witness,
+  interacts, and reads `공개 게시`, `civic-ledger-4 -> civic-ledger-2`, the Park
+  notice board target, `공개 전파`, public reader roles, visible environment
+  context, and the line that turns a local Store mismatch into public talk.
 - Previous implementation slice: the live HUD record line now includes
   `주변 태도`, summarizing visible NPC reactions such as Waiting Customer
   contact refusal, Studio PM review block, and Store Manager report handoff

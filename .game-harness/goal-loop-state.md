@@ -79,15 +79,18 @@ Latest completion audit:
   proof is carried by the playable slice Evidence Pack, Codex gameplay probe,
   and packaged-route evidence.
 - latest Codex gameplay QA artifact reports `ok=true`,
-  `aiPlayerReport.pass=true`, 27 accepted public actions, 5/5 route reports,
-  all 25 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
+  `aiPlayerReport.pass=true`, 29 accepted public actions, 5/5 route reports,
+  all 26 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
   no-live provider packet readiness for bounded `actorMemory` plus
   `actorPolicy`. It now also proves Codex/player can inspect Store Clerk as the
-  record-making NPC and Station Officer as the authority actor: the Officer
-  inspection names the cited Store Manager ledger, Station document target,
-  `대상=플레이어`, comparison focus, inquest authority, visible environment
-  context, and spoken intake line before downstream NPC reactions. It also
-  explicitly marks itself as not a replacement for external comprehension.
+  record-making NPC, Park Witness as the public-spread actor, and Station
+  Officer as the authority actor: the Witness inspection names the Clerk note,
+  Park notice board target, public-spread readers, and spoken rumor line; the
+  Officer inspection names the cited Store Manager ledger, Station document
+  target, `대상=플레이어`, comparison focus, inquest authority, visible
+  environment context, and spoken intake line before downstream NPC reactions.
+  It also explicitly marks itself as not a replacement for external
+  comprehension.
 - latest packaged-route evidence validates as a Godot Evidence Pack and
   conversation/suspicion proof for the single `inquest_opened` route with
   `packagedRouteSmokeProof=true`, `fallback_only_m1`, and
@@ -284,8 +287,8 @@ Latest status check:
   `testerFacingFiles=["tester-invite.md"]`, `humanEvidence=false`, and
   `closesGoal=false`; it is setup material only, not comprehension evidence.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `ee2eb4954c6ec250393788d768dca0b9bc3046a57ab746ca10b3b423d3bb7a40`
-  - Markdown SHA-256: `5ac29dfa96c916cd4a55e8e8648232362d7bea7b8dc2e311590c61f2a8a589cc`
+  - JSON SHA-256: `74b0ab152a717557982e56fa9bc3a74c1b2a6b4f59364358eb961b85d5afc4c9`
+  - Markdown SHA-256: `327ee6a473bd0a2f6412596551ac72656f62bd6093131ab2d17f2d0ed1a64c8e`
   - playable Evidence Pack SHA-256: `dd69a70384e218c58ff2e5a6ee6b58f6cbada43b82225d2f6ea7cd1ad43bc64d`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
@@ -293,10 +296,11 @@ Latest status check:
 Latest AI-play interface check:
 - command: `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `27 / 27`, `explainability=25/25`, Store Clerk record-action
-  inspection, Station Officer authority-citation inspection, actor memory for
-  observed NPC decisions, no-live provider packet memory and actor-policy
-  readiness, and `routeReportPassCount=5 / 5` with Godot
+  player actions `29 / 29`, `explainability=26/26`, Store Clerk record-action
+  inspection, Park Witness public-spread inspection, Station Officer
+  authority-citation inspection, actor memory for observed NPC decisions,
+  no-live provider packet memory and actor-policy readiness, and
+  `routeReportPassCount=5 / 5` with Godot
   `4.7.beta2.official.777579205` from local `GODOT_BIN`.
 - latest local pack-route check: `$GODOT_BIN --headless --path godot
   --export-pack "macOS PCK" build/macos/dream-of-one-same-order.pck` passed,
@@ -419,6 +423,12 @@ Latest AI-play interface check:
   with `대상=플레이어`, the comparison against the Store handoff and player
   speech, the inquest authority, visible environment context, and the spoken
   intake line before opening downstream Studio PM or Waiting Customer detail.
+- latest game increment: Park Witness is now inspectable as the public-spread
+  actor who turns a local Store note into a public record. Codex/player can
+  focus the Witness after inquest and read `civic-ledger-4 -> civic-ledger-2`,
+  the Park notice board target, `공개 전파` labels, the roles that can use that
+  public record, visible environment context, and the spoken rumor line before
+  opening Studio PM or Waiting Customer detail.
 - latest game increment: repair recovery now travels one small step beyond the
   Park board. After `public_repair_noted`, Studio PM reads `park_notice_board`
   and `studio_review_queue`, uses `offer_conditional_review`, changes

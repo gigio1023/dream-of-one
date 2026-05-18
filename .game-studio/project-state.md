@@ -130,6 +130,11 @@ Current M1 carry-in:
   comparison against Store handoff and player speech, inquest authority, visible
   environment context, and spoken intake line before reading downstream social
   consequences.
+- latest small-slice carry-in: Park Witness is now readable as the public-spread
+  actor. After inquest opens, Codex/player can inspect the Witness and read the
+  Clerk note it observed, the Park notice board target, `공개 전파` labels, the
+  roles that can use that public record, and the line that turns a local Store
+  mismatch into public talk.
 - latest small-slice carry-in: the live HUD now has `열람`, a compact reader
   summary for records that actually exist in the current ledger. This keeps the
   player-facing social-sim layer focused on who can see the active record chain

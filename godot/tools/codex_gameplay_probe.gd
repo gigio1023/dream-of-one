@@ -22,6 +22,8 @@ const PROBE_STEPS := [
 	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.world_record_prop", "payload": {"objectId": "park_notice_board"}},
 	{"actionId": "player.interact.focused", "payload": {}},
+	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Park_Witness"}},
+	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.world_record_prop", "payload": {"objectId": "studio_review_queue"}},
 	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.world_record_prop", "payload": {"objectId": "civic_economy_panel"}},
@@ -749,6 +751,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Codex/player did not inspect the Waiting Customer as a visible NPC reaction")
 	if not bool(checks.get("codexInspectedStoreClerkRecordAction", false)):
 		failures.append("Codex/player did not inspect the Store Clerk's own record-making reaction")
+	if not bool(checks.get("codexInspectedParkWitnessPublicSpread", false)):
+		failures.append("Codex/player did not inspect the Park Witness public spread basis")
 	if not bool(checks.get("codexInspectedStationOfficerCitation", false)):
 		failures.append("Codex/player did not inspect the Station Officer citation basis")
 	if not bool(checks.get("visibleWaitingCustomerReaction", false)):
@@ -781,6 +785,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"codexInspectedBlockedReview": _inspected_studio_review_block(summary),
 		"codexInspectedRecordAffordanceMap": _inspected_record_affordance_map(summary),
 		"codexInspectedStoreClerkRecordAction": _inspected_store_clerk_record_action(summary),
+		"codexInspectedParkWitnessPublicSpread": _inspected_park_witness_public_spread(summary),
 		"codexInspectedStationOfficerCitation": _inspected_station_officer_citation(summary),
 		"codexInspectedWaitingCustomer": _inspected_waiting_customer(summary),
 		"codexInspectedStudioPm": _inspected_studio_pm_block(summary),
@@ -819,6 +824,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
 		"canInspectRecordRoleAffordanceMap": bool(checks.get("codexInspectedRecordAffordanceMap", false)),
 		"canInspectStoreClerkRecordAction": bool(checks.get("codexInspectedStoreClerkRecordAction", false)),
+		"canInspectPublicWitnessSpread": bool(checks.get("codexInspectedParkWitnessPublicSpread", false)),
 		"canInspectAuthorityExaminer": bool(checks.get("codexInspectedStationOfficerCitation", false)),
 		"canInspectNpcReaction": bool(checks.get("codexInspectedWaitingCustomer", false)),
 		"canReadNpcSpokenReaction": bool(checks.get("codexReadNpcSpokenReaction", false)),
@@ -868,6 +874,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 				"Codex/player inspected the Store Clerk to read that the same role placed the report note, which record object it used, which environment objects it could see, and which tiny values changed.",
 				"The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.",
 				"Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.",
+				"Codex/player inspected the Park Witness to read that a local rumor became a public record other roles can use.",
 				"Codex/player inspected the Studio review queue and Studio PM to read that the Station citation blocked a small opportunity in another place.",
 				"Codex/player read the Studio review queue's visible role/action map: Studio PM can invite, defer, or block review from shared records.",
 				"Codex/player inspected the civic ledger to read the NPC-to-NPC social chain as a player-facing timeline.",
@@ -1393,6 +1400,34 @@ func _inspected_store_clerk_record_action(summary: Dictionary) -> bool:
 			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "신뢰-20")
 			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "부담+35")
 			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "주목+30")
+			)
+
+func _inspected_park_witness_public_spread(summary: Dictionary) -> bool:
+	var inspected := _inspected_npc_candidate(summary, "NPC_Park_Witness", "rumored")
+	return not inspected.is_empty() and (
+			str(inspected.get("npcId", "")) == "NPC_Park_Witness"
+			and str(inspected.get("state", "")) == "rumored"
+			and str(inspected.get("body", "")).contains("근거 행동")
+			and str(inspected.get("body", "")).contains("공원 목격자 -> 공개 게시")
+			and str(inspected.get("body", "")).contains("읽은 기록")
+			and str(inspected.get("body", "")).contains("상점 점원 -> 메모 배치")
+			and str(inspected.get("body", "")).contains("대상 기록물: 공원 게시판")
+			and str(inspected.get("body", "")).contains("공개 전파")
+			and str(inspected.get("body", "")).contains("게시판=공개 기록")
+			and str(inspected.get("body", "")).contains("읽는 역할=대기 손님/스튜디오 PM")
+			and str(inspected.get("body", "")).contains("효과=소문이 다른 장소 행동으로 이동")
+			and str(inspected.get("body", "")).contains("보는 환경")
+			and str(inspected.get("body", "")).contains("들은 말")
+			and str(inspected.get("spokenLine", "")).contains("동네를 돕니다")
+			and str(inspected.get("basisLedgerEventId", "")) == "civic-ledger-4"
+			and str(inspected.get("citedLedgerEventId", "")) == "civic-ledger-2"
+			and str(inspected.get("basisAffordance", "")) == "post_rumor"
+			and _string_array_has_fragment(inspected.get("visibleEnvironmentObjectLabels", []), "공원 게시판=소문")
+			and _string_array_has_fragment(inspected.get("basisConditionLabels", []), "공원 게시판=비어 있음")
+			and _string_array_has_fragment(inspected.get("basisConditionLabels", []), "인용 장부 civic-ledger-2")
+			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "부담+5")
+			and _string_array_has_fragment(inspected.get("publicSpreadLabels", []), "게시판=공개 기록")
+			and _string_array_has_fragment(inspected.get("publicSpreadLabels", []), "대기 손님/스튜디오 PM")
 		)
 
 func _inspected_station_officer_citation(summary: Dictionary) -> bool:
@@ -1453,6 +1488,7 @@ func _inspected_studio_pm_block(summary: Dictionary) -> bool:
 func _inspected_npc_spoken_reactions(summary: Dictionary) -> bool:
 	return (
 		_inspected_store_clerk_record_action(summary)
+		and _inspected_park_witness_public_spread(summary)
 		and _inspected_station_officer_citation(summary)
 		and _inspected_waiting_customer(summary)
 		and _inspected_studio_pm_block(summary)

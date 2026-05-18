@@ -2790,6 +2790,7 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 	var basis_condition_labels := PackedStringArray()
 	var basis_economy_effect_labels := PackedStringArray()
 	var authority_focus_labels := PackedStringArray()
+	var public_spread_labels := PackedStringArray()
 	if not basis_action.is_empty():
 		basis_event_id = str(basis_action.get("ledgerEventId", ""))
 		basis_affordance = str(basis_action.get("affordance", ""))
@@ -2810,6 +2811,9 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		authority_focus_labels = _authority_focus_labels_for_inspection(basis_action, cited_event_id)
 		if not authority_focus_labels.is_empty():
 			body_lines.append("심문 초점: %s" % ", ".join(authority_focus_labels))
+		public_spread_labels = _public_spread_labels_for_inspection(basis_action)
+		if not public_spread_labels.is_empty():
+			body_lines.append("공개 전파: %s" % ", ".join(public_spread_labels))
 		var selected_descriptor := _selected_action_descriptor_for_inspection(basis_action)
 		if not selected_descriptor.is_empty():
 			basis_condition_labels = _selected_action_condition_labels(selected_descriptor, cited_event_id)
@@ -2836,6 +2840,7 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		inspected_npc_state["basisConditionLabels"] = basis_condition_labels
 		inspected_npc_state["basisEconomyEffectLabels"] = basis_economy_effect_labels
 		inspected_npc_state["authorityFocusLabels"] = authority_focus_labels
+		inspected_npc_state["publicSpreadLabels"] = public_spread_labels
 	inspected_npc_state["body"] = "\n".join(body_lines)
 	inspected_npc_history.append(inspected_npc_state.duplicate(true))
 	_set_notice(title, str(inspected_npc_state.get("body", "")))
@@ -2940,6 +2945,24 @@ func _authority_focus_labels_for_inspection(action: Dictionary, cited_event_id: 
 		labels.append("인용=%s" % (cited_label if not cited_label.is_empty() else cited_event_id))
 	labels.append("대조=상점 전달 기록과 플레이어 발화")
 	labels.append("권한=심문 개시")
+	return labels
+
+func _public_spread_labels_for_inspection(action: Dictionary) -> PackedStringArray:
+	var labels := PackedStringArray()
+	var affordance := str(action.get("affordance", ""))
+	if not ["post_rumor", "post_warning", "vouch_routine", "post_repair_notice"].has(affordance):
+		return labels
+	labels.append("게시판=공개 기록")
+	labels.append("읽는 역할=대기 손님/스튜디오 PM")
+	match affordance:
+		"post_rumor":
+			labels.append("효과=소문이 다른 장소 행동으로 이동")
+		"post_warning":
+			labels.append("효과=경고가 거리두기와 리뷰 보류로 이동")
+		"vouch_routine":
+			labels.append("효과=확인이 도움과 리뷰 초대로 이동")
+		"post_repair_notice":
+			labels.append("효과=수습 기록이 조건부 기회로 이동")
 	return labels
 
 func _ledger_event_kind_condition_label(raw_kinds: String) -> String:

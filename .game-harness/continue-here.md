@@ -47,7 +47,11 @@ Last Updated: 2026-05-18
 - If `--status` is already pass and no watched Godot/HUD/probe/session-helper
   source changed, do not rerun Codex probe or regenerate setup kits merely to
   show activity. The next useful move is human play, not more preparation.
-- Latest implementation slice: the live HUD record line now includes
+- Latest implementation slice: NPC reaction inspection now shows a short
+  `들은 말` line and exports `spokenLine`, so inspecting Studio PM or Waiting
+  Customer reads the actual social refusal/blocking line that came from the
+  record they saw, not only a state label.
+- Previous implementation slice: the live HUD record line now includes
   `주변 태도`, summarizing visible NPC reactions such as Waiting Customer
   contact refusal, Studio PM review block, and Store Manager report handoff
   without requiring individual inspection panels.

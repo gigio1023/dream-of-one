@@ -156,6 +156,17 @@ main-pack evidence SHA-256:
 app-route evidence SHA-256:
 `f1db23c41bb44bace41d06b2dd2724351513aeaf7f3e447ea722379e8fe460d4`.
 
+Refresh note, 2026-05-18 KST: the PCK, macOS zip, unpacked app, and packaged
+route evidence were regenerated after NPC inspection gained `spokenLine` /
+`들은 말` for visible social reactions. PCK `--main-pack` smoke, packaged app
+launch, packaged route smoke, and tester preflight pass. PCK SHA-256:
+`1ba6d7350ccbf26a12773f8393b8e5ef7cd87216e0fdffb58273ea8d7571ed1c`; macOS
+zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`;
+main-pack evidence SHA-256:
+`ab2195fdf89b6de9b761234c86625be71cd3dde6c6f754c61d5b052c78df7f7d`; packaged
+app-route evidence SHA-256:
+`eaafccb06cc974ba3d22f968584693f45f5d68cfa0993ed87d719a5b63ffc4ac`.
+
 ## Command Evidence
 
 Import:

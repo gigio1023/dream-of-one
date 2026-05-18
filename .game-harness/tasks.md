@@ -181,6 +181,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Add a live HUD nearby-stance summary: `주변 태도` now names the active
   visible NPC reactions such as help, conditional review, distance, queue exit,
   review block, and contact refusal without requiring NPC-by-NPC inspection.
+- [x] Add player-readable NPC spoken reaction lines: inspecting Studio PM or
+  Waiting Customer now shows `들은 말` and exports `spokenLine` so Codex/player
+  can read the actual social blocking/refusal line through focus plus interact.
 - [x] Make the civic economy panel player-readable as a tiny social-pressure
   record: Codex/player can inspect current credit/trust/burden/attention values
   and recent ledger deltas that show which role action moved them.

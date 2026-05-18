@@ -95,6 +95,11 @@ Current M1 carry-in:
   long-term content focus. Future work should extract reusable
   environment-agent patterns instead of deepening Store operations or Station
   procedure.
+- latest small-slice carry-in: inspecting a visible NPC now includes the short
+  line the NPC is saying as `들은 말` / `spokenLine`. Studio PM's review block
+  and Waiting Customer's contact refusal are now readable as social speech
+  through the running game's focus plus interact path, keeping conversation at
+  the center of the social consequence.
 - latest small-slice carry-in: the live HUD now has `주변 태도`, a compact
   stance summary for visible NPCs. The player can see nearby help, distance,
   service pause, review block, and contact refusal in the main play HUD before

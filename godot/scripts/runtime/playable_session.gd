@@ -2448,11 +2448,14 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 	var role := str(snapshot.get("role", ""))
 	var reaction_text := str(snapshot.get("reactionText", "")).strip_edges()
 	var pressure_text := str(snapshot.get("pressureText", "")).strip_edges()
+	var spoken_line := str(snapshot.get("spokenLine", "")).strip_edges()
 	var state := str(snapshot.get("state", "normal"))
 	var title := "%s / %s" % [display_name, role]
 	var body_lines := PackedStringArray()
 	body_lines.append("현재 반응: %s" % (reaction_text if not reaction_text.is_empty() else _record_state_value(state)))
-	if not pressure_text.is_empty():
+	if not spoken_line.is_empty():
+		body_lines.append("들은 말: \"%s\"" % spoken_line)
+	elif not pressure_text.is_empty():
 		body_lines.append("말/태도: %s" % pressure_text)
 	var basis_action := _latest_accepted_action_for_actor(npc_id)
 	var basis_event_id := ""
@@ -2490,6 +2493,7 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 				body_lines.append("값 변화: %s" % ", ".join(basis_economy_effect_labels))
 	body_lines.append("이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.")
 	inspected_npc_state = snapshot.duplicate(true)
+	inspected_npc_state["spokenLine"] = spoken_line
 	if not basis_action.is_empty():
 		inspected_npc_state["basisAction"] = basis_action.duplicate(true)
 		inspected_npc_state["basisLedgerEventId"] = basis_event_id
@@ -3318,7 +3322,9 @@ func _visible_npc_states() -> Dictionary:
 		if node.has_method("debug_reaction_snapshot"):
 			var snapshot: Variant = node.call("debug_reaction_snapshot")
 			if snapshot is Dictionary:
-				states[npc_id] = snapshot
+				var npc_snapshot: Dictionary = snapshot
+				npc_snapshot["spokenLine"] = _npc_spoken_reaction_line(npc_id, npc_snapshot)
+				states[npc_id] = npc_snapshot
 				continue
 		states[npc_id] = {
 			"npcId": npc_id,
@@ -3326,6 +3332,59 @@ func _visible_npc_states() -> Dictionary:
 			"homeLandmark": str(node.get_meta("home_landmark", ""))
 		}
 	return states
+
+func _npc_spoken_reaction_line(npc_id: String, snapshot: Dictionary) -> String:
+	var line := str(snapshot.get("pressureText", "")).strip_edges()
+	if not line.is_empty():
+		return line
+	var state := str(snapshot.get("state", "normal"))
+	if state == "normal":
+		return ""
+	match npc_id:
+		"NPC_Waiting_Customer":
+			match state:
+				"helped":
+					return "다음엔 여기서 같은 말만 먼저 하면 돼요."
+				"repair_accepted":
+					return "정정됐으면 줄은 계속 가도 되겠네요."
+				"distanced":
+					return "가까이 서지는 않겠습니다."
+				"left":
+					return "카운터까지 멈추면 저는 빠질게요."
+				"refused":
+					return "스테이션이 인용했으면 저는 말 섞지 않겠습니다."
+		"NPC_Studio_PM":
+			match state:
+				"invited":
+					return "공개 확인이 붙었네요. 리뷰 줄은 열어둘게요."
+				"conditional":
+					return "공개 수습 기록은 봤습니다. 리뷰 줄은 조건부로 남겨둘게요."
+				"deferred":
+					return "공개 경고가 붙었네요. 리뷰 줄은 오늘 보류하겠습니다."
+				"blocked":
+					return "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다."
+		"NPC_Store_Manager":
+			match state:
+				"paused":
+					return "보고가 붙은 동안 카운터를 잠시 멈춥니다."
+				"forwarded":
+					return "이 상점 기록은 스테이션이 대조해야 합니다."
+		"NPC_Park_Witness":
+			match state:
+				"vouched":
+					return "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요."
+				"repaired":
+					return "정정 기록이 붙었으니 소문으로 돌릴 일은 아니겠네요."
+				"warned":
+					return "줄이 늦춰진 건 남겨둘게요."
+				"rumored":
+					return "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다."
+		"NPC_Station_Officer":
+			if state == "reported":
+				return "상점 기록을 접수했습니다. 이전 발화와 대조합니다."
+			if state == "inquest":
+				return "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다."
+	return ""
 
 func _current_choices() -> Array:
 	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})

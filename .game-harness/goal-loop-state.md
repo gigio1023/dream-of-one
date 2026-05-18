@@ -96,17 +96,24 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `158e354dce79f6f24e7794c541aa0af2c6ecf472f01c9d46d033d87b81be4e49`
-  - Markdown SHA-256: `29baae67aea7f53e8b6e74005b45391d6f5430202a6308dcbdc23eccf05aeb80`
-  - playable Evidence Pack SHA-256: `b7644cb8b509b061a14201066074d69d68eea629fd288329211664f1aa2f1206`
+  - JSON SHA-256: `22263bdd4abde9c20b5d99d1ae084c8b54e74e1c57754e9fd281288d65ce2e6e`
+  - Markdown SHA-256: `a6adf94724769b0bd2008e2f3b4d101cfae18080df36ec8eac92b7e03c5ca2fe`
+  - playable Evidence Pack SHA-256: `fff50f027a1d44cab3fb8430b58578e11a4c1a317c271c195178ff8be400eeca`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
-  - packaged app zip SHA-256: `36ab9e79b7a16150df1a0cea0e0df00f22942e9ed877633b5f8ef21b3c81ff50`
+  - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `17 / 17`, `explainability=17/17`, and
+  player actions `17 / 17`, `explainability=18/18`, and
   `routeReportPassCount=5 / 5`.
+- latest game increment: NPC reaction inspection now exposes the short
+  player-readable line the NPC is saying, not only the reaction label. In the
+  inquest Codex run, inspecting Studio PM shows `들은 말: "스테이션 인용이
+  붙었네요. 리뷰 줄은 오늘 차단하겠습니다."`, and inspecting Waiting Customer
+  shows `들은 말: "스테이션이 인용했으면 저는 말 섞지 않겠습니다."`. The
+  exported snapshots carry `spokenLine`, and Codex gameplay QA now requires
+  `canReadNpcSpokenReaction=true`.
 - latest game increment: the live HUD record line now includes a compact
   `주변 태도` summary of visible NPC stances. In the inquest Codex run, the HUD
   shows `대기 손님=접촉 거부`, `스튜디오 PM=리뷰 차단`, and `상점 매니저=보고 전달`
@@ -391,9 +398,9 @@ Latest AI-play interface check:
 - Markdown report:
   `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md`
 - SHA-256:
-  `da11727be3fed6576dd999bb3732f9927a222df82e9dbcc476f7f85b0d870a5c`
+  `22263bdd4abde9c20b5d99d1ae084c8b54e74e1c57754e9fd281288d65ce2e6e`
 - Markdown SHA-256:
-  `13069f5169068c3b6efe7aec2a1a2591e2a067ceebc657cd4d6c76dc95727437`
+  `a6adf94724769b0bd2008e2f3b4d101cfae18080df36ec8eac92b7e03c5ca2fe`
 - new proof: artifact now includes `aiPlayerReport` with action path, final
   player-visible state, player-readable cause chain, role-action explanation,
   NPC-to-NPC observation explanation, and the explicit boundary that this is

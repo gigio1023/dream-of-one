@@ -52,6 +52,7 @@
 			"canReadInputToRecordChain": true,
 			"canReadLiveHudNearbyStances": true,
 			"canReadLiveHudSocialCitation": true,
+			"canReadNpcSpokenReaction": true,
 			"canReadNpcToNpcChain": true,
 			"canReadVisibleNpcReaction": true,
 			"codexPlayedThroughPublicActions": true,
@@ -201,7 +202,7 @@
 					"basisLedgerEventLabel": "civic-ledger-7 / 스튜디오 PM -> 리뷰 차단",
 					"basisObjectId": "studio_review_queue",
 					"basisObjectLabel": "스튜디오 리뷰 줄",
-					"body": "현재 반응: 리뷰 차단\n말/태도: 스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"body": "현재 반응: 리뷰 차단\n들은 말: \"스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\"\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 					"citedLedgerEventId": "civic-ledger-6",
 					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 					"displayName": "Studio PM",
@@ -213,6 +214,7 @@
 					"pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"reactionText": "리뷰 차단",
 					"role": "Studio PM",
+					"spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"state": "blocked"
 				},
 				{
@@ -446,7 +448,7 @@
 					"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 					"basisObjectId": "store_queue_mark",
 					"basisObjectLabel": "대기 표식",
-					"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 					"citedLedgerEventId": "civic-ledger-6",
 					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 					"displayName": "Waiting Customer",
@@ -458,6 +460,7 @@
 					"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"reactionText": "접촉 거부",
 					"role": "Waiting Customer",
+					"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"state": "refused"
 				},
 				{
@@ -691,7 +694,7 @@
 					"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 					"basisObjectId": "store_queue_mark",
 					"basisObjectLabel": "대기 표식",
-					"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 					"citedLedgerEventId": "civic-ledger-6",
 					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 					"displayName": "Waiting Customer",
@@ -703,6 +706,7 @@
 					"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"reactionText": "접촉 거부",
 					"role": "Waiting Customer",
+					"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"state": "refused"
 				},
 				{
@@ -936,7 +940,7 @@
 					"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 					"basisObjectId": "store_queue_mark",
 					"basisObjectLabel": "대기 표식",
-					"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 					"citedLedgerEventId": "civic-ledger-6",
 					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 					"displayName": "Waiting Customer",
@@ -948,6 +952,7 @@
 					"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"reactionText": "접촉 거부",
 					"role": "Waiting Customer",
+					"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"state": "refused"
 				},
 				{
@@ -1181,7 +1186,7 @@
 					"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 					"basisObjectId": "store_queue_mark",
 					"basisObjectLabel": "대기 표식",
-					"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 					"citedLedgerEventId": "civic-ledger-6",
 					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 					"displayName": "Waiting Customer",
@@ -1193,6 +1198,499 @@
 					"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"reactionText": "접촉 거부",
 					"role": "Waiting Customer",
+					"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+					"state": "refused"
+				},
+				{
+					"basisAction": {
+						"accepted": true,
+						"actorId": "NPC_Waiting_Customer",
+						"actorRole": "waiting_customer",
+						"affordance": "refuse_contact",
+						"availableActions": [
+							{
+								"actionId": "store_queue_mark.complain_delay",
+								"affordance": "complain_delay",
+								"citableLedgerEventIds": [
+									"civic-ledger-6"
+								],
+								"civicEconomyEffects": [
+									"recordBurden:+5"
+								],
+								"eligibleRoles": [
+									"waiting_customer"
+								],
+								"failureReasons": [
+									"object_not_perceived",
+									"affordance_unavailable",
+									"role_authority_exceeded",
+									"why_line_required",
+									"ledger_event_unknown",
+									"ledger_event_not_known"
+								],
+								"ledgerEventKind": "queue_delay_noted",
+								"objectId": "store_queue_mark",
+								"objectState": "disrupted",
+								"perceivedAs": "public queue pressure",
+								"playerLabel": "Complain Delay",
+								"preconditions": [
+									"object_state:disrupted",
+									"role_allowed:waiting_customer",
+									"known_ledger_event_required",
+									"record_id:store_same_order_queue_state"
+								],
+								"priorityHints": [
+									"economy:recordBurden",
+									"pressure:queue_delay"
+								],
+								"recordId": "store_same_order_queue_state",
+								"requiresLedgerEvent": true,
+								"requiresStoreLedgerEvent": false,
+								"toState": "disrupted",
+								"validationRuleId": "same_order.store_queue_mark.complain_delay",
+								"visibleTo": [
+									"store_clerk",
+									"waiting_customer"
+								]
+							},
+							{
+								"actionId": "store_queue_mark.accept_repair",
+								"affordance": "accept_repair",
+								"citableLedgerEventIds": [
+									"civic-ledger-6"
+								],
+								"civicEconomyEffects": [
+									"localTrust:+5",
+									"recordBurden:-5"
+								],
+								"eligibleRoles": [
+									"waiting_customer"
+								],
+								"failureReasons": [
+									"object_not_perceived",
+									"affordance_unavailable",
+									"role_authority_exceeded",
+									"why_line_required",
+									"ledger_event_unknown",
+									"ledger_event_not_known"
+								],
+								"ledgerEventKind": "queue_repair_accepted",
+								"objectId": "store_queue_mark",
+								"objectState": "disrupted",
+								"perceivedAs": "public repair acceptance",
+								"playerLabel": "Accept Repair",
+								"preconditions": [
+									"object_state:disrupted",
+									"role_allowed:waiting_customer",
+									"known_ledger_event_required",
+									"record_id:store_same_order_queue_state"
+								],
+								"priorityHints": [
+									"economy:localTrust",
+									"economy:recordBurden",
+									"pressure:repair_accepted"
+								],
+								"recordId": "store_same_order_queue_state",
+								"requiresLedgerEvent": true,
+								"requiresStoreLedgerEvent": false,
+								"toState": "settled",
+								"validationRuleId": "same_order.store_queue_mark.accept_repair",
+								"visibleTo": [
+									"store_clerk",
+									"waiting_customer"
+								]
+							},
+							{
+								"actionId": "store_queue_mark.refuse_contact",
+								"affordance": "refuse_contact",
+								"citableLedgerEventIds": [
+									"civic-ledger-6"
+								],
+								"civicEconomyEffects": [
+									"localTrust:-8",
+									"recordBurden:+5"
+								],
+								"eligibleRoles": [
+									"waiting_customer"
+								],
+								"failureReasons": [
+									"object_not_perceived",
+									"affordance_unavailable",
+									"role_authority_exceeded",
+									"why_line_required",
+									"ledger_event_unknown",
+									"ledger_event_not_known"
+								],
+								"ledgerEventKind": "queue_contact_refused",
+								"objectId": "store_queue_mark",
+								"objectState": "disrupted",
+								"perceivedAs": "queue refuses contact after citation",
+								"playerLabel": "Refuse Contact",
+								"preconditions": [
+									"object_state:disrupted",
+									"role_allowed:waiting_customer",
+									"known_ledger_event_required",
+									"record_id:store_same_order_queue_state"
+								],
+								"priorityHints": [
+									"economy:localTrust",
+									"economy:recordBurden",
+									"pressure:authority_seen"
+								],
+								"recordId": "store_same_order_queue_state",
+								"requiresLedgerEvent": true,
+								"requiresStoreLedgerEvent": false,
+								"toState": "refused",
+								"validationRuleId": "same_order.store_queue_mark.refuse_contact",
+								"visibleTo": [
+									"store_clerk",
+									"waiting_customer"
+								]
+							}
+						],
+						"citedLedgerEventId": "civic-ledger-6",
+						"economyAfter": {
+							"accountCredit": 3,
+							"localTrust": 0,
+							"recordBurden": 93,
+							"stationAttention": 70
+						},
+						"ledgerEventId": "civic-ledger-8",
+						"ledgerEventKind": "queue_contact_refused",
+						"objectId": "store_queue_mark",
+						"perceivedObjectIds": [
+							"store_queue_mark",
+							"store_counter",
+							"usual_order_cue",
+							"park_notice_board"
+						],
+						"recordId": "store_same_order_contact_refused",
+						"selectedActionDescriptor": {
+							"actionId": "store_queue_mark.refuse_contact",
+							"affordance": "refuse_contact",
+							"citableLedgerEventIds": [
+								"civic-ledger-6"
+							],
+							"civicEconomyEffects": [
+								"localTrust:-8",
+								"recordBurden:+5"
+							],
+							"eligibleRoles": [
+								"waiting_customer"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known"
+							],
+							"ledgerEventKind": "queue_contact_refused",
+							"objectId": "store_queue_mark",
+							"objectState": "disrupted",
+							"perceivedAs": "queue refuses contact after citation",
+							"playerLabel": "Refuse Contact",
+							"preconditions": [
+								"object_state:disrupted",
+								"role_allowed:waiting_customer",
+								"known_ledger_event_required",
+								"record_id:store_same_order_queue_state"
+							],
+							"priorityHints": [
+								"economy:localTrust",
+								"economy:recordBurden",
+								"pressure:authority_seen"
+							],
+							"recordId": "store_same_order_queue_state",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": false,
+							"toState": "refused",
+							"validationRuleId": "same_order.store_queue_mark.refuse_contact",
+							"visibleTo": [
+								"store_clerk",
+								"waiting_customer"
+							]
+						},
+						"selectionReason": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open.",
+						"sequence": 8,
+						"stepId": "inquest.waiting_customer.refuse_contact",
+						"validation": "accepted",
+						"whyLine": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open."
+					},
+					"basisAffordance": "refuse_contact",
+					"basisAffordanceLabel": "접촉 거부",
+					"basisConditionLabels": [
+						"대기 표식=줄 흐트러짐",
+						"인용 장부 civic-ledger-6"
+					],
+					"basisEconomyEffectLabels": [
+						"신뢰-8",
+						"부담+5"
+					],
+					"basisLedgerEventId": "civic-ledger-8",
+					"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
+					"basisObjectId": "store_queue_mark",
+					"basisObjectLabel": "대기 표식",
+					"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"citedLedgerEventId": "civic-ledger-6",
+					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"displayName": "Waiting Customer",
+					"emissionEnergy": 0.616666674613953,
+					"exposure": 125,
+					"markerVisible": true,
+					"materialAlpha": 0.3980952501297,
+					"npcId": "NPC_Waiting_Customer",
+					"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+					"reactionText": "접촉 거부",
+					"role": "Waiting Customer",
+					"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+					"state": "refused"
+				},
+				{
+					"basisAction": {
+						"accepted": true,
+						"actorId": "NPC_Waiting_Customer",
+						"actorRole": "waiting_customer",
+						"affordance": "refuse_contact",
+						"availableActions": [
+							{
+								"actionId": "store_queue_mark.complain_delay",
+								"affordance": "complain_delay",
+								"citableLedgerEventIds": [
+									"civic-ledger-6"
+								],
+								"civicEconomyEffects": [
+									"recordBurden:+5"
+								],
+								"eligibleRoles": [
+									"waiting_customer"
+								],
+								"failureReasons": [
+									"object_not_perceived",
+									"affordance_unavailable",
+									"role_authority_exceeded",
+									"why_line_required",
+									"ledger_event_unknown",
+									"ledger_event_not_known"
+								],
+								"ledgerEventKind": "queue_delay_noted",
+								"objectId": "store_queue_mark",
+								"objectState": "disrupted",
+								"perceivedAs": "public queue pressure",
+								"playerLabel": "Complain Delay",
+								"preconditions": [
+									"object_state:disrupted",
+									"role_allowed:waiting_customer",
+									"known_ledger_event_required",
+									"record_id:store_same_order_queue_state"
+								],
+								"priorityHints": [
+									"economy:recordBurden",
+									"pressure:queue_delay"
+								],
+								"recordId": "store_same_order_queue_state",
+								"requiresLedgerEvent": true,
+								"requiresStoreLedgerEvent": false,
+								"toState": "disrupted",
+								"validationRuleId": "same_order.store_queue_mark.complain_delay",
+								"visibleTo": [
+									"store_clerk",
+									"waiting_customer"
+								]
+							},
+							{
+								"actionId": "store_queue_mark.accept_repair",
+								"affordance": "accept_repair",
+								"citableLedgerEventIds": [
+									"civic-ledger-6"
+								],
+								"civicEconomyEffects": [
+									"localTrust:+5",
+									"recordBurden:-5"
+								],
+								"eligibleRoles": [
+									"waiting_customer"
+								],
+								"failureReasons": [
+									"object_not_perceived",
+									"affordance_unavailable",
+									"role_authority_exceeded",
+									"why_line_required",
+									"ledger_event_unknown",
+									"ledger_event_not_known"
+								],
+								"ledgerEventKind": "queue_repair_accepted",
+								"objectId": "store_queue_mark",
+								"objectState": "disrupted",
+								"perceivedAs": "public repair acceptance",
+								"playerLabel": "Accept Repair",
+								"preconditions": [
+									"object_state:disrupted",
+									"role_allowed:waiting_customer",
+									"known_ledger_event_required",
+									"record_id:store_same_order_queue_state"
+								],
+								"priorityHints": [
+									"economy:localTrust",
+									"economy:recordBurden",
+									"pressure:repair_accepted"
+								],
+								"recordId": "store_same_order_queue_state",
+								"requiresLedgerEvent": true,
+								"requiresStoreLedgerEvent": false,
+								"toState": "settled",
+								"validationRuleId": "same_order.store_queue_mark.accept_repair",
+								"visibleTo": [
+									"store_clerk",
+									"waiting_customer"
+								]
+							},
+							{
+								"actionId": "store_queue_mark.refuse_contact",
+								"affordance": "refuse_contact",
+								"citableLedgerEventIds": [
+									"civic-ledger-6"
+								],
+								"civicEconomyEffects": [
+									"localTrust:-8",
+									"recordBurden:+5"
+								],
+								"eligibleRoles": [
+									"waiting_customer"
+								],
+								"failureReasons": [
+									"object_not_perceived",
+									"affordance_unavailable",
+									"role_authority_exceeded",
+									"why_line_required",
+									"ledger_event_unknown",
+									"ledger_event_not_known"
+								],
+								"ledgerEventKind": "queue_contact_refused",
+								"objectId": "store_queue_mark",
+								"objectState": "disrupted",
+								"perceivedAs": "queue refuses contact after citation",
+								"playerLabel": "Refuse Contact",
+								"preconditions": [
+									"object_state:disrupted",
+									"role_allowed:waiting_customer",
+									"known_ledger_event_required",
+									"record_id:store_same_order_queue_state"
+								],
+								"priorityHints": [
+									"economy:localTrust",
+									"economy:recordBurden",
+									"pressure:authority_seen"
+								],
+								"recordId": "store_same_order_queue_state",
+								"requiresLedgerEvent": true,
+								"requiresStoreLedgerEvent": false,
+								"toState": "refused",
+								"validationRuleId": "same_order.store_queue_mark.refuse_contact",
+								"visibleTo": [
+									"store_clerk",
+									"waiting_customer"
+								]
+							}
+						],
+						"citedLedgerEventId": "civic-ledger-6",
+						"economyAfter": {
+							"accountCredit": 3,
+							"localTrust": 0,
+							"recordBurden": 93,
+							"stationAttention": 70
+						},
+						"ledgerEventId": "civic-ledger-8",
+						"ledgerEventKind": "queue_contact_refused",
+						"objectId": "store_queue_mark",
+						"perceivedObjectIds": [
+							"store_queue_mark",
+							"store_counter",
+							"usual_order_cue",
+							"park_notice_board"
+						],
+						"recordId": "store_same_order_contact_refused",
+						"selectedActionDescriptor": {
+							"actionId": "store_queue_mark.refuse_contact",
+							"affordance": "refuse_contact",
+							"citableLedgerEventIds": [
+								"civic-ledger-6"
+							],
+							"civicEconomyEffects": [
+								"localTrust:-8",
+								"recordBurden:+5"
+							],
+							"eligibleRoles": [
+								"waiting_customer"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known"
+							],
+							"ledgerEventKind": "queue_contact_refused",
+							"objectId": "store_queue_mark",
+							"objectState": "disrupted",
+							"perceivedAs": "queue refuses contact after citation",
+							"playerLabel": "Refuse Contact",
+							"preconditions": [
+								"object_state:disrupted",
+								"role_allowed:waiting_customer",
+								"known_ledger_event_required",
+								"record_id:store_same_order_queue_state"
+							],
+							"priorityHints": [
+								"economy:localTrust",
+								"economy:recordBurden",
+								"pressure:authority_seen"
+							],
+							"recordId": "store_same_order_queue_state",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": false,
+							"toState": "refused",
+							"validationRuleId": "same_order.store_queue_mark.refuse_contact",
+							"visibleTo": [
+								"store_clerk",
+								"waiting_customer"
+							]
+						},
+						"selectionReason": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open.",
+						"sequence": 8,
+						"stepId": "inquest.waiting_customer.refuse_contact",
+						"validation": "accepted",
+						"whyLine": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open."
+					},
+					"basisAffordance": "refuse_contact",
+					"basisAffordanceLabel": "접촉 거부",
+					"basisConditionLabels": [
+						"대기 표식=줄 흐트러짐",
+						"인용 장부 civic-ledger-6"
+					],
+					"basisEconomyEffectLabels": [
+						"신뢰-8",
+						"부담+5"
+					],
+					"basisLedgerEventId": "civic-ledger-8",
+					"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
+					"basisObjectId": "store_queue_mark",
+					"basisObjectLabel": "대기 표식",
+					"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"citedLedgerEventId": "civic-ledger-6",
+					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"displayName": "Waiting Customer",
+					"emissionEnergy": 0.616666674613953,
+					"exposure": 125,
+					"markerVisible": true,
+					"materialAlpha": 0.3980952501297,
+					"npcId": "NPC_Waiting_Customer",
+					"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+					"reactionText": "접촉 거부",
+					"role": "Waiting Customer",
+					"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"state": "refused"
 				}
 			],
@@ -1427,7 +1925,7 @@
 				"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 				"basisObjectId": "store_queue_mark",
 				"basisObjectLabel": "대기 표식",
-				"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"citedLedgerEventId": "civic-ledger-6",
 				"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 				"displayName": "Waiting Customer",
@@ -1439,6 +1937,7 @@
 				"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"reactionText": "접촉 거부",
 				"role": "Waiting Customer",
+				"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"state": "refused"
 			},
 			"inspectedWorldRecordHistory": [
@@ -2083,7 +2582,7 @@
 				"title": "시민 장부"
 			},
 			"investigationTrail": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-			"notice": "Waiting Customer / Waiting Customer / 현재 반응: 접촉 거부 / 말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다. / 근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부 / 읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용 / 대상 기록물: 대기 표식 / 가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6 / 값 변화: 신뢰-8, 부담+5 / 이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+			"notice": "Waiting Customer / Waiting Customer / 현재 반응: 접촉 거부 / 들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\" / 근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부 / 읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용 / 대상 기록물: 대기 표식 / 가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6 / 값 변화: 신뢰-8, 부담+5 / 이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 			"outcomeBody": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
 			"recordState": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 전달 | 스테이션 인용됨 | 잔액 3 신뢰 0 부담 93 주목 70 | 장부 8 최근 civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6 | 사회 반응 대기 손님이 스테이션 직원 기록 인용(civic-ledger-6) 기록을 보고 접촉 거부, 부담 85 | 주변 태도 대기 손님=접촉 거부, 스튜디오 PM=리뷰 차단, 상점 매니저=보고 전달",
 			"reportWeight": 120,
@@ -2102,6 +2601,7 @@
 					"pressureText": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
 					"reactionText": "소문 게시",
 					"role": "Park Witness",
+					"spokenLine": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
 					"state": "rumored"
 				},
 				"NPC_Station_Officer": {
@@ -2114,6 +2614,7 @@
 					"pressureText": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
 					"reactionText": "보고됨",
 					"role": "Station Officer",
+					"spokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
 					"state": "inquest"
 				},
 				"NPC_Store_Clerk": {
@@ -2126,6 +2627,7 @@
 					"pressureText": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
 					"reactionText": "보고됨",
 					"role": "Store Clerk",
+					"spokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
 					"state": "inquest"
 				},
 				"NPC_Store_Manager": {
@@ -2138,6 +2640,7 @@
 					"pressureText": "이 상점 기록은 스테이션이 대조해야 합니다.",
 					"reactionText": "보고 전달",
 					"role": "Store Manager",
+					"spokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
 					"state": "forwarded"
 				},
 				"NPC_Studio_PM": {
@@ -2150,6 +2653,7 @@
 					"pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"reactionText": "리뷰 차단",
 					"role": "Studio PM",
+					"spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"state": "blocked"
 				},
 				"NPC_Waiting_Customer": {
@@ -2162,6 +2666,7 @@
 					"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"reactionText": "접촉 거부",
 					"role": "Waiting Customer",
+					"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"state": "refused"
 				}
 			},
@@ -2180,7 +2685,7 @@
 			"Codex/player inspected the Studio review queue and Studio PM to read that the Station citation blocked a small opportunity in another place.",
 			"Codex/player read the Studio review queue's visible role/action map: Studio PM can invite, defer, or block review from shared records.",
 			"Codex/player inspected the civic ledger to read the NPC-to-NPC social chain as a player-facing timeline.",
-			"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state and its cited ledger basis.",
+			"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, and cited ledger basis.",
 			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
 		],
 		"purpose": "Readable AI-play report: what Codex did as the player, what changed in the running scene, and what a human still has to verify.",
@@ -2288,7 +2793,7 @@
 			"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 			"freeInputVisible": false,
 			"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-			"noticeBodyLabel": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+			"noticeBodyLabel": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 			"noticeTitleLabel": "Waiting Customer / Waiting Customer",
 			"noticeVisible": false,
 			"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
@@ -2532,7 +3037,7 @@
 			"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 			"basisObjectId": "store_queue_mark",
 			"basisObjectLabel": "대기 표식",
-			"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+			"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 			"citedLedgerEventId": "civic-ledger-6",
 			"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 			"displayName": "Waiting Customer",
@@ -2544,6 +3049,7 @@
 			"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 			"reactionText": "접촉 거부",
 			"role": "Waiting Customer",
+			"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 			"state": "refused"
 		},
 		"recordObjects": {
@@ -3965,7 +4471,7 @@
 					"basisLedgerEventLabel": "civic-ledger-7 / 스튜디오 PM -> 리뷰 차단",
 					"basisObjectId": "studio_review_queue",
 					"basisObjectLabel": "스튜디오 리뷰 줄",
-					"body": "현재 반응: 리뷰 차단\n말/태도: 스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"body": "현재 반응: 리뷰 차단\n들은 말: \"스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\"\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 					"citedLedgerEventId": "civic-ledger-6",
 					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 					"displayName": "Studio PM",
@@ -3977,6 +4483,7 @@
 					"pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"reactionText": "리뷰 차단",
 					"role": "Studio PM",
+					"spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"state": "blocked"
 				},
 				"inspectedWorldRecordProp": {
@@ -4275,7 +4782,7 @@
 					"basisLedgerEventLabel": "civic-ledger-7 / 스튜디오 PM -> 리뷰 차단",
 					"basisObjectId": "studio_review_queue",
 					"basisObjectLabel": "스튜디오 리뷰 줄",
-					"body": "현재 반응: 리뷰 차단\n말/태도: 스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"body": "현재 반응: 리뷰 차단\n들은 말: \"스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\"\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 					"citedLedgerEventId": "civic-ledger-6",
 					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 					"displayName": "Studio PM",
@@ -4287,6 +4794,7 @@
 					"pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"reactionText": "리뷰 차단",
 					"role": "Studio PM",
+					"spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"state": "blocked"
 				},
 				"inspectedWorldRecordProp": {
@@ -4503,7 +5011,7 @@
 					"basisLedgerEventLabel": "civic-ledger-7 / 스튜디오 PM -> 리뷰 차단",
 					"basisObjectId": "studio_review_queue",
 					"basisObjectLabel": "스튜디오 리뷰 줄",
-					"body": "현재 반응: 리뷰 차단\n말/태도: 스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"body": "현재 반응: 리뷰 차단\n들은 말: \"스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\"\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 					"citedLedgerEventId": "civic-ledger-6",
 					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 					"displayName": "Studio PM",
@@ -4515,6 +5023,7 @@
 					"pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"reactionText": "리뷰 차단",
 					"role": "Studio PM",
+					"spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"state": "blocked"
 				},
 				"inspectedWorldRecordProp": {
@@ -4831,7 +5340,7 @@
 					"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 					"basisObjectId": "store_queue_mark",
 					"basisObjectLabel": "대기 표식",
-					"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 					"citedLedgerEventId": "civic-ledger-6",
 					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 					"displayName": "Waiting Customer",
@@ -4843,6 +5352,7 @@
 					"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"reactionText": "접촉 거부",
 					"role": "Waiting Customer",
+					"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"state": "refused"
 				},
 				"inspectedWorldRecordProp": {
@@ -5059,7 +5569,7 @@
 					"basisLedgerEventLabel": "civic-ledger-7 / 스튜디오 PM -> 리뷰 차단",
 					"basisObjectId": "studio_review_queue",
 					"basisObjectLabel": "스튜디오 리뷰 줄",
-					"body": "현재 반응: 리뷰 차단\n말/태도: 스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"body": "현재 반응: 리뷰 차단\n들은 말: \"스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\"\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 					"citedLedgerEventId": "civic-ledger-6",
 					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 					"displayName": "Studio PM",
@@ -5071,6 +5581,7 @@
 					"pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"reactionText": "리뷰 차단",
 					"role": "Studio PM",
+					"spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"state": "blocked"
 				},
 				"inspectedWorldRecordProp": {
@@ -7169,14 +7680,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779065094953",
+				"eventId": "playable_session_started-001-1779065688051",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779065094953,
+				"timestampMs": 1779065688051,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -7189,7 +7700,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-002-1779065095018",
+				"eventId": "conversation_started-002-1779065688141",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -7198,7 +7709,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779065095018,
+				"timestampMs": 1779065688141,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -7211,7 +7722,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-003-1779065095034",
+				"eventId": "response_hesitation_noted-003-1779065688154",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -7232,7 +7743,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779065095034,
+				"timestampMs": 1779065688154,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -7247,7 +7758,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-004-1779065095048",
+				"eventId": "dialogue_choice_selected-004-1779065688168",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -7269,7 +7780,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779065095048,
+				"timestampMs": 1779065688168,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -7284,7 +7795,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-005-1779065095048",
+				"eventId": "conversation_anomaly_detected-005-1779065688169",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -7306,7 +7817,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779065095048,
+				"timestampMs": 1779065688169,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -7321,7 +7832,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-006-1779065095048",
+				"eventId": "npc_suspicion_changed-006-1779065688169",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -7343,7 +7854,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779065095048,
+				"timestampMs": 1779065688169,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -7358,7 +7869,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-007-1779065095060",
+				"eventId": "free_input_submitted-007-1779065688182",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -7383,7 +7894,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779065095060,
+				"timestampMs": 1779065688182,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -7398,7 +7909,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779065095060",
+				"eventId": "conversation_anomaly_detected-008-1779065688182",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -7423,7 +7934,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779065095060,
+				"timestampMs": 1779065688182,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -7438,7 +7949,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779065095060",
+				"eventId": "npc_suspicion_changed-009-1779065688182",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -7463,7 +7974,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779065095060,
+				"timestampMs": 1779065688182,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -7478,7 +7989,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-010-1779065095060",
+				"eventId": "suspicion_shared-010-1779065688182",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -7503,7 +8014,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779065095060,
+				"timestampMs": 1779065688182,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -7518,7 +8029,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-011-1779065095061",
+				"eventId": "station_report_created-011-1779065688182",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -7543,7 +8054,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779065095061,
+				"timestampMs": 1779065688182,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -7558,7 +8069,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-012-1779065095061",
+				"eventId": "station_inquest_opened-012-1779065688183",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -7583,7 +8094,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779065095061,
+				"timestampMs": 1779065688183,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -7593,7 +8104,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-013-1779065095104",
+				"eventId": "world_record_prop_inspected-013-1779065688224",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -7601,7 +8112,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779065095104,
+				"timestampMs": 1779065688224,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -7613,7 +8124,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-014-1779065095130",
+				"eventId": "world_record_prop_inspected-014-1779065688249",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "studio_review_queue",
 				"schemaVersion": "godot-runtime-v1",
@@ -7621,7 +8132,7 @@
 				"state": "blocked",
 				"stateLabel": "차단",
 				"summary": "Inspected world record prop studio_review_queue in state blocked.",
-				"timestampMs": 1779065095130,
+				"timestampMs": 1779065688249,
 				"uiSummaryArgs": {
 					"object": "스튜디오 리뷰 줄",
 					"state": "차단"
@@ -7633,7 +8144,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-015-1779065095157",
+				"eventId": "world_record_prop_inspected-015-1779065688276",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_economy_panel",
 				"schemaVersion": "godot-runtime-v1",
@@ -7641,7 +8152,7 @@
 				"state": "attention",
 				"stateLabel": "주목 상승",
 				"summary": "Inspected world record prop civic_economy_panel in state attention.",
-				"timestampMs": 1779065095157,
+				"timestampMs": 1779065688276,
 				"uiSummaryArgs": {
 					"object": "시민 경제",
 					"state": "주목 상승"
@@ -7653,7 +8164,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-016-1779065095184",
+				"eventId": "world_record_prop_inspected-016-1779065688304",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_ledger",
 				"schemaVersion": "godot-runtime-v1",
@@ -7661,7 +8172,7 @@
 				"state": "append_only",
 				"stateLabel": "추가됨",
 				"summary": "Inspected world record prop civic_ledger in state append_only.",
-				"timestampMs": 1779065095184,
+				"timestampMs": 1779065688304,
 				"uiSummaryArgs": {
 					"object": "시민 장부",
 					"state": "추가됨"
@@ -7673,7 +8184,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-017-1779065095212",
+				"eventId": "npc_reaction_inspected-017-1779065688332",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Studio_PM",
 				"reactionText": "리뷰 차단",
@@ -7681,7 +8192,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "blocked",
 				"summary": "Inspected NPC reaction NPC_Studio_PM in state blocked.",
-				"timestampMs": 1779065095212,
+				"timestampMs": 1779065688332,
 				"uiSummaryArgs": {
 					"npc": "Studio PM",
 					"state": "리뷰 차단"
@@ -7693,7 +8204,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-018-1779065095240",
+				"eventId": "npc_reaction_inspected-018-1779065688360",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Waiting_Customer",
 				"reactionText": "접촉 거부",
@@ -7701,7 +8212,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "refused",
 				"summary": "Inspected NPC reaction NPC_Waiting_Customer in state refused.",
-				"timestampMs": 1779065095240,
+				"timestampMs": 1779065688360,
 				"uiSummaryArgs": {
 					"npc": "Waiting Customer",
 					"state": "접촉 거부"
@@ -7854,7 +8365,7 @@
 				"basisLedgerEventLabel": "civic-ledger-7 / 스튜디오 PM -> 리뷰 차단",
 				"basisObjectId": "studio_review_queue",
 				"basisObjectLabel": "스튜디오 리뷰 줄",
-				"body": "현재 반응: 리뷰 차단\n말/태도: 스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"body": "현재 반응: 리뷰 차단\n들은 말: \"스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\"\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"citedLedgerEventId": "civic-ledger-6",
 				"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 				"displayName": "Studio PM",
@@ -7866,6 +8377,7 @@
 				"pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 				"reactionText": "리뷰 차단",
 				"role": "Studio PM",
+				"spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 				"state": "blocked"
 			},
 			{
@@ -8099,7 +8611,7 @@
 				"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 				"basisObjectId": "store_queue_mark",
 				"basisObjectLabel": "대기 표식",
-				"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"citedLedgerEventId": "civic-ledger-6",
 				"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 				"displayName": "Waiting Customer",
@@ -8111,6 +8623,7 @@
 				"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"reactionText": "접촉 거부",
 				"role": "Waiting Customer",
+				"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"state": "refused"
 			},
 			{
@@ -8344,7 +8857,7 @@
 				"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 				"basisObjectId": "store_queue_mark",
 				"basisObjectLabel": "대기 표식",
-				"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"citedLedgerEventId": "civic-ledger-6",
 				"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 				"displayName": "Waiting Customer",
@@ -8356,6 +8869,7 @@
 				"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"reactionText": "접촉 거부",
 				"role": "Waiting Customer",
+				"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"state": "refused"
 			},
 			{
@@ -8589,7 +9103,7 @@
 				"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 				"basisObjectId": "store_queue_mark",
 				"basisObjectLabel": "대기 표식",
-				"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"citedLedgerEventId": "civic-ledger-6",
 				"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 				"displayName": "Waiting Customer",
@@ -8601,6 +9115,7 @@
 				"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"reactionText": "접촉 거부",
 				"role": "Waiting Customer",
+				"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"state": "refused"
 			},
 			{
@@ -8834,7 +9349,7 @@
 				"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 				"basisObjectId": "store_queue_mark",
 				"basisObjectLabel": "대기 표식",
-				"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"citedLedgerEventId": "civic-ledger-6",
 				"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 				"displayName": "Waiting Customer",
@@ -8846,6 +9361,499 @@
 				"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"reactionText": "접촉 거부",
 				"role": "Waiting Customer",
+				"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+				"state": "refused"
+			},
+			{
+				"basisAction": {
+					"accepted": true,
+					"actorId": "NPC_Waiting_Customer",
+					"actorRole": "waiting_customer",
+					"affordance": "refuse_contact",
+					"availableActions": [
+						{
+							"actionId": "store_queue_mark.complain_delay",
+							"affordance": "complain_delay",
+							"citableLedgerEventIds": [
+								"civic-ledger-6"
+							],
+							"civicEconomyEffects": [
+								"recordBurden:+5"
+							],
+							"eligibleRoles": [
+								"waiting_customer"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known"
+							],
+							"ledgerEventKind": "queue_delay_noted",
+							"objectId": "store_queue_mark",
+							"objectState": "disrupted",
+							"perceivedAs": "public queue pressure",
+							"playerLabel": "Complain Delay",
+							"preconditions": [
+								"object_state:disrupted",
+								"role_allowed:waiting_customer",
+								"known_ledger_event_required",
+								"record_id:store_same_order_queue_state"
+							],
+							"priorityHints": [
+								"economy:recordBurden",
+								"pressure:queue_delay"
+							],
+							"recordId": "store_same_order_queue_state",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": false,
+							"toState": "disrupted",
+							"validationRuleId": "same_order.store_queue_mark.complain_delay",
+							"visibleTo": [
+								"store_clerk",
+								"waiting_customer"
+							]
+						},
+						{
+							"actionId": "store_queue_mark.accept_repair",
+							"affordance": "accept_repair",
+							"citableLedgerEventIds": [
+								"civic-ledger-6"
+							],
+							"civicEconomyEffects": [
+								"localTrust:+5",
+								"recordBurden:-5"
+							],
+							"eligibleRoles": [
+								"waiting_customer"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known"
+							],
+							"ledgerEventKind": "queue_repair_accepted",
+							"objectId": "store_queue_mark",
+							"objectState": "disrupted",
+							"perceivedAs": "public repair acceptance",
+							"playerLabel": "Accept Repair",
+							"preconditions": [
+								"object_state:disrupted",
+								"role_allowed:waiting_customer",
+								"known_ledger_event_required",
+								"record_id:store_same_order_queue_state"
+							],
+							"priorityHints": [
+								"economy:localTrust",
+								"economy:recordBurden",
+								"pressure:repair_accepted"
+							],
+							"recordId": "store_same_order_queue_state",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": false,
+							"toState": "settled",
+							"validationRuleId": "same_order.store_queue_mark.accept_repair",
+							"visibleTo": [
+								"store_clerk",
+								"waiting_customer"
+							]
+						},
+						{
+							"actionId": "store_queue_mark.refuse_contact",
+							"affordance": "refuse_contact",
+							"citableLedgerEventIds": [
+								"civic-ledger-6"
+							],
+							"civicEconomyEffects": [
+								"localTrust:-8",
+								"recordBurden:+5"
+							],
+							"eligibleRoles": [
+								"waiting_customer"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known"
+							],
+							"ledgerEventKind": "queue_contact_refused",
+							"objectId": "store_queue_mark",
+							"objectState": "disrupted",
+							"perceivedAs": "queue refuses contact after citation",
+							"playerLabel": "Refuse Contact",
+							"preconditions": [
+								"object_state:disrupted",
+								"role_allowed:waiting_customer",
+								"known_ledger_event_required",
+								"record_id:store_same_order_queue_state"
+							],
+							"priorityHints": [
+								"economy:localTrust",
+								"economy:recordBurden",
+								"pressure:authority_seen"
+							],
+							"recordId": "store_same_order_queue_state",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": false,
+							"toState": "refused",
+							"validationRuleId": "same_order.store_queue_mark.refuse_contact",
+							"visibleTo": [
+								"store_clerk",
+								"waiting_customer"
+							]
+						}
+					],
+					"citedLedgerEventId": "civic-ledger-6",
+					"economyAfter": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"ledgerEventId": "civic-ledger-8",
+					"ledgerEventKind": "queue_contact_refused",
+					"objectId": "store_queue_mark",
+					"perceivedObjectIds": [
+						"store_queue_mark",
+						"store_counter",
+						"usual_order_cue",
+						"park_notice_board"
+					],
+					"recordId": "store_same_order_contact_refused",
+					"selectedActionDescriptor": {
+						"actionId": "store_queue_mark.refuse_contact",
+						"affordance": "refuse_contact",
+						"citableLedgerEventIds": [
+							"civic-ledger-6"
+						],
+						"civicEconomyEffects": [
+							"localTrust:-8",
+							"recordBurden:+5"
+						],
+						"eligibleRoles": [
+							"waiting_customer"
+						],
+						"failureReasons": [
+							"object_not_perceived",
+							"affordance_unavailable",
+							"role_authority_exceeded",
+							"why_line_required",
+							"ledger_event_unknown",
+							"ledger_event_not_known"
+						],
+						"ledgerEventKind": "queue_contact_refused",
+						"objectId": "store_queue_mark",
+						"objectState": "disrupted",
+						"perceivedAs": "queue refuses contact after citation",
+						"playerLabel": "Refuse Contact",
+						"preconditions": [
+							"object_state:disrupted",
+							"role_allowed:waiting_customer",
+							"known_ledger_event_required",
+							"record_id:store_same_order_queue_state"
+						],
+						"priorityHints": [
+							"economy:localTrust",
+							"economy:recordBurden",
+							"pressure:authority_seen"
+						],
+						"recordId": "store_same_order_queue_state",
+						"requiresLedgerEvent": true,
+						"requiresStoreLedgerEvent": false,
+						"toState": "refused",
+						"validationRuleId": "same_order.store_queue_mark.refuse_contact",
+						"visibleTo": [
+							"store_clerk",
+							"waiting_customer"
+						]
+					},
+					"selectionReason": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open.",
+					"sequence": 8,
+					"stepId": "inquest.waiting_customer.refuse_contact",
+					"validation": "accepted",
+					"whyLine": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open."
+				},
+				"basisAffordance": "refuse_contact",
+				"basisAffordanceLabel": "접촉 거부",
+				"basisConditionLabels": [
+					"대기 표식=줄 흐트러짐",
+					"인용 장부 civic-ledger-6"
+				],
+				"basisEconomyEffectLabels": [
+					"신뢰-8",
+					"부담+5"
+				],
+				"basisLedgerEventId": "civic-ledger-8",
+				"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
+				"basisObjectId": "store_queue_mark",
+				"basisObjectLabel": "대기 표식",
+				"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"citedLedgerEventId": "civic-ledger-6",
+				"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+				"displayName": "Waiting Customer",
+				"emissionEnergy": 0.616666674613953,
+				"exposure": 125,
+				"markerVisible": true,
+				"materialAlpha": 0.3980952501297,
+				"npcId": "NPC_Waiting_Customer",
+				"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+				"reactionText": "접촉 거부",
+				"role": "Waiting Customer",
+				"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+				"state": "refused"
+			},
+			{
+				"basisAction": {
+					"accepted": true,
+					"actorId": "NPC_Waiting_Customer",
+					"actorRole": "waiting_customer",
+					"affordance": "refuse_contact",
+					"availableActions": [
+						{
+							"actionId": "store_queue_mark.complain_delay",
+							"affordance": "complain_delay",
+							"citableLedgerEventIds": [
+								"civic-ledger-6"
+							],
+							"civicEconomyEffects": [
+								"recordBurden:+5"
+							],
+							"eligibleRoles": [
+								"waiting_customer"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known"
+							],
+							"ledgerEventKind": "queue_delay_noted",
+							"objectId": "store_queue_mark",
+							"objectState": "disrupted",
+							"perceivedAs": "public queue pressure",
+							"playerLabel": "Complain Delay",
+							"preconditions": [
+								"object_state:disrupted",
+								"role_allowed:waiting_customer",
+								"known_ledger_event_required",
+								"record_id:store_same_order_queue_state"
+							],
+							"priorityHints": [
+								"economy:recordBurden",
+								"pressure:queue_delay"
+							],
+							"recordId": "store_same_order_queue_state",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": false,
+							"toState": "disrupted",
+							"validationRuleId": "same_order.store_queue_mark.complain_delay",
+							"visibleTo": [
+								"store_clerk",
+								"waiting_customer"
+							]
+						},
+						{
+							"actionId": "store_queue_mark.accept_repair",
+							"affordance": "accept_repair",
+							"citableLedgerEventIds": [
+								"civic-ledger-6"
+							],
+							"civicEconomyEffects": [
+								"localTrust:+5",
+								"recordBurden:-5"
+							],
+							"eligibleRoles": [
+								"waiting_customer"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known"
+							],
+							"ledgerEventKind": "queue_repair_accepted",
+							"objectId": "store_queue_mark",
+							"objectState": "disrupted",
+							"perceivedAs": "public repair acceptance",
+							"playerLabel": "Accept Repair",
+							"preconditions": [
+								"object_state:disrupted",
+								"role_allowed:waiting_customer",
+								"known_ledger_event_required",
+								"record_id:store_same_order_queue_state"
+							],
+							"priorityHints": [
+								"economy:localTrust",
+								"economy:recordBurden",
+								"pressure:repair_accepted"
+							],
+							"recordId": "store_same_order_queue_state",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": false,
+							"toState": "settled",
+							"validationRuleId": "same_order.store_queue_mark.accept_repair",
+							"visibleTo": [
+								"store_clerk",
+								"waiting_customer"
+							]
+						},
+						{
+							"actionId": "store_queue_mark.refuse_contact",
+							"affordance": "refuse_contact",
+							"citableLedgerEventIds": [
+								"civic-ledger-6"
+							],
+							"civicEconomyEffects": [
+								"localTrust:-8",
+								"recordBurden:+5"
+							],
+							"eligibleRoles": [
+								"waiting_customer"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known"
+							],
+							"ledgerEventKind": "queue_contact_refused",
+							"objectId": "store_queue_mark",
+							"objectState": "disrupted",
+							"perceivedAs": "queue refuses contact after citation",
+							"playerLabel": "Refuse Contact",
+							"preconditions": [
+								"object_state:disrupted",
+								"role_allowed:waiting_customer",
+								"known_ledger_event_required",
+								"record_id:store_same_order_queue_state"
+							],
+							"priorityHints": [
+								"economy:localTrust",
+								"economy:recordBurden",
+								"pressure:authority_seen"
+							],
+							"recordId": "store_same_order_queue_state",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": false,
+							"toState": "refused",
+							"validationRuleId": "same_order.store_queue_mark.refuse_contact",
+							"visibleTo": [
+								"store_clerk",
+								"waiting_customer"
+							]
+						}
+					],
+					"citedLedgerEventId": "civic-ledger-6",
+					"economyAfter": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"ledgerEventId": "civic-ledger-8",
+					"ledgerEventKind": "queue_contact_refused",
+					"objectId": "store_queue_mark",
+					"perceivedObjectIds": [
+						"store_queue_mark",
+						"store_counter",
+						"usual_order_cue",
+						"park_notice_board"
+					],
+					"recordId": "store_same_order_contact_refused",
+					"selectedActionDescriptor": {
+						"actionId": "store_queue_mark.refuse_contact",
+						"affordance": "refuse_contact",
+						"citableLedgerEventIds": [
+							"civic-ledger-6"
+						],
+						"civicEconomyEffects": [
+							"localTrust:-8",
+							"recordBurden:+5"
+						],
+						"eligibleRoles": [
+							"waiting_customer"
+						],
+						"failureReasons": [
+							"object_not_perceived",
+							"affordance_unavailable",
+							"role_authority_exceeded",
+							"why_line_required",
+							"ledger_event_unknown",
+							"ledger_event_not_known"
+						],
+						"ledgerEventKind": "queue_contact_refused",
+						"objectId": "store_queue_mark",
+						"objectState": "disrupted",
+						"perceivedAs": "queue refuses contact after citation",
+						"playerLabel": "Refuse Contact",
+						"preconditions": [
+							"object_state:disrupted",
+							"role_allowed:waiting_customer",
+							"known_ledger_event_required",
+							"record_id:store_same_order_queue_state"
+						],
+						"priorityHints": [
+							"economy:localTrust",
+							"economy:recordBurden",
+							"pressure:authority_seen"
+						],
+						"recordId": "store_same_order_queue_state",
+						"requiresLedgerEvent": true,
+						"requiresStoreLedgerEvent": false,
+						"toState": "refused",
+						"validationRuleId": "same_order.store_queue_mark.refuse_contact",
+						"visibleTo": [
+							"store_clerk",
+							"waiting_customer"
+						]
+					},
+					"selectionReason": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open.",
+					"sequence": 8,
+					"stepId": "inquest.waiting_customer.refuse_contact",
+					"validation": "accepted",
+					"whyLine": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open."
+				},
+				"basisAffordance": "refuse_contact",
+				"basisAffordanceLabel": "접촉 거부",
+				"basisConditionLabels": [
+					"대기 표식=줄 흐트러짐",
+					"인용 장부 civic-ledger-6"
+				],
+				"basisEconomyEffectLabels": [
+					"신뢰-8",
+					"부담+5"
+				],
+				"basisLedgerEventId": "civic-ledger-8",
+				"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
+				"basisObjectId": "store_queue_mark",
+				"basisObjectLabel": "대기 표식",
+				"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"citedLedgerEventId": "civic-ledger-6",
+				"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+				"displayName": "Waiting Customer",
+				"emissionEnergy": 0.616666674613953,
+				"exposure": 125,
+				"markerVisible": true,
+				"materialAlpha": 0.3980952501297,
+				"npcId": "NPC_Waiting_Customer",
+				"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
+				"reactionText": "접촉 거부",
+				"role": "Waiting Customer",
+				"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"state": "refused"
 			}
 		],
@@ -9080,7 +10088,7 @@
 			"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 			"basisObjectId": "store_queue_mark",
 			"basisObjectLabel": "대기 표식",
-			"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+			"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 			"citedLedgerEventId": "civic-ledger-6",
 			"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 			"displayName": "Waiting Customer",
@@ -9092,6 +10100,7 @@
 			"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 			"reactionText": "접촉 거부",
 			"role": "Waiting Customer",
+			"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 			"state": "refused"
 		},
 		"inspectedWorldRecordHistory": [
@@ -9741,7 +10750,7 @@
 		"lastWhyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 		"lastWhyLineKey": "dream_language_leak",
 		"locale": "ko",
-		"noticeBody": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+		"noticeBody": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 		"noticeTitle": "Waiting Customer / Waiting Customer",
 		"outcomeBody": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
 		"outcomeTitle": "스테이션 심문 개시",
@@ -11881,7 +12890,7 @@
 					"basisLedgerEventLabel": "civic-ledger-7 / 스튜디오 PM -> 리뷰 차단",
 					"basisObjectId": "studio_review_queue",
 					"basisObjectLabel": "스튜디오 리뷰 줄",
-					"body": "현재 반응: 리뷰 차단\n말/태도: 스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"body": "현재 반응: 리뷰 차단\n들은 말: \"스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\"\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 					"citedLedgerEventId": "civic-ledger-6",
 					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 					"displayName": "Studio PM",
@@ -11893,6 +12902,7 @@
 					"pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"reactionText": "리뷰 차단",
 					"role": "Studio PM",
+					"spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"state": "blocked"
 				},
 				{
@@ -12126,7 +13136,7 @@
 					"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 					"basisObjectId": "store_queue_mark",
 					"basisObjectLabel": "대기 표식",
-					"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 					"citedLedgerEventId": "civic-ledger-6",
 					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 					"displayName": "Waiting Customer",
@@ -12138,6 +13148,7 @@
 					"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"reactionText": "접촉 거부",
 					"role": "Waiting Customer",
+					"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"state": "refused"
 				}
 			],
@@ -12372,7 +13383,7 @@
 				"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 				"basisObjectId": "store_queue_mark",
 				"basisObjectLabel": "대기 표식",
-				"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"citedLedgerEventId": "civic-ledger-6",
 				"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 				"displayName": "Waiting Customer",
@@ -12384,6 +13395,7 @@
 				"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"reactionText": "접촉 거부",
 				"role": "Waiting Customer",
+				"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"state": "refused"
 			},
 			"inspectedWorldRecordHistory": [
@@ -12784,6 +13796,7 @@
 					"pressureText": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
 					"reactionText": "소문 게시",
 					"role": "Park Witness",
+					"spokenLine": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
 					"state": "rumored"
 				},
 				"NPC_Station_Officer": {
@@ -12796,6 +13809,7 @@
 					"pressureText": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
 					"reactionText": "보고됨",
 					"role": "Station Officer",
+					"spokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
 					"state": "inquest"
 				},
 				"NPC_Store_Clerk": {
@@ -12808,6 +13822,7 @@
 					"pressureText": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
 					"reactionText": "보고됨",
 					"role": "Store Clerk",
+					"spokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
 					"state": "inquest"
 				},
 				"NPC_Store_Manager": {
@@ -12820,6 +13835,7 @@
 					"pressureText": "이 상점 기록은 스테이션이 대조해야 합니다.",
 					"reactionText": "보고 전달",
 					"role": "Store Manager",
+					"spokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
 					"state": "forwarded"
 				},
 				"NPC_Studio_PM": {
@@ -12832,6 +13848,7 @@
 					"pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"reactionText": "리뷰 차단",
 					"role": "Studio PM",
+					"spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 					"state": "blocked"
 				},
 				"NPC_Waiting_Customer": {
@@ -12844,6 +13861,7 @@
 					"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"reactionText": "접촉 거부",
 					"role": "Waiting Customer",
+					"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"state": "refused"
 				}
 			},
@@ -13064,6 +14082,7 @@
 				"pressureText": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
 				"reactionText": "소문 게시",
 				"role": "Park Witness",
+				"spokenLine": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
 				"state": "rumored"
 			},
 			"NPC_Station_Officer": {
@@ -13076,6 +14095,7 @@
 				"pressureText": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
 				"reactionText": "보고됨",
 				"role": "Station Officer",
+				"spokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
 				"state": "inquest"
 			},
 			"NPC_Store_Clerk": {
@@ -13088,6 +14108,7 @@
 				"pressureText": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
 				"reactionText": "보고됨",
 				"role": "Store Clerk",
+				"spokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
 				"state": "inquest"
 			},
 			"NPC_Store_Manager": {
@@ -13100,6 +14121,7 @@
 				"pressureText": "이 상점 기록은 스테이션이 대조해야 합니다.",
 				"reactionText": "보고 전달",
 				"role": "Store Manager",
+				"spokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
 				"state": "forwarded"
 			},
 			"NPC_Studio_PM": {
@@ -13112,6 +14134,7 @@
 				"pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 				"reactionText": "리뷰 차단",
 				"role": "Studio PM",
+				"spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 				"state": "blocked"
 			},
 			"NPC_Waiting_Customer": {
@@ -13124,6 +14147,7 @@
 				"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"reactionText": "접촉 거부",
 				"role": "Waiting Customer",
+				"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 				"state": "refused"
 			}
 		},
@@ -13207,6 +14231,7 @@
 		"codexInspectedRecordAffordanceMap": true,
 		"codexInspectedStudioPm": true,
 		"codexInspectedWaitingCustomer": true,
+		"codexReadNpcSpokenReaction": true,
 		"economyPanelReadable": true,
 		"latestLedger": {
 			"actorId": "NPC_Waiting_Customer",
@@ -13416,6 +14441,7 @@
 						"pressureText": "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요.",
 						"reactionText": "공개 확인",
 						"role": "Park Witness",
+						"spokenLine": "줄도 그대로 갔으니 평소 흐름으로 남겨둘게요.",
 						"state": "vouched"
 					},
 					"NPC_Station_Officer": {
@@ -13428,6 +14454,7 @@
 						"pressureText": "",
 						"reactionText": "",
 						"role": "Station Officer",
+						"spokenLine": "",
 						"state": "normal"
 					},
 					"NPC_Store_Clerk": {
@@ -13440,6 +14467,7 @@
 						"pressureText": "그럼 같은 봉투로 두겠습니다.",
 						"reactionText": "",
 						"role": "Store Clerk",
+						"spokenLine": "그럼 같은 봉투로 두겠습니다.",
 						"state": "normal"
 					},
 					"NPC_Store_Manager": {
@@ -13452,6 +14480,7 @@
 						"pressureText": "",
 						"reactionText": "",
 						"role": "Store Manager",
+						"spokenLine": "",
 						"state": "normal"
 					},
 					"NPC_Studio_PM": {
@@ -13464,6 +14493,7 @@
 						"pressureText": "공개 확인이 붙었네요. 리뷰 줄은 열어둘게요.",
 						"reactionText": "리뷰 열림",
 						"role": "Studio PM",
+						"spokenLine": "공개 확인이 붙었네요. 리뷰 줄은 열어둘게요.",
 						"state": "invited"
 					},
 					"NPC_Waiting_Customer": {
@@ -13476,6 +14506,7 @@
 						"pressureText": "공원 게시판에 확인이 붙었으니 알려드릴게요. 다음엔 여기서 같은 말만 먼저 하면 돼요.",
 						"reactionText": "도움",
 						"role": "Waiting Customer",
+						"spokenLine": "공원 게시판에 확인이 붙었으니 알려드릴게요. 다음엔 여기서 같은 말만 먼저 하면 돼요.",
 						"state": "helped"
 					}
 				},
@@ -13489,6 +14520,7 @@
 				"codexInspectedRecordAffordanceMap": false,
 				"codexInspectedStudioPm": false,
 				"codexInspectedWaitingCustomer": false,
+				"codexReadNpcSpokenReaction": false,
 				"economyPanelReadable": false,
 				"latestLedger": {
 					"actorId": "NPC_Studio_PM",
@@ -14687,6 +15719,7 @@
 						"pressureText": "정정 기록이 붙었으니 소문으로 돌릴 일은 아니겠네요.",
 						"reactionText": "수습 게시",
 						"role": "Park Witness",
+						"spokenLine": "정정 기록이 붙었으니 소문으로 돌릴 일은 아니겠네요.",
 						"state": "repaired"
 					},
 					"NPC_Station_Officer": {
@@ -14699,6 +15732,7 @@
 						"pressureText": "",
 						"reactionText": "",
 						"role": "Station Officer",
+						"spokenLine": "",
 						"state": "normal"
 					},
 					"NPC_Store_Clerk": {
@@ -14711,6 +15745,7 @@
 						"pressureText": "그럼 같은 봉투로 두겠습니다.",
 						"reactionText": "이상함 감지",
 						"role": "Store Clerk",
+						"spokenLine": "그럼 같은 봉투로 두겠습니다.",
 						"state": "uneasy"
 					},
 					"NPC_Store_Manager": {
@@ -14723,6 +15758,7 @@
 						"pressureText": "",
 						"reactionText": "",
 						"role": "Store Manager",
+						"spokenLine": "",
 						"state": "normal"
 					},
 					"NPC_Studio_PM": {
@@ -14735,6 +15771,7 @@
 						"pressureText": "공개 수습 기록은 봤습니다. 리뷰 줄은 조건부로 남겨둘게요.",
 						"reactionText": "조건부 리뷰",
 						"role": "Studio PM",
+						"spokenLine": "공개 수습 기록은 봤습니다. 리뷰 줄은 조건부로 남겨둘게요.",
 						"state": "conditional"
 					},
 					"NPC_Waiting_Customer": {
@@ -14747,6 +15784,7 @@
 						"pressureText": "정정됐으면 줄은 계속 가도 되겠네요.",
 						"reactionText": "수습 수락",
 						"role": "Waiting Customer",
+						"spokenLine": "정정됐으면 줄은 계속 가도 되겠네요.",
 						"state": "repair_accepted"
 					}
 				},
@@ -14760,6 +15798,7 @@
 				"codexInspectedRecordAffordanceMap": false,
 				"codexInspectedStudioPm": false,
 				"codexInspectedWaitingCustomer": false,
+				"codexReadNpcSpokenReaction": false,
 				"economyPanelReadable": false,
 				"latestLedger": {
 					"actorId": "NPC_Studio_PM",
@@ -16324,6 +17363,7 @@
 						"pressureText": "줄이 늦춰진 건 남겨둘게요. 아직 보고는 아니고, 조심하라는 표시입니다.",
 						"reactionText": "공개 경고",
 						"role": "Park Witness",
+						"spokenLine": "줄이 늦춰진 건 남겨둘게요. 아직 보고는 아니고, 조심하라는 표시입니다.",
 						"state": "warned"
 					},
 					"NPC_Station_Officer": {
@@ -16336,6 +17376,7 @@
 						"pressureText": "",
 						"reactionText": "",
 						"role": "Station Officer",
+						"spokenLine": "",
 						"state": "normal"
 					},
 					"NPC_Store_Clerk": {
@@ -16348,6 +17389,7 @@
 						"pressureText": "그럼 같은 봉투로 두겠습니다.",
 						"reactionText": "이상함 감지",
 						"role": "Store Clerk",
+						"spokenLine": "그럼 같은 봉투로 두겠습니다.",
 						"state": "uneasy"
 					},
 					"NPC_Store_Manager": {
@@ -16360,6 +17402,7 @@
 						"pressureText": "",
 						"reactionText": "",
 						"role": "Store Manager",
+						"spokenLine": "",
 						"state": "normal"
 					},
 					"NPC_Studio_PM": {
@@ -16372,6 +17415,7 @@
 						"pressureText": "공개 경고가 붙었네요. 리뷰 줄은 오늘 보류하겠습니다.",
 						"reactionText": "리뷰 보류",
 						"role": "Studio PM",
+						"spokenLine": "공개 경고가 붙었네요. 리뷰 줄은 오늘 보류하겠습니다.",
 						"state": "deferred"
 					},
 					"NPC_Waiting_Customer": {
@@ -16384,6 +17428,7 @@
 						"pressureText": "공원 게시판에 경고가 붙었으니 조금 떨어져 있을게요. 보고까지는 아니지만 가까이 서지는 않겠습니다.",
 						"reactionText": "거리두기",
 						"role": "Waiting Customer",
+						"spokenLine": "공원 게시판에 경고가 붙었으니 조금 떨어져 있을게요. 보고까지는 아니지만 가까이 서지는 않겠습니다.",
 						"state": "distanced"
 					}
 				},
@@ -16397,6 +17442,7 @@
 				"codexInspectedRecordAffordanceMap": false,
 				"codexInspectedStudioPm": false,
 				"codexInspectedWaitingCustomer": false,
+				"codexReadNpcSpokenReaction": false,
 				"economyPanelReadable": false,
 				"latestLedger": {
 					"actorId": "NPC_Studio_PM",
@@ -17565,6 +18611,7 @@
 						"pressureText": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
 						"reactionText": "소문 게시",
 						"role": "Park Witness",
+						"spokenLine": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
 						"state": "rumored"
 					},
 					"NPC_Station_Officer": {
@@ -17577,6 +18624,7 @@
 						"pressureText": "상점 기록을 접수했습니다. 이전 발화와 대조합니다.",
 						"reactionText": "보고됨",
 						"role": "Station Officer",
+						"spokenLine": "상점 기록을 접수했습니다. 이전 발화와 대조합니다.",
 						"state": "reported"
 					},
 					"NPC_Store_Clerk": {
@@ -17589,6 +18637,7 @@
 						"pressureText": "기록과 다릅니다. 담당자에게 전달하겠습니다.",
 						"reactionText": "보고됨",
 						"role": "Store Clerk",
+						"spokenLine": "기록과 다릅니다. 담당자에게 전달하겠습니다.",
 						"state": "reported"
 					},
 					"NPC_Store_Manager": {
@@ -17601,6 +18650,7 @@
 						"pressureText": "보고가 붙은 동안 카운터를 잠시 멈춥니다.",
 						"reactionText": "응대 중단",
 						"role": "Store Manager",
+						"spokenLine": "보고가 붙은 동안 카운터를 잠시 멈춥니다.",
 						"state": "paused"
 					},
 					"NPC_Studio_PM": {
@@ -17613,6 +18663,7 @@
 						"pressureText": "",
 						"reactionText": "",
 						"role": "Studio PM",
+						"spokenLine": "",
 						"state": "normal"
 					},
 					"NPC_Waiting_Customer": {
@@ -17625,6 +18676,7 @@
 						"pressureText": "카운터까지 멈추면 저는 빠질게요.",
 						"reactionText": "줄 이탈",
 						"role": "Waiting Customer",
+						"spokenLine": "카운터까지 멈추면 저는 빠질게요.",
 						"state": "left"
 					}
 				},
@@ -17638,6 +18690,7 @@
 				"codexInspectedRecordAffordanceMap": false,
 				"codexInspectedStudioPm": false,
 				"codexInspectedWaitingCustomer": false,
+				"codexReadNpcSpokenReaction": false,
 				"economyPanelReadable": false,
 				"latestLedger": {
 					"actorId": "NPC_Waiting_Customer",
@@ -18710,7 +19763,7 @@
 					"basisLedgerEventLabel": "civic-ledger-8 / 대기 손님 -> 접촉 거부",
 					"basisObjectId": "store_queue_mark",
 					"basisObjectLabel": "대기 표식",
-					"body": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"body": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 					"citedLedgerEventId": "civic-ledger-6",
 					"citedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
 					"displayName": "Waiting Customer",
@@ -18722,6 +19775,7 @@
 					"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"reactionText": "접촉 거부",
 					"role": "Waiting Customer",
+					"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 					"state": "refused"
 				},
 				"inspectedWorldRecordProp": {
@@ -18788,7 +19842,7 @@
 					"title": "시민 장부"
 				},
 				"investigationTrail": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-				"notice": "Waiting Customer / Waiting Customer / 현재 반응: 접촉 거부 / 말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다. / 근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부 / 읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용 / 대상 기록물: 대기 표식 / 가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6 / 값 변화: 신뢰-8, 부담+5 / 이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"notice": "Waiting Customer / Waiting Customer / 현재 반응: 접촉 거부 / 들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\" / 근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부 / 읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용 / 대상 기록물: 대기 표식 / 가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6 / 값 변화: 신뢰-8, 부담+5 / 이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"outcomeBody": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
 				"recordObjects": {
 					"civic_ledger": "append_only",
@@ -18821,6 +19875,7 @@
 						"pressureText": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
 						"reactionText": "소문 게시",
 						"role": "Park Witness",
+						"spokenLine": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
 						"state": "rumored"
 					},
 					"NPC_Station_Officer": {
@@ -18833,6 +19888,7 @@
 						"pressureText": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
 						"reactionText": "보고됨",
 						"role": "Station Officer",
+						"spokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
 						"state": "inquest"
 					},
 					"NPC_Store_Clerk": {
@@ -18845,6 +19901,7 @@
 						"pressureText": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
 						"reactionText": "보고됨",
 						"role": "Store Clerk",
+						"spokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
 						"state": "inquest"
 					},
 					"NPC_Store_Manager": {
@@ -18857,6 +19914,7 @@
 						"pressureText": "이 상점 기록은 스테이션이 대조해야 합니다.",
 						"reactionText": "보고 전달",
 						"role": "Store Manager",
+						"spokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
 						"state": "forwarded"
 					},
 					"NPC_Studio_PM": {
@@ -18869,6 +19927,7 @@
 						"pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 						"reactionText": "리뷰 차단",
 						"role": "Studio PM",
+						"spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
 						"state": "blocked"
 					},
 					"NPC_Waiting_Customer": {
@@ -18881,6 +19940,7 @@
 						"pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 						"reactionText": "접촉 거부",
 						"role": "Waiting Customer",
+						"spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
 						"state": "refused"
 					}
 				},
@@ -18894,6 +19954,7 @@
 				"codexInspectedRecordAffordanceMap": true,
 				"codexInspectedStudioPm": true,
 				"codexInspectedWaitingCustomer": true,
+				"codexReadNpcSpokenReaction": true,
 				"economyPanelReadable": true,
 				"latestLedger": {
 					"actorId": "NPC_Waiting_Customer",
@@ -21499,7 +22560,7 @@
 				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 				"freeInputVisible": false,
 				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-				"noticeBodyLabel": "현재 반응: 리뷰 차단\n말/태도: 스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"noticeBodyLabel": "현재 반응: 리뷰 차단\n들은 말: \"스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\"\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"noticeTitleLabel": "Studio PM / Studio PM",
 				"noticeVisible": false,
 				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
@@ -21703,7 +22764,7 @@
 				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 				"freeInputVisible": false,
 				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-				"noticeBodyLabel": "현재 반응: 리뷰 차단\n말/태도: 스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"noticeBodyLabel": "현재 반응: 리뷰 차단\n들은 말: \"스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\"\n근거 행동: civic-ledger-7 / 스튜디오 PM -> 리뷰 차단\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 스튜디오 리뷰 줄\n가능 조건: 스튜디오 리뷰 줄=열림, 인용 장부 civic-ledger-6, 필요 기록 스테이션 인용\n값 변화: 신뢰-2, 부담+3\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"noticeTitleLabel": "Studio PM / Studio PM",
 				"noticeVisible": false,
 				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
@@ -21907,7 +22968,7 @@
 				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 				"freeInputVisible": false,
 				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-				"noticeBodyLabel": "현재 반응: 접촉 거부\n말/태도: 스테이션이 인용했으면 저는 말 섞지 않겠습니다.\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+				"noticeBodyLabel": "현재 반응: 접촉 거부\n들은 말: \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"\n근거 행동: civic-ledger-8 / 대기 손님 -> 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n대상 기록물: 대기 표식\n가능 조건: 대기 표식=줄 흐트러짐, 인용 장부 civic-ledger-6\n값 변화: 신뢰-8, 부담+5\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"noticeTitleLabel": "Waiting Customer / Waiting Customer",
 				"noticeVisible": false,
 				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",

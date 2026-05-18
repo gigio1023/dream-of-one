@@ -31,13 +31,17 @@ this issue.
   expected conclusions before the tester's first play.
 - Do not weaken the strict review helper to pass incomplete notes.
 - Do not record machine-specific app paths in tracked docs or scripts.
+- Do not launch the observed play session from a headless shell where
+  `.game-harness/scripts/run-same-order-comprehension-session.sh --status`
+  reports `Human play display: not-ready`.
 - Do not claim product/demo readiness while raw notes remain below three or
   strict review remains `PENDING_TESTER_NOTES`.
 
 ## Acceptance Criteria
 
 - `.game-harness/scripts/run-same-order-comprehension-session.sh --status`
-  reaches setup readiness pass on the facilitator device.
+  reaches setup readiness pass on the facilitator device, including a ready
+  `Human play display` line.
 - Raw note count is at least `3 / 3`.
 - Raw notes use distinct fresh tester labels.
 - Strict review no longer returns `PENDING_TESTER_NOTES`.
@@ -83,3 +87,7 @@ As of 2026-05-18, the available Linear MCP in this session had search,
 update, and comment tools but no issue-create tool, and `LINEAR_API_TOKEN` was
 unset for GraphQL fallback. Create this in Linear from a session with issue
 creation permission, then link the created issue in the goal loop state.
+
+Rechecked on 2026-05-18 after the Ubuntu ARM display-readiness helper change:
+the searchable Linear tools still expose search/update/project/label helpers,
+but no issue-create mutation.

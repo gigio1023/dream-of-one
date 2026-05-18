@@ -128,6 +128,9 @@ Latest Ubuntu ARM environment setup:
 - Remaining local runtime caveat: this server currently has no `DISPLAY` or
   `WAYLAND_DISPLAY`, so an observed human play session still needs a GUI/display
   path such as local desktop, VNC, X11 forwarding, or another tester device.
+  The session helper now reports this explicitly in `--status` as
+  `Human play display: not-ready` and fails before tester prompts on the
+  default launch path.
 
 Latest environment/auth awareness note:
 - Current work is on a headless Ubuntu ARM/aarch64 server, so future agents must

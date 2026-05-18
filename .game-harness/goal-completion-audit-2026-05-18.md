@@ -29,7 +29,7 @@ continue through small playable proofs.
 | Live role voice is bounded enough for proof-only use. | Store Clerk returned `오늘도같은걸로드릴까요?`; Waiting Customer observed that live utterance and returned `줄은그대로네요.`; smoke rejects Waiting Customer player-blame phrases. | PASS |
 | Codex gameplay QA is current after provider packet changes. | `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd` passed; status helper reports Codex source freshness pass; JSON SHA-256 `7116b486d7c8481e6b74de0094fd2de8d234527989b4e632ea7790135ab5af1d`. | PASS |
 | Codex can play, inspect, and explain the proof cell through public APIs. | `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.json`: `ok=true`, `aiPlayerReport.pass=true`, `stage=inquest`, 23/23 accepted actions, 5/5 route reports, 23 explainability checks including actor memory and provider-packet actor policy readiness. | PASS |
-| Packaged/tester setup remains ready. | `.game-harness/scripts/run-same-order-comprehension-session.sh --status`: packaged app preflight pass and Codex gameplay QA pass. | PASS |
+| Packaged/tester setup remains ready. | `.game-harness/scripts/run-same-order-comprehension-session.sh --status`: packaged app preflight pass and Codex gameplay QA pass, but the current Ubuntu ARM shell reports `Human play display: not-ready` because neither `DISPLAY` nor `WAYLAND_DISPLAY` is set. | PARTIAL |
 | Goal work budget is accounted separately from game-provider spend. | Active Codex goal accounting is tracked by the Codex goal runtime; live NPC provider usage is tracked only through request count, fixed model, estimated caps, fallback status, and returned token usage because ChatGPT Pro remaining quota is not exposed by the provider payload. | PASS |
 | External fresh-player comprehension exists. | Same status command: raw session note files `0 / 3`, strict review `PENDING_TESTER_NOTES`. | FAIL |
 | Product/demo readiness can be claimed. | External comprehension gate remains open and product state remains `fallback_only_m1`; live wording is proof-only. | FAIL |
@@ -53,6 +53,10 @@ continue through small playable proofs.
   model, reasoning, request count, estimated caps, fallback status, and
   returned token usage are recorded; ChatGPT Pro remaining quota is unavailable
   from these responses.
+- Current local facilitator launch is display-blocked on this Ubuntu ARM shell:
+  the packaged app/evidence and Codex QA setup are ready, but observed human
+  play requires a GUI/display path such as desktop, VNC, X11 forwarding, or a
+  different tester device.
 
 ## Completion Decision
 
@@ -77,7 +81,14 @@ gameplay report can close that gate.
 
 ## Next Action
 
-When a fresh tester is available, run:
+When a fresh tester and a display-capable facilitator device are available,
+first confirm:
+
+```bash
+.game-harness/scripts/run-same-order-comprehension-session.sh --status
+```
+
+The `Human play display` line must be ready. Then run:
 
 ```bash
 .game-harness/scripts/run-same-order-comprehension-session.sh

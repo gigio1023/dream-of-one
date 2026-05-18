@@ -31,6 +31,10 @@ Last Updated: 2026-05-18
 - Use `--status` as a short readiness check only. It now keeps the successful
   preflight and Codex QA details compressed so the next action remains obvious:
   run the live fresh-player session.
+- On this Ubuntu ARM shell, `--status` now also reports human-play display
+  readiness. The current server has no `DISPLAY` or `WAYLAND_DISPLAY`, so the
+  default live helper will fail before tester prompts until a desktop, VNC, X11
+  forwarding, or another display-capable tester device is used.
 - The default live helper also keeps successful packaged-preflight details out
   of the pre-play terminal output. It should not leak facilitator-only setup
   terms to a fresh tester before first play.

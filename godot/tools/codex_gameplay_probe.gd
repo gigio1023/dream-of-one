@@ -685,6 +685,7 @@ func _snapshot(label: String, session: Node) -> Dictionary:
 		"environmentToolSummary": summary.get("conversation", {}).get("environmentToolSummary", []),
 		"visibleEnvironmentSummary": summary.get("conversation", {}).get("visibleEnvironmentSummary", []),
 		"visibleEnvironmentObjects": _compact_visible_environment_objects(summary.get("conversation", {}).get("visibleEnvironmentObjects", [])),
+		"socialAudienceSummary": summary.get("conversation", {}).get("socialAudienceSummary", []),
 		"recordObjects": summary.get("recordObjects", {}),
 		"civicEconomy": summary.get("civicEconomy", {}),
 		"latestLedger": _latest_ledger(summary),
@@ -807,6 +808,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"codexReadCrossPlaceRuleBoards": _read_cross_place_rule_boards(summary),
 		"codexReadEnvironmentToolCatalog": _read_environment_tool_catalog(snapshots),
 		"codexReadConversationVisibleContext": _read_conversation_visible_context(snapshots),
+		"codexReadConversationSocialAudience": _read_conversation_social_audience(snapshots),
 		"codexInspectedPublicNotice": _inspected_public_notice(summary),
 		"codexInspectedBlockedReview": _inspected_studio_review_block(summary),
 		"codexInspectedRecordAffordanceMap": _inspected_record_affordance_map(summary),
@@ -845,6 +847,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadCrossPlaceSocialRules": bool(checks.get("codexReadCrossPlaceRuleBoards", false)),
 		"canReadEnvironmentToolCatalog": bool(checks.get("codexReadEnvironmentToolCatalog", false)),
 		"canReadConversationVisibleContext": bool(checks.get("codexReadConversationVisibleContext", false)),
+		"canReadConversationSocialAudience": bool(checks.get("codexReadConversationSocialAudience", false)),
 		"canReadLiveHudSocialCitation": _hud_record_state_cites_latest_social_observation(summary, record_state_label),
 		"canReadLiveHudNearbyStances": _hud_record_state_names_visible_stances(record_state_label),
 		"canReadLiveHudRecordReaders": _hud_record_state_names_record_readers(record_state_label),
@@ -1260,6 +1263,25 @@ func _read_conversation_visible_context(snapshots: Array[Dictionary]) -> bool:
 			object_ids.has("store_counter")
 			and object_ids.has("usual_order_cue")
 			and object_ids.has("civic_economy_panel")
+		)
+	return false
+
+func _read_conversation_social_audience(snapshots: Array[Dictionary]) -> bool:
+	for snapshot in snapshots:
+		if str(snapshot.get("label", "")) != "conversation.start":
+			continue
+		var audience_summary: Array = snapshot.get("socialAudienceSummary", [])
+		var hud: Dictionary = snapshot.get("hud", {})
+		var combined := "%s\n%s" % [
+			"\n".join(_string_array(audience_summary)),
+			str(hud.get("focusLabel", ""))
+		]
+		return (
+			combined.contains("말의 경로")
+			and combined.contains("상점 점원")
+			and combined.contains("대기 손님")
+			and combined.contains("상점 매니저")
+			and combined.contains("보고 트레이")
 		)
 	return false
 

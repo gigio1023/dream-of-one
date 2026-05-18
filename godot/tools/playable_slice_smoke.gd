@@ -512,6 +512,7 @@ func _validate_active_conversation_state(summary: Dictionary, hud: Node) -> Arra
 		failures.append("Expected active conversation to expose exactly three dialogue choices")
 	var environment_tools: Array = conversation.get("environmentToolCatalog", [])
 	var environment_tool_summary: Array = conversation.get("environmentToolSummary", [])
+	var social_audience: Array = conversation.get("socialAudienceSummary", [])
 	if environment_tools.size() < 5:
 		failures.append("Expected active conversation to expose Store Clerk environment tool catalog, got %d" % environment_tools.size())
 	if not _environment_tool_exists(environment_tools, "receipt_tray", "create_receipt"):
@@ -527,6 +528,10 @@ func _validate_active_conversation_state(summary: Dictionary, hud: Node) -> Arra
 		failures.append("Expected HUD focus label to show the current environment tool catalog, got '%s'" % str(snapshot.get("focusLabel", "")))
 	if not str(snapshot.get("focusLabel", "")).contains("정상 영수증") or not str(snapshot.get("focusLabel", "")).contains("상점 보고"):
 		failures.append("Expected HUD environment tool catalog to name receipt/report tools, got '%s'" % str(snapshot.get("focusLabel", "")))
+	if not str(social_audience).contains("상점 점원") or not str(social_audience).contains("대기 손님") or not str(social_audience).contains("상점 매니저"):
+		failures.append("Expected active conversation to expose the social audience for player speech, got %s" % str(social_audience))
+	if not str(snapshot.get("focusLabel", "")).contains("말의 경로") or not str(snapshot.get("focusLabel", "")).contains("대기 손님"):
+		failures.append("Expected HUD conversation prompt to name who can hear or read the player speech path, got '%s'" % str(snapshot.get("focusLabel", "")))
 	if not str(snapshot.get("choicesLabel", "")).begins_with("1  네, 같은 걸로"):
 		failures.append("Expected HUD choice label 1 to preserve the active safe dialogue line, got '%s'" % str(snapshot.get("choicesLabel", "")))
 	if str(snapshot.get("choicesLabel", "")).contains("정상 영수증"):

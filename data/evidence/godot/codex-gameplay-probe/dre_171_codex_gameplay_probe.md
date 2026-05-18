@@ -119,6 +119,7 @@
 - `canReadCrossPlaceSocialRules`: `true`
 - `canReadEnvironmentToolCatalog`: `true`
 - `canReadConversationVisibleContext`: `true`
+- `canReadConversationSocialAudience`: `true`
 - `canReadLiveHudSocialCitation`: `true`
 - `canReadLiveHudNearbyStances`: `true`
 - `canReadLiveHudRecordReaders`: `true`

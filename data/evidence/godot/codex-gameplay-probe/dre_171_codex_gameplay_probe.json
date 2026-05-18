@@ -81,6 +81,7 @@
 			"canInspectStoreManagerHandoff": true,
 			"canReadActorMemory": true,
 			"canReadCivicEconomyPressure": true,
+			"canReadConversationSocialAudience": true,
 			"canReadConversationVisibleContext": true,
 			"canReadCrossPlaceSocialRules": true,
 			"canReadEnvironmentToolCatalog": true,
@@ -8930,6 +8931,11 @@
 			"recordedStatementAction": "",
 			"recordedStatementLine": "",
 			"recordedStatementScope": "",
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"typedFreeInputAction": "free_input_submitted",
 			"typedFreeInputAvailable": true,
 			"typedFreeInputLine": "저는 이 꿈에 방금 들어왔어요.",
@@ -27847,6 +27853,11 @@
 			"recordedStatementAction": "",
 			"recordedStatementLine": "",
 			"recordedStatementScope": "",
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"typedFreeInputAction": "free_input_submitted",
 			"typedFreeInputAvailable": true,
 			"typedFreeInputLine": "저는 이 꿈에 방금 들어왔어요.",
@@ -27950,14 +27961,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779114076061",
+				"eventId": "playable_session_started-001-1779118592917",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779114076061,
+				"timestampMs": 1779118592917,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -27966,7 +27977,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-002-1779114076149",
+				"eventId": "world_record_prop_inspected-002-1779118593010",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "usual_order_cue",
 				"schemaVersion": "godot-runtime-v1",
@@ -27974,7 +27985,7 @@
 				"state": "read",
 				"stateLabel": "읽힘",
 				"summary": "Inspected world record prop usual_order_cue in state read.",
-				"timestampMs": 1779114076149,
+				"timestampMs": 1779118593010,
 				"uiSummaryArgs": {
 					"object": "늘 같은 주문",
 					"state": "읽힘"
@@ -27992,13 +28003,13 @@
 					"DL_ST1_APPROVAL_GATE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-003-1779114076175",
+				"eventId": "text_surface_read-003-1779118593036",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Studio_ApprovalCriteria as local context before speaking.",
 				"textSurfaceId": "TS_Studio_ApprovalCriteria",
-				"timestampMs": 1779114076175,
+				"timestampMs": 1779118593036,
 				"uiSummaryArgs": {
 					"law": "DL_ST1_APPROVAL_GATE",
 					"surface": "승인 기준"
@@ -28016,13 +28027,13 @@
 					"DL_P1_OBSERVATION_ETIQUETTE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-004-1779114076202",
+				"eventId": "text_surface_read-004-1779118593065",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Park_NoticeBoard as local context before speaking.",
 				"textSurfaceId": "TS_Park_NoticeBoard",
-				"timestampMs": 1779114076202,
+				"timestampMs": 1779118593065,
 				"uiSummaryArgs": {
 					"law": "DL_P1_OBSERVATION_ETIQUETTE",
 					"surface": "공지 게시판"
@@ -28038,7 +28049,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-005-1779114076231",
+				"eventId": "conversation_started-005-1779118593095",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -28047,7 +28058,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779114076231,
+				"timestampMs": 1779118593095,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -28060,7 +28071,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-006-1779114076252",
+				"eventId": "response_hesitation_noted-006-1779118593117",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -28081,7 +28092,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779114076252,
+				"timestampMs": 1779118593117,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -28096,7 +28107,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-007-1779114076268",
+				"eventId": "dialogue_choice_selected-007-1779118593134",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -28118,7 +28129,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779114076268,
+				"timestampMs": 1779118593134,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -28133,7 +28144,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779114076268",
+				"eventId": "conversation_anomaly_detected-008-1779118593134",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -28155,7 +28166,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779114076268,
+				"timestampMs": 1779118593134,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -28170,7 +28181,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779114076268",
+				"eventId": "npc_suspicion_changed-009-1779118593134",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -28192,7 +28203,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779114076268,
+				"timestampMs": 1779118593134,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -28207,7 +28218,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-010-1779114076288",
+				"eventId": "free_input_submitted-010-1779118593154",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -28232,7 +28243,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779114076288,
+				"timestampMs": 1779118593154,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -28247,7 +28258,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-011-1779114076288",
+				"eventId": "conversation_anomaly_detected-011-1779118593154",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -28272,7 +28283,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779114076288,
+				"timestampMs": 1779118593154,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -28287,7 +28298,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-012-1779114076288",
+				"eventId": "npc_suspicion_changed-012-1779118593154",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -28312,7 +28323,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779114076288,
+				"timestampMs": 1779118593154,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -28327,7 +28338,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-013-1779114076288",
+				"eventId": "suspicion_shared-013-1779118593154",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -28352,7 +28363,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779114076288,
+				"timestampMs": 1779118593154,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -28367,7 +28378,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-014-1779114076288",
+				"eventId": "station_report_created-014-1779118593154",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -28392,7 +28403,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779114076288,
+				"timestampMs": 1779118593154,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -28407,7 +28418,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-015-1779114076289",
+				"eventId": "station_inquest_opened-015-1779118593155",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -28432,7 +28443,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779114076289,
+				"timestampMs": 1779118593155,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -28442,7 +28453,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-016-1779114076369",
+				"eventId": "npc_reaction_inspected-016-1779118593220",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Store_Clerk",
 				"reactionText": "보고됨",
@@ -28450,7 +28461,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "inquest",
 				"summary": "Inspected NPC reaction NPC_Store_Clerk in state inquest.",
-				"timestampMs": 1779114076369,
+				"timestampMs": 1779118593220,
 				"uiSummaryArgs": {
 					"npc": "Store Clerk",
 					"state": "보고됨"
@@ -28462,7 +28473,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-017-1779114076407",
+				"eventId": "npc_reaction_inspected-017-1779118593261",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Store_Manager",
 				"reactionText": "보고 전달",
@@ -28470,7 +28481,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "forwarded",
 				"summary": "Inspected NPC reaction NPC_Store_Manager in state forwarded.",
-				"timestampMs": 1779114076407,
+				"timestampMs": 1779118593261,
 				"uiSummaryArgs": {
 					"npc": "Store Manager",
 					"state": "보고 전달"
@@ -28482,7 +28493,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-018-1779114076443",
+				"eventId": "world_record_prop_inspected-018-1779118593297",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -28490,7 +28501,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779114076443,
+				"timestampMs": 1779118593297,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -28502,7 +28513,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-019-1779114076479",
+				"eventId": "npc_reaction_inspected-019-1779118593340",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Park_Witness",
 				"reactionText": "소문 게시",
@@ -28510,7 +28521,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "rumored",
 				"summary": "Inspected NPC reaction NPC_Park_Witness in state rumored.",
-				"timestampMs": 1779114076479,
+				"timestampMs": 1779118593340,
 				"uiSummaryArgs": {
 					"npc": "Park Witness",
 					"state": "소문 게시"
@@ -28522,7 +28533,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-020-1779114076516",
+				"eventId": "world_record_prop_inspected-020-1779118593383",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "studio_review_queue",
 				"schemaVersion": "godot-runtime-v1",
@@ -28530,7 +28541,7 @@
 				"state": "blocked",
 				"stateLabel": "차단",
 				"summary": "Inspected world record prop studio_review_queue in state blocked.",
-				"timestampMs": 1779114076516,
+				"timestampMs": 1779118593383,
 				"uiSummaryArgs": {
 					"object": "스튜디오 리뷰 줄",
 					"state": "차단"
@@ -28542,7 +28553,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-021-1779114076626",
+				"eventId": "world_record_prop_inspected-021-1779118593422",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_economy_panel",
 				"schemaVersion": "godot-runtime-v1",
@@ -28550,7 +28561,7 @@
 				"state": "attention",
 				"stateLabel": "주목 상승",
 				"summary": "Inspected world record prop civic_economy_panel in state attention.",
-				"timestampMs": 1779114076626,
+				"timestampMs": 1779118593422,
 				"uiSummaryArgs": {
 					"object": "시민 경제",
 					"state": "주목 상승"
@@ -28562,7 +28573,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-022-1779114076671",
+				"eventId": "world_record_prop_inspected-022-1779118593469",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_ledger",
 				"schemaVersion": "godot-runtime-v1",
@@ -28570,7 +28581,7 @@
 				"state": "append_only",
 				"stateLabel": "추가됨",
 				"summary": "Inspected world record prop civic_ledger in state append_only.",
-				"timestampMs": 1779114076671,
+				"timestampMs": 1779118593469,
 				"uiSummaryArgs": {
 					"object": "시민 장부",
 					"state": "추가됨"
@@ -28582,7 +28593,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-023-1779114076705",
+				"eventId": "npc_reaction_inspected-023-1779118593505",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Station_Officer",
 				"reactionText": "보고됨",
@@ -28590,7 +28601,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "inquest",
 				"summary": "Inspected NPC reaction NPC_Station_Officer in state inquest.",
-				"timestampMs": 1779114076705,
+				"timestampMs": 1779118593505,
 				"uiSummaryArgs": {
 					"npc": "Station Officer",
 					"state": "보고됨"
@@ -28602,7 +28613,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-024-1779114076739",
+				"eventId": "npc_reaction_inspected-024-1779118593541",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Studio_PM",
 				"reactionText": "리뷰 차단",
@@ -28610,7 +28621,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "blocked",
 				"summary": "Inspected NPC reaction NPC_Studio_PM in state blocked.",
-				"timestampMs": 1779114076739,
+				"timestampMs": 1779118593541,
 				"uiSummaryArgs": {
 					"npc": "Studio PM",
 					"state": "리뷰 차단"
@@ -28622,7 +28633,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-025-1779114076773",
+				"eventId": "npc_reaction_inspected-025-1779118593575",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Waiting_Customer",
 				"reactionText": "접촉 거부",
@@ -28630,7 +28641,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "refused",
 				"summary": "Inspected NPC reaction NPC_Waiting_Customer in state refused.",
-				"timestampMs": 1779114076773,
+				"timestampMs": 1779118593575,
 				"uiSummaryArgs": {
 					"npc": "Waiting Customer",
 					"state": "접촉 거부"
@@ -41863,6 +41874,7 @@
 		"codexInspectedStudioPm": true,
 		"codexInspectedUsualOrderCue": true,
 		"codexInspectedWaitingCustomer": true,
+		"codexReadConversationSocialAudience": true,
 		"codexReadConversationVisibleContext": true,
 		"codexReadCrossPlaceRuleBoards": true,
 		"codexReadEnvironmentToolCatalog": true,
@@ -42501,6 +42513,7 @@
 				"codexInspectedStudioPm": false,
 				"codexInspectedUsualOrderCue": false,
 				"codexInspectedWaitingCustomer": false,
+				"codexReadConversationSocialAudience": true,
 				"codexReadConversationVisibleContext": true,
 				"codexReadCrossPlaceRuleBoards": false,
 				"codexReadEnvironmentToolCatalog": true,
@@ -42854,6 +42867,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "",
@@ -43285,6 +43303,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "",
@@ -43684,7 +43707,7 @@
 					"hud": {
 						"choicesLabel": "1  네, 같은 걸로 부탁해요.",
 						"consequenceLabel": "말과 응답 지연은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.",
-						"focusLabel": "오늘도 같은 걸로 드릴까요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정",
+						"focusLabel": "오늘도 같은 걸로 드릴까요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정\n말의 경로: 상점 점원=듣고 기록; 대기 손님=근처 줄; 상점 매니저=보고 트레이 열람 가능",
 						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 						"freeInputVisible": true,
 						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 방금 발화",
@@ -43716,6 +43739,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "",
@@ -44115,7 +44143,7 @@
 					"hud": {
 						"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
 						"consequenceLabel": "말과 응답 지연은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.\n최근 발화: turn-1: 네, 같은 걸로 부탁해요.",
-						"focusLabel": "네. 어제 기록처럼 같은 주문 맞으시죠?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정",
+						"focusLabel": "네. 어제 기록처럼 같은 주문 맞으시죠?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정\n말의 경로: 상점 점원=듣고 기록; 대기 손님=근처 줄; 상점 매니저=보고 트레이 열람 가능",
 						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 						"freeInputVisible": true,
 						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 방금 발화",
@@ -44147,6 +44175,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "store.same_order.safe",
@@ -44551,6 +44584,11 @@
 						"studio_review_queue": "invited",
 						"usual_order_cue": "cited"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -44955,6 +44993,11 @@
 						"studio_review_queue": "invited",
 						"usual_order_cue": "cited"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -45394,6 +45437,11 @@
 						"studio_review_queue": "invited",
 						"usual_order_cue": "cited"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -45833,6 +45881,11 @@
 						"studio_review_queue": "invited",
 						"usual_order_cue": "cited"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -46272,6 +46325,11 @@
 						"studio_review_queue": "invited",
 						"usual_order_cue": "cited"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -46907,6 +46965,7 @@
 				"codexInspectedStudioPm": false,
 				"codexInspectedUsualOrderCue": false,
 				"codexInspectedWaitingCustomer": false,
+				"codexReadConversationSocialAudience": true,
 				"codexReadConversationVisibleContext": true,
 				"codexReadCrossPlaceRuleBoards": false,
 				"codexReadEnvironmentToolCatalog": true,
@@ -47260,6 +47319,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "",
@@ -47691,6 +47755,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "",
@@ -48090,7 +48159,7 @@
 					"hud": {
 						"choicesLabel": "1  네, 같은 걸로 부탁해요.",
 						"consequenceLabel": "말과 응답 지연은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.",
-						"focusLabel": "오늘도 같은 걸로 드릴까요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정",
+						"focusLabel": "오늘도 같은 걸로 드릴까요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정\n말의 경로: 상점 점원=듣고 기록; 대기 손님=근처 줄; 상점 매니저=보고 트레이 열람 가능",
 						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 						"freeInputVisible": true,
 						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 방금 발화",
@@ -48122,6 +48191,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "",
@@ -48442,7 +48516,7 @@
 					"hud": {
 						"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
 						"consequenceLabel": "말과 응답 지연은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.\n최근 발화: turn-1: 제가 보통 뭘 시켰죠?",
-						"focusLabel": "보통은 표식 하나라고 하셨죠. 오늘은 왜 확인하시나요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 정정 문서: 정정 첨부 -> 정정 처리; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=신뢰 하락",
+						"focusLabel": "보통은 표식 하나라고 하셨죠. 오늘은 왜 확인하시나요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 정정 문서: 정정 첨부 -> 정정 처리; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=신뢰 하락\n말의 경로: 상점 점원=듣고 기록; 대기 손님=근처 줄; 상점 매니저=보고 트레이 열람 가능",
 						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 						"freeInputVisible": true,
 						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 방금 발화",
@@ -48487,6 +48561,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "store.same_order.repair",
@@ -48807,6 +48886,11 @@
 						"studio_review_queue": "conditional",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -49127,6 +49211,11 @@
 						"studio_review_queue": "conditional",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -49484,6 +49573,11 @@
 						"studio_review_queue": "conditional",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -49841,6 +49935,11 @@
 						"studio_review_queue": "conditional",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -50196,6 +50295,11 @@
 						"studio_review_queue": "conditional",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -50551,6 +50655,11 @@
 						"studio_review_queue": "conditional",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -50906,6 +51015,11 @@
 						"studio_review_queue": "conditional",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -51536,6 +51650,7 @@
 				"codexInspectedStudioPm": false,
 				"codexInspectedUsualOrderCue": false,
 				"codexInspectedWaitingCustomer": false,
+				"codexReadConversationSocialAudience": true,
 				"codexReadConversationVisibleContext": true,
 				"codexReadCrossPlaceRuleBoards": false,
 				"codexReadEnvironmentToolCatalog": true,
@@ -51888,6 +52003,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "",
@@ -52319,6 +52439,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "",
@@ -52718,7 +52843,7 @@
 					"hud": {
 						"choicesLabel": "1  네, 같은 걸로 부탁해요.",
 						"consequenceLabel": "말과 응답 지연은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.",
-						"focusLabel": "오늘도 같은 걸로 드릴까요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정",
+						"focusLabel": "오늘도 같은 걸로 드릴까요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정\n말의 경로: 상점 점원=듣고 기록; 대기 손님=근처 줄; 상점 매니저=보고 트레이 열람 가능",
 						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 						"freeInputVisible": true,
 						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 방금 발화",
@@ -52750,6 +52875,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "",
@@ -53064,7 +53194,7 @@
 					"hud": {
 						"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
 						"consequenceLabel": "말과 응답 지연은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.\n최근 발화: turn-1: 오늘 처음 왔는데요.",
-						"focusLabel": "처음이라고요? 어제도 같은 자리에서 같은 말을 하셨는데요.\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=신뢰 하락",
+						"focusLabel": "처음이라고요? 어제도 같은 자리에서 같은 말을 하셨는데요.\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=신뢰 하락\n말의 경로: 상점 점원=듣고 기록; 대기 손님=근처 줄; 상점 매니저=보고 트레이 열람 가능",
 						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 						"freeInputVisible": true,
 						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 방금 발화",
@@ -53110,6 +53240,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "store.same_order.risky",
@@ -53471,6 +53606,11 @@
 						"studio_review_queue": "deferred",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -53832,6 +53972,11 @@
 						"studio_review_queue": "deferred",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -54228,6 +54373,11 @@
 						"studio_review_queue": "deferred",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -54624,6 +54774,11 @@
 						"studio_review_queue": "deferred",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -55020,6 +55175,11 @@
 						"studio_review_queue": "deferred",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.safe",
@@ -55780,6 +55940,7 @@
 				"codexInspectedStudioPm": false,
 				"codexInspectedUsualOrderCue": false,
 				"codexInspectedWaitingCustomer": false,
+				"codexReadConversationSocialAudience": true,
 				"codexReadConversationVisibleContext": true,
 				"codexReadCrossPlaceRuleBoards": false,
 				"codexReadEnvironmentToolCatalog": true,
@@ -56134,6 +56295,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "",
@@ -56565,6 +56731,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "",
@@ -56964,7 +57135,7 @@
 					"hud": {
 						"choicesLabel": "1  네, 같은 걸로 부탁해요.",
 						"consequenceLabel": "말과 응답 지연은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.",
-						"focusLabel": "오늘도 같은 걸로 드릴까요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정",
+						"focusLabel": "오늘도 같은 걸로 드릴까요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정\n말의 경로: 상점 점원=듣고 기록; 대기 손님=근처 줄; 상점 매니저=보고 트레이 열람 가능",
 						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 						"freeInputVisible": true,
 						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 방금 발화",
@@ -56996,6 +57167,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "",
@@ -57310,7 +57486,7 @@
 					"hud": {
 						"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
 						"consequenceLabel": "말과 응답 지연은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.\n최근 발화: turn-1: 오늘 처음 왔는데요.",
-						"focusLabel": "처음이라고요? 어제도 같은 자리에서 같은 말을 하셨는데요.\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=신뢰 하락",
+						"focusLabel": "처음이라고요? 어제도 같은 자리에서 같은 말을 하셨는데요.\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=신뢰 하락\n말의 경로: 상점 점원=듣고 기록; 대기 손님=근처 줄; 상점 매니저=보고 트레이 열람 가능",
 						"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 						"freeInputVisible": true,
 						"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 방금 발화",
@@ -57356,6 +57532,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": false,
 						"lastDialogueChoice": "store.same_order.risky",
@@ -57675,6 +57856,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.risky",
@@ -57994,6 +58180,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.risky",
@@ -58313,6 +58504,11 @@
 						"studio_review_queue": "open",
 						"usual_order_cue": "read"
 					},
+					"socialAudienceSummary": [
+						"상점 점원=듣고 기록",
+						"대기 손님=근처 줄",
+						"상점 매니저=보고 트레이 열람 가능"
+					],
 					"summary": {
 						"inputLocked": true,
 						"lastDialogueChoice": "store.same_order.probe.risky",
@@ -59115,6 +59311,7 @@
 				"codexInspectedStudioPm": true,
 				"codexInspectedUsualOrderCue": true,
 				"codexInspectedWaitingCustomer": true,
+				"codexReadConversationSocialAudience": true,
 				"codexReadConversationVisibleContext": true,
 				"codexReadCrossPlaceRuleBoards": true,
 				"codexReadEnvironmentToolCatalog": true,
@@ -59550,6 +59747,11 @@
 				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": false,
 				"lastDialogueChoice": "",
@@ -59981,6 +60183,11 @@
 				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": false,
 				"lastDialogueChoice": "",
@@ -60433,6 +60640,11 @@
 				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": false,
 				"lastDialogueChoice": "",
@@ -60885,6 +61097,11 @@
 				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": false,
 				"lastDialogueChoice": "",
@@ -61337,6 +61554,11 @@
 				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": false,
 				"lastDialogueChoice": "",
@@ -61789,6 +62011,11 @@
 				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": false,
 				"lastDialogueChoice": "",
@@ -62241,6 +62468,11 @@
 				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": false,
 				"lastDialogueChoice": "",
@@ -62693,6 +62925,11 @@
 				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": false,
 				"lastDialogueChoice": "",
@@ -63092,7 +63329,7 @@
 			"hud": {
 				"choicesLabel": "1  네, 같은 걸로 부탁해요.",
 				"consequenceLabel": "말과 응답 지연은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.",
-				"focusLabel": "오늘도 같은 걸로 드릴까요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정",
+				"focusLabel": "오늘도 같은 걸로 드릴까요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정\n말의 경로: 상점 점원=듣고 기록; 대기 손님=근처 줄; 상점 매니저=보고 트레이 열람 가능",
 				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 				"freeInputVisible": true,
 				"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 방금 발화",
@@ -63145,6 +63382,11 @@
 				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": false,
 				"lastDialogueChoice": "",
@@ -63544,7 +63786,7 @@
 			"hud": {
 				"choicesLabel": "1  네, 같은 걸로 부탁해요.",
 				"consequenceLabel": "말과 응답 지연은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.",
-				"focusLabel": "오늘도 같은 걸로 드릴까요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정",
+				"focusLabel": "오늘도 같은 걸로 드릴까요?\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 영수증 트레이: 영수증 작성 -> 정상 영수증; 영수증 트레이: 영수증 표시 -> 영수증 표시; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=안정\n말의 경로: 상점 점원=듣고 기록; 대기 손님=근처 줄; 상점 매니저=보고 트레이 열람 가능",
 				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 				"freeInputVisible": true,
 				"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 방금 발화",
@@ -63597,6 +63839,11 @@
 				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": false,
 				"lastDialogueChoice": "",
@@ -63911,7 +64158,7 @@
 			"hud": {
 				"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
 				"consequenceLabel": "말과 응답 지연은 기록됩니다. 점원은 먼저 어긋남을 느끼고, 스테이션은 나중에 근거를 봅니다.\n최근 발화: turn-1: 오늘 처음 왔는데요.",
-				"focusLabel": "처음이라고요? 어제도 같은 자리에서 같은 말을 하셨는데요.\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=신뢰 하락",
+				"focusLabel": "처음이라고요? 어제도 같은 자리에서 같은 말을 하셨는데요.\n환경 도구: 상점 카운터: 응대 중단 -> 응대 중단; 늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용; 정정 문서: offer_correction -> 정정 제안; 보고 트레이: 메모 배치 -> 상점 보고\n보는 단서: 상점 카운터=응대 중; 늘 같은 주문=읽힘; 보고 트레이=비어 있음; 시민 경제=신뢰 하락\n말의 경로: 상점 점원=듣고 기록; 대기 손님=근처 줄; 상점 매니저=보고 트레이 열람 가능",
 				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 				"freeInputVisible": true,
 				"investigationTrailLabel": "검사자: 상점 점원 | 대상: 플레이어 | 근거: 방금 발화",
@@ -63978,6 +64225,11 @@
 				"studio_review_queue": "open",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": false,
 				"lastDialogueChoice": "store.same_order.risky",
@@ -64314,6 +64566,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -64650,6 +64907,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -64986,6 +65248,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -65322,6 +65589,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -65658,6 +65930,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -65994,6 +66271,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -66348,6 +66630,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -66702,6 +66989,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -67056,6 +67348,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -67410,6 +67707,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -67760,6 +68062,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -68110,6 +68417,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -68490,6 +68802,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -68870,6 +69187,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -69247,6 +69569,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -69624,6 +69951,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -70001,6 +70333,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -70378,6 +70715,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -70755,6 +71097,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -71132,6 +71479,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",
@@ -71509,6 +71861,11 @@
 				"studio_review_queue": "blocked",
 				"usual_order_cue": "read"
 			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
 			"summary": {
 				"inputLocked": true,
 				"lastDialogueChoice": "free_input",

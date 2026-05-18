@@ -1006,6 +1006,7 @@ func build_summary() -> Dictionary:
 			"environmentToolSummary": _current_environment_tool_summary_lines(),
 			"visibleEnvironmentObjects": _current_visible_environment_objects(),
 			"visibleEnvironmentSummary": _current_visible_environment_summary_lines(),
+			"socialAudienceSummary": _current_conversation_social_audience_lines(),
 			"recordedStatementLine": "",
 			"recordedStatementScope": "",
 			"recordedStatementAction": "",
@@ -1698,11 +1699,14 @@ func _refresh_hud() -> void:
 		var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
 		var tool_summary := _current_environment_tool_summary_text()
 		var visible_summary := _current_visible_environment_summary_text()
+		var social_audience := _current_conversation_social_audience_text()
 		prompt = _current_npc_line(beat)
 		if not tool_summary.is_empty():
 			prompt = "%s\n%s" % [prompt, tool_summary]
 		if not visible_summary.is_empty():
 			prompt = "%s\n%s" % [prompt, visible_summary]
+		if not social_audience.is_empty():
+			prompt = "%s\n%s" % [prompt, social_audience]
 		choices_enabled = true
 	elif current_focus != null and current_focus_kind == "record_prop":
 		var object_id := str(current_focus.get_meta("record_object_id", ""))
@@ -3931,6 +3935,31 @@ func _current_visible_environment_summary_text() -> String:
 	if labels.is_empty():
 		return ""
 	return "보는 단서: %s" % "; ".join(labels)
+
+func _current_conversation_social_audience_lines() -> Array[String]:
+	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
+	var actor_id := str(beat.get("actorId", ""))
+	if actor_id != "NPC_Store_Clerk":
+		return []
+	if _current_locale() == "en":
+		return [
+			"Store Clerk=listens and records",
+			"Waiting Customer=nearby queue",
+			"Store Manager=can read report tray"
+		]
+	return [
+		"상점 점원=듣고 기록",
+		"대기 손님=근처 줄",
+		"상점 매니저=보고 트레이 열람 가능"
+	]
+
+func _current_conversation_social_audience_text() -> String:
+	var labels := PackedStringArray()
+	for line in _current_conversation_social_audience_lines():
+		labels.append(line)
+	if labels.is_empty():
+		return ""
+	return "말의 경로: %s" % "; ".join(labels)
 
 func _conversation_history_lines() -> Array[String]:
 	var lines: Array[String] = []

@@ -76,6 +76,7 @@ export class DefaultCodexBroker implements CodexBroker {
         usedFallback: false,
         threadId: toolResult.threadId,
         transport: toolResult.transport,
+        ...(toolResult.providerUsage ? { providerUsage: toolResult.providerUsage } : {}),
       },
     });
     this.recordWorkspace(packet, workspace, decision);

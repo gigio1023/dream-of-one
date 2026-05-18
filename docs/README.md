@@ -51,7 +51,9 @@ Use this page as the documentation map. README.md is the project entry point; th
 
 Dream of One is a conversation-first suspicion game. The player is investigated through dialogue, recorded statements, suspicion signals, social reports, Station intake, inquest, and deterministic session end states.
 
-The checked-in build proves an M1 technical slice. It does not yet prove a public demo, exported build, live provider-backed wording loop, or fixed GPT model availability.
+The checked-in build proves an M1 technical slice and backend `openai-codex`
+live wording calls. It does not yet prove a public demo, live Godot
+provider-backed wording loop, or product-ready fixed GPT model availability.
 
 The current planning method is benchmark-first: build a readable Store-to-Station
 procedure simulator before expanding dream fiction, broad social simulation, or
@@ -77,7 +79,9 @@ descriptors that NPC agents may propose and the runtime must validate.
 The default live-LLM provider mode is direct `openai-codex` auth with
 `gpt-5.4-mini` low reasoning effort only; API `nano` models are not assumed
 usable through that Codex provider until live discovery proves it. Missing
-credential or failed provider calls fall back deterministically.
+credential or failed provider calls fall back deterministically. Backend live
+proof records estimated caps and returned token usage, but ChatGPT Pro
+remaining quota is not exposed by the provider response.
 
 The current prototype target is one small Store/Station environment where
 conversation changes records, environment affordances become available, role

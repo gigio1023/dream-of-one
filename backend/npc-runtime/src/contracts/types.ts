@@ -109,5 +109,15 @@ export interface DecisionEnvelope {
     transport: "codex" | "codex-reply" | "fallback";
     socialLoopStage?: SocialLoopStage;
     playerSpeechAct?: PlayerSpeechAct;
+    providerUsage?: {
+      model: string;
+      estimatedInputTokens: number;
+      maxOutputTokens: number;
+      estimatedTotalTokens: number;
+      estimatedCostUsd: number;
+      actualInputTokens?: number;
+      actualOutputTokens?: number;
+      actualTotalTokens?: number;
+    };
   };
 }

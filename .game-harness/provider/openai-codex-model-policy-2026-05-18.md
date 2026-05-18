@@ -1,7 +1,7 @@
 # OpenAI Codex Model Policy
 
 Date: 2026-05-18
-Status: implemented default provider policy, live Codex-provider access not yet proven
+Status: implemented default provider policy with backend live Codex-provider proof
 
 ## Decision
 
@@ -21,6 +21,15 @@ Runtime defaults now use this policy. `NPC_RUNTIME_PROPOSAL_PROVIDER` defaults
 to `openai-codex`, the base URL defaults to
 `https://chatgpt.com/backend-api/codex`, and the checked-in provider smoke
 prints the Codex-provider configuration by default.
+
+Backend live proof now passes for the provider boundary:
+
+- auth helper: `npm run openai-codex:login --prefix backend/npc-runtime`
+- smoke: `OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai:proposal-smoke --prefix backend/npc-runtime`
+- tiny social probe: `OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai-codex:social-probe --prefix backend/npc-runtime`
+
+Use `OPENAI_CODEX_AUTH_STORE_PATH` when a device needs an explicit ignored auth
+profile path. Do not commit that path or token material.
 
 ## Nano Check
 
@@ -54,8 +63,11 @@ Sources checked:
 
 ## Implementation Implication
 
-The current provider shape is implemented. Live access remains unproven until a
-credential is configured through `OPENAI_CODEX_ACCESS_TOKEN`,
-`OPENAI_CODEX_API_KEY`, or `OPENAI_CODEX_AUTH_STORE_PATH`, and the live smoke
-passes without deterministic fallback. Godot HUD, Evidence, or release notes
-must not claim live Codex-provider behavior before that proof.
+The current backend provider shape and live Codex access are proven for bounded
+text proposal calls. ChatGPT Pro remaining quota is not exposed by the Codex
+Responses payload, so the runtime records request count, model, reasoning,
+estimated token/cost cap, and actual token usage when the response includes it.
+
+Godot HUD, Evidence, or release notes still must not claim live Codex-backed
+in-game simulation until Godot-to-backend live dispatch is proven. The current
+Godot playable truth remains fallback-only.

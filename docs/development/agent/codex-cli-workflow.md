@@ -20,14 +20,20 @@ Useful local checks:
 
 ```bash
 codex login status
+npm run openai-codex:login --prefix backend/npc-runtime
 npm run openai:proposal-smoke --prefix backend/npc-runtime
 OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai:proposal-smoke --prefix backend/npc-runtime
+OPENAI_PROPOSAL_MAX_ESTIMATED_COST_USD=0.005 OPENAI_CODEX_SOCIAL_PROBE_TOTAL_ESTIMATED_COST_USD=0.01 OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai-codex:social-probe --prefix backend/npc-runtime
 ```
 
 Do not treat ChatGPT/Codex login as proof that the game runtime can call live
 models. The checked-in smoke defaults to `openai-codex`; live proof still
 requires a configured `OPENAI_CODEX_ACCESS_TOKEN`, `OPENAI_CODEX_API_KEY`, or
 `OPENAI_CODEX_AUTH_STORE_PATH`.
+
+The device-login helper is the OpenClaw-style path for headless machines. It
+prints a device URL/code and saves a per-device ignored auth profile. Do not
+copy token material or absolute auth-store paths into tracked files.
 
 Model policy for the Codex-provider path:
 
@@ -39,5 +45,7 @@ Model policy for the Codex-provider path:
 
 The active assessment is
 `.game-harness/provider/openclaw-codex-auth-adoption-proposal-2026-05-18.md`.
+Backend live proof and usage accounting are recorded in
+`.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md`.
 
 Do not add legacy engine work back into the active tree.

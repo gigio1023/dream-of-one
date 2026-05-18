@@ -1,7 +1,7 @@
 # OpenClaw OpenAI Codex Provider Adoption Proposal
 
 Date: 2026-05-18
-Status: implemented default provider shape, live access not proven
+Status: implemented default provider shape with backend live proof
 
 ## Correction
 
@@ -115,9 +115,10 @@ catalog and resolver do not expose nano models. Do not configure nano for
 
 ### Slice 2: OAuth profile store
 
-- Add a small ignored auth-profile file format:
+- Done: add a small ignored auth-profile file format:
   `{ access, refresh, expires, accountId?, email?, planType? }`.
-- Add device-code login helper for local setup.
+- Done: add device-code login helper for local setup:
+  `npm run openai-codex:login --prefix backend/npc-runtime`.
 - Prefer implementing only the small Codex OAuth/device-code/refresh surface
   needed by this runtime before adding a broad provider SDK dependency.
 - Add refresh logic with file locking before spending refresh tokens.
@@ -127,11 +128,19 @@ catalog and resolver do not expose nano models. Do not configure nano for
 
 - Done at provider-shape level: reuse the existing proposal prompt, JSON
   schema, parser, and POST path under the configured Codex base URL.
-- Live proof remains pending until a valid Codex credential is configured.
+- Done for backend live calls: Codex Responses requires `stream: true` and
+  rejects `max_output_tokens` on this provider path, so `openai-codex` requests
+  stream text and omit that parameter while generic `openai-api` still sends
+  `max_output_tokens`.
+- Done: backend live smoke passed with `gpt-5.4-mini`, low reasoning, no
+  fallback models, no deterministic fallback, and provider usage metadata.
 
 ### Slice 4: proof and product gate
 
-- Add a backend live smoke that skips without a usable Codex auth profile.
+- Done: backend live smoke skips without a usable Codex auth profile and runs
+  with an explicit budget gate when `OPENAI_PROPOSAL_LIVE_TEST=1`.
+- Done: backend tiny social probe checks two role agents against the same
+  visible record context while enforcing a total estimated cap.
 - Add Godot-to-backend proof before surfacing `providerState.mode =
   openai_codex`.
 - Keep `fallback_only_m1` as product truth until exported-build proof passes.

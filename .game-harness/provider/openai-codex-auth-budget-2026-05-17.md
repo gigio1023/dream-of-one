@@ -1,13 +1,14 @@
 # OpenAI/Codex Auth and Budgeted Proposal Smoke
 
 Date: 2026-05-17
-Status: superseded for future provider choice; legacy OpenAI API guardrail,
-live access not proven
+Status: superseded for provider choice; legacy OpenAI API guardrail,
+generic OpenAI API live access not proven
 
 Supersession note, 2026-05-18: the default live-LLM provider mode is direct
 `openai-codex` auth with `gpt-5.4-mini` low reasoning effort and no default
 model fallbacks. Keep this file as the historical `openai-api` smoke/budget
-record only.
+record only. Backend direct `openai-codex` live proof is now recorded in
+`openai-codex-live-social-probe-2026-05-18.md`.
 
 ## Decision
 
@@ -105,7 +106,8 @@ Result:
 - Backend build and 116 integration tests pass.
 - Dry smoke prints the `gpt-5.4-mini` config and skips without spending.
 - Live smoke also skips because `OPENAI_API_KEY` is missing.
-- Live `gpt-5.4-mini` access is still not proven.
+- Generic OpenAI API `gpt-5.4-mini` access was not proven in this historical
+  run. Direct `openai-codex` backend access was proven later.
 
 ## Release Truth
 

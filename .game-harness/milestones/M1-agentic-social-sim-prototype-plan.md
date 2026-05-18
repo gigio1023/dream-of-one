@@ -152,8 +152,9 @@ action was present in the available candidate list. This partially satisfies
 It does not satisfy `AS-03` through `AS-08` as a player-facing proof. Godot
 still needs a fresh Godot smoke run, screenshots, comprehension proof, and live
 provider dispatch inside the runtime before this milestone can pass. The
-provider-shaped backend comparison, scheduling plan, and dispatch packet plan
-are contract proof, not live provider availability.
+provider-shaped backend comparison, scheduling plan, dispatch packet plan, and
+backend `openai-codex` live probes are boundary proof, not live Godot provider
+availability.
 
 ## Required Evidence Artifacts
 
@@ -164,7 +165,7 @@ are contract proof, not live provider availability.
 | asset BOM | `docs/scenario/content/same-order-asset-bill-of-materials.md` and `.game-harness/assets/same-order-asset-bom-2026-05-16.md` | local source, license, procedural prop, UI, audio-scope, and replacement plan proof. |
 | agent action log | backend/Godot evidence export | perception -> available action candidates -> selected affordance -> validation result -> ledger event. |
 | comprehension note | `.game-harness/review-log.md` or verification ledger | proxy proves the current artifact exposes the cause chain; fresh player notes still required for product closure. |
-| provider boundary note | `.game-harness/verification-ledger.md`, `.game-harness/provider/same-order-provider-scheduling-contract-2026-05-16.md`, and `.game-harness/provider/same-order-provider-dispatch-contract-2026-05-16.md` | provider-shaped proposal path preserves provider-off ledger outcomes; scheduled role-agent jobs and backend dispatch packets exist; live provider availability remains separate. |
+| provider boundary note | `.game-harness/verification-ledger.md`, `.game-harness/provider/same-order-provider-scheduling-contract-2026-05-16.md`, `.game-harness/provider/same-order-provider-dispatch-contract-2026-05-16.md`, and `.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md` | provider-shaped proposal path preserves provider-off ledger outcomes; scheduled role-agent jobs, backend dispatch packets, and backend live Codex text probes exist; live Godot provider availability remains separate. |
 
 ## Verification Commands
 

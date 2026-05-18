@@ -13,6 +13,7 @@ const execFileAsync = promisify(execFile);
 export interface CodexToolResponse {
   threadId: string;
   content: string;
+  providerUsage?: OpenAiProposalUsageSummary;
 }
 
 export interface CodexToolRunOptions {
@@ -85,6 +86,12 @@ interface OpenAiProposalBudgetEstimate {
   estimatedCostUsd: number;
 }
 
+export interface OpenAiProposalUsageSummary extends OpenAiProposalBudgetEstimate {
+  actualInputTokens?: number;
+  actualOutputTokens?: number;
+  actualTotalTokens?: number;
+}
+
 interface OpenAiProposalGatewayOptions {
   fetch?: FetchLike;
   timeoutMs?: number;
@@ -106,6 +113,11 @@ interface NpcTextProposal {
 interface OpenAiResponsePayload {
   id: string;
   text: string;
+  usage?: {
+    inputTokens?: number;
+    outputTokens?: number;
+    totalTokens?: number;
+  };
 }
 
 const OPENAI_PROPOSAL_INSTRUCTIONS = [
@@ -428,7 +440,8 @@ function extractOpenAiResponseText(payload: unknown): OpenAiResponsePayload {
 
   const outputText = payload.output_text;
   if (typeof outputText === "string" && outputText.trim().length > 0) {
-    return { id: id.trim(), text: outputText.trim() };
+    const usage = extractOpenAiUsage(payload);
+    return { id: id.trim(), text: outputText.trim(), ...(usage ? { usage } : {}) };
   }
 
   const output = payload.output;
@@ -443,13 +456,121 @@ function extractOpenAiResponseText(payload: unknown): OpenAiResponsePayload {
         }
         const text = content.text;
         if (typeof text === "string" && text.trim().length > 0) {
-          return { id: id.trim(), text: text.trim() };
+          const usage = extractOpenAiUsage(payload);
+          return { id: id.trim(), text: text.trim(), ...(usage ? { usage } : {}) };
         }
       }
     }
   }
 
   throw new CodexToolError("OpenAI response missing output text");
+}
+
+function readNestedString(value: unknown, keys: string[]): string | undefined {
+  let cursor = value;
+  for (const key of keys) {
+    if (!isRecord(cursor)) return undefined;
+    cursor = cursor[key];
+  }
+  return typeof cursor === "string" && cursor.trim().length > 0 ? cursor.trim() : undefined;
+}
+
+function readNestedNumber(value: unknown, keys: string[]): number | undefined {
+  let cursor = value;
+  for (const key of keys) {
+    if (!isRecord(cursor)) return undefined;
+    cursor = cursor[key];
+  }
+  return typeof cursor === "number" && Number.isFinite(cursor) && cursor >= 0 ? Math.floor(cursor) : undefined;
+}
+
+function extractOpenAiUsage(value: unknown): OpenAiResponsePayload["usage"] {
+  const usage = isRecord(value) ? value.usage : undefined;
+  if (!isRecord(usage)) return undefined;
+
+  const inputTokens =
+    readNestedNumber(usage, ["input_tokens"])
+    ?? readNestedNumber(usage, ["prompt_tokens"]);
+  const outputTokens =
+    readNestedNumber(usage, ["output_tokens"])
+    ?? readNestedNumber(usage, ["completion_tokens"]);
+  const totalTokens =
+    readNestedNumber(usage, ["total_tokens"])
+    ?? (inputTokens !== undefined && outputTokens !== undefined ? inputTokens + outputTokens : undefined);
+
+  if (inputTokens === undefined && outputTokens === undefined && totalTokens === undefined) {
+    return undefined;
+  }
+
+  return {
+    ...(inputTokens !== undefined ? { inputTokens } : {}),
+    ...(outputTokens !== undefined ? { outputTokens } : {}),
+    ...(totalTokens !== undefined ? { totalTokens } : {}),
+  };
+}
+
+function extractOpenAiStreamResponseText(payload: string): OpenAiResponsePayload {
+  let responseId = "";
+  let outputText = "";
+  let completedResponse: unknown;
+  let streamUsage: OpenAiResponsePayload["usage"];
+
+  for (const rawLine of payload.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line.startsWith("data:")) continue;
+    const data = line.slice("data:".length).trim();
+    if (!data || data === "[DONE]") continue;
+
+    let event: unknown;
+    try {
+      event = JSON.parse(data) as unknown;
+    } catch {
+      continue;
+    }
+    if (!isRecord(event)) continue;
+
+    const id = readNestedString(event, ["response", "id"]) ?? readNestedString(event, ["id"]);
+    if (id) responseId = id;
+
+    const delta = readNestedString(event, ["delta"]);
+    if (delta) outputText += delta;
+
+    const type = readNestedString(event, ["type"]);
+    if (type === "response.completed" && event.response) {
+      completedResponse = event.response;
+      streamUsage = extractOpenAiUsage(event.response);
+    }
+
+    const text = readNestedString(event, ["item", "content", "text"]) ?? readNestedString(event, ["content", "text"]);
+    if (!outputText && text) outputText = text;
+  }
+
+  if (completedResponse) {
+    try {
+      const completed = extractOpenAiResponseText(completedResponse);
+      return {
+        id: completed.id || responseId,
+        text: completed.text || outputText,
+        ...((completed.usage ?? streamUsage) ? { usage: completed.usage ?? streamUsage } : {}),
+      };
+    } catch {
+      // Codex Responses stream completion events can omit output text while
+      // earlier delta events carry the text. Use the accumulated stream text.
+    }
+  }
+
+  if (!responseId) {
+    responseId = `openai-codex-stream-${Date.now()}`;
+  }
+  if (!outputText.trim()) {
+    throw new CodexToolError("OpenAI stream response missing output text");
+  }
+
+  return {
+    id: responseId,
+    text: outputText.trim(),
+    ...(streamUsage ? { usage: streamUsage } : {}),
+  };
 }
 
 function parseModelIds(payload: unknown): string[] {
@@ -497,6 +618,18 @@ function estimateProposalBudget(
     maxOutputTokens,
     estimatedTotalTokens,
     estimatedCostUsd,
+  };
+}
+
+function summarizeProviderUsage(
+  estimate: OpenAiProposalBudgetEstimate,
+  usage: OpenAiResponsePayload["usage"],
+): OpenAiProposalUsageSummary {
+  return {
+    ...estimate,
+    ...(usage?.inputTokens !== undefined ? { actualInputTokens: usage.inputTokens } : {}),
+    ...(usage?.outputTokens !== undefined ? { actualOutputTokens: usage.outputTokens } : {}),
+    ...(usage?.totalTokens !== undefined ? { actualTotalTokens: usage.totalTokens } : {}),
   };
 }
 
@@ -660,7 +793,8 @@ export class OpenAiProposalGateway implements CodexToolGateway {
     const budget = this.createDecisionBudget(options?.deadlineMs);
     const selectedModel = await this.resolveAvailableModel(budget, options?.signal);
     const prompt = this.buildProposalPrompt(frame);
-    assertProposalWithinBudget(this.config, estimateProposalBudget(this.config, selectedModel, prompt));
+    const budgetEstimate = estimateProposalBudget(this.config, selectedModel, prompt);
+    assertProposalWithinBudget(this.config, budgetEstimate);
     const body: Record<string, unknown> = {
       model: selectedModel,
       instructions: OPENAI_PROPOSAL_INSTRUCTIONS,
@@ -683,9 +817,14 @@ export class OpenAiProposalGateway implements CodexToolGateway {
           strict: true,
         },
       },
-      max_output_tokens: Math.max(1, Math.floor(this.config.maxOutputTokens)),
       store: false,
     };
+
+    if (this.config.provider === "openai-codex") {
+      body.stream = true;
+    } else {
+      body.max_output_tokens = Math.max(1, Math.floor(this.config.maxOutputTokens));
+    }
 
     if (this.config.reasoningEffort) {
       body.reasoning = { effort: this.config.reasoningEffort };
@@ -696,16 +835,24 @@ export class OpenAiProposalGateway implements CodexToolGateway {
     }
 
     const timeout = budget.remainingTimeoutMs();
-    const payload = await this.fetchJson("responses", {
-      method: "POST",
-      body: JSON.stringify(body),
-    }, timeout, options?.signal);
-    const response = extractOpenAiResponseText(payload);
+    const payload = this.config.provider === "openai-codex"
+      ? await this.fetchText("responses", {
+          method: "POST",
+          body: JSON.stringify(body),
+        }, timeout, options?.signal)
+      : await this.fetchJson("responses", {
+          method: "POST",
+          body: JSON.stringify(body),
+        }, timeout, options?.signal);
+    const response = typeof payload === "string"
+      ? extractOpenAiStreamResponseText(payload)
+      : extractOpenAiResponseText(payload);
     const proposal = parseNpcTextProposal(response.text, frame.packet.npcId);
 
     return {
       threadId: response.id,
       content: proposalToIntentJson(frame.packet, proposal),
+      providerUsage: summarizeProviderUsage(budgetEstimate, response.usage),
     };
   }
 
@@ -756,6 +903,25 @@ export class OpenAiProposalGateway implements CodexToolGateway {
     timeoutMs: number,
     signal?: AbortSignal,
   ): Promise<unknown> {
+    return await this.fetchPayload(path, init, timeoutMs, signal, "json");
+  }
+
+  private async fetchText(
+    path: string,
+    init: { method: string; body?: string },
+    timeoutMs: number,
+    signal?: AbortSignal,
+  ): Promise<string> {
+    return await this.fetchPayload(path, init, timeoutMs, signal, "text") as string;
+  }
+
+  private async fetchPayload(
+    path: string,
+    init: { method: string; body?: string },
+    timeoutMs: number,
+    signal: AbortSignal | undefined,
+    responseMode: "json" | "text",
+  ): Promise<unknown> {
     const controller = new AbortController();
     let timedOut = false;
     const timeout = setTimeout(() => {
@@ -783,7 +949,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
         throw new CodexToolError(`OpenAI API ${path} failed with ${response.status} ${response.statusText}${suffix}`);
       }
 
-      return await response.json();
+      return responseMode === "text" ? await response.text() : await response.json();
     } catch (error) {
       if (signal?.aborted && !timedOut) {
         throw new CodexToolCancelledError(`OpenAI API ${path} cancelled`);

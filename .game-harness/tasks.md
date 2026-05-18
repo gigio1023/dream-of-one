@@ -32,6 +32,12 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [ ] Execute GI-04 external comprehension dry run or fresh-player session.
 - [x] Execute GI-05 live authority vs fallback-only product decision and proof.
 - [x] Execute GI-06 exported build/setup proof before tester-facing demo claims.
+- [x] Add direct `openai-codex` backend provider auth using a per-device ignored
+  auth profile, not `codex exec` and not generic `OPENAI_API_KEY`.
+- [x] Prove backend live `openai-codex` text proposals with `gpt-5.4-mini`, low
+  reasoning, no fallbacks, and recorded estimated/actual usage.
+- [x] Add a tiny two-NPC backend live social probe with a total estimated budget
+  cap before attempting live Godot provider dispatch.
 - [x] Defer four-week prototype plan issue splitting until fresh-player comprehension evidence and the M1/M2 decision are recorded.
 - [x] Run parallel simulator benchmark research lanes and record source-backed md files.
 - [x] Add simulator benchmark adoption brief and reference map to active direction docs.

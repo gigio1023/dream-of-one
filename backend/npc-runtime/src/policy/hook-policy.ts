@@ -24,6 +24,7 @@ export interface ToolHookSuccess {
   intent: NpcIntent;
   threadId: string;
   transport: "codex" | "codex-reply";
+  providerUsage?: CodexToolResponse["providerUsage"];
 }
 
 export interface ToolHookFailure {
@@ -72,6 +73,7 @@ export async function runToolHook(options: ToolHookOptions): Promise<ToolHookSuc
         intent,
         threadId: response.threadId,
         transport,
+        ...(response.providerUsage ? { providerUsage: response.providerUsage } : {}),
       };
     } catch (error) {
       const reason = classifyToolError(error);

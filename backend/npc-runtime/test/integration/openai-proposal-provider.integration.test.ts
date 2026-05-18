@@ -95,6 +95,11 @@ test("OpenAI proposal gateway uses preferred model and maps text proposal into b
     return jsonResponse(200, {
       id: "resp-preferred",
       output_text: JSON.stringify(proposal()),
+      usage: {
+        input_tokens: 111,
+        output_tokens: 22,
+        total_tokens: 133,
+      },
     });
   };
 
@@ -110,6 +115,11 @@ test("OpenAI proposal gateway uses preferred model and maps text proposal into b
   assert.equal(result.intent.utterance, "Restate the record in one procedure.");
   assert.deepEqual(result.intent.reasonCodes, ["openai_text_proposal"]);
   assert.equal(result.intent.confidence, 0.5);
+  assert.equal(result.meta.providerUsage?.model, "gpt-5.4-mini");
+  assert.equal(result.meta.providerUsage?.actualInputTokens, 111);
+  assert.equal(result.meta.providerUsage?.actualOutputTokens, 22);
+  assert.equal(result.meta.providerUsage?.actualTotalTokens, 133);
+  assert.ok((result.meta.providerUsage?.estimatedCostUsd ?? 0) > 0);
 
   assert.equal(responseBodies.length, 1);
   assert.equal(responseBodies[0]?.model, "gpt-5.4-mini");
@@ -126,6 +136,72 @@ test("OpenAI proposal gateway uses preferred model and maps text proposal into b
       "stationPressureWording",
     ],
   );
+});
+
+test("OpenAI Codex proposal gateway streams responses with gpt-5.4-mini", async () => {
+  const responseBodies: Array<Record<string, unknown>> = [];
+  const fetchImpl: FetchLike = async (url, init) => {
+    assert.ok(url.endsWith("/responses"));
+    const body = JSON.parse(init?.body ?? "{}") as Record<string, unknown>;
+    responseBodies.push(body);
+    const sse = [
+      "data: " + JSON.stringify({
+        type: "response.output_text.delta",
+        response: { id: "resp-codex-stream" },
+        delta: JSON.stringify(proposal()).slice(0, 30),
+      }),
+      "data: " + JSON.stringify({
+        type: "response.output_text.delta",
+        response: { id: "resp-codex-stream" },
+        delta: JSON.stringify(proposal()).slice(30),
+      }),
+      "data: " + JSON.stringify({
+        type: "response.completed",
+        response: {
+          id: "resp-codex-stream",
+          usage: {
+            input_tokens: 120,
+            output_tokens: 30,
+            total_tokens: 150,
+          },
+        },
+      }),
+      "data: [DONE]",
+      "",
+    ].join("\n");
+    return {
+      ok: true,
+      status: 200,
+      statusText: "ok",
+      async json() {
+        return {};
+      },
+      async text() {
+        return sse;
+      },
+    };
+  };
+
+  const gateway = new OpenAiProposalGateway(buildOpenAiConfig({
+    provider: "openai-codex",
+    baseUrl: "https://chatgpt.com/backend-api/codex",
+  }), { fetch: fetchImpl });
+  const broker = new DefaultCodexBroker(gateway, new InMemoryThreadStore());
+
+  const result = await broker.decide(buildPacket("Station"));
+
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.meta.threadId, "resp-codex-stream");
+  assert.equal(result.intent.actionType, "Ask");
+  assert.equal(result.intent.utterance, "Restate the record in one procedure.");
+  assert.equal(responseBodies[0]?.model, "gpt-5.4-mini");
+  assert.equal(responseBodies[0]?.stream, true);
+  assert.equal("max_output_tokens" in (responseBodies[0] ?? {}), false);
+  assert.deepEqual(responseBodies[0]?.reasoning, { effort: "low" });
+  assert.equal(result.meta.providerUsage?.model, "gpt-5.4-mini");
+  assert.equal(result.meta.providerUsage?.actualInputTokens, 120);
+  assert.equal(result.meta.providerUsage?.actualOutputTokens, 30);
+  assert.equal(result.meta.providerUsage?.actualTotalTokens, 150);
 });
 
 test("OpenAI proposal gateway falls back to first explicitly configured available model", async () => {

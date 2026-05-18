@@ -127,6 +127,26 @@ Latest environment/auth awareness note:
   path would require a separate provider mode, preflight, schema validation,
   timeout/failure handling, deterministic fallback, and fresh proof.
 
+Latest OpenAI Codex provider note:
+- Direct `openai-codex` backend live proof now passes through the ignored
+  auth-profile store created by `npm run openai-codex:login --prefix
+  backend/npc-runtime`.
+- Runtime defaults stay fixed to `gpt-5.4-mini`, low reasoning effort, and no
+  model fallbacks. API nano models are still not assumed available through the
+  Codex provider catalog.
+- The one-call live smoke passed with estimated cost `$0.00360825` and returned
+  usage 513 input / 230 output / 743 total tokens.
+- The two-NPC backend live social probe passed under a `$0.01` total estimated
+  cap with summed estimated cost `$0.00732675` and returned usage 1,126 input /
+  425 output / 1,551 total tokens.
+- ChatGPT Pro remaining quota was not exposed by these Codex Responses, so
+  future work must track request count, fixed model, reasoning effort,
+  estimated caps, fallback status, and returned token usage instead of claiming
+  remaining subscription quota.
+- This is backend live text-proposal proof only. Godot HUD/Evidence product
+  truth remains `fallback_only_m1` until live Godot-to-backend dispatch is
+  proven with fallback parity.
+
 Latest status check:
 - command: `.game-harness/scripts/run-same-order-comprehension-session.sh --status`
 - result in this local shell: pass after loading the ignored Ubuntu ARM local

@@ -108,11 +108,11 @@ Date: 2026-05-06
 
 Decision:
 - M1 technical pass records local backend/Godot/Evidence verification only.
-- Product closure still requires council review, player comprehension evidence, live provider/setup decisions, and release-truth review.
+- Product closure still requires council review, player comprehension evidence, live in-game provider/setup decisions, and release-truth review.
 - Long-running PR updates must separate technical pass, product blockers, bot feedback, and unresolved release claims.
 
 Rationale:
-- The project can pass local protocol checks while still being blocked for public demo truth, player understanding, or live provider availability.
+- The project can pass local protocol checks while still being blocked for public demo truth, player understanding, or live in-game provider availability.
 
 Risks:
 - PR summaries may overclaim if they collapse technical evidence and product readiness.
@@ -278,19 +278,21 @@ Date: 2026-05-17
 
 Decision:
 - The current Same Order M1 product proof is deterministic fallback-only.
-- Provider-shaped backend contracts, scheduling, and dispatch packets remain
-  valid internal evidence for the future live provider boundary.
-- Live provider behavior is not part of the current demo claim until budgeted
-  `openai-codex` preflight and Godot-to-backend provider dispatch are both
-  proven.
+- Provider-shaped backend contracts, scheduling, dispatch packets, and backend
+  live `openai-codex` probes remain valid internal evidence for the future live
+  provider boundary.
+- Live in-game provider behavior is not part of the current demo claim until
+  Godot-to-backend provider dispatch is proven with fallback parity.
 - `gpt-5.4-mini` low reasoning effort is the default configured Codex model,
-  but still needs runtime verification before any live claim.
+  and backend live verification now passes. It still must not be claimed as a
+  Godot product feature until the running scene proves it.
 
 Rationale:
 - The current work proves the important authority rule: generated wording must
   not own records, risk, Exposure, Evidence, inquest, verdict, or session end.
-- The current local machine has Codex CLI login but no game runtime API key, so
-  live provider access remains unproven.
+- The current Ubuntu ARM machine has a per-device ignored Codex auth profile,
+  and backend live access is proven. This still does not move the Godot product
+  truth out of fallback-only mode.
 - A fallback-only M1 keeps the Store/Station cell honest while the game proves
   conversation, records, role actions, and Station citation.
 
@@ -302,8 +304,8 @@ Risks:
 
 Required evidence:
 - `.game-harness/provider/same-order-provider-mode-decision-2026-05-17.md`.
-- budgeted live smoke result remains recorded as skipped until the configured
-  provider credential/profile exists.
+- `.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md`.
+- budgeted backend live smoke and tiny social probe pass with usage accounting.
 - provider-shaped backend tests keep rejecting forbidden authority fields.
-- future live provider claims require successful runtime preflight and Godot
-  dispatch evidence.
+- future in-game live provider claims require successful Godot dispatch
+  evidence.

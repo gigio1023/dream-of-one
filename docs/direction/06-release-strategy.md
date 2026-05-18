@@ -71,10 +71,11 @@ No-provider fallback:
 - preserves Dream Law, Evidence, Exposure, inquest, verdict, and session termination.
 
 Current M1 provider mode:
-- Same Order M1 is fallback-only until live API preflight and Godot-to-backend
-  provider dispatch both pass.
-- Provider-shaped backend contracts may be cited as boundary evidence only, not
-  as live provider proof.
+- Same Order M1 is fallback-only until Godot-to-backend provider dispatch passes
+  with fallback parity. Backend `openai-codex` live preflight and the tiny
+  two-NPC social probe now pass, but they are not in-game product proof.
+- Provider-shaped backend contracts and backend live probes may be cited as
+  boundary evidence only, not as live Godot provider proof.
 - Tester-facing setup and in-game UI still need to show the verified
   provider/fallback state before demo-complete claims.
 
@@ -87,7 +88,7 @@ The current checked-in build may claim only what fresh evidence proves:
 - M1 technical proof can pass locally when the verification ledger commands pass.
 
 The current checked-in build must not claim:
-- live API-backed NPC proposal flow.
+- live in-game API-backed NPC proposal flow.
 - full playable prologue.
 - small complete prologue/demo.
 - exported platform support.

@@ -35,6 +35,7 @@ It is the game-development memory layer:
 | `council/m1-team-planning-council-review-2026-05-14.md` | Parallel Game Studio council review that produced the team operating plan |
 | `council/m1-simulator-benchmark-research-council-2026-05-14.md` | Parallel benchmark research council that reframed Same Order as a simulator-first proof |
 | `provider/openai-codex-auth-budget-2026-05-17.md` | Historical OpenAI API auth decision, request budget, and live proposal smoke runbook |
+| `provider/openai-codex-live-social-probe-2026-05-18.md` | Backend live `openai-codex` smoke and tiny two-NPC social probe results with usage accounting |
 | `provider/openai-codex-model-policy-2026-05-18.md` | Active `openai-codex` model policy: `gpt-5.4-mini` low reasoning only until live discovery proves cheaper Codex models |
 | `provider/same-order-provider-mode-decision-2026-05-17.md` | M1 fallback-only provider mode decision and live-provider gate |
 | `export/same-order-export-setup-proof-2026-05-17.md` | Latest Godot export proof, including PCK route smoke, macOS app export, and remaining packaged-route blocker |

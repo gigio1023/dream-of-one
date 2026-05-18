@@ -99,8 +99,8 @@ Latest completion audit:
   exchange lines and exports `socialExchangeLines`, so the player/Codex can
   read the Station Officer -> Waiting Customer spoken exchange behind contact
   refusal. The Waiting Customer world marker now also names the social source
-  as `← 스테이션 직원`, so the player can read who caused the refusal before
-  opening any detail panel.
+  action as `← 스테이션 직원 · 기록 인용`, so the player can read who caused the
+  refusal and which role action caused it before opening any detail panel.
   It also explicitly marks itself as not a replacement for external
   comprehension.
 - latest packaged-route evidence validates as a Godot Evidence Pack and
@@ -309,10 +309,10 @@ Latest status check:
   `testerFacingFiles=["tester-invite.md"]`, `humanEvidence=false`, and
   `closesGoal=false`; it is setup material only, not comprehension evidence.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `7af8f54ebf268c5fd02a0d2a5a8d33365f1b5468ee9491dbc1197619bdb8a103`
-  - Markdown SHA-256: `a69c04161a18e2878b5750b09ee1146b34b5e5a89e8d885e9d2130917e03b7eb`
+  - JSON SHA-256: `aab108df317aba392eecc27693847723902247018572b88c57ebd445551f9924`
+  - Markdown SHA-256: `3c0060332dd628bcdfdeaa39ba772adb16a599a0a619f9b55573c769797fe1ce`
   - playable Evidence Pack SHA-256: `64e8c495a2ac8fd336426efd450f3f3f2eed3f22f45541d18f8d93d2dcde68fa`
-  - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
+  - visual capture manifest SHA-256: `1ac364f91871ea3b18221289653cf5388e487b487680a571396c34eba336091a`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
 
 Latest AI-play interface check:
@@ -328,11 +328,12 @@ Latest AI-play interface check:
   decisions, no-live provider packet memory and actor-policy readiness, and
   `routeReportPassCount=5 / 5` with Godot
   `4.7.beta2.official.777579205` from local `GODOT_BIN`.
-- latest game increment: visible NPC reaction markers now show who caused the
-  current social reaction. In the inquest Codex run, the Waiting Customer's
-  world marker reads `접촉 거부` plus `← 스테이션 직원`, while the HUD stance
-  summary still uses the compact base reaction text. Codex gameplay QA now
-  requires `canReadVisibleNpcReactionSource=true`.
+- latest game increment: visible NPC reaction markers now show which role action
+  caused the current social reaction. In the inquest Codex run, the Waiting
+  Customer's world marker reads `접촉 거부` plus `← 스테이션 직원 · 기록 인용`,
+  while the HUD stance summary still uses the compact base reaction text.
+  Codex gameplay QA now requires `canReadVisibleNpcReactionSource=true` with
+  both the source role and action.
 - latest game increment: the live HUD record line now includes `오간 말`, a
   compact NPC-to-NPC spoken exchange next to the existing ledger and stance
   summary. In the inquest Codex run, the final HUD record line reads

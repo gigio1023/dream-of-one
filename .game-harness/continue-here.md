@@ -129,11 +129,12 @@ Last Updated: 2026-05-19
   `오간 말` for the latest NPC-to-NPC spoken exchange. Codex gameplay QA verifies
   `canReadLiveHudSocialExchange=true`, so the player can observe the Station
   Officer -> Waiting Customer refusal exchange without opening inspection.
-- Latest implementation slice: visible NPC reaction markers now name the role
-  that caused the reaction. In the inquest path, the Waiting Customer world
-  label reads `접촉 거부` plus `← 스테이션 직원`, and Codex gameplay QA verifies
-  `canReadVisibleNpcReactionSource=true`. This is a player-facing readability
-  slice, not a new Store/Station system.
+- Latest implementation slice: visible NPC reaction markers now name the source
+  role action behind the reaction. In the inquest path, the Waiting Customer
+  world label reads `접촉 거부` plus `← 스테이션 직원 · 기록 인용`, and Codex
+  gameplay QA verifies `canReadVisibleNpcReactionSource=true` with both the
+  role and action. This is a player-facing readability slice, not a new
+  Store/Station system.
 - Latest implementation slice: Store Clerk can now be inspected as the first
   record-making actor after typed inquest-triggering speech. Codex gameplay QA
   focuses the Clerk, interacts, and reads `메모 배치`, report-tray basis,

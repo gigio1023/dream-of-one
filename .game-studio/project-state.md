@@ -185,10 +185,10 @@ Current M1 carry-in:
   Officer -> Waiting Customer refusal line in the running HUD before opening
   any NPC detail panel.
 - latest small-slice carry-in: visible NPC reaction markers now show the source
-  role behind the current social reaction. In the inquest path, the Waiting
-  Customer label reads `접촉 거부` plus `← 스테이션 직원`, so the player can see
-  that the refusal came from Station citation pressure before opening HUD
-  detail.
+  role action behind the current social reaction. In the inquest path, the
+  Waiting Customer label reads `접촉 거부` plus `← 스테이션 직원 · 기록 인용`, so
+  the player can see that the refusal came from Station citation pressure
+  before opening HUD detail.
 - latest small-slice carry-in: repair recovery now leaves a player-readable
   public environment record and one small cross-place consequence. Park Witness
   `post_repair_notice` sets `park_notice_board=repaired`; Studio PM reads that

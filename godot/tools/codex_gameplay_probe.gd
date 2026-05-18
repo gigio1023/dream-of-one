@@ -787,7 +787,7 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 	if not bool(checks.get("visibleWaitingCustomerReaction", false)):
 		failures.append("Waiting Customer reaction is not visible on a spawned NPC")
 	if not bool(checks.get("visibleWaitingCustomerReactionSource", false)):
-		failures.append("Waiting Customer world reaction marker does not name the Station source")
+		failures.append("Waiting Customer world reaction marker does not name the Station source action")
 	if not bool(checks.get("codexReadNpcSocialExchange", false)):
 		failures.append("Codex/player did not read the inspected NPC's overheard NPC-to-NPC exchange")
 	if not str(hud_snapshot.get("noticeBodyLabel", "")).contains("접촉 거부"):
@@ -810,7 +810,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"stationObservedManager": _observation_exists(summary, "station_officer", "store_manager", "forward_report", "cite_record"),
 		"waitingCustomerObservedStation": _observation_exists(summary, "waiting_customer", "station_officer", "cite_record", "refuse_contact"),
 		"visibleWaitingCustomerReaction": _visible_npc_has_line(summary, "NPC_Waiting_Customer"),
-		"visibleWaitingCustomerReactionSource": _visible_npc_reaction_source(summary, "NPC_Waiting_Customer", "스테이션 직원"),
+		"visibleWaitingCustomerReactionSource": _visible_npc_reaction_source(summary, "NPC_Waiting_Customer", "스테이션 직원", "기록 인용"),
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"codexInspectedUsualOrderCue": _inspected_usual_order_cue(summary),
 		"codexReadCrossPlaceRuleBoards": _read_cross_place_rule_boards(summary),
@@ -1827,14 +1827,22 @@ func _visible_waiting_customer_reaction(summary: Dictionary, expected_state: Str
 		and str(state.get("reactionText", "")).contains(expected_label)
 	)
 
-func _visible_npc_reaction_source(summary: Dictionary, npc_id: String, source_fragment: String) -> bool:
+func _visible_npc_reaction_source(summary: Dictionary, npc_id: String, source_fragment: String, action_fragment := "") -> bool:
 	var states: Dictionary = summary.get("visibleNpcStates", {})
 	var state: Dictionary = states.get(npc_id, {})
-	return (
+	var has_source := (
 		str(state.get("npcId", "")) == npc_id
 		and bool(state.get("markerVisible", false))
 		and str(state.get("reactionSourceText", "")).contains(source_fragment)
 		and str(state.get("reactionText", "")).contains(source_fragment)
+	)
+	if not has_source:
+		return false
+	if action_fragment.is_empty():
+		return true
+	return (
+		str(state.get("reactionSourceText", "")).contains(action_fragment)
+		and str(state.get("reactionText", "")).contains(action_fragment)
 	)
 
 func _visible_npc_has_line(summary: Dictionary, npc_id: String) -> bool:

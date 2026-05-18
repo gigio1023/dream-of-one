@@ -3879,7 +3879,11 @@ func _reaction_source_label(observation: Dictionary) -> String:
 	var observed_label := _actor_role_label(observed_role)
 	if observed_label.is_empty():
 		return ""
-	return "← %s" % observed_label
+	var observed_affordance := str(observation.get("observedAffordance", ""))
+	var observed_action_label := _affordance_label(observed_affordance)
+	if observed_action_label.is_empty():
+		return "← %s" % observed_label
+	return "← %s · %s" % [observed_label, observed_action_label]
 
 func _visible_npc_states() -> Dictionary:
 	var states := {}

@@ -141,8 +141,12 @@ catalog and resolver do not expose nano models. Do not configure nano for
   with an explicit budget gate when `OPENAI_PROPOSAL_LIVE_TEST=1`.
 - Done: backend tiny social probe checks two role agents against the same
   visible record context while enforcing a total estimated cap.
-- Add Godot-to-backend proof before surfacing `providerState.mode =
-  openai_codex`.
+- Done: Godot-to-backend HTTP decision smoke proves one live `/v1/npc/decision`
+  request can reach `openai-codex` and return bounded wording plus usage
+  metadata without mutating Godot state.
+- Still required before surfacing `providerState.mode = openai_codex`: wire one
+  existing `PlayableSession` route provider job through the live backend and
+  prove fallback parity for route events, ledger, object state, and economy.
 - Keep `fallback_only_m1` as product truth until exported-build proof passes.
 
 ## Do Not

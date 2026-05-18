@@ -72,10 +72,12 @@ No-provider fallback:
 
 Current M1 provider mode:
 - Same Order M1 is fallback-only until Godot-to-backend provider dispatch passes
-  with fallback parity. Backend `openai-codex` live preflight and the tiny
-  two-NPC social probe now pass, but they are not in-game product proof.
-- Provider-shaped backend contracts and backend live probes may be cited as
-  boundary evidence only, not as live Godot provider proof.
+  with fallback parity from an actual `PlayableSession` route job. Backend
+  `openai-codex` live preflight, the tiny two-NPC social probe, and one Godot
+  HTTP decision smoke now pass, but they are not in-game product proof.
+- Provider-shaped backend contracts, backend live probes, and the Godot HTTP
+  decision smoke may be cited as boundary evidence only, not as live playable
+  route proof.
 - Tester-facing setup and in-game UI still need to show the verified
   provider/fallback state before demo-complete claims.
 

@@ -4,7 +4,9 @@ extends RefCounted
 const ShellSchema := preload("res://scripts/data/shell_schema.gd")
 
 const DEFAULT_READINESS_URL := "http://127.0.0.1:8787/health/ready"
+const DEFAULT_DECISION_URL := "http://127.0.0.1:8787/v1/npc/decision"
 const DEFAULT_TIMEOUT_MS := 350
+const DEFAULT_DECISION_TIMEOUT_MS := 12000
 const AI_OWNS_STATE := false
 const BRIDGE_OWNS_STATE := false
 
@@ -100,6 +102,50 @@ static func probe_live_readiness(
 	report["httpStatus"] = response_code
 	return preflight_from_report(context, report, "live-http", endpoint)
 
+static func probe_live_decision(
+	tree: SceneTree,
+	packet: Dictionary,
+	endpoint := DEFAULT_DECISION_URL,
+	timeout_ms := DEFAULT_DECISION_TIMEOUT_MS
+) -> Dictionary:
+	if tree == null:
+		return _decision_report(false, endpoint, 0, "bridge_scene_tree_missing", {}, "SceneTree is unavailable.")
+
+	var request := HTTPRequest.new()
+	request.timeout = max(0.05, float(timeout_ms) / 1000.0)
+	tree.root.add_child(request)
+
+	var error := request.request(
+		endpoint,
+		PackedStringArray(["Accept: application/json", "Content-Type: application/json"]),
+		HTTPClient.METHOD_POST,
+		JSON.stringify(packet)
+	)
+	if error != OK:
+		request.queue_free()
+		return _decision_report(false, endpoint, 0, "bridge_request_start_failed", {}, "Unable to start decision request: %s" % error)
+
+	var response: Array = await request.request_completed
+	request.queue_free()
+
+	var result_code := int(response[0])
+	var response_code := int(response[1])
+	var body_bytes := response[3] as PackedByteArray
+	var body_text := body_bytes.get_string_from_utf8()
+	if result_code != HTTPRequest.RESULT_SUCCESS:
+		return _decision_report(false, endpoint, response_code, "bridge_backend_unavailable", {}, "Decision endpoint did not complete: %s" % result_code)
+
+	var parsed = JSON.parse_string(body_text)
+	if not parsed is Dictionary:
+		return _decision_report(false, endpoint, response_code, "bridge_invalid_decision_response", {}, "Decision endpoint returned non-JSON body.")
+
+	var decision: Dictionary = parsed
+	var meta: Dictionary = decision.get("meta", {})
+	var intent: Dictionary = decision.get("intent", {})
+	var ok := response_code >= 200 and response_code < 300 and not bool(meta.get("usedFallback", true))
+	var reason := "" if ok else str(meta.get("reason", "bridge_decision_fallback_or_http_error"))
+	return _decision_report(ok, endpoint, response_code, reason, decision, "")
+
 static func ready_fixture() -> Dictionary:
 	return {
 		"status": "ready",
@@ -132,6 +178,31 @@ static func ready_fixture() -> Dictionary:
 				"path": "mock/workspaces",
 				"resolvedPath": "mock/workspaces"
 			}
+		}
+	}
+
+static func _decision_report(
+	ok: bool,
+	endpoint: String,
+	http_status: int,
+	reason: String,
+	decision: Dictionary,
+	detail: String
+) -> Dictionary:
+	return {
+		"ok": ok,
+		"bridgeStatus": "ready" if ok else "fallback",
+		"mode": "live-http-decision",
+		"endpoint": endpoint,
+		"httpStatus": http_status,
+		"reason": reason,
+		"detail": detail,
+		"decision": decision,
+		"state": _state_contract(),
+		"proofs": {
+			"decisionRequested": true,
+			"commandExecuted": false,
+			"readinessOnly": false
 		}
 	}
 

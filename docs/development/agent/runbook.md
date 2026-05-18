@@ -42,6 +42,7 @@ npm run openai-codex:login --prefix backend/npc-runtime
 npm run openai:proposal-smoke --prefix backend/npc-runtime
 OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai:proposal-smoke --prefix backend/npc-runtime
 OPENAI_PROPOSAL_MAX_ESTIMATED_COST_USD=0.005 OPENAI_CODEX_SOCIAL_PROBE_TOTAL_ESTIMATED_COST_USD=0.01 OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai-codex:social-probe --prefix backend/npc-runtime
+$GODOT_BIN --headless --path godot --script res://tools/live_provider_dispatch_smoke.gd
 ```
 
 The default provider is direct `openai-codex` with `gpt-5.4-mini`, low
@@ -55,7 +56,8 @@ ChatGPT Pro remaining quota is not exposed by the Codex response used here.
 Track request count, fixed model, low reasoning, estimated per-request cap,
 estimated total cap, fallback status, and returned token usage. Do not claim
 live `openai-codex` behavior until the live smoke passes. Do not claim live
-Godot simulation until Godot-to-backend live dispatch is proven.
+Godot simulation until a `PlayableSession` route job uses the live backend and
+proves fallback parity.
 
 ## Routing
 

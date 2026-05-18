@@ -38,6 +38,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   reasoning, no fallbacks, and recorded estimated/actual usage.
 - [x] Add a tiny two-NPC backend live social probe with a total estimated budget
   cap before attempting live Godot provider dispatch.
+- [x] Add a Godot live HTTP decision smoke that calls backend `/v1/npc/decision`
+  with `openai-codex`, records usage, and does not mutate product state.
+- [ ] Wire one actual `PlayableSession` route provider job through live backend
+  and prove fallback parity for route events, ledger, object state, and economy.
 - [x] Defer four-week prototype plan issue splitting until fresh-player comprehension evidence and the M1/M2 decision are recorded.
 - [x] Run parallel simulator benchmark research lanes and record source-backed md files.
 - [x] Add simulator benchmark adoption brief and reference map to active direction docs.

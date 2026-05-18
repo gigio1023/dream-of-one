@@ -278,11 +278,12 @@ Date: 2026-05-17
 
 Decision:
 - The current Same Order M1 product proof is deterministic fallback-only.
-- Provider-shaped backend contracts, scheduling, dispatch packets, and backend
-  live `openai-codex` probes remain valid internal evidence for the future live
-  provider boundary.
-- Live in-game provider behavior is not part of the current demo claim until
-  Godot-to-backend provider dispatch is proven with fallback parity.
+- Provider-shaped backend contracts, scheduling, dispatch packets, backend live
+  `openai-codex` probes, and the Godot HTTP decision smoke remain valid
+  internal evidence for the future live provider boundary.
+- Live in-game provider behavior is not part of the current demo claim until an
+  actual `PlayableSession` route job uses the live backend and proves fallback
+  parity.
 - `gpt-5.4-mini` low reasoning effort is the default configured Codex model,
   and backend live verification now passes. It still must not be claimed as a
   Godot product feature until the running scene proves it.
@@ -305,7 +306,8 @@ Risks:
 Required evidence:
 - `.game-harness/provider/same-order-provider-mode-decision-2026-05-17.md`.
 - `.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md`.
-- budgeted backend live smoke and tiny social probe pass with usage accounting.
+- budgeted backend live smoke, tiny social probe, and Godot HTTP decision smoke
+  pass with usage accounting.
 - provider-shaped backend tests keep rejecting forbidden authority fields.
 - future in-game live provider claims require successful Godot dispatch
   evidence.

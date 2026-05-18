@@ -1,0 +1,77 @@
+{
+	"adapter": "godot",
+	"artifactPath": "data/evidence/godot/live-provider-dispatch/dre_171_live_provider_dispatch_smoke.json",
+	"checks": {
+		"decision": {
+			"actionType": "Talk",
+			"endpoint": "http://127.0.0.1:8787/v1/npc/decision",
+			"httpStatus": 200,
+			"npcId": "store-clerk-godot-live-dispatch",
+			"ok": true,
+			"providerUsage": {
+				"actualInputTokens": 568.0,
+				"actualOutputTokens": 300.0,
+				"actualTotalTokens": 868.0,
+				"estimatedCostUsd": 0.003666,
+				"estimatedInputTokens": 688.0,
+				"estimatedTotalTokens": 1388.0,
+				"maxOutputTokens": 700.0,
+				"model": "gpt-5.4-mini"
+			},
+			"reason": "",
+			"threadId": "resp_0f1218ab3793a4b4016a0adfcc0288819183c334a193d4f872",
+			"transport": "codex",
+			"usedFallback": false,
+			"utterance": "영수증은여기있습니다.번호와내용이맞는지만확인해주세요."
+		},
+		"readiness": {
+			"bridgeStatus": "ready",
+			"endpoint": "http://127.0.0.1:8787/health/ready",
+			"ok": true,
+			"provider": {
+				"ok": true,
+				"openAi": {
+					"budget": {
+						"inputUsdPerMillionTokens": 0.75,
+						"maxEstimatedCostUsd": 0.005,
+						"maxEstimatedInputTokens": 6000.0,
+						"maxEstimatedTotalTokens": 8000.0,
+						"outputUsdPerMillionTokens": 4.5
+					},
+					"checkedModels": [
+						"gpt-5.4-mini"
+					],
+					"fallbackModels": [],
+					"ok": true,
+					"preferredModel": "gpt-5.4-mini",
+					"provider": "openai-codex",
+					"selectedModel": "gpt-5.4-mini"
+				},
+				"provider": "openai-codex"
+			},
+			"providerReady": true,
+			"reasons": [],
+			"storageReady": true
+		}
+	},
+	"failures": [],
+	"ok": true,
+	"proofs": {
+		"actualInputTokens": 568,
+		"actualOutputTokens": 300,
+		"actualTotalTokens": 868,
+		"chatGptProQuotaRemaining": "not_exposed_by_codex_response",
+		"commandExecuted": false,
+		"contextMutated": false,
+		"decisionRequested": true,
+		"estimatedCostUsd": 0.003666,
+		"productProviderStateChanged": false,
+		"providerMode": "openai-codex",
+		"selectedModel": "gpt-5.4-mini",
+		"transport": "codex",
+		"usedFallback": false,
+		"utterance": "영수증은여기있습니다.번호와내용이맞는지만확인해주세요."
+	},
+	"runId": "dre-live-provider-dispatch-smoke",
+	"schemaVersion": "godot-runtime-v1"
+}

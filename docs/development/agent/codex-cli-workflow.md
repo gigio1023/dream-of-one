@@ -24,6 +24,7 @@ npm run openai-codex:login --prefix backend/npc-runtime
 npm run openai:proposal-smoke --prefix backend/npc-runtime
 OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai:proposal-smoke --prefix backend/npc-runtime
 OPENAI_PROPOSAL_MAX_ESTIMATED_COST_USD=0.005 OPENAI_CODEX_SOCIAL_PROBE_TOTAL_ESTIMATED_COST_USD=0.01 OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai-codex:social-probe --prefix backend/npc-runtime
+$GODOT_BIN --headless --path godot --script res://tools/live_provider_dispatch_smoke.gd
 ```
 
 Do not treat ChatGPT/Codex login as proof that the game runtime can call live
@@ -47,5 +48,7 @@ The active assessment is
 `.game-harness/provider/openclaw-codex-auth-adoption-proposal-2026-05-18.md`.
 Backend live proof and usage accounting are recorded in
 `.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md`.
+The Godot smoke proves one live HTTP decision call only; it does not change
+`fallback_only_m1` product truth.
 
 Do not add legacy engine work back into the active tree.

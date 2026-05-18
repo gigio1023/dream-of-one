@@ -127,6 +127,7 @@ func _run() -> void:
 	var final_summary: Dictionary = final_snapshot.get("summary", {})
 	var record_props: Dictionary = final_snapshot.get("worldRecordProps", {})
 	var hud_snapshot: Dictionary = final_snapshot.get("hud", {})
+	var provider_packet_memory_probe := _provider_packet_memory_probe(session)
 	var checks := _npc_interaction_checks(final_summary, record_props, snapshots)
 	var ai_player_report := _ai_player_report(final_summary, hud_snapshot, record_props, checks, executed_steps)
 	var route_reports: Array[Dictionary] = []
@@ -151,6 +152,7 @@ func _run() -> void:
 	failures.append_array(_validate_probe(final_summary, hud_snapshot, record_props, checks, executed_steps))
 	failures.append_array(_validate_ai_player_report(ai_player_report))
 	failures.append_array(_validate_route_reports(route_reports))
+	failures.append_array(_validate_provider_packet_memory_probe(provider_packet_memory_probe))
 
 	var output_path := _probe_output_path()
 	DirAccess.make_dir_recursive_absolute(output_path.get_base_dir())
@@ -185,6 +187,7 @@ func _run() -> void:
 			"inspectedNpcState": final_summary.get("inspectedNpcState", {}),
 			"hud": hud_snapshot
 		},
+		"providerPacketMemoryProbe": provider_packet_memory_probe,
 		"npcInteractionChecks": checks,
 		"aiPlayerReport": ai_player_report,
 		"routeReports": route_reports,
@@ -261,6 +264,47 @@ func _drive_codex_action(session: Node, executed_steps: Array[Dictionary], snaps
 	await _settle_frames(2)
 	executed_steps.append(result)
 	snapshots.append(_snapshot(action_id, session))
+
+func _provider_packet_memory_probe(session: Node) -> Dictionary:
+	if session == null or not session.has_method("debug_live_provider_packet"):
+		return {
+			"pass": false,
+			"reason": "debug_live_provider_packet_missing"
+		}
+	var packet: Variant = session.call(
+		"debug_live_provider_packet",
+		"codex-gameplay-provider-memory-probe",
+		"NPC_Waiting_Customer",
+		[]
+	)
+	if not packet is Dictionary:
+		return {
+			"pass": false,
+			"reason": "provider_packet_not_dictionary"
+		}
+	var provider_packet: Dictionary = packet
+	var organization_context: Dictionary = provider_packet.get("organizationContext", {})
+	var actor_memory: Dictionary = organization_context.get("actorMemory", {})
+	var probe_pass := (
+		str(provider_packet.get("npcId", "")) == "NPC_Waiting_Customer"
+		and str(actor_memory.get("actorRole", "")) == "waiting_customer"
+		and _actor_memory_has_observation(actor_memory, "station_officer", "cite_record", "refuse_contact")
+		and _actor_memory_has_own_action(actor_memory, "refuse_contact")
+	)
+	return {
+		"pass": probe_pass,
+		"npcId": str(provider_packet.get("npcId", "")),
+		"role": str(organization_context.get("role", "")),
+		"providerJobId": str(organization_context.get("providerJobId", "")),
+		"actorMemory": actor_memory,
+		"environmentToolCount": Array(organization_context.get("environmentToolCatalog", [])).size(),
+		"recentEvents": provider_packet.get("recentEvents", [])
+	}
+
+func _validate_provider_packet_memory_probe(probe: Dictionary) -> Array[String]:
+	if bool(probe.get("pass", false)):
+		return []
+	return ["Provider packet memory probe failed: %s" % str(probe)]
 
 func _run_route_probe(packed: PackedScene, plan: Dictionary) -> Dictionary:
 	var scene := packed.instantiate()

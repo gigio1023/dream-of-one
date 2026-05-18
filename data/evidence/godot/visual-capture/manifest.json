@@ -113,6 +113,7 @@
 				"outcome names the exact Store ledger entry cited by the Station",
 				"outcome shows speech/delay to record to queue reaction to Park notice to Station role-action to Studio review block chain",
 				"outcome names the NPC-to-NPC social reaction behind the Station citation",
+				"scripted summary records the visible Station Officer -> Waiting Customer social influence link",
 				"why-line remains visible as session-end basis"
 			],
 			"height": 720,
@@ -231,6 +232,7 @@
 				"outcome names the exact Store ledger entry cited by the Station",
 				"outcome shows speech/delay to record to queue reaction to Park notice to Station role-action to Studio review block chain",
 				"outcome names the NPC-to-NPC social reaction behind the Station citation",
+				"scripted summary records the visible Station Officer -> Waiting Customer social influence link",
 				"why-line remains visible as session-end basis"
 			],
 			"role": "inquest-session-end"
@@ -472,6 +474,143 @@
 		"typedFreeInputAction": "free_input_submitted",
 		"typedFreeInputAvailable": true,
 		"typedFreeInputLine": "저는 이 꿈에 방금 들어왔어요.",
+		"visibleSocialLinks": [
+			{
+				"color": [
+					0.720000028610229,
+					0.620000004768372,
+					0.939999997615814,
+					1.0
+				],
+				"fromPosition": [
+					8.80000019073486,
+					2.11999988555908,
+					-11.1999998092651
+				],
+				"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+				"observedActorId": "NPC_Station_Officer",
+				"observedActorRole": "station_officer",
+				"observedAffordance": "cite_record",
+				"observedLedgerEventId": "civic-ledger-6",
+				"observerActorId": "NPC_Waiting_Customer",
+				"observerRole": "waiting_customer",
+				"resultingAffordance": "refuse_contact",
+				"toPosition": [
+					-10.3999996185303,
+					2.11999988555908,
+					1.39999997615814
+				],
+				"visible": true
+			},
+			{
+				"color": [
+					1.0,
+					0.720000028610229,
+					0.419999986886978,
+					1.0
+				],
+				"fromPosition": [
+					-13.3999996185303,
+					2.11999988555908,
+					0.699999988079071
+				],
+				"linkId": "NPC_Store_Clerk__NPC_Park_Witness__place_note__post_rumor",
+				"observedActorId": "NPC_Store_Clerk",
+				"observedActorRole": "store_clerk",
+				"observedAffordance": "place_note",
+				"observedLedgerEventId": "civic-ledger-2",
+				"observerActorId": "NPC_Park_Witness",
+				"observerRole": "park_witness",
+				"resultingAffordance": "post_rumor",
+				"toPosition": [
+					-10.1999998092651,
+					2.11999988555908,
+					-10.3999996185303
+				],
+				"visible": true
+			},
+			{
+				"color": [
+					1.0,
+					0.720000028610229,
+					0.419999986886978,
+					1.0
+				],
+				"fromPosition": [
+					-13.3999996185303,
+					2.11999988555908,
+					0.699999988079071
+				],
+				"linkId": "NPC_Store_Clerk__NPC_Store_Manager__place_note__forward_report",
+				"observedActorId": "NPC_Store_Clerk",
+				"observedActorRole": "store_clerk",
+				"observedAffordance": "place_note",
+				"observedLedgerEventId": "civic-ledger-2",
+				"observerActorId": "NPC_Store_Manager",
+				"observerRole": "store_manager",
+				"resultingAffordance": "forward_report",
+				"toPosition": [
+					-12.3999996185303,
+					2.11999988555908,
+					-2.59999990463257
+				],
+				"visible": true
+			},
+			{
+				"color": [
+					0.939999997615814,
+					0.550000011920929,
+					0.379999995231628,
+					1.0
+				],
+				"fromPosition": [
+					-12.3999996185303,
+					2.11999988555908,
+					-2.59999990463257
+				],
+				"linkId": "NPC_Store_Manager__NPC_Station_Officer__forward_report__cite_record",
+				"observedActorId": "NPC_Store_Manager",
+				"observedActorRole": "store_manager",
+				"observedAffordance": "forward_report",
+				"observedLedgerEventId": "civic-ledger-5",
+				"observerActorId": "NPC_Station_Officer",
+				"observerRole": "station_officer",
+				"resultingAffordance": "cite_record",
+				"toPosition": [
+					8.80000019073486,
+					2.11999988555908,
+					-11.1999998092651
+				],
+				"visible": true
+			},
+			{
+				"color": [
+					0.720000028610229,
+					0.620000004768372,
+					0.939999997615814,
+					1.0
+				],
+				"fromPosition": [
+					8.80000019073486,
+					2.11999988555908,
+					-11.1999998092651
+				],
+				"linkId": "NPC_Station_Officer__NPC_Studio_PM__cite_record__block_review",
+				"observedActorId": "NPC_Station_Officer",
+				"observedActorRole": "station_officer",
+				"observedAffordance": "cite_record",
+				"observedLedgerEventId": "civic-ledger-6",
+				"observerActorId": "NPC_Studio_PM",
+				"observerRole": "studio_pm",
+				"resultingAffordance": "block_review",
+				"toPosition": [
+					8.89999961853027,
+					2.11999988555908,
+					0.400000005960464
+				],
+				"visible": true
+			}
+		],
 		"worldRecordProps": {
 			"civic_economy_panel": {
 				"hasBody": true,

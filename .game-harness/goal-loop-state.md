@@ -80,11 +80,11 @@ Latest completion audit:
   and packaged-route evidence.
 - latest Codex gameplay QA artifact reports `ok=true`,
   `aiPlayerReport.pass=true`, 31 accepted public actions, 5/5 route reports,
-  all 35 explainability flags true, `canReadEnvironmentToolCatalog=true`,
-  `canReadVisibleNpcRoleTints=true`, and
-  `canReadVisibleNpcSourceToken=true`, and
-  no-live provider packet readiness for bounded `actorMemory` plus
-  `actorPolicy`. It now also proves Codex/player can read the Store Clerk's
+  all 36 explainability flags true, `canReadEnvironmentToolCatalog=true`,
+  `canReadVisibleNpcRoleTints=true`, `canReadVisibleNpcSourceToken=true`,
+  `canReadVisibleSocialInfluenceLink=true`, and no-live provider packet
+  readiness for bounded `actorMemory` plus `actorPolicy`. It now also proves
+  Codex/player can read the Store Clerk's
   visible environment cues in the live prompt before choosing speech, then
   inspect Store Clerk as the record-making NPC, Store Manager as the
   organizational handoff actor, Park Witness as the public-spread actor,
@@ -109,8 +109,12 @@ Latest completion audit:
   opening inspection panels. Reacting NPCs now also carry a small source token
   colored from the observed actor role; in the inquest path, the Waiting
   Customer refusal carries a Station Officer token tied to `cite_record`.
+  The scene now also draws role-colored NPC-to-NPC influence links from the
+  observed/source actor to the reacting actor; in the inquest path, Codex/player
+  can read `NPC_Station_Officer -> NPC_Waiting_Customer` for
+  `cite_record -> refuse_contact` before treating the refusal as social state.
   Latest Codex gameplay artifact SHA-256:
-  `adf4e81c3b5c72b545a124db67b31573c4b182dfcfa777a23bf73ae3b26c7375`.
+  `389d09d1fcff230e1d3fa2114d1924e7985d42e8d36120d9e16da941e962e6ec`.
   It also explicitly marks itself as not a replacement for external
   comprehension.
 - latest packaged-route evidence validates as a Godot Evidence Pack and
@@ -319,22 +323,22 @@ Latest status check:
   `testerFacingFiles=["tester-invite.md"]`, `humanEvidence=false`, and
   `closesGoal=false`; it is setup material only, not comprehension evidence.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `aab108df317aba392eecc27693847723902247018572b88c57ebd445551f9924`
-  - Markdown SHA-256: `3c0060332dd628bcdfdeaa39ba772adb16a599a0a619f9b55573c769797fe1ce`
-  - playable Evidence Pack SHA-256: `64e8c495a2ac8fd336426efd450f3f3f2eed3f22f45541d18f8d93d2dcde68fa`
-  - visual capture manifest SHA-256: `1ac364f91871ea3b18221289653cf5388e487b487680a571396c34eba336091a`
+  - JSON SHA-256: `389d09d1fcff230e1d3fa2114d1924e7985d42e8d36120d9e16da941e962e6ec`
+  - Markdown SHA-256: `598eaf4855cc141ff395798cbdca8906ec96527d15e9526b755cf67365229558`
+  - playable Evidence Pack SHA-256: `8cbcd341ca72f9a4e4edc8be62db42de9254e3e29b49f89165ea2d0c395987dd`
+  - visual capture manifest SHA-256: `00acafaeaad0e466b9a28fcf55e32b18b4641096b2bd1d0f261a43b3ef9033eb`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
 
 Latest AI-play interface check:
 - command: `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `31 / 31`, `explainability=33/33`, conversation visible
+  player actions `31 / 31`, `explainability=36/36`, conversation visible
   context in the live Store Clerk prompt, Store Clerk record-action inspection,
   Store Manager handoff inspection, Park Witness public-spread inspection,
   Station Officer authority-citation inspection, Studio PM cross-place
   opportunity inspection, Waiting Customer social-exchange inspection, live HUD
   `오간 말` social exchange readability, visible NPC reaction source
-  readability, actor memory for observed NPC
+  readability, visible NPC-to-NPC influence-link readability, actor memory for observed NPC
   decisions, no-live provider packet memory and actor-policy readiness, and
   `routeReportPassCount=5 / 5` with Godot
   `4.7.beta2.official.777579205` from local `GODOT_BIN`.

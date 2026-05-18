@@ -792,6 +792,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Visible NPC bodies do not expose distinct role tints for the social field")
 	if not bool(checks.get("visibleNpcSourceToken", false)):
 		failures.append("Visible NPC reaction source token does not expose the Station citation source")
+	if not bool(checks.get("visibleSocialInfluenceLink", false)):
+		failures.append("Visible social influence link does not connect Station citation pressure to contact refusal")
 	if not bool(checks.get("codexReadNpcSocialExchange", false)):
 		failures.append("Codex/player did not read the inspected NPC's overheard NPC-to-NPC exchange")
 	if not str(hud_snapshot.get("noticeBodyLabel", "")).contains("접촉 거부"):
@@ -817,6 +819,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"visibleWaitingCustomerReactionSource": _visible_npc_reaction_source(summary, "NPC_Waiting_Customer", "스테이션 직원", "기록 인용"),
 		"visibleNpcRoleTints": _visible_npc_role_tints(summary),
 		"visibleNpcSourceToken": _visible_npc_source_token(summary, "NPC_Waiting_Customer", "station_officer", "cite_record"),
+		"visibleSocialInfluenceLink": _visible_social_influence_link(summary, "NPC_Station_Officer", "NPC_Waiting_Customer", "cite_record", "refuse_contact"),
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"codexInspectedUsualOrderCue": _inspected_usual_order_cue(summary),
 		"codexReadCrossPlaceRuleBoards": _read_cross_place_rule_boards(summary),
@@ -871,6 +874,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadVisibleNpcReactionSource": bool(checks.get("visibleWaitingCustomerReactionSource", false)),
 		"canReadVisibleNpcRoleTints": bool(checks.get("visibleNpcRoleTints", false)),
 		"canReadVisibleNpcSourceToken": bool(checks.get("visibleNpcSourceToken", false)),
+		"canReadVisibleSocialInfluenceLink": bool(checks.get("visibleSocialInfluenceLink", false)),
 		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
 		"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
 		"canInspectRecordRoleAffordanceMap": bool(checks.get("codexInspectedRecordAffordanceMap", false)),
@@ -939,6 +943,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 				"Codex/player could also read the Waiting Customer's in-world reaction marker as sourced from the Station Officer before opening the detail panel.",
 				"Visible NPC bodies use distinct role tints, so Codex/player can identify the social field by actor role before opening detailed panels.",
 				"The Waiting Customer also carries a visible source token colored from the Station Officer role, exposing that the refusal came from Station citation pressure.",
+				"The scene draws a visible social influence link from the Station Officer citation source to the Waiting Customer refusal, making the NPC-to-NPC consequence readable in the 3D space.",
 				"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, cited ledger basis, and overheard NPC-to-NPC exchange.",
 				"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
 			],
@@ -1903,6 +1908,31 @@ func _visible_npc_source_token(summary: Dictionary, npc_id: String, source_role:
 		and float(token_color[0]) > 0.60
 		and float(token_color[2]) > 0.80
 	)
+
+func _visible_social_influence_link(summary: Dictionary, observed_actor_id: String, observer_actor_id: String, observed_affordance: String, resulting_affordance: String) -> bool:
+	var links_variant: Variant = summary.get("visibleSocialLinks", [])
+	if not (links_variant is Array):
+		return false
+	for link_variant in links_variant:
+		if not (link_variant is Dictionary):
+			continue
+		var link: Dictionary = link_variant
+		var color_variant: Variant = link.get("color", [])
+		if not (color_variant is Array):
+			continue
+		var color: Array = color_variant
+		if (
+			bool(link.get("visible", false))
+			and str(link.get("observedActorId", "")) == observed_actor_id
+			and str(link.get("observerActorId", "")) == observer_actor_id
+			and str(link.get("observedAffordance", "")) == observed_affordance
+			and str(link.get("resultingAffordance", "")) == resulting_affordance
+			and color.size() >= 4
+			and float(color[0]) > 0.60
+			and float(color[2]) > 0.80
+		):
+			return true
+	return false
 
 func _visible_npc_has_line(summary: Dictionary, npc_id: String) -> bool:
 	var states: Dictionary = summary.get("visibleNpcStates", {})

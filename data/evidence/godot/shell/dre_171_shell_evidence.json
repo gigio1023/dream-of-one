@@ -1,17 +1,17 @@
 {
 	"adapter": "godot",
-	"createdAtMs": 1779124157561,
+	"createdAtMs": 1779124927627,
 	"events": [
 		{
 			"adapter": "godot",
 			"eventFamily": "domain",
-			"eventId": "event-domain-shell-1779124157561",
+			"eventId": "event-domain-shell-1779124927627",
 			"eventName": "shell_domain_surfaces_loaded",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-shell-session",
 			"socialLoopStage": "intake",
 			"summary": "Godot shell loaded canonical text surfaces and Station intake metadata.",
-			"timestampMs": 1779124157561,
+			"timestampMs": 1779124927627,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
 		},
@@ -19,12 +19,12 @@
 			"adapter": "godot",
 			"artifactPath": "data/evidence/godot/shell/dre_171_shell_evidence.json",
 			"eventFamily": "evidence_export",
-			"eventId": "event-export-shell-1779124157561",
+			"eventId": "event-export-shell-1779124927627",
 			"eventName": "evidence_pack_created",
 			"schemaVersion": "godot-runtime-v1",
 			"sessionId": "dre-171-shell-session",
 			"summary": "Godot shell Evidence Pack exported.",
-			"timestampMs": 1779124157561,
+			"timestampMs": 1779124927627,
 			"worldId": "dre_171_godot_shell",
 			"worldRevision": "rev-social-stealth-v1"
 		}

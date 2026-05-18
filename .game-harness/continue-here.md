@@ -147,6 +147,13 @@ Last Updated: 2026-05-19
   source token tied to `cite_record`, and Codex gameplay QA verifies
   `canReadVisibleNpcSourceToken=true`; the refreshed probe passes 31/31
   accepted public actions, 35/35 explainability checks, and 5/5 route reports.
+- Latest implementation slice: the running 3D scene now draws role-colored
+  NPC-to-NPC influence links from the observed/source actor to the reacting
+  actor. In the inquest path, Codex/player can read a visible
+  `NPC_Station_Officer -> NPC_Waiting_Customer` link for
+  `cite_record -> refuse_contact`; Codex gameplay QA verifies
+  `canReadVisibleSocialInfluenceLink=true` and passes 31/31 accepted public
+  actions, 36/36 explainability checks, and 5/5 route reports.
 - Latest implementation slice: Store Clerk can now be inspected as the first
   record-making actor after typed inquest-triggering speech. Codex gameplay QA
   focuses the Clerk, interacts, and reads `메모 배치`, report-tray basis,

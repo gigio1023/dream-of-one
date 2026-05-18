@@ -19,6 +19,8 @@ script = ExtResource("5_localization")
 
 [node name="Player" parent="Actors" instance=ExtResource("2_player")]
 
+[node name="SocialInfluenceLinks" type="Node3D" parent="."]
+
 [node name="Sun" type="DirectionalLight3D" parent="."]
 rotation = Vector3(-0.942478, 0.628319, 0)
 light_color = Color(1, 0.88, 0.68, 1)

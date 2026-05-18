@@ -482,6 +482,9 @@ var agent_action_log: Array[Dictionary] = []
 var _event_sequence := 0
 var _civic_ledger_sequence := 0
 var _agent_action_sequence := 0
+var _social_link_layer: Node3D
+var _social_link_nodes: Dictionary = {}
+var _social_link_snapshots: Array[Dictionary] = []
 
 @onready var _root: Node = get_parent()
 @onready var _hud: CanvasLayer = $"../SocialStealthHud"
@@ -950,6 +953,7 @@ func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) ->
 
 func build_summary() -> Dictionary:
 	_refresh_world_record_props()
+	_refresh_actor_reaction_source_labels()
 	return {
 		"schemaVersion": ShellSchema.EVIDENCE_SCHEMA,
 		"runId": RUN_ID,
@@ -990,6 +994,7 @@ func build_summary() -> Dictionary:
 		"actorMemory": _actor_memory_snapshot(),
 		"socialObservationTrace": _social_observation_trace(),
 		"visibleNpcStates": _visible_npc_states(),
+		"visibleSocialLinks": _visible_social_links(),
 		"worldRecordProps": _world_record_prop_snapshot(),
 		"providerState": _provider_state(),
 		"inputLocked": _session_locked(),
@@ -1029,6 +1034,7 @@ func build_summary() -> Dictionary:
 			"agentActionLog": agent_action_log.duplicate(true),
 			"socialObservationTrace": _social_observation_trace(),
 			"visibleNpcStates": _visible_npc_states(),
+			"visibleSocialLinks": _visible_social_links(),
 			"worldRecordProps": _world_record_prop_snapshot(),
 			"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
 			"inspectedWorldRecordHistory": inspected_world_record_history.duplicate(true),
@@ -3875,6 +3881,7 @@ func _refresh_actor_reaction_source_labels() -> void:
 			node.set_reaction_source_observation(source_text, observation)
 		else:
 			node.set_reaction_source(source_text)
+	_refresh_visible_social_links(latest_observation_by_role)
 
 func _reaction_source_label(observation: Dictionary) -> String:
 	var observed_role := str(observation.get("observedActorRole", ""))
@@ -3888,6 +3895,166 @@ func _reaction_source_label(observation: Dictionary) -> String:
 	if observed_action_label.is_empty():
 		return "← %s" % observed_label
 	return "← %s · %s" % [observed_label, observed_action_label]
+
+func _refresh_visible_social_links(latest_observation_by_role: Dictionary) -> void:
+	_social_link_snapshots = []
+	var layer: Node3D = _ensure_social_link_layer()
+	if layer == null:
+		return
+	for link_variant in _social_link_nodes.values():
+		if is_instance_valid(link_variant) and link_variant is MeshInstance3D:
+			(link_variant as MeshInstance3D).visible = false
+	var actor_nodes := _actor_nodes_by_id()
+	for observer_role_variant in latest_observation_by_role.keys():
+		var observation: Dictionary = latest_observation_by_role.get(observer_role_variant, {})
+		var observed_actor_id := str(observation.get("observedActorId", "")).strip_edges()
+		var observer_actor_id := str(observation.get("observerActorId", "")).strip_edges()
+		if observed_actor_id.is_empty() or observer_actor_id.is_empty():
+			continue
+		if not actor_nodes.has(observed_actor_id) or not actor_nodes.has(observer_actor_id):
+			continue
+		var observed_node: Node3D = actor_nodes.get(observed_actor_id)
+		var observer_node: Node3D = actor_nodes.get(observer_actor_id)
+		var observed_affordance := str(observation.get("observedAffordance", "")).strip_edges()
+		var resulting_affordance := str(observation.get("resultingAffordance", "")).strip_edges()
+		var link_id := "%s__%s__%s__%s" % [
+			observed_actor_id,
+			observer_actor_id,
+			observed_affordance,
+			resulting_affordance
+		]
+		var link_node: MeshInstance3D = _social_link_node(link_id)
+		if link_node == null:
+			continue
+		var color := _social_link_color(str(observation.get("observedActorRole", "")))
+		var start_position := observed_node.global_position + Vector3(0, 2.12, 0)
+		var end_position := observer_node.global_position + Vector3(0, 2.12, 0)
+		if not _apply_social_link_visual(link_node, start_position, end_position, color):
+			continue
+		var snapshot := {
+			"linkId": link_id,
+			"visible": true,
+			"observedActorId": observed_actor_id,
+			"observedActorRole": str(observation.get("observedActorRole", "")),
+			"observedAffordance": observed_affordance,
+			"observedLedgerEventId": str(observation.get("observedLedgerEventId", "")),
+			"observerActorId": observer_actor_id,
+			"observerRole": str(observation.get("observerRole", "")),
+			"resultingAffordance": resulting_affordance,
+			"color": _color_components(color),
+			"fromPosition": _vector3_components(start_position),
+			"toPosition": _vector3_components(end_position)
+		}
+		link_node.set_meta("social_link_snapshot", snapshot)
+		_social_link_snapshots.append(snapshot)
+
+func _ensure_social_link_layer() -> Node3D:
+	if _social_link_layer != null and is_instance_valid(_social_link_layer):
+		return _social_link_layer
+	if _root != null and _root.has_node("SocialInfluenceLinks"):
+		var existing := _root.get_node("SocialInfluenceLinks")
+		if existing is Node3D:
+			_social_link_layer = existing as Node3D
+			return _social_link_layer
+	if not (_root is Node3D):
+		return null
+	if not _root.is_node_ready():
+		return null
+	_social_link_layer = Node3D.new()
+	_social_link_layer.name = "SocialInfluenceLinks"
+	(_root as Node3D).add_child(_social_link_layer)
+	return _social_link_layer
+
+func _actor_nodes_by_id() -> Dictionary:
+	var actor_nodes := {}
+	for node in _local_group_nodes(&"npc_placeholders"):
+		if not (node is Node3D):
+			continue
+		var actor_id := str(node.get_meta("npc_id", ""))
+		if actor_id.is_empty():
+			continue
+		actor_nodes[actor_id] = node as Node3D
+	return actor_nodes
+
+func _social_link_node(link_id: String) -> MeshInstance3D:
+	var existing: Variant = _social_link_nodes.get(link_id)
+	if is_instance_valid(existing) and existing is MeshInstance3D:
+		return existing as MeshInstance3D
+	var layer: Node3D = _ensure_social_link_layer()
+	if layer == null:
+		return null
+	var link := MeshInstance3D.new()
+	link.name = "SocialLink_%s" % _safe_node_name(link_id)
+	link.add_to_group("social_influence_links")
+	layer.add_child(link)
+	_social_link_nodes[link_id] = link
+	return link
+
+func _apply_social_link_visual(link_node: MeshInstance3D, start_position: Vector3, end_position: Vector3, color: Color) -> bool:
+	var direction := end_position - start_position
+	var length := direction.length()
+	if length < 0.05:
+		link_node.visible = false
+		return false
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = 0.035
+	mesh.bottom_radius = 0.035
+	mesh.height = length
+	mesh.radial_segments = 8
+	link_node.mesh = mesh
+	link_node.global_transform = Transform3D(_basis_from_y_axis(direction.normalized()), (start_position + end_position) * 0.5)
+	link_node.set_surface_override_material(0, _social_link_material(color))
+	link_node.visible = true
+	return true
+
+func _basis_from_y_axis(y_axis: Vector3) -> Basis:
+	var y := y_axis.normalized()
+	var x := Vector3.UP.cross(y)
+	if x.length() < 0.001:
+		x = Vector3.RIGHT
+	else:
+		x = x.normalized()
+	var z := x.cross(y).normalized()
+	return Basis(x, y, z)
+
+func _social_link_material(color: Color) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.resource_name = "SocialInfluenceLink"
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.albedo_color = Color(color.r, color.g, color.b, 0.62)
+	material.emission_enabled = true
+	material.emission = Color(color.r, color.g, color.b, 1.0)
+	material.emission_energy_multiplier = 0.42
+	material.roughness = 0.72
+	return material
+
+func _social_link_color(source_role: String) -> Color:
+	match source_role:
+		"store_clerk":
+			return Color(1.0, 0.72, 0.42, 1.0)
+		"store_manager":
+			return Color(0.94, 0.55, 0.38, 1.0)
+		"waiting_customer":
+			return Color(0.48, 0.82, 0.76, 1.0)
+		"studio_pm":
+			return Color(0.54, 0.70, 1.0, 1.0)
+		"park_witness":
+			return Color(0.58, 0.82, 0.50, 1.0)
+		"station_officer":
+			return Color(0.72, 0.62, 0.94, 1.0)
+	return Color(1.0, 0.88, 0.38, 1.0)
+
+func _visible_social_links() -> Array[Dictionary]:
+	return _social_link_snapshots.duplicate(true)
+
+func _safe_node_name(value: String) -> String:
+	return value.replace(":", "_").replace(".", "_").replace("-", "_").replace("/", "_")
+
+func _vector3_components(value: Vector3) -> Array[float]:
+	return [value.x, value.y, value.z]
+
+func _color_components(color: Color) -> Array[float]:
+	return [color.r, color.g, color.b, color.a]
 
 func _visible_npc_states() -> Dictionary:
 	var states := {}

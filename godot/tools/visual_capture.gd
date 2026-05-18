@@ -91,8 +91,9 @@ const CAPTURE_DEFINITIONS := [
 			"suspicion, report pressure, and session termination state are visible",
 				"live HUD consequence line shows speech/delay -> Store record -> queue reaction -> Park notice -> report handoff -> Station citation -> Studio review block -> contact refusal",
 			"outcome names the exact Store ledger entry cited by the Station",
-				"outcome shows speech/delay to record to queue reaction to Park notice to Station role-action to Studio review block chain",
+			"outcome shows speech/delay to record to queue reaction to Park notice to Station role-action to Studio review block chain",
 			"outcome names the NPC-to-NPC social reaction behind the Station citation",
+			"scripted summary records the visible Station Officer -> Waiting Customer social influence link",
 			"why-line remains visible as session-end basis"
 		]
 	},
@@ -322,6 +323,8 @@ func _capture_inquest_session_end(
 		blockers.append("Inquest capture did not name the NPC-to-NPC social reaction in the outcome panel.")
 	if not outcome_body.contains("역할 행동: 스테이션 직원"):
 		blockers.append("Inquest capture did not name the Station Officer role action in the outcome panel.")
+	if not _visible_social_link_exists(summary, "NPC_Station_Officer", "NPC_Waiting_Customer", "cite_record", "refuse_contact"):
+		blockers.append("Inquest capture summary did not expose the Station Officer -> Waiting Customer social influence link.")
 	if not str(snapshot.get("investigationTrailLabel", "")).contains("스테이션 직원"):
 		blockers.append("Inquest capture did not show Station Officer as the current examiner.")
 	_capture_definition("inquest-session-end", captures, images, blockers)
@@ -646,6 +649,8 @@ func _store_conversation_blockers(summary: Dictionary) -> Array[String]:
 		blockers.append("Final visual capture summary does not prove Store Manager observed the clerk record.")
 	if not _social_observation_exists(observations, "station_officer", "store_manager", "forward_report", "cite_record"):
 		blockers.append("Final visual capture summary does not prove Station Officer observed the forwarded Store record.")
+	if not _visible_social_link_exists(summary, "NPC_Station_Officer", "NPC_Waiting_Customer", "cite_record", "refuse_contact"):
+		blockers.append("Final visual capture summary does not prove the Station citation influence link is visible.")
 	return blockers
 
 func _record_prop_blockers(summary: Dictionary) -> Array[String]:
@@ -697,6 +702,7 @@ func _store_conversation_evidence(summary: Dictionary) -> Dictionary:
 		"station": summary.get("station", {}),
 		"recordObjects": summary.get("recordObjects", {}),
 		"socialObservationTrace": summary.get("socialObservationTrace", []),
+		"visibleSocialLinks": summary.get("visibleSocialLinks", []),
 		"worldRecordProps": summary.get("worldRecordProps", {}),
 		"eventNames": _event_names(summary)
 	}
@@ -709,6 +715,18 @@ func _social_observation_exists(social_observations: Array, observer_role: Strin
 			and str(observation.get("observedActorRole", "")) == observed_role \
 			and str(observation.get("observedAffordance", "")) == observed_affordance \
 			and str(observation.get("resultingAffordance", "")) == resulting_affordance:
+			return true
+	return false
+
+func _visible_social_link_exists(summary: Dictionary, observed_actor_id: String, observer_actor_id: String, observed_affordance: String, resulting_affordance: String) -> bool:
+	for link in summary.get("visibleSocialLinks", []):
+		if not link is Dictionary:
+			continue
+		if bool(link.get("visible", false)) \
+			and str(link.get("observedActorId", "")) == observed_actor_id \
+			and str(link.get("observerActorId", "")) == observer_actor_id \
+			and str(link.get("observedAffordance", "")) == observed_affordance \
+			and str(link.get("resultingAffordance", "")) == resulting_affordance:
 			return true
 	return false
 

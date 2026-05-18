@@ -100,6 +100,7 @@
 			"canReadVisibleNpcReactionSource": true,
 			"canReadVisibleNpcRoleTints": true,
 			"canReadVisibleNpcSourceToken": true,
+			"canReadVisibleSocialInfluenceLink": true,
 			"codexPlayedThroughPublicActions": true,
 			"notHumanEvidence": true
 		},
@@ -9746,6 +9747,7 @@
 			"Codex/player could also read the Waiting Customer's in-world reaction marker as sourced from the Station Officer before opening the detail panel.",
 			"Visible NPC bodies use distinct role tints, so Codex/player can identify the social field by actor role before opening detailed panels.",
 			"The Waiting Customer also carries a visible source token colored from the Station Officer role, exposing that the refusal came from Station citation pressure.",
+			"The scene draws a visible social influence link from the Station Officer citation source to the Waiting Customer refusal, making the NPC-to-NPC consequence readable in the 3D space.",
 			"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, cited ledger basis, and overheard NPC-to-NPC exchange.",
 			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
 		],
@@ -30461,14 +30463,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779124142423",
+				"eventId": "playable_session_started-001-1779125018960",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779124142423,
+				"timestampMs": 1779125018960,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -30477,7 +30479,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-002-1779124142741",
+				"eventId": "world_record_prop_inspected-002-1779125019117",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "usual_order_cue",
 				"schemaVersion": "godot-runtime-v1",
@@ -30485,7 +30487,7 @@
 				"state": "read",
 				"stateLabel": "읽힘",
 				"summary": "Inspected world record prop usual_order_cue in state read.",
-				"timestampMs": 1779124142741,
+				"timestampMs": 1779125019117,
 				"uiSummaryArgs": {
 					"object": "늘 같은 주문",
 					"state": "읽힘"
@@ -30503,13 +30505,13 @@
 					"DL_ST1_APPROVAL_GATE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-003-1779124142785",
+				"eventId": "text_surface_read-003-1779125019147",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Studio_ApprovalCriteria as local context before speaking.",
 				"textSurfaceId": "TS_Studio_ApprovalCriteria",
-				"timestampMs": 1779124142785,
+				"timestampMs": 1779125019147,
 				"uiSummaryArgs": {
 					"law": "DL_ST1_APPROVAL_GATE",
 					"surface": "승인 기준"
@@ -30527,13 +30529,13 @@
 					"DL_P1_OBSERVATION_ETIQUETTE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-004-1779124142846",
+				"eventId": "text_surface_read-004-1779125019182",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Park_NoticeBoard as local context before speaking.",
 				"textSurfaceId": "TS_Park_NoticeBoard",
-				"timestampMs": 1779124142846,
+				"timestampMs": 1779125019182,
 				"uiSummaryArgs": {
 					"law": "DL_P1_OBSERVATION_ETIQUETTE",
 					"surface": "공지 게시판"
@@ -30549,7 +30551,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-005-1779124142897",
+				"eventId": "conversation_started-005-1779125019216",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -30558,7 +30560,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779124142897,
+				"timestampMs": 1779125019216,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -30571,7 +30573,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-006-1779124142930",
+				"eventId": "response_hesitation_noted-006-1779125019239",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -30592,7 +30594,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779124142930,
+				"timestampMs": 1779125019239,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -30607,7 +30609,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-007-1779124142959",
+				"eventId": "dialogue_choice_selected-007-1779125019259",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -30629,7 +30631,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779124142959,
+				"timestampMs": 1779125019259,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -30644,7 +30646,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779124142959",
+				"eventId": "conversation_anomaly_detected-008-1779125019259",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -30666,7 +30668,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779124142959,
+				"timestampMs": 1779125019259,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -30681,7 +30683,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779124142959",
+				"eventId": "npc_suspicion_changed-009-1779125019259",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -30703,7 +30705,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779124142959,
+				"timestampMs": 1779125019259,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -30718,7 +30720,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-010-1779124142992",
+				"eventId": "free_input_submitted-010-1779125019281",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -30743,7 +30745,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779124142992,
+				"timestampMs": 1779125019281,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -30758,7 +30760,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-011-1779124142992",
+				"eventId": "conversation_anomaly_detected-011-1779125019281",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -30783,7 +30785,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779124142992,
+				"timestampMs": 1779125019281,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -30798,7 +30800,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-012-1779124142992",
+				"eventId": "npc_suspicion_changed-012-1779125019281",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -30823,7 +30825,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779124142992,
+				"timestampMs": 1779125019281,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -30838,7 +30840,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-013-1779124142992",
+				"eventId": "suspicion_shared-013-1779125019281",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -30863,7 +30865,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779124142992,
+				"timestampMs": 1779125019281,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -30878,7 +30880,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-014-1779124142993",
+				"eventId": "station_report_created-014-1779125019282",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -30903,7 +30905,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779124142993,
+				"timestampMs": 1779125019282,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -30918,7 +30920,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-015-1779124142993",
+				"eventId": "station_inquest_opened-015-1779125019282",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -30943,7 +30945,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779124142993,
+				"timestampMs": 1779125019282,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -30953,7 +30955,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-016-1779124143133",
+				"eventId": "npc_reaction_inspected-016-1779125019389",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Store_Clerk",
 				"reactionText": "보고됨",
@@ -30961,7 +30963,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "inquest",
 				"summary": "Inspected NPC reaction NPC_Store_Clerk in state inquest.",
-				"timestampMs": 1779124143133,
+				"timestampMs": 1779125019389,
 				"uiSummaryArgs": {
 					"npc": "Store Clerk",
 					"state": "보고됨"
@@ -30973,7 +30975,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-017-1779124143233",
+				"eventId": "npc_reaction_inspected-017-1779125019469",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Store_Manager",
 				"reactionText": "보고 전달\n← 상점 점원 · 메모 배치",
@@ -30981,7 +30983,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "forwarded",
 				"summary": "Inspected NPC reaction NPC_Store_Manager in state forwarded.",
-				"timestampMs": 1779124143233,
+				"timestampMs": 1779125019469,
 				"uiSummaryArgs": {
 					"npc": "Store Manager",
 					"state": "보고 전달\n← 상점 점원 · 메모 배치"
@@ -30993,7 +30995,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-018-1779124143322",
+				"eventId": "world_record_prop_inspected-018-1779125019550",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -31001,7 +31003,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779124143322,
+				"timestampMs": 1779125019550,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -31013,7 +31015,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-019-1779124143486",
+				"eventId": "npc_reaction_inspected-019-1779125019632",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Park_Witness",
 				"reactionText": "소문 게시\n← 상점 점원 · 메모 배치",
@@ -31021,7 +31023,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "rumored",
 				"summary": "Inspected NPC reaction NPC_Park_Witness in state rumored.",
-				"timestampMs": 1779124143486,
+				"timestampMs": 1779125019632,
 				"uiSummaryArgs": {
 					"npc": "Park Witness",
 					"state": "소문 게시\n← 상점 점원 · 메모 배치"
@@ -31033,7 +31035,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-020-1779124143641",
+				"eventId": "world_record_prop_inspected-020-1779125019710",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "studio_review_queue",
 				"schemaVersion": "godot-runtime-v1",
@@ -31041,7 +31043,7 @@
 				"state": "blocked",
 				"stateLabel": "차단",
 				"summary": "Inspected world record prop studio_review_queue in state blocked.",
-				"timestampMs": 1779124143641,
+				"timestampMs": 1779125019710,
 				"uiSummaryArgs": {
 					"object": "스튜디오 리뷰 줄",
 					"state": "차단"
@@ -31053,7 +31055,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-021-1779124143765",
+				"eventId": "world_record_prop_inspected-021-1779125019787",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_economy_panel",
 				"schemaVersion": "godot-runtime-v1",
@@ -31061,7 +31063,7 @@
 				"state": "attention",
 				"stateLabel": "주목 상승",
 				"summary": "Inspected world record prop civic_economy_panel in state attention.",
-				"timestampMs": 1779124143765,
+				"timestampMs": 1779125019787,
 				"uiSummaryArgs": {
 					"object": "시민 경제",
 					"state": "주목 상승"
@@ -31073,7 +31075,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-022-1779124143889",
+				"eventId": "world_record_prop_inspected-022-1779125019878",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_ledger",
 				"schemaVersion": "godot-runtime-v1",
@@ -31081,7 +31083,7 @@
 				"state": "append_only",
 				"stateLabel": "추가됨",
 				"summary": "Inspected world record prop civic_ledger in state append_only.",
-				"timestampMs": 1779124143889,
+				"timestampMs": 1779125019878,
 				"uiSummaryArgs": {
 					"object": "시민 장부",
 					"state": "추가됨"
@@ -31093,7 +31095,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-023-1779124144008",
+				"eventId": "npc_reaction_inspected-023-1779125019973",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Station_Officer",
 				"reactionText": "보고됨\n← 상점 매니저 · 보고 전달",
@@ -31101,7 +31103,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "inquest",
 				"summary": "Inspected NPC reaction NPC_Station_Officer in state inquest.",
-				"timestampMs": 1779124144008,
+				"timestampMs": 1779125019973,
 				"uiSummaryArgs": {
 					"npc": "Station Officer",
 					"state": "보고됨\n← 상점 매니저 · 보고 전달"
@@ -31113,7 +31115,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-024-1779124144120",
+				"eventId": "npc_reaction_inspected-024-1779125020114",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Studio_PM",
 				"reactionText": "리뷰 차단\n← 스테이션 직원 · 기록 인용",
@@ -31121,7 +31123,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "blocked",
 				"summary": "Inspected NPC reaction NPC_Studio_PM in state blocked.",
-				"timestampMs": 1779124144120,
+				"timestampMs": 1779125020114,
 				"uiSummaryArgs": {
 					"npc": "Studio PM",
 					"state": "리뷰 차단\n← 스테이션 직원 · 기록 인용"
@@ -31133,7 +31135,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-025-1779124144203",
+				"eventId": "npc_reaction_inspected-025-1779125020196",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Waiting_Customer",
 				"reactionText": "접촉 거부\n← 스테이션 직원 · 기록 인용",
@@ -31141,7 +31143,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "refused",
 				"summary": "Inspected NPC reaction NPC_Waiting_Customer in state refused.",
-				"timestampMs": 1779124144203,
+				"timestampMs": 1779125020196,
 				"uiSummaryArgs": {
 					"npc": "Waiting Customer",
 					"state": "접촉 거부\n← 스테이션 직원 · 기록 인용"
@@ -45469,6 +45471,143 @@
 					"state": "refused"
 				}
 			},
+			"visibleSocialLinks": [
+				{
+					"color": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"fromPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+					"observedActorId": "NPC_Station_Officer",
+					"observedActorRole": "station_officer",
+					"observedAffordance": "cite_record",
+					"observedLedgerEventId": "civic-ledger-6",
+					"observerActorId": "NPC_Waiting_Customer",
+					"observerRole": "waiting_customer",
+					"resultingAffordance": "refuse_contact",
+					"toPosition": [
+						-10.3999996185303,
+						2.11999988555908,
+						1.39999997615814
+					],
+					"visible": true
+				},
+				{
+					"color": [
+						1.0,
+						0.720000028610229,
+						0.419999986886978,
+						1.0
+					],
+					"fromPosition": [
+						-13.3999996185303,
+						2.11999988555908,
+						0.699999988079071
+					],
+					"linkId": "NPC_Store_Clerk__NPC_Park_Witness__place_note__post_rumor",
+					"observedActorId": "NPC_Store_Clerk",
+					"observedActorRole": "store_clerk",
+					"observedAffordance": "place_note",
+					"observedLedgerEventId": "civic-ledger-2",
+					"observerActorId": "NPC_Park_Witness",
+					"observerRole": "park_witness",
+					"resultingAffordance": "post_rumor",
+					"toPosition": [
+						-10.1999998092651,
+						2.11999988555908,
+						-10.3999996185303
+					],
+					"visible": true
+				},
+				{
+					"color": [
+						1.0,
+						0.720000028610229,
+						0.419999986886978,
+						1.0
+					],
+					"fromPosition": [
+						-13.3999996185303,
+						2.11999988555908,
+						0.699999988079071
+					],
+					"linkId": "NPC_Store_Clerk__NPC_Store_Manager__place_note__forward_report",
+					"observedActorId": "NPC_Store_Clerk",
+					"observedActorRole": "store_clerk",
+					"observedAffordance": "place_note",
+					"observedLedgerEventId": "civic-ledger-2",
+					"observerActorId": "NPC_Store_Manager",
+					"observerRole": "store_manager",
+					"resultingAffordance": "forward_report",
+					"toPosition": [
+						-12.3999996185303,
+						2.11999988555908,
+						-2.59999990463257
+					],
+					"visible": true
+				},
+				{
+					"color": [
+						0.939999997615814,
+						0.550000011920929,
+						0.379999995231628,
+						1.0
+					],
+					"fromPosition": [
+						-12.3999996185303,
+						2.11999988555908,
+						-2.59999990463257
+					],
+					"linkId": "NPC_Store_Manager__NPC_Station_Officer__forward_report__cite_record",
+					"observedActorId": "NPC_Store_Manager",
+					"observedActorRole": "store_manager",
+					"observedAffordance": "forward_report",
+					"observedLedgerEventId": "civic-ledger-5",
+					"observerActorId": "NPC_Station_Officer",
+					"observerRole": "station_officer",
+					"resultingAffordance": "cite_record",
+					"toPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"visible": true
+				},
+				{
+					"color": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"fromPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"linkId": "NPC_Station_Officer__NPC_Studio_PM__cite_record__block_review",
+					"observedActorId": "NPC_Station_Officer",
+					"observedActorRole": "station_officer",
+					"observedAffordance": "cite_record",
+					"observedLedgerEventId": "civic-ledger-6",
+					"observerActorId": "NPC_Studio_PM",
+					"observerRole": "studio_pm",
+					"resultingAffordance": "block_review",
+					"toPosition": [
+						8.89999961853027,
+						2.11999988555908,
+						0.400000005960464
+					],
+					"visible": true
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -45950,6 +46089,143 @@
 				"state": "refused"
 			}
 		},
+		"visibleSocialLinks": [
+			{
+				"color": [
+					0.720000028610229,
+					0.620000004768372,
+					0.939999997615814,
+					1.0
+				],
+				"fromPosition": [
+					8.80000019073486,
+					2.11999988555908,
+					-11.1999998092651
+				],
+				"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+				"observedActorId": "NPC_Station_Officer",
+				"observedActorRole": "station_officer",
+				"observedAffordance": "cite_record",
+				"observedLedgerEventId": "civic-ledger-6",
+				"observerActorId": "NPC_Waiting_Customer",
+				"observerRole": "waiting_customer",
+				"resultingAffordance": "refuse_contact",
+				"toPosition": [
+					-10.3999996185303,
+					2.11999988555908,
+					1.39999997615814
+				],
+				"visible": true
+			},
+			{
+				"color": [
+					1.0,
+					0.720000028610229,
+					0.419999986886978,
+					1.0
+				],
+				"fromPosition": [
+					-13.3999996185303,
+					2.11999988555908,
+					0.699999988079071
+				],
+				"linkId": "NPC_Store_Clerk__NPC_Park_Witness__place_note__post_rumor",
+				"observedActorId": "NPC_Store_Clerk",
+				"observedActorRole": "store_clerk",
+				"observedAffordance": "place_note",
+				"observedLedgerEventId": "civic-ledger-2",
+				"observerActorId": "NPC_Park_Witness",
+				"observerRole": "park_witness",
+				"resultingAffordance": "post_rumor",
+				"toPosition": [
+					-10.1999998092651,
+					2.11999988555908,
+					-10.3999996185303
+				],
+				"visible": true
+			},
+			{
+				"color": [
+					1.0,
+					0.720000028610229,
+					0.419999986886978,
+					1.0
+				],
+				"fromPosition": [
+					-13.3999996185303,
+					2.11999988555908,
+					0.699999988079071
+				],
+				"linkId": "NPC_Store_Clerk__NPC_Store_Manager__place_note__forward_report",
+				"observedActorId": "NPC_Store_Clerk",
+				"observedActorRole": "store_clerk",
+				"observedAffordance": "place_note",
+				"observedLedgerEventId": "civic-ledger-2",
+				"observerActorId": "NPC_Store_Manager",
+				"observerRole": "store_manager",
+				"resultingAffordance": "forward_report",
+				"toPosition": [
+					-12.3999996185303,
+					2.11999988555908,
+					-2.59999990463257
+				],
+				"visible": true
+			},
+			{
+				"color": [
+					0.939999997615814,
+					0.550000011920929,
+					0.379999995231628,
+					1.0
+				],
+				"fromPosition": [
+					-12.3999996185303,
+					2.11999988555908,
+					-2.59999990463257
+				],
+				"linkId": "NPC_Store_Manager__NPC_Station_Officer__forward_report__cite_record",
+				"observedActorId": "NPC_Store_Manager",
+				"observedActorRole": "store_manager",
+				"observedAffordance": "forward_report",
+				"observedLedgerEventId": "civic-ledger-5",
+				"observerActorId": "NPC_Station_Officer",
+				"observerRole": "station_officer",
+				"resultingAffordance": "cite_record",
+				"toPosition": [
+					8.80000019073486,
+					2.11999988555908,
+					-11.1999998092651
+				],
+				"visible": true
+			},
+			{
+				"color": [
+					0.720000028610229,
+					0.620000004768372,
+					0.939999997615814,
+					1.0
+				],
+				"fromPosition": [
+					8.80000019073486,
+					2.11999988555908,
+					-11.1999998092651
+				],
+				"linkId": "NPC_Station_Officer__NPC_Studio_PM__cite_record__block_review",
+				"observedActorId": "NPC_Station_Officer",
+				"observedActorRole": "station_officer",
+				"observedAffordance": "cite_record",
+				"observedLedgerEventId": "civic-ledger-6",
+				"observerActorId": "NPC_Studio_PM",
+				"observerRole": "studio_pm",
+				"resultingAffordance": "block_review",
+				"toPosition": [
+					8.89999961853027,
+					2.11999988555908,
+					0.400000005960464
+				],
+				"visible": true
+			}
+		],
 		"worldId": "dre_171_godot_shell",
 		"worldRecordProps": {
 			"civic_economy_panel": {
@@ -46071,6 +46347,7 @@
 		"storeManagerForwardedReport": true,
 		"visibleNpcRoleTints": true,
 		"visibleNpcSourceToken": true,
+		"visibleSocialInfluenceLink": true,
 		"visibleWaitingCustomerReaction": true,
 		"visibleWaitingCustomerReactionSource": true,
 		"waitingCustomerObservedClerk": true,
@@ -46923,6 +47200,7 @@
 				"storeManagerForwardedReport": false,
 				"visibleNpcRoleTints": true,
 				"visibleNpcSourceToken": false,
+				"visibleSocialInfluenceLink": false,
 				"visibleWaitingCustomerReaction": true,
 				"visibleWaitingCustomerReactionSource": false,
 				"waitingCustomerObservedClerk": false,
@@ -51578,6 +51856,7 @@
 				"storeManagerForwardedReport": false,
 				"visibleNpcRoleTints": true,
 				"visibleNpcSourceToken": false,
+				"visibleSocialInfluenceLink": false,
 				"visibleWaitingCustomerReaction": true,
 				"visibleWaitingCustomerReactionSource": false,
 				"waitingCustomerObservedClerk": false,
@@ -56466,6 +56745,7 @@
 				"storeManagerForwardedReport": false,
 				"visibleNpcRoleTints": true,
 				"visibleNpcSourceToken": false,
+				"visibleSocialInfluenceLink": false,
 				"visibleWaitingCustomerReaction": true,
 				"visibleWaitingCustomerReactionSource": false,
 				"waitingCustomerObservedClerk": false,
@@ -60959,6 +61239,7 @@
 				"storeManagerForwardedReport": false,
 				"visibleNpcRoleTints": true,
 				"visibleNpcSourceToken": false,
+				"visibleSocialInfluenceLink": false,
 				"visibleWaitingCustomerReaction": true,
 				"visibleWaitingCustomerReactionSource": false,
 				"waitingCustomerObservedClerk": true,
@@ -64534,6 +64815,7 @@
 				"storeManagerForwardedReport": true,
 				"visibleNpcRoleTints": true,
 				"visibleNpcSourceToken": true,
+				"visibleSocialInfluenceLink": true,
 				"visibleWaitingCustomerReaction": true,
 				"visibleWaitingCustomerReactionSource": true,
 				"waitingCustomerObservedClerk": true,

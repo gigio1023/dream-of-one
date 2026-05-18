@@ -216,6 +216,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   actor's observed ledger action, and Codex gameplay QA verifies
   `canReadVisibleNpcSourceToken=true` on the Waiting Customer's Station-citation
   refusal.
+- [x] Draw visible NPC-to-NPC influence links: the running 3D scene now renders
+  role-colored links from the observed/source actor to the reacting actor, and
+  Codex gameplay QA verifies `canReadVisibleSocialInfluenceLink=true` for
+  Station Officer `cite_record` -> Waiting Customer `refuse_contact`.
 - [x] Make the civic economy panel player-readable as a tiny social-pressure
   record: Codex/player can inspect current credit/trust/burden/attention values
   and recent ledger deltas that show which role action moved them.

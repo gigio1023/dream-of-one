@@ -200,6 +200,12 @@ Current M1 carry-in:
   source token for `cite_record`, and Codex gameplay QA requires
   `canReadVisibleNpcSourceToken=true`. This makes NPC-to-NPC influence visible
   in the 3D scene before the player opens inspection text.
+- latest small-slice carry-in: the running 3D scene now draws role-colored
+  NPC-to-NPC influence links from the observed/source actor to the reacting
+  actor. In the inquest path, a visible link connects
+  `NPC_Station_Officer -> NPC_Waiting_Customer` for
+  `cite_record -> refuse_contact`, so the player can read the social cause
+  between actors instead of inferring it only from HUD text.
 - latest small-slice carry-in: repair recovery now leaves a player-readable
   public environment record and one small cross-place consequence. Park Witness
   `post_repair_notice` sets `park_notice_board=repaired`; Studio PM reads that

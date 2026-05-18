@@ -30,6 +30,13 @@ before the tester arrives:
 
 The display helper serves noVNC on localhost only. Use an explicit secure
 access path such as an SSH tunnel when a remote tester must view the session.
+For example, from the remote facilitator or tester machine:
+
+```bash
+ssh -N -L 6080:127.0.0.1:6080 <server>
+```
+
+Then open `http://127.0.0.1:6080/vnc.html` on that remote machine.
 
 Use setup helpers only when recruiting, handing off to another facilitator, or
 collecting notes outside the interactive helper:

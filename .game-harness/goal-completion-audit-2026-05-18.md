@@ -30,6 +30,8 @@ continue through small playable proofs.
 | Codex gameplay QA is current after provider packet changes. | `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd` passed; status helper reports Codex source freshness pass; JSON SHA-256 `7116b486d7c8481e6b74de0094fd2de8d234527989b4e632ea7790135ab5af1d`. | PASS |
 | Codex can play, inspect, and explain the proof cell through public APIs. | `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.json`: `ok=true`, `aiPlayerReport.pass=true`, `stage=inquest`, 23/23 accepted actions, 5/5 route reports, 23 explainability checks including actor memory and provider-packet actor policy readiness. | PASS |
 | Packaged/tester setup remains ready. | `.game-harness/scripts/run-same-order-comprehension-session.sh --status`: packaged app preflight pass and Codex gameplay QA pass, but the current Ubuntu ARM shell reports `Human play display: not-ready` because neither `DISPLAY` nor `WAYLAND_DISPLAY` is set. | PARTIAL |
+| Tester/facilitator helper is portable across current devices. | Status output now prints repo-local guide paths relative to the repo, session-kit examples use ignored `build/session-kits/same-order`, and `.game-harness/scripts/verify-comprehension-review-guards.sh` auto-loads the ignored device-local env and passes on Ubuntu ARM without manual `source`. | PASS |
+| Linear SoT route exists for the external comprehension blocker. | Linear searches for `Dream of One comprehension fresh player Same Order GI-04 tester notes PENDING_TESTER_NOTES`, `Same Order`, and `fresh player comprehension tester notes` found no open matching issue. Recent tickets confirm team `Dream-of-one` (`DRE`), but the available Linear MCP has no create mutation and `LINEAR_API_TOKEN` is unset. | FAIL |
 | Goal work budget is accounted separately from game-provider spend. | Active Codex goal accounting is tracked by the Codex goal runtime; live NPC provider usage is tracked only through request count, fixed model, estimated caps, fallback status, and returned token usage because ChatGPT Pro remaining quota is not exposed by the provider payload. | PASS |
 | External fresh-player comprehension exists. | Same status command: raw session note files `0 / 3`, strict review `PENDING_TESTER_NOTES`. | FAIL |
 | Product/demo readiness can be claimed. | External comprehension gate remains open and product state remains `fallback_only_m1`; live wording is proof-only. | FAIL |
@@ -57,6 +59,9 @@ continue through small playable proofs.
   the packaged app/evidence and Codex QA setup are ready, but observed human
   play requires a GUI/display path such as desktop, VNC, X11 forwarding, or a
   different tester device.
+- Linear SoT routing is prepared but not created: the copy-ready draft targets
+  `Dream-of-one` (`DRE`), but this session lacks both a Linear issue-create MCP
+  mutation and `LINEAR_API_TOKEN` for GraphQL fallback.
 
 ## Completion Decision
 
@@ -78,6 +83,10 @@ The remaining blocker is outside Codex-only control: observed fresh-player
 comprehension notes. Current status is `0 / 3` raw sessions and
 `PENDING_TESTER_NOTES`. No internal smoke, generated kit, screenshot, or Codex
 gameplay report can close that gate.
+
+There is also an administrative SoT gap: GI-04 is drafted and routed to the
+`DRE` team, but it is not yet a Linear issue because this session cannot create
+issues through MCP or GraphQL fallback.
 
 ## Next Action
 

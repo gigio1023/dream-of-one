@@ -200,6 +200,11 @@ Latest status check:
   player action catalog entries, copied-probe schema/API/report flags, manifest
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
+- latest local facilitator handoff kit:
+  `build/same-order-session-kit-current` was regenerated and verified after
+  the refreshed Codex gameplay QA artifact. Its manifest keeps
+  `testerFacingFiles=["tester-invite.md"]`, `humanEvidence=false`, and
+  `closesGoal=false`; it is setup material only, not comprehension evidence.
 - latest Codex gameplay QA hashes:
   - JSON SHA-256: `5575974bf9080739cf122e016ba8c9dfb6cb0aaf938dfb3247cf2ca416739827`
   - Markdown SHA-256: `6445a0e64e5b99398646c0e08bbb98aacb9378d0dd03f3a4a523ce2c0b6a0253`

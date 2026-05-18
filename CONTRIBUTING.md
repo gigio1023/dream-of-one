@@ -2,6 +2,9 @@
 
 ## Commit Discipline
 
+- Default agent cadence: after a coherent slice is useful, verified, and
+  meaningful to revert as one unit, commit it and push it before starting a
+  different slice. Do not wait for an end-of-session cleanup pass.
 - Make small, revertable commits. A commit should have one reason to exist and one clear rollback meaning.
 - Prefer committing after each coherent slice passes its narrow proof check, then push the branch while the context is still fresh.
 - In this repo, Codex should treat commit-and-push as the default end of each

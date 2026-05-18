@@ -2676,6 +2676,13 @@ func _world_record_prop_label(object_id: String, state: String) -> String:
 	return "%s\n%s" % [_world_record_prop_title(object_id), _record_state_value(state)]
 
 func _world_record_prop_inspection_body(object_id: String, state: String) -> String:
+	if object_id == "usual_order_cue":
+		match state:
+			"read":
+				return "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다."
+			"cited":
+				return "평소 주문 단서가 인용되었습니다. 점원은 이 단서를 근거로 플레이어의 답이 지역 루틴 안에 머물렀다고 보고 정상 영수증을 닫았습니다."
+		return "평소 주문 단서입니다. 이 기록은 플레이어가 대화 전에 읽을 수 있는 정상 절차이며, 어긋난 말은 다른 기록으로 바뀔 수 있습니다."
 	if object_id == "park_notice_board":
 		match state:
 			"vouched":
@@ -2962,7 +2969,8 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"store_exception_reported": "상점 보고",
 		"store_report_escalated": "보고 전달",
 		"service_paused": "응대 중단",
-		"station_record_cited": "스테이션 인용"
+		"station_record_cited": "스테이션 인용",
+		"usual_order_cited": "평소 주문 인용"
 	}
 	var en := {
 		"store_sale_normal": "normal receipt",
@@ -2988,7 +2996,8 @@ func _civic_ledger_kind_label(kind: String) -> String:
 		"store_exception_reported": "Store report",
 		"store_report_escalated": "report forwarded",
 		"service_paused": "service paused",
-		"station_record_cited": "Station cited"
+		"station_record_cited": "Station cited",
+		"usual_order_cited": "usual order cited"
 	}
 	var table: Dictionary = en if _current_locale() == "en" else ko
 	return str(table.get(kind, kind))
@@ -3037,7 +3046,8 @@ func _affordance_label(affordance: String) -> String:
 		"block_review": "리뷰 차단",
 		"place_note": "메모 배치",
 		"forward_report": "보고 전달",
-		"cite_record": "기록 인용"
+		"cite_record": "기록 인용",
+		"cite_expected_order": "평소 주문 인용"
 	}
 	var en := {
 		"create_receipt": "create receipt",
@@ -3062,7 +3072,8 @@ func _affordance_label(affordance: String) -> String:
 		"block_review": "block review",
 		"place_note": "place note",
 		"forward_report": "forward report",
-		"cite_record": "cite record"
+		"cite_record": "cite record",
+		"cite_expected_order": "cite expected order"
 	}
 	var table: Dictionary = en if _current_locale() == "en" else ko
 	return str(table.get(affordance, affordance))

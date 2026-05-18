@@ -47,6 +47,12 @@ Last Updated: 2026-05-18
 - If `--status` is already pass and no watched Godot/HUD/probe/session-helper
   source changed, do not rerun Codex probe or regenerate setup kits merely to
   show activity. The next useful move is human play, not more preparation.
+- Latest implementation slice: `usual_order_cue` is now a player-readable
+  normal-procedure prop before the Store Clerk prompt. Codex gameplay QA first
+  focuses and inspects it, then continues through the inquest path; current
+  proof passes with 19/19 accepted public actions, 20/20 explainability checks,
+  and 5/5 route reports. This remains internal QA, not fresh-player
+  comprehension.
 - Latest implementation slice: the live HUD record line now shows `열람`, naming
   which roles can read the current record chain after ledger events exist. Empty
   starting state remains `열람 -`; inquest names Station Officer, Studio PM,

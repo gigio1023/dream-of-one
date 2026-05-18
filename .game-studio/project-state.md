@@ -95,6 +95,11 @@ Current M1 carry-in:
   long-term content focus. Future work should extract reusable
   environment-agent patterns instead of deepening Store operations or Station
   procedure.
+- latest small-slice carry-in: the usual-order cue is now readable as a normal
+  procedure prop before the player speaks. Inspecting `usual_order_cue` tells
+  the player that `표식 하나, 같은 봉투` is the local routine and that NPCs can
+  compare the player's line against that expectation. Codex gameplay QA starts
+  by reading this prop and requires `canInspectNormalProcedureCue=true`.
 - latest small-slice carry-in: inspecting a visible NPC now includes the short
   line the NPC is saying as `들은 말` / `spokenLine`. Studio PM's review block
   and Waiting Customer's contact refusal are now readable as social speech
@@ -384,6 +389,15 @@ Dream of One supersedes the Codex CLI player-prerequisite decision.
 | `docs/framework/substantive-review.md` | Project-local Codex-led game-substance review guidance. |
 | `.game-harness/` | Existing execution harness for M1 work. Do not replace it without an explicit migration decision. |
 | `.game-harness/goal-loop-state.md` | Compact long-running goal state for resumes, blockers, next action, and exit gates. |
+
+Path portability rule:
+- Active docs, scripts, and handoffs should use repo-local paths or explicit
+  environment variables.
+- Use `GAME_STUDIO_ROOT` for the local Game Studio source repo and `GODOT_BIN`
+  for the local Godot CLI.
+- Do not add `/Users/...`, `/home/...`, `~/git/...`, or sibling-repo paths as
+  reusable instructions. Those paths may appear only as historical evidence of
+  where a past artifact was produced.
 
 ## Open Blockers
 

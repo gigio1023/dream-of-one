@@ -7,6 +7,8 @@ const MARKDOWN_ARTIFACT_PATH := "data/evidence/godot/codex-gameplay-probe/dre_17
 const OUTPUT_ENV := "DREAM_OF_ONE_CODEX_GAMEPLAY_PROBE_OUTPUT"
 const TYPED_LINE := "저는 이 꿈에 방금 들어왔어요."
 const PROBE_STEPS := [
+	{"actionId": "focus.world_record_prop", "payload": {"objectId": "usual_order_cue"}},
+	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.store_counter", "payload": {}},
 	{"actionId": "conversation.start", "payload": {}},
 	{"actionId": "player.wait.hesitation_record", "payload": {}},
@@ -665,6 +667,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Codex/player did not inspect the civic economy panel as a social pressure record")
 	if not bool(checks.get("codexInspectedCivicLedgerSocialChain", false)):
 		failures.append("Codex/player did not inspect the civic ledger as a social observation chain")
+	if not bool(checks.get("codexInspectedUsualOrderCue", false)):
+		failures.append("Codex/player did not inspect the usual-order cue before speaking")
 	if not bool(checks.get("worldPropsReachInquest", false)):
 		failures.append("World record props do not show forwarded report and cited Station dossier")
 	if not bool(checks.get("codexInspectedPublicNotice", false)):
@@ -696,6 +700,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary) -> D
 		"waitingCustomerObservedStation": _observation_exists(summary, "waiting_customer", "station_officer", "cite_record", "refuse_contact"),
 		"visibleWaitingCustomerReaction": _visible_npc_has_line(summary, "NPC_Waiting_Customer"),
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
+		"codexInspectedUsualOrderCue": _inspected_usual_order_cue(summary),
 		"codexInspectedPublicNotice": _inspected_public_notice(summary),
 		"codexInspectedBlockedReview": _inspected_studio_review_block(summary),
 			"codexInspectedRecordAffordanceMap": _inspected_record_affordance_map(summary),
@@ -723,6 +728,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadExaminedPlayerRole": investigation_trail.contains("대상: 플레이어") or investigation_trail.to_lower().contains("player"),
 		"canReadInputToRecordChain": consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부"),
 		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)) and bool(checks.get("waitingCustomerObservedStation", false)),
+		"canInspectNormalProcedureCue": bool(checks.get("codexInspectedUsualOrderCue", false)),
 		"canReadLiveHudSocialCitation": _hud_record_state_cites_latest_social_observation(summary, record_state_label),
 		"canReadLiveHudNearbyStances": _hud_record_state_names_visible_stances(record_state_label),
 		"canReadLiveHudRecordReaders": _hud_record_state_names_record_readers(record_state_label),
@@ -767,6 +773,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"civicEconomyPanel": economy_panel.get("label", "")
 		},
 		"playerReadableCauseChain": [
+			"Codex/player first inspected the usual-order cue, making the normal 'same order' procedure readable before choosing a line.",
 			"Codex/player focused the Store counter and started the Store Clerk prompt.",
 			"Codex/player waited long enough to create a response hesitation record.",
 			"Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.",
@@ -1027,6 +1034,18 @@ func _world_props_reach_inquest(record_props: Dictionary) -> bool:
 		and str(record_props.get("park_notice_board", {}).get("state", "")) == "rumored"
 		and str(record_props.get("station_dossier", {}).get("state", "")) == "cited"
 		and str(record_props.get("civic_ledger", {}).get("state", "")) == "append_only"
+	)
+
+func _inspected_usual_order_cue(summary: Dictionary) -> bool:
+	var inspected := _inspected_world_record_candidate(summary, "usual_order_cue", "read")
+	if inspected.is_empty():
+		return false
+	var body := str(inspected.get("body", ""))
+	return (
+		body.contains("단골 주문")
+		and body.contains("표식 하나")
+		and body.contains("정상 루틴")
+		and body.contains("플레이어의 말")
 	)
 
 func _inspected_public_notice(summary: Dictionary) -> bool:

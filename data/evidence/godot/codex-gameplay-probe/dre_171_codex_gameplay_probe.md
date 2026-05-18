@@ -8,6 +8,8 @@
 
 ## Action Path
 
+- focus.world_record_prop -> look at environment record prop: usual_order_cue
+- player.interact.focused -> press the focused interaction
 - focus.store_counter -> look at the Store counter
 - conversation.start -> start the clerk's Same Order question
 - player.wait.hesitation_record -> let hesitation become a record
@@ -28,6 +30,7 @@
 
 ## Player-Readable Cause Chain
 
+- Codex/player first inspected the usual-order cue, making the normal 'same order' procedure readable before choosing a line.
 - Codex/player focused the Store counter and started the Store Clerk prompt.
 - Codex/player waited long enough to create a response hesitation record.
 - Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.
@@ -91,6 +94,7 @@
 - `canReadExaminedPlayerRole`: `true`
 - `canReadInputToRecordChain`: `true`
 - `canReadNpcToNpcChain`: `true`
+- `canInspectNormalProcedureCue`: `true`
 - `canReadLiveHudSocialCitation`: `true`
 - `canReadLiveHudNearbyStances`: `true`
 - `canReadLiveHudRecordReaders`: `true`

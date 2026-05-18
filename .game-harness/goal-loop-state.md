@@ -7,20 +7,22 @@ continues from this state file until the external blocker is resolved.
 
 ## Why This Exists
 
-`~/git/harness` shows useful long-running-agent habits: keep a prompt, a task
-list, a resumable state file, logs/evidence, and clear exit gates. Dream of One
-does not need a copied `.ralph/` system. The current `.game-harness/` already
-does that job, so this file is the compact resume point for long Codex passes.
+Prior harness work shows useful long-running-agent habits: keep a prompt, a
+task list, a resumable state file, logs/evidence, and clear exit gates. Dream
+of One does not need a copied `.ralph/` system. The current `.game-harness/`
+already does that job, so this file is the compact resume point for long Codex
+passes.
 
 ## Read First On Resume
 
 1. `.game-harness/active-goal-prompt.md`
-2. `.game-harness/goal-loop-state.md`
-3. `.game-harness/continue-here.md`
-4. `.game-harness/tasks.md`
-5. `.game-harness/verification-ledger.md`
-6. `.game-studio/project-state.md`
-7. `AGENTS.md`
+2. `.game-harness/playable-goal-reference.md`
+3. `.game-harness/goal-loop-state.md`
+4. `.game-harness/continue-here.md`
+5. `.game-harness/tasks.md`
+6. `.game-harness/verification-ledger.md`
+7. `.game-studio/project-state.md`
+8. `AGENTS.md`
 
 ## Current Objective
 
@@ -96,17 +98,28 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `002f89d56603076fe6ac09d8acc072cbfd06667706700eb29d9648194e9b2800`
-  - Markdown SHA-256: `1aad9813b45957528de73c447bf7fa76a626d9695d66e6c9ac38de417de653ea`
-  - playable Evidence Pack SHA-256: `25fe2c4e5a5617fff03fb7a6e30871d3245e566faf21b91c9d4ef73f2c96f376`
+  - JSON SHA-256: `38d8a9f75be5720b4304467e133277620f0a26d73c846045c8e052c8de085133`
+  - Markdown SHA-256: `ca27811ac88964116b4586d0dffde2dea1281e2aaa5924d5cd91530eb1ceb979`
+  - playable Evidence Pack SHA-256: `adc841f4cccee07028c67e0034739b6b95d8d423470e50e7df7976eed14a2bb6`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
 
 Latest AI-play interface check:
-- command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
+- command: `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `17 / 17`, `explainability=18/18`, and
-  `routeReportPassCount=5 / 5`.
+  player actions `19 / 19`, `explainability=20/20`, and
+  `routeReportPassCount=5 / 5` with Godot
+  `4.6.2.stable.official.71f334935` from a temporary local `GODOT_BIN`.
+- latest game increment: the usual-order cue is now a player-readable
+  normal-procedure prop. Inspecting `usual_order_cue` explains that `표식 하나,
+  같은 봉투` is the expected local routine and that the clerk and waiting
+  customer can compare the player's speech against it before any report chain
+  starts. Codex gameplay QA now starts by focusing and interacting with that
+  prop, adds `canInspectNormalProcedureCue=true`, and writes it into the
+  Markdown QA action path/cause chain. Narrow proof passed with Godot import,
+  GDScript syntax check, scene load smoke, playable slice smoke, Codex gameplay
+  probe, backend report attach, backend `npm run check`, `git diff --check`,
+  and shell syntax checks.
 - latest game increment: the live HUD record line now includes `열람`, a
   compact list of roles that can read the current record set after actual
   ledger events exist. Initial empty state stays `열람 -`; the inquest Codex run
@@ -615,8 +628,8 @@ Latest AI-play interface check:
 | Stage | `M1 Protocol Proof` |
 | Product verdict | `technical conditional pass; product gate open` |
 | Provider mode | `fallback_only_m1` |
-| Latest Godot command | `/opt/homebrew/bin/godot-latest` |
-| Packaged proof path | `/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json` |
+| Latest Godot command | set `GODOT_BIN` per device |
+| Packaged proof path | set `DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH` per device |
 | Codex gameplay QA | pass with JSON `aiPlayerReport`, Markdown sidecar, and 5/5 route reports; internal proof only |
 | Codex action catalog | bound into status output and generated session kit manifests; internal setup proof only |
 | External comprehension | `PENDING_TESTER_NOTES` |

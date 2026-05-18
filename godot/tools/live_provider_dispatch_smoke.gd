@@ -44,6 +44,7 @@ func _run() -> void:
 	var route_after_customer_fingerprint := ""
 	var customer_provider_mutated_route := false
 	var customer_provider_packet := {}
+	var clerk_live_observation := ""
 	var customer_decision_report := {}
 	if failures.is_empty():
 		session = await _load_playable_session(failures)
@@ -79,7 +80,7 @@ func _run() -> void:
 		_validate_route_parity(route_final, failures)
 	if failures.is_empty():
 		var route_final_fingerprint := _route_fingerprint(route_final)
-		var clerk_live_observation := _live_observation_event(decision_report)
+		clerk_live_observation = _live_observation_event(decision_report)
 		customer_provider_packet = session.call(
 			"debug_live_provider_packet",
 			"godot-live-playable-route-provider-customer-%d-%d" % [
@@ -134,6 +135,10 @@ func _run() -> void:
 			"readiness": _summarize_readiness(readiness),
 			"decision": _summarize_decision(decision_report),
 			"liveDecisions": live_decisions,
+			"providerPackets": {
+				"storeClerk": _summarize_provider_packet(provider_packet, ""),
+				"waitingCustomer": _summarize_provider_packet(customer_provider_packet, clerk_live_observation)
+			},
 			"playableRoute": {
 				"before": _summarize_route(route_before),
 				"afterProviderDecision": _summarize_route(route_after),
@@ -165,6 +170,7 @@ func _run() -> void:
 			"playableSessionPacket": not provider_packet.is_empty(),
 			"multiActorLiveProviderPackets": not provider_packet.is_empty() and not customer_provider_packet.is_empty(),
 			"npcToNpcLiveObservation": not customer_provider_packet.is_empty() and _recent_events_have(customer_provider_packet, _live_observation_event(decision_report)),
+			"npcToNpcLiveObservationEvent": clerk_live_observation,
 			"providerDecisionMutatedRouteState": route_before_fingerprint != route_after_fingerprint or customer_provider_mutated_route,
 			"fallbackParityRouteOutcome": str(route_final.get("routeOutcome", "")),
 			"fallbackParitySessionOutcome": str(route_final.get("sessionOutcome", ""))
@@ -255,6 +261,23 @@ func _recent_events_have(packet: Dictionary, expected: String) -> bool:
 		if str(event) == expected:
 			return true
 	return false
+
+func _summarize_provider_packet(packet: Dictionary, expected_observation: String) -> Dictionary:
+	var organization_context: Dictionary = packet.get("organizationContext", {})
+	var recent_events: Array[String] = []
+	for event in Array(packet.get("recentEvents", [])):
+		recent_events.append(str(event))
+	return {
+		"sessionId": str(packet.get("sessionId", "")),
+		"npcId": str(packet.get("npcId", "")),
+		"landmarkId": str(packet.get("landmarkId", "")),
+		"role": str(organization_context.get("role", "")),
+		"nearbyActors": packet.get("nearbyActors", []),
+		"recentEvents": recent_events,
+		"expectedLiveObservation": expected_observation,
+		"hasExpectedLiveObservation": expected_observation.is_empty() or recent_events.has(expected_observation),
+		"environmentToolCount": Array(organization_context.get("environmentToolCatalog", [])).size()
+	}
 
 func _agent_log_has(actions: Array, actor_id: String, affordance: String) -> bool:
 	for action in actions:

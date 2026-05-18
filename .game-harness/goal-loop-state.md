@@ -153,13 +153,15 @@ Latest OpenAI Codex provider note:
   the Waiting Customer packet as an observed `live_utterance:*` event. It
   selected `gpt-5.4-mini`, used no fallback, capped each request at `$0.01`,
   kept the two-request total estimate under `$0.01`, and returned total usage
-  of 2,296 input / 510 output / 2,806 total tokens with total estimated cost
-  `$0.00844875`. It avoided route mutation and continued the deterministic
-  fallback path to `routeOutcome=clean_cover` and `sessionOutcome=cover_held`.
-  It wrote
+  of 2,296 input / 449 output / 2,745 total tokens with total estimated cost
+  `$0.00844875`. The artifact includes the concrete Waiting Customer
+  `recentEvents` and `proofs.npcToNpcLiveObservationEvent`, so the observed
+  Store Clerk live line is auditable from the JSON itself. It avoided route
+  mutation and continued the deterministic fallback path to
+  `routeOutcome=clean_cover` and `sessionOutcome=cover_held`. It wrote
   `data/evidence/godot/live-provider-dispatch/dre_171_live_provider_dispatch_smoke.json`
   with SHA-256
-  `fbb5cb6733e0ec514454c1d6038998f59b8116915000bb55761d29e69f0e3f0a`.
+  `035a1ec3044a070001b0afbb5a31d2acdb2c5e734be1dccc68321c71a7c74df0`.
   A prior attempt in this slice timed out on the Waiting Customer call under
   the default 8-second deadline after one successful Store Clerk call; that
   successful call spent estimated `$0.00433725` and returned 1,290 input / 230
@@ -176,7 +178,7 @@ Latest OpenAI Codex provider note:
 - Role-voice policy now distinguishes NPC role voice from player choices before
   the live request. The refreshed Waiting Customer live line was bounded,
   role-anchored, and based on an observed Store Clerk live utterance:
-  `줄은여기서유지하면돼요.확인은공원게시판에붙어있더군요.`
+  `줄은그대로네요.`
 - Same-session NPC memory/thread continuity is now covered for the actual
   `openai-codex` Godot route with local backend-owned workspace memory. The
   default remains `storeResponses=false`; the Codex endpoint rejected

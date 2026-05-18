@@ -107,7 +107,7 @@ Two-NPC social probe:
 Godot live PlayableSession route provider dispatch smoke:
 
 - artifact: `data/evidence/godot/live-provider-dispatch/dre_171_live_provider_dispatch_smoke.json`
-- artifact SHA-256: `fbb5cb6733e0ec514454c1d6038998f59b8116915000bb55761d29e69f0e3f0a`
+- artifact SHA-256: `035a1ec3044a070001b0afbb5a31d2acdb2c5e734be1dccc68321c71a7c74df0`
 - readiness: ready for `openai-codex`
 - model: `gpt-5.4-mini`
 - reasoning: `low`
@@ -118,16 +118,19 @@ Godot live PlayableSession route provider dispatch smoke:
 - request count: 2
 - live actors: `NPC_Store_Clerk`, `NPC_Waiting_Customer`
 - total estimated cost: `$0.00844875`
-- total actual usage: 2,296 input tokens, 510 output tokens, 2,806 total tokens
+- total actual usage: 2,296 input tokens, 449 output tokens, 2,745 total tokens
 - Store Clerk estimated cost: `$0.00433725`
-- Store Clerk actual usage: 1,290 input tokens, 191 output tokens, 1,481 total tokens
+- Store Clerk actual usage: 1,290 input tokens, 266 output tokens, 1,556 total tokens
 - Waiting Customer estimated cost: `$0.0041115`
-- Waiting Customer actual usage: 1,006 input tokens, 319 output tokens, 1,325 total tokens
+- Waiting Customer actual usage: 1,006 input tokens, 183 output tokens, 1,189 total tokens
 - fallback: false
 - Store Clerk utterance: `오늘도같은걸로드릴까요?`
 - Waiting Customer observed Store Clerk live utterance: yes
-- Waiting Customer utterance:
-  `줄은여기서유지하면돼요.확인은공원게시판에붙어있더군요.`
+- Waiting Customer utterance: `줄은그대로네요.`
+- self-contained provider-packet evidence: yes. The artifact includes
+  `checks.providerPackets.waitingCustomer.recentEvents` and
+  `proofs.npcToNpcLiveObservationEvent`, so the observed Store Clerk live line
+  can be checked without reading the smoke script.
 - command executed in Godot world: false
 - product provider state changed: false
 - provider decision mutated route state: false
@@ -140,6 +143,10 @@ Additional dispatch-chain probing note:
   tokens, 230 output tokens, and 1,520 total tokens; the timed-out second call
   returned no provider usage. The passing run above used the documented
   12-second provider/deadline settings.
+- A later self-contained evidence refresh re-ran the same two-call smoke and
+  spent estimated `$0.00844875` with returned usage 2,296 input tokens, 449
+  output tokens, and 2,745 total tokens. ChatGPT Pro remaining quota was still
+  not exposed.
 - fallback parity route outcome: `clean_cover`
 - fallback parity session outcome: `cover_held`
 

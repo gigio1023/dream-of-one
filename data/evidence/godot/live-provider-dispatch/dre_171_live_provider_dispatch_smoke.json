@@ -10,8 +10,8 @@
 			"ok": true,
 			"providerUsage": {
 				"actualInputTokens": 1290.0,
-				"actualOutputTokens": 191.0,
-				"actualTotalTokens": 1481.0,
+				"actualOutputTokens": 266.0,
+				"actualTotalTokens": 1556.0,
 				"estimatedCostUsd": 0.00433725,
 				"estimatedInputTokens": 1583.0,
 				"estimatedTotalTokens": 2283.0,
@@ -19,7 +19,7 @@
 				"model": "gpt-5.4-mini"
 			},
 			"reason": "",
-			"threadId": "resp_02b10c449196c95b016a0aeb5daaac8191889891ef217e429c",
+			"threadId": "resp_0929c9bc9feae263016a0aec5037d48191ae6d417433763de6",
 			"transport": "codex",
 			"usedFallback": false,
 			"utterance": "오늘도같은걸로드릴까요?"
@@ -33,8 +33,8 @@
 				"ok": true,
 				"providerUsage": {
 					"actualInputTokens": 1290.0,
-					"actualOutputTokens": 191.0,
-					"actualTotalTokens": 1481.0,
+					"actualOutputTokens": 266.0,
+					"actualTotalTokens": 1556.0,
 					"estimatedCostUsd": 0.00433725,
 					"estimatedInputTokens": 1583.0,
 					"estimatedTotalTokens": 2283.0,
@@ -42,7 +42,7 @@
 					"model": "gpt-5.4-mini"
 				},
 				"reason": "",
-				"threadId": "resp_02b10c449196c95b016a0aeb5daaac8191889891ef217e429c",
+				"threadId": "resp_0929c9bc9feae263016a0aec5037d48191ae6d417433763de6",
 				"transport": "codex",
 				"usedFallback": false,
 				"utterance": "오늘도같은걸로드릴까요?"
@@ -55,8 +55,8 @@
 				"ok": true,
 				"providerUsage": {
 					"actualInputTokens": 1006.0,
-					"actualOutputTokens": 319.0,
-					"actualTotalTokens": 1325.0,
+					"actualOutputTokens": 183.0,
+					"actualTotalTokens": 1189.0,
 					"estimatedCostUsd": 0.0041115,
 					"estimatedInputTokens": 1282.0,
 					"estimatedTotalTokens": 1982.0,
@@ -64,10 +64,10 @@
 					"model": "gpt-5.4-mini"
 				},
 				"reason": "",
-				"threadId": "resp_00aa5f116e9b3d8d016a0aeb604db48191bc4c57cf63fd869d",
+				"threadId": "resp_0ce8cbebd3098316016a0aec53eb9c8191a82a34d70e258dd3",
 				"transport": "codex",
 				"usedFallback": false,
-				"utterance": "줄은여기서유지하면돼요.확인은공원게시판에붙어있더군요."
+				"utterance": "줄은그대로네요."
 			}
 		],
 		"playableRoute": {
@@ -143,6 +143,61 @@
 			},
 			"stateMutatedByProviderDecision": false
 		},
+		"providerPackets": {
+			"storeClerk": {
+				"environmentToolCount": 4,
+				"expectedLiveObservation": "",
+				"hasExpectedLiveObservation": true,
+				"landmarkId": "Store",
+				"nearbyActors": [
+					"player",
+					"NPC_Store_Manager",
+					"NPC_Waiting_Customer",
+					"NPC_Studio_PM",
+					"NPC_Park_Witness"
+				],
+				"npcId": "NPC_Store_Clerk",
+				"recentEvents": [
+					"stage:normal",
+					"prompt:store.same_order.routine",
+					"route:running",
+					"last_choice:",
+					"tool:상점 카운터: 응대 중단 -> 응대 중단",
+					"tool:늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용",
+					"tool:영수증 트레이: 영수증 작성 -> 정상 영수증",
+					"tool:영수증 트레이: 영수증 표시 -> 영수증 표시",
+					"tool:정정 문서: offer_correction -> 정정 제안",
+					"tool:보고 트레이: 메모 배치 -> 상점 보고"
+				],
+				"role": "store_clerk",
+				"sessionId": "godot-live-playable-route-provider-1779100751-1232"
+			},
+			"waitingCustomer": {
+				"environmentToolCount": 0,
+				"expectedLiveObservation": "live_utterance:NPC_Store_Clerk:오늘도같은걸로드릴까요?",
+				"hasExpectedLiveObservation": true,
+				"landmarkId": "Store",
+				"nearbyActors": [
+					"player",
+					"NPC_Store_Clerk",
+					"NPC_Store_Manager",
+					"NPC_Studio_PM",
+					"NPC_Park_Witness"
+				],
+				"npcId": "NPC_Waiting_Customer",
+				"recentEvents": [
+					"stage:normal",
+					"prompt:store.same_order.probe",
+					"route:clean_cover",
+					"last_choice:safe/local",
+					"ledger:civic-ledger-6:studio_review_invited:invite_review",
+					"ledger:civic-ledger-5:local_tip_shared:share_local_tip",
+					"live_utterance:NPC_Store_Clerk:오늘도같은걸로드릴까요?"
+				],
+				"role": "waiting_customer",
+				"sessionId": "godot-live-playable-route-provider-customer-1779100755-5317"
+			}
+		},
 		"readiness": {
 			"bridgeStatus": "ready",
 			"endpoint": "http://127.0.0.1:8787/health/ready",
@@ -178,8 +233,8 @@
 	"ok": true,
 	"proofs": {
 		"actualInputTokens": 1290,
-		"actualOutputTokens": 191,
-		"actualTotalTokens": 1481,
+		"actualOutputTokens": 266,
+		"actualTotalTokens": 1556,
 		"chatGptProQuotaRemaining": "not_exposed_by_codex_response",
 		"commandExecuted": false,
 		"contextMutated": false,
@@ -194,14 +249,15 @@
 		],
 		"multiActorLiveProviderPackets": true,
 		"npcToNpcLiveObservation": true,
+		"npcToNpcLiveObservationEvent": "live_utterance:NPC_Store_Clerk:오늘도같은걸로드릴까요?",
 		"playableSessionPacket": true,
 		"productProviderStateChanged": false,
 		"providerDecisionMutatedRouteState": false,
 		"providerMode": "openai-codex",
 		"selectedModel": "gpt-5.4-mini",
 		"totalActualInputTokens": 2296,
-		"totalActualOutputTokens": 510,
-		"totalActualTokens": 2806,
+		"totalActualOutputTokens": 449,
+		"totalActualTokens": 2745,
 		"totalEstimatedCostUsd": 0.00844875,
 		"transport": "codex",
 		"usedFallback": false,

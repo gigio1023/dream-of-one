@@ -29,6 +29,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Resolve GI-01 typed recorded speech: HUD typed free-input is proven in current Godot/HUD/packaged/Codex QA artifacts; legacy recorded-statement fallback remains internal only and is not tester-facing.
 - [x] Execute GI-02 consequence readability pass and capture human readability notes.
 - [x] Execute GI-03 NPC/Station investigation feedback pass.
+- [ ] Create or link the Linear SoT issue for GI-04 external comprehension
+  fresh-player sessions using
+  `.game-harness/linear-issue-drafts/gi-04-external-comprehension-fresh-player.md`.
 - [ ] Execute GI-04 external comprehension dry run or fresh-player session.
 - [x] Execute GI-05 live authority vs fallback-only product decision and proof.
 - [x] Execute GI-06 exported build/setup proof before tester-facing demo claims.

@@ -146,12 +146,12 @@ Latest OpenAI Codex provider note:
   packets from the running route state for `NPC_Store_Clerk` and
   `NPC_Waiting_Customer`, selected `gpt-5.4-mini`, used no fallback, capped each
   request at `$0.01`, kept the two-request total estimate under `$0.01`, and
-  returned total usage of 1,829 input / 400 output / 2,229 total tokens with
-  total estimated cost `$0.00792525`. It avoided route mutation and continued
+  returned total usage of 2,275 input / 405 output / 2,680 total tokens with
+  total estimated cost `$0.0084375`. It avoided route mutation and continued
   the deterministic fallback path to `routeOutcome=clean_cover` and
   `sessionOutcome=cover_held`. It wrote
   `data/evidence/godot/live-provider-dispatch/dre_171_live_provider_dispatch_smoke.json`
-  with SHA-256 `eaba9c097d35e199a43fb32bac18ac0ff44f138c0fb28bcdcdb43010bb252751`.
+  with SHA-256 `ba676ffdd7c0ff307b14835ac569bcf3adfe3a7044e0b460f383b4d4253a9b08`.
 - ChatGPT Pro remaining quota was not exposed by these Codex Responses, so
   future work must track request count, fixed model, reasoning effort,
   estimated caps, fallback status, and returned token usage instead of claiming
@@ -161,9 +161,9 @@ Latest OpenAI Codex provider note:
   HUD/Evidence product truth remains `fallback_only_m1` until a later decision
   exposes live wording as a player-visible mode and records that usage in
   playable Evidence.
-- Residual risk: the Waiting Customer live wording remained bounded and
-  non-mutating but weakly role-anchored, so live role-voice policy needs a
-  targeted improvement before player-visible live wording is enabled.
+- Role-voice policy now distinguishes NPC role voice from player choices before
+  the live request. The refreshed Waiting Customer live line was bounded and
+  role-anchored: `줄은잠깐멈췄네요.`
 
 Latest status check:
 - command: `.game-harness/scripts/run-same-order-comprehension-session.sh --status`

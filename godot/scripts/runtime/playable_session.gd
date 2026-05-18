@@ -655,9 +655,11 @@ func debug_live_provider_packet(session_id_override: String = "", actor_id_overr
 			"organization": _provider_landmark_for_actor(actor_id),
 			"role": actor_role,
 			"duty": _provider_duty_for_actor(actor_id, actor_role),
+			"roleVoicePolicy": _provider_role_voice_policy(actor_id, actor_role),
+			"currentActorState": _provider_actor_state(actor_id),
 			"currentPromptId": current_prompt_id,
 			"currentTurnId": current_turn_id,
-			"availableChoices": _current_choice_lines(),
+			"availableChoices": _provider_available_choices_for_actor(actor_id, beat),
 			"environmentToolCatalog": tool_catalog,
 			"providerJobId": "%s.%s.live-wording-proposal" % [route_outcome, current_prompt_id]
 		},
@@ -670,6 +672,20 @@ func debug_live_provider_packet(session_id_override: String = "", actor_id_overr
 			"deterministicOutcome": _session_outcome(),
 			"providerBoundary": "wording_only_no_state_mutation"
 		}
+	}
+
+func _provider_available_choices_for_actor(actor_id: String, beat: Dictionary) -> Array[String]:
+	if actor_id != str(beat.get("actorId", "")):
+		return []
+	return _current_choice_lines()
+
+func _provider_actor_state(actor_id: String) -> Dictionary:
+	var state: Dictionary = _visible_npc_states().get(actor_id, {})
+	return {
+		"state": str(state.get("state", "normal")),
+		"reactionLabel": str(state.get("reactionLabel", "")),
+		"spokenLine": str(state.get("spokenLine", "")),
+		"homeLandmark": str(state.get("homeLandmark", ""))
 	}
 
 func _provider_landmark_for_actor(actor_id: String) -> String:
@@ -688,6 +704,20 @@ func _provider_landmark_for_actor(actor_id: String) -> String:
 		"NPC_Studio_PM":
 			return "Studio"
 	return "Store"
+
+func _provider_role_voice_policy(actor_id: String, actor_role: String) -> String:
+	match actor_id:
+		"NPC_Store_Clerk":
+			return "Use clerk procedure voice. Do not speak as the player or decide record consequences."
+		"NPC_Waiting_Customer":
+			return "Use waiting-customer observer voice. Comment on queue, public records, or distance/help stance. Never confess as the player or take blame for the order."
+		"NPC_Park_Witness":
+			return "Use public-witness voice. Comment on notice-board facts without inventing a report."
+		"NPC_Studio_PM":
+			return "Use Studio PM review-gate voice. Comment on public review access without changing queue state."
+		"NPC_Station_Officer":
+			return "Use Station procedure voice. Ask from cited records without deciding verdicts."
+	return "Use %s voice only. Do not speak as the player or change deterministic state." % actor_role
 
 func _provider_duty_for_actor(actor_id: String, actor_role: String) -> String:
 	match actor_id:

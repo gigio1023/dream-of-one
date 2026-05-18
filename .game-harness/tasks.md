@@ -42,7 +42,7 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   with `openai-codex`, records usage, and does not mutate product state.
 - [x] Wire one actual `PlayableSession` route provider job through live backend
   and prove fallback parity for route events, ledger, object state, and economy.
-- [ ] Improve live provider role-voice policy before exposing live wording as a
+- [x] Improve live provider role-voice policy before exposing live wording as a
   player-visible HUD/Evidence mode.
 - [x] Defer four-week prototype plan issue splitting until fresh-player comprehension evidence and the M1/M2 decision are recorded.
 - [x] Run parallel simulator benchmark research lanes and record source-backed md files.

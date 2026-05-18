@@ -93,7 +93,7 @@ Two-NPC social probe:
 Godot live PlayableSession route provider dispatch smoke:
 
 - artifact: `data/evidence/godot/live-provider-dispatch/dre_171_live_provider_dispatch_smoke.json`
-- artifact SHA-256: `eaba9c097d35e199a43fb32bac18ac0ff44f138c0fb28bcdcdb43010bb252751`
+- artifact SHA-256: `ba676ffdd7c0ff307b14835ac569bcf3adfe3a7044e0b460f383b4d4253a9b08`
 - readiness: ready for `openai-codex`
 - model: `gpt-5.4-mini`
 - reasoning: `low`
@@ -103,15 +103,15 @@ Godot live PlayableSession route provider dispatch smoke:
 - per-request estimated cap: `$0.01`
 - request count: 2
 - live actors: `NPC_Store_Clerk`, `NPC_Waiting_Customer`
-- total estimated cost: `$0.00792525`
-- total actual usage: 1,829 input tokens, 400 output tokens, 2,229 total tokens
-- Store Clerk estimated cost: `$0.00409125`
-- Store Clerk actual usage: 1,077 input tokens, 223 output tokens, 1,300 total tokens
-- Waiting Customer estimated cost: `$0.003834`
-- Waiting Customer actual usage: 752 input tokens, 177 output tokens, 929 total tokens
+- total estimated cost: `$0.0084375`
+- total actual usage: 2,275 input tokens, 405 output tokens, 2,680 total tokens
+- Store Clerk estimated cost: `$0.00433725`
+- Store Clerk actual usage: 1,290 input tokens, 171 output tokens, 1,461 total tokens
+- Waiting Customer estimated cost: `$0.00410025`
+- Waiting Customer actual usage: 985 input tokens, 234 output tokens, 1,219 total tokens
 - fallback: false
-- Store Clerk utterance: `네,같은걸로드릴게요.`
-- Waiting Customer utterance: `맞습니다.제가착각했습니다.`
+- Store Clerk utterance: `오늘도같은걸로드릴까요?`
+- Waiting Customer utterance: `줄은잠깐멈췄네요.`
 - command executed in Godot world: false
 - product provider state changed: false
 - provider decision mutated route state: false
@@ -146,9 +146,9 @@ upgrades, and recorded actual token usage when the provider returns it.
   `fallback_only_m1`.
 - Continuous live provider scheduling across more than two `PlayableSession`
   route jobs and memory turns.
-- Strong role-voice policy for live wording. The Waiting Customer proof stayed
-  bounded and non-mutating, but the returned line was weakly role-anchored and
-  should be improved before player-visible live wording is enabled.
+- Player-visible live-provider mode and HUD/Evidence display. The current proof
+  is still proof-only even though the two-actor role-voice smoke now returns
+  bounded role-anchored lines.
 - Multi-step NPC memory and policy behavior across a long live simulation.
 - ChatGPT Pro quota remaining or plan-limit accounting, because the endpoint
   does not expose remaining subscription usage in these responses.

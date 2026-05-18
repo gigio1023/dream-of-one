@@ -59,9 +59,9 @@ Last Updated: 2026-05-18
   `/v1/npc/decision`, records total usage, confirms no route mutation, and then
   proves clean-cover fallback parity. This is still proof-only: do not claim
   player-visible live provider behavior while the running HUD/Evidence product
-  truth remains `fallback_only_m1`. The Waiting Customer returned bounded but
-  weakly role-anchored wording, so the next live-provider improvement should be
-  role-voice policy before enabling live wording in the playable HUD.
+  truth remains `fallback_only_m1`. Role-voice policy now separates NPC speech
+  from player choices; the refreshed Waiting Customer live line is
+  `줄은잠깐멈췄네요.`
 - Latest correction slice: active Store dialogue choices must remain speech
   inputs, not fixed consequence branches. The prompt now needs to expose the
   Store Clerk's current environment tool catalog from object affordances, while

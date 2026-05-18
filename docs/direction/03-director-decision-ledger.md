@@ -312,7 +312,8 @@ Required evidence:
 - budgeted backend live smoke, tiny social probe, and two-actor Godot
   PlayableSession route dispatch smoke pass with usage accounting.
 - provider-shaped backend tests keep rejecting forbidden authority fields.
-- live role-voice policy must be improved before player-visible live wording;
-  current proof is bounded/non-mutating but not yet a product voice claim.
+- live role-voice policy separates NPC speech from player choices and rejects
+  Waiting Customer player-blame wording before player-visible live wording is
+  considered.
 - future player-visible live provider claims require explicit HUD/Evidence mode
   proof, not only proof-only dispatch evidence.

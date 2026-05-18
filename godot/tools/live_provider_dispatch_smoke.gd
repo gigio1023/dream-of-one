@@ -213,6 +213,16 @@ func _validate_decision_report(report: Dictionary, provider_packet: Dictionary, 
 	_require(str(intent.get("npcId", "")) == str(provider_packet.get("npcId", "")), failures, "Live provider decision must target the requested NPC.")
 	_require(str(intent.get("utterance", "")).length() > 0, failures, "Live provider decision must include bounded wording.")
 	_require(Array(intent.get("reasonCodes", [])).has("openai_text_proposal"), failures, "Live provider decision must mark wording-only proposal reason.")
+	_validate_role_voice_decision(intent, failures)
+
+func _validate_role_voice_decision(intent: Dictionary, failures: Array[String]) -> void:
+	var npc_id := str(intent.get("npcId", ""))
+	var utterance := str(intent.get("utterance", "")).replace(" ", "")
+	if npc_id != "NPC_Waiting_Customer":
+		return
+	var forbidden_player_blame := ["제가착각", "제가잘못", "제주문", "제가주문"]
+	for phrase in forbidden_player_blame:
+		_require(not utterance.contains(phrase), failures, "Waiting Customer live wording must not confess as the player or take blame for the player's order.")
 
 func _validate_route_parity(summary: Dictionary, failures: Array[String]) -> void:
 	_require(str(summary.get("routeOutcome", "")) == "clean_cover", failures, "PlayableSession route outcome must remain clean_cover after the live provider probe.")

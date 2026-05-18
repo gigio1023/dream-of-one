@@ -125,6 +125,8 @@ test("OpenAI proposal gateway uses preferred model and maps text proposal into b
   assert.equal(responseBodies[0]?.model, "gpt-5.4-mini");
   assert.deepEqual(responseBodies[0]?.reasoning, { effort: "low" });
   assert.match(String(responseBodies[0]?.instructions), /Do not decide Exposure delta/);
+  assert.match(String(responseBodies[0]?.instructions), /Speak only as the NPC named by PerceptionPacket\.npcId/);
+  assert.match(String(responseBodies[0]?.instructions), /For waiting-customer roles, use observer wording/);
   const text = responseBodies[0]?.text as { format?: { schema?: { properties?: Record<string, unknown> } } };
   assert.deepEqual(
     Object.keys(text.format?.schema?.properties ?? {}).sort(),
@@ -136,6 +138,57 @@ test("OpenAI proposal gateway uses preferred model and maps text proposal into b
       "stationPressureWording",
     ],
   );
+});
+
+test("OpenAI proposal prompt separates role voice from player choices", async () => {
+  const prompts: string[] = [];
+  const fetchImpl: FetchLike = async (url, init) => {
+    if (url.endsWith("/models")) {
+      return jsonResponse(200, {
+        data: [{ id: "gpt-5.4-mini" }],
+      });
+    }
+
+    const body = JSON.parse(init?.body ?? "{}") as {
+      input?: Array<{ content?: Array<{ text?: string }> }>;
+    };
+    prompts.push(String(body.input?.[0]?.content?.[0]?.text ?? ""));
+    return jsonResponse(200, {
+      id: "resp-role-voice",
+      output_text: JSON.stringify(proposal({
+        npcId: "NPC_Waiting_Customer",
+        npcLineCandidates: ["줄은 그대로 가면 되겠네요."],
+      })),
+    });
+  };
+
+  const packet: PerceptionPacket = {
+    sessionId: "session-openai",
+    npcId: "NPC_Waiting_Customer",
+    landmarkId: "Store",
+    nearbyActors: ["player", "NPC_Store_Clerk"],
+    recentEvents: ["tool:대기 표식: 일상 수락 -> 줄 안정"],
+    organizationContext: {
+      organization: "Store",
+      role: "waiting_customer",
+      roleVoicePolicy: "Use waiting-customer observer voice. Never confess as the player.",
+      availableChoices: ["같은 걸로 주세요."],
+    },
+    playerSignals: { suspicion: 0, exposure: 0 },
+  };
+
+  const gateway = new OpenAiProposalGateway(buildOpenAiConfig(), { fetch: fetchImpl });
+  const broker = new DefaultCodexBroker(gateway, new InMemoryThreadStore());
+
+  const result = await broker.decide(packet);
+
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.intent.npcId, "NPC_Waiting_Customer");
+  assert.equal(result.intent.utterance, "줄은 그대로 가면 되겠네요.");
+  assert.equal(prompts.length, 1);
+  assert.match(prompts[0] ?? "", /Role voice policy:/);
+  assert.match(prompts[0] ?? "", /availableChoices, when present, are player speech options, not NPC lines to repeat/);
+  assert.match(prompts[0] ?? "", /Use waiting-customer observer voice/);
 });
 
 test("OpenAI Codex proposal gateway streams responses with gpt-5.4-mini", async () => {

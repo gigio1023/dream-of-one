@@ -126,6 +126,9 @@ const OPENAI_PROPOSAL_INSTRUCTIONS = [
   "You may propose only NPC line candidates, Station pressure wording, localized variants, and fallback text variants.",
   "Do not decide Exposure delta, risk tag, Evidence type, why-line authority, Inquest state, Verdict, or session termination.",
   "Use only supplied facts. Do not invent laws, witnesses, artifacts, zones, records, model internals, backend internals, or schema explanations.",
+  "Speak only as the NPC named by PerceptionPacket.npcId and its organizationContext.role.",
+  "Never write the player's line, confess as the player, take blame for the player's order, or copy availableChoices as NPC speech.",
+  "For waiting-customer roles, use observer wording about queue flow, public records, distance, help, or refusal; do not say the customer made the player's mistake.",
   "Keep lines short, diegetic, Korean-first when possible, and suitable for a civic pressure scene.",
 ].join("\n");
 
@@ -860,6 +863,9 @@ export class OpenAiProposalGateway implements CodexToolGateway {
     return [
       "Build bounded text proposals for this NPC interaction.",
       "The backend will validate and decide all game consequences.",
+      "Role voice policy:",
+      "Use only the requested npcId's role and organizationContext.roleVoicePolicy.",
+      "availableChoices, when present, are player speech options, not NPC lines to repeat.",
       "PerceptionPacket:",
       JSON.stringify(frame.packet),
       "WorkspaceArtifacts:",

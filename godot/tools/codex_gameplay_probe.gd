@@ -683,6 +683,7 @@ func _snapshot(label: String, session: Node) -> Dictionary:
 		"availableChoices": summary.get("conversation", {}).get("availableChoices", []),
 		"environmentToolCatalog": summary.get("conversation", {}).get("environmentToolCatalog", []),
 		"environmentToolSummary": summary.get("conversation", {}).get("environmentToolSummary", []),
+		"visibleEnvironmentSummary": summary.get("conversation", {}).get("visibleEnvironmentSummary", []),
 		"visibleEnvironmentObjects": _compact_visible_environment_objects(summary.get("conversation", {}).get("visibleEnvironmentObjects", [])),
 		"recordObjects": summary.get("recordObjects", {}),
 		"civicEconomy": summary.get("civicEconomy", {}),
@@ -759,6 +760,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Codex/player did not read cross-place Studio/Park rule boards before speaking")
 	if not bool(checks.get("codexReadEnvironmentToolCatalog", false)):
 		failures.append("Codex/player did not see the environment tool catalog before choosing a line")
+	if not bool(checks.get("codexReadConversationVisibleContext", false)):
+		failures.append("Codex/player did not see the Store Clerk's visible environment cues before choosing a line")
 	if not bool(checks.get("worldPropsReachInquest", false)):
 		failures.append("World record props do not show forwarded report and cited Station dossier")
 	if not bool(checks.get("codexInspectedPublicNotice", false)):
@@ -803,6 +806,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"codexInspectedUsualOrderCue": _inspected_usual_order_cue(summary),
 		"codexReadCrossPlaceRuleBoards": _read_cross_place_rule_boards(summary),
 		"codexReadEnvironmentToolCatalog": _read_environment_tool_catalog(snapshots),
+		"codexReadConversationVisibleContext": _read_conversation_visible_context(snapshots),
 		"codexInspectedPublicNotice": _inspected_public_notice(summary),
 		"codexInspectedBlockedReview": _inspected_studio_review_block(summary),
 		"codexInspectedRecordAffordanceMap": _inspected_record_affordance_map(summary),
@@ -840,6 +844,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canInspectNormalProcedureCue": bool(checks.get("codexInspectedUsualOrderCue", false)),
 		"canReadCrossPlaceSocialRules": bool(checks.get("codexReadCrossPlaceRuleBoards", false)),
 		"canReadEnvironmentToolCatalog": bool(checks.get("codexReadEnvironmentToolCatalog", false)),
+		"canReadConversationVisibleContext": bool(checks.get("codexReadConversationVisibleContext", false)),
 		"canReadLiveHudSocialCitation": _hud_record_state_cites_latest_social_observation(summary, record_state_label),
 		"canReadLiveHudNearbyStances": _hud_record_state_names_visible_stances(record_state_label),
 		"canReadLiveHudRecordReaders": _hud_record_state_names_record_readers(record_state_label),
@@ -893,6 +898,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"Codex/player first inspected the usual-order cue, making the normal 'same order' procedure readable before choosing a line.",
 			"Codex/player read the Studio and Park rule boards as cross-place social rules, so later review and public-notice consequences are grounded before the Store line.",
 			"The active Store prompt exposed the current environment tool catalog for the Clerk role while keeping the three player choices as speech lines, so Codex/player could see what the place affords without treating choices as hardcoded outcomes.",
+			"Codex/player read the Store Clerk's visible environment cues in the live prompt: the counter, usual-order cue, and civic values are part of the question before any line is chosen.",
 			"Codex/player focused the Store counter and started the Store Clerk prompt.",
 				"Codex/player waited long enough to create a response hesitation record.",
 				"Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.",
@@ -1232,6 +1238,29 @@ func _read_environment_tool_catalog(snapshots: Array[Dictionary]) -> bool:
 			continue
 		if _tool_catalog_has(tool_catalog, "receipt_tray", "create_receipt") and _tool_catalog_has(tool_catalog, "report_tray", "place_note"):
 			return true
+	return false
+
+func _read_conversation_visible_context(snapshots: Array[Dictionary]) -> bool:
+	for snapshot in snapshots:
+		if str(snapshot.get("label", "")) != "conversation.start":
+			continue
+		var visible_summary: Array = snapshot.get("visibleEnvironmentSummary", [])
+		var visible_objects: Array = snapshot.get("visibleEnvironmentObjects", [])
+		var hud: Dictionary = snapshot.get("hud", {})
+		var combined := "%s\n%s" % [
+			"\n".join(_string_array(visible_summary)),
+			str(hud.get("focusLabel", ""))
+		]
+		if not combined.contains("보는 단서"):
+			continue
+		if not combined.contains("상점 카운터") or not combined.contains("늘 같은 주문") or not combined.contains("시민 경제"):
+			continue
+		var object_ids := _visible_environment_object_ids(visible_objects)
+		return (
+			object_ids.has("store_counter")
+			and object_ids.has("usual_order_cue")
+			and object_ids.has("civic_economy_panel")
+		)
 	return false
 
 func _tool_catalog_has(tool_catalog: Array, object_id: String, affordance: String) -> bool:

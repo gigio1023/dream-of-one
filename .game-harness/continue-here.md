@@ -82,10 +82,15 @@ Last Updated: 2026-05-18
   cross-place social rules before the Store line. Codex gameplay QA focuses
   `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard`, interacts with both,
   and verifies `canReadCrossPlaceSocialRules=true`; current proof passes with
-  31/31 accepted public actions, 28/28 explainability checks, and 5/5 route
-  reports after the Store Manager handoff-inspection update. This is a game-facing
+  31/31 accepted public actions, 29/29 explainability checks, and 5/5 route
+  reports after the conversation visible-context update. This is a game-facing
   legibility slice toward the broader
   open-environment social sim, not another product-closure claim.
+- Latest implementation slice: the active Store Clerk prompt now shows
+  `보는 단서`, a compact player-readable list of the environment facts the Clerk
+  can see before the player speaks: counter state, usual-order cue, report
+  tray, and civic values. Codex gameplay QA verifies
+  `canReadConversationVisibleContext=true` from the actual HUD focus label.
 - Latest implementation slice: Studio PM inspection now shows `기회 변화`.
   Codex route reports inspect Studio PM on clean, repair, warning, and inquest
   paths, proving that public confirmation opens a review opportunity, public

@@ -240,6 +240,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   hardcoding choice consequences: Store prompt choices remain diegetic speech
   lines while the prompt exposes current Store Clerk object tools such as
   receipt creation, receipt marking, correction, and report-note affordances.
+- [x] Show the Store Clerk's visible environment cues inside the live
+  conversation prompt: the player/Codex can read the counter state, usual-order
+  cue, report tray, and civic values before choosing a line.
 - [x] Extend the live HUD consequence chain through post-citation social
   consequences: inquest now shows Station citation -> Studio review block ->
   Waiting Customer contact refusal before the player opens inspection detail.

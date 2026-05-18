@@ -1005,6 +1005,7 @@ func build_summary() -> Dictionary:
 			"environmentToolCatalog": _current_environment_tool_catalog(),
 			"environmentToolSummary": _current_environment_tool_summary_lines(),
 			"visibleEnvironmentObjects": _current_visible_environment_objects(),
+			"visibleEnvironmentSummary": _current_visible_environment_summary_lines(),
 			"recordedStatementLine": "",
 			"recordedStatementScope": "",
 			"recordedStatementAction": "",
@@ -1696,9 +1697,12 @@ func _refresh_hud() -> void:
 	if conversation_active and not _session_locked():
 		var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
 		var tool_summary := _current_environment_tool_summary_text()
+		var visible_summary := _current_visible_environment_summary_text()
 		prompt = _current_npc_line(beat)
 		if not tool_summary.is_empty():
 			prompt = "%s\n%s" % [prompt, tool_summary]
+		if not visible_summary.is_empty():
+			prompt = "%s\n%s" % [prompt, visible_summary]
 		choices_enabled = true
 	elif current_focus != null and current_focus_kind == "record_prop":
 		var object_id := str(current_focus.get_meta("record_object_id", ""))
@@ -3881,6 +3885,24 @@ func _current_visible_environment_objects() -> Array[Dictionary]:
 	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
 	return _provider_visible_environment_objects_for_actor(str(beat.get("actorId", "")))
 
+func _current_visible_environment_summary_lines() -> Array[String]:
+	var lines: Array[String] = []
+	var objects := _current_visible_environment_objects()
+	var priority_ids := ["store_counter", "usual_order_cue", "report_tray", "civic_economy_panel"]
+	for object_id in priority_ids:
+		for object in objects:
+			if not object is Dictionary:
+				continue
+			if str(object.get("objectId", "")) != object_id:
+				continue
+			var title := str(object.get("title", ""))
+			var state_label := str(object.get("stateLabel", ""))
+			if title.is_empty() or state_label.is_empty():
+				continue
+			lines.append("%s=%s" % [title, state_label])
+			break
+	return lines
+
 func _environment_tool_summary_lines_for_actor(actor_id: String) -> Array[String]:
 	var lines: Array[String] = []
 	for action in _environment_tool_catalog_for_actor(actor_id):
@@ -3901,6 +3923,14 @@ func _current_environment_tool_summary_text() -> String:
 	if labels.is_empty():
 		return ""
 	return "환경 도구: %s" % "; ".join(labels)
+
+func _current_visible_environment_summary_text() -> String:
+	var labels := PackedStringArray()
+	for line in _current_visible_environment_summary_lines():
+		labels.append(line)
+	if labels.is_empty():
+		return ""
+	return "보는 단서: %s" % "; ".join(labels)
 
 func _conversation_history_lines() -> Array[String]:
 	var lines: Array[String] = []

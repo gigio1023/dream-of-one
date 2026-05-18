@@ -80,20 +80,22 @@ Latest completion audit:
   and packaged-route evidence.
 - latest Codex gameplay QA artifact reports `ok=true`,
   `aiPlayerReport.pass=true`, 31 accepted public actions, 5/5 route reports,
-  all 28 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
+  all 29 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
   no-live provider packet readiness for bounded `actorMemory` plus
-  `actorPolicy`. It now also proves Codex/player can inspect Store Clerk as the
-  record-making NPC, Store Manager as the organizational handoff actor, Park
-  Witness as the public-spread actor, Station Officer as the authority actor,
-  and Studio PM as the cross-place opportunity actor. Store Manager inspection
-  now names `관리 처리` labels for either local service pause or Station-readable
-  report handoff; Studio PM inspection names `기회 변화` labels for opening,
-  limiting, delaying, or closing the tiny review opportunity from public
-  records; the Witness inspection names the Clerk note, Park notice board
-  target, public-spread readers, and spoken rumor line; the Officer inspection
-  names the cited Store Manager ledger, Station document target,
-  `대상=플레이어`, comparison focus, inquest authority, visible environment
-  context, and spoken intake line before downstream NPC reactions.
+  `actorPolicy`. It now also proves Codex/player can read the Store Clerk's
+  visible environment cues in the live prompt before choosing speech, then
+  inspect Store Clerk as the record-making NPC, Store Manager as the
+  organizational handoff actor, Park Witness as the public-spread actor,
+  Station Officer as the authority actor, and Studio PM as the cross-place
+  opportunity actor. Store Manager inspection now names `관리 처리` labels for
+  either local service pause or Station-readable report handoff; Studio PM
+  inspection names `기회 변화` labels for opening, limiting, delaying, or closing
+  the tiny review opportunity from public records; the Witness inspection names
+  the Clerk note, Park notice board target, public-spread readers, and spoken
+  rumor line; the Officer inspection names the cited Store Manager ledger,
+  Station document target, `대상=플레이어`, comparison focus, inquest authority,
+  visible environment context, and spoken intake line before downstream NPC
+  reactions.
   It also explicitly marks itself as not a replacement for external
   comprehension.
 - latest packaged-route evidence validates as a Godot Evidence Pack and
@@ -292,8 +294,8 @@ Latest status check:
   `testerFacingFiles=["tester-invite.md"]`, `humanEvidence=false`, and
   `closesGoal=false`; it is setup material only, not comprehension evidence.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `d53a30b5fb2542fcda76047936aaca4f3be35dc509d5a4b4e4564972c251f8ca`
-  - Markdown SHA-256: `f8506dc81818d4037803627fddef653baccfa767a7831ca5c21db2ef35e4f0c3`
+  - JSON SHA-256: `f683ae68d448ac326fe78045f0784bcec0eb80c1939add31387dfa5da5b878f5`
+  - Markdown SHA-256: `8a05c8f68c14beb72518dfc382cc93bd1e72f5b2dad9e51d49e79fb905db59d0`
   - playable Evidence Pack SHA-256: `dd69a70384e218c58ff2e5a6ee6b58f6cbada43b82225d2f6ea7cd1ad43bc64d`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
@@ -301,13 +303,19 @@ Latest status check:
 Latest AI-play interface check:
 - command: `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `31 / 31`, `explainability=28/28`, Store Clerk record-action
-  inspection, Store Manager handoff inspection, Park Witness public-spread
-  inspection, Station Officer authority-citation inspection, Studio PM
-  cross-place opportunity inspection, actor memory for observed NPC decisions,
-  no-live provider packet memory and actor-policy readiness, and
+  player actions `31 / 31`, `explainability=29/29`, conversation visible
+  context in the live Store Clerk prompt, Store Clerk record-action inspection,
+  Store Manager handoff inspection, Park Witness public-spread inspection,
+  Station Officer authority-citation inspection, Studio PM cross-place
+  opportunity inspection, actor memory for observed NPC decisions, no-live
+  provider packet memory and actor-policy readiness, and
   `routeReportPassCount=5 / 5` with Godot
   `4.7.beta2.official.777579205` from local `GODOT_BIN`.
+- latest game increment: the live Store Clerk conversation prompt now exposes
+  `보는 단서` before the player chooses speech. The prompt names the Clerk's
+  relevant visible context: `상점 카운터=응대 중`, `늘 같은 주문=읽힘`,
+  `보고 트레이=비어 있음`, and `시민 경제=안정`. Codex gameplay QA now fails if
+  the player-facing prompt loses this visible-context line.
 - latest local pack-route check: `$GODOT_BIN --headless --path godot
   --export-pack "macOS PCK" build/macos/dream-of-one-same-order.pck` passed,
   then `DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_OUTPUT=data/evidence/godot/packaged-route/dre_171_packaged_route_evidence.json

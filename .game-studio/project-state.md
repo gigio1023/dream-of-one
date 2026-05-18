@@ -101,6 +101,10 @@ Current M1 carry-in:
   place affords before speaking, but the NPC/provider still has to choose a
   role-filtered tool and the runtime still validates the resulting record or
   ledger mutation.
+- latest small-slice carry-in: the Store Clerk prompt now also shows the
+  Clerk-visible environment cues as `보는 단서`. Before choosing a line, the
+  player can read the counter state, usual-order cue, report tray state, and
+  civic values that make the ordinary question socially loaded.
 - latest small-slice carry-in: Studio and Park text surfaces are now readable
   cross-place social rules before the player speaks. Inspecting
   `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard` shows the place,

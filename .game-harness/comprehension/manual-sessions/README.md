@@ -20,6 +20,17 @@ Use `--status` only as a quick readiness check:
 .game-harness/scripts/run-same-order-comprehension-session.sh --status
 ```
 
+On a headless facilitator machine, start or inspect the local display stack
+before the tester arrives:
+
+```bash
+.game-harness/scripts/run-local-display-session.sh start
+.game-harness/scripts/run-local-display-session.sh status
+```
+
+The display helper serves noVNC on localhost only. Use an explicit secure
+access path such as an SSH tunnel when a remote tester must view the session.
+
 Use setup helpers only when recruiting, handing off to another facilitator, or
 collecting notes outside the interactive helper:
 

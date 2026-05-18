@@ -685,6 +685,7 @@ const readmeBody = fs.readFileSync(path.join(kitDir, "README.md"), "utf8");
 const requiredReadmeMarkers = [
   "## Required Follow-Up",
   ".game-harness/scripts/run-same-order-comprehension-session.sh --verify-session-kit <this-session-kit-dir>",
+  ".game-harness/scripts/run-local-display-session.sh start",
   ".game-harness/scripts/run-same-order-comprehension-session.sh --status",
   "The `Human play display` line must be ready before launching observed play.",
   "With the tester present, run the observed-session helper:",
@@ -1432,9 +1433,12 @@ Before the tester arrives, verify this kit if it was moved or edited:
 
 Also check current launch readiness on the facilitator device:
 
+  .game-harness/scripts/run-local-display-session.sh start
   .game-harness/scripts/run-same-order-comprehension-session.sh --status
 
 The \`Human play display\` line must be ready before launching observed play.
+The local noVNC endpoint binds to localhost; use an explicit secure access
+path such as an SSH tunnel for remote testers.
 
 With the tester present, run the observed-session helper:
 

@@ -47,7 +47,11 @@ Last Updated: 2026-05-18
 - If `--status` is already pass and no watched Godot/HUD/probe/session-helper
   source changed, do not rerun Codex probe or regenerate setup kits merely to
   show activity. The next useful move is human play, not more preparation.
-- Latest implementation slice: repair recovery now propagates one tiny
+- Latest implementation slice: the live HUD record line now includes
+  `주변 태도`, summarizing visible NPC reactions such as Waiting Customer
+  contact refusal, Studio PM review block, and Store Manager report handoff
+  without requiring individual inspection panels.
+- Previous implementation slice: repair recovery now propagates one tiny
   cross-place consequence from a public repair record. `post_repair_notice`
   sets `park_notice_board=repaired`; Studio PM then reads that board plus
   `studio_review_queue`, uses `offer_conditional_review`, sets

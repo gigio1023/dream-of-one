@@ -50,7 +50,7 @@ const UI_COPY := {
 		"recorded_statement_submit": "직접 입력도 기록됩니다.",
 		"free_input_placeholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 		"recent_line": "최근 발화: {line}",
-		"record_state": "상점 기록: 영수증 {receipt} | 정정 {correction} | 보고 {report} | 스테이션 {dossier} | 잔액 {credit} 신뢰 {trust} 부담 {burden} 주목 {attention} | 장부 {ledgerCount} 최근 {ledgerLatest} | 사회 반응 {socialLatest}",
+		"record_state": "상점 기록: 영수증 {receipt} | 정정 {correction} | 보고 {report} | 스테이션 {dossier} | 잔액 {credit} 신뢰 {trust} 부담 {burden} 주목 {attention} | 장부 {ledgerCount} 최근 {ledgerLatest} | 사회 반응 {socialLatest} | 주변 태도 {npcStances}",
 		"investigation_trail": "검사자: {actor} | 대상: 플레이어 | 근거: {basis}",
 		"provider_state": "AI 제공자: {mode} | API 검증 {live} | 모델 {model}",
 		"evidence_count": "최근 기록 {shown} / 전체 {total}",
@@ -108,7 +108,7 @@ const UI_COPY := {
 		"recorded_statement_submit": "Typed speech is recorded.",
 		"free_input_placeholder": "Type and press Enter: speech becomes a Store record",
 		"recent_line": "Recent line: {line}",
-		"record_state": "Store records: receipt {receipt} | correction {correction} | report {report} | Station {dossier} | credit {credit} trust {trust} burden {burden} attention {attention} | ledger {ledgerCount} latest {ledgerLatest} | social reaction {socialLatest}",
+		"record_state": "Store records: receipt {receipt} | correction {correction} | report {report} | Station {dossier} | credit {credit} trust {trust} burden {burden} attention {attention} | ledger {ledgerCount} latest {ledgerLatest} | social reaction {socialLatest} | nearby stance {npcStances}",
 		"investigation_trail": "Examiner: {actor} | subject: player | basis: {basis}",
 		"provider_state": "AI provider: {mode} | API verified {live} | model {model}",
 		"evidence_count": "Recent record {shown} / total {total}",
@@ -179,6 +179,7 @@ var _civic_economy: Dictionary = {}
 var _civic_ledger_count := 0
 var _latest_civic_ledger_text := "-"
 var _latest_social_observation_text := "-"
+var _visible_npc_stance_text := "-"
 var _provider_mode := "fallback-only M1"
 var _provider_model := "none"
 var _provider_live_verified := false
@@ -353,12 +354,13 @@ func set_evidence(events: Array) -> void:
 		_evidence_list.add_child(label)
 		display_index += 1
 
-func set_record_state(record_objects: Dictionary, civic_economy: Dictionary, civic_ledger: Array, social_observations: Array = []) -> void:
+func set_record_state(record_objects: Dictionary, civic_economy: Dictionary, civic_ledger: Array, social_observations: Array = [], visible_npc_states: Dictionary = {}) -> void:
 	_record_objects = record_objects.duplicate(true)
 	_civic_economy = civic_economy.duplicate(true)
 	_civic_ledger_count = civic_ledger.size()
 	_latest_civic_ledger_text = _latest_civic_ledger_label(civic_ledger)
 	_latest_social_observation_text = _latest_social_observation_label(social_observations)
+	_visible_npc_stance_text = _visible_npc_stance_label(visible_npc_states)
 	_refresh_record_state_label()
 	_refresh_investigation_trail_label()
 	_refresh_consequence_text()
@@ -452,7 +454,8 @@ func _refresh_record_state_label() -> void:
 		"attention": int(_civic_economy.get("stationAttention", 0)),
 		"ledgerCount": _civic_ledger_count,
 		"ledgerLatest": _latest_civic_ledger_text,
-		"socialLatest": _latest_social_observation_text
+		"socialLatest": _latest_social_observation_text,
+		"npcStances": _visible_npc_stance_text
 	})
 
 func _record_chain_text(state_key: String) -> String:
@@ -530,12 +533,60 @@ func _latest_social_observation_label(social_observations: Array) -> String:
 			resulting_affordance,
 			int(pressure.get("recordBurden", 0))
 		]
-	return "%s가 %s 기록을 보고 %s, 부담 %d" % [
+	return "%s%s %s 기록을 보고 %s, 부담 %d" % [
 		observer,
+		_korean_subject_particle(observer),
 		observed_basis,
 		resulting_affordance,
 		int(pressure.get("recordBurden", 0))
 	]
+
+func _korean_subject_particle(label: String) -> String:
+	if label.is_empty():
+		return "가"
+	var codepoint := label.unicode_at(label.length() - 1)
+	if codepoint < 0xAC00 or codepoint > 0xD7A3:
+		return "이"
+	return "이" if int(codepoint - 0xAC00) % 28 != 0 else "가"
+
+func _visible_npc_stance_label(visible_npc_states: Dictionary) -> String:
+	if visible_npc_states.is_empty():
+		return "-"
+	var actor_ids := [
+		"NPC_Waiting_Customer",
+		"NPC_Studio_PM",
+		"NPC_Store_Manager",
+		"NPC_Park_Witness",
+		"NPC_Station_Officer"
+	]
+	var labels: Array[String] = []
+	for actor_id in actor_ids:
+		if not visible_npc_states.has(actor_id):
+			continue
+		var state: Dictionary = visible_npc_states.get(actor_id, {})
+		if str(state.get("state", "normal")) == "normal":
+			continue
+		var reaction_text := str(state.get("reactionText", "")).strip_edges()
+		if reaction_text.is_empty():
+			continue
+		var role_label := _actor_role_label(_actor_role_id_for_npc(actor_id))
+		labels.append("%s=%s" % [role_label, reaction_text])
+		if labels.size() >= 3:
+			break
+	if labels.is_empty():
+		return "-"
+	return ", ".join(labels)
+
+func _actor_role_id_for_npc(npc_id: String) -> String:
+	var role_ids := {
+		"NPC_Store_Clerk": "store_clerk",
+		"NPC_Store_Manager": "store_manager",
+		"NPC_Waiting_Customer": "waiting_customer",
+		"NPC_Studio_PM": "studio_pm",
+		"NPC_Park_Witness": "park_witness",
+		"NPC_Station_Officer": "station_officer"
+	}
+	return str(role_ids.get(npc_id, npc_id))
 
 func _civic_ledger_kind_label(kind: String) -> String:
 	var ko := {

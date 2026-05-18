@@ -96,17 +96,24 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `4eca9e7f883dda4fbc715b163c53345925a70628d993dfa416c9e0481e984115`
-  - Markdown SHA-256: `8c30cc10c90563d6aad9fc81e225a2d4822132eebdcc449c39c4c534ed13be2f`
-  - playable Evidence Pack SHA-256: `f8a3e037e27cd2fe3fdeb6e3a5be67d1521318f1501f407ae8e46a7f9bf44611`
+  - JSON SHA-256: `158e354dce79f6f24e7794c541aa0af2c6ecf472f01c9d46d033d87b81be4e49`
+  - Markdown SHA-256: `29baae67aea7f53e8b6e74005b45391d6f5430202a6308dcbdc23eccf05aeb80`
+  - playable Evidence Pack SHA-256: `b7644cb8b509b061a14201066074d69d68eea629fd288329211664f1aa2f1206`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
-  - packaged app zip SHA-256: `11bbc6430c4f58258c4ac438f612c82cfa8d6b6a9f6071a4e66be72928a43f01`
+  - packaged app zip SHA-256: `36ab9e79b7a16150df1a0cea0e0df00f22942e9ed877633b5f8ef21b3c81ff50`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `17 / 17`, `explainability=16/16`, and
+  player actions `17 / 17`, `explainability=17/17`, and
   `routeReportPassCount=5 / 5`.
+- latest game increment: the live HUD record line now includes a compact
+  `주변 태도` summary of visible NPC stances. In the inquest Codex run, the HUD
+  shows `대기 손님=접촉 거부`, `스튜디오 PM=리뷰 차단`, and `상점 매니저=보고 전달`
+  next to the record/economy/social-reaction line, so the player can read who
+  is currently helping, distancing, blocking, or escalating without opening
+  each NPC detail panel. Playable smoke now checks route-specific nearby
+  stances for clean, repair, suspicious, soft-report, and inquest routes.
 - latest game increment: the live HUD `사회 반응` line now names the exact
   ledger record an NPC read before acting. In the inquest Codex run, the final
   HUD record line includes the latest social reaction with `civic-ledger-6`,

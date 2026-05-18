@@ -145,6 +145,17 @@ main-pack evidence SHA-256:
 app-route evidence SHA-256:
 `f86316825bc6c00a89eff13bcf9f4b34dd52ae2c70aa6ecd8c2be714fae3370d`.
 
+Refresh note, 2026-05-18 KST: the PCK, macOS zip, unpacked app, and packaged
+route evidence were regenerated after the live HUD record line gained `주변 태도`
+for visible NPC reactions. PCK `--main-pack` smoke, packaged app launch,
+packaged route smoke, and tester preflight pass. PCK SHA-256:
+`567a9e6f1b40beee5ea17b0895271a9817636f4afa9ff8b1c6f579127f343962`; macOS
+zip SHA-256: `36ab9e79b7a16150df1a0cea0e0df00f22942e9ed877633b5f8ef21b3c81ff50`;
+main-pack evidence SHA-256:
+`20bd334da2ff8633f682b16a530b98b548389b63cf35d8f902ad703f5f078cf7`; packaged
+app-route evidence SHA-256:
+`f1db23c41bb44bace41d06b2dd2724351513aeaf7f3e447ea722379e8fe460d4`.
+
 ## Command Evidence
 
 Import:

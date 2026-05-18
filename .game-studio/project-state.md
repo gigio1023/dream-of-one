@@ -95,6 +95,10 @@ Current M1 carry-in:
   long-term content focus. Future work should extract reusable
   environment-agent patterns instead of deepening Store operations or Station
   procedure.
+- latest small-slice carry-in: the live HUD now has `주변 태도`, a compact
+  stance summary for visible NPCs. The player can see nearby help, distance,
+  service pause, review block, and contact refusal in the main play HUD before
+  opening individual NPC inspection panels.
 - latest small-slice carry-in: the live HUD social reaction now names the
   `civic-ledger-*` record an NPC read before choosing its next action. This
   keeps the improvement at the player-readable social-sim layer: the same

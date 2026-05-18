@@ -1440,6 +1440,12 @@ func _update_stage_from_pressure() -> void:
 func _refresh_hud() -> void:
 	if _hud == null:
 		return
+	_refresh_world_record_props()
+	_set_actor_reaction_state("NPC_Store_Clerk", stage, exposure)
+	_set_actor_reaction_state("NPC_Store_Manager", _store_manager_reaction_stage(), exposure)
+	_set_actor_reaction_state("NPC_Waiting_Customer", _waiting_customer_reaction_stage(), exposure)
+	_set_actor_reaction_state("NPC_Park_Witness", _park_witness_reaction_stage(stage), exposure)
+	_set_actor_reaction_state("NPC_Station_Officer", "inquest" if bool(station["inquestOpen"]) else ("reported" if bool(station["intakeOpen"]) else "normal"), exposure)
 	var prompt := "WASD로 이동. 상점 카운터에 접근해 E로 대화를 시작하세요."
 	var choices_enabled := false
 	if conversation_active and not _session_locked():
@@ -1468,17 +1474,11 @@ func _refresh_hud() -> void:
 	if _hud.has_method("set_outcome"):
 		_hud.set_outcome(outcome_visible, outcome_title, outcome_body)
 	if _hud.has_method("set_record_state"):
-		_hud.set_record_state(record_objects, civic_economy, civic_ledger, _social_observation_trace())
+		_hud.set_record_state(record_objects, civic_economy, civic_ledger, _social_observation_trace(), _visible_npc_states())
 	if _hud.has_method("set_provider_state"):
 		_hud.set_provider_state(_provider_state())
 	if _hud.has_method("set_evidence"):
 		_hud.set_evidence(_recent_events())
-	_refresh_world_record_props()
-	_set_actor_reaction_state("NPC_Store_Clerk", stage, exposure)
-	_set_actor_reaction_state("NPC_Store_Manager", _store_manager_reaction_stage(), exposure)
-	_set_actor_reaction_state("NPC_Waiting_Customer", _waiting_customer_reaction_stage(), exposure)
-	_set_actor_reaction_state("NPC_Park_Witness", _park_witness_reaction_stage(stage), exposure)
-	_set_actor_reaction_state("NPC_Station_Officer", "inquest" if bool(station["inquestOpen"]) else ("reported" if bool(station["intakeOpen"]) else "normal"), exposure)
 
 func _store_manager_reaction_stage() -> String:
 	for index in range(agent_action_log.size()):

@@ -147,6 +147,14 @@ Remaining blockers before advancing beyond M1:
 
 ## Runtime Evidence
 
+Latest live-HUD nearby-stance addendum: the HUD record-state line now includes
+`주변 태도`, a compact summary of visible NPC reactions in the running scene.
+In the inquest Codex run, the live HUD names `대기 손님=접촉 거부`,
+`스튜디오 PM=리뷰 차단`, and `상점 매니저=보고 전달` next to the ledger and
+economy state. Playable smoke checks route-specific nearby stances for clean,
+repair, suspicious-cover, soft-report, and inquest routes, and Codex gameplay
+QA now requires `canReadLiveHudNearbyStances=true`.
+
 Latest live-HUD social-citation addendum: the HUD record-state line now cites
 the exact ledger record behind the latest NPC social reaction. In the inquest
 Codex run, `사회 반응` includes the observed Station citation ledger ID

@@ -723,6 +723,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadInputToRecordChain": consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부"),
 		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)) and bool(checks.get("waitingCustomerObservedStation", false)),
 		"canReadLiveHudSocialCitation": _hud_record_state_cites_latest_social_observation(summary, record_state_label),
+		"canReadLiveHudNearbyStances": _hud_record_state_names_visible_stances(record_state_label),
 		"canReadVisibleNpcReaction": bool(checks.get("visibleWaitingCustomerReaction", false)),
 		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
 		"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
@@ -1281,6 +1282,15 @@ func _hud_record_state_cites_latest_social_observation(summary: Dictionary, reco
 		record_state_label.contains("사회 반응")
 		and not observed_event_id.is_empty()
 		and record_state_label.contains(observed_event_id)
+	)
+
+func _hud_record_state_names_visible_stances(record_state_label: String) -> bool:
+	return (
+		record_state_label.contains("주변 태도")
+		and record_state_label.contains("대기 손님")
+		and record_state_label.contains("접촉 거부")
+		and record_state_label.contains("스튜디오 PM")
+		and record_state_label.contains("리뷰 차단")
 	)
 
 func _ledger_event_cites(summary: Dictionary, kind: String, cited_id: String) -> bool:

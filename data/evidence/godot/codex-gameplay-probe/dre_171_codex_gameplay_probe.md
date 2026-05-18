@@ -92,6 +92,7 @@
 - `canReadInputToRecordChain`: `true`
 - `canReadNpcToNpcChain`: `true`
 - `canReadLiveHudSocialCitation`: `true`
+- `canReadLiveHudNearbyStances`: `true`
 - `canReadVisibleNpcReaction`: `true`
 - `canInspectPublicEnvironmentRecord`: `true`
 - `canInspectCrossPlaceAuthorityConsequence`: `true`

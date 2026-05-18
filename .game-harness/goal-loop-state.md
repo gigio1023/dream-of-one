@@ -95,11 +95,30 @@ Latest completion audit:
   activity. The next required evidence is an observed fresh-player session and
   accepted direct-note review, which is outside Codex-only control.
 
+Latest Ubuntu ARM environment setup:
+- `.game-harness/scripts/run-same-order-comprehension-session.sh` now accepts a
+  per-device executable launcher as `DREAM_OF_ONE_APP_PATH`, not only a macOS
+  `.app`, and uses portable file mtime checks for macOS/BSD and Linux/GNU
+  `stat`.
+- The helper auto-loads an ignored repo-local device env file from
+  `build/dream-of-one-local-env.sh` when present. Keep machine-specific paths in
+  that ignored file or explicit environment variables, not tracked docs.
+- On the Ubuntu ARM server, a local ignored PCK, executable launcher, and
+  packaged-route evidence were generated under `build/ubuntu-arm/`.
+  `.game-harness/scripts/run-same-order-comprehension-session.sh --preflight`
+  passes, and `--status` now reaches the expected fresh-player gate summary:
+  raw notes `0 / 3`, strict review `PENDING_TESTER_NOTES`, Codex QA setup
+  proof pass, and next action `run an observed fresh-player session now`.
+- Remaining local runtime caveat: this server currently has no `DISPLAY` or
+  `WAYLAND_DISPLAY`, so an observed human play session still needs a GUI/display
+  path such as local desktop, VNC, X11 forwarding, or another tester device.
+
 Latest status check:
 - command: `.game-harness/scripts/run-same-order-comprehension-session.sh --status`
-- result in this local shell: blocked before status because
-  `DREAM_OF_ONE_APP_PATH` is not set. Set the per-device packaged app path
-  before running a live fresh-player session or status check.
+- result in this local shell: pass after loading the ignored Ubuntu ARM local
+  env file and checking the local executable launcher plus route evidence.
+  Status now reaches the external gate summary instead of stopping on missing
+  `DREAM_OF_ONE_APP_PATH`.
 - last recorded packaged-preflight result remains pass; strict review remains
   `PENDING_TESTER_NOTES`.
 - packaged evidence: tester-ready, `stage=inquest`,

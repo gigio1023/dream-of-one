@@ -3,6 +3,14 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
+LOCAL_ENV_PATH="${DREAM_OF_ONE_LOCAL_ENV_PATH:-$REPO_ROOT/build/dream-of-one-local-env.sh}"
+if [[ -f "$LOCAL_ENV_PATH" ]]; then
+  # Device-local env only. Keep machine paths out of tracked docs/scripts.
+  set -a
+  # shellcheck source=/dev/null
+  source "$LOCAL_ENV_PATH"
+  set +a
+fi
 
 APP_PATH="${DREAM_OF_ONE_APP_PATH:-}"
 ROUTE_EVIDENCE_PATH="${DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH:-}"
@@ -64,8 +72,18 @@ Environment:
   DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH
   DREAM_OF_ONE_CODEX_GAMEPLAY_PROBE_PATH
   DREAM_OF_ONE_COMPREHENSION_NOTES_DIR
+  DREAM_OF_ONE_LOCAL_ENV_PATH
   GODOT_BIN or GODOT_PATH
 EOF
+}
+
+file_mtime() {
+  local path="$1"
+  if stat -f '%m' "$path" >/dev/null 2>&1; then
+    stat -f '%m' "$path"
+  else
+    stat -c '%Y' "$path"
+  fi
 }
 
 while (( $# > 0 )); do
@@ -193,8 +211,8 @@ codex_probe_freshness_line_for_paths() {
   fi
   local json_mtime
   local markdown_mtime
-  json_mtime="$(stat -f '%m' "$json_path")"
-  markdown_mtime="$(stat -f '%m' "$markdown_path")"
+  json_mtime="$(file_mtime "$json_path")"
+  markdown_mtime="$(file_mtime "$markdown_path")"
   local newest_source_mtime=0
   local newest_source_path=""
   local relative_path
@@ -206,7 +224,7 @@ codex_probe_freshness_line_for_paths() {
       printf "not-ready: missing watched source %s" "$relative_path"
       return 0
     fi
-    source_mtime="$(stat -f '%m' "$full_path")"
+    source_mtime="$(file_mtime "$full_path")"
     if (( source_mtime > newest_source_mtime )); then
       newest_source_mtime="$source_mtime"
       newest_source_path="$relative_path"
@@ -694,17 +712,23 @@ fi
 
 if [[ -z "$APP_PATH" ]]; then
   echo "DREAM_OF_ONE_APP_PATH is not set." >&2
-  echo "Set it to the local packaged .app path for this device." >&2
+  echo "Set it to the local packaged .app path or executable launcher for this device." >&2
   exit 1
 fi
 
-if [[ ! -d "$APP_PATH" ]]; then
-  echo "Missing packaged app: $APP_PATH" >&2
-  echo "Set DREAM_OF_ONE_APP_PATH to a valid .app path for this device." >&2
+APP_LAUNCH_MODE=""
+if [[ -d "$APP_PATH" ]]; then
+  APP_BINARY="$APP_PATH/Contents/MacOS/Dream of One Godot Shell"
+  APP_LAUNCH_MODE="macos_app"
+elif [[ -f "$APP_PATH" ]]; then
+  APP_BINARY="$APP_PATH"
+  APP_LAUNCH_MODE="executable"
+else
+  echo "Missing packaged app or executable launcher: $APP_PATH" >&2
+  echo "Set DREAM_OF_ONE_APP_PATH to a valid .app path or executable launcher for this device." >&2
   exit 1
 fi
 
-APP_BINARY="$APP_PATH/Contents/MacOS/Dream of One Godot Shell"
 if [[ ! -x "$APP_BINARY" ]]; then
   echo "Missing packaged app executable: $APP_BINARY" >&2
   exit 1
@@ -1576,7 +1600,11 @@ echo "Instruction to tester:"
 echo "Play this short scene without prior explanation until it stops or until 5 minutes pass."
 echo
 echo "Opening packaged app. Keep facilitator-only terminal output private until after the first explanation."
-open -W "$APP_PATH"
+if [[ "$APP_LAUNCH_MODE" == "macos_app" ]]; then
+  open -W "$APP_PATH"
+else
+  "$APP_BINARY"
+fi
 
 echo
 echo "After play, before explaining the design:"

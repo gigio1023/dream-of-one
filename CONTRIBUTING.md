@@ -55,3 +55,21 @@
   unpublished.
 - Preserve user edits. If a file contains mixed authorship, read the diff and stage only the relevant hunks when needed.
 - Leave generated local caches, editor files, and engine scratch directories untracked unless the repo already treats them as source.
+
+## Push Failure Recovery
+
+- Do not let a verified commit sit locally because push failed once. Treat that
+  as an active failure to resolve before taking on new product work.
+- First run `git status --short --branch` and `git log --oneline --decorate -5`
+  so the local/remote relationship is explicit.
+- If the remote moved, run `git pull --rebase`, resolve only the relevant
+  conflicts, rerun the narrow proof that covers the slice, then push again.
+- If hooks, credentials, network, or remote policy block the push, capture the
+  exact failing command and error, fix the cause when possible, and retry in the
+  same turn.
+- Do not squash unrelated finished slices together just because push was
+  delayed. Preserve the small revertable commits already made unless history
+  repair is explicitly required.
+- If a push truly cannot be completed, leave the repo in a clear state: local
+  commit present, working tree status reported, failing command recorded, and
+  next recovery step identified.

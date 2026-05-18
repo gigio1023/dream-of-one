@@ -155,6 +155,14 @@ Last Updated: 2026-05-19
   refuse_contact`, and cited `civic-ledger-6` in the HUD. The refreshed probe
   passes 33/33 accepted public actions, 37/37 explainability checks, and 5/5
   route reports with `canInspectVisibleSocialInfluenceLink=true`.
+- Latest implementation slice: the existing `store_queue_mark` now acts as an
+  environment-readable social relay for the Waiting Customer's inquest refusal.
+  Codex gameplay QA focuses the queue marker, interacts, and reads `플레이어
+  발화/응답 지연 -> 상점 기록 -> 보고 전달 -> 스테이션 인용 -> 대기 표식 접촉
+  거부` plus the exact manager handoff, Station citation, and
+  `civic-ledger-8` refusal result. The refreshed probe passes 35/35 accepted
+  public actions, 38/38 explainability checks, and 5/5 route reports with
+  `canInspectQueueSocialMarker=true`.
 - Latest implementation slice: the running 3D scene now draws role-colored
   NPC-to-NPC influence links from the observed/source actor to the reacting
   actor. In the inquest path, Codex/player can read a visible

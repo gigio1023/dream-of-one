@@ -209,6 +209,14 @@ Current M1 carry-in:
   HUD. Codex gameplay QA now requires
   `canInspectVisibleSocialInfluenceLink=true` and passes 33 accepted public
   actions, 37 explainability checks, and 5/5 route reports.
+- latest small-slice carry-in: the existing `store_queue_mark` now acts as an
+  environment-readable refusal marker in the inquest route. After the Station
+  citation, Codex/player can focus the queue marker, interact, and read that
+  player speech/delay became a Store record, then manager handoff, then Station
+  citation, and finally the Waiting Customer's `접촉 거부` applied to the
+  player. Codex gameplay QA now requires `canInspectQueueSocialMarker=true`
+  and passes 35 accepted public actions, 38 explainability checks, and 5/5
+  route reports.
 - latest small-slice carry-in: the running 3D scene now draws role-colored
   NPC-to-NPC influence links from the observed/source actor to the reacting
   actor. In the inquest path, a visible link connects

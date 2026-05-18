@@ -3352,7 +3352,23 @@ func _world_record_prop_inspection_body(object_id: String, state: String) -> Str
 			"distanced":
 				return "대기 표식이 거리두기 상태입니다. 공개 경고와 낮은 신뢰가 NPC의 접촉 방식을 바꿨습니다."
 			"refused":
-				return "대기 표식이 접촉 거부 상태입니다. 스테이션 인용을 본 NPC가 플레이어와 말 섞기를 거부했습니다."
+				var body_lines := PackedStringArray()
+				body_lines.append("대기 표식이 접촉 거부 상태입니다. 대기 손님은 지금 플레이어와 말 섞기와 줄 접촉을 거부합니다.")
+				body_lines.append("연쇄: 플레이어 발화/응답 지연 -> 상점 기록 -> 보고 전달 -> 스테이션 인용 -> 대기 표식 접촉 거부")
+				var store_record_event := _latest_civic_ledger_event_for_affordance("place_note", "report_tray")
+				if not store_record_event.is_empty():
+					body_lines.append("상점 기록: %s" % _civic_ledger_event_summary_line(store_record_event))
+				var manager_handoff_event := _latest_civic_ledger_event_for_affordance("forward_report", "report_tray")
+				if not manager_handoff_event.is_empty():
+					body_lines.append("관리 전달: %s" % _civic_ledger_event_summary_line(manager_handoff_event))
+				var station_citation_event := _latest_civic_ledger_event_for_affordance("cite_record", "station_dossier")
+				if not station_citation_event.is_empty():
+					body_lines.append("스테이션 인용: %s" % _civic_ledger_event_summary_line(station_citation_event))
+				var queue_refusal_event := _latest_civic_ledger_event_for_affordance("refuse_contact", "store_queue_mark")
+				if not queue_refusal_event.is_empty():
+					body_lines.append("현재 결과: %s" % _civic_ledger_event_summary_line(queue_refusal_event))
+				body_lines.append("의미: 플레이어 말이 상점 안 기록으로 남고, 그 기록을 관리자가 전달하고 스테이션이 인용한 뒤, 대기 손님의 지역 행동이 이 표식에서 접촉 거부로 바뀌었습니다.")
+				return "\n".join(body_lines)
 			"empty":
 				return "대기줄이 비었습니다. 보고 부담 때문에 카운터가 멈추자 대기 손님이 빠져나갔습니다."
 	if object_id == "civic_economy_panel":
@@ -3550,6 +3566,36 @@ func _latest_civic_ledger_label() -> String:
 	if not cited_id.is_empty():
 		return "%s -> %s\n%s" % [event_id, cited_id, affordance_label]
 	return "%s\n%s" % [event_id, affordance_label]
+
+func _latest_civic_ledger_event_for_affordance(affordance: String, object_id: String = "") -> Dictionary:
+	for index in range(civic_ledger.size() - 1, -1, -1):
+		var event: Dictionary = civic_ledger[index]
+		if str(event.get("affordance", "")) != affordance:
+			continue
+		if not str(object_id).is_empty() and str(event.get("objectId", "")) != str(object_id):
+			continue
+		return event.duplicate(true)
+	return {}
+
+func _civic_ledger_event_summary_line(event: Dictionary) -> String:
+	if event.is_empty():
+		return ""
+	var parts := PackedStringArray()
+	var event_id := str(event.get("eventId", "")).strip_edges()
+	if not event_id.is_empty():
+		parts.append(event_id)
+	var actor_label := _actor_role_label(str(event.get("actorRole", "")))
+	var affordance_label := _affordance_label(str(event.get("affordance", "")))
+	if not actor_label.is_empty() and not affordance_label.is_empty():
+		parts.append("%s -> %s" % [actor_label, affordance_label])
+	elif not actor_label.is_empty():
+		parts.append(actor_label)
+	elif not affordance_label.is_empty():
+		parts.append(affordance_label)
+	var cited_id := str(event.get("citedLedgerEventId", "")).strip_edges()
+	if not cited_id.is_empty():
+		parts.append("인용 %s" % cited_id)
+	return " / ".join(parts)
 
 func _compact_world_record_prop_label(object_id: String, state: String) -> String:
 	if _current_locale() == "en":

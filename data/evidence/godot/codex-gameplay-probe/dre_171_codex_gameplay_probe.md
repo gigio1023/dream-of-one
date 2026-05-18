@@ -35,6 +35,8 @@
 - player.interact.focused -> press the focused interaction
 - focus.npc -> look at visible NPC: NPC_Station_Officer
 - player.interact.focused -> press the focused interaction
+- focus.world_record_prop -> look at environment record prop: store_queue_mark
+- player.interact.focused -> press the focused interaction
 - focus.social_link -> look at social influence link: NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact
 - player.interact.focused -> press the focused interaction
 - focus.npc -> look at visible NPC: NPC_Studio_PM
@@ -61,6 +63,7 @@
 - Codex/player read the Studio review queue's visible role/action map: Studio PM can invite, defer, or block review from shared records.
 - Codex/player inspected the civic ledger to read the NPC-to-NPC social chain as a player-facing timeline.
 - Codex/player inspected the Station Officer to read which Store record was cited, what Station document was used, and why the player became the target of formal questioning.
+- Codex/player inspected the queue marker itself to read that player speech and delay became a Store record, then manager handoff, then Station citation, and finally the Waiting Customer's environment-facing contact refusal.
 - Codex/player snapshot exposed actor memory, showing which ledger events a role observed before choosing the next validated action.
 - Codex/player could also read the Waiting Customer's in-world reaction marker as sourced from the Station Officer before opening the detail panel.
 - Visible NPC bodies use distinct role tints, so Codex/player can identify the social field by actor role before opening detailed panels.
@@ -137,6 +140,7 @@
 - `canReadVisibleNpcSourceToken`: `true`
 - `canReadVisibleSocialInfluenceLink`: `true`
 - `canInspectVisibleSocialInfluenceLink`: `true`
+- `canInspectQueueSocialMarker`: `true`
 - `canInspectPublicEnvironmentRecord`: `true`
 - `canInspectCrossPlaceAuthorityConsequence`: `true`
 - `canInspectRecordRoleAffordanceMap`: `true`

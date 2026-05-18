@@ -79,13 +79,14 @@ Latest completion audit:
   proof is carried by the playable slice Evidence Pack, Codex gameplay probe,
   and packaged-route evidence.
 - latest Codex gameplay QA artifact reports `ok=true`,
-  `aiPlayerReport.pass=true`, 33 accepted public actions, 5/5 route reports,
-  all 37 explainability flags true, `canReadEnvironmentToolCatalog=true`,
+  `aiPlayerReport.pass=true`, 35 accepted public actions, 5/5 route reports,
+  all 38 explainability flags true, `canReadEnvironmentToolCatalog=true`,
   `canReadVisibleNpcRoleTints=true`, `canReadVisibleNpcSourceToken=true`,
   `canReadVisibleSocialInfluenceLink=true`,
-  `canInspectVisibleSocialInfluenceLink=true`, and no-live provider packet
-  readiness for bounded `actorMemory` plus `actorPolicy`. It now also proves
-  Codex/player can read the Store Clerk's
+  `canInspectVisibleSocialInfluenceLink=true`,
+  `canInspectQueueSocialMarker=true`, and no-live provider packet readiness for
+  bounded `actorMemory` plus `actorPolicy`. It now also proves Codex/player can
+  read the Store Clerk's
   visible environment cues in the live prompt before choosing speech, then
   inspect Store Clerk as the record-making NPC, Store Manager as the
   organizational handoff actor, Park Witness as the public-spread actor,
@@ -116,11 +117,14 @@ Latest completion audit:
   `cite_record -> refuse_contact` before treating the refusal as social state.
   Codex/player can now focus that link and read the source actor, target actor,
   `cite_record -> refuse_contact`, and cited `civic-ledger-6` through the same
-  HUD notice path used for props and NPCs. Latest Codex gameplay artifact
-  SHA-256: JSON
-  `3f1be7c9119db663dc96a044c7f3ad8c59802cd191dee0bf2d1a8ddc64ed7ee3`,
+  HUD notice path used for props and NPCs. Codex/player can also focus
+  `store_queue_mark` and read that player speech/delay became a Store record,
+  then manager handoff, then Station citation, and finally the Waiting
+  Customer's queue/contact refusal for the player. Latest Codex gameplay
+  artifact SHA-256: JSON
+  `06edae9b389c7b1d76514d554c1449c21c08a773697623ac9a60f7537b93b609`,
   Markdown
-  `1c9b329290eee9150b02aa288a7144fd9841b0f4be6e0534296dbaa88da43cba`.
+  `e0740c318c31da74e5e85e1dbc2716d41c4b88d838350ea32db174b32a026b0e`.
   It also explicitly marks itself as not a replacement for external
   comprehension.
 - latest packaged-route evidence validates as a Godot Evidence Pack and

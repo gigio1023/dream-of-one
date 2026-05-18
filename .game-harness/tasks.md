@@ -225,6 +225,11 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   `focus.social_link` on the Station Officer -> Waiting Customer link,
   `player.interact.focused` opens the same HUD notice, and Codex gameplay QA
   verifies `canInspectVisibleSocialInfluenceLink=true`.
+- [x] Make the Waiting Customer refusal leave a readable queue-marker relay:
+  inquest now turns `store_queue_mark` into an inspectable environment
+  consequence whose HUD notice explains `플레이어 발화/응답 지연 -> 상점 기록 ->
+  보고 전달 -> 스테이션 인용 -> 대기 표식 접촉 거부`, and Codex gameplay QA
+  verifies `canInspectQueueSocialMarker=true`.
 - [x] Make the civic economy panel player-readable as a tiny social-pressure
   record: Codex/player can inspect current credit/trust/burden/attention values
   and recent ledger deltas that show which role action moved them.

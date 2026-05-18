@@ -34,6 +34,8 @@ const PROBE_STEPS := [
 	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Station_Officer"}},
 	{"actionId": "player.interact.focused", "payload": {}},
+	{"actionId": "focus.world_record_prop", "payload": {"objectId": "store_queue_mark"}},
+	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.social_link", "payload": {"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact"}},
 	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Studio_PM"}},
@@ -798,6 +800,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Visible social influence link does not connect Station citation pressure to contact refusal")
 	if not bool(checks.get("codexInspectedVisibleSocialInfluenceLink", false)):
 		failures.append("Codex/player did not inspect the Station Officer -> Waiting Customer social influence link through the HUD")
+	if not bool(checks.get("codexInspectedQueueSocialMarker", false)):
+		failures.append("Codex/player did not inspect the queue marker as the environment-readable refusal consequence")
 	if not bool(checks.get("codexReadNpcSocialExchange", false)):
 		failures.append("Codex/player did not read the inspected NPC's overheard NPC-to-NPC exchange")
 	if not str(hud_snapshot.get("noticeBodyLabel", "")).contains("접촉 거부"):
@@ -825,6 +829,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"visibleNpcSourceToken": _visible_npc_source_token(summary, "NPC_Waiting_Customer", "station_officer", "cite_record"),
 		"visibleSocialInfluenceLink": _visible_social_influence_link(summary, "NPC_Station_Officer", "NPC_Waiting_Customer", "cite_record", "refuse_contact"),
 		"codexInspectedVisibleSocialInfluenceLink": _inspected_social_influence_link(summary, "NPC_Station_Officer", "NPC_Waiting_Customer", "cite_record", "refuse_contact"),
+		"codexInspectedQueueSocialMarker": _inspected_queue_social_marker(summary),
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"codexInspectedUsualOrderCue": _inspected_usual_order_cue(summary),
 		"codexReadCrossPlaceRuleBoards": _read_cross_place_rule_boards(summary),
@@ -881,6 +886,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadVisibleNpcSourceToken": bool(checks.get("visibleNpcSourceToken", false)),
 		"canReadVisibleSocialInfluenceLink": bool(checks.get("visibleSocialInfluenceLink", false)),
 		"canInspectVisibleSocialInfluenceLink": bool(checks.get("codexInspectedVisibleSocialInfluenceLink", false)),
+		"canInspectQueueSocialMarker": bool(checks.get("codexInspectedQueueSocialMarker", false)),
 		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
 		"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
 		"canInspectRecordRoleAffordanceMap": bool(checks.get("codexInspectedRecordAffordanceMap", false)),
@@ -947,6 +953,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 				"Codex/player read the Studio review queue's visible role/action map: Studio PM can invite, defer, or block review from shared records.",
 				"Codex/player inspected the civic ledger to read the NPC-to-NPC social chain as a player-facing timeline.",
 				"Codex/player inspected the Station Officer to read which Store record was cited, what Station document was used, and why the player became the target of formal questioning.",
+				"Codex/player inspected the queue marker itself to read that player speech and delay became a Store record, then manager handoff, then Station citation, and finally the Waiting Customer's environment-facing contact refusal.",
 				"Codex/player snapshot exposed actor memory, showing which ledger events a role observed before choosing the next validated action.",
 				"Codex/player could also read the Waiting Customer's in-world reaction marker as sourced from the Station Officer before opening the detail panel.",
 				"Visible NPC bodies use distinct role tints, so Codex/player can identify the social field by actor role before opening detailed panels.",
@@ -1401,6 +1408,21 @@ func _inspected_record_affordance_map(summary: Dictionary) -> bool:
 		and str(inspected.get("body", "")).contains("행동 가능성")
 		and str(inspected.get("body", "")).contains("현재 열린 행동: 없음")
 		and str(inspected.get("body", "")).contains("최근 장부")
+	)
+
+func _inspected_queue_social_marker(summary: Dictionary) -> bool:
+	var inspected := _inspected_world_record_candidate(summary, "store_queue_mark", "refused")
+	if inspected.is_empty():
+		return false
+	var body := str(inspected.get("body", ""))
+	return (
+		body.contains("플레이어 발화/응답 지연")
+		and body.contains("상점 기록")
+		and body.contains("보고 전달")
+		and body.contains("스테이션 인용")
+		and body.contains("접촉 거부")
+		and body.contains("플레이어")
+		and _ledger_array_has_event(inspected.get("recentLedgerEvents", []), "civic-ledger-8", "queue_contact_refused")
 	)
 
 func _inspected_world_record_exists(summary: Dictionary, object_id: String, state: String, body_fragment: String) -> bool:

@@ -90,8 +90,9 @@ comprehension notes. Current status is `0 / 3` raw sessions and
 gameplay report can close that gate.
 
 There is also an administrative SoT gap: GI-04 is drafted and routed to the
-`DRE` team, but it is not yet a Linear issue because this session cannot create
-issues through MCP or GraphQL fallback.
+`DRE` team, but it is not yet a Linear issue because the connected Linear app
+rejects issue creation without `write`/`issues:create` scope and
+`LINEAR_API_TOKEN` is unset for GraphQL fallback.
 
 ## Next Action
 

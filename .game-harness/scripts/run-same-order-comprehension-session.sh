@@ -678,6 +678,8 @@ const readmeBody = fs.readFileSync(path.join(kitDir, "README.md"), "utf8");
 const requiredReadmeMarkers = [
   "## Required Follow-Up",
   ".game-harness/scripts/run-same-order-comprehension-session.sh --verify-session-kit <this-session-kit-dir>",
+  ".game-harness/scripts/run-same-order-comprehension-session.sh --status",
+  "The `Human play display` line must be ready before launching observed play.",
   "With the tester present, run the observed-session helper:",
   ".game-harness/scripts/run-same-order-comprehension-session.sh",
   "Say only the neutral pre-play line printed in facilitator-card.md before first",
@@ -1412,6 +1414,12 @@ Codex QA artifacts, and remaining external gate without reading every note.
 Before the tester arrives, verify this kit if it was moved or edited:
 
   .game-harness/scripts/run-same-order-comprehension-session.sh --verify-session-kit <this-session-kit-dir>
+
+Also check current launch readiness on the facilitator device:
+
+  .game-harness/scripts/run-same-order-comprehension-session.sh --status
+
+The \`Human play display\` line must be ready before launching observed play.
 
 With the tester present, run the observed-session helper:
 

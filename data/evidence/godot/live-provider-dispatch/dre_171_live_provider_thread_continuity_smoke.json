@@ -1,0 +1,141 @@
+{
+	"adapter": "godot",
+	"artifactPath": "data/evidence/godot/live-provider-dispatch/dre_171_live_provider_thread_continuity_smoke.json",
+	"checks": {
+		"firstDecision": {
+			"actionType": "Talk",
+			"endpoint": "http://127.0.0.1:8787/v1/npc/decision",
+			"httpStatus": 200,
+			"npcId": "NPC_Store_Clerk",
+			"ok": true,
+			"providerUsage": {
+				"actualInputTokens": 1289.0,
+				"actualOutputTokens": 199.0,
+				"actualTotalTokens": 1488.0,
+				"estimatedCostUsd": 0.00433575,
+				"estimatedInputTokens": 1581.0,
+				"estimatedTotalTokens": 2281.0,
+				"maxOutputTokens": 700.0,
+				"model": "gpt-5.4-mini"
+			},
+			"reason": "",
+			"threadId": "resp_009494c9e99a3d07016a0ae9ee516481918f7e9b554cf511f4",
+			"transport": "codex",
+			"usedFallback": false,
+			"utterance": "오늘도같은걸로드릴까요?"
+		},
+		"playableRoute": {
+			"after": {
+				"agentActionCount": 0,
+				"providerState": {
+					"authorityBoundary": "wording_only_when_later_enabled",
+					"decisionPath": "deterministic_fallback",
+					"liveVerified": false,
+					"mode": "fallback_only_m1",
+					"modeLabel": "fallback-only M1",
+					"selectedModel": "none"
+				},
+				"reportWeight": 0,
+				"routeOutcome": "running",
+				"sessionOutcome": "running",
+				"stage": "normal",
+				"suspicion": 0
+			},
+			"before": {
+				"agentActionCount": 0,
+				"providerState": {
+					"authorityBoundary": "wording_only_when_later_enabled",
+					"decisionPath": "deterministic_fallback",
+					"liveVerified": false,
+					"mode": "fallback_only_m1",
+					"modeLabel": "fallback-only M1",
+					"selectedModel": "none"
+				},
+				"reportWeight": 0,
+				"routeOutcome": "running",
+				"sessionOutcome": "running",
+				"stage": "normal",
+				"suspicion": 0
+			},
+			"stateMutatedByProviderDecision": false
+		},
+		"readiness": {
+			"bridgeStatus": "ready",
+			"endpoint": "http://127.0.0.1:8787/health/ready",
+			"ok": true,
+			"provider": {
+				"ok": true,
+				"openAi": {
+					"budget": {
+						"inputUsdPerMillionTokens": 0.75,
+						"maxEstimatedCostUsd": 0.01,
+						"maxEstimatedInputTokens": 6000.0,
+						"maxEstimatedTotalTokens": 8000.0,
+						"outputUsdPerMillionTokens": 4.5
+					},
+					"checkedModels": [
+						"gpt-5.4-mini"
+					],
+					"fallbackModels": [],
+					"ok": true,
+					"preferredModel": "gpt-5.4-mini",
+					"provider": "openai-codex",
+					"selectedModel": "gpt-5.4-mini",
+					"storeResponses": false
+				},
+				"provider": "openai-codex"
+			},
+			"providerReady": true,
+			"reasons": [],
+			"storageReady": true
+		},
+		"secondDecision": {
+			"actionType": "Talk",
+			"endpoint": "http://127.0.0.1:8787/v1/npc/decision",
+			"httpStatus": 200,
+			"npcId": "NPC_Store_Clerk",
+			"ok": true,
+			"providerUsage": {
+				"actualInputTokens": 1686.0,
+				"actualOutputTokens": 225.0,
+				"actualTotalTokens": 1911.0,
+				"estimatedCostUsd": 0.00457725,
+				"estimatedInputTokens": 1903.0,
+				"estimatedTotalTokens": 2603.0,
+				"maxOutputTokens": 700.0,
+				"model": "gpt-5.4-mini"
+			},
+			"reason": "",
+			"threadId": "resp_07a36f3aadda19c6016a0ae9f1bf508191b0c0cc37e88c3756",
+			"transport": "codex-reply",
+			"usedFallback": false,
+			"utterance": "네,오늘도같은걸로드릴까요?"
+		}
+	},
+	"failures": [],
+	"ok": true,
+	"proofs": {
+		"chatGptProQuotaRemaining": "not_exposed_by_codex_response",
+		"decisionCount": 2,
+		"decisionRequested": true,
+		"firstThreadId": "resp_009494c9e99a3d07016a0ae9ee516481918f7e9b554cf511f4",
+		"firstTransport": "codex",
+		"npcId": "NPC_Store_Clerk",
+		"productProviderStateChanged": false,
+		"providerDecisionMutatedRouteState": false,
+		"providerMode": "openai-codex",
+		"sameSessionNpc": true,
+		"secondThreadId": "resp_07a36f3aadda19c6016a0ae9f1bf508191b0c0cc37e88c3756",
+		"secondTransport": "codex-reply",
+		"selectedModel": "gpt-5.4-mini",
+		"sessionId": "godot-live-thread-continuity-1779100140-208",
+		"threadContinuity": true,
+		"totalActualInputTokens": 2975,
+		"totalActualOutputTokens": 424,
+		"totalActualTokens": 3399,
+		"totalEstimatedCostUsd": 0.008913,
+		"usedFallback": false
+	},
+	"runId": "dre-live-provider-thread-continuity-smoke",
+	"schemaVersion": "godot-runtime-v1"
+}

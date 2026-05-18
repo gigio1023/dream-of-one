@@ -41,6 +41,7 @@ function buildOpenAiConfig(overrides: Partial<OpenAiProposalConfig> = {}): OpenA
     preferredModel: "gpt-5.4-mini",
     fallbackModels: [],
     reasoningEffort: "low",
+    storeResponses: false,
     modelCheckTimeoutMs: 1000,
     requestTimeoutMs: 1000,
     maxOutputTokens: 700,
@@ -165,6 +166,7 @@ test("OpenAI proposal gateway uses preferred model and maps text proposal into b
   assert.equal(responseBodies.length, 1);
   assert.equal(responseBodies[0]?.model, "gpt-5.4-mini");
   assert.deepEqual(responseBodies[0]?.reasoning, { effort: "low" });
+  assert.equal(responseBodies[0]?.store, false);
   assert.match(String(responseBodies[0]?.instructions), /Do not decide Exposure delta/);
   assert.match(String(responseBodies[0]?.instructions), /Speak only as the NPC named by PerceptionPacket\.npcId/);
   assert.match(String(responseBodies[0]?.instructions), /For waiting-customer roles, use observer wording/);
@@ -255,6 +257,7 @@ test("OpenAI Codex proposal gateway streams responses with gpt-5.4-mini", async 
   assert.equal(result.intent.utterance, "Restate the record in one procedure.");
   assert.equal(responseBodies[0]?.model, "gpt-5.4-mini");
   assert.equal(responseBodies[0]?.stream, true);
+  assert.equal(responseBodies[0]?.store, false);
   assert.equal("max_output_tokens" in (responseBodies[0] ?? {}), false);
   assert.deepEqual(responseBodies[0]?.reasoning, { effort: "low" });
   assert.equal(result.meta.providerUsage?.model, "gpt-5.4-mini");
@@ -263,12 +266,16 @@ test("OpenAI Codex proposal gateway streams responses with gpt-5.4-mini", async 
   assert.equal(result.meta.providerUsage?.actualTotalTokens, 150);
 });
 
-test("OpenAI Codex proposal gateway resumes same NPC thread with previous response id", async () => {
+test("OpenAI Codex proposal gateway resumes same NPC with local workspace memory by default", async () => {
   const responseBodies: Array<Record<string, unknown>> = [];
+  const prompts: string[] = [];
   const fetchImpl: FetchLike = async (url, init) => {
     assert.ok(url.endsWith("/responses"));
-    const body = JSON.parse(init?.body ?? "{}") as Record<string, unknown>;
+    const body = JSON.parse(init?.body ?? "{}") as {
+      input?: Array<{ content?: Array<{ text?: string }> }>;
+    } & Record<string, unknown>;
     responseBodies.push(body);
+    prompts.push(String(body.input?.[0]?.content?.[0]?.text ?? ""));
     return codexStreamResponse(responseBodies.length === 1 ? "resp-codex-first" : "resp-codex-second");
   };
 
@@ -289,10 +296,40 @@ test("OpenAI Codex proposal gateway resumes same NPC thread with previous respon
   assert.equal(second.meta.threadId, "resp-codex-second");
   assert.equal(responseBodies.length, 2);
   assert.equal("previous_response_id" in (responseBodies[0] ?? {}), false);
-  assert.equal(responseBodies[1]?.previous_response_id, "resp-codex-first");
+  assert.equal("previous_response_id" in (responseBodies[1] ?? {}), false);
+  assert.equal(responseBodies[0]?.store, false);
+  assert.equal(responseBodies[1]?.store, false);
   assert.equal(responseBodies[1]?.model, "gpt-5.4-mini");
   assert.deepEqual(responseBodies[1]?.reasoning, { effort: "low" });
   assert.equal(responseBodies[1]?.stream, true);
+  assert.match(prompts[1] ?? "", /WorkspaceArtifacts:/);
+  assert.match(prompts[1] ?? "", /openai_text_proposal/);
+});
+
+test("OpenAI proposal gateway can opt into stored previous response id", async () => {
+  const responseBodies: Array<Record<string, unknown>> = [];
+  const fetchImpl: FetchLike = async (url, init) => {
+    assert.ok(url.endsWith("/responses"));
+    const body = JSON.parse(init?.body ?? "{}") as Record<string, unknown>;
+    responseBodies.push(body);
+    return codexStreamResponse(responseBodies.length === 1 ? "resp-stored-first" : "resp-stored-second");
+  };
+
+  const gateway = new OpenAiProposalGateway(buildOpenAiConfig({
+    provider: "openai-codex",
+    baseUrl: "https://chatgpt.com/backend-api/codex",
+    storeResponses: true,
+  }), { fetch: fetchImpl });
+  const broker = new DefaultCodexBroker(gateway, new InMemoryThreadStore());
+
+  await broker.decide(buildPacket("Station"));
+  const second = await broker.decide(buildPacket("Station"));
+
+  assert.equal(second.meta.usedFallback, false);
+  assert.equal(second.meta.transport, "codex-reply");
+  assert.equal(responseBodies[0]?.store, true);
+  assert.equal(responseBodies[1]?.store, true);
+  assert.equal(responseBodies[1]?.previous_response_id, "resp-stored-first");
 });
 
 test("OpenAI proposal gateway falls back to first explicitly configured available model", async () => {
@@ -594,6 +631,7 @@ test("runtime defaults to OpenAI Codex proposal provider with gpt-5.4-mini only"
   assert.equal(config.openAiProposal.preferredModel, "gpt-5.4-mini");
   assert.deepEqual(config.openAiProposal.fallbackModels, []);
   assert.equal(config.openAiProposal.reasoningEffort, "low");
+  assert.equal(config.openAiProposal.storeResponses, false);
   assert.equal(config.openAiProposal.budget.maxEstimatedCostUsd, 0.01);
 });
 
@@ -612,6 +650,7 @@ test("OpenAI Codex provider config uses explicit Codex credential and base URL",
   assert.equal(decoded.preferredModel, "gpt-5.4-mini");
   assert.deepEqual(decoded.fallbackModels, []);
   assert.equal(decoded.reasoningEffort, "low");
+  assert.equal(decoded.storeResponses, false);
 });
 
 test("OpenAI Codex provider config can read a repo-local auth profile store", async t => {

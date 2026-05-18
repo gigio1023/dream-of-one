@@ -32,6 +32,7 @@ export interface OpenAiProposalConfig {
   preferredModel: string;
   fallbackModels: string[];
   reasoningEffort: "low" | "medium" | "high" | "xhigh";
+  storeResponses: boolean;
   modelCheckTimeoutMs: number;
   requestTimeoutMs: number;
   maxOutputTokens: number;
@@ -242,6 +243,7 @@ export function decodeOpenAiProposalGatewayConfig(encoded: string | undefined): 
       ? parsed.fallbackModels.filter((model): model is string => typeof model === "string" && model.trim().length > 0)
       : [...DEFAULT_OPENAI_PROPOSAL_FALLBACK_MODELS],
     reasoningEffort: parseReasoningEffort(parsed.reasoningEffort),
+    storeResponses: typeof parsed.storeResponses === "boolean" ? parsed.storeResponses : false,
     modelCheckTimeoutMs: typeof parsed.modelCheckTimeoutMs === "number" && parsed.modelCheckTimeoutMs > 0
       ? Math.floor(parsed.modelCheckTimeoutMs)
       : 3000,
@@ -294,6 +296,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig 
         ? (env.OPENAI_CODEX_REASONING_EFFORT ?? env.OPENAI_PROPOSAL_REASONING_EFFORT)
         : env.OPENAI_PROPOSAL_REASONING_EFFORT,
     ),
+    storeResponses: parseBoolean(env.OPENAI_PROPOSAL_STORE_RESPONSES, false),
     modelCheckTimeoutMs: parseNumber(env.OPENAI_MODEL_CHECK_TIMEOUT_MS, 3000),
     requestTimeoutMs: parseNumber(env.OPENAI_PROPOSAL_TIMEOUT_MS, 8000),
     maxOutputTokens: parseNumber(env.OPENAI_PROPOSAL_MAX_OUTPUT_TOKENS, 700),

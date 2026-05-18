@@ -170,14 +170,31 @@ Latest OpenAI Codex provider note:
   the live request. The refreshed Waiting Customer live line was bounded and
   role-anchored: `줄은잠깐멈췄네요.`
 - Same-session NPC memory/thread continuity is now covered for the actual
-  `openai-codex` provider path without live spend. The backend integration test
-  `OpenAI Codex proposal gateway resumes same NPC thread with previous response
-  id` proves the second decision for the same session/NPC uses
-  `previous_response_id=resp-codex-first`, keeps `gpt-5.4-mini`, low reasoning,
-  and streaming enabled, and reports `transport=codex-reply`.
+  `openai-codex` Godot route with local backend-owned workspace memory. The
+  default remains `storeResponses=false`; the Codex endpoint rejected
+  `storeResponses=true` during live probing, so the safe working route is
+  stateless provider calls plus the repo-local workspace summary/memory in the
+  next prompt, not provider-stored `previous_response_id`.
 - Latest backend check after that contract: `npm run check --prefix
-  backend/npc-runtime` passed with 137 tests. No live provider request was made
-  for this continuity proof, so incremental LLM budget spend was `$0`.
+  backend/npc-runtime` passed with 138 tests. The backend test proves the
+  second same-session/same-NPC `openai-codex` call uses `transport=codex-reply`,
+  keeps `gpt-5.4-mini`, low reasoning, streaming enabled, `store=false`, and
+  carries prior `WorkspaceArtifacts` into the second prompt.
+- Godot live continuity proof now passes through
+  `godot/tools/live_provider_thread_continuity_smoke.gd`. It drove
+  `main.tscn`, called `NPC_Store_Clerk` twice with the same session id, and
+  received `transport=codex` then `transport=codex-reply` without fallback or
+  route mutation. Final passing artifact:
+  `data/evidence/godot/live-provider-dispatch/dre_171_live_provider_thread_continuity_smoke.json`
+  with SHA-256
+  `69a2bc0ff0389ffe77ba61ffa922ddc30a1529710fd42a101d15f2472923ec3e`.
+  Final run estimated cost `$0.008913`, actual usage 2,975 input / 424 output /
+  3,399 total tokens. This slice also spent one earlier successful first-call
+  probe before revealing the failed provider-stored reply path: estimated
+  `$0.00433575`, actual usage 1,289 input / 263 output / 1,552 total tokens.
+  Total live spend observed during this slice: estimated `$0.01324875`, actual
+  4,264 input / 687 output / 4,951 total tokens. ChatGPT Pro remaining quota
+  remains not exposed by the response.
 
 Latest status check:
 - command: `.game-harness/scripts/run-same-order-comprehension-session.sh --status`

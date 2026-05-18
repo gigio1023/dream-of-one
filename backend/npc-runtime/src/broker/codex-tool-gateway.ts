@@ -64,6 +64,7 @@ export interface OpenAiProposalHealth {
   preferredModel: string;
   fallbackModels: string[];
   checkedModels: string[];
+  storeResponses: boolean;
   budget: OpenAiProposalBudgetSummary;
   selectedModel?: string;
   reason?: OpenAiProposalHealthReason;
@@ -718,6 +719,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
         preferredModel: this.config.preferredModel,
         fallbackModels: [...this.config.fallbackModels],
         checkedModels,
+        storeResponses: this.config.storeResponses,
         budget,
         reason: "openai_api_key_missing",
       };
@@ -732,6 +734,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
             preferredModel: this.config.preferredModel,
             fallbackModels: [...this.config.fallbackModels],
             checkedModels,
+            storeResponses: this.config.storeResponses,
             budget,
             selectedModel,
           }
@@ -741,6 +744,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
             preferredModel: this.config.preferredModel,
             fallbackModels: [...this.config.fallbackModels],
             checkedModels,
+            storeResponses: this.config.storeResponses,
             budget,
             reason: "openai_model_unavailable",
           };
@@ -756,6 +760,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
           preferredModel: this.config.preferredModel,
           fallbackModels: [...this.config.fallbackModels],
           checkedModels,
+          storeResponses: this.config.storeResponses,
           budget,
           reason: "openai_model_unavailable",
         };
@@ -767,6 +772,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
         preferredModel: this.config.preferredModel,
         fallbackModels: [...this.config.fallbackModels],
         checkedModels,
+        storeResponses: this.config.storeResponses,
         budget,
         selectedModel,
       };
@@ -777,6 +783,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
         preferredModel: this.config.preferredModel,
         fallbackModels: [...this.config.fallbackModels],
         checkedModels,
+        storeResponses: this.config.storeResponses,
         budget,
         reason: error instanceof CodexToolTimeoutError ? "openai_model_check_timeout" : "openai_provider_unavailable",
         detail: errorMessage(error),
@@ -820,7 +827,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
           strict: true,
         },
       },
-      store: false,
+      store: this.config.storeResponses,
     };
 
     if (this.config.provider === "openai-codex") {
@@ -833,7 +840,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
       body.reasoning = { effort: this.config.reasoningEffort };
     }
 
-    if (previousResponseId) {
+    if (previousResponseId && this.config.storeResponses) {
       body.previous_response_id = previousResponseId;
     }
 

@@ -44,6 +44,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   and prove fallback parity for route events, ledger, object state, and economy.
 - [x] Improve live provider role-voice policy before exposing live wording as a
   player-visible HUD/Evidence mode.
+- [x] Prove same-session/same-NPC `openai-codex` continuity through actual
+  Godot `PlayableSession` packets using backend-owned local workspace memory,
+  fixed cheapest model, and recorded usage caps.
 - [x] Defer four-week prototype plan issue splitting until fresh-player comprehension evidence and the M1/M2 decision are recorded.
 - [x] Run parallel simulator benchmark research lanes and record source-backed md files.
 - [x] Add simulator benchmark adoption brief and reference map to active direction docs.

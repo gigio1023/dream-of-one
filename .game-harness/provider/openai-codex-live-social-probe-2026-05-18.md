@@ -1,7 +1,8 @@
 # OpenAI Codex Live Social Probe
 
 Date: 2026-05-18
-Status: backend live proof and Godot PlayableSession route dispatch smoke passed
+Status: backend live proof, Godot route dispatch smoke, and Godot same-NPC
+local-memory continuity smoke passed
 
 ## Claim
 
@@ -14,6 +15,11 @@ now also proves two live `/v1/npc/decision` dispatches using actual
 `PlayableSession` route packets for the Store Clerk and Waiting Customer, then
 confirms deterministic fallback parity on the same running scene. This still
 does not switch the playable scene or HUD out of `fallback_only_m1`.
+
+A second Godot tool proves same-session/same-NPC continuity for Store Clerk
+through backend-owned local workspace memory. The working `openai-codex` route
+keeps `storeResponses=false`; provider-stored `previous_response_id` is not
+current product truth for this endpoint.
 
 ## Commands
 
@@ -57,6 +63,12 @@ In another shell:
 
 ```bash
 $GODOT_BIN --headless --path godot --script res://tools/live_provider_dispatch_smoke.gd
+```
+
+Godot live same-NPC continuity smoke:
+
+```bash
+$GODOT_BIN --headless --path godot --script res://tools/live_provider_thread_continuity_smoke.gd
 ```
 
 Do not commit auth stores or local absolute auth paths. Use
@@ -118,6 +130,39 @@ Godot live PlayableSession route provider dispatch smoke:
 - fallback parity route outcome: `clean_cover`
 - fallback parity session outcome: `cover_held`
 
+Godot live same-NPC local-memory continuity smoke:
+
+- artifact:
+  `data/evidence/godot/live-provider-dispatch/dre_171_live_provider_thread_continuity_smoke.json`
+- artifact SHA-256:
+  `69a2bc0ff0389ffe77ba61ffa922ddc30a1529710fd42a101d15f2472923ec3e`
+- readiness: ready for `openai-codex`
+- model: `gpt-5.4-mini`
+- reasoning: `low`
+- stored provider responses: false
+- request count: 2
+- NPC: `NPC_Store_Clerk`
+- transports: first `codex`, second `codex-reply`
+- fallback: false for both calls
+- total estimated cost: `$0.008913`
+- total actual usage: 2,975 input tokens, 424 output tokens, 3,399 total tokens
+- first utterance: `오늘도같은걸로드릴까요?`
+- second utterance: `네,오늘도같은걸로드릴까요?`
+- command executed in Godot world: false
+- product provider state changed: false
+- provider decision mutated route state: false
+
+Continuity troubleshooting note:
+
+- A prior live probe showed that sending a second request with a stored-provider
+  `previous_response_id` is not the current working path for this Codex
+  endpoint. The default therefore remains `storeResponses=false`, and memory is
+  carried by backend workspace artifacts in the next prompt. During that probe,
+  one successful first call spent estimated `$0.00433575` and returned 1,289
+  input tokens, 263 output tokens, and 1,552 total tokens before the provider
+  reply path fell back. A later `storeResponses=true` smoke fell back before
+  provider usage was returned.
+
 ChatGPT Pro remaining quota is not exposed by the Codex Responses payload used
 here. The enforceable budget controls are model allowlist, reasoning effort,
 request count, estimated per-request cap, estimated total cap, no fallback
@@ -130,6 +175,9 @@ upgrades, and recorded actual token usage when the provider returns it.
 - Codex Responses must stream on this provider path.
 - This provider path rejects `max_output_tokens`, so the runtime omits it only
   for `openai-codex`.
+- The default continuity path is backend-owned local memory with
+  `storeResponses=false`. Stored-provider response chaining remains opt-in and
+  mock-covered only; do not claim it as live-proven for `openai-codex`.
 - Provider output remains wording only; backend action type, records, Evidence,
   Exposure, inquest, verdict, and session end remain deterministic authority.
 - A tiny two-role social context can produce bounded live LLM wording without
@@ -145,11 +193,12 @@ upgrades, and recorded actual token usage when the provider returns it.
 - In-game HUD/Evidence truth showing `openai_codex` instead of
   `fallback_only_m1`.
 - Continuous live provider scheduling across more than two `PlayableSession`
-  route jobs and memory turns.
+  route jobs.
 - Player-visible live-provider mode and HUD/Evidence display. The current proof
   is still proof-only even though the two-actor role-voice smoke now returns
   bounded role-anchored lines.
 - Multi-step NPC memory and policy behavior across a long live simulation.
+  Current live proof covers only two same-NPC Store Clerk wording turns.
 - ChatGPT Pro quota remaining or plan-limit accounting, because the endpoint
   does not expose remaining subscription usage in these responses.
 

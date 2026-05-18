@@ -43,11 +43,14 @@ npm run openai:proposal-smoke --prefix backend/npc-runtime
 OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai:proposal-smoke --prefix backend/npc-runtime
 OPENAI_PROPOSAL_MAX_ESTIMATED_COST_USD=0.005 OPENAI_CODEX_SOCIAL_PROBE_TOTAL_ESTIMATED_COST_USD=0.01 OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai-codex:social-probe --prefix backend/npc-runtime
 $GODOT_BIN --headless --path godot --script res://tools/live_provider_dispatch_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/live_provider_thread_continuity_smoke.gd
 ```
 
 The default provider is direct `openai-codex` with `gpt-5.4-mini`, low
 reasoning effort, no default model fallbacks, and deterministic fallback on any
-provider failure. Live runs require `OPENAI_CODEX_ACCESS_TOKEN`,
+provider failure. It keeps `OPENAI_PROPOSAL_STORE_RESPONSES=false` by default;
+same-NPC continuity uses backend-owned workspace memory in the next prompt, not
+provider-stored response chaining. Live runs require `OPENAI_CODEX_ACCESS_TOKEN`,
 `OPENAI_CODEX_API_KEY`, or `OPENAI_CODEX_AUTH_STORE_PATH`. The login helper
 writes an ignored per-device auth profile; use an env var for the auth-store
 path instead of writing a machine-specific path into docs or scripts.

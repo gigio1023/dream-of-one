@@ -41,6 +41,8 @@ Model policy for the Codex-provider path:
 - use `gpt-5.4-mini`;
 - request low reasoning effort;
 - do not configure fallback models by default;
+- keep provider response storage off by default; same-NPC continuity should use
+  backend-owned workspace memory unless a separate live proof changes this;
 - do not use `gpt-5.4-nano` or `gpt-5-nano` through `openai-codex` until live
   Codex-provider discovery proves they are available there.
 
@@ -48,7 +50,7 @@ The active assessment is
 `.game-harness/provider/openclaw-codex-auth-adoption-proposal-2026-05-18.md`.
 Backend live proof and usage accounting are recorded in
 `.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md`.
-The Godot smoke proves one live HTTP decision call only; it does not change
-`fallback_only_m1` product truth.
+The Godot smokes prove two-actor route-context dispatch and same-NPC local
+memory continuity; they do not change `fallback_only_m1` product truth.
 
 Do not add legacy engine work back into the active tree.

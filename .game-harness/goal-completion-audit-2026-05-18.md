@@ -19,10 +19,10 @@ continue through small playable proofs.
 | Repo guidance and game goal are active references. | `AGENTS.md`, `.game-harness/active-goal-prompt.md`, `.game-harness/playable-goal-reference.md`, `.game-harness/goal-loop-state.md`, `.game-studio/project-state.md`. | PASS |
 | Store/Station is treated as a disposable proof cell, not the product center. | `.game-harness/active-goal-prompt.md`, `.game-harness/playable-goal-reference.md`, `.game-harness/tasks.md`, `.game-harness/verification-ledger.md`. | PASS |
 | Current environment has role affordances, visibility, records, economy effects, and validation rules. | `docs/scenario/content/environment-affordance-map.md`, `backend/npc-runtime/test/integration/agentic-environment.integration.test.ts`, `godot/scripts/runtime/playable_session.gd`. | PASS |
-| Backend protects deterministic authority and rejects unavailable/hidden/forbidden provider actions. | `npm run check --prefix backend/npc-runtime` passed with 137 tests after the OpenAI Codex thread-continuity update. | PASS |
+| Backend protects deterministic authority and rejects unavailable/hidden/forbidden provider actions. | `npm run check --prefix backend/npc-runtime` passed with 138 tests after the OpenAI Codex local-memory continuity update. | PASS |
 | Provider path uses the cheapest allowed Codex model by default. | `backend/npc-runtime/src/config.ts`, `.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md`; default remains `openai-codex`, `gpt-5.4-mini`, low reasoning, no fallback models. | PASS |
 | Live usage is budgeted and recorded. | `data/evidence/godot/live-provider-dispatch/dre_171_live_provider_dispatch_smoke.json`: 2 requests, total estimate `$0.0084375`, actual 2,275 input / 405 output / 2,680 total tokens, ChatGPT Pro remaining quota not exposed. | PASS |
-| Same-session NPC memory/thread continuity is protected without extra live spend. | `backend/npc-runtime/test/integration/openai-proposal-provider.integration.test.ts`: second same session/NPC `openai-codex` decision sends `previous_response_id=resp-codex-first`, keeps `gpt-5.4-mini`, low reasoning, and streaming enabled; incremental LLM spend `$0`. | PASS |
+| Same-session NPC memory/thread continuity is protected and live-proven. | `backend/npc-runtime/test/integration/openai-proposal-provider.integration.test.ts` proves local workspace memory is carried into the second same-session/same-NPC `openai-codex` prompt with `store=false`; `godot/tools/live_provider_thread_continuity_smoke.gd` live artifact proves Store Clerk `codex` then `codex-reply`, no fallback, no route mutation, final run estimate `$0.008913`, actual 2,975 input / 424 output / 3,399 total tokens. | PASS |
 | Live LLM wording can run from the actual Godot `PlayableSession`. | `godot/tools/live_provider_dispatch_smoke.gd` drove `main.tscn`, called Store Clerk and Waiting Customer route-context packets, received `openai-codex` responses, and wrote a passing artifact. | PASS |
 | Live provider output does not mutate records, economy, route, inquest, verdict, or session state. | Live provider dispatch artifact reports `providerDecisionMutatedRouteState=false`, `productProviderStateChanged=false`, `routeOutcome=clean_cover`, `sessionOutcome=cover_held`. | PASS |
 | Live role voice is bounded enough for proof-only use. | Store Clerk returned `오늘도같은걸로드릴까요?`; Waiting Customer returned `줄은잠깐멈췄네요.`; smoke rejects Waiting Customer player-blame phrases. | PASS |
@@ -40,10 +40,12 @@ The Codex-controllable live-provider and AI-play proof surface is current:
 budgeted two-actor `openai-codex` route-context dispatch works from the running
 Godot scene, stays under the configured estimate cap, records actual token
 usage, preserves deterministic fallback authority, and now maintains role voice
-for the Waiting Customer proof. The same-session NPC thread-continuity contract
-is now also locked by a no-live-spend integration test that proves the actual
-`openai-codex` gateway resumes with `previous_response_id` on the second
-decision for the same NPC.
+for the Waiting Customer proof. The same-session NPC continuity contract is now
+also locked by backend tests and a Godot live smoke. The working Codex provider
+route is `storeResponses=false` plus backend-owned workspace memory in the next
+prompt; a provider-stored `previous_response_id` route was not accepted by the
+live Codex endpoint during probing and should not be treated as current product
+truth.
 
 The remaining blocker is outside Codex-only control: observed fresh-player
 comprehension notes. Current status is `0 / 3` raw sessions and

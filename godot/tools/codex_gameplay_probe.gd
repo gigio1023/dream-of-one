@@ -715,12 +715,14 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 	var consequence_label := str(hud_snapshot.get("consequenceLabel", ""))
 	var outcome_body := str(hud_snapshot.get("outcomeBodyLabel", ""))
 	var investigation_trail := str(hud_snapshot.get("investigationTrailLabel", ""))
+	var record_state_label := str(hud_snapshot.get("recordStateLabel", ""))
 	var economy_panel: Dictionary = record_props.get("civic_economy_panel", {})
 	var explainability_checks := {
 		"codexPlayedThroughPublicActions": accepted_actions.size() == PROBE_STEPS.size() and rejected_actions.is_empty(),
 		"canReadExaminedPlayerRole": investigation_trail.contains("대상: 플레이어") or investigation_trail.to_lower().contains("player"),
 		"canReadInputToRecordChain": consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부"),
 		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)) and bool(checks.get("waitingCustomerObservedStation", false)),
+		"canReadLiveHudSocialCitation": _hud_record_state_cites_latest_social_observation(summary, record_state_label),
 		"canReadVisibleNpcReaction": bool(checks.get("visibleWaitingCustomerReaction", false)),
 		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
 		"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
@@ -750,7 +752,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"investigationTrail": investigation_trail,
 			"consequence": consequence_label,
 			"outcomeBody": outcome_body,
-			"recordState": hud_snapshot.get("recordStateLabel", ""),
+			"recordState": record_state_label,
 			"visibleNpcStates": summary.get("visibleNpcStates", {}),
 			"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {}),
 			"inspectedWorldRecordHistory": summary.get("inspectedWorldRecordHistory", []),
@@ -1266,6 +1268,20 @@ func _latest_ledger(summary: Dictionary) -> Dictionary:
 	if latest is Dictionary:
 		return latest
 	return {}
+
+func _hud_record_state_cites_latest_social_observation(summary: Dictionary, record_state_label: String) -> bool:
+	var observations: Array = summary.get("socialObservationTrace", [])
+	if observations.is_empty():
+		return false
+	var latest: Variant = observations[observations.size() - 1]
+	if not latest is Dictionary:
+		return false
+	var observed_event_id := str(latest.get("observedLedgerEventId", ""))
+	return (
+		record_state_label.contains("사회 반응")
+		and not observed_event_id.is_empty()
+		and record_state_label.contains(observed_event_id)
+	)
 
 func _ledger_event_cites(summary: Dictionary, kind: String, cited_id: String) -> bool:
 	for event in summary.get("civicLedger", []):

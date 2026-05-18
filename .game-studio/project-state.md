@@ -95,6 +95,11 @@ Current M1 carry-in:
   long-term content focus. Future work should extract reusable
   environment-agent patterns instead of deepening Store operations or Station
   procedure.
+- latest small-slice carry-in: the live HUD social reaction now names the
+  `civic-ledger-*` record an NPC read before choosing its next action. This
+  keeps the improvement at the player-readable social-sim layer: the same
+  Station citation that appears in inspections is also visible in the main HUD
+  record line before the player opens detail panels.
 - latest small-slice carry-in: the civic ledger is now a player-readable
   NPC-to-NPC social-chain prop. Inspecting `civic_ledger` shows `사회 연쇄`
   lines for who read whose ledger action and which validated action followed,

@@ -91,6 +91,7 @@
 - `canReadExaminedPlayerRole`: `true`
 - `canReadInputToRecordChain`: `true`
 - `canReadNpcToNpcChain`: `true`
+- `canReadLiveHudSocialCitation`: `true`
 - `canReadVisibleNpcReaction`: `true`
 - `canInspectPublicEnvironmentRecord`: `true`
 - `canInspectCrossPlaceAuthorityConsequence`: `true`

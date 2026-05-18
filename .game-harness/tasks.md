@@ -174,6 +174,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Make the civic ledger player-readable as an NPC-to-NPC social chain:
   Codex/player can inspect `civic_ledger` and read `사회 연쇄` lines showing who
   saw whose ledger action and which action they chose next.
+- [x] Make the live HUD social reaction cite the observed ledger record:
+  `사회 반응` now includes the `civic-ledger-*` record an NPC read before
+  acting, and Codex/playable smoke checks fail if that player-visible citation
+  disappears.
 - [x] Make the civic economy panel player-readable as a tiny social-pressure
   record: Codex/player can inspect current credit/trust/burden/attention values
   and recent ledger deltas that show which role action moved them.

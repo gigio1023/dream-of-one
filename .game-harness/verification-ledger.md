@@ -147,6 +147,15 @@ Remaining blockers before advancing beyond M1:
 
 ## Runtime Evidence
 
+Latest live-HUD social-citation addendum: the HUD record-state line now cites
+the exact ledger record behind the latest NPC social reaction. In the inquest
+Codex run, `사회 반응` includes the observed Station citation ledger ID
+`civic-ledger-6` before the Waiting Customer refusal, so the player can connect
+the live HUD line to the same record chain shown by NPC and civic-ledger
+inspection. Codex gameplay QA now requires `canReadLiveHudSocialCitation=true`,
+and playable smoke checks that social-reaction HUD copy includes the observed
+ledger event ID for social routes.
+
 Latest civic-ledger social-chain addendum: the civic ledger is now readable as
 an NPC-to-NPC social timeline, not only as an append-only event count. In the
 inquest Codex run, inspecting `civic_ledger` shows `사회 연쇄` entries for

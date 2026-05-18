@@ -518,19 +518,21 @@ func _latest_social_observation_label(social_observations: Array) -> String:
 	var observed := _actor_role_label(str(observation.get("observedActorRole", "")))
 	var observed_affordance := _affordance_label(str(observation.get("observedAffordance", "")))
 	var resulting_affordance := _affordance_label(str(observation.get("resultingAffordance", "")))
+	var observed_event_id := str(observation.get("observedLedgerEventId", ""))
 	var pressure: Dictionary = observation.get("economyPressure", {})
+	var observed_basis := "%s %s" % [observed, observed_affordance]
+	if not observed_event_id.is_empty():
+		observed_basis = "%s(%s)" % [observed_basis, observed_event_id]
 	if _current_locale() == "en":
-		return "%s saw %s %s -> %s, burden %d" % [
+		return "%s read %s -> %s, burden %d" % [
 			observer,
-			observed,
-			observed_affordance,
+			observed_basis,
 			resulting_affordance,
 			int(pressure.get("recordBurden", 0))
 		]
-	return "%s가 %s의 %s 기록을 보고 %s, 부담 %d" % [
+	return "%s가 %s 기록을 보고 %s, 부담 %d" % [
 		observer,
-		observed,
-		observed_affordance,
+		observed_basis,
 		resulting_affordance,
 		int(pressure.get("recordBurden", 0))
 	]

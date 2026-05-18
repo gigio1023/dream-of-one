@@ -860,6 +860,13 @@ func _validate_hud_record_state(route: Dictionary, summary: Dictionary, hud: Nod
 			failures.append("inquest_opened expected HUD record state to show cited Station dossier")
 	if ["cover_held_under_suspicion", "soft_report", "inquest_opened"].has(route_id) and not record_state_label.contains("사회 반응"):
 		failures.append("%s expected HUD record state to show NPC social reaction" % route_id)
+	if ["cover_held_under_suspicion", "soft_report", "inquest_opened"].has(route_id):
+		var social_observations: Array = summary.get("socialObservationTrace", [])
+		if not social_observations.is_empty():
+			var latest_observation: Dictionary = social_observations[social_observations.size() - 1]
+			var observed_event_id := str(latest_observation.get("observedLedgerEventId", ""))
+			if not observed_event_id.is_empty() and not record_state_label.contains(observed_event_id):
+				failures.append("%s expected HUD social reaction to cite observed ledger event %s" % [route_id, observed_event_id])
 	if route_id == "cover_held_under_suspicion" and not record_state_label.contains("스튜디오 PM"):
 		failures.append("cover_held_under_suspicion expected HUD social reaction to name Studio PM")
 	if route_id == "soft_report" and not record_state_label.contains("상점 매니저"):

@@ -96,17 +96,24 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `e8ab8f558a09ece26cbacbe5dce86212be8b05c2623f2f6bb22c56419c4dd806`
-  - Markdown SHA-256: `10b21210bb6a98a72523c2ac0221fe812cbc10b36f20ecc5bdb44927faa7927b`
-  - playable Evidence Pack SHA-256: `57d6ff6f8f539314de47ce44a2b7f7512efaf138e1db634357fa4846af3cc24c`
+  - JSON SHA-256: `4eca9e7f883dda4fbc715b163c53345925a70628d993dfa416c9e0481e984115`
+  - Markdown SHA-256: `8c30cc10c90563d6aad9fc81e225a2d4822132eebdcc449c39c4c534ed13be2f`
+  - playable Evidence Pack SHA-256: `f8a3e037e27cd2fe3fdeb6e3a5be67d1521318f1501f407ae8e46a7f9bf44611`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `11bbc6430c4f58258c4ac438f612c82cfa8d6b6a9f6071a4e66be72928a43f01`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `17 / 17`, `explainability=15/15`, and
+  player actions `17 / 17`, `explainability=16/16`, and
   `routeReportPassCount=5 / 5`.
+- latest game increment: the live HUD `사회 반응` line now names the exact
+  ledger record an NPC read before acting. In the inquest Codex run, the final
+  HUD record line includes the latest social reaction with `civic-ledger-6`,
+  so the player can connect Station citation -> Studio review block / Waiting
+  Customer refusal without first opening the civic ledger prop. Codex gameplay
+  QA now has `canReadLiveHudSocialCitation=true`, and playable smoke fails if
+  HUD social reaction copy no longer cites the observed ledger event.
 - latest game increment: the civic ledger is now an inspectable social-chain
   timeline, not only an append-only event count. Codex/player focuses
   `civic_ledger`, presses interact, and reads `사회 연쇄` lines such as

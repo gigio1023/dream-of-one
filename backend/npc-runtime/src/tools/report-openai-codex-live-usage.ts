@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 type ArtifactInput = {
   name: string;
@@ -6,7 +7,7 @@ type ArtifactInput = {
   url: URL;
 };
 
-type ArtifactSummary = {
+export type ArtifactSummary = {
   name: string;
   path: string;
   ok: boolean;
@@ -26,6 +27,19 @@ type UsageTotals = {
   totalActualInputTokens: number;
   totalActualOutputTokens: number;
   totalActualTokens: number;
+};
+
+export type OpenAiCodexLiveUsageReport = {
+  status: "pass" | "fail";
+  source: string;
+  spendsLiveBudget: false;
+  provider: "openai-codex";
+  models: string[];
+  reasoningEffort: "low";
+  chatGptProQuotaRemaining: "not_exposed_by_codex_response";
+  totals: UsageTotals & { requestCount: number };
+  artifacts: ArtifactSummary[];
+  notes: string[];
 };
 
 const artifacts: ArtifactInput[] = [
@@ -193,7 +207,7 @@ function summarizeLedgerEntries(): ArtifactSummary[] {
   });
 }
 
-function main(): void {
+export function buildOpenAiCodexLiveUsageReport(): OpenAiCodexLiveUsageReport {
   const summaries = [
     ...summarizeLedgerEntries(),
     ...artifacts.map(summarizeArtifact),
@@ -214,7 +228,7 @@ function main(): void {
   });
 
   const models = Array.from(new Set(summaries.flatMap(summary => summary.models))).sort();
-  const summary = {
+  return {
     status: summaries.every(artifact => artifact.ok) ? "pass" : "fail",
     source: "checked-in provider ledger plus Godot live provider artifacts",
     spendsLiveBudget: false,
@@ -230,11 +244,16 @@ function main(): void {
       "Product HUD/Evidence truth remains fallback_only_m1 unless a separate player-visible live-provider mode is implemented and proven.",
     ],
   };
+}
 
+function main(): void {
+  const summary = buildOpenAiCodexLiveUsageReport();
   console.log(JSON.stringify(summary, null, 2));
   if (summary.status !== "pass") {
     process.exitCode = 1;
   }
 }
 
-main();
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  main();
+}

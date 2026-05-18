@@ -211,6 +211,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   conversation snapshots and Waiting Customer provider packets now expose it in
   `visibleEnvironmentObjects` so NPC agents can read the same tiny values the
   player inspects.
+- [x] Make visible NPC inspection show current role perception: Studio PM and
+  Waiting Customer HUD notices now include `보는 환경` plus
+  `visibleEnvironmentObjectLabels`, so the player can read which props and
+  shared values the NPC is currently acting from.
 - [x] Make cross-place rule boards player-readable before speech: Codex/player
   can focus and read the Studio approval criteria and Park notice board as
   social rules that later ground public notice and review consequences.

@@ -2776,6 +2776,10 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		body_lines.append("들은 말: \"%s\"" % spoken_line)
 	elif not pressure_text.is_empty():
 		body_lines.append("말/태도: %s" % pressure_text)
+	var visible_environment_objects := _provider_visible_environment_objects_for_actor(npc_id)
+	var visible_environment_object_labels := _visible_environment_object_labels(visible_environment_objects)
+	if not visible_environment_object_labels.is_empty():
+		body_lines.append("보는 환경: %s" % ", ".join(visible_environment_object_labels))
 	var basis_action := _latest_accepted_action_for_actor(npc_id)
 	var basis_event_id := ""
 	var basis_affordance := ""
@@ -2813,6 +2817,8 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 	body_lines.append("이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.")
 	inspected_npc_state = snapshot.duplicate(true)
 	inspected_npc_state["spokenLine"] = spoken_line
+	inspected_npc_state["visibleEnvironmentObjects"] = visible_environment_objects
+	inspected_npc_state["visibleEnvironmentObjectLabels"] = visible_environment_object_labels
 	if not basis_action.is_empty():
 		inspected_npc_state["basisAction"] = basis_action.duplicate(true)
 		inspected_npc_state["basisLedgerEventId"] = basis_event_id
@@ -2841,6 +2847,23 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		}
 	)
 	return {"ok": true, "inspectedNpcState": inspected_npc_state.duplicate(true)}
+
+func _visible_environment_object_labels(objects: Array[Dictionary]) -> PackedStringArray:
+	var labels := PackedStringArray()
+	for object in objects:
+		var title := str(object.get("title", ""))
+		if title.is_empty():
+			title = _world_record_prop_title(str(object.get("objectId", "")))
+		var state_label := str(object.get("stateLabel", ""))
+		if state_label.is_empty():
+			state_label = _record_state_value(str(object.get("state", "")))
+		if title.is_empty():
+			continue
+		if state_label.is_empty() or state_label == "unknown":
+			labels.append(title)
+		else:
+			labels.append("%s=%s" % [title, state_label])
+	return labels
 
 func _latest_accepted_action_for_actor(actor_id: String) -> Dictionary:
 	for index in range(agent_action_log.size()):

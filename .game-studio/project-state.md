@@ -143,6 +143,11 @@ Current M1 carry-in:
   Waiting Customer provider packet must include `civic_economy_panel` before
   the Codex gameplay probe passes. This keeps the tiny economy useful as an NPC
   affordance signal instead of a HUD-only number.
+- latest small-slice carry-in: inspecting an NPC now shows the role's current
+  visible environment context. Studio PM and Waiting Customer inspection panels
+  include `보는 환경` with readable object/state pairs and export
+  `visibleEnvironmentObjectLabels`, so a player can see which props and shared
+  values the NPC is using before reading the action basis.
 - latest small-slice carry-in: repair recovery now leaves a player-readable
   public environment record and one small cross-place consequence. Park Witness
   `post_repair_notice` sets `park_notice_board=repaired`; Studio PM reads that

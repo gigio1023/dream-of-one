@@ -249,6 +249,13 @@ the latest Codex gameplay probe confirms `conversation.start` includes
 attention-state panel while using bounded actor memory/policy. This is still a
 tiny value loop, not a broader economy system.
 
+Latest NPC perception addendum: visible NPC inspection now shows the current
+environment context a role can read before it acts. Studio PM inspection shows
+`보는 환경: 공원 게시판=소문 게시, 스튜디오 리뷰 줄=차단, 시민 경제=주목 상승`,
+and Waiting Customer inspection shows `보는 환경` with the queue mark, counter,
+usual-order cue, Park board, and civic economy. Codex gameplay QA fails if
+those player-readable perception labels disappear.
+
 Latest repair-conditional addendum: repair recovery now leaves a public
 environment record and one small cross-place consequence. Park Witness
 `post_repair_notice` changes `park_notice_board` to `repaired`; Studio PM then

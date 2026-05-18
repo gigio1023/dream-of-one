@@ -398,6 +398,12 @@ Latest AI-play interface check:
   conversation snapshots and `debug_live_provider_packet`, and the Codex
   gameplay probe now fails unless the Waiting Customer provider packet can read
   the attention-state economy panel alongside actor memory and policy.
+- latest game increment: visible NPC inspection now shows what the NPC can see
+  right now. Inspecting Studio PM or Waiting Customer adds `보는 환경` lines
+  such as `공원 게시판=소문 게시`, `스튜디오 리뷰 줄=차단`, and `시민 경제=주목
+  상승`, plus exported `visibleEnvironmentObjectLabels`. This makes the
+  player-readable NPC panel match the role-visible environment context instead
+  of hiding the agent's current perception in private logs.
 - latest game increment: repair recovery now travels one small step beyond the
   Park board. After `public_repair_noted`, Studio PM reads `park_notice_board`
   and `studio_review_queue`, uses `offer_conditional_review`, changes

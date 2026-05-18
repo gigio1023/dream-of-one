@@ -95,6 +95,12 @@ Current M1 carry-in:
   long-term content focus. Future work should extract reusable
   environment-agent patterns instead of deepening Store operations or Station
   procedure.
+- latest small-slice carry-in: Studio and Park text surfaces are now readable
+  cross-place social rules before the player speaks. Inspecting
+  `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard` shows the place,
+  procedure rule, dialogue pressure, record outputs, and role consequence each
+  board can support, so the running sample teaches a wider social field instead
+  of only Store counter outcomes.
 - latest small-slice carry-in: the usual-order cue is now readable as a normal
   procedure prop before the player speaks. Inspecting `usual_order_cue` tells
   the player that `표식 하나, 같은 봉투` is the local routine and that NPCs can

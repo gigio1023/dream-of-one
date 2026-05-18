@@ -9,6 +9,10 @@ const TYPED_LINE := "저는 이 꿈에 방금 들어왔어요."
 const PROBE_STEPS := [
 	{"actionId": "focus.world_record_prop", "payload": {"objectId": "usual_order_cue"}},
 	{"actionId": "player.interact.focused", "payload": {}},
+	{"actionId": "focus.text_surface", "payload": {"surfaceId": "TS_Studio_ApprovalCriteria"}},
+	{"actionId": "player.interact.focused", "payload": {}},
+	{"actionId": "focus.text_surface", "payload": {"surfaceId": "TS_Park_NoticeBoard"}},
+	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.store_counter", "payload": {}},
 	{"actionId": "conversation.start", "payload": {}},
 	{"actionId": "player.wait.hesitation_record", "payload": {}},
@@ -669,6 +673,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Codex/player did not inspect the civic ledger as a social observation chain")
 	if not bool(checks.get("codexInspectedUsualOrderCue", false)):
 		failures.append("Codex/player did not inspect the usual-order cue before speaking")
+	if not bool(checks.get("codexReadCrossPlaceRuleBoards", false)):
+		failures.append("Codex/player did not read cross-place Studio/Park rule boards before speaking")
 	if not bool(checks.get("worldPropsReachInquest", false)):
 		failures.append("World record props do not show forwarded report and cited Station dossier")
 	if not bool(checks.get("codexInspectedPublicNotice", false)):
@@ -701,6 +707,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary) -> D
 		"visibleWaitingCustomerReaction": _visible_npc_has_line(summary, "NPC_Waiting_Customer"),
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"codexInspectedUsualOrderCue": _inspected_usual_order_cue(summary),
+		"codexReadCrossPlaceRuleBoards": _read_cross_place_rule_boards(summary),
 		"codexInspectedPublicNotice": _inspected_public_notice(summary),
 		"codexInspectedBlockedReview": _inspected_studio_review_block(summary),
 			"codexInspectedRecordAffordanceMap": _inspected_record_affordance_map(summary),
@@ -729,6 +736,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadInputToRecordChain": consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부"),
 		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)) and bool(checks.get("waitingCustomerObservedStation", false)),
 		"canInspectNormalProcedureCue": bool(checks.get("codexInspectedUsualOrderCue", false)),
+		"canReadCrossPlaceSocialRules": bool(checks.get("codexReadCrossPlaceRuleBoards", false)),
 		"canReadLiveHudSocialCitation": _hud_record_state_cites_latest_social_observation(summary, record_state_label),
 		"canReadLiveHudNearbyStances": _hud_record_state_names_visible_stances(record_state_label),
 		"canReadLiveHudRecordReaders": _hud_record_state_names_record_readers(record_state_label),
@@ -774,6 +782,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		},
 		"playerReadableCauseChain": [
 			"Codex/player first inspected the usual-order cue, making the normal 'same order' procedure readable before choosing a line.",
+			"Codex/player read the Studio and Park rule boards as cross-place social rules, so later review and public-notice consequences are grounded before the Store line.",
 			"Codex/player focused the Store counter and started the Store Clerk prompt.",
 			"Codex/player waited long enough to create a response hesitation record.",
 			"Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.",
@@ -916,6 +925,8 @@ func _action_player_meaning(action_id: String, payload: Dictionary) -> String:
 			return "type player speech: %s" % str(payload.get("line", ""))
 		"focus.world_record_prop":
 			return "look at environment record prop: %s" % str(payload.get("objectId", ""))
+		"focus.text_surface":
+			return "read place social rule board: %s" % str(payload.get("surfaceId", ""))
 		"focus.npc":
 			return "look at visible NPC: %s" % str(payload.get("npcId", ""))
 		"player.interact.focused":
@@ -1047,6 +1058,10 @@ func _inspected_usual_order_cue(summary: Dictionary) -> bool:
 		and body.contains("정상 루틴")
 		and body.contains("플레이어의 말")
 	)
+
+func _read_cross_place_rule_boards(summary: Dictionary) -> bool:
+	var surface_ids: Array = summary.get("readSurfaceIds", [])
+	return surface_ids.has("TS_Studio_ApprovalCriteria") and surface_ids.has("TS_Park_NoticeBoard")
 
 func _inspected_public_notice(summary: Dictionary) -> bool:
 	return _inspected_world_record_exists(summary, "park_notice_board", "rumored", "소문")

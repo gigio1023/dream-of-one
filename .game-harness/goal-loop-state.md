@@ -98,18 +98,26 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `38d8a9f75be5720b4304467e133277620f0a26d73c846045c8e052c8de085133`
-  - Markdown SHA-256: `ca27811ac88964116b4586d0dffde2dea1281e2aaa5924d5cd91530eb1ceb979`
-  - playable Evidence Pack SHA-256: `adc841f4cccee07028c67e0034739b6b95d8d423470e50e7df7976eed14a2bb6`
+  - JSON SHA-256: `519728931319fb4af10aeeecae1db1d12c424076e98d3060ddcfea2b2063bb57`
+  - Markdown SHA-256: `a8bf7e2da16d1622ce72170803514e95106729052036d7377a2352112e84795d`
+  - playable Evidence Pack SHA-256: `25e9efc79a607826757b1fe68f212f7f7c941203c52f137d6b528ada8998421a`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
 
 Latest AI-play interface check:
 - command: `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `19 / 19`, `explainability=20/20`, and
+  player actions `23 / 23`, `explainability=21/21`, and
   `routeReportPassCount=5 / 5` with Godot
   `4.6.2.stable.official.71f334935` from a temporary local `GODOT_BIN`.
+- latest game increment: Studio and Park rule boards are now player-readable
+  cross-place social rules before the Store conversation. Codex/player can
+  focus `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard`, interact, and
+  read each board's place, procedure rule, dialogue pressure, remaining record
+  outputs, and the role consequence those rules can later unlock. This moves
+  the current proof cell toward the larger game goal: the player reads a wider
+  social field before speaking, then NPCs and institutions compare the player's
+  text against those visible rules.
 - latest game increment: the usual-order cue is now a player-readable
   normal-procedure prop. Inspecting `usual_order_cue` explains that `표식 하나,
   같은 봉투` is the expected local routine and that the clerk and waiting

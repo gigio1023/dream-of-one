@@ -47,6 +47,13 @@ Last Updated: 2026-05-18
 - If `--status` is already pass and no watched Godot/HUD/probe/session-helper
   source changed, do not rerun Codex probe or regenerate setup kits merely to
   show activity. The next useful move is human play, not more preparation.
+- Latest implementation slice: Studio and Park rule boards are now readable
+  cross-place social rules before the Store line. Codex gameplay QA focuses
+  `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard`, interacts with both,
+  and verifies `canReadCrossPlaceSocialRules=true`; current proof passes with
+  23/23 accepted public actions, 21/21 explainability checks, and 5/5 route
+  reports. This is a game-facing legibility slice toward the broader
+  open-environment social sim, not another product-closure claim.
 - Latest implementation slice: `usual_order_cue` is now a player-readable
   normal-procedure prop before the Store Clerk prompt. Codex gameplay QA first
   focuses and inspects it, then continues through the inquest path; current

@@ -575,6 +575,11 @@ func debug_codex_gameplay_action_catalog() -> Array[Dictionary]:
 			"playerMeaning": "Move Codex/player attention to one visible environment record prop."
 		},
 		{
+			"actionId": "focus.text_surface",
+			"payloadSchema": {"surfaceId": "string"},
+			"playerMeaning": "Move Codex/player attention to a place rule board so its local social rule can be read."
+		},
+		{
 			"actionId": "focus.npc",
 			"payloadSchema": {"npcId": "string"},
 			"playerMeaning": "Move Codex/player attention to one visible NPC so their current social reaction can be read."
@@ -652,6 +657,16 @@ func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) ->
 			elif not _force_focus_record_prop(object_id):
 				accepted = false
 				reason = "record_prop_unavailable"
+			else:
+				codex_focus_hold_frames = 4
+		"focus.text_surface":
+			var surface_id := str(payload.get("surfaceId", "")).strip_edges()
+			if surface_id.is_empty():
+				accepted = false
+				reason = "surface_id_required"
+			elif not _force_focus_text_surface(surface_id):
+				accepted = false
+				reason = "text_surface_unavailable"
 			else:
 				codex_focus_hold_frames = 4
 		"focus.npc":
@@ -885,10 +900,7 @@ func _interact() -> void:
 		var surface_id := str(current_focus.get_meta("surface_id", ""))
 		var surface_label := _localized_text_surface_label(current_focus, surface_id)
 		read_surface_ids[surface_id] = true
-		_set_notice(
-			surface_label,
-			"%s\n이 안내문은 대화 중 무엇이 이상하게 들리는지 판단하는 맥락입니다." % _text("text_surface.%s.body" % surface_id, {}, surface_id)
-		)
+		_set_notice(surface_label, _text_surface_context_body(current_focus, surface_id))
 		_record_event(
 			"observation",
 			"text_surface_read",
@@ -3534,12 +3546,13 @@ func _force_focus_zone(zone_id: String) -> void:
 			current_focus_kind = "zone"
 			return
 
-func _force_focus_text_surface(surface_id: String) -> void:
+func _force_focus_text_surface(surface_id: String) -> bool:
 	for node in _local_group_nodes(&"text_surfaces"):
 		if str(node.get_meta("surface_id", "")) == surface_id and node is Node3D:
 			current_focus = node as Node3D
 			current_focus_kind = "text_surface"
-			return
+			return true
+	return false
 
 func _text(key: String, args: Dictionary = {}, fallback := "") -> String:
 	var localization := _localization()
@@ -3554,6 +3567,41 @@ func _localized_text_surface_label(surface: Node, surface_id: String) -> String:
 	if surface.has_method("localized_display_name"):
 		return str(surface.localized_display_name())
 	return _text("text_surface.%s.label" % surface_id, {}, surface_id)
+
+func _text_surface_context_body(surface: Node, surface_id: String) -> String:
+	var body := _text("text_surface.%s.body" % surface_id, {}, str(surface.get_meta("body", surface_id)))
+	var landmark := str(surface.get_meta("landmark", ""))
+	var law_id := str(surface.get_meta("law_id", ""))
+	var cover_test_id := str(surface.get_meta("cover_test_id", ""))
+	var outputs := PackedStringArray()
+	for output in Array(surface.get_meta("evidence_outputs", [])):
+		outputs.append(str(output))
+	var context_lines := PackedStringArray()
+	if not landmark.is_empty():
+		context_lines.append("장소: %s" % landmark)
+	if not law_id.is_empty():
+		context_lines.append("절차 규칙: %s" % law_id)
+	if not cover_test_id.is_empty():
+		context_lines.append("대화 압력: %s" % cover_test_id)
+	if not outputs.is_empty():
+		context_lines.append("남는 기록: %s" % ", ".join(outputs))
+	var surface_hint := _text_surface_social_hint(surface_id)
+	if not surface_hint.is_empty():
+		context_lines.append(surface_hint)
+	context_lines.append("이 안내문은 플레이어가 조사하는 단서가 아니라, NPC와 기관이 플레이어의 말을 비교할 사회 규칙입니다.")
+	return "%s\n%s" % [body, "\n".join(context_lines)]
+
+func _text_surface_social_hint(surface_id: String) -> String:
+	match surface_id:
+		"TS_Studio_ApprovalCriteria":
+			return "스튜디오 PM은 공개 확인, 수습, 경고, 스테이션 인용을 읽고 리뷰 기회를 열거나 닫습니다."
+		"TS_Park_NoticeBoard":
+			return "공원 게시판은 상점 안의 기록을 공개 확인, 수습, 경고, 소문으로 바꿔 다른 NPC가 읽게 합니다."
+		"TS_Station_IntakeRules":
+			return "스테이션은 새 사실을 발명하지 않고 전달된 상점 장부와 플레이어 발화를 대조합니다."
+		"TS_Store_QueueRules":
+			return "상점 줄은 평소 주문, 정정표, 지연, 보고 부담을 가장 먼저 사회 행동으로 바꿉니다."
+	return ""
 
 func _localization() -> Node:
 	var nodes := _local_group_nodes(&"localization_services")

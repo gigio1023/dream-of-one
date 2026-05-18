@@ -186,10 +186,13 @@ Latest OpenAI Codex provider note:
   stateless provider calls plus the repo-local workspace summary/memory in the
   next prompt, not provider-stored `previous_response_id`.
 - Latest backend check after that contract: `npm run check --prefix
-  backend/npc-runtime` passed with 138 tests. The backend test proves the
+  backend/npc-runtime` passed with 141 tests. The backend tests prove the
   second same-session/same-NPC `openai-codex` call uses `transport=codex-reply`,
   keeps `gpt-5.4-mini`, low reasoning, streaming enabled, `store=false`, and
-  carries prior `WorkspaceArtifacts` into the second prompt.
+  carries prior `WorkspaceArtifacts` into the second prompt. They also verify
+  the checked-in Godot live dispatch artifact carries both NPC decisions, the
+  concrete `npcToNpcLiveObservationEvent`, and the Waiting Customer provider
+  packet `recentEvents` containing that observed Store Clerk live utterance.
 - Godot live continuity proof now passes through
   `godot/tools/live_provider_thread_continuity_smoke.gd`. It drove
   `main.tscn`, called `NPC_Store_Clerk` twice with the same session id, and

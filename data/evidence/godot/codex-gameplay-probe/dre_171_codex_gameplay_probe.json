@@ -28,6 +28,8 @@
 			"player.interact.focused",
 			"focus.npc",
 			"player.interact.focused",
+			"focus.social_link",
+			"player.interact.focused",
 			"focus.npc",
 			"player.interact.focused",
 			"focus.npc",
@@ -61,6 +63,8 @@
 			"player.interact.focused -> press the focused interaction",
 			"focus.npc -> look at visible NPC: NPC_Station_Officer",
 			"player.interact.focused -> press the focused interaction",
+			"focus.social_link -> look at social influence link: NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+			"player.interact.focused -> press the focused interaction",
 			"focus.npc -> look at visible NPC: NPC_Studio_PM",
 			"player.interact.focused -> press the focused interaction",
 			"focus.npc -> look at visible NPC: NPC_Waiting_Customer",
@@ -79,6 +83,7 @@
 			"canInspectRecordRoleAffordanceMap": true,
 			"canInspectStoreClerkRecordAction": true,
 			"canInspectStoreManagerHandoff": true,
+			"canInspectVisibleSocialInfluenceLink": true,
 			"canReadActorMemory": true,
 			"canReadCivicEconomyPressure": true,
 			"canReadConversationSocialAudience": true,
@@ -8730,6 +8735,80 @@
 					}
 				]
 			},
+			"inspectedSocialLink": {
+				"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+				"color": [
+					0.720000028610229,
+					0.620000004768372,
+					0.939999997615814,
+					1.0
+				],
+				"fromPosition": [
+					8.80000019073486,
+					2.11999988555908,
+					-11.1999998092651
+				],
+				"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+				"observedActorId": "NPC_Station_Officer",
+				"observedActorName": "Station Officer",
+				"observedActorRole": "station_officer",
+				"observedAffordance": "cite_record",
+				"observedAffordanceLabel": "기록 인용",
+				"observedLedgerEventId": "civic-ledger-6",
+				"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+				"observedRoleLabel": "스테이션 직원",
+				"observerActorId": "NPC_Waiting_Customer",
+				"observerActorName": "Waiting Customer",
+				"observerRole": "waiting_customer",
+				"observerRoleLabel": "대기 손님",
+				"resultingAffordance": "refuse_contact",
+				"resultingAffordanceLabel": "접촉 거부",
+				"title": "사회 영향 / Station Officer -> Waiting Customer",
+				"toPosition": [
+					-10.3999996185303,
+					2.11999988555908,
+					1.39999997615814
+				],
+				"visible": true
+			},
+			"inspectedSocialLinkHistory": [
+				{
+					"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+					"color": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"fromPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+					"observedActorId": "NPC_Station_Officer",
+					"observedActorName": "Station Officer",
+					"observedActorRole": "station_officer",
+					"observedAffordance": "cite_record",
+					"observedAffordanceLabel": "기록 인용",
+					"observedLedgerEventId": "civic-ledger-6",
+					"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"observedRoleLabel": "스테이션 직원",
+					"observerActorId": "NPC_Waiting_Customer",
+					"observerActorName": "Waiting Customer",
+					"observerRole": "waiting_customer",
+					"observerRoleLabel": "대기 손님",
+					"resultingAffordance": "refuse_contact",
+					"resultingAffordanceLabel": "접촉 거부",
+					"title": "사회 영향 / Station Officer -> Waiting Customer",
+					"toPosition": [
+						-10.3999996185303,
+						2.11999988555908,
+						1.39999997615814
+					],
+					"visible": true
+				}
+			],
 			"inspectedWorldRecordHistory": [
 				{
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
@@ -9748,6 +9827,7 @@
 			"Visible NPC bodies use distinct role tints, so Codex/player can identify the social field by actor role before opening detailed panels.",
 			"The Waiting Customer also carries a visible source token colored from the Station Officer role, exposing that the refusal came from Station citation pressure.",
 			"The scene draws a visible social influence link from the Station Officer citation source to the Waiting Customer refusal, making the NPC-to-NPC consequence readable in the 3D space.",
+			"Codex/player focused that social influence link and pressed the same interaction key to read the source actor, target actor, observed action, resulting action, and cited ledger record in the HUD.",
 			"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, cited ledger basis, and overheard NPC-to-NPC exchange.",
 			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
 		],
@@ -10806,11 +10886,20 @@
 		{
 			"accepted": true,
 			"actionId": "focus.world_record_prop",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
-				"inspectedWorldRecordProp": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
+				"inspectedWorldRecordProp": {
+
+				},
 				"lastDialogueChoice": "",
 				"lastReasonCode": "",
 				"reportWeight": 0,
@@ -10822,8 +10911,15 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
-				"inspectedWorldRecordProp": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
+				"inspectedWorldRecordProp": {
+
+				},
 				"lastDialogueChoice": "",
 				"lastReasonCode": "",
 				"reportWeight": 0,
@@ -10841,10 +10937,17 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -10878,8 +10981,15 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
-				"inspectedWorldRecordProp": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
+				"inspectedWorldRecordProp": {
+
+				},
 				"lastDialogueChoice": "",
 				"lastReasonCode": "",
 				"reportWeight": 0,
@@ -10889,16 +10999,25 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.text_surface",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -10932,7 +11051,12 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -10972,10 +11096,17 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11009,7 +11140,12 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11041,16 +11177,25 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.text_surface",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11084,7 +11229,12 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11124,10 +11274,17 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11161,7 +11318,12 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11193,16 +11355,25 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.store_counter",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11236,7 +11407,12 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11268,16 +11444,25 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "conversation.start",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11311,7 +11496,12 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11343,16 +11533,25 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "player.wait.hesitation_record",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11386,7 +11585,12 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11418,16 +11622,25 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "dialogue.choice.by_id",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11461,7 +11674,12 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11501,10 +11719,17 @@
 		{
 			"accepted": true,
 			"actionId": "player.type.free_input",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11538,7 +11763,12 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11578,10 +11808,17 @@
 		{
 			"accepted": true,
 			"actionId": "focus.npc",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11615,7 +11852,12 @@
 			},
 			"before": {
 				"inputLocked": true,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -11655,7 +11897,9 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -12063,6 +12307,9 @@
 						}
 					]
 				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -12096,7 +12343,12 @@
 			},
 			"before": {
 				"inputLocked": true,
-				"inspectedNpcState": {},
+				"inspectedNpcState": {
+
+				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -12128,13 +12380,17 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.npc",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -12541,6 +12797,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
@@ -12979,6 +13238,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
@@ -13019,7 +13281,9 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -13463,6 +13727,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
@@ -13902,6 +14169,9 @@
 						}
 					]
 				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -13933,13 +14203,17 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.world_record_prop",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -14383,6 +14657,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
@@ -14858,6 +15135,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
@@ -14898,7 +15178,9 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -15342,6 +15624,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n현재 열린 행동: 공개 게시(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2 / 변화 부담+5",
@@ -15835,6 +16120,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
@@ -15867,13 +16155,17 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.npc",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -16317,6 +16609,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n현재 열린 행동: 공개 게시(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2 / 변화 부담+5",
@@ -16810,6 +17105,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n현재 열린 행동: 공개 게시(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2 / 변화 부담+5",
@@ -16868,7 +17166,9 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -17261,6 +17561,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n현재 열린 행동: 공개 게시(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2 / 변화 부담+5",
@@ -17755,6 +18058,9 @@
 						}
 					]
 				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n현재 열린 행동: 공개 게시(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2 / 변화 부담+5",
 					"currentAffordanceLabels": [
@@ -17804,13 +18110,17 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.world_record_prop",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -18203,6 +18513,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n현재 열린 행동: 공개 게시(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2 / 변화 부담+5",
@@ -18645,6 +18958,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n현재 열린 행동: 공개 게시(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2 / 변화 부담+5",
@@ -18703,7 +19019,9 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -19096,6 +19414,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 조건부 리뷰(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n현재 열린 행동: 없음\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3",
@@ -19534,6 +19855,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n현재 열린 행동: 공개 게시(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2 / 변화 부담+5",
@@ -19584,13 +19908,17 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.world_record_prop",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -19983,6 +20311,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 조건부 리뷰(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n현재 열린 행동: 없음\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3",
@@ -20421,6 +20752,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 조건부 리뷰(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n현재 열린 행동: 없음\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3",
@@ -20475,7 +20809,9 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -20868,6 +21204,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
@@ -21336,6 +21675,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 조건부 리뷰(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n현재 열린 행동: 없음\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3",
@@ -21382,13 +21724,17 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.world_record_prop",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -21781,6 +22127,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
@@ -22249,6 +22598,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
@@ -22333,7 +22685,9 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -22726,6 +23080,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
@@ -23191,6 +23548,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
@@ -23267,13 +23627,17 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.npc",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -23666,6 +24030,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
@@ -24131,6 +24498,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
@@ -24212,7 +24582,9 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -24504,6 +24876,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
@@ -24970,6 +25345,9 @@
 						}
 					]
 				},
+				"inspectedSocialLink": {
+
+				},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
 					"currentAffordanceLabels": [],
@@ -25042,13 +25420,17 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
-			"actionId": "focus.npc",
-			"actionResult": {},
+			"actionId": "focus.social_link",
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -25340,6 +25722,9 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
 				},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
@@ -25704,6 +26089,1598 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+
+				},
+				"inspectedWorldRecordProp": {
+					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
+					"currentAffordanceLabels": [],
+					"label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
+					"objectId": "civic_ledger",
+					"possibleAffordanceLabels": [],
+					"readerRoleLabels": [
+						"스테이션 직원"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "waiting_customer",
+							"actorRoleLabel": "대기 손님",
+							"affordance": "refuse_contact",
+							"affordanceLabel": "접촉 거부",
+							"citedLedgerEventId": "civic-ledger-6",
+							"economyDelta": {
+								"localTrust": -8,
+								"recordBurden": 5
+							},
+							"economyDeltaLabel": "신뢰-8, 부담+5",
+							"eventId": "civic-ledger-8",
+							"kind": "queue_contact_refused",
+							"kindLabel": "접촉 거부"
+						},
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"economyDelta": {
+								"localTrust": -2,
+								"recordBurden": 3
+							},
+							"economyDeltaLabel": "신뢰-2, 부담+3",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						},
+						{
+							"actorRole": "station_officer",
+							"actorRoleLabel": "스테이션 직원",
+							"affordance": "cite_record",
+							"affordanceLabel": "기록 인용",
+							"citedLedgerEventId": "civic-ledger-5",
+							"eventId": "civic-ledger-6",
+							"kind": "station_record_cited",
+							"kindLabel": "스테이션 인용"
+						}
+					],
+					"socialObservationLabels": [
+						"대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부",
+						"스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단",
+						"스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용",
+						"상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달",
+						"공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시",
+						"대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평"
+					],
+					"state": "append_only",
+					"stateLabel": "추가됨",
+					"title": "시민 장부"
+				},
+				"lastDialogueChoice": "free_input",
+				"lastReasonCode": "dream_language_leak",
+				"reportWeight": 120,
+				"responseHesitationCount": 1,
+				"routeOutcome": "inquest_opened",
+				"sessionOutcome": "inquest_opened",
+				"stage": "inquest",
+				"suspicion": 125
+			},
+			"payload": {
+				"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact"
+			},
+			"reason": "accepted"
+		},
+		{
+			"accepted": true,
+			"actionId": "player.interact.focused",
+			"actionResult": {
+
+			},
+			"after": {
+				"inputLocked": true,
+				"inspectedNpcState": {
+					"authorityFocusLabels": [
+						"대상=플레이어",
+						"인용=civic-ledger-5 / 상점 매니저 -> 보고 전달",
+						"대조=상점 전달 기록과 플레이어 발화",
+						"권한=심문 개시"
+					],
+					"baseReactionText": "보고됨",
+					"basisAction": {
+						"accepted": true,
+						"actorId": "NPC_Station_Officer",
+						"actorRole": "station_officer",
+						"affordance": "cite_record",
+						"availableActions": [
+							{
+								"actionId": "station_dossier.cite_record",
+								"affordance": "cite_record",
+								"citableLedgerEventIds": [
+									"civic-ledger-5"
+								],
+								"civicEconomyEffects": [],
+								"eligibleRoles": [
+									"station_officer"
+								],
+								"failureReasons": [
+									"object_not_perceived",
+									"affordance_unavailable",
+									"role_authority_exceeded",
+									"why_line_required",
+									"ledger_event_unknown",
+									"ledger_event_not_known",
+									"station_citation_requires_store_record"
+								],
+								"ledgerEventKind": "station_record_cited",
+								"objectId": "station_dossier",
+								"objectState": "absent",
+								"perceivedAs": "Station dossier citation",
+								"playerLabel": "Cite Record",
+								"preconditions": [
+									"object_state:absent",
+									"role_allowed:station_officer",
+									"known_ledger_event_required",
+									"known_store_ledger_event_required",
+									"record_id:station_same_order_dossier"
+								],
+								"priorityHints": [
+									"requires:store_record_citation"
+								],
+								"recordId": "station_same_order_dossier",
+								"requiresLedgerEvent": true,
+								"requiresStoreLedgerEvent": true,
+								"toState": "cited",
+								"validationRuleId": "same_order.station_dossier.cite_record",
+								"visibleTo": [
+									"station_officer"
+								]
+							}
+						],
+						"citedLedgerEventId": "civic-ledger-5",
+						"economyAfter": {
+							"accountCredit": 3,
+							"localTrust": 5,
+							"recordBurden": 85,
+							"stationAttention": 70
+						},
+						"ledgerEventId": "civic-ledger-6",
+						"ledgerEventKind": "station_record_cited",
+						"objectId": "station_dossier",
+						"perceivedObjectIds": [
+							"report_tray",
+							"station_dossier",
+							"civic_ledger",
+							"civic_economy_panel"
+						],
+						"recordId": "station_same_order_dossier",
+						"selectedActionDescriptor": {
+							"actionId": "station_dossier.cite_record",
+							"affordance": "cite_record",
+							"citableLedgerEventIds": [
+								"civic-ledger-5"
+							],
+							"civicEconomyEffects": [],
+							"eligibleRoles": [
+								"station_officer"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known",
+								"station_citation_requires_store_record"
+							],
+							"ledgerEventKind": "station_record_cited",
+							"objectId": "station_dossier",
+							"objectState": "absent",
+							"perceivedAs": "Station dossier citation",
+							"playerLabel": "Cite Record",
+							"preconditions": [
+								"object_state:absent",
+								"role_allowed:station_officer",
+								"known_ledger_event_required",
+								"known_store_ledger_event_required",
+								"record_id:station_same_order_dossier"
+							],
+							"priorityHints": [
+								"requires:store_record_citation"
+							],
+							"recordId": "station_same_order_dossier",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": true,
+							"toState": "cited",
+							"validationRuleId": "same_order.station_dossier.cite_record",
+							"visibleTo": [
+								"station_officer"
+							]
+						},
+						"selectionReason": "The Station cites the exact forwarded Store ledger event before narrowing the player's answer.",
+						"sequence": 6,
+						"stepId": "inquest.station.cite_store_report",
+						"validation": "accepted",
+						"whyLine": "The Station cites the exact forwarded Store ledger event before narrowing the player's answer."
+					},
+					"basisAffordance": "cite_record",
+					"basisAffordanceLabel": "기록 인용",
+					"basisConditionLabels": [
+						"스테이션 문서=없음",
+						"인용 장부 civic-ledger-5",
+						"상점 기록 필요"
+					],
+					"basisEconomyEffectLabels": [],
+					"basisLedgerEventId": "civic-ledger-6",
+					"basisLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"basisObjectId": "station_dossier",
+					"basisObjectLabel": "스테이션 문서",
+					"body": "현재 반응: 보고됨\n← 상점 매니저 · 보고 전달\n들은 말: \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"\n보는 환경: 보고 트레이=전달, 스테이션 문서=인용됨, 시민 장부=추가됨, 시민 경제=주목 상승\n오간 말: Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\" -> Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"\n근거 행동: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n읽은 기록: civic-ledger-5 / 상점 매니저 -> 보고 전달\n대상 기록물: 스테이션 문서\n심문 초점: 대상=플레이어, 인용=civic-ledger-5 / 상점 매니저 -> 보고 전달, 대조=상점 전달 기록과 플레이어 발화, 권한=심문 개시\n가능 조건: 스테이션 문서=없음, 인용 장부 civic-ledger-5, 상점 기록 필요\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"bodyColor": [
+						0.560000002384186,
+						0.430000007152557,
+						0.819999992847443,
+						1.0
+					],
+					"citedLedgerEventId": "civic-ledger-5",
+					"citedLedgerEventLabel": "civic-ledger-5 / 상점 매니저 -> 보고 전달",
+					"displayName": "Station Officer",
+					"emissionEnergy": 0.616666674613953,
+					"exposure": 125,
+					"handoffLabels": [],
+					"headColor": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"homeLandmark": "Station",
+					"markerVisible": true,
+					"materialAlpha": 0.3980952501297,
+					"npcId": "NPC_Station_Officer",
+					"opportunityChangeLabels": [],
+					"pressureText": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
+					"publicSpreadLabels": [],
+					"reactionSourceActorId": "NPC_Store_Manager",
+					"reactionSourceAffordance": "forward_report",
+					"reactionSourceRole": "store_manager",
+					"reactionSourceText": "← 상점 매니저 · 보고 전달",
+					"reactionSourceTokenColor": [
+						0.939999997615814,
+						0.550000011920929,
+						0.379999995231628,
+						1.0
+					],
+					"reactionSourceTokenVisible": true,
+					"reactionText": "보고됨\n← 상점 매니저 · 보고 전달",
+					"role": "Station Officer",
+					"roleTint": "station-officer-violet",
+					"roleTintLabel": "station officer violet",
+					"routeId": "StationIntake",
+					"socialExchangeLines": [
+						"Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\" -> Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\""
+					],
+					"spokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
+					"state": "inquest",
+					"visibleEnvironmentObjectLabels": [
+						"보고 트레이=전달",
+						"스테이션 문서=인용됨",
+						"시민 장부=추가됨",
+						"시민 경제=주목 상승"
+					],
+					"visibleEnvironmentObjects": [
+						{
+							"label": "보고\n전달",
+							"objectId": "report_tray",
+							"state": "forwarded",
+							"stateLabel": "전달",
+							"title": "보고 트레이"
+						},
+						{
+							"label": "스테이션 문서\n인용됨",
+							"objectId": "station_dossier",
+							"state": "cited",
+							"stateLabel": "인용됨",
+							"title": "스테이션 문서"
+						},
+						{
+							"label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
+							"objectId": "civic_ledger",
+							"recentLedgerEvents": [
+								{
+									"actorRole": "waiting_customer",
+									"actorRoleLabel": "대기 손님",
+									"affordance": "refuse_contact",
+									"affordanceLabel": "접촉 거부",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -8,
+										"recordBurden": 5
+									},
+									"economyDeltaLabel": "신뢰-8, 부담+5",
+									"eventId": "civic-ledger-8",
+									"kind": "queue_contact_refused",
+									"kindLabel": "접촉 거부"
+								},
+								{
+									"actorRole": "studio_pm",
+									"actorRoleLabel": "스튜디오 PM",
+									"affordance": "block_review",
+									"affordanceLabel": "리뷰 차단",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -2,
+										"recordBurden": 3
+									},
+									"economyDeltaLabel": "신뢰-2, 부담+3",
+									"eventId": "civic-ledger-7",
+									"kind": "studio_review_blocked",
+									"kindLabel": "리뷰 차단"
+								}
+							],
+							"state": "append_only",
+							"stateLabel": "추가됨",
+							"title": "시민 장부"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 0,
+								"recordBurden": 93,
+								"stationAttention": 70
+							},
+							"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
+							"objectId": "civic_economy_panel",
+							"recentLedgerEvents": [
+								{
+									"actorRole": "waiting_customer",
+									"actorRoleLabel": "대기 손님",
+									"affordance": "refuse_contact",
+									"affordanceLabel": "접촉 거부",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -8,
+										"recordBurden": 5
+									},
+									"economyDeltaLabel": "신뢰-8, 부담+5",
+									"eventId": "civic-ledger-8",
+									"kind": "queue_contact_refused",
+									"kindLabel": "접촉 거부"
+								},
+								{
+									"actorRole": "studio_pm",
+									"actorRoleLabel": "스튜디오 PM",
+									"affordance": "block_review",
+									"affordanceLabel": "리뷰 차단",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -2,
+										"recordBurden": 3
+									},
+									"economyDeltaLabel": "신뢰-2, 부담+3",
+									"eventId": "civic-ledger-7",
+									"kind": "studio_review_blocked",
+									"kindLabel": "리뷰 차단"
+								}
+							],
+							"state": "attention",
+							"stateLabel": "주목 상승",
+							"title": "시민 경제"
+						}
+					]
+				},
+				"inspectedSocialLink": {
+					"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+					"color": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"fromPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+					"observedActorId": "NPC_Station_Officer",
+					"observedActorName": "Station Officer",
+					"observedActorRole": "station_officer",
+					"observedAffordance": "cite_record",
+					"observedAffordanceLabel": "기록 인용",
+					"observedLedgerEventId": "civic-ledger-6",
+					"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"observedRoleLabel": "스테이션 직원",
+					"observerActorId": "NPC_Waiting_Customer",
+					"observerActorName": "Waiting Customer",
+					"observerRole": "waiting_customer",
+					"observerRoleLabel": "대기 손님",
+					"resultingAffordance": "refuse_contact",
+					"resultingAffordanceLabel": "접촉 거부",
+					"title": "사회 영향 / Station Officer -> Waiting Customer",
+					"toPosition": [
+						-10.3999996185303,
+						2.11999988555908,
+						1.39999997615814
+					],
+					"visible": true
+				},
+				"inspectedWorldRecordProp": {
+					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
+					"currentAffordanceLabels": [],
+					"label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
+					"objectId": "civic_ledger",
+					"possibleAffordanceLabels": [],
+					"readerRoleLabels": [
+						"스테이션 직원"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "waiting_customer",
+							"actorRoleLabel": "대기 손님",
+							"affordance": "refuse_contact",
+							"affordanceLabel": "접촉 거부",
+							"citedLedgerEventId": "civic-ledger-6",
+							"economyDelta": {
+								"localTrust": -8,
+								"recordBurden": 5
+							},
+							"economyDeltaLabel": "신뢰-8, 부담+5",
+							"eventId": "civic-ledger-8",
+							"kind": "queue_contact_refused",
+							"kindLabel": "접촉 거부"
+						},
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"economyDelta": {
+								"localTrust": -2,
+								"recordBurden": 3
+							},
+							"economyDeltaLabel": "신뢰-2, 부담+3",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						},
+						{
+							"actorRole": "station_officer",
+							"actorRoleLabel": "스테이션 직원",
+							"affordance": "cite_record",
+							"affordanceLabel": "기록 인용",
+							"citedLedgerEventId": "civic-ledger-5",
+							"eventId": "civic-ledger-6",
+							"kind": "station_record_cited",
+							"kindLabel": "스테이션 인용"
+						}
+					],
+					"socialObservationLabels": [
+						"대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부",
+						"스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단",
+						"스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용",
+						"상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달",
+						"공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시",
+						"대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평"
+					],
+					"state": "append_only",
+					"stateLabel": "추가됨",
+					"title": "시민 장부"
+				},
+				"lastDialogueChoice": "free_input",
+				"lastReasonCode": "dream_language_leak",
+				"reportWeight": 120,
+				"responseHesitationCount": 1,
+				"routeOutcome": "inquest_opened",
+				"sessionOutcome": "inquest_opened",
+				"stage": "inquest",
+				"suspicion": 125
+			},
+			"before": {
+				"inputLocked": true,
+				"inspectedNpcState": {
+					"authorityFocusLabels": [
+						"대상=플레이어",
+						"인용=civic-ledger-5 / 상점 매니저 -> 보고 전달",
+						"대조=상점 전달 기록과 플레이어 발화",
+						"권한=심문 개시"
+					],
+					"baseReactionText": "보고됨",
+					"basisAction": {
+						"accepted": true,
+						"actorId": "NPC_Station_Officer",
+						"actorRole": "station_officer",
+						"affordance": "cite_record",
+						"availableActions": [
+							{
+								"actionId": "station_dossier.cite_record",
+								"affordance": "cite_record",
+								"citableLedgerEventIds": [
+									"civic-ledger-5"
+								],
+								"civicEconomyEffects": [],
+								"eligibleRoles": [
+									"station_officer"
+								],
+								"failureReasons": [
+									"object_not_perceived",
+									"affordance_unavailable",
+									"role_authority_exceeded",
+									"why_line_required",
+									"ledger_event_unknown",
+									"ledger_event_not_known",
+									"station_citation_requires_store_record"
+								],
+								"ledgerEventKind": "station_record_cited",
+								"objectId": "station_dossier",
+								"objectState": "absent",
+								"perceivedAs": "Station dossier citation",
+								"playerLabel": "Cite Record",
+								"preconditions": [
+									"object_state:absent",
+									"role_allowed:station_officer",
+									"known_ledger_event_required",
+									"known_store_ledger_event_required",
+									"record_id:station_same_order_dossier"
+								],
+								"priorityHints": [
+									"requires:store_record_citation"
+								],
+								"recordId": "station_same_order_dossier",
+								"requiresLedgerEvent": true,
+								"requiresStoreLedgerEvent": true,
+								"toState": "cited",
+								"validationRuleId": "same_order.station_dossier.cite_record",
+								"visibleTo": [
+									"station_officer"
+								]
+							}
+						],
+						"citedLedgerEventId": "civic-ledger-5",
+						"economyAfter": {
+							"accountCredit": 3,
+							"localTrust": 5,
+							"recordBurden": 85,
+							"stationAttention": 70
+						},
+						"ledgerEventId": "civic-ledger-6",
+						"ledgerEventKind": "station_record_cited",
+						"objectId": "station_dossier",
+						"perceivedObjectIds": [
+							"report_tray",
+							"station_dossier",
+							"civic_ledger",
+							"civic_economy_panel"
+						],
+						"recordId": "station_same_order_dossier",
+						"selectedActionDescriptor": {
+							"actionId": "station_dossier.cite_record",
+							"affordance": "cite_record",
+							"citableLedgerEventIds": [
+								"civic-ledger-5"
+							],
+							"civicEconomyEffects": [],
+							"eligibleRoles": [
+								"station_officer"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known",
+								"station_citation_requires_store_record"
+							],
+							"ledgerEventKind": "station_record_cited",
+							"objectId": "station_dossier",
+							"objectState": "absent",
+							"perceivedAs": "Station dossier citation",
+							"playerLabel": "Cite Record",
+							"preconditions": [
+								"object_state:absent",
+								"role_allowed:station_officer",
+								"known_ledger_event_required",
+								"known_store_ledger_event_required",
+								"record_id:station_same_order_dossier"
+							],
+							"priorityHints": [
+								"requires:store_record_citation"
+							],
+							"recordId": "station_same_order_dossier",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": true,
+							"toState": "cited",
+							"validationRuleId": "same_order.station_dossier.cite_record",
+							"visibleTo": [
+								"station_officer"
+							]
+						},
+						"selectionReason": "The Station cites the exact forwarded Store ledger event before narrowing the player's answer.",
+						"sequence": 6,
+						"stepId": "inquest.station.cite_store_report",
+						"validation": "accepted",
+						"whyLine": "The Station cites the exact forwarded Store ledger event before narrowing the player's answer."
+					},
+					"basisAffordance": "cite_record",
+					"basisAffordanceLabel": "기록 인용",
+					"basisConditionLabels": [
+						"스테이션 문서=없음",
+						"인용 장부 civic-ledger-5",
+						"상점 기록 필요"
+					],
+					"basisEconomyEffectLabels": [],
+					"basisLedgerEventId": "civic-ledger-6",
+					"basisLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"basisObjectId": "station_dossier",
+					"basisObjectLabel": "스테이션 문서",
+					"body": "현재 반응: 보고됨\n← 상점 매니저 · 보고 전달\n들은 말: \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"\n보는 환경: 보고 트레이=전달, 스테이션 문서=인용됨, 시민 장부=추가됨, 시민 경제=주목 상승\n오간 말: Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\" -> Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"\n근거 행동: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n읽은 기록: civic-ledger-5 / 상점 매니저 -> 보고 전달\n대상 기록물: 스테이션 문서\n심문 초점: 대상=플레이어, 인용=civic-ledger-5 / 상점 매니저 -> 보고 전달, 대조=상점 전달 기록과 플레이어 발화, 권한=심문 개시\n가능 조건: 스테이션 문서=없음, 인용 장부 civic-ledger-5, 상점 기록 필요\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"bodyColor": [
+						0.560000002384186,
+						0.430000007152557,
+						0.819999992847443,
+						1.0
+					],
+					"citedLedgerEventId": "civic-ledger-5",
+					"citedLedgerEventLabel": "civic-ledger-5 / 상점 매니저 -> 보고 전달",
+					"displayName": "Station Officer",
+					"emissionEnergy": 0.616666674613953,
+					"exposure": 125,
+					"handoffLabels": [],
+					"headColor": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"homeLandmark": "Station",
+					"markerVisible": true,
+					"materialAlpha": 0.3980952501297,
+					"npcId": "NPC_Station_Officer",
+					"opportunityChangeLabels": [],
+					"pressureText": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
+					"publicSpreadLabels": [],
+					"reactionSourceActorId": "NPC_Store_Manager",
+					"reactionSourceAffordance": "forward_report",
+					"reactionSourceRole": "store_manager",
+					"reactionSourceText": "← 상점 매니저 · 보고 전달",
+					"reactionSourceTokenColor": [
+						0.939999997615814,
+						0.550000011920929,
+						0.379999995231628,
+						1.0
+					],
+					"reactionSourceTokenVisible": true,
+					"reactionText": "보고됨\n← 상점 매니저 · 보고 전달",
+					"role": "Station Officer",
+					"roleTint": "station-officer-violet",
+					"roleTintLabel": "station officer violet",
+					"routeId": "StationIntake",
+					"socialExchangeLines": [
+						"Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\" -> Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\""
+					],
+					"spokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
+					"state": "inquest",
+					"visibleEnvironmentObjectLabels": [
+						"보고 트레이=전달",
+						"스테이션 문서=인용됨",
+						"시민 장부=추가됨",
+						"시민 경제=주목 상승"
+					],
+					"visibleEnvironmentObjects": [
+						{
+							"label": "보고\n전달",
+							"objectId": "report_tray",
+							"state": "forwarded",
+							"stateLabel": "전달",
+							"title": "보고 트레이"
+						},
+						{
+							"label": "스테이션 문서\n인용됨",
+							"objectId": "station_dossier",
+							"state": "cited",
+							"stateLabel": "인용됨",
+							"title": "스테이션 문서"
+						},
+						{
+							"label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
+							"objectId": "civic_ledger",
+							"recentLedgerEvents": [
+								{
+									"actorRole": "waiting_customer",
+									"actorRoleLabel": "대기 손님",
+									"affordance": "refuse_contact",
+									"affordanceLabel": "접촉 거부",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -8,
+										"recordBurden": 5
+									},
+									"economyDeltaLabel": "신뢰-8, 부담+5",
+									"eventId": "civic-ledger-8",
+									"kind": "queue_contact_refused",
+									"kindLabel": "접촉 거부"
+								},
+								{
+									"actorRole": "studio_pm",
+									"actorRoleLabel": "스튜디오 PM",
+									"affordance": "block_review",
+									"affordanceLabel": "리뷰 차단",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -2,
+										"recordBurden": 3
+									},
+									"economyDeltaLabel": "신뢰-2, 부담+3",
+									"eventId": "civic-ledger-7",
+									"kind": "studio_review_blocked",
+									"kindLabel": "리뷰 차단"
+								}
+							],
+							"state": "append_only",
+							"stateLabel": "추가됨",
+							"title": "시민 장부"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 0,
+								"recordBurden": 93,
+								"stationAttention": 70
+							},
+							"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
+							"objectId": "civic_economy_panel",
+							"recentLedgerEvents": [
+								{
+									"actorRole": "waiting_customer",
+									"actorRoleLabel": "대기 손님",
+									"affordance": "refuse_contact",
+									"affordanceLabel": "접촉 거부",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -8,
+										"recordBurden": 5
+									},
+									"economyDeltaLabel": "신뢰-8, 부담+5",
+									"eventId": "civic-ledger-8",
+									"kind": "queue_contact_refused",
+									"kindLabel": "접촉 거부"
+								},
+								{
+									"actorRole": "studio_pm",
+									"actorRoleLabel": "스튜디오 PM",
+									"affordance": "block_review",
+									"affordanceLabel": "리뷰 차단",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -2,
+										"recordBurden": 3
+									},
+									"economyDeltaLabel": "신뢰-2, 부담+3",
+									"eventId": "civic-ledger-7",
+									"kind": "studio_review_blocked",
+									"kindLabel": "리뷰 차단"
+								}
+							],
+							"state": "attention",
+							"stateLabel": "주목 상승",
+							"title": "시민 경제"
+						}
+					]
+				},
+				"inspectedSocialLink": {
+
+				},
+				"inspectedWorldRecordProp": {
+					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
+					"currentAffordanceLabels": [],
+					"label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
+					"objectId": "civic_ledger",
+					"possibleAffordanceLabels": [],
+					"readerRoleLabels": [
+						"스테이션 직원"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "waiting_customer",
+							"actorRoleLabel": "대기 손님",
+							"affordance": "refuse_contact",
+							"affordanceLabel": "접촉 거부",
+							"citedLedgerEventId": "civic-ledger-6",
+							"economyDelta": {
+								"localTrust": -8,
+								"recordBurden": 5
+							},
+							"economyDeltaLabel": "신뢰-8, 부담+5",
+							"eventId": "civic-ledger-8",
+							"kind": "queue_contact_refused",
+							"kindLabel": "접촉 거부"
+						},
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"economyDelta": {
+								"localTrust": -2,
+								"recordBurden": 3
+							},
+							"economyDeltaLabel": "신뢰-2, 부담+3",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						},
+						{
+							"actorRole": "station_officer",
+							"actorRoleLabel": "스테이션 직원",
+							"affordance": "cite_record",
+							"affordanceLabel": "기록 인용",
+							"citedLedgerEventId": "civic-ledger-5",
+							"eventId": "civic-ledger-6",
+							"kind": "station_record_cited",
+							"kindLabel": "스테이션 인용"
+						}
+					],
+					"socialObservationLabels": [
+						"대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부",
+						"스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단",
+						"스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용",
+						"상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달",
+						"공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시",
+						"대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평"
+					],
+					"state": "append_only",
+					"stateLabel": "추가됨",
+					"title": "시민 장부"
+				},
+				"lastDialogueChoice": "free_input",
+				"lastReasonCode": "dream_language_leak",
+				"reportWeight": 120,
+				"responseHesitationCount": 1,
+				"routeOutcome": "inquest_opened",
+				"sessionOutcome": "inquest_opened",
+				"stage": "inquest",
+				"suspicion": 125
+			},
+			"payload": {
+
+			},
+			"reason": "accepted"
+		},
+		{
+			"accepted": true,
+			"actionId": "focus.npc",
+			"actionResult": {
+
+			},
+			"after": {
+				"inputLocked": true,
+				"inspectedNpcState": {
+					"authorityFocusLabels": [
+						"대상=플레이어",
+						"인용=civic-ledger-5 / 상점 매니저 -> 보고 전달",
+						"대조=상점 전달 기록과 플레이어 발화",
+						"권한=심문 개시"
+					],
+					"baseReactionText": "보고됨",
+					"basisAction": {
+						"accepted": true,
+						"actorId": "NPC_Station_Officer",
+						"actorRole": "station_officer",
+						"affordance": "cite_record",
+						"availableActions": [
+							{
+								"actionId": "station_dossier.cite_record",
+								"affordance": "cite_record",
+								"citableLedgerEventIds": [
+									"civic-ledger-5"
+								],
+								"civicEconomyEffects": [],
+								"eligibleRoles": [
+									"station_officer"
+								],
+								"failureReasons": [
+									"object_not_perceived",
+									"affordance_unavailable",
+									"role_authority_exceeded",
+									"why_line_required",
+									"ledger_event_unknown",
+									"ledger_event_not_known",
+									"station_citation_requires_store_record"
+								],
+								"ledgerEventKind": "station_record_cited",
+								"objectId": "station_dossier",
+								"objectState": "absent",
+								"perceivedAs": "Station dossier citation",
+								"playerLabel": "Cite Record",
+								"preconditions": [
+									"object_state:absent",
+									"role_allowed:station_officer",
+									"known_ledger_event_required",
+									"known_store_ledger_event_required",
+									"record_id:station_same_order_dossier"
+								],
+								"priorityHints": [
+									"requires:store_record_citation"
+								],
+								"recordId": "station_same_order_dossier",
+								"requiresLedgerEvent": true,
+								"requiresStoreLedgerEvent": true,
+								"toState": "cited",
+								"validationRuleId": "same_order.station_dossier.cite_record",
+								"visibleTo": [
+									"station_officer"
+								]
+							}
+						],
+						"citedLedgerEventId": "civic-ledger-5",
+						"economyAfter": {
+							"accountCredit": 3,
+							"localTrust": 5,
+							"recordBurden": 85,
+							"stationAttention": 70
+						},
+						"ledgerEventId": "civic-ledger-6",
+						"ledgerEventKind": "station_record_cited",
+						"objectId": "station_dossier",
+						"perceivedObjectIds": [
+							"report_tray",
+							"station_dossier",
+							"civic_ledger",
+							"civic_economy_panel"
+						],
+						"recordId": "station_same_order_dossier",
+						"selectedActionDescriptor": {
+							"actionId": "station_dossier.cite_record",
+							"affordance": "cite_record",
+							"citableLedgerEventIds": [
+								"civic-ledger-5"
+							],
+							"civicEconomyEffects": [],
+							"eligibleRoles": [
+								"station_officer"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known",
+								"station_citation_requires_store_record"
+							],
+							"ledgerEventKind": "station_record_cited",
+							"objectId": "station_dossier",
+							"objectState": "absent",
+							"perceivedAs": "Station dossier citation",
+							"playerLabel": "Cite Record",
+							"preconditions": [
+								"object_state:absent",
+								"role_allowed:station_officer",
+								"known_ledger_event_required",
+								"known_store_ledger_event_required",
+								"record_id:station_same_order_dossier"
+							],
+							"priorityHints": [
+								"requires:store_record_citation"
+							],
+							"recordId": "station_same_order_dossier",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": true,
+							"toState": "cited",
+							"validationRuleId": "same_order.station_dossier.cite_record",
+							"visibleTo": [
+								"station_officer"
+							]
+						},
+						"selectionReason": "The Station cites the exact forwarded Store ledger event before narrowing the player's answer.",
+						"sequence": 6,
+						"stepId": "inquest.station.cite_store_report",
+						"validation": "accepted",
+						"whyLine": "The Station cites the exact forwarded Store ledger event before narrowing the player's answer."
+					},
+					"basisAffordance": "cite_record",
+					"basisAffordanceLabel": "기록 인용",
+					"basisConditionLabels": [
+						"스테이션 문서=없음",
+						"인용 장부 civic-ledger-5",
+						"상점 기록 필요"
+					],
+					"basisEconomyEffectLabels": [],
+					"basisLedgerEventId": "civic-ledger-6",
+					"basisLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"basisObjectId": "station_dossier",
+					"basisObjectLabel": "스테이션 문서",
+					"body": "현재 반응: 보고됨\n← 상점 매니저 · 보고 전달\n들은 말: \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"\n보는 환경: 보고 트레이=전달, 스테이션 문서=인용됨, 시민 장부=추가됨, 시민 경제=주목 상승\n오간 말: Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\" -> Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"\n근거 행동: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n읽은 기록: civic-ledger-5 / 상점 매니저 -> 보고 전달\n대상 기록물: 스테이션 문서\n심문 초점: 대상=플레이어, 인용=civic-ledger-5 / 상점 매니저 -> 보고 전달, 대조=상점 전달 기록과 플레이어 발화, 권한=심문 개시\n가능 조건: 스테이션 문서=없음, 인용 장부 civic-ledger-5, 상점 기록 필요\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"bodyColor": [
+						0.560000002384186,
+						0.430000007152557,
+						0.819999992847443,
+						1.0
+					],
+					"citedLedgerEventId": "civic-ledger-5",
+					"citedLedgerEventLabel": "civic-ledger-5 / 상점 매니저 -> 보고 전달",
+					"displayName": "Station Officer",
+					"emissionEnergy": 0.616666674613953,
+					"exposure": 125,
+					"handoffLabels": [],
+					"headColor": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"homeLandmark": "Station",
+					"markerVisible": true,
+					"materialAlpha": 0.3980952501297,
+					"npcId": "NPC_Station_Officer",
+					"opportunityChangeLabels": [],
+					"pressureText": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
+					"publicSpreadLabels": [],
+					"reactionSourceActorId": "NPC_Store_Manager",
+					"reactionSourceAffordance": "forward_report",
+					"reactionSourceRole": "store_manager",
+					"reactionSourceText": "← 상점 매니저 · 보고 전달",
+					"reactionSourceTokenColor": [
+						0.939999997615814,
+						0.550000011920929,
+						0.379999995231628,
+						1.0
+					],
+					"reactionSourceTokenVisible": true,
+					"reactionText": "보고됨\n← 상점 매니저 · 보고 전달",
+					"role": "Station Officer",
+					"roleTint": "station-officer-violet",
+					"roleTintLabel": "station officer violet",
+					"routeId": "StationIntake",
+					"socialExchangeLines": [
+						"Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\" -> Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\""
+					],
+					"spokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
+					"state": "inquest",
+					"visibleEnvironmentObjectLabels": [
+						"보고 트레이=전달",
+						"스테이션 문서=인용됨",
+						"시민 장부=추가됨",
+						"시민 경제=주목 상승"
+					],
+					"visibleEnvironmentObjects": [
+						{
+							"label": "보고\n전달",
+							"objectId": "report_tray",
+							"state": "forwarded",
+							"stateLabel": "전달",
+							"title": "보고 트레이"
+						},
+						{
+							"label": "스테이션 문서\n인용됨",
+							"objectId": "station_dossier",
+							"state": "cited",
+							"stateLabel": "인용됨",
+							"title": "스테이션 문서"
+						},
+						{
+							"label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
+							"objectId": "civic_ledger",
+							"recentLedgerEvents": [
+								{
+									"actorRole": "waiting_customer",
+									"actorRoleLabel": "대기 손님",
+									"affordance": "refuse_contact",
+									"affordanceLabel": "접촉 거부",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -8,
+										"recordBurden": 5
+									},
+									"economyDeltaLabel": "신뢰-8, 부담+5",
+									"eventId": "civic-ledger-8",
+									"kind": "queue_contact_refused",
+									"kindLabel": "접촉 거부"
+								},
+								{
+									"actorRole": "studio_pm",
+									"actorRoleLabel": "스튜디오 PM",
+									"affordance": "block_review",
+									"affordanceLabel": "리뷰 차단",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -2,
+										"recordBurden": 3
+									},
+									"economyDeltaLabel": "신뢰-2, 부담+3",
+									"eventId": "civic-ledger-7",
+									"kind": "studio_review_blocked",
+									"kindLabel": "리뷰 차단"
+								}
+							],
+							"state": "append_only",
+							"stateLabel": "추가됨",
+							"title": "시민 장부"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 0,
+								"recordBurden": 93,
+								"stationAttention": 70
+							},
+							"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
+							"objectId": "civic_economy_panel",
+							"recentLedgerEvents": [
+								{
+									"actorRole": "waiting_customer",
+									"actorRoleLabel": "대기 손님",
+									"affordance": "refuse_contact",
+									"affordanceLabel": "접촉 거부",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -8,
+										"recordBurden": 5
+									},
+									"economyDeltaLabel": "신뢰-8, 부담+5",
+									"eventId": "civic-ledger-8",
+									"kind": "queue_contact_refused",
+									"kindLabel": "접촉 거부"
+								},
+								{
+									"actorRole": "studio_pm",
+									"actorRoleLabel": "스튜디오 PM",
+									"affordance": "block_review",
+									"affordanceLabel": "리뷰 차단",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -2,
+										"recordBurden": 3
+									},
+									"economyDeltaLabel": "신뢰-2, 부담+3",
+									"eventId": "civic-ledger-7",
+									"kind": "studio_review_blocked",
+									"kindLabel": "리뷰 차단"
+								}
+							],
+							"state": "attention",
+							"stateLabel": "주목 상승",
+							"title": "시민 경제"
+						}
+					]
+				},
+				"inspectedSocialLink": {
+					"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+					"color": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"fromPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+					"observedActorId": "NPC_Station_Officer",
+					"observedActorName": "Station Officer",
+					"observedActorRole": "station_officer",
+					"observedAffordance": "cite_record",
+					"observedAffordanceLabel": "기록 인용",
+					"observedLedgerEventId": "civic-ledger-6",
+					"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"observedRoleLabel": "스테이션 직원",
+					"observerActorId": "NPC_Waiting_Customer",
+					"observerActorName": "Waiting Customer",
+					"observerRole": "waiting_customer",
+					"observerRoleLabel": "대기 손님",
+					"resultingAffordance": "refuse_contact",
+					"resultingAffordanceLabel": "접촉 거부",
+					"title": "사회 영향 / Station Officer -> Waiting Customer",
+					"toPosition": [
+						-10.3999996185303,
+						2.11999988555908,
+						1.39999997615814
+					],
+					"visible": true
+				},
+				"inspectedWorldRecordProp": {
+					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
+					"currentAffordanceLabels": [],
+					"label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
+					"objectId": "civic_ledger",
+					"possibleAffordanceLabels": [],
+					"readerRoleLabels": [
+						"스테이션 직원"
+					],
+					"recentLedgerEvents": [
+						{
+							"actorRole": "waiting_customer",
+							"actorRoleLabel": "대기 손님",
+							"affordance": "refuse_contact",
+							"affordanceLabel": "접촉 거부",
+							"citedLedgerEventId": "civic-ledger-6",
+							"economyDelta": {
+								"localTrust": -8,
+								"recordBurden": 5
+							},
+							"economyDeltaLabel": "신뢰-8, 부담+5",
+							"eventId": "civic-ledger-8",
+							"kind": "queue_contact_refused",
+							"kindLabel": "접촉 거부"
+						},
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"economyDelta": {
+								"localTrust": -2,
+								"recordBurden": 3
+							},
+							"economyDeltaLabel": "신뢰-2, 부담+3",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						},
+						{
+							"actorRole": "station_officer",
+							"actorRoleLabel": "스테이션 직원",
+							"affordance": "cite_record",
+							"affordanceLabel": "기록 인용",
+							"citedLedgerEventId": "civic-ledger-5",
+							"eventId": "civic-ledger-6",
+							"kind": "station_record_cited",
+							"kindLabel": "스테이션 인용"
+						}
+					],
+					"socialObservationLabels": [
+						"대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부",
+						"스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단",
+						"스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용",
+						"상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달",
+						"공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시",
+						"대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평"
+					],
+					"state": "append_only",
+					"stateLabel": "추가됨",
+					"title": "시민 장부"
+				},
+				"lastDialogueChoice": "free_input",
+				"lastReasonCode": "dream_language_leak",
+				"reportWeight": 120,
+				"responseHesitationCount": 1,
+				"routeOutcome": "inquest_opened",
+				"sessionOutcome": "inquest_opened",
+				"stage": "inquest",
+				"suspicion": 125
+			},
+			"before": {
+				"inputLocked": true,
+				"inspectedNpcState": {
+					"authorityFocusLabels": [
+						"대상=플레이어",
+						"인용=civic-ledger-5 / 상점 매니저 -> 보고 전달",
+						"대조=상점 전달 기록과 플레이어 발화",
+						"권한=심문 개시"
+					],
+					"baseReactionText": "보고됨",
+					"basisAction": {
+						"accepted": true,
+						"actorId": "NPC_Station_Officer",
+						"actorRole": "station_officer",
+						"affordance": "cite_record",
+						"availableActions": [
+							{
+								"actionId": "station_dossier.cite_record",
+								"affordance": "cite_record",
+								"citableLedgerEventIds": [
+									"civic-ledger-5"
+								],
+								"civicEconomyEffects": [],
+								"eligibleRoles": [
+									"station_officer"
+								],
+								"failureReasons": [
+									"object_not_perceived",
+									"affordance_unavailable",
+									"role_authority_exceeded",
+									"why_line_required",
+									"ledger_event_unknown",
+									"ledger_event_not_known",
+									"station_citation_requires_store_record"
+								],
+								"ledgerEventKind": "station_record_cited",
+								"objectId": "station_dossier",
+								"objectState": "absent",
+								"perceivedAs": "Station dossier citation",
+								"playerLabel": "Cite Record",
+								"preconditions": [
+									"object_state:absent",
+									"role_allowed:station_officer",
+									"known_ledger_event_required",
+									"known_store_ledger_event_required",
+									"record_id:station_same_order_dossier"
+								],
+								"priorityHints": [
+									"requires:store_record_citation"
+								],
+								"recordId": "station_same_order_dossier",
+								"requiresLedgerEvent": true,
+								"requiresStoreLedgerEvent": true,
+								"toState": "cited",
+								"validationRuleId": "same_order.station_dossier.cite_record",
+								"visibleTo": [
+									"station_officer"
+								]
+							}
+						],
+						"citedLedgerEventId": "civic-ledger-5",
+						"economyAfter": {
+							"accountCredit": 3,
+							"localTrust": 5,
+							"recordBurden": 85,
+							"stationAttention": 70
+						},
+						"ledgerEventId": "civic-ledger-6",
+						"ledgerEventKind": "station_record_cited",
+						"objectId": "station_dossier",
+						"perceivedObjectIds": [
+							"report_tray",
+							"station_dossier",
+							"civic_ledger",
+							"civic_economy_panel"
+						],
+						"recordId": "station_same_order_dossier",
+						"selectedActionDescriptor": {
+							"actionId": "station_dossier.cite_record",
+							"affordance": "cite_record",
+							"citableLedgerEventIds": [
+								"civic-ledger-5"
+							],
+							"civicEconomyEffects": [],
+							"eligibleRoles": [
+								"station_officer"
+							],
+							"failureReasons": [
+								"object_not_perceived",
+								"affordance_unavailable",
+								"role_authority_exceeded",
+								"why_line_required",
+								"ledger_event_unknown",
+								"ledger_event_not_known",
+								"station_citation_requires_store_record"
+							],
+							"ledgerEventKind": "station_record_cited",
+							"objectId": "station_dossier",
+							"objectState": "absent",
+							"perceivedAs": "Station dossier citation",
+							"playerLabel": "Cite Record",
+							"preconditions": [
+								"object_state:absent",
+								"role_allowed:station_officer",
+								"known_ledger_event_required",
+								"known_store_ledger_event_required",
+								"record_id:station_same_order_dossier"
+							],
+							"priorityHints": [
+								"requires:store_record_citation"
+							],
+							"recordId": "station_same_order_dossier",
+							"requiresLedgerEvent": true,
+							"requiresStoreLedgerEvent": true,
+							"toState": "cited",
+							"validationRuleId": "same_order.station_dossier.cite_record",
+							"visibleTo": [
+								"station_officer"
+							]
+						},
+						"selectionReason": "The Station cites the exact forwarded Store ledger event before narrowing the player's answer.",
+						"sequence": 6,
+						"stepId": "inquest.station.cite_store_report",
+						"validation": "accepted",
+						"whyLine": "The Station cites the exact forwarded Store ledger event before narrowing the player's answer."
+					},
+					"basisAffordance": "cite_record",
+					"basisAffordanceLabel": "기록 인용",
+					"basisConditionLabels": [
+						"스테이션 문서=없음",
+						"인용 장부 civic-ledger-5",
+						"상점 기록 필요"
+					],
+					"basisEconomyEffectLabels": [],
+					"basisLedgerEventId": "civic-ledger-6",
+					"basisLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"basisObjectId": "station_dossier",
+					"basisObjectLabel": "스테이션 문서",
+					"body": "현재 반응: 보고됨\n← 상점 매니저 · 보고 전달\n들은 말: \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"\n보는 환경: 보고 트레이=전달, 스테이션 문서=인용됨, 시민 장부=추가됨, 시민 경제=주목 상승\n오간 말: Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\" -> Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"\n근거 행동: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n읽은 기록: civic-ledger-5 / 상점 매니저 -> 보고 전달\n대상 기록물: 스테이션 문서\n심문 초점: 대상=플레이어, 인용=civic-ledger-5 / 상점 매니저 -> 보고 전달, 대조=상점 전달 기록과 플레이어 발화, 권한=심문 개시\n가능 조건: 스테이션 문서=없음, 인용 장부 civic-ledger-5, 상점 기록 필요\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
+					"bodyColor": [
+						0.560000002384186,
+						0.430000007152557,
+						0.819999992847443,
+						1.0
+					],
+					"citedLedgerEventId": "civic-ledger-5",
+					"citedLedgerEventLabel": "civic-ledger-5 / 상점 매니저 -> 보고 전달",
+					"displayName": "Station Officer",
+					"emissionEnergy": 0.616666674613953,
+					"exposure": 125,
+					"handoffLabels": [],
+					"headColor": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"homeLandmark": "Station",
+					"markerVisible": true,
+					"materialAlpha": 0.3980952501297,
+					"npcId": "NPC_Station_Officer",
+					"opportunityChangeLabels": [],
+					"pressureText": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
+					"publicSpreadLabels": [],
+					"reactionSourceActorId": "NPC_Store_Manager",
+					"reactionSourceAffordance": "forward_report",
+					"reactionSourceRole": "store_manager",
+					"reactionSourceText": "← 상점 매니저 · 보고 전달",
+					"reactionSourceTokenColor": [
+						0.939999997615814,
+						0.550000011920929,
+						0.379999995231628,
+						1.0
+					],
+					"reactionSourceTokenVisible": true,
+					"reactionText": "보고됨\n← 상점 매니저 · 보고 전달",
+					"role": "Station Officer",
+					"roleTint": "station-officer-violet",
+					"roleTintLabel": "station officer violet",
+					"routeId": "StationIntake",
+					"socialExchangeLines": [
+						"Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\" -> Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\""
+					],
+					"spokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
+					"state": "inquest",
+					"visibleEnvironmentObjectLabels": [
+						"보고 트레이=전달",
+						"스테이션 문서=인용됨",
+						"시민 장부=추가됨",
+						"시민 경제=주목 상승"
+					],
+					"visibleEnvironmentObjects": [
+						{
+							"label": "보고\n전달",
+							"objectId": "report_tray",
+							"state": "forwarded",
+							"stateLabel": "전달",
+							"title": "보고 트레이"
+						},
+						{
+							"label": "스테이션 문서\n인용됨",
+							"objectId": "station_dossier",
+							"state": "cited",
+							"stateLabel": "인용됨",
+							"title": "스테이션 문서"
+						},
+						{
+							"label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
+							"objectId": "civic_ledger",
+							"recentLedgerEvents": [
+								{
+									"actorRole": "waiting_customer",
+									"actorRoleLabel": "대기 손님",
+									"affordance": "refuse_contact",
+									"affordanceLabel": "접촉 거부",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -8,
+										"recordBurden": 5
+									},
+									"economyDeltaLabel": "신뢰-8, 부담+5",
+									"eventId": "civic-ledger-8",
+									"kind": "queue_contact_refused",
+									"kindLabel": "접촉 거부"
+								},
+								{
+									"actorRole": "studio_pm",
+									"actorRoleLabel": "스튜디오 PM",
+									"affordance": "block_review",
+									"affordanceLabel": "리뷰 차단",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -2,
+										"recordBurden": 3
+									},
+									"economyDeltaLabel": "신뢰-2, 부담+3",
+									"eventId": "civic-ledger-7",
+									"kind": "studio_review_blocked",
+									"kindLabel": "리뷰 차단"
+								}
+							],
+							"state": "append_only",
+							"stateLabel": "추가됨",
+							"title": "시민 장부"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 0,
+								"recordBurden": 93,
+								"stationAttention": 70
+							},
+							"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
+							"objectId": "civic_economy_panel",
+							"recentLedgerEvents": [
+								{
+									"actorRole": "waiting_customer",
+									"actorRoleLabel": "대기 손님",
+									"affordance": "refuse_contact",
+									"affordanceLabel": "접촉 거부",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -8,
+										"recordBurden": 5
+									},
+									"economyDeltaLabel": "신뢰-8, 부담+5",
+									"eventId": "civic-ledger-8",
+									"kind": "queue_contact_refused",
+									"kindLabel": "접촉 거부"
+								},
+								{
+									"actorRole": "studio_pm",
+									"actorRoleLabel": "스튜디오 PM",
+									"affordance": "block_review",
+									"affordanceLabel": "리뷰 차단",
+									"citedLedgerEventId": "civic-ledger-6",
+									"economyDelta": {
+										"localTrust": -2,
+										"recordBurden": 3
+									},
+									"economyDeltaLabel": "신뢰-2, 부담+3",
+									"eventId": "civic-ledger-7",
+									"kind": "studio_review_blocked",
+									"kindLabel": "리뷰 차단"
+								}
+							],
+							"state": "attention",
+							"stateLabel": "주목 상승",
+							"title": "시민 경제"
+						}
+					]
+				},
+				"inspectedSocialLink": {
+					"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+					"color": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"fromPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+					"observedActorId": "NPC_Station_Officer",
+					"observedActorName": "Station Officer",
+					"observedActorRole": "station_officer",
+					"observedAffordance": "cite_record",
+					"observedAffordanceLabel": "기록 인용",
+					"observedLedgerEventId": "civic-ledger-6",
+					"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"observedRoleLabel": "스테이션 직원",
+					"observerActorId": "NPC_Waiting_Customer",
+					"observerActorName": "Waiting Customer",
+					"observerRole": "waiting_customer",
+					"observerRoleLabel": "대기 손님",
+					"resultingAffordance": "refuse_contact",
+					"resultingAffordanceLabel": "접촉 거부",
+					"title": "사회 영향 / Station Officer -> Waiting Customer",
+					"toPosition": [
+						-10.3999996185303,
+						2.11999988555908,
+						1.39999997615814
+					],
+					"visible": true
 				},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
@@ -25785,7 +27762,9 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -26048,6 +28027,42 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+					"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+					"color": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"fromPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+					"observedActorId": "NPC_Station_Officer",
+					"observedActorName": "Station Officer",
+					"observedActorRole": "station_officer",
+					"observedAffordance": "cite_record",
+					"observedAffordanceLabel": "기록 인용",
+					"observedLedgerEventId": "civic-ledger-6",
+					"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"observedRoleLabel": "스테이션 직원",
+					"observerActorId": "NPC_Waiting_Customer",
+					"observerActorName": "Waiting Customer",
+					"observerRole": "waiting_customer",
+					"observerRoleLabel": "대기 손님",
+					"resultingAffordance": "refuse_contact",
+					"resultingAffordanceLabel": "접촉 거부",
+					"title": "사회 영향 / Station Officer -> Waiting Customer",
+					"toPosition": [
+						-10.3999996185303,
+						2.11999988555908,
+						1.39999997615814
+					],
+					"visible": true
 				},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
@@ -26413,6 +28428,42 @@
 						}
 					]
 				},
+				"inspectedSocialLink": {
+					"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+					"color": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"fromPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+					"observedActorId": "NPC_Station_Officer",
+					"observedActorName": "Station Officer",
+					"observedActorRole": "station_officer",
+					"observedAffordance": "cite_record",
+					"observedAffordanceLabel": "기록 인용",
+					"observedLedgerEventId": "civic-ledger-6",
+					"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"observedRoleLabel": "스테이션 직원",
+					"observerActorId": "NPC_Waiting_Customer",
+					"observerActorName": "Waiting Customer",
+					"observerRole": "waiting_customer",
+					"observerRoleLabel": "대기 손님",
+					"resultingAffordance": "refuse_contact",
+					"resultingAffordanceLabel": "접촉 거부",
+					"title": "사회 영향 / Station Officer -> Waiting Customer",
+					"toPosition": [
+						-10.3999996185303,
+						2.11999988555908,
+						1.39999997615814
+					],
+					"visible": true
+				},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
 					"currentAffordanceLabels": [],
@@ -26485,13 +28536,17 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.npc",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -26754,6 +28809,42 @@
 							"title": "시민 경제"
 						}
 					]
+				},
+				"inspectedSocialLink": {
+					"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+					"color": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"fromPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+					"observedActorId": "NPC_Station_Officer",
+					"observedActorName": "Station Officer",
+					"observedActorRole": "station_officer",
+					"observedAffordance": "cite_record",
+					"observedAffordanceLabel": "기록 인용",
+					"observedLedgerEventId": "civic-ledger-6",
+					"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"observedRoleLabel": "스테이션 직원",
+					"observerActorId": "NPC_Waiting_Customer",
+					"observerActorName": "Waiting Customer",
+					"observerRole": "waiting_customer",
+					"observerRoleLabel": "대기 손님",
+					"resultingAffordance": "refuse_contact",
+					"resultingAffordanceLabel": "접촉 거부",
+					"title": "사회 영향 / Station Officer -> Waiting Customer",
+					"toPosition": [
+						-10.3999996185303,
+						2.11999988555908,
+						1.39999997615814
+					],
+					"visible": true
 				},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
@@ -27090,6 +29181,42 @@
 						}
 					]
 				},
+				"inspectedSocialLink": {
+					"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+					"color": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"fromPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+					"observedActorId": "NPC_Station_Officer",
+					"observedActorName": "Station Officer",
+					"observedActorRole": "station_officer",
+					"observedAffordance": "cite_record",
+					"observedAffordanceLabel": "기록 인용",
+					"observedLedgerEventId": "civic-ledger-6",
+					"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"observedRoleLabel": "스테이션 직원",
+					"observerActorId": "NPC_Waiting_Customer",
+					"observerActorName": "Waiting Customer",
+					"observerRole": "waiting_customer",
+					"observerRoleLabel": "대기 손님",
+					"resultingAffordance": "refuse_contact",
+					"resultingAffordanceLabel": "접촉 거부",
+					"title": "사회 영향 / Station Officer -> Waiting Customer",
+					"toPosition": [
+						-10.3999996185303,
+						2.11999988555908,
+						1.39999997615814
+					],
+					"visible": true
+				},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
 					"currentAffordanceLabels": [],
@@ -27170,7 +29297,9 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {},
+			"actionResult": {
+
+			},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -27538,6 +29667,42 @@
 						}
 					]
 				},
+				"inspectedSocialLink": {
+					"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+					"color": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"fromPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+					"observedActorId": "NPC_Station_Officer",
+					"observedActorName": "Station Officer",
+					"observedActorRole": "station_officer",
+					"observedAffordance": "cite_record",
+					"observedAffordanceLabel": "기록 인용",
+					"observedLedgerEventId": "civic-ledger-6",
+					"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"observedRoleLabel": "스테이션 직원",
+					"observerActorId": "NPC_Waiting_Customer",
+					"observerActorName": "Waiting Customer",
+					"observerRole": "waiting_customer",
+					"observerRoleLabel": "대기 손님",
+					"resultingAffordance": "refuse_contact",
+					"resultingAffordanceLabel": "접촉 거부",
+					"title": "사회 영향 / Station Officer -> Waiting Customer",
+					"toPosition": [
+						-10.3999996185303,
+						2.11999988555908,
+						1.39999997615814
+					],
+					"visible": true
+				},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
 					"currentAffordanceLabels": [],
@@ -27873,6 +30038,42 @@
 						}
 					]
 				},
+				"inspectedSocialLink": {
+					"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+					"color": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"fromPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+					"observedActorId": "NPC_Station_Officer",
+					"observedActorName": "Station Officer",
+					"observedActorRole": "station_officer",
+					"observedAffordance": "cite_record",
+					"observedAffordanceLabel": "기록 인용",
+					"observedLedgerEventId": "civic-ledger-6",
+					"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"observedRoleLabel": "스테이션 직원",
+					"observerActorId": "NPC_Waiting_Customer",
+					"observerActorName": "Waiting Customer",
+					"observerRole": "waiting_customer",
+					"observerRoleLabel": "대기 손님",
+					"resultingAffordance": "refuse_contact",
+					"resultingAffordanceLabel": "접촉 거부",
+					"title": "사회 영향 / Station Officer -> Waiting Customer",
+					"toPosition": [
+						-10.3999996185303,
+						2.11999988555908,
+						1.39999997615814
+					],
+					"visible": true
+				},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
 					"currentAffordanceLabels": [],
@@ -27945,7 +30146,9 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {},
+			"payload": {
+
+			},
 			"reason": "accepted"
 		}
 	],
@@ -30137,7 +32340,9 @@
 				"actorRole": "station_officer",
 				"affordance": "cite_record",
 				"citedLedgerEventId": "civic-ledger-5",
-				"economyDelta": {},
+				"economyDelta": {
+
+				},
 				"eventId": "civic-ledger-6",
 				"kind": "station_record_cited",
 				"objectId": "station_dossier",
@@ -30463,15 +32668,17 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779125018960",
+				"eventId": "playable_session_started-001-1779126768104",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779125018960,
-				"uiSummaryArgs": {},
+				"timestampMs": 1779126768104,
+				"uiSummaryArgs": {
+
+				},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -30479,7 +32686,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-002-1779125019117",
+				"eventId": "world_record_prop_inspected-002-1779126768269",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "usual_order_cue",
 				"schemaVersion": "godot-runtime-v1",
@@ -30487,7 +32694,7 @@
 				"state": "read",
 				"stateLabel": "읽힘",
 				"summary": "Inspected world record prop usual_order_cue in state read.",
-				"timestampMs": 1779125019117,
+				"timestampMs": 1779126768269,
 				"uiSummaryArgs": {
 					"object": "늘 같은 주문",
 					"state": "읽힘"
@@ -30505,13 +32712,13 @@
 					"DL_ST1_APPROVAL_GATE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-003-1779125019147",
+				"eventId": "text_surface_read-003-1779126768307",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Studio_ApprovalCriteria as local context before speaking.",
 				"textSurfaceId": "TS_Studio_ApprovalCriteria",
-				"timestampMs": 1779125019147,
+				"timestampMs": 1779126768307,
 				"uiSummaryArgs": {
 					"law": "DL_ST1_APPROVAL_GATE",
 					"surface": "승인 기준"
@@ -30529,13 +32736,13 @@
 					"DL_P1_OBSERVATION_ETIQUETTE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-004-1779125019182",
+				"eventId": "text_surface_read-004-1779126768352",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Park_NoticeBoard as local context before speaking.",
 				"textSurfaceId": "TS_Park_NoticeBoard",
-				"timestampMs": 1779125019182,
+				"timestampMs": 1779126768352,
 				"uiSummaryArgs": {
 					"law": "DL_P1_OBSERVATION_ETIQUETTE",
 					"surface": "공지 게시판"
@@ -30551,7 +32758,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-005-1779125019216",
+				"eventId": "conversation_started-005-1779126768612",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -30560,7 +32767,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779125019216,
+				"timestampMs": 1779126768612,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -30573,7 +32780,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-006-1779125019239",
+				"eventId": "response_hesitation_noted-006-1779126768649",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -30594,7 +32801,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779125019239,
+				"timestampMs": 1779126768649,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -30609,7 +32816,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-007-1779125019259",
+				"eventId": "dialogue_choice_selected-007-1779126768677",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -30631,7 +32838,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779125019259,
+				"timestampMs": 1779126768677,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -30646,7 +32853,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779125019259",
+				"eventId": "conversation_anomaly_detected-008-1779126768677",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -30668,7 +32875,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779125019259,
+				"timestampMs": 1779126768677,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -30683,7 +32890,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779125019259",
+				"eventId": "npc_suspicion_changed-009-1779126768677",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -30705,7 +32912,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779125019259,
+				"timestampMs": 1779126768677,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -30720,7 +32927,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-010-1779125019281",
+				"eventId": "free_input_submitted-010-1779126768709",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -30745,7 +32952,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779125019281,
+				"timestampMs": 1779126768709,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -30760,7 +32967,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-011-1779125019281",
+				"eventId": "conversation_anomaly_detected-011-1779126768709",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -30785,7 +32992,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779125019281,
+				"timestampMs": 1779126768709,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -30800,7 +33007,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-012-1779125019281",
+				"eventId": "npc_suspicion_changed-012-1779126768709",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -30825,7 +33032,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779125019281,
+				"timestampMs": 1779126768709,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -30840,7 +33047,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-013-1779125019281",
+				"eventId": "suspicion_shared-013-1779126768709",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -30865,7 +33072,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779125019281,
+				"timestampMs": 1779126768709,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -30880,7 +33087,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-014-1779125019282",
+				"eventId": "station_report_created-014-1779126768710",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -30905,7 +33112,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779125019282,
+				"timestampMs": 1779126768710,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -30920,7 +33127,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-015-1779125019282",
+				"eventId": "station_inquest_opened-015-1779126768710",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -30945,7 +33152,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779125019282,
+				"timestampMs": 1779126768710,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -30955,7 +33162,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-016-1779125019389",
+				"eventId": "npc_reaction_inspected-016-1779126768856",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Store_Clerk",
 				"reactionText": "보고됨",
@@ -30963,7 +33170,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "inquest",
 				"summary": "Inspected NPC reaction NPC_Store_Clerk in state inquest.",
-				"timestampMs": 1779125019389,
+				"timestampMs": 1779126768856,
 				"uiSummaryArgs": {
 					"npc": "Store Clerk",
 					"state": "보고됨"
@@ -30975,7 +33182,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-017-1779125019469",
+				"eventId": "npc_reaction_inspected-017-1779126768974",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Store_Manager",
 				"reactionText": "보고 전달\n← 상점 점원 · 메모 배치",
@@ -30983,7 +33190,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "forwarded",
 				"summary": "Inspected NPC reaction NPC_Store_Manager in state forwarded.",
-				"timestampMs": 1779125019469,
+				"timestampMs": 1779126768974,
 				"uiSummaryArgs": {
 					"npc": "Store Manager",
 					"state": "보고 전달\n← 상점 점원 · 메모 배치"
@@ -30995,7 +33202,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-018-1779125019550",
+				"eventId": "world_record_prop_inspected-018-1779126769086",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -31003,7 +33210,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779125019550,
+				"timestampMs": 1779126769086,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -31015,7 +33222,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-019-1779125019632",
+				"eventId": "npc_reaction_inspected-019-1779126769185",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Park_Witness",
 				"reactionText": "소문 게시\n← 상점 점원 · 메모 배치",
@@ -31023,7 +33230,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "rumored",
 				"summary": "Inspected NPC reaction NPC_Park_Witness in state rumored.",
-				"timestampMs": 1779125019632,
+				"timestampMs": 1779126769185,
 				"uiSummaryArgs": {
 					"npc": "Park Witness",
 					"state": "소문 게시\n← 상점 점원 · 메모 배치"
@@ -31035,7 +33242,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-020-1779125019710",
+				"eventId": "world_record_prop_inspected-020-1779126769275",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "studio_review_queue",
 				"schemaVersion": "godot-runtime-v1",
@@ -31043,7 +33250,7 @@
 				"state": "blocked",
 				"stateLabel": "차단",
 				"summary": "Inspected world record prop studio_review_queue in state blocked.",
-				"timestampMs": 1779125019710,
+				"timestampMs": 1779126769275,
 				"uiSummaryArgs": {
 					"object": "스튜디오 리뷰 줄",
 					"state": "차단"
@@ -31055,7 +33262,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-021-1779125019787",
+				"eventId": "world_record_prop_inspected-021-1779126769356",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_economy_panel",
 				"schemaVersion": "godot-runtime-v1",
@@ -31063,7 +33270,7 @@
 				"state": "attention",
 				"stateLabel": "주목 상승",
 				"summary": "Inspected world record prop civic_economy_panel in state attention.",
-				"timestampMs": 1779125019787,
+				"timestampMs": 1779126769356,
 				"uiSummaryArgs": {
 					"object": "시민 경제",
 					"state": "주목 상승"
@@ -31075,7 +33282,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-022-1779125019878",
+				"eventId": "world_record_prop_inspected-022-1779126769439",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_ledger",
 				"schemaVersion": "godot-runtime-v1",
@@ -31083,7 +33290,7 @@
 				"state": "append_only",
 				"stateLabel": "추가됨",
 				"summary": "Inspected world record prop civic_ledger in state append_only.",
-				"timestampMs": 1779125019878,
+				"timestampMs": 1779126769439,
 				"uiSummaryArgs": {
 					"object": "시민 장부",
 					"state": "추가됨"
@@ -31095,7 +33302,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-023-1779125019973",
+				"eventId": "npc_reaction_inspected-023-1779126769551",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Station_Officer",
 				"reactionText": "보고됨\n← 상점 매니저 · 보고 전달",
@@ -31103,7 +33310,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "inquest",
 				"summary": "Inspected NPC reaction NPC_Station_Officer in state inquest.",
-				"timestampMs": 1779125019973,
+				"timestampMs": 1779126769551,
 				"uiSummaryArgs": {
 					"npc": "Station Officer",
 					"state": "보고됨\n← 상점 매니저 · 보고 전달"
@@ -31115,7 +33322,29 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-024-1779125020114",
+				"eventId": "social_link_inspected-024-1779126769719",
+				"eventName": "social_link_inspected",
+				"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+				"observedActorId": "NPC_Station_Officer",
+				"observedAffordance": "cite_record",
+				"observerActorId": "NPC_Waiting_Customer",
+				"resultingAffordance": "refuse_contact",
+				"schemaVersion": "godot-runtime-v1",
+				"sessionId": "dre-171-playable-session",
+				"summary": "Inspected social influence link NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact.",
+				"timestampMs": 1779126769719,
+				"uiSummaryArgs": {
+					"from": "Station Officer",
+					"to": "Waiting Customer"
+				},
+				"uiSummaryKey": "event.social_link_inspected",
+				"worldId": "dre_171_godot_shell",
+				"worldRevision": "rev-social-stealth-v1"
+			},
+			{
+				"adapter": "godot",
+				"eventFamily": "observation",
+				"eventId": "npc_reaction_inspected-025-1779126769819",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Studio_PM",
 				"reactionText": "리뷰 차단\n← 스테이션 직원 · 기록 인용",
@@ -31123,7 +33352,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "blocked",
 				"summary": "Inspected NPC reaction NPC_Studio_PM in state blocked.",
-				"timestampMs": 1779125020114,
+				"timestampMs": 1779126769819,
 				"uiSummaryArgs": {
 					"npc": "Studio PM",
 					"state": "리뷰 차단\n← 스테이션 직원 · 기록 인용"
@@ -31135,7 +33364,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-025-1779125020196",
+				"eventId": "npc_reaction_inspected-026-1779126769952",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Waiting_Customer",
 				"reactionText": "접촉 거부\n← 스테이션 직원 · 기록 인용",
@@ -31143,7 +33372,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "refused",
 				"summary": "Inspected NPC reaction NPC_Waiting_Customer in state refused.",
-				"timestampMs": 1779125020196,
+				"timestampMs": 1779126769952,
 				"uiSummaryArgs": {
 					"npc": "Waiting Customer",
 					"state": "접촉 거부\n← 스테이션 직원 · 기록 인용"
@@ -39516,6 +41745,80 @@
 				}
 			]
 		},
+		"inspectedSocialLink": {
+			"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+			"color": [
+				0.720000028610229,
+				0.620000004768372,
+				0.939999997615814,
+				1.0
+			],
+			"fromPosition": [
+				8.80000019073486,
+				2.11999988555908,
+				-11.1999998092651
+			],
+			"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+			"observedActorId": "NPC_Station_Officer",
+			"observedActorName": "Station Officer",
+			"observedActorRole": "station_officer",
+			"observedAffordance": "cite_record",
+			"observedAffordanceLabel": "기록 인용",
+			"observedLedgerEventId": "civic-ledger-6",
+			"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+			"observedRoleLabel": "스테이션 직원",
+			"observerActorId": "NPC_Waiting_Customer",
+			"observerActorName": "Waiting Customer",
+			"observerRole": "waiting_customer",
+			"observerRoleLabel": "대기 손님",
+			"resultingAffordance": "refuse_contact",
+			"resultingAffordanceLabel": "접촉 거부",
+			"title": "사회 영향 / Station Officer -> Waiting Customer",
+			"toPosition": [
+				-10.3999996185303,
+				2.11999988555908,
+				1.39999997615814
+			],
+			"visible": true
+		},
+		"inspectedSocialLinkHistory": [
+			{
+				"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+				"color": [
+					0.720000028610229,
+					0.620000004768372,
+					0.939999997615814,
+					1.0
+				],
+				"fromPosition": [
+					8.80000019073486,
+					2.11999988555908,
+					-11.1999998092651
+				],
+				"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+				"observedActorId": "NPC_Station_Officer",
+				"observedActorName": "Station Officer",
+				"observedActorRole": "station_officer",
+				"observedAffordance": "cite_record",
+				"observedAffordanceLabel": "기록 인용",
+				"observedLedgerEventId": "civic-ledger-6",
+				"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+				"observedRoleLabel": "스테이션 직원",
+				"observerActorId": "NPC_Waiting_Customer",
+				"observerActorName": "Waiting Customer",
+				"observerRole": "waiting_customer",
+				"observerRoleLabel": "대기 손님",
+				"resultingAffordance": "refuse_contact",
+				"resultingAffordanceLabel": "접촉 거부",
+				"title": "사회 영향 / Station Officer -> Waiting Customer",
+				"toPosition": [
+					-10.3999996185303,
+					2.11999988555908,
+					1.39999997615814
+				],
+				"visible": true
+			}
+		],
 		"inspectedWorldRecordHistory": [
 			{
 				"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
@@ -42216,7 +44519,9 @@
 					"actorRole": "station_officer",
 					"affordance": "cite_record",
 					"citedLedgerEventId": "civic-ledger-5",
-					"economyDelta": {},
+					"economyDelta": {
+
+					},
 					"eventId": "civic-ledger-6",
 					"kind": "station_record_cited",
 					"objectId": "station_dossier",
@@ -44783,6 +47088,80 @@
 					}
 				]
 			},
+			"inspectedSocialLink": {
+				"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+				"color": [
+					0.720000028610229,
+					0.620000004768372,
+					0.939999997615814,
+					1.0
+				],
+				"fromPosition": [
+					8.80000019073486,
+					2.11999988555908,
+					-11.1999998092651
+				],
+				"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+				"observedActorId": "NPC_Station_Officer",
+				"observedActorName": "Station Officer",
+				"observedActorRole": "station_officer",
+				"observedAffordance": "cite_record",
+				"observedAffordanceLabel": "기록 인용",
+				"observedLedgerEventId": "civic-ledger-6",
+				"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+				"observedRoleLabel": "스테이션 직원",
+				"observerActorId": "NPC_Waiting_Customer",
+				"observerActorName": "Waiting Customer",
+				"observerRole": "waiting_customer",
+				"observerRoleLabel": "대기 손님",
+				"resultingAffordance": "refuse_contact",
+				"resultingAffordanceLabel": "접촉 거부",
+				"title": "사회 영향 / Station Officer -> Waiting Customer",
+				"toPosition": [
+					-10.3999996185303,
+					2.11999988555908,
+					1.39999997615814
+				],
+				"visible": true
+			},
+			"inspectedSocialLinkHistory": [
+				{
+					"body": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+					"color": [
+						0.720000028610229,
+						0.620000004768372,
+						0.939999997615814,
+						1.0
+					],
+					"fromPosition": [
+						8.80000019073486,
+						2.11999988555908,
+						-11.1999998092651
+					],
+					"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
+					"observedActorId": "NPC_Station_Officer",
+					"observedActorName": "Station Officer",
+					"observedActorRole": "station_officer",
+					"observedAffordance": "cite_record",
+					"observedAffordanceLabel": "기록 인용",
+					"observedLedgerEventId": "civic-ledger-6",
+					"observedLedgerEventLabel": "civic-ledger-6 / 스테이션 직원 -> 기록 인용",
+					"observedRoleLabel": "스테이션 직원",
+					"observerActorId": "NPC_Waiting_Customer",
+					"observerActorName": "Waiting Customer",
+					"observerRole": "waiting_customer",
+					"observerRoleLabel": "대기 손님",
+					"resultingAffordance": "refuse_contact",
+					"resultingAffordanceLabel": "접촉 거부",
+					"title": "사회 영향 / Station Officer -> Waiting Customer",
+					"toPosition": [
+						-10.3999996185303,
+						2.11999988555908,
+						1.39999997615814
+					],
+					"visible": true
+				}
+			],
 			"inspectedWorldRecordHistory": [
 				{
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
@@ -46312,6 +48691,7 @@
 		"codexInspectedStudioOpportunityChange": true,
 		"codexInspectedStudioPm": true,
 		"codexInspectedUsualOrderCue": true,
+		"codexInspectedVisibleSocialInfluenceLink": true,
 		"codexInspectedWaitingCustomer": true,
 		"codexReadConversationSocialAudience": true,
 		"codexReadConversationVisibleContext": true,
@@ -46360,17 +48740,23 @@
 	"playerActionCatalog": [
 		{
 			"actionId": "focus.store_counter",
-			"payloadSchema": {},
+			"payloadSchema": {
+
+			},
 			"playerMeaning": "Move Codex/player attention to the Store counter interaction zone."
 		},
 		{
 			"actionId": "conversation.start",
-			"payloadSchema": {},
+			"payloadSchema": {
+
+			},
 			"playerMeaning": "Start the Store Clerk conversation inside the running scene."
 		},
 		{
 			"actionId": "player.wait.hesitation_record",
-			"payloadSchema": {},
+			"payloadSchema": {
+
+			},
 			"playerMeaning": "Record a delayed answer as player uncertainty."
 		},
 		{
@@ -46416,8 +48802,17 @@
 			"playerMeaning": "Move Codex/player attention to one visible NPC so their current social reaction can be read."
 		},
 		{
+			"actionId": "focus.social_link",
+			"payloadSchema": {
+				"linkId": "string"
+			},
+			"playerMeaning": "Move Codex/player attention to one visible NPC-to-NPC influence link."
+		},
+		{
 			"actionId": "player.interact.focused",
-			"payloadSchema": {},
+			"payloadSchema": {
+
+			},
 			"playerMeaning": "Press the current focused interaction in the running scene."
 		},
 		{
@@ -46433,6 +48828,13 @@
 				"npcId": "string"
 			},
 			"playerMeaning": "Read one visible NPC reaction through the same HUD notice area a player uses."
+		},
+		{
+			"actionId": "inspect.social_link",
+			"payloadSchema": {
+				"linkId": "string"
+			},
+			"playerMeaning": "Read one visible NPC-to-NPC influence link through the same HUD notice area a player uses."
 		}
 	],
 	"providerPacketMemoryProbe": {
@@ -47165,6 +49567,7 @@
 				"codexInspectedStudioOpportunityChange": false,
 				"codexInspectedStudioPm": false,
 				"codexInspectedUsualOrderCue": false,
+				"codexInspectedVisibleSocialInfluenceLink": false,
 				"codexInspectedWaitingCustomer": false,
 				"codexReadConversationSocialAudience": true,
 				"codexReadConversationVisibleContext": true,
@@ -47510,9 +49913,13 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "initial",
-					"latestLedger": {},
+					"latestLedger": {
+
+					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -47946,9 +50353,13 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "focus.store_counter",
-					"latestLedger": {},
+					"latestLedger": {
+
+					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -48382,9 +50793,13 @@
 						"safeLineLabel": "2  제가 보통 뭘 시켰죠?",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "conversation.start",
-					"latestLedger": {},
+					"latestLedger": {
+
+					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -48818,9 +51233,13 @@
 						"safeLineLabel": "2  어제 일이 조금 흐릿해서 확인했습니다.",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "dialogue.choice.by_id",
-					"latestLedger": {},
+					"latestLedger": {
+
+					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -49212,7 +51631,9 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Studio_PM",
@@ -49621,7 +52042,9 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "focus.world_record_prop",
 					"latestLedger": {
 						"actorId": "NPC_Studio_PM",
@@ -51821,6 +54244,7 @@
 				"codexInspectedStudioOpportunityChange": false,
 				"codexInspectedStudioPm": false,
 				"codexInspectedUsualOrderCue": false,
+				"codexInspectedVisibleSocialInfluenceLink": false,
 				"codexInspectedWaitingCustomer": false,
 				"codexReadConversationSocialAudience": true,
 				"codexReadConversationVisibleContext": true,
@@ -52166,9 +54590,13 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "initial",
-					"latestLedger": {},
+					"latestLedger": {
+
+					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -52602,9 +55030,13 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "focus.store_counter",
-					"latestLedger": {},
+					"latestLedger": {
+
+					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -53038,9 +55470,13 @@
 						"safeLineLabel": "2  제가 보통 뭘 시켰죠?",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "conversation.start",
-					"latestLedger": {},
+					"latestLedger": {
+
+					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -53395,7 +55831,9 @@
 						"safeLineLabel": "2  어제 일이 조금 흐릿해서 확인했습니다.",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Store_Clerk",
@@ -53718,7 +56156,9 @@
 						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Studio_PM",
@@ -54043,7 +56483,9 @@
 						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "focus.world_record_prop",
 					"latestLedger": {
 						"actorId": "NPC_Studio_PM",
@@ -56710,6 +59152,7 @@
 				"codexInspectedStudioOpportunityChange": false,
 				"codexInspectedStudioPm": false,
 				"codexInspectedUsualOrderCue": false,
+				"codexInspectedVisibleSocialInfluenceLink": false,
 				"codexInspectedWaitingCustomer": false,
 				"codexReadConversationSocialAudience": true,
 				"codexReadConversationVisibleContext": true,
@@ -57054,9 +59497,13 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "initial",
-					"latestLedger": {},
+					"latestLedger": {
+
+					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -57490,9 +59937,13 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "focus.store_counter",
-					"latestLedger": {},
+					"latestLedger": {
+
+					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -57926,9 +60377,13 @@
 						"safeLineLabel": "2  제가 보통 뭘 시켰죠?",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "conversation.start",
-					"latestLedger": {},
+					"latestLedger": {
+
+					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -58277,7 +60732,9 @@
 						"safeLineLabel": "2  어제 일이 조금 흐릿해서 확인했습니다.",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Store_Clerk",
@@ -58642,7 +61099,9 @@
 						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Studio_PM",
@@ -59008,7 +61467,9 @@
 						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "focus.world_record_prop",
 					"latestLedger": {
 						"actorId": "NPC_Studio_PM",
@@ -60916,7 +63377,9 @@
 						}
 					]
 				},
-				"inspectedWorldRecordProp": {},
+				"inspectedWorldRecordProp": {
+
+				},
 				"investigationTrail": "검사자: 상점 매니저 -> 스테이션 직원 | 대상: 플레이어 | 근거: 상점 보고 기록",
 				"notice": "Store Manager / Store Manager / 현재 반응: 응대 중단 / ← 상점 점원 · 메모 배치 / 들은 말: \"보고가 붙은 동안 카운터를 잠시 멈춥니다.\" / 보는 환경: 상점 카운터=응대 중단, 늘 같은 주문=읽힘, 영수증 트레이=표시됨, 정정 문서=없음, 보고 트레이=대기, 시민 경제=부담 증가 / 오간 말: Store Clerk \"기록과 다릅니다. 담당자에게 전달하겠습니다.\" -> Store Manager \"보고가 붙은 동안 카운터를 잠시 멈춥니다.\" / 근거 행동: civic-ledger-6 / 상점 매니저 -> 응대 중단 / 대상 기록물: 상점 카운터 / 관리 처리: 카운터=응대 중단, 근거=상점 메모, 효과=대기 손님이 줄을 떠남 / 가능 조건: 상점 카운터=응대 중 / 값 변화: 부담+5 / 이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"outcomeBody": "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 공원 소문 게시 -> 카운터 중단 -> 대기 이탈 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자는 같은 기록을 보고 게시판에 소문을 남겼습니다. 상점 관리자는 기록 부담을 보고 후속 메모를 붙인 뒤 카운터 응대를 잠시 멈췄고, 그 중단을 본 대기 손님은 줄에서 빠졌습니다.\n역할 행동: 공원 목격자가 상점 기록을 공개 소문으로 바꿨고, 상점 관리자가 보고 트레이에 후속 기록을 남기고 카운터를 중단 상태로 바꿨으며, 대기 손님이 중단 기록을 보고 대기 표식을 비웠습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.\nR 다시 시작 / Q 종료",
@@ -61204,6 +63667,7 @@
 				"codexInspectedStudioOpportunityChange": false,
 				"codexInspectedStudioPm": false,
 				"codexInspectedUsualOrderCue": false,
+				"codexInspectedVisibleSocialInfluenceLink": false,
 				"codexInspectedWaitingCustomer": false,
 				"codexReadConversationSocialAudience": true,
 				"codexReadConversationVisibleContext": true,
@@ -61550,9 +64014,13 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "initial",
-					"latestLedger": {},
+					"latestLedger": {
+
+					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -61986,9 +64454,13 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "focus.store_counter",
-					"latestLedger": {},
+					"latestLedger": {
+
+					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -62422,9 +64894,13 @@
 						"safeLineLabel": "2  제가 보통 뭘 시켰죠?",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "conversation.start",
-					"latestLedger": {},
+					"latestLedger": {
+
+					},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -62773,7 +65249,9 @@
 						"safeLineLabel": "2  어제 일이 조금 흐릿해서 확인했습니다.",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Store_Clerk",
@@ -63096,7 +65574,9 @@
 						"safeLineLabel": "스테이션은 상점 대화 기록을 참고합니다.",
 						"whyLineLabel": "WHY-LINE: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다."
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Waiting_Customer",
@@ -63420,7 +65900,9 @@
 						"safeLineLabel": "스테이션은 상점 대화 기록을 참고합니다.",
 						"whyLineLabel": "WHY-LINE: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다."
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "focus.npc",
 					"latestLedger": {
 						"actorId": "NPC_Waiting_Customer",
@@ -63744,7 +66226,9 @@
 						"safeLineLabel": "스테이션은 상점 대화 기록을 참고합니다.",
 						"whyLineLabel": "WHY-LINE: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다."
 					},
-					"inspectedWorldRecordProp": {},
+					"inspectedWorldRecordProp": {
+
+					},
 					"label": "player.interact.focused",
 					"latestLedger": {
 						"actorId": "NPC_Waiting_Customer",
@@ -64013,6 +66497,8 @@
 				"player.interact.focused",
 				"focus.npc",
 				"player.interact.focused",
+				"focus.social_link",
+				"player.interact.focused",
 				"focus.npc",
 				"player.interact.focused",
 				"focus.npc",
@@ -64045,6 +66531,8 @@
 				"focus.world_record_prop -> look at environment record prop: civic_ledger",
 				"player.interact.focused -> press the focused interaction",
 				"focus.npc -> look at visible NPC: NPC_Station_Officer",
+				"player.interact.focused -> press the focused interaction",
+				"focus.social_link -> look at social influence link: NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact",
 				"player.interact.focused -> press the focused interaction",
 				"focus.npc -> look at visible NPC: NPC_Studio_PM",
 				"player.interact.focused -> press the focused interaction",
@@ -64780,6 +67268,7 @@
 				"codexInspectedStudioOpportunityChange": true,
 				"codexInspectedStudioPm": true,
 				"codexInspectedUsualOrderCue": true,
+				"codexInspectedVisibleSocialInfluenceLink": true,
 				"codexInspectedWaitingCustomer": true,
 				"codexReadConversationSocialAudience": true,
 				"codexReadConversationVisibleContext": true,
@@ -65207,9 +67696,13 @@
 				"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 				"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 			},
-			"inspectedWorldRecordProp": {},
+			"inspectedWorldRecordProp": {
+
+			},
 			"label": "initial",
-			"latestLedger": {},
+			"latestLedger": {
+
+			},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -65643,9 +68136,13 @@
 				"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 				"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 			},
-			"inspectedWorldRecordProp": {},
+			"inspectedWorldRecordProp": {
+
+			},
 			"label": "focus.world_record_prop",
-			"latestLedger": {},
+			"latestLedger": {
+
+			},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -66102,7 +68599,9 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "player.interact.focused",
-			"latestLedger": {},
+			"latestLedger": {
+
+			},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -66559,7 +69058,9 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "focus.text_surface",
-			"latestLedger": {},
+			"latestLedger": {
+
+			},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -67016,7 +69517,9 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "player.interact.focused",
-			"latestLedger": {},
+			"latestLedger": {
+
+			},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -67473,7 +69976,9 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "focus.text_surface",
-			"latestLedger": {},
+			"latestLedger": {
+
+			},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -67930,7 +70435,9 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "player.interact.focused",
-			"latestLedger": {},
+			"latestLedger": {
+
+			},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -68387,7 +70894,9 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "focus.store_counter",
-			"latestLedger": {},
+			"latestLedger": {
+
+			},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -68844,7 +71353,9 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "conversation.start",
-			"latestLedger": {},
+			"latestLedger": {
+
+			},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -69301,7 +71812,9 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "player.wait.hesitation_record",
-			"latestLedger": {},
+			"latestLedger": {
+
+			},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -76081,12 +78594,776 @@
 			"hud": {
 				"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
 				"consequenceLabel": "심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다.\n흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부",
-				"focusLabel": "E: Studio PM 반응 읽기",
+				"focusLabel": "E: 사회 영향 읽기",
 				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 				"freeInputVisible": false,
 				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
 				"noticeBodyLabel": "현재 반응: 보고됨\n← 상점 매니저 · 보고 전달\n들은 말: \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"\n보는 환경: 보고 트레이=전달, 스테이션 문서=인용됨, 시민 장부=추가됨, 시민 경제=주목 상승\n오간 말: Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\" -> Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"\n근거 행동: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n읽은 기록: civic-ledger-5 / 상점 매니저 -> 보고 전달\n대상 기록물: 스테이션 문서\n심문 초점: 대상=플레이어, 인용=civic-ledger-5 / 상점 매니저 -> 보고 전달, 대조=상점 전달 기록과 플레이어 발화, 권한=심문 개시\n가능 조건: 스테이션 문서=없음, 인용 장부 civic-ledger-5, 상점 기록 필요\n이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.",
 				"noticeTitleLabel": "Station Officer / Station Officer",
+				"noticeVisible": false,
+				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
+				"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 125 -> 접수 열림 / 심문 열림 / 판정 닫힘 / 종료 열림",
+				"outcomeVisible": true,
+				"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
+				"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 전달 | 스테이션 인용됨 | 잔액 3 신뢰 0 부담 93 주목 70 | 장부 8 최근 civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6 | 열람 스테이션 직원, 스튜디오 PM, 대기 손님, 상점 매니저 | 사회 반응 대기 손님이 스테이션 직원 기록 인용(civic-ledger-6) 기록을 보고 접촉 거부, 부담 85 | 오간 말 스테이션 직원 -> 대기 손님: 스테이션이 인용했으면 저는 말 섞지 않겠습니다. | 주변 태도 대기 손님=접촉 거부, 스튜디오 PM=리뷰 차단, 상점 매니저=보고 전달",
+				"recordedStatementLabel": "직접 입력도 기록됩니다.",
+				"riskyLineLabel": "점원이 이상하다고 느낀 말이 증거가 됩니다.",
+				"safeLineLabel": "이전 발화와 같은 전제를 유지하세요.",
+				"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
+			},
+			"inspectedWorldRecordProp": {
+				"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
+				"currentAffordanceLabels": [],
+				"label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
+				"objectId": "civic_ledger",
+				"possibleAffordanceLabels": [],
+				"readerRoleLabels": [
+					"스테이션 직원"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "waiting_customer",
+						"actorRoleLabel": "대기 손님",
+						"affordance": "refuse_contact",
+						"affordanceLabel": "접촉 거부",
+						"citedLedgerEventId": "civic-ledger-6",
+						"economyDelta": {
+							"localTrust": -8,
+							"recordBurden": 5
+						},
+						"economyDeltaLabel": "신뢰-8, 부담+5",
+						"eventId": "civic-ledger-8",
+						"kind": "queue_contact_refused",
+						"kindLabel": "접촉 거부"
+					},
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"economyDelta": {
+							"localTrust": -2,
+							"recordBurden": 3
+						},
+						"economyDeltaLabel": "신뢰-2, 부담+3",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					},
+					{
+						"actorRole": "station_officer",
+						"actorRoleLabel": "스테이션 직원",
+						"affordance": "cite_record",
+						"affordanceLabel": "기록 인용",
+						"citedLedgerEventId": "civic-ledger-5",
+						"eventId": "civic-ledger-6",
+						"kind": "station_record_cited",
+						"kindLabel": "스테이션 인용"
+					}
+				],
+				"socialObservationLabels": [
+					"대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부",
+					"스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단",
+					"스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용",
+					"상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달",
+					"공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시",
+					"대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평"
+				],
+				"state": "append_only",
+				"stateLabel": "추가됨",
+				"title": "시민 장부"
+			},
+			"label": "focus.social_link",
+			"latestLedger": {
+				"actorId": "NPC_Waiting_Customer",
+				"actorRole": "waiting_customer",
+				"affordance": "refuse_contact",
+				"citedLedgerEventId": "civic-ledger-6",
+				"economyDelta": {
+					"localTrust": -8,
+					"recordBurden": 5
+				},
+				"eventId": "civic-ledger-8",
+				"kind": "queue_contact_refused",
+				"objectId": "store_queue_mark",
+				"recordId": "store_same_order_contact_refused",
+				"validation": "accepted",
+				"whyLine": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open."
+			},
+			"recordObjects": {
+				"civic_ledger": "append_only",
+				"correction_slip": "absent",
+				"park_notice_board": "rumored",
+				"receipt_tray": "marked",
+				"report_tray": "forwarded",
+				"station_dossier": "cited",
+				"store_counter": "serving",
+				"store_queue_mark": "refused",
+				"studio_review_queue": "blocked",
+				"usual_order_cue": "read"
+			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
+			"summary": {
+				"inputLocked": true,
+				"lastDialogueChoice": "free_input",
+				"lastReasonCode": "dream_language_leak",
+				"reportWeight": 120,
+				"responseHesitationCount": 1,
+				"routeOutcome": "inquest_opened",
+				"sessionOutcome": "inquest_opened",
+				"stage": "inquest",
+				"suspicion": 125
+			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
+			"visibleEnvironmentSummary": [
+				"상점 카운터=응대 중",
+				"늘 같은 주문=읽힘",
+				"보고 트레이=전달",
+				"시민 경제=주목 상승"
+			],
+			"worldRecordProps": {
+				"civic_economy_panel": {
+					"hasBody": true,
+					"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
+					"state": "attention",
+					"visible": true
+				},
+				"civic_ledger": {
+					"hasBody": true,
+					"label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
+					"state": "append_only",
+					"visible": true
+				},
+				"correction_slip": {
+					"hasBody": true,
+					"label": "정정\n없음",
+					"state": "absent",
+					"visible": true
+				},
+				"park_notice_board": {
+					"hasBody": true,
+					"label": "공개판\n소문 게시",
+					"state": "rumored",
+					"visible": true
+				},
+				"receipt_tray": {
+					"hasBody": true,
+					"label": "영수증\n표시됨",
+					"state": "marked",
+					"visible": true
+				},
+				"report_tray": {
+					"hasBody": true,
+					"label": "보고\n전달",
+					"state": "forwarded",
+					"visible": true
+				},
+				"station_dossier": {
+					"hasBody": true,
+					"label": "스테이션 문서\n인용됨",
+					"state": "cited",
+					"visible": true
+				},
+				"store_counter": {
+					"hasBody": true,
+					"label": "카운터\n응대 중",
+					"state": "serving",
+					"visible": true
+				},
+				"store_queue_mark": {
+					"hasBody": true,
+					"label": "대기 표식\n접촉 거부",
+					"state": "refused",
+					"visible": true
+				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n차단",
+					"state": "blocked",
+					"visible": true
+				},
+				"usual_order_cue": {
+					"hasBody": true,
+					"label": "늘 같은 주문\n읽힘",
+					"state": "read",
+					"visible": true
+				}
+			}
+		},
+		{
+			"availableChoices": [
+				"맞습니다. 제가 착각했습니다.",
+				"어제 일이 조금 흐릿해서 확인했습니다.",
+				"저는 여기 사람이 아닙니다."
+			],
+			"civicEconomy": {
+				"accountCredit": 3,
+				"localTrust": 0,
+				"recordBurden": 93,
+				"stationAttention": 70
+			},
+			"environmentToolCatalog": [
+				{
+					"actionId": "store_counter.pause_service",
+					"affordance": "pause_service",
+					"citableLedgerEventIds": [],
+					"civicEconomyEffects": [
+						"recordBurden:+5"
+					],
+					"eligibleRoles": [
+						"store_clerk",
+						"store_manager"
+					],
+					"failureReasons": [
+						"object_not_perceived",
+						"affordance_unavailable",
+						"role_authority_exceeded",
+						"why_line_required"
+					],
+					"ledgerEventKind": "service_paused",
+					"objectId": "store_counter",
+					"objectState": "serving",
+					"perceivedAs": "paused local service",
+					"playerLabel": "Pause Service",
+					"preconditions": [
+						"object_state:serving",
+						"role_allowed:store_clerk|store_manager"
+					],
+					"priorityHints": [
+						"economy:recordBurden",
+						"pressure:service_paused"
+					],
+					"recordId": "",
+					"requiresLedgerEvent": false,
+					"requiresStoreLedgerEvent": false,
+					"toState": "paused",
+					"validationRuleId": "same_order.store_counter.pause_service",
+					"visibleTo": [
+						"store_clerk",
+						"waiting_customer",
+						"store_manager"
+					]
+				},
+				{
+					"actionId": "usual_order_cue.cite_expected_order",
+					"affordance": "cite_expected_order",
+					"citableLedgerEventIds": [],
+					"civicEconomyEffects": [],
+					"eligibleRoles": [
+						"store_clerk",
+						"store_manager"
+					],
+					"failureReasons": [
+						"object_not_perceived",
+						"affordance_unavailable",
+						"role_authority_exceeded",
+						"why_line_required"
+					],
+					"ledgerEventKind": "usual_order_cited",
+					"objectId": "usual_order_cue",
+					"objectState": "read",
+					"perceivedAs": "usual_order_cue cite_expected_order",
+					"playerLabel": "Cite Expected Order",
+					"preconditions": [
+						"object_state:read",
+						"role_allowed:store_clerk|store_manager"
+					],
+					"priorityHints": [],
+					"recordId": "",
+					"requiresLedgerEvent": false,
+					"requiresStoreLedgerEvent": false,
+					"toState": "cited",
+					"validationRuleId": "same_order.usual_order_cue.cite_expected_order",
+					"visibleTo": [
+						"store_clerk",
+						"store_manager",
+						"waiting_customer"
+					]
+				},
+				{
+					"actionId": "correction_slip.offer_correction",
+					"affordance": "offer_correction",
+					"citableLedgerEventIds": [],
+					"civicEconomyEffects": [
+						"recordBurden:+5"
+					],
+					"eligibleRoles": [
+						"store_clerk",
+						"store_manager"
+					],
+					"failureReasons": [
+						"object_not_perceived",
+						"affordance_unavailable",
+						"role_authority_exceeded",
+						"why_line_required"
+					],
+					"ledgerEventKind": "correction_offered",
+					"objectId": "correction_slip",
+					"objectState": "absent",
+					"perceivedAs": "local correction path",
+					"playerLabel": "Offer Correction",
+					"preconditions": [
+						"object_state:absent",
+						"role_allowed:store_clerk|store_manager",
+						"record_id:store_same_order_correction"
+					],
+					"priorityHints": [
+						"economy:recordBurden"
+					],
+					"recordId": "store_same_order_correction",
+					"requiresLedgerEvent": false,
+					"requiresStoreLedgerEvent": false,
+					"toState": "offered",
+					"validationRuleId": "same_order.correction_slip.offer_correction",
+					"visibleTo": [
+						"store_clerk",
+						"store_manager"
+					]
+				}
+			],
+			"environmentToolSummary": [
+				"상점 카운터: 응대 중단 -> 응대 중단",
+				"늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용",
+				"정정 문서: offer_correction -> 정정 제안"
+			],
+			"hud": {
+				"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
+				"consequenceLabel": "심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다.\n흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부",
+				"focusLabel": "E: 사회 영향 읽기",
+				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
+				"freeInputVisible": false,
+				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
+				"noticeBodyLabel": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+				"noticeTitleLabel": "사회 영향 / Station Officer -> Waiting Customer",
+				"noticeVisible": false,
+				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
+				"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 125 -> 접수 열림 / 심문 열림 / 판정 닫힘 / 종료 열림",
+				"outcomeVisible": true,
+				"providerStateLabel": "AI 제공자: fallback-only M1 | API 검증 닫힘 | 모델 none",
+				"recordStateLabel": "상점 기록: 영수증 표시됨 | 정정 없음 | 보고 전달 | 스테이션 인용됨 | 잔액 3 신뢰 0 부담 93 주목 70 | 장부 8 최근 civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6 | 열람 스테이션 직원, 스튜디오 PM, 대기 손님, 상점 매니저 | 사회 반응 대기 손님이 스테이션 직원 기록 인용(civic-ledger-6) 기록을 보고 접촉 거부, 부담 85 | 오간 말 스테이션 직원 -> 대기 손님: 스테이션이 인용했으면 저는 말 섞지 않겠습니다. | 주변 태도 대기 손님=접촉 거부, 스튜디오 PM=리뷰 차단, 상점 매니저=보고 전달",
+				"recordedStatementLabel": "직접 입력도 기록됩니다.",
+				"riskyLineLabel": "점원이 이상하다고 느낀 말이 증거가 됩니다.",
+				"safeLineLabel": "이전 발화와 같은 전제를 유지하세요.",
+				"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
+			},
+			"inspectedWorldRecordProp": {
+				"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
+				"currentAffordanceLabels": [],
+				"label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
+				"objectId": "civic_ledger",
+				"possibleAffordanceLabels": [],
+				"readerRoleLabels": [
+					"스테이션 직원"
+				],
+				"recentLedgerEvents": [
+					{
+						"actorRole": "waiting_customer",
+						"actorRoleLabel": "대기 손님",
+						"affordance": "refuse_contact",
+						"affordanceLabel": "접촉 거부",
+						"citedLedgerEventId": "civic-ledger-6",
+						"economyDelta": {
+							"localTrust": -8,
+							"recordBurden": 5
+						},
+						"economyDeltaLabel": "신뢰-8, 부담+5",
+						"eventId": "civic-ledger-8",
+						"kind": "queue_contact_refused",
+						"kindLabel": "접촉 거부"
+					},
+					{
+						"actorRole": "studio_pm",
+						"actorRoleLabel": "스튜디오 PM",
+						"affordance": "block_review",
+						"affordanceLabel": "리뷰 차단",
+						"citedLedgerEventId": "civic-ledger-6",
+						"economyDelta": {
+							"localTrust": -2,
+							"recordBurden": 3
+						},
+						"economyDeltaLabel": "신뢰-2, 부담+3",
+						"eventId": "civic-ledger-7",
+						"kind": "studio_review_blocked",
+						"kindLabel": "리뷰 차단"
+					},
+					{
+						"actorRole": "station_officer",
+						"actorRoleLabel": "스테이션 직원",
+						"affordance": "cite_record",
+						"affordanceLabel": "기록 인용",
+						"citedLedgerEventId": "civic-ledger-5",
+						"eventId": "civic-ledger-6",
+						"kind": "station_record_cited",
+						"kindLabel": "스테이션 인용"
+					}
+				],
+				"socialObservationLabels": [
+					"대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부",
+					"스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단",
+					"스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용",
+					"상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달",
+					"공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시",
+					"대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평"
+				],
+				"state": "append_only",
+				"stateLabel": "추가됨",
+				"title": "시민 장부"
+			},
+			"label": "player.interact.focused",
+			"latestLedger": {
+				"actorId": "NPC_Waiting_Customer",
+				"actorRole": "waiting_customer",
+				"affordance": "refuse_contact",
+				"citedLedgerEventId": "civic-ledger-6",
+				"economyDelta": {
+					"localTrust": -8,
+					"recordBurden": 5
+				},
+				"eventId": "civic-ledger-8",
+				"kind": "queue_contact_refused",
+				"objectId": "store_queue_mark",
+				"recordId": "store_same_order_contact_refused",
+				"validation": "accepted",
+				"whyLine": "A waiting customer sees the Station cite the player and refuses contact while the inquest is open."
+			},
+			"recordObjects": {
+				"civic_ledger": "append_only",
+				"correction_slip": "absent",
+				"park_notice_board": "rumored",
+				"receipt_tray": "marked",
+				"report_tray": "forwarded",
+				"station_dossier": "cited",
+				"store_counter": "serving",
+				"store_queue_mark": "refused",
+				"studio_review_queue": "blocked",
+				"usual_order_cue": "read"
+			},
+			"socialAudienceSummary": [
+				"상점 점원=듣고 기록",
+				"대기 손님=근처 줄",
+				"상점 매니저=보고 트레이 열람 가능"
+			],
+			"summary": {
+				"inputLocked": true,
+				"lastDialogueChoice": "free_input",
+				"lastReasonCode": "dream_language_leak",
+				"reportWeight": 120,
+				"responseHesitationCount": 1,
+				"routeOutcome": "inquest_opened",
+				"sessionOutcome": "inquest_opened",
+				"stage": "inquest",
+				"suspicion": 125
+			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
+			"visibleEnvironmentSummary": [
+				"상점 카운터=응대 중",
+				"늘 같은 주문=읽힘",
+				"보고 트레이=전달",
+				"시민 경제=주목 상승"
+			],
+			"worldRecordProps": {
+				"civic_economy_panel": {
+					"hasBody": true,
+					"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
+					"state": "attention",
+					"visible": true
+				},
+				"civic_ledger": {
+					"hasBody": true,
+					"label": "시민 장부 8건\ncivic-ledger-8 -> civic-ledger-6\n접촉 거부",
+					"state": "append_only",
+					"visible": true
+				},
+				"correction_slip": {
+					"hasBody": true,
+					"label": "정정\n없음",
+					"state": "absent",
+					"visible": true
+				},
+				"park_notice_board": {
+					"hasBody": true,
+					"label": "공개판\n소문 게시",
+					"state": "rumored",
+					"visible": true
+				},
+				"receipt_tray": {
+					"hasBody": true,
+					"label": "영수증\n표시됨",
+					"state": "marked",
+					"visible": true
+				},
+				"report_tray": {
+					"hasBody": true,
+					"label": "보고\n전달",
+					"state": "forwarded",
+					"visible": true
+				},
+				"station_dossier": {
+					"hasBody": true,
+					"label": "스테이션 문서\n인용됨",
+					"state": "cited",
+					"visible": true
+				},
+				"store_counter": {
+					"hasBody": true,
+					"label": "카운터\n응대 중",
+					"state": "serving",
+					"visible": true
+				},
+				"store_queue_mark": {
+					"hasBody": true,
+					"label": "대기 표식\n접촉 거부",
+					"state": "refused",
+					"visible": true
+				},
+				"studio_review_queue": {
+					"hasBody": true,
+					"label": "리뷰\n차단",
+					"state": "blocked",
+					"visible": true
+				},
+				"usual_order_cue": {
+					"hasBody": true,
+					"label": "늘 같은 주문\n읽힘",
+					"state": "read",
+					"visible": true
+				}
+			}
+		},
+		{
+			"availableChoices": [
+				"맞습니다. 제가 착각했습니다.",
+				"어제 일이 조금 흐릿해서 확인했습니다.",
+				"저는 여기 사람이 아닙니다."
+			],
+			"civicEconomy": {
+				"accountCredit": 3,
+				"localTrust": 0,
+				"recordBurden": 93,
+				"stationAttention": 70
+			},
+			"environmentToolCatalog": [
+				{
+					"actionId": "store_counter.pause_service",
+					"affordance": "pause_service",
+					"citableLedgerEventIds": [],
+					"civicEconomyEffects": [
+						"recordBurden:+5"
+					],
+					"eligibleRoles": [
+						"store_clerk",
+						"store_manager"
+					],
+					"failureReasons": [
+						"object_not_perceived",
+						"affordance_unavailable",
+						"role_authority_exceeded",
+						"why_line_required"
+					],
+					"ledgerEventKind": "service_paused",
+					"objectId": "store_counter",
+					"objectState": "serving",
+					"perceivedAs": "paused local service",
+					"playerLabel": "Pause Service",
+					"preconditions": [
+						"object_state:serving",
+						"role_allowed:store_clerk|store_manager"
+					],
+					"priorityHints": [
+						"economy:recordBurden",
+						"pressure:service_paused"
+					],
+					"recordId": "",
+					"requiresLedgerEvent": false,
+					"requiresStoreLedgerEvent": false,
+					"toState": "paused",
+					"validationRuleId": "same_order.store_counter.pause_service",
+					"visibleTo": [
+						"store_clerk",
+						"waiting_customer",
+						"store_manager"
+					]
+				},
+				{
+					"actionId": "usual_order_cue.cite_expected_order",
+					"affordance": "cite_expected_order",
+					"citableLedgerEventIds": [],
+					"civicEconomyEffects": [],
+					"eligibleRoles": [
+						"store_clerk",
+						"store_manager"
+					],
+					"failureReasons": [
+						"object_not_perceived",
+						"affordance_unavailable",
+						"role_authority_exceeded",
+						"why_line_required"
+					],
+					"ledgerEventKind": "usual_order_cited",
+					"objectId": "usual_order_cue",
+					"objectState": "read",
+					"perceivedAs": "usual_order_cue cite_expected_order",
+					"playerLabel": "Cite Expected Order",
+					"preconditions": [
+						"object_state:read",
+						"role_allowed:store_clerk|store_manager"
+					],
+					"priorityHints": [],
+					"recordId": "",
+					"requiresLedgerEvent": false,
+					"requiresStoreLedgerEvent": false,
+					"toState": "cited",
+					"validationRuleId": "same_order.usual_order_cue.cite_expected_order",
+					"visibleTo": [
+						"store_clerk",
+						"store_manager",
+						"waiting_customer"
+					]
+				},
+				{
+					"actionId": "correction_slip.offer_correction",
+					"affordance": "offer_correction",
+					"citableLedgerEventIds": [],
+					"civicEconomyEffects": [
+						"recordBurden:+5"
+					],
+					"eligibleRoles": [
+						"store_clerk",
+						"store_manager"
+					],
+					"failureReasons": [
+						"object_not_perceived",
+						"affordance_unavailable",
+						"role_authority_exceeded",
+						"why_line_required"
+					],
+					"ledgerEventKind": "correction_offered",
+					"objectId": "correction_slip",
+					"objectState": "absent",
+					"perceivedAs": "local correction path",
+					"playerLabel": "Offer Correction",
+					"preconditions": [
+						"object_state:absent",
+						"role_allowed:store_clerk|store_manager",
+						"record_id:store_same_order_correction"
+					],
+					"priorityHints": [
+						"economy:recordBurden"
+					],
+					"recordId": "store_same_order_correction",
+					"requiresLedgerEvent": false,
+					"requiresStoreLedgerEvent": false,
+					"toState": "offered",
+					"validationRuleId": "same_order.correction_slip.offer_correction",
+					"visibleTo": [
+						"store_clerk",
+						"store_manager"
+					]
+				}
+			],
+			"environmentToolSummary": [
+				"상점 카운터: 응대 중단 -> 응대 중단",
+				"늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용",
+				"정정 문서: offer_correction -> 정정 제안"
+			],
+			"hud": {
+				"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
+				"consequenceLabel": "심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다.\n흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부",
+				"focusLabel": "E: Studio PM 반응 읽기",
+				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
+				"freeInputVisible": false,
+				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
+				"noticeBodyLabel": "출발: 스테이션 직원 · 기록 인용\n도착: 대기 손님 · 접촉 거부\n읽은 기록: civic-ledger-6 / 스테이션 직원 -> 기록 인용\n의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.",
+				"noticeTitleLabel": "사회 영향 / Station Officer -> Waiting Customer",
 				"noticeVisible": false,
 				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
 				"outcomeTraceLabel": "Trace: 상점 대화 -> 의심/보고 125 -> 접수 열림 / 심문 열림 / 판정 닫힘 / 종료 열림",

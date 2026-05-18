@@ -79,10 +79,11 @@ Latest completion audit:
   proof is carried by the playable slice Evidence Pack, Codex gameplay probe,
   and packaged-route evidence.
 - latest Codex gameplay QA artifact reports `ok=true`,
-  `aiPlayerReport.pass=true`, 31 accepted public actions, 5/5 route reports,
-  all 36 explainability flags true, `canReadEnvironmentToolCatalog=true`,
+  `aiPlayerReport.pass=true`, 33 accepted public actions, 5/5 route reports,
+  all 37 explainability flags true, `canReadEnvironmentToolCatalog=true`,
   `canReadVisibleNpcRoleTints=true`, `canReadVisibleNpcSourceToken=true`,
-  `canReadVisibleSocialInfluenceLink=true`, and no-live provider packet
+  `canReadVisibleSocialInfluenceLink=true`,
+  `canInspectVisibleSocialInfluenceLink=true`, and no-live provider packet
   readiness for bounded `actorMemory` plus `actorPolicy`. It now also proves
   Codex/player can read the Store Clerk's
   visible environment cues in the live prompt before choosing speech, then
@@ -113,8 +114,13 @@ Latest completion audit:
   observed/source actor to the reacting actor; in the inquest path, Codex/player
   can read `NPC_Station_Officer -> NPC_Waiting_Customer` for
   `cite_record -> refuse_contact` before treating the refusal as social state.
-  Latest Codex gameplay artifact SHA-256:
-  `389d09d1fcff230e1d3fa2114d1924e7985d42e8d36120d9e16da941e962e6ec`.
+  Codex/player can now focus that link and read the source actor, target actor,
+  `cite_record -> refuse_contact`, and cited `civic-ledger-6` through the same
+  HUD notice path used for props and NPCs. Latest Codex gameplay artifact
+  SHA-256: JSON
+  `3f1be7c9119db663dc96a044c7f3ad8c59802cd191dee0bf2d1a8ddc64ed7ee3`,
+  Markdown
+  `1c9b329290eee9150b02aa288a7144fd9841b0f4be6e0534296dbaa88da43cba`.
   It also explicitly marks itself as not a replacement for external
   comprehension.
 - latest packaged-route evidence validates as a Godot Evidence Pack and
@@ -323,29 +329,32 @@ Latest status check:
   `testerFacingFiles=["tester-invite.md"]`, `humanEvidence=false`, and
   `closesGoal=false`; it is setup material only, not comprehension evidence.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `389d09d1fcff230e1d3fa2114d1924e7985d42e8d36120d9e16da941e962e6ec`
-  - Markdown SHA-256: `598eaf4855cc141ff395798cbdca8906ec96527d15e9526b755cf67365229558`
-  - playable Evidence Pack SHA-256: `8cbcd341ca72f9a4e4edc8be62db42de9254e3e29b49f89165ea2d0c395987dd`
+  - JSON SHA-256: `3f1be7c9119db663dc96a044c7f3ad8c59802cd191dee0bf2d1a8ddc64ed7ee3`
+  - Markdown SHA-256: `1c9b329290eee9150b02aa288a7144fd9841b0f4be6e0534296dbaa88da43cba`
+  - playable Evidence Pack SHA-256: `11d7df597152d2bcce2cfcb4db63c84e6d91bc25ec9edd560ec662a2035bd1dc`
   - visual capture manifest SHA-256: `00acafaeaad0e466b9a28fcf55e32b18b4641096b2bd1d0f261a43b3ef9033eb`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
 
 Latest AI-play interface check:
 - command: `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `31 / 31`, `explainability=36/36`, conversation visible
+  player actions `33 / 33`, `explainability=37/37`, conversation visible
   context in the live Store Clerk prompt, Store Clerk record-action inspection,
   Store Manager handoff inspection, Park Witness public-spread inspection,
   Station Officer authority-citation inspection, Studio PM cross-place
   opportunity inspection, Waiting Customer social-exchange inspection, live HUD
   `오간 말` social exchange readability, visible NPC reaction source
-  readability, visible NPC-to-NPC influence-link readability, actor memory for observed NPC
-  decisions, no-live provider packet memory and actor-policy readiness, and
-  `routeReportPassCount=5 / 5` with Godot
-  `4.7.beta2.official.777579205` from local `GODOT_BIN`.
-- latest game increment: visible NPC reaction markers now show which role action
-  caused the current social reaction. In the inquest Codex run, the Waiting
-  Customer's world marker reads `접촉 거부` plus `← 스테이션 직원 · 기록 인용`,
-  while the HUD stance summary still uses the compact base reaction text.
+  readability, visible NPC-to-NPC influence-link readability, visible
+  NPC-to-NPC influence-link inspection through the HUD, actor memory for
+  observed NPC decisions, no-live provider packet memory and actor-policy
+  readiness, and `routeReportPassCount=5 / 5` with Godot
+  `4.6.2.stable.official.71f334935` from local `command -v godot` fallback.
+- latest game increment: visible NPC-to-NPC influence links are now inspectable
+  through the same focus plus interact path used for props and NPCs. In the
+  inquest Codex run, the focused
+  `NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact`
+  link opens a HUD notice that names the source actor, target actor,
+  `cite_record -> refuse_contact`, and cited `civic-ledger-6`.
   Codex gameplay QA now requires `canReadVisibleNpcReactionSource=true` with
   both the source role and action.
 - latest game increment: the live HUD record line now includes `오간 말`, a

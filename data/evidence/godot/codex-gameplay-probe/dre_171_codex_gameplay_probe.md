@@ -35,6 +35,8 @@
 - player.interact.focused -> press the focused interaction
 - focus.npc -> look at visible NPC: NPC_Station_Officer
 - player.interact.focused -> press the focused interaction
+- focus.social_link -> look at social influence link: NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact
+- player.interact.focused -> press the focused interaction
 - focus.npc -> look at visible NPC: NPC_Studio_PM
 - player.interact.focused -> press the focused interaction
 - focus.npc -> look at visible NPC: NPC_Waiting_Customer
@@ -64,6 +66,7 @@
 - Visible NPC bodies use distinct role tints, so Codex/player can identify the social field by actor role before opening detailed panels.
 - The Waiting Customer also carries a visible source token colored from the Station Officer role, exposing that the refusal came from Station citation pressure.
 - The scene draws a visible social influence link from the Station Officer citation source to the Waiting Customer refusal, making the NPC-to-NPC consequence readable in the 3D space.
+- Codex/player focused that social influence link and pressed the same interaction key to read the source actor, target actor, observed action, resulting action, and cited ledger record in the HUD.
 - Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, cited ledger basis, and overheard NPC-to-NPC exchange.
 - The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8.
 
@@ -133,6 +136,7 @@
 - `canReadVisibleNpcRoleTints`: `true`
 - `canReadVisibleNpcSourceToken`: `true`
 - `canReadVisibleSocialInfluenceLink`: `true`
+- `canInspectVisibleSocialInfluenceLink`: `true`
 - `canInspectPublicEnvironmentRecord`: `true`
 - `canInspectCrossPlaceAuthorityConsequence`: `true`
 - `canInspectRecordRoleAffordanceMap`: `true`

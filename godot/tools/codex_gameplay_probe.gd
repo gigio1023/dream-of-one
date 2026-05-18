@@ -34,6 +34,8 @@ const PROBE_STEPS := [
 	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Station_Officer"}},
 	{"actionId": "player.interact.focused", "payload": {}},
+	{"actionId": "focus.social_link", "payload": {"linkId": "NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact"}},
+	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Studio_PM"}},
 	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Waiting_Customer"}},
@@ -794,6 +796,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Visible NPC reaction source token does not expose the Station citation source")
 	if not bool(checks.get("visibleSocialInfluenceLink", false)):
 		failures.append("Visible social influence link does not connect Station citation pressure to contact refusal")
+	if not bool(checks.get("codexInspectedVisibleSocialInfluenceLink", false)):
+		failures.append("Codex/player did not inspect the Station Officer -> Waiting Customer social influence link through the HUD")
 	if not bool(checks.get("codexReadNpcSocialExchange", false)):
 		failures.append("Codex/player did not read the inspected NPC's overheard NPC-to-NPC exchange")
 	if not str(hud_snapshot.get("noticeBodyLabel", "")).contains("접촉 거부"):
@@ -820,6 +824,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"visibleNpcRoleTints": _visible_npc_role_tints(summary),
 		"visibleNpcSourceToken": _visible_npc_source_token(summary, "NPC_Waiting_Customer", "station_officer", "cite_record"),
 		"visibleSocialInfluenceLink": _visible_social_influence_link(summary, "NPC_Station_Officer", "NPC_Waiting_Customer", "cite_record", "refuse_contact"),
+		"codexInspectedVisibleSocialInfluenceLink": _inspected_social_influence_link(summary, "NPC_Station_Officer", "NPC_Waiting_Customer", "cite_record", "refuse_contact"),
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"codexInspectedUsualOrderCue": _inspected_usual_order_cue(summary),
 		"codexReadCrossPlaceRuleBoards": _read_cross_place_rule_boards(summary),
@@ -875,6 +880,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadVisibleNpcRoleTints": bool(checks.get("visibleNpcRoleTints", false)),
 		"canReadVisibleNpcSourceToken": bool(checks.get("visibleNpcSourceToken", false)),
 		"canReadVisibleSocialInfluenceLink": bool(checks.get("visibleSocialInfluenceLink", false)),
+		"canInspectVisibleSocialInfluenceLink": bool(checks.get("codexInspectedVisibleSocialInfluenceLink", false)),
 		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
 		"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
 		"canInspectRecordRoleAffordanceMap": bool(checks.get("codexInspectedRecordAffordanceMap", false)),
@@ -913,6 +919,8 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"recordState": record_state_label,
 			"visibleNpcStates": summary.get("visibleNpcStates", {}),
 			"actorMemory": summary.get("actorMemory", {}),
+			"inspectedSocialLink": summary.get("inspectedSocialLink", {}),
+			"inspectedSocialLinkHistory": summary.get("inspectedSocialLinkHistory", []),
 			"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {}),
 			"inspectedWorldRecordHistory": summary.get("inspectedWorldRecordHistory", []),
 			"inspectedNpcState": summary.get("inspectedNpcState", {}),
@@ -944,6 +952,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 				"Visible NPC bodies use distinct role tints, so Codex/player can identify the social field by actor role before opening detailed panels.",
 				"The Waiting Customer also carries a visible source token colored from the Station Officer role, exposing that the refusal came from Station citation pressure.",
 				"The scene draws a visible social influence link from the Station Officer citation source to the Waiting Customer refusal, making the NPC-to-NPC consequence readable in the 3D space.",
+				"Codex/player focused that social influence link and pressed the same interaction key to read the source actor, target actor, observed action, resulting action, and cited ledger record in the HUD.",
 				"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, cited ledger basis, and overheard NPC-to-NPC exchange.",
 				"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
 			],
@@ -1081,12 +1090,16 @@ func _action_player_meaning(action_id: String, payload: Dictionary) -> String:
 			return "read place social rule board: %s" % str(payload.get("surfaceId", ""))
 		"focus.npc":
 			return "look at visible NPC: %s" % str(payload.get("npcId", ""))
+		"focus.social_link":
+			return "look at social influence link: %s" % str(payload.get("linkId", ""))
 		"player.interact.focused":
 			return "press the focused interaction"
 		"inspect.world_record_prop":
 			return "inspect environment record prop: %s" % str(payload.get("objectId", ""))
 		"inspect.npc":
 			return "inspect visible NPC reaction: %s" % str(payload.get("npcId", ""))
+		"inspect.social_link":
+			return "inspect social influence link: %s" % str(payload.get("linkId", ""))
 		_:
 			return "unsupported or unknown player action"
 
@@ -1933,6 +1946,24 @@ func _visible_social_influence_link(summary: Dictionary, observed_actor_id: Stri
 		):
 			return true
 	return false
+
+func _inspected_social_influence_link(summary: Dictionary, observed_actor_id: String, observer_actor_id: String, observed_affordance: String, resulting_affordance: String) -> bool:
+	var inspected: Dictionary = summary.get("inspectedSocialLink", {})
+	if _social_influence_link_matches(inspected, observed_actor_id, observer_actor_id, observed_affordance, resulting_affordance):
+		return str(inspected.get("body", "")).contains("읽은 기록")
+	var history: Array = summary.get("inspectedSocialLinkHistory", [])
+	for item in history:
+		if item is Dictionary and _social_influence_link_matches(item, observed_actor_id, observer_actor_id, observed_affordance, resulting_affordance):
+			return str(item.get("body", "")).contains("읽은 기록")
+	return false
+
+func _social_influence_link_matches(link: Dictionary, observed_actor_id: String, observer_actor_id: String, observed_affordance: String, resulting_affordance: String) -> bool:
+	return (
+		str(link.get("observedActorId", "")) == observed_actor_id
+		and str(link.get("observerActorId", "")) == observer_actor_id
+		and str(link.get("observedAffordance", "")) == observed_affordance
+		and str(link.get("resultingAffordance", "")) == resulting_affordance
+	)
 
 func _visible_npc_has_line(summary: Dictionary, npc_id: String) -> bool:
 	var states: Dictionary = summary.get("visibleNpcStates", {})

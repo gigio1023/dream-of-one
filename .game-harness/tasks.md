@@ -220,6 +220,11 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   role-colored links from the observed/source actor to the reacting actor, and
   Codex gameplay QA verifies `canReadVisibleSocialInfluenceLink=true` for
   Station Officer `cite_record` -> Waiting Customer `refuse_contact`.
+- [x] Let Codex/player focus and inspect a visible social influence link through
+  actual focus plus interact: the inquest path now supports
+  `focus.social_link` on the Station Officer -> Waiting Customer link,
+  `player.interact.focused` opens the same HUD notice, and Codex gameplay QA
+  verifies `canInspectVisibleSocialInfluenceLink=true`.
 - [x] Make the civic economy panel player-readable as a tiny social-pressure
   record: Codex/player can inspect current credit/trust/burden/attention values
   and recent ledger deltas that show which role action moved them.

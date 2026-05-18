@@ -147,6 +147,14 @@ Last Updated: 2026-05-19
   source token tied to `cite_record`, and Codex gameplay QA verifies
   `canReadVisibleNpcSourceToken=true`; the refreshed probe passes 31/31
   accepted public actions, 35/35 explainability checks, and 5/5 route reports.
+- Latest implementation slice: visible NPC-to-NPC influence links are now
+  inspectable through the same focus plus interact path used for props and
+  NPCs. Codex gameplay QA focuses
+  `NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact`,
+  interacts, and reads the source actor, target actor, `cite_record ->
+  refuse_contact`, and cited `civic-ledger-6` in the HUD. The refreshed probe
+  passes 33/33 accepted public actions, 37/37 explainability checks, and 5/5
+  route reports with `canInspectVisibleSocialInfluenceLink=true`.
 - Latest implementation slice: the running 3D scene now draws role-colored
   NPC-to-NPC influence links from the observed/source actor to the reacting
   actor. In the inquest path, Codex/player can read a visible

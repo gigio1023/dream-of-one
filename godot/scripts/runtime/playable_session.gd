@@ -444,6 +444,8 @@ var inspected_world_record_prop: Dictionary = {}
 var inspected_world_record_history: Array[Dictionary] = []
 var inspected_npc_state: Dictionary = {}
 var inspected_npc_history: Array[Dictionary] = []
+var inspected_social_link: Dictionary = {}
+var inspected_social_link_history: Array[Dictionary] = []
 var outcome_visible := false
 var outcome_title := ""
 var outcome_body := ""
@@ -597,6 +599,11 @@ func debug_codex_gameplay_action_catalog() -> Array[Dictionary]:
 			"playerMeaning": "Move Codex/player attention to one visible NPC so their current social reaction can be read."
 		},
 		{
+			"actionId": "focus.social_link",
+			"payloadSchema": {"linkId": "string"},
+			"playerMeaning": "Move Codex/player attention to one visible NPC-to-NPC influence link."
+		},
+		{
 			"actionId": "player.interact.focused",
 			"payloadSchema": {},
 			"playerMeaning": "Press the current focused interaction in the running scene."
@@ -610,6 +617,11 @@ func debug_codex_gameplay_action_catalog() -> Array[Dictionary]:
 			"actionId": "inspect.npc",
 			"payloadSchema": {"npcId": "string"},
 			"playerMeaning": "Read one visible NPC reaction through the same HUD notice area a player uses."
+		},
+		{
+			"actionId": "inspect.social_link",
+			"payloadSchema": {"linkId": "string"},
+			"playerMeaning": "Read one visible NPC-to-NPC influence link through the same HUD notice area a player uses."
 		}
 	]
 
@@ -625,6 +637,8 @@ func debug_codex_gameplay_snapshot() -> Dictionary:
 		"inspectedWorldRecordHistory": inspected_world_record_history.duplicate(true),
 		"inspectedNpcState": inspected_npc_state.duplicate(true),
 		"inspectedNpcHistory": inspected_npc_history.duplicate(true),
+		"inspectedSocialLink": inspected_social_link.duplicate(true),
+		"inspectedSocialLinkHistory": inspected_social_link_history.duplicate(true),
 		"hud": _codex_hud_snapshot()
 	}
 
@@ -911,6 +925,16 @@ func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) ->
 				reason = "npc_unavailable"
 			else:
 				codex_focus_hold_frames = 4
+		"focus.social_link":
+			var link_id := str(payload.get("linkId", "")).strip_edges()
+			if link_id.is_empty():
+				accepted = false
+				reason = "link_id_required"
+			elif not _force_focus_social_link(link_id):
+				accepted = false
+				reason = "social_link_unavailable"
+			else:
+				codex_focus_hold_frames = 4
 		"player.interact.focused":
 			if current_focus == null:
 				accepted = false
@@ -937,6 +961,16 @@ func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) ->
 				if not bool(action_result.get("ok", false)):
 					accepted = false
 					reason = str(action_result.get("reason", "npc_unavailable"))
+		"inspect.social_link":
+			var link_id := str(payload.get("linkId", "")).strip_edges()
+			if link_id.is_empty():
+				accepted = false
+				reason = "link_id_required"
+			else:
+				action_result = _inspect_social_link(link_id)
+				if not bool(action_result.get("ok", false)):
+					accepted = false
+					reason = str(action_result.get("reason", "social_link_unavailable"))
 		_:
 			accepted = false
 			reason = "unsupported_action"
@@ -977,6 +1011,8 @@ func build_summary() -> Dictionary:
 		"inspectedWorldRecordHistory": inspected_world_record_history.duplicate(true),
 		"inspectedNpcState": inspected_npc_state.duplicate(true),
 		"inspectedNpcHistory": inspected_npc_history.duplicate(true),
+		"inspectedSocialLink": inspected_social_link.duplicate(true),
+		"inspectedSocialLinkHistory": inspected_social_link_history.duplicate(true),
 		"sessionOutcome": _session_outcome(),
 		"lastWhyLine": last_why_line,
 		"lastWhyLineKey": last_why_line_key,
@@ -1040,6 +1076,8 @@ func build_summary() -> Dictionary:
 			"inspectedWorldRecordHistory": inspected_world_record_history.duplicate(true),
 			"inspectedNpcState": inspected_npc_state.duplicate(true),
 			"inspectedNpcHistory": inspected_npc_history.duplicate(true),
+			"inspectedSocialLink": inspected_social_link.duplicate(true),
+			"inspectedSocialLinkHistory": inspected_social_link_history.duplicate(true),
 			"providerState": _provider_state(),
 			"endControls": _end_controls()
 		},
@@ -1096,6 +1134,8 @@ func build_evidence_pack(artifact_path: String) -> Dictionary:
 			"inspectedWorldRecordHistory": inspected_world_record_history.duplicate(true),
 			"inspectedNpcState": inspected_npc_state.duplicate(true),
 			"inspectedNpcHistory": inspected_npc_history.duplicate(true),
+			"inspectedSocialLink": inspected_social_link.duplicate(true),
+			"inspectedSocialLinkHistory": inspected_social_link_history.duplicate(true),
 			"providerState": _provider_state(),
 			"endControls": _end_controls(),
 			"visibleWhyLine": last_why_line,
@@ -1119,6 +1159,13 @@ func _interact() -> void:
 		var result := _inspect_npc(npc_id)
 		if not bool(result.get("ok", false)):
 			_set_notice("NPC 없음", "이 NPC의 현재 반응은 아직 읽을 수 없습니다.")
+		return
+
+	if current_focus != null and current_focus_kind == "social_link":
+		var link_id := str(current_focus.get_meta("social_link_id", ""))
+		var result := _inspect_social_link(link_id)
+		if not bool(result.get("ok", false)):
+			_set_notice("사회 영향 없음", "이 사회 영향선은 아직 읽을 수 있는 상태가 아닙니다.")
 		return
 
 	if _session_locked():
@@ -1723,6 +1770,8 @@ func _refresh_hud() -> void:
 		prompt = "E: %s 읽기" % _localized_text_surface_label(current_focus, surface_id)
 	elif current_focus != null and current_focus_kind == "npc":
 		prompt = "E: %s 반응 읽기" % str(current_focus.get_meta("role", "NPC"))
+	elif current_focus != null and current_focus_kind == "social_link":
+		prompt = "E: 사회 영향 읽기"
 	elif current_focus != null and current_focus_kind == "zone":
 		var zone_id := str(current_focus.get_meta("zone_id", ""))
 		prompt = "E: 상점 점원과 대화 시작" if zone_id == "StoreCounterZone" else "상점 카운터가 현재 대화 프롤로그입니다."
@@ -2054,6 +2103,7 @@ func _codex_small_summary(summary: Dictionary) -> Dictionary:
 		"lastReasonCode": summary.get("lastReasonCode", ""),
 		"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {}),
 		"inspectedNpcState": summary.get("inspectedNpcState", {}),
+		"inspectedSocialLink": summary.get("inspectedSocialLink", {}),
 		"inputLocked": summary.get("inputLocked", false)
 	}
 
@@ -2898,6 +2948,60 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		}
 	)
 	return {"ok": true, "inspectedNpcState": inspected_npc_state.duplicate(true)}
+
+func _inspect_social_link(link_id: String) -> Dictionary:
+	_refresh_actor_reaction_source_labels()
+	var link := _social_link_snapshot(link_id)
+	if link.is_empty():
+		return {"ok": false, "reason": "social_link_unknown", "linkId": link_id}
+
+	var observed_actor_id := str(link.get("observedActorId", ""))
+	var observer_actor_id := str(link.get("observerActorId", ""))
+	var observed_name := _actor_display_name(observed_actor_id)
+	var observer_name := _actor_display_name(observer_actor_id)
+	var observed_role_label := _actor_role_label(str(link.get("observedActorRole", "")))
+	var observer_role_label := _actor_role_label(str(link.get("observerRole", "")))
+	var observed_affordance := str(link.get("observedAffordance", ""))
+	var resulting_affordance := str(link.get("resultingAffordance", ""))
+	var observed_affordance_label := _affordance_label(observed_affordance)
+	var resulting_affordance_label := _affordance_label(resulting_affordance)
+	var observed_event_id := str(link.get("observedLedgerEventId", ""))
+	var observed_event_label := _civic_ledger_event_compact_label(observed_event_id)
+	var title := "사회 영향 / %s -> %s" % [observed_name, observer_name]
+	var body_lines := PackedStringArray()
+	body_lines.append("출발: %s · %s" % [observed_role_label, observed_affordance_label])
+	body_lines.append("도착: %s · %s" % [observer_role_label, resulting_affordance_label])
+	if not observed_event_id.is_empty():
+		body_lines.append("읽은 기록: %s" % (observed_event_label if not observed_event_label.is_empty() else observed_event_id))
+	body_lines.append("의미: 이 선은 한 NPC가 읽은 기록/말이 다른 NPC의 사회 행동으로 넘어간 경로입니다.")
+
+	inspected_social_link = link.duplicate(true)
+	inspected_social_link["title"] = title
+	inspected_social_link["body"] = "\n".join(body_lines)
+	inspected_social_link["observedActorName"] = observed_name
+	inspected_social_link["observerActorName"] = observer_name
+	inspected_social_link["observedRoleLabel"] = observed_role_label
+	inspected_social_link["observerRoleLabel"] = observer_role_label
+	inspected_social_link["observedAffordanceLabel"] = observed_affordance_label
+	inspected_social_link["resultingAffordanceLabel"] = resulting_affordance_label
+	inspected_social_link["observedLedgerEventLabel"] = observed_event_label
+	inspected_social_link_history.append(inspected_social_link.duplicate(true))
+	_set_notice(title, str(inspected_social_link.get("body", "")))
+	_record_event(
+		"observation",
+		"social_link_inspected",
+		"Inspected social influence link %s." % link_id,
+		{
+			"linkId": link_id,
+			"observedActorId": observed_actor_id,
+			"observerActorId": observer_actor_id,
+			"observedAffordance": observed_affordance,
+			"resultingAffordance": resulting_affordance,
+			"uiSummaryKey": "event.social_link_inspected",
+			"uiSummaryArgs": {"from": observed_name, "to": observer_name}
+		}
+	)
+	return {"ok": true, "inspectedSocialLink": inspected_social_link.duplicate(true)}
 
 func _npc_social_exchange_lines(npc_id: String, limit: int) -> PackedStringArray:
 	var lines := PackedStringArray()
@@ -3945,6 +4049,7 @@ func _refresh_visible_social_links(latest_observation_by_role: Dictionary) -> vo
 			"fromPosition": _vector3_components(start_position),
 			"toPosition": _vector3_components(end_position)
 		}
+		link_node.set_meta("social_link_id", link_id)
 		link_node.set_meta("social_link_snapshot", snapshot)
 		_social_link_snapshots.append(snapshot)
 
@@ -4046,6 +4151,14 @@ func _social_link_color(source_role: String) -> Color:
 
 func _visible_social_links() -> Array[Dictionary]:
 	return _social_link_snapshots.duplicate(true)
+
+func _social_link_snapshot(link_id: String) -> Dictionary:
+	if link_id.is_empty():
+		return {}
+	for link in _social_link_snapshots:
+		if str(link.get("linkId", "")) == link_id:
+			return link.duplicate(true)
+	return {}
 
 func _safe_node_name(value: String) -> String:
 	return value.replace(":", "_").replace(".", "_").replace("-", "_").replace("/", "_")
@@ -4334,6 +4447,14 @@ func _update_focus() -> void:
 					best_node = node as Node3D
 					best_kind = "text_surface"
 					best_distance = distance
+	if best_node == null:
+		for node in _local_group_nodes(&"social_influence_links"):
+			if node is Node3D and bool((node as Node3D).visible):
+				var distance := _player.global_position.distance_to((node as Node3D).global_position)
+				if distance < best_distance:
+					best_node = node as Node3D
+					best_kind = "social_link"
+					best_distance = distance
 	current_focus = best_node
 	current_focus_kind = best_kind
 
@@ -4359,6 +4480,20 @@ func _force_focus_npc(npc_id: String) -> bool:
 			current_focus_kind = "npc"
 			if _player != null:
 				var focus_position := (node as Node3D).global_position + Vector3(0, 0, 1.25)
+				focus_position.y = _player.global_position.y
+				_player.global_position = focus_position
+			_refresh_hud()
+			return true
+	return false
+
+func _force_focus_social_link(link_id: String) -> bool:
+	_refresh_actor_reaction_source_labels()
+	for node in _local_group_nodes(&"social_influence_links"):
+		if node is Node3D and str(node.get_meta("social_link_id", "")) == link_id and bool((node as Node3D).visible):
+			current_focus = node as Node3D
+			current_focus_kind = "social_link"
+			if _player != null:
+				var focus_position := (node as Node3D).global_position + Vector3(0, 0, 1.0)
 				focus_position.y = _player.global_position.y
 				_player.global_position = focus_position
 			_refresh_hud()

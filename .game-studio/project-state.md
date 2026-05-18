@@ -200,6 +200,15 @@ Current M1 carry-in:
   source token for `cite_record`, and Codex gameplay QA requires
   `canReadVisibleNpcSourceToken=true`. This makes NPC-to-NPC influence visible
   in the 3D scene before the player opens inspection text.
+- latest small-slice carry-in: visible NPC-to-NPC influence links are now
+  inspectable through the same focus plus interact path used for props and
+  NPCs. In the inquest path, Codex/player can focus
+  `NPC_Station_Officer__NPC_Waiting_Customer__cite_record__refuse_contact`,
+  interact, and read the source actor, target actor,
+  `cite_record -> refuse_contact`, and cited `civic-ledger-6` through the live
+  HUD. Codex gameplay QA now requires
+  `canInspectVisibleSocialInfluenceLink=true` and passes 33 accepted public
+  actions, 37 explainability checks, and 5/5 route reports.
 - latest small-slice carry-in: the running 3D scene now draws role-colored
   NPC-to-NPC influence links from the observed/source actor to the reacting
   actor. In the inquest path, a visible link connects

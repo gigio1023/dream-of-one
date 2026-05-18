@@ -10,10 +10,10 @@ OAuth auth, using only `gpt-5.4-mini` with low reasoning effort, no model
 fallbacks, and deterministic fallback if the provider path fails.
 
 The backend proof proves bounded LLM text proposals for NPC roles. A Godot tool
-now also proves one live `/v1/npc/decision` dispatch using an actual
-`PlayableSession` route packet, then confirms deterministic fallback parity on
-the same running scene. This still does not switch the playable scene or HUD out
-of `fallback_only_m1`.
+now also proves two live `/v1/npc/decision` dispatches using actual
+`PlayableSession` route packets for the Store Clerk and Waiting Customer, then
+confirms deterministic fallback parity on the same running scene. This still
+does not switch the playable scene or HUD out of `fallback_only_m1`.
 
 ## Commands
 
@@ -93,7 +93,7 @@ Two-NPC social probe:
 Godot live PlayableSession route provider dispatch smoke:
 
 - artifact: `data/evidence/godot/live-provider-dispatch/dre_171_live_provider_dispatch_smoke.json`
-- artifact SHA-256: `73411662f282d5c1afe340aef7c10fcb5a52eb477bdaca4f049ca71df5de5e5f`
+- artifact SHA-256: `eaba9c097d35e199a43fb32bac18ac0ff44f138c0fb28bcdcdb43010bb252751`
 - readiness: ready for `openai-codex`
 - model: `gpt-5.4-mini`
 - reasoning: `low`
@@ -101,10 +101,17 @@ Godot live PlayableSession route provider dispatch smoke:
 - HTTP decision endpoint: `200`
 - transport: `codex`
 - per-request estimated cap: `$0.01`
-- estimated cost: `$0.00422775`
-- actual usage: 1,211 input tokens, 199 output tokens, 1,410 total tokens
+- request count: 2
+- live actors: `NPC_Store_Clerk`, `NPC_Waiting_Customer`
+- total estimated cost: `$0.00792525`
+- total actual usage: 1,829 input tokens, 400 output tokens, 2,229 total tokens
+- Store Clerk estimated cost: `$0.00409125`
+- Store Clerk actual usage: 1,077 input tokens, 223 output tokens, 1,300 total tokens
+- Waiting Customer estimated cost: `$0.003834`
+- Waiting Customer actual usage: 752 input tokens, 177 output tokens, 929 total tokens
 - fallback: false
-- selected utterance: `네,같은걸로준비할게요.`
+- Store Clerk utterance: `네,같은걸로드릴게요.`
+- Waiting Customer utterance: `맞습니다.제가착각했습니다.`
 - command executed in Godot world: false
 - product provider state changed: false
 - provider decision mutated route state: false
@@ -127,17 +134,21 @@ upgrades, and recorded actual token usage when the provider returns it.
   Exposure, inquest, verdict, and session end remain deterministic authority.
 - A tiny two-role social context can produce bounded live LLM wording without
   falling back or upgrading model.
-- A Godot script can drive the actual `PlayableSession`, build a live
-  route-context provider packet, reach the backend `/v1/npc/decision` endpoint,
-  receive bounded `openai-codex` wording plus usage metadata, and then continue
-  the deterministic fallback route without state mutation or route drift.
+- A Godot script can drive the actual `PlayableSession`, build live
+  route-context provider packets for two NPC actors, reach the backend
+  `/v1/npc/decision` endpoint, receive bounded `openai-codex` wording plus
+  usage metadata, and then continue the deterministic fallback route without
+  state mutation or route drift.
 
 ## What Remains Unproven
 
 - In-game HUD/Evidence truth showing `openai_codex` instead of
   `fallback_only_m1`.
-- Continuous live provider scheduling across multiple `PlayableSession` route
-  jobs, actors, and memory turns.
+- Continuous live provider scheduling across more than two `PlayableSession`
+  route jobs and memory turns.
+- Strong role-voice policy for live wording. The Waiting Customer proof stayed
+  bounded and non-mutating, but the returned line was weakly role-anchored and
+  should be improved before player-visible live wording is enabled.
 - Multi-step NPC memory and policy behavior across a long live simulation.
 - ChatGPT Pro quota remaining or plan-limit accounting, because the endpoint
   does not expose remaining subscription usage in these responses.

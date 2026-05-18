@@ -142,23 +142,28 @@ Latest OpenAI Codex provider note:
 - Godot live PlayableSession route-context dispatch now also passes through
   `godot/tools/live_provider_dispatch_smoke.gd` against a local backend on
   `127.0.0.1:8787`. It drove `main.tscn` through
-  `PlayableSession.debug_codex_gameplay_action`, built one live provider packet
-  from the running route state, selected `gpt-5.4-mini`, used no fallback,
-  capped the request at `$0.01`, estimated `$0.00422775`, returned 1,211 input /
-  199 output / 1,410 total tokens, avoided route mutation, then continued the
-  deterministic fallback path to `routeOutcome=clean_cover` and
+  `PlayableSession.debug_codex_gameplay_action`, built two live provider
+  packets from the running route state for `NPC_Store_Clerk` and
+  `NPC_Waiting_Customer`, selected `gpt-5.4-mini`, used no fallback, capped each
+  request at `$0.01`, kept the two-request total estimate under `$0.01`, and
+  returned total usage of 1,829 input / 400 output / 2,229 total tokens with
+  total estimated cost `$0.00792525`. It avoided route mutation and continued
+  the deterministic fallback path to `routeOutcome=clean_cover` and
   `sessionOutcome=cover_held`. It wrote
   `data/evidence/godot/live-provider-dispatch/dre_171_live_provider_dispatch_smoke.json`
-  with SHA-256 `73411662f282d5c1afe340aef7c10fcb5a52eb477bdaca4f049ca71df5de5e5f`.
+  with SHA-256 `eaba9c097d35e199a43fb32bac18ac0ff44f138c0fb28bcdcdb43010bb252751`.
 - ChatGPT Pro remaining quota was not exposed by these Codex Responses, so
   future work must track request count, fixed model, reasoning effort,
   estimated caps, fallback status, and returned token usage instead of claiming
   remaining subscription quota.
-- This is backend live text-proposal proof plus one proof-only Godot
-  PlayableSession route provider dispatch with fallback parity. Godot
+- This is backend live text-proposal proof plus two proof-only Godot
+  PlayableSession route provider dispatches with fallback parity. Godot
   HUD/Evidence product truth remains `fallback_only_m1` until a later decision
   exposes live wording as a player-visible mode and records that usage in
   playable Evidence.
+- Residual risk: the Waiting Customer live wording remained bounded and
+  non-mutating but weakly role-anchored, so live role-voice policy needs a
+  targeted improvement before player-visible live wording is enabled.
 
 Latest status check:
 - command: `.game-harness/scripts/run-same-order-comprehension-session.sh --status`

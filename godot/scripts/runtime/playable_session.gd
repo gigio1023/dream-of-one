@@ -615,14 +615,14 @@ func debug_codex_gameplay_snapshot() -> Dictionary:
 		"hud": _codex_hud_snapshot()
 	}
 
-func debug_live_provider_packet(session_id_override: String = "") -> Dictionary:
+func debug_live_provider_packet(session_id_override: String = "", actor_id_override: String = "") -> Dictionary:
 	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
-	var actor_id := str(beat.get("actorId", "NPC_Store_Clerk"))
+	var actor_id := actor_id_override if not actor_id_override.is_empty() else str(beat.get("actorId", "NPC_Store_Clerk"))
 	if actor_id.is_empty():
 		actor_id = "NPC_Store_Clerk"
 	var actor_role := str(ACTOR_AGENT_ROLES.get(actor_id, "store_clerk"))
-	var tool_catalog := _compact_provider_tool_catalog(_current_environment_tool_catalog())
-	var tool_summaries := _current_environment_tool_summary_lines()
+	var tool_catalog := _compact_provider_tool_catalog(_environment_tool_catalog_for_actor(actor_id))
+	var tool_summaries := _environment_tool_summary_lines_for_actor(actor_id)
 	var recent_events: Array[String] = [
 		"stage:%s" % stage,
 		"prompt:%s" % current_prompt_id,
@@ -631,7 +631,7 @@ func debug_live_provider_packet(session_id_override: String = "") -> Dictionary:
 	]
 	for line in tool_summaries:
 		recent_events.append("tool:%s" % str(line))
-	for event in _recent_civic_ledger_events(3):
+	for event in _recent_civic_ledger_events(2):
 		recent_events.append("ledger:%s:%s:%s" % [
 			str(event.get("eventId", "")),
 			str(event.get("kind", "")),
@@ -648,13 +648,13 @@ func debug_live_provider_packet(session_id_override: String = "") -> Dictionary:
 	return {
 		"sessionId": session_id_override if not session_id_override.is_empty() else "%s-live-provider-%d" % [SESSION_ID, Time.get_ticks_msec()],
 		"npcId": actor_id,
-		"landmarkId": "Store",
+		"landmarkId": _provider_landmark_for_actor(actor_id),
 		"nearbyActors": nearby_actors,
 		"recentEvents": recent_events,
 		"organizationContext": {
-			"organization": "Store",
+			"organization": _provider_landmark_for_actor(actor_id),
 			"role": actor_role,
-			"duty": "speak from the current Store procedure without changing records",
+			"duty": _provider_duty_for_actor(actor_id, actor_role),
 			"currentPromptId": current_prompt_id,
 			"currentTurnId": current_turn_id,
 			"availableChoices": _current_choice_lines(),
@@ -672,6 +672,37 @@ func debug_live_provider_packet(session_id_override: String = "") -> Dictionary:
 		}
 	}
 
+func _provider_landmark_for_actor(actor_id: String) -> String:
+	for npc_id in _visible_npc_states().keys():
+		if str(npc_id) != actor_id:
+			continue
+		var state: Dictionary = _visible_npc_states().get(npc_id, {})
+		var home_landmark := str(state.get("homeLandmark", ""))
+		if not home_landmark.is_empty():
+			return home_landmark
+	match actor_id:
+		"NPC_Park_Witness":
+			return "Park"
+		"NPC_Station_Officer":
+			return "Station"
+		"NPC_Studio_PM":
+			return "Studio"
+	return "Store"
+
+func _provider_duty_for_actor(actor_id: String, actor_role: String) -> String:
+	match actor_id:
+		"NPC_Store_Clerk":
+			return "speak from the current Store procedure without changing records"
+		"NPC_Waiting_Customer":
+			return "react to visible queue and public record facts without changing authority state"
+		"NPC_Park_Witness":
+			return "comment on public notices and observed routine records without inventing reports"
+		"NPC_Studio_PM":
+			return "comment on review access from public records without changing review state"
+		"NPC_Station_Officer":
+			return "speak only from cited records and intake procedure without deciding verdicts"
+	return "speak from the %s role without changing deterministic records" % actor_role
+
 func _compact_provider_tool_catalog(tool_catalog: Array[Dictionary]) -> Array[Dictionary]:
 	var compact: Array[Dictionary] = []
 	for action in tool_catalog:
@@ -682,7 +713,7 @@ func _compact_provider_tool_catalog(tool_catalog: Array[Dictionary]) -> Array[Di
 			"toState": str(action.get("toState", "")),
 			"ledgerEventKind": str(action.get("ledgerEventKind", ""))
 		})
-		if compact.size() >= 6:
+		if compact.size() >= 4:
 			break
 	return compact
 
@@ -3521,14 +3552,21 @@ func _current_choice_lines() -> Array[String]:
 
 func _current_environment_tool_catalog() -> Array[Dictionary]:
 	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
-	var actor_role := str(ACTOR_AGENT_ROLES.get(str(beat.get("actorId", "")), ""))
+	return _environment_tool_catalog_for_actor(str(beat.get("actorId", "")))
+
+func _environment_tool_catalog_for_actor(actor_id: String) -> Array[Dictionary]:
+	var actor_role := str(ACTOR_AGENT_ROLES.get(actor_id, ""))
 	if actor_role.is_empty():
 		return []
 	return _available_role_agent_actions(actor_role)
 
 func _current_environment_tool_summary_lines() -> Array[String]:
+	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
+	return _environment_tool_summary_lines_for_actor(str(beat.get("actorId", "")))
+
+func _environment_tool_summary_lines_for_actor(actor_id: String) -> Array[String]:
 	var lines: Array[String] = []
-	for action in _current_environment_tool_catalog():
+	for action in _environment_tool_catalog_for_actor(actor_id):
 		var label := _affordance_label(str(action.get("affordance", "")))
 		var object_label := _world_record_prop_title(str(action.get("objectId", "")))
 		var event_kind := str(action.get("ledgerEventKind", ""))

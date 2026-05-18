@@ -9,21 +9,67 @@
 			"npcId": "NPC_Store_Clerk",
 			"ok": true,
 			"providerUsage": {
-				"actualInputTokens": 1211.0,
-				"actualOutputTokens": 199.0,
-				"actualTotalTokens": 1410.0,
-				"estimatedCostUsd": 0.00422775,
-				"estimatedInputTokens": 1437.0,
-				"estimatedTotalTokens": 2137.0,
+				"actualInputTokens": 1077.0,
+				"actualOutputTokens": 223.0,
+				"actualTotalTokens": 1300.0,
+				"estimatedCostUsd": 0.00409125,
+				"estimatedInputTokens": 1255.0,
+				"estimatedTotalTokens": 1955.0,
 				"maxOutputTokens": 700.0,
 				"model": "gpt-5.4-mini"
 			},
 			"reason": "",
-			"threadId": "resp_0a108f7f125e446f016a0ae22f57d0819195036d439bac592e",
+			"threadId": "resp_0d1cf734cc0c8e4e016a0ae3f83ca08191bc4563d724ef47ff",
 			"transport": "codex",
 			"usedFallback": false,
-			"utterance": "네,같은걸로준비할게요."
+			"utterance": "네,같은걸로드릴게요."
 		},
+		"liveDecisions": [
+			{
+				"actionType": "Talk",
+				"endpoint": "http://127.0.0.1:8787/v1/npc/decision",
+				"httpStatus": 200,
+				"npcId": "NPC_Store_Clerk",
+				"ok": true,
+				"providerUsage": {
+					"actualInputTokens": 1077.0,
+					"actualOutputTokens": 223.0,
+					"actualTotalTokens": 1300.0,
+					"estimatedCostUsd": 0.00409125,
+					"estimatedInputTokens": 1255.0,
+					"estimatedTotalTokens": 1955.0,
+					"maxOutputTokens": 700.0,
+					"model": "gpt-5.4-mini"
+				},
+				"reason": "",
+				"threadId": "resp_0d1cf734cc0c8e4e016a0ae3f83ca08191bc4563d724ef47ff",
+				"transport": "codex",
+				"usedFallback": false,
+				"utterance": "네,같은걸로드릴게요."
+			},
+			{
+				"actionType": "Talk",
+				"endpoint": "http://127.0.0.1:8787/v1/npc/decision",
+				"httpStatus": 200,
+				"npcId": "NPC_Waiting_Customer",
+				"ok": true,
+				"providerUsage": {
+					"actualInputTokens": 752.0,
+					"actualOutputTokens": 177.0,
+					"actualTotalTokens": 929.0,
+					"estimatedCostUsd": 0.003834,
+					"estimatedInputTokens": 912.0,
+					"estimatedTotalTokens": 1612.0,
+					"maxOutputTokens": 700.0,
+					"model": "gpt-5.4-mini"
+				},
+				"reason": "",
+				"threadId": "resp_088b5c040a55eb11016a0ae3fb2a10819193da322132037e89",
+				"transport": "codex",
+				"usedFallback": false,
+				"utterance": "맞습니다.제가착각했습니다."
+			}
+		],
 		"playableRoute": {
 			"afterProviderDecision": {
 				"agentActionCount": 0,
@@ -130,24 +176,34 @@
 	"failures": [],
 	"ok": true,
 	"proofs": {
-		"actualInputTokens": 1211,
-		"actualOutputTokens": 199,
-		"actualTotalTokens": 1410,
+		"actualInputTokens": 1077,
+		"actualOutputTokens": 223,
+		"actualTotalTokens": 1300,
 		"chatGptProQuotaRemaining": "not_exposed_by_codex_response",
 		"commandExecuted": false,
 		"contextMutated": false,
+		"decisionCount": 2,
 		"decisionRequested": true,
-		"estimatedCostUsd": 0.00422775,
+		"estimatedCostUsd": 0.00409125,
 		"fallbackParityRouteOutcome": "clean_cover",
 		"fallbackParitySessionOutcome": "cover_held",
+		"liveActorIds": [
+			"NPC_Store_Clerk",
+			"NPC_Waiting_Customer"
+		],
+		"multiActorLiveProviderPackets": true,
 		"playableSessionPacket": true,
 		"productProviderStateChanged": false,
 		"providerDecisionMutatedRouteState": false,
 		"providerMode": "openai-codex",
 		"selectedModel": "gpt-5.4-mini",
+		"totalActualInputTokens": 1829,
+		"totalActualOutputTokens": 400,
+		"totalActualTokens": 2229,
+		"totalEstimatedCostUsd": 0.00792525,
 		"transport": "codex",
 		"usedFallback": false,
-		"utterance": "네,같은걸로준비할게요."
+		"utterance": "네,같은걸로드릴게요."
 	},
 	"runId": "dre-live-provider-dispatch-smoke",
 	"schemaVersion": "godot-runtime-v1"

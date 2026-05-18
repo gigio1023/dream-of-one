@@ -7,6 +7,7 @@ const OUTPUT_PATH := "res://../data/evidence/godot/live-provider-dispatch/dre_17
 const ARTIFACT_PATH := "data/evidence/godot/live-provider-dispatch/dre_171_live_provider_dispatch_smoke.json"
 const OUTPUT_ENV := "DREAM_OF_ONE_LIVE_PROVIDER_DISPATCH_OUTPUT"
 const MAX_ROUTE_PROVIDER_ESTIMATED_COST_USD := 0.01
+const MAX_ROUTE_PROVIDER_TOTAL_ESTIMATED_COST_USD := 0.01
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -40,6 +41,10 @@ func _run() -> void:
 	var route_final := {}
 	var route_before_fingerprint := ""
 	var route_after_fingerprint := ""
+	var route_after_customer_fingerprint := ""
+	var customer_provider_mutated_route := false
+	var customer_provider_packet := {}
+	var customer_decision_report := {}
 	if failures.is_empty():
 		session = await _load_playable_session(failures)
 	if failures.is_empty():
@@ -72,6 +77,34 @@ func _run() -> void:
 		await _drive_session(session, "dialogue.choice.by_id", {"choiceId": "store.same_order.probe.safe"}, failures)
 		route_final = _session_summary(session)
 		_validate_route_parity(route_final, failures)
+	if failures.is_empty():
+		var route_final_fingerprint := _route_fingerprint(route_final)
+		customer_provider_packet = session.call(
+			"debug_live_provider_packet",
+			"godot-live-playable-route-provider-customer-%d-%d" % [
+				Time.get_unix_time_from_system(),
+				Time.get_ticks_msec()
+			],
+			"NPC_Waiting_Customer"
+		)
+		customer_decision_report = await BackendBridge.probe_live_decision(
+			self,
+			customer_provider_packet,
+			decision_endpoint,
+			BackendBridge.DEFAULT_DECISION_TIMEOUT_MS
+		)
+		_validate_decision_report(customer_decision_report, customer_provider_packet, failures)
+		route_final = _session_summary(session)
+		route_after_customer_fingerprint = _route_fingerprint(route_final)
+		customer_provider_mutated_route = route_final_fingerprint != route_after_customer_fingerprint
+		_require(not customer_provider_mutated_route, failures, "Waiting Customer live provider decision mutated PlayableSession route state.")
+
+	var usage_totals := _provider_usage_totals([
+		decision_report.get("decision", {}).get("meta", {}).get("providerUsage", {}),
+		customer_decision_report.get("decision", {}).get("meta", {}).get("providerUsage", {})
+	])
+	if not decision_report.is_empty() and not customer_decision_report.is_empty():
+		_require(float(usage_totals.get("estimatedCostUsd", 1.0)) <= MAX_ROUTE_PROVIDER_TOTAL_ESTIMATED_COST_USD, failures, "Two-actor live provider proof must stay under the total estimated cap.")
 
 	var after_fingerprint := JSON.stringify(context)
 	_require(before_fingerprint == after_fingerprint, failures, "Live provider dispatch smoke mutated runtime context.")
@@ -80,6 +113,11 @@ func _run() -> void:
 	var meta: Dictionary = decision.get("meta", {})
 	var intent: Dictionary = decision.get("intent", {})
 	var provider_usage: Dictionary = meta.get("providerUsage", {})
+	var live_decisions: Array[Dictionary] = []
+	if not decision_report.is_empty():
+		live_decisions.append(_summarize_decision(decision_report))
+	if not customer_decision_report.is_empty():
+		live_decisions.append(_summarize_decision(customer_decision_report))
 	var pack := {
 		"ok": failures.is_empty(),
 		"runId": "dre-live-provider-dispatch-smoke",
@@ -88,15 +126,18 @@ func _run() -> void:
 		"checks": {
 			"readiness": _summarize_readiness(readiness),
 			"decision": _summarize_decision(decision_report),
+			"liveDecisions": live_decisions,
 			"playableRoute": {
 				"before": _summarize_route(route_before),
 				"afterProviderDecision": _summarize_route(route_after),
 				"final": _summarize_route(route_final),
-				"stateMutatedByProviderDecision": route_before_fingerprint != route_after_fingerprint
+				"stateMutatedByProviderDecision": route_before_fingerprint != route_after_fingerprint or customer_provider_mutated_route
 			}
 		},
 		"proofs": {
 			"decisionRequested": not decision_report.is_empty(),
+			"decisionCount": live_decisions.size(),
+			"liveActorIds": _live_actor_ids(live_decisions),
 			"commandExecuted": false,
 			"contextMutated": before_fingerprint != after_fingerprint,
 			"providerMode": "openai-codex",
@@ -108,10 +149,15 @@ func _run() -> void:
 			"actualInputTokens": int(provider_usage.get("actualInputTokens", 0)),
 			"actualOutputTokens": int(provider_usage.get("actualOutputTokens", 0)),
 			"actualTotalTokens": int(provider_usage.get("actualTotalTokens", 0)),
+			"totalEstimatedCostUsd": float(usage_totals.get("estimatedCostUsd", 0.0)),
+			"totalActualInputTokens": int(usage_totals.get("actualInputTokens", 0)),
+			"totalActualOutputTokens": int(usage_totals.get("actualOutputTokens", 0)),
+			"totalActualTokens": int(usage_totals.get("actualTotalTokens", 0)),
 			"chatGptProQuotaRemaining": "not_exposed_by_codex_response",
 			"productProviderStateChanged": false,
 			"playableSessionPacket": not provider_packet.is_empty(),
-			"providerDecisionMutatedRouteState": route_before_fingerprint != route_after_fingerprint,
+			"multiActorLiveProviderPackets": not provider_packet.is_empty() and not customer_provider_packet.is_empty(),
+			"providerDecisionMutatedRouteState": route_before_fingerprint != route_after_fingerprint or customer_provider_mutated_route,
 			"fallbackParityRouteOutcome": str(route_final.get("routeOutcome", "")),
 			"fallbackParitySessionOutcome": str(route_final.get("sessionOutcome", ""))
 		},
@@ -282,6 +328,30 @@ func _latest_ledger_event(summary: Dictionary) -> Dictionary:
 		return {}
 	var latest = ledger[ledger.size() - 1]
 	return latest if latest is Dictionary else {}
+
+func _provider_usage_totals(usages: Array) -> Dictionary:
+	var totals := {
+		"estimatedCostUsd": 0.0,
+		"actualInputTokens": 0,
+		"actualOutputTokens": 0,
+		"actualTotalTokens": 0
+	}
+	for usage in usages:
+		if not usage is Dictionary:
+			continue
+		totals["estimatedCostUsd"] = float(totals["estimatedCostUsd"]) + float(usage.get("estimatedCostUsd", 0.0))
+		totals["actualInputTokens"] = int(totals["actualInputTokens"]) + int(usage.get("actualInputTokens", 0))
+		totals["actualOutputTokens"] = int(totals["actualOutputTokens"]) + int(usage.get("actualOutputTokens", 0))
+		totals["actualTotalTokens"] = int(totals["actualTotalTokens"]) + int(usage.get("actualTotalTokens", 0))
+	return totals
+
+func _live_actor_ids(decisions: Array[Dictionary]) -> Array[String]:
+	var actor_ids: Array[String] = []
+	for decision in decisions:
+		var npc_id := str(decision.get("npcId", ""))
+		if not npc_id.is_empty() and not actor_ids.has(npc_id):
+			actor_ids.append(npc_id)
+	return actor_ids
 
 func _settle_frames(count: int) -> void:
 	for _i in range(max(1, count)):

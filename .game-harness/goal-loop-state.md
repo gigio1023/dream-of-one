@@ -71,6 +71,30 @@ session count is `0 / 3`, so product closure remains blocked even though
 backend, Godot, visual, Codex gameplay QA, export, and packaged route proofs
 are current.
 
+Latest completion audit:
+- objective mapped to artifacts: open-environment social-sim guidance and
+  Store/Station-as-sample framing are current in `AGENTS.md`,
+  `.game-harness/playable-goal-reference.md`, `.game-harness/active-goal-prompt.md`,
+  and `.game-studio/project-state.md`; current environment/tool affordance
+  proof is carried by the playable slice Evidence Pack, Codex gameplay probe,
+  and packaged-route evidence.
+- latest Codex gameplay QA artifact reports `ok=true`,
+  `aiPlayerReport.pass=true`, 23 accepted public actions, 5/5 route reports,
+  all 22 explainability flags true, and
+  `canReadEnvironmentToolCatalog=true`. It also explicitly marks itself as not
+  a replacement for external comprehension.
+- latest packaged-route evidence validates as a Godot Evidence Pack and
+  conversation/suspicion proof for the single `inquest_opened` route with
+  `packagedRouteSmokeProof=true`, `fallback_only_m1`, and
+  `canReadEnvironmentToolCatalog=true`.
+- strict raw-note review still returns `PENDING_TESTER_NOTES` with manual
+  session count `0`; `.game-harness/scripts/run-same-order-comprehension-session.sh
+  --status` is locally blocked until `DREAM_OF_ONE_APP_PATH` is set for this
+  device.
+- conclusion: do not add another internal helper, route, or proof just to show
+  activity. The next required evidence is an observed fresh-player session and
+  accepted direct-note review, which is outside Codex-only control.
+
 Latest status check:
 - command: `.game-harness/scripts/run-same-order-comprehension-session.sh --status`
 - result in this local shell: blocked before status because

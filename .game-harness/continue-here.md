@@ -32,9 +32,11 @@ Last Updated: 2026-05-18
   preflight and Codex QA details compressed so the next action remains obvious:
   run the live fresh-player session.
 - On this Ubuntu ARM shell, `--status` now also reports human-play display
-  readiness. The current server has no `DISPLAY` or `WAYLAND_DISPLAY`, so the
-  default live helper will fail before tester prompts until a desktop, VNC, X11
-  forwarding, or another display-capable tester device is used.
+  readiness. A local Xvfb/fluxbox/x11vnc/noVNC stack can be managed with
+  `.game-harness/scripts/run-local-display-session.sh start|status|stop`.
+  Current proof shows `Human play display: ready: X display :99 is present`;
+  noVNC is bound to localhost and should be reached through an explicit secure
+  access path such as an SSH tunnel.
 - The default live helper also keeps successful packaged-preflight details out
   of the pre-play terminal output. It should not leak facilitator-only setup
   terms to a fresh tester before first play.

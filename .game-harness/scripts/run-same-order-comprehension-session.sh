@@ -11,6 +11,13 @@ if [[ -f "$LOCAL_ENV_PATH" ]]; then
   source "$LOCAL_ENV_PATH"
   set +a
 fi
+DISPLAY_ENV_PATH="${DREAM_OF_ONE_DISPLAY_ENV_PATH:-$REPO_ROOT/build/display-session/env.sh}"
+if [[ -z "${DISPLAY:-}" && -z "${WAYLAND_DISPLAY:-}" && -f "$DISPLAY_ENV_PATH" ]]; then
+  set -a
+  # shellcheck source=/dev/null
+  source "$DISPLAY_ENV_PATH"
+  set +a
+fi
 
 APP_PATH="${DREAM_OF_ONE_APP_PATH:-}"
 ROUTE_EVIDENCE_PATH="${DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH:-}"
@@ -756,8 +763,16 @@ human_play_display_status_line() {
     printf "ready: local macOS executable launch"
     return 0
   fi
-  if [[ -n "${DISPLAY:-}" || -n "${WAYLAND_DISPLAY:-}" ]]; then
-    printf "ready: display environment is present"
+  if [[ -n "${DISPLAY:-}" ]]; then
+    if command -v xdpyinfo >/dev/null 2>&1 && ! xdpyinfo -display "$DISPLAY" >/dev/null 2>&1; then
+      printf "not-ready: DISPLAY is set to %s but the X display is not reachable" "$DISPLAY"
+      return 0
+    fi
+    printf "ready: X display %s is present" "$DISPLAY"
+    return 0
+  fi
+  if [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
+    printf "ready: Wayland display %s is present" "$WAYLAND_DISPLAY"
     return 0
   fi
   printf "not-ready: no DISPLAY or WAYLAND_DISPLAY; use a desktop session, VNC, X11 forwarding, or another tester device before launching"

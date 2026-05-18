@@ -29,7 +29,7 @@ continue through small playable proofs.
 | Live role voice is bounded enough for proof-only use. | Store Clerk returned `오늘도같은걸로드릴까요?`; Waiting Customer observed that live utterance and returned `줄은그대로네요.`; smoke rejects Waiting Customer player-blame phrases. | PASS |
 | Codex gameplay QA is current after provider packet changes. | `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd` passed; status helper reports Codex source freshness pass; JSON SHA-256 `7116b486d7c8481e6b74de0094fd2de8d234527989b4e632ea7790135ab5af1d`. | PASS |
 | Codex can play, inspect, and explain the proof cell through public APIs. | `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.json`: `ok=true`, `aiPlayerReport.pass=true`, `stage=inquest`, 23/23 accepted actions, 5/5 route reports, 23 explainability checks including actor memory and provider-packet actor policy readiness. | PASS |
-| Packaged/tester setup remains ready. | `.game-harness/scripts/run-same-order-comprehension-session.sh --status`: packaged app preflight pass and Codex gameplay QA pass, but the current Ubuntu ARM shell reports `Human play display: not-ready` because neither `DISPLAY` nor `WAYLAND_DISPLAY` is set. | PARTIAL |
+| Packaged/tester setup remains ready. | `.game-harness/scripts/run-same-order-comprehension-session.sh --status`: packaged app preflight pass, `Human play display: ready: X display :99 is present`, and Codex gameplay QA pass. | PASS |
 | Tester/facilitator helper is portable across current devices. | Status output now prints repo-local guide paths relative to the repo, session-kit examples use ignored `build/session-kits/same-order`, and `.game-harness/scripts/verify-comprehension-review-guards.sh` auto-loads the ignored device-local env and passes on Ubuntu ARM without manual `source`. | PASS |
 | Linear SoT route exists for the external comprehension blocker. | Linear searches for `Dream of One comprehension fresh player Same Order GI-04 tester notes PENDING_TESTER_NOTES`, `Same Order`, and `fresh player comprehension tester notes` found no open matching issue. Recent tickets confirm team `Dream-of-one` (`DRE`), but the available Linear MCP has no create mutation and `LINEAR_API_TOKEN` is unset. | FAIL |
 | Goal work budget is accounted separately from game-provider spend. | Active Codex goal accounting is tracked by the Codex goal runtime; live NPC provider usage is tracked only through request count, fixed model, estimated caps, fallback status, and returned token usage because ChatGPT Pro remaining quota is not exposed by the provider payload. | PASS |
@@ -55,10 +55,12 @@ continue through small playable proofs.
   model, reasoning, request count, estimated caps, fallback status, and
   returned token usage are recorded; ChatGPT Pro remaining quota is unavailable
   from these responses.
-- Current local facilitator launch is display-blocked on this Ubuntu ARM shell:
-  the packaged app/evidence and Codex QA setup are ready, but observed human
-  play requires a GUI/display path such as desktop, VNC, X11 forwarding, or a
-  different tester device.
+- Current local facilitator launch has a display path on this Ubuntu ARM shell:
+  `.game-harness/scripts/run-local-display-session.sh` starts a localhost-bound
+  Xvfb/fluxbox/x11vnc/noVNC stack, `--status` reports X display `:99` ready,
+  noVNC serves `vnc.html`, and a timeout launch reaches the Godot GUI. Observed
+  human play still requires a fresh tester and an explicit secure access path
+  to that localhost noVNC endpoint.
 - Linear SoT routing is prepared but not created: the copy-ready draft targets
   `Dream-of-one` (`DRE`), but this session lacks both a Linear issue-create MCP
   mutation and `LINEAR_API_TOKEN` for GraphQL fallback.
@@ -90,8 +92,13 @@ issues through MCP or GraphQL fallback.
 
 ## Next Action
 
-When a fresh tester and a display-capable facilitator device are available,
-first confirm:
+When a fresh tester is available, keep or start the local display stack:
+
+```bash
+.game-harness/scripts/run-local-display-session.sh start
+```
+
+Then confirm:
 
 ```bash
 .game-harness/scripts/run-same-order-comprehension-session.sh --status

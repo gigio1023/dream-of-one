@@ -132,12 +132,15 @@ Latest Ubuntu ARM environment setup:
   passes, and `--status` now reaches the expected fresh-player gate summary:
   raw notes `0 / 3`, strict review `PENDING_TESTER_NOTES`, Codex QA setup
   proof pass, and next action `run an observed fresh-player session now`.
-- Remaining local runtime caveat: this server currently has no `DISPLAY` or
-  `WAYLAND_DISPLAY`, so an observed human play session still needs a GUI/display
-  path such as local desktop, VNC, X11 forwarding, or another tester device.
-  The session helper now reports this explicitly in `--status` as
-  `Human play display: not-ready` and fails before tester prompts on the
-  default launch path.
+- Local display setup on this Ubuntu ARM server now has a managed
+  Xvfb/fluxbox/x11vnc/noVNC path through
+  `.game-harness/scripts/run-local-display-session.sh start|status|stop`.
+  The noVNC listener binds to localhost. Current proof shows
+  `Human play display: ready: X display :99 is present`, noVNC serves
+  `vnc.html`, and the packaged app reaches the Godot GUI on that display under
+  a timeout launch. Observed human play still requires a fresh tester and an
+  explicit secure access path to the localhost noVNC endpoint, such as an SSH
+  tunnel.
 
 Latest environment/auth awareness note:
 - Current work is on a headless Ubuntu ARM/aarch64 server, so future agents must

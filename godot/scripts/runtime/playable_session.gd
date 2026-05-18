@@ -2631,7 +2631,19 @@ func _world_record_prop_inspection_body(object_id: String, state: String) -> Str
 			"empty":
 				return "대기줄이 비었습니다. 보고 부담 때문에 카운터가 멈추자 대기 손님이 빠져나갔습니다."
 	if object_id == "civic_economy_panel":
-		return "현재 작은 사회 값입니다. 신뢰, 부담, 주목 같은 값은 한 NPC의 다음 선택을 바꾸는 데만 쓰입니다."
+		if _current_locale() == "en":
+			return "Current tiny social values: credit %d, trust %d, burden %d, attention %d. These values only exist to change one visible NPC choice; the recent ledger below shows which role action moved them." % [
+				int(civic_economy.get("accountCredit", 3)),
+				int(civic_economy.get("localTrust", 50)),
+				int(civic_economy.get("recordBurden", 0)),
+				int(civic_economy.get("stationAttention", 0))
+			]
+		return "현재 작은 사회 값입니다. 잔액 %d, 신뢰 %d, 부담 %d, 주목 %d. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다." % [
+			int(civic_economy.get("accountCredit", 3)),
+			int(civic_economy.get("localTrust", 50)),
+			int(civic_economy.get("recordBurden", 0)),
+			int(civic_economy.get("stationAttention", 0))
+		]
 	if object_id == "civic_ledger":
 		return "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어집니다."
 	return "%s 상태입니다. 이 기록은 NPC가 볼 수 있는 환경 단서이며, 다음 역할 행동의 근거가 될 수 있습니다." % _record_state_value(state)
@@ -2653,6 +2665,9 @@ func _world_record_prop_social_lines(reader_role_labels: Array[String], possible
 			var compact := "%s %s / %s -> %s" % [event_id, kind_label, actor_label, affordance_label]
 			if not cited_id.is_empty():
 				compact = "%s / 인용 %s" % [compact, cited_id]
+			var economy_delta_label := str(event.get("economyDeltaLabel", ""))
+			if not economy_delta_label.is_empty():
+				compact = "%s / 변화 %s" % [compact, economy_delta_label]
 			compact_events.append(compact)
 		lines.append("최근 장부: %s" % " | ".join(compact_events))
 	return lines
@@ -2688,7 +2703,11 @@ func _world_record_prop_recent_ledger_events(object_id: String, limit: int) -> A
 	for index in range(civic_ledger.size() - 1, -1, -1):
 		var event: Dictionary = civic_ledger[index]
 		var event_object_id := str(event.get("objectId", ""))
-		if object_id != "civic_ledger" and event_object_id != object_id:
+		if object_id == "civic_economy_panel":
+			var event_economy_delta: Dictionary = event.get("economyDelta", {})
+			if event_economy_delta.is_empty():
+				continue
+		elif object_id != "civic_ledger" and event_object_id != object_id:
 			continue
 		var compact := {
 			"eventId": str(event.get("eventId", "")),
@@ -2702,10 +2721,36 @@ func _world_record_prop_recent_ledger_events(object_id: String, limit: int) -> A
 		var cited_id := str(event.get("citedLedgerEventId", ""))
 		if not cited_id.is_empty():
 			compact["citedLedgerEventId"] = cited_id
+		var economy_delta: Dictionary = event.get("economyDelta", {})
+		if not economy_delta.is_empty():
+			compact["economyDelta"] = economy_delta.duplicate(true)
+			compact["economyDeltaLabel"] = _economy_delta_label(economy_delta)
 		events.append(compact)
 		if events.size() >= limit:
 			break
 	return events
+
+func _economy_delta_label(economy_delta: Dictionary) -> String:
+	var labels := PackedStringArray()
+	for key in ["accountCredit", "localTrust", "recordBurden", "stationAttention"]:
+		if not economy_delta.has(key):
+			continue
+		var value := int(economy_delta.get(key, 0))
+		var sign := "+" if value >= 0 else ""
+		labels.append("%s%s%d" % [_economy_value_label(key), sign, value])
+	return ", ".join(labels)
+
+func _economy_value_label(key: String) -> String:
+	match key:
+		"accountCredit":
+			return "잔액"
+		"localTrust":
+			return "신뢰"
+		"recordBurden":
+			return "부담"
+		"stationAttention":
+			return "주목"
+	return key
 
 func _latest_civic_ledger_label() -> String:
 	if civic_ledger.is_empty():
@@ -2890,7 +2935,8 @@ func _world_record_prop_title(object_id: String) -> String:
 		"park_notice_board": "공원 게시판",
 		"studio_review_queue": "스튜디오 리뷰 줄",
 		"station_dossier": "스테이션 문서",
-		"civic_ledger": "시민 장부"
+		"civic_ledger": "시민 장부",
+		"civic_economy_panel": "시민 경제"
 	}
 	var en := {
 		"store_queue_mark": "Queue mark",
@@ -2902,7 +2948,8 @@ func _world_record_prop_title(object_id: String) -> String:
 		"park_notice_board": "Park notice board",
 		"studio_review_queue": "Studio review queue",
 		"station_dossier": "Station dossier",
-		"civic_ledger": "Civic ledger"
+		"civic_ledger": "Civic ledger",
+		"civic_economy_panel": "Civic economy"
 	}
 	var table: Dictionary = en if _current_locale() == "en" else ko
 	return str(table.get(object_id, object_id))

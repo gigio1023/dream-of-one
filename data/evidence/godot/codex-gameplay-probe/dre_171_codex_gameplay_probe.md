@@ -17,6 +17,8 @@
 - player.interact.focused -> press the focused interaction
 - focus.world_record_prop -> look at environment record prop: studio_review_queue
 - player.interact.focused -> press the focused interaction
+- focus.world_record_prop -> look at environment record prop: civic_economy_panel
+- player.interact.focused -> press the focused interaction
 - focus.npc -> look at visible NPC: NPC_Studio_PM
 - player.interact.focused -> press the focused interaction
 - focus.npc -> look at visible NPC: NPC_Waiting_Customer
@@ -93,6 +95,7 @@
 - `canInspectNpcReaction`: `true`
 - `canReadExactStationCitation`: `true`
 - `canReadCivicEconomyPressure`: `true`
+- `canInspectCivicEconomyChange`: `true`
 - `canReadFinalOutcome`: `true`
 - `notHumanEvidence`: `true`
 

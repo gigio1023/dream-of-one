@@ -96,17 +96,24 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `b97e344847861ffdc78d2437040cca213d0c6e1d856f9be6095729399281b9db`
-  - Markdown SHA-256: `c88b43d4838ee8ad23d1add47f12030d43abc581d5a9fb76eeacf0f68fc1798b`
-  - playable Evidence Pack SHA-256: `2fd5d004e1555c408421b8ec9d041559411dcd38b2ee52703ec3d6534142c986`
+  - JSON SHA-256: `0ee9f01a1d8879eb79a5701a3b6b9d01a11bb17818a6a9ce2546f74b7e31a84b`
+  - Markdown SHA-256: `644c0f12e106173e883be9fa160fc619ffbb3e6beb2c64112532cbbf3e2636b0`
+  - playable Evidence Pack SHA-256: `eebfa59dd43c5bc876ca038b268fff60fdfccc2636e62f8bd8d1f45848d82a3a`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `11bbc6430c4f58258c4ac438f612c82cfa8d6b6a9f6071a4e66be72928a43f01`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `13 / 13`, `explainability=13/13`, and
+  player actions `15 / 15`, `explainability=14/14`, and
   `routeReportPassCount=5 / 5`.
+- latest game increment: the civic economy panel is now an actual inspectable
+  social-pressure record. Codex/player focuses `civic_economy_panel`, presses
+  interact, and reads current tiny values for `잔액`, `신뢰`, `부담`, and
+  `주목`, plus recent ledger entries with `변화` labels such as trust and burden
+  deltas. This keeps the economy intentionally child-simple while making the
+  important game point visible: one role action changed one shared value, and
+  that value exists only because it can alter the next NPC choice.
 - latest game increment: repair recovery now travels one small step beyond the
   Park board. After `public_repair_noted`, Studio PM reads `park_notice_board`
   and `studio_review_queue`, uses `offer_conditional_review`, changes

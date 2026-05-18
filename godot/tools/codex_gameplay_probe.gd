@@ -16,6 +16,8 @@ const PROBE_STEPS := [
 	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.world_record_prop", "payload": {"objectId": "studio_review_queue"}},
 	{"actionId": "player.interact.focused", "payload": {}},
+	{"actionId": "focus.world_record_prop", "payload": {"objectId": "civic_economy_panel"}},
+	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Studio_PM"}},
 	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Waiting_Customer"}},
@@ -657,6 +659,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Waiting Customer did not react to the Station citation")
 	if not bool(checks.get("economyPanelReadable", false)):
 		failures.append("Civic economy panel is not readable with credit/trust/burden/attention")
+	if not bool(checks.get("codexInspectedCivicEconomyPanel", false)):
+		failures.append("Codex/player did not inspect the civic economy panel as a social pressure record")
 	if not bool(checks.get("worldPropsReachInquest", false)):
 		failures.append("World record props do not show forwarded report and cited Station dossier")
 	if not bool(checks.get("codexInspectedPublicNotice", false)):
@@ -694,6 +698,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary) -> D
 		"codexInspectedWaitingCustomer": _inspected_waiting_customer(summary),
 		"codexInspectedStudioPm": _inspected_studio_pm_block(summary),
 		"economyPanelReadable": _economy_panel_readable(record_props),
+		"codexInspectedCivicEconomyPanel": _inspected_civic_economy_panel(summary),
 		"worldPropsReachInquest": _world_props_reach_inquest(record_props),
 		"latestLedger": latest_ledger
 	}
@@ -718,6 +723,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canInspectNpcReaction": bool(checks.get("codexInspectedWaitingCustomer", false)),
 		"canReadExactStationCitation": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"canReadCivicEconomyPressure": bool(checks.get("economyPanelReadable", false)),
+		"canInspectCivicEconomyChange": bool(checks.get("codexInspectedCivicEconomyPanel", false)),
 		"canReadFinalOutcome": str(summary.get("stage", "")) == "inquest" and outcome_body.contains("심문"),
 		"notHumanEvidence": true
 	}
@@ -973,6 +979,20 @@ func _economy_panel_readable(record_props: Dictionary) -> bool:
 		and label.contains("신뢰")
 		and label.contains("부담")
 		and label.contains("주목")
+	)
+
+func _inspected_civic_economy_panel(summary: Dictionary) -> bool:
+	var inspected := _inspected_world_record_candidate(summary, "civic_economy_panel", "attention")
+	if inspected.is_empty():
+		return false
+	var body := str(inspected.get("body", ""))
+	return (
+		body.contains("잔액")
+		and body.contains("신뢰")
+		and body.contains("부담")
+		and body.contains("주목")
+		and body.contains("최근 장부")
+		and body.contains("변화")
 	)
 
 func _world_props_reach_inquest(record_props: Dictionary) -> bool:

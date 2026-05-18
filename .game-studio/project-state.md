@@ -95,11 +95,12 @@ Current M1 carry-in:
   long-term content focus. Future work should extract reusable
   environment-agent patterns instead of deepening Store operations or Station
   procedure.
-- latest small-slice carry-in: active Store dialogue choices now expose compact
-  rule consequences while preserving diegetic speech lines. The initial prompt
-  shows that the three lines can become a normal receipt, correction slip, or
-  report burden, making the player-facing verb `speak` connect directly to
-  environment records before selection.
+- latest small-slice carry-in: active Store dialogue choices remain diegetic
+  speech inputs while the prompt exposes the Store Clerk's current
+  environment tool catalog from object affordances. The player can see what the
+  place affords before speaking, but the NPC/provider still has to choose a
+  role-filtered tool and the runtime still validates the resulting record or
+  ledger mutation.
 - latest small-slice carry-in: Studio and Park text surfaces are now readable
   cross-place social rules before the player speaks. Inspecting
   `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard` shows the place,

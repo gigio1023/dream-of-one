@@ -8,6 +8,9 @@ Last Updated: 2026-05-18
 - Current product blocker is external fresh-player comprehension: raw manual
   session notes remain `0 / 3`, and strict review remains
   `PENDING_TESTER_NOTES`.
+- Current local shell blocker for running that session: `DREAM_OF_ONE_APP_PATH`
+  is not set. Set the per-device packaged app path before using the live
+  comprehension helper; do not guess or record another machine's app path.
 - Do not reopen manual typed input, fallback-only provider mode, export setup,
   or broad role-review blockers unless new evidence regresses. Current proof
   already covers HUD typed input, packaged route evidence, fallback-only M1,

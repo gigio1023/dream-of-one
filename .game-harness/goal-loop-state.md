@@ -73,7 +73,10 @@ are current.
 
 Latest status check:
 - command: `.game-harness/scripts/run-same-order-comprehension-session.sh --status`
-- result: pass for packaged preflight; strict review remains
+- result in this local shell: blocked before status because
+  `DREAM_OF_ONE_APP_PATH` is not set. Set the per-device packaged app path
+  before running a live fresh-player session or status check.
+- last recorded packaged-preflight result remains pass; strict review remains
   `PENDING_TESTER_NOTES`.
 - packaged evidence: tester-ready, `stage=inquest`,
   `providerState.mode=fallback_only_m1`, typed input yes, response hesitation

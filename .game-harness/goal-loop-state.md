@@ -236,6 +236,14 @@ Latest OpenAI Codex provider note:
   Total live spend observed during this slice: estimated `$0.01324875`, actual
   4,264 input / 687 output / 4,951 total tokens. ChatGPT Pro remaining quota
   remains not exposed by the response.
+- `npm run openai-codex:usage --prefix backend/npc-runtime` now reports
+  checked-in Godot live provider artifact usage without calling the provider.
+  Latest pass reports `spendsLiveBudget=false`, model `gpt-5.4-mini`, low
+  reasoning, 4 recorded Godot live artifact requests, total estimated cost
+  `$0.01736175`, and actual usage 5,271 input / 873 output / 6,144 total
+  tokens. Backend one-call and two-NPC probe usage remains recorded in
+  `.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md`.
+  ChatGPT Pro remaining quota is still not exposed by the Codex responses.
 
 Latest status check:
 - command: `.game-harness/scripts/run-same-order-comprehension-session.sh --status`

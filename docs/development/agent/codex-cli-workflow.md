@@ -52,5 +52,8 @@ Backend live proof and usage accounting are recorded in
 `.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md`.
 The Godot smokes prove NPC-to-NPC route-context dispatch and same-NPC local
 memory continuity; they do not change `fallback_only_m1` product truth.
+Use `npm run openai-codex:usage --prefix backend/npc-runtime` before any new
+live provider run to summarize checked-in Godot live-artifact spend without
+calling the provider.
 
 Do not add legacy engine work back into the active tree.

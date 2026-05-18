@@ -9,6 +9,7 @@
     "dev": "tsx src/index.ts",
     "same-order:attach-playability-reports": "tsx src/tools/attach-same-order-playability-reports.ts",
     "openai-codex:login": "tsx src/tools/openai-codex-device-login.ts",
+    "openai-codex:usage": "tsx src/tools/report-openai-codex-live-usage.ts",
     "openai-codex:social-probe": "tsx src/tools/openai-codex-social-probe.ts",
     "openai:proposal-smoke": "tsx src/tools/openai-proposal-smoke.ts",
     "start": "node dist/index.js",

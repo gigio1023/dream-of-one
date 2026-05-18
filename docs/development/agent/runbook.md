@@ -39,6 +39,7 @@ command now defaults to the `openai-codex` gateway:
 
 ```bash
 npm run openai-codex:login --prefix backend/npc-runtime
+npm run openai-codex:usage --prefix backend/npc-runtime
 npm run openai:proposal-smoke --prefix backend/npc-runtime
 OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai:proposal-smoke --prefix backend/npc-runtime
 OPENAI_PROPOSAL_MAX_ESTIMATED_COST_USD=0.005 OPENAI_CODEX_SOCIAL_PROBE_TOTAL_ESTIMATED_COST_USD=0.01 OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai-codex:social-probe --prefix backend/npc-runtime

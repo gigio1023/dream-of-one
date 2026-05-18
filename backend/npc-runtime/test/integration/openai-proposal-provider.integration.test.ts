@@ -216,6 +216,22 @@ test("OpenAI proposal prompt separates role voice from player choices", async ()
       role: "waiting_customer",
       roleVoicePolicy: "Use waiting-customer observer voice. Never confess as the player.",
       availableChoices: ["같은 걸로 주세요."],
+      actorMemory: {
+        actorId: "NPC_Waiting_Customer",
+        actorRole: "waiting_customer",
+        memoryPolicy: "only own validated actions plus observed ledger events",
+        ownRecentActions: [
+          { ledgerEventId: "civic-ledger-8", affordance: "refuse_contact", validation: "accepted" },
+        ],
+        observedRecentActions: [
+          {
+            observedLedgerEventId: "civic-ledger-6",
+            observedActorRole: "station_officer",
+            observedAffordance: "cite_record",
+            resultingAffordance: "refuse_contact",
+          },
+        ],
+      },
     },
     playerSignals: { suspicion: 0, exposure: 0 },
   };
@@ -231,6 +247,9 @@ test("OpenAI proposal prompt separates role voice from player choices", async ()
   assert.equal(prompts.length, 1);
   assert.match(prompts[0] ?? "", /Role voice policy:/);
   assert.match(prompts[0] ?? "", /availableChoices, when present, are player speech options, not NPC lines to repeat/);
+  assert.match(prompts[0] ?? "", /actorMemory, when present, is bounded observed memory only/);
+  assert.match(prompts[0] ?? "", /do not infer hidden events, private intent, or unobserved ledger facts/);
+  assert.match(prompts[0] ?? "", /observedRecentActions/);
   assert.match(prompts[0] ?? "", /Use waiting-customer observer voice/);
 });
 

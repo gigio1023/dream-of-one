@@ -1,18 +1,18 @@
 {
   "adapter": "godot",
-  "createdAtMs": 1779118586691,
+  "createdAtMs": 1779123664096,
   "events": [
     {
       "adapter": "godot",
       "eventFamily": "session",
-      "eventId": "playable_session_started-001-1779118586444",
+      "eventId": "playable_session_started-001-1779123663818",
       "eventName": "playable_session_started",
       "prologueStep": "beginning",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "sessionOutcome": "running",
       "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-      "timestampMs": 1779118586444,
+      "timestampMs": 1779123663818,
       "uiSummaryArgs": {},
       "uiSummaryKey": "event.session_started",
       "worldId": "dre_171_godot_shell",
@@ -25,7 +25,7 @@
       "conversationId": "conv-same-order",
       "conversationStage": "normal",
       "eventFamily": "domain",
-      "eventId": "conversation_started-002-1779118586542",
+      "eventId": "conversation_started-002-1779123663914",
       "eventName": "conversation_started",
       "outcome": "running",
       "promptId": "store.same_order.routine",
@@ -34,7 +34,7 @@
       "socialLoopStage": "normal",
       "speakerId": "NPC_Store_Clerk",
       "summary": "Store Clerk opened the Same Order conversation.",
-      "timestampMs": 1779118586542,
+      "timestampMs": 1779123663914,
       "turnId": "turn-1",
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
@@ -47,7 +47,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "dialogue_choice_selected-003-1779118586581",
+      "eventId": "dialogue_choice_selected-003-1779123663961",
       "eventName": "dialogue_choice_selected",
       "inputMode": "choice",
       "outcome": "running",
@@ -69,7 +69,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779118586581,
+      "timestampMs": 1779123663961,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -84,7 +84,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-004-1779118586581",
+      "eventId": "conversation_anomaly_detected-004-1779123663961",
       "eventName": "conversation_anomaly_detected",
       "inputMode": "choice",
       "outcome": "running",
@@ -106,7 +106,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779118586581,
+      "timestampMs": 1779123663961,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -121,7 +121,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-005-1779118586581",
+      "eventId": "npc_suspicion_changed-005-1779123663961",
       "eventName": "npc_suspicion_changed",
       "inputMode": "choice",
       "outcome": "running",
@@ -143,7 +143,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779118586581,
+      "timestampMs": 1779123663961,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -158,7 +158,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "응답 지연 12000ms",
       "eventFamily": "domain",
-      "eventId": "response_hesitation_noted-006-1779118586616",
+      "eventId": "response_hesitation_noted-006-1779123664011",
       "eventName": "response_hesitation_noted",
       "inputMode": "response_hesitation",
       "outcome": "running",
@@ -181,7 +181,7 @@
       "suspicionSignals": [
         "response_hesitation"
       ],
-      "timestampMs": 1779118586616,
+      "timestampMs": 1779123664011,
       "turnId": "turn-2",
       "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
       "whyLineKey": "response_hesitation",
@@ -196,7 +196,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "free_input_submitted-007-1779118586642",
+      "eventId": "free_input_submitted-007-1779123664034",
       "eventName": "free_input_submitted",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -221,7 +221,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779118586642,
+      "timestampMs": 1779123664034,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -236,7 +236,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-008-1779118586642",
+      "eventId": "conversation_anomaly_detected-008-1779123664035",
       "eventName": "conversation_anomaly_detected",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -261,7 +261,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779118586642,
+      "timestampMs": 1779123664035,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -276,7 +276,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-009-1779118586642",
+      "eventId": "npc_suspicion_changed-009-1779123664035",
       "eventName": "npc_suspicion_changed",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -301,7 +301,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779118586642,
+      "timestampMs": 1779123664035,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -316,7 +316,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "suspicion_shared-010-1779118586642",
+      "eventId": "suspicion_shared-010-1779123664035",
       "eventName": "suspicion_shared",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -341,7 +341,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779118586642,
+      "timestampMs": 1779123664035,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -356,7 +356,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_report_created-011-1779118586643",
+      "eventId": "station_report_created-011-1779123664035",
       "eventName": "station_report_created",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -381,7 +381,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779118586643,
+      "timestampMs": 1779123664035,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -396,7 +396,7 @@
       "conversationStage": "inquest",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_inquest_opened-012-1779118586643",
+      "eventId": "station_inquest_opened-012-1779123664035",
       "eventName": "station_inquest_opened",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -421,7 +421,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779118586643,
+      "timestampMs": 1779123664035,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -432,12 +432,12 @@
       "adapter": "godot",
       "artifactPath": "data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json",
       "eventFamily": "evidence_export",
-      "eventId": "evidence_pack_created-013-1779118586691",
+      "eventId": "evidence_pack_created-013-1779123664096",
       "eventName": "evidence_pack_created",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "summary": "Godot conversation playable Evidence Pack exported for backend validation.",
-      "timestampMs": 1779118586691,
+      "timestampMs": 1779123664096,
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
     }
@@ -3590,19 +3590,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779118585174",
+            "eventId": "playable_session_started-001-1779123662766",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779118585305",
+            "eventId": "conversation_started-002-1779123662882",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-003-1779118585345",
+            "eventId": "dialogue_choice_selected-003-1779123662921",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3613,7 +3613,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-004-1779118585380",
+            "eventId": "dialogue_choice_selected-004-1779123662953",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3624,7 +3624,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_outcome_reached-005-1779118585381",
+            "eventId": "conversation_outcome_reached-005-1779123662954",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "clean_cover",
@@ -3660,19 +3660,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779118585571",
+            "eventId": "playable_session_started-001-1779123663044",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779118585750",
+            "eventId": "conversation_started-002-1779123663151",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779118585788",
+            "eventId": "dialogue_choice_selected-003-1779123663191",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3685,7 +3685,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779118585788",
+            "eventId": "conversation_anomaly_detected-004-1779123663191",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3698,7 +3698,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779118585788",
+            "eventId": "npc_suspicion_changed-005-1779123663191",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3711,7 +3711,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-006-1779118585834",
+            "eventId": "dialogue_choice_selected-006-1779123663229",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3722,7 +3722,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_outcome_reached-007-1779118585834",
+            "eventId": "conversation_outcome_reached-007-1779123663229",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "repair_recovered",
@@ -3764,19 +3764,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779118586195",
+            "eventId": "playable_session_started-001-1779123663564",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779118586293",
+            "eventId": "conversation_started-002-1779123663664",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779118586331",
+            "eventId": "dialogue_choice_selected-003-1779123663703",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3789,7 +3789,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779118586331",
+            "eventId": "conversation_anomaly_detected-004-1779123663703",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3802,7 +3802,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779118586331",
+            "eventId": "npc_suspicion_changed-005-1779123663703",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3815,7 +3815,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "dialogue_choice_selected-006-1779118586368",
+            "eventId": "dialogue_choice_selected-006-1779123663739",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3829,7 +3829,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-007-1779118586368",
+            "eventId": "conversation_anomaly_detected-007-1779123663739",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3843,7 +3843,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-008-1779118586368",
+            "eventId": "npc_suspicion_changed-008-1779123663739",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3857,7 +3857,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-009-1779118586369",
+            "eventId": "suspicion_shared-009-1779123663739",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3871,7 +3871,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-010-1779118586369",
+            "eventId": "station_report_created-010-1779123663740",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 80,
@@ -3885,7 +3885,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_outcome_reached-011-1779118586369",
+            "eventId": "conversation_outcome_reached-011-1779123663740",
             "eventName": "conversation_outcome_reached",
             "outcome": "soft_report",
             "routeOutcome": "soft_report",
@@ -3930,19 +3930,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779118586444",
+            "eventId": "playable_session_started-001-1779123663818",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779118586542",
+            "eventId": "conversation_started-002-1779123663914",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779118586581",
+            "eventId": "dialogue_choice_selected-003-1779123663961",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3955,7 +3955,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779118586581",
+            "eventId": "conversation_anomaly_detected-004-1779123663961",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3968,7 +3968,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779118586581",
+            "eventId": "npc_suspicion_changed-005-1779123663961",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3981,7 +3981,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "response_hesitation_noted-006-1779118586616",
+            "eventId": "response_hesitation_noted-006-1779123664011",
             "eventName": "response_hesitation_noted",
             "outcome": "running",
             "reportWeightAfter": 35,
@@ -3994,7 +3994,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "free_input_submitted-007-1779118586642",
+            "eventId": "free_input_submitted-007-1779123664034",
             "eventName": "free_input_submitted",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -4008,7 +4008,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-008-1779118586642",
+            "eventId": "conversation_anomaly_detected-008-1779123664035",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -4022,7 +4022,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-009-1779118586642",
+            "eventId": "npc_suspicion_changed-009-1779123664035",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -4036,7 +4036,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-010-1779118586642",
+            "eventId": "suspicion_shared-010-1779123664035",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -4050,7 +4050,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-011-1779118586643",
+            "eventId": "station_report_created-011-1779123664035",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 120,
@@ -4064,7 +4064,7 @@
           },
           {
             "conversationStage": "inquest",
-            "eventId": "station_inquest_opened-012-1779118586643",
+            "eventId": "station_inquest_opened-012-1779123664035",
             "eventName": "station_inquest_opened",
             "outcome": "inquest_opened",
             "reportWeightAfter": 120,
@@ -4106,12 +4106,16 @@
           "recordBurden": 50,
           "stationAttention": 30
         },
+        "exchangeLine": "Store Clerk \"잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\" -> Waiting Customer \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"",
+        "observedActorId": "NPC_Store_Clerk",
         "observedActorRole": "store_clerk",
         "observedAffordance": "place_note",
         "observedLedgerEventId": "civic-ledger-2",
         "observedObjectId": "report_tray",
+        "observedSpokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
         "observerActorId": "NPC_Waiting_Customer",
         "observerRole": "waiting_customer",
+        "observerSpokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
         "resultingAffordance": "complain_delay",
         "resultingStepId": "report.waiting_customer.complain_delay",
         "whyLine": "waiting_customer reads store_clerk's place_note record before choosing complain_delay."
@@ -4122,12 +4126,16 @@
           "recordBurden": 50,
           "stationAttention": 30
         },
+        "exchangeLine": "Store Clerk \"잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\" -> Park Witness \"공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.\"",
+        "observedActorId": "NPC_Store_Clerk",
         "observedActorRole": "store_clerk",
         "observedAffordance": "place_note",
         "observedLedgerEventId": "civic-ledger-2",
         "observedObjectId": "report_tray",
+        "observedSpokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
         "observerActorId": "NPC_Park_Witness",
         "observerRole": "park_witness",
+        "observerSpokenLine": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
         "resultingAffordance": "post_rumor",
         "resultingStepId": "report.park_witness.post_rumor",
         "whyLine": "park_witness reads store_clerk's place_note record before choosing post_rumor."
@@ -4138,12 +4146,16 @@
           "recordBurden": 50,
           "stationAttention": 30
         },
+        "exchangeLine": "Store Clerk \"잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\" -> Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\"",
+        "observedActorId": "NPC_Store_Clerk",
         "observedActorRole": "store_clerk",
         "observedAffordance": "place_note",
         "observedLedgerEventId": "civic-ledger-2",
         "observedObjectId": "report_tray",
+        "observedSpokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
         "observerActorId": "NPC_Store_Manager",
         "observerRole": "store_manager",
+        "observerSpokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
         "resultingAffordance": "forward_report",
         "resultingStepId": "inquest.manager.forward_report",
         "whyLine": "store_manager reads store_clerk's place_note record before choosing forward_report."
@@ -4154,12 +4166,16 @@
           "recordBurden": 85,
           "stationAttention": 70
         },
+        "exchangeLine": "Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\" -> Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"",
+        "observedActorId": "NPC_Store_Manager",
         "observedActorRole": "store_manager",
         "observedAffordance": "forward_report",
         "observedLedgerEventId": "civic-ledger-5",
         "observedObjectId": "report_tray",
+        "observedSpokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
         "observerActorId": "NPC_Station_Officer",
         "observerRole": "station_officer",
+        "observerSpokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
         "resultingAffordance": "cite_record",
         "resultingStepId": "inquest.station.cite_store_report",
         "whyLine": "station_officer reads store_manager's forward_report record before choosing cite_record."
@@ -4170,12 +4186,16 @@
           "recordBurden": 85,
           "stationAttention": 70
         },
+        "exchangeLine": "Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\" -> Studio PM \"스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\"",
+        "observedActorId": "NPC_Station_Officer",
         "observedActorRole": "station_officer",
         "observedAffordance": "cite_record",
         "observedLedgerEventId": "civic-ledger-6",
         "observedObjectId": "station_dossier",
+        "observedSpokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
         "observerActorId": "NPC_Studio_PM",
         "observerRole": "studio_pm",
+        "observerSpokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
         "resultingAffordance": "block_review",
         "resultingStepId": "inquest.studio_pm.block_review",
         "whyLine": "studio_pm reads station_officer's cite_record record before choosing block_review."
@@ -4186,12 +4206,16 @@
           "recordBurden": 85,
           "stationAttention": 70
         },
+        "exchangeLine": "Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\" -> Waiting Customer \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"",
+        "observedActorId": "NPC_Station_Officer",
         "observedActorRole": "station_officer",
         "observedAffordance": "cite_record",
         "observedLedgerEventId": "civic-ledger-6",
         "observedObjectId": "station_dossier",
+        "observedSpokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
         "observerActorId": "NPC_Waiting_Customer",
         "observerRole": "waiting_customer",
+        "observerSpokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
         "resultingAffordance": "refuse_contact",
         "resultingStepId": "inquest.waiting_customer.refuse_contact",
         "whyLine": "waiting_customer reads station_officer's cite_record record before choosing refuse_contact."
@@ -4199,80 +4223,188 @@
     ],
     "visibleNpcStates": {
       "NPC_Park_Witness": {
+        "baseReactionText": "소문 게시",
+        "bodyColor": [
+          0.360000014305115,
+          0.660000026226044,
+          0.319999992847443,
+          1
+        ],
         "displayName": "Park Witness",
         "emissionEnergy": 0.616666674613953,
         "exposure": 125,
+        "headColor": [
+          0.579999983310699,
+          0.819999992847443,
+          0.5,
+          1
+        ],
+        "homeLandmark": "Park",
         "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Park_Witness",
         "pressureText": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
-        "reactionText": "소문 게시",
+        "reactionSourceText": "← 상점 점원 · 메모 배치",
+        "reactionText": "소문 게시\n← 상점 점원 · 메모 배치",
         "role": "Park Witness",
+        "roleTint": "park-witness-green",
+        "roleTintLabel": "park witness green",
+        "routeId": "CivicLoop",
         "spokenLine": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
         "state": "rumored"
       },
       "NPC_Station_Officer": {
+        "baseReactionText": "보고됨",
+        "bodyColor": [
+          0.560000002384186,
+          0.430000007152557,
+          0.819999992847443,
+          1
+        ],
         "displayName": "Station Officer",
         "emissionEnergy": 0.616666674613953,
         "exposure": 125,
+        "headColor": [
+          0.720000028610229,
+          0.620000004768372,
+          0.939999997615814,
+          1
+        ],
+        "homeLandmark": "Station",
         "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Station_Officer",
         "pressureText": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
-        "reactionText": "보고됨",
+        "reactionSourceText": "← 상점 매니저 · 보고 전달",
+        "reactionText": "보고됨\n← 상점 매니저 · 보고 전달",
         "role": "Station Officer",
+        "roleTint": "station-officer-violet",
+        "roleTintLabel": "station officer violet",
+        "routeId": "StationIntake",
         "spokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
         "state": "inquest"
       },
       "NPC_Store_Clerk": {
+        "baseReactionText": "보고됨",
+        "bodyColor": [
+          0.939999997615814,
+          0.550000011920929,
+          0.219999998807907,
+          1
+        ],
         "displayName": "Store Clerk",
         "emissionEnergy": 0.616666674613953,
         "exposure": 125,
+        "headColor": [
+          1,
+          0.720000028610229,
+          0.419999986886978,
+          1
+        ],
+        "homeLandmark": "Store",
         "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Store_Clerk",
         "pressureText": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
+        "reactionSourceText": "",
         "reactionText": "보고됨",
         "role": "Store Clerk",
+        "roleTint": "store-clerk-warm",
+        "roleTintLabel": "store clerk warm amber",
+        "routeId": "StoreQueue",
         "spokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
         "state": "inquest"
       },
       "NPC_Store_Manager": {
+        "baseReactionText": "보고 전달",
+        "bodyColor": [
+          0.779999971389771,
+          0.360000014305115,
+          0.219999998807907,
+          1
+        ],
         "displayName": "Store Manager",
         "emissionEnergy": 0.616666674613953,
         "exposure": 125,
+        "headColor": [
+          0.939999997615814,
+          0.550000011920929,
+          0.379999995231628,
+          1
+        ],
+        "homeLandmark": "Store",
         "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Store_Manager",
         "pressureText": "이 상점 기록은 스테이션이 대조해야 합니다.",
-        "reactionText": "보고 전달",
+        "reactionSourceText": "← 상점 점원 · 메모 배치",
+        "reactionText": "보고 전달\n← 상점 점원 · 메모 배치",
         "role": "Store Manager",
+        "roleTint": "store-manager-rust",
+        "roleTintLabel": "store manager rust",
+        "routeId": "StoreQueue",
         "spokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
         "state": "forwarded"
       },
       "NPC_Studio_PM": {
+        "baseReactionText": "리뷰 차단",
+        "bodyColor": [
+          0.319999992847443,
+          0.519999980926514,
+          0.879999995231628,
+          1
+        ],
         "displayName": "Studio PM",
         "emissionEnergy": 0.616666674613953,
         "exposure": 45,
+        "headColor": [
+          0.540000021457672,
+          0.699999988079071,
+          1,
+          1
+        ],
+        "homeLandmark": "Studio",
         "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Studio_PM",
         "pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
-        "reactionText": "리뷰 차단",
+        "reactionSourceText": "← 스테이션 직원 · 기록 인용",
+        "reactionText": "리뷰 차단\n← 스테이션 직원 · 기록 인용",
         "role": "Studio PM",
+        "roleTint": "studio-pm-blue",
+        "roleTintLabel": "studio pm blue",
+        "routeId": "CivicLoop",
         "spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
         "state": "blocked"
       },
       "NPC_Waiting_Customer": {
+        "baseReactionText": "접촉 거부",
+        "bodyColor": [
+          0.259999990463257,
+          0.670000016689301,
+          0.620000004768372,
+          1
+        ],
         "displayName": "Waiting Customer",
         "emissionEnergy": 0.616666674613953,
         "exposure": 125,
+        "headColor": [
+          0.479999989271164,
+          0.819999992847443,
+          0.759999990463257,
+          1
+        ],
+        "homeLandmark": "Store",
         "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Waiting_Customer",
         "pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
-        "reactionText": "접촉 거부",
+        "reactionSourceText": "← 스테이션 직원 · 기록 인용",
+        "reactionText": "접촉 거부\n← 스테이션 직원 · 기록 인용",
         "role": "Waiting Customer",
+        "roleTint": "queue-customer-teal",
+        "roleTintLabel": "waiting customer teal",
+        "routeId": "StoreQueue",
         "spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
         "state": "refused"
       }
@@ -28436,7 +28568,7 @@
         "expectedHeight": 1440,
         "actualWidth": 1280,
         "actualHeight": 1440,
-        "bytes": 884135,
+        "bytes": 946242,
         "pass": true,
         "missing": []
       },
@@ -28458,7 +28590,7 @@
           "expectedHeight": 720,
           "actualWidth": 1280,
           "actualHeight": 720,
-          "bytes": 377691,
+          "bytes": 379282,
           "pass": true,
           "requiresHumanReadabilityReview": true,
           "expectedContent": [
@@ -28477,7 +28609,7 @@
           "expectedHeight": 720,
           "actualWidth": 1280,
           "actualHeight": 720,
-          "bytes": 421634,
+          "bytes": 434749,
           "pass": true,
           "requiresHumanReadabilityReview": true,
           "expectedContent": [
@@ -28495,7 +28627,7 @@
           "expectedHeight": 720,
           "actualWidth": 1280,
           "actualHeight": 720,
-          "bytes": 332603,
+          "bytes": 365269,
           "pass": true,
           "requiresHumanReadabilityReview": true,
           "expectedContent": [
@@ -28514,7 +28646,7 @@
           "expectedHeight": 720,
           "actualWidth": 1280,
           "actualHeight": 720,
-          "bytes": 347358,
+          "bytes": 370150,
           "pass": true,
           "requiresHumanReadabilityReview": true,
           "expectedContent": [
@@ -28535,7 +28667,7 @@
           "expectedHeight": 720,
           "actualWidth": 1280,
           "actualHeight": 720,
-          "bytes": 113136,
+          "bytes": 113139,
           "pass": true,
           "requiresHumanReadabilityReview": true,
           "expectedContent": [
@@ -28553,7 +28685,7 @@
           "expectedHeight": 720,
           "actualWidth": 1280,
           "actualHeight": 720,
-          "bytes": 311419,
+          "bytes": 327065,
           "pass": true,
           "requiresHumanReadabilityReview": true,
           "expectedContent": [
@@ -28593,7 +28725,7 @@
           "expectedHeight": 720,
           "actualWidth": 1280,
           "actualHeight": 720,
-          "bytes": 118893,
+          "bytes": 119232,
           "pass": true,
           "requiresHumanReadabilityReview": true,
           "expectedContent": [
@@ -28984,10 +29116,15 @@
         "memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
         "observedRecentActions": [
           {
+            "exchangeLine": "Store Clerk \"잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\" -> Park Witness \"공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.\"",
+            "observedActorId": "NPC_Store_Clerk",
             "observedActorRole": "store_clerk",
             "observedAffordance": "place_note",
             "observedLedgerEventId": "civic-ledger-2",
             "observedObjectId": "report_tray",
+            "observedSpokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
+            "observerActorId": "NPC_Park_Witness",
+            "observerSpokenLine": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
             "resultingAffordance": "post_rumor",
             "whyLine": "park_witness reads store_clerk's place_note record before choosing post_rumor."
           }
@@ -29017,10 +29154,15 @@
         "memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
         "observedRecentActions": [
           {
+            "exchangeLine": "Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\" -> Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"",
+            "observedActorId": "NPC_Store_Manager",
             "observedActorRole": "store_manager",
             "observedAffordance": "forward_report",
             "observedLedgerEventId": "civic-ledger-5",
             "observedObjectId": "report_tray",
+            "observedSpokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
+            "observerActorId": "NPC_Station_Officer",
+            "observerSpokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
             "resultingAffordance": "cite_record",
             "whyLine": "station_officer reads store_manager's forward_report record before choosing cite_record."
           }
@@ -29089,10 +29231,15 @@
         "memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
         "observedRecentActions": [
           {
+            "exchangeLine": "Store Clerk \"잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\" -> Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\"",
+            "observedActorId": "NPC_Store_Clerk",
             "observedActorRole": "store_clerk",
             "observedAffordance": "place_note",
             "observedLedgerEventId": "civic-ledger-2",
             "observedObjectId": "report_tray",
+            "observedSpokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
+            "observerActorId": "NPC_Store_Manager",
+            "observerSpokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
             "resultingAffordance": "forward_report",
             "whyLine": "store_manager reads store_clerk's place_note record before choosing forward_report."
           }
@@ -29126,10 +29273,15 @@
         "memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
         "observedRecentActions": [
           {
+            "exchangeLine": "Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\" -> Studio PM \"스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\"",
+            "observedActorId": "NPC_Station_Officer",
             "observedActorRole": "station_officer",
             "observedAffordance": "cite_record",
             "observedLedgerEventId": "civic-ledger-6",
             "observedObjectId": "station_dossier",
+            "observedSpokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
+            "observerActorId": "NPC_Studio_PM",
+            "observerSpokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
             "resultingAffordance": "block_review",
             "whyLine": "studio_pm reads station_officer's cite_record record before choosing block_review."
           }
@@ -29162,18 +29314,28 @@
         "memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
         "observedRecentActions": [
           {
+            "exchangeLine": "Store Clerk \"잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\" -> Waiting Customer \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"",
+            "observedActorId": "NPC_Store_Clerk",
             "observedActorRole": "store_clerk",
             "observedAffordance": "place_note",
             "observedLedgerEventId": "civic-ledger-2",
             "observedObjectId": "report_tray",
+            "observedSpokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
+            "observerActorId": "NPC_Waiting_Customer",
+            "observerSpokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
             "resultingAffordance": "complain_delay",
             "whyLine": "waiting_customer reads store_clerk's place_note record before choosing complain_delay."
           },
           {
+            "exchangeLine": "Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\" -> Waiting Customer \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"",
+            "observedActorId": "NPC_Station_Officer",
             "observedActorRole": "station_officer",
             "observedAffordance": "cite_record",
             "observedLedgerEventId": "civic-ledger-6",
             "observedObjectId": "station_dossier",
+            "observedSpokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
+            "observerActorId": "NPC_Waiting_Customer",
+            "observerSpokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
             "resultingAffordance": "refuse_contact",
             "whyLine": "waiting_customer reads station_officer's cite_record record before choosing refuse_contact."
           }
@@ -31455,14 +31617,14 @@
       {
         "adapter": "godot",
         "eventFamily": "session",
-        "eventId": "playable_session_started-001-1779118586444",
+        "eventId": "playable_session_started-001-1779123663818",
         "eventName": "playable_session_started",
         "prologueStep": "beginning",
         "schemaVersion": "godot-runtime-v1",
         "sessionId": "dre-171-playable-session",
         "sessionOutcome": "running",
         "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-        "timestampMs": 1779118586444,
+        "timestampMs": 1779123663818,
         "uiSummaryArgs": {},
         "uiSummaryKey": "event.session_started",
         "worldId": "dre_171_godot_shell",
@@ -31475,7 +31637,7 @@
         "conversationId": "conv-same-order",
         "conversationStage": "normal",
         "eventFamily": "domain",
-        "eventId": "conversation_started-002-1779118586542",
+        "eventId": "conversation_started-002-1779123663914",
         "eventName": "conversation_started",
         "outcome": "running",
         "promptId": "store.same_order.routine",
@@ -31484,7 +31646,7 @@
         "socialLoopStage": "normal",
         "speakerId": "NPC_Store_Clerk",
         "summary": "Store Clerk opened the Same Order conversation.",
-        "timestampMs": 1779118586542,
+        "timestampMs": 1779123663914,
         "turnId": "turn-1",
         "worldId": "dre_171_godot_shell",
         "worldRevision": "rev-social-stealth-v1"
@@ -31497,7 +31659,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "dialogue_choice_selected-003-1779118586581",
+        "eventId": "dialogue_choice_selected-003-1779123663961",
         "eventName": "dialogue_choice_selected",
         "inputMode": "choice",
         "outcome": "running",
@@ -31519,7 +31681,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779118586581,
+        "timestampMs": 1779123663961,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -31534,7 +31696,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-004-1779118586581",
+        "eventId": "conversation_anomaly_detected-004-1779123663961",
         "eventName": "conversation_anomaly_detected",
         "inputMode": "choice",
         "outcome": "running",
@@ -31556,7 +31718,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779118586581,
+        "timestampMs": 1779123663961,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -31571,7 +31733,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-005-1779118586581",
+        "eventId": "npc_suspicion_changed-005-1779123663961",
         "eventName": "npc_suspicion_changed",
         "inputMode": "choice",
         "outcome": "running",
@@ -31593,7 +31755,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779118586581,
+        "timestampMs": 1779123663961,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -31608,7 +31770,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "응답 지연 12000ms",
         "eventFamily": "domain",
-        "eventId": "response_hesitation_noted-006-1779118586616",
+        "eventId": "response_hesitation_noted-006-1779123664011",
         "eventName": "response_hesitation_noted",
         "inputMode": "response_hesitation",
         "outcome": "running",
@@ -31631,7 +31793,7 @@
         "suspicionSignals": [
           "response_hesitation"
         ],
-        "timestampMs": 1779118586616,
+        "timestampMs": 1779123664011,
         "turnId": "turn-2",
         "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
         "whyLineKey": "response_hesitation",
@@ -31646,7 +31808,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "free_input_submitted-007-1779118586642",
+        "eventId": "free_input_submitted-007-1779123664034",
         "eventName": "free_input_submitted",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -31671,7 +31833,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779118586642,
+        "timestampMs": 1779123664034,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -31686,7 +31848,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-008-1779118586642",
+        "eventId": "conversation_anomaly_detected-008-1779123664035",
         "eventName": "conversation_anomaly_detected",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -31711,7 +31873,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779118586642,
+        "timestampMs": 1779123664035,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -31726,7 +31888,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-009-1779118586642",
+        "eventId": "npc_suspicion_changed-009-1779123664035",
         "eventName": "npc_suspicion_changed",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -31751,7 +31913,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779118586642,
+        "timestampMs": 1779123664035,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -31766,7 +31928,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "suspicion_shared-010-1779118586642",
+        "eventId": "suspicion_shared-010-1779123664035",
         "eventName": "suspicion_shared",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -31791,7 +31953,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779118586642,
+        "timestampMs": 1779123664035,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -31806,7 +31968,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_report_created-011-1779118586643",
+        "eventId": "station_report_created-011-1779123664035",
         "eventName": "station_report_created",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -31831,7 +31993,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779118586643,
+        "timestampMs": 1779123664035,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -31846,7 +32008,7 @@
         "conversationStage": "inquest",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_inquest_opened-012-1779118586643",
+        "eventId": "station_inquest_opened-012-1779123664035",
         "eventName": "station_inquest_opened",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -31871,7 +32033,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779118586643,
+        "timestampMs": 1779123664035,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -33934,12 +34096,16 @@
             "recordBurden": 50,
             "stationAttention": 30
           },
+          "exchangeLine": "Store Clerk \"잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\" -> Waiting Customer \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"",
+          "observedActorId": "NPC_Store_Clerk",
           "observedActorRole": "store_clerk",
           "observedAffordance": "place_note",
           "observedLedgerEventId": "civic-ledger-2",
           "observedObjectId": "report_tray",
+          "observedSpokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
           "observerActorId": "NPC_Waiting_Customer",
           "observerRole": "waiting_customer",
+          "observerSpokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
           "resultingAffordance": "complain_delay",
           "resultingStepId": "report.waiting_customer.complain_delay",
           "whyLine": "waiting_customer reads store_clerk's place_note record before choosing complain_delay."
@@ -33950,12 +34116,16 @@
             "recordBurden": 50,
             "stationAttention": 30
           },
+          "exchangeLine": "Store Clerk \"잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\" -> Park Witness \"공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.\"",
+          "observedActorId": "NPC_Store_Clerk",
           "observedActorRole": "store_clerk",
           "observedAffordance": "place_note",
           "observedLedgerEventId": "civic-ledger-2",
           "observedObjectId": "report_tray",
+          "observedSpokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
           "observerActorId": "NPC_Park_Witness",
           "observerRole": "park_witness",
+          "observerSpokenLine": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
           "resultingAffordance": "post_rumor",
           "resultingStepId": "report.park_witness.post_rumor",
           "whyLine": "park_witness reads store_clerk's place_note record before choosing post_rumor."
@@ -33966,12 +34136,16 @@
             "recordBurden": 50,
             "stationAttention": 30
           },
+          "exchangeLine": "Store Clerk \"잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\" -> Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\"",
+          "observedActorId": "NPC_Store_Clerk",
           "observedActorRole": "store_clerk",
           "observedAffordance": "place_note",
           "observedLedgerEventId": "civic-ledger-2",
           "observedObjectId": "report_tray",
+          "observedSpokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
           "observerActorId": "NPC_Store_Manager",
           "observerRole": "store_manager",
+          "observerSpokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
           "resultingAffordance": "forward_report",
           "resultingStepId": "inquest.manager.forward_report",
           "whyLine": "store_manager reads store_clerk's place_note record before choosing forward_report."
@@ -33982,12 +34156,16 @@
             "recordBurden": 85,
             "stationAttention": 70
           },
+          "exchangeLine": "Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\" -> Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"",
+          "observedActorId": "NPC_Store_Manager",
           "observedActorRole": "store_manager",
           "observedAffordance": "forward_report",
           "observedLedgerEventId": "civic-ledger-5",
           "observedObjectId": "report_tray",
+          "observedSpokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
           "observerActorId": "NPC_Station_Officer",
           "observerRole": "station_officer",
+          "observerSpokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
           "resultingAffordance": "cite_record",
           "resultingStepId": "inquest.station.cite_store_report",
           "whyLine": "station_officer reads store_manager's forward_report record before choosing cite_record."
@@ -33998,12 +34176,16 @@
             "recordBurden": 85,
             "stationAttention": 70
           },
+          "exchangeLine": "Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\" -> Studio PM \"스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\"",
+          "observedActorId": "NPC_Station_Officer",
           "observedActorRole": "station_officer",
           "observedAffordance": "cite_record",
           "observedLedgerEventId": "civic-ledger-6",
           "observedObjectId": "station_dossier",
+          "observedSpokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
           "observerActorId": "NPC_Studio_PM",
           "observerRole": "studio_pm",
+          "observerSpokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
           "resultingAffordance": "block_review",
           "resultingStepId": "inquest.studio_pm.block_review",
           "whyLine": "studio_pm reads station_officer's cite_record record before choosing block_review."
@@ -34014,12 +34196,16 @@
             "recordBurden": 85,
             "stationAttention": 70
           },
+          "exchangeLine": "Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\" -> Waiting Customer \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"",
+          "observedActorId": "NPC_Station_Officer",
           "observedActorRole": "station_officer",
           "observedAffordance": "cite_record",
           "observedLedgerEventId": "civic-ledger-6",
           "observedObjectId": "station_dossier",
+          "observedSpokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
           "observerActorId": "NPC_Waiting_Customer",
           "observerRole": "waiting_customer",
+          "observerSpokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
           "resultingAffordance": "refuse_contact",
           "resultingStepId": "inquest.waiting_customer.refuse_contact",
           "whyLine": "waiting_customer reads station_officer's cite_record record before choosing refuse_contact."
@@ -34028,80 +34214,188 @@
       "typedFreeInput": "HUD text entry submits the player's typed line into the same deterministic Evidence path",
       "visibleNpcStates": {
         "NPC_Park_Witness": {
+          "baseReactionText": "소문 게시",
+          "bodyColor": [
+            0.360000014305115,
+            0.660000026226044,
+            0.319999992847443,
+            1
+          ],
           "displayName": "Park Witness",
           "emissionEnergy": 0.616666674613953,
           "exposure": 125,
+          "headColor": [
+            0.579999983310699,
+            0.819999992847443,
+            0.5,
+            1
+          ],
+          "homeLandmark": "Park",
           "markerVisible": true,
           "materialAlpha": 0.3980952501297,
           "npcId": "NPC_Park_Witness",
           "pressureText": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
-          "reactionText": "소문 게시",
+          "reactionSourceText": "← 상점 점원 · 메모 배치",
+          "reactionText": "소문 게시\n← 상점 점원 · 메모 배치",
           "role": "Park Witness",
+          "roleTint": "park-witness-green",
+          "roleTintLabel": "park witness green",
+          "routeId": "CivicLoop",
           "spokenLine": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
           "state": "rumored"
         },
         "NPC_Station_Officer": {
+          "baseReactionText": "보고됨",
+          "bodyColor": [
+            0.560000002384186,
+            0.430000007152557,
+            0.819999992847443,
+            1
+          ],
           "displayName": "Station Officer",
           "emissionEnergy": 0.616666674613953,
           "exposure": 125,
+          "headColor": [
+            0.720000028610229,
+            0.620000004768372,
+            0.939999997615814,
+            1
+          ],
+          "homeLandmark": "Station",
           "markerVisible": true,
           "materialAlpha": 0.3980952501297,
           "npcId": "NPC_Station_Officer",
           "pressureText": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
-          "reactionText": "보고됨",
+          "reactionSourceText": "← 상점 매니저 · 보고 전달",
+          "reactionText": "보고됨\n← 상점 매니저 · 보고 전달",
           "role": "Station Officer",
+          "roleTint": "station-officer-violet",
+          "roleTintLabel": "station officer violet",
+          "routeId": "StationIntake",
           "spokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
           "state": "inquest"
         },
         "NPC_Store_Clerk": {
+          "baseReactionText": "보고됨",
+          "bodyColor": [
+            0.939999997615814,
+            0.550000011920929,
+            0.219999998807907,
+            1
+          ],
           "displayName": "Store Clerk",
           "emissionEnergy": 0.616666674613953,
           "exposure": 125,
+          "headColor": [
+            1,
+            0.720000028610229,
+            0.419999986886978,
+            1
+          ],
+          "homeLandmark": "Store",
           "markerVisible": true,
           "materialAlpha": 0.3980952501297,
           "npcId": "NPC_Store_Clerk",
           "pressureText": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
+          "reactionSourceText": "",
           "reactionText": "보고됨",
           "role": "Store Clerk",
+          "roleTint": "store-clerk-warm",
+          "roleTintLabel": "store clerk warm amber",
+          "routeId": "StoreQueue",
           "spokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
           "state": "inquest"
         },
         "NPC_Store_Manager": {
+          "baseReactionText": "보고 전달",
+          "bodyColor": [
+            0.779999971389771,
+            0.360000014305115,
+            0.219999998807907,
+            1
+          ],
           "displayName": "Store Manager",
           "emissionEnergy": 0.616666674613953,
           "exposure": 125,
+          "headColor": [
+            0.939999997615814,
+            0.550000011920929,
+            0.379999995231628,
+            1
+          ],
+          "homeLandmark": "Store",
           "markerVisible": true,
           "materialAlpha": 0.3980952501297,
           "npcId": "NPC_Store_Manager",
           "pressureText": "이 상점 기록은 스테이션이 대조해야 합니다.",
-          "reactionText": "보고 전달",
+          "reactionSourceText": "← 상점 점원 · 메모 배치",
+          "reactionText": "보고 전달\n← 상점 점원 · 메모 배치",
           "role": "Store Manager",
+          "roleTint": "store-manager-rust",
+          "roleTintLabel": "store manager rust",
+          "routeId": "StoreQueue",
           "spokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
           "state": "forwarded"
         },
         "NPC_Studio_PM": {
+          "baseReactionText": "리뷰 차단",
+          "bodyColor": [
+            0.319999992847443,
+            0.519999980926514,
+            0.879999995231628,
+            1
+          ],
           "displayName": "Studio PM",
           "emissionEnergy": 0.616666674613953,
           "exposure": 45,
+          "headColor": [
+            0.540000021457672,
+            0.699999988079071,
+            1,
+            1
+          ],
+          "homeLandmark": "Studio",
           "markerVisible": true,
           "materialAlpha": 0.3980952501297,
           "npcId": "NPC_Studio_PM",
           "pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
-          "reactionText": "리뷰 차단",
+          "reactionSourceText": "← 스테이션 직원 · 기록 인용",
+          "reactionText": "리뷰 차단\n← 스테이션 직원 · 기록 인용",
           "role": "Studio PM",
+          "roleTint": "studio-pm-blue",
+          "roleTintLabel": "studio pm blue",
+          "routeId": "CivicLoop",
           "spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
           "state": "blocked"
         },
         "NPC_Waiting_Customer": {
+          "baseReactionText": "접촉 거부",
+          "bodyColor": [
+            0.259999990463257,
+            0.670000016689301,
+            0.620000004768372,
+            1
+          ],
           "displayName": "Waiting Customer",
           "emissionEnergy": 0.616666674613953,
           "exposure": 125,
+          "headColor": [
+            0.479999989271164,
+            0.819999992847443,
+            0.759999990463257,
+            1
+          ],
+          "homeLandmark": "Store",
           "markerVisible": true,
           "materialAlpha": 0.3980952501297,
           "npcId": "NPC_Waiting_Customer",
           "pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
-          "reactionText": "접촉 거부",
+          "reactionSourceText": "← 스테이션 직원 · 기록 인용",
+          "reactionText": "접촉 거부\n← 스테이션 직원 · 기록 인용",
           "role": "Waiting Customer",
+          "roleTint": "queue-customer-teal",
+          "roleTintLabel": "waiting customer teal",
+          "routeId": "StoreQueue",
           "spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
           "state": "refused"
         }
@@ -34213,12 +34507,16 @@
           "recordBurden": 50,
           "stationAttention": 30
         },
+        "exchangeLine": "Store Clerk \"잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\" -> Waiting Customer \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"",
+        "observedActorId": "NPC_Store_Clerk",
         "observedActorRole": "store_clerk",
         "observedAffordance": "place_note",
         "observedLedgerEventId": "civic-ledger-2",
         "observedObjectId": "report_tray",
+        "observedSpokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
         "observerActorId": "NPC_Waiting_Customer",
         "observerRole": "waiting_customer",
+        "observerSpokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
         "resultingAffordance": "complain_delay",
         "resultingStepId": "report.waiting_customer.complain_delay",
         "whyLine": "waiting_customer reads store_clerk's place_note record before choosing complain_delay."
@@ -34229,12 +34527,16 @@
           "recordBurden": 50,
           "stationAttention": 30
         },
+        "exchangeLine": "Store Clerk \"잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\" -> Park Witness \"공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.\"",
+        "observedActorId": "NPC_Store_Clerk",
         "observedActorRole": "store_clerk",
         "observedAffordance": "place_note",
         "observedLedgerEventId": "civic-ledger-2",
         "observedObjectId": "report_tray",
+        "observedSpokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
         "observerActorId": "NPC_Park_Witness",
         "observerRole": "park_witness",
+        "observerSpokenLine": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
         "resultingAffordance": "post_rumor",
         "resultingStepId": "report.park_witness.post_rumor",
         "whyLine": "park_witness reads store_clerk's place_note record before choosing post_rumor."
@@ -34245,12 +34547,16 @@
           "recordBurden": 50,
           "stationAttention": 30
         },
+        "exchangeLine": "Store Clerk \"잠시만요. 이 대화는 스테이션으로 넘기겠습니다.\" -> Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\"",
+        "observedActorId": "NPC_Store_Clerk",
         "observedActorRole": "store_clerk",
         "observedAffordance": "place_note",
         "observedLedgerEventId": "civic-ledger-2",
         "observedObjectId": "report_tray",
+        "observedSpokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
         "observerActorId": "NPC_Store_Manager",
         "observerRole": "store_manager",
+        "observerSpokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
         "resultingAffordance": "forward_report",
         "resultingStepId": "inquest.manager.forward_report",
         "whyLine": "store_manager reads store_clerk's place_note record before choosing forward_report."
@@ -34261,12 +34567,16 @@
           "recordBurden": 85,
           "stationAttention": 70
         },
+        "exchangeLine": "Store Manager \"이 상점 기록은 스테이션이 대조해야 합니다.\" -> Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\"",
+        "observedActorId": "NPC_Store_Manager",
         "observedActorRole": "store_manager",
         "observedAffordance": "forward_report",
         "observedLedgerEventId": "civic-ledger-5",
         "observedObjectId": "report_tray",
+        "observedSpokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
         "observerActorId": "NPC_Station_Officer",
         "observerRole": "station_officer",
+        "observerSpokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
         "resultingAffordance": "cite_record",
         "resultingStepId": "inquest.station.cite_store_report",
         "whyLine": "station_officer reads store_manager's forward_report record before choosing cite_record."
@@ -34277,12 +34587,16 @@
           "recordBurden": 85,
           "stationAttention": 70
         },
+        "exchangeLine": "Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\" -> Studio PM \"스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.\"",
+        "observedActorId": "NPC_Station_Officer",
         "observedActorRole": "station_officer",
         "observedAffordance": "cite_record",
         "observedLedgerEventId": "civic-ledger-6",
         "observedObjectId": "station_dossier",
+        "observedSpokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
         "observerActorId": "NPC_Studio_PM",
         "observerRole": "studio_pm",
+        "observerSpokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
         "resultingAffordance": "block_review",
         "resultingStepId": "inquest.studio_pm.block_review",
         "whyLine": "studio_pm reads station_officer's cite_record record before choosing block_review."
@@ -34293,12 +34607,16 @@
           "recordBurden": 85,
           "stationAttention": 70
         },
+        "exchangeLine": "Station Officer \"같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.\" -> Waiting Customer \"스테이션이 인용했으면 저는 말 섞지 않겠습니다.\"",
+        "observedActorId": "NPC_Station_Officer",
         "observedActorRole": "station_officer",
         "observedAffordance": "cite_record",
         "observedLedgerEventId": "civic-ledger-6",
         "observedObjectId": "station_dossier",
+        "observedSpokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
         "observerActorId": "NPC_Waiting_Customer",
         "observerRole": "waiting_customer",
+        "observerSpokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
         "resultingAffordance": "refuse_contact",
         "resultingStepId": "inquest.waiting_customer.refuse_contact",
         "whyLine": "waiting_customer reads station_officer's cite_record record before choosing refuse_contact."
@@ -34314,80 +34632,188 @@
     "suspicion": 125,
     "visibleNpcStates": {
       "NPC_Park_Witness": {
+        "baseReactionText": "소문 게시",
+        "bodyColor": [
+          0.360000014305115,
+          0.660000026226044,
+          0.319999992847443,
+          1
+        ],
         "displayName": "Park Witness",
         "emissionEnergy": 0.616666674613953,
         "exposure": 125,
+        "headColor": [
+          0.579999983310699,
+          0.819999992847443,
+          0.5,
+          1
+        ],
+        "homeLandmark": "Park",
         "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Park_Witness",
         "pressureText": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
-        "reactionText": "소문 게시",
+        "reactionSourceText": "← 상점 점원 · 메모 배치",
+        "reactionText": "소문 게시\n← 상점 점원 · 메모 배치",
         "role": "Park Witness",
+        "roleTint": "park-witness-green",
+        "roleTintLabel": "park witness green",
+        "routeId": "CivicLoop",
         "spokenLine": "공원 게시판에 적어둘게요. 같은 말이 동네를 돕니다.",
         "state": "rumored"
       },
       "NPC_Station_Officer": {
+        "baseReactionText": "보고됨",
+        "bodyColor": [
+          0.560000002384186,
+          0.430000007152557,
+          0.819999992847443,
+          1
+        ],
         "displayName": "Station Officer",
         "emissionEnergy": 0.616666674613953,
         "exposure": 125,
+        "headColor": [
+          0.720000028610229,
+          0.620000004768372,
+          0.939999997615814,
+          1
+        ],
+        "homeLandmark": "Station",
         "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Station_Officer",
         "pressureText": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
-        "reactionText": "보고됨",
+        "reactionSourceText": "← 상점 매니저 · 보고 전달",
+        "reactionText": "보고됨\n← 상점 매니저 · 보고 전달",
         "role": "Station Officer",
+        "roleTint": "station-officer-violet",
+        "roleTintLabel": "station officer violet",
+        "routeId": "StationIntake",
         "spokenLine": "같은 대화에 두 출처가 있습니다. 지금부터 접수 형식으로만 남깁니다.",
         "state": "inquest"
       },
       "NPC_Store_Clerk": {
+        "baseReactionText": "보고됨",
+        "bodyColor": [
+          0.939999997615814,
+          0.550000011920929,
+          0.219999998807907,
+          1
+        ],
         "displayName": "Store Clerk",
         "emissionEnergy": 0.616666674613953,
         "exposure": 125,
+        "headColor": [
+          1,
+          0.720000028610229,
+          0.419999986886978,
+          1
+        ],
+        "homeLandmark": "Store",
         "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Store_Clerk",
         "pressureText": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
+        "reactionSourceText": "",
         "reactionText": "보고됨",
         "role": "Store Clerk",
+        "roleTint": "store-clerk-warm",
+        "roleTintLabel": "store clerk warm amber",
+        "routeId": "StoreQueue",
         "spokenLine": "잠시만요. 이 대화는 스테이션으로 넘기겠습니다.",
         "state": "inquest"
       },
       "NPC_Store_Manager": {
+        "baseReactionText": "보고 전달",
+        "bodyColor": [
+          0.779999971389771,
+          0.360000014305115,
+          0.219999998807907,
+          1
+        ],
         "displayName": "Store Manager",
         "emissionEnergy": 0.616666674613953,
         "exposure": 125,
+        "headColor": [
+          0.939999997615814,
+          0.550000011920929,
+          0.379999995231628,
+          1
+        ],
+        "homeLandmark": "Store",
         "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Store_Manager",
         "pressureText": "이 상점 기록은 스테이션이 대조해야 합니다.",
-        "reactionText": "보고 전달",
+        "reactionSourceText": "← 상점 점원 · 메모 배치",
+        "reactionText": "보고 전달\n← 상점 점원 · 메모 배치",
         "role": "Store Manager",
+        "roleTint": "store-manager-rust",
+        "roleTintLabel": "store manager rust",
+        "routeId": "StoreQueue",
         "spokenLine": "이 상점 기록은 스테이션이 대조해야 합니다.",
         "state": "forwarded"
       },
       "NPC_Studio_PM": {
+        "baseReactionText": "리뷰 차단",
+        "bodyColor": [
+          0.319999992847443,
+          0.519999980926514,
+          0.879999995231628,
+          1
+        ],
         "displayName": "Studio PM",
         "emissionEnergy": 0.616666674613953,
         "exposure": 45,
+        "headColor": [
+          0.540000021457672,
+          0.699999988079071,
+          1,
+          1
+        ],
+        "homeLandmark": "Studio",
         "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Studio_PM",
         "pressureText": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
-        "reactionText": "리뷰 차단",
+        "reactionSourceText": "← 스테이션 직원 · 기록 인용",
+        "reactionText": "리뷰 차단\n← 스테이션 직원 · 기록 인용",
         "role": "Studio PM",
+        "roleTint": "studio-pm-blue",
+        "roleTintLabel": "studio pm blue",
+        "routeId": "CivicLoop",
         "spokenLine": "스테이션 인용이 붙었네요. 리뷰 줄은 오늘 차단하겠습니다.",
         "state": "blocked"
       },
       "NPC_Waiting_Customer": {
+        "baseReactionText": "접촉 거부",
+        "bodyColor": [
+          0.259999990463257,
+          0.670000016689301,
+          0.620000004768372,
+          1
+        ],
         "displayName": "Waiting Customer",
         "emissionEnergy": 0.616666674613953,
         "exposure": 125,
+        "headColor": [
+          0.479999989271164,
+          0.819999992847443,
+          0.759999990463257,
+          1
+        ],
+        "homeLandmark": "Store",
         "markerVisible": true,
         "materialAlpha": 0.3980952501297,
         "npcId": "NPC_Waiting_Customer",
         "pressureText": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
-        "reactionText": "접촉 거부",
+        "reactionSourceText": "← 스테이션 직원 · 기록 인용",
+        "reactionText": "접촉 거부\n← 스테이션 직원 · 기록 인용",
         "role": "Waiting Customer",
+        "roleTint": "queue-customer-teal",
+        "roleTintLabel": "waiting customer teal",
+        "routeId": "StoreQueue",
         "spokenLine": "스테이션이 인용했으면 저는 말 섞지 않겠습니다.",
         "state": "refused"
       }

@@ -80,7 +80,8 @@ Latest completion audit:
   and packaged-route evidence.
 - latest Codex gameplay QA artifact reports `ok=true`,
   `aiPlayerReport.pass=true`, 31 accepted public actions, 5/5 route reports,
-  all 33 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
+  all 34 explainability flags true, `canReadEnvironmentToolCatalog=true`,
+  `canReadVisibleNpcRoleTints=true`, and
   no-live provider packet readiness for bounded `actorMemory` plus
   `actorPolicy`. It now also proves Codex/player can read the Store Clerk's
   visible environment cues in the live prompt before choosing speech, then
@@ -101,6 +102,11 @@ Latest completion audit:
   refusal. The Waiting Customer world marker now also names the social source
   action as `← 스테이션 직원 · 기록 인용`, so the player can read who caused the
   refusal and which role action caused it before opening any detail panel.
+  The 3D NPC placeholders now also carry distinct role tints for Store Clerk,
+  Store Manager, Waiting Customer, Studio PM, Park Witness, and Station Officer,
+  so the player can recognize the small social field by actor role before
+  opening inspection panels. Latest Codex gameplay artifact SHA-256:
+  `3e9ebf5e2cef2be8bd3441c1752daa30b250c9b4470a43098d7532f703489b7a`.
   It also explicitly marks itself as not a replacement for external
   comprehension.
 - latest packaged-route evidence validates as a Godot Evidence Pack and

@@ -189,6 +189,11 @@ Current M1 carry-in:
   Waiting Customer label reads `접촉 거부` plus `← 스테이션 직원 · 기록 인용`, so
   the player can see that the refusal came from Station citation pressure
   before opening HUD detail.
+- latest small-slice carry-in: visible NPC bodies now carry role tints in the
+  3D scene. Store Clerk, Store Manager, Waiting Customer, Studio PM, Park
+  Witness, and Station Officer are visually separable before inspection, and
+  Codex gameplay QA requires `canReadVisibleNpcRoleTints=true`. This improves
+  the readable social field itself instead of deepening Store/Station systems.
 - latest small-slice carry-in: repair recovery now leaves a player-readable
   public environment record and one small cross-place consequence. Park Witness
   `post_repair_notice` sets `park_notice_board=repaired`; Studio PM reads that

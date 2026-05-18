@@ -207,6 +207,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Add player-readable NPC spoken reaction lines: inspecting Studio PM or
   Waiting Customer now shows `들은 말` and exports `spokenLine` so Codex/player
   can read the actual social blocking/refusal line through focus plus interact.
+- [x] Make visible NPC roles readable in the 3D scene: NPC placeholder bodies
+  and heads now use distinct role tints for Store Clerk, Store Manager, Waiting
+  Customer, Studio PM, Park Witness, and Station Officer, and Codex gameplay QA
+  verifies `canReadVisibleNpcRoleTints=true`.
 - [x] Make the civic economy panel player-readable as a tiny social-pressure
   record: Codex/player can inspect current credit/trust/burden/attention values
   and recent ledger deltas that show which role action moved them.

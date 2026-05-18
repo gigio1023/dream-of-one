@@ -13,7 +13,13 @@ var _reaction_state := "normal"
 var _reaction_exposure := 0
 var _reaction_text := ""
 var _reaction_source_text := ""
+var _role_tint := "neutral"
+var _role_tint_label := "neutral role"
+var _body_color := Color(0.92, 0.50, 0.34, 1.0)
+var _head_color := Color(1.0, 0.68, 0.48, 1.0)
 
+@onready var _body_mesh: MeshInstance3D = $Body
+@onready var _head_mesh: MeshInstance3D = $Head
 @onready var _name_label: Label3D = $NameLabel
 @onready var _pressure_label: Label3D = $PressureLabel
 @onready var _reaction_label: Label3D = $ReactionLabel
@@ -27,6 +33,7 @@ func _ready() -> void:
 	set_meta("home_landmark", home_landmark)
 	set_meta("route_id", route_id)
 	_apply_label()
+	_apply_role_tint()
 
 func configure(actor_data: Dictionary) -> void:
 	npc_id = StringName(actor_data.get("id", "NPC_Placeholder"))
@@ -41,6 +48,7 @@ func configure(actor_data: Dictionary) -> void:
 	set_meta("route_id", route_id)
 	if is_node_ready():
 		_apply_label()
+		_apply_role_tint()
 
 func _apply_label() -> void:
 	_name_label.text = "%s\n%s" % [
@@ -146,6 +154,12 @@ func debug_reaction_snapshot() -> Dictionary:
 		"reactionText": _reaction_label.text,
 		"baseReactionText": _reaction_text,
 		"reactionSourceText": _reaction_source_text,
+		"homeLandmark": home_landmark,
+		"routeId": route_id,
+		"roleTint": _role_tint,
+		"roleTintLabel": _role_tint_label,
+		"bodyColor": _color_components(_body_color),
+		"headColor": _color_components(_head_color),
 		"materialAlpha": material.albedo_color.a if material != null else -1.0,
 		"emissionEnergy": material.emission_energy_multiplier if material != null else -1.0
 	}
@@ -183,6 +197,103 @@ func _apply_reaction_label() -> void:
 		_reaction_label.text = _reaction_text
 	else:
 		_reaction_label.text = "%s\n%s" % [_reaction_text, _reaction_source_text]
+
+func _apply_role_tint() -> void:
+	var profile := _role_tint_profile()
+	_role_tint = str(profile.get("tint", "neutral"))
+	_role_tint_label = str(profile.get("label", _role_tint))
+	_body_color = profile.get("body", Color(0.92, 0.50, 0.34, 1.0))
+	_head_color = profile.get("head", Color(1.0, 0.68, 0.48, 1.0))
+	_apply_mesh_color(_body_mesh, _body_color)
+	_apply_mesh_color(_head_mesh, _head_color)
+
+func _role_tint_profile() -> Dictionary:
+	match String(npc_id):
+		"NPC_Store_Clerk":
+			return {
+				"tint": "store-clerk-warm",
+				"label": "store clerk warm amber",
+				"body": Color(0.94, 0.55, 0.22, 1.0),
+				"head": Color(1.0, 0.72, 0.42, 1.0)
+			}
+		"NPC_Store_Manager":
+			return {
+				"tint": "store-manager-rust",
+				"label": "store manager rust",
+				"body": Color(0.78, 0.36, 0.22, 1.0),
+				"head": Color(0.94, 0.55, 0.38, 1.0)
+			}
+		"NPC_Waiting_Customer":
+			return {
+				"tint": "queue-customer-teal",
+				"label": "waiting customer teal",
+				"body": Color(0.26, 0.67, 0.62, 1.0),
+				"head": Color(0.48, 0.82, 0.76, 1.0)
+			}
+		"NPC_Studio_PM":
+			return {
+				"tint": "studio-pm-blue",
+				"label": "studio pm blue",
+				"body": Color(0.32, 0.52, 0.88, 1.0),
+				"head": Color(0.54, 0.70, 1.0, 1.0)
+			}
+		"NPC_Park_Witness":
+			return {
+				"tint": "park-witness-green",
+				"label": "park witness green",
+				"body": Color(0.36, 0.66, 0.32, 1.0),
+				"head": Color(0.58, 0.82, 0.50, 1.0)
+			}
+		"NPC_Station_Officer":
+			return {
+				"tint": "station-officer-violet",
+				"label": "station officer violet",
+				"body": Color(0.56, 0.43, 0.82, 1.0),
+				"head": Color(0.72, 0.62, 0.94, 1.0)
+			}
+
+	var place_key := home_landmark.to_lower()
+	if place_key.contains("studio"):
+		return {
+			"tint": "studio-blue",
+			"label": "studio role blue",
+			"body": Color(0.36, 0.56, 0.86, 1.0),
+			"head": Color(0.58, 0.74, 0.98, 1.0)
+		}
+	if place_key.contains("park"):
+		return {
+			"tint": "park-green",
+			"label": "park role green",
+			"body": Color(0.38, 0.66, 0.34, 1.0),
+			"head": Color(0.58, 0.82, 0.52, 1.0)
+		}
+	if place_key.contains("station"):
+		return {
+			"tint": "station-violet",
+			"label": "station role violet",
+			"body": Color(0.56, 0.44, 0.78, 1.0),
+			"head": Color(0.72, 0.64, 0.92, 1.0)
+		}
+	return {
+		"tint": "local-amber",
+		"label": "local role amber",
+		"body": Color(0.88, 0.52, 0.28, 1.0),
+		"head": Color(1.0, 0.70, 0.46, 1.0)
+	}
+
+func _apply_mesh_color(mesh_instance: MeshInstance3D, color: Color) -> void:
+	if mesh_instance == null:
+		return
+	var material := StandardMaterial3D.new()
+	var base := mesh_instance.get_surface_override_material(0)
+	if base is StandardMaterial3D:
+		material = (base as StandardMaterial3D).duplicate() as StandardMaterial3D
+	material.albedo_color = color
+	material.roughness = 0.88
+	mesh_instance.set_surface_override_material(0, material)
+
+func _color_components(color: Color) -> Array[float]:
+	return [color.r, color.g, color.b, color.a]
 
 func _localized(key: String, args: Dictionary = {}, fallback := "") -> String:
 	var localization := _localization()

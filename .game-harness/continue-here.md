@@ -135,6 +135,12 @@ Last Updated: 2026-05-19
   gameplay QA verifies `canReadVisibleNpcReactionSource=true` with both the
   role and action. This is a player-facing readability slice, not a new
   Store/Station system.
+- Latest implementation slice: NPC bodies and heads now use distinct role tints
+  in the running 3D scene: Store Clerk, Store Manager, Waiting Customer, Studio
+  PM, Park Witness, and Station Officer are visually separable before opening
+  detail panels. Codex gameplay QA now verifies
+  `canReadVisibleNpcRoleTints=true`; the refreshed probe passes 31/31 accepted
+  public actions, 34/34 explainability checks, and 5/5 route reports.
 - Latest implementation slice: Store Clerk can now be inspected as the first
   record-making actor after typed inquest-triggering speech. Codex gameplay QA
   focuses the Clerk, interacts, and reads `메모 배치`, report-tray basis,

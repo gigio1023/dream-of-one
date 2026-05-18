@@ -1047,6 +1047,11 @@ func _inspected_world_record_candidate(summary: Dictionary, object_id: String, s
 	return {}
 
 func _string_array_has_fragment(values: Variant, fragment: String) -> bool:
+	if values is PackedStringArray:
+		for value in values:
+			if str(value).contains(fragment):
+				return true
+		return false
 	if not values is Array:
 		return false
 	for value in values:
@@ -1082,6 +1087,12 @@ func _inspected_waiting_customer(summary: Dictionary) -> bool:
 			and str(inspected.get("body", "")).contains("근거 행동")
 			and str(inspected.get("body", "")).contains("civic-ledger-8")
 			and str(inspected.get("body", "")).contains("civic-ledger-6")
+			and str(inspected.get("body", "")).contains("가능 조건")
+			and str(inspected.get("body", "")).contains("값 변화")
+			and _string_array_has_fragment(inspected.get("basisConditionLabels", []), "대기 표식=줄 흐트러짐")
+			and _string_array_has_fragment(inspected.get("basisConditionLabels", []), "인용 장부 civic-ledger-6")
+			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "신뢰-8")
+			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "부담+5")
 		)
 
 func _inspected_studio_pm_block(summary: Dictionary) -> bool:
@@ -1096,6 +1107,11 @@ func _inspected_studio_pm_block(summary: Dictionary) -> bool:
 			and str(inspected.get("citedLedgerEventLabel", "")).contains("스테이션 직원")
 			and str(inspected.get("body", "")).contains("스튜디오 PM -> 리뷰 차단")
 			and str(inspected.get("body", "")).contains("스테이션 직원 -> 기록 인용")
+			and str(inspected.get("body", "")).contains("가능 조건")
+			and str(inspected.get("body", "")).contains("값 변화")
+			and _string_array_has_fragment(inspected.get("basisConditionLabels", []), "스튜디오 리뷰 줄=열림")
+			and _string_array_has_fragment(inspected.get("basisConditionLabels", []), "필요 기록 스테이션 인용")
+			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "신뢰-2")
 		)
 
 func _inspected_npc_candidate(summary: Dictionary, npc_id: String, state: String) -> Dictionary:

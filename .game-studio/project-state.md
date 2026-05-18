@@ -102,6 +102,11 @@ Current M1 carry-in:
   `offer_conditional_review`, sets `studio_review_queue=conditional`, and shows
   `조건부 리뷰`. Codex gameplay QA inspects both the repaired Park notice board
   and the conditional Studio review queue.
+- latest small-slice carry-in: inspecting visible NPC reactions now shows the
+  action gates behind them. Studio PM and Waiting Customer inspection bodies
+  include `가능 조건` for object state and cited ledger requirements plus
+  `값 변화` for the tiny economy effect, so the player can read why the current
+  environment allowed `리뷰 차단` or `접촉 거부`.
 - latest small-slice carry-in: Park Witness `post_rumor` is now visible as a
   public NPC reaction (`rumored` / `소문 게시`) in soft-report and inquest paths,
   and the soft-report result names that rumor as part of the social chain.

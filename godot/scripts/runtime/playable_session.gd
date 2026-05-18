@@ -2451,6 +2451,8 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 	var cited_event_id := ""
 	var basis_object_id := ""
 	var basis_object_label := ""
+	var basis_condition_labels := PackedStringArray()
+	var basis_economy_effect_labels := PackedStringArray()
 	if not basis_action.is_empty():
 		basis_event_id = str(basis_action.get("ledgerEventId", ""))
 		basis_affordance = str(basis_action.get("affordance", ""))
@@ -2468,6 +2470,14 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		if not basis_object_id.is_empty():
 			basis_object_label = _world_record_prop_title(basis_object_id)
 			body_lines.append("대상 기록물: %s" % basis_object_label)
+		var selected_descriptor := _selected_action_descriptor_for_inspection(basis_action)
+		if not selected_descriptor.is_empty():
+			basis_condition_labels = _selected_action_condition_labels(selected_descriptor, cited_event_id)
+			basis_economy_effect_labels = _selected_action_economy_effect_labels(selected_descriptor)
+			if not basis_condition_labels.is_empty():
+				body_lines.append("가능 조건: %s" % ", ".join(basis_condition_labels))
+			if not basis_economy_effect_labels.is_empty():
+				body_lines.append("값 변화: %s" % ", ".join(basis_economy_effect_labels))
 	body_lines.append("이 반응은 NPC가 읽은 기록, 공개 단서, 또는 인용 결과가 사회적 행동으로 바뀐 상태입니다.")
 	inspected_npc_state = snapshot.duplicate(true)
 	if not basis_action.is_empty():
@@ -2480,6 +2490,8 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		inspected_npc_state["basisObjectLabel"] = basis_object_label
 		inspected_npc_state["citedLedgerEventId"] = cited_event_id
 		inspected_npc_state["citedLedgerEventLabel"] = _civic_ledger_event_compact_label(cited_event_id)
+		inspected_npc_state["basisConditionLabels"] = basis_condition_labels
+		inspected_npc_state["basisEconomyEffectLabels"] = basis_economy_effect_labels
 	inspected_npc_state["body"] = "\n".join(body_lines)
 	inspected_npc_history.append(inspected_npc_state.duplicate(true))
 	_set_notice(title, str(inspected_npc_state.get("body", "")))
@@ -2518,6 +2530,60 @@ func _civic_ledger_event_compact_label(event_id: String) -> String:
 	if affordance_label.is_empty():
 		return "%s / %s" % [event_id, actor_label]
 	return "%s / %s -> %s" % [event_id, actor_label, affordance_label]
+
+func _selected_action_descriptor_for_inspection(action: Dictionary) -> Dictionary:
+	var descriptor: Dictionary = action.get("selectedActionDescriptor", {})
+	if not descriptor.is_empty():
+		return descriptor.duplicate(true)
+	var available_actions: Array = action.get("availableActions", [])
+	for available in available_actions:
+		if not available is Dictionary:
+			continue
+		var candidate: Dictionary = available
+		if str(candidate.get("objectId", "")) == str(action.get("objectId", "")) \
+				and str(candidate.get("affordance", "")) == str(action.get("affordance", "")):
+			return candidate.duplicate(true)
+	return {}
+
+func _selected_action_condition_labels(descriptor: Dictionary, cited_event_id: String) -> PackedStringArray:
+	var labels := PackedStringArray()
+	var object_id := str(descriptor.get("objectId", ""))
+	var object_state := str(descriptor.get("objectState", ""))
+	if not object_id.is_empty() and not object_state.is_empty():
+		labels.append("%s=%s" % [_world_record_prop_title(object_id), _record_state_value(object_state)])
+	if bool(descriptor.get("requiresLedgerEvent", false)):
+		if not cited_event_id.is_empty():
+			labels.append("인용 장부 %s" % cited_event_id)
+		else:
+			labels.append("알려진 장부 필요")
+	var preconditions: Array = descriptor.get("preconditions", [])
+	for precondition_value in preconditions:
+		var precondition := str(precondition_value)
+		if precondition.begins_with("ledger_event_kind:"):
+			labels.append("필요 기록 %s" % _ledger_event_kind_condition_label(precondition.substr("ledger_event_kind:".length())))
+		elif precondition == "known_store_ledger_event_required":
+			labels.append("상점 기록 필요")
+		elif precondition.begins_with("localTrust>="):
+			labels.append("신뢰 %s 이상" % precondition.substr("localTrust>=".length()))
+		elif precondition.begins_with("localTrust<="):
+			labels.append("신뢰 %s 이하" % precondition.substr("localTrust<=".length()))
+	return labels
+
+func _ledger_event_kind_condition_label(raw_kinds: String) -> String:
+	var labels := PackedStringArray()
+	for kind_value in raw_kinds.split("|", false):
+		labels.append(_civic_ledger_kind_label(str(kind_value)))
+	return "|".join(labels)
+
+func _selected_action_economy_effect_labels(descriptor: Dictionary) -> PackedStringArray:
+	var labels := PackedStringArray()
+	var effects: Array = descriptor.get("civicEconomyEffects", [])
+	for effect_value in effects:
+		var parts := str(effect_value).split(":", false, 1)
+		if parts.size() != 2:
+			continue
+		labels.append("%s%s" % [_economy_value_label(str(parts[0])), str(parts[1])])
+	return labels
 
 func _refresh_world_record_props() -> void:
 	for prop_value in _local_group_nodes(&"operation_record_props"):
@@ -2972,9 +3038,11 @@ func _record_state_value(state: String) -> String:
 		"paused": "응대 중단",
 		"player_waiting": "플레이어 대기",
 		"delayed": "조금 지연",
+		"disrupted": "줄 흐트러짐",
 		"settled": "줄 안정",
 		"helped": "도움 공유",
 		"distanced": "거리 둠",
+		"refused": "접촉 거부",
 		"append_only": "추가됨",
 		"stable": "안정",
 		"burden": "부담 증가",
@@ -3009,9 +3077,11 @@ func _record_state_value(state: String) -> String:
 		"paused": "paused",
 		"player_waiting": "player waiting",
 		"delayed": "slowed",
+		"disrupted": "queue disrupted",
 		"settled": "settled",
 		"helped": "help shared",
 		"distanced": "distance kept",
+		"refused": "contact refused",
 		"append_only": "append only",
 		"stable": "stable",
 		"burden": "burden rising",

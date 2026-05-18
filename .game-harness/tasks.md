@@ -143,6 +143,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Make NPC reaction inspection name ledger actors and validated actions:
   Studio PM and Waiting Customer inspection now show both the current reaction
   record and cited Station record as `ledger / role -> action` lines.
+- [x] Make NPC reaction inspection show action gates and economy effects:
+  Studio PM and Waiting Customer inspection now show the object state, cited
+  ledger requirement, and tiny value change that made the visible social action
+  valid.
 - [x] Make Park Witness public rumor visible as NPC state: soft-report and
   inquest paths now show `NPC_Park_Witness` as `rumored` with `소문 게시`, and
   the soft-report outcome chain names `공원 소문 게시`.

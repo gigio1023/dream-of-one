@@ -96,9 +96,9 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `0ee9f01a1d8879eb79a5701a3b6b9d01a11bb17818a6a9ce2546f74b7e31a84b`
-  - Markdown SHA-256: `644c0f12e106173e883be9fa160fc619ffbb3e6beb2c64112532cbbf3e2636b0`
-  - playable Evidence Pack SHA-256: `eebfa59dd43c5bc876ca038b268fff60fdfccc2636e62f8bd8d1f45848d82a3a`
+  - JSON SHA-256: `926699ddcf76af128e94daa9c2bf91cb59450510c658f70e39953cffccd38690`
+  - Markdown SHA-256: `2c6743ad17616a60d2d71bdcc5bb76bd6dc82f0dbf6483c27ab68ccbffebd16e`
+  - playable Evidence Pack SHA-256: `49b7e4624f31af05c8a0f82974aebfce48089c82c3a1846ad628c41a2ed92989`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `11bbc6430c4f58258c4ac438f612c82cfa8d6b6a9f6071a4e66be72928a43f01`
 
@@ -107,6 +107,14 @@ Latest AI-play interface check:
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `15 / 15`, `explainability=14/14`, and
   `routeReportPassCount=5 / 5`.
+- latest game increment: NPC reaction inspection now shows why a visible
+  social action was available, not just which ledger event happened. Inspecting
+  Studio PM or Waiting Customer shows `가능 조건` such as
+  `스튜디오 리뷰 줄=열림`, `대기 표식=줄 흐트러짐`, and `인용 장부 civic-ledger-6`,
+  plus `값 변화` such as `신뢰-8, 부담+5`. This makes the current sample more
+  like an environment that agents can reason inside: the player can see the
+  shared record, the object state, and the tiny economy consequence that made
+  an NPC action valid.
 - latest game increment: the civic economy panel is now an actual inspectable
   social-pressure record. Codex/player focuses `civic_economy_panel`, presses
   interact, and reads current tiny values for `잔액`, `신뢰`, `부담`, and

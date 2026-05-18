@@ -76,9 +76,14 @@ Last Updated: 2026-05-18
   cross-place social rules before the Store line. Codex gameplay QA focuses
   `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard`, interacts with both,
   and verifies `canReadCrossPlaceSocialRules=true`; current proof passes with
-  23/23 accepted public actions, 22/22 explainability checks, and 5/5 route
+  23/23 accepted public actions, 23/23 explainability checks, and 5/5 route
   reports. This is a game-facing legibility slice toward the broader
   open-environment social sim, not another product-closure claim.
+- Latest implementation slice: Codex gameplay QA and live provider packets now
+  expose `actorMemory` derived from validated role actions and
+  `socialObservationTrace`. This makes NPC memory bounded to own actions plus
+  ledger events the role observed, and the probe verifies
+  `canReadActorMemory=true` without spending live LLM budget.
 - Latest implementation slice: `usual_order_cue` is now a player-readable
   normal-procedure prop before the Store Clerk prompt. Codex gameplay QA first
   focuses and inspects it, then continues through the inquest path; current

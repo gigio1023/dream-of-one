@@ -211,19 +211,24 @@ Implemented now:
   `agentActionLog` with available action candidates, selected action
   descriptors, and selection reasons, and smoke validation requires it to match
   `civicLedger` and prove each selected action was actually available.
+- Godot Codex gameplay snapshots and live provider packets now expose
+  `actorMemory`, derived from each role's own validated actions and the ledger
+  events it observed through `socialObservationTrace`. This is bounded memory
+  context for QA/provider prompts; it does not grant authority to invent hidden
+  state or mutate records.
 
 Not implemented yet:
 
-- live provider-driven Store Clerk/Manager/Customer/Station dispatch against
-  the Godot runtime;
-- screenshot/contact-sheet proof;
+- player-visible live provider mode for Store Clerk/Manager/Customer/Station;
+- long-running live provider scheduling across many route jobs;
 - fresh-player comprehension proof.
 
 Blocked verification:
 
-- this environment does not expose a `godot` CLI binary, so
-  `godot --headless --path godot --script res://tools/playable_slice_smoke.gd`
-  still needs to be re-run when Godot is available.
+- none for the latest Codex gameplay QA slice on this Ubuntu ARM device. The
+  session helper loads a device-local ignored env for `$GODOT_BIN` and reports
+  source freshness pass. External comprehension remains blocked on observed
+  human sessions, not local tooling.
 
 ## Same Order Route Mapping
 

@@ -46,6 +46,7 @@
 - Codex/player inspected the Studio review queue and Studio PM to read that the Station citation blocked a small opportunity in another place.
 - Codex/player read the Studio review queue's visible role/action map: Studio PM can invite, defer, or block review from shared records.
 - Codex/player inspected the civic ledger to read the NPC-to-NPC social chain as a player-facing timeline.
+- Codex/player snapshot exposed actor memory, showing which ledger events a role observed before choosing the next validated action.
 - Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, and cited ledger basis.
 - The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8.
 
@@ -100,6 +101,7 @@
 - `canReadExaminedPlayerRole`: `true`
 - `canReadInputToRecordChain`: `true`
 - `canReadNpcToNpcChain`: `true`
+- `canReadActorMemory`: `true`
 - `canInspectNormalProcedureCue`: `true`
 - `canReadCrossPlaceSocialRules`: `true`
 - `canReadEnvironmentToolCatalog`: `true`

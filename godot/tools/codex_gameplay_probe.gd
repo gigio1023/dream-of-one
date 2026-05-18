@@ -180,6 +180,7 @@ func _run() -> void:
 			"conversation": final_summary.get("conversation", {}),
 			"civicEconomy": final_summary.get("civicEconomy", {}),
 			"recordObjects": final_summary.get("recordObjects", {}),
+			"actorMemory": final_summary.get("actorMemory", {}),
 			"worldRecordProps": record_props,
 			"inspectedNpcState": final_summary.get("inspectedNpcState", {}),
 			"hud": hud_snapshot
@@ -673,6 +674,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Codex/player did not inspect the civic economy panel as a social pressure record")
 	if not bool(checks.get("codexInspectedCivicLedgerSocialChain", false)):
 		failures.append("Codex/player did not inspect the civic ledger as a social observation chain")
+	if not bool(checks.get("codexCanReadActorMemory", false)):
+		failures.append("Codex snapshot does not expose actor memory for observed NPC-to-NPC decisions")
 	if not bool(checks.get("codexInspectedUsualOrderCue", false)):
 		failures.append("Codex/player did not inspect the usual-order cue before speaking")
 	if not bool(checks.get("codexReadCrossPlaceRuleBoards", false)):
@@ -722,6 +725,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 			"economyPanelReadable": _economy_panel_readable(record_props),
 		"codexInspectedCivicEconomyPanel": _inspected_civic_economy_panel(summary),
 		"codexInspectedCivicLedgerSocialChain": _inspected_civic_ledger_social_chain(summary),
+		"codexCanReadActorMemory": _actor_memory_covers_social_chain(summary),
 		"worldPropsReachInquest": _world_props_reach_inquest(record_props),
 		"latestLedger": latest_ledger
 	}
@@ -740,6 +744,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadExaminedPlayerRole": investigation_trail.contains("대상: 플레이어") or investigation_trail.to_lower().contains("player"),
 		"canReadInputToRecordChain": consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부"),
 		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)) and bool(checks.get("waitingCustomerObservedStation", false)),
+		"canReadActorMemory": bool(checks.get("codexCanReadActorMemory", false)),
 		"canInspectNormalProcedureCue": bool(checks.get("codexInspectedUsualOrderCue", false)),
 		"canReadCrossPlaceSocialRules": bool(checks.get("codexReadCrossPlaceRuleBoards", false)),
 		"canReadEnvironmentToolCatalog": bool(checks.get("codexReadEnvironmentToolCatalog", false)),
@@ -778,6 +783,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"outcomeBody": outcome_body,
 			"recordState": record_state_label,
 			"visibleNpcStates": summary.get("visibleNpcStates", {}),
+			"actorMemory": summary.get("actorMemory", {}),
 			"inspectedWorldRecordProp": summary.get("inspectedWorldRecordProp", {}),
 			"inspectedWorldRecordHistory": summary.get("inspectedWorldRecordHistory", []),
 			"inspectedNpcState": summary.get("inspectedNpcState", {}),
@@ -797,8 +803,9 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.",
 			"Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.",
 			"Codex/player inspected the Studio review queue and Studio PM to read that the Station citation blocked a small opportunity in another place.",
-			"Codex/player read the Studio review queue's visible role/action map: Studio PM can invite, defer, or block review from shared records.",
+				"Codex/player read the Studio review queue's visible role/action map: Studio PM can invite, defer, or block review from shared records.",
 				"Codex/player inspected the civic ledger to read the NPC-to-NPC social chain as a player-facing timeline.",
+				"Codex/player snapshot exposed actor memory, showing which ledger events a role observed before choosing the next validated action.",
 				"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, and cited ledger basis.",
 				"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
 		],
@@ -1004,6 +1011,45 @@ func _observation_exists(summary: Dictionary, observer_role: String, observed_ro
 			and str(observation.get("observedAffordance", "")) == observed_affordance
 			and str(observation.get("resultingAffordance", "")) == resulting_affordance
 		):
+			return true
+	return false
+
+func _actor_memory_covers_social_chain(summary: Dictionary) -> bool:
+	var memory: Dictionary = summary.get("actorMemory", {})
+	var waiting_customer := _actor_memory_for_role(memory, "waiting_customer")
+	var station_officer := _actor_memory_for_role(memory, "station_officer")
+	return (
+		_actor_memory_has_observation(waiting_customer, "store_clerk", "place_note", "complain_delay")
+		and _actor_memory_has_observation(waiting_customer, "station_officer", "cite_record", "refuse_contact")
+		and _actor_memory_has_own_action(waiting_customer, "refuse_contact")
+		and _actor_memory_has_observation(station_officer, "store_manager", "forward_report", "cite_record")
+		and _actor_memory_has_own_action(station_officer, "cite_record")
+	)
+
+func _actor_memory_for_role(memory: Dictionary, actor_role: String) -> Dictionary:
+	for actor_id in memory.keys():
+		var entry: Variant = memory.get(actor_id, {})
+		if entry is Dictionary and str(entry.get("actorRole", "")) == actor_role:
+			return entry
+	return {}
+
+func _actor_memory_has_observation(memory_entry: Dictionary, observed_role: String, observed_affordance: String, resulting_affordance: String) -> bool:
+	for observation in memory_entry.get("observedRecentActions", []):
+		if not observation is Dictionary:
+			continue
+		if (
+			str(observation.get("observedActorRole", "")) == observed_role
+			and str(observation.get("observedAffordance", "")) == observed_affordance
+			and str(observation.get("resultingAffordance", "")) == resulting_affordance
+		):
+			return true
+	return false
+
+func _actor_memory_has_own_action(memory_entry: Dictionary, affordance: String) -> bool:
+	for action in memory_entry.get("ownRecentActions", []):
+		if not action is Dictionary:
+			continue
+		if str(action.get("affordance", "")) == affordance and str(action.get("validation", "")) == "accepted":
 			return true
 	return false
 

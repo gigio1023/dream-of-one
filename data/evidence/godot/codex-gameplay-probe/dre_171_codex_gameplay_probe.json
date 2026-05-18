@@ -58,6 +58,7 @@
 			"canInspectNpcToNpcSocialLedger": true,
 			"canInspectPublicEnvironmentRecord": true,
 			"canInspectRecordRoleAffordanceMap": true,
+			"canReadActorMemory": true,
 			"canReadCivicEconomyPressure": true,
 			"canReadCrossPlaceSocialRules": true,
 			"canReadEnvironmentToolCatalog": true,
@@ -75,6 +76,232 @@
 			"notHumanEvidence": true
 		},
 		"finalPlayerVisibleState": {
+			"actorMemory": {
+				"NPC_Park_Witness": {
+					"actorId": "NPC_Park_Witness",
+					"actorRole": "park_witness",
+					"knownLedgerEventIds": [
+						"civic-ledger-4",
+						"civic-ledger-2"
+					],
+					"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+					"observedRecentActions": [
+						{
+							"observedActorRole": "store_clerk",
+							"observedAffordance": "place_note",
+							"observedLedgerEventId": "civic-ledger-2",
+							"observedObjectId": "report_tray",
+							"resultingAffordance": "post_rumor",
+							"whyLine": "park_witness reads store_clerk's place_note record before choosing post_rumor."
+						}
+					],
+					"ownRecentActions": [
+						{
+							"affordance": "post_rumor",
+							"ledgerEventId": "civic-ledger-4",
+							"objectId": "park_notice_board",
+							"recordId": "park_public_rumor",
+							"sequence": 4,
+							"validation": "accepted"
+						}
+					],
+					"perceivedObjectIds": [
+						"park_notice_board"
+					]
+				},
+				"NPC_Station_Officer": {
+					"actorId": "NPC_Station_Officer",
+					"actorRole": "station_officer",
+					"knownLedgerEventIds": [
+						"civic-ledger-6",
+						"civic-ledger-5"
+					],
+					"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+					"observedRecentActions": [
+						{
+							"observedActorRole": "store_manager",
+							"observedAffordance": "forward_report",
+							"observedLedgerEventId": "civic-ledger-5",
+							"observedObjectId": "report_tray",
+							"resultingAffordance": "cite_record",
+							"whyLine": "station_officer reads store_manager's forward_report record before choosing cite_record."
+						}
+					],
+					"ownRecentActions": [
+						{
+							"affordance": "cite_record",
+							"ledgerEventId": "civic-ledger-6",
+							"objectId": "station_dossier",
+							"recordId": "station_same_order_dossier",
+							"sequence": 6,
+							"validation": "accepted"
+						}
+					],
+					"perceivedObjectIds": [
+						"report_tray",
+						"station_dossier",
+						"civic_ledger"
+					]
+				},
+				"NPC_Store_Clerk": {
+					"actorId": "NPC_Store_Clerk",
+					"actorRole": "store_clerk",
+					"knownLedgerEventIds": [
+						"civic-ledger-1",
+						"civic-ledger-2"
+					],
+					"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+					"observedRecentActions": [],
+					"ownRecentActions": [
+						{
+							"affordance": "mark_receipt",
+							"ledgerEventId": "civic-ledger-1",
+							"objectId": "receipt_tray",
+							"recordId": "store_same_order_receipt",
+							"sequence": 1,
+							"validation": "accepted"
+						},
+						{
+							"affordance": "place_note",
+							"ledgerEventId": "civic-ledger-2",
+							"objectId": "report_tray",
+							"recordId": "store_same_order_clerk_statement",
+							"sequence": 2,
+							"validation": "accepted"
+						}
+					],
+					"perceivedObjectIds": [
+						"store_queue_mark",
+						"store_counter",
+						"usual_order_cue",
+						"receipt_tray",
+						"correction_slip",
+						"report_tray"
+					]
+				},
+				"NPC_Store_Manager": {
+					"actorId": "NPC_Store_Manager",
+					"actorRole": "store_manager",
+					"knownLedgerEventIds": [
+						"civic-ledger-5",
+						"civic-ledger-2"
+					],
+					"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+					"observedRecentActions": [
+						{
+							"observedActorRole": "store_clerk",
+							"observedAffordance": "place_note",
+							"observedLedgerEventId": "civic-ledger-2",
+							"observedObjectId": "report_tray",
+							"resultingAffordance": "forward_report",
+							"whyLine": "store_manager reads store_clerk's place_note record before choosing forward_report."
+						}
+					],
+					"ownRecentActions": [
+						{
+							"affordance": "forward_report",
+							"ledgerEventId": "civic-ledger-5",
+							"objectId": "report_tray",
+							"recordId": "store_same_order_clerk_statement",
+							"sequence": 5,
+							"validation": "accepted"
+						}
+					],
+					"perceivedObjectIds": [
+						"store_counter",
+						"usual_order_cue",
+						"receipt_tray",
+						"correction_slip",
+						"report_tray"
+					]
+				},
+				"NPC_Studio_PM": {
+					"actorId": "NPC_Studio_PM",
+					"actorRole": "studio_pm",
+					"knownLedgerEventIds": [
+						"civic-ledger-7",
+						"civic-ledger-6"
+					],
+					"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+					"observedRecentActions": [
+						{
+							"observedActorRole": "station_officer",
+							"observedAffordance": "cite_record",
+							"observedLedgerEventId": "civic-ledger-6",
+							"observedObjectId": "station_dossier",
+							"resultingAffordance": "block_review",
+							"whyLine": "studio_pm reads station_officer's cite_record record before choosing block_review."
+						}
+					],
+					"ownRecentActions": [
+						{
+							"affordance": "block_review",
+							"ledgerEventId": "civic-ledger-7",
+							"objectId": "studio_review_queue",
+							"recordId": "studio_public_review_blocked",
+							"sequence": 7,
+							"validation": "accepted"
+						}
+					],
+					"perceivedObjectIds": [
+						"park_notice_board",
+						"studio_review_queue"
+					]
+				},
+				"NPC_Waiting_Customer": {
+					"actorId": "NPC_Waiting_Customer",
+					"actorRole": "waiting_customer",
+					"knownLedgerEventIds": [
+						"civic-ledger-3",
+						"civic-ledger-8",
+						"civic-ledger-2",
+						"civic-ledger-6"
+					],
+					"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+					"observedRecentActions": [
+						{
+							"observedActorRole": "store_clerk",
+							"observedAffordance": "place_note",
+							"observedLedgerEventId": "civic-ledger-2",
+							"observedObjectId": "report_tray",
+							"resultingAffordance": "complain_delay",
+							"whyLine": "waiting_customer reads store_clerk's place_note record before choosing complain_delay."
+						},
+						{
+							"observedActorRole": "station_officer",
+							"observedAffordance": "cite_record",
+							"observedLedgerEventId": "civic-ledger-6",
+							"observedObjectId": "station_dossier",
+							"resultingAffordance": "refuse_contact",
+							"whyLine": "waiting_customer reads station_officer's cite_record record before choosing refuse_contact."
+						}
+					],
+					"ownRecentActions": [
+						{
+							"affordance": "complain_delay",
+							"ledgerEventId": "civic-ledger-3",
+							"objectId": "store_queue_mark",
+							"recordId": "store_same_order_queue_delay",
+							"sequence": 3,
+							"validation": "accepted"
+						},
+						{
+							"affordance": "refuse_contact",
+							"ledgerEventId": "civic-ledger-8",
+							"objectId": "store_queue_mark",
+							"recordId": "store_same_order_contact_refused",
+							"sequence": 8,
+							"validation": "accepted"
+						}
+					],
+					"perceivedObjectIds": [
+						"store_queue_mark",
+						"store_counter",
+						"usual_order_cue",
+						"park_notice_board"
+					]
+				}
+			},
 			"civicEconomyPanel": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
 			"consequence": "심문 압박입니다. 이전 대화의 이상 신호가 근거가 됩니다.\n흐름: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부",
 			"inspectedNpcHistory": [
@@ -2789,6 +3016,7 @@
 			"Codex/player inspected the Studio review queue and Studio PM to read that the Station citation blocked a small opportunity in another place.",
 			"Codex/player read the Studio review queue's visible role/action map: Studio PM can invite, defer, or block review from shared records.",
 			"Codex/player inspected the civic ledger to read the NPC-to-NPC social chain as a player-facing timeline.",
+			"Codex/player snapshot exposed actor memory, showing which ledger events a role observed before choosing the next validated action.",
 			"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, and cited ledger basis.",
 			"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
 		],
@@ -2827,6 +3055,232 @@
 		"stableRuntimeSnapshotApi": "PlayableSession.debug_codex_gameplay_snapshot"
 	},
 	"environmentSnapshot": {
+		"actorMemory": {
+			"NPC_Park_Witness": {
+				"actorId": "NPC_Park_Witness",
+				"actorRole": "park_witness",
+				"knownLedgerEventIds": [
+					"civic-ledger-4",
+					"civic-ledger-2"
+				],
+				"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+				"observedRecentActions": [
+					{
+						"observedActorRole": "store_clerk",
+						"observedAffordance": "place_note",
+						"observedLedgerEventId": "civic-ledger-2",
+						"observedObjectId": "report_tray",
+						"resultingAffordance": "post_rumor",
+						"whyLine": "park_witness reads store_clerk's place_note record before choosing post_rumor."
+					}
+				],
+				"ownRecentActions": [
+					{
+						"affordance": "post_rumor",
+						"ledgerEventId": "civic-ledger-4",
+						"objectId": "park_notice_board",
+						"recordId": "park_public_rumor",
+						"sequence": 4,
+						"validation": "accepted"
+					}
+				],
+				"perceivedObjectIds": [
+					"park_notice_board"
+				]
+			},
+			"NPC_Station_Officer": {
+				"actorId": "NPC_Station_Officer",
+				"actorRole": "station_officer",
+				"knownLedgerEventIds": [
+					"civic-ledger-6",
+					"civic-ledger-5"
+				],
+				"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+				"observedRecentActions": [
+					{
+						"observedActorRole": "store_manager",
+						"observedAffordance": "forward_report",
+						"observedLedgerEventId": "civic-ledger-5",
+						"observedObjectId": "report_tray",
+						"resultingAffordance": "cite_record",
+						"whyLine": "station_officer reads store_manager's forward_report record before choosing cite_record."
+					}
+				],
+				"ownRecentActions": [
+					{
+						"affordance": "cite_record",
+						"ledgerEventId": "civic-ledger-6",
+						"objectId": "station_dossier",
+						"recordId": "station_same_order_dossier",
+						"sequence": 6,
+						"validation": "accepted"
+					}
+				],
+				"perceivedObjectIds": [
+					"report_tray",
+					"station_dossier",
+					"civic_ledger"
+				]
+			},
+			"NPC_Store_Clerk": {
+				"actorId": "NPC_Store_Clerk",
+				"actorRole": "store_clerk",
+				"knownLedgerEventIds": [
+					"civic-ledger-1",
+					"civic-ledger-2"
+				],
+				"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+				"observedRecentActions": [],
+				"ownRecentActions": [
+					{
+						"affordance": "mark_receipt",
+						"ledgerEventId": "civic-ledger-1",
+						"objectId": "receipt_tray",
+						"recordId": "store_same_order_receipt",
+						"sequence": 1,
+						"validation": "accepted"
+					},
+					{
+						"affordance": "place_note",
+						"ledgerEventId": "civic-ledger-2",
+						"objectId": "report_tray",
+						"recordId": "store_same_order_clerk_statement",
+						"sequence": 2,
+						"validation": "accepted"
+					}
+				],
+				"perceivedObjectIds": [
+					"store_queue_mark",
+					"store_counter",
+					"usual_order_cue",
+					"receipt_tray",
+					"correction_slip",
+					"report_tray"
+				]
+			},
+			"NPC_Store_Manager": {
+				"actorId": "NPC_Store_Manager",
+				"actorRole": "store_manager",
+				"knownLedgerEventIds": [
+					"civic-ledger-5",
+					"civic-ledger-2"
+				],
+				"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+				"observedRecentActions": [
+					{
+						"observedActorRole": "store_clerk",
+						"observedAffordance": "place_note",
+						"observedLedgerEventId": "civic-ledger-2",
+						"observedObjectId": "report_tray",
+						"resultingAffordance": "forward_report",
+						"whyLine": "store_manager reads store_clerk's place_note record before choosing forward_report."
+					}
+				],
+				"ownRecentActions": [
+					{
+						"affordance": "forward_report",
+						"ledgerEventId": "civic-ledger-5",
+						"objectId": "report_tray",
+						"recordId": "store_same_order_clerk_statement",
+						"sequence": 5,
+						"validation": "accepted"
+					}
+				],
+				"perceivedObjectIds": [
+					"store_counter",
+					"usual_order_cue",
+					"receipt_tray",
+					"correction_slip",
+					"report_tray"
+				]
+			},
+			"NPC_Studio_PM": {
+				"actorId": "NPC_Studio_PM",
+				"actorRole": "studio_pm",
+				"knownLedgerEventIds": [
+					"civic-ledger-7",
+					"civic-ledger-6"
+				],
+				"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+				"observedRecentActions": [
+					{
+						"observedActorRole": "station_officer",
+						"observedAffordance": "cite_record",
+						"observedLedgerEventId": "civic-ledger-6",
+						"observedObjectId": "station_dossier",
+						"resultingAffordance": "block_review",
+						"whyLine": "studio_pm reads station_officer's cite_record record before choosing block_review."
+					}
+				],
+				"ownRecentActions": [
+					{
+						"affordance": "block_review",
+						"ledgerEventId": "civic-ledger-7",
+						"objectId": "studio_review_queue",
+						"recordId": "studio_public_review_blocked",
+						"sequence": 7,
+						"validation": "accepted"
+					}
+				],
+				"perceivedObjectIds": [
+					"park_notice_board",
+					"studio_review_queue"
+				]
+			},
+			"NPC_Waiting_Customer": {
+				"actorId": "NPC_Waiting_Customer",
+				"actorRole": "waiting_customer",
+				"knownLedgerEventIds": [
+					"civic-ledger-3",
+					"civic-ledger-8",
+					"civic-ledger-2",
+					"civic-ledger-6"
+				],
+				"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+				"observedRecentActions": [
+					{
+						"observedActorRole": "store_clerk",
+						"observedAffordance": "place_note",
+						"observedLedgerEventId": "civic-ledger-2",
+						"observedObjectId": "report_tray",
+						"resultingAffordance": "complain_delay",
+						"whyLine": "waiting_customer reads store_clerk's place_note record before choosing complain_delay."
+					},
+					{
+						"observedActorRole": "station_officer",
+						"observedAffordance": "cite_record",
+						"observedLedgerEventId": "civic-ledger-6",
+						"observedObjectId": "station_dossier",
+						"resultingAffordance": "refuse_contact",
+						"whyLine": "waiting_customer reads station_officer's cite_record record before choosing refuse_contact."
+					}
+				],
+				"ownRecentActions": [
+					{
+						"affordance": "complain_delay",
+						"ledgerEventId": "civic-ledger-3",
+						"objectId": "store_queue_mark",
+						"recordId": "store_same_order_queue_delay",
+						"sequence": 3,
+						"validation": "accepted"
+					},
+					{
+						"affordance": "refuse_contact",
+						"ledgerEventId": "civic-ledger-8",
+						"objectId": "store_queue_mark",
+						"recordId": "store_same_order_contact_refused",
+						"sequence": 8,
+						"validation": "accepted"
+					}
+				],
+				"perceivedObjectIds": [
+					"store_queue_mark",
+					"store_counter",
+					"usual_order_cue",
+					"park_notice_board"
+				]
+			}
+		},
 		"civicEconomy": {
 			"accountCredit": 3,
 			"localTrust": 0,
@@ -6714,6 +7168,232 @@
 	],
 	"failures": [],
 	"finalSummary": {
+		"actorMemory": {
+			"NPC_Park_Witness": {
+				"actorId": "NPC_Park_Witness",
+				"actorRole": "park_witness",
+				"knownLedgerEventIds": [
+					"civic-ledger-4",
+					"civic-ledger-2"
+				],
+				"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+				"observedRecentActions": [
+					{
+						"observedActorRole": "store_clerk",
+						"observedAffordance": "place_note",
+						"observedLedgerEventId": "civic-ledger-2",
+						"observedObjectId": "report_tray",
+						"resultingAffordance": "post_rumor",
+						"whyLine": "park_witness reads store_clerk's place_note record before choosing post_rumor."
+					}
+				],
+				"ownRecentActions": [
+					{
+						"affordance": "post_rumor",
+						"ledgerEventId": "civic-ledger-4",
+						"objectId": "park_notice_board",
+						"recordId": "park_public_rumor",
+						"sequence": 4,
+						"validation": "accepted"
+					}
+				],
+				"perceivedObjectIds": [
+					"park_notice_board"
+				]
+			},
+			"NPC_Station_Officer": {
+				"actorId": "NPC_Station_Officer",
+				"actorRole": "station_officer",
+				"knownLedgerEventIds": [
+					"civic-ledger-6",
+					"civic-ledger-5"
+				],
+				"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+				"observedRecentActions": [
+					{
+						"observedActorRole": "store_manager",
+						"observedAffordance": "forward_report",
+						"observedLedgerEventId": "civic-ledger-5",
+						"observedObjectId": "report_tray",
+						"resultingAffordance": "cite_record",
+						"whyLine": "station_officer reads store_manager's forward_report record before choosing cite_record."
+					}
+				],
+				"ownRecentActions": [
+					{
+						"affordance": "cite_record",
+						"ledgerEventId": "civic-ledger-6",
+						"objectId": "station_dossier",
+						"recordId": "station_same_order_dossier",
+						"sequence": 6,
+						"validation": "accepted"
+					}
+				],
+				"perceivedObjectIds": [
+					"report_tray",
+					"station_dossier",
+					"civic_ledger"
+				]
+			},
+			"NPC_Store_Clerk": {
+				"actorId": "NPC_Store_Clerk",
+				"actorRole": "store_clerk",
+				"knownLedgerEventIds": [
+					"civic-ledger-1",
+					"civic-ledger-2"
+				],
+				"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+				"observedRecentActions": [],
+				"ownRecentActions": [
+					{
+						"affordance": "mark_receipt",
+						"ledgerEventId": "civic-ledger-1",
+						"objectId": "receipt_tray",
+						"recordId": "store_same_order_receipt",
+						"sequence": 1,
+						"validation": "accepted"
+					},
+					{
+						"affordance": "place_note",
+						"ledgerEventId": "civic-ledger-2",
+						"objectId": "report_tray",
+						"recordId": "store_same_order_clerk_statement",
+						"sequence": 2,
+						"validation": "accepted"
+					}
+				],
+				"perceivedObjectIds": [
+					"store_queue_mark",
+					"store_counter",
+					"usual_order_cue",
+					"receipt_tray",
+					"correction_slip",
+					"report_tray"
+				]
+			},
+			"NPC_Store_Manager": {
+				"actorId": "NPC_Store_Manager",
+				"actorRole": "store_manager",
+				"knownLedgerEventIds": [
+					"civic-ledger-5",
+					"civic-ledger-2"
+				],
+				"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+				"observedRecentActions": [
+					{
+						"observedActorRole": "store_clerk",
+						"observedAffordance": "place_note",
+						"observedLedgerEventId": "civic-ledger-2",
+						"observedObjectId": "report_tray",
+						"resultingAffordance": "forward_report",
+						"whyLine": "store_manager reads store_clerk's place_note record before choosing forward_report."
+					}
+				],
+				"ownRecentActions": [
+					{
+						"affordance": "forward_report",
+						"ledgerEventId": "civic-ledger-5",
+						"objectId": "report_tray",
+						"recordId": "store_same_order_clerk_statement",
+						"sequence": 5,
+						"validation": "accepted"
+					}
+				],
+				"perceivedObjectIds": [
+					"store_counter",
+					"usual_order_cue",
+					"receipt_tray",
+					"correction_slip",
+					"report_tray"
+				]
+			},
+			"NPC_Studio_PM": {
+				"actorId": "NPC_Studio_PM",
+				"actorRole": "studio_pm",
+				"knownLedgerEventIds": [
+					"civic-ledger-7",
+					"civic-ledger-6"
+				],
+				"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+				"observedRecentActions": [
+					{
+						"observedActorRole": "station_officer",
+						"observedAffordance": "cite_record",
+						"observedLedgerEventId": "civic-ledger-6",
+						"observedObjectId": "station_dossier",
+						"resultingAffordance": "block_review",
+						"whyLine": "studio_pm reads station_officer's cite_record record before choosing block_review."
+					}
+				],
+				"ownRecentActions": [
+					{
+						"affordance": "block_review",
+						"ledgerEventId": "civic-ledger-7",
+						"objectId": "studio_review_queue",
+						"recordId": "studio_public_review_blocked",
+						"sequence": 7,
+						"validation": "accepted"
+					}
+				],
+				"perceivedObjectIds": [
+					"park_notice_board",
+					"studio_review_queue"
+				]
+			},
+			"NPC_Waiting_Customer": {
+				"actorId": "NPC_Waiting_Customer",
+				"actorRole": "waiting_customer",
+				"knownLedgerEventIds": [
+					"civic-ledger-3",
+					"civic-ledger-8",
+					"civic-ledger-2",
+					"civic-ledger-6"
+				],
+				"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+				"observedRecentActions": [
+					{
+						"observedActorRole": "store_clerk",
+						"observedAffordance": "place_note",
+						"observedLedgerEventId": "civic-ledger-2",
+						"observedObjectId": "report_tray",
+						"resultingAffordance": "complain_delay",
+						"whyLine": "waiting_customer reads store_clerk's place_note record before choosing complain_delay."
+					},
+					{
+						"observedActorRole": "station_officer",
+						"observedAffordance": "cite_record",
+						"observedLedgerEventId": "civic-ledger-6",
+						"observedObjectId": "station_dossier",
+						"resultingAffordance": "refuse_contact",
+						"whyLine": "waiting_customer reads station_officer's cite_record record before choosing refuse_contact."
+					}
+				],
+				"ownRecentActions": [
+					{
+						"affordance": "complain_delay",
+						"ledgerEventId": "civic-ledger-3",
+						"objectId": "store_queue_mark",
+						"recordId": "store_same_order_queue_delay",
+						"sequence": 3,
+						"validation": "accepted"
+					},
+					{
+						"affordance": "refuse_contact",
+						"ledgerEventId": "civic-ledger-8",
+						"objectId": "store_queue_mark",
+						"recordId": "store_same_order_contact_refused",
+						"sequence": 8,
+						"validation": "accepted"
+					}
+				],
+				"perceivedObjectIds": [
+					"store_queue_mark",
+					"store_counter",
+					"usual_order_cue",
+					"park_notice_board"
+				]
+			}
+		},
 		"adapter": "godot",
 		"agentActionLog": [
 			{
@@ -8858,14 +9538,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779101279591",
+				"eventId": "playable_session_started-001-1779101651937",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779101279591,
+				"timestampMs": 1779101651937,
 				"uiSummaryArgs": {
 
 				},
@@ -8876,7 +9556,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-002-1779101279970",
+				"eventId": "world_record_prop_inspected-002-1779101652322",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "usual_order_cue",
 				"schemaVersion": "godot-runtime-v1",
@@ -8884,7 +9564,7 @@
 				"state": "read",
 				"stateLabel": "읽힘",
 				"summary": "Inspected world record prop usual_order_cue in state read.",
-				"timestampMs": 1779101279970,
+				"timestampMs": 1779101652322,
 				"uiSummaryArgs": {
 					"object": "늘 같은 주문",
 					"state": "읽힘"
@@ -8902,13 +9582,13 @@
 					"DL_ST1_APPROVAL_GATE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-003-1779101280095",
+				"eventId": "text_surface_read-003-1779101652449",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Studio_ApprovalCriteria as local context before speaking.",
 				"textSurfaceId": "TS_Studio_ApprovalCriteria",
-				"timestampMs": 1779101280095,
+				"timestampMs": 1779101652449,
 				"uiSummaryArgs": {
 					"law": "DL_ST1_APPROVAL_GATE",
 					"surface": "승인 기준"
@@ -8926,13 +9606,13 @@
 					"DL_P1_OBSERVATION_ETIQUETTE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-004-1779101280290",
+				"eventId": "text_surface_read-004-1779101652640",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Park_NoticeBoard as local context before speaking.",
 				"textSurfaceId": "TS_Park_NoticeBoard",
-				"timestampMs": 1779101280290,
+				"timestampMs": 1779101652640,
 				"uiSummaryArgs": {
 					"law": "DL_P1_OBSERVATION_ETIQUETTE",
 					"surface": "공지 게시판"
@@ -8948,7 +9628,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-005-1779101280498",
+				"eventId": "conversation_started-005-1779101652853",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -8957,7 +9637,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779101280498,
+				"timestampMs": 1779101652853,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -8970,7 +9650,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-006-1779101280655",
+				"eventId": "response_hesitation_noted-006-1779101653012",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -8991,7 +9671,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779101280655,
+				"timestampMs": 1779101653012,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -9006,7 +9686,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-007-1779101280752",
+				"eventId": "dialogue_choice_selected-007-1779101653110",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -9028,7 +9708,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101280752,
+				"timestampMs": 1779101653110,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -9043,7 +9723,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779101280752",
+				"eventId": "conversation_anomaly_detected-008-1779101653110",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -9065,7 +9745,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101280752,
+				"timestampMs": 1779101653110,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -9080,7 +9760,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779101280752",
+				"eventId": "npc_suspicion_changed-009-1779101653110",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -9102,7 +9782,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101280752,
+				"timestampMs": 1779101653110,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -9117,7 +9797,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-010-1779101280906",
+				"eventId": "free_input_submitted-010-1779101653268",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9142,7 +9822,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101280906,
+				"timestampMs": 1779101653268,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9157,7 +9837,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-011-1779101280906",
+				"eventId": "conversation_anomaly_detected-011-1779101653268",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9182,7 +9862,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101280906,
+				"timestampMs": 1779101653268,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9197,7 +9877,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-012-1779101280906",
+				"eventId": "npc_suspicion_changed-012-1779101653268",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9222,7 +9902,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101280906,
+				"timestampMs": 1779101653268,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9237,7 +9917,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-013-1779101280906",
+				"eventId": "suspicion_shared-013-1779101653268",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9262,7 +9942,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101280906,
+				"timestampMs": 1779101653268,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9277,7 +9957,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-014-1779101280907",
+				"eventId": "station_report_created-014-1779101653269",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9302,7 +9982,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101280907,
+				"timestampMs": 1779101653269,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9317,7 +9997,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-015-1779101280909",
+				"eventId": "station_inquest_opened-015-1779101653270",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9342,7 +10022,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101280909,
+				"timestampMs": 1779101653270,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9352,7 +10032,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-016-1779101281397",
+				"eventId": "world_record_prop_inspected-016-1779101653774",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -9360,7 +10040,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779101281397,
+				"timestampMs": 1779101653774,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -9372,7 +10052,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-017-1779101281679",
+				"eventId": "world_record_prop_inspected-017-1779101654072",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "studio_review_queue",
 				"schemaVersion": "godot-runtime-v1",
@@ -9380,7 +10060,7 @@
 				"state": "blocked",
 				"stateLabel": "차단",
 				"summary": "Inspected world record prop studio_review_queue in state blocked.",
-				"timestampMs": 1779101281679,
+				"timestampMs": 1779101654072,
 				"uiSummaryArgs": {
 					"object": "스튜디오 리뷰 줄",
 					"state": "차단"
@@ -9392,7 +10072,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-018-1779101281910",
+				"eventId": "world_record_prop_inspected-018-1779101654300",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_economy_panel",
 				"schemaVersion": "godot-runtime-v1",
@@ -9400,7 +10080,7 @@
 				"state": "attention",
 				"stateLabel": "주목 상승",
 				"summary": "Inspected world record prop civic_economy_panel in state attention.",
-				"timestampMs": 1779101281910,
+				"timestampMs": 1779101654300,
 				"uiSummaryArgs": {
 					"object": "시민 경제",
 					"state": "주목 상승"
@@ -9412,7 +10092,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-019-1779101282083",
+				"eventId": "world_record_prop_inspected-019-1779101654484",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_ledger",
 				"schemaVersion": "godot-runtime-v1",
@@ -9420,7 +10100,7 @@
 				"state": "append_only",
 				"stateLabel": "추가됨",
 				"summary": "Inspected world record prop civic_ledger in state append_only.",
-				"timestampMs": 1779101282083,
+				"timestampMs": 1779101654484,
 				"uiSummaryArgs": {
 					"object": "시민 장부",
 					"state": "추가됨"
@@ -9432,7 +10112,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-020-1779101282314",
+				"eventId": "npc_reaction_inspected-020-1779101654674",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Studio_PM",
 				"reactionText": "리뷰 차단",
@@ -9440,7 +10120,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "blocked",
 				"summary": "Inspected NPC reaction NPC_Studio_PM in state blocked.",
-				"timestampMs": 1779101282314,
+				"timestampMs": 1779101654674,
 				"uiSummaryArgs": {
 					"npc": "Studio PM",
 					"state": "리뷰 차단"
@@ -9452,7 +10132,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-021-1779101282492",
+				"eventId": "npc_reaction_inspected-021-1779101654844",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Waiting_Customer",
 				"reactionText": "접촉 거부",
@@ -9460,7 +10140,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "refused",
 				"summary": "Inspected NPC reaction NPC_Waiting_Customer in state refused.",
-				"timestampMs": 1779101282492,
+				"timestampMs": 1779101654844,
 				"uiSummaryArgs": {
 					"npc": "Waiting Customer",
 					"state": "접촉 거부"
@@ -15584,6 +16264,7 @@
 	},
 	"markdownArtifactPath": "data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.md",
 	"npcInteractionChecks": {
+		"codexCanReadActorMemory": true,
 		"codexInspectedBlockedReview": true,
 		"codexInspectedCivicEconomyPanel": true,
 		"codexInspectedCivicLedgerSocialChain": true,
@@ -15893,6 +16574,7 @@
 				"whyLine": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 			},
 			"npcInteractionChecks": {
+				"codexCanReadActorMemory": false,
 				"codexInspectedBlockedReview": false,
 				"codexInspectedCivicEconomyPanel": false,
 				"codexInspectedCivicLedgerSocialChain": false,
@@ -18855,6 +19537,7 @@
 				"whyLine": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 			},
 			"npcInteractionChecks": {
+				"codexCanReadActorMemory": false,
 				"codexInspectedBlockedReview": false,
 				"codexInspectedCivicEconomyPanel": false,
 				"codexInspectedCivicLedgerSocialChain": false,
@@ -22108,6 +22791,7 @@
 				"whyLine": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 			},
 			"npcInteractionChecks": {
+				"codexCanReadActorMemory": false,
 				"codexInspectedBlockedReview": false,
 				"codexInspectedCivicEconomyPanel": false,
 				"codexInspectedCivicLedgerSocialChain": false,
@@ -24826,6 +25510,7 @@
 				"whyLine": "WHY-LINE: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다."
 			},
 			"npcInteractionChecks": {
+				"codexCanReadActorMemory": false,
 				"codexInspectedBlockedReview": false,
 				"codexInspectedCivicEconomyPanel": false,
 				"codexInspectedCivicLedgerSocialChain": false,
@@ -27184,6 +27869,7 @@
 				"whyLine": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
 			},
 			"npcInteractionChecks": {
+				"codexCanReadActorMemory": true,
 				"codexInspectedBlockedReview": true,
 				"codexInspectedCivicEconomyPanel": true,
 				"codexInspectedCivicLedgerSocialChain": true,

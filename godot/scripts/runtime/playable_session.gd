@@ -607,6 +607,7 @@ func debug_codex_gameplay_snapshot() -> Dictionary:
 		"schemaVersion": "codex-gameplay-snapshot-v1",
 		"actionCatalog": debug_codex_gameplay_action_catalog(),
 		"summary": summary,
+		"actorMemory": summary.get("actorMemory", {}),
 		"worldRecordProps": _world_record_prop_snapshot(),
 		"inspectedWorldRecordProp": inspected_world_record_prop.duplicate(true),
 		"inspectedWorldRecordHistory": inspected_world_record_history.duplicate(true),
@@ -661,6 +662,7 @@ func debug_live_provider_packet(session_id_override: String = "", actor_id_overr
 			"duty": _provider_duty_for_actor(actor_id, actor_role),
 			"roleVoicePolicy": _provider_role_voice_policy(actor_id, actor_role),
 			"currentActorState": _provider_actor_state(actor_id),
+			"actorMemory": _actor_memory_entry(actor_id),
 			"currentPromptId": current_prompt_id,
 			"currentTurnId": current_turn_id,
 			"availableChoices": _provider_available_choices_for_actor(actor_id, beat),
@@ -894,6 +896,7 @@ func build_summary() -> Dictionary:
 		"civicEconomy": civic_economy.duplicate(true),
 		"civicLedger": civic_ledger.duplicate(true),
 		"agentActionLog": agent_action_log.duplicate(true),
+		"actorMemory": _actor_memory_snapshot(),
 		"socialObservationTrace": _social_observation_trace(),
 		"visibleNpcStates": _visible_npc_states(),
 		"worldRecordProps": _world_record_prop_snapshot(),
@@ -1986,6 +1989,68 @@ func _social_observation_trace() -> Array[Dictionary]:
 			]
 		})
 	return observations
+
+func _actor_memory_snapshot() -> Dictionary:
+	var snapshot := {}
+	for actor_id in ACTOR_AGENT_ROLES.keys():
+		var memory := _actor_memory_entry(str(actor_id))
+		var own_actions: Array = memory.get("ownRecentActions", [])
+		var observed_actions: Array = memory.get("observedRecentActions", [])
+		if not own_actions.is_empty() or not observed_actions.is_empty() or _visible_npc_states().has(actor_id):
+			snapshot[str(actor_id)] = memory
+	return snapshot
+
+func _actor_memory_entry(actor_id: String) -> Dictionary:
+	var actor_role := str(ACTOR_AGENT_ROLES.get(actor_id, ""))
+	var known_ledger_event_ids: Array[String] = []
+	var own_actions: Array[Dictionary] = []
+	var observed_actions: Array[Dictionary] = []
+
+	for action in agent_action_log:
+		if not action is Dictionary:
+			continue
+		if str(action.get("actorRole", "")) != actor_role:
+			continue
+		var ledger_event_id := str(action.get("ledgerEventId", ""))
+		known_ledger_event_ids = _append_unique_string(known_ledger_event_ids, ledger_event_id)
+		own_actions.append({
+			"sequence": int(action.get("sequence", 0)),
+			"ledgerEventId": ledger_event_id,
+			"affordance": str(action.get("affordance", "")),
+			"objectId": str(action.get("objectId", "")),
+			"recordId": str(action.get("recordId", "")),
+			"validation": str(action.get("validation", ""))
+		})
+		if own_actions.size() > 4:
+			own_actions.remove_at(0)
+
+	for observation in _social_observation_trace():
+		if not observation is Dictionary:
+			continue
+		if str(observation.get("observerRole", "")) != actor_role:
+			continue
+		var observed_ledger_event_id := str(observation.get("observedLedgerEventId", ""))
+		known_ledger_event_ids = _append_unique_string(known_ledger_event_ids, observed_ledger_event_id)
+		observed_actions.append({
+			"observedLedgerEventId": observed_ledger_event_id,
+			"observedActorRole": str(observation.get("observedActorRole", "")),
+			"observedAffordance": str(observation.get("observedAffordance", "")),
+			"observedObjectId": str(observation.get("observedObjectId", "")),
+			"resultingAffordance": str(observation.get("resultingAffordance", "")),
+			"whyLine": str(observation.get("whyLine", ""))
+		})
+		if observed_actions.size() > 4:
+			observed_actions.remove_at(0)
+
+	return {
+		"actorId": actor_id,
+		"actorRole": actor_role,
+		"memoryPolicy": "only own validated actions plus ledger events this role observed through socialObservationTrace",
+		"perceivedObjectIds": _visible_object_ids(actor_role),
+		"knownLedgerEventIds": known_ledger_event_ids,
+		"ownRecentActions": own_actions,
+		"observedRecentActions": observed_actions
+	}
 
 func _observed_agent_action(action: Dictionary, previous_actions: Array) -> Dictionary:
 	var cited_ledger_event_id := str(action.get("citedLedgerEventId", ""))
@@ -3638,6 +3703,12 @@ func _unique_signals(values: Array[String]) -> Array[String]:
 	return result
 
 func _append_signal(values: Array[String], value: String) -> Array[String]:
+	if value.is_empty() or values.has(value):
+		return values
+	values.append(value)
+	return values
+
+func _append_unique_string(values: Array[String], value: String) -> Array[String]:
 	if value.is_empty() or values.has(value):
 		return values
 	values.append(value)

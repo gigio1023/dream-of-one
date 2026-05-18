@@ -139,20 +139,26 @@ Latest OpenAI Codex provider note:
 - The two-NPC backend live social probe passed under a `$0.01` total estimated
   cap with summed estimated cost `$0.00732675` and returned usage 1,126 input /
   425 output / 1,551 total tokens.
-- Godot live HTTP decision dispatch now also passes through
+- Godot live PlayableSession route-context dispatch now also passes through
   `godot/tools/live_provider_dispatch_smoke.gd` against a local backend on
-  `127.0.0.1:8787`. It selected `gpt-5.4-mini`, used no fallback, estimated
-  `$0.003666`, returned 568 input / 300 output / 868 total tokens, and wrote
+  `127.0.0.1:8787`. It drove `main.tscn` through
+  `PlayableSession.debug_codex_gameplay_action`, built one live provider packet
+  from the running route state, selected `gpt-5.4-mini`, used no fallback,
+  capped the request at `$0.01`, estimated `$0.00422775`, returned 1,211 input /
+  199 output / 1,410 total tokens, avoided route mutation, then continued the
+  deterministic fallback path to `routeOutcome=clean_cover` and
+  `sessionOutcome=cover_held`. It wrote
   `data/evidence/godot/live-provider-dispatch/dre_171_live_provider_dispatch_smoke.json`
-  with SHA-256 `6bfa62f7db9f00cb96c7d47c78eee47772eb8bcefb6b81ecda2cb68eb367b962`.
+  with SHA-256 `73411662f282d5c1afe340aef7c10fcb5a52eb477bdaca4f049ca71df5de5e5f`.
 - ChatGPT Pro remaining quota was not exposed by these Codex Responses, so
   future work must track request count, fixed model, reasoning effort,
   estimated caps, fallback status, and returned token usage instead of claiming
   remaining subscription quota.
-- This is backend live text-proposal proof plus Godot HTTP decision smoke.
-  Godot HUD/Evidence product truth remains `fallback_only_m1` until one actual
-  `PlayableSession` route provider job is wired through the live backend and
-  proven with fallback parity.
+- This is backend live text-proposal proof plus one proof-only Godot
+  PlayableSession route provider dispatch with fallback parity. Godot
+  HUD/Evidence product truth remains `fallback_only_m1` until a later decision
+  exposes live wording as a player-visible mode and records that usage in
+  playable Evidence.
 
 Latest status check:
 - command: `.game-harness/scripts/run-same-order-comprehension-session.sh --status`

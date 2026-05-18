@@ -54,10 +54,11 @@ Last Updated: 2026-05-18
   device-code auth, `gpt-5.4-mini`, low reasoning, no model fallbacks, streaming
   Codex Responses, and usage metadata. The one-call smoke and two-NPC social
   probe passed with explicit estimated caps; ChatGPT Pro remaining quota is not
-  exposed by the response. A Godot HTTP decision smoke now also reaches live
-  `/v1/npc/decision` and records usage without mutating Godot state. Do not
-  claim live in-game provider behavior until one actual PlayableSession route
-  job is wired through the backend and fallback parity is proven.
+  exposed by the response. Godot now also drives an actual `PlayableSession`
+  route-context packet through live `/v1/npc/decision`, records usage, confirms
+  no route mutation, and then proves clean-cover fallback parity. This is still
+  proof-only: do not claim player-visible live provider behavior while the
+  running HUD/Evidence product truth remains `fallback_only_m1`.
 - Latest correction slice: active Store dialogue choices must remain speech
   inputs, not fixed consequence branches. The prompt now needs to expose the
   Store Clerk's current environment tool catalog from object affordances, while

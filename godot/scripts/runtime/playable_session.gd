@@ -615,6 +615,77 @@ func debug_codex_gameplay_snapshot() -> Dictionary:
 		"hud": _codex_hud_snapshot()
 	}
 
+func debug_live_provider_packet(session_id_override: String = "") -> Dictionary:
+	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
+	var actor_id := str(beat.get("actorId", "NPC_Store_Clerk"))
+	if actor_id.is_empty():
+		actor_id = "NPC_Store_Clerk"
+	var actor_role := str(ACTOR_AGENT_ROLES.get(actor_id, "store_clerk"))
+	var tool_catalog := _compact_provider_tool_catalog(_current_environment_tool_catalog())
+	var tool_summaries := _current_environment_tool_summary_lines()
+	var recent_events: Array[String] = [
+		"stage:%s" % stage,
+		"prompt:%s" % current_prompt_id,
+		"route:%s" % route_outcome,
+		"last_choice:%s" % last_choice_intent
+	]
+	for line in tool_summaries:
+		recent_events.append("tool:%s" % str(line))
+	for event in _recent_civic_ledger_events(3):
+		recent_events.append("ledger:%s:%s:%s" % [
+			str(event.get("eventId", "")),
+			str(event.get("kind", "")),
+			str(event.get("affordance", ""))
+		])
+
+	var nearby_actors: Array[String] = ["player"]
+	for npc_id in _visible_npc_states().keys():
+		if str(npc_id) != actor_id:
+			nearby_actors.append(str(npc_id))
+		if nearby_actors.size() >= 5:
+			break
+
+	return {
+		"sessionId": session_id_override if not session_id_override.is_empty() else "%s-live-provider-%d" % [SESSION_ID, Time.get_ticks_msec()],
+		"npcId": actor_id,
+		"landmarkId": "Store",
+		"nearbyActors": nearby_actors,
+		"recentEvents": recent_events,
+		"organizationContext": {
+			"organization": "Store",
+			"role": actor_role,
+			"duty": "speak from the current Store procedure without changing records",
+			"currentPromptId": current_prompt_id,
+			"currentTurnId": current_turn_id,
+			"availableChoices": _current_choice_lines(),
+			"environmentToolCatalog": tool_catalog,
+			"providerJobId": "%s.%s.live-wording-proposal" % [route_outcome, current_prompt_id]
+		},
+		"playerSignals": {
+			"suspicion": suspicion,
+			"reportWeight": report_weight,
+			"exposure": exposure,
+			"lastSpeechAct": "SA_INQUIRE",
+			"lastChoiceIntent": last_choice_intent,
+			"deterministicOutcome": _session_outcome(),
+			"providerBoundary": "wording_only_no_state_mutation"
+		}
+	}
+
+func _compact_provider_tool_catalog(tool_catalog: Array[Dictionary]) -> Array[Dictionary]:
+	var compact: Array[Dictionary] = []
+	for action in tool_catalog:
+		compact.append({
+			"affordance": str(action.get("affordance", "")),
+			"objectId": str(action.get("objectId", "")),
+			"fromStates": action.get("fromStates", []),
+			"toState": str(action.get("toState", "")),
+			"ledgerEventKind": str(action.get("ledgerEventKind", ""))
+		})
+		if compact.size() >= 6:
+			break
+	return compact
+
 func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) -> Dictionary:
 	var before := _codex_small_summary(build_summary())
 	var accepted := true
@@ -1778,6 +1849,15 @@ func _defer_studio_review_after_warning(warning_event_id: String) -> void:
 
 func debug_agent_action_log() -> Array:
 	return agent_action_log.duplicate(true)
+
+func _recent_civic_ledger_events(limit: int) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	for index in range(civic_ledger.size() - 1, -1, -1):
+		var event: Dictionary = civic_ledger[index]
+		events.append(event.duplicate(true))
+		if events.size() >= limit:
+			break
+	return events
 
 func _codex_choice_id_available(choice_id: String) -> bool:
 	if not conversation_active or _session_locked():

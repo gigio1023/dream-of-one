@@ -40,7 +40,7 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   cap before attempting live Godot provider dispatch.
 - [x] Add a Godot live HTTP decision smoke that calls backend `/v1/npc/decision`
   with `openai-codex`, records usage, and does not mutate product state.
-- [ ] Wire one actual `PlayableSession` route provider job through live backend
+- [x] Wire one actual `PlayableSession` route provider job through live backend
   and prove fallback parity for route events, ledger, object state, and economy.
 - [x] Defer four-week prototype plan issue splitting until fresh-player comprehension evidence and the M1/M2 decision are recorded.
 - [x] Run parallel simulator benchmark research lanes and record source-backed md files.

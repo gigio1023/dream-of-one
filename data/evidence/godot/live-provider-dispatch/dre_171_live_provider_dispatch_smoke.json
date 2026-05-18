@@ -6,23 +6,96 @@
 			"actionType": "Talk",
 			"endpoint": "http://127.0.0.1:8787/v1/npc/decision",
 			"httpStatus": 200,
-			"npcId": "store-clerk-godot-live-dispatch",
+			"npcId": "NPC_Store_Clerk",
 			"ok": true,
 			"providerUsage": {
-				"actualInputTokens": 568.0,
-				"actualOutputTokens": 300.0,
-				"actualTotalTokens": 868.0,
-				"estimatedCostUsd": 0.003666,
-				"estimatedInputTokens": 688.0,
-				"estimatedTotalTokens": 1388.0,
+				"actualInputTokens": 1211.0,
+				"actualOutputTokens": 199.0,
+				"actualTotalTokens": 1410.0,
+				"estimatedCostUsd": 0.00422775,
+				"estimatedInputTokens": 1437.0,
+				"estimatedTotalTokens": 2137.0,
 				"maxOutputTokens": 700.0,
 				"model": "gpt-5.4-mini"
 			},
 			"reason": "",
-			"threadId": "resp_0f1218ab3793a4b4016a0adfcc0288819183c334a193d4f872",
+			"threadId": "resp_0a108f7f125e446f016a0ae22f57d0819195036d439bac592e",
 			"transport": "codex",
 			"usedFallback": false,
-			"utterance": "영수증은여기있습니다.번호와내용이맞는지만확인해주세요."
+			"utterance": "네,같은걸로준비할게요."
+		},
+		"playableRoute": {
+			"afterProviderDecision": {
+				"agentActionCount": 0,
+				"latestLedgerEvent": {
+
+				},
+				"providerState": {
+					"authorityBoundary": "wording_only_when_later_enabled",
+					"decisionPath": "deterministic_fallback",
+					"liveVerified": false,
+					"mode": "fallback_only_m1",
+					"modeLabel": "fallback-only M1",
+					"selectedModel": "none"
+				},
+				"reportWeight": 0,
+				"routeOutcome": "running",
+				"sessionOutcome": "running",
+				"stage": "normal",
+				"suspicion": 0
+			},
+			"before": {
+				"agentActionCount": 0,
+				"latestLedgerEvent": {
+
+				},
+				"providerState": {
+					"authorityBoundary": "wording_only_when_later_enabled",
+					"decisionPath": "deterministic_fallback",
+					"liveVerified": false,
+					"mode": "fallback_only_m1",
+					"modeLabel": "fallback-only M1",
+					"selectedModel": "none"
+				},
+				"reportWeight": 0,
+				"routeOutcome": "running",
+				"sessionOutcome": "running",
+				"stage": "normal",
+				"suspicion": 0
+			},
+			"final": {
+				"agentActionCount": 6,
+				"latestLedgerEvent": {
+					"actorId": "NPC_Studio_PM",
+					"actorRole": "studio_pm",
+					"affordance": "invite_review",
+					"citedLedgerEventId": "civic-ledger-4",
+					"economyDelta": {
+						"localTrust": 1,
+						"recordBurden": -1
+					},
+					"eventId": "civic-ledger-6",
+					"kind": "studio_review_invited",
+					"objectId": "studio_review_queue",
+					"recordId": "studio_public_review_invite",
+					"validation": "accepted",
+					"whyLine": "The Studio PM reads the public routine vouch and opens a tiny review invitation instead of relying on a private Store branch."
+				},
+				"providerState": {
+					"authorityBoundary": "wording_only_when_later_enabled",
+					"decisionPath": "deterministic_fallback",
+					"liveVerified": false,
+					"mode": "fallback_only_m1",
+					"modeLabel": "fallback-only M1",
+					"selectedModel": "none"
+				},
+				"reportWeight": 0,
+				"routeOutcome": "clean_cover",
+				"sessionOutcome": "cover_held",
+				"stage": "normal",
+				"suspicion": 0
+			},
+			"stateMutatedByProviderDecision": false
 		},
 		"readiness": {
 			"bridgeStatus": "ready",
@@ -33,7 +106,7 @@
 				"openAi": {
 					"budget": {
 						"inputUsdPerMillionTokens": 0.75,
-						"maxEstimatedCostUsd": 0.005,
+						"maxEstimatedCostUsd": 0.01,
 						"maxEstimatedInputTokens": 6000.0,
 						"maxEstimatedTotalTokens": 8000.0,
 						"outputUsdPerMillionTokens": 4.5
@@ -57,20 +130,24 @@
 	"failures": [],
 	"ok": true,
 	"proofs": {
-		"actualInputTokens": 568,
-		"actualOutputTokens": 300,
-		"actualTotalTokens": 868,
+		"actualInputTokens": 1211,
+		"actualOutputTokens": 199,
+		"actualTotalTokens": 1410,
 		"chatGptProQuotaRemaining": "not_exposed_by_codex_response",
 		"commandExecuted": false,
 		"contextMutated": false,
 		"decisionRequested": true,
-		"estimatedCostUsd": 0.003666,
+		"estimatedCostUsd": 0.00422775,
+		"fallbackParityRouteOutcome": "clean_cover",
+		"fallbackParitySessionOutcome": "cover_held",
+		"playableSessionPacket": true,
 		"productProviderStateChanged": false,
+		"providerDecisionMutatedRouteState": false,
 		"providerMode": "openai-codex",
 		"selectedModel": "gpt-5.4-mini",
 		"transport": "codex",
 		"usedFallback": false,
-		"utterance": "영수증은여기있습니다.번호와내용이맞는지만확인해주세요."
+		"utterance": "네,같은걸로준비할게요."
 	},
 	"runId": "dre-live-provider-dispatch-smoke",
 	"schemaVersion": "godot-runtime-v1"

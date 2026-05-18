@@ -1,7 +1,7 @@
 # OpenAI Codex Live Social Probe
 
 Date: 2026-05-18
-Status: backend live proof and Godot HTTP decision dispatch smoke passed
+Status: backend live proof and Godot PlayableSession route dispatch smoke passed
 
 ## Claim
 
@@ -10,9 +10,10 @@ OAuth auth, using only `gpt-5.4-mini` with low reasoning effort, no model
 fallbacks, and deterministic fallback if the provider path fails.
 
 The backend proof proves bounded LLM text proposals for NPC roles. A Godot tool
-now also proves one live `/v1/npc/decision` HTTP dispatch through the backend.
-This still does not switch the running playable scene or HUD out of
-`fallback_only_m1`.
+now also proves one live `/v1/npc/decision` dispatch using an actual
+`PlayableSession` route packet, then confirms deterministic fallback parity on
+the same running scene. This still does not switch the playable scene or HUD out
+of `fallback_only_m1`.
 
 ## Commands
 
@@ -40,13 +41,13 @@ OPENAI_CODEX_SOCIAL_PROBE_TOTAL_ESTIMATED_COST_USD=0.01 \
 npm run openai-codex:social-probe --prefix backend/npc-runtime
 ```
 
-Godot live provider dispatch smoke:
+Godot live PlayableSession route provider dispatch smoke:
 
 ```bash
 OPENAI_CODEX_AUTH_STORE_PATH=<ignored auth store> \
 NPC_RUNTIME_HOST=127.0.0.1 \
 NPC_RUNTIME_PORT=8787 \
-OPENAI_PROPOSAL_MAX_ESTIMATED_COST_USD=0.005 \
+OPENAI_PROPOSAL_MAX_ESTIMATED_COST_USD=0.01 \
 OPENAI_PROPOSAL_TIMEOUT_MS=12000 \
 NPC_RUNTIME_DECISION_DEADLINE_MS=12000 \
 npm run dev --prefix backend/npc-runtime
@@ -89,22 +90,26 @@ Two-NPC social probe:
 - Store Clerk utterance: `영수증기록은이미남겼습니다.`
 - Waiting Customer utterance: `줄이길어졌네요.`
 
-Godot live provider dispatch smoke:
+Godot live PlayableSession route provider dispatch smoke:
 
 - artifact: `data/evidence/godot/live-provider-dispatch/dre_171_live_provider_dispatch_smoke.json`
-- artifact SHA-256: `6bfa62f7db9f00cb96c7d47c78eee47772eb8bcefb6b81ecda2cb68eb367b962`
+- artifact SHA-256: `73411662f282d5c1afe340aef7c10fcb5a52eb477bdaca4f049ca71df5de5e5f`
 - readiness: ready for `openai-codex`
 - model: `gpt-5.4-mini`
 - reasoning: `low`
 - fallbacks: none
 - HTTP decision endpoint: `200`
 - transport: `codex`
-- estimated cost: `$0.003666`
-- actual usage: 568 input tokens, 300 output tokens, 868 total tokens
+- per-request estimated cap: `$0.01`
+- estimated cost: `$0.00422775`
+- actual usage: 1,211 input tokens, 199 output tokens, 1,410 total tokens
 - fallback: false
-- selected utterance: `영수증은여기있습니다.번호와내용이맞는지만확인해주세요.`
+- selected utterance: `네,같은걸로준비할게요.`
 - command executed in Godot world: false
 - product provider state changed: false
+- provider decision mutated route state: false
+- fallback parity route outcome: `clean_cover`
+- fallback parity session outcome: `cover_held`
 
 ChatGPT Pro remaining quota is not exposed by the Codex Responses payload used
 here. The enforceable budget controls are model allowlist, reasoning effort,
@@ -122,24 +127,25 @@ upgrades, and recorded actual token usage when the provider returns it.
   Exposure, inquest, verdict, and session end remain deterministic authority.
 - A tiny two-role social context can produce bounded live LLM wording without
   falling back or upgrading model.
-- A Godot script can reach the live backend `/v1/npc/decision` endpoint and
-  receive bounded `openai-codex` wording plus usage metadata without mutating
-  Godot state.
+- A Godot script can drive the actual `PlayableSession`, build a live
+  route-context provider packet, reach the backend `/v1/npc/decision` endpoint,
+  receive bounded `openai-codex` wording plus usage metadata, and then continue
+  the deterministic fallback route without state mutation or route drift.
 
 ## What Remains Unproven
 
 - In-game HUD/Evidence truth showing `openai_codex` instead of
   `fallback_only_m1`.
-- Live provider dispatch from the actual `PlayableSession` route loop with
-  fallback parity for the same route events.
+- Continuous live provider scheduling across multiple `PlayableSession` route
+  jobs, actors, and memory turns.
 - Multi-step NPC memory and policy behavior across a long live simulation.
 - ChatGPT Pro quota remaining or plan-limit accounting, because the endpoint
   does not expose remaining subscription usage in these responses.
 
 ## Next Playable Slice
 
-Keep the next increment small: route one existing `PlayableSession` provider
-job through the live backend with `gpt-5.4-mini`, preserve the same
-deterministic route events as fallback-only, and expose provider mode plus usage
-summary in the playable Evidence artifact before expanding NPC count or memory
-scope.
+Keep the next increment small: choose whether to expose live-provider wording
+as a player-visible experimental mode or keep it as proof-only. If enabled,
+wire one bounded multi-actor route step at a time, preserve deterministic
+records/actions as authority, and keep usage caps plus actual token reporting in
+the playable Evidence artifact before expanding NPC count or memory scope.

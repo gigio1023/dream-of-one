@@ -725,6 +725,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)) and bool(checks.get("waitingCustomerObservedStation", false)),
 		"canReadLiveHudSocialCitation": _hud_record_state_cites_latest_social_observation(summary, record_state_label),
 		"canReadLiveHudNearbyStances": _hud_record_state_names_visible_stances(record_state_label),
+		"canReadLiveHudRecordReaders": _hud_record_state_names_record_readers(record_state_label),
 		"canReadVisibleNpcReaction": bool(checks.get("visibleWaitingCustomerReaction", false)),
 		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
 			"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
@@ -1303,6 +1304,14 @@ func _hud_record_state_names_visible_stances(record_state_label: String) -> bool
 		and record_state_label.contains("접촉 거부")
 		and record_state_label.contains("스튜디오 PM")
 		and record_state_label.contains("리뷰 차단")
+	)
+
+func _hud_record_state_names_record_readers(record_state_label: String) -> bool:
+	return (
+		record_state_label.contains("열람")
+		and record_state_label.contains("스테이션 직원")
+		and record_state_label.contains("스튜디오 PM")
+		and record_state_label.contains("대기 손님")
 	)
 
 func _ledger_event_cites(summary: Dictionary, kind: String, cited_id: String) -> bool:

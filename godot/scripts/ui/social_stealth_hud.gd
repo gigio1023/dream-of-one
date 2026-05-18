@@ -50,7 +50,7 @@ const UI_COPY := {
 		"recorded_statement_submit": "직접 입력도 기록됩니다.",
 		"free_input_placeholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 		"recent_line": "최근 발화: {line}",
-		"record_state": "상점 기록: 영수증 {receipt} | 정정 {correction} | 보고 {report} | 스테이션 {dossier} | 잔액 {credit} 신뢰 {trust} 부담 {burden} 주목 {attention} | 장부 {ledgerCount} 최근 {ledgerLatest} | 사회 반응 {socialLatest} | 주변 태도 {npcStances}",
+		"record_state": "상점 기록: 영수증 {receipt} | 정정 {correction} | 보고 {report} | 스테이션 {dossier} | 잔액 {credit} 신뢰 {trust} 부담 {burden} 주목 {attention} | 장부 {ledgerCount} 최근 {ledgerLatest} | 열람 {recordReaders} | 사회 반응 {socialLatest} | 주변 태도 {npcStances}",
 		"investigation_trail": "검사자: {actor} | 대상: 플레이어 | 근거: {basis}",
 		"provider_state": "AI 제공자: {mode} | API 검증 {live} | 모델 {model}",
 		"evidence_count": "최근 기록 {shown} / 전체 {total}",
@@ -108,7 +108,7 @@ const UI_COPY := {
 		"recorded_statement_submit": "Typed speech is recorded.",
 		"free_input_placeholder": "Type and press Enter: speech becomes a Store record",
 		"recent_line": "Recent line: {line}",
-		"record_state": "Store records: receipt {receipt} | correction {correction} | report {report} | Station {dossier} | credit {credit} trust {trust} burden {burden} attention {attention} | ledger {ledgerCount} latest {ledgerLatest} | social reaction {socialLatest} | nearby stance {npcStances}",
+		"record_state": "Store records: receipt {receipt} | correction {correction} | report {report} | Station {dossier} | credit {credit} trust {trust} burden {burden} attention {attention} | ledger {ledgerCount} latest {ledgerLatest} | readers {recordReaders} | social reaction {socialLatest} | nearby stance {npcStances}",
 		"investigation_trail": "Examiner: {actor} | subject: player | basis: {basis}",
 		"provider_state": "AI provider: {mode} | API verified {live} | model {model}",
 		"evidence_count": "Recent record {shown} / total {total}",
@@ -129,6 +129,41 @@ const UI_COPY := {
 		"outcome_trace": "Trace: Store conversation -> suspicion/report {exposure} -> intake {intake} / inquest {inquest} / verdict {verdict} / end {termination}"
 	}
 }
+
+const RECORD_READER_ROLES := {
+	"store_queue_mark": ["store_clerk", "waiting_customer"],
+	"store_counter": ["store_clerk", "waiting_customer", "store_manager"],
+	"usual_order_cue": ["store_clerk", "store_manager", "waiting_customer"],
+	"receipt_tray": ["store_clerk", "store_manager"],
+	"correction_slip": ["store_clerk", "store_manager"],
+	"report_tray": ["store_clerk", "store_manager", "station_officer"],
+	"park_notice_board": ["park_witness", "waiting_customer", "studio_pm"],
+	"studio_review_queue": ["studio_pm"],
+	"station_dossier": ["station_officer"],
+	"civic_ledger": ["station_officer"]
+}
+
+const RECORD_READER_OBJECT_ORDER := [
+	"station_dossier",
+	"report_tray",
+	"studio_review_queue",
+	"park_notice_board",
+	"store_queue_mark",
+	"receipt_tray",
+	"correction_slip",
+	"store_counter",
+	"usual_order_cue",
+	"civic_ledger"
+]
+
+const RECORD_READER_ROLE_PRIORITY := [
+	"station_officer",
+	"studio_pm",
+	"waiting_customer",
+	"store_manager",
+	"park_witness",
+	"store_clerk"
+]
 
 @onready var _case_title: Label = $Root/TopPanel/TopMargin/TopRows/TopBar/CaseTitle
 @onready var _case_meta: Label = $Root/TopPanel/TopMargin/TopRows/CaseMetaLabel
@@ -180,6 +215,7 @@ var _civic_ledger_count := 0
 var _latest_civic_ledger_text := "-"
 var _latest_social_observation_text := "-"
 var _visible_npc_stance_text := "-"
+var _record_reader_text := "-"
 var _provider_mode := "fallback-only M1"
 var _provider_model := "none"
 var _provider_live_verified := false
@@ -361,6 +397,7 @@ func set_record_state(record_objects: Dictionary, civic_economy: Dictionary, civ
 	_latest_civic_ledger_text = _latest_civic_ledger_label(civic_ledger)
 	_latest_social_observation_text = _latest_social_observation_label(social_observations)
 	_visible_npc_stance_text = _visible_npc_stance_label(visible_npc_states)
+	_record_reader_text = _record_reader_label(record_objects, civic_ledger)
 	_refresh_record_state_label()
 	_refresh_investigation_trail_label()
 	_refresh_consequence_text()
@@ -454,6 +491,7 @@ func _refresh_record_state_label() -> void:
 		"attention": int(_civic_economy.get("stationAttention", 0)),
 		"ledgerCount": _civic_ledger_count,
 		"ledgerLatest": _latest_civic_ledger_text,
+		"recordReaders": _record_reader_text,
 		"socialLatest": _latest_social_observation_text,
 		"npcStances": _visible_npc_stance_text
 	})
@@ -576,6 +614,57 @@ func _visible_npc_stance_label(visible_npc_states: Dictionary) -> String:
 	if labels.is_empty():
 		return "-"
 	return ", ".join(labels)
+
+func _record_reader_label(record_objects: Dictionary, civic_ledger: Array) -> String:
+	if record_objects.is_empty():
+		return "-"
+	var active_object_ids := _ledger_object_ids(civic_ledger)
+	var readers := {}
+	for object_id in RECORD_READER_OBJECT_ORDER:
+		var state := str(record_objects.get(object_id, ""))
+		if not _record_object_has_visible_record(object_id, state, active_object_ids):
+			continue
+		var roles: Array = RECORD_READER_ROLES.get(object_id, [])
+		for role_value in roles:
+			var role := str(role_value)
+			if not role.is_empty():
+				readers[role] = true
+	if readers.is_empty():
+		return "-"
+	var labels: Array[String] = []
+	for role in RECORD_READER_ROLE_PRIORITY:
+		if not readers.has(role):
+			continue
+		labels.append(_actor_role_label(str(role)))
+		if labels.size() >= 4:
+			break
+	if labels.is_empty():
+		return "-"
+	return ", ".join(labels)
+
+func _ledger_object_ids(civic_ledger: Array) -> Dictionary:
+	var object_ids := {}
+	for event_value in civic_ledger:
+		if not event_value is Dictionary:
+			continue
+		var event: Dictionary = event_value
+		var object_id := str(event.get("objectId", ""))
+		if not object_id.is_empty():
+			object_ids[object_id] = true
+	if not object_ids.is_empty():
+		object_ids["civic_ledger"] = true
+	return object_ids
+
+func _record_object_has_visible_record(object_id: String, state: String, active_object_ids: Dictionary) -> bool:
+	if not active_object_ids.has(object_id):
+		return false
+	if object_id == "civic_ledger":
+		return _civic_ledger_count > 0
+	if state.is_empty():
+		return false
+	if ["unknown", "blank", "absent", "clear", "open", "serving", "player_waiting"].has(state):
+		return false
+	return true
 
 func _actor_role_id_for_npc(npc_id: String) -> String:
 	var role_ids := {

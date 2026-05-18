@@ -100,6 +100,10 @@ Current M1 carry-in:
   and Waiting Customer's contact refusal are now readable as social speech
   through the running game's focus plus interact path, keeping conversation at
   the center of the social consequence.
+- latest small-slice carry-in: the live HUD now has `열람`, a compact reader
+  summary for records that actually exist in the current ledger. This keeps the
+  player-facing social-sim layer focused on who can see the active record chain
+  before the player opens individual props or NPC panels.
 - latest small-slice carry-in: the live HUD now has `주변 태도`, a compact
   stance summary for visible NPCs. The player can see nearby help, distance,
   service pause, review block, and contact refusal in the main play HUD before

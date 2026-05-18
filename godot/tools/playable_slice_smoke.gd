@@ -862,6 +862,8 @@ func _validate_hud_record_state(route: Dictionary, summary: Dictionary, hud: Nod
 		failures.append("%s expected HUD record state to show NPC social reaction" % route_id)
 	if ["clean_cover", "repair_recovered", "cover_held_under_suspicion", "soft_report", "inquest_opened"].has(route_id) and not record_state_label.contains("주변 태도"):
 		failures.append("%s expected HUD record state to summarize nearby NPC stance" % route_id)
+	if ["clean_cover", "repair_recovered", "cover_held_under_suspicion", "soft_report", "inquest_opened"].has(route_id) and not record_state_label.contains("열람"):
+		failures.append("%s expected HUD record state to show which roles can read current records" % route_id)
 	if route_id == "clean_cover" and (not record_state_label.contains("대기 손님") or not record_state_label.contains("도움")):
 		failures.append("clean_cover expected HUD nearby stance to show Waiting Customer help")
 	if route_id == "repair_recovered" and (not record_state_label.contains("스튜디오 PM") or not record_state_label.contains("조건부")):
@@ -872,6 +874,8 @@ func _validate_hud_record_state(route: Dictionary, summary: Dictionary, hud: Nod
 		failures.append("soft_report expected HUD nearby stance to show Waiting Customer queue exit")
 	if route_id == "inquest_opened" and (not record_state_label.contains("대기 손님") or not record_state_label.contains("접촉 거부")):
 		failures.append("inquest_opened expected HUD nearby stance to show Waiting Customer contact refusal")
+	if route_id == "inquest_opened" and (not record_state_label.contains("스테이션 직원") or not record_state_label.contains("스튜디오 PM") or not record_state_label.contains("대기 손님")):
+		failures.append("inquest_opened expected HUD record readers to name Station Officer, Studio PM, and Waiting Customer")
 	if ["cover_held_under_suspicion", "soft_report", "inquest_opened"].has(route_id):
 		var social_observations: Array = summary.get("socialObservationTrace", [])
 		if not social_observations.is_empty():

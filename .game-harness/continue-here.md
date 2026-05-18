@@ -47,6 +47,11 @@ Last Updated: 2026-05-18
 - If `--status` is already pass and no watched Godot/HUD/probe/session-helper
   source changed, do not rerun Codex probe or regenerate setup kits merely to
   show activity. The next useful move is human play, not more preparation.
+- Latest implementation slice: the live HUD record line now shows `열람`, naming
+  which roles can read the current record chain after ledger events exist. Empty
+  starting state remains `열람 -`; inquest names Station Officer, Studio PM,
+  Waiting Customer, and Store Manager as readers of the active records. Codex
+  gameplay QA now checks `canReadLiveHudRecordReaders=true`.
 - Latest implementation slice: NPC reaction inspection now shows a short
   `들은 말` line and exports `spokenLine`, so inspecting Studio PM or Waiting
   Customer reads the actual social refusal/blocking line that came from the

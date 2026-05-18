@@ -96,9 +96,9 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `22263bdd4abde9c20b5d99d1ae084c8b54e74e1c57754e9fd281288d65ce2e6e`
-  - Markdown SHA-256: `a6adf94724769b0bd2008e2f3b4d101cfae18080df36ec8eac92b7e03c5ca2fe`
-  - playable Evidence Pack SHA-256: `fff50f027a1d44cab3fb8430b58578e11a4c1a317c271c195178ff8be400eeca`
+  - JSON SHA-256: `002f89d56603076fe6ac09d8acc072cbfd06667706700eb29d9648194e9b2800`
+  - Markdown SHA-256: `1aad9813b45957528de73c447bf7fa76a626d9695d66e6c9ac38de417de653ea`
+  - playable Evidence Pack SHA-256: `25fe2c4e5a5617fff03fb7a6e30871d3245e566faf21b91c9d4ef73f2c96f376`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
 
@@ -107,6 +107,13 @@ Latest AI-play interface check:
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `17 / 17`, `explainability=18/18`, and
   `routeReportPassCount=5 / 5`.
+- latest game increment: the live HUD record line now includes `열람`, a
+  compact list of roles that can read the current record set after actual
+  ledger events exist. Initial empty state stays `열람 -`; the inquest Codex run
+  shows `스테이션 직원`, `스튜디오 PM`, `대기 손님`, and `상점 매니저` in the
+  running HUD. Codex gameplay QA now requires
+  `canReadLiveHudRecordReaders=true`, and playable smoke fails if the inquest
+  HUD no longer names the roles that can see the active record chain.
 - latest game increment: NPC reaction inspection now exposes the short
   player-readable line the NPC is saying, not only the reaction label. In the
   inquest Codex run, inspecting Studio PM shows `들은 말: "스테이션 인용이

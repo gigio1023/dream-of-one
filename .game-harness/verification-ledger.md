@@ -147,6 +147,14 @@ Remaining blockers before advancing beyond M1:
 
 ## Runtime Evidence
 
+Latest live-HUD record-reader addendum: the HUD record-state line now includes
+`열람`, naming which roles can read the current record chain once ledger-backed
+records exist. Initial empty state stays `열람 -`; in the inquest Codex run the
+HUD names `스테이션 직원`, `스튜디오 PM`, `대기 손님`, and `상점 매니저` next to
+the same ledger/social-reaction data. Codex gameplay QA now requires
+`canReadLiveHudRecordReaders=true`, and playable smoke checks that the inquest
+HUD exposes the active record readers.
+
 Latest NPC spoken-reaction addendum: inspecting a visible NPC now shows the
 short social line attached to the reaction. In the inquest Codex run, Studio PM
 inspection includes `들은 말: "스테이션 인용이 붙었네요. 리뷰 줄은 오늘

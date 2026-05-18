@@ -2,28 +2,17 @@
 
 ## Commit Discipline
 
-- Default agent cadence: after a coherent slice is useful, verified, and
-  meaningful to revert as one unit, commit it and push it before starting a
-  different slice. Do not wait for an end-of-session cleanup pass.
-- Make small, revertable commits. A commit should have one reason to exist and one clear rollback meaning.
-- Prefer committing after each coherent slice passes its narrow proof check, then push the branch while the context is still fresh.
-- In this repo, Codex should treat commit-and-push as the default end of each
-  completed work slice, not as a final cleanup step. If the work is coherent,
-  verified, and useful to revert as one unit, commit it and push it before
-  moving on.
-- For Codex/agent work, the default is to commit and push every finished slice
-  before starting a different slice. Do not save several unrelated improvements
-  for one large end-of-session commit.
-- A finished slice means code/docs/evidence are internally consistent and the
-  narrow proof check for that slice has run. At that point, inspect status,
-  stage explicit paths, commit, and push without waiting for another reminder.
+- Codex/agent default: after every coherent, verified slice, commit and push
+  before starting a different slice. Do not wait for an end-of-session cleanup
+  pass.
+- A finished slice means code, docs, and evidence are internally consistent and
+  the narrow proof check for that slice has run.
 - Treat an unpushed finished slice as incomplete agent work unless the user
   explicitly asks to hold it locally.
-- If commit or push fails, diagnose and retry immediately instead of carrying
-  the verified slice forward as local-only work.
-- If the next slice would require a different rollback decision, push the
-  current slice first. A later revert should be able to remove one coherent
-  behavior change, one documentation-only adjustment, or one proof refresh.
+- Make small, revertable commits. Each commit should have one reason to exist
+  and one clear rollback meaning.
+- If the next slice would require a different rollback decision, commit and
+  push the current slice first.
 - Do not hide several unrelated decisions behind a vague commit like
   `update docs` or `misc fixes`. Use a subject that names the actual change,
   so `git revert` remains understandable weeks later.
@@ -44,7 +33,8 @@
 
 ## Agent Workflow
 
-- Inspect `git status --short --branch` before and after each slice.
+- Inspect `git status --short --branch` before editing, before committing, and
+  after pushing.
 - Stage explicit paths. Avoid `git add -A` when unrelated local files are present.
 - Commit and push each finished slice before starting the next one. If the user
   has asked for active progress, do not wait for another approval before
@@ -63,8 +53,8 @@
 
 - Do not let a verified commit sit locally because push failed once. Treat that
   as an active failure to resolve before taking on new product work.
-- First run `git status --short --branch` and `git log --oneline --decorate -5`
-  so the local/remote relationship is explicit.
+- First run `git status --short --branch`, `git log --oneline --decorate -5`,
+  and `git pull --rebase` so the local/remote relationship is explicit.
 - If the remote moved, run `git pull --rebase`, resolve only the relevant
   conflicts, rerun the narrow proof that covers the slice, then push again.
 - If hooks, credentials, network, or remote policy block the push, capture the

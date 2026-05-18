@@ -80,15 +80,18 @@ Latest completion audit:
   and packaged-route evidence.
 - latest Codex gameplay QA artifact reports `ok=true`,
   `aiPlayerReport.pass=true`, 29 accepted public actions, 5/5 route reports,
-  all 26 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
+  all 27 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
   no-live provider packet readiness for bounded `actorMemory` plus
   `actorPolicy`. It now also proves Codex/player can inspect Store Clerk as the
   record-making NPC, Park Witness as the public-spread actor, and Station
-  Officer as the authority actor: the Witness inspection names the Clerk note,
-  Park notice board target, public-spread readers, and spoken rumor line; the
-  Officer inspection names the cited Store Manager ledger, Station document
-  target, `대상=플레이어`, comparison focus, inquest authority, visible
-  environment context, and spoken intake line before downstream NPC reactions.
+  Officer as the authority actor, plus Studio PM as the cross-place opportunity
+  actor. Studio PM inspection now names `기회 변화` labels for opening,
+  limiting, delaying, or closing the tiny review opportunity from public
+  records; the Witness inspection names the Clerk note, Park notice board
+  target, public-spread readers, and spoken rumor line; the Officer inspection
+  names the cited Store Manager ledger, Station document target,
+  `대상=플레이어`, comparison focus, inquest authority, visible environment
+  context, and spoken intake line before downstream NPC reactions.
   It also explicitly marks itself as not a replacement for external
   comprehension.
 - latest packaged-route evidence validates as a Godot Evidence Pack and
@@ -287,8 +290,8 @@ Latest status check:
   `testerFacingFiles=["tester-invite.md"]`, `humanEvidence=false`, and
   `closesGoal=false`; it is setup material only, not comprehension evidence.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `74b0ab152a717557982e56fa9bc3a74c1b2a6b4f59364358eb961b85d5afc4c9`
-  - Markdown SHA-256: `327ee6a473bd0a2f6412596551ac72656f62bd6093131ab2d17f2d0ed1a64c8e`
+  - JSON SHA-256: `205ce81e2cbd91e279985d348799bc8dd3463535af3fa34af26e617f8ad65f59`
+  - Markdown SHA-256: `8f6aadee88618c74f992390f537374b710838191e7280e9325d094b580732da7`
   - playable Evidence Pack SHA-256: `dd69a70384e218c58ff2e5a6ee6b58f6cbada43b82225d2f6ea7cd1ad43bc64d`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
@@ -296,9 +299,10 @@ Latest status check:
 Latest AI-play interface check:
 - command: `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `29 / 29`, `explainability=26/26`, Store Clerk record-action
+  player actions `29 / 29`, `explainability=27/27`, Store Clerk record-action
   inspection, Park Witness public-spread inspection, Station Officer
-  authority-citation inspection, actor memory for observed NPC decisions,
+  authority-citation inspection, Studio PM cross-place opportunity inspection,
+  actor memory for observed NPC decisions,
   no-live provider packet memory and actor-policy readiness, and
   `routeReportPassCount=5 / 5` with Godot
   `4.7.beta2.official.777579205` from local `GODOT_BIN`.
@@ -429,6 +433,12 @@ Latest AI-play interface check:
   the Park notice board target, `공개 전파` labels, the roles that can use that
   public record, visible environment context, and the spoken rumor line before
   opening Studio PM or Waiting Customer detail.
+- latest game increment: Studio PM is now inspectable as the cross-place
+  opportunity actor. NPC inspection adds `기회 변화` labels, and Codex route
+  reports now focus and interact with Studio PM on clean, repair, warning, and
+  inquest paths to read how public confirmation opens review, public repair
+  keeps review conditional, public warning delays it, and Station citation
+  closes it.
 - latest game increment: repair recovery now travels one small step beyond the
   Park board. After `public_repair_noted`, Studio PM reads `park_notice_board`
   and `studio_review_queue`, uses `offer_conditional_review`, changes

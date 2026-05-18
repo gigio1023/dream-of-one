@@ -135,6 +135,12 @@ Current M1 carry-in:
   Clerk note it observed, the Park notice board target, `공개 전파` labels, the
   roles that can use that public record, and the line that turns a local Store
   mismatch into public talk.
+- latest small-slice carry-in: Studio PM is now readable as the cross-place
+  opportunity actor. Inspecting the PM shows `기회 변화` labels for review
+  opening, conditional review, review deferral, or review block, so the player
+  can read how a public record changes a small opportunity outside the Store.
+  Codex route reports now inspect Studio PM on the clean, repair, warning, and
+  inquest paths.
 - latest small-slice carry-in: the live HUD now has `열람`, a compact reader
   summary for records that actually exist in the current ledger. This keeps the
   player-facing social-sim layer focused on who can see the active record chain

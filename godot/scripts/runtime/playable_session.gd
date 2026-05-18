@@ -2791,6 +2791,7 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 	var basis_economy_effect_labels := PackedStringArray()
 	var authority_focus_labels := PackedStringArray()
 	var public_spread_labels := PackedStringArray()
+	var opportunity_change_labels := PackedStringArray()
 	if not basis_action.is_empty():
 		basis_event_id = str(basis_action.get("ledgerEventId", ""))
 		basis_affordance = str(basis_action.get("affordance", ""))
@@ -2814,6 +2815,9 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		public_spread_labels = _public_spread_labels_for_inspection(basis_action)
 		if not public_spread_labels.is_empty():
 			body_lines.append("공개 전파: %s" % ", ".join(public_spread_labels))
+		opportunity_change_labels = _opportunity_change_labels_for_inspection(basis_action)
+		if not opportunity_change_labels.is_empty():
+			body_lines.append("기회 변화: %s" % ", ".join(opportunity_change_labels))
 		var selected_descriptor := _selected_action_descriptor_for_inspection(basis_action)
 		if not selected_descriptor.is_empty():
 			basis_condition_labels = _selected_action_condition_labels(selected_descriptor, cited_event_id)
@@ -2841,6 +2845,7 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		inspected_npc_state["basisEconomyEffectLabels"] = basis_economy_effect_labels
 		inspected_npc_state["authorityFocusLabels"] = authority_focus_labels
 		inspected_npc_state["publicSpreadLabels"] = public_spread_labels
+		inspected_npc_state["opportunityChangeLabels"] = opportunity_change_labels
 	inspected_npc_state["body"] = "\n".join(body_lines)
 	inspected_npc_history.append(inspected_npc_state.duplicate(true))
 	_set_notice(title, str(inspected_npc_state.get("body", "")))
@@ -2963,6 +2968,27 @@ func _public_spread_labels_for_inspection(action: Dictionary) -> PackedStringArr
 			labels.append("효과=확인이 도움과 리뷰 초대로 이동")
 		"post_repair_notice":
 			labels.append("효과=수습 기록이 조건부 기회로 이동")
+	return labels
+
+func _opportunity_change_labels_for_inspection(action: Dictionary) -> PackedStringArray:
+	var labels := PackedStringArray()
+	match str(action.get("affordance", "")):
+		"invite_review":
+			labels.append("리뷰=열림")
+			labels.append("근거=공개 확인")
+			labels.append("효과=작은 기회가 다른 장소에서 열림")
+		"offer_conditional_review":
+			labels.append("리뷰=조건부")
+			labels.append("근거=공개 수습")
+			labels.append("효과=수습 기록이 제한된 기회를 남김")
+		"defer_review":
+			labels.append("리뷰=보류")
+			labels.append("근거=공개 경고")
+			labels.append("효과=경고가 기회를 늦춤")
+		"block_review":
+			labels.append("리뷰=차단")
+			labels.append("근거=스테이션 인용")
+			labels.append("효과=공식 기록이 기회를 닫음")
 	return labels
 
 func _ledger_event_kind_condition_label(raw_kinds: String) -> String:

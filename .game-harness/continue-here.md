@@ -82,10 +82,15 @@ Last Updated: 2026-05-18
   cross-place social rules before the Store line. Codex gameplay QA focuses
   `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard`, interacts with both,
   and verifies `canReadCrossPlaceSocialRules=true`; current proof passes with
-  29/29 accepted public actions, 26/26 explainability checks, and 5/5 route
-  reports after the Park Witness public-spread inspection update. This is a game-facing
+  29/29 accepted public actions, 27/27 explainability checks, and 5/5 route
+  reports after the Studio PM opportunity-inspection update. This is a game-facing
   legibility slice toward the broader
   open-environment social sim, not another product-closure claim.
+- Latest implementation slice: Studio PM inspection now shows `기회 변화`.
+  Codex route reports inspect Studio PM on clean, repair, warning, and inquest
+  paths, proving that public confirmation opens a review opportunity, public
+  repair keeps it conditional, public warning delays it, and Station citation
+  closes it.
 - Latest implementation slice: Codex gameplay QA and live provider packets now
   expose `actorMemory` derived from validated role actions and
   `socialObservationTrace`. This makes NPC memory bounded to own actions plus

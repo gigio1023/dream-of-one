@@ -226,6 +226,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Make Park Witness public spread readable through NPC inspection:
   Codex/player can inspect the Witness after inquest and read that the Clerk's
   note became a public Park record other roles can use.
+- [x] Make Studio PM opportunity changes readable through NPC inspection:
+  Codex/player can inspect Studio PM across clean, repair, warning, and inquest
+  routes and read how a public record opens, limits, delays, or closes a tiny
+  cross-place review opportunity.
 - [x] Make cross-place rule boards player-readable before speech: Codex/player
   can focus and read the Studio approval criteria and Park notice board as
   social rules that later ground public notice and review consequences.

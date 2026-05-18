@@ -145,6 +145,12 @@
   a believable social field that NPCs can act inside; the player enters that
   field and becomes examined by it through conversation, hesitation, repair, and
   records.
+- Permanent AI/NPC philosophy: `AGENT_LOOP_RUNTIME`, documented in
+  `docs/direction/17-agent-loop-runtime-pivot.md`, is part of the game
+  definition. Do not treat it as a transient goal-state note. Future NPC work
+  should move toward constrained coding-agent behavior inside the game world:
+  observe context, choose a next step, call a small validated tool, read the
+  result, update memory or conversation state, and iterate.
 - When priorities conflict, choose the work that makes the intended game more
   playable, legible, or socially reactive in the current build. Do not let
   testing strategy, AI-agent interface work, or documentation polish displace a
@@ -179,6 +185,9 @@
   another NPC reads record and posts/blocks/refuses" with fixed ordering, stop
   and reframe it as tool access, observation, conversation availability, or
   iteration-state work.
+- Future agents should be able to find this rule by searching:
+  `AGENT_LOOP_RUNTIME`, `NPC_TOOL_LOOP`, `NO_FIXED_SOCIAL_CHAINS`,
+  `PROGRAMMATIC_WORLD_AI_INTENT`, or `CLAUDE_CODE_STYLE_NPC`.
 - Favor agile playable slices over waterfall planning. Add the smallest
   environment rule, prop, economy pressure, or NPC affordance that makes the
   social simulation more real, then prove it in the running build before adding

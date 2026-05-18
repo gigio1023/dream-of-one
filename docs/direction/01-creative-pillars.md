@@ -92,10 +92,45 @@ Evidence:
 - keyboard-only route proof.
 - text readability at gameplay distance.
 
+## Pillar 5: NPCs Iterate Through Tools, Not Branches
+
+Statement:
+- NPC society should feel alive because agents observe, use validated tools,
+  read results, and choose the next step. It should not be a long authored
+  chain of special-case reactions.
+
+Strengthens:
+- `AGENT_LOOP_RUNTIME` direction in
+  [Agent Loop Runtime Doctrine](17-agent-loop-runtime-pivot.md).
+- small tool APIs such as `move_to`, `look`, `talk_to`, `wait`,
+  `inspect_record`, and `request`.
+- programmatic movement, distance, busy/available state, dialogue locks,
+  object mutation, and Evidence authority.
+- LLM/NPC judgment about what to say, whether to wait, retry, ask another NPC,
+  or stop after a blocked tool result.
+- player/Codex-readable loop transcripts from the running scene.
+
+Rejects:
+- adding one more `if prior record then NPC posts/blocks/refuses` chain as the
+  default development method.
+- provider calls that only phrase an already locked action while pretending to
+  prove agentic behavior.
+- broad generative-agent frameworks before one tiny loop works.
+- tests that only protect a route-specific ledger order instead of the public
+  tool-loop behavior.
+
+Evidence:
+- `agent_loop_probe_v0` shows one NPC taking multiple tool calls across
+  observed results.
+- at least one tool call blocks or fails and the NPC chooses a next step.
+- another NPC can accept or reject conversation from programmatic state.
+- the player/Codex can inspect the loop transcript in the running game.
+
 ## Conflict Rule
 
 When pillars conflict:
 1. Deterministic authority wins over generated text variety.
-2. Dialogue danger wins over lore clarity.
-3. Being investigated wins over player empowerment.
-4. 3D value must be proven; otherwise simplify presentation.
+2. Agent-loop architecture wins over adding another fixed social chain.
+3. Dialogue danger wins over lore clarity.
+4. Being investigated wins over player empowerment.
+5. 3D value must be proven; otherwise simplify presentation.

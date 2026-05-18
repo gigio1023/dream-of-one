@@ -7,12 +7,19 @@ Search index: `docs/agent-search-index.md`
 Search tokens: `AI_PROVIDER_SEARCH_INDEX`, `GAME_RUNTIME_CODEX_AUTH`,
 `OPENAI_CODEX_PROVIDER`, `OPENAI_CODEX_PROVIDER_AUTH_STORE`,
 `CODEX_CLI_IS_NOT_GAME_PROVIDER_AUTH`, `LLM_PROPOSAL_ONLY`,
-`DO_NOT_RUN_CODEX_LOGIN_FOR_GAME_PROVIDER_AUTH`.
+`DO_NOT_RUN_CODEX_LOGIN_FOR_GAME_PROVIDER_AUTH`, `AGENT_LOOP_RUNTIME`,
+`NPC_TOOL_LOOP`.
 
 ## Core Rule
 
-Dream of One uses AI providers as bounded proposal workers for NPC and Station
-wording. The provider may help a role sound alive. It does not own the game.
+Dream of One uses AI providers as bounded proposal workers. The current
+checked-in provider path mainly handles NPC and Station wording, but the game
+philosophy is broader: future NPC agents should be able to propose the next
+valid tool call and utterance inside `AGENT_LOOP_RUNTIME`. See
+`docs/direction/17-agent-loop-runtime-pivot.md`.
+
+The provider may help a role sound alive and may eventually help a role decide
+what small runtime tool to try next. It does not own the game.
 
 The runtime owns facts, records, affordances, validation, ledger mutation,
 Evidence, Exposure, Station intake, inquest, verdict, and session termination.
@@ -72,6 +79,7 @@ world.
 
 Allowed provider outputs:
 
+- `toolCallProposal` only when the tool exists in an explicit runtime schema
 - `npcLineCandidates`
 - `stationPressureWording`
 - `localizedVariants`
@@ -79,7 +87,9 @@ Allowed provider outputs:
 
 Forbidden provider authority:
 
-- action type selection outside the validated catalog
+- unchecked action type selection outside the validated tool catalog
+- bypassing movement, distance, turn lock, busy/available state, ownership,
+  payment, object-state, or record-access checks
 - new environment affordances
 - new records or hidden facts
 - ledger mutation

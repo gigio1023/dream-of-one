@@ -11,9 +11,15 @@ Dream of One is a Godot 4.x 3D conversation social-stealth game where NPC societ
 
 - Player is not an investigator. NPCs and Station systems investigate the player.
 - Dialogue is where the danger starts. Dream Laws are exposed through NPC prompts, prior conversation memory, diegetic records, and Station pressure.
+- Core AI/NPC philosophy is `AGENT_LOOP_RUNTIME`, defined in
+  `docs/direction/17-agent-loop-runtime-pivot.md`: NPCs should observe, call
+  validated tools, read results, and iterate like constrained game-world
+  agents, not follow a growing set of fixed social reaction chains.
 - Default interaction is three diegetic dialogue choices plus optional typed free input when deterministic classification and UI are proven. Recorded statements are Evidence artifacts, not open-ended chat.
 - Suspicion starts socially: an NPC notices conversational weirdness, probes, shares a report, and only then can Station pressure formalize it.
 - API proposal-provider-backed NPC society proposes bounded wording only: NPC line candidates, Station pressure wording, localized variants, and fallback text variants.
+- Future provider work may propose the next valid tool call and utterance inside
+  explicit runtime schemas, but never direct world mutation.
 - GPT model availability is checked at runtime. `gpt-5.4-nano` is not assumed by design, docs, or release planning.
 - Deterministic adjudication owns validation, fallback selection, Exposure thresholds, Station intake/inquest, verdict, and session termination.
 - Deterministic adjudication also owns action choice, risk tags, Evidence type, reason codes, why-line authority, and session-end authority.
@@ -41,6 +47,7 @@ Dream of One is a Godot 4.x 3D conversation social-stealth game where NPC societ
 - Minimal civic economy model: `docs/direction/14-minimal-civic-economy-model.md`
 - Agentic social simulation model: `docs/direction/15-agentic-social-simulation-model.md`
 - Agentic prototype target: `docs/direction/16-agentic-prototype-target.md`
+- Agent loop runtime doctrine: `docs/direction/17-agent-loop-runtime-pivot.md`
 - Simulator benchmark research: `docs/research/simulator-benchmarks/2026-05-14/`
 - Low-budget operation sim research: `docs/research/simulator-benchmarks/2026-05-15/`
 - First conversation-first scenario: `docs/scenario/bible/12-conversation-suspicion-prologue.md`
@@ -76,15 +83,15 @@ The current lane target is:
   record state changes, and exact Station citation before broader content.
 - define society through a minimal civic economy: account credit, local trust,
   record burden, Station attention, and an append-only ledger.
-- grow society by defining environments, affordances, records, visibility, and
-  civic pressure, then letting role agents choose validated actions instead of
-  manually scripting every reaction.
+- grow society by defining environments, low-level tools, records, visibility,
+  dialogue availability, and civic pressure, then letting role agents iterate
+  through validated tool calls instead of manually scripting every reaction.
 - keep AI provider work routed through `docs/agent-search-index.md` and
   `docs/development/ai-provider-runtime.md`; game-runtime Codex auth means the
   backend `openai-codex` provider profile, not Codex CLI login.
-- target the next prototype at one affordance-rich Store/Station environment
-  where conversation changes records, agents react, and Station cites the
-  ledger.
+- target the next prototype at `agent_loop_probe_v0`: one NPC, one other NPC,
+  one object or record, five or fewer tools, three to six observe/tool/result
+  iterations, and a player/Codex-readable transcript.
 - keep the conversation-first proof honest by adding manual typed-input UI if needed, manual replay/readability/comprehension validation, human readability review, player-comprehension, provider, and exported-build gates before expanding scope.
 - produce truthful evidence for whether the umbrella can continue toward demo completion, should merge current work as M1-only proof, or should stop for product fixes.
 

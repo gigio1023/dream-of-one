@@ -47,15 +47,17 @@ consequence, or player-facing pressure. Tests, AI-play probes, and Evidence
 records should be attached to that implementation, not treated as the
 implementation itself.
 
-Direction correction: the next architecture target is not another authored
-NPC-to-NPC consequence chain. The intended model is an NPC agent loop. The
-runtime should expose small programmatic tools and constraints, then let an NPC
-observe, choose a next step, call a tool, read the result, update local memory
-or conversation state, and iterate. Movement, reachability, dialogue locks,
-busy/available state, object mutation, ownership/payment, Evidence, Exposure,
-inquest, verdict, provider safety, and replay boundaries remain deterministic.
-What to try, what to say, whether to wait, whether to ask another actor, and how
-to handle a blocked result should move into the agent loop.
+Direction lock: `AGENT_LOOP_RUNTIME` is a game-definition rule, not a temporary
+implementation suggestion. See `docs/direction/17-agent-loop-runtime-pivot.md`.
+The next architecture target is not another authored NPC-to-NPC consequence
+chain. The intended model is an NPC agent loop. The runtime should expose small
+programmatic tools and constraints, then let an NPC observe, choose a next step,
+call a tool, read the result, update local memory or conversation state, and
+iterate. Movement, reachability, dialogue locks, busy/available state, object
+mutation, ownership/payment, Evidence, Exposure, inquest, verdict, provider
+safety, and replay boundaries remain deterministic. What to try, what to say,
+whether to wait, whether to ask another actor, and how to handle a blocked
+result should move into the agent loop.
 
 Direction reset: Dream of One should be treated as an open social environment,
 not as a Store/Station game. Store/Station and `Same Order` remain useful only

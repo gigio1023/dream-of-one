@@ -55,6 +55,12 @@ Use this page as the documentation map. README.md is the project entry point; th
 
 Dream of One is a conversation-first suspicion game. The player is investigated through dialogue, recorded statements, suspicion signals, social reports, Station intake, inquest, and deterministic session end states.
 
+Core AI/NPC philosophy is `AGENT_LOOP_RUNTIME`, not fixed social-chain
+authoring. Read [Agent Loop Runtime Doctrine](direction/17-agent-loop-runtime-pivot.md)
+before planning NPC behavior, LLM provider work, social simulation, or the next
+prototype. Search terms: `NPC_TOOL_LOOP`, `NO_FIXED_SOCIAL_CHAINS`,
+`PROGRAMMATIC_WORLD_AI_INTENT`, `CLAUDE_CODE_STYLE_NPC`.
+
 The checked-in build proves an M1 technical slice and backend `openai-codex`
 live wording calls. Godot live smokes now prove proof-only route-context
 dispatch and same-NPC local-memory continuity through the running

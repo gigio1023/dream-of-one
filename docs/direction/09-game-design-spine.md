@@ -4,6 +4,7 @@ Status: active design spine draft
 Date: 2026-05-14
 Use with: `00-game-thesis.md`, `01-creative-pillars.md`,
 `08-conversation-suspicion-redesign.md`, and
+`17-agent-loop-runtime-pivot.md`, and
 `docs/scenario/content/social-simulation-cards.md`
 
 ## Purpose
@@ -30,6 +31,14 @@ This means the real dramatic question is:
 
 Every system should support that question.
 
+The AI/social-simulation thesis is equally important:
+
+> Can NPCs behave like constrained agents using world tools, instead of like a
+> table of scripted social consequences?
+
+If an implementation only adds another fixed reaction chain, it may improve the
+current proof cell, but it does not advance the core game design.
+
 ## Player Fantasy
 
 The fantasy is not power, investigation, or discovery. It is pressured cover
@@ -52,7 +61,7 @@ The player should not feel:
 
 ## Core Design Loop
 
-The repeated loop is:
+The player's repeated loop is:
 
 ```text
 Read local premise
@@ -65,6 +74,21 @@ Read local premise
 
 This loop is stronger than "talk to NPCs" because it has a stateful cost:
 every line can preserve or damage the player's public self.
+
+The NPC loop is:
+
+```text
+Observe local world
+-> choose a local goal or next step
+-> call a small validated tool
+-> read the result
+-> update short memory or conversation state
+-> continue, wait, ask, retry, stop, or escalate
+```
+
+The game is the interaction between these loops. The player speaks under
+pressure; NPCs iterate through tools and conversation context; deterministic
+authority records what is allowed to become world truth.
 
 ## Mechanic-Dynamic-Experience Chain
 
@@ -164,10 +188,18 @@ reaction text, and smoke tests.
 
 ## LLM Design Rule
 
-Use LLMs to thicken the impression of society, not to own game truth.
+Use LLMs to thicken the impression of society and to choose bounded next steps
+inside tool schemas, not to own game truth.
+
+Permanent rule: `NO_FIXED_SOCIAL_CHAINS`. Do not make the main design method
+"add another NPC reads X and performs Y." That can be scaffolding, but the game
+philosophy is [Agent Loop Runtime Doctrine](17-agent-loop-runtime-pivot.md):
+NPCs receive context, goals, memory, and tools, then iterate.
 
 The provider may help with:
 
+- choosing the next valid tool call from an explicit tool schema;
+- deciding whether to wait, ask, retry, request, or stop after a tool result;
 - local phrasing variants;
 - NPC reaction wording after deterministic signals are selected;
 - ambient overheard lines from shared social context;
@@ -176,12 +208,29 @@ The provider may help with:
 
 The provider must not decide:
 
-- whether the player fits locally;
+- whether the player fits locally unless the runtime has explicitly exposed a
+  bounded classification tool for that purpose;
 - which suspicion signal fired;
 - whether repair succeeds;
 - whether an artifact is valid Evidence;
 - whether Station pressure advances;
 - whether the session ends.
+
+## Agent Loop Design Rule
+
+The runtime should expose small tools, not finished social outcomes.
+
+| Tool family | Runtime owns | NPC/LLM owns |
+|---|---|---|
+| Movement | path, arrival, collision, distance | where to go and why |
+| Looking | visible actors, objects, records | what matters now |
+| Talking | busy state, turn lock, target availability, safety | what to say and whether to wait |
+| Requesting | schema, ownership, payment, object rules | what to ask for and from whom |
+| Records | access, citations, writes, Evidence boundary | which record to inspect or cite in speech |
+
+The smallest correct implementation is not a larger storylet. It is
+`agent_loop_probe_v0`: one NPC, one other NPC, one object or record, five or
+fewer tools, three to six iterations, and a player-readable transcript.
 
 ### Dialogue-As-Simulation
 

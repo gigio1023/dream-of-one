@@ -12,6 +12,12 @@ cells only. They are not the game premise, not the product center, and not the
 default lens for deciding future work. Keep them deliberately thin: enough to
 prove a reusable pattern, never enough to become the game.
 
+Permanent direction lock: `AGENT_LOOP_RUNTIME` is part of the game definition.
+It is documented in `docs/direction/17-agent-loop-runtime-pivot.md` and must not
+be treated as a one-off task note. Future agents should find this rule by
+searching `NPC_TOOL_LOOP`, `NO_FIXED_SOCIAL_CHAINS`,
+`PROGRAMMATIC_WORLD_AI_INTENT`, or `CLAUDE_CODE_STYLE_NPC`.
+
 The game should not be treated as a generic LLM sandbox, a detective game, or a
 document-only design exercise. The player is the person being examined.
 Ordinary dialogue, hesitation, repair attempts, and typed statements become

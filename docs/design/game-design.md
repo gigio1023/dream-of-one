@@ -1,11 +1,19 @@
 # Game Design
 
 Director source of truth starts in `docs/direction/08-conversation-suspicion-redesign.md`.
+Core AI/NPC philosophy is locked in
+`docs/direction/17-agent-loop-runtime-pivot.md`.
 Scenario source of truth lives in `docs/scenario/`, but the current scenario bible still needs a conversation-first rewrite before it can be treated as player-facing canon again.
 
 ## Core Loop
 
 The player talks to NPCs while trying to sound locally normal. Each prompt offers three diegetic dialogue choices and, when proven safe enough for the build, optional free input. The runtime records the line, deterministic rules classify conversational weirdness, NPC suspicion changes, and reports can propagate to Station intake, inquest, and verdict logic.
+
+NPCs should not be implemented as a growing set of fixed reaction branches. The
+core social-simulation loop is `AGENT_LOOP_RUNTIME`: an NPC observes context,
+chooses a local next step, calls a small validated tool, reads the result,
+updates memory or conversation state, and iterates. The game definition depends
+on this distinction.
 
 ## Player Role
 
@@ -36,6 +44,26 @@ Rule-driven systems own:
 - Fallback Path selection
 
 Godot owns scene presentation, dialogue UI, observed world state, and player input capture. Backend Schema and validation keep the loop auditable.
+
+## NPC Agent Loop
+
+The runtime should expose small tools and programmatic constraints:
+
+- `move_to(target)`
+- `look(target)`
+- `talk_to(actor, utterance)`
+- `wait(duration, reason)`
+- `inspect_record(target)`
+- `request(actor, topic_or_item)`
+
+Programmatic systems own distance, reachability, busy/available dialogue state,
+turn locks, object mutation, ownership/payment, memory writes, Evidence,
+Exposure, inquest, verdict, and session end.
+
+The NPC/LLM agent owns what to try, what to say, whether to wait, whether to
+ask another actor, and how to react to a blocked tool result. A new feature that
+only adds another fixed `if record X then NPC Y does Z` chain is not sufficient
+game progress unless it directly scaffolds this loop.
 
 ## Current Internal Harness
 

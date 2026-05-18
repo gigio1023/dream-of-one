@@ -8,21 +8,25 @@ Direction source:
 - `docs/direction/13-operation-sim-quality-floor.md`
 - `docs/direction/14-minimal-civic-economy-model.md`
 - `docs/direction/15-agentic-social-simulation-model.md`
+- `docs/direction/17-agent-loop-runtime-pivot.md`
 - `docs/research/simulator-benchmarks/2026-05-17/00-environment-agent-interface-benchmarks.md`
 - `docs/research/simulator-benchmarks/2026-05-17/01-broader-game-environment-agent-patterns.md`
 - `docs/scenario/content/environment-affordance-map.md`
 
 ## Target
 
-The next prototype should prove Dream of One as a conversation-centered social
-simulation, not as a hand-authored conversation branch.
+The next prototype should prove Dream of One as a conversation-centered
+`NPC_TOOL_LOOP` simulation, not as a hand-authored conversation branch and not
+as a longer list of fixed social consequences.
 
 The player enters a small authored social environment. The current Store/Station
 scene is only a tiny example cell, not the game premise. It should stay compact
 enough to replace with another environment later. The real target is a reusable
 pattern: procedures, objects, records, visibility, crude economy values, and
 social pressure that NPCs can use according to role, memory, goals, and
-perception. The runtime validates their actions and writes ledger events.
+perception. The runtime validates their tool calls and writes ledger events.
+NPCs should observe, call tools, read results, and choose the next step over
+multiple iterations.
 
 The prototype should feel closer to the researched low-budget operation
 simulators in density:
@@ -38,7 +42,8 @@ walk into a workplace
 
 But the fantasy is not store management or station procedure. The fantasy is
 being a person whose speech becomes socially expensive inside an environment
-that keeps reacting.
+where other people keep trying things, talking, waiting, refusing, requesting,
+and adapting through tools.
 
 ## Player Promise
 
@@ -70,20 +75,42 @@ Conversation remains the primary player action. Object and agent systems exist
 to make speech, repair attempts, typed statements, and delayed answers socially
 consequential.
 
+## Architecture Target
+
+Before adding another authored social chain, the prototype must prove
+`agent_loop_probe_v0`:
+
+```text
+one NPC
+one other NPC
+one object or record
+five or fewer tools
+three to six observe/tool/result iterations
+player/Codex-readable transcript
+```
+
+The important proof is that the NPC did not simply follow a route-specific
+sequence. It used generic tools, saw a result such as busy/refused/blocked, and
+chose a reasonable next step.
+
 ## Production Rule
 
 Build this like a fast playable social-sim prototype, not a waterfall design
 project. Each increment should add one small environment truth and prove it:
 
-- one NPC-to-NPC observation;
-- one lightweight economy pressure such as trust, burden, token, debt, queue
-  delay, or authority attention;
-- one new validated affordance on an existing object;
-- one visible record use that changes how another role acts.
+- one NPC tool loop with a visible result;
+- one programmatic dialogue availability or busy-state result;
+- one movement/look/talk/wait/request sequence that changes what the NPC does
+  next;
+- one player-readable transcript showing the loop.
 
 Do not add a bigger Store management layer or deeper Station bureaucracy unless
 it directly proves the reusable NPC social simulation. Prefer a tiny running
 proof over a broad design plan.
+
+Do not use "one more NPC reads a record and reacts" as the default increment.
+That pattern has already proven enough for scaffolding. The next value is
+iteration.
 
 ## Codex Gameplay QA Interface
 
@@ -148,7 +175,7 @@ the proposal.
 
 ## Agent Requirements
 
-M1 requires three social agents:
+The old M1 proof required three social agents:
 
 | Agent | Role goal | Perception | Must prove |
 |---|---|---|---|
@@ -159,6 +186,17 @@ M1 requires three social agents:
 Agents are not required to be live LLM in M1. Deterministic policies can prove
 the environment-agent loop first. Provider-on behavior is a later comparison
 unless it preserves provider-off outcomes.
+
+The next agent-loop proof is smaller and more important than adding another
+actor:
+
+| Requirement | Meaning |
+|---|---|
+| one controlled agent | enough to prove iterative choice. |
+| one counterpart NPC | enough to prove talk availability and response state. |
+| one object or record | enough to prove tool use is grounded in the world. |
+| blocked result | enough to prove the agent responds to feedback. |
+| transcript | enough for player/Codex to inspect what happened. |
 
 ## State Model
 

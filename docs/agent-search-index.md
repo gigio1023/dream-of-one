@@ -10,6 +10,7 @@ It exists so important runtime rules are not trapped in one deep document.
 
 | Search phrase or task | Read first | Then inspect |
 |---|---|---|
+| `AGENT_LOOP_RUNTIME`, `NPC_TOOL_LOOP`, `NO_FIXED_SOCIAL_CHAINS`, `PROGRAMMATIC_WORLD_AI_INTENT`, `CLAUDE_CODE_STYLE_NPC` | `docs/direction/17-agent-loop-runtime-pivot.md` | `docs/direction/00-game-thesis.md`, `docs/direction/01-creative-pillars.md`, `docs/direction/09-game-design-spine.md`, `docs/design/game-design.md` |
 | `codex auth`, `Codex auth`, `openai-codex auth`, `provider auth`, `game LLM auth` | `docs/development/ai-provider-runtime.md` | `backend/npc-runtime/src/config.ts`, `backend/npc-runtime/src/tools/openai-codex-device-login.ts`, `.game-harness/provider/openai-codex-provider-verification-2026-05-19.md` |
 | `openai-codex`, `OpenAI Codex provider`, `Codex provider`, `ChatGPT/Codex provider` | `docs/development/ai-provider-runtime.md` | `backend/npc-runtime/src/broker/codex-tool-gateway.ts`, `.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md` |
 | `codex login`, `codex cli`, `codex exec`, `Codex CLI auth` | `docs/development/ai-provider-runtime.md` | `.game-harness/provider/codex-cli-auth-runtime-assessment-2026-05-18.md`, `docs/direction/03-director-decision-ledger.md` |
@@ -33,6 +34,11 @@ comments:
 - `LLM_PROPOSAL_ONLY`
 - `CODEX_CLI_IS_NOT_GAME_PROVIDER_AUTH`
 - `DO_NOT_RUN_CODEX_LOGIN_FOR_GAME_PROVIDER_AUTH`
+- `AGENT_LOOP_RUNTIME`
+- `NPC_TOOL_LOOP`
+- `NO_FIXED_SOCIAL_CHAINS`
+- `PROGRAMMATIC_WORLD_AI_INTENT`
+- `CLAUDE_CODE_STYLE_NPC`
 
 If a future agent searches any of those tokens, it should land on this index,
 `docs/development/ai-provider-runtime.md`, `AGENTS.md`, or the backend provider

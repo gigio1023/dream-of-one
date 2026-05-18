@@ -10,6 +10,7 @@ Depends on:
 - `docs/research/simulator-benchmarks/2026-05-17/01-broader-game-environment-agent-patterns.md`
 - `docs/research/simulator-benchmarks/2026-05-18/00-llm-npc-tool-catalog-research.md`
 - `docs/scenario/content/social-simulation-cards.md`
+- `docs/direction/17-agent-loop-runtime-pivot.md`
 
 ## Decision
 
@@ -20,19 +21,24 @@ defines a world that has places, procedures, records, affordances, economic
 pressure, visibility, and authority. Social agents then observe that world and
 choose how to act inside it.
 
+2026-05-19 direction lock: this means more than "choose from a longer action
+catalog." The game must move toward `AGENT_LOOP_RUNTIME`: NPCs iterate through
+small tools, tool results, conversation state, and memory. A larger list of
+hardcoded social reactions is still scripted branching.
+
 ```text
 environment state
 -> agent perception
--> agent goal selection
--> affordance discovery
--> proposed action
--> runtime validation
--> ledger/world update
--> other agents perceive the change
+-> local goal or next-step selection
+-> tool discovery
+-> tool call proposal
+-> runtime validation and tool result
+-> memory/conversation update
+-> next iteration or stop
 ```
 
 The game is not an if/else script. It is a constrained social sandbox where
-agents can use the environment freely, while the runtime keeps facts, records,
+agents can use world tools freely, while the runtime keeps facts, records,
 and verdict authority deterministic.
 
 ## What The Designer Defines
@@ -72,6 +78,11 @@ A social agent is a role-bound actor operating in an authored environment.
 
 The important shift: the agent does not own a hardcoded scene branch. The agent
 owns a role, perception, goals, and a way to choose from available affordances.
+
+Stronger rule: the agent should not merely choose the next item in a
+route-specific action list. It should run a small loop over context and tools:
+look, move, talk, wait, request, inspect, read result, then choose the next
+step. This is the `CLAUDE_CODE_STYLE_NPC` target for Dream of One.
 
 ## Environment Affordances
 
@@ -129,7 +140,8 @@ Minimum descriptor fields:
 | `failureReasons` | player/agent-readable reason when use is blocked. |
 
 This is the core interface: agents do not receive a blank instruction to
-"react." They receive a role-filtered list of usable environment tools.
+"react." They receive a role-filtered list of usable environment tools and the
+results of previous tool calls.
 
 ## Tool Catalog, Not Choice Consequences
 
@@ -164,16 +176,16 @@ possible.
 
 ## Agent Tick
 
-Each social agent runs an event-driven tick after relevant changes:
+Each social agent runs an event-driven loop after relevant changes:
 
 ```text
 Perceive local world
 -> update private memory
 -> choose short-term goal
 -> list available affordances
--> propose one action
--> runtime validates
--> world/ledger changes if accepted
+-> propose one tool call
+-> runtime validates and returns a result
+-> decide whether to continue, wait, retry, ask, or stop
 ```
 
 Ticks should be event-driven for M1:
@@ -186,6 +198,10 @@ Ticks should be event-driven for M1:
 - another nearby actor acts.
 
 Do not run every citizen as a constant background LLM process in M1.
+
+For the next implementation, do not add another bespoke reaction chain. Build
+`agent_loop_probe_v0` and prove three to six observe/tool/result iterations in
+the running scene.
 
 ## Runtime Validation
 
@@ -256,6 +272,7 @@ The first live implementation is the direct `openai-codex` provider. It is not
 
 Allowed provider jobs:
 
+- propose the next valid tool call from the current tool schema;
 - choose among currently available affordances;
 - choose one validated environment tool from the role-filtered tool catalog;
 - explain the chosen action in role voice;
@@ -267,6 +284,7 @@ Allowed provider jobs:
 Rejected provider jobs:
 
 - create new affordances;
+- bypass a blocked tool result;
 - invent records or hidden facts;
 - mutate ledger without validation;
 - make agents omniscient;

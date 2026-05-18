@@ -19,6 +19,8 @@
 - player.wait.hesitation_record -> let hesitation become a record
 - dialogue.choice.by_id -> choose dialogue id store.same_order.risky
 - player.type.free_input -> type player speech: 저는 이 꿈에 방금 들어왔어요.
+- focus.npc -> look at visible NPC: NPC_Store_Clerk
+- player.interact.focused -> press the focused interaction
 - focus.world_record_prop -> look at environment record prop: park_notice_board
 - player.interact.focused -> press the focused interaction
 - focus.world_record_prop -> look at environment record prop: studio_review_queue
@@ -41,6 +43,7 @@
 - Codex/player waited long enough to create a response hesitation record.
 - Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.
 - Codex/player typed a dream-language line, causing a Store report, waiting-customer queue reaction, Park notice, Manager forwarding, Station citation, Studio review block, and contact refusal.
+- Codex/player inspected the Store Clerk to read that the same role placed the report note, which record object it used, which environment objects it could see, and which tiny values changed.
 - The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.
 - Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.
 - Codex/player inspected the Studio review queue and Studio PM to read that the Station citation blocked a small opportunity in another place.
@@ -112,6 +115,7 @@
 - `canInspectPublicEnvironmentRecord`: `true`
 - `canInspectCrossPlaceAuthorityConsequence`: `true`
 - `canInspectRecordRoleAffordanceMap`: `true`
+- `canInspectStoreClerkRecordAction`: `true`
 - `canInspectNpcReaction`: `true`
 - `canReadNpcSpokenReaction`: `true`
 - `canReadExactStationCitation`: `true`

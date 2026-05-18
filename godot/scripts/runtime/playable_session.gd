@@ -3694,6 +3694,16 @@ func _npc_spoken_reaction_line(npc_id: String, snapshot: Dictionary) -> String:
 	if state == "normal":
 		return ""
 	match npc_id:
+		"NPC_Store_Clerk":
+			match state:
+				"uneasy":
+					return "방금 말은 영수증에 표시해두겠습니다."
+				"probing":
+					return "확인이 필요합니다. 기록을 보고 다시 묻겠습니다."
+				"reported":
+					return "기록과 다릅니다. 보고 트레이에 남기겠습니다."
+				"inquest":
+					return "이 대화는 스테이션으로 넘기겠습니다."
 		"NPC_Waiting_Customer":
 			match state:
 				"helped":

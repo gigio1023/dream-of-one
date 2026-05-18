@@ -79,14 +79,14 @@ Latest completion audit:
   proof is carried by the playable slice Evidence Pack, Codex gameplay probe,
   and packaged-route evidence.
 - latest Codex gameplay QA artifact reports `ok=true`,
-  `aiPlayerReport.pass=true`, 23 accepted public actions, 5/5 route reports,
-  all 23 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
+  `aiPlayerReport.pass=true`, 25 accepted public actions, 5/5 route reports,
+  all 24 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
   no-live provider packet readiness for bounded `actorMemory` plus
-  `actorPolicy`. It now also exposes the civic economy panel through
-  `visibleEnvironmentObjects` in both the active Store conversation snapshot
-  and the Waiting Customer provider packet, so role agents can read the same
-  tiny social values the player inspects. It also explicitly marks itself as
-  not a replacement for external comprehension.
+  `actorPolicy`. It now also proves Codex/player can inspect Store Clerk as the
+  record-making NPC and read the Clerk's `place_note` basis, report tray target,
+  visible environment context, spoken handoff line, and tiny value changes before
+  reading downstream NPC reactions. It also explicitly marks itself as not a
+  replacement for external comprehension.
 - latest packaged-route evidence validates as a Godot Evidence Pack and
   conversation/suspicion proof for the single `inquest_opened` route with
   `packagedRouteSmokeProof=true`, `fallback_only_m1`, and
@@ -283,8 +283,8 @@ Latest status check:
   `testerFacingFiles=["tester-invite.md"]`, `humanEvidence=false`, and
   `closesGoal=false`; it is setup material only, not comprehension evidence.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `7116b486d7c8481e6b74de0094fd2de8d234527989b4e632ea7790135ab5af1d`
-  - Markdown SHA-256: `10b059b69b3ad77b04ccc5e56c0131de72671056d9514139f731a723511e3f40`
+  - JSON SHA-256: `472fbe1e87ecd0659bda0931769060ddda2bc7c3ff27a96cce9b6abbaa29e952`
+  - Markdown SHA-256: `64053fd026490b8efa3f4eab92d99e69459fb3fb705149a2e5020fa1e2a8c3ee`
   - playable Evidence Pack SHA-256: `dd69a70384e218c58ff2e5a6ee6b58f6cbada43b82225d2f6ea7cd1ad43bc64d`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
@@ -292,10 +292,10 @@ Latest status check:
 Latest AI-play interface check:
 - command: `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `23 / 23`, `explainability=23/23`, actor memory for observed
-  NPC decisions, no-live provider packet memory and actor-policy readiness, and
-  `routeReportPassCount=5 / 5` with Godot
-  `4.6.2.stable.official.71f334935` from a temporary local `GODOT_BIN`.
+  player actions `25 / 25`, `explainability=24/24`, Store Clerk record-action
+  inspection, actor memory for observed NPC decisions, no-live provider packet
+  memory and actor-policy readiness, and `routeReportPassCount=5 / 5` with Godot
+  `4.7.beta2.official.777579205` from local `GODOT_BIN`.
 - latest local pack-route check: `$GODOT_BIN --headless --path godot
   --export-pack "macOS PCK" build/macos/dream-of-one-same-order.pck` passed,
   then `DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_OUTPUT=data/evidence/godot/packaged-route/dre_171_packaged_route_evidence.json
@@ -404,6 +404,12 @@ Latest AI-play interface check:
   상승`, plus exported `visibleEnvironmentObjectLabels`. This makes the
   player-readable NPC panel match the role-visible environment context instead
   of hiding the agent's current perception in private logs.
+- latest game increment: Store Clerk is now inspectable as the first
+  record-making actor in the chain. Codex/player can focus the Clerk after the
+  typed inquest-triggering line and read the Clerk's `메모 배치` ledger basis,
+  report-tray target, visible environment context, spoken Station handoff line,
+  and `신뢰-20, 부담+35, 주목+30` value change before inspecting downstream
+  Studio PM or Waiting Customer reactions.
 - latest game increment: repair recovery now travels one small step beyond the
   Park board. After `public_repair_noted`, Studio PM reads `park_notice_board`
   and `studio_review_queue`, uses `offer_conditional_review`, changes

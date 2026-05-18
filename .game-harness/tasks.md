@@ -215,6 +215,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   Waiting Customer HUD notices now include `보는 환경` plus
   `visibleEnvironmentObjectLabels`, so the player can read which props and
   shared values the NPC is currently acting from.
+- [x] Make Store Clerk record-making readable through NPC inspection: Codex/player
+  can inspect the Clerk after typed speech and read `메모 배치`, the report tray
+  basis, visible environment objects, spoken handoff line, and tiny value
+  changes before inspecting downstream NPC reactions.
 - [x] Make cross-place rule boards player-readable before speech: Codex/player
   can focus and read the Studio approval criteria and Park notice board as
   social rules that later ground public notice and review consequences.

@@ -117,6 +117,12 @@ Current M1 carry-in:
   and Waiting Customer's contact refusal are now readable as social speech
   through the running game's focus plus interact path, keeping conversation at
   the center of the social consequence.
+- latest small-slice carry-in: Store Clerk is now readable as the first
+  record-making actor, not only the NPC who starts the conversation. After
+  typed speech opens inquest, Codex/player can inspect the Clerk and read the
+  Clerk's `메모 배치` ledger basis, report-tray target, visible environment
+  context, spoken Station handoff line, and `신뢰-20, 부담+35, 주목+30` value
+  change before inspecting Studio PM or Waiting Customer consequences.
 - latest small-slice carry-in: the live HUD now has `열람`, a compact reader
   summary for records that actually exist in the current ledger. This keeps the
   player-facing social-sim layer focused on who can see the active record chain

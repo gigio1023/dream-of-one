@@ -18,6 +18,8 @@ const PROBE_STEPS := [
 	{"actionId": "player.wait.hesitation_record", "payload": {}},
 	{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.risky"}},
 	{"actionId": "player.type.free_input", "payload": {"line": TYPED_LINE}},
+	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Store_Clerk"}},
+	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.world_record_prop", "payload": {"objectId": "park_notice_board"}},
 	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.world_record_prop", "payload": {"objectId": "studio_review_queue"}},
@@ -743,6 +745,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Codex/player did not inspect which role and action can use the Studio review record")
 	if not bool(checks.get("codexInspectedWaitingCustomer", false)):
 		failures.append("Codex/player did not inspect the Waiting Customer as a visible NPC reaction")
+	if not bool(checks.get("codexInspectedStoreClerkRecordAction", false)):
+		failures.append("Codex/player did not inspect the Store Clerk's own record-making reaction")
 	if not bool(checks.get("visibleWaitingCustomerReaction", false)):
 		failures.append("Waiting Customer reaction is not visible on a spawned NPC")
 	if not str(hud_snapshot.get("noticeBodyLabel", "")).contains("접촉 거부"):
@@ -771,11 +775,12 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"codexReadEnvironmentToolCatalog": _read_environment_tool_catalog(snapshots),
 		"codexInspectedPublicNotice": _inspected_public_notice(summary),
 		"codexInspectedBlockedReview": _inspected_studio_review_block(summary),
-			"codexInspectedRecordAffordanceMap": _inspected_record_affordance_map(summary),
-			"codexInspectedWaitingCustomer": _inspected_waiting_customer(summary),
-			"codexInspectedStudioPm": _inspected_studio_pm_block(summary),
-			"codexReadNpcSpokenReaction": _inspected_npc_spoken_reactions(summary),
-			"economyPanelReadable": _economy_panel_readable(record_props),
+		"codexInspectedRecordAffordanceMap": _inspected_record_affordance_map(summary),
+		"codexInspectedStoreClerkRecordAction": _inspected_store_clerk_record_action(summary),
+		"codexInspectedWaitingCustomer": _inspected_waiting_customer(summary),
+		"codexInspectedStudioPm": _inspected_studio_pm_block(summary),
+		"codexReadNpcSpokenReaction": _inspected_npc_spoken_reactions(summary),
+		"economyPanelReadable": _economy_panel_readable(record_props),
 		"codexInspectedCivicEconomyPanel": _inspected_civic_economy_panel(summary),
 		"codexInspectedCivicLedgerSocialChain": _inspected_civic_ledger_social_chain(summary),
 		"codexCanReadActorMemory": _actor_memory_covers_social_chain(summary),
@@ -806,11 +811,12 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadLiveHudRecordReaders": _hud_record_state_names_record_readers(record_state_label),
 		"canReadVisibleNpcReaction": bool(checks.get("visibleWaitingCustomerReaction", false)),
 		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
-			"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
-			"canInspectRecordRoleAffordanceMap": bool(checks.get("codexInspectedRecordAffordanceMap", false)),
-			"canInspectNpcReaction": bool(checks.get("codexInspectedWaitingCustomer", false)),
-			"canReadNpcSpokenReaction": bool(checks.get("codexReadNpcSpokenReaction", false)),
-			"canReadExactStationCitation": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
+		"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
+		"canInspectRecordRoleAffordanceMap": bool(checks.get("codexInspectedRecordAffordanceMap", false)),
+		"canInspectStoreClerkRecordAction": bool(checks.get("codexInspectedStoreClerkRecordAction", false)),
+		"canInspectNpcReaction": bool(checks.get("codexInspectedWaitingCustomer", false)),
+		"canReadNpcSpokenReaction": bool(checks.get("codexReadNpcSpokenReaction", false)),
+		"canReadExactStationCitation": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"canReadCivicEconomyPressure": bool(checks.get("economyPanelReadable", false)),
 		"canInspectCivicEconomyChange": bool(checks.get("codexInspectedCivicEconomyPanel", false)),
 		"canInspectNpcToNpcSocialLedger": bool(checks.get("codexInspectedCivicLedgerSocialChain", false)),
@@ -850,12 +856,13 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 			"Codex/player read the Studio and Park rule boards as cross-place social rules, so later review and public-notice consequences are grounded before the Store line.",
 			"The active Store prompt exposed the current environment tool catalog for the Clerk role while keeping the three player choices as speech lines, so Codex/player could see what the place affords without treating choices as hardcoded outcomes.",
 			"Codex/player focused the Store counter and started the Store Clerk prompt.",
-			"Codex/player waited long enough to create a response hesitation record.",
-			"Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.",
-			"Codex/player typed a dream-language line, causing a Store report, waiting-customer queue reaction, Park notice, Manager forwarding, Station citation, Studio review block, and contact refusal.",
-			"The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.",
-			"Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.",
-			"Codex/player inspected the Studio review queue and Studio PM to read that the Station citation blocked a small opportunity in another place.",
+				"Codex/player waited long enough to create a response hesitation record.",
+				"Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.",
+				"Codex/player typed a dream-language line, causing a Store report, waiting-customer queue reaction, Park notice, Manager forwarding, Station citation, Studio review block, and contact refusal.",
+				"Codex/player inspected the Store Clerk to read that the same role placed the report note, which record object it used, which environment objects it could see, and which tiny values changed.",
+				"The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.",
+				"Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.",
+				"Codex/player inspected the Studio review queue and Studio PM to read that the Station citation blocked a small opportunity in another place.",
 				"Codex/player read the Studio review queue's visible role/action map: Studio PM can invite, defer, or block review from shared records.",
 				"Codex/player inspected the civic ledger to read the NPC-to-NPC social chain as a player-facing timeline.",
 				"Codex/player snapshot exposed actor memory, showing which ledger events a role observed before choosing the next validated action.",
@@ -1352,6 +1359,33 @@ func _inspected_waiting_customer(summary: Dictionary) -> bool:
 			and _string_array_has_fragment(inspected.get("basisConditionLabels", []), "인용 장부 civic-ledger-6")
 			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "신뢰-8")
 			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "부담+5")
+			)
+
+func _inspected_store_clerk_record_action(summary: Dictionary) -> bool:
+	var inspected := _inspected_npc_candidate(summary, "NPC_Store_Clerk", "inquest")
+	if inspected.is_empty():
+		inspected = _inspected_npc_candidate(summary, "NPC_Store_Clerk", "reported")
+	return not inspected.is_empty() and (
+			str(inspected.get("npcId", "")) == "NPC_Store_Clerk"
+			and ["inquest", "reported"].has(str(inspected.get("state", "")))
+			and str(inspected.get("body", "")).contains("근거 행동")
+			and str(inspected.get("body", "")).contains("상점 점원 -> 메모 배치")
+			and str(inspected.get("body", "")).contains("대상 기록물: 보고 트레이")
+			and str(inspected.get("body", "")).contains("보는 환경")
+			and str(inspected.get("body", "")).contains("시민 경제=주목 상승")
+			and str(inspected.get("body", "")).contains("들은 말")
+			and str(inspected.get("spokenLine", "")).contains("스테이션으로 넘기겠습니다")
+			and str(inspected.get("basisLedgerEventId", "")) == "civic-ledger-2"
+			and str(inspected.get("basisAffordance", "")) == "place_note"
+			and str(inspected.get("basisLedgerEventLabel", "")).contains("상점 점원")
+			and str(inspected.get("basisLedgerEventLabel", "")).contains("메모 배치")
+			and _string_array_has_fragment(inspected.get("visibleEnvironmentObjectLabels", []), "영수증 트레이=표시됨")
+			and _string_array_has_fragment(inspected.get("visibleEnvironmentObjectLabels", []), "보고 트레이=전달")
+			and _string_array_has_fragment(inspected.get("visibleEnvironmentObjectLabels", []), "시민 경제=주목 상승")
+			and _string_array_has_fragment(inspected.get("basisConditionLabels", []), "보고 트레이=비어 있음")
+			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "신뢰-20")
+			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "부담+35")
+			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "주목+30")
 		)
 
 func _inspected_studio_pm_block(summary: Dictionary) -> bool:
@@ -1381,7 +1415,8 @@ func _inspected_studio_pm_block(summary: Dictionary) -> bool:
 
 func _inspected_npc_spoken_reactions(summary: Dictionary) -> bool:
 	return (
-		_inspected_waiting_customer(summary)
+		_inspected_store_clerk_record_action(summary)
+		and _inspected_waiting_customer(summary)
 		and _inspected_studio_pm_block(summary)
 	)
 

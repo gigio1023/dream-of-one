@@ -8,9 +8,12 @@ Last Updated: 2026-05-18
 - Current product blocker is external fresh-player comprehension: raw manual
   session notes remain `0 / 3`, and strict review remains
   `PENDING_TESTER_NOTES`.
-- Current local shell blocker for running that session: `DREAM_OF_ONE_APP_PATH`
-  is not set. Set the per-device packaged app path before using the live
-  comprehension helper; do not guess or record another machine's app path.
+- Current local shell setup for running that session: this Ubuntu ARM device
+  has a device-local env file loaded by the session helper, and
+  `.game-harness/scripts/run-same-order-comprehension-session.sh --status`
+  reaches packaged-app preflight pass. Keep the actual app and route-evidence
+  paths in the ignored local env; do not copy machine-specific paths into
+  tracked docs or scripts.
 - Do not reopen manual typed input, fallback-only provider mode, export setup,
   or broad role-review blockers unless new evidence regresses. Current proof
   already covers HUD typed input, packaged route evidence, fallback-only M1,

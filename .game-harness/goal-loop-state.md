@@ -98,6 +98,10 @@ Latest completion audit:
   search/update/comment tools but no issue-create tool, and `LINEAR_API_TOKEN`
   is unset for GraphQL fallback. Create or link the SoT issue from a session
   with Linear create permission before treating GI-04 as properly routed.
+- A copy-ready Linear draft now lives at
+  `.game-harness/linear-issue-drafts/gi-04-external-comprehension-fresh-player.md`.
+  It is not the SoT issue; it exists only so a future session with Linear
+  create permission can make the issue without redoing the blocker analysis.
 - conclusion: do not add another internal helper, route, or proof just to show
   activity. The next required evidence is an observed fresh-player session and
   accepted direct-note review, which is outside Codex-only control.

@@ -87,3 +87,6 @@ Create a narrow `codex-cli` provider spike that does not touch product claims:
 - verify missing login, timeout, invalid JSON, authority-field rejection, and
   deterministic fallback;
 - only after backend proof, wire Godot dispatch and HUD provider-state evidence.
+
+OpenClaw was reviewed as a design reference for this path. See
+`openclaw-codex-auth-adoption-proposal-2026-05-18.md`.

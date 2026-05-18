@@ -9,10 +9,10 @@ All M1 implementation work must produce a bundle with these parts.
 Required:
 
 ```bash
-/opt/homebrew/bin/godot-latest --headless --import --path godot
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/scene_load_smoke.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/evidence_run.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/runtime_slice_smoke.gd
+${GODOT_BIN:?set GODOT_BIN to the local Godot CLI} --headless --import --path godot
+$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/evidence_run.gd
+$GODOT_BIN --headless --path godot --script res://tools/runtime_slice_smoke.gd
 npm run check --prefix backend/npc-runtime
 ```
 

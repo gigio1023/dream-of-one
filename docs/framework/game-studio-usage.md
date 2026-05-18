@@ -25,6 +25,35 @@ Game Studio does not replace Linear, `.game-harness/`, Git, backend checks,
 Godot checks, or human authority over taste, Direction Lock, stage movement, and
 public promises.
 
+## Path Portability
+
+Dream of One is developed across multiple machines. Active guidance must not
+depend on one developer's filesystem layout.
+
+Use this rule when writing or updating docs, scripts, handoffs, or commands:
+
+- Use repo-local paths relative to the Dream of One repository root whenever
+  possible.
+- Do not add machine-specific absolute paths such as `/Users/...` or
+  `/home/...`.
+- Do not add repo-external relative paths such as `../game-studio`; sibling repo
+  layout differs by device.
+- For an external local source repo or tool, require an explicit environment
+  variable. Use `GAME_STUDIO_ROOT` for the local Game Studio source repo,
+  `GODOT_BIN` for the local Godot CLI, and `GODOT_BEST_PRACTICE_SKILL` for the
+  local Godot skill scripts.
+- If the environment variable is missing, record the check as blocked on local
+  setup instead of guessing a path.
+- Historical evidence may preserve the exact path used when the evidence was
+  produced. Do not reuse that path as an active instruction.
+
+Portable Game Studio check:
+
+```bash
+test -n "${GAME_STUDIO_ROOT:-}" && \
+  node "$GAME_STUDIO_ROOT/tools/check-project.mjs" "$PWD"
+```
+
 ## Current Route
 
 | Item | Value |
@@ -168,14 +197,14 @@ Use these checks when the touched area requires them:
 
 ```bash
 npm run check --prefix backend/npc-runtime
-godot --headless --import --path godot
-godot --headless --path godot --script res://tools/scene_load_smoke.gd
-godot --headless --path godot --script res://tools/evidence_run.gd
-godot --headless --path godot --script res://tools/runtime_slice_smoke.gd
+${GODOT_BIN:?set GODOT_BIN to the local Godot CLI} --headless --import --path godot
+$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/evidence_run.gd
+$GODOT_BIN --headless --path godot --script res://tools/runtime_slice_smoke.gd
 ```
 
-If Godot is not installed or not on `PATH`, record the blocker instead of
-claiming the Godot proof passed.
+If `GODOT_BIN` is not set or the binary is unavailable, record the blocker
+instead of claiming the Godot proof passed.
 
 ## Codex App Position
 

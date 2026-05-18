@@ -171,8 +171,8 @@ are contract proof, not live provider availability.
 Required existing checks:
 
 ```bash
-PATH=/opt/homebrew/bin:$PATH npm run check --prefix backend/npc-runtime
-node /Users/naem1023/git/game-studio/tools/check-project.mjs /Users/naem1023/git/dream-of-one
+npm run check --prefix backend/npc-runtime
+test -n "${GAME_STUDIO_ROOT:-}" && node "$GAME_STUDIO_ROOT/tools/check-project.mjs" "$PWD"
 git diff --check
 ```
 

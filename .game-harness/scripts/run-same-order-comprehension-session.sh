@@ -4,12 +4,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
 
-APP_PATH="${DREAM_OF_ONE_APP_PATH:-/private/tmp/dream-of-one-export-proof-4.7/app/Dream of One Godot Shell.app}"
-ROUTE_EVIDENCE_PATH="${DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH:-/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json}"
+APP_PATH="${DREAM_OF_ONE_APP_PATH:-}"
+ROUTE_EVIDENCE_PATH="${DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH:-}"
 CODEX_PROBE_PATH_OVERRIDE="${DREAM_OF_ONE_CODEX_GAMEPLAY_PROBE_PATH:-}"
 CODEX_PROBE_PATH="${CODEX_PROBE_PATH_OVERRIDE:-$REPO_ROOT/data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.json}"
 CODEX_PROBE_MARKDOWN_PATH="${CODEX_PROBE_PATH%.*}.md"
-GODOT_BIN="${GODOT_PATH:-/opt/homebrew/bin/godot-latest}"
+GODOT_BIN="${GODOT_BIN:-${GODOT_PATH:-}}"
 NOTES_DIR="${DREAM_OF_ONE_COMPREHENSION_NOTES_DIR:-$REPO_ROOT/.game-harness/comprehension/manual-sessions}"
 CODEX_PROBE_FRESHNESS_WATCH_FILES=(
   "godot/tools/codex_gameplay_probe.gd"
@@ -64,7 +64,7 @@ Environment:
   DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH
   DREAM_OF_ONE_CODEX_GAMEPLAY_PROBE_PATH
   DREAM_OF_ONE_COMPREHENSION_NOTES_DIR
-  GODOT_PATH
+  GODOT_BIN or GODOT_PATH
 EOF
 }
 
@@ -145,8 +145,8 @@ done
 
 run_codex_probe() {
   if [[ ! -x "$GODOT_BIN" ]]; then
-    echo "Missing executable Godot binary for Codex gameplay probe: $GODOT_BIN" >&2
-    echo "Set GODOT_PATH to the active Godot 4.7 binary." >&2
+    echo "Missing executable Godot binary for Codex gameplay probe: ${GODOT_BIN:-unset}" >&2
+    echo "Set GODOT_BIN, or set legacy GODOT_PATH, to the local active Godot binary." >&2
     exit 1
   fi
   echo "Running Codex gameplay QA probe with $GODOT_BIN"
@@ -692,9 +692,15 @@ NODE
   exit 0
 fi
 
+if [[ -z "$APP_PATH" ]]; then
+  echo "DREAM_OF_ONE_APP_PATH is not set." >&2
+  echo "Set it to the local packaged .app path for this device." >&2
+  exit 1
+fi
+
 if [[ ! -d "$APP_PATH" ]]; then
   echo "Missing packaged app: $APP_PATH" >&2
-  echo "Set DREAM_OF_ONE_APP_PATH to a valid .app path." >&2
+  echo "Set DREAM_OF_ONE_APP_PATH to a valid .app path for this device." >&2
   exit 1
 fi
 
@@ -704,9 +710,15 @@ if [[ ! -x "$APP_BINARY" ]]; then
   exit 1
 fi
 
+if [[ -z "$ROUTE_EVIDENCE_PATH" ]]; then
+  echo "DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH is not set." >&2
+  echo "Set it to the local packaged route evidence JSON for this device." >&2
+  exit 1
+fi
+
 if [[ ! -f "$ROUTE_EVIDENCE_PATH" ]]; then
   echo "Missing packaged route evidence: $ROUTE_EVIDENCE_PATH" >&2
-  echo "Set DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH or rerun packaged route smoke." >&2
+  echo "Set DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH or rerun packaged route smoke on this device." >&2
   exit 1
 fi
 

@@ -34,25 +34,42 @@
   prompt, task list, state, proof, and exit gate. Do not add a separate `.ralph/`
   system unless explicitly requested.
 - On resume, read `.game-harness/active-goal-prompt.md`,
+  `.game-harness/playable-goal-reference.md`,
   `.game-harness/goal-loop-state.md`, `.game-harness/continue-here.md`,
   `.game-harness/tasks.md`, `.game-harness/verification-ledger.md`, and
   `.game-studio/project-state.md`, and `AGENTS.md` before changing code.
 
+## Path Portability
+
+- This repo is worked on across multiple devices. Do not add machine-specific
+  absolute paths, home-directory paths, or repo-external relative paths to
+  active instructions, scripts, docs, or commands unless the path is the
+  artifact being recorded as historical evidence.
+- Prefer repo-local paths relative to the repository root.
+- For external local tools or sibling repos, use explicit environment variables
+  such as `GAME_STUDIO_ROOT`, `GODOT_BIN`, or `GODOT_BEST_PRACTICE_SKILL`.
+  If an environment variable is not set, ask the user or record the local
+  blocker instead of guessing `/Users/...`, `/home/...`, `~/git/...`, or
+  `../game-studio`.
+- Historical evidence ledgers may mention the path that was used on a specific
+  machine. Do not copy those paths into new instructions or treat them as
+  portable commands.
+
 ## Godot Runtime
 
 - Active engine root: `godot/`
-- Latest published Godot command: `/opt/homebrew/bin/godot-latest`
-  (`4.7.beta2.official.777579205` as of 2026-05-17). Homebrew `godot` may
-  remain the latest stable cask; use `godot-latest` for repo proof unless a
-  task explicitly asks for stable-only verification.
+- Preferred Godot command: set `GODOT_BIN` to the local latest Godot CLI for
+  the current machine. The latest published proof used
+  `4.7.beta2.official.777579205` as of 2026-05-17, but do not hardcode another
+  device's absolute CLI path into new docs or scripts.
 - Main scene: `godot/scenes/main.tscn`
 - Runtime data: `godot/data/world_layout.json`
 - Godot checks:
-  - `/opt/homebrew/bin/godot-latest --headless --import --path godot`
-  - `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/scene_load_smoke.gd`
-  - `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/evidence_run.gd`
-  - `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/runtime_slice_smoke.gd`
-  - `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
+  - `$GODOT_BIN --headless --import --path godot`
+  - `$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd`
+  - `$GODOT_BIN --headless --path godot --script res://tools/evidence_run.gd`
+  - `$GODOT_BIN --headless --path godot --script res://tools/runtime_slice_smoke.gd`
+  - `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 
 ## Backend Runtime
 

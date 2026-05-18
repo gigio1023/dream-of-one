@@ -12,7 +12,7 @@ The screenshot is a current internal Godot capture of the `Same Order` Store Cle
 
 | Area | Status |
 |---|---|
-| Engine | Godot 4.x 3D project under `godot/`; current proof uses Godot 4.7-beta2 through `godot-latest`. |
+| Engine | Godot 4.x 3D project under `godot/`; current proof uses Godot 4.7-beta2 through the local `GODOT_BIN`. |
 | Backend | TypeScript NPC runtime under `backend/npc-runtime/`. |
 | Playable proof | Store Clerk prompt, three choices, preset recorded statement, deterministic suspicion/report, Station inquest. |
 | Evidence | Godot Evidence Packs validate through the backend Schema. |
@@ -23,9 +23,9 @@ The screenshot is a current internal Godot capture of the `Same Order` Store Cle
 
 Prerequisites:
 - Latest published Godot for this repo proof: `4.7.beta2.official.777579205`
-  through `/opt/homebrew/bin/godot-latest`.
-- Stable Homebrew `godot` may still be `4.6.2`; prefer `godot-latest` unless
-  a task explicitly asks for stable-only verification.
+  through the local `GODOT_BIN`.
+- Set `GODOT_BIN` explicitly per device. Do not copy another machine's Godot
+  absolute path into docs or scripts.
 - Node.js and npm.
 - OpenAI/API credentials only if you are working on live proposal-provider paths.
 
@@ -44,13 +44,13 @@ npm run check --prefix backend/npc-runtime
 Open the game in Godot:
 
 ```bash
-/opt/homebrew/bin/godot-latest --path godot
+${GODOT_BIN:?set GODOT_BIN to the local Godot CLI} --path godot
 ```
 
 Run the current playable proof:
 
 ```bash
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/playable_slice_smoke.gd
+${GODOT_BIN:?set GODOT_BIN to the local Godot CLI} --headless --path godot --script res://tools/playable_slice_smoke.gd
 ```
 
 ## Game Loop
@@ -139,24 +139,26 @@ Repo-local checks:
 
 ```bash
 npm run check --prefix backend/npc-runtime
-/opt/homebrew/bin/godot-latest --headless --import --path godot
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/scene_load_smoke.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/evidence_run.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/runtime_slice_smoke.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/playable_slice_smoke.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/live_backend_bridge_smoke.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/localization_smoke.gd
-/opt/homebrew/bin/godot-latest --quit-after 2400 --path godot --script res://tools/visual_capture.gd
+${GODOT_BIN:?set GODOT_BIN to the local Godot CLI} --headless --import --path godot
+$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/evidence_run.gd
+$GODOT_BIN --headless --path godot --script res://tools/runtime_slice_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/playable_slice_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/live_backend_bridge_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/localization_smoke.gd
+$GODOT_BIN --quit-after 2400 --path godot --script res://tools/visual_capture.gd
 ```
 
 Optional local workspace helper checks:
 
 ```bash
-export GAME_STUDIO_ROOT=/path/to/game-studio
-export GODOT_BEST_PRACTICE_SKILL=/path/to/godot-best-practice
+# Set these explicitly per device. Do not commit machine-specific absolute
+# paths or sibling-repo assumptions into project docs or scripts.
+export GAME_STUDIO_ROOT="<local game-studio repo>"
+export GODOT_BEST_PRACTICE_SKILL="<local godot-best-practice skill>"
 
-node "$GAME_STUDIO_ROOT/tools/check-project.mjs" "$PWD"
-bash "$GODOT_BEST_PRACTICE_SKILL/scripts/check_gd_syntax.sh" godot
+test -n "${GAME_STUDIO_ROOT:-}" && node "$GAME_STUDIO_ROOT/tools/check-project.mjs" "$PWD"
+test -n "${GODOT_BEST_PRACTICE_SKILL:-}" && bash "$GODOT_BEST_PRACTICE_SKILL/scripts/check_gd_syntax.sh" godot
 ```
 
 ## License

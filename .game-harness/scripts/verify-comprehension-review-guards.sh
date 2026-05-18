@@ -4,8 +4,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
 
-APP_PATH="${DREAM_OF_ONE_APP_PATH:-/private/tmp/dream-of-one-export-proof-4.7/app/Dream of One Godot Shell.app}"
-ROUTE_EVIDENCE_PATH="${DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH:-/private/tmp/dream-of-one-export-proof-4.7/app-route-evidence.json}"
+APP_PATH="${DREAM_OF_ONE_APP_PATH:-}"
+ROUTE_EVIDENCE_PATH="${DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH:-}"
+
+if [[ -z "$APP_PATH" || -z "$ROUTE_EVIDENCE_PATH" ]]; then
+  echo "Set DREAM_OF_ONE_APP_PATH and DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH for this device before running comprehension guard checks." >&2
+  exit 1
+fi
+
 APP_BINARY="$APP_PATH/Contents/MacOS/Dream of One Godot Shell"
 
 if [[ ! -x "$APP_BINARY" ]]; then

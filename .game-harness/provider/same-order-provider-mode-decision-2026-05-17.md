@@ -70,4 +70,11 @@ Live provider mode can be considered only after all of the following are true:
   backend-owned outcomes;
 - in-game UI or setup copy clearly names the verified provider mode.
 
+If the future provider is Codex CLI auth instead of direct API auth, it must be
+implemented and proved as a distinct `codex-cli` provider mode. Do not read or
+reuse Codex cached ChatGPT credentials as `OPENAI_API_KEY`; invoke `codex exec`
+through a documented local worker contract, validate structured output, and
+keep deterministic fallback/authority boundaries. See
+`codex-cli-auth-runtime-assessment-2026-05-18.md`.
+
 Until then, fallback-only is the honest M1 product mode.

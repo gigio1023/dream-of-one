@@ -55,6 +55,26 @@
   machine. Do not copy those paths into new instructions or treat them as
   portable commands.
 
+## Environment Awareness
+
+- Before environment-sensitive work, identify the active OS, CPU architecture,
+  shell, display availability, Godot CLI, Node/npm availability, and required
+  environment variables. Record blockers instead of assuming a desktop,
+  macOS `.app`, x86_64 binary, or GUI display exists.
+- Current local setup may be a headless Ubuntu ARM/aarch64 server. On such
+  devices, Godot headless checks and PCK route proofs can pass while observed
+  human play still needs a GUI/display path such as VNC, X11 forwarding, a
+  desktop session, or another tester device.
+- Keep per-device launchers, exported PCKs, local route evidence, and auth/env
+  settings in ignored repo-local `build/` files or explicit environment
+  variables. Do not copy their absolute paths into tracked active instructions.
+- Codex CLI login is useful for agent/developer workflows. Do not treat
+  ChatGPT/Codex cached login as an OpenAI API key for the game runtime. If a
+  Codex CLI-backed runtime provider is explored, treat it as a separate
+  provider mode with explicit preflight, schema validation, timeout handling,
+  deterministic fallback, and no authority over records, Evidence, Exposure,
+  inquest, verdict, or session end.
+
 ## Godot Runtime
 
 - Active engine root: `godot/`

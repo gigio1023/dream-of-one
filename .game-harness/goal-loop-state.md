@@ -113,6 +113,20 @@ Latest Ubuntu ARM environment setup:
   `WAYLAND_DISPLAY`, so an observed human play session still needs a GUI/display
   path such as local desktop, VNC, X11 forwarding, or another tester device.
 
+Latest environment/auth awareness note:
+- Current work is on a headless Ubuntu ARM/aarch64 server, so future agents must
+  check OS, architecture, display availability, `GODOT_BIN`, Node/npm, and
+  required runtime env vars before assuming a desktop build or macOS app path.
+- `codex-cli 0.130.0` is installed locally and `codex login status` reports
+  ChatGPT login. This is useful for agent work and possible future local
+  `codex-cli` provider experiments, but it is not an OpenAI API key and must
+  not be treated as the existing `openai-api` runtime credential.
+- The Codex CLI runtime-auth assessment lives at
+  `.game-harness/provider/codex-cli-auth-runtime-assessment-2026-05-18.md`.
+  Current product truth remains `fallback_only_m1`; a Codex-auth-backed game
+  path would require a separate provider mode, preflight, schema validation,
+  timeout/failure handling, deterministic fallback, and fresh proof.
+
 Latest status check:
 - command: `.game-harness/scripts/run-same-order-comprehension-session.sh --status`
 - result in this local shell: pass after loading the ignored Ubuntu ARM local

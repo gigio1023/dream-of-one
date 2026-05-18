@@ -26,11 +26,32 @@ continue through small playable proofs.
 | Live LLM wording can run from the actual Godot `PlayableSession`. | `godot/tools/live_provider_dispatch_smoke.gd` drove `main.tscn`, called Store Clerk and Waiting Customer route-context packets, received `openai-codex` responses, and wrote a passing artifact. | PASS |
 | Live provider output does not mutate records, economy, route, inquest, verdict, or session state. | Live provider dispatch artifact reports `providerDecisionMutatedRouteState=false`, `productProviderStateChanged=false`, `routeOutcome=clean_cover`, `sessionOutcome=cover_held`. | PASS |
 | Live role voice is bounded enough for proof-only use. | Store Clerk returned `오늘도같은걸로드릴까요?`; Waiting Customer observed that live utterance and returned `줄은그대로네요.`; smoke rejects Waiting Customer player-blame phrases. | PASS |
-| Codex gameplay QA is current after provider packet changes. | `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd` passed; status helper reports Codex source freshness pass; JSON SHA-256 `5575974bf9080739cf122e016ba8c9dfb6cb0aaf938dfb3247cf2ca416739827`. | PASS |
+| Codex gameplay QA is current after provider packet changes. | `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd` passed; status helper reports Codex source freshness pass; JSON SHA-256 `7a26c5a82e64d83d7c520e3ed0a7b56b70a8ae32f77219a50b97b0cfd3ba3c70`. | PASS |
 | Codex can play, inspect, and explain the proof cell through public APIs. | `data/evidence/godot/codex-gameplay-probe/dre_171_codex_gameplay_probe.json`: `ok=true`, `aiPlayerReport.pass=true`, `stage=inquest`, 23/23 accepted actions, 5/5 route reports, 22 explainability checks. | PASS |
 | Packaged/tester setup remains ready. | `.game-harness/scripts/run-same-order-comprehension-session.sh --status`: packaged app preflight pass and Codex gameplay QA pass. | PASS |
+| Goal work budget is accounted separately from game-provider spend. | Active Codex goal accounting is tracked by the Codex goal runtime; live NPC provider usage is tracked only through request count, fixed model, estimated caps, fallback status, and returned token usage because ChatGPT Pro remaining quota is not exposed by the provider payload. | PASS |
 | External fresh-player comprehension exists. | Same status command: raw session note files `0 / 3`, strict review `PENDING_TESTER_NOTES`. | FAIL |
 | Product/demo readiness can be claimed. | External comprehension gate remains open and product state remains `fallback_only_m1`; live wording is proof-only. | FAIL |
+
+## Residual Gaps
+
+- Player-visible live provider mode is not implemented. The current Godot
+  proof calls `openai-codex` from smoke tools only, then proves fallback parity;
+  HUD/Evidence truth still reports `fallback_only_m1`.
+- Live LLM action selection is not product authority. The provider proposes
+  bounded wording, while backend validation still owns action type, records,
+  economy effects, Exposure, inquest, verdict, and session termination.
+- Long-running live simulation remains unproven. Current live proof covers one
+  two-actor dispatch chain and one two-turn same-NPC memory chain, not a
+  sustained multi-agent scheduler across many route jobs.
+- Action-space/tool definitions are present as deterministic route-context
+  packets and public Codex gameplay actions, but exposing those as
+  player-visible LLM-driven choices is a future mode decision, not current
+  product behavior.
+- Budget enforcement is practical but incomplete at the subscription level:
+  model, reasoning, request count, estimated caps, fallback status, and
+  returned token usage are recorded; ChatGPT Pro remaining quota is unavailable
+  from these responses.
 
 ## Completion Decision
 

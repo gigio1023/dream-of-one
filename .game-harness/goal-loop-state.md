@@ -245,7 +245,7 @@ Latest status check:
   `testerFacingFiles=["tester-invite.md"]`, `humanEvidence=false`, and
   `closesGoal=false`; it is setup material only, not comprehension evidence.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `5575974bf9080739cf122e016ba8c9dfb6cb0aaf938dfb3247cf2ca416739827`
+  - JSON SHA-256: `7a26c5a82e64d83d7c520e3ed0a7b56b70a8ae32f77219a50b97b0cfd3ba3c70`
   - Markdown SHA-256: `6445a0e64e5b99398646c0e08bbb98aacb9378d0dd03f3a4a523ce2c0b6a0253`
   - playable Evidence Pack SHA-256: `dd69a70384e218c58ff2e5a6ee6b58f6cbada43b82225d2f6ea7cd1ad43bc64d`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`

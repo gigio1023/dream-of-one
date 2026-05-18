@@ -615,7 +615,7 @@ func debug_codex_gameplay_snapshot() -> Dictionary:
 		"hud": _codex_hud_snapshot()
 	}
 
-func debug_live_provider_packet(session_id_override: String = "", actor_id_override: String = "") -> Dictionary:
+func debug_live_provider_packet(session_id_override: String = "", actor_id_override: String = "", extra_recent_events: Array = []) -> Dictionary:
 	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
 	var actor_id := actor_id_override if not actor_id_override.is_empty() else str(beat.get("actorId", "NPC_Store_Clerk"))
 	if actor_id.is_empty():
@@ -637,6 +637,10 @@ func debug_live_provider_packet(session_id_override: String = "", actor_id_overr
 			str(event.get("kind", "")),
 			str(event.get("affordance", ""))
 		])
+	for event in extra_recent_events:
+		var event_text := str(event).strip_edges()
+		if not event_text.is_empty():
+			recent_events.append(event_text)
 
 	var nearby_actors: Array[String] = ["player"]
 	for npc_id in _visible_npc_states().keys():

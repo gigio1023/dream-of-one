@@ -79,13 +79,20 @@ func _run() -> void:
 		_validate_route_parity(route_final, failures)
 	if failures.is_empty():
 		var route_final_fingerprint := _route_fingerprint(route_final)
+		var clerk_live_observation := _live_observation_event(decision_report)
 		customer_provider_packet = session.call(
 			"debug_live_provider_packet",
 			"godot-live-playable-route-provider-customer-%d-%d" % [
 				Time.get_unix_time_from_system(),
 				Time.get_ticks_msec()
 			],
-			"NPC_Waiting_Customer"
+			"NPC_Waiting_Customer",
+			[clerk_live_observation]
+		)
+		_require(
+			_recent_events_have(customer_provider_packet, clerk_live_observation),
+			failures,
+			"Waiting Customer provider packet must observe the Store Clerk live utterance."
 		)
 		customer_decision_report = await BackendBridge.probe_live_decision(
 			self,
@@ -157,6 +164,7 @@ func _run() -> void:
 			"productProviderStateChanged": false,
 			"playableSessionPacket": not provider_packet.is_empty(),
 			"multiActorLiveProviderPackets": not provider_packet.is_empty() and not customer_provider_packet.is_empty(),
+			"npcToNpcLiveObservation": not customer_provider_packet.is_empty() and _recent_events_have(customer_provider_packet, _live_observation_event(decision_report)),
 			"providerDecisionMutatedRouteState": route_before_fingerprint != route_after_fingerprint or customer_provider_mutated_route,
 			"fallbackParityRouteOutcome": str(route_final.get("routeOutcome", "")),
 			"fallbackParitySessionOutcome": str(route_final.get("sessionOutcome", ""))
@@ -233,6 +241,20 @@ func _validate_route_parity(summary: Dictionary, failures: Array[String]) -> voi
 	var agent_actions: Array = summary.get("agentActionLog", [])
 	_require(_agent_log_has(agent_actions, "NPC_Store_Clerk", "create_receipt"), failures, "Fallback parity route must still create the deterministic receipt.")
 	_require(_agent_log_has(agent_actions, "NPC_Waiting_Customer", "accept_routine"), failures, "Fallback parity route must still run the waiting customer routine acceptance.")
+
+func _live_observation_event(report: Dictionary) -> String:
+	var decision: Dictionary = report.get("decision", {})
+	var intent: Dictionary = decision.get("intent", {})
+	return "live_utterance:%s:%s" % [
+		str(intent.get("npcId", "")),
+		str(intent.get("utterance", ""))
+	]
+
+func _recent_events_have(packet: Dictionary, expected: String) -> bool:
+	for event in Array(packet.get("recentEvents", [])):
+		if str(event) == expected:
+			return true
+	return false
 
 func _agent_log_has(actions: Array, actor_id: String, affordance: String) -> bool:
 	for action in actions:

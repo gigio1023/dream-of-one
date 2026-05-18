@@ -1,8 +1,8 @@
 # OpenAI Codex Live Social Probe
 
 Date: 2026-05-18
-Status: backend live proof, Godot route dispatch smoke, and Godot same-NPC
-local-memory continuity smoke passed
+Status: backend live proof, Godot NPC-to-NPC route dispatch smoke, and Godot
+same-NPC local-memory continuity smoke passed
 
 ## Claim
 
@@ -12,9 +12,11 @@ fallbacks, and deterministic fallback if the provider path fails.
 
 The backend proof proves bounded LLM text proposals for NPC roles. A Godot tool
 now also proves two live `/v1/npc/decision` dispatches using actual
-`PlayableSession` route packets for the Store Clerk and Waiting Customer, then
-confirms deterministic fallback parity on the same running scene. This still
-does not switch the playable scene or HUD out of `fallback_only_m1`.
+`PlayableSession` route packets for the Store Clerk and Waiting Customer. The
+Waiting Customer packet observes the Store Clerk's live utterance before the
+second provider call, then the smoke confirms deterministic fallback parity on
+the same running scene. This still does not switch the playable scene or HUD
+out of `fallback_only_m1`.
 
 A second Godot tool proves same-session/same-NPC continuity for Store Clerk
 through backend-owned local workspace memory. The working `openai-codex` route
@@ -105,7 +107,7 @@ Two-NPC social probe:
 Godot live PlayableSession route provider dispatch smoke:
 
 - artifact: `data/evidence/godot/live-provider-dispatch/dre_171_live_provider_dispatch_smoke.json`
-- artifact SHA-256: `ba676ffdd7c0ff307b14835ac569bcf3adfe3a7044e0b460f383b4d4253a9b08`
+- artifact SHA-256: `fbb5cb6733e0ec514454c1d6038998f59b8116915000bb55761d29e69f0e3f0a`
 - readiness: ready for `openai-codex`
 - model: `gpt-5.4-mini`
 - reasoning: `low`
@@ -115,18 +117,29 @@ Godot live PlayableSession route provider dispatch smoke:
 - per-request estimated cap: `$0.01`
 - request count: 2
 - live actors: `NPC_Store_Clerk`, `NPC_Waiting_Customer`
-- total estimated cost: `$0.0084375`
-- total actual usage: 2,275 input tokens, 405 output tokens, 2,680 total tokens
+- total estimated cost: `$0.00844875`
+- total actual usage: 2,296 input tokens, 510 output tokens, 2,806 total tokens
 - Store Clerk estimated cost: `$0.00433725`
-- Store Clerk actual usage: 1,290 input tokens, 171 output tokens, 1,461 total tokens
-- Waiting Customer estimated cost: `$0.00410025`
-- Waiting Customer actual usage: 985 input tokens, 234 output tokens, 1,219 total tokens
+- Store Clerk actual usage: 1,290 input tokens, 191 output tokens, 1,481 total tokens
+- Waiting Customer estimated cost: `$0.0041115`
+- Waiting Customer actual usage: 1,006 input tokens, 319 output tokens, 1,325 total tokens
 - fallback: false
 - Store Clerk utterance: `오늘도같은걸로드릴까요?`
-- Waiting Customer utterance: `줄은잠깐멈췄네요.`
+- Waiting Customer observed Store Clerk live utterance: yes
+- Waiting Customer utterance:
+  `줄은여기서유지하면돼요.확인은공원게시판에붙어있더군요.`
 - command executed in Godot world: false
 - product provider state changed: false
 - provider decision mutated route state: false
+
+Additional dispatch-chain probing note:
+
+- One prior attempt used the default 8-second decision deadline and timed out
+  on the Waiting Customer call after a successful Store Clerk call. That
+  successful first call spent estimated `$0.00433725` and returned 1,290 input
+  tokens, 230 output tokens, and 1,520 total tokens; the timed-out second call
+  returned no provider usage. The passing run above used the documented
+  12-second provider/deadline settings.
 - fallback parity route outcome: `clean_cover`
 - fallback parity session outcome: `cover_held`
 
@@ -185,7 +198,8 @@ upgrades, and recorded actual token usage when the provider returns it.
 - A Godot script can drive the actual `PlayableSession`, build live
   route-context provider packets for two NPC actors, reach the backend
   `/v1/npc/decision` endpoint, receive bounded `openai-codex` wording plus
-  usage metadata, and then continue the deterministic fallback route without
+  usage metadata, pass the first NPC's live utterance into the second NPC's
+  observed context, and then continue the deterministic fallback route without
   state mutation or route drift.
 
 ## What Remains Unproven

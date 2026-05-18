@@ -10,8 +10,8 @@
 			"ok": true,
 			"providerUsage": {
 				"actualInputTokens": 1290.0,
-				"actualOutputTokens": 171.0,
-				"actualTotalTokens": 1461.0,
+				"actualOutputTokens": 191.0,
+				"actualTotalTokens": 1481.0,
 				"estimatedCostUsd": 0.00433725,
 				"estimatedInputTokens": 1583.0,
 				"estimatedTotalTokens": 2283.0,
@@ -19,7 +19,7 @@
 				"model": "gpt-5.4-mini"
 			},
 			"reason": "",
-			"threadId": "resp_0561da2a31704e76016a0ae535f65481919511f0397308b8a3",
+			"threadId": "resp_02b10c449196c95b016a0aeb5daaac8191889891ef217e429c",
 			"transport": "codex",
 			"usedFallback": false,
 			"utterance": "오늘도같은걸로드릴까요?"
@@ -33,8 +33,8 @@
 				"ok": true,
 				"providerUsage": {
 					"actualInputTokens": 1290.0,
-					"actualOutputTokens": 171.0,
-					"actualTotalTokens": 1461.0,
+					"actualOutputTokens": 191.0,
+					"actualTotalTokens": 1481.0,
 					"estimatedCostUsd": 0.00433725,
 					"estimatedInputTokens": 1583.0,
 					"estimatedTotalTokens": 2283.0,
@@ -42,7 +42,7 @@
 					"model": "gpt-5.4-mini"
 				},
 				"reason": "",
-				"threadId": "resp_0561da2a31704e76016a0ae535f65481919511f0397308b8a3",
+				"threadId": "resp_02b10c449196c95b016a0aeb5daaac8191889891ef217e429c",
 				"transport": "codex",
 				"usedFallback": false,
 				"utterance": "오늘도같은걸로드릴까요?"
@@ -54,20 +54,20 @@
 				"npcId": "NPC_Waiting_Customer",
 				"ok": true,
 				"providerUsage": {
-					"actualInputTokens": 985.0,
-					"actualOutputTokens": 234.0,
-					"actualTotalTokens": 1219.0,
-					"estimatedCostUsd": 0.00410025,
-					"estimatedInputTokens": 1267.0,
-					"estimatedTotalTokens": 1967.0,
+					"actualInputTokens": 1006.0,
+					"actualOutputTokens": 319.0,
+					"actualTotalTokens": 1325.0,
+					"estimatedCostUsd": 0.0041115,
+					"estimatedInputTokens": 1282.0,
+					"estimatedTotalTokens": 1982.0,
 					"maxOutputTokens": 700.0,
 					"model": "gpt-5.4-mini"
 				},
 				"reason": "",
-				"threadId": "resp_0c4ea19111acbba5016a0ae53887d081918583be41c1778c25",
+				"threadId": "resp_00aa5f116e9b3d8d016a0aeb604db48191bc4c57cf63fd869d",
 				"transport": "codex",
 				"usedFallback": false,
-				"utterance": "줄은잠깐멈췄네요."
+				"utterance": "줄은여기서유지하면돼요.확인은공원게시판에붙어있더군요."
 			}
 		],
 		"playableRoute": {
@@ -164,7 +164,8 @@
 					"ok": true,
 					"preferredModel": "gpt-5.4-mini",
 					"provider": "openai-codex",
-					"selectedModel": "gpt-5.4-mini"
+					"selectedModel": "gpt-5.4-mini",
+					"storeResponses": false
 				},
 				"provider": "openai-codex"
 			},
@@ -177,8 +178,8 @@
 	"ok": true,
 	"proofs": {
 		"actualInputTokens": 1290,
-		"actualOutputTokens": 171,
-		"actualTotalTokens": 1461,
+		"actualOutputTokens": 191,
+		"actualTotalTokens": 1481,
 		"chatGptProQuotaRemaining": "not_exposed_by_codex_response",
 		"commandExecuted": false,
 		"contextMutated": false,
@@ -192,15 +193,16 @@
 			"NPC_Waiting_Customer"
 		],
 		"multiActorLiveProviderPackets": true,
+		"npcToNpcLiveObservation": true,
 		"playableSessionPacket": true,
 		"productProviderStateChanged": false,
 		"providerDecisionMutatedRouteState": false,
 		"providerMode": "openai-codex",
 		"selectedModel": "gpt-5.4-mini",
-		"totalActualInputTokens": 2275,
-		"totalActualOutputTokens": 405,
-		"totalActualTokens": 2680,
-		"totalEstimatedCostUsd": 0.0084375,
+		"totalActualInputTokens": 2296,
+		"totalActualOutputTokens": 510,
+		"totalActualTokens": 2806,
+		"totalEstimatedCostUsd": 0.00844875,
 		"transport": "codex",
 		"usedFallback": false,
 		"utterance": "오늘도같은걸로드릴까요?"

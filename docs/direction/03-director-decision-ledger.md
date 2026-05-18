@@ -279,7 +279,7 @@ Date: 2026-05-17
 Decision:
 - The current Same Order M1 product proof is deterministic fallback-only.
 - Provider-shaped backend contracts, scheduling, dispatch packets, backend live
-  `openai-codex` probes, and the proof-only two-actor Godot
+  `openai-codex` probes, and the proof-only NPC-to-NPC Godot
   `PlayableSession` route dispatch smoke remain valid internal evidence for the
   future live provider boundary.
 - Live in-game provider behavior is not part of the current demo claim. One
@@ -309,7 +309,7 @@ Risks:
 Required evidence:
 - `.game-harness/provider/same-order-provider-mode-decision-2026-05-17.md`.
 - `.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md`.
-- budgeted backend live smoke, tiny social probe, and two-actor Godot
+- budgeted backend live smoke, tiny social probe, and NPC-to-NPC Godot
   PlayableSession route dispatch smoke pass with usage accounting.
 - provider-shaped backend tests keep rejecting forbidden authority fields.
 - live role-voice policy separates NPC speech from player choices and rejects

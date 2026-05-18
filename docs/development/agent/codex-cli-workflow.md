@@ -50,7 +50,7 @@ The active assessment is
 `.game-harness/provider/openclaw-codex-auth-adoption-proposal-2026-05-18.md`.
 Backend live proof and usage accounting are recorded in
 `.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md`.
-The Godot smokes prove two-actor route-context dispatch and same-NPC local
+The Godot smokes prove NPC-to-NPC route-context dispatch and same-NPC local
 memory continuity; they do not change `fallback_only_m1` product truth.
 
 Do not add legacy engine work back into the active tree.

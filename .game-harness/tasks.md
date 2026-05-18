@@ -44,6 +44,8 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   and prove fallback parity for route events, ledger, object state, and economy.
 - [x] Improve live provider role-voice policy before exposing live wording as a
   player-visible HUD/Evidence mode.
+- [x] Prove proof-only NPC-to-NPC live wording observation: Waiting Customer
+  provider context observes Store Clerk live utterance before responding.
 - [x] Prove same-session/same-NPC `openai-codex` continuity through actual
   Godot `PlayableSession` packets using backend-owned local workspace memory,
   fixed cheapest model, and recorded usage caps.

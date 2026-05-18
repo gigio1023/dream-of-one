@@ -147,16 +147,23 @@ Latest OpenAI Codex provider note:
 - Godot live PlayableSession route-context dispatch now also passes through
   `godot/tools/live_provider_dispatch_smoke.gd` against a local backend on
   `127.0.0.1:8787`. It drove `main.tscn` through
-  `PlayableSession.debug_codex_gameplay_action`, built two live provider
-  packets from the running route state for `NPC_Store_Clerk` and
-  `NPC_Waiting_Customer`, selected `gpt-5.4-mini`, used no fallback, capped each
-  request at `$0.01`, kept the two-request total estimate under `$0.01`, and
-  returned total usage of 2,275 input / 405 output / 2,680 total tokens with
-  total estimated cost `$0.0084375`. It avoided route mutation and continued
-  the deterministic fallback path to `routeOutcome=clean_cover` and
-  `sessionOutcome=cover_held`. It wrote
+  `PlayableSession.debug_codex_gameplay_action`, built live provider packets
+  from the running route state for `NPC_Store_Clerk` and
+  `NPC_Waiting_Customer`, and now passes the Store Clerk live utterance into
+  the Waiting Customer packet as an observed `live_utterance:*` event. It
+  selected `gpt-5.4-mini`, used no fallback, capped each request at `$0.01`,
+  kept the two-request total estimate under `$0.01`, and returned total usage
+  of 2,296 input / 510 output / 2,806 total tokens with total estimated cost
+  `$0.00844875`. It avoided route mutation and continued the deterministic
+  fallback path to `routeOutcome=clean_cover` and `sessionOutcome=cover_held`.
+  It wrote
   `data/evidence/godot/live-provider-dispatch/dre_171_live_provider_dispatch_smoke.json`
-  with SHA-256 `ba676ffdd7c0ff307b14835ac569bcf3adfe3a7044e0b460f383b4d4253a9b08`.
+  with SHA-256
+  `fbb5cb6733e0ec514454c1d6038998f59b8116915000bb55761d29e69f0e3f0a`.
+  A prior attempt in this slice timed out on the Waiting Customer call under
+  the default 8-second deadline after one successful Store Clerk call; that
+  successful call spent estimated `$0.00433725` and returned 1,290 input / 230
+  output / 1,520 total tokens.
 - ChatGPT Pro remaining quota was not exposed by these Codex Responses, so
   future work must track request count, fixed model, reasoning effort,
   estimated caps, fallback status, and returned token usage instead of claiming
@@ -167,8 +174,9 @@ Latest OpenAI Codex provider note:
   exposes live wording as a player-visible mode and records that usage in
   playable Evidence.
 - Role-voice policy now distinguishes NPC role voice from player choices before
-  the live request. The refreshed Waiting Customer live line was bounded and
-  role-anchored: `줄은잠깐멈췄네요.`
+  the live request. The refreshed Waiting Customer live line was bounded,
+  role-anchored, and based on an observed Store Clerk live utterance:
+  `줄은여기서유지하면돼요.확인은공원게시판에붙어있더군요.`
 - Same-session NPC memory/thread continuity is now covered for the actual
   `openai-codex` Godot route with local backend-owned workspace memory. The
   default remains `storeResponses=false`; the Codex endpoint rejected

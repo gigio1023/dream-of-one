@@ -25,8 +25,8 @@ collecting notes outside the interactive helper:
 
 ```bash
 .game-harness/scripts/run-same-order-comprehension-session.sh --recruitment
-.game-harness/scripts/run-same-order-comprehension-session.sh --session-kit-output /tmp/same-order-session-kit
-.game-harness/scripts/run-same-order-comprehension-session.sh --verify-session-kit /tmp/same-order-session-kit
+.game-harness/scripts/run-same-order-comprehension-session.sh --session-kit-output build/session-kits/same-order
+.game-harness/scripts/run-same-order-comprehension-session.sh --verify-session-kit build/session-kits/same-order
 .game-harness/scripts/run-same-order-comprehension-session.sh --facilitator-pack
 .game-harness/scripts/run-same-order-comprehension-session.sh --worksheet
 .game-harness/scripts/run-same-order-comprehension-session.sh --debrief

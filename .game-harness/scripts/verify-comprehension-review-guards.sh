@@ -12,7 +12,14 @@ if [[ -z "$APP_PATH" || -z "$ROUTE_EVIDENCE_PATH" ]]; then
   exit 1
 fi
 
-APP_BINARY="$APP_PATH/Contents/MacOS/Dream of One Godot Shell"
+if [[ -d "$APP_PATH" ]]; then
+  APP_BINARY="$APP_PATH/Contents/MacOS/Dream of One Godot Shell"
+elif [[ -f "$APP_PATH" ]]; then
+  APP_BINARY="$APP_PATH"
+else
+  echo "Missing packaged app or executable launcher: $APP_PATH" >&2
+  exit 1
+fi
 
 if [[ ! -x "$APP_BINARY" ]]; then
   echo "Missing packaged app executable: $APP_BINARY" >&2
@@ -26,7 +33,7 @@ fi
 
 APP_BINARY_SHA256="$(shasum -a 256 "$APP_BINARY" | awk '{print $1}')"
 ROUTE_EVIDENCE_SHA256="$(shasum -a 256 "$ROUTE_EVIDENCE_PATH" | awk '{print $1}')"
-TMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/same-order-review-guards.XXXXXX")"
+TMP_ROOT="$(mktemp -d)"
 trap 'rm -rf "$TMP_ROOT"' EXIT
 
 TESTER_INVITE_FORBIDDEN_TERMS=(
@@ -74,13 +81,12 @@ EXTERNAL_NOTES_LEDGER="$REPO_ROOT/.game-harness/comprehension/same-order-externa
 NEUTRAL_PRE_PLAY_LINE="Play this short scene without prior explanation until it stops or until 5 minutes pass."
 STALE_PRE_PLAY_LINE="Play this short Station intake path"
 
-if rg -n --fixed-strings -- "$STALE_PRE_PLAY_LINE" "$EXTERNAL_NOTES_LEDGER" >/tmp/same-order-stale-preplay.$$ 2>/dev/null; then
+STALE_PRE_PLAY_MATCHES="$TMP_ROOT/stale-preplay-matches.txt"
+if rg -n --fixed-strings -- "$STALE_PRE_PLAY_LINE" "$EXTERNAL_NOTES_LEDGER" >"$STALE_PRE_PLAY_MATCHES" 2>/dev/null; then
   echo "External comprehension notes still contain stale pre-play wording." >&2
-  cat /tmp/same-order-stale-preplay.$$ >&2
-  rm -f /tmp/same-order-stale-preplay.$$
+  cat "$STALE_PRE_PLAY_MATCHES" >&2
   exit 1
 fi
-rm -f /tmp/same-order-stale-preplay.$$
 
 if ! rg -n --fixed-strings -- "$NEUTRAL_PRE_PLAY_LINE" "$EXTERNAL_NOTES_LEDGER" >/dev/null; then
   echo "External comprehension notes do not include the neutral pre-play line." >&2
@@ -91,16 +97,15 @@ assert_tester_invite_has_no_spoilers() {
   local label="$1"
   local path="$2"
   local term
+  local invite_leak_matches="$TMP_ROOT/invite-leak-matches.txt"
   for term in "${TESTER_INVITE_FORBIDDEN_TERMS[@]}"; do
-    if rg -i -n --fixed-strings -- "$term" "$path" >/tmp/same-order-invite-leak.$$ 2>/dev/null; then
+    if rg -i -n --fixed-strings -- "$term" "$path" >"$invite_leak_matches" 2>/dev/null; then
       echo "Tester-facing invite leaks facilitator-only setup details: $label" >&2
       echo "Forbidden term: $term" >&2
-      cat /tmp/same-order-invite-leak.$$ >&2
-      rm -f /tmp/same-order-invite-leak.$$
+      cat "$invite_leak_matches" >&2
       exit 1
     fi
   done
-  rm -f /tmp/same-order-invite-leak.$$
 }
 
 RECRUITMENT_OUTPUT="$TMP_ROOT/recruitment-output.md"
@@ -230,7 +235,6 @@ const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 const probePath = path.join(kitDir, manifest.codexGameplayQa.copiedJsonFile);
 const probe = JSON.parse(fs.readFileSync(probePath, "utf8"));
 probe.finalSummary.agentActionLog = probe.finalSummary.agentActionLog.filter((action) => action.actorRole !== "station_officer");
-probe.finalSummary.civicLedger = probe.finalSummary.civicLedger.filter((event) => event.actorRole !== "station_officer");
 probe.aiPlayerReport.roleActionExplanation = probe.aiPlayerReport.roleActionExplanation.filter((line) => !line.includes("station_officer"));
 fs.writeFileSync(probePath, `${JSON.stringify(probe, null, 2)}\n`);
 manifest.codexGameplayQa.sourceJsonSha256 = crypto.createHash("sha256").update(fs.readFileSync(probePath)).digest("hex");

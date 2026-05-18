@@ -194,11 +194,11 @@ Current tester-ready entry:
 - Gate status helper:
   `.game-harness/scripts/run-same-order-comprehension-session.sh --status`
 - Facilitator kit helper:
-  `.game-harness/scripts/run-same-order-comprehension-session.sh --session-kit-output /tmp/same-order-session-kit`
+  `.game-harness/scripts/run-same-order-comprehension-session.sh --session-kit-output build/session-kits/same-order`
 - Codex gameplay QA refresh:
   `.game-harness/scripts/run-same-order-comprehension-session.sh --codex-probe --codex-probe-status`
 - Facilitator pack file helper:
-  `.game-harness/scripts/run-same-order-comprehension-session.sh --facilitator-pack-output /tmp/same-order-facilitator-pack.md`
+  `.game-harness/scripts/run-same-order-comprehension-session.sh --facilitator-pack-output build/session-kits/same-order/facilitator-pack.md`
 - No-spoiler recruitment helper:
   `.game-harness/scripts/run-same-order-comprehension-session.sh --recruitment`
 - After-play debrief helper:

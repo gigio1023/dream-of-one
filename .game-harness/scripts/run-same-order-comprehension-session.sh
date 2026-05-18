@@ -962,8 +962,8 @@ Minimal path when a fresh tester is present:
 
 Optional setup when recruiting or handing off to a facilitator:
   .game-harness/scripts/run-same-order-comprehension-session.sh --recruitment
-  .game-harness/scripts/run-same-order-comprehension-session.sh --session-kit-output /tmp/same-order-session-kit
-  .game-harness/scripts/run-same-order-comprehension-session.sh --verify-session-kit /tmp/same-order-session-kit
+  .game-harness/scripts/run-same-order-comprehension-session.sh --session-kit-output build/session-kits/same-order
+  .game-harness/scripts/run-same-order-comprehension-session.sh --verify-session-kit build/session-kits/same-order
 
 Only raw notes from observed fresh-player play can move this gate.
 EOF

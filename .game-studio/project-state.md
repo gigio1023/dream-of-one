@@ -1,6 +1,6 @@
 # Game Studio Project State
 
-Last updated: 2026-05-18
+Last updated: 2026-05-19
 
 This file records how Game Studio guidance is applied to Dream of One. It does not replace `.game-harness/`, which remains the current execution harness for M1 handoffs, reviews, evidence, and drift.
 
@@ -176,6 +176,10 @@ Current M1 carry-in:
   include `보는 환경` with readable object/state pairs and export
   `visibleEnvironmentObjectLabels`, so a player can see which props and shared
   values the NPC is using before reading the action basis.
+- latest small-slice carry-in: inspecting an NPC now also shows short
+  NPC-to-NPC exchange lines as `오간 말` and exports `socialExchangeLines`.
+  Waiting Customer contact refusal now reads as a spoken social exchange from
+  Station Officer to Waiting Customer, not just a marker or ledger result.
 - latest small-slice carry-in: repair recovery now leaves a player-readable
   public environment record and one small cross-place consequence. Park Witness
   `post_repair_notice` sets `park_notice_board=repaired`; Studio PM reads that

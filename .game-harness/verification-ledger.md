@@ -262,6 +262,14 @@ and Waiting Customer inspection shows `보는 환경` with the queue mark, count
 usual-order cue, Park board, and civic economy. Codex gameplay QA fails if
 those player-readable perception labels disappear.
 
+Latest NPC social-exchange addendum: visible NPC inspection now shows short
+`오간 말` lines for observed NPC-to-NPC exchanges. In the inquest route, Waiting
+Customer inspection shows a Station Officer -> Waiting Customer exchange ending
+with "스테이션이 인용했으면 저는 말 섞지 않겠습니다." and exports the same value
+as `socialExchangeLines`. Codex gameplay QA now requires
+`canReadNpcSocialExchange=true`, so the refusal cannot regress into a private
+ledger transition without a player-readable exchange.
+
 Latest Store Clerk record-action addendum: Codex/player now inspects the Store
 Clerk before downstream NPCs and reads the Clerk's own record-making basis.
 The Clerk inspection shows `들은 말`, `보는 환경`, `civic-ledger-2 / 상점 점원 ->

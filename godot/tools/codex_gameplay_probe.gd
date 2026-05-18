@@ -783,6 +783,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Codex/player did not inspect the Studio PM opportunity change")
 	if not bool(checks.get("visibleWaitingCustomerReaction", false)):
 		failures.append("Waiting Customer reaction is not visible on a spawned NPC")
+	if not bool(checks.get("codexReadNpcSocialExchange", false)):
+		failures.append("Codex/player did not read the inspected NPC's overheard NPC-to-NPC exchange")
 	if not str(hud_snapshot.get("noticeBodyLabel", "")).contains("접촉 거부"):
 		failures.append("HUD notice does not explain the inspected Waiting Customer contact refusal")
 	return failures
@@ -820,6 +822,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"codexInspectedStudioPm": _inspected_studio_pm_block(summary),
 		"codexInspectedStudioOpportunityChange": _inspected_studio_pm_opportunity_block(summary),
 		"codexReadNpcSpokenReaction": _inspected_npc_spoken_reactions(summary),
+		"codexReadNpcSocialExchange": _inspected_npc_social_exchange(summary),
 		"economyPanelReadable": _economy_panel_readable(record_props),
 		"codexInspectedCivicEconomyPanel": _inspected_civic_economy_panel(summary),
 		"codexInspectedCivicLedgerSocialChain": _inspected_civic_ledger_social_chain(summary),
@@ -862,6 +865,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canInspectCrossPlaceOpportunityChange": bool(checks.get("codexInspectedStudioOpportunityChange", false)),
 		"canInspectNpcReaction": bool(checks.get("codexInspectedWaitingCustomer", false)),
 		"canReadNpcSpokenReaction": bool(checks.get("codexReadNpcSpokenReaction", false)),
+		"canReadNpcSocialExchange": bool(checks.get("codexReadNpcSocialExchange", false)),
 		"canReadExactStationCitation": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"canReadCivicEconomyPressure": bool(checks.get("economyPanelReadable", false)),
 		"canInspectCivicEconomyChange": bool(checks.get("codexInspectedCivicEconomyPanel", false)),
@@ -916,9 +920,9 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 				"Codex/player inspected the civic ledger to read the NPC-to-NPC social chain as a player-facing timeline.",
 				"Codex/player inspected the Station Officer to read which Store record was cited, what Station document was used, and why the player became the target of formal questioning.",
 				"Codex/player snapshot exposed actor memory, showing which ledger events a role observed before choosing the next validated action.",
-				"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, and cited ledger basis.",
+				"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, cited ledger basis, and overheard NPC-to-NPC exchange.",
 				"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
-		],
+			],
 		"roleActionExplanation": _role_action_explanation(summary),
 		"socialObservationExplanation": _social_observation_explanation(summary),
 		"humanTesterBoundary": "This proves Codex can play and inspect the current build. It does not prove fresh players understood it; external notes remain required.",
@@ -1688,6 +1692,22 @@ func _inspected_npc_spoken_reactions(summary: Dictionary) -> bool:
 		and _inspected_waiting_customer(summary)
 		and _inspected_studio_pm_block(summary)
 		and _inspected_studio_pm_opportunity_block(summary)
+	)
+
+func _inspected_npc_social_exchange(summary: Dictionary) -> bool:
+	var inspected := _inspected_npc_candidate(summary, "NPC_Waiting_Customer", "refused")
+	if inspected.is_empty():
+		return false
+	var body := str(inspected.get("body", ""))
+	var exchange_lines: Variant = inspected.get("socialExchangeLines", [])
+	return (
+		body.contains("오간 말")
+		and body.contains("Station Officer")
+		and body.contains("Waiting Customer")
+		and body.contains("말 섞지 않겠습니다")
+		and _string_array_has_fragment(exchange_lines, "Station Officer")
+		and _string_array_has_fragment(exchange_lines, "Waiting Customer")
+		and _string_array_has_fragment(exchange_lines, "말 섞지 않겠습니다")
 	)
 
 func _inspected_npc_candidate(summary: Dictionary, npc_id: String, state: String) -> Dictionary:

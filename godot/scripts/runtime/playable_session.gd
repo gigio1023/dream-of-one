@@ -2067,9 +2067,12 @@ func _social_observation_trace() -> Array[Dictionary]:
 		if observed.is_empty():
 			continue
 		var economy: Dictionary = observed.get("economyAfter", {})
-		observations.append({
-			"observerActorId": str(action.get("actorId", "")),
+		var observed_actor_id := str(observed.get("actorId", ""))
+		var observer_actor_id := str(action.get("actorId", ""))
+		var observation := {
+			"observerActorId": observer_actor_id,
 			"observerRole": str(action.get("actorRole", "")),
+			"observedActorId": observed_actor_id,
 			"observedLedgerEventId": str(observed.get("ledgerEventId", "")),
 			"observedActorRole": str(observed.get("actorRole", "")),
 			"observedAffordance": str(observed.get("affordance", "")),
@@ -2087,7 +2090,11 @@ func _social_observation_trace() -> Array[Dictionary]:
 				str(observed.get("affordance", "")),
 				str(action.get("affordance", ""))
 			]
-		})
+		}
+		observation["observedSpokenLine"] = _npc_spoken_line_by_id(observed_actor_id)
+		observation["observerSpokenLine"] = _npc_spoken_line_by_id(observer_actor_id)
+		observation["exchangeLine"] = _format_social_exchange_line(observation)
+		observations.append(observation)
 	return observations
 
 func _actor_memory_snapshot() -> Dictionary:
@@ -2132,11 +2139,16 @@ func _actor_memory_entry(actor_id: String) -> Dictionary:
 		var observed_ledger_event_id := str(observation.get("observedLedgerEventId", ""))
 		known_ledger_event_ids = _append_unique_string(known_ledger_event_ids, observed_ledger_event_id)
 		observed_actions.append({
+			"observedActorId": str(observation.get("observedActorId", "")),
+			"observerActorId": str(observation.get("observerActorId", "")),
 			"observedLedgerEventId": observed_ledger_event_id,
 			"observedActorRole": str(observation.get("observedActorRole", "")),
 			"observedAffordance": str(observation.get("observedAffordance", "")),
 			"observedObjectId": str(observation.get("observedObjectId", "")),
 			"resultingAffordance": str(observation.get("resultingAffordance", "")),
+			"observedSpokenLine": str(observation.get("observedSpokenLine", "")),
+			"observerSpokenLine": str(observation.get("observerSpokenLine", "")),
+			"exchangeLine": str(observation.get("exchangeLine", "")),
 			"whyLine": str(observation.get("whyLine", ""))
 		})
 		if observed_actions.size() > 4:
@@ -2788,6 +2800,9 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 	var visible_environment_object_labels := _visible_environment_object_labels(visible_environment_objects)
 	if not visible_environment_object_labels.is_empty():
 		body_lines.append("보는 환경: %s" % ", ".join(visible_environment_object_labels))
+	var social_exchange_lines := _npc_social_exchange_lines(npc_id, 2)
+	for exchange_line in social_exchange_lines:
+		body_lines.append("오간 말: %s" % exchange_line)
 	var basis_action := _latest_accepted_action_for_actor(npc_id)
 	var basis_event_id := ""
 	var basis_affordance := ""
@@ -2843,6 +2858,7 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 	inspected_npc_state["spokenLine"] = spoken_line
 	inspected_npc_state["visibleEnvironmentObjects"] = visible_environment_objects
 	inspected_npc_state["visibleEnvironmentObjectLabels"] = visible_environment_object_labels
+	inspected_npc_state["socialExchangeLines"] = social_exchange_lines
 	if not basis_action.is_empty():
 		inspected_npc_state["basisAction"] = basis_action.duplicate(true)
 		inspected_npc_state["basisLedgerEventId"] = basis_event_id
@@ -2875,6 +2891,78 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		}
 	)
 	return {"ok": true, "inspectedNpcState": inspected_npc_state.duplicate(true)}
+
+func _npc_social_exchange_lines(npc_id: String, limit: int) -> PackedStringArray:
+	var lines := PackedStringArray()
+	if limit <= 0:
+		return lines
+	var actor_role := str(ACTOR_AGENT_ROLES.get(npc_id, ""))
+	if actor_role.is_empty():
+		return lines
+	var observations := _social_observation_trace()
+	for index in range(observations.size() - 1, -1, -1):
+		var observation: Dictionary = observations[index]
+		if str(observation.get("observerRole", "")) != actor_role:
+			continue
+		var line := str(observation.get("exchangeLine", "")).strip_edges()
+		if line.is_empty():
+			line = _format_social_exchange_line(observation)
+		if line.is_empty():
+			continue
+		lines.append(line)
+		if lines.size() >= limit:
+			break
+	return lines
+
+func _format_social_exchange_line(observation: Dictionary) -> String:
+	var observed_actor_id := str(observation.get("observedActorId", ""))
+	var observer_actor_id := str(observation.get("observerActorId", ""))
+	var observed_label := _actor_display_name(observed_actor_id)
+	var observer_label := _actor_display_name(observer_actor_id)
+	var observed_line := str(observation.get("observedSpokenLine", "")).strip_edges()
+	var observer_line := str(observation.get("observerSpokenLine", "")).strip_edges()
+	if observed_label.is_empty():
+		observed_label = _actor_role_label(str(observation.get("observedActorRole", "")))
+	if observer_label.is_empty():
+		observer_label = _actor_role_label(str(observation.get("observerRole", "")))
+	if observed_line.is_empty():
+		observed_line = _affordance_label(str(observation.get("observedAffordance", "")))
+	if observer_line.is_empty():
+		observer_line = _affordance_label(str(observation.get("resultingAffordance", "")))
+	if observed_label.is_empty() or observer_label.is_empty() or observed_line.is_empty() or observer_line.is_empty():
+		return ""
+	return "%s \"%s\" -> %s \"%s\"" % [
+		observed_label,
+		observed_line,
+		observer_label,
+		observer_line
+	]
+
+func _actor_display_name(actor_id: String) -> String:
+	if actor_id.is_empty():
+		return ""
+	var states := _visible_npc_states()
+	if states.has(actor_id):
+		var state: Dictionary = states.get(actor_id, {})
+		var display_name := str(state.get("displayName", "")).strip_edges()
+		if not display_name.is_empty():
+			return display_name
+	var actor_role := str(ACTOR_AGENT_ROLES.get(actor_id, ""))
+	if not actor_role.is_empty():
+		return _actor_role_label(actor_role)
+	return actor_id
+
+func _npc_spoken_line_by_id(actor_id: String) -> String:
+	if actor_id.is_empty():
+		return ""
+	for node in _local_group_nodes(&"npc_placeholders"):
+		if str(node.get_meta("npc_id", "")) != actor_id:
+			continue
+		if node.has_method("debug_reaction_snapshot"):
+			var snapshot: Variant = node.call("debug_reaction_snapshot")
+			if snapshot is Dictionary:
+				return _npc_spoken_reaction_line(actor_id, snapshot)
+	return ""
 
 func _visible_environment_object_labels(objects: Array[Dictionary]) -> PackedStringArray:
 	var labels := PackedStringArray()

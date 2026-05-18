@@ -1,6 +1,6 @@
 # Goal Loop State
 
-Last Updated: 2026-05-18
+Last Updated: 2026-05-19
 Mode: lightweight Ralph-style persistence
 Status: active-local-work; Codex thread goal may report paused, but repo work
 continues from this state file until the external blocker is resolved.
@@ -80,7 +80,7 @@ Latest completion audit:
   and packaged-route evidence.
 - latest Codex gameplay QA artifact reports `ok=true`,
   `aiPlayerReport.pass=true`, 31 accepted public actions, 5/5 route reports,
-  all 29 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
+  all 31 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
   no-live provider packet readiness for bounded `actorMemory` plus
   `actorPolicy`. It now also proves Codex/player can read the Store Clerk's
   visible environment cues in the live prompt before choosing speech, then
@@ -95,7 +95,10 @@ Latest completion audit:
   rumor line; the Officer inspection names the cited Store Manager ledger,
   Station document target, `대상=플레이어`, comparison focus, inquest authority,
   visible environment context, and spoken intake line before downstream NPC
-  reactions.
+  reactions. Waiting Customer inspection now also shows `오간 말` social
+  exchange lines and exports `socialExchangeLines`, so the player/Codex can
+  read the Station Officer -> Waiting Customer spoken exchange behind contact
+  refusal.
   It also explicitly marks itself as not a replacement for external
   comprehension.
 - latest packaged-route evidence validates as a Godot Evidence Pack and
@@ -304,21 +307,22 @@ Latest status check:
   `testerFacingFiles=["tester-invite.md"]`, `humanEvidence=false`, and
   `closesGoal=false`; it is setup material only, not comprehension evidence.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `f683ae68d448ac326fe78045f0784bcec0eb80c1939add31387dfa5da5b878f5`
-  - Markdown SHA-256: `8a05c8f68c14beb72518dfc382cc93bd1e72f5b2dad9e51d49e79fb905db59d0`
-  - playable Evidence Pack SHA-256: `dd69a70384e218c58ff2e5a6ee6b58f6cbada43b82225d2f6ea7cd1ad43bc64d`
+  - JSON SHA-256: `d806e7e024f2b97aebf13ff2c3e557c41918926f735106de714d8505919b6723`
+  - Markdown SHA-256: `a9531c9b58a2bf60332827361a1bfab984b243db046564b4ccd86c9b1f6096f9`
+  - playable Evidence Pack SHA-256: `64e8c495a2ac8fd336426efd450f3f3f2eed3f22f45541d18f8d93d2dcde68fa`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
 
 Latest AI-play interface check:
 - command: `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `31 / 31`, `explainability=29/29`, conversation visible
+  player actions `31 / 31`, `explainability=31/31`, conversation visible
   context in the live Store Clerk prompt, Store Clerk record-action inspection,
   Store Manager handoff inspection, Park Witness public-spread inspection,
   Station Officer authority-citation inspection, Studio PM cross-place
-  opportunity inspection, actor memory for observed NPC decisions, no-live
-  provider packet memory and actor-policy readiness, and
+  opportunity inspection, Waiting Customer social-exchange inspection, actor
+  memory for observed NPC decisions, no-live provider packet memory and
+  actor-policy readiness, and
   `routeReportPassCount=5 / 5` with Godot
   `4.7.beta2.official.777579205` from local `GODOT_BIN`.
 - latest game increment: the live Store Clerk conversation prompt now exposes

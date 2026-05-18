@@ -218,6 +218,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   Waiting Customer HUD notices now include `보는 환경` plus
   `visibleEnvironmentObjectLabels`, so the player can read which props and
   shared values the NPC is currently acting from.
+- [x] Make visible NPC inspection show overheard NPC-to-NPC exchange lines:
+  Waiting Customer inspection now shows `오간 말` and exports
+  `socialExchangeLines`, so the player can read which actor's spoken line led
+  into the current social response.
 - [x] Make Store Clerk record-making readable through NPC inspection: Codex/player
   can inspect the Clerk after typed speech and read `메모 배치`, the report tray
   basis, visible environment objects, spoken handoff line, and tiny value

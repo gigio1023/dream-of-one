@@ -121,6 +121,10 @@ Last Updated: 2026-05-18
   `들은 말` line and exports `spokenLine`, so inspecting Studio PM or Waiting
   Customer reads the actual social refusal/blocking line that came from the
   record they saw, not only a state label.
+- Latest implementation slice: NPC reaction inspection now also shows `오간 말`
+  exchange lines and exports `socialExchangeLines`. Codex gameplay QA verifies
+  `canReadNpcSocialExchange=true`, proving the player can read the Station
+  Officer -> Waiting Customer spoken exchange behind contact refusal.
 - Latest implementation slice: Store Clerk can now be inspected as the first
   record-making actor after typed inquest-triggering speech. Codex gameplay QA
   focuses the Clerk, interacts, and reads `메모 배치`, report-tray basis,

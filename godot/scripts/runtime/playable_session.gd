@@ -661,6 +661,7 @@ func debug_live_provider_packet(session_id_override: String = "", actor_id_overr
 			"role": actor_role,
 			"duty": _provider_duty_for_actor(actor_id, actor_role),
 			"roleVoicePolicy": _provider_role_voice_policy(actor_id, actor_role),
+			"actorPolicy": _provider_actor_policy(actor_id, actor_role),
 			"currentActorState": _provider_actor_state(actor_id),
 			"actorMemory": _actor_memory_entry(actor_id),
 			"currentPromptId": current_prompt_id,
@@ -724,6 +725,56 @@ func _provider_role_voice_policy(actor_id: String, actor_role: String) -> String
 		"NPC_Station_Officer":
 			return "Use Station procedure voice. Ask from cited records without deciding verdicts."
 	return "Use %s voice only. Do not speak as the player or change deterministic state." % actor_role
+
+func _provider_actor_policy(actor_id: String, actor_role: String) -> Dictionary:
+	var base_forbidden := [
+		"do_not_invent_hidden_events",
+		"do_not_infer_private_player_intent",
+		"do_not_create_records_or_ledger_events",
+		"do_not_choose_exposure_inquest_verdict_or_session_end"
+	]
+	match actor_id:
+		"NPC_Store_Clerk":
+			return {
+				"stableGoals": ["keep_service_moving", "keep_receipts_clean"],
+				"priorityShifts": ["record_burden_makes_correction_or_note_more_attractive"],
+				"actionSelectionPolicy": "choose wording from visible Store procedure and current tool catalog only",
+				"forbiddenClaims": base_forbidden
+			}
+		"NPC_Waiting_Customer":
+			return {
+				"stableGoals": ["keep_queue_moving", "avoid_public_disruption"],
+				"priorityShifts": ["public_vouch_can_unlock_help", "public_warning_can_unlock_distance", "station_citation_can_unlock_refusal"],
+				"actionSelectionPolicy": "react only to visible queue, public records, actorMemory, and current tool catalog",
+				"forbiddenClaims": base_forbidden
+			}
+		"NPC_Park_Witness":
+			return {
+				"stableGoals": ["make_public_norms_visible", "avoid_private_station_claims"],
+				"priorityShifts": ["routine_record_can_become_vouch", "wary_record_can_become_warning", "repair_record_can_become_notice"],
+				"actionSelectionPolicy": "comment only on public board facts and observed records",
+				"forbiddenClaims": base_forbidden
+			}
+		"NPC_Studio_PM":
+			return {
+				"stableGoals": ["protect_review_gate", "respect_public_records"],
+				"priorityShifts": ["public_vouch_opens_review", "public_warning_defers_review", "station_citation_blocks_review"],
+				"actionSelectionPolicy": "speak only from review access state, public records, and actorMemory",
+				"forbiddenClaims": base_forbidden
+			}
+		"NPC_Station_Officer":
+			return {
+				"stableGoals": ["reconcile_records", "cite_exact_known_records"],
+				"priorityShifts": ["forwarded_store_report_opens_station_citation"],
+				"actionSelectionPolicy": "ask only from known ledger citations and intake procedure",
+				"forbiddenClaims": base_forbidden
+			}
+	return {
+		"stableGoals": ["stay_in_role"],
+		"priorityShifts": [],
+		"actionSelectionPolicy": "use only visible context and actorMemory",
+		"forbiddenClaims": base_forbidden
+	}
 
 func _provider_duty_for_actor(actor_id: String, actor_role: String) -> String:
 	match actor_id:

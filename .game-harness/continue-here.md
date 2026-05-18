@@ -84,6 +84,11 @@ Last Updated: 2026-05-18
   `socialObservationTrace`. This makes NPC memory bounded to own actions plus
   ledger events the role observed, and the probe verifies
   `canReadActorMemory=true` without spending live LLM budget.
+- Latest implementation slice: live provider packets now also expose
+  `actorPolicy` with stable goals, priority shifts, action-selection policy,
+  and forbidden claims. Codex gameplay QA checks the Waiting Customer packet can
+  read the queue goal and Station-citation refusal priority without a live LLM
+  call.
 - Latest implementation slice: `usual_order_cue` is now a player-readable
   normal-procedure prop before the Store Clerk prompt. Codex gameplay QA first
   focuses and inspects it, then continues through the inquest path; current

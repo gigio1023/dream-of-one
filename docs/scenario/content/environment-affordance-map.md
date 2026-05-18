@@ -216,6 +216,10 @@ Implemented now:
   events it observed through `socialObservationTrace`. This is bounded memory
   context for QA/provider prompts; it does not grant authority to invent hidden
   state or mutate records.
+- Live provider packets also expose `actorPolicy`: stable role goals, priority
+  shifts, action-selection policy, and forbidden claims. This keeps provider
+  context focused on role policy and observed state instead of broad free-form
+  reasoning over the whole 3D action space.
 
 Not implemented yet:
 

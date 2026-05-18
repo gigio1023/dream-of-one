@@ -9538,14 +9538,14 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779101858312",
+				"eventId": "playable_session_started-001-1779102083531",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779101858312,
+				"timestampMs": 1779102083531,
 				"uiSummaryArgs": {
 
 				},
@@ -9556,7 +9556,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-002-1779101858709",
+				"eventId": "world_record_prop_inspected-002-1779102083907",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "usual_order_cue",
 				"schemaVersion": "godot-runtime-v1",
@@ -9564,7 +9564,7 @@
 				"state": "read",
 				"stateLabel": "읽힘",
 				"summary": "Inspected world record prop usual_order_cue in state read.",
-				"timestampMs": 1779101858709,
+				"timestampMs": 1779102083907,
 				"uiSummaryArgs": {
 					"object": "늘 같은 주문",
 					"state": "읽힘"
@@ -9582,13 +9582,13 @@
 					"DL_ST1_APPROVAL_GATE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-003-1779101858835",
+				"eventId": "text_surface_read-003-1779102084034",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Studio_ApprovalCriteria as local context before speaking.",
 				"textSurfaceId": "TS_Studio_ApprovalCriteria",
-				"timestampMs": 1779101858835,
+				"timestampMs": 1779102084034,
 				"uiSummaryArgs": {
 					"law": "DL_ST1_APPROVAL_GATE",
 					"surface": "승인 기준"
@@ -9606,13 +9606,13 @@
 					"DL_P1_OBSERVATION_ETIQUETTE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-004-1779101859028",
+				"eventId": "text_surface_read-004-1779102084224",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Park_NoticeBoard as local context before speaking.",
 				"textSurfaceId": "TS_Park_NoticeBoard",
-				"timestampMs": 1779101859028,
+				"timestampMs": 1779102084224,
 				"uiSummaryArgs": {
 					"law": "DL_P1_OBSERVATION_ETIQUETTE",
 					"surface": "공지 게시판"
@@ -9628,7 +9628,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-005-1779101859243",
+				"eventId": "conversation_started-005-1779102084447",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -9637,7 +9637,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779101859243,
+				"timestampMs": 1779102084447,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -9650,7 +9650,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-006-1779101859404",
+				"eventId": "response_hesitation_noted-006-1779102084606",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -9671,7 +9671,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779101859404,
+				"timestampMs": 1779102084606,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -9686,7 +9686,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-007-1779101859505",
+				"eventId": "dialogue_choice_selected-007-1779102084704",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -9708,7 +9708,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101859505,
+				"timestampMs": 1779102084704,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -9723,7 +9723,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779101859505",
+				"eventId": "conversation_anomaly_detected-008-1779102084704",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -9745,7 +9745,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101859505,
+				"timestampMs": 1779102084704,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -9760,7 +9760,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779101859505",
+				"eventId": "npc_suspicion_changed-009-1779102084704",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -9782,7 +9782,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101859505,
+				"timestampMs": 1779102084704,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -9797,7 +9797,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-010-1779101859661",
+				"eventId": "free_input_submitted-010-1779102084862",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9822,7 +9822,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101859661,
+				"timestampMs": 1779102084862,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9837,7 +9837,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-011-1779101859661",
+				"eventId": "conversation_anomaly_detected-011-1779102084862",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9862,7 +9862,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101859661,
+				"timestampMs": 1779102084862,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9877,7 +9877,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-012-1779101859661",
+				"eventId": "npc_suspicion_changed-012-1779102084862",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9902,7 +9902,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101859661,
+				"timestampMs": 1779102084862,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9917,7 +9917,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-013-1779101859661",
+				"eventId": "suspicion_shared-013-1779102084862",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9942,7 +9942,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101859661,
+				"timestampMs": 1779102084862,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9957,7 +9957,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-014-1779101859662",
+				"eventId": "station_report_created-014-1779102084863",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9982,7 +9982,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101859662,
+				"timestampMs": 1779102084863,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9997,7 +9997,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-015-1779101859663",
+				"eventId": "station_inquest_opened-015-1779102084864",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -10022,7 +10022,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779101859663,
+				"timestampMs": 1779102084864,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -10032,7 +10032,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-016-1779101860161",
+				"eventId": "world_record_prop_inspected-016-1779102085360",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -10040,7 +10040,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779101860161,
+				"timestampMs": 1779102085360,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -10052,7 +10052,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-017-1779101860447",
+				"eventId": "world_record_prop_inspected-017-1779102085645",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "studio_review_queue",
 				"schemaVersion": "godot-runtime-v1",
@@ -10060,7 +10060,7 @@
 				"state": "blocked",
 				"stateLabel": "차단",
 				"summary": "Inspected world record prop studio_review_queue in state blocked.",
-				"timestampMs": 1779101860447,
+				"timestampMs": 1779102085645,
 				"uiSummaryArgs": {
 					"object": "스튜디오 리뷰 줄",
 					"state": "차단"
@@ -10072,7 +10072,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-018-1779101860669",
+				"eventId": "world_record_prop_inspected-018-1779102085896",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_economy_panel",
 				"schemaVersion": "godot-runtime-v1",
@@ -10080,7 +10080,7 @@
 				"state": "attention",
 				"stateLabel": "주목 상승",
 				"summary": "Inspected world record prop civic_economy_panel in state attention.",
-				"timestampMs": 1779101860669,
+				"timestampMs": 1779102085896,
 				"uiSummaryArgs": {
 					"object": "시민 경제",
 					"state": "주목 상승"
@@ -10092,7 +10092,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-019-1779101860836",
+				"eventId": "world_record_prop_inspected-019-1779102086062",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_ledger",
 				"schemaVersion": "godot-runtime-v1",
@@ -10100,7 +10100,7 @@
 				"state": "append_only",
 				"stateLabel": "추가됨",
 				"summary": "Inspected world record prop civic_ledger in state append_only.",
-				"timestampMs": 1779101860836,
+				"timestampMs": 1779102086062,
 				"uiSummaryArgs": {
 					"object": "시민 장부",
 					"state": "추가됨"
@@ -10112,7 +10112,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-020-1779101861024",
+				"eventId": "npc_reaction_inspected-020-1779102086265",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Studio_PM",
 				"reactionText": "리뷰 차단",
@@ -10120,7 +10120,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "blocked",
 				"summary": "Inspected NPC reaction NPC_Studio_PM in state blocked.",
-				"timestampMs": 1779101861024,
+				"timestampMs": 1779102086265,
 				"uiSummaryArgs": {
 					"npc": "Studio PM",
 					"state": "리뷰 차단"
@@ -10132,7 +10132,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-021-1779101861192",
+				"eventId": "npc_reaction_inspected-021-1779102086431",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Waiting_Customer",
 				"reactionText": "접촉 거부",
@@ -10140,7 +10140,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "refused",
 				"summary": "Inspected NPC reaction NPC_Waiting_Customer in state refused.",
-				"timestampMs": 1779101861192,
+				"timestampMs": 1779102086431,
 				"uiSummaryArgs": {
 					"npc": "Waiting Customer",
 					"state": "접촉 거부"
@@ -16448,6 +16448,24 @@
 				"store_counter",
 				"usual_order_cue",
 				"park_notice_board"
+			]
+		},
+		"actorPolicy": {
+			"actionSelectionPolicy": "react only to visible queue, public records, actorMemory, and current tool catalog",
+			"forbiddenClaims": [
+				"do_not_invent_hidden_events",
+				"do_not_infer_private_player_intent",
+				"do_not_create_records_or_ledger_events",
+				"do_not_choose_exposure_inquest_verdict_or_session_end"
+			],
+			"priorityShifts": [
+				"public_vouch_can_unlock_help",
+				"public_warning_can_unlock_distance",
+				"station_citation_can_unlock_refusal"
+			],
+			"stableGoals": [
+				"keep_queue_moving",
+				"avoid_public_disruption"
 			]
 		},
 		"environmentToolCount": 0,

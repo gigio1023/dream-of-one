@@ -285,11 +285,15 @@ func _provider_packet_memory_probe(session: Node) -> Dictionary:
 	var provider_packet: Dictionary = packet
 	var organization_context: Dictionary = provider_packet.get("organizationContext", {})
 	var actor_memory: Dictionary = organization_context.get("actorMemory", {})
+	var actor_policy: Dictionary = organization_context.get("actorPolicy", {})
 	var probe_pass := (
 		str(provider_packet.get("npcId", "")) == "NPC_Waiting_Customer"
 		and str(actor_memory.get("actorRole", "")) == "waiting_customer"
 		and _actor_memory_has_observation(actor_memory, "station_officer", "cite_record", "refuse_contact")
 		and _actor_memory_has_own_action(actor_memory, "refuse_contact")
+		and Array(actor_policy.get("stableGoals", [])).has("keep_queue_moving")
+		and Array(actor_policy.get("priorityShifts", [])).has("station_citation_can_unlock_refusal")
+		and Array(actor_policy.get("forbiddenClaims", [])).has("do_not_infer_private_player_intent")
 	)
 	return {
 		"pass": probe_pass,
@@ -297,6 +301,7 @@ func _provider_packet_memory_probe(session: Node) -> Dictionary:
 		"role": str(organization_context.get("role", "")),
 		"providerJobId": str(organization_context.get("providerJobId", "")),
 		"actorMemory": actor_memory,
+		"actorPolicy": actor_policy,
 		"environmentToolCount": Array(organization_context.get("environmentToolCatalog", [])).size(),
 		"recentEvents": provider_packet.get("recentEvents", [])
 	}

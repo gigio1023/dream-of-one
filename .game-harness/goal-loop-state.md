@@ -245,7 +245,7 @@ Latest status check:
   `testerFacingFiles=["tester-invite.md"]`, `humanEvidence=false`, and
   `closesGoal=false`; it is setup material only, not comprehension evidence.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `750ef286361eada6c3f2fe3de1ac98c8c5d9cb25e392639c4474fb95499f20c8`
+  - JSON SHA-256: `7116b486d7c8481e6b74de0094fd2de8d234527989b4e632ea7790135ab5af1d`
   - Markdown SHA-256: `10b059b69b3ad77b04ccc5e56c0131de72671056d9514139f731a723511e3f40`
   - playable Evidence Pack SHA-256: `dd69a70384e218c58ff2e5a6ee6b58f6cbada43b82225d2f6ea7cd1ad43bc64d`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
@@ -255,7 +255,7 @@ Latest AI-play interface check:
 - command: `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `23 / 23`, `explainability=23/23`, actor memory for observed
-  NPC decisions, no-live provider packet memory readiness, and
+  NPC decisions, no-live provider packet memory and actor-policy readiness, and
   `routeReportPassCount=5 / 5` with Godot
   `4.6.2.stable.official.71f334935` from a temporary local `GODOT_BIN`.
 - latest local pack-route check: `$GODOT_BIN --headless --path godot

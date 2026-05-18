@@ -102,6 +102,11 @@ Current M1 carry-in:
   `offer_conditional_review`, sets `studio_review_queue=conditional`, and shows
   `조건부 리뷰`. Codex gameplay QA inspects both the repaired Park notice board
   and the conditional Studio review queue.
+- latest small-slice carry-in: world-record prop inspection now distinguishes
+  broad action possibility from currently open actions. A blocked review queue
+  still teaches which role/actions belong to that record, but now also states
+  `현재 열린 행동: 없음`; an active public board shows the actions currently
+  available in that object state.
 - latest small-slice carry-in: inspecting visible NPC reactions now shows the
   action gates behind them. Studio PM and Waiting Customer inspection bodies
   include `가능 조건` for object state and cited ledger requirements plus

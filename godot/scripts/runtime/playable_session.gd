@@ -2397,8 +2397,14 @@ func _inspect_world_record_prop(object_id: String) -> Dictionary:
 	var body := _world_record_prop_inspection_body(object_id, state)
 	var reader_role_labels := _world_record_prop_reader_role_labels(object_id)
 	var possible_affordance_labels := _world_record_prop_affordance_labels(object_id)
+	var current_affordance_labels := _world_record_prop_current_affordance_labels(object_id)
 	var recent_ledger_events := _world_record_prop_recent_ledger_events(object_id, 3)
-	var social_lines := _world_record_prop_social_lines(reader_role_labels, possible_affordance_labels, recent_ledger_events)
+	var social_lines := _world_record_prop_social_lines(
+		reader_role_labels,
+		possible_affordance_labels,
+		current_affordance_labels,
+		recent_ledger_events
+	)
 	if not social_lines.is_empty():
 		body = "%s\n%s" % [body, "\n".join(social_lines)]
 	inspected_world_record_prop = {
@@ -2410,6 +2416,7 @@ func _inspect_world_record_prop(object_id: String) -> Dictionary:
 		"body": body,
 		"readerRoleLabels": reader_role_labels,
 		"possibleAffordanceLabels": possible_affordance_labels,
+		"currentAffordanceLabels": current_affordance_labels,
 		"recentLedgerEvents": recent_ledger_events
 	}
 	inspected_world_record_history.append(inspected_world_record_prop.duplicate(true))
@@ -2714,12 +2721,21 @@ func _world_record_prop_inspection_body(object_id: String, state: String) -> Str
 		return "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어집니다."
 	return "%s 상태입니다. 이 기록은 NPC가 볼 수 있는 환경 단서이며, 다음 역할 행동의 근거가 될 수 있습니다." % _record_state_value(state)
 
-func _world_record_prop_social_lines(reader_role_labels: Array[String], possible_affordance_labels: Array[String], recent_ledger_events: Array[Dictionary]) -> PackedStringArray:
+func _world_record_prop_social_lines(
+	reader_role_labels: Array[String],
+	possible_affordance_labels: Array[String],
+	current_affordance_labels: Array[String],
+	recent_ledger_events: Array[Dictionary]
+) -> PackedStringArray:
 	var lines := PackedStringArray()
 	if not reader_role_labels.is_empty():
 		lines.append("읽는 역할: %s" % ", ".join(reader_role_labels))
 	if not possible_affordance_labels.is_empty():
 		lines.append("행동 가능성: %s" % ", ".join(possible_affordance_labels))
+		if current_affordance_labels.is_empty():
+			lines.append("현재 열린 행동: 없음")
+		else:
+			lines.append("현재 열린 행동: %s" % ", ".join(current_affordance_labels))
 	if not recent_ledger_events.is_empty():
 		var compact_events := PackedStringArray()
 		for event in recent_ledger_events:
@@ -2761,6 +2777,36 @@ func _world_record_prop_affordance_labels(object_id: String) -> Array[String]:
 		else:
 			labels.append("%s(%s)" % [_affordance_label(affordance), ", ".join(role_labels)])
 	return labels
+
+func _world_record_prop_current_affordance_labels(object_id: String) -> Array[String]:
+	var labels: Array[String] = []
+	var seen := {}
+	var roles: Array = OBJECT_VISIBILITY.get(object_id, [])
+	var known_ledger_event_ids := _all_civic_ledger_event_ids()
+	for role in roles:
+		for action in _available_role_agent_actions(str(role), known_ledger_event_ids):
+			if not action is Dictionary:
+				continue
+			var descriptor: Dictionary = action
+			if str(descriptor.get("objectId", "")) != object_id:
+				continue
+			var affordance := str(descriptor.get("affordance", ""))
+			var label := "%s(%s)" % [_affordance_label(affordance), _actor_role_label(str(role))]
+			if seen.has(label):
+				continue
+			seen[label] = true
+			labels.append(label)
+	return labels
+
+func _all_civic_ledger_event_ids() -> Array:
+	var ids := []
+	for event in civic_ledger:
+		if not event is Dictionary:
+			continue
+		var event_id := str(event.get("eventId", ""))
+		if not event_id.is_empty():
+			ids.append(event_id)
+	return ids
 
 func _world_record_prop_recent_ledger_events(object_id: String, limit: int) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []

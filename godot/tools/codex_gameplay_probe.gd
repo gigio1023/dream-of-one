@@ -1023,8 +1023,10 @@ func _inspected_record_affordance_map(summary: Dictionary) -> bool:
 	return (
 		_string_array_has_fragment(inspected.get("readerRoleLabels", []), "스튜디오 PM")
 		and _string_array_has_fragment(inspected.get("possibleAffordanceLabels", []), "리뷰 차단")
+		and _string_array_is_empty(inspected.get("currentAffordanceLabels", []))
 		and _ledger_array_has_event(inspected.get("recentLedgerEvents", []), "civic-ledger-7", "studio_review_blocked")
 		and str(inspected.get("body", "")).contains("행동 가능성")
+		and str(inspected.get("body", "")).contains("현재 열린 행동: 없음")
 		and str(inspected.get("body", "")).contains("최근 장부")
 	)
 
@@ -1057,6 +1059,13 @@ func _string_array_has_fragment(values: Variant, fragment: String) -> bool:
 	for value in values:
 		if str(value).contains(fragment):
 			return true
+	return false
+
+func _string_array_is_empty(values: Variant) -> bool:
+	if values is PackedStringArray:
+		return values.is_empty()
+	if values is Array:
+		return values.is_empty()
 	return false
 
 func _ledger_array_has_event(values: Variant, event_id: String, kind: String) -> bool:

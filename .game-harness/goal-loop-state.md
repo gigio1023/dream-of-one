@@ -96,9 +96,9 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `926699ddcf76af128e94daa9c2bf91cb59450510c658f70e39953cffccd38690`
+  - JSON SHA-256: `01091bb5fe706689d7d2645e5c189bc6e9d9153450b42a86faab9f9443e358b8`
   - Markdown SHA-256: `2c6743ad17616a60d2d71bdcc5bb76bd6dc82f0dbf6483c27ab68ccbffebd16e`
-  - playable Evidence Pack SHA-256: `49b7e4624f31af05c8a0f82974aebfce48089c82c3a1846ad628c41a2ed92989`
+  - playable Evidence Pack SHA-256: `3d1ed8a23cbc044ae73b824ac9a933ab8d4365fb61bd73394e8cda290d8a763a`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `11bbc6430c4f58258c4ac438f612c82cfa8d6b6a9f6071a4e66be72928a43f01`
 
@@ -107,6 +107,12 @@ Latest AI-play interface check:
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `15 / 15`, `explainability=14/14`, and
   `routeReportPassCount=5 / 5`.
+- latest game increment: world-record prop inspection now separates broad
+  `행동 가능성` from `현재 열린 행동`. In the inquest Codex run,
+  `park_notice_board=rumored` shows currently open actions such as
+  `공개 게시` and `수습 게시`, while `studio_review_queue=blocked` still shows
+  its role/action map but also says `현재 열린 행동: 없음`. This makes the
+  environment read as stateful affordances instead of a static rules list.
 - latest game increment: NPC reaction inspection now shows why a visible
   social action was available, not just which ledger event happened. Inspecting
   Studio PM or Waiting Customer shows `가능 조건` such as

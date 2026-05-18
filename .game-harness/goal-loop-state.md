@@ -169,6 +169,15 @@ Latest OpenAI Codex provider note:
 - Role-voice policy now distinguishes NPC role voice from player choices before
   the live request. The refreshed Waiting Customer live line was bounded and
   role-anchored: `줄은잠깐멈췄네요.`
+- Same-session NPC memory/thread continuity is now covered for the actual
+  `openai-codex` provider path without live spend. The backend integration test
+  `OpenAI Codex proposal gateway resumes same NPC thread with previous response
+  id` proves the second decision for the same session/NPC uses
+  `previous_response_id=resp-codex-first`, keeps `gpt-5.4-mini`, low reasoning,
+  and streaming enabled, and reports `transport=codex-reply`.
+- Latest backend check after that contract: `npm run check --prefix
+  backend/npc-runtime` passed with 137 tests. No live provider request was made
+  for this continuity proof, so incremental LLM budget spend was `$0`.
 
 Latest status check:
 - command: `.game-harness/scripts/run-same-order-comprehension-session.sh --status`

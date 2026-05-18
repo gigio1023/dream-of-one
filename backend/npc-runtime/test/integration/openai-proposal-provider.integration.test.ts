@@ -80,6 +80,47 @@ function proposal(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function codexStreamResponse(id: string, responseBody: unknown = proposal(), usage = {
+  input_tokens: 120,
+  output_tokens: 30,
+  total_tokens: 150,
+}) {
+  const outputText = JSON.stringify(responseBody);
+  const sse = [
+    "data: " + JSON.stringify({
+      type: "response.output_text.delta",
+      response: { id },
+      delta: outputText.slice(0, 30),
+    }),
+    "data: " + JSON.stringify({
+      type: "response.output_text.delta",
+      response: { id },
+      delta: outputText.slice(30),
+    }),
+    "data: " + JSON.stringify({
+      type: "response.completed",
+      response: {
+        id,
+        usage,
+      },
+    }),
+    "data: [DONE]",
+    "",
+  ].join("\n");
+
+  return {
+    ok: true,
+    status: 200,
+    statusText: "ok",
+    async json() {
+      return {};
+    },
+    async text() {
+      return sse;
+    },
+  };
+}
+
 test("OpenAI proposal gateway uses preferred model and maps text proposal into backend-owned intent", async () => {
   const responseBodies: Array<Record<string, unknown>> = [];
   const fetchImpl: FetchLike = async (url, init) => {
@@ -197,42 +238,7 @@ test("OpenAI Codex proposal gateway streams responses with gpt-5.4-mini", async 
     assert.ok(url.endsWith("/responses"));
     const body = JSON.parse(init?.body ?? "{}") as Record<string, unknown>;
     responseBodies.push(body);
-    const sse = [
-      "data: " + JSON.stringify({
-        type: "response.output_text.delta",
-        response: { id: "resp-codex-stream" },
-        delta: JSON.stringify(proposal()).slice(0, 30),
-      }),
-      "data: " + JSON.stringify({
-        type: "response.output_text.delta",
-        response: { id: "resp-codex-stream" },
-        delta: JSON.stringify(proposal()).slice(30),
-      }),
-      "data: " + JSON.stringify({
-        type: "response.completed",
-        response: {
-          id: "resp-codex-stream",
-          usage: {
-            input_tokens: 120,
-            output_tokens: 30,
-            total_tokens: 150,
-          },
-        },
-      }),
-      "data: [DONE]",
-      "",
-    ].join("\n");
-    return {
-      ok: true,
-      status: 200,
-      statusText: "ok",
-      async json() {
-        return {};
-      },
-      async text() {
-        return sse;
-      },
-    };
+    return codexStreamResponse("resp-codex-stream");
   };
 
   const gateway = new OpenAiProposalGateway(buildOpenAiConfig({
@@ -255,6 +261,38 @@ test("OpenAI Codex proposal gateway streams responses with gpt-5.4-mini", async 
   assert.equal(result.meta.providerUsage?.actualInputTokens, 120);
   assert.equal(result.meta.providerUsage?.actualOutputTokens, 30);
   assert.equal(result.meta.providerUsage?.actualTotalTokens, 150);
+});
+
+test("OpenAI Codex proposal gateway resumes same NPC thread with previous response id", async () => {
+  const responseBodies: Array<Record<string, unknown>> = [];
+  const fetchImpl: FetchLike = async (url, init) => {
+    assert.ok(url.endsWith("/responses"));
+    const body = JSON.parse(init?.body ?? "{}") as Record<string, unknown>;
+    responseBodies.push(body);
+    return codexStreamResponse(responseBodies.length === 1 ? "resp-codex-first" : "resp-codex-second");
+  };
+
+  const gateway = new OpenAiProposalGateway(buildOpenAiConfig({
+    provider: "openai-codex",
+    baseUrl: "https://chatgpt.com/backend-api/codex",
+  }), { fetch: fetchImpl });
+  const broker = new DefaultCodexBroker(gateway, new InMemoryThreadStore());
+
+  const first = await broker.decide(buildPacket("Station"));
+  const second = await broker.decide(buildPacket("Station"));
+
+  assert.equal(first.meta.usedFallback, false);
+  assert.equal(first.meta.transport, "codex");
+  assert.equal(first.meta.threadId, "resp-codex-first");
+  assert.equal(second.meta.usedFallback, false);
+  assert.equal(second.meta.transport, "codex-reply");
+  assert.equal(second.meta.threadId, "resp-codex-second");
+  assert.equal(responseBodies.length, 2);
+  assert.equal("previous_response_id" in (responseBodies[0] ?? {}), false);
+  assert.equal(responseBodies[1]?.previous_response_id, "resp-codex-first");
+  assert.equal(responseBodies[1]?.model, "gpt-5.4-mini");
+  assert.deepEqual(responseBodies[1]?.reasoning, { effort: "low" });
+  assert.equal(responseBodies[1]?.stream, true);
 });
 
 test("OpenAI proposal gateway falls back to first explicitly configured available model", async () => {

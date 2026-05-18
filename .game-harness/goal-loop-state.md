@@ -80,7 +80,7 @@ Latest completion audit:
   and packaged-route evidence.
 - latest Codex gameplay QA artifact reports `ok=true`,
   `aiPlayerReport.pass=true`, 31 accepted public actions, 5/5 route reports,
-  all 31 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
+  all 33 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
   no-live provider packet readiness for bounded `actorMemory` plus
   `actorPolicy`. It now also proves Codex/player can read the Store Clerk's
   visible environment cues in the live prompt before choosing speech, then
@@ -98,7 +98,9 @@ Latest completion audit:
   reactions. Waiting Customer inspection now also shows `오간 말` social
   exchange lines and exports `socialExchangeLines`, so the player/Codex can
   read the Station Officer -> Waiting Customer spoken exchange behind contact
-  refusal.
+  refusal. The Waiting Customer world marker now also names the social source
+  as `← 스테이션 직원`, so the player can read who caused the refusal before
+  opening any detail panel.
   It also explicitly marks itself as not a replacement for external
   comprehension.
 - latest packaged-route evidence validates as a Godot Evidence Pack and
@@ -307,8 +309,8 @@ Latest status check:
   `testerFacingFiles=["tester-invite.md"]`, `humanEvidence=false`, and
   `closesGoal=false`; it is setup material only, not comprehension evidence.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `d345ed81032621cb8fdb930df5cb9fa7b959f544ea4a5b5f6244bee549e889bb`
-  - Markdown SHA-256: `57e47c87f09a71c277cb29a534b96be284088bbe79031fbc66057dfa249448ea`
+  - JSON SHA-256: `7af8f54ebf268c5fd02a0d2a5a8d33365f1b5468ee9491dbc1197619bdb8a103`
+  - Markdown SHA-256: `a69c04161a18e2878b5750b09ee1146b34b5e5a89e8d885e9d2130917e03b7eb`
   - playable Evidence Pack SHA-256: `64e8c495a2ac8fd336426efd450f3f3f2eed3f22f45541d18f8d93d2dcde68fa`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
@@ -316,15 +318,21 @@ Latest status check:
 Latest AI-play interface check:
 - command: `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `31 / 31`, `explainability=32/32`, conversation visible
+  player actions `31 / 31`, `explainability=33/33`, conversation visible
   context in the live Store Clerk prompt, Store Clerk record-action inspection,
   Store Manager handoff inspection, Park Witness public-spread inspection,
   Station Officer authority-citation inspection, Studio PM cross-place
   opportunity inspection, Waiting Customer social-exchange inspection, live HUD
-  `오간 말` social exchange readability, actor memory for observed NPC
+  `오간 말` social exchange readability, visible NPC reaction source
+  readability, actor memory for observed NPC
   decisions, no-live provider packet memory and actor-policy readiness, and
   `routeReportPassCount=5 / 5` with Godot
   `4.7.beta2.official.777579205` from local `GODOT_BIN`.
+- latest game increment: visible NPC reaction markers now show who caused the
+  current social reaction. In the inquest Codex run, the Waiting Customer's
+  world marker reads `접촉 거부` plus `← 스테이션 직원`, while the HUD stance
+  summary still uses the compact base reaction text. Codex gameplay QA now
+  requires `canReadVisibleNpcReactionSource=true`.
 - latest game increment: the live HUD record line now includes `오간 말`, a
   compact NPC-to-NPC spoken exchange next to the existing ledger and stance
   summary. In the inquest Codex run, the final HUD record line reads

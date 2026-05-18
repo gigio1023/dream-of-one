@@ -786,6 +786,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Codex/player did not inspect the Studio PM opportunity change")
 	if not bool(checks.get("visibleWaitingCustomerReaction", false)):
 		failures.append("Waiting Customer reaction is not visible on a spawned NPC")
+	if not bool(checks.get("visibleWaitingCustomerReactionSource", false)):
+		failures.append("Waiting Customer world reaction marker does not name the Station source")
 	if not bool(checks.get("codexReadNpcSocialExchange", false)):
 		failures.append("Codex/player did not read the inspected NPC's overheard NPC-to-NPC exchange")
 	if not str(hud_snapshot.get("noticeBodyLabel", "")).contains("접촉 거부"):
@@ -808,6 +810,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"stationObservedManager": _observation_exists(summary, "station_officer", "store_manager", "forward_report", "cite_record"),
 		"waitingCustomerObservedStation": _observation_exists(summary, "waiting_customer", "station_officer", "cite_record", "refuse_contact"),
 		"visibleWaitingCustomerReaction": _visible_npc_has_line(summary, "NPC_Waiting_Customer"),
+		"visibleWaitingCustomerReactionSource": _visible_npc_reaction_source(summary, "NPC_Waiting_Customer", "스테이션 직원"),
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"codexInspectedUsualOrderCue": _inspected_usual_order_cue(summary),
 		"codexReadCrossPlaceRuleBoards": _read_cross_place_rule_boards(summary),
@@ -859,6 +862,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadLiveHudNearbyStances": _hud_record_state_names_visible_stances(record_state_label),
 		"canReadLiveHudRecordReaders": _hud_record_state_names_record_readers(record_state_label),
 		"canReadVisibleNpcReaction": bool(checks.get("visibleWaitingCustomerReaction", false)),
+		"canReadVisibleNpcReactionSource": bool(checks.get("visibleWaitingCustomerReactionSource", false)),
 		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
 		"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
 		"canInspectRecordRoleAffordanceMap": bool(checks.get("codexInspectedRecordAffordanceMap", false)),
@@ -924,6 +928,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 				"Codex/player inspected the civic ledger to read the NPC-to-NPC social chain as a player-facing timeline.",
 				"Codex/player inspected the Station Officer to read which Store record was cited, what Station document was used, and why the player became the target of formal questioning.",
 				"Codex/player snapshot exposed actor memory, showing which ledger events a role observed before choosing the next validated action.",
+				"Codex/player could also read the Waiting Customer's in-world reaction marker as sourced from the Station Officer before opening the detail panel.",
 				"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, cited ledger basis, and overheard NPC-to-NPC exchange.",
 				"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
 			],
@@ -1820,6 +1825,16 @@ func _visible_waiting_customer_reaction(summary: Dictionary, expected_state: Str
 		and bool(state.get("markerVisible", false))
 		and not str(state.get("pressureText", "")).strip_edges().is_empty()
 		and str(state.get("reactionText", "")).contains(expected_label)
+	)
+
+func _visible_npc_reaction_source(summary: Dictionary, npc_id: String, source_fragment: String) -> bool:
+	var states: Dictionary = summary.get("visibleNpcStates", {})
+	var state: Dictionary = states.get(npc_id, {})
+	return (
+		str(state.get("npcId", "")) == npc_id
+		and bool(state.get("markerVisible", false))
+		and str(state.get("reactionSourceText", "")).contains(source_fragment)
+		and str(state.get("reactionText", "")).contains(source_fragment)
 	)
 
 func _visible_npc_has_line(summary: Dictionary, npc_id: String) -> bool:

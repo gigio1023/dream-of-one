@@ -11,6 +11,8 @@ var _pressure_line_key := ""
 var _pressure_line_args: Dictionary = {}
 var _reaction_state := "normal"
 var _reaction_exposure := 0
+var _reaction_text := ""
+var _reaction_source_text := ""
 
 @onready var _name_label: Label3D = $NameLabel
 @onready var _pressure_label: Label3D = $PressureLabel
@@ -121,7 +123,8 @@ func set_reaction_state(state: String, exposure: int) -> void:
 			reaction_color = Color(1.0, 0.78, 0.36, 1.0)
 		_:
 			reaction_text = ""
-	_reaction_label.text = reaction_text
+	_reaction_text = reaction_text
+	_apply_reaction_label()
 	_reaction_label.modulate = reaction_color
 	_pressure_label.modulate = reaction_color
 	var material := _reaction_material()
@@ -141,9 +144,15 @@ func debug_reaction_snapshot() -> Dictionary:
 		"pressureText": _pressure_label.text,
 		"markerVisible": _attention_disc.visible,
 		"reactionText": _reaction_label.text,
+		"baseReactionText": _reaction_text,
+		"reactionSourceText": _reaction_source_text,
 		"materialAlpha": material.albedo_color.a if material != null else -1.0,
 		"emissionEnergy": material.emission_energy_multiplier if material != null else -1.0
 	}
+
+func set_reaction_source(source_text: String) -> void:
+	_reaction_source_text = source_text.strip_edges()
+	_apply_reaction_label()
 
 func say_key(line_key: String, args: Dictionary = {}) -> void:
 	_pressure_line = ""
@@ -166,6 +175,14 @@ func _reaction_material() -> StandardMaterial3D:
 	if material == null:
 		material = _attention_disc.get_active_material(0)
 	return material as StandardMaterial3D
+
+func _apply_reaction_label() -> void:
+	if _reaction_text.is_empty():
+		_reaction_label.text = ""
+	elif _reaction_source_text.is_empty():
+		_reaction_label.text = _reaction_text
+	else:
+		_reaction_label.text = "%s\n%s" % [_reaction_text, _reaction_source_text]
 
 func _localized(key: String, args: Dictionary = {}, fallback := "") -> String:
 	var localization := _localization()

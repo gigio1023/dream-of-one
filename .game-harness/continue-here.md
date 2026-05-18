@@ -1,6 +1,6 @@
 # Continue Here
 
-Last Updated: 2026-05-18
+Last Updated: 2026-05-19
 
 ## Current State
 
@@ -82,8 +82,8 @@ Last Updated: 2026-05-18
   cross-place social rules before the Store line. Codex gameplay QA focuses
   `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard`, interacts with both,
   and verifies `canReadCrossPlaceSocialRules=true`; current proof passes with
-  31/31 accepted public actions, 32/32 explainability checks, and 5/5 route
-  reports after the conversation visible-context update. This is a game-facing
+  31/31 accepted public actions, 33/33 explainability checks, and 5/5 route
+  reports after the visible reaction-source update. This is a game-facing
   legibility slice toward the broader
   open-environment social sim, not another product-closure claim.
 - Latest implementation slice: the active Store Clerk prompt now shows
@@ -129,6 +129,11 @@ Last Updated: 2026-05-18
   `오간 말` for the latest NPC-to-NPC spoken exchange. Codex gameplay QA verifies
   `canReadLiveHudSocialExchange=true`, so the player can observe the Station
   Officer -> Waiting Customer refusal exchange without opening inspection.
+- Latest implementation slice: visible NPC reaction markers now name the role
+  that caused the reaction. In the inquest path, the Waiting Customer world
+  label reads `접촉 거부` plus `← 스테이션 직원`, and Codex gameplay QA verifies
+  `canReadVisibleNpcReactionSource=true`. This is a player-facing readability
+  slice, not a new Store/Station system.
 - Latest implementation slice: Store Clerk can now be inspected as the first
   record-making actor after typed inquest-triggering speech. Codex gameplay QA
   focuses the Clerk, interacts, and reads `메모 배치`, report-tray basis,

@@ -1693,6 +1693,7 @@ func _refresh_hud() -> void:
 	_set_actor_reaction_state("NPC_Waiting_Customer", _waiting_customer_reaction_stage(), exposure)
 	_set_actor_reaction_state("NPC_Park_Witness", _park_witness_reaction_stage(stage), exposure)
 	_set_actor_reaction_state("NPC_Station_Officer", "inquest" if bool(station["inquestOpen"]) else ("reported" if bool(station["intakeOpen"]) else "normal"), exposure)
+	_refresh_actor_reaction_source_labels()
 	var prompt := "WASD로 이동. 상점 카운터에 접근해 E로 대화를 시작하세요."
 	var choices_enabled := false
 	if conversation_active and not _session_locked():
@@ -3850,6 +3851,35 @@ func _set_actor_reaction_state(actor_id: String, reaction_stage: String, reactio
 		if str(node.get_meta("npc_id", "")) == actor_id and node.has_method("set_reaction_state"):
 			node.set_reaction_state(reaction_stage, reaction_exposure)
 			return
+
+func _refresh_actor_reaction_source_labels() -> void:
+	var latest_observation_by_role := {}
+	for observation in _social_observation_trace():
+		if not observation is Dictionary:
+			continue
+		var observer_role := str(observation.get("observerRole", ""))
+		if observer_role.is_empty():
+			continue
+		latest_observation_by_role[observer_role] = observation
+	for node in _local_group_nodes(&"npc_placeholders"):
+		if not node.has_method("set_reaction_source"):
+			continue
+		var actor_id := str(node.get_meta("npc_id", ""))
+		var actor_role := str(ACTOR_AGENT_ROLES.get(actor_id, ""))
+		var source_text := ""
+		if latest_observation_by_role.has(actor_role):
+			var observation: Dictionary = latest_observation_by_role.get(actor_role, {})
+			source_text = _reaction_source_label(observation)
+		node.set_reaction_source(source_text)
+
+func _reaction_source_label(observation: Dictionary) -> String:
+	var observed_role := str(observation.get("observedActorRole", ""))
+	if observed_role.is_empty():
+		return ""
+	var observed_label := _actor_role_label(observed_role)
+	if observed_label.is_empty():
+		return ""
+	return "← %s" % observed_label
 
 func _visible_npc_states() -> Dictionary:
 	var states := {}

@@ -225,6 +225,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Make the live HUD show the latest NPC-to-NPC spoken exchange: the record
   line now includes `오간 말` so a player can observe the Station Officer ->
   Waiting Customer refusal exchange without opening NPC inspection.
+- [x] Make visible NPC reaction markers show who caused the reaction: the
+  Waiting Customer world label now shows `접촉 거부` plus `← 스테이션 직원`, so
+  the player can read the social source before opening HUD detail.
 - [x] Make Store Clerk record-making readable through NPC inspection: Codex/player
   can inspect the Clerk after typed speech and read `메모 배치`, the report tray
   basis, visible environment objects, spoken handoff line, and tiny value

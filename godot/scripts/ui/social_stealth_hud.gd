@@ -624,7 +624,7 @@ func _visible_npc_stance_label(visible_npc_states: Dictionary) -> String:
 		var state: Dictionary = visible_npc_states.get(actor_id, {})
 		if str(state.get("state", "normal")) == "normal":
 			continue
-		var reaction_text := str(state.get("reactionText", "")).strip_edges()
+		var reaction_text := str(state.get("baseReactionText", state.get("reactionText", ""))).strip_edges()
 		if reaction_text.is_empty():
 			continue
 		var role_label := _actor_role_label(_actor_role_id_for_npc(actor_id))

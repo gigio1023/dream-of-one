@@ -31,6 +31,9 @@
 - Framework review and proof gates live in `docs/framework/`.
 - Game Studio usage rules live in `docs/framework/game-studio-usage.md`.
 - Project-local Game Studio skills live under `.codex/skills/game-*` and `.codex/skills/narrative-director/`.
+- Use `.codex/skills/game-long-run-control` when resuming a long Codex goal,
+  when work starts drifting into support artifacts, or when a multi-slice run
+  needs Ralph-like progress discipline.
 - GPT review policy lives in `docs/framework/gpt-code-review.md`; meaningful reviews use GPT-5.5 high/xhigh lanes and Game Studio proof gates.
 - `.game-harness/` remains the current M1 execution harness; do not replace or migrate it without an explicit decision.
 - Long-running Codex goal work uses `.game-harness/goal-loop-state.md` as the

@@ -33,7 +33,9 @@ the current direction source is missing, weak, disputed, or unknown.
    `brownfield-unknown`.
 5. Name the authority owner for taste, concept selection, Direction Lock, stage
    movement, and public promises.
-6. Return the route output and stop at `USER_DECISION_NEEDED` when the next step
+6. If the creator needs deeper philosophy, whole-game frame, or first playable
+   proof clarification, route to `game-creator-interview`.
+7. Return the route output and stop at `USER_DECISION_NEEDED` when the next step
    belongs to the human.
 
 ## Public Language
@@ -66,5 +68,6 @@ public promises.
 | File | When to read | Content |
 | --- | --- | --- |
 | `references/entry-routing.md` | Every onboarding route | Entry modes, output shape, stop conditions |
+| `skills/game-creator-interview/SKILL.md` | Deep creator intent interview | Philosophy, frame, non-goals, and first proof |
 | `.game-studio/project-state.md` | When installed | Current project state and entry mode |
 | `.game-studio/core/workflows/workflow-catalog.yaml` | Choosing next skill or gate | Stage and gate routing |

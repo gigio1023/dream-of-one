@@ -3820,17 +3820,11 @@
 		{
 			"accepted": true,
 			"actionId": "focus.world_record_prop",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
-				"inspectedWorldRecordProp": {
-
-				},
+				"inspectedNpcState": {},
+				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "",
 				"lastReasonCode": "",
 				"reportWeight": 0,
@@ -3842,12 +3836,8 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
-				"inspectedWorldRecordProp": {
-
-				},
+				"inspectedNpcState": {},
+				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "",
 				"lastReasonCode": "",
 				"reportWeight": 0,
@@ -3865,14 +3855,10 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -3906,12 +3892,8 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
-				"inspectedWorldRecordProp": {
-
-				},
+				"inspectedNpcState": {},
+				"inspectedWorldRecordProp": {},
 				"lastDialogueChoice": "",
 				"lastReasonCode": "",
 				"reportWeight": 0,
@@ -3921,22 +3903,16 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
-			"payload": {
-
-			},
+			"payload": {},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.text_surface",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -3970,9 +3946,7 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4012,14 +3986,10 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4053,9 +4023,7 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4087,22 +4055,16 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
-			"payload": {
-
-			},
+			"payload": {},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.text_surface",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4136,9 +4098,7 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4178,14 +4138,10 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4219,9 +4175,7 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4253,22 +4207,16 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
-			"payload": {
-
-			},
+			"payload": {},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.store_counter",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4302,9 +4250,7 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4336,22 +4282,16 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
-			"payload": {
-
-			},
+			"payload": {},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "conversation.start",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4385,9 +4325,7 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4419,22 +4357,16 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
-			"payload": {
-
-			},
+			"payload": {},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "player.wait.hesitation_record",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4468,9 +4400,7 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4502,22 +4432,16 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
-			"payload": {
-
-			},
+			"payload": {},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "dialogue.choice.by_id",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4551,9 +4475,7 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4593,14 +4515,10 @@
 		{
 			"accepted": true,
 			"actionId": "player.type.free_input",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4634,9 +4552,7 @@
 			},
 			"before": {
 				"inputLocked": false,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4676,14 +4592,10 @@
 		{
 			"accepted": true,
 			"actionId": "focus.world_record_prop",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4717,9 +4629,7 @@
 			},
 			"before": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4759,14 +4669,10 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n현재 열린 행동: 공개 게시(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2 / 변화 부담+5",
 					"currentAffordanceLabels": [
@@ -4818,9 +4724,7 @@
 			},
 			"before": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "카운터 옆 단골 주문 단서입니다. 평소에는 '표식 하나, 같은 봉투'가 정상 루틴이며, 점원과 대기 손님은 플레이어의 말이 이 기대와 맞는지 비교할 수 있습니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님\n행동 가능성: 평소 주문 인용(상점 점원, 상점 매니저)\n현재 열린 행동: 평소 주문 인용(상점 점원), 평소 주문 인용(상점 매니저)",
 					"currentAffordanceLabels": [
@@ -4852,22 +4756,16 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {
-
-			},
+			"payload": {},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.world_record_prop",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n현재 열린 행동: 공개 게시(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2 / 변화 부담+5",
 					"currentAffordanceLabels": [
@@ -4919,9 +4817,7 @@
 			},
 			"before": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n현재 열린 행동: 공개 게시(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2 / 변화 부담+5",
 					"currentAffordanceLabels": [
@@ -4979,14 +4875,10 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 조건부 리뷰(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n현재 열린 행동: 없음\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3",
 					"currentAffordanceLabels": [],
@@ -5034,9 +4926,7 @@
 			},
 			"before": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "소문이 붙어 있습니다. 이 공개 기록은 상점 안의 보고와 함께 더 큰 절차로 이어질 수 있습니다.\n읽는 역할: 공원 목격자, 대기 손님, 스튜디오 PM\n행동 가능성: 공개 게시(공원 목격자), 일상 확인(공원 목격자), 공개 경고(공원 목격자), 수습 게시(공원 목격자)\n현재 열린 행동: 공개 게시(공원 목격자), 수습 게시(공원 목격자)\n최근 장부: civic-ledger-4 공개 소문 / 공원 목격자 -> 공개 게시 / 인용 civic-ledger-2 / 변화 부담+5",
 					"currentAffordanceLabels": [
@@ -5086,22 +4976,16 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {
-
-			},
+			"payload": {},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.world_record_prop",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 조건부 리뷰(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n현재 열린 행동: 없음\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3",
 					"currentAffordanceLabels": [],
@@ -5149,9 +5033,7 @@
 			},
 			"before": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 조건부 리뷰(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n현재 열린 행동: 없음\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3",
 					"currentAffordanceLabels": [],
@@ -5205,14 +5087,10 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 					"currentAffordanceLabels": [],
@@ -5283,9 +5161,7 @@
 			},
 			"before": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "스튜디오 리뷰 줄이 차단 상태입니다. 스튜디오 PM은 스테이션 인용 기록을 보고 이 기회를 오늘 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 조건부 리뷰(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n현재 열린 행동: 없음\n최근 장부: civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3",
 					"currentAffordanceLabels": [],
@@ -5331,22 +5207,16 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {
-
-			},
+			"payload": {},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.world_record_prop",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 					"currentAffordanceLabels": [],
@@ -5417,9 +5287,7 @@
 			},
 			"before": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 					"currentAffordanceLabels": [],
@@ -5496,14 +5364,10 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
 					"currentAffordanceLabels": [],
@@ -5578,9 +5442,7 @@
 			},
 			"before": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 					"currentAffordanceLabels": [],
@@ -5649,22 +5511,16 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {
-
-			},
+			"payload": {},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.npc",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
 					"currentAffordanceLabels": [],
@@ -5739,9 +5595,7 @@
 			},
 			"before": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
 					"currentAffordanceLabels": [],
@@ -5822,9 +5676,7 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -6056,9 +5908,7 @@
 			},
 			"before": {
 				"inputLocked": true,
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다.\n읽는 역할: 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-6 스테이션 인용 / 스테이션 직원 -> 기록 인용 / 인용 civic-ledger-5\n사회 연쇄: 대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부 | 스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단 | 스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용 | 상점 매니저: 상점 점원/메모 배치(civic-ledger-2) -> 보고 전달 | 공원 목격자: 상점 점원/메모 배치(civic-ledger-2) -> 공개 게시 | 대기 손님: 상점 점원/메모 배치(civic-ledger-2) -> 대기 불평",
 					"currentAffordanceLabels": [],
@@ -6131,17 +5981,13 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {
-
-			},
+			"payload": {},
 			"reason": "accepted"
 		},
 		{
 			"accepted": true,
 			"actionId": "focus.npc",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -6608,9 +6454,7 @@
 		{
 			"accepted": true,
 			"actionId": "player.interact.focused",
-			"actionResult": {
-
-			},
+			"actionResult": {},
 			"after": {
 				"inputLocked": true,
 				"inspectedNpcState": {
@@ -7160,9 +7004,7 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
-			"payload": {
-
-			},
+			"payload": {},
 			"reason": "accepted"
 		}
 	],
@@ -9310,9 +9152,7 @@
 				"actorRole": "station_officer",
 				"affordance": "cite_record",
 				"citedLedgerEventId": "civic-ledger-5",
-				"economyDelta": {
-
-				},
+				"economyDelta": {},
 				"eventId": "civic-ledger-6",
 				"kind": "station_record_cited",
 				"objectId": "station_dossier",
@@ -9538,17 +9378,15 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779102083531",
+				"eventId": "playable_session_started-001-1779107986636",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779102083531,
-				"uiSummaryArgs": {
-
-				},
+				"timestampMs": 1779107986636,
+				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -9556,7 +9394,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-002-1779102083907",
+				"eventId": "world_record_prop_inspected-002-1779107986737",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "usual_order_cue",
 				"schemaVersion": "godot-runtime-v1",
@@ -9564,7 +9402,7 @@
 				"state": "read",
 				"stateLabel": "읽힘",
 				"summary": "Inspected world record prop usual_order_cue in state read.",
-				"timestampMs": 1779102083907,
+				"timestampMs": 1779107986737,
 				"uiSummaryArgs": {
 					"object": "늘 같은 주문",
 					"state": "읽힘"
@@ -9582,13 +9420,13 @@
 					"DL_ST1_APPROVAL_GATE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-003-1779102084034",
+				"eventId": "text_surface_read-003-1779107986762",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Studio_ApprovalCriteria as local context before speaking.",
 				"textSurfaceId": "TS_Studio_ApprovalCriteria",
-				"timestampMs": 1779102084034,
+				"timestampMs": 1779107986762,
 				"uiSummaryArgs": {
 					"law": "DL_ST1_APPROVAL_GATE",
 					"surface": "승인 기준"
@@ -9606,13 +9444,13 @@
 					"DL_P1_OBSERVATION_ETIQUETTE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-004-1779102084224",
+				"eventId": "text_surface_read-004-1779107986791",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Park_NoticeBoard as local context before speaking.",
 				"textSurfaceId": "TS_Park_NoticeBoard",
-				"timestampMs": 1779102084224,
+				"timestampMs": 1779107986791,
 				"uiSummaryArgs": {
 					"law": "DL_P1_OBSERVATION_ETIQUETTE",
 					"surface": "공지 게시판"
@@ -9628,7 +9466,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-005-1779102084447",
+				"eventId": "conversation_started-005-1779107986822",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -9637,7 +9475,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779102084447,
+				"timestampMs": 1779107986822,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -9650,7 +9488,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-006-1779102084606",
+				"eventId": "response_hesitation_noted-006-1779107986841",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -9671,7 +9509,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779102084606,
+				"timestampMs": 1779107986841,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -9686,7 +9524,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-007-1779102084704",
+				"eventId": "dialogue_choice_selected-007-1779107986855",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -9708,7 +9546,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779102084704,
+				"timestampMs": 1779107986855,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -9723,7 +9561,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779102084704",
+				"eventId": "conversation_anomaly_detected-008-1779107986855",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -9745,7 +9583,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779102084704,
+				"timestampMs": 1779107986855,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -9760,7 +9598,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779102084704",
+				"eventId": "npc_suspicion_changed-009-1779107986855",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -9782,7 +9620,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779102084704,
+				"timestampMs": 1779107986855,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -9797,7 +9635,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-010-1779102084862",
+				"eventId": "free_input_submitted-010-1779107986874",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9822,7 +9660,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779102084862,
+				"timestampMs": 1779107986874,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9837,7 +9675,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-011-1779102084862",
+				"eventId": "conversation_anomaly_detected-011-1779107986874",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9862,7 +9700,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779102084862,
+				"timestampMs": 1779107986874,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9877,7 +9715,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-012-1779102084862",
+				"eventId": "npc_suspicion_changed-012-1779107986874",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9902,7 +9740,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779102084862,
+				"timestampMs": 1779107986874,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9917,7 +9755,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-013-1779102084862",
+				"eventId": "suspicion_shared-013-1779107986874",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9942,7 +9780,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779102084862,
+				"timestampMs": 1779107986874,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9957,7 +9795,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-014-1779102084863",
+				"eventId": "station_report_created-014-1779107986876",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9982,7 +9820,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779102084863,
+				"timestampMs": 1779107986876,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9997,7 +9835,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-015-1779102084864",
+				"eventId": "station_inquest_opened-015-1779107986877",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -10022,7 +9860,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779102084864,
+				"timestampMs": 1779107986877,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -10032,7 +9870,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-016-1779102085360",
+				"eventId": "world_record_prop_inspected-016-1779107986933",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -10040,7 +9878,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779102085360,
+				"timestampMs": 1779107986933,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -10052,7 +9890,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-017-1779102085645",
+				"eventId": "world_record_prop_inspected-017-1779107986969",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "studio_review_queue",
 				"schemaVersion": "godot-runtime-v1",
@@ -10060,7 +9898,7 @@
 				"state": "blocked",
 				"stateLabel": "차단",
 				"summary": "Inspected world record prop studio_review_queue in state blocked.",
-				"timestampMs": 1779102085645,
+				"timestampMs": 1779107986969,
 				"uiSummaryArgs": {
 					"object": "스튜디오 리뷰 줄",
 					"state": "차단"
@@ -10072,7 +9910,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-018-1779102085896",
+				"eventId": "world_record_prop_inspected-018-1779107986999",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_economy_panel",
 				"schemaVersion": "godot-runtime-v1",
@@ -10080,7 +9918,7 @@
 				"state": "attention",
 				"stateLabel": "주목 상승",
 				"summary": "Inspected world record prop civic_economy_panel in state attention.",
-				"timestampMs": 1779102085896,
+				"timestampMs": 1779107986999,
 				"uiSummaryArgs": {
 					"object": "시민 경제",
 					"state": "주목 상승"
@@ -10092,7 +9930,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-019-1779102086062",
+				"eventId": "world_record_prop_inspected-019-1779107987034",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_ledger",
 				"schemaVersion": "godot-runtime-v1",
@@ -10100,7 +9938,7 @@
 				"state": "append_only",
 				"stateLabel": "추가됨",
 				"summary": "Inspected world record prop civic_ledger in state append_only.",
-				"timestampMs": 1779102086062,
+				"timestampMs": 1779107987034,
 				"uiSummaryArgs": {
 					"object": "시민 장부",
 					"state": "추가됨"
@@ -10112,7 +9950,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-020-1779102086265",
+				"eventId": "npc_reaction_inspected-020-1779107987062",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Studio_PM",
 				"reactionText": "리뷰 차단",
@@ -10120,7 +9958,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "blocked",
 				"summary": "Inspected NPC reaction NPC_Studio_PM in state blocked.",
-				"timestampMs": 1779102086265,
+				"timestampMs": 1779107987062,
 				"uiSummaryArgs": {
 					"npc": "Studio PM",
 					"state": "리뷰 차단"
@@ -10132,7 +9970,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-021-1779102086431",
+				"eventId": "npc_reaction_inspected-021-1779107987096",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Waiting_Customer",
 				"reactionText": "접촉 거부",
@@ -10140,7 +9978,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "refused",
 				"summary": "Inspected NPC reaction NPC_Waiting_Customer in state refused.",
-				"timestampMs": 1779102086431,
+				"timestampMs": 1779107987096,
 				"uiSummaryArgs": {
 					"npc": "Waiting Customer",
 					"state": "접촉 거부"
@@ -14716,9 +14554,7 @@
 					"actorRole": "station_officer",
 					"affordance": "cite_record",
 					"citedLedgerEventId": "civic-ledger-5",
-					"economyDelta": {
-
-					},
+					"economyDelta": {},
 					"eventId": "civic-ledger-6",
 					"kind": "station_record_cited",
 					"objectId": "station_dossier",
@@ -16313,23 +16149,17 @@
 	"playerActionCatalog": [
 		{
 			"actionId": "focus.store_counter",
-			"payloadSchema": {
-
-			},
+			"payloadSchema": {},
 			"playerMeaning": "Move Codex/player attention to the Store counter interaction zone."
 		},
 		{
 			"actionId": "conversation.start",
-			"payloadSchema": {
-
-			},
+			"payloadSchema": {},
 			"playerMeaning": "Start the Store Clerk conversation inside the running scene."
 		},
 		{
 			"actionId": "player.wait.hesitation_record",
-			"payloadSchema": {
-
-			},
+			"payloadSchema": {},
 			"playerMeaning": "Record a delayed answer as player uncertainty."
 		},
 		{
@@ -16376,9 +16206,7 @@
 		},
 		{
 			"actionId": "player.interact.focused",
-			"payloadSchema": {
-
-			},
+			"payloadSchema": {},
 			"playerMeaning": "Press the current focused interaction in the running scene."
 		},
 		{
@@ -16515,9 +16343,7 @@
 					"stationAttention": 0
 				},
 				"consequence": "당신은 검사 대상입니다. 상점 점원의 평범한 질문도 기록됩니다.",
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "스튜디오 리뷰 줄이 초대 상태입니다. 스튜디오 PM은 공원 게시판의 공개 확인을 읽고 플레이어에게 작은 기회를 열어뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 조건부 리뷰(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n현재 열린 행동: 없음\n최근 장부: civic-ledger-6 리뷰 초대 / 스튜디오 PM -> 리뷰 초대 / 인용 civic-ledger-4 / 변화 신뢰+1, 부담-1",
 					"currentAffordanceLabels": [],
@@ -17006,13 +16832,9 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "initial",
-					"latestLedger": {
-
-					},
+					"latestLedger": {},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -17392,13 +17214,9 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "focus.store_counter",
-					"latestLedger": {
-
-					},
+					"latestLedger": {},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -17778,13 +17596,9 @@
 						"safeLineLabel": "2  제가 보통 뭘 시켰죠?",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "conversation.start",
-					"latestLedger": {
-
-					},
+					"latestLedger": {},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -18164,13 +17978,9 @@
 						"safeLineLabel": "2  어제 일이 조금 흐릿해서 확인했습니다.",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "dialogue.choice.by_id",
-					"latestLedger": {
-
-					},
+					"latestLedger": {},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -18508,9 +18318,7 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Studio_PM",
@@ -18865,9 +18673,7 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "focus.world_record_prop",
 					"latestLedger": {
 						"actorId": "NPC_Studio_PM",
@@ -19478,9 +19284,7 @@
 					"stationAttention": 5
 				},
 				"consequence": "NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다.\n흐름: 기억 공백 발화 -> 정정표 -> 대기줄 수습 -> 공개 수습 게시 -> 조건부 리뷰",
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "스튜디오 리뷰 줄이 조건부 상태입니다. 스튜디오 PM은 공원 게시판의 공개 수습 기록을 읽고 기회를 완전히 닫지 않되 다음 기록을 더 보겠다고 남겼습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 조건부 리뷰(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n현재 열린 행동: 없음\n최근 장부: civic-ledger-6 조건부 리뷰 / 스튜디오 PM -> 조건부 리뷰 / 인용 civic-ledger-5 / 변화 신뢰+1, 부담-2",
 					"currentAffordanceLabels": [],
@@ -19969,13 +19773,9 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "initial",
-					"latestLedger": {
-
-					},
+					"latestLedger": {},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -20355,13 +20155,9 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "focus.store_counter",
-					"latestLedger": {
-
-					},
+					"latestLedger": {},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -20741,13 +20537,9 @@
 						"safeLineLabel": "2  제가 보통 뭘 시켰죠?",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "conversation.start",
-					"latestLedger": {
-
-					},
+					"latestLedger": {},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -21048,9 +20840,7 @@
 						"safeLineLabel": "2  어제 일이 조금 흐릿해서 확인했습니다.",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Store_Clerk",
@@ -21319,9 +21109,7 @@
 						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Studio_PM",
@@ -21592,9 +21380,7 @@
 						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "focus.world_record_prop",
 					"latestLedger": {
 						"actorId": "NPC_Studio_PM",
@@ -22732,9 +22518,7 @@
 					"stationAttention": 0
 				},
 				"consequence": "NPC는 발화의 어긋남을 먼저 느끼고, 스테이션은 그 기록을 나중에 봅니다.",
-				"inspectedNpcState": {
-
-				},
+				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
 					"body": "스튜디오 리뷰 줄이 보류 상태입니다. 스튜디오 PM은 공원 게시판의 공개 경고를 읽고 작은 기회를 닫아뒀습니다.\n읽는 역할: 스튜디오 PM\n행동 가능성: 리뷰 초대(스튜디오 PM), 조건부 리뷰(스튜디오 PM), 리뷰 보류(스튜디오 PM), 리뷰 차단(스튜디오 PM)\n현재 열린 행동: 없음\n최근 장부: civic-ledger-5 리뷰 보류 / 스튜디오 PM -> 리뷰 보류 / 인용 civic-ledger-3 / 변화 신뢰-1, 부담+1",
 					"currentAffordanceLabels": [],
@@ -23222,13 +23006,9 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "initial",
-					"latestLedger": {
-
-					},
+					"latestLedger": {},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -23608,13 +23388,9 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "focus.store_counter",
-					"latestLedger": {
-
-					},
+					"latestLedger": {},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -23994,13 +23770,9 @@
 						"safeLineLabel": "2  제가 보통 뭘 시켰죠?",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "conversation.start",
-					"latestLedger": {
-
-					},
+					"latestLedger": {},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -24295,9 +24067,7 @@
 						"safeLineLabel": "2  어제 일이 조금 흐릿해서 확인했습니다.",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Store_Clerk",
@@ -24608,9 +24378,7 @@
 						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Studio_PM",
@@ -24922,9 +24690,7 @@
 						"safeLineLabel": "대화 선택지는 위험 라벨 없이 발화문으로만 표시됩니다.",
 						"whyLineLabel": "WHY-LINE: 이 발화는 점원이 전제한 지역 루틴 안에 머물렀습니다."
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "focus.world_record_prop",
 					"latestLedger": {
 						"actorId": "NPC_Studio_PM",
@@ -25484,12 +25250,8 @@
 					"stationAttention": 60
 				},
 				"consequence": "대화 기록이 접수되었습니다. 앞선 말과 충돌하지 않아야 합니다.\n흐름: 플레이어 발화 -> 상점 기록 -> 공원 게시 -> 응대 중단 -> 줄 이탈 -> 보고 접수",
-				"inspectedNpcState": {
-
-				},
-				"inspectedWorldRecordProp": {
-
-				},
+				"inspectedNpcState": {},
+				"inspectedWorldRecordProp": {},
 				"investigationTrail": "검사자: 상점 매니저 -> 스테이션 직원 | 대상: 플레이어 | 근거: 상점 보고 기록",
 				"notice": "NPC_Store_Clerk / 기록과 다릅니다. 담당자에게 전달하겠습니다. / 플레이어 발화: 저는 여기 사람이 아닙니다. / why-line: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.",
 				"outcomeBody": "결과: soft_report\n사슬: 플레이어 발화 -> 상점 보고 기록 -> 대기줄 반응 -> 공원 소문 게시 -> 카운터 중단 -> 대기 이탈 -> 스테이션 경고 접수\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자는 같은 기록을 보고 게시판에 소문을 남겼습니다. 상점 관리자는 기록 부담을 보고 후속 메모를 붙인 뒤 카운터 응대를 잠시 멈췄고, 그 중단을 본 대기 손님은 줄에서 빠졌습니다.\n역할 행동: 공원 목격자가 상점 기록을 공개 소문으로 바꿨고, 상점 관리자가 보고 트레이에 후속 기록을 남기고 카운터를 중단 상태로 바꿨으며, 대기 손님이 중단 기록을 보고 대기 표식을 비웠습니다.\n스테이션 경고: 상점 보고는 접수되었지만 심문 기준에는 닿지 않았습니다.\n이 마이크로 시나리오는 경고로 닫힙니다.\n마지막 why-line: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다.\nR 다시 시작 / Q 종료",
@@ -25943,13 +25705,9 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "initial",
-					"latestLedger": {
-
-					},
+					"latestLedger": {},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -26329,13 +26087,9 @@
 						"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "focus.store_counter",
-					"latestLedger": {
-
-					},
+					"latestLedger": {},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -26715,13 +26469,9 @@
 						"safeLineLabel": "2  제가 보통 뭘 시켰죠?",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "conversation.start",
-					"latestLedger": {
-
-					},
+					"latestLedger": {},
 					"recordObjects": {
 						"civic_ledger": "append_only",
 						"correction_slip": "absent",
@@ -27016,9 +26766,7 @@
 						"safeLineLabel": "2  어제 일이 조금 흐릿해서 확인했습니다.",
 						"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Store_Clerk",
@@ -27287,9 +27035,7 @@
 						"safeLineLabel": "스테이션은 상점 대화 기록을 참고합니다.",
 						"whyLineLabel": "WHY-LINE: 그 말은 평범한 구매 상황의 사회적 대본에서 벗어납니다."
 					},
-					"inspectedWorldRecordProp": {
-
-					},
+					"inspectedWorldRecordProp": {},
 					"label": "dialogue.choice.by_id",
 					"latestLedger": {
 						"actorId": "NPC_Waiting_Customer",
@@ -28383,13 +28129,9 @@
 				"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 				"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 			},
-			"inspectedWorldRecordProp": {
-
-			},
+			"inspectedWorldRecordProp": {},
 			"label": "initial",
-			"latestLedger": {
-
-			},
+			"latestLedger": {},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -28769,13 +28511,9 @@
 				"safeLineLabel": "상점 카운터에서 E로 대화 시작",
 				"whyLineLabel": "WHY-LINE: 아직 기록된 모순 없음"
 			},
-			"inspectedWorldRecordProp": {
-
-			},
+			"inspectedWorldRecordProp": {},
 			"label": "focus.world_record_prop",
-			"latestLedger": {
-
-			},
+			"latestLedger": {},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -29178,9 +28916,7 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "player.interact.focused",
-			"latestLedger": {
-
-			},
+			"latestLedger": {},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -29583,9 +29319,7 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "focus.text_surface",
-			"latestLedger": {
-
-			},
+			"latestLedger": {},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -29988,9 +29722,7 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "player.interact.focused",
-			"latestLedger": {
-
-			},
+			"latestLedger": {},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -30393,9 +30125,7 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "focus.text_surface",
-			"latestLedger": {
-
-			},
+			"latestLedger": {},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -30798,9 +30528,7 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "player.interact.focused",
-			"latestLedger": {
-
-			},
+			"latestLedger": {},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -31203,9 +30931,7 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "focus.store_counter",
-			"latestLedger": {
-
-			},
+			"latestLedger": {},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -31608,9 +31334,7 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "conversation.start",
-			"latestLedger": {
-
-			},
+			"latestLedger": {},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",
@@ -32013,9 +31737,7 @@
 				"title": "늘 같은 주문"
 			},
 			"label": "player.wait.hesitation_record",
-			"latestLedger": {
-
-			},
+			"latestLedger": {},
 			"recordObjects": {
 				"civic_ledger": "append_only",
 				"correction_slip": "absent",

@@ -26,7 +26,9 @@ tags:
    `.game-studio/core/references/operational/godot-playable-build.md`.
 8. If the Godot task resembles a known engine pattern, read
    `.game-studio/core/references/operational/godot-reference-patterns.md`.
-9. Verify and write a handoff before claiming completion.
+9. If the work spans multiple autonomous slices or has drifted into docs,
+   tests, reports, or helper tooling, route through `game-long-run-control`.
+10. Verify and write a handoff before claiming completion.
 
 ## Entry Check
 
@@ -58,6 +60,9 @@ instead of choosing for the human.
   the claim.
 - For Godot work, do not copy a starter kit blindly. Name the reference pattern,
   adaptation, license risk, and runtime check.
+- Do not let execution turn into support-work momentum. If two slices in a row
+  are not playable implementation or real play proof, stop and apply
+  `game-long-run-control`.
 
 ## Reference Files
 
@@ -66,7 +71,9 @@ instead of choosing for the human.
 | `references/work-packages.md` | Every implementation split | Work package rules |
 | `references/design-preservation.md` | Player-facing implementation | Preserve design intent |
 | `.game-studio/core/templates/execution/work-intake.md` | Starting work | Intake template |
+| `.game-studio/core/templates/execution/long-run-loop-state.md` | Multi-slice autonomous work | Loop state, product-progress predicate, blocker, and resume mode |
 | `.game-studio/core/templates/execution/implementation-handoff.md` | Ending work | Handoff template |
+| `skills/game-long-run-control/SKILL.md` | Long autonomous sessions | Product-progress guard and support-work circuit breakers |
 | `.game-studio/core/templates/production/godot-reference-adoption-note.md` | Borrowing from a Godot demo or starter kit | Reference pattern, license decision, adaptation, and runtime check |
 | `.game-studio/core/references/operational/godot-playable-build.md` | Godot milestone or prototype work | Godot scene, script, runtime, and capture checks |
 | `.game-studio/core/references/operational/godot-reference-patterns.md` | Godot work that matches known demos or starter kits | Reference selector and pattern cards |

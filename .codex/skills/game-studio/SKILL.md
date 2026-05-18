@@ -26,6 +26,8 @@ tags:
 6. Check whether the milestone has a contract.
 7. Require playable proof before stage advancement and record internal evidence
    artifacts for that proof.
+8. If the request is a long autonomous run, route to `game-long-run-control`
+   after the milestone/proof target is known.
 
 ## Gotchas
 
@@ -34,6 +36,8 @@ tags:
 - Do not call a prototype a vertical slice.
 - AI can recommend the next proof, but the human owns Direction Lock, stage
   movement, and public promises.
+- Long-running agent activity is not progress unless the active playable claim
+  changes or the real play path is unblocked.
 
 ## Reference Files
 
@@ -41,6 +45,7 @@ tags:
 | --- | --- | --- |
 | `references/milestone-planning.md` | Every milestone or roadmap task | Stage and milestone flow |
 | `references/production-judgment.md` | Milestone approval | Producer-level proof and cut review |
+| `skills/game-long-run-control/SKILL.md` | Multi-slice autonomous work | Product-progress guard, support-work limits, and resume labels |
 | `skills/game-onboarding/SKILL.md` | Missing or ambiguous direction | Entry routing before Direction Lock |
 | `.game-studio/core/workflows/stage-model.md` | Stage classification | Stage definitions |
 | `.game-studio/core/templates/production/milestone-contract.md` | Creating a milestone | Contract template |

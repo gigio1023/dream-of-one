@@ -178,7 +178,7 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `60104fcbd590a2ef545bcd29a587b42912c0073fe24e751a47bca957b1d7d9cb`
+  - JSON SHA-256: `9a26c04c65cd12cf4ec2d54e54d0206ae553e7430dba01d572aff5d5925f85cd`
   - Markdown SHA-256: `6445a0e64e5b99398646c0e08bbb98aacb9378d0dd03f3a4a523ce2c0b6a0253`
   - playable Evidence Pack SHA-256: `dd69a70384e218c58ff2e5a6ee6b58f6cbada43b82225d2f6ea7cd1ad43bc64d`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`

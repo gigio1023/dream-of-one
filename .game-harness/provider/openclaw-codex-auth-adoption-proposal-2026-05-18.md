@@ -1,22 +1,37 @@
-# OpenClaw Codex Auth Adoption Proposal
+# OpenClaw OpenAI Codex Provider Adoption Proposal
 
 Date: 2026-05-18
-Status: proposal, not implemented product truth
+Status: corrected proposal, not implemented product truth
+
+## Correction
+
+The first pass over-emphasized OpenClaw's native Codex app-server and
+`codex exec` automation paths. The relevant OpenClaw path for Dream Of One is
+the direct LLM-provider path:
+
+- provider id: `openai-codex`
+- model API: `openai-codex-responses`
+- base URL: `https://chatgpt.com/backend-api/codex`
+- auth profile type: OpenAI Codex/ChatGPT OAuth, with optional API-key backup
+
+This is closer to Dream Of One's existing `OpenAiProposalGateway` than to a
+local CLI subprocess.
 
 ## Source Reviewed
 
-An external OpenClaw clone was inspected for Codex auth/provider behavior,
-including:
+OpenClaw files inspected:
 
-- `docs/providers/openai.md`
-- `docs/concepts/oauth.md`
-- `docs/auth-credential-semantics.md`
-- `extensions/codex/provider.ts`
-- `extensions/codex/provider-catalog.ts`
-- `extensions/codex/src/app-server/auth-bridge.ts`
-- `extensions/codex/src/app-server/config.ts`
-- `src/agents/cli-credentials.ts`
-- `src/agents/auth-profiles/external-cli-discovery.ts`
+- `extensions/openai/openai-codex-provider.ts`
+- `extensions/openai/openai-codex-catalog.ts`
+- `extensions/openai/openai-codex-oauth.runtime.ts`
+- `extensions/openai/openai-codex-device-code.ts`
+- `extensions/openai/openai-codex-provider.runtime.ts`
+- `extensions/openai/base-url.ts`
+- `src/agents/auth-profiles/oauth.ts`
+- `src/agents/model-auth.ts`
+- `src/agents/model-auth.profiles.test.ts`
+- `src/agents/openai-transport-stream.ts`
+- `src/agents/pi-embedded-runner/stream-resolution.ts`
 
 Official Codex docs checked:
 
@@ -25,107 +40,107 @@ Official Codex docs checked:
 
 ## OpenClaw Pattern To Borrow
 
-OpenClaw does not treat Codex ChatGPT login as an `OPENAI_API_KEY`.
+OpenClaw treats Codex as a provider/auth mode, not as `OPENAI_API_KEY`.
 
-It separates:
+The important shape is:
 
-- model route: canonical `openai/<model>` style model refs;
-- runtime: Codex app-server or other execution runtime;
-- auth source: Codex/ChatGPT OAuth profile, Codex CLI login fallback, or API-key
-  backup;
-- readiness: probe/status can discover auth and model availability without
-  changing product truth;
-- authority: model output is still routed through validators and runtime-owned
-  policy.
+- register an `openai-codex` provider;
+- normalize its transport to `openai-codex-responses`;
+- use `https://chatgpt.com/backend-api/codex` as the Responses-compatible base
+  URL;
+- store Codex OAuth profiles in an auth-profile store;
+- resolve a usable OAuth access token for runtime requests;
+- refresh OAuth credentials through provider-owned refresh logic;
+- use device-code login for remote/headless setups;
+- route requests through the same OpenAI Responses-style transport with bearer
+  auth;
+- keep provider output behind the same validators and policy gates.
 
-OpenClaw also scopes external CLI credential discovery. It only reads Codex CLI
-auth when the provider/runtime is in scope, keeps keychain prompting disabled on
-read-only status paths, and treats local OAuth profile storage as the canonical
-token sink once its own profile exists.
+## Dream Of One Recommended Shape
 
-## What Dream Of One Should Not Copy Yet
+Add a distinct `openai-codex` proposal provider mode, not a `codex exec` worker.
 
-Do not copy OpenClaw's full app-server/OAuth system into the game runtime.
+The implementation should reuse the existing `OpenAiProposalGateway` contract:
 
-Do not:
+1. Add `NPC_RUNTIME_PROPOSAL_PROVIDER=openai-codex`.
+2. Add `OpenAiCodexProposalGateway` or generalize `OpenAiProposalGateway` to
+   support a provider descriptor.
+3. Use the Codex Responses base URL:
+   `https://chatgpt.com/backend-api/codex`.
+4. Use Codex model defaults such as `gpt-5.5` or `gpt-5.4-mini`, with explicit
+   availability checks.
+5. Send the same strict JSON proposal schema already used by `openai-api`.
+6. Reuse existing proposal parsing and forbidden-authority rejection.
+7. Keep deterministic fallback for missing auth, expired auth, refresh failure,
+   unavailable model, invalid JSON, unsupported fields, and timeout.
 
-- read Codex tokens as `OPENAI_API_KEY`;
-- commit or expose Codex credential cache contents;
-- make game state depend on private token files;
-- claim live provider mode from `codex login status` alone;
-- let LLM output create records, risk, Exposure, Evidence, inquest, verdict, or
-  session end;
-- add hidden NPC actions that are not present in the environment affordance
-  catalog.
+## Auth Design
 
-## Recommended Dream Of One Shape
+Start with a project-local auth profile store, not with direct reads from the
+Codex CLI credential cache.
 
-Add a distinct optional provider mode named `codex-cli` only after a backend
-spike proves it.
+Recommended env/config:
 
-The mode should use the local Codex CLI as a proposal worker, not as a direct
-game authority:
+- `NPC_RUNTIME_PROPOSAL_PROVIDER=openai-codex`
+- `OPENAI_CODEX_PROPOSAL_MODEL=gpt-5.5`
+- `OPENAI_CODEX_PROPOSAL_MODEL_FALLBACKS=gpt-5.4-mini`
+- `OPENAI_CODEX_BASE_URL=https://chatgpt.com/backend-api/codex`
+- `OPENAI_CODEX_AUTH_PROFILE=default`
+- `OPENAI_CODEX_AUTH_STORE_PATH=build/provider-auth/openai-codex-auth.json`
 
-1. Preflight `codex --version`, `codex login status`, `codex exec --help`, and
-   required non-interactive flags.
-2. Run `codex exec` with the smallest viable sandbox, preferably read-only for
-   proposal generation.
-3. Pass only a compact NPC perception packet, environment affordance catalog,
-   and allowed output schema.
-4. Require strict JSON output with the existing text-proposal fields:
-   `npcId`, `npcLineCandidates`, `stationPressureWording`,
-   `localizedVariants`, and `fallbackTextVariants`.
-5. Reuse the existing proposal parser/authority rejection rules from the
-   `openai-api` path.
-6. Treat auth failure, timeout, malformed JSON, unsupported fields, forbidden
-   authority wording, or model unavailability as deterministic fallback.
-7. Record Evidence/HUD provider mode as `codex_cli` only after a live exported
-   build proves Godot-to-backend dispatch.
+`build/` is ignored and per-device. Do not commit auth profiles or token
+material.
 
-## Suggested Implementation Slices
+For headless Ubuntu ARM, prefer device-code login. A browser callback flow is
+not reliable on this server class.
 
-### Slice 1: backend-only spike
+## Implementation Slices
 
-- Add `NPC_RUNTIME_PROPOSAL_PROVIDER=codex-cli`.
-- Add config fields:
-  - `CODEX_CLI_BIN`
-  - `CODEX_CLI_MODEL`
-  - `CODEX_CLI_TIMEOUT_MS`
-  - `CODEX_CLI_SANDBOX`
-- Add a command-runner backed `CodexCliProposalGateway`.
-- Keep tests on a fake runner; no live Codex is required for normal CI.
-- Add a skipped/optional live smoke that requires logged-in Codex CLI.
+### Slice 1: provider shape, no live auth
 
-### Slice 2: contract proof
+- Add config parsing for `openai-codex`.
+- Add provider health that reports missing auth cleanly.
+- Add tests proving the provider mode does not fall back to `OPENAI_API_KEY`
+  unless explicitly configured as API-key backup.
 
-- Feed a static Same Order perception packet through the `codex-cli` gateway.
-- Verify strict parser pass/fail behavior.
-- Verify deterministic fallback for missing auth, timeout, bad JSON, forbidden
-  fields, mismatched `npcId`, and authority wording.
+### Slice 2: OAuth profile store
 
-### Slice 3: Godot dispatch
+- Add a small ignored auth-profile file format:
+  `{ access, refresh, expires, accountId?, email?, planType? }`.
+- Add device-code login helper for local setup.
+- Prefer implementing only the small Codex OAuth/device-code/refresh surface
+  needed by this runtime before adding a broad provider SDK dependency.
+- Add refresh logic with file locking before spending refresh tokens.
+- Never log or write raw tokens to Evidence.
 
-- Wire `codex-cli` provider mode through the same backend decision service.
-- Surface provider state in HUD/Evidence as `codex_cli`.
-- Preserve deterministic runtime authority over all game consequences.
+### Slice 3: Codex Responses proposal call
 
-### Slice 4: product gate
+- Reuse the existing proposal prompt and JSON schema.
+- POST to `/responses` under the Codex base URL with bearer access token.
+- Strip or avoid fields that Codex Responses rejects.
+- Parse the output through the existing `parseNpcTextProposal` path.
 
-- Only then update current product truth from `fallback_only_m1`.
-- Require exported-build evidence, not just backend tests.
+### Slice 4: proof and product gate
 
-## Open Question
+- Add a backend live smoke that skips without a usable Codex auth profile.
+- Add Godot-to-backend proof before surfacing `providerState.mode =
+  openai_codex`.
+- Keep `fallback_only_m1` as product truth until exported-build proof passes.
 
-OpenClaw has moved toward a native Codex app-server harness. Dream Of One should
-start with `codex exec` because it is smaller, officially documented for
-non-interactive use, easier to sandbox, and enough for text proposals. Native
-app-server style integration can be revisited only if `codex exec` cannot
-provide stable structured proposal output.
+## Do Not
+
+- Do not use `codex exec` as the runtime LLM worker for this path.
+- Do not treat Codex ChatGPT login as `OPENAI_API_KEY`.
+- Do not read or copy another tool's private token cache into tracked files.
+- Do not let LLM output create records, risk, Exposure, Evidence, inquest,
+  verdict, or session end.
+- Do not add hidden NPC actions outside the environment affordance catalog.
 
 ## Current Decision
 
-Keep the active product mode as `fallback_only_m1`.
+Implementing `openai-codex` as a direct provider is feasible and better aligned
+with OpenClaw than a CLI-worker design.
 
-Treat OpenClaw as a design reference for provider/auth separation, scoped CLI
-credential discovery, and fail-closed validation. Do not import its auth system
-as a runtime dependency until a separate implementation decision is made.
+The safe first target is backend-only: authenticate, call Codex Responses with
+the existing bounded proposal schema, validate, and fall back deterministically.
+Only after that should Godot HUD/Evidence claim live `openai_codex` behavior.

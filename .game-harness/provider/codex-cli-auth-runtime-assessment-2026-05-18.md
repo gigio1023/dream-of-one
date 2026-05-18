@@ -47,8 +47,14 @@ Relevant official guidance:
 Do not reinterpret Codex ChatGPT login as `OPENAI_API_KEY`, and do not extract
 or reuse the Codex credential cache inside the game runtime.
 
-If Dream of One wants an OpenClaw-style "Codex auth by default" path, implement
-it as an explicit optional `codex-cli` provider mode:
+If Dream of One wants an OpenClaw-style "Codex auth by default" path, the
+closer OpenClaw match is a direct `openai-codex` provider mode, not `codex
+exec`. OpenClaw also supports native app-server and CLI-related paths, but its
+direct LLM-provider path registers `openai-codex` with
+`openai-codex-responses` and `https://chatgpt.com/backend-api/codex`.
+
+If a CLI-worker experiment is still pursued independently, implement it as an
+explicit optional `codex-cli` provider mode:
 
 1. Preflight `codex --version`, `codex login status`, required `codex exec`
    flags, and model/provider selection.
@@ -74,18 +80,21 @@ OpenAI Responses API calls and uses `OPENAI_API_KEY`. Codex CLI auth is not a
 drop-in replacement for that path.
 
 Codex CLI auth is feasible as a future local-player/provider experiment, but it
-needs its own implementation and proof gate before it can become a game runtime
-claim.
+is not the primary OpenClaw-style LLM provider path. The better next target is a
+separate `openai-codex` provider mode that authenticates with Codex/ChatGPT
+OAuth and calls the Codex Responses backend through the same proposal schema as
+the existing `openai-api` path.
 
 ## Next Proof If Pursued
 
-Create a narrow `codex-cli` provider spike that does not touch product claims:
+Create a narrow `openai-codex` provider spike that does not touch product
+claims:
 
-- add a backend-only preflight command for `codex-cli`;
-- add one schema-constrained `codex exec` proposal call against a static
-  Same Order perception packet;
-- verify missing login, timeout, invalid JSON, authority-field rejection, and
-  deterministic fallback;
+- add backend-only auth/profile preflight for Codex OAuth;
+- add one schema-constrained Codex Responses proposal call against a static Same
+  Order perception packet;
+- verify missing login, refresh failure, timeout, invalid JSON,
+  authority-field rejection, and deterministic fallback;
 - only after backend proof, wire Godot dispatch and HUD provider-state evidence.
 
 OpenClaw was reviewed as a design reference for this path. See

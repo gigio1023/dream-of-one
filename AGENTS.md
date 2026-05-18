@@ -158,6 +158,27 @@
   question, not from Store/Station scope: what tiny role affordance, prop,
   record, gossip, warning, refusal, repair, help, obstruction, or toy economy
   value makes NPCs act more believably around the player?
+- Direction pivot: do not keep extending the game by hardcoding one new
+  social reaction chain at a time. That is still fixed-workflow behavior. The
+  intended model is closer to a constrained Claude Code loop: an NPC observes
+  the world, picks a local goal or next step, calls a small validated tool,
+  reads the result, updates memory/conversation state, and iterates.
+- Author low-level tools and world rules, not every social outcome. Movement,
+  reachability, dialogue locks, busy/available state, inventory/payment,
+  object mutation, Evidence, Exposure, inquest, verdict, provider safety, and
+  replay boundaries stay programmatic. What to try next, what to say, whether
+  to wait, whether to ask another NPC, and how to respond to a blocked result
+  should increasingly belong to the NPC agent loop.
+- The next gameplay architecture work should prove a narrow `agent_loop_probe`
+  before adding more authored social chains: one NPC, one other NPC, one
+  object or record, five or fewer tools such as `move_to`, `look`, `talk_to`,
+  `wait`, and `request`, three to six iterations, and a player/Codex-readable
+  transcript from the running scene.
+- Avoid new route-specific `if X then Y` social consequences unless they are
+  scaffolding for that generic tool loop. If a proposed slice is mostly "add
+  another NPC reads record and posts/blocks/refuses" with fixed ordering, stop
+  and reframe it as tool access, observation, conversation availability, or
+  iteration-state work.
 - Favor agile playable slices over waterfall planning. Add the smallest
   environment rule, prop, economy pressure, or NPC affordance that makes the
   social simulation more real, then prove it in the running build before adding

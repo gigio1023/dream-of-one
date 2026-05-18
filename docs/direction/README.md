@@ -28,6 +28,7 @@ active source of truth.
 - [Minimal Civic Economy Model](14-minimal-civic-economy-model.md)
 - [Agentic Social Simulation Model](15-agentic-social-simulation-model.md)
 - [Agentic Prototype Target](16-agentic-prototype-target.md)
+- [Agent Loop Runtime Pivot](17-agent-loop-runtime-pivot.md)
 
 ## Relationship to Other Docs
 
@@ -45,6 +46,7 @@ active source of truth.
 | Minimal civic economy model | `docs/direction/14-minimal-civic-economy-model.md` | active economy model: account credit, local trust, record burden, Station attention, and civic ledger |
 | Agentic social simulation model | `docs/direction/15-agentic-social-simulation-model.md` | active society model: environment affordances plus role agents that freely choose validated actions |
 | Agentic prototype target | `docs/direction/16-agentic-prototype-target.md` | active M1 target: one affordance-rich Store/Station environment with 2-3 role agents, ledgered interaction, and conversation-centered social proof |
+| Agent loop runtime pivot | `docs/direction/17-agent-loop-runtime-pivot.md` | current correction: stop extending fixed social chains and build a small NPC tool-call iteration loop |
 | Runtime design | `docs/design/` | rules, authority, evidence |
 | Research basis | `docs/research/2026-04-30/director-harness/` | source-backed director methodology |
 | Harness engineering | `docs/development/harness/` | operating contracts and readiness gates |
@@ -76,9 +78,14 @@ Current verdict:
   expansion.
 - the minimal civic economy now defines society through normal transactions,
   record cleanup cost, report burden, and Station audit.
-- the long-term social simulation model is environment-first agentic society:
-  places, records, affordances, visibility, and economy pressure are authored;
-  NPC role agents freely choose validated actions inside that world.
+- the long-term social simulation model is environment-first agentic society,
+  but the current correction is sharper: do not keep adding fixed social
+  reaction chains. Author small tools, world rules, visibility, dialogue locks,
+  and validation; let NPC agents iterate over tool calls and conversation
+  context.
 - the active prototype target is now one small Store/Station environment where
   conversation changes records, agents react through affordances, and Station
   cites the ledger.
+- the next architecture target is `agent_loop_probe_v0`: one NPC, one other NPC,
+  one object or record, five or fewer tools, three to six iterations, and a
+  player/Codex-readable transcript.

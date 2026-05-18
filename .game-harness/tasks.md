@@ -61,6 +61,12 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Expand game economy web research with source/sink, live-economy, operation-sim, and obligation examples; lock next economy work to the local repair sink.
 - [x] Add environment-first agentic social simulation model for affordance-driven role agents.
 - [x] Add active agentic prototype target and environment affordance map.
+- [x] Record the agent-loop pivot: future NPC work should not continue as a
+  growing list of fixed social reaction chains, and the next architecture proof
+  should behave more like a constrained Claude Code loop over small game tools.
+- [ ] Implement `agent_loop_probe_v0`: one NPC, one other NPC, one object or
+  record, five or fewer tools, three to six observe/tool/result iterations, and
+  a player/Codex-readable transcript from the running scene.
 - [x] Clarify that Store/Station is the first proof cell, not the whole game premise.
 - [x] Reset the active goal language so Store/Station is only a tiny disposable
   example for an open-environment NPC social simulation.

@@ -1,6 +1,6 @@
 # Active Goal Prompt
 
-Last Updated: 2026-05-18
+Last Updated: 2026-05-19
 Status: replacement prompt for the active thread goal
 
 ## Replacement Goal
@@ -29,7 +29,29 @@ simple while still being playable:
 - validation rules that accept or reject every role-agent action before any
   state changes.
 
-Role agents should behave through the environment rather than through hand-authored reaction branches. Each role observes the current situation, sees the currently available affordances, chooses a bounded action, and lets the runtime validate it. The first useful goal is not a large society model; it is a small open place where NPCs can notice, talk, mark records, repair, warn, report, cite, gossip, block, forgive, or help without every reaction being scripted. The provider may help propose wording or choose among available actions, but it must not create new rules, mutate records directly, decide risk tags, set Exposure, create Evidence authority, open inquest, choose verdict, or end the session.
+Correction to the current build direction: do not keep extending the prototype
+by adding one more fixed social reaction chain after another. That path is
+still a scripted workflow. The intended model is closer to a constrained
+Claude Code loop inside a game world: an NPC observes context, chooses a local
+goal or next step, calls a small validated tool, reads the result, updates
+memory or conversation state, and iterates until success, failure, interruption,
+or budget end.
+
+Role agents should behave through low-level world tools rather than through a
+growing catalog of authored social outcomes. The runtime should expose tools
+such as `move_to`, `look`, `talk_to`, `wait`, `inspect_record`, and `request`.
+It should programmatically validate movement, reachability, dialogue locks,
+busy/available state, object mutation, ownership/payment, memory writes,
+Evidence, Exposure, inquest, verdict, safety, budget, and replay boundaries.
+The NPC agent should increasingly decide what to try, what to say, whether to
+wait, whether to ask another NPC, and how to react to a blocked result.
+
+The provider may choose the next valid tool call, produce the utterance, and
+summarize short memory within tight schemas. It must not invent tools, bypass
+physics or dialogue locks, mutate records directly, decide risk tags, set
+Exposure, create Evidence authority, open inquest, choose verdict, or end the
+session. Deterministic authority remains the guardrail; the agent loop supplies
+the flexible iteration.
 
 Conversation remains the main player action. The player should read an NPC or
 system prompt, choose one of three authored lines or submit optional typed text,
@@ -82,6 +104,10 @@ The work is not complete until current evidence proves all of the following:
 - The authored environment map lists objects, affordances, roles, visibility,
   records, tiny economy effects, and validation rules for the current example
   cell.
+- A narrow `agent_loop_probe_v0` exists before more authored social chains are
+  added: one NPC, one other NPC, one object or record, five or fewer tools,
+  three to six iterations, and a player/Codex-readable transcript showing the
+  NPC observe, call tools, read results, and choose the next step from context.
 - Backend tests prove role-scoped affordance discovery, action validation,
   ledger creation, tiny economy deltas, exact citation of prior records, and
   rejection of unavailable or hidden actions.
@@ -121,6 +147,10 @@ The work is not complete until current evidence proves all of the following:
 - Treat Store/Station as a disposable sample of the wider design. Keep it
   small, legible, and cheap. Do not make the next decision from a desire to
   deepen Store operations, Station procedure, or simulator-management detail.
+- Do not add another route-specific social consequence just because it is the
+  next easy slice. If the work looks like `if prior record X then NPC Y posts,
+  blocks, refuses, or cites Z`, stop and reframe it as generic tool access,
+  observation, conversation availability, iteration state, or a tiny agent loop.
 - When choosing work, start from the open-environment question: which small
   affordance, prop, record, NPC reaction, or toy economy value makes the social
   field more believable? Use Store/Station only if it is the cheapest disposable
@@ -131,9 +161,11 @@ The work is not complete until current evidence proves all of the following:
   game premise. Treat them as tiny examples for proving social affordances,
   record pressure, and NPC-to-NPC consequences that can move to other
   environments.
-- Work in short playable increments. Add one social affordance, one lightweight
-  economy pressure, or one NPC-to-NPC record use at a time, then verify it in
-  the running build.
+- Work in short playable increments, but aim the next increments at reusable
+  agent-loop mechanics: observation, movement, conversation availability,
+  tool-call result handling, short memory, and player-readable loop transcript.
+  Add authored social actions only when they are scaffolding for that generic
+  loop, not as the main design method.
 - Do not call tests or generated packets player comprehension.
 - Do not call live provider behavior proven unless a budgeted live preflight succeeds.
 - Keep deterministic backend authority stronger than provider output.
@@ -168,12 +200,13 @@ When choosing the next task, prefer the weakest missing proof in this order:
 
 1. identify the smallest missing game improvement in the open-environment social
    simulation;
-2. implement that improvement as a playable result, not just as a document or
+2. before adding another fixed social reaction, build the smallest playable
+   agent-loop proof: one NPC uses generic tools over several iterations and
+   reacts to tool results;
+3. implement that improvement as a playable result, not just as a document or
    harness artifact;
-3. prefer a neutral open-place interaction; keep Store/Station only when it is
+4. prefer a neutral open-place interaction; keep Store/Station only when it is
    the cheapest disposable sample for the general pattern;
-4. add only small social-simulation increments that make NPC-to-NPC action and
-   player consequences clearer;
 5. keep the Codex gameplay QA interface able to play, inspect, and explain the
    running proof cell before asking humans to judge it; if the interface cannot
    play the new slice, fix that before expanding scope;

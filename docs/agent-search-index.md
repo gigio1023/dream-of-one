@@ -14,6 +14,7 @@ It exists so important runtime rules are not trapped in one deep document.
 | `openai-codex`, `OpenAI Codex provider`, `Codex provider`, `ChatGPT/Codex provider` | `docs/development/ai-provider-runtime.md` | `backend/npc-runtime/src/broker/codex-tool-gateway.ts`, `.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md` |
 | `codex login`, `codex cli`, `codex exec`, `Codex CLI auth` | `docs/development/ai-provider-runtime.md` | `.game-harness/provider/codex-cli-auth-runtime-assessment-2026-05-18.md`, `docs/direction/03-director-decision-ledger.md` |
 | `AI provider`, `LLM provider`, `proposal provider`, `NPC proposal`, `provider boundary` | `docs/development/ai-provider-runtime.md` | `docs/design/authority-map.md`, `docs/direction/15-agentic-social-simulation-model.md` |
+| `agent loop`, `Claude Code loop`, `tool call NPC`, `NPC tools`, `agent_loop_probe`, `LLM decides next action` | `docs/direction/17-agent-loop-runtime-pivot.md` | `.game-harness/active-goal-prompt.md`, `AGENTS.md`, `docs/development/ai-provider-runtime.md` |
 | `provider output authority`, `LLM can decide`, `AI action`, `AI verdict` | `docs/design/authority-map.md` | `docs/development/ai-provider-runtime.md`, `docs/direction/00-game-thesis.md` |
 | `gpt-5.4-mini`, `model availability`, `model fallback`, `nano model` | `docs/development/ai-provider-runtime.md` | `.game-harness/provider/openai-codex-model-policy-2026-05-18.md`, `docs/direction/06-release-strategy.md` |
 | `live provider smoke`, `live LLM proof`, `provider usage`, `provider budget` | `.game-harness/provider/openai-codex-live-social-probe-2026-05-18.md` | `.game-harness/provider/openai-codex-provider-verification-2026-05-19.md`, `.game-harness/verification-ledger.md` |
@@ -81,6 +82,12 @@ Do not start with Codex CLI login commands for game provider auth.
 
 ## Authority Rule
 
+Current checked-in provider mode is still proposal-only for the existing
+Store/Station proof path. The direction pivot in
+`docs/direction/17-agent-loop-runtime-pivot.md` allows future NPC agents to
+propose the next small tool call, but only through explicit tool schemas and
+runtime validation. Tool-call proposal is not direct state authority.
+
 Allowed provider proposal fields:
 
 - `npcLineCandidates`
@@ -90,7 +97,7 @@ Allowed provider proposal fields:
 
 The provider must not decide:
 
-- action type;
+- unchecked action type outside an explicit tool schema;
 - record creation;
 - ledger mutation;
 - risk tag;

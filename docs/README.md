@@ -44,11 +44,12 @@ Use this page as the documentation map. README.md is the project entry point; th
 10. [Minimal civic economy model](direction/14-minimal-civic-economy-model.md)
 11. [Agentic social simulation model](direction/15-agentic-social-simulation-model.md)
 12. [Agentic prototype target](direction/16-agentic-prototype-target.md)
-13. [AI provider runtime](development/ai-provider-runtime.md)
-14. [Game design](design/game-design.md)
-15. [Scenario docs](scenario/README.md)
-16. [Godot runtime path](runtime/godot/README.md)
-17. [Verification ledger](../.game-harness/verification-ledger.md)
+13. [Agent loop runtime pivot](direction/17-agent-loop-runtime-pivot.md)
+14. [AI provider runtime](development/ai-provider-runtime.md)
+15. [Game design](design/game-design.md)
+16. [Scenario docs](scenario/README.md)
+17. [Godot runtime path](runtime/godot/README.md)
+18. [Verification ledger](../.game-harness/verification-ledger.md)
 
 ## Current Truth
 
@@ -74,14 +75,14 @@ The current economy method is civic-ledger-first: Same Order needs one normal
 transaction, one possible correction, one report burden, and one Station audit
 before broad shop or staff systems.
 
-The current social simulation method is environment-first: author places,
-records, affordances, visibility, and civic pressure, then let NPC role agents
-choose validated actions inside that world instead of hand-authoring every
-reaction branch.
+The current social simulation method is agent-loop-first: author places, low
+level tools, records, visibility, dialogue locks, and validation, then let NPC
+agents iterate over tool calls and conversation context. Do not keep adding one
+fixed social reaction chain after another as the main design method.
 
-The current LLM/NPC method is tool-catalog-first: dialogue choices are player
-speech inputs, while Store/Station objects expose role-filtered tool
-descriptors that NPC agents may propose and the runtime must validate.
+The current LLM/NPC method is tool-loop-first: dialogue choices are player
+speech inputs, while NPCs should increasingly use small validated tools such as
+`move_to`, `look`, `talk_to`, `wait`, `inspect_record`, and `request`.
 AI_PROVIDER_SEARCH_INDEX lives at [agent-search-index.md](agent-search-index.md).
 The default live-LLM provider mode is direct `openai-codex` auth with
 `gpt-5.4-mini` low reasoning effort only; API `nano` models are not assumed
@@ -94,6 +95,7 @@ exposed by the provider response.
 Game-runtime Codex auth means the backend provider profile described in
 [AI provider runtime](development/ai-provider-runtime.md), not Codex CLI login.
 
-The current prototype target is one small Store/Station environment where
-conversation changes records, environment affordances become available, role
-agents react, and Station later cites the ledger.
+The current prototype target is `agent_loop_probe_v0`: one NPC, one other NPC,
+one object or record, five or fewer tools, three to six iterations, and a
+player/Codex-readable transcript proving the NPC can observe, act, read the
+result, and choose the next step without a fixed authored chain.

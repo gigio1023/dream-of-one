@@ -25,7 +25,7 @@ runtime or changing the Game Studio operating model.
 | Scope overlay | `small-team` role model | Work still names Game Director, Systems, Godot, Narrative, QA, and Producer lanes. |
 | Genre | `social-stealth` | NPCs, local institutions, and authority systems watch the player through dialogue, suspicion signals, reports, Exposure, and verdict pressure. |
 | Genre method | `simulation` overlay | Current planning borrows simulator grammar: procedure cues, watcher, record, repair, and formal citation. |
-| Genre overlay | `narrative-ai` | API proposal providers may generate bounded wording only, while deterministic rules own actions and consequences. |
+| Genre overlay | `narrative-ai` | LLM/NPC work should move toward bounded tool-call iteration, while deterministic rules own physics, validation, records, Evidence, and authority outcomes. |
 | Review mode | `lean` | Require focused role verdicts at gates, not large process artifacts. |
 | Decision mode | `agentic` with human authority | Agents may execute scoped work, but cannot lock direction, move stages, or make public promises. |
 
@@ -46,6 +46,16 @@ clearer social role behavior, environment use, record transformation, visible
 consequence, or player-facing pressure. Tests, AI-play probes, and Evidence
 records should be attached to that implementation, not treated as the
 implementation itself.
+
+Direction correction: the next architecture target is not another authored
+NPC-to-NPC consequence chain. The intended model is an NPC agent loop. The
+runtime should expose small programmatic tools and constraints, then let an NPC
+observe, choose a next step, call a tool, read the result, update local memory
+or conversation state, and iterate. Movement, reachability, dialogue locks,
+busy/available state, object mutation, ownership/payment, Evidence, Exposure,
+inquest, verdict, provider safety, and replay boundaries remain deterministic.
+What to try, what to say, whether to wait, whether to ask another actor, and how
+to handle a blocked result should move into the agent loop.
 
 Direction reset: Dream of One should be treated as an open social environment,
 not as a Store/Station game. Store/Station and `Same Order` remain useful only
@@ -95,6 +105,11 @@ Current M1 carry-in:
   long-term content focus. Future work should extract reusable
   environment-agent patterns instead of deepening Store operations or Station
   procedure.
+- latest direction correction: stop adding fixed chains such as "NPC reads
+  record, then posts/blocks/refuses" as the default next slice. The next useful
+  slice should prove `agent_loop_probe_v0`: one NPC, one other NPC, one object
+  or record, five or fewer tools, three to six observe/tool/result iterations,
+  and a player/Codex-readable transcript from the running scene.
 - latest small-slice carry-in: active Store dialogue choices remain diegetic
   speech inputs while the prompt exposes the Store Clerk's current
   environment tool catalog from object affordances. The player can see what the

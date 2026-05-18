@@ -31,6 +31,8 @@ Dream of One is a Godot 4.x 3D conversation social-stealth game where NPC societ
 ## Scenario Source Of Truth
 
 - Active scenario docs: `docs/scenario/`
+- Agent/LLM search index: `docs/agent-search-index.md`
+- AI provider runtime contract: `docs/development/ai-provider-runtime.md`
 - Design spine: `docs/direction/09-game-design-spine.md`
 - Team operating brief: `docs/direction/10-team-operating-brief.md`
 - Simulator benchmark adoption brief: `docs/direction/11-simulator-benchmark-adoption-brief.md`
@@ -77,6 +79,9 @@ The current lane target is:
 - grow society by defining environments, affordances, records, visibility, and
   civic pressure, then letting role agents choose validated actions instead of
   manually scripting every reaction.
+- keep AI provider work routed through `docs/agent-search-index.md` and
+  `docs/development/ai-provider-runtime.md`; game-runtime Codex auth means the
+  backend `openai-codex` provider profile, not Codex CLI login.
 - target the next prototype at one affordance-rich Store/Station environment
   where conversation changes records, agents react, and Station cites the
   ledger.

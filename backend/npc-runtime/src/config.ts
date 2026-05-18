@@ -22,6 +22,7 @@ export interface RuntimeConfig {
   evidenceOutputDir: string;
 }
 
+// AI_PROVIDER_SEARCH_INDEX: docs/agent-search-index.md.
 // Game AI providers are proposal workers, not game-state authorities.
 // `openai-codex` means the backend's Codex-compatible OAuth provider profile;
 // it must not be confused with Codex CLI login or a `codex exec` subprocess.
@@ -53,7 +54,7 @@ export interface OpenAiProposalBudgetConfig {
 export const OPENAI_PROPOSAL_GATEWAY_COMMAND = "__openai_api_proposal_provider__";
 export const OPENAI_API_BASE_URL = "https://api.openai.com/v1";
 export const OPENAI_CODEX_BASE_URL = "https://chatgpt.com/backend-api/codex";
-// Ignored repo-local OAuth store for the game provider. This is separate from
+// OPENAI_CODEX_PROVIDER_AUTH_STORE: ignored repo-local OAuth store for the game provider. This is separate from
 // Codex CLI auth and is the first place to check for gameplay LLM auth.
 export const DEFAULT_OPENAI_CODEX_AUTH_STORE_PATH = "build/provider-auth/openai-codex-auth.json";
 export const DEFAULT_OPENAI_CODEX_AUTH_PROFILE = "default";

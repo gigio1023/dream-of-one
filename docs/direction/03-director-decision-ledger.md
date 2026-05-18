@@ -81,6 +81,8 @@ Decision:
 - Dream of One uses direct `openai-codex` as the default proposal provider premise for live AI NPC text.
 - Player-installed Codex CLI is not assumed as a release prerequisite.
 - The game must check configured provider access and GPT model availability at runtime.
+- Provider/auth lookup starts at `docs/agent-search-index.md` and
+  `docs/development/ai-provider-runtime.md`.
 - `gpt-5.4-mini` low reasoning effort is the default `openai-codex` model, but
   live behavior is claimed only when runtime verification proves access and the
   configured request budget.

@@ -691,6 +691,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
   private readonly fetchImpl: FetchLike;
   private readonly timeoutMs: number;
 
+  // AI_PROVIDER_SEARCH_INDEX: docs/agent-search-index.md.
   // This gateway adapts external LLM providers into Dream of One's proposal
   // contract. The current default implementation is `openai-codex`, but every
   // provider must return bounded wording that the backend validates before any

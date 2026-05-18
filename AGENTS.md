@@ -82,6 +82,10 @@
   configured OpenAI Codex model until live Codex-provider discovery proves a
   cheaper Codex-supported model. Do not assume API `nano` models are available
   through the Codex provider.
+- AI_PROVIDER_SEARCH_INDEX: for any provider/auth/LLM ambiguity, read
+  `docs/agent-search-index.md` first. Search tokens:
+  `GAME_RUNTIME_CODEX_AUTH`, `OPENAI_CODEX_PROVIDER`,
+  `CODEX_CLI_IS_NOT_GAME_PROVIDER_AUTH`, `LLM_PROPOSAL_ONLY`.
 - When a task says "Codex auth" in relation to the game runtime, read
   `docs/development/ai-provider-runtime.md` first. Check the backend
   `openai-codex` auth profile store, usually

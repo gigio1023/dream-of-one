@@ -249,6 +249,7 @@ usable environmental tool and gives the player one readable consequence.
 ## Provider/LLM Placement
 
 Implementation contract: see
+[`docs/agent-search-index.md`](../agent-search-index.md) and
 [`docs/development/ai-provider-runtime.md`](../development/ai-provider-runtime.md).
 The first live implementation is the direct `openai-codex` provider. It is not
 `codex exec`, not Codex CLI login, and not a replacement for runtime validation.

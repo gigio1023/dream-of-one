@@ -17,6 +17,7 @@ It is the game-development memory layer:
 
 | File | Purpose |
 |---|---|
+| `../docs/agent-search-index.md` | Search-first routing for AI provider/auth/provider-boundary terms |
 | `game-seed.md` | Stable product promise and authority boundaries |
 | `current-stage.md` | Current stage gate and deliverables |
 | `tasks.md` | Harness-level task checklist, not issue SoT |

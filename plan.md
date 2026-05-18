@@ -4,7 +4,14 @@
 
 Dream of One is no longer scoped as a Godot migration alone. The release target is a small honest prologue/demo where the player is investigated by Station/NPC systems, dialogue becomes danger, and deterministic backend/runtime authority owns suspicion signals, reports, Exposure, Evidence, Inquest, Verdict, and Session End.
 
-The AI path is an API proposal provider. The provider may propose wording only: NPC line candidates, Station pressure wording, localized variants, and fallback text variants. It must not decide action type, risk tag, Evidence type, reason codes, why-line authority, Exposure delta, Inquest state, Verdict, or session termination.
+The AI path is an API proposal provider. The provider may propose wording only:
+NPC line candidates, Station pressure wording, localized variants, and fallback
+text variants. It must not decide action type, risk tag, Evidence type, reason
+codes, why-line authority, Exposure delta, Inquest state, Verdict, or session
+termination. For all provider/auth work, route through
+`docs/agent-search-index.md` and `docs/development/ai-provider-runtime.md`;
+game-runtime Codex auth means the backend `openai-codex` provider profile, not
+Codex CLI login.
 
 ## Current Lane And Umbrella Target
 

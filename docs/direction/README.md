@@ -4,6 +4,11 @@ This is the active director-level entry point for Dream of One.
 
 Use this before planning large features, changing the game loop, expanding story, changing 2D/3D strategy, publishing public material, or delegating broad Codex work.
 
+For LLM/provider/auth questions, read
+[`docs/agent-search-index.md`](../agent-search-index.md) first. It routes
+`codex auth`, `openai-codex`, AI provider, and provider-boundary terms to the
+active source of truth.
+
 ## Documents
 
 - [Game Thesis](00-game-thesis.md)

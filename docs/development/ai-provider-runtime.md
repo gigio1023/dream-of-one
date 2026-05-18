@@ -3,6 +3,12 @@
 Status: active runtime contract
 Last updated: 2026-05-19
 
+Search index: `docs/agent-search-index.md`
+Search tokens: `AI_PROVIDER_SEARCH_INDEX`, `GAME_RUNTIME_CODEX_AUTH`,
+`OPENAI_CODEX_PROVIDER`, `OPENAI_CODEX_PROVIDER_AUTH_STORE`,
+`CODEX_CLI_IS_NOT_GAME_PROVIDER_AUTH`, `LLM_PROPOSAL_ONLY`,
+`DO_NOT_RUN_CODEX_LOGIN_FOR_GAME_PROVIDER_AUTH`.
+
 ## Core Rule
 
 Dream of One uses AI providers as bounded proposal workers for NPC and Station

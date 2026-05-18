@@ -417,6 +417,9 @@ Dream of One supersedes the Codex CLI player-prerequisite decision.
 
 - **Accepted path**: Default to a direct `openai-codex` proposal provider for live NPC/Station wording when configured and verified at runtime.
 - **Rejected path**: Do not require player-installed Codex CLI as the release prerequisite. Do not let provider prose own gameplay rules.
+- **Search route**: AI_PROVIDER_SEARCH_INDEX lives at
+  `docs/agent-search-index.md`; game-runtime Codex auth means the backend
+  `openai-codex` provider profile, not Codex CLI login.
 - **Invocation model**: Backend/runtime performs provider preflight, checks configured model availability, validates structured wording proposals, and falls back deterministically.
 - **Model rule**: Use `gpt-5.4-mini` with low reasoning effort as the only default `openai-codex` model. Do not configure API nano models for the Codex provider until live provider discovery proves availability. Missing or unavailable model means deterministic fallback, not automatic model escalation.
 - **Authority boundary**: Provider output is wording only: NPC line candidates, Station pressure wording, localized variants, and fallback text variants.

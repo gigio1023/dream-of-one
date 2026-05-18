@@ -2,6 +2,11 @@
 
 Dream of One uses this directory as a project-local Game Studio guidance overlay.
 
+For AI provider/auth/provider-boundary terms, route first through
+`docs/agent-search-index.md`. It keeps `openai-codex`, Codex auth, Codex CLI,
+LLM proposal authority, and provider proof references searchable from a single
+active index.
+
 - `core/` contains copied Game Studio roles, rubrics, gates, schemas, workflows, and templates.
 - `project-state.md` records the current routing, profiles, stage, API migration decision, and proof blockers.
 - `milestones/` and `council/` are reserved for Game Studio summaries only after the human chooses to mirror or migrate current harness state.

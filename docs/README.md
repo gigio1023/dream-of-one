@@ -6,6 +6,7 @@ Use this page as the documentation map. README.md is the project entry point; th
 
 | Directory | Purpose |
 |---|---|
+| [agent-search-index.md](agent-search-index.md) | Search-first routing for agents, especially AI provider/auth/provider-boundary work. |
 | [direction](direction/README.md) | Game thesis, pillars, roadmap, decision ledger, release strategy, and conversation redesign. |
 | [design](design/game-design.md) | Runtime authority, Dream Laws, Evidence semantics, and social-causality rules. |
 | [scenario](scenario/README.md) | Active scenario bible, dialogue/content banks, localization notes, and playtest rubric. |
@@ -31,22 +32,23 @@ Use this page as the documentation map. README.md is the project entry point; th
 
 ## Reading Order
 
-1. [Project definition](../project.md)
-2. [Completion plan](../plan.md)
-3. [Conversation suspicion redesign](direction/08-conversation-suspicion-redesign.md)
-4. [Game design spine](direction/09-game-design-spine.md)
-5. [Team operating brief](direction/10-team-operating-brief.md)
-6. [Simulator benchmark adoption brief](direction/11-simulator-benchmark-adoption-brief.md)
-7. [Simulator reference games map](direction/12-simulator-reference-map.md)
-8. [Operation sim quality floor](direction/13-operation-sim-quality-floor.md)
-9. [Minimal civic economy model](direction/14-minimal-civic-economy-model.md)
-10. [Agentic social simulation model](direction/15-agentic-social-simulation-model.md)
-11. [Agentic prototype target](direction/16-agentic-prototype-target.md)
-12. [AI provider runtime](development/ai-provider-runtime.md)
-13. [Game design](design/game-design.md)
-14. [Scenario docs](scenario/README.md)
-15. [Godot runtime path](runtime/godot/README.md)
-16. [Verification ledger](../.game-harness/verification-ledger.md)
+1. [Agent search index](agent-search-index.md)
+2. [Project definition](../project.md)
+3. [Completion plan](../plan.md)
+4. [Conversation suspicion redesign](direction/08-conversation-suspicion-redesign.md)
+5. [Game design spine](direction/09-game-design-spine.md)
+6. [Team operating brief](direction/10-team-operating-brief.md)
+7. [Simulator benchmark adoption brief](direction/11-simulator-benchmark-adoption-brief.md)
+8. [Simulator reference games map](direction/12-simulator-reference-map.md)
+9. [Operation sim quality floor](direction/13-operation-sim-quality-floor.md)
+10. [Minimal civic economy model](direction/14-minimal-civic-economy-model.md)
+11. [Agentic social simulation model](direction/15-agentic-social-simulation-model.md)
+12. [Agentic prototype target](direction/16-agentic-prototype-target.md)
+13. [AI provider runtime](development/ai-provider-runtime.md)
+14. [Game design](design/game-design.md)
+15. [Scenario docs](scenario/README.md)
+16. [Godot runtime path](runtime/godot/README.md)
+17. [Verification ledger](../.game-harness/verification-ledger.md)
 
 ## Current Truth
 
@@ -80,6 +82,7 @@ reaction branch.
 The current LLM/NPC method is tool-catalog-first: dialogue choices are player
 speech inputs, while Store/Station objects expose role-filtered tool
 descriptors that NPC agents may propose and the runtime must validate.
+AI_PROVIDER_SEARCH_INDEX lives at [agent-search-index.md](agent-search-index.md).
 The default live-LLM provider mode is direct `openai-codex` auth with
 `gpt-5.4-mini` low reasoning effort only; API `nano` models are not assumed
 usable through that Codex provider until live discovery proves it. Missing

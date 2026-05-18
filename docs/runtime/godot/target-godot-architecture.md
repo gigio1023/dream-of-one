@@ -19,6 +19,8 @@ Godot ObservationFrame
 ```
 
 AI/LLM output remains intent proposal only. No AI/LLM response may directly mutate Godot world state.
+Provider/auth lookup starts at `docs/agent-search-index.md`; game-runtime
+Codex auth is backend `openai-codex` provider auth, not Codex CLI login.
 
 ## Godot Components
 

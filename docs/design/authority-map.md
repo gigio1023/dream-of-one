@@ -18,6 +18,7 @@ Release pass/fail decisions must use Godot Runtime Path Evidence.
 | NPC line candidates, Station pressure wording, localized variants, fallback text variants. | Suspicion signals, risk tags, Evidence type, why-line authority, Exposure, reports, Station intake, Inquest, verdict, or session termination. |
 
 The active provider contract is documented in
+[`docs/agent-search-index.md`](../agent-search-index.md) and
 [`docs/development/ai-provider-runtime.md`](../development/ai-provider-runtime.md).
 `openai-codex` is the first implementation of that contract. It is not Codex CLI
 login and it is not a game-state authority path.

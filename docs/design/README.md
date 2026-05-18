@@ -4,6 +4,7 @@ Use this directory for active product rules, deterministic authority, Evidence s
 
 | File | Use |
 |---|---|
+| [../agent-search-index.md](../agent-search-index.md) | Search-first routing for agent/provider/auth terms. |
 | [game-design.md](game-design.md) | Core loop, player role, text danger, and deterministic authority. |
 | [authority-map.md](authority-map.md) | System ownership and AI proposal boundary. |
 | [dream-laws.md](dream-laws.md) | Dream Law content and text-pressure rules. |

@@ -35,6 +35,10 @@ Release direction no longer treats player-installed Codex CLI as a public prereq
 
 AI NPC text uses an API-based proposal provider only when the configured build verifies access at runtime.
 
+Provider/auth lookup starts at `docs/agent-search-index.md` and
+`docs/development/ai-provider-runtime.md`. Game-runtime Codex auth means the
+backend `openai-codex` provider profile, not Codex CLI login.
+
 The release copy must disclose the actual access mode:
 - developer-hosted provider.
 - player-configured provider credentials.

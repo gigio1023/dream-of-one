@@ -12,6 +12,11 @@ The player should feel that ordinary conversation is necessary but never fully s
 
 This is an AI game because an API proposal provider can participate in bounded NPC/Station wording variation for prompts, response choices, reactions, localization, and fallback text. It is not an AI game because an LLM decides truth, suspicion tags, Exposure, Evidence, report thresholds, verdict, or session termination.
 
+AI_PROVIDER_SEARCH_INDEX: provider/auth implementation truth starts at
+[`docs/agent-search-index.md`](../agent-search-index.md) and
+[`docs/development/ai-provider-runtime.md`](../development/ai-provider-runtime.md).
+The first provider implementation is `openai-codex`; it is not Codex CLI login.
+
 ## Primary Interaction
 
 The default player verb is dialogue.

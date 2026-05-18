@@ -25,3 +25,6 @@ Godot owns scene presentation, dialogue UI, input capture, visual state, collisi
 The TypeScript backend owns Schema validation, deterministic suspicion signals, reports, fallback selection, Evidence semantics, Station intake/inquest/verdict authority, and session termination.
 
 AI/API providers may propose wording only after runtime preflight and model availability checks pass.
+Provider/auth lookup starts at
+[`docs/agent-search-index.md`](../../agent-search-index.md) and
+[`docs/development/ai-provider-runtime.md`](../../development/ai-provider-runtime.md).

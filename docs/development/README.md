@@ -4,6 +4,7 @@ Use this directory for local setup, checks, CI rules, agent runbooks, and harnes
 
 | File | Use |
 |---|---|
+| [../agent-search-index.md](../agent-search-index.md) | Search-first routing for provider/auth/LLM ambiguity. |
 | [dev.md](dev.md) | Local setup, backend checks, Godot checks, and Evidence paths. |
 | [ai-provider-runtime.md](ai-provider-runtime.md) | AI provider contract, `openai-codex` runtime auth, and live proposal boundary. |
 | [ci-runner-policy.md](ci-runner-policy.md) | Required GitHub Actions runner policy. |

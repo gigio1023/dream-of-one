@@ -219,6 +219,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   can inspect the Clerk after typed speech and read `메모 배치`, the report tray
   basis, visible environment objects, spoken handoff line, and tiny value
   changes before inspecting downstream NPC reactions.
+- [x] Make Station Officer citation readable through NPC inspection: Codex/player
+  can inspect the Officer after inquest and read the cited Store Manager ledger,
+  Station document target, authority focus, visible environment context, and
+  spoken intake line before inspecting downstream social consequences.
 - [x] Make cross-place rule boards player-readable before speech: Codex/player
   can focus and read the Studio approval criteria and Park notice board as
   social rules that later ground public notice and review consequences.

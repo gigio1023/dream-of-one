@@ -123,6 +123,13 @@ Current M1 carry-in:
   Clerk's `메모 배치` ledger basis, report-tray target, visible environment
   context, spoken Station handoff line, and `신뢰-20, 부담+35, 주목+30` value
   change before inspecting Studio PM or Waiting Customer consequences.
+- latest small-slice carry-in: Station Officer is now readable as the authority
+  actor who turns a forwarded Store record into formal questioning. After
+  inquest opens, Codex/player can inspect the Officer and read the cited Store
+  Manager ledger, Station document target, `심문 초점` with `대상=플레이어`, the
+  comparison against Store handoff and player speech, inquest authority, visible
+  environment context, and spoken intake line before reading downstream social
+  consequences.
 - latest small-slice carry-in: the live HUD now has `열람`, a compact reader
   summary for records that actually exist in the current ledger. This keeps the
   player-facing social-sim layer focused on who can see the active record chain

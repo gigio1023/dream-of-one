@@ -82,8 +82,9 @@ Last Updated: 2026-05-18
   cross-place social rules before the Store line. Codex gameplay QA focuses
   `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard`, interacts with both,
   and verifies `canReadCrossPlaceSocialRules=true`; current proof passes with
-  25/25 accepted public actions, 24/24 explainability checks, and 5/5 route
-  reports. This is a game-facing legibility slice toward the broader
+  27/27 accepted public actions, 25/25 explainability checks, and 5/5 route
+  reports after the Station Officer inspection update. This is a game-facing
+  legibility slice toward the broader
   open-environment social sim, not another product-closure claim.
 - Latest implementation slice: Codex gameplay QA and live provider packets now
   expose `actorMemory` derived from validated role actions and
@@ -115,6 +116,13 @@ Last Updated: 2026-05-18
   focuses the Clerk, interacts, and reads `메모 배치`, report-tray basis,
   visible environment context, spoken Station handoff, and value changes before
   it inspects Studio PM or Waiting Customer.
+- Latest implementation slice: Station Officer can now be inspected as the
+  authority actor after inquest. Codex gameplay QA focuses the Officer,
+  interacts, and reads `기록 인용`, `civic-ledger-6 -> civic-ledger-5`, the
+  Station document target, `심문 초점`, `대상=플레이어`, comparison against the
+  Store handoff and player speech, inquest authority, visible environment
+  context, and spoken intake line before inspecting Studio PM or Waiting
+  Customer.
 - Previous implementation slice: the live HUD record line now includes
   `주변 태도`, summarizing visible NPC reactions such as Waiting Customer
   contact refusal, Studio PM review block, and Store Manager report handoff

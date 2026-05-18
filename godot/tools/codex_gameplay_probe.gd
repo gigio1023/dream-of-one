@@ -28,6 +28,8 @@ const PROBE_STEPS := [
 	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.world_record_prop", "payload": {"objectId": "civic_ledger"}},
 	{"actionId": "player.interact.focused", "payload": {}},
+	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Station_Officer"}},
+	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Studio_PM"}},
 	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Waiting_Customer"}},
@@ -747,6 +749,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Codex/player did not inspect the Waiting Customer as a visible NPC reaction")
 	if not bool(checks.get("codexInspectedStoreClerkRecordAction", false)):
 		failures.append("Codex/player did not inspect the Store Clerk's own record-making reaction")
+	if not bool(checks.get("codexInspectedStationOfficerCitation", false)):
+		failures.append("Codex/player did not inspect the Station Officer citation basis")
 	if not bool(checks.get("visibleWaitingCustomerReaction", false)):
 		failures.append("Waiting Customer reaction is not visible on a spawned NPC")
 	if not str(hud_snapshot.get("noticeBodyLabel", "")).contains("접촉 거부"):
@@ -777,6 +781,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"codexInspectedBlockedReview": _inspected_studio_review_block(summary),
 		"codexInspectedRecordAffordanceMap": _inspected_record_affordance_map(summary),
 		"codexInspectedStoreClerkRecordAction": _inspected_store_clerk_record_action(summary),
+		"codexInspectedStationOfficerCitation": _inspected_station_officer_citation(summary),
 		"codexInspectedWaitingCustomer": _inspected_waiting_customer(summary),
 		"codexInspectedStudioPm": _inspected_studio_pm_block(summary),
 		"codexReadNpcSpokenReaction": _inspected_npc_spoken_reactions(summary),
@@ -814,6 +819,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
 		"canInspectRecordRoleAffordanceMap": bool(checks.get("codexInspectedRecordAffordanceMap", false)),
 		"canInspectStoreClerkRecordAction": bool(checks.get("codexInspectedStoreClerkRecordAction", false)),
+		"canInspectAuthorityExaminer": bool(checks.get("codexInspectedStationOfficerCitation", false)),
 		"canInspectNpcReaction": bool(checks.get("codexInspectedWaitingCustomer", false)),
 		"canReadNpcSpokenReaction": bool(checks.get("codexReadNpcSpokenReaction", false)),
 		"canReadExactStationCitation": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
@@ -865,6 +871,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 				"Codex/player inspected the Studio review queue and Studio PM to read that the Station citation blocked a small opportunity in another place.",
 				"Codex/player read the Studio review queue's visible role/action map: Studio PM can invite, defer, or block review from shared records.",
 				"Codex/player inspected the civic ledger to read the NPC-to-NPC social chain as a player-facing timeline.",
+				"Codex/player inspected the Station Officer to read which Store record was cited, what Station document was used, and why the player became the target of formal questioning.",
 				"Codex/player snapshot exposed actor memory, showing which ledger events a role observed before choosing the next validated action.",
 				"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, and cited ledger basis.",
 				"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
@@ -1388,6 +1395,36 @@ func _inspected_store_clerk_record_action(summary: Dictionary) -> bool:
 			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "주목+30")
 		)
 
+func _inspected_station_officer_citation(summary: Dictionary) -> bool:
+	var inspected := _inspected_npc_candidate(summary, "NPC_Station_Officer", "inquest")
+	return not inspected.is_empty() and (
+			str(inspected.get("npcId", "")) == "NPC_Station_Officer"
+			and str(inspected.get("state", "")) == "inquest"
+			and str(inspected.get("body", "")).contains("근거 행동")
+			and str(inspected.get("body", "")).contains("스테이션 직원 -> 기록 인용")
+			and str(inspected.get("body", "")).contains("읽은 기록")
+			and str(inspected.get("body", "")).contains("상점 매니저 -> 보고 전달")
+			and str(inspected.get("body", "")).contains("대상 기록물: 스테이션 문서")
+			and str(inspected.get("body", "")).contains("심문 초점")
+			and str(inspected.get("body", "")).contains("대상=플레이어")
+			and str(inspected.get("body", "")).contains("대조=상점 전달 기록과 플레이어 발화")
+			and str(inspected.get("body", "")).contains("권한=심문 개시")
+			and str(inspected.get("body", "")).contains("보는 환경")
+			and str(inspected.get("body", "")).contains("시민 경제=주목 상승")
+			and str(inspected.get("body", "")).contains("들은 말")
+			and str(inspected.get("spokenLine", "")).contains("접수 형식")
+			and str(inspected.get("basisLedgerEventId", "")) == "civic-ledger-6"
+			and str(inspected.get("citedLedgerEventId", "")) == "civic-ledger-5"
+			and str(inspected.get("basisAffordance", "")) == "cite_record"
+			and _string_array_has_fragment(inspected.get("visibleEnvironmentObjectLabels", []), "보고 트레이=전달")
+			and _string_array_has_fragment(inspected.get("visibleEnvironmentObjectLabels", []), "스테이션 문서=인용됨")
+			and _string_array_has_fragment(inspected.get("visibleEnvironmentObjectLabels", []), "시민 경제=주목 상승")
+			and _string_array_has_fragment(inspected.get("basisConditionLabels", []), "스테이션 문서=없음")
+			and _string_array_has_fragment(inspected.get("basisConditionLabels", []), "인용 장부 civic-ledger-5")
+			and _string_array_has_fragment(inspected.get("authorityFocusLabels", []), "대상=플레이어")
+			and _string_array_has_fragment(inspected.get("authorityFocusLabels", []), "권한=심문 개시")
+		)
+
 func _inspected_studio_pm_block(summary: Dictionary) -> bool:
 	var inspected := _inspected_npc_candidate(summary, "NPC_Studio_PM", "blocked")
 	return not inspected.is_empty() and (
@@ -1416,6 +1453,7 @@ func _inspected_studio_pm_block(summary: Dictionary) -> bool:
 func _inspected_npc_spoken_reactions(summary: Dictionary) -> bool:
 	return (
 		_inspected_store_clerk_record_action(summary)
+		and _inspected_station_officer_citation(summary)
 		and _inspected_waiting_customer(summary)
 		and _inspected_studio_pm_block(summary)
 	)

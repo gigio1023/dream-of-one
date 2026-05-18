@@ -2789,6 +2789,7 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 	var basis_object_label := ""
 	var basis_condition_labels := PackedStringArray()
 	var basis_economy_effect_labels := PackedStringArray()
+	var authority_focus_labels := PackedStringArray()
 	if not basis_action.is_empty():
 		basis_event_id = str(basis_action.get("ledgerEventId", ""))
 		basis_affordance = str(basis_action.get("affordance", ""))
@@ -2806,6 +2807,9 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		if not basis_object_id.is_empty():
 			basis_object_label = _world_record_prop_title(basis_object_id)
 			body_lines.append("대상 기록물: %s" % basis_object_label)
+		authority_focus_labels = _authority_focus_labels_for_inspection(basis_action, cited_event_id)
+		if not authority_focus_labels.is_empty():
+			body_lines.append("심문 초점: %s" % ", ".join(authority_focus_labels))
 		var selected_descriptor := _selected_action_descriptor_for_inspection(basis_action)
 		if not selected_descriptor.is_empty():
 			basis_condition_labels = _selected_action_condition_labels(selected_descriptor, cited_event_id)
@@ -2831,6 +2835,7 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		inspected_npc_state["citedLedgerEventLabel"] = _civic_ledger_event_compact_label(cited_event_id)
 		inspected_npc_state["basisConditionLabels"] = basis_condition_labels
 		inspected_npc_state["basisEconomyEffectLabels"] = basis_economy_effect_labels
+		inspected_npc_state["authorityFocusLabels"] = authority_focus_labels
 	inspected_npc_state["body"] = "\n".join(body_lines)
 	inspected_npc_history.append(inspected_npc_state.duplicate(true))
 	_set_notice(title, str(inspected_npc_state.get("body", "")))
@@ -2923,6 +2928,18 @@ func _selected_action_condition_labels(descriptor: Dictionary, cited_event_id: S
 			labels.append("신뢰 %s 이상" % precondition.substr("localTrust>=".length()))
 		elif precondition.begins_with("localTrust<="):
 			labels.append("신뢰 %s 이하" % precondition.substr("localTrust<=".length()))
+	return labels
+
+func _authority_focus_labels_for_inspection(action: Dictionary, cited_event_id: String) -> PackedStringArray:
+	var labels := PackedStringArray()
+	if str(action.get("affordance", "")) != "cite_record":
+		return labels
+	labels.append("대상=플레이어")
+	if not cited_event_id.is_empty():
+		var cited_label := _civic_ledger_event_compact_label(cited_event_id)
+		labels.append("인용=%s" % (cited_label if not cited_label.is_empty() else cited_event_id))
+	labels.append("대조=상점 전달 기록과 플레이어 발화")
+	labels.append("권한=심문 개시")
 	return labels
 
 func _ledger_event_kind_condition_label(raw_kinds: String) -> String:

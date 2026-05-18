@@ -172,6 +172,47 @@ Godot live same-NPC local-memory continuity smoke:
 - product provider state changed: false
 - provider decision mutated route state: false
 
+## 2026-05-19 Auth Refresh And One-Call Smoke
+
+After cloning and reviewing OpenClaw at `~/git/openclaw`, the current local
+auth state was checked without starting a login flow:
+
+- Codex CLI status: `Logged in using ChatGPT`
+- provider auth store: `build/provider-auth/openai-codex-auth.json`
+- provider auth profile: `default`
+- provider auth type: `oauth`
+- access token present: yes
+- refresh token present: yes
+- expiry: `2026-05-28T12:48:16.554Z`
+- expired at check time: no
+
+Live one-call smoke command:
+
+```bash
+OPENAI_PROPOSAL_LIVE_TEST=1 \
+NPC_RUNTIME_PROPOSAL_PROVIDER=openai-codex \
+OPENAI_CODEX_PROPOSAL_MODEL=gpt-5.4-mini \
+OPENAI_CODEX_REASONING_EFFORT=low \
+OPENAI_CODEX_PROPOSAL_MODEL_FALLBACKS='' \
+OPENAI_PROPOSAL_MAX_ESTIMATED_COST_USD=0.01 \
+npm run openai:proposal-smoke --prefix backend/npc-runtime
+```
+
+Result:
+
+- health: ready for `openai-codex`
+- selected model: `gpt-5.4-mini`
+- reasoning: `low`
+- fallbacks: none
+- fallback: false
+- transport: `codex`
+- estimated cost: `$0.00384675`
+- actual usage: 707 input tokens, 258 output tokens, 965 total tokens
+- selected utterance: `이영수증사본은맞지않습니다.`
+
+See `provider/openai-codex-provider-verification-2026-05-19.md` for the
+OpenClaw source mapping and game-runtime meaning.
+
 Continuity troubleshooting note:
 
 - A prior live probe showed that sending a second request with a stored-provider

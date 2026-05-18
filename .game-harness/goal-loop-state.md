@@ -257,6 +257,16 @@ Latest OpenAI Codex provider note:
   estimated cost `$0.03696975`, and actual usage 9,489 input / 2,021 output /
   11,510 total tokens. ChatGPT Pro remaining quota is still not exposed by the
   Codex responses.
+- 2026-05-19 OpenClaw refresh: cloned/reviewed `~/git/openclaw` at commit
+  `4af590a5` and confirmed the relevant pattern is direct `openai-codex`
+  provider/auth/transport, not `codex exec` or OpenClaw's chat runtime. Current
+  local auth was checked without starting a login flow: Codex CLI reports
+  ChatGPT login, and `build/provider-auth/openai-codex-auth.json` contains an
+  unexpired `default` OAuth profile with access and refresh tokens. Live
+  `gpt-5.4-mini` smoke passed with no model fallbacks, low reasoning, estimated
+  cost `$0.00384675`, actual usage 707 input / 258 output / 965 total tokens,
+  and no deterministic fallback. Detailed note:
+  `.game-harness/provider/openai-codex-provider-verification-2026-05-19.md`.
 
 Latest status check:
 - command: `.game-harness/scripts/run-same-order-comprehension-session.sh --status`

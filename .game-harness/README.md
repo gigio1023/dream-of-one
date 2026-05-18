@@ -37,6 +37,7 @@ It is the game-development memory layer:
 | `provider/openai-codex-auth-budget-2026-05-17.md` | Historical OpenAI API auth decision, request budget, and live proposal smoke runbook |
 | `provider/openai-codex-live-social-probe-2026-05-18.md` | Backend live `openai-codex` smoke, tiny two-NPC social probe, and Godot HTTP decision smoke results with usage accounting |
 | `provider/openai-codex-model-policy-2026-05-18.md` | Active `openai-codex` model policy: `gpt-5.4-mini` low reasoning only until live discovery proves cheaper Codex models |
+| `provider/openai-codex-provider-verification-2026-05-19.md` | OpenClaw source refresh, local auth status, and current `gpt-5.4-mini` live smoke proof |
 | `provider/same-order-provider-mode-decision-2026-05-17.md` | M1 fallback-only provider mode decision and live-provider gate |
 | `export/same-order-export-setup-proof-2026-05-17.md` | Latest Godot export proof, including PCK route smoke, macOS app export, and remaining packaged-route blocker |
 | `visual/same-order-manual-readability-review-2026-05-17.md` | Manual readability review for existing Store conversation captures |

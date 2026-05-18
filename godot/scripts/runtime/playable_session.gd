@@ -2399,11 +2399,13 @@ func _inspect_world_record_prop(object_id: String) -> Dictionary:
 	var possible_affordance_labels := _world_record_prop_affordance_labels(object_id)
 	var current_affordance_labels := _world_record_prop_current_affordance_labels(object_id)
 	var recent_ledger_events := _world_record_prop_recent_ledger_events(object_id, 3)
+	var social_observation_labels := _world_record_prop_social_observation_labels(object_id, 6)
 	var social_lines := _world_record_prop_social_lines(
 		reader_role_labels,
 		possible_affordance_labels,
 		current_affordance_labels,
-		recent_ledger_events
+		recent_ledger_events,
+		social_observation_labels
 	)
 	if not social_lines.is_empty():
 		body = "%s\n%s" % [body, "\n".join(social_lines)]
@@ -2417,7 +2419,8 @@ func _inspect_world_record_prop(object_id: String) -> Dictionary:
 		"readerRoleLabels": reader_role_labels,
 		"possibleAffordanceLabels": possible_affordance_labels,
 		"currentAffordanceLabels": current_affordance_labels,
-		"recentLedgerEvents": recent_ledger_events
+		"recentLedgerEvents": recent_ledger_events,
+		"socialObservationLabels": social_observation_labels
 	}
 	inspected_world_record_history.append(inspected_world_record_prop.duplicate(true))
 	_set_notice(title, body)
@@ -2718,14 +2721,15 @@ func _world_record_prop_inspection_body(object_id: String, state: String) -> Str
 			int(civic_economy.get("stationAttention", 0))
 		]
 	if object_id == "civic_ledger":
-		return "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어집니다."
+		return "시민 장부는 누가 어떤 기록을 만들었고 무엇을 인용했는지 보여줍니다. NPC 행동은 이 장부를 근거로 이어지며, 아래 사회 연쇄가 누가 누구의 기록을 읽고 다음 행동을 골랐는지 정리합니다."
 	return "%s 상태입니다. 이 기록은 NPC가 볼 수 있는 환경 단서이며, 다음 역할 행동의 근거가 될 수 있습니다." % _record_state_value(state)
 
 func _world_record_prop_social_lines(
 	reader_role_labels: Array[String],
 	possible_affordance_labels: Array[String],
 	current_affordance_labels: Array[String],
-	recent_ledger_events: Array[Dictionary]
+	recent_ledger_events: Array[Dictionary],
+	social_observation_labels: Array[String]
 ) -> PackedStringArray:
 	var lines := PackedStringArray()
 	if not reader_role_labels.is_empty():
@@ -2752,6 +2756,8 @@ func _world_record_prop_social_lines(
 				compact = "%s / 변화 %s" % [compact, economy_delta_label]
 			compact_events.append(compact)
 		lines.append("최근 장부: %s" % " | ".join(compact_events))
+	if not social_observation_labels.is_empty():
+		lines.append("사회 연쇄: %s" % " | ".join(social_observation_labels))
 	return lines
 
 func _world_record_prop_reader_role_labels(object_id: String) -> Array[String]:
@@ -2807,6 +2813,27 @@ func _all_civic_ledger_event_ids() -> Array:
 		if not event_id.is_empty():
 			ids.append(event_id)
 	return ids
+
+func _world_record_prop_social_observation_labels(object_id: String, limit: int) -> Array[String]:
+	var labels: Array[String] = []
+	if object_id != "civic_ledger" or limit <= 0:
+		return labels
+	var observations := _social_observation_trace()
+	for index in range(observations.size() - 1, -1, -1):
+		var observation: Dictionary = observations[index]
+		var observer_label := _actor_role_label(str(observation.get("observerRole", "")))
+		var observed_actor_label := _actor_role_label(str(observation.get("observedActorRole", "")))
+		var observed_affordance_label := _affordance_label(str(observation.get("observedAffordance", "")))
+		var resulting_affordance_label := _affordance_label(str(observation.get("resultingAffordance", "")))
+		var observed_event_id := str(observation.get("observedLedgerEventId", ""))
+		var compact := "%s: %s/%s" % [observer_label, observed_actor_label, observed_affordance_label]
+		if not observed_event_id.is_empty():
+			compact = "%s(%s)" % [compact, observed_event_id]
+		compact = "%s -> %s" % [compact, resulting_affordance_label]
+		labels.append(compact)
+		if labels.size() >= limit:
+			break
+	return labels
 
 func _world_record_prop_recent_ledger_events(object_id: String, limit: int) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []

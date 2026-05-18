@@ -171,6 +171,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Distinguish possible vs currently open world-record actions: inspected
   props now show `현재 열린 행동`, so blocked records do not look actionable and
   active public records show what a role can still do now.
+- [x] Make the civic ledger player-readable as an NPC-to-NPC social chain:
+  Codex/player can inspect `civic_ledger` and read `사회 연쇄` lines showing who
+  saw whose ledger action and which action they chose next.
 - [x] Make the civic economy panel player-readable as a tiny social-pressure
   record: Codex/player can inspect current credit/trust/burden/attention values
   and recent ledger deltas that show which role action moved them.

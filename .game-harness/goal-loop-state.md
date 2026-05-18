@@ -96,17 +96,26 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `01091bb5fe706689d7d2645e5c189bc6e9d9153450b42a86faab9f9443e358b8`
-  - Markdown SHA-256: `2c6743ad17616a60d2d71bdcc5bb76bd6dc82f0dbf6483c27ab68ccbffebd16e`
-  - playable Evidence Pack SHA-256: `3d1ed8a23cbc044ae73b824ac9a933ab8d4365fb61bd73394e8cda290d8a763a`
+  - JSON SHA-256: `e8ab8f558a09ece26cbacbe5dce86212be8b05c2623f2f6bb22c56419c4dd806`
+  - Markdown SHA-256: `10b21210bb6a98a72523c2ac0221fe812cbc10b36f20ecc5bdb44927faa7927b`
+  - playable Evidence Pack SHA-256: `57d6ff6f8f539314de47ce44a2b7f7512efaf138e1db634357fa4846af3cc24c`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `11bbc6430c4f58258c4ac438f612c82cfa8d6b6a9f6071a4e66be72928a43f01`
 
 Latest AI-play interface check:
 - command: `/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `15 / 15`, `explainability=14/14`, and
+  player actions `17 / 17`, `explainability=15/15`, and
   `routeReportPassCount=5 / 5`.
+- latest game increment: the civic ledger is now an inspectable social-chain
+  timeline, not only an append-only event count. Codex/player focuses
+  `civic_ledger`, presses interact, and reads `사회 연쇄` lines such as
+  `스테이션 직원: 상점 매니저/보고 전달(civic-ledger-5) -> 기록 인용`,
+  `스튜디오 PM: 스테이션 직원/기록 인용(civic-ledger-6) -> 리뷰 차단`,
+  and `대기 손님: 스테이션 직원/기록 인용(civic-ledger-6) -> 접촉 거부`.
+  This makes the current proof cell explain the NPC-to-NPC record chain from a
+  player-facing prop instead of requiring the player or Codex to infer it from
+  separate NPC inspections.
 - latest game increment: world-record prop inspection now separates broad
   `행동 가능성` from `현재 열린 행동`. In the inquest Codex run,
   `park_notice_board=rumored` shows currently open actions such as

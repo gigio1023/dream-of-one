@@ -95,6 +95,13 @@ Current M1 carry-in:
   long-term content focus. Future work should extract reusable
   environment-agent patterns instead of deepening Store operations or Station
   procedure.
+- latest small-slice carry-in: the civic ledger is now a player-readable
+  NPC-to-NPC social-chain prop. Inspecting `civic_ledger` shows `사회 연쇄`
+  lines for who read whose ledger action and which validated action followed,
+  such as Station citing the manager report, Studio PM blocking review from the
+  Station citation, and Waiting Customer refusing contact from the same
+  citation. This keeps the improvement focused on reusable social simulation
+  readability, not Store/Station expansion.
 - latest small-slice carry-in: repair recovery now leaves a player-readable
   public environment record and one small cross-place consequence. Park Witness
   `post_repair_notice` sets `park_notice_board=repaired`; Studio PM reads that

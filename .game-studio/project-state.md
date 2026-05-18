@@ -196,6 +196,12 @@ Current M1 carry-in:
   action as player-readable NPC state. Soft report shows `pause_service` as
   `paused` / `응대 중단`, while inquest shows `forward_report` as `forwarded` /
   `보고 전달`.
+- latest small-slice carry-in: Store Manager inspection now explains the
+  organizational handoff. In inquest, Codex/player can focus the Manager and
+  read `관리 처리` labels showing `보고 트레이=스테이션 전달`, `읽는 역할=스테이션
+  직원`, and `공식 인용 가능`; in soft report, the same inspection explains
+  `카운터=응대 중단` and the waiting customer leaving. This keeps the sample
+  focused on how one record changes who may act next.
 - latest small-slice carry-in: soft-report HUD consequence now names the
   player-readable social chain that already exists in the running scene:
   `플레이어 발화 -> 상점 기록 -> 공원 게시 -> 응대 중단 -> 줄 이탈 -> 보고 접수`.

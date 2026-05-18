@@ -82,8 +82,8 @@ Last Updated: 2026-05-18
   cross-place social rules before the Store line. Codex gameplay QA focuses
   `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard`, interacts with both,
   and verifies `canReadCrossPlaceSocialRules=true`; current proof passes with
-  29/29 accepted public actions, 27/27 explainability checks, and 5/5 route
-  reports after the Studio PM opportunity-inspection update. This is a game-facing
+  31/31 accepted public actions, 28/28 explainability checks, and 5/5 route
+  reports after the Store Manager handoff-inspection update. This is a game-facing
   legibility slice toward the broader
   open-environment social sim, not another product-closure claim.
 - Latest implementation slice: Studio PM inspection now shows `기회 변화`.
@@ -153,6 +153,12 @@ Last Updated: 2026-05-18
   `paused` / `응대 중단`; inquest shows `forward_report` as `forwarded` /
   `보고 전달`, so the player can distinguish local service pause from formal
   report handoff.
+- Latest implementation slice: Store Manager handoff is now inspectable through
+  the same focus plus interact path used for other visible NPCs. In inquest,
+  the manager panel reads `관리 처리` with `보고 트레이=스테이션 전달`,
+  `읽는 역할=스테이션 직원`, and `공식 인용 가능`; in soft report, route QA
+  verifies the manager panel explains `카운터=응대 중단` and the queue leaving.
+  This keeps the proof on one small record handoff, not Store management scope.
 
 2026-05-17 lightweight Ralph-style loop note:
 - Use `.game-harness/goal-loop-state.md` as the compact resume state for

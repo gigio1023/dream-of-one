@@ -2792,6 +2792,7 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 	var authority_focus_labels := PackedStringArray()
 	var public_spread_labels := PackedStringArray()
 	var opportunity_change_labels := PackedStringArray()
+	var handoff_labels := PackedStringArray()
 	if not basis_action.is_empty():
 		basis_event_id = str(basis_action.get("ledgerEventId", ""))
 		basis_affordance = str(basis_action.get("affordance", ""))
@@ -2818,6 +2819,9 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		opportunity_change_labels = _opportunity_change_labels_for_inspection(basis_action)
 		if not opportunity_change_labels.is_empty():
 			body_lines.append("기회 변화: %s" % ", ".join(opportunity_change_labels))
+		handoff_labels = _handoff_labels_for_inspection(basis_action)
+		if not handoff_labels.is_empty():
+			body_lines.append("관리 처리: %s" % ", ".join(handoff_labels))
 		var selected_descriptor := _selected_action_descriptor_for_inspection(basis_action)
 		if not selected_descriptor.is_empty():
 			basis_condition_labels = _selected_action_condition_labels(selected_descriptor, cited_event_id)
@@ -2846,6 +2850,7 @@ func _inspect_npc(npc_id: String) -> Dictionary:
 		inspected_npc_state["authorityFocusLabels"] = authority_focus_labels
 		inspected_npc_state["publicSpreadLabels"] = public_spread_labels
 		inspected_npc_state["opportunityChangeLabels"] = opportunity_change_labels
+		inspected_npc_state["handoffLabels"] = handoff_labels
 	inspected_npc_state["body"] = "\n".join(body_lines)
 	inspected_npc_history.append(inspected_npc_state.duplicate(true))
 	_set_notice(title, str(inspected_npc_state.get("body", "")))
@@ -2989,6 +2994,24 @@ func _opportunity_change_labels_for_inspection(action: Dictionary) -> PackedStri
 			labels.append("리뷰=차단")
 			labels.append("근거=스테이션 인용")
 			labels.append("효과=공식 기록이 기회를 닫음")
+	return labels
+
+func _handoff_labels_for_inspection(action: Dictionary) -> PackedStringArray:
+	var labels := PackedStringArray()
+	match str(action.get("affordance", "")):
+		"place_note":
+			labels.append("보고 트레이=후속 메모")
+			labels.append("근거=점원 기록")
+			labels.append("효과=응대 판단 대기")
+		"pause_service":
+			labels.append("카운터=응대 중단")
+			labels.append("근거=상점 메모")
+			labels.append("효과=대기 손님이 줄을 떠남")
+		"forward_report":
+			labels.append("보고 트레이=스테이션 전달")
+			labels.append("근거=상점 메모")
+			labels.append("읽는 역할=스테이션 직원")
+			labels.append("효과=공식 인용 가능")
 	return labels
 
 func _ledger_event_kind_condition_label(raw_kinds: String) -> String:

@@ -173,6 +173,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Make Store Manager intermediary actions visible as distinct NPC state:
   soft-report `pause_service` now shows `paused` / `응대 중단`, and inquest
   `forward_report` now shows `forwarded` / `보고 전달`.
+- [x] Make Store Manager handoff inspectable through Codex/player focus plus
+  interact: the HUD notice now explains how the Clerk note becomes either
+  local service pause or Station-readable report handoff.
 - [x] Extend the soft-report HUD consequence chain through local social
   reactions: soft report now shows `플레이어 발화 -> 상점 기록 -> 공원 게시 ->
   응대 중단 -> 줄 이탈 -> 보고 접수` instead of stopping at generic report

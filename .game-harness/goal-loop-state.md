@@ -79,13 +79,15 @@ Latest completion audit:
   proof is carried by the playable slice Evidence Pack, Codex gameplay probe,
   and packaged-route evidence.
 - latest Codex gameplay QA artifact reports `ok=true`,
-  `aiPlayerReport.pass=true`, 29 accepted public actions, 5/5 route reports,
-  all 27 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
+  `aiPlayerReport.pass=true`, 31 accepted public actions, 5/5 route reports,
+  all 28 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
   no-live provider packet readiness for bounded `actorMemory` plus
   `actorPolicy`. It now also proves Codex/player can inspect Store Clerk as the
-  record-making NPC, Park Witness as the public-spread actor, and Station
-  Officer as the authority actor, plus Studio PM as the cross-place opportunity
-  actor. Studio PM inspection now names `기회 변화` labels for opening,
+  record-making NPC, Store Manager as the organizational handoff actor, Park
+  Witness as the public-spread actor, Station Officer as the authority actor,
+  and Studio PM as the cross-place opportunity actor. Store Manager inspection
+  now names `관리 처리` labels for either local service pause or Station-readable
+  report handoff; Studio PM inspection names `기회 변화` labels for opening,
   limiting, delaying, or closing the tiny review opportunity from public
   records; the Witness inspection names the Clerk note, Park notice board
   target, public-spread readers, and spoken rumor line; the Officer inspection
@@ -290,8 +292,8 @@ Latest status check:
   `testerFacingFiles=["tester-invite.md"]`, `humanEvidence=false`, and
   `closesGoal=false`; it is setup material only, not comprehension evidence.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `205ce81e2cbd91e279985d348799bc8dd3463535af3fa34af26e617f8ad65f59`
-  - Markdown SHA-256: `8f6aadee88618c74f992390f537374b710838191e7280e9325d094b580732da7`
+  - JSON SHA-256: `d53a30b5fb2542fcda76047936aaca4f3be35dc509d5a4b4e4564972c251f8ca`
+  - Markdown SHA-256: `f8506dc81818d4037803627fddef653baccfa767a7831ca5c21db2ef35e4f0c3`
   - playable Evidence Pack SHA-256: `dd69a70384e218c58ff2e5a6ee6b58f6cbada43b82225d2f6ea7cd1ad43bc64d`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
@@ -299,10 +301,10 @@ Latest status check:
 Latest AI-play interface check:
 - command: `$GODOT_BIN --headless --path godot --script res://tools/codex_gameplay_probe.gd`
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
-  player actions `29 / 29`, `explainability=27/27`, Store Clerk record-action
-  inspection, Park Witness public-spread inspection, Station Officer
-  authority-citation inspection, Studio PM cross-place opportunity inspection,
-  actor memory for observed NPC decisions,
+  player actions `31 / 31`, `explainability=28/28`, Store Clerk record-action
+  inspection, Store Manager handoff inspection, Park Witness public-spread
+  inspection, Station Officer authority-citation inspection, Studio PM
+  cross-place opportunity inspection, actor memory for observed NPC decisions,
   no-live provider packet memory and actor-policy readiness, and
   `routeReportPassCount=5 / 5` with Godot
   `4.7.beta2.official.777579205` from local `GODOT_BIN`.
@@ -461,8 +463,12 @@ Latest AI-play interface check:
   visible as distinct NPC state instead of generic `reported`. In soft report,
   `pause_service` shows `NPC_Store_Manager` as `paused` with `응대 중단`; in
   inquest, `forward_report` shows the same actor as `forwarded` with
-  `보고 전달`. Playable smoke and Codex gameplay QA now fail if the manager's
-  local pause and formal handoff collapse back into one generic marker.
+  `보고 전달`. Codex/player can now also focus and inspect the manager to read
+  `관리 처리`: soft report explains `카운터=응대 중단` and queue exit, while
+  inquest explains `보고 트레이=스테이션 전달`, `읽는 역할=스테이션 직원`, and
+  `공식 인용 가능`. Codex gameplay QA now fails if the manager's local pause,
+  formal handoff, or player-readable handoff explanation collapses back into
+  one generic marker.
 - latest game increment: Park Witness public rumor is now visible as NPC state
   in the soft-report/inquest paths. When Park Witness uses `post_rumor`, the
   actor keeps a `rumored` reaction with `소문 게시`, and the soft-report outcome

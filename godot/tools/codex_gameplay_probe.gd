@@ -20,6 +20,8 @@ const PROBE_STEPS := [
 	{"actionId": "player.type.free_input", "payload": {"line": TYPED_LINE}},
 	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Store_Clerk"}},
 	{"actionId": "player.interact.focused", "payload": {}},
+	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Store_Manager"}},
+	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.world_record_prop", "payload": {"objectId": "park_notice_board"}},
 	{"actionId": "player.interact.focused", "payload": {}},
 	{"actionId": "focus.npc", "payload": {"npcId": "NPC_Park_Witness"}},
@@ -97,7 +99,9 @@ const ROUTE_PROBE_PLANS := [
 			{"actionId": "focus.store_counter", "payload": {}},
 			{"actionId": "conversation.start", "payload": {}},
 			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.risky"}},
-			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.probe.risky"}}
+			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.probe.risky"}},
+			{"actionId": "focus.npc", "payload": {"npcId": "NPC_Store_Manager"}},
+			{"actionId": "player.interact.focused", "payload": {}}
 		]
 	}
 ]
@@ -580,6 +584,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("soft_report expected visible Park Witness rumor-post reaction")
 			if not _visible_store_manager_reaction(summary, "paused", "중단"):
 				failures.append("soft_report expected visible Store Manager service-pause reaction")
+			if not _inspected_store_manager_service_pause(summary):
+				failures.append("soft_report expected Codex/player to inspect Store Manager service-pause handoff")
 			var consequence_label := str(report.get("finalPlayerVisibleState", {}).get("consequence", ""))
 			if not consequence_label.contains("공원 게시") or not consequence_label.contains("응대 중단") or not consequence_label.contains("줄 이탈"):
 				failures.append("soft_report expected HUD consequence chain to show public rumor, service pause, and queue exit")
@@ -763,6 +769,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Codex/player did not inspect the Waiting Customer as a visible NPC reaction")
 	if not bool(checks.get("codexInspectedStoreClerkRecordAction", false)):
 		failures.append("Codex/player did not inspect the Store Clerk's own record-making reaction")
+	if not bool(checks.get("codexInspectedStoreManagerHandoff", false)):
+		failures.append("Codex/player did not inspect the Store Manager handoff basis")
 	if not bool(checks.get("codexInspectedParkWitnessPublicSpread", false)):
 		failures.append("Codex/player did not inspect the Park Witness public spread basis")
 	if not bool(checks.get("codexInspectedStationOfficerCitation", false)):
@@ -799,6 +807,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"codexInspectedBlockedReview": _inspected_studio_review_block(summary),
 		"codexInspectedRecordAffordanceMap": _inspected_record_affordance_map(summary),
 		"codexInspectedStoreClerkRecordAction": _inspected_store_clerk_record_action(summary),
+		"codexInspectedStoreManagerHandoff": _inspected_store_manager_forwarding(summary),
 		"codexInspectedParkWitnessPublicSpread": _inspected_park_witness_public_spread(summary),
 		"codexInspectedStationOfficerCitation": _inspected_station_officer_citation(summary),
 		"codexInspectedWaitingCustomer": _inspected_waiting_customer(summary),
@@ -839,6 +848,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
 		"canInspectRecordRoleAffordanceMap": bool(checks.get("codexInspectedRecordAffordanceMap", false)),
 		"canInspectStoreClerkRecordAction": bool(checks.get("codexInspectedStoreClerkRecordAction", false)),
+		"canInspectStoreManagerHandoff": bool(checks.get("codexInspectedStoreManagerHandoff", false)),
 		"canInspectPublicWitnessSpread": bool(checks.get("codexInspectedParkWitnessPublicSpread", false)),
 		"canInspectAuthorityExaminer": bool(checks.get("codexInspectedStationOfficerCitation", false)),
 		"canInspectCrossPlaceOpportunityChange": bool(checks.get("codexInspectedStudioOpportunityChange", false)),
@@ -888,6 +898,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 				"Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.",
 				"Codex/player typed a dream-language line, causing a Store report, waiting-customer queue reaction, Park notice, Manager forwarding, Station citation, Studio review block, and contact refusal.",
 				"Codex/player inspected the Store Clerk to read that the same role placed the report note, which record object it used, which environment objects it could see, and which tiny values changed.",
+				"Codex/player inspected the Store Manager to read how a local Store note became a management handoff that the Station can later cite.",
 				"The waiting customer exists in the running scene and shows the contact-refusal reaction as player-readable NPC text.",
 				"Codex/player inspected the Park notice board as a public environment record instead of only reading hidden state.",
 				"Codex/player inspected the Park Witness to read that a local rumor became a public record other roles can use.",
@@ -1418,6 +1429,47 @@ func _inspected_store_clerk_record_action(summary: Dictionary) -> bool:
 			and _string_array_has_fragment(inspected.get("basisEconomyEffectLabels", []), "주목+30")
 			)
 
+func _inspected_store_manager_forwarding(summary: Dictionary) -> bool:
+	var inspected := _inspected_npc_candidate(summary, "NPC_Store_Manager", "forwarded")
+	return not inspected.is_empty() and (
+			str(inspected.get("npcId", "")) == "NPC_Store_Manager"
+			and str(inspected.get("state", "")) == "forwarded"
+			and str(inspected.get("body", "")).contains("근거 행동")
+			and str(inspected.get("body", "")).contains("상점 매니저 -> 보고 전달")
+			and str(inspected.get("body", "")).contains("대상 기록물: 보고 트레이")
+			and str(inspected.get("body", "")).contains("관리 처리")
+			and str(inspected.get("body", "")).contains("보고 트레이=스테이션 전달")
+			and str(inspected.get("body", "")).contains("읽는 역할=스테이션 직원")
+			and str(inspected.get("body", "")).contains("공식 인용 가능")
+			and str(inspected.get("body", "")).contains("들은 말")
+			and str(inspected.get("spokenLine", "")).contains("스테이션이 대조")
+			and str(inspected.get("basisLedgerEventId", "")) == "civic-ledger-5"
+			and str(inspected.get("basisAffordance", "")) == "forward_report"
+			and _string_array_has_fragment(inspected.get("visibleEnvironmentObjectLabels", []), "보고 트레이=전달")
+			and _string_array_has_fragment(inspected.get("handoffLabels", []), "스테이션 전달")
+			and _string_array_has_fragment(inspected.get("handoffLabels", []), "스테이션 직원")
+			and _string_array_has_fragment(inspected.get("handoffLabels", []), "공식 인용 가능")
+			)
+
+func _inspected_store_manager_service_pause(summary: Dictionary) -> bool:
+	var inspected := _inspected_npc_candidate(summary, "NPC_Store_Manager", "paused")
+	return not inspected.is_empty() and (
+			str(inspected.get("npcId", "")) == "NPC_Store_Manager"
+			and str(inspected.get("state", "")) == "paused"
+			and str(inspected.get("body", "")).contains("근거 행동")
+			and str(inspected.get("body", "")).contains("상점 매니저 -> 응대 중단")
+			and str(inspected.get("body", "")).contains("대상 기록물: 상점 카운터")
+			and str(inspected.get("body", "")).contains("관리 처리")
+			and str(inspected.get("body", "")).contains("카운터=응대 중단")
+			and str(inspected.get("body", "")).contains("대기 손님이 줄을 떠남")
+			and str(inspected.get("body", "")).contains("들은 말")
+			and str(inspected.get("spokenLine", "")).contains("카운터를 잠시 멈춥니다")
+			and str(inspected.get("basisAffordance", "")) == "pause_service"
+			and _string_array_has_fragment(inspected.get("visibleEnvironmentObjectLabels", []), "상점 카운터=응대 중단")
+			and _string_array_has_fragment(inspected.get("handoffLabels", []), "응대 중단")
+			and _string_array_has_fragment(inspected.get("handoffLabels", []), "줄을 떠남")
+			)
+
 func _inspected_park_witness_public_spread(summary: Dictionary) -> bool:
 	var inspected := _inspected_npc_candidate(summary, "NPC_Park_Witness", "rumored")
 	return not inspected.is_empty() and (
@@ -1579,6 +1631,7 @@ func _inspected_studio_pm_opportunity_change(
 func _inspected_npc_spoken_reactions(summary: Dictionary) -> bool:
 	return (
 		_inspected_store_clerk_record_action(summary)
+		and _inspected_store_manager_forwarding(summary)
 		and _inspected_park_witness_public_spread(summary)
 		and _inspected_station_officer_citation(summary)
 		and _inspected_waiting_customer(summary)

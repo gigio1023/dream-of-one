@@ -3,6 +3,14 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
+LOCAL_ENV_PATH="${DREAM_OF_ONE_LOCAL_ENV_PATH:-$REPO_ROOT/build/dream-of-one-local-env.sh}"
+if [[ -f "$LOCAL_ENV_PATH" ]]; then
+  # Device-local env only. Keep machine paths out of tracked docs/scripts.
+  set -a
+  # shellcheck source=/dev/null
+  source "$LOCAL_ENV_PATH"
+  set +a
+fi
 
 APP_PATH="${DREAM_OF_ONE_APP_PATH:-}"
 ROUTE_EVIDENCE_PATH="${DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH:-}"

@@ -47,11 +47,18 @@ Last Updated: 2026-05-18
 - If `--status` is already pass and no watched Godot/HUD/probe/session-helper
   source changed, do not rerun Codex probe or regenerate setup kits merely to
   show activity. The next useful move is human play, not more preparation.
+- Latest implementation slice: active Store dialogue choices now expose
+  compact rule cues beside the diegetic lines. The prompt still presents speech
+  first, but the HUD now ties the three initial lines to normal receipt,
+  correction slip, and report burden consequences before the player chooses.
+  Codex gameplay QA verifies `canReadDialogueRuleConsequences=true`; current
+  proof passes with 23/23 accepted public actions, 22/22 explainability checks,
+  and 5/5 route reports.
 - Latest implementation slice: Studio and Park rule boards are now readable
   cross-place social rules before the Store line. Codex gameplay QA focuses
   `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard`, interacts with both,
   and verifies `canReadCrossPlaceSocialRules=true`; current proof passes with
-  23/23 accepted public actions, 21/21 explainability checks, and 5/5 route
+  23/23 accepted public actions, 22/22 explainability checks, and 5/5 route
   reports. This is a game-facing legibility slice toward the broader
   open-environment social sim, not another product-closure claim.
 - Latest implementation slice: `usual_order_cue` is now a player-readable

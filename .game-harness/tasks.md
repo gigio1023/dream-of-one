@@ -190,6 +190,9 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Make cross-place rule boards player-readable before speech: Codex/player
   can focus and read the Studio approval criteria and Park notice board as
   social rules that later ground public notice and review consequences.
+- [x] Make active dialogue choices show player-readable rule consequences:
+  Store prompt choices now keep diegetic speech first while exposing normal
+  receipt, correction slip, and report burden cues before selection.
 - [x] Extend the live HUD consequence chain through post-citation social
   consequences: inquest now shows Station citation -> Studio review block ->
   Waiting Customer contact refusal before the player opens inspection detail.

@@ -510,15 +510,26 @@ func _validate_active_conversation_state(summary: Dictionary, hud: Node) -> Arra
 	var choices: Array = conversation.get("availableChoices", [])
 	if choices.size() != 3:
 		failures.append("Expected active conversation to expose exactly three dialogue choices")
+	var rule_cues: Array = conversation.get("choiceRuleCues", [])
+	if rule_cues.size() != 3:
+		failures.append("Expected active conversation to expose three player-readable choice rule cues")
+	elif not str(rule_cues[0]).contains("정상 영수증") or not str(rule_cues[1]).contains("정정표") or not str(rule_cues[2]).contains("보고 부담"):
+		failures.append("Expected active conversation rule cues to connect choices to receipt/correction/report consequences, got %s" % str(rule_cues))
 	var snapshot := _hud_snapshot(hud)
 	if not str(snapshot.get("focusLabel", "")).contains("오늘도 같은 걸로"):
 		failures.append("Expected HUD focus label to show the Store Clerk prompt, got '%s'" % str(snapshot.get("focusLabel", "")))
 	if not str(snapshot.get("choicesLabel", "")).begins_with("1  네, 같은 걸로"):
 		failures.append("Expected HUD choice label 1 to preserve the active safe dialogue line, got '%s'" % str(snapshot.get("choicesLabel", "")))
+	if not str(snapshot.get("choicesLabel", "")).contains("정상 영수증"):
+		failures.append("Expected HUD choice label 1 to show its rule cue, got '%s'" % str(snapshot.get("choicesLabel", "")))
 	if not str(snapshot.get("safeLineLabel", "")).begins_with("2  제가 보통"):
 		failures.append("Expected HUD choice label 2 to preserve the active repair dialogue line, got '%s'" % str(snapshot.get("safeLineLabel", "")))
+	if not str(snapshot.get("safeLineLabel", "")).contains("정정표"):
+		failures.append("Expected HUD choice label 2 to show its rule cue, got '%s'" % str(snapshot.get("safeLineLabel", "")))
 	if not str(snapshot.get("riskyLineLabel", "")).begins_with("3  오늘 처음"):
 		failures.append("Expected HUD choice label 3 to preserve the active risky dialogue line, got '%s'" % str(snapshot.get("riskyLineLabel", "")))
+	if not str(snapshot.get("riskyLineLabel", "")).contains("보고 부담"):
+		failures.append("Expected HUD choice label 3 to show its rule cue, got '%s'" % str(snapshot.get("riskyLineLabel", "")))
 	if str(snapshot.get("consequenceLabel", "")).contains("4  기록"):
 		failures.append("Expected HUD active conversation copy to prioritize typed input instead of key 4, got '%s'" % str(snapshot.get("consequenceLabel", "")))
 	if not bool(snapshot.get("freeInputVisible", false)):

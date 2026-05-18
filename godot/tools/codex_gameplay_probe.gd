@@ -127,7 +127,7 @@ func _run() -> void:
 	var final_summary: Dictionary = final_snapshot.get("summary", {})
 	var record_props: Dictionary = final_snapshot.get("worldRecordProps", {})
 	var hud_snapshot: Dictionary = final_snapshot.get("hud", {})
-	var checks := _npc_interaction_checks(final_summary, record_props)
+	var checks := _npc_interaction_checks(final_summary, record_props, snapshots)
 	var ai_player_report := _ai_player_report(final_summary, hud_snapshot, record_props, checks, executed_steps)
 	var route_reports: Array[Dictionary] = []
 	for plan in ROUTE_PROBE_PLANS:
@@ -286,7 +286,7 @@ func _run_route_probe(packed: PackedScene, plan: Dictionary) -> Dictionary:
 	var final_summary: Dictionary = final_snapshot.get("summary", {})
 	var record_props: Dictionary = final_snapshot.get("worldRecordProps", {})
 	var hud_snapshot: Dictionary = final_snapshot.get("hud", {})
-	var checks := _npc_interaction_checks(final_summary, record_props)
+	var checks := _npc_interaction_checks(final_summary, record_props, snapshots)
 	var report := _route_report_from_current_run(plan, final_summary, hud_snapshot, record_props, executed_steps, checks)
 	report["snapshots"] = snapshots
 	failures.append_array(_validate_route_report(plan, report, final_summary, record_props, checks))
@@ -604,6 +604,8 @@ func _snapshot(label: String, session: Node) -> Dictionary:
 		"label": label,
 		"summary": _small_summary(summary),
 		"availableChoices": summary.get("conversation", {}).get("availableChoices", []),
+		"visibleChoiceLines": summary.get("conversation", {}).get("visibleChoiceLines", []),
+		"choiceRuleCues": summary.get("conversation", {}).get("choiceRuleCues", []),
 		"recordObjects": summary.get("recordObjects", {}),
 		"civicEconomy": summary.get("civicEconomy", {}),
 		"latestLedger": _latest_ledger(summary),
@@ -675,6 +677,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Codex/player did not inspect the usual-order cue before speaking")
 	if not bool(checks.get("codexReadCrossPlaceRuleBoards", false)):
 		failures.append("Codex/player did not read cross-place Studio/Park rule boards before speaking")
+	if not bool(checks.get("codexReadDialogueRuleCues", false)):
+		failures.append("Codex/player did not see dialogue choices connected to rule/record consequences")
 	if not bool(checks.get("worldPropsReachInquest", false)):
 		failures.append("World record props do not show forwarded report and cited Station dossier")
 	if not bool(checks.get("codexInspectedPublicNotice", false)):
@@ -689,7 +693,7 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("HUD notice does not explain the inspected Waiting Customer contact refusal")
 	return failures
 
-func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary) -> Dictionary:
+func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snapshots: Array[Dictionary]) -> Dictionary:
 	var latest_ledger := _latest_ledger(summary)
 	return {
 		"storeClerkMarkedReceipt": _action_exists(summary, "store_clerk", "mark_receipt"),
@@ -708,6 +712,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary) -> D
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"codexInspectedUsualOrderCue": _inspected_usual_order_cue(summary),
 		"codexReadCrossPlaceRuleBoards": _read_cross_place_rule_boards(summary),
+		"codexReadDialogueRuleCues": _read_dialogue_rule_cues(snapshots),
 		"codexInspectedPublicNotice": _inspected_public_notice(summary),
 		"codexInspectedBlockedReview": _inspected_studio_review_block(summary),
 			"codexInspectedRecordAffordanceMap": _inspected_record_affordance_map(summary),
@@ -737,6 +742,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)) and bool(checks.get("waitingCustomerObservedStation", false)),
 		"canInspectNormalProcedureCue": bool(checks.get("codexInspectedUsualOrderCue", false)),
 		"canReadCrossPlaceSocialRules": bool(checks.get("codexReadCrossPlaceRuleBoards", false)),
+		"canReadDialogueRuleConsequences": bool(checks.get("codexReadDialogueRuleCues", false)),
 		"canReadLiveHudSocialCitation": _hud_record_state_cites_latest_social_observation(summary, record_state_label),
 		"canReadLiveHudNearbyStances": _hud_record_state_names_visible_stances(record_state_label),
 		"canReadLiveHudRecordReaders": _hud_record_state_names_record_readers(record_state_label),
@@ -783,6 +789,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"playerReadableCauseChain": [
 			"Codex/player first inspected the usual-order cue, making the normal 'same order' procedure readable before choosing a line.",
 			"Codex/player read the Studio and Park rule boards as cross-place social rules, so later review and public-notice consequences are grounded before the Store line.",
+			"The active dialogue choices showed rule cues for normal receipt, correction slip, and report burden, so the player could connect each spoken line to an environment record consequence before choosing.",
 			"Codex/player focused the Store counter and started the Store Clerk prompt.",
 			"Codex/player waited long enough to create a response hesitation record.",
 			"Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.",
@@ -1063,6 +1070,24 @@ func _read_cross_place_rule_boards(summary: Dictionary) -> bool:
 	var surface_ids: Array = summary.get("readSurfaceIds", [])
 	return surface_ids.has("TS_Studio_ApprovalCriteria") and surface_ids.has("TS_Park_NoticeBoard")
 
+func _read_dialogue_rule_cues(snapshots: Array[Dictionary]) -> bool:
+	for snapshot in snapshots:
+		if str(snapshot.get("label", "")) != "conversation.start":
+			continue
+		var cues: Array = snapshot.get("choiceRuleCues", [])
+		var visible_lines: Array = snapshot.get("visibleChoiceLines", [])
+		var hud: Dictionary = snapshot.get("hud", {})
+		var combined := "%s\n%s\n%s\n%s\n%s" % [
+			"\n".join(_string_array(cues)),
+			"\n".join(_string_array(visible_lines)),
+			str(hud.get("choicesLabel", "")),
+			str(hud.get("safeLineLabel", "")),
+			str(hud.get("riskyLineLabel", ""))
+		]
+		if combined.contains("정상 영수증") and combined.contains("정정표") and combined.contains("보고 부담"):
+			return true
+	return false
+
 func _inspected_public_notice(summary: Dictionary) -> bool:
 	return _inspected_world_record_exists(summary, "park_notice_board", "rumored", "소문")
 
@@ -1119,6 +1144,16 @@ func _string_array_has_fragment(values: Variant, fragment: String) -> bool:
 		if str(value).contains(fragment):
 			return true
 	return false
+
+func _string_array(values: Variant) -> PackedStringArray:
+	var result := PackedStringArray()
+	if values is PackedStringArray:
+		for value in values:
+			result.append(str(value))
+	elif values is Array:
+		for value in values:
+			result.append(str(value))
+	return result
 
 func _string_array_is_empty(values: Variant) -> bool:
 	if values is PackedStringArray:

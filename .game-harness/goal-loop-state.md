@@ -96,9 +96,9 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `e2da3f0766d028d9097e63e30db973283af33ada1f3781ccf21899c180cea5b6`
-  - Markdown SHA-256: `b47549434397cd9dae7ab330f1d0cd03494e00be27384c7e3231fabbec0b61ab`
-  - playable Evidence Pack SHA-256: `1a1f45d6f37cdb258f4e7e732110d800c1eed1d5c2e32e0837cc3dd3e3e1711c`
+  - JSON SHA-256: `b97e344847861ffdc78d2437040cca213d0c6e1d856f9be6095729399281b9db`
+  - Markdown SHA-256: `c88b43d4838ee8ad23d1add47f12030d43abc581d5a9fb76eeacf0f68fc1798b`
+  - playable Evidence Pack SHA-256: `2fd5d004e1555c408421b8ec9d041559411dcd38b2ee52703ec3d6534142c986`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `11bbc6430c4f58258c4ac438f612c82cfa8d6b6a9f6071a4e66be72928a43f01`
 
@@ -107,6 +107,14 @@ Latest AI-play interface check:
 - result: pass, `aiPlayerReportPass=true`, `stage=inquest`, accepted public
   player actions `13 / 13`, `explainability=13/13`, and
   `routeReportPassCount=5 / 5`.
+- latest game increment: repair recovery now travels one small step beyond the
+  Park board. After `public_repair_noted`, Studio PM reads `park_notice_board`
+  and `studio_review_queue`, uses `offer_conditional_review`, changes
+  `studio_review_queue` to `conditional`, writes
+  `studio_review_conditioned`, and becomes visible as `NPC_Studio_PM` with
+  `조건부 리뷰`. Codex repair-route QA now inspects both the public repair
+  notice and the conditional Studio review queue, proving repair does not erase
+  suspicion but can keep another-place opportunity conditionally open.
 - latest game increment: the soft-report HUD consequence line now names the
   social chain that already happens before formal inquest: `플레이어 발화 ->
   상점 기록 -> 공원 게시 -> 응대 중단 -> 줄 이탈 -> 보고 접수`. Playable smoke and

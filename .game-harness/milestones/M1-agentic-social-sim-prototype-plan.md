@@ -90,7 +90,7 @@ resulting route proofs must preserve provider-off ledger, object-state, and
 civic economy outcomes. The current playable slice artifact carries
 `playability.providerActionComparison`.
 `backend/npc-runtime/src/runtime/same-order-provider-scheduling.ts` now turns
-that comparison into a provider scheduling contract: 24 bounded role-agent jobs
+that comparison into a provider scheduling contract: 27 bounded role-agent jobs
 carry current available actions, allowed provider fields, forbidden authority
 fields, deterministic fallback wording, accepted locked actions, and exact
 Station citation. The current playable slice artifact carries

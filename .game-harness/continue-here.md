@@ -47,11 +47,13 @@ Last Updated: 2026-05-18
 - If `--status` is already pass and no watched Godot/HUD/probe/session-helper
   source changed, do not rerun Codex probe or regenerate setup kits merely to
   show activity. The next useful move is human play, not more preparation.
-- Latest implementation slice: repair recovery now leaves a public environment
-  record instead of only a ledger/NPC marker. `post_repair_notice` sets
-  `park_notice_board=repaired`, the HUD names `기억 공백 발화 -> 정정표 ->
-  대기줄 수습 -> 공개 수습 게시`, and Codex gameplay QA focuses/interacts with
-  the Park notice board to inspect the repaired public notice.
+- Latest implementation slice: repair recovery now propagates one tiny
+  cross-place consequence from a public repair record. `post_repair_notice`
+  sets `park_notice_board=repaired`; Studio PM then reads that board plus
+  `studio_review_queue`, uses `offer_conditional_review`, sets
+  `studio_review_queue=conditional`, and shows `조건부 리뷰`. Codex gameplay QA
+  focuses/interacts with both the Park notice board and the Studio review queue
+  to inspect the repaired public notice and conditional review consequence.
 - Previous implementation slice: soft-report HUD consequence now shows the actual
   local social chain before inquest: `플레이어 발화 -> 상점 기록 -> 공원 게시 ->
   응대 중단 -> 줄 이탈 -> 보고 접수`. This keeps soft report readable as public
@@ -317,11 +319,11 @@ Already implemented:
 - backend provider-shaped action comparison proving scripted proposals must
   choose available affordances and preserve provider-off ledger outcomes plus
   affordance provenance
-- backend provider scheduling contract proving 24 bounded role-agent provider
+- backend provider scheduling contract proving 27 bounded role-agent provider
   jobs across clean, repair, soft report, and inquest routes, with deterministic
   fallback wording, recent ledger affordance context, and exact Station citation
   while keeping live Godot dispatch explicitly open
-- backend provider dispatch packet contract proving those 12 scheduled jobs
+- backend provider dispatch packet contract proving those 27 scheduled jobs
   become `/v1/npc/decision` packets that pass schema, carry recent affordance
   context, and preserve bounded behavior while keeping live HTTP dispatch
   explicitly open

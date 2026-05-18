@@ -426,6 +426,41 @@ test("Park witness can turn a correction record into public repair notice", () =
   assert.equal(repairNotice.environment.objects.find(item => item.objectId === "park_notice_board")?.state, "repaired");
   assert.equal(repairNotice.environment.economy.localTrust, 48);
   assert.equal(repairNotice.environment.economy.recordBurden, 15);
+
+  environment = repairNotice.environment;
+  const studioPm = actor({
+    actorId: "NPC_Studio_PM",
+    role: "studio_pm",
+    knownLedgerEventIds: [repairNotice.event.eventId],
+  }, environment);
+  assert.equal(studioPm.perceivedObjectIds.includes("park_notice_board"), true);
+  assert.equal(studioPm.perceivedObjectIds.includes("studio_review_queue"), true);
+  const studioAction = listAvailableEnvironmentActions(environment, studioPm)
+    .find(candidate => candidate.affordance === "offer_conditional_review");
+
+  assert.ok(studioAction);
+  assert.equal(studioAction.objectId, "studio_review_queue");
+  assert.equal(studioAction.toState, "conditional");
+  assert.deepEqual(studioAction.citableLedgerEventIds, [repairNotice.event.eventId]);
+  assert.equal(studioAction.preconditions.includes("localTrust>=48"), true);
+  assert.equal(studioAction.preconditions.includes("ledger_event_kind:public_repair_noted"), true);
+  assert.deepEqual(studioAction.civicEconomyEffects, ["localTrust:+1", "recordBurden:-2"]);
+
+  const conditional = requireAccepted(validateAndApplyEnvironmentAction(environment, studioPm, {
+    actorId: studioPm.actorId,
+    role: studioPm.role,
+    affordance: "offer_conditional_review",
+    objectId: "studio_review_queue",
+    recordId: "studio_public_review_conditional",
+    citedLedgerEventId: repairNotice.event.eventId,
+    whyLine: "The Studio PM reads the repair notice and keeps review conditional.",
+  }));
+
+  assert.equal(conditional.event.kind, "studio_review_conditioned");
+  assert.equal(conditional.event.citedLedgerEventId, repairNotice.event.eventId);
+  assert.equal(conditional.environment.objects.find(item => item.objectId === "studio_review_queue")?.state, "conditional");
+  assert.equal(conditional.environment.economy.localTrust, 49);
+  assert.equal(conditional.environment.economy.recordBurden, 13);
 });
 
 test("Park witness can publicly vouch for a kept routine record", () => {

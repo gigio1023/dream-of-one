@@ -224,7 +224,7 @@ const ROUTE_SPECS: RouteSpec[] = [
     sessionOutcome: "cover_held",
     playerLineKind: "repair_line",
     playerLine: "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.",
-    socialReactionSummary: "The provider-shaped proposal path keeps the mismatch local through a correction slip, visible queue settlement, and a public repair notice.",
+    socialReactionSummary: "The provider-shaped proposal path keeps the mismatch local through a correction slip, visible queue settlement, a public repair notice, and a conditional Studio review response.",
     steps: [
       {
         stepId: "repair.clerk.mark_receipt",
@@ -284,6 +284,19 @@ const ROUTE_SPECS: RouteSpec[] = [
         knownLedgerEventFromStepIds: ["repair.clerk.attach_correction"],
         whyLine: "The Park witness sees the correction record and posts that the mismatch was repaired instead of becoming a rumor.",
         npcLineCandidate: "정정 기록이 붙었으니 소문으로 돌릴 일은 아니겠네요.",
+      },
+      {
+        stepId: "repair.studio_pm.offer_conditional_review",
+        actorId: "NPC_Studio_PM",
+        actorRole: "studio_pm",
+        stepGoal: "keep a tiny review opportunity conditional from the public repair notice",
+        affordance: "offer_conditional_review",
+        objectId: "studio_review_queue",
+        recordId: "studio_public_review_conditional",
+        citedLedgerEventFromStepId: "repair.park_witness.post_repair_notice",
+        knownLedgerEventFromStepIds: ["repair.park_witness.post_repair_notice"],
+        whyLine: "The Studio PM reads the public repair notice and keeps the review queue conditional instead of fully opening or closing it.",
+        npcLineCandidate: "공개 수습 기록은 봤습니다. 리뷰 줄은 조건부로 남겨둘게요.",
       },
     ],
   },

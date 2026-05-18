@@ -47,6 +47,8 @@ const ROUTE_PROBE_PLANS := [
 			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.repair"}},
 			{"actionId": "dialogue.choice.by_id", "payload": {"choiceId": "store.same_order.probe.safe"}},
 			{"actionId": "focus.world_record_prop", "payload": {"objectId": "park_notice_board"}},
+			{"actionId": "player.interact.focused", "payload": {}},
+			{"actionId": "focus.world_record_prop", "payload": {"objectId": "studio_review_queue"}},
 			{"actionId": "player.interact.focused", "payload": {}}
 		]
 	},
@@ -400,6 +402,8 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("repair_recovered expected queue mark to settle after correction")
 			if str(record_objects.get("park_notice_board", "")) != "repaired":
 				failures.append("repair_recovered expected public repair notice on Park board")
+			if str(record_objects.get("studio_review_queue", "")) != "conditional":
+				failures.append("repair_recovered expected Studio review queue to stay conditional after public repair")
 			if not _action_exists(summary, "store_clerk", "attach_correction"):
 				failures.append("repair_recovered expected Store Clerk correction attachment")
 			if not _action_exists(summary, "waiting_customer", "accept_repair"):
@@ -410,13 +414,25 @@ func _validate_route_report(plan: Dictionary, report: Dictionary, summary: Dicti
 				failures.append("repair_recovered expected Park Witness repair notice")
 			if not _visible_park_witness_reaction(summary, "repaired", "수습"):
 				failures.append("repair_recovered expected visible Park Witness repair-post reaction")
+			if not _action_exists(summary, "studio_pm", "offer_conditional_review"):
+				failures.append("repair_recovered expected Studio PM conditional review after public repair")
+			if not _action_perceives(summary, "studio_pm", "offer_conditional_review", "park_notice_board"):
+				failures.append("repair_recovered expected Studio PM to perceive public repair notice")
+			if not _action_perceives(summary, "studio_pm", "offer_conditional_review", "studio_review_queue"):
+				failures.append("repair_recovered expected Studio PM to perceive Studio review queue")
+			if not _visible_studio_pm_conditional(summary):
+				failures.append("repair_recovered expected visible Studio PM conditional review reaction")
 			if not _observation_exists(summary, "park_witness", "store_clerk", "attach_correction", "post_repair_notice"):
 				failures.append("repair_recovered expected Park Witness to read the correction record")
+			if not _observation_exists(summary, "studio_pm", "park_witness", "post_repair_notice", "offer_conditional_review"):
+				failures.append("repair_recovered expected Studio PM to read public repair notice")
 			var consequence_label := str(report.get("finalPlayerVisibleState", {}).get("consequence", ""))
-			if not consequence_label.contains("정정표") or not consequence_label.contains("대기줄 수습") or not consequence_label.contains("공개 수습 게시"):
-				failures.append("repair_recovered expected HUD consequence chain to show correction slip, queue repair, and public repair notice")
+			if not consequence_label.contains("정정표") or not consequence_label.contains("대기줄 수습") or not consequence_label.contains("공개 수습 게시") or not consequence_label.contains("조건부 리뷰"):
+				failures.append("repair_recovered expected HUD consequence chain to show correction slip, queue repair, public repair notice, and conditional review")
 			if not _inspected_public_repair_notice(summary):
 				failures.append("repair_recovered expected Codex/player to inspect the public repair notice")
+			if not _inspected_studio_review_conditional(summary):
+				failures.append("repair_recovered expected Codex/player to inspect the conditional Studio review queue")
 		"cover_held_under_suspicion":
 			if int(summary.get("reportWeight", 0)) > 49:
 				failures.append("cover_held_under_suspicion must stay below report threshold")
@@ -561,7 +577,7 @@ func _route_player_readable_summary(route_id: String, summary: Dictionary, hud_s
 		"clean_cover":
 			return "Clean cover: Codex accepted the routine, the Store Clerk closed a normal receipt, public trust rose, the waiting customer shared a local tip, the Studio PM opened a review invitation from the public record, and Codex inspected that invited review queue as a visible world prop. %s." % state
 		"repair_recovered":
-			return "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, the Park board showed a public repair notice, and Codex inspected that notice as a visible world prop. %s. %s" % [state, _one_line(hud_snapshot.get("consequenceLabel", ""))]
+			return "Repair recovery: Codex admitted uncertainty, accepted the Clerk premise, the correction slip attached, the waiting customer let the queue settle, the Park board showed a public repair notice, the Studio PM kept review conditional from that public record, and Codex inspected both props. %s. %s" % [state, _one_line(hud_snapshot.get("consequenceLabel", ""))]
 		"cover_held_under_suspicion":
 			return "Suspicious cover: Codex made a risky claim then returned to the Clerk premise; the Park public warning made the waiting customer keep distance, the Studio PM deferred review, and Codex inspected that deferred review queue. %s." % state
 		"soft_report":
@@ -977,6 +993,9 @@ func _inspected_public_repair_notice(summary: Dictionary) -> bool:
 func _inspected_studio_review_block(summary: Dictionary) -> bool:
 	return _inspected_world_record_exists(summary, "studio_review_queue", "blocked", "스테이션 인용")
 
+func _inspected_studio_review_conditional(summary: Dictionary) -> bool:
+	return _inspected_world_record_exists(summary, "studio_review_queue", "conditional", "조건부")
+
 func _inspected_record_affordance_map(summary: Dictionary) -> bool:
 	var inspected := _inspected_world_record_candidate(summary, "studio_review_queue", "blocked")
 	if inspected.is_empty():
@@ -1107,6 +1126,17 @@ func _visible_studio_pm_deferral(summary: Dictionary) -> bool:
 	return (
 		str(state.get("npcId", "")) == "NPC_Studio_PM"
 		and str(state.get("state", "")) == "deferred"
+		and bool(state.get("markerVisible", false))
+		and str(state.get("pressureText", "")).contains("리뷰")
+		and str(state.get("reactionText", "")).contains("리뷰")
+	)
+
+func _visible_studio_pm_conditional(summary: Dictionary) -> bool:
+	var states: Dictionary = summary.get("visibleNpcStates", {})
+	var state: Dictionary = states.get("NPC_Studio_PM", {})
+	return (
+		str(state.get("npcId", "")) == "NPC_Studio_PM"
+		and str(state.get("state", "")) == "conditional"
 		and bool(state.get("markerVisible", false))
 		and str(state.get("pressureText", "")).contains("리뷰")
 		and str(state.get("reactionText", "")).contains("리뷰")

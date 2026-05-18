@@ -96,10 +96,12 @@ Current M1 carry-in:
   environment-agent patterns instead of deepening Store operations or Station
   procedure.
 - latest small-slice carry-in: repair recovery now leaves a player-readable
-  public environment record. Park Witness `post_repair_notice` sets
-  `park_notice_board=repaired`, the HUD names the repair chain through
-  `공개 수습 게시`, and Codex gameplay QA inspects the Park notice board as a
-  repaired public notice.
+  public environment record and one small cross-place consequence. Park Witness
+  `post_repair_notice` sets `park_notice_board=repaired`; Studio PM reads that
+  public repair notice plus `studio_review_queue`, uses
+  `offer_conditional_review`, sets `studio_review_queue=conditional`, and shows
+  `조건부 리뷰`. Codex gameplay QA inspects both the repaired Park notice board
+  and the conditional Studio review queue.
 - latest small-slice carry-in: Park Witness `post_rumor` is now visible as a
   public NPC reaction (`rumored` / `소문 게시`) in soft-report and inquest paths,
   and the soft-report result names that rumor as part of the social chain.
@@ -132,7 +134,7 @@ Current M1 carry-in:
   object-state, and civic economy outcomes.
 - backend provider scheduling seed
   `backend/npc-runtime/src/runtime/same-order-provider-scheduling.ts` now
-  turns that comparison into 26 bounded Store Clerk, Waiting Customer, Park
+  turns that comparison into 27 bounded Store Clerk, Waiting Customer, Park
   Witness, Studio PM, Store Manager, and Station Officer role-agent provider jobs. Each
   job carries available action context,
   allowed provider fields, forbidden authority fields, deterministic fallback
@@ -203,8 +205,9 @@ Current M1 carry-in:
   a Park Witness can turn a routine queue record into public social trust, a
   Waiting Customer can read that public vouch and share a local tip only after
   `localTrust >= 55`, a Studio PM can read that same public vouch and open a
-  review invitation, a Studio PM can read a public warning and defer that
-  review queue, or a Waiting Customer can read a public warning and keep distance only after
+  review invitation, read a public repair notice and keep the review queue
+  conditional, read a public warning and defer that review queue, or a Waiting
+  Customer can read a public warning and keep distance only after
   local trust is low,
   a Park Witness can turn a Store note into public rumor, turn a correction
   record into a public repair notice, or turn a wary queue record into an

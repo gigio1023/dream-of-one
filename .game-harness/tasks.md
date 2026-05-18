@@ -157,6 +157,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   now sets `park_notice_board=repaired`, the live HUD names `기억 공백 발화 ->
   정정표 -> 대기줄 수습 -> 공개 수습 게시`, and Codex inspects the Park notice
   board as a repaired public notice.
+- [x] Add the next smallest repair-side cross-place reaction: Studio PM reads
+  the public repair notice, uses `offer_conditional_review`, changes
+  `studio_review_queue` to `conditional`, and Codex inspects the conditional
+  review queue as a player-readable consequence.
 - [x] Show the role/action map inside world-record prop inspection: the blocked
   Studio review queue HUD notice now names who can read it, which actions that
   record supports, and the latest ledger event that changed it.

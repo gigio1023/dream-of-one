@@ -52,6 +52,7 @@ export const ENVIRONMENT_AFFORDANCES = [
   "post_warning",
   "post_repair_notice",
   "invite_review",
+  "offer_conditional_review",
   "defer_review",
   "block_review",
   "forward_report",
@@ -90,6 +91,7 @@ export const LEDGER_EVENT_KINDS = [
   "public_warning_posted",
   "public_repair_noted",
   "studio_review_invited",
+  "studio_review_conditioned",
   "studio_review_deferred",
   "studio_review_blocked",
   "store_report_escalated",
@@ -131,6 +133,7 @@ export type EnvironmentObjectState =
   | "rumored"
   | "open"
   | "invited"
+  | "conditional"
   | "deferred"
   | "blocked"
   | "filed"
@@ -491,6 +494,18 @@ const AFFORDANCE_RULES: AffordanceRule[] = [
   },
   {
     objectId: "studio_review_queue",
+    affordance: "offer_conditional_review",
+    fromStates: ["open"],
+    toState: "conditional",
+    eventKind: "studio_review_conditioned",
+    allowedRoles: ["studio_pm"],
+    economyDelta: { localTrust: 1, recordBurden: -2 },
+    requiresLedgerEvent: true,
+    requiresLedgerEventKinds: ["public_repair_noted"],
+    minimumLocalTrust: 48,
+  },
+  {
+    objectId: "studio_review_queue",
     affordance: "defer_review",
     fromStates: ["open"],
     toState: "deferred",
@@ -713,7 +728,7 @@ export function validateAndApplyEnvironmentAction(
     return reject(cloned, "station_citation_requires_store_record", "Station citation must cite a Store ledger event");
   }
 
-  if (["create_receipt", "mark_receipt", "attach_correction", "place_note", "post_rumor", "vouch_routine", "post_warning", "post_repair_notice", "share_local_tip", "keep_distance", "invite_review", "defer_review", "block_review", "forward_report", "cite_record"].includes(action.affordance)) {
+  if (["create_receipt", "mark_receipt", "attach_correction", "place_note", "post_rumor", "vouch_routine", "post_warning", "post_repair_notice", "share_local_tip", "keep_distance", "invite_review", "offer_conditional_review", "defer_review", "block_review", "forward_report", "cite_record"].includes(action.affordance)) {
     const recordId = action.recordId ?? object.recordId;
     if (!recordId || recordId.trim().length === 0) {
       return reject(cloned, "invalid_record_mutation", `${action.affordance} requires a record id`);
@@ -880,6 +895,9 @@ function priorityHintsForRule(rule: AffordanceRule): string[] {
   if (rule.affordance === "invite_review") {
     hints.push("pressure:public_trust_opens_review");
   }
+  if (rule.affordance === "offer_conditional_review") {
+    hints.push("pressure:public_repair_keeps_review_conditional");
+  }
   if (rule.affordance === "defer_review") {
     hints.push("pressure:public_warning_blocks_review");
   }
@@ -940,6 +958,8 @@ function perceivedAs(rule: AffordanceRule): string {
       return "public repair notice";
     case "invite_review":
       return "public trust opens another local review";
+    case "offer_conditional_review":
+      return "public repair keeps another local review conditional";
     case "defer_review":
       return "public warning defers another local review";
     case "block_review":

@@ -265,7 +265,7 @@ function buildRepairRecoveredProof(): SameOrderAgenticRouteProof {
     knownLedgerEventIds: [correctionEvent.eventId],
     whyLine: "A waiting customer sees the correction slip attach and lets the line settle instead of turning it into a complaint.",
   });
-  applyAction(build, {
+  const repairNoticeEvent = applyAction(build, {
     stepId: "repair.park_witness.post_repair_notice",
     actorId: "NPC_Park_Witness",
     role: "park_witness",
@@ -276,6 +276,17 @@ function buildRepairRecoveredProof(): SameOrderAgenticRouteProof {
     knownLedgerEventIds: [correctionEvent.eventId],
     whyLine: "The Park witness sees the correction record and posts that the mismatch was repaired instead of becoming a rumor.",
   });
+  applyAction(build, {
+    stepId: "repair.studio_pm.offer_conditional_review",
+    actorId: "NPC_Studio_PM",
+    role: "studio_pm",
+    affordance: "offer_conditional_review",
+    objectId: "studio_review_queue",
+    recordId: "studio_public_review_conditional",
+    citedLedgerEventId: repairNoticeEvent.eventId,
+    knownLedgerEventIds: [repairNoticeEvent.eventId],
+    whyLine: "The Studio PM reads the public repair notice and keeps the review queue conditional instead of fully opening or closing it.",
+  });
 
   return routeProof({
     build,
@@ -283,7 +294,7 @@ function buildRepairRecoveredProof(): SameOrderAgenticRouteProof {
     sessionOutcome: "cover_held",
     playerLineKind: "repair_line",
     playerLine: "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.",
-    socialReactionSummary: "The clerk contains the mismatch through a correction, a waiting customer accepts the repair, and a Park witness posts that the mismatch was repaired instead of becoming a rumor.",
+    socialReactionSummary: "The clerk contains the mismatch through a correction, a waiting customer accepts the repair, a Park witness posts the public repair, and the Studio PM keeps another local opportunity conditional from that public record.",
   });
 }
 
@@ -738,8 +749,19 @@ function validateRepairRecovered(
   )) {
     failures.push({ routeId: proof.routeId, path: "socialObservationTrace", message: "repair route must prove a public witness can spread the repair record" });
   }
+  if (!proof.socialObservationTrace.some(observation =>
+    observation.observerRole === "studio_pm"
+    && observation.observedActorRole === "park_witness"
+    && observation.observedAffordance === "post_repair_notice"
+    && observation.resultingAffordance === "offer_conditional_review"
+  )) {
+    failures.push({ routeId: proof.routeId, path: "socialObservationTrace", message: "repair route must prove another place can react to the public repair record" });
+  }
   if (proof.finalObjectStates.store_queue_mark !== "settled") {
     failures.push({ routeId: proof.routeId, path: "finalObjectStates.store_queue_mark", message: "repair route must visibly settle the queue after correction" });
+  }
+  if (proof.finalObjectStates.studio_review_queue !== "conditional") {
+    failures.push({ routeId: proof.routeId, path: "finalObjectStates.studio_review_queue", message: "repair route must leave another-place opportunity conditional, not invisible" });
   }
   if (proof.economyAfter.recordBurden <= 0 || proof.economyAfter.stationAttention >= 50) {
     failures.push({ routeId: proof.routeId, path: "economyAfter", message: "repair route must create bounded local burden below Station-report pressure" });

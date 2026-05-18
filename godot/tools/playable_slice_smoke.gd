@@ -37,8 +37,8 @@ const ROUTE_DEFINITIONS := [
 		"maxReportWeight": 49,
 		"expectedStationIntake": false,
 		"expectedStationInquest": false,
-		"expectedRecordStates": {"store_queue_mark": "settled", "receipt_tray": "marked", "correction_slip": "attached", "report_tray": "empty", "park_notice_board": "repaired", "studio_review_queue": "open", "station_dossier": "absent"},
-		"expectedCivicLedgerCount": 5,
+		"expectedRecordStates": {"store_queue_mark": "settled", "receipt_tray": "marked", "correction_slip": "attached", "report_tray": "empty", "park_notice_board": "repaired", "studio_review_queue": "conditional", "station_dossier": "absent"},
+		"expectedCivicLedgerCount": 6,
 		"expectedEvents": ["conversation_started", "dialogue_choice_selected", "conversation_anomaly_detected", "npc_suspicion_changed", "conversation_outcome_reached"],
 		"forbiddenEvents": ["station_report_created", "station_inquest_opened"],
 		"expectedSignals": ["memory_gap_admission"]
@@ -400,7 +400,7 @@ func _validate_route_summary(route: Dictionary, summary: Dictionary) -> Array[St
 			failures.append("soft_report outcome must name Park Witness public rumor action")
 	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("수습"):
 		failures.append("repair_recovered outcome must explain recovery")
-	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 공개 수습 게시 -> 상점 안에서 수습"):
+	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("기억 공백 발화 -> 영수증 표시/정정표 -> 대기줄 수습 -> 공개 수습 게시 -> 조건부 리뷰"):
 		failures.append("repair_recovered outcome must show repair record chain")
 	if route_id == "repair_recovered" and not str(summary.get("outcomeBody", "")).contains("대기 손님"):
 		failures.append("repair_recovered outcome must name waiting-customer repair acceptance")
@@ -620,8 +620,16 @@ func _validate_agent_action_log(route: Dictionary, summary: Dictionary) -> Array
 	if route_id == "repair_recovered":
 		if not _agent_action_exists(action_log, "park_witness", "post_repair_notice"):
 			failures.append("repair_recovered expected Park Witness post_repair_notice action in agentActionLog")
+		if not _agent_action_exists(action_log, "studio_pm", "offer_conditional_review"):
+			failures.append("repair_recovered expected Studio PM offer_conditional_review action in agentActionLog")
+		if not _agent_action_perceives(action_log, "studio_pm", "offer_conditional_review", "park_notice_board"):
+			failures.append("repair_recovered expected Studio PM to perceive park_notice_board before conditional review")
+		if not _agent_action_perceives(action_log, "studio_pm", "offer_conditional_review", "studio_review_queue"):
+			failures.append("repair_recovered expected Studio PM to perceive studio_review_queue before conditional review")
 		if not str(summary.get("outcomeBody", "")).contains("공개 수습 게시"):
 			failures.append("repair_recovered outcome must show repair spreading into public social space")
+		if not str(summary.get("outcomeBody", "")).contains("조건부 리뷰"):
+			failures.append("repair_recovered outcome must show repaired public record keeping review conditional")
 	var social_observations: Array = summary.get("socialObservationTrace", [])
 	if route_id == "clean_cover" and not _social_observation_exists(social_observations, "park_witness", "waiting_customer", "accept_routine", "vouch_routine"):
 		failures.append("clean_cover expected Park Witness reading the routine queue record")
@@ -641,6 +649,8 @@ func _validate_agent_action_log(route: Dictionary, summary: Dictionary) -> Array
 		failures.append("cover_held_under_suspicion outcome must show low trust causing distance")
 	if route_id == "repair_recovered" and not _social_observation_exists(social_observations, "park_witness", "store_clerk", "attach_correction", "post_repair_notice"):
 		failures.append("repair_recovered expected Park Witness reading the correction record")
+	if route_id == "repair_recovered" and not _social_observation_exists(social_observations, "studio_pm", "park_witness", "post_repair_notice", "offer_conditional_review"):
+		failures.append("repair_recovered expected Studio PM reading the public repair notice")
 	if route_id == "soft_report" and not _social_observation_exists(social_observations, "store_manager", "store_clerk", "place_note", "place_note"):
 		failures.append("soft_report expected playable summary socialObservationTrace to show manager reading clerk note")
 	if route_id == "inquest_opened":
@@ -728,6 +738,14 @@ func _validate_visible_social_actors(route: Dictionary, summary: Dictionary, ses
 			failures.append("inquest_opened expected NPC_Studio_PM reaction marker after review block")
 		if not str(studio_state.get("reactionText", "")).contains("리뷰"):
 			failures.append("inquest_opened expected NPC_Studio_PM reaction label to mention review block")
+	if route_id == "repair_recovered" and _agent_action_exists(action_log, "studio_pm", "offer_conditional_review"):
+		var studio_state: Dictionary = visible_states.get("NPC_Studio_PM", {})
+		if str(studio_state.get("state", "")) != "conditional":
+			failures.append("repair_recovered expected NPC_Studio_PM visible state to show conditional review")
+		if not bool(studio_state.get("markerVisible", false)):
+			failures.append("repair_recovered expected NPC_Studio_PM reaction marker after conditional review")
+		if not str(studio_state.get("reactionText", "")).contains("리뷰"):
+			failures.append("repair_recovered expected NPC_Studio_PM reaction label to mention conditional review")
 	if route_id == "clean_cover" and _agent_action_exists(action_log, "park_witness", "vouch_routine"):
 		failures.append_array(_validate_park_witness_reaction(visible_states, route_id, "vouched", "공개"))
 	if route_id == "repair_recovered" and _agent_action_exists(action_log, "park_witness", "post_repair_notice"):
@@ -817,10 +835,12 @@ func _validate_hud_record_state(route: Dictionary, summary: Dictionary, hud: Nod
 		failures.append("repair_recovered expected queue mark to settle after correction")
 	if route_id == "repair_recovered" and str(summary.get("recordObjects", {}).get("park_notice_board", "")) != "repaired":
 		failures.append("repair_recovered expected park notice board to show public repair")
+	if route_id == "repair_recovered" and str(summary.get("recordObjects", {}).get("studio_review_queue", "")) != "conditional":
+		failures.append("repair_recovered expected studio review queue to stay conditional after public repair")
 	if route_id == "repair_recovered":
 		var consequence_label := str(snapshot.get("consequenceLabel", ""))
-		if not consequence_label.contains("정정표") or not consequence_label.contains("대기줄 수습") or not consequence_label.contains("공개 수습 게시"):
-			failures.append("repair_recovered expected HUD consequence chain to show correction slip, queue repair, and public repair notice")
+		if not consequence_label.contains("정정표") or not consequence_label.contains("대기줄 수습") or not consequence_label.contains("공개 수습 게시") or not consequence_label.contains("조건부 리뷰"):
+			failures.append("repair_recovered expected HUD consequence chain to show correction slip, queue repair, public repair notice, and conditional review")
 	if route_id == "cover_held_under_suspicion" and not record_state_label.contains("리뷰 보류"):
 		failures.append("cover_held_under_suspicion expected HUD record state to show review deferral after public warning")
 	if route_id == "soft_report" and not record_state_label.contains("대기"):
@@ -990,6 +1010,8 @@ func _affordance_label(affordance: String) -> String:
 			return "수습 게시"
 		"invite_review":
 			return "리뷰 초대"
+		"offer_conditional_review":
+			return "조건부 리뷰"
 		"defer_review":
 			return "리뷰 보류"
 		"place_note":
@@ -1136,9 +1158,10 @@ func _agentic_route_proof(route_id: String) -> Dictionary:
 			_agentic_trace("repair.clerk.offer_correction", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "offer_correction", "correction_slip", "civic-ledger-2", "correction_offered", {"recordId": "store_same_order_correction"}, _economy(3, 45, 20, 0), "The mismatch can still be repaired locally through a correction slip."),
 			_agentic_trace("repair.clerk.attach_correction", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "attach_correction", "correction_slip", "civic-ledger-3", "store_sale_corrected", {"recordId": "store_same_order_correction"}, _economy(2, 40, 35, 5), "The player accepts the correction, so the Store records a corrected sale instead of a report."),
 			_agentic_trace("repair.waiting_customer.accept_repair", "NPC_Waiting_Customer", "waiting_customer", ["store_queue_mark", "store_counter", "usual_order_cue", "park_notice_board"], "accept_repair", "store_queue_mark", "civic-ledger-4", "queue_repair_accepted", {"recordId": "store_same_order_queue_repair", "citedLedgerEventId": "civic-ledger-3"}, _economy(2, 45, 30, 5), "A waiting customer sees the correction slip attach and lets the line settle instead of turning it into a complaint."),
-			_agentic_trace("repair.park_witness.post_repair_notice", "NPC_Park_Witness", "park_witness", ["park_notice_board"], "post_repair_notice", "park_notice_board", "civic-ledger-5", "public_repair_noted", {"recordId": "park_public_repair_notice", "citedLedgerEventId": "civic-ledger-3"}, _economy(2, 48, 25, 5), "The Park witness sees the correction record and posts that the mismatch was repaired instead of becoming a rumor.")
+			_agentic_trace("repair.park_witness.post_repair_notice", "NPC_Park_Witness", "park_witness", ["park_notice_board"], "post_repair_notice", "park_notice_board", "civic-ledger-5", "public_repair_noted", {"recordId": "park_public_repair_notice", "citedLedgerEventId": "civic-ledger-3"}, _economy(2, 48, 25, 5), "The Park witness sees the correction record and posts that the mismatch was repaired instead of becoming a rumor."),
+			_agentic_trace("repair.studio_pm.offer_conditional_review", "NPC_Studio_PM", "studio_pm", ["park_notice_board", "studio_review_queue"], "offer_conditional_review", "studio_review_queue", "civic-ledger-6", "studio_review_conditioned", {"recordId": "studio_public_review_conditional", "citedLedgerEventId": "civic-ledger-5"}, _economy(2, 49, 23, 5), "The Studio PM reads the public repair notice and keeps the review queue conditional instead of fully opening or closing it.")
 		]
-		return _agentic_route_result(route_id, "cover_held", "repair_line", "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.", "The clerk contains the mismatch through a correction, a waiting customer accepts the repair, and a Park witness posts that the mismatch was repaired instead of becoming a rumor.", repair_trace, _agentic_final_states({"store_queue_mark": "settled", "receipt_tray": "marked", "correction_slip": "attached", "park_notice_board": "repaired"}))
+		return _agentic_route_result(route_id, "cover_held", "repair_line", "잠깐 헷갈렸어요. 정정해서 같은 걸로 할게요.", "The clerk contains the mismatch through a correction, a waiting customer accepts the repair, a Park witness posts the public repair, and the Studio PM keeps another local opportunity conditional from that public record.", repair_trace, _agentic_final_states({"store_queue_mark": "settled", "receipt_tray": "marked", "correction_slip": "attached", "park_notice_board": "repaired", "studio_review_queue": "conditional"}))
 	if route_id == "soft_report":
 		var soft_report_trace := [
 			_agentic_trace("soft.clerk.mark_receipt", "NPC_Store_Clerk", "store_clerk", ["store_queue_mark", "store_counter", "usual_order_cue", "receipt_tray", "correction_slip", "report_tray"], "mark_receipt", "receipt_tray", "civic-ledger-1", "store_receipt_marked", {"recordId": "store_same_order_receipt"}, _economy(3, 45, 15, 0), "The player breaks the expected routine, so the clerk marks the receipt as unresolved."),
@@ -1332,6 +1355,11 @@ func _validate_agentic_route_proofs(agentic_route_proofs: Array) -> Array[String
 			failures.append("soft_report agenticRouteProof must include Store Manager reaction")
 		if expected_route == "soft_report" and not _social_observation_exists(social_observations, "store_manager", "store_clerk", "place_note", "place_note"):
 			failures.append("soft_report agenticRouteProof must prove manager acted from clerk record")
+		if expected_route == "repair_recovered":
+			if str(final_states.get("studio_review_queue", "")) != "conditional":
+				failures.append("repair_recovered agenticRouteProof must leave Studio review queue conditional")
+			if not _social_observation_exists(social_observations, "studio_pm", "park_witness", "post_repair_notice", "offer_conditional_review"):
+				failures.append("repair_recovered agenticRouteProof must prove Studio PM acted from public repair notice")
 		if expected_route == "inquest_opened":
 			var station_citation: Dictionary = proof.get("stationCitation", {})
 			if station_citation.is_empty():

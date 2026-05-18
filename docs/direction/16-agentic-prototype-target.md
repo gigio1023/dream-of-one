@@ -269,7 +269,7 @@ It proves the smallest environment-action contract:
   now records a provider-shaped comparison lane for the Same Order routes, and
   the playable slice artifact carries `playability.providerActionComparison`.
 - `backend/npc-runtime/src/runtime/same-order-provider-scheduling.ts` now
-  records a provider scheduling contract for 12 bounded role-agent jobs, and
+  records a provider scheduling contract for 27 bounded role-agent jobs, and
   the playable slice artifact carries `playability.providerSchedulingPlan`.
   The scheduled job prompt context carries action descriptors, recent ledger
   event kinds, and matching affordances, so provider wording sees the validated

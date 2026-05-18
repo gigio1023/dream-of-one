@@ -80,6 +80,9 @@ func set_reaction_state(state: String, exposure: int) -> void:
 		"invited":
 			reaction_text = _localized("npc.reaction.invited", {}, "review open")
 			reaction_color = Color(0.52, 0.78, 1.0, 1.0)
+		"conditional":
+			reaction_text = _localized("npc.reaction.conditional", {}, "conditional review")
+			reaction_color = Color(0.62, 0.82, 1.0, 1.0)
 		"deferred":
 			reaction_text = _localized("npc.reaction.deferred", {}, "review deferred")
 			reaction_color = Color(1.0, 0.62, 0.36, 1.0)

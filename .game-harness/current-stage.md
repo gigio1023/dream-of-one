@@ -123,8 +123,8 @@ Current simulator-first reducer verdict:
   actions in `agentActionLog`, including available candidates, selected action
   descriptors, and selection reasons before mutation. Backend provider-shaped action comparison now proves
   scripted proposals preserve provider-off ledger outcomes, and backend provider
-  scheduling now defines 24 bounded role-agent jobs with fallback wording and
-  exact Station citation, and backend dispatch contract turns those jobs into
+	  scheduling now defines 27 bounded role-agent jobs with fallback wording,
+	  public-repair conditional review, and exact Station citation, and backend dispatch contract turns those jobs into
   schema-safe `/v1/npc/decision` packets while keeping live HTTP/Godot dispatch
   unverified. Asset BOM proof now verifies local CC0/project-authored Store and
   Station asset sources, and manual readability review now passes with

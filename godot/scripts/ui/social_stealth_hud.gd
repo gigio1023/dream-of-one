@@ -50,7 +50,7 @@ const UI_COPY := {
 		"recorded_statement_submit": "직접 입력도 기록됩니다.",
 		"free_input_placeholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 		"recent_line": "최근 발화: {line}",
-		"record_state": "상점 기록: 영수증 {receipt} | 정정 {correction} | 보고 {report} | 스테이션 {dossier} | 잔액 {credit} 신뢰 {trust} 부담 {burden} 주목 {attention} | 장부 {ledgerCount} 최근 {ledgerLatest} | 열람 {recordReaders} | 사회 반응 {socialLatest} | 주변 태도 {npcStances}",
+		"record_state": "상점 기록: 영수증 {receipt} | 정정 {correction} | 보고 {report} | 스테이션 {dossier} | 잔액 {credit} 신뢰 {trust} 부담 {burden} 주목 {attention} | 장부 {ledgerCount} 최근 {ledgerLatest} | 열람 {recordReaders} | 사회 반응 {socialLatest} | 오간 말 {socialExchange} | 주변 태도 {npcStances}",
 		"investigation_trail": "검사자: {actor} | 대상: 플레이어 | 근거: {basis}",
 		"provider_state": "AI 제공자: {mode} | API 검증 {live} | 모델 {model}",
 		"evidence_count": "최근 기록 {shown} / 전체 {total}",
@@ -108,7 +108,7 @@ const UI_COPY := {
 		"recorded_statement_submit": "Typed speech is recorded.",
 		"free_input_placeholder": "Type and press Enter: speech becomes a Store record",
 		"recent_line": "Recent line: {line}",
-		"record_state": "Store records: receipt {receipt} | correction {correction} | report {report} | Station {dossier} | credit {credit} trust {trust} burden {burden} attention {attention} | ledger {ledgerCount} latest {ledgerLatest} | readers {recordReaders} | social reaction {socialLatest} | nearby stance {npcStances}",
+		"record_state": "Store records: receipt {receipt} | correction {correction} | report {report} | Station {dossier} | credit {credit} trust {trust} burden {burden} attention {attention} | ledger {ledgerCount} latest {ledgerLatest} | readers {recordReaders} | social reaction {socialLatest} | heard exchange {socialExchange} | nearby stance {npcStances}",
 		"investigation_trail": "Examiner: {actor} | subject: player | basis: {basis}",
 		"provider_state": "AI provider: {mode} | API verified {live} | model {model}",
 		"evidence_count": "Recent record {shown} / total {total}",
@@ -214,6 +214,7 @@ var _civic_economy: Dictionary = {}
 var _civic_ledger_count := 0
 var _latest_civic_ledger_text := "-"
 var _latest_social_observation_text := "-"
+var _latest_social_exchange_text := "-"
 var _visible_npc_stance_text := "-"
 var _record_reader_text := "-"
 var _provider_mode := "fallback-only M1"
@@ -396,6 +397,7 @@ func set_record_state(record_objects: Dictionary, civic_economy: Dictionary, civ
 	_civic_ledger_count = civic_ledger.size()
 	_latest_civic_ledger_text = _latest_civic_ledger_label(civic_ledger)
 	_latest_social_observation_text = _latest_social_observation_label(social_observations)
+	_latest_social_exchange_text = _latest_social_exchange_label(social_observations)
 	_visible_npc_stance_text = _visible_npc_stance_label(visible_npc_states)
 	_record_reader_text = _record_reader_label(record_objects, civic_ledger)
 	_refresh_record_state_label()
@@ -493,6 +495,7 @@ func _refresh_record_state_label() -> void:
 		"ledgerLatest": _latest_civic_ledger_text,
 		"recordReaders": _record_reader_text,
 		"socialLatest": _latest_social_observation_text,
+		"socialExchange": _latest_social_exchange_text,
 		"npcStances": _visible_npc_stance_text
 	})
 
@@ -578,6 +581,23 @@ func _latest_social_observation_label(social_observations: Array) -> String:
 		resulting_affordance,
 		int(pressure.get("recordBurden", 0))
 	]
+
+func _latest_social_exchange_label(social_observations: Array) -> String:
+	for offset in range(social_observations.size()):
+		var index := social_observations.size() - 1 - offset
+		var observation_value: Variant = social_observations[index]
+		if not observation_value is Dictionary:
+			continue
+		var observation: Dictionary = observation_value
+		var observer := _actor_role_label(str(observation.get("observerRole", "")))
+		var observed := _actor_role_label(str(observation.get("observedActorRole", "")))
+		var observer_line := str(observation.get("observerSpokenLine", "")).strip_edges()
+		if observer.is_empty() or observed.is_empty() or observer_line.is_empty():
+			continue
+		if _current_locale() == "en":
+			return "%s -> %s: %s" % [observed, observer, observer_line]
+		return "%s -> %s: %s" % [observed, observer, observer_line]
+	return "-"
 
 func _korean_subject_particle(label: String) -> String:
 	if label.is_empty():

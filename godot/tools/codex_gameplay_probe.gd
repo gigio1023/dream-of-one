@@ -721,8 +721,11 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 	if not str(hud_snapshot.get("investigationTrailLabel", "")).contains("스테이션 직원"):
 		failures.append("HUD investigation trail does not name the Station examiner")
 	var consequence_label := str(hud_snapshot.get("consequenceLabel", ""))
+	var record_state_label := str(hud_snapshot.get("recordStateLabel", ""))
 	if not consequence_label.contains("플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부"):
 		failures.append("HUD consequence line does not show the speech/delay-to-record-to-social-refusal chain")
+	if not _hud_record_state_names_social_exchange(record_state_label):
+		failures.append("HUD record-state line does not show the latest NPC-to-NPC spoken exchange")
 	if not bool(checks.get("storeClerkMarkedReceipt", false)):
 		failures.append("Store Clerk did not mark a receipt from the player line")
 	if not bool(checks.get("storeClerkPlacedNote", false)):
@@ -852,6 +855,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadConversationVisibleContext": bool(checks.get("codexReadConversationVisibleContext", false)),
 		"canReadConversationSocialAudience": bool(checks.get("codexReadConversationSocialAudience", false)),
 		"canReadLiveHudSocialCitation": _hud_record_state_cites_latest_social_observation(summary, record_state_label),
+		"canReadLiveHudSocialExchange": _hud_record_state_names_social_exchange(record_state_label),
 		"canReadLiveHudNearbyStances": _hud_record_state_names_visible_stances(record_state_label),
 		"canReadLiveHudRecordReaders": _hud_record_state_names_record_readers(record_state_label),
 		"canReadVisibleNpcReaction": bool(checks.get("visibleWaitingCustomerReaction", false)),
@@ -1847,6 +1851,14 @@ func _hud_record_state_cites_latest_social_observation(summary: Dictionary, reco
 		record_state_label.contains("사회 반응")
 		and not observed_event_id.is_empty()
 		and record_state_label.contains(observed_event_id)
+	)
+
+func _hud_record_state_names_social_exchange(record_state_label: String) -> bool:
+	return (
+		record_state_label.contains("오간 말")
+		and record_state_label.contains("스테이션 직원")
+		and record_state_label.contains("대기 손님")
+		and record_state_label.contains("말 섞지 않겠습니다")
 	)
 
 func _hud_record_state_names_visible_stances(record_state_label: String) -> bool:

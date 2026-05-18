@@ -180,6 +180,10 @@ Current M1 carry-in:
   NPC-to-NPC exchange lines as `오간 말` and exports `socialExchangeLines`.
   Waiting Customer contact refusal now reads as a spoken social exchange from
   Station Officer to Waiting Customer, not just a marker or ledger result.
+- latest small-slice carry-in: the live HUD record line now shows the latest
+  NPC-to-NPC spoken exchange as `오간 말`. The player can observe the Station
+  Officer -> Waiting Customer refusal line in the running HUD before opening
+  any NPC detail panel.
 - latest small-slice carry-in: repair recovery now leaves a player-readable
   public environment record and one small cross-place consequence. Park Witness
   `post_repair_notice` sets `park_notice_board=repaired`; Studio PM reads that

@@ -121,6 +121,7 @@
 - `canReadConversationVisibleContext`: `true`
 - `canReadConversationSocialAudience`: `true`
 - `canReadLiveHudSocialCitation`: `true`
+- `canReadLiveHudSocialExchange`: `true`
 - `canReadLiveHudNearbyStances`: `true`
 - `canReadLiveHudRecordReaders`: `true`
 - `canReadVisibleNpcReaction`: `true`

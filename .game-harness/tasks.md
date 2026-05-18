@@ -211,6 +211,11 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
   and heads now use distinct role tints for Store Clerk, Store Manager, Waiting
   Customer, Studio PM, Park Witness, and Station Officer, and Codex gameplay QA
   verifies `canReadVisibleNpcRoleTints=true`.
+- [x] Make visible NPC reactions carry a source token: a reacting NPC now shows
+  a small role-colored source token when its current reaction came from another
+  actor's observed ledger action, and Codex gameplay QA verifies
+  `canReadVisibleNpcSourceToken=true` on the Waiting Customer's Station-citation
+  refusal.
 - [x] Make the civic economy panel player-readable as a tiny social-pressure
   record: Codex/player can inspect current credit/trust/burden/attention values
   and recent ledger deltas that show which role action moved them.

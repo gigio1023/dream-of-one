@@ -194,6 +194,12 @@ Current M1 carry-in:
   Witness, and Station Officer are visually separable before inspection, and
   Codex gameplay QA requires `canReadVisibleNpcRoleTints=true`. This improves
   the readable social field itself instead of deepening Store/Station systems.
+- latest small-slice carry-in: visible NPC reactions now carry a small source
+  token colored from the role whose observed ledger action caused the reaction.
+  In the inquest path, the Waiting Customer refusal exposes a Station Officer
+  source token for `cite_record`, and Codex gameplay QA requires
+  `canReadVisibleNpcSourceToken=true`. This makes NPC-to-NPC influence visible
+  in the 3D scene before the player opens inspection text.
 - latest small-slice carry-in: repair recovery now leaves a player-readable
   public environment record and one small cross-place consequence. Park Witness
   `post_repair_notice` sets `park_notice_board=repaired`; Studio PM reads that

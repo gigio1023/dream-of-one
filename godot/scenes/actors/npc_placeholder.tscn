@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/actors/npc_placeholder.gd" id="1_npc_placeholder"]
 
@@ -31,6 +31,16 @@ emission_enabled = true
 emission = Color(1, 0.48, 0.18, 1)
 emission_energy_multiplier = 0.25
 
+[sub_resource type="SphereMesh" id="SphereMesh_source_token"]
+radius = 0.14
+height = 0.28
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_source_token"]
+albedo_color = Color(0.72, 0.62, 0.94, 1)
+emission_enabled = true
+emission = Color(0.72, 0.62, 0.94, 1)
+emission_energy_multiplier = 0.35
+
 [node name="NpcPlaceholder" type="CharacterBody3D"]
 script = ExtResource("1_npc_placeholder")
 
@@ -39,6 +49,12 @@ visible = false
 position = Vector3(0, 0.03, 0)
 mesh = SubResource("CylinderMesh_attention")
 surface_material_override/0 = SubResource("StandardMaterial3D_attention")
+
+[node name="SourceToken" type="MeshInstance3D" parent="."]
+visible = false
+position = Vector3(0.46, 2.04, 0)
+mesh = SubResource("SphereMesh_source_token")
+surface_material_override/0 = SubResource("StandardMaterial3D_source_token")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 position = Vector3(0, 0.825, 0)

@@ -141,6 +141,12 @@ Last Updated: 2026-05-19
   detail panels. Codex gameplay QA now verifies
   `canReadVisibleNpcRoleTints=true`; the refreshed probe passes 31/31 accepted
   public actions, 34/34 explainability checks, and 5/5 route reports.
+- Latest implementation slice: reacting NPCs now carry a small source token
+  colored from the role whose observed ledger action caused the reaction. In
+  the inquest path, the Waiting Customer's refusal carries a Station Officer
+  source token tied to `cite_record`, and Codex gameplay QA verifies
+  `canReadVisibleNpcSourceToken=true`; the refreshed probe passes 31/31
+  accepted public actions, 35/35 explainability checks, and 5/5 route reports.
 - Latest implementation slice: Store Clerk can now be inspected as the first
   record-making actor after typed inquest-triggering speech. Codex gameplay QA
   focuses the Clerk, interacts, and reads `메모 배치`, report-tray basis,

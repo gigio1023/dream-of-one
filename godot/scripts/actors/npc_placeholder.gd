@@ -17,9 +17,14 @@ var _role_tint := "neutral"
 var _role_tint_label := "neutral role"
 var _body_color := Color(0.92, 0.50, 0.34, 1.0)
 var _head_color := Color(1.0, 0.68, 0.48, 1.0)
+var _reaction_source_actor_id := ""
+var _reaction_source_role := ""
+var _reaction_source_affordance := ""
+var _reaction_source_token_color := Color(0.72, 0.62, 0.94, 1.0)
 
 @onready var _body_mesh: MeshInstance3D = $Body
 @onready var _head_mesh: MeshInstance3D = $Head
+@onready var _source_token: MeshInstance3D = $SourceToken
 @onready var _name_label: Label3D = $NameLabel
 @onready var _pressure_label: Label3D = $PressureLabel
 @onready var _reaction_label: Label3D = $ReactionLabel
@@ -160,12 +165,32 @@ func debug_reaction_snapshot() -> Dictionary:
 		"roleTintLabel": _role_tint_label,
 		"bodyColor": _color_components(_body_color),
 		"headColor": _color_components(_head_color),
+		"reactionSourceActorId": _reaction_source_actor_id,
+		"reactionSourceRole": _reaction_source_role,
+		"reactionSourceAffordance": _reaction_source_affordance,
+		"reactionSourceTokenVisible": _source_token.visible,
+		"reactionSourceTokenColor": _color_components(_reaction_source_token_color),
 		"materialAlpha": material.albedo_color.a if material != null else -1.0,
 		"emissionEnergy": material.emission_energy_multiplier if material != null else -1.0
 	}
 
 func set_reaction_source(source_text: String) -> void:
 	_reaction_source_text = source_text.strip_edges()
+	if _reaction_source_text.is_empty():
+		_clear_reaction_source_token()
+	_apply_reaction_label()
+
+func set_reaction_source_observation(source_text: String, observation: Dictionary) -> void:
+	_reaction_source_text = source_text.strip_edges()
+	_reaction_source_actor_id = str(observation.get("observedActorId", "")).strip_edges()
+	_reaction_source_role = str(observation.get("observedActorRole", "")).strip_edges()
+	_reaction_source_affordance = str(observation.get("observedAffordance", "")).strip_edges()
+	if _reaction_source_text.is_empty() or _reaction_source_role.is_empty():
+		_clear_reaction_source_token()
+	else:
+		_reaction_source_token_color = _source_role_color(_reaction_source_role)
+		_apply_source_token_color(_reaction_source_token_color)
+		_source_token.visible = true
 	_apply_reaction_label()
 
 func say_key(line_key: String, args: Dictionary = {}) -> void:
@@ -291,6 +316,45 @@ func _apply_mesh_color(mesh_instance: MeshInstance3D, color: Color) -> void:
 	material.albedo_color = color
 	material.roughness = 0.88
 	mesh_instance.set_surface_override_material(0, material)
+
+func _clear_reaction_source_token() -> void:
+	_reaction_source_actor_id = ""
+	_reaction_source_role = ""
+	_reaction_source_affordance = ""
+	_reaction_source_token_color = Color(0.72, 0.62, 0.94, 1.0)
+	if _source_token != null:
+		_source_token.visible = false
+		_apply_source_token_color(_reaction_source_token_color)
+
+func _source_role_color(source_role: String) -> Color:
+	match source_role:
+		"store_clerk":
+			return Color(1.0, 0.72, 0.42, 1.0)
+		"store_manager":
+			return Color(0.94, 0.55, 0.38, 1.0)
+		"waiting_customer":
+			return Color(0.48, 0.82, 0.76, 1.0)
+		"studio_pm":
+			return Color(0.54, 0.70, 1.0, 1.0)
+		"park_witness":
+			return Color(0.58, 0.82, 0.50, 1.0)
+		"station_officer":
+			return Color(0.72, 0.62, 0.94, 1.0)
+	return Color(1.0, 0.88, 0.38, 1.0)
+
+func _apply_source_token_color(color: Color) -> void:
+	if _source_token == null:
+		return
+	var material := StandardMaterial3D.new()
+	var base := _source_token.get_surface_override_material(0)
+	if base is StandardMaterial3D:
+		material = (base as StandardMaterial3D).duplicate() as StandardMaterial3D
+	material.albedo_color = color
+	material.emission_enabled = true
+	material.emission = color
+	material.emission_energy_multiplier = 0.35
+	material.roughness = 0.78
+	_source_token.set_surface_override_material(0, material)
 
 func _color_components(color: Color) -> Array[float]:
 	return [color.r, color.g, color.b, color.a]

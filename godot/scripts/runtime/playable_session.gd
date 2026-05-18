@@ -3862,15 +3862,19 @@ func _refresh_actor_reaction_source_labels() -> void:
 			continue
 		latest_observation_by_role[observer_role] = observation
 	for node in _local_group_nodes(&"npc_placeholders"):
-		if not node.has_method("set_reaction_source"):
+		if not node.has_method("set_reaction_source") and not node.has_method("set_reaction_source_observation"):
 			continue
 		var actor_id := str(node.get_meta("npc_id", ""))
 		var actor_role := str(ACTOR_AGENT_ROLES.get(actor_id, ""))
 		var source_text := ""
+		var observation := {}
 		if latest_observation_by_role.has(actor_role):
-			var observation: Dictionary = latest_observation_by_role.get(actor_role, {})
+			observation = latest_observation_by_role.get(actor_role, {})
 			source_text = _reaction_source_label(observation)
-		node.set_reaction_source(source_text)
+		if node.has_method("set_reaction_source_observation"):
+			node.set_reaction_source_observation(source_text, observation)
+		else:
+			node.set_reaction_source(source_text)
 
 func _reaction_source_label(observation: Dictionary) -> String:
 	var observed_role := str(observation.get("observedActorRole", ""))

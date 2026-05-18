@@ -790,6 +790,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Waiting Customer world reaction marker does not name the Station source action")
 	if not bool(checks.get("visibleNpcRoleTints", false)):
 		failures.append("Visible NPC bodies do not expose distinct role tints for the social field")
+	if not bool(checks.get("visibleNpcSourceToken", false)):
+		failures.append("Visible NPC reaction source token does not expose the Station citation source")
 	if not bool(checks.get("codexReadNpcSocialExchange", false)):
 		failures.append("Codex/player did not read the inspected NPC's overheard NPC-to-NPC exchange")
 	if not str(hud_snapshot.get("noticeBodyLabel", "")).contains("접촉 거부"):
@@ -814,6 +816,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"visibleWaitingCustomerReaction": _visible_npc_has_line(summary, "NPC_Waiting_Customer"),
 		"visibleWaitingCustomerReactionSource": _visible_npc_reaction_source(summary, "NPC_Waiting_Customer", "스테이션 직원", "기록 인용"),
 		"visibleNpcRoleTints": _visible_npc_role_tints(summary),
+		"visibleNpcSourceToken": _visible_npc_source_token(summary, "NPC_Waiting_Customer", "station_officer", "cite_record"),
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"codexInspectedUsualOrderCue": _inspected_usual_order_cue(summary),
 		"codexReadCrossPlaceRuleBoards": _read_cross_place_rule_boards(summary),
@@ -867,6 +870,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadVisibleNpcReaction": bool(checks.get("visibleWaitingCustomerReaction", false)),
 		"canReadVisibleNpcReactionSource": bool(checks.get("visibleWaitingCustomerReactionSource", false)),
 		"canReadVisibleNpcRoleTints": bool(checks.get("visibleNpcRoleTints", false)),
+		"canReadVisibleNpcSourceToken": bool(checks.get("visibleNpcSourceToken", false)),
 		"canInspectPublicEnvironmentRecord": bool(checks.get("codexInspectedPublicNotice", false)),
 		"canInspectCrossPlaceAuthorityConsequence": bool(checks.get("codexInspectedBlockedReview", false)) and bool(checks.get("codexInspectedStudioPm", false)),
 		"canInspectRecordRoleAffordanceMap": bool(checks.get("codexInspectedRecordAffordanceMap", false)),
@@ -934,6 +938,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 				"Codex/player snapshot exposed actor memory, showing which ledger events a role observed before choosing the next validated action.",
 				"Codex/player could also read the Waiting Customer's in-world reaction marker as sourced from the Station Officer before opening the detail panel.",
 				"Visible NPC bodies use distinct role tints, so Codex/player can identify the social field by actor role before opening detailed panels.",
+				"The Waiting Customer also carries a visible source token colored from the Station Officer role, exposing that the refusal came from Station citation pressure.",
 				"Codex/player focused the Waiting Customer and pressed the same interaction key to read the NPC's current contact-refusal state, spoken refusal line, cited ledger basis, and overheard NPC-to-NPC exchange.",
 				"The Station Officer cited civic-ledger-5 in civic-ledger-6 before opening inquest; the Studio PM blocked review in civic-ledger-7, and the waiting customer refused contact in civic-ledger-8."
 			],
@@ -1880,6 +1885,24 @@ func _visible_npc_role_tints(summary: Dictionary) -> bool:
 		]
 		seen_body_colors[color_key] = true
 	return seen_body_colors.size() == expected_tints.size()
+
+func _visible_npc_source_token(summary: Dictionary, npc_id: String, source_role: String, source_affordance: String) -> bool:
+	var states: Dictionary = summary.get("visibleNpcStates", {})
+	var state: Dictionary = states.get(npc_id, {})
+	var color_variant: Variant = state.get("reactionSourceTokenColor", [])
+	if not (color_variant is Array):
+		return false
+	var token_color: Array = color_variant
+	return (
+		str(state.get("npcId", "")) == npc_id
+		and bool(state.get("reactionSourceTokenVisible", false))
+		and str(state.get("reactionSourceRole", "")) == source_role
+		and str(state.get("reactionSourceAffordance", "")) == source_affordance
+		and str(state.get("reactionSourceActorId", "")) == "NPC_Station_Officer"
+		and token_color.size() >= 4
+		and float(token_color[0]) > 0.60
+		and float(token_color[2]) > 0.80
+	)
 
 func _visible_npc_has_line(summary: Dictionary, npc_id: String) -> bool:
 	var states: Dictionary = summary.get("visibleNpcStates", {})

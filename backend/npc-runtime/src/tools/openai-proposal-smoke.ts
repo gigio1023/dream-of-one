@@ -36,18 +36,19 @@ function buildSmokePacket(): PerceptionPacket {
 async function main(): Promise<void> {
   const config = loadConfig({
     ...process.env,
-    NPC_RUNTIME_PROPOSAL_PROVIDER: "openai-api",
-    OPENAI_PROPOSAL_PREFERRED_MODEL: process.env.OPENAI_PROPOSAL_PREFERRED_MODEL ?? "gpt-5.4-mini",
+    NPC_RUNTIME_PROPOSAL_PROVIDER: process.env.NPC_RUNTIME_PROPOSAL_PROVIDER ?? "openai-codex",
   });
   const liveTestEnabled = parseBoolean(process.env.OPENAI_PROPOSAL_LIVE_TEST);
 
   const summary = {
     provider: config.proposalProvider,
+    baseUrl: config.openAiProposal.baseUrl,
     preferredModel: config.openAiProposal.preferredModel,
     fallbackModels: config.openAiProposal.fallbackModels,
+    reasoningEffort: config.openAiProposal.reasoningEffort,
     maxOutputTokens: config.openAiProposal.maxOutputTokens,
     budget: config.openAiProposal.budget,
-    hasApiKey: config.openAiProposal.apiKey.trim().length > 0,
+    hasCredential: config.openAiProposal.apiKey.trim().length > 0,
     liveTestEnabled,
   };
 
@@ -59,7 +60,10 @@ async function main(): Promise<void> {
   }
 
   if (!config.openAiProposal.apiKey.trim()) {
-    console.log("SKIP: OPENAI_API_KEY is not set. Codex ChatGPT login is not an API key.");
+    const hint = config.proposalProvider === "openai-codex"
+      ? "OPENAI_CODEX_ACCESS_TOKEN, OPENAI_CODEX_API_KEY, or OPENAI_CODEX_AUTH_STORE_PATH is not configured."
+      : "OPENAI_API_KEY is not set.";
+    console.log(`SKIP: ${hint} Codex ChatGPT login is not an API key.`);
     return;
   }
 

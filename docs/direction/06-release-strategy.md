@@ -48,12 +48,14 @@ Provider preflight must check:
 - timeout and retry behavior.
 - deterministic fallback behavior.
 
-GPT model names are not public promises. Do not assume `gpt-5.4-mini` or any fixed GPT model unless runtime verification proves it for the configured provider.
+GPT model names are not public promises. `gpt-5.4-mini` low reasoning effort is
+the default `openai-codex` model, but do not claim any fixed GPT model unless
+runtime verification proves it for the configured provider.
 
 Model preference:
 - `gpt-5.4-mini` with low reasoning effort is the only default model for the
-  future `openai-codex` provider route after runtime verification and the
-  preconfigured request budget pass.
+  `openai-codex` provider route. Live claims still require runtime verification
+  and the preconfigured request budget to pass.
 - `gpt-5.4-nano` and `gpt-5-nano` are generic API models, not Codex-provider
   promises; do not use them through `openai-codex` unless live provider
   discovery proves availability.

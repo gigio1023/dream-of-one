@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -22,13 +22,16 @@ export interface RuntimeConfig {
   evidenceOutputDir: string;
 }
 
-export type ProposalProviderMode = "codex-cli" | "openai-api";
+export type OpenAiProposalProviderMode = "openai-api" | "openai-codex";
+export type ProposalProviderMode = "codex-cli" | OpenAiProposalProviderMode;
 
 export interface OpenAiProposalConfig {
+  provider: OpenAiProposalProviderMode;
   apiKey: string;
   baseUrl: string;
   preferredModel: string;
   fallbackModels: string[];
+  reasoningEffort: "low" | "medium" | "high" | "xhigh";
   modelCheckTimeoutMs: number;
   requestTimeoutMs: number;
   maxOutputTokens: number;
@@ -44,8 +47,13 @@ export interface OpenAiProposalBudgetConfig {
 }
 
 export const OPENAI_PROPOSAL_GATEWAY_COMMAND = "__openai_api_proposal_provider__";
+export const OPENAI_API_BASE_URL = "https://api.openai.com/v1";
+export const OPENAI_CODEX_BASE_URL = "https://chatgpt.com/backend-api/codex";
+export const DEFAULT_OPENAI_CODEX_AUTH_STORE_PATH = "build/provider-auth/openai-codex-auth.json";
+export const DEFAULT_OPENAI_CODEX_AUTH_PROFILE = "default";
 export const DEFAULT_OPENAI_PROPOSAL_MODEL = "gpt-5.4-mini";
 export const DEFAULT_OPENAI_PROPOSAL_FALLBACK_MODELS = [] as const;
+export const DEFAULT_OPENAI_PROPOSAL_REASONING_EFFORT = "low" as const;
 export const DEFAULT_OPENAI_PROPOSAL_BUDGET: OpenAiProposalBudgetConfig = {
   maxEstimatedInputTokens: 6000,
   maxEstimatedTotalTokens: 8000,
@@ -94,13 +102,28 @@ function parseList(value: string | undefined, fallback: string[]): string[] {
 
 function parseProviderMode(value: string | undefined): ProposalProviderMode {
   const normalized = value?.trim().toLowerCase();
-  if (normalized === "codex" || normalized === "codex-cli" || normalized === "cli") {
+  if (normalized === "codex-cli" || normalized === "cli") {
     return "codex-cli";
+  }
+  if (normalized === "codex" || normalized === "openai-codex" || normalized === "codex-oauth") {
+    return "openai-codex";
   }
   if (normalized === "openai" || normalized === "openai-api" || normalized === "api") {
     return "openai-api";
   }
-  return "openai-api";
+  return "openai-codex";
+}
+
+function parseOpenAiProviderMode(value: unknown): OpenAiProposalProviderMode {
+  return value === "openai-codex" ? "openai-codex" : "openai-api";
+}
+
+function parseReasoningEffort(value: string | undefined): OpenAiProposalConfig["reasoningEffort"] {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === "medium" || normalized === "high" || normalized === "xhigh") {
+    return normalized;
+  }
+  return DEFAULT_OPENAI_PROPOSAL_REASONING_EFFORT;
 }
 
 function parseBaseUrl(value: string | undefined, fallback: string): string {
@@ -144,6 +167,57 @@ function normalizeOpenAiProposalBudget(value: unknown): OpenAiProposalBudgetConf
   };
 }
 
+function extractAuthProfileCredential(value: unknown, profileName: string): string {
+  if (typeof value === "string") return value.trim();
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return "";
+  const record = value as Record<string, unknown>;
+  const profile = typeof record.profiles === "object" && record.profiles !== null && !Array.isArray(record.profiles)
+    ? (record.profiles as Record<string, unknown>)[profileName]
+    : undefined;
+  if (profile) {
+    const profileCredential = extractAuthProfileCredential(profile, profileName);
+    if (profileCredential) return profileCredential;
+  }
+
+  const expires = record.expires ?? record.expiresAt ?? record.expires_at;
+  if (typeof expires === "number" && expires > 0 && expires <= Date.now()) return "";
+  if (typeof expires === "string" && expires.trim()) {
+    const parsed = Date.parse(expires);
+    if (Number.isFinite(parsed) && parsed <= Date.now()) return "";
+  }
+
+  for (const key of ["access", "accessToken", "apiKey", "token"]) {
+    const candidate = record[key];
+    if (typeof candidate === "string" && candidate.trim()) return candidate.trim();
+  }
+
+  const credentials = record.credentials;
+  if (typeof credentials === "object" && credentials !== null && !Array.isArray(credentials)) {
+    return extractAuthProfileCredential(credentials, profileName);
+  }
+
+  return "";
+}
+
+function readOpenAiCodexCredential(env: NodeJS.ProcessEnv): string {
+  const directCredential = parsePath(env.OPENAI_CODEX_ACCESS_TOKEN, "")
+    || parsePath(env.OPENAI_CODEX_API_KEY, "");
+  if (directCredential) return directCredential;
+
+  const storePath = parsePath(env.OPENAI_CODEX_AUTH_STORE_PATH, DEFAULT_OPENAI_CODEX_AUTH_STORE_PATH);
+  if (!existsSync(storePath)) return "";
+
+  try {
+    const parsed = JSON.parse(readFileSync(storePath, "utf8")) as unknown;
+    return extractAuthProfileCredential(
+      parsed,
+      parsePath(env.OPENAI_CODEX_AUTH_PROFILE, DEFAULT_OPENAI_CODEX_AUTH_PROFILE),
+    );
+  } catch {
+    return "";
+  }
+}
+
 export function encodeOpenAiProposalGatewayConfig(config: OpenAiProposalConfig): string {
   return Buffer.from(JSON.stringify(config), "utf8").toString("base64url");
 }
@@ -154,17 +228,20 @@ export function decodeOpenAiProposalGatewayConfig(encoded: string | undefined): 
   }
 
   const parsed = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8")) as Partial<OpenAiProposalConfig>;
+  const provider = parseOpenAiProviderMode(parsed.provider);
   return {
+    provider,
     apiKey: typeof parsed.apiKey === "string" ? parsed.apiKey : "",
     baseUrl: typeof parsed.baseUrl === "string" && parsed.baseUrl.trim().length > 0
       ? parsed.baseUrl.trim().replace(/\/+$/, "")
-      : "https://api.openai.com/v1",
+      : (provider === "openai-codex" ? OPENAI_CODEX_BASE_URL : OPENAI_API_BASE_URL),
     preferredModel: typeof parsed.preferredModel === "string" && parsed.preferredModel.trim().length > 0
       ? parsed.preferredModel.trim()
       : DEFAULT_OPENAI_PROPOSAL_MODEL,
     fallbackModels: Array.isArray(parsed.fallbackModels)
       ? parsed.fallbackModels.filter((model): model is string => typeof model === "string" && model.trim().length > 0)
       : [...DEFAULT_OPENAI_PROPOSAL_FALLBACK_MODELS],
+    reasoningEffort: parseReasoningEffort(parsed.reasoningEffort),
     modelCheckTimeoutMs: typeof parsed.modelCheckTimeoutMs === "number" && parsed.modelCheckTimeoutMs > 0
       ? Math.floor(parsed.modelCheckTimeoutMs)
       : 3000,
@@ -197,11 +274,26 @@ function resolveDefaultCodexTool(): { command: string; args: string[] } {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig {
   const defaultTool = resolveDefaultCodexTool();
   const proposalProvider = parseProviderMode(env.NPC_RUNTIME_PROPOSAL_PROVIDER);
+  const openAiProvider: OpenAiProposalProviderMode = proposalProvider === "openai-codex" ? "openai-codex" : "openai-api";
   const openAiProposal: OpenAiProposalConfig = {
-    apiKey: parsePath(env.OPENAI_API_KEY, ""),
-    baseUrl: parseBaseUrl(env.OPENAI_BASE_URL, "https://api.openai.com/v1"),
-    preferredModel: parsePath(env.OPENAI_PROPOSAL_PREFERRED_MODEL, DEFAULT_OPENAI_PROPOSAL_MODEL),
-    fallbackModels: parseList(env.OPENAI_PROPOSAL_MODEL_FALLBACKS, [...DEFAULT_OPENAI_PROPOSAL_FALLBACK_MODELS]),
+    provider: openAiProvider,
+    apiKey: openAiProvider === "openai-codex"
+      ? readOpenAiCodexCredential(env)
+      : parsePath(env.OPENAI_API_KEY, ""),
+    baseUrl: openAiProvider === "openai-codex"
+      ? parseBaseUrl(env.OPENAI_CODEX_BASE_URL ?? env.OPENAI_BASE_URL, OPENAI_CODEX_BASE_URL)
+      : parseBaseUrl(env.OPENAI_BASE_URL, OPENAI_API_BASE_URL),
+    preferredModel: openAiProvider === "openai-codex"
+      ? parsePath(env.OPENAI_CODEX_PROPOSAL_MODEL ?? env.OPENAI_PROPOSAL_PREFERRED_MODEL, DEFAULT_OPENAI_PROPOSAL_MODEL)
+      : parsePath(env.OPENAI_PROPOSAL_PREFERRED_MODEL, DEFAULT_OPENAI_PROPOSAL_MODEL),
+    fallbackModels: openAiProvider === "openai-codex"
+      ? parseList(env.OPENAI_CODEX_PROPOSAL_MODEL_FALLBACKS ?? env.OPENAI_PROPOSAL_MODEL_FALLBACKS, [...DEFAULT_OPENAI_PROPOSAL_FALLBACK_MODELS])
+      : parseList(env.OPENAI_PROPOSAL_MODEL_FALLBACKS, [...DEFAULT_OPENAI_PROPOSAL_FALLBACK_MODELS]),
+    reasoningEffort: parseReasoningEffort(
+      openAiProvider === "openai-codex"
+        ? (env.OPENAI_CODEX_REASONING_EFFORT ?? env.OPENAI_PROPOSAL_REASONING_EFFORT)
+        : env.OPENAI_PROPOSAL_REASONING_EFFORT,
+    ),
     modelCheckTimeoutMs: parseNumber(env.OPENAI_MODEL_CHECK_TIMEOUT_MS, 3000),
     requestTimeoutMs: parseNumber(env.OPENAI_PROPOSAL_TIMEOUT_MS, 8000),
     maxOutputTokens: parseNumber(env.OPENAI_PROPOSAL_MAX_OUTPUT_TOKENS, 700),
@@ -230,10 +322,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig 
   };
   const hasCommandOverride = typeof env.CODEX_TOOL_COMMAND === "string" && env.CODEX_TOOL_COMMAND.trim().length > 0;
   const hasArgsOverride = typeof env.CODEX_TOOL_ARGS === "string" && env.CODEX_TOOL_ARGS.trim().length > 0;
-  const codexCommand = proposalProvider === "openai-api"
+  const usesOpenAiGateway = proposalProvider === "openai-api" || proposalProvider === "openai-codex";
+  const codexCommand = usesOpenAiGateway
     ? OPENAI_PROPOSAL_GATEWAY_COMMAND
     : (hasCommandOverride ? env.CODEX_TOOL_COMMAND!.trim() : defaultTool.command);
-  const codexArgs = proposalProvider === "openai-api"
+  const codexArgs = usesOpenAiGateway
     ? [encodeOpenAiProposalGatewayConfig(openAiProposal)]
     : (hasArgsOverride
         ? parseArgs(env.CODEX_TOOL_ARGS)

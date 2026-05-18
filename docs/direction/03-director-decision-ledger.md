@@ -78,10 +78,12 @@ Status: accepted
 Date: 2026-05-06
 
 Decision:
-- Dream of One uses an API-based proposal provider as the release premise for live AI NPC text.
+- Dream of One uses direct `openai-codex` as the default proposal provider premise for live AI NPC text.
 - Player-installed Codex CLI is not assumed as a release prerequisite.
 - The game must check configured provider access and GPT model availability at runtime.
-- `gpt-5.4-mini` is preferred only when runtime verification proves it for the configured provider and the configured request budget.
+- `gpt-5.4-mini` low reasoning effort is the default `openai-codex` model, but
+  live behavior is claimed only when runtime verification proves access and the
+  configured request budget.
 - Design, docs, release copy, and tests must not treat any GPT model as available before runtime verification.
 
 Rationale:
@@ -279,9 +281,10 @@ Decision:
 - Provider-shaped backend contracts, scheduling, and dispatch packets remain
   valid internal evidence for the future live provider boundary.
 - Live provider behavior is not part of the current demo claim until budgeted
-  API preflight and Godot-to-backend provider dispatch are both proven.
-- `gpt-5.4-mini` remains a preferred configured model only after runtime
-  verification and budget checks pass.
+  `openai-codex` preflight and Godot-to-backend provider dispatch are both
+  proven.
+- `gpt-5.4-mini` low reasoning effort is the default configured Codex model,
+  but still needs runtime verification before any live claim.
 
 Rationale:
 - The current work proves the important authority rule: generated wording must

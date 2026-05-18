@@ -50,8 +50,9 @@ M1 may claim:
 - provider-shaped proposals are bounded to available actions in backend tests;
 - generated wording, when later enabled, cannot own records, risk, Exposure,
   Evidence, inquest, verdict, or session termination;
-- `gpt-5.4-mini` low reasoning effort is the future `openai-codex` target only
-  after runtime verification and budget checks pass.
+- `gpt-5.4-mini` low reasoning effort is the default `openai-codex` target, but
+  live behavior is claimed only after runtime verification and budget checks
+  pass.
 
 M1 must not claim:
 - live API-backed NPC proposals;

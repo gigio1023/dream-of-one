@@ -35,17 +35,18 @@ Do not:
 ## Provider Smoke
 
 Use the budgeted smoke before claiming live provider behavior. The checked-in
-command currently covers the legacy `openai-api` gateway:
+command now defaults to the `openai-codex` gateway:
 
 ```bash
 npm run openai:proposal-smoke --prefix backend/npc-runtime
 OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai:proposal-smoke --prefix backend/npc-runtime
 ```
 
-The active future live-LLM target is a direct `openai-codex` provider with an
-explicit auth profile, `gpt-5.4-mini`, low reasoning effort, no default model
-fallbacks, and deterministic fallback on any provider failure. Do not claim
-`openai-codex` behavior until a Codex-provider smoke exists and passes.
+The default provider is direct `openai-codex` with `gpt-5.4-mini`, low
+reasoning effort, no default model fallbacks, and deterministic fallback on any
+provider failure. Live runs require `OPENAI_CODEX_ACCESS_TOKEN`,
+`OPENAI_CODEX_API_KEY`, or `OPENAI_CODEX_AUTH_STORE_PATH`. Do not claim live
+`openai-codex` behavior until the live smoke passes.
 
 ## Routing
 

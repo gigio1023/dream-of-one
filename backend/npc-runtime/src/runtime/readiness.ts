@@ -186,14 +186,14 @@ async function checkWorkspaceRootPath(path: string): Promise<WorkspaceRootPathRe
 }
 
 async function checkProvider(config: RuntimeConfig, options: RuntimeReadinessOptions): Promise<ProviderReadiness> {
-  if (config.proposalProvider === "openai-api") {
+  if (config.proposalProvider === "openai-api" || config.proposalProvider === "openai-codex") {
     const openAi = await checkOpenAiProposalProviderHealth(config.openAiProposal, {
       fetch: options.fetch,
       timeoutMs: config.openAiProposal.modelCheckTimeoutMs,
     });
     return {
       ok: openAi.ok,
-      provider: "openai-api",
+      provider: config.proposalProvider,
       reason: openAi.reason,
       openAi,
     };

@@ -1,7 +1,7 @@
 # OpenAI Codex Model Policy
 
 Date: 2026-05-18
-Status: active target policy, live Codex-provider access not yet proven
+Status: implemented default provider policy, live Codex-provider access not yet proven
 
 ## Decision
 
@@ -16,6 +16,11 @@ Configured model policy:
 - default model fallbacks: none
 - failure behavior: deterministic runtime fallback, not an automatic upgrade to
   a larger or more expensive model
+
+Runtime defaults now use this policy. `NPC_RUNTIME_PROPOSAL_PROVIDER` defaults
+to `openai-codex`, the base URL defaults to
+`https://chatgpt.com/backend-api/codex`, and the checked-in provider smoke
+prints the Codex-provider configuration by default.
 
 ## Nano Check
 
@@ -49,7 +54,8 @@ Sources checked:
 
 ## Implementation Implication
 
-The current `openai-api` smoke remains a legacy guardrail. The next provider
-implementation should add `openai-codex` auth/profile smoke and prove
-`gpt-5.4-mini` availability before any Godot HUD, Evidence, or release note
-claims live Codex-provider behavior.
+The current provider shape is implemented. Live access remains unproven until a
+credential is configured through `OPENAI_CODEX_ACCESS_TOKEN`,
+`OPENAI_CODEX_API_KEY`, or `OPENAI_CODEX_AUTH_STORE_PATH`, and the live smoke
+passes without deterministic fallback. Godot HUD, Evidence, or release notes
+must not claim live Codex-provider behavior before that proof.

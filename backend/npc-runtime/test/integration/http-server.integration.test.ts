@@ -67,10 +67,12 @@ function buildConfig(port: number, overrides: Partial<RuntimeConfig> = {}): Runt
     codexArgs: [],
     codexTimeoutMs: 1000,
     openAiProposal: {
+      provider: "openai-api",
       apiKey: "",
       baseUrl: "https://api.openai.com/v1",
       preferredModel: "gpt-5.4-mini",
       fallbackModels: [],
+      reasoningEffort: "low",
       modelCheckTimeoutMs: 1000,
       requestTimeoutMs: 1000,
       maxOutputTokens: 700,

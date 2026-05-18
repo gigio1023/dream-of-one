@@ -1,7 +1,7 @@
 # OpenClaw OpenAI Codex Provider Adoption Proposal
 
 Date: 2026-05-18
-Status: corrected proposal, not implemented product truth
+Status: implemented default provider shape, live access not proven
 
 ## Correction
 
@@ -107,10 +107,11 @@ catalog and resolver do not expose nano models. Do not configure nano for
 
 ### Slice 1: provider shape, no live auth
 
-- Add config parsing for `openai-codex`.
-- Add provider health that reports missing auth cleanly.
-- Add tests proving the provider mode does not fall back to `OPENAI_API_KEY`
-  unless explicitly configured as API-key backup.
+- Done: config parsing defaults to `openai-codex`.
+- Done: provider health reports missing auth cleanly and uses the local
+  OpenClaw-style Codex catalog allowlist.
+- Done: tests prove the provider mode uses `gpt-5.4-mini` with no default model
+  fallbacks and does not rely on `OPENAI_API_KEY`.
 
 ### Slice 2: OAuth profile store
 
@@ -124,10 +125,9 @@ catalog and resolver do not expose nano models. Do not configure nano for
 
 ### Slice 3: Codex Responses proposal call
 
-- Reuse the existing proposal prompt and JSON schema.
-- POST to `/responses` under the Codex base URL with bearer access token.
-- Strip or avoid fields that Codex Responses rejects.
-- Parse the output through the existing `parseNpcTextProposal` path.
+- Done at provider-shape level: reuse the existing proposal prompt, JSON
+  schema, parser, and POST path under the configured Codex base URL.
+- Live proof remains pending until a valid Codex credential is configured.
 
 ### Slice 4: proof and product gate
 

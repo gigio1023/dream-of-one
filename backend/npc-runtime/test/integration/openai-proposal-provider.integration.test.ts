@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -13,6 +13,7 @@ import { InMemoryThreadStore } from "../../src/broker/thread-store.js";
 import {
   decodeOpenAiProposalGatewayConfig,
   loadConfig,
+  OPENAI_CODEX_BASE_URL,
   OPENAI_PROPOSAL_GATEWAY_COMMAND,
   type OpenAiProposalConfig,
   type RuntimeConfig,
@@ -34,10 +35,12 @@ function buildPacket(landmarkId = "Store"): PerceptionPacket {
 
 function buildOpenAiConfig(overrides: Partial<OpenAiProposalConfig> = {}): OpenAiProposalConfig {
   return {
+    provider: "openai-api",
     apiKey: "test-key",
     baseUrl: "https://api.openai.test/v1",
     preferredModel: "gpt-5.4-mini",
     fallbackModels: [],
+    reasoningEffort: "low",
     modelCheckTimeoutMs: 1000,
     requestTimeoutMs: 1000,
     maxOutputTokens: 700,
@@ -110,6 +113,7 @@ test("OpenAI proposal gateway uses preferred model and maps text proposal into b
 
   assert.equal(responseBodies.length, 1);
   assert.equal(responseBodies[0]?.model, "gpt-5.4-mini");
+  assert.deepEqual(responseBodies[0]?.reasoning, { effort: "low" });
   assert.match(String(responseBodies[0]?.instructions), /Do not decide Exposure delta/);
   const text = responseBodies[0]?.text as { format?: { schema?: { properties?: Record<string, unknown> } } };
   assert.deepEqual(
@@ -406,20 +410,91 @@ test("OpenAI provider config is selected through runtime env/config, not game lo
   assert.equal(config.proposalProvider, "openai-api");
   assert.equal(config.codexCommand, OPENAI_PROPOSAL_GATEWAY_COMMAND);
   const decoded = decodeOpenAiProposalGatewayConfig(config.codexArgs[0]);
+  assert.equal(decoded.provider, "openai-api");
   assert.equal(decoded.apiKey, "env-key");
   assert.equal(decoded.baseUrl, "https://api.openai.test/v1");
   assert.equal(decoded.preferredModel, "configured-preferred");
   assert.deepEqual(decoded.fallbackModels, ["configured-fallback-a", "configured-fallback-b"]);
 });
 
-test("runtime defaults to OpenAI API proposal provider, not direct Codex CLI", () => {
+test("runtime defaults to OpenAI Codex proposal provider with gpt-5.4-mini only", () => {
   const config = loadConfig({});
 
-  assert.equal(config.proposalProvider, "openai-api");
+  assert.equal(config.proposalProvider, "openai-codex");
   assert.equal(config.codexCommand, OPENAI_PROPOSAL_GATEWAY_COMMAND);
+  assert.equal(config.openAiProposal.provider, "openai-codex");
+  assert.equal(config.openAiProposal.baseUrl, OPENAI_CODEX_BASE_URL);
   assert.equal(config.openAiProposal.preferredModel, "gpt-5.4-mini");
   assert.deepEqual(config.openAiProposal.fallbackModels, []);
+  assert.equal(config.openAiProposal.reasoningEffort, "low");
   assert.equal(config.openAiProposal.budget.maxEstimatedCostUsd, 0.01);
+});
+
+test("OpenAI Codex provider config uses explicit Codex credential and base URL", () => {
+  const config = loadConfig({
+    OPENAI_CODEX_ACCESS_TOKEN: "codex-token",
+    OPENAI_CODEX_BASE_URL: "https://codex.test/backend-api/codex/",
+  });
+
+  assert.equal(config.proposalProvider, "openai-codex");
+  assert.equal(config.codexCommand, OPENAI_PROPOSAL_GATEWAY_COMMAND);
+  const decoded = decodeOpenAiProposalGatewayConfig(config.codexArgs[0]);
+  assert.equal(decoded.provider, "openai-codex");
+  assert.equal(decoded.apiKey, "codex-token");
+  assert.equal(decoded.baseUrl, "https://codex.test/backend-api/codex");
+  assert.equal(decoded.preferredModel, "gpt-5.4-mini");
+  assert.deepEqual(decoded.fallbackModels, []);
+  assert.equal(decoded.reasoningEffort, "low");
+});
+
+test("OpenAI Codex provider config can read a repo-local auth profile store", async t => {
+  const tempDir = await mkdtemp(join(tmpdir(), "npc-runtime-codex-auth-store-"));
+  t.after(async () => {
+    await rm(tempDir, { recursive: true, force: true });
+  });
+  const authStorePath = join(tempDir, "openai-codex-auth.json");
+  await mkdir(tempDir, { recursive: true });
+  await writeFile(authStorePath, JSON.stringify({
+    profiles: {
+      default: {
+        credentials: {
+          access: "profile-access-token",
+        },
+      },
+    },
+  }), "utf8");
+
+  const config = loadConfig({
+    OPENAI_CODEX_AUTH_STORE_PATH: authStorePath,
+  });
+  const decoded = decodeOpenAiProposalGatewayConfig(config.codexArgs[0]);
+
+  assert.equal(config.proposalProvider, "openai-codex");
+  assert.equal(decoded.apiKey, "profile-access-token");
+  assert.equal(decoded.preferredModel, "gpt-5.4-mini");
+  assert.deepEqual(decoded.fallbackModels, []);
+});
+
+test("OpenAI Codex provider health uses local catalog model policy", async () => {
+  let fetchCallCount = 0;
+  const config: RuntimeConfig = {
+    ...loadConfig({
+      OPENAI_CODEX_ACCESS_TOKEN: "codex-token",
+    }),
+    threadStorePath: join(tmpdir(), "npc-runtime-codex-health-threads.json"),
+    workspaceRootPath: join(tmpdir(), "npc-runtime-codex-health-workspaces"),
+  };
+  const fetchImpl: FetchLike = async () => {
+    fetchCallCount += 1;
+    return jsonResponse(500, {});
+  };
+
+  const readiness = await evaluateRuntimeReadiness(config, { fetch: fetchImpl });
+
+  assert.equal(readiness.status, "ready");
+  assert.equal(readiness.checks.provider.provider, "openai-codex");
+  assert.equal(readiness.checks.provider.openAi?.selectedModel, "gpt-5.4-mini");
+  assert.equal(fetchCallCount, 0);
 });
 
 test("readiness reports selected explicitly configured OpenAI fallback model", async t => {

@@ -4,7 +4,7 @@ Date: 2026-05-17
 Status: superseded for future provider choice; legacy OpenAI API guardrail,
 live access not proven
 
-Supersession note, 2026-05-18: the active future live-LLM target is direct
+Supersession note, 2026-05-18: the default live-LLM provider mode is direct
 `openai-codex` auth with `gpt-5.4-mini` low reasoning effort and no default
 model fallbacks. Keep this file as the historical `openai-api` smoke/budget
 record only.

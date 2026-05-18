@@ -3,6 +3,7 @@ import { promisify } from "node:util";
 import {
   decodeOpenAiProposalGatewayConfig,
   OPENAI_PROPOSAL_GATEWAY_COMMAND,
+  type OpenAiProposalProviderMode,
   type OpenAiProposalConfig,
 } from "../config.js";
 import type { ActionType, PerceptionPacket } from "../contracts/types.js";
@@ -58,7 +59,7 @@ export type OpenAiProposalHealthReason =
 
 export interface OpenAiProposalHealth {
   ok: boolean;
-  provider: "openai-api";
+  provider: OpenAiProposalProviderMode;
   preferredModel: string;
   fallbackModels: string[];
   checkedModels: string[];
@@ -115,6 +116,14 @@ const OPENAI_PROPOSAL_INSTRUCTIONS = [
   "Use only supplied facts. Do not invent laws, witnesses, artifacts, zones, records, model internals, backend internals, or schema explanations.",
   "Keep lines short, diegetic, Korean-first when possible, and suitable for a civic pressure scene.",
 ].join("\n");
+
+const OPENAI_CODEX_PROVIDER_MODELS = new Set([
+  "gpt-5.4-mini",
+  "gpt-5.4",
+  "gpt-5.4-pro",
+  "gpt-5.5",
+  "gpt-5.5-pro",
+]);
 
 const OPENAI_PROPOSAL_SCHEMA = {
   type: "object",
@@ -569,7 +578,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
     if (!this.config.apiKey.trim()) {
       return {
         ok: false,
-        provider: "openai-api",
+        provider: this.config.provider,
         preferredModel: this.config.preferredModel,
         fallbackModels: [...this.config.fallbackModels],
         checkedModels,
@@ -578,13 +587,36 @@ export class OpenAiProposalGateway implements CodexToolGateway {
       };
     }
 
+    if (this.config.provider === "openai-codex") {
+      const selectedModel = checkedModels.find(model => OPENAI_CODEX_PROVIDER_MODELS.has(model));
+      return selectedModel
+        ? {
+            ok: true,
+            provider: this.config.provider,
+            preferredModel: this.config.preferredModel,
+            fallbackModels: [...this.config.fallbackModels],
+            checkedModels,
+            budget,
+            selectedModel,
+          }
+        : {
+            ok: false,
+            provider: this.config.provider,
+            preferredModel: this.config.preferredModel,
+            fallbackModels: [...this.config.fallbackModels],
+            checkedModels,
+            budget,
+            reason: "openai_model_unavailable",
+          };
+    }
+
     try {
       const availableModels = await this.listAvailableModelIds(this.config.modelCheckTimeoutMs);
       const selectedModel = checkedModels.find(model => availableModels.has(model));
       if (!selectedModel) {
         return {
           ok: false,
-          provider: "openai-api",
+          provider: this.config.provider,
           preferredModel: this.config.preferredModel,
           fallbackModels: [...this.config.fallbackModels],
           checkedModels,
@@ -595,7 +627,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
 
       return {
         ok: true,
-        provider: "openai-api",
+        provider: this.config.provider,
         preferredModel: this.config.preferredModel,
         fallbackModels: [...this.config.fallbackModels],
         checkedModels,
@@ -605,7 +637,7 @@ export class OpenAiProposalGateway implements CodexToolGateway {
     } catch (error) {
       return {
         ok: false,
-        provider: "openai-api",
+        provider: this.config.provider,
         preferredModel: this.config.preferredModel,
         fallbackModels: [...this.config.fallbackModels],
         checkedModels,
@@ -655,6 +687,10 @@ export class OpenAiProposalGateway implements CodexToolGateway {
       store: false,
     };
 
+    if (this.config.reasoningEffort) {
+      body.reasoning = { effort: this.config.reasoningEffort };
+    }
+
     if (previousResponseId) {
       body.previous_response_id = previousResponseId;
     }
@@ -690,6 +726,14 @@ export class OpenAiProposalGateway implements CodexToolGateway {
     const checkedModels = uniqueModels(this.config.preferredModel, this.config.fallbackModels);
     if (checkedModels.length === 0) {
       throw new CodexToolError("OpenAI proposal model list is empty");
+    }
+
+    if (this.config.provider === "openai-codex") {
+      const selected = checkedModels.find(model => OPENAI_CODEX_PROVIDER_MODELS.has(model));
+      if (!selected) {
+        throw new CodexToolError(`OpenAI Codex proposal models unavailable in local catalog: ${checkedModels.join(", ")}`);
+      }
+      return selected;
     }
 
     const timeout = Math.min(this.config.modelCheckTimeoutMs, budget.remainingTimeoutMs());

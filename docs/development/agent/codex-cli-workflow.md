@@ -12,9 +12,9 @@ Use Linear as the Work SoT.
 
 ## Provider Auth
 
-Codex CLI login is useful for agent work. Dream of One's active future
-live-LLM target is a direct `openai-codex` proposal provider, not `codex exec`
-and not a hidden `OPENAI_API_KEY` replacement.
+Codex CLI login is useful for agent work. Dream of One's default live-LLM
+provider mode is direct `openai-codex`, not `codex exec` and not a hidden
+`OPENAI_API_KEY` replacement.
 
 Useful local checks:
 
@@ -25,9 +25,9 @@ OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai:proposal-smoke --prefix backend/npc-r
 ```
 
 Do not treat ChatGPT/Codex login as proof that the game runtime can call live
-models. The checked-in smoke currently covers the legacy `openai-api` gateway;
-do not claim `openai-codex` behavior until a Codex-provider smoke verifies the
-configured auth profile, model, and budget.
+models. The checked-in smoke defaults to `openai-codex`; live proof still
+requires a configured `OPENAI_CODEX_ACCESS_TOKEN`, `OPENAI_CODEX_API_KEY`, or
+`OPENAI_CODEX_AUTH_STORE_PATH`.
 
 Model policy for the Codex-provider path:
 

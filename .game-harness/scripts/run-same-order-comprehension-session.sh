@@ -86,6 +86,17 @@ file_mtime() {
   fi
 }
 
+display_path() {
+  local path="$1"
+  if [[ "$path" == "$REPO_ROOT" ]]; then
+    printf "."
+  elif [[ "$path" == "$REPO_ROOT/"* ]]; then
+    printf "%s" "${path#"$REPO_ROOT"/}"
+  else
+    printf "%s" "$path"
+  fi
+}
+
 while (( $# > 0 )); do
   case "$1" in
     --help|-h)
@@ -920,8 +931,8 @@ if (( PRINT_STATUS == 1 )); then
     echo "Next action: run an observed fresh-player session now."
     echo
   fi
-  echo "- Raw notes directory: $NOTES_DIR"
-  echo "- Raw note quality guide: $NOTES_DIR/README.md"
+  echo "- Raw notes directory: $(display_path "$NOTES_DIR")"
+  echo "- Raw note quality guide: $(display_path "$NOTES_DIR/README.md")"
   echo "- Raw session note files: $note_count / 3 minimum"
   echo "- Strict review status: $review_status"
   echo "- Minimum additional raw files needed before strict review can pass: $remaining"

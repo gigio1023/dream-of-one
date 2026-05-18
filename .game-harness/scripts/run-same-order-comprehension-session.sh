@@ -734,6 +734,31 @@ if [[ ! -x "$APP_BINARY" ]]; then
   exit 1
 fi
 
+human_play_display_status_line() {
+  if [[ "$APP_LAUNCH_MODE" == "macos_app" ]]; then
+    printf "ready: macOS app bundle launch uses open -W"
+    return 0
+  fi
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    printf "ready: local macOS executable launch"
+    return 0
+  fi
+  if [[ -n "${DISPLAY:-}" || -n "${WAYLAND_DISPLAY:-}" ]]; then
+    printf "ready: display environment is present"
+    return 0
+  fi
+  printf "not-ready: no DISPLAY or WAYLAND_DISPLAY; use a desktop session, VNC, X11 forwarding, or another tester device before launching"
+}
+
+require_human_play_display() {
+  local display_status
+  display_status="$(human_play_display_status_line)"
+  if [[ "$display_status" == not-ready:* ]]; then
+    echo "Cannot launch an observed fresh-player session from this shell: $display_status" >&2
+    exit 1
+  fi
+}
+
 if [[ -z "$ROUTE_EVIDENCE_PATH" ]]; then
   echo "DREAM_OF_ONE_PACKAGED_ROUTE_EVIDENCE_PATH is not set." >&2
   echo "Set it to the local packaged route evidence JSON for this device." >&2
@@ -905,6 +930,7 @@ if (( PRINT_STATUS == 1 )); then
   echo "# Setup Readiness"
   echo
   echo "- Packaged app preflight: pass; current app/evidence is tester-ready."
+  echo "- Human play display: $(human_play_display_status_line)"
   print_codex_probe_status_summary
   if (( note_count > 0 )); then
     echo
@@ -1564,6 +1590,8 @@ is_explicit_yes() {
   value="$(printf "%s" "$1" | tr '[:upper:]' '[:lower:]' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
   [[ "$value" == yes || "$value" == yes,* || "$value" == yes.* || "$value" == "yes "* ]]
 }
+
+require_human_play_display
 
 tester_id="$(prompt "Tester label")"
 fresh_tester="$(prompt "Fresh tester? yes/no")"

@@ -94,10 +94,12 @@ Latest completion audit:
   app preflight plus Codex QA setup pass.
 - Linear SoT check on 2026-05-18 found no open issue for
   `GI-04 external comprehension Same Order fresh-player PENDING_TESTER_NOTES`
-  or `fresh-player comprehension Same Order`. The current Linear MCP exposes
-  search/update/comment tools but no issue-create tool, and `LINEAR_API_TOKEN`
-  is unset for GraphQL fallback. Create or link the SoT issue from a session
-  with Linear create permission before treating GI-04 as properly routed.
+  or `fresh-player comprehension Same Order`. A later tool-discovery check did
+  expose a Linear issue-create action, but the connected account rejected the
+  create request with `Invalid scope: write or issues:create required`.
+  `LINEAR_API_TOKEN` is also unset for GraphQL fallback. Create or link the SoT
+  issue from a session with Linear create permission before treating GI-04 as
+  properly routed.
 - A later broader Linear check also found no open issue for `Same Order` or
   `fresh player comprehension tester notes`. Recent ticket lookup confirmed
   the repo's Linear team is `Dream-of-one` with key `DRE`; create the GI-04

@@ -103,6 +103,13 @@ repo team is `Dream-of-one` with key `DRE`. Create this as a new DRE issue from
 a session with issue-create permission; do not hardcode the future identifier
 before Linear assigns it.
 
+Rechecked with tool discovery on 2026-05-18: a Linear issue-create action was
+available, but the connected account rejected creation with `Invalid scope:
+write or issues:create required`. The attempted target was the `Dream-of-one`
+team, `Backlog` state, labels `codex-managed` and `agent:codex`, and priority
+`High`. Reconnect Linear with issue creation permission or set
+`LINEAR_API_TOKEN` for a GraphQL fallback before retrying.
+
 Label/state lookup:
 
 - `codex-managed` label exists in DRE.

@@ -98,6 +98,10 @@ Latest completion audit:
   search/update/comment tools but no issue-create tool, and `LINEAR_API_TOKEN`
   is unset for GraphQL fallback. Create or link the SoT issue from a session
   with Linear create permission before treating GI-04 as properly routed.
+- A later broader Linear check also found no open issue for `Same Order` or
+  `fresh player comprehension tester notes`. Recent ticket lookup confirmed
+  the repo's Linear team is `Dream-of-one` with key `DRE`; create the GI-04
+  issue there, letting Linear assign the identifier.
 - A copy-ready Linear draft now lives at
   `.game-harness/linear-issue-drafts/gi-04-external-comprehension-fresh-player.md`.
   It is not the SoT issue; it exists only so a future session with Linear

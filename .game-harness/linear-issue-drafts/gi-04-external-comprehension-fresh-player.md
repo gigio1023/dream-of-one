@@ -2,6 +2,7 @@
 
 Status: draft for Linear creation
 Date: 2026-05-18
+Target Linear team: `Dream-of-one` (`DRE`)
 
 ## Goal
 
@@ -91,3 +92,11 @@ creation permission, then link the created issue in the goal loop state.
 Rechecked on 2026-05-18 after the Ubuntu ARM display-readiness helper change:
 the searchable Linear tools still expose search/update/project/label helpers,
 but no issue-create mutation.
+
+Rechecked again on 2026-05-18 with broader open-issue searches for
+`Dream of One comprehension fresh player Same Order GI-04 tester notes
+PENDING_TESTER_NOTES`, `Same Order`, and `fresh player comprehension tester
+notes`; no open matching issue was found. Recent Linear tickets confirm the
+repo team is `Dream-of-one` with key `DRE`. Create this as a new DRE issue from
+a session with issue-create permission; do not hardcode the future identifier
+before Linear assigns it.

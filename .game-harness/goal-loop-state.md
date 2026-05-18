@@ -860,6 +860,11 @@ Latest AI-play interface check:
   helper mode, manifest field, or review artifact, it is probably the wrong
   next move unless an existing live-session path is failing. The current proof
   surface is enough to try the session.
+- Test-hardening check before starting: do not add tests for helper output,
+  accounting reports, manifests, or process scaffolding unless the behavior
+  gates live provider spend, deterministic authority, or a player-visible
+  release claim. A command proof plus ledger note is enough for support-only
+  surfaces.
 - If the current playable build has a clear game-design gap, prefer a tiny
   implementation slice over more comprehension infrastructure. Examples:
   clearer NPC-to-NPC handoff feedback, a prop state that changes after a role
@@ -896,7 +901,9 @@ Latest AI-play interface check:
 - Do not replace play-based AI QA with mock-heavy tests. Test code is allowed
   only when it protects public behavior, deterministic authority, schema
   compatibility, route evidence, provider boundaries, or a known regression.
-- Do not add mock-heavy tests or coverage padding.
+- Do not add mock-heavy tests, report-format tests, or coverage padding. This
+  is a game project; test work must stay smaller than the playable slice it
+  protects.
 
 ## Loop Exit Gate
 

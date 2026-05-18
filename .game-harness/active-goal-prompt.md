@@ -114,6 +114,10 @@ The work is not complete until current evidence proves all of the following:
   a playable change, clarifies player-visible consequence, or prevents a known
   regression. Do not spend the next pass on more helper scaffolding when a small
   game design or implementation gap can be made playable instead.
+- Do not choose a test/report/helper-only slice while a playable game increment
+  or fresh-player session is the real next move. If no playable change is
+  justified, keep the build ready and report the blocker instead of adding more
+  automation.
 - Treat Store/Station as a disposable sample of the wider design. Keep it
   small, legible, and cheap. Do not make the next decision from a desire to
   deepen Store operations, Station procedure, or simulator-management detail.
@@ -152,7 +156,11 @@ The work is not complete until current evidence proves all of the following:
   player-visible consequence. Add test code only when it protects deterministic
   authority, schema compatibility, route evidence, provider boundaries, or a
   known regression.
-- Keep tests lean and Detroit-style: protect the game consequence and contract, avoid mock-heavy implementation checks, and do not pad coverage for its own sake.
+- Keep tests lean and Detroit-style: protect the game consequence and contract,
+  avoid mock-heavy implementation checks, and do not pad coverage for its own
+  sake. Do not add tests for convenience reports, helper formatting, or process
+  output unless that behavior gates live spend, deterministic authority, or a
+  player-visible release claim.
 
 ## Practical Next Work
 
@@ -174,6 +182,11 @@ When choosing the next task, prefer the weakest missing proof in this order:
 8. decide M1 go/conditional/no-go from those notes and council review;
 9. only pursue live provider work if it becomes part of the public promise;
 10. only then broader content, extra roles, more locations, or deeper provider behavior.
+
+When the next available work is only test hardening or process polish, do not
+invent it as progress. Either make the smallest real playable change, run the
+current playable/fresh-player path, or stop and report what human/game evidence
+is blocking the goal.
 
 ## Long-Running Loop Rules
 

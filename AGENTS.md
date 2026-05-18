@@ -18,6 +18,10 @@
   result would make the intended game more real in the running build. Prefer
   implementing that small result and proving it over adding more process,
   review scaffolding, or helper automation.
+- Do not spend a slice on tests, reports, budget tooling, helper modes, or
+  evidence plumbing unless a concrete playable change or broken live-session
+  path requires it. When there is no such requirement, stop at the current
+  ready gate and run/playtest the game.
 
 ## Game Studio Overlay
 
@@ -104,6 +108,10 @@
 - Tests are subordinate to playable game progress. Use them to protect the
   smallest implemented game consequence, not to substitute for implementing
   the consequence.
+- A test-only change is exceptional. Before adding one, name the player-facing
+  behavior, deterministic authority boundary, provider boundary, or known
+  regression it protects. If that sentence cannot name a real game consequence,
+  do not add the test.
 - Keep tests Detroit-style: exercise the public behavior boundary and the player/game consequence, not private implementation steps.
 - Prefer a small number of high-signal integration or smoke checks over broad test matrices.
 - Do not add mocks just to make tests pass. Use fakes only at real external boundaries such as network, filesystem, time, process, or engine availability.
@@ -111,6 +119,11 @@
 - For game work, a test is justified when it protects deterministic authority, schema compatibility, route evidence, player-visible consequence, provider boundary, or a known regression.
 - Do not spend time padding coverage with tests that only restate implementation details.
 - Prefer game-running probes over test padding when the question is whether Codex can understand, play, inspect, and explain the current build.
+- Do not grow tests around convenience scripts, accounting reports, manifest
+  formatting, or helper output merely because they are easy to verify. For
+  those, a single command run and ledger note is usually enough unless the
+  behavior gates live provider spend, deterministic authority, or a player-
+  visible release claim.
 
 ## Design Rails
 

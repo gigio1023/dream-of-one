@@ -46,6 +46,10 @@ source, license, files used, and adaptation. Do not import whole starter kits.
 - Do not add broad economy, inventory, staff, tax, price, or multi-shop systems.
 - Do not add docs, tests, probes, packets, or ledgers unless they protect a
   concrete playable change in the same pass.
+- Do not treat test hardening, report coverage, helper scripts, or budget
+  accounting as game progress by themselves. Use the narrowest command proof
+  for those support surfaces, then return to playable implementation or
+  fresh-player play.
 - Do not treat Codex QA, screenshots, proxy reports, or generated kits as
   fresh-player comprehension.
 - Do not claim product/demo/vertical-slice readiness.
@@ -62,3 +66,7 @@ source, license, files used, and adaptation. Do not import whole starter kits.
 Pick one small playable gap, implement it, expose it to the player, run the
 narrowest available proof, update `.game-harness/goal-loop-state.md`, then stop
 when the next required evidence is fresh-player comprehension.
+
+If there is no small playable gap to implement in the current pass, do not fill
+the time with tests. Keep the repo ready for play and state the external or
+human blocker plainly.

@@ -67,8 +67,8 @@ The implementation should reuse the existing `OpenAiProposalGateway` contract:
    support a provider descriptor.
 3. Use the Codex Responses base URL:
    `https://chatgpt.com/backend-api/codex`.
-4. Use Codex model defaults such as `gpt-5.5` or `gpt-5.4-mini`, with explicit
-   availability checks.
+4. Use `gpt-5.4-mini` with low reasoning effort as the only default Codex
+   provider model, with explicit availability checks.
 5. Send the same strict JSON proposal schema already used by `openai-api`.
 6. Reuse existing proposal parsing and forbidden-authority rejection.
 7. Keep deterministic fallback for missing auth, expired auth, refresh failure,
@@ -82,8 +82,8 @@ Codex CLI credential cache.
 Recommended env/config:
 
 - `NPC_RUNTIME_PROPOSAL_PROVIDER=openai-codex`
-- `OPENAI_CODEX_PROPOSAL_MODEL=gpt-5.5`
-- `OPENAI_CODEX_PROPOSAL_MODEL_FALLBACKS=gpt-5.4-mini`
+- `OPENAI_CODEX_PROPOSAL_MODEL=gpt-5.4-mini`
+- `OPENAI_CODEX_REASONING_EFFORT=low`
 - `OPENAI_CODEX_BASE_URL=https://chatgpt.com/backend-api/codex`
 - `OPENAI_CODEX_AUTH_PROFILE=default`
 - `OPENAI_CODEX_AUTH_STORE_PATH=build/provider-auth/openai-codex-auth.json`
@@ -93,6 +93,15 @@ material.
 
 For headless Ubuntu ARM, prefer device-code login. A browser callback flow is
 not reliable on this server class.
+
+## Model Policy
+
+Use only the cheapest model currently visible in OpenClaw's `openai-codex`
+provider path: `gpt-5.4-mini` with low reasoning effort. OpenAI API docs list
+`gpt-5.4-nano` and `gpt-5-nano` as cheaper API models, and OpenClaw lists nano
+models under its general `openai` catalog, but the reviewed `openai-codex`
+catalog and resolver do not expose nano models. Do not configure nano for
+`openai-codex` until live Codex-provider discovery proves availability.
 
 ## Implementation Slices
 
@@ -131,6 +140,8 @@ not reliable on this server class.
 
 - Do not use `codex exec` as the runtime LLM worker for this path.
 - Do not treat Codex ChatGPT login as `OPENAI_API_KEY`.
+- Do not configure `gpt-5.5`, pro models, `gpt-5.4`, or API nano models as the
+  default Codex-provider route for this game.
 - Do not read or copy another tool's private token cache into tracked files.
 - Do not let LLM output create records, risk, Exposure, Evidence, inquest,
   verdict, or session end.

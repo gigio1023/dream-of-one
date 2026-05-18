@@ -299,8 +299,8 @@ Risks:
 
 Required evidence:
 - `.game-harness/provider/same-order-provider-mode-decision-2026-05-17.md`.
-- budgeted live smoke result remains recorded as skipped without
-  `OPENAI_API_KEY`.
+- budgeted live smoke result remains recorded as skipped until the configured
+  provider credential/profile exists.
 - provider-shaped backend tests keep rejecting forbidden authority fields.
 - future live provider claims require successful runtime preflight and Godot
   dispatch evidence.

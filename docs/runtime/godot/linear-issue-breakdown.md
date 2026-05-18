@@ -68,10 +68,10 @@ Acceptance Criteria:
 Verification:
 
 ```bash
-${GODOT:-godot} --headless --import --path godot
-bash /Users/user/.agents/skills/godot-best-practice/scripts/check_gd_syntax.sh godot
-${GODOT:-godot} --headless --path godot --script res://tools/scene_load_smoke.gd
-${GODOT:-godot} --path godot --script res://tools/visual_capture.gd
+$GODOT_BIN --headless --import --path godot
+GODOT_PATH="$GODOT_BIN" bash "$GODOT_BEST_PRACTICE_SKILL/scripts/check_gd_syntax.sh" godot
+$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
+$GODOT_BIN --path godot --script res://tools/visual_capture.gd
 ```
 
 Handoff Artifacts:

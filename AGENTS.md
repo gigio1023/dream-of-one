@@ -68,12 +68,13 @@
 - Keep per-device launchers, exported PCKs, local route evidence, and auth/env
   settings in ignored repo-local `build/` files or explicit environment
   variables. Do not copy their absolute paths into tracked active instructions.
-- Codex CLI login is useful for agent/developer workflows. Do not treat
-  ChatGPT/Codex cached login as an OpenAI API key for the game runtime. If a
-  Codex CLI-backed runtime provider is explored, treat it as a separate
-  provider mode with explicit preflight, schema validation, timeout handling,
-  deterministic fallback, and no authority over records, Evidence, Exposure,
-  inquest, verdict, or session end.
+- Codex CLI login is useful for agent/developer workflows. The active future
+  live-LLM target is a direct `openai-codex` proposal provider with explicit
+  auth/profile setup, not `codex exec` and not a hidden `OPENAI_API_KEY`
+  replacement. Use `gpt-5.4-mini` with low reasoning effort as the only
+  configured OpenAI Codex model until live Codex-provider discovery proves a
+  cheaper Codex-supported model. Do not assume API `nano` models are available
+  through the Codex provider.
 
 ## Godot Runtime
 

@@ -70,7 +70,7 @@ function buildConfig(port: number, overrides: Partial<RuntimeConfig> = {}): Runt
       apiKey: "",
       baseUrl: "https://api.openai.com/v1",
       preferredModel: "gpt-5.4-mini",
-      fallbackModels: ["gpt-5.4-nano", "gpt-5-nano"],
+      fallbackModels: [],
       modelCheckTimeoutMs: 1000,
       requestTimeoutMs: 1000,
       maxOutputTokens: 700,

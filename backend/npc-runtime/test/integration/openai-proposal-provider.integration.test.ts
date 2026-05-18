@@ -37,7 +37,7 @@ function buildOpenAiConfig(overrides: Partial<OpenAiProposalConfig> = {}): OpenA
     apiKey: "test-key",
     baseUrl: "https://api.openai.test/v1",
     preferredModel: "gpt-5.4-mini",
-    fallbackModels: ["gpt-5.4-nano", "gpt-5-nano"],
+    fallbackModels: [],
     modelCheckTimeoutMs: 1000,
     requestTimeoutMs: 1000,
     maxOutputTokens: 700,
@@ -82,7 +82,7 @@ test("OpenAI proposal gateway uses preferred model and maps text proposal into b
   const fetchImpl: FetchLike = async (url, init) => {
     if (url.endsWith("/models")) {
       return jsonResponse(200, {
-        data: [{ id: "gpt-5.4-mini" }, { id: "gpt-5.4-nano" }, { id: "gpt-5-nano" }],
+        data: [{ id: "gpt-5.4-mini" }],
       });
     }
 
@@ -124,12 +124,12 @@ test("OpenAI proposal gateway uses preferred model and maps text proposal into b
   );
 });
 
-test("OpenAI proposal gateway falls back to first configured available model after availability check", async () => {
+test("OpenAI proposal gateway falls back to first explicitly configured available model", async () => {
   const responseModels: string[] = [];
   const fetchImpl: FetchLike = async (url, init) => {
     if (url.endsWith("/models")) {
       return jsonResponse(200, {
-        data: [{ id: "gpt-5-nano" }],
+        data: [{ id: "configured-fallback-model" }],
       });
     }
 
@@ -141,14 +141,17 @@ test("OpenAI proposal gateway falls back to first configured available model aft
     });
   };
 
-  const gateway = new OpenAiProposalGateway(buildOpenAiConfig(), { fetch: fetchImpl });
+  const gateway = new OpenAiProposalGateway(buildOpenAiConfig({
+    preferredModel: "configured-preferred-model",
+    fallbackModels: ["configured-fallback-model"],
+  }), { fetch: fetchImpl });
   const broker = new DefaultCodexBroker(gateway, new InMemoryThreadStore());
 
   const result = await broker.decide(buildPacket());
 
   assert.equal(result.meta.usedFallback, false);
   assert.equal(result.meta.threadId, "resp-fallback-model");
-  assert.deepEqual(responseModels, ["gpt-5-nano"]);
+  assert.deepEqual(responseModels, ["configured-fallback-model"]);
 });
 
 test("OpenAI proposal gateway shares one decision deadline across model check and response", async () => {
@@ -415,11 +418,11 @@ test("runtime defaults to OpenAI API proposal provider, not direct Codex CLI", (
   assert.equal(config.proposalProvider, "openai-api");
   assert.equal(config.codexCommand, OPENAI_PROPOSAL_GATEWAY_COMMAND);
   assert.equal(config.openAiProposal.preferredModel, "gpt-5.4-mini");
-  assert.deepEqual(config.openAiProposal.fallbackModels, ["gpt-5.4-nano", "gpt-5-nano"]);
+  assert.deepEqual(config.openAiProposal.fallbackModels, []);
   assert.equal(config.openAiProposal.budget.maxEstimatedCostUsd, 0.01);
 });
 
-test("readiness reports selected OpenAI fallback model when preferred model is unavailable", async t => {
+test("readiness reports selected explicitly configured OpenAI fallback model", async t => {
   const tempDir = await mkdtemp(join(tmpdir(), "npc-runtime-openai-ready-"));
   t.after(async () => {
     await rm(tempDir, { recursive: true, force: true });
@@ -429,14 +432,14 @@ test("readiness reports selected OpenAI fallback model when preferred model is u
     ...loadConfig({
       NPC_RUNTIME_PROPOSAL_PROVIDER: "openai-api",
       OPENAI_API_KEY: "ready-key",
-      OPENAI_PROPOSAL_PREFERRED_MODEL: "gpt-5.4-mini",
-      OPENAI_PROPOSAL_MODEL_FALLBACKS: "gpt-5.4-nano,gpt-5-nano",
+      OPENAI_PROPOSAL_PREFERRED_MODEL: "configured-preferred-model",
+      OPENAI_PROPOSAL_MODEL_FALLBACKS: "configured-fallback-model",
     }),
     threadStorePath: join(tempDir, "threads.json"),
     workspaceRootPath: join(tempDir, "workspaces"),
   };
   const fetchImpl: FetchLike = async () => jsonResponse(200, {
-    data: [{ id: "gpt-5.4-nano" }],
+    data: [{ id: "configured-fallback-model" }],
   });
 
   const readiness = await evaluateRuntimeReadiness(config, { fetch: fetchImpl });
@@ -444,7 +447,7 @@ test("readiness reports selected OpenAI fallback model when preferred model is u
   assert.equal(readiness.status, "ready");
   assert.deepEqual(readiness.reasons, []);
   assert.equal(readiness.checks.provider.ok, true);
-  assert.equal(readiness.checks.provider.openAi?.selectedModel, "gpt-5.4-nano");
+  assert.equal(readiness.checks.provider.openAi?.selectedModel, "configured-fallback-model");
   assert.equal(readiness.checks.codexCommand.ok, true);
 });
 

@@ -27,10 +27,10 @@ termination.
 
 ```bash
 npm run check --prefix backend/npc-runtime
-/opt/homebrew/bin/godot-latest --headless --import --path godot
-GODOT_PATH=/opt/homebrew/bin/godot-latest bash "$HOME/.agents/skills/godot-best-practice/scripts/check_gd_syntax.sh" godot
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/scene_load_smoke.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/evidence_run.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/runtime_slice_smoke.gd
-/opt/homebrew/bin/godot-latest --quit-after 2400 --path godot --script res://tools/visual_capture.gd
+$GODOT_BIN --headless --import --path godot
+GODOT_PATH="$GODOT_BIN" bash "$GODOT_BEST_PRACTICE_SKILL/scripts/check_gd_syntax.sh" godot
+$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/evidence_run.gd
+$GODOT_BIN --headless --path godot --script res://tools/runtime_slice_smoke.gd
+$GODOT_BIN --quit-after 2400 --path godot --script res://tools/visual_capture.gd
 ```

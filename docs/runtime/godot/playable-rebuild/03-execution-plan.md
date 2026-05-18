@@ -34,10 +34,10 @@ Acceptance:
 Verification:
 
 ```bash
-godot --headless --import --path godot
-bash /Users/user/.agents/skills/godot-best-practice/scripts/check_gd_syntax.sh godot
-godot --headless --path godot --script res://tools/scene_load_smoke.gd
-godot --path godot --script res://tools/visual_capture.gd
+$GODOT_BIN --headless --import --path godot
+GODOT_PATH="$GODOT_BIN" bash "$GODOT_BEST_PRACTICE_SKILL/scripts/check_gd_syntax.sh" godot
+$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
+$GODOT_BIN --path godot --script res://tools/visual_capture.gd
 ```
 
 ## Task 2: Playable Text And Cover Test Loop

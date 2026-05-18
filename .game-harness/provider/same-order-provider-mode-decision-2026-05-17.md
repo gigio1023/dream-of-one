@@ -7,8 +7,8 @@ Status: fallback-only for M1 product truth
 
 The current Same Order M1 proof uses deterministic fallback-only provider truth.
 
-Live API proposal behavior remains a future integration target, not a current
-demo claim. The M1 Store/Station cell may continue using provider-shaped
+Live `openai-codex` proposal behavior remains a future integration target, not
+a current demo claim. The M1 Store/Station cell may continue using provider-shaped
 backend contracts, dispatch packets, and fallback wording, but the build must
 not claim live provider behavior until live access and Godot dispatch are both
 proven.
@@ -26,8 +26,9 @@ Current local evidence proves the important design boundary:
 Current local evidence does not prove live provider behavior:
 - `codex login status` proves the local Codex CLI is logged in using ChatGPT,
   but that is not a game runtime API credential.
-- `OPENAI_API_KEY` is not present in the current environment.
-- the budgeted live smoke skips when the API key is missing.
+- no verified game runtime provider credential/profile exists yet.
+- the current budgeted live smoke is a legacy `openai-api` guardrail, not
+  proof of `openai-codex`.
 - Godot-to-backend live provider dispatch has not been refreshed in the current
   playable artifact.
 
@@ -49,8 +50,8 @@ M1 may claim:
 - provider-shaped proposals are bounded to available actions in backend tests;
 - generated wording, when later enabled, cannot own records, risk, Exposure,
   Evidence, inquest, verdict, or session termination;
-- `gpt-5.4-mini` is a preferred configured model only after runtime
-  verification and budget checks pass.
+- `gpt-5.4-mini` low reasoning effort is the future `openai-codex` target only
+  after runtime verification and budget checks pass.
 
 M1 must not claim:
 - live API-backed NPC proposals;
@@ -62,7 +63,7 @@ M1 must not claim:
 ## Future Gate For Live Provider Mode
 
 Live provider mode can be considered only after all of the following are true:
-- `OPENAI_API_KEY` or another explicit game runtime credential is configured;
+- an explicit `openai-codex` game runtime auth profile is configured;
 - budgeted live smoke succeeds without fallback;
 - selected model availability is verified for the configured provider;
 - generated output passes schema and forbidden-authority validation;
@@ -70,11 +71,10 @@ Live provider mode can be considered only after all of the following are true:
   backend-owned outcomes;
 - in-game UI or setup copy clearly names the verified provider mode.
 
-If the future provider is Codex CLI auth instead of direct API auth, it must be
-implemented and proved as a distinct `codex-cli` provider mode. Do not read or
-reuse Codex cached ChatGPT credentials as `OPENAI_API_KEY`; invoke `codex exec`
-through a documented local worker contract, validate structured output, and
-keep deterministic fallback/authority boundaries. See
-`codex-cli-auth-runtime-assessment-2026-05-18.md`.
+The current future target is direct `openai-codex`, not `codex exec`. Do not
+read or reuse Codex cached ChatGPT credentials as `OPENAI_API_KEY`; use an
+explicit auth/profile flow and keep deterministic fallback/authority boundaries.
+See `openclaw-codex-auth-adoption-proposal-2026-05-18.md` and
+`openai-codex-model-policy-2026-05-18.md`.
 
 Until then, fallback-only is the honest M1 product mode.

@@ -84,15 +84,15 @@ Reject scenario content if:
 
 ```bash
 npm run check --prefix backend/npc-runtime
-godot --headless --import --path godot
-bash /Users/user/.agents/skills/godot-best-practice/scripts/check_gd_syntax.sh godot
-godot --headless --path godot --script res://tools/scene_load_smoke.gd
-godot --headless --path godot --script res://tools/evidence_run.gd
-godot --headless --path godot --script res://tools/runtime_slice_smoke.gd
-godot --headless --path godot --script res://tools/playable_slice_smoke.gd
-godot --headless --path godot --script res://tools/localization_smoke.gd
-godot --headless --path godot --script res://tools/keyboard_look_smoke.gd
-godot --path godot --script res://tools/visual_capture.gd
+$GODOT_BIN --headless --import --path godot
+GODOT_PATH="$GODOT_BIN" bash "$GODOT_BEST_PRACTICE_SKILL/scripts/check_gd_syntax.sh" godot
+$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/evidence_run.gd
+$GODOT_BIN --headless --path godot --script res://tools/runtime_slice_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/playable_slice_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/localization_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/keyboard_look_smoke.gd
+$GODOT_BIN --path godot --script res://tools/visual_capture.gd
 ```
 
 ## Playtest Questions

@@ -370,10 +370,10 @@ Required proof:
 
 Dream of One supersedes the Codex CLI player-prerequisite decision.
 
-- **Accepted path**: Use an API proposal provider for live NPC/Station wording when configured and verified at runtime.
+- **Accepted path**: Use a direct `openai-codex` proposal provider for live NPC/Station wording when configured and verified at runtime.
 - **Rejected path**: Do not require player-installed Codex CLI as the release prerequisite. Do not let provider prose own gameplay rules.
 - **Invocation model**: Backend/runtime performs provider preflight, checks configured model availability, validates structured wording proposals, and falls back deterministically.
-- **Model rule**: `gpt-5.4-nano` may be tried as a configured preferred model, but it is not assumed. Runtime must fall back to configured available models such as `gpt-5-nano`.
+- **Model rule**: Use `gpt-5.4-mini` with low reasoning effort as the only default `openai-codex` model. Do not configure API nano models for the Codex provider until live provider discovery proves availability. Missing or unavailable model means deterministic fallback, not automatic model escalation.
 - **Authority boundary**: Provider output is wording only: NPC line candidates, Station pressure wording, localized variants, and fallback text variants.
 - **Deterministic owner**: Backend/runtime owns action choice, risk tag,
   suspicion signal, Evidence type, reason codes, why-line authority, fallback,
@@ -492,6 +492,9 @@ Design baseline:
 - LLM/provider work should thicken social impression through bounded wording,
   shared context, drama tone, and NPC preoccupations while deterministic runtime
   authority remains unchanged.
+- Live provider work should target direct `openai-codex` auth with
+  `gpt-5.4-mini` low reasoning effort only. Generic API nano availability does
+  not prove nano availability through the Codex provider.
 
 Current improvement verdict:
 

@@ -1,8 +1,7 @@
 # Godot Validation Gates
 
-Use `${GODOT:-/opt/homebrew/bin/godot-latest}` for the editor-capable Godot
-binary. Current proof baseline: Godot `4.7.beta2.official.777579205` with
-Forward+ rendering and Jolt Physics.
+Use `$GODOT_BIN` for the editor-capable Godot binary. Current proof baseline:
+Godot `4.7.beta2.official.777579205` with Forward+ rendering and Jolt Physics.
 
 ## G1 Backend Schema
 
@@ -42,13 +41,13 @@ Artifacts:
 Commands:
 
 ```bash
-${GODOT:-/opt/homebrew/bin/godot-latest} --headless --import --path godot
-GODOT_PATH="${GODOT:-/opt/homebrew/bin/godot-latest}" bash "$HOME/.agents/skills/godot-best-practice/scripts/check_gd_syntax.sh" godot
-${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/scene_load_smoke.gd
-${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/playable_slice_smoke.gd
-${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/localization_smoke.gd
-${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/keyboard_look_smoke.gd
-${GODOT:-/opt/homebrew/bin/godot-latest} --quit-after 2400 --path godot --script res://tools/visual_capture.gd
+$GODOT_BIN --headless --import --path godot
+GODOT_PATH="$GODOT_BIN" bash "$GODOT_BEST_PRACTICE_SKILL/scripts/check_gd_syntax.sh" godot
+$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/playable_slice_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/localization_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/keyboard_look_smoke.gd
+$GODOT_BIN --quit-after 2400 --path godot --script res://tools/visual_capture.gd
 ```
 
 Visual capture must run with a renderer-capable Godot binary. It writes JSON to stdout with the expected `1280x720` viewport, artifact roles, and a pointer to `godot/assets/kenney/README.md` for free-asset source and license evidence.
@@ -83,9 +82,9 @@ Artifacts:
 Commands:
 
 ```bash
-${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/evidence_run.gd
-${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/runtime_slice_smoke.gd
-${GODOT:-/opt/homebrew/bin/godot-latest} --headless --path godot --script res://tools/playable_slice_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/evidence_run.gd
+$GODOT_BIN --headless --path godot --script res://tools/runtime_slice_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/playable_slice_smoke.gd
 ```
 
 Pass criteria:

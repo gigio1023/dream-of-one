@@ -51,8 +51,12 @@ Provider preflight must check:
 GPT model names are not public promises. Do not assume `gpt-5.4-mini` or any fixed GPT model unless runtime verification proves it for the configured provider.
 
 Model preference:
-- `gpt-5.4-mini` is the preferred GPT model only for configured providers that pass runtime verification and the preconfigured request budget.
-- `gpt-5.4-nano` and `gpt-5-nano` are fallback candidates, not public promises.
+- `gpt-5.4-mini` with low reasoning effort is the only default model for the
+  future `openai-codex` provider route after runtime verification and the
+  preconfigured request budget pass.
+- `gpt-5.4-nano` and `gpt-5-nano` are generic API models, not Codex-provider
+  promises; do not use them through `openai-codex` unless live provider
+  discovery proves availability.
 - If runtime verification fails, release truth must say live GPT access is unavailable or must name the verified fallback mode.
 - Public copy must describe the access mode, not the aspirational model target.
 

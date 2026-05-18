@@ -31,7 +31,7 @@ Remaining blockers before advancing beyond M1:
 | Live API proposal provider | not proven | Must not claim live API-backed NPC proposals. M1 provider mode is fallback-only. |
 | Provider action proposal boundary | contract pass | May claim provider-shaped proposals are constrained to available actions and same ledger outcomes; must not claim live provider dispatch. |
 | Godot backend bridge fallback | pass | May claim controlled readiness fallback smoke, not live integration. |
-| `gpt-5.4-mini` model access | not proven | Preferred only when runtime provider verification and budgeted live smoke confirm availability. |
+| `gpt-5.4-mini` Codex-provider access | not proven | Active target is `openai-codex` with low reasoning effort and no default model fallbacks; nano models require live Codex-provider discovery before use. |
 | External player comprehension | pending | Same Order proxy dry run and product council review pass/conditional, but must not claim product validation or player-understood loop until fresh tester notes pass. |
 | Exported build/setup path | PCK route proof plus packaged app export/launch/route proof | May claim current latest-Godot export, app launch, and packaged route proof. Must not claim public install readiness. |
 | Canonical route event validation | internal pass | May claim only internal route-proof validation; public route-contrast proof still requires manual replay/readability and player comprehension. |

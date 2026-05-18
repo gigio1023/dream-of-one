@@ -45,7 +45,7 @@ export interface OpenAiProposalBudgetConfig {
 
 export const OPENAI_PROPOSAL_GATEWAY_COMMAND = "__openai_api_proposal_provider__";
 export const DEFAULT_OPENAI_PROPOSAL_MODEL = "gpt-5.4-mini";
-export const DEFAULT_OPENAI_PROPOSAL_FALLBACK_MODELS = ["gpt-5.4-nano", "gpt-5-nano"] as const;
+export const DEFAULT_OPENAI_PROPOSAL_FALLBACK_MODELS = [] as const;
 export const DEFAULT_OPENAI_PROPOSAL_BUDGET: OpenAiProposalBudgetConfig = {
   maxEstimatedInputTokens: 6000,
   maxEstimatedTotalTokens: 8000,

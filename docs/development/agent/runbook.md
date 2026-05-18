@@ -12,10 +12,10 @@
 
 ```bash
 npm run check --prefix backend/npc-runtime
-/opt/homebrew/bin/godot-latest --headless --import --path godot
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/scene_load_smoke.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/evidence_run.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/runtime_slice_smoke.gd
+$GODOT_BIN --headless --import --path godot
+$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/evidence_run.gd
+$GODOT_BIN --headless --path godot --script res://tools/runtime_slice_smoke.gd
 ```
 
 ## Test Style
@@ -34,14 +34,18 @@ Do not:
 
 ## Provider Smoke
 
-Use the budgeted OpenAI proposal smoke before claiming live provider behavior:
+Use the budgeted smoke before claiming live provider behavior. The checked-in
+command currently covers the legacy `openai-api` gateway:
 
 ```bash
 npm run openai:proposal-smoke --prefix backend/npc-runtime
 OPENAI_PROPOSAL_LIVE_TEST=1 npm run openai:proposal-smoke --prefix backend/npc-runtime
 ```
 
-The live command must still skip unless `OPENAI_API_KEY` is set. Codex ChatGPT login is not treated as a game runtime API key.
+The active future live-LLM target is a direct `openai-codex` provider with an
+explicit auth profile, `gpt-5.4-mini`, low reasoning effort, no default model
+fallbacks, and deterministic fallback on any provider failure. Do not claim
+`openai-codex` behavior until a Codex-provider smoke exists and passes.
 
 ## Routing
 

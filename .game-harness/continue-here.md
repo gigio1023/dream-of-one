@@ -438,7 +438,11 @@ Remaining required outputs:
 - Do not reopen manual typed-input UI work unless current Godot/HUD/packaged or
   Codex gameplay QA evidence regresses.
 - Do not let provider-generated NPC text own Exposure, verdict, or session termination.
-- Prefer `gpt-5.4-mini` only after runtime provider verification confirms it for the configured provider and budgeted live smoke stays within the configured cap.
+- Use `gpt-5.4-mini` low reasoning effort as the only default `openai-codex`
+  model after runtime provider verification confirms it and budgeted live smoke
+  stays within the configured cap.
+- Do not assume `gpt-5.4-nano` or `gpt-5-nano` are available through
+  `openai-codex`; generic API availability is not enough.
 - Do not assume live API access, model availability, credentials, or provider hosting from local technical checks.
 - Do not claim product-playable or demo-complete until Godot/backend evidence,
   renderer-backed visual evidence, readability review, and player comprehension

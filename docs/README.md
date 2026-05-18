@@ -74,6 +74,9 @@ reaction branch.
 The current LLM/NPC method is tool-catalog-first: dialogue choices are player
 speech inputs, while Store/Station objects expose role-filtered tool
 descriptors that NPC agents may propose and the runtime must validate.
+The active future live-LLM provider target is direct `openai-codex` auth with
+`gpt-5.4-mini` low reasoning effort only; API `nano` models are not assumed
+usable through that Codex provider until live discovery proves it.
 
 The current prototype target is one small Store/Station environment where
 conversation changes records, environment affordances become available, role

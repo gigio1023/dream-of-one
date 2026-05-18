@@ -1,7 +1,13 @@
 # OpenAI/Codex Auth and Budgeted Proposal Smoke
 
 Date: 2026-05-17
-Status: implemented guardrail, live access not proven
+Status: superseded for future provider choice; legacy OpenAI API guardrail,
+live access not proven
+
+Supersession note, 2026-05-18: the active future live-LLM target is direct
+`openai-codex` auth with `gpt-5.4-mini` low reasoning effort and no default
+model fallbacks. Keep this file as the historical `openai-api` smoke/budget
+record only.
 
 ## Decision
 
@@ -33,7 +39,7 @@ Sources checked:
 
 Configured defaults:
 - Preferred model: `gpt-5.4-mini`
-- Fallback candidates: `gpt-5.4-nano`, `gpt-5-nano`
+- Fallback candidates: none by default
 - Max output: `700` tokens
 - Estimated input cap: `6000` tokens
 - Estimated total cap: `8000` tokens

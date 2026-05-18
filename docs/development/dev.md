@@ -4,12 +4,12 @@
 
 ```bash
 npm install --prefix backend/npc-runtime
-/opt/homebrew/bin/godot-latest --headless --version
+$GODOT_BIN --headless --version
 ```
 
 Expected Godot proof baseline for this branch is the latest published Godot
-available through `/opt/homebrew/bin/godot-latest`. On 2026-05-17 that is
-Godot `4.7.beta2.official.777579205`.
+available through the current machine's `GODOT_BIN`. The latest published proof
+used Godot `4.7.beta2.official.777579205` on 2026-05-17.
 
 ## Backend Checks
 
@@ -26,15 +26,15 @@ Detroit-style rule: prefer one clear end-to-end or integration check over many i
 ## Godot Checks
 
 ```bash
-/opt/homebrew/bin/godot-latest --headless --import --path godot
-GODOT_PATH=/opt/homebrew/bin/godot-latest bash "$HOME/.agents/skills/godot-best-practice/scripts/check_gd_syntax.sh" godot
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/scene_load_smoke.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/evidence_run.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/runtime_slice_smoke.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/playable_slice_smoke.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/live_backend_bridge_smoke.gd
-/opt/homebrew/bin/godot-latest --headless --path godot --script res://tools/localization_smoke.gd
-/opt/homebrew/bin/godot-latest --quit-after 2400 --path godot --script res://tools/visual_capture.gd
+$GODOT_BIN --headless --import --path godot
+GODOT_PATH="$GODOT_BIN" bash "$GODOT_BEST_PRACTICE_SKILL/scripts/check_gd_syntax.sh" godot
+$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/evidence_run.gd
+$GODOT_BIN --headless --path godot --script res://tools/runtime_slice_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/playable_slice_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/live_backend_bridge_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/localization_smoke.gd
+$GODOT_BIN --quit-after 2400 --path godot --script res://tools/visual_capture.gd
 ```
 
 ## Evidence

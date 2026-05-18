@@ -80,17 +80,24 @@ Latest completion audit:
   and packaged-route evidence.
 - latest Codex gameplay QA artifact reports `ok=true`,
   `aiPlayerReport.pass=true`, 23 accepted public actions, 5/5 route reports,
-  all 22 explainability flags true, and
-  `canReadEnvironmentToolCatalog=true`. It also explicitly marks itself as not
-  a replacement for external comprehension.
+  all 23 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
+  no-live provider packet readiness for bounded `actorMemory` plus
+  `actorPolicy`. It also explicitly marks itself as not a replacement for
+  external comprehension.
 - latest packaged-route evidence validates as a Godot Evidence Pack and
   conversation/suspicion proof for the single `inquest_opened` route with
   `packagedRouteSmokeProof=true`, `fallback_only_m1`, and
   `canReadEnvironmentToolCatalog=true`.
 - strict raw-note review still returns `PENDING_TESTER_NOTES` with manual
   session count `0`; `.game-harness/scripts/run-same-order-comprehension-session.sh
-  --status` is locally blocked until `DREAM_OF_ONE_APP_PATH` is set for this
-  device.
+  --status` now loads the ignored Ubuntu ARM device env and reaches packaged
+  app preflight plus Codex QA setup pass.
+- Linear SoT check on 2026-05-18 found no open issue for
+  `GI-04 external comprehension Same Order fresh-player PENDING_TESTER_NOTES`
+  or `fresh-player comprehension Same Order`. The current Linear MCP exposes
+  search/update/comment tools but no issue-create tool, and `LINEAR_API_TOKEN`
+  is unset for GraphQL fallback. Create or link the SoT issue from a session
+  with Linear create permission before treating GI-04 as properly routed.
 - conclusion: do not add another internal helper, route, or proof just to show
   activity. The next required evidence is an observed fresh-player session and
   accepted direct-note review, which is outside Codex-only control.

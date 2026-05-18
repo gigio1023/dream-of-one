@@ -106,7 +106,8 @@
 						}
 					],
 					"perceivedObjectIds": [
-						"park_notice_board"
+						"park_notice_board",
+						"civic_economy_panel"
 					]
 				},
 				"NPC_Station_Officer": {
@@ -140,7 +141,8 @@
 					"perceivedObjectIds": [
 						"report_tray",
 						"station_dossier",
-						"civic_ledger"
+						"civic_ledger",
+						"civic_economy_panel"
 					]
 				},
 				"NPC_Store_Clerk": {
@@ -176,7 +178,8 @@
 						"usual_order_cue",
 						"receipt_tray",
 						"correction_slip",
-						"report_tray"
+						"report_tray",
+						"civic_economy_panel"
 					]
 				},
 				"NPC_Store_Manager": {
@@ -212,7 +215,8 @@
 						"usual_order_cue",
 						"receipt_tray",
 						"correction_slip",
-						"report_tray"
+						"report_tray",
+						"civic_economy_panel"
 					]
 				},
 				"NPC_Studio_PM": {
@@ -245,7 +249,8 @@
 					],
 					"perceivedObjectIds": [
 						"park_notice_board",
-						"studio_review_queue"
+						"studio_review_queue",
+						"civic_economy_panel"
 					]
 				},
 				"NPC_Waiting_Customer": {
@@ -298,7 +303,8 @@
 						"store_queue_mark",
 						"store_counter",
 						"usual_order_cue",
-						"park_notice_board"
+						"park_notice_board",
+						"civic_economy_panel"
 					]
 				}
 			},
@@ -373,7 +379,8 @@
 						"objectId": "studio_review_queue",
 						"perceivedObjectIds": [
 							"park_notice_board",
-							"studio_review_queue"
+							"studio_review_queue",
+							"civic_economy_panel"
 						],
 						"recordId": "studio_public_review_blocked",
 						"selectedActionDescriptor": {
@@ -621,7 +628,8 @@
 							"store_queue_mark",
 							"store_counter",
 							"usual_order_cue",
-							"park_notice_board"
+							"park_notice_board",
+							"civic_economy_panel"
 						],
 						"recordId": "store_same_order_contact_refused",
 						"selectedActionDescriptor": {
@@ -867,7 +875,8 @@
 							"store_queue_mark",
 							"store_counter",
 							"usual_order_cue",
-							"park_notice_board"
+							"park_notice_board",
+							"civic_economy_panel"
 						],
 						"recordId": "store_same_order_contact_refused",
 						"selectedActionDescriptor": {
@@ -1113,7 +1122,8 @@
 							"store_queue_mark",
 							"store_counter",
 							"usual_order_cue",
-							"park_notice_board"
+							"park_notice_board",
+							"civic_economy_panel"
 						],
 						"recordId": "store_same_order_contact_refused",
 						"selectedActionDescriptor": {
@@ -1359,7 +1369,8 @@
 							"store_queue_mark",
 							"store_counter",
 							"usual_order_cue",
-							"park_notice_board"
+							"park_notice_board",
+							"civic_economy_panel"
 						],
 						"recordId": "store_same_order_contact_refused",
 						"selectedActionDescriptor": {
@@ -1605,7 +1616,8 @@
 							"store_queue_mark",
 							"store_counter",
 							"usual_order_cue",
-							"park_notice_board"
+							"park_notice_board",
+							"civic_economy_panel"
 						],
 						"recordId": "store_same_order_contact_refused",
 						"selectedActionDescriptor": {
@@ -1851,7 +1863,8 @@
 							"store_queue_mark",
 							"store_counter",
 							"usual_order_cue",
-							"park_notice_board"
+							"park_notice_board",
+							"civic_economy_panel"
 						],
 						"recordId": "store_same_order_contact_refused",
 						"selectedActionDescriptor": {
@@ -2098,7 +2111,8 @@
 						"store_queue_mark",
 						"store_counter",
 						"usual_order_cue",
-						"park_notice_board"
+						"park_notice_board",
+						"civic_economy_panel"
 					],
 					"recordId": "store_same_order_contact_refused",
 					"selectedActionDescriptor": {
@@ -2283,12 +2297,19 @@
 					"title": "스튜디오 리뷰 줄"
 				},
 				{
-					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
+					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 					"currentAffordanceLabels": [],
 					"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
 					"objectId": "civic_economy_panel",
 					"possibleAffordanceLabels": [],
-					"readerRoleLabels": [],
+					"readerRoleLabels": [
+						"상점 점원",
+						"상점 매니저",
+						"대기 손님",
+						"공원 목격자",
+						"스튜디오 PM",
+						"스테이션 직원"
+					],
 					"recentLedgerEvents": [
 						{
 							"actorRole": "waiting_customer",
@@ -3085,7 +3106,8 @@
 					}
 				],
 				"perceivedObjectIds": [
-					"park_notice_board"
+					"park_notice_board",
+					"civic_economy_panel"
 				]
 			},
 			"NPC_Station_Officer": {
@@ -3119,7 +3141,8 @@
 				"perceivedObjectIds": [
 					"report_tray",
 					"station_dossier",
-					"civic_ledger"
+					"civic_ledger",
+					"civic_economy_panel"
 				]
 			},
 			"NPC_Store_Clerk": {
@@ -3155,7 +3178,8 @@
 					"usual_order_cue",
 					"receipt_tray",
 					"correction_slip",
-					"report_tray"
+					"report_tray",
+					"civic_economy_panel"
 				]
 			},
 			"NPC_Store_Manager": {
@@ -3191,7 +3215,8 @@
 					"usual_order_cue",
 					"receipt_tray",
 					"correction_slip",
-					"report_tray"
+					"report_tray",
+					"civic_economy_panel"
 				]
 			},
 			"NPC_Studio_PM": {
@@ -3224,7 +3249,8 @@
 				],
 				"perceivedObjectIds": [
 					"park_notice_board",
-					"studio_review_queue"
+					"studio_review_queue",
+					"civic_economy_panel"
 				]
 			},
 			"NPC_Waiting_Customer": {
@@ -3277,7 +3303,8 @@
 					"store_queue_mark",
 					"store_counter",
 					"usual_order_cue",
-					"park_notice_board"
+					"park_notice_board",
+					"civic_economy_panel"
 				]
 			}
 		},
@@ -3466,7 +3493,96 @@
 			"recordedStatementScope": "",
 			"typedFreeInputAction": "free_input_submitted",
 			"typedFreeInputAvailable": true,
-			"typedFreeInputLine": "저는 이 꿈에 방금 들어왔어요."
+			"typedFreeInputLine": "저는 이 꿈에 방금 들어왔어요.",
+			"visibleEnvironmentObjects": [
+				{
+					"label": "대기 표식\n접촉 거부",
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부",
+					"title": "대기 표식"
+				},
+				{
+					"label": "카운터\n응대 중",
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중",
+					"title": "상점 카운터"
+				},
+				{
+					"label": "늘 같은 주문\n읽힘",
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘",
+					"title": "늘 같은 주문"
+				},
+				{
+					"label": "영수증\n표시됨",
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨",
+					"title": "영수증 트레이"
+				},
+				{
+					"label": "정정\n없음",
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음",
+					"title": "정정 문서"
+				},
+				{
+					"label": "보고\n전달",
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달",
+					"title": "보고 트레이"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
+					"objectId": "civic_economy_panel",
+					"recentLedgerEvents": [
+						{
+							"actorRole": "waiting_customer",
+							"actorRoleLabel": "대기 손님",
+							"affordance": "refuse_contact",
+							"affordanceLabel": "접촉 거부",
+							"citedLedgerEventId": "civic-ledger-6",
+							"economyDelta": {
+								"localTrust": -8,
+								"recordBurden": 5
+							},
+							"economyDeltaLabel": "신뢰-8, 부담+5",
+							"eventId": "civic-ledger-8",
+							"kind": "queue_contact_refused",
+							"kindLabel": "접촉 거부"
+						},
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"economyDelta": {
+								"localTrust": -2,
+								"recordBurden": 3
+							},
+							"economyDeltaLabel": "신뢰-2, 부담+3",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
+					"state": "attention",
+					"stateLabel": "주목 상승",
+					"title": "시민 경제"
+				}
+			]
 		},
 		"hud": {
 			"choicesLabel": "1  맞습니다. 제가 착각했습니다.",
@@ -3649,7 +3765,8 @@
 					"store_queue_mark",
 					"store_counter",
 					"usual_order_cue",
-					"park_notice_board"
+					"park_notice_board",
+					"civic_economy_panel"
 				],
 				"recordId": "store_same_order_contact_refused",
 				"selectedActionDescriptor": {
@@ -5092,12 +5209,19 @@
 				"inputLocked": true,
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
+					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 					"currentAffordanceLabels": [],
 					"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
 					"objectId": "civic_economy_panel",
 					"possibleAffordanceLabels": [],
-					"readerRoleLabels": [],
+					"readerRoleLabels": [
+						"상점 점원",
+						"상점 매니저",
+						"대기 손님",
+						"공원 목격자",
+						"스튜디오 PM",
+						"스테이션 직원"
+					],
 					"recentLedgerEvents": [
 						{
 							"actorRole": "waiting_customer",
@@ -5218,12 +5342,19 @@
 				"inputLocked": true,
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
+					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 					"currentAffordanceLabels": [],
 					"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
 					"objectId": "civic_economy_panel",
 					"possibleAffordanceLabels": [],
-					"readerRoleLabels": [],
+					"readerRoleLabels": [
+						"상점 점원",
+						"상점 매니저",
+						"대기 손님",
+						"공원 목격자",
+						"스튜디오 PM",
+						"스테이션 직원"
+					],
 					"recentLedgerEvents": [
 						{
 							"actorRole": "waiting_customer",
@@ -5289,12 +5420,19 @@
 				"inputLocked": true,
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
+					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 					"currentAffordanceLabels": [],
 					"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
 					"objectId": "civic_economy_panel",
 					"possibleAffordanceLabels": [],
-					"readerRoleLabels": [],
+					"readerRoleLabels": [
+						"상점 점원",
+						"상점 매니저",
+						"대기 손님",
+						"공원 목격자",
+						"스튜디오 PM",
+						"스테이션 직원"
+					],
 					"recentLedgerEvents": [
 						{
 							"actorRole": "waiting_customer",
@@ -5444,12 +5582,19 @@
 				"inputLocked": true,
 				"inspectedNpcState": {},
 				"inspectedWorldRecordProp": {
-					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
+					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 					"currentAffordanceLabels": [],
 					"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
 					"objectId": "civic_economy_panel",
 					"possibleAffordanceLabels": [],
-					"readerRoleLabels": [],
+					"readerRoleLabels": [
+						"상점 점원",
+						"상점 매니저",
+						"대기 손님",
+						"공원 목격자",
+						"스튜디오 PM",
+						"스테이션 직원"
+					],
 					"recentLedgerEvents": [
 						{
 							"actorRole": "waiting_customer",
@@ -5747,7 +5892,8 @@
 						"objectId": "studio_review_queue",
 						"perceivedObjectIds": [
 							"park_notice_board",
-							"studio_review_queue"
+							"studio_review_queue",
+							"civic_economy_panel"
 						],
 						"recordId": "studio_public_review_blocked",
 						"selectedActionDescriptor": {
@@ -6058,7 +6204,8 @@
 						"objectId": "studio_review_queue",
 						"perceivedObjectIds": [
 							"park_notice_board",
-							"studio_review_queue"
+							"studio_review_queue",
+							"civic_economy_panel"
 						],
 						"recordId": "studio_public_review_blocked",
 						"selectedActionDescriptor": {
@@ -6287,7 +6434,8 @@
 						"objectId": "studio_review_queue",
 						"perceivedObjectIds": [
 							"park_notice_board",
-							"studio_review_queue"
+							"studio_review_queue",
+							"civic_economy_panel"
 						],
 						"recordId": "studio_public_review_blocked",
 						"selectedActionDescriptor": {
@@ -6618,7 +6766,8 @@
 							"store_queue_mark",
 							"store_counter",
 							"usual_order_cue",
-							"park_notice_board"
+							"park_notice_board",
+							"civic_economy_panel"
 						],
 						"recordId": "store_same_order_contact_refused",
 						"selectedActionDescriptor": {
@@ -6845,7 +6994,8 @@
 						"objectId": "studio_review_queue",
 						"perceivedObjectIds": [
 							"park_notice_board",
-							"studio_review_queue"
+							"studio_review_queue",
+							"civic_economy_panel"
 						],
 						"recordId": "studio_public_review_blocked",
 						"selectedActionDescriptor": {
@@ -7040,7 +7190,8 @@
 					}
 				],
 				"perceivedObjectIds": [
-					"park_notice_board"
+					"park_notice_board",
+					"civic_economy_panel"
 				]
 			},
 			"NPC_Station_Officer": {
@@ -7074,7 +7225,8 @@
 				"perceivedObjectIds": [
 					"report_tray",
 					"station_dossier",
-					"civic_ledger"
+					"civic_ledger",
+					"civic_economy_panel"
 				]
 			},
 			"NPC_Store_Clerk": {
@@ -7110,7 +7262,8 @@
 					"usual_order_cue",
 					"receipt_tray",
 					"correction_slip",
-					"report_tray"
+					"report_tray",
+					"civic_economy_panel"
 				]
 			},
 			"NPC_Store_Manager": {
@@ -7146,7 +7299,8 @@
 					"usual_order_cue",
 					"receipt_tray",
 					"correction_slip",
-					"report_tray"
+					"report_tray",
+					"civic_economy_panel"
 				]
 			},
 			"NPC_Studio_PM": {
@@ -7179,7 +7333,8 @@
 				],
 				"perceivedObjectIds": [
 					"park_notice_board",
-					"studio_review_queue"
+					"studio_review_queue",
+					"civic_economy_panel"
 				]
 			},
 			"NPC_Waiting_Customer": {
@@ -7232,7 +7387,8 @@
 					"store_queue_mark",
 					"store_counter",
 					"usual_order_cue",
-					"park_notice_board"
+					"park_notice_board",
+					"civic_economy_panel"
 				]
 			}
 		},
@@ -7506,7 +7662,8 @@
 					"usual_order_cue",
 					"receipt_tray",
 					"correction_slip",
-					"report_tray"
+					"report_tray",
+					"civic_economy_panel"
 				],
 				"recordId": "store_same_order_receipt",
 				"selectedActionDescriptor": {
@@ -7742,7 +7899,8 @@
 					"usual_order_cue",
 					"receipt_tray",
 					"correction_slip",
-					"report_tray"
+					"report_tray",
+					"civic_economy_panel"
 				],
 				"recordId": "store_same_order_clerk_statement",
 				"selectedActionDescriptor": {
@@ -8007,7 +8165,8 @@
 					"store_queue_mark",
 					"store_counter",
 					"usual_order_cue",
-					"park_notice_board"
+					"park_notice_board",
+					"civic_economy_panel"
 				],
 				"recordId": "store_same_order_queue_delay",
 				"selectedActionDescriptor": {
@@ -8270,7 +8429,8 @@
 				"ledgerEventKind": "public_rumor_posted",
 				"objectId": "park_notice_board",
 				"perceivedObjectIds": [
-					"park_notice_board"
+					"park_notice_board",
+					"civic_economy_panel"
 				],
 				"recordId": "park_public_rumor",
 				"selectedActionDescriptor": {
@@ -8553,7 +8713,8 @@
 					"usual_order_cue",
 					"receipt_tray",
 					"correction_slip",
-					"report_tray"
+					"report_tray",
+					"civic_economy_panel"
 				],
 				"recordId": "store_same_order_clerk_statement",
 				"selectedActionDescriptor": {
@@ -8669,7 +8830,8 @@
 				"perceivedObjectIds": [
 					"report_tray",
 					"station_dossier",
-					"civic_ledger"
+					"civic_ledger",
+					"civic_economy_panel"
 				],
 				"recordId": "station_same_order_dossier",
 				"selectedActionDescriptor": {
@@ -8788,7 +8950,8 @@
 				"objectId": "studio_review_queue",
 				"perceivedObjectIds": [
 					"park_notice_board",
-					"studio_review_queue"
+					"studio_review_queue",
+					"civic_economy_panel"
 				],
 				"recordId": "studio_public_review_blocked",
 				"selectedActionDescriptor": {
@@ -9005,7 +9168,8 @@
 					"store_queue_mark",
 					"store_counter",
 					"usual_order_cue",
-					"park_notice_board"
+					"park_notice_board",
+					"civic_economy_panel"
 				],
 				"recordId": "store_same_order_contact_refused",
 				"selectedActionDescriptor": {
@@ -9372,20 +9536,109 @@
 			"recordedStatementScope": "",
 			"typedFreeInputAction": "free_input_submitted",
 			"typedFreeInputAvailable": true,
-			"typedFreeInputLine": "저는 이 꿈에 방금 들어왔어요."
+			"typedFreeInputLine": "저는 이 꿈에 방금 들어왔어요.",
+			"visibleEnvironmentObjects": [
+				{
+					"label": "대기 표식\n접촉 거부",
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부",
+					"title": "대기 표식"
+				},
+				{
+					"label": "카운터\n응대 중",
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중",
+					"title": "상점 카운터"
+				},
+				{
+					"label": "늘 같은 주문\n읽힘",
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘",
+					"title": "늘 같은 주문"
+				},
+				{
+					"label": "영수증\n표시됨",
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨",
+					"title": "영수증 트레이"
+				},
+				{
+					"label": "정정\n없음",
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음",
+					"title": "정정 문서"
+				},
+				{
+					"label": "보고\n전달",
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달",
+					"title": "보고 트레이"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
+					"objectId": "civic_economy_panel",
+					"recentLedgerEvents": [
+						{
+							"actorRole": "waiting_customer",
+							"actorRoleLabel": "대기 손님",
+							"affordance": "refuse_contact",
+							"affordanceLabel": "접촉 거부",
+							"citedLedgerEventId": "civic-ledger-6",
+							"economyDelta": {
+								"localTrust": -8,
+								"recordBurden": 5
+							},
+							"economyDeltaLabel": "신뢰-8, 부담+5",
+							"eventId": "civic-ledger-8",
+							"kind": "queue_contact_refused",
+							"kindLabel": "접촉 거부"
+						},
+						{
+							"actorRole": "studio_pm",
+							"actorRoleLabel": "스튜디오 PM",
+							"affordance": "block_review",
+							"affordanceLabel": "리뷰 차단",
+							"citedLedgerEventId": "civic-ledger-6",
+							"economyDelta": {
+								"localTrust": -2,
+								"recordBurden": 3
+							},
+							"economyDeltaLabel": "신뢰-2, 부담+3",
+							"eventId": "civic-ledger-7",
+							"kind": "studio_review_blocked",
+							"kindLabel": "리뷰 차단"
+						}
+					],
+					"state": "attention",
+					"stateLabel": "주목 상승",
+					"title": "시민 경제"
+				}
+			]
 		},
 		"events": [
 			{
 				"adapter": "godot",
 				"eventFamily": "session",
-				"eventId": "playable_session_started-001-1779107986636",
+				"eventId": "playable_session_started-001-1779109575200",
 				"eventName": "playable_session_started",
 				"prologueStep": "beginning",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"sessionOutcome": "running",
 				"summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-				"timestampMs": 1779107986636,
+				"timestampMs": 1779109575200,
 				"uiSummaryArgs": {},
 				"uiSummaryKey": "event.session_started",
 				"worldId": "dre_171_godot_shell",
@@ -9394,7 +9647,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-002-1779107986737",
+				"eventId": "world_record_prop_inspected-002-1779109575330",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "usual_order_cue",
 				"schemaVersion": "godot-runtime-v1",
@@ -9402,7 +9655,7 @@
 				"state": "read",
 				"stateLabel": "읽힘",
 				"summary": "Inspected world record prop usual_order_cue in state read.",
-				"timestampMs": 1779107986737,
+				"timestampMs": 1779109575330,
 				"uiSummaryArgs": {
 					"object": "늘 같은 주문",
 					"state": "읽힘"
@@ -9420,13 +9673,13 @@
 					"DL_ST1_APPROVAL_GATE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-003-1779107986762",
+				"eventId": "text_surface_read-003-1779109575379",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Studio_ApprovalCriteria as local context before speaking.",
 				"textSurfaceId": "TS_Studio_ApprovalCriteria",
-				"timestampMs": 1779107986762,
+				"timestampMs": 1779109575379,
 				"uiSummaryArgs": {
 					"law": "DL_ST1_APPROVAL_GATE",
 					"surface": "승인 기준"
@@ -9444,13 +9697,13 @@
 					"DL_P1_OBSERVATION_ETIQUETTE"
 				],
 				"eventFamily": "observation",
-				"eventId": "text_surface_read-004-1779107986791",
+				"eventId": "text_surface_read-004-1779109575413",
 				"eventName": "text_surface_read",
 				"schemaVersion": "godot-runtime-v1",
 				"sessionId": "dre-171-playable-session",
 				"summary": "Read TS_Park_NoticeBoard as local context before speaking.",
 				"textSurfaceId": "TS_Park_NoticeBoard",
-				"timestampMs": 1779107986791,
+				"timestampMs": 1779109575413,
 				"uiSummaryArgs": {
 					"law": "DL_P1_OBSERVATION_ETIQUETTE",
 					"surface": "공지 게시판"
@@ -9466,7 +9719,7 @@
 				"conversationId": "conv-same-order",
 				"conversationStage": "normal",
 				"eventFamily": "domain",
-				"eventId": "conversation_started-005-1779107986822",
+				"eventId": "conversation_started-005-1779109575507",
 				"eventName": "conversation_started",
 				"outcome": "running",
 				"promptId": "store.same_order.routine",
@@ -9475,7 +9728,7 @@
 				"socialLoopStage": "normal",
 				"speakerId": "NPC_Store_Clerk",
 				"summary": "Store Clerk opened the Same Order conversation.",
-				"timestampMs": 1779107986822,
+				"timestampMs": 1779109575507,
 				"turnId": "turn-1",
 				"worldId": "dre_171_godot_shell",
 				"worldRevision": "rev-social-stealth-v1"
@@ -9488,7 +9741,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "응답 지연 12000ms",
 				"eventFamily": "domain",
-				"eventId": "response_hesitation_noted-006-1779107986841",
+				"eventId": "response_hesitation_noted-006-1779109575531",
 				"eventName": "response_hesitation_noted",
 				"inputMode": "response_hesitation",
 				"outcome": "running",
@@ -9509,7 +9762,7 @@
 				"suspicionSignals": [
 					"response_hesitation"
 				],
-				"timestampMs": 1779107986841,
+				"timestampMs": 1779109575531,
 				"turnId": "turn-1",
 				"whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
 				"whyLineKey": "response_hesitation",
@@ -9524,7 +9777,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "dialogue_choice_selected-007-1779107986855",
+				"eventId": "dialogue_choice_selected-007-1779109575549",
 				"eventName": "dialogue_choice_selected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -9546,7 +9799,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779107986855,
+				"timestampMs": 1779109575549,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -9561,7 +9814,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-008-1779107986855",
+				"eventId": "conversation_anomaly_detected-008-1779109575549",
 				"eventName": "conversation_anomaly_detected",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -9583,7 +9836,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779107986855,
+				"timestampMs": 1779109575549,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -9598,7 +9851,7 @@
 				"conversationStage": "uneasy",
 				"displayedPlayerLine": "오늘 처음 왔는데요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-009-1779107986855",
+				"eventId": "npc_suspicion_changed-009-1779109575549",
 				"eventName": "npc_suspicion_changed",
 				"inputMode": "choice",
 				"outcome": "running",
@@ -9620,7 +9873,7 @@
 				"suspicionSignals": [
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779107986855,
+				"timestampMs": 1779109575549,
 				"turnId": "turn-1",
 				"whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
 				"whyLineKey": "local_routine_mismatch",
@@ -9635,7 +9888,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "free_input_submitted-010-1779107986874",
+				"eventId": "free_input_submitted-010-1779109575577",
 				"eventName": "free_input_submitted",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9660,7 +9913,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779107986874,
+				"timestampMs": 1779109575577,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9675,7 +9928,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "conversation_anomaly_detected-011-1779107986874",
+				"eventId": "conversation_anomaly_detected-011-1779109575577",
 				"eventName": "conversation_anomaly_detected",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9700,7 +9953,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779107986874,
+				"timestampMs": 1779109575577,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9715,7 +9968,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "npc_suspicion_changed-012-1779107986874",
+				"eventId": "npc_suspicion_changed-012-1779109575577",
 				"eventName": "npc_suspicion_changed",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9740,7 +9993,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779107986874,
+				"timestampMs": 1779109575577,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9755,7 +10008,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "suspicion_shared-013-1779107986874",
+				"eventId": "suspicion_shared-013-1779109575577",
 				"eventName": "suspicion_shared",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9780,7 +10033,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779107986874,
+				"timestampMs": 1779109575577,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9795,7 +10048,7 @@
 				"conversationStage": "reported",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_report_created-014-1779107986876",
+				"eventId": "station_report_created-014-1779109575577",
 				"eventName": "station_report_created",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9820,7 +10073,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779107986876,
+				"timestampMs": 1779109575577,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9835,7 +10088,7 @@
 				"conversationStage": "inquest",
 				"displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
 				"eventFamily": "domain",
-				"eventId": "station_inquest_opened-015-1779107986877",
+				"eventId": "station_inquest_opened-015-1779109575578",
 				"eventName": "station_inquest_opened",
 				"freeInputHash": "free-17-3317429208",
 				"inputMode": "typed_free_input",
@@ -9860,7 +10113,7 @@
 					"dream_language_leak",
 					"local_routine_mismatch"
 				],
-				"timestampMs": 1779107986877,
+				"timestampMs": 1779109575578,
 				"turnId": "turn-2",
 				"whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
 				"whyLineKey": "dream_language_leak",
@@ -9870,7 +10123,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-016-1779107986933",
+				"eventId": "world_record_prop_inspected-016-1779109575642",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "park_notice_board",
 				"schemaVersion": "godot-runtime-v1",
@@ -9878,7 +10131,7 @@
 				"state": "rumored",
 				"stateLabel": "소문 게시",
 				"summary": "Inspected world record prop park_notice_board in state rumored.",
-				"timestampMs": 1779107986933,
+				"timestampMs": 1779109575642,
 				"uiSummaryArgs": {
 					"object": "공원 게시판",
 					"state": "소문 게시"
@@ -9890,7 +10143,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-017-1779107986969",
+				"eventId": "world_record_prop_inspected-017-1779109575683",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "studio_review_queue",
 				"schemaVersion": "godot-runtime-v1",
@@ -9898,7 +10151,7 @@
 				"state": "blocked",
 				"stateLabel": "차단",
 				"summary": "Inspected world record prop studio_review_queue in state blocked.",
-				"timestampMs": 1779107986969,
+				"timestampMs": 1779109575683,
 				"uiSummaryArgs": {
 					"object": "스튜디오 리뷰 줄",
 					"state": "차단"
@@ -9910,7 +10163,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-018-1779107986999",
+				"eventId": "world_record_prop_inspected-018-1779109575720",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_economy_panel",
 				"schemaVersion": "godot-runtime-v1",
@@ -9918,7 +10171,7 @@
 				"state": "attention",
 				"stateLabel": "주목 상승",
 				"summary": "Inspected world record prop civic_economy_panel in state attention.",
-				"timestampMs": 1779107986999,
+				"timestampMs": 1779109575720,
 				"uiSummaryArgs": {
 					"object": "시민 경제",
 					"state": "주목 상승"
@@ -9930,7 +10183,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "world_record_prop_inspected-019-1779107987034",
+				"eventId": "world_record_prop_inspected-019-1779109575757",
 				"eventName": "world_record_prop_inspected",
 				"objectId": "civic_ledger",
 				"schemaVersion": "godot-runtime-v1",
@@ -9938,7 +10191,7 @@
 				"state": "append_only",
 				"stateLabel": "추가됨",
 				"summary": "Inspected world record prop civic_ledger in state append_only.",
-				"timestampMs": 1779107987034,
+				"timestampMs": 1779109575757,
 				"uiSummaryArgs": {
 					"object": "시민 장부",
 					"state": "추가됨"
@@ -9950,7 +10203,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-020-1779107987062",
+				"eventId": "npc_reaction_inspected-020-1779109575803",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Studio_PM",
 				"reactionText": "리뷰 차단",
@@ -9958,7 +10211,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "blocked",
 				"summary": "Inspected NPC reaction NPC_Studio_PM in state blocked.",
-				"timestampMs": 1779107987062,
+				"timestampMs": 1779109575803,
 				"uiSummaryArgs": {
 					"npc": "Studio PM",
 					"state": "리뷰 차단"
@@ -9970,7 +10223,7 @@
 			{
 				"adapter": "godot",
 				"eventFamily": "observation",
-				"eventId": "npc_reaction_inspected-021-1779107987096",
+				"eventId": "npc_reaction_inspected-021-1779109575839",
 				"eventName": "npc_reaction_inspected",
 				"npcId": "NPC_Waiting_Customer",
 				"reactionText": "접촉 거부",
@@ -9978,7 +10231,7 @@
 				"sessionId": "dre-171-playable-session",
 				"state": "refused",
 				"summary": "Inspected NPC reaction NPC_Waiting_Customer in state refused.",
-				"timestampMs": 1779107987096,
+				"timestampMs": 1779109575839,
 				"uiSummaryArgs": {
 					"npc": "Waiting Customer",
 					"state": "접촉 거부"
@@ -10059,7 +10312,8 @@
 					"objectId": "studio_review_queue",
 					"perceivedObjectIds": [
 						"park_notice_board",
-						"studio_review_queue"
+						"studio_review_queue",
+						"civic_economy_panel"
 					],
 					"recordId": "studio_public_review_blocked",
 					"selectedActionDescriptor": {
@@ -10307,7 +10561,8 @@
 						"store_queue_mark",
 						"store_counter",
 						"usual_order_cue",
-						"park_notice_board"
+						"park_notice_board",
+						"civic_economy_panel"
 					],
 					"recordId": "store_same_order_contact_refused",
 					"selectedActionDescriptor": {
@@ -10553,7 +10808,8 @@
 						"store_queue_mark",
 						"store_counter",
 						"usual_order_cue",
-						"park_notice_board"
+						"park_notice_board",
+						"civic_economy_panel"
 					],
 					"recordId": "store_same_order_contact_refused",
 					"selectedActionDescriptor": {
@@ -10799,7 +11055,8 @@
 						"store_queue_mark",
 						"store_counter",
 						"usual_order_cue",
-						"park_notice_board"
+						"park_notice_board",
+						"civic_economy_panel"
 					],
 					"recordId": "store_same_order_contact_refused",
 					"selectedActionDescriptor": {
@@ -11045,7 +11302,8 @@
 						"store_queue_mark",
 						"store_counter",
 						"usual_order_cue",
-						"park_notice_board"
+						"park_notice_board",
+						"civic_economy_panel"
 					],
 					"recordId": "store_same_order_contact_refused",
 					"selectedActionDescriptor": {
@@ -11291,7 +11549,8 @@
 						"store_queue_mark",
 						"store_counter",
 						"usual_order_cue",
-						"park_notice_board"
+						"park_notice_board",
+						"civic_economy_panel"
 					],
 					"recordId": "store_same_order_contact_refused",
 					"selectedActionDescriptor": {
@@ -11537,7 +11796,8 @@
 						"store_queue_mark",
 						"store_counter",
 						"usual_order_cue",
-						"park_notice_board"
+						"park_notice_board",
+						"civic_economy_panel"
 					],
 					"recordId": "store_same_order_contact_refused",
 					"selectedActionDescriptor": {
@@ -11784,7 +12044,8 @@
 					"store_queue_mark",
 					"store_counter",
 					"usual_order_cue",
-					"park_notice_board"
+					"park_notice_board",
+					"civic_economy_panel"
 				],
 				"recordId": "store_same_order_contact_refused",
 				"selectedActionDescriptor": {
@@ -11969,12 +12230,19 @@
 				"title": "스튜디오 리뷰 줄"
 			},
 			{
-				"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
+				"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 				"currentAffordanceLabels": [],
 				"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
 				"objectId": "civic_economy_panel",
 				"possibleAffordanceLabels": [],
-				"readerRoleLabels": [],
+				"readerRoleLabels": [
+					"상점 점원",
+					"상점 매니저",
+					"대기 손님",
+					"공원 목격자",
+					"스튜디오 PM",
+					"스테이션 직원"
+				],
 				"recentLedgerEvents": [
 					{
 						"actorRole": "waiting_customer",
@@ -12908,7 +13176,8 @@
 						"usual_order_cue",
 						"receipt_tray",
 						"correction_slip",
-						"report_tray"
+						"report_tray",
+						"civic_economy_panel"
 					],
 					"recordId": "store_same_order_receipt",
 					"selectedActionDescriptor": {
@@ -13144,7 +13413,8 @@
 						"usual_order_cue",
 						"receipt_tray",
 						"correction_slip",
-						"report_tray"
+						"report_tray",
+						"civic_economy_panel"
 					],
 					"recordId": "store_same_order_clerk_statement",
 					"selectedActionDescriptor": {
@@ -13409,7 +13679,8 @@
 						"store_queue_mark",
 						"store_counter",
 						"usual_order_cue",
-						"park_notice_board"
+						"park_notice_board",
+						"civic_economy_panel"
 					],
 					"recordId": "store_same_order_queue_delay",
 					"selectedActionDescriptor": {
@@ -13672,7 +13943,8 @@
 					"ledgerEventKind": "public_rumor_posted",
 					"objectId": "park_notice_board",
 					"perceivedObjectIds": [
-						"park_notice_board"
+						"park_notice_board",
+						"civic_economy_panel"
 					],
 					"recordId": "park_public_rumor",
 					"selectedActionDescriptor": {
@@ -13955,7 +14227,8 @@
 						"usual_order_cue",
 						"receipt_tray",
 						"correction_slip",
-						"report_tray"
+						"report_tray",
+						"civic_economy_panel"
 					],
 					"recordId": "store_same_order_clerk_statement",
 					"selectedActionDescriptor": {
@@ -14071,7 +14344,8 @@
 					"perceivedObjectIds": [
 						"report_tray",
 						"station_dossier",
-						"civic_ledger"
+						"civic_ledger",
+						"civic_economy_panel"
 					],
 					"recordId": "station_same_order_dossier",
 					"selectedActionDescriptor": {
@@ -14190,7 +14464,8 @@
 					"objectId": "studio_review_queue",
 					"perceivedObjectIds": [
 						"park_notice_board",
-						"studio_review_queue"
+						"studio_review_queue",
+						"civic_economy_panel"
 					],
 					"recordId": "studio_public_review_blocked",
 					"selectedActionDescriptor": {
@@ -14407,7 +14682,8 @@
 						"store_queue_mark",
 						"store_counter",
 						"usual_order_cue",
-						"park_notice_board"
+						"park_notice_board",
+						"civic_economy_panel"
 					],
 					"recordId": "store_same_order_contact_refused",
 					"selectedActionDescriptor": {
@@ -14669,7 +14945,8 @@
 						"objectId": "studio_review_queue",
 						"perceivedObjectIds": [
 							"park_notice_board",
-							"studio_review_queue"
+							"studio_review_queue",
+							"civic_economy_panel"
 						],
 						"recordId": "studio_public_review_blocked",
 						"selectedActionDescriptor": {
@@ -14917,7 +15194,8 @@
 							"store_queue_mark",
 							"store_counter",
 							"usual_order_cue",
-							"park_notice_board"
+							"park_notice_board",
+							"civic_economy_panel"
 						],
 						"recordId": "store_same_order_contact_refused",
 						"selectedActionDescriptor": {
@@ -15164,7 +15442,8 @@
 						"store_queue_mark",
 						"store_counter",
 						"usual_order_cue",
-						"park_notice_board"
+						"park_notice_board",
+						"civic_economy_panel"
 					],
 					"recordId": "store_same_order_contact_refused",
 					"selectedActionDescriptor": {
@@ -15349,12 +15628,19 @@
 					"title": "스튜디오 리뷰 줄"
 				},
 				{
-					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
+					"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 					"currentAffordanceLabels": [],
 					"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
 					"objectId": "civic_economy_panel",
 					"possibleAffordanceLabels": [],
-					"readerRoleLabels": [],
+					"readerRoleLabels": [
+						"상점 점원",
+						"상점 매니저",
+						"대기 손님",
+						"공원 목격자",
+						"스튜디오 PM",
+						"스테이션 직원"
+					],
 					"recentLedgerEvents": [
 						{
 							"actorRole": "waiting_customer",
@@ -16275,7 +16561,8 @@
 				"store_queue_mark",
 				"store_counter",
 				"usual_order_cue",
-				"park_notice_board"
+				"park_notice_board",
+				"civic_economy_panel"
 			]
 		},
 		"actorPolicy": {
@@ -16308,7 +16595,14 @@
 			"ledger:civic-ledger-8:queue_contact_refused:refuse_contact",
 			"ledger:civic-ledger-7:studio_review_blocked:block_review"
 		],
-		"role": "waiting_customer"
+		"role": "waiting_customer",
+		"visibleEnvironmentObjectIds": [
+			"store_queue_mark",
+			"store_counter",
+			"usual_order_cue",
+			"park_notice_board",
+			"civic_economy_panel"
+		]
 	},
 	"purpose": "Codex gameplay QA interface for running the actual Same Order Godot scene, applying bounded player inputs, reading environment state, and checking NPC-to-NPC social reactions.",
 	"routeReports": [
@@ -16858,6 +17152,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "blank",
+							"stateLabel": "빈칸"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 50,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -17240,6 +17577,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "blank",
+							"stateLabel": "빈칸"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 50,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -17622,6 +18002,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "blank",
+							"stateLabel": "빈칸"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 50,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -18004,6 +18427,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "blank",
+							"stateLabel": "빈칸"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 50,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -18359,6 +18825,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "helped",
+							"stateLabel": "도움 공유"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "cited",
+							"stateLabel": "인용됨"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "normal",
+							"stateLabel": "정상"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 2,
+								"localTrust": 60,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -18714,6 +19223,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "helped",
+							"stateLabel": "도움 공유"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "cited",
+							"stateLabel": "인용됨"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "normal",
+							"stateLabel": "정상"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 2,
+								"localTrust": 60,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -19104,6 +19656,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "helped",
+							"stateLabel": "도움 공유"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "cited",
+							"stateLabel": "인용됨"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "normal",
+							"stateLabel": "정상"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 2,
+								"localTrust": 60,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -19799,6 +20394,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "blank",
+							"stateLabel": "빈칸"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 50,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -20181,6 +20819,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "blank",
+							"stateLabel": "빈칸"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 50,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -20563,6 +21244,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "blank",
+							"stateLabel": "빈칸"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 50,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -20879,6 +21603,49 @@
 						"stage": "uneasy",
 						"suspicion": 20
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "marked",
+							"stateLabel": "표시됨"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "offered",
+							"stateLabel": "제안됨"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 45,
+								"recordBurden": 20,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "trust_low",
+							"stateLabel": "신뢰 하락"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -21150,6 +21917,49 @@
 						"stage": "uneasy",
 						"suspicion": 20
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "settled",
+							"stateLabel": "줄 안정"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "marked",
+							"stateLabel": "표시됨"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "attached",
+							"stateLabel": "첨부됨"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 2,
+								"localTrust": 49,
+								"recordBurden": 23,
+								"stationAttention": 5
+							},
+							"objectId": "civic_economy_panel",
+							"state": "trust_low",
+							"stateLabel": "신뢰 하락"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -21421,6 +22231,49 @@
 						"stage": "uneasy",
 						"suspicion": 20
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "settled",
+							"stateLabel": "줄 안정"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "marked",
+							"stateLabel": "표시됨"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "attached",
+							"stateLabel": "첨부됨"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 2,
+								"localTrust": 49,
+								"recordBurden": 23,
+								"stationAttention": 5
+							},
+							"objectId": "civic_economy_panel",
+							"state": "trust_low",
+							"stateLabel": "신뢰 하락"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -21729,6 +22582,49 @@
 						"stage": "uneasy",
 						"suspicion": 20
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "settled",
+							"stateLabel": "줄 안정"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "marked",
+							"stateLabel": "표시됨"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "attached",
+							"stateLabel": "첨부됨"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 2,
+								"localTrust": 49,
+								"recordBurden": 23,
+								"stationAttention": 5
+							},
+							"objectId": "civic_economy_panel",
+							"state": "trust_low",
+							"stateLabel": "신뢰 하락"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -22037,6 +22933,49 @@
 						"stage": "uneasy",
 						"suspicion": 20
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "settled",
+							"stateLabel": "줄 안정"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "marked",
+							"stateLabel": "표시됨"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "attached",
+							"stateLabel": "첨부됨"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 2,
+								"localTrust": 49,
+								"recordBurden": 23,
+								"stationAttention": 5
+							},
+							"objectId": "civic_economy_panel",
+							"state": "trust_low",
+							"stateLabel": "신뢰 하락"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -22343,6 +23282,49 @@
 						"stage": "uneasy",
 						"suspicion": 20
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "settled",
+							"stateLabel": "줄 안정"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "marked",
+							"stateLabel": "표시됨"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "attached",
+							"stateLabel": "첨부됨"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 2,
+								"localTrust": 49,
+								"recordBurden": 23,
+								"stationAttention": 5
+							},
+							"objectId": "civic_economy_panel",
+							"state": "trust_low",
+							"stateLabel": "신뢰 하락"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -23032,6 +24014,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "blank",
+							"stateLabel": "빈칸"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 50,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -23414,6 +24439,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "blank",
+							"stateLabel": "빈칸"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 50,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -23796,6 +24864,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "blank",
+							"stateLabel": "빈칸"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 50,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -24107,6 +25218,49 @@
 						"stage": "uneasy",
 						"suspicion": 35
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "marked",
+							"stateLabel": "표시됨"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 45,
+								"recordBurden": 15,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "trust_low",
+							"stateLabel": "신뢰 하락"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -24419,6 +25573,49 @@
 						"stage": "uneasy",
 						"suspicion": 35
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "distanced",
+							"stateLabel": "거리 둠"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "marked",
+							"stateLabel": "표시됨"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 40,
+								"recordBurden": 26,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "trust_low",
+							"stateLabel": "신뢰 하락"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -24731,6 +25928,49 @@
 						"stage": "uneasy",
 						"suspicion": 35
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "distanced",
+							"stateLabel": "거리 둠"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "marked",
+							"stateLabel": "표시됨"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 40,
+								"recordBurden": 26,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "trust_low",
+							"stateLabel": "신뢰 하락"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -25078,6 +26318,49 @@
 						"stage": "uneasy",
 						"suspicion": 35
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "distanced",
+							"stateLabel": "거리 둠"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "marked",
+							"stateLabel": "표시됨"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 40,
+								"recordBurden": 26,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "trust_low",
+							"stateLabel": "신뢰 하락"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -25731,6 +27014,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "blank",
+							"stateLabel": "빈칸"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 50,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -26113,6 +27439,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "blank",
+							"stateLabel": "빈칸"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 50,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -26495,6 +27864,49 @@
 						"stage": "normal",
 						"suspicion": 0
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "blank",
+							"stateLabel": "빈칸"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 50,
+								"recordBurden": 0,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "stable",
+							"stateLabel": "안정"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -26806,6 +28218,49 @@
 						"stage": "uneasy",
 						"suspicion": 35
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "player_waiting",
+							"stateLabel": "플레이어 대기"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "serving",
+							"stateLabel": "응대 중"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "marked",
+							"stateLabel": "표시됨"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 45,
+								"recordBurden": 15,
+								"stationAttention": 0
+							},
+							"objectId": "civic_economy_panel",
+							"state": "trust_low",
+							"stateLabel": "신뢰 하락"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -27076,6 +28531,49 @@
 						"stage": "reported",
 						"suspicion": 95
 					},
+					"visibleEnvironmentObjects": [
+						{
+							"objectId": "store_queue_mark",
+							"state": "empty",
+							"stateLabel": "비어 있음"
+						},
+						{
+							"objectId": "store_counter",
+							"state": "paused",
+							"stateLabel": "응대 중단"
+						},
+						{
+							"objectId": "usual_order_cue",
+							"state": "read",
+							"stateLabel": "읽힘"
+						},
+						{
+							"objectId": "receipt_tray",
+							"state": "marked",
+							"stateLabel": "표시됨"
+						},
+						{
+							"objectId": "correction_slip",
+							"state": "absent",
+							"stateLabel": "없음"
+						},
+						{
+							"objectId": "report_tray",
+							"state": "pending",
+							"stateLabel": "대기"
+						},
+						{
+							"civicEconomy": {
+								"accountCredit": 3,
+								"localTrust": 2,
+								"recordBurden": 100,
+								"stationAttention": 60
+							},
+							"objectId": "civic_economy_panel",
+							"state": "burden",
+							"stateLabel": "부담 증가"
+						}
+					],
 					"worldRecordProps": {
 						"civic_economy_panel": {
 							"hasBody": true,
@@ -27447,7 +28945,8 @@
 							"store_queue_mark",
 							"store_counter",
 							"usual_order_cue",
-							"park_notice_board"
+							"park_notice_board",
+							"civic_economy_panel"
 						],
 						"recordId": "store_same_order_contact_refused",
 						"selectedActionDescriptor": {
@@ -28155,6 +29654,49 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "player_waiting",
+					"stateLabel": "플레이어 대기"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "blank",
+					"stateLabel": "빈칸"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "empty",
+					"stateLabel": "비어 있음"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 50,
+						"recordBurden": 0,
+						"stationAttention": 0
+					},
+					"objectId": "civic_economy_panel",
+					"state": "stable",
+					"stateLabel": "안정"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -28537,6 +30079,49 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "player_waiting",
+					"stateLabel": "플레이어 대기"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "blank",
+					"stateLabel": "빈칸"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "empty",
+					"stateLabel": "비어 있음"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 50,
+						"recordBurden": 0,
+						"stationAttention": 0
+					},
+					"objectId": "civic_economy_panel",
+					"state": "stable",
+					"stateLabel": "안정"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -28940,6 +30525,49 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "player_waiting",
+					"stateLabel": "플레이어 대기"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "blank",
+					"stateLabel": "빈칸"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "empty",
+					"stateLabel": "비어 있음"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 50,
+						"recordBurden": 0,
+						"stationAttention": 0
+					},
+					"objectId": "civic_economy_panel",
+					"state": "stable",
+					"stateLabel": "안정"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -29343,6 +30971,49 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "player_waiting",
+					"stateLabel": "플레이어 대기"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "blank",
+					"stateLabel": "빈칸"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "empty",
+					"stateLabel": "비어 있음"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 50,
+						"recordBurden": 0,
+						"stationAttention": 0
+					},
+					"objectId": "civic_economy_panel",
+					"state": "stable",
+					"stateLabel": "안정"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -29746,6 +31417,49 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "player_waiting",
+					"stateLabel": "플레이어 대기"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "blank",
+					"stateLabel": "빈칸"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "empty",
+					"stateLabel": "비어 있음"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 50,
+						"recordBurden": 0,
+						"stationAttention": 0
+					},
+					"objectId": "civic_economy_panel",
+					"state": "stable",
+					"stateLabel": "안정"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -30149,6 +31863,49 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "player_waiting",
+					"stateLabel": "플레이어 대기"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "blank",
+					"stateLabel": "빈칸"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "empty",
+					"stateLabel": "비어 있음"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 50,
+						"recordBurden": 0,
+						"stationAttention": 0
+					},
+					"objectId": "civic_economy_panel",
+					"state": "stable",
+					"stateLabel": "안정"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -30552,6 +32309,49 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "player_waiting",
+					"stateLabel": "플레이어 대기"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "blank",
+					"stateLabel": "빈칸"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "empty",
+					"stateLabel": "비어 있음"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 50,
+						"recordBurden": 0,
+						"stationAttention": 0
+					},
+					"objectId": "civic_economy_panel",
+					"state": "stable",
+					"stateLabel": "안정"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -30955,6 +32755,49 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "player_waiting",
+					"stateLabel": "플레이어 대기"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "blank",
+					"stateLabel": "빈칸"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "empty",
+					"stateLabel": "비어 있음"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 50,
+						"recordBurden": 0,
+						"stationAttention": 0
+					},
+					"objectId": "civic_economy_panel",
+					"state": "stable",
+					"stateLabel": "안정"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -31358,6 +33201,49 @@
 				"stage": "normal",
 				"suspicion": 0
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "player_waiting",
+					"stateLabel": "플레이어 대기"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "blank",
+					"stateLabel": "빈칸"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "empty",
+					"stateLabel": "비어 있음"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 50,
+						"recordBurden": 0,
+						"stationAttention": 0
+					},
+					"objectId": "civic_economy_panel",
+					"state": "stable",
+					"stateLabel": "안정"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -31761,6 +33647,49 @@
 				"stage": "uneasy",
 				"suspicion": 10
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "player_waiting",
+					"stateLabel": "플레이어 대기"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "blank",
+					"stateLabel": "빈칸"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "empty",
+					"stateLabel": "비어 있음"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 50,
+						"recordBurden": 0,
+						"stationAttention": 0
+					},
+					"objectId": "civic_economy_panel",
+					"state": "stable",
+					"stateLabel": "안정"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -32093,6 +34022,49 @@
 				"stage": "uneasy",
 				"suspicion": 45
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "player_waiting",
+					"stateLabel": "플레이어 대기"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "empty",
+					"stateLabel": "비어 있음"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 45,
+						"recordBurden": 15,
+						"stationAttention": 0
+					},
+					"objectId": "civic_economy_panel",
+					"state": "trust_low",
+					"stateLabel": "신뢰 하락"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -32380,6 +34352,49 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -32667,6 +34682,49 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -32972,6 +35030,49 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -33277,6 +35378,49 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -33578,6 +35722,49 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -33879,6 +36066,49 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -34091,7 +36321,7 @@
 				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 				"freeInputVisible": false,
 				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-				"noticeBodyLabel": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
+				"noticeBodyLabel": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 				"noticeTitleLabel": "시민 경제",
 				"noticeVisible": false,
 				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
@@ -34105,12 +36335,19 @@
 				"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
 			},
 			"inspectedWorldRecordProp": {
-				"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
+				"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 				"currentAffordanceLabels": [],
 				"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
 				"objectId": "civic_economy_panel",
 				"possibleAffordanceLabels": [],
-				"readerRoleLabels": [],
+				"readerRoleLabels": [
+					"상점 점원",
+					"상점 매니저",
+					"대기 손님",
+					"공원 목격자",
+					"스튜디오 PM",
+					"스테이션 직원"
+				],
 				"recentLedgerEvents": [
 					{
 						"actorRole": "waiting_customer",
@@ -34203,6 +36440,49 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -34415,7 +36695,7 @@
 				"freeInputPlaceholder": "직접 입력 후 Enter: 말은 상점 기록에 남습니다",
 				"freeInputVisible": false,
 				"investigationTrailLabel": "검사자: 스테이션 직원 | 대상: 플레이어 | 근거: civic-ledger-8 대기 손님 / 접촉 거부 / 접촉 거부 -> civic-ledger-6",
-				"noticeBodyLabel": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
+				"noticeBodyLabel": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 				"noticeTitleLabel": "시민 경제",
 				"noticeVisible": false,
 				"outcomeBodyLabel": "상점 대화 기록이 접수되었습니다.\n사슬: 플레이어 발화/응답 지연 -> 상점 기록 -> 대기줄 반응 -> 공원 게시 -> 보고 전달 -> 스테이션 인용 -> 스튜디오 리뷰 차단 -> 접촉 거부 -> 심문\n사회 반응: 대기 손님이 점원 기록을 보고 줄이 멈췄다고 말했고, 공원 목격자가 게시판에 소문을 남겼으며, 상점 관리자가 그 기록을 전달했고, 스테이션 직원이 전달 기록을 인용했습니다. 그 인용을 본 스튜디오 PM은 리뷰 줄을 차단하고, 대기 손님은 플레이어와 말 섞기를 거부했습니다.\n스테이션 인용: 보고 트레이에서 전달된 장부 civic-ledger-5\n역할 행동: 스테이션 직원이 전달된 Store 장부를 인용했고, 스튜디오 PM이 그 인용 기록으로 리뷰 대기열을 차단했으며, 대기 손님이 같은 인용 기록을 보고 대기 표식을 접촉 거부 상태로 바꿨습니다.\n대조 대상: 이전 발화와 방금 입력한 말\n기록된 why-line: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.\nR 다시 시작 / Q 종료",
@@ -34429,12 +36709,19 @@
 				"whyLineLabel": "WHY-LINE: 그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다."
 			},
 			"inspectedWorldRecordProp": {
-				"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
+				"body": "현재 작은 사회 값입니다. 잔액 3, 신뢰 0, 부담 93, 주목 70. 이 값은 한 NPC의 다음 선택을 바꿀 때만 쓰이며, 아래 최근 장부가 어떤 역할 행동이 값을 움직였는지 보여줍니다.\n읽는 역할: 상점 점원, 상점 매니저, 대기 손님, 공원 목격자, 스튜디오 PM, 스테이션 직원\n최근 장부: civic-ledger-8 접촉 거부 / 대기 손님 -> 접촉 거부 / 인용 civic-ledger-6 / 변화 신뢰-8, 부담+5 | civic-ledger-7 리뷰 차단 / 스튜디오 PM -> 리뷰 차단 / 인용 civic-ledger-6 / 변화 신뢰-2, 부담+3 | civic-ledger-5 보고 전달 / 상점 매니저 -> 보고 전달 / 변화 신뢰-20, 부담+25, 주목+40",
 				"currentAffordanceLabels": [],
 				"label": "시민 경제\n잔액 3 | 신뢰 0 | 부담 93 | 주목 70",
 				"objectId": "civic_economy_panel",
 				"possibleAffordanceLabels": [],
-				"readerRoleLabels": [],
+				"readerRoleLabels": [
+					"상점 점원",
+					"상점 매니저",
+					"대기 손님",
+					"공원 목격자",
+					"스튜디오 PM",
+					"스테이션 직원"
+				],
 				"recentLedgerEvents": [
 					{
 						"actorRole": "waiting_customer",
@@ -34527,6 +36814,49 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -34855,6 +37185,49 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -35183,6 +37556,49 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -35511,6 +37927,49 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -35839,6 +38298,49 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,
@@ -36167,6 +38669,49 @@
 				"stage": "inquest",
 				"suspicion": 125
 			},
+			"visibleEnvironmentObjects": [
+				{
+					"objectId": "store_queue_mark",
+					"state": "refused",
+					"stateLabel": "접촉 거부"
+				},
+				{
+					"objectId": "store_counter",
+					"state": "serving",
+					"stateLabel": "응대 중"
+				},
+				{
+					"objectId": "usual_order_cue",
+					"state": "read",
+					"stateLabel": "읽힘"
+				},
+				{
+					"objectId": "receipt_tray",
+					"state": "marked",
+					"stateLabel": "표시됨"
+				},
+				{
+					"objectId": "correction_slip",
+					"state": "absent",
+					"stateLabel": "없음"
+				},
+				{
+					"objectId": "report_tray",
+					"state": "forwarded",
+					"stateLabel": "전달"
+				},
+				{
+					"civicEconomy": {
+						"accountCredit": 3,
+						"localTrust": 0,
+						"recordBurden": 93,
+						"stationAttention": 70
+					},
+					"objectId": "civic_economy_panel",
+					"state": "attention",
+					"stateLabel": "주목 상승"
+				}
+			],
 			"worldRecordProps": {
 				"civic_economy_panel": {
 					"hasBody": true,

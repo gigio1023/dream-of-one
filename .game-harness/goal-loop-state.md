@@ -82,8 +82,11 @@ Latest completion audit:
   `aiPlayerReport.pass=true`, 23 accepted public actions, 5/5 route reports,
   all 23 explainability flags true, `canReadEnvironmentToolCatalog=true`, and
   no-live provider packet readiness for bounded `actorMemory` plus
-  `actorPolicy`. It also explicitly marks itself as not a replacement for
-  external comprehension.
+  `actorPolicy`. It now also exposes the civic economy panel through
+  `visibleEnvironmentObjects` in both the active Store conversation snapshot
+  and the Waiting Customer provider packet, so role agents can read the same
+  tiny social values the player inspects. It also explicitly marks itself as
+  not a replacement for external comprehension.
 - latest packaged-route evidence validates as a Godot Evidence Pack and
   conversation/suspicion proof for the single `inquest_opened` route with
   `packagedRouteSmokeProof=true`, `fallback_only_m1`, and
@@ -389,6 +392,12 @@ Latest AI-play interface check:
   deltas. This keeps the economy intentionally child-simple while making the
   important game point visible: one role action changed one shared value, and
   that value exists only because it can alter the next NPC choice.
+- latest game increment: the same civic economy panel is now a role-visible
+  environment object, not only a player inspection panel. `OBJECT_VISIBILITY`
+  includes `civic_economy_panel`, `visibleEnvironmentObjects` is exported in
+  conversation snapshots and `debug_live_provider_packet`, and the Codex
+  gameplay probe now fails unless the Waiting Customer provider packet can read
+  the attention-state economy panel alongside actor memory and policy.
 - latest game increment: repair recovery now travels one small step beyond the
   Park board. After `public_repair_noted`, Studio PM reads `park_notice_board`
   and `studio_review_queue`, uses `offer_conditional_review`, changes

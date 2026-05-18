@@ -286,6 +286,7 @@ func _provider_packet_memory_probe(session: Node) -> Dictionary:
 	var organization_context: Dictionary = provider_packet.get("organizationContext", {})
 	var actor_memory: Dictionary = organization_context.get("actorMemory", {})
 	var actor_policy: Dictionary = organization_context.get("actorPolicy", {})
+	var visible_environment_objects: Array = organization_context.get("visibleEnvironmentObjects", [])
 	var probe_pass := (
 		str(provider_packet.get("npcId", "")) == "NPC_Waiting_Customer"
 		and str(actor_memory.get("actorRole", "")) == "waiting_customer"
@@ -294,6 +295,7 @@ func _provider_packet_memory_probe(session: Node) -> Dictionary:
 		and Array(actor_policy.get("stableGoals", [])).has("keep_queue_moving")
 		and Array(actor_policy.get("priorityShifts", [])).has("station_citation_can_unlock_refusal")
 		and Array(actor_policy.get("forbiddenClaims", [])).has("do_not_infer_private_player_intent")
+		and _visible_environment_objects_have_civic_economy(visible_environment_objects, true)
 	)
 	return {
 		"pass": probe_pass,
@@ -303,6 +305,7 @@ func _provider_packet_memory_probe(session: Node) -> Dictionary:
 		"actorMemory": actor_memory,
 		"actorPolicy": actor_policy,
 		"environmentToolCount": Array(organization_context.get("environmentToolCatalog", [])).size(),
+		"visibleEnvironmentObjectIds": _visible_environment_object_ids(visible_environment_objects),
 		"recentEvents": provider_packet.get("recentEvents", [])
 	}
 
@@ -656,6 +659,7 @@ func _snapshot(label: String, session: Node) -> Dictionary:
 		"availableChoices": summary.get("conversation", {}).get("availableChoices", []),
 		"environmentToolCatalog": summary.get("conversation", {}).get("environmentToolCatalog", []),
 		"environmentToolSummary": summary.get("conversation", {}).get("environmentToolSummary", []),
+		"visibleEnvironmentObjects": _compact_visible_environment_objects(summary.get("conversation", {}).get("visibleEnvironmentObjects", [])),
 		"recordObjects": summary.get("recordObjects", {}),
 		"civicEconomy": summary.get("civicEconomy", {}),
 		"latestLedger": _latest_ledger(summary),
@@ -1188,6 +1192,49 @@ func _tool_catalog_has(tool_catalog: Array, object_id: String, affordance: Strin
 			continue
 		if str(action.get("objectId", "")) == object_id and str(action.get("affordance", "")) == affordance:
 			return true
+	return false
+
+func _visible_environment_object_ids(objects: Array) -> Array[String]:
+	var ids: Array[String] = []
+	for object in objects:
+		if not object is Dictionary:
+			continue
+		var object_id := str(object.get("objectId", ""))
+		if not object_id.is_empty():
+			ids.append(object_id)
+	return ids
+
+func _compact_visible_environment_objects(objects: Array) -> Array[Dictionary]:
+	var compact: Array[Dictionary] = []
+	for object in objects:
+		if not object is Dictionary:
+			continue
+		var object_id := str(object.get("objectId", ""))
+		if object_id.is_empty():
+			continue
+		var item := {
+			"objectId": object_id,
+			"state": str(object.get("state", "")),
+			"stateLabel": str(object.get("stateLabel", ""))
+		}
+		if object_id == "civic_economy_panel":
+			item["civicEconomy"] = object.get("civicEconomy", {})
+		compact.append(item)
+	return compact
+
+func _visible_environment_objects_have_civic_economy(objects: Array, require_attention: bool) -> bool:
+	for object in objects:
+		if not object is Dictionary:
+			continue
+		if str(object.get("objectId", "")) != "civic_economy_panel":
+			continue
+		var economy: Dictionary = object.get("civicEconomy", {})
+		if economy.is_empty():
+			return false
+		if require_attention and int(economy.get("stationAttention", 0)) < 70:
+			return false
+		var label := str(object.get("label", ""))
+		return label.contains("잔액") and label.contains("신뢰") and label.contains("부담") and label.contains("주목")
 	return false
 
 func _inspected_public_notice(summary: Dictionary) -> bool:

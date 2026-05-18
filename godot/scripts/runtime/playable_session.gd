@@ -73,7 +73,15 @@ const OBJECT_VISIBILITY := {
 	"park_notice_board": ["park_witness", "waiting_customer", "studio_pm"],
 	"studio_review_queue": ["studio_pm"],
 	"station_dossier": ["station_officer"],
-	"civic_ledger": ["station_officer"]
+	"civic_ledger": ["station_officer"],
+	"civic_economy_panel": [
+		"store_clerk",
+		"store_manager",
+		"waiting_customer",
+		"park_witness",
+		"studio_pm",
+		"station_officer"
+	]
 }
 
 const ENVIRONMENT_OBJECT_ORDER := [
@@ -86,7 +94,8 @@ const ENVIRONMENT_OBJECT_ORDER := [
 	"park_notice_board",
 	"studio_review_queue",
 	"station_dossier",
-	"civic_ledger"
+	"civic_ledger",
+	"civic_economy_panel"
 ]
 
 const ENVIRONMENT_AFFORDANCE_ORDER := [
@@ -623,6 +632,7 @@ func debug_live_provider_packet(session_id_override: String = "", actor_id_overr
 		actor_id = "NPC_Store_Clerk"
 	var actor_role := str(ACTOR_AGENT_ROLES.get(actor_id, "store_clerk"))
 	var tool_catalog := _compact_provider_tool_catalog(_environment_tool_catalog_for_actor(actor_id))
+	var visible_environment_objects := _provider_visible_environment_objects_for_actor(actor_id)
 	var tool_summaries := _environment_tool_summary_lines_for_actor(actor_id)
 	var recent_events: Array[String] = [
 		"stage:%s" % stage,
@@ -668,6 +678,7 @@ func debug_live_provider_packet(session_id_override: String = "", actor_id_overr
 			"currentTurnId": current_turn_id,
 			"availableChoices": _provider_available_choices_for_actor(actor_id, beat),
 			"environmentToolCatalog": tool_catalog,
+			"visibleEnvironmentObjects": visible_environment_objects,
 			"providerJobId": "%s.%s.live-wording-proposal" % [route_outcome, current_prompt_id]
 		},
 		"playerSignals": {
@@ -803,6 +814,35 @@ func _compact_provider_tool_catalog(tool_catalog: Array[Dictionary]) -> Array[Di
 		if compact.size() >= 4:
 			break
 	return compact
+
+func _provider_visible_environment_objects_for_actor(actor_id: String) -> Array[Dictionary]:
+	var actor_role := str(ACTOR_AGENT_ROLES.get(actor_id, ""))
+	if actor_role.is_empty():
+		return []
+	_refresh_world_record_props()
+	var snapshot := _world_record_prop_snapshot()
+	var visible_objects: Array[Dictionary] = []
+	for object_id in _visible_object_ids(actor_role):
+		if not snapshot.has(object_id):
+			continue
+		var prop: Dictionary = snapshot.get(object_id, {})
+		var state := str(prop.get("state", _world_record_prop_state(object_id)))
+		var object := {
+			"objectId": object_id,
+			"title": _world_record_prop_title(object_id),
+			"state": state,
+			"stateLabel": _record_state_value(state),
+			"label": str(prop.get("label", ""))
+		}
+		if object_id == "civic_economy_panel":
+			object["civicEconomy"] = civic_economy.duplicate(true)
+			object["recentLedgerEvents"] = _world_record_prop_recent_ledger_events(object_id, 2)
+		elif object_id == "civic_ledger":
+			object["recentLedgerEvents"] = _world_record_prop_recent_ledger_events(object_id, 2)
+		visible_objects.append(object)
+		if visible_objects.size() >= 8:
+			break
+	return visible_objects
 
 func debug_codex_gameplay_action(action_id: String, payload: Dictionary = {}) -> Dictionary:
 	var before := _codex_small_summary(build_summary())
@@ -964,6 +1004,7 @@ func build_summary() -> Dictionary:
 			"availableChoices": _current_choice_lines(),
 			"environmentToolCatalog": _current_environment_tool_catalog(),
 			"environmentToolSummary": _current_environment_tool_summary_lines(),
+			"visibleEnvironmentObjects": _current_visible_environment_objects(),
 			"recordedStatementLine": "",
 			"recordedStatementScope": "",
 			"recordedStatementAction": "",
@@ -3713,6 +3754,10 @@ func _environment_tool_catalog_for_actor(actor_id: String) -> Array[Dictionary]:
 func _current_environment_tool_summary_lines() -> Array[String]:
 	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
 	return _environment_tool_summary_lines_for_actor(str(beat.get("actorId", "")))
+
+func _current_visible_environment_objects() -> Array[Dictionary]:
+	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
+	return _provider_visible_environment_objects_for_actor(str(beat.get("actorId", "")))
 
 func _environment_tool_summary_lines_for_actor(actor_id: String) -> Array[String]:
 	var lines: Array[String] = []

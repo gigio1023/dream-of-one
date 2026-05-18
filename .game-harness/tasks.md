@@ -207,6 +207,10 @@ This checklist is not the issue source of truth. Use Linear for issue ownership.
 - [x] Make the civic economy panel player-readable as a tiny social-pressure
   record: Codex/player can inspect current credit/trust/burden/attention values
   and recent ledger deltas that show which role action moved them.
+- [x] Make the civic economy panel role-readable as shared environment context:
+  conversation snapshots and Waiting Customer provider packets now expose it in
+  `visibleEnvironmentObjects` so NPC agents can read the same tiny values the
+  player inspects.
 - [x] Make cross-place rule boards player-readable before speech: Codex/player
   can focus and read the Studio approval criteria and Park notice board as
   social rules that later ground public notice and review consequences.

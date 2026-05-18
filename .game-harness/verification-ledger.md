@@ -241,6 +241,14 @@ interact to read current tiny social values for `잔액`, `신뢰`, `부담`, an
 now fails if the panel cannot explain which visible role action moved those
 values from the player point of view.
 
+Latest civic-economy role-context addendum: the same panel is now available to
+role agents as shared environment context. `visibleEnvironmentObjects` is
+exported in the active conversation snapshot and in `debug_live_provider_packet`;
+the latest Codex gameplay probe confirms `conversation.start` includes
+`civic_economy_panel` and the Waiting Customer provider packet can read the
+attention-state panel while using bounded actor memory/policy. This is still a
+tiny value loop, not a broader economy system.
+
 Latest repair-conditional addendum: repair recovery now leaves a public
 environment record and one small cross-place consequence. Park Witness
 `post_repair_notice` changes `park_notice_board` to `repaired`; Studio PM then

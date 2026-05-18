@@ -137,6 +137,12 @@ Current M1 carry-in:
   Station citation, and Waiting Customer refusing contact from the same
   citation. This keeps the improvement focused on reusable social simulation
   readability, not Store/Station expansion.
+- latest small-slice carry-in: the civic economy panel is now also exported as
+  shared role-readable environment context. `visibleEnvironmentObjects` appears
+  in the current conversation snapshot and in `debug_live_provider_packet`; the
+  Waiting Customer provider packet must include `civic_economy_panel` before
+  the Codex gameplay probe passes. This keeps the tiny economy useful as an NPC
+  affordance signal instead of a HUD-only number.
 - latest small-slice carry-in: repair recovery now leaves a player-readable
   public environment record and one small cross-place consequence. Park Witness
   `post_repair_notice` sets `park_notice_board=repaired`; Studio PM reads that

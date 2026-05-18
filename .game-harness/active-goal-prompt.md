@@ -85,7 +85,11 @@ The work is not complete until current evidence proves all of the following:
 - Backend tests prove role-scoped affordance discovery, action validation,
   ledger creation, tiny economy deltas, exact citation of prior records, and
   rejection of unavailable or hidden actions.
-- Provider-shaped paths preserve backend-owned ledger and economy outcomes and cannot smuggle authority fields.
+- Provider-shaped paths preserve backend-owned ledger and economy outcomes and
+  cannot smuggle authority fields. If provider packets include actor memory or
+  policy, current proof must show that `actorMemory` is bounded to own validated
+  actions plus observed ledger events, and `actorPolicy` is bounded to stable
+  goals, priority shifts, action-selection policy, and forbidden claims.
 - Godot evidence shows the player can see the current example props, record
   states, latest ledger event, actor role, validated action, social pressure,
   and later citation.
@@ -129,6 +133,9 @@ The work is not complete until current evidence proves all of the following:
 - Do not call tests or generated packets player comprehension.
 - Do not call live provider behavior proven unless a budgeted live preflight succeeds.
 - Keep deterministic backend authority stronger than provider output.
+- Do not let provider memory or policy become hidden authority. Memory is
+  observed context; policy is role guidance. Neither may invent affordances,
+  records, private intent, Exposure, inquest, verdict, or session end.
 - Keep language, UI, and evidence focused on what the player can see, infer, and explain.
 - Maintain a stable AI-play interface for the active proof cell. In Godot, use
   public debug/action/snapshot APIs such as

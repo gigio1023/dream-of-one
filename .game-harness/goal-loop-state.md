@@ -138,9 +138,11 @@ Latest Ubuntu ARM environment setup:
   The noVNC listener binds to localhost. Current proof shows
   `Human play display: ready: X display :99 is present`, noVNC serves
   `vnc.html`, and the packaged app reaches the Godot GUI on that display under
-  a timeout launch. Observed human play still requires a fresh tester and an
-  explicit secure access path to the localhost noVNC endpoint, such as an SSH
-  tunnel.
+  a timeout launch. A local screen proof in
+  `build/display-session/same-order-display-proof.png` captured a 1280x720
+  nonblank root window with grayscale mean `21349.3`. Observed human play still
+  requires a fresh tester and an explicit secure access path to the localhost
+  noVNC endpoint, such as an SSH tunnel.
 
 Latest environment/auth awareness note:
 - Current work is on a headless Ubuntu ARM/aarch64 server, so future agents must

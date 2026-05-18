@@ -58,9 +58,11 @@ continue through small playable proofs.
 - Current local facilitator launch has a display path on this Ubuntu ARM shell:
   `.game-harness/scripts/run-local-display-session.sh` starts a localhost-bound
   Xvfb/fluxbox/x11vnc/noVNC stack, `--status` reports X display `:99` ready,
-  noVNC serves `vnc.html`, and a timeout launch reaches the Godot GUI. Observed
-  human play still requires a fresh tester and an explicit secure access path
-  to that localhost noVNC endpoint.
+  noVNC serves `vnc.html`, and a timeout launch reaches the Godot GUI. Local
+  screen proof captured `build/display-session/same-order-display-proof.png` as
+  a 1280x720 nonblank root-window screenshot with grayscale mean `21349.3`.
+  Observed human play still requires a fresh tester and an explicit secure
+  access path to that localhost noVNC endpoint.
 - Linear SoT routing is prepared but not created: the copy-ready draft targets
   `Dream-of-one` (`DRE`), but this session lacks both a Linear issue-create MCP
   mutation and `LINEAR_API_TOKEN` for GraphQL fallback.

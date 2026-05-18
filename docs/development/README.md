@@ -5,6 +5,7 @@ Use this directory for local setup, checks, CI rules, agent runbooks, and harnes
 | File | Use |
 |---|---|
 | [dev.md](dev.md) | Local setup, backend checks, Godot checks, and Evidence paths. |
+| [ai-provider-runtime.md](ai-provider-runtime.md) | AI provider contract, `openai-codex` runtime auth, and live proposal boundary. |
 | [ci-runner-policy.md](ci-runner-policy.md) | Required GitHub Actions runner policy. |
 | [agent-skills.md](agent-skills.md) | Repo-local and installed skill guidance. |
 | [agent/runbook.md](agent/runbook.md) | Agent execution loop and required checks. |

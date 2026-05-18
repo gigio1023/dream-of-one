@@ -22,6 +22,9 @@ export interface RuntimeConfig {
   evidenceOutputDir: string;
 }
 
+// Game AI providers are proposal workers, not game-state authorities.
+// `openai-codex` means the backend's Codex-compatible OAuth provider profile;
+// it must not be confused with Codex CLI login or a `codex exec` subprocess.
 export type OpenAiProposalProviderMode = "openai-api" | "openai-codex";
 export type ProposalProviderMode = "codex-cli" | OpenAiProposalProviderMode;
 
@@ -50,6 +53,8 @@ export interface OpenAiProposalBudgetConfig {
 export const OPENAI_PROPOSAL_GATEWAY_COMMAND = "__openai_api_proposal_provider__";
 export const OPENAI_API_BASE_URL = "https://api.openai.com/v1";
 export const OPENAI_CODEX_BASE_URL = "https://chatgpt.com/backend-api/codex";
+// Ignored repo-local OAuth store for the game provider. This is separate from
+// Codex CLI auth and is the first place to check for gameplay LLM auth.
 export const DEFAULT_OPENAI_CODEX_AUTH_STORE_PATH = "build/provider-auth/openai-codex-auth.json";
 export const DEFAULT_OPENAI_CODEX_AUTH_PROFILE = "default";
 export const DEFAULT_OPENAI_PROPOSAL_MODEL = "gpt-5.4-mini";
@@ -201,6 +206,8 @@ function extractAuthProfileCredential(value: unknown, profileName: string): stri
 }
 
 function readOpenAiCodexCredential(env: NodeJS.ProcessEnv): string {
+  // For gameplay, prefer the explicit provider token or repo-local profile
+  // store. Do not read Codex CLI's private cache here.
   const directCredential = parsePath(env.OPENAI_CODEX_ACCESS_TOKEN, "")
     || parsePath(env.OPENAI_CODEX_API_KEY, "");
   if (directCredential) return directCredential;

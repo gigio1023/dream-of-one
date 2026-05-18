@@ -82,6 +82,13 @@
   configured OpenAI Codex model until live Codex-provider discovery proves a
   cheaper Codex-supported model. Do not assume API `nano` models are available
   through the Codex provider.
+- When a task says "Codex auth" in relation to the game runtime, read
+  `docs/development/ai-provider-runtime.md` first. Check the backend
+  `openai-codex` auth profile store, usually
+  `build/provider-auth/openai-codex-auth.json`, without printing raw tokens.
+  Do not run `codex login`, `codex auth`, or `npm run openai-codex:login`
+  unless the provider auth store is missing, expired, rejected by proof, or the
+  user explicitly asks to refresh auth.
 
 ## Godot Runtime
 

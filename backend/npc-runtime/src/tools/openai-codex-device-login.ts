@@ -5,6 +5,9 @@ import {
   DEFAULT_OPENAI_CODEX_AUTH_STORE_PATH,
 } from "../config.js";
 
+// Creates the game runtime's `openai-codex` provider profile. This is not a
+// Codex CLI login helper; run it only when the backend provider auth store must
+// be created or refreshed.
 const OPENAI_AUTH_BASE_URL = "https://auth.openai.com";
 const OPENAI_CODEX_CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann";
 const OPENAI_CODEX_DEVICE_CALLBACK_URL = `${OPENAI_AUTH_BASE_URL}/deviceauth/callback`;

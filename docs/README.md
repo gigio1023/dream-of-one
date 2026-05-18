@@ -42,10 +42,11 @@ Use this page as the documentation map. README.md is the project entry point; th
 9. [Minimal civic economy model](direction/14-minimal-civic-economy-model.md)
 10. [Agentic social simulation model](direction/15-agentic-social-simulation-model.md)
 11. [Agentic prototype target](direction/16-agentic-prototype-target.md)
-12. [Game design](design/game-design.md)
-13. [Scenario docs](scenario/README.md)
-14. [Godot runtime path](runtime/godot/README.md)
-15. [Verification ledger](../.game-harness/verification-ledger.md)
+12. [AI provider runtime](development/ai-provider-runtime.md)
+13. [Game design](design/game-design.md)
+14. [Scenario docs](scenario/README.md)
+15. [Godot runtime path](runtime/godot/README.md)
+16. [Verification ledger](../.game-harness/verification-ledger.md)
 
 ## Current Truth
 
@@ -87,6 +88,8 @@ response storage is off by default; same-NPC continuity uses backend-owned
 workspace memory in the next prompt. Backend and Godot live proof records
 estimated caps and returned token usage, but ChatGPT Pro remaining quota is not
 exposed by the provider response.
+Game-runtime Codex auth means the backend provider profile described in
+[AI provider runtime](development/ai-provider-runtime.md), not Codex CLI login.
 
 The current prototype target is one small Store/Station environment where
 conversation changes records, environment affordances become available, role

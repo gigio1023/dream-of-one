@@ -17,6 +17,13 @@ used Godot `4.7.beta2.official.777579205` on 2026-05-17.
 npm run check --prefix backend/npc-runtime
 ```
 
+## AI Provider Runtime
+
+The active game LLM path is documented in
+[AI Provider Runtime](ai-provider-runtime.md). In this repo, "Codex auth" for
+gameplay means the backend `openai-codex` provider profile, not Codex CLI login.
+Check the provider auth store and backend smoke before starting any login flow.
+
 ## Test Discipline
 
 Tests should stay small and behavior-first. Add or keep a test only when it protects a real runtime contract, game consequence, provider boundary, Evidence shape, or regression. Avoid mock-heavy tests that mainly prove the mocked setup.

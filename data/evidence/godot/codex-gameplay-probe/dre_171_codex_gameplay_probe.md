@@ -36,7 +36,7 @@
 
 - Codex/player first inspected the usual-order cue, making the normal 'same order' procedure readable before choosing a line.
 - Codex/player read the Studio and Park rule boards as cross-place social rules, so later review and public-notice consequences are grounded before the Store line.
-- The active dialogue choices showed rule cues for normal receipt, correction slip, and report burden, so the player could connect each spoken line to an environment record consequence before choosing.
+- The active Store prompt exposed the current environment tool catalog for the Clerk role while keeping the three player choices as speech lines, so Codex/player could see what the place affords without treating choices as hardcoded outcomes.
 - Codex/player focused the Store counter and started the Store Clerk prompt.
 - Codex/player waited long enough to create a response hesitation record.
 - Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.
@@ -102,7 +102,7 @@
 - `canReadNpcToNpcChain`: `true`
 - `canInspectNormalProcedureCue`: `true`
 - `canReadCrossPlaceSocialRules`: `true`
-- `canReadDialogueRuleConsequences`: `true`
+- `canReadEnvironmentToolCatalog`: `true`
 - `canReadLiveHudSocialCitation`: `true`
 - `canReadLiveHudNearbyStances`: `true`
 - `canReadLiveHudRecordReaders`: `true`

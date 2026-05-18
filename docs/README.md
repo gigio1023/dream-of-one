@@ -71,6 +71,10 @@ records, affordances, visibility, and civic pressure, then let NPC role agents
 choose validated actions inside that world instead of hand-authoring every
 reaction branch.
 
+The current LLM/NPC method is tool-catalog-first: dialogue choices are player
+speech inputs, while Store/Station objects expose role-filtered tool
+descriptors that NPC agents may propose and the runtime must validate.
+
 The current prototype target is one small Store/Station environment where
 conversation changes records, environment affordances become available, role
 agents react, and Station later cites the ledger.

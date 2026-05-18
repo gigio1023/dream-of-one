@@ -478,6 +478,11 @@ Design baseline:
 - Environment-first agentic social simulation is the long-term society model:
   places, records, affordances, visibility, and economy pressure are authored;
   role actors then choose validated actions inside that world.
+- LLM/NPC implementation must stay tool-catalog-first: dialogue choices are
+  player speech inputs, not hardcoded consequence branches. Store/Station
+  objects expose role-filtered tool descriptors; the NPC/provider may propose
+  one action, and runtime validation owns object state, ledger mutation,
+  authority, and session gates.
 - The active prototype target is one tiny affordance-rich example environment
   where conversation changes object state, ledger entries, and social agent
   behavior before another actor or authority cites the prior record.

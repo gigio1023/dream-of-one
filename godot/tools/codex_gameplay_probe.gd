@@ -604,8 +604,8 @@ func _snapshot(label: String, session: Node) -> Dictionary:
 		"label": label,
 		"summary": _small_summary(summary),
 		"availableChoices": summary.get("conversation", {}).get("availableChoices", []),
-		"visibleChoiceLines": summary.get("conversation", {}).get("visibleChoiceLines", []),
-		"choiceRuleCues": summary.get("conversation", {}).get("choiceRuleCues", []),
+		"environmentToolCatalog": summary.get("conversation", {}).get("environmentToolCatalog", []),
+		"environmentToolSummary": summary.get("conversation", {}).get("environmentToolSummary", []),
 		"recordObjects": summary.get("recordObjects", {}),
 		"civicEconomy": summary.get("civicEconomy", {}),
 		"latestLedger": _latest_ledger(summary),
@@ -677,8 +677,8 @@ func _validate_probe(summary: Dictionary, hud_snapshot: Dictionary, record_props
 		failures.append("Codex/player did not inspect the usual-order cue before speaking")
 	if not bool(checks.get("codexReadCrossPlaceRuleBoards", false)):
 		failures.append("Codex/player did not read cross-place Studio/Park rule boards before speaking")
-	if not bool(checks.get("codexReadDialogueRuleCues", false)):
-		failures.append("Codex/player did not see dialogue choices connected to rule/record consequences")
+	if not bool(checks.get("codexReadEnvironmentToolCatalog", false)):
+		failures.append("Codex/player did not see the environment tool catalog before choosing a line")
 	if not bool(checks.get("worldPropsReachInquest", false)):
 		failures.append("World record props do not show forwarded report and cited Station dossier")
 	if not bool(checks.get("codexInspectedPublicNotice", false)):
@@ -712,7 +712,7 @@ func _npc_interaction_checks(summary: Dictionary, record_props: Dictionary, snap
 		"stationCitedExactLedger": _ledger_event_cites(summary, "station_record_cited", "civic-ledger-5"),
 		"codexInspectedUsualOrderCue": _inspected_usual_order_cue(summary),
 		"codexReadCrossPlaceRuleBoards": _read_cross_place_rule_boards(summary),
-		"codexReadDialogueRuleCues": _read_dialogue_rule_cues(snapshots),
+		"codexReadEnvironmentToolCatalog": _read_environment_tool_catalog(snapshots),
 		"codexInspectedPublicNotice": _inspected_public_notice(summary),
 		"codexInspectedBlockedReview": _inspected_studio_review_block(summary),
 			"codexInspectedRecordAffordanceMap": _inspected_record_affordance_map(summary),
@@ -742,7 +742,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"canReadNpcToNpcChain": bool(checks.get("waitingCustomerObservedClerk", false)) and bool(checks.get("parkWitnessObservedClerk", false)) and bool(checks.get("managerObservedClerk", false)) and bool(checks.get("stationObservedManager", false)) and bool(checks.get("waitingCustomerObservedStation", false)),
 		"canInspectNormalProcedureCue": bool(checks.get("codexInspectedUsualOrderCue", false)),
 		"canReadCrossPlaceSocialRules": bool(checks.get("codexReadCrossPlaceRuleBoards", false)),
-		"canReadDialogueRuleConsequences": bool(checks.get("codexReadDialogueRuleCues", false)),
+		"canReadEnvironmentToolCatalog": bool(checks.get("codexReadEnvironmentToolCatalog", false)),
 		"canReadLiveHudSocialCitation": _hud_record_state_cites_latest_social_observation(summary, record_state_label),
 		"canReadLiveHudNearbyStances": _hud_record_state_names_visible_stances(record_state_label),
 		"canReadLiveHudRecordReaders": _hud_record_state_names_record_readers(record_state_label),
@@ -789,7 +789,7 @@ func _ai_player_report(summary: Dictionary, hud_snapshot: Dictionary, record_pro
 		"playerReadableCauseChain": [
 			"Codex/player first inspected the usual-order cue, making the normal 'same order' procedure readable before choosing a line.",
 			"Codex/player read the Studio and Park rule boards as cross-place social rules, so later review and public-notice consequences are grounded before the Store line.",
-			"The active dialogue choices showed rule cues for normal receipt, correction slip, and report burden, so the player could connect each spoken line to an environment record consequence before choosing.",
+			"The active Store prompt exposed the current environment tool catalog for the Clerk role while keeping the three player choices as speech lines, so Codex/player could see what the place affords without treating choices as hardcoded outcomes.",
 			"Codex/player focused the Store counter and started the Store Clerk prompt.",
 			"Codex/player waited long enough to create a response hesitation record.",
 			"Codex/player chose the risky 'first time here' line, causing the Store Clerk to mark the receipt.",
@@ -1070,21 +1070,28 @@ func _read_cross_place_rule_boards(summary: Dictionary) -> bool:
 	var surface_ids: Array = summary.get("readSurfaceIds", [])
 	return surface_ids.has("TS_Studio_ApprovalCriteria") and surface_ids.has("TS_Park_NoticeBoard")
 
-func _read_dialogue_rule_cues(snapshots: Array[Dictionary]) -> bool:
+func _read_environment_tool_catalog(snapshots: Array[Dictionary]) -> bool:
 	for snapshot in snapshots:
 		if str(snapshot.get("label", "")) != "conversation.start":
 			continue
-		var cues: Array = snapshot.get("choiceRuleCues", [])
-		var visible_lines: Array = snapshot.get("visibleChoiceLines", [])
+		var tool_summary: Array = snapshot.get("environmentToolSummary", [])
+		var tool_catalog: Array = snapshot.get("environmentToolCatalog", [])
 		var hud: Dictionary = snapshot.get("hud", {})
-		var combined := "%s\n%s\n%s\n%s\n%s" % [
-			"\n".join(_string_array(cues)),
-			"\n".join(_string_array(visible_lines)),
-			str(hud.get("choicesLabel", "")),
-			str(hud.get("safeLineLabel", "")),
-			str(hud.get("riskyLineLabel", ""))
+		var combined := "%s\n%s" % [
+			"\n".join(_string_array(tool_summary)),
+			str(hud.get("focusLabel", ""))
 		]
-		if combined.contains("정상 영수증") and combined.contains("정정표") and combined.contains("보고 부담"):
+		if not combined.contains("환경 도구") or not combined.contains("정상 영수증") or not combined.contains("상점 보고"):
+			continue
+		if _tool_catalog_has(tool_catalog, "receipt_tray", "create_receipt") and _tool_catalog_has(tool_catalog, "report_tray", "place_note"):
+			return true
+	return false
+
+func _tool_catalog_has(tool_catalog: Array, object_id: String, affordance: String) -> bool:
+	for action in tool_catalog:
+		if not action is Dictionary:
+			continue
+		if str(action.get("objectId", "")) == object_id and str(action.get("affordance", "")) == affordance:
 			return true
 	return false
 

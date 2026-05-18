@@ -510,26 +510,35 @@ func _validate_active_conversation_state(summary: Dictionary, hud: Node) -> Arra
 	var choices: Array = conversation.get("availableChoices", [])
 	if choices.size() != 3:
 		failures.append("Expected active conversation to expose exactly three dialogue choices")
-	var rule_cues: Array = conversation.get("choiceRuleCues", [])
-	if rule_cues.size() != 3:
-		failures.append("Expected active conversation to expose three player-readable choice rule cues")
-	elif not str(rule_cues[0]).contains("정상 영수증") or not str(rule_cues[1]).contains("정정표") or not str(rule_cues[2]).contains("보고 부담"):
-		failures.append("Expected active conversation rule cues to connect choices to receipt/correction/report consequences, got %s" % str(rule_cues))
+	var environment_tools: Array = conversation.get("environmentToolCatalog", [])
+	var environment_tool_summary: Array = conversation.get("environmentToolSummary", [])
+	if environment_tools.size() < 5:
+		failures.append("Expected active conversation to expose Store Clerk environment tool catalog, got %d" % environment_tools.size())
+	if not _environment_tool_exists(environment_tools, "receipt_tray", "create_receipt"):
+		failures.append("Expected environment tool catalog to expose receipt_tray.create_receipt")
+	if not _environment_tool_exists(environment_tools, "report_tray", "place_note"):
+		failures.append("Expected environment tool catalog to expose report_tray.place_note")
+	if not str(environment_tool_summary).contains("정상 영수증") or not str(environment_tool_summary).contains("상점 보고"):
+		failures.append("Expected environment tool summary to show receipt/report tools, got %s" % str(environment_tool_summary))
 	var snapshot := _hud_snapshot(hud)
 	if not str(snapshot.get("focusLabel", "")).contains("오늘도 같은 걸로"):
 		failures.append("Expected HUD focus label to show the Store Clerk prompt, got '%s'" % str(snapshot.get("focusLabel", "")))
+	if not str(snapshot.get("focusLabel", "")).contains("환경 도구"):
+		failures.append("Expected HUD focus label to show the current environment tool catalog, got '%s'" % str(snapshot.get("focusLabel", "")))
+	if not str(snapshot.get("focusLabel", "")).contains("정상 영수증") or not str(snapshot.get("focusLabel", "")).contains("상점 보고"):
+		failures.append("Expected HUD environment tool catalog to name receipt/report tools, got '%s'" % str(snapshot.get("focusLabel", "")))
 	if not str(snapshot.get("choicesLabel", "")).begins_with("1  네, 같은 걸로"):
 		failures.append("Expected HUD choice label 1 to preserve the active safe dialogue line, got '%s'" % str(snapshot.get("choicesLabel", "")))
-	if not str(snapshot.get("choicesLabel", "")).contains("정상 영수증"):
-		failures.append("Expected HUD choice label 1 to show its rule cue, got '%s'" % str(snapshot.get("choicesLabel", "")))
+	if str(snapshot.get("choicesLabel", "")).contains("정상 영수증"):
+		failures.append("Expected HUD choice label 1 to stay a diegetic speech line without hardcoded result cue, got '%s'" % str(snapshot.get("choicesLabel", "")))
 	if not str(snapshot.get("safeLineLabel", "")).begins_with("2  제가 보통"):
 		failures.append("Expected HUD choice label 2 to preserve the active repair dialogue line, got '%s'" % str(snapshot.get("safeLineLabel", "")))
-	if not str(snapshot.get("safeLineLabel", "")).contains("정정표"):
-		failures.append("Expected HUD choice label 2 to show its rule cue, got '%s'" % str(snapshot.get("safeLineLabel", "")))
+	if str(snapshot.get("safeLineLabel", "")).contains("정정표"):
+		failures.append("Expected HUD choice label 2 to stay a diegetic speech line without hardcoded result cue, got '%s'" % str(snapshot.get("safeLineLabel", "")))
 	if not str(snapshot.get("riskyLineLabel", "")).begins_with("3  오늘 처음"):
 		failures.append("Expected HUD choice label 3 to preserve the active risky dialogue line, got '%s'" % str(snapshot.get("riskyLineLabel", "")))
-	if not str(snapshot.get("riskyLineLabel", "")).contains("보고 부담"):
-		failures.append("Expected HUD choice label 3 to show its rule cue, got '%s'" % str(snapshot.get("riskyLineLabel", "")))
+	if str(snapshot.get("riskyLineLabel", "")).contains("보고 부담"):
+		failures.append("Expected HUD choice label 3 to stay a diegetic speech line without hardcoded result cue, got '%s'" % str(snapshot.get("riskyLineLabel", "")))
 	if str(snapshot.get("consequenceLabel", "")).contains("4  기록"):
 		failures.append("Expected HUD active conversation copy to prioritize typed input instead of key 4, got '%s'" % str(snapshot.get("consequenceLabel", "")))
 	if not bool(snapshot.get("freeInputVisible", false)):
@@ -537,6 +546,14 @@ func _validate_active_conversation_state(summary: Dictionary, hud: Node) -> Arra
 	if str(snapshot.get("freeInputPlaceholder", "")).strip_edges().is_empty():
 		failures.append("Expected HUD typed input to explain that speech becomes a Store record")
 	return failures
+
+func _environment_tool_exists(actions: Array, object_id: String, affordance: String) -> bool:
+	for action in actions:
+		if not action is Dictionary:
+			continue
+		if str(action.get("objectId", "")) == object_id and str(action.get("affordance", "")) == affordance:
+			return true
+	return false
 
 func _validate_mid_conversation_visibility(route: Dictionary, session: Node, hud: Node) -> Array[String]:
 	var failures: Array[String] = []

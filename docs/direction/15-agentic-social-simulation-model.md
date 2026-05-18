@@ -8,6 +8,7 @@ Depends on:
 - `docs/direction/14-minimal-civic-economy-model.md`
 - `docs/research/simulator-benchmarks/2026-05-17/00-environment-agent-interface-benchmarks.md`
 - `docs/research/simulator-benchmarks/2026-05-17/01-broader-game-environment-agent-patterns.md`
+- `docs/research/simulator-benchmarks/2026-05-18/00-llm-npc-tool-catalog-research.md`
 - `docs/scenario/content/social-simulation-cards.md`
 
 ## Decision
@@ -130,6 +131,37 @@ Minimum descriptor fields:
 This is the core interface: agents do not receive a blank instruction to
 "react." They receive a role-filtered list of usable environment tools.
 
+## Tool Catalog, Not Choice Consequences
+
+The correction from the 2026-05-18 research pass is strict:
+
+- dialogue choices are player speech inputs, not NPC action definitions;
+- the environment defines tool descriptors;
+- the NPC/LLM agent chooses among currently available tools;
+- deterministic runtime validation owns whether the proposed tool call is
+  accepted, rejected, ledgered, or escalated.
+
+Do not attach result cues such as "this choice creates a report" to individual
+dialogue options. The player should be able to read what the place can do:
+which objects exist, which roles can act on them, which records can be created,
+and which validators can reject an action. The NPC then decides whether to
+create a normal receipt, mark it, offer correction, place a note, pause service,
+cite a record, or do nothing based on perception, goals, memory, pressure, and
+the role-filtered tool catalog.
+
+```text
+player speech / delay / movement
+-> environment state and observations change
+-> role agent receives perception + tool catalog
+-> role agent proposes one actionId with a why-line
+-> runtime validates object state, role authority, visibility, economy, ledger
+-> accepted action mutates world/ledger; rejected action returns feedback
+```
+
+This keeps LLM agency in the right place. The provider may rank, choose, or word
+a bounded action, but it may not author the world rule that makes the action
+possible.
+
 ## Agent Tick
 
 Each social agent runs an event-driven tick after relevant changes:
@@ -219,6 +251,7 @@ usable environmental tool and gives the player one readable consequence.
 Allowed provider jobs:
 
 - choose among currently available affordances;
+- choose one validated environment tool from the role-filtered tool catalog;
 - explain the chosen action in role voice;
 - generate in-character wording for an approved intent;
 - summarize memory into a compact note;

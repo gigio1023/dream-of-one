@@ -42,6 +42,11 @@ Each object above must expose its affordances as action descriptors, not just as
 design prose. The descriptor is the shared interface used by player prompts,
 role-agent candidate lists, provider packets, validation, and evidence.
 
+Dialogue choices must not contain hidden action outcomes. A choice can be a
+spoken line that changes observed signals, but the resulting NPC action must
+come from this environment descriptor set after the role agent chooses and the
+runtime validates a proposed tool call.
+
 Required fields for M1:
 
 | Field | Example | Use |
@@ -55,6 +60,11 @@ Required fields for M1:
 | `ledgerEventKind` | `store_exception_reported` | makes the result replayable. |
 | `validationRuleId` | `same_order.store.place_note` | keeps runtime authority inspectable. |
 | `failureReasons` | `missing_forwarded_report` | gives useful blocked-action evidence. |
+
+Provider-facing tool packets may include only these descriptor fields plus
+bounded memory/perception context. They must not include authority to create new
+objects, invent ledger events, mutate civic economy directly, or decide session
+gates.
 
 ## Civic Economy Values
 

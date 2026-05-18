@@ -98,9 +98,9 @@ Latest status check:
   action/route data against the copied Codex JSON, 5/5 route reports,
   `humanEvidence=false`, `closesGoal=false`, and a no-spoiler tester invite.
 - latest Codex gameplay QA hashes:
-  - JSON SHA-256: `c12c6c55d0a5ad7b2d1a6976864c6562e4d442dfdff2b03d9982a51cfd14ad10`
-  - Markdown SHA-256: `f58f166b835192b74c17c8e6407810d1d08424e0a2ec356397a9aa87120b655c`
-  - playable Evidence Pack SHA-256: `15beecadcc36af26af1b39990de1145252e9febd99246a04916913d369d7f372`
+  - JSON SHA-256: `60104fcbd590a2ef545bcd29a587b42912c0073fe24e751a47bca957b1d7d9cb`
+  - Markdown SHA-256: `6445a0e64e5b99398646c0e08bbb98aacb9378d0dd03f3a4a523ce2c0b6a0253`
+  - playable Evidence Pack SHA-256: `dd69a70384e218c58ff2e5a6ee6b58f6cbada43b82225d2f6ea7cd1ad43bc64d`
   - visual capture manifest SHA-256: `a4a539262d34f74ad0ffb49b07ee884736f95a56d2cd25c0625ff502084dda3b`
   - packaged app zip SHA-256: `73eac5d69492f5a01355346ef86ef2acb5a1e07b0e37a104c878580d83d9b1c3`
 
@@ -110,14 +110,13 @@ Latest AI-play interface check:
   player actions `23 / 23`, `explainability=22/22`, and
   `routeReportPassCount=5 / 5` with Godot
   `4.6.2.stable.official.71f334935` from a temporary local `GODOT_BIN`.
-- latest game increment: active dialogue choices now show player-readable rule
-  cues without replacing the diegetic speech lines. At the Store prompt, the
-  three choices still start with `네, 같은 걸로 부탁해요.`, `제가 보통 뭘
-  시켰죠?`, and `오늘 처음 왔는데요.`, but each now adds a compact `규칙`
-  line that points to the environment consequence: normal receipt, correction
-  slip, or report burden. Codex gameplay QA verifies
-  `canReadDialogueRuleConsequences=true`, so the player can connect a spoken
-  line to a record consequence before choosing.
+- latest correction: dialogue choices are speech inputs, not hardcoded NPC
+  consequence branches. The active Store prompt should expose the Store Clerk's
+  current environment tool catalog from object affordances while the choices
+  remain diegetic speech lines. Codex gameplay QA now needs
+  `canReadEnvironmentToolCatalog=true`, proving the player/agent can see the
+  place's available tools without treating a line of dialogue as a fixed
+  receipt/correction/report result.
 - latest game increment: Studio and Park rule boards are now player-readable
   cross-place social rules before the Store conversation. Codex/player can
   focus `TS_Studio_ApprovalCriteria` and `TS_Park_NoticeBoard`, interact, and

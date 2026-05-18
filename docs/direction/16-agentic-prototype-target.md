@@ -141,6 +141,11 @@ tray, civic ledger, and Station dossier must each answer:
 - what validation rule accepts or rejects it;
 - what visible feedback tells the player it happened.
 
+Do not encode these answers as per-choice result labels. The current target is
+an environment tool catalog: the player speaks, the Store/Station state changes,
+the role agent chooses from available object tools, and the runtime validates
+the proposal.
+
 ## Agent Requirements
 
 M1 requires three social agents:
@@ -310,7 +315,8 @@ packet, and world prop pass are implemented in code, and the current evidence
 JSON has been updated with the expected inquest, provider comparison, provider
 scheduling, provider dispatch, proxy comprehension, playtest packet, visual
 proxy, asset BOM, and social observation snapshots. Current proof uses
-`/opt/homebrew/bin/godot-latest` Godot 4.7-beta2.
+the per-device `GODOT_BIN` Godot CLI; do not hardcode a historical local
+binary path as an active command.
 
 ## Required Routes
 
@@ -327,15 +333,15 @@ route must now include environment and agent evidence.
 ## Dialogue Design
 
 Dialogue is the main interface, but dialogue should not carry the whole game
-alone.
+alone. A dialogue choice is a speech input, not a hardcoded NPC action.
 
 Each player line must connect to:
 
-- the environment affordance it interacts with;
-- the record or object state it changes;
-- the actor that perceives it;
+- the environment object and tool catalog available around it;
+- the observation, signal, record, or object state it changes;
+- the actor that perceives the changed state;
 - the economy value it affects;
-- the ledger event it creates or avoids;
+- the validated tool call and ledger event an NPC may create or avoid;
 - the Station citation it may enable.
 
 This prevents "LLM chat" drift. The player is speaking inside a working

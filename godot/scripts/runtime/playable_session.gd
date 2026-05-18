@@ -345,7 +345,6 @@ const CONVERSATION_BEATS := {
 				"id": "store.same_order.safe",
 				"line": "네, 같은 걸로 부탁해요.",
 				"intent": "safe/local",
-				"ruleCue": "규칙: 평소 주문과 맞으면 정상 영수증",
 				"signals": [],
 				"npcResponse": "네. 표식 하나, 같은 봉투로 처리하겠습니다.",
 				"nextPromptId": "store.same_order.probe"
@@ -354,7 +353,6 @@ const CONVERSATION_BEATS := {
 				"id": "store.same_order.repair",
 				"line": "제가 보통 뭘 시켰죠?",
 				"intent": "uncertain/repair",
-				"ruleCue": "규칙: 기억 공백은 정정표로 남음",
 				"signals": ["memory_gap_admission"],
 				"npcResponse": "보통은 표식 하나라고 하셨죠. 오늘은 왜 확인하시나요?",
 				"nextPromptId": "store.same_order.probe"
@@ -363,7 +361,6 @@ const CONVERSATION_BEATS := {
 				"id": "store.same_order.risky",
 				"line": "오늘 처음 왔는데요.",
 				"intent": "risky/weird",
-				"ruleCue": "규칙: 단골 전제와 충돌하면 보고 부담",
 				"signals": ["local_routine_mismatch"],
 				"npcResponse": "처음이라고요? 어제도 같은 자리에서 같은 말을 하셨는데요.",
 				"nextPromptId": "store.same_order.probe"
@@ -379,7 +376,6 @@ const CONVERSATION_BEATS := {
 				"id": "store.same_order.probe.safe",
 				"line": "맞습니다. 제가 착각했습니다.",
 				"intent": "safe/local",
-				"ruleCue": "규칙: 이전 전제를 맞추면 수습",
 				"signals": [],
 				"npcResponse": "그럼 같은 봉투로 두겠습니다.",
 				"nextPromptId": ""
@@ -388,7 +384,6 @@ const CONVERSATION_BEATS := {
 				"id": "store.same_order.probe.repair",
 				"line": "어제 일이 조금 흐릿해서 확인했습니다.",
 				"intent": "uncertain/repair",
-				"ruleCue": "규칙: 흐릿함은 기록 부담으로 남음",
 				"signals": ["memory_gap_admission"],
 				"npcResponse": "흐릿하다고요. 기록에는 남겨두겠습니다.",
 				"nextPromptId": ""
@@ -397,7 +392,6 @@ const CONVERSATION_BEATS := {
 				"id": "store.same_order.probe.risky",
 				"line": "저는 여기 사람이 아닙니다.",
 				"intent": "risky/weird",
-				"ruleCue": "규칙: 소속 부정은 인용 가능한 말",
 				"signals": ["role_script_break", "prior_statement_contradiction"],
 				"npcResponse": "그 말은 그냥 넘길 수 없습니다.",
 				"nextPromptId": ""
@@ -778,8 +772,8 @@ func build_summary() -> Dictionary:
 			"currentTurnId": current_turn_id,
 			"history": conversation_history.duplicate(true),
 			"availableChoices": _current_choice_lines(),
-			"visibleChoiceLines": _current_choice_display_lines(),
-			"choiceRuleCues": _current_choice_rule_cues(),
+			"environmentToolCatalog": _current_environment_tool_catalog(),
+			"environmentToolSummary": _current_environment_tool_summary_lines(),
 			"recordedStatementLine": "",
 			"recordedStatementScope": "",
 			"recordedStatementAction": "",
@@ -1470,7 +1464,10 @@ func _refresh_hud() -> void:
 	var choices_enabled := false
 	if conversation_active and not _session_locked():
 		var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
+		var tool_summary := _current_environment_tool_summary_text()
 		prompt = _current_npc_line(beat)
+		if not tool_summary.is_empty():
+			prompt = "%s\n%s" % [prompt, tool_summary]
 		choices_enabled = true
 	elif current_focus != null and current_focus_kind == "record_prop":
 		var object_id := str(current_focus.get_meta("record_object_id", ""))
@@ -1486,7 +1483,7 @@ func _refresh_hud() -> void:
 	if _hud.has_method("set_status"):
 		_hud.set_status(stage, exposure, station, _objective())
 	if _hud.has_method("set_conversation"):
-		_hud.set_conversation(prompt, _current_choice_display_lines(), RECORDED_STATEMENT_LINE, _conversation_history_lines(), choices_enabled)
+		_hud.set_conversation(prompt, _current_choice_lines(), RECORDED_STATEMENT_LINE, _conversation_history_lines(), choices_enabled)
 	elif _hud.has_method("set_focus"):
 		_hud.set_focus(prompt, choices_enabled)
 	if _hud.has_method("set_notice"):
@@ -3442,22 +3439,33 @@ func _current_choice_lines() -> Array[String]:
 		lines.append(str(choice.get("line", "")))
 	return lines
 
-func _current_choice_display_lines() -> Array[String]:
+func _current_environment_tool_catalog() -> Array[Dictionary]:
+	var beat: Dictionary = CONVERSATION_BEATS.get(current_prompt_id, {})
+	var actor_role := str(ACTOR_AGENT_ROLES.get(str(beat.get("actorId", "")), ""))
+	if actor_role.is_empty():
+		return []
+	return _available_role_agent_actions(actor_role)
+
+func _current_environment_tool_summary_lines() -> Array[String]:
 	var lines: Array[String] = []
-	for choice in _current_choices():
-		var line := str(choice.get("line", ""))
-		var rule_cue := str(choice.get("ruleCue", ""))
-		if rule_cue.is_empty():
-			lines.append(line)
+	for action in _current_environment_tool_catalog():
+		var label := _affordance_label(str(action.get("affordance", "")))
+		var object_label := _world_record_prop_title(str(action.get("objectId", "")))
+		var event_kind := str(action.get("ledgerEventKind", ""))
+		var to_state := str(action.get("toState", ""))
+		if event_kind.is_empty():
+			lines.append("%s: %s -> %s" % [object_label, label, to_state])
 		else:
-			lines.append("%s\n   %s" % [line, rule_cue])
+			lines.append("%s: %s -> %s" % [object_label, label, _civic_ledger_kind_label(event_kind)])
 	return lines
 
-func _current_choice_rule_cues() -> Array[String]:
-	var cues: Array[String] = []
-	for choice in _current_choices():
-		cues.append(str(choice.get("ruleCue", "")))
-	return cues
+func _current_environment_tool_summary_text() -> String:
+	var labels := PackedStringArray()
+	for line in _current_environment_tool_summary_lines():
+		labels.append(line)
+	if labels.is_empty():
+		return ""
+	return "환경 도구: %s" % "; ".join(labels)
 
 func _conversation_history_lines() -> Array[String]:
 	var lines: Array[String] = []

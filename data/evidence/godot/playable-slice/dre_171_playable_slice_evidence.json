@@ -1,18 +1,18 @@
 {
   "adapter": "godot",
-  "createdAtMs": 1779086960393,
+  "createdAtMs": 1779087838201,
   "events": [
     {
       "adapter": "godot",
       "eventFamily": "session",
-      "eventId": "playable_session_started-001-1779086958680",
+      "eventId": "playable_session_started-001-1779087836544",
       "eventName": "playable_session_started",
       "prologueStep": "beginning",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "sessionOutcome": "running",
       "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-      "timestampMs": 1779086958680,
+      "timestampMs": 1779087836544,
       "uiSummaryArgs": {},
       "uiSummaryKey": "event.session_started",
       "worldId": "dre_171_godot_shell",
@@ -25,7 +25,7 @@
       "conversationId": "conv-same-order",
       "conversationStage": "normal",
       "eventFamily": "domain",
-      "eventId": "conversation_started-002-1779086959116",
+      "eventId": "conversation_started-002-1779087836969",
       "eventName": "conversation_started",
       "outcome": "running",
       "promptId": "store.same_order.routine",
@@ -34,7 +34,7 @@
       "socialLoopStage": "normal",
       "speakerId": "NPC_Store_Clerk",
       "summary": "Store Clerk opened the Same Order conversation.",
-      "timestampMs": 1779086959116,
+      "timestampMs": 1779087836969,
       "turnId": "turn-1",
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
@@ -47,7 +47,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "dialogue_choice_selected-003-1779086959308",
+      "eventId": "dialogue_choice_selected-003-1779087837164",
       "eventName": "dialogue_choice_selected",
       "inputMode": "choice",
       "outcome": "running",
@@ -69,7 +69,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779086959308,
+      "timestampMs": 1779087837164,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -84,7 +84,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-004-1779086959308",
+      "eventId": "conversation_anomaly_detected-004-1779087837164",
       "eventName": "conversation_anomaly_detected",
       "inputMode": "choice",
       "outcome": "running",
@@ -106,7 +106,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779086959308,
+      "timestampMs": 1779087837164,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -121,7 +121,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "오늘 처음 왔는데요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-005-1779086959308",
+      "eventId": "npc_suspicion_changed-005-1779087837164",
       "eventName": "npc_suspicion_changed",
       "inputMode": "choice",
       "outcome": "running",
@@ -143,7 +143,7 @@
       "suspicionSignals": [
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779086959308,
+      "timestampMs": 1779087837164,
       "turnId": "turn-1",
       "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
       "whyLineKey": "local_routine_mismatch",
@@ -158,7 +158,7 @@
       "conversationStage": "uneasy",
       "displayedPlayerLine": "응답 지연 12000ms",
       "eventFamily": "domain",
-      "eventId": "response_hesitation_noted-006-1779086959652",
+      "eventId": "response_hesitation_noted-006-1779087837486",
       "eventName": "response_hesitation_noted",
       "inputMode": "response_hesitation",
       "outcome": "running",
@@ -181,7 +181,7 @@
       "suspicionSignals": [
         "response_hesitation"
       ],
-      "timestampMs": 1779086959652,
+      "timestampMs": 1779087837486,
       "turnId": "turn-2",
       "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
       "whyLineKey": "response_hesitation",
@@ -196,7 +196,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "free_input_submitted-007-1779086959896",
+      "eventId": "free_input_submitted-007-1779087837725",
       "eventName": "free_input_submitted",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -221,7 +221,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779086959896,
+      "timestampMs": 1779087837725,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -236,7 +236,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "conversation_anomaly_detected-008-1779086959896",
+      "eventId": "conversation_anomaly_detected-008-1779087837725",
       "eventName": "conversation_anomaly_detected",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -261,7 +261,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779086959896,
+      "timestampMs": 1779087837725,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -276,7 +276,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "npc_suspicion_changed-009-1779086959896",
+      "eventId": "npc_suspicion_changed-009-1779087837725",
       "eventName": "npc_suspicion_changed",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -301,7 +301,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779086959896,
+      "timestampMs": 1779087837725,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -316,7 +316,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "suspicion_shared-010-1779086959896",
+      "eventId": "suspicion_shared-010-1779087837725",
       "eventName": "suspicion_shared",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -341,7 +341,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779086959896,
+      "timestampMs": 1779087837725,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -356,7 +356,7 @@
       "conversationStage": "reported",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_report_created-011-1779086959897",
+      "eventId": "station_report_created-011-1779087837726",
       "eventName": "station_report_created",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -381,7 +381,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779086959897,
+      "timestampMs": 1779087837726,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -396,7 +396,7 @@
       "conversationStage": "inquest",
       "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
       "eventFamily": "domain",
-      "eventId": "station_inquest_opened-012-1779086959898",
+      "eventId": "station_inquest_opened-012-1779087837727",
       "eventName": "station_inquest_opened",
       "freeInputHash": "free-17-3317429208",
       "inputMode": "typed_free_input",
@@ -421,7 +421,7 @@
         "dream_language_leak",
         "local_routine_mismatch"
       ],
-      "timestampMs": 1779086959898,
+      "timestampMs": 1779087837727,
       "turnId": "turn-2",
       "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
       "whyLineKey": "dream_language_leak",
@@ -432,12 +432,12 @@
       "adapter": "godot",
       "artifactPath": "data/evidence/godot/playable-slice/dre_171_playable_slice_evidence.json",
       "eventFamily": "evidence_export",
-      "eventId": "evidence_pack_created-013-1779086960393",
+      "eventId": "evidence_pack_created-013-1779087838201",
       "eventName": "evidence_pack_created",
       "schemaVersion": "godot-runtime-v1",
       "sessionId": "dre-171-playable-session",
       "summary": "Godot conversation playable Evidence Pack exported for backend validation.",
-      "timestampMs": 1779086960393,
+      "timestampMs": 1779087838201,
       "worldId": "dre_171_godot_shell",
       "worldRevision": "rev-social-stealth-v1"
     }
@@ -3582,19 +3582,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779086952079",
+            "eventId": "playable_session_started-001-1779087829957",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779086952568",
+            "eventId": "conversation_started-002-1779087830449",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-003-1779086952750",
+            "eventId": "dialogue_choice_selected-003-1779087830645",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3605,7 +3605,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "dialogue_choice_selected-004-1779086953021",
+            "eventId": "dialogue_choice_selected-004-1779087830927",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 0,
@@ -3616,7 +3616,7 @@
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_outcome_reached-005-1779086953024",
+            "eventId": "conversation_outcome_reached-005-1779087830930",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "clean_cover",
@@ -3652,19 +3652,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779086953669",
+            "eventId": "playable_session_started-001-1779087831575",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779086954090",
+            "eventId": "conversation_started-002-1779087831997",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779086954268",
+            "eventId": "dialogue_choice_selected-003-1779087832194",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3677,7 +3677,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779086954268",
+            "eventId": "conversation_anomaly_detected-004-1779087832194",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3690,7 +3690,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779086954268",
+            "eventId": "npc_suspicion_changed-005-1779087832194",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3703,7 +3703,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-006-1779086954627",
+            "eventId": "dialogue_choice_selected-006-1779087832549",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 10,
@@ -3714,7 +3714,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_outcome_reached-007-1779086954627",
+            "eventId": "conversation_outcome_reached-007-1779087832550",
             "eventName": "conversation_outcome_reached",
             "outcome": "cover_held",
             "routeOutcome": "repair_recovered",
@@ -3756,19 +3756,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779086956959",
+            "eventId": "playable_session_started-001-1779087834861",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779086957393",
+            "eventId": "conversation_started-002-1779087835287",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779086957583",
+            "eventId": "dialogue_choice_selected-003-1779087835482",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3781,7 +3781,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779086957583",
+            "eventId": "conversation_anomaly_detected-004-1779087835482",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3794,7 +3794,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779086957583",
+            "eventId": "npc_suspicion_changed-005-1779087835482",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3807,7 +3807,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "dialogue_choice_selected-006-1779086957913",
+            "eventId": "dialogue_choice_selected-006-1779087835806",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3821,7 +3821,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-007-1779086957914",
+            "eventId": "conversation_anomaly_detected-007-1779087835806",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3835,7 +3835,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-008-1779086957914",
+            "eventId": "npc_suspicion_changed-008-1779087835806",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3849,7 +3849,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-009-1779086957914",
+            "eventId": "suspicion_shared-009-1779087835806",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 80,
@@ -3863,7 +3863,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-010-1779086957916",
+            "eventId": "station_report_created-010-1779087835808",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 80,
@@ -3877,7 +3877,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_outcome_reached-011-1779086957916",
+            "eventId": "conversation_outcome_reached-011-1779087835808",
             "eventName": "conversation_outcome_reached",
             "outcome": "soft_report",
             "routeOutcome": "soft_report",
@@ -3922,19 +3922,19 @@
         ],
         "events": [
           {
-            "eventId": "playable_session_started-001-1779086958680",
+            "eventId": "playable_session_started-001-1779087836544",
             "eventName": "playable_session_started"
           },
           {
             "conversationStage": "normal",
-            "eventId": "conversation_started-002-1779086959116",
+            "eventId": "conversation_started-002-1779087836969",
             "eventName": "conversation_started",
             "outcome": "running",
             "socialLoopStage": "normal"
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "dialogue_choice_selected-003-1779086959308",
+            "eventId": "dialogue_choice_selected-003-1779087837164",
             "eventName": "dialogue_choice_selected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3947,7 +3947,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "conversation_anomaly_detected-004-1779086959308",
+            "eventId": "conversation_anomaly_detected-004-1779087837164",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3960,7 +3960,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "npc_suspicion_changed-005-1779086959308",
+            "eventId": "npc_suspicion_changed-005-1779087837164",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 30,
@@ -3973,7 +3973,7 @@
           },
           {
             "conversationStage": "uneasy",
-            "eventId": "response_hesitation_noted-006-1779086959652",
+            "eventId": "response_hesitation_noted-006-1779087837486",
             "eventName": "response_hesitation_noted",
             "outcome": "running",
             "reportWeightAfter": 35,
@@ -3986,7 +3986,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "free_input_submitted-007-1779086959896",
+            "eventId": "free_input_submitted-007-1779087837725",
             "eventName": "free_input_submitted",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -4000,7 +4000,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "conversation_anomaly_detected-008-1779086959896",
+            "eventId": "conversation_anomaly_detected-008-1779087837725",
             "eventName": "conversation_anomaly_detected",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -4014,7 +4014,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "npc_suspicion_changed-009-1779086959896",
+            "eventId": "npc_suspicion_changed-009-1779087837725",
             "eventName": "npc_suspicion_changed",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -4028,7 +4028,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "suspicion_shared-010-1779086959896",
+            "eventId": "suspicion_shared-010-1779087837725",
             "eventName": "suspicion_shared",
             "outcome": "running",
             "reportWeightAfter": 120,
@@ -4042,7 +4042,7 @@
           },
           {
             "conversationStage": "reported",
-            "eventId": "station_report_created-011-1779086959897",
+            "eventId": "station_report_created-011-1779087837726",
             "eventName": "station_report_created",
             "outcome": "soft_report",
             "reportWeightAfter": 120,
@@ -4056,7 +4056,7 @@
           },
           {
             "conversationStage": "inquest",
-            "eventId": "station_inquest_opened-012-1779086959898",
+            "eventId": "station_inquest_opened-012-1779087837727",
             "eventName": "station_inquest_opened",
             "outcome": "inquest_opened",
             "reportWeightAfter": 120,
@@ -30928,14 +30928,133 @@
         "어제 일이 조금 흐릿해서 확인했습니다.",
         "저는 여기 사람이 아닙니다."
       ],
-      "choiceRuleCues": [
-        "규칙: 이전 전제를 맞추면 수습",
-        "규칙: 흐릿함은 기록 부담으로 남음",
-        "규칙: 소속 부정은 인용 가능한 말"
-      ],
       "conversationId": "conv-same-order",
       "currentPromptId": "store.same_order.probe",
       "currentTurnId": "turn-2",
+      "environmentToolCatalog": [
+        {
+          "actionId": "store_counter.pause_service",
+          "affordance": "pause_service",
+          "citableLedgerEventIds": [],
+          "civicEconomyEffects": [
+            "recordBurden:+5"
+          ],
+          "eligibleRoles": [
+            "store_clerk",
+            "store_manager"
+          ],
+          "failureReasons": [
+            "object_not_perceived",
+            "affordance_unavailable",
+            "role_authority_exceeded",
+            "why_line_required"
+          ],
+          "ledgerEventKind": "service_paused",
+          "objectId": "store_counter",
+          "objectState": "serving",
+          "perceivedAs": "paused local service",
+          "playerLabel": "Pause Service",
+          "preconditions": [
+            "object_state:serving",
+            "role_allowed:store_clerk|store_manager"
+          ],
+          "priorityHints": [
+            "economy:recordBurden",
+            "pressure:service_paused"
+          ],
+          "recordId": "",
+          "requiresLedgerEvent": false,
+          "requiresStoreLedgerEvent": false,
+          "toState": "paused",
+          "validationRuleId": "same_order.store_counter.pause_service",
+          "visibleTo": [
+            "store_clerk",
+            "waiting_customer",
+            "store_manager"
+          ]
+        },
+        {
+          "actionId": "usual_order_cue.cite_expected_order",
+          "affordance": "cite_expected_order",
+          "citableLedgerEventIds": [],
+          "civicEconomyEffects": [],
+          "eligibleRoles": [
+            "store_clerk",
+            "store_manager"
+          ],
+          "failureReasons": [
+            "object_not_perceived",
+            "affordance_unavailable",
+            "role_authority_exceeded",
+            "why_line_required"
+          ],
+          "ledgerEventKind": "usual_order_cited",
+          "objectId": "usual_order_cue",
+          "objectState": "read",
+          "perceivedAs": "usual_order_cue cite_expected_order",
+          "playerLabel": "Cite Expected Order",
+          "preconditions": [
+            "object_state:read",
+            "role_allowed:store_clerk|store_manager"
+          ],
+          "priorityHints": [],
+          "recordId": "",
+          "requiresLedgerEvent": false,
+          "requiresStoreLedgerEvent": false,
+          "toState": "cited",
+          "validationRuleId": "same_order.usual_order_cue.cite_expected_order",
+          "visibleTo": [
+            "store_clerk",
+            "store_manager",
+            "waiting_customer"
+          ]
+        },
+        {
+          "actionId": "correction_slip.offer_correction",
+          "affordance": "offer_correction",
+          "citableLedgerEventIds": [],
+          "civicEconomyEffects": [
+            "recordBurden:+5"
+          ],
+          "eligibleRoles": [
+            "store_clerk",
+            "store_manager"
+          ],
+          "failureReasons": [
+            "object_not_perceived",
+            "affordance_unavailable",
+            "role_authority_exceeded",
+            "why_line_required"
+          ],
+          "ledgerEventKind": "correction_offered",
+          "objectId": "correction_slip",
+          "objectState": "absent",
+          "perceivedAs": "local correction path",
+          "playerLabel": "Offer Correction",
+          "preconditions": [
+            "object_state:absent",
+            "role_allowed:store_clerk|store_manager",
+            "record_id:store_same_order_correction"
+          ],
+          "priorityHints": [
+            "economy:recordBurden"
+          ],
+          "recordId": "store_same_order_correction",
+          "requiresLedgerEvent": false,
+          "requiresStoreLedgerEvent": false,
+          "toState": "offered",
+          "validationRuleId": "same_order.correction_slip.offer_correction",
+          "visibleTo": [
+            "store_clerk",
+            "store_manager"
+          ]
+        }
+      ],
+      "environmentToolSummary": [
+        "상점 카운터: 응대 중단 -> 응대 중단",
+        "늘 같은 주문: 평소 주문 인용 -> 평소 주문 인용",
+        "정정 문서: offer_correction -> 정정 제안"
+      ],
       "history": [
         {
           "choiceSetId": "store.same_order.routine.choices",
@@ -30982,25 +31101,20 @@
       "recordedStatementScope": "",
       "typedFreeInputAction": "free_input_submitted",
       "typedFreeInputAvailable": true,
-      "typedFreeInputLine": "저는 이 꿈에 방금 들어왔어요.",
-      "visibleChoiceLines": [
-        "맞습니다. 제가 착각했습니다.\n   규칙: 이전 전제를 맞추면 수습",
-        "어제 일이 조금 흐릿해서 확인했습니다.\n   규칙: 흐릿함은 기록 부담으로 남음",
-        "저는 여기 사람이 아닙니다.\n   규칙: 소속 부정은 인용 가능한 말"
-      ]
+      "typedFreeInputLine": "저는 이 꿈에 방금 들어왔어요."
     },
     "events": [
       {
         "adapter": "godot",
         "eventFamily": "session",
-        "eventId": "playable_session_started-001-1779086958680",
+        "eventId": "playable_session_started-001-1779087836544",
         "eventName": "playable_session_started",
         "prologueStep": "beginning",
         "schemaVersion": "godot-runtime-v1",
         "sessionId": "dre-171-playable-session",
         "sessionOutcome": "running",
         "summary": "Conversation-first prologue started. Reach the Store Clerk and answer the Same Order prompt.",
-        "timestampMs": 1779086958680,
+        "timestampMs": 1779087836544,
         "uiSummaryArgs": {},
         "uiSummaryKey": "event.session_started",
         "worldId": "dre_171_godot_shell",
@@ -31013,7 +31127,7 @@
         "conversationId": "conv-same-order",
         "conversationStage": "normal",
         "eventFamily": "domain",
-        "eventId": "conversation_started-002-1779086959116",
+        "eventId": "conversation_started-002-1779087836969",
         "eventName": "conversation_started",
         "outcome": "running",
         "promptId": "store.same_order.routine",
@@ -31022,7 +31136,7 @@
         "socialLoopStage": "normal",
         "speakerId": "NPC_Store_Clerk",
         "summary": "Store Clerk opened the Same Order conversation.",
-        "timestampMs": 1779086959116,
+        "timestampMs": 1779087836969,
         "turnId": "turn-1",
         "worldId": "dre_171_godot_shell",
         "worldRevision": "rev-social-stealth-v1"
@@ -31035,7 +31149,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "dialogue_choice_selected-003-1779086959308",
+        "eventId": "dialogue_choice_selected-003-1779087837164",
         "eventName": "dialogue_choice_selected",
         "inputMode": "choice",
         "outcome": "running",
@@ -31057,7 +31171,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779086959308,
+        "timestampMs": 1779087837164,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -31072,7 +31186,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-004-1779086959308",
+        "eventId": "conversation_anomaly_detected-004-1779087837164",
         "eventName": "conversation_anomaly_detected",
         "inputMode": "choice",
         "outcome": "running",
@@ -31094,7 +31208,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779086959308,
+        "timestampMs": 1779087837164,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -31109,7 +31223,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "오늘 처음 왔는데요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-005-1779086959308",
+        "eventId": "npc_suspicion_changed-005-1779087837164",
         "eventName": "npc_suspicion_changed",
         "inputMode": "choice",
         "outcome": "running",
@@ -31131,7 +31245,7 @@
         "suspicionSignals": [
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779086959308,
+        "timestampMs": 1779087837164,
         "turnId": "turn-1",
         "whyLine": "그 말은 점원이 전제한 단골 루틴과 맞지 않습니다.",
         "whyLineKey": "local_routine_mismatch",
@@ -31146,7 +31260,7 @@
         "conversationStage": "uneasy",
         "displayedPlayerLine": "응답 지연 12000ms",
         "eventFamily": "domain",
-        "eventId": "response_hesitation_noted-006-1779086959652",
+        "eventId": "response_hesitation_noted-006-1779087837486",
         "eventName": "response_hesitation_noted",
         "inputMode": "response_hesitation",
         "outcome": "running",
@@ -31169,7 +31283,7 @@
         "suspicionSignals": [
           "response_hesitation"
         ],
-        "timestampMs": 1779086959652,
+        "timestampMs": 1779087837486,
         "turnId": "turn-2",
         "whyLine": "평범한 주문 질문에서 답변이 늦어져 불확실성 기록으로 남았습니다.",
         "whyLineKey": "response_hesitation",
@@ -31184,7 +31298,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "free_input_submitted-007-1779086959896",
+        "eventId": "free_input_submitted-007-1779087837725",
         "eventName": "free_input_submitted",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -31209,7 +31323,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779086959896,
+        "timestampMs": 1779087837725,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -31224,7 +31338,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "conversation_anomaly_detected-008-1779086959896",
+        "eventId": "conversation_anomaly_detected-008-1779087837725",
         "eventName": "conversation_anomaly_detected",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -31249,7 +31363,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779086959896,
+        "timestampMs": 1779087837725,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -31264,7 +31378,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "npc_suspicion_changed-009-1779086959896",
+        "eventId": "npc_suspicion_changed-009-1779087837725",
         "eventName": "npc_suspicion_changed",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -31289,7 +31403,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779086959896,
+        "timestampMs": 1779087837725,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -31304,7 +31418,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "suspicion_shared-010-1779086959896",
+        "eventId": "suspicion_shared-010-1779087837725",
         "eventName": "suspicion_shared",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -31329,7 +31443,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779086959896,
+        "timestampMs": 1779087837725,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -31344,7 +31458,7 @@
         "conversationStage": "reported",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_report_created-011-1779086959897",
+        "eventId": "station_report_created-011-1779087837726",
         "eventName": "station_report_created",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -31369,7 +31483,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779086959897,
+        "timestampMs": 1779087837726,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",
@@ -31384,7 +31498,7 @@
         "conversationStage": "inquest",
         "displayedPlayerLine": "저는 이 꿈에 방금 들어왔어요.",
         "eventFamily": "domain",
-        "eventId": "station_inquest_opened-012-1779086959898",
+        "eventId": "station_inquest_opened-012-1779087837727",
         "eventName": "station_inquest_opened",
         "freeInputHash": "free-17-3317429208",
         "inputMode": "typed_free_input",
@@ -31409,7 +31523,7 @@
           "dream_language_leak",
           "local_routine_mismatch"
         ],
-        "timestampMs": 1779086959898,
+        "timestampMs": 1779087837727,
         "turnId": "turn-2",
         "whyLine": "그 말에는 이곳 사람이 쓰지 않는 꿈/바깥 세계 표현이 들어 있습니다.",
         "whyLineKey": "dream_language_leak",

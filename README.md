@@ -1,166 +1,73 @@
 # Dream of One
 
-Dream of One is a Godot 4.x conversation social-stealth prototype where NPCs and the Station investigate what the player says.
+Dream of One is a 2D top-down conversation social-stealth game built with
+Godot 4.x and a TypeScript NPC runtime. NPCs and the Station investigate what
+the player says: dialogue is the threat surface, records travel between NPCs,
+and deterministic rules — not the LLM — decide consequences.
 
-Current state: M1 technical proof passes locally. A public prologue/demo is not verified yet.
+**Current state: direction reset (v2).** The project rebooted on 2026-07-10
+from a 3D prototype to a 2D top-down game. The v1 prototype proved the
+conversation/suspicion protocol end to end; v2 keeps that core and rebuilds the
+presentation layer in 2D with real (licensed) art, a port-and-adapter AI
+provider layer, and a plan that optimizes for playable fun instead of process
+gates.
 
-![Same Order conversation HUD](docs/assets/readme-same-order-conversation.png)
+## Where to Start
 
-The screenshot is a current internal Godot capture of the `Same Order` Store Clerk conversation proof. It is not final art or a release screenshot.
+**Everything is indexed from [`docs/README.md`](docs/README.md).** Read it
+first; every document is scoped so an AI agent (or human) can pick up one
+document and start working.
 
-## What Exists
-
-| Area | Status |
+| You want to... | Read |
 |---|---|
-| Engine | Godot 4.x 3D project under `godot/`; current proof uses Godot 4.7-beta2 through the local `GODOT_BIN`. |
-| Backend | TypeScript NPC runtime under `backend/npc-runtime/`. |
-| Playable proof | Store Clerk prompt, three choices, preset recorded statement, deterministic suspicion/report, Station inquest. |
-| Evidence | Godot Evidence Packs validate through the backend Schema. |
-| AI provider | Optional wording proposal layer. Current M1 proof is `fallback_only_m1`, not live GPT. |
-| Release | Packaged app export is proven for local testing. No public demo or fixed GPT model promise yet. |
-
-## Quick Start
-
-Prerequisites:
-- Latest published Godot for this repo proof: `4.7.beta2.official.777579205`
-  through the local `GODOT_BIN`.
-- Set `GODOT_BIN` explicitly per device. Do not copy another machine's Godot
-  absolute path into docs or scripts.
-- Node.js and npm.
-- OpenAI/API credentials only if you are working on live proposal-provider paths.
-
-Install backend dependencies:
-
-```bash
-npm install --prefix backend/npc-runtime
-```
-
-Run the backend checks:
-
-```bash
-npm run check --prefix backend/npc-runtime
-```
-
-Open the game in Godot:
-
-```bash
-${GODOT_BIN:?set GODOT_BIN to the local Godot CLI} --path godot
-```
-
-Run the current playable proof:
-
-```bash
-${GODOT_BIN:?set GODOT_BIN to the local Godot CLI} --headless --path godot --script res://tools/playable_slice_smoke.gd
-```
+| Understand the game | [`docs/vision/pitch.md`](docs/vision/pitch.md) |
+| Know what to build next | [`docs/plan/roadmap.md`](docs/plan/roadmap.md) |
+| Work on the Godot client | [`docs/tech/godot-2d-client.md`](docs/tech/godot-2d-client.md) |
+| Work on the NPC runtime | [`docs/tech/npc-runtime.md`](docs/tech/npc-runtime.md) |
+| Work on AI providers | [`docs/tech/ai-provider-ports.md`](docs/tech/ai-provider-ports.md) |
+| Know why v1 died | [`docs/history/v1-postmortem.md`](docs/history/v1-postmortem.md) |
 
 ## Game Loop
 
 1. NPC prompts assume the player belongs here.
-2. The player answers through three diegetic dialogue choices.
-3. Optional free input is treated as a recorded statement, not open-ended chat.
-4. Deterministic rules classify suspicious wording.
-5. NPC suspicion becomes social report pressure.
-6. Station intake, inquest, verdict, and session end remain backend/runtime authority.
+2. The player answers through three diegetic dialogue choices or bounded typed
+   free input. Typed input becomes a recorded statement, not open-ended chat.
+3. Deterministic rules classify suspicious wording and hesitation.
+4. NPC suspicion becomes social pressure: probing, gossip, reports, records
+   that other NPCs read and act on.
+5. Station intake, inquest, verdict, and session end remain deterministic
+   runtime authority.
+6. NPCs run an agent loop: observe → pick a validated tool → read the result →
+   iterate. The LLM proposes wording and next tool calls; it never mutates the
+   world directly.
 
-## Architecture
+## Quick Start
 
-```mermaid
-flowchart LR
-    Player["Player"]
-    Godot["Godot 4.x\n3D scene, HUD, input, capture"]
-    Backend["TypeScript backend\nSchema, suspicion, reports, Evidence"]
-    Provider["API proposal provider\nwording only, optional"]
-    Evidence["Evidence Packs\nJSON plus visual captures"]
+Prerequisites: Godot 4.x (set `GODOT_BIN` per device), Node.js and npm.
 
-    Player --> Godot
-    Godot --> Backend
-    Provider -. proposes wording .-> Backend
-    Backend --> Godot
-    Backend --> Evidence
+```bash
+npm install --prefix backend/npc-runtime
+npm run check --prefix backend/npc-runtime
+${GODOT_BIN:?set GODOT_BIN to the local Godot CLI} --path godot
 ```
 
-## Authority Boundary
-
-| Layer | May Own | Must Not Own |
-|---|---|---|
-| Godot | Scene presentation, player input, HUD, NPC bodies, visual capture. | Exposure, suspicion math, Evidence meaning, verdict, session termination. |
-| Backend/runtime | Validation, deterministic suspicion, report thresholds, fallback, Evidence, Station state. | Final art, player camera feel, scene composition. |
-| API provider | NPC line candidates, Station wording, localized variants, fallback text variants. | Risk tags, Exposure delta, Evidence type, why-line authority, inquest, verdict, session end. |
-
-GPT model availability is checked at runtime. `gpt-5.4-mini` is the preferred configured candidate only when the provider verifies it; the game must fall back to an available configured model or deterministic text. Live proposal smoke tests must pass the configured request budget before calling the Responses API.
-
-## Current Proof
-
-The checked-in proof covers:
-
-- Backend Schema and runtime tests.
-- Godot import, scene-load, runtime, playable, bridge fallback, localization, keyboard, and visual capture smokes.
-- Backend validation for shell, runtime, and playable Godot Evidence Packs.
-- `Same Order` conversation chain with shared conversation identity, selected line, recorded statement hash, suspicion signals, report pressure, why-line, and Station inquest.
-- Internal `Same Order` route contrast for clean cover, repair recovery, soft report, and inquest, validated by backend internal route-proof checks.
-
-Still pending before calling this a small complete prologue/demo:
-
-- Live provider preflight only if provider-backed wording becomes part of the public promise.
-- External player comprehension evidence.
-- Manual replay notes from a fresh player using the packaged app.
-
-## Documentation
-
-| Need | Start Here |
-|---|---|
-| Project truth | [project.md](project.md), [plan.md](plan.md), [terminology.md](terminology.md) |
-| Full docs index | [docs/README.md](docs/README.md) |
-| Direction | [docs/direction/README.md](docs/direction/README.md) |
-| Current redesign | [docs/direction/08-conversation-suspicion-redesign.md](docs/direction/08-conversation-suspicion-redesign.md) |
-| Runtime design | [docs/design/game-design.md](docs/design/game-design.md), [docs/design/runtime-evidence.md](docs/design/runtime-evidence.md) |
-| Scenario source | [docs/scenario/README.md](docs/scenario/README.md) |
-| Godot runtime path | [docs/runtime/godot/README.md](docs/runtime/godot/README.md) |
-| Development checks | [docs/development/dev.md](docs/development/dev.md) |
-| Current evidence state | [.game-harness/verification-ledger.md](.game-harness/verification-ledger.md) |
-| Game Studio state | [.game-studio/project-state.md](.game-studio/project-state.md) |
+Note: `godot/` currently contains the v1 3D scene tree. It is scheduled to be
+rebuilt as a 2D project in milestone M1 — see
+[`docs/plan/m1-2d-playable-slice.md`](docs/plan/m1-2d-playable-slice.md).
 
 ## Repository Map
 
 | Path | Purpose |
 |---|---|
-| `godot/` | Godot 4.x game project and smoke scripts. |
-| `backend/npc-runtime/` | TypeScript backend runtime, provider boundary, Schema, and Evidence validators. |
-| `data/evidence/godot/` | Generated runtime Evidence Packs and visual captures. |
-| `docs/` | Product, design, runtime, development, research, and archive documentation. |
-| `.game-harness/` | Current M1 execution state, gates, ledgers, and continuation notes. |
-| `.game-studio/` | Project-local Game Studio guidance and routing. |
-
-## Full Verification
-
-Use this set before claiming the local proof is still healthy.
-
-Repo-local checks:
-
-```bash
-npm run check --prefix backend/npc-runtime
-${GODOT_BIN:?set GODOT_BIN to the local Godot CLI} --headless --import --path godot
-$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
-$GODOT_BIN --headless --path godot --script res://tools/evidence_run.gd
-$GODOT_BIN --headless --path godot --script res://tools/runtime_slice_smoke.gd
-$GODOT_BIN --headless --path godot --script res://tools/playable_slice_smoke.gd
-$GODOT_BIN --headless --path godot --script res://tools/live_backend_bridge_smoke.gd
-$GODOT_BIN --headless --path godot --script res://tools/localization_smoke.gd
-$GODOT_BIN --quit-after 2400 --path godot --script res://tools/visual_capture.gd
-```
-
-Optional local workspace helper checks:
-
-```bash
-# Set these explicitly per device. Do not commit machine-specific absolute
-# paths or sibling-repo assumptions into project docs or scripts.
-export GAME_STUDIO_ROOT="<local game-studio repo>"
-export GODOT_BEST_PRACTICE_SKILL="<local godot-best-practice skill>"
-
-test -n "${GAME_STUDIO_ROOT:-}" && node "$GAME_STUDIO_ROOT/tools/check-project.mjs" "$PWD"
-test -n "${GODOT_BEST_PRACTICE_SKILL:-}" && bash "$GODOT_BEST_PRACTICE_SKILL/scripts/check_gd_syntax.sh" godot
-```
+| `docs/` | v2 documentation, indexed by `docs/README.md`. |
+| `docs/scenario/` | Scenario canon: storylets, dialogue banks, social cards (engine-agnostic, reused by v2). |
+| `docs/archive/` | Frozen v1 documentation. Do not build from it. |
+| `godot/` | Godot game project (v1 3D, rebuilt to 2D in M1). |
+| `backend/npc-runtime/` | TypeScript NPC runtime: deterministic authority, schema, provider ports. |
+| `data/evidence/` | Generated runtime artifacts from smoke runs. |
 
 ## License
 
-No top-level project license is declared yet.
+Code: no top-level license declared yet. Third-party art is governed by
+per-pack licenses — see [`docs/art/asset-pipeline.md`](docs/art/asset-pipeline.md);
+paid packs are never committed to this public repository.

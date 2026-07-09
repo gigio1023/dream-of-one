@@ -1,107 +1,93 @@
-# Dream of One Documentation
+# Dream of One — Documentation Index
 
-Use this page as the documentation map. README.md is the project entry point; this page routes deeper work.
+This is the single entry point for all active documentation. Every document
+below is scoped so that one agent can read it plus its linked references and
+start working. If a document is not reachable from this index, it is not
+active.
 
-## Active Documentation
+Status: **v2 direction reset (2026-07-10).** v1 (3D prototype, 2025-10 →
+2026-05) is archived under `docs/archive/` and summarized in the postmortem.
 
-| Directory | Purpose |
+## Reading Order for New Agents
+
+1. [`vision/pitch.md`](vision/pitch.md) — what the game is.
+2. [`vision/design-pillars.md`](vision/design-pillars.md) — what we optimize
+   for, and the anti-goals that keep v1's failure from repeating.
+3. [`plan/roadmap.md`](plan/roadmap.md) — milestone ladder and what is active
+   right now.
+4. The active milestone spec under `plan/`.
+5. The `tech/` docs for whichever layer you are touching.
+
+## Document Map
+
+### Vision — why and what
+
+| Doc | Scope |
 |---|---|
-| [agent-search-index.md](agent-search-index.md) | Search-first routing for agents, especially AI provider/auth/provider-boundary work. |
-| [direction](direction/README.md) | Game thesis, pillars, roadmap, decision ledger, release strategy, and conversation redesign. |
-| [design](design/game-design.md) | Runtime authority, Dream Laws, Evidence semantics, and social-causality rules. |
-| [scenario](scenario/README.md) | Active scenario bible, dialogue/content banks, localization notes, and playtest rubric. |
-| [runtime/godot](runtime/godot/README.md) | Godot runtime path, validation gates, Schema/action notes, parity, and cutover history. |
-| [development](development/dev.md) | Developer setup, checks, CI policy, agent runbooks, and harness engineering docs. |
-| [framework](framework/README.md) | Project-local Game Studio proof gates and GPT review guidance. |
+| [`vision/pitch.md`](vision/pitch.md) | Game pitch, fantasy, references, target scope |
+| [`vision/design-pillars.md`](vision/design-pillars.md) | Four pillars, anti-goals, decision rules |
 
-## State And Evidence
+### Game design — how it plays
 
-| Path | Role |
+| Doc | Scope |
 |---|---|
-| [.game-harness](../.game-harness/README.md) | Current M1 execution state, tasks, review logs, verification ledger, and continuation note. |
-| [.game-studio](../.game-studio/README.md) | Project-local Game Studio routing, rubrics, roles, gates, and state. |
-| [data/evidence/godot](../data/evidence/godot/) | Generated Godot Evidence Packs and visual captures. |
+| [`game/core-loop.md`](game/core-loop.md) | Conversation → suspicion → record → consequence loop; route contrast; session shape |
+| [`game/npc-agent-loop.md`](game/npc-agent-loop.md) | NPC agent-loop model: observe → tool → result → iterate; tool catalog; validation |
+| [`game/world-social-sim.md`](game/world-social-sim.md) | Locations, civic ledger, records, propagation, minimal economy |
+| [`game/content-guide.md`](game/content-guide.md) | Reusing `docs/scenario/` canon; tone; Korean-first localization |
+| [`game/glossary.md`](game/glossary.md) | Canonical terms (Station, record, suspicion signal, route, ...) |
 
-## Archive And Research
+### Art — how it looks
 
-| Directory | Contents |
+| Doc | Scope |
 |---|---|
-| [archive](archive/README.md) | Superseded material for historical lookup only. Not an active implementation path. |
-| [research](research/) | Source-backed methodology and director-harness research. |
-| [research/simulator-benchmarks](research/simulator-benchmarks/README.md) | Source-backed benchmark research for simulator-first Dream of One planning. |
+| [`art/art-direction.md`](art/art-direction.md) | 2D top-down direction, resolution, palette, readability rules |
+| [`art/asset-pipeline.md`](art/asset-pipeline.md) | Asset sources, licenses, gitignore policy, import conventions |
 
-## Reading Order
+### Tech — how it is built
 
-1. [Agent search index](agent-search-index.md)
-2. [Project definition](../project.md)
-3. [Completion plan](../plan.md)
-4. [Conversation suspicion redesign](direction/08-conversation-suspicion-redesign.md)
-5. [Game design spine](direction/09-game-design-spine.md)
-6. [Team operating brief](direction/10-team-operating-brief.md)
-7. [Simulator benchmark adoption brief](direction/11-simulator-benchmark-adoption-brief.md)
-8. [Simulator reference games map](direction/12-simulator-reference-map.md)
-9. [Operation sim quality floor](direction/13-operation-sim-quality-floor.md)
-10. [Minimal civic economy model](direction/14-minimal-civic-economy-model.md)
-11. [Agentic social simulation model](direction/15-agentic-social-simulation-model.md)
-12. [Agentic prototype target](direction/16-agentic-prototype-target.md)
-13. [Agent loop runtime pivot](direction/17-agent-loop-runtime-pivot.md)
-14. [AI provider runtime](development/ai-provider-runtime.md)
-15. [Game design](design/game-design.md)
-16. [Scenario docs](scenario/README.md)
-17. [Godot runtime path](runtime/godot/README.md)
-18. [Verification ledger](../.game-harness/verification-ledger.md)
+| Doc | Scope |
+|---|---|
+| [`tech/architecture.md`](tech/architecture.md) | System map: Godot 2D client ↔ TS runtime ↔ provider ports |
+| [`tech/godot-2d-client.md`](tech/godot-2d-client.md) | Scene/node structure, tilemaps, interaction, HUD, localization |
+| [`tech/npc-runtime.md`](tech/npc-runtime.md) | Backend inventory: what carries over from v1, target module shape |
+| [`tech/ai-provider-ports.md`](tech/ai-provider-ports.md) | Port-and-adapter provider layer: Chat Completions port, Responses port, registry, fallback |
+| [`tech/verification.md`](tech/verification.md) | Commands, smoke policy, the fun gate |
 
-## Current Truth
+### Plan — what to build, in order
 
-Dream of One is a conversation-first suspicion game. The player is investigated through dialogue, recorded statements, suspicion signals, social reports, Station intake, inquest, and deterministic session end states.
+| Doc | Scope | Status |
+|---|---|---|
+| [`plan/roadmap.md`](plan/roadmap.md) | Milestone ladder M0–M5, gates, tracks | — |
+| [`plan/m1-2d-playable-slice.md`](plan/m1-2d-playable-slice.md) | 2D rebuild: store scene, movement, conversation, four routes | **next** |
+| [`plan/m2-provider-ports.md`](plan/m2-provider-ports.md) | Provider port/adapter implementation, live NPC wording | queued |
+| [`plan/m3-agent-loop-npcs.md`](plan/m3-agent-loop-npcs.md) | Agent-loop NPCs with validated tools and transcripts | queued |
+| [`plan/m4-town-social-sim.md`](plan/m4-town-social-sim.md) | Multi-location town, propagation, day segments, save/load | queued |
+| [`plan/m5-prologue-demo.md`](plan/m5-prologue-demo.md) | 15–30 min prologue, KO/EN, exports, itch release | queued |
 
-Core AI/NPC philosophy is `AGENT_LOOP_RUNTIME`, not fixed social-chain
-authoring. Read [Agent Loop Runtime Doctrine](direction/17-agent-loop-runtime-pivot.md)
-before planning NPC behavior, LLM provider work, social simulation, or the next
-prototype. Search terms: `NPC_TOOL_LOOP`, `NO_FIXED_SOCIAL_CHAINS`,
-`PROGRAMMATIC_WORLD_AI_INTENT`, `CLAUDE_CODE_STYLE_NPC`.
+### History
 
-The checked-in build proves an M1 technical slice and backend `openai-codex`
-live wording calls. Godot live smokes now prove proof-only route-context
-dispatch and same-NPC local-memory continuity through the running
-`PlayableSession`, but the product HUD/Evidence truth remains `fallback_only_m1`.
-It does not yet prove a public demo, player-visible live-provider mode, or
-product-ready fixed GPT model availability.
+| Doc | Scope |
+|---|---|
+| [`history/v1-postmortem.md`](history/v1-postmortem.md) | Why v1 was abandoned; what v2 keeps, changes, and forbids |
 
-The current planning method is benchmark-first: build a readable Store-to-Station
-procedure simulator before expanding dream fiction, broad social simulation, or
-OpenAI/provider-led wording claims.
+### Content canon (kept from v1, still active)
 
-The current quality-floor method is operation-sim-first: Same Order must show a
-visible workplace, usable Store/Station objects, record state changes, NPC
-pressure, and exact Station citation before broad content or provider-forward
-claims.
+| Doc | Scope |
+|---|---|
+| [`scenario/`](scenario/) | Storylet packets, social simulation cards, dialogue line bank, affordance maps, Korean voice notes |
 
-The current economy method is civic-ledger-first: Same Order needs one normal
-transaction, one possible correction, one report burden, and one Station audit
-before broad shop or staff systems.
+### Archive (frozen — do not build from)
 
-The current social simulation method is agent-loop-first: author places, low
-level tools, records, visibility, dialogue locks, and validation, then let NPC
-agents iterate over tool calls and conversation context. Do not keep adding one
-fixed social reaction chain after another as the main design method.
+`archive/v1-direction/`, `archive/v1-design/`, `archive/v1-development/`,
+`archive/v1-runtime/`, `archive/v1-framework/`, `archive/v1-research/`, plus
+older `archive/` material. Recover history from git, not by resurrecting these
+into the active tree.
 
-The current LLM/NPC method is tool-loop-first: dialogue choices are player
-speech inputs, while NPCs should increasingly use small validated tools such as
-`move_to`, `look`, `talk_to`, `wait`, `inspect_record`, and `request`.
-AI_PROVIDER_SEARCH_INDEX lives at [agent-search-index.md](agent-search-index.md).
-The default live-LLM provider mode is direct `openai-codex` auth with
-`gpt-5.4-mini` low reasoning effort only; API `nano` models are not assumed
-usable through that Codex provider until live discovery proves it. Missing
-credential or failed provider calls fall back deterministically. Provider
-response storage is off by default; same-NPC continuity uses backend-owned
-workspace memory in the next prompt. Backend and Godot live proof records
-estimated caps and returned token usage, but ChatGPT Pro remaining quota is not
-exposed by the provider response.
-Game-runtime Codex auth means the backend provider profile described in
-[AI provider runtime](development/ai-provider-runtime.md), not Codex CLI login.
+## Index Rules
 
-The current prototype target is `agent_loop_probe_v0`: one NPC, one other NPC,
-one object or record, five or fewer tools, three to six iterations, and a
-player/Codex-readable transcript proving the NPC can observe, act, read the
-result, and choose the next step without a fixed authored chain.
+- New active docs must be added to this index in the same commit.
+- Prefer editing an existing doc over adding a new one. A new doc needs a new
+  scope, not a new opinion on an existing scope.
+- Plans live under `plan/`, one file per milestone, exactly one marked
+  **next**/**active** at a time.

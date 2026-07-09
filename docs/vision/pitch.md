@@ -32,11 +32,14 @@ zero; design clarity is the scarce resource.
 
 ## View and look
 
-Top-down 2D (Stardew Valley camera), 16×16 licensed pixel tiles and 4-direction
-character sprites, modern-mundane interiors: store, station office, park,
-studio. Surveillance pressure is drawn with sightline cues, speech bubbles,
-reaction markers, and record props — all things a top-down camera makes *more*
-readable than 3D did.
+Top-down 2D (Stardew Valley camera), 16×16 pixel tiles and 4-direction
+character sprites (free/CC0-first per the asset pipeline), modern-mundane
+interiors: store, station office, park, studio. The setting is a **stateless
+administered district** — generic-modern, institutionally named, deliberately
+unlocatable; Korean stays the authoring language of the content. Surveillance
+pressure is drawn with sightline cues, speech bubbles, reaction markers, and
+record props — all things a top-down camera makes *more* readable than 3D
+did.
 
 ## References (what we take, what we leave)
 

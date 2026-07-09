@@ -68,7 +68,9 @@ event, never an error surfaced to gameplay*.
 ## Profiles and registry
 
 Profiles are declarative config (`backend/npc-runtime/providers.config.json`,
-committed; secrets stay in env):
+committed; secrets stay in env). **First-class profiles** (keys available to
+this project now, used by default in M2 work and smokes): `modelscope/*` and
+`openai/*`. OpenRouter/local entries are supported examples, not defaults:
 
 ```jsonc
 {
@@ -150,6 +152,7 @@ rest of the session.
   budget, and envelope repair are fully testable offline. CI runs these.
 - **Live smokes** (`npm run provider:smoke -- --profile modelscope/qwen3.7-plus`)
   are manual/opt-in, spend pennies, and print utterance + usage. Never in CI.
+  Default smoke targets are the two first-class profiles (ModelScope, OpenAI).
 - The game with `default: "off"` must be byte-identical in route outcomes to
   the game with providers on (providers change texture, not truth) —
   `route_smoke.gd` asserts this by running routes in both modes (M2).

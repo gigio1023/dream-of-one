@@ -2,7 +2,7 @@
 
 Status: active authoring aid
 Date: 2026-05-14
-Primary direction: `docs/direction/09-game-design-spine.md`
+Primary direction: `docs/archive/v1-direction/09-game-design-spine.md`
 
 ## Purpose
 

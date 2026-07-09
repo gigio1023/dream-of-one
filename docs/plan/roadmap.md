@@ -11,7 +11,7 @@ boundaries (see anti-goals in
 
 | # | Milestone | One-line goal | Retires the risk that... | Status |
 |---|---|---|---|---|
-| M0 | Direction reset | This documentation tree; v1 process retired | ...agents rebuild the proof factory | **done (this PR)** |
+| M0 | Direction reset | This documentation tree; v1 process retired | ...agents rebuild the proof factory | **done (PR #98)** |
 | M1 | [2D playable slice](m1-2d-playable-slice.md) | Same Order storylet fully playable in 2D with real art, four routes, deterministic | ...2D top-down doesn't carry the surveillance feeling; the game isn't fun even at its core | **next** |
 | M2 | [Provider ports live](m2-provider-ports.md) | Port/adapter layer shipped; live NPC wording in-game via ModelScope profile, OpenAI profile, fallback proven | ...LLM texture adds nothing / costs too much / can't be tamed | queued |
 | M3 | [Agent-loop NPCs](m3-agent-loop-npcs.md) | NPCs iterate observe→tool→result with visible transcripts; propagation emerges from tools, not scripts | ...the agent-loop concept (v1's unbuilt pivot) doesn't actually produce believable society | queued |

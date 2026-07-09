@@ -13,13 +13,16 @@ isn't fun."
 
 ## Player-visible deliverables
 
-1. **The store scene**, built from the asset pipeline's committed tier and
-   local licensed tier: store interior + entrance street strip, counter,
-   usual-order cue, receipt tray, correction slip, report tray, queue marker,
-   and a doorway to a minimal Station intake room (inquest terminal scene).
-2. **Five characters** with real sprites and role accents: player, Store
-   Clerk, Store Manager, Waiting Customer, Station Officer (Station room
-   only).
+1. **The store scene**, built free-first (CC0 packs + greybox per
+   [`../art/asset-pipeline.md`](../art/asset-pipeline.md)): store interior +
+   entrance street strip, counter, usual-order cue, receipt tray, correction
+   slip, report tray, queue marker, and a doorway to a minimal Station intake
+   room (inquest terminal scene). Greybox elements follow the greybox rules
+   (plain, labeled, on-grid).
+2. **Five characters** with sprites and role accents: player, Store Clerk,
+   Store Manager, Waiting Customer, Station Officer (Station room only).
+   Kenney RPG Urban Pack's walk-cycle characters are the starting candidates;
+   role accents applied per the art direction.
 3. **Movement + interaction:** 4-dir walk, collision, focus highlight,
    `interact` opens conversation with the Clerk or inspection of any record
    prop.
@@ -42,8 +45,10 @@ isn't fun."
   v1 3D scenes/scripts deleted in the same PR.
 - `world_layout.json` gains its `tile` block; `world_builder_2d.gd` renders
   from it.
-- Asset pipeline bootstrapped: `godot/assets/kenney2d/` committed,
-  `godot/assets/third_party/` gitignored with `manifest.json` +
+- **Asset survey slice first** (see asset pipeline): assemble one test room
+  from candidate CC0 packs, screenshot, decide the base pack in the PR.
+- Asset pipeline bootstrapped: `godot/assets/kenney2d/` + `godot/assets/greybox/`
+  committed, `godot/assets/third_party/` gitignored with `manifest.json` +
   `check_assets.gd`, `docs/art/CREDITS.md` started.
 - Runtime: `data/storylets/same-order.json` compiled from the scenario
   packet; sidecar session endpoints
@@ -62,8 +67,9 @@ isn't fun."
 - [ ] A player who slips once can find the repair path without docs.
 - [ ] Every suspicion change shows a why-line; every ledger event surfaces a
       visible consequence within 1s.
-- [ ] Game runs from a fresh clone without paid assets (fallback tier) and
-      looks right with them.
+- [ ] Game runs and looks intentional from a fresh clone with committed
+      tiers only (CC0 + greybox); no paid or local-only asset is required by
+      any scene or smoke.
 - [ ] `npm run check` green; no v1 3D files remain under `godot/`.
 - [ ] Fun gate answered honestly in the PR.
 
@@ -75,5 +81,6 @@ gamepad support.
 
 ## Dependencies / notes
 
-- Purchase/download the LimeZu set (~$10) before scene work; manifest first.
+- No purchases required. The asset survey slice is the first M1 task; paid
+  upgrades are a post-M1 option only if the free tier fails readability.
 - Keep sessions restartable in <2s — replay speed is part of the fun gate.

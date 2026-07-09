@@ -1,16 +1,18 @@
 # Dream of One
 
-Dream of One is a 2D top-down conversation social-stealth game built with
-Godot 4.x and a TypeScript NPC runtime. NPCs and the Station investigate what
-the player says: dialogue is the threat surface, records travel between NPCs,
-and deterministic rules — not the LLM — decide consequences.
+Dream of One is a 2D top-down conversation social-stealth game set in a
+stateless administered district, built with Godot 4.x and a TypeScript NPC
+runtime. NPCs and the Station investigate what the player says: dialogue is
+the threat surface, records travel between NPCs, and deterministic rules —
+not the LLM — decide consequences. NPC brains live in the TS runtime as
+constrained agent loops; a port-and-adapter provider layer (ModelScope/Qwen,
+OpenAI, or none) proposes their wording.
 
-**Current state: direction reset (v2).** The project rebooted on 2026-07-10
-from a 3D prototype to a 2D top-down game. The v1 prototype proved the
-conversation/suspicion protocol end to end; v2 keeps that core and rebuilds the
-presentation layer in 2D with real (licensed) art, a port-and-adapter AI
-provider layer, and a plan that optimizes for playable fun instead of process
-gates.
+**Current state: v2 direction reset merged (M0 done); next milestone is M1,
+the 2D playable slice.** v1 (2025-10 → 2026-05, 3D) proved the
+conversation/suspicion protocol end to end and is archived; v2 keeps that
+core and rebuilds the presentation in 2D with free-first art and a plan that
+optimizes for playable fun instead of process gates.
 
 ## Where to Start
 
@@ -69,5 +71,6 @@ rebuilt as a 2D project in milestone M1 — see
 ## License
 
 Code: no top-level license declared yet. Third-party art is governed by
-per-pack licenses — see [`docs/art/asset-pipeline.md`](docs/art/asset-pipeline.md);
-paid packs are never committed to this public repository.
+per-pack licenses — see [`docs/art/asset-pipeline.md`](docs/art/asset-pipeline.md).
+Committed assets are CC0 or project-owned only; redistribution-restricted
+packs (free or paid) are never committed to this public repository.

@@ -1,11 +1,11 @@
 # Player Experience MDA
 
 Status: retained experience map; current design spine lives in
-`docs/direction/09-game-design-spine.md`.
+`docs/archive/v1-direction/09-game-design-spine.md`.
 
-Use `docs/direction/08-conversation-suspicion-redesign.md` and
+Use `docs/archive/v1-direction/08-conversation-suspicion-redesign.md` and
 `docs/scenario/bible/12-conversation-suspicion-prologue.md` for the current
-player-facing proof target. Use `docs/direction/09-game-design-spine.md` for
+player-facing proof target. Use `docs/archive/v1-direction/09-game-design-spine.md` for
 the mechanic-dynamic-experience chain that should drive new development. The
 tables below preserve useful experience goals, but rows that center text
 notices, Cover Test zones, or abstract speech-act buttons are legacy

@@ -1,8 +1,8 @@
 # Conversation Suspicion Prologue
 
 Status: active first playable scenario; internally route-proven; product closure pending
-Depends on: `docs/direction/08-conversation-suspicion-redesign.md`,
-`docs/direction/09-game-design-spine.md`, and
+Depends on: `docs/archive/v1-direction/08-conversation-suspicion-redesign.md`,
+`docs/archive/v1-direction/09-game-design-spine.md`, and
 `docs/scenario/content/social-simulation-cards.md`
 
 ## Working Title

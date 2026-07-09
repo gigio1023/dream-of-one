@@ -28,3 +28,11 @@ backend/npc-runtime/data/thread-store.json
 backend/npc-runtime/data/workspaces/
 
 godot/.godot/
+
+# Paid/licensed asset packs must never be committed (public repo).
+# See docs/art/asset-pipeline.md; manifest.json stays tracked.
+godot/assets/third_party/*
+!godot/assets/third_party/manifest.json
+
+.env
+.env.local

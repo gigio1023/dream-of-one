@@ -70,6 +70,44 @@ and the stage** — senses in (observations, player input), actions out
 headless (fixture NPCs conversing without a renderer), which is how agent-loop
 work gets tested from M3 on.
 
+### Full re-evaluation record (2026-07-10, owner-requested)
+
+The owner asked for a from-scratch reconsideration with reimplementation on
+the table. Candidates evaluated with web research (evidence in PR): TS Node
+sidecar, Python sidecar, Godot C#/.NET in-process, GDScript native.
+
+- **Godot C# in-process** is genuinely viable on desktop: official
+  `openai-dotnet` SDK is mature (Responses API stable since 2025-12, custom
+  baseURL first-class → ModelScope works), and Godot's main-thread
+  `GodotSynchronizationContext` makes `HttpClient` + async/await safe. Its win
+  is eliminating sidecar lifecycle/port/dual-signing costs. Its costs: C#
+  **cannot export to web** (unresolved through 4.7, draft-PR only), thin
+  shipped precedent for Godot C# + LLM, brain iteration coupled to engine
+  compile cycles, and lower AI-agent fluency with Godot C# than TS.
+- **TS sidecar** keeps brain iteration and testing fully engine-independent,
+  reuses the proven v1 schema/suspicion core, and has direct shipping
+  precedent (Screeps: World has bundled a Node server on Steam since 2016).
+  Sidecar costs (orphan processes, port conflicts, per-executable
+  signing/notarization) are real but M5-localized with documented mitigations.
+- **Python sidecar** has the best LLM ecosystem but the worst packaging
+  friction (PyInstaller AV false positives, macOS notarization landmines); the
+  owner expressed no language preference, removing its main upside.
+- **GDScript native** stays rejected (no SDK, hand-rolled validation,
+  engine-coupled tests).
+
+**Decision rule:** with agents writing most code, brain iteration speed,
+headless testability, and agent fluency outweigh single-process deployment
+simplicity. **Decision: keep the TS sidecar.** Constraints adopted from the
+research: treat Chat Completions as the lowest common denominator for
+OpenAI-compatible endpoints (Responses only for OpenAI itself); bind the
+sidecar to localhost with a dynamic port; the game must kill the sidecar on
+exit (orphan processes are the #1 documented sidecar failure).
+
+**Reversal conditions:** (a) a browser/web demo becomes a requirement → move
+brains to a hosted server (TS/Python), C# stays excluded; (b) M5 bundling
+fails in practice → try single-binary compilation (Bun compile / Node SEA)
+before any C# re-evaluation.
+
 ## Client ↔ runtime transport
 
 - **HTTP sidecar.** The runtime runs as a local Node process

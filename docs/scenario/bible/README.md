@@ -4,11 +4,12 @@ Status: Needs conversation-first rewrite before use as player-facing canon.
 
 ## One-Sentence Game
 
-Dream of One is a 3D conversation social-stealth game where a player tries to sound locally normal while NPC society and the Station convert conversational weirdness, reports, and recorded statements into Evidence.
+Dream of One is a 2D top-down conversation social-stealth game where a player tries to sound locally normal while NPC society and the Station convert conversational weirdness, reports, and recorded statements into records.
 
 ## Redesign Notice
 
-The active director-level redesign is `docs/direction/08-conversation-suspicion-redesign.md`.
+Historical design source: `docs/archive/v1-direction/08-conversation-suspicion-redesign.md`.
+The active design authority is `docs/game/core-loop.md` and `docs/vision/design-pillars.md`.
 
 This bible still contains useful NPC, location, Dream Law, voice, and Station material, but its player-facing loop is outdated where it centers abstract `SA_*` buttons, Cover Test zone activation, or repeated risky inputs. Future scenario work should rewrite these documents around NPC prompts, three dialogue choices, optional free input, deterministic suspicion signals, social sharing/report, and Station consequence.
 

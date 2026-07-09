@@ -2,9 +2,15 @@
 
 ## Direction in one line
 
-Modern-mundane Korean town block in warm 16×16 pixel art — cozy at first
+A stateless administered district in warm 16×16 pixel art — cozy at first
 glance, administrative on second glance — where surveillance reads through
 composition and UI, not grimdark palette.
+
+Setting note (decided 2026-07-10): the town is a **placeless administrative
+zone** — no real-world country markers, generic-modern signage, institutional
+naming (구역/스테이션 numbering). Korean remains the authoring language of all
+content; the *place* stays unlocatable, which also keeps KO/EN localization
+symmetrical and fits the dream-logic undertone.
 
 ## Camera and resolution
 
@@ -46,6 +52,8 @@ composition and UI, not grimdark palette.
 
 - No 3D, no normal-mapped "HD-2D" lighting, no mixed pixel densities on one
   screen.
-- No placeholder programmer art in player-facing builds after M1: if an
-  element exists, it uses the licensed art language.
+- Free-first with greybox mixing is the M1–M3 norm (see
+  [`asset-pipeline.md`](asset-pipeline.md)): greybox elements must follow the
+  greybox rules (plain, labeled, on-grid) so they read as intentional. The M4
+  art pass unifies the look; after M4, no greybox in player-facing builds.
 - No horror styling — dread comes from procedure, not from darkness.

@@ -23,6 +23,14 @@ the questions are and how permanent the records feel. Korean first; the
 Korean voice notes govern register (존댓말 defaults, clipped clerk speech,
 Station's flat officialese).
 
+**Setting/naming rule (stateless district):** the town is a placeless
+administrative zone. No real-world countries, cities, brands, currencies, or
+holidays. Places and institutions use generic-administrative names (스테이션,
+구역/번호, 상점, 스튜디오); people use role titles over surnames where
+possible. Korean is the authoring language, but nothing in the text should
+pin the place to Korea — a reader should feel "somewhere administered,"
+nowhere on a map.
+
 ## Writing rules
 
 - Every NPC prompt needs its three-choice set with a felt safe/uncertain/risky

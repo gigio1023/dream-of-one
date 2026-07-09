@@ -48,17 +48,39 @@ flowchart LR
    (wording + at most one tool call); the agent-loop engine validates it like
    any other candidate action.
 
+## Where the NPC brains live — decided: the TS runtime
+
+The question that settles the client/runtime split: where is it best to
+implement *many concurrent NPC brains* that assemble context, talk to LLM
+provider APIs, and manage memory? Answer: TypeScript, decisively.
+
+| Concern | TS runtime (Node) | GDScript in-engine |
+|---|---|---|
+| Concurrent LLM calls for N NPCs | Native async I/O; trivial fan-out, timeout, retry per NPC | `HTTPRequest` nodes + signal plumbing per call; awkward at N>2 |
+| Provider SDKs | Official OpenAI SDK (both API shapes), mature streaming | No first-class LLM SDK; hand-rolled HTTP + SSE parsing |
+| Schema validation of proposals | zod at every boundary, typed end to end | Manual `Dictionary` checking, no type safety |
+| Context/prompt assembly, token budgeting | First-class string/JSON tooling, tokenizer libs | Possible but clumsy |
+| Testing brains without the engine | Plain unit/fixture tests, headless simulation of whole social scenes | Engine-coupled tests only |
+| Frame-rate isolation | Brain latency can never hitch rendering (separate process) | LLM waits share the main loop |
+
+So: **brains (agent loop, context assembly, provider ports, memory, all
+deterministic authority) live in `backend/npc-runtime/`. Godot is the body
+and the stage** — senses in (observations, player input), actions out
+(validated mutations to render). This also means the whole social sim can run
+headless (fixture NPCs conversing without a renderer), which is how agent-loop
+work gets tested from M3 on.
+
 ## Client ↔ runtime transport
 
-- **Dev default: HTTP sidecar.** The runtime runs as a local Node process
+- **HTTP sidecar.** The runtime runs as a local Node process
   (`npm run serve`) exposing the v1-proven endpoint shape
   (`/v1/npc/decision`, plus v2 session endpoints). Godot talks JSON over
   localhost. Fast iteration, engine-independent testing.
-- **Packaging decision (deferred to M5):** bundle Node sidecar with the
-  export vs. port the (small, dependency-light) decision core to GDScript.
-  Default assumption is the bundled sidecar; decide with real export testing.
-  Both paths keep schema as the contract, so the choice does not leak into
-  M1–M4 work.
+- **Packaging (M5 detail, not an architecture question):** the shipped build
+  bundles the sidecar (launcher starts/stops it; Node runtime packaged
+  per-OS). Porting brains to GDScript is explicitly rejected per the table
+  above; if bundling proves painful at M5, the fallback investigation is a
+  compiled single-binary sidecar (e.g. pkg/bun-style), never an engine port.
 
 ## Data flow contracts
 

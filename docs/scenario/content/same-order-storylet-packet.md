@@ -2,8 +2,8 @@
 
 Status: active M1 storylet packet
 Date: 2026-05-14
-Source: `docs/direction/10-team-operating-brief.md`
-Benchmark method: `docs/direction/11-simulator-benchmark-adoption-brief.md`
+Source: `docs/archive/v1-direction/10-team-operating-brief.md`
+Benchmark method: `docs/archive/v1-direction/11-simulator-benchmark-adoption-brief.md`
 
 ## Purpose
 

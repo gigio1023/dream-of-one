@@ -2,8 +2,8 @@
 
 Status: active M1 design artifact
 Date: 2026-05-15
-Direction source: `docs/direction/15-agentic-social-simulation-model.md`
-Prototype target: `docs/direction/16-agentic-prototype-target.md`
+Direction source: `docs/archive/v1-direction/15-agentic-social-simulation-model.md`
+Prototype target: `docs/archive/v1-direction/16-agentic-prototype-target.md`
 
 ## Purpose
 

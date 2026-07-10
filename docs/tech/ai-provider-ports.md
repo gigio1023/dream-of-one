@@ -64,6 +64,29 @@ It uses the private `Qwen-Ambassador/Qwen3.7-Plus` model id and disables Qwen
 thinking for the bounded JSON envelope; this keeps reasoning tokens from
 consuming the short response budget before the JSON body is emitted.
 
+## Live prompt calibration
+
+Judgment deltas are model-owned but calibrated to the runtime's 0–125 score
+scale. The prompt gives magnitude examples for ordinary, mismatched, explicit
+outside/dream, and severe refusal cases; they are a ruler, not a deterministic
+classifier. This prevents providers that naturally emit 1–5 ratings from
+making report and Station pressure unreachable while leaving the actual
+meaning judgment with the NPC model.
+
+Agent-step prompts require Korean for every player-visible utterance and tell
+the model to stop after a successful goal-satisfying tool result instead of
+repeating the same successful read or look until the iteration budget ends.
+Tool names and ids stay unchanged for validation. The generic agent-loop
+validator also suppresses an identical call after it has already succeeded or
+been blocked within the same beat, returning that result to the model so it can
+stop or choose a genuinely different next action.
+
+Player-visible dialogue, reply suggestions, judgment reasons, NPC utterances,
+and record/ledger prose also pass a modern-Korean script check at the provider
+envelope boundary. Latin or Han-character leakage receives the same single
+bounded repair attempt as malformed JSON; ids and tool names are excluded from
+that language check.
+
 ## Envelope and failure handling
 
 Adapters return text and usage only. `ProviderService` parses the text with the

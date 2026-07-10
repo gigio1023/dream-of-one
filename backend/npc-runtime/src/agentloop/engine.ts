@@ -69,6 +69,9 @@ export async function runBeat(input: RunBeatInput): Promise<BeatResult> {
   const events: LedgerEvent[] = [];
   const actions: NpcAction[] = [];
   const deltas: TranscriptEntry[] = [];
+  // A signature becomes unavailable for the rest of one beat after either a
+  // block or a success. Re-observing may change the next useful action, but
+  // repeating the exact same completed call cannot create new information.
   const blockedSignatures = new Set<string>();
   const memory: ActorMemory = {
     actorId: input.memory.actorId,
@@ -110,7 +113,7 @@ export async function runBeat(input: RunBeatInput): Promise<BeatResult> {
         args: call.args,
         ok: false,
         reason: "retry_suppressed",
-        detail: "identical call already blocked against unchanged state",
+        detail: "identical call already completed or blocked in this beat",
         note: "retry suppressed",
       };
       const entry: TranscriptEntry = {
@@ -122,8 +125,8 @@ export async function runBeat(input: RunBeatInput): Promise<BeatResult> {
         utterance: proposal.utterance,
         rationale: proposal.rationale,
         proposalMeta: resolved.meta,
-        validation: { ok: false, reason: "retry_suppressed", note: "would retry a blocked step" },
-        nextStepChange: "provider must choose a different tool after the blocked result",
+        validation: { ok: false, reason: "retry_suppressed", note: "would repeat a completed or blocked step" },
+        nextStepChange: "provider must choose a different tool or stop after the prior result",
       };
       transcript.append(entry);
       deltas.push(entry);
@@ -146,6 +149,7 @@ export async function runBeat(input: RunBeatInput): Promise<BeatResult> {
         nextStepChange = "observation succeeded; provider chooses the next attempt";
       }
       memory.ownActionNotes.push(validation.note);
+      blockedSignatures.add(sig);
       previousResult = {
         tool: call.tool,
         args: call.args,

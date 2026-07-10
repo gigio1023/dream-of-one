@@ -4,12 +4,16 @@ import { TOOL_NAMES } from "../agentloop/tools.js";
 import { RECORD_KINDS, WORLD_ROLES } from "../runtime/world/index.js";
 
 const nonEmpty = z.string().trim().min(1);
+const forbiddenPlayerVisibleScript = /[\p{Script=Latin}\p{Script=Han}]/u;
+const modernKoreanText = nonEmpty.refine(value => !forbiddenPlayerVisibleScript.test(value), {
+  message: "player-visible text must use modern Korean without Latin or Han characters",
+});
 const intentSchema = z.enum(CONVERSATION_CHOICE_INTENTS);
-const suggestedReplySchema = z.object({ text: nonEmpty, intent: intentSchema }).strict();
+const suggestedReplySchema = z.object({ text: modernKoreanText, intent: intentSchema }).strict();
 
 export const conversationProposalSchema = z
   .object({
-    utterance: nonEmpty,
+    utterance: modernKoreanText,
     suggestedReplies: z.tuple([
       suggestedReplySchema,
       suggestedReplySchema,
@@ -26,7 +30,7 @@ export const conversationJudgmentSchema = z
     suspicionDelta: z.number().int(),
     reportDelta: z.number().int(),
     signals: z.array(z.enum(CONVERSATION_SUSPICION_SIGNALS)),
-    whyLine: nonEmpty,
+    whyLine: modernKoreanText,
   })
   .strict();
 
@@ -53,6 +57,19 @@ export const agentStepProposalSchema = z
   }))
   .refine(value => value.done || value.toolCall !== undefined, {
     message: "an active agent step requires toolCall",
+  })
+  .refine(value => !value.utterance || !forbiddenPlayerVisibleScript.test(value.utterance), {
+    message: "player-visible utterance must use modern Korean without Latin or Han characters",
+  })
+  .refine(value => {
+    const args = value.toolCall?.args;
+    if (!args) return true;
+    const whyLine = typeof args.whyLine === "string" ? args.whyLine : undefined;
+    const record = args.record && typeof args.record === "object" ? args.record as Record<string, unknown> : undefined;
+    const stateBody = typeof record?.stateBody === "string" ? record.stateBody : undefined;
+    return [whyLine, stateBody].every(text => !text || !forbiddenPlayerVisibleScript.test(text));
+  }, {
+    message: "player-visible tool text must use modern Korean without Latin or Han characters",
   });
 
 export const conversationProposalJsonSchema: Record<string, unknown> = {

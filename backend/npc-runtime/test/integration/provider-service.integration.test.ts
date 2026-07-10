@@ -115,9 +115,10 @@ test("provider service returns schema-validated live conversation proposals", as
 });
 
 test("the model judges suspicion live; the rule classifier answers only as fallback", async () => {
+  const judgmentTextGen = new FakeTextGen([{ text: validJudgment }]);
   const live = new ProviderService({
     profileId: "test/judgment",
-    textGen: new FakeTextGen([{ text: validJudgment }]),
+    textGen: judgmentTextGen,
     fallback: new RuleFallbackNpcAdapter(),
   });
   const judged = await live.judgeConversationTurn(judgmentRequest());
@@ -125,6 +126,9 @@ test("the model judges suspicion live; the rule classifier answers only as fallb
   assert.equal(judged.proposal.suspicionDelta, 35);
   assert.deepEqual(judged.proposal.signals, ["dream_language_leak"]);
   assert.match(judged.proposal.whyLine, /[가-힣]/);
+  assert.match(judgmentTextGen.requests[0].instructions, /0\.\.125 game scale/);
+  assert.match(judgmentTextGen.requests[0].instructions, /not tiny 1\.\.5 ratings/);
+  assert.match(judgmentTextGen.requests[0].instructions, /do not mix English, Chinese characters/);
 
   const down = new ProviderService({
     profileId: "test/judgment-down",
@@ -137,6 +141,61 @@ test("the model judges suspicion live; the rule classifier answers only as fallb
   // The dream-language line still registers through the deterministic classifier.
   assert.ok(fallback.proposal.signals.includes("dream_language_leak"));
   assert.ok(fallback.proposal.suspicionDelta > 0);
+});
+
+test("agent-step prompts keep visible language Korean and stop successful repetition", async () => {
+  const textGen = new FakeTextGen([
+    {
+      text: JSON.stringify({
+        toolCall: null,
+        utterance: null,
+        rationale: "기록을 이미 읽었으므로 행동을 마칩니다.",
+        done: true,
+      }),
+    },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/agent-language",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const result = await service.proposeNextStep({
+    sessionId: "session-agent-language",
+    iteration: 2,
+    goal: "보이는 기록을 읽고 반응한다.",
+    observePacket: observePacket(),
+    previousResult: {
+      tool: "read_record",
+      args: { recordId: "rec-1" },
+      ok: true,
+      note: "record read",
+    },
+    blockedSignatures: [],
+  });
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.proposal.done, true);
+  assert.match(textGen.requests[0].instructions, /player-visible.*in natural modern Korean only/);
+  assert.match(textGen.requests[0].instructions, /Never repeat an identical successful tool call/);
+});
+
+test("mixed-script player text gets one repair before it reaches the game", async () => {
+  const mixedScriptJudgment = JSON.stringify({
+    suspicionDelta: 45,
+    reportDelta: 30,
+    signals: ["dream_language_leak"],
+    whyLine: "꿈이라는 단어를公然히 사용했습니다.",
+  });
+  const textGen = new FakeTextGen([{ text: mixedScriptJudgment }, { text: validJudgment }]);
+  const service = new ProviderService({
+    profileId: "test/korean-repair",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const result = await service.judgeConversationTurn(judgmentRequest());
+  assert.equal(result.meta.transport, "live");
+  assert.equal(textGen.requests.length, 2);
+  assert.equal(textGen.requests[1].purpose, "repair");
+  assert.doesNotMatch(result.proposal.whyLine, /[\p{Script=Latin}\p{Script=Han}]/u);
 });
 
 test("invalid provider JSON gets one bounded repair attempt", async () => {

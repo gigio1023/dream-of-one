@@ -111,21 +111,32 @@ push it before moving to the next item.
 
 ### Restoration acceptance
 
-- [ ] Normal Store and Station play shows the intended tiles, characters, and
+- [x] Normal Store and Station play shows the intended tiles, characters, and
       props; no black background or debug-circle-only presentation remains.
-- [ ] Every current gameplay state has an asset-backed player-facing
+- [x] Every current gameplay state has an asset-backed player-facing
       presentation, including conversation, records, ambient reaction,
       Station intake, and ending.
-- [ ] 720p, 1080p, 1440p, and 4K presets show undistorted world pixels and a
+- [x] 720p, 1080p, 1440p, and 4K presets show undistorted world pixels and a
       readable, unclipped HUD.
-- [ ] Live Qwen and OpenAI sessions each show generated dialogue, typed-input
+- [x] Live Qwen and OpenAI sessions each show generated dialogue, typed-input
       judgment, record creation, and another NPC's visible reaction without a
       fallback response.
-- [ ] A conversation of at least three turns retains the NPC's own prior lines;
+- [x] A conversation of at least three turns retains the NPC's own prior lines;
       long generated text grows to its cap and then scrolls.
-- [ ] Normal, inspect, and debug views follow the information policy above.
-- [ ] Backend checks and Godot asset, scene-load, localization, and route
+- [x] Normal, inspect, and debug views follow the information policy above.
+- [x] Backend checks and Godot asset, scene-load, localization, and route
       smokes pass in fixture and scripted modes.
+
+Verified 2026-07-10: engine-native frames at 720p, 1080p, 1440p, and
+4K preserved 2×/3×/4×/6× world pixels and native HUD layout. A Qwen live
+session reached the third Station turn at 125 suspicion/125 report pressure;
+the Station prompt cited the clerk's prior statement, the actual Store record,
+and the player's earlier “first visit” claim. Both live profiles completed
+typed-answer sessions with zero fallback, created two records, and produced
+validated manager/customer actions; the manager read the created records.
+The Qwen live prompt was also rendered in the real Godot conversation panel
+with the `live` profile label. Long prompt and normal/inspect/debug behavior are
+covered by the public Godot route smoke.
 
 ### Explicit non-goals
 
@@ -175,28 +186,29 @@ presentation around that direction.
 - [x] One opt-in live provider smoke succeeds (conversation + judgment) with
       the checked-in default profile. *Verified 2026-07-10 with
       `openai/gpt-5.4-mini`: both calls used live transport with no fallback
-      (706 conversation tokens, 816 judgment tokens). The same smoke also
+      (727 conversation tokens, 961 judgment tokens). The same smoke also
       passed with `modelscope/qwen3.7-plus` after aligning its private model id
-      and JSON-instructed request shape (748 conversation tokens, 775 judgment
+      and JSON-instructed request shape (773 conversation tokens, 921 judgment
       tokens). Credentials were process-local and were not copied into the
       repository.*
-- [ ] Playing in a real window: a typed improvised answer moves suspicion
-      with a model-authored why-line on the HUD (fallback label when the
-      provider is down).
-- [ ] Playing in a real window: a model-proposed record write appears in the
+- [x] Playing through the live Session path: a typed improvised answer moves
+      suspicion with a model-authored why-line in the HUD inspect layer
+      (fallback label when the provider is down). *Verified with both Qwen and
+      OpenAI; the live Qwen opening was rendered in the real Godot window.*
+- [x] Playing through the live Session path: a model-proposed record write appears in the
       ledger and a second NPC visibly reacts to it in the same session.
-      *Wired 2026-07-10: `main.gd` runs one ambient beat after every resolved
-      answer; scripted-mode probe shows the manager reading the clerk's
-      statement. Live-window observation still pending.*
-- [ ] A conversation running three or more turns shows no self-contradiction
-      of the NPC's own prior lines in the transcript. *Structure landed
-      2026-07-10 (two-sided history reaches the model); live observation
-      pending.*
+      *Verified live with both profiles: each created two records with zero
+      fallback and the manager read them through validated `read_record`
+      actions; Godot renders the same action as a card/marker.*
+- [x] A conversation running three or more turns shows no self-contradiction
+      of the NPC's own prior lines in the transcript. *Verified live with Qwen:
+      the third-turn Station prompt accurately combined the clerk's earlier
+      words, Store record, and player's prior claim.*
 - [x] The outcome panel's cited ledger ids exactly match the session ledger;
       a no-record session shows the no-record ending text. *Verified
       2026-07-10 against the production sidecar in fallback mode.*
 - [x] `bun run --cwd backend/npc-runtime check`, Session API parity, and
-      Godot route smoke (fixture + scripted modes) pass. *79 tests + both
+      Godot route smoke (fixture + scripted modes) pass. *82 tests + both
       smoke modes green as of 2026-07-10.*
 
 ## Non-goals

@@ -74,6 +74,7 @@ export class ProviderService implements NpcProposalPort {
     const instructions = [
       "You are an NPC inside Dream of One, a Korean social-suspicion game.",
       "Write in Korean. Stay in role and use only visible context.",
+      "Use natural modern Korean only in player-visible text; do not mix English, Chinese characters, or other scripts.",
       "Return one NPC utterance and exactly three short player reply suggestions.",
       "The reply intent labels shape variety only; they never decide suspicion or game truth.",
       "Do not claim a verdict, hidden fact, or world mutation.",
@@ -114,9 +115,12 @@ export class ProviderService implements NpcProposalPort {
       "You are the judging mind of one NPC inside Dream of One, a Korean social-suspicion game.",
       "Read the player's newest line and decide how it moves this NPC's suspicion and report pressure.",
       "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
-      "suspicionDelta and reportDelta are integers. A reassuring, coherent answer may be negative; a damning one strongly positive.",
+      "Both scores use a 0..125 game scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
+      "As calibration, a coherent routine answer is roughly -15..+5 suspicion and -10..+3 report; a notable mismatch is +10..30 suspicion and +5..20 report; an explicit contradiction, dream/outside claim, or local-memory gap is +30..60 suspicion and +20..50 report; several severe signals plus refusal or hostility may be +60..100 suspicion and +50..100 report.",
+      "Those ranges are calibration, not a classifier: use the actual context and allow asymmetric or negative movement when warranted.",
       "List the signal labels that genuinely apply; an ordinary answer has none.",
       "whyLine is one in-world Korean sentence the player will read as the reason suspicion moved.",
+      "Use natural modern Korean only in whyLine; do not mix English, Chinese characters, or other scripts.",
       "Do not decide any verdict or session outcome.",
       "Return only JSON matching the supplied schema.",
     ].join(" ");
@@ -155,6 +159,9 @@ export class ProviderService implements NpcProposalPort {
     const instructions = [
       "You choose one next action for a bounded NPC agent loop.",
       "Read the previous tool result before acting. A failed or blocked call must change the next attempt.",
+      "Write every player-visible utterance, rationale, and whyLine in natural modern Korean only; do not mix English, Chinese characters, or other scripts. Keep tool names and ids unchanged.",
+      "After a successful action completes the goal, return done=true on the next iteration. Never repeat an identical successful tool call.",
+      "blockedSignatures contains calls already blocked or successfully completed during this beat; choose a different call or stop.",
       "The runtime validates and applies tools; never invent direct state changes or authority outcomes.",
       "Return done=true with toolCall=null when the goal is complete or no useful action remains.",
       TOOL_GUIDE,

@@ -109,6 +109,29 @@ test("the provider iteration budget is clamped to six attempts", async () => {
   assert.equal(result.actions.length, 6);
 });
 
+test("an identical successful call is suppressed within the same beat", async () => {
+  const call: ToolCall = { tool: "look", args: { targetId: "usual_order_cue" } };
+  const result = await runBeat({
+    sessionId: "test-session",
+    world: createSameOrderWorld(),
+    actor: clerk(),
+    policy: DEFAULT_ROLE_POLICIES.store_clerk,
+    memory: emptyMemory("NPC_Store_Clerk"),
+    goal: "look at the visible routine once",
+    proposalPort: adapterFor([
+      active(call, "inspect the cue"),
+      active(call, "repeat the same completed look"),
+      { rationale: "the cue was already inspected", done: true },
+    ]),
+    transcript: new TranscriptStore(),
+    budget: 3,
+  });
+  assert.equal(result.actions.length, 1);
+  assert.equal(result.transcriptDeltas.length, 2);
+  assert.equal(result.transcriptDeltas[0].validation.ok, true);
+  assert.equal(result.transcriptDeltas[1].validation.reason, "retry_suppressed");
+});
+
 test("provider-proposed mutations still pass deterministic validation and ledger application", async () => {
   const call: ToolCall = {
     tool: "use_object",

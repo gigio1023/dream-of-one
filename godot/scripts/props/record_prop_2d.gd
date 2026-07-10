@@ -1,22 +1,24 @@
 extends Node2D
 ## Record prop — a readable in-world artifact (counter, usual-order cue, receipt
 ## tray, correction slip, report tray, queue marker, station dossier). Its
-## readability comes from silhouette + a state label; inspecting it opens the
-## HUD InspectPanel with 열람/기록 detail. See docs/game/glossary.md (Record).
+## readability comes from silhouette + a projected native state chip;
+## inspecting it opens the HUD InspectPanel with 열람/기록 detail. See
+## docs/game/glossary.md (Record).
 
 const PackAtlas := preload("res://scripts/data/pack_atlas.gd")
 
 @onready var _sprite: Sprite2D = $Sprite
-@onready var _state_label: Label = $StateLabel
-
 var prop_id := ""
 var label_text := ""
 var desc_text := ""
 var state := ""
+var _state_text := ""
 var readers: Array = []
 var _tile_index := 251
 var _texture_path := ""
 var _focused := false
+var _state_visible := false
+var _state_revision := 0
 
 func configure(data: Dictionary) -> void:
 	prop_id = str(data.get("propId", ""))
@@ -46,33 +48,37 @@ func _apply() -> void:
 	$InteractionArea.set_meta("id", prop_id)
 	$DebugLabel.text = "%s · %s" % [prop_id, state]
 	_refresh_state_label()
-	_state_label.visible = false
+	_state_visible = false
 
 func set_state(new_state: String) -> void:
 	if new_state.is_empty():
 		return
 	state = new_state
+	_state_revision += 1
+	var revision := _state_revision
 	_refresh_state_label()
-	_state_label.visible = true
+	_state_visible = true
 	# Brief highlight so a ledger-driven state change reads within 1s.
 	_sprite.modulate = Color(1.4, 1.25, 0.7)
 	var tween := create_tween()
 	tween.tween_property(_sprite, "modulate", Color(1, 1, 1), 0.5)
 	tween.tween_interval(0.35)
-	tween.tween_callback(func() -> void: _state_label.visible = _focused)
+	tween.tween_callback(func() -> void:
+		if revision == _state_revision:
+			_state_visible = _focused
+	)
 
 func set_focused(value: bool) -> void:
 	_focused = value
 	_sprite.modulate = Color(1.35, 1.25, 0.78) if value else Color.WHITE
-	_state_label.modulate = Color(1.0, 0.9, 0.55) if value else Color.WHITE
-	_state_label.visible = value
+	_state_visible = value
 
 func _refresh_state_label() -> void:
 	var loc := get_node_or_null("/root/Localization")
 	var state_str := state
 	if loc != null and not state.is_empty():
 		state_str = str(loc.call("t", "state.%s" % state))
-	_state_label.text = "%s\n%s" % [label_text, state_str]
+	_state_text = state_str
 	if is_instance_valid($DebugLabel):
 		$DebugLabel.text = "%s · %s" % [prop_id, state]
 
@@ -87,4 +93,15 @@ func inspect_payload() -> Dictionary:
 		"desc": desc_text,
 		"state": state,
 		"readers": readers,
+	}
+
+func overlay_payload() -> Dictionary:
+	return {
+		"propId": prop_id,
+		"label": label_text,
+		"state": _state_text,
+		"stateVisible": _state_visible,
+		"worldPosition": global_position + Vector2(0, 7),
+		"subjectWorldPosition": global_position + Vector2(0, -8),
+		"subjectWorldSize": Vector2(18, 20),
 	}

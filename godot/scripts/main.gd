@@ -157,7 +157,7 @@ func _on_ui_scale_requested(value: float) -> void:
 	_save_display_config()
 
 func _process(_delta: float) -> void:
-	_sync_actor_overlays()
+	_sync_world_overlays()
 	if not is_instance_valid(_player):
 		return
 	_player.input_enabled = not _hud.is_modal() and not _transitioning and not _resolving_answer
@@ -172,26 +172,68 @@ func _process(_delta: float) -> void:
 		title = str((parent.call("inspect_payload") as Dictionary).get("title", ""))
 	_hud.set_hint(_t("hud.prompt.focus", {"target": title}))
 
-func _sync_actor_overlays() -> void:
+func _sync_world_overlays() -> void:
 	if not is_instance_valid(_location):
-		_hud.sync_actor_overlays([])
+		_hud.sync_world_overlays([], [], Rect2())
 		return
-	var overlays: Array = _location.call("actor_overlay_payloads")
-	var positioned: Array[Dictionary] = []
+	var actor_overlays: Array = _location.call("actor_overlay_payloads")
+	var prop_overlays: Array = _location.call("prop_overlay_payloads")
+	var positioned_actors: Array[Dictionary] = []
+	var positioned_props: Array[Dictionary] = []
 	var canvas_transform := _world_viewport.get_canvas_transform()
 	var speaker_id := ""
 	if _hud.conversation_visible() and not _current_turn.is_empty():
 		speaker_id = str(_current_turn.get("speakerId", _current_turn.get("actorId", "")))
-	for payload_value in overlays:
+	for payload_value in actor_overlays:
 		if not payload_value is Dictionary:
 			continue
-		var payload: Dictionary = payload_value.duplicate(true)
-		var world_position := Vector2(payload.get("worldPosition", Vector2.ZERO))
-		var viewport_position := canvas_transform * world_position
-		payload["screenPosition"] = _world_container.global_position + viewport_position * _world_container.scale
+		var payload := _position_overlay_payload(payload_value as Dictionary, canvas_transform)
 		payload["speaking"] = not speaker_id.is_empty() and str(payload.get("actorId", "")) == speaker_id
-		positioned.append(payload)
-	_hud.sync_actor_overlays(positioned)
+		positioned_actors.append(payload)
+	for payload_value in prop_overlays:
+		if payload_value is Dictionary:
+			positioned_props.append(_position_overlay_payload(payload_value as Dictionary, canvas_transform))
+	var safe_world_rect: Rect2 = _location.call("overlay_safe_world_rect")
+	var world_screen_rect := _world_container_screen_rect()
+	var safe_screen_rect := _world_rect_to_screen(safe_world_rect, canvas_transform).intersection(world_screen_rect)
+	var extra_obstacles: Array[Rect2] = []
+	if _player is Node2D:
+		var player_center := (_player as Node2D).global_position + Vector2(0, -8)
+		extra_obstacles.append(_world_rect_to_screen(Rect2(player_center - Vector2(10, 12), Vector2(20, 24)), canvas_transform))
+	_hud.sync_world_overlays(positioned_actors, positioned_props, safe_screen_rect, extra_obstacles)
+
+func _position_overlay_payload(source: Dictionary, canvas_transform: Transform2D) -> Dictionary:
+	var payload := source.duplicate(true)
+	var world_position := Vector2(payload.get("worldPosition", Vector2.ZERO))
+	payload["screenPosition"] = _world_point_to_screen(world_position, canvas_transform)
+	var subject_position := Vector2(payload.get("subjectWorldPosition", world_position))
+	var subject_size := Vector2(payload.get("subjectWorldSize", Vector2(16, 16)))
+	var subject_world_rect := Rect2(subject_position - subject_size * 0.5, subject_size)
+	var avoid_rect := _world_rect_to_screen(subject_world_rect, canvas_transform)
+	payload["avoidRect"] = avoid_rect
+	payload["onScreen"] = avoid_rect.intersects(_world_container_screen_rect())
+	return payload
+
+func _world_point_to_screen(world_position: Vector2, canvas_transform: Transform2D) -> Vector2:
+	var viewport_position := canvas_transform * world_position
+	return _world_container.get_global_transform() * viewport_position
+
+func _world_container_screen_rect() -> Rect2:
+	var transform := _world_container.get_global_transform()
+	var first := transform * Vector2.ZERO
+	var second := transform * Vector2(_world_container.size)
+	var top_left := Vector2(minf(first.x, second.x), minf(first.y, second.y))
+	var bottom_right := Vector2(maxf(first.x, second.x), maxf(first.y, second.y))
+	return Rect2(top_left, bottom_right - top_left)
+
+func _world_rect_to_screen(world_rect: Rect2, canvas_transform: Transform2D) -> Rect2:
+	if not world_rect.has_area():
+		return Rect2()
+	var first := _world_point_to_screen(world_rect.position, canvas_transform)
+	var second := _world_point_to_screen(world_rect.end, canvas_transform)
+	var top_left := Vector2(minf(first.x, second.x), minf(first.y, second.y))
+	var bottom_right := Vector2(maxf(first.x, second.x), maxf(first.y, second.y))
+	return Rect2(top_left, bottom_right - top_left)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_debug"):

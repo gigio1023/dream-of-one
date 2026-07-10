@@ -16,6 +16,9 @@ const PLAYER_SCENE := preload("res://scenes/actors/player.tscn")
 const APRON_TILES := 7
 
 var tile_size := 16
+## Lit room bounds in tiles. Native world-text overlays stay inside the inner
+## floor so speech and status chips never cover the wall band or apron.
+var room_bounds := Rect2i()
 ## Room + street + apron, in tiles. The location camera clamps to this rect.
 var dressed_bounds := Rect2i()
 var player: Node = null
@@ -63,6 +66,7 @@ func build(root: Node2D, location_id: String, snapshot: Dictionary, tile_block: 
 	var overhead := _make_layer(root, "Overhead", tileset)
 
 	var room: Array = loc.get("room", [0, 0, 12, 8])
+	room_bounds = Rect2i(int(room[0]), int(room[1]), int(room[2]), int(room[3]))
 	var solids: Dictionary = {}
 
 	# Ground: room interior + optional street strip.

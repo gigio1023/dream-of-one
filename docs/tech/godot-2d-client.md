@@ -40,11 +40,12 @@ Main (Node)
 │               ├── TileMapLayers: ground / walls / furniture / overhead
 │               ├── Actors (YSort via Node2D y_sort_enabled)
 │               │   ├── Player (CharacterBody2D + interaction ray)
-│               │   └── NPC instances (sprite, role accent, reaction marker,
-│               │       speech bubble anchor, attention/sightline cue)
-│               ├── RecordProps (sprite, state label, inspect area)
+│               │   └── NPC instances (sprite, role accent, speech/reaction
+│               │       presentation state, attention/sightline cue)
+│               ├── RecordProps (sprite, state presentation, inspect area)
 │               └── InfluenceLinks (Line2D pool, observer → reactor)
 ├── HUD (CanvasLayer)
+│   ├── WorldTextOverlays (projected nameplate, speech/reaction/state chips)
 │   ├── ConversationPanel (generated prompt + suggestions, typed input field)
 │   ├── PressureLine (suspicion/report meters, latest-ledger line, 열람/오간 말)
 │   ├── InspectPanel (record/NPC inspection)
@@ -75,8 +76,9 @@ scene or art code.
 ## HUD behavior rules
 
 - Conversation is a bottom sheet (~68% width, bottom ~36% height), not a
-  modal wall: the speaker, other NPCs, and their reactions stay visible while
-  answering, and the world stays live behind it (NPCs keep their loops
+  modal wall: the speaker and surrounding room stay visible, while projected
+  nameplates and reaction chips route around the sheet so other NPC state
+  remains readable. The world stays live behind it (NPCs keep their loops
   running — being watched *while* answering is the point).
 - Suggested replies and typed input submit the displayed text into the same
   judgment path — the NPC's model reads the content either way; a subtle
@@ -86,16 +88,17 @@ scene or art code.
   the hesitation event to the runtime — visible as the NPC's patience cue.
 - Every consequence surfaced within 1s of its ledger event: pressure line
   update, reaction marker, influence link, or bubble. No silent state changes.
-- Quiet native nameplates follow NPC world positions: the identity line (with
-  a role-accent tick) is always readable; the social-action line appears for
-  the conversation speaker, the focused NPC, a recently changed action
-  (~5s), and debug mode. In-world speech bubbles carry the gist (truncated,
-  auto-expiring); the full line stays in inspect. Judgment reasons,
+- World-anchored native HUD overlays follow projected NPC and record-prop
+  positions while remaining inside the visible room floor: quiet nameplates,
+  truncated/auto-expiring speech chips, reaction chips, and focused or freshly
+  changed prop-state chips. They avoid actor/prop bodies and visible HUD panels,
+  so the pixel world never rasterizes Korean UI text. The social-action line
+  appears for the conversation speaker, focused NPC, a recently changed action
+  (~5s), and debug mode; full speech stays in inspect. Judgment reasons,
   provider/action source, record detail, and recent causality stay in
   inspect/ledger views. Provider status and fallback detail live in the Esc
   settings sheet; a small badge plus a transient line surface fallback
-  honestly in normal play. Raw ids and state labels are hidden unless F3
-  debug mode is active.
+  honestly in normal play. Raw ids remain hidden unless F3 debug mode is active.
 
 ## Localization
 

@@ -87,8 +87,9 @@ Normal play always exposes the facts needed for social reading:
 
 - NPC identity and role (quiet nameplate with a role-accent tick, plus the
   role-accent ring under each sprite);
-- the NPC's current speech bubble (gist in-world, full line in inspect);
-- a short reaction marker;
+- the NPC's current speech bubble (gist in a world-anchored native HUD chip,
+  full line in inspect);
+- a short native reaction chip anchored to the NPC;
 - the NPC's current social action — on the nameplate for the conversation
   speaker, the focused NPC, and any recently changed action, and always in
   inspect. A permanent per-NPC card is explicitly not required.
@@ -98,6 +99,11 @@ lands, then clear. Detailed judgment reasons, longer relationship or memory
 state, cited record contents, and the full causality chain live in the inspect
 view. Debug mode may add collision, sensing, influence, ids, and raw state, but
 none of those overlays may be required to understand normal play.
+
+Generated Korean speech, reaction, and record-state text never renders inside
+the integer-scaled world SubViewport. The HUD projects those chips back onto
+the room, keeps them within the inner floor, and routes them around actors,
+props, and visible panels; sprites and tiles remain in the pixel scale domain.
 
 ### Execution order
 

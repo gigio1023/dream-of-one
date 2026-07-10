@@ -95,20 +95,44 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			var sprite := instance.get_node_or_null("Sprite") as AnimatedSprite2D
 			if sprite == null or sprite.sprite_frames == null:
 				_failures.append("npc has no runtime SpriteFrames")
+			if instance.get_node_or_null("SpeechBubble") != null or instance.get_node_or_null("ReactionMarker") != null:
+				_failures.append("npc still renders normal-play text inside the pixel SubViewport")
 			var debug_label := instance.get_node_or_null("DebugLabel") as Label
 			if debug_label == null or debug_label.visible:
 				_failures.append("npc raw debug label is missing or visible in normal play")
+			var full_utterance := "가나다라마바사아자차카타파하".repeat(3)
+			instance.call("show_speech", full_utterance)
+			instance.call("set_reaction", "reported", "보고함")
 			var overlay: Dictionary = instance.call("overlay_payload")
 			if str(overlay.get("action", "")).is_empty():
 				_failures.append("npc exposes no normal-view current action")
+			var expected_summary := full_utterance.left(instance.BUBBLE_MAX_CHARS) + "…"
+			if str(overlay.get("speech", "")) != expected_summary:
+				_failures.append("npc native speech payload does not preserve 36-char gist + ellipsis")
+			if not bool(overlay.get("reactionVisible", false)) or str(overlay.get("reaction", "")) != "보고함":
+				_failures.append("npc native reaction payload is missing")
+			var inspect: Dictionary = instance.call("inspect_payload")
+			if str(inspect.get("utterance", "")) != full_utterance:
+				_failures.append("npc inspect payload lost the full utterance")
+			var bubble_timer := instance.get("_bubble_timer") as Timer
+			if bubble_timer == null or not is_equal_approx(bubble_timer.wait_time, instance.BUBBLE_SECONDS):
+				_failures.append("npc speech timer no longer preserves the 7-second contract")
 		"prop":
 			var sprite := instance.get_node_or_null("Sprite") as Sprite2D
 			if sprite == null or sprite.texture == null:
 				_failures.append("prop has no runtime texture")
+			if instance.get_node_or_null("StateLabel") != null:
+				_failures.append("prop still renders its state inside the pixel SubViewport")
+			instance.call("configure", {"propId": "smoke_prop", "label": "정정표", "state": "offered"})
+			instance.call("set_focused", true)
+			var overlay: Dictionary = instance.call("overlay_payload")
+			if not bool(overlay.get("stateVisible", false)) or str(overlay.get("state", "")).is_empty():
+				_failures.append("focused prop exposes no native state payload")
 		"hud":
 			_require_node(label, instance, "Root/ConversationPanel")
 			_require_node(label, instance, "Root/InspectPanel")
 			_require_node(label, instance, "Root/OutcomePanel")
+			_require_node(label, instance, "Root/WorldTextOverlays")
 
 func _require_node(label: String, instance: Node, path: String) -> void:
 	if instance.get_node_or_null(path) == null:

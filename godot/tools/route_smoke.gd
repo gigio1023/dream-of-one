@@ -60,6 +60,7 @@ func _run() -> void:
 	quit(0)
 
 func _check_hud_choice_activation(fixture: Dictionary) -> bool:
+	root.size = Vector2i(1920, 1080)
 	var hud_resource := ResourceLoader.load("res://scenes/ui/hud.tscn")
 	if not hud_resource is PackedScene:
 		_fail("HUD scene did not load for choice activation regression")
@@ -151,13 +152,90 @@ func _check_hud_choice_activation(fixture: Dictionary) -> bool:
 		_fail("HUD inspect view did not separate action source and judgment reasons from the normal overlay")
 		hud.queue_free()
 		return false
-	hud.sync_actor_overlays([
-		{"actorId": "NPC_Store_Clerk", "label": "상점 점원", "action": "기록 작성", "accent": Color("#e2a33d"), "screenPosition": Vector2(500, 300)},
-		{"actorId": "NPC_Waiting_Customer", "label": "대기 손님", "action": "주변 관찰", "accent": Color("#c0505a"), "screenPosition": Vector2(700, 500)},
-	])
-	var actor_overlays_value: Variant = hud.get("_actor_overlays")
-	if not actor_overlays_value is Dictionary or (actor_overlays_value as Dictionary).size() != 2:
-		_fail("HUD normal view did not build the expected actor identity/action overlays")
+	hud.hide_inspection()
+	await process_frame
+	var safe_rect := Rect2(280, 110, 1360, 720)
+	var clerk_body := Rect2(530, 160, 100, 120)
+	# The ambient customer sits behind the shipped bottom sheet. Native identity
+	# and reaction chips must route across that panel edge instead of disappearing.
+	var customer_body := Rect2(980, 740, 100, 120)
+	var prop_body := Rect2(760, 300, 90, 90)
+	var player_body := Rect2(700, 520, 100, 120)
+	var extra_obstacles: Array[Rect2] = [player_body]
+	hud.sync_world_overlays([
+		{
+			"actorId": "NPC_Store_Clerk",
+			"label": "상점 점원",
+			"role": "점원",
+			"action": "기록 작성",
+			"actionTool": "write_record",
+			"accent": Color("#e2a33d"),
+			"speech": "확인을 위해 정정표를 하나 붙이겠습니다. 잠시 기다려주세요…",
+			"reaction": "보고함",
+			"reactionVisible": true,
+			"avoidRect": clerk_body,
+			"onScreen": true,
+		},
+		{
+			"actorId": "NPC_Waiting_Customer",
+			"label": "대기 손님",
+			"action": "주변 관찰",
+			"actionTool": "observe",
+			"accent": Color("#c0505a"),
+			"reaction": "메모",
+			"reactionVisible": true,
+			"avoidRect": customer_body,
+			"onScreen": true,
+		},
+	], [
+		{
+			"propId": "correction_slip",
+			"label": "정정표",
+			"state": "제시됨",
+			"stateVisible": true,
+			"avoidRect": prop_body,
+			"onScreen": true,
+		},
+	], safe_rect, extra_obstacles)
+	await process_frame
+	await process_frame
+	var overlay_root := hud.get_node_or_null("Root/WorldTextOverlays") as Control
+	var speech_chip := hud.get_node_or_null("Root/WorldTextOverlays/Actors/Actor_NPC_Store_Clerk/SpeechChip") as Control
+	var reaction_chip := hud.get_node_or_null("Root/WorldTextOverlays/Actors/Actor_NPC_Store_Clerk/ReactionChip") as Control
+	var customer_nameplate := hud.get_node_or_null("Root/WorldTextOverlays/Actors/Actor_NPC_Waiting_Customer/Nameplate") as Control
+	var customer_reaction := hud.get_node_or_null("Root/WorldTextOverlays/Actors/Actor_NPC_Waiting_Customer/ReactionChip") as Control
+	var state_chip := hud.get_node_or_null("Root/WorldTextOverlays/Props/Prop_correction_slip/StateChip") as Control
+	if overlay_root == null or speech_chip == null or reaction_chip == null or customer_nameplate == null or customer_reaction == null or state_chip == null:
+		_fail("HUD did not build native speech/reaction/prop text surfaces")
+		hud.queue_free()
+		return false
+	var callout_rects: Array[Rect2] = [
+		speech_chip.get_global_rect(),
+		reaction_chip.get_global_rect(),
+		customer_nameplate.get_global_rect(),
+		customer_reaction.get_global_rect(),
+		state_chip.get_global_rect(),
+	]
+	var conversation_panel := hud.get("_conversation_panel") as Control
+	var body_rects: Array[Rect2] = [clerk_body, customer_body, prop_body, player_body, conversation_panel.get_global_rect()]
+	for rect in callout_rects:
+		if not _rect_contains(safe_rect, rect):
+			_fail("HUD world callout escaped its wall/apron-safe rect: %s" % rect)
+			hud.queue_free()
+			return false
+		for body in body_rects:
+			if rect.intersects(body):
+				_fail("HUD world callout overlapped an actor/prop body: %s vs %s" % [rect, body])
+				hud.queue_free()
+				return false
+	for first in range(callout_rects.size()):
+		for second in range(first + 1, callout_rects.size()):
+			if callout_rects[first].intersects(callout_rects[second]):
+				_fail("HUD world callouts overlapped each other")
+				hud.queue_free()
+				return false
+	if hud.world_overlay_fallback_count() != 0:
+		_fail("HUD synthetic Store placement required a least-overlap fallback")
 		hud.queue_free()
 		return false
 	hud.set_debug_mode(true)
@@ -172,6 +250,14 @@ func _check_hud_choice_activation(fixture: Dictionary) -> bool:
 	hud.queue_free()
 	await process_frame
 	return true
+
+func _rect_contains(outer: Rect2, inner: Rect2) -> bool:
+	return (
+		inner.position.x >= outer.position.x
+		and inner.position.y >= outer.position.y
+		and inner.end.x <= outer.end.x
+		and inner.end.y <= outer.end.y
+	)
 
 func _drive_route(session: Node, walkthrough: Dictionary, replay: Dictionary, first_route: bool) -> bool:
 	var expected_route := str(walkthrough.get("expectedOutcome", walkthrough.get("route", "")))

@@ -1,7 +1,7 @@
 extends Node2D
-## NPC — a standing role actor with a one-color role accent, a reaction marker,
-## and a speech-bubble anchor. Surveillance is drawn, not narrated
-## (docs/art/art-direction.md): reactions and utterances appear in-world.
+## NPC — a standing role actor with a one-color role accent. It owns the
+## timing and content state for speech/reactions; the native-resolution HUD
+## projects that state back onto the world so generated Korean stays crisp.
 
 const PackAtlas := preload("res://scripts/data/pack_atlas.gd")
 ## Bubbles carry the gist, not the transcript: long generated lines truncate
@@ -11,8 +11,6 @@ const BUBBLE_MAX_CHARS := 36
 const BUBBLE_SECONDS := 7.0
 
 @onready var _sprite: AnimatedSprite2D = $Sprite
-@onready var _marker: Label = $ReactionMarker
-@onready var _bubble: Label = $SpeechBubble
 @onready var _debug: Label = $DebugLabel
 
 var _bubble_timer: Timer = null
@@ -24,6 +22,8 @@ var accent := Color(0.9, 0.9, 0.9)
 var state_reaction := "calm"
 var reaction_label := ""
 var last_utterance := ""
+var _bubble_summary := ""
+var _reaction_visible := false
 var current_action := "observe"
 var action_source := ""
 var _sprite_block := 1
@@ -59,8 +59,6 @@ func _apply() -> void:
 	_sprite.sprite_frames = PackAtlas.character_frames(_sprite_block)
 	_sprite.offset = Vector2(0, -8)
 	_sprite.play("idle_%s" % _facing)
-	_marker.visible = false
-	_bubble.visible = false
 	_refresh_debug_label()
 	$InteractionArea.set_meta("kind", "npc")
 	$InteractionArea.set_meta("id", actor_id)
@@ -81,23 +79,22 @@ func set_reaction(reaction: String, label: String) -> void:
 	state_reaction = reaction
 	reaction_label = label
 	var calm := reaction == "calm" or reaction == "settled"
-	_marker.visible = not calm and not label.is_empty()
-	_marker.text = label
-	_marker.modulate = Color(1, 0.82, 0.4) if not calm else Color(1, 1, 1)
+	_reaction_visible = not calm and not label.is_empty()
 	_refresh_debug_label()
 
 func show_speech(text: String) -> void:
 	last_utterance = text
 	if text.is_empty():
-		_bubble.visible = false
+		_bubble_summary = ""
+		if _bubble_timer != null:
+			_bubble_timer.stop()
 		return
-	_bubble.text = text if text.length() <= BUBBLE_MAX_CHARS else text.left(BUBBLE_MAX_CHARS) + "…"
-	_bubble.visible = true
+	_bubble_summary = text if text.length() <= BUBBLE_MAX_CHARS else text.left(BUBBLE_MAX_CHARS) + "…"
 	if _bubble_timer != null:
 		_bubble_timer.start()
 
 func clear_speech() -> void:
-	_bubble.visible = false
+	_bubble_summary = ""
 
 func set_social_action(tool: String, source := "") -> void:
 	current_action = tool if not tool.is_empty() else "observe"
@@ -147,7 +144,12 @@ func overlay_payload() -> Dictionary:
 		"actionTool": current_action,
 		"focused": _focused,
 		"accent": accent,
+		"speech": _bubble_summary,
+		"reaction": reaction_label,
+		"reactionVisible": _reaction_visible,
 		"worldPosition": global_position + Vector2(0, 7),
+		"subjectWorldPosition": global_position + Vector2(0, -8),
+		"subjectWorldSize": Vector2(20, 24),
 	}
 
 func _t(key: String) -> String:

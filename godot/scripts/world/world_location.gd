@@ -90,6 +90,30 @@ func actor_overlay_payloads() -> Array[Dictionary]:
 			payloads.append(npc.call("overlay_payload"))
 	return payloads
 
+func prop_overlay_payloads() -> Array[Dictionary]:
+	var payloads: Array[Dictionary] = []
+	if builder == null:
+		return payloads
+	for prop in builder.props.values():
+		if prop != null and prop.has_method("overlay_payload"):
+			payloads.append(prop.call("overlay_payload"))
+	return payloads
+
+## Screen-attached text may follow world objects, but it stays over the lit
+## floor rather than covering the one-tile wall band or spilling into apron.
+func overlay_safe_world_rect() -> Rect2:
+	if builder == null:
+		return Rect2()
+	var room: Rect2i = builder.room_bounds
+	if room.size.x <= 2 or room.size.y <= 2:
+		return Rect2()
+	var inner_position := room.position + Vector2i.ONE
+	var inner_size := room.size - Vector2i(2, 2)
+	return Rect2(
+		Vector2(inner_position * builder.tile_size),
+		Vector2(inner_size * builder.tile_size)
+	)
+
 func set_debug_visible(value: bool) -> void:
 	if builder == null:
 		return

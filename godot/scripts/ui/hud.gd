@@ -5,6 +5,8 @@ extends CanvasLayer
 ## and the Station outcome. Provider/source detail and display settings live
 ## behind Esc (settings) and Tab/E (inspect), never in permanent chrome.
 
+const WorldTextOverlaysScript := preload("res://scripts/ui/world_text_overlays.gd")
+
 signal choice_submitted(choice_id: String)
 signal free_input_submitted(text: String)
 signal hesitation_submitted
@@ -16,9 +18,6 @@ signal ui_scale_requested(scale: float)
 const HESITATION_SECONDS := 6.0
 const INPUT_MAX_LENGTH := 120
 const HUD_REFERENCE_HEIGHT := 720.0
-## How long a changed NPC action stays on its nameplate in normal play.
-const ACTION_LINGER_MSEC := 5000
-
 const INK := Color("#ece8dc")
 const MUTED := Color("#a9b0b8")
 const WARM := Color("#e2a33d")
@@ -26,11 +25,9 @@ const COLD := Color("#6f8fbd")
 const DANGER := Color("#c8645a")
 const PAPER := Color(0.075, 0.083, 0.098, 0.96)
 const PAPER_SOFT := Color(0.105, 0.112, 0.126, 0.94)
-const OUTLINE_DARK := Color(0.04, 0.05, 0.07, 1.0)
 
 var _root: Control
-var _actor_overlay_root: Control
-var _actor_overlays: Dictionary = {}
+var _world_text_overlays: Control
 var _pressure_panel: PanelContainer
 var _location_label: Label
 var _suspicion_label: Label
@@ -83,7 +80,6 @@ var _agent_actions: Array[String] = []
 var _status_revision := 0
 var _ui_scale := 1.0
 var _user_scale := 1.0
-var _debug_mode := false
 var _provider_fallback := false
 
 func _ready() -> void:
@@ -139,11 +135,10 @@ func _build_ui() -> void:
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
-	_actor_overlay_root = Control.new()
-	_actor_overlay_root.name = "ActorOverlays"
-	_actor_overlay_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_actor_overlay_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_root.add_child(_actor_overlay_root)
+	_world_text_overlays = WorldTextOverlaysScript.new()
+	_world_text_overlays.name = "WorldTextOverlays"
+	_root.add_child(_world_text_overlays)
+	_world_text_overlays.call("set_ui_scale", _ui_scale)
 	_build_pressure_panel()
 	_build_hint_panel()
 	_build_conversation_panel()
@@ -579,84 +574,30 @@ func set_provider(meta: Dictionary) -> void:
 		_fallback_badge.modulate = DANGER
 
 func set_debug_mode(value: bool) -> void:
-	_debug_mode = value
 	_debug_badge.visible = value
+	_world_text_overlays.call("set_debug_mode", value)
 
-## Quiet nameplates instead of cards: always the name over an accent tick;
-## the action line only for the current speaker, focused NPC, a recent action
-## change, or debug mode. Detail stays in inspect.
-func sync_actor_overlays(payloads: Array) -> void:
-	var now := Time.get_ticks_msec()
-	var seen := {}
-	for payload_value in payloads:
-		if not payload_value is Dictionary:
-			continue
-		var payload: Dictionary = payload_value
-		var actor_id := str(payload.get("actorId", ""))
-		if actor_id.is_empty():
-			continue
-		seen[actor_id] = true
-		var plate: Control = _actor_overlays.get(actor_id, null)
-		if plate == null:
-			plate = _create_actor_overlay(actor_id)
-			_actor_overlays[actor_id] = plate
-		var name_label := plate.get_node("Name") as Label
-		var accent_rect := plate.get_node("AccentTick") as ColorRect
-		var action_label := plate.get_node("Action") as Label
-		var actor_label := str(payload.get("label", actor_id))
-		var actor_role := str(payload.get("role", ""))
-		name_label.text = "%s · %s" % [actor_label, actor_role] if not actor_role.is_empty() and not actor_label.contains(actor_role) else actor_label
-		action_label.text = str(payload.get("action", ""))
-		var accent: Color = payload.get("accent", COLD) if payload.get("accent") is Color else COLD
-		accent_rect.color = Color(accent, 0.9)
-		var tool := str(payload.get("actionTool", payload.get("action", "")))
-		if str(plate.get_meta("last_tool", "")) != tool:
-			plate.set_meta("last_tool", tool)
-			plate.set_meta("tool_since", now)
-		var recent: bool = tool != "observe" and now - int(plate.get_meta("tool_since", 0)) < ACTION_LINGER_MSEC
-		action_label.visible = (
-			not action_label.text.is_empty()
-			and (_debug_mode or recent or bool(payload.get("focused", false)) or bool(payload.get("speaking", false)))
-		)
-		var anchor := Vector2(payload.get("screenPosition", Vector2.ZERO))
-		var viewport_size := get_viewport().get_visible_rect().size
-		plate.position = Vector2(
-			clampf(anchor.x - plate.size.x * 0.5, 8.0, maxf(8.0, viewport_size.x - plate.size.x - 8.0)),
-			clampf(anchor.y, 8.0, maxf(8.0, viewport_size.y - plate.size.y - 8.0))
-		)
-	for actor_id_value in _actor_overlays.keys():
-		var actor_id := str(actor_id_value)
-		if seen.has(actor_id):
-			continue
-		var stale: Control = _actor_overlays[actor_id]
-		stale.queue_free()
-		_actor_overlays.erase(actor_id)
+## Nameplates and transient world text share one native-resolution placement
+## surface. Inspect/settings/outcome own the screen while open; conversation
+## stays live and is treated as an obstacle instead of hiding reactions.
+func sync_world_overlays(
+	actor_payloads: Array,
+	prop_payloads: Array,
+	world_safe_rect: Rect2,
+	extra_obstacles: Array[Rect2] = []
+) -> void:
+	var hidden_by_modal := _inspect_panel.visible or _settings_panel.visible or _outcome_layer.visible
+	_world_text_overlays.visible = not hidden_by_modal
+	if hidden_by_modal:
+		return
+	var reserved: Array[Rect2] = []
+	for control in [_pressure_panel, _hint_panel, _conversation_panel]:
+		if is_instance_valid(control) and control.visible:
+			reserved.append(control.get_global_rect())
+	_world_text_overlays.call("sync", actor_payloads, prop_payloads, world_safe_rect, reserved, extra_obstacles)
 
-func _create_actor_overlay(actor_id: String) -> Control:
-	var plate := VBoxContainer.new()
-	plate.name = "Actor_%s" % actor_id
-	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	plate.add_theme_constant_override("separation", 1)
-	plate.alignment = BoxContainer.ALIGNMENT_BEGIN
-	_actor_overlay_root.add_child(plate)
-	var name_label := _label("", 10, INK)
-	name_label.name = "Name"
-	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_set_scaled_outline(name_label, 4)
-	plate.add_child(name_label)
-	var accent_rect := ColorRect.new()
-	accent_rect.name = "AccentTick"
-	accent_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_set_scaled_minimum(accent_rect, Vector2(14, 2))
-	accent_rect.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	plate.add_child(accent_rect)
-	var action_label := _label("", 9, Color("#b8c9df"))
-	action_label.name = "Action"
-	action_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_set_scaled_outline(action_label, 4)
-	action_label.visible = false
-	plate.add_child(action_label)
-	return plate
+func world_overlay_fallback_count() -> int:
+	return int(_world_text_overlays.call("fallback_count"))
 
 func configure_resolution_options(options: Array, current_id: String) -> void:
 	_resolution_option.clear()
@@ -986,14 +927,10 @@ func _set_scaled_minimum(control: Control, logical_size: Vector2) -> void:
 	control.set_meta("hud_base_minimum_size", logical_size)
 	control.custom_minimum_size = logical_size * _ui_scale
 
-func _set_scaled_outline(control: Control, logical_size: int) -> void:
-	control.set_meta("hud_base_outline", logical_size)
-	control.add_theme_color_override("font_outline_color", OUTLINE_DARK)
-	control.add_theme_constant_override("outline_size", roundi(logical_size * _ui_scale))
-
 func _apply_ui_scale() -> void:
 	_ui_scale = _calculate_ui_scale()
 	_apply_control_scale(_root)
+	_world_text_overlays.call("set_ui_scale", _ui_scale)
 
 func _apply_control_scale(node: Node) -> void:
 	if node is Control:
@@ -1005,11 +942,6 @@ func _apply_control_scale(node: Node) -> void:
 			)
 		if control.has_meta("hud_base_minimum_size"):
 			control.custom_minimum_size = Vector2(control.get_meta("hud_base_minimum_size")) * _ui_scale
-		if control.has_meta("hud_base_outline"):
-			control.add_theme_constant_override(
-				"outline_size",
-				roundi(float(control.get_meta("hud_base_outline")) * _ui_scale)
-			)
 		if control is MarginContainer and control.has_meta("hud_base_margins"):
 			_apply_margin_scale(control as MarginContainer)
 	for child in node.get_children():

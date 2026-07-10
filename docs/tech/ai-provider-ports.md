@@ -22,20 +22,25 @@ tests + fixture generation
         └── ScriptedNpcAdapter (never selectable from production config)
 ```
 
-The domain port exposes two operations:
+The domain port exposes three operations:
 
 ```ts
 interface NpcProposalPort {
   proposeConversationTurn(request): Promise<ResolvedProposal<ConversationProposal>>;
+  judgeConversationTurn(request): Promise<ResolvedProposal<ConversationJudgment>>;
   proposeNextStep(request): Promise<ResolvedProposal<AgentStepProposal>>;
 }
 ```
 
 `ConversationProposal` contains an NPC utterance and three generated reply
-suggestions. Reply intent labels shape variety only; deterministic
-classification owns suspicion. `AgentStepProposal` contains at most one tool
-call, an optional utterance, and a stop flag. The runtime validates every tool
-against visibility, role authority, object state, and the offered catalog.
+suggestions. Reply intent labels shape variety only; they never decide
+suspicion. `ConversationJudgment` is the judging NPC's read of the player's
+answer: a bounded suspicion/report delta, the signal classes that applied,
+and a player-visible Korean why-line. The runtime clamps deltas and scores;
+it does not decide what the answer meant. `AgentStepProposal` contains at
+most one tool call, an optional utterance, and a stop flag. The runtime
+validates every tool against visibility, role authority, object state, and
+the offered catalog.
 
 ## Production profiles
 
@@ -69,8 +74,11 @@ reported in `ProposalMeta`:
 - invalid envelope after repair;
 - per-session call or token budget exhaustion.
 
-Fallback is resilience, not the production policy. The HUD shows the selected
-profile, `live`/`fallback`/`scripted` transport, and fallback reason.
+Fallback is resilience, not the production policy. For judgment, fallback is
+the deterministic signal classifier in
+`src/runtime/conversation-suspicion.ts`; for conversation and agent steps it
+is the bounded rule adapter. The HUD shows the selected profile,
+`live`/`fallback`/`scripted` transport, and fallback reason.
 
 ## Scripted tests
 
@@ -94,6 +102,9 @@ GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/live-route-parity.sh
 bun run --cwd backend/npc-runtime provider:smoke -- --profile openai/gpt-5.4-mini
 ```
 
-Route truth remains deterministic for a given player statement history.
-Provider choices may change NPC wording and validated world attempts, so world
-state is not required to be byte-identical across models.
+Under the scripted test adapter, route outcomes are deterministic for a given
+answer history — that is what the regression fixtures assert. Under a live
+provider, judgment, wording, and validated world attempts are the model's, so
+neither routes nor world state are required to be identical across runs; the
+guarantees that hold everywhere are validity (visibility, tool validation,
+clamps) and a session that ends.

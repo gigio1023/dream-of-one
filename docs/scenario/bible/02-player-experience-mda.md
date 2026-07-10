@@ -37,8 +37,8 @@ implementation language.
 | Mechanic | Scenario Role |
 |---|---|
 | Read NPC prompt | Reveals the local assumption and puts the player under a social rule. |
-| Choose dialogue line | Converts player speech into deterministic suspicion and artifact outcomes. |
-| Optional free input | Records a player-authored statement for deterministic classification. |
+| Choose dialogue line | Puts player speech in front of an NPC that judges its content. |
+| Optional free input | Records a player-authored statement the NPC actually reads and judges. |
 | Evidence feed | Shows why a state changed without breaking diegesis. |
 | NPC barks | Provide social pressure, hints, and changing public mood. |
 | Station thresholds | Convert local mistakes into formal procedure. |

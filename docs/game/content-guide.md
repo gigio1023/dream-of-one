@@ -39,9 +39,10 @@ nowhere on a map.
 - Every suspicion signal needs a why-line (이유 문장) a player can read.
 - Role voice separation is strict: NPC speech, player choices, and system/HUD
   text use distinct registers and must never be attributed across roles.
-- Scene facts, goals, and deterministic classification rules live in data.
-  Fixed test dialogue lives only in scripted adapters; live player-facing
-  dialogue comes from the selected provider.
+- Scene facts, goals, ending thresholds, and outcome presentation live in
+  data. Fixed test dialogue lives only in scripted adapters; live
+  player-facing dialogue and suspicion judgment come from the selected
+  provider.
 
 ## Localization
 

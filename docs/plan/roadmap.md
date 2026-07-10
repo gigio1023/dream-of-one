@@ -13,8 +13,8 @@ boundaries (see anti-goals in
 |---|---|---|---|---|
 | M0 | Direction reset | This documentation tree; v1 process retired | ...agents rebuild the proof factory | **done (PR #98)** |
 | M1 | [2D scenario harness](m1-2d-playable-slice.md) | 2D client, Session API, world rules, and four deterministic regression scenarios | ...the presentation and deterministic authority boundary cannot be exercised end to end | **closed as harness (PR #100)** |
-| M2 | [LLM-native agent loop](m2-provider-ports.md) | Provider ports are live by default; NPC dialogue, suggested replies, and next tool calls share one proposal boundary | ...the shipped architecture is a scripted storylet runner wearing agent-loop names | **active** |
-| M3 | [Agent-loop society](m3-agent-loop-npcs.md) | Multiple NPCs pursue concurrent goals and propagation emerges from tools, records, and visibility | ...one working agent loop does not produce believable society | queued |
+| M2 | [LLM-native agent loop](m2-provider-ports.md) | The model judges suspicion and writes records that another NPC visibly reads; rules keep validity only | ...the shipped architecture is a scripted storylet runner wearing agent-loop names | **active** |
+| M3 | [Agent-loop society](m3-agent-loop-npcs.md) | Station verdicts become model-judged (reversible by argument); multiple NPCs pursue concurrent goals | ...one working agent loop does not produce believable society | queued |
 | M4 | [Town social sim](m4-town-social-sim.md) | Four locations, 6–8 NPCs, day segments, ambient life, save/load | ...the loop doesn't scale past one room | queued |
 | M5 | [Prologue demo](m5-prologue-demo.md) | 15–30 min honest public demo, KO/EN, desktop exports, itch page | ...nothing shippable exists (v1's terminal state) | queued |
 
@@ -52,3 +52,10 @@ Its authored dialogue choices and route consequence lists are retained only as
 test inputs while M2 replaces the production policy with provider-backed
 proposals. This correction was explicitly directed by the owner at the M1
 boundary; it does not authorize additional scripted routes.
+
+Same day, after the owner interview and an independent audit: judgment
+authority (suspicion, and later Station verdicts) moved from deterministic
+rules to the model, visible NPC-to-NPC reaction moved from M3 into M2, and
+the four canonical routes were demoted to regression tests. Recorded in
+[`../vision/design-pillars.md`](../vision/design-pillars.md); M2's
+acceptance list was rewritten accordingly.

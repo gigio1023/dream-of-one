@@ -4,78 +4,80 @@
 
 ```mermaid
 flowchart TD
-    A[Provider-proposed NPC prompt<br/>ordinary question] --> B{Player answers}
-    B -->|generated suggestion 1..3| C[Deterministic classification]
+    A[Model-proposed NPC prompt<br/>ordinary question] --> B{Player answers}
+    B -->|generated suggestion 1..3| C[Model judgment<br/>the NPC reads the content]
     B -->|typed free input| C
     B -->|hesitation / delay| C
-    C --> D[Suspicion signals]
+    C --> D[Suspicion movement + why-line<br/>clamped by rules]
     D --> E[NPC suspicion + memory update]
-    E --> F{Threshold?}
-    F -->|no| G[Conversation continues<br/>or ends clean]
-    F -->|probe| A2[Probing follow-up prompt]
+    E --> F{Where does the NPC take it?}
+    F -->|keeps talking| A2[Follow-up question]
     A2 --> B
-    F -->|record| H[NPC writes record<br/>ledger event]
-    H --> I[Other NPCs observe record<br/>via visibility rules]
+    F -->|lets it go| G[Conversation continues<br/>or ends clean]
+    F -->|acts| H[Agent-loop tool call<br/>validated record / object change]
+    H --> I[Other NPCs observe the record<br/>via visibility rules]
     I --> J[Social reactions:<br/>gossip, warning, refusal, report]
     J --> K{Report pressure?}
     K -->|no| G
-    K -->|yes| L[Station intake → inquest → verdict]
-    L --> M[Deterministic session end + replay]
+    K -->|yes| L[Station intake → inquest → verdict<br/>model-judged, ending guaranteed]
+    L --> M[Session end + replay]
 ```
 
-The LLM proposes the NPC utterance, three reply suggestions, and the next tool
-attempt. It cannot classify suspicion, apply a mutation, or move the authority
-state machine.
+The model is the NPC's mind: it proposes the utterance and reply suggestions,
+judges how suspicious the player's answer is (and why), and chooses the next
+tool attempt. Deterministic rules enforce validity only: per-turn delta caps,
+visibility of context, tool validation, and a session that always ends.
 
 ## The answer surface
 
 - **Three generated diegetic suggestions** per prompt, requested with a felt
-  safety gradient:
-  one safe, one uncertain, one risky. The gradient must be inferable from the
-  fiction (what a normal resident would say), never labeled. They are proposed
-  at runtime from visible context, not stored in the storylet. Choosing one is
-  identical to typing that line; deterministic classification assigns truth.
-- **Typed free input** — a bounded text field. Submitted text is classified
-  deterministically (keyword/pattern/contradiction rules), hashed into the
-  session record, and treated in-fiction as a *recorded statement*. It is not
-  open-ended chat and the UI never implies it is.
+  safety gradient: one safe, one uncertain, one risky. The gradient must be
+  inferable from the fiction, never labeled. They are proposed at runtime from
+  visible context, not stored in the storylet. Choosing one is identical to
+  typing that line — either way the NPC's model reads the content.
+- **Typed free input** — a bounded text field ("기타…"). This is real
+  conversation: the NPC understands the content and responds to it. The bound
+  is ergonomics (typing fatigue) and injection surface control, not a limit on
+  what the conversation means. Submitted text is hashed into the session
+  record and treated in-fiction as a *recorded statement*.
 - **Hesitation is an answer.** Delay past a threshold emits
   `response_hesitation_noted` — a real signal NPCs can act on.
 
-## Suspicion model (deterministic)
+## Suspicion model (model-judged, rule-bounded)
 
-Carried from v1's proven taxonomy (`backend/npc-runtime/src/runtime/conversation-suspicion.ts`,
-`policy/reason-taxonomy.ts`):
+The judging NPC's model receives the player's line, the conversation so far
+(both sides), and only the context that NPC has seen, heard, or read. It
+returns how much suspicion moved, which signal classes applied, and a
+player-visible why-line. The signal taxonomy
+(`backend/npc-runtime/src/runtime/conversation-suspicion.ts`) survives as
+shared vocabulary and as the deterministic fallback when the provider is
+unavailable — fallback judgment is visibly marked and is never the product
+experience.
 
-- Signal classes: odd wording, contradiction with a known record, hesitation,
-  refusal, over-explanation.
-- Each signal carries a reason code and a why-line (플레이어에게 보여줄 이유
-  문장) so the player can always learn *why* suspicion moved.
-- Per-NPC suspicion accumulates; crossing thresholds unlocks NPC behaviors
-  (probe → note → share → report), each visible in-world.
+Rules enforce validity around the judgment:
 
-## Route contrast (the replay promise)
+- per-turn suspicion/report deltas are clamped to a bounded range;
+- accumulated scores are clamped to `0..125`;
+- every movement carries a why-line the player can read;
+- thresholds only guarantee that accumulated pressure eventually reaches an
+  ending — they do not decide what an answer *means*.
 
-Every storylet must support the four canonical routes end to end:
+## Canonical routes (regression tests only)
 
-| Route | Player behavior | Terminal state |
-|---|---|---|
-| Clean cover (무사 통과) | Safe answers, no signals | NPC closes interaction; no record |
-| Repair recovery (수습) | A slip, then a successful repair action | Record created then resolved; small trust cost |
-| Soft report (약식 보고) | Accumulated signals without repair | Manager/intermediary pauses service, forwards report; social friction persists |
-| Hard inquest (심문) | Risky statement or contradiction | Station cites the exact record chain, formal inquest, locked session end |
-
-Replay rule: a player who answers differently must be able to name what they
-did differently and see a different terminal panel that cites different
-records.
+The four canonical arcs — clean cover (무사 통과), repair recovery (수습),
+soft report (약식 보고), hard inquest (심문) — are **regression scenarios**,
+kept alive by the scripted test adapter and fixtures. Live play may leave
+them: an unexpected but valid NPC action or a persuasive player argument is
+gameplay, not a defect. The replay promise is that different answers lead to
+visibly different social consequences that cite different records — not that
+play lands on one of four authored endings.
 
 ## Session shape
 
-- A session is 5–15 minutes in M1 (single storylet) growing to 15–30 minutes
-  by M5 (prologue arc across locations).
-- Sessions always reach a deterministic end state with an outcome panel that
-  names: the route, the role action that closed/escalated it, and the exact
-  ledger entries cited.
+- A session is 5–15 minutes now, growing to 15–30 minutes by M5.
+- Sessions always reach an ending. The outcome panel names the closing role
+  action and cites only ledger entries that actually exist; it never narrates
+  a consequence that did not happen.
 - Restart is instant and keeps nothing except the player's knowledge.
 
 ## What "fun" means here (fun-gate rubric)

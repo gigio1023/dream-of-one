@@ -48,8 +48,9 @@ Main (Node2D)
 - Conversation is modal but the world stays live behind it (NPCs keep their
   loops running — being watched *while* answering is the point).
 - Suggested replies and typed input submit the displayed text into the same
-  deterministic classification path; a subtle "recorded" stamp
-  animation lands on submit (recorded-statement fiction, pillar 1).
+  judgment path — the NPC's model reads the content either way; a subtle
+  "recorded" stamp animation lands on submit (recorded-statement fiction,
+  pillar 1).
 - Hesitation timer runs while the panel is open; crossing the threshold emits
   the hesitation event to the runtime — visible as the NPC's patience cue.
 - Every consequence surfaced within 1s of its ledger event: pressure line

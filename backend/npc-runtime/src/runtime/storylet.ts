@@ -153,7 +153,7 @@ function moduleDir(): string {
 }
 
 export function storyletDataDir(): string {
-  // src/runtime/storylet.ts -> ../../data/storylets when run via tsx,
+  // src/runtime/storylet.ts -> ../../data/storylets when run directly by Bun,
   // dist/runtime/storylet.js -> ../../data/storylets when built.
   return resolve(moduleDir(), "..", "..", "data", "storylets");
 }

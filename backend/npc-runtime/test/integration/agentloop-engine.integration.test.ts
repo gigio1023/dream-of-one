@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "bun:test";
 import { createSameOrderWorld } from "../../src/runtime/world/index.js";
 import { DEFAULT_ROLE_POLICIES, type ActorMemory } from "../../src/agentloop/context.js";
 import { runBeat } from "../../src/agentloop/engine.js";

@@ -39,7 +39,7 @@ a first-class mode.
 **Proof:**
 
 - Contract tests against `MockAdapter` (validation, ladder, budget, repair) in
-  `npm run check`.
+  `bun run --cwd backend/npc-runtime check`.
 - `provider:smoke` script per profile (manual, budget-capped).
 - `route_smoke.gd` extended: run all four routes with providers off and with
   `mock/scripted` on; assert identical route outcomes (texture-not-truth

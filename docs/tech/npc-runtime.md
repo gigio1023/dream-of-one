@@ -87,6 +87,7 @@ consequences incrementally.
 
 ## Checks
 
-`npm run check` = typecheck + unit/fixture tests + storylet data validation.
-Keep it under ~60s. Provider live smokes are separate opt-in scripts
+`bun run --cwd backend/npc-runtime check` = typecheck + unit/fixture tests +
+storylet data validation. Keep it under ~60s. Provider live smokes are
+separate opt-in scripts
 ([`ai-provider-ports.md`](ai-provider-ports.md)).

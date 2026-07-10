@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "bun:test";
 import { loadStorylet, parseStorylet } from "../../src/runtime/storylet.js";
 import { CONVERSATION_CHOICE_INTENTS } from "../../src/contracts/types.js";
 

@@ -71,7 +71,8 @@ isn't fun."
 - [ ] Game runs and looks intentional from a fresh clone with committed
       tiers only (CC0 + greybox); no paid or local-only asset is required by
       any scene or smoke.
-- [ ] `npm run check` green; no v1 3D files remain under `godot/`.
+- [ ] `bun run --cwd backend/npc-runtime check` green; no v1 3D files remain
+      under `godot/`.
 - [ ] Fun gate answered honestly in the PR.
 
 ## Non-goals

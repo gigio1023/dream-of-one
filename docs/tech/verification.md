@@ -15,7 +15,7 @@ gate.
 
 ```bash
 # Runtime (fast, always)
-npm run check --prefix backend/npc-runtime
+bun run --cwd backend/npc-runtime check
 
 # Godot client (headless)
 $GODOT_BIN --version # Expected: 4.7.x stable
@@ -29,7 +29,7 @@ $GODOT_BIN --headless --path godot --script res://tools/check_assets.gd
 GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/live-route-parity.sh
 ```
 
-CI runs the npm check on backend changes (existing workflow). Godot smokes
+CI runs the Bun check on backend changes (existing workflow). Godot smokes
 run locally per slice; add them to CI only if a real regression escapes
 twice.
 

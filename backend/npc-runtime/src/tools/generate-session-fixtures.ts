@@ -1,6 +1,6 @@
 // Generates data/fixtures/session-api-examples.json from real session flows so
 // the client fixtures match the live server exactly. Re-run after any Session
-// API shape change: `npm run fixtures:generate`.
+// API shape change: `bun run --cwd backend/npc-runtime fixtures:generate`.
 
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -322,7 +322,7 @@ function buildReplayGraph() {
 
 function main(): void {
   const fixtures = {
-    note: "Generated from live SessionService responses; sessionId normalized to a placeholder. Regenerate with `npm run fixtures:generate`.",
+    note: "Generated from live SessionService responses; sessionId normalized to a placeholder. Regenerate with `bun run --cwd backend/npc-runtime fixtures:generate`.",
     storyletId: "same-order",
     locale: "ko-KR",
     placeholderSessionId: PLACEHOLDER_SESSION,

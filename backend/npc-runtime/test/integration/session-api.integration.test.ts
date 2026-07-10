@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "bun:test";
 import { startSessionServer, type RunningSessionServer } from "../../src/api/http-server.js";
 
 type Answer = { type: "choice" | "free_input" | "hesitation"; choiceId?: string; text?: string };

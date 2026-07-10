@@ -3,7 +3,7 @@
 > **The society investigates you.**
 
 [![Godot 4.7](https://img.shields.io/badge/Godot-4.7-478CBF?logo=godot-engine&logoColor=white)](https://godotengine.org/)
-![Development Node.js 22+](https://img.shields.io/badge/development-Node.js%2022%2B-5FA04E?logo=node.js&logoColor=white)
+![Development Bun 1.3.14](https://img.shields.io/badge/development-Bun%201.3.14-FBF0DF?logo=bun&logoColor=black)
 ![Korean first](https://img.shields.io/badge/content-Korean--first-B86055)
 
 Dream of One is a 2D top-down conversation social-stealth game set in a
@@ -34,7 +34,7 @@ storylet:
 - Restart immediately and test a different line.
 
 The default build replays committed, backend-generated fixture data, so it is
-fully playable without Node.js or a live AI provider. The same four routes
+fully playable without Bun or a live AI provider. The same four routes
 also pass against the localhost TypeScript sidecar. M1 remains active until
 its manual fun-gate and acceptance closeout are recorded.
 
@@ -109,12 +109,12 @@ for M3. See the [architecture](docs/tech/architecture.md) and
 
 ## Development
 
-Node.js **22+** is required only for runtime development and localhost HTTP
-mode.
+Bun **1.3.14+** is required only for runtime development and localhost HTTP
+mode. From the repository root:
 
 ```bash
-npm install --prefix backend/npc-runtime
-npm run check --prefix backend/npc-runtime
+bun install --cwd backend/npc-runtime --frozen-lockfile
+bun run --cwd backend/npc-runtime check
 
 "$GODOT_BIN" --headless --import --path godot
 "$GODOT_BIN" --headless --path godot --script res://tools/scene_load_smoke.gd
@@ -126,7 +126,7 @@ npm run check --prefix backend/npc-runtime
 Start the deterministic runtime in one terminal:
 
 ```bash
-PORT=18787 npm run serve --prefix backend/npc-runtime
+PORT=18787 bun run --cwd backend/npc-runtime serve
 ```
 
 Then launch the Godot client in HTTP mode from another:

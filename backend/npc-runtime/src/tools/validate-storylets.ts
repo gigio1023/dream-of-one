@@ -1,4 +1,4 @@
-// Storylet data validation, run as part of `npm run check`.
+// Storylet data validation, run as part of `bun run check`.
 // Loads and validates every compiled storylet against the zod schema + the
 // structural integrity rules (Korean strings, safety gradient, route citation).
 

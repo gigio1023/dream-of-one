@@ -1,5 +1,5 @@
 {
-  "note": "Generated from live SessionService responses; sessionId normalized to a placeholder. Regenerate with `npm run fixtures:generate`.",
+  "note": "Generated from live SessionService responses; sessionId normalized to a placeholder. Regenerate with `bun run --cwd backend/npc-runtime fixtures:generate`.",
   "storyletId": "same-order",
   "locale": "ko-KR",
   "placeholderSessionId": "sess-00000000-0000-0000-0000-000000000000",

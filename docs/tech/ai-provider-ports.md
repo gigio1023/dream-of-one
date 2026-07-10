@@ -150,7 +150,8 @@ rest of the session.
 - **Contract tests** run the whole provider service against `MockAdapter`
   (scripted envelopes + scripted failures) — validation, fallback ladder,
   budget, and envelope repair are fully testable offline. CI runs these.
-- **Live smokes** (`npm run provider:smoke -- --profile modelscope/qwen3.7-plus`)
+- **Live smokes**
+  (`bun run --cwd backend/npc-runtime provider:smoke -- --profile modelscope/qwen3.7-plus`)
   are manual/opt-in, spend pennies, and print utterance + usage. Never in CI.
   Default smoke targets are the two first-class profiles (ModelScope, OpenAI).
 - The game with `default: "off"` must be byte-identical in route outcomes to

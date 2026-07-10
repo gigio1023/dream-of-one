@@ -57,7 +57,7 @@ Commands and policy: [`docs/tech/verification.md`](docs/tech/verification.md).
 The short list:
 
 ```bash
-npm run check --prefix backend/npc-runtime
+bun run --cwd backend/npc-runtime check
 $GODOT_BIN --headless --import --path godot
 $GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
 ```

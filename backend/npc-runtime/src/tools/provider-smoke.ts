@@ -34,14 +34,39 @@ const result = await proposalPort.proposeConversationTurn({
   conversationHistory: [],
 });
 
+const judged = await proposalPort.judgeConversationTurn({
+  sessionId: "provider-smoke",
+  locale: "ko-KR",
+  beatId: "routine",
+  promptId: "store.same_order.routine",
+  actorId: actor.actorId,
+  playerLine: "꿈에서 봤던 가게 같아서요. 평소에 뭘 시켰는지 기억이 잘 안 나요.",
+  conversationHistory: [{ speakerId: actor.actorId, line: result.proposal.utterance }],
+  observePacket,
+  suspicionBefore: 0,
+  reportPressureBefore: 0,
+});
+
 console.log(JSON.stringify({
   profileId,
-  transport: result.meta.transport,
-  usedFallback: result.meta.usedFallback,
-  fallbackReason: result.meta.fallbackReason,
-  utterance: result.proposal.utterance,
-  suggestedReplyCount: result.proposal.suggestedReplies.length,
-  usage: result.meta.usage,
+  conversation: {
+    transport: result.meta.transport,
+    usedFallback: result.meta.usedFallback,
+    fallbackReason: result.meta.fallbackReason,
+    utterance: result.proposal.utterance,
+    suggestedReplyCount: result.proposal.suggestedReplies.length,
+    usage: result.meta.usage,
+  },
+  judgment: {
+    transport: judged.meta.transport,
+    usedFallback: judged.meta.usedFallback,
+    fallbackReason: judged.meta.fallbackReason,
+    suspicionDelta: judged.proposal.suspicionDelta,
+    reportDelta: judged.proposal.reportDelta,
+    signals: judged.proposal.signals,
+    whyLine: judged.proposal.whyLine,
+    usage: judged.meta.usage,
+  },
 }, null, 2));
 
-if (result.meta.transport !== "live") process.exitCode = 2;
+if (result.meta.transport !== "live" || judged.meta.transport !== "live") process.exitCode = 2;

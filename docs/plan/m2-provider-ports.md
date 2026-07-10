@@ -57,18 +57,28 @@ and generated fixtures.
 - [ ] One opt-in live provider smoke succeeds (conversation + judgment) with
       the checked-in default profile. **Run before everything else once
       credentials exist on a dev machine; this is the milestone's declared
-      risk.**
+      risk.** *Blocked 2026-07-10: `provider:smoke` now exercises both calls,
+      but `OPENAI_API_KEY` is not set on this machine (no shell env, no repo
+      auth store, 1Password CLI signed out). Both calls fall back cleanly with
+      `missing_credentials`; the tool exits non-zero as intended.*
 - [ ] Playing in a real window: a typed improvised answer moves suspicion
       with a model-authored why-line on the HUD (fallback label when the
       provider is down).
 - [ ] Playing in a real window: a model-proposed record write appears in the
       ledger and a second NPC visibly reacts to it in the same session.
+      *Wired 2026-07-10: `main.gd` runs one ambient beat after every resolved
+      answer; scripted-mode probe shows the manager reading the clerk's
+      statement. Live-window observation still pending.*
 - [ ] A conversation running three or more turns shows no self-contradiction
-      of the NPC's own prior lines in the transcript.
-- [ ] The outcome panel's cited ledger ids exactly match the session ledger;
-      a no-record session shows the no-record ending text.
-- [ ] `bun run --cwd backend/npc-runtime check`, Session API parity, and
-      Godot route smoke (fixture + scripted modes) pass.
+      of the NPC's own prior lines in the transcript. *Structure landed
+      2026-07-10 (two-sided history reaches the model); live observation
+      pending.*
+- [x] The outcome panel's cited ledger ids exactly match the session ledger;
+      a no-record session shows the no-record ending text. *Verified
+      2026-07-10 against the production sidecar in fallback mode.*
+- [x] `bun run --cwd backend/npc-runtime check`, Session API parity, and
+      Godot route smoke (fixture + scripted modes) pass. *79 tests + both
+      smoke modes green as of 2026-07-10.*
 
 ## Non-goals
 

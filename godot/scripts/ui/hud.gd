@@ -214,7 +214,9 @@ func _build_conversation_panel() -> void:
 		button.focus_mode = Control.FOCUS_ALL
 		button.add_theme_font_size_override("font_size", 10)
 		_apply_button_styles(button, PAPER_SOFT, WARM)
-		button.pressed.connect(_submit_choice.bind(index))
+		# Submit on activation start so both mouse-down and keyboard accept remain
+		# reliable while the resizable window remaps the release point.
+		button.button_down.connect(_submit_choice.bind(index))
 		column.add_child(button)
 		_choice_buttons.append(button)
 
@@ -361,6 +363,13 @@ func set_busy(value: bool) -> void:
 	_submit_button.disabled = value
 	if value:
 		_hesitation_timer.stop()
+
+func show_conversation_error(message: String) -> void:
+	set_busy(false)
+	_ledger_label.text = message
+	_ledger_label.modulate = DANGER
+	if _conversation_panel.visible:
+		_hesitation_timer.start(HESITATION_SECONDS)
 
 func set_pressure(suspicion: int, report_pressure: int, why_lines: Array = []) -> void:
 	_suspicion_bar.value = suspicion

@@ -54,8 +54,66 @@ func _run() -> void:
 		if not seen.has(expected_route):
 			_fail("missing canonical route: %s" % expected_route)
 			return
+	if not await _check_hud_choice_activation(fixture):
+		return
 	print("PASS route_smoke: %s mode drove all four canonical routes" % str(session.call("mode")))
 	quit(0)
+
+func _check_hud_choice_activation(fixture: Dictionary) -> bool:
+	var hud_resource := ResourceLoader.load("res://scenes/ui/hud.tscn")
+	if not hud_resource is PackedScene:
+		_fail("HUD scene did not load for choice activation regression")
+		return false
+	var hud: Node = (hud_resource as PackedScene).instantiate()
+	root.add_child(hud)
+	await process_frame
+	var graph: Dictionary = fixture.get("replayGraph", {})
+	var start_response: Dictionary = graph.get("startResponse", {})
+	var turn: Dictionary = start_response.get("nextTurn", {})
+	if turn.is_empty():
+		_fail("HUD choice activation fixture has no opening nextTurn")
+		hud.queue_free()
+		return false
+	var selected: Array[String] = []
+	hud.choice_submitted.connect(func(choice_id: String) -> void: selected.append(choice_id))
+	hud.show_turn(turn)
+	await process_frame
+	var buttons_value: Variant = hud.get("_choice_buttons")
+	if not buttons_value is Array or (buttons_value as Array).is_empty():
+		_fail("HUD built no choice buttons")
+		hud.queue_free()
+		return false
+	var first_button := (buttons_value as Array)[0] as Button
+	first_button.button_down.emit()
+	await process_frame
+	if selected != ["routine.safe"]:
+		_fail("HUD mouse activation did not submit routine.safe: %s" % JSON.stringify(selected))
+		hud.queue_free()
+		return false
+
+	selected.clear()
+	hud.show_turn(turn)
+	await process_frame
+	first_button.grab_focus()
+	await process_frame
+	var enter_down := InputEventKey.new()
+	enter_down.keycode = KEY_ENTER
+	enter_down.pressed = true
+	Input.parse_input_event(enter_down)
+	var enter_up := InputEventKey.new()
+	enter_up.keycode = KEY_ENTER
+	enter_up.pressed = false
+	Input.parse_input_event(enter_up)
+	await process_frame
+	if selected != ["routine.safe"]:
+		_fail("HUD Enter activation did not submit routine.safe: %s" % JSON.stringify(selected))
+		hud.queue_free()
+		return false
+
+	print("PASS route_smoke: HUD mouse + Enter choice activation")
+	hud.queue_free()
+	await process_frame
+	return true
 
 func _drive_route(session: Node, walkthrough: Dictionary, replay: Dictionary, first_route: bool) -> bool:
 	var expected_route := str(walkthrough.get("expectedOutcome", walkthrough.get("route", "")))

@@ -21,11 +21,12 @@ Session="*res://scripts/runtime/session.gd"
 
 window/size/viewport_width=640
 window/size/viewport_height=360
-window/size/window_width_override=1280
-window/size/window_height_override=720
+window/size/window_width_override=1920
+window/size/window_height_override=1080
+window/size/resizable=true
 window/stretch/mode="canvas_items"
 window/stretch/aspect="keep"
-window/stretch/scale_mode="integer"
+window/stretch/scale_mode="fractional"
 
 [internationalization]
 

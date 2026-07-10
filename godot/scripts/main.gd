@@ -63,6 +63,7 @@ func _connect_session() -> void:
 	Session.npc_reaction.connect(_on_npc_reaction)
 	Session.location_transition.connect(_on_session_location_transition)
 	Session.route_ended.connect(_on_route_ended)
+	Session.request_failed.connect(_on_session_request_failed)
 
 func _begin_session() -> void:
 	_hud.set_mode(Session.mode())
@@ -128,9 +129,14 @@ func _submit_answer(payload: Dictionary) -> void:
 	var result: Dictionary = await Session.answer(payload)
 	_resolving_answer = false
 	if result.is_empty() or result.has("error"):
-		_hud.set_busy(false)
-		_hud.set_hint(_t("hud.error.answer"))
+		_hud.show_conversation_error(_t("hud.error.answer"))
+		push_warning("Session answer failed: %s" % JSON.stringify(result))
 	_refresh_player_input()
+
+func _on_session_request_failed(operation: String, error: Dictionary) -> void:
+	if operation == "answer" and _hud.conversation_visible():
+		_hud.show_conversation_error(_t("hud.error.answer"))
+	push_warning("Session %s failed: %s" % [operation, JSON.stringify(error)])
 
 func _on_answer_resolved(result: Dictionary) -> void:
 	var route_state: Dictionary = result.get("routeState", {})

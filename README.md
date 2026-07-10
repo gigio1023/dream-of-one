@@ -45,7 +45,7 @@ document and start working.
 
 ## Quick Start
 
-Prerequisites: Godot 4.x (set `GODOT_BIN` per device), Node.js and npm.
+Prerequisites: Godot 4.7.x stable (set `GODOT_BIN` per device), Node.js and npm.
 
 ```bash
 npm install --prefix backend/npc-runtime

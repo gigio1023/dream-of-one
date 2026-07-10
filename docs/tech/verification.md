@@ -18,6 +18,7 @@ gate.
 npm run check --prefix backend/npc-runtime
 
 # Godot client (headless)
+$GODOT_BIN --version # Expected: 4.7.x stable
 $GODOT_BIN --headless --import --path godot
 $GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/route_smoke.gd

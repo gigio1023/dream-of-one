@@ -1,7 +1,8 @@
 # Godot 2D Client
 
-Target: Godot 4.x (current stable; keep `GODOT_BIN` per device). The v1 3D
-project under `godot/` is replaced in M1 — salvage listed at the bottom.
+Target: Godot 4.7.x stable (current stable series; keep `GODOT_BIN` per
+device). The v1 3D project under `godot/` is replaced in M1 — salvage listed
+at the bottom.
 
 ## Project settings
 

@@ -16,6 +16,124 @@ tool validation, bounded deltas, and a session that always ends.
 tool sequences, and route outcomes exist only in the scripted test adapter
 and generated fixtures.
 
+## Owner-approved 2D restoration contract
+
+Approved 2026-07-10 after reviewing the current build against the last known
+good 2D implementation. This is a presentation and interaction restoration
+inside M2, not a return to M1's authored gameplay policy. The current
+provider-backed judgment, two-sided conversation memory, ambient NPC reaction,
+record authority, and honest-ending behavior remain authoritative.
+
+### Outcome
+
+Restore the complete asset-backed Store and Station play loop from commit
+`83983ebd` around the current LLM social-simulation behavior, with a native,
+responsive HUD and selectable output sizes from 720p through 4K.
+
+The visual references are:
+
+- [`../assets/readme-same-order-conversation.png`](../assets/readme-same-order-conversation.png)
+  for the Store, characters, props, conversation composition, and pressure
+  presentation.
+- [`../assets/readme-same-order-hard-inquest.png`](../assets/readme-same-order-hard-inquest.png)
+  for the Station transition, intake scene, citation beat, and ending panel.
+
+When those references conflict with current behavior, current behavior wins.
+Adapt the restored presentation as little as necessary; do not resurrect
+hard-coded dialogue policy, projected routes, or fixed social reaction chains.
+
+### Player-visible scope
+
+- Restore the full Store and Station loop: top-down movement, collision,
+  character animation, focus and interaction, readable room dressing, record
+  props, conversation, NPC reactions, inspection, transition, and ending.
+- Use the committed Kenney 2D and project greybox assets already present in the
+  repository before considering new art. New paid or redistribution-restricted
+  art requires a separate owner decision.
+- Replace the black-field/debug-circle presentation with the asset-backed world
+  in normal play. Diagnostic rings, permanent influence lines, and raw labels
+  belong to an explicit debug view only.
+- Preserve keyboard play and the existing Session API boundary. Suggestions
+  and free input continue through the same model judgment path.
+
+### Resolution and composition contract
+
+The world and HUD use separate scale domains:
+
+- The pixel-art world renders at a fixed logical **640×360** through a
+  `SubViewport`, nearest-neighbor filtered and integer-scaled. Supported output
+  presets are 1280×720 (2×), 1920×1080 (3×, default), 2560×1440 (4×), and
+  3840×2160 (6×).
+- The minimum supported window is 1280×720. Resizing between presets may
+  letterbox the world; it must not introduce fractional pixel distortion.
+- The HUD is a native-resolution `Control` hierarchy outside the world
+  viewport. Anchors and containers, not manually scaled world coordinates,
+  determine its layout. Text and controls therefore remain readable at 4K
+  instead of becoming a six-times-scaled 640×360 overlay.
+- Generated conversation text grows its panel to a defined maximum height,
+  then scrolls internally. It must not displace response controls off-screen.
+- Output-size selection is exposed in the game UI and persisted locally; the
+  default remains 1920×1080. Fullscreen/window mode stays independent from the
+  selected output preset.
+
+### Information policy
+
+Normal play always exposes the facts needed for social reading:
+
+- NPC identity and role;
+- the NPC's current speech bubble;
+- a short reaction marker;
+- the NPC's current social action.
+
+The immediate influence line and action source appear briefly when an event
+lands, then clear. Detailed judgment reasons, longer relationship or memory
+state, cited record contents, and the full causality chain live in the inspect
+view. Debug mode may add collision, sensing, influence, ids, and raw state, but
+none of those overlays may be required to understand normal play.
+
+### Execution order
+
+1. **Recover the render baseline.** Compare current runtime output with
+   `83983ebd`, locate the first asset/camera/atlas/import regression, and make
+   the Store playable with visible tiles, props, actors, and focus behavior.
+2. **Separate world and HUD scaling.** Introduce the 640×360 world viewport,
+   native responsive HUD, output presets, and capped scrolling conversation
+   layout without changing Session API semantics.
+3. **Restore the full social presentation.** Bring the Station, record props,
+   ambient reactions, normal/inspect/debug information policy, transitions,
+   and honest ending presentation onto the restored asset-backed path.
+4. **Prove the actual game.** Exercise every output preset, then play live
+   Qwen and OpenAI sessions that include generated dialogue, a typed answer,
+   model judgment, a record write, and a second NPC's visible reaction.
+
+Each item is a coherent playable slice: run its narrow proof, commit it, and
+push it before moving to the next item.
+
+### Restoration acceptance
+
+- [ ] Normal Store and Station play shows the intended tiles, characters, and
+      props; no black background or debug-circle-only presentation remains.
+- [ ] Every current gameplay state has an asset-backed player-facing
+      presentation, including conversation, records, ambient reaction,
+      Station intake, and ending.
+- [ ] 720p, 1080p, 1440p, and 4K presets show undistorted world pixels and a
+      readable, unclipped HUD.
+- [ ] Live Qwen and OpenAI sessions each show generated dialogue, typed-input
+      judgment, record creation, and another NPC's visible reaction without a
+      fallback response.
+- [ ] A conversation of at least three turns retains the NPC's own prior lines;
+      long generated text grows to its cap and then scrolls.
+- [ ] Normal, inspect, and debug views follow the information policy above.
+- [ ] Backend checks and Godot asset, scene-load, localization, and route
+      smokes pass in fixture and scripted modes.
+
+### Explicit non-goals
+
+No 3D return, engine replacement, new location, broad art-pack purchase,
+additional authored route, or expansion of deterministic judgment authority.
+This work does not redesign the game's direction; it restores the proven 2D
+presentation around that direction.
+
 ## Player-visible deliverables
 
 1. **A clerk that judges.** The player answers with a generated suggestion or

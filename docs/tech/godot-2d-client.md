@@ -7,12 +7,12 @@ device). The active project under `godot/` is the M2 provider-backed client.
 
 - The pixel-art world renders in a `SubViewport` whose logical view follows a
   window-height ladder (`main.gd` `WORLD_VIEW_LADDER`): 1280×720 → 320×180 at
-  4×, 1920×1080 → 480×270 at 4×, 2560×1440 → 512×288 at 5×, 3840×2160 →
-  480×270 at 8×. The container applies the largest integer scale that fits,
-  centered with letterboxing; output size and world magnification are separate
-  domains. Locations draw a 10-tile pavement apron and the camera (zoom 1)
-  clamps to it, so wide views never expose void. The minimum window is
-  1280×720.
+  4×, 1920×1080 → 384×216 at 5×, 2560×1440 → 426×240 at 6× (2px side
+  letterbox), 3840×2160 → 384×216 at 10×. The container applies the largest
+  integer scale that fits, centered with letterboxing; output size and world
+  magnification are separate domains. Locations draw a 7-tile pavement apron
+  and the camera (zoom 1) clamps to it, so wide views never expose void. The
+  minimum window is 1280×720.
 - HUD controls render in the native window viewport. Typography scales from
   window height at regular PC density (body ≈19px at 1080p, ≈39px at 4K),
   multiplied by a user-selectable UI scale (80/100/125/150%) in the Esc

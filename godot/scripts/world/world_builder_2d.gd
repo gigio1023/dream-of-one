@@ -9,10 +9,11 @@ const PackAtlas := preload("res://scripts/data/pack_atlas.gd")
 const NPC_SCENE := preload("res://scenes/actors/npc_2d.tscn")
 const PROP_SCENE := preload("res://scenes/props/record_prop_2d.tscn")
 const PLAYER_SCENE := preload("res://scenes/actors/player.tscn")
-## Plaza apron drawn around the room so wide views (up to 512×288 world px)
-## never expose void; it also bounds the follow camera. 10 tiles covers the
-## widest ladder view around the smallest room (station, 224×160).
-const APRON_TILES := 10
+## Plaza apron drawn around the room so wide views (up to 426×240 world px)
+## never expose void; it also bounds the follow camera. 7 tiles covers the
+## widest ladder view around the smallest room (station, 224×160) while
+## keeping edge shots from reading as empty plaza.
+const APRON_TILES := 7
 
 var tile_size := 16
 ## Room + street + apron, in tiles. The location camera clamps to this rect.

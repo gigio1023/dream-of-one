@@ -16,11 +16,13 @@ const OUTPUT_PRESETS := [
 ## Output size and world magnification are separate domains: a taller window
 ## gets a wider logical view at a gentler integer scale, instead of the same
 ## view re-magnified. Entries: window height floor -> logical world view.
-## 720p 320×180·4×, 1080p 480×270·4×, 1440p 512×288·5×, 4K 480×270·8×.
+## 720p 320×180·4×, 1080p 384×216·5×, 1440p 426×240·6×, 4K 384×216·10×.
+## Tuned so the Store fills most of the frame (Stardew-band density) instead
+## of floating in plaza; 426×240 leaves a 2px letterbox per side at 2560.
 const WORLD_VIEW_LADDER := [
-	{"minHeight": 1900, "view": Vector2i(480, 270)},
-	{"minHeight": 1300, "view": Vector2i(512, 288)},
-	{"minHeight": 900, "view": Vector2i(480, 270)},
+	{"minHeight": 1900, "view": Vector2i(384, 216)},
+	{"minHeight": 1300, "view": Vector2i(426, 240)},
+	{"minHeight": 900, "view": Vector2i(384, 216)},
 	{"minHeight": 0, "view": Vector2i(320, 180)},
 ]
 ## User-selectable HUD scale (Esc settings), multiplied on top of the

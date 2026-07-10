@@ -63,12 +63,12 @@ rejected the original fixed-640×360 rule — on large monitors it re-magnified
 the same narrow view instead of showing more world.)
 
 - The pixel-art world renders 1:1 into a `SubViewport` whose logical view is
-  chosen by window height — 320×180 (720p), 480×270 (1080p, 4K), 512×288
-  (1440p) — nearest-neighbor filtered and integer-scaled (4×/4×/5×/8×).
-  Output size and world magnification are independent; from 1080p up the whole
-  Store fits in frame, and locations draw a pavement apron so wide views never
-  expose void. Output presets are 1280×720, 1920×1080 (default), 2560×1440,
-  and 3840×2160.
+  chosen by window height — 320×180 (720p), 384×216 (1080p, 4K), 426×240
+  (1440p) — nearest-neighbor filtered and integer-scaled (4×/5×/6×/10×).
+  Output size and world magnification are independent; the Store fills most
+  of the frame at Stardew-band density, and locations draw a pavement apron
+  so wide views never expose void. Output presets are 1280×720, 1920×1080
+  (default), 2560×1440, and 3840×2160.
 - The minimum supported window is 1280×720. Resizing between presets may
   letterbox the world; it must not introduce fractional pixel distortion.
 - The HUD is a native-resolution `Control` hierarchy outside the world

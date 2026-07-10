@@ -18,10 +18,11 @@ symmetrical and fits the dream-logic undertone.
   isometric diamond grid). Quarter-view/isometric was evaluated and rejected:
   higher art cost, scarcer packs, zero gameplay value for a conversation game.
 - The world renders 1:1 into a logical view picked by window height —
-  320×180 (720p), 480×270 (1080p and 4K), 512×288 (1440p) — then integer-scales
-  to the output (4×/4×/5×/8×). A larger output means more visible world or
-  finer pixels, never the same narrow view re-magnified. Pixel snap on.
-- Rooms sit on a darker pavement apron (10 tiles) so wide views never expose
+  320×180 (720p), 384×216 (1080p and 4K), 426×240 (1440p) — then integer-scales
+  to the output (4×/5×/6×/10×). Stardew-band density: the room fills most of
+  the frame, and a larger output means finer pixels or slightly more world,
+  never the same narrow view re-magnified. Pixel snap on.
+- Rooms sit on a darker pavement apron (7 tiles) so wide views never expose
   void; the follow camera clamps to the apron bounds.
 - Tile size **16×16**; characters 16×32 (LimeZu-compatible proportions),
   4-direction walk cycles.

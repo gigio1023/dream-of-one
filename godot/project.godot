@@ -19,14 +19,11 @@ Session="*res://scripts/runtime/session.gd"
 
 [display]
 
-window/size/viewport_width=640
-window/size/viewport_height=360
-window/size/window_width_override=1920
-window/size/window_height_override=1080
+window/size/viewport_width=1920
+window/size/viewport_height=1080
 window/size/resizable=true
-window/stretch/mode="canvas_items"
+window/stretch/mode="disabled"
 window/stretch/aspect="keep"
-window/stretch/scale_mode="fractional"
 
 [internationalization]
 

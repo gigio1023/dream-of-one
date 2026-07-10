@@ -5,9 +5,17 @@ device). The active project under `godot/` is the M2 provider-backed client.
 
 ## Project settings
 
-- Internal viewport 640×360, default window 1920×1080, resizable with
-  `canvas_items` fractional scaling. Pixel snap is on (2D transforms +
-  vertices), with nearest-neighbor default texture filtering.
+- The pixel-art world renders in a fixed 640×360 `SubViewport`, centered and
+  nearest-neighbor scaled at an integer factor. Output presets are 1280×720
+  (2×), 1920×1080 (3×, default), 2560×1440 (4×), and 3840×2160 (6×); the
+  minimum window is 1280×720.
+- HUD controls render in the native window viewport and scale their typography
+  and minimum control sizes from the selected output height. This keeps text
+  crisp and lets containers reflow independently from the pixel-art world.
+  Pixel snap remains on for 2D transforms and vertices.
+- The display selector persists its output preset under `user://`. Automated
+  visual checks may override it process-locally with
+  `DREAM_OUTPUT_PRESET=720p|1080p|1440p|4k`.
 - Input map: 4-direction move (WASD/arrows), `interact` (E/Space),
   `choice_1..3` (1/2/3), `open_ledger` (Tab), `cancel` (Esc). Full
   keyboard-only play is a standing requirement; mouse is optional everywhere.
@@ -15,15 +23,18 @@ device). The active project under `godot/` is the M2 provider-backed client.
 ## Scene architecture
 
 ```
-Main (Node2D)
-├── World (Node2D)
-│   ├── TileMapLayers: ground / walls / furniture / overhead (per location)
-│   ├── Actors (YSort via Node2D y_sort_enabled)
-│   │   ├── Player (CharacterBody2D + AnimatedSprite2D + interaction ray)
-│   │   └── NPC instances (npc_2d.tscn: body, role accent, reaction marker,
-│   │       speech bubble anchor, attention/sightline cue)
-│   ├── RecordProps (record_prop_2d.tscn: sprite, state label, inspect area)
-│   └── InfluenceLinks (Line2D pool, observer → reactor)
+Main (Node)
+├── WorldFrame (Control, integer-scaled and centered)
+│   └── WorldContainer (SubViewportContainer)
+│       └── WorldViewport (SubViewport, fixed 640×360)
+│           └── World (Node2D)
+│               ├── TileMapLayers: ground / walls / furniture / overhead
+│               ├── Actors (YSort via Node2D y_sort_enabled)
+│               │   ├── Player (CharacterBody2D + interaction ray)
+│               │   └── NPC instances (sprite, role accent, reaction marker,
+│               │       speech bubble anchor, attention/sightline cue)
+│               ├── RecordProps (sprite, state label, inspect area)
+│               └── InfluenceLinks (Line2D pool, observer → reactor)
 ├── HUD (CanvasLayer)
 │   ├── ConversationPanel (generated prompt + suggestions, typed input field)
 │   ├── PressureLine (suspicion/report meters, latest-ledger line, 열람/오간 말)
@@ -32,6 +43,15 @@ Main (Node2D)
 ├── Session (Node) — session state machine, beat scheduler
 └── RuntimeBridge (Node) — HTTPRequest pool to the runtime sidecar
 ```
+
+## Asset-backed startup
+
+`PackAtlas` builds the tile set and character frames from the committed Kenney
+atlas at runtime. After a fresh clone, engine upgrade, or branch switch, run the
+documented headless `--import` command before judging the visuals. A field that
+shows only role-accent rings means Canvas drawing is alive but imported
+textures are not; verify the import and `check_assets.gd` before replacing any
+scene or art code.
 
 - Locations are separate scenes (`store.tscn`, `station.tscn`, `park.tscn`,
   `studio.tscn`, `street.tscn`) instanced by `World` from

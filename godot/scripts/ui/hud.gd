@@ -8,9 +8,11 @@ signal free_input_submitted(text: String)
 signal hesitation_submitted
 signal conversation_closed
 signal restart_requested
+signal resolution_requested(preset_id: String)
 
 const HESITATION_SECONDS := 6.0
 const INPUT_MAX_LENGTH := 120
+const HUD_REFERENCE_HEIGHT := 720.0
 
 const INK := Color("#ece8dc")
 const MUTED := Color("#a9b0b8")
@@ -29,10 +31,13 @@ var _suspicion_bar: ProgressBar
 var _report_label: Label
 var _report_bar: ProgressBar
 var _ledger_label: Label
+var _resolution_option: OptionButton
+var _resolution_ids: Array[String] = []
 
 var _conversation_panel: PanelContainer
 var _speaker_label: Label
 var _prompt_label: Label
+var _prompt_scroll: ScrollContainer
 var _timer_label: Label
 var _timer_bar: ProgressBar
 var _choice_buttons: Array[Button] = []
@@ -58,10 +63,13 @@ var _restart_button: Button
 
 var _busy := false
 var _latest_ledger_events: Array = []
+var _ui_scale := 1.0
 
 func _ready() -> void:
 	layer = 20
+	_ui_scale = _calculate_ui_scale()
 	_build_ui()
+	get_viewport().size_changed.connect(_apply_ui_scale)
 	set_process(true)
 
 func _process(_delta: float) -> void:
@@ -133,6 +141,15 @@ func _build_pressure_panel() -> void:
 	_mode_label = _label(_t("hud.mode.fixture"), 8, COLD)
 	_mode_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	header.add_child(_mode_label)
+	var resolution_label := _label(_t("hud.display.resolution"), 8, MUTED)
+	header.add_child(resolution_label)
+	_resolution_option = OptionButton.new()
+	_resolution_option.name = "ResolutionPreset"
+	_set_scaled_font(_resolution_option, 8)
+	_set_scaled_minimum(_resolution_option, Vector2(80, 18))
+	_apply_button_styles(_resolution_option, Color("#202733"), COLD)
+	_resolution_option.item_selected.connect(_on_resolution_selected)
+	header.add_child(_resolution_option)
 
 	var meters := HBoxContainer.new()
 	meters.add_theme_constant_override("separation", 6)
@@ -191,28 +208,35 @@ func _build_conversation_panel() -> void:
 	_stamp.rotation = -0.08
 	header.add_child(_stamp)
 	_timer_label = _label(_t("hud.timer.seconds", {"seconds": "6.0"}), 9, MUTED)
-	_timer_label.custom_minimum_size.x = 42
+	_set_scaled_minimum(_timer_label, Vector2(42, 0))
 	_timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	header.add_child(_timer_label)
 
+	_prompt_scroll = ScrollContainer.new()
+	_prompt_scroll.name = "GeneratedPromptScroll"
+	_prompt_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_prompt_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_prompt_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_set_scaled_minimum(_prompt_scroll, Vector2(0, 30))
+	column.add_child(_prompt_scroll)
 	_prompt_label = _label("", 12, INK)
-	_prompt_label.custom_minimum_size.y = 30
+	_prompt_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_prompt_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	column.add_child(_prompt_label)
+	_prompt_scroll.add_child(_prompt_label)
 
 	_timer_bar = _meter(COLD)
 	_timer_bar.max_value = HESITATION_SECONDS
-	_timer_bar.custom_minimum_size.y = 3
+	_set_scaled_minimum(_timer_bar, Vector2(70, 3))
 	column.add_child(_timer_bar)
 
 	for index in range(3):
 		var button := Button.new()
 		button.name = "Choice%d" % (index + 1)
-		button.custom_minimum_size.y = 26
+		_set_scaled_minimum(button, Vector2(0, 26))
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.focus_mode = Control.FOCUS_ALL
-		button.add_theme_font_size_override("font_size", 10)
+		_set_scaled_font(button, 10)
 		_apply_button_styles(button, PAPER_SOFT, WARM)
 		# Submit on activation start so both mouse-down and keyboard accept remain
 		# reliable while the resizable window remaps the release point.
@@ -228,7 +252,7 @@ func _build_conversation_panel() -> void:
 	_input.max_length = INPUT_MAX_LENGTH
 	_input.placeholder_text = _t("hud.conversation.input_placeholder")
 	_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_input.add_theme_font_size_override("font_size", 9)
+	_set_scaled_font(_input, 9)
 	_input.add_theme_color_override("font_color", INK)
 	_input.add_theme_color_override("font_placeholder_color", Color(MUTED, 0.7))
 	_input.add_theme_stylebox_override("normal", _input_style(false))
@@ -237,8 +261,8 @@ func _build_conversation_panel() -> void:
 	input_row.add_child(_input)
 	_submit_button = Button.new()
 	_submit_button.text = _t("hud.conversation.submit")
-	_submit_button.custom_minimum_size = Vector2(52, 26)
-	_submit_button.add_theme_font_size_override("font_size", 9)
+	_set_scaled_minimum(_submit_button, Vector2(52, 26))
+	_set_scaled_font(_submit_button, 9)
 	_apply_button_styles(_submit_button, Color("#263143"), COLD)
 	_submit_button.pressed.connect(func() -> void: _submit_text(_input.text))
 	input_row.add_child(_submit_button)
@@ -312,8 +336,8 @@ func _build_outcome_panel() -> void:
 	column.add_child(_cited_label)
 	_restart_button = Button.new()
 	_restart_button.text = _t("hud.outcome.restart")
-	_restart_button.custom_minimum_size.y = 34
-	_restart_button.add_theme_font_size_override("font_size", 11)
+	_set_scaled_minimum(_restart_button, Vector2(0, 34))
+	_set_scaled_font(_restart_button, 11)
 	_apply_button_styles(_restart_button, Color("#27364a"), COLD)
 	_restart_button.pressed.connect(_request_restart)
 	column.add_child(_restart_button)
@@ -327,6 +351,7 @@ func show_turn(turn: Dictionary) -> void:
 	var actor_id := str(turn.get("speakerId", turn.get("actorId", "")))
 	_speaker_label.text = _actor_name(actor_id)
 	_prompt_label.text = str(turn.get("prompt", ""))
+	_prompt_scroll.scroll_vertical = 0
 	set_provider(_dictionary_or_empty(turn.get("proposalMeta")))
 	var choices: Array = turn.get("choices", [])
 	for index in range(_choice_buttons.size()):
@@ -427,6 +452,26 @@ func set_provider(meta: Dictionary) -> void:
 		" (%s)" % reason if not reason.is_empty() else "",
 	]
 	_mode_label.modulate = DANGER if bool(meta.get("usedFallback", false)) else COLD
+
+func configure_resolution_options(options: Array, current_id: String) -> void:
+	_resolution_option.clear()
+	_resolution_ids.clear()
+	var selected_index := 0
+	for option_value in options:
+		if not option_value is Dictionary:
+			continue
+		var option: Dictionary = option_value
+		var preset_id := str(option.get("id", ""))
+		_resolution_ids.append(preset_id)
+		_resolution_option.add_item(str(option.get("label", preset_id)))
+		if preset_id == current_id:
+			selected_index = _resolution_ids.size() - 1
+	_resolution_option.select(selected_index)
+
+func _on_resolution_selected(index: int) -> void:
+	if index < 0 or index >= _resolution_ids.size():
+		return
+	resolution_requested.emit(_resolution_ids[index])
 
 func set_hint(text: String) -> void:
 	_hint_label.text = text
@@ -583,7 +628,7 @@ func _dictionary_or_empty(value: Variant) -> Dictionary:
 func _label(text: String, size: int, color: Color) -> Label:
 	var label := Label.new()
 	label.text = text
-	label.add_theme_font_size_override("font_size", size)
+	_set_scaled_font(label, size)
 	label.add_theme_color_override("font_color", color)
 	return label
 
@@ -597,7 +642,7 @@ func _meter(fill_color: Color) -> ProgressBar:
 	bar.min_value = 0
 	bar.max_value = 120
 	bar.show_percentage = false
-	bar.custom_minimum_size = Vector2(70, 6)
+	_set_scaled_minimum(bar, Vector2(70, 6))
 	var background := StyleBoxFlat.new()
 	background.bg_color = Color(0.02, 0.025, 0.035, 0.82)
 	background.corner_radius_top_left = 1
@@ -657,11 +702,48 @@ func _button_style(bg: Color, accent: Color, alpha: float, radius: int) -> Style
 
 func _margin(left: int, top: int, right: int, bottom: int) -> MarginContainer:
 	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", left)
-	margin.add_theme_constant_override("margin_top", top)
-	margin.add_theme_constant_override("margin_right", right)
-	margin.add_theme_constant_override("margin_bottom", bottom)
+	margin.set_meta("hud_base_margins", Vector4(left * 2, top * 2, right * 2, bottom * 2))
+	_apply_margin_scale(margin)
 	return margin
+
+func _calculate_ui_scale() -> float:
+	var height := get_viewport().get_visible_rect().size.y
+	return clampf(height / HUD_REFERENCE_HEIGHT, 1.0, 3.0)
+
+func _set_scaled_font(control: Control, logical_size: int) -> void:
+	control.set_meta("hud_base_font_size", logical_size * 2)
+	control.add_theme_font_size_override("font_size", roundi(logical_size * 2 * _ui_scale))
+
+func _set_scaled_minimum(control: Control, logical_size: Vector2) -> void:
+	var base_size := logical_size * 2.0
+	control.set_meta("hud_base_minimum_size", base_size)
+	control.custom_minimum_size = base_size * _ui_scale
+
+func _apply_ui_scale() -> void:
+	_ui_scale = _calculate_ui_scale()
+	_apply_control_scale(_root)
+
+func _apply_control_scale(node: Node) -> void:
+	if node is Control:
+		var control := node as Control
+		if control.has_meta("hud_base_font_size"):
+			control.add_theme_font_size_override(
+				"font_size",
+				roundi(float(control.get_meta("hud_base_font_size")) * _ui_scale)
+			)
+		if control.has_meta("hud_base_minimum_size"):
+			control.custom_minimum_size = Vector2(control.get_meta("hud_base_minimum_size")) * _ui_scale
+		if control is MarginContainer and control.has_meta("hud_base_margins"):
+			_apply_margin_scale(control as MarginContainer)
+	for child in node.get_children():
+		_apply_control_scale(child)
+
+func _apply_margin_scale(margin: MarginContainer) -> void:
+	var base := Vector4(margin.get_meta("hud_base_margins", Vector4.ZERO))
+	margin.add_theme_constant_override("margin_left", roundi(base.x * _ui_scale))
+	margin.add_theme_constant_override("margin_top", roundi(base.y * _ui_scale))
+	margin.add_theme_constant_override("margin_right", roundi(base.z * _ui_scale))
+	margin.add_theme_constant_override("margin_bottom", roundi(base.w * _ui_scale))
 
 func _set_rect(control: Control, left: float, top: float, right: float, bottom: float) -> void:
 	control.anchor_left = left

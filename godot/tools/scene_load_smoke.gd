@@ -61,9 +61,13 @@ func _instance_scene(spec: Dictionary) -> void:
 func _check_runtime_shape(label: String, instance: Node) -> void:
 	match label:
 		"main":
-			_require_node(label, instance, "World")
+			_require_node(label, instance, "WorldFrame/WorldContainer/WorldViewport")
+			_require_node(label, instance, "WorldFrame/WorldContainer/WorldViewport/World")
 			_require_node(label, instance, "HUD")
-			var world := instance.get_node_or_null("World")
+			var viewport := instance.get_node_or_null("WorldFrame/WorldContainer/WorldViewport") as SubViewport
+			if viewport != null and viewport.size != Vector2i(640, 360):
+				_failures.append("main world viewport is not 640x360: %s" % viewport.size)
+			var world := instance.get_node_or_null("WorldFrame/WorldContainer/WorldViewport/World")
 			if world != null and world.get_child_count() == 0:
 				_failures.append("main World stayed empty after startup frames")
 		"store", "station":

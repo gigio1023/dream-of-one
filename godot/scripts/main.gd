@@ -1,12 +1,23 @@
-extends Node2D
+extends Node
 ## Main playable chain for M1: approach -> answer -> visible social consequence
 ## -> route outcome -> instant replay. Session owns truth; this controller only
 ## forwards input and renders the returned world, ledger, and reaction state.
 
 const STORE_SCENE := preload("res://scenes/world/store.tscn")
 const STATION_SCENE := preload("res://scenes/world/station.tscn")
+const WORLD_SIZE := Vector2i(640, 360)
+const MINIMUM_WINDOW_SIZE := Vector2i(1280, 720)
+const DISPLAY_CONFIG_PATH := "user://display.cfg"
+const OUTPUT_PRESETS := [
+	{"id": "720p", "label": "1280×720 · 2×", "size": Vector2i(1280, 720)},
+	{"id": "1080p", "label": "1920×1080 · 3×", "size": Vector2i(1920, 1080)},
+	{"id": "1440p", "label": "2560×1440 · 4×", "size": Vector2i(2560, 1440)},
+	{"id": "4k", "label": "3840×2160 · 6×", "size": Vector2i(3840, 2160)},
+]
 
-@onready var _world_root: Node2D = $World
+@onready var _world_container: SubViewportContainer = $WorldFrame/WorldContainer
+@onready var _world_viewport: SubViewport = $WorldFrame/WorldContainer/WorldViewport
+@onready var _world_root: Node2D = $WorldFrame/WorldContainer/WorldViewport/World
 @onready var _hud: CanvasLayer = $HUD
 
 var _location: Node2D = null
@@ -19,15 +30,78 @@ var _transitioning := false
 var _transition_target := ""
 var _resolving_answer := false
 var _ambient_beat := 0
+var _output_preset := "1080p"
 
 func _ready() -> void:
+	DisplayServer.window_set_min_size(MINIMUM_WINDOW_SIZE)
+	_output_preset = _load_output_preset()
+	_apply_output_preset(_output_preset, false)
+	get_viewport().size_changed.connect(_layout_world_viewport)
+	_layout_world_viewport()
 	_connect_session()
 	_hud.choice_submitted.connect(_on_choice_submitted)
 	_hud.free_input_submitted.connect(_on_free_input_submitted)
 	_hud.hesitation_submitted.connect(_on_hesitation_submitted)
 	_hud.restart_requested.connect(_on_restart_requested)
 	_hud.conversation_closed.connect(_refresh_player_input)
+	_hud.resolution_requested.connect(_on_resolution_requested)
+	_hud.configure_resolution_options(OUTPUT_PRESETS, _output_preset)
 	call_deferred("_begin_session")
+
+func _layout_world_viewport() -> void:
+	var available := Vector2(get_viewport().get_visible_rect().size)
+	if available.x <= 0.0 or available.y <= 0.0:
+		return
+	var integer_scale := maxi(1, floori(minf(available.x / WORLD_SIZE.x, available.y / WORLD_SIZE.y)))
+	_world_viewport.size = WORLD_SIZE
+	_world_container.size = Vector2(WORLD_SIZE)
+	_world_container.scale = Vector2(integer_scale, integer_scale)
+	_world_container.position = (available - Vector2(WORLD_SIZE * integer_scale)) * 0.5
+
+func _on_resolution_requested(preset_id: String) -> void:
+	_apply_output_preset(preset_id, true)
+
+func _apply_output_preset(preset_id: String, persist: bool) -> void:
+	var spec := _output_preset_spec(preset_id)
+	if spec.is_empty():
+		return
+	_output_preset = preset_id
+	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_WINDOWED:
+		DisplayServer.window_set_size(spec.get("size", Vector2i(1920, 1080)))
+		_center_window_on_screen()
+	if persist:
+		_save_output_preset()
+	_layout_world_viewport.call_deferred()
+
+func _output_preset_spec(preset_id: String) -> Dictionary:
+	for spec in OUTPUT_PRESETS:
+		if str(spec.get("id", "")) == preset_id:
+			return spec
+	return {}
+
+func _center_window_on_screen() -> void:
+	var window_size := DisplayServer.window_get_size()
+	var screen := DisplayServer.window_get_current_screen()
+	var usable_rect := DisplayServer.screen_get_usable_rect(screen)
+	var position := usable_rect.position + (usable_rect.size - window_size) / 2
+	DisplayServer.window_set_position(position)
+
+func _load_output_preset() -> String:
+	var environment_preset := OS.get_environment("DREAM_OUTPUT_PRESET").strip_edges().to_lower()
+	if not environment_preset.is_empty() and not _output_preset_spec(environment_preset).is_empty():
+		return environment_preset
+	var config := ConfigFile.new()
+	if config.load(DISPLAY_CONFIG_PATH) != OK:
+		return "1080p"
+	var preset_id := str(config.get_value("display", "output_preset", "1080p"))
+	return preset_id if not _output_preset_spec(preset_id).is_empty() else "1080p"
+
+func _save_output_preset() -> void:
+	var config := ConfigFile.new()
+	config.set_value("display", "output_preset", _output_preset)
+	var error := config.save(DISPLAY_CONFIG_PATH)
+	if error != OK:
+		push_warning("Could not save display preset: %s" % error_string(error))
 
 func _process(_delta: float) -> void:
 	if not is_instance_valid(_player):

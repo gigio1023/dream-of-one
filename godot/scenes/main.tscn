@@ -3,9 +3,29 @@
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="2_hud"]
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node"]
 script = ExtResource("1_main")
 
-[node name="World" type="Node2D" parent="."]
+[node name="WorldFrame" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="WorldContainer" type="SubViewportContainer" parent="WorldFrame"]
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 2
+texture_filter = 1
+
+[node name="WorldViewport" type="SubViewport" parent="WorldFrame/WorldContainer"]
+size = Vector2i(640, 360)
+render_target_update_mode = 4
+canvas_item_default_texture_filter = 0
+
+[node name="World" type="Node2D" parent="WorldFrame/WorldContainer/WorldViewport"]
 
 [node name="HUD" parent="." instance=ExtResource("2_hud")]

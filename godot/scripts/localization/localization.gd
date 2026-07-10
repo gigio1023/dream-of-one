@@ -44,6 +44,7 @@ const MESSAGES := {
 		"hud.ledger.open_hint": "Tab: 시민 원장",
 		"hud.mode.fixture": "오프라인 기록",
 		"hud.mode.http": "실시간 기록",
+		"hud.display.resolution": "화면",
 		"hud.error.session_start": "세션을 시작하지 못했습니다. 런타임 연결을 확인하세요.",
 		"hud.error.answer": "답변을 기록하지 못했습니다. 다시 시도하세요.",
 

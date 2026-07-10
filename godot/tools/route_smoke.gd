@@ -121,7 +121,18 @@ func _check_hud_choice_activation(fixture: Dictionary) -> bool:
 		hud.queue_free()
 		return false
 
-	print("PASS route_smoke: HUD mouse + Enter choice activation")
+	var long_turn := turn.duplicate(true)
+	long_turn["prompt"] = "길어진 모델 발화가 대화 선택지를 밀어내지 않고 패널 안에서 스크롤되어야 합니다. ".repeat(48)
+	hud.show_turn(long_turn)
+	await process_frame
+	await process_frame
+	var prompt_scroll := hud.get("_prompt_scroll") as ScrollContainer
+	if prompt_scroll == null or prompt_scroll.get_v_scroll_bar().max_value <= prompt_scroll.get_v_scroll_bar().page:
+		_fail("HUD long generated prompt did not overflow into its internal scroll region")
+		hud.queue_free()
+		return false
+
+	print("PASS route_smoke: HUD mouse + Enter choice activation + long prompt scroll")
 	hud.queue_free()
 	await process_frame
 	return true

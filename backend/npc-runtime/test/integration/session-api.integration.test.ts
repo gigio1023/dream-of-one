@@ -179,6 +179,46 @@ test("Session API exposes a blocked tool result followed by a provider re-plan",
   }
 });
 
+test("the provider sees both sides of the dialogue, including the NPC's own prior line", async () => {
+  const histories: Array<Array<{ speakerId: string; line: string }>> = [];
+  const adapter = new ScriptedNpcAdapter({
+    conversation: request => {
+      histories.push(request.conversationHistory.map(entry => ({ ...entry })));
+      return {
+        utterance: request.beatId === "routine" ? "오늘도 같은 걸로 드릴까요?" : "기록과 다르지 않습니까?",
+        suggestedReplies: [
+          { text: "네, 같은 걸로 부탁해요.", intent: "safe/local" },
+          { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair" },
+          { text: "오늘 처음 왔는데요.", intent: "risky/weird" },
+        ],
+        continueConversation: true,
+      };
+    },
+    nextStep: () => ({ rationale: "No world action needed.", done: true }),
+  });
+  const running = await startSessionServer({
+    logListen: false,
+    service: new SessionService({ proposalPort: adapter }),
+  });
+  const base = `http://${running.host}:${running.port}`;
+  try {
+    const start = await post(base, "/v1/session/start", { storyletId: "same-order", locale: "ko-KR" });
+    await post(base, "/v1/session/answer", {
+      sessionId: start.json.sessionId,
+      turnId: start.json.nextTurn.turnId,
+      answer: { type: "choice", choiceId: "routine.generated.1" },
+    });
+    const secondHistory = histories[1];
+    assert.ok(secondHistory, "expected a second conversation turn request");
+    assert.deepEqual(secondHistory, [
+      { speakerId: "NPC_Store_Clerk", line: "오늘도 같은 걸로 드릴까요?" },
+      { speakerId: "player", line: "네, 같은 걸로 부탁해요." },
+    ]);
+  } finally {
+    await running.close();
+  }
+});
+
 test("provider conversation pacing may close within the deterministic storylet bound", async () => {
   const adapter = new ScriptedNpcAdapter({
     conversation: () => ({

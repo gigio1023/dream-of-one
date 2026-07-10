@@ -186,6 +186,8 @@ interface SessionState {
   reportPressure: number;
   signalsSeen: Set<ConversationSuspicionSignal>;
   turns: ConversationMemoryLine[];
+  /** Both sides of the conversation, in order. NPCs must remember their own lines. */
+  dialogue: Array<{ speakerId: string; line: string }>;
   processedTurnIds: Set<string>;
   finalRoute?: RouteId;
   terminal: boolean;
@@ -258,6 +260,7 @@ export class SessionService {
       reportPressure: 0,
       signalsSeen: new Set(),
       turns: [],
+      dialogue: [],
       processedTurnIds: new Set(),
       terminal: false,
       turnCount: 0,
@@ -288,6 +291,7 @@ export class SessionService {
     const classified = this.classifyAnswer(session, answer);
     session.processedTurnIds.add(turnId);
     session.turnCount += 1;
+    session.dialogue.push({ speakerId: "player", line: classified.line });
 
     const evaluation = evaluateConversationTurn({
       conversationId: session.storylet.conversationId,
@@ -487,9 +491,10 @@ export class SessionService {
       objective: beat.objective,
       sceneFacts: [session.storylet.scenePremise, ...beat.sceneFacts],
       observePacket,
-      conversationHistory: session.turns.slice(-6).map(turn => ({ speakerId: "player", line: turn.line })),
+      conversationHistory: session.dialogue.slice(-10),
     });
     this.trackProposalMeta(session, [resolved.meta]);
+    session.dialogue.push({ speakerId: beat.speakerId, line: resolved.proposal.utterance });
     const choiceSetId = `${beat.promptId}.generated`;
     const turnId = `${session.storylet.conversationId}#${session.beatIndex}#${session.turnCount}`;
     return {

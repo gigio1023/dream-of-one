@@ -44,6 +44,7 @@ func _apply() -> void:
 	_sprite.offset = Vector2(0, -8)
 	$InteractionArea.set_meta("kind", "prop")
 	$InteractionArea.set_meta("id", prop_id)
+	$DebugLabel.text = "%s · %s" % [prop_id, state]
 	_refresh_state_label()
 	_state_label.visible = false
 
@@ -72,6 +73,11 @@ func _refresh_state_label() -> void:
 	if loc != null and not state.is_empty():
 		state_str = str(loc.call("t", "state.%s" % state))
 	_state_label.text = "%s\n%s" % [label_text, state_str]
+	if is_instance_valid($DebugLabel):
+		$DebugLabel.text = "%s · %s" % [prop_id, state]
+
+func set_debug_visible(value: bool) -> void:
+	$DebugLabel.visible = value
 
 func inspect_payload() -> Dictionary:
 	return {

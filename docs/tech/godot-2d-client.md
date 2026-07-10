@@ -19,6 +19,8 @@ device). The active project under `godot/` is the M2 provider-backed client.
 - Input map: 4-direction move (WASD/arrows), `interact` (E/Space),
   `choice_1..3` (1/2/3), `open_ledger` (Tab), `cancel` (Esc). Full
   keyboard-only play is a standing requirement; mouse is optional everywhere.
+  `toggle_debug` (F3) is the explicit boundary for raw actor ids and internal
+  reaction state.
 
 ## Scene architecture
 
@@ -75,6 +77,10 @@ scene or art code.
   the hesitation event to the runtime — visible as the NPC's patience cue.
 - Every consequence surfaced within 1s of its ledger event: pressure line
   update, reaction marker, influence link, or bubble. No silent state changes.
+- Native actor cards follow NPC world positions and always show identity/role
+  plus current social action. Judgment reasons, provider/action source, record
+  detail, and recent causality stay in inspect/ledger views. Raw ids and state
+  labels are hidden unless F3 debug mode is active.
 
 ## Localization
 

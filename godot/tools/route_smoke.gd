@@ -131,8 +131,44 @@ func _check_hud_choice_activation(fixture: Dictionary) -> bool:
 		_fail("HUD long generated prompt did not overflow into its internal scroll region")
 		hud.queue_free()
 		return false
+	hud.set_pressure(18, 7, ["모델이 이 답변의 지역 루틴 불일치를 근거로 들었습니다."])
+	hud.show_agent_step({
+		"tool": "write_record",
+		"proposalMeta": {"profileId": "scripted/test", "transport": "scripted", "usedFallback": false},
+		"validation": {"ok": true},
+	})
+	hud.show_inspection({
+		"kind": "npc",
+		"title": "상점 점원",
+		"role": "점원",
+		"reaction": "메모",
+		"utterance": "기록을 확인하겠습니다.",
+		"action": "기록 작성",
+		"actionSource": "scripted/test",
+	})
+	var inspect_body := hud.get("_inspect_body") as Label
+	if inspect_body == null or not inspect_body.text.contains("현재 행동: 기록 작성") or not inspect_body.text.contains("행동 출처: scripted/test") or not inspect_body.text.contains("지역 루틴 불일치"):
+		_fail("HUD inspect view did not separate action source and judgment reasons from the normal overlay")
+		hud.queue_free()
+		return false
+	hud.sync_actor_overlays([
+		{"actorId": "NPC_Store_Clerk", "label": "상점 점원", "action": "기록 작성", "accent": Color("#e2a33d"), "screenPosition": Vector2(500, 300)},
+		{"actorId": "NPC_Waiting_Customer", "label": "대기 손님", "action": "주변 관찰", "accent": Color("#c0505a"), "screenPosition": Vector2(700, 500)},
+	])
+	var actor_overlays_value: Variant = hud.get("_actor_overlays")
+	if not actor_overlays_value is Dictionary or (actor_overlays_value as Dictionary).size() != 2:
+		_fail("HUD normal view did not build the expected actor identity/action overlays")
+		hud.queue_free()
+		return false
+	hud.set_debug_mode(true)
+	var debug_badge := hud.get("_debug_badge") as Label
+	if debug_badge == null or not debug_badge.visible:
+		_fail("HUD explicit debug mode did not expose its badge")
+		hud.queue_free()
+		return false
+	hud.set_debug_mode(false)
 
-	print("PASS route_smoke: HUD mouse + Enter choice activation + long prompt scroll")
+	print("PASS route_smoke: HUD input + long text + normal/inspect/debug information layers")
 	hud.queue_free()
 	await process_frame
 	return true

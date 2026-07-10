@@ -23,7 +23,8 @@ const MESSAGES := {
 		"hud.timer.seconds": "{seconds}초",
 		"hud.pressure.suspicion": "의심",
 		"hud.pressure.report": "보고 압박",
-		"hud.pressure.why": "왜: {line}",
+		"hud.pressure.reason_updated": "판단 근거 갱신 · Tab에서 열람",
+		"hud.status.record_updated": "새 기록 생성 · Tab에서 열람",
 		"hud.pressure.latest_ledger": "최근 원장: {line}",
 		"hud.pressure.readers": "열람: {readers}",
 		"hud.pressure.exchange": "오간 말: {line}",
@@ -33,6 +34,10 @@ const MESSAGES := {
 		"hud.inspect.title": "열람",
 		"hud.inspect.record": "기록: {state}",
 		"hud.inspect.readers": "열람 가능: {readers}",
+		"hud.inspect.current_action": "현재 행동: {action}",
+		"hud.inspect.action_source": "행동 출처: {source}",
+		"hud.inspect.judgment_reasons": "판단 근거",
+		"hud.inspect.causality": "행동 인과",
 		"hud.inspect.close": "닫기 (E/Esc)",
 		"hud.outcome.restart": "다시 시작 (Enter)",
 		"hud.outcome.route": "경로 · {route}",
@@ -44,7 +49,7 @@ const MESSAGES := {
 		"hud.ledger.open_hint": "Tab: 시민 원장",
 		"hud.mode.fixture": "오프라인 기록",
 		"hud.mode.http": "실시간 기록",
-		"hud.display.resolution": "화면",
+		"hud.debug.active": "디버그 · F3",
 		"hud.error.session_start": "세션을 시작하지 못했습니다. 런타임 연결을 확인하세요.",
 		"hud.error.answer": "답변을 기록하지 못했습니다. 다시 시도하세요.",
 
@@ -124,6 +129,17 @@ const MESSAGES := {
 		"reaction.forwarded": "보고 전달",
 		"reaction.cited": "기록 인용",
 		"reaction.settled": "정리됨",
+
+		# --- NPC current actions ---
+		"action.observe": "주변 관찰",
+		"action.look": "기록 확인",
+		"action.talk_to": "대화 중",
+		"action.use_object": "기록 열람",
+		"action.write_record": "기록 작성",
+		"action.move_to": "이동 중",
+		"action.wait": "대기 중",
+		"action.request": "요청 중",
+		"action.stop": "행동 멈춤",
 
 		# --- Record props ---
 		"prop.store_counter.label": "카운터",

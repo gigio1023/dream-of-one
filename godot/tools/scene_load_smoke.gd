@@ -84,6 +84,12 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			var sprite := instance.get_node_or_null("Sprite") as AnimatedSprite2D
 			if sprite == null or sprite.sprite_frames == null:
 				_failures.append("npc has no runtime SpriteFrames")
+			var debug_label := instance.get_node_or_null("DebugLabel") as Label
+			if debug_label == null or debug_label.visible:
+				_failures.append("npc raw debug label is missing or visible in normal play")
+			var overlay: Dictionary = instance.call("overlay_payload")
+			if str(overlay.get("action", "")).is_empty():
+				_failures.append("npc exposes no normal-view current action")
 		"prop":
 			var sprite := instance.get_node_or_null("Sprite") as Sprite2D
 			if sprite == null or sprite.texture == null:

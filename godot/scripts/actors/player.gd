@@ -89,3 +89,6 @@ func set_focused_area(area: Area2D) -> void:
 		var current := _focused_area.get_parent()
 		if current != null and current.has_method("set_focused"):
 			current.call("set_focused", true)
+
+func set_debug_visible(value: bool) -> void:
+	$DebugLabel.visible = value

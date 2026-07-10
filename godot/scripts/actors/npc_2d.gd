@@ -8,6 +8,7 @@ const PackAtlas := preload("res://scripts/data/pack_atlas.gd")
 @onready var _sprite: AnimatedSprite2D = $Sprite
 @onready var _marker: Label = $ReactionMarker
 @onready var _bubble: Label = $SpeechBubble
+@onready var _debug: Label = $DebugLabel
 
 var actor_id := ""
 var label_text := ""
@@ -16,9 +17,12 @@ var accent := Color(0.9, 0.9, 0.9)
 var state_reaction := "calm"
 var reaction_label := ""
 var last_utterance := ""
+var current_action := "observe"
+var action_source := ""
 var _sprite_block := 1
 var _facing := "down"
 var _focused := false
+var _debug_visible := false
 
 func configure(data: Dictionary) -> void:
 	actor_id = str(data.get("actorId", ""))
@@ -45,6 +49,7 @@ func _apply() -> void:
 	_sprite.play("idle_%s" % _facing)
 	_marker.visible = false
 	_bubble.visible = false
+	_refresh_debug_label()
 	$InteractionArea.set_meta("kind", "npc")
 	$InteractionArea.set_meta("id", actor_id)
 	queue_redraw()
@@ -67,6 +72,7 @@ func set_reaction(reaction: String, label: String) -> void:
 	_marker.visible = not calm and not label.is_empty()
 	_marker.text = label
 	_marker.modulate = Color(1, 0.82, 0.4) if not calm else Color(1, 1, 1)
+	_refresh_debug_label()
 
 func show_speech(text: String) -> void:
 	last_utterance = text
@@ -78,6 +84,26 @@ func show_speech(text: String) -> void:
 
 func clear_speech() -> void:
 	_bubble.visible = false
+
+func set_social_action(tool: String, source := "") -> void:
+	current_action = tool if not tool.is_empty() else "observe"
+	action_source = source
+	_refresh_debug_label()
+
+func set_debug_visible(value: bool) -> void:
+	_debug_visible = value
+	_refresh_debug_label()
+
+func _action_label() -> String:
+	var key := "action.%s" % current_action
+	var resolved := _t(key)
+	return resolved if resolved != key else current_action
+
+func _refresh_debug_label() -> void:
+	if _debug == null:
+		return
+	_debug.visible = _debug_visible
+	_debug.text = "%s · %s · %s" % [actor_id, current_action, state_reaction]
 
 func face(dir: String) -> void:
 	_facing = dir
@@ -93,4 +119,21 @@ func inspect_payload() -> Dictionary:
 		"role": role_text,
 		"reaction": reaction_label if not reaction_label.is_empty() else state_reaction,
 		"utterance": last_utterance,
+		"action": _action_label(),
+		"actionTool": current_action,
+		"actionSource": action_source,
 	}
+
+func overlay_payload() -> Dictionary:
+	return {
+		"actorId": actor_id,
+		"label": label_text,
+		"role": role_text,
+		"action": _action_label(),
+		"accent": accent,
+		"worldPosition": global_position + Vector2(0, 7),
+	}
+
+func _t(key: String) -> String:
+	var loc := get_node_or_null("/root/Localization")
+	return str(loc.call("t", key)) if loc != null else key

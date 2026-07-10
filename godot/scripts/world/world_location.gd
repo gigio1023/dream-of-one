@@ -88,3 +88,24 @@ func get_prop(prop_id: String) -> Node:
 
 func influence_layer() -> Node2D:
 	return builder.influence_node if builder != null else null
+
+func actor_overlay_payloads() -> Array[Dictionary]:
+	var payloads: Array[Dictionary] = []
+	if builder == null:
+		return payloads
+	for npc in builder.npcs.values():
+		if npc != null and npc.has_method("overlay_payload"):
+			payloads.append(npc.call("overlay_payload"))
+	return payloads
+
+func set_debug_visible(value: bool) -> void:
+	if builder == null:
+		return
+	if builder.player != null and builder.player.has_method("set_debug_visible"):
+		builder.player.call("set_debug_visible", value)
+	for npc in builder.npcs.values():
+		if npc != null and npc.has_method("set_debug_visible"):
+			npc.call("set_debug_visible", value)
+	for prop in builder.props.values():
+		if prop != null and prop.has_method("set_debug_visible"):
+			prop.call("set_debug_visible", value)

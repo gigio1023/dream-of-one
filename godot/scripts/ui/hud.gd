@@ -23,6 +23,8 @@ const PAPER := Color(0.075, 0.083, 0.098, 0.96)
 const PAPER_SOFT := Color(0.105, 0.112, 0.126, 0.94)
 
 var _root: Control
+var _actor_overlay_root: Control
+var _actor_overlays: Dictionary = {}
 var _pressure_panel: PanelContainer
 var _location_label: Label
 var _mode_label: Label
@@ -33,6 +35,7 @@ var _report_bar: ProgressBar
 var _ledger_label: Label
 var _resolution_option: OptionButton
 var _resolution_ids: Array[String] = []
+var _debug_badge: Label
 
 var _conversation_panel: PanelContainer
 var _speaker_label: Label
@@ -49,6 +52,7 @@ var _hesitation_timer: Timer
 var _inspect_panel: PanelContainer
 var _inspect_title: Label
 var _inspect_body: Label
+var _inspect_scroll: ScrollContainer
 
 var _hint_panel: PanelContainer
 var _hint_label: Label
@@ -63,6 +67,9 @@ var _restart_button: Button
 
 var _busy := false
 var _latest_ledger_events: Array = []
+var _judgment_reasons: Array[String] = []
+var _agent_actions: Array[String] = []
+var _status_revision := 0
 var _ui_scale := 1.0
 
 func _ready() -> void:
@@ -110,6 +117,11 @@ func _build_ui() -> void:
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
+	_actor_overlay_root = Control.new()
+	_actor_overlay_root.name = "ActorOverlays"
+	_actor_overlay_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_actor_overlay_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_root.add_child(_actor_overlay_root)
 	_build_pressure_panel()
 	_build_hint_panel()
 	_build_conversation_panel()
@@ -141,8 +153,9 @@ func _build_pressure_panel() -> void:
 	_mode_label = _label(_t("hud.mode.fixture"), 8, COLD)
 	_mode_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	header.add_child(_mode_label)
-	var resolution_label := _label(_t("hud.display.resolution"), 8, MUTED)
-	header.add_child(resolution_label)
+	_debug_badge = _label(_t("hud.debug.active"), 8, Color("#ef72cf"))
+	_debug_badge.visible = false
+	header.add_child(_debug_badge)
 	_resolution_option = OptionButton.new()
 	_resolution_option.name = "ResolutionPreset"
 	_set_scaled_font(_resolution_option, 8)
@@ -290,10 +303,16 @@ func _build_inspect_panel() -> void:
 	column.add_child(_inspect_title)
 	var rule := HSeparator.new()
 	column.add_child(rule)
+	_inspect_scroll = ScrollContainer.new()
+	_inspect_scroll.name = "InspectScroll"
+	_inspect_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_inspect_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_inspect_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(_inspect_scroll)
 	_inspect_body = _label("", 10, INK)
 	_inspect_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_inspect_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	column.add_child(_inspect_body)
+	_inspect_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_inspect_scroll.add_child(_inspect_body)
 	var close_hint := _label(_t("hud.inspect.close"), 8, MUTED)
 	close_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	column.add_child(close_hint)
@@ -392,6 +411,7 @@ func set_busy(value: bool) -> void:
 
 func show_conversation_error(message: String) -> void:
 	set_busy(false)
+	_status_revision += 1
 	_ledger_label.text = message
 	_ledger_label.modulate = DANGER
 	if _conversation_panel.visible:
@@ -403,7 +423,13 @@ func set_pressure(suspicion: int, report_pressure: int, why_lines: Array = []) -
 	_suspicion_label.text = "%s %03d" % [_t("hud.pressure.suspicion"), suspicion]
 	_report_label.text = "%s %03d" % [_t("hud.pressure.report"), report_pressure]
 	if not why_lines.is_empty():
-		_ledger_label.text = _t("hud.pressure.why", {"line": " / ".join(why_lines)})
+		for reason_value in why_lines:
+			var reason := str(reason_value).strip_edges()
+			if not reason.is_empty():
+				_judgment_reasons.append(reason)
+		while _judgment_reasons.size() > 8:
+			_judgment_reasons.pop_front()
+		_show_transient_status(_t("hud.pressure.reason_updated"), MUTED)
 	var authority: int = maxi(suspicion, report_pressure)
 	_pressure_panel.add_theme_stylebox_override(
 		"panel",
@@ -414,24 +440,22 @@ func set_latest_ledger(event: Dictionary) -> void:
 	_latest_ledger_events.append(event.duplicate(true))
 	if _latest_ledger_events.size() > 8:
 		_latest_ledger_events.pop_front()
-	var event_id := str(event.get("eventId", event.get("id", "")))
-	var line := str(event.get("whyLine", event.get("summary", event.get("kind", ""))))
-	_ledger_label.text = "%s · %s" % [event_id, line]
-	_ledger_label.modulate = Color("#f4cc7d")
-	var tween := create_tween()
-	tween.tween_property(_ledger_label, "modulate", MUTED, 0.65)
+	_show_transient_status(_t("hud.status.record_updated"), Color("#f4cc7d"))
 
 func show_agent_step(entry: Dictionary) -> void:
 	var meta := _dictionary_or_empty(entry.get("proposalMeta"))
 	set_provider(meta)
 	var validation := _dictionary_or_empty(entry.get("validation"))
 	var result_text := "성공" if bool(validation.get("ok", false)) else "차단: %s" % str(validation.get("reason", "unknown"))
-	_ledger_label.text = "%s · %s → %s" % [
+	var status_text := "%s · %s → %s" % [
 		str(meta.get("profileId", "provider")),
 		str(entry.get("tool", "stop")),
 		result_text,
 	]
-	_ledger_label.modulate = COLD if bool(validation.get("ok", false)) else DANGER
+	_show_transient_status(status_text, COLD if bool(validation.get("ok", false)) else DANGER)
+	_agent_actions.append(status_text)
+	while _agent_actions.size() > 8:
+		_agent_actions.pop_front()
 
 func set_location(location_id: String) -> void:
 	_location_label.text = _t("world.location.%s" % location_id)
@@ -452,6 +476,75 @@ func set_provider(meta: Dictionary) -> void:
 		" (%s)" % reason if not reason.is_empty() else "",
 	]
 	_mode_label.modulate = DANGER if bool(meta.get("usedFallback", false)) else COLD
+
+func set_debug_mode(value: bool) -> void:
+	_debug_badge.visible = value
+
+func sync_actor_overlays(payloads: Array) -> void:
+	var seen := {}
+	for payload_value in payloads:
+		if not payload_value is Dictionary:
+			continue
+		var payload: Dictionary = payload_value
+		var actor_id := str(payload.get("actorId", ""))
+		if actor_id.is_empty():
+			continue
+		seen[actor_id] = true
+		var panel: PanelContainer = _actor_overlays.get(actor_id, null)
+		if panel == null:
+			panel = _create_actor_overlay(actor_id)
+			_actor_overlays[actor_id] = panel
+		var name_label := panel.get_node("Margin/Column/Name") as Label
+		var action_label := panel.get_node("Margin/Column/Action") as Label
+		var actor_label := str(payload.get("label", actor_id))
+		var actor_role := str(payload.get("role", ""))
+		name_label.text = "%s · %s" % [actor_label, actor_role] if not actor_role.is_empty() and not actor_label.contains(actor_role) else actor_label
+		action_label.text = str(payload.get("action", ""))
+		var accent: Color = payload.get("accent", COLD) if payload.get("accent") is Color else COLD
+		if panel.get_meta("accent", Color.TRANSPARENT) != accent:
+			panel.set_meta("accent", accent)
+			panel.add_theme_stylebox_override("panel", _panel_style(Color(0.045, 0.052, 0.065, 0.88), accent, 0.72, 3, 2))
+		var anchor := Vector2(payload.get("screenPosition", Vector2.ZERO))
+		var panel_size := panel.custom_minimum_size
+		var viewport_size := get_viewport().get_visible_rect().size
+		var safe_top := _pressure_panel.position.y + _pressure_panel.size.y + 8.0
+		var safe_bottom := viewport_size.y - panel_size.y - 8.0
+		if _hint_panel.visible:
+			safe_bottom = minf(safe_bottom, _hint_panel.position.y - panel_size.y - 8.0)
+		panel.position = Vector2(
+			clampf(anchor.x - panel_size.x * 0.5, 8.0, maxf(8.0, viewport_size.x - panel_size.x - 8.0)),
+			clampf(anchor.y, safe_top, maxf(safe_top, safe_bottom))
+		)
+	for actor_id_value in _actor_overlays.keys():
+		var actor_id := str(actor_id_value)
+		if seen.has(actor_id):
+			continue
+		var stale: Control = _actor_overlays[actor_id]
+		stale.queue_free()
+		_actor_overlays.erase(actor_id)
+
+func _create_actor_overlay(actor_id: String) -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.name = "Actor_%s" % actor_id
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_set_scaled_minimum(panel, Vector2(56, 18))
+	_actor_overlay_root.add_child(panel)
+	var margin := _margin(3, 1, 3, 1)
+	margin.name = "Margin"
+	panel.add_child(margin)
+	var column := VBoxContainer.new()
+	column.name = "Column"
+	column.add_theme_constant_override("separation", 0)
+	margin.add_child(column)
+	var name_label := _label("", 7, INK)
+	name_label.name = "Name"
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(name_label)
+	var action_label := _label("", 6, COLD)
+	action_label.name = "Action"
+	action_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(action_label)
+	return panel
 
 func configure_resolution_options(options: Array, current_id: String) -> void:
 	_resolution_option.clear()
@@ -481,15 +574,21 @@ func set_hint(text: String) -> void:
 func show_inspection(payload: Dictionary, latest_exchange := "") -> void:
 	_inspect_panel.visible = true
 	_hint_panel.visible = false
+	_inspect_scroll.scroll_vertical = 0
 	var title := str(payload.get("title", ""))
 	_inspect_title.text = "%s · %s" % [_t("hud.inspect.title"), title]
 	if str(payload.get("kind", "")) == "npc":
 		var reaction := str(payload.get("reaction", ""))
 		var utterance := str(payload.get("utterance", latest_exchange))
-		_inspect_body.text = "%s\n%s\n\n%s\n%s" % [
+		var source := str(payload.get("actionSource", ""))
+		_inspect_body.text = "%s\n%s\n%s\n%s\n\n%s\n\n%s\n%s\n\n%s" % [
 			str(payload.get("role", "")),
 			reaction,
+			_t("hud.inspect.current_action", {"action": str(payload.get("action", ""))}),
+			_t("hud.inspect.action_source", {"source": source if not source.is_empty() else "—"}),
 			_t("hud.pressure.exchange", {"line": utterance if not utterance.is_empty() else "—"}),
+			_t("hud.inspect.judgment_reasons"),
+			_recent_reasons_text(),
 			_t("hud.ledger.open_hint"),
 		]
 	else:
@@ -508,16 +607,20 @@ func show_inspection(payload: Dictionary, latest_exchange := "") -> void:
 func show_ledger() -> void:
 	_inspect_panel.visible = true
 	_hint_panel.visible = false
+	_inspect_scroll.scroll_vertical = 0
 	_inspect_title.text = _t("hud.ledger.title")
-	if _latest_ledger_events.is_empty():
-		_inspect_body.text = _t("hud.ledger.empty")
-		return
-	var lines: Array[String] = []
+	var event_lines: Array[String] = []
 	for event in _latest_ledger_events:
 		var event_id := str(event.get("eventId", event.get("id", "")))
 		var line := str(event.get("whyLine", event.get("summary", event.get("kind", ""))))
-		lines.append("%s  %s" % [event_id, line])
-	_inspect_body.text = "\n\n".join(lines)
+		event_lines.append("%s  %s" % [event_id, line])
+	var sections: Array[String] = []
+	sections.append("\n\n".join(event_lines) if not event_lines.is_empty() else _t("hud.ledger.empty"))
+	if not _judgment_reasons.is_empty():
+		sections.append("%s\n%s" % [_t("hud.inspect.judgment_reasons"), _recent_reasons_text()])
+	if not _agent_actions.is_empty():
+		sections.append("%s\n%s" % [_t("hud.inspect.causality"), "\n".join(_agent_actions)])
+	_inspect_body.text = "\n\n".join(sections)
 
 func hide_inspection() -> void:
 	_inspect_panel.visible = false
@@ -540,9 +643,12 @@ func show_outcome(end_result: Dictionary, closing_action := "") -> void:
 	_restart_button.call_deferred("grab_focus")
 
 func prepare_restart() -> void:
+	_status_revision += 1
 	_outcome_layer.visible = false
 	_inspect_panel.visible = false
 	_latest_ledger_events.clear()
+	_judgment_reasons.clear()
+	_agent_actions.clear()
 	_ledger_label.text = _t("hud.ledger.empty")
 	set_pressure(0, 0)
 	_hint_panel.visible = true
@@ -615,6 +721,28 @@ func _route_name(route: String) -> String:
 	var key := "route.%s" % route
 	var resolved := _t(key)
 	return resolved if resolved != key else route
+
+func _recent_reasons_text() -> String:
+	if _judgment_reasons.is_empty():
+		return "—"
+	var lines: Array[String] = []
+	for reason in _judgment_reasons:
+		lines.append("• %s" % reason)
+	return "\n".join(lines)
+
+func _show_transient_status(text: String, color: Color) -> void:
+	_status_revision += 1
+	var revision := _status_revision
+	_ledger_label.text = text
+	_ledger_label.modulate = color
+	var tween := create_tween()
+	tween.tween_interval(2.2)
+	tween.tween_callback(func() -> void:
+		if revision != _status_revision:
+			return
+		_ledger_label.text = _t("hud.ledger.open_hint")
+		_ledger_label.modulate = MUTED
+	)
 
 func _t(key: String, args: Dictionary = {}) -> String:
 	var loc := get_node_or_null("/root/Localization")

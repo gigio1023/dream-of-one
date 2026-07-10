@@ -31,6 +31,7 @@ var _transition_target := ""
 var _resolving_answer := false
 var _ambient_beat := 0
 var _output_preset := "1080p"
+var _debug_visible := false
 
 func _ready() -> void:
 	DisplayServer.window_set_min_size(MINIMUM_WINDOW_SIZE)
@@ -104,6 +105,7 @@ func _save_output_preset() -> void:
 		push_warning("Could not save display preset: %s" % error_string(error))
 
 func _process(_delta: float) -> void:
+	_sync_actor_overlays()
 	if not is_instance_valid(_player):
 		return
 	_player.input_enabled = not _hud.is_modal() and not _transitioning and not _resolving_answer
@@ -118,7 +120,31 @@ func _process(_delta: float) -> void:
 		title = str((parent.call("inspect_payload") as Dictionary).get("title", ""))
 	_hud.set_hint(_t("hud.prompt.focus", {"target": title}))
 
+func _sync_actor_overlays() -> void:
+	if not is_instance_valid(_location):
+		_hud.sync_actor_overlays([])
+		return
+	var overlays: Array = _location.call("actor_overlay_payloads")
+	var positioned: Array[Dictionary] = []
+	var canvas_transform := _world_viewport.get_canvas_transform()
+	for payload_value in overlays:
+		if not payload_value is Dictionary:
+			continue
+		var payload: Dictionary = payload_value.duplicate(true)
+		var world_position := Vector2(payload.get("worldPosition", Vector2.ZERO))
+		var viewport_position := canvas_transform * world_position
+		payload["screenPosition"] = _world_container.global_position + viewport_position * _world_container.scale
+		positioned.append(payload)
+	_hud.sync_actor_overlays(positioned)
+
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("toggle_debug"):
+		_debug_visible = not _debug_visible
+		if is_instance_valid(_location):
+			_location.call("set_debug_visible", _debug_visible)
+		_hud.set_debug_mode(_debug_visible)
+		get_viewport().set_input_as_handled()
+		return
 	if _hud.is_modal() or _transitioning or _resolving_answer:
 		return
 	if event.is_action_pressed("open_ledger"):
@@ -264,6 +290,7 @@ func _show_ambient_action(action: Dictionary) -> void:
 		npc.show_speech(utterance)
 	var marker_state := _reaction_state(action)
 	npc.set_reaction(marker_state, _t("reaction.%s" % marker_state))
+	npc.set_social_action(str(action.get("tool", "observe")), _proposal_source(action))
 
 func _on_ledger_event(event: Dictionary) -> void:
 	_last_ledger_event = event.duplicate(true)
@@ -279,6 +306,7 @@ func _on_ledger_event(event: Dictionary) -> void:
 		var actor: Node = _location.call("get_npc", actor_id)
 		if actor != null:
 			actor.set_reaction("noted", _t("reaction.noted"))
+			actor.set_social_action(_ledger_action(event), str(event.get("eventId", event.get("id", ""))))
 
 func _on_npc_reaction(reaction: Dictionary) -> void:
 	var actor_id := str(reaction.get("actorId", ""))
@@ -293,6 +321,7 @@ func _on_npc_reaction(reaction: Dictionary) -> void:
 			npc.show_speech(utterance)
 		var marker_state := _reaction_state(reaction)
 		npc.set_reaction(marker_state, _t("reaction.%s" % marker_state))
+		npc.set_social_action(str(reaction.get("tool", "talk_to")), _proposal_source(reaction))
 	var influence: Dictionary = reaction.get("influence", {})
 	var from_id := str(influence.get("from", reaction.get("influenceFrom", "")))
 	var to_id := str(influence.get("to", actor_id))
@@ -310,6 +339,16 @@ func _reaction_state(reaction: Dictionary) -> String:
 	if tool == "talk_to":
 		return "forwarded"
 	return "noted"
+
+func _proposal_source(action: Dictionary) -> String:
+	var meta: Dictionary = action.get("proposalMeta", {}) if action.get("proposalMeta") is Dictionary else {}
+	return str(meta.get("profileId", action.get("source", "agent_loop")))
+
+func _ledger_action(event: Dictionary) -> String:
+	var kind := str(event.get("kind", ""))
+	if kind.contains("cited") or kind.contains("read"):
+		return "use_object"
+	return "write_record"
 
 func _draw_influence(from_id: String, to_id: String) -> void:
 	if not is_instance_valid(_location):
@@ -390,6 +429,7 @@ func _load_location(location_id: String, snapshot: Dictionary = {}) -> void:
 	_location.doorway_entered.connect(_on_doorway_entered)
 	await get_tree().process_frame
 	_player = _location.get_player()
+	_location.call("set_debug_visible", _debug_visible)
 	_hud.set_location(location_id)
 	_transitioning = false
 	_transition_target = ""

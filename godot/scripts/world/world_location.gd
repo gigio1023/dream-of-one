@@ -53,27 +53,19 @@ func _on_doorway_body_entered(body: Node, doorway: Area2D) -> void:
 func _setup_camera(tile_block: Dictionary) -> void:
 	if builder == null or builder.player == null:
 		return
-	var loc: Dictionary = (tile_block.get("locations", {}) as Dictionary).get(location_id, {})
 	var t := int(tile_block.get("tile_size", 16))
-	var room: Array = loc.get("room", [0, 0, 12, 8])
-	var min_x := int(room[0])
-	var min_y := int(room[1])
-	var max_x := int(room[0]) + int(room[2])
-	var max_y := int(room[1]) + int(room[3])
-	if loc.has("street"):
-		var s: Array = loc["street"]
-		min_x = min(min_x, int(s[0]))
-		min_y = min(min_y, int(s[1]))
-		max_x = max(max_x, int(s[0]) + int(s[2]))
-		max_y = max(max_y, int(s[1]) + int(s[3]))
+	# Magnification lives entirely in the window's integer scale (main.gd);
+	# the camera renders 1:1 world pixels and clamps to the dressed apron so
+	# wide views never show void.
+	var bounds: Rect2i = builder.dressed_bounds
 	_camera = Camera2D.new()
-	_camera.zoom = Vector2(2, 2)
+	_camera.zoom = Vector2(1, 1)
 	_camera.position_smoothing_enabled = true
 	_camera.position_smoothing_speed = 8.0
-	_camera.limit_left = min_x * t
-	_camera.limit_top = min_y * t
-	_camera.limit_right = max_x * t
-	_camera.limit_bottom = max_y * t
+	_camera.limit_left = bounds.position.x * t
+	_camera.limit_top = bounds.position.y * t
+	_camera.limit_right = bounds.end.x * t
+	_camera.limit_bottom = bounds.end.y * t
 	builder.player.add_child(_camera)
 	_camera.make_current()
 

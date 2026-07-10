@@ -5,14 +5,23 @@ extends Node
 
 const STORE_SCENE := preload("res://scenes/world/store.tscn")
 const STATION_SCENE := preload("res://scenes/world/station.tscn")
-const WORLD_SIZE := Vector2i(640, 360)
 const MINIMUM_WINDOW_SIZE := Vector2i(1280, 720)
 const DISPLAY_CONFIG_PATH := "user://display.cfg"
 const OUTPUT_PRESETS := [
-	{"id": "720p", "label": "1280×720 · 2×", "size": Vector2i(1280, 720)},
-	{"id": "1080p", "label": "1920×1080 · 3×", "size": Vector2i(1920, 1080)},
-	{"id": "1440p", "label": "2560×1440 · 4×", "size": Vector2i(2560, 1440)},
-	{"id": "4k", "label": "3840×2160 · 6×", "size": Vector2i(3840, 2160)},
+	{"id": "720p", "label": "1280×720", "size": Vector2i(1280, 720)},
+	{"id": "1080p", "label": "1920×1080", "size": Vector2i(1920, 1080)},
+	{"id": "1440p", "label": "2560×1440", "size": Vector2i(2560, 1440)},
+	{"id": "4k", "label": "3840×2160", "size": Vector2i(3840, 2160)},
+]
+## Output size and world magnification are separate domains: a taller window
+## gets a wider logical view at a gentler integer scale, instead of the same
+## view re-magnified. Entries: window height floor -> logical world view.
+## 720p 320×180·4×, 1080p 480×270·4×, 1440p 512×288·5×, 4K 480×270·8×.
+const WORLD_VIEW_LADDER := [
+	{"minHeight": 1900, "view": Vector2i(480, 270)},
+	{"minHeight": 1300, "view": Vector2i(512, 288)},
+	{"minHeight": 900, "view": Vector2i(480, 270)},
+	{"minHeight": 0, "view": Vector2i(320, 180)},
 ]
 
 @onready var _world_container: SubViewportContainer = $WorldFrame/WorldContainer
@@ -53,11 +62,18 @@ func _layout_world_viewport() -> void:
 	var available := Vector2(get_viewport().get_visible_rect().size)
 	if available.x <= 0.0 or available.y <= 0.0:
 		return
-	var integer_scale := maxi(1, floori(minf(available.x / WORLD_SIZE.x, available.y / WORLD_SIZE.y)))
-	_world_viewport.size = WORLD_SIZE
-	_world_container.size = Vector2(WORLD_SIZE)
+	var view := _world_view_for_height(available.y)
+	var integer_scale := maxi(1, floori(minf(available.x / view.x, available.y / view.y)))
+	_world_viewport.size = view
+	_world_container.size = Vector2(view)
 	_world_container.scale = Vector2(integer_scale, integer_scale)
-	_world_container.position = (available - Vector2(WORLD_SIZE * integer_scale)) * 0.5
+	_world_container.position = (available - Vector2(view * integer_scale)) * 0.5
+
+func _world_view_for_height(height: float) -> Vector2i:
+	for step in WORLD_VIEW_LADDER:
+		if height >= float(step.get("minHeight", 0)):
+			return step.get("view", Vector2i(320, 180))
+	return Vector2i(320, 180)
 
 func _on_resolution_requested(preset_id: String) -> void:
 	_apply_output_preset(preset_id, true)

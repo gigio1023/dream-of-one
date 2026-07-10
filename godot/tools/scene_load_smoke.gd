@@ -64,9 +64,20 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			_require_node(label, instance, "WorldFrame/WorldContainer/WorldViewport")
 			_require_node(label, instance, "WorldFrame/WorldContainer/WorldViewport/World")
 			_require_node(label, instance, "HUD")
+			# World scale contract (main.gd WORLD_VIEW_LADDER): the viewport is
+			# one of the ladder views and the container applies an integer scale.
 			var viewport := instance.get_node_or_null("WorldFrame/WorldContainer/WorldViewport") as SubViewport
-			if viewport != null and viewport.size != Vector2i(640, 360):
-				_failures.append("main world viewport is not 640x360: %s" % viewport.size)
+			var container := instance.get_node_or_null("WorldFrame/WorldContainer") as SubViewportContainer
+			if viewport != null:
+				var ladder_views: Array[Vector2i] = []
+				for step in instance.WORLD_VIEW_LADDER:
+					ladder_views.append(step.get("view", Vector2i.ZERO))
+				if not ladder_views.has(viewport.size):
+					_failures.append("main world viewport %s is not a ladder view %s" % [viewport.size, ladder_views])
+			if container != null:
+				var scale_x := container.scale.x
+				if scale_x < 1.0 or absf(scale_x - roundf(scale_x)) > 0.0001 or container.scale.y != scale_x:
+					_failures.append("main world container scale is not a positive integer: %s" % container.scale)
 			var world := instance.get_node_or_null("WorldFrame/WorldContainer/WorldViewport/World")
 			if world != null and world.get_child_count() == 0:
 				_failures.append("main World stayed empty after startup frames")

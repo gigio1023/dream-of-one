@@ -58,12 +58,17 @@ hard-coded dialogue policy, projected routes, or fixed social reaction chains.
 
 ### Resolution and composition contract
 
-The world and HUD use separate scale domains:
+The world and HUD use separate scale domains. (Revised 2026-07-10: the owner
+rejected the original fixed-640×360 rule — on large monitors it re-magnified
+the same narrow view instead of showing more world.)
 
-- The pixel-art world renders at a fixed logical **640×360** through a
-  `SubViewport`, nearest-neighbor filtered and integer-scaled. Supported output
-  presets are 1280×720 (2×), 1920×1080 (3×, default), 2560×1440 (4×), and
-  3840×2160 (6×).
+- The pixel-art world renders 1:1 into a `SubViewport` whose logical view is
+  chosen by window height — 320×180 (720p), 480×270 (1080p, 4K), 512×288
+  (1440p) — nearest-neighbor filtered and integer-scaled (4×/4×/5×/8×).
+  Output size and world magnification are independent; from 1080p up the whole
+  Store fits in frame, and locations draw a pavement apron so wide views never
+  expose void. Output presets are 1280×720, 1920×1080 (default), 2560×1440,
+  and 3840×2160.
 - The minimum supported window is 1280×720. Resizing between presets may
   letterbox the world; it must not introduce fractional pixel distortion.
 - The HUD is a native-resolution `Control` hierarchy outside the world
@@ -137,6 +142,13 @@ validated manager/customer actions; the manager read the created records.
 The Qwen live prompt was also rendered in the real Godot conversation panel
 with the `live` profile label. Long prompt and normal/inspect/debug behavior are
 covered by the public Godot route smoke.
+
+That pass proved integer scaling, not composition: reviewing the same build on
+a large monitor, the owner rejected the default density (fixed 640×360 view
+re-magnified to 6×, HUD text at twice the recommended body size, panels
+dominating the world) later the same day. The resolution contract above was
+revised accordingly and re-verified with engine-native frames at all four
+presets.
 
 ### Explicit non-goals
 

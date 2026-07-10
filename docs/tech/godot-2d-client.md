@@ -5,10 +5,14 @@ device). The active project under `godot/` is the M2 provider-backed client.
 
 ## Project settings
 
-- The pixel-art world renders in a fixed 640×360 `SubViewport`, centered and
-  nearest-neighbor scaled at an integer factor. Output presets are 1280×720
-  (2×), 1920×1080 (3×, default), 2560×1440 (4×), and 3840×2160 (6×); the
-  minimum window is 1280×720.
+- The pixel-art world renders in a `SubViewport` whose logical view follows a
+  window-height ladder (`main.gd` `WORLD_VIEW_LADDER`): 1280×720 → 320×180 at
+  4×, 1920×1080 → 480×270 at 4×, 2560×1440 → 512×288 at 5×, 3840×2160 →
+  480×270 at 8×. The container applies the largest integer scale that fits,
+  centered with letterboxing; output size and world magnification are separate
+  domains. Locations draw a 10-tile pavement apron and the camera (zoom 1)
+  clamps to it, so wide views never expose void. The minimum window is
+  1280×720.
 - HUD controls render in the native window viewport and scale their typography
   and minimum control sizes from the selected output height. This keeps text
   crisp and lets containers reflow independently from the pixel-art world.
@@ -28,7 +32,7 @@ device). The active project under `godot/` is the M2 provider-backed client.
 Main (Node)
 ├── WorldFrame (Control, integer-scaled and centered)
 │   └── WorldContainer (SubViewportContainer)
-│       └── WorldViewport (SubViewport, fixed 640×360)
+│       └── WorldViewport (SubViewport, ladder-selected logical view)
 │           └── World (Node2D)
 │               ├── TileMapLayers: ground / walls / furniture / overhead
 │               ├── Actors (YSort via Node2D y_sort_enabled)

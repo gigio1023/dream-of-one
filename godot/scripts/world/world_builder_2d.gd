@@ -9,8 +9,14 @@ const PackAtlas := preload("res://scripts/data/pack_atlas.gd")
 const NPC_SCENE := preload("res://scenes/actors/npc_2d.tscn")
 const PROP_SCENE := preload("res://scenes/props/record_prop_2d.tscn")
 const PLAYER_SCENE := preload("res://scenes/actors/player.tscn")
+## Plaza apron drawn around the room so wide views (up to 512×288 world px)
+## never expose void; it also bounds the follow camera. 10 tiles covers the
+## widest ladder view around the smallest room (station, 224×160).
+const APRON_TILES := 10
 
 var tile_size := 16
+## Room + street + apron, in tiles. The location camera clamps to this rect.
+var dressed_bounds := Rect2i()
 var player: Node = null
 var npcs: Dictionary = {}
 var props: Dictionary = {}
@@ -30,6 +36,18 @@ func build(root: Node2D, location_id: String, snapshot: Dictionary, tile_block: 
 		return
 
 	var tileset := PackAtlas.build_tileset(palette.values())
+
+	# Apron first so every later layer draws above it. Modulated down so the
+	# lit room, not the plaza, stays the visual anchor.
+	var extent := _location_extent(loc)
+	dressed_bounds = extent.grow(APRON_TILES)
+	var apron := _make_layer(root, "Apron", tileset)
+	apron.modulate = Color(0.72, 0.72, 0.78)
+	_fill_rect(
+		apron,
+		[dressed_bounds.position.x, dressed_bounds.position.y, dressed_bounds.size.x, dressed_bounds.size.y],
+		int(palette.get("station_floor", 9))
+	)
 
 	var ground := _make_layer(root, "Ground", tileset)
 	var walls := _make_layer(root, "Walls", tileset)
@@ -71,7 +89,7 @@ func build(root: Node2D, location_id: String, snapshot: Dictionary, tile_block: 
 		for cell in group.get("cells", []):
 			_set_cell(overhead, cell, idx)
 
-	_build_collision(root, solids, room, loc)
+	_build_collision(root, solids, loc)
 	_build_doorways(root, loc)
 
 	# Record props.
@@ -163,7 +181,7 @@ func _wall_cell(layer: TileMapLayer, cell: Array, index: int, door_gaps: Diction
 	_set_cell(layer, cell, index)
 	solids[_key(cell)] = cell
 
-func _build_collision(root: Node2D, solids: Dictionary, room: Array, loc: Dictionary) -> void:
+func _build_collision(root: Node2D, solids: Dictionary, loc: Dictionary) -> void:
 	var body := StaticBody2D.new()
 	body.name = "Collision"
 	body.collision_layer = 1
@@ -177,21 +195,26 @@ func _build_collision(root: Node2D, solids: Dictionary, room: Array, loc: Dictio
 		shape.shape = rect
 		shape.position = _cell_center(cell)
 		body.add_child(shape)
-	# Outer boundary around the full extent (room + street) keeps the player in.
-	var min_x := int(room[0])
-	var min_y := int(room[1])
-	var max_x := int(room[0]) + int(room[2])
-	var max_y := int(room[1]) + int(room[3])
-	if loc.has("street"):
-		var s: Array = loc["street"]
-		min_x = min(min_x, int(s[0]))
-		min_y = min(min_y, int(s[1]))
-		max_x = max(max_x, int(s[0]) + int(s[2]))
-		max_y = max(max_y, int(s[1]) + int(s[3]))
+	# Outer boundary around the full extent (room + street) keeps the player in;
+	# the apron beyond it is scenery only.
+	var extent := _location_extent(loc)
+	var min_x := extent.position.x
+	var min_y := extent.position.y
+	var max_x := extent.end.x
+	var max_y := extent.end.y
 	_boundary(body, Vector2(min_x, min_y) * tile_size, Vector2(max_x, min_y) * tile_size)
 	_boundary(body, Vector2(min_x, max_y) * tile_size, Vector2(max_x, max_y) * tile_size)
 	_boundary(body, Vector2(min_x, min_y) * tile_size, Vector2(min_x, max_y) * tile_size)
 	_boundary(body, Vector2(max_x, min_y) * tile_size, Vector2(max_x, max_y) * tile_size)
+
+## Playable extent (room + optional street) of a location, in tiles.
+func _location_extent(loc: Dictionary) -> Rect2i:
+	var room: Array = loc.get("room", [0, 0, 12, 8])
+	var extent := Rect2i(int(room[0]), int(room[1]), int(room[2]), int(room[3]))
+	if loc.has("street"):
+		var s: Array = loc["street"]
+		extent = extent.merge(Rect2i(int(s[0]), int(s[1]), int(s[2]), int(s[3])))
+	return extent
 
 func _build_doorways(root: Node2D, loc: Dictionary) -> void:
 	var doorway_root := Node2D.new()

@@ -48,6 +48,20 @@ function done(reason: string): AgentStepProposal {
 
 function scriptedNextStep(request: AgentStepRequest): AgentStepProposal {
   if (request.goal.startsWith("ambient:")) {
+    if (request.observePacket.role === "store_manager") {
+      const statement = request.observePacket.visibleRecords.find(
+        record => record.kind === "clerk_statement",
+      );
+      if (statement && request.iteration === 0) {
+        return {
+          toolCall: { tool: "read_record", args: { recordId: statement.recordId } },
+          utterance: "점원이 남긴 기록을 확인해 두죠.",
+          rationale: "Read the clerk's visible statement before reacting.",
+          done: false,
+        };
+      }
+      return done("No new store record needs the manager's attention.");
+    }
     if (request.iteration === 0) {
       return {
         toolCall: { tool: "look", args: { targetId: "store_queue_mark" } },
@@ -65,7 +79,19 @@ function scriptedNextStep(request: AgentStepRequest): AgentStepProposal {
     return done("Ambient observation complete.");
   }
 
-  const route = request.goal.match(/projectedRoute=([a-z_]+)/)?.[1] ?? "clean_cover";
+  // Test-only route inference. Production goals expose the NPC's perceived
+  // pressure, never a projected ending; this script mirrors the same-order
+  // regression thresholds (softReport 40, inquest 90) to stay deterministic.
+  const suspicion = Number(request.goal.match(/suspicion=(\d+)/)?.[1] ?? "0");
+  const reportPressure = Number(request.goal.match(/reportPressure=(\d+)/)?.[1] ?? "0");
+  const route =
+    reportPressure >= 90
+      ? "hard_inquest"
+      : reportPressure >= 40
+        ? "soft_report"
+        : suspicion > 0
+          ? "repair_recovery"
+          : "clean_cover";
   const actor = request.observePacket.actorId;
   if (route === "clean_cover") {
     if (request.iteration === 0) {

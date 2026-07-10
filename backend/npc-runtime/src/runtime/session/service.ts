@@ -212,6 +212,8 @@ export class SessionService {
   private readonly sessions = new Map<string, SessionState>();
   private readonly storyletCache = new Map<string, Storylet>();
   private readonly proposalPort: NpcProposalPort;
+  /** Serializes mutating calls per session so an ambient decision can never interleave with an answer. */
+  private readonly sessionChains = new Map<string, Promise<unknown>>();
 
   constructor(options: SessionServiceOptions = {}) {
     this.proposalPort = options.proposalPort ?? createProviderFromEnvironment().proposalPort;
@@ -281,7 +283,24 @@ export class SessionService {
     };
   }
 
-  async answer(sessionId: string, turnId: string, answer: SessionAnswer): Promise<AnswerResult> {
+  private serialize<T>(sessionId: string, task: () => Promise<T>): Promise<T> {
+    const prev = this.sessionChains.get(sessionId) ?? Promise.resolve();
+    const next = prev.then(task, task);
+    this.sessionChains.set(
+      sessionId,
+      next.then(
+        () => undefined,
+        () => undefined,
+      ),
+    );
+    return next;
+  }
+
+  answer(sessionId: string, turnId: string, answer: SessionAnswer): Promise<AnswerResult> {
+    return this.serialize(sessionId, () => this.resolveAnswer(sessionId, turnId, answer));
+  }
+
+  private async resolveAnswer(sessionId: string, turnId: string, answer: SessionAnswer): Promise<AnswerResult> {
     const session = this.require(sessionId);
     if (session.terminal || !session.activeTurn) {
       throw new SessionError("session already reached a terminal state", "session_ended");
@@ -349,7 +368,9 @@ export class SessionService {
       actor,
       policy: DEFAULT_ROLE_POLICIES[actor.role],
       memory,
-      goal: `conversation: beat=${beat.beatId} projectedRoute=${projectedRoute} suspicion=${session.suspicion} reportPressure=${session.reportPressure}`,
+      // The NPC's own perceived state only. Never leak a projected ending:
+      // what to do about the pressure is the model's decision.
+      goal: `conversation: beat=${beat.beatId} suspicion=${session.suspicion} reportPressure=${session.reportPressure}`,
       heardSpeech: [classified.line],
       proposalPort: this.proposalPort,
       transcript: session.transcript,
@@ -404,36 +425,51 @@ export class SessionService {
     };
   }
 
-  async decision(sessionId: string, beat: number): Promise<DecisionResult> {
+  decision(sessionId: string, beat: number): Promise<DecisionResult> {
+    return this.serialize(sessionId, () => this.resolveDecision(sessionId, beat));
+  }
+
+  /** Storylet actors that live in the scene but never speak a beat: they act ambiently. */
+  private ambientActorIds(session: SessionState): string[] {
+    const speakers = new Set(session.storylet.beats.map(beat => beat.speakerId));
+    return session.storylet.actors
+      .filter(actor => actor.role !== "player" && !speakers.has(actor.actorId))
+      .map(actor => actor.actorId);
+  }
+
+  private async resolveDecision(sessionId: string, beat: number): Promise<DecisionResult> {
     const session = this.require(sessionId);
-    const actorId = "NPC_Waiting_Customer";
-    const actor = this.actorContext(session, actorId);
-    const result = await runBeat({
-      sessionId,
-      world: session.world,
-      actor,
-      policy: DEFAULT_ROLE_POLICIES[actor.role],
-      memory: this.memoryFor(session, actorId),
-      goal: `ambient: observe the queue and choose whether to wait or react at beat ${beat}`,
-      proposalPort: this.proposalPort,
-      transcript: session.transcript,
-      budget: 3,
-    });
-    session.world = result.world;
-    session.memory.set(actorId, result.memory);
-    this.trackProposalMeta(session, result.actions.map(action => action.proposalMeta));
-    return {
-      npcActions: result.actions.map(action => ({
-        actorId: action.actorId,
-        tool: action.tool,
-        args: action.args,
-        utterance: action.utterance,
-        validationResult: action.validationResult,
-        proposalMeta: action.proposalMeta,
-      })),
-      ledgerEvents: result.events,
-      transcriptDeltas: result.transcriptDeltas,
-    };
+    const result: DecisionResult = { npcActions: [], ledgerEvents: [], transcriptDeltas: [] };
+    for (const actorId of this.ambientActorIds(session)) {
+      const actor = this.actorContext(session, actorId);
+      const beatResult = await runBeat({
+        sessionId,
+        world: session.world,
+        actor,
+        policy: DEFAULT_ROLE_POLICIES[actor.role],
+        memory: this.memoryFor(session, actorId),
+        goal: `ambient: act as ${actor.role} — read any record or object you can see, and react within your role at beat ${beat}`,
+        proposalPort: this.proposalPort,
+        transcript: session.transcript,
+        budget: 3,
+      });
+      session.world = beatResult.world;
+      session.memory.set(actorId, beatResult.memory);
+      this.trackProposalMeta(session, beatResult.actions.map(action => action.proposalMeta));
+      result.npcActions.push(
+        ...beatResult.actions.map(action => ({
+          actorId: action.actorId,
+          tool: action.tool,
+          args: action.args,
+          utterance: action.utterance,
+          validationResult: action.validationResult,
+          proposalMeta: action.proposalMeta,
+        })),
+      );
+      result.ledgerEvents.push(...beatResult.events);
+      result.transcriptDeltas.push(...beatResult.transcriptDeltas);
+    }
+    return result;
   }
 
   snapshot(sessionId: string): FullSnapshot {
@@ -481,7 +517,9 @@ export class SessionService {
       route,
       outcomePanel: {
         title: routeDef.title,
-        body: routeDef.body,
+        // Never narrate a consequence that did not happen: without a citable
+        // ledger event the panel uses the honest no-record variant.
+        body: citedLedgerIds.length > 0 ? routeDef.body : (routeDef.bodyNoRecord ?? routeDef.body),
         citedLedgerIds,
       },
       telemetrySummary: {

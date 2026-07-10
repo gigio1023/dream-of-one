@@ -232,7 +232,7 @@
           {
             "actorId": "NPC_Store_Clerk",
             "step": 1,
-            "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+            "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
             "tool": "use_object",
             "args": {
               "objectId": "correction_slip",
@@ -345,7 +345,7 @@
           {
             "actorId": "NPC_Waiting_Customer",
             "step": 1,
-            "observedSummary": "role=waiting_customer at=Store objects=2 records=0 ledger=0 tools=8 goal=ambient: observe the queue and choose whether to wait or react at beat 1",
+            "observedSummary": "role=waiting_customer at=Store objects=2 records=0 ledger=0 tools=8 goal=ambient: act as waiting_customer — read any record or object you can see, and react within your role at beat 1",
             "tool": "look",
             "args": {
               "targetId": "store_queue_mark"
@@ -365,7 +365,7 @@
           {
             "actorId": "NPC_Waiting_Customer",
             "step": 2,
-            "observedSummary": "role=waiting_customer at=Store objects=2 records=0 ledger=0 tools=8 goal=ambient: observe the queue and choose whether to wait or react at beat 1",
+            "observedSummary": "role=waiting_customer at=Store objects=2 records=0 ledger=0 tools=8 goal=ambient: act as waiting_customer — read any record or object you can see, and react within your role at beat 1",
             "tool": "look",
             "args": {
               "targetId": "store_counter"
@@ -607,7 +607,7 @@
           {
             "actorId": "NPC_Store_Clerk",
             "step": 1,
-            "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+            "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
             "tool": "use_object",
             "args": {
               "objectId": "correction_slip",
@@ -635,7 +635,7 @@
           {
             "actorId": "NPC_Waiting_Customer",
             "step": 1,
-            "observedSummary": "role=waiting_customer at=Store objects=2 records=0 ledger=0 tools=8 goal=ambient: observe the queue and choose whether to wait or react at beat 1",
+            "observedSummary": "role=waiting_customer at=Store objects=2 records=0 ledger=0 tools=8 goal=ambient: act as waiting_customer — read any record or object you can see, and react within your role at beat 1",
             "tool": "look",
             "args": {
               "targetId": "store_queue_mark"
@@ -655,7 +655,7 @@
           {
             "actorId": "NPC_Waiting_Customer",
             "step": 2,
-            "observedSummary": "role=waiting_customer at=Store objects=2 records=0 ledger=0 tools=8 goal=ambient: observe the queue and choose whether to wait or react at beat 1",
+            "observedSummary": "role=waiting_customer at=Store objects=2 records=0 ledger=0 tools=8 goal=ambient: act as waiting_customer — read any record or object you can see, and react within your role at beat 1",
             "tool": "look",
             "args": {
               "targetId": "store_counter"
@@ -1186,7 +1186,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 1,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                 "tool": "use_object",
                 "args": {
                   "objectId": "usual_order_cue",
@@ -1463,7 +1463,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 1,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                 "tool": "use_object",
                 "args": {
                   "objectId": "usual_order_cue",
@@ -1541,7 +1541,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 2,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                 "tool": "use_object",
                 "args": {
                   "objectId": "usual_order_cue",
@@ -1771,7 +1771,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 1,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                 "tool": "use_object",
                 "args": {
                   "objectId": "usual_order_cue",
@@ -1796,7 +1796,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 2,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                 "tool": "use_object",
                 "args": {
                   "objectId": "usual_order_cue",
@@ -2265,7 +2265,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 1,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                 "tool": "use_object",
                 "args": {
                   "objectId": "correction_slip",
@@ -2548,7 +2548,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 1,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                 "tool": "use_object",
                 "args": {
                   "objectId": "correction_slip",
@@ -2632,7 +2632,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 2,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=20 reportPressure=10",
                 "tool": "use_object",
                 "args": {
                   "objectId": "correction_slip",
@@ -2871,7 +2871,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 1,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                 "tool": "use_object",
                 "args": {
                   "objectId": "correction_slip",
@@ -2899,7 +2899,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 2,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=20 reportPressure=10",
                 "tool": "use_object",
                 "args": {
                   "objectId": "correction_slip",
@@ -3373,7 +3373,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 1,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                 "tool": "use_object",
                 "args": {
                   "objectId": "correction_slip",
@@ -3656,7 +3656,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 1,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                 "tool": "use_object",
                 "args": {
                   "objectId": "correction_slip",
@@ -3744,7 +3744,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 2,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=soft_report suspicion=55 reportPressure=45",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=55 reportPressure=45",
                 "tool": "write_record",
                 "args": {
                   "objectId": "report_tray",
@@ -3978,7 +3978,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 1,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                 "tool": "use_object",
                 "args": {
                   "objectId": "correction_slip",
@@ -4006,7 +4006,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 2,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=soft_report suspicion=55 reportPressure=45",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=55 reportPressure=45",
                 "tool": "write_record",
                 "args": {
                   "objectId": "report_tray",
@@ -4493,7 +4493,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 1,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                 "tool": "use_object",
                 "args": {
                   "objectId": "correction_slip",
@@ -4776,7 +4776,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 1,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                 "tool": "use_object",
                 "args": {
                   "objectId": "correction_slip",
@@ -4866,7 +4866,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 2,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=115",
                 "tool": "write_record",
                 "args": {
                   "objectId": "report_tray",
@@ -5162,7 +5162,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 1,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                 "tool": "use_object",
                 "args": {
                   "objectId": "correction_slip",
@@ -5190,7 +5190,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 2,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=115",
                 "tool": "write_record",
                 "args": {
                   "objectId": "report_tray",
@@ -5290,7 +5290,7 @@
               {
                 "actorId": "NPC_Station_Officer",
                 "step": 1,
-                "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                 "tool": "write_record",
                 "args": {
                   "objectId": "station_dossier",
@@ -5553,7 +5553,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 1,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                 "tool": "use_object",
                 "args": {
                   "objectId": "correction_slip",
@@ -5581,7 +5581,7 @@
               {
                 "actorId": "NPC_Store_Clerk",
                 "step": 2,
-                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=115",
                 "tool": "write_record",
                 "args": {
                   "objectId": "report_tray",
@@ -5622,7 +5622,7 @@
               {
                 "actorId": "NPC_Station_Officer",
                 "step": 1,
-                "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                 "tool": "write_record",
                 "args": {
                   "objectId": "station_dossier",
@@ -6091,7 +6091,7 @@
           "route": "clean_cover",
           "outcomePanel": {
             "title": "무사 통과",
-            "body": "평소 순서대로 응대가 끝났습니다.",
+            "body": "평소 순서대로 응대가 끝났고, 기록도 남지 않았습니다.",
             "citedLedgerIds": []
           },
           "telemetrySummary": {
@@ -6163,7 +6163,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -6440,7 +6440,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -6528,7 +6528,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -6811,7 +6811,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -6902,7 +6902,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -7185,7 +7185,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -7269,7 +7269,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -7546,7 +7546,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -7637,7 +7637,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -7914,7 +7914,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -8069,7 +8069,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -8299,7 +8299,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -8324,7 +8324,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -8427,7 +8427,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -8657,7 +8657,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -8682,7 +8682,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -8790,7 +8790,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=20 reportPressure=15",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=20 reportPressure=15",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -9026,7 +9026,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -9051,7 +9051,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=20 reportPressure=15",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=20 reportPressure=15",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -9157,7 +9157,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -9387,7 +9387,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -9412,7 +9412,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -9525,7 +9525,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -9818,7 +9818,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -9843,7 +9843,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -10010,7 +10010,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -10270,7 +10270,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -10295,7 +10295,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -10336,7 +10336,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -10463,7 +10463,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=100 reportPressure=100",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -10723,7 +10723,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -10748,7 +10748,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -10789,7 +10789,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=100 reportPressure=100",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -10918,7 +10918,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=120 reportPressure=115",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=120 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -11178,7 +11178,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -11203,7 +11203,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -11244,7 +11244,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=120 reportPressure=115",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=120 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -11370,7 +11370,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=100 reportPressure=100",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -11630,7 +11630,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -11655,7 +11655,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -11696,7 +11696,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=100 reportPressure=100",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -11828,7 +11828,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -12088,7 +12088,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -12113,7 +12113,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -12154,7 +12154,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -12338,7 +12338,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -12577,7 +12577,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -12605,7 +12605,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -12716,7 +12716,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -12955,7 +12955,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -12983,7 +12983,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -13096,7 +13096,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=40 reportPressure=25",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=40 reportPressure=25",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -13335,7 +13335,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -13363,7 +13363,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=40 reportPressure=25",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=40 reportPressure=25",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -13473,7 +13473,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -13712,7 +13712,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -13740,7 +13740,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -13856,7 +13856,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=95",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=95",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -14152,7 +14152,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -14180,7 +14180,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=95",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=95",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -14345,7 +14345,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -14608,7 +14608,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -14636,7 +14636,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=95",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=95",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -14677,7 +14677,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -14804,7 +14804,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=115 reportPressure=95",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=115 reportPressure=95",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -15067,7 +15067,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -15095,7 +15095,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=95",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=95",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -15136,7 +15136,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=115 reportPressure=95",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=115 reportPressure=95",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -15265,7 +15265,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=110",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=110",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -15528,7 +15528,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -15556,7 +15556,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=95",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=95",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -15597,7 +15597,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=110",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=110",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -15723,7 +15723,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=115 reportPressure=95",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=115 reportPressure=95",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -15986,7 +15986,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -16014,7 +16014,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=95",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=95",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -16055,7 +16055,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=115 reportPressure=95",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=115 reportPressure=95",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -16185,7 +16185,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -16448,7 +16448,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=20 reportPressure=10",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=20 reportPressure=10",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -16476,7 +16476,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=95",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=95",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -16517,7 +16517,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -16701,7 +16701,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -16940,7 +16940,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -16968,7 +16968,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -17079,7 +17079,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -17318,7 +17318,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -17346,7 +17346,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -17461,7 +17461,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=soft_report suspicion=55 reportPressure=45",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=55 reportPressure=45",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -17695,7 +17695,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -17723,7 +17723,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=soft_report suspicion=55 reportPressure=45",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=55 reportPressure=45",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -17845,7 +17845,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -18084,7 +18084,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -18112,7 +18112,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -18228,7 +18228,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -18524,7 +18524,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -18552,7 +18552,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -18716,7 +18716,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -18979,7 +18979,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -19007,7 +19007,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -19048,7 +19048,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -19174,7 +19174,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -19437,7 +19437,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -19465,7 +19465,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -19506,7 +19506,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -19634,7 +19634,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -19897,7 +19897,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -19925,7 +19925,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -19966,7 +19966,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -20091,7 +20091,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -20354,7 +20354,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -20382,7 +20382,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -20423,7 +20423,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -20552,7 +20552,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -20815,7 +20815,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=repair_recovery suspicion=35 reportPressure=30",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=35 reportPressure=30",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -20843,7 +20843,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -20884,7 +20884,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -21062,7 +21062,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -21292,7 +21292,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -21317,7 +21317,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -21420,7 +21420,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -21650,7 +21650,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -21675,7 +21675,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -21783,7 +21783,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=20 reportPressure=15",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=20 reportPressure=15",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -22019,7 +22019,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -22044,7 +22044,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=repair_recovery suspicion=20 reportPressure=15",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=20 reportPressure=15",
                   "tool": "use_object",
                   "args": {
                     "objectId": "correction_slip",
@@ -22150,7 +22150,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -22380,7 +22380,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -22405,7 +22405,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -22516,7 +22516,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -22747,7 +22747,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=clean_cover suspicion=0 reportPressure=0",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=0 reportPressure=0",
                   "tool": "use_object",
                   "args": {
                     "objectId": "usual_order_cue",
@@ -22772,7 +22772,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -22875,7 +22875,7 @@
           "route": "soft_report",
           "outcomePanel": {
             "title": "약식 보고",
-            "body": "상점의 주의와 기록 부담이 높아졌습니다.",
+            "body": "점원의 경계는 높아졌지만, 아직 기록으로 남지는 않았습니다.",
             "citedLedgerIds": []
           },
           "telemetrySummary": {
@@ -22955,7 +22955,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -23170,7 +23170,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -23211,7 +23211,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -23255,7 +23255,7 @@
               "route": "soft_report",
               "outcomePanel": {
                 "title": "약식 보고",
-                "body": "상점의 주의와 기록 부담이 높아졌습니다.",
+                "body": "점원의 경계는 높아졌지만, 아직 기록으로 남지는 않았습니다.",
                 "citedLedgerIds": []
               },
               "telemetrySummary": {
@@ -23335,7 +23335,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -23550,7 +23550,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -23591,7 +23591,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -23635,7 +23635,7 @@
               "route": "soft_report",
               "outcomePanel": {
                 "title": "약식 보고",
-                "body": "상점의 주의와 기록 부담이 높아졌습니다.",
+                "body": "점원의 경계는 높아졌지만, 아직 기록으로 남지는 않았습니다.",
                 "citedLedgerIds": []
               },
               "telemetrySummary": {
@@ -23717,7 +23717,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -23994,7 +23994,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -24035,7 +24035,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -24137,7 +24137,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -24352,7 +24352,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -24393,7 +24393,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -24437,7 +24437,7 @@
               "route": "soft_report",
               "outcomePanel": {
                 "title": "약식 보고",
-                "body": "상점의 주의와 기록 부담이 높아졌습니다.",
+                "body": "점원의 경계는 높아졌지만, 아직 기록으로 남지는 않았습니다.",
                 "citedLedgerIds": []
               },
               "telemetrySummary": {
@@ -24520,7 +24520,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -24797,7 +24797,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -24838,7 +24838,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -24919,7 +24919,7 @@
           "route": "hard_inquest",
           "outcomePanel": {
             "title": "심문",
-            "body": "스테이션이 실제 기록과 진술을 근거로 정식 확인을 시작했습니다.",
+            "body": "스테이션 확인이 필요하다고 판단됐지만, 인용할 기록은 남지 않았습니다.",
             "citedLedgerIds": []
           },
           "telemetrySummary": {
@@ -25001,7 +25001,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -25246,7 +25246,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -25287,7 +25287,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -25328,7 +25328,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -25454,7 +25454,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=115 reportPressure=100",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=115 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -25699,7 +25699,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -25740,7 +25740,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -25781,7 +25781,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=115 reportPressure=100",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=115 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -25909,7 +25909,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -26154,7 +26154,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -26195,7 +26195,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -26236,7 +26236,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=115",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -26360,7 +26360,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=115 reportPressure=100",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=115 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -26605,7 +26605,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -26646,7 +26646,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -26687,7 +26687,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=115 reportPressure=100",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=115 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -26816,7 +26816,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -27061,7 +27061,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -27102,7 +27102,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=115 reportPressure=100",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=115 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -27143,7 +27143,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -27247,7 +27247,7 @@
           "route": "hard_inquest",
           "outcomePanel": {
             "title": "심문",
-            "body": "스테이션이 실제 기록과 진술을 근거로 정식 확인을 시작했습니다.",
+            "body": "스테이션 확인이 필요하다고 판단됐지만, 인용할 기록은 남지 않았습니다.",
             "citedLedgerIds": []
           },
           "telemetrySummary": {
@@ -27328,7 +27328,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -27573,7 +27573,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -27614,7 +27614,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -27655,7 +27655,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -27780,7 +27780,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -28025,7 +28025,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -28066,7 +28066,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -28107,7 +28107,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -28234,7 +28234,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -28479,7 +28479,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -28520,7 +28520,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -28561,7 +28561,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -28685,7 +28685,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -28930,7 +28930,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -28971,7 +28971,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -29012,7 +29012,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -29140,7 +29140,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -29385,7 +29385,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 1,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine projectedRoute=soft_report suspicion=95 reportPressure=85",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=0 tools=8 goal=conversation: beat=routine suspicion=95 reportPressure=85",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -29426,7 +29426,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=3 ledger=1 tools=8 goal=conversation: beat=probe suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -29467,7 +29467,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=2 tools=8 goal=conversation: beat=reconciliation suspicion=125 reportPressure=125",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",

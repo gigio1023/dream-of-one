@@ -18,6 +18,7 @@ var _last_ledger_event: Dictionary = {}
 var _transitioning := false
 var _transition_target := ""
 var _resolving_answer := false
+var _ambient_beat := 0
 
 func _ready() -> void:
 	_connect_session()
@@ -152,6 +153,43 @@ func _on_answer_resolved(result: Dictionary) -> void:
 		for entry_value in transcript_value as Array:
 			if entry_value is Dictionary:
 				_hud.show_agent_step(entry_value as Dictionary)
+	if not bool(route_state.get("terminal", false)):
+		_ambient_beat += 1
+		_run_ambient_beat(_ambient_beat)
+
+## The town keeps existing while the player talks: after each resolved answer
+## the ambient NPCs (manager, waiting customer) get one bounded agent-loop
+## beat, and their validated actions are rendered like any other reaction.
+func _run_ambient_beat(beat: int) -> void:
+	var result: Dictionary = await Session.npc_decision(beat)
+	if result.is_empty() or result.has("error"):
+		return
+	for action_value in result.get("npcActions", []):
+		if not action_value is Dictionary:
+			continue
+		var action: Dictionary = action_value
+		var validation: Dictionary = action.get("validationResult", {}) if action.get("validationResult") is Dictionary else {}
+		if not bool(validation.get("ok", false)):
+			continue
+		_show_ambient_action(action)
+	var transcript_value: Variant = result.get("transcriptDeltas", [])
+	if transcript_value is Array:
+		for entry_value in transcript_value as Array:
+			if entry_value is Dictionary:
+				_hud.show_agent_step(entry_value as Dictionary)
+
+func _show_ambient_action(action: Dictionary) -> void:
+	if not is_instance_valid(_location):
+		return
+	var actor_id := str(action.get("actorId", ""))
+	var npc: Node = _location.call("get_npc", actor_id)
+	if npc == null:
+		return
+	var utterance := str(action.get("utterance", ""))
+	if not utterance.is_empty():
+		npc.show_speech(utterance)
+	var marker_state := _reaction_state(action)
+	npc.set_reaction(marker_state, _t("reaction.%s" % marker_state))
 
 func _on_ledger_event(event: Dictionary) -> void:
 	_last_ledger_event = event.duplicate(true)
@@ -239,6 +277,7 @@ func _on_restart_requested() -> void:
 	_latest_exchange = ""
 	_last_ledger_event.clear()
 	_current_turn.clear()
+	_ambient_beat = 0
 	var response: Dictionary = await Session.restart("same-order", "ko-KR")
 	var snapshot: Dictionary = response.get("worldSnapshot", {})
 	_transitioning = false

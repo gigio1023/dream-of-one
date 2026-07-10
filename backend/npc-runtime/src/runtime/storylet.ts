@@ -31,6 +31,8 @@ const routeSchema = z
     outcome: nonEmpty,
     title: nonEmpty,
     body: nonEmpty,
+    /** Honest variant shown when the session produced no citable ledger event. */
+    bodyNoRecord: nonEmpty.optional(),
   })
   .strict();
 

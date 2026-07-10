@@ -85,9 +85,29 @@
     "eventName": "response_hesitation_noted"
   },
   "routes": {
-    "clean_cover": { "outcome": "cover_held", "title": "무사 통과", "body": "평소 순서대로 응대가 끝났습니다." },
-    "repair_recovery": { "outcome": "cover_held_with_unease", "title": "수습", "body": "작은 어긋남은 남았지만 대화가 마무리됐습니다." },
-    "soft_report": { "outcome": "soft_report", "title": "약식 보고", "body": "상점의 주의와 기록 부담이 높아졌습니다." },
-    "hard_inquest": { "outcome": "hard_inquest", "title": "심문", "body": "스테이션이 실제 기록과 진술을 근거로 정식 확인을 시작했습니다." }
+    "clean_cover": {
+      "outcome": "cover_held",
+      "title": "무사 통과",
+      "body": "평소 순서대로 응대가 끝났습니다.",
+      "bodyNoRecord": "평소 순서대로 응대가 끝났고, 기록도 남지 않았습니다."
+    },
+    "repair_recovery": {
+      "outcome": "cover_held_with_unease",
+      "title": "수습",
+      "body": "작은 어긋남은 남았지만 대화가 마무리됐습니다.",
+      "bodyNoRecord": "작은 어긋남은 남았지만 기록 없이 대화가 마무리됐습니다."
+    },
+    "soft_report": {
+      "outcome": "soft_report",
+      "title": "약식 보고",
+      "body": "상점의 주의와 기록 부담이 높아졌습니다.",
+      "bodyNoRecord": "점원의 경계는 높아졌지만, 아직 기록으로 남지는 않았습니다."
+    },
+    "hard_inquest": {
+      "outcome": "hard_inquest",
+      "title": "심문",
+      "body": "스테이션이 실제 기록과 진술을 근거로 정식 확인을 시작했습니다.",
+      "bodyNoRecord": "스테이션 확인이 필요하다고 판단됐지만, 인용할 기록은 남지 않았습니다."
+    }
   }
 }

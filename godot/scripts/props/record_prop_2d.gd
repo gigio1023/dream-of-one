@@ -45,21 +45,26 @@ func _apply() -> void:
 	$InteractionArea.set_meta("kind", "prop")
 	$InteractionArea.set_meta("id", prop_id)
 	_refresh_state_label()
+	_state_label.visible = false
 
 func set_state(new_state: String) -> void:
 	if new_state.is_empty():
 		return
 	state = new_state
 	_refresh_state_label()
+	_state_label.visible = true
 	# Brief highlight so a ledger-driven state change reads within 1s.
 	_sprite.modulate = Color(1.4, 1.25, 0.7)
 	var tween := create_tween()
 	tween.tween_property(_sprite, "modulate", Color(1, 1, 1), 0.5)
+	tween.tween_interval(0.35)
+	tween.tween_callback(func() -> void: _state_label.visible = _focused)
 
 func set_focused(value: bool) -> void:
 	_focused = value
 	_sprite.modulate = Color(1.35, 1.25, 0.78) if value else Color.WHITE
 	_state_label.modulate = Color(1.0, 0.9, 0.55) if value else Color.WHITE
+	_state_label.visible = value
 
 func _refresh_state_label() -> void:
 	var loc := get_node_or_null("/root/Localization")

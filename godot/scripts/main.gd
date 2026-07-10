@@ -16,6 +16,7 @@ var _current_turn: Dictionary = {}
 var _latest_exchange := ""
 var _last_ledger_event: Dictionary = {}
 var _transitioning := false
+var _transition_target := ""
 var _resolving_answer := false
 
 func _ready() -> void:
@@ -102,8 +103,11 @@ func _on_session_started(snapshot: Dictionary) -> void:
 func _on_beat_opened(turn: Dictionary) -> void:
 	_current_turn = turn.duplicate(true)
 	var beat_id := str(turn.get("beatId", ""))
-	if beat_id == "reconciliation" and _location_id != "station":
-		await _load_location("station")
+	if beat_id == "reconciliation":
+		while _transitioning:
+			await get_tree().process_frame
+		if _location_id != "station":
+			await _load_location("station")
 	_hud.show_turn(turn)
 	_refresh_player_input()
 
@@ -236,9 +240,17 @@ func _on_doorway_entered(target_location: String) -> void:
 	await _load_location(target_location)
 
 func _load_location(location_id: String, snapshot: Dictionary = {}) -> void:
-	if _transitioning and location_id == _location_id and is_instance_valid(_location):
-		return
+	if _transitioning:
+		if location_id == _transition_target:
+			while _transitioning:
+				await get_tree().process_frame
+			return
+		while _transitioning:
+			await get_tree().process_frame
+		if location_id == _location_id and is_instance_valid(_location):
+			return
 	_transitioning = true
+	_transition_target = location_id
 	if snapshot.is_empty() and Session.is_started():
 		var full_snapshot: Dictionary = await Session.snapshot()
 		snapshot = full_snapshot.get("worldSnapshot", full_snapshot)
@@ -256,6 +268,7 @@ func _load_location(location_id: String, snapshot: Dictionary = {}) -> void:
 	_player = _location.get_player()
 	_hud.set_location(location_id)
 	_transitioning = false
+	_transition_target = ""
 	_refresh_player_input()
 
 func _refresh_player_input() -> void:

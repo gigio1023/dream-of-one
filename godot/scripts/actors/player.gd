@@ -18,6 +18,12 @@ func _ready() -> void:
 	add_to_group("player")
 	_sprite.sprite_frames = PackAtlas.character_frames(SPRITE_BLOCK)
 	_sprite.play("idle_up")
+	queue_redraw()
+
+func _draw() -> void:
+	var accent := Color("#7ec8a0")
+	draw_circle(Vector2(0, -1), 5.0, Color(accent.r, accent.g, accent.b, 0.28))
+	draw_arc(Vector2(0, -1), 5.0, 0.0, TAU, 20, Color(accent.r, accent.g, accent.b, 0.9), 1.0)
 
 func _physics_process(_delta: float) -> void:
 	if not input_enabled:

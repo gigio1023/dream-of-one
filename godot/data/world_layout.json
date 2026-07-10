@@ -302,7 +302,7 @@
         "props": {
           "store_counter": [8, 4],
           "usual_order_cue": [15, 2],
-          "store_queue_mark": [9, 8],
+          "store_queue_mark": [8, 9],
           "receipt_tray": [11, 4],
           "correction_slip": [12, 4],
           "report_tray": [13, 4]

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CONVERSATION_CHOICE_INTENTS } from "../contracts/types.js";
+import { CONVERSATION_CHOICE_INTENTS, CONVERSATION_SUSPICION_SIGNALS } from "../contracts/types.js";
 import { TOOL_NAMES } from "../agentloop/tools.js";
 import { RECORD_KINDS, WORLD_ROLES } from "../runtime/world/index.js";
 
@@ -16,6 +16,17 @@ export const conversationProposalSchema = z
       suggestedReplySchema,
     ]),
     continueConversation: z.boolean(),
+  })
+  .strict();
+
+// Deltas are validated as integers only; the runtime clamps them to the
+// per-turn validity caps so an over-eager model never dumps to fallback.
+export const conversationJudgmentSchema = z
+  .object({
+    suspicionDelta: z.number().int(),
+    reportDelta: z.number().int(),
+    signals: z.array(z.enum(CONVERSATION_SUSPICION_SIGNALS)),
+    whyLine: nonEmpty,
   })
   .strict();
 
@@ -65,6 +76,21 @@ export const conversationProposalJsonSchema: Record<string, unknown> = {
       },
     },
     continueConversation: { type: "boolean" },
+  },
+};
+
+export const conversationJudgmentJsonSchema: Record<string, unknown> = {
+  type: "object",
+  additionalProperties: false,
+  required: ["suspicionDelta", "reportDelta", "signals", "whyLine"],
+  properties: {
+    suspicionDelta: { type: "integer" },
+    reportDelta: { type: "integer" },
+    signals: {
+      type: "array",
+      items: { type: "string", enum: [...CONVERSATION_SUSPICION_SIGNALS] },
+    },
+    whyLine: { type: "string", minLength: 1 },
   },
 };
 

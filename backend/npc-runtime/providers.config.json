@@ -6,7 +6,7 @@
       "model": "gpt-5.4-mini",
       "params": {
         "reasoningEffort": "low",
-        "maxTokens": 500
+        "maxTokens": 700
       },
       "structured": "json-schema"
     },
@@ -38,8 +38,8 @@
     "envOverride": "NPC_PROVIDER_PROFILE"
   },
   "runtime": {
-    "timeoutMs": 2500,
-    "maxCallsPerSession": 50,
-    "maxTokensPerSession": 50000
+    "timeoutMs": 12000,
+    "maxCallsPerSession": 60,
+    "maxTokensPerSession": 150000
   }
 }

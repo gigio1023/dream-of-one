@@ -69,7 +69,8 @@ repair request. The following conditions use deterministic fallback and are
 reported in `ProposalMeta`:
 
 - missing credentials or unavailable profile;
-- 2.5-second timeout;
+- timeout (config `runtime.timeoutMs`; sized for judgment-grade calls, not
+  the old 2.5-second bark budget);
 - rate limiting or transport failure;
 - invalid envelope after repair;
 - per-session call or token budget exhaustion.

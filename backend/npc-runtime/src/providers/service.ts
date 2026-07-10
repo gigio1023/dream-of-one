@@ -2,12 +2,16 @@ import type { z } from "zod";
 import {
   agentStepProposalJsonSchema,
   agentStepProposalSchema,
+  conversationJudgmentJsonSchema,
+  conversationJudgmentSchema,
   conversationProposalJsonSchema,
   conversationProposalSchema,
 } from "./envelope.js";
 import type {
   AgentStepProposal,
   AgentStepRequest,
+  ConversationJudgment,
+  ConversationJudgmentRequest,
   ConversationProposal,
   ConversationTurnRequest,
   NpcProposalPort,
@@ -99,6 +103,48 @@ export class ProviderService implements NpcProposalPort {
     }
     return this.withFallbackReason(
       await this.options.fallback.proposeConversationTurn(request),
+      resolved.reason,
+    );
+  }
+
+  async judgeConversationTurn(
+    request: ConversationJudgmentRequest,
+  ): Promise<ResolvedProposal<ConversationJudgment>> {
+    const instructions = [
+      "You are the judging mind of one NPC inside Dream of One, a Korean social-suspicion game.",
+      "Read the player's newest line and decide how it moves this NPC's suspicion and report pressure.",
+      "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
+      "suspicionDelta and reportDelta are integers. A reassuring, coherent answer may be negative; a damning one strongly positive.",
+      "List the signal labels that genuinely apply; an ordinary answer has none.",
+      "whyLine is one in-world Korean sentence the player will read as the reason suspicion moved.",
+      "Do not decide any verdict or session outcome.",
+      "Return only JSON matching the supplied schema.",
+    ].join(" ");
+    const input = JSON.stringify({
+      playerLine: request.playerLine,
+      conversationHistory: request.conversationHistory.slice(-10),
+      actor: request.observePacket,
+      suspicionBefore: request.suspicionBefore,
+      reportPressureBefore: request.reportPressureBefore,
+      beatId: request.beatId,
+      locale: request.locale,
+    });
+    const resolved = await this.generateValidated({
+      sessionId: request.sessionId,
+      request: {
+        purpose: "conversation",
+        instructions,
+        input,
+        schemaName: "npc_conversation_judgment",
+        jsonSchema: conversationJudgmentJsonSchema,
+      },
+      schema: conversationJudgmentSchema,
+    });
+    if (resolved.ok) {
+      return { proposal: resolved.value, meta: resolved.meta };
+    }
+    return this.withFallbackReason(
+      await this.options.fallback.judgeConversationTurn(request),
       resolved.reason,
     );
   }

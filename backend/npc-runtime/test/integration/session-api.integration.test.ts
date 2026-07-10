@@ -179,6 +179,45 @@ test("Session API exposes a blocked tool result followed by a provider re-plan",
   }
 });
 
+test("an over-eager model judgment is clamped by the per-turn validity cap", async () => {
+  const adapter = new ScriptedNpcAdapter({
+    conversation: () => ({
+      utterance: "오늘도 같은 걸로 드릴까요?",
+      suggestedReplies: [
+        { text: "네, 같은 걸로 부탁해요.", intent: "safe/local" },
+        { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair" },
+        { text: "오늘 처음 왔는데요.", intent: "risky/weird" },
+      ],
+      continueConversation: true,
+    }),
+    judgment: () => ({
+      suspicionDelta: 999,
+      reportDelta: -999,
+      signals: ["dream_language_leak"],
+      whyLine: "그 대답은 꿈 바깥의 말처럼 들렸습니다.",
+    }),
+    nextStep: () => ({ rationale: "No world action needed.", done: true }),
+  });
+  const running = await startSessionServer({
+    logListen: false,
+    service: new SessionService({ proposalPort: adapter }),
+  });
+  const base = `http://${running.host}:${running.port}`;
+  try {
+    const start = await post(base, "/v1/session/start", { storyletId: "same-order", locale: "ko-KR" });
+    const answer = await post(base, "/v1/session/answer", {
+      sessionId: start.json.sessionId,
+      turnId: start.json.nextTurn.turnId,
+      answer: { type: "choice", choiceId: "routine.generated.1" },
+    });
+    assert.equal(answer.status, 200, JSON.stringify(answer.json));
+    assert.equal(answer.json.suspicionDelta, 100, "suspicion delta must clamp to the per-turn cap");
+    assert.equal(answer.json.reportPressure, 0, "report pressure must clamp at zero");
+  } finally {
+    await running.close();
+  }
+});
+
 test("the provider sees both sides of the dialogue, including the NPC's own prior line", async () => {
   const histories: Array<Array<{ speakerId: string; line: string }>> = [];
   const adapter = new ScriptedNpcAdapter({

@@ -1,6 +1,6 @@
 import type { ObservePacket } from "../agentloop/context.js";
 import type { ToolCall } from "../agentloop/tools.js";
-import type { ConversationChoiceIntent } from "../contracts/types.js";
+import type { ConversationChoiceIntent, ConversationSuspicionSignal } from "../contracts/types.js";
 
 export type ProviderFailureReason =
   | "missing_credentials"
@@ -60,6 +60,33 @@ export interface ConversationTurnRequest {
   conversationHistory: Array<{ speakerId: string; line: string }>;
 }
 
+/**
+ * The judging NPC's read of one player answer. The model owns the meaning;
+ * the runtime clamps the movement and keeps the session ending guaranteed.
+ */
+export interface ConversationJudgment {
+  suspicionDelta: number;
+  reportDelta: number;
+  signals: ConversationSuspicionSignal[];
+  /** One in-world Korean sentence the player sees as the reason. */
+  whyLine: string;
+}
+
+export interface ConversationJudgmentRequest {
+  sessionId: string;
+  locale: string;
+  beatId: string;
+  promptId: string;
+  /** The NPC doing the judging. */
+  actorId: string;
+  playerLine: string;
+  /** Both sides of the exchange so far, excluding the line being judged. */
+  conversationHistory: Array<{ speakerId: string; line: string }>;
+  observePacket: ObservePacket;
+  suspicionBefore: number;
+  reportPressureBefore: number;
+}
+
 export interface AgentToolResult {
   tool: string;
   args: Record<string, unknown>;
@@ -85,6 +112,9 @@ export interface NpcProposalPort {
   proposeConversationTurn(
     request: ConversationTurnRequest,
   ): Promise<ResolvedProposal<ConversationProposal>>;
+  judgeConversationTurn(
+    request: ConversationJudgmentRequest,
+  ): Promise<ResolvedProposal<ConversationJudgment>>;
   proposeNextStep(request: AgentStepRequest): Promise<ResolvedProposal<AgentStepProposal>>;
 }
 

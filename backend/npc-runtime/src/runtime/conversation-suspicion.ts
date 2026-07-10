@@ -74,6 +74,14 @@ const ROLE_BREAK_PATTERNS = [
 
 export const CONVERSATION_SUSPICION_MAX_SCORE = 125;
 
+// Validity guardrails around model judgment (owner direction 2026-07-10):
+// rules bound how far one answer can move the meters, never what it means.
+// The cap must stay at least as wide as the deterministic classifier's real
+// multi-signal output (a decisive dream-language slip can legitimately move
+// ~95/85 in one turn), so it only blocks absurd runaway judgments.
+export const JUDGMENT_SUSPICION_DELTA_CAP = 100;
+export const JUDGMENT_REPORT_DELTA_CAP = 100;
+
 export const CONVERSATION_SUSPICION_SIGNAL_WEIGHT: Record<ConversationSuspicionSignal, number> = {
   local_routine_mismatch: 35,
   dream_language_leak: 60,
@@ -211,6 +219,56 @@ export function resolveConversationStationConsequence(
 function resolveWhyLine(signals: readonly ConversationSuspicionSignal[]): string {
   const first = signals[0];
   return first ? WHY_LINES[first] : "The line fit the local conversation premise.";
+}
+
+/** Clamp one judgment delta to the per-turn validity cap. */
+export function clampJudgmentDelta(value: number, cap: number): number {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+  return Math.max(-cap, Math.min(cap, Math.trunc(value)));
+}
+
+export interface RuleJudgmentInput {
+  promptId: string;
+  playerLine: string;
+  /** Prior player lines, oldest first. */
+  priorPlayerLines: readonly string[];
+  suspicionBefore: number;
+  reportPressureBefore: number;
+}
+
+/**
+ * Deterministic fallback judgment: the signal-pattern classifier that was the
+ * M1 product default. It is used only when no live provider judgment is
+ * available (and by the scripted regression adapter).
+ */
+export function ruleJudgeConversationTurn(input: RuleJudgmentInput): {
+  suspicionDelta: number;
+  reportDelta: number;
+  signals: ConversationSuspicionSignal[];
+  whyLine: string;
+} {
+  const evaluation = evaluateConversationTurn({
+    conversationId: "rule-judgment",
+    turnId: "rule-judgment",
+    promptId: input.promptId,
+    choiceSetId: "rule-judgment",
+    line: input.playerLine,
+    memory: input.priorPlayerLines.map((line, index) => ({
+      turnId: `prior-${index}`,
+      promptId: input.promptId,
+      line,
+    })),
+    suspicionBefore: input.suspicionBefore,
+    reportWeightBefore: input.reportPressureBefore,
+  });
+  return {
+    suspicionDelta: evaluation.suspicionDelta,
+    reportDelta: evaluation.reportDelta,
+    signals: evaluation.suspicionSignals,
+    whyLine: evaluation.whyLine,
+  };
 }
 
 export function evaluateConversationTurn(input: ConversationTurnInput): ConversationTurnEvaluation {

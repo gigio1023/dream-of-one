@@ -1,11 +1,21 @@
+import { ruleJudgeConversationTurn } from "../runtime/conversation-suspicion.js";
 import type {
   AgentStepRequest,
+  ConversationJudgment,
+  ConversationJudgmentRequest,
   ConversationTurnRequest,
   NpcProposalPort,
   ResolvedProposal,
   AgentStepProposal,
   ConversationProposal,
 } from "./ports.js";
+
+/** Prior player lines, oldest first, extracted from a two-sided history. */
+export function priorPlayerLines(
+  history: ReadonlyArray<{ speakerId: string; line: string }>,
+): string[] {
+  return history.filter(entry => entry.speakerId === "player").map(entry => entry.line);
+}
 
 /** Minimal resilience policy. It is never selected as the production profile. */
 export class RuleFallbackNpcAdapter implements NpcProposalPort {
@@ -29,6 +39,25 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
         ],
         continueConversation: true,
       },
+      meta: {
+        profileId: this.profileId,
+        transport: "fallback",
+        usedFallback: true,
+      },
+    };
+  }
+
+  async judgeConversationTurn(
+    request: ConversationJudgmentRequest,
+  ): Promise<ResolvedProposal<ConversationJudgment>> {
+    return {
+      proposal: ruleJudgeConversationTurn({
+        promptId: request.promptId,
+        playerLine: request.playerLine,
+        priorPlayerLines: priorPlayerLines(request.conversationHistory),
+        suspicionBefore: request.suspicionBefore,
+        reportPressureBefore: request.reportPressureBefore,
+      }),
       meta: {
         profileId: this.profileId,
         transport: "fallback",

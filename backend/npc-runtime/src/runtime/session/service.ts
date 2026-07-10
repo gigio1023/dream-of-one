@@ -6,7 +6,13 @@ import { TranscriptStore, type TranscriptEntry } from "../../agentloop/transcrip
 import type { NpcProposalPort, ProposalMeta } from "../../providers/ports.js";
 import { createProviderFromEnvironment } from "../../providers/registry.js";
 import type { ConversationChoiceIntent, ConversationSuspicionSignal } from "../../contracts/types.js";
-import { evaluateConversationTurn, type ConversationMemoryLine } from "../conversation-suspicion.js";
+import {
+  clampConversationScore,
+  clampJudgmentDelta,
+  JUDGMENT_REPORT_DELTA_CAP,
+  JUDGMENT_SUSPICION_DELTA_CAP,
+  type ConversationMemoryLine,
+} from "../conversation-suspicion.js";
 import {
   createSameOrderWorld,
   visibleLedger,
@@ -291,24 +297,41 @@ export class SessionService {
     const classified = this.classifyAnswer(session, answer);
     session.processedTurnIds.add(turnId);
     session.turnCount += 1;
+    const judgmentHistory = session.dialogue.slice(-10);
     session.dialogue.push({ speakerId: "player", line: classified.line });
 
-    const evaluation = evaluateConversationTurn({
-      conversationId: session.storylet.conversationId,
-      turnId,
+    // The judging NPC's model decides what the answer means. Rules only
+    // bound the movement (per-turn caps, 0..125 clamps) — owner direction.
+    const actor = this.actorContext(session, beat.speakerId);
+    const memory = this.memoryFor(session, beat.speakerId);
+    const judged = await this.proposalPort.judgeConversationTurn({
+      sessionId,
+      locale: session.locale,
+      beatId: beat.beatId,
       promptId: beat.promptId,
-      choiceSetId: session.activeTurn.choiceSetId,
-      line: classified.line,
-      selectedChoiceId: classified.choiceId,
-      freeInputHash: classified.freeInputHash,
-      intent: classified.intent,
-      memory: session.turns,
+      actorId: beat.speakerId,
+      playerLine: classified.line,
+      conversationHistory: judgmentHistory,
+      observePacket: assembleObservePacket(session.world, {
+        actor,
+        goals: [beat.objective],
+        policy: DEFAULT_ROLE_POLICIES[actor.role],
+        memory,
+        heardSpeech: [classified.line],
+      }),
       suspicionBefore: session.suspicion,
-      reportWeightBefore: session.reportPressure,
+      reportPressureBefore: session.reportPressure,
     });
-    session.suspicion = evaluation.suspicionAfter;
-    session.reportPressure = evaluation.reportWeightAfter;
-    for (const signal of evaluation.suspicionSignals) session.signalsSeen.add(signal);
+    this.trackProposalMeta(session, [judged.meta]);
+    const suspicionBefore = session.suspicion;
+    const reportPressureBefore = session.reportPressure;
+    session.suspicion = clampConversationScore(
+      suspicionBefore + clampJudgmentDelta(judged.proposal.suspicionDelta, JUDGMENT_SUSPICION_DELTA_CAP),
+    );
+    session.reportPressure = clampConversationScore(
+      reportPressureBefore + clampJudgmentDelta(judged.proposal.reportDelta, JUDGMENT_REPORT_DELTA_CAP),
+    );
+    for (const signal of judged.proposal.signals) session.signalsSeen.add(signal);
     session.turns.push({
       turnId,
       promptId: beat.promptId,
@@ -316,12 +339,10 @@ export class SessionService {
       selectedChoiceId: classified.choiceId,
       freeInputHash: classified.freeInputHash,
       intent: classified.intent,
-      signals: evaluation.suspicionSignals,
+      signals: judged.proposal.signals,
     });
 
     const projectedRoute = this.projectRoute(session);
-    const actor = this.actorContext(session, beat.speakerId);
-    const memory = this.memoryFor(session, beat.speakerId);
     const beatResult = await runBeat({
       sessionId,
       world: session.world,
@@ -368,9 +389,12 @@ export class SessionService {
       });
     }
     return {
-      signals: evaluation.suspicionSignals,
-      whyLines: this.resolveWhyLines(session.storylet, evaluation.suspicionSignals),
-      suspicionDelta: evaluation.suspicionDelta,
+      signals: judged.proposal.signals,
+      whyLines:
+        judged.meta.transport === "live"
+          ? [judged.proposal.whyLine]
+          : this.resolveWhyLines(session.storylet, judged.proposal.signals),
+      suspicionDelta: session.suspicion - suspicionBefore,
       reportPressure: session.reportPressure,
       npcReactions: reactions,
       ledgerEvents: beatResult.events,

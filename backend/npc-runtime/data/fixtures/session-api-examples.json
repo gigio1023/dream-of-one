@@ -9481,8 +9481,8 @@
                 "그 대답이 상점의 평소 순서와 맞지 않았습니다.",
                 "그 말은 이전 진술과 어긋납니다."
               ],
-              "suspicionDelta": 125,
-              "reportPressure": 120,
+              "suspicionDelta": 100,
+              "reportPressure": 100,
               "npcReactions": [
                 {
                   "actorId": "NPC_Store_Clerk",
@@ -9525,7 +9525,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=120",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -9568,8 +9568,8 @@
                 "stage": "reconciliation",
                 "projectedRoute": "hard_inquest",
                 "terminal": false,
-                "suspicion": 125,
-                "reportPressure": 120
+                "suspicion": 100,
+                "reportPressure": 100
               },
               "nextTurn": {
                 "turnId": "conv-same-order#2#2",
@@ -9723,8 +9723,8 @@
                   "favor": 0
                 },
                 "hudState": {
-                  "suspicion": 125,
-                  "reportPressure": 120,
+                  "suspicion": 100,
+                  "reportPressure": 100,
                   "stage": "reconciliation",
                   "projectedRoute": "hard_inquest",
                   "ledgerCount": 2,
@@ -9779,8 +9779,8 @@
                 "stage": "reconciliation",
                 "projectedRoute": "hard_inquest",
                 "terminal": false,
-                "suspicion": 125,
-                "reportPressure": 120
+                "suspicion": 100,
+                "reportPressure": 100
               },
               "nextTurn": {
                 "turnId": "conv-same-order#2#2",
@@ -9843,7 +9843,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=120",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -9936,8 +9936,8 @@
               "local_routine_mismatch",
               "prior_statement_contradiction"
             ],
-            "finalSuspicion": 125,
-            "finalReportPressure": 120,
+            "finalSuspicion": 100,
+            "finalReportPressure": 100,
             "ledgerEventCount": 2,
             "route": "hard_inquest",
             "providerProfile": "scripted/test",
@@ -9967,7 +9967,7 @@
                 "그 대답이 상점의 평소 순서와 맞지 않았습니다.",
                 "그 말은 이전 진술과 어긋납니다."
               ],
-              "suspicionDelta": 0,
+              "suspicionDelta": 25,
               "reportPressure": 125,
               "npcReactions": [
                 {
@@ -10295,7 +10295,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=120",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -10421,7 +10421,7 @@
                 "그 대답은 상점의 평소 대화에 들어맞았습니다."
               ],
               "suspicionDelta": 0,
-              "reportPressure": 120,
+              "reportPressure": 100,
               "npcReactions": [
                 {
                   "actorId": "NPC_Station_Officer",
@@ -10463,7 +10463,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=120",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -10505,8 +10505,8 @@
                 "stage": "resolved",
                 "projectedRoute": "hard_inquest",
                 "terminal": true,
-                "suspicion": 125,
-                "reportPressure": 120
+                "suspicion": 100,
+                "reportPressure": 100
               },
               "nextTurn": null
             },
@@ -10629,8 +10629,8 @@
                   "favor": 0
                 },
                 "hudState": {
-                  "suspicion": 125,
-                  "reportPressure": 120,
+                  "suspicion": 100,
+                  "reportPressure": 100,
                   "stage": "resolved",
                   "projectedRoute": "hard_inquest",
                   "ledgerCount": 3,
@@ -10715,8 +10715,8 @@
                 "stage": "resolved",
                 "projectedRoute": "hard_inquest",
                 "terminal": true,
-                "suspicion": 125,
-                "reportPressure": 120
+                "suspicion": 100,
+                "reportPressure": 100
               },
               "nextTurn": null,
               "agentTranscript": [
@@ -10748,7 +10748,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=120",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -10789,7 +10789,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=120",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -10846,8 +10846,8 @@
                   "local_routine_mismatch",
                   "prior_statement_contradiction"
                 ],
-                "finalSuspicion": 125,
-                "finalReportPressure": 120,
+                "finalSuspicion": 100,
+                "finalReportPressure": 100,
                 "ledgerEventCount": 3,
                 "route": "hard_inquest",
                 "providerProfile": "scripted/test",
@@ -10875,8 +10875,8 @@
               "whyLines": [
                 "예상된 응대 절차 밖의 대답이었습니다."
               ],
-              "suspicionDelta": 0,
-              "reportPressure": 125,
+              "suspicionDelta": 20,
+              "reportPressure": 115,
               "npcReactions": [
                 {
                   "actorId": "NPC_Station_Officer",
@@ -10918,7 +10918,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=120 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -10960,8 +10960,8 @@
                 "stage": "resolved",
                 "projectedRoute": "hard_inquest",
                 "terminal": true,
-                "suspicion": 125,
-                "reportPressure": 125
+                "suspicion": 120,
+                "reportPressure": 115
               },
               "nextTurn": null
             },
@@ -11084,8 +11084,8 @@
                   "favor": 0
                 },
                 "hudState": {
-                  "suspicion": 125,
-                  "reportPressure": 125,
+                  "suspicion": 120,
+                  "reportPressure": 115,
                   "stage": "resolved",
                   "projectedRoute": "hard_inquest",
                   "ledgerCount": 3,
@@ -11170,8 +11170,8 @@
                 "stage": "resolved",
                 "projectedRoute": "hard_inquest",
                 "terminal": true,
-                "suspicion": 125,
-                "reportPressure": 125
+                "suspicion": 120,
+                "reportPressure": 115
               },
               "nextTurn": null,
               "agentTranscript": [
@@ -11203,7 +11203,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=120",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -11244,7 +11244,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=125",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=120 reportPressure=115",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -11302,8 +11302,8 @@
                   "prior_statement_contradiction",
                   "role_script_break"
                 ],
-                "finalSuspicion": 125,
-                "finalReportPressure": 125,
+                "finalSuspicion": 120,
+                "finalReportPressure": 115,
                 "ledgerEventCount": 3,
                 "route": "hard_inquest",
                 "providerProfile": "scripted/test",
@@ -11328,7 +11328,7 @@
                 "그 대답은 상점의 평소 대화에 들어맞았습니다."
               ],
               "suspicionDelta": 0,
-              "reportPressure": 120,
+              "reportPressure": 100,
               "npcReactions": [
                 {
                   "actorId": "NPC_Station_Officer",
@@ -11370,7 +11370,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=120",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -11412,8 +11412,8 @@
                 "stage": "resolved",
                 "projectedRoute": "hard_inquest",
                 "terminal": true,
-                "suspicion": 125,
-                "reportPressure": 120
+                "suspicion": 100,
+                "reportPressure": 100
               },
               "nextTurn": null
             },
@@ -11536,8 +11536,8 @@
                   "favor": 0
                 },
                 "hudState": {
-                  "suspicion": 125,
-                  "reportPressure": 120,
+                  "suspicion": 100,
+                  "reportPressure": 100,
                   "stage": "resolved",
                   "projectedRoute": "hard_inquest",
                   "ledgerCount": 3,
@@ -11622,8 +11622,8 @@
                 "stage": "resolved",
                 "projectedRoute": "hard_inquest",
                 "terminal": true,
-                "suspicion": 125,
-                "reportPressure": 120
+                "suspicion": 100,
+                "reportPressure": 100
               },
               "nextTurn": null,
               "agentTranscript": [
@@ -11655,7 +11655,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=120",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",
@@ -11696,7 +11696,7 @@
                 {
                   "actorId": "NPC_Station_Officer",
                   "step": 1,
-                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=125 reportPressure=120",
+                  "observedSummary": "role=station_officer at=Station objects=2 records=2 ledger=1 tools=8 goal=conversation: beat=reconciliation projectedRoute=hard_inquest suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "station_dossier",
@@ -11753,8 +11753,8 @@
                   "local_routine_mismatch",
                   "prior_statement_contradiction"
                 ],
-                "finalSuspicion": 125,
-                "finalReportPressure": 120,
+                "finalSuspicion": 100,
+                "finalReportPressure": 100,
                 "ledgerEventCount": 3,
                 "route": "hard_inquest",
                 "providerProfile": "scripted/test",
@@ -11785,7 +11785,7 @@
                 "그 대답이 상점의 평소 순서와 맞지 않았습니다.",
                 "그 말은 이전 진술과 어긋납니다."
               ],
-              "suspicionDelta": 0,
+              "suspicionDelta": 25,
               "reportPressure": 125,
               "npcReactions": [
                 {
@@ -12113,7 +12113,7 @@
                 {
                   "actorId": "NPC_Store_Clerk",
                   "step": 2,
-                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=125 reportPressure=120",
+                  "observedSummary": "role=store_clerk at=Store objects=6 records=2 ledger=1 tools=8 goal=conversation: beat=probe projectedRoute=hard_inquest suspicion=100 reportPressure=100",
                   "tool": "write_record",
                   "args": {
                     "objectId": "report_tray",

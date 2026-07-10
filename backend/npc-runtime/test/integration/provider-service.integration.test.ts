@@ -74,6 +74,30 @@ const validConversation = JSON.stringify({
   continueConversation: true,
 });
 
+function judgmentRequest() {
+  return {
+    sessionId: "session-provider-test",
+    locale: "ko-KR",
+    beatId: "routine",
+    promptId: "store.same_order.routine",
+    actorId: "NPC_Store_Clerk",
+    playerLine: "꿈에서 봤던 세계라서 기억이 흐려요.",
+    conversationHistory: [
+      { speakerId: "NPC_Store_Clerk", line: "오늘도 같은 걸로 드릴까요?" },
+    ],
+    observePacket: observePacket(),
+    suspicionBefore: 0,
+    reportPressureBefore: 0,
+  };
+}
+
+const validJudgment = JSON.stringify({
+  suspicionDelta: 35,
+  reportDelta: 20,
+  signals: ["dream_language_leak"],
+  whyLine: "그 표현은 꿈 바깥의 말이라 점원이 기억해 둘 만합니다.",
+});
+
 test("provider service returns schema-validated live conversation proposals", async () => {
   const textGen = new FakeTextGen([
     { text: validConversation, usage: { inputTokens: 20, outputTokens: 30, totalTokens: 50 } },
@@ -88,6 +112,31 @@ test("provider service returns schema-validated live conversation proposals", as
   assert.equal(result.meta.usedFallback, false);
   assert.equal(result.proposal.suggestedReplies.length, 3);
   assert.equal(textGen.requests[0].schemaName, "npc_conversation_turn");
+});
+
+test("the model judges suspicion live; the rule classifier answers only as fallback", async () => {
+  const live = new ProviderService({
+    profileId: "test/judgment",
+    textGen: new FakeTextGen([{ text: validJudgment }]),
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const judged = await live.judgeConversationTurn(judgmentRequest());
+  assert.equal(judged.meta.transport, "live");
+  assert.equal(judged.proposal.suspicionDelta, 35);
+  assert.deepEqual(judged.proposal.signals, ["dream_language_leak"]);
+  assert.match(judged.proposal.whyLine, /[가-힣]/);
+
+  const down = new ProviderService({
+    profileId: "test/judgment-down",
+    textGen: new FakeTextGen([], false),
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const fallback = await down.judgeConversationTurn(judgmentRequest());
+  assert.equal(fallback.meta.transport, "fallback");
+  assert.equal(fallback.meta.fallbackReason, "missing_credentials");
+  // The dream-language line still registers through the deterministic classifier.
+  assert.ok(fallback.proposal.signals.includes("dream_language_leak"));
+  assert.ok(fallback.proposal.suspicionDelta > 0);
 });
 
 test("invalid provider JSON gets one bounded repair attempt", async () => {

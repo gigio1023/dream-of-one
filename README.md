@@ -32,8 +32,9 @@ The active M2 build uses an LLM-native NPC loop inside the **Same Order
   or report pressure changed.
 - Watch each NPC choose a bounded world tool, read success or failure, and
   propose its next step through a configured LLM provider.
-- Reach four deterministic authority outcomes: **clean cover**, **repair recovery**,
-  **soft report**, and **hard inquest**.
+- Reach a guaranteed session ending. Four canonical arcs — **clean cover**,
+  **repair recovery**, **soft report**, and **hard inquest** — survive as
+  regression scenarios; live play may leave them.
 - Restart immediately and test a different line.
 
 Normal play uses the localhost TypeScript/Bun sidecar and selects a real
@@ -91,17 +92,20 @@ flowchart LR
     P --> R["Runtime validates and applies"]
     R --> C
     P --> A["Player answers, types, or hesitates"]
-    A --> D["Deterministic suspicion and authority"]
+    A --> D["Model judges suspicion; rules clamp and record"]
     D --> V["Visible record and reaction"]
-    V --> O["Cover, repair, report, or inquest"]
+    V --> O["Session ending with cited records"]
     O -->|restart| C
 ```
 
-The LLM owns what an NPC attempts and says. It never owns mutation validity,
-suspicion, records, or verdicts. Each suspicion change carries a visible
-why-line; terminal outcomes cite the exact ledger entries that produced them.
+The LLM is the NPC's mind: it writes the dialogue, judges how suspicious an
+answer is (and says why), and proposes the next world action. Deterministic
+rules enforce validity only — per-NPC sight and context separation, tool
+validation of every mutation, clamped suspicion deltas, and a session that
+always ends. Each suspicion change carries a visible why-line; terminal
+outcomes cite the exact ledger entries that produced them.
 
-| Route | What the player does | What the world does |
+| Canonical arc (regression scenarios) | What the player does | What the world does |
 | --- | --- | --- |
 | **Clean cover · 무사 통과** | Stays consistent | Leaves no adverse record |
 | **Repair · 수습** | Slips, then repairs | Attaches a correction; no report |
@@ -117,9 +121,9 @@ the three ledger entries used to open the formal inquiry.*
 
 | Layer | Owns | Does not own |
 | --- | --- | --- |
-| **Godot client** | World, input, HUD | Rules and verdicts |
-| **TypeScript runtime** | Session rules and records | Rendering |
-| **Provider ports** | Wording, replies, tools | Authority or mutation |
+| **Godot client** | World, input, HUD | Truth of any kind |
+| **TypeScript runtime** | Validity: clamps, tool validation, visibility, records, session ending | The content of a judgment |
+| **Provider ports** | Wording, replies, suspicion judgment, next tool proposals | Direct world mutation |
 
 `NpcProposalPort` is the only AI dependency visible to game logic. Responses,
 Chat Completions, deterministic fallback, and scripted tests all implement the
@@ -178,9 +182,10 @@ The full check list and test policy live in
 | Path | Purpose |
 | --- | --- |
 | [Godot client](godot/) | 2D scenes, scripts, assets, and smoke tools |
-| [NPC runtime](backend/npc-runtime/) | Provider ports, agent loop, deterministic authority, and HTTP API |
+| [NPC runtime](backend/npc-runtime/) | Provider ports, agent loop, deterministic validity, and HTTP API |
 | [Documentation](docs/) | Direction, design, art, architecture, and plans |
 | [Scenario canon](docs/scenario/) | Korean storylets and dialogue |
+| [Agent skills](.agents/skills/) | Repo-specific skills for coding agents (Claude Code reads them via the `.claude/skills` symlink) |
 | [Runtime artifacts](data/evidence/) | Historical and generated check output |
 
 ## Documentation
@@ -192,6 +197,7 @@ The full check list and test policy live in
 | The active implementation milestone | [M2: LLM-native agent loop](docs/plan/m2-provider-ports.md) |
 | The Godot / runtime authority boundary | [Architecture](docs/tech/architecture.md) |
 | Every active project document | [Documentation index](docs/README.md) |
+| Working here as a coding agent | [AGENTS.md](AGENTS.md) and [repo skills](.agents/skills/README.md) |
 | Local contribution and commit workflow | [Contributing](CONTRIBUTING.md) |
 | Why the previous 3D iteration was retired | [v1 postmortem](docs/history/v1-postmortem.md) |
 

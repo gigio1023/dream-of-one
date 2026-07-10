@@ -1,0 +1,45 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/npc_2d.gd" id="1_npc"]
+
+[sub_resource type="CircleShape2D" id="area_shape"]
+radius = 9.0
+
+[node name="NPC2D" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_npc")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+offset = Vector2(0, -8)
+
+[node name="ReactionMarker" type="Label" parent="."]
+offset_left = -24.0
+offset_top = -34.0
+offset_right = 24.0
+offset_bottom = -20.0
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+vertical_alignment = 1
+text = ""
+
+[node name="SpeechBubble" type="Label" parent="."]
+offset_left = -40.0
+offset_top = -50.0
+offset_right = 40.0
+offset_bottom = -34.0
+theme_override_colors/font_color = Color(0.1, 0.1, 0.12, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+text = ""
+
+[node name="InteractionArea" type="Area2D" parent="."]
+position = Vector2(0, -6)
+collision_layer = 2
+collision_mask = 0
+
+[node name="AreaShape" type="CollisionShape2D" parent="InteractionArea"]
+shape = SubResource("area_shape")

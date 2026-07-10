@@ -1,0 +1,283 @@
+{
+  "contractVersion": "v1",
+  "generator": "godot-local-stub",
+  "note": "Local stub fixture for the Same Order storylet. Authored by the M1 client work order because backend/npc-runtime/data/fixtures/session-api-examples.json was absent. Shapes follow the pinned Session API contract in the M1 work order. A backend-generated fixture, when present, supersedes this file.",
+  "storyletId": "same-order",
+  "locale": "ko",
+  "thresholds": { "share": 50, "report": 70, "inquest": 100 },
+  "signalModel": {
+    "local_routine_mismatch":        { "suspicion": 35, "report": 30, "whyKey": "why.local_routine_mismatch" },
+    "dream_language_leak":           { "suspicion": 60, "report": 55, "whyKey": "why.dream_language_leak" },
+    "memory_gap_admission":          { "suspicion": 20, "report": 10, "whyKey": "why.memory_gap_admission" },
+    "role_script_break":             { "suspicion": 20, "report": 15, "whyKey": "why.role_script_break" },
+    "prior_statement_contradiction": { "suspicion": 40, "report": 35, "whyKey": "why.prior_statement_contradiction" },
+    "authority_evasion":             { "suspicion": 25, "report": 25, "whyKey": "why.authority_evasion" },
+    "over_explanation":              { "suspicion": 15, "report": 10, "whyKey": "why.over_explanation" },
+    "response_hesitation":           { "suspicion": 10, "report": 5,  "whyKey": "why.response_hesitation" }
+  },
+  "routeResolution": [
+    { "route": "hard_inquest",    "ifSignalsAny": ["dream_language_leak"] },
+    { "route": "hard_inquest",    "ifSuspicionGte": 100 },
+    { "route": "soft_report",     "ifReportGte": 70 },
+    { "route": "soft_report",     "ifSignalsAny": ["role_script_break", "prior_statement_contradiction"] },
+    { "route": "repair_recovery", "ifSignalsAny": ["memory_gap_admission"] },
+    { "route": "clean_cover",     "default": true }
+  ],
+  "start": {
+    "request": { "storyletId": "same-order", "locale": "ko" },
+    "response": {
+      "sessionId": "sess-same-order-fixture",
+      "worldSnapshot": {
+        "landmarks": [
+          { "id": "store",   "labelKey": "world.location.store",   "kind": "interior" },
+          { "id": "street",  "labelKey": "world.location.street",  "kind": "exterior" },
+          { "id": "station", "labelKey": "world.location.station", "kind": "interior" }
+        ],
+        "actors": [
+          { "actorId": "player",              "labelKey": "npc.player.label",              "roleKey": "npc.player.role",              "sprite": 0, "accent": "#7ec8a0", "home": "store" },
+          { "actorId": "NPC_Store_Clerk",     "labelKey": "npc.NPC_Store_Clerk.label",     "roleKey": "npc.NPC_Store_Clerk.role",     "sprite": 3, "accent": "#e2a33d", "home": "store" },
+          { "actorId": "NPC_Store_Manager",   "labelKey": "npc.NPC_Store_Manager.label",   "roleKey": "npc.NPC_Store_Manager.role",   "sprite": 4, "accent": "#c8643c", "home": "store" },
+          { "actorId": "NPC_Waiting_Customer","labelKey": "npc.NPC_Waiting_Customer.label","roleKey": "npc.NPC_Waiting_Customer.role","sprite": 1, "accent": "#c0505a", "home": "store" },
+          { "actorId": "NPC_Station_Officer", "labelKey": "npc.NPC_Station_Officer.label", "roleKey": "npc.NPC_Station_Officer.role", "sprite": 2, "accent": "#5b78a8", "home": "station" }
+        ],
+        "recordProps": [
+          { "propId": "queue_marker",     "labelKey": "prop.queue_marker.label",     "descKey": "prop.queue_marker.desc",     "state": "player_waiting", "home": "store",   "readers": ["NPC_Store_Clerk", "NPC_Waiting_Customer"] },
+          { "propId": "store_counter",    "labelKey": "prop.store_counter.label",    "descKey": "prop.store_counter.desc",    "state": "serving",        "home": "store",   "readers": ["NPC_Store_Clerk", "NPC_Store_Manager", "NPC_Waiting_Customer"] },
+          { "propId": "usual_order_cue",  "labelKey": "prop.usual_order_cue.label",  "descKey": "prop.usual_order_cue.desc",  "state": "read",           "home": "store",   "readers": ["NPC_Store_Clerk", "NPC_Store_Manager"] },
+          { "propId": "receipt_tray",     "labelKey": "prop.receipt_tray.label",     "descKey": "prop.receipt_tray.desc",     "state": "blank",          "home": "store",   "readers": ["NPC_Store_Clerk", "NPC_Store_Manager"] },
+          { "propId": "correction_slip",  "labelKey": "prop.correction_slip.label",  "descKey": "prop.correction_slip.desc",  "state": "absent",         "home": "store",   "readers": ["NPC_Store_Clerk", "NPC_Store_Manager"] },
+          { "propId": "report_tray",      "labelKey": "prop.report_tray.label",      "descKey": "prop.report_tray.desc",      "state": "empty",          "home": "store",   "readers": ["NPC_Store_Manager", "NPC_Station_Officer"] },
+          { "propId": "station_dossier",  "labelKey": "prop.station_dossier.label",  "descKey": "prop.station_dossier.desc",  "state": "absent",         "home": "station", "readers": ["NPC_Station_Officer"] }
+        ],
+        "civicEconomy": { "accountCredit": 3, "localTrust": 50, "recordBurden": 0, "stationAttention": 0 },
+        "hudState": { "suspicion": 0, "reportPressure": 0, "band": "low", "latestLedger": "", "routeState": "in_progress" }
+      },
+      "ledgerEvents": [
+        { "id": "ev-000", "kind": "session_started", "summaryKey": "ledger.session_started", "actorId": "player", "objectId": "", "toState": "" }
+      ]
+    }
+  },
+  "firstBeat": "store.same_order.routine",
+  "beats": {
+    "store.same_order.routine": {
+      "location": "store",
+      "actorId": "NPC_Store_Clerk",
+      "promptKey": "beat.store.same_order.routine.prompt",
+      "allowFreeInput": false,
+      "choices": [
+        {
+          "choiceId": "store.same_order.safe",
+          "textKey": "choice.store.same_order.safe",
+          "intent": "safe",
+          "signals": [],
+          "npcResponseKey": "npcresp.store.same_order.safe",
+          "ledgerEvents": [
+            { "kind": "store_sale_normal", "summaryKey": "ledger.store_sale_normal", "actorId": "NPC_Store_Clerk", "objectId": "receipt_tray", "toState": "normal" }
+          ],
+          "npcReactions": [ { "actorId": "NPC_Store_Clerk", "reaction": "calm" } ],
+          "next": "store.same_order.probe"
+        },
+        {
+          "choiceId": "store.same_order.repair",
+          "textKey": "choice.store.same_order.repair",
+          "intent": "repair",
+          "signals": ["memory_gap_admission"],
+          "npcResponseKey": "npcresp.store.same_order.repair",
+          "ledgerEvents": [
+            { "kind": "usual_order_cited", "summaryKey": "ledger.usual_order_cited", "actorId": "NPC_Store_Clerk", "objectId": "usual_order_cue", "toState": "cited" }
+          ],
+          "npcReactions": [ { "actorId": "NPC_Store_Clerk", "reaction": "probing" } ],
+          "next": "store.same_order.probe"
+        },
+        {
+          "choiceId": "store.same_order.risky",
+          "textKey": "choice.store.same_order.risky",
+          "intent": "risky",
+          "signals": ["local_routine_mismatch"],
+          "npcResponseKey": "npcresp.store.same_order.risky",
+          "ledgerEvents": [
+            { "kind": "store_receipt_marked", "summaryKey": "ledger.store_receipt_marked", "actorId": "NPC_Store_Clerk", "objectId": "receipt_tray", "toState": "marked" }
+          ],
+          "npcReactions": [
+            { "actorId": "NPC_Store_Clerk", "reaction": "uneasy" },
+            { "actorId": "NPC_Waiting_Customer", "reaction": "noted", "influenceFrom": "NPC_Store_Clerk" }
+          ],
+          "next": "store.same_order.probe"
+        }
+      ]
+    },
+    "store.same_order.probe": {
+      "location": "store",
+      "actorId": "NPC_Store_Clerk",
+      "promptKey": "beat.store.same_order.probe.prompt",
+      "allowFreeInput": true,
+      "choices": [
+        {
+          "choiceId": "store.same_order.probe.safe",
+          "textKey": "choice.store.same_order.probe.safe",
+          "intent": "safe",
+          "signals": [],
+          "npcResponseKey": "npcresp.store.same_order.probe.safe",
+          "ledgerEvents": [],
+          "npcReactions": [ { "actorId": "NPC_Store_Clerk", "reaction": "settled" } ],
+          "next": ""
+        },
+        {
+          "choiceId": "store.same_order.probe.repair",
+          "textKey": "choice.store.same_order.probe.repair",
+          "intent": "repair",
+          "signals": ["memory_gap_admission"],
+          "npcResponseKey": "npcresp.store.same_order.probe.repair",
+          "ledgerEvents": [
+            { "kind": "correction_offered", "summaryKey": "ledger.correction_offered", "actorId": "NPC_Store_Clerk", "objectId": "correction_slip", "toState": "offered" }
+          ],
+          "npcReactions": [ { "actorId": "NPC_Store_Clerk", "reaction": "noted" } ],
+          "next": ""
+        },
+        {
+          "choiceId": "store.same_order.probe.risky",
+          "textKey": "choice.store.same_order.probe.risky",
+          "intent": "risky",
+          "signals": ["role_script_break", "prior_statement_contradiction"],
+          "npcResponseKey": "npcresp.store.same_order.probe.risky",
+          "ledgerEvents": [
+            { "kind": "store_exception_reported", "summaryKey": "ledger.store_exception_reported", "actorId": "NPC_Store_Manager", "objectId": "report_tray", "toState": "pending" },
+            { "kind": "service_paused", "summaryKey": "ledger.service_paused", "actorId": "NPC_Store_Manager", "objectId": "store_counter", "toState": "paused" }
+          ],
+          "npcReactions": [
+            { "actorId": "NPC_Store_Clerk", "reaction": "reported" },
+            { "actorId": "NPC_Store_Manager", "reaction": "paused", "influenceFrom": "NPC_Store_Clerk" }
+          ],
+          "next": ""
+        }
+      ],
+      "freeInputRules": [
+        {
+          "anyKeywords": ["꿈", "바깥", "방금 들어", "여기 사람이 아니", "깨어", "다른 세계"],
+          "signals": ["dream_language_leak", "prior_statement_contradiction"],
+          "npcResponseKey": "npcresp.store.same_order.probe.free",
+          "ledgerEvents": [
+            { "kind": "store_exception_reported", "summaryKey": "ledger.store_exception_reported", "actorId": "NPC_Store_Clerk", "objectId": "report_tray", "toState": "pending" },
+            { "kind": "store_report_escalated", "summaryKey": "ledger.store_report_escalated", "actorId": "NPC_Store_Manager", "objectId": "report_tray", "toState": "forwarded" }
+          ],
+          "npcReactions": [
+            { "actorId": "NPC_Store_Clerk", "reaction": "reported" },
+            { "actorId": "NPC_Store_Manager", "reaction": "forwarded", "influenceFrom": "NPC_Store_Clerk" }
+          ],
+          "next": "station.same_order.reconciliation"
+        },
+        {
+          "anyKeywords": ["몰라", "기억", "흐릿", "헷갈", "확인"],
+          "signals": ["memory_gap_admission"],
+          "npcResponseKey": "npcresp.store.same_order.probe.repair",
+          "ledgerEvents": [
+            { "kind": "correction_offered", "summaryKey": "ledger.correction_offered", "actorId": "NPC_Store_Clerk", "objectId": "correction_slip", "toState": "offered" }
+          ],
+          "npcReactions": [ { "actorId": "NPC_Store_Clerk", "reaction": "noted" } ],
+          "next": ""
+        },
+        {
+          "default": true,
+          "signals": [],
+          "npcResponseKey": "npcresp.store.same_order.probe.safe",
+          "ledgerEvents": [],
+          "npcReactions": [ { "actorId": "NPC_Store_Clerk", "reaction": "settled" } ],
+          "next": ""
+        }
+      ]
+    },
+    "station.same_order.reconciliation": {
+      "location": "station",
+      "actorId": "NPC_Station_Officer",
+      "promptKey": "beat.station.same_order.reconciliation.prompt",
+      "allowFreeInput": true,
+      "choices": [
+        {
+          "choiceId": "station.same_order.reconciliation.safe",
+          "textKey": "choice.station.same_order.reconciliation.safe",
+          "intent": "safe",
+          "signals": [],
+          "npcResponseKey": "npcresp.station.same_order.reconciliation.safe",
+          "ledgerEvents": [
+            { "kind": "station_record_cited", "summaryKey": "ledger.station_record_cited", "actorId": "NPC_Station_Officer", "objectId": "station_dossier", "toState": "cited" }
+          ],
+          "npcReactions": [ { "actorId": "NPC_Station_Officer", "reaction": "cited" } ],
+          "next": ""
+        },
+        {
+          "choiceId": "station.same_order.reconciliation.repair",
+          "textKey": "choice.station.same_order.reconciliation.repair",
+          "intent": "repair",
+          "signals": ["authority_evasion"],
+          "npcResponseKey": "npcresp.station.same_order.reconciliation.repair",
+          "ledgerEvents": [
+            { "kind": "station_record_cited", "summaryKey": "ledger.station_record_cited", "actorId": "NPC_Station_Officer", "objectId": "station_dossier", "toState": "cited" }
+          ],
+          "npcReactions": [ { "actorId": "NPC_Station_Officer", "reaction": "cited" } ],
+          "next": ""
+        },
+        {
+          "choiceId": "station.same_order.reconciliation.risky",
+          "textKey": "choice.station.same_order.reconciliation.risky",
+          "intent": "risky",
+          "signals": ["prior_statement_contradiction", "dream_language_leak"],
+          "npcResponseKey": "npcresp.station.same_order.reconciliation.risky",
+          "ledgerEvents": [
+            { "kind": "station_record_cited", "summaryKey": "ledger.station_record_cited", "actorId": "NPC_Station_Officer", "objectId": "station_dossier", "toState": "cited" }
+          ],
+          "npcReactions": [ { "actorId": "NPC_Station_Officer", "reaction": "cited" } ],
+          "next": ""
+        }
+      ],
+      "freeInputRules": [
+        {
+          "default": true,
+          "signals": ["dream_language_leak"],
+          "npcResponseKey": "npcresp.station.same_order.reconciliation.risky",
+          "ledgerEvents": [
+            { "kind": "station_record_cited", "summaryKey": "ledger.station_record_cited", "actorId": "NPC_Station_Officer", "objectId": "station_dossier", "toState": "cited" }
+          ],
+          "npcReactions": [ { "actorId": "NPC_Station_Officer", "reaction": "cited" } ],
+          "next": ""
+        }
+      ]
+    }
+  },
+  "routeEnds": {
+    "clean_cover": {
+      "route": "clean_cover",
+      "outcomePanel": { "titleKey": "outcome.clean_cover.title", "bodyKey": "outcome.clean_cover.body", "citedLedgerKinds": ["store_sale_normal"] },
+      "telemetrySummary": { "reportForwarded": false, "inquestOpened": false }
+    },
+    "repair_recovery": {
+      "route": "repair_recovery",
+      "outcomePanel": { "titleKey": "outcome.repair_recovery.title", "bodyKey": "outcome.repair_recovery.body", "citedLedgerKinds": ["usual_order_cited", "correction_offered"] },
+      "telemetrySummary": { "reportForwarded": false, "inquestOpened": false }
+    },
+    "soft_report": {
+      "route": "soft_report",
+      "outcomePanel": { "titleKey": "outcome.soft_report.title", "bodyKey": "outcome.soft_report.body", "citedLedgerKinds": ["store_exception_reported", "service_paused"] },
+      "telemetrySummary": { "reportForwarded": true, "inquestOpened": false }
+    },
+    "hard_inquest": {
+      "route": "hard_inquest",
+      "outcomePanel": { "titleKey": "outcome.hard_inquest.title", "bodyKey": "outcome.hard_inquest.body", "citedLedgerKinds": ["store_report_escalated", "station_record_cited"] },
+      "telemetrySummary": { "reportForwarded": true, "inquestOpened": true }
+    }
+  },
+  "answerExamples": [
+    {
+      "comment": "Illustrative POST /v1/session/answer response shape (risky routine choice).",
+      "request": { "sessionId": "sess-same-order-fixture", "turnId": "turn-1", "answer": { "type": "choice", "choiceId": "store.same_order.risky" } },
+      "response": {
+        "signals": ["local_routine_mismatch"],
+        "whyLines": ["그 말은 점원이 전제한 단골 루틴과 맞지 않습니다."],
+        "suspicionDelta": 35,
+        "reportPressure": 30,
+        "npcReactions": [ { "actorId": "NPC_Store_Clerk", "reaction": "uneasy" } ],
+        "ledgerEvents": [ { "id": "ev-002", "kind": "store_receipt_marked", "actorId": "NPC_Store_Clerk", "objectId": "receipt_tray", "toState": "marked" } ],
+        "routeState": "in_progress"
+      }
+    }
+  ]
+}

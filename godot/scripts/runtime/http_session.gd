@@ -4,11 +4,13 @@ extends Node
 ## suspicion, record, route, and terminal decision remains backend-owned.
 
 const RuntimeBridge := preload("res://scripts/runtime/runtime_bridge.gd")
-## Provider-bound calls (start/answer/npc decision) wait on live generation
-## and judgment; M2 raised the runtime budgets for judgment-grade calls, so
-## the client must outwait them instead of timing out at the transport
-## default and re-submitting through the hesitation path.
-const PROVIDER_CALL_TIMEOUT_SECONDS := 60.0
+## These limits cover the runtime's valid provider-repair path. Answers may
+## also queue behind a serialized ambient decision for the same session; a
+## client timeout does not cancel that backend mutation, so it must outwait
+## both operations instead of retrying a turn whose state is still changing.
+const START_TIMEOUT_SECONDS := 60.0
+const DECISION_TIMEOUT_SECONDS := 180.0
+const ANSWER_TIMEOUT_SECONDS := 300.0
 
 var _bridge: Node = null
 var _session_id := ""
@@ -32,7 +34,7 @@ func start(storylet_id: String, locale: String) -> Dictionary:
 	var result: Dictionary = await _bridge.post_json("/v1/session/start", {
 		"storyletId": storylet_id,
 		"locale": locale,
-	}, PROVIDER_CALL_TIMEOUT_SECONDS)
+	}, START_TIMEOUT_SECONDS)
 	var body := _response_body(result, "session_start_failed")
 	if not body.has("error"):
 		_session_id = str(body.get("sessionId", ""))
@@ -56,7 +58,7 @@ func answer(requested_session_id: String, turn_id: String, payload: Dictionary) 
 		"sessionId": requested_session_id,
 		"turnId": turn_id,
 		"answer": payload,
-	}, PROVIDER_CALL_TIMEOUT_SECONDS)
+	}, ANSWER_TIMEOUT_SECONDS)
 	var body := _response_body(result, "session_answer_failed")
 	if not body.has("error"):
 		_turn_count += 1
@@ -72,7 +74,7 @@ func npc_decision(beat: int) -> Dictionary:
 	var result: Dictionary = await _bridge.post_json("/v1/npc/decision", {
 		"sessionId": _session_id,
 		"beat": beat,
-	}, PROVIDER_CALL_TIMEOUT_SECONDS)
+	}, DECISION_TIMEOUT_SECONDS)
 	return _response_body(result, "npc_decision_failed")
 
 func end(requested_session_id: String) -> Dictionary:

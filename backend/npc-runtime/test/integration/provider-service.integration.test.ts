@@ -195,6 +195,8 @@ test("production registry contains no scripted profile", () => {
   const config = loadProviderConfig();
   assert.equal(config.selection.default, "openai/gpt-5.4-mini");
   assert.equal(Object.keys(config.profiles).some(profile => profile.startsWith("scripted/")), false);
+  assert.equal(config.profiles["modelscope/qwen3.7-plus"]?.model, "Qwen-Ambassador/Qwen3.7-Plus");
+  assert.equal(config.profiles["modelscope/qwen3.7-plus"]?.params.enableThinking, false);
 });
 
 test("OpenAI-compatible profiles require their configured base URL and local may be keyless", async () => {

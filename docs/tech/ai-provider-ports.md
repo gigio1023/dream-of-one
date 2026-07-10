@@ -54,12 +54,15 @@ Available adapter shapes:
 | Profile | Adapter | Credentials |
 | --- | --- | --- |
 | `openai/gpt-5.4-mini` | Responses | `OPENAI_API_KEY` |
-| `modelscope/qwen3.7-plus` | Chat Completions | ModelScope env vars |
+| `modelscope/qwen3.7-plus` (`Qwen-Ambassador/Qwen3.7-Plus`) | Chat Completions | ModelScope env vars |
 | `local/openai-compatible` | Chat Completions | `LOCAL_LLM_BASE_URL` |
 
 Secrets are environment variables and never appear in config, logs, fixtures,
 or committed files.
 The ModelScope profile reads `MODELSCOPE_BASE_URL` and `MODELSCOPE_API_KEY`.
+It uses the private `Qwen-Ambassador/Qwen3.7-Plus` model id and disables Qwen
+thinking for the bounded JSON envelope; this keeps reasoning tokens from
+consuming the short response budget before the JSON body is emitted.
 
 ## Envelope and failure handling
 
@@ -101,6 +104,7 @@ GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/live-route-parity.sh
 
 # Manual and spend-bearing; never CI
 bun run --cwd backend/npc-runtime provider:smoke -- --profile openai/gpt-5.4-mini
+bun run --cwd backend/npc-runtime provider:smoke -- --profile modelscope/qwen3.7-plus
 ```
 
 Under the scripted test adapter, route outcomes are deterministic for a given

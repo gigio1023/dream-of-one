@@ -30,6 +30,7 @@ GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/live-route-parity.sh
 
 # Opt-in real provider smoke; requires the selected profile's credentials
 bun run --cwd backend/npc-runtime provider:smoke -- --profile openai/gpt-5.4-mini
+bun run --cwd backend/npc-runtime provider:smoke -- --profile modelscope/qwen3.7-plus
 ```
 
 CI runs the Bun check on backend changes (existing workflow). Godot smokes

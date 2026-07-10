@@ -54,13 +54,14 @@ and generated fixtures.
 
 ## Acceptance
 
-- [ ] One opt-in live provider smoke succeeds (conversation + judgment) with
-      the checked-in default profile. **Run before everything else once
-      credentials exist on a dev machine; this is the milestone's declared
-      risk.** *Blocked 2026-07-10: `provider:smoke` now exercises both calls,
-      but `OPENAI_API_KEY` is not set on this machine (no shell env, no repo
-      auth store, 1Password CLI signed out). Both calls fall back cleanly with
-      `missing_credentials`; the tool exits non-zero as intended.*
+- [x] One opt-in live provider smoke succeeds (conversation + judgment) with
+      the checked-in default profile. *Verified 2026-07-10 with
+      `openai/gpt-5.4-mini`: both calls used live transport with no fallback
+      (706 conversation tokens, 816 judgment tokens). The same smoke also
+      passed with `modelscope/qwen3.7-plus` after aligning its private model id
+      and JSON-instructed request shape (748 conversation tokens, 775 judgment
+      tokens). Credentials were process-local and were not copied into the
+      repository.*
 - [ ] Playing in a real window: a typed improvised answer moves suspicion
       with a model-authored why-line on the HUD (fallback label when the
       provider is down).

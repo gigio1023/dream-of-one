@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import type { ChatCompletionCreateParamsNonStreaming } from "openai/resources/chat/completions";
 import type {
   ProviderFailureReason,
   TextGenPort,
@@ -14,6 +15,7 @@ export interface ChatCompletionsAdapterOptions {
   model: string;
   maxTokens: number;
   temperature?: number;
+  enableThinking?: boolean;
   timeoutMs: number;
   structured: "json-schema" | "json-instructed";
 }
@@ -56,17 +58,27 @@ export class ChatCompletionsAdapter implements TextGenPort {
             },
           }
         : { type: "json_object" as const };
-    const completion = await this.client.chat.completions.create({
+    const instructions =
+      this.options.structured === "json-instructed"
+        ? `${request.instructions}\nJSON Schema (${request.schemaName}): ${JSON.stringify(request.jsonSchema)}`
+        : request.instructions;
+    const body: ChatCompletionCreateParamsNonStreaming & {
+      chat_template_kwargs?: { enable_thinking: boolean };
+    } = {
       model: this.options.model,
       messages: [
-        { role: "developer", content: request.instructions },
+        { role: "system", content: instructions },
         { role: "user", content: request.input },
       ],
       response_format: responseFormat,
       max_tokens: this.options.maxTokens,
       temperature: this.options.temperature,
-    });
-    const text = completion.choices[0]?.message.content;
+      ...(this.options.enableThinking === undefined
+        ? {}
+        : { chat_template_kwargs: { enable_thinking: this.options.enableThinking } }),
+    };
+    const completion = await this.client.chat.completions.create(body);
+    const text = completion.choices?.[0]?.message.content;
     if (!text) {
       throw new Error("chat completion returned no message content");
     }

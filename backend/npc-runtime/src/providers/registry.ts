@@ -19,6 +19,7 @@ const profileSchema = z
         temperature: z.number().min(0).max(2).optional(),
         maxTokens: z.number().int().positive().default(400),
         reasoningEffort: z.enum(["none", "minimal", "low", "medium", "high", "xhigh"]).optional(),
+        enableThinking: z.boolean().optional(),
       })
       .default({ maxTokens: 400 }),
     structured: z.enum(["json-schema", "json-instructed"]).default("json-schema"),
@@ -89,6 +90,7 @@ export function createProviderFromEnvironment(
       model: profile.model,
       maxTokens: profile.params.maxTokens,
       temperature: profile.params.temperature,
+      enableThinking: profile.params.enableThinking,
       timeoutMs: config.runtime.timeoutMs,
       structured: profile.structured,
     });

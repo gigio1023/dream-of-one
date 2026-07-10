@@ -23,6 +23,9 @@ const WORLD_VIEW_LADDER := [
 	{"minHeight": 900, "view": Vector2i(480, 270)},
 	{"minHeight": 0, "view": Vector2i(320, 180)},
 ]
+## User-selectable HUD scale (Esc settings), multiplied on top of the
+## height-proportional base. 1.0 is regular PC density.
+const UI_SCALE_VALUES := [0.8, 1.0, 1.25, 1.5]
 
 @onready var _world_container: SubViewportContainer = $WorldFrame/WorldContainer
 @onready var _world_viewport: SubViewport = $WorldFrame/WorldContainer/WorldViewport
@@ -40,6 +43,7 @@ var _transition_target := ""
 var _resolving_answer := false
 var _ambient_beat := 0
 var _output_preset := "1080p"
+var _user_ui_scale := 1.0
 var _debug_visible := false
 
 func _ready() -> void:
@@ -56,6 +60,10 @@ func _ready() -> void:
 	_hud.conversation_closed.connect(_refresh_player_input)
 	_hud.resolution_requested.connect(_on_resolution_requested)
 	_hud.configure_resolution_options(OUTPUT_PRESETS, _output_preset)
+	_hud.ui_scale_requested.connect(_on_ui_scale_requested)
+	_user_ui_scale = _load_ui_scale()
+	_hud.set_user_scale(_user_ui_scale)
+	_hud.configure_ui_scale_options(_ui_scale_options(), _user_ui_scale)
 	call_deferred("_begin_session")
 
 func _layout_world_viewport() -> void:
@@ -114,11 +122,37 @@ func _load_output_preset() -> String:
 	return preset_id if not _output_preset_spec(preset_id).is_empty() else "1080p"
 
 func _save_output_preset() -> void:
+	_save_display_config()
+
+func _save_display_config() -> void:
 	var config := ConfigFile.new()
+	config.load(DISPLAY_CONFIG_PATH)
 	config.set_value("display", "output_preset", _output_preset)
+	config.set_value("display", "ui_scale", _user_ui_scale)
 	var error := config.save(DISPLAY_CONFIG_PATH)
 	if error != OK:
-		push_warning("Could not save display preset: %s" % error_string(error))
+		push_warning("Could not save display config: %s" % error_string(error))
+
+func _load_ui_scale() -> float:
+	var config := ConfigFile.new()
+	if config.load(DISPLAY_CONFIG_PATH) != OK:
+		return 1.0
+	return clampf(float(config.get_value("display", "ui_scale", 1.0)), 0.5, 2.0)
+
+func _ui_scale_options() -> Array:
+	var options: Array = []
+	for value_variant in UI_SCALE_VALUES:
+		var value := float(value_variant)
+		options.append({
+			"value": value,
+			"label": _t("hud.scale.%d" % roundi(value * 100)),
+		})
+	return options
+
+func _on_ui_scale_requested(value: float) -> void:
+	_user_ui_scale = clampf(value, 0.5, 2.0)
+	_hud.set_user_scale(_user_ui_scale)
+	_save_display_config()
 
 func _process(_delta: float) -> void:
 	_sync_actor_overlays()
@@ -143,6 +177,9 @@ func _sync_actor_overlays() -> void:
 	var overlays: Array = _location.call("actor_overlay_payloads")
 	var positioned: Array[Dictionary] = []
 	var canvas_transform := _world_viewport.get_canvas_transform()
+	var speaker_id := ""
+	if _hud.conversation_visible() and not _current_turn.is_empty():
+		speaker_id = str(_current_turn.get("speakerId", _current_turn.get("actorId", "")))
 	for payload_value in overlays:
 		if not payload_value is Dictionary:
 			continue
@@ -150,6 +187,7 @@ func _sync_actor_overlays() -> void:
 		var world_position := Vector2(payload.get("worldPosition", Vector2.ZERO))
 		var viewport_position := canvas_transform * world_position
 		payload["screenPosition"] = _world_container.global_position + viewport_position * _world_container.scale
+		payload["speaking"] = not speaker_id.is_empty() and str(payload.get("actorId", "")) == speaker_id
 		positioned.append(payload)
 	_hud.sync_actor_overlays(positioned)
 

@@ -46,8 +46,12 @@ symmetrical and fits the dream-logic undertone.
 
 ## UI
 
-- Diegetic-leaning HUD: conversation panel (prompt, three choices, typed
-  input), suspicion/pressure meter, record/ledger line, outcome panels.
+- Diegetic-leaning HUD, world-first: a compact case-file chip (top-left) for
+  location/pressure/record line, a bottom-sheet conversation panel (prompt,
+  three choices, typed input) that keeps the speaker visible, quiet NPC
+  nameplates, and outcome panels. Display and provider settings live behind
+  Esc, never in permanent chrome. Body text targets regular PC density
+  (~18px at 1080p) with a user-adjustable UI scale for larger text.
 - Pixel font pair: one KO-capable pixel font for body (e.g. Galmuri/NeoDunggeunmo
   family — verify license at adoption), one accent font for Station officialese.
 - Follow the LimeZu Modern User Interface pack style where it fits; UI is the

@@ -85,10 +85,13 @@ the same narrow view instead of showing more world.)
 
 Normal play always exposes the facts needed for social reading:
 
-- NPC identity and role;
-- the NPC's current speech bubble;
+- NPC identity and role (quiet nameplate with a role-accent tick, plus the
+  role-accent ring under each sprite);
+- the NPC's current speech bubble (gist in-world, full line in inspect);
 - a short reaction marker;
-- the NPC's current social action.
+- the NPC's current social action — on the nameplate for the conversation
+  speaker, the focused NPC, and any recently changed action, and always in
+  inspect. A permanent per-NPC card is explicitly not required.
 
 The immediate influence line and action source appear briefly when an event
 lands, then clear. Detailed judgment reasons, longer relationship or memory

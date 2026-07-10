@@ -13,12 +13,15 @@ device). The active project under `godot/` is the M2 provider-backed client.
   domains. Locations draw a 10-tile pavement apron and the camera (zoom 1)
   clamps to it, so wide views never expose void. The minimum window is
   1280×720.
-- HUD controls render in the native window viewport and scale their typography
-  and minimum control sizes from the selected output height. This keeps text
-  crisp and lets containers reflow independently from the pixel-art world.
-  Pixel snap remains on for 2D transforms and vertices.
-- The display selector persists its output preset under `user://`. Automated
-  visual checks may override it process-locally with
+- HUD controls render in the native window viewport. Typography scales from
+  window height at regular PC density (body ≈19px at 1080p, ≈39px at 4K),
+  multiplied by a user-selectable UI scale (80/100/125/150%) in the Esc
+  settings sheet. This keeps text crisp and lets containers reflow
+  independently from the pixel-art world. Pixel snap remains on for 2D
+  transforms and vertices.
+- Output preset and UI scale persist under `user://display.cfg`; the selectors
+  live in the Esc settings sheet, not in permanent gameplay chrome. Automated
+  visual checks may override the preset process-locally with
   `DREAM_OUTPUT_PRESET=720p|1080p|1440p|4k`.
 - Input map: 4-direction move (WASD/arrows), `interact` (E/Space),
   `choice_1..3` (1/2/3), `open_ledger` (Tab), `cancel` (Esc). Full
@@ -71,8 +74,10 @@ scene or art code.
 
 ## HUD behavior rules
 
-- Conversation is modal but the world stays live behind it (NPCs keep their
-  loops running — being watched *while* answering is the point).
+- Conversation is a bottom sheet (~68% width, bottom ~36% height), not a
+  modal wall: the speaker, other NPCs, and their reactions stay visible while
+  answering, and the world stays live behind it (NPCs keep their loops
+  running — being watched *while* answering is the point).
 - Suggested replies and typed input submit the displayed text into the same
   judgment path — the NPC's model reads the content either way; a subtle
   "recorded" stamp animation lands on submit (recorded-statement fiction,
@@ -81,10 +86,16 @@ scene or art code.
   the hesitation event to the runtime — visible as the NPC's patience cue.
 - Every consequence surfaced within 1s of its ledger event: pressure line
   update, reaction marker, influence link, or bubble. No silent state changes.
-- Native actor cards follow NPC world positions and always show identity/role
-  plus current social action. Judgment reasons, provider/action source, record
-  detail, and recent causality stay in inspect/ledger views. Raw ids and state
-  labels are hidden unless F3 debug mode is active.
+- Quiet native nameplates follow NPC world positions: the identity line (with
+  a role-accent tick) is always readable; the social-action line appears for
+  the conversation speaker, the focused NPC, a recently changed action
+  (~5s), and debug mode. In-world speech bubbles carry the gist (truncated,
+  auto-expiring); the full line stays in inspect. Judgment reasons,
+  provider/action source, record detail, and recent causality stay in
+  inspect/ledger views. Provider status and fallback detail live in the Esc
+  settings sheet; a small badge plus a transient line surface fallback
+  honestly in normal play. Raw ids and state labels are hidden unless F3
+  debug mode is active.
 
 ## Localization
 

@@ -4,11 +4,18 @@ extends Node2D
 ## (docs/art/art-direction.md): reactions and utterances appear in-world.
 
 const PackAtlas := preload("res://scripts/data/pack_atlas.gd")
+## Bubbles carry the gist, not the transcript: long generated lines truncate
+## in-world (full text stays in inspect/ledger) and expire so stale speech
+## does not hang over the room.
+const BUBBLE_MAX_CHARS := 36
+const BUBBLE_SECONDS := 7.0
 
 @onready var _sprite: AnimatedSprite2D = $Sprite
 @onready var _marker: Label = $ReactionMarker
 @onready var _bubble: Label = $SpeechBubble
 @onready var _debug: Label = $DebugLabel
+
+var _bubble_timer: Timer = null
 
 var actor_id := ""
 var label_text := ""
@@ -39,6 +46,11 @@ func configure(data: Dictionary) -> void:
 func _ready() -> void:
 	add_to_group("npc_actors")
 	$InteractionArea.add_to_group("interactable")
+	_bubble_timer = Timer.new()
+	_bubble_timer.one_shot = true
+	_bubble_timer.wait_time = BUBBLE_SECONDS
+	_bubble_timer.timeout.connect(clear_speech)
+	add_child(_bubble_timer)
 	_apply()
 
 func _apply() -> void:
@@ -79,8 +91,10 @@ func show_speech(text: String) -> void:
 	if text.is_empty():
 		_bubble.visible = false
 		return
-	_bubble.text = text
+	_bubble.text = text if text.length() <= BUBBLE_MAX_CHARS else text.left(BUBBLE_MAX_CHARS) + "…"
 	_bubble.visible = true
+	if _bubble_timer != null:
+		_bubble_timer.start()
 
 func clear_speech() -> void:
 	_bubble.visible = false
@@ -130,6 +144,8 @@ func overlay_payload() -> Dictionary:
 		"label": label_text,
 		"role": role_text,
 		"action": _action_label(),
+		"actionTool": current_action,
+		"focused": _focused,
 		"accent": accent,
 		"worldPosition": global_position + Vector2(0, 7),
 	}

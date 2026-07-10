@@ -1,13 +1,13 @@
 # Godot 2D Client
 
 Target: Godot 4.7.x stable (current stable series; keep `GODOT_BIN` per
-device). The v1 3D project under `godot/` is replaced in M1 — salvage listed
-at the bottom.
+device). The active project under `godot/` is the M1 2D client.
 
 ## Project settings
 
-- Viewport 640×360, `canvas_items` stretch, integer scale, pixel snap on
-  (2D transforms + vertices), nearest-neighbor default texture filter.
+- Internal viewport 640×360, default window 1920×1080, resizable with
+  `canvas_items` fractional scaling. Pixel snap is on (2D transforms +
+  vertices), with nearest-neighbor default texture filtering.
 - Input map: 4-direction move (WASD/arrows), `interact` (E/Space),
   `choice_1..3` (1/2/3), `open_ledger` (Tab), `cancel` (Esc). Full
   keyboard-only play is a standing requirement; mouse is optional everywhere.

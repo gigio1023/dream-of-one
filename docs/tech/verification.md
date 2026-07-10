@@ -23,10 +23,10 @@ $GODOT_BIN --headless --import --path godot
 $GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/route_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/localization_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/check_assets.gd
 
-# Provider contract tests are inside npm run check (MockAdapter, offline).
-# Live provider smoke — manual, opt-in, spends real pennies:
-npm run provider:smoke --prefix backend/npc-runtime -- --profile <profile>
+# Localhost sidecar parity (starts and stops its own deterministic server)
+GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/live-route-parity.sh
 ```
 
 CI runs the npm check on backend changes (existing workflow). Godot smokes

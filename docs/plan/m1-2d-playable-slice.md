@@ -1,6 +1,7 @@
 # M1 — 2D Playable Slice
 
-**Status: next.** First implementation milestone of v2.
+**Status: active.** The playable implementation and automated checks are in
+place; manual acceptance and the fun-gate closeout remain.
 
 ## Goal
 

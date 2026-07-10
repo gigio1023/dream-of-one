@@ -5,8 +5,9 @@ below is scoped so that one agent can read it plus its linked references and
 start working. If a document is not reachable from this index, it is not
 active.
 
-Status: **v2 direction reset (2026-07-10).** v1 (3D prototype, 2025-10 →
-2026-05) is archived under `docs/archive/` and summarized in the postmortem.
+Status: **M1 2D playable slice active (2026-07-10).** v1 (3D prototype,
+2025-10 → 2026-05) is archived under `docs/archive/` and summarized in the
+postmortem.
 
 ## Reading Order for New Agents
 
@@ -59,7 +60,7 @@ Status: **v2 direction reset (2026-07-10).** v1 (3D prototype, 2025-10 →
 | Doc | Scope | Status |
 |---|---|---|
 | [`plan/roadmap.md`](plan/roadmap.md) | Milestone ladder M0–M5, gates, tracks | — |
-| [`plan/m1-2d-playable-slice.md`](plan/m1-2d-playable-slice.md) | 2D rebuild: store scene, movement, conversation, four routes | **next** |
+| [`plan/m1-2d-playable-slice.md`](plan/m1-2d-playable-slice.md) | 2D rebuild: store scene, movement, conversation, four routes | **active** |
 | [`plan/m2-provider-ports.md`](plan/m2-provider-ports.md) | Provider port/adapter implementation, live NPC wording | queued |
 | [`plan/m3-agent-loop-npcs.md`](plan/m3-agent-loop-npcs.md) | Agent-loop NPCs with validated tools and transcripts | queued |
 | [`plan/m4-town-social-sim.md`](plan/m4-town-social-sim.md) | Multi-location town, propagation, day segments, save/load | queued |

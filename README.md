@@ -1,76 +1,177 @@
 # Dream of One
 
+> **The society investigates you.**
+
+[![Godot 4.7](https://img.shields.io/badge/Godot-4.7-478CBF?logo=godot-engine&logoColor=white)](https://godotengine.org/)
+![Development Node.js 22+](https://img.shields.io/badge/development-Node.js%2022%2B-5FA04E?logo=node.js&logoColor=white)
+![Korean first](https://img.shields.io/badge/content-Korean--first-B86055)
+
 Dream of One is a 2D top-down conversation social-stealth game set in a
-stateless administered district, built with Godot 4.x and a TypeScript NPC
-runtime. NPCs and the Station investigate what the player says: dialogue is
-the threat surface, records travel between NPCs, and deterministic rules —
-not the LLM — decide consequences. NPC brains live in the TS runtime as
-constrained agent loops; a port-and-adapter provider layer (ModelScope/Qwen,
-OpenAI, or none) proposes their wording.
+stateless administered district. Ordinary questions become small
+interrogations: what you say, type, or leave unanswered can become a record,
+and that record can follow you from the Store to the Station.
 
-**Current state: v2 direction reset merged (M0 done); next milestone is M1,
-the 2D playable slice.** v1 (2025-10 → 2026-05, 3D) proved the
-conversation/suspicion protocol end to end and is archived; v2 keeps that
-core and rebuilds the presentation in 2D with free-first art and a plan that
-optimizes for playable fun instead of process gates.
+The player is never the investigator. The society investigates the player.
 
-## Where to Start
+![The Store clerk challenges a suspicious answer while pressure and the record line update.](docs/assets/readme-same-order-conversation.png)
 
-**Everything is indexed from [`docs/README.md`](docs/README.md).** Read it
-first; every document is scoped so an AI agent (or human) can pick up one
-document and start working.
+*The current Same Order slice: a risky answer raises suspicion and report
+pressure, exposes a why-line, and changes the clerk's next question.*
 
-| You want to... | Read |
-|---|---|
-| Understand the game | [`docs/vision/pitch.md`](docs/vision/pitch.md) |
-| Know what to build next | [`docs/plan/roadmap.md`](docs/plan/roadmap.md) |
-| Work on the Godot client | [`docs/tech/godot-2d-client.md`](docs/tech/godot-2d-client.md) |
-| Work on the NPC runtime | [`docs/tech/npc-runtime.md`](docs/tech/npc-runtime.md) |
-| Work on AI providers | [`docs/tech/ai-provider-ports.md`](docs/tech/ai-provider-ports.md) |
-| Know why v1 died | [`docs/history/v1-postmortem.md`](docs/history/v1-postmortem.md) |
+## Playable now
 
-## Game Loop
+The active M1 build plays end to end through the **Same Order (같은 주문)**
+storylet:
 
-1. NPC prompts assume the player belongs here.
-2. The player answers through three diegetic dialogue choices or bounded typed
-   free input. Typed input becomes a recorded statement, not open-ended chat.
-3. Deterministic rules classify suspicious wording and hesitation.
-4. NPC suspicion becomes social pressure: probing, gossip, reports, records
-   that other NPCs read and act on.
-5. Station intake, inquest, verdict, and session end remain deterministic
-   runtime authority.
-6. NPCs run an agent loop: observe → pick a validated tool → read the result →
-   iterate. The LLM proposes wording and next tool calls; it never mutates the
-   world directly.
+- Explore a 2D Store and the Station intake room with a resizable pixel-art
+  presentation.
+- Answer with three dialogue choices, a bounded typed statement, or silence;
+  six seconds of hesitation is itself recorded as an answer.
+- Inspect NPCs and record props, open the civic ledger, and see why suspicion
+  or report pressure changed.
+- Reach four deterministic outcomes: **clean cover**, **repair recovery**,
+  **soft report**, and **hard inquest**.
+- Restart immediately and test a different line.
 
-## Quick Start
+The default build replays committed, backend-generated fixture data, so it is
+fully playable without Node.js or a live AI provider. The same four routes
+also pass against the localhost TypeScript sidecar. M1 remains active until
+its manual fun-gate and acceptance closeout are recorded.
 
-Prerequisites: Godot 4.7.x stable (set `GODOT_BIN` per device), Node.js and npm.
+## Play
+
+### Requirements
+
+- Godot **4.7.x stable**
+
+Set `GODOT_BIN` to the Godot executable for your machine, then launch the
+project from the repository root:
+
+```bash
+export GODOT_BIN="/absolute/path/to/Godot"
+"${GODOT_BIN:?set GODOT_BIN to the local Godot CLI}" --path godot
+```
+
+The game opens in deterministic fixture mode. Walk to the Store clerk and
+press `E` or `Space` to begin.
+
+### Controls
+
+| Action | Keyboard / mouse |
+| --- | --- |
+| Move | `WASD` or arrow keys |
+| Interact / inspect | `E` or `Space` |
+| Choose a response | Click, `1`–`3`, or focus with `↑`/`↓` and press `Enter` |
+| Submit a typed statement | Type, then press `Enter` or click **기록** |
+| Open the ledger | `Tab` |
+| Close conversation / inspection | `Esc` (`E` also closes inspection) |
+| Restart after an outcome | `Enter` or click **다시 시작** |
+
+## The conversation loop
+
+```mermaid
+flowchart LR
+    Q["Ordinary question"] --> A["Answer, type, or hesitate"]
+    A --> R["Deterministic rules"]
+    R --> V["Visible suspicion, record, and reaction"]
+    V --> O["Cover, repair, report, or inquest"]
+    O -->|restart| Q
+```
+
+Every consequence after the player's answer is deterministic. Each suspicion
+change carries a visible why-line; terminal outcomes cite the exact ledger
+entries that produced them.
+
+| Route | What the player does | What the world does |
+| --- | --- | --- |
+| **Clean cover · 무사 통과** | Stays consistent | Leaves no adverse record |
+| **Repair · 수습** | Slips, then repairs | Attaches a correction; no report |
+| **Soft report · 약식 보고** | Leaves signals unresolved | Forwards a report |
+| **Hard inquest · 심문** | Contradicts a record | Cites it at the Station |
+
+![The hard-inquest route ends at the Station with the cited ledger chain visible.](docs/assets/readme-same-order-hard-inquest.png)
+
+*A hard-inquest outcome names the authority action and the three ledger entries
+used to open the formal inquiry.*
+
+## How the build is split
+
+| Layer | Owns | Does not own |
+| --- | --- | --- |
+| **Godot client** | World, input, HUD | Rules and verdicts |
+| **TypeScript runtime** | Session rules and records | Rendering |
+| **Provider ports** | Future wording and tool proposals | Authority |
+
+M1 is deterministic-only: it makes no live LLM calls. Live provider wording is
+planned for M2, and NPCs that iterate through visible agent loops are planned
+for M3. See the [architecture](docs/tech/architecture.md) and
+[roadmap](docs/plan/roadmap.md) for those boundaries.
+
+## Development
+
+Node.js **22+** is required only for runtime development and localhost HTTP
+mode.
 
 ```bash
 npm install --prefix backend/npc-runtime
 npm run check --prefix backend/npc-runtime
-${GODOT_BIN:?set GODOT_BIN to the local Godot CLI} --path godot
+
+"$GODOT_BIN" --headless --import --path godot
+"$GODOT_BIN" --headless --path godot --script res://tools/scene_load_smoke.gd
+"$GODOT_BIN" --headless --path godot --script res://tools/route_smoke.gd
 ```
 
-Note: `godot/` currently contains the v1 3D scene tree. It is scheduled to be
-rebuilt as a 2D project in milestone M1 — see
-[`docs/plan/m1-2d-playable-slice.md`](docs/plan/m1-2d-playable-slice.md).
+### Run against the localhost sidecar
 
-## Repository Map
+Start the deterministic runtime in one terminal:
+
+```bash
+PORT=18787 npm run serve --prefix backend/npc-runtime
+```
+
+Then launch the Godot client in HTTP mode from another:
+
+```bash
+DREAM_SESSION_MODE=http \
+DREAM_SESSION_URL=http://127.0.0.1:18787 \
+"$GODOT_BIN" --path godot
+```
+
+The automated live parity check starts and stops its own sidecar:
+
+```bash
+GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/live-route-parity.sh
+```
+
+The full check list and test policy live in
+[`docs/tech/verification.md`](docs/tech/verification.md).
+
+## Repository map
 
 | Path | Purpose |
-|---|---|
-| `docs/` | v2 documentation, indexed by `docs/README.md`. |
-| `docs/scenario/` | Scenario canon: storylets, dialogue banks, social cards (engine-agnostic, reused by v2). |
-| `docs/archive/` | Frozen v1 documentation. Do not build from it. |
-| `godot/` | Godot game project (v1 3D, rebuilt to 2D in M1). |
-| `backend/npc-runtime/` | TypeScript NPC runtime: deterministic authority, schema, provider ports. |
-| `data/evidence/` | Generated runtime artifacts from smoke runs. |
+| --- | --- |
+| [Godot client](godot/) | 2D scenes, scripts, assets, and smoke tools |
+| [NPC runtime](backend/npc-runtime/) | Deterministic sessions and HTTP API |
+| [Documentation](docs/) | Direction, design, art, architecture, and plans |
+| [Scenario canon](docs/scenario/) | Korean storylets and dialogue |
+| [Runtime artifacts](data/evidence/) | Historical and generated check output |
 
-## License
+## Documentation
 
-Code: no top-level license declared yet. Third-party art is governed by
-per-pack licenses — see [`docs/art/asset-pipeline.md`](docs/art/asset-pipeline.md).
-Committed assets are CC0 or project-owned only; redistribution-restricted
-packs (free or paid) are never committed to this public repository.
+| Start here for… | Document |
+| --- | --- |
+| The one-sentence pitch and player fantasy | [Pitch](docs/vision/pitch.md) |
+| The playable conversation and route rules | [Core loop](docs/game/core-loop.md) |
+| The active implementation milestone | [M1: 2D playable slice](docs/plan/m1-2d-playable-slice.md) |
+| The Godot / runtime authority boundary | [Architecture](docs/tech/architecture.md) |
+| Every active project document | [Documentation index](docs/README.md) |
+| Local contribution and commit workflow | [Contributing](CONTRIBUTING.md) |
+| Why the previous 3D iteration was retired | [v1 postmortem](docs/history/v1-postmortem.md) |
+
+## License and assets
+
+No top-level code license has been declared yet. Third-party art follows the
+[asset pipeline](docs/art/asset-pipeline.md): committed assets are CC0 or
+project-owned, while redistribution-restricted packs remain local and are
+never pushed to this public repository. Attribution details are in
+[`docs/art/CREDITS.md`](docs/art/CREDITS.md).

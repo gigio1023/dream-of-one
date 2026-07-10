@@ -47,8 +47,10 @@ same blocked state is a bug.
 | `read_record(record)` | Load a visible record into memory | Visibility (열람 rules) |
 | `request(actor, action)` | Ask another NPC to act (handoff, confirmation) | Target role can perform the action |
 
-Player-directed danger stays deterministic: suspicion classification of player
-speech is **not** a tool and never goes through the provider.
+Suspicion judgment of player speech is **not** a tool: it flows through
+`judgeConversationTurn` on the proposal port, with rules clamping the delta
+and keeping the deterministic classifier as fallback (see
+[`../vision/design-pillars.md`](../vision/design-pillars.md)).
 
 ## Memory and context bounds
 
@@ -70,8 +72,9 @@ provider proposal exactly like a deterministic one — no trust distinction.
 Provider unavailable, over budget, or invalid → deterministic fallback decides
 and the transcript marks the fallback reason. Scripted proposal sequences are
 test adapters only; they are never production storylet content.
-Player-speech classification and authority outcomes remain deterministic.
-Different models may attempt different valid tools and therefore create
+Suspicion judgment is model-owned with rule-clamped deltas; authority
+*procedure* (thresholds reaching an ending, verdict validity) stays
+deterministic. Different models may attempt different valid tools and therefore create
 different records; that variation is intended as long as every mutation
 passes the same world rules.
 

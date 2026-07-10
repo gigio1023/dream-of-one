@@ -1,6 +1,6 @@
 ---
 name: dream-npc-runtime
-description: Use when changing backend/npc-runtime in dream-of-one — session engine, agent loop, suspicion judgment, records and civic ledger, provider ports/adapters/profiles, envelope schemas, fallback, or runtime tests. Triggers include "provider profile", "adapter", "envelope", "fallback", "suspicion judgment", "ledger", "tool validation", and "Session API". NOT for Godot scene/HUD work (dream-godot-client) or authoring Korean player-facing content (dream-content-authoring).
+description: Use when changing, reviewing, or diagnosing backend/npc-runtime in dream-of-one — session engine, agent loop, suspicion judgment, records and civic ledger, provider ports/adapters/profiles, envelope schemas, fallback, or runtime tests. Triggers include "provider profile", "adapter", "envelope", "fallback", "suspicion judgment", "ledger", "tool validation", and "Session API". NOT for Godot scene/HUD work (dream-godot-client) or authoring Korean player-facing content (dream-content-authoring).
 ---
 
 # Dream of One — NPC Runtime
@@ -15,8 +15,8 @@ the task-time contract, not a replacement for them.
 The model owns *meaning*; deterministic code owns *validity*.
 
 - Model-owned (never hardcode): NPC wording, reply suggestions, suspicion
-  judgment with why-lines, next tool proposals, and (from M3) Station
-  verdicts.
+  judgment with why-lines, next tool proposals, and — once the active
+  milestone reaches them — Station verdicts.
 - Runtime-owned (never delegate): per-NPC sight/context separation, tool
   validation of every world mutation, delta and score clamps, civic-ledger
   append, guaranteed session ending.
@@ -25,10 +25,16 @@ Decision rule from `docs/vision/design-pillars.md`: if a rule decides the
 *content* of a judgment, move that decision into the model's context; if it
 protects the *validity* of the world, keep it deterministic.
 
+If any doc or comment conflicts with this split, the owner-direction block
+in `docs/vision/design-pillars.md` wins; fix the stale text, don't follow
+it.
+
 ## Provider Boundary
 
-- Game logic depends only on `NpcProposalPort`. Vendor SDK imports and base
-  URLs exist only in adapters under `src/providers/adapters/`.
+- Game logic depends only on `NpcProposalPort`. Vendor SDK imports live
+  only in adapters under `src/providers/adapters/`, and no vendor base URL
+  is hardcoded outside them — config and registry code may resolve and pass
+  endpoint values from profiles and env vars.
 - Profiles are config (`backend/npc-runtime/providers.config.json`); model
   ids are opaque profile data; availability is proven by an opt-in live
   smoke, never assumed.
@@ -46,8 +52,6 @@ protects the *validity* of the world, keep it deterministic.
   never in config, logs, fixtures, or commits.
 
 ## Runtime Invariants (do not renegotiate per slice)
-
-From `docs/tech/npc-runtime.md`:
 
 1. Every packet crossing a process boundary validates against schema on both
    sides.
@@ -68,7 +72,8 @@ dialogue.
 
 ## Verification
 
-Default check for any backend slice (keep it under ~60s):
+Default check for any backend slice (kept fast by policy — see
+`docs/tech/npc-runtime.md`):
 
 ```bash
 bun run --cwd backend/npc-runtime check

@@ -1,6 +1,6 @@
 ---
 name: dream-content-authoring
-description: Use when writing or editing dream-of-one player-facing content — Korean NPC dialogue and tone, storylets, scenario canon, suspicion why-lines, HUD strings, or KO/EN localization. Triggers include "storylet", "대사", "말투", "why-line", "이유 문장", "Korean voice", and "localization keys". NOT for engineering docs, code comments, runtime logic (dream-npc-runtime), or client presentation (dream-godot-client).
+description: Use when writing, editing, or reviewing dream-of-one player-facing content — Korean NPC dialogue and tone, storylets, scenario canon, suspicion why-lines, HUD strings, or KO/EN localization. Triggers include "storylet", "대사", "말투", "why-line", "이유 문장", "Korean voice", and "localization keys". NOT for engineering docs, code comments, runtime logic (dream-npc-runtime), or client presentation (dream-godot-client).
 ---
 
 # Dream of One — Content Authoring
@@ -51,9 +51,10 @@ referencing the real world) and an NPC contradicting what it just said.
 
 ## Localization
 
-Author KO first; EN follows through the localization path. Parity is an M5
-release requirement, not a per-slice gate. Player-facing strings live in
-content files and translation keys, not code.
+Author KO first; EN follows through the localization path. Parity is a
+release requirement, not a per-slice gate (timing: the active plan under
+`docs/plan/`). Player-facing strings live in content files and translation
+keys, not code.
 
 ## Verification
 

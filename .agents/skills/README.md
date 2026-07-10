@@ -10,7 +10,10 @@ across agent harnesses.
   `.claude/skills` → `../.agents/skills`.
 - Other harnesses can read the `SKILL.md` files directly.
 
-Keep the symlink relative; never replace it with a copy.
+Keep the symlink relative; never replace it with a copy. On Windows,
+checkouts with `core.symlinks=false` materialize it as a plain file —
+enable symlinks (Developer Mode + `git config core.symlinks true`) or read
+`.agents/skills/` directly.
 
 ## Rules
 

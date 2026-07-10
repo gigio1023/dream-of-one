@@ -1,14 +1,15 @@
 ---
 name: dream-godot-client
-description: Use when changing dream-of-one's Godot client under godot/ — scenes, tilemaps, actors, HUD, conversation panel, input, presentation scale, assets, or headless smokes. Triggers include "HUD", "conversation panel", "tilemap", "output preset", "speech bubble", "reaction marker", and "scene smoke". NOT for suspicion/record/session logic (dream-npc-runtime), Korean wording and tone (dream-content-authoring), or engine-generic Godot questions.
+description: Use when changing, reviewing, or diagnosing dream-of-one's Godot client under godot/ — scenes, tilemaps, actors, HUD, conversation panel, input, presentation scale, assets, or headless smokes. Triggers include "HUD", "conversation panel", "tilemap", "output preset", "speech bubble", "reaction marker", and "scene smoke". NOT for suspicion/record/session logic (dream-npc-runtime), Korean wording and tone (dream-content-authoring), or engine-generic Godot questions.
 ---
 
 # Dream of One — Godot Client
 
-Change the 2D client under `godot/` (Godot 4.7.x stable, launched via
-`GODOT_BIN`) while keeping it a pure presentation layer. Paths below are
-from the repository root. This skill carries the repo's contracts; engine
-technique itself belongs to a general Godot skill when one is installed.
+Change the 2D client under `godot/` (launched via `GODOT_BIN`; the pinned
+engine version lives in `docs/tech/godot-2d-client.md`) while keeping it a
+pure presentation layer. Paths below are from the repository root. This
+skill carries the repo's contracts; engine technique itself belongs to a
+general Godot skill when one is installed.
 
 ## Presentation-Only Boundary
 
@@ -18,28 +19,31 @@ records, verdicts, or session end. If a change needs new truth, it belongs
 in `backend/npc-runtime` (see the dream-npc-runtime skill); the client
 renders what comes back.
 
-## Scale Domains (fragile — keep exact)
+## Scale Domains (two domains, never mixed)
 
-- World: fixed 640×360 `SubViewport`, nearest-neighbor filtered,
-  integer-scaled. Output presets 1280×720 (2×), 1920×1080 (3×, default),
-  2560×1440 (4×), 3840×2160 (6×). Minimum window 1280×720; pixel snap on.
+- World: fixed-logical-resolution pixel-art `SubViewport`,
+  nearest-neighbor filtered, **integer**-scaled to the selected output
+  preset. Never introduce fractional pixel scaling.
 - HUD: native-resolution `Control` hierarchy outside the world viewport.
   Anchors and containers determine layout — never manually scaled world
   coordinates.
 - Generated conversation text grows its panel to a capped height, then
   scrolls internally; it must not push response controls off-screen.
 
+Exact base resolution, preset list, and minimum window:
+`docs/tech/godot-2d-client.md`. Verify HUD changes at the smallest and
+largest supported presets.
+
 ## Information Policy
 
-Normal play always shows: NPC identity/role, current speech bubble, a short
-reaction marker, and the NPC's current social action. Influence lines and
-action source appear briefly when an event lands, then clear. Judgment
-reasons, record contents, and causality chains live in inspect/ledger
-views. Raw ids, collision, sensing, and raw state sit behind F3 debug — and
-no debug overlay may be required to understand normal play.
-
-Every consequence surfaces within 1s of its ledger event; no silent state
-changes. Full keyboard-only play is a standing requirement.
+Three disclosure tiers — normal play (identity, speech, reaction, current
+social action, always readable without overlays), inspect/ledger views
+(judgment reasons, record contents, causality), and F3 debug (raw ids and
+internal state). No debug overlay may be required to understand normal
+play. Every consequence surfaces promptly after its ledger event — no
+silent state changes. Full keyboard-only play is a standing requirement.
+The current tier assignments live in `docs/tech/godot-2d-client.md` and
+the active milestone's information policy.
 
 ## Assets
 

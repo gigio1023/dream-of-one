@@ -60,14 +60,18 @@ Delete when the replacing module lands; don't leave both alive.
    sides.
 2. `DecisionService` preserves ordered turns per conversation
    (`conversation.turnId`) — no latest-wins coalescing.
-3. Suspicion classification is pure and fixture-tested; adding a signal class
-   requires fixtures for KO and EN phrasing.
+3. The deterministic suspicion classifier stays pure and fixture-tested; it
+   is the fallback for provider outages, never the product judgment path.
+   Adding a signal class requires fixtures for KO and EN phrasing.
 4. World mutations happen only through validated tool application, and each
    emits exactly one civic ledger event.
 5. NPC context assembly enforces visibility — no data an NPC couldn't know
    ever enters its packet (this is both a fairness rule and the prompt-side
    information boundary).
-6. Player speech classification and authority outcomes stay deterministic.
+6. The model judges what player speech means (suspicion movement, why-lines)
+   within rule-enforced validity: clamped deltas, visibility-checked context,
+   and a guaranteed session ending
+   (see [`../vision/design-pillars.md`](../vision/design-pillars.md)).
    Providers may choose different valid attempts and wording; fallback keeps a
    session alive but is never the default production profile.
 

@@ -1,26 +1,38 @@
-import { randomUUID } from "node:crypto";
+// Session API sidecar (docs/tech/npc-runtime.md).
+//
+// Localhost-only HTTP server exposing the five v2 session endpoints. Every
+// request and response is zod-validated (invariant #1). Provider proposals
+// remain behind SessionService's NpcProposalPort dependency.
+
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
-import type { RuntimeConfig } from "../config.js";
-import type { DecisionService } from "../runtime/decision-service.js";
-import { evaluateRuntimeReadiness, type RuntimeReadinessReport } from "../runtime/readiness.js";
-import { annotateDecisionMeta } from "../policy/reason-taxonomy.js";
-import type { ActionType, DecisionEnvelope } from "../contracts/types.js";
-import { parsePerceptionPacket, SchemaValidationError } from "../runtime/schema.js";
-import { enforceBoundedBehavior } from "../runtime/bounded-behavior.js";
-import type { RuntimeTelemetryCollector } from "../runtime/telemetry.js";
-import type { SchedulerSnapshot } from "../runtime/multi-bot-scheduler.js";
+import type { AddressInfo } from "node:net";
+import { z } from "zod";
+import { SessionError, SessionService } from "../runtime/session/service.js";
+import { evaluateRuntimeReadiness } from "../runtime/readiness.js";
+import {
+  answerRequestSchema,
+  answerResponseSchema,
+  decisionRequestSchema,
+  decisionResponseSchema,
+  endRequestSchema,
+  endResponseSchema,
+  snapshotRequestSchema,
+  snapshotResponseSchema,
+  startRequestSchema,
+  startResponseSchema,
+} from "./session-schemas.js";
+
+export const LOOPBACK_HOST = "127.0.0.1";
 
 async function readJsonBody(req: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
   for await (const chunk of req) {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
   }
-
   const raw = Buffer.concat(chunks).toString("utf-8");
   if (raw.length === 0) {
     return {};
   }
-
   return JSON.parse(raw);
 }
 
@@ -29,274 +41,117 @@ function writeJson(res: ServerResponse, status: number, payload: unknown): void 
   res.end(JSON.stringify(payload));
 }
 
-function asStringField(value: unknown): string | undefined {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    return undefined;
-  }
-  return value;
-}
-
-function asPositiveNumber(value: unknown): number | undefined {
-  const parsed = typeof value === "number"
-    ? value
-    : (typeof value === "string" ? Number(value.trim()) : Number.NaN);
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return undefined;
-  }
-  return Math.floor(parsed);
-}
-
-function asHeaderString(value: string | string[] | undefined): string | undefined {
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-  return value;
-}
-
-function resolveDeadlineMs(config: RuntimeConfig, payloadObj: Record<string, unknown> | undefined, req: IncomingMessage): number {
-  const payloadDeadline = asPositiveNumber(payloadObj?.deadlineMs);
-  const headerDeadline = asPositiveNumber(asHeaderString(req.headers["x-decision-timeout-ms"]));
-  const requested = payloadDeadline ?? headerDeadline;
-  if (requested === undefined) {
-    return config.decisionDeadlineMs;
-  }
-  return Math.max(1, Math.min(config.decisionDeadlineMs, requested));
-}
-
-function tryParsePerceptionPacket(payload: unknown) {
-  try {
-    return parsePerceptionPacket(payload);
-  } catch (error) {
-    if (error instanceof SchemaValidationError) {
-      return undefined;
-    }
-    return undefined;
+function statusForSessionError(error: SessionError): number {
+  switch (error.code) {
+    case "session_not_found":
+    case "storylet_not_found":
+      return 404;
+    case "session_ended":
+    case "unexpected_turn":
+      return 409;
+    case "unknown_choice":
+    case "invalid_answer":
+      return 400;
+    default:
+      return 400;
   }
 }
 
-function resolveRequestUrl(req: IncomingMessage, config: RuntimeConfig): URL {
-  const host = asHeaderString(req.headers.host) ?? `${config.host}:${config.port}`;
-  return new URL(req.url ?? "/", `http://${host}`);
+/** Validate a handler's output against its response schema before sending. */
+function respond<T>(res: ServerResponse, schema: z.ZodType<T>, value: T): void {
+  const parsed = schema.safeParse(value);
+  if (!parsed.success) {
+    writeJson(res, 500, {
+      error: "response_contract_violation",
+      issues: parsed.error.issues.map(issue => ({ path: issue.path.join("."), message: issue.message })),
+    });
+    return;
+  }
+  writeJson(res, 200, parsed.data);
 }
 
-export type ReadinessEvaluator = (config: RuntimeConfig) => Promise<RuntimeReadinessReport>;
-export interface RuntimeDispatchResult {
-  actionId: string;
-  actionType: ActionType;
-  result: {
-    ok: boolean;
-    actionId?: string;
-    reasonCode?: string;
-    evidence?: Record<string, unknown>;
-  };
+function badRequest(res: ServerResponse, error: z.ZodError): void {
+  writeJson(res, 400, {
+    error: "invalid_request",
+    issues: error.issues.map(issue => ({ path: issue.path.join("."), message: issue.message })),
+  });
 }
 
-export type DecisionDispatcher = (decision: DecisionEnvelope, actionId: string) => Promise<RuntimeDispatchResult>;
-export type SchedulerSnapshotProvider = () => SchedulerSnapshot;
+export interface SessionServerOptions {
+  port?: number;
+  host?: string;
+  service?: SessionService;
+  /** Print the chosen port on listen (default true). */
+  logListen?: boolean;
+}
 
-export function startHttpServer(
-  config: RuntimeConfig,
-  decisionService: DecisionService,
-  readinessEvaluator: ReadinessEvaluator = evaluateRuntimeReadiness,
-  decisionDispatcher?: DecisionDispatcher,
-  telemetryCollector?: RuntimeTelemetryCollector,
-  schedulerSnapshotProvider?: SchedulerSnapshotProvider,
-): Server {
-  const server = createServer(async (req, res) => {
+export interface RunningSessionServer {
+  server: Server;
+  port: number;
+  host: string;
+  close: () => Promise<void>;
+}
+
+export function createSessionServer(service: SessionService): Server {
+  return createServer(async (req, res) => {
     try {
-      const requestUrl = resolveRequestUrl(req, config);
-      const requestPath = requestUrl.pathname;
+      const url = new URL(req.url ?? "/", `http://${LOOPBACK_HOST}`);
+      const path = url.pathname;
+      const method = req.method ?? "GET";
 
-      if (req.method === "GET" && requestPath === "/health") {
+      if (method === "GET" && path === "/health") {
         writeJson(res, 200, {
           status: "ok",
           service: "npc-runtime",
+          mode: "provider-first",
+          providerProfile: service.providerProfile(),
         });
         return;
       }
 
-      if (req.method === "GET" && requestPath === "/health/ready") {
-        const readiness = await readinessEvaluator(config);
+      if (method === "GET" && path === "/health/ready") {
+        const readiness = await evaluateRuntimeReadiness(service);
         writeJson(res, readiness.status === "ready" ? 200 : 503, readiness);
         return;
       }
 
-      if (req.method === "GET" && requestPath === "/health/queue") {
-        const schedulerSnapshot = schedulerSnapshotProvider?.();
-        writeJson(res, 200, {
-          status: "ok",
-          mailbox: decisionService.getMailboxMetrics(),
-          scheduler: schedulerSnapshot ?? null,
-        });
+      if (method === "POST" && path === "/v1/session/start") {
+        const parsed = startRequestSchema.safeParse(await readJsonBody(req));
+        if (!parsed.success) return badRequest(res, parsed.error);
+        const result = await service.start(parsed.data.storyletId, parsed.data.locale);
+        respond(res, startResponseSchema, result);
         return;
       }
 
-      if (req.method === "GET" && requestPath === "/v1/telemetry/events") {
-        if (!telemetryCollector) {
-          writeJson(res, 503, { error: "telemetry_disabled" });
-          return;
-        }
-        const requestedLimit = asPositiveNumber(requestUrl.searchParams.get("limit"));
-        const limit = requestedLimit ?? 100;
-        writeJson(res, 200, {
-          records: telemetryCollector.listRecords(limit),
-        });
+      if (method === "POST" && path === "/v1/session/answer") {
+        const parsed = answerRequestSchema.safeParse(await readJsonBody(req));
+        if (!parsed.success) return badRequest(res, parsed.error);
+        const result = await service.answer(parsed.data.sessionId, parsed.data.turnId, parsed.data.answer);
+        respond(res, answerResponseSchema, result);
         return;
       }
 
-      if (req.method === "GET" && requestPath === "/v1/telemetry/evidence-pack") {
-        if (!telemetryCollector) {
-          writeJson(res, 503, { error: "telemetry_disabled" });
-          return;
-        }
-        writeJson(res, 200, telemetryCollector.buildEvidencePack());
+      if (method === "POST" && path === "/v1/npc/decision") {
+        const parsed = decisionRequestSchema.safeParse(await readJsonBody(req));
+        if (!parsed.success) return badRequest(res, parsed.error);
+        const result = await service.decision(parsed.data.sessionId, parsed.data.beat);
+        respond(res, decisionResponseSchema, result);
         return;
       }
 
-      if (req.method === "POST" && requestPath === "/v1/telemetry/evidence-pack/export") {
-        if (!telemetryCollector) {
-          writeJson(res, 503, { error: "telemetry_disabled" });
-          return;
-        }
-        const payload = await readJsonBody(req);
-        const payloadObj =
-          payload && typeof payload === "object" && !Array.isArray(payload)
-            ? (payload as Record<string, unknown>)
-            : {};
-        const fileName = asStringField(payloadObj.fileName);
-        const outputPath = await telemetryCollector.writeEvidencePack(fileName);
-        writeJson(res, 200, {
-          status: "ok",
-          outputPath,
-        });
+      if (method === "GET" && path === "/v1/session/snapshot") {
+        const parsed = snapshotRequestSchema.safeParse({ sessionId: url.searchParams.get("sessionId") ?? undefined });
+        if (!parsed.success) return badRequest(res, parsed.error);
+        const result = service.snapshot(parsed.data.sessionId);
+        respond(res, snapshotResponseSchema, result);
         return;
       }
 
-      if (req.method === "POST" && requestPath === "/v1/npc/decision") {
-        const requestId = randomUUID();
-        const startedAt = process.hrtime.bigint();
-        const abortController = new AbortController();
-        const abortRequest = () => {
-          if (!abortController.signal.aborted) {
-            abortController.abort();
-          }
-        };
-        req.once("aborted", abortRequest);
-        res.once("close", () => {
-          if (!res.writableEnded) {
-            abortRequest();
-          }
-        });
-
-        const payload = await readJsonBody(req);
-        const payloadObj =
-          payload && typeof payload === "object" && !Array.isArray(payload)
-            ? (payload as Record<string, unknown>)
-            : undefined;
-        const requestThreadId = asStringField(payloadObj?.threadId);
-        const deadlineMs = resolveDeadlineMs(config, payloadObj, req);
-
-        console.log(
-          JSON.stringify({
-            event: "npc_decision_request",
-            requestId,
-            sessionId: asStringField(payloadObj?.sessionId),
-            npcId: asStringField(payloadObj?.npcId),
-            threadId: requestThreadId ?? null,
-            deadlineMs,
-            latencyMs: 0,
-          }),
-        );
-
-        const rawDecision = await decisionService.decide(payload, {
-          signal: abortController.signal,
-          deadlineMs,
-        });
-        const parsedPacket = tryParsePerceptionPacket(payload);
-        const bounded = parsedPacket ? enforceBoundedBehavior(parsedPacket, rawDecision) : undefined;
-        const decision = bounded ? bounded.decision : annotateDecisionMeta(rawDecision);
-        let dispatchResult: RuntimeDispatchResult | undefined;
-        if (decisionDispatcher) {
-          dispatchResult = await decisionDispatcher(decision, requestId);
-        }
-        const dispatchReasonCode =
-          dispatchResult && !dispatchResult.result.ok
-            ? dispatchResult.result.reasonCode
-            : undefined;
-        const latencyMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
-        const mailbox = decisionService.getMailboxMetrics();
-        telemetryCollector?.recordDecisionCycle({
-          requestId,
-          sessionId: asStringField(payloadObj?.sessionId),
-          npcId: asStringField(payloadObj?.npcId),
-          deadlineMs,
-          latencyMs,
-          decision,
-          mailbox,
-          dispatchResult,
-        });
-        const responseClosedByClient = abortController.signal.aborted || req.aborted || res.destroyed;
-
-        if (responseClosedByClient) {
-          console.log(
-            JSON.stringify({
-              event: "npc_decision_response_dropped",
-              droppedReason: "client_aborted",
-              requestId,
-              sessionId: asStringField(payloadObj?.sessionId),
-              npcId: asStringField(payloadObj?.npcId),
-              transport: decision.meta.transport,
-              threadId: decision.meta.threadId ?? requestThreadId ?? null,
-              usedFallback: decision.meta.usedFallback,
-              reason: decision.meta.reason,
-              reasonCategory: decision.meta.reasonCategory,
-              warningTier: decision.meta.warningTier,
-              deadlineMs,
-              latencyMs: Number(latencyMs.toFixed(3)),
-              mailbox,
-              actionType: dispatchResult?.actionType,
-              actionOk: dispatchResult?.result.ok,
-              actionReason: dispatchReasonCode,
-              socialLoopStage: decision.meta.socialLoopStage ?? null,
-              playerSpeechAct: decision.meta.playerSpeechAct ?? null,
-            }),
-          );
-          return;
-        }
-
-        console.log(
-          JSON.stringify({
-            event: "npc_decision_response",
-            requestId,
-            sessionId: asStringField(payloadObj?.sessionId),
-            npcId: asStringField(payloadObj?.npcId),
-            transport: decision.meta.transport,
-            threadId: decision.meta.threadId ?? requestThreadId ?? null,
-            usedFallback: decision.meta.usedFallback,
-            reason: decision.meta.reason,
-            reasonCategory: decision.meta.reasonCategory,
-            warningTier: decision.meta.warningTier,
-            deadlineMs,
-            latencyMs: Number(latencyMs.toFixed(3)),
-            mailbox,
-            actionType: dispatchResult?.actionType,
-            actionOk: dispatchResult?.result.ok,
-            actionReason: dispatchReasonCode,
-            socialLoopStage: decision.meta.socialLoopStage ?? null,
-            playerSpeechAct: decision.meta.playerSpeechAct ?? null,
-          }),
-        );
-
-        writeJson(
-          res,
-          200,
-          dispatchResult
-            ? {
-                ...decision,
-                execution: dispatchResult,
-              }
-            : decision,
-        );
+      if (method === "POST" && path === "/v1/session/end") {
+        const parsed = endRequestSchema.safeParse(await readJsonBody(req));
+        if (!parsed.success) return badRequest(res, parsed.error);
+        const result = service.end(parsed.data.sessionId);
+        respond(res, endResponseSchema, result);
         return;
       }
 
@@ -305,23 +160,66 @@ export function startHttpServer(
       if (res.writableEnded || res.destroyed) {
         return;
       }
-
+      if (error instanceof SessionError) {
+        writeJson(res, statusForSessionError(error), { error: error.code, message: error.message });
+        return;
+      }
       if (error instanceof SyntaxError) {
         writeJson(res, 400, { error: "invalid_json" });
         return;
       }
-
-      writeJson(res, 500, {
-        error: "internal_error",
-        message: (error as Error).message,
-      });
+      writeJson(res, 500, { error: "internal_error", message: (error as Error).message });
     }
   });
+}
 
-  server.listen(config.port, config.host, () => {
-    // Keep startup log concise so smoke checks can grep this line.
-    console.log(`npc-runtime listening on http://${config.host}:${config.port}`);
+/**
+ * Start the session server bound to loopback. Port from `PORT` env (or the
+ * `port` option); default 0 → the OS picks a free port, which we print.
+ */
+export async function startSessionServer(options: SessionServerOptions = {}): Promise<RunningSessionServer> {
+  const service = options.service ?? new SessionService();
+  const server = createSessionServer(service);
+  const host = options.host ?? LOOPBACK_HOST;
+  const envPort = process.env.PORT ? Number(process.env.PORT) : undefined;
+  const requestedPort =
+    options.port ?? (Number.isFinite(envPort) && (envPort as number) >= 0 ? Math.floor(envPort as number) : 0);
+
+  await new Promise<void>((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(requestedPort, host, () => {
+      server.off("error", reject);
+      resolve();
+    });
   });
 
-  return server;
+  const address = server.address() as AddressInfo;
+  const port = address.port;
+  if (options.logListen !== false) {
+    // Keep this line greppable for smoke checks.
+    console.log(`npc-runtime session API listening on http://${host}:${port}`);
+  }
+
+  const close = () =>
+    new Promise<void>((resolve, reject) => {
+      server.close(err => (err ? reject(err) : resolve()));
+    });
+
+  return { server, port, host, close };
+}
+
+/** Install SIGTERM/SIGINT handlers that gracefully close the server. */
+export function installGracefulShutdown(running: RunningSessionServer): void {
+  let closing = false;
+  const shutdown = (signal: NodeJS.Signals) => {
+    if (closing) return;
+    closing = true;
+    console.log(`npc-runtime received ${signal}; shutting down session API`);
+    running
+      .close()
+      .then(() => process.exit(0))
+      .catch(() => process.exit(1));
+  };
+  process.once("SIGTERM", () => shutdown("SIGTERM"));
+  process.once("SIGINT", () => shutdown("SIGINT"));
 }

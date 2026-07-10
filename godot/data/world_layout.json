@@ -228,5 +228,110 @@
       "spawn_anchor": "Station.npc_spawn",
       "route_id": "StationIntake"
     }
-  ]
+  ],
+  "tile": {
+    "_note": "2D grid layer for M1 (docs/tech/godot-2d-client.md). Grid coords in tiles, derived from the semantic Store/Station anchors above. Rendered by scripts/world/world_builder_2d.gd from the Kenney RPG Urban Pack atlas plus greybox record props.",
+    "atlas": "res://assets/kenney2d/rpg-urban-pack/Tilemap/tilemap_packed.png",
+    "atlas_cols": 27,
+    "tile_size": 16,
+    "palette": {
+      "store_floor": 90,
+      "station_floor": 9,
+      "street_ground": 433,
+      "wall": 18,
+      "wall_cap": 17,
+      "counter": 273,
+      "shelf": 303,
+      "shelf_alt": 304,
+      "plant": 331,
+      "door": 283,
+      "sign": 166,
+      "window": 359
+    },
+    "prop_textures": {
+      "store_queue_mark": "res://assets/greybox/queue_marker.png",
+      "store_counter": "res://assets/greybox/store_counter.png",
+      "usual_order_cue": "res://assets/greybox/usual_order_cue.png",
+      "receipt_tray": "res://assets/greybox/receipt_tray.png",
+      "correction_slip": "res://assets/greybox/correction_slip.png",
+      "report_tray": "res://assets/greybox/report_tray.png",
+      "station_dossier": "res://assets/greybox/station_dossier.png"
+    },
+    "actor_visuals": {
+      "player": {"sprite": 0, "accent": "#7ec8a0", "labelKey": "npc.player.label", "roleKey": "npc.player.role"},
+      "NPC_Store_Clerk": {"sprite": 3, "accent": "#e2a33d", "labelKey": "npc.NPC_Store_Clerk.label", "roleKey": "npc.NPC_Store_Clerk.role"},
+      "NPC_Store_Manager": {"sprite": 4, "accent": "#c8643c", "labelKey": "npc.NPC_Store_Manager.label", "roleKey": "npc.NPC_Store_Manager.role"},
+      "NPC_Waiting_Customer": {"sprite": 1, "accent": "#c0505a", "labelKey": "npc.NPC_Waiting_Customer.label", "roleKey": "npc.NPC_Waiting_Customer.role"},
+      "NPC_Station_Officer": {"sprite": 2, "accent": "#6f8fbd", "labelKey": "npc.NPC_Station_Officer.label", "roleKey": "npc.NPC_Station_Officer.role"}
+    },
+    "prop_content": {
+      "store_queue_mark": {"labelKey": "prop.queue_marker.label", "descKey": "prop.queue_marker.desc", "defaultState": "player_waiting", "readers": ["player", "store_clerk", "waiting_customer"]},
+      "store_counter": {"labelKey": "prop.store_counter.label", "descKey": "prop.store_counter.desc", "defaultState": "serving", "readers": ["player", "store_clerk", "store_manager", "waiting_customer"]},
+      "usual_order_cue": {"labelKey": "prop.usual_order_cue.label", "descKey": "prop.usual_order_cue.desc", "defaultState": "read", "readers": ["player", "store_clerk", "store_manager"]},
+      "receipt_tray": {"labelKey": "prop.receipt_tray.label", "descKey": "prop.receipt_tray.desc", "defaultState": "blank", "readers": ["player", "store_clerk", "store_manager"]},
+      "correction_slip": {"labelKey": "prop.correction_slip.label", "descKey": "prop.correction_slip.desc", "defaultState": "absent", "readers": ["player", "store_clerk", "store_manager"]},
+      "report_tray": {"labelKey": "prop.report_tray.label", "descKey": "prop.report_tray.desc", "defaultState": "empty", "readers": ["store_clerk", "store_manager", "station_officer"]},
+      "station_dossier": {"labelKey": "prop.station_dossier.label", "descKey": "prop.station_dossier.desc", "defaultState": "absent", "readers": ["player", "station_officer"]}
+    },
+    "locations": {
+      "store": {
+        "labelKey": "world.location.store",
+        "room": [0, 0, 18, 12],
+        "street": [0, 12, 18, 4],
+        "floor_tile": "store_floor",
+        "wall_modulate": [1.0, 1.0, 1.0],
+        "door_gaps": [[8, 11], [9, 11], [17, 5]],
+        "furniture": [
+          {"tile": "counter", "cells": [[4, 4], [5, 4], [6, 4], [7, 4], [10, 4], [11, 4], [12, 4], [13, 4]]},
+          {"tile": "shelf", "cells": [[2, 1], [3, 1]]},
+          {"tile": "shelf_alt", "cells": [[14, 1], [15, 1]]},
+          {"tile": "plant", "cells": [[1, 10], [16, 10]]},
+          {"tile": "sign", "cells": [[16, 5]]},
+          {"tile": "door", "cells": [[17, 5]]}
+        ],
+        "overhead": [
+          {"tile": "wall_cap", "cells": [[8, 0], [9, 0]]}
+        ],
+        "solid_cells": [[4, 4], [5, 4], [6, 4], [7, 4], [10, 4], [11, 4], [12, 4], [13, 4]],
+        "spawns": {
+          "player": [9, 8, "up"],
+          "NPC_Store_Clerk": [9, 3, "down"],
+          "NPC_Store_Manager": [14, 3, "down"],
+          "NPC_Waiting_Customer": [9, 10, "up"]
+        },
+        "props": {
+          "store_counter": [8, 4],
+          "usual_order_cue": [15, 2],
+          "store_queue_mark": [8, 9],
+          "receipt_tray": [11, 4],
+          "correction_slip": [12, 4],
+          "report_tray": [13, 4]
+        },
+        "doorways": [{"to": "station", "cell": [17, 5]}]
+      },
+      "station": {
+        "labelKey": "world.location.station",
+        "room": [0, 0, 14, 10],
+        "floor_tile": "station_floor",
+        "wall_modulate": [0.72, 0.79, 0.92],
+        "door_gaps": [[6, 9], [7, 9]],
+        "furniture": [
+          {"tile": "counter", "cells": [[4, 3], [5, 3], [6, 3], [8, 3], [9, 3]]},
+          {"tile": "sign", "cells": [[6, 1]]},
+          {"tile": "plant", "cells": [[1, 8], [12, 8]]}
+        ],
+        "overhead": [],
+        "solid_cells": [[4, 3], [5, 3], [6, 3], [8, 3], [9, 3]],
+        "spawns": {
+          "player": [7, 7, "up"],
+          "NPC_Station_Officer": [7, 2, "down"]
+        },
+        "props": {
+          "station_dossier": [7, 4],
+          "report_tray": [9, 4]
+        },
+        "doorways": [{"to": "store", "cell": [7, 9]}]
+      }
+    }
+  }
 }

@@ -1,0 +1,106 @@
+{
+  "storyletId": "same-order",
+  "title": "같은 주문",
+  "locale": "ko-KR",
+  "conversationId": "conv-same-order",
+  "scenePremise": "플레이어가 단골처럼 취급되는 상점에서 평소 주문과 기억을 확인받는다.",
+  "primaryRecordId": "store_same_order_clerk_statement",
+  "thresholds": {
+    "softReport": 40,
+    "inquest": 90,
+    "suspicionProbe": 55,
+    "hesitationMs": 6000
+  },
+  "actors": [
+    { "actorId": "player", "role": "player", "name": "플레이어", "landmarkId": "Store" },
+    { "actorId": "NPC_Store_Clerk", "role": "store_clerk", "name": "상점 점원", "landmarkId": "Store" },
+    { "actorId": "NPC_Store_Manager", "role": "store_manager", "name": "상점 관리자", "landmarkId": "Store" },
+    { "actorId": "NPC_Waiting_Customer", "role": "waiting_customer", "name": "대기 손님", "landmarkId": "Store" },
+    { "actorId": "NPC_Station_Officer", "role": "station_officer", "name": "스테이션 담당관", "landmarkId": "Station" }
+  ],
+  "landmarks": [
+    { "landmarkId": "Store", "label": "상점" },
+    { "landmarkId": "Station", "label": "스테이션" }
+  ],
+  "whyLines": {
+    "none": "그 대답은 상점의 평소 대화에 들어맞았습니다.",
+    "local_routine_mismatch": "그 대답이 상점의 평소 순서와 맞지 않았습니다.",
+    "dream_language_leak": "그 표현은 꿈 바깥의 말이라 기록에 남습니다.",
+    "memory_gap_admission": "평소 기억을 확인하려 한 점이 불안 요소로 남았습니다.",
+    "role_script_break": "예상된 응대 절차 밖의 대답이었습니다.",
+    "prior_statement_contradiction": "그 말은 이전 진술과 어긋납니다.",
+    "authority_evasion": "절차 질문을 피한 대답으로 기록됐습니다.",
+    "over_explanation": "평범한 응대에 비해 설명이 너무 길었습니다.",
+    "response_hesitation": "대답이 늦어 확인이 필요한 지연으로 기록됐습니다."
+  },
+  "beats": [
+    {
+      "beatId": "routine",
+      "promptId": "store.same_order.routine",
+      "speakerId": "NPC_Store_Clerk",
+      "landmarkId": "Store",
+      "act": "public_procedure",
+      "objective": "단골에게 평소 주문을 자연스럽게 확인하고, 어긋남이 있으면 이유를 묻는다.",
+      "sceneFacts": ["평소 주문은 표식 하나와 같은 봉투다.", "점원은 플레이어를 어제도 온 단골로 기억한다."],
+      "procedureCue": ["store_queue_mark", "usual_order_cue", "receipt_tray"],
+      "acceptsFreeInput": true,
+      "next": "probe"
+    },
+    {
+      "beatId": "probe",
+      "promptId": "store.same_order.probe",
+      "speakerId": "NPC_Store_Clerk",
+      "landmarkId": "Store",
+      "act": "social_audit",
+      "objective": "플레이어의 방금 답과 상점의 평소 기록을 비교해 짧게 확인한다.",
+      "sceneFacts": ["상점에는 같은 주문 기록이 있다.", "점원은 모순을 직접 단정하지 않고 확인 질문을 한다."],
+      "procedureCue": ["usual_order_cue", "receipt_tray", "report_tray"],
+      "acceptsFreeInput": true,
+      "next": "reconciliation"
+    },
+    {
+      "beatId": "reconciliation",
+      "promptId": "station.same_order.reconciliation",
+      "speakerId": "NPC_Station_Officer",
+      "landmarkId": "Station",
+      "act": "station_reconciliation",
+      "onlyWhenRoute": ["hard_inquest"],
+      "objective": "상점에서 생긴 기록과 플레이어 진술을 인용해 어느 진술을 정정할지 묻는다.",
+      "sceneFacts": ["담당관은 실제로 보이는 상점 기록만 인용할 수 있다.", "담당관은 인용한 기록과 진술을 근거로만 판단을 내린다."],
+      "procedureCue": ["station_dossier"],
+      "acceptsFreeInput": true,
+      "next": null
+    }
+  ],
+  "hesitation": {
+    "thresholdMs": 6000,
+    "signal": "response_hesitation",
+    "eventName": "response_hesitation_noted"
+  },
+  "routes": {
+    "clean_cover": {
+      "outcome": "cover_held",
+      "title": "무사 통과",
+      "body": "평소 순서대로 응대가 끝났습니다.",
+      "bodyNoRecord": "평소 순서대로 응대가 끝났고, 기록도 남지 않았습니다."
+    },
+    "repair_recovery": {
+      "outcome": "cover_held_with_unease",
+      "title": "수습",
+      "body": "작은 어긋남은 남았지만 대화가 마무리됐습니다.",
+      "bodyNoRecord": "작은 어긋남은 남았지만 기록 없이 대화가 마무리됐습니다."
+    },
+    "soft_report": {
+      "outcome": "soft_report",
+      "title": "약식 보고",
+      "body": "상점의 주의와 기록 부담이 높아졌습니다.",
+      "bodyNoRecord": "점원의 경계는 높아졌지만, 아직 기록으로 남지는 않았습니다."
+    },
+    "hard_inquest": {
+      "outcome": "hard_inquest",
+      "title": "심문",
+      "body": "스테이션이 실제 기록과 진술을 근거로 정식 확인을 시작했습니다.",
+      "bodyNoRecord": "스테이션 확인이 필요하다고 판단됐지만, 인용할 기록은 남지 않았습니다."
+    }
+  }
+}

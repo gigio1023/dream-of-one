@@ -15,7 +15,7 @@
   - `godot: add park notice affordance`
   - `backend: validate social route ledger`
 - Put verification in the commit body when it matters:
-  - `Check: npm run check --prefix backend/npc-runtime`
+  - `Check: bun run --cwd backend/npc-runtime check`
   - `Check: $GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd`
 - Do not add broad tests only to make a commit look safer. Use the smallest
   Detroit-style check that proves player-visible behavior, runtime authority,

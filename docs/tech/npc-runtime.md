@@ -16,12 +16,12 @@ src/
     readiness.ts          # boot/preflight state (kept, simplified)
     telemetry.ts          # session telemetry (kept, + provider usage)
     world/                # v2: records, civic ledger, economy values, visibility
-  agentloop/        # v2 (M1 shape, M3 full):
+  agentloop/        # provider-driven loop:
     context.ts            # observe-packet assembly (pure fn of world state)
     tools.ts              # tool catalog + validators
     engine.ts             # iterate/validate/apply/budget
     transcript.ts         # per-NPC loop transcript
-  providers/        # v2 (M2): ports, adapters, registry, budget, envelope
+  providers/        # ports, adapters, registry, budget, envelope, test adapters
   policy/           # reason taxonomy, hook policy (kept)
   memory/           # actor memory / session memory stores (kept, trimmed)
   api/http-server.ts# sidecar endpoints (kept, extended)
@@ -60,15 +60,20 @@ Delete when the replacing module lands; don't leave both alive.
    sides.
 2. `DecisionService` preserves ordered turns per conversation
    (`conversation.turnId`) — no latest-wins coalescing.
-3. Suspicion classification is pure and fixture-tested; adding a signal class
-   requires fixtures for KO and EN phrasing.
+3. The deterministic suspicion classifier stays pure and fixture-tested; it
+   is the fallback for provider outages, never the product judgment path.
+   Adding a signal class requires fixtures for KO and EN phrasing.
 4. World mutations happen only through validated tool application, and each
    emits exactly one civic ledger event.
 5. NPC context assembly enforces visibility — no data an NPC couldn't know
    ever enters its packet (this is both a fairness rule and the prompt-side
    information boundary).
-6. The runtime runs fully deterministic with providers off; provider on/off
-   cannot change route outcomes (texture-not-truth, asserted by smoke in M2+).
+6. The model judges what player speech means (suspicion movement, why-lines)
+   within rule-enforced validity: clamped deltas, visibility-checked context,
+   and a guaranteed session ending
+   (see [`../vision/design-pillars.md`](../vision/design-pillars.md)).
+   Providers may choose different valid attempts and wording; fallback keeps a
+   session alive but is never the default production profile.
 
 ## Sidecar API (v2 surface)
 
@@ -82,11 +87,13 @@ Keep the v1-proven `/v1/npc/decision` shape; add session lifecycle:
 | `GET  /v1/session/snapshot` | Full renderable state (HUD hydrate, debugging) |
 | `POST /v1/session/end` | Terminal route result + telemetry summary |
 
-All responses carry `ledgerEvents[]` deltas so the client can animate
+Responses carry `ProposalMeta`, transcript deltas, and `ledgerEvents[]` so the
+client can distinguish live/fallback/scripted behavior and animate validated
 consequences incrementally.
 
 ## Checks
 
-`npm run check` = typecheck + unit/fixture tests + storylet data validation.
-Keep it under ~60s. Provider live smokes are separate opt-in scripts
+`bun run --cwd backend/npc-runtime check` = typecheck + unit/fixture tests +
+storylet data validation. Keep it under ~60s. Provider live smokes are
+separate opt-in scripts
 ([`ai-provider-ports.md`](ai-provider-ports.md)).

@@ -25,10 +25,14 @@ The player is never the investigator. The society investigates the player.
 This is an AI-built game about AI-driven NPCs. NPCs are constrained agents:
 they observe the world, choose a validated tool (move, look, talk, use an
 object, write a record), read the result, and iterate — the same loop as a
-coding agent, pointed at a social world. A cheap, swappable LLM provider layer
-proposes NPC wording and next tool calls; deterministic rules validate
-everything and own all consequences. Implementation cost is treated as near
-zero; design clarity is the scarce resource.
+coding agent, pointed at a social world. A swappable LLM provider layer is
+the NPCs' actual mind: it decides what they say, what they try next, how
+suspicious they become, and how the Station judges. Deterministic rules
+enforce validity — sight/context separation, tool validation, a guaranteed
+session ending — never the content of a judgment (see
+[`design-pillars.md`](design-pillars.md), owner direction 2026-07-10).
+Implementation cost is treated as near zero; design clarity is the scarce
+resource.
 
 ## View and look
 

@@ -18,8 +18,8 @@ loop (per NPC, per beat, budgeted):
                  visible objects/records/actors, heard speech,
                  available tool catalog (from affordances)
   2. propose   — pick the next step:
-                 deterministic policy first (fallback always works);
-                 provider proposal when a profile is live
+                 provider proposal by default;
+                 bounded deterministic fallback when provider work fails
                  (one tool call + optional utterance, schema-bound)
   3. validate  — runtime checks the tool call against the catalog,
                  role permissions, visibility, object state, budget
@@ -47,8 +47,10 @@ same blocked state is a bug.
 | `read_record(record)` | Load a visible record into memory | Visibility (열람 rules) |
 | `request(actor, action)` | Ask another NPC to act (handoff, confirmation) | Target role can perform the action |
 
-Player-directed danger stays deterministic: suspicion classification of player
-speech is **not** a tool and never goes through the provider.
+Suspicion judgment of player speech is **not** a tool: it flows through
+`judgeConversationTurn` on the proposal port, with rules clamping the delta
+and keeping the deterministic classifier as fallback (see
+[`../vision/design-pillars.md`](../vision/design-pillars.md)).
 
 ## Memory and context bounds
 
@@ -57,19 +59,24 @@ speech is **not** a tool and never goes through the provider.
 - **Actor policy** = stable goals, priority shifts, action-selection policy,
   forbidden claims. Deterministic data, editable per role.
 - Context assembly is a pure function of world state — the same packet shape
-  feeds the deterministic policy, the provider proposal, and the debug
-  transcript.
+  feeds the live provider, deterministic fallback, scripted test adapter, and
+  debug transcript.
 
 ## Provider involvement
 
-When a provider profile is live (see
+The production loop always calls the selected provider profile first (see
 [`../tech/ai-provider-ports.md`](../tech/ai-provider-ports.md)), step 2 sends
 the observe-packet and receives a `ProposalEnvelope`: at most one tool call
 from the offered catalog plus optional utterance text. Validation treats a
 provider proposal exactly like a deterministic one — no trust distinction.
-Provider unavailable, over budget, or invalid → deterministic policy decides.
-The game must be indistinguishable in *structure* (routes, records, verdicts)
-with providers on or off; providers change texture, not truth.
+Provider unavailable, over budget, or invalid → deterministic fallback decides
+and the transcript marks the fallback reason. Scripted proposal sequences are
+test adapters only; they are never production storylet content.
+Suspicion judgment is model-owned with rule-clamped deltas; authority
+*procedure* (thresholds reaching an ending, verdict validity) stays
+deterministic. Different models may attempt different valid tools and therefore create
+different records; that variation is intended as long as every mutation
+passes the same world rules.
 
 ## Transcript (player/agent-readable)
 
@@ -85,10 +92,10 @@ change. Exposed two ways:
 
 ## Milestone mapping
 
-- **M1** ships the loop's *shape* deterministically: NPCs run observe →
-  policy → validate → apply with the tool catalog, no provider.
-- **M2** adds provider proposals through the ports.
-- **M3** is the full probe: 2 NPCs + 1 object/record, ≤ 5 tools active, 3–6
+- **M1** retained the 2D client and deterministic scenario harness.
+- **M2** ships provider dialogue and next-step proposals together: 2 NPCs + 1
+  object/record, ≤ 5 tools active, 3–6
   iterations per beat, a blocked result visibly changing a plan, transcript
   overlay shipped. Acceptance details:
-  [`../plan/m3-agent-loop-npcs.md`](../plan/m3-agent-loop-npcs.md).
+  [`../plan/m2-provider-ports.md`](../plan/m2-provider-ports.md).
+- **M3** scales the proven loop to concurrent NPCs and emergent propagation.

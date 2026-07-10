@@ -17,7 +17,13 @@ symmetrical and fits the dream-logic undertone.
 - Top-down, Stardew Valley-style camera (slight front-facing walls, no
   isometric diamond grid). Quarter-view/isometric was evaluated and rejected:
   higher art cost, scarcer packs, zero gameplay value for a conversation game.
-- Base viewport **640×360**, integer-scaled to window size. Pixel snap on.
+- The world renders 1:1 into a logical view picked by window height —
+  320×180 (720p), 384×216 (1080p and 4K), 426×240 (1440p) — then integer-scales
+  to the output (4×/5×/6×/10×). Stardew-band density: the room fills most of
+  the frame, and a larger output means finer pixels or slightly more world,
+  never the same narrow view re-magnified. Pixel snap on.
+- Rooms sit on a darker pavement apron (7 tiles) so wide views never expose
+  void; the follow camera clamps to the apron bounds.
 - Tile size **16×16**; characters 16×32 (LimeZu-compatible proportions),
   4-direction walk cycles.
 
@@ -41,8 +47,12 @@ symmetrical and fits the dream-logic undertone.
 
 ## UI
 
-- Diegetic-leaning HUD: conversation panel (prompt, three choices, typed
-  input), suspicion/pressure meter, record/ledger line, outcome panels.
+- Diegetic-leaning HUD, world-first: a compact case-file chip (top-left) for
+  location/pressure/record line, a bottom-sheet conversation panel (prompt,
+  three choices, typed input) that keeps the speaker visible, quiet NPC
+  nameplates, and outcome panels. Display and provider settings live behind
+  Esc, never in permanent chrome. Body text targets regular PC density
+  (~18px at 1080p) with a user-adjustable UI scale for larger text.
 - Pixel font pair: one KO-capable pixel font for body (e.g. Galmuri/NeoDunggeunmo
   family — verify license at adoption), one accent font for Station officialese.
 - Follow the LimeZu Modern User Interface pack style where it fits; UI is the

@@ -6,6 +6,6 @@ export function createFallbackIntent(packet: Pick<PerceptionPacket, "npcId">, re
     actionType: "Observe",
     reasonCodes: [`fallback:${reason}`],
     confidence: 0,
-    utterance: "I need more context. Observing for now.",
+    utterance: "관찰하겠습니다.",
   };
 }

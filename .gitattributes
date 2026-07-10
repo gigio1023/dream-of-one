@@ -1,2 +1,5 @@
 # GitHub Linguist attributes
 godot/.godot/** linguist-generated
+
+# Agent skills must stay LF (harness/tooling portability)
+.agents/skills/** text eol=lf

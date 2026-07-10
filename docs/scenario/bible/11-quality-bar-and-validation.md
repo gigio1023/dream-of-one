@@ -83,7 +83,7 @@ Reject scenario content if:
 ## Validation Commands
 
 ```bash
-npm run check --prefix backend/npc-runtime
+bun run --cwd backend/npc-runtime check
 $GODOT_BIN --headless --import --path godot
 GODOT_PATH="$GODOT_BIN" bash "$GODOT_BEST_PRACTICE_SKILL/scripts/check_gd_syntax.sh" godot
 $GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd

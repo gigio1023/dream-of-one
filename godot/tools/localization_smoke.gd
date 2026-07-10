@@ -1,68 +1,62 @@
 extends SceneTree
 
-const MAIN_SCENE := "res://scenes/main.tscn"
+## Verifies the complete primary Korean localization table through the same
+## Localization autoload API used by the HUD and world scenes.
+
+var _failures: Array[String] = []
 
 func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
-	var packed := load(MAIN_SCENE) as PackedScene
-	if packed == null:
-		_fail(["Unable to load %s" % MAIN_SCENE])
+	await process_frame
+	var localization = root.get_node_or_null("Localization")
+	if localization == null:
+		_failures.append("Localization autoload is missing")
+		_finish()
+		return
+	if not localization.has_method("all_keys") or not localization.has_method("t"):
+		_failures.append("Localization autoload does not expose all_keys()/t()")
+		_finish()
 		return
 
-	var scene := packed.instantiate()
-	root.add_child(scene)
-	await process_frame
-	await process_frame
-	await process_frame
+	TranslationServer.set_locale("ko")
+	if localization.has_method("locale") and str(localization.call("locale")) != "ko":
+		_failures.append("primary locale is not ko")
 
-	var localization := scene.find_child("LocalizationManager", true, false)
-	var failures: Array[String] = []
-	if localization == null or not localization.has_method("get_locale"):
-		failures.append("LocalizationManager is missing")
-	elif str(localization.get_locale()) != "ko":
-		failures.append("Expected default locale ko")
-
-	var language_label := scene.find_child("LanguageLabel", true, false) as Label
-	if language_label == null or language_label.text != "언어":
-		failures.append("Expected Korean language label")
-
-	var station_surface := _find_text_surface("TS_Station_IntakeRules")
-	if station_surface == null or not station_surface.has_method("localized_display_name"):
-		failures.append("Expected localized Station text surface")
-	elif str(station_surface.localized_display_name()) != "접수 규칙":
-		failures.append("Expected Korean Station text surface label")
-
-	if localization != null and localization.has_method("set_locale"):
-		localization.set_locale("en")
-		await process_frame
-		await process_frame
-
-	if localization != null and localization.has_method("get_locale") and str(localization.get_locale()) != "en":
-		failures.append("Expected locale switch to en")
-	if language_label == null or language_label.text != "Language":
-		failures.append("Expected English language label after switch")
-	if station_surface != null and station_surface.has_method("localized_display_name") and str(station_surface.localized_display_name()) != "Intake Rules":
-		failures.append("Expected English Station text surface label after switch")
-
-	if failures.size() > 0:
-		_fail(failures)
+	var keys_value: Variant = localization.call("all_keys")
+	if not keys_value is Array:
+		_failures.append("Localization.all_keys() did not return an Array")
+		_finish()
 		return
+	var keys: Array = keys_value
+	if keys.is_empty():
+		_failures.append("Localization.all_keys() returned no KO keys")
 
-	print(JSON.stringify({
-		"ok": true,
-		"defaultLocale": "ko",
-		"switchedLocale": "en"
-	}, "\t"))
-	quit(0)
+	var seen := {}
+	for key_value in keys:
+		var key := str(key_value)
+		if key.is_empty():
+			_failures.append("localization table contains an empty key")
+			continue
+		if seen.has(key):
+			_failures.append("duplicate localization key: %s" % key)
+			continue
+		seen[key] = true
+		var resolved := str(localization.call("t", key))
+		if resolved.strip_edges().is_empty():
+			_failures.append("KO key resolved empty: %s" % key)
+		elif resolved == key:
+			_failures.append("KO key resolved to itself: %s" % key)
 
-func _find_text_surface(surface_id: String) -> Node:
-	for node in get_nodes_in_group("text_surfaces"):
-		if str(node.get_meta("surface_id", "")) == surface_id:
-			return node
-	return null
+	if _failures.is_empty():
+		print("PASS localization_smoke: %d KO keys resolved" % keys.size())
+	_finish()
 
-func _fail(failures: Array[String]) -> void:
-	printerr(JSON.stringify({"ok": false, "failures": failures}, "\t"))
+func _finish() -> void:
+	if _failures.is_empty():
+		quit(0)
+		return
+	for failure in _failures:
+		print("FAIL localization_smoke: %s" % failure)
 	quit(1)

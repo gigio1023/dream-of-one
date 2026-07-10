@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "bun:test";
 
 import { DecisionService } from "../../src/runtime/decision-service.js";
-import type { CodexBroker } from "../../src/broker/codex-broker.js";
+// The Codex provider broker was retired in M1; DecisionService now takes the
+// narrow DecisionProducer interface (any object with a `decide` method).
+import type { DecisionProducer } from "../../src/runtime/decision-service.js";
 import type { DecisionEnvelope, PerceptionPacket } from "../../src/contracts/types.js";
 
-const noopBroker: CodexBroker = {
+const noopBroker: DecisionProducer = {
   async decide() {
     throw new Error("should not be called for invalid input");
   },
@@ -79,7 +81,7 @@ test("same actor burst uses single-flight with latest-wins coalescing", async ()
   let activeCalls = 0;
   let maxActiveCalls = 0;
 
-  const broker: CodexBroker = {
+  const broker: DecisionProducer = {
     async decide(packet) {
       const eventCode = packet.recentEvents[0] ?? "none";
       callOrder.push(eventCode);
@@ -115,7 +117,7 @@ test("same actor conversation turns are ordered and never coalesced", async () =
   let activeCalls = 0;
   let maxActiveCalls = 0;
 
-  const broker: CodexBroker = {
+  const broker: DecisionProducer = {
     async decide(packet) {
       const turnId = packet.conversation?.turnId ?? "none";
       callOrder.push(turnId);
@@ -148,7 +150,7 @@ test("different actors remain isolated and can execute concurrently", async () =
   let activeCalls = 0;
   let maxActiveCalls = 0;
 
-  const broker: CodexBroker = {
+  const broker: DecisionProducer = {
     async decide(packet) {
       activeCalls += 1;
       maxActiveCalls = Math.max(maxActiveCalls, activeCalls);
@@ -174,7 +176,7 @@ test("global cap limits concurrent broker execution", async () => {
   let activeCalls = 0;
   let maxActiveCalls = 0;
 
-  const broker: CodexBroker = {
+  const broker: DecisionProducer = {
     async decide(packet) {
       activeCalls += 1;
       maxActiveCalls = Math.max(maxActiveCalls, activeCalls);
@@ -202,7 +204,7 @@ test("global cap limits concurrent broker execution", async () => {
 test("request cancellation returns fallback and aborts running broker call", async () => {
   let sawAbort = false;
 
-  const broker: CodexBroker = {
+  const broker: DecisionProducer = {
     async decide(packet, options) {
       await new Promise<void>(resolve => {
         const timer = setTimeout(resolve, 100);
@@ -238,7 +240,7 @@ test("request cancellation returns fallback and aborts running broker call", asy
 });
 
 test("queued request that misses deadline returns deterministic fallback", async () => {
-  const broker: CodexBroker = {
+  const broker: DecisionProducer = {
     async decide(packet) {
       await sleep(40);
       return envelopeFromPacket(packet);
@@ -263,7 +265,7 @@ test("queued request that misses deadline returns deterministic fallback", async
 
 test("global limiter reports queued work when max in-flight is reached", async () => {
   let releaseFirst: (() => void) | undefined;
-  const broker: CodexBroker = {
+  const broker: DecisionProducer = {
     async decide(packet) {
       if (packet.recentEvents[0] === "blocking") {
         await new Promise<void>(resolve => {
@@ -292,7 +294,7 @@ test("queued cancellation before execution returns fallback without extra broker
   let releaseFirst: (() => void) | undefined;
   let callCount = 0;
 
-  const broker: CodexBroker = {
+  const broker: DecisionProducer = {
     async decide(packet) {
       callCount += 1;
       if (packet.recentEvents[0] === "cancellable") {
@@ -335,7 +337,7 @@ test("global limiter waiting job skips broker execution when all waiters cancel"
   let releaseFirst: (() => void) | undefined;
   let callCount = 0;
 
-  const broker: CodexBroker = {
+  const broker: DecisionProducer = {
     async decide(packet, options) {
       callCount += 1;
       if (packet.recentEvents[0] === "hold") {
@@ -379,7 +381,7 @@ test("global limiter waiting job skips broker execution when deadline elapses", 
   let releaseFirst: (() => void) | undefined;
   let callCount = 0;
 
-  const broker: CodexBroker = {
+  const broker: DecisionProducer = {
     async decide(packet) {
       callCount += 1;
       if (packet.recentEvents[0] === "hold") {
@@ -418,7 +420,7 @@ test("per-bot pending limit rejects with deterministic backpressure fallback", a
   let releaseFirst: (() => void) | undefined;
   let callCount = 0;
 
-  const broker: CodexBroker = {
+  const broker: DecisionProducer = {
     async decide(packet) {
       callCount += 1;
       if (packet.recentEvents[0] === "hold") {
@@ -457,7 +459,7 @@ test("global pending limit rejects cross-bot overload deterministically", async 
   let releaseFirst: (() => void) | undefined;
   let callCount = 0;
 
-  const broker: CodexBroker = {
+  const broker: DecisionProducer = {
     async decide(packet) {
       callCount += 1;
       if (packet.recentEvents[0] === "hold") {

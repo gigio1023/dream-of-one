@@ -4,6 +4,10 @@ Read [`docs/README.md`](docs/README.md) before changing anything. It is the
 single documentation index; every active document hangs off it. Do not build
 from `docs/archive/` — that tree is frozen v1 history.
 
+Repo-specific agent skills live in `.agents/skills/` (Claude Code reads them
+through the tracked `.claude/skills` symlink). They route to the docs; the
+docs stay the source of truth.
+
 ## Operating Model
 
 - The deliverable is a playable game. The single product gate is the fun gate:
@@ -41,9 +45,9 @@ are load-bearing:
 
 | Layer | Owns | Must not own |
 |---|---|---|
-| Godot client | Presentation, input, tilemaps, HUD, scene-local interaction | Suspicion math, record semantics, verdicts, session termination |
-| NPC runtime (TS) | Deterministic validation, suspicion, records, ledger, scheduling, fallback | Final art, camera feel |
-| AI provider (via ports) | Proposing NPC wording and next tool calls inside schemas | Any direct world mutation, risk tags, verdicts, session end |
+| Godot client | Presentation, input, tilemaps, HUD, scene-local interaction | Suspicion state, record semantics, verdicts, session termination |
+| NPC runtime (TS) | Validity: tool validation, sight/context separation, delta caps and clamps, records, ledger, scheduling, guaranteed session ending, fallback | Final art, camera feel, the content of a judgment when a live provider is available |
+| AI provider (via ports) | NPC wording, reply suggestions, suspicion judgment with why-lines, next tool calls — all inside schemas | Any direct world mutation, conjuring unseen context, blocking session end |
 
 Provider access goes exclusively through the port-and-adapter layer defined in
 [`docs/tech/ai-provider-ports.md`](docs/tech/ai-provider-ports.md). Never
@@ -51,13 +55,18 @@ hardcode a vendor SDK call or base URL outside an adapter. Never assume a
 specific model is available; profiles are config, availability is checked at
 runtime, and deterministic fallback must always work.
 
+Production gameplay is provider-first. Do not store authored choice sets, NPC
+reply sequences, or ordered social consequences in production storylets.
+Deterministic scripted proposal sets are allowed only behind a test adapter or
+generated fixture used by smoke tests.
+
 ## Verification
 
 Commands and policy: [`docs/tech/verification.md`](docs/tech/verification.md).
 The short list:
 
 ```bash
-npm run check --prefix backend/npc-runtime
+bun run --cwd backend/npc-runtime check
 $GODOT_BIN --headless --import --path godot
 $GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
 ```

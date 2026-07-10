@@ -21,20 +21,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: backend/npc-runtime/package-lock.json
+          bun-version: "1.3.14"
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Validate backend and Godot Evidence Schema
         run: |
-          npm run check
-          node --import tsx --input-type=module <<'NODE'
+          bun run check
+          bun run - <<'BUN'
           import { readFile } from "node:fs/promises";
           import { validateGodotEvidencePack, validateGodotObservationFrame } from "./src/godot/runtime-schema.ts";
           const shell = JSON.parse(await readFile("../../data/evidence/godot/shell/dre_171_shell_evidence.json", "utf8"));
@@ -50,4 +48,4 @@ jobs:
             process.exit(1);
           }
           console.log("Godot Evidence Packs validated.");
-          NODE
+          BUN

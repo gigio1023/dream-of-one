@@ -15,20 +15,25 @@ gate.
 
 ```bash
 # Runtime (fast, always)
-npm run check --prefix backend/npc-runtime
+bun run --cwd backend/npc-runtime check
 
 # Godot client (headless)
+$GODOT_BIN --version # Expected: 4.7.x stable
 $GODOT_BIN --headless --import --path godot
-$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
-$GODOT_BIN --headless --path godot --script res://tools/route_smoke.gd
+DREAM_SESSION_MODE=fixture $GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
+DREAM_SESSION_MODE=fixture $GODOT_BIN --headless --path godot --script res://tools/route_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/localization_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/check_assets.gd
 
-# Provider contract tests are inside npm run check (MockAdapter, offline).
-# Live provider smoke — manual, opt-in, spends real pennies:
-npm run provider:smoke --prefix backend/npc-runtime -- --profile <profile>
+# Localhost Session API parity (starts and stops a scripted test adapter)
+GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/live-route-parity.sh
+
+# Opt-in real provider smoke; requires the selected profile's credentials
+bun run --cwd backend/npc-runtime provider:smoke -- --profile openai/gpt-5.4-mini
+bun run --cwd backend/npc-runtime provider:smoke -- --profile modelscope/qwen3.7-plus
 ```
 
-CI runs the npm check on backend changes (existing workflow). Godot smokes
+CI runs the Bun check on backend changes (existing workflow). Godot smokes
 run locally per slice; add them to CI only if a real regression escapes
 twice.
 

@@ -21,7 +21,8 @@ flowchart LR
     subgraph Providers["Adapters (config-selected profiles)"]
         CC["ChatCompletionsAdapter\nOpenAI SDK + custom baseURL\n(ModelScope, OpenRouter, local, ...)"]
         RESP["ResponsesAdapter\nOpenAI Responses API\n(gpt-5.x family)"]
-        MOCK["MockAdapter (tests)\n+ deterministic fallback"]
+        FALLBACK["RuleFallbackNpcAdapter\n(resilience only)"]
+        SCRIPTED["ScriptedNpcAdapter\n(test injection only)"]
     end
 
     Scenes --> Bridge
@@ -33,7 +34,8 @@ flowchart LR
     Agent --> Ports
     Ports --> CC
     Ports --> RESP
-    Ports --> MOCK
+    Ports --> FALLBACK
+    Agent -. test injection .-> SCRIPTED
 ```
 
 ## Boundaries (load-bearing)
@@ -52,16 +54,17 @@ flowchart LR
 
 The question that settles the client/runtime split: where is it best to
 implement *many concurrent NPC brains* that assemble context, talk to LLM
-provider APIs, and manage memory? Answer: TypeScript, decisively.
+provider APIs, and manage memory? Current answer: TypeScript via Bun, subject
+to the clean-machine packaging gate below.
 
-| Concern | TS runtime (Node) | GDScript in-engine |
+| Concern | TS runtime (Bun) | GDScript in-engine |
 |---|---|---|
 | Concurrent LLM calls for N NPCs | Native async I/O; trivial fan-out, timeout, retry per NPC | `HTTPRequest` nodes + signal plumbing per call; awkward at N>2 |
 | Provider SDKs | Official OpenAI SDK (both API shapes), mature streaming | No first-class LLM SDK; hand-rolled HTTP + SSE parsing |
 | Schema validation of proposals | zod at every boundary, typed end to end | Manual `Dictionary` checking, no type safety |
 | Context/prompt assembly, token budgeting | First-class string/JSON tooling, tokenizer libs | Possible but clumsy |
 | Testing brains without the engine | Plain unit/fixture tests, headless simulation of whole social scenes | Engine-coupled tests only |
-| Frame-rate isolation | Brain latency can never hitch rendering (separate process) | LLM waits share the main loop |
+| Frame-rate isolation | Brain latency is process-isolated from rendering | Requires disciplined threaded/async scheduling inside the engine |
 
 So: **brains (agent loop, context assembly, provider ports, memory, all
 deterministic authority) live in `backend/npc-runtime/`. Godot is the body
@@ -70,17 +73,56 @@ and the stage** — senses in (observations, player input), actions out
 headless (fixture NPCs conversing without a renderer), which is how agent-loop
 work gets tested from M3 on.
 
+### Full re-evaluation record (2026-07-10, owner-requested)
+
+The owner asked for a from-scratch reconsideration with reimplementation on
+the table. Candidates evaluated with web research (evidence in PR): TS
+sidecar, Python sidecar, Godot C#/.NET in-process, GDScript native. The TS
+runtime now uses Bun for package management, execution, tests, and CI.
+
+- **Godot C# in-process** is genuinely viable on desktop: official
+  `openai-dotnet` SDK is mature (Responses API stable since 2025-12, custom
+  baseURL first-class → ModelScope works), and Godot's main-thread
+  `GodotSynchronizationContext` makes `HttpClient` + async/await safe. Its win
+  is eliminating sidecar lifecycle/port/dual-signing costs. Its costs: C#
+  **cannot export to web** (unresolved through 4.7, draft-PR only), thin
+  shipped precedent for Godot C# + LLM, brain iteration coupled to engine
+  compile cycles, and lower AI-agent fluency with Godot C# than TS.
+- **TS/Bun sidecar** keeps brain iteration and testing fully engine-independent,
+  reuses the proven v1 schema/suspicion core, and has direct shipping
+  precedent (Screeps: World has bundled a Node server on Steam since 2016).
+  Sidecar costs (orphan processes, port conflicts, per-executable
+  signing/notarization) are real but M5-localized with documented mitigations.
+- **Python sidecar** has the best LLM ecosystem but the worst packaging
+  friction (PyInstaller AV false positives, macOS notarization landmines); the
+  owner expressed no language preference, removing its main upside.
+- **GDScript native** stays rejected (no SDK, hand-rolled validation,
+  engine-coupled tests).
+
+**Decision rule:** with agents writing most code, brain iteration speed,
+headless testability, and agent fluency outweigh single-process deployment
+simplicity. **Decision: keep the TS sidecar.** Constraints adopted from the
+research: treat Chat Completions as the lowest common denominator for
+OpenAI-compatible endpoints (Responses only for OpenAI itself); bind the
+sidecar to localhost with a dynamic port; the game must kill the sidecar on
+exit (orphan processes are the #1 documented sidecar failure).
+
+**Reversal conditions:** (a) a browser/web demo becomes a requirement → move
+brains to a hosted server (TS/Python), C# stays excluded; (b) clean-machine
+Bun executable packaging, lifecycle, or signing fails in practice → compare a
+small Godot C# in-process probe before committing to the M5 runtime path.
+
 ## Client ↔ runtime transport
 
-- **HTTP sidecar.** The runtime runs as a local Node process
-  (`npm run serve`) exposing the v1-proven endpoint shape
-  (`/v1/npc/decision`, plus v2 session endpoints). Godot talks JSON over
+- **HTTP sidecar.** The runtime runs as a local Bun process
+  (`bun run --cwd backend/npc-runtime serve`) exposing the v1-proven endpoint
+  shape (`/v1/npc/decision`, plus v2 session endpoints). Godot talks JSON over
   localhost. Fast iteration, engine-independent testing.
-- **Packaging (M5 detail, not an architecture question):** the shipped build
-  bundles the sidecar (launcher starts/stops it; Node runtime packaged
-  per-OS). Porting brains to GDScript is explicitly rejected per the table
-  above; if bundling proves painful at M5, the fallback investigation is a
-  compiled single-binary sidecar (e.g. pkg/bun-style), never an engine port.
+- **Packaging (must be proven before M5):** the shipped build targets a
+  Bun-compiled sidecar executable with a launcher that starts and stops it.
+  If clean-machine packaging or lifecycle recovery fails, compare the
+  in-process C# probe described by the reversal condition before rewriting the
+  runtime.
 
 ## Data flow contracts
 
@@ -92,9 +134,10 @@ work gets tested from M3 on.
   source for landmarks/zones/anchors/actors, extended with a `tile` block
   (grid coords) for 2D. The client renders it; the runtime reasons over it.
   One file, two consumers, no duplicated world truth.
-- **Content as data.** Storylets compile from `docs/scenario/` canon into
-  runtime data (`backend/npc-runtime/data/storylets/*.json`); lines, choices,
-  classification patterns, and route definitions are data, not code.
+- **Content as constraints.** Storylets compile scene facts, actor goals,
+  classification patterns, authority thresholds, and outcome presentation
+  from `docs/scenario/` canon. Authored choice lists, NPC reply lists, and
+  ordered route consequences belong only to scripted test adapters.
 
 ## Repo layout target
 

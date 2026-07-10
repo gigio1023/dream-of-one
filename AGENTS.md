@@ -4,6 +4,10 @@ Read [`docs/README.md`](docs/README.md) before changing anything. It is the
 single documentation index; every active document hangs off it. Do not build
 from `docs/archive/` — that tree is frozen v1 history.
 
+Repo-specific agent skills live in `.agents/skills/` (Claude Code reads them
+through the tracked `.claude/skills` symlink). They route to the docs; the
+docs stay the source of truth.
+
 ## Operating Model
 
 - The deliverable is a playable game. The single product gate is the fun gate:

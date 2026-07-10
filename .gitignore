@@ -2,7 +2,8 @@
 Thumbs.db
 *.log
 
-.claude/
+.claude/*
+!.claude/skills
 .vscode/
 *.slnx
 

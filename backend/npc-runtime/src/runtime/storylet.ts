@@ -36,13 +36,6 @@ const routeSchema = z
   })
   .strict();
 
-const freeInputPatternSchema = z
-  .object({
-    signal: signalEnum,
-    patterns: z.array(nonEmpty).min(1),
-  })
-  .strict();
-
 export const storyletSchema = z
   .object({
     storyletId: nonEmpty,
@@ -67,7 +60,6 @@ export const storyletSchema = z
     landmarks: z.array(z.object({ landmarkId: nonEmpty, label: nonEmpty }).strict()).min(1),
     whyLines: z.record(signalEnum.or(z.literal("none")), nonEmpty),
     beats: z.array(beatSchema).min(1),
-    freeInputPatterns: z.array(freeInputPatternSchema).min(1),
     hesitation: z
       .object({ thresholdMs: z.number().int().positive(), signal: signalEnum, eventName: nonEmpty })
       .strict(),
@@ -109,15 +101,6 @@ export function assertStoryletIntegrity(storylet: Storylet): void {
   for (const beat of storylet.beats) {
     if (!actorIds.has(beat.speakerId)) problems.push(`unknown speaker in ${beat.beatId}: ${beat.speakerId}`);
     if (beat.next && !beatIds.has(beat.next)) problems.push(`unknown next beat in ${beat.beatId}: ${beat.next}`);
-  }
-  for (const entry of storylet.freeInputPatterns) {
-    for (const pattern of entry.patterns) {
-      try {
-        void new RegExp(pattern);
-      } catch {
-        problems.push(`invalid free-input regex for ${entry.signal}: ${pattern}`);
-      }
-    }
   }
   if (!storylet.whyLines.none) problems.push("missing Korean why-line for none");
   const koreanFields = [

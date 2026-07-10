@@ -66,18 +66,11 @@
       "act": "station_reconciliation",
       "onlyWhenRoute": ["hard_inquest"],
       "objective": "상점에서 생긴 기록과 플레이어 진술을 인용해 어느 진술을 정정할지 묻는다.",
-      "sceneFacts": ["담당관은 실제로 보이는 상점 기록만 인용할 수 있다.", "최종 판정은 대사가 아니라 deterministic authority가 내린다."],
+      "sceneFacts": ["담당관은 실제로 보이는 상점 기록만 인용할 수 있다.", "담당관은 인용한 기록과 진술을 근거로만 판단을 내린다."],
       "procedureCue": ["station_dossier"],
       "acceptsFreeInput": true,
       "next": null
     }
-  ],
-  "freeInputPatterns": [
-    { "signal": "dream_language_leak", "patterns": ["꿈", "dream", "world", "세계", "save", "load", "세이브", "로드"] },
-    { "signal": "memory_gap_admission", "patterns": ["보통.*(뭘|무엇|어떻게)", "(기억|생각).*(안|못|흐려)"] },
-    { "signal": "authority_evasion", "patterns": ["중요하지 않", "말할 수 없", "상관없"] },
-    { "signal": "local_routine_mismatch", "patterns": ["처음", "방금", "처음 왔"] },
-    { "signal": "role_script_break", "patterns": ["여기 사람이 아니", "밖에서 왔"] }
   ],
   "hesitation": {
     "thresholdMs": 6000,

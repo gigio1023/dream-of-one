@@ -28,10 +28,15 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
   async proposeConversationTurn(
     request: ConversationTurnRequest,
   ): Promise<ResolvedProposal<ConversationProposal>> {
-    const subject = request.sceneFacts[0] ?? request.objective;
+    // The objective and scene facts are authoring text, not speech. When no
+    // model is available the NPC stalls with an in-world line instead of
+    // reading its own stage direction to the player.
+    const isFollowUp = request.conversationHistory.length > 0;
     return {
       proposal: {
-        utterance: `${request.objective} ${subject}`.trim(),
+        utterance: isFollowUp
+          ? "잠깐만요, 방금 하신 말을 한 번 더 확인할게요. 평소하고 같은 게 맞나요?"
+          : "잠시만요, 오늘따라 정신이 없네요. 평소 하시던 대로 맞으실까요?",
         suggestedReplies: [
           { text: "네, 확인했습니다.", intent: "safe/local" },
           { text: "무슨 뜻인지 조금 더 설명해 주세요.", intent: "uncertain/repair" },

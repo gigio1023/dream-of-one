@@ -9,6 +9,10 @@ const SCREEN_MARGIN := 8.0
 const CALLOUT_GAP := 7.0
 const COLLISION_PADDING := 3.0
 const SUMMARY_LINE_CHARS := 13
+## The 80% HUD option must not reduce world-attached Korean below a readable
+## raster size at 720p. Larger outputs still follow the normal proportional
+## HUD scale, so this is a low-resolution floor rather than a new scale domain.
+const MIN_FONT_PIXELS := 13
 
 const INK := Color("#ece8dc")
 const SPEECH_INK := Color("#27231d")
@@ -229,7 +233,7 @@ func _create_actor_overlay(actor_id: String) -> Control:
 	nameplate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	nameplate.add_theme_constant_override("separation", 1)
 	root.add_child(nameplate)
-	var name_label := _label("", 10, INK)
+	var name_label := _label("", 12, INK)
 	name_label.name = "Name"
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_set_outline(name_label, 3)
@@ -240,7 +244,7 @@ func _create_actor_overlay(actor_id: String) -> Control:
 	_set_minimum(accent_tick, Vector2(14, 2))
 	accent_tick.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	nameplate.add_child(accent_tick)
-	var action_label := _label("", 9, Color("#b8c9df"))
+	var action_label := _label("", 11, Color("#b8c9df"))
 	action_label.name = "Action"
 	action_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_set_outline(action_label, 3)
@@ -251,7 +255,7 @@ func _create_actor_overlay(actor_id: String) -> Control:
 	root.add_child(speech)
 	var speech_margin := _margin("Margin", Vector4(8, 5, 8, 5))
 	speech.add_child(speech_margin)
-	var speech_label := _label("", 11, SPEECH_INK)
+	var speech_label := _label("", 13, SPEECH_INK)
 	speech_label.name = "Text"
 	speech_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	speech_margin.add_child(speech_label)
@@ -261,7 +265,7 @@ func _create_actor_overlay(actor_id: String) -> Control:
 	root.add_child(marker)
 	var marker_margin := _margin("Margin", Vector4(6, 3, 6, 3))
 	marker.add_child(marker_margin)
-	var marker_label := _label("", 9, Color("#f4cc7d"))
+	var marker_label := _label("", 11, Color("#f4cc7d"))
 	marker_label.name = "Text"
 	marker_margin.add_child(marker_label)
 	marker.visible = false
@@ -279,11 +283,11 @@ func _create_prop_overlay(prop_id: String) -> Control:
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_theme_constant_override("separation", 0)
 	margin.add_child(column)
-	var name_label := _label("", 9, INK)
+	var name_label := _label("", 11, INK)
 	name_label.name = "Name"
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(name_label)
-	var state_label := _label("", 8, Color("#b8c9df"))
+	var state_label := _label("", 10, Color("#b8c9df"))
 	state_label.name = "State"
 	state_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(state_label)
@@ -518,7 +522,7 @@ func _label(text: String, logical_size: int, color: Color) -> Label:
 	label.text = text
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.set_meta("overlay_font_size", logical_size)
-	label.add_theme_font_size_override("font_size", roundi(logical_size * _ui_scale))
+	label.add_theme_font_size_override("font_size", _scaled_font_size(logical_size))
 	label.add_theme_color_override("font_color", color)
 	return label
 
@@ -543,7 +547,7 @@ func _apply_scale(node: Node) -> void:
 	if node is Control:
 		var control := node as Control
 		if control.has_meta("overlay_font_size"):
-			control.add_theme_font_size_override("font_size", roundi(float(control.get_meta("overlay_font_size")) * _ui_scale))
+			control.add_theme_font_size_override("font_size", _scaled_font_size(int(control.get_meta("overlay_font_size"))))
 		if control.has_meta("overlay_outline"):
 			control.add_theme_constant_override("outline_size", roundi(float(control.get_meta("overlay_outline")) * _ui_scale))
 		if control.has_meta("overlay_minimum_size"):
@@ -554,6 +558,9 @@ func _apply_scale(node: Node) -> void:
 			_apply_panel_style(control as PanelContainer)
 	for child in node.get_children():
 		_apply_scale(child)
+
+func _scaled_font_size(logical_size: int) -> int:
+	return maxi(MIN_FONT_PIXELS, roundi(logical_size * _ui_scale))
 
 func _apply_margin(margin: MarginContainer) -> void:
 	var values := Vector4(margin.get_meta("overlay_margins", Vector4.ZERO))

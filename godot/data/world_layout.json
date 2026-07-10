@@ -249,13 +249,29 @@
       "window": 359
     },
     "prop_textures": {
-      "queue_marker": "res://assets/greybox/queue_marker.png",
+      "store_queue_mark": "res://assets/greybox/queue_marker.png",
       "store_counter": "res://assets/greybox/store_counter.png",
       "usual_order_cue": "res://assets/greybox/usual_order_cue.png",
       "receipt_tray": "res://assets/greybox/receipt_tray.png",
       "correction_slip": "res://assets/greybox/correction_slip.png",
       "report_tray": "res://assets/greybox/report_tray.png",
       "station_dossier": "res://assets/greybox/station_dossier.png"
+    },
+    "actor_visuals": {
+      "player": {"sprite": 0, "accent": "#7ec8a0", "labelKey": "npc.player.label", "roleKey": "npc.player.role"},
+      "NPC_Store_Clerk": {"sprite": 3, "accent": "#e2a33d", "labelKey": "npc.NPC_Store_Clerk.label", "roleKey": "npc.NPC_Store_Clerk.role"},
+      "NPC_Store_Manager": {"sprite": 4, "accent": "#c8643c", "labelKey": "npc.NPC_Store_Manager.label", "roleKey": "npc.NPC_Store_Manager.role"},
+      "NPC_Waiting_Customer": {"sprite": 1, "accent": "#c0505a", "labelKey": "npc.NPC_Waiting_Customer.label", "roleKey": "npc.NPC_Waiting_Customer.role"},
+      "NPC_Station_Officer": {"sprite": 2, "accent": "#6f8fbd", "labelKey": "npc.NPC_Station_Officer.label", "roleKey": "npc.NPC_Station_Officer.role"}
+    },
+    "prop_content": {
+      "store_queue_mark": {"labelKey": "prop.queue_marker.label", "descKey": "prop.queue_marker.desc", "defaultState": "player_waiting", "readers": ["player", "store_clerk", "waiting_customer"]},
+      "store_counter": {"labelKey": "prop.store_counter.label", "descKey": "prop.store_counter.desc", "defaultState": "serving", "readers": ["player", "store_clerk", "store_manager", "waiting_customer"]},
+      "usual_order_cue": {"labelKey": "prop.usual_order_cue.label", "descKey": "prop.usual_order_cue.desc", "defaultState": "read", "readers": ["player", "store_clerk", "store_manager"]},
+      "receipt_tray": {"labelKey": "prop.receipt_tray.label", "descKey": "prop.receipt_tray.desc", "defaultState": "blank", "readers": ["player", "store_clerk", "store_manager"]},
+      "correction_slip": {"labelKey": "prop.correction_slip.label", "descKey": "prop.correction_slip.desc", "defaultState": "absent", "readers": ["player", "store_clerk", "store_manager"]},
+      "report_tray": {"labelKey": "prop.report_tray.label", "descKey": "prop.report_tray.desc", "defaultState": "empty", "readers": ["store_clerk", "store_manager", "station_officer"]},
+      "station_dossier": {"labelKey": "prop.station_dossier.label", "descKey": "prop.station_dossier.desc", "defaultState": "absent", "readers": ["player", "station_officer"]}
     },
     "locations": {
       "store": {
@@ -264,7 +280,7 @@
         "street": [0, 12, 18, 4],
         "floor_tile": "store_floor",
         "wall_modulate": [1.0, 1.0, 1.0],
-        "door_gaps": [[8, 11], [9, 11]],
+        "door_gaps": [[8, 11], [9, 11], [17, 5]],
         "furniture": [
           {"tile": "counter", "cells": [[4, 4], [5, 4], [6, 4], [7, 4], [10, 4], [11, 4], [12, 4], [13, 4]]},
           {"tile": "shelf", "cells": [[2, 1], [3, 1]]},
@@ -286,7 +302,7 @@
         "props": {
           "store_counter": [8, 4],
           "usual_order_cue": [15, 2],
-          "queue_marker": [9, 8],
+          "store_queue_mark": [9, 8],
           "receipt_tray": [11, 4],
           "correction_slip": [12, 4],
           "report_tray": [13, 4]

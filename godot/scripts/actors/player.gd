@@ -12,6 +12,7 @@ const SPRITE_BLOCK := 0
 
 var input_enabled := true
 var _facing := "up"
+var _focused_area: Area2D = null
 
 func _ready() -> void:
 	add_to_group("player")
@@ -69,3 +70,16 @@ func focused_interactable() -> Area2D:
 			best_dist = d
 			best = area
 	return best
+
+func set_focused_area(area: Area2D) -> void:
+	if _focused_area == area:
+		return
+	if is_instance_valid(_focused_area):
+		var previous := _focused_area.get_parent()
+		if previous != null and previous.has_method("set_focused"):
+			previous.call("set_focused", false)
+	_focused_area = area
+	if is_instance_valid(_focused_area):
+		var current := _focused_area.get_parent()
+		if current != null and current.has_method("set_focused"):
+			current.call("set_focused", true)

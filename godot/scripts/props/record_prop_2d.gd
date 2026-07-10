@@ -16,6 +16,7 @@ var state := ""
 var readers: Array = []
 var _tile_index := 251
 var _texture_path := ""
+var _focused := false
 
 func configure(data: Dictionary) -> void:
 	prop_id = str(data.get("propId", ""))
@@ -30,6 +31,7 @@ func configure(data: Dictionary) -> void:
 
 func _ready() -> void:
 	add_to_group("record_props")
+	$InteractionArea.add_to_group("interactable")
 	_apply()
 
 func _apply() -> void:
@@ -53,6 +55,11 @@ func set_state(new_state: String) -> void:
 	_sprite.modulate = Color(1.4, 1.25, 0.7)
 	var tween := create_tween()
 	tween.tween_property(_sprite, "modulate", Color(1, 1, 1), 0.5)
+
+func set_focused(value: bool) -> void:
+	_focused = value
+	_sprite.modulate = Color(1.35, 1.25, 0.78) if value else Color.WHITE
+	_state_label.modulate = Color(1.0, 0.9, 0.55) if value else Color.WHITE
 
 func _refresh_state_label() -> void:
 	var loc := get_node_or_null("/root/Localization")

@@ -1,80 +1,132 @@
-extends RefCounted
-## RuntimeBridge — synchronous localhost JSON transport to the TS sidecar.
-##
-## Deliberately synchronous (HTTPClient poll loop) so the Session facade can
-## stay non-coroutine for both backends; the sidecar is localhost-only and only
-## used in the flag-gated http mode, so a bounded blocking poll is acceptable
-## for M1. See docs/tech/architecture.md (client <-> runtime transport).
+extends Node
+## RuntimeBridge owns a small pool of Godot HTTPRequest nodes for localhost
+## JSON calls to the TypeScript sidecar. Calls are asynchronous by design: an
+## HTTPRequest completes from the SceneTree and must never be wrapped in a
+## blocking poll loop on the render thread.
 
-const DEFAULT_TIMEOUT_MS := 8000
+signal request_released
 
-var _base := "http://127.0.0.1:8787"
+const DEFAULT_TIMEOUT_SECONDS := 8.0
+const DEFAULT_POOL_SIZE := 2
 
-func configure(base_url: String) -> void:
-	_base = base_url.trim_suffix("/")
+var _base_url := "http://127.0.0.1:8787"
+var _configuration_error := ""
+var _available: Array[HTTPRequest] = []
 
-func post_json(path: String, body: Dictionary, timeout_ms := DEFAULT_TIMEOUT_MS) -> Dictionary:
-	return _request(HTTPClient.METHOD_POST, path, JSON.stringify(body), timeout_ms)
+func _ready() -> void:
+	_ensure_pool()
 
-func get_json(path: String, timeout_ms := DEFAULT_TIMEOUT_MS) -> Dictionary:
-	return _request(HTTPClient.METHOD_GET, path, "", timeout_ms)
+## Returns false when the URL is not an HTTP(S) loopback URL. The game runtime
+## is intentionally localhost-only; remote provider access belongs behind the
+## sidecar's provider ports, never in Godot.
+func configure(base_url: String) -> bool:
+	_configuration_error = ""
+	var candidate := base_url.strip_edges().trim_suffix("/")
+	if candidate.is_empty():
+		_configuration_error = "empty_base_url"
+		return false
+	if not candidate.begins_with("http://") and not candidate.begins_with("https://"):
+		_configuration_error = "unsupported_scheme"
+		return false
+	var authority := candidate.get_slice("://", 1).get_slice("/", 0)
+	var host := authority
+	if authority.begins_with("["):
+		var close := authority.find("]")
+		if close < 0:
+			_configuration_error = "invalid_host"
+			return false
+		host = authority.substr(1, close - 1)
+	elif authority.count(":") == 1:
+		host = authority.get_slice(":", 0)
+	if host not in ["127.0.0.1", "localhost", "::1"]:
+		_configuration_error = "non_loopback_host"
+		return false
+	_base_url = candidate
+	return true
 
-func _request(method: int, path: String, body: String, timeout_ms: int) -> Dictionary:
-	var url := _base + path
-	var scheme_split := _base.trim_prefix("http://").trim_prefix("https://")
-	var host_port := scheme_split.get_slice("/", 0)
-	var host := host_port.get_slice(":", 0)
-	var port := 80
-	if host_port.find(":") >= 0:
-		port = int(host_port.get_slice(":", 1))
-	var use_tls := _base.begins_with("https://")
+func post_json(path: String, body: Dictionary, timeout_seconds := DEFAULT_TIMEOUT_SECONDS) -> Dictionary:
+	return await _request(HTTPClient.METHOD_POST, path, JSON.stringify(body), timeout_seconds)
 
-	var client := HTTPClient.new()
-	var err := client.connect_to_host(host, port, TLSOptions.client() if use_tls else null)
-	if err != OK:
-		return _fail("connect_failed", err)
-	var deadline := Time.get_ticks_msec() + timeout_ms
-	while client.get_status() == HTTPClient.STATUS_CONNECTING or client.get_status() == HTTPClient.STATUS_RESOLVING:
-		client.poll()
-		if Time.get_ticks_msec() > deadline:
-			return _fail("connect_timeout", 0)
-		OS.delay_msec(4)
-	if client.get_status() != HTTPClient.STATUS_CONNECTED:
-		return _fail("not_connected", client.get_status())
+func get_json(path: String, timeout_seconds := DEFAULT_TIMEOUT_SECONDS) -> Dictionary:
+	return await _request(HTTPClient.METHOD_GET, path, "", timeout_seconds)
 
-	var request_path := path
-	var headers := PackedStringArray(["Accept: application/json", "Content-Type: application/json"])
-	err = client.request(method, request_path, headers, body)
-	if err != OK:
-		return _fail("request_failed", err)
-	while client.get_status() == HTTPClient.STATUS_REQUESTING:
-		client.poll()
-		if Time.get_ticks_msec() > deadline:
-			return _fail("request_timeout", 0)
-		OS.delay_msec(4)
+func _request(method: int, path: String, body: String, timeout_seconds: float) -> Dictionary:
+	if not _configuration_error.is_empty():
+		return _fail("invalid_base_url", _configuration_error)
+	_ensure_pool()
+	var request := await _acquire_request()
+	request.timeout = timeout_seconds
+	var headers := PackedStringArray(["Accept: application/json"])
+	if method != HTTPClient.METHOD_GET:
+		headers.append("Content-Type: application/json")
+	var error := request.request(_join_url(path), headers, method, body)
+	if error != OK:
+		_release_request(request)
+		return _fail("request_start_failed", error)
 
-	if not (client.get_status() == HTTPClient.STATUS_BODY or client.get_status() == HTTPClient.STATUS_CONNECTED):
-		return _fail("no_response", client.get_status())
-	var status_code := client.get_response_code()
-	var buffer := PackedByteArray()
-	while client.get_status() == HTTPClient.STATUS_BODY:
-		client.poll()
-		var chunk := client.read_response_body_chunk()
-		if chunk.size() == 0:
-			if Time.get_ticks_msec() > deadline:
-				break
-			OS.delay_msec(2)
-		else:
-			buffer.append_array(chunk)
-	client.close()
-	var text := buffer.get_string_from_utf8()
-	var parsed = JSON.parse_string(text)
+	var completed: Array = await request.request_completed
+	_release_request(request)
+	var result := int(completed[0])
+	var status_code := int(completed[1])
+	var response_headers: PackedStringArray = completed[2]
+	var response_body: PackedByteArray = completed[3]
+	var text := response_body.get_string_from_utf8()
+	var parsed = JSON.parse_string(text) if not text.is_empty() else {}
+	var json_body: Dictionary = parsed if parsed is Dictionary else {}
+	var success := (
+		result == HTTPRequest.RESULT_SUCCESS
+		and status_code >= 200
+		and status_code < 300
+		and parsed is Dictionary
+	)
 	return {
-		"ok": status_code >= 200 and status_code < 300 and parsed is Dictionary,
+		"ok": success,
 		"status": status_code,
-		"json": parsed if parsed is Dictionary else {},
-		"url": url,
+		"json": json_body,
+		"result": result,
+		"headers": response_headers,
+		"reason": "" if success else _failure_reason(result, status_code, parsed),
 	}
 
-func _fail(reason: String, detail: int) -> Dictionary:
-	return {"ok": false, "status": 0, "json": {}, "reason": reason, "detail": detail}
+func _ensure_pool() -> void:
+	if not _available.is_empty() or get_child_count() > 0:
+		return
+	for _index in range(DEFAULT_POOL_SIZE):
+		var request := HTTPRequest.new()
+		request.use_threads = true
+		add_child(request)
+		_available.append(request)
+
+func _acquire_request() -> HTTPRequest:
+	while _available.is_empty():
+		await request_released
+	return _available.pop_back()
+
+func _release_request(request: HTTPRequest) -> void:
+	_available.append(request)
+	request_released.emit()
+
+func _join_url(path: String) -> String:
+	if path.begins_with("/"):
+		return _base_url + path
+	return "%s/%s" % [_base_url, path]
+
+func _failure_reason(result: int, status_code: int, parsed: Variant) -> String:
+	if result != HTTPRequest.RESULT_SUCCESS:
+		return "request_result_%d" % result
+	if status_code < 200 or status_code >= 300:
+		return "http_%d" % status_code
+	if not parsed is Dictionary:
+		return "invalid_json_response"
+	return "unknown_transport_error"
+
+func _fail(reason: String, detail: Variant) -> Dictionary:
+	return {
+		"ok": false,
+		"status": 0,
+		"json": {},
+		"result": HTTPRequest.RESULT_CANT_CONNECT,
+		"headers": PackedStringArray(),
+		"reason": reason,
+		"detail": detail,
+	}

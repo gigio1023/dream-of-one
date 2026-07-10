@@ -18,6 +18,7 @@ var reaction_label := ""
 var last_utterance := ""
 var _sprite_block := 1
 var _facing := "down"
+var _focused := false
 
 func configure(data: Dictionary) -> void:
 	actor_id = str(data.get("actorId", ""))
@@ -33,6 +34,7 @@ func configure(data: Dictionary) -> void:
 
 func _ready() -> void:
 	add_to_group("npc_actors")
+	$InteractionArea.add_to_group("interactable")
 	_apply()
 
 func _apply() -> void:
@@ -51,6 +53,12 @@ func _draw() -> void:
 	# Role accent: a soft ring under the feet, readable before any inspection.
 	draw_circle(Vector2(0, -1), 5.0, Color(accent.r, accent.g, accent.b, 0.35))
 	draw_arc(Vector2(0, -1), 5.0, 0.0, TAU, 20, Color(accent.r, accent.g, accent.b, 0.9), 1.0)
+	if _focused:
+		draw_arc(Vector2(0, -7), 10.0, 0.0, TAU, 24, Color(1.0, 0.88, 0.48, 0.95), 1.5)
+
+func set_focused(value: bool) -> void:
+	_focused = value
+	queue_redraw()
 
 func set_reaction(reaction: String, label: String) -> void:
 	state_reaction = reaction

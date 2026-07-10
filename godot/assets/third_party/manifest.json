@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "packs": [
+    {
+      "name": "Kenney RPG Urban Pack",
+      "source": "https://kenney.nl/assets/rpg-urban-pack",
+      "version": "downloaded 2026-07-10",
+      "license": "CC0 1.0 Universal",
+      "tier": "committed",
+      "required": true,
+      "installPath": "res://assets/kenney2d/rpg-urban-pack",
+      "licensePath": "res://assets/kenney2d/rpg-urban-pack/License.txt"
+    }
+  ]
+}

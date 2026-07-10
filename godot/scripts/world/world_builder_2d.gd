@@ -16,11 +16,14 @@ var npcs: Dictionary = {}
 var props: Dictionary = {}
 var actors_node: Node2D = null
 var influence_node: Node2D = null
+var doorways: Array[Area2D] = []
 
 func build(root: Node2D, location_id: String, snapshot: Dictionary, tile_block: Dictionary) -> void:
 	tile_size = int(tile_block.get("tile_size", 16))
 	var palette: Dictionary = tile_block.get("palette", {})
 	var prop_textures: Dictionary = tile_block.get("prop_textures", {})
+	var prop_content: Dictionary = tile_block.get("prop_content", {})
+	var actor_visuals: Dictionary = tile_block.get("actor_visuals", {})
 	var locations: Dictionary = tile_block.get("locations", {})
 	var loc: Dictionary = locations.get(location_id, {})
 	if loc.is_empty():
@@ -69,6 +72,7 @@ func build(root: Node2D, location_id: String, snapshot: Dictionary, tile_block: 
 			_set_cell(overhead, cell, idx)
 
 	_build_collision(root, solids, room, loc)
+	_build_doorways(root, loc)
 
 	# Record props.
 	var prop_state := _prop_state_map(snapshot)
@@ -79,12 +83,16 @@ func build(root: Node2D, location_id: String, snapshot: Dictionary, tile_block: 
 		actors_node.add_child(node)
 		node.position = _cell_center(cell)
 		var meta: Dictionary = prop_meta.get(prop_id, {})
+		var content: Dictionary = prop_content.get(prop_id, {})
+		var label := str(meta.get("label", ""))
+		if label.is_empty():
+			label = _t(str(content.get("labelKey", "")))
 		node.configure({
 			"propId": prop_id,
-			"label": _t(str(meta.get("labelKey", ""))),
-			"desc": _t(str(meta.get("descKey", ""))),
-			"state": str(prop_state.get(prop_id, str(meta.get("state", "")))),
-			"readers": meta.get("readers", []),
+			"label": label,
+			"desc": _t(str(content.get("descKey", ""))),
+			"state": str(prop_state.get(prop_id, str(content.get("defaultState", "")))),
+			"readers": meta.get("visibleTo", content.get("readers", [])),
 			"texture": str(prop_textures.get(prop_id, "")),
 		})
 		props[prop_id] = node
@@ -105,12 +113,16 @@ func build(root: Node2D, location_id: String, snapshot: Dictionary, tile_block: 
 			actors_node.add_child(npc)
 			npc.position = pos
 			var meta: Dictionary = actor_meta.get(actor_id, {})
+			var visual: Dictionary = actor_visuals.get(actor_id, {})
+			var actor_label := str(meta.get("name", ""))
+			if actor_label.is_empty():
+				actor_label = _t(str(visual.get("labelKey", "")))
 			npc.configure({
 				"actorId": actor_id,
-				"label": _t(str(meta.get("labelKey", ""))),
-				"role": _t(str(meta.get("roleKey", ""))),
-				"sprite": int(meta.get("sprite", 1)),
-				"accent": str(meta.get("accent", "#e6e6e6")),
+				"label": actor_label,
+				"role": _t(str(visual.get("roleKey", ""))),
+				"sprite": int(visual.get("sprite", 1)),
+				"accent": str(visual.get("accent", "#e6e6e6")),
 				"facing": facing,
 			})
 			npcs[actor_id] = npc
@@ -163,7 +175,7 @@ func _build_collision(root: Node2D, solids: Dictionary, room: Array, loc: Dictio
 		var rect := RectangleShape2D.new()
 		rect.size = Vector2(tile_size, tile_size)
 		shape.shape = rect
-		shape.position = _cell_center(cell) - Vector2(0, tile_size * 0.5)
+		shape.position = _cell_center(cell)
 		body.add_child(shape)
 	# Outer boundary around the full extent (room + street) keeps the player in.
 	var min_x := int(room[0])
@@ -180,6 +192,30 @@ func _build_collision(root: Node2D, solids: Dictionary, room: Array, loc: Dictio
 	_boundary(body, Vector2(min_x, max_y) * tile_size, Vector2(max_x, max_y) * tile_size)
 	_boundary(body, Vector2(min_x, min_y) * tile_size, Vector2(min_x, max_y) * tile_size)
 	_boundary(body, Vector2(max_x, min_y) * tile_size, Vector2(max_x, max_y) * tile_size)
+
+func _build_doorways(root: Node2D, loc: Dictionary) -> void:
+	var doorway_root := Node2D.new()
+	doorway_root.name = "Doorways"
+	root.add_child(doorway_root)
+	doorways.clear()
+	for spec in loc.get("doorways", []):
+		var doorway_cell: Array = spec.get("cell", [0, 0])
+		var area := Area2D.new()
+		area.name = "DoorwayTo%s" % str(spec.get("to", "")).capitalize()
+		area.collision_layer = 0
+		area.collision_mask = 1
+		area.monitoring = true
+		area.monitorable = false
+		area.position = _cell_center(doorway_cell)
+		area.set_meta("target_location", str(spec.get("to", "")))
+		area.add_to_group("doorways")
+		var shape := CollisionShape2D.new()
+		var rect := RectangleShape2D.new()
+		rect.size = Vector2(tile_size * 0.8, tile_size * 0.8)
+		shape.shape = rect
+		area.add_child(shape)
+		doorway_root.add_child(area)
+		doorways.append(area)
 
 func _boundary(body: StaticBody2D, from: Vector2, to: Vector2) -> void:
 	var seg := SegmentShape2D.new()
@@ -207,13 +243,15 @@ func _key(cell: Array) -> String:
 func _prop_state_map(snapshot: Dictionary) -> Dictionary:
 	var out := {}
 	for prop in snapshot.get("recordProps", []):
-		out[str(prop.get("propId", ""))] = str(prop.get("state", ""))
+		var object_id := str(prop.get("objectId", prop.get("propId", "")))
+		out[object_id] = str(prop.get("state", ""))
 	return out
 
 func _prop_meta_map(snapshot: Dictionary) -> Dictionary:
 	var out := {}
 	for prop in snapshot.get("recordProps", []):
-		out[str(prop.get("propId", ""))] = prop
+		var object_id := str(prop.get("objectId", prop.get("propId", "")))
+		out[object_id] = prop
 	return out
 
 func _actor_meta_map(snapshot: Dictionary) -> Dictionary:

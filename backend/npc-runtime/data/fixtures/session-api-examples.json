@@ -1,0 +1,609 @@
+{
+  "note": "Generated from live SessionService responses; sessionId normalized to a placeholder. Regenerate with `npm run fixtures:generate`.",
+  "storyletId": "same-order",
+  "locale": "ko-KR",
+  "placeholderSessionId": "sess-00000000-0000-0000-0000-000000000000",
+  "endpoints": {
+    "start": {
+      "endpoint": "POST /v1/session/start",
+      "request": {
+        "storyletId": "same-order",
+        "locale": "ko-KR"
+      },
+      "response": {
+        "sessionId": "sess-00000000-0000-0000-0000-000000000000",
+        "worldSnapshot": {
+          "landmarks": [
+            {
+              "landmarkId": "Store",
+              "label": "상점"
+            },
+            {
+              "landmarkId": "Station",
+              "label": "스테이션"
+            }
+          ],
+          "actors": [
+            {
+              "actorId": "player",
+              "role": "player",
+              "name": "플레이어",
+              "landmarkId": "Store"
+            },
+            {
+              "actorId": "NPC_Store_Clerk",
+              "role": "store_clerk",
+              "name": "상점 점원",
+              "landmarkId": "Store"
+            },
+            {
+              "actorId": "NPC_Store_Manager",
+              "role": "store_manager",
+              "name": "상점 관리자",
+              "landmarkId": "Store"
+            },
+            {
+              "actorId": "NPC_Waiting_Customer",
+              "role": "waiting_customer",
+              "name": "대기 손님",
+              "landmarkId": "Store"
+            },
+            {
+              "actorId": "NPC_Station_Officer",
+              "role": "station_officer",
+              "name": "스테이션 담당관",
+              "landmarkId": "Station"
+            }
+          ],
+          "recordProps": [
+            {
+              "objectId": "store_queue_mark",
+              "label": "줄 표식",
+              "state": "player_waiting",
+              "visibleTo": [
+                "player",
+                "store_clerk",
+                "waiting_customer"
+              ]
+            },
+            {
+              "objectId": "store_counter",
+              "label": "상점 계산대",
+              "state": "serving",
+              "visibleTo": [
+                "player",
+                "store_clerk",
+                "store_manager",
+                "waiting_customer"
+              ]
+            },
+            {
+              "objectId": "usual_order_cue",
+              "label": "같은 주문 안내판",
+              "state": "read",
+              "visibleTo": [
+                "player",
+                "store_clerk",
+                "store_manager"
+              ]
+            },
+            {
+              "objectId": "receipt_tray",
+              "label": "영수증 트레이",
+              "state": "blank",
+              "visibleTo": [
+                "player",
+                "store_clerk",
+                "store_manager"
+              ],
+              "recordId": "store_same_order_receipt"
+            },
+            {
+              "objectId": "correction_slip",
+              "label": "정정표",
+              "state": "absent",
+              "visibleTo": [
+                "player",
+                "store_clerk",
+                "store_manager"
+              ],
+              "recordId": "store_same_order_correction"
+            },
+            {
+              "objectId": "station_dossier",
+              "label": "스테이션 조서",
+              "state": "absent",
+              "visibleTo": [
+                "player",
+                "station_officer"
+              ],
+              "recordId": "station_same_order_dossier"
+            }
+          ],
+          "civicEconomy": {
+            "accountCredit": 3,
+            "localTrust": 50,
+            "recordBurden": 0,
+            "stationAttention": 0,
+            "favor": 0
+          },
+          "hudState": {
+            "suspicion": 0,
+            "reportPressure": 0,
+            "stage": "routine",
+            "projectedRoute": "clean_cover",
+            "ledgerCount": 0,
+            "activePromptId": "store.same_order.routine"
+          }
+        },
+        "ledgerEvents": [],
+        "nextTurn": {
+          "turnId": "conv-same-order#0#routine",
+          "beatId": "routine",
+          "promptId": "store.same_order.routine",
+          "choiceSetId": "store.same_order.routine.choices",
+          "speakerId": "NPC_Store_Clerk",
+          "prompt": "오늘도 같은 걸로 드릴까요?",
+          "acceptsFreeInput": true,
+          "choices": [
+            {
+              "choiceId": "routine.safe",
+              "intent": "safe/local",
+              "line": "네, 같은 걸로 부탁해요."
+            },
+            {
+              "choiceId": "routine.repair",
+              "intent": "uncertain/repair",
+              "line": "제가 보통 뭘 시켰죠?"
+            },
+            {
+              "choiceId": "routine.risky",
+              "intent": "risky/weird",
+              "line": "오늘 처음 왔는데요."
+            }
+          ]
+        }
+      }
+    },
+    "answer": {
+      "endpoint": "POST /v1/session/answer",
+      "request": {
+        "sessionId": "sess-00000000-0000-0000-0000-000000000000",
+        "turnId": "conv-same-order#0#routine",
+        "answer": {
+          "type": "choice",
+          "choiceId": "routine.risky"
+        }
+      },
+      "response": {
+        "signals": [
+          "local_routine_mismatch"
+        ],
+        "whyLines": [
+          "그 대답이 상점의 평소 순서와 맞지 않았습니다."
+        ],
+        "suspicionDelta": 35,
+        "reportPressure": 30,
+        "npcReactions": [
+          {
+            "actorId": "NPC_Store_Clerk",
+            "role": "store_clerk",
+            "kind": "speech",
+            "utterance": "처음이라고요? 어제도 같은 자리에서 같은 말을 하셨는데요."
+          }
+        ],
+        "ledgerEvents": [],
+        "routeState": {
+          "stage": "probe",
+          "projectedRoute": "repair_recovery",
+          "terminal": false,
+          "suspicion": 35,
+          "reportPressure": 30
+        },
+        "nextTurn": {
+          "turnId": "conv-same-order#1#probe",
+          "beatId": "probe",
+          "promptId": "store.same_order.probe",
+          "choiceSetId": "store.same_order.probe.choices",
+          "speakerId": "NPC_Store_Clerk",
+          "prompt": "어제 기록에는 같은 주문이라고 적혀 있습니다. 맞습니까?",
+          "acceptsFreeInput": true,
+          "choices": [
+            {
+              "choiceId": "probe.safe",
+              "intent": "safe/local",
+              "line": "맞습니다. 제가 착각했습니다."
+            },
+            {
+              "choiceId": "probe.repair",
+              "intent": "uncertain/repair",
+              "line": "어제 일이 조금 흐릿해서 확인했습니다."
+            },
+            {
+              "choiceId": "probe.risky",
+              "intent": "risky/weird",
+              "line": "저는 여기 사람이 아닙니다."
+            }
+          ]
+        }
+      }
+    },
+    "decision": {
+      "endpoint": "POST /v1/npc/decision",
+      "request": {
+        "sessionId": "sess-00000000-0000-0000-0000-000000000000",
+        "beat": 1
+      },
+      "response": {
+        "npcActions": [
+          {
+            "actorId": "NPC_Waiting_Customer",
+            "tool": "look",
+            "args": {
+              "targetId": "store_queue_mark"
+            },
+            "validationResult": {
+              "ok": true,
+              "note": "waiting_customer looked at store_queue_mark"
+            }
+          },
+          {
+            "actorId": "NPC_Waiting_Customer",
+            "tool": "look",
+            "args": {
+              "targetId": "store_counter"
+            },
+            "validationResult": {
+              "ok": true,
+              "note": "waiting_customer looked at store_counter"
+            }
+          },
+          {
+            "actorId": "NPC_Waiting_Customer",
+            "tool": "wait",
+            "args": {
+              "reason": "beat 1"
+            },
+            "validationResult": {
+              "ok": true,
+              "note": "waiting_customer waited: beat 1"
+            }
+          }
+        ],
+        "ledgerEvents": [],
+        "transcriptDeltas": [
+          {
+            "actorId": "NPC_Waiting_Customer",
+            "step": 1,
+            "observedSummary": "role=waiting_customer at=Store objects=2 records=0 tools=8 goal=watch queue",
+            "tool": "look",
+            "args": {
+              "targetId": "store_queue_mark"
+            },
+            "validation": {
+              "ok": true,
+              "note": "waiting_customer looked at store_queue_mark"
+            },
+            "nextStepChange": "observed without mutation; advancing to next goal"
+          },
+          {
+            "actorId": "NPC_Waiting_Customer",
+            "step": 2,
+            "observedSummary": "role=waiting_customer at=Store objects=2 records=0 tools=8 goal=watch counter",
+            "tool": "look",
+            "args": {
+              "targetId": "store_counter"
+            },
+            "validation": {
+              "ok": true,
+              "note": "waiting_customer looked at store_counter"
+            },
+            "nextStepChange": "observed without mutation; advancing to next goal"
+          },
+          {
+            "actorId": "NPC_Waiting_Customer",
+            "step": 3,
+            "observedSummary": "role=waiting_customer at=Store objects=2 records=0 tools=8 goal=hold position",
+            "tool": "wait",
+            "args": {
+              "reason": "beat 1"
+            },
+            "validation": {
+              "ok": true,
+              "note": "waiting_customer waited: beat 1"
+            },
+            "nextStepChange": "observed without mutation; advancing to next goal"
+          }
+        ]
+      }
+    },
+    "snapshot": {
+      "endpoint": "GET /v1/session/snapshot",
+      "request": {
+        "sessionId": "sess-00000000-0000-0000-0000-000000000000"
+      },
+      "response": {
+        "sessionId": "sess-00000000-0000-0000-0000-000000000000",
+        "storyletId": "same-order",
+        "worldSnapshot": {
+          "landmarks": [
+            {
+              "landmarkId": "Store",
+              "label": "상점"
+            },
+            {
+              "landmarkId": "Station",
+              "label": "스테이션"
+            }
+          ],
+          "actors": [
+            {
+              "actorId": "player",
+              "role": "player",
+              "name": "플레이어",
+              "landmarkId": "Store"
+            },
+            {
+              "actorId": "NPC_Store_Clerk",
+              "role": "store_clerk",
+              "name": "상점 점원",
+              "landmarkId": "Store"
+            },
+            {
+              "actorId": "NPC_Store_Manager",
+              "role": "store_manager",
+              "name": "상점 관리자",
+              "landmarkId": "Store"
+            },
+            {
+              "actorId": "NPC_Waiting_Customer",
+              "role": "waiting_customer",
+              "name": "대기 손님",
+              "landmarkId": "Store"
+            },
+            {
+              "actorId": "NPC_Station_Officer",
+              "role": "station_officer",
+              "name": "스테이션 담당관",
+              "landmarkId": "Station"
+            }
+          ],
+          "recordProps": [
+            {
+              "objectId": "store_queue_mark",
+              "label": "줄 표식",
+              "state": "player_waiting",
+              "visibleTo": [
+                "player",
+                "store_clerk",
+                "waiting_customer"
+              ]
+            },
+            {
+              "objectId": "store_counter",
+              "label": "상점 계산대",
+              "state": "serving",
+              "visibleTo": [
+                "player",
+                "store_clerk",
+                "store_manager",
+                "waiting_customer"
+              ]
+            },
+            {
+              "objectId": "usual_order_cue",
+              "label": "같은 주문 안내판",
+              "state": "read",
+              "visibleTo": [
+                "player",
+                "store_clerk",
+                "store_manager"
+              ]
+            },
+            {
+              "objectId": "receipt_tray",
+              "label": "영수증 트레이",
+              "state": "blank",
+              "visibleTo": [
+                "player",
+                "store_clerk",
+                "store_manager"
+              ],
+              "recordId": "store_same_order_receipt"
+            },
+            {
+              "objectId": "correction_slip",
+              "label": "정정표",
+              "state": "absent",
+              "visibleTo": [
+                "player",
+                "store_clerk",
+                "store_manager"
+              ],
+              "recordId": "store_same_order_correction"
+            },
+            {
+              "objectId": "station_dossier",
+              "label": "스테이션 조서",
+              "state": "absent",
+              "visibleTo": [
+                "player",
+                "station_officer"
+              ],
+              "recordId": "station_same_order_dossier"
+            }
+          ],
+          "civicEconomy": {
+            "accountCredit": 3,
+            "localTrust": 50,
+            "recordBurden": 0,
+            "stationAttention": 0,
+            "favor": 0
+          },
+          "hudState": {
+            "suspicion": 35,
+            "reportPressure": 30,
+            "stage": "probe",
+            "projectedRoute": "repair_recovery",
+            "ledgerCount": 0,
+            "activePromptId": "store.same_order.probe"
+          }
+        },
+        "records": [
+          {
+            "recordId": "store_same_order_receipt",
+            "kind": "receipt",
+            "authorRole": "store_clerk",
+            "stateBody": "영수증 없음.",
+            "visibleTo": [
+              "player",
+              "store_clerk",
+              "store_manager"
+            ]
+          },
+          {
+            "recordId": "store_yesterday_same_order",
+            "kind": "receipt",
+            "authorRole": "store_clerk",
+            "stateBody": "어제 기록: 같은 주문, 표식 하나.",
+            "visibleTo": [
+              "player",
+              "store_clerk",
+              "store_manager",
+              "station_officer"
+            ]
+          }
+        ],
+        "ledgerEvents": [],
+        "routeState": {
+          "stage": "probe",
+          "projectedRoute": "repair_recovery",
+          "terminal": false,
+          "suspicion": 35,
+          "reportPressure": 30
+        },
+        "nextTurn": {
+          "turnId": "conv-same-order#1#probe",
+          "beatId": "probe",
+          "promptId": "store.same_order.probe",
+          "choiceSetId": "store.same_order.probe.choices",
+          "speakerId": "NPC_Store_Clerk",
+          "prompt": "어제 기록에는 같은 주문이라고 적혀 있습니다. 맞습니까?",
+          "acceptsFreeInput": true,
+          "choices": [
+            {
+              "choiceId": "probe.safe",
+              "intent": "safe/local",
+              "line": "맞습니다. 제가 착각했습니다."
+            },
+            {
+              "choiceId": "probe.repair",
+              "intent": "uncertain/repair",
+              "line": "어제 일이 조금 흐릿해서 확인했습니다."
+            },
+            {
+              "choiceId": "probe.risky",
+              "intent": "risky/weird",
+              "line": "저는 여기 사람이 아닙니다."
+            }
+          ]
+        }
+      }
+    },
+    "end": {
+      "endpoint": "POST /v1/session/end",
+      "request": {
+        "sessionId": "sess-00000000-0000-0000-0000-000000000000"
+      },
+      "response": {
+        "route": "soft_report",
+        "outcomePanel": {
+          "title": "약식 보고",
+          "body": "상점 기록이 남았고 응대가 잠시 멈췄습니다. 스테이션 정식 심문까지 가지는 않았습니다.",
+          "citedLedgerIds": [
+            "led-1",
+            "led-2",
+            "led-3"
+          ]
+        },
+        "telemetrySummary": {
+          "turns": 2,
+          "signalsSeen": [
+            "local_routine_mismatch",
+            "role_script_break"
+          ],
+          "finalSuspicion": 55,
+          "finalReportPressure": 45,
+          "ledgerEventCount": 3,
+          "route": "soft_report"
+        }
+      }
+    }
+  },
+  "routeWalkthroughs": [
+    {
+      "route": "clean_cover",
+      "answers": [
+        {
+          "type": "choice",
+          "choiceId": "routine.safe"
+        },
+        {
+          "type": "choice",
+          "choiceId": "probe.safe"
+        }
+      ],
+      "expectedOutcome": "clean_cover",
+      "expectedTitle": "무사 통과"
+    },
+    {
+      "route": "repair_recovery",
+      "answers": [
+        {
+          "type": "choice",
+          "choiceId": "routine.repair"
+        },
+        {
+          "type": "choice",
+          "choiceId": "probe.repair"
+        }
+      ],
+      "expectedOutcome": "repair_recovery",
+      "expectedTitle": "수습"
+    },
+    {
+      "route": "soft_report",
+      "answers": [
+        {
+          "type": "choice",
+          "choiceId": "routine.risky"
+        },
+        {
+          "type": "choice",
+          "choiceId": "probe.risky"
+        }
+      ],
+      "expectedOutcome": "soft_report",
+      "expectedTitle": "약식 보고"
+    },
+    {
+      "route": "hard_inquest",
+      "answers": [
+        {
+          "type": "choice",
+          "choiceId": "routine.risky"
+        },
+        {
+          "type": "free_input",
+          "text": "저는 이 꿈에 방금 들어왔어요."
+        },
+        {
+          "type": "choice",
+          "choiceId": "reconciliation.risky"
+        }
+      ],
+      "expectedOutcome": "hard_inquest",
+      "expectedTitle": "심문"
+    }
+  ]
+}

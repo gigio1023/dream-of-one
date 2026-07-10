@@ -1,0 +1,335 @@
+{
+  "storyletId": "same-order",
+  "title": "같은 주문",
+  "locale": "ko-KR",
+  "conversationId": "conv-same-order",
+  "source": "docs/scenario/content/same-order-storylet-packet.md",
+  "primaryRecordId": "store_same_order_clerk_statement",
+  "thresholds": {
+    "softReport": 40,
+    "inquest": 90,
+    "suspicionProbe": 55,
+    "hesitationMs": 6000
+  },
+  "actors": [
+    { "actorId": "player", "role": "player", "name": "플레이어", "landmarkId": "Store" },
+    { "actorId": "NPC_Store_Clerk", "role": "store_clerk", "name": "상점 점원", "landmarkId": "Store" },
+    { "actorId": "NPC_Store_Manager", "role": "store_manager", "name": "상점 관리자", "landmarkId": "Store" },
+    { "actorId": "NPC_Waiting_Customer", "role": "waiting_customer", "name": "대기 손님", "landmarkId": "Store" },
+    { "actorId": "NPC_Station_Officer", "role": "station_officer", "name": "스테이션 담당관", "landmarkId": "Station" }
+  ],
+  "landmarks": [
+    { "landmarkId": "Store", "label": "상점" },
+    { "landmarkId": "Station", "label": "스테이션" }
+  ],
+  "whyLines": {
+    "none": "그 대답은 상점의 평소 대화에 들어맞았습니다.",
+    "local_routine_mismatch": "그 대답이 상점의 평소 순서와 맞지 않았습니다.",
+    "dream_language_leak": "그 표현은 꿈 바깥의 말이라 기록에 남습니다.",
+    "memory_gap_admission": "평소 기억을 확인하려 한 점이 불안 요소로 남았습니다.",
+    "role_script_break": "예상된 응대 절차 밖의 대답이었습니다.",
+    "prior_statement_contradiction": "그 말은 어제 기록과 어긋납니다.",
+    "authority_evasion": "절차 질문을 피한 대답으로 기록됐습니다.",
+    "over_explanation": "평범한 응대에 비해 설명이 너무 길었습니다.",
+    "response_hesitation": "대답이 늦어 확인이 필요한 지연으로 기록됐습니다."
+  },
+  "beats": [
+    {
+      "beatId": "routine",
+      "promptId": "store.same_order.routine",
+      "choiceSetId": "store.same_order.routine.choices",
+      "speakerId": "NPC_Store_Clerk",
+      "landmarkId": "Store",
+      "act": "public_procedure",
+      "prompt": "오늘도 같은 걸로 드릴까요?",
+      "procedureCue": ["store_queue_mark", "usual_order_cue", "receipt_tray"],
+      "acceptsFreeInput": true,
+      "choices": [
+        {
+          "choiceId": "routine.safe",
+          "intent": "safe/local",
+          "line": "네, 같은 걸로 부탁해요.",
+          "signals": [],
+          "clerkResponse": "네. 표식 하나, 같은 봉투로 처리하겠습니다."
+        },
+        {
+          "choiceId": "routine.repair",
+          "intent": "uncertain/repair",
+          "line": "제가 보통 뭘 시켰죠?",
+          "signals": ["memory_gap_admission"],
+          "clerkResponse": "보통은 표식 하나라고 하셨죠. 오늘은 왜 확인하시나요?"
+        },
+        {
+          "choiceId": "routine.risky",
+          "intent": "risky/weird",
+          "line": "오늘 처음 왔는데요.",
+          "signals": ["local_routine_mismatch"],
+          "clerkResponse": "처음이라고요? 어제도 같은 자리에서 같은 말을 하셨는데요."
+        }
+      ],
+      "next": "probe"
+    },
+    {
+      "beatId": "probe",
+      "promptId": "store.same_order.probe",
+      "choiceSetId": "store.same_order.probe.choices",
+      "speakerId": "NPC_Store_Clerk",
+      "landmarkId": "Store",
+      "act": "social_audit",
+      "prompt": "어제 기록에는 같은 주문이라고 적혀 있습니다. 맞습니까?",
+      "procedureCue": ["usual_order_cue", "receipt_tray", "report_tray"],
+      "acceptsFreeInput": true,
+      "choices": [
+        {
+          "choiceId": "probe.safe",
+          "intent": "safe/local",
+          "line": "맞습니다. 제가 착각했습니다.",
+          "signals": [],
+          "clerkResponse": "그럼 같은 봉투로 두겠습니다."
+        },
+        {
+          "choiceId": "probe.repair",
+          "intent": "uncertain/repair",
+          "line": "어제 일이 조금 흐릿해서 확인했습니다.",
+          "signals": ["memory_gap_admission"],
+          "clerkResponse": "흐릿하다고요. 기록에는 남겨두겠습니다."
+        },
+        {
+          "choiceId": "probe.risky",
+          "intent": "risky/weird",
+          "line": "저는 여기 사람이 아닙니다.",
+          "signals": ["role_script_break"],
+          "clerkResponse": "그 말은 그냥 넘길 수 없습니다."
+        }
+      ],
+      "next": "reconciliation"
+    },
+    {
+      "beatId": "reconciliation",
+      "promptId": "station.same_order.reconciliation",
+      "choiceSetId": "station.same_order.reconciliation.choices",
+      "speakerId": "NPC_Station_Officer",
+      "landmarkId": "Station",
+      "act": "station_reconciliation",
+      "onlyWhenRoute": ["hard_inquest"],
+      "prompt": "상점 기록에는 처음 왔다고 답한 뒤, 꿈에 방금 들어왔다고 진술한 기록이 있습니다. 어느 진술을 정정합니까?",
+      "procedureCue": ["station_dossier"],
+      "acceptsFreeInput": true,
+      "choices": [
+        {
+          "choiceId": "reconciliation.safe",
+          "intent": "safe/local",
+          "line": "처음 왔다는 답변을 정정합니다. 같은 주문 기록을 따르겠습니다.",
+          "signals": [],
+          "clerkResponse": "정정 진술로 접수합니다."
+        },
+        {
+          "choiceId": "reconciliation.repair",
+          "intent": "uncertain/repair",
+          "line": "상점 절차를 몰라 확인하려 했습니다. 꿈이라는 표현은 철회합니다.",
+          "signals": ["memory_gap_admission"],
+          "clerkResponse": "철회 기록을 남깁니다."
+        },
+        {
+          "choiceId": "reconciliation.risky",
+          "intent": "risky/weird",
+          "line": "둘 다 맞습니다. 저는 여기 사람이 아닙니다.",
+          "signals": ["prior_statement_contradiction", "dream_language_leak"],
+          "clerkResponse": "두 진술은 같은 기록에 남길 수 없습니다."
+        }
+      ],
+      "next": null
+    }
+  ],
+  "freeInputPatterns": [
+    { "signal": "dream_language_leak", "patterns": ["꿈", "dream", "world", "세계", "save", "load", "세이브", "로드"] },
+    { "signal": "memory_gap_admission", "patterns": ["보통.*(뭘|무엇|어떻게)", "(기억|생각).*(안|못|흐려)"] },
+    { "signal": "authority_evasion", "patterns": ["중요하지 않", "말할 수 없", "상관없"] },
+    { "signal": "local_routine_mismatch", "patterns": ["처음", "방금", "처음 왔"] }
+  ],
+  "hesitation": {
+    "thresholdMs": 6000,
+    "signal": "response_hesitation",
+    "eventName": "response_hesitation_noted"
+  },
+  "routes": {
+    "clean_cover": {
+      "outcome": "cover_held",
+      "title": "무사 통과",
+      "body": "평소 순서대로 응대가 끝났습니다. 상점 기록에 남은 문제는 없습니다.",
+      "consequences": [
+        {
+          "actorId": "NPC_Store_Clerk",
+          "actorRole": "store_clerk",
+          "objectId": "usual_order_cue",
+          "toState": "cited",
+          "ledgerKind": "usual_order_cited",
+          "whyLineKey": "none",
+          "whyLine": "점원이 같은 주문 안내를 근거로 인용했습니다."
+        },
+        {
+          "actorId": "NPC_Store_Clerk",
+          "actorRole": "store_clerk",
+          "objectId": "receipt_tray",
+          "toState": "normal",
+          "ledgerKind": "store_sale_normal",
+          "record": {
+            "recordId": "store_same_order_receipt",
+            "kind": "receipt",
+            "targetId": "player",
+            "stateBody": "같은 주문, 표식 하나로 정상 판매.",
+            "visibleTo": ["player", "store_clerk", "store_manager"]
+          },
+          "economyDelta": { "accountCredit": -1, "localTrust": 5 },
+          "whyLine": "정상 판매 영수증을 발행했습니다."
+        }
+      ]
+    },
+    "repair_recovery": {
+      "outcome": "cover_held_with_unease",
+      "title": "수습",
+      "body": "불확실했지만 정정표로 마무리했습니다. 작은 불안 기록만 남았습니다.",
+      "consequences": [
+        {
+          "actorId": "NPC_Store_Clerk",
+          "actorRole": "store_clerk",
+          "objectId": "correction_slip",
+          "toState": "offered",
+          "ledgerKind": "correction_offered",
+          "economyDelta": { "recordBurden": 5 },
+          "whyLine": "점원이 정정표를 제안했습니다."
+        },
+        {
+          "actorId": "NPC_Store_Clerk",
+          "actorRole": "store_clerk",
+          "objectId": "correction_slip",
+          "toState": "attached",
+          "ledgerKind": "store_sale_corrected",
+          "record": {
+            "recordId": "store_same_order_correction",
+            "kind": "correction",
+            "targetId": "player",
+            "stateBody": "기억 확인에 대한 정정표를 영수증에 첨부.",
+            "visibleTo": ["player", "store_clerk", "store_manager"]
+          },
+          "economyDelta": { "accountCredit": -1, "localTrust": -3, "recordBurden": 5 },
+          "whyLine": "정정표를 첨부해 판매를 마무리했습니다."
+        }
+      ]
+    },
+    "soft_report": {
+      "outcome": "soft_report",
+      "title": "약식 보고",
+      "body": "상점 기록이 남았고 응대가 잠시 멈췄습니다. 스테이션 정식 심문까지 가지는 않았습니다.",
+      "consequences": [
+        {
+          "actorId": "NPC_Store_Clerk",
+          "actorRole": "store_clerk",
+          "objectId": "receipt_tray",
+          "toState": "marked",
+          "ledgerKind": "store_receipt_marked",
+          "economyDelta": { "localTrust": -5, "recordBurden": 10 },
+          "whyLine": "점원이 영수증에 불일치를 표시했습니다."
+        },
+        {
+          "actorId": "NPC_Store_Clerk",
+          "actorRole": "store_clerk",
+          "objectId": "report_tray",
+          "toState": "pending",
+          "ledgerKind": "store_exception_reported",
+          "record": {
+            "recordId": "store_same_order_clerk_statement",
+            "kind": "clerk_statement",
+            "targetId": "player",
+            "stateBody": "상점 기록에 맞지 않아 정정표로 남김. 보고 대기.",
+            "visibleTo": ["store_clerk", "store_manager", "station_officer"],
+            "captureSelectedLine": true
+          },
+          "economyDelta": { "localTrust": -15, "recordBurden": 25, "stationAttention": 20 },
+          "whyLine": "상점 기록에 맞지 않아 정정표로 남기겠습니다."
+        },
+        {
+          "actorId": "NPC_Store_Manager",
+          "actorRole": "store_manager",
+          "objectId": "store_counter",
+          "toState": "paused",
+          "ledgerKind": "service_paused",
+          "economyDelta": { "recordBurden": 5 },
+          "whyLine": "관리자가 응대를 잠시 멈췄습니다."
+        }
+      ]
+    },
+    "hard_inquest": {
+      "outcome": "inquest_opened",
+      "title": "심문",
+      "body": "스테이션이 상점 기록을 그대로 인용해 정식 심문을 열었습니다.",
+      "consequences": [
+        {
+          "actorId": "NPC_Store_Clerk",
+          "actorRole": "store_clerk",
+          "objectId": "report_tray",
+          "toState": "pending",
+          "ledgerKind": "store_exception_reported",
+          "record": {
+            "recordId": "store_same_order_clerk_statement",
+            "kind": "clerk_statement",
+            "targetId": "player",
+            "stateBody": "상점 기록과 어긋난 진술을 접수 형식으로 남김.",
+            "visibleTo": ["store_clerk", "store_manager", "station_officer"],
+            "captureSelectedLine": true
+          },
+          "economyDelta": { "localTrust": -15, "recordBurden": 25, "stationAttention": 25 },
+          "whyLine": "그 표현은 접수 형식으로 넘기겠습니다."
+        },
+        {
+          "actorId": "NPC_Store_Manager",
+          "actorRole": "store_manager",
+          "objectId": "report_tray",
+          "toState": "forwarded",
+          "ledgerKind": "store_report_escalated",
+          "economyDelta": { "recordBurden": 10, "stationAttention": 30 },
+          "whyLine": "관리자가 상점 보고를 스테이션으로 넘겼습니다."
+        },
+        {
+          "actorId": "NPC_Station_Officer",
+          "actorRole": "station_officer",
+          "objectId": "station_dossier",
+          "toState": "cited",
+          "ledgerKind": "station_record_cited",
+          "citeLedgerKind": "store_exception_reported",
+          "record": {
+            "recordId": "station_same_order_dossier",
+            "kind": "citation",
+            "targetId": "player",
+            "stateBody": "상점 정정표 기록을 인용해 심문 조서를 개시.",
+            "visibleTo": ["player", "station_officer"]
+          },
+          "economyDelta": { "stationAttention": 10 },
+          "whyLine": "상점 기록을 기준으로 대조하겠습니다."
+        }
+      ]
+    }
+  },
+  "fallbackLines": {
+    "store_clerk": [
+      "줄 표식 안에서 말씀해 주세요.",
+      "순서가 비었습니다. 앞 사람 확인이 먼저입니다.",
+      "상품명만으로는 접수되지 않습니다. 수량과 라벨을 같이요.",
+      "그 말은 어제 기록과 맞지 않습니다.",
+      "정정표로 남기겠습니다."
+    ],
+    "store_manager": [
+      "예외는 만들 수 있습니다. 기록 없이 만들 수는 없습니다.",
+      "그럼 경고가 아니라 정정표로 두세요."
+    ],
+    "waiting_customer": [
+      "저 사람, 수량은 말했는데 라벨은 안 봤죠?"
+    ],
+    "station_officer": [
+      "상점 기록을 기준으로 대조하겠습니다.",
+      "지금부터 답변은 접수 형식으로만 남깁니다.",
+      "어느 진술을 정정합니까?",
+      "두 진술은 같은 기록에 남길 수 없습니다."
+    ]
+  }
+}

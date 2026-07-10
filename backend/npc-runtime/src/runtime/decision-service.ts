@@ -1,5 +1,4 @@
 import type { DecisionEnvelope, PerceptionPacket } from "../contracts/types.js";
-import type { CodexBroker } from "../broker/codex-broker.js";
 import { createFallbackIntent } from "./fallback.js";
 import { parsePerceptionPacket, SchemaValidationError } from "./schema.js";
 import { annotateDecisionMeta, FALLBACK_REASON_CODES, normalizeReasonCode } from "../policy/reason-taxonomy.js";
@@ -48,6 +47,19 @@ export interface DecisionMailboxMetrics {
   perBotPendingLimit: number;
   globalPendingLimit: number;
   currentGlobalPending: number;
+}
+
+/**
+ * The decision producer the service orchestrates. In v1 this was the Codex
+ * provider broker; the broker was retired for M1 (deterministic-only), so the
+ * dependency is now this narrow interface. Any producer with a `decide` method
+ * that returns a `DecisionEnvelope` works (e.g. a deterministic policy).
+ */
+export interface DecisionProducer {
+  decide(
+    packet: PerceptionPacket,
+    options?: { signal?: AbortSignal; deadlineMs?: number },
+  ): Promise<DecisionEnvelope>;
 }
 
 export interface DecisionServiceOptions {
@@ -139,7 +151,7 @@ export class DecisionService {
   };
 
   constructor(
-    private readonly broker: CodexBroker,
+    private readonly broker: DecisionProducer,
     options: DecisionServiceOptions = {},
   ) {
     this.limiter = new GlobalDecisionLimiter(options.maxBrokerInFlight ?? 4);

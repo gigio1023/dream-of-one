@@ -51,9 +51,9 @@ export interface DecisionMailboxMetrics {
 
 /**
  * The decision producer the service orchestrates. In v1 this was the Codex
- * provider broker; the broker was retired for M1 (deterministic-only), so the
- * dependency is now this narrow interface. Any producer with a `decide` method
- * that returns a `DecisionEnvelope` works (e.g. a deterministic policy).
+ * provider broker. The dependency is now this narrow interface, while the
+ * active NPC gameplay path uses `NpcProposalPort`. Any legacy producer with a
+ * `decide` method can still exercise ordering and backpressure behavior.
  */
 export interface DecisionProducer {
   decide(

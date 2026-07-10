@@ -19,7 +19,6 @@ export interface ConversationTurnInput {
   selectedChoiceId?: string;
   freeInputHash?: string;
   intent?: ConversationChoiceIntent;
-  authoredSignals?: readonly ConversationSuspicionSignal[];
   memory?: readonly ConversationMemoryLine[];
   suspicionBefore: number;
   reportWeightBefore: number;
@@ -65,6 +64,12 @@ const AUTHORITY_EVASION_PATTERNS = [
   /중요하지 않/,
   /말할 수 없/,
   /상관없/,
+] as const;
+
+const ROLE_BREAK_PATTERNS = [
+  /여기 사람이 (아니|아닙)/,
+  /밖에서 왔/,
+  /이 세계 사람이 아니/,
 ] as const;
 
 export const CONVERSATION_SUSPICION_MAX_SCORE = 125;
@@ -127,7 +132,7 @@ function previousLineClaimsRoutine(memory: readonly ConversationMemoryLine[]): b
 }
 
 function detectSignals(input: ConversationTurnInput): ConversationSuspicionSignal[] {
-  const signals: ConversationSuspicionSignal[] = [...(input.authoredSignals ?? [])];
+  const signals: ConversationSuspicionSignal[] = [];
   const line = input.line.trim();
   const memory = input.memory ?? [];
 
@@ -140,14 +145,14 @@ function detectSignals(input: ConversationTurnInput): ConversationSuspicionSigna
   if (hasPattern(line, AUTHORITY_EVASION_PATTERNS)) {
     signals.push("authority_evasion");
   }
+  if (hasPattern(line, ROLE_BREAK_PATTERNS)) {
+    signals.push("role_script_break");
+  }
   if (/처음|방금|처음 왔/.test(line) && /same_order|routine|store/.test(input.promptId)) {
     signals.push("local_routine_mismatch");
   }
   if (/처음|방금|아닌/.test(line) && previousLineClaimsRoutine(memory)) {
     signals.push("prior_statement_contradiction");
-  }
-  if (input.intent === "risky/weird" && signals.length === 0) {
-    signals.push("role_script_break");
   }
   if (line.length > 80) {
     signals.push("over_explanation");

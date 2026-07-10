@@ -51,6 +51,11 @@ hardcode a vendor SDK call or base URL outside an adapter. Never assume a
 specific model is available; profiles are config, availability is checked at
 runtime, and deterministic fallback must always work.
 
+Production gameplay is provider-first. Do not store authored choice sets, NPC
+reply sequences, or ordered social consequences in production storylets.
+Deterministic scripted proposal sets are allowed only behind a test adapter or
+generated fixture used by smoke tests.
+
 ## Verification
 
 Commands and policy: [`docs/tech/verification.md`](docs/tech/verification.md).

@@ -11,6 +11,8 @@
     "serve": "bun run src/index.ts",
     "validate:storylets": "bun run src/tools/validate-storylets.ts",
     "fixtures:generate": "bun run src/tools/generate-session-fixtures.ts",
+    "provider:smoke": "bun run src/tools/provider-smoke.ts",
+    "serve:scripted": "bun run src/tools/scripted-session-server.ts",
     "start": "bun run dist/index.js",
     "test": "bun test test/integration/*.test.ts",
     "check": "bun run build && bun run validate:storylets && bun run test"
@@ -19,6 +21,7 @@
     "bun": ">=1.3.14"
   },
   "dependencies": {
+    "openai": "^6.46.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

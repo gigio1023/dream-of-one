@@ -1,16 +1,17 @@
 # M1 — 2D Playable Slice
 
-**Status: active.** The playable implementation and automated checks are in
-place; manual acceptance and the fun-gate closeout remain.
+**Status: closed as a deterministic scenario harness.** The implementation is
+useful for UI, transport, authority, and regression testing, but it did not
+prove the intended LLM-driven NPC gameplay. Production gameplay continues in
+M2; authored choices and route scripts must not expand here.
 
 ## Goal
 
-The `Same Order` (같은 주문) storylet is fully playable as a 2D top-down game
+The `Same Order` (같은 주문) scenario is executable as a 2D top-down harness
 with real licensed art: walk into the store, get questioned, answer through
 choices or typed input, watch suspicion travel, reach any of the four routes,
-replay. Deterministic only (no live provider — that's M2). This retires the
-two biggest reboot risks: "2D doesn't carry the feeling" and "the core loop
-isn't fun."
+and replay. It retired presentation and transport risks, not the core
+AI-gameplay risk.
 
 ## Player-visible deliverables
 
@@ -55,7 +56,8 @@ isn't fun."
   packet; sidecar session endpoints
   (`start/answer/decision/snapshot/end`) serving the storylet; agent-loop
   *shape* (context assembly + tool validation + ledger events) driving NPC
-  reactions deterministically. Begin the keep/trim/retire absorption listed
+  reactions deterministically as a test harness. Begin the keep/trim/retire
+  absorption listed
   in [`../tech/npc-runtime.md`](../tech/npc-runtime.md) as these modules are
   touched.
 - Smokes: `scene_load_smoke.gd`, `route_smoke.gd` (drives all four routes
@@ -77,9 +79,12 @@ isn't fun."
 
 ## Non-goals
 
-Live providers, EN locale, additional locations beyond the Station intake
-room, ambient NPC schedules, save/load, audio beyond trivial CC0 blips,
+EN locale, additional locations beyond the Station intake room, ambient NPC
+schedules, save/load, audio beyond trivial CC0 blips,
 gamepad support.
+
+Live providers and agent-selected actions are no longer deferred as optional
+texture. They are the active M2 foundation.
 
 ## Dependencies / notes
 

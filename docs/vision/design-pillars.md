@@ -4,8 +4,10 @@ Four pillars. When priorities conflict, the lower-numbered pillar wins.
 
 ## 1. Conversation is the threat surface
 
-The core verb is answering. Danger enters through dialogue: three diegetic
-choices plus bounded typed free input that becomes a recorded statement.
+The core verb is answering. Danger enters through dialogue: three
+context-generated diegetic suggestions plus bounded typed free input that
+becomes a recorded statement. Production storylets never pre-author the
+suggestions or the NPC reply sequence.
 Combat, stealth-crouching, and inventory puzzles are out of scope. If a
 feature does not change what it feels like to be questioned, it is decoration.
 

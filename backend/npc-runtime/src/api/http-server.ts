@@ -1,8 +1,8 @@
 // Session API sidecar (docs/tech/npc-runtime.md).
 //
 // Localhost-only HTTP server exposing the five v2 session endpoints. Every
-// request and response is zod-validated (invariant #1). Deterministic only in
-// M1 — no provider calls.
+// request and response is zod-validated (invariant #1). Provider proposals
+// remain behind SessionService's NpcProposalPort dependency.
 
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
@@ -100,12 +100,17 @@ export function createSessionServer(service: SessionService): Server {
       const method = req.method ?? "GET";
 
       if (method === "GET" && path === "/health") {
-        writeJson(res, 200, { status: "ok", service: "npc-runtime", mode: "deterministic" });
+        writeJson(res, 200, {
+          status: "ok",
+          service: "npc-runtime",
+          mode: "provider-first",
+          providerProfile: service.providerProfile(),
+        });
         return;
       }
 
       if (method === "GET" && path === "/health/ready") {
-        const readiness = evaluateRuntimeReadiness();
+        const readiness = await evaluateRuntimeReadiness(service);
         writeJson(res, readiness.status === "ready" ? 200 : 503, readiness);
         return;
       }
@@ -113,7 +118,7 @@ export function createSessionServer(service: SessionService): Server {
       if (method === "POST" && path === "/v1/session/start") {
         const parsed = startRequestSchema.safeParse(await readJsonBody(req));
         if (!parsed.success) return badRequest(res, parsed.error);
-        const result = service.start(parsed.data.storyletId, parsed.data.locale);
+        const result = await service.start(parsed.data.storyletId, parsed.data.locale);
         respond(res, startResponseSchema, result);
         return;
       }
@@ -121,7 +126,7 @@ export function createSessionServer(service: SessionService): Server {
       if (method === "POST" && path === "/v1/session/answer") {
         const parsed = answerRequestSchema.safeParse(await readJsonBody(req));
         if (!parsed.success) return badRequest(res, parsed.error);
-        const result = service.answer(parsed.data.sessionId, parsed.data.turnId, parsed.data.answer);
+        const result = await service.answer(parsed.data.sessionId, parsed.data.turnId, parsed.data.answer);
         respond(res, answerResponseSchema, result);
         return;
       }
@@ -129,7 +134,7 @@ export function createSessionServer(service: SessionService): Server {
       if (method === "POST" && path === "/v1/npc/decision") {
         const parsed = decisionRequestSchema.safeParse(await readJsonBody(req));
         if (!parsed.success) return badRequest(res, parsed.error);
-        const result = service.decision(parsed.data.sessionId, parsed.data.beat);
+        const result = await service.decision(parsed.data.sessionId, parsed.data.beat);
         respond(res, decisionResponseSchema, result);
         return;
       }

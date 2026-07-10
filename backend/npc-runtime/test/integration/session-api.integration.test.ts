@@ -1,11 +1,17 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
 import { startSessionServer, type RunningSessionServer } from "../../src/api/http-server.js";
+import { SessionService } from "../../src/runtime/session/service.js";
+import { createSameOrderScriptedAdapter } from "../../src/providers/testing/same-order-script.js";
+import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-adapter.js";
 
 type Answer = { type: "choice" | "free_input" | "hesitation"; choiceId?: string; text?: string };
 
 async function withServer(fn: (base: string) => Promise<void>): Promise<void> {
-  const running: RunningSessionServer = await startSessionServer({ logListen: false });
+  const running: RunningSessionServer = await startSessionServer({
+    logListen: false,
+    service: new SessionService({ proposalPort: createSameOrderScriptedAdapter() }),
+  });
   const base = `http://${running.host}:${running.port}`;
   try {
     await fn(base);
@@ -47,28 +53,28 @@ async function driveRoute(base: string, answers: Answer[]): Promise<any> {
 test("all four routes are drivable purely through the Session API", async () => {
   await withServer(async base => {
     const clean = await driveRoute(base, [
-      { type: "choice", choiceId: "routine.safe" },
-      { type: "choice", choiceId: "probe.safe" },
+      { type: "choice", choiceId: "routine.generated.1" },
+      { type: "choice", choiceId: "probe.generated.1" },
     ]);
     assert.equal(clean.route, "clean_cover");
     assert.equal(clean.outcomePanel.title, "무사 통과");
 
     const repair = await driveRoute(base, [
-      { type: "choice", choiceId: "routine.repair" },
-      { type: "choice", choiceId: "probe.repair" },
+      { type: "choice", choiceId: "routine.generated.2" },
+      { type: "choice", choiceId: "probe.generated.2" },
     ]);
     assert.equal(repair.route, "repair_recovery");
 
     const soft = await driveRoute(base, [
-      { type: "choice", choiceId: "routine.risky" },
-      { type: "choice", choiceId: "probe.risky" },
+      { type: "choice", choiceId: "routine.generated.3" },
+      { type: "choice", choiceId: "probe.generated.3" },
     ]);
     assert.equal(soft.route, "soft_report");
 
     const inquest = await driveRoute(base, [
-      { type: "choice", choiceId: "routine.risky" },
+      { type: "choice", choiceId: "routine.generated.3" },
       { type: "free_input", text: "저는 이 꿈에 방금 들어왔어요." },
-      { type: "choice", choiceId: "reconciliation.risky" },
+      { type: "choice", choiceId: "reconciliation.generated.3" },
     ]);
     assert.equal(inquest.route, "hard_inquest");
     // The inquest outcome cites an exact Store ledger chain.
@@ -90,6 +96,7 @@ test("session/start returns a validated world snapshot with five economy values"
     ]);
     assert.equal(start.json.ledgerEvents.length, 0);
     assert.equal(start.json.nextTurn.beatId, "routine");
+    assert.equal(start.json.nextTurn.proposalMeta.transport, "scripted");
   });
 });
 
@@ -100,7 +107,7 @@ test("answer surfaces Korean why-lines, a suspicion delta, and ledger deltas", a
     const res = await post(base, "/v1/session/answer", {
       sessionId,
       turnId: start.json.nextTurn.turnId,
-      answer: { type: "choice", choiceId: "routine.risky" },
+      answer: { type: "choice", choiceId: "routine.generated.3" },
     });
     assert.equal(res.status, 200);
     assert.deepEqual(res.json.signals, ["local_routine_mismatch"]);
@@ -110,7 +117,7 @@ test("answer surfaces Korean why-lines, a suspicion delta, and ledger deltas", a
   });
 });
 
-test("npc/decision runs a deterministic beat with transcript deltas", async () => {
+test("npc/decision runs through the injected proposal port with transcript deltas", async () => {
   await withServer(async base => {
     const start = await post(base, "/v1/session/start", { storyletId: "same-order", locale: "ko-KR" });
     const decision = await post(base, "/v1/npc/decision", { sessionId: start.json.sessionId, beat: 1 });
@@ -118,6 +125,92 @@ test("npc/decision runs a deterministic beat with transcript deltas", async () =
     assert.ok(decision.json.npcActions.length >= 1);
     assert.ok(decision.json.transcriptDeltas.length >= 1);
   });
+});
+
+test("Session API exposes a blocked tool result followed by a provider re-plan", async () => {
+  const previousResults: Array<boolean | undefined> = [];
+  const adapter = new ScriptedNpcAdapter({
+    conversation: () => ({
+      utterance: "오늘도 같은 걸로 드릴까요?",
+      suggestedReplies: [
+        { text: "네, 같은 걸로 부탁해요.", intent: "safe/local" },
+        { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair" },
+        { text: "오늘 처음 왔는데요.", intent: "risky/weird" },
+      ],
+      continueConversation: true,
+    }),
+    nextStep: request => {
+      previousResults.push(request.previousResult?.ok);
+      if (request.iteration === 0) {
+        return {
+          toolCall: { tool: "look", args: { targetId: "missing_counter" } },
+          rationale: "Check the assumed counter.",
+          done: false,
+        };
+      }
+      if (request.iteration === 1) {
+        return {
+          toolCall: { tool: "look", args: { targetId: "store_counter" } },
+          rationale: "Use the visible counter after the failure.",
+          done: false,
+        };
+      }
+      return { rationale: "Re-plan complete.", done: true };
+    },
+  });
+  const running = await startSessionServer({
+    logListen: false,
+    service: new SessionService({ proposalPort: adapter }),
+  });
+  const base = `http://${running.host}:${running.port}`;
+  try {
+    const start = await post(base, "/v1/session/start", { storyletId: "same-order", locale: "ko-KR" });
+    const answer = await post(base, "/v1/session/answer", {
+      sessionId: start.json.sessionId,
+      turnId: start.json.nextTurn.turnId,
+      answer: { type: "choice", choiceId: "routine.generated.1" },
+    });
+    assert.equal(answer.status, 200, JSON.stringify(answer.json));
+    assert.equal(answer.json.transcriptDeltas[0].validation.reason, "not_visible");
+    assert.equal(answer.json.transcriptDeltas[1].validation.ok, true);
+    assert.deepEqual(previousResults.slice(0, 2), [undefined, false]);
+  } finally {
+    await running.close();
+  }
+});
+
+test("provider conversation pacing may close within the deterministic storylet bound", async () => {
+  const adapter = new ScriptedNpcAdapter({
+    conversation: () => ({
+      utterance: "평소 주문으로 마칠까요?",
+      suggestedReplies: [
+        { text: "네, 마칩니다.", intent: "safe/local" },
+        { text: "잠깐 확인해 주세요.", intent: "uncertain/repair" },
+        { text: "처음 왔습니다.", intent: "risky/weird" },
+      ],
+      continueConversation: false,
+    }),
+    nextStep: () => ({ rationale: "No world action needed.", done: true }),
+  });
+  const running = await startSessionServer({
+    logListen: false,
+    service: new SessionService({ proposalPort: adapter }),
+  });
+  const base = `http://${running.host}:${running.port}`;
+  try {
+    const start = await post(base, "/v1/session/start", { storyletId: "same-order", locale: "ko-KR" });
+    const answer = await post(base, "/v1/session/answer", {
+      sessionId: start.json.sessionId,
+      turnId: start.json.nextTurn.turnId,
+      answer: { type: "choice", choiceId: "routine.generated.1" },
+    });
+    assert.equal(answer.status, 200, JSON.stringify(answer.json));
+    assert.equal(answer.json.nextTurn, null);
+    assert.equal(answer.json.routeState.terminal, true);
+    assert.equal(answer.json.routeState.projectedRoute, "clean_cover");
+  } finally {
+    await running.close();
+  }
 });
 
 test("snapshot returns full renderable state", async () => {

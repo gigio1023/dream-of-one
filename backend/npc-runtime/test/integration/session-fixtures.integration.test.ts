@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { SessionService } from "../../src/runtime/session/service.js";
+import { createSameOrderScriptedAdapter } from "../../src/providers/testing/same-order-script.js";
 import {
   answerRequestSchema,
   answerResponseSchema,
@@ -39,15 +40,15 @@ test("every endpoint fixture validates against the live request and response sch
   endResponseSchema.parse(e.end.response);
 });
 
-test("scripted route walkthroughs deterministically reach each route", () => {
+test("scripted adapter walkthroughs reach each deterministic route", async () => {
   assert.equal(fixtures.routeWalkthroughs.length, 4);
   for (const walkthrough of fixtures.routeWalkthroughs) {
-    const svc = new SessionService();
-    const start = svc.start(fixtures.storyletId, fixtures.locale);
+    const svc = new SessionService({ proposalPort: createSameOrderScriptedAdapter() });
+    const start = await svc.start(fixtures.storyletId, fixtures.locale);
     let next: { turnId: string } | null = start.nextTurn;
     for (const answer of walkthrough.answers) {
       assert.ok(next, `walkthrough ${walkthrough.route} ran out of turns`);
-      const res = svc.answer(start.sessionId, next.turnId, answer);
+      const res = await svc.answer(start.sessionId, next.turnId, answer);
       next = res.nextTurn;
     }
     const end = svc.end(start.sessionId);

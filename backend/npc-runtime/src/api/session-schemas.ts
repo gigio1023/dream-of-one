@@ -16,6 +16,33 @@ const routeIdEnum = z.enum(["clean_cover", "repair_recovery", "soft_report", "ha
 const stageEnum = z.enum(["routine", "probe", "reconciliation", "resolved"]);
 const nonEmpty = z.string().min(1);
 
+const proposalMetaSchema = z
+  .object({
+    profileId: nonEmpty,
+    transport: z.enum(["live", "fallback", "scripted"]),
+    usedFallback: z.boolean(),
+    fallbackReason: z
+      .enum([
+        "missing_credentials",
+        "unavailable",
+        "timeout",
+        "rate_limited",
+        "invalid_envelope",
+        "budget_exhausted",
+        "transport_error",
+      ])
+      .optional(),
+    usage: z
+      .object({
+        inputTokens: z.number().int().nonnegative(),
+        outputTokens: z.number().int().nonnegative(),
+        totalTokens: z.number().int().nonnegative(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
 export const civicEconomySchema = z
   .object({
     accountCredit: z.number().int(),
@@ -70,6 +97,9 @@ const hudStateSchema = z
     projectedRoute: routeIdEnum,
     ledgerCount: z.number().int().nonnegative(),
     activePromptId: z.string().nullable(),
+    providerProfile: nonEmpty,
+    providerTransport: z.enum(["live", "fallback", "scripted"]),
+    providerFallbackReason: z.string().optional(),
   })
   .strict();
 
@@ -94,9 +124,11 @@ const nextTurnSchema = z
     speakerId: nonEmpty,
     prompt: nonEmpty,
     acceptsFreeInput: z.boolean(),
+    continueConversation: z.boolean(),
     choices: z.array(
       z.object({ choiceId: nonEmpty, intent: intentEnum, line: nonEmpty }).strict(),
     ),
+    proposalMeta: proposalMetaSchema,
   })
   .strict();
 
@@ -110,6 +142,7 @@ const npcReactionSchema = z
     ledgerEventId: z.string().optional(),
     whyLine: z.string().optional(),
     influence: z.object({ from: nonEmpty, to: nonEmpty }).strict().optional(),
+    proposalMeta: proposalMetaSchema,
   })
   .strict();
 
@@ -131,6 +164,8 @@ const transcriptEntrySchema = z
     tool: toolEnum,
     args: z.record(z.string(), z.unknown()),
     utterance: z.string().optional(),
+    rationale: nonEmpty,
+    proposalMeta: proposalMetaSchema,
     validation: z
       .object({
         ok: z.boolean(),
@@ -158,6 +193,7 @@ const npcActionSchema = z
         note: z.string(),
       })
       .strict(),
+    proposalMeta: proposalMetaSchema,
   })
   .strict();
 
@@ -212,6 +248,7 @@ export const answerResponseSchema = z
     reportPressure: z.number().int().nonnegative(),
     npcReactions: z.array(npcReactionSchema),
     ledgerEvents: z.array(ledgerEventSchema),
+    transcriptDeltas: z.array(transcriptEntrySchema),
     routeState: routeStateSchema,
     nextTurn: nextTurnSchema.nullable(),
   })
@@ -245,6 +282,7 @@ export const snapshotResponseSchema = z
     ledgerEvents: z.array(ledgerEventSchema),
     routeState: routeStateSchema,
     nextTurn: nextTurnSchema.nullable(),
+    agentTranscript: z.array(transcriptEntrySchema),
   })
   .strict();
 
@@ -262,6 +300,8 @@ export const endResponseSchema = z
         finalReportPressure: z.number().int().nonnegative(),
         ledgerEventCount: z.number().int().nonnegative(),
         route: routeIdEnum,
+        providerProfile: nonEmpty,
+        fallbackCount: z.number().int().nonnegative(),
       })
       .strict(),
   })

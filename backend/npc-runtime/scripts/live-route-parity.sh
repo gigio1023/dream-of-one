@@ -26,7 +26,7 @@ trap cleanup EXIT HUP INT TERM
 mkdir -p "$GODOT_HOME"
 (
 	cd "$RUNTIME_DIR"
-	PORT=$PORT bun run serve
+	PORT=$PORT bun run serve:scripted
 ) >"$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 

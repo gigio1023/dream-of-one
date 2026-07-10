@@ -4,8 +4,8 @@
 
 ```mermaid
 flowchart TD
-    A[NPC prompt<br/>ordinary question] --> B{Player answers}
-    B -->|choice 1..3| C[Deterministic classification]
+    A[Provider-proposed NPC prompt<br/>ordinary question] --> B{Player answers}
+    B -->|generated suggestion 1..3| C[Deterministic classification]
     B -->|typed free input| C
     B -->|hesitation / delay| C
     C --> D[Suspicion signals]
@@ -23,15 +23,18 @@ flowchart TD
     L --> M[Deterministic session end + replay]
 ```
 
-Every arrow after "Player answers" is deterministic. The LLM only colors the
-words NPCs use and proposes which tool an NPC tries next; it cannot move the
+The LLM proposes the NPC utterance, three reply suggestions, and the next tool
+attempt. It cannot classify suspicion, apply a mutation, or move the authority
 state machine.
 
 ## The answer surface
 
-- **Three diegetic choices** per prompt, always with a felt safety gradient:
+- **Three generated diegetic suggestions** per prompt, requested with a felt
+  safety gradient:
   one safe, one uncertain, one risky. The gradient must be inferable from the
-  fiction (what a normal resident would say), never labeled.
+  fiction (what a normal resident would say), never labeled. They are proposed
+  at runtime from visible context, not stored in the storylet. Choosing one is
+  identical to typing that line; deterministic classification assigns truth.
 - **Typed free input** — a bounded text field. Submitted text is classified
   deterministically (keyword/pattern/contradiction rules), hashed into the
   session record, and treated in-fiction as a *recorded statement*. It is not

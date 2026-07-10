@@ -327,6 +327,7 @@ func show_turn(turn: Dictionary) -> void:
 	var actor_id := str(turn.get("speakerId", turn.get("actorId", "")))
 	_speaker_label.text = _actor_name(actor_id)
 	_prompt_label.text = str(turn.get("prompt", ""))
+	set_provider(_dictionary_or_empty(turn.get("proposalMeta")))
 	var choices: Array = turn.get("choices", [])
 	for index in range(_choice_buttons.size()):
 		var button := _choice_buttons[index]
@@ -395,12 +396,37 @@ func set_latest_ledger(event: Dictionary) -> void:
 	var tween := create_tween()
 	tween.tween_property(_ledger_label, "modulate", MUTED, 0.65)
 
+func show_agent_step(entry: Dictionary) -> void:
+	var meta := _dictionary_or_empty(entry.get("proposalMeta"))
+	set_provider(meta)
+	var validation := _dictionary_or_empty(entry.get("validation"))
+	var result_text := "성공" if bool(validation.get("ok", false)) else "차단: %s" % str(validation.get("reason", "unknown"))
+	_ledger_label.text = "%s · %s → %s" % [
+		str(meta.get("profileId", "provider")),
+		str(entry.get("tool", "stop")),
+		result_text,
+	]
+	_ledger_label.modulate = COLD if bool(validation.get("ok", false)) else DANGER
+
 func set_location(location_id: String) -> void:
 	_location_label.text = _t("world.location.%s" % location_id)
 
 func set_mode(mode: String) -> void:
 	_mode_label.text = _t("hud.mode.http" if mode == "http" else "hud.mode.fixture")
 	_mode_label.modulate = COLD if mode == "http" else Color("#91b7a0")
+
+func set_provider(meta: Dictionary) -> void:
+	if meta.is_empty():
+		return
+	var profile := str(meta.get("profileId", "unknown"))
+	var transport := str(meta.get("transport", "unknown"))
+	var reason := str(meta.get("fallbackReason", ""))
+	_mode_label.text = "%s · %s%s" % [
+		profile,
+		transport,
+		" (%s)" % reason if not reason.is_empty() else "",
+	]
+	_mode_label.modulate = DANGER if bool(meta.get("usedFallback", false)) else COLD
 
 func set_hint(text: String) -> void:
 	_hint_label.text = text
@@ -550,6 +576,9 @@ func _t(key: String, args: Dictionary = {}) -> String:
 	if loc != null:
 		return str(loc.call("t", key, args))
 	return key.format(args)
+
+func _dictionary_or_empty(value: Variant) -> Dictionary:
+	return (value as Dictionary).duplicate(true) if value is Dictionary else {}
 
 func _label(text: String, size: int, color: Color) -> Label:
 	var label := Label.new()

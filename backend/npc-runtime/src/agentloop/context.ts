@@ -1,7 +1,7 @@
 // Observe-packet assembly — a pure function of world state (invariant #5).
 //
-// The same packet shape feeds the deterministic policy, the (M2) provider
-// proposal, and the debug transcript. No data an NPC could not know ever
+// The same packet shape feeds live providers, fallback, scripted tests, and
+// the debug transcript. No data an NPC could not know ever
 // enters its packet: everything here is visibility-checked.
 
 import {
@@ -37,6 +37,12 @@ export interface ObservePacket {
   actorMemory: ActorMemory;
   visibleObjects: Array<{ objectId: string; label: string; state: string }>;
   visibleRecords: Array<{ recordId: string; kind: string; stateBody: string }>;
+  visibleLedgerEvents: Array<{
+    eventId: string;
+    kind: string;
+    actorId: string;
+    recordId?: string;
+  }>;
   visibleActors: string[];
   heardSpeech: string[];
   toolCatalog: ToolName[];
@@ -82,6 +88,12 @@ export function assembleObservePacket(world: WorldState, input: AssembleObserveI
       kind: r.kind,
       stateBody: r.stateBody,
     })),
+    visibleLedgerEvents: observedLedger.map(event => ({
+      eventId: event.eventId,
+      kind: event.kind,
+      actorId: event.actorId,
+      recordId: event.recordId,
+    })),
     visibleActors: [...actor.knownActorIds],
     heardSpeech: [...input.heardSpeech],
     toolCatalog: toolCatalogForRole(actor.role),
@@ -94,6 +106,7 @@ export function summarizeObservePacket(packet: ObservePacket): string {
     `at=${packet.landmarkId}`,
     `objects=${packet.visibleObjects.length}`,
     `records=${packet.visibleRecords.length}`,
+    `ledger=${packet.visibleLedgerEvents.length}`,
     `tools=${packet.toolCatalog.length}`,
     `goal=${packet.goals[0] ?? "none"}`,
   ].join(" ");

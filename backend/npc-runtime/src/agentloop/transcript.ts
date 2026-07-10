@@ -3,6 +3,7 @@
 // next-step change for every loop iteration, per actor.
 
 import type { ToolName } from "./tools.js";
+import type { ProposalMeta } from "../providers/ports.js";
 
 export interface TranscriptEntry {
   actorId: string;
@@ -11,6 +12,8 @@ export interface TranscriptEntry {
   tool: ToolName;
   args: Record<string, unknown>;
   utterance?: string;
+  rationale: string;
+  proposalMeta: ProposalMeta;
   validation: { ok: boolean; reason?: string; detail?: string; note: string };
   ledgerEventId?: string;
   /** How this result changes the NPC's next step (blocked/busy must change it). */

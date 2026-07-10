@@ -1,7 +1,7 @@
 # Godot 2D Client
 
 Target: Godot 4.7.x stable (current stable series; keep `GODOT_BIN` per
-device). The active project under `godot/` is the M1 2D client.
+device). The active project under `godot/` is the M2 provider-backed client.
 
 ## Project settings
 
@@ -25,7 +25,7 @@ Main (Node2D)
 │   ├── RecordProps (record_prop_2d.tscn: sprite, state label, inspect area)
 │   └── InfluenceLinks (Line2D pool, observer → reactor)
 ├── HUD (CanvasLayer)
-│   ├── ConversationPanel (prompt, 3 choices, typed input field)
+│   ├── ConversationPanel (generated prompt + suggestions, typed input field)
 │   ├── PressureLine (suspicion/report meters, latest-ledger line, 열람/오간 말)
 │   ├── InspectPanel (record/NPC inspection)
 │   └── OutcomePanel (route result, cited ledger entries, restart)
@@ -47,8 +47,8 @@ Main (Node2D)
 
 - Conversation is modal but the world stays live behind it (NPCs keep their
   loops running — being watched *while* answering is the point).
-- Typed input: single-line field, length-bounded, submits into the same
-  deterministic classification path as choices; a subtle "recorded" stamp
+- Suggested replies and typed input submit the displayed text into the same
+  deterministic classification path; a subtle "recorded" stamp
   animation lands on submit (recorded-statement fiction, pillar 1).
 - Hesitation timer runs while the panel is open; crossing the threshold emits
   the hesitation event to the runtime — visible as the NPC's patience cue.
@@ -69,6 +69,9 @@ Main (Node2D)
 Same Order routes via Session API, assert terminal states), `localization_smoke.gd`,
 `check_assets.gd` (third-party manifest presence). That's the full list —
 resist adding more without a regression that demands it.
+
+Normal launch defaults to HTTP/provider mode. Fixture replay is selected only
+for smoke tests with `DREAM_SESSION_MODE=fixture`.
 
 ## Salvage map from v1 (`godot/` current tree)
 

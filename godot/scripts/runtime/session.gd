@@ -18,7 +18,7 @@ signal route_ended(end_result: Dictionary)
 signal request_failed(operation: String, error: Dictionary)
 
 var _backend: Object = null
-var _mode := "fixture"
+var _mode := "http"
 var _session_id := ""
 var _started := false
 var _end_emitted := false
@@ -205,7 +205,7 @@ func _resolve_mode() -> String:
 		if arg.begins_with("--session-mode="):
 			return arg.get_slice("=", 1)
 	var env := OS.get_environment("DREAM_SESSION_MODE")
-	return "http" if env == "http" else "fixture"
+	return "fixture" if env == "fixture" else "http"
 
 func _resolve_http_base() -> String:
 	for arg in OS.get_cmdline_user_args():

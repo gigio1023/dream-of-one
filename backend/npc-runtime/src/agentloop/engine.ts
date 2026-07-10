@@ -1,14 +1,12 @@
-// Agent-loop engine (docs/game/npc-agent-loop.md).
-//
-// Runs the deterministic loop for one NPC over a beat:
-//   observe -> propose (deterministic policy) -> validate -> apply -> read
-//   -> update memory -> iterate (budget 3-6).
-//
-// M1 is deterministic only: NO provider calls. The policy is a goal queue.
-// The load-bearing property: a blocked/busy result MUST change the next step.
-// The engine never re-proposes a tool call whose signature already blocked.
+// Provider-driven NPC loop: observe -> propose -> validate -> apply -> read -> iterate.
+// The provider owns the attempt. Deterministic runtime code owns every result.
 
 import { applyMutation, type LedgerEvent, type WorldState } from "../runtime/world/index.js";
+import type {
+  AgentToolResult,
+  NpcProposalPort,
+  ProposalMeta,
+} from "../providers/ports.js";
 import {
   assembleObservePacket,
   summarizeObservePacket,
@@ -29,6 +27,7 @@ export interface NpcAction {
   utterance?: string;
   validationResult: { ok: boolean; reason?: string; detail?: string; note: string };
   ledgerEventId?: string;
+  proposalMeta: ProposalMeta;
 }
 
 export interface BeatResult {
@@ -40,13 +39,14 @@ export interface BeatResult {
 }
 
 export interface RunBeatInput {
+  sessionId: string;
   world: WorldState;
   actor: ActorContextLite;
   policy: ActorPolicy;
   memory: ActorMemory;
   heardSpeech?: string[];
-  /** Ordered candidate tool calls the NPC wants to attempt this beat. */
-  goals: Array<{ call: ToolCall; goalLabel: string }>;
+  goal: string;
+  proposalPort: NpcProposalPort;
   transcript: TranscriptStore;
   budget?: number;
 }
@@ -60,7 +60,7 @@ function signatureOf(call: ToolCall): string {
   return `${call.tool}:${JSON.stringify(call.args)}`;
 }
 
-export function runBeat(input: RunBeatInput): BeatResult {
+export async function runBeat(input: RunBeatInput): Promise<BeatResult> {
   const budget = clampBudget(input.budget);
   const transcript = input.transcript;
   const heardSpeech = input.heardSpeech ?? [];
@@ -75,81 +75,115 @@ export function runBeat(input: RunBeatInput): BeatResult {
     ownActionNotes: [...input.memory.ownActionNotes],
     observedLedgerEventIds: [...input.memory.observedLedgerEventIds],
   };
+  let previousResult: AgentToolResult | undefined;
 
-  let attempted = 0;
-  for (const goal of input.goals) {
-    if (attempted >= budget) {
-      break;
-    }
-
-    // observe (fresh each iteration, reflecting prior mutations)
+  for (let iteration = 0; iteration < budget; iteration += 1) {
     const packet = assembleObservePacket(world, {
       actor: input.actor,
-      goals: [goal.goalLabel],
+      goals: [input.goal],
       policy: input.policy,
       memory,
       heardSpeech,
     });
     const observedSummary = summarizeObservePacket(packet);
-    const step = transcript.nextStep(input.actor.actorId);
-    const sig = signatureOf(goal.call);
+    const resolved = await input.proposalPort.proposeNextStep({
+      sessionId: input.sessionId,
+      iteration,
+      goal: input.goal,
+      observePacket: packet,
+      previousResult,
+      blockedSignatures: [...blockedSignatures],
+    });
+    const proposal = resolved.proposal;
+    if (proposal.done || !proposal.toolCall) {
+      memory.ownActionNotes.push(`goal stopped: ${proposal.rationale}`);
+      break;
+    }
 
-    // propose: refuse to re-propose an already-blocked step -> next step changes
+    const call = proposal.toolCall;
+    const step = transcript.nextStep(input.actor.actorId);
+    const sig = signatureOf(call);
+
     if (blockedSignatures.has(sig)) {
+      previousResult = {
+        tool: call.tool,
+        args: call.args,
+        ok: false,
+        reason: "retry_suppressed",
+        detail: "identical call already blocked against unchanged state",
+        note: "retry suppressed",
+      };
       const entry: TranscriptEntry = {
         actorId: input.actor.actorId,
         step,
         observedSummary,
-        tool: goal.call.tool,
-        args: goal.call.args,
-        utterance: goal.call.utterance,
+        tool: call.tool,
+        args: call.args,
+        utterance: proposal.utterance,
+        rationale: proposal.rationale,
+        proposalMeta: resolved.meta,
         validation: { ok: false, reason: "retry_suppressed", note: "would retry a blocked step" },
-        nextStepChange: "skipped a blocked step; switching to a different tool",
+        nextStepChange: "provider must choose a different tool after the blocked result",
       };
       transcript.append(entry);
       deltas.push(entry);
       continue;
     }
 
-    // validate
-    const validation = validateToolCall(world, input.actor, goal.call);
-    attempted += 1;
-
+    const validation = validateToolCall(world, input.actor, call);
     let ledgerEventId: string | undefined;
     let nextStepChange: string;
 
     if (validation.ok) {
-      // apply
       if (validation.mutation) {
         const applied = applyMutation(world, validation.mutation);
         world = applied.world;
         events.push(applied.event);
         ledgerEventId = applied.event.eventId;
         memory.observedLedgerEventIds.push(applied.event.eventId);
-        nextStepChange = "applied mutation; advancing to next goal";
+        nextStepChange = "world changed; provider receives the fresh observation";
       } else {
-        nextStepChange = "observed without mutation; advancing to next goal";
+        nextStepChange = "observation succeeded; provider chooses the next attempt";
       }
-      // update memory (read result)
       memory.ownActionNotes.push(validation.note);
+      previousResult = {
+        tool: call.tool,
+        args: call.args,
+        ok: true,
+        note: validation.note,
+      };
       actions.push({
         actorId: input.actor.actorId,
-        tool: goal.call.tool,
-        args: goal.call.args,
-        utterance: goal.call.utterance,
+        tool: call.tool,
+        args: call.args,
+        utterance: proposal.utterance,
         validationResult: { ok: true, note: validation.note },
         ledgerEventId,
+        proposalMeta: resolved.meta,
       });
     } else {
-      // blocked: record and ensure the next step differs
       blockedSignatures.add(sig);
-      nextStepChange = `blocked (${validation.reason}); will not retry this tool`;
+      nextStepChange = `blocked (${validation.reason}); provider receives the failure and must re-plan`;
+      previousResult = {
+        tool: call.tool,
+        args: call.args,
+        ok: false,
+        reason: validation.reason,
+        detail: validation.detail,
+        note: validation.detail,
+      };
       actions.push({
         actorId: input.actor.actorId,
-        tool: goal.call.tool,
-        args: goal.call.args,
-        utterance: goal.call.utterance,
-        validationResult: { ok: false, reason: validation.reason, detail: validation.detail, note: validation.detail },
+        tool: call.tool,
+        args: call.args,
+        utterance: proposal.utterance,
+        validationResult: {
+          ok: false,
+          reason: validation.reason,
+          detail: validation.detail,
+          note: validation.detail,
+        },
+        proposalMeta: resolved.meta,
       });
     }
 
@@ -157,12 +191,19 @@ export function runBeat(input: RunBeatInput): BeatResult {
       actorId: input.actor.actorId,
       step,
       observedSummary,
-      tool: goal.call.tool,
-      args: goal.call.args,
-      utterance: goal.call.utterance,
+      tool: call.tool,
+      args: call.args,
+      utterance: proposal.utterance,
+      rationale: proposal.rationale,
+      proposalMeta: resolved.meta,
       validation: validation.ok
         ? { ok: true, note: validation.note }
-        : { ok: false, reason: validation.reason, detail: validation.detail, note: validation.detail },
+        : {
+            ok: false,
+            reason: validation.reason,
+            detail: validation.detail,
+            note: validation.detail,
+          },
       ledgerEventId,
       nextStepChange,
     };

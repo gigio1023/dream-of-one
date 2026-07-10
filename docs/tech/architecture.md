@@ -21,7 +21,8 @@ flowchart LR
     subgraph Providers["Adapters (config-selected profiles)"]
         CC["ChatCompletionsAdapter\nOpenAI SDK + custom baseURL\n(ModelScope, OpenRouter, local, ...)"]
         RESP["ResponsesAdapter\nOpenAI Responses API\n(gpt-5.x family)"]
-        MOCK["MockAdapter (tests)\n+ deterministic fallback"]
+        FALLBACK["RuleFallbackNpcAdapter\n(resilience only)"]
+        SCRIPTED["ScriptedNpcAdapter\n(test injection only)"]
     end
 
     Scenes --> Bridge
@@ -33,7 +34,8 @@ flowchart LR
     Agent --> Ports
     Ports --> CC
     Ports --> RESP
-    Ports --> MOCK
+    Ports --> FALLBACK
+    Agent -. test injection .-> SCRIPTED
 ```
 
 ## Boundaries (load-bearing)
@@ -132,9 +134,10 @@ small Godot C# in-process probe before committing to the M5 runtime path.
   source for landmarks/zones/anchors/actors, extended with a `tile` block
   (grid coords) for 2D. The client renders it; the runtime reasons over it.
   One file, two consumers, no duplicated world truth.
-- **Content as data.** Storylets compile from `docs/scenario/` canon into
-  runtime data (`backend/npc-runtime/data/storylets/*.json`); lines, choices,
-  classification patterns, and route definitions are data, not code.
+- **Content as constraints.** Storylets compile scene facts, actor goals,
+  classification patterns, authority thresholds, and outcome presentation
+  from `docs/scenario/` canon. Authored choice lists, NPC reply lists, and
+  ordered route consequences belong only to scripted test adapters.
 
 ## Repo layout target
 

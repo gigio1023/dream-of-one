@@ -20,13 +20,16 @@ bun run --cwd backend/npc-runtime check
 # Godot client (headless)
 $GODOT_BIN --version # Expected: 4.7.x stable
 $GODOT_BIN --headless --import --path godot
-$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
-$GODOT_BIN --headless --path godot --script res://tools/route_smoke.gd
+DREAM_SESSION_MODE=fixture $GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
+DREAM_SESSION_MODE=fixture $GODOT_BIN --headless --path godot --script res://tools/route_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/localization_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/check_assets.gd
 
-# Localhost sidecar parity (starts and stops its own deterministic server)
+# Localhost Session API parity (starts and stops a scripted test adapter)
 GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/live-route-parity.sh
+
+# Opt-in real provider smoke; requires the selected profile's credentials
+bun run --cwd backend/npc-runtime provider:smoke -- --profile openai/gpt-5.4-mini
 ```
 
 CI runs the Bun check on backend changes (existing workflow). Godot smokes

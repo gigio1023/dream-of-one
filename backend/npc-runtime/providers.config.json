@@ -1,0 +1,45 @@
+{
+  "profiles": {
+    "openai/gpt-5.4-mini": {
+      "adapter": "responses",
+      "apiKeyEnv": "OPENAI_API_KEY",
+      "model": "gpt-5.4-mini",
+      "params": {
+        "reasoningEffort": "low",
+        "maxTokens": 500
+      },
+      "structured": "json-schema"
+    },
+    "modelscope/qwen3.7-plus": {
+      "adapter": "chat-completions",
+      "baseUrlEnv": "MODELSCOPE_BASE_URL",
+      "apiKeyEnv": "MODELSCOPE_API_KEY",
+      "model": "Qwen/Qwen3.7-Plus",
+      "params": {
+        "temperature": 0.7,
+        "maxTokens": 500
+      },
+      "structured": "json-instructed"
+    },
+    "local/openai-compatible": {
+      "adapter": "chat-completions",
+      "baseUrlEnv": "LOCAL_LLM_BASE_URL",
+      "apiKeyEnv": null,
+      "model": "local-model",
+      "params": {
+        "temperature": 0.7,
+        "maxTokens": 500
+      },
+      "structured": "json-instructed"
+    }
+  },
+  "selection": {
+    "default": "openai/gpt-5.4-mini",
+    "envOverride": "NPC_PROVIDER_PROFILE"
+  },
+  "runtime": {
+    "timeoutMs": 2500,
+    "maxCallsPerSession": 50,
+    "maxTokensPerSession": 50000
+  }
+}

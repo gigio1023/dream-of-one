@@ -1,4 +1,4 @@
-// World state model for the deterministic M1 runtime.
+// Deterministic world-state authority shared by live, fallback, and scripted proposals.
 //
 // Absorbs the generic core of the retired `runtime/agentic-environment.ts`
 // proof file: records, an append-only civic ledger, the civic economy, and

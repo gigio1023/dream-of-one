@@ -74,10 +74,21 @@ func _check_hud_choice_activation(fixture: Dictionary) -> bool:
 		_fail("HUD choice activation fixture has no opening nextTurn")
 		hud.queue_free()
 		return false
+	var choices: Array = turn.get("choices", [])
+	if choices.is_empty() or not choices[0] is Dictionary:
+		_fail("HUD choice activation fixture has no generated choice")
+		hud.queue_free()
+		return false
+	var expected_choice_id := str((choices[0] as Dictionary).get("choiceId", ""))
 	var selected: Array[String] = []
 	hud.choice_submitted.connect(func(choice_id: String) -> void: selected.append(choice_id))
 	hud.show_turn(turn)
 	await process_frame
+	var mode_label := hud.get("_mode_label") as Label
+	if mode_label == null or not mode_label.text.contains("scripted/test") or not mode_label.text.contains("scripted"):
+		_fail("HUD does not expose scripted provider metadata: %s" % (mode_label.text if mode_label != null else "missing"))
+		hud.queue_free()
+		return false
 	var buttons_value: Variant = hud.get("_choice_buttons")
 	if not buttons_value is Array or (buttons_value as Array).is_empty():
 		_fail("HUD built no choice buttons")
@@ -86,8 +97,8 @@ func _check_hud_choice_activation(fixture: Dictionary) -> bool:
 	var first_button := (buttons_value as Array)[0] as Button
 	first_button.button_down.emit()
 	await process_frame
-	if selected != ["routine.safe"]:
-		_fail("HUD mouse activation did not submit routine.safe: %s" % JSON.stringify(selected))
+	if selected != [expected_choice_id]:
+		_fail("HUD mouse activation did not submit %s: %s" % [expected_choice_id, JSON.stringify(selected)])
 		hud.queue_free()
 		return false
 
@@ -105,8 +116,8 @@ func _check_hud_choice_activation(fixture: Dictionary) -> bool:
 	enter_up.pressed = false
 	Input.parse_input_event(enter_up)
 	await process_frame
-	if selected != ["routine.safe"]:
-		_fail("HUD Enter activation did not submit routine.safe: %s" % JSON.stringify(selected))
+	if selected != [expected_choice_id]:
+		_fail("HUD Enter activation did not submit %s: %s" % [expected_choice_id, JSON.stringify(selected)])
 		hud.queue_free()
 		return false
 
@@ -156,6 +167,10 @@ func _drive_route(session: Node, walkthrough: Dictionary, replay: Dictionary, fi
 			return false
 
 	var route_state: Dictionary = last_answer.get("routeState", {})
+	var transcript_value: Variant = last_answer.get("transcriptDeltas", [])
+	if not transcript_value is Array or (transcript_value as Array).is_empty():
+		_fail("%s returned no provider agent transcript" % expected_route)
+		return false
 	if not bool(route_state.get("terminal", false)):
 		_fail("%s did not return a terminal final answer" % expected_route)
 		return false

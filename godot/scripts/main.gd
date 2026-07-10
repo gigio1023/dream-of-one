@@ -147,6 +147,11 @@ func _on_answer_resolved(result: Dictionary) -> void:
 	)
 	if not bool(route_state.get("terminal", false)):
 		_hud.set_busy(false)
+	var transcript_value: Variant = result.get("transcriptDeltas", [])
+	if transcript_value is Array:
+		for entry_value in transcript_value as Array:
+			if entry_value is Dictionary:
+				_hud.show_agent_step(entry_value as Dictionary)
 
 func _on_ledger_event(event: Dictionary) -> void:
 	_last_ledger_event = event.duplicate(true)

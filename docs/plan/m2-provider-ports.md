@@ -1,66 +1,62 @@
-# M2 — Provider Ports Live
+# M2 — LLM-Native Agent Loop
 
-**Status: queued** (starts when M1 passes its gate).
+**Status: active.**
 
 ## Goal
 
-Ship the port-and-adapter provider layer from
-[`../tech/ai-provider-ports.md`](../tech/ai-provider-ports.md) and make live
-LLM wording player-visible in the M1 slice — the thing v1 built but never
-turned on. After M2, switching a profile (`NPC_PROVIDER_PROFILE=modelscope/qwen3.7-plus`)
-changes NPC texture in-game with zero code changes, and providers-off remains
-a first-class mode.
+Replace the scripted production policy with one provider-backed proposal
+boundary. NPC dialogue, player reply suggestions, and the next world tool call
+are generated from bounded context. The runtime still owns validation,
+suspicion, records, authority, and terminal outcomes.
 
-## Deliverables
+`Same Order` remains a regression scenario, not a dialogue tree. Fixed lines,
+tool sequences, and failures may exist only in the scripted test adapter and
+generated fixtures.
 
-**Runtime (`src/providers/`):**
+## Player-visible deliverables
 
-- `ports.ts` (`NpcProposalPort`, `TextGenPort`), `envelope.ts` (zod schema +
-  instructed-JSON repair), `registry.ts` (profile loading, env resolution,
-  selection), `budget.ts` (per-session caps + usage accounting),
-  `service.ts` (fallback ladder, timeouts, retry, telemetry events).
-- `adapters/chat-completions.ts`, `adapters/responses.ts`, `adapters/mock.ts`.
-- `providers.config.json` + `.env.example` documenting
-  `MODELSCOPE_BASE_URL/API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_*`,
-  `OLLAMA_BASE_URL`, `NPC_PROVIDER_PROFILE`.
-- Retire the v1 codex broker/auth stack in the same PR
-  (see [`../tech/npc-runtime.md`](../tech/npc-runtime.md) retire list).
+- The Clerk's question and three reply suggestions are generated for the live
+  context; typed input remains available.
+- An NPC performs a three-to-six-step observe → propose → validate → result
+  loop. A blocked tool result is sent back to the provider and visibly changes
+  the next proposal.
+- The HUD identifies the active provider/fallback state and exposes the short
+  transcript used to explain the NPC's action.
+- Network failure or budget exhaustion continues play through bounded fallback
+  without pretending that fallback is live AI.
 
-**Game integration:**
+## Technical deliverables
 
-- `proposeUtterance` wired into conversation beats: Clerk prompts, probes,
-  reaction lines, Waiting Customer remarks — each with intent + forbidden-claims
-  bounds from actor policy, hydrated from the NPC's visible context only.
-- Latency UX: beat-appropriate thinking cue; hard 2.5s deadline → fallback
-  line; no conversation stall ever.
-- Debug overlay: active profile, per-NPC last proposal (accepted/fallback +
-  reason), session usage/cost estimate.
-
-**Proof:**
-
-- Contract tests against `MockAdapter` (validation, ladder, budget, repair) in
-  `bun run --cwd backend/npc-runtime check`.
-- `provider:smoke` script per profile (manual, budget-capped).
-- `route_smoke.gd` extended: run all four routes with providers off and with
-  `mock/scripted` on; assert identical route outcomes (texture-not-truth
-  invariant).
-- One real session each on a ModelScope Qwen profile and an OpenAI profile
-  with usage numbers recorded in the PR.
+- `NpcProposalPort` is the only domain dependency. It exposes generated turns
+  and next-step proposals.
+- `TextGenPort` adapters implement Chat Completions, Responses, and scripted
+  test transport. Vendor URLs, keys, and model identifiers stay in profiles.
+- Production selection defaults to a real provider profile. `scripted/test` is
+  injectable from tests and fixture generation only.
+- Provider envelopes validate with zod before reaching game logic. Tool calls
+  then pass through the same deterministic world validators as any fallback.
+- Storylet data contains scene facts, actor goals, deterministic thresholds,
+  and outcome presentation. It does not contain authored player choices, NPC
+  replies, or ordered route consequences.
 
 ## Acceptance
 
-- [ ] Profile switch via env var only; no vendor imports outside `adapters/`.
-- [ ] Kill the network mid-conversation → play continues on fallback without
-      a visible error.
-- [ ] Budget exhaustion downgrades silently and is visible in the overlay.
-- [ ] Live wording respects intent and forbidden claims across ~20 sampled
-      utterances (manual review in PR).
-- [ ] Fun gate: does live texture make the conversation *feel* more alive
-      than the line bank? Honest answer recorded — if "no", M3 proceeds
-      anyway but M5's default profile decision gets this data point.
+- [x] No production storylet contains pre-authored choice arrays, NPC response
+      lines, or ordered consequence chains.
+- [x] A provider proposal chooses both utterance/reply suggestions and the next
+      tool call through ports; no vendor import appears outside adapters.
+- [x] A scripted adapter drives deterministic scenarios without a test branch
+      in the agent loop or `SessionService`.
+- [x] A blocked result changes the next provider proposal and appears in the
+      Session API transcript.
+- [x] Provider timeout, invalid output, missing credentials, and budget
+      exhaustion produce explicit fallback metadata while play continues.
+- [x] `bun run --cwd backend/npc-runtime check`, Session API parity, and Godot
+      route smoke pass.
+- [ ] One opt-in live provider smoke succeeds when credentials are available.
 
 ## Non-goals
 
-`proposeNextStep` (M3), per-role profile routing (M4), streaming responses,
-cost dashboards, provider-side memory (`previous_response_id` etc. — session
-memory stays runtime-owned).
+Multiple locations, long-horizon memory, provider-owned suspicion or verdicts,
+and broad concurrent society scheduling. Those scale in M3/M4 after this loop
+is playable.

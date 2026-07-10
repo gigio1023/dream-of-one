@@ -16,12 +16,12 @@ src/
     readiness.ts          # boot/preflight state (kept, simplified)
     telemetry.ts          # session telemetry (kept, + provider usage)
     world/                # v2: records, civic ledger, economy values, visibility
-  agentloop/        # v2 (M1 shape, M3 full):
+  agentloop/        # provider-driven loop:
     context.ts            # observe-packet assembly (pure fn of world state)
     tools.ts              # tool catalog + validators
     engine.ts             # iterate/validate/apply/budget
     transcript.ts         # per-NPC loop transcript
-  providers/        # v2 (M2): ports, adapters, registry, budget, envelope
+  providers/        # ports, adapters, registry, budget, envelope, test adapters
   policy/           # reason taxonomy, hook policy (kept)
   memory/           # actor memory / session memory stores (kept, trimmed)
   api/http-server.ts# sidecar endpoints (kept, extended)
@@ -67,8 +67,9 @@ Delete when the replacing module lands; don't leave both alive.
 5. NPC context assembly enforces visibility — no data an NPC couldn't know
    ever enters its packet (this is both a fairness rule and the prompt-side
    information boundary).
-6. The runtime runs fully deterministic with providers off; provider on/off
-   cannot change route outcomes (texture-not-truth, asserted by smoke in M2+).
+6. Player speech classification and authority outcomes stay deterministic.
+   Providers may choose different valid attempts and wording; fallback keeps a
+   session alive but is never the default production profile.
 
 ## Sidecar API (v2 surface)
 
@@ -82,7 +83,8 @@ Keep the v1-proven `/v1/npc/decision` shape; add session lifecycle:
 | `GET  /v1/session/snapshot` | Full renderable state (HUD hydrate, debugging) |
 | `POST /v1/session/end` | Terminal route result + telemetry summary |
 
-All responses carry `ledgerEvents[]` deltas so the client can animate
+Responses carry `ProposalMeta`, transcript deltas, and `ledgerEvents[]` so the
+client can distinguish live/fallback/scripted behavior and animate validated
 consequences incrementally.
 
 ## Checks

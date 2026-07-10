@@ -1,40 +1,33 @@
-// Boot/preflight readiness (kept from v1, simplified for M1).
-//
-// v1 probed the Codex provider + thread/workspace stores. M1 is
-// deterministic-only with no provider, so readiness now confirms the
-// deterministic core can load its content (the storylet data). Provider
-// readiness returns in M2 with the provider ports.
-
+import type { SessionService } from "./session/service.js";
 import { loadStorylet } from "./storylet.js";
 
 export type ReadinessReason = "storylet_data_unavailable";
 
-export interface RuntimeReadinessReport {
-  status: "ready" | "not_ready";
-  service: "npc-runtime";
-  mode: "deterministic";
-  reasons: ReadinessReason[];
-  checks: {
-    storylet: { ok: boolean; storyletId: string; reason?: ReadinessReason };
-  };
-}
-
-export function evaluateRuntimeReadiness(storyletId = "same-order"): RuntimeReadinessReport {
-  let ok = true;
+export async function evaluateRuntimeReadiness(service: SessionService, storyletId = "same-order") {
+  let storyletOk = true;
   const reasons: ReadinessReason[] = [];
   try {
     loadStorylet(storyletId);
   } catch {
-    ok = false;
+    storyletOk = false;
     reasons.push("storylet_data_unavailable");
   }
+  const provider = await service.providerPreflight();
   return {
-    status: ok ? "ready" : "not_ready",
-    service: "npc-runtime",
-    mode: "deterministic",
+    status: storyletOk ? "ready" as const : "not_ready" as const,
+    service: "npc-runtime" as const,
+    mode: "provider-first" as const,
     reasons,
     checks: {
-      storylet: ok ? { ok, storyletId } : { ok, storyletId, reason: "storylet_data_unavailable" },
+      storylet: storyletOk
+        ? { ok: true, storyletId }
+        : { ok: false, storyletId, reason: "storylet_data_unavailable" as const },
+      provider: {
+        ok: provider.available,
+        profileId: service.providerProfile(),
+        reason: provider.reason,
+        fallbackAvailable: true,
+      },
     },
   };
 }

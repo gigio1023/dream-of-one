@@ -12,9 +12,9 @@ boundaries (see anti-goals in
 | # | Milestone | One-line goal | Retires the risk that... | Status |
 |---|---|---|---|---|
 | M0 | Direction reset | This documentation tree; v1 process retired | ...agents rebuild the proof factory | **done (PR #98)** |
-| M1 | [2D playable slice](m1-2d-playable-slice.md) | Same Order storylet fully playable in 2D with real art, four routes, deterministic | ...2D top-down doesn't carry the surveillance feeling; the game isn't fun even at its core | **active** |
-| M2 | [Provider ports live](m2-provider-ports.md) | Port/adapter layer shipped; live NPC wording in-game via ModelScope profile, OpenAI profile, fallback proven | ...LLM texture adds nothing / costs too much / can't be tamed | queued |
-| M3 | [Agent-loop NPCs](m3-agent-loop-npcs.md) | NPCs iterate observe→tool→result with visible transcripts; propagation emerges from tools, not scripts | ...the agent-loop concept (v1's unbuilt pivot) doesn't actually produce believable society | queued |
+| M1 | [2D scenario harness](m1-2d-playable-slice.md) | 2D client, Session API, world rules, and four deterministic regression scenarios | ...the presentation and deterministic authority boundary cannot be exercised end to end | **closed as harness (PR #100)** |
+| M2 | [LLM-native agent loop](m2-provider-ports.md) | Provider ports are live by default; NPC dialogue, suggested replies, and next tool calls share one proposal boundary | ...the shipped architecture is a scripted storylet runner wearing agent-loop names | **active** |
+| M3 | [Agent-loop society](m3-agent-loop-npcs.md) | Multiple NPCs pursue concurrent goals and propagation emerges from tools, records, and visibility | ...one working agent loop does not produce believable society | queued |
 | M4 | [Town social sim](m4-town-social-sim.md) | Four locations, 6–8 NPCs, day segments, ambient life, save/load | ...the loop doesn't scale past one room | queued |
 | M5 | [Prologue demo](m5-prologue-demo.md) | 15–30 min honest public demo, KO/EN, desktop exports, itch page | ...nothing shippable exists (v1's terminal state) | queued |
 
@@ -30,8 +30,9 @@ Steam page, modding surface for storylet data.
 - **Art track:** committed CC0 base + local licensed tier per
   [`../art/asset-pipeline.md`](../art/asset-pipeline.md); M1 establishes the
   pipeline, M4 completes location theming, M5 does the polish pass.
-- **Provider track:** M2 builds ports; M3 adds `proposeNextStep`; M4 adds
-  per-role profiles (cheap ambient / better Station); M5 locks the demo's
+- **Provider track:** M2 builds ports and `proposeNextStep` together; M3 adds
+  concurrent scheduling and emergent propagation; M4 adds per-role profiles
+  (cheap ambient / better Station); M5 locks the demo's
   default profile + disclosure copy.
 
 ## Milestone rules
@@ -43,3 +44,11 @@ Steam page, modding surface for storylet data.
   the next milestone's doc.
 - Every milestone doc has: goal, player-visible deliverables, technical
   deliverables, acceptance checks, explicit non-goals, and dependency notes.
+
+## 2026-07-10 milestone correction
+
+M1 proved a useful deterministic scenario harness but not the intended game.
+Its authored dialogue choices and route consequence lists are retained only as
+test inputs while M2 replaces the production policy with provider-backed
+proposals. This correction was explicitly directed by the owner at the M1
+boundary; it does not authorize additional scripted routes.

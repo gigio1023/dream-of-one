@@ -7,9 +7,9 @@ survived the v1→v2 reboot intact. Reuse it before writing new canon:
 
 | File | What it holds | v2 use |
 |---|---|---|
-| `scenario/content/same-order-storylet-packet.md` | The complete `Same Order` (같은 주문) storylet: prompts, choices, signals, routes | M1's playable slice implements exactly this |
+| `scenario/content/same-order-storylet-packet.md` | `Same Order` prompts, choices, signals, and routes | Scene constraints plus scripted regression adapter; not production dialogue policy |
 | `scenario/content/social-simulation-cards.md` | ~700 lines of social situation cards | Source for M4 storylets |
-| `scenario/content/dialogue-line-bank.md` | Reusable NPC lines by role/intent | Deterministic fallback lines |
+| `scenario/content/dialogue-line-bank.md` | Reusable NPC lines by role/intent | Scripted tests and bounded fallback reference |
 | `scenario/content/environment-affordance-map.md` | Object affordances per role | Tool catalog + `use_object` validation data |
 | `scenario/content/location-placement-contracts.md` | Where objects/NPCs belong per location | 2D scene layout |
 | `scenario/content/korean-voice-notes.md` | Korean tone/voice rules | All KO writing |
@@ -33,13 +33,15 @@ nowhere on a map.
 
 ## Writing rules
 
-- Every NPC prompt needs its three-choice set with a felt safe/uncertain/risky
-  gradient, plus deterministic classification patterns for typed input.
+- Every conversation objective requests three generated suggestions with a
+  felt safe/uncertain/risky gradient. Canon may keep fixed examples for tests,
+  but production storylets store no choice or reply arrays.
 - Every suspicion signal needs a why-line (이유 문장) a player can read.
 - Role voice separation is strict: NPC speech, player choices, and system/HUD
   text use distinct registers and must never be attributed across roles.
-- Content lives in data files (storylet packets → runtime data), not in code.
-  Player-visible strings never appear as literals in GDScript/TS logic.
+- Scene facts, goals, and deterministic classification rules live in data.
+  Fixed test dialogue lives only in scripted adapters; live player-facing
+  dialogue comes from the selected provider.
 
 ## Localization
 
@@ -50,8 +52,7 @@ nowhere on a map.
 
 ## Provider-written text boundary
 
-LLM proposals may vary NPC wording within an intent (a probe stays a probe, a
-refusal stays a refusal) and must respect forbidden-claims lists in actor
-policy. Provider text never introduces facts absent from the NPC's memory or
-visible context. Fallback lines from the line bank must exist for every
-intent the provider can color.
+LLM proposals choose both wording and the next valid tool attempt while
+respecting actor goals, visible context, and forbidden claims. Generated reply
+intent labels shape variety but never assign suspicion. Provider text never
+introduces facts absent from the NPC's memory or visible context.

@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://bx80vcrhm61id"]
+
+[ext_resource type="Script" uid="uid://bofl8f2726igp" path="res://scripts/actors/npc_3d.gd" id="1_npc"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_npc"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_ggi0j"]
+size = Vector3(0.48, 0.12, 0.08)
+
+[node name="NPC3D" type="CharacterBody3D" unique_id=1516277086 groups=["interactables", "npc_actors"]]
+collision_layer = 12
+collision_mask = 23
+floor_snap_length = 0.2
+script = ExtResource("1_npc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2118346088]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape_npc")
+
+[node name="VisualRoot" type="Node3D" parent="." unique_id=1168346440]
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=134534480]
+path_desired_distance = 0.35
+target_desired_distance = 0.4
+height = 1.8
+radius = 0.4
+neighbor_distance = 4.0
+max_neighbors = 6
+time_horizon_obstacles = 1.0
+max_speed = 2.2
+
+[node name="DoorRay" type="RayCast3D" parent="." unique_id=1615889797]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+target_position = Vector3(0, 0, -0.9)
+collision_mask = 9
+
+[node name="RoleAccent" type="MeshInstance3D" parent="." unique_id=1142064502]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, -0.24)
+mesh = SubResource("BoxMesh_ggi0j")

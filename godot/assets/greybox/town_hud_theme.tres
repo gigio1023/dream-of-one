@@ -1,0 +1,63 @@
+[gd_resource type="Theme" format=3 uid="uid://cveoqev2gg0t3"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hdq2v"]
+bg_color = Color(0.20392157, 0.3137255, 0.2784314, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.56078434, 0.7607843, 0.65882355, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d7q47"]
+bg_color = Color(0.14901961, 0.1882353, 0.18431373, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.4509804, 0.43529412, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sy2hc"]
+bg_color = Color(0.12156863, 0.23921569, 0.20784314, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6156863, 0.8392157, 0.72156864, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bhbum"]
+bg_color = Color(0.08627451, 0.105882354, 0.11764706, 0.9098039)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.4509804, 0.43529412, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 8
+
+[resource]
+Button/colors/font_color = Color(0.9411765, 0.93333334, 0.90588236, 1)
+Button/font_sizes/font_size = 18
+Button/styles/hover = SubResource("StyleBoxFlat_hdq2v")
+Button/styles/normal = SubResource("StyleBoxFlat_d7q47")
+Button/styles/pressed = SubResource("StyleBoxFlat_sy2hc")
+CheckButton/colors/font_color = Color(0.9411765, 0.93333334, 0.90588236, 1)
+CheckButton/font_sizes/font_size = 18
+Label/colors/font_color = Color(0.9411765, 0.93333334, 0.90588236, 1)
+Label/font_sizes/font_size = 18
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_bhbum")

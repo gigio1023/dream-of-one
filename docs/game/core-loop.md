@@ -19,10 +19,11 @@ flowchart TD
     I --> J[Social reactions:<br/>question, warning, refusal, report]
     J --> K{Report pressure?}
     K -->|no| G
-    K -->|yes| L[Station intake → inquest → verdict<br/>model-judged, ending guaranteed]
-    L -->|defense persuades| N[Suspicion drops<br/>the run continues]
+    K -->|yes| L[Station intake / interrogation<br/>survivable, never run-ending]
+    L --> N[Suspicion may change<br/>the run continues]
     N --> G
-    L -->|definitive verdict| M[Run ends + replay]
+    G -. "scheduled world-time event" .-> O[Station hearing<br/>pooled memories + final defense]
+    O --> M[Model-judged definitive verdict<br/>run ends + replay]
 ```
 
 The model is the NPC's mind: it proposes the utterance and reply suggestions,

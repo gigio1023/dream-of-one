@@ -3,6 +3,23 @@ extends SceneTree
 ## Verifies the complete primary Korean localization table through the same
 ## Localization autoload API used by the HUD and world scenes.
 
+const M3R_EN_KEYS := [
+	"hud.interaction.npc",
+	"hud.interaction.door",
+	"hud.m3r.start_hint",
+	"hud.settings.title",
+	"hud.settings.look_sensitivity",
+	"hud.settings.invert_y",
+	"hud.settings.fov",
+	"hud.settings.ui_scale",
+	"hud.settings.master_volume",
+	"hud.settings.sfx_volume",
+	"hud.settings.language",
+	"hud.settings.return",
+	"hud.language.ko",
+	"hud.language.en",
+]
+
 var _failures: Array[String] = []
 
 func _initialize() -> void:
@@ -49,8 +66,20 @@ func _run() -> void:
 		elif resolved == key:
 			_failures.append("KO key resolved to itself: %s" % key)
 
+	if not localization.has_method("set_locale") or not bool(localization.call("set_locale", "en")):
+		_failures.append("Localization cannot switch to the M3R English table")
+	else:
+		for key in M3R_EN_KEYS:
+			var resolved := str(localization.call("t", key))
+			if resolved.strip_edges().is_empty() or resolved == key:
+				_failures.append("M3R EN key did not resolve: %s" % key)
+	localization.call("set_locale", "ko")
+
 	if _failures.is_empty():
-		print("PASS localization_smoke: %d KO keys resolved" % keys.size())
+		print(
+			"PASS localization_smoke: %d KO keys and %d M3R EN keys resolved"
+			% [keys.size(), M3R_EN_KEYS.size()]
+		)
 	_finish()
 
 func _finish() -> void:

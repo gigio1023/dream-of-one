@@ -1,232 +1,585 @@
 {
-  "version": 1,
-  "world_id": "dre_171_godot_shell",
-  "world_revision": "rev-social-stealth-v1",
+  "version": 2,
+  "world_id": "m3r_first_person_town",
+  "world_revision": "rev-first-person-town-v1",
   "units": "meters",
-  "runtime_path": "Godot 4.x shell",
-  "player_start": {
-    "position": [0, 0.05, 7],
-    "yaw_degrees": 0,
-    "near_landmark": "Station"
+  "coordinate_system": {
+    "up": "+Y",
+    "north": "-Z",
+    "forward_at_zero_yaw": "-Z"
   },
+  "runtime_path": "Godot 4.7.x first-person 3D",
+  "world_bounds": {
+    "center": [0, 1.5, 0],
+    "size": [46, 3, 42],
+    "closed": true,
+    "kill_y": -10
+  },
+  "player_start": {
+    "position": [8, 0.05, 5],
+    "yaw_degrees": 0,
+    "near_landmark": "Station",
+    "zone_id": "ZONE_PARK",
+    "nearest_anchor": "Park.player_start"
+  },
+  "player_respawn_anchor_refs": [
+    "Park.player_start",
+    "Park.center",
+    "Park.studio_approach",
+    "Park.office_approach",
+    "Park.station_approach",
+    "Studio.door_inside",
+    "Office.door_inside",
+    "Station.door_inside"
+  ],
   "landmarks": [
     {
-      "id": "Store",
-      "label": "Store",
-      "hint": "Queue speech only",
-      "position": [-11, 0, 0],
-      "size": [8, 3, 6],
-      "color": [0.24, 0.52, 0.82, 1.0],
+      "id": "Park",
+      "label_key": "world.location.park",
+      "kind": "public_exterior",
+      "position": [0, 0, 0],
+      "size": [22, 0.2, 18],
+      "zone_id": "ZONE_PARK",
+      "enterable": true,
+      "color": [0.25, 0.66, 0.45, 1.0],
       "anchors": {
-        "front_door": [-11, 0, 3.7],
-        "counter": [-13.5, 0, -1.6],
-        "label_board": [-8.2, 1.45, -2.7],
-        "queue_start": [-10.4, 0, 1.4],
-        "npc_spawn": [-13.4, 0, 0.7],
-        "manager_spawn": [-12.4, 0, -2.6]
+        "center": [0, 0, 0],
+        "player_start": [8, 0.05, 5],
+        "studio_approach": [0, 0, -9.5],
+        "office_approach": [-9.5, 0, 0],
+        "station_approach": [9.5, 0, 0],
+        "bench_west": [-4, 0, 2],
+        "bench_east": [4, 0, 2],
+        "meeting_north": [0, 0, -4],
+        "meeting_west": [-5, 0, 0],
+        "meeting_east": [5, 0, 0],
+        "caretaker_spawn": [-3, 0, 3],
+        "liaison_spawn": [3, 0, 3],
+        "notice_board_reserved": [0, 0, -6.5]
       }
     },
     {
       "id": "Studio",
-      "label": "Studio",
-      "hint": "Source owner reason",
-      "position": [11, 0, 0],
-      "size": [8, 3, 6],
+      "label_key": "world.location.studio",
+      "kind": "enterable_building",
+      "position": [0, 0, -16],
+      "size": [12, 3, 8],
+      "zone_id": "ZONE_STUDIO",
+      "enterable": true,
+      "single_story": true,
       "color": [0.66, 0.44, 0.78, 1.0],
       "anchors": {
-        "front_door": [11, 0, 3.7],
-        "approval_desk": [8.4, 0, -1.2],
-        "criteria_wall": [13.8, 1.45, -2.7],
-        "review_queue": [10.4, 0, 1.4],
-        "npc_spawn": [8.9, 0, 0.4]
+        "front_door": [0, 0, -12],
+        "door_outside": [0, 0, -11.2],
+        "door_inside": [0, 0, -12.8],
+        "reception_desk": [-2, 0, -15],
+        "waiting_seats": [2, 0, -14.5],
+        "review_records": [3.5, 1.2, -18.5],
+        "manager_desk": [0, 0, -18],
+        "receptionist_spawn": [-2, 0, -14.2],
+        "manager_spawn": [0, 0, -18]
       }
     },
     {
-      "id": "Park",
-      "label": "Park",
-      "hint": "Public flow",
-      "position": [-11, 0, -12],
-      "size": [9, 0.35, 7],
-      "color": [0.25, 0.66, 0.45, 1.0],
+      "id": "Office",
+      "label_key": "world.location.office",
+      "kind": "enterable_building",
+      "position": [-16, 0, 0],
+      "size": [8, 3, 12],
+      "zone_id": "ZONE_OFFICE",
+      "enterable": true,
+      "single_story": true,
+      "color": [0.24, 0.52, 0.82, 1.0],
       "anchors": {
-        "gate": [-11, 0, -8.0],
-        "notice_board": [-14.2, 1.25, -14.7],
-        "photo_spot": [-9.1, 0, -12.2],
-        "bench": [-12.8, 0, -11.4],
-        "npc_spawn": [-10.2, 0, -10.4]
+        "front_door": [-12, 0, 0],
+        "door_outside": [-11.2, 0, 0],
+        "door_inside": [-12.8, 0, 0],
+        "work_desk": [-16, 0, 0],
+        "filing_wall": [-18.5, 1.2, -3],
+        "meeting_table": [-16, 0, 2.5],
+        "worker_spawn": [-17, 0, 0]
       }
     },
     {
       "id": "Station",
-      "label": "Station",
-      "hint": "Procedural intake",
-      "position": [11, 0, -12],
-      "size": [9, 3.4, 7],
+      "label_key": "world.location.station",
+      "kind": "enterable_building",
+      "position": [16, 0, 0],
+      "size": [8, 3, 12],
+      "zone_id": "ZONE_STATION",
+      "enterable": true,
+      "single_story": true,
       "color": [0.78, 0.72, 0.43, 1.0],
       "anchors": {
-        "front_door": [11, 0, -8.0],
-        "report_desk": [8.4, 0, -13.0],
-        "intake_board": [13.8, 1.6, -14.8],
-        "waiting_line": [10.2, 0, -10.4],
-        "npc_spawn": [8.8, 0, -11.2]
+        "front_door": [12, 0, 0],
+        "door_outside": [11.2, 0, 0],
+        "door_inside": [12.8, 0, 0],
+        "intake_desk": [15, 0, 0],
+        "waiting_seats": [14, 0, 3],
+        "hearing_table": [18, 0, -2],
+        "hearing_player": [16.5, 0, -2],
+        "hearing_witness": [18, 0, 0],
+        "hearing_notice": [18.8, 1.3, 3],
+        "officer_spawn": [16, 0, 0]
       }
+    }
+  ],
+  "doors": [
+    {
+      "id": "DOOR_STUDIO_FRONT",
+      "landmark": "Studio",
+      "anchor": "Studio.front_door",
+      "position": [0, 0, -12],
+      "yaw_degrees": 0,
+      "width": 1.2,
+      "height": 2.1,
+      "starts_open": false,
+      "connects_zone_ids": ["ZONE_STREET", "ZONE_STUDIO"],
+      "connects_audibility_volume_ids": ["AUD_PUBLIC_CENTER", "AUD_STUDIO"],
+      "acoustic_portal": true
+    },
+    {
+      "id": "DOOR_OFFICE_FRONT",
+      "landmark": "Office",
+      "anchor": "Office.front_door",
+      "position": [-12, 0, 0],
+      "yaw_degrees": 90,
+      "width": 1.2,
+      "height": 2.1,
+      "starts_open": false,
+      "connects_zone_ids": ["ZONE_STREET", "ZONE_OFFICE"],
+      "connects_audibility_volume_ids": ["AUD_PUBLIC_CENTER", "AUD_OFFICE"],
+      "acoustic_portal": true
+    },
+    {
+      "id": "DOOR_STATION_FRONT",
+      "landmark": "Station",
+      "anchor": "Station.front_door",
+      "position": [12, 0, 0],
+      "yaw_degrees": 90,
+      "width": 1.2,
+      "height": 2.1,
+      "starts_open": false,
+      "connects_zone_ids": ["ZONE_STREET", "ZONE_STATION"],
+      "connects_audibility_volume_ids": ["AUD_PUBLIC_CENTER", "AUD_STATION"],
+      "acoustic_portal": true
+    }
+  ],
+  "zones": [
+    {
+      "id": "ZONE_PARK",
+      "kind": "public_exterior",
+      "landmark": "Park",
+      "shape": "box",
+      "center": [0, 1.5, 0],
+      "size": [18, 3, 14],
+      "inside": false
+    },
+    {
+      "id": "ZONE_STREET",
+      "kind": "connective_exterior",
+      "landmark": "Park",
+      "shape": "boxes",
+      "volumes": [
+        {"center": [0, 1.5, -9.6], "size": [4, 3, 5.2]},
+        {"center": [-10.6, 1.5, 0], "size": [3.2, 3, 4]},
+        {"center": [10.6, 1.5, 0], "size": [3.2, 3, 4]}
+      ],
+      "inside": false
+    },
+    {
+      "id": "ZONE_STUDIO",
+      "kind": "interior",
+      "landmark": "Studio",
+      "shape": "box",
+      "center": [0, 1.5, -16],
+      "size": [11.6, 3, 7.6],
+      "inside": true
+    },
+    {
+      "id": "ZONE_OFFICE",
+      "kind": "interior",
+      "landmark": "Office",
+      "shape": "box",
+      "center": [-16, 1.5, 0],
+      "size": [7.6, 3, 11.6],
+      "inside": true
+    },
+    {
+      "id": "ZONE_STATION",
+      "kind": "interior",
+      "landmark": "Station",
+      "shape": "box",
+      "center": [16, 1.5, 0],
+      "size": [7.6, 3, 11.6],
+      "inside": true
+    }
+  ],
+  "sight_volumes": [
+    {
+      "id": "SIGHT_PARK_CENTER",
+      "zone_ids": ["ZONE_PARK", "ZONE_STREET"],
+      "shape": "box",
+      "center": [0, 1.5, 0],
+      "size": [18, 3, 14],
+      "visible_anchor_refs": [
+        "Studio.front_door",
+        "Office.front_door",
+        "Station.front_door"
+      ],
+      "occlusion_mode": "scene_geometry"
+    },
+    {
+      "id": "SIGHT_STUDIO_INTERIOR",
+      "zone_ids": ["ZONE_STUDIO"],
+      "shape": "box",
+      "center": [0, 1.5, -16],
+      "size": [11.6, 3, 7.6],
+      "visible_through_open_door_id": "DOOR_STUDIO_FRONT",
+      "occlusion_mode": "scene_geometry"
+    },
+    {
+      "id": "SIGHT_OFFICE_INTERIOR",
+      "zone_ids": ["ZONE_OFFICE"],
+      "shape": "box",
+      "center": [-16, 1.5, 0],
+      "size": [7.6, 3, 11.6],
+      "visible_through_open_door_id": "DOOR_OFFICE_FRONT",
+      "occlusion_mode": "scene_geometry"
+    },
+    {
+      "id": "SIGHT_STATION_INTERIOR",
+      "zone_ids": ["ZONE_STATION"],
+      "shape": "box",
+      "center": [16, 1.5, 0],
+      "size": [7.6, 3, 11.6],
+      "visible_through_open_door_id": "DOOR_STATION_FRONT",
+      "occlusion_mode": "scene_geometry"
+    }
+  ],
+  "audibility_volumes": [
+    {
+      "id": "AUD_PUBLIC_CENTER",
+      "zone_ids": ["ZONE_PARK", "ZONE_STREET"],
+      "shape": "boxes",
+      "volumes": [
+        {"center": [0, 1.5, 0], "size": [20, 3, 16]},
+        {"center": [0, 1.5, -10.5], "size": [4, 3, 5]},
+        {"center": [-10.5, 1.5, 0], "size": [5, 3, 4]},
+        {"center": [10.5, 1.5, 0], "size": [5, 3, 4]}
+      ],
+      "max_speech_distance_m": 12,
+      "occlusion_mode": "scene_geometry"
+    },
+    {
+      "id": "AUD_STUDIO",
+      "zone_ids": ["ZONE_STUDIO"],
+      "shape": "box",
+      "center": [0, 1.5, -16],
+      "size": [11.6, 3, 7.6],
+      "max_speech_distance_m": 9,
+      "portal_door_id": "DOOR_STUDIO_FRONT",
+      "occlusion_mode": "scene_geometry"
+    },
+    {
+      "id": "AUD_OFFICE",
+      "zone_ids": ["ZONE_OFFICE"],
+      "shape": "box",
+      "center": [-16, 1.5, 0],
+      "size": [7.6, 3, 11.6],
+      "max_speech_distance_m": 9,
+      "portal_door_id": "DOOR_OFFICE_FRONT",
+      "occlusion_mode": "scene_geometry"
+    },
+    {
+      "id": "AUD_STATION",
+      "zone_ids": ["ZONE_STATION"],
+      "shape": "box",
+      "center": [16, 1.5, 0],
+      "size": [7.6, 3, 11.6],
+      "max_speech_distance_m": 9,
+      "portal_door_id": "DOOR_STATION_FRONT",
+      "occlusion_mode": "scene_geometry"
     }
   ],
   "routes": [
     {
-      "id": "CivicLoop",
-      "label": "Civic Loop",
+      "id": "StudioFrontDesk",
+      "kind": "schedule",
       "points": [
-        "Station.front_door",
-        "Store.front_door",
-        "Park.gate",
-        "Studio.front_door",
-        "Station.front_door"
+        "Studio.receptionist_spawn",
+        "Studio.reception_desk",
+        "Studio.waiting_seats",
+        "Studio.reception_desk"
       ]
     },
     {
-      "id": "StoreQueue",
-      "label": "Store Queue",
-      "points": ["Store.queue_start", "Store.counter", "Store.label_board"]
+      "id": "StudioManagerRound",
+      "kind": "schedule",
+      "points": [
+        "Studio.manager_spawn",
+        "Studio.manager_desk",
+        "Studio.review_records",
+        "Studio.waiting_seats",
+        "Studio.manager_desk"
+      ]
     },
     {
-      "id": "StationIntake",
-      "label": "Station Intake",
-      "points": ["Station.waiting_line", "Station.report_desk", "Station.intake_board"]
+      "id": "OfficeShift",
+      "kind": "schedule",
+      "points": [
+        "Office.worker_spawn",
+        "Office.work_desk",
+        "Office.filing_wall",
+        "Office.meeting_table",
+        "Office.work_desk"
+      ]
+    },
+    {
+      "id": "ParkCaretakerRound",
+      "kind": "schedule",
+      "points": [
+        "Park.caretaker_spawn",
+        "Park.bench_west",
+        "Park.meeting_north",
+        "Park.bench_east",
+        "Park.meeting_east",
+        "Park.caretaker_spawn"
+      ]
+    },
+    {
+      "id": "StationDuty",
+      "kind": "schedule",
+      "points": [
+        "Station.officer_spawn",
+        "Station.intake_desk",
+        "Station.waiting_seats",
+        "Station.hearing_table",
+        "Station.intake_desk"
+      ]
+    },
+    {
+      "id": "TownLiaisonCircuit",
+      "kind": "schedule",
+      "points": [
+        "Park.liaison_spawn",
+        "Park.studio_approach",
+        "Studio.front_door",
+        "Studio.reception_desk",
+        "Studio.front_door",
+        "Park.office_approach",
+        "Office.front_door",
+        "Office.meeting_table",
+        "Office.front_door",
+        "Park.station_approach",
+        "Station.front_door",
+        "Station.waiting_seats",
+        "Station.front_door",
+        "Park.liaison_spawn"
+      ]
     }
   ],
+  "schedule": {
+    "grace_period_world_seconds": 90,
+    "hearing_world_seconds": 1800,
+    "meeting_windows": [
+      {
+        "id": "MEET_MANAGER_CARETAKER",
+        "start_world_seconds": 110,
+        "end_world_seconds": 230,
+        "anchor": "Park.meeting_north",
+        "actor_ids": ["NPC_Studio_Manager", "NPC_Park_Caretaker"]
+      },
+      {
+        "id": "MEET_RECEPTIONIST_CARETAKER",
+        "start_world_seconds": 480,
+        "end_world_seconds": 600,
+        "anchor": "Park.meeting_north",
+        "actor_ids": ["NPC_Studio_Receptionist", "NPC_Park_Caretaker"]
+      },
+      {
+        "id": "MEET_OFFICE_LIAISON",
+        "start_world_seconds": 720,
+        "end_world_seconds": 840,
+        "anchor": "Park.meeting_west",
+        "actor_ids": ["NPC_Office_Worker", "NPC_Roaming_Liaison"]
+      },
+      {
+        "id": "MEET_OFFICER_LIAISON",
+        "start_world_seconds": 1080,
+        "end_world_seconds": 1200,
+        "anchor": "Park.meeting_east",
+        "actor_ids": ["NPC_Station_Officer", "NPC_Roaming_Liaison"]
+      }
+    ]
+  },
   "interaction_zones": [
     {
-      "id": "StoreCounterZone",
-      "kind": "Conversation",
-      "landmark": "Store",
-      "anchor": "Store.counter",
-      "radius": 2.1,
-      "cover_test_id": "CT_STORE_QUEUE_LANGUAGE"
-    },
-    {
-      "id": "StudioApprovalZone",
-      "kind": "Cover Test",
+      "id": "StudioReceptionConversation",
+      "kind": "conversation",
       "landmark": "Studio",
-      "anchor": "Studio.approval_desk",
-      "radius": 2.2,
-      "cover_test_id": "CT_STUDIO_APPROVAL_GATE_SPEECH"
+      "anchor": "Studio.reception_desk",
+      "radius": 2.5,
+      "actor_id": "NPC_Studio_Receptionist"
     },
     {
-      "id": "ParkObservationZone",
-      "kind": "Cover Test",
+      "id": "StudioManagerConversation",
+      "kind": "conversation",
+      "landmark": "Studio",
+      "anchor": "Studio.manager_desk",
+      "radius": 2.5,
+      "actor_id": "NPC_Studio_Manager"
+    },
+    {
+      "id": "OfficeConversation",
+      "kind": "conversation",
+      "landmark": "Office",
+      "anchor": "Office.work_desk",
+      "radius": 2.5,
+      "actor_id": "NPC_Office_Worker"
+    },
+    {
+      "id": "ParkConversation",
+      "kind": "conversation",
       "landmark": "Park",
-      "anchor": "Park.photo_spot",
-      "radius": 2.4,
-      "cover_test_id": "CT_PARK_OBSERVATION_PRESSURE"
+      "anchor": "Park.center",
+      "radius": 8,
+      "actor_ids": ["NPC_Park_Caretaker", "NPC_Roaming_Liaison"]
     },
     {
-      "id": "StationIntakeZone",
-      "kind": "Cover Test",
+      "id": "StationIntakeConversation",
+      "kind": "conversation",
       "landmark": "Station",
-      "anchor": "Station.report_desk",
-      "radius": 2.0,
-      "cover_test_id": "CT_STATION_SOFT_INQUEST"
+      "anchor": "Station.intake_desk",
+      "radius": 2.5,
+      "actor_id": "NPC_Station_Officer"
+    },
+    {
+      "id": "StationHearing",
+      "kind": "hearing",
+      "landmark": "Station",
+      "anchor": "Station.hearing_player",
+      "radius": 2.5,
+      "actor_id": "NPC_Station_Officer"
     }
   ],
   "text_surfaces": [
     {
-      "id": "TS_Store_QueueRules",
-      "label": "Queue Rules",
-      "landmark": "Store",
-      "anchor": "Store.label_board",
-      "law_id": "DL_S1_QUEUE_SANCTITY",
-      "law_alias": "DL_S1",
-      "cover_test_id": "CT_STORE_QUEUE_LANGUAGE",
-      "purpose": "TextSurface equivalent for Store queue language.",
-      "body": "Store procedure: answer normally if this is your usual order. Uncertainty attaches a correction slip; mismatched speech moves to the report tray. Station cites only forwarded Store records.",
-      "evidence_outputs": ["QueueMismatchEvent", "WitnessStatement"]
-    },
-    {
-      "id": "TS_Studio_ApprovalCriteria",
-      "label": "Approval Criteria",
+      "id": "TS_Studio_ReviewRecords",
+      "label_key": "surface.studio_review_records.label",
       "landmark": "Studio",
-      "anchor": "Studio.criteria_wall",
-      "law_id": "DL_ST1_APPROVAL_GATE",
-      "law_alias": "DL_ST1",
-      "cover_test_id": "CT_STUDIO_APPROVAL_GATE_SPEECH",
-      "purpose": "TextSurface equivalent for approval criteria speech.",
-      "body": "Approval criteria: cite source, owner, and reason before requesting review.",
-      "evidence_outputs": ["ApprovalMismatchEvent", "ReviewArtifact"]
+      "anchor": "Studio.review_records",
+      "kind": "record_surface"
     },
     {
-      "id": "TS_Park_NoticeBoard",
-      "label": "Notice Board",
-      "landmark": "Park",
-      "anchor": "Park.notice_board",
-      "law_id": "DL_P1_OBSERVATION_ETIQUETTE",
-      "law_alias": "DL_P1",
-      "cover_test_id": "CT_PARK_OBSERVATION_PRESSURE",
-      "purpose": "TextSurface equivalent for observation pressure.",
-      "body": "Observation notice: remain in public flow and do not narrate the dream state.",
-      "evidence_outputs": ["NoticeSnapshot", "Statement"]
+      "id": "TS_Office_FilingIndex",
+      "label_key": "surface.office_filing_index.label",
+      "landmark": "Office",
+      "anchor": "Office.filing_wall",
+      "kind": "record_surface"
     },
     {
-      "id": "TS_Station_IntakeRules",
-      "label": "Intake Rules",
+      "id": "TS_Station_HearingNotice",
+      "label_key": "surface.station_hearing_notice.label",
       "landmark": "Station",
-      "anchor": "Station.intake_board",
-      "law_id": "DL_N1_PROCEDURE_SPEECH_ONLY",
-      "law_alias": "DL_N1",
-      "cover_test_id": "CT_STATION_SOFT_INQUEST",
-      "purpose": "TextSurface equivalent for soft Inquest intake.",
-      "body": "Station intake: procedural answers outrank explanation. The officer compares receipt, report tray, and ledger number before asking which statement stands.",
-      "evidence_outputs": ["StationReport", "InquestDossier"]
+      "anchor": "Station.hearing_notice",
+      "kind": "hearing_notice"
     }
   ],
   "actors": [
     {
-      "id": "NPC_Store_Clerk",
-      "label": "Store Clerk",
-      "role": "Store Clerk",
-      "home_landmark": "Store",
-      "spawn_anchor": "Store.npc_spawn",
-      "route_id": "StoreQueue"
-    },
-    {
-      "id": "NPC_Store_Manager",
-      "label": "Store Manager",
-      "role": "Store Manager",
-      "home_landmark": "Store",
-      "spawn_anchor": "Store.manager_spawn",
-      "route_id": "StoreQueue"
-    },
-    {
-      "id": "NPC_Waiting_Customer",
-      "label": "Waiting Customer",
-      "role": "Waiting Customer",
-      "home_landmark": "Store",
-      "spawn_anchor": "Store.queue_start",
-      "route_id": "StoreQueue"
-    },
-    {
-      "id": "NPC_Studio_PM",
-      "label": "Studio PM",
-      "role": "Studio PM",
+      "id": "NPC_Studio_Receptionist",
+      "label_key": "npc.NPC_Studio_Receptionist.label",
+      "role_key": "npc.NPC_Studio_Receptionist.role",
+      "role_placeholder": "studio_receptionist",
       "home_landmark": "Studio",
-      "spawn_anchor": "Studio.npc_spawn",
-      "route_id": "CivicLoop"
+      "spawn_anchor": "Studio.receptionist_spawn",
+      "route_id": "StudioFrontDesk",
+      "character_scene": "res://assets/quaternius/women/formal.gltf",
+      "schedule_blocks": [
+        {"start": 0, "end": 460, "anchor": "Studio.reception_desk", "activity": "front_desk"},
+        {"start": 460, "end": 600, "anchor": "Park.meeting_north", "activity": "park_break"},
+        {"start": 600, "end": 1800, "anchor": "Studio.reception_desk", "activity": "front_desk"}
+      ]
     },
     {
-      "id": "NPC_Park_Witness",
-      "label": "Park Witness",
-      "role": "Park Witness",
+      "id": "NPC_Studio_Manager",
+      "label_key": "npc.NPC_Studio_Manager.label",
+      "role_key": "npc.NPC_Studio_Manager.role",
+      "role_placeholder": "studio_manager",
+      "home_landmark": "Studio",
+      "spawn_anchor": "Studio.manager_spawn",
+      "route_id": "StudioManagerRound",
+      "character_scene": "res://assets/quaternius/men/casual_hoodie.gltf",
+      "schedule_blocks": [
+        {"start": 0, "end": 90, "anchor": "Studio.manager_desk", "activity": "review_work"},
+        {"start": 90, "end": 230, "anchor": "Park.meeting_north", "activity": "park_meeting"},
+        {"start": 230, "end": 1800, "anchor": "Studio.manager_desk", "activity": "review_work"}
+      ]
+    },
+    {
+      "id": "NPC_Office_Worker",
+      "label_key": "npc.NPC_Office_Worker.label",
+      "role_key": "npc.NPC_Office_Worker.role",
+      "role_placeholder": "office_worker",
+      "home_landmark": "Office",
+      "spawn_anchor": "Office.worker_spawn",
+      "route_id": "OfficeShift",
+      "character_scene": "res://assets/quaternius/women/casual.gltf",
+      "schedule_blocks": [
+        {"start": 0, "end": 700, "anchor": "Office.work_desk", "activity": "office_work"},
+        {"start": 700, "end": 840, "anchor": "Park.meeting_west", "activity": "park_meeting"},
+        {"start": 840, "end": 1800, "anchor": "Office.work_desk", "activity": "office_work"}
+      ]
+    },
+    {
+      "id": "NPC_Park_Caretaker",
+      "label_key": "npc.NPC_Park_Caretaker.label",
+      "role_key": "npc.NPC_Park_Caretaker.role",
+      "role_placeholder": "park_caretaker",
       "home_landmark": "Park",
-      "spawn_anchor": "Park.npc_spawn",
-      "route_id": "CivicLoop"
+      "spawn_anchor": "Park.caretaker_spawn",
+      "route_id": "ParkCaretakerRound",
+      "character_scene": "res://assets/quaternius/men/worker.gltf",
+      "schedule_blocks": [
+        {"start": 0, "end": 90, "route_id": "ParkCaretakerRound", "activity": "caretaking_round"},
+        {"start": 90, "end": 230, "anchor": "Park.meeting_north", "activity": "park_meeting"},
+        {"start": 230, "end": 460, "route_id": "ParkCaretakerRound", "activity": "caretaking_round"},
+        {"start": 460, "end": 600, "anchor": "Park.meeting_north", "activity": "park_meeting"},
+        {"start": 600, "end": 1800, "route_id": "ParkCaretakerRound", "activity": "caretaking_round"}
+      ]
     },
     {
       "id": "NPC_Station_Officer",
-      "label": "Station Officer",
-      "role": "Station Officer",
+      "label_key": "npc.NPC_Station_Officer.label",
+      "role_key": "npc.NPC_Station_Officer.role",
+      "role_placeholder": "station_officer",
       "home_landmark": "Station",
-      "spawn_anchor": "Station.npc_spawn",
-      "route_id": "StationIntake"
+      "spawn_anchor": "Station.officer_spawn",
+      "route_id": "StationDuty",
+      "character_scene": "res://assets/quaternius/women/worker.gltf",
+      "schedule_blocks": [
+        {"start": 0, "end": 1060, "anchor": "Station.intake_desk", "activity": "station_duty"},
+        {"start": 1060, "end": 1200, "anchor": "Park.meeting_east", "activity": "park_meeting"},
+        {"start": 1200, "end": 1800, "anchor": "Station.hearing_table", "activity": "hearing_preparation"}
+      ]
+    },
+    {
+      "id": "NPC_Roaming_Liaison",
+      "label_key": "npc.NPC_Roaming_Liaison.label",
+      "role_key": "npc.NPC_Roaming_Liaison.role",
+      "role_placeholder": "roaming_liaison",
+      "home_landmark": "Park",
+      "spawn_anchor": "Park.liaison_spawn",
+      "route_id": "TownLiaisonCircuit",
+      "character_scene": "res://assets/quaternius/men/casual_2.gltf",
+      "schedule_blocks": [
+        {"start": 0, "end": 700, "route_id": "TownLiaisonCircuit", "activity": "town_round"},
+        {"start": 700, "end": 840, "anchor": "Park.meeting_west", "activity": "park_meeting"},
+        {"start": 840, "end": 1060, "route_id": "TownLiaisonCircuit", "activity": "town_round"},
+        {"start": 1060, "end": 1200, "anchor": "Park.meeting_east", "activity": "park_meeting"},
+        {"start": 1200, "end": 1800, "route_id": "TownLiaisonCircuit", "activity": "town_round"}
+      ]
     }
   ],
   "tile": {

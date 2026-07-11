@@ -72,7 +72,7 @@ There is no model-generated transcript summary standing in for the exchange.
 |---|---|---|
 | `move_to(place_or_actor)` | Pathfind toward a navpoint/actor | Reachability, role area permissions |
 | `look(target)` | Add a visible object/actor/record to context | Line of sight, visibility rules |
-| `talk_to(actor, intent)` | Open/continue conversation; utterance from proposal or line bank | Target availability (busy/refusing), social rules |
+| `talk_to(actor, intent)` | Open/continue conversation; provider utterance, or a marked deterministic fallback utterance | Target availability (busy/refusing), social rules; scripted lines stay fixture/test-only |
 | `wait(reason)` | Yield a beat, keep intent | Always valid; consumes iteration |
 | `use_object(object, affordance)` | Trigger an object affordance (serve, mark queue, post notice, pause service) | Affordance exists for role, object state |
 | `write_record(kind, target)` | Create/update a record (note, correction, report, posting, citation) | Role authority for the record kind; becomes a ledger event |

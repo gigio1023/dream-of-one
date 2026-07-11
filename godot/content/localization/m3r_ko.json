@@ -1,0 +1,33 @@
+{
+  "ko": {
+    "hud.interaction.npc": "E — 말 걸기",
+    "hud.interaction.door": "E — 문 열기 / 닫기",
+    "hud.m3r.start_hint": "스테이션 앞 공원에서 스튜디오 접수실로 이동하세요.",
+    "hud.settings.look_sensitivity": "시점 감도",
+    "hud.settings.invert_y": "세로 시점 반전",
+    "hud.settings.fov": "시야각",
+    "hud.settings.ui_scale": "UI 배율",
+    "hud.settings.master_volume": "전체 음량",
+    "hud.settings.sfx_volume": "효과음 음량",
+    "hud.settings.language": "언어",
+    "hud.settings.return": "돌아가기",
+    "hud.language.ko": "한국어",
+    "hud.language.en": "English",
+    "world.location.park": "중앙 공원",
+    "world.location.studio": "스튜디오 접수실",
+    "world.location.office": "사무실",
+    "surface.studio_review_records.label": "스튜디오 검토 기록",
+    "surface.office_filing_index.label": "사무실 열람 목록",
+    "surface.station_hearing_notice.label": "청문회 일정",
+    "npc.NPC_Studio_Receptionist.label": "스튜디오 접수 담당자",
+    "npc.NPC_Studio_Receptionist.role": "접수 담당자",
+    "npc.NPC_Studio_Manager.label": "스튜디오 관리자",
+    "npc.NPC_Studio_Manager.role": "관리자",
+    "npc.NPC_Office_Worker.label": "사무실 직원",
+    "npc.NPC_Office_Worker.role": "직원",
+    "npc.NPC_Park_Caretaker.label": "공원 관리인",
+    "npc.NPC_Park_Caretaker.role": "관리인",
+    "npc.NPC_Roaming_Liaison.label": "구역 연락 담당자",
+    "npc.NPC_Roaming_Liaison.role": "연락 담당자"
+  }
+}

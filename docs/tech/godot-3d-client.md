@@ -1,11 +1,13 @@
 # Godot 3D Client
 
-Target: Godot 4.7.x stable (keep `GODOT_BIN` per device). **Status: target
-specification for the M3R conversion
-([`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md)) — the
-tree under `godot/` is the 2D client until conversion slices land.** The 2D
-client doc left the active index at the 2026-07-11 direction change; its
-interaction contracts carry over wherever this page says "unchanged".
+Target: Godot 4.7.x stable (keep `GODOT_BIN` per device). **Status: the M3R
+spatial foundation has landed beside the retained 2D main
+([`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md)).**
+`res://scenes/main_3d.tscn` now provides the whole-town greybox, dressed park
+and studio, first-person controller, doors, one navigation map, six resident
+shells, HUD/settings, layout binding, and `AgentPlaytestSurface`.
+`run/main_scene` intentionally remains the 2D harness until the run-backed
+social-contact and NPC-society slices complete the first playable proof.
 
 Engine practice (node choices, physics layers, import settings, pitfalls) is
 not duplicated here: implementing agents use the repo's `godot-best-practice`
@@ -34,18 +36,17 @@ skill and the pinned Godot AI
 Decided here so conversion slices don't churn on project-global settings.
 Landed together in the bounded engine-baseline slice before the blockout:
 
-- **Renderer: Forward+.** The current `gl_compatibility` setting serves the
-  2D pixel client; the shipped target is desktop (M5 exports), where
-  Forward+ is the intended 3D renderer. Switching is project-global, so
-  verify the still-active 2D client visually once after the switch (one
-  before/after pair). A Web build is a non-goal; revisit the renderer only
-  if that changes. Desktop uses `forward_plus`; the unused mobile override is
-  Godot's `mobile` renderer rather than forcing desktop Forward+ there.
+- **Renderer: Forward+.** The project-global switch from `gl_compatibility`
+  landed before the 3D blockout while the 2D harness remained runnable. The
+  shipped target is desktop (M5 exports), where Forward+ is the intended 3D
+  renderer. A Web build is a non-goal; revisit the renderer only if that
+  changes. Desktop uses `forward_plus`; the unused mobile override is Godot's
+  `mobile` renderer rather than forcing desktop Forward+ there.
 - **3D physics: Jolt**, set explicitly (`physics/3d/physics_engine`) before
   the first 3D physics slice to `Jolt Physics`, then restart the editor as the
   [Godot 4.7 Jolt guide](https://docs.godotengine.org/en/4.7/tutorials/physics/using_jolt_physics.html)
-  requires. No 3D physics exists yet, so the cost is zero now and a migration
-  later.
+  requires. The player, six resident shells, doors, and static blockers now
+  exercise that baseline; no later physics-engine migration is planned.
 - **Lighting: fixed daylight, no bakes.** One `DirectionalLight3D` with
   shadows plus `WorldEnvironment` ambient; interiors read through ambient
   plus a few `OmniLight3D`s. No day/night cycle (continuous world time is
@@ -192,11 +193,13 @@ playable proof needs a dressed park + studio reception; the office and
 Station may stay greybox longer (interaction-critical surfaces stay greybox
 longest by design).
 
-**Doors.** Bake the navmesh with doorways open; the door body animates out
-of the way. The player opens doors with `interact`; an NPC arriving at a
-closed door opens it automatically (same animation and sound). Doors are
-social and acoustic boundaries — they gate audibility volumes — never
-progression locks in M3R.
+**Doors.** Bake walkable surfaces with doorways open; a bidirectional
+`NavigationLink3D` bridges each narrow doorway's two baked surfaces inside the
+same navigation map. The link follows the physical opening and is not a scene
+transition. The door body animates out of the way. The player opens doors with
+`interact`; an NPC arriving at a closed door opens it automatically (same
+animation and sound). Doors are social and acoustic boundaries — they gate
+audibility volumes — never progression locks in M3R.
 
 **Town scale.** Small enough that any door-to-door walk stays under roughly
 30 seconds, and the park center keeps all three building entrances in view —
@@ -252,9 +255,10 @@ the dev machine with all six NPC loops live.
   volumes so the runtime and presentation agree on what was hearable.
 - **Interaction**: forward ray picks the nearest interactable (NPC, door,
   prop, record surface); `interact` opens conversation, door, or inspect.
-- **Navigation**: one baked navmesh for the whole seamless map; NPC `move_to`
-  resolves through NavigationAgent3D; doorways are continuous walkable
-  navmesh, never scene boundaries. Movement waits until the navigation map has
+- **Navigation**: one navigation map for the whole seamless town, with one
+  baked surface resource and three bidirectional doorway links; NPC `move_to`
+  resolves through `NavigationAgent3D`; doorways remain continuous paths,
+  never scene boundaries. Movement waits until the navigation map has
   synchronized, calls `get_next_path_position()` from `_physics_process`, and
   stops querying once `is_navigation_finished()` is true to avoid empty-path
   startup and endpoint jitter. Avoidance is enabled only while an NPC is
@@ -268,8 +272,9 @@ the dev machine with all six NPC loops live.
 ## Smokes (headless, thin)
 
 Keep the thin list, rebuilt for 3D as slices land: `scene_load_smoke.gd`
-(scene instances, plus the layout-binding assertion from the world
-construction plan), a run/session route smoke against the sidecar API
+(scene instances, bidirectional layout binding, reachable interior path
+endpoints, no ceiling nav islands, and one physical NPC movement), a
+run/session route smoke against the sidecar API
 (fixture mode), `localization_smoke.gd`, `check_assets.gd`. Same commands as
 [`verification.md`](verification.md); resist additions without an escaped
 regression.

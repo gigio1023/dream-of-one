@@ -1,9 +1,10 @@
 # Godot AI Inspection and Routed Play Control
 
-**Status: foundation implemented and handshake-verified (2026-07-12).** The
-vendored add-on, editor plugin/autoload, portable repository skill, and
-editor/server/game-helper path are proven. The 3D-owned semantic adapter and
-hands-on M3R acceptance remain later work, explicitly routed below.
+**Status: foundation and 3D read surface implemented (2026-07-12).** The
+vendored add-on, editor plugin/autoload, portable repository skill,
+editor/server/game-helper path, and scene-owned `AgentPlaytestSurface` are
+proven through native Godot AI calls. Hands-on M3R acceptance remains later
+work, explicitly routed below.
 
 ## Reader job
 
@@ -88,12 +89,17 @@ Verified on 2026-07-12 against Godot `4.7.stable.official.5b4e0cb0f`:
   `ObjectDB` instances and two resources still in use. This did not affect the
   server/helper handshake or run stop, but remains a pinned-integration cleanup
   warning to recheck on upgrade; it is not hidden as a clean shutdown claim.
-- The current Codex harness did not dynamically expose namespaced Godot AI
-  tools because the server became available after the harness loaded its tool
-  surface. A loopback status/initialize probe may diagnose that condition, but
-  scene work and capture evidence must resume in a fresh harness session with
-  native Godot AI tool calls. Claude Code execution is untested, while its
-  package discovery path is the tracked `.claude/skills` symlink.
+- A fresh Codex harness exposed the native Godot AI tool surface after the
+  server and editor were available. The 3D blockout was authored and inspected
+  against the exact checkout session; a fixture-mode run returned a valid
+  `AgentPlaytestSurface` snapshot and nine semantic targets (six residents,
+  three doors) without player input or a gameplay model call. Claude Code
+  execution remains untested, while its package discovery path is the tracked
+  `.claude/skills` symlink.
+- Stopping the agent-owned editor also stopped an externally started server in
+  one observed run. Treat editor and server lifetime as coupled unless current
+  session status proves otherwise; after editor shutdown, restart the server
+  before expecting a new harness to discover it.
 - No port, editor preference, client configuration, credential, or absolute
   machine path is tracked.
 
@@ -106,7 +112,7 @@ flowchart LR
     M --> E["Godot editor plugin"]
     E --> H["_mcp_game_helper in running game"]
     H --> G["Dream of One main scene"]
-    G -. "3D main-scene slice" .-> P["AgentPlaytestSurface (planned semantic read surface)"]
+    G --> P["AgentPlaytestSurface (scene-owned semantic read surface)"]
     S -. "code edits, imports, smokes" .-> C["Files and Godot CLI"]
 ```
 
@@ -173,12 +179,12 @@ and visual claims. It does not turn CLI checks into equivalent evidence.
 
 ### Placement
 
-When the first-person main scene lands, add a scene-owned node named
-`AgentPlaytestSurface` and attach
-`res://scripts/testing/agent_playtest_surface.gd`. Do not add it to the
-soon-to-be-replaced 2D main scene and do not create another autoload. The 3D
-main scene owns the HUD, world, player, and presentation aliases, so it is the
-narrowest coherent lifetime.
+The opt-in first-person scene `res://scenes/main_3d.tscn` owns a node named
+`AgentPlaytestSurface` with
+`res://scripts/testing/agent_playtest_surface.gd` attached. It is not present
+in the retained 2D main scene and is not an autoload. The 3D main scene owns
+the HUD, town, player, and presentation aliases, so this remains the narrowest
+coherent lifetime.
 
 The surface is available only in a debug run with an active engine debugger.
 Outside that context it reports `available: false` and performs no work. It
@@ -186,7 +192,7 @@ must not open a socket, persist state, or run per-frame polling.
 
 ### Initial API
 
-The first version should be read-oriented:
+The landed first version is read-oriented:
 
 ```gdscript
 func capabilities() -> Dictionary
@@ -324,12 +330,13 @@ editor, or use Computer Use without separate authority.
 - Exercise the same basic workflow in Codex and Claude Code when both clients
   are available; record an unavailable cell rather than extrapolating.
 
-### Slice 3 — Add `AgentPlaytestSurface` — deferred to the 3D main scene
+### Slice 3 — Add `AgentPlaytestSurface` — complete 2026-07-12
 
-- Add the scene-owned debug-only read surface and initial API above.
+- Added the scene-owned debug-only read surface and initial API above to
+  `main_3d.tscn`.
 - Keep all game truth in the run/session runtime layers.
-- Parse/import the new script, load the main scene, and read a valid snapshot
-  through Godot AI from a running game.
+- Parsed/imported the script, loaded the 3D scene, and read a valid fixture-mode
+  snapshot plus semantic targets through native Godot AI calls.
 - Do not use generic input in the implementation slice. Final routed play proves
   the snapshot changes without an alternate mutation API.
 
@@ -355,7 +362,7 @@ standing report file.
 
 ## Completion bars
 
-The integration foundation committed by slices 1–2 is complete when:
+The integration foundation implemented by slices 1–3 is complete when:
 
 - the pinned editor snapshot, Python server package 2.9.1, MIT license, and
   required project settings are tracked with no
@@ -372,9 +379,10 @@ The integration foundation committed by slices 1–2 is complete when:
 - Normal non-editor launch remains provider-first and the client/runtime
   authority boundary is unchanged.
 
-The full M3R play surface is complete later when the 3D scene-owned adapter is
-live and the bounded Terra/Qwen direct-play loop passes without Computer Use or
-an alternate state mutation path.
+The full M3R play surface is complete later when the adapter exposes the
+finished run-backed conversation/hearing surfaces and the bounded Terra/Qwen
+direct-play loop passes without Computer Use or an alternate state mutation
+path.
 
 ## Risks and revisit rules
 
@@ -390,6 +398,9 @@ an alternate state mutation path.
 - **Editor dependence:** Godot AI is intentionally required for this workflow.
   File/CLI checks may still diagnose code, but a missing live integration blocks
   direct-play and visual claims.
+- **Editor/server lifetime:** plugin unload stopped an externally started
+  server once during implementation. Recheck server status after every editor
+  exit; a new editor does not imply an already discoverable MCP server.
 - **Editor-exit cleanup:** the verified 2.9.1 combination reports leaked
   objects/resources after plugin unload on this Godot 4.7 build. It is nonfatal
   in the proven workflow; revisit if it grows, affects editor restart, or the

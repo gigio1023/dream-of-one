@@ -6,6 +6,10 @@ extends Node
 ## See docs/tech/godot-2d-client.md (Localization) and docs/game/glossary.md.
 
 const DEFAULT_LOCALE := "ko"
+const CONTENT_PATHS: Array[String] = [
+	"res://content/localization/m3r_ko.json",
+	"res://content/localization/m3r_en.json",
+]
 
 const MESSAGES := {
 	"ko": {
@@ -223,21 +227,44 @@ const MESSAGES := {
 }
 
 var _all_keys: Array[String] = []
+var _messages: Dictionary = {}
 
 func _enter_tree() -> void:
+	_messages = MESSAGES.duplicate(true)
+	_load_content_files()
 	_register()
 
+func _load_content_files() -> void:
+	for path in CONTENT_PATHS:
+		var text := FileAccess.get_file_as_string(path)
+		if text.is_empty():
+			push_error("Localization content file is unreadable: %s" % path)
+			continue
+		var parsed: Variant = JSON.parse_string(text)
+		if not parsed is Dictionary:
+			push_error("Localization content root must be a Dictionary: %s" % path)
+			continue
+		for locale_value in (parsed as Dictionary).keys():
+			var locale_name := str(locale_value)
+			var additions: Variant = (parsed as Dictionary)[locale_value]
+			if not additions is Dictionary:
+				push_error("Localization locale must map to messages: %s:%s" % [path, locale_name])
+				continue
+			if not _messages.has(locale_name):
+				_messages[locale_name] = {}
+			(_messages[locale_name] as Dictionary).merge(additions as Dictionary, true)
+
 func _register() -> void:
-	for locale in MESSAGES.keys():
+	for locale_name in _messages.keys():
 		var translation := Translation.new()
-		translation.locale = str(locale)
-		var messages: Dictionary = MESSAGES[locale]
+		translation.locale = str(locale_name)
+		var messages: Dictionary = _messages[locale_name]
 		for key in messages.keys():
 			translation.add_message(StringName(str(key)), StringName(str(messages[key])))
 		TranslationServer.add_translation(translation)
 	TranslationServer.set_locale(DEFAULT_LOCALE)
 	_all_keys.clear()
-	for key in MESSAGES[DEFAULT_LOCALE].keys():
+	for key in (_messages[DEFAULT_LOCALE] as Dictionary).keys():
 		_all_keys.append(str(key))
 
 ## Resolve a content-id key to its localized string, with optional {name} args.
@@ -249,11 +276,19 @@ func t(key: String, args: Dictionary = {}) -> String:
 
 ## True when a key exists in the active locale table.
 func has_key(key: String) -> bool:
-	return MESSAGES[DEFAULT_LOCALE].has(key)
+	return (_messages[DEFAULT_LOCALE] as Dictionary).has(key)
 
 ## Every content-id key (used by the localization smoke).
 func all_keys() -> Array[String]:
 	return _all_keys.duplicate()
 
 func locale() -> String:
-	return DEFAULT_LOCALE
+	return TranslationServer.get_locale().split("_")[0]
+
+## Switch the presentation locale when the requested content table exists.
+func set_locale(locale_name: String) -> bool:
+	var normalized := locale_name.strip_edges().to_lower().split("_")[0]
+	if not _messages.has(normalized):
+		return false
+	TranslationServer.set_locale(normalized)
+	return true

@@ -105,3 +105,10 @@ Second principle, beside the timer note: the player's only wait is the
 minimum path to the content about to be shown — every other provider call is
 preloaded, overlapped with the player's think/typing time, or deferred. Long
 generation is tolerable; structural waiting is a defect.
+
+Same-day gap review (owner-confirmed, defaults recorded in the M3 doc):
+action-cost time in day segments, an always-visible two-layer suspicion
+gauge, purpose achieved through conversation only, an in-run suspicion
+recovery path, NPC-initiated conversations, a ledger-built run recap, and
+sightline-only spatial rules for the exterior shell (no other level design
+yet).

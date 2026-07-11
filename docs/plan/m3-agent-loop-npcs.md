@@ -43,6 +43,28 @@ and the run continues.
 7. **Audio lands here.** CC0 SFX and ambience — footsteps, door chime, store
    murmur, and the signature record-scribble when something about the player
    is written down. BGM waits for M5.
+8. **Action-cost time.** The deadline is spent in day segments
+   (morning/noon/evening): a meaningful conversation or incident consumes a
+   segment, resting one slightly lowers suspicion, and the clock never
+   moves while the player thinks or types. Deadline pressure is "chances
+   left," never a running clock.
+9. **Always-visible suspicion gauge.** Suspicion is two-layered — per-NPC
+   opinion plus institutional report pressure — and the HUD shows a
+   standing gauge (owner choice: legibility over diegetic subtlety).
+   Why-lines stay per judgment; detail stays in inspect; in-world record
+   props stay removed.
+10. **Design defaults adopted at the owner's gap review** (owner may veto
+    any of these at a boundary): the run purpose is achieved through
+    conversation only — asking, probing, persuading, never fetch-quest
+    mechanics — so approaching the goal and risking suspicion are the same
+    act; ordinary play has a suspicion recovery path (consistent low-key
+    behavior, resting a segment) so one slip is not a hidden death spiral;
+    NPCs whose suspicion warrants it can initiate a conversation with the
+    player; a run ends with a recap screen built from the ledger (what the
+    town learned about you); the player's concrete secret is drafted from
+    `docs/scenario/` canon for owner approval alongside the purpose; and
+    the exterior shell carries simple sightline rules (who can see the
+    counter, where talk can be overheard) — no other level design yet.
 
 ## Opening slices (folded in from the M2 closeout)
 
@@ -58,9 +80,14 @@ Player-visible:
 
 - A turn that answers back from one merged call, with ambient life arriving
   during the player's own thinking time — never ahead of the reply.
-- A run frame: visible purpose and deadline, suspicion and records that
-  carry across conversations, and a Station interrogation the player can
+- A run frame: visible purpose, a day-segment clock showing chances left,
+  suspicion and records that carry across conversations, an always-visible
+  two-layer suspicion gauge, and a Station interrogation the player can
   argue their way out of and return to the run.
+- NPC-initiated conversations: an NPC whose suspicion warrants it walks up
+  and questions the player unprompted.
+- A run recap on ending: a ledger-built timeline of what the town learned
+  about the player this run.
 - 2–3 conversable NPCs in the Store block (manager and waiting customer stop
   being ambient-only).
 - NPCs that move and socialize on policy-based game AI (schedules, utility
@@ -96,6 +123,12 @@ Technical:
       argument: suspicion visibly drops and the run continues.
 - [ ] The run's purpose and deadline are visible in play, and both ending
       kinds (purpose achieved, definitive verdict) are reachable.
+- [ ] Time advances only through segment-consuming actions; resting a
+      segment visibly recovers some suspicion; the clock never moves while
+      the player thinks or types.
+- [ ] At least one NPC initiates a conversation with the player unprompted,
+      driven by its suspicion state.
+- [ ] A finished run shows a ledger-built recap of what the town learned.
 - [ ] Two NPCs pursue different goals without a hardcoded action ordering.
 - [ ] A blocked or busy result changes the proposing NPC's next attempt.
 - [ ] A record becomes actionable only for roles that can actually observe

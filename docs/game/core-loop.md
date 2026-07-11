@@ -83,6 +83,13 @@ play lands on one of four authored endings.
   and a deadline (sourced from scenario canon), and a run spans multiple
   conversations and incidents. Suspicion, records, and the ledger persist
   across conversations within a run and reset between runs.
+- **Run time is action-cost.** A day splits into segments; a meaningful
+  conversation or incident consumes one, and resting a segment slightly
+  lowers suspicion. The clock never moves while the player thinks or types
+  — deadline pressure is "chances left," never a running clock.
+- **The purpose is achieved through conversation only** — asking, probing,
+  persuading. Approaching the goal and risking suspicion are the same act;
+  there are no fetch-quest mechanics.
 - A **conversation session** stays the runtime unit: it always reaches an
   ending, and the runtime owns that guarantee. A session ending is not a run
   ending — being reported and interrogated is an in-run event, and a defense

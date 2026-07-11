@@ -69,6 +69,15 @@ Deltas confirmed at the M2 close. Where this block conflicts with the
    merged judgment+reply call); every other provider call is preloaded,
    overlapped with the player's think/typing time, or deferred. Long
    generation is acceptable; serialized architecture is a defect.
+6. **Time is spent, not streamed.** Run time advances only when the player
+   acts: a day splits into segments (morning/noon/evening), a meaningful
+   conversation or incident consumes one, and resting a segment slightly
+   lowers suspicion. Thinking and typing never move the clock; deadline
+   pressure is "chances left," never a running clock.
+7. **State is on the dashboard, not in the room.** Suspicion is two-layered
+   — per-NPC opinion plus institutional report pressure — and the HUD keeps
+   an always-visible gauge (owner choice: legibility over diegetic
+   subtlety). In-world record props stay removed; detail lives in inspect.
 
 ## 1. Conversation is the threat surface
 

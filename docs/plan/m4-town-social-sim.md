@@ -14,6 +14,9 @@ game reads as a *place* that investigates you, not a scene that does.
 **World:** Park, Studio, and street scenes themed per the asset pipeline;
 location transitions; navigation across the block; notice board, review
 queue, and approval-criteria objects live with real visibility rules.
+(Owner note 2026-07-11, very low priority: the notice board is the intended
+successor to the removed in-room record props — NPCs both read *and* write
+it during ambient life.)
 
 **Cast:** Park Witness, Studio PM, and 1–2 ambient residents join the M1
 cast, each with actor policy, schedules (three day segments), and low-budget

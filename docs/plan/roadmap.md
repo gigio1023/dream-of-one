@@ -59,3 +59,30 @@ rules to the model, visible NPC-to-NPC reaction moved from M3 into M2, and
 the four canonical routes were demoted to regression tests. Recorded in
 [`../vision/design-pillars.md`](../vision/design-pillars.md); M2's
 acceptance list was rewritten accordingly.
+
+## 2026-07-11 owner playtest correction
+
+The owner played the completed M2 build and reviewed it (findings and root
+causes recorded in [`m2-provider-ports.md`](m2-provider-ports.md), "Owner
+playtest review"). The architecture holds; the fiction does not: one crammed
+room, a static cast, unexplained generation stalls, artificial record props,
+and a punishing answer timer break immersion before the judgment loop can be
+felt. Consequences:
+
+- **M2 closeout items (defects/cuts, no scope added):** camera micro-jitter
+  fix, a diegetic "NPC is thinking" wait state, larger default HUD scale,
+  removal of the auto-submitting hesitation timer (slow answers stop being
+  problematized by default), and removal of in-room record props from normal
+  play (owner overrides that point of the M2 information policy).
+- **M3 reshaping (recorded in [`m3-agent-loop-npcs.md`](m3-agent-loop-npcs.md)):**
+  respond-first provider pipeline (player-facing turn generated and shown
+  first; judgment, agent actions, and ambient beats run in parallel or during
+  player think-time), 2–3 conversable NPCs, policy-based (non-LLM) ambient
+  movement and NPC-to-NPC socializing, and a minimal exterior town shell so
+  the Store is a building in a place rather than the whole world. Full
+  four-location theming stays M4.
+- **Very low priority queue:** a bulletin board other NPCs read and write
+  (subsumes the removed record props; maps to M4's notice board).
+
+Timer note: the fiction's pressure should come from the NPCs' judged
+reactions, not from a real-time countdown on the input box.

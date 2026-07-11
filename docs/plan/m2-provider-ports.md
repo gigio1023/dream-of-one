@@ -239,3 +239,39 @@ broad concurrent society scheduling. Station verdict reversal through
 argument (the model judging intake → inquest → verdict end-to-end) is the
 next milestone's centerpiece; M2 only moves conversation suspicion judgment
 to the model.
+
+## Owner playtest review (2026-07-11)
+
+The owner played the completed build (likely `db1ae765`, head of the
+live-Qwen worktree branch `codex/qwen-openai-provider-proof` at recording
+time — not an ancestor of this branch; the owner's exact run is not pinned)
+on a live Qwen profile and
+reported nine findings. This section records them with root causes and
+dispositions. No scope is added to M2: items marked *closeout* are defects
+or cuts inside existing M2 deliverables; items marked *M3 queue* are
+recorded in [`m3-agent-loop-npcs.md`](m3-agent-loop-npcs.md).
+
+The owner did not state the fun-gate answer in so many words, but the review
+reads as a **no on immersion**: the judgment loop itself was not the
+complaint — the crammed single room, the static cast, the unexplained
+generation stalls, and the artificial record props break the fiction before
+the loop can be felt.
+
+| # | Owner finding | Root cause in this build | Disposition |
+|---|---|---|---|
+| 1 | Map is too small; even a very tiny village would do. Everything is crammed inside one building, which kills immersion (몰입도) | The whole game happens in one Store room (plus Station) from `world_layout.json`; town scope was deferred to M4 | **M3 queue** — pull a minimal exterior shell forward; full four-location theming stays M4 |
+| 2 | The receipts/conversation-log props next to NPCs are unnecessary and feel artificial; view them from a menu or just delete them | In-room record props (`receipt_tray`, `correction_slip`, `usual_order_cue`, …) exist to satisfy this doc's information policy — surfacing record state in normal play | **Closeout (cut)** — owner overrides the record-prop point of the information policy: remove from normal play, inspect/menu at most. Bulletin-board variant (other NPCs read and write it) queued at very low priority; maps to M4's existing notice board |
+| 3 | Even Qwen takes noticeably long, and it looks like everything (extra info, actions) is generated together. Must split: respond to the player first, generate the rest in parallel or during player think-time | Confirmed: `resolveAnswer` serializes judgment (1 call) + agent-loop beat (≤3 calls) + next-turn generation (1 call) before the player sees anything; the per-session `serialize()` chain additionally lets in-flight ambient decision calls (≤3 × 2 actors) block the next answer | **M3 queue (first technical slice)** — respond-first pipeline split, precondition for scaling the cast |
+| 4 | While the LLM generates, nothing on screen says so — the game just freezes, which feels broken. At minimum "~가 생각 중입니다" plus a spinner | `set_busy` only disables buttons; the missing wait indicator was a known P2 | **Closeout** — diegetic thinking state required wherever the player waits on the model |
+| 5 | Time pressure is far too harsh; there is no time even to type. Answering late should not itself be problematized | `HESITATION_SECONDS = 6.0` auto-submits "(응답 지연)", which is judged and can leave a hesitation ledger record | **Closeout (cut)** — remove auto-submit hesitation as a default mechanic; slow answers cost nothing by default |
+| 6 | Only one NPC is interactive; make more | Only the clerk speaks Store beats (officer at Station); manager and waiting customer are ambient-only | **M3 queue** — already M3's concurrent-goal thesis; make 2–3 NPCs conversable |
+| 7 | NPCs are parked like Pokémon furniture. The game is NPCs doing social building with the player joining in, so they should move around — policy-based game AI (non-LLM) is explicitly fine | `npc_2d.gd` has no locomotion; ambient actions render as chips on stationary sprites | **M3 queue** — policy-driven ambient movement and visible NPC-to-NPC interaction; the model owns judgment, not locomotion |
+| 8 | The screen micro-shakes while the character moves; nausea-inducing | `world_location.gd` enables `Camera2D` position smoothing (fractional positions) while `project.godot` snaps 2D transforms to pixel and the world is integer-upscaled 5–10×, producing stepped jitter | **Closeout (fix)** — presentation bug in an existing deliverable |
+| 9 | HUD should be bigger | Default HUD body scale (19px @1080p) is below the owner's comfort; the 80–150% setting exists but the default is wrong | **Closeout (fix)** — raise the default |
+
+What the findings share: this build surfaces the social simulation the way a
+test harness would — props, chips, and labels that prove state instead of a
+place and cast that embody it — and it spends the player's waiting time
+proving judgment instead of answering first. The architecture passed its
+acceptance; the fiction did not. That is the gap the next milestone must
+close.

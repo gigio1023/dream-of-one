@@ -267,11 +267,11 @@
     "prop_content": {
       "store_queue_mark": {"labelKey": "prop.queue_marker.label", "descKey": "prop.queue_marker.desc", "defaultState": "player_waiting", "readers": ["player", "store_clerk", "waiting_customer"]},
       "store_counter": {"labelKey": "prop.store_counter.label", "descKey": "prop.store_counter.desc", "defaultState": "serving", "readers": ["player", "store_clerk", "store_manager", "waiting_customer"]},
-      "usual_order_cue": {"labelKey": "prop.usual_order_cue.label", "descKey": "prop.usual_order_cue.desc", "defaultState": "read", "readers": ["player", "store_clerk", "store_manager"]},
-      "receipt_tray": {"labelKey": "prop.receipt_tray.label", "descKey": "prop.receipt_tray.desc", "defaultState": "blank", "readers": ["player", "store_clerk", "store_manager"]},
-      "correction_slip": {"labelKey": "prop.correction_slip.label", "descKey": "prop.correction_slip.desc", "defaultState": "absent", "readers": ["player", "store_clerk", "store_manager"]},
-      "report_tray": {"labelKey": "prop.report_tray.label", "descKey": "prop.report_tray.desc", "defaultState": "empty", "readers": ["store_clerk", "store_manager", "station_officer"]},
-      "station_dossier": {"labelKey": "prop.station_dossier.label", "descKey": "prop.station_dossier.desc", "defaultState": "absent", "readers": ["player", "station_officer"]}
+      "usual_order_cue": {"labelKey": "prop.usual_order_cue.label", "descKey": "prop.usual_order_cue.desc", "defaultState": "read", "readers": ["player", "store_clerk", "store_manager"], "spawnInWorld": false},
+      "receipt_tray": {"labelKey": "prop.receipt_tray.label", "descKey": "prop.receipt_tray.desc", "defaultState": "blank", "readers": ["player", "store_clerk", "store_manager"], "spawnInWorld": false},
+      "correction_slip": {"labelKey": "prop.correction_slip.label", "descKey": "prop.correction_slip.desc", "defaultState": "absent", "readers": ["player", "store_clerk", "store_manager"], "spawnInWorld": false},
+      "report_tray": {"labelKey": "prop.report_tray.label", "descKey": "prop.report_tray.desc", "defaultState": "empty", "readers": ["store_clerk", "store_manager", "station_officer"], "spawnInWorld": false},
+      "station_dossier": {"labelKey": "prop.station_dossier.label", "descKey": "prop.station_dossier.desc", "defaultState": "absent", "readers": ["player", "station_officer"], "spawnInWorld": false}
     },
     "locations": {
       "store": {

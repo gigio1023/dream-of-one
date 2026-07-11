@@ -158,9 +158,10 @@ test("Session API exposes a blocked tool result followed by a provider re-plan",
       return { rationale: "Re-plan complete.", done: true };
     },
   });
+  const service = new SessionService({ proposalPort: adapter });
   const running = await startSessionServer({
     logListen: false,
-    service: new SessionService({ proposalPort: adapter }),
+    service,
   });
   const base = `http://${running.host}:${running.port}`;
   try {
@@ -171,8 +172,12 @@ test("Session API exposes a blocked tool result followed by a provider re-plan",
       answer: { type: "choice", choiceId: "routine.generated.1" },
     });
     assert.equal(answer.status, 200, JSON.stringify(answer.json));
-    assert.equal(answer.json.transcriptDeltas[0].validation.reason, "not_visible");
-    assert.equal(answer.json.transcriptDeltas[1].validation.ok, true);
+    // Agent-loop beats no longer delay the answer; drain the aftermath queue.
+    await service.awaitIdle(start.json.sessionId);
+    const aftermath = service.takeLastAftermath(start.json.sessionId);
+    assert.ok(aftermath);
+    assert.equal(aftermath.transcriptDeltas[0].validation.reason, "not_visible");
+    assert.equal(aftermath.transcriptDeltas[1].validation.ok, true);
     assert.deepEqual(previousResults.slice(0, 2), [undefined, false]);
   } finally {
     await running.close();

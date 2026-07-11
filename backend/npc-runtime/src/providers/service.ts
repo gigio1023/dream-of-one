@@ -6,6 +6,8 @@ import {
   conversationJudgmentSchema,
   conversationProposalJsonSchema,
   conversationProposalSchema,
+  mergedConversationTurnJsonSchema,
+  mergedConversationTurnSchema,
 } from "./envelope.js";
 import type {
   AgentStepProposal,
@@ -14,6 +16,8 @@ import type {
   ConversationJudgmentRequest,
   ConversationProposal,
   ConversationTurnRequest,
+  MergedConversationTurn,
+  MergedConversationTurnRequest,
   NpcProposalPort,
   ProposalMeta,
   ProviderFailureReason,
@@ -149,6 +153,55 @@ export class ProviderService implements NpcProposalPort {
     }
     return this.withFallbackReason(
       await this.options.fallback.judgeConversationTurn(request),
+      resolved.reason,
+    );
+  }
+
+  async judgeAndProposeConversationTurn(
+    request: MergedConversationTurnRequest,
+  ): Promise<ResolvedProposal<MergedConversationTurn>> {
+    const instructions = [
+      "You are one NPC inside Dream of One, a Korean social-suspicion game.",
+      "In one response, judge the player's newest line AND write your next spoken reply with exactly three short player reply suggestions.",
+      "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
+      "Both scores use a 0..125 game scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
+      "As calibration, a coherent routine answer is roughly -15..+5 suspicion and -10..+3 report; a notable mismatch is +10..30 suspicion and +5..20 report; an explicit contradiction, dream/outside claim, or local-memory gap is +30..60 suspicion and +20..50 report; several severe signals plus refusal or hostility may be +60..100 suspicion and +50..100 report.",
+      "Those ranges are calibration, not a classifier: use the actual context and allow asymmetric or negative movement when warranted.",
+      "List the signal labels that genuinely apply; an ordinary answer has none.",
+      "whyLine is one in-world Korean sentence the player will read as the reason suspicion moved.",
+      "utterance is your next in-character Korean line after hearing the player.",
+      "The reply intent labels shape variety only; they never decide suspicion or game truth.",
+      "Use natural modern Korean only in whyLine, utterance, and suggestion text; do not mix English, Chinese characters, or other scripts.",
+      "Do not decide any verdict or session outcome, and do not claim a hidden fact or world mutation.",
+      "Return only JSON matching the supplied schema.",
+    ].join(" ");
+    const input = JSON.stringify({
+      playerLine: request.playerLine,
+      conversationHistory: request.conversationHistory.slice(-10),
+      objective: request.objective,
+      sceneFacts: request.sceneFacts,
+      actor: request.observePacket,
+      suspicionBefore: request.suspicionBefore,
+      reportPressureBefore: request.reportPressureBefore,
+      beatId: request.beatId,
+      locale: request.locale,
+    });
+    const resolved = await this.generateValidated({
+      sessionId: request.sessionId,
+      request: {
+        purpose: "conversation_turn",
+        instructions,
+        input,
+        schemaName: "npc_merged_conversation_turn",
+        jsonSchema: mergedConversationTurnJsonSchema,
+      },
+      schema: mergedConversationTurnSchema,
+    });
+    if (resolved.ok) {
+      return { proposal: resolved.value, meta: resolved.meta };
+    }
+    return this.withFallbackReason(
+      await this.options.fallback.judgeAndProposeConversationTurn(request),
       resolved.reason,
     );
   }

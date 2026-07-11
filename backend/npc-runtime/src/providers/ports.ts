@@ -72,6 +72,17 @@ export interface ConversationJudgment {
   whyLine: string;
 }
 
+/**
+ * One merged player-turn result: judgment of the player's line plus the NPC's
+ * next utterance and three reply suggestions. This is the only provider work
+ * the player ever waits on (M3).
+ */
+export interface MergedConversationTurn extends ConversationJudgment {
+  utterance: string;
+  suggestedReplies: [SuggestedReply, SuggestedReply, SuggestedReply];
+  continueConversation: boolean;
+}
+
 export interface ConversationJudgmentRequest {
   sessionId: string;
   locale: string;
@@ -85,6 +96,12 @@ export interface ConversationJudgmentRequest {
   observePacket: ObservePacket;
   suspicionBefore: number;
   reportPressureBefore: number;
+}
+
+/** Judgment request plus the scene context needed to write the next NPC line. */
+export interface MergedConversationTurnRequest extends ConversationJudgmentRequest {
+  objective: string;
+  sceneFacts: string[];
 }
 
 export interface AgentToolResult {
@@ -115,11 +132,15 @@ export interface NpcProposalPort {
   judgeConversationTurn(
     request: ConversationJudgmentRequest,
   ): Promise<ResolvedProposal<ConversationJudgment>>;
+  /** Judgment + next NPC reply + suggestions in one call (player-blocking path). */
+  judgeAndProposeConversationTurn(
+    request: MergedConversationTurnRequest,
+  ): Promise<ResolvedProposal<MergedConversationTurn>>;
   proposeNextStep(request: AgentStepRequest): Promise<ResolvedProposal<AgentStepProposal>>;
 }
 
 export interface TextGenRequest {
-  purpose: "conversation" | "agent_step" | "repair";
+  purpose: "conversation" | "conversation_turn" | "agent_step" | "repair";
   instructions: string;
   input: string;
   schemaName: string;

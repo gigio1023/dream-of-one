@@ -7,6 +7,8 @@ import type {
   ConversationJudgmentRequest,
   ConversationProposal,
   ConversationTurnRequest,
+  MergedConversationTurn,
+  MergedConversationTurnRequest,
   NpcProposalPort,
   ResolvedProposal,
 } from "../ports.js";
@@ -16,6 +18,10 @@ export interface ScriptedNpcHandlers {
   nextStep(request: AgentStepRequest): AgentStepProposal | Promise<AgentStepProposal>;
   /** Defaults to the deterministic rule classifier for regression stability. */
   judgment?(request: ConversationJudgmentRequest): ConversationJudgment | Promise<ConversationJudgment>;
+  /** Optional override for the merged player-turn operation. */
+  mergedTurn?(
+    request: MergedConversationTurnRequest,
+  ): MergedConversationTurn | Promise<MergedConversationTurn>;
 }
 
 /** Fixed proposal sets live here, never in production storylet data. */
@@ -55,6 +61,48 @@ export class ScriptedNpcAdapter implements NpcProposalPort {
         });
     return {
       proposal,
+      meta: {
+        profileId: this.profileId,
+        transport: "scripted",
+        usedFallback: false,
+      },
+    };
+  }
+
+  async judgeAndProposeConversationTurn(
+    request: MergedConversationTurnRequest,
+  ): Promise<ResolvedProposal<MergedConversationTurn>> {
+    if (this.handlers.mergedTurn) {
+      return {
+        proposal: await this.handlers.mergedTurn(request),
+        meta: {
+          profileId: this.profileId,
+          transport: "scripted",
+          usedFallback: false,
+        },
+      };
+    }
+    const judged = await this.judgeConversationTurn(request);
+    const proposed = await this.proposeConversationTurn({
+      sessionId: request.sessionId,
+      locale: request.locale,
+      beatId: request.beatId,
+      actorId: request.actorId,
+      objective: request.objective,
+      sceneFacts: request.sceneFacts,
+      observePacket: request.observePacket,
+      conversationHistory: [
+        ...request.conversationHistory,
+        { speakerId: "player", line: request.playerLine },
+      ],
+    });
+    return {
+      proposal: {
+        ...judged.proposal,
+        utterance: proposed.proposal.utterance,
+        suggestedReplies: proposed.proposal.suggestedReplies,
+        continueConversation: proposed.proposal.continueConversation,
+      },
       meta: {
         profileId: this.profileId,
         transport: "scripted",

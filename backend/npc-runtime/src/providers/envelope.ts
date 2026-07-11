@@ -34,6 +34,22 @@ export const conversationJudgmentSchema = z
   })
   .strict();
 
+export const mergedConversationTurnSchema = z
+  .object({
+    suspicionDelta: z.number().int(),
+    reportDelta: z.number().int(),
+    signals: z.array(z.enum(CONVERSATION_SUSPICION_SIGNALS)),
+    whyLine: modernKoreanText,
+    utterance: modernKoreanText,
+    suggestedReplies: z.tuple([
+      suggestedReplySchema,
+      suggestedReplySchema,
+      suggestedReplySchema,
+    ]),
+    continueConversation: z.boolean(),
+  })
+  .strict();
+
 const toolCallSchema = z
   .object({
     tool: z.enum(TOOL_NAMES),
@@ -108,6 +124,45 @@ export const conversationJudgmentJsonSchema: Record<string, unknown> = {
       items: { type: "string", enum: [...CONVERSATION_SUSPICION_SIGNALS] },
     },
     whyLine: { type: "string", minLength: 1 },
+  },
+};
+
+export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "suspicionDelta",
+    "reportDelta",
+    "signals",
+    "whyLine",
+    "utterance",
+    "suggestedReplies",
+    "continueConversation",
+  ],
+  properties: {
+    suspicionDelta: { type: "integer" },
+    reportDelta: { type: "integer" },
+    signals: {
+      type: "array",
+      items: { type: "string", enum: [...CONVERSATION_SUSPICION_SIGNALS] },
+    },
+    whyLine: { type: "string", minLength: 1 },
+    utterance: { type: "string", minLength: 1 },
+    suggestedReplies: {
+      type: "array",
+      minItems: 3,
+      maxItems: 3,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["text", "intent"],
+        properties: {
+          text: { type: "string", minLength: 1 },
+          intent: { type: "string", enum: [...CONVERSATION_CHOICE_INTENTS] },
+        },
+      },
+    },
+    continueConversation: { type: "boolean" },
   },
 };
 

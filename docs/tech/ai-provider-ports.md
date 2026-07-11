@@ -22,19 +22,24 @@ tests + fixture generation
         └── ScriptedNpcAdapter (never selectable from production config)
 ```
 
-The domain port exposes three operations. (M3, per the 2026-07-11 interview,
-adds a merged conversation-turn operation — judgment + reply + suggestions
-in one call, the only provider work the player ever blocks on; the split
-operations below remain for agent beats, ambient work, and fallback. Its
-schema is specified with M3's first technical slice.)
+The domain port exposes four operations. The merged conversation-turn
+operation is the only provider work the player ever blocks on; the split
+operations remain for opening lines, agent beats, ambient work, and fallback.
 
 ```ts
 interface NpcProposalPort {
   proposeConversationTurn(request): Promise<ResolvedProposal<ConversationProposal>>;
   judgeConversationTurn(request): Promise<ResolvedProposal<ConversationJudgment>>;
+  judgeAndProposeConversationTurn(request): Promise<ResolvedProposal<MergedConversationTurn>>;
   proposeNextStep(request): Promise<ResolvedProposal<AgentStepProposal>>;
 }
 ```
+
+`MergedConversationTurn` is judgment fields (bounded suspicion/report deltas,
+signal classes, Korean why-line) plus the NPC's next utterance and three
+reply suggestions. If a live model breaks that schema, `ProviderService`
+retries once, then falls back to composing the rule judgment with the
+canned reply set — the schema contents are not shrunk.
 
 `ConversationProposal` contains an NPC utterance and three generated reply
 suggestions. Reply intent labels shape variety only; they never decide

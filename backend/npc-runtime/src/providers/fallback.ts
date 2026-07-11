@@ -4,6 +4,8 @@ import type {
   ConversationJudgment,
   ConversationJudgmentRequest,
   ConversationTurnRequest,
+  MergedConversationTurn,
+  MergedConversationTurnRequest,
   NpcProposalPort,
   ResolvedProposal,
   AgentStepProposal,
@@ -63,6 +65,38 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
         suspicionBefore: request.suspicionBefore,
         reportPressureBefore: request.reportPressureBefore,
       }),
+      meta: {
+        profileId: this.profileId,
+        transport: "fallback",
+        usedFallback: true,
+      },
+    };
+  }
+
+  async judgeAndProposeConversationTurn(
+    request: MergedConversationTurnRequest,
+  ): Promise<ResolvedProposal<MergedConversationTurn>> {
+    const judged = await this.judgeConversationTurn(request);
+    const proposed = await this.proposeConversationTurn({
+      sessionId: request.sessionId,
+      locale: request.locale,
+      beatId: request.beatId,
+      actorId: request.actorId,
+      objective: request.objective,
+      sceneFacts: request.sceneFacts,
+      observePacket: request.observePacket,
+      conversationHistory: [
+        ...request.conversationHistory,
+        { speakerId: "player", line: request.playerLine },
+      ],
+    });
+    return {
+      proposal: {
+        ...judged.proposal,
+        utterance: proposed.proposal.utterance,
+        suggestedReplies: proposed.proposal.suggestedReplies,
+        continueConversation: proposed.proposal.continueConversation,
+      },
       meta: {
         profileId: this.profileId,
         transport: "fallback",

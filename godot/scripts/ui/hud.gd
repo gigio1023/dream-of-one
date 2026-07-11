@@ -81,6 +81,10 @@ var _status_revision := 0
 var _ui_scale := 1.0
 var _user_scale := 1.0
 var _provider_fallback := false
+var _committed_prompt := ""
+var _typewriter_tween: Tween = null
+var _thinking_tween: Tween = null
+const TYPEWRITER_CHARS_PER_SECOND := 36.0
 
 func _ready() -> void:
 	layer = 20
@@ -447,8 +451,8 @@ func show_turn(turn: Dictionary) -> void:
 	_conversation_panel.visible = true
 	var actor_id := str(turn.get("speakerId", turn.get("actorId", "")))
 	_speaker_label.text = _actor_name(actor_id)
-	_prompt_label.text = str(turn.get("prompt", ""))
 	_prompt_scroll.scroll_vertical = 0
+	_start_typewriter(str(turn.get("prompt", "")))
 	set_provider(_dictionary_or_empty(turn.get("proposalMeta")))
 	var choices: Array = turn.get("choices", [])
 	for index in range(_choice_buttons.size()):
@@ -473,6 +477,8 @@ func show_turn(turn: Dictionary) -> void:
 
 func hide_conversation() -> void:
 	_hesitation_timer.stop()
+	_stop_thinking_animation()
+	_kill_typewriter()
 	_conversation_panel.visible = false
 	_busy = false
 	if not _outcome_layer.visible:
@@ -486,14 +492,67 @@ func set_busy(value: bool) -> void:
 	_submit_button.disabled = value
 	if value:
 		_hesitation_timer.stop()
+		_show_thinking()
+	else:
+		_stop_thinking_animation()
 
 func show_conversation_error(message: String) -> void:
 	set_busy(false)
+	_prompt_label.modulate = Color(1, 1, 1, 1)
+	_prompt_label.text = _committed_prompt
 	_status_revision += 1
 	_ledger_label.text = message
 	_ledger_label.modulate = DANGER
 	if _conversation_panel.visible:
 		_hesitation_timer.start(HESITATION_SECONDS)
+
+func _show_thinking() -> void:
+	_kill_typewriter()
+	_stop_thinking_animation()
+	var speaker := _speaker_label.text
+	if speaker.is_empty():
+		speaker = _t("hud.conversation.thinking_speaker_fallback")
+	_prompt_label.text = _t("hud.conversation.thinking", {"speaker": speaker})
+	_prompt_label.modulate = Color(1, 1, 1, 1)
+	_thinking_tween = create_tween()
+	_thinking_tween.set_loops()
+	_thinking_tween.tween_property(_prompt_label, "modulate:a", 0.55, 0.55)
+	_thinking_tween.tween_property(_prompt_label, "modulate:a", 1.0, 0.55)
+
+func _stop_thinking_animation() -> void:
+	if _thinking_tween != null and is_instance_valid(_thinking_tween):
+		_thinking_tween.kill()
+	_thinking_tween = null
+	if is_instance_valid(_prompt_label):
+		_prompt_label.modulate = Color(1, 1, 1, 1)
+
+func _start_typewriter(full_text: String) -> void:
+	_stop_thinking_animation()
+	_kill_typewriter()
+	_committed_prompt = full_text
+	_prompt_label.modulate = Color(1, 1, 1, 1)
+	# Long generated lines fill immediately so the prompt scroll region can
+	# size itself; ordinary reply length still typewrites.
+	if full_text.length() > 64:
+		_prompt_label.text = full_text
+		return
+	_prompt_label.text = ""
+	if full_text.is_empty():
+		return
+	var duration := clampf(float(full_text.length()) / TYPEWRITER_CHARS_PER_SECOND, 0.08, 0.85)
+	_typewriter_tween = create_tween()
+	_typewriter_tween.tween_method(_reveal_typewriter_chars, 0.0, float(full_text.length()), duration)
+
+func _reveal_typewriter_chars(visible_count: float) -> void:
+	_prompt_label.text = _committed_prompt.substr(
+		0,
+		clampi(int(round(visible_count)), 0, _committed_prompt.length())
+	)
+
+func _kill_typewriter() -> void:
+	if _typewriter_tween != null and is_instance_valid(_typewriter_tween):
+		_typewriter_tween.kill()
+	_typewriter_tween = null
 
 func set_pressure(suspicion: int, report_pressure: int, why_lines: Array = []) -> void:
 	_suspicion_bar.value = suspicion

@@ -20,6 +20,8 @@ const MESSAGES := {
 		"hud.conversation.submit": "기록",
 		"hud.conversation.recorded_stamp": "기록됨",
 		"hud.conversation.hesitation": "응답 지연 기록 중…",
+		"hud.conversation.thinking": "…{speaker}이(가) 생각 중입니다",
+		"hud.conversation.thinking_speaker_fallback": "상대",
 		"hud.timer.seconds": "{seconds}초",
 		"hud.pressure.suspicion": "의심",
 		"hud.pressure.report": "보고 압박",

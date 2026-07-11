@@ -13,6 +13,7 @@ const M3R_EN_KEYS := [
 	"hud.m3r.conversation.input_required",
 	"hud.m3r.conversation.submit",
 	"hud.m3r.conversation.retry_end",
+	"hud.m3r.conversation.retry_start",
 	"hud.m3r.conversation.ended",
 	"hud.m3r.stance.header",
 	"hud.m3r.stance.oppose",

@@ -52,6 +52,30 @@ func layout_snapshot() -> Dictionary:
 	return _layout.duplicate(true)
 
 
+func anchor_position(anchor_ref: String) -> Variant:
+	var marker_name := anchor_ref.replace(".", "__")
+	var marker := get_node_or_null("Markers/Anchors/%s" % marker_name) as Node3D
+	if marker == null:
+		return null
+	return marker.global_position
+
+
+func navigation_position(anchor_ref: String) -> Variant:
+	var anchor_value: Variant = anchor_position(anchor_ref)
+	if not anchor_value is Vector3:
+		return null
+	var region := get_node_or_null("Navigation/TownNavigation") as NavigationRegion3D
+	if region == null:
+		return null
+	var navigation_map := region.get_navigation_map()
+	if (
+		not navigation_map.is_valid()
+		or NavigationServer3D.map_get_iteration_id(navigation_map) <= 0
+	):
+		return null
+	return NavigationServer3D.map_get_closest_point(navigation_map, anchor_value as Vector3)
+
+
 func nearest_anchor_position(point: Vector3) -> Vector3:
 	var nearest := _vector3_from_array(
 		(_layout.get("player_start", {}) as Dictionary).get("position", [])

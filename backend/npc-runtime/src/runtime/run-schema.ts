@@ -103,6 +103,7 @@ export const runActorSchema = z
     locationId: nonEmpty,
     stance: stanceSchema,
     suspicion: z.number().int().min(0).max(125),
+    playerConversationReady: z.boolean(),
     hasMeaningfulFirsthandConversation: z.boolean(),
     memories: z.array(runMemorySchema),
   })
@@ -127,6 +128,71 @@ const runLedgerEventSchema = z
     actorId: nonEmpty,
     whyLine: nonEmpty,
     worldRevision: z.number().int().positive(),
+  })
+  .strict();
+
+export const runScheduleBlockSnapshotSchema = z
+  .object({
+    blockId: nonEmpty,
+    startSeconds: z.number().nonnegative(),
+    endSeconds: z.number().positive(),
+    activity: nonEmpty,
+    targetKind: z.enum(["anchor", "route"]),
+    targetId: nonEmpty,
+  })
+  .strict();
+
+export const runPendingMovementSchema = z
+  .object({
+    movementId: nonEmpty,
+    targetAnchorRef: nonEmpty,
+    targetLocationId: nonEmpty,
+    issuedAtSeconds: z.number().nonnegative(),
+    scheduleBlockId: nonEmpty,
+    routePointIndex: z.number().int().nonnegative().nullable(),
+  })
+  .strict();
+
+export const runScheduleWakeSchema = z
+  .object({
+    wakeId: nonEmpty,
+    kind: z.enum([
+      "actor_schedule",
+      "meeting_window",
+      "meeting_ready",
+      "grace",
+      "hearing",
+    ]),
+    phase: z.enum(["started", "ended", "due"]),
+    sourceId: nonEmpty,
+    actorIds: z.array(nonEmpty),
+    scheduledAtSeconds: z.number().nonnegative(),
+    observedWorldRevision: z.number().int().positive(),
+    requiresDecision: z.boolean(),
+    status: z.enum(["informational", "pending"]),
+  })
+  .strict();
+
+export const runActorSchedulerSchema = z
+  .object({
+    actorId: nonEmpty,
+    routeId: nonEmpty,
+    currentBlock: runScheduleBlockSnapshotSchema.nullable(),
+    confirmedAnchorRef: nonEmpty,
+    desiredAnchorRef: nonEmpty.nullable(),
+    routePointIndex: z.number().int().nonnegative().nullable(),
+    routePointArrivedAtSeconds: z.number().nonnegative().nullable(),
+    nextRouteMoveAtSeconds: z.number().nonnegative().nullable(),
+    pendingMovement: runPendingMovementSchema.nullable(),
+  })
+  .strict();
+
+export const runSchedulerSnapshotSchema = z
+  .object({
+    routeCadenceSeconds: z.number().positive(),
+    activeMeetingWindowIds: z.array(nonEmpty),
+    pendingWakes: z.array(runScheduleWakeSchema),
+    actors: z.array(runActorSchedulerSchema).length(6),
   })
   .strict();
 
@@ -159,6 +225,7 @@ export const runSnapshotSchema = z
     lastProposalMeta: proposalMetaSchema.nullable(),
     activeConversationId: nonEmpty.nullable(),
     actors: z.array(runActorSchema).length(6),
+    scheduler: runSchedulerSnapshotSchema,
     records: z.array(runRecordSchema),
     ledgerEvents: z.array(runLedgerEventSchema),
   })
@@ -187,8 +254,122 @@ export const runNextTurnSchema = z
   })
   .strict();
 
-export const runStartRequestSchema = z.object({ locale: z.literal("ko-KR") }).strict();
+export const runStartRequestSchema = z
+  .object({
+    startId: nonEmpty.max(128),
+    locale: nonEmpty,
+  })
+  .strict();
 export const runSnapshotRequestSchema = z.object({ runId: nonEmpty }).strict();
+
+export const runArrivalObservationSchema = z
+  .object({
+    movementId: nonEmpty,
+    actorId: nonEmpty,
+    anchorRef: nonEmpty,
+  })
+  .strict();
+
+export const runAdvanceRequestSchema = z
+  .object({
+    runId: nonEmpty,
+    advanceId: nonEmpty.max(128),
+    observedWorldRevision: z.number().int().nonnegative(),
+    elapsedSeconds: z.number().min(0).max(10),
+    arrivals: z.array(runArrivalObservationSchema).max(6),
+  })
+  .strict()
+  .superRefine((request, context) => {
+    if (request.elapsedSeconds === 0 && request.arrivals.length === 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["elapsedSeconds"],
+        message: "advance requires elapsed time or at least one arrival",
+      });
+    }
+    if (new Set(request.arrivals.map(arrival => arrival.actorId)).size !== request.arrivals.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["arrivals"],
+        message: "arrival actorIds must be unique within one advance",
+      });
+    }
+    if (new Set(request.arrivals.map(arrival => arrival.movementId)).size !== request.arrivals.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["arrivals"],
+        message: "arrival movementIds must be unique within one advance",
+      });
+    }
+  });
+
+export const runArrivalAppliedSchema = z
+  .object({
+    movementId: nonEmpty,
+    actorId: nonEmpty,
+    anchorRef: nonEmpty,
+    locationId: nonEmpty,
+  })
+  .strict();
+
+export const runArrivalRejectedSchema = z
+  .object({
+    movementId: nonEmpty,
+    actorId: nonEmpty,
+    anchorRef: nonEmpty,
+    reason: z.enum(["superseded", "not_current", "target_mismatch"]),
+    currentMovementId: nonEmpty.optional(),
+    currentTargetAnchorRef: nonEmpty.optional(),
+  })
+  .strict();
+
+export const runMovementDeltaSchema = z
+  .object({
+    movementId: nonEmpty,
+    actorId: nonEmpty,
+    issuedAtSeconds: z.number().nonnegative(),
+    fromAnchorRef: nonEmpty,
+    targetAnchorRef: nonEmpty,
+    targetLocationId: nonEmpty,
+    scheduleBlockId: nonEmpty,
+    activity: nonEmpty,
+    routePointIndex: z.number().int().nonnegative().nullable(),
+    supersedesMovementId: nonEmpty.optional(),
+  })
+  .strict();
+
+export const runActorReadinessDeltaSchema = z
+  .object({
+    actorId: nonEmpty,
+    playerConversationReady: z.boolean(),
+    reason: z.enum(["schedule_departure", "arrival_at_interaction"]),
+  })
+  .strict();
+
+export const runAdvanceResponseSchema = z
+  .object({
+    runId: nonEmpty,
+    advanceId: nonEmpty,
+    previousWorldRevision: z.number().int().nonnegative(),
+    worldRevision: z.number().int().nonnegative(),
+    clock: z
+      .object({
+        fromSeconds: z.number().nonnegative(),
+        toSeconds: z.number().nonnegative(),
+        requestedElapsedSeconds: z.number().nonnegative(),
+        appliedElapsedSeconds: z.number().nonnegative(),
+        graceEnded: z.boolean(),
+        hearingDue: z.boolean(),
+      })
+      .strict(),
+    arrivalsApplied: z.array(runArrivalAppliedSchema),
+    arrivalsRejected: z.array(runArrivalRejectedSchema),
+    scheduleWakes: z.array(runScheduleWakeSchema),
+    movementDeltas: z.array(runMovementDeltaSchema),
+    actorReadinessDeltas: z.array(runActorReadinessDeltaSchema),
+    scheduler: runSchedulerSnapshotSchema,
+  })
+  .strict();
 
 export const runSessionStartRequestSchema = z
   .object({
@@ -299,5 +480,14 @@ export type RunSessionStartResponse = z.infer<typeof runSessionStartResponseSche
 export type RunSessionAnswerResponse = z.infer<typeof runSessionAnswerResponseSchema>;
 export type RunSessionEndResponse = z.infer<typeof runSessionEndResponseSchema>;
 export type RunSessionSnapshotResponse = z.infer<typeof runSessionSnapshotResponseSchema>;
+export type RunAdvanceRequest = z.infer<typeof runAdvanceRequestSchema>;
+export type RunAdvanceResponse = z.infer<typeof runAdvanceResponseSchema>;
+export type RunArrivalObservation = z.infer<typeof runArrivalObservationSchema>;
+export type RunArrivalApplied = z.infer<typeof runArrivalAppliedSchema>;
+export type RunArrivalRejected = z.infer<typeof runArrivalRejectedSchema>;
+export type RunMovementDelta = z.infer<typeof runMovementDeltaSchema>;
+export type RunScheduleWake = z.infer<typeof runScheduleWakeSchema>;
+export type RunSchedulerSnapshot = z.infer<typeof runSchedulerSnapshotSchema>;
+export type RunActorReadinessDelta = z.infer<typeof runActorReadinessDeltaSchema>;
 
 export { proposalMetaSchema as runProposalMetaSchema };

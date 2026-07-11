@@ -1,7 +1,7 @@
 {
   "version": 2,
   "world_id": "m3r_first_person_town",
-  "world_revision": "rev-first-person-town-v1",
+  "world_revision": "rev-first-person-town-v2",
   "units": "meters",
   "coordinate_system": {
     "up": "+Y",
@@ -51,8 +51,14 @@
         "bench_west": [-4, 0, 2],
         "bench_east": [4, 0, 2],
         "meeting_north": [0, 0, -4],
+        "meeting_north_west": [-0.8, 0, -4],
+        "meeting_north_east": [0.8, 0, -4],
         "meeting_west": [-5, 0, 0],
+        "meeting_west_north": [-5, 0, -0.8],
+        "meeting_west_south": [-5, 0, 0.8],
         "meeting_east": [5, 0, 0],
+        "meeting_east_north": [5, 0, -0.8],
+        "meeting_east_south": [5, 0, 0.8],
         "caretaker_spawn": [-3, 0, 3],
         "liaison_spawn": [3, 0, 3],
         "notice_board_reserved": [0, 0, -6.5]
@@ -388,28 +394,44 @@
         "start_world_seconds": 110,
         "end_world_seconds": 230,
         "anchor": "Park.meeting_north",
-        "actor_ids": ["NPC_Studio_Manager", "NPC_Park_Caretaker"]
+        "actor_ids": ["NPC_Studio_Manager", "NPC_Park_Caretaker"],
+        "participant_anchor_refs": {
+          "NPC_Studio_Manager": "Park.meeting_north_west",
+          "NPC_Park_Caretaker": "Park.meeting_north_east"
+        }
       },
       {
         "id": "MEET_RECEPTIONIST_CARETAKER",
         "start_world_seconds": 480,
         "end_world_seconds": 600,
         "anchor": "Park.meeting_north",
-        "actor_ids": ["NPC_Studio_Receptionist", "NPC_Park_Caretaker"]
+        "actor_ids": ["NPC_Studio_Receptionist", "NPC_Park_Caretaker"],
+        "participant_anchor_refs": {
+          "NPC_Studio_Receptionist": "Park.meeting_north_west",
+          "NPC_Park_Caretaker": "Park.meeting_north_east"
+        }
       },
       {
         "id": "MEET_OFFICE_LIAISON",
         "start_world_seconds": 720,
         "end_world_seconds": 840,
         "anchor": "Park.meeting_west",
-        "actor_ids": ["NPC_Office_Worker", "NPC_Roaming_Liaison"]
+        "actor_ids": ["NPC_Office_Worker", "NPC_Roaming_Liaison"],
+        "participant_anchor_refs": {
+          "NPC_Office_Worker": "Park.meeting_west_north",
+          "NPC_Roaming_Liaison": "Park.meeting_west_south"
+        }
       },
       {
         "id": "MEET_OFFICER_LIAISON",
         "start_world_seconds": 1080,
         "end_world_seconds": 1200,
         "anchor": "Park.meeting_east",
-        "actor_ids": ["NPC_Station_Officer", "NPC_Roaming_Liaison"]
+        "actor_ids": ["NPC_Station_Officer", "NPC_Roaming_Liaison"],
+        "participant_anchor_refs": {
+          "NPC_Station_Officer": "Park.meeting_east_north",
+          "NPC_Roaming_Liaison": "Park.meeting_east_south"
+        }
       }
     ]
   },
@@ -498,7 +520,7 @@
       "character_scene": "res://assets/quaternius/women/formal.gltf",
       "schedule_blocks": [
         {"start": 0, "end": 460, "anchor": "Studio.reception_desk", "activity": "front_desk"},
-        {"start": 460, "end": 600, "anchor": "Park.meeting_north", "activity": "park_break"},
+        {"start": 460, "end": 600, "anchor": "Park.meeting_north_west", "activity": "park_break"},
         {"start": 600, "end": 1800, "anchor": "Studio.reception_desk", "activity": "front_desk"}
       ]
     },
@@ -513,7 +535,7 @@
       "character_scene": "res://assets/quaternius/men/casual_hoodie.gltf",
       "schedule_blocks": [
         {"start": 0, "end": 90, "anchor": "Studio.manager_desk", "activity": "review_work"},
-        {"start": 90, "end": 230, "anchor": "Park.meeting_north", "activity": "park_meeting"},
+        {"start": 90, "end": 230, "anchor": "Park.meeting_north_west", "activity": "park_meeting"},
         {"start": 230, "end": 1800, "anchor": "Studio.manager_desk", "activity": "review_work"}
       ]
     },
@@ -528,7 +550,7 @@
       "character_scene": "res://assets/quaternius/women/casual.gltf",
       "schedule_blocks": [
         {"start": 0, "end": 700, "anchor": "Office.work_desk", "activity": "office_work"},
-        {"start": 700, "end": 840, "anchor": "Park.meeting_west", "activity": "park_meeting"},
+        {"start": 700, "end": 840, "anchor": "Park.meeting_west_north", "activity": "park_meeting"},
         {"start": 840, "end": 1800, "anchor": "Office.work_desk", "activity": "office_work"}
       ]
     },
@@ -543,9 +565,9 @@
       "character_scene": "res://assets/quaternius/men/worker.gltf",
       "schedule_blocks": [
         {"start": 0, "end": 90, "route_id": "ParkCaretakerRound", "activity": "caretaking_round"},
-        {"start": 90, "end": 230, "anchor": "Park.meeting_north", "activity": "park_meeting"},
+        {"start": 90, "end": 230, "anchor": "Park.meeting_north_east", "activity": "park_meeting"},
         {"start": 230, "end": 460, "route_id": "ParkCaretakerRound", "activity": "caretaking_round"},
-        {"start": 460, "end": 600, "anchor": "Park.meeting_north", "activity": "park_meeting"},
+        {"start": 460, "end": 600, "anchor": "Park.meeting_north_east", "activity": "park_meeting"},
         {"start": 600, "end": 1800, "route_id": "ParkCaretakerRound", "activity": "caretaking_round"}
       ]
     },
@@ -560,7 +582,7 @@
       "character_scene": "res://assets/quaternius/women/worker.gltf",
       "schedule_blocks": [
         {"start": 0, "end": 1060, "anchor": "Station.intake_desk", "activity": "station_duty"},
-        {"start": 1060, "end": 1200, "anchor": "Park.meeting_east", "activity": "park_meeting"},
+        {"start": 1060, "end": 1200, "anchor": "Park.meeting_east_north", "activity": "park_meeting"},
         {"start": 1200, "end": 1800, "anchor": "Station.hearing_table", "activity": "hearing_preparation"}
       ]
     },
@@ -575,9 +597,9 @@
       "character_scene": "res://assets/quaternius/men/casual_2.gltf",
       "schedule_blocks": [
         {"start": 0, "end": 700, "route_id": "TownLiaisonCircuit", "activity": "town_round"},
-        {"start": 700, "end": 840, "anchor": "Park.meeting_west", "activity": "park_meeting"},
+        {"start": 700, "end": 840, "anchor": "Park.meeting_west_south", "activity": "park_meeting"},
         {"start": 840, "end": 1060, "route_id": "TownLiaisonCircuit", "activity": "town_round"},
-        {"start": 1060, "end": 1200, "anchor": "Park.meeting_east", "activity": "park_meeting"},
+        {"start": 1060, "end": 1200, "anchor": "Park.meeting_east_south", "activity": "park_meeting"},
         {"start": 1200, "end": 1800, "route_id": "TownLiaisonCircuit", "activity": "town_round"}
       ]
     }

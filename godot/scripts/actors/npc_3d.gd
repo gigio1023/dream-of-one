@@ -7,6 +7,13 @@ extends CharacterBody3D
 ## conversations, but social state and world truth remain outside this node.
 
 signal conversation_requested(actor_id: StringName)
+signal movement_arrived(movement_id: String, actor_id: StringName, anchor_ref: String)
+signal movement_blocked(
+	movement_id: String,
+	actor_id: StringName,
+	anchor_ref: String,
+	reason: String
+)
 
 const POLICY_IDLE: StringName = &"idle"
 const POLICY_WALK: StringName = &"walk"
@@ -43,6 +50,9 @@ var _policy_state: StringName = POLICY_IDLE
 var _pending_target := Vector3.ZERO
 var _has_pending_target := false
 var _moving := false
+var _movement_id := ""
+var _movement_anchor_ref := ""
+var _movement_target := Vector3.ZERO
 
 
 func _ready() -> void:
@@ -75,7 +85,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if _navigation_agent.is_navigation_finished():
-		stop()
+		_complete_move()
 		move_and_slide()
 		return
 
@@ -94,6 +104,22 @@ func move_to(target_position: Vector3) -> void:
 	_has_pending_target = true
 
 
+func apply_movement_command(
+	movement_id: String,
+	anchor_ref: String,
+	projected_target: Vector3
+) -> bool:
+	if movement_id.is_empty() or anchor_ref.is_empty():
+		return false
+	if movement_id == _movement_id:
+		return true
+	_movement_id = movement_id
+	_movement_anchor_ref = anchor_ref
+	_movement_target = projected_target
+	move_to(projected_target)
+	return true
+
+
 func stop() -> void:
 	_has_pending_target = false
 	_moving = false
@@ -102,10 +128,23 @@ func stop() -> void:
 	velocity.x = 0.0
 	velocity.z = 0.0
 	set_policy_state(POLICY_IDLE)
+	_movement_id = ""
+	_movement_anchor_ref = ""
+	_movement_target = Vector3.ZERO
 
 
 func is_moving() -> bool:
 	return _moving
+
+
+func movement_status() -> Dictionary:
+	return {
+		"movementId": _movement_id,
+		"anchorRef": _movement_anchor_ref,
+		"moving": _moving or _has_pending_target,
+		"targetPosition": _movement_target,
+		"finalPosition": _navigation_agent.get_final_position(),
+	}
 
 
 func set_policy_state(state: StringName) -> void:
@@ -150,6 +189,32 @@ func _begin_pending_move() -> void:
 	velocity.z = 0.0
 	_navigation_agent.avoidance_enabled = true
 	set_policy_state(POLICY_WALK)
+
+
+func _complete_move() -> void:
+	var completed_movement_id := _movement_id
+	var completed_anchor_ref := _movement_anchor_ref
+	var final_position := _navigation_agent.get_final_position()
+	var reached_final := _planar_distance(global_position, final_position) <= 0.85
+	var reached_target := _planar_distance(final_position, _movement_target) <= 0.05
+	stop()
+	if not completed_movement_id.is_empty() and reached_final and reached_target:
+		movement_arrived.emit(completed_movement_id, actor_id, completed_anchor_ref)
+	elif not completed_movement_id.is_empty():
+		push_warning(
+			"NPC %s could not reach projected runtime anchor %s; arrival not emitted."
+			% [actor_id, completed_anchor_ref]
+		)
+		movement_blocked.emit(
+			completed_movement_id,
+			actor_id,
+			completed_anchor_ref,
+			"navigation_unreachable"
+		)
+
+
+func _planar_distance(a: Vector3, b: Vector3) -> float:
+	return Vector2(a.x - b.x, a.z - b.z).length()
 
 
 func _navigation_map_is_synchronized() -> bool:

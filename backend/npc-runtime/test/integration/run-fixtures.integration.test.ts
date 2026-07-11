@@ -4,6 +4,8 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "bun:test";
 import {
+  runAdvanceRequestSchema,
+  runAdvanceResponseSchema,
   runSessionAnswerRequestSchema,
   runSessionAnswerResponseSchema,
   runSessionEndRequestSchema,
@@ -34,6 +36,18 @@ test("every run fixture packet validates against the public wire schemas", () =>
   runStartRequestSchema.parse(endpoints.runStart.request);
   runSnapshotSchema.parse(endpoints.runStart.response);
 
+  for (const endpoint of [
+    endpoints.runAdvanceInitial,
+    endpoints.runAdvanceArrival,
+    endpoints.runAdvanceRoute,
+    endpoints.runAdvanceRouteRetry,
+  ]) {
+    runAdvanceRequestSchema.parse(endpoint.request);
+    runAdvanceResponseSchema.parse(endpoint.response);
+  }
+  runSnapshotRequestSchema.parse(endpoints.runSnapshotAfterAdvance.request);
+  runSnapshotSchema.parse(endpoints.runSnapshotAfterAdvance.response);
+
   runSessionStartRequestSchema.parse(endpoints.sessionStart.request);
   runSessionStartResponseSchema.parse(endpoints.sessionStart.response);
 
@@ -51,6 +65,38 @@ test("every run fixture packet validates against the public wire schemas", () =>
 
   runSnapshotRequestSchema.parse(endpoints.runSnapshotAfterEnd.request);
   runSnapshotSchema.parse(endpoints.runSnapshotAfterEnd.response);
+});
+
+test("advance fixture replays initial moves, batched arrivals, and arrival-gated routes", () => {
+  const sequence = fixtures.runAdvanceSequence;
+  assert.deepEqual(
+    sequence.map((step: { stepId: string }) => step.stepId),
+    ["initial_clock", "initial_arrivals", "first_route_moves"],
+  );
+  for (const step of sequence) {
+    runAdvanceRequestSchema.parse(step.request);
+    runAdvanceResponseSchema.parse(step.response);
+  }
+  const initial = fixtures.endpoints.runAdvanceInitial.response;
+  assert.deepEqual(
+    initial.movementDeltas.map((movement: { actorId: string }) => movement.actorId),
+    ["NPC_Studio_Receptionist", "NPC_Office_Worker", "NPC_Station_Officer"],
+  );
+  const arrival = fixtures.endpoints.runAdvanceArrival;
+  assert.equal(arrival.request.arrivals.length, 3);
+  assert.equal(arrival.response.arrivalsApplied.length, 3);
+  const route = fixtures.endpoints.runAdvanceRoute.response;
+  assert.deepEqual(
+    route.movementDeltas.map((movement: { actorId: string; routePointIndex: number }) => [
+      movement.actorId,
+      movement.routePointIndex,
+    ]),
+    [
+      ["NPC_Park_Caretaker", 1],
+      ["NPC_Roaming_Liaison", 1],
+    ],
+  );
+  assert.deepEqual(route, fixtures.endpoints.runAdvanceRouteRetry.response);
 });
 
 test("the fixture proves one attributable Studio stance change without institutional mutation", () => {

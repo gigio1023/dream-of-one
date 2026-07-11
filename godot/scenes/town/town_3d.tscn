@@ -557,6 +557,7 @@ end_position = Vector3(12.6, 0.2, 0)
 [node name="DOOR_STUDIO_FRONT" parent="Doors" unique_id=1193602996 instance=ExtResource("10_1n6g8")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0, -12)
 door_id = &"DOOR_STUDIO_FRONT"
+open_angle_degrees = -95.0
 
 [node name="DOOR_OFFICE_FRONT" parent="Doors" unique_id=1920575576 instance=ExtResource("10_1n6g8")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 0, 0.6)
@@ -795,6 +796,24 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.8, 1.3, 3)
 [node name="Station__officer_spawn" type="Marker3D" parent="Markers/Anchors" unique_id=1724547186]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 0)
 
+[node name="Park__meeting_north_west" type="Marker3D" parent="Markers/Anchors" unique_id=1011558007]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0, -4)
+
+[node name="Park__meeting_north_east" type="Marker3D" parent="Markers/Anchors" unique_id=41865745]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0, -4)
+
+[node name="Park__meeting_west_north" type="Marker3D" parent="Markers/Anchors" unique_id=1836579471]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -0.8)
+
+[node name="Park__meeting_west_south" type="Marker3D" parent="Markers/Anchors" unique_id=816011954]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0.8)
+
+[node name="Park__meeting_east_north" type="Marker3D" parent="Markers/Anchors" unique_id=1551083139]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -0.8)
+
+[node name="Park__meeting_east_south" type="Marker3D" parent="Markers/Anchors" unique_id=2032264447]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 0.8)
+
 [node name="Zones" type="Node3D" parent="Markers" unique_id=717928266]
 
 [node name="ZONE_PARK" type="Marker3D" parent="Markers/Zones" unique_id=1715316485]
@@ -852,7 +871,6 @@ label_key = &"npc.NPC_Studio_Receptionist.label"
 role_key = &"npc.NPC_Studio_Receptionist.role"
 accent = Color(0.85, 0.66, 0.36, 1)
 character_scene = ExtResource("14_1n6g8")
-conversation_enabled = true
 
 [node name="NPC_Studio_Manager" parent="Actors" unique_id=24346185 instance=ExtResource("13_hgwq8")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -18)

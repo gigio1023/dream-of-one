@@ -8,6 +8,7 @@
     "hud.m3r.conversation.input_placeholder": "직접 답변을 입력하세요 (최대 120자)",
     "hud.m3r.conversation.input_required": "답변을 입력하세요.",
     "hud.m3r.conversation.submit": "답변하기",
+    "hud.m3r.conversation.retry_start": "대화 시작 다시 시도",
     "hud.m3r.conversation.retry_end": "대화 종료 다시 시도",
     "hud.m3r.conversation.ended": "대화가 끝났습니다.",
     "hud.m3r.stance.header": "현재 태도",

@@ -3,18 +3,21 @@
 TypeScript runtime owning all deterministic truth. This doc maps v1's ~12.7k
 LOC onto the M3R target so an agent knows what to keep, trim, or build.
 
-> **Implementation status (2026-07-12):** the first additive M3R run slice is
-> checked in alongside the retained M1 Session service. `RunService` hydrates
+> **Implementation status (2026-07-12):** the first two additive M3R run slices
+> are checked in alongside the retained M1 Session service. `RunService` hydrates
 > the one `world_layout.json` into six persistent actor workspaces, separates
 > topology revision from monotonic run revision, owns the initial clock and
 > shared provider budget, and exposes run start/snapshot plus a run-bound
 > Studio receptionist conversation. A validated answer persists that actor's
 > exact line, why-line, private report inclination, firsthand provenance, and
 > model-judged coarse stance; speech alone cannot mutate institutional
-> pressure. Child-session end is idempotent and leaves the run alive.
-> Scheduler wakes, clock advance, ambient NPC conversation, records, and the
-> hearing remain target work below; this first contact is not evidence that
-> those later surfaces already exist.
+> pressure. Child-session end is idempotent and leaves the run alive. The
+> second slice adds idempotent run start/advance, unpaused clock batching, an
+> arrival-confirmed six-actor scheduler, participant-specific meeting slots,
+> and pending schedule/meeting/grace/hearing wakes without making a provider
+> call. Ambient NPC decisions and conversation, records, and the hearing
+> procedure remain target work below; schedule wakes are data, not evidence
+> that those later surfaces already exist.
 
 ## Target module shape
 
@@ -111,7 +114,7 @@ surface is:
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /v1/run/start` | Create one run, six actor workspaces, clock, revision, budgets, and initial snapshot |
+| `POST /v1/run/start` | Idempotently create one run from a client `startId`, six actor workspaces, clock, revision, budgets, and initial snapshot |
 | `POST /v1/run/advance` | Submit a bounded unpaused-time delta plus validated physical/world observations; returns due wakes and deltas |
 | `GET  /v1/run/snapshot` | Full run snapshot for HUD hydrate, reconnect, and debug inspection |
 | `POST /v1/session/start` | Start a child conversation from `runId` + actor id; returns the modal conversation view |
@@ -126,8 +129,9 @@ Responses carry `ProposalMeta`, transcript deltas, and `ledgerEvents[]` so the
 client can distinguish live/fallback/scripted behavior and animate validated
 consequences incrementally.
 
-The landed subset is `POST /v1/run/start`, `GET /v1/run/snapshot`, and the
-run-discriminated start/answer/snapshot/end session routes. Legacy
+The landed subset is `POST /v1/run/start`, `POST /v1/run/advance`,
+`GET /v1/run/snapshot`, and the run-discriminated
+start/answer/snapshot/end session routes. Legacy
 `{storyletId, locale}` packets still dispatch to `SessionService`; strict
 `{runId, ...}` packets dispatch to `RunService` on the same loopback server.
 Fixture-only Studio scripts generate byte-identical backend and Godot replay
@@ -141,6 +145,26 @@ advances the authoritative clock, and schedules only event-driven wakes. A
 player-modal conversation pauses these advance requests. Background NPC
 requests already in flight may finish, but their effects remain revision-
 checked and queued until the modal closes.
+
+Run creation and advance both have client-supplied idempotency keys. An exact
+retry returns the cached byte-identical response before stale-revision or
+modal checks; reusing a key for a different payload is a conflict. Each
+advance carries the observed run revision, at most ten seconds of unpaused
+time, and at most one exact arrival observation per actor. Arrivals apply
+before clock boundaries. An issued movement changes only scheduler intent;
+the actor's confirmed anchor and location change only after Godot reports the
+matching `movementId`, actor, and semantic anchor. Route progress is likewise
+arrival-gated: after a confirmed route point, the actor dwells for at least
+15 world seconds before another route movement can issue, while a schedule
+block transition may supersede an in-flight route movement.
+
+Meeting windows retain one semantic center but map every participant to a
+distinct physical standing-slot anchor. A `meeting_ready` wake becomes pending
+only when both actors have confirmed their own slots during the open window;
+the window boundary alone is informational. Grace and hearing wakes follow
+the same deterministic scheduler surface. These wakes carry no authored
+conversation and spend zero provider budget until a later `/v1/npc/decision`
+slice consumes them.
 
 ## Run-scoped state and judgment
 

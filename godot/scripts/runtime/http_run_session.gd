@@ -6,6 +6,7 @@ extends Node
 const RuntimeBridge := preload("res://scripts/runtime/runtime_bridge.gd")
 const START_TIMEOUT_SECONDS := 60.0
 const ANSWER_TIMEOUT_SECONDS := 300.0
+const ADVANCE_TIMEOUT_SECONDS := 15.0
 
 var _bridge: Node
 var _last_error: Dictionary = {}
@@ -23,10 +24,10 @@ func configure(base_url: String) -> bool:
 	return false
 
 
-func start_run(locale: String) -> Dictionary:
+func start_run(locale: String, start_id: String) -> Dictionary:
 	return await _post(
 		"/v1/run/start",
-		{"locale": locale},
+		{"startId": start_id, "locale": locale},
 		START_TIMEOUT_SECONDS,
 		"run_start_failed"
 	)
@@ -86,6 +87,15 @@ func run_snapshot(run_id: String) -> Dictionary:
 		START_TIMEOUT_SECONDS
 	)
 	return _response_body(result, "run_snapshot_failed")
+
+
+func advance(request: Dictionary) -> Dictionary:
+	return await _post(
+		"/v1/run/advance",
+		request,
+		ADVANCE_TIMEOUT_SECONDS,
+		"run_advance_failed"
+	)
 
 
 func last_error() -> Dictionary:

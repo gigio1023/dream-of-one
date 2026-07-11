@@ -44,7 +44,7 @@ async function get(base: string, path: string): Promise<{ status: number; json: 
 
 test("run-bound Studio conversation and legacy session routes coexist on one sidecar", async () => {
   await withServer(async base => {
-    const run = await post(base, "/v1/run/start", { locale: "ko-KR" });
+    const run = await post(base, "/v1/run/start", { startId: "api-run-1", locale: "ko-KR" });
     assert.equal(run.status, 200, JSON.stringify(run.json));
     assert.equal(run.json.actors.length, 6);
     assert.equal(run.json.lastProposalMeta, null);
@@ -125,7 +125,7 @@ test("run API keeps strict request bounds and explicit error codes", async () =>
     assert.equal(malformed.status, 400);
     assert.equal(malformed.json.error, "invalid_request");
 
-    const run = await post(base, "/v1/run/start", { locale: "ko-KR" });
+    const run = await post(base, "/v1/run/start", { startId: "api-run-2", locale: "ko-KR" });
     const unsupported = await post(base, "/v1/session/start", {
       runId: run.json.runId,
       actorId: "NPC_Office_Worker",
@@ -171,5 +171,56 @@ test("run API keeps strict request bounds and explicit error codes", async () =>
     const missing = await get(base, "/v1/run/snapshot?runId=run-does-not-exist");
     assert.equal(missing.status, 404);
     assert.equal(missing.json.error, "run_not_found");
+  });
+});
+
+test("run start and clock advance expose retry-safe HTTP conflicts", async () => {
+  await withServer(async base => {
+    const startRequest = { startId: "api-retry-start", locale: "ko-KR" };
+    const started = await post(base, "/v1/run/start", startRequest);
+    const startRetry = await post(base, "/v1/run/start", startRequest);
+    assert.equal(started.status, 200, JSON.stringify(started.json));
+    assert.deepEqual(startRetry, started);
+    const startConflict = await post(base, "/v1/run/start", {
+      startId: startRequest.startId,
+      locale: "en-US",
+    });
+    assert.equal(startConflict.status, 409);
+    assert.equal(startConflict.json.error, "start_id_conflict");
+
+    const invalidAdvance = await post(base, "/v1/run/advance", {
+      runId: started.json.runId,
+      advanceId: "http-empty",
+      observedWorldRevision: 0,
+      elapsedSeconds: 0,
+      arrivals: [],
+    });
+    assert.equal(invalidAdvance.status, 400);
+    assert.equal(invalidAdvance.json.error, "invalid_request");
+
+    const advanceRequest = {
+      runId: started.json.runId,
+      advanceId: "http-advance-1",
+      observedWorldRevision: 0,
+      elapsedSeconds: 10,
+      arrivals: [],
+    };
+    const advanced = await post(base, "/v1/run/advance", advanceRequest);
+    const advanceRetry = await post(base, "/v1/run/advance", advanceRequest);
+    assert.equal(advanced.status, 200, JSON.stringify(advanced.json));
+    assert.deepEqual(advanceRetry, advanced);
+
+    const advanceConflict = await post(base, "/v1/run/advance", {
+      ...advanceRequest,
+      elapsedSeconds: 9,
+    });
+    assert.equal(advanceConflict.status, 409);
+    assert.equal(advanceConflict.json.error, "advance_id_conflict");
+    const stale = await post(base, "/v1/run/advance", {
+      ...advanceRequest,
+      advanceId: "http-advance-stale",
+    });
+    assert.equal(stale.status, 409);
+    assert.equal(stale.json.error, "stale_world_revision");
   });
 });

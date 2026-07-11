@@ -20,7 +20,7 @@ async function driveVariant(spec: VariantSpec) {
     proposalPort: createStudioReceptionScriptedAdapter(),
     idFactory: fixtureIds(),
   });
-  const runStartResponse = service.start("ko-KR");
+  const runStartResponse = service.start("run-fixture-start-1", "ko-KR");
   const sessionStartResponse = await service.startConversation(
     runStartResponse.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -63,6 +63,61 @@ async function driveVariant(spec: VariantSpec) {
   };
 }
 
+async function driveAdvanceSequence() {
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: fixtureIds(),
+  });
+  const runStartResponse = service.start("run-fixture-start-1", "ko-KR");
+  const initialRequest = {
+    runId: runStartResponse.runId,
+    advanceId: `${runStartResponse.runId}:advance:000001`,
+    observedWorldRevision: runStartResponse.worldRevision,
+    elapsedSeconds: 10,
+    arrivals: [],
+  };
+  const initialResponse = await service.advance(initialRequest);
+  const arrivalRequest = {
+    runId: runStartResponse.runId,
+    advanceId: `${runStartResponse.runId}:advance:000002`,
+    observedWorldRevision: initialResponse.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: initialResponse.movementDeltas
+      .map(movement => ({
+        movementId: movement.movementId,
+        actorId: movement.actorId,
+        anchorRef: movement.targetAnchorRef,
+      }))
+      .sort((first, second) => {
+        const actorOrder = first.actorId.localeCompare(second.actorId);
+        return actorOrder !== 0
+          ? actorOrder
+          : first.movementId.localeCompare(second.movementId);
+      }),
+  };
+  const arrivalResponse = await service.advance(arrivalRequest);
+  const routeRequest = {
+    runId: runStartResponse.runId,
+    advanceId: `${runStartResponse.runId}:advance:000003`,
+    observedWorldRevision: arrivalResponse.worldRevision,
+    elapsedSeconds: 10,
+    arrivals: [],
+  };
+  const routeResponse = await service.advance(routeRequest);
+  const routeRetryResponse = await service.advance(routeRequest);
+  const runSnapshotAfterAdvanceResponse = service.snapshot(runStartResponse.runId);
+  return {
+    initialRequest,
+    initialResponse,
+    arrivalRequest,
+    arrivalResponse,
+    routeRequest,
+    routeResponse,
+    routeRetryResponse,
+    runSnapshotAfterAdvanceResponse,
+  };
+}
+
 export async function buildRunApiFixture() {
   const variants: VariantSpec[] = [
     ...([0, 1, 2] as const).map(choiceIndex => ({
@@ -84,6 +139,7 @@ export async function buildRunApiFixture() {
   for (const variant of variants) driven.push(await driveVariant(variant));
   const defaultPath = driven[0];
   if (!defaultPath) throw new Error("run fixture has no default path");
+  const advancePath = await driveAdvanceSequence();
 
   return {
     note: "Generated through the fixture-only Studio adapter and production RunService paths. Regenerate with `bun run --cwd backend/npc-runtime fixtures:run:generate`.",
@@ -91,8 +147,33 @@ export async function buildRunApiFixture() {
     endpoints: {
       runStart: {
         endpoint: "POST /v1/run/start",
-        request: { locale: "ko-KR" },
+        request: { startId: "run-fixture-start-1", locale: "ko-KR" },
         response: defaultPath.runStartResponse,
+      },
+      runAdvanceInitial: {
+        endpoint: "POST /v1/run/advance",
+        request: advancePath.initialRequest,
+        response: advancePath.initialResponse,
+      },
+      runAdvanceArrival: {
+        endpoint: "POST /v1/run/advance",
+        request: advancePath.arrivalRequest,
+        response: advancePath.arrivalResponse,
+      },
+      runAdvanceRoute: {
+        endpoint: "POST /v1/run/advance",
+        request: advancePath.routeRequest,
+        response: advancePath.routeResponse,
+      },
+      runAdvanceRouteRetry: {
+        endpoint: "POST /v1/run/advance",
+        request: advancePath.routeRequest,
+        response: advancePath.routeRetryResponse,
+      },
+      runSnapshotAfterAdvance: {
+        endpoint: "GET /v1/run/snapshot",
+        request: { runId: defaultPath.runStartResponse.runId },
+        response: advancePath.runSnapshotAfterAdvanceResponse,
       },
       sessionStart: {
         endpoint: "POST /v1/session/start",
@@ -136,6 +217,26 @@ export async function buildRunApiFixture() {
         response: defaultPath.runSnapshotAfterEndResponse,
       },
     },
+    runAdvanceSequence: [
+      {
+        stepId: "initial_clock",
+        endpoint: "POST /v1/run/advance",
+        request: advancePath.initialRequest,
+        response: advancePath.initialResponse,
+      },
+      {
+        stepId: "initial_arrivals",
+        endpoint: "POST /v1/run/advance",
+        request: advancePath.arrivalRequest,
+        response: advancePath.arrivalResponse,
+      },
+      {
+        stepId: "first_route_moves",
+        endpoint: "POST /v1/run/advance",
+        request: advancePath.routeRequest,
+        response: advancePath.routeResponse,
+      },
+    ],
     sessionAnswerVariants: driven.map(variant => ({
       variantId: variant.variantId,
       request: variant.answerRequest,

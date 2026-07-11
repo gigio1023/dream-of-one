@@ -66,6 +66,7 @@ var _choice_ids: Array[String] = ["", "", ""]
 var _choice_buttons: Array[Button] = []
 var _encountered_stances: Dictionary = {}
 var _prompt_tween: Tween
+var _retry_button_mode: StringName = &"end"
 
 
 func _ready() -> void:
@@ -91,6 +92,8 @@ func _ready() -> void:
 	_conversation_thinking_label.visible = false
 	_conversation_why_line_label.visible = false
 	_conversation_status_label.visible = false
+	_retry_button_mode = &"end"
+	_refresh_retry_button_text()
 	_end_conversation_button.visible = false
 	_encountered_stance_panel.visible = false
 
@@ -264,10 +267,22 @@ func show_judgment(judgment: Dictionary) -> void:
 func show_conversation_error(key: StringName, allow_end_retry := false) -> void:
 	set_conversation_busy(false)
 	_set_status(str(tr(key)))
+	_retry_button_mode = &"end"
+	_refresh_retry_button_text()
 	_end_conversation_button.visible = allow_end_retry
 	if allow_end_retry:
 		clear_turn_controls()
 		_end_conversation_button.grab_focus()
+
+
+func show_conversation_start_retry() -> void:
+	set_conversation_busy(false)
+	_set_status(str(tr(&"hud.m3r.error.conversation_start")))
+	_retry_button_mode = &"start"
+	_refresh_retry_button_text()
+	clear_turn_controls()
+	_end_conversation_button.visible = true
+	_end_conversation_button.grab_focus()
 
 
 func show_conversation_ended() -> void:
@@ -287,6 +302,7 @@ func close_conversation() -> void:
 	_conversation_visible = false
 	_conversation_busy = false
 	_conversation_actor_id = ""
+	_retry_button_mode = &"end"
 	_current_turn.clear()
 	_provider_meta = {}
 	_conversation_shade.visible = false
@@ -415,7 +431,7 @@ func _apply_localized_text() -> void:
 	_refresh_thinking_label()
 	_conversation_free_input.placeholder_text = tr(&"hud.m3r.conversation.input_placeholder")
 	_conversation_submit_button.text = tr(&"hud.m3r.conversation.submit")
-	_end_conversation_button.text = tr(&"hud.m3r.conversation.retry_end")
+	_refresh_retry_button_text()
 	_refresh_stance_label()
 	_refresh_provider_label()
 	_refresh_encountered_stances()
@@ -443,6 +459,14 @@ func _typewrite_prompt(text: String) -> void:
 func _set_status(text: String) -> void:
 	_conversation_status_label.text = text
 	_conversation_status_label.visible = not text.is_empty()
+
+
+func _refresh_retry_button_text() -> void:
+	_end_conversation_button.text = tr(
+		&"hud.m3r.conversation.retry_start"
+		if _retry_button_mode == &"start"
+		else &"hud.m3r.conversation.retry_end"
+	)
 
 
 func _refresh_stance_label() -> void:

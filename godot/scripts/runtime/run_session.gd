@@ -24,9 +24,9 @@ func mode() -> String:
 	return _mode
 
 
-func start_run(locale := "ko-KR") -> Dictionary:
+func start_run(locale := "ko-KR", start_id := "") -> Dictionary:
 	await get_tree().process_frame
-	return await _backend.start_run(locale)
+	return await _backend.start_run(locale, start_id)
 
 
 func start_conversation(
@@ -57,6 +57,11 @@ func end_conversation(run_id: String, session_id: String) -> Dictionary:
 func run_snapshot(run_id: String) -> Dictionary:
 	await get_tree().process_frame
 	return await _backend.run_snapshot(run_id)
+
+
+func advance(request: Dictionary) -> Dictionary:
+	await get_tree().process_frame
+	return await _backend.advance(request)
 
 
 func _resolve_mode() -> String:

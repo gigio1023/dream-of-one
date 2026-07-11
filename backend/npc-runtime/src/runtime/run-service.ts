@@ -11,7 +11,17 @@ import {
 } from "./conversation-suspicion.js";
 import type { WorldState } from "./world/index.js";
 import { loadRunLayout, type RunLayout } from "./run-layout.js";
+import {
+  advanceRunScheduler,
+  alignActorForPlayerConversation,
+  createRunScheduler,
+  snapshotRunScheduler,
+  type RunSchedulerRuntime,
+} from "./run-scheduler.js";
 import type {
+  RunActorReadinessDelta,
+  RunAdvanceRequest,
+  RunAdvanceResponse,
   RunActor,
   RunJudgment,
   RunMemory,
@@ -44,7 +54,17 @@ const STUDIO_SCENE_FACTS = [
   "The scheduled Station hearing is later; this conversation cannot decide its verdict.",
 ] as const;
 
-type RunActorState = RunActor & { lastConversationEndedAtRevision?: number };
+type RunActorState = RunActor;
+
+interface CachedStart {
+  signature: string;
+  response: RunSnapshot;
+}
+
+interface CachedAdvance {
+  signature: string;
+  response: RunAdvanceResponse;
+}
 
 interface CachedAnswer {
   signature: string;
@@ -79,6 +99,8 @@ interface RunState {
   lastProposalMeta: ProposalMeta | null;
   activeConversationId: string | null;
   actors: Map<string, RunActorState>;
+  scheduler: RunSchedulerRuntime;
+  advanceCache: Map<string, CachedAdvance>;
   conversations: Map<string, ConversationState>;
   records: RunSnapshot["records"];
   ledgerEvents: RunSnapshot["ledgerEvents"];
@@ -105,7 +127,13 @@ export type RunErrorCode =
   | "unknown_choice"
   | "invalid_answer"
   | "invalid_interaction"
-  | "invalid_locale";
+  | "invalid_locale"
+  | "start_id_conflict"
+  | "advance_id_conflict"
+  | "stale_world_revision"
+  | "run_paused"
+  | "hearing_due"
+  | "invalid_arrival";
 
 export class RunError extends Error {
   constructor(
@@ -142,8 +170,33 @@ function answerSignature(answer: RunSessionAnswer): string {
     : `free_input:${answer.text.trim()}`;
 }
 
+function startSignature(locale: string): string {
+  return JSON.stringify({ locale });
+}
+
+function advanceSignature(request: RunAdvanceRequest): string {
+  const arrivals = [...request.arrivals].sort((first, second) => {
+    const actorOrder = first.actorId.localeCompare(second.actorId);
+    if (actorOrder !== 0) return actorOrder;
+    const movementOrder = first.movementId.localeCompare(second.movementId);
+    return movementOrder !== 0 ? movementOrder : first.anchorRef.localeCompare(second.anchorRef);
+  });
+  return JSON.stringify({
+    runId: request.runId,
+    advanceId: request.advanceId,
+    observedWorldRevision: request.observedWorldRevision,
+    elapsedSeconds: request.elapsedSeconds,
+    arrivals,
+  });
+}
+
+function anchorLocationId(anchorRef: string): string {
+  return anchorRef.split(".", 1)[0] ?? anchorRef;
+}
+
 export class RunService {
   private readonly runs = new Map<string, RunState>();
+  private readonly startCache = new Map<string, CachedStart>();
   private readonly runChains = new Map<string, Promise<unknown>>();
   private readonly proposalPort: NpcProposalPort;
   private readonly idFactory: (prefix: IdPrefix) => string;
@@ -163,17 +216,31 @@ export class RunService {
     return this.proposalPort.preflight();
   }
 
-  start(locale: string): RunSnapshot {
+  start(startId: string, locale: string): RunSnapshot {
+    const signature = startSignature(locale);
+    const cached = this.startCache.get(startId);
+    if (cached) {
+      if (cached.signature !== signature) {
+        throw new RunError("the same startId cannot be retried with a different payload", "start_id_conflict");
+      }
+      return clone(cached.response);
+    }
     if (locale !== "ko-KR") {
       throw new RunError(`M3R first-contact runs require ko-KR, got ${locale}`, "invalid_locale");
     }
     const runId = this.idFactory("run");
+    const scheduler = createRunScheduler(this.layout);
     const actors = new Map<string, RunActorState>();
     for (const seed of this.layout.actors) {
+      const confirmedAnchorRef = scheduler.actors.get(seed.actorId)?.confirmedAnchorRef;
+      if (!confirmedAnchorRef) throw new Error(`scheduler did not hydrate actor ${seed.actorId}`);
       actors.set(seed.actorId, {
-        ...seed,
+        actorId: seed.actorId,
+        role: seed.role,
+        locationId: anchorLocationId(confirmedAnchorRef),
         stance: "uncertain",
         suspicion: 0,
+        playerConversationReady: seed.actorId === STUDIO_RECEPTIONIST_ID,
         hasMeaningfulFirsthandConversation: false,
         memories: [],
       });
@@ -196,12 +263,21 @@ export class RunService {
       lastProposalMeta: null,
       activeConversationId: null,
       actors,
+      scheduler,
+      advanceCache: new Map(),
       conversations: new Map(),
       records: [],
       ledgerEvents: [],
     };
     this.runs.set(runId, run);
-    return this.snapshot(runId);
+    const response = this.snapshot(runId);
+    this.startCache.set(startId, { signature, response: clone(response) });
+    while (this.startCache.size > 256) {
+      const oldest = this.startCache.keys().next().value as string | undefined;
+      if (!oldest) break;
+      this.startCache.delete(oldest);
+    }
+    return response;
   }
 
   snapshot(runId: string): RunSnapshot {
@@ -223,9 +299,143 @@ export class RunService {
       lastProposalMeta: clone(run.lastProposalMeta),
       activeConversationId: run.activeConversationId,
       actors: [...run.actors.values()].map(actor => this.publicActor(actor)),
+      scheduler: snapshotRunScheduler(this.layout, run.scheduler, run.elapsedSeconds),
       records: clone(run.records),
       ledgerEvents: clone(run.ledgerEvents),
     };
+  }
+
+  advance(request: RunAdvanceRequest): Promise<RunAdvanceResponse> {
+    return this.serialize(request.runId, async () => {
+      const run = this.requireRun(request.runId);
+      const signature = advanceSignature(request);
+      const cached = run.advanceCache.get(request.advanceId);
+      if (cached) {
+        if (cached.signature !== signature) {
+          throw new RunError(
+            "the same advanceId cannot be retried with a different payload",
+            "advance_id_conflict",
+          );
+        }
+        return clone(cached.response);
+      }
+      if (request.observedWorldRevision !== run.worldRevision) {
+        throw new RunError(
+          `advance observed revision ${request.observedWorldRevision}, current is ${run.worldRevision}`,
+          "stale_world_revision",
+        );
+      }
+      if (run.activeConversationId !== null) {
+        throw new RunError("the unpaused run clock cannot advance during a modal conversation", "run_paused");
+      }
+      if (run.elapsedSeconds >= run.hearingAtSeconds) {
+        throw new RunError("the Station hearing is already due", "hearing_due");
+      }
+      for (const arrival of request.arrivals) {
+        this.requireActor(run, arrival.actorId);
+        if (!this.layout.anchorRefs.includes(arrival.anchorRef)) {
+          throw new RunError(`arrival references unknown anchor: ${arrival.anchorRef}`, "invalid_arrival");
+        }
+      }
+
+      const previousWorldRevision = run.worldRevision;
+      const fromSeconds = run.elapsedSeconds;
+      const appliedElapsedSeconds = Math.min(
+        request.elapsedSeconds,
+        run.hearingAtSeconds - fromSeconds,
+      );
+      const toSeconds = fromSeconds + appliedElapsedSeconds;
+      const candidateWorldRevision = previousWorldRevision + 1;
+      const schedulerResult = advanceRunScheduler({
+        runId: run.runId,
+        layout: this.layout,
+        runtime: run.scheduler,
+        fromSeconds,
+        toSeconds,
+        arrivals: request.arrivals,
+        observedWorldRevision: candidateWorldRevision,
+      });
+      const actorReadinessDeltas: RunActorReadinessDelta[] = [];
+
+      // Arrivals are observations at the request's starting instant and are
+      // applied before schedule boundaries in this same batch.
+      for (const arrival of schedulerResult.arrivalsApplied) {
+        const actor = this.requireActor(run, arrival.actorId);
+        actor.locationId = arrival.locationId;
+        if (
+          actor.actorId === STUDIO_RECEPTIONIST_ID &&
+          arrival.anchorRef === this.layout.studioReceptionAnchorRef &&
+          !actor.playerConversationReady
+        ) {
+          actor.playerConversationReady = true;
+          actorReadinessDeltas.push({
+            actorId: actor.actorId,
+            playerConversationReady: true,
+            reason: "arrival_at_interaction",
+          });
+        }
+      }
+      for (const movement of schedulerResult.movementDeltas) {
+        if (
+          movement.actorId === STUDIO_RECEPTIONIST_ID &&
+          movement.targetAnchorRef !== this.layout.studioReceptionAnchorRef
+        ) {
+          const actor = this.requireActor(run, movement.actorId);
+          if (actor.playerConversationReady) {
+            actor.playerConversationReady = false;
+            actorReadinessDeltas.push({
+              actorId: actor.actorId,
+              playerConversationReady: false,
+              reason: "schedule_departure",
+            });
+          }
+        }
+      }
+
+      const materialMutation =
+        appliedElapsedSeconds > 0 ||
+        schedulerResult.arrivalsApplied.length > 0 ||
+        schedulerResult.movementDeltas.length > 0 ||
+        schedulerResult.scheduleWakes.length > 0 ||
+        actorReadinessDeltas.length > 0;
+      if (materialMutation) {
+        run.elapsedSeconds = toSeconds;
+        run.worldRevision = candidateWorldRevision;
+      }
+      const response: RunAdvanceResponse = {
+        runId: run.runId,
+        advanceId: request.advanceId,
+        previousWorldRevision,
+        worldRevision: run.worldRevision,
+        clock: {
+          fromSeconds,
+          toSeconds: materialMutation ? toSeconds : fromSeconds,
+          requestedElapsedSeconds: request.elapsedSeconds,
+          appliedElapsedSeconds: materialMutation ? appliedElapsedSeconds : 0,
+          graceEnded:
+            materialMutation &&
+            fromSeconds < run.graceEndsAtSeconds &&
+            run.graceEndsAtSeconds <= toSeconds,
+          hearingDue:
+            materialMutation &&
+            fromSeconds < run.hearingAtSeconds &&
+            run.hearingAtSeconds <= toSeconds,
+        },
+        arrivalsApplied: schedulerResult.arrivalsApplied,
+        arrivalsRejected: schedulerResult.arrivalsRejected,
+        scheduleWakes: schedulerResult.scheduleWakes,
+        movementDeltas: schedulerResult.movementDeltas,
+        actorReadinessDeltas,
+        scheduler: snapshotRunScheduler(this.layout, run.scheduler, run.elapsedSeconds),
+      };
+      run.advanceCache.set(request.advanceId, { signature, response: clone(response) });
+      while (run.advanceCache.size > 256) {
+        const oldest = run.advanceCache.keys().next().value as string | undefined;
+        if (!oldest) break;
+        run.advanceCache.delete(oldest);
+      }
+      return response;
+    });
   }
 
   startConversation(
@@ -268,8 +478,8 @@ export class RunService {
           "conversation_active",
         );
       }
-      if (actor.lastConversationEndedAtRevision === run.worldRevision) {
-        throw new RunError("conversation needs new evidence or a later world event before reopening", "conversation_not_ready");
+      if (!actor.playerConversationReady) {
+        throw new RunError("actor is not ready for a player conversation", "conversation_not_ready");
       }
 
       const sessionId = this.idFactory("sess");
@@ -284,6 +494,15 @@ export class RunService {
         conversationHistory: [],
       });
       this.trackProposal(run, resolved.meta);
+      alignActorForPlayerConversation(
+        this.layout,
+        run.scheduler,
+        actor.actorId,
+        this.layout.studioReceptionAnchorRef,
+        run.elapsedSeconds,
+      );
+      actor.locationId = anchorLocationId(this.layout.studioReceptionAnchorRef);
+      actor.playerConversationReady = false;
       const nextTurn = this.nextTurn(
         sessionId,
         0,
@@ -496,7 +715,6 @@ export class RunService {
       conversation.activeTurn = null;
       if (run.activeConversationId === sessionId) run.activeConversationId = null;
       run.worldRevision += 1;
-      actor.lastConversationEndedAtRevision = run.worldRevision;
       const response: RunSessionEndResponse = {
         runId,
         sessionId,
@@ -568,6 +786,7 @@ export class RunService {
       locationId: actor.locationId,
       stance: actor.stance,
       suspicion: actor.suspicion,
+      playerConversationReady: actor.playerConversationReady,
       hasMeaningfulFirsthandConversation: actor.hasMeaningfulFirsthandConversation,
       memories: clone(actor.memories),
     };

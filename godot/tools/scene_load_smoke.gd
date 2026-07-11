@@ -17,6 +17,11 @@ const SCENES := [
 	{"label": "hud_3d", "path": "res://scenes/ui/hud_3d.tscn", "frames": 2},
 	{"label": "town_3d", "path": "res://scenes/town/town_3d.tscn", "frames": 6},
 	{"label": "main_3d", "path": "res://scenes/main_3d.tscn", "frames": 6},
+	{
+		"label": "main_3d_schedule",
+		"path": "res://scenes/main_3d.tscn",
+		"frames": 6,
+	},
 ]
 
 var _failures: Array[String] = []
@@ -63,6 +68,10 @@ func _instance_scene(spec: Dictionary) -> void:
 	root.add_child(instance)
 	for _frame in range(maxi(1, int(spec.get("frames", 1)))):
 		await process_frame
+	if label in ["town_3d", "main_3d", "main_3d_schedule"]:
+		var town := instance if label == "town_3d" else instance.get_node_or_null("Town")
+		if town != null:
+			await _wait_for_town_navigation(label, town)
 
 	if not is_instance_valid(instance) or not instance.is_inside_tree():
 		_failures.append("%s did not survive one process frame" % label)
@@ -72,12 +81,54 @@ func _instance_scene(spec: Dictionary) -> void:
 			await _check_npc_movement(label, instance)
 		if label == "main_3d":
 			await _check_run_conversation(label, instance)
+		if label == "main_3d_schedule":
+			await _check_run_clock_and_schedule(label, instance)
 		if not _has_failure_for(label):
 			print("PASS scene_load_smoke: %s" % label)
 
 	if is_instance_valid(instance):
 		instance.queue_free()
 		await process_frame
+
+
+func _wait_for_town_navigation(label: String, town: Node) -> void:
+	var region := town.get_node_or_null(
+		"Navigation/TownNavigation"
+	) as NavigationRegion3D
+	if region == null:
+		return
+	var layout: Dictionary = town.call("layout_snapshot")
+	var player_start: Dictionary = layout.get("player_start", {})
+	var start := _vector3_from_json(player_start.get("position", []))
+	var target := _anchor_position(layout, "Park.meeting_north")
+	for _frame in range(120):
+		var navigation_map := region.get_navigation_map()
+		if navigation_map.is_valid() and NavigationServer3D.map_get_iteration_id(
+			navigation_map
+		) > 0:
+			var projected_start := NavigationServer3D.map_get_closest_point(
+				navigation_map,
+				start
+			)
+			var projected_target := NavigationServer3D.map_get_closest_point(
+				navigation_map,
+				target
+			)
+			var path := NavigationServer3D.map_get_path(
+				navigation_map,
+				projected_start,
+				projected_target,
+				true
+			)
+			if (
+				projected_start.distance_to(start) <= 0.65
+				and projected_target.distance_to(target) <= 0.65
+				and path.size() >= 2
+				and path[path.size() - 1].distance_to(projected_target) <= 0.65
+			):
+				return
+		await physics_frame
+	_failures.append("%s navigation map did not become query-ready in 120 physics frames" % label)
 
 func _check_runtime_shape(label: String, instance: Node) -> void:
 	match label:
@@ -211,7 +262,7 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 				var binding_errors: Variant = instance.call("binding_errors")
 				if binding_errors is PackedStringArray and not (binding_errors as PackedStringArray).is_empty():
 					_failures.append("town_3d layout bindings failed: %s" % binding_errors)
-		"main_3d":
+		"main_3d", "main_3d_schedule":
 			_require_node(label, instance, "Town")
 			_require_node(label, instance, "Town/Actors/Player3D")
 			_require_node(label, instance, "HUD3D")
@@ -267,6 +318,77 @@ func _check_town_navigation(label: String, instance: Node, region: NavigationReg
 					targets[target_name],
 				]
 			)
+	_check_semantic_meeting_slots(label, instance, region, layout, start)
+
+
+func _check_semantic_meeting_slots(
+	label: String,
+	instance: Node,
+	region: NavigationRegion3D,
+	layout: Dictionary,
+	start: Vector3
+) -> void:
+	var schedule_value: Variant = layout.get("schedule", {})
+	if not schedule_value is Dictionary:
+		_failures.append("%s layout has no semantic schedule" % label)
+		return
+	var meeting_windows_value: Variant = (schedule_value as Dictionary).get(
+		"meeting_windows",
+		[]
+	)
+	if not meeting_windows_value is Array or (meeting_windows_value as Array).is_empty():
+		_failures.append("%s layout has no semantic meeting windows" % label)
+		return
+	var navigation_map := region.get_navigation_map()
+	for meeting_value in meeting_windows_value as Array:
+		if not meeting_value is Dictionary:
+			continue
+		var meeting := meeting_value as Dictionary
+		var meeting_id := str(meeting.get("id", "unknown"))
+		var participant_refs_value: Variant = meeting.get("participant_anchor_refs", {})
+		if not participant_refs_value is Dictionary:
+			_failures.append("%s meeting %s has no participant slots" % [label, meeting_id])
+			continue
+		var projected_slots: Array[Vector3] = []
+		for anchor_ref_value in (participant_refs_value as Dictionary).values():
+			var anchor_ref := str(anchor_ref_value)
+			var authored_position := _anchor_position(layout, anchor_ref)
+			var projected_value: Variant = instance.call("navigation_position", anchor_ref)
+			if not projected_value is Vector3:
+				_failures.append(
+					"%s meeting %s slot is not navmesh-bound: %s"
+					% [label, meeting_id, anchor_ref]
+				)
+				continue
+			var projected := projected_value as Vector3
+			projected_slots.append(projected)
+			if projected.distance_to(authored_position) > 0.65:
+				_failures.append(
+					"%s meeting %s slot projects too far from its authored anchor: %s"
+					% [label, meeting_id, anchor_ref]
+				)
+			var path := NavigationServer3D.map_get_path(
+				navigation_map,
+				start,
+				projected,
+				true
+			)
+			if path.size() < 2 or path[path.size() - 1].distance_to(projected) > 0.65:
+				_failures.append(
+					"%s meeting %s slot is unreachable: %s"
+					% [label, meeting_id, anchor_ref]
+				)
+		for left_index in projected_slots.size():
+			for right_index in range(left_index + 1, projected_slots.size()):
+				var planar_separation := Vector2(
+					projected_slots[left_index].x - projected_slots[right_index].x,
+					projected_slots[left_index].z - projected_slots[right_index].z
+				).length()
+				if planar_separation < 0.75:
+					_failures.append(
+						"%s meeting %s participant slots collapse together"
+						% [label, meeting_id]
+					)
 
 
 func _check_town_location_coverage(label: String, instance: Node) -> void:
@@ -324,20 +446,127 @@ func _check_respawn_anchor_contract(label: String, instance: Node) -> void:
 
 
 func _check_npc_movement(label: String, instance: Node) -> void:
-	var npc := instance.get_node_or_null("Actors/NPC_Park_Caretaker") as CharacterBody3D
-	if npc == null or not npc.has_method("move_to"):
-		_failures.append("%s has no movable caretaker shell" % label)
+	var manager := instance.get_node_or_null("Actors/NPC_Studio_Manager") as NPC3D
+	var caretaker := instance.get_node_or_null("Actors/NPC_Park_Caretaker") as NPC3D
+	var studio_door := instance.get_node_or_null("Doors/DOOR_STUDIO_FRONT") as Door3D
+	if manager == null or caretaker == null or studio_door == null:
+		_failures.append("%s has no manager/caretaker/Studio-door movement proof" % label)
 		return
-	var start := npc.global_position
-	var target := start + Vector3(2.0, 0.0, 0.0)
-	npc.call("move_to", target)
-	for _frame in range(45):
+	if studio_door.is_open():
+		_failures.append("%s Studio door did not start closed" % label)
+		return
+	var manager_anchor := "Park.meeting_north_west"
+	var caretaker_anchor := "Park.meeting_north_east"
+	var manager_target_value: Variant = instance.call("navigation_position", manager_anchor)
+	var caretaker_target_value: Variant = instance.call("navigation_position", caretaker_anchor)
+	if not manager_target_value is Vector3 or not caretaker_target_value is Vector3:
+		_failures.append("%s cannot project the first meeting's participant slots" % label)
+		return
+	var manager_target := manager_target_value as Vector3
+	var caretaker_target := caretaker_target_value as Vector3
+	var manager_start := manager.global_position
+	var caretaker_start := caretaker.global_position
+	var arrivals: Dictionary = {}
+	var blocks: Array[Dictionary] = []
+	var record_arrival := func(
+		movement_id: String,
+		actor_id: StringName,
+		anchor_ref: String
+	) -> void:
+		arrivals[str(actor_id)] = {
+			"movementId": movement_id,
+			"anchorRef": anchor_ref,
+		}
+	var record_block := func(
+		movement_id: String,
+		actor_id: StringName,
+		anchor_ref: String,
+		reason: String
+	) -> void:
+		blocks.append({
+			"movementId": movement_id,
+			"actorId": str(actor_id),
+			"anchorRef": anchor_ref,
+			"reason": reason,
+		})
+	manager.movement_arrived.connect(record_arrival)
+	caretaker.movement_arrived.connect(record_arrival)
+	manager.movement_blocked.connect(record_block)
+	caretaker.movement_blocked.connect(record_block)
+	manager.apply_movement_command("smoke-manager-meeting", manager_anchor, manager_target)
+	caretaker.apply_movement_command(
+		"smoke-caretaker-meeting",
+		caretaker_anchor,
+		caretaker_target
+	)
+	var studio_door_opened := false
+	var convergence_frames := 540
+	for _frame in range(convergence_frames):
 		await physics_frame
-	var progress := Vector2(npc.global_position.x - start.x, npc.global_position.z - start.z).length()
-	if progress < 0.25:
-		_failures.append("%s NPC move_to made no physical progress" % label)
-	if npc.has_method("stop"):
-		npc.call("stop")
+		studio_door_opened = studio_door_opened or studio_door.is_open()
+		if arrivals.size() == 2 or not blocks.is_empty():
+			break
+	var manager_position_before_stop := manager.global_position
+	var caretaker_position_before_stop := caretaker.global_position
+	var manager_status_before_stop := manager.movement_status()
+	var caretaker_status_before_stop := caretaker.movement_status()
+	if manager.movement_arrived.is_connected(record_arrival):
+		manager.movement_arrived.disconnect(record_arrival)
+	if caretaker.movement_arrived.is_connected(record_arrival):
+		caretaker.movement_arrived.disconnect(record_arrival)
+	if manager.movement_blocked.is_connected(record_block):
+		manager.movement_blocked.disconnect(record_block)
+	if caretaker.movement_blocked.is_connected(record_block):
+		caretaker.movement_blocked.disconnect(record_block)
+	manager.stop()
+	caretaker.stop()
+	if not blocks.is_empty():
+		_failures.append("%s meeting movement was blocked: %s" % [label, blocks])
+		return
+	if not arrivals.has("NPC_Studio_Manager") or not arrivals.has("NPC_Park_Caretaker"):
+		_failures.append(
+			(
+				"%s manager/caretaker did not converge in %d physics frames "
+				+ "(arrivals=%s manager=%s caretaker=%s doorOpen=%s)"
+			)
+			% [
+				label,
+				convergence_frames,
+				arrivals,
+				{
+					"position": manager_position_before_stop,
+					"status": manager_status_before_stop,
+				},
+				{
+					"position": caretaker_position_before_stop,
+					"status": caretaker_status_before_stop,
+				},
+				studio_door_opened,
+			]
+		)
+		return
+	if str((arrivals["NPC_Studio_Manager"] as Dictionary).get("anchorRef", "")) != manager_anchor:
+		_failures.append("%s manager arrived at the wrong semantic meeting slot" % label)
+	if str((arrivals["NPC_Park_Caretaker"] as Dictionary).get("anchorRef", "")) != caretaker_anchor:
+		_failures.append("%s caretaker arrived at the wrong semantic meeting slot" % label)
+	if not studio_door_opened:
+		_failures.append("%s manager did not open the closed Studio door en route" % label)
+	var manager_progress := Vector2(
+		manager.global_position.x - manager_start.x,
+		manager.global_position.z - manager_start.z
+	).length()
+	var caretaker_progress := Vector2(
+		caretaker.global_position.x - caretaker_start.x,
+		caretaker.global_position.z - caretaker_start.z
+	).length()
+	if manager_progress < 0.25 or caretaker_progress < 0.25:
+		_failures.append("%s meeting convergence made no readable physical progress" % label)
+	var slot_separation := Vector2(
+		manager.global_position.x - caretaker.global_position.x,
+		manager.global_position.z - caretaker.global_position.z
+	).length()
+	if slot_separation < 0.75:
+		_failures.append("%s physical meeting participants collapsed into one slot" % label)
 
 
 func _check_run_conversation(label: String, instance: Node) -> void:
@@ -423,6 +652,207 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 			_failures.append("%s did not present the runtime-judged vouch stance" % label)
 		elif str((stance_entry as Dictionary).get("summary", "")).is_empty():
 			_failures.append("%s did not persist the judgment why-line in normal UI" % label)
+
+
+func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
+	if OS.get_environment("DREAM_SESSION_MODE") != "fixture":
+		_failures.append("%s schedule smoke requires DREAM_SESSION_MODE=fixture" % label)
+		return
+	var office_worker := instance.get_node_or_null(
+		"Town/Actors/NPC_Office_Worker"
+	) as NPC3D
+	if office_worker == null:
+		_failures.append("%s has no office worker for schedule movement" % label)
+		return
+
+	var snapshot: Dictionary = {}
+	var run_ready := false
+	for _frame in range(120):
+		await process_frame
+		snapshot = instance.call("presentation_snapshot")
+		var scheduler_value: Variant = snapshot.get("scheduler", {})
+		if (
+			not str(snapshot.get("runId", "")).is_empty()
+			and scheduler_value is Dictionary
+			and not (scheduler_value as Dictionary).is_empty()
+		):
+			run_ready = true
+			break
+	if not run_ready:
+		_failures.append("%s fixture run did not auto-start with scheduler state" % label)
+		return
+	if int(snapshot.get("runWorldRevision", -1)) != 0:
+		_failures.append("%s fresh schedule run did not start at revision zero" % label)
+	var initial_clock: Dictionary = snapshot.get("worldClock", {})
+	if float(initial_clock.get("elapsedSeconds", -1.0)) != 0.0:
+		_failures.append("%s fresh schedule clock did not start at zero" % label)
+	var initial_budget: Dictionary = snapshot.get("providerBudget", {})
+	if int(initial_budget.get("callsUsed", -1)) != 0:
+		_failures.append("%s schedule run started with provider calls" % label)
+	var initial_office_scheduler := _scheduler_actor(snapshot, "NPC_Office_Worker")
+	var initial_office_anchor := str(initial_office_scheduler.get("confirmedAnchorRef", ""))
+	if initial_office_anchor.is_empty():
+		_failures.append("%s scheduler exposes no confirmed office-worker anchor" % label)
+
+	var office_start := office_worker.global_position
+	instance.set("_advance_elapsed_buffer", 10.0)
+	var first_advance_applied := false
+	for _frame in range(120):
+		await process_frame
+		snapshot = instance.call("presentation_snapshot")
+		var movement_actor_ids := _active_movement_actor_ids(snapshot)
+		if (
+			int(snapshot.get("runWorldRevision", -1)) == 1
+			and movement_actor_ids.has("NPC_Studio_Receptionist")
+			and movement_actor_ids.has("NPC_Office_Worker")
+			and movement_actor_ids.has("NPC_Station_Officer")
+		):
+			first_advance_applied = true
+			break
+	if not first_advance_applied:
+		_failures.append(
+			(
+				"%s first ten-second advance did not issue initial movements "
+				+ "(advance=%s pending=%s)"
+			)
+			% [
+				label,
+				snapshot.get("advance", {}),
+				instance.get("_pending_advance_request"),
+			]
+		)
+		return
+	var first_movement_actor_ids := _active_movement_actor_ids(snapshot)
+	if first_movement_actor_ids.size() != 3:
+		_failures.append(
+			"%s initial movement batch contains unexpected actors: %s"
+			% [label, first_movement_actor_ids.keys()]
+		)
+	var first_clock: Dictionary = snapshot.get("worldClock", {})
+	if float(first_clock.get("elapsedSeconds", -1.0)) != 10.0:
+		_failures.append("%s first advance did not reach ten world seconds" % label)
+
+	# Main processes while paused so conversation HTTP can finish, but its clock
+	# lane explicitly returns and Town/NPC physics are pausable.
+	var pause_position := office_worker.global_position
+	var pause_clock := float(first_clock.get("elapsedSeconds", -1.0))
+	var pause_buffer := float(instance.get("_advance_elapsed_buffer"))
+	paused = true
+	for _frame in range(16):
+		await process_frame
+	var paused_snapshot: Dictionary = instance.call("presentation_snapshot")
+	if office_worker.global_position.distance_to(pause_position) > 0.001:
+		_failures.append("%s NPC physics advanced while SceneTree was paused" % label)
+	var paused_clock: Dictionary = paused_snapshot.get("worldClock", {})
+	if float(paused_clock.get("elapsedSeconds", -1.0)) != pause_clock:
+		_failures.append("%s world clock advanced while SceneTree was paused" % label)
+	if absf(float(instance.get("_advance_elapsed_buffer")) - pause_buffer) > 0.001:
+		_failures.append("%s clock buffer accumulated while SceneTree was paused" % label)
+	paused = false
+
+	var physical_progress := false
+	var arrivals_applied := false
+	for _frame in range(240):
+		await physics_frame
+		var planar_progress := Vector2(
+			office_worker.global_position.x - pause_position.x,
+			office_worker.global_position.z - pause_position.z
+		).length()
+		physical_progress = physical_progress or planar_progress > 0.15
+		snapshot = instance.call("presentation_snapshot")
+		var arrivals_value: Variant = (snapshot.get("arrivals", {}) as Dictionary).get(
+			"applied",
+			[]
+		)
+		if (
+			int(snapshot.get("runWorldRevision", -1)) >= 2
+			and arrivals_value is Array
+			and (arrivals_value as Array).size() == 3
+		):
+			arrivals_applied = true
+			break
+	if not physical_progress:
+		_failures.append("%s office worker made no physical progress after resume" % label)
+	else:
+		var total_progress := Vector2(
+			office_worker.global_position.x - office_start.x,
+			office_worker.global_position.z - office_start.z
+		).length()
+		if total_progress < 0.25:
+			_failures.append("%s runtime movement made no readable physical progress" % label)
+	if not arrivals_applied:
+		_failures.append(
+			(
+				"%s initial movement arrivals were not acknowledged together "
+				+ "(advance=%s pending=%s active=%s queued=%s)"
+			)
+			% [
+				label,
+				snapshot.get("advance", {}),
+				instance.get("_pending_advance_request"),
+				snapshot.get("activeMovements", []),
+				instance.get("_queued_arrivals"),
+			]
+		)
+		return
+	var arrived_office_scheduler := _scheduler_actor(snapshot, "NPC_Office_Worker")
+	var arrived_office_anchor := str(
+		arrived_office_scheduler.get("confirmedAnchorRef", "")
+	)
+	if arrived_office_anchor != "Office.work_desk":
+		_failures.append("%s office-worker arrival did not confirm its runtime anchor" % label)
+	elif arrived_office_anchor == initial_office_anchor:
+		_failures.append("%s arrival acknowledgement did not change confirmed anchor" % label)
+
+	instance.set("_advance_elapsed_buffer", 10.0)
+	var route_advance_applied := false
+	for _frame in range(120):
+		await process_frame
+		snapshot = instance.call("presentation_snapshot")
+		var route_actor_ids := _active_movement_actor_ids(snapshot)
+		if (
+			int(snapshot.get("runWorldRevision", -1)) == 3
+			and route_actor_ids.has("NPC_Park_Caretaker")
+			and route_actor_ids.has("NPC_Roaming_Liaison")
+		):
+			route_advance_applied = true
+			break
+	if not route_advance_applied:
+		_failures.append("%s second ten-second advance did not issue route movements" % label)
+		return
+	var route_clock: Dictionary = snapshot.get("worldClock", {})
+	if float(route_clock.get("elapsedSeconds", -1.0)) != 20.0:
+		_failures.append("%s route advance did not reach twenty world seconds" % label)
+	var final_budget: Dictionary = snapshot.get("providerBudget", {})
+	if int(final_budget.get("callsUsed", -1)) != 0:
+		_failures.append("%s deterministic scheduling consumed provider calls" % label)
+
+
+func _scheduler_actor(snapshot: Dictionary, actor_id: String) -> Dictionary:
+	var scheduler_value: Variant = snapshot.get("scheduler", {})
+	if not scheduler_value is Dictionary:
+		return {}
+	var actors_value: Variant = (scheduler_value as Dictionary).get("actors", [])
+	if not actors_value is Array:
+		return {}
+	for actor_value in actors_value as Array:
+		if (
+			actor_value is Dictionary
+			and str((actor_value as Dictionary).get("actorId", "")) == actor_id
+		):
+			return (actor_value as Dictionary).duplicate(true)
+	return {}
+
+
+func _active_movement_actor_ids(snapshot: Dictionary) -> Dictionary:
+	var actor_ids: Dictionary = {}
+	var movements_value: Variant = snapshot.get("activeMovements", [])
+	if not movements_value is Array:
+		return actor_ids
+	for movement_value in movements_value as Array:
+		if movement_value is Dictionary:
+			actor_ids[str((movement_value as Dictionary).get("actorId", ""))] = true
+	return actor_ids
 
 
 func _anchor_position(layout: Dictionary, anchor_ref: String) -> Vector3:

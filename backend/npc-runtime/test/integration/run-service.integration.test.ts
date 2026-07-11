@@ -19,10 +19,10 @@ test("run/start hydrates the shared town layout into six persistent uncertain ac
     proposalPort: createStudioReceptionScriptedAdapter(),
     idFactory: deterministicIds(),
   });
-  const snapshot = runSnapshotSchema.parse(service.start("ko-KR"));
+  const snapshot = runSnapshotSchema.parse(service.start("run-test-start", "ko-KR"));
 
   assert.equal(snapshot.worldId, "m3r_first_person_town");
-  assert.equal(snapshot.layoutRevision, "rev-first-person-town-v1");
+  assert.equal(snapshot.layoutRevision, "rev-first-person-town-v2");
   assert.equal(snapshot.worldRevision, 0);
   assert.equal(snapshot.worldClock.graceEndsAtSeconds, 90);
   assert.equal(snapshot.worldClock.hearingAtSeconds, 1800);
@@ -44,6 +44,11 @@ test("run/start hydrates the shared town layout into six persistent uncertain ac
   );
   assert.ok(snapshot.actors.every(actor => actor.stance === "uncertain"));
   assert.ok(snapshot.actors.every(actor => actor.memories.length === 0));
+  assert.equal(snapshot.actors[0].playerConversationReady, true);
+  assert.ok(snapshot.actors.slice(1).every(actor => !actor.playerConversationReady));
+  assert.equal(snapshot.scheduler.actors.length, 6);
+  assert.ok(snapshot.scheduler.actors.every(actor => actor.currentBlock !== null));
+  assert.ok(snapshot.scheduler.actors.every(actor => actor.pendingMovement === null));
 });
 
 test("a Studio answer persists model judgment and stance once across idempotent retries", async () => {
@@ -57,7 +62,7 @@ test("a Studio answer persists model judgment and stance once across idempotent 
     return originalMerged(request);
   };
   const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
-  const run = service.start("ko-KR");
+  const run = service.start("run-test-start", "ko-KR");
   const started = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -156,7 +161,7 @@ test("vouch provenance is clamped and speech cannot silently move institutional 
     nextStep: () => ({ rationale: "후속 행동 없음", done: true }),
   });
   const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
-  const run = service.start("ko-KR");
+  const run = service.start("run-test-start", "ko-KR");
   const started = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -182,7 +187,7 @@ test("ending a child conversation is idempotent and leaves its run state alive",
     proposalPort: createStudioReceptionScriptedAdapter(),
     idFactory: deterministicIds(),
   });
-  const run = service.start("ko-KR");
+  const run = service.start("run-test-start", "ko-KR");
   const started = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -219,7 +224,7 @@ test("rule fallback stays in-fiction and reaches a bounded clean end", async () 
     proposalPort: new RuleFallbackNpcAdapter(),
     idFactory: deterministicIds(),
   });
-  const run = service.start("ko-KR");
+  const run = service.start("run-test-start", "ko-KR");
   const started = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,

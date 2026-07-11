@@ -23,6 +23,8 @@ import {
   startResponseSchema,
 } from "./session-schemas.js";
 import {
+  runAdvanceRequestSchema,
+  runAdvanceResponseSchema,
   runSessionAnswerRequestSchema,
   runSessionAnswerResponseSchema,
   runSessionEndRequestSchema,
@@ -83,6 +85,11 @@ function statusForRunError(error: RunError): number {
     case "session_ended":
     case "session_still_active":
     case "unexpected_turn":
+    case "start_id_conflict":
+    case "advance_id_conflict":
+    case "stale_world_revision":
+    case "run_paused":
+    case "hearing_due":
       return 409;
     default:
       return 400;
@@ -155,7 +162,15 @@ export function createSessionServer(service: SessionService, runService = new Ru
       if (method === "POST" && path === "/v1/run/start") {
         const parsed = runStartRequestSchema.safeParse(await readJsonBody(req));
         if (!parsed.success) return badRequest(res, parsed.error);
-        respond(res, runSnapshotSchema, runService.start(parsed.data.locale));
+        respond(res, runSnapshotSchema, runService.start(parsed.data.startId, parsed.data.locale));
+        return;
+      }
+
+      if (method === "POST" && path === "/v1/run/advance") {
+        const parsed = runAdvanceRequestSchema.safeParse(await readJsonBody(req));
+        if (!parsed.success) return badRequest(res, parsed.error);
+        const result = await runService.advance(parsed.data);
+        respond(res, runAdvanceResponseSchema, result);
         return;
       }
 

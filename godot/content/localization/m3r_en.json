@@ -8,6 +8,7 @@
     "hud.m3r.conversation.input_placeholder": "Enter a response (120 characters maximum)",
     "hud.m3r.conversation.input_required": "Enter a response.",
     "hud.m3r.conversation.submit": "Respond",
+    "hud.m3r.conversation.retry_start": "Retry starting conversation",
     "hud.m3r.conversation.retry_end": "Retry ending conversation",
     "hud.m3r.conversation.ended": "The conversation has ended.",
     "hud.m3r.stance.header": "Current stance",

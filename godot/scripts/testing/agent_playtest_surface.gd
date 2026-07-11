@@ -80,6 +80,36 @@ func snapshot() -> Dictionary:
 		"runId": _first_value(sources, [&"runId", &"run_id"], ""),
 		"sessionMode": _first_value(sources, [&"sessionMode", &"session_mode"], ""),
 		"worldRevision": _first_value(sources, [&"worldRevision", &"world_revision"], null),
+		"runWorldRevision": _first_value(
+			sources,
+			[&"runWorldRevision", &"run_world_revision"],
+			null
+		),
+		"worldClock": _first_value(sources, [&"worldClock", &"world_clock"], {}),
+		"advance": _first_value(sources, [&"advance"], {}),
+		"scheduler": _first_value(sources, [&"scheduler"], {}),
+		"scheduleWakes": _first_value(
+			sources,
+			[&"scheduleWakes", &"schedule_wakes"],
+			[]
+		),
+		"arrivals": _first_value(sources, [&"arrivals"], {}),
+		"activeMovements": _first_value(
+			sources,
+			[&"activeMovements", &"active_movements"],
+			[]
+		),
+		"blockedMovements": _first_value(
+			sources,
+			[&"blockedMovements", &"blocked_movements"],
+			[]
+		),
+		"actors": _first_value(sources, [&"actors"], []),
+		"providerBudget": _first_value(
+			sources,
+			[&"providerBudget", &"provider_budget"],
+			{}
+		),
 		"player": _player_snapshot(player),
 		"transitioning": _first_value(sources, [&"transitioning"], null),
 		"resolvingAnswer": _first_value(sources, [&"resolvingAnswer", &"resolving_answer"], null),

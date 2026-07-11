@@ -14,6 +14,9 @@ var _selected_run_snapshot_response: Dictionary = {}
 var _selected_end_run_snapshot_response: Dictionary = {}
 var _selected_answer_request: Dictionary = {}
 var _selected_answer_response: Dictionary = {}
+var _advance_index := 0
+var _advance_cache: Dictionary = {}
+var _current_run_snapshot: Dictionary = {}
 var _last_error: Dictionary = {}
 
 
@@ -21,15 +24,22 @@ func _init() -> void:
 	_load_fixture()
 
 
-func start_run(locale: String) -> Dictionary:
+func start_run(locale: String, start_id: String) -> Dictionary:
 	reset()
 	var packet := _endpoint("runStart")
 	if packet.is_empty():
 		return _stored_error("fixture_run_start_missing", "Fixture has no runStart packet.")
-	if locale != str(_dictionary_or_empty(packet.get("request")).get("locale", "")):
+	var request := _dictionary_or_empty(packet.get("request"))
+	if locale != str(request.get("locale", "")):
 		return _stored_error("fixture_locale_mismatch", "Fixture does not contain locale: %s" % locale)
+	if start_id != str(request.get("startId", "")):
+		return _stored_error(
+			"fixture_start_id_mismatch",
+			"Fixture does not contain startId: %s" % start_id
+		)
 	_started = true
-	return _dictionary_or_empty(packet.get("response"))
+	_current_run_snapshot = _dictionary_or_empty(packet.get("response"))
+	return _current_run_snapshot.duplicate(true)
 
 
 func start_conversation(
@@ -140,7 +150,55 @@ func run_snapshot(run_id: String) -> Dictionary:
 		return _selected_end_run_snapshot_response.duplicate(true)
 	if _answered and not _selected_run_snapshot_response.is_empty():
 		return _selected_run_snapshot_response.duplicate(true)
+	if not _current_run_snapshot.is_empty():
+		return _current_run_snapshot.duplicate(true)
 	return _dictionary_or_empty(_endpoint("runStart").get("response"))
+
+
+func advance(request: Dictionary) -> Dictionary:
+	if not _started:
+		return _stored_error("run_not_started", "Start the fixture run first.")
+	var advance_id := str(request.get("advanceId", ""))
+	if _advance_cache.has(advance_id):
+		var cached := _dictionary_or_empty(_advance_cache.get(advance_id))
+		if _advance_request_signature(request) == _advance_request_signature(
+			_dictionary_or_empty(cached.get("request"))
+		):
+			_last_error = {}
+			return _dictionary_or_empty(cached.get("response"))
+		return _stored_error(
+			"advance_id_conflict",
+			"Fixture advanceId was reused with a different payload."
+		)
+	if _conversation_started and not _ended:
+		return _stored_error("run_paused", "Fixture run is paused by conversation.")
+	var sequence := _advance_sequence()
+	if _advance_index >= sequence.size():
+		return _stored_error(
+			"fixture_replay_complete",
+			"Fixture advance replay has reached its bounded end."
+		)
+	var packet_value: Variant = sequence[_advance_index]
+	if not packet_value is Dictionary:
+		return _stored_error("fixture_advance_invalid", "Fixture advance packet is invalid.")
+	var packet := packet_value as Dictionary
+	var expected_request := _dictionary_or_empty(packet.get("request"))
+	if _advance_request_signature(request) != _advance_request_signature(expected_request):
+		return _stored_error(
+			"fixture_advance_miss",
+			"Fixture has no authoritative response for that advance packet."
+		)
+	var response := _dictionary_or_empty(packet.get("response"))
+	if response.is_empty():
+		return _stored_error("fixture_advance_missing", "Fixture advance has no response.")
+	_advance_index += 1
+	_advance_cache[advance_id] = {
+		"request": expected_request.duplicate(true),
+		"response": response.duplicate(true),
+	}
+	_apply_advance_to_snapshot(response)
+	_last_error = {}
+	return response.duplicate(true)
 
 
 func reset() -> void:
@@ -153,6 +211,9 @@ func reset() -> void:
 	_selected_end_run_snapshot_response = {}
 	_selected_answer_request = {}
 	_selected_answer_response = {}
+	_advance_index = 0
+	_advance_cache = {}
+	_current_run_snapshot = {}
 	_last_error = {}
 
 
@@ -184,6 +245,88 @@ func _answer_variants() -> Array:
 	return [endpoint] if not endpoint.is_empty() else []
 
 
+func _advance_sequence() -> Array:
+	var sequence_value: Variant = _fixture.get("runAdvanceSequence", [])
+	return sequence_value as Array if sequence_value is Array else []
+
+
+func _apply_advance_to_snapshot(response: Dictionary) -> void:
+	if _current_run_snapshot.is_empty():
+		return
+	_current_run_snapshot["worldRevision"] = int(response.get(
+		"worldRevision",
+		_current_run_snapshot.get("worldRevision", 0)
+	))
+	var clock := _dictionary_or_empty(_current_run_snapshot.get("worldClock"))
+	var response_clock := _dictionary_or_empty(response.get("clock"))
+	if not response_clock.is_empty():
+		clock["elapsedSeconds"] = float(response_clock.get(
+			"toSeconds",
+			clock.get("elapsedSeconds", 0)
+		))
+		clock["paused"] = false
+		_current_run_snapshot["worldClock"] = clock
+	var scheduler := _dictionary_or_empty(response.get("scheduler"))
+	if not scheduler.is_empty():
+		_current_run_snapshot["scheduler"] = scheduler.duplicate(true)
+	for readiness_value in _array_or_empty(response.get("actorReadinessDeltas")):
+		if readiness_value is Dictionary:
+			_patch_snapshot_actor(readiness_value as Dictionary)
+	for arrival_value in _array_or_empty(response.get("arrivalsApplied")):
+		if not arrival_value is Dictionary:
+			continue
+		var arrival := arrival_value as Dictionary
+		_patch_snapshot_actor({
+			"actorId": str(arrival.get("actorId", "")),
+			"locationId": str(arrival.get("locationId", "")),
+		})
+
+
+func _patch_snapshot_actor(patch: Dictionary) -> void:
+	var actors_value: Variant = _current_run_snapshot.get("actors", [])
+	if not actors_value is Array:
+		return
+	var actors := actors_value as Array
+	for index in actors.size():
+		var actor_value: Variant = actors[index]
+		if (
+			actor_value is Dictionary
+			and str((actor_value as Dictionary).get("actorId", ""))
+			== str(patch.get("actorId", ""))
+		):
+			var actor := (actor_value as Dictionary).duplicate(true)
+			for key in patch:
+				if key != "actorId":
+					actor[key] = patch[key]
+			actors[index] = actor
+			return
+
+
+func _advance_request_signature(request: Dictionary) -> String:
+	var arrivals: Array = _array_or_empty(request.get("arrivals"))
+	arrivals.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if str(a.get("actorId", "")) == str(b.get("actorId", "")):
+			return str(a.get("movementId", "")) < str(b.get("movementId", ""))
+		return str(a.get("actorId", "")) < str(b.get("actorId", ""))
+	)
+	var normalized_arrivals: Array = []
+	for arrival_value in arrivals:
+		if arrival_value is Dictionary:
+			var arrival := arrival_value as Dictionary
+			normalized_arrivals.append({
+				"movementId": str(arrival.get("movementId", "")),
+				"actorId": str(arrival.get("actorId", "")),
+				"anchorRef": str(arrival.get("anchorRef", "")),
+			})
+	return JSON.stringify({
+		"runId": str(request.get("runId", "")),
+		"advanceId": str(request.get("advanceId", "")),
+		"observedWorldRevision": int(request.get("observedWorldRevision", -1)),
+		"elapsedSeconds": float(request.get("elapsedSeconds", -1.0)),
+		"arrivals": normalized_arrivals,
+	})
+
+
 func _answer_matches(expected: Dictionary, actual: Dictionary) -> bool:
 	var answer_type := str(expected.get("type", ""))
 	if answer_type != str(actual.get("type", "")):
@@ -209,3 +352,7 @@ func _error(code: String, message: String) -> Dictionary:
 
 func _dictionary_or_empty(value: Variant) -> Dictionary:
 	return (value as Dictionary).duplicate(true) if value is Dictionary else {}
+
+
+func _array_or_empty(value: Variant) -> Array:
+	return (value as Array).duplicate(true) if value is Array else []

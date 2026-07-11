@@ -1,8 +1,8 @@
 # Godot 3D Client
 
 Target: Godot 4.7.x stable (keep `GODOT_BIN` per device). **Status: the M3R
-spatial foundation and first run-backed social contact have landed beside the
-retained 2D main
+spatial foundation, first run-backed social contact, and authoritative
+clock/schedule movement have landed beside the retained 2D main
 ([`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md)).**
 `res://scenes/main_3d.tscn` now provides the whole-town greybox, dressed park
 and studio, first-person controller, doors, one navigation map, six resident
@@ -11,8 +11,12 @@ shells, HUD/settings, layout binding, and `AgentPlaytestSurface`. Its local
 conversation through generated choices or bounded free text, model judgment,
 coarse stance display, child-session end, and world resume. The modal owns
 only presentation and pause; all memory and stance truth comes back from the
-TypeScript `RunService`. Only the receptionist advertises conversation until
-the runtime supports the other five actors.
+TypeScript `RunService`. Outside a modal, the client batches unpaused time,
+applies runtime movement IDs to projected NavMesh targets, and acknowledges an
+arrival only after the matching NPC physically reaches that target. Runtime
+`playerConversationReady` remains the only authority for prompts; the initial
+receptionist is the sole enabled conversation until the runtime supports the
+other five actors.
 `run/main_scene` intentionally remains the 2D harness until the run-backed
 NPC-society slices complete the first playable proof.
 
@@ -272,18 +276,34 @@ the dev machine with all six NPC loops live.
   stops querying once `is_navigation_finished()` is true to avoid empty-path
   startup and endpoint jitter. Avoidance is enabled only while an NPC is
   moving; the agent's `velocity_computed` signal supplies the safe velocity.
+  Semantic anchors are projected onto this map before becoming agent targets;
+  this keeps desk/surface markers authored above floor height from becoming
+  false arrival checks. Arrival signals carry the runtime movement ID and
+  anchor, and unreachable final positions never acknowledge arrival. The
+  client retries a freshly projected target twice for transient map/path
+  failure, then exposes a stable blocked movement for debug inspection until
+  a later runtime movement supersedes it.
   These lifecycle rules follow the
   [Godot 4.7 NavigationAgent guide](https://docs.godotengine.org/en/4.7/tutorials/navigation/navigation_using_navigationagents.html).
 - **Schedule presentation**: NPCs visibly commute between anchors; meeting
   windows read at a glance (two residents talking look like two residents
-  talking from across the park).
+  talking from across the park). Each pair approaches distinct physical
+  standing slots around one semantic meeting center so solid capsules cannot
+  deadlock a meeting-ready condition.
+- **Advance lane**: run start and clock packets use stable client idempotency
+  keys. Only one mutation is in flight; an ambiguous transport failure retries
+  the exact packet, while a stale revision rebases from a full run snapshot
+  before unsent time/arrivals receive a new ID. Opening conversation pauses
+  the tree, settles that lane, and sends no clock packet until clean resume.
+  Settings and log surfaces do not pause the clock.
 
 ## Smokes (headless, thin)
 
 Keep the thin list, rebuilt for 3D as slices land: `scene_load_smoke.gd`
 (scene instances, bidirectional layout binding, reachable interior path
-endpoints, no ceiling nav islands, one physical NPC movement, and the full
-fixture receptionist flow from run start through modal pause, judgment,
+endpoints, no ceiling nav islands, runtime-issued physical NPC movement,
+arrival acknowledgement, clock/physics pause, distinct meeting slots, and the
+full fixture receptionist flow from run start through modal pause, judgment,
 stance presentation, child-session end, and resumed control), a
 run/session route smoke against the sidecar API
 (fixture mode), `localization_smoke.gd`, `check_assets.gd`. Same commands as

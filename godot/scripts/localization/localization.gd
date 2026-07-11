@@ -15,7 +15,7 @@ const MESSAGES := {
 		"hud.prompt.approach": "WASD/방향키로 이동. 상점 카운터의 점원에게 다가가 E로 말을 거세요.",
 		"hud.prompt.inspect": "E: 기록물 열람 · 대화 시작",
 		"hud.prompt.focus": "E · {target}",
-		"hud.conversation.hint": "1 / 2 / 3 선택 · 직접 입력 후 Enter · 오래 침묵하면 지연이 기록됩니다",
+		"hud.conversation.hint": "1 / 2 / 3 선택 · 직접 입력 후 Enter",
 		"hud.conversation.input_placeholder": "직접 입력 후 Enter (말은 상점 기록에 남습니다)",
 		"hud.conversation.submit": "기록",
 		"hud.conversation.recorded_stamp": "기록됨",

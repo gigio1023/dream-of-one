@@ -129,6 +129,8 @@ const nextTurnSchema = z
       z.object({ choiceId: nonEmpty, intent: intentEnum, line: nonEmpty }).strict(),
     ),
     proposalMeta: proposalMetaSchema,
+    /** Station interrogation only; omit on ordinary conversation turns. */
+    hesitationMs: z.number().int().positive().optional(),
   })
   .strict();
 

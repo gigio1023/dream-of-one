@@ -75,6 +75,7 @@ export interface NextTurn {
   continueConversation: boolean;
   choices: Array<{ choiceId: string; intent: ConversationChoiceIntent; line: string }>;
   proposalMeta: ProposalMeta;
+  hesitationMs?: number;
 }
 
 export interface SessionStartResult {
@@ -574,6 +575,7 @@ export class SessionService {
         line: reply.text,
       })),
       proposalMeta: resolved.meta,
+      ...(beat.hesitationMs !== undefined ? { hesitationMs: beat.hesitationMs } : {}),
     };
   }
 

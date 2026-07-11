@@ -26,7 +26,12 @@ test("every why-line is Korean and deterministic hesitation remains configured",
   for (const [key, value] of Object.entries(storylet.whyLines)) {
     assert.match(value, /[가-힣]/, `why-line for ${key} must be Korean`);
   }
-  assert.equal(storylet.hesitation.thresholdMs, 6000);
+  assert.equal(storylet.hesitation.thresholdMs, 40000);
+  assert.equal(storylet.thresholds.hesitationMs, 40000);
+  const interrogation = storylet.beats.find(beat => beat.beatId === "reconciliation");
+  assert.ok(interrogation);
+  assert.equal(interrogation.hesitationMs, 40000);
+  assert.ok(storylet.beats.every(beat => beat.beatId === "reconciliation" || beat.hesitationMs === undefined));
   assert.ok(storylet.whyLines[storylet.hesitation.signal]);
 });
 

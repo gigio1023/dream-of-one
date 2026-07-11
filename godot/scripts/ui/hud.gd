@@ -15,7 +15,7 @@ signal restart_requested
 signal resolution_requested(preset_id: String)
 signal ui_scale_requested(scale: float)
 
-const HESITATION_SECONDS := 6.0
+const MIN_INTERROGATION_HESITATION_MS := 40000
 const INPUT_MAX_LENGTH := 120
 const HUD_REFERENCE_HEIGHT := 720.0
 const INK := Color("#ece8dc")
@@ -84,6 +84,7 @@ var _provider_fallback := false
 var _committed_prompt := ""
 var _typewriter_tween: Tween = null
 var _thinking_tween: Tween = null
+var _hesitation_seconds := 0.0
 const TYPEWRITER_CHARS_PER_SECOND := 36.0
 
 func _ready() -> void:
@@ -94,10 +95,10 @@ func _ready() -> void:
 	set_process(true)
 
 func _process(_delta: float) -> void:
-	if not _conversation_panel.visible or _hesitation_timer.is_stopped():
+	if not _conversation_panel.visible or _hesitation_seconds <= 0.0 or _hesitation_timer.is_stopped():
 		return
 	var remaining := maxf(_hesitation_timer.time_left, 0.0)
-	_timer_bar.value = HESITATION_SECONDS - remaining
+	_timer_bar.value = _hesitation_seconds - remaining
 	_timer_label.text = _t("hud.timer.seconds", {"seconds": "%0.1f" % remaining})
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -243,9 +244,10 @@ func _build_conversation_panel() -> void:
 	_stamp.visible = false
 	_stamp.rotation = -0.08
 	header.add_child(_stamp)
-	_timer_label = _label(_t("hud.timer.seconds", {"seconds": "6.0"}), 10, MUTED)
-	_set_scaled_minimum(_timer_label, Vector2(42, 0))
+	_timer_label = _label(_t("hud.timer.seconds", {"seconds": "40.0"}), 10, MUTED)
+	_set_scaled_minimum(_timer_label, Vector2(48, 0))
 	_timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_timer_label.visible = false
 	header.add_child(_timer_label)
 
 	_prompt_scroll = ScrollContainer.new()
@@ -262,9 +264,10 @@ func _build_conversation_panel() -> void:
 	_prompt_scroll.add_child(_prompt_label)
 
 	_timer_bar = _meter(COLD)
-	_timer_bar.max_value = HESITATION_SECONDS
+	_timer_bar.max_value = 40.0
 	_timer_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_set_scaled_minimum(_timer_bar, Vector2(70, 3))
+	_timer_bar.visible = false
 	column.add_child(_timer_bar)
 
 	for index in range(3):
@@ -306,7 +309,7 @@ func _build_conversation_panel() -> void:
 
 	_hesitation_timer = Timer.new()
 	_hesitation_timer.one_shot = true
-	_hesitation_timer.wait_time = HESITATION_SECONDS
+	_hesitation_timer.wait_time = 40.0
 	_hesitation_timer.timeout.connect(_on_hesitation_timeout)
 	add_child(_hesitation_timer)
 
@@ -470,13 +473,13 @@ func show_turn(turn: Dictionary) -> void:
 	_input.clear()
 	_stamp.visible = false
 	_stamp.modulate.a = 0.0
-	_timer_bar.value = 0
-	_hesitation_timer.start(HESITATION_SECONDS)
+	_configure_hesitation_timer(turn)
 	if not _choice_buttons.is_empty():
 		_choice_buttons[0].call_deferred("grab_focus")
 
 func hide_conversation() -> void:
 	_hesitation_timer.stop()
+	_hesitation_seconds = 0.0
 	_stop_thinking_animation()
 	_kill_typewriter()
 	_conversation_panel.visible = false
@@ -503,8 +506,25 @@ func show_conversation_error(message: String) -> void:
 	_status_revision += 1
 	_ledger_label.text = message
 	_ledger_label.modulate = DANGER
-	if _conversation_panel.visible:
-		_hesitation_timer.start(HESITATION_SECONDS)
+	if _conversation_panel.visible and _hesitation_seconds > 0.0:
+		_hesitation_timer.start(_hesitation_seconds)
+
+func _configure_hesitation_timer(turn: Dictionary) -> void:
+	var hesitation_ms := int(turn.get("hesitationMs", 0))
+	if hesitation_ms >= MIN_INTERROGATION_HESITATION_MS:
+		_hesitation_seconds = float(hesitation_ms) / 1000.0
+		_timer_label.visible = true
+		_timer_bar.visible = true
+		_timer_bar.max_value = _hesitation_seconds
+		_timer_bar.value = 0.0
+		_timer_label.text = _t("hud.timer.seconds", {"seconds": "%0.1f" % _hesitation_seconds})
+		_hesitation_timer.start(_hesitation_seconds)
+	else:
+		_hesitation_seconds = 0.0
+		_timer_label.visible = false
+		_timer_bar.visible = false
+		_timer_bar.value = 0.0
+		_hesitation_timer.stop()
 
 func _show_thinking() -> void:
 	_kill_typewriter()

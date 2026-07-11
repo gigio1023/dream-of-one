@@ -172,7 +172,7 @@ func _build_pressure_panel() -> void:
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 8)
 	rows.add_child(header)
-	_location_label = _label(_t("world.location.store"), 12, INK)
+	_location_label = _label(_t("world.location.store"), 14, INK)
 	header.add_child(_location_label)
 	_fallback_badge = _label(_t("hud.mode.fixture"), 10, Color("#91b7a0"))
 	_fallback_badge.visible = false
@@ -193,7 +193,7 @@ func _build_pressure_panel() -> void:
 	_report_bar = _meter(COLD)
 	meters.add_child(_report_bar)
 
-	_ledger_label = _label(_t("hud.ledger.open_hint"), 10, MUTED)
+	_ledger_label = _label(_t("hud.ledger.open_hint"), 12, MUTED)
 	_ledger_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	rows.add_child(_ledger_label)
 
@@ -212,7 +212,7 @@ func _build_hint_panel() -> void:
 	anchor.add_child(_hint_panel)
 	var margin := _margin(12, 4, 12, 4)
 	_hint_panel.add_child(margin)
-	_hint_label = _label(_t("hud.prompt.approach"), 11, INK)
+	_hint_label = _label(_t("hud.prompt.approach"), 13, INK)
 	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	margin.add_child(_hint_label)
@@ -236,7 +236,7 @@ func _build_conversation_panel() -> void:
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 6)
 	column.add_child(header)
-	_speaker_label = _label("", 12, WARM)
+	_speaker_label = _label("", 14, WARM)
 	_speaker_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_speaker_label)
 	_stamp = _label(_t("hud.conversation.recorded_stamp"), 11, Color("#e8b46c"))
@@ -255,7 +255,7 @@ func _build_conversation_panel() -> void:
 	_prompt_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_set_scaled_minimum(_prompt_scroll, Vector2(0, 30))
 	column.add_child(_prompt_scroll)
-	_prompt_label = _label("", 13, INK)
+	_prompt_label = _label("", 15, INK)
 	_prompt_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_prompt_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -270,10 +270,10 @@ func _build_conversation_panel() -> void:
 	for index in range(3):
 		var button := Button.new()
 		button.name = "Choice%d" % (index + 1)
-		_set_scaled_minimum(button, Vector2(0, 22))
+		_set_scaled_minimum(button, Vector2(0, 26))
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.focus_mode = Control.FOCUS_ALL
-		_set_scaled_font(button, 12)
+		_set_scaled_font(button, 14)
 		_apply_button_styles(button, PAPER_SOFT, WARM)
 		# Submit on activation start so both mouse-down and keyboard accept remain
 		# reliable while the resizable window remaps the release point.
@@ -289,7 +289,7 @@ func _build_conversation_panel() -> void:
 	_input.max_length = INPUT_MAX_LENGTH
 	_input.placeholder_text = _t("hud.conversation.input_placeholder")
 	_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_set_scaled_font(_input, 12)
+	_set_scaled_font(_input, 14)
 	_input.add_theme_color_override("font_color", INK)
 	_input.add_theme_color_override("font_placeholder_color", Color(MUTED, 0.7))
 	_input.add_theme_stylebox_override("normal", _input_style(false))
@@ -298,8 +298,8 @@ func _build_conversation_panel() -> void:
 	input_row.add_child(_input)
 	_submit_button = Button.new()
 	_submit_button.text = _t("hud.conversation.submit")
-	_set_scaled_minimum(_submit_button, Vector2(46, 22))
-	_set_scaled_font(_submit_button, 11)
+	_set_scaled_minimum(_submit_button, Vector2(52, 24))
+	_set_scaled_font(_submit_button, 13)
 	_apply_button_styles(_submit_button, Color("#263143"), COLD)
 	_submit_button.pressed.connect(func() -> void: _submit_text(_input.text))
 	input_row.add_child(_submit_button)
@@ -898,7 +898,7 @@ func _label(text: String, size: int, color: Color) -> Label:
 	return label
 
 func _metric_label(label_text: String) -> Label:
-	var label := _label("%s 000" % label_text, 10, INK)
+	var label := _label("%s 000" % label_text, 12, INK)
 	_set_scaled_minimum(label, Vector2(50, 0))
 	return label
 
@@ -972,8 +972,8 @@ func _margin(left: int, top: int, right: int, bottom: int) -> MarginContainer:
 	return margin
 
 ## Base typography: logical px at 720p ≈ physical px. Body text lands at
-## ~19px on 1080p and ~39px on 4K at 100% — regular PC density, not the old
-## doubled large-text default. The user scale multiplies on top (Esc settings).
+## ~22px on 1080p and ~45px on 4K at 100% after the M3 readability bump.
+## The user scale multiplies on top (Esc settings, 80–150%).
 func _calculate_ui_scale() -> float:
 	var height := get_viewport().get_visible_rect().size.y
 	return clampf(height / HUD_REFERENCE_HEIGHT, 1.0, 3.0) * _user_scale

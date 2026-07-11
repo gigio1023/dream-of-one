@@ -117,9 +117,12 @@ small Godot C# in-process probe before committing to the M5 runtime path.
 ## Client ↔ runtime transport
 
 - **HTTP sidecar.** The runtime runs as a local Bun process
-  (`bun run --cwd backend/npc-runtime serve`) exposing the v1-proven endpoint
-  shape (`/v1/npc/decision`, plus v2 session endpoints). Godot talks JSON over
-  localhost. Fast iteration, engine-independent testing.
+  (`bun run --cwd backend/npc-runtime serve`). The current implementation is
+  session-scoped and exposes `/v1/npc/decision` plus the v2 session endpoints.
+  M3R keeps this transport but adds `/v1/run/*` lifecycle endpoints, binds
+  conversation sessions beneath a `runId`, and extends the validated packets
+  with run identity. Godot talks JSON over localhost. Fast iteration,
+  engine-independent testing.
 - **Packaging (must be proven before M5):** the shipped build targets a
   Bun-compiled sidecar executable with a launcher that starts and stops it.
   If clean-machine packaging or lifecycle recovery fails, compare the

@@ -69,8 +69,9 @@ DREAM_SESSION_MODE=fixture $GODOT_BIN --headless --path godot --script res://too
 
 Full smoke list, Qwen-only live-provider rule, and owner-set final play routing:
 `docs/tech/verification.md`. Resist adding smokes without an escaped
-regression. Player-facing claims need a Godot AI live run and a capture at the
-required state; model-free smokes never prove the LLM experience.
+regression. Sol may use headless checks and non-play editor snapshots, but
+player-facing claims require the final bounded Terra-high Godot AI hands-on
+run and its state capture. Model-free smokes never prove the LLM experience.
 
 ## Read Before Editing
 

@@ -90,10 +90,12 @@ DREAM_SESSION_URL=http://127.0.0.1:18787 \
 ```
 
 `/health/ready` proves only the sidecar is serving. The Terra run must inspect
-at least one actual response packet and require the Qwen profile, live
-transport, and zero fallback. The OpenAI-compatible npm client used by the
-ModelScope adapter is transport code; the pinned base URL and returned profile
-identify the model route.
+the final run-wide provider accounting, require a model-call count greater
+than zero, and require **every** recorded model call to report
+`profileId=modelscope/qwen3.7-plus`, `transport=live`, and
+`usedFallback=false`. Sampling one response packet is insufficient. The
+OpenAI-compatible npm client used by the ModelScope adapter is transport code;
+the pinned base URL and returned profile identify the model route.
 
 CI runs the Bun check on backend changes (existing workflow). Godot smokes
 run locally per slice; add them to CI only if a real regression escapes

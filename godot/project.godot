@@ -16,6 +16,7 @@ config/icon="res://assets/kenney2d/rpg-urban-pack/Tilemap/tilemap_packed.png"
 
 Localization="*res://scripts/localization/localization.gd"
 Session="*res://scripts/runtime/session.gd"
+_mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 
 [display]
 
@@ -24,6 +25,10 @@ window/size/viewport_height=1080
 window/size/resizable=true
 window/stretch/mode="disabled"
 window/stretch/aspect="keep"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_ai/plugin.cfg")
 
 [internationalization]
 

@@ -55,6 +55,7 @@ boundary (architecture passed, fun gate: no on immersion); M1 remains as the
 |---|---|
 | [`tech/architecture.md`](tech/architecture.md) | System map: Godot first-person 3D client ↔ TS runtime ↔ provider ports |
 | [`tech/godot-3d-client.md`](tech/godot-3d-client.md) | M3R conversion target: scene architecture, navigation, subtitles, HUD, salvage map from the 2D client |
+| [`tech/godot-ai-playtest.md`](tech/godot-ai-playtest.md) | Pinned Godot AI inspection and routed play surface; non-play Sol checks and final Terra/Qwen execution boundary |
 | [`tech/npc-runtime.md`](tech/npc-runtime.md) | Backend inventory: what carries over from v1, target module shape |
 | [`tech/ai-provider-ports.md`](tech/ai-provider-ports.md) | Port-and-adapter provider layer: Chat Completions port, Responses port, registry, fallback |
 | [`tech/verification.md`](tech/verification.md) | Commands, smoke policy, the fun gate |

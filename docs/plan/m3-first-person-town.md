@@ -61,8 +61,9 @@ can overhear with subtitles.
 
 ## Dependency notes and ordering
 
-- **Godot AI integration lands first.** The owner's pinned Godot AI
-  integration (add-on, autoload, and working contract) is the inspection
+- **Godot AI integration lands first.** The owner's pinned
+  [Godot AI integration](../tech/godot-ai-playtest.md) (add-on, autoload, and
+  working contract) is the inspection
   infrastructure for scene trees, logs, non-player-controlled snapshots, and
   the final Terra run. Sol may prove its handshake and use those non-play
   surfaces during implementation, but does not drive the game. Commit and

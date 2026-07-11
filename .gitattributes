@@ -3,3 +3,6 @@ godot/.godot/** linguist-generated
 
 # Agent skills must stay LF (harness/tooling portability)
 .agents/skills/** text eol=lf
+
+# Preserve the pinned Godot AI upstream snapshot byte-for-byte.
+godot/addons/godot_ai/** linguist-vendored -whitespace

@@ -20,6 +20,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	await process_frame
+	_check_engine_baseline()
 	for spec in SCENES:
 		await _instance_scene(spec)
 
@@ -30,6 +31,16 @@ func _run() -> void:
 	for failure in _failures:
 		print("FAIL scene_load_smoke: %s" % failure)
 	quit(1)
+
+func _check_engine_baseline() -> void:
+	var renderer := str(ProjectSettings.get_setting("rendering/renderer/rendering_method", ""))
+	var physics_engine := str(ProjectSettings.get_setting("physics/3d/physics_engine", ""))
+	if renderer != "forward_plus":
+		_failures.append("renderer is %s instead of forward_plus" % renderer)
+	if physics_engine != "Jolt Physics":
+		_failures.append("3D physics is %s instead of Jolt Physics" % physics_engine)
+	if renderer == "forward_plus" and physics_engine == "Jolt Physics":
+		print("PASS scene_load_smoke: Forward+ renderer and Jolt Physics baseline")
 
 func _instance_scene(spec: Dictionary) -> void:
 	var label := str(spec.get("label", "unknown"))

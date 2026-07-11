@@ -33,14 +33,15 @@ workstream is proved and committed.
 ## Engine baseline (M3R decisions)
 
 Decided here so conversion slices don't churn on project-global settings.
-Land these together as one bounded engine-baseline slice before the blockout:
+Landed together in the bounded engine-baseline slice before the blockout:
 
 - **Renderer: Forward+.** The current `gl_compatibility` setting serves the
   2D pixel client; the shipped target is desktop (M5 exports), where
   Forward+ is the intended 3D renderer. Switching is project-global, so
   verify the still-active 2D client visually once after the switch (one
   before/after pair). A Web build is a non-goal; revisit the renderer only
-  if that changes.
+  if that changes. Desktop uses `forward_plus`; the unused mobile override is
+  Godot's `mobile` renderer rather than forcing desktop Forward+ there.
 - **3D physics: Jolt**, set explicitly (`physics/3d/physics_engine`) before
   the first 3D physics slice to `Jolt Physics`, then restart the editor as the
   [Godot 4.7 Jolt guide](https://docs.godotengine.org/en/4.7/tutorials/physics/using_jolt_physics.html)

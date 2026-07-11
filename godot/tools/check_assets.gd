@@ -126,7 +126,7 @@ func _check_no_closed_commercial_buildings() -> void:
 	if not _directory_exists(COMMERCIAL_TRIM_DIR):
 		return
 	for file_name in DirAccess.get_files_at(COMMERCIAL_TRIM_DIR):
-		var normalized := file_name.to_lower()
+		var normalized := file_name.to_lower().replace("-", "_")
 		if normalized.begins_with("building_") or normalized.begins_with("low_detail_building_"):
 			_failures.append("closed City Kit building mesh is forbidden in the enterable town: %s" % file_name)
 

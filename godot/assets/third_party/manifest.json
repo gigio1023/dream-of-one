@@ -10,6 +10,116 @@
       "required": true,
       "installPath": "res://assets/kenney2d/rpg-urban-pack",
       "licensePath": "res://assets/kenney2d/rpg-urban-pack/License.txt"
+    },
+    {
+      "name": "Kenney Furniture Kit",
+      "source": "https://kenney.nl/assets/furniture-kit",
+      "version": "2.0",
+      "license": "CC0 1.0 Universal",
+      "tier": "committed",
+      "required": true,
+      "installPath": "res://assets/kenney3d/furniture",
+      "licensePath": "res://assets/kenney3d/furniture/License.txt",
+      "sourceArchiveSha256": "e67652d0932cee41683f74711c03d3e192a2af9979ef8e6b237711f5482d46b0",
+      "selectedAssets": [
+        "bench.glb",
+        "bookcase_open_low.glb",
+        "chair_desk.glb",
+        "computer_keyboard.glb",
+        "computer_screen.glb",
+        "desk.glb",
+        "lounge_sofa.glb",
+        "potted_plant.glb"
+      ]
+    },
+    {
+      "name": "Kenney Nature Kit",
+      "source": "https://kenney.nl/assets/nature-kit",
+      "version": "2.1",
+      "license": "CC0 1.0 Universal",
+      "tier": "committed",
+      "required": true,
+      "installPath": "res://assets/kenney3d/nature",
+      "licensePath": "res://assets/kenney3d/nature/License.txt",
+      "sourceArchiveSha256": "fa7974a0d342bfe63c38664ba9f8ec1a4aab8ea25f099bdc56870e33588c4d9d",
+      "selectedAssets": [
+        "fence_simple.glb",
+        "ground_grass.glb",
+        "ground_path_straight.glb",
+        "plant_bush.glb",
+        "rock_large_a.glb",
+        "tree_default.glb",
+        "tree_oak.glb"
+      ]
+    },
+    {
+      "name": "Kenney City Kit Roads",
+      "source": "https://kenney.nl/assets/city-kit-roads",
+      "version": "2.0",
+      "license": "CC0 1.0 Universal",
+      "tier": "committed",
+      "required": true,
+      "installPath": "res://assets/kenney3d/city_roads",
+      "licensePath": "res://assets/kenney3d/city_roads/License.txt",
+      "sourceArchiveSha256": "2c1644a293a85d98837ef788b0cbc4b9d53dffb1280fbe9a4f927b644aaba4b0",
+      "selectedAssets": [
+        "light_curved.glb",
+        "road_bend.glb",
+        "road_end.glb",
+        "road_intersection.glb",
+        "road_straight.glb",
+        "Textures/colormap.png"
+      ]
+    },
+    {
+      "name": "Kenney City Kit Commercial",
+      "source": "https://kenney.nl/assets/city-kit-commercial",
+      "version": "2.1",
+      "license": "CC0 1.0 Universal",
+      "tier": "committed",
+      "required": true,
+      "installPath": "res://assets/kenney3d/city_commercial",
+      "licensePath": "res://assets/kenney3d/city_commercial/License.txt",
+      "sourceArchiveSha256": "f8b09b081c2bb88bcc126e2dec1cb40fd0dad7e7e591b6c26aaefe96fb35276b",
+      "selectionPolicy": "render-only awning, overhang, and parasol trim; no closed building mesh",
+      "selectedAssets": [
+        "detail_awning.glb",
+        "detail_overhang.glb",
+        "detail_parasol_a.glb",
+        "Textures/colormap.png"
+      ]
+    },
+    {
+      "name": "Quaternius Ultimate Modular Men",
+      "source": "https://quaternius.com/packs/ultimatemodularcharacters.html",
+      "version": "downloaded 2026-07-12",
+      "license": "CC0 1.0 Universal",
+      "tier": "committed",
+      "required": true,
+      "installPath": "res://assets/quaternius/men",
+      "licensePath": "res://assets/quaternius/men/License.txt",
+      "selectionPolicy": "unarmed civilian silhouettes only",
+      "selectedFileSha256": {
+        "casual_2.gltf": "55c654d09a2a5ff6e3bd6158d4a1b462f181cd6f1e12a0f5e9d959f9c3abc438",
+        "casual_hoodie.gltf": "dd74886c26998a0fa888b4ce557a0932d7d97b0265dd4c763154d081b7a6cb98",
+        "worker.gltf": "e49f8ec0f8a7de72dd26b1c01e6413c9a87a9116eeee21f9364ccd36bc286335"
+      }
+    },
+    {
+      "name": "Quaternius Ultimate Modular Women",
+      "source": "https://quaternius.com/packs/ultimatemodularwomen.html",
+      "version": "downloaded 2026-07-12",
+      "license": "CC0 1.0 Universal",
+      "tier": "committed",
+      "required": true,
+      "installPath": "res://assets/quaternius/women",
+      "licensePath": "res://assets/quaternius/women/License.txt",
+      "licenseNote": "The upstream Women archive's license copy says Ultimate Modular Males; the official Women source page identifies this pack as CC0. The upstream text is preserved verbatim.",
+      "selectedFileSha256": {
+        "casual.gltf": "b0fe6e92219cd71808844a20a1a8b960fd1cf640a6546dc6362b5add6604e87c",
+        "formal.gltf": "fdfcf454c4de037d31973eb28d8591bd7763035d49f46b380e63b1c832dc7ddf",
+        "worker.gltf": "e2bfc1039f429e870a0119e274c2dd45f6304f00c39f4570dfeb9ed4d97a063d"
+      }
     }
   ]
 }

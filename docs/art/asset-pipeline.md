@@ -26,12 +26,12 @@ Rules (unchanged):
 - Every third-party pack (committed or local) gets a manifest row.
 - Credits: maintain `docs/art/CREDITS.md` (credit even CC0 sources).
 
-## M3R asset family decision (desk research, 2026-07-11)
+## M3R asset family decision (researched 2026-07-11, validated 2026-07-12)
 
 Recorded so the in-engine validation slice starts from a decision, not a
 blank survey. Licenses, formats, and pack contents below were verified on the
-creators' own pages on 2026-07-11; the in-engine gates in the next section
-are what remain unproven.
+creators' own pages and the curated subset was imported in Godot 4.7. The
+remaining visual judgment is named in the validation section.
 
 **Decision: one family per layer, greybox architecture.** No CC0 family ships
 walk-in modern buildings (city kits are exterior shells or miniature-scale
@@ -41,8 +41,8 @@ proportions differ across creators more than palettes do. Therefore:
 | Layer | Family | Why |
 |---|---|---|
 | Architecture — walls, doorways, floors of all three interiors, exterior massing | Project greybox | The only route that guarantees enterable interiors, primitive collision shapes, and navmesh-correct doorways sized to the NavigationAgent3D and first-person camera |
-| Environment and props — park, street, interior dressing | **Kenney**: [Furniture Kit](https://kenney.nl/assets/furniture-kit) (reception/office/Station dressing incl. wall/doorway/window pieces), [Nature Kit](https://kenney.nl/assets/nature-kit) (park), [City Kit Commercial](https://kenney.nl/assets/city-kit-commercial) + [Roads](https://kenney.nl/assets/city-kit-roads) (exterior shells, street) | CC0; GLB is Kenney's recommended format for Godot; Kenney's own Godot 4 [starter project](https://github.com/KenneyNL/Starter-Kit-City-Builder) proves the import path |
-| Characters — all six residents | **Quaternius**: [Ultimate Modular Men](https://quaternius.com/packs/ultimatemodularcharacters.html) + [Women](https://quaternius.com/packs/ultimatemodularwomen.html) packs | The only CC0 modern-civilian roster covering the six roles (Business Man, Suit, Worker, SWAT→officer, Casual); modular body parts for role differentiation; 24 bundled animations; glTF |
+| Environment and props — park, street, interior dressing | **Kenney**: [Furniture Kit](https://kenney.nl/assets/furniture-kit) (furniture only), [Nature Kit](https://kenney.nl/assets/nature-kit) (park), [City Kit Roads](https://kenney.nl/assets/city-kit-roads) (street), and [City Kit Commercial](https://kenney.nl/assets/city-kit-commercial) (awning/overhang/parasol trim only) | CC0; GLB imports cleanly in Godot. No City Kit building mesh and no Furniture wall/floor/doorway mesh may own visible architecture or collision; every visible building remains the enterable greybox structure |
+| Characters — all six residents | **Quaternius**: [Ultimate Modular Men](https://quaternius.com/packs/ultimatemodularcharacters.html) + [Women](https://quaternius.com/packs/ultimatemodularwomen.html) packs | Six unarmed civilian variants (`Casual_2`, `Casual_Hoodie`, and `Worker`; `Casual`, `Formal`, and `Worker`) provide distinct base silhouettes, 24 bundled animations each, and self-contained glTF files. Armed Suit/SWAT variants were rejected for the non-combat town |
 | Animation upgrade path | Quaternius [Universal Animation Library](https://quaternius.com/packs/universalanimationlibrary.html) free tier (45 anims, on the official Godot store), then [KayKit Character Animations](https://kaylousberg.itch.io/kaykit-character-animations) (161 anims, CC0) | Both built for engine retargeting (Godot BoneMap + SkeletonProfileHumanoid) |
 
 **Ranked fallback:** if the character gates below fail after one bounded fix
@@ -70,32 +70,55 @@ License rules the research made binding:
   redistribution).
 - Paid-tier remainders (Quaternius Pro/Source, KayKit Extra, Kenney paid
   packs) stay local-tier until their license text is verified.
+- The Women archive's license copy incorrectly names “Ultimate Modular Males.”
+  Preserve that upstream file verbatim and pair it with the official Women
+  source page, which identifies the pack as CC0; do not silently rewrite
+  third-party license text.
 
 ## M3R validation slice (first art task of the conversion)
 
-One slice proves the decision in-engine instead of re-surveying. Sol uses
+This slice proves the decision in-engine instead of re-surveying. Sol uses
 headless import plus Godot AI's non-play scene/log/snapshot inspection; it
-does not drive the game. The final Terra run owns hands-on validation. Capture
-the narrow import/snapshot evidence in the PR and fill the manifest. Gates,
-in order:
+does not drive the game. The final Terra run owns hands-on validation.
+
+Programmatic results on 2026-07-12:
+
+- all 23 curated Kenney models and all six Quaternius characters load as
+  `PackedScene`; City Kit palette textures resolve;
+- the six character meshes measure 1.843–1.870 m at `1.0×` and every file has
+  `Idle` and `Walk` among its 24 animations;
+- the single scale contract in `AssetScales` is Furniture `2.0×`, Nature
+  `2.5×`, City kits `5.0×`, Characters `1.0×`. This produces a 0.769 m desk,
+  4.27 m tree, 5 m road tile, and 2.25 m parasol;
+- the test corner has a 1.65 m eye camera, 1.8 m capsule, 1.1 × 2.1 m greybox
+  doorway, desk/chair, road, bench, tree, all six characters at park-view
+  distance, and an automatic `Idle` → `Walk` doorway pass;
+- bundled animations are sufficient, so the conditional retarget gate is not
+  entered.
+
+The gates remain:
 
 1. **Scale reference scene** — a 1.8 m capsule, a 2.1 m doorway, a desk;
-   measure each family against it and fix one global import scale per family
-   (no creator publishes a unit convention; proportions differ per family).
+   measure each family against it and keep the four validated multipliers in
+   `AssetScales`; per-model scale exceptions are forbidden.
 2. **Import gate** — `$GODOT_BIN --headless --import` clean on every pack;
    GLB materials and textures resolve. Some Kenney kits carry the palette
    texture separately — assign once per kit, not per model.
-3. **Character gate** — six residents assembled from the modular packs are
-   distinguishable at park distance (the art-direction bar); `walk`/`idle`
-   loops play in Godot 4.7. A separate conversation animation is optional.
+3. **Character gate** — six unarmed residents are distinguishable at park
+   distance (the art-direction bar); `Walk`/`Idle` loops play in Godot 4.7. A
+   separate conversation animation is optional. Headless import and animation
+   transition pass; final visual readability remains for Terra-high hands-on
+   acceptance.
 4. **Retarget gate (conditional)** — only if bundled animations are
    insufficient: BoneMap + SkeletonProfileHumanoid auto-maps on the
    Quaternius rig and one external clip plays without limb distortion. Godot's
    [4.7 retargeting guide](https://docs.godotengine.org/en/4.7/tutorials/assets_pipeline/retargeting_3d_skeletons.html)
    requires compatible bone names *and rest transforms*; auto-mapping warnings
    do not block import, so visible limb validation remains mandatory.
-5. **Test corner** — park bench + greybox studio doorway + one character
-   walking through the door, captured live.
+5. **Test corner** — park bench + road + greybox studio doorway + one character
+   transitioning from idle to walking through the door. Sol may take only a
+   non-play editor snapshot. Hands-on traversal, silhouette judgment, and
+   clipping acceptance occur only in the final Terra-high run.
 
 If gates 3–4 fail after one bounded fix attempt, apply the ranked fallback
 and record why in the PR. The decision section above is then updated in the
@@ -114,19 +137,24 @@ same commit — it stays the single record of the choice.
 
 `godot/assets/third_party/manifest.json` (committed even when assets are
 not) records name, source URL, version/date, license summary, install path.
-`godot/tools/check_assets.gd` verifies presence and prints download links.
+`godot/tools/check_assets.gd` verifies the declared licenses and curated files;
+`asset_validation_smoke.gd` proves import, materials, scales, and animation.
 The game must run with `third_party/` absent — committed tiers only, uglier
 but functional. CI and headless smokes never depend on local-tier assets.
 
 ## Import conventions
 
-- glTF (`.glb`) as the interchange format — Godot 4.7's
+- glTF (`.glb`, plus the selected self-contained character `.gltf` files) as
+  the interchange format — Godot 4.7's
   [recommended 3D scene format](https://docs.godotengine.org/en/4.7/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html);
   imported scenes inherit a shared
   base material setup; collision generated or authored per kit convention,
   verified in the validation slice.
 - Characters: shared `SkeletonProfile`-compatible rigs where the family
-  allows; walk/idle animations named consistently (`walk`, `idle`).
+  allows. Preserve imported `Idle`/`Walk` clip names; the NPC wrapper exposes
+  canonical `idle`/`walk` states to gameplay code.
+- Apply only the multipliers in `AssetScales`; never “fix” an individual prop
+  by eye with a one-off scale.
 - Naming: `snake_case`, prefix by theme (`studio_desk`, `station_dossier`).
 - Engine-practice details (import flags, LOD, lightmap choices) follow the
   repo's `godot-best-practice` skill at implementation time.

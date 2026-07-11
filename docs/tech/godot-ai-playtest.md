@@ -89,12 +89,11 @@ Verified on 2026-07-12 against Godot `4.7.stable.official.5b4e0cb0f`:
   server/helper handshake or run stop, but remains a pinned-integration cleanup
   warning to recheck on upgrade; it is not hidden as a clean shutdown claim.
 - The current Codex harness did not dynamically expose namespaced Godot AI
-  tools. Typed loopback MCP calls selected the exact session and exercised the
-  same 2.9.1 server's scene open, hierarchy/property reads, diagnostics, and
-  editor capture without input. This is an implementation-only, non-portable
-  transport path; it does not prove native tool discovery or replace the final
-  executor route. Claude Code execution is untested, while its package discovery
-  path is the tracked `.claude/skills` symlink.
+  tools because the server became available after the harness loaded its tool
+  surface. A loopback status/initialize probe may diagnose that condition, but
+  scene work and capture evidence must resume in a fresh harness session with
+  native Godot AI tool calls. Claude Code execution is untested, while its
+  package discovery path is the tracked `.claude/skills` symlink.
 - No port, editor preference, client configuration, credential, or absolute
   machine path is tracked.
 

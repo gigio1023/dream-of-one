@@ -1,6 +1,12 @@
 # M4 — Town Social Sim
 
-**Status: queued.**
+**Status: queued — rescope required at activation (2026-07-11).** The
+first-person conversion (M3R, [`roadmap.md`](roadmap.md)) absorbed this
+milestone's multi-location town and ambient life, and continuous world time
+replaced day segments. What remains for M4 per the roadmap ladder: the
+rumor-diffusion run clock, NPC-initiated incidents, the notice board, and
+save/load. Rewrite this spec against the shipped M3R before activating; the
+body below is the pre-conversion 2D spec, kept for its still-valid ideas.
 
 ## Goal
 

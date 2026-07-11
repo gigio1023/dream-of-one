@@ -1,10 +1,12 @@
 # M3 — Agent-Loop Society
 
-**Status: active (2026-07-11).** Activated at the M2 close, rewritten from
-the owner playtest review ([`m2-provider-ports.md`](m2-provider-ports.md))
-and the boundary interview (deltas in
-[`../vision/design-pillars.md`](../vision/design-pillars.md), summary in
-[`roadmap.md`](roadmap.md)).
+**Status: killed (2026-07-11).** Killed the same day it activated, at the
+first-person 3D conversion boundary — kill paragraph and rationale in
+[`roadmap.md`](roadmap.md). Its completed opening slices shipped; its
+surviving design decisions (merged-call turn, run frame, survivable
+interrogation, no structural waiting) carry into
+[`m3-first-person-town.md`](m3-first-person-town.md), the active
+replacement. Kept for history; do not build from this file.
 
 ## Goal
 

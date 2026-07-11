@@ -34,6 +34,38 @@ The key property carried from v1's design: **a blocked or busy result must
 change the NPC's next step.** An agent that retries the same tool against the
 same blocked state is a bug.
 
+### Event-driven wake-ups (2026-07-11, six-NPC continuous world)
+
+All six NPCs run this same loop regardless of player distance, but "same
+loop" never means "provider call every tick." A beat opens only on a wake
+event: a schedule anchor (shift start, park break), an arrival (actor enters
+the NPC's space), an observation (visible change worth reacting to), a goal
+becoming actionable, or a conversation (incoming `talk_to`, or the NPC's own
+planned approach). Between wake events an NPC follows policy-based movement
+and idles — deterministic game AI, zero provider cost. Six actors iterating
+3–6 provider steps per tick would waste calls and create queue pressure; the
+scheduler exists to make that impossible.
+
+Ambient proposals carry the `runId`, actor id, wake id, and world revision
+they observed. Provider work may finish while the world keeps moving, but the
+runtime validates the proposal again against the current revision before any
+tool applies. If the player opens a modal conversation, finished ambient
+results queue without mutating until the world resumes. A stale proposal gets
+the structured current-state result and yields or replans; it never applies to
+the world it imagined.
+
+### Bounded NPC-to-NPC conversation
+
+`talk_to` begins a real two-agent conversation, not a ledger-only notification.
+The runtime stores participants, initiator, current speaker, wake/world
+revision, an audibility snapshot, and a clean-end flag. The two agents
+alternate their own provider-generated utterances for 2–4 total utterances;
+after each validated utterance, only listeners present in that audibility
+snapshot receive an attributed heard-speech memory. The exchange then ends
+cleanly or earlier when either participant stops. One ambient NPC conversation
+may be active at a time in M3R; the player-facing lane always has priority.
+There is no model-generated transcript summary standing in for the exchange.
+
 ## Tool catalog (v2 baseline, ≤ 8 tools)
 
 | Tool | Effect | Validation highlights |
@@ -55,7 +87,8 @@ and keeping the deterministic classifier as fallback (see
 ## Memory and context bounds
 
 - **Actor memory** = the NPC's own validated actions + ledger events the NPC
-  actually observed (visibility-checked). No omniscient NPCs.
+  actually observed + attributed utterances the NPC was present to hear
+  (visibility/audibility-checked). No omniscient NPCs.
 - **Actor policy** = stable goals, priority shifts, action-selection policy,
   forbidden claims. Deterministic data, editable per role.
 - Context assembly is a pure function of world state — the same packet shape
@@ -87,15 +120,31 @@ change. Exposed two ways:
 - **Debug overlay** (dev builds): full transcript per NPC.
 - **In-world legibility** (all builds): reaction markers, `보는 단서` (what
   the NPC can see), `들은 말`/`오간 말` (what was heard/exchanged), influence
-  links from source actor to reacting actor. v1 proved these HUD patterns;
-  v2 re-implements them in 2D where they are cheaper and clearer.
+  cues from source actor to reacting actor, and direction-aware subtitles for
+  audible in-world speech. v1 proved these HUD patterns in 3D; the converted
+  first-person client re-implements them per
+  [`../tech/godot-3d-client.md`](../tech/godot-3d-client.md).
+
+## Spatial validation in 3D
+
+Tool names and semantics are unchanged by the first-person conversion; their
+validators gain 3D grounding in the converted client's world model:
+`move_to` reachability resolves through navmesh paths, `look` line-of-sight
+through 3D sightlines, and `talk_to` audibility through distance/occlusion
+rules. The exact validation data (navpoints, sight volumes, audibility
+ranges) is design work inside the active milestone
+([`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md)); the
+authority split — runtime validates, model proposes — does not move.
 
 ## Milestone mapping
 
 - **M1** retained the 2D client and deterministic scenario harness.
-- **M2** ships provider dialogue and next-step proposals together: 2 NPCs + 1
-  object/record, ≤ 5 tools active, 3–6
-  iterations per beat, a blocked result visibly changing a plan, transcript
-  overlay shipped. Acceptance details:
+- **M2** shipped provider dialogue and next-step proposals together (2 NPCs,
+  a blocked result visibly changing a plan, transcript overlay):
   [`../plan/m2-provider-ports.md`](../plan/m2-provider-ports.md).
-- **M3** scales the proven loop to concurrent NPCs and emergent propagation.
+- **M3 (agent-loop society, 2D frame)** was killed at the 2026-07-11
+  boundary; its completed opening slices (merged judgment+reply call,
+  thinking state, timer removal) carry forward.
+- **The active milestone** scales the proven loop to six event-driven NPCs
+  inside the first-person town:
+  [`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md).

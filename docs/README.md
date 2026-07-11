@@ -5,11 +5,13 @@ below is scoped so that one agent can read it plus its linked references and
 start working. If a document is not reachable from this index, it is not
 active.
 
-Status: **M3 agent-loop society active (2026-07-11).** M2 closed at the
-owner playtest boundary (architecture passed, fun gate: no on immersion);
-M1 remains as the 2D deterministic scenario harness. v1 (3D prototype,
-2025-10 → 2026-05) is archived under `docs/archive/` and summarized in the
-postmortem.
+Status: **M3R first-person town active (2026-07-11).** The owner-approved
+direction interview converted the game to a seamless first-person 3D town;
+the 2D M3 was killed the day it activated (kill paragraph in
+[`plan/roadmap.md`](plan/roadmap.md)). M2 closed at the owner playtest
+boundary (architecture passed, fun gate: no on immersion); M1 remains as the
+2D deterministic scenario harness. v1 (the first 3D prototype, 2025-10 →
+2026-05) is archived under `docs/archive/` and summarized in the postmortem.
 
 ## Reading Order for New Agents
 
@@ -44,15 +46,15 @@ postmortem.
 
 | Doc | Scope |
 |---|---|
-| [`art/art-direction.md`](art/art-direction.md) | 2D top-down direction, resolution, palette, readability rules |
-| [`art/asset-pipeline.md`](art/asset-pipeline.md) | Asset sources, licenses, gitignore policy, import conventions |
+| [`art/art-direction.md`](art/art-direction.md) | First-person 3D low-fi direction, quality bars, palette, readability rules |
+| [`art/asset-pipeline.md`](art/asset-pipeline.md) | 3D asset sources, licenses, gitignore policy, import conventions |
 
 ### Tech — how it is built
 
 | Doc | Scope |
 |---|---|
-| [`tech/architecture.md`](tech/architecture.md) | System map: Godot 2D client ↔ TS runtime ↔ provider ports |
-| [`tech/godot-2d-client.md`](tech/godot-2d-client.md) | Scene/node structure, tilemaps, interaction, HUD, localization |
+| [`tech/architecture.md`](tech/architecture.md) | System map: Godot first-person 3D client ↔ TS runtime ↔ provider ports |
+| [`tech/godot-3d-client.md`](tech/godot-3d-client.md) | M3R conversion target: scene architecture, navigation, subtitles, HUD, salvage map from the 2D client |
 | [`tech/npc-runtime.md`](tech/npc-runtime.md) | Backend inventory: what carries over from v1, target module shape |
 | [`tech/ai-provider-ports.md`](tech/ai-provider-ports.md) | Port-and-adapter provider layer: Chat Completions port, Responses port, registry, fallback |
 | [`tech/verification.md`](tech/verification.md) | Commands, smoke policy, the fun gate |
@@ -64,8 +66,9 @@ postmortem.
 | [`plan/roadmap.md`](plan/roadmap.md) | Milestone ladder M0–M5, gates, tracks | — |
 | [`plan/m1-2d-playable-slice.md`](plan/m1-2d-playable-slice.md) | 2D rebuild and deterministic regression harness | closed as harness |
 | [`plan/m2-provider-ports.md`](plan/m2-provider-ports.md) | Provider-backed dialogue and next-step agent loop | done |
-| [`plan/m3-agent-loop-npcs.md`](plan/m3-agent-loop-npcs.md) | Concurrent NPC society, long-breath run, emergent propagation | **active** |
-| [`plan/m4-town-social-sim.md`](plan/m4-town-social-sim.md) | Multi-location town, propagation, day segments, save/load | queued |
+| [`plan/m3-agent-loop-npcs.md`](plan/m3-agent-loop-npcs.md) | Concurrent NPC society in the 2D frame | killed 2026-07-11 |
+| [`plan/m3-first-person-town.md`](plan/m3-first-person-town.md) | First-person 3D town conversion: six event-driven NPCs, stances, the hearing run frame | **active** |
+| [`plan/m4-town-social-sim.md`](plan/m4-town-social-sim.md) | Social depth: rumor-diffusion clock, incidents, notice board, save/load | queued (rescope at activation) |
 | [`plan/m5-prologue-demo.md`](plan/m5-prologue-demo.md) | 15–30 min prologue, KO/EN, exports, itch release | queued |
 
 ### History
@@ -78,7 +81,7 @@ postmortem.
 
 | Doc | Scope |
 |---|---|
-| [`scenario/`](scenario/) | Storylet packets, social simulation cards, dialogue line bank, affordance maps, Korean voice notes |
+| [`scenario/`](scenario/) | Active tone/role canon plus M1 regression packets; M3R adapts rather than copies Store-specific material |
 
 ### Archive (frozen — do not build from)
 

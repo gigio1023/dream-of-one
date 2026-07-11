@@ -24,7 +24,7 @@ route, or storylet.
   procedural, never cartoonishly sinister; dread comes from how ordinary
   the questions are and how permanent records feel.
 - Stateless district: no real-world countries, cities, brands, currencies,
-  or holidays. Generic-administrative naming (스테이션, 구역/번호, 상점);
+  or holidays. Generic-administrative naming (스테이션, 구역/번호, 스튜디오);
   role titles over surnames. Korean is the authoring language, but nothing
   in the text may pin the place to Korea.
 - Register follows `docs/scenario/content/korean-voice-notes.md`: 존댓말
@@ -74,3 +74,16 @@ $GODOT_BIN --headless --path godot --script res://tools/localization_smoke.gd
 | `docs/scenario/content/korean-voice-notes.md` | any Korean wording |
 | `docs/game/glossary.md` | naming anything |
 | `docs/game/core-loop.md` | answer surface, suggestion gradient, session shape |
+
+## Gotchas
+
+- Store-specific scenario pages are M1 regression/source material. Do not
+  restore commerce, the Store layout, authored choices, or ordered reactions
+  in M3R; adapt tone and procedural pressure to studio, office, park, and
+  Station through `docs/game/content-guide.md`.
+- A record can change factual memory and institutional pressure, but it cannot
+  directly move a resident's personal stance. That requires remembered real
+  speech; a vouch additionally requires meaningful first-hand player contact.
+- Keep hidden speech hidden. Player-facing logs may name an encountered
+  provenance chain without revealing words the player never heard or later
+  learned in-world.

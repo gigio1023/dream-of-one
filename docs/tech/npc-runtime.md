@@ -1,7 +1,13 @@
 # NPC Runtime (backend/npc-runtime)
 
 TypeScript runtime owning all deterministic truth. This doc maps v1's ~12.7k
-LOC onto the v2 target so an agent knows what to keep, trim, or build.
+LOC onto the M3R target so an agent knows what to keep, trim, or build.
+
+> **Implementation status (2026-07-11):** the checked-in runtime still owns
+> one conversation session at a time. M3R's first runtime slice must add the
+> run-scoped service below before six persistent NPCs or the hearing are
+> implemented. The target shape in this document is not evidence that it
+> already exists.
 
 ## Target module shape
 
@@ -10,12 +16,14 @@ src/
   contracts/        # shared types (kept)
   runtime/
     schema.ts             # packet schemas (kept, extended)
+    run-service.ts         # M3R: run lifecycle, clock, revision, hearing
+    run-schema.ts          # M3R: RunState + run-bound request schemas
     decision-service.ts   # ordered decision core (kept)
     conversation-suspicion.ts  # signal classification (kept)
     fallback.ts           # deterministic lines (kept, feeds from line bank data)
     readiness.ts          # boot/preflight state (kept, simplified)
-    telemetry.ts          # session telemetry (kept, + provider usage)
-    world/                # v2: records, civic ledger, economy values, visibility
+    telemetry.ts          # run/session telemetry (kept, + provider usage)
+    world/                # M3R: memories, stances, records, ledger, visibility
   agentloop/        # provider-driven loop:
     context.ts            # observe-packet assembly (pure fn of world state)
     tools.ts              # tool catalog + validators
@@ -23,7 +31,7 @@ src/
     transcript.ts         # per-NPC loop transcript
   providers/        # ports, adapters, registry, budget, envelope, test adapters
   policy/           # reason taxonomy, hook policy (kept)
-  memory/           # actor memory / session memory stores (kept, trimmed)
+  memory/           # actor memory + run/session memory stores (kept, extended)
   api/http-server.ts# sidecar endpoints (kept, extended)
   godot/runtime-schema.ts # client-boundary schema (kept)
 data/storylets/     # compiled content from docs/scenario (v2)
@@ -74,22 +82,64 @@ Delete when the replacing module lands; don't leave both alive.
    (see [`../vision/design-pillars.md`](../vision/design-pillars.md)).
    Providers may choose different valid attempts and wording; fallback keeps a
    session alive but is never the default production profile.
+7. A `runId` owns the six NPC memories and stances, records, civic ledger,
+   institutional pressure, unpaused world clock, hearing state, provider
+   budget, and monotonically increasing `worldRevision`. Conversation
+   sessions are children of a run; ending a conversation never resets or
+   duplicates run state.
+8. Background proposals carry `runId`, `wakeId`, and the world revision they
+   observed. On arrival, the runtime revalidates them against current facts
+   before applying anything. While a player conversation is modal, valid
+   ambient effects queue and apply after the modal surface closes; an ambient
+   provider wait never pauses the world.
+9. A run reset clears every run-owned value together. Content, provider
+   profile selection, and deterministic test fixtures are configuration, not
+   remembered world state.
 
-## Sidecar API (v2 surface)
+## Sidecar API (M3R target)
 
-Keep the v1-proven `/v1/npc/decision` shape; add session lifecycle:
+Keep the proven decision/session shapes while placing them under an explicit
+run lifecycle. Exact JSON is schema-owned in code, but the minimum public
+surface is:
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /v1/session/start` | New session from storylet id; returns initial world snapshot |
+| `POST /v1/run/start` | Create one run, six actor workspaces, clock, revision, budgets, and initial snapshot |
+| `POST /v1/run/advance` | Submit a bounded unpaused-time delta plus validated physical/world observations; returns due wakes and deltas |
+| `GET  /v1/run/snapshot` | Full run snapshot for HUD hydrate, reconnect, and debug inspection |
+| `POST /v1/session/start` | Start a child conversation from `runId` + actor id; returns the modal conversation view |
 | `POST /v1/session/answer` | Player choice/typed input/hesitation → signals, state delta, NPC reactions |
-| `POST /v1/npc/decision` | Beat tick: NPC agent-loop steps for scheduled actors |
-| `GET  /v1/session/snapshot` | Full renderable state (HUD hydrate, debugging) |
-| `POST /v1/session/end` | Terminal route result + telemetry summary |
+| `POST /v1/npc/decision` | Event wake for one scheduled actor, carrying `runId`, `wakeId`, and observed `worldRevision` |
+| `GET  /v1/session/snapshot` | Renderable child-session state; never a substitute for the run snapshot |
+| `POST /v1/session/end` | End the conversation and return queued run deltas; the run continues |
+| `POST /v1/run/hearing` | Open the scheduled, run-ending hearing after its clock condition is met |
+| `POST /v1/run/end` | Return terminal result, run telemetry, and provider accounting, then close the run |
 
 Responses carry `ProposalMeta`, transcript deltas, and `ledgerEvents[]` so the
 client can distinguish live/fallback/scripted behavior and animate validated
 consequences incrementally.
+
+`POST /v1/run/advance` is not a per-frame provider call. Godot batches elapsed
+unpaused time and discrete scene observations; `RunService` clamps the delta,
+advances the authoritative clock, and schedules only event-driven wakes. A
+player-modal conversation pauses these advance requests. Background NPC
+requests already in flight may finish, but their effects remain revision-
+checked and queued until the modal closes.
+
+## Run-scoped state and judgment
+
+The normal player UI exposes only each NPC's coarse `oppose / uncertain /
+vouch` stance and one institutional-pressure line. Numeric suspicion remains
+internal/debug data. A stance may be judged only from that actor's validated
+memories; `vouch` additionally requires a meaningful first-hand conversation
+with the player. Reading an administrative record may update factual memory
+or institutional pressure, but does not directly move personal stance.
+
+The runtime verifies provenance and procedure; the selected live model judges
+meaning. At the scheduled hearing it enforces four evidenced vouches out of
+six as the eligibility floor, then asks the model to reassess the final
+defense against pooled visible memories. No earlier interrogation can end an
+M3R run.
 
 ## Checks
 

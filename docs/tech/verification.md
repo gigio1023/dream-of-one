@@ -11,6 +11,34 @@ description — **"Would I play this again for five minutes?"** with one
 sentence of why. That's it. External playtests are welcome input and never a
 gate.
 
+For the M3R conversion, the owner's later routing instruction defers all
+hands-on game driving until every implementation item and Sol self-review is
+complete. Intermediate slices therefore use only model-free headless and
+runtime checks; they do not claim the fun gate. The final bounded Terra-high
+run supplies the first M3R play/fun answer and the itemized live acceptance.
+
+### M3R live-play routing (owner-set, 2026-07-11)
+
+M3R separates the model driving the test from the model living inside the
+game:
+
+- GPT-5.6 Sol ultra owns planning, implementation, diagnosis, repair, and
+  self-review.
+- Once implementation and self-review are complete, Sol writes one bounded
+  run-only packet using the `lower-capability-executor-prompt` contract.
+  GPT-5.6 Terra high alone drives the actual game through Godot AI and records
+  the fun/acceptance observations. Terra does not edit or diagnose on failure;
+  it reports, Sol repairs, and a new bounded Terra run is issued.
+- Every real NPC/model call in those play runs pins
+  `modelscope/qwen3.7-plus`. A live result counts only when the returned
+  metadata says that profile, `transport=live`, and no fallback. Missing Qwen
+  credentials block live acceptance; OpenAI, a local model, scripted output,
+  or fallback may not substitute.
+- Bun checks, fixture smokes, scripted Session API parity, headless Godot
+  smokes, and explicit fallback-completion checks make no product LLM call.
+  Sol may run them, but they are engineering evidence only and never prove the
+  LLM game experience.
+
 ## Commands (engineering)
 
 ```bash
@@ -28,10 +56,43 @@ $GODOT_BIN --headless --path godot --script res://tools/check_assets.gd
 # Localhost Session API parity (starts and stops a scripted test adapter)
 GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/live-route-parity.sh
 
-# Opt-in real provider smoke; requires the selected profile's credentials
-bun run --cwd backend/npc-runtime provider:smoke -- --profile openai/gpt-5.4-mini
-bun run --cwd backend/npc-runtime provider:smoke -- --profile modelscope/qwen3.7-plus
+# M3R opt-in live provider smoke (manual/spend-bearing; Qwen only)
+: "${MODELSCOPE_API_KEY:?MODELSCOPE_API_KEY is required for live Qwen verification}"
+set -o pipefail
+env -u OPENAI_API_KEY -u LOCAL_LLM_BASE_URL \
+  NPC_PROVIDER_PROFILE=modelscope/qwen3.7-plus \
+  MODELSCOPE_BASE_URL=https://api-inference.modelscope.ai/v1 \
+  bun --no-env-file backend/npc-runtime/src/tools/provider-smoke.ts \
+  --profile modelscope/qwen3.7-plus | \
+  jq -e '
+    .profileId == "modelscope/qwen3.7-plus" and
+    .conversation.transport == "live" and
+    (.conversation.usedFallback | not) and
+    .judgment.transport == "live" and
+    (.judgment.usedFallback | not)
+  '
 ```
+
+For a live game run, start the sidecar with the same guard and no dotenv
+autoload, then point Godot at it:
+
+```bash
+env -u OPENAI_API_KEY -u LOCAL_LLM_BASE_URL \
+  NPC_PROVIDER_PROFILE=modelscope/qwen3.7-plus \
+  MODELSCOPE_BASE_URL=https://api-inference.modelscope.ai/v1 \
+  PORT=18787 \
+  bun --no-env-file backend/npc-runtime/src/index.ts
+
+DREAM_SESSION_MODE=http \
+DREAM_SESSION_URL=http://127.0.0.1:18787 \
+"$GODOT_BIN" --path godot
+```
+
+`/health/ready` proves only the sidecar is serving. The Terra run must inspect
+at least one actual response packet and require the Qwen profile, live
+transport, and zero fallback. The OpenAI-compatible npm client used by the
+ModelScope adapter is transport code; the pinned base URL and returned profile
+identify the model route.
 
 CI runs the Bun check on backend changes (existing workflow). Godot smokes
 run locally per slice; add them to CI only if a real regression escapes
@@ -48,3 +109,6 @@ twice.
   files. State lives in code, tests, and the PR that shipped it.
 - Screenshots in PRs for visual changes: one before/after pair, taken from
   the running game. No contact-sheet apparatus.
+- A failed or unavailable Terra/Qwen live run is an honest blocked result, not
+  permission to relax the route or count a deterministic smoke as the fun
+  gate.

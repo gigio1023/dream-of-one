@@ -14,9 +14,9 @@ flowchart TD
     F -->|keeps talking| A2[Follow-up question]
     A2 --> B
     F -->|lets it go| G[Conversation continues<br/>or ends clean]
-    F -->|acts| H[Agent-loop tool call<br/>validated record / object change]
-    H --> I[Other NPCs observe the record<br/>via visibility rules]
-    I --> J[Social reactions:<br/>gossip, warning, refusal, report]
+    F -->|acts| H[Agent-loop tool call<br/>validated speech / record / object change]
+    H --> I[Other NPCs hear a real utterance<br/>or explicitly read a visible record]
+    I --> J[Social reactions:<br/>question, warning, refusal, report]
     J --> K{Report pressure?}
     K -->|no| G
     K -->|yes| L[Station intake → inquest → verdict<br/>model-judged, ending guaranteed]
@@ -79,29 +79,58 @@ play lands on one of four authored endings.
 
 ## Run and session shape
 
-- A **run** (회차) is the unit of play: the player arrives with a purpose
-  and a deadline (sourced from scenario canon), and a run spans multiple
-  conversations and incidents. Suspicion, records, and the ledger persist
-  across conversations within a run and reset between runs.
-- **Run time is action-cost.** A day splits into segments; a meaningful
-  conversation or incident consumes one, and resting a segment slightly
-  lowers suspicion. The clock never moves while the player thinks or types
-  — deadline pressure is "chances left," never a running clock.
-- **The purpose is achieved through conversation only** — asking, probing,
-  persuading. Approaching the goal and risking suspicion are the same act;
-  there are no fetch-quest mechanics.
+- A **run** (회차) is the unit of play: the player arrives as an outsider,
+  and a Station hearing (청문회) is already scheduled for a known day — the
+  run's deadline, announced diegetically, never a countdown on the input box.
+  Suspicion, records, stances, and the ledger persist across conversations
+  within a run and reset between runs.
+- **World time is continuous.** The town, NPC schedules, and NPC-to-NPC
+  conversations run in real time during free exploration; everything pauses
+  while the player is inside a modal conversation, including the merged
+  judgment+reply wait. Ambient provider calls remain asynchronous and never
+  pause free exploration; their proposed effects are applied only after a
+  fresh world-revision validation. If a modal conversation begins before an
+  ambient result returns, the result may finish but waits to apply until the
+  world resumes. Thinking and typing never cost anything. Pressure between
+  conversations comes from schedule windows and other people's meetings —
+  whom to catch before which encounter — not from wall-clock speed.
+- **Progress is belief-editing.** Each NPC holds a stance toward the player
+  built from what it actually saw, heard, and was told. This stance is the
+  coarse presentation of the existing per-NPC opinion, not another meter:
+  `oppose`, `uncertain`, or `vouch`. Stances move only when a conversation
+  (the player's, or one NPC's with another) changes what an NPC believes —
+  never for mere contact or reading a record. A positive vouch additionally
+  requires a meaningful first-hand conversation with the player; hearsay can
+  create doubt but cannot manufacture one. There are no friendship meters and
+  no per-day accrual: novel, true, relevant speech is the only currency.
+- **The hearing ends the run.** On the scheduled day the Station pools the
+  six NPCs' real memories and stances. A four-of-six `vouch` quorum is the
+  deterministic eligibility floor, not the verdict: after the player's final
+  defense and one last memory-grounded stance reassessment, the model judges
+  the pooled account inside deterministic procedure. Classified ordinary →
+  the player may leave (win). Definitive abnormal verdict → run ends (loss).
+  An NPC who never met the player testifies exactly that and cannot vouch.
+- **Interrogation before the hearing is survivable.** Being reported and
+  questioned is an in-run event: a defense that persuades lowers suspicion
+  and returns the player to the run. An in-run recovery path exists —
+  consistent, ordinary interactions genuinely lower a wary NPC's suspicion —
+  so one slip is never a hidden death spiral.
+- **The purpose is pursued through conversation only** — asking, probing,
+  persuading, repairing. Approaching the goal and risking suspicion are the
+  same act; doors and selected props make the space tangible but cannot
+  advance a vouch. There are no fetch-quest mechanics and no inventory.
 - A **conversation session** stays the runtime unit: it always reaches an
   ending, and the runtime owns that guarantee. A session ending is not a run
-  ending — being reported and interrogated is an in-run event, and a defense
-  that persuades lowers suspicion and returns the player to the run. Only
-  achieving the purpose, missing the deadline, or a definitive Station
-  verdict ends a run.
-- A conversation is a few minutes; a run fits one sitting in M3 and grows
-  toward the 15–30 minute prologue demo by M5. Mid-run save is deliberately
-  deferred: if runs outgrow one sitting, M4's save/load moves up.
-- The outcome panel names the closing role action and cites only ledger
-  entries that actually exist; it never narrates a consequence that did not
-  happen.
+  ending. A cleanly ended conversation cannot be reopened against the same
+  unchanged evidence; that NPC becomes available again after a relevant new
+  memory, goal, schedule event, or player action changes the context. This
+  prevents modal pause from becoming an infinite deadline freeze without
+  charging the player for reading or typing.
+- A run targets 30–60 minutes in one sitting. Mid-run save is deliberately
+  deferred: if runs outgrow one sitting, save/load moves up from the next
+  milestone.
+- The run recap is ledger-built — what the town learned about you, who said
+  what to whom — and cites only entries that actually exist.
 - Restart starts a new run instantly and keeps nothing except the player's
   knowledge.
 
@@ -111,5 +140,6 @@ The fun gate is subjective by design, but these are the felt qualities to aim
 for: (1) answering under social pressure feels risky (the clock joins in
 only under Station interrogation); (2) watching
 suspicion travel between NPCs is legible and a little dreadful; (3) losing
-makes the player immediately want to try a different line; (4) the town feels
-like it keeps existing when you're not talking to it.
+makes the player immediately want to try a different line; (4) the town
+visibly keeps existing when you're not talking to it — and that motion is
+quietly threatening, because some of it is about you.

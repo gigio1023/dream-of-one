@@ -1,6 +1,6 @@
 ---
 name: dream-npc-runtime
-description: Use when changing, reviewing, or diagnosing backend/npc-runtime in dream-of-one — session engine, agent loop, suspicion judgment, records and civic ledger, provider ports/adapters/profiles, envelope schemas, fallback, or runtime tests. Triggers include "provider profile", "adapter", "envelope", "fallback", "suspicion judgment", "ledger", "tool validation", and "Session API". NOT for Godot scene/HUD work (dream-godot-client) or authoring Korean player-facing content (dream-content-authoring).
+description: Use when changing, reviewing, or diagnosing backend/npc-runtime in dream-of-one — run/session lifecycle, NPC scheduler and memory, stance/hearing judgment, records and civic ledger, provider ports/adapters/profiles, envelope schemas, fallback, or runtime tests. Triggers include "RunService", "provider profile", "adapter", "envelope", "fallback", "stance", "hearing", "ledger", "tool validation", and "run/session API". NOT for Godot scene/HUD work (dream-godot-client) or authoring Korean player-facing content (dream-content-authoring).
 ---
 
 # Dream of One — NPC Runtime
@@ -19,7 +19,8 @@ The model owns *meaning*; deterministic code owns *validity*.
   milestone reaches them — Station verdicts.
 - Runtime-owned (never delegate): per-NPC sight/context separation, tool
   validation of every world mutation, delta and score clamps, civic-ledger
-  append, guaranteed session ending.
+  append, run revision and scheduling validity, evidenced-vouch quorum, and
+  guaranteed conversation/run endings.
 
 Decision rule from `docs/vision/design-pillars.md`: if a rule decides the
 *content* of a judgment, move that decision into the model's context; if it
@@ -64,6 +65,16 @@ it.
 5. Every session reaches an ending; the runtime owns that guarantee even
    when the judgment inside it is the model's.
 6. Outcome presentation cites only ledger events that actually exist.
+7. A `runId` owns all six actor memories and stances, records, ledger,
+   institutional pressure, unpaused clock, hearing state, provider budget,
+   and monotonic world revision. Conversation sessions are children and may
+   not reset run state.
+8. Background proposals carry their observed run revision and are revalidated
+   on arrival. Ambient provider waits never pause the world; effects that
+   finish during a player-modal conversation queue until it closes.
+9. Personal stance changes only from remembered validated speech. Record
+   reads may update facts or institutional pressure; a vouch also requires
+   meaningful first-hand player conversation.
 
 Player-visible text is Korean-first and passes the modern-Korean script
 check at the envelope boundary (ids and tool names exempt). Fallback lines
@@ -79,9 +90,10 @@ Default check for any backend slice (kept fast by policy — see
 bun run --cwd backend/npc-runtime check
 ```
 
-Full ladder, Session API parity script, and opt-in spend-bearing provider
-smokes: `docs/tech/verification.md`. Live provider smokes are manual and
-never CI. Add a test only when it protects deterministic authority, schema
+Full ladder, run/session API parity, owner-set Sol/Terra execution routing,
+and the Qwen-only opt-in live-provider rule:
+`docs/tech/verification.md`. Live provider smokes are manual and never CI.
+Add a test only when it protects deterministic authority, schema
 compatibility, the provider boundary, or a player-visible consequence.
 
 ## Read Before Editing
@@ -102,5 +114,8 @@ compatibility, the provider boundary, or a player-visible consequence.
   owner-set unacceptable failure, not flavor.
 - Timeouts and token budgets are sized for judgment-grade calls; do not
   reintroduce bark-sized budgets from M1.
+- `/health/ready` is process readiness, not live-provider proof. Only response
+  metadata showing the pinned profile, live transport, and zero fallback
+  satisfies model-backed acceptance.
 - Do not build standing trackers, evidence ledgers, or proof reports around
   this work — see `docs/history/v1-postmortem.md`.

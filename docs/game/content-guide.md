@@ -5,13 +5,21 @@
 Engine-agnostic scenario canon lives in [`../scenario/`](../scenario/) and
 survived the v1→v2 reboot intact. Reuse it before writing new canon:
 
+The Store-specific names, layouts, choices, and route ordering in the M1
+packet remain regression-fixture material, not M3R world instructions. M3R
+reuses tone, role pressures, visibility constraints, and the general
+outsider-under-procedure premise, then re-expresses them through the studio,
+office, park, and Station named in the active milestone. When a legacy
+scenario page conflicts with the M3R milestone or the late 2026-07-11 owner
+block, the newer active direction wins.
+
 | File | What it holds | v2 use |
 |---|---|---|
-| `scenario/content/same-order-storylet-packet.md` | `Same Order` prompts, choices, signals, and routes | Scene constraints plus scripted regression adapter; not production dialogue policy |
+| `scenario/content/same-order-storylet-packet.md` | `Same Order` prompts, choices, signals, and routes | M1 scripted regression adapter; not M3R layout or production dialogue policy |
 | `scenario/content/social-simulation-cards.md` | ~700 lines of social situation cards | Source for M4 storylets |
 | `scenario/content/dialogue-line-bank.md` | Reusable NPC lines by role/intent | Scripted tests and bounded fallback reference |
-| `scenario/content/environment-affordance-map.md` | Object affordances per role | Tool catalog + `use_object` validation data |
-| `scenario/content/location-placement-contracts.md` | Where objects/NPCs belong per location | 2D scene layout |
+| `scenario/content/environment-affordance-map.md` | M1 object affordances per role | Source patterns for tool validation; Store-specific objects are not M3R requirements |
+| `scenario/content/location-placement-contracts.md` | Legacy placement and readability constraints | Reuse sightline/landmark principles, not the Store layout; M3R's 3D layout is newly authored |
 | `scenario/content/korean-voice-notes.md` | Korean tone/voice rules | All KO writing |
 | `scenario/bible/12-conversation-suspicion-prologue.md` | Prologue arc | M5 demo arc |
 
@@ -26,7 +34,7 @@ Station's flat officialese).
 **Setting/naming rule (stateless district):** the town is a placeless
 administrative zone. No real-world countries, cities, brands, currencies, or
 holidays. Places and institutions use generic-administrative names (스테이션,
-구역/번호, 상점, 스튜디오); people use role titles over surnames where
+구역/번호, 스튜디오, 사무실); people use role titles over surnames where
 possible. Korean is the authoring language, but nothing in the text should
 pin the place to Korea — a reader should feel "somewhere administered,"
 nowhere on a map.

@@ -14,8 +14,9 @@ boundaries (see anti-goals in
 | M0 | Direction reset | This documentation tree; v1 process retired | ...agents rebuild the proof factory | **done (PR #98)** |
 | M1 | [2D scenario harness](m1-2d-playable-slice.md) | 2D client, Session API, world rules, and four deterministic regression scenarios | ...the presentation and deterministic authority boundary cannot be exercised end to end | **closed as harness (PR #100)** |
 | M2 | [LLM-native agent loop](m2-provider-ports.md) | The model judges suspicion and writes records that another NPC visibly reads; rules keep validity only | ...the shipped architecture is a scripted storylet runner wearing agent-loop names | **done (closed 2026-07-11)** |
-| M3 | [Agent-loop society](m3-agent-loop-npcs.md) | Station verdicts become model-judged (reversible by argument); multiple NPCs pursue concurrent goals inside a long-breath run | ...one working agent loop does not produce believable society | **active** |
-| M4 | [Town social sim](m4-town-social-sim.md) | Four locations, 6–8 NPCs, day segments, ambient life, save/load | ...the loop doesn't scale past one room | queued |
+| M3 | [Agent-loop society](m3-agent-loop-npcs.md) | Station verdicts become model-judged (reversible by argument); multiple NPCs pursue concurrent goals inside a long-breath run | ...one working agent loop does not produce believable society | **killed 2026-07-11** (opening slices shipped; see history below) |
+| M3R | [First-person town](m3-first-person-town.md) | Convert to one seamless first-person 3D town where six event-driven LLM NPCs live, talk, and remember; run frame = stances/vouches toward a scheduled Station hearing | ...the LLM society cannot carry an inhabitable world, and the game stays a cramped 2D test harness | **active** |
+| M4 | [Town social sim](m4-town-social-sim.md) | Social depth on the proven town: rumor-diffusion clock, NPC-initiated incidents, notice board, save/load | ...belief movement doesn't scale into replayable social drama | queued (rescope at activation) |
 | M5 | [Prologue demo](m5-prologue-demo.md) | 15–30 min honest public demo, KO/EN, desktop exports, itch page | ...nothing shippable exists (v1's terminal state) | queued |
 
 Post-M5 (not planned in detail, listed to aim high): additional storylet
@@ -25,15 +26,18 @@ Steam page, modding surface for storylet data.
 ## Cross-cutting tracks
 
 - **Content track:** each milestone pulls from `docs/scenario/` canon
-  (M1: Same Order; M4: 2–3 more cards; M5: prologue arc). New canon requires
-  the content-guide rules, not new process.
+  (M1: Same Order; M3R: player identity/secret and the six resident
+  identities as owner-approved content slices; M5: prologue arc). New canon
+  requires the content-guide rules, not new process.
 - **Art track:** committed CC0 base + local licensed tier per
-  [`../art/asset-pipeline.md`](../art/asset-pipeline.md); M1 establishes the
-  pipeline, M4 completes location theming, M5 does the polish pass.
-- **Provider track:** M2 builds ports and `proposeNextStep` together; M3 adds
-  concurrent scheduling and emergent propagation; M4 adds per-role profiles
-  (cheap ambient / better Station); M5 locks the demo's
-  default profile + disclosure copy.
+  [`../art/asset-pipeline.md`](../art/asset-pipeline.md); M3R's 3D family is
+  decided (greybox architecture + Kenney environment + Quaternius
+  characters, 2026-07-11) and validated in-engine as the first art slice;
+  M5 does the polish pass.
+- **Provider track:** M2 built ports and `proposeNextStep` together; M3R adds
+  event-driven scheduling for six concurrent NPC loops and emergent
+  propagation; M4 adds per-role profiles (cheap ambient / better Station);
+  M5 locks the demo's default profile + disclosure copy.
 
 ## Milestone rules
 
@@ -112,3 +116,28 @@ gauge, purpose achieved through conversation only, an in-run suspicion
 recovery path, NPC-initiated conversations, a ledger-built run recap, and
 sightline-only spatial rules for the exterior shell (no other level design
 yet).
+
+## 2026-07-11 direction conversion — M3 killed and replaced by M3R
+
+Kill paragraph (required by the milestone rules): the owner played the
+completed M2 build, rejected its immersion (one crammed 2D room, a static
+cast), and after a full direction interview chose a complete conversion to a
+first-person 3D town — the player physically inside the NPC society rather
+than above it. M3's 2D exterior-shell frame therefore no longer described a
+game anyone intended to ship. M3 was killed at this boundary with its
+completed opening slices retained (merged judgment+reply call, diegetic
+thinking state, HUD scale, timer removal, record-prop removal); its surviving
+design decisions (run frame, survivable interrogation, merged-call turn,
+no-structural-waiting) move into M3R unchanged. The interview also resolved
+the open player-purpose question via a researched option map: the run
+objective is now belief-editing toward a scheduled Station hearing (vouch
+quorum first, rumor-diffusion clock in M4). Direction deltas are recorded in
+[`../vision/design-pillars.md`](../vision/design-pillars.md) (2026-07-11 late
+block); this consumed the one direction change budgeted for the boundary.
+
+Time-model consequence: the action-cost day-segment clock from the same-day
+gap review above is superseded by continuous world time. A player-modal
+conversation, including its merged reply wait, pauses the world; ambient
+NPC-to-NPC and scheduling calls remain asynchronous and their results are
+revision-checked before application. "The clock never moves while the player
+thinks or types" survives; the segment currency does not.

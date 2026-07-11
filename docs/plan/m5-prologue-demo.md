@@ -1,6 +1,10 @@
 # M5 — Prologue Demo
 
-**Status: queued.**
+**Status: queued — reconcile with the first-person direction at activation
+(2026-07-11).** The public target (15–30 min honest demo, KO/EN, exports)
+stands; the arc below predates the M3R conversion and the hearing-based run
+frame ([`roadmap.md`](roadmap.md)), so rewrite the arc against shipped M3R/M4
+reality before activating.
 
 ## Goal
 

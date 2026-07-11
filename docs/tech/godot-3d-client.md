@@ -10,8 +10,7 @@ interaction contracts carry over wherever this page says "unchanged".
 Engine practice (node choices, physics layers, import settings, pitfalls) is
 not duplicated here: implementing agents use the repo's `godot-best-practice`
 skill and the pinned Godot AI
-[`inspection/play contract`](godot-ai-playtest.md) once that separate
-workstream is proved and committed.
+[`inspection/play contract`](godot-ai-playtest.md).
 
 ## Presentation direction
 

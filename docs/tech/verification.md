@@ -13,9 +13,11 @@ gate.
 
 For the M3R conversion, the owner's later routing instruction defers all
 hands-on game driving until every implementation item and Sol self-review is
-complete. Intermediate slices therefore use only model-free headless and
-runtime checks; they do not claim the fun gate. The final bounded Terra-high
-run supplies the first M3R play/fun answer and the itemized live acceptance.
+complete. Intermediate 3D spatial/UI slices use model-free engineering
+evidence: CLI smokes plus Godot AI session/readiness, saved scene
+hierarchy/properties, current diagnostics, and non-input captures. Sol sends no
+gameplay input and does not claim the fun gate. The final bounded Terra-high run
+supplies the first M3R play/fun answer and the itemized live acceptance.
 
 ### M3R live-play routing (owner-set, 2026-07-11)
 
@@ -110,8 +112,10 @@ twice.
   do not protect: helper scripts, formatting, internal helper structure.
 - No verification ledgers, evidence packs, proof audits, or standing status
   files. State lives in code, tests, and the PR that shipped it.
-- Screenshots in PRs for visual changes: one before/after pair, taken from
-  the running game. No contact-sheet apparatus.
+- Visual-change PRs include the smallest Godot AI capture that proves the
+  claim: one affected editor/game frame, with a before/after pair only when the
+  comparison matters. Sol captures without gameplay input; exercised-state
+  captures belong to final Terra play. No contact-sheet apparatus.
 - A failed or unavailable Terra/Qwen live run is an honest blocked result, not
   permission to relax the route or count a deterministic smoke as the fun
   gate.

@@ -61,15 +61,19 @@ can overhear with subtitles.
 
 ## Dependency notes and ordering
 
-- **Godot AI integration lands first.** The owner's pinned
-  [Godot AI integration](../tech/godot-ai-playtest.md) (add-on, autoload, and
-  working contract) is the inspection
-  infrastructure for scene trees, logs, non-player-controlled snapshots, and
-  the final Terra run. Sol may prove its handshake and use those non-play
-  surfaces during implementation, but does not drive the game. Commit and
-  prove that workstream (owner's existing changes, preserved verbatim) before
-  or alongside the first 3D slice; it must not displace playable slices after
-  that.
+- **Godot AI is active in every 3D spatial/UI slice.** Before changing a slice,
+  select the editor session whose canonical path is this checkout's `godot/`
+  root and require Godot 4.7.x, plugin/server 2.9.1, and
+  `readiness=ready`. Files and the CLI own code, data, bulk resources, import,
+  and smokes. Godot AI owns scene/Inspector work where appropriate, saved
+  hierarchy/property inspection, current editor/game diagnostics, and the
+  smallest non-input capture needed for a visual claim. Sol may run the
+  fixture helper but sends no player input or gameplay model call. If one
+  bounded recovery cannot restore the integration, file/CLI evidence may
+  diagnose the problem but the spatial/UI slice cannot claim scene or visual
+  completion. Add the scene-owned `AgentPlaytestSurface` with the 3D main
+  scene, not as a later test-only slice. The full contract is
+  [`../tech/godot-ai-playtest.md`](../tech/godot-ai-playtest.md).
 - **Asset validation before scene work.** The asset family is decided on
   desk research (2026-07-11, recorded in
   [`../art/asset-pipeline.md`](../art/asset-pipeline.md)): greybox

@@ -40,10 +40,13 @@ executor/provider route in [`verification.md`](verification.md).
 - When the integration is unavailable, attempt bounded automatic recovery once,
   then report the blocker. Do not silently fall back to Computer Use.
 - Use `godot-best-practice` as the engine-generic control and evidence contract.
-- During M3R implementation, Sol may use non-play inspection and a fixture-mode
-  helper handshake only. After implementation and self-review, the bounded
-  executor packet assigns actual play to Terra high; all in-game model calls
-  are Qwen live with zero fallback. The maintained command contract is
+- During M3R, every 3D spatial/UI slice uses the non-play implementation route:
+  exact-session preflight, scene/Inspector inspection or mutation where
+  appropriate, diagnostics, and a state-appropriate capture. Sol may run a
+  fixture-mode helper handshake, but sends no player input and makes no gameplay
+  model call. After implementation and self-review, the bounded executor packet
+  assigns actual play to Terra high; all in-game model calls are Qwen live with
+  zero fallback. The maintained command contract is
   [`verification.md`](verification.md).
 
 ## Non-goals
@@ -54,9 +57,9 @@ executor/provider route in [`verification.md`](verification.md).
   endpoint.
 - No replacement for the existing Bun and Godot smokes in
   [`verification.md`](verification.md).
-- No editor scene-generation policy. Godot AI remains available for ordinary
-  editor work, but this page specifies inspection, routed play, and runtime
-  debugging only.
+- No blanket requirement to generate every scene through MCP. Godot AI is
+  required for live scene/Inspector work and evidence; files and the CLI remain
+  preferred for code, bulk edits, import, and smokes.
 - No debug command that changes suspicion, records, the civic ledger, verdicts,
   or session termination. The existing authority boundary remains intact.
 - No committed machine-specific MCP client configuration, editor preferences,
@@ -85,11 +88,13 @@ Verified on 2026-07-12 against Godot `4.7.stable.official.5b4e0cb0f`:
   `ObjectDB` instances and two resources still in use. This did not affect the
   server/helper handshake or run stop, but remains a pinned-integration cleanup
   warning to recheck on upgrade; it is not hidden as a clean shutdown claim.
-- The current Codex turn did not dynamically expose namespaced Godot AI tools.
-  A loopback MCP initialization and bounded read/call proved the 43-operation
-  server surface and helper handshake; a fresh Codex session is still required
-  to prove native tool discovery. Claude Code execution is untested, while its
-  package discovery path is the tracked `.claude/skills` symlink.
+- The current Codex harness did not dynamically expose namespaced Godot AI
+  tools. Typed loopback MCP calls selected the exact session and exercised the
+  same 2.9.1 server's scene open, hierarchy/property reads, diagnostics, and
+  editor capture without input. This is an implementation-only, non-portable
+  transport path; it does not prove native tool discovery or replace the final
+  executor route. Claude Code execution is untested, while its package discovery
+  path is the tracked `.claude/skills` symlink.
 - No port, editor preference, client configuration, credential, or absolute
   machine path is tracked.
 
@@ -131,6 +136,7 @@ Use the smallest surface that answers the current question.
 | Read parse, load, debugger, or runtime errors | Godot AI editor and game logs |
 | Explore an unfamiliar node or UI | Godot AI runtime tree, node, and UI inspection |
 | Read stable game-specific presentation state after the 3D adapter lands | `AgentPlaytestSurface.snapshot()` through a bounded runtime call |
+| Add, reparent, configure, or connect scene-owned nodes | Godot AI scene/node/resource operations with undo and save; direct text editing only for small, fully understood serialized changes |
 | Change GDScript or many text resources | Files and `apply_patch`; reload and inspect through Godot AI |
 | Import, smoke, or CI-style checks | Godot CLI and existing scripts |
 
@@ -144,6 +150,25 @@ least one of these is true:
 - a client refactor would otherwise break every agent play procedure.
 
 Do not add a helper merely to shorten one MCP call.
+
+## M3R implementation-time slice contract
+
+For each 3D spatial/UI slice:
+
+1. Enumerate sessions and match the canonical `godot/` root, then require the
+   pinned versions, editor readiness, current scene, play state, and diagnostic
+   cursor before the first stateful operation.
+2. Keep code, data, bulk resource edits, import, and smokes in files/CLI. Use
+   session-routed Godot AI operations for scene-owned structure and Inspector
+   work where they give safer undo/save semantics.
+3. After reload or import, inspect the saved hierarchy and relevant properties,
+   read new editor/game errors, and capture the affected editor or game state
+   when the slice makes a visual claim.
+4. Launch the fixture helper only when runtime state is necessary; inspect it
+   without input or a model call, then stop it.
+
+After one bounded recovery, a missing integration blocks spatial/UI completion
+and visual claims. It does not turn CLI checks into equivalent evidence.
 
 ## Thin Dream-specific adapter
 

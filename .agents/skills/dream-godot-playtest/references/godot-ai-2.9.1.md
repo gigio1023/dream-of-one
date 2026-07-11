@@ -57,8 +57,13 @@ plugin/server package version.
 ## Missing tool exposure
 
 If the server and editor connect but the current harness did not load callable
-Godot AI tools, refresh discovery once or use a fresh harness session. A direct
-loopback status/initialize probe may diagnose the integration, but it is not a
-portable play surface and must not be used to bypass the executor, authority,
-or provider gates. Report the harness tool surface as unavailable if it remains
-missing.
+Godot AI tools, refresh discovery once. For implementation-time non-play work,
+typed direct-loopback MCP calls to the pinned server may then perform only the
+session-routed operations allowed by the main skill: scene/Inspector work,
+hierarchy/property reads, diagnostics, non-input captures, and a fixture helper
+handshake. Re-enumerate sessions, use the exact canonical project path, and pass
+the Godot session id on every stateful call. This transport is non-portable and
+must be reported as such; it may not send player input, satisfy the Terra/Qwen
+gate, bypass game authority, or become a committed port/client configuration.
+If neither the harness tools nor this bounded loopback path is available, report
+the integration layer unavailable after the one recovery pass.

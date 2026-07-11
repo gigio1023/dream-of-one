@@ -1,5 +1,12 @@
 # World and Social Simulation
 
+> Note (2026-07-11, owner review + interview): in-room record props left
+> normal play — records are read through inspect/menus, and the notice board
+> is their successor. Where this doc says "session" for a whole play-through,
+> read "run" (회차); see [`core-loop.md`](core-loop.md), "Run and session
+> shape". Object lists below describe world data, not what is surfaced
+> beside NPCs.
+
 ## The town block
 
 v2's world is one administered town block, top-down 2D, four interior/exterior
@@ -66,14 +73,15 @@ until a playable loop needs them.
 
 ## Day segments and ambient life (M4)
 
-- Three segments per session day (open, midday, close); NPC schedules move
-  them between locations, giving natural conversation windows and witnesses.
+- Three segments per run day (open, midday, close) — the segment clock
+  itself lands in M3 as the run's time currency; NPC schedules move them
+  between locations, giving natural conversation windows and witnesses.
 - Ambient agent-loop behavior (restock, sweep, queue, chat) runs on the same
   tool catalog with low iteration budgets — the town must feel like it keeps
   existing when the player isn't talking to it.
 
 ## Save/load boundary (M4)
 
-A session is the unit of persistence: world layout, records, ledger, economy
-values, NPC memory snapshots. Mid-conversation state is not saved — sessions
+A run is the unit of persistence: world layout, records, ledger, economy
+values, NPC memory snapshots. Mid-conversation state is not saved — saves
 resume at beat boundaries.

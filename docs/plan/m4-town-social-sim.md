@@ -32,13 +32,13 @@ emergent-feeling beat, now emergent for real).
 `scenario/content/social-simulation-cards.md`, placed across locations so a
 session weaves storylet beats with ambient life.
 
-**Persistence:** session save/load at beat boundaries (records, ledger,
+**Persistence:** mid-run save/load at beat boundaries (records, ledger,
 economy, NPC memory snapshots); per-role provider profiles (cheap ambient,
 better Station/Studio) through the M2 registry.
 
 ## Acceptance
 
-- [ ] A full session (open → close of a day) plays across ≥3 locations with
+- [ ] A full run day (open → close) plays across ≥3 locations with
       storylet + ambient beats interleaved.
 - [ ] Suspicion raised in the store visibly alters behavior in the park and
       studio *only* via records/economy values (no cross-scene scripting).

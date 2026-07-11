@@ -19,4 +19,5 @@ Korean strings in parentheses.
 | **Fallback** | Deterministic resilience used when the selected provider is unavailable, over budget, or invalid. It is visibly marked and is never the production default profile. |
 | **Suspicion / report pressure** (의심 / 보고 압박) | Per-NPC suspicion accumulates into social report pressure. Movement per turn is model-judged and rule-clamped; thresholds only guarantee accumulated pressure reaches an ending. |
 | **Fun gate** | The single product gate: after playing a slice, "would I play this again for five minutes?" Honest answer recorded in the PR. |
-| **Session** | One run from start to a deterministic end state (verdict or exit). Replay with different answers must reach a meaningfully different route. |
+| **Run** (회차) | The unit of play (2026-07-11): the player arrives with a purpose and a deadline, and a run spans multiple conversations and incidents. Suspicion, records, and the ledger persist across conversations within a run and reset between runs; time is spent in day segments. Replay with different answers must reach a meaningfully different run. |
+| **Session** | One conversation with a guaranteed ending — the runtime unit behind the Session API. A session ending is not a run ending: a survived interrogation returns the player to the run. |

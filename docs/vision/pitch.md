@@ -42,8 +42,8 @@ interiors: store, station office, park, studio. The setting is a **stateless
 administered district** — generic-modern, institutionally named, deliberately
 unlocatable; Korean stays the authoring language of the content. Surveillance
 pressure is drawn with sightline cues, speech bubbles, reaction markers, and
-record props — all things a top-down camera makes *more* readable than 3D
-did.
+inspectable records — all things a top-down camera makes *more* readable
+than 3D did.
 
 ## References (what we take, what we leave)
 

@@ -145,7 +145,9 @@ Technical:
 
 ## Non-goals
 
-Full four-location theming and day segments (M4); mid-run save/load — pulled
+Full four-location theming and segment-driven NPC schedules across the town
+(M4) — the day-segment clock itself lands here as the run's time currency;
+mid-run save/load — pulled
 into M4 early only if runs outgrow one sitting; cross-run persistence
 (roguelite record carryover — M4 discussion at the earliest); the NPC
 bulletin board (M4 notice board, lowest priority); BGM (M5); long-horizon

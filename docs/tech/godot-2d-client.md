@@ -84,8 +84,10 @@ scene or art code.
   judgment path — the NPC's model reads the content either way; a subtle
   "recorded" stamp animation lands on submit (recorded-statement fiction,
   pillar 1).
-- Hesitation timer runs while the panel is open; crossing the threshold emits
-  the hesitation event to the runtime — visible as the NPC's patience cue.
+- Hesitation timer exists only in Station interrogation beats (≥40s, from
+  the storylet's `hesitationMs`); ordinary conversation has no timer and no
+  delay record (owner direction 2026-07-11). When it runs, crossing it emits
+  the hesitation event — visible as the officer's patience cue.
 - Every consequence surfaced within 1s of its ledger event: pressure line
   update, reaction marker, influence link, or bubble. No silent state changes.
 - World-anchored native HUD overlays follow projected NPC and record-prop

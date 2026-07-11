@@ -22,7 +22,11 @@ tests + fixture generation
         └── ScriptedNpcAdapter (never selectable from production config)
 ```
 
-The domain port exposes three operations:
+The domain port exposes three operations. (M3, per the 2026-07-11 interview,
+adds a merged conversation-turn operation — judgment + reply + suggestions
+in one call, the only provider work the player ever blocks on; the split
+operations below remain for agent beats, ambient work, and fallback. Its
+schema is specified with M3's first technical slice.)
 
 ```ts
 interface NpcProposalPort {

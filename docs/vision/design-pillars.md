@@ -43,6 +43,33 @@ this block ever drift apart, this block wins until the owner says otherwise.
 10. **Not now** — cross-session memory, local model support (long-term goal
     only), more locations, save/load.
 
+## Owner direction (2026-07-11, interview-confirmed, M2→M3 boundary)
+
+Deltas confirmed at the M2 close. Where this block conflicts with the
+2026-07-10 block (notably its item 7) or a pillar, this block wins.
+
+1. **The run (회차) is the unit of play.** A run spans multiple conversations
+   and incidents; suspicion, records, and the ledger persist across
+   conversations *within* a run and reset *between* runs. "Memory lives
+   inside one session" now reads "inside one run"; a conversation session
+   stays the runtime unit with a guaranteed ending.
+2. **A run has a purpose and a deadline.** The player came to town for a
+   reason (sourced from scenario canon) and has limited time. Win by
+   achieving the purpose in time; lose only to a definitive Station verdict.
+3. **Interrogation is survivable.** Being reported and questioned at the
+   Station is an in-run event: a defense that persuades lowers suspicion and
+   the run continues. Argument-reversible verdicts are the hinge of the run
+   structure, not a session-ending screen.
+4. **Pressure comes from the fiction, not the clock.** No timers,
+   auto-submit, or hesitation records in ordinary conversation; slow answers
+   cost nothing by default. Real-time pressure exists only inside explicit
+   high-pressure fiction (Station interrogation), and generously (≥40s).
+5. **Waiting must never be structural.** The only time the player waits on
+   the model is the minimum path to the content about to be shown (one
+   merged judgment+reply call); every other provider call is preloaded,
+   overlapped with the player's think/typing time, or deferred. Long
+   generation is acceptable; serialized architecture is a defect.
+
 ## 1. Conversation is the threat surface
 
 The core verb is answering. The player converses through AI-generated

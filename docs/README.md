@@ -5,8 +5,9 @@ below is scoped so that one agent can read it plus its linked references and
 start working. If a document is not reachable from this index, it is not
 active.
 
-Status: **M2 LLM-native agent loop active (2026-07-10).** M1 remains as the
-2D deterministic scenario harness. v1 (3D prototype,
+Status: **M3 agent-loop society active (2026-07-11).** M2 closed at the
+owner playtest boundary (architecture passed, fun gate: no on immersion);
+M1 remains as the 2D deterministic scenario harness. v1 (3D prototype,
 2025-10 → 2026-05) is archived under `docs/archive/` and summarized in the
 postmortem.
 
@@ -62,8 +63,8 @@ postmortem.
 |---|---|---|
 | [`plan/roadmap.md`](plan/roadmap.md) | Milestone ladder M0–M5, gates, tracks | — |
 | [`plan/m1-2d-playable-slice.md`](plan/m1-2d-playable-slice.md) | 2D rebuild and deterministic regression harness | closed as harness |
-| [`plan/m2-provider-ports.md`](plan/m2-provider-ports.md) | Provider-backed dialogue and next-step agent loop | **active** |
-| [`plan/m3-agent-loop-npcs.md`](plan/m3-agent-loop-npcs.md) | Concurrent NPC society and emergent propagation | queued |
+| [`plan/m2-provider-ports.md`](plan/m2-provider-ports.md) | Provider-backed dialogue and next-step agent loop | done |
+| [`plan/m3-agent-loop-npcs.md`](plan/m3-agent-loop-npcs.md) | Concurrent NPC society, long-breath run, emergent propagation | **active** |
 | [`plan/m4-town-social-sim.md`](plan/m4-town-social-sim.md) | Multi-location town, propagation, day segments, save/load | queued |
 | [`plan/m5-prologue-demo.md`](plan/m5-prologue-demo.md) | 15–30 min prologue, KO/EN, exports, itch release | queued |
 

@@ -20,7 +20,9 @@ flowchart TD
     J --> K{Report pressure?}
     K -->|no| G
     K -->|yes| L[Station intake → inquest → verdict<br/>model-judged, ending guaranteed]
-    L --> M[Session end + replay]
+    L -->|defense persuades| N[Suspicion drops<br/>the run continues]
+    N --> G
+    L -->|definitive verdict| M[Run ends + replay]
 ```
 
 The model is the NPC's mind: it proposes the utterance and reply suggestions,
@@ -40,8 +42,11 @@ visibility of context, tool validation, and a session that always ends.
   is ergonomics (typing fatigue) and injection surface control, not a limit on
   what the conversation means. Submitted text is hashed into the session
   record and treated in-fiction as a *recorded statement*.
-- **Hesitation is an answer.** Delay past a threshold emits
-  `response_hesitation_noted` — a real signal NPCs can act on.
+- **Hesitation is an answer only under interrogation.** Ordinary
+  conversation has no timer and no delay record — slow answers cost nothing
+  (owner direction 2026-07-11). Inside explicit high-pressure Station beats
+  a generous (≥40s) timer emits `response_hesitation_noted`, a real signal
+  the officer can act on.
 
 ## Suspicion model (model-judged, rule-bounded)
 
@@ -72,18 +77,32 @@ gameplay, not a defect. The replay promise is that different answers lead to
 visibly different social consequences that cite different records — not that
 play lands on one of four authored endings.
 
-## Session shape
+## Run and session shape
 
-- A session is 5–15 minutes now, growing to 15–30 minutes by M5.
-- Sessions always reach an ending. The outcome panel names the closing role
-  action and cites only ledger entries that actually exist; it never narrates
-  a consequence that did not happen.
-- Restart is instant and keeps nothing except the player's knowledge.
+- A **run** (회차) is the unit of play: the player arrives with a purpose
+  and a deadline (sourced from scenario canon), and a run spans multiple
+  conversations and incidents. Suspicion, records, and the ledger persist
+  across conversations within a run and reset between runs.
+- A **conversation session** stays the runtime unit: it always reaches an
+  ending, and the runtime owns that guarantee. A session ending is not a run
+  ending — being reported and interrogated is an in-run event, and a defense
+  that persuades lowers suspicion and returns the player to the run. Only
+  achieving the purpose, missing the deadline, or a definitive Station
+  verdict ends a run.
+- A conversation is a few minutes; a run fits one sitting in M3 and grows
+  toward the 15–30 minute prologue demo by M5. Mid-run save is deliberately
+  deferred: if runs outgrow one sitting, M4's save/load moves up.
+- The outcome panel names the closing role action and cites only ledger
+  entries that actually exist; it never narrates a consequence that did not
+  happen.
+- Restart starts a new run instantly and keeps nothing except the player's
+  knowledge.
 
 ## What "fun" means here (fun-gate rubric)
 
 The fun gate is subjective by design, but these are the felt qualities to aim
-for: (1) answering under mild time/social pressure feels risky; (2) watching
+for: (1) answering under social pressure feels risky (the clock joins in
+only under Station interrogation); (2) watching
 suspicion travel between NPCs is legible and a little dreadful; (3) losing
 makes the player immediately want to try a different line; (4) the town feels
 like it keeps existing when you're not talking to it.

@@ -13,8 +13,8 @@ boundaries (see anti-goals in
 |---|---|---|---|---|
 | M0 | Direction reset | This documentation tree; v1 process retired | ...agents rebuild the proof factory | **done (PR #98)** |
 | M1 | [2D scenario harness](m1-2d-playable-slice.md) | 2D client, Session API, world rules, and four deterministic regression scenarios | ...the presentation and deterministic authority boundary cannot be exercised end to end | **closed as harness (PR #100)** |
-| M2 | [LLM-native agent loop](m2-provider-ports.md) | The model judges suspicion and writes records that another NPC visibly reads; rules keep validity only | ...the shipped architecture is a scripted storylet runner wearing agent-loop names | **active** |
-| M3 | [Agent-loop society](m3-agent-loop-npcs.md) | Station verdicts become model-judged (reversible by argument); multiple NPCs pursue concurrent goals | ...one working agent loop does not produce believable society | queued |
+| M2 | [LLM-native agent loop](m2-provider-ports.md) | The model judges suspicion and writes records that another NPC visibly reads; rules keep validity only | ...the shipped architecture is a scripted storylet runner wearing agent-loop names | **done (closed 2026-07-11)** |
+| M3 | [Agent-loop society](m3-agent-loop-npcs.md) | Station verdicts become model-judged (reversible by argument); multiple NPCs pursue concurrent goals inside a long-breath run | ...one working agent loop does not produce believable society | **active** |
 | M4 | [Town social sim](m4-town-social-sim.md) | Four locations, 6–8 NPCs, day segments, ambient life, save/load | ...the loop doesn't scale past one room | queued |
 | M5 | [Prologue demo](m5-prologue-demo.md) | 15–30 min honest public demo, KO/EN, desktop exports, itch page | ...nothing shippable exists (v1's terminal state) | queued |
 
@@ -86,3 +86,22 @@ felt. Consequences:
 
 Timer note: the fiction's pressure should come from the NPCs' judged
 reactions, not from a real-time countdown on the input box.
+
+## 2026-07-11 owner interview (M2→M3 boundary)
+
+Interview at the M2 close, same day as the playtest review (deltas recorded
+in [`../vision/design-pillars.md`](../vision/design-pillars.md)). M2 closes
+with its acceptance passed and the fun gate honestly recorded as *no on
+immersion*; the closeout slate above executes as M3's opening slices rather
+than holding the milestone open. M3 activates rewritten around the owner
+decisions: a merged judgment+reply provider call as the turn's only
+player-blocking work; a long-breath run (회차) in which suspicion and records
+persist across conversations and reset between runs; a purpose-plus-deadline
+run frame; Station interrogation survivable by argument (the run continues);
+timers only inside interrogation and generous (≥40s); controls-only
+onboarding with rules taught by the fiction; SFX/ambience in M3, BGM in M5.
+
+Second principle, beside the timer note: the player's only wait is the
+minimum path to the content about to be shown — every other provider call is
+preloaded, overlapped with the player's think/typing time, or deferred. Long
+generation is tolerable; structural waiting is a defect.

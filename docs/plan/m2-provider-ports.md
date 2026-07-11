@@ -1,7 +1,10 @@
 # M2 — LLM-Native Agent Loop
 
-**Status: active.** Rewritten 2026-07-10 after the owner interview moved
-judgment authority to the model (see
+**Status: done — closed 2026-07-11.** Acceptance passed; fun gate honestly
+recorded as *no on immersion* (owner playtest review below). Per the
+boundary interview, the closeout slate executes as M3's opening slices
+([`m3-agent-loop-npcs.md`](m3-agent-loop-npcs.md)). Rewritten 2026-07-10
+after the owner interview moved judgment authority to the model (see
 [`../vision/design-pillars.md`](../vision/design-pillars.md)).
 
 ## Goal

@@ -30,6 +30,7 @@ const WEAPON_NAME_TOKENS: PackedStringArray = [
 @export var role_key: StringName
 @export var accent := Color(0.82, 0.82, 0.82)
 @export var character_scene: PackedScene
+@export var conversation_enabled := false
 @export_range(0.1, 8.0, 0.1, "or_greater") var walk_speed := 2.2
 
 @onready var _visual_root: Node3D = $VisualRoot
@@ -131,7 +132,13 @@ func interaction_kind() -> StringName:
 	return &"npc"
 
 
+func is_interaction_enabled() -> bool:
+	return conversation_enabled
+
+
 func interact(_interactor: Node3D) -> void:
+	if not conversation_enabled:
+		return
 	conversation_requested.emit(actor_id)
 
 

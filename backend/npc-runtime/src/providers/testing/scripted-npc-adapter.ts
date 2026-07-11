@@ -13,6 +13,14 @@ import type {
   ResolvedProposal,
 } from "../ports.js";
 
+function scriptedFallbackStance(
+  suspicionAfter: number,
+  signalCount: number,
+): "oppose" | "uncertain" | "vouch" {
+  if (suspicionAfter >= 55) return "oppose";
+  return signalCount === 0 ? "vouch" : "uncertain";
+}
+
 export interface ScriptedNpcHandlers {
   conversation(request: ConversationTurnRequest): ConversationProposal | Promise<ConversationProposal>;
   nextStep(request: AgentStepRequest): AgentStepProposal | Promise<AgentStepProposal>;
@@ -99,6 +107,12 @@ export class ScriptedNpcAdapter implements NpcProposalPort {
     return {
       proposal: {
         ...judged.proposal,
+        stance: scriptedFallbackStance(
+          request.suspicionBefore + judged.proposal.suspicionDelta,
+          judged.proposal.signals.length,
+        ),
+        meaningfulFirsthand:
+          request.playerLine.trim().length > 1 && request.playerLine !== "(응답 지연)",
         utterance: proposed.proposal.utterance,
         suggestedReplies: proposed.proposal.suggestedReplies,
         continueConversation: proposed.proposal.continueConversation,

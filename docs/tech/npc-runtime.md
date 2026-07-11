@@ -3,11 +3,18 @@
 TypeScript runtime owning all deterministic truth. This doc maps v1's ~12.7k
 LOC onto the M3R target so an agent knows what to keep, trim, or build.
 
-> **Implementation status (2026-07-11):** the checked-in runtime still owns
-> one conversation session at a time. M3R's first runtime slice must add the
-> run-scoped service below before six persistent NPCs or the hearing are
-> implemented. The target shape in this document is not evidence that it
-> already exists.
+> **Implementation status (2026-07-12):** the first additive M3R run slice is
+> checked in alongside the retained M1 Session service. `RunService` hydrates
+> the one `world_layout.json` into six persistent actor workspaces, separates
+> topology revision from monotonic run revision, owns the initial clock and
+> shared provider budget, and exposes run start/snapshot plus a run-bound
+> Studio receptionist conversation. A validated answer persists that actor's
+> exact line, why-line, private report inclination, firsthand provenance, and
+> model-judged coarse stance; speech alone cannot mutate institutional
+> pressure. Child-session end is idempotent and leaves the run alive.
+> Scheduler wakes, clock advance, ambient NPC conversation, records, and the
+> hearing remain target work below; this first contact is not evidence that
+> those later surfaces already exist.
 
 ## Target module shape
 
@@ -118,6 +125,15 @@ surface is:
 Responses carry `ProposalMeta`, transcript deltas, and `ledgerEvents[]` so the
 client can distinguish live/fallback/scripted behavior and animate validated
 consequences incrementally.
+
+The landed subset is `POST /v1/run/start`, `GET /v1/run/snapshot`, and the
+run-discriminated start/answer/snapshot/end session routes. Legacy
+`{storyletId, locale}` packets still dispatch to `SessionService`; strict
+`{runId, ...}` packets dispatch to `RunService` on the same loopback server.
+Fixture-only Studio scripts generate byte-identical backend and Godot replay
+files covering all three issued choices and one bounded free-input path.
+Production still resolves wording, suggestions, judgment, and stance through
+the configured provider port.
 
 `POST /v1/run/advance` is not a per-frame provider call. Godot batches elapsed
 unpaused time and discrete scene observations; `RunService` clamps the delta,

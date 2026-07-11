@@ -8,6 +8,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import type { AddressInfo } from "node:net";
 import { z } from "zod";
 import { SessionError, SessionService } from "../runtime/session/service.js";
+import { RunError, RunService } from "../runtime/run-service.js";
 import { evaluateRuntimeReadiness } from "../runtime/readiness.js";
 import {
   answerRequestSchema,
@@ -21,6 +22,19 @@ import {
   startRequestSchema,
   startResponseSchema,
 } from "./session-schemas.js";
+import {
+  runSessionAnswerRequestSchema,
+  runSessionAnswerResponseSchema,
+  runSessionEndRequestSchema,
+  runSessionEndResponseSchema,
+  runSessionSnapshotRequestSchema,
+  runSessionSnapshotResponseSchema,
+  runSessionStartRequestSchema,
+  runSessionStartResponseSchema,
+  runSnapshotRequestSchema,
+  runSnapshotSchema,
+  runStartRequestSchema,
+} from "../runtime/run-schema.js";
 
 export const LOOPBACK_HOST = "127.0.0.1";
 
@@ -57,6 +71,28 @@ function statusForSessionError(error: SessionError): number {
   }
 }
 
+function statusForRunError(error: RunError): number {
+  switch (error.code) {
+    case "run_not_found":
+    case "actor_not_found":
+    case "session_not_found":
+      return 404;
+    case "actor_not_supported":
+    case "conversation_active":
+    case "conversation_not_ready":
+    case "session_ended":
+    case "session_still_active":
+    case "unexpected_turn":
+      return 409;
+    default:
+      return 400;
+  }
+}
+
+function hasRunId(body: unknown): body is Record<string, unknown> & { runId: unknown } {
+  return typeof body === "object" && body !== null && "runId" in body;
+}
+
 /** Validate a handler's output against its response schema before sending. */
 function respond<T>(res: ServerResponse, schema: z.ZodType<T>, value: T): void {
   const parsed = schema.safeParse(value);
@@ -81,6 +117,7 @@ export interface SessionServerOptions {
   port?: number;
   host?: string;
   service?: SessionService;
+  runService?: RunService;
   /** Print the chosen port on listen (default true). */
   logListen?: boolean;
 }
@@ -92,7 +129,7 @@ export interface RunningSessionServer {
   close: () => Promise<void>;
 }
 
-export function createSessionServer(service: SessionService): Server {
+export function createSessionServer(service: SessionService, runService = new RunService()): Server {
   return createServer(async (req, res) => {
     try {
       const url = new URL(req.url ?? "/", `http://${LOOPBACK_HOST}`);
@@ -115,8 +152,37 @@ export function createSessionServer(service: SessionService): Server {
         return;
       }
 
+      if (method === "POST" && path === "/v1/run/start") {
+        const parsed = runStartRequestSchema.safeParse(await readJsonBody(req));
+        if (!parsed.success) return badRequest(res, parsed.error);
+        respond(res, runSnapshotSchema, runService.start(parsed.data.locale));
+        return;
+      }
+
+      if (method === "GET" && path === "/v1/run/snapshot") {
+        const parsed = runSnapshotRequestSchema.safeParse({
+          runId: url.searchParams.get("runId") ?? undefined,
+        });
+        if (!parsed.success) return badRequest(res, parsed.error);
+        respond(res, runSnapshotSchema, runService.snapshot(parsed.data.runId));
+        return;
+      }
+
       if (method === "POST" && path === "/v1/session/start") {
-        const parsed = startRequestSchema.safeParse(await readJsonBody(req));
+        const body = await readJsonBody(req);
+        if (hasRunId(body)) {
+          const parsed = runSessionStartRequestSchema.safeParse(body);
+          if (!parsed.success) return badRequest(res, parsed.error);
+          const result = await runService.startConversation(
+            parsed.data.runId,
+            parsed.data.actorId,
+            parsed.data.interactionZoneId,
+            parsed.data.locale,
+          );
+          respond(res, runSessionStartResponseSchema, result);
+          return;
+        }
+        const parsed = startRequestSchema.safeParse(body);
         if (!parsed.success) return badRequest(res, parsed.error);
         const result = await service.start(parsed.data.storyletId, parsed.data.locale);
         respond(res, startResponseSchema, result);
@@ -124,7 +190,20 @@ export function createSessionServer(service: SessionService): Server {
       }
 
       if (method === "POST" && path === "/v1/session/answer") {
-        const parsed = answerRequestSchema.safeParse(await readJsonBody(req));
+        const body = await readJsonBody(req);
+        if (hasRunId(body)) {
+          const parsed = runSessionAnswerRequestSchema.safeParse(body);
+          if (!parsed.success) return badRequest(res, parsed.error);
+          const result = await runService.answer(
+            parsed.data.runId,
+            parsed.data.sessionId,
+            parsed.data.turnId,
+            parsed.data.answer,
+          );
+          respond(res, runSessionAnswerResponseSchema, result);
+          return;
+        }
+        const parsed = answerRequestSchema.safeParse(body);
         if (!parsed.success) return badRequest(res, parsed.error);
         const result = await service.answer(parsed.data.sessionId, parsed.data.turnId, parsed.data.answer);
         respond(res, answerResponseSchema, result);
@@ -140,6 +219,17 @@ export function createSessionServer(service: SessionService): Server {
       }
 
       if (method === "GET" && path === "/v1/session/snapshot") {
+        const runId = url.searchParams.get("runId");
+        if (runId !== null) {
+          const parsed = runSessionSnapshotRequestSchema.safeParse({
+            runId,
+            sessionId: url.searchParams.get("sessionId") ?? undefined,
+          });
+          if (!parsed.success) return badRequest(res, parsed.error);
+          const result = runService.sessionSnapshot(parsed.data.runId, parsed.data.sessionId);
+          respond(res, runSessionSnapshotResponseSchema, result);
+          return;
+        }
         const parsed = snapshotRequestSchema.safeParse({ sessionId: url.searchParams.get("sessionId") ?? undefined });
         if (!parsed.success) return badRequest(res, parsed.error);
         const result = service.snapshot(parsed.data.sessionId);
@@ -148,7 +238,15 @@ export function createSessionServer(service: SessionService): Server {
       }
 
       if (method === "POST" && path === "/v1/session/end") {
-        const parsed = endRequestSchema.safeParse(await readJsonBody(req));
+        const body = await readJsonBody(req);
+        if (hasRunId(body)) {
+          const parsed = runSessionEndRequestSchema.safeParse(body);
+          if (!parsed.success) return badRequest(res, parsed.error);
+          const result = await runService.endConversation(parsed.data.runId, parsed.data.sessionId);
+          respond(res, runSessionEndResponseSchema, result);
+          return;
+        }
+        const parsed = endRequestSchema.safeParse(body);
         if (!parsed.success) return badRequest(res, parsed.error);
         const result = service.end(parsed.data.sessionId);
         respond(res, endResponseSchema, result);
@@ -162,6 +260,10 @@ export function createSessionServer(service: SessionService): Server {
       }
       if (error instanceof SessionError) {
         writeJson(res, statusForSessionError(error), { error: error.code, message: error.message });
+        return;
+      }
+      if (error instanceof RunError) {
+        writeJson(res, statusForRunError(error), { error: error.code, message: error.message });
         return;
       }
       if (error instanceof SyntaxError) {
@@ -179,7 +281,8 @@ export function createSessionServer(service: SessionService): Server {
  */
 export async function startSessionServer(options: SessionServerOptions = {}): Promise<RunningSessionServer> {
   const service = options.service ?? new SessionService();
-  const server = createSessionServer(service);
+  const runService = options.runService ?? new RunService();
+  const server = createSessionServer(service, runService);
   const host = options.host ?? LOOPBACK_HOST;
   const envPort = process.env.PORT ? Number(process.env.PORT) : undefined;
   const requestedPort =

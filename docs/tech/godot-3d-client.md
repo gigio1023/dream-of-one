@@ -1,13 +1,20 @@
 # Godot 3D Client
 
 Target: Godot 4.7.x stable (keep `GODOT_BIN` per device). **Status: the M3R
-spatial foundation has landed beside the retained 2D main
+spatial foundation and first run-backed social contact have landed beside the
+retained 2D main
 ([`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md)).**
 `res://scenes/main_3d.tscn` now provides the whole-town greybox, dressed park
 and studio, first-person controller, doors, one navigation map, six resident
-shells, HUD/settings, layout binding, and `AgentPlaytestSurface`.
+shells, HUD/settings, layout binding, and `AgentPlaytestSurface`. Its local
+`RunSession` can start the shared run and carry a Studio receptionist
+conversation through generated choices or bounded free text, model judgment,
+coarse stance display, child-session end, and world resume. The modal owns
+only presentation and pause; all memory and stance truth comes back from the
+TypeScript `RunService`. Only the receptionist advertises conversation until
+the runtime supports the other five actors.
 `run/main_scene` intentionally remains the 2D harness until the run-backed
-social-contact and NPC-society slices complete the first playable proof.
+NPC-society slices complete the first playable proof.
 
 Engine practice (node choices, physics layers, import settings, pitfalls) is
 not duplicated here: implementing agents use the repo's `godot-best-practice`
@@ -233,8 +240,10 @@ the dev machine with all six NPC loops live.
   [`npc-runtime.md`](npc-runtime.md); the old Session API is not the whole
   contract anymore.
 - **Conversation input semantics** — three generated suggestions plus bounded
-  free text submit into the same judgment path; "recorded statement" fiction;
-  no timer outside Station interrogation (≥40s inside it).
+  free text submit into the same judgment path. Ordinary talk becomes the
+  interlocutor's attributed memory; it is not presented as an administrative
+  record unless a later validated record action actually creates one. No
+  timer exists outside Station interrogation (≥40s inside it).
 - **Consequence surfacing ≤1s** of its ledger event; no silent state change.
 - **Fallback honesty** — provider status badge and fallback reason surface in
   play; raw ids stay behind F3 debug.
@@ -273,7 +282,9 @@ the dev machine with all six NPC loops live.
 
 Keep the thin list, rebuilt for 3D as slices land: `scene_load_smoke.gd`
 (scene instances, bidirectional layout binding, reachable interior path
-endpoints, no ceiling nav islands, and one physical NPC movement), a
+endpoints, no ceiling nav islands, one physical NPC movement, and the full
+fixture receptionist flow from run start through modal pause, judgment,
+stance presentation, child-session end, and resumed control), a
 run/session route smoke against the sidecar API
 (fixture mode), `localization_smoke.gd`, `check_assets.gd`. Same commands as
 [`verification.md`](verification.md); resist additions without an escaped

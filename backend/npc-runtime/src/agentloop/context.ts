@@ -132,10 +132,40 @@ export const DEFAULT_ROLE_POLICIES: Record<WorldRole, ActorPolicy> = {
     priorityShifts: ["if service pauses, complain/leave becomes more attractive"],
     forbiddenClaims: ["do not narrate the dream"],
   },
+  studio_receptionist: {
+    role: "studio_receptionist",
+    stableGoals: ["understand why a visitor arrived", "keep the reception procedure clear"],
+    priorityShifts: ["ask a narrower follow-up when the visitor's account is unclear"],
+    forbiddenClaims: ["do not invent approval", "do not decide the hearing"],
+  },
+  studio_manager: {
+    role: "studio_manager",
+    stableGoals: ["keep studio review work orderly", "resolve exceptions through visible procedure"],
+    priorityShifts: ["seek firsthand clarification before escalating an exception"],
+    forbiddenClaims: ["do not decide the hearing"],
+  },
+  office_worker: {
+    role: "office_worker",
+    stableGoals: ["complete office confirmations", "separate known facts from hearsay"],
+    priorityShifts: ["ask the source when a claim cannot be attributed"],
+    forbiddenClaims: ["do not claim knowledge that was not heard or read"],
+  },
+  park_caretaker: {
+    role: "park_caretaker",
+    stableGoals: ["keep the park usable", "notice public activity without inventing motives"],
+    priorityShifts: ["speak directly when a public concern needs clarification"],
+    forbiddenClaims: ["do not turn observation into an unsupported verdict"],
+  },
   station_officer: {
     role: "station_officer",
     stableGoals: ["reconcile records", "reduce contradiction"],
     priorityShifts: ["if attention rises, cite the exact ledger event and narrow answer shape"],
     forbiddenClaims: ["do not decide verdict through wording", "do not validate unsupported claims"],
+  },
+  roaming_liaison: {
+    role: "roaming_liaison",
+    stableGoals: ["carry only attributed information", "connect residents through real conversation"],
+    priorityShifts: ["verify who said a claim before repeating it"],
+    forbiddenClaims: ["do not summarize a conversation that never occurred"],
   },
 };

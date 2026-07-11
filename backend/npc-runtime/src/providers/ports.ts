@@ -1,6 +1,10 @@
 import type { ObservePacket } from "../agentloop/context.js";
 import type { ToolCall } from "../agentloop/tools.js";
-import type { ConversationChoiceIntent, ConversationSuspicionSignal } from "../contracts/types.js";
+import type {
+  CoarseStance,
+  ConversationChoiceIntent,
+  ConversationSuspicionSignal,
+} from "../contracts/types.js";
 
 export type ProviderFailureReason =
   | "missing_credentials"
@@ -78,6 +82,10 @@ export interface ConversationJudgment {
  * the player ever waits on (M3).
  */
 export interface MergedConversationTurn extends ConversationJudgment {
+  /** Model-owned coarse opinion after considering this direct exchange. */
+  stance: CoarseStance;
+  /** Whether the exchange contained enough firsthand substance to support a vouch. */
+  meaningfulFirsthand: boolean;
   utterance: string;
   suggestedReplies: [SuggestedReply, SuggestedReply, SuggestedReply];
   continueConversation: boolean;
@@ -102,6 +110,8 @@ export interface ConversationJudgmentRequest {
 export interface MergedConversationTurnRequest extends ConversationJudgmentRequest {
   objective: string;
   sceneFacts: string[];
+  stanceBefore?: CoarseStance;
+  hasMeaningfulFirsthandConversation?: boolean;
 }
 
 export interface AgentToolResult {
@@ -126,6 +136,8 @@ export interface AgentStepRequest {
 export interface NpcProposalPort {
   readonly profileId: string;
   preflight(): Promise<{ available: boolean; reason?: ProviderFailureReason }>;
+  /** Exact transport budget use for one run/session key, when this port owns a budget. */
+  accountingSnapshot?(scopeId: string): { callsUsed: number; tokensUsed: number };
   proposeConversationTurn(
     request: ConversationTurnRequest,
   ): Promise<ResolvedProposal<ConversationProposal>>;

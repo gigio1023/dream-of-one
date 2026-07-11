@@ -70,6 +70,8 @@ func _instance_scene(spec: Dictionary) -> void:
 		_check_runtime_shape(label, instance)
 		if label == "town_3d":
 			await _check_npc_movement(label, instance)
+		if label == "main_3d":
+			await _check_run_conversation(label, instance)
 		if not _has_failure_for(label):
 			print("PASS scene_load_smoke: %s" % label)
 
@@ -213,7 +215,16 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			_require_node(label, instance, "Town")
 			_require_node(label, instance, "Town/Actors/Player3D")
 			_require_node(label, instance, "HUD3D")
+			_require_node(label, instance, "RunSession")
 			_require_node(label, instance, "AgentPlaytestSurface")
+			if instance.process_mode != Node.PROCESS_MODE_ALWAYS:
+				_failures.append("main_3d does not process during its modal pause")
+			var town := instance.get_node_or_null("Town")
+			var run_session := instance.get_node_or_null("RunSession")
+			if town != null and town.process_mode != Node.PROCESS_MODE_PAUSABLE:
+				_failures.append("main_3d Town keeps processing during conversation")
+			if run_session != null and run_session.process_mode != Node.PROCESS_MODE_ALWAYS:
+				_failures.append("main_3d RunSession stops during conversation")
 			var playtest_surface := instance.get_node_or_null("AgentPlaytestSurface")
 			if playtest_surface == null or not playtest_surface.has_method("snapshot"):
 				_failures.append("main_3d has no AgentPlaytestSurface snapshot")
@@ -327,6 +338,91 @@ func _check_npc_movement(label: String, instance: Node) -> void:
 		_failures.append("%s NPC move_to made no physical progress" % label)
 	if npc.has_method("stop"):
 		npc.call("stop")
+
+
+func _check_run_conversation(label: String, instance: Node) -> void:
+	if OS.get_environment("DREAM_SESSION_MODE") != "fixture":
+		_failures.append("%s conversation smoke requires DREAM_SESSION_MODE=fixture" % label)
+		return
+	var player := instance.get_node_or_null("Town/Actors/Player3D") as CharacterBody3D
+	var receptionist := instance.get_node_or_null("Town/Actors/NPC_Studio_Receptionist") as NPC3D
+	var hud := instance.get_node_or_null("HUD3D") as HUD3D
+	if player == null or receptionist == null or hud == null:
+		return
+	if not receptionist.is_interaction_enabled():
+		_failures.append("%s Studio receptionist is not interactable" % label)
+		return
+	for actor_value in instance.get_tree().get_nodes_in_group(&"npc_actors"):
+		if not actor_value is NPC3D or actor_value == receptionist:
+			continue
+		if (actor_value as NPC3D).is_interaction_enabled():
+			_failures.append("%s exposes an unsupported NPC conversation" % label)
+
+	player.global_position = receptionist.global_position + Vector3(0.0, 0.0, 1.5)
+	receptionist.interact(player)
+	var opened := false
+	for _frame in range(120):
+		await process_frame
+		var hud_snapshot := hud.presentation_snapshot()
+		var current_turn: Dictionary = hud_snapshot.get("currentTurn", {})
+		if str(hud_snapshot.get("modalSurface", "")) == "conversation" and not current_turn.is_empty():
+			opened = true
+			break
+	if not opened:
+		_failures.append("%s fixture conversation did not open" % label)
+		paused = false
+		return
+	if not paused:
+		_failures.append("%s world is not paused during conversation" % label)
+	if bool(player.get("_control_enabled")):
+		_failures.append("%s player control stayed enabled during conversation" % label)
+	var opened_snapshot := hud.presentation_snapshot()
+	var opened_provider: Dictionary = opened_snapshot.get("provider", {})
+	if str(opened_provider.get("transport", "")) != "scripted":
+		_failures.append("%s conversation does not visibly identify fixture provenance" % label)
+	var opened_turn: Dictionary = opened_snapshot.get("currentTurn", {})
+	var choices_value: Variant = opened_turn.get("choices", [])
+	if not choices_value is Array or (choices_value as Array).size() != 3:
+		_failures.append("%s conversation does not expose exactly three runtime choices" % label)
+		paused = false
+		return
+	var first_choice: Variant = (choices_value as Array)[0]
+	if not first_choice is Dictionary:
+		_failures.append("%s conversation first choice is invalid" % label)
+		paused = false
+		return
+	hud.choice_submitted.emit(str((first_choice as Dictionary).get("choiceId", "")))
+
+	var ended := false
+	for _frame in range(180):
+		await process_frame
+		var hud_snapshot := hud.presentation_snapshot()
+		if str(hud_snapshot.get("modalSurface", "")) == "none" and not paused:
+			ended = true
+			break
+	if not ended:
+		_failures.append("%s fixture conversation did not end and resume the world" % label)
+		paused = false
+		return
+	if not bool(player.get("_control_enabled")):
+		_failures.append("%s player control did not resume after conversation" % label)
+	if receptionist.is_interaction_enabled():
+		_failures.append("%s leaves a false receptionist re-conversation prompt" % label)
+	var main_snapshot: Dictionary = instance.call("presentation_snapshot")
+	if int(main_snapshot.get("runWorldRevision", -1)) != 3:
+		_failures.append("%s run revision did not reach idempotent child-session end" % label)
+	var provider: Dictionary = main_snapshot.get("provider", {})
+	if str(provider.get("transport", "")) != "scripted":
+		_failures.append("%s fixture provider provenance is not scripted" % label)
+	var stance_summaries: Variant = main_snapshot.get("encounteredStances", [])
+	if not stance_summaries is Array or (stance_summaries as Array).size() != 1:
+		_failures.append("%s did not retain the encountered receptionist stance" % label)
+	else:
+		var stance_entry: Variant = (stance_summaries as Array)[0]
+		if not stance_entry is Dictionary or str((stance_entry as Dictionary).get("stance", "")) != "vouch":
+			_failures.append("%s did not present the runtime-judged vouch stance" % label)
+		elif str((stance_entry as Dictionary).get("summary", "")).is_empty():
+			_failures.append("%s did not persist the judgment why-line in normal UI" % label)
 
 
 func _anchor_position(layout: Dictionary, anchor_ref: String) -> Vector3:

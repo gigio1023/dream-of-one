@@ -72,6 +72,14 @@ export class ProviderService implements NpcProposalPort {
     return this.options.textGen.preflight();
   }
 
+  accountingSnapshot(scopeId: string): { callsUsed: number; tokensUsed: number } {
+    const budget = this.budgetFor(scopeId);
+    return {
+      callsUsed: budget.calls,
+      tokensUsed: budget.inputTokens + budget.outputTokens,
+    };
+  }
+
   async proposeConversationTurn(
     request: ConversationTurnRequest,
   ): Promise<ResolvedProposal<ConversationProposal>> {
@@ -169,6 +177,8 @@ export class ProviderService implements NpcProposalPort {
       "Those ranges are calibration, not a classifier: use the actual context and allow asymmetric or negative movement when warranted.",
       "List the signal labels that genuinely apply; an ordinary answer has none.",
       "whyLine is one in-world Korean sentence the player will read as the reason suspicion moved.",
+      "Return stance as this NPC's coarse opinion after the exchange: oppose, uncertain, or vouch.",
+      "meaningfulFirsthand is true only when this direct exchange gave the NPC substantive firsthand grounds; vouch requires it.",
       "utterance is your next in-character Korean line after hearing the player.",
       "The reply intent labels shape variety only; they never decide suspicion or game truth.",
       "Use natural modern Korean only in whyLine, utterance, and suggestion text; do not mix English, Chinese characters, or other scripts.",
@@ -183,6 +193,8 @@ export class ProviderService implements NpcProposalPort {
       actor: request.observePacket,
       suspicionBefore: request.suspicionBefore,
       reportPressureBefore: request.reportPressureBefore,
+      stanceBefore: request.stanceBefore,
+      hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
       beatId: request.beatId,
       locale: request.locale,
     });
@@ -263,8 +275,9 @@ export class ProviderService implements NpcProposalPort {
       return { ok: false, reason: preflight.reason ?? "unavailable" };
     }
     try {
+      this.reserveCall(input.sessionId);
       const first = await this.withTimeout(this.options.textGen.generate(input.request));
-      this.recordUsage(input.sessionId, first.usage);
+      this.recordTokens(input.sessionId, first.usage);
       const parsed = this.parseJson(input.schema, first.text);
       if (parsed.success) {
         return {
@@ -277,6 +290,7 @@ export class ProviderService implements NpcProposalPort {
       if (this.isBudgetExhausted(input.sessionId)) {
         return { ok: false, reason: "budget_exhausted" };
       }
+      this.reserveCall(input.sessionId);
       const repair = await this.withTimeout(
         this.options.textGen.generate({
           ...input.request,
@@ -291,10 +305,14 @@ export class ProviderService implements NpcProposalPort {
           }),
         }),
       );
-      this.recordUsage(input.sessionId, repair.usage);
+      this.recordTokens(input.sessionId, repair.usage);
       const repaired = this.parseJson(input.schema, repair.text);
       return repaired.success
-        ? { ok: true, value: repaired.data, meta: this.liveMeta(repair.usage) }
+        ? {
+            ok: true,
+            value: repaired.data,
+            meta: this.liveMeta(this.combineUsage(first.usage, repair.usage)),
+          }
         : { ok: false, reason: "invalid_envelope" };
     } catch (error) {
       const message = (error as Error).message.toLowerCase();
@@ -341,11 +359,28 @@ export class ProviderService implements NpcProposalPort {
     return budget.calls >= this.maxCalls || budget.inputTokens + budget.outputTokens >= this.maxTokens;
   }
 
-  private recordUsage(sessionId: string, usage?: ProviderUsage): void {
+  private reserveCall(sessionId: string): void {
     const budget = this.budgetFor(sessionId);
     budget.calls += 1;
+  }
+
+  private recordTokens(sessionId: string, usage?: ProviderUsage): void {
+    const budget = this.budgetFor(sessionId);
     budget.inputTokens += usage?.inputTokens ?? 0;
     budget.outputTokens += usage?.outputTokens ?? 0;
+  }
+
+  private combineUsage(...usages: Array<ProviderUsage | undefined>): ProviderUsage | undefined {
+    const present = usages.filter((usage): usage is ProviderUsage => usage !== undefined);
+    if (present.length === 0) return undefined;
+    return present.reduce<ProviderUsage>(
+      (total, usage) => ({
+        inputTokens: total.inputTokens + usage.inputTokens,
+        outputTokens: total.outputTokens + usage.outputTokens,
+        totalTokens: total.totalTokens + usage.totalTokens,
+      }),
+      { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    );
   }
 
   private liveMeta(usage?: ProviderUsage): ProposalMeta {

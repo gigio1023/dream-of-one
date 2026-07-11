@@ -98,6 +98,22 @@ const validJudgment = JSON.stringify({
   whyLine: "그 표현은 꿈 바깥의 말이라 점원이 기억해 둘 만합니다.",
 });
 
+const validMergedTurn = JSON.stringify({
+  suspicionDelta: -10,
+  reportDelta: 0,
+  signals: [],
+  whyLine: "방문 이유를 분명하게 설명해 의문이 줄었습니다.",
+  stance: "vouch",
+  meaningfulFirsthand: true,
+  utterance: "방문 목적을 확인했습니다.",
+  suggestedReplies: [
+    { text: "확인해 주셔서 감사합니다.", intent: "safe/local" },
+    { text: "다음 절차를 알려 주세요.", intent: "uncertain/repair" },
+    { text: "더 말하지 않겠습니다.", intent: "risky/weird" },
+  ],
+  continueConversation: false,
+});
+
 test("provider service returns schema-validated live conversation proposals", async () => {
   const textGen = new FakeTextGen([
     { text: validConversation, usage: { inputTokens: 20, outputTokens: 30, totalTokens: 50 } },
@@ -141,6 +157,32 @@ test("the model judges suspicion live; the rule classifier answers only as fallb
   // The dream-language line still registers through the deterministic classifier.
   assert.ok(fallback.proposal.signals.includes("dream_language_leak"));
   assert.ok(fallback.proposal.suspicionDelta > 0);
+});
+
+test("the one blocking merged call returns model-owned stance with firsthand grounding", async () => {
+  const textGen = new FakeTextGen([{ text: validMergedTurn }]);
+  const service = new ProviderService({
+    profileId: "test/merged-stance",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const result = await service.judgeAndProposeConversationTurn({
+    ...judgmentRequest(),
+    objective: "방문 이유를 확인한다.",
+    sceneFacts: ["스튜디오 접수대에서 직접 대화하고 있다."],
+    stanceBefore: "uncertain",
+    hasMeaningfulFirsthandConversation: false,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.proposal.stance, "vouch");
+  assert.equal(result.proposal.meaningfulFirsthand, true);
+  assert.equal(textGen.requests.length, 1);
+  assert.equal(textGen.requests[0].schemaName, "npc_merged_conversation_turn");
+  assert.match(textGen.requests[0].instructions, /vouch requires it/);
+  const input = JSON.parse(textGen.requests[0].input);
+  assert.equal(input.stanceBefore, "uncertain");
+  assert.equal(input.hasMeaningfulFirsthandConversation, false);
 });
 
 test("agent-step prompts keep visible language Korean and stop successful repetition", async () => {
@@ -199,7 +241,10 @@ test("mixed-script player text gets one repair before it reaches the game", asyn
 });
 
 test("invalid provider JSON gets one bounded repair attempt", async () => {
-  const textGen = new FakeTextGen([{ text: "not json" }, { text: validConversation }]);
+  const textGen = new FakeTextGen([
+    { text: "not json", usage: { inputTokens: 5, outputTokens: 1, totalTokens: 6 } },
+    { text: validConversation, usage: { inputTokens: 7, outputTokens: 2, totalTokens: 9 } },
+  ]);
   const service = new ProviderService({
     profileId: "test/repair",
     textGen,
@@ -209,6 +254,11 @@ test("invalid provider JSON gets one bounded repair attempt", async () => {
   assert.equal(result.meta.transport, "live");
   assert.equal(textGen.requests.length, 2);
   assert.equal(textGen.requests[1].purpose, "repair");
+  assert.deepEqual(service.accountingSnapshot("session-provider-test"), {
+    callsUsed: 2,
+    tokensUsed: 15,
+  });
+  assert.equal(result.meta.usage?.totalTokens, 15);
 });
 
 test("missing credentials and exhausted budget use explicit fallback metadata", async () => {
@@ -220,6 +270,7 @@ test("missing credentials and exhausted budget use explicit fallback metadata", 
   const missing = await unavailable.proposeConversationTurn(conversationRequest());
   assert.equal(missing.meta.transport, "fallback");
   assert.equal(missing.meta.fallbackReason, "missing_credentials");
+  assert.equal(unavailable.accountingSnapshot("session-provider-test").callsUsed, 0);
 
   const budgeted = new ProviderService({
     profileId: "test/budget",
@@ -231,6 +282,7 @@ test("missing credentials and exhausted budget use explicit fallback metadata", 
   const second = await budgeted.proposeConversationTurn(conversationRequest());
   assert.equal(first.meta.transport, "live");
   assert.equal(second.meta.fallbackReason, "budget_exhausted");
+  assert.equal(budgeted.accountingSnapshot("session-provider-test").callsUsed, 1);
 });
 
 test("provider timeout falls back without blocking the session", async () => {
@@ -248,6 +300,7 @@ test("provider timeout falls back without blocking the session", async () => {
   const result = await service.proposeConversationTurn(conversationRequest());
   assert.equal(result.meta.transport, "fallback");
   assert.equal(result.meta.fallbackReason, "timeout");
+  assert.equal(service.accountingSnapshot("session-provider-test").callsUsed, 1);
 });
 
 test("production registry contains no scripted profile", () => {

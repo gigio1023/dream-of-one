@@ -56,6 +56,11 @@ export const CONVERSATION_CHOICE_INTENTS = [
 
 export type ConversationChoiceIntent = (typeof CONVERSATION_CHOICE_INTENTS)[number];
 
+/** Player-facing presentation of one resident's opinion during an M3R run. */
+export const COARSE_STANCES = ["oppose", "uncertain", "vouch"] as const;
+
+export type CoarseStance = (typeof COARSE_STANCES)[number];
+
 export interface ConversationTurnSignal {
   conversationId: string;
   turnId: string;

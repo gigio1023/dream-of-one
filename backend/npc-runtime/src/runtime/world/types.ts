@@ -14,7 +14,12 @@ export const WORLD_ROLES = [
   "store_clerk",
   "store_manager",
   "waiting_customer",
+  "studio_receptionist",
+  "studio_manager",
+  "office_worker",
+  "park_caretaker",
   "station_officer",
+  "roaming_liaison",
 ] as const;
 
 export type WorldRole = (typeof WORLD_ROLES)[number];

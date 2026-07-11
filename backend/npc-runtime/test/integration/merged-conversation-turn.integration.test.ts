@@ -43,6 +43,8 @@ test("merged conversation turn schema accepts a valid judgment-plus-reply envelo
     reportDelta: 10,
     signals: ["local_routine_mismatch"],
     whyLine: "그 대답이 상점의 평소 순서와 맞지 않았습니다.",
+    stance: "uncertain",
+    meaningfulFirsthand: true,
     utterance: "어제 기록에는 같은 주문이라고 적혀 있습니다. 맞습니까?",
     suggestedReplies: [
       { text: "네, 맞습니다.", intent: "safe/local" },
@@ -65,8 +67,6 @@ test("fallback merged turn composes rule judgment with canned reply suggestions"
   assert.ok(resolved.proposal.whyLine.length > 0);
   const reparsed = mergedConversationTurnSchema.safeParse({
     ...resolved.proposal,
-    // Rule fallback why-lines may be English; live/scripted paths keep Korean.
-    whyLine: "그 대답이 상점의 평소 순서와 맞지 않았습니다.",
   });
   assert.equal(reparsed.success, true);
 });

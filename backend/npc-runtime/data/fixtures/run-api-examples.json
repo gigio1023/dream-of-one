@@ -1,0 +1,3034 @@
+{
+  "note": "Generated through the fixture-only Studio adapter and production RunService paths. Regenerate with `bun run --cwd backend/npc-runtime fixtures:run:generate`.",
+  "locale": "ko-KR",
+  "endpoints": {
+    "runStart": {
+      "endpoint": "POST /v1/run/start",
+      "request": {
+        "locale": "ko-KR"
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "worldId": "m3r_first_person_town",
+        "layoutRevision": "rev-first-person-town-v1",
+        "worldRevision": 0,
+        "locale": "ko-KR",
+        "worldClock": {
+          "elapsedSeconds": 0,
+          "graceEndsAtSeconds": 90,
+          "hearingAtSeconds": 1800,
+          "paused": false
+        },
+        "institutionalPressure": 0,
+        "providerBudget": {
+          "callLimit": 120,
+          "tokenLimit": 300000,
+          "reservedCalls": 20,
+          "reservedTokens": 50000,
+          "callsUsed": 0,
+          "tokensUsed": 0
+        },
+        "lastProposalMeta": null,
+        "activeConversationId": null,
+        "actors": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "role": "studio_receptionist",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "role": "studio_manager",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "role": "office_worker",
+            "locationId": "Office",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "role": "park_caretaker",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "role": "station_officer",
+            "locationId": "Station",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "role": "roaming_liaison",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          }
+        ],
+        "records": [],
+        "ledgerEvents": []
+      }
+    },
+    "sessionStart": {
+      "endpoint": "POST /v1/session/start",
+      "request": {
+        "runId": "run-fixture-1",
+        "actorId": "NPC_Studio_Receptionist",
+        "interactionZoneId": "StudioReceptionConversation",
+        "locale": "ko-KR"
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "worldRevision": 1,
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "uncertain",
+          "suspicion": 0,
+          "hasMeaningfulFirsthandConversation": false,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "nextTurn": {
+          "turnId": "sess-fixture-1#0",
+          "beatId": "studio_arrival",
+          "promptId": "studio_visit_reason",
+          "choiceSetId": "studio_arrival.generated",
+          "speakerId": "NPC_Studio_Receptionist",
+          "prompt": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+          "acceptsFreeInput": true,
+          "continueConversation": true,
+          "choices": [
+            {
+              "choiceId": "studio_arrival.generated.1",
+              "intent": "safe/local",
+              "line": "안내받은 절차를 확인하러 왔습니다."
+            },
+            {
+              "choiceId": "studio_arrival.generated.2",
+              "intent": "uncertain/repair",
+              "line": "먼저 어떤 접수인지 설명해 주세요."
+            },
+            {
+              "choiceId": "studio_arrival.generated.3",
+              "intent": "risky/weird",
+              "line": "여기 사람이 아니라서 잘 모르겠습니다."
+            }
+          ],
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        }
+      }
+    },
+    "sessionAnswer": {
+      "endpoint": "POST /v1/session/answer",
+      "request": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "turnId": "sess-fixture-1#0",
+        "answer": {
+          "type": "choice",
+          "choiceId": "studio_arrival.generated.1"
+        }
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "worldRevision": 2,
+        "judgment": {
+          "signals": [],
+          "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+          "suspicionDelta": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "suspicionAfter": 0,
+          "reportPressureAfter": 0,
+          "stanceBefore": "uncertain",
+          "stanceAfter": "vouch",
+          "meaningfulFirsthand": true
+        },
+        "memoryDelta": {
+          "memoryId": "mem-fixture-2",
+          "kind": "player_conversation",
+          "sourceActorId": "player",
+          "listenerActorId": "NPC_Studio_Receptionist",
+          "conversationId": "sess-fixture-1",
+          "turnId": "sess-fixture-1#0",
+          "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+          "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+          "signals": [],
+          "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+          "suspicionBefore": 0,
+          "suspicionAfter": 0,
+          "suspicionDelta": 0,
+          "reportPressureBefore": 0,
+          "reportPressureAfter": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "proposedStance": "vouch",
+          "appliedStance": "vouch",
+          "meaningfulFirsthand": true,
+          "worldSeconds": 0,
+          "worldRevision": 2,
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "vouch",
+          "suspicion": 0,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "signals": [],
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 0,
+              "suspicionDelta": 0,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "vouch",
+              "appliedStance": "vouch",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "nextTurn": null,
+        "proposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        }
+      }
+    },
+    "sessionSnapshot": {
+      "endpoint": "GET /v1/session/snapshot",
+      "request": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1"
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "actorId": "NPC_Studio_Receptionist",
+        "worldRevision": 2,
+        "status": "awaiting_end",
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "vouch",
+          "suspicion": 0,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "signals": [],
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 0,
+              "suspicionDelta": 0,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "vouch",
+              "appliedStance": "vouch",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "nextTurn": null,
+        "lastJudgment": {
+          "signals": [],
+          "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+          "suspicionDelta": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "suspicionAfter": 0,
+          "reportPressureAfter": 0,
+          "stanceBefore": "uncertain",
+          "stanceAfter": "vouch",
+          "meaningfulFirsthand": true
+        },
+        "lastMemory": {
+          "memoryId": "mem-fixture-2",
+          "kind": "player_conversation",
+          "sourceActorId": "player",
+          "listenerActorId": "NPC_Studio_Receptionist",
+          "conversationId": "sess-fixture-1",
+          "turnId": "sess-fixture-1#0",
+          "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+          "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+          "signals": [],
+          "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+          "suspicionBefore": 0,
+          "suspicionAfter": 0,
+          "suspicionDelta": 0,
+          "reportPressureBefore": 0,
+          "reportPressureAfter": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "proposedStance": "vouch",
+          "appliedStance": "vouch",
+          "meaningfulFirsthand": true,
+          "worldSeconds": 0,
+          "worldRevision": 2,
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        }
+      }
+    },
+    "runSnapshotAfterAnswer": {
+      "endpoint": "GET /v1/run/snapshot",
+      "request": {
+        "runId": "run-fixture-1"
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "worldId": "m3r_first_person_town",
+        "layoutRevision": "rev-first-person-town-v1",
+        "worldRevision": 2,
+        "locale": "ko-KR",
+        "worldClock": {
+          "elapsedSeconds": 0,
+          "graceEndsAtSeconds": 90,
+          "hearingAtSeconds": 1800,
+          "paused": true
+        },
+        "institutionalPressure": 0,
+        "providerBudget": {
+          "callLimit": 120,
+          "tokenLimit": 300000,
+          "reservedCalls": 20,
+          "reservedTokens": 50000,
+          "callsUsed": 0,
+          "tokensUsed": 0
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "activeConversationId": "sess-fixture-1",
+        "actors": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "role": "studio_receptionist",
+            "locationId": "Studio",
+            "stance": "vouch",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": true,
+            "memories": [
+              {
+                "memoryId": "mem-fixture-1",
+                "kind": "npc_utterance",
+                "sourceActorId": "NPC_Studio_Receptionist",
+                "listenerActorIds": [
+                  "player"
+                ],
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "worldSeconds": 0,
+                "worldRevision": 1,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "memoryId": "mem-fixture-2",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+                "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+                "signals": [],
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+                "suspicionBefore": 0,
+                "suspicionAfter": 0,
+                "suspicionDelta": 0,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 0,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "vouch",
+                "appliedStance": "vouch",
+                "meaningfulFirsthand": true,
+                "worldSeconds": 0,
+                "worldRevision": 2,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "role": "studio_manager",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "role": "office_worker",
+            "locationId": "Office",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "role": "park_caretaker",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "role": "station_officer",
+            "locationId": "Station",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "role": "roaming_liaison",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          }
+        ],
+        "records": [],
+        "ledgerEvents": []
+      }
+    },
+    "sessionEnd": {
+      "endpoint": "POST /v1/session/end",
+      "request": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1"
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "ended": true,
+        "worldRevision": 3,
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "vouch",
+          "suspicion": 0,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "signals": [],
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 0,
+              "suspicionDelta": 0,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "vouch",
+              "appliedStance": "vouch",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "queuedRunDeltas": []
+      }
+    },
+    "runSnapshotAfterEnd": {
+      "endpoint": "GET /v1/run/snapshot",
+      "request": {
+        "runId": "run-fixture-1"
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "worldId": "m3r_first_person_town",
+        "layoutRevision": "rev-first-person-town-v1",
+        "worldRevision": 3,
+        "locale": "ko-KR",
+        "worldClock": {
+          "elapsedSeconds": 0,
+          "graceEndsAtSeconds": 90,
+          "hearingAtSeconds": 1800,
+          "paused": false
+        },
+        "institutionalPressure": 0,
+        "providerBudget": {
+          "callLimit": 120,
+          "tokenLimit": 300000,
+          "reservedCalls": 20,
+          "reservedTokens": 50000,
+          "callsUsed": 0,
+          "tokensUsed": 0
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "activeConversationId": null,
+        "actors": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "role": "studio_receptionist",
+            "locationId": "Studio",
+            "stance": "vouch",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": true,
+            "memories": [
+              {
+                "memoryId": "mem-fixture-1",
+                "kind": "npc_utterance",
+                "sourceActorId": "NPC_Studio_Receptionist",
+                "listenerActorIds": [
+                  "player"
+                ],
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "worldSeconds": 0,
+                "worldRevision": 1,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "memoryId": "mem-fixture-2",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+                "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+                "signals": [],
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+                "suspicionBefore": 0,
+                "suspicionAfter": 0,
+                "suspicionDelta": 0,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 0,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "vouch",
+                "appliedStance": "vouch",
+                "meaningfulFirsthand": true,
+                "worldSeconds": 0,
+                "worldRevision": 2,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "role": "studio_manager",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "role": "office_worker",
+            "locationId": "Office",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "role": "park_caretaker",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "role": "station_officer",
+            "locationId": "Station",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "role": "roaming_liaison",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          }
+        ],
+        "records": [],
+        "ledgerEvents": []
+      }
+    }
+  },
+  "sessionAnswerVariants": [
+    {
+      "variantId": "choice_1",
+      "request": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "turnId": "sess-fixture-1#0",
+        "answer": {
+          "type": "choice",
+          "choiceId": "studio_arrival.generated.1"
+        }
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "worldRevision": 2,
+        "judgment": {
+          "signals": [],
+          "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+          "suspicionDelta": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "suspicionAfter": 0,
+          "reportPressureAfter": 0,
+          "stanceBefore": "uncertain",
+          "stanceAfter": "vouch",
+          "meaningfulFirsthand": true
+        },
+        "memoryDelta": {
+          "memoryId": "mem-fixture-2",
+          "kind": "player_conversation",
+          "sourceActorId": "player",
+          "listenerActorId": "NPC_Studio_Receptionist",
+          "conversationId": "sess-fixture-1",
+          "turnId": "sess-fixture-1#0",
+          "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+          "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+          "signals": [],
+          "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+          "suspicionBefore": 0,
+          "suspicionAfter": 0,
+          "suspicionDelta": 0,
+          "reportPressureBefore": 0,
+          "reportPressureAfter": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "proposedStance": "vouch",
+          "appliedStance": "vouch",
+          "meaningfulFirsthand": true,
+          "worldSeconds": 0,
+          "worldRevision": 2,
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "vouch",
+          "suspicion": 0,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "signals": [],
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 0,
+              "suspicionDelta": 0,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "vouch",
+              "appliedStance": "vouch",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "nextTurn": null,
+        "proposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        }
+      },
+      "sessionSnapshotResponse": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "actorId": "NPC_Studio_Receptionist",
+        "worldRevision": 2,
+        "status": "awaiting_end",
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "vouch",
+          "suspicion": 0,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "signals": [],
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 0,
+              "suspicionDelta": 0,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "vouch",
+              "appliedStance": "vouch",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "nextTurn": null,
+        "lastJudgment": {
+          "signals": [],
+          "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+          "suspicionDelta": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "suspicionAfter": 0,
+          "reportPressureAfter": 0,
+          "stanceBefore": "uncertain",
+          "stanceAfter": "vouch",
+          "meaningfulFirsthand": true
+        },
+        "lastMemory": {
+          "memoryId": "mem-fixture-2",
+          "kind": "player_conversation",
+          "sourceActorId": "player",
+          "listenerActorId": "NPC_Studio_Receptionist",
+          "conversationId": "sess-fixture-1",
+          "turnId": "sess-fixture-1#0",
+          "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+          "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+          "signals": [],
+          "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+          "suspicionBefore": 0,
+          "suspicionAfter": 0,
+          "suspicionDelta": 0,
+          "reportPressureBefore": 0,
+          "reportPressureAfter": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "proposedStance": "vouch",
+          "appliedStance": "vouch",
+          "meaningfulFirsthand": true,
+          "worldSeconds": 0,
+          "worldRevision": 2,
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        }
+      },
+      "runSnapshotResponse": {
+        "runId": "run-fixture-1",
+        "worldId": "m3r_first_person_town",
+        "layoutRevision": "rev-first-person-town-v1",
+        "worldRevision": 2,
+        "locale": "ko-KR",
+        "worldClock": {
+          "elapsedSeconds": 0,
+          "graceEndsAtSeconds": 90,
+          "hearingAtSeconds": 1800,
+          "paused": true
+        },
+        "institutionalPressure": 0,
+        "providerBudget": {
+          "callLimit": 120,
+          "tokenLimit": 300000,
+          "reservedCalls": 20,
+          "reservedTokens": 50000,
+          "callsUsed": 0,
+          "tokensUsed": 0
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "activeConversationId": "sess-fixture-1",
+        "actors": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "role": "studio_receptionist",
+            "locationId": "Studio",
+            "stance": "vouch",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": true,
+            "memories": [
+              {
+                "memoryId": "mem-fixture-1",
+                "kind": "npc_utterance",
+                "sourceActorId": "NPC_Studio_Receptionist",
+                "listenerActorIds": [
+                  "player"
+                ],
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "worldSeconds": 0,
+                "worldRevision": 1,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "memoryId": "mem-fixture-2",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+                "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+                "signals": [],
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+                "suspicionBefore": 0,
+                "suspicionAfter": 0,
+                "suspicionDelta": 0,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 0,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "vouch",
+                "appliedStance": "vouch",
+                "meaningfulFirsthand": true,
+                "worldSeconds": 0,
+                "worldRevision": 2,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "role": "studio_manager",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "role": "office_worker",
+            "locationId": "Office",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "role": "park_caretaker",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "role": "station_officer",
+            "locationId": "Station",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "role": "roaming_liaison",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          }
+        ],
+        "records": [],
+        "ledgerEvents": []
+      },
+      "endResponse": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "ended": true,
+        "worldRevision": 3,
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "vouch",
+          "suspicion": 0,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "signals": [],
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 0,
+              "suspicionDelta": 0,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "vouch",
+              "appliedStance": "vouch",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "queuedRunDeltas": []
+      },
+      "endRunSnapshotResponse": {
+        "runId": "run-fixture-1",
+        "worldId": "m3r_first_person_town",
+        "layoutRevision": "rev-first-person-town-v1",
+        "worldRevision": 3,
+        "locale": "ko-KR",
+        "worldClock": {
+          "elapsedSeconds": 0,
+          "graceEndsAtSeconds": 90,
+          "hearingAtSeconds": 1800,
+          "paused": false
+        },
+        "institutionalPressure": 0,
+        "providerBudget": {
+          "callLimit": 120,
+          "tokenLimit": 300000,
+          "reservedCalls": 20,
+          "reservedTokens": 50000,
+          "callsUsed": 0,
+          "tokensUsed": 0
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "activeConversationId": null,
+        "actors": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "role": "studio_receptionist",
+            "locationId": "Studio",
+            "stance": "vouch",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": true,
+            "memories": [
+              {
+                "memoryId": "mem-fixture-1",
+                "kind": "npc_utterance",
+                "sourceActorId": "NPC_Studio_Receptionist",
+                "listenerActorIds": [
+                  "player"
+                ],
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "worldSeconds": 0,
+                "worldRevision": 1,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "memoryId": "mem-fixture-2",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+                "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+                "signals": [],
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+                "suspicionBefore": 0,
+                "suspicionAfter": 0,
+                "suspicionDelta": 0,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 0,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "vouch",
+                "appliedStance": "vouch",
+                "meaningfulFirsthand": true,
+                "worldSeconds": 0,
+                "worldRevision": 2,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "role": "studio_manager",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "role": "office_worker",
+            "locationId": "Office",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "role": "park_caretaker",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "role": "station_officer",
+            "locationId": "Station",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "role": "roaming_liaison",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          }
+        ],
+        "records": [],
+        "ledgerEvents": []
+      }
+    },
+    {
+      "variantId": "choice_2",
+      "request": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "turnId": "sess-fixture-1#0",
+        "answer": {
+          "type": "choice",
+          "choiceId": "studio_arrival.generated.2"
+        }
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "worldRevision": 2,
+        "judgment": {
+          "signals": [],
+          "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+          "suspicionDelta": 5,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "suspicionAfter": 5,
+          "reportPressureAfter": 0,
+          "stanceBefore": "uncertain",
+          "stanceAfter": "uncertain",
+          "meaningfulFirsthand": true
+        },
+        "memoryDelta": {
+          "memoryId": "mem-fixture-2",
+          "kind": "player_conversation",
+          "sourceActorId": "player",
+          "listenerActorId": "NPC_Studio_Receptionist",
+          "conversationId": "sess-fixture-1",
+          "turnId": "sess-fixture-1#0",
+          "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+          "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+          "signals": [],
+          "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+          "suspicionBefore": 0,
+          "suspicionAfter": 5,
+          "suspicionDelta": 5,
+          "reportPressureBefore": 0,
+          "reportPressureAfter": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "proposedStance": "uncertain",
+          "appliedStance": "uncertain",
+          "meaningfulFirsthand": true,
+          "worldSeconds": 0,
+          "worldRevision": 2,
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "uncertain",
+          "suspicion": 5,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+              "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+              "signals": [],
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 5,
+              "suspicionDelta": 5,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "nextTurn": null,
+        "proposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        }
+      },
+      "sessionSnapshotResponse": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "actorId": "NPC_Studio_Receptionist",
+        "worldRevision": 2,
+        "status": "awaiting_end",
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "uncertain",
+          "suspicion": 5,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+              "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+              "signals": [],
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 5,
+              "suspicionDelta": 5,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "nextTurn": null,
+        "lastJudgment": {
+          "signals": [],
+          "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+          "suspicionDelta": 5,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "suspicionAfter": 5,
+          "reportPressureAfter": 0,
+          "stanceBefore": "uncertain",
+          "stanceAfter": "uncertain",
+          "meaningfulFirsthand": true
+        },
+        "lastMemory": {
+          "memoryId": "mem-fixture-2",
+          "kind": "player_conversation",
+          "sourceActorId": "player",
+          "listenerActorId": "NPC_Studio_Receptionist",
+          "conversationId": "sess-fixture-1",
+          "turnId": "sess-fixture-1#0",
+          "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+          "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+          "signals": [],
+          "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+          "suspicionBefore": 0,
+          "suspicionAfter": 5,
+          "suspicionDelta": 5,
+          "reportPressureBefore": 0,
+          "reportPressureAfter": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "proposedStance": "uncertain",
+          "appliedStance": "uncertain",
+          "meaningfulFirsthand": true,
+          "worldSeconds": 0,
+          "worldRevision": 2,
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        }
+      },
+      "runSnapshotResponse": {
+        "runId": "run-fixture-1",
+        "worldId": "m3r_first_person_town",
+        "layoutRevision": "rev-first-person-town-v1",
+        "worldRevision": 2,
+        "locale": "ko-KR",
+        "worldClock": {
+          "elapsedSeconds": 0,
+          "graceEndsAtSeconds": 90,
+          "hearingAtSeconds": 1800,
+          "paused": true
+        },
+        "institutionalPressure": 0,
+        "providerBudget": {
+          "callLimit": 120,
+          "tokenLimit": 300000,
+          "reservedCalls": 20,
+          "reservedTokens": 50000,
+          "callsUsed": 0,
+          "tokensUsed": 0
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "activeConversationId": "sess-fixture-1",
+        "actors": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "role": "studio_receptionist",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 5,
+            "hasMeaningfulFirsthandConversation": true,
+            "memories": [
+              {
+                "memoryId": "mem-fixture-1",
+                "kind": "npc_utterance",
+                "sourceActorId": "NPC_Studio_Receptionist",
+                "listenerActorIds": [
+                  "player"
+                ],
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "worldSeconds": 0,
+                "worldRevision": 1,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "memoryId": "mem-fixture-2",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+                "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+                "signals": [],
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+                "suspicionBefore": 0,
+                "suspicionAfter": 5,
+                "suspicionDelta": 5,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 0,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "uncertain",
+                "appliedStance": "uncertain",
+                "meaningfulFirsthand": true,
+                "worldSeconds": 0,
+                "worldRevision": 2,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "role": "studio_manager",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "role": "office_worker",
+            "locationId": "Office",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "role": "park_caretaker",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "role": "station_officer",
+            "locationId": "Station",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "role": "roaming_liaison",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          }
+        ],
+        "records": [],
+        "ledgerEvents": []
+      },
+      "endResponse": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "ended": true,
+        "worldRevision": 3,
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "uncertain",
+          "suspicion": 5,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+              "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+              "signals": [],
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 5,
+              "suspicionDelta": 5,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "queuedRunDeltas": []
+      },
+      "endRunSnapshotResponse": {
+        "runId": "run-fixture-1",
+        "worldId": "m3r_first_person_town",
+        "layoutRevision": "rev-first-person-town-v1",
+        "worldRevision": 3,
+        "locale": "ko-KR",
+        "worldClock": {
+          "elapsedSeconds": 0,
+          "graceEndsAtSeconds": 90,
+          "hearingAtSeconds": 1800,
+          "paused": false
+        },
+        "institutionalPressure": 0,
+        "providerBudget": {
+          "callLimit": 120,
+          "tokenLimit": 300000,
+          "reservedCalls": 20,
+          "reservedTokens": 50000,
+          "callsUsed": 0,
+          "tokensUsed": 0
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "activeConversationId": null,
+        "actors": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "role": "studio_receptionist",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 5,
+            "hasMeaningfulFirsthandConversation": true,
+            "memories": [
+              {
+                "memoryId": "mem-fixture-1",
+                "kind": "npc_utterance",
+                "sourceActorId": "NPC_Studio_Receptionist",
+                "listenerActorIds": [
+                  "player"
+                ],
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "worldSeconds": 0,
+                "worldRevision": 1,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "memoryId": "mem-fixture-2",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+                "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+                "signals": [],
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+                "suspicionBefore": 0,
+                "suspicionAfter": 5,
+                "suspicionDelta": 5,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 0,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "uncertain",
+                "appliedStance": "uncertain",
+                "meaningfulFirsthand": true,
+                "worldSeconds": 0,
+                "worldRevision": 2,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "role": "studio_manager",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "role": "office_worker",
+            "locationId": "Office",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "role": "park_caretaker",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "role": "station_officer",
+            "locationId": "Station",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "role": "roaming_liaison",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          }
+        ],
+        "records": [],
+        "ledgerEvents": []
+      }
+    },
+    {
+      "variantId": "choice_3",
+      "request": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "turnId": "sess-fixture-1#0",
+        "answer": {
+          "type": "choice",
+          "choiceId": "studio_arrival.generated.3"
+        }
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "worldRevision": 2,
+        "judgment": {
+          "signals": [
+            "role_script_break"
+          ],
+          "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+          "suspicionDelta": 35,
+          "reportDelta": 15,
+          "institutionalPressureDelta": 0,
+          "suspicionAfter": 35,
+          "reportPressureAfter": 0,
+          "stanceBefore": "uncertain",
+          "stanceAfter": "oppose",
+          "meaningfulFirsthand": true
+        },
+        "memoryDelta": {
+          "memoryId": "mem-fixture-2",
+          "kind": "player_conversation",
+          "sourceActorId": "player",
+          "listenerActorId": "NPC_Studio_Receptionist",
+          "conversationId": "sess-fixture-1",
+          "turnId": "sess-fixture-1#0",
+          "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+          "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+          "signals": [
+            "role_script_break"
+          ],
+          "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+          "suspicionBefore": 0,
+          "suspicionAfter": 35,
+          "suspicionDelta": 35,
+          "reportPressureBefore": 0,
+          "reportPressureAfter": 0,
+          "reportDelta": 15,
+          "institutionalPressureDelta": 0,
+          "proposedStance": "oppose",
+          "appliedStance": "oppose",
+          "meaningfulFirsthand": true,
+          "worldSeconds": 0,
+          "worldRevision": 2,
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "oppose",
+          "suspicion": 35,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+              "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+              "signals": [
+                "role_script_break"
+              ],
+              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 35,
+              "suspicionDelta": 35,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 15,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "oppose",
+              "appliedStance": "oppose",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "nextTurn": null,
+        "proposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        }
+      },
+      "sessionSnapshotResponse": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "actorId": "NPC_Studio_Receptionist",
+        "worldRevision": 2,
+        "status": "awaiting_end",
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "oppose",
+          "suspicion": 35,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+              "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+              "signals": [
+                "role_script_break"
+              ],
+              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 35,
+              "suspicionDelta": 35,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 15,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "oppose",
+              "appliedStance": "oppose",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "nextTurn": null,
+        "lastJudgment": {
+          "signals": [
+            "role_script_break"
+          ],
+          "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+          "suspicionDelta": 35,
+          "reportDelta": 15,
+          "institutionalPressureDelta": 0,
+          "suspicionAfter": 35,
+          "reportPressureAfter": 0,
+          "stanceBefore": "uncertain",
+          "stanceAfter": "oppose",
+          "meaningfulFirsthand": true
+        },
+        "lastMemory": {
+          "memoryId": "mem-fixture-2",
+          "kind": "player_conversation",
+          "sourceActorId": "player",
+          "listenerActorId": "NPC_Studio_Receptionist",
+          "conversationId": "sess-fixture-1",
+          "turnId": "sess-fixture-1#0",
+          "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+          "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+          "signals": [
+            "role_script_break"
+          ],
+          "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+          "suspicionBefore": 0,
+          "suspicionAfter": 35,
+          "suspicionDelta": 35,
+          "reportPressureBefore": 0,
+          "reportPressureAfter": 0,
+          "reportDelta": 15,
+          "institutionalPressureDelta": 0,
+          "proposedStance": "oppose",
+          "appliedStance": "oppose",
+          "meaningfulFirsthand": true,
+          "worldSeconds": 0,
+          "worldRevision": 2,
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        }
+      },
+      "runSnapshotResponse": {
+        "runId": "run-fixture-1",
+        "worldId": "m3r_first_person_town",
+        "layoutRevision": "rev-first-person-town-v1",
+        "worldRevision": 2,
+        "locale": "ko-KR",
+        "worldClock": {
+          "elapsedSeconds": 0,
+          "graceEndsAtSeconds": 90,
+          "hearingAtSeconds": 1800,
+          "paused": true
+        },
+        "institutionalPressure": 0,
+        "providerBudget": {
+          "callLimit": 120,
+          "tokenLimit": 300000,
+          "reservedCalls": 20,
+          "reservedTokens": 50000,
+          "callsUsed": 0,
+          "tokensUsed": 0
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "activeConversationId": "sess-fixture-1",
+        "actors": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "role": "studio_receptionist",
+            "locationId": "Studio",
+            "stance": "oppose",
+            "suspicion": 35,
+            "hasMeaningfulFirsthandConversation": true,
+            "memories": [
+              {
+                "memoryId": "mem-fixture-1",
+                "kind": "npc_utterance",
+                "sourceActorId": "NPC_Studio_Receptionist",
+                "listenerActorIds": [
+                  "player"
+                ],
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "worldSeconds": 0,
+                "worldRevision": 1,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "memoryId": "mem-fixture-2",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+                "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+                "signals": [
+                  "role_script_break"
+                ],
+                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+                "suspicionBefore": 0,
+                "suspicionAfter": 35,
+                "suspicionDelta": 35,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 15,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "oppose",
+                "appliedStance": "oppose",
+                "meaningfulFirsthand": true,
+                "worldSeconds": 0,
+                "worldRevision": 2,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "role": "studio_manager",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "role": "office_worker",
+            "locationId": "Office",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "role": "park_caretaker",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "role": "station_officer",
+            "locationId": "Station",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "role": "roaming_liaison",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          }
+        ],
+        "records": [],
+        "ledgerEvents": []
+      },
+      "endResponse": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "ended": true,
+        "worldRevision": 3,
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "oppose",
+          "suspicion": 35,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+              "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+              "signals": [
+                "role_script_break"
+              ],
+              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 35,
+              "suspicionDelta": 35,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 15,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "oppose",
+              "appliedStance": "oppose",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "queuedRunDeltas": []
+      },
+      "endRunSnapshotResponse": {
+        "runId": "run-fixture-1",
+        "worldId": "m3r_first_person_town",
+        "layoutRevision": "rev-first-person-town-v1",
+        "worldRevision": 3,
+        "locale": "ko-KR",
+        "worldClock": {
+          "elapsedSeconds": 0,
+          "graceEndsAtSeconds": 90,
+          "hearingAtSeconds": 1800,
+          "paused": false
+        },
+        "institutionalPressure": 0,
+        "providerBudget": {
+          "callLimit": 120,
+          "tokenLimit": 300000,
+          "reservedCalls": 20,
+          "reservedTokens": 50000,
+          "callsUsed": 0,
+          "tokensUsed": 0
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "activeConversationId": null,
+        "actors": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "role": "studio_receptionist",
+            "locationId": "Studio",
+            "stance": "oppose",
+            "suspicion": 35,
+            "hasMeaningfulFirsthandConversation": true,
+            "memories": [
+              {
+                "memoryId": "mem-fixture-1",
+                "kind": "npc_utterance",
+                "sourceActorId": "NPC_Studio_Receptionist",
+                "listenerActorIds": [
+                  "player"
+                ],
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "worldSeconds": 0,
+                "worldRevision": 1,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "memoryId": "mem-fixture-2",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+                "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+                "signals": [
+                  "role_script_break"
+                ],
+                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+                "suspicionBefore": 0,
+                "suspicionAfter": 35,
+                "suspicionDelta": 35,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 15,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "oppose",
+                "appliedStance": "oppose",
+                "meaningfulFirsthand": true,
+                "worldSeconds": 0,
+                "worldRevision": 2,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "role": "studio_manager",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "role": "office_worker",
+            "locationId": "Office",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "role": "park_caretaker",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "role": "station_officer",
+            "locationId": "Station",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "role": "roaming_liaison",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          }
+        ],
+        "records": [],
+        "ledgerEvents": []
+      }
+    },
+    {
+      "variantId": "free_input",
+      "request": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "turnId": "sess-fixture-1#0",
+        "answer": {
+          "type": "free_input",
+          "text": "안내받은 절차를 확인하러 왔습니다."
+        }
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "worldRevision": 2,
+        "judgment": {
+          "signals": [],
+          "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+          "suspicionDelta": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "suspicionAfter": 0,
+          "reportPressureAfter": 0,
+          "stanceBefore": "uncertain",
+          "stanceAfter": "vouch",
+          "meaningfulFirsthand": true
+        },
+        "memoryDelta": {
+          "memoryId": "mem-fixture-2",
+          "kind": "player_conversation",
+          "sourceActorId": "player",
+          "listenerActorId": "NPC_Studio_Receptionist",
+          "conversationId": "sess-fixture-1",
+          "turnId": "sess-fixture-1#0",
+          "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+          "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+          "signals": [],
+          "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+          "suspicionBefore": 0,
+          "suspicionAfter": 0,
+          "suspicionDelta": 0,
+          "reportPressureBefore": 0,
+          "reportPressureAfter": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "proposedStance": "vouch",
+          "appliedStance": "vouch",
+          "meaningfulFirsthand": true,
+          "worldSeconds": 0,
+          "worldRevision": 2,
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "vouch",
+          "suspicion": 0,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "signals": [],
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 0,
+              "suspicionDelta": 0,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "vouch",
+              "appliedStance": "vouch",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "nextTurn": null,
+        "proposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        }
+      },
+      "sessionSnapshotResponse": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "actorId": "NPC_Studio_Receptionist",
+        "worldRevision": 2,
+        "status": "awaiting_end",
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "vouch",
+          "suspicion": 0,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "signals": [],
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 0,
+              "suspicionDelta": 0,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "vouch",
+              "appliedStance": "vouch",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "nextTurn": null,
+        "lastJudgment": {
+          "signals": [],
+          "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+          "suspicionDelta": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "suspicionAfter": 0,
+          "reportPressureAfter": 0,
+          "stanceBefore": "uncertain",
+          "stanceAfter": "vouch",
+          "meaningfulFirsthand": true
+        },
+        "lastMemory": {
+          "memoryId": "mem-fixture-2",
+          "kind": "player_conversation",
+          "sourceActorId": "player",
+          "listenerActorId": "NPC_Studio_Receptionist",
+          "conversationId": "sess-fixture-1",
+          "turnId": "sess-fixture-1#0",
+          "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+          "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+          "signals": [],
+          "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+          "suspicionBefore": 0,
+          "suspicionAfter": 0,
+          "suspicionDelta": 0,
+          "reportPressureBefore": 0,
+          "reportPressureAfter": 0,
+          "reportDelta": 0,
+          "institutionalPressureDelta": 0,
+          "proposedStance": "vouch",
+          "appliedStance": "vouch",
+          "meaningfulFirsthand": true,
+          "worldSeconds": 0,
+          "worldRevision": 2,
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        }
+      },
+      "runSnapshotResponse": {
+        "runId": "run-fixture-1",
+        "worldId": "m3r_first_person_town",
+        "layoutRevision": "rev-first-person-town-v1",
+        "worldRevision": 2,
+        "locale": "ko-KR",
+        "worldClock": {
+          "elapsedSeconds": 0,
+          "graceEndsAtSeconds": 90,
+          "hearingAtSeconds": 1800,
+          "paused": true
+        },
+        "institutionalPressure": 0,
+        "providerBudget": {
+          "callLimit": 120,
+          "tokenLimit": 300000,
+          "reservedCalls": 20,
+          "reservedTokens": 50000,
+          "callsUsed": 0,
+          "tokensUsed": 0
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "activeConversationId": "sess-fixture-1",
+        "actors": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "role": "studio_receptionist",
+            "locationId": "Studio",
+            "stance": "vouch",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": true,
+            "memories": [
+              {
+                "memoryId": "mem-fixture-1",
+                "kind": "npc_utterance",
+                "sourceActorId": "NPC_Studio_Receptionist",
+                "listenerActorIds": [
+                  "player"
+                ],
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "worldSeconds": 0,
+                "worldRevision": 1,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "memoryId": "mem-fixture-2",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+                "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+                "signals": [],
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+                "suspicionBefore": 0,
+                "suspicionAfter": 0,
+                "suspicionDelta": 0,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 0,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "vouch",
+                "appliedStance": "vouch",
+                "meaningfulFirsthand": true,
+                "worldSeconds": 0,
+                "worldRevision": 2,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "role": "studio_manager",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "role": "office_worker",
+            "locationId": "Office",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "role": "park_caretaker",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "role": "station_officer",
+            "locationId": "Station",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "role": "roaming_liaison",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          }
+        ],
+        "records": [],
+        "ledgerEvents": []
+      },
+      "endResponse": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "ended": true,
+        "worldRevision": 3,
+        "actor": {
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
+          "stance": "vouch",
+          "suspicion": 0,
+          "hasMeaningfulFirsthandConversation": true,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "worldSeconds": 0,
+              "worldRevision": 1,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "memoryId": "mem-fixture-2",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "signals": [],
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "suspicionBefore": 0,
+              "suspicionAfter": 0,
+              "suspicionDelta": 0,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "vouch",
+              "appliedStance": "vouch",
+              "meaningfulFirsthand": true,
+              "worldSeconds": 0,
+              "worldRevision": 2,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "queuedRunDeltas": []
+      },
+      "endRunSnapshotResponse": {
+        "runId": "run-fixture-1",
+        "worldId": "m3r_first_person_town",
+        "layoutRevision": "rev-first-person-town-v1",
+        "worldRevision": 3,
+        "locale": "ko-KR",
+        "worldClock": {
+          "elapsedSeconds": 0,
+          "graceEndsAtSeconds": 90,
+          "hearingAtSeconds": 1800,
+          "paused": false
+        },
+        "institutionalPressure": 0,
+        "providerBudget": {
+          "callLimit": 120,
+          "tokenLimit": 300000,
+          "reservedCalls": 20,
+          "reservedTokens": 50000,
+          "callsUsed": 0,
+          "tokensUsed": 0
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "activeConversationId": null,
+        "actors": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "role": "studio_receptionist",
+            "locationId": "Studio",
+            "stance": "vouch",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": true,
+            "memories": [
+              {
+                "memoryId": "mem-fixture-1",
+                "kind": "npc_utterance",
+                "sourceActorId": "NPC_Studio_Receptionist",
+                "listenerActorIds": [
+                  "player"
+                ],
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "worldSeconds": 0,
+                "worldRevision": 1,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "memoryId": "mem-fixture-2",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+                "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+                "signals": [],
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+                "suspicionBefore": 0,
+                "suspicionAfter": 0,
+                "suspicionDelta": 0,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 0,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "vouch",
+                "appliedStance": "vouch",
+                "meaningfulFirsthand": true,
+                "worldSeconds": 0,
+                "worldRevision": 2,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "role": "studio_manager",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "role": "office_worker",
+            "locationId": "Office",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "role": "park_caretaker",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "role": "station_officer",
+            "locationId": "Station",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "role": "roaming_liaison",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          }
+        ],
+        "records": [],
+        "ledgerEvents": []
+      }
+    }
+  ]
+}

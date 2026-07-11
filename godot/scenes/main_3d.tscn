@@ -4,13 +4,20 @@
 [ext_resource type="PackedScene" uid="uid://bkfs8yd56naxc" path="res://scenes/town/town_3d.tscn" id="2_le0cj"]
 [ext_resource type="PackedScene" uid="uid://bfis2d2g38chy" path="res://scenes/ui/hud_3d.tscn" id="3_78blk"]
 [ext_resource type="Script" uid="uid://dmp0ser2qy15m" path="res://scripts/testing/agent_playtest_surface.gd" id="4_a6i3j"]
+[ext_resource type="Script" uid="uid://c7epxxxlsmxbe" path="res://scripts/runtime/run_session.gd" id="5_le0cj"]
 
 [node name="Main3D" type="Node" unique_id=1848067774]
+process_mode = 3
 script = ExtResource("1_mt54i")
 
 [node name="Town" parent="." unique_id=1757344954 instance=ExtResource("2_le0cj")]
+process_mode = 1
 
 [node name="HUD3D" parent="." unique_id=1675612338 instance=ExtResource("3_78blk")]
 
 [node name="AgentPlaytestSurface" type="Node" parent="." unique_id=1624548472]
 script = ExtResource("4_a6i3j")
+
+[node name="RunSession" type="Node" parent="." unique_id=737421013]
+process_mode = 3
+script = ExtResource("5_le0cj")

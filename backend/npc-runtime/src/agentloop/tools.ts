@@ -86,7 +86,12 @@ const ROLE_LEDGER_AUTHORITY: Record<WorldRole, ReadonlySet<string>> = {
     "queue_wary_noted",
     "queue_delay_noted",
   ]),
+  studio_receptionist: new Set<string>(),
+  studio_manager: new Set<string>(),
+  office_worker: new Set<string>(),
+  park_caretaker: new Set<string>(),
   station_officer: new Set(["station_record_cited", "station_correction_recorded"]),
+  roaming_liaison: new Set<string>(),
 };
 
 /** Which record kinds a role may author. */
@@ -95,7 +100,12 @@ const ROLE_RECORD_AUTHORITY: Record<WorldRole, ReadonlySet<RecordKind>> = {
   store_clerk: new Set<RecordKind>(["receipt", "clerk_statement", "correction"]),
   store_manager: new Set<RecordKind>(["clerk_statement", "report"]),
   waiting_customer: new Set<RecordKind>(["posting"]),
+  studio_receptionist: new Set<RecordKind>(),
+  studio_manager: new Set<RecordKind>(),
+  office_worker: new Set<RecordKind>(),
+  park_caretaker: new Set<RecordKind>(),
   station_officer: new Set<RecordKind>(["dossier", "citation"]),
+  roaming_liaison: new Set<RecordKind>(),
 };
 
 function asString(value: unknown): string | undefined {

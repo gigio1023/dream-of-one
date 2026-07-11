@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { CONVERSATION_CHOICE_INTENTS, CONVERSATION_SUSPICION_SIGNALS } from "../contracts/types.js";
+import {
+  COARSE_STANCES,
+  CONVERSATION_CHOICE_INTENTS,
+  CONVERSATION_SUSPICION_SIGNALS,
+} from "../contracts/types.js";
 import { TOOL_NAMES } from "../agentloop/tools.js";
 import { RECORD_KINDS, WORLD_ROLES } from "../runtime/world/index.js";
 
@@ -40,6 +44,8 @@ export const mergedConversationTurnSchema = z
     reportDelta: z.number().int(),
     signals: z.array(z.enum(CONVERSATION_SUSPICION_SIGNALS)),
     whyLine: modernKoreanText,
+    stance: z.enum(COARSE_STANCES),
+    meaningfulFirsthand: z.boolean(),
     utterance: modernKoreanText,
     suggestedReplies: z.tuple([
       suggestedReplySchema,
@@ -135,6 +141,8 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
     "reportDelta",
     "signals",
     "whyLine",
+    "stance",
+    "meaningfulFirsthand",
     "utterance",
     "suggestedReplies",
     "continueConversation",
@@ -147,6 +155,8 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
       items: { type: "string", enum: [...CONVERSATION_SUSPICION_SIGNALS] },
     },
     whyLine: { type: "string", minLength: 1 },
+    stance: { type: "string", enum: [...COARSE_STANCES] },
+    meaningfulFirsthand: { type: "boolean" },
     utterance: { type: "string", minLength: 1 },
     suggestedReplies: {
       type: "array",

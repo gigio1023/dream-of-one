@@ -128,6 +128,12 @@ func _find_interactable(start: Node) -> Node:
 			candidate.has_method("get_interaction_label_key")
 			and candidate.has_method("interact")
 		):
+			if (
+				candidate.has_method("is_interaction_enabled")
+				and not bool(candidate.call("is_interaction_enabled"))
+			):
+				candidate = candidate.get_parent()
+				continue
 			return candidate
 		candidate = candidate.get_parent()
 	return null
@@ -160,6 +166,18 @@ func set_control_enabled(enabled: bool) -> void:
 	if not enabled:
 		velocity.x = 0.0
 		velocity.z = 0.0
+
+
+func face_position(target_position: Vector3) -> void:
+	var flat_target := Vector3(target_position.x, global_position.y, target_position.z)
+	if not flat_target.is_equal_approx(global_position):
+		look_at(flat_target, Vector3.UP)
+	var local_target := _head.to_local(target_position)
+	_head.rotation.x = clampf(
+		-atan2(local_target.y, maxf(0.001, -local_target.z)),
+		-MAX_PITCH_RADIANS,
+		MAX_PITCH_RADIANS
+	)
 
 
 func focused_interactable() -> Node:

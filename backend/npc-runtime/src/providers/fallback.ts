@@ -12,6 +12,33 @@ import type {
   ConversationProposal,
 } from "./ports.js";
 
+const FALLBACK_WHY_LINES: Record<string, string> = {
+  local_routine_mismatch: "그 답은 이곳에서 확인하려던 절차와 맞지 않았습니다.",
+  dream_language_leak: "그 말에는 이곳 바깥을 가리키는 낯선 표현이 섞였습니다.",
+  memory_gap_admission: "기억이 비어 있다는 답이 확인할 점을 남겼습니다.",
+  role_script_break: "이곳 사람이라면 하지 않을 답이라 의문이 남았습니다.",
+  prior_statement_contradiction: "앞서 한 말과 지금 답이 서로 맞지 않았습니다.",
+  authority_evasion: "확인하려는 질문을 피한 답이라 의문이 남았습니다.",
+  over_explanation: "필요한 범위보다 길어진 설명이 오히려 의문을 남겼습니다.",
+  response_hesitation: "바로 답하지 못한 점이 확인할 사항으로 남았습니다.",
+};
+
+function koreanFallbackWhyLine(signals: readonly string[]): string {
+  const first = signals[0];
+  return first
+    ? (FALLBACK_WHY_LINES[first] ?? "그 답에는 더 확인할 점이 남았습니다.")
+    : "그 답은 지금까지 확인한 정황과 자연스럽게 맞았습니다.";
+}
+
+function fallbackStance(
+  suspicionAfter: number,
+  signals: readonly string[],
+): "oppose" | "uncertain" | "vouch" {
+  if (suspicionAfter >= 55) return "oppose";
+  if (signals.length === 0) return "vouch";
+  return "uncertain";
+}
+
 /** Prior player lines, oldest first, extracted from a two-sided history. */
 export function priorPlayerLines(
   history: ReadonlyArray<{ speakerId: string; line: string }>,
@@ -33,17 +60,28 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
     // The objective and scene facts are authoring text, not speech. When no
     // model is available the NPC stalls with an in-world line instead of
     // reading its own stage direction to the player.
+    const isStudioReception = request.actorId === "NPC_Studio_Receptionist";
     const isFollowUp = request.conversationHistory.length > 0;
     return {
       proposal: {
-        utterance: isFollowUp
-          ? "잠깐만요, 방금 하신 말을 한 번 더 확인할게요. 평소하고 같은 게 맞나요?"
-          : "잠시만요, 오늘따라 정신이 없네요. 평소 하시던 대로 맞으실까요?",
-        suggestedReplies: [
-          { text: "네, 확인했습니다.", intent: "safe/local" },
-          { text: "무슨 뜻인지 조금 더 설명해 주세요.", intent: "uncertain/repair" },
-          { text: "저는 여기 사람이 아닙니다.", intent: "risky/weird" },
-        ],
+        utterance: isStudioReception
+          ? isFollowUp
+            ? "말씀하신 이유를 접수 내용과 맞춰 보겠습니다. 한 가지만 더 확인해도 될까요?"
+            : "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요."
+          : isFollowUp
+            ? "잠깐만요, 방금 하신 말을 한 번 더 확인할게요. 평소하고 같은 게 맞나요?"
+            : "잠시만요, 오늘따라 정신이 없네요. 평소 하시던 대로 맞으실까요?",
+        suggestedReplies: isStudioReception
+          ? [
+              { text: "안내받은 절차를 확인하러 왔습니다.", intent: "safe/local" },
+              { text: "먼저 어떤 접수인지 설명해 주세요.", intent: "uncertain/repair" },
+              { text: "여기 사람이 아니라서 잘 모르겠습니다.", intent: "risky/weird" },
+            ]
+          : [
+              { text: "네, 확인했습니다.", intent: "safe/local" },
+              { text: "무슨 뜻인지 조금 더 설명해 주세요.", intent: "uncertain/repair" },
+              { text: "저는 여기 사람이 아닙니다.", intent: "risky/weird" },
+            ],
         continueConversation: true,
       },
       meta: {
@@ -57,14 +95,15 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
   async judgeConversationTurn(
     request: ConversationJudgmentRequest,
   ): Promise<ResolvedProposal<ConversationJudgment>> {
+    const proposal = ruleJudgeConversationTurn({
+      promptId: request.promptId,
+      playerLine: request.playerLine,
+      priorPlayerLines: priorPlayerLines(request.conversationHistory),
+      suspicionBefore: request.suspicionBefore,
+      reportPressureBefore: request.reportPressureBefore,
+    });
     return {
-      proposal: ruleJudgeConversationTurn({
-        promptId: request.promptId,
-        playerLine: request.playerLine,
-        priorPlayerLines: priorPlayerLines(request.conversationHistory),
-        suspicionBefore: request.suspicionBefore,
-        reportPressureBefore: request.reportPressureBefore,
-      }),
+      proposal: { ...proposal, whyLine: koreanFallbackWhyLine(proposal.signals) },
       meta: {
         profileId: this.profileId,
         transport: "fallback",
@@ -90,9 +129,14 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
         { speakerId: "player", line: request.playerLine },
       ],
     });
+    const suspicionAfter = request.suspicionBefore + judged.proposal.suspicionDelta;
+    const meaningfulFirsthand =
+      request.playerLine.trim().length > 1 && request.playerLine !== "(응답 지연)";
     return {
       proposal: {
         ...judged.proposal,
+        stance: fallbackStance(suspicionAfter, judged.proposal.signals),
+        meaningfulFirsthand,
         utterance: proposed.proposal.utterance,
         suggestedReplies: proposed.proposal.suggestedReplies,
         continueConversation: proposed.proposal.continueConversation,

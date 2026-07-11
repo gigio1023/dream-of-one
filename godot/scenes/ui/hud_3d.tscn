@@ -4,6 +4,7 @@
 [ext_resource type="Theme" uid="uid://cveoqev2gg0t3" path="res://assets/greybox/town_hud_theme.tres" id="2_w7ihb"]
 
 [node name="HUD3D" type="CanvasLayer" unique_id=1675612338]
+process_mode = 3
 script = ExtResource("1_xeuvv")
 
 [node name="Overlay" type="Control" parent="." unique_id=1541512440]
@@ -204,3 +205,163 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 48)
 layout_mode = 2
 text = "hud.settings.return"
+
+[node name="ConversationShade" type="ColorRect" parent="Overlay" unique_id=1769277182]
+visible = false
+z_index = 50
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.025, 0.035, 0.05, 0.72)
+
+[node name="ConversationPanel" type="PanelContainer" parent="Overlay/ConversationShade" unique_id=575960445]
+custom_minimum_size = Vector2(900, 650)
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -450.0
+offset_top = -680.0
+offset_right = 450.0
+offset_bottom = -30.0
+
+[node name="ConversationMargin" type="MarginContainer" parent="Overlay/ConversationShade/ConversationPanel" unique_id=1943691211]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="ConversationColumns" type="VBoxContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin" unique_id=48711294]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ConversationHeader" type="HBoxContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=565651476]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="ConversationSpeakerLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationHeader" unique_id=1532702043]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+
+[node name="ConversationStanceLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationHeader" unique_id=1574555424]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 2
+
+[node name="ConversationProviderLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationHeader" unique_id=493881863]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 2
+
+[node name="PromptScroll" type="ScrollContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=1003693884]
+custom_minimum_size = Vector2(820, 120)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ConversationPromptLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/PromptScroll" unique_id=855216337]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(800, 100)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 22
+autowrap_mode = 3
+
+[node name="ConversationThinkingLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=1298750503]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+
+[node name="ConversationWhyLineLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=337130830]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(820, 54)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="ConversationChoices" type="VBoxContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=643675631]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ConversationChoice1" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices" unique_id=413619225]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(820, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+
+[node name="ConversationChoice2" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices" unique_id=444677498]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(820, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+
+[node name="ConversationChoice3" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices" unique_id=1928375374]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(820, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+
+[node name="ConversationInputRow" type="HBoxContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=291500317]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ConversationFreeInput" type="LineEdit" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationInputRow" unique_id=540008870]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(680, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+max_length = 120
+
+[node name="ConversationSubmitButton" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationInputRow" unique_id=834202607]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+
+[node name="ConversationStatusLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=1099542982]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(820, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+autowrap_mode = 3
+
+[node name="EndConversationButton" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=1154947243]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(820, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+
+[node name="EncounteredStancePanel" type="PanelContainer" parent="Overlay" unique_id=1963527026]
+visible = false
+z_index = 15
+custom_minimum_size = Vector2(440, 160)
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -470.0
+offset_top = 90.0
+offset_right = -30.0
+offset_bottom = 250.0
+
+[node name="EncounteredStanceMargin" type="MarginContainer" parent="Overlay/EncounteredStancePanel" unique_id=1866431278]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="EncounteredStanceLabel" type="Label" parent="Overlay/EncounteredStancePanel/EncounteredStanceMargin" unique_id=27522384]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3

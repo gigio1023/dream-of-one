@@ -6913,6 +6913,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
               }
             }
@@ -6933,6 +6934,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
               }
             }
@@ -7522,6 +7524,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
               }
             }
@@ -7542,6 +7545,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
               }
             }
@@ -7650,6 +7654,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
               }
             }
@@ -7670,6 +7675,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
               }
             }
@@ -8130,6 +8136,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
               }
             }
@@ -8150,6 +8157,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
               }
             }
@@ -8313,6 +8321,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
               }
             }
@@ -8333,6 +8342,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
               }
             }
@@ -8497,6 +8507,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
               }
             }
@@ -8517,6 +8528,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
               }
             }
@@ -8569,6 +8581,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
               }
             }
@@ -8589,6 +8602,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
               }
             },
@@ -8607,6 +8621,7 @@
                 "recordId": "record:run-fixture-1:1",
                 "recordRevision": 1,
                 "ledgerEventId": "ledger:run-fixture-1:2",
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "관리자가 기록을 읽고 추가 확인 대상을 정해야 한다고 판단했습니다."
               }
             }
@@ -8629,6 +8644,7 @@
                 "recordId": "record:run-fixture-1:1",
                 "recordRevision": 1,
                 "ledgerEventId": "ledger:run-fixture-1:2",
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "관리자가 접수 기록의 출처와 내용을 직접 확인했습니다."
               }
             }
@@ -9174,6 +9190,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
               }
             }
@@ -9194,6 +9211,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
               }
             },
@@ -9212,6 +9230,7 @@
                 "recordId": "record:run-fixture-1:1",
                 "recordRevision": 1,
                 "ledgerEventId": "ledger:run-fixture-1:2",
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "관리자가 기록을 읽고 추가 확인 대상을 정해야 한다고 판단했습니다."
               }
             }
@@ -9234,6 +9253,7 @@
                 "recordId": "record:run-fixture-1:1",
                 "recordRevision": 1,
                 "ledgerEventId": "ledger:run-fixture-1:2",
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "관리자가 접수 기록의 출처와 내용을 직접 확인했습니다."
               }
             }
@@ -13679,6 +13699,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
               }
             }
@@ -13699,6 +13720,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
               }
             }
@@ -14275,6 +14297,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
               }
             }
@@ -14295,6 +14318,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
               }
             }
@@ -14396,6 +14420,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
               }
             }
@@ -14416,6 +14441,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
               }
             }
@@ -14870,6 +14896,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
               }
             }
@@ -14890,6 +14917,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
               }
             }
@@ -15127,6 +15155,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "먼저 어떤 접수인지 설명해 주세요.",
                 "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
               }
             }
@@ -15147,6 +15176,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "먼저 어떤 접수인지 설명해 주세요.",
                 "whyLine": "방문 목적이 아직 분명하지 않습니다."
               }
             }
@@ -15723,6 +15753,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "먼저 어떤 접수인지 설명해 주세요.",
                 "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
               }
             }
@@ -15743,6 +15774,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "먼저 어떤 접수인지 설명해 주세요.",
                 "whyLine": "방문 목적이 아직 분명하지 않습니다."
               }
             }
@@ -15844,6 +15876,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "먼저 어떤 접수인지 설명해 주세요.",
                 "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
               }
             }
@@ -15864,6 +15897,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "먼저 어떤 접수인지 설명해 주세요.",
                 "whyLine": "방문 목적이 아직 분명하지 않습니다."
               }
             }
@@ -16318,6 +16352,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "먼저 어떤 접수인지 설명해 주세요.",
                 "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
               }
             }
@@ -16338,6 +16373,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "먼저 어떤 접수인지 설명해 주세요.",
                 "whyLine": "방문 목적이 아직 분명하지 않습니다."
               }
             }
@@ -16581,6 +16617,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
               }
             }
@@ -16601,6 +16638,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
               }
             }
@@ -17185,6 +17223,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
               }
             }
@@ -17205,6 +17244,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
               }
             }
@@ -17308,6 +17348,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
               }
             }
@@ -17328,6 +17369,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
               }
             }
@@ -17784,6 +17826,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
               }
             }
@@ -17804,6 +17847,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
               }
             }
@@ -18041,6 +18085,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
               }
             }
@@ -18061,6 +18106,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
               }
             }
@@ -18637,6 +18683,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
               }
             }
@@ -18657,6 +18704,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
               }
             }
@@ -18758,6 +18806,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
               }
             }
@@ -18778,6 +18827,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
               }
             }
@@ -19232,6 +19282,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
               }
             }
@@ -19252,6 +19303,7 @@
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
+                "sourceExcerpt": "안내받은 절차를 확인하러 왔습니다.",
                 "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
               }
             }

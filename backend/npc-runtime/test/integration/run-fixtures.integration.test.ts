@@ -219,10 +219,35 @@ test("administration fixture carries provider prose through write, read, pressur
     finalSnapshot.socialView.encounteredRecords[0].provenance.recipientActorId,
     "NPC_Studio_Manager",
   );
+  const administrativeSourceId =
+    finalSnapshot.socialView.encounteredRecords[0].provenance.sourceMemoryId;
+  const administrativeSourceOwners = finalSnapshot.actors.flatMap((actor: {
+    actorId: string;
+    memories: Array<{ memoryId: string; kind: string; playerLine?: string }>;
+  }) => actor.memories
+    .filter((memory: { memoryId: string }) => memory.memoryId === administrativeSourceId)
+    .map(memory => ({ actorId: actor.actorId, memory }))
+  );
+  assert.equal(administrativeSourceOwners.length, 1);
+  assert.equal(
+    administrativeSourceOwners[0]?.actorId,
+    finalSnapshot.socialView.encounteredRecords[0].authorActorId,
+  );
+  const administrativeSource = administrativeSourceOwners[0]?.memory;
+  assert.equal(administrativeSource?.kind, "player_conversation");
+  assert.equal(
+    finalSnapshot.socialView.encounteredRecords[0].provenance.sourceExcerpt,
+    administrativeSource?.playerLine,
+  );
   assert.ok(finalSnapshot.socialView.openQuestions.some(
-    (question: { questionId: string; text: string }) =>
+    (question: {
+      questionId: string;
+      text: string;
+      provenance: { sourceExcerpt: string };
+    }) =>
       question.questionId === `question:record:${read.record.recordId}` &&
-      question.text === "관리자가 확인한 방문 경위는 누구에게 다시 물어야 하는가?",
+      question.text === "관리자가 확인한 방문 경위는 누구에게 다시 물어야 하는가?" &&
+      question.provenance.sourceExcerpt === administrativeSource?.playerLine,
   ));
 });
 
@@ -378,6 +403,14 @@ test("the fixture proves one attributable Studio stance change without instituti
   assert.equal(answer.judgment.stanceAfter, "vouch");
   assert.equal(answer.judgment.institutionalPressureDelta, 0);
   assert.equal(answer.proposalMeta.transport, "scripted");
+  assert.equal(
+    answer.socialView.encounteredResidents[0].provenance.sourceExcerpt,
+    answer.memoryDelta.playerLine,
+  );
+  assert.equal(
+    answer.socialView.openQuestions[0].provenance.sourceExcerpt,
+    answer.memoryDelta.playerLine,
+  );
   assert.equal(receptionist.memories.length, 2);
   const judgmentMemory = receptionist.memories.find(
     (memory: { kind: string }) => memory.kind === "player_conversation",

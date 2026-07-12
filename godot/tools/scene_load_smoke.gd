@@ -511,6 +511,7 @@ func _check_social_hud_contract(label: String, hud: HUD3D) -> void:
 				"recordId": null,
 				"recordRevision": null,
 				"ledgerEventId": null,
+				"sourceExcerpt": "방문자가 접수 순서를 직접 설명했습니다.",
 				"whyLine": "직접 들은 답변입니다.",
 			},
 		}],
@@ -520,7 +521,18 @@ func _check_social_hud_contract(label: String, hud: HUD3D) -> void:
 			"status": "open",
 			"text": "접수 순서를 누가 확인했는가?",
 			"whyLine": "확인 주체가 아직 드러나지 않았습니다.",
-			"provenance": null,
+			"provenance": {
+				"originKind": "record",
+				"originActorId": "NPC_Studio_Receptionist",
+				"recipientKind": "reader",
+				"recipientActorId": "player",
+				"sourceMemoryId": "hidden-record-source-memory-id",
+				"recordId": "hidden-record-id",
+				"recordRevision": 1,
+				"ledgerEventId": "hidden-ledger-id",
+				"sourceExcerpt": "방문 경위가 기록 본문에 남았습니다.",
+				"whyLine": "접수 기록이 검토 대기 상태입니다.",
+			},
 		}],
 		"encounteredRecords": [{
 			"recordId": "hidden-record-id",
@@ -567,6 +579,7 @@ func _check_social_hud_contract(label: String, hud: HUD3D) -> void:
 	for hidden_value in [
 		"NPC_Studio_Receptionist",
 		"hidden-memory-id",
+		"hidden-record-source-memory-id",
 		"hidden-question-id",
 		"hidden-record-id",
 		"hidden-ledger-id",
@@ -576,6 +589,10 @@ func _check_social_hud_contract(label: String, hud: HUD3D) -> void:
 			_failures.append("%s normal social UI leaked raw hidden data: %s" % [label, hidden_value])
 	if not normal_text.contains("접수 순서 확인이 보류되었습니다."):
 		_failures.append("%s inspect log omitted disclosed run-locale record prose" % label)
+	if not normal_text.contains("방문자가 접수 순서를 직접 설명했습니다."):
+		_failures.append("%s inspect log omitted disclosed speech source prose" % label)
+	if not normal_text.contains("방문 경위가 기록 본문에 남았습니다."):
+		_failures.append("%s inspect log omitted disclosed record source prose" % label)
 	if not str((opened.get("log", {}) as Dictionary).get("body", "")).contains(
 		"접수 기록이 검토 대기 상태입니다."
 	):

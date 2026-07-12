@@ -1376,6 +1376,7 @@ func _provenance_text(provenance: Dictionary) -> String:
 	return str(tr("hud.m3r.log.provenance.%s" % origin_kind)).format({
 		"origin": _actor_label(str(provenance.get("originActorId", ""))),
 		"recipient": _actor_label(str(provenance.get("recipientActorId", ""))),
+		"source": str(provenance.get("sourceExcerpt", "")),
 		"why": str(provenance.get("whyLine", "")),
 	})
 

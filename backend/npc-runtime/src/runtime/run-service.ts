@@ -131,6 +131,25 @@ export const RUN_PROVIDER_BUDGET = {
  */
 export const MAX_PROP_OBSERVATION_MEMORIES_PER_ACTOR = 12;
 export const MAX_PROVIDER_RUNTIME_TRACE_ENTRIES = 512;
+export const MAX_SOCIAL_SOURCE_EXCERPT_CODE_POINTS = 160;
+
+/**
+ * Project one player-safe source excerpt without preserving terminal controls
+ * or directional overrides. This text is presentation-only and never enters
+ * provider context or world-authority decisions.
+ */
+export function normalizeSocialSourceExcerpt(value: string): string {
+  const cleaned = value
+    .replace(/[\u0009-\u000D]/gu, " ")
+    .replace(/[\u0000-\u0008\u000E-\u001F\u007F-\u009F]/gu, "")
+    .replace(/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/gu, "")
+    .replace(/\s+/gu, " ")
+    .trim();
+  const codePoints = [...cleaned];
+  if (codePoints.length === 0) return "…";
+  if (codePoints.length <= MAX_SOCIAL_SOURCE_EXCERPT_CODE_POINTS) return cleaned;
+  return `${codePoints.slice(0, MAX_SOCIAL_SOURCE_EXCERPT_CODE_POINTS - 1).join("")}…`;
+}
 
 export function appendProviderRuntimeTrace(
   trace: RunSnapshot["providerRuntimeTrace"],
@@ -4249,6 +4268,7 @@ export class RunService {
       recordId: null,
       recordRevision: null,
       ledgerEventId: null,
+      sourceExcerpt: normalizeSocialSourceExcerpt(memory.playerLine),
       whyLine: memory.whyLine,
     };
     const resident = {
@@ -4295,6 +4315,8 @@ export class RunService {
         )
       );
     if (!memory) return;
+    const sourceExcerpt = this.ambientSourceExcerpt(run, actor, memory);
+    if (sourceExcerpt === null) return;
     const provenance: RunSocialProvenance = {
       originKind: "speech",
       originActorId: memory.sourceActorId,
@@ -4304,6 +4326,7 @@ export class RunService {
       recordId: null,
       recordRevision: null,
       ledgerEventId: null,
+      sourceExcerpt,
       whyLine: memory.whyLine,
     };
     const resident = {
@@ -4362,6 +4385,7 @@ export class RunService {
       recordId: record.recordId,
       recordRevision: record.recordRevision,
       ledgerEventId: event.eventId,
+      sourceExcerpt: this.recordSourceExcerpt(run, record, event),
       whyLine: event.whyLine,
     };
     const disclosed = {
@@ -4398,6 +4422,93 @@ export class RunService {
       else run.socialView.openQuestions.push(question);
     }
     this.bumpSocialRevision(run);
+  }
+
+  private ambientSourceExcerpt(
+    run: RunState,
+    actor: RunActorState,
+    judgment: RunAmbientStanceJudgmentMemory,
+  ): string | null {
+    if (judgment.listenerActorId !== actor.actorId) return null;
+    const sourceMemories = actor.memories.filter(
+      (candidate): candidate is RunAmbientUtteranceMemory =>
+        candidate.kind === "ambient_utterance" &&
+        candidate.memoryId === judgment.sourceMemoryId,
+    );
+    if (sourceMemories.length !== 1) return null;
+    const sourceMemory = sourceMemories[0];
+    if (
+      !sourceMemory ||
+      sourceMemory.eventId !== judgment.sourceSpeechEventId ||
+      sourceMemory.speakerActorId !== judgment.sourceActorId ||
+      sourceMemory.wakeId !== judgment.wakeId ||
+      sourceMemory.conversationId !== judgment.conversationId ||
+      !sourceMemory.listenerActorIds.includes(actor.actorId)
+    ) return null;
+    const sourceEvents = run.ambientSpeechEvents.filter(
+      event => event.eventId === judgment.sourceSpeechEventId,
+    );
+    if (sourceEvents.length !== 1) return null;
+    const sourceEvent = sourceEvents[0];
+    if (
+      !sourceEvent ||
+      sourceEvent.speakerActorId !== judgment.sourceActorId ||
+      sourceEvent.wakeId !== judgment.wakeId ||
+      sourceEvent.conversationId !== judgment.conversationId ||
+      !sourceEvent.listenerActorIds.includes(actor.actorId) ||
+      sourceMemory.line !== sourceEvent.line ||
+      sourceMemory.turnId !== sourceEvent.turnId ||
+      sourceMemory.worldRevision !== sourceEvent.worldRevision
+    ) return null;
+    return normalizeSocialSourceExcerpt(sourceMemory.line);
+  }
+
+  private recordSourceExcerpt(
+    run: RunState,
+    record: RunRecord,
+    event: RunSnapshot["ledgerEvents"][number],
+  ): string {
+    const matchingSourceRefs = record.sourceRefs.filter(
+      candidate => candidate.sourceMemoryId === event.sourceMemoryId,
+    );
+    const sourceRef = matchingSourceRefs.length === 1 ? matchingSourceRefs[0] : undefined;
+    const author = run.actors.get(record.authorActorId);
+    const matches = sourceRef && author
+      ? author.memories.filter(memory =>
+          memory.memoryId === event.sourceMemoryId &&
+          this.administrativeMemoryOrigin(memory) === sourceRef.originActorId &&
+          this.administrativeMemoryExcerpt(memory) !== null
+        )
+      : [];
+    if (matches.length === 1) {
+      const excerpt = this.administrativeMemoryExcerpt(matches[0]);
+      if (excerpt !== null) return normalizeSocialSourceExcerpt(excerpt);
+    }
+    // Older damaged snapshots may have lost their exact memory holder. The
+    // record body is already visible at this encountered surface, so it is the
+    // only safe fallback and does not reveal a hidden source.
+    return normalizeSocialSourceExcerpt(record.stateBody);
+  }
+
+  private administrativeMemoryOrigin(memory: RunMemory): string | null {
+    if (memory.kind === "player_conversation") return "player";
+    if (memory.kind === "ambient_utterance") return memory.speakerActorId;
+    if (memory.kind === "npc_utterance") return memory.sourceActorId;
+    if (memory.kind === "record_read") return memory.sourceActorId;
+    if (memory.kind === "player_contact_outcome") return "player";
+    if (memory.kind === "interrogation_outcome") return "player";
+    return null;
+  }
+
+  private administrativeMemoryExcerpt(memory: RunMemory): string | null {
+    if (memory.kind === "player_conversation") return memory.playerLine;
+    if (memory.kind === "ambient_utterance" || memory.kind === "npc_utterance") {
+      return memory.line;
+    }
+    if (memory.kind === "record_read") return memory.stateBody;
+    if (memory.kind === "player_contact_outcome") return memory.contactReason;
+    if (memory.kind === "interrogation_outcome") return memory.whyLine;
+    return null;
   }
 
   private async executeConversationOpening(

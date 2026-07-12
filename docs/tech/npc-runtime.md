@@ -186,6 +186,13 @@ Debug-capable responses retain `ProposalMeta`, transcript deltas, and raw
 `socialView`, whose encountered residents, questions, records, provenance, and
 qualitative pressure never reveal undisclosed state.
 
+Each public provenance item carries a player-readable `sourceExcerpt` instead
+of exposing an internal source id. The runtime derives that excerpt only from
+the exact owned source memory (or the already visible record body), removes
+terminal and bidirectional control characters, and limits it to 160 Unicode
+code points. Missing, duplicated, or cross-owner sources fall back to visible
+record text or remain undisclosed rather than guessing at provenance.
+
 Run snapshots, player-answer responses, both hearing responses, and run-end
 responses also carry strict `providerAudit` metadata. Actual provider calls are
 captured inside `ProviderService` before a result can become stale or be

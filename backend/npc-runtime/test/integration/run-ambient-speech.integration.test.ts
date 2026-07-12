@@ -24,6 +24,14 @@ function deterministicIds(label: string) {
   return (prefix: keyof typeof counts) => `${prefix}-${label}-${++counts[prefix]}`;
 }
 
+function collidingMemoryIds(label: string) {
+  const counts = { run: 0, sess: 0 };
+  return (prefix: "run" | "sess" | "mem") => {
+    if (prefix === "mem") return "mem-collision";
+    return `${prefix}-${label}-${++counts[prefix]}`;
+  };
+}
+
 async function readyFirstMeeting(
   service: RunService,
   startId: string,
@@ -716,7 +724,17 @@ test("preload keeps an off-screen ambient judgment hidden and the next conversat
   assert.equal(disclosed.provenance?.originActorId, decision.speechEvents[0]?.speakerActorId);
   assert.equal(disclosed.provenance?.recipientActorId, caretaker.actorId);
   assert.equal(disclosed.provenance?.sourceMemoryId, judgment.sourceMemoryId);
+  assert.equal(disclosed.provenance?.sourceExcerpt, decision.speechEvents[0]?.line);
+  assert.equal(disclosed.provenance?.sourceExcerpt.includes(judgment.sourceMemoryId), false);
+  assert.equal(
+    disclosed.provenance?.sourceExcerpt.includes(judgment.sourceSpeechEventId),
+    false,
+  );
   assert.equal(disclosed.provenance?.whyLine, judgment.whyLine);
+  const disclosedQuestion = started.socialView.openQuestions.find(
+    question => question.subjectActorId === caretaker.actorId,
+  );
+  assert.equal(disclosedQuestion?.provenance.sourceExcerpt, decision.speechEvents[0]?.line);
   const revision = started.socialView.revision;
   const retried = await service.startConversation(
     meeting.started.runId,
@@ -725,6 +743,64 @@ test("preload keeps an off-screen ambient judgment hidden and the next conversat
     "ko-KR",
   );
   assert.equal(retried.socialView.revision, revision, "a start retry cannot disclose twice");
+  assert.deepEqual(retried.socialView, started.socialView);
+});
+
+test("an ambiguous ambient source memory stays hidden instead of guessing an excerpt", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  adapter.judgeAndProposeAmbientReply = async request => ({
+    proposal: {
+      toolCall: { tool: "talk_to", args: { actorId: request.targetActorId } },
+      utterance: "직접 확인할 내용이 생겼습니다.",
+      rationale: "전해 들은 설명에 확인이 필요합니다.",
+      done: true,
+      suspicionDelta: 20,
+      proposedStance: "oppose",
+      whyLine: "전해 들은 설명 때문에 방문자를 의심하게 됐습니다.",
+      openQuestion: null,
+    },
+    meta: {
+      profileId: "scripted/ambient-ambiguous-source",
+      transport: "scripted",
+      usedFallback: false,
+    },
+  });
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: collidingMemoryIds("ambiguous-source"),
+  });
+  const meeting = await readyFirstMeeting(service, "ambient-ambiguous-source");
+  await service.decision(meeting.request);
+  const hidden = service.snapshot(meeting.started.runId);
+  const caretaker = hidden.actors.find(actor => actor.actorId === "NPC_Park_Caretaker");
+  assert.ok(caretaker);
+  assert.equal(
+    caretaker.memories.filter(memory =>
+      memory.kind === "ambient_utterance" && memory.memoryId === "mem-collision"
+    ).length,
+    2,
+  );
+  await service.preloadConversation(
+    meeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ko-KR",
+  );
+  await groundOrdinaryConversation(
+    service,
+    meeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ground-ambiguous-source",
+  );
+  const started = await service.startConversation(
+    meeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ko-KR",
+  );
+  assert.deepEqual(started.socialView.encounteredResidents, []);
+  assert.deepEqual(started.socialView.openQuestions, []);
 });
 
 test("a newer no-change ambient judgment cannot hide or misattribute an earlier material change", async () => {
@@ -845,6 +921,11 @@ test("a newer no-change ambient judgment cannot hide or misattribute an earlier 
   assert.equal(disclosed.whyLine, material.whyLine);
   assert.equal(disclosed.provenance?.originActorId, material.sourceActorId);
   assert.equal(disclosed.provenance?.sourceMemoryId, material.sourceMemoryId);
+  const materialSource = caretaker.memories.find(
+    memory => memory.kind === "ambient_utterance" && memory.memoryId === material.sourceMemoryId,
+  );
+  assert.ok(materialSource && materialSource.kind === "ambient_utterance");
+  assert.equal(disclosed.provenance?.sourceExcerpt, materialSource.line);
   assert.equal(disclosed.provenance?.whyLine, material.whyLine);
   assert.notEqual(disclosed.provenance?.originActorId, noChange.sourceActorId);
   assert.notEqual(disclosed.provenance?.sourceMemoryId, noChange.sourceMemoryId);

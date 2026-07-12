@@ -205,7 +205,7 @@ func _run() -> void:
 	await _check_hud_registry(localization, locales, registry_order, default_locale)
 	if _failures.is_empty():
 		print(
-			"PASS localization_smoke: %d locales share %d exact M3R keys/placeholders; bundled KR/SC/JP glyph routes and long it/fr HUD at 100/150%% are valid"
+			"PASS localization_smoke: %d locales share %d exact M3R keys/placeholders; bundled KR/SC/JP glyph routes, source-excerpt logs, and long it/fr HUD at 100/150%% are valid"
 			% [locales.size(), reference_keys.size()]
 		)
 	_finish()
@@ -410,6 +410,7 @@ func _check_hud_registry(
 	# before locale changes, then prove the actual Overlay follows every
 	# regional face rather than retaining its initial KR font.
 	hud.call("set_ui_scale", 1.5)
+	var provenance_revision := 10
 	for entry_value in locales:
 		if not entry_value is Dictionary:
 			continue
@@ -427,6 +428,13 @@ func _check_hud_registry(
 			onboarding,
 			dynamic_world_label,
 			presentation_id
+		)
+		provenance_revision += 1
+		await _check_provenance_log(
+			localization,
+			hud,
+			presentation_id,
+			provenance_revision
 		)
 
 	var revision := 100
@@ -449,6 +457,77 @@ func _check_hud_registry(
 	if onboarding != null:
 		onboarding.queue_free()
 	dynamic_world_label.queue_free()
+	await process_frame
+
+
+func _check_provenance_log(
+	localization: Node,
+	hud: Node,
+	presentation_id: String,
+	revision: int
+) -> void:
+	var speech_source := str(localization.call(
+		"content_message",
+		presentation_id,
+		"hud.m3r.onboarding.talk"
+	))
+	var record_source := str(localization.call(
+		"content_message",
+		presentation_id,
+		"hud.m3r.onboarding.dialogue"
+	))
+	var hidden_speech_id := "localization-hidden-speech-id-%s" % presentation_id
+	var hidden_record_id := "localization-hidden-record-id-%s" % presentation_id
+	hud.call("set_social_view", {
+		"revision": revision,
+		"hearing": {"due": false, "atSeconds": 1800.0},
+		"pressure": {"band": "low", "latestEncounteredWhyLine": null},
+		"encounteredResidents": [{
+			"actorId": "NPC_Studio_Receptionist",
+			"stance": "uncertain",
+			"stanceRevision": revision,
+			"whyLine": speech_source,
+			"provenance": {
+				"originKind": "speech",
+				"originActorId": "player",
+				"recipientActorId": "NPC_Studio_Receptionist",
+				"sourceMemoryId": hidden_speech_id,
+				"sourceExcerpt": speech_source,
+				"whyLine": speech_source,
+			},
+		}],
+		"openQuestions": [],
+		"encounteredRecords": [{
+			"recordId": hidden_record_id,
+			"kind": "note",
+			"authorActorId": "NPC_Studio_Receptionist",
+			"targetId": "player",
+			"stateBody": record_source,
+			"recordRevision": 1,
+			"lastLedgerEventId": "localization-hidden-ledger-id-%s" % presentation_id,
+			"provenance": {
+				"originKind": "record",
+				"originActorId": "NPC_Studio_Receptionist",
+				"recipientActorId": "player",
+				"sourceMemoryId": hidden_record_id,
+				"sourceExcerpt": record_source,
+				"whyLine": record_source,
+			},
+		}],
+	})
+	hud.call("open_log")
+	await process_frame
+	var log_text := str((hud.call("presentation_snapshot").get("log", {}) as Dictionary).get(
+		"body",
+		""
+	))
+	if speech_source.is_empty() or not log_text.contains(speech_source):
+		_failures.append("%s log omitted its localized speech excerpt" % presentation_id)
+	if record_source.is_empty() or not log_text.contains(record_source):
+		_failures.append("%s log omitted its localized record excerpt" % presentation_id)
+	if log_text.contains(hidden_speech_id) or log_text.contains(hidden_record_id):
+		_failures.append("%s log leaked a raw provenance id" % presentation_id)
+	hud.call("close_log")
 	await process_frame
 
 
@@ -551,6 +630,11 @@ func _check_long_locale_hud(
 	hud.call("refresh_localized_text")
 	hud.call("set_ui_scale", scale)
 	var why_line := str(text.get("why", ""))
+	var source_choices_value: Variant = text.get("choices", [])
+	var source_choices: Array = (
+		source_choices_value as Array if source_choices_value is Array else []
+	)
+	var source_excerpt := str(source_choices[0]) if not source_choices.is_empty() else ""
 	hud.call("set_social_view", {
 		"revision": revision,
 		"hearing": {"due": false, "atSeconds": 720.0},
@@ -566,6 +650,8 @@ func _check_long_locale_hud(
 				"originKind": "speech",
 				"originActorId": "NPC_Studio_Receptionist",
 				"recipientActorId": "player",
+				"sourceMemoryId": "localization-hidden-memory-id",
+				"sourceExcerpt": source_excerpt,
 				"whyLine": why_line,
 			},
 		}],
@@ -582,6 +668,12 @@ func _check_long_locale_hud(
 	hud.call("open_log")
 	await process_frame
 	await process_frame
+	var log_body := hud.find_child("LogBody", true, false) as RichTextLabel
+	var log_text := log_body.text if log_body != null else ""
+	if source_excerpt.is_empty() or not log_text.contains(source_excerpt):
+		_failures.append("%s log omitted the localized source excerpt" % presentation_id)
+	if log_text.contains("localization-hidden-memory-id"):
+		_failures.append("%s log leaked a raw source memory id" % presentation_id)
 	_check_visible_and_in_viewport(
 		hud.find_child("LogPanel", true, false) as Control,
 		"%s log panel at %d%%" % [presentation_id, roundi(scale * 100.0)]

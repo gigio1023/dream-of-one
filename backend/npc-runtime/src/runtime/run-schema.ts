@@ -8,6 +8,13 @@ import { gameplayLocaleSchema } from "../localization/supported-locales.js";
 import { RECORD_KINDS } from "./world/types.js";
 
 const nonEmpty = z.string().trim().min(1);
+const socialSourceExcerptSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .refine(value => [...value].length <= 160, {
+    message: "social source excerpts must contain at most 160 Unicode code points",
+  });
 const providerFailureReasonSchema = z.enum([
   "missing_credentials",
   "unavailable",
@@ -569,6 +576,7 @@ export const runSocialProvenanceSchema = z
     recordId: nonEmpty.nullable(),
     recordRevision: z.number().int().positive().nullable(),
     ledgerEventId: nonEmpty.nullable(),
+    sourceExcerpt: socialSourceExcerptSchema,
     whyLine: nonEmpty,
   })
   .strict();

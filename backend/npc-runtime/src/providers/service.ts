@@ -42,6 +42,10 @@ Tool argument guide:
 - use_object: {objectId,toState,ledgerKind,whyLine,economyDelta?}
 - write_record: {objectId?,toState?,ledgerKind,record,citedLedgerEventId?,whyLine,economyDelta?}
 - read_record: {recordId}
+- M3R write_record when administrativeAuthority is present:
+  {recordKind,sourceMemoryId,stateBody,whyLine,institutionalPressureDelta,textSurfaceId,recordId?,openQuestion}
+- M3R read_record: {recordId,whyLine,institutionalPressureDelta,openQuestion}; source memory is runtime-derived
+- M3R openQuestion is required and either null or {status,text,whyLine}. Author it only when the administrative action creates a concrete player-log question; never fill it mechanically.
 - request: {targetActorId,action,whyLine?}
 Only use actors, objects, records, and tool names present in the observe packet.`;
 
@@ -206,11 +210,12 @@ export class ProviderService implements NpcProposalPort {
       "whyLine is one in-world sentence the player will read as the reason suspicion moved.",
       "Return stance as this NPC's coarse opinion after the exchange: oppose, uncertain, or vouch.",
       "meaningfulFirsthand is true only when this direct exchange gave the NPC substantive firsthand grounds; vouch requires it.",
+      "openQuestion is either null or one concise player-log question authored from this exchange, with its own open/resolved status, text, and whyLine.",
       "utterance is your next in-character line after hearing the player.",
       "The reply intent labels shape variety only; they never decide suspicion or game truth.",
       ...localeOutputInstructions(
         request.locale,
-        "whyLine, utterance, and all three suggestion texts",
+        "whyLine, openQuestion text/whyLine, utterance, and all three suggestion texts",
       ),
       "Do not decide any verdict or session outcome, and do not claim a hidden fact or world mutation.",
       "Return only JSON matching the supplied schema.",

@@ -109,6 +109,19 @@ func run_snapshot(run_id: String) -> Dictionary:
 	return _response_body(result, "run_snapshot_failed")
 
 
+func encounter(run_id: String, encounter_id: String, encounter_packet: Dictionary) -> Dictionary:
+	return await _post(
+		"/v1/run/encounter",
+		{
+			"runId": run_id,
+			"encounterId": encounter_id,
+			"encounter": encounter_packet,
+		},
+		ADVANCE_TIMEOUT_SECONDS,
+		"run_encounter_failed"
+	)
+
+
 func advance(request: Dictionary) -> Dictionary:
 	return await _post(
 		"/v1/run/advance",

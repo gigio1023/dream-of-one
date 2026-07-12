@@ -4,7 +4,7 @@ import {
   summarizeObservePacket,
   type ObservePacket,
 } from "../agentloop/context.js";
-import { toolCatalogForRole } from "../agentloop/tools.js";
+import { recordKindsForRole, toolCatalogForRole } from "../agentloop/tools.js";
 import { runBoundedProposalLoop } from "../agentloop/proposal-loop.js";
 import { TranscriptStore } from "../agentloop/transcript.js";
 import type { CoarseStance } from "../contracts/types.js";
@@ -47,7 +47,13 @@ import {
   snapshotRunScheduler,
   type RunSchedulerRuntime,
 } from "./run-scheduler.js";
+import {
+  applyRunAdministration,
+  type ValidatedAdministrativeAction,
+} from "./world/run-administration.js";
+import { RECORD_KINDS, type RecordKind } from "./world/types.js";
 import type {
+  RunAdministrationDelta,
   RunActorReadinessDelta,
   RunActorSpatialFacts,
   RunAmbientConversation,
@@ -57,6 +63,8 @@ import type {
   RunAdvanceResponse,
   RunActor,
   RunDecisionDelta,
+  RunEncounterRequest,
+  RunEncounterResponse,
   RunJudgment,
   RunMemory,
   RunMovementDelta,
@@ -64,7 +72,10 @@ import type {
   RunNpcDecisionRequest,
   RunNpcDecisionResponse,
   RunNpcUtteranceMemory,
+  RunOpenQuestion,
   RunPlayerConversationMemory,
+  RunRecord,
+  RunRecordReadMemory,
   RunSessionAnswer,
   RunSessionAnswerResponse,
   RunSessionEndResponse,
@@ -72,6 +83,8 @@ import type {
   RunSessionSnapshotResponse,
   RunSessionStartResponse,
   RunSnapshot,
+  RunSocialProvenance,
+  RunSocialView,
 } from "./run-schema.js";
 
 export const STUDIO_RECEPTIONIST_ID = "NPC_Studio_Receptionist";
@@ -107,6 +120,11 @@ interface CachedAdvance {
 interface CachedAnswer {
   signature: string;
   response: RunSessionAnswerResponse;
+}
+
+interface CachedEncounter {
+  signature: string;
+  response: RunEncounterResponse;
 }
 
 interface AmbientObservation {
@@ -155,7 +173,8 @@ type GoalAction =
   | { tool: "wait"; reason: string }
   | { tool: "look"; targetKind: "actor" | "object" | "record"; targetId: string }
   | { tool: "talk_to"; targetActorId: string; utterance: string }
-  | { tool: "move_to"; targetAnchorRef: string };
+  | { tool: "move_to"; targetAnchorRef: string }
+  | ValidatedAdministrativeAction;
 
 interface GoalObservation {
   actorId: string;
@@ -259,6 +278,10 @@ interface RunState {
   preloadRequiredEvidence: Map<string, string>;
   records: RunSnapshot["records"];
   ledgerEvents: RunSnapshot["ledgerEvents"];
+  socialView: RunSocialView;
+  encounterCache: Map<string, CachedEncounter>;
+  encounteredIdentityIds: Set<string>;
+  encounteredSpeechEventIds: Set<string>;
 }
 
 type IdPrefix = "run" | "sess" | "mem";
@@ -293,7 +316,9 @@ export type RunErrorCode =
   | "run_paused"
   | "hearing_due"
   | "invalid_arrival"
-  | "invalid_spatial_facts";
+  | "invalid_spatial_facts"
+  | "encounter_id_conflict"
+  | "encounter_not_visible";
 
 export class RunError extends Error {
   constructor(
@@ -357,6 +382,16 @@ function decisionSignature(request: RunNpcDecisionRequest): string {
     wakeId: request.wakeId,
     observedWorldRevision: request.observedWorldRevision,
   });
+}
+
+function encounterSignature(request: RunEncounterRequest): string {
+  return JSON.stringify(request.encounter);
+}
+
+function pressureBand(value: number): RunSocialView["pressure"]["band"] {
+  if (value >= 90) return "high";
+  if (value > 0) return "raised";
+  return "low";
 }
 
 function runAmbientCallCeiling(run: RunState): number {
@@ -513,6 +548,17 @@ export class RunService {
       preloadRequiredEvidence: new Map(),
       records: [],
       ledgerEvents: [],
+      socialView: {
+        revision: 0,
+        hearing: { atSeconds: this.layout.hearingAtSeconds, due: false },
+        pressure: { band: "low", latestEncounteredWhyLine: null },
+        encounteredResidents: [],
+        openQuestions: [],
+        encounteredRecords: [],
+      },
+      encounterCache: new Map(),
+      encounteredIdentityIds: new Set(),
+      encounteredSpeechEventIds: new Set(),
     };
     this.runs.set(runId, run);
     const response = this.snapshot(runId);
@@ -552,7 +598,89 @@ export class RunService {
       },
       records: clone(run.records),
       ledgerEvents: clone(run.ledgerEvents),
+      socialView: this.publicSocialView(run),
     };
+  }
+
+  encounter(request: RunEncounterRequest): Promise<RunEncounterResponse> {
+    return this.serialize(request.runId, async () => {
+      const run = this.requireRun(request.runId);
+      const signature = encounterSignature(request);
+      const cached = run.encounterCache.get(request.encounterId);
+      if (cached) {
+        if (cached.signature !== signature) {
+          throw new RunError(
+            "the same encounterId cannot be retried with a different payload",
+            "encounter_id_conflict",
+          );
+        }
+        return clone(cached.response);
+      }
+
+      const encounter = request.encounter;
+      if (encounter.kind === "speech") {
+        const event = run.ambientSpeechEvents.find(
+          candidate => candidate.eventId === encounter.speechEventId,
+        );
+        const volume = event
+          ? this.layout.audibilityVolumes.find(
+              candidate => candidate.volumeId === event.audibility.volumeId,
+            )
+          : undefined;
+        if (
+          !event ||
+          !volume ||
+          !volumeContains(volume, encounter.playerPosition) ||
+          distanceBetween(event.audibility.speakerPosition, encounter.playerPosition) >
+            event.audibility.maxSpeechDistanceM
+        ) {
+          throw new RunError("speech was not audible at the reported player position", "encounter_not_visible");
+        }
+        this.discloseSpeech(run, event);
+      } else {
+        const surface = this.layout.recordSurfaces.find(
+          candidate => candidate.surfaceId === encounter.textSurfaceId,
+        );
+        const anchorPosition = surface ? this.layout.anchorPositions[surface.anchorRef] : undefined;
+        if (
+          !surface ||
+          !anchorPosition ||
+          distanceBetween(anchorPosition, encounter.playerPosition) > 3
+        ) {
+          throw new RunError("record surface was not visible at the reported player position", "encounter_not_visible");
+        }
+        const matchingRecords = run.records
+          .filter(record =>
+            record.textSurfaceId === surface.surfaceId &&
+            record.visibleToActorIds.includes("player")
+          )
+          .sort((first, second) => {
+            const firstSeq = run.ledgerEvents.find(
+              event => event.eventId === first.lastLedgerEventId,
+            )?.seq ?? 0;
+            const secondSeq = run.ledgerEvents.find(
+              event => event.eventId === second.lastLedgerEventId,
+            )?.seq ?? 0;
+            return firstSeq - secondSeq;
+          });
+        for (const record of matchingRecords) {
+          this.discloseRecord(run, record);
+        }
+      }
+
+      const response: RunEncounterResponse = {
+        runId: run.runId,
+        encounterId: request.encounterId,
+        socialView: this.publicSocialView(run),
+      };
+      run.encounterCache.set(request.encounterId, { signature, response: clone(response) });
+      while (run.encounterCache.size > 256) {
+        const oldest = run.encounterCache.keys().next().value as string | undefined;
+        if (!oldest) break;
+        run.encounterCache.delete(oldest);
+      }
+      return response;
+    });
   }
 
   advance(request: RunAdvanceRequest): Promise<RunAdvanceResponse> {
@@ -789,6 +917,10 @@ export class RunService {
           };
         }
       }
+      if (!run.socialView.hearing.due && run.elapsedSeconds >= run.hearingAtSeconds) {
+        run.socialView.hearing.due = true;
+        this.bumpSocialRevision(run);
+      }
       schedulerResult.scheduleWakes.sort((first, second) =>
         first.scheduledAtSeconds === second.scheduledAtSeconds
           ? first.wakeId.localeCompare(second.wakeId)
@@ -823,6 +955,7 @@ export class RunService {
         ),
         ambientSpeechCursor: run.ambientSpeechCursor,
         scheduler: snapshotRunScheduler(this.layout, run.scheduler, run.elapsedSeconds),
+        socialView: this.publicSocialView(run),
       };
       run.advanceCache.set(request.advanceId, { signature, response: clone(response) });
       while (run.advanceCache.size > 256) {
@@ -1021,6 +1154,7 @@ export class RunService {
             worldRevision: run.worldRevision,
             actor: this.publicActor(actor),
             nextTurn: clone(active.activeTurn),
+            socialView: this.publicSocialView(run),
           };
         }
         throw new RunError(
@@ -1100,12 +1234,14 @@ export class RunService {
       run.conversations.set(sessionId, conversation);
       run.activeConversationId = sessionId;
       run.worldRevision = openingRevision;
+      run.encounteredIdentityIds.add(actor.actorId);
       return {
         runId,
         sessionId,
         worldRevision: run.worldRevision,
         actor: this.publicActor(actor),
         nextTurn: clone(nextTurn),
+        socialView: this.publicSocialView(run),
       };
     });
   }
@@ -1216,6 +1352,7 @@ export class RunService {
         proposedStance: resolved.proposal.stance,
         appliedStance: stanceAfter,
         meaningfulFirsthand,
+        openQuestion: clone(resolved.proposal.openQuestion ?? null),
         worldSeconds: run.elapsedSeconds,
         worldRevision: nextRevision,
         proposalMeta: clone(resolved.meta),
@@ -1226,6 +1363,7 @@ export class RunService {
       actor.hasMeaningfulFirsthandConversation = hasFirsthand;
       actor.memories.push(memory);
       run.worldRevision = nextRevision;
+      this.discloseResidentJudgment(run, actor, memory);
       conversation.turnCount += 1;
       conversation.dialogue.push(
         { speakerId: "player", line: playerLine },
@@ -1261,6 +1399,7 @@ export class RunService {
         actor: this.publicActor(actor),
         nextTurn: clone(nextTurn),
         proposalMeta: clone(resolved.meta),
+        socialView: this.publicSocialView(run),
       };
       conversation.answerCache.set(turnId, { signature, response: clone(response) });
       return response;
@@ -1298,6 +1437,7 @@ export class RunService {
         worldRevision: run.worldRevision,
         actor: this.publicActor(actor),
         queuedRunDeltas,
+        socialView: this.publicSocialView(run),
       };
       conversation.endResponse = clone(response);
       return response;
@@ -1553,6 +1693,14 @@ export class RunService {
       observePacket.visibleObjects.length > 0 ||
       observePacket.visibleRecords.length > 0
     ) offeredTools.unshift("look");
+    if (observePacket.visibleRecords.some(record =>
+      !this.hasReadRecordRevision(actor, record.recordId, record.recordRevision ?? 0)
+    )) offeredTools.unshift("read_record");
+    if (
+      observePacket.administrativeSources.length > 0 &&
+      observePacket.administrativeAuthority.allowedRecordKinds.length > 0 &&
+      observePacket.administrativeAuthority.writableTextSurfaceIds.length > 0
+    ) offeredTools.unshift("write_record");
     const lastSpokeAt = run.lastGoalSpeechAt.get(actor.actorId);
     const talkAvailable =
       run.activeAmbientConversation === null &&
@@ -1606,6 +1754,19 @@ export class RunService {
     if (!call) return { reason: "invalid_args", detail: "goal step requires a tool or done" };
     const asId = (value: unknown): string | null =>
       typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+    const asOpenQuestion = (value: unknown): RunOpenQuestion | null | undefined => {
+      if (value === null) return null;
+      if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+      const question = value as Record<string, unknown>;
+      const status = question.status;
+      const text = asId(question.text);
+      const whyLine = asId(question.whyLine);
+      if ((status !== "open" && status !== "resolved") || !text || !whyLine) return undefined;
+      if (Object.keys(question).some(key => !["status", "text", "whyLine"].includes(key))) {
+        return undefined;
+      }
+      return { status, text, whyLine };
+    };
     switch (call.tool) {
       case "wait":
         return {
@@ -1674,6 +1835,109 @@ export class RunService {
           return { reason: "unreachable", detail: `${targetAnchorRef} is outside current schedule policy` };
         }
         return { action: { tool: "move_to", targetAnchorRef } };
+      }
+      case "write_record": {
+        const recordKind = asId(call.args.recordKind) as RecordKind | null;
+        const sourceMemoryId = asId(call.args.sourceMemoryId);
+        const stateBody = asId(call.args.stateBody);
+        const whyLine = asId(call.args.whyLine);
+        const textSurfaceId = asId(call.args.textSurfaceId);
+        const requestedRecordId = asId(call.args.recordId);
+        const pressureDelta = Number(call.args.institutionalPressureDelta);
+        const openQuestion = Object.prototype.hasOwnProperty.call(call.args, "openQuestion")
+          ? asOpenQuestion(call.args.openQuestion)
+          : undefined;
+        if (
+          !recordKind ||
+          !RECORD_KINDS.includes(recordKind) ||
+          !sourceMemoryId ||
+          !stateBody ||
+          !whyLine ||
+          !textSurfaceId ||
+          !Number.isInteger(pressureDelta) ||
+          openQuestion === undefined
+        ) {
+          return { reason: "invalid_args", detail: "write_record requires the M3R administrative contract" };
+        }
+        if (!observation.observePacket.administrativeAuthority.allowedRecordKinds.includes(recordKind)) {
+          return { reason: "role_authority_exceeded", detail: `${recordKind} is not authorized for this role` };
+        }
+        if (!observation.observePacket.administrativeAuthority.writableTextSurfaceIds.includes(textSurfaceId)) {
+          return { reason: "not_visible", detail: `${textSurfaceId} is not an available record surface` };
+        }
+        const source = observation.observePacket.administrativeSources.find(
+          candidate => candidate.memoryId === sourceMemoryId,
+        );
+        if (!source) {
+          return { reason: "cited_event_unknown", detail: `${sourceMemoryId} is not this actor's memory` };
+        }
+        if (this.sourceAlreadyAdministered(run, observation.actorId, sourceMemoryId)) {
+          return { reason: "already_recorded", detail: "that source memory already produced an administrative record" };
+        }
+        const existing = requestedRecordId
+          ? run.records.find(record => record.recordId === requestedRecordId)
+          : undefined;
+        if (requestedRecordId && (!existing || existing.authorActorId !== observation.actorId)) {
+          return { reason: "record_visibility_denied", detail: "only the author may update this visible record" };
+        }
+        if (existing && existing.textSurfaceId !== textSurfaceId) {
+          return { reason: "invalid_args", detail: "a record update cannot move between surfaces" };
+        }
+        return {
+          action: {
+            tool: "write_record",
+            recordKind: existing?.kind ?? recordKind,
+            sourceMemoryId,
+            originActorId: source.originActorId,
+            stateBody,
+            whyLine,
+            institutionalPressureDelta: pressureDelta,
+            textSurfaceId: existing?.textSurfaceId ?? textSurfaceId,
+            ...(existing ? { recordId: existing.recordId } : {}),
+            visibleToActorIds: existing?.visibleToActorIds ??
+              this.recordVisibility(run, observation.actorId, recordKind),
+            openQuestion,
+          },
+        };
+      }
+      case "read_record": {
+        const recordId = asId(call.args.recordId);
+        const whyLine = asId(call.args.whyLine);
+        const pressureDelta = Number(call.args.institutionalPressureDelta);
+        const openQuestion = Object.prototype.hasOwnProperty.call(call.args, "openQuestion")
+          ? asOpenQuestion(call.args.openQuestion)
+          : undefined;
+        const record = recordId
+          ? run.records.find(candidate =>
+              candidate.recordId === recordId &&
+              candidate.visibleToActorIds.includes(observation.actorId)
+            )
+          : undefined;
+        if (
+          !recordId ||
+          !record ||
+          !whyLine ||
+          !Number.isInteger(pressureDelta) ||
+          openQuestion === undefined
+        ) {
+          return { reason: "record_visibility_denied", detail: "read_record requires one visible record revision" };
+        }
+        const actor = this.requireActor(run, observation.actorId);
+        if (this.hasReadRecordRevision(actor, record.recordId, record.recordRevision)) {
+          return { reason: "already_read", detail: "this actor already read that record revision" };
+        }
+        const sourceMemoryId = record.sourceRefs[0]?.sourceMemoryId;
+        if (!sourceMemoryId) return { reason: "cited_event_unknown", detail: "record has no source memory" };
+        return {
+          action: {
+            tool: "read_record",
+            recordId: record.recordId,
+            sourceMemoryId,
+            whyLine,
+            institutionalPressureDelta: pressureDelta,
+            openQuestion,
+          },
+        };
       }
       default:
         return { reason: "role_authority_exceeded", detail: `${call.tool} is not legal for a T4 goal wake` };
@@ -1930,6 +2194,31 @@ export class RunService {
       movementDeltas.push(movement);
       actionDeltas.push({ kind: "movement", movementDelta: clone(movement) });
       this.setActorReadiness(actor, false, "movement_started", readinessDeltas);
+    } else if (action.tool === "write_record" || action.tool === "read_record") {
+      const nextRevision = run.worldRevision + 1;
+      const applied = applyRunAdministration({
+        runId: run.runId,
+        actorId: actor.actorId,
+        actorRole: actor.role,
+        action,
+        records: run.records,
+        ledgerEvents: run.ledgerEvents,
+        institutionalPressure: run.institutionalPressure,
+        worldSeconds: run.elapsedSeconds,
+        worldRevision: nextRevision,
+        ...(action.tool === "read_record" ? { memoryId: this.idFactory("mem") } : {}),
+      });
+      run.records = applied.records;
+      run.ledgerEvents = applied.ledgerEvents;
+      run.institutionalPressure = applied.institutionalPressure;
+      run.worldRevision = nextRevision;
+      if (applied.recordReadMemory) actor.memories.push(applied.recordReadMemory);
+      actionDeltas.push(clone(applied.delta));
+      for (const visibleActorId of applied.delta.record.visibleToActorIds) {
+        if (visibleActorId === "player") continue;
+        const visibleActor = run.actors.get(visibleActorId);
+        if (visibleActor) this.reconcileConversationOpening(run, visibleActor, readinessDeltas);
+      }
     } else if (action.tool === "talk_to") {
       const events = this.commitGoalConversation(run, attempt);
       if (!events) return this.finishGoalAttempt(run, attempt, "stale");
@@ -2159,6 +2448,7 @@ export class RunService {
       actionDeltas: clone(actionDeltas),
       movementDeltas: clone(movementDeltas),
       providerMetas: clone(attempt.providerMetas),
+      socialView: this.publicSocialView(run),
     };
   }
 
@@ -2202,6 +2492,36 @@ export class RunService {
         facts.reachableAnchorRefs.includes(action.targetAnchorRef) &&
         this.schedulePermitsAnchor(run, attempt.actorId, action.targetAnchorRef) &&
         run.scheduler.actors.get(attempt.actorId)?.confirmedAnchorRef !== action.targetAnchorRef
+      );
+    }
+    if (action.tool === "write_record") {
+      const actor = this.requireActor(run, attempt.actorId);
+      const sourceExists = actor.memories.some(memory => memory.memoryId === action.sourceMemoryId);
+      const surface = this.layout.recordSurfaces.find(
+        candidate => candidate.surfaceId === action.textSurfaceId,
+      );
+      const existing = action.recordId
+        ? run.records.find(record => record.recordId === action.recordId)
+        : undefined;
+      return Boolean(
+        sourceExists &&
+        !this.sourceAlreadyAdministered(run, actor.actorId, action.sourceMemoryId) &&
+        surface?.landmarkId === actor.locationId &&
+        recordKindsForRole(actor.role).includes(action.recordKind) &&
+        (!action.recordId || (
+          existing?.authorActorId === actor.actorId &&
+          existing.textSurfaceId === action.textSurfaceId
+        )),
+      );
+    }
+    if (action.tool === "read_record") {
+      const actor = this.requireActor(run, attempt.actorId);
+      const record = run.records.find(candidate => candidate.recordId === action.recordId);
+      return Boolean(
+        record &&
+        record.visibleToActorIds.includes(actor.actorId) &&
+        record.sourceRefs[0]?.sourceMemoryId === action.sourceMemoryId &&
+        !this.hasReadRecordRevision(actor, record.recordId, record.recordRevision),
       );
     }
     const targetFacts = run.spatialFacts?.actors.get(action.targetActorId);
@@ -2706,6 +3026,7 @@ export class RunService {
       ],
       movementDeltas: [],
       providerMetas: clone(attempt.providerMetas),
+      socialView: this.publicSocialView(run),
     };
   }
 
@@ -2753,6 +3074,163 @@ export class RunService {
       hasMeaningfulFirsthandConversation: actor.hasMeaningfulFirsthandConversation,
       memories: clone(actor.memories),
     };
+  }
+
+  private publicSocialView(run: RunState): RunSocialView {
+    return clone(run.socialView);
+  }
+
+  private hasReadRecordRevision(actor: RunActorState, recordId: string, revision: number): boolean {
+    return actor.memories.some(
+      memory =>
+        memory.kind === "record_read" &&
+        memory.recordId === recordId &&
+        memory.recordRevision === revision,
+    );
+  }
+
+  private sourceAlreadyAdministered(run: RunState, actorId: string, memoryId: string): boolean {
+    return run.ledgerEvents.some(
+      event =>
+        event.actorId === actorId &&
+        event.sourceMemoryId === memoryId &&
+        (event.kind === "record_written" || event.kind === "record_updated"),
+    );
+  }
+
+  private recordVisibility(
+    run: RunState,
+    authorActorId: string,
+    kind: RecordKind,
+  ): string[] {
+    const visible = new Set<string>(["player", authorActorId]);
+    const addRole = (role: RunActor["role"]) => {
+      const actor = [...run.actors.values()].find(candidate => candidate.role === role);
+      if (actor) visible.add(actor.actorId);
+    };
+    addRole("station_officer");
+    const author = this.requireActor(run, authorActorId);
+    if (author.role === "studio_receptionist" || author.role === "studio_manager") {
+      addRole("studio_manager");
+    }
+    if (kind === "posting") {
+      for (const actor of run.actors.values()) visible.add(actor.actorId);
+    }
+    return [...visible].sort();
+  }
+
+  private bumpSocialRevision(run: RunState): void {
+    run.socialView.revision += 1;
+  }
+
+  private discloseResidentJudgment(
+    run: RunState,
+    actor: RunActorState,
+    memory: RunPlayerConversationMemory,
+  ): void {
+    const provenance: RunSocialProvenance = {
+      originKind: "speech",
+      originActorId: "player",
+      recipientKind: "listener",
+      recipientActorId: actor.actorId,
+      sourceMemoryId: memory.memoryId,
+      recordId: null,
+      recordRevision: null,
+      ledgerEventId: null,
+      whyLine: memory.whyLine,
+    };
+    const resident = {
+      actorId: actor.actorId,
+      stance: actor.stance,
+      stanceRevision: run.worldRevision,
+      whyLine: memory.whyLine,
+      provenance,
+    };
+    const index = run.socialView.encounteredResidents.findIndex(
+      entry => entry.actorId === actor.actorId,
+    );
+    if (index >= 0) run.socialView.encounteredResidents[index] = resident;
+    else run.socialView.encounteredResidents.push(resident);
+    if (memory.openQuestion) {
+      run.socialView.openQuestions = run.socialView.openQuestions.filter(
+        entry => entry.subjectActorId !== actor.actorId,
+      );
+      run.socialView.openQuestions.push({
+        questionId: `question:${memory.memoryId}`,
+        subjectActorId: actor.actorId,
+        status: memory.openQuestion.status,
+        text: memory.openQuestion.text,
+        whyLine: memory.openQuestion.whyLine,
+        provenance: { ...provenance, whyLine: memory.openQuestion.whyLine },
+      });
+    }
+    this.bumpSocialRevision(run);
+  }
+
+  private discloseSpeech(run: RunState, event: RunAmbientSpeechEvent): void {
+    // The exact audible event is now known to the player, but speech text is
+    // not mechanically promoted into an open question. A model judgment or
+    // administrative proposal must author that player-log content.
+    if (run.encounteredSpeechEventIds.has(event.eventId)) return;
+    run.encounteredSpeechEventIds.add(event.eventId);
+  }
+
+  private discloseRecord(run: RunState, record: RunRecord): void {
+    const existing = run.socialView.encounteredRecords.find(
+      entry => entry.recordId === record.recordId,
+    );
+    if (
+      existing &&
+      existing.recordRevision === record.recordRevision &&
+      existing.lastLedgerEventId === record.lastLedgerEventId
+    ) return;
+    const event = run.ledgerEvents.find(candidate => candidate.eventId === record.lastLedgerEventId);
+    if (!event) return;
+    const provenance: RunSocialProvenance = {
+      originKind: "record",
+      originActorId: record.authorActorId,
+      recipientKind: "reader",
+      recipientActorId: event.kind === "record_read" ? event.actorId : "player",
+      sourceMemoryId: event.sourceMemoryId,
+      recordId: record.recordId,
+      recordRevision: record.recordRevision,
+      ledgerEventId: event.eventId,
+      whyLine: event.whyLine,
+    };
+    const disclosed = {
+      recordId: record.recordId,
+      kind: record.kind,
+      authorActorId: record.authorActorId,
+      targetId: record.targetId,
+      stateBody: record.stateBody,
+      recordRevision: record.recordRevision,
+      lastLedgerEventId: record.lastLedgerEventId,
+      provenance,
+    };
+    const index = run.socialView.encounteredRecords.findIndex(
+      entry => entry.recordId === record.recordId,
+    );
+    if (index >= 0) run.socialView.encounteredRecords[index] = disclosed;
+    else run.socialView.encounteredRecords.push(disclosed);
+    run.socialView.pressure.latestEncounteredWhyLine = event.whyLine;
+    run.socialView.pressure.band = pressureBand(event.pressureAfter);
+    if (event.openQuestion) {
+      const questionId = `question:record:${record.recordId}`;
+      const question = {
+        questionId,
+        subjectActorId: null,
+        status: event.openQuestion.status,
+        text: event.openQuestion.text,
+        whyLine: event.openQuestion.whyLine,
+        provenance: { ...provenance, whyLine: event.openQuestion.whyLine },
+      };
+      const questionIndex = run.socialView.openQuestions.findIndex(
+        entry => entry.questionId === questionId,
+      );
+      if (questionIndex >= 0) run.socialView.openQuestions[questionIndex] = question;
+      else run.socialView.openQuestions.push(question);
+    }
+    this.bumpSocialRevision(run);
   }
 
   private async executeConversationOpening(
@@ -3021,9 +3499,14 @@ export class RunService {
       incomingMemoryIds: actor.memories
         .filter(memory =>
           memory.kind === "player_conversation" ||
+          memory.kind === "record_read" ||
           (memory.kind === "ambient_utterance" && memory.speakerActorId !== actor.actorId),
         )
         .map(memory => memory.memoryId),
+      visibleRecordVersions: run.records
+        .filter(record => record.visibleToActorIds.includes(actor.actorId))
+        .map(record => `${record.recordId}@${record.recordRevision}`)
+        .sort(),
       spatialSignature,
     }))}`;
   }
@@ -3057,6 +3540,10 @@ export class RunService {
         recordId: record.recordId,
         kind: record.kind,
         stateBody: record.stateBody,
+        recordRevision: record.recordRevision,
+        authorActorId: record.authorActorId,
+        sourceMemoryId: record.sourceRefs[0]?.sourceMemoryId,
+        textSurfaceId: record.textSurfaceId,
       }));
     const ownActionNotes = actor.memories.map(memory => {
       if (memory.kind === "npc_utterance") return `[self_utterance] ${memory.line}`;
@@ -3067,9 +3554,12 @@ export class RunService {
           `[judgment_reason] ${memory.whyLine}`,
         ].join(" / ");
       }
-      return memory.speakerActorId === actor.actorId
-        ? `[self_utterance] ${memory.line}`
-        : `[heard_from=${memory.speakerActorId}] ${memory.line}`;
+      if (memory.kind === "ambient_utterance") {
+        return memory.speakerActorId === actor.actorId
+          ? `[self_utterance] ${memory.line}`
+          : `[heard_from=${memory.speakerActorId}] ${memory.line}`;
+      }
+      return `[record_read=${memory.recordId}@${memory.recordRevision}] ${memory.stateBody}`;
     });
     const heardSpeech = actor.memories.flatMap(memory => {
       if (memory.kind === "player_conversation") return [memory.playerLine];
@@ -3097,17 +3587,72 @@ export class RunService {
         actorId: actor.actorId,
         ownActionNotes,
         observedLedgerEventIds: run.ledgerEvents
-          .filter(event => event.actorId === actor.actorId)
+          .filter(event => event.visibleToActorIds.includes(actor.actorId))
           .map(event => event.eventId),
       },
       visibleObjects: [],
       visibleRecords,
-      visibleLedgerEvents: [],
+      visibleLedgerEvents: run.ledgerEvents
+        .filter(event => event.visibleToActorIds.includes(actor.actorId))
+        .map(event => ({
+          eventId: event.eventId,
+          kind: event.kind,
+          actorId: event.actorId,
+          recordId: event.recordId,
+        })),
       visibleActors: [...new Set(visibleActorIds.filter(id => id !== actor.actorId))],
       audibleActorIds: spatialFacts ? [...spatialFacts.audibleActorIds] : [],
       reachableAnchorRefs: spatialFacts ? [...spatialFacts.reachableAnchorRefs] : [],
       heardSpeech: [...heardSpeech, ...additionalSpeech],
       toolCatalog: toolCatalogForRole(actor.role),
+      administrativeSources: actor.memories
+        .filter(memory => !this.sourceAlreadyAdministered(run, actor.actorId, memory.memoryId))
+        .map(memory => {
+        if (memory.kind === "player_conversation") {
+          return {
+            memoryId: memory.memoryId,
+            kind: memory.kind,
+            originActorId: "player",
+            summary: memory.playerLine,
+            whyLine: memory.whyLine,
+            reportDelta: memory.reportDelta,
+          };
+        }
+        if (memory.kind === "ambient_utterance") {
+          return {
+            memoryId: memory.memoryId,
+            kind: memory.kind,
+            originActorId: memory.speakerActorId,
+            summary: memory.line,
+            whyLine: memory.line,
+            reportDelta: 0,
+          };
+        }
+        if (memory.kind === "record_read") {
+          return {
+            memoryId: memory.memoryId,
+            kind: memory.kind,
+            originActorId: memory.sourceActorId,
+            summary: memory.stateBody,
+            whyLine: memory.whyLine,
+            reportDelta: 0,
+          };
+        }
+        return {
+          memoryId: memory.memoryId,
+          kind: memory.kind,
+          originActorId: memory.sourceActorId,
+          summary: memory.line,
+          whyLine: memory.line,
+          reportDelta: 0,
+        };
+        }),
+      administrativeAuthority: {
+        allowedRecordKinds: recordKindsForRole(actor.role),
+        writableTextSurfaceIds: this.layout.recordSurfaces
+          .filter(surface => surface.landmarkId === actor.locationId)
+          .map(surface => surface.surfaceId),
+      },
     };
   }
 

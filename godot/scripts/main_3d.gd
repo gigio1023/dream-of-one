@@ -37,6 +37,7 @@ var _run_start_id := ""
 var _run_start_locale := ""
 var _active_session_id := ""
 var _run_snapshot: Dictionary = {}
+var _social_view: Dictionary = {}
 var _active_turn: Dictionary = {}
 var _last_proposal_meta: Dictionary = {}
 var _conversation_target: NPC3D
@@ -92,6 +93,9 @@ var _ambient_last_actor_ids: Array = []
 var _ambient_provider_metas: Array = []
 var _deferred_ambient_speech_events: Array[Dictionary] = []
 var _applied_conversation_end_batches: Dictionary = {}
+var _record_encounter_in_flight := false
+var _encounter_sequence := 0
+var _acknowledged_speech_encounters: Dictionary = {}
 
 
 func _ready() -> void:
@@ -105,6 +109,8 @@ func _ready() -> void:
 	_player.focus_changed.connect(_hud.set_focus)
 	_player.settings_requested.connect(_hud.open_settings)
 	_hud.settings_visibility_changed.connect(_on_settings_visibility_changed)
+	_hud.log_visibility_changed.connect(_on_log_visibility_changed)
+	_hud.debug_visibility_changed.connect(_on_debug_visibility_changed)
 	_hud.look_settings_changed.connect(_on_look_settings_changed)
 	_hud.ui_scale_requested.connect(_on_ui_scale_requested)
 	_hud.audio_settings_requested.connect(_on_audio_settings_requested)
@@ -113,6 +119,14 @@ func _ready() -> void:
 	_hud.free_input_submitted.connect(_on_free_input_submitted)
 	_hud.conversation_end_retry_requested.connect(_on_conversation_end_retry_requested)
 	_hud.ambient_subtitle_started.connect(_on_ambient_subtitle_started)
+	for surface_value in get_tree().get_nodes_in_group(&"record_surfaces"):
+		if surface_value is Node and (surface_value as Node).has_signal(
+			&"record_surface_requested"
+		):
+			(surface_value as Node).connect(
+				&"record_surface_requested",
+				_on_record_surface_requested
+			)
 	for actor_value in get_tree().get_nodes_in_group(&"npc_actors"):
 		if actor_value is NPC3D:
 			var actor := actor_value as NPC3D
@@ -133,6 +147,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if _hud.debug_visible():
+		_hud.set_debug_snapshot(_debug_snapshot())
 	if get_tree().paused or _conversation_target != null:
 		return
 	if _run_id.is_empty() or _run_start_in_flight:
@@ -208,10 +224,9 @@ func presentation_snapshot() -> Dictionary:
 		"resolvingAnswer": _resolving_answer or _ending_conversation,
 		"currentTurn": _active_turn.duplicate(true),
 		"encounteredStances": hud_snapshot.get("encounteredStances", []),
-		"institutionalPressure": {
-			"level": _run_snapshot.get("institutionalPressure", 0),
-			"summary": str(_run_snapshot.get("institutionalPressure", 0)),
-		} if not _run_snapshot.is_empty() else {},
+		"socialView": hud_snapshot.get("socialView", {}),
+		"hearing": hud_snapshot.get("hearing", {}),
+		"institutionalPressure": hud_snapshot.get("institutionalPressure", {}),
 		"provider": _last_proposal_meta.duplicate(true),
 		"providerBudget": _dictionary_or_empty(_run_snapshot.get("providerBudget")),
 		"actors": _actor_readiness_summaries(),
@@ -265,11 +280,79 @@ func presentation_snapshot() -> Dictionary:
 
 
 func _on_settings_visibility_changed(visible: bool) -> void:
-	_player.set_control_enabled(not visible)
 	if visible:
+		_player.set_control_enabled(false)
 		_player.release_mouse()
 	else:
-		_player.capture_mouse()
+		_restore_player_control_if_unlocked()
+
+
+func _on_log_visibility_changed(visible: bool) -> void:
+	if visible:
+		_player.set_control_enabled(false)
+		_player.release_mouse()
+	else:
+		_restore_player_control_if_unlocked()
+
+
+func _on_debug_visibility_changed(visible: bool) -> void:
+	if visible:
+		_hud.set_debug_snapshot(_debug_snapshot())
+
+
+func _restore_player_control_if_unlocked() -> void:
+	if (
+		_record_encounter_in_flight
+		or _conversation_target != null
+		or _hud.settings_visible()
+		or _hud.log_visible()
+	):
+		return
+	_player.set_control_enabled(true)
+	_player.capture_mouse()
+
+
+func _on_record_surface_requested(surface_id: String) -> void:
+	if (
+		_record_encounter_in_flight
+		or _conversation_target != null
+		or _hud.settings_visible()
+		or _hud.log_visible()
+	):
+		return
+	_record_encounter_in_flight = true
+	_hud.open_log_busy()
+	if not await _ensure_run():
+		_record_encounter_in_flight = false
+		_hud.finish_log_busy(&"hud.m3r.error.record_inspect")
+		return
+	_encounter_sequence += 1
+	var encounter_id := "enc:record:%06d" % _encounter_sequence
+	var result: Dictionary = await _send_encounter_with_retry(
+		encounter_id,
+		{
+			"kind": "record_surface",
+			"textSurfaceId": surface_id,
+			"playerPosition": _vector3_to_array(_player.global_position),
+		}
+	)
+	_record_encounter_in_flight = false
+	if _is_error(result):
+		_hud.finish_log_busy(&"hud.m3r.error.record_inspect")
+		return
+	_apply_social_view_from_response(result)
+	_hud.finish_log_busy()
+
+
+func _send_encounter_with_retry(encounter_id: String, encounter: Dictionary) -> Dictionary:
+	var result: Dictionary = {}
+	for attempt in 3:
+		result = await _run_session.encounter(_run_id, encounter_id, encounter)
+		if not _is_error(result) or str(result.get("error", "")) != "run_encounter_failed":
+			return result
+		if attempt < 2:
+			await get_tree().create_timer(pow(2.0, attempt), false).timeout
+	return result
 
 
 func _on_look_settings_changed(sensitivity: float, inverted: bool, fov: float) -> void:
@@ -364,6 +447,7 @@ func _handle_conversation_start_result(result: Dictionary) -> void:
 
 	_active_session_id = str(result.get("sessionId", ""))
 	_active_turn = _dictionary_or_empty(result.get("nextTurn"))
+	_apply_social_view_from_response(result)
 	_run_snapshot["worldRevision"] = int(result.get("worldRevision", 0))
 	_spatial_facts_dirty = true
 	_run_snapshot["activeConversationId"] = _active_session_id
@@ -446,6 +530,7 @@ func _submit_answer(answer_payload: Dictionary) -> void:
 		return
 
 	_required_retry_answer = {}
+	_apply_social_view_from_response(result)
 	_run_snapshot["worldRevision"] = int(result.get("worldRevision", 0))
 	_spatial_facts_dirty = true
 	_update_run_actor(_dictionary_or_empty(result.get("actor")))
@@ -488,6 +573,7 @@ func _end_active_conversation() -> void:
 	if _is_error(result):
 		_hud.show_conversation_error(&"hud.m3r.error.conversation_end", true)
 		return
+	_apply_social_view_from_response(result)
 	_run_snapshot["worldRevision"] = int(result.get("worldRevision", 0))
 	_spatial_facts_dirty = true
 	_run_snapshot["activeConversationId"] = null
@@ -561,6 +647,8 @@ func _ensure_run() -> bool:
 	_run_start_attempts = 0
 	_fixture_replay_complete = false
 	_run_snapshot = result.duplicate(true)
+	_social_view = {}
+	_apply_social_view_from_response(result)
 	_spatial_facts_dirty = true
 	_last_proposal_meta = _dictionary_or_empty(result.get("lastProposalMeta"))
 	_ingest_ambient_snapshot(result)
@@ -841,6 +929,7 @@ func _restore_advance_request(request: Dictionary) -> void:
 
 
 func _apply_advance_response(result: Dictionary) -> void:
+	_apply_social_view_from_response(result)
 	_ingest_ambient_speech_events(_array_or_empty(result.get("ambientSpeechEvents")))
 	_ambient_speech_cursor = maxi(
 		_ambient_speech_cursor,
@@ -988,6 +1077,7 @@ func _dispatch_ambient_decision() -> void:
 	_ambient_last_wake_kind = str(result.get("wakeKind", ""))
 	_ambient_last_actor_ids = _array_or_empty(result.get("actorIds"))
 	_ambient_provider_metas = _array_or_empty(result.get("providerMetas"))
+	_apply_social_view_from_response(result)
 	_run_snapshot["worldRevision"] = maxi(
 		int(_run_snapshot.get("worldRevision", 0)),
 		int(result.get("worldRevision", 0))
@@ -1112,6 +1202,9 @@ func _face_ambient_participants(event: Dictionary) -> void:
 
 func _on_ambient_subtitle_started(event: Dictionary) -> void:
 	var seq := int(event.get("seq", -1))
+	if _hud.log_visible() or _hud.settings_visible():
+		_hud.discard_current_ambient_subtitle(seq)
+		return
 	var audibility := _dictionary_or_empty(event.get("audibility"))
 	var player_audibility: Dictionary = _town.player_speech_audibility(audibility)
 	if not bool(player_audibility.get("audible", false)):
@@ -1136,6 +1229,29 @@ func _on_ambient_subtitle_started(event: Dictionary) -> void:
 	) as NPC3D
 	if speaker != null:
 		speaker.play_speech_blip(float(player_audibility.get("maxDistanceM", 0.0)))
+	_acknowledge_speech_encounter(event)
+
+
+func _acknowledge_speech_encounter(event: Dictionary) -> void:
+	var speech_event_id := str(event.get("speechEventId", event.get("eventId", "")))
+	if speech_event_id.is_empty() or _acknowledged_speech_encounters.has(speech_event_id):
+		return
+	_acknowledged_speech_encounters[speech_event_id] = "pending"
+	var encounter_id := "enc:speech:%s" % speech_event_id.sha256_text().left(32)
+	var result: Dictionary = await _send_encounter_with_retry(
+		encounter_id,
+		{
+			"kind": "speech",
+			"speechEventId": speech_event_id,
+			"playerPosition": _vector3_to_array(_player.global_position),
+		}
+	)
+	if _is_error(result):
+		_acknowledged_speech_encounters.erase(speech_event_id)
+		push_warning("RunService did not acknowledge displayed speech: %s" % speech_event_id)
+		return
+	_acknowledged_speech_encounters[speech_event_id] = "accepted"
+	_apply_social_view_from_response(result)
 
 
 func _flush_deferred_ambient_speech_events() -> void:
@@ -1222,6 +1338,10 @@ func _apply_run_deltas(deltas: Array) -> void:
 					push_warning("Ignoring runtime movement delta without movementDelta.")
 				else:
 					_queue_or_apply_movement(movement_delta)
+			"administration":
+				# The runtime has already committed and validated this mutation.
+				# Player knowledge arrives separately through authoritative socialView.
+				pass
 			_:
 				push_warning("Ignoring unknown runtime action delta kind: %s" % delta.get("kind", ""))
 
@@ -1597,7 +1717,10 @@ func _rebase_run_after_advance_conflict() -> void:
 		_advance_needs_rebase = true
 		_advance_retry_remaining = ADVANCE_RETRY_SECONDS
 		return
+	_apply_social_view_from_response(result)
 	_run_snapshot = result.duplicate(true)
+	if not _social_view.is_empty():
+		_run_snapshot["socialView"] = _social_view.duplicate(true)
 	_run_snapshot["worldRevision"] = maxi(current_revision, snapshot_revision)
 	_spatial_facts_dirty = true
 	_last_proposal_meta = _dictionary_or_empty(result.get("lastProposalMeta"))
@@ -1717,6 +1840,47 @@ func _api_locale() -> String:
 	if not _run_start_locale.is_empty():
 		return _run_start_locale
 	return str(_localization.call("api_locale", _locale_name))
+
+
+func _apply_social_view_from_response(response: Dictionary) -> bool:
+	var social_view := _dictionary_or_empty(response.get("socialView"))
+	if social_view.is_empty():
+		for key in ["runSnapshot", "snapshot"]:
+			var nested := _dictionary_or_empty(response.get(key))
+			social_view = _dictionary_or_empty(nested.get("socialView"))
+			if not social_view.is_empty():
+				break
+	if social_view.is_empty() or not social_view.has("revision"):
+		return false
+	var incoming_revision := int(social_view.get("revision", -1))
+	var current_revision := int(_social_view.get("revision", -1))
+	if incoming_revision < current_revision:
+		return false
+	_social_view = social_view.duplicate(true)
+	if not _run_snapshot.is_empty():
+		_run_snapshot["socialView"] = _social_view.duplicate(true)
+	_hud.set_social_view(_social_view)
+	return true
+
+
+func _debug_snapshot() -> Dictionary:
+	if not OS.is_debug_build():
+		return {}
+	return {
+		"runId": _run_id,
+		"worldRevision": _run_snapshot.get("worldRevision", 0),
+		"socialRevision": _social_view.get("revision", -1),
+		"institutionalPressure": _run_snapshot.get("institutionalPressure", 0),
+		"actors": _run_snapshot.get("actors", []),
+		"records": _run_snapshot.get("records", []),
+		"ledgerEvents": _run_snapshot.get("ledgerEvents", []),
+		"providerBudget": _run_snapshot.get("providerBudget", {}),
+		"lastProposalMeta": _last_proposal_meta,
+	}
+
+
+func _vector3_to_array(value: Vector3) -> Array[float]:
+	return [value.x, value.y, value.z]
 
 
 func _is_error(result: Dictionary) -> bool:

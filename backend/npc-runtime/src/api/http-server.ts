@@ -25,6 +25,8 @@ import {
 import {
   runAdvanceRequestSchema,
   runAdvanceResponseSchema,
+  runEncounterRequestSchema,
+  runEncounterResponseSchema,
   runNpcDecisionRequestSchema,
   runNpcDecisionResponseSchema,
   runSessionAnswerRequestSchema,
@@ -97,6 +99,7 @@ function statusForRunError(error: RunError): number {
     case "stale_world_revision":
     case "run_paused":
     case "hearing_due":
+    case "encounter_id_conflict":
       return 409;
     default:
       return 400;
@@ -187,6 +190,14 @@ export function createSessionServer(service: SessionService, runService = new Ru
         });
         if (!parsed.success) return badRequest(res, parsed.error);
         respond(res, runSnapshotSchema, runService.snapshot(parsed.data.runId));
+        return;
+      }
+
+      if (method === "POST" && path === "/v1/run/encounter") {
+        const parsed = runEncounterRequestSchema.safeParse(await readJsonBody(req));
+        if (!parsed.success) return badRequest(res, parsed.error);
+        const result = await runService.encounter(parsed.data);
+        respond(res, runEncounterResponseSchema, result);
         return;
       }
 

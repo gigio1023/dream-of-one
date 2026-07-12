@@ -102,6 +102,11 @@ func run_snapshot(run_id: String) -> Dictionary:
 	return await _backend.run_snapshot(run_id)
 
 
+func encounter(run_id: String, encounter_id: String, encounter: Dictionary) -> Dictionary:
+	await get_tree().process_frame
+	return await _backend.encounter(run_id, encounter_id, encounter)
+
+
 func advance(request: Dictionary) -> Dictionary:
 	await get_tree().process_frame
 	return await _backend.advance(request)

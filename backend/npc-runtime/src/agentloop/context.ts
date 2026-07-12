@@ -11,7 +11,12 @@ import {
   type WorldRole,
   type WorldState,
 } from "../runtime/world/index.js";
-import { toolCatalogForRole, type ActorContextLite, type ToolName } from "./tools.js";
+import {
+  recordKindsForRole,
+  toolCatalogForRole,
+  type ActorContextLite,
+  type ToolName,
+} from "./tools.js";
 
 /** Stable, editable role policy (docs/game/npc-agent-loop.md). */
 export interface ActorPolicy {
@@ -36,7 +41,15 @@ export interface ObservePacket {
   actorPolicy: ActorPolicy;
   actorMemory: ActorMemory;
   visibleObjects: Array<{ objectId: string; label: string; state: string }>;
-  visibleRecords: Array<{ recordId: string; kind: string; stateBody: string }>;
+  visibleRecords: Array<{
+    recordId: string;
+    kind: string;
+    stateBody: string;
+    recordRevision?: number;
+    authorActorId?: string;
+    sourceMemoryId?: string;
+    textSurfaceId?: string;
+  }>;
   visibleLedgerEvents: Array<{
     eventId: string;
     kind: string;
@@ -50,6 +63,18 @@ export interface ObservePacket {
   reachableAnchorRefs: string[];
   heardSpeech: string[];
   toolCatalog: ToolName[];
+  administrativeSources: Array<{
+    memoryId: string;
+    kind: string;
+    originActorId: string;
+    summary: string;
+    whyLine: string;
+    reportDelta: number;
+  }>;
+  administrativeAuthority: {
+    allowedRecordKinds: string[];
+    writableTextSurfaceIds: string[];
+  };
 }
 
 export interface AssembleObserveInput {
@@ -103,6 +128,11 @@ export function assembleObservePacket(world: WorldState, input: AssembleObserveI
     reachableAnchorRefs: [],
     heardSpeech: [...input.heardSpeech],
     toolCatalog: toolCatalogForRole(actor.role),
+    administrativeSources: [],
+    administrativeAuthority: {
+      allowedRecordKinds: recordKindsForRole(actor.role),
+      writableTextSurfaceIds: [],
+    },
   };
 }
 

@@ -161,3 +161,40 @@ test("provider-proposed mutations still pass deterministic validation and ledger
   assert.equal(result.transcriptDeltas[0].ledgerEventId, result.events[0].eventId);
   assert.equal(result.transcriptDeltas[0].proposalMeta.transport, "scripted");
 });
+
+test("legacy record writes preserve omitted-field semantics through required nulls", async () => {
+  const call: ToolCall = {
+    tool: "write_record",
+    args: {
+      objectId: null,
+      toState: null,
+      ledgerKind: "usual_order_cited",
+      record: {
+        recordId: "legacy-strict-record",
+        kind: "clerk_statement",
+        targetId: "player",
+        stateBody: "점원이 평소 주문 기록을 확인했습니다.",
+        visibleTo: ["player", "store_clerk"],
+      },
+      citedLedgerEventId: null,
+      whyLine: "선택 사항을 비워 둔 채 기록만 남겼습니다.",
+    },
+  };
+  const result = await runBeat({
+    sessionId: "test-legacy-strict-null",
+    locale: "ko-KR",
+    world: createSameOrderWorld(),
+    actor: clerk(),
+    policy: DEFAULT_ROLE_POLICIES.store_clerk,
+    memory: emptyMemory("NPC_Store_Clerk"),
+    goal: "write one legacy record without an object transition or citation",
+    proposalPort: adapterFor([active(call, "write the record")]),
+    transcript: new TranscriptStore(),
+    budget: 2,
+  });
+
+  assert.equal(result.events.length, 1);
+  assert.equal(result.world.records.find(record => record.recordId === "legacy-strict-record")?.stateBody,
+    "점원이 평소 주문 기록을 확인했습니다.");
+  assert.equal(result.transcriptDeltas[0]?.validation.ok, true);
+});

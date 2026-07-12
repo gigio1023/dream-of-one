@@ -10,6 +10,8 @@ signal choice_submitted(choice_id: String)
 signal free_input_submitted(text: String)
 signal conversation_end_retry_requested
 signal ambient_subtitle_started(event: Dictionary)
+signal log_visibility_changed(visible: bool)
+signal debug_visibility_changed(visible: bool)
 
 const UI_SCALE_OPTIONS: Array[float] = [0.8, 1.0, 1.25, 1.5]
 const TYPEWRITER_CHARACTERS_PER_SECOND := 42.0
@@ -56,11 +58,22 @@ const AMBIENT_SUBTITLE_SECONDS_PER_CHARACTER := 0.055
 @onready var _end_conversation_button: Button = %EndConversationButton
 @onready var _encountered_stance_panel: PanelContainer = $Overlay/EncounteredStancePanel
 @onready var _encountered_stance_label: Label = %EncounteredStanceLabel
+@onready var _log_shade: ColorRect = %LogShade
+@onready var _log_title: Label = %LogTitle
+@onready var _log_body: RichTextLabel = %LogBody
+@onready var _log_error_label: Label = %LogErrorLabel
+@onready var _log_busy_label: Label = %LogBusyLabel
+@onready var _close_log_button: Button = %CloseLogButton
+@onready var _debug_panel: PanelContainer = %DebugPanel
+@onready var _debug_text: RichTextLabel = %DebugText
 @onready var _localization: Node = get_node("/root/Localization")
 
 var _settings_visible := false
 var _conversation_visible := false
 var _conversation_busy := false
+var _log_visible := false
+var _log_busy := false
+var _debug_visible := false
 var _focused_target: Node
 var _runtime_theme: Theme
 var _conversation_actor_id := ""
@@ -70,7 +83,7 @@ var _last_why_line := ""
 var _provider_meta: Dictionary = {}
 var _choice_ids: Array[String] = ["", "", ""]
 var _choice_buttons: Array[Button] = []
-var _encountered_stances: Dictionary = {}
+var _social_view: Dictionary = {}
 var _prompt_tween: Tween
 var _retry_button_mode: StringName = &"end"
 var _ambient_subtitle_queue: Array[Dictionary] = []
@@ -97,6 +110,7 @@ func _ready() -> void:
 	_conversation_submit_button.pressed.connect(_submit_free_input)
 	_conversation_free_input.text_submitted.connect(_on_free_input_text_submitted)
 	_end_conversation_button.pressed.connect(_on_end_conversation_retry_pressed)
+	_close_log_button.pressed.connect(close_log)
 	_prompt_panel.visible = false
 	_ambient_subtitle_panel.visible = false
 	_settings_shade.visible = false
@@ -108,6 +122,10 @@ func _ready() -> void:
 	_refresh_retry_button_text()
 	_end_conversation_button.visible = false
 	_encountered_stance_panel.visible = false
+	_log_shade.visible = false
+	_log_error_label.visible = false
+	_log_busy_label.visible = false
+	_debug_panel.visible = false
 
 
 func _process(delta: float) -> void:
@@ -122,6 +140,19 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("toggle_debug") and OS.is_debug_build():
+		_set_debug_visible(not _debug_visible)
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed("open_log") and not _conversation_visible and not _settings_visible:
+		toggle_log()
+		get_viewport().set_input_as_handled()
+		return
+	if _log_visible:
+		if event.is_action_pressed("cancel"):
+			close_log()
+			get_viewport().set_input_as_handled()
+		return
 	if _conversation_visible:
 		if not _conversation_busy and not _conversation_free_input.has_focus():
 			for index in _choice_buttons.size():
@@ -139,7 +170,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func set_focus(target: Node) -> void:
 	_focused_target = target
-	if _conversation_visible or _settings_visible:
+	if _conversation_visible or _settings_visible or _log_visible:
 		_prompt_panel.visible = false
 		return
 	if target == null or not target.has_method("get_interaction_label_key"):
@@ -241,7 +272,7 @@ func ambient_subtitle_snapshot() -> Dictionary:
 
 
 func open_settings() -> void:
-	if _conversation_visible:
+	if _conversation_visible or _log_visible:
 		return
 	_set_settings_visible(true)
 
@@ -258,13 +289,95 @@ func conversation_visible() -> bool:
 	return _conversation_visible
 
 
+func log_visible() -> bool:
+	return _log_visible
+
+
+func debug_visible() -> bool:
+	return _debug_visible
+
+
+func log_busy() -> bool:
+	return _log_busy
+
+
+func toggle_log() -> void:
+	if _log_busy:
+		return
+	_set_log_visible(not _log_visible)
+
+
+func open_log(error_key := StringName()) -> void:
+	if _conversation_visible or _settings_visible:
+		return
+	if not error_key.is_empty():
+		show_log_error(error_key)
+	_set_log_visible(true)
+
+
+func close_log() -> void:
+	if _log_busy:
+		return
+	_set_log_visible(false)
+
+
+func open_log_busy() -> void:
+	if _conversation_visible or _settings_visible:
+		return
+	clear_log_error()
+	_set_log_busy(true)
+	_set_log_visible(true)
+
+
+func finish_log_busy(error_key := StringName()) -> void:
+	_set_log_busy(false)
+	if not error_key.is_empty():
+		show_log_error(error_key)
+
+
+func show_log_error(key: StringName) -> void:
+	_log_error_label.text = str(tr(key))
+	_log_error_label.visible = not _log_error_label.text.is_empty()
+
+
+func clear_log_error() -> void:
+	_log_error_label.text = ""
+	_log_error_label.visible = false
+
+
+func set_social_view(value: Dictionary) -> bool:
+	if not value.has("revision"):
+		return false
+	var incoming_revision := int(value.get("revision", -1))
+	var current_revision := int(_social_view.get("revision", -1))
+	if incoming_revision < current_revision:
+		return false
+	_social_view = value.duplicate(true)
+	if not _conversation_actor_id.is_empty():
+		_current_stance = _disclosed_stance(_conversation_actor_id)
+		_refresh_stance_label()
+	_refresh_encountered_stances()
+	_refresh_log_body()
+	return true
+
+
+func social_view_snapshot() -> Dictionary:
+	return _social_view.duplicate(true)
+
+
+func set_debug_snapshot(value: Dictionary) -> void:
+	if not OS.is_debug_build():
+		return
+	_debug_text.text = JSON.stringify(value, "  ")
+
+
 func begin_conversation(actor: Dictionary) -> void:
 	if _settings_visible:
 		_set_settings_visible(false)
 	_conversation_visible = true
 	_conversation_busy = false
 	_conversation_actor_id = str(actor.get("actorId", ""))
-	_current_stance = str(actor.get("stance", ""))
+	_current_stance = _disclosed_stance(_conversation_actor_id)
 	_current_turn.clear()
 	_last_why_line = ""
 	_provider_meta = {}
@@ -330,21 +443,16 @@ func show_provider(meta: Dictionary) -> void:
 	_refresh_provider_label()
 
 
-func show_judgment(judgment: Dictionary) -> void:
-	_last_why_line = str(judgment.get("whyLine", "")).strip_edges()
-	_current_stance = str(judgment.get("stanceAfter", _current_stance))
+func show_judgment(_judgment: Dictionary) -> void:
+	var disclosed := _disclosed_resident(_conversation_actor_id)
+	_last_why_line = str(disclosed.get("whyLine", "")).strip_edges()
+	_current_stance = _disclosed_stance(_conversation_actor_id)
 	_refresh_stance_label()
 	if not _last_why_line.is_empty():
 		_conversation_why_line_label.text = str(
 			tr(&"hud.m3r.why_line.format")
 		).format({"reason": _last_why_line})
 		_conversation_why_line_label.visible = true
-	if not _conversation_actor_id.is_empty():
-		_encountered_stances[_conversation_actor_id] = {
-			"stance": _current_stance,
-			"whyLine": _last_why_line,
-		}
-		_refresh_encountered_stances()
 
 
 func show_conversation_error(key: StringName, allow_end_retry := false) -> void:
@@ -400,6 +508,7 @@ func presentation_snapshot() -> Dictionary:
 	return {
 		"modalSurface": (
 			"conversation" if _conversation_visible
+			else "inspect" if _log_visible
 			else "settings" if _settings_visible
 			else "none"
 		),
@@ -413,13 +522,23 @@ func presentation_snapshot() -> Dictionary:
 		"languageAppliesNextRun": _language_applies_next_run,
 		"currentTurn": _current_turn.duplicate(true),
 		"encounteredStances": _encountered_stance_snapshot(),
+		"socialView": _social_view.duplicate(true),
+		"hearing": _dictionary_or_empty(_social_view.get("hearing")),
+		"institutionalPressure": _pressure_snapshot(),
+		"log": {
+			"visible": _log_visible,
+			"busy": _log_busy,
+			"body": _log_body.text,
+			"error": _log_error_label.text if _log_error_label.visible else "",
+		},
+		"debugVisible": _debug_visible,
 		"provider": _provider_meta.duplicate(true),
 		"ambientSubtitle": ambient_subtitle_snapshot(),
 	}
 
 
 func _set_settings_visible(should_show: bool) -> void:
-	if should_show and _conversation_visible:
+	if should_show and (_conversation_visible or _log_visible):
 		return
 	if _settings_visible == should_show:
 		return
@@ -435,6 +554,40 @@ func _set_settings_visible(should_show: bool) -> void:
 	settings_visibility_changed.emit(should_show)
 	if should_show:
 		_close_settings_button.grab_focus()
+
+
+func _set_log_visible(should_show: bool) -> void:
+	if not should_show and _log_busy:
+		return
+	if should_show and (_conversation_visible or _settings_visible):
+		return
+	if _log_visible == should_show:
+		return
+	_log_visible = should_show
+	_log_shade.visible = should_show
+	if should_show:
+		_prompt_panel.visible = false
+		_encountered_stance_panel.visible = false
+		_refresh_log_body()
+		_close_log_button.grab_focus()
+	else:
+		clear_log_error()
+		_refresh_encountered_stances()
+		set_focus(_focused_target)
+	_refresh_ambient_subtitle_visibility()
+	log_visibility_changed.emit(should_show)
+
+
+func _set_debug_visible(should_show: bool) -> void:
+	_debug_visible = should_show and OS.is_debug_build()
+	_debug_panel.visible = _debug_visible
+	debug_visibility_changed.emit(_debug_visible)
+
+
+func _set_log_busy(should_be_busy: bool) -> void:
+	_log_busy = should_be_busy
+	_log_busy_label.visible = should_be_busy
+	_close_log_button.disabled = should_be_busy
 
 
 func _on_look_setting_changed(_value: float) -> void:
@@ -508,6 +661,9 @@ func _populate_ui_scale_options() -> void:
 
 func _apply_localized_text() -> void:
 	_start_hint.text = tr(&"hud.m3r.start_hint")
+	_log_title.text = tr(&"hud.m3r.log.title")
+	_log_busy_label.text = tr(&"hud.m3r.log.loading")
+	_close_log_button.text = tr(&"hud.m3r.log.close")
 	_invert_y_check.text = tr(&"hud.settings.invert_y")
 	_close_settings_button.text = tr(&"hud.settings.return")
 	_settings_title.text = tr(&"hud.settings.title")
@@ -524,6 +680,7 @@ func _apply_localized_text() -> void:
 	_refresh_stance_label()
 	_refresh_provider_label()
 	_refresh_encountered_stances()
+	_refresh_log_body()
 	_refresh_ambient_subtitle_text()
 	_populate_language_options()
 	set_focus(_focused_target)
@@ -614,59 +771,194 @@ func _refresh_provider_label() -> void:
 func _refresh_encountered_stances() -> void:
 	if not is_instance_valid(_encountered_stance_label):
 		return
-	if _encountered_stances.is_empty():
+	if _social_view.is_empty():
 		_encountered_stance_panel.visible = false
 		_encountered_stance_label.text = ""
 		return
-	var lines: Array[String] = [str(tr(&"hud.m3r.encountered_stances.title"))]
-	for actor_value in _encountered_stances.keys():
-		var actor_id := str(actor_value)
-		var stance_value: Variant = _encountered_stances[actor_value]
-		var stance := str(
-			(stance_value as Dictionary).get("stance", "uncertain")
-			if stance_value is Dictionary
-			else stance_value
-		)
-		var why_line := str(
-			(stance_value as Dictionary).get("whyLine", "")
-			if stance_value is Dictionary
-			else ""
-		)
+	var lines: Array[String] = [_hearing_text(), _pressure_text(), ""]
+	var residents := _encountered_residents()
+	if not residents.is_empty():
+		lines.append(str(tr(&"hud.m3r.encountered_stances.title")))
+	for resident in residents:
+		var actor_id := str(resident.get("actorId", ""))
 		lines.append(
 			str(tr(&"hud.m3r.encountered_stances.entry")).format({
 				"actor": _actor_label(actor_id),
-				"stance": _stance_text(stance),
+				"stance": _stance_text(str(resident.get("stance", "uncertain"))),
 			})
 		)
-		if not why_line.is_empty():
-			lines.append(
-				str(tr(&"hud.m3r.why_line.format")).format({"reason": why_line})
-			)
+	lines.append("")
+	lines.append(str(tr(&"hud.m3r.log.hint")))
 	_encountered_stance_label.text = "\n".join(lines)
-	_encountered_stance_panel.visible = not _conversation_visible and not _settings_visible
+	_encountered_stance_panel.visible = (
+		not _conversation_visible and not _settings_visible and not _log_visible
+	)
 
 
 func _encountered_stance_snapshot() -> Array:
 	var result: Array = []
-	for actor_value in _encountered_stances.keys():
-		var actor_id := str(actor_value)
-		var stance_value: Variant = _encountered_stances[actor_value]
-		var entry := stance_value as Dictionary if stance_value is Dictionary else {}
+	for entry in _encountered_residents():
+		var actor_id := str(entry.get("actorId", ""))
 		result.append({
 			"actorId": actor_id,
 			"title": _actor_label(actor_id),
-			"stance": str(entry.get("stance", stance_value)),
-			"summary": str(entry.get("whyLine", "")),
+			"stance": str(entry.get("stance", "uncertain")),
+			"summary": "",
 		})
 	return result
+
+
+func _encountered_residents() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for value in _array_or_empty(_social_view.get("encounteredResidents")):
+		if value is Dictionary:
+			result.append((value as Dictionary).duplicate(true))
+	result.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return str(a.get("actorId", "")) < str(b.get("actorId", ""))
+	)
+	return result
+
+
+func _hearing_text() -> String:
+	var hearing := _dictionary_or_empty(_social_view.get("hearing"))
+	if bool(hearing.get("due", false)):
+		return str(tr(&"hud.m3r.hearing.due"))
+	var at_seconds := maxf(0.0, float(hearing.get("atSeconds", 0.0)))
+	var minutes := maxi(0, roundi(at_seconds / 60.0))
+	return str(tr(&"hud.m3r.hearing.schedule")).format({"minutes": minutes})
+
+
+func _pressure_snapshot() -> Dictionary:
+	var pressure := _dictionary_or_empty(_social_view.get("pressure"))
+	var band := str(pressure.get("band", "low"))
+	if band not in ["low", "raised", "high"]:
+		band = "low"
+	return {
+		"band": band,
+		"summary": str(tr("hud.m3r.pressure.band.%s" % band)),
+	}
+
+
+func _pressure_text() -> String:
+	var pressure := _pressure_snapshot()
+	return str(tr(&"hud.m3r.pressure.format")).format({
+		"band": str(pressure.get("summary", "")),
+	})
+
+
+func _refresh_log_body() -> void:
+	if not is_instance_valid(_log_body):
+		return
+	var sections: Array[String] = []
+	var pressure := _pressure_snapshot()
+	var pressure_reason := _encountered_pressure_reason()
+	if not pressure_reason.is_empty():
+		sections.append("\n\n".join([
+			str(tr(&"hud.m3r.log.section.pressure")),
+			str(tr(&"hud.m3r.log.pressure_entry")).format({
+				"band": str(pressure.get("summary", "")),
+				"reason": pressure_reason,
+			}),
+		]))
+	var residents := _encountered_residents()
+	if not residents.is_empty():
+		var lines: Array[String] = [str(tr(&"hud.m3r.log.section.stances"))]
+		for resident in residents:
+			lines.append(str(tr(&"hud.m3r.log.stance_entry")).format({
+				"actor": _actor_label(str(resident.get("actorId", ""))),
+				"stance": _stance_text(str(resident.get("stance", "uncertain"))),
+				"why": str(resident.get("whyLine", "")),
+			}))
+			var provenance_text := _provenance_text(
+				_dictionary_or_empty(resident.get("provenance"))
+			)
+			if not provenance_text.is_empty():
+				lines.append(provenance_text)
+		sections.append("\n\n".join(lines))
+
+	var questions := _array_or_empty(_social_view.get("openQuestions"))
+	if not questions.is_empty():
+		var lines: Array[String] = [str(tr(&"hud.m3r.log.section.questions"))]
+		for value in questions:
+			if not value is Dictionary:
+				continue
+			var question := value as Dictionary
+			var status := str(question.get("status", "open"))
+			if status not in ["open", "resolved"]:
+				status = "open"
+			lines.append(str(tr(&"hud.m3r.log.question_entry")).format({
+				"status": tr("hud.m3r.log.question_status.%s" % status),
+				"text": str(question.get("text", "")),
+				"why": str(question.get("whyLine", "")),
+			}))
+			var provenance_text := _provenance_text(
+				_dictionary_or_empty(question.get("provenance"))
+			)
+			if not provenance_text.is_empty():
+				lines.append(provenance_text)
+		sections.append("\n\n".join(lines))
+
+	var records := _array_or_empty(_social_view.get("encounteredRecords"))
+	if not records.is_empty():
+		var lines: Array[String] = [str(tr(&"hud.m3r.log.section.records"))]
+		for value in records:
+			if not value is Dictionary:
+				continue
+			var record := value as Dictionary
+			lines.append(str(tr(&"hud.m3r.log.record_entry")).format({
+				"author": _actor_label(str(record.get("authorActorId", ""))),
+				"body": str(record.get("stateBody", "")),
+			}))
+			var provenance_text := _provenance_text(
+				_dictionary_or_empty(record.get("provenance"))
+			)
+			if not provenance_text.is_empty():
+				lines.append(provenance_text)
+		sections.append("\n\n".join(lines))
+	_log_body.text = (
+		str(tr(&"hud.m3r.log.empty")) if sections.is_empty()
+		else "\n\n\n".join(sections)
+	)
+
+
+func _encountered_pressure_reason() -> String:
+	var pressure := _dictionary_or_empty(_social_view.get("pressure"))
+	var why_value: Variant = pressure.get("latestEncounteredWhyLine", null)
+	return "" if why_value == null else str(why_value).strip_edges()
+
+
+func _provenance_text(provenance: Dictionary) -> String:
+	if provenance.is_empty():
+		return ""
+	var origin_kind := str(provenance.get("originKind", ""))
+	if origin_kind not in ["speech", "record"]:
+		return ""
+	return str(tr("hud.m3r.log.provenance.%s" % origin_kind)).format({
+		"origin": _actor_label(str(provenance.get("originActorId", ""))),
+		"recipient": _actor_label(str(provenance.get("recipientActorId", ""))),
+		"why": str(provenance.get("whyLine", "")),
+	})
+
+
+func _disclosed_stance(actor_id: String) -> String:
+	return str(_disclosed_resident(actor_id).get("stance", ""))
+
+
+func _disclosed_resident(actor_id: String) -> Dictionary:
+	for resident in _encountered_residents():
+		if str(resident.get("actorId", "")) == actor_id:
+			return resident.duplicate(true)
+	return {}
 
 
 func _actor_label(actor_id: String) -> String:
 	if actor_id.is_empty():
 		return str(tr(&"hud.m3r.conversation.speaker_fallback"))
+	if actor_id.to_lower() in ["player", "player_3d"]:
+		return str(tr(&"hud.m3r.resident.player"))
 	var key := "npc.%s.label" % actor_id
 	var localized := str(tr(key))
-	return actor_id if localized == key else localized
+	return str(tr(&"hud.m3r.resident.unknown")) if localized == key else localized
 
 
 func _stance_text(stance: String) -> String:
@@ -722,11 +1014,16 @@ func _refresh_ambient_subtitle_visibility() -> void:
 		not _current_ambient_subtitle.is_empty()
 		and not _conversation_visible
 		and not _settings_visible
+		and not _log_visible
 	)
 
 
 func _dictionary_or_empty(value: Variant) -> Dictionary:
 	return (value as Dictionary).duplicate(true) if value is Dictionary else {}
+
+
+func _array_or_empty(value: Variant) -> Array:
+	return (value as Array).duplicate(true) if value is Array else []
 
 
 func _populate_language_options() -> void:

@@ -77,6 +77,8 @@ func _check_jump_input_contract() -> void:
 		_failures.append("3D player jump action is not bound to physical Space")
 	if _action_has_physical_key(&"interact", KEY_SPACE):
 		_failures.append("physical Space still triggers interact as well as jump")
+	if not InputMap.has_action(&"open_log") or not _action_has_physical_key(&"open_log", KEY_TAB):
+		_failures.append("M3R inspect log is not bound to physical Tab")
 
 
 func _action_has_physical_key(action: StringName, keycode: int) -> bool:
@@ -326,8 +328,12 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			_require_node(label, instance, "Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns/MasterVolumeSlider")
 			_require_node(label, instance, "Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns/SfxVolumeSlider")
 			_require_node(label, instance, "Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns/LanguageOption")
+			_require_node(label, instance, "Overlay/LogShade/LogPanel")
+			_require_node(label, instance, "Overlay/DebugPanel")
 			if not instance.has_method("presentation_snapshot"):
 				_failures.append("hud_3d exposes no presentation snapshot")
+			else:
+				_check_social_hud_contract(label, instance as HUD3D)
 		"town_3d":
 			_require_node(label, instance, "Environment/WorldEnvironment")
 			_require_node(label, instance, "Geometry/Ground/TownGround/Collision")
@@ -356,6 +362,7 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			]:
 				_require_node(label, instance, "Props/Blockers/%s/Collision" % tree_blocker_name)
 			_check_town_dressing_density(label, instance)
+			_check_record_surface_bindings(label, instance)
 			if not instance.has_method("binding_errors"):
 				_failures.append("town_3d exposes no layout binding check")
 			else:
@@ -376,9 +383,162 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 				_failures.append("main_3d Town keeps processing during conversation")
 			if run_session != null and run_session.process_mode != Node.PROCESS_MODE_ALWAYS:
 				_failures.append("main_3d RunSession stops during conversation")
+			if run_session != null and not run_session.has_method("encounter"):
+				_failures.append("main_3d RunSession exposes no encounter endpoint")
+			for surface_value in instance.get_tree().get_nodes_in_group(&"record_surfaces"):
+				if not surface_value is Node:
+					continue
+				var surface := surface_value as Node
+				if not surface.is_connected(
+					&"record_surface_requested",
+					Callable(instance, "_on_record_surface_requested")
+				):
+					_failures.append(
+						"%s leaves record surface %s unwired"
+						% [label, str(surface.get("surface_id"))]
+					)
 			var playtest_surface := instance.get_node_or_null("AgentPlaytestSurface")
 			if playtest_surface == null or not playtest_surface.has_method("snapshot"):
 				_failures.append("main_3d has no AgentPlaytestSurface snapshot")
+
+func _check_social_hud_contract(label: String, hud: HUD3D) -> void:
+	if hud == null:
+		return
+	var sample_view := {
+		"revision": 2,
+		"hearing": {"atSeconds": 1800, "due": false},
+		"pressure": {
+			"band": "raised",
+			"latestEncounteredWhyLine": "접수 기록이 검토 대기 상태입니다.",
+		},
+		"encounteredResidents": [{
+			"actorId": "NPC_Studio_Receptionist",
+			"stance": "uncertain",
+			"stanceRevision": 1,
+			"whyLine": "답변의 확인 순서가 남아 있습니다.",
+			"provenance": {
+				"originKind": "speech",
+				"originActorId": "NPC_Studio_Receptionist",
+				"recipientKind": "listener",
+				"recipientActorId": "player",
+				"sourceMemoryId": "hidden-memory-id",
+				"recordId": null,
+				"recordRevision": null,
+				"ledgerEventId": null,
+				"whyLine": "직접 들은 답변입니다.",
+			},
+		}],
+		"openQuestions": [{
+			"questionId": "hidden-question-id",
+			"subjectActorId": "NPC_Studio_Receptionist",
+			"status": "open",
+			"text": "접수 순서를 누가 확인했는가?",
+			"whyLine": "확인 주체가 아직 드러나지 않았습니다.",
+			"provenance": null,
+		}],
+		"encounteredRecords": [{
+			"recordId": "hidden-record-id",
+			"kind": "note",
+			"authorActorId": "NPC_Studio_Receptionist",
+			"targetId": "player",
+			"stateBody": "접수 순서 확인이 보류되었습니다.",
+			"recordRevision": 1,
+			"lastLedgerEventId": "hidden-ledger-id",
+			"provenance": null,
+		}],
+		"hiddenSuspicion": 99,
+	}
+	if not hud.set_social_view(sample_view):
+		_failures.append("%s rejected a newer authoritative social view" % label)
+		return
+	var frame_label := hud.get_node_or_null(
+		"Overlay/EncounteredStancePanel/EncounteredStanceMargin/EncounteredStanceLabel"
+	) as Label
+	var first_hearing_text := frame_label.text if frame_label != null else ""
+	if not first_hearing_text.contains("30"):
+		_failures.append("%s hearing frame does not show one fixed scheduled time" % label)
+	if first_hearing_text.contains("접수 기록이 검토 대기 상태입니다."):
+		_failures.append("%s permanent pressure frame leaked its encountered reason" % label)
+	var stale_view := sample_view.duplicate(true)
+	stale_view["revision"] = 1
+	stale_view["hearing"] = {"atSeconds": 60, "due": false}
+	if hud.set_social_view(stale_view):
+		_failures.append("%s accepted a stale social view replacement" % label)
+	var social_snapshot := hud.social_view_snapshot()
+	if int(social_snapshot.get("revision", -1)) != 2:
+		_failures.append("%s lost the newest social view revision" % label)
+	if frame_label != null and frame_label.text != first_hearing_text:
+		_failures.append("%s hearing display changed into a countdown" % label)
+	var was_paused := paused
+	hud.open_log()
+	var opened := hud.presentation_snapshot()
+	if str(opened.get("modalSurface", "")) != "inspect" or paused != was_paused:
+		_failures.append("%s inspect log pauses the world or lacks inspect modal state" % label)
+	var normal_text := "%s\n%s" % [
+		frame_label.text if frame_label != null else "",
+		str((opened.get("log", {}) as Dictionary).get("body", "")),
+	]
+	for hidden_value in [
+		"NPC_Studio_Receptionist",
+		"hidden-memory-id",
+		"hidden-question-id",
+		"hidden-record-id",
+		"hidden-ledger-id",
+		"99",
+	]:
+		if normal_text.contains(hidden_value):
+			_failures.append("%s normal social UI leaked raw hidden data: %s" % [label, hidden_value])
+	if not normal_text.contains("접수 순서 확인이 보류되었습니다."):
+		_failures.append("%s inspect log omitted disclosed run-locale record prose" % label)
+	if not str((opened.get("log", {}) as Dictionary).get("body", "")).contains(
+		"접수 기록이 검토 대기 상태입니다."
+	):
+		_failures.append("%s inspect log omitted the encountered pressure reason" % label)
+	hud.close_log()
+	if bool(hud.presentation_snapshot().get("debugVisible", true)):
+		_failures.append("%s F3 diagnostics are visible by default" % label)
+
+
+func _check_record_surface_bindings(label: String, town: Node) -> void:
+	var layout: Dictionary = town.call("layout_snapshot")
+	var expected_record_ids: Dictionary = {}
+	for surface_value in layout.get("text_surfaces", []):
+		if not surface_value is Dictionary:
+			continue
+		var surface := surface_value as Dictionary
+		if str(surface.get("kind", "")) == "record_surface":
+			expected_record_ids[str(surface.get("id", ""))] = true
+	if expected_record_ids.size() != 4:
+		_failures.append("%s layout does not expose four administrative record surfaces" % label)
+	for surface_id_value in expected_record_ids:
+		var surface_id := str(surface_id_value)
+		var node := town.get_node_or_null("Props/TextSurfaces/%s" % surface_id)
+		if node == null or not node.has_method("is_interaction_enabled"):
+			_failures.append("%s record surface is not bound: %s" % [label, surface_id])
+			continue
+		var record_surface := node as StaticBody3D
+		if (
+			not bool(record_surface.call("is_interaction_enabled"))
+			or str(record_surface.call("interaction_kind")) != "record_surface"
+			or record_surface.get_collision_layer_value(4) != true
+		):
+			_failures.append("%s record surface interaction contract drifted: %s" % [label, surface_id])
+		if (
+			surface_id == "TS_Park_NoticeBoard"
+			and (
+				not record_surface.is_in_group(&"town_navigation_source")
+				or not record_surface.get_collision_layer_value(1)
+			)
+		):
+			_failures.append("%s freestanding park record surface is absent from nav bake" % label)
+	var hearing_notice := town.get_node_or_null("Props/TextSurfaces/TS_Station_HearingNotice")
+	if (
+		hearing_notice == null
+		or not hearing_notice.has_method("is_interaction_enabled")
+		or bool(hearing_notice.call("is_interaction_enabled"))
+	):
+		_failures.append("%s hearing notice became a record-surface encounter" % label)
+
 
 func _check_town_navigation(label: String, instance: Node, region: NavigationRegion3D) -> void:
 	var navigation_map := region.get_navigation_map()
@@ -999,8 +1159,95 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 		var stance_entry: Variant = (stance_summaries as Array)[0]
 		if not stance_entry is Dictionary or str((stance_entry as Dictionary).get("stance", "")) != "vouch":
 			_failures.append("%s did not present the runtime-judged vouch stance" % label)
-		elif str((stance_entry as Dictionary).get("summary", "")).is_empty():
-			_failures.append("%s did not persist the judgment why-line in normal UI" % label)
+		elif not str((stance_entry as Dictionary).get("summary", "")).is_empty():
+			_failures.append("%s leaked a stance why-line outside the inspect log" % label)
+		else:
+			var social_view: Dictionary = main_snapshot.get("socialView", {})
+			var disclosed_residents: Array = social_view.get("encounteredResidents", [])
+			var why_line := ""
+			if not disclosed_residents.is_empty() and disclosed_residents[0] is Dictionary:
+				why_line = str((disclosed_residents[0] as Dictionary).get("whyLine", ""))
+			var log_snapshot: Dictionary = hud.presentation_snapshot().get("log", {})
+			if why_line.is_empty() or not str(log_snapshot.get("body", "")).contains(why_line):
+				_failures.append("%s inspect log omitted the disclosed stance why-line" % label)
+	var record_surface := instance.get_node_or_null(
+		"Town/Props/TextSurfaces/TS_Studio_ReviewRecords"
+	)
+	if record_surface == null or not record_surface.has_method("interact"):
+		_failures.append("%s has no interactable Studio record surface" % label)
+	else:
+		player.global_position = Vector3(3.5, 0.05, -17.0)
+		player.velocity = Vector3.ZERO
+		await physics_frame
+		var close_events: Array[int] = [0]
+		hud.log_visibility_changed.connect(func(visible: bool) -> void:
+			if not visible:
+				close_events[0] += 1
+		)
+		record_surface.call("interact", player)
+		var pending_snapshot := hud.presentation_snapshot()
+		var pending_log: Dictionary = pending_snapshot.get("log", {})
+		hud.toggle_log()
+		hud.close_log()
+		var close_button := hud.get_node_or_null(
+			"Overlay/LogShade/LogPanel/LogMargin/LogColumns/CloseLogButton"
+		) as Button
+		if close_button != null:
+			close_button.pressed.emit()
+		var resisted_close := hud.presentation_snapshot()
+		if (
+			str(pending_snapshot.get("modalSurface", "")) != "inspect"
+			or not bool(pending_log.get("busy", false))
+			or str(resisted_close.get("modalSurface", "")) != "inspect"
+			or not bool((resisted_close.get("log", {}) as Dictionary).get("busy", false))
+			or bool(player.get("_control_enabled"))
+			or paused
+			or close_events[0] != 0
+		):
+			_failures.append(
+				"%s pending record inspect could close or release its player lock" % label
+			)
+		var record_log_opened := false
+		for _frame in range(120):
+			await process_frame
+			var inspect_snapshot := hud.presentation_snapshot()
+			var inspect_log: Dictionary = inspect_snapshot.get("log", {})
+			var inspect_social: Dictionary = inspect_snapshot.get("socialView", {})
+			if (
+				str(inspect_snapshot.get("modalSurface", "")) == "inspect"
+				and not bool(inspect_log.get("busy", true))
+				and (inspect_social.get("encounteredRecords", []) as Array).size() == 1
+			):
+				record_log_opened = true
+				break
+		if not record_log_opened:
+			_failures.append("%s record encounter did not open the inspect log" % label)
+		else:
+			var record_snapshot: Dictionary = instance.call("presentation_snapshot")
+			var record_social: Dictionary = record_snapshot.get("socialView", {})
+			var record_pressure: Dictionary = record_snapshot.get("institutionalPressure", {})
+			var encountered_records: Array = record_social.get("encounteredRecords", [])
+			if (
+				paused
+				or bool(player.get("_control_enabled"))
+				or str(record_pressure.get("band", "")) != "raised"
+				or encountered_records.size() != 1
+			):
+				_failures.append(
+					"%s record inspect failed its non-pausing disclosed-view contract" % label
+				)
+			hud.close_log()
+			await process_frame
+			hud.close_log()
+			await process_frame
+			if (
+				not bool(player.get("_control_enabled"))
+				or paused
+				or close_events[0] != 1
+			):
+				_failures.append(
+					"%s record inspect did not restore player control exactly once" % label
+				)
 	var manager := instance.get_node_or_null("Town/Actors/NPC_Studio_Manager") as NPC3D
 	var caretaker := instance.get_node_or_null("Town/Actors/NPC_Park_Caretaker") as NPC3D
 	if manager != null and caretaker != null:

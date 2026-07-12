@@ -173,6 +173,135 @@ async function driveVariant(spec: VariantSpec) {
   };
 }
 
+async function driveAdministrativeSequence() {
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: fixtureIds(),
+  });
+  const layout = loadRunLayout();
+  const started = service.start("run-fixture-administration", "ko-KR");
+  await service.preloadConversation(
+    started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    "StudioReceptionConversation",
+    "ko-KR",
+  );
+  const conversation = await service.startConversation(
+    started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    "StudioReceptionConversation",
+    "ko-KR",
+  );
+  const answerRequest = {
+    runId: started.runId,
+    sessionId: conversation.sessionId,
+    turnId: conversation.nextTurn.turnId,
+    answer: { type: "choice" as const, choiceId: conversation.nextTurn.choices[2].choiceId },
+  };
+  const answerResponse = await service.answer(
+    answerRequest.runId,
+    answerRequest.sessionId,
+    answerRequest.turnId,
+    answerRequest.answer,
+  );
+  await service.endConversation(started.runId, conversation.sessionId);
+  const beforeFacts = service.snapshot(started.runId);
+  const actors = beforeFacts.scheduler.actors.map(schedulerActor => {
+    const position = layout.anchorPositions[schedulerActor.confirmedAnchorRef];
+    if (!position) throw new Error(`administration fixture actor has no position: ${schedulerActor.actorId}`);
+    const block = schedulerActor.currentBlock;
+    return {
+      actorId: schedulerActor.actorId,
+      position: [position[0], position[1], position[2]] as [number, number, number],
+      reachableAnchorRefs: block?.targetKind === "anchor"
+        ? [block.targetId]
+        : [...new Set(layout.routes.find(route => route.routeId === block?.targetId)?.points ?? [])],
+      visibleActorIds: [],
+      audibleActorIds: [],
+      visibleObjectIds: [],
+    };
+  });
+  const firstAdvanceRequest: RunAdvanceRequest = {
+    runId: started.runId,
+    advanceId: "fixture-admin-facts-1",
+    observedWorldRevision: beforeFacts.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: { observedWorldRevision: beforeFacts.worldRevision, actors },
+  };
+  const firstAdvanceResponse = await service.advance(firstAdvanceRequest);
+  for (const wake of firstAdvanceResponse.scheduleWakes.filter(
+    candidate => candidate.kind === "goal" && candidate.actorIds[0] !== STUDIO_RECEPTIONIST_ID,
+  )) {
+    await service.decision({
+      runId: started.runId,
+      wakeId: wake.wakeId,
+      observedWorldRevision: wake.observedWorldRevision,
+    });
+  }
+  const writeWake = firstAdvanceResponse.scheduleWakes.find(
+    candidate => candidate.kind === "goal" && candidate.actorIds[0] === STUDIO_RECEPTIONIST_ID,
+  );
+  if (!writeWake) throw new Error("administration fixture has no receptionist goal wake");
+  const writeRequest = {
+    runId: started.runId,
+    wakeId: writeWake.wakeId,
+    observedWorldRevision: writeWake.observedWorldRevision,
+  };
+  const writeResponse = await service.decision(writeRequest);
+  const afterWrite = service.snapshot(started.runId);
+  const secondAdvanceRequest: RunAdvanceRequest = {
+    runId: started.runId,
+    advanceId: "fixture-admin-facts-2",
+    observedWorldRevision: afterWrite.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: { observedWorldRevision: afterWrite.worldRevision, actors },
+  };
+  const secondAdvanceResponse = await service.advance(secondAdvanceRequest);
+  const readWake = secondAdvanceResponse.scheduleWakes.find(
+    candidate => candidate.kind === "goal" && candidate.actorIds[0] === "NPC_Studio_Manager",
+  );
+  if (!readWake) throw new Error("administration fixture has no manager read wake");
+  const readRequest = {
+    runId: started.runId,
+    wakeId: readWake.wakeId,
+    observedWorldRevision: readWake.observedWorldRevision,
+  };
+  const readResponse = await service.decision(readRequest);
+  const surface = layout.recordSurfaces.find(
+    candidate => candidate.surfaceId === "TS_Studio_ReviewRecords",
+  );
+  if (!surface) throw new Error("administration fixture has no Studio record surface");
+  const playerPosition = layout.anchorPositions[surface.anchorRef];
+  if (!playerPosition) throw new Error("administration fixture surface has no position");
+  const encounterRequest = {
+    runId: started.runId,
+    encounterId: "fixture-admin-encounter-1",
+    encounter: {
+      kind: "record_surface" as const,
+      textSurfaceId: surface.surfaceId,
+      playerPosition: [playerPosition[0], playerPosition[1], playerPosition[2]] as [number, number, number],
+    },
+  };
+  const encounterResponse = await service.encounter(encounterRequest);
+  return {
+    answerRequest,
+    answerResponse,
+    firstAdvanceRequest,
+    firstAdvanceResponse,
+    writeRequest,
+    writeResponse,
+    secondAdvanceRequest,
+    secondAdvanceResponse,
+    readRequest,
+    readResponse,
+    encounterRequest,
+    encounterResponse,
+    finalSnapshot: service.snapshot(started.runId),
+  };
+}
+
 async function driveAdvanceSequence() {
   const service = new RunService({
     proposalPort: createStudioReceptionScriptedAdapter(),
@@ -303,6 +432,7 @@ export async function buildRunApiFixture() {
   if (!defaultPath) throw new Error("run fixture has no default path");
   const advancePath = await driveAdvanceSequence();
   const spatialGoals = await driveSpatialGoalVariants();
+  const administration = await driveAdministrativeSequence();
 
   return {
     note: "Generated through the fixture-only Studio adapter and production RunService paths. Regenerate with `bun run --cwd backend/npc-runtime fixtures:run:generate`.",
@@ -411,6 +541,26 @@ export async function buildRunApiFixture() {
         endpoint: "GET /v1/run/snapshot",
         request: { runId: defaultPath.runStartResponse.runId },
         response: defaultPath.runSnapshotAfterEndResponse,
+      },
+      administrationWriteDecision: {
+        endpoint: "POST /v1/npc/decision",
+        request: administration.writeRequest,
+        response: administration.writeResponse,
+      },
+      administrationReadDecision: {
+        endpoint: "POST /v1/npc/decision",
+        request: administration.readRequest,
+        response: administration.readResponse,
+      },
+      administrationRecordEncounter: {
+        endpoint: "POST /v1/run/encounter",
+        request: administration.encounterRequest,
+        response: administration.encounterResponse,
+      },
+      administrationFinalSnapshot: {
+        endpoint: "GET /v1/run/snapshot",
+        request: { runId: administration.finalSnapshot.runId },
+        response: administration.finalSnapshot,
       },
     },
     runAdvanceSequence: [

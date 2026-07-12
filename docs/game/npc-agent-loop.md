@@ -75,8 +75,8 @@ There is no model-generated transcript summary standing in for the exchange.
 | `talk_to(actor, intent)` | Open/continue conversation; provider utterance, or a marked deterministic fallback utterance | Target availability (busy/refusing), social rules; scripted lines stay fixture/test-only |
 | `wait(reason)` | Yield a beat, keep intent | Always valid; consumes iteration |
 | `use_object(object, affordance)` | Trigger an object affordance (serve, mark queue, post notice, pause service) | Affordance exists for role, object state |
-| `write_record(kind, target)` | Create/update a record (note, correction, report, posting, citation) | Role authority for the record kind; becomes a ledger event |
-| `read_record(record)` | Load a visible record into memory | Visibility (열람 rules) |
+| `write_record(kind, source_memory, surface, prose, why, pressure_delta)` | Create/update a provider-authored record (note, correction, report, posting, citation) | Role authority, owned source memory, authored surface, immutable target/visibility, revision check, pressure clamp; exactly one ledger event |
+| `read_record(record, why, pressure_delta)` | Load one visible record revision into factual memory | Visibility (열람 rules), first-read idempotency, pressure clamp; rereading the same revision is a no-op |
 | `request(actor, action)` | Ask another NPC to act (handoff, confirmation) | Target role can perform the action |
 
 Suspicion judgment of player speech is **not** a tool: it flows through

@@ -50,6 +50,7 @@ export const CIVIC_ECONOMY_KEYS: readonly (keyof CivicEconomy)[] = [
 
 /** Record kinds — the social medium (docs/game/glossary.md, world-social-sim.md). */
 export const RECORD_KINDS = [
+  "note",
   "receipt",
   "clerk_statement",
   "correction",

@@ -18,6 +18,7 @@ var _advance_index := 0
 var _advance_cache: Dictionary = {}
 var _preload_cache: Dictionary = {}
 var _decision_cache: Dictionary = {}
+var _encounter_cache: Dictionary = {}
 var _decision_call_count := 0
 var _current_run_snapshot: Dictionary = {}
 var _last_error: Dictionary = {}
@@ -235,6 +236,66 @@ func run_snapshot(run_id: String) -> Dictionary:
 	return _dictionary_or_empty(_endpoint("runStart").get("response"))
 
 
+func encounter(run_id: String, encounter_id: String, encounter_packet: Dictionary) -> Dictionary:
+	if not _started:
+		return _stored_error("run_not_started", "Start the fixture run first.")
+	var expected_run_id := str(
+		_dictionary_or_empty(_endpoint("runStart").get("response")).get("runId", "")
+	)
+	if run_id != expected_run_id:
+		return _stored_error("run_not_found", "Fixture has no run: %s" % run_id)
+	if encounter_id.is_empty() or not _encounter_packet_valid(encounter_packet):
+		return _stored_error("invalid_encounter", "Fixture encounter packet is invalid.")
+	var signature := JSON.stringify({
+		"runId": run_id,
+		"encounter": encounter_packet,
+	})
+	if _encounter_cache.has(encounter_id):
+		var cached := _dictionary_or_empty(_encounter_cache.get(encounter_id))
+		if str(cached.get("signature", "")) != signature:
+			return _stored_error(
+				"encounter_id_conflict",
+				"Fixture encounterId was reused with a different payload."
+			)
+		_last_error = {}
+		return _dictionary_or_empty(cached.get("response"))
+
+	var response: Dictionary = {}
+	for packet_value in _encounter_variants():
+		if not packet_value is Dictionary:
+			continue
+		var packet := packet_value as Dictionary
+		var request := _dictionary_or_empty(packet.get("request"))
+		if not _encounter_source_matches(
+			encounter_packet,
+			_dictionary_or_empty(request.get("encounter"))
+		):
+			continue
+		response = _dictionary_or_empty(packet.get("response"))
+		break
+	if response.is_empty():
+		# Older generated fixtures predate the encounter endpoint. Preserve the
+		# backend-authored current view without manufacturing newly encountered
+		# knowledge so structural client smokes remain deterministic.
+		response = {
+			"runId": run_id,
+			"encounterId": encounter_id,
+			"socialView": _fixture_social_view(),
+		}
+	else:
+		response["runId"] = run_id
+		response["encounterId"] = encounter_id
+	var social_view := _dictionary_or_empty(response.get("socialView"))
+	if not social_view.is_empty() and not _current_run_snapshot.is_empty():
+		_current_run_snapshot["socialView"] = social_view.duplicate(true)
+	_encounter_cache[encounter_id] = {
+		"signature": signature,
+		"response": response.duplicate(true),
+	}
+	_last_error = {}
+	return response.duplicate(true)
+
+
 func advance(request: Dictionary) -> Dictionary:
 	if not _started:
 		return _stored_error("run_not_started", "Start the fixture run first.")
@@ -335,6 +396,7 @@ func reset() -> void:
 	_advance_cache = {}
 	_preload_cache = {}
 	_decision_cache = {}
+	_encounter_cache = {}
 	_decision_call_count = 0
 	_current_run_snapshot = {}
 	_last_error = {}
@@ -387,6 +449,53 @@ func _preload_variants() -> Array:
 func _advance_sequence() -> Array:
 	var sequence_value: Variant = _fixture.get("runAdvanceSequence", [])
 	return sequence_value as Array if sequence_value is Array else []
+
+
+func _encounter_variants() -> Array:
+	var endpoints := _dictionary_or_empty(_fixture.get("endpoints"))
+	for key in ["runEncounters", "encounters"]:
+		var variants_value: Variant = endpoints.get(key, null)
+		if variants_value is Array and not (variants_value as Array).is_empty():
+			return variants_value as Array
+	var result: Array = []
+	for key in ["runEncounter", "administrationRecordEncounter"]:
+		var single := _dictionary_or_empty(endpoints.get(key))
+		if not single.is_empty():
+			result.append(single)
+	return result
+
+
+func _encounter_packet_valid(packet: Dictionary) -> bool:
+	var kind := str(packet.get("kind", ""))
+	if kind == "speech" and str(packet.get("speechEventId", "")).is_empty():
+		return false
+	if kind == "record_surface" and str(packet.get("textSurfaceId", "")).is_empty():
+		return false
+	if kind not in ["speech", "record_surface"]:
+		return false
+	var position_value: Variant = packet.get("playerPosition", [])
+	return position_value is Array and (position_value as Array).size() == 3
+
+
+func _encounter_source_matches(actual: Dictionary, expected: Dictionary) -> bool:
+	var kind := str(actual.get("kind", ""))
+	if kind != str(expected.get("kind", "")):
+		return false
+	var source_key := "speechEventId" if kind == "speech" else "textSurfaceId"
+	return str(actual.get(source_key, "")) == str(expected.get(source_key, ""))
+
+
+func _fixture_social_view() -> Dictionary:
+	for source in [
+		_selected_end_response,
+		_selected_answer_response,
+		_current_run_snapshot,
+		_dictionary_or_empty(_endpoint("runStart").get("response")),
+	]:
+		var social_view := _dictionary_or_empty((source as Dictionary).get("socialView"))
+		if not social_view.is_empty():
+			return social_view
+	return {}
 
 
 func _apply_advance_to_snapshot(response: Dictionary) -> void:

@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "bun:test";
 import { assembleObservePacket, DEFAULT_ROLE_POLICIES } from "../../src/agentloop/context.js";
 import { createSameOrderWorld } from "../../src/runtime/world/index.js";
+import {
+  agentStepProposalJsonSchema,
+  agentStepProposalSchemaForLocale,
+} from "../../src/providers/envelope.js";
 import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import { createProviderFromEnvironment, loadProviderConfig } from "../../src/providers/registry.js";
 import { ProviderService } from "../../src/providers/service.js";
@@ -107,6 +111,7 @@ const validMergedTurn = JSON.stringify({
   whyLine: "방문 이유를 분명하게 설명해 의문이 줄었습니다.",
   stance: "vouch",
   meaningfulFirsthand: true,
+  openQuestion: null,
   utterance: "방문 목적을 확인했습니다.",
   suggestedReplies: [
     { text: "확인해 주셔서 감사합니다.", intent: "safe/local" },
@@ -114,6 +119,61 @@ const validMergedTurn = JSON.stringify({
     { text: "더 말하지 않겠습니다.", intent: "risky/weird" },
   ],
   continueConversation: false,
+});
+
+function assertEveryObjectPropertyIsRequired(value: unknown, path = "root"): void {
+  if (Array.isArray(value)) {
+    value.forEach((entry, index) => assertEveryObjectPropertyIsRequired(entry, `${path}[${index}]`));
+    return;
+  }
+  if (!value || typeof value !== "object") return;
+  const schema = value as Record<string, unknown>;
+  if (schema.type === "object" && schema.properties && typeof schema.properties === "object") {
+    const propertyNames = Object.keys(schema.properties as Record<string, unknown>).sort();
+    const required = Array.isArray(schema.required)
+      ? schema.required.filter((entry): entry is string => typeof entry === "string").sort()
+      : [];
+    assert.deepEqual(required, propertyNames, `${path} must require every declared property`);
+  }
+  for (const [key, child] of Object.entries(schema)) {
+    assertEveryObjectPropertyIsRequired(child, `${path}.${key}`);
+  }
+}
+
+test("agent-step strict schema requires every property in every object branch", () => {
+  assertEveryObjectPropertyIsRequired(agentStepProposalJsonSchema);
+});
+
+test("Korean agent-step validation covers provider-authored administrative questions", () => {
+  const proposal = {
+    toolCall: {
+      tool: "write_record",
+      args: {
+        recordKind: "note",
+        sourceMemoryId: "mem-question-source",
+        stateBody: "방문 경위를 추가로 확인해야 합니다.",
+        whyLine: "접수 기록이 의문을 남겼습니다.",
+        institutionalPressureDelta: 10,
+        textSurfaceId: "TS_Studio_ReviewRecords",
+        openQuestion: {
+          status: "open",
+          text: "방문자의 來歷은 무엇인가?",
+          whyLine: "기록의 根據를 다시 확인해야 합니다.",
+        },
+      },
+    },
+    utterance: null,
+    rationale: "접수 기록을 남깁니다.",
+    done: true,
+  };
+  assert.equal(agentStepProposalSchemaForLocale("ko-KR").safeParse(proposal).success, false);
+  assert.equal(agentStepProposalSchemaForLocale("en-US").safeParse(proposal).success, true);
+  proposal.toolCall.args.openQuestion = {
+    status: "open",
+    text: "방문 경위는 무엇인가?",
+    whyLine: "기록의 근거를 다시 확인해야 합니다.",
+  };
+  assert.equal(agentStepProposalSchemaForLocale("ko-KR").safeParse(proposal).success, true);
 });
 
 test("provider service returns schema-validated live conversation proposals", async () => {

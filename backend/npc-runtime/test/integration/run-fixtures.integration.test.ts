@@ -6,6 +6,8 @@ import { test } from "bun:test";
 import {
   runAdvanceRequestSchema,
   runAdvanceResponseSchema,
+  runEncounterRequestSchema,
+  runEncounterResponseSchema,
   runNpcDecisionRequestSchema,
   runNpcDecisionResponseSchema,
   runSessionAnswerRequestSchema,
@@ -88,6 +90,56 @@ test("every run fixture packet validates against the public wire schemas", () =>
 
   runSnapshotRequestSchema.parse(endpoints.runSnapshotAfterEnd.request);
   runSnapshotSchema.parse(endpoints.runSnapshotAfterEnd.response);
+
+  for (const endpoint of [
+    endpoints.administrationWriteDecision,
+    endpoints.administrationReadDecision,
+  ]) {
+    runNpcDecisionRequestSchema.parse(endpoint.request);
+    runNpcDecisionResponseSchema.parse(endpoint.response);
+  }
+  runEncounterRequestSchema.parse(endpoints.administrationRecordEncounter.request);
+  runEncounterResponseSchema.parse(endpoints.administrationRecordEncounter.response);
+  runSnapshotRequestSchema.parse(endpoints.administrationFinalSnapshot.request);
+  runSnapshotSchema.parse(endpoints.administrationFinalSnapshot.response);
+});
+
+test("administration fixture carries provider prose through write, read, pressure, and disclosure", () => {
+  const endpoints = fixtures.endpoints;
+  const written = endpoints.administrationWriteDecision.response;
+  const writeDelta = written.actionDeltas.find(
+    (delta: { kind: string }) => delta.kind === "administration",
+  );
+  assert.equal(writeDelta.action, "write_record");
+  assert.equal(writeDelta.ledgerEvent.pressureDelta, 15);
+  assert.equal(writeDelta.ledgerEvent.openQuestion.text, "접수 기록에 남은 방문 경위는 무엇인가?");
+  assert.equal(writeDelta.record.stateBody, "방문자가 마을 절차를 모른다고 밝혀 방문 경위를 추가 확인해야 함.");
+  const read = endpoints.administrationReadDecision.response.actionDeltas.find(
+    (delta: { kind: string }) => delta.kind === "administration",
+  );
+  assert.equal(read.action, "read_record");
+  assert.equal(read.ledgerEvent.pressureDelta, 10);
+  assert.equal(
+    read.ledgerEvent.openQuestion.text,
+    "관리자가 확인한 방문 경위는 누구에게 다시 물어야 하는가?",
+  );
+  assert.equal(read.record.recordRevision, writeDelta.record.recordRevision);
+  assert.equal(read.record.lastLedgerEventId, read.ledgerEvent.eventId);
+  const finalSnapshot = endpoints.administrationFinalSnapshot.response;
+  assert.equal(finalSnapshot.records.length, 1);
+  assert.equal(finalSnapshot.ledgerEvents.length, 2);
+  assert.equal(finalSnapshot.institutionalPressure, 25);
+  assert.equal(finalSnapshot.socialView.encounteredRecords.length, 1);
+  assert.equal(finalSnapshot.socialView.pressure.band, "raised");
+  assert.equal(
+    finalSnapshot.socialView.encounteredRecords[0].provenance.recipientActorId,
+    "NPC_Studio_Manager",
+  );
+  assert.ok(finalSnapshot.socialView.openQuestions.some(
+    (question: { questionId: string; text: string }) =>
+      question.questionId === `question:record:${read.record.recordId}` &&
+      question.text === "관리자가 확인한 방문 경위는 누구에게 다시 물어야 하는가?",
+  ));
 });
 
 test("advance fixture replays staggered moves, batched arrivals, and arrival-gated routes", () => {

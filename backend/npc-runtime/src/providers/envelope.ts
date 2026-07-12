@@ -62,6 +62,15 @@ export const mergedConversationTurnSchema = z
     whyLine: nonEmpty,
     stance: z.enum(COARSE_STANCES),
     meaningfulFirsthand: z.boolean(),
+    openQuestion: z
+      .object({
+        status: z.enum(["open", "resolved"]),
+        text: nonEmpty,
+        whyLine: nonEmpty,
+      })
+      .strict()
+      .nullable()
+      .optional(),
     utterance: nonEmpty,
     suggestedReplies: z.tuple([
       suggestedReplySchema,
@@ -121,6 +130,8 @@ export function mergedConversationTurnSchemaForLocale(locale: string) {
     if (!korean) return;
     addKoreanTextIssue(context, ["whyLine"], value.whyLine);
     addKoreanTextIssue(context, ["utterance"], value.utterance);
+    addKoreanTextIssue(context, ["openQuestion", "text"], value.openQuestion?.text);
+    addKoreanTextIssue(context, ["openQuestion", "whyLine"], value.openQuestion?.whyLine);
     value.suggestedReplies.forEach((reply, index) => {
       addKoreanTextIssue(context, ["suggestedReplies", index, "text"], reply.text);
     });
@@ -145,7 +156,15 @@ export function agentStepProposalSchemaForLocale(locale: string) {
         ? args.record as Record<string, unknown>
         : undefined;
       const stateBody = typeof record?.stateBody === "string" ? record.stateBody : undefined;
-      return [whyLine, stateBody].every(
+      const directStateBody = typeof args.stateBody === "string" ? args.stateBody : undefined;
+      const openQuestion = args.openQuestion && typeof args.openQuestion === "object"
+        ? args.openQuestion as Record<string, unknown>
+        : undefined;
+      const openQuestionText = typeof openQuestion?.text === "string" ? openQuestion.text : undefined;
+      const openQuestionWhyLine = typeof openQuestion?.whyLine === "string"
+        ? openQuestion.whyLine
+        : undefined;
+      return [whyLine, stateBody, directStateBody, openQuestionText, openQuestionWhyLine].every(
         text => !text || !forbiddenPlayerVisibleScript.test(text),
       );
     }, {
@@ -202,6 +221,7 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
     "whyLine",
     "stance",
     "meaningfulFirsthand",
+    "openQuestion",
     "utterance",
     "suggestedReplies",
     "continueConversation",
@@ -216,6 +236,21 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
     whyLine: { type: "string", minLength: 1 },
     stance: { type: "string", enum: [...COARSE_STANCES] },
     meaningfulFirsthand: { type: "boolean" },
+    openQuestion: {
+      anyOf: [
+        { type: "null" },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["status", "text", "whyLine"],
+          properties: {
+            status: { type: "string", enum: ["open", "resolved"] },
+            text: { type: "string", minLength: 1 },
+            whyLine: { type: "string", minLength: 1 },
+          },
+        },
+      ],
+    },
     utterance: { type: "string", minLength: 1 },
     suggestedReplies: {
       type: "array",
@@ -233,6 +268,22 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
     },
     continueConversation: { type: "boolean" },
   },
+};
+
+const administrativeOpenQuestionJsonSchema: Record<string, unknown> = {
+  anyOf: [
+    { type: "null" },
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["status", "text", "whyLine"],
+      properties: {
+        status: { type: "string", enum: ["open", "resolved"] },
+        text: { type: "string", minLength: 1 },
+        whyLine: { type: "string", minLength: 1 },
+      },
+    },
+  ],
 };
 
 export const agentStepProposalJsonSchema: Record<string, unknown> = {
@@ -260,8 +311,8 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
           [
             "write_record",
             {
-              objectId: { type: "string" },
-              toState: { type: "string" },
+              objectId: { type: ["string", "null"] },
+              toState: { type: ["string", "null"] },
               ledgerKind: { type: "string" },
               record: {
                 type: "object",
@@ -281,8 +332,63 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
               citedLedgerEventId: { type: ["string", "null"] },
               whyLine: { type: "string" },
             },
+            ["objectId", "toState", "ledgerKind", "record", "citedLedgerEventId", "whyLine"],
+          ],
+          [
+            "write_record",
+            {
+              recordKind: { type: "string", enum: [...RECORD_KINDS] },
+              sourceMemoryId: { type: "string" },
+              stateBody: { type: "string" },
+              whyLine: { type: "string" },
+              institutionalPressureDelta: { type: "integer" },
+              textSurfaceId: { type: "string" },
+              openQuestion: administrativeOpenQuestionJsonSchema,
+            },
+            [
+              "recordKind",
+              "sourceMemoryId",
+              "stateBody",
+              "whyLine",
+              "institutionalPressureDelta",
+              "textSurfaceId",
+              "openQuestion",
+            ],
+          ],
+          [
+            "write_record",
+            {
+              recordKind: { type: "string", enum: [...RECORD_KINDS] },
+              sourceMemoryId: { type: "string" },
+              stateBody: { type: "string" },
+              whyLine: { type: "string" },
+              institutionalPressureDelta: { type: "integer" },
+              textSurfaceId: { type: "string" },
+              recordId: { type: "string" },
+              openQuestion: administrativeOpenQuestionJsonSchema,
+            },
+            [
+              "recordKind",
+              "sourceMemoryId",
+              "stateBody",
+              "whyLine",
+              "institutionalPressureDelta",
+              "textSurfaceId",
+              "recordId",
+              "openQuestion",
+            ],
           ],
           ["read_record", { recordId: { type: "string" } }],
+          [
+            "read_record",
+            {
+              recordId: { type: "string" },
+              whyLine: { type: "string" },
+              institutionalPressureDelta: { type: "integer" },
+              openQuestion: administrativeOpenQuestionJsonSchema,
+            },
+            ["recordId", "whyLine", "institutionalPressureDelta", "openQuestion"],
+          ],
           [
             "request",
             {
@@ -291,7 +397,7 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
               whyLine: { type: "string" },
             },
           ],
-        ].map(([tool, properties]) => ({
+        ].map(([tool, properties, requiredArgs]) => ({
           type: "object",
           additionalProperties: false,
           required: ["tool", "args"],
@@ -300,7 +406,7 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
             args: {
               type: "object",
               additionalProperties: false,
-              required: Object.keys(properties as Record<string, unknown>),
+              required: requiredArgs ?? Object.keys(properties as Record<string, unknown>),
               properties,
             },
           },

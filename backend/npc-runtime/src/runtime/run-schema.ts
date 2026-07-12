@@ -5,6 +5,7 @@ import {
   CONVERSATION_SUSPICION_SIGNALS,
 } from "../contracts/types.js";
 import { gameplayLocaleSchema } from "../localization/supported-locales.js";
+import { RECORD_KINDS } from "./world/types.js";
 
 const nonEmpty = z.string().trim().min(1);
 const proposalMetaSchema = z
@@ -31,6 +32,14 @@ const proposalMetaSchema = z
       })
       .strict()
       .optional(),
+  })
+  .strict();
+
+export const runOpenQuestionSchema = z
+  .object({
+    status: z.enum(["open", "resolved"]),
+    text: nonEmpty,
+    whyLine: nonEmpty,
   })
   .strict();
 
@@ -121,9 +130,27 @@ export const runPlayerConversationMemorySchema = z
     proposedStance: stanceSchema,
     appliedStance: stanceSchema,
     meaningfulFirsthand: z.boolean(),
+    openQuestion: runOpenQuestionSchema.nullable(),
     worldSeconds: z.number().nonnegative(),
     worldRevision: z.number().int().positive(),
     proposalMeta: proposalMetaSchema,
+  })
+  .strict();
+
+export const runRecordReadMemorySchema = z
+  .object({
+    memoryId: nonEmpty,
+    kind: z.literal("record_read"),
+    sourceActorId: nonEmpty,
+    listenerActorId: nonEmpty,
+    recordId: nonEmpty,
+    recordRevision: z.number().int().positive(),
+    sourceMemoryId: nonEmpty,
+    stateBody: nonEmpty,
+    whyLine: nonEmpty,
+    ledgerEventId: nonEmpty,
+    worldSeconds: z.number().nonnegative(),
+    worldRevision: z.number().int().positive(),
   })
   .strict();
 
@@ -131,6 +158,7 @@ export const runMemorySchema = z.discriminatedUnion("kind", [
   runNpcUtteranceMemorySchema,
   runPlayerConversationMemorySchema,
   runAmbientUtteranceMemorySchema,
+  runRecordReadMemorySchema,
 ]);
 
 export const runActorSchema = z
@@ -146,25 +174,94 @@ export const runActorSchema = z
   })
   .strict();
 
-const runRecordSchema = z
+export const runRecordSchema = z
   .object({
     recordId: nonEmpty,
-    kind: nonEmpty,
+    kind: z.enum(RECORD_KINDS),
     authorActorId: nonEmpty,
+    authorRole: runActorRoleSchema,
+    targetId: z.literal("player"),
     stateBody: nonEmpty,
     visibleToActorIds: z.array(nonEmpty),
-    lastLedgerEventId: nonEmpty.optional(),
+    sourceRefs: z.array(z.object({ sourceMemoryId: nonEmpty, originActorId: nonEmpty }).strict()).min(1),
+    textSurfaceId: nonEmpty,
+    createdWorldSeconds: z.number().nonnegative(),
+    createdWorldRevision: z.number().int().positive(),
+    recordRevision: z.number().int().positive(),
+    lastLedgerEventId: nonEmpty,
   })
   .strict();
 
-const runLedgerEventSchema = z
+export const runLedgerEventSchema = z
   .object({
     eventId: nonEmpty,
-    seq: z.number().int().nonnegative(),
-    kind: nonEmpty,
+    seq: z.number().int().positive(),
+    kind: z.enum(["record_written", "record_updated", "record_read"]),
     actorId: nonEmpty,
+    actorRole: runActorRoleSchema,
+    recordId: nonEmpty,
+    sourceMemoryId: nonEmpty,
+    recordRevision: z.number().int().positive(),
+    pressureBefore: z.number().int().min(0).max(125),
+    pressureDelta: z.number().int(),
+    pressureAfter: z.number().int().min(0).max(125),
+    visibleToActorIds: z.array(nonEmpty),
     whyLine: nonEmpty,
+    openQuestion: runOpenQuestionSchema.nullable(),
+    worldSeconds: z.number().nonnegative(),
     worldRevision: z.number().int().positive(),
+  })
+  .strict();
+
+export const runSocialProvenanceSchema = z
+  .object({
+    originKind: z.enum(["speech", "record"]),
+    originActorId: nonEmpty,
+    recipientKind: z.enum(["listener", "reader"]),
+    recipientActorId: nonEmpty,
+    sourceMemoryId: nonEmpty.nullable(),
+    recordId: nonEmpty.nullable(),
+    recordRevision: z.number().int().positive().nullable(),
+    ledgerEventId: nonEmpty.nullable(),
+    whyLine: nonEmpty,
+  })
+  .strict();
+
+export const runSocialViewSchema = z
+  .object({
+    revision: z.number().int().nonnegative(),
+    hearing: z.object({ atSeconds: z.number().positive(), due: z.boolean() }).strict(),
+    pressure: z
+      .object({
+        band: z.enum(["low", "raised", "high"]),
+        latestEncounteredWhyLine: z.string().nullable(),
+      })
+      .strict(),
+    encounteredResidents: z.array(z.object({
+      actorId: nonEmpty,
+      stance: stanceSchema,
+      stanceRevision: z.number().int().nonnegative(),
+      whyLine: z.string(),
+      provenance: runSocialProvenanceSchema.nullable(),
+    }).strict()),
+    openQuestions: z.array(z.object({
+      questionId: nonEmpty,
+      subjectActorId: nonEmpty.nullable(),
+      status: z.enum(["open", "resolved"]),
+      text: nonEmpty,
+      whyLine: nonEmpty,
+      provenance: runSocialProvenanceSchema,
+    }).strict()),
+    encounteredRecords: z.array(z.object({
+      recordId: nonEmpty,
+      kind: z.enum(RECORD_KINDS),
+      authorActorId: nonEmpty,
+      targetId: z.literal("player"),
+      stateBody: nonEmpty,
+      recordRevision: z.number().int().positive(),
+      lastLedgerEventId: nonEmpty,
+      provenance: runSocialProvenanceSchema,
+    }).strict()),
   })
   .strict();
 
@@ -291,6 +388,7 @@ export const runSnapshotSchema = z
     ambientSpeech: runAmbientSpeechSnapshotSchema,
     records: z.array(runRecordSchema),
     ledgerEvents: z.array(runLedgerEventSchema),
+    socialView: runSocialViewSchema,
   })
   .strict();
 
@@ -494,6 +592,7 @@ export const runAdvanceResponseSchema = z
     ambientSpeechEvents: z.array(runAmbientSpeechEventSchema),
     ambientSpeechCursor: z.number().int().nonnegative(),
     scheduler: runSchedulerSnapshotSchema,
+    socialView: runSocialViewSchema,
   })
   .strict();
 
@@ -515,10 +614,22 @@ export const runLookDeltaSchema = z
   })
   .strict();
 
+export const runAdministrationDeltaSchema = z
+  .object({
+    kind: z.literal("administration"),
+    action: z.enum(["write_record", "read_record"]),
+    record: runRecordSchema,
+    ledgerEvent: runLedgerEventSchema,
+    pressureBefore: z.number().int().min(0).max(125),
+    pressureAfter: z.number().int().min(0).max(125),
+  })
+  .strict();
+
 export const runDecisionDeltaSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("speech"), speechEvent: runAmbientSpeechEventSchema }).strict(),
   z.object({ kind: z.literal("readiness"), readinessDelta: runActorReadinessDeltaSchema }).strict(),
   runLookDeltaSchema,
+  runAdministrationDeltaSchema,
   z.object({ kind: z.literal("movement"), movementDelta: runMovementDeltaSchema }).strict(),
 ]);
 
@@ -539,6 +650,7 @@ export const runNpcDecisionResponseSchema = z
     actionDeltas: z.array(runDecisionDeltaSchema),
     movementDeltas: z.array(runMovementDeltaSchema),
     providerMetas: z.array(proposalMetaSchema).max(3),
+    socialView: runSocialViewSchema,
   })
   .strict();
 
@@ -558,6 +670,7 @@ export const runSessionStartResponseSchema = z
     worldRevision: z.number().int().positive(),
     actor: runActorSchema,
     nextTurn: runNextTurnSchema,
+    socialView: runSocialViewSchema,
   })
   .strict();
 
@@ -612,6 +725,7 @@ export const runSessionAnswerResponseSchema = z
     actor: runActorSchema,
     nextTurn: runNextTurnSchema.nullable(),
     proposalMeta: proposalMetaSchema,
+    socialView: runSocialViewSchema,
   })
   .strict();
 
@@ -627,6 +741,34 @@ export const runSessionEndResponseSchema = z
     worldRevision: z.number().int().positive(),
     actor: runActorSchema,
     queuedRunDeltas: z.array(runDecisionDeltaSchema),
+    socialView: runSocialViewSchema,
+  })
+  .strict();
+
+export const runEncounterRequestSchema = z
+  .object({
+    runId: nonEmpty,
+    encounterId: nonEmpty.max(128),
+    encounter: z.discriminatedUnion("kind", [
+      z.object({
+        kind: z.literal("speech"),
+        speechEventId: nonEmpty,
+        playerPosition: position3Schema,
+      }).strict(),
+      z.object({
+        kind: z.literal("record_surface"),
+        textSurfaceId: nonEmpty,
+        playerPosition: position3Schema,
+      }).strict(),
+    ]),
+  })
+  .strict();
+
+export const runEncounterResponseSchema = z
+  .object({
+    runId: nonEmpty,
+    encounterId: nonEmpty,
+    socialView: runSocialViewSchema,
   })
   .strict();
 
@@ -652,6 +794,12 @@ export const runSessionSnapshotResponseSchema = z
 export type RunSnapshot = z.infer<typeof runSnapshotSchema>;
 export type RunActor = z.infer<typeof runActorSchema>;
 export type RunMemory = z.infer<typeof runMemorySchema>;
+export type RunRecordReadMemory = z.infer<typeof runRecordReadMemorySchema>;
+export type RunOpenQuestion = z.infer<typeof runOpenQuestionSchema>;
+export type RunRecord = z.infer<typeof runRecordSchema>;
+export type RunLedgerEvent = z.infer<typeof runLedgerEventSchema>;
+export type RunSocialProvenance = z.infer<typeof runSocialProvenanceSchema>;
+export type RunSocialView = z.infer<typeof runSocialViewSchema>;
 export type RunNpcUtteranceMemory = z.infer<typeof runNpcUtteranceMemorySchema>;
 export type RunPlayerConversationMemory = z.infer<typeof runPlayerConversationMemorySchema>;
 export type RunAmbientUtteranceMemory = z.infer<typeof runAmbientUtteranceMemorySchema>;
@@ -677,8 +825,11 @@ export type RunScheduleWake = z.infer<typeof runScheduleWakeSchema>;
 export type RunSchedulerSnapshot = z.infer<typeof runSchedulerSnapshotSchema>;
 export type RunActorReadinessDelta = z.infer<typeof runActorReadinessDeltaSchema>;
 export type RunDecisionDelta = z.infer<typeof runDecisionDeltaSchema>;
+export type RunAdministrationDelta = z.infer<typeof runAdministrationDeltaSchema>;
 export type RunLookDelta = z.infer<typeof runLookDeltaSchema>;
 export type RunNpcDecisionRequest = z.infer<typeof runNpcDecisionRequestSchema>;
 export type RunNpcDecisionResponse = z.infer<typeof runNpcDecisionResponseSchema>;
+export type RunEncounterRequest = z.infer<typeof runEncounterRequestSchema>;
+export type RunEncounterResponse = z.infer<typeof runEncounterResponseSchema>;
 
 export { proposalMetaSchema as runProposalMetaSchema };

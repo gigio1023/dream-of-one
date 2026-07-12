@@ -86,6 +86,8 @@ export interface MergedConversationTurn extends ConversationJudgment {
   stance: CoarseStance;
   /** Whether the exchange contained enough firsthand substance to support a vouch. */
   meaningfulFirsthand: boolean;
+  /** Provider-authored player log entry; omitted when this exchange opens no question. */
+  openQuestion?: { status: "open" | "resolved"; text: string; whyLine: string } | null;
   utterance: string;
   suggestedReplies: [SuggestedReply, SuggestedReply, SuggestedReply];
   continueConversation: boolean;

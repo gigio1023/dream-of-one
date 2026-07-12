@@ -214,7 +214,21 @@
           "activeConversation": null
         },
         "records": [],
-        "ledgerEvents": []
+        "ledgerEvents": [],
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
+        }
       }
     },
     "runAdvanceInitial": {
@@ -360,6 +374,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -626,6 +654,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -866,6 +908,20 @@
               }
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -1106,6 +1162,20 @@
               }
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -1324,7 +1394,21 @@
           "activeConversation": null
         },
         "records": [],
-        "ledgerEvents": []
+        "ledgerEvents": [],
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
+        }
       }
     },
     "npcDecision": {
@@ -1521,7 +1605,21 @@
             "transport": "scripted",
             "usedFallback": false
           }
-        ]
+        ],
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
+        }
       }
     },
     "runAdvanceSpatialFacts": {
@@ -1663,7 +1761,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:b22e8f65421a4ac3",
+            "sourceId": "goal:cd44a7b0f36ff01f",
             "actorIds": [
               "NPC_Office_Worker"
             ],
@@ -1676,7 +1774,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:9492f19c1dc406a9",
+            "sourceId": "goal:7e9d0eddc97463e0",
             "actorIds": [
               "NPC_Park_Caretaker"
             ],
@@ -1689,7 +1787,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:5b0b7a930ffa99aa",
+            "sourceId": "goal:e3b17457b3e6b05d",
             "actorIds": [
               "NPC_Roaming_Liaison"
             ],
@@ -1702,7 +1800,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:cd7c842f7115eb56",
+            "sourceId": "goal:9948be6da80ab537",
             "actorIds": [
               "NPC_Station_Officer"
             ],
@@ -1715,7 +1813,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:67052a7d18e7ab0b",
+            "sourceId": "goal:c87132181bdfae82",
             "actorIds": [
               "NPC_Studio_Manager"
             ],
@@ -1728,7 +1826,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:83f771e13fb5aab4",
+            "sourceId": "goal:ce4769d0d8cb6f37",
             "actorIds": [
               "NPC_Studio_Receptionist"
             ],
@@ -1859,7 +1957,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:b22e8f65421a4ac3",
+              "sourceId": "goal:cd44a7b0f36ff01f",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -1872,7 +1970,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:9492f19c1dc406a9",
+              "sourceId": "goal:7e9d0eddc97463e0",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -1885,7 +1983,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5b0b7a930ffa99aa",
+              "sourceId": "goal:e3b17457b3e6b05d",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -1898,7 +1996,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:cd7c842f7115eb56",
+              "sourceId": "goal:9948be6da80ab537",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -1911,7 +2009,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:67052a7d18e7ab0b",
+              "sourceId": "goal:c87132181bdfae82",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -1924,7 +2022,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:83f771e13fb5aab4",
+              "sourceId": "goal:ce4769d0d8cb6f37",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -2044,6 +2142,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -2242,7 +2354,21 @@
               "transport": "scripted",
               "usedFallback": false
             }
-          ]
+          ],
+          "socialView": {
+            "revision": 0,
+            "hearing": {
+              "atSeconds": 1800,
+              "due": false
+            },
+            "pressure": {
+              "band": "low",
+              "latestEncounteredWhyLine": null
+            },
+            "encounteredResidents": [],
+            "openQuestions": [],
+            "encounteredRecords": []
+          }
         }
       },
       {
@@ -2275,7 +2401,21 @@
               "transport": "scripted",
               "usedFallback": false
             }
-          ]
+          ],
+          "socialView": {
+            "revision": 0,
+            "hearing": {
+              "atSeconds": 1800,
+              "due": false
+            },
+            "pressure": {
+              "band": "low",
+              "latestEncounteredWhyLine": null
+            },
+            "encounteredResidents": [],
+            "openQuestions": [],
+            "encounteredRecords": []
+          }
         }
       },
       {
@@ -2308,7 +2448,21 @@
               "transport": "scripted",
               "usedFallback": false
             }
-          ]
+          ],
+          "socialView": {
+            "revision": 0,
+            "hearing": {
+              "atSeconds": 1800,
+              "due": false
+            },
+            "pressure": {
+              "band": "low",
+              "latestEncounteredWhyLine": null
+            },
+            "encounteredResidents": [],
+            "openQuestions": [],
+            "encounteredRecords": []
+          }
         }
       },
       {
@@ -2341,7 +2495,21 @@
               "transport": "scripted",
               "usedFallback": false
             }
-          ]
+          ],
+          "socialView": {
+            "revision": 0,
+            "hearing": {
+              "atSeconds": 1800,
+              "due": false
+            },
+            "pressure": {
+              "band": "low",
+              "latestEncounteredWhyLine": null
+            },
+            "encounteredResidents": [],
+            "openQuestions": [],
+            "encounteredRecords": []
+          }
         }
       },
       {
@@ -2374,7 +2542,21 @@
               "transport": "scripted",
               "usedFallback": false
             }
-          ]
+          ],
+          "socialView": {
+            "revision": 0,
+            "hearing": {
+              "atSeconds": 1800,
+              "due": false
+            },
+            "pressure": {
+              "band": "low",
+              "latestEncounteredWhyLine": null
+            },
+            "encounteredResidents": [],
+            "openQuestions": [],
+            "encounteredRecords": []
+          }
         }
       },
       {
@@ -2407,7 +2589,21 @@
               "transport": "scripted",
               "usedFallback": false
             }
-          ]
+          ],
+          "socialView": {
+            "revision": 0,
+            "hearing": {
+              "atSeconds": 1800,
+              "due": false
+            },
+            "pressure": {
+              "band": "low",
+              "latestEncounteredWhyLine": null
+            },
+            "encounteredResidents": [],
+            "openQuestions": [],
+            "encounteredRecords": []
+          }
         }
       },
       {
@@ -2440,7 +2636,21 @@
               "transport": "scripted",
               "usedFallback": false
             }
-          ]
+          ],
+          "socialView": {
+            "revision": 0,
+            "hearing": {
+              "atSeconds": 1800,
+              "due": false
+            },
+            "pressure": {
+              "band": "low",
+              "latestEncounteredWhyLine": null
+            },
+            "encounteredResidents": [],
+            "openQuestions": [],
+            "encounteredRecords": []
+          }
         }
       }
     ],
@@ -2661,6 +2871,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -3093,7 +3317,21 @@
           "activeConversation": null
         },
         "records": [],
-        "ledgerEvents": []
+        "ledgerEvents": [],
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
+        }
       }
     },
     "sessionPreloads": [
@@ -3344,6 +3582,20 @@
             "transport": "scripted",
             "usedFallback": false
           }
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -3395,6 +3647,11 @@
           "proposedStance": "vouch",
           "appliedStance": "vouch",
           "meaningfulFirsthand": true,
+          "openQuestion": {
+            "status": "resolved",
+            "text": "방문 목적은 접수 절차와 맞는가?",
+            "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+          },
           "worldSeconds": 0,
           "worldRevision": 8,
           "proposalMeta": {
@@ -3451,6 +3708,11 @@
               "proposedStance": "vouch",
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "resolved",
+                "text": "방문 목적은 접수 절차와 맞는가?",
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -3466,6 +3728,57 @@
           "profileId": "scripted/test",
           "transport": "scripted",
           "usedFallback": false
+        },
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "vouch",
+              "stanceRevision": 8,
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "resolved",
+              "text": "방문 목적은 접수 절차와 맞는가?",
+              "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
         }
       }
     },
@@ -3529,6 +3842,11 @@
               "proposedStance": "vouch",
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "resolved",
+                "text": "방문 목적은 접수 절차와 맞는가?",
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -3573,6 +3891,11 @@
           "proposedStance": "vouch",
           "appliedStance": "vouch",
           "meaningfulFirsthand": true,
+          "openQuestion": {
+            "status": "resolved",
+            "text": "방문 목적은 접수 절차와 맞는가?",
+            "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+          },
           "worldSeconds": 0,
           "worldRevision": 8,
           "proposalMeta": {
@@ -3669,6 +3992,11 @@
                 "proposedStance": "vouch",
                 "appliedStance": "vouch",
                 "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "resolved",
+                  "text": "방문 목적은 접수 절차와 맞는가?",
+                  "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+                },
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -3851,7 +4179,58 @@
           "activeConversation": null
         },
         "records": [],
-        "ledgerEvents": []
+        "ledgerEvents": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "vouch",
+              "stanceRevision": 8,
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "resolved",
+              "text": "방문 목적은 접수 절차와 맞는가?",
+              "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       }
     },
     "sessionEnd": {
@@ -3913,6 +4292,11 @@
               "proposedStance": "vouch",
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "resolved",
+                "text": "방문 목적은 접수 절차와 맞는가?",
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -3923,7 +4307,58 @@
             }
           ]
         },
-        "queuedRunDeltas": []
+        "queuedRunDeltas": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "vouch",
+              "stanceRevision": 8,
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "resolved",
+              "text": "방문 목적은 접수 절차와 맞는가?",
+              "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       }
     },
     "runSnapshotAfterEnd": {
@@ -4007,6 +4442,11 @@
                 "proposedStance": "vouch",
                 "appliedStance": "vouch",
                 "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "resolved",
+                  "text": "방문 목적은 접수 절차와 맞는가?",
+                  "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+                },
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -4189,7 +4629,1020 @@
           "activeConversation": null
         },
         "records": [],
-        "ledgerEvents": []
+        "ledgerEvents": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "vouch",
+              "stanceRevision": 8,
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "resolved",
+              "text": "방문 목적은 접수 절차와 맞는가?",
+              "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
+      }
+    },
+    "administrationWriteDecision": {
+      "endpoint": "POST /v1/npc/decision",
+      "request": {
+        "runId": "run-fixture-1",
+        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:5",
+        "observedWorldRevision": 5
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:5",
+        "decisionKind": "actor_goal",
+        "wakeKind": "goal",
+        "actorIds": [
+          "NPC_Studio_Receptionist"
+        ],
+        "status": "completed",
+        "observedWorldRevision": 5,
+        "worldRevision": 6,
+        "conversationId": null,
+        "participantActorIds": [],
+        "speechEvents": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Station_Officer",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          },
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          }
+        ],
+        "actionDeltas": [
+          {
+            "kind": "administration",
+            "action": "write_record",
+            "record": {
+              "recordId": "record:run-fixture-1:1",
+              "kind": "note",
+              "authorActorId": "NPC_Studio_Receptionist",
+              "authorRole": "studio_receptionist",
+              "targetId": "player",
+              "stateBody": "방문자가 마을 절차를 모른다고 밝혀 방문 경위를 추가 확인해야 함.",
+              "visibleToActorIds": [
+                "NPC_Station_Officer",
+                "NPC_Studio_Manager",
+                "NPC_Studio_Receptionist",
+                "player"
+              ],
+              "sourceRefs": [
+                {
+                  "sourceMemoryId": "mem-fixture-2",
+                  "originActorId": "player"
+                }
+              ],
+              "textSurfaceId": "TS_Studio_ReviewRecords",
+              "createdWorldSeconds": 0,
+              "createdWorldRevision": 6,
+              "recordRevision": 1,
+              "lastLedgerEventId": "ledger:run-fixture-1:1"
+            },
+            "ledgerEvent": {
+              "eventId": "ledger:run-fixture-1:1",
+              "seq": 1,
+              "kind": "record_written",
+              "actorId": "NPC_Studio_Receptionist",
+              "actorRole": "studio_receptionist",
+              "recordId": "record:run-fixture-1:1",
+              "sourceMemoryId": "mem-fixture-2",
+              "recordRevision": 1,
+              "pressureBefore": 0,
+              "pressureDelta": 15,
+              "pressureAfter": 15,
+              "visibleToActorIds": [
+                "NPC_Station_Officer",
+                "NPC_Studio_Manager",
+                "NPC_Studio_Receptionist",
+                "player"
+              ],
+              "whyLine": "접수 담당자가 직접 들은 진술을 확인 기록으로 남겼습니다.",
+              "openQuestion": {
+                "status": "open",
+                "text": "접수 기록에 남은 방문 경위는 무엇인가?",
+                "whyLine": "접수 담당자의 기록이 방문 경위에 관한 구체적인 의문을 남겼습니다."
+              },
+              "worldSeconds": 0,
+              "worldRevision": 6
+            },
+            "pressureBefore": 0,
+            "pressureAfter": 15
+          },
+          {
+            "kind": "readiness",
+            "readinessDelta": {
+              "actorId": "NPC_Station_Officer",
+              "playerConversationReady": false,
+              "reason": "preload_required"
+            }
+          },
+          {
+            "kind": "readiness",
+            "readinessDelta": {
+              "actorId": "NPC_Studio_Manager",
+              "playerConversationReady": false,
+              "reason": "preload_required"
+            }
+          },
+          {
+            "kind": "readiness",
+            "readinessDelta": {
+              "actorId": "NPC_Studio_Receptionist",
+              "playerConversationReady": false,
+              "reason": "preload_required"
+            }
+          }
+        ],
+        "movementDeltas": [],
+        "providerMetas": [
+          {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        ],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "oppose",
+              "stanceRevision": 3,
+              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "open",
+              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
+      }
+    },
+    "administrationReadDecision": {
+      "endpoint": "POST /v1/npc/decision",
+      "request": {
+        "runId": "run-fixture-1",
+        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
+        "observedWorldRevision": 7
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
+        "decisionKind": "actor_goal",
+        "wakeKind": "goal",
+        "actorIds": [
+          "NPC_Studio_Manager"
+        ],
+        "status": "completed",
+        "observedWorldRevision": 7,
+        "worldRevision": 8,
+        "conversationId": null,
+        "participantActorIds": [],
+        "speechEvents": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Station_Officer",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          },
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          }
+        ],
+        "actionDeltas": [
+          {
+            "kind": "administration",
+            "action": "read_record",
+            "record": {
+              "recordId": "record:run-fixture-1:1",
+              "kind": "note",
+              "authorActorId": "NPC_Studio_Receptionist",
+              "authorRole": "studio_receptionist",
+              "targetId": "player",
+              "stateBody": "방문자가 마을 절차를 모른다고 밝혀 방문 경위를 추가 확인해야 함.",
+              "visibleToActorIds": [
+                "NPC_Station_Officer",
+                "NPC_Studio_Manager",
+                "NPC_Studio_Receptionist",
+                "player"
+              ],
+              "sourceRefs": [
+                {
+                  "sourceMemoryId": "mem-fixture-2",
+                  "originActorId": "player"
+                }
+              ],
+              "textSurfaceId": "TS_Studio_ReviewRecords",
+              "createdWorldSeconds": 0,
+              "createdWorldRevision": 6,
+              "recordRevision": 1,
+              "lastLedgerEventId": "ledger:run-fixture-1:2"
+            },
+            "ledgerEvent": {
+              "eventId": "ledger:run-fixture-1:2",
+              "seq": 2,
+              "kind": "record_read",
+              "actorId": "NPC_Studio_Manager",
+              "actorRole": "studio_manager",
+              "recordId": "record:run-fixture-1:1",
+              "sourceMemoryId": "mem-fixture-2",
+              "recordRevision": 1,
+              "pressureBefore": 15,
+              "pressureDelta": 10,
+              "pressureAfter": 25,
+              "visibleToActorIds": [
+                "NPC_Station_Officer",
+                "NPC_Studio_Manager",
+                "NPC_Studio_Receptionist",
+                "player"
+              ],
+              "whyLine": "관리자가 접수 기록의 출처와 내용을 직접 확인했습니다.",
+              "openQuestion": {
+                "status": "open",
+                "text": "관리자가 확인한 방문 경위는 누구에게 다시 물어야 하는가?",
+                "whyLine": "관리자가 기록을 읽고 추가 확인 대상을 정해야 한다고 판단했습니다."
+              },
+              "worldSeconds": 0,
+              "worldRevision": 8
+            },
+            "pressureBefore": 15,
+            "pressureAfter": 25
+          },
+          {
+            "kind": "readiness",
+            "readinessDelta": {
+              "actorId": "NPC_Station_Officer",
+              "playerConversationReady": false,
+              "reason": "preload_required"
+            }
+          },
+          {
+            "kind": "readiness",
+            "readinessDelta": {
+              "actorId": "NPC_Studio_Manager",
+              "playerConversationReady": false,
+              "reason": "preload_required"
+            }
+          },
+          {
+            "kind": "readiness",
+            "readinessDelta": {
+              "actorId": "NPC_Studio_Receptionist",
+              "playerConversationReady": false,
+              "reason": "preload_required"
+            }
+          }
+        ],
+        "movementDeltas": [],
+        "providerMetas": [
+          {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        ],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "oppose",
+              "stanceRevision": 3,
+              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "open",
+              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
+      }
+    },
+    "administrationRecordEncounter": {
+      "endpoint": "POST /v1/run/encounter",
+      "request": {
+        "runId": "run-fixture-1",
+        "encounterId": "fixture-admin-encounter-1",
+        "encounter": {
+          "kind": "record_surface",
+          "textSurfaceId": "TS_Studio_ReviewRecords",
+          "playerPosition": [
+            3.5,
+            1.2,
+            -18.5
+          ]
+        }
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "encounterId": "fixture-admin-encounter-1",
+        "socialView": {
+          "revision": 2,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "raised",
+            "latestEncounteredWhyLine": "관리자가 접수 기록의 출처와 내용을 직접 확인했습니다."
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "oppose",
+              "stanceRevision": 3,
+              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "open",
+              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+              }
+            },
+            {
+              "questionId": "question:record:record:run-fixture-1:1",
+              "subjectActorId": null,
+              "status": "open",
+              "text": "관리자가 확인한 방문 경위는 누구에게 다시 물어야 하는가?",
+              "whyLine": "관리자가 기록을 읽고 추가 확인 대상을 정해야 한다고 판단했습니다.",
+              "provenance": {
+                "originKind": "record",
+                "originActorId": "NPC_Studio_Receptionist",
+                "recipientKind": "reader",
+                "recipientActorId": "NPC_Studio_Manager",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": "record:run-fixture-1:1",
+                "recordRevision": 1,
+                "ledgerEventId": "ledger:run-fixture-1:2",
+                "whyLine": "관리자가 기록을 읽고 추가 확인 대상을 정해야 한다고 판단했습니다."
+              }
+            }
+          ],
+          "encounteredRecords": [
+            {
+              "recordId": "record:run-fixture-1:1",
+              "kind": "note",
+              "authorActorId": "NPC_Studio_Receptionist",
+              "targetId": "player",
+              "stateBody": "방문자가 마을 절차를 모른다고 밝혀 방문 경위를 추가 확인해야 함.",
+              "recordRevision": 1,
+              "lastLedgerEventId": "ledger:run-fixture-1:2",
+              "provenance": {
+                "originKind": "record",
+                "originActorId": "NPC_Studio_Receptionist",
+                "recipientKind": "reader",
+                "recipientActorId": "NPC_Studio_Manager",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": "record:run-fixture-1:1",
+                "recordRevision": 1,
+                "ledgerEventId": "ledger:run-fixture-1:2",
+                "whyLine": "관리자가 접수 기록의 출처와 내용을 직접 확인했습니다."
+              }
+            }
+          ]
+        }
+      }
+    },
+    "administrationFinalSnapshot": {
+      "endpoint": "GET /v1/run/snapshot",
+      "request": {
+        "runId": "run-fixture-1"
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "worldId": "m3r_first_person_town",
+        "layoutRevision": "rev-first-person-town-v4",
+        "worldRevision": 8,
+        "locale": "ko-KR",
+        "worldClock": {
+          "elapsedSeconds": 0,
+          "graceEndsAtSeconds": 90,
+          "hearingAtSeconds": 1800,
+          "paused": false
+        },
+        "institutionalPressure": 25,
+        "providerBudget": {
+          "callLimit": 120,
+          "tokenLimit": 300000,
+          "reservedCalls": 20,
+          "reservedTokens": 50000,
+          "callsUsed": 0,
+          "tokensUsed": 0
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "activeConversationId": null,
+        "actors": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "role": "studio_receptionist",
+            "locationId": "Studio",
+            "stance": "oppose",
+            "suspicion": 35,
+            "playerConversationReady": false,
+            "hasMeaningfulFirsthandConversation": true,
+            "memories": [
+              {
+                "memoryId": "mem-fixture-1",
+                "kind": "npc_utterance",
+                "sourceActorId": "NPC_Studio_Receptionist",
+                "listenerActorIds": [
+                  "player"
+                ],
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "worldSeconds": 0,
+                "worldRevision": 2,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "memoryId": "mem-fixture-2",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#0",
+                "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+                "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+                "signals": [
+                  "role_script_break"
+                ],
+                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+                "suspicionBefore": 0,
+                "suspicionAfter": 35,
+                "suspicionDelta": 35,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 15,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "oppose",
+                "appliedStance": "oppose",
+                "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "open",
+                  "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+                  "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+                },
+                "worldSeconds": 0,
+                "worldRevision": 3,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "role": "studio_manager",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "playerConversationReady": false,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": [
+              {
+                "memoryId": "mem-fixture-3",
+                "kind": "record_read",
+                "sourceActorId": "NPC_Studio_Receptionist",
+                "listenerActorId": "NPC_Studio_Manager",
+                "recordId": "record:run-fixture-1:1",
+                "recordRevision": 1,
+                "sourceMemoryId": "mem-fixture-2",
+                "stateBody": "방문자가 마을 절차를 모른다고 밝혀 방문 경위를 추가 확인해야 함.",
+                "whyLine": "관리자가 접수 기록의 출처와 내용을 직접 확인했습니다.",
+                "ledgerEventId": "ledger:run-fixture-1:2",
+                "worldSeconds": 0,
+                "worldRevision": 8
+              }
+            ]
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "role": "office_worker",
+            "locationId": "Office",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "playerConversationReady": false,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "role": "park_caretaker",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "playerConversationReady": false,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "role": "station_officer",
+            "locationId": "Station",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "playerConversationReady": false,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "role": "roaming_liaison",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "playerConversationReady": false,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          }
+        ],
+        "scheduler": {
+          "routeCadenceSeconds": 28,
+          "activeMeetingWindowIds": [],
+          "pendingWakes": [
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:81fa9765bca7bc1b",
+              "actorIds": [
+                "NPC_Station_Officer"
+              ],
+              "scheduledAtSeconds": 0,
+              "observedWorldRevision": 7,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:2ac5a95eed255ceb",
+              "actorIds": [
+                "NPC_Studio_Receptionist"
+              ],
+              "scheduledAtSeconds": 0,
+              "observedWorldRevision": 7,
+              "requiresDecision": true,
+              "status": "pending"
+            }
+          ],
+          "actors": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "routeId": "StudioFrontDesk",
+              "currentBlock": {
+                "blockId": "NPC_Studio_Receptionist.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 460,
+                "activity": "front_desk",
+                "targetKind": "route",
+                "targetId": "StudioFrontDesk"
+              },
+              "confirmedAnchorRef": "Studio.receptionist_spawn",
+              "desiredAnchorRef": "Studio.receptionist_spawn",
+              "routePointIndex": 0,
+              "routePointArrivedAtSeconds": 0,
+              "nextRouteMoveAtSeconds": 17,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Studio_Manager",
+              "routeId": "StudioManagerRound",
+              "currentBlock": {
+                "blockId": "NPC_Studio_Manager.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 90,
+                "activity": "review_work",
+                "targetKind": "route",
+                "targetId": "StudioManagerRound"
+              },
+              "confirmedAnchorRef": "Studio.manager_spawn",
+              "desiredAnchorRef": "Studio.manager_spawn",
+              "routePointIndex": 0,
+              "routePointArrivedAtSeconds": 0,
+              "nextRouteMoveAtSeconds": 15,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Office_Worker",
+              "routeId": "OfficeShift",
+              "currentBlock": {
+                "blockId": "NPC_Office_Worker.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 700,
+                "activity": "office_work",
+                "targetKind": "route",
+                "targetId": "OfficeShift"
+              },
+              "confirmedAnchorRef": "Office.worker_spawn",
+              "desiredAnchorRef": "Office.worker_spawn",
+              "routePointIndex": 0,
+              "routePointArrivedAtSeconds": 0,
+              "nextRouteMoveAtSeconds": 18,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Park_Caretaker",
+              "routeId": "ParkCaretakerRound",
+              "currentBlock": {
+                "blockId": "NPC_Park_Caretaker.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 90,
+                "activity": "caretaking_round",
+                "targetKind": "route",
+                "targetId": "ParkCaretakerRound"
+              },
+              "confirmedAnchorRef": "Park.caretaker_spawn",
+              "desiredAnchorRef": "Park.caretaker_spawn",
+              "routePointIndex": 0,
+              "routePointArrivedAtSeconds": 0,
+              "nextRouteMoveAtSeconds": 26,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Station_Officer",
+              "routeId": "StationDuty",
+              "currentBlock": {
+                "blockId": "NPC_Station_Officer.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 1060,
+                "activity": "station_duty",
+                "targetKind": "route",
+                "targetId": "StationDuty"
+              },
+              "confirmedAnchorRef": "Station.officer_spawn",
+              "desiredAnchorRef": "Station.officer_spawn",
+              "routePointIndex": 0,
+              "routePointArrivedAtSeconds": 0,
+              "nextRouteMoveAtSeconds": 27,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Roaming_Liaison",
+              "routeId": "TownLiaisonCircuit",
+              "currentBlock": {
+                "blockId": "NPC_Roaming_Liaison.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 700,
+                "activity": "town_round",
+                "targetKind": "route",
+                "targetId": "TownLiaisonCircuit"
+              },
+              "confirmedAnchorRef": "Park.liaison_spawn",
+              "desiredAnchorRef": "Park.liaison_spawn",
+              "routePointIndex": 0,
+              "routePointArrivedAtSeconds": 0,
+              "nextRouteMoveAtSeconds": 12,
+              "pendingMovement": null
+            }
+          ]
+        },
+        "ambientSpeech": {
+          "cursor": 0,
+          "events": [],
+          "activeConversation": null
+        },
+        "records": [
+          {
+            "recordId": "record:run-fixture-1:1",
+            "kind": "note",
+            "authorActorId": "NPC_Studio_Receptionist",
+            "authorRole": "studio_receptionist",
+            "targetId": "player",
+            "stateBody": "방문자가 마을 절차를 모른다고 밝혀 방문 경위를 추가 확인해야 함.",
+            "visibleToActorIds": [
+              "NPC_Station_Officer",
+              "NPC_Studio_Manager",
+              "NPC_Studio_Receptionist",
+              "player"
+            ],
+            "sourceRefs": [
+              {
+                "sourceMemoryId": "mem-fixture-2",
+                "originActorId": "player"
+              }
+            ],
+            "textSurfaceId": "TS_Studio_ReviewRecords",
+            "createdWorldSeconds": 0,
+            "createdWorldRevision": 6,
+            "recordRevision": 1,
+            "lastLedgerEventId": "ledger:run-fixture-1:2"
+          }
+        ],
+        "ledgerEvents": [
+          {
+            "eventId": "ledger:run-fixture-1:1",
+            "seq": 1,
+            "kind": "record_written",
+            "actorId": "NPC_Studio_Receptionist",
+            "actorRole": "studio_receptionist",
+            "recordId": "record:run-fixture-1:1",
+            "sourceMemoryId": "mem-fixture-2",
+            "recordRevision": 1,
+            "pressureBefore": 0,
+            "pressureDelta": 15,
+            "pressureAfter": 15,
+            "visibleToActorIds": [
+              "NPC_Station_Officer",
+              "NPC_Studio_Manager",
+              "NPC_Studio_Receptionist",
+              "player"
+            ],
+            "whyLine": "접수 담당자가 직접 들은 진술을 확인 기록으로 남겼습니다.",
+            "openQuestion": {
+              "status": "open",
+              "text": "접수 기록에 남은 방문 경위는 무엇인가?",
+              "whyLine": "접수 담당자의 기록이 방문 경위에 관한 구체적인 의문을 남겼습니다."
+            },
+            "worldSeconds": 0,
+            "worldRevision": 6
+          },
+          {
+            "eventId": "ledger:run-fixture-1:2",
+            "seq": 2,
+            "kind": "record_read",
+            "actorId": "NPC_Studio_Manager",
+            "actorRole": "studio_manager",
+            "recordId": "record:run-fixture-1:1",
+            "sourceMemoryId": "mem-fixture-2",
+            "recordRevision": 1,
+            "pressureBefore": 15,
+            "pressureDelta": 10,
+            "pressureAfter": 25,
+            "visibleToActorIds": [
+              "NPC_Station_Officer",
+              "NPC_Studio_Manager",
+              "NPC_Studio_Receptionist",
+              "player"
+            ],
+            "whyLine": "관리자가 접수 기록의 출처와 내용을 직접 확인했습니다.",
+            "openQuestion": {
+              "status": "open",
+              "text": "관리자가 확인한 방문 경위는 누구에게 다시 물어야 하는가?",
+              "whyLine": "관리자가 기록을 읽고 추가 확인 대상을 정해야 한다고 판단했습니다."
+            },
+            "worldSeconds": 0,
+            "worldRevision": 8
+          }
+        ],
+        "socialView": {
+          "revision": 2,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "raised",
+            "latestEncounteredWhyLine": "관리자가 접수 기록의 출처와 내용을 직접 확인했습니다."
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "oppose",
+              "stanceRevision": 3,
+              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "open",
+              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+              }
+            },
+            {
+              "questionId": "question:record:record:run-fixture-1:1",
+              "subjectActorId": null,
+              "status": "open",
+              "text": "관리자가 확인한 방문 경위는 누구에게 다시 물어야 하는가?",
+              "whyLine": "관리자가 기록을 읽고 추가 확인 대상을 정해야 한다고 판단했습니다.",
+              "provenance": {
+                "originKind": "record",
+                "originActorId": "NPC_Studio_Receptionist",
+                "recipientKind": "reader",
+                "recipientActorId": "NPC_Studio_Manager",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": "record:run-fixture-1:1",
+                "recordRevision": 1,
+                "ledgerEventId": "ledger:run-fixture-1:2",
+                "whyLine": "관리자가 기록을 읽고 추가 확인 대상을 정해야 한다고 판단했습니다."
+              }
+            }
+          ],
+          "encounteredRecords": [
+            {
+              "recordId": "record:run-fixture-1:1",
+              "kind": "note",
+              "authorActorId": "NPC_Studio_Receptionist",
+              "targetId": "player",
+              "stateBody": "방문자가 마을 절차를 모른다고 밝혀 방문 경위를 추가 확인해야 함.",
+              "recordRevision": 1,
+              "lastLedgerEventId": "ledger:run-fixture-1:2",
+              "provenance": {
+                "originKind": "record",
+                "originActorId": "NPC_Studio_Receptionist",
+                "recipientKind": "reader",
+                "recipientActorId": "NPC_Studio_Manager",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": "record:run-fixture-1:1",
+                "recordRevision": 1,
+                "ledgerEventId": "ledger:run-fixture-1:2",
+                "whyLine": "관리자가 접수 기록의 출처와 내용을 직접 확인했습니다."
+              }
+            }
+          ]
+        }
       }
     }
   },
@@ -4338,6 +5791,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -4579,6 +6046,20 @@
               }
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -4846,6 +6327,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -5041,6 +6536,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -5250,6 +6759,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -5422,6 +6945,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -5602,6 +7139,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -5820,6 +7371,20 @@
               }
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -6058,6 +7623,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -6253,6 +7832,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -6462,6 +8055,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -6652,6 +8259,20 @@
               }
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -6861,6 +8482,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -7102,6 +8737,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -7369,6 +9018,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -7636,6 +9299,20 @@
               }
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -7905,6 +9582,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     },
@@ -8126,6 +9817,20 @@
               "pendingMovement": null
             }
           ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
         }
       }
     }
@@ -8179,6 +9884,11 @@
           "proposedStance": "vouch",
           "appliedStance": "vouch",
           "meaningfulFirsthand": true,
+          "openQuestion": {
+            "status": "resolved",
+            "text": "방문 목적은 접수 절차와 맞는가?",
+            "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+          },
           "worldSeconds": 0,
           "worldRevision": 8,
           "proposalMeta": {
@@ -8235,6 +9945,11 @@
               "proposedStance": "vouch",
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "resolved",
+                "text": "방문 목적은 접수 절차와 맞는가?",
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -8250,6 +9965,57 @@
           "profileId": "scripted/test",
           "transport": "scripted",
           "usedFallback": false
+        },
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "vouch",
+              "stanceRevision": 8,
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "resolved",
+              "text": "방문 목적은 접수 절차와 맞는가?",
+              "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
         }
       },
       "sessionSnapshotResponse": {
@@ -8306,6 +10072,11 @@
               "proposedStance": "vouch",
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "resolved",
+                "text": "방문 목적은 접수 절차와 맞는가?",
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -8350,6 +10121,11 @@
           "proposedStance": "vouch",
           "appliedStance": "vouch",
           "meaningfulFirsthand": true,
+          "openQuestion": {
+            "status": "resolved",
+            "text": "방문 목적은 접수 절차와 맞는가?",
+            "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+          },
           "worldSeconds": 0,
           "worldRevision": 8,
           "proposalMeta": {
@@ -8440,6 +10216,11 @@
                 "proposedStance": "vouch",
                 "appliedStance": "vouch",
                 "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "resolved",
+                  "text": "방문 목적은 접수 절차와 맞는가?",
+                  "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+                },
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -8622,7 +10403,58 @@
           "activeConversation": null
         },
         "records": [],
-        "ledgerEvents": []
+        "ledgerEvents": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "vouch",
+              "stanceRevision": 8,
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "resolved",
+              "text": "방문 목적은 접수 절차와 맞는가?",
+              "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       },
       "endResponse": {
         "runId": "run-fixture-1",
@@ -8677,6 +10509,11 @@
               "proposedStance": "vouch",
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "resolved",
+                "text": "방문 목적은 접수 절차와 맞는가?",
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -8687,7 +10524,58 @@
             }
           ]
         },
-        "queuedRunDeltas": []
+        "queuedRunDeltas": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "vouch",
+              "stanceRevision": 8,
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "resolved",
+              "text": "방문 목적은 접수 절차와 맞는가?",
+              "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       },
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
@@ -8765,6 +10653,11 @@
                 "proposedStance": "vouch",
                 "appliedStance": "vouch",
                 "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "resolved",
+                  "text": "방문 목적은 접수 절차와 맞는가?",
+                  "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+                },
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -8947,7 +10840,58 @@
           "activeConversation": null
         },
         "records": [],
-        "ledgerEvents": []
+        "ledgerEvents": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "vouch",
+              "stanceRevision": 8,
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "resolved",
+              "text": "방문 목적은 접수 절차와 맞는가?",
+              "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       }
     },
     {
@@ -8998,6 +10942,11 @@
           "proposedStance": "uncertain",
           "appliedStance": "uncertain",
           "meaningfulFirsthand": true,
+          "openQuestion": {
+            "status": "open",
+            "text": "접수 목적은 무엇인가?",
+            "whyLine": "방문 목적이 아직 분명하지 않습니다."
+          },
           "worldSeconds": 0,
           "worldRevision": 8,
           "proposalMeta": {
@@ -9054,6 +11003,11 @@
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "open",
+                "text": "접수 목적은 무엇인가?",
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -9069,6 +11023,57 @@
           "profileId": "scripted/test",
           "transport": "scripted",
           "usedFallback": false
+        },
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "uncertain",
+              "stanceRevision": 8,
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "open",
+              "text": "접수 목적은 무엇인가?",
+              "whyLine": "방문 목적이 아직 분명하지 않습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
         }
       },
       "sessionSnapshotResponse": {
@@ -9125,6 +11130,11 @@
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "open",
+                "text": "접수 목적은 무엇인가?",
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -9169,6 +11179,11 @@
           "proposedStance": "uncertain",
           "appliedStance": "uncertain",
           "meaningfulFirsthand": true,
+          "openQuestion": {
+            "status": "open",
+            "text": "접수 목적은 무엇인가?",
+            "whyLine": "방문 목적이 아직 분명하지 않습니다."
+          },
           "worldSeconds": 0,
           "worldRevision": 8,
           "proposalMeta": {
@@ -9259,6 +11274,11 @@
                 "proposedStance": "uncertain",
                 "appliedStance": "uncertain",
                 "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "open",
+                  "text": "접수 목적은 무엇인가?",
+                  "whyLine": "방문 목적이 아직 분명하지 않습니다."
+                },
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -9441,7 +11461,58 @@
           "activeConversation": null
         },
         "records": [],
-        "ledgerEvents": []
+        "ledgerEvents": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "uncertain",
+              "stanceRevision": 8,
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "open",
+              "text": "접수 목적은 무엇인가?",
+              "whyLine": "방문 목적이 아직 분명하지 않습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       },
       "endResponse": {
         "runId": "run-fixture-1",
@@ -9496,6 +11567,11 @@
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "open",
+                "text": "접수 목적은 무엇인가?",
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -9506,7 +11582,58 @@
             }
           ]
         },
-        "queuedRunDeltas": []
+        "queuedRunDeltas": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "uncertain",
+              "stanceRevision": 8,
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "open",
+              "text": "접수 목적은 무엇인가?",
+              "whyLine": "방문 목적이 아직 분명하지 않습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       },
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
@@ -9584,6 +11711,11 @@
                 "proposedStance": "uncertain",
                 "appliedStance": "uncertain",
                 "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "open",
+                  "text": "접수 목적은 무엇인가?",
+                  "whyLine": "방문 목적이 아직 분명하지 않습니다."
+                },
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -9766,7 +11898,58 @@
           "activeConversation": null
         },
         "records": [],
-        "ledgerEvents": []
+        "ledgerEvents": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "uncertain",
+              "stanceRevision": 8,
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "open",
+              "text": "접수 목적은 무엇인가?",
+              "whyLine": "방문 목적이 아직 분명하지 않습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       }
     },
     {
@@ -9821,6 +12004,11 @@
           "proposedStance": "oppose",
           "appliedStance": "oppose",
           "meaningfulFirsthand": true,
+          "openQuestion": {
+            "status": "open",
+            "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+            "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+          },
           "worldSeconds": 0,
           "worldRevision": 8,
           "proposalMeta": {
@@ -9879,6 +12067,11 @@
               "proposedStance": "oppose",
               "appliedStance": "oppose",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "open",
+                "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -9894,6 +12087,57 @@
           "profileId": "scripted/test",
           "transport": "scripted",
           "usedFallback": false
+        },
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "oppose",
+              "stanceRevision": 8,
+              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "open",
+              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
         }
       },
       "sessionSnapshotResponse": {
@@ -9952,6 +12196,11 @@
               "proposedStance": "oppose",
               "appliedStance": "oppose",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "open",
+                "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -10000,6 +12249,11 @@
           "proposedStance": "oppose",
           "appliedStance": "oppose",
           "meaningfulFirsthand": true,
+          "openQuestion": {
+            "status": "open",
+            "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+            "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+          },
           "worldSeconds": 0,
           "worldRevision": 8,
           "proposalMeta": {
@@ -10092,6 +12346,11 @@
                 "proposedStance": "oppose",
                 "appliedStance": "oppose",
                 "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "open",
+                  "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+                  "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+                },
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -10274,7 +12533,58 @@
           "activeConversation": null
         },
         "records": [],
-        "ledgerEvents": []
+        "ledgerEvents": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "oppose",
+              "stanceRevision": 8,
+              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "open",
+              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       },
       "endResponse": {
         "runId": "run-fixture-1",
@@ -10331,6 +12641,11 @@
               "proposedStance": "oppose",
               "appliedStance": "oppose",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "open",
+                "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -10341,7 +12656,58 @@
             }
           ]
         },
-        "queuedRunDeltas": []
+        "queuedRunDeltas": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "oppose",
+              "stanceRevision": 8,
+              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "open",
+              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       },
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
@@ -10421,6 +12787,11 @@
                 "proposedStance": "oppose",
                 "appliedStance": "oppose",
                 "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "open",
+                  "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+                  "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+                },
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -10603,7 +12974,58 @@
           "activeConversation": null
         },
         "records": [],
-        "ledgerEvents": []
+        "ledgerEvents": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "oppose",
+              "stanceRevision": 8,
+              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "open",
+              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
+              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       }
     },
     {
@@ -10654,6 +13076,11 @@
           "proposedStance": "vouch",
           "appliedStance": "vouch",
           "meaningfulFirsthand": true,
+          "openQuestion": {
+            "status": "resolved",
+            "text": "방문 목적은 접수 절차와 맞는가?",
+            "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+          },
           "worldSeconds": 0,
           "worldRevision": 8,
           "proposalMeta": {
@@ -10710,6 +13137,11 @@
               "proposedStance": "vouch",
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "resolved",
+                "text": "방문 목적은 접수 절차와 맞는가?",
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -10725,6 +13157,57 @@
           "profileId": "scripted/test",
           "transport": "scripted",
           "usedFallback": false
+        },
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "vouch",
+              "stanceRevision": 8,
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "resolved",
+              "text": "방문 목적은 접수 절차와 맞는가?",
+              "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
         }
       },
       "sessionSnapshotResponse": {
@@ -10781,6 +13264,11 @@
               "proposedStance": "vouch",
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "resolved",
+                "text": "방문 목적은 접수 절차와 맞는가?",
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -10825,6 +13313,11 @@
           "proposedStance": "vouch",
           "appliedStance": "vouch",
           "meaningfulFirsthand": true,
+          "openQuestion": {
+            "status": "resolved",
+            "text": "방문 목적은 접수 절차와 맞는가?",
+            "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+          },
           "worldSeconds": 0,
           "worldRevision": 8,
           "proposalMeta": {
@@ -10915,6 +13408,11 @@
                 "proposedStance": "vouch",
                 "appliedStance": "vouch",
                 "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "resolved",
+                  "text": "방문 목적은 접수 절차와 맞는가?",
+                  "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+                },
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -11097,7 +13595,58 @@
           "activeConversation": null
         },
         "records": [],
-        "ledgerEvents": []
+        "ledgerEvents": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "vouch",
+              "stanceRevision": 8,
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "resolved",
+              "text": "방문 목적은 접수 절차와 맞는가?",
+              "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       },
       "endResponse": {
         "runId": "run-fixture-1",
@@ -11152,6 +13701,11 @@
               "proposedStance": "vouch",
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "resolved",
+                "text": "방문 목적은 접수 절차와 맞는가?",
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              },
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -11162,7 +13716,58 @@
             }
           ]
         },
-        "queuedRunDeltas": []
+        "queuedRunDeltas": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "vouch",
+              "stanceRevision": 8,
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "resolved",
+              "text": "방문 목적은 접수 절차와 맞는가?",
+              "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       },
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
@@ -11240,6 +13845,11 @@
                 "proposedStance": "vouch",
                 "appliedStance": "vouch",
                 "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "resolved",
+                  "text": "방문 목적은 접수 절차와 맞는가?",
+                  "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+                },
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -11422,7 +14032,58 @@
           "activeConversation": null
         },
         "records": [],
-        "ledgerEvents": []
+        "ledgerEvents": [],
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "vouch",
+              "stanceRevision": 8,
+              "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다."
+              }
+            }
+          ],
+          "openQuestions": [
+            {
+              "questionId": "question:mem-fixture-2",
+              "subjectActorId": "NPC_Studio_Receptionist",
+              "status": "resolved",
+              "text": "방문 목적은 접수 절차와 맞는가?",
+              "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다.",
+              "provenance": {
+                "originKind": "speech",
+                "originActorId": "player",
+                "recipientKind": "listener",
+                "recipientActorId": "NPC_Studio_Receptionist",
+                "sourceMemoryId": "mem-fixture-2",
+                "recordId": null,
+                "recordRevision": null,
+                "ledgerEventId": null,
+                "whyLine": "방문 목적을 분명히 설명해 의문이 해소되었습니다."
+              }
+            }
+          ],
+          "encounteredRecords": []
+        }
       }
     }
   ]

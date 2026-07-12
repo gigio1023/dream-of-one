@@ -374,12 +374,29 @@ test("hearing clamps one final batch and exact retry wins over terminal state", 
     arrivals: [],
   };
   const final = await service.advance(request);
+  assert.equal(atSeventeenNinetyFive.socialView.hearing.due, false);
   assert.equal(final.clock.requestedElapsedSeconds, 10);
   assert.equal(final.clock.appliedElapsedSeconds, 5);
   assert.equal(final.clock.toSeconds, 1800);
   assert.equal(final.clock.hearingDue, true);
+  assert.equal(final.socialView.hearing.due, true);
+  assert.equal(
+    final.socialView.revision,
+    atSeventeenNinetyFive.socialView.revision + 1,
+    "hearing publication must advance player-knowledge revision exactly once",
+  );
   assert.equal(final.scheduleWakes.filter(wake => wake.kind === "hearing").length, 1);
   assert.deepEqual(await service.advance(request), final);
+  assert.deepEqual(service.snapshot(started.runId).socialView, final.socialView);
+  const delayedOlderResponse = await service.advance({
+    runId: started.runId,
+    advanceId: "hearing-prelude-180",
+    observedWorldRevision: atSeventeenNinetyFive.previousWorldRevision,
+    elapsedSeconds: 5,
+    arrivals: [],
+  });
+  assert.deepEqual(delayedOlderResponse, atSeventeenNinetyFive);
+  assert.ok(delayedOlderResponse.socialView.revision < final.socialView.revision);
   await assert.rejects(
     service.advance({
       ...request,

@@ -22,7 +22,11 @@ LOC onto the M3R target so an agent knows what to keep, trim, or build.
 > spatial packet: each stable resident can `wait`, `look`, `move_to`, or begin
 > a two-turn `talk_to` exchange through the same bounded proposal-loop core.
 > Current facts and schedule policy are revalidated before any typed action
-> delta commits. Administrative records and the hearing remain target work.
+> delta commits. Provider-authored administrative record proposals now pass
+> through run-scoped role, source, visibility, revision, pressure-clamp, and
+> exactly-one-ledger validation. The player receives a separate encountered-only
+> `socialView`; hidden records and pressure changes remain hidden until a valid
+> speech or record-surface encounter. The hearing remains target work.
 
 ## Target module shape
 
@@ -127,6 +131,11 @@ Delete when the replacing module lands; don't leave both alive.
     Continuous position changes refresh commit-time position and audibility,
     but only reachability, visibility, audibility, or object changes create a
     new material goal signature.
+12. Player knowledge is a runtime-owned `socialView` with its own monotonic
+    revision. Direct conversation judgments, actually presented audible speech,
+    and explicitly inspected record surfaces are the only encounter inputs.
+    Knowledge acknowledgement never changes `worldRevision`; hidden mutations
+    never change the normal HUD's disclosed pressure or record state.
 
 ## Sidecar API (M3R target)
 
@@ -139,6 +148,7 @@ surface is:
 | `POST /v1/run/start` | Idempotently create one run from a client `startId`, six actor workspaces, clock, revision, budgets, and initial snapshot |
 | `POST /v1/run/advance` | Submit a bounded unpaused-time delta plus validated physical/world observations; returns due wakes and deltas |
 | `GET  /v1/run/snapshot` | Full run snapshot for HUD hydrate, reconnect, and debug inspection |
+| `POST /v1/run/encounter` | Idempotently acknowledge one actually presented ambient speech event or explicitly inspected record surface; returns the encountered-only `socialView` without changing `worldRevision` |
 | `POST /v1/session/preload` | Resolve and cache an opening from strict `{runId, actorId, interactionZoneId, locale}`; returns the ready actor plus `ProposalMeta` without starting or pausing a child conversation |
 | `POST /v1/session/start` | Consume that opening from the same strict actor/zone/locale packet with zero provider calls; returns the modal conversation view |
 | `POST /v1/session/answer` | Player choice/typed input/hesitation → signals, state delta, NPC reactions |
@@ -148,12 +158,13 @@ surface is:
 | `POST /v1/run/hearing` | Open the scheduled, run-ending hearing after its clock condition is met |
 | `POST /v1/run/end` | Return terminal result, run telemetry, and provider accounting, then close the run |
 
-Responses carry `ProposalMeta`, transcript deltas, and `ledgerEvents[]` so the
-client can distinguish live/fallback/scripted behavior and animate validated
-consequences incrementally.
+Debug-capable responses retain `ProposalMeta`, transcript deltas, and raw
+`ledgerEvents[]`. Normal player presentation reads only the sanitized
+`socialView`, whose encountered residents, questions, records, provenance, and
+qualitative pressure never reveal undisclosed state.
 
 The landed subset is `POST /v1/run/start`, `POST /v1/run/advance`,
-`GET /v1/run/snapshot`, `POST /v1/session/preload`, the run-discriminated
+`GET /v1/run/snapshot`, `POST /v1/run/encounter`, `POST /v1/session/preload`, the run-discriminated
 start/answer/snapshot/end session routes, and run-discriminated
 `POST /v1/npc/decision` for bounded ambient meetings and single-resident goal
 decisions. Legacy
@@ -226,7 +237,7 @@ provider proposals in flight, and only one ambient conversation may hold the
 run lease.
 
 Current NPC decision responses use one typed `actionDeltas` stream: `speech`,
-`readiness`, `look`, or `movement`. If a player modal owns the run when an
+`readiness`, `look`, `movement`, or validated `administration`. If a player modal owns the run when an
 ambient result resolves, the signature-bound attempt becomes queued without a
 second provider call. `POST /v1/session/end` commits every still-valid queued
 attempt and returns `queuedRunDeltas`; an idempotent session-end retry returns
@@ -235,12 +246,15 @@ the client cannot apply one mutation twice.
 
 ## Run-scoped state and judgment
 
-The normal player UI exposes only each NPC's coarse `oppose / uncertain /
-vouch` stance and one institutional-pressure line. Numeric suspicion remains
-internal/debug data. A stance may be judged only from that actor's validated
-memories; `vouch` additionally requires a meaningful first-hand conversation
-with the player. Reading an administrative record may update factual memory
-or institutional pressure, but does not directly move personal stance.
+The normal player UI exposes only each encountered NPC's disclosed coarse
+`oppose / uncertain / vouch` stance and one encountered institutional-pressure
+line. Numeric suspicion and undisclosed current state remain internal/debug
+data. A stance may be judged only from that actor's validated memories;
+`vouch` additionally requires a meaningful first-hand conversation with the
+player. Reading an administrative record may update factual memory or
+institutional pressure, but does not directly move personal stance. One
+successful record write, update, or first read produces exactly one ledger
+event; retrying or rereading the same revision cannot duplicate it.
 
 The runtime verifies provenance and procedure; the selected live model judges
 meaning. At the scheduled hearing it enforces four evidenced vouches out of

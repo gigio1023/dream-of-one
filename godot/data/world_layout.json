@@ -482,6 +482,13 @@
   ],
   "text_surfaces": [
     {
+      "id": "TS_Park_NoticeBoard",
+      "label_key": "surface.park_notice_board.label",
+      "landmark": "Park",
+      "anchor": "Park.notice_board_reserved",
+      "kind": "record_surface"
+    },
+    {
       "id": "TS_Studio_ReviewRecords",
       "label_key": "surface.studio_review_records.label",
       "landmark": "Studio",
@@ -493,6 +500,13 @@
       "label_key": "surface.office_filing_index.label",
       "landmark": "Office",
       "anchor": "Office.filing_wall",
+      "kind": "record_surface"
+    },
+    {
+      "id": "TS_Station_IntakeRecords",
+      "label_key": "surface.station_intake_records.label",
+      "landmark": "Station",
+      "anchor": "Station.intake_desk",
       "kind": "record_surface"
     },
     {

@@ -52,6 +52,14 @@ func layout_snapshot() -> Dictionary:
 	return _layout.duplicate(true)
 
 
+func text_surface_snapshot() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for surface_value in _layout.get("text_surfaces", []):
+		if surface_value is Dictionary:
+			result.append((surface_value as Dictionary).duplicate(true))
+	return result
+
+
 func conversation_zone_id(actor_id: String, landmark_id: String) -> String:
 	var matches: PackedStringArray = []
 	for zone_value in _layout.get("interaction_zones", []):
@@ -425,6 +433,7 @@ func _validate_bindings() -> PackedStringArray:
 	_validate_spatial_markers("zones", "Markers/Zones", errors)
 	_validate_spatial_markers("sight_volumes", "Markers/SightVolumes", errors)
 	_validate_spatial_markers("audibility_volumes", "Markers/AudibilityVolumes", errors)
+	_validate_text_surfaces(anchor_positions, errors)
 
 	var player := get_node_or_null(player_path) as Node3D
 	var player_start: Variant = _layout.get("player_start", {})
@@ -490,6 +499,45 @@ func _validate_bindings() -> PackedStringArray:
 	_validate_no_extra_markers("Actors", expected_actors, errors)
 
 	return errors
+
+
+func _validate_text_surfaces(
+	anchor_positions: Dictionary,
+	errors: PackedStringArray
+) -> void:
+	var expected: Dictionary = {}
+	for surface_value in _layout.get("text_surfaces", []):
+		if not surface_value is Dictionary:
+			continue
+		var surface := surface_value as Dictionary
+		var surface_id := str(surface.get("id", ""))
+		var surface_kind := str(surface.get("kind", ""))
+		var anchor_ref := str(surface.get("anchor", ""))
+		expected[surface_id] = true
+		var node := get_node_or_null("Props/TextSurfaces/%s" % surface_id)
+		if node == null:
+			errors.append("Town3D missing text surface: %s" % surface_id)
+			continue
+		if (
+			str(node.get("surface_id")) != surface_id
+			or str(node.get("label_key")) != str(surface.get("label_key", ""))
+			or str(node.get("surface_kind")) != surface_kind
+		):
+			errors.append("Town3D text surface binding drifted: %s" % surface_id)
+		if not anchor_positions.has(anchor_ref):
+			errors.append("Town3D text surface anchor is unknown: %s" % surface_id)
+		elif not _positions_match(
+			(node as Node3D).position,
+			anchor_positions[anchor_ref] as Vector3
+		):
+			errors.append("Town3D text surface position drifted: %s" % surface_id)
+		var should_interact := surface_kind == "record_surface"
+		if (
+			not node.has_method("is_interaction_enabled")
+			or bool(node.call("is_interaction_enabled")) != should_interact
+		):
+			errors.append("Town3D text surface interaction kind drifted: %s" % surface_id)
+	_validate_no_extra_markers("Props/TextSurfaces", expected, errors)
 
 
 func _validate_spatial_markers(

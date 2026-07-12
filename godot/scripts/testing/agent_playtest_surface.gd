@@ -159,6 +159,7 @@ func snapshot() -> Dictionary:
 			[&"ambientSubtitle", &"ambient_subtitle"],
 			{}
 		),
+		"socialView": _first_value(sources, [&"socialView", &"social_view"], {}),
 		"player": _player_snapshot(player),
 		"transitioning": _first_value(sources, [&"transitioning"], null),
 		"resolvingAnswer": _first_value(sources, [&"resolvingAnswer", &"resolving_answer"], null),
@@ -174,7 +175,10 @@ func snapshot() -> Dictionary:
 		"provider": _provider_summary(
 			_first_value(sources, [&"provider", &"providerProvenance", &"provider_provenance"], {})
 		),
-		"hearing": _not_implemented_result("hearing"),
+		"hearing": _hearing_summary(
+			_first_value(sources, [&"hearing"], {})
+		),
+		"log": _dictionary_value(hud_view, [&"log"], {}),
 		"outcome": _not_implemented_result("outcome"),
 	}
 
@@ -389,6 +393,8 @@ func _hud_snapshot(hud_view: Dictionary) -> Dictionary:
 			[&"ambientSubtitle", &"ambient_subtitle"],
 			{}
 		),
+		"socialView": _dictionary_value(hud_view, [&"socialView", &"social_view"], {}),
+		"log": _dictionary_value(hud_view, [&"log"], {}),
 	}
 
 
@@ -417,7 +423,19 @@ func _pressure_summary(value: Variant) -> Dictionary:
 		"available": true,
 		"reason": "",
 		"summary": _dictionary_value(source, [&"summary", &"label"], ""),
-		"level": _dictionary_value(source, [&"level", &"value"], null),
+		"band": _dictionary_value(source, [&"band"], ""),
+	}
+
+
+func _hearing_summary(value: Variant) -> Dictionary:
+	if not value is Dictionary or (value as Dictionary).is_empty():
+		return {"available": false, "reason": "hearing_unavailable"}
+	var source := value as Dictionary
+	return {
+		"available": true,
+		"reason": "",
+		"atSeconds": _dictionary_value(source, [&"atSeconds", &"at_seconds"], null),
+		"due": _dictionary_value(source, [&"due"], false),
 	}
 
 

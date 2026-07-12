@@ -3,6 +3,7 @@ import { test } from "bun:test";
 import { startSessionServer, type RunningSessionServer } from "../../src/api/http-server.js";
 import { createSameOrderScriptedAdapter } from "../../src/providers/testing/same-order-script.js";
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
+import { loadRunLayout } from "../../src/runtime/run-layout.js";
 import { RunService, STUDIO_RECEPTIONIST_ID } from "../../src/runtime/run-service.js";
 import { SessionService } from "../../src/runtime/session/service.js";
 
@@ -142,6 +143,30 @@ test("run API keeps strict request bounds and explicit error codes", async () =>
     assert.equal(malformed.json.error, "invalid_request");
 
     const run = await post(base, "/v1/run/start", { startId: "api-run-2", locale: "ko-KR" });
+    const layout = loadRunLayout();
+    const surface = layout.recordSurfaces.find(candidate => candidate.surfaceId === "TS_Studio_ReviewRecords");
+    assert.ok(surface);
+    const position = layout.anchorPositions[surface.anchorRef];
+    assert.ok(position);
+    const encounterRequest = {
+      runId: run.json.runId,
+      encounterId: "api-record-surface-1",
+      encounter: {
+        kind: "record_surface",
+        textSurfaceId: surface.surfaceId,
+        playerPosition: [position[0], position[1], position[2]],
+      },
+    };
+    const encounter = await post(base, "/v1/run/encounter", encounterRequest);
+    const encounterRetry = await post(base, "/v1/run/encounter", encounterRequest);
+    assert.equal(encounter.status, 200, JSON.stringify(encounter.json));
+    assert.deepEqual(encounterRetry, encounter);
+    const encounterConflict = await post(base, "/v1/run/encounter", {
+      ...encounterRequest,
+      encounter: { ...encounterRequest.encounter, playerPosition: [999, 0, 999] },
+    });
+    assert.equal(encounterConflict.status, 409);
+    assert.equal(encounterConflict.json.error, "encounter_id_conflict");
     const mismatchedActorZone = await post(base, "/v1/session/preload", {
       runId: run.json.runId,
       actorId: "NPC_Office_Worker",

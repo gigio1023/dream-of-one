@@ -181,6 +181,52 @@ test("ambient utterances enter only the speaker and current runtime-confirmed li
   assert.equal(afterCursor.ambientSpeechCursor, 2);
 });
 
+test("player speech encounter acknowledgements prove audibility without leaking a hidden stance", async () => {
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: deterministicIds("player-encounter"),
+  });
+  const meeting = await readyFirstMeeting(service, "ambient-player-encounter");
+  const response = await service.decision(meeting.request);
+  const event = response.speechEvents[0];
+  assert.ok(event);
+  const before = service.snapshot(meeting.started.runId);
+  const encountered = await service.encounter({
+    runId: meeting.started.runId,
+    encounterId: "heard-1",
+    encounter: {
+      kind: "speech",
+      speechEventId: event.eventId,
+      playerPosition: [...event.audibility.speakerPosition],
+    },
+  });
+  assert.deepEqual(encountered.socialView.encounteredResidents, []);
+  assert.deepEqual(encountered.socialView.openQuestions, []);
+  assert.equal(service.snapshot(meeting.started.runId).worldRevision, before.worldRevision);
+  const retried = await service.encounter({
+    runId: meeting.started.runId,
+    encounterId: "heard-1",
+    encounter: {
+      kind: "speech",
+      speechEventId: event.eventId,
+      playerPosition: [...event.audibility.speakerPosition],
+    },
+  });
+  assert.deepEqual(retried, encountered);
+  await assert.rejects(
+    service.encounter({
+      runId: meeting.started.runId,
+      encounterId: "heard-far",
+      encounter: {
+        kind: "speech",
+        speechEventId: event.eventId,
+        playerPosition: [1000, 0, 1000],
+      },
+    }),
+    (error: unknown) => error instanceof RunError && error.code === "encounter_not_visible",
+  );
+});
+
 test("player opening context includes a listener's ambient memory but never leaks it to an uninvolved actor", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
   const openingRequests: ConversationTurnRequest[] = [];

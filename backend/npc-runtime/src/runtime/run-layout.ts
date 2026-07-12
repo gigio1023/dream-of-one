@@ -119,6 +119,13 @@ const interactionZoneSchema = z
     }
   });
 
+const textSurfaceSchema = z.object({
+  id: nonEmpty,
+  landmark: nonEmpty,
+  anchor: nonEmpty,
+  kind: nonEmpty,
+});
+
 const townLayoutSchema = z
   .object({
     world_id: nonEmpty,
@@ -138,6 +145,7 @@ const townLayoutSchema = z
     audibility_volumes: z.array(audibilityVolumeSchema).min(1),
     actors: z.array(layoutActorSchema).length(6),
     interaction_zones: z.array(interactionZoneSchema),
+    text_surfaces: z.array(textSurfaceSchema),
   })
   .refine(value => new Set(value.actors.map(actor => actor.id)).size === value.actors.length, {
     message: "town layout actor ids must be unique",
@@ -203,12 +211,19 @@ export interface RunInteractionZone {
   actorIds: string[];
 }
 
+export interface RunRecordSurface {
+  surfaceId: string;
+  landmarkId: string;
+  anchorRef: string;
+}
+
 export interface RunLayout {
   worldId: string;
   layoutRevision: string;
   graceEndsAtSeconds: number;
   hearingAtSeconds: number;
   conversationZones: RunInteractionZone[];
+  recordSurfaces: RunRecordSurface[];
   anchorRefs: string[];
   anchorPositions: Record<string, readonly [number, number, number]>;
   routes: RunLayoutRoute[];
@@ -358,6 +373,20 @@ export function loadRunLayout(path = defaultLayoutPath()): RunLayout {
     };
   });
 
+  const recordSurfaces: RunRecordSurface[] = parsed.text_surfaces
+    .filter(surface => surface.kind === "record_surface")
+    .map(surface => {
+      if (!landmarkIds.has(surface.landmark) || !anchorRefSet.has(surface.anchor)) {
+        throw new Error(`record surface ${surface.id} references unknown landmark or anchor`);
+      }
+      return {
+        surfaceId: surface.id,
+        landmarkId: surface.landmark,
+        anchorRef: surface.anchor,
+      };
+    });
+  assertUnique(recordSurfaces.map(surface => surface.surfaceId), "record surface ids");
+
   for (const window of meetingWindows) {
     for (const actorId of window.actorIds) {
       const participantAnchorRef = window.participantAnchorRefs[actorId];
@@ -432,6 +461,7 @@ export function loadRunLayout(path = defaultLayoutPath()): RunLayout {
     graceEndsAtSeconds: parsed.schedule.grace_period_world_seconds,
     hearingAtSeconds: parsed.schedule.hearing_world_seconds,
     conversationZones,
+    recordSurfaces,
     anchorRefs,
     anchorPositions,
     routes: parsed.routes.map(route => ({ routeId: route.id, points: [...route.points] })),

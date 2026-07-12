@@ -134,6 +134,8 @@ test("one meeting decision is single-flight, cached, and gives the responder the
     actorId: "NPC_Park_Caretaker",
   });
   assert.equal(requests[0]?.requireUtterance, true);
+  assert.equal(requests[0]?.locale, "ko-KR");
+  assert.equal(requests[1]?.locale, "ko-KR");
   assert.equal(
     requests[1]?.observePacket.heardSpeech.at(-1),
     `NPC_Studio_Manager: ${first.speechEvents[0]?.line}`,

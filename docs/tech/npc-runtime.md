@@ -108,9 +108,10 @@ Delete when the replacing module lands; don't leave both alive.
 10. A run has one immutable gameplay locale selected from the shared supported
     registry. The same locale flows through player conversation, ambient agent
     calls, records, hearing/recap, and deterministic fallback; stable ids and
-    world truth remain language-neutral. The currently landed runtime still
-    accepts only `ko-KR`; the six-locale foundation replaces that literal
-    before later M3R content surfaces expand it.
+    world truth remain language-neutral. The landed run and run-bound session
+    schemas accept exactly `ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and
+    `ja-JP`; the retained Same Order regression storylet remains honestly
+    `ko-KR`-only.
 
 ## Sidecar API (M3R target)
 

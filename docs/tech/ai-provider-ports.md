@@ -82,29 +82,31 @@ classifier. This prevents providers that naturally emit 1–5 ratings from
 making report and Station pressure unreachable while leaving the actual
 meaning judgment with the NPC model.
 
-The currently landed M3R prompts require Korean for every player-visible
-utterance. The six-locale foundation replaces that literal with the run's
-supported locale and carries it into `AgentStepRequest`; it still tells the
-model to stop after a successful goal-satisfying tool result instead of
-repeating the same successful read or look until the iteration budget ends.
+M3R prompts derive every player-visible output instruction from the run's
+supported locale and carry that locale into `AgentStepRequest`; they still
+tell the model to stop after a successful goal-satisfying tool result instead
+of repeating the same successful read or look until the iteration budget ends.
 Tool names and ids stay unchanged for validation. The generic agent-loop
 validator also suppresses an identical call after it has already succeeded or
 been blocked within the same beat, returning that result to the model so it can
 stop or choose a genuinely different next action.
 
-The locale-foundation target is one locale-aware validation stage for
+One locale-aware validation stage covers
 player-visible dialogue, reply suggestions, judgment reasons, NPC utterances,
 and record/ledger prose. Korean keeps its modern-Korean script check; the other
 locales use bounded structural and locale instructions without introducing a
 second language detector. A mismatch will use the existing single repair
-attempt; ids and tool names remain excluded. Target gameplay locales are
+attempt; ids and tool names remain excluded. Supported gameplay locales are
 `ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`.
 
-The target run fixes its locale at creation. That tag will be part of
-opening-cache and request-idempotency signatures and will flow through
-conversation, ambient agent steps, record/hearing generation, and fallback
-selection. Adapters remain locale-agnostic transports; no vendor SDK, base
-URL, or provider profile is added per language.
+A run fixes its locale at creation. That tag is part of opening-cache and
+request-idempotency signatures and already flows through conversation,
+ambient agent steps, and fallback selection; later record/hearing/recap
+generation must reuse it. Adapters remain locale-agnostic transports; no
+vendor SDK, base URL, or provider profile is added per language. Localized
+fallback is structurally bounded in all six locales, while its legacy
+keyword signal classifier remains Korean/partial-English and is not treated
+as native-quality non-Korean judgment.
 
 ## Envelope and failure handling
 

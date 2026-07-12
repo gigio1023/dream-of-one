@@ -1,5 +1,6 @@
 import { ruleJudgeConversationTurn } from "../../runtime/conversation-suspicion.js";
 import { priorPlayerLines } from "../fallback.js";
+import { fallbackContent } from "../../localization/fallback-content.js";
 import type {
   AgentStepProposal,
   AgentStepRequest,
@@ -112,7 +113,8 @@ export class ScriptedNpcAdapter implements NpcProposalPort {
           judged.proposal.signals.length,
         ),
         meaningfulFirsthand:
-          request.playerLine.trim().length > 1 && request.playerLine !== "(응답 지연)",
+          request.playerLine.trim().length > 1 &&
+          request.playerLine !== fallbackContent(request.locale).hesitationMarker,
         utterance: proposed.proposal.utterance,
         suggestedReplies: proposed.proposal.suggestedReplies,
         continueConversation: proposed.proposal.continueConversation,

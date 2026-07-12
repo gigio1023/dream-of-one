@@ -5,6 +5,10 @@ import {
 } from "../agentloop/context.js";
 import { toolCatalogForRole } from "../agentloop/tools.js";
 import type { CoarseStance } from "../contracts/types.js";
+import {
+  gameplayLocaleSchema,
+  type GameplayLocale,
+} from "../localization/supported-locales.js";
 import { agentStepProposalSchema } from "../providers/envelope.js";
 import type {
   AgentStepProposal,
@@ -163,7 +167,7 @@ interface RunState {
   worldId: string;
   layoutRevision: string;
   worldRevision: number;
-  locale: "ko-KR";
+  locale: GameplayLocale;
   elapsedSeconds: number;
   graceEndsAtSeconds: number;
   hearingAtSeconds: number;
@@ -329,16 +333,18 @@ export class RunService {
   }
 
   start(startId: string, locale: string): RunSnapshot {
-    const signature = startSignature(locale);
+    const parsedLocale = gameplayLocaleSchema.safeParse(locale);
+    if (!parsedLocale.success) {
+      throw new RunError(`unsupported gameplay locale: ${locale}`, "invalid_locale");
+    }
+    const runLocale = parsedLocale.data;
+    const signature = startSignature(runLocale);
     const cached = this.startCache.get(startId);
     if (cached) {
       if (cached.signature !== signature) {
         throw new RunError("the same startId cannot be retried with a different payload", "start_id_conflict");
       }
       return clone(cached.response);
-    }
-    if (locale !== "ko-KR") {
-      throw new RunError(`M3R first-contact runs require ko-KR, got ${locale}`, "invalid_locale");
     }
     const runId = this.idFactory("run");
     const scheduler = createRunScheduler(this.layout);
@@ -362,7 +368,7 @@ export class RunService {
       worldId: this.layout.worldId,
       layoutRevision: this.layout.layoutRevision,
       worldRevision: 0,
-      locale,
+      locale: runLocale,
       elapsedSeconds: 0,
       graceEndsAtSeconds: this.layout.graceEndsAtSeconds,
       hearingAtSeconds: this.layout.hearingAtSeconds,
@@ -1049,6 +1055,7 @@ export class RunService {
           }
           const resolved = await this.proposalPort.proposeNextStep({
             sessionId: runId,
+            locale: this.requireRun(runId).locale,
             iteration: turnIndex,
             goal: "함께 도착한 주민과 지금 상황에 맞는 한 문장을 직접 나누고 대화를 마친다.",
             observePacket,
@@ -1616,6 +1623,7 @@ export class RunService {
       .map(record => [record.recordId, record.lastLedgerEventId ?? "", record.stateBody])
       .sort((first, second) => String(first[0]).localeCompare(String(second[0])));
     return JSON.stringify({
+      locale: run.locale,
       role: actor.role,
       locationId: actor.locationId,
       scheduleBlockId: block?.blockId ?? "none",

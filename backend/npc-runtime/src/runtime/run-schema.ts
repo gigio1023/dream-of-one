@@ -4,6 +4,7 @@ import {
   CONVERSATION_CHOICE_INTENTS,
   CONVERSATION_SUSPICION_SIGNALS,
 } from "../contracts/types.js";
+import { gameplayLocaleSchema } from "../localization/supported-locales.js";
 
 const nonEmpty = z.string().trim().min(1);
 const proposalMetaSchema = z
@@ -260,7 +261,7 @@ export const runSnapshotSchema = z
     worldId: nonEmpty,
     layoutRevision: nonEmpty,
     worldRevision: z.number().int().nonnegative(),
-    locale: z.literal("ko-KR"),
+    locale: gameplayLocaleSchema,
     worldClock: z
       .object({
         elapsedSeconds: z.number().nonnegative(),
@@ -316,7 +317,7 @@ export const runNextTurnSchema = z
 export const runStartRequestSchema = z
   .object({
     startId: nonEmpty.max(128),
-    locale: nonEmpty,
+    locale: gameplayLocaleSchema,
   })
   .strict();
 export const runSnapshotRequestSchema = z.object({ runId: nonEmpty }).strict();
@@ -467,7 +468,7 @@ export const runSessionStartRequestSchema = z
     runId: nonEmpty,
     actorId: nonEmpty,
     interactionZoneId: nonEmpty,
-    locale: z.literal("ko-KR"),
+    locale: gameplayLocaleSchema,
   })
   .strict();
 

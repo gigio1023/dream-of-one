@@ -106,11 +106,11 @@ can overhear with subtitles.
   validation gates (scale reference, import, character legibility,
   retargeting if needed, test corner) instead of re-surveying, and applies
   the recorded ranked fallback if a gate fails.
-- **Runtime authority carries over; run scope does not yet exist.** The current
-  implementation owns conversation-session state and budgets. The first
-  runtime slice adds a `RunService` keyed by `runId`, owning the six memories,
-  coarse stances, records, ledger, world clock, scheduler, and run-level
-  provider budget; existing conversation sessions become children. Judgment,
+- **Run scope carries the authority.** The landed `RunService`, keyed by
+  `runId`, owns the six memories and coarse stances, world clock, scheduler,
+  world revision, and run-level provider budget; player conversations are
+  children. Records, institutional pressure, hearing, and terminal recap
+  extend that same scope rather than creating another state owner. Judgment,
   provider-port, fallback, and validity boundaries stay unchanged.
 - **Final live verification is owner-routed.** Planning, implementation, and
   diagnosis remain with GPT-5.6 Sol ultra. After implementation and self-review
@@ -125,9 +125,10 @@ can overhear with subtitles.
   six resident identities are drafted from `docs/scenario/` canon for owner
   approval as content slices inside this milestone.
 - **Locale work follows the playable slices instead of becoming a second
-  framework.** The next locale-foundation slice, before the event loop and HUD
-  expand further, carries the selected locale through the existing run,
-  session, provider, fallback, and fixture paths. Subsequent ambient,
+  framework.** The shared six-locale foundation now carries the selected
+  locale through the existing UI, run, session, provider, ambient, fallback,
+  and fixture paths. A run locks one locale; later setting changes apply to
+  the next run or restart. Subsequent
   administrative, hearing, recap, physicality, and onboarding work adds text
   only through that path. Milestone integration verifies exact key/placeholder
   parity, long Latin text, CJK glyphs, IME input, and one bounded generated

@@ -72,7 +72,7 @@ export interface ConversationJudgment {
   suspicionDelta: number;
   reportDelta: number;
   signals: ConversationSuspicionSignal[];
-  /** One in-world Korean sentence the player sees as the reason. */
+  /** One in-world sentence in the run locale that the player sees as the reason. */
   whyLine: string;
 }
 
@@ -125,6 +125,8 @@ export interface AgentToolResult {
 
 export interface AgentStepRequest {
   sessionId: string;
+  /** Immutable locale of the owning run/session. */
+  locale: string;
   iteration: number;
   goal: string;
   observePacket: ObservePacket;

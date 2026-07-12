@@ -1,0 +1,272 @@
+{
+  "ko-KR": {
+    "hesitationMarker": "(응답 지연)",
+    "whyLines": {
+      "local_routine_mismatch": "그 답은 이곳에서 확인하려던 절차와 맞지 않았습니다.",
+      "dream_language_leak": "그 말에는 이곳 바깥을 가리키는 낯선 표현이 섞였습니다.",
+      "memory_gap_admission": "기억이 비어 있다는 답이 확인할 점을 남겼습니다.",
+      "role_script_break": "이곳 사람이라면 하지 않을 답이라 의문이 남았습니다.",
+      "prior_statement_contradiction": "앞서 한 말과 지금 답이 서로 맞지 않았습니다.",
+      "authority_evasion": "확인하려는 질문을 피한 답이라 의문이 남았습니다.",
+      "over_explanation": "필요한 범위보다 길어진 설명이 오히려 의문을 남겼습니다.",
+      "response_hesitation": "바로 답하지 못한 점이 확인할 사항으로 남았습니다.",
+      "defaultSignal": "그 답에는 더 확인할 점이 남았습니다.",
+      "none": "그 답은 지금까지 확인한 정황과 자연스럽게 맞았습니다."
+    },
+    "conversation": {
+      "studioReception": {
+        "opening": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+        "followUp": "말씀하신 이유를 접수 내용과 맞춰 보겠습니다. 한 가지만 더 확인해도 될까요?",
+        "suggestedReplies": [
+          { "text": "안내받은 절차를 확인하러 왔습니다.", "intent": "safe/local" },
+          { "text": "먼저 어떤 접수인지 설명해 주세요.", "intent": "uncertain/repair" },
+          { "text": "여기 사람이 아니라서 잘 모르겠습니다.", "intent": "risky/weird" }
+        ]
+      },
+      "generic": {
+        "opening": "잠시만요, 오늘따라 정신이 없네요. 평소 하시던 대로 맞으실까요?",
+        "followUp": "잠깐만요, 방금 하신 말을 한 번 더 확인할게요. 평소하고 같은 게 맞나요?",
+        "suggestedReplies": [
+          { "text": "네, 확인했습니다.", "intent": "safe/local" },
+          { "text": "무슨 뜻인지 조금 더 설명해 주세요.", "intent": "uncertain/repair" },
+          { "text": "저는 여기 사람이 아닙니다.", "intent": "risky/weird" }
+        ]
+      }
+    },
+    "agent": {
+      "previousResultWaitReason": "방금 결과를 다시 살핍니다",
+      "previousResultRationale": "방금 행동의 결과를 확인하고 잠시 기다립니다.",
+      "heardUtterance": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+      "talkUtterance": "잠시 이야기 나눌 수 있을까요? 지금 확인한 내용을 서로 맞춰 보고 싶습니다.",
+      "talkRationale": "곁에 있는 주민과 직접 말을 나눕니다.",
+      "lookRationale": "보이는 물건을 먼저 살펴봅니다.",
+      "doneRationale": "지금 할 수 있는 행동이 없어 멈춥니다.",
+      "observeUtterance": "관찰하겠습니다."
+    }
+  },
+  "en-US": {
+    "hesitationMarker": "(response delayed)",
+    "whyLines": {
+      "local_routine_mismatch": "That answer did not match the procedure I was trying to confirm here.",
+      "dream_language_leak": "That answer included an unfamiliar expression pointing beyond this place.",
+      "memory_gap_admission": "Saying that your memory is blank leaves something to be checked.",
+      "role_script_break": "That is not an answer someone from here would normally give, so doubts remain.",
+      "prior_statement_contradiction": "What you said earlier does not match your answer now.",
+      "authority_evasion": "You avoided the question I was trying to verify, so doubts remain.",
+      "over_explanation": "The explanation went beyond what was needed and raised more questions.",
+      "response_hesitation": "The delay before answering remains something to be checked.",
+      "defaultSignal": "That answer leaves more to be checked.",
+      "none": "That answer fits naturally with what has been established so far."
+    },
+    "conversation": {
+      "studioReception": {
+        "opening": "I can help with your registration. Please tell me why you came here.",
+        "followUp": "I will compare your reason with the registration details. May I confirm one more thing?",
+        "suggestedReplies": [
+          { "text": "I came to confirm the procedure I was given.", "intent": "safe/local" },
+          { "text": "Please explain what this registration is for first.", "intent": "uncertain/repair" },
+          { "text": "I am not from here, so I do not really know.", "intent": "risky/weird" }
+        ]
+      },
+      "generic": {
+        "opening": "One moment. Things are hectic today. You are following your usual routine, right?",
+        "followUp": "Hold on. Let me check what you just said once more. It is the same as usual, correct?",
+        "suggestedReplies": [
+          { "text": "Yes, I have checked.", "intent": "safe/local" },
+          { "text": "Please explain what you mean in a little more detail.", "intent": "uncertain/repair" },
+          { "text": "I am not from here.", "intent": "risky/weird" }
+        ]
+      }
+    },
+    "agent": {
+      "previousResultWaitReason": "review the latest result",
+      "previousResultRationale": "I review the result of the last action and wait briefly.",
+      "heardUtterance": "I understand what you said. I will remember separately what I confirmed myself.",
+      "talkUtterance": "Could we talk for a moment? I would like to compare what we have each confirmed.",
+      "talkRationale": "I speak directly with the nearby resident.",
+      "lookRationale": "I inspect the visible object first.",
+      "doneRationale": "There is nothing useful I can do now, so I stop.",
+      "observeUtterance": "I will observe."
+    }
+  },
+  "it-IT": {
+    "hesitationMarker": "(risposta in ritardo)",
+    "whyLines": {
+      "local_routine_mismatch": "Quella risposta non corrispondeva alla procedura che stavo cercando di verificare qui.",
+      "dream_language_leak": "Nelle sue parole c'era un'espressione insolita che sembrava riferirsi a qualcosa fuori da questo luogo.",
+      "memory_gap_admission": "Dire di avere un vuoto di memoria lascia qualcosa da chiarire.",
+      "role_script_break": "È una risposta che una persona di qui non darebbe normalmente, e lascia dei dubbi.",
+      "prior_statement_contradiction": "Quello che ha detto prima non coincide con la risposta di adesso.",
+      "authority_evasion": "Ha evitato la domanda che cercavo di verificare, e questo lascia dei dubbi.",
+      "over_explanation": "Una spiegazione più lunga del necessario ha finito per suscitare altri dubbi.",
+      "response_hesitation": "L'esitazione nel rispondere resta un elemento da chiarire.",
+      "defaultSignal": "Quella risposta lascia altri aspetti da verificare.",
+      "none": "Quella risposta concorda in modo naturale con quanto è stato accertato finora."
+    },
+    "conversation": {
+      "studioReception": {
+        "opening": "Posso aiutarla con la registrazione. Mi dica il motivo della sua visita.",
+        "followUp": "Confronterò il motivo che ha indicato con i dati della registrazione. Posso verificare ancora una cosa?",
+        "suggestedReplies": [
+          { "text": "Sono qui per verificare la procedura che mi è stata indicata.", "intent": "safe/local" },
+          { "text": "Prima mi spieghi a cosa serve questa registrazione.", "intent": "uncertain/repair" },
+          { "text": "Non sono di qui, quindi non ne so molto.", "intent": "risky/weird" }
+        ]
+      },
+      "generic": {
+        "opening": "Un momento. Oggi c'è molta confusione. Sta seguendo la solita procedura, vero?",
+        "followUp": "Aspetti. Vorrei controllare ancora una volta ciò che ha appena detto. È tutto come al solito, giusto?",
+        "suggestedReplies": [
+          { "text": "Sì, ho controllato.", "intent": "safe/local" },
+          { "text": "Può spiegarmi un po' meglio cosa intende?", "intent": "uncertain/repair" },
+          { "text": "Non sono di qui.", "intent": "risky/weird" }
+        ]
+      }
+    },
+    "agent": {
+      "previousResultWaitReason": "riesaminare l'ultimo risultato",
+      "previousResultRationale": "Controllo il risultato dell'ultima azione e aspetto un momento.",
+      "heardUtterance": "Ho capito ciò che ha detto. Terrò separato il ricordo di quello che ho verificato personalmente.",
+      "talkUtterance": "Possiamo parlare un momento? Vorrei confrontare ciò che abbiamo verificato.",
+      "talkRationale": "Parlo direttamente con la persona qui vicino.",
+      "lookRationale": "Esamino prima l'oggetto che posso vedere.",
+      "doneRationale": "Non c'è nulla di utile che possa fare adesso, quindi mi fermo.",
+      "observeUtterance": "Osserverò."
+    }
+  },
+  "zh-CN": {
+    "hesitationMarker": "（回答延迟）",
+    "whyLines": {
+      "local_routine_mismatch": "这个回答与我在这里想要确认的程序不符。",
+      "dream_language_leak": "这番话里夹杂了一个仿佛指向此地之外的陌生说法。",
+      "memory_gap_admission": "承认记忆有空白，留下了需要核实的问题。",
+      "role_script_break": "这里的人通常不会这样回答，因此仍有疑问。",
+      "prior_statement_contradiction": "之前说的话与现在的回答互相矛盾。",
+      "authority_evasion": "这个回答避开了我想核实的问题，因此仍有疑问。",
+      "over_explanation": "说明超出了必要范围，反而引出了更多疑问。",
+      "response_hesitation": "没有立即作答这一点仍需核实。",
+      "defaultSignal": "这个回答仍有需要进一步核实之处。",
+      "none": "这个回答与目前核实到的情况自然吻合。"
+    },
+    "conversation": {
+      "studioReception": {
+        "opening": "我来帮您办理登记。请说明您来这里的原因。",
+        "followUp": "我会把您说的理由与登记内容核对。可以再确认一件事吗？",
+        "suggestedReplies": [
+          { "text": "我是来确认别人告知我的程序的。", "intent": "safe/local" },
+          { "text": "请先说明这是哪一种登记。", "intent": "uncertain/repair" },
+          { "text": "我不是这里的人，所以不太清楚。", "intent": "risky/weird" }
+        ]
+      },
+      "generic": {
+        "opening": "请稍等，今天有些忙乱。您还是照平常的方式来办，对吗？",
+        "followUp": "等一下，我再确认一次您刚才说的话。和平常一样，对吗？",
+        "suggestedReplies": [
+          { "text": "是的，我确认过了。", "intent": "safe/local" },
+          { "text": "请再详细说明一下您的意思。", "intent": "uncertain/repair" },
+          { "text": "我不是这里的人。", "intent": "risky/weird" }
+        ]
+      }
+    },
+    "agent": {
+      "previousResultWaitReason": "重新查看刚才的结果",
+      "previousResultRationale": "我确认刚才行动的结果，并稍等片刻。",
+      "heardUtterance": "我明白您说的内容。我会把自己亲自确认的事另外记清楚。",
+      "talkUtterance": "可以聊一会儿吗？我想核对一下我们各自确认到的情况。",
+      "talkRationale": "我与身边的居民直接交谈。",
+      "lookRationale": "我先查看眼前可见的物品。",
+      "doneRationale": "现在没有可做的有效行动，因此我停下来。",
+      "observeUtterance": "我会观察。"
+    }
+  },
+  "fr-FR": {
+    "hesitationMarker": "(réponse tardive)",
+    "whyLines": {
+      "local_routine_mismatch": "Cette réponse ne correspondait pas à la procédure que je cherchais à vérifier ici.",
+      "dream_language_leak": "Cette réponse contenait une expression inhabituelle qui semblait désigner quelque chose au-delà de cet endroit.",
+      "memory_gap_admission": "Dire que votre mémoire est vide laisse un point à éclaircir.",
+      "role_script_break": "Ce n'est pas une réponse qu'une personne d'ici donnerait normalement, alors le doute demeure.",
+      "prior_statement_contradiction": "Ce que vous avez dit plus tôt ne correspond pas à votre réponse actuelle.",
+      "authority_evasion": "Vous avez évité la question que je cherchais à vérifier, alors le doute demeure.",
+      "over_explanation": "Cette explication dépassait ce qui était nécessaire et a soulevé davantage de questions.",
+      "response_hesitation": "Le délai avant votre réponse reste un point à vérifier.",
+      "defaultSignal": "Cette réponse laisse encore des points à vérifier.",
+      "none": "Cette réponse concorde naturellement avec ce qui a été établi jusqu'ici."
+    },
+    "conversation": {
+      "studioReception": {
+        "opening": "Je peux vous aider pour l'enregistrement. Dites-moi la raison de votre venue.",
+        "followUp": "Je vais comparer votre motif avec les renseignements enregistrés. Puis-je vérifier encore un point ?",
+        "suggestedReplies": [
+          { "text": "Je viens vérifier la procédure qui m'a été indiquée.", "intent": "safe/local" },
+          { "text": "Expliquez-moi d'abord à quoi sert cet enregistrement.", "intent": "uncertain/repair" },
+          { "text": "Je ne suis pas d'ici, alors je ne sais pas vraiment.", "intent": "risky/weird" }
+        ]
+      },
+      "generic": {
+        "opening": "Un instant. La journée est mouvementée. Vous suivez bien la procédure habituelle ?",
+        "followUp": "Attendez. Je veux vérifier encore une fois ce que vous venez de dire. C'est bien comme d'habitude ?",
+        "suggestedReplies": [
+          { "text": "Oui, j'ai vérifié.", "intent": "safe/local" },
+          { "text": "Expliquez-moi un peu plus précisément ce que vous voulez dire.", "intent": "uncertain/repair" },
+          { "text": "Je ne suis pas d'ici.", "intent": "risky/weird" }
+        ]
+      }
+    },
+    "agent": {
+      "previousResultWaitReason": "réexaminer le dernier résultat",
+      "previousResultRationale": "J'examine le résultat de ma dernière action et j'attends un instant.",
+      "heardUtterance": "J'ai compris ce que vous avez dit. Je garderai séparément le souvenir de ce que j'ai vérifié moi-même.",
+      "talkUtterance": "Pouvons-nous parler un instant ? J'aimerais comparer ce que nous avons chacun vérifié.",
+      "talkRationale": "Je parle directement à la personne qui se trouve près de moi.",
+      "lookRationale": "J'examine d'abord l'objet visible.",
+      "doneRationale": "Je ne peux rien faire d'utile pour le moment, alors je m'arrête.",
+      "observeUtterance": "Je vais observer."
+    }
+  },
+  "ja-JP": {
+    "hesitationMarker": "（返答の遅れ）",
+    "whyLines": {
+      "local_routine_mismatch": "その答えは、ここで確認しようとしていた手続きと一致しませんでした。",
+      "dream_language_leak": "その言葉には、ここではない場所を指すような見慣れない表現が混じっていました。",
+      "memory_gap_admission": "記憶が抜けているという答えには、確認すべき点が残りました。",
+      "role_script_break": "ここの住民なら普通はしない答えだったため、疑問が残りました。",
+      "prior_statement_contradiction": "先ほどの話と今の答えが食い違っています。",
+      "authority_evasion": "確認しようとした質問を避けた答えだったため、疑問が残りました。",
+      "over_explanation": "必要な範囲を超えた説明が、かえって疑問を増やしました。",
+      "response_hesitation": "すぐに答えなかったことが、確認すべき点として残りました。",
+      "defaultSignal": "その答えには、さらに確認すべき点が残っています。",
+      "none": "その答えは、これまでに確認した状況と自然に一致しています。"
+    },
+    "conversation": {
+      "studioReception": {
+        "opening": "受付をお手伝いします。ここへ来た理由を教えてください。",
+        "followUp": "お話しいただいた理由を受付内容と照合します。もう一つ確認してもよろしいですか。",
+        "suggestedReplies": [
+          { "text": "案内された手続きを確認しに来ました。", "intent": "safe/local" },
+          { "text": "まず、何の受付なのか説明してください。", "intent": "uncertain/repair" },
+          { "text": "ここの者ではないので、よく分かりません。", "intent": "risky/weird" }
+        ]
+      },
+      "generic": {
+        "opening": "少しお待ちください。今日は慌ただしくて。いつもどおりで間違いありませんか。",
+        "followUp": "待ってください。今おっしゃったことをもう一度確認します。いつもと同じで間違いありませんね。",
+        "suggestedReplies": [
+          { "text": "はい、確認しました。", "intent": "safe/local" },
+          { "text": "どういう意味か、もう少し詳しく説明してください。", "intent": "uncertain/repair" },
+          { "text": "私はここの者ではありません。", "intent": "risky/weird" }
+        ]
+      }
+    },
+    "agent": {
+      "previousResultWaitReason": "直前の結果を見直す",
+      "previousResultRationale": "直前の行動結果を確認して、少し待ちます。",
+      "heardUtterance": "お話の内容は分かりました。自分で確認したことは別に覚えておきます。",
+      "talkUtterance": "少し話せますか。お互いに確認したことを照らし合わせたいです。",
+      "talkRationale": "近くにいる住民と直接話します。",
+      "lookRationale": "まず、見えている物を確認します。",
+      "doneRationale": "今できる有益な行動がないので、ここで止めます。",
+      "observeUtterance": "観察します。"
+    }
+  }
+}

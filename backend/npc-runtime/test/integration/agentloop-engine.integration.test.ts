@@ -71,6 +71,7 @@ test("a blocked provider proposal is returned to the adapter and changes the nex
 
   const result = await runBeat({
     sessionId: "test-session",
+    locale: "ko-KR",
     world: createSameOrderWorld(),
     actor: clerk(),
     policy: DEFAULT_ROLE_POLICIES.store_clerk,
@@ -97,6 +98,7 @@ test("the provider iteration budget is clamped to six attempts", async () => {
   );
   const result = await runBeat({
     sessionId: "test-session",
+    locale: "ko-KR",
     world: createSameOrderWorld(),
     actor: clerk(),
     policy: DEFAULT_ROLE_POLICIES.store_clerk,
@@ -113,6 +115,7 @@ test("an identical successful call is suppressed within the same beat", async ()
   const call: ToolCall = { tool: "look", args: { targetId: "usual_order_cue" } };
   const result = await runBeat({
     sessionId: "test-session",
+    locale: "ko-KR",
     world: createSameOrderWorld(),
     actor: clerk(),
     policy: DEFAULT_ROLE_POLICIES.store_clerk,
@@ -144,6 +147,7 @@ test("provider-proposed mutations still pass deterministic validation and ledger
   };
   const result = await runBeat({
     sessionId: "test-session",
+    locale: "ko-KR",
     world: createSameOrderWorld(),
     actor: clerk(),
     policy: DEFAULT_ROLE_POLICIES.store_clerk,

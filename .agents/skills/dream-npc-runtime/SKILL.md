@@ -1,6 +1,6 @@
 ---
 name: dream-npc-runtime
-description: Use when changing, reviewing, or diagnosing backend/npc-runtime in dream-of-one — run/session lifecycle, NPC scheduler and memory, stance/hearing judgment, records and civic ledger, provider ports/adapters/profiles, envelope schemas, fallback, or runtime tests. Triggers include "RunService", "provider profile", "adapter", "envelope", "fallback", "stance", "hearing", "ledger", "tool validation", and "run/session API". NOT for Godot scene/HUD work (dream-godot-client) or authoring Korean player-facing content (dream-content-authoring).
+description: Use when changing, reviewing, or diagnosing backend/npc-runtime in dream-of-one — run/session lifecycle, NPC scheduler and memory, stance/hearing judgment, records and civic ledger, provider ports/adapters/profiles, locale-aware envelopes, fallback, or runtime tests. Triggers include "RunService", "provider profile", "adapter", "envelope", "fallback", "stance", "hearing", "ledger", "tool validation", and "run/session API". NOT for Godot scene/HUD work (dream-godot-client) or authoring player-facing content (dream-content-authoring).
 ---
 
 # Dream of One — NPC Runtime
@@ -76,10 +76,12 @@ it.
    reads may update facts or institutional pressure; a vouch also requires
    meaningful first-hand player conversation.
 
-Player-visible text is Korean-first and passes the modern-Korean script
-check at the envelope boundary (ids and tool names exempt). Fallback lines
-must stay in-fiction — no goal strings, meta text, or English leaking into
-dialogue.
+Player-visible text is Korean-first but resolves in the run's immutable
+supported locale. Korean packets pass the modern-Korean script check at the
+envelope boundary (ids and tool names exempt); other locales keep structural
+validation without pretending a lightweight script regex can prove language
+quality. Fallback lines must stay in-fiction and use the same run locale — no
+goal strings, meta text, or cross-locale leakage into dialogue.
 
 ## Verification
 

@@ -1,15 +1,12 @@
 extends Node
 ## Localization autoload.
-## All player-facing strings are Korean, keyed by content id. Keys are
-## registered as a Godot Translation (locale "ko") so tr() resolves, and the
-## t()/all_keys() helpers back the localization smoke and the runtime/HUD.
-## See docs/tech/godot-2d-client.md (Localization) and docs/game/glossary.md.
+## Registers the retained Korean harness strings plus M3R's registry-backed
+## locale tables with TranslationServer. The shared locale registry is also
+## the one presentation-id <-> API-locale boundary used by the HUD and run.
+## See docs/tech/godot-3d-client.md and docs/game/content-guide.md.
 
-const DEFAULT_LOCALE := "ko"
-const CONTENT_PATHS: Array[String] = [
-	"res://content/localization/m3r_ko.json",
-	"res://content/localization/m3r_en.json",
-]
+const LOCALE_REGISTRY_PATH := "res://data/supported_locales.json"
+const CONTENT_PATH_TEMPLATE := "res://content/localization/m3r_%s.json"
 
 const MESSAGES := {
 	"ko": {
@@ -226,16 +223,74 @@ const MESSAGES := {
 	}
 }
 
-var _all_keys: Array[String] = []
 var _messages: Dictionary = {}
+var _content_messages: Dictionary = {}
+var _supported_locales: Array[Dictionary] = []
+var _api_by_presentation: Dictionary = {}
+var _presentation_by_normalized: Dictionary = {}
+var _default_locale := ""
 
 func _enter_tree() -> void:
+	_load_locale_registry()
 	_messages = MESSAGES.duplicate(true)
 	_load_content_files()
 	_register()
 
+func _load_locale_registry() -> void:
+	_supported_locales.clear()
+	_api_by_presentation.clear()
+	_presentation_by_normalized.clear()
+	_default_locale = ""
+	var text := FileAccess.get_file_as_string(LOCALE_REGISTRY_PATH)
+	if text.is_empty():
+		push_error("Locale registry is unreadable: %s" % LOCALE_REGISTRY_PATH)
+		return
+	var parsed: Variant = JSON.parse_string(text)
+	if not parsed is Dictionary:
+		push_error("Locale registry root must be a Dictionary: %s" % LOCALE_REGISTRY_PATH)
+		return
+	var registry := parsed as Dictionary
+	var locales_value: Variant = registry.get("locales", [])
+	if not locales_value is Array:
+		push_error("Locale registry locales must be an Array: %s" % LOCALE_REGISTRY_PATH)
+		return
+	for entry_value in locales_value as Array:
+		if not entry_value is Dictionary:
+			push_error("Locale registry entries must be Dictionaries")
+			continue
+		var entry := entry_value as Dictionary
+		var presentation_id := str(entry.get("presentationId", "")).strip_edges().to_lower()
+		var api_locale_name := str(entry.get("apiLocale", "")).strip_edges()
+		var label_key := str(entry.get("labelKey", "")).strip_edges()
+		if presentation_id.is_empty() or api_locale_name.is_empty() or label_key.is_empty():
+			push_error("Locale registry entry is missing presentationId, apiLocale, or labelKey")
+			continue
+		var normalized_api := _normalize_locale_identifier(api_locale_name)
+		if (
+			_api_by_presentation.has(presentation_id)
+			or _presentation_by_normalized.has(normalized_api)
+		):
+			push_error("Locale registry contains a duplicate locale: %s" % presentation_id)
+			continue
+		var canonical := {
+			"presentationId": presentation_id,
+			"apiLocale": api_locale_name,
+			"labelKey": label_key,
+		}
+		_supported_locales.append(canonical)
+		_api_by_presentation[presentation_id] = api_locale_name
+		_presentation_by_normalized[presentation_id] = presentation_id
+		_presentation_by_normalized[normalized_api] = presentation_id
+	_default_locale = presentation_locale(str(registry.get("defaultPresentationId", "")))
+	if _default_locale.is_empty() and not _supported_locales.is_empty():
+		_default_locale = str(_supported_locales[0].get("presentationId", ""))
+		push_error("Locale registry defaultPresentationId is invalid")
+
 func _load_content_files() -> void:
-	for path in CONTENT_PATHS:
+	_content_messages.clear()
+	for locale_entry in _supported_locales:
+		var expected_locale := str(locale_entry.get("presentationId", ""))
+		var path := CONTENT_PATH_TEMPLATE % expected_locale
 		var text := FileAccess.get_file_as_string(path)
 		if text.is_empty():
 			push_error("Localization content file is unreadable: %s" % path)
@@ -245,11 +300,18 @@ func _load_content_files() -> void:
 			push_error("Localization content root must be a Dictionary: %s" % path)
 			continue
 		for locale_value in (parsed as Dictionary).keys():
-			var locale_name := str(locale_value)
+			var locale_name := presentation_locale(str(locale_value))
+			if locale_name != expected_locale:
+				push_error(
+					"Localization file must contain only its registry locale: %s:%s"
+					% [path, str(locale_value)]
+				)
+				continue
 			var additions: Variant = (parsed as Dictionary)[locale_value]
 			if not additions is Dictionary:
 				push_error("Localization locale must map to messages: %s:%s" % [path, locale_name])
 				continue
+			_content_messages[locale_name] = (additions as Dictionary).duplicate(true)
 			if not _messages.has(locale_name):
 				_messages[locale_name] = {}
 			(_messages[locale_name] as Dictionary).merge(additions as Dictionary, true)
@@ -262,10 +324,8 @@ func _register() -> void:
 		for key in messages.keys():
 			translation.add_message(StringName(str(key)), StringName(str(messages[key])))
 		TranslationServer.add_translation(translation)
-	TranslationServer.set_locale(DEFAULT_LOCALE)
-	_all_keys.clear()
-	for key in (_messages[DEFAULT_LOCALE] as Dictionary).keys():
-		_all_keys.append(str(key))
+	if not _default_locale.is_empty():
+		TranslationServer.set_locale(_default_locale)
 
 ## Resolve a content-id key to its localized string, with optional {name} args.
 func t(key: String, args: Dictionary = {}) -> String:
@@ -274,21 +334,65 @@ func t(key: String, args: Dictionary = {}) -> String:
 		return resolved
 	return resolved.format(args)
 
-## True when a key exists in the active locale table.
-func has_key(key: String) -> bool:
-	return (_messages[DEFAULT_LOCALE] as Dictionary).has(key)
+## True when a key exists directly in one locale table (never via fallback).
+func has_key(key: String, locale_name := "") -> bool:
+	var requested := locale() if locale_name.is_empty() else presentation_locale(locale_name)
+	return _messages.has(requested) and (_messages[requested] as Dictionary).has(key)
 
-## Every content-id key (used by the localization smoke).
-func all_keys() -> Array[String]:
-	return _all_keys.duplicate()
+## Every registered key in one direct locale table. Defaults to the primary table.
+func all_keys(locale_name := "") -> Array[String]:
+	var requested := _default_locale if locale_name.is_empty() else presentation_locale(locale_name)
+	if not _messages.has(requested):
+		return []
+	return _sorted_string_keys(_messages[requested] as Dictionary)
+
+## M3R JSON keys for one locale, excluding retained Korean harness-only strings.
+func content_keys(locale_name: String) -> Array[String]:
+	var requested := presentation_locale(locale_name)
+	if not _content_messages.has(requested):
+		return []
+	return _sorted_string_keys(_content_messages[requested] as Dictionary)
+
+## A direct M3R JSON value. Missing keys return empty instead of Korean fallback.
+func content_message(locale_name: String, key: String) -> String:
+	var requested := presentation_locale(locale_name)
+	if not _content_messages.has(requested):
+		return ""
+	return str((_content_messages[requested] as Dictionary).get(key, ""))
 
 func locale() -> String:
-	return TranslationServer.get_locale().split("_")[0]
+	return presentation_locale(TranslationServer.get_locale())
 
 ## Switch the presentation locale when the requested content table exists.
 func set_locale(locale_name: String) -> bool:
-	var normalized := locale_name.strip_edges().to_lower().split("_")[0]
-	if not _messages.has(normalized):
+	var requested := presentation_locale(locale_name)
+	if requested.is_empty() or not _messages.has(requested):
 		return false
-	TranslationServer.set_locale(normalized)
+	TranslationServer.set_locale(requested)
 	return true
+
+## Registry entries in display order. Callers receive a deep copy.
+func supported_locales() -> Array[Dictionary]:
+	return _supported_locales.duplicate(true)
+
+func default_locale() -> String:
+	return _default_locale
+
+## Resolve either a presentation id or full API tag to its presentation id.
+func presentation_locale(locale_name: String) -> String:
+	return str(_presentation_by_normalized.get(_normalize_locale_identifier(locale_name), ""))
+
+## Resolve a presentation id or API tag to the registry's exact full API tag.
+func api_locale(locale_name := "") -> String:
+	var requested := locale() if locale_name.is_empty() else presentation_locale(locale_name)
+	return str(_api_by_presentation.get(requested, ""))
+
+func _normalize_locale_identifier(locale_name: String) -> String:
+	return locale_name.strip_edges().replace("_", "-").to_lower()
+
+func _sorted_string_keys(messages: Dictionary) -> Array[String]:
+	var keys: Array[String] = []
+	for key_value in messages.keys():
+		keys.append(str(key_value))
+	keys.sort()
+	return keys

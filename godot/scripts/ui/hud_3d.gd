@@ -12,7 +12,6 @@ signal conversation_end_retry_requested
 signal ambient_subtitle_started(event: Dictionary)
 
 const UI_SCALE_OPTIONS: Array[float] = [0.8, 1.0, 1.25, 1.5]
-const LANGUAGE_OPTIONS: Array[String] = ["ko", "en"]
 const TYPEWRITER_CHARACTERS_PER_SECOND := 42.0
 const AMBIENT_SUBTITLE_MIN_SECONDS := 2.4
 const AMBIENT_SUBTITLE_MAX_SECONDS := 6.0
@@ -57,6 +56,7 @@ const AMBIENT_SUBTITLE_SECONDS_PER_CHARACTER := 0.055
 @onready var _end_conversation_button: Button = %EndConversationButton
 @onready var _encountered_stance_panel: PanelContainer = $Overlay/EncounteredStancePanel
 @onready var _encountered_stance_label: Label = %EncounteredStanceLabel
+@onready var _localization: Node = get_node("/root/Localization")
 
 var _settings_visible := false
 var _conversation_visible := false
@@ -76,6 +76,8 @@ var _retry_button_mode: StringName = &"end"
 var _ambient_subtitle_queue: Array[Dictionary] = []
 var _current_ambient_subtitle: Dictionary = {}
 var _ambient_subtitle_remaining := 0.0
+var _language_options: Array[String] = []
+var _language_applies_next_run := false
 
 
 func _ready() -> void:
@@ -177,6 +179,12 @@ func set_ui_scale(value: float) -> void:
 
 func refresh_localized_text() -> void:
 	_apply_localized_text()
+
+
+func set_language_applies_next_run(value: bool) -> void:
+	_language_applies_next_run = value
+	if is_instance_valid(_language_label):
+		_refresh_language_label()
 
 
 func enqueue_ambient_subtitle(event: Dictionary, direction: StringName) -> void:
@@ -399,7 +407,10 @@ func presentation_snapshot() -> Dictionary:
 		"thinking": _conversation_busy,
 		"hesitationTimerVisible": false,
 		"uiScale": UI_SCALE_OPTIONS[_ui_scale_option.selected],
-		"locale": LANGUAGE_OPTIONS[_language_option.selected],
+		"locale": str(_localization.call("locale")),
+		"selectedLocale": _selected_language(),
+		"languageOptions": _language_options.duplicate(),
+		"languageAppliesNextRun": _language_applies_next_run,
 		"currentTurn": _current_turn.duplicate(true),
 		"encounteredStances": _encountered_stance_snapshot(),
 		"provider": _provider_meta.duplicate(true),
@@ -452,9 +463,9 @@ func _on_audio_setting_changed(_value: float) -> void:
 
 
 func _on_language_selected(index: int) -> void:
-	if index < 0 or index >= LANGUAGE_OPTIONS.size():
+	if index < 0 or index >= _language_options.size():
 		return
-	language_requested.emit(LANGUAGE_OPTIONS[index])
+	language_requested.emit(_language_options[index])
 
 
 func _on_choice_pressed(index: int) -> void:
@@ -505,7 +516,7 @@ func _apply_localized_text() -> void:
 	_ui_scale_label.text = tr(&"hud.settings.ui_scale")
 	_master_volume_label.text = tr(&"hud.settings.master_volume")
 	_sfx_volume_label.text = tr(&"hud.settings.sfx_volume")
-	_language_label.text = tr(&"hud.settings.language")
+	_refresh_language_label()
 	_refresh_thinking_label()
 	_conversation_free_input.placeholder_text = tr(&"hud.m3r.conversation.input_placeholder")
 	_conversation_submit_button.text = tr(&"hud.m3r.conversation.submit")
@@ -719,13 +730,23 @@ func _dictionary_or_empty(value: Variant) -> Dictionary:
 
 
 func _populate_language_options() -> void:
-	var selected_locale := TranslationServer.get_locale().split("_")[0]
+	var selected_locale := str(_localization.call("locale"))
+	_language_options.clear()
 	_language_option.clear()
-	for index in LANGUAGE_OPTIONS.size():
-		var locale_name := LANGUAGE_OPTIONS[index]
-		_language_option.add_item(tr("hud.language.%s" % locale_name))
-		if locale_name == selected_locale:
-			_language_option.select(index)
+	var locales_value: Variant = _localization.call("supported_locales")
+	if not locales_value is Array:
+		return
+	for entry_value in locales_value as Array:
+		if not entry_value is Dictionary:
+			continue
+		var entry := entry_value as Dictionary
+		var locale_name := str(entry.get("presentationId", ""))
+		var label_key := str(entry.get("labelKey", ""))
+		if locale_name.is_empty() or label_key.is_empty():
+			continue
+		_language_options.append(locale_name)
+		_language_option.add_item(tr(label_key))
+	_select_language(selected_locale)
 
 
 func _select_float_option(option: OptionButton, values: Array[float], target: float) -> void:
@@ -738,9 +759,24 @@ func _select_float_option(option: OptionButton, values: Array[float], target: fl
 
 
 func _select_language(locale_name: String) -> void:
-	var normalized := locale_name.to_lower().split("_")[0]
-	for index in LANGUAGE_OPTIONS.size():
-		if LANGUAGE_OPTIONS[index] == normalized:
+	var normalized := str(_localization.call("presentation_locale", locale_name))
+	for index in _language_options.size():
+		if _language_options[index] == normalized:
 			_language_option.select(index)
 			return
-	_language_option.select(0)
+	if not _language_options.is_empty():
+		_language_option.select(0)
+
+
+func _selected_language() -> String:
+	if _language_option.selected < 0 or _language_option.selected >= _language_options.size():
+		return ""
+	return _language_options[_language_option.selected]
+
+
+func _refresh_language_label() -> void:
+	_language_label.text = tr(
+		&"hud.settings.language_next_run"
+		if _language_applies_next_run
+		else &"hud.settings.language"
+	)

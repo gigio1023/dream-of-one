@@ -19,18 +19,19 @@ theme = ExtResource("2_w7ihb")
 
 [node name="StartHint" type="Label" parent="Overlay" unique_id=2062677157]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(600, 40)
+custom_minimum_size = Vector2(680, 56)
 layout_mode = 0
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -300.0
+offset_left = -340.0
 offset_top = 28.0
-offset_right = 300.0
-offset_bottom = 68.0
+offset_right = 340.0
+offset_bottom = 84.0
 theme_override_font_sizes/font_size = 20
 text = "hud.m3r.start_hint"
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="Reticle" type="Label" parent="Overlay" unique_id=1701409843]
 unique_name_in_owner = true
@@ -51,15 +52,15 @@ vertical_alignment = 1
 
 [node name="PromptPanel" type="PanelContainer" parent="Overlay" unique_id=442350069]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(480, 56)
+custom_minimum_size = Vector2(560, 72)
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -240.0
-offset_top = -88.0
-offset_right = 240.0
+offset_left = -280.0
+offset_top = -104.0
+offset_right = 280.0
 offset_bottom = -32.0
 mouse_filter = 2
 
@@ -76,6 +77,7 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="AmbientSubtitlePanel" type="PanelContainer" parent="Overlay" unique_id=1128530992]
 unique_name_in_owner = true
@@ -141,18 +143,24 @@ layout_mode = 2
 theme_override_constants/separation = 11
 
 [node name="SettingsTitle" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=1749963203]
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 30
 text = "hud.settings.title"
 horizontal_alignment = 1
+autowrap_mode = 3
 
 [node name="TitleSeparator" type="HSeparator" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=493455203]
 layout_mode = 2
 
 [node name="SensitivityLabel" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=152357322]
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 18
 text = "hud.settings.look_sensitivity"
+autowrap_mode = 3
 
 [node name="SensitivitySlider" type="HSlider" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=1907032286]
 unique_name_in_owner = true
@@ -166,13 +174,19 @@ value = 0.12
 
 [node name="InvertYCheck" type="CheckButton" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=1454467187]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 text = "hud.settings.invert_y"
+autowrap_mode = 3
 
 [node name="FovLabel" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=145728742]
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 18
 text = "hud.settings.fov"
+autowrap_mode = 3
 
 [node name="FovSlider" type="HSlider" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=70903646]
 unique_name_in_owner = true
@@ -183,9 +197,12 @@ min_value = 60.0
 value = 75.0
 
 [node name="UiScaleLabel" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=1811602415]
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 18
 text = "hud.settings.ui_scale"
+autowrap_mode = 3
 
 [node name="UiScaleOption" type="OptionButton" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=1664846954]
 unique_name_in_owner = true
@@ -193,9 +210,12 @@ custom_minimum_size = Vector2(420, 36)
 layout_mode = 2
 
 [node name="MasterVolumeLabel" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=2132074860]
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 18
 text = "hud.settings.master_volume"
+autowrap_mode = 3
 
 [node name="MasterVolumeSlider" type="HSlider" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=1938455988]
 unique_name_in_owner = true
@@ -206,9 +226,12 @@ step = 0.05
 value = 0.8
 
 [node name="SfxVolumeLabel" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=418253914]
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 18
 text = "hud.settings.sfx_volume"
+autowrap_mode = 3
 
 [node name="SfxVolumeSlider" type="HSlider" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=2051936076]
 unique_name_in_owner = true
@@ -219,9 +242,12 @@ step = 0.05
 value = 0.8
 
 [node name="LanguageLabel" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=2129814183]
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 18
 text = "hud.settings.language"
+autowrap_mode = 3
 
 [node name="LanguageOption" type="OptionButton" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=299281038]
 unique_name_in_owner = true
@@ -237,6 +263,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 48)
 layout_mode = 2
 text = "hud.settings.return"
+autowrap_mode = 3
 
 [node name="ConversationShade" type="ColorRect" parent="Overlay" unique_id=1769277182]
 visible = false
@@ -247,14 +274,14 @@ anchor_bottom = 1.0
 color = Color(0.025, 0.035, 0.05, 0.72)
 
 [node name="ConversationPanel" type="PanelContainer" parent="Overlay/ConversationShade" unique_id=575960445]
-custom_minimum_size = Vector2(900, 650)
+custom_minimum_size = Vector2(900, 760)
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -450.0
-offset_top = -680.0
+offset_top = -790.0
 offset_right = 450.0
 offset_bottom = -30.0
 
@@ -269,28 +296,34 @@ theme_override_constants/margin_bottom = 24
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="ConversationHeader" type="HBoxContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=565651476]
+[node name="ConversationHeader" type="VBoxContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=565651476]
 layout_mode = 2
-theme_override_constants/separation = 18
+theme_override_constants/separation = 4
 
 [node name="ConversationSpeakerLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationHeader" unique_id=1532702043]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(820, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 30
+autowrap_mode = 3
 
 [node name="ConversationStanceLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationHeader" unique_id=1574555424]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(820, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 22
-horizontal_alignment = 2
+autowrap_mode = 3
 
 [node name="ConversationProviderLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationHeader" unique_id=493881863]
 unique_name_in_owner = true
 visible = false
+custom_minimum_size = Vector2(820, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 16
-horizontal_alignment = 2
+autowrap_mode = 3
 
 [node name="PromptScroll" type="ScrollContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=1003693884]
 custom_minimum_size = Vector2(820, 120)
@@ -325,21 +358,24 @@ theme_override_constants/separation = 8
 
 [node name="ConversationChoice1" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices" unique_id=413619225]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(820, 56)
+custom_minimum_size = Vector2(820, 64)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
 
 [node name="ConversationChoice2" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices" unique_id=444677498]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(820, 56)
+custom_minimum_size = Vector2(820, 64)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
 
 [node name="ConversationChoice3" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices" unique_id=1928375374]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(820, 56)
+custom_minimum_size = Vector2(820, 64)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
 
 [node name="ConversationInputRow" type="HBoxContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=291500317]
 layout_mode = 2
@@ -347,7 +383,7 @@ theme_override_constants/separation = 10
 
 [node name="ConversationFreeInput" type="LineEdit" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationInputRow" unique_id=540008870]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(680, 44)
+custom_minimum_size = Vector2(600, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 18
@@ -355,9 +391,10 @@ max_length = 120
 
 [node name="ConversationSubmitButton" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationInputRow" unique_id=834202607]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(130, 44)
+custom_minimum_size = Vector2(210, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
 
 [node name="ConversationStatusLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=1099542982]
 unique_name_in_owner = true
@@ -372,6 +409,7 @@ visible = false
 custom_minimum_size = Vector2(820, 48)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
 
 [node name="EncounteredStancePanel" type="PanelContainer" parent="Overlay" unique_id=1963527026]
 visible = false

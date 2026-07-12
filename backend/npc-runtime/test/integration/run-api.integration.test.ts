@@ -158,7 +158,7 @@ test("run API keeps strict request bounds and explicit error codes", async () =>
       locale: "en-US",
     });
     assert.equal(wrongLocale.status, 400);
-    assert.equal(wrongLocale.json.error, "invalid_request");
+    assert.equal(wrongLocale.json.error, "invalid_locale");
 
     const invalidInteraction = await post(base, "/v1/session/start", {
       runId: run.json.runId,

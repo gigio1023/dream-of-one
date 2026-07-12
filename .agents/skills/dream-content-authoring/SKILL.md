@@ -1,6 +1,6 @@
 ---
 name: dream-content-authoring
-description: Use when writing, editing, or reviewing dream-of-one player-facing content — Korean NPC dialogue and tone, storylets, scenario canon, suspicion why-lines, HUD strings, or KO/EN localization. Triggers include "storylet", "대사", "말투", "why-line", "이유 문장", "Korean voice", and "localization keys". NOT for engineering docs, code comments, runtime logic (dream-npc-runtime), or client presentation (dream-godot-client).
+description: Use when writing, editing, or reviewing dream-of-one player-facing content — Korean NPC dialogue and tone, storylets, scenario canon, suspicion why-lines, HUD strings, or six-locale localization. Triggers include "storylet", "대사", "말투", "why-line", "이유 문장", "Korean voice", and "localization keys". NOT for engineering docs, code comments, runtime logic (dream-npc-runtime), or client presentation (dream-godot-client).
 ---
 
 # Dream of One — Content Authoring
@@ -41,9 +41,9 @@ wording and judgment come from the selected provider. Fixed dialogue lives
 only in scripted test adapters and the line bank that feeds bounded
 fallback.
 
-Every suspicion movement needs a player-readable Korean why-line
-(이유 문장). Prompt-side content must never introduce facts absent from the
-NPC's visible context.
+Every suspicion movement needs a player-readable why-line (이유 문장) in the
+run locale; Korean remains the authored source. Prompt-side content must never
+introduce facts absent from the NPC's visible context.
 
 Owner-set never-accept failures — content and prompts actively defend
 against them: an NPC breaking the fiction (admitting it is an AI,
@@ -51,10 +51,11 @@ referencing the real world) and an NPC contradicting what it just said.
 
 ## Localization
 
-Author KO first; EN follows through the localization path. Parity is a
-release requirement, not a per-slice gate (timing: the active plan under
-`docs/plan/`). Player-facing strings live in content files and translation
-keys, not code.
+Author Korean first, then localize through the same content path into English,
+Italian, Simplified Chinese, French, and Japanese. The exact locale contract,
+parity timing, and terminology rules live in `docs/game/content-guide.md` and
+the active plan under `docs/plan/`. Player-facing strings live in content
+files and translation keys, not code.
 
 ## Verification
 

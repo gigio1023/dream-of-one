@@ -171,9 +171,11 @@ list.
 
 The target surface contains look sensitivity, invert Y, FOV, UI scale (M2
 carryover), master/SFX volume, and language (`ko/en/it/zh/fr/ja`). The landed
-selector still exposes only `ko/en`; the next locale-foundation slice makes one
-supported-locale registry feed it. No second hardcoded language list belongs
-in the HUD, and nothing else is added until live play asks for it.
+selector reads those six entries from `data/supported_locales.json`; the HUD
+does not carry a second hardcoded language list. The first run-start attempt
+locks the corresponding full API locale, while a later selector change is
+saved and labeled for the next run or restart. Nothing else is added until
+live play asks for it.
 
 ## World construction plan
 
@@ -262,15 +264,15 @@ the dev machine with all six NPC loops live.
 - **Consequence surfacing ≤1s** of its ledger event; no silent state change.
 - **Fallback honesty** — provider status badge and fallback reason surface in
   play; raw ids stay behind F3 debug.
-- **Localization target** — all player-facing strings use the existing Godot
+- **Localization path** — all player-facing strings use the existing Godot
   `TranslationServer` path. Korean is first-authored; `en/it/zh/fr/ja` use the
-  same keys and placeholder sets. The selected presentation id will map once to
+  same M3R keys and placeholder sets. The selected presentation id maps once to
   the full immutable run locale (`ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`,
-  or `ja-JP`). The
-  parity smoke will read each locale directly so Korean fallback cannot hide a
-  missing translation. The shared theme must cover Latin accents, Hangul, Han,
-  and kana, and the existing HUD must wrap long Italian/French text rather
-  than branch by locale.
+  or `ja-JP`). The parity smoke reads each JSON table directly so Korean
+  fallback cannot hide a missing translation. The current HUD uses Godot's
+  default/system font path and wraps long Italian/French text without a
+  locale-specific scene; glyph rendering and IME composition remain visual
+  and hands-on acceptance items.
 
 ## New client responsibilities (3D-specific)
 

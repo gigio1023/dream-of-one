@@ -31,9 +31,10 @@ const AMBIENT_DECISION_RETRY_SECONDS := 1.0
 var _ui_scale := DEFAULT_UI_SCALE
 var _master_volume := DEFAULT_MASTER_VOLUME
 var _sfx_volume := DEFAULT_SFX_VOLUME
-var _locale_name := "ko"
+var _locale_name := ""
 var _run_id := ""
 var _run_start_id := ""
+var _run_start_locale := ""
 var _active_session_id := ""
 var _run_snapshot: Dictionary = {}
 var _active_turn: Dictionary = {}
@@ -91,7 +92,7 @@ func _ready() -> void:
 	_ensure_sfx_bus()
 	_load_preferences()
 	if not bool(_localization.call("set_locale", _locale_name)):
-		_locale_name = "ko"
+		_locale_name = str(_localization.call("default_locale"))
 		_localization.call("set_locale", _locale_name)
 	else:
 		_locale_name = str(_localization.call("locale"))
@@ -118,6 +119,7 @@ func _ready() -> void:
 		float(_player.get("field_of_view"))
 	)
 	_hud.configure_preferences(_ui_scale, _master_volume, _sfx_volume, _locale_name)
+	_hud.set_language_applies_next_run(false)
 	_hud.set_ui_scale(_ui_scale)
 	_hud.refresh_localized_text()
 	_apply_audio_settings()
@@ -192,6 +194,10 @@ func presentation_snapshot() -> Dictionary:
 		"runWorldRevision": _run_snapshot.get("worldRevision", 0),
 		"runId": _run_id,
 		"sessionMode": _run_session.mode(),
+		"runLocale": _run_snapshot.get("locale", _run_start_locale),
+		"presentationLocale": hud_snapshot.get("locale", ""),
+		"nextRunLocale": str(_localization.call("api_locale", _locale_name)),
+		"languageAppliesNextRun": hud_snapshot.get("languageAppliesNextRun", false),
 		"transitioning": false,
 		"resolvingAnswer": _resolving_answer or _ending_conversation,
 		"currentTurn": _active_turn.duplicate(true),
@@ -274,10 +280,15 @@ func _on_audio_settings_requested(master_volume: float, sfx_volume: float) -> vo
 
 
 func _on_language_requested(locale_name: String) -> void:
-	if not bool(_localization.call("set_locale", locale_name)):
+	var requested_locale := str(_localization.call("presentation_locale", locale_name))
+	if requested_locale.is_empty():
 		return
-	_locale_name = str(_localization.call("locale"))
-	_hud.refresh_localized_text()
+	_locale_name = requested_locale
+	if _run_start_locale.is_empty():
+		if not bool(_localization.call("set_locale", _locale_name)):
+			return
+		_locale_name = str(_localization.call("locale"))
+		_hud.refresh_localized_text()
 	_hud.configure_preferences(_ui_scale, _master_volume, _sfx_volume, _locale_name)
 	_save_preferences()
 
@@ -484,16 +495,33 @@ func _ensure_run() -> bool:
 		if not _run_id.is_empty():
 			return true
 	_run_start_in_flight = true
+	if _run_start_locale.is_empty():
+		_run_start_locale = str(_localization.call("api_locale", _locale_name))
+		if _run_start_locale.is_empty():
+			_run_start_in_flight = false
+			_run_start_last_error = {
+				"error": "run_start_invalid_locale",
+				"message": "The selected presentation locale has no API locale mapping.",
+			}
+			return false
+		_hud.set_language_applies_next_run(true)
 	if _run_start_id.is_empty():
 		_run_start_id = (
 			"run-fixture-start-1"
 			if _run_session.mode() == "fixture"
 			else "godot-%d-%d" % [OS.get_process_id(), Time.get_ticks_usec()]
 		)
-	var result: Dictionary = await _run_session.start_run(_api_locale(), _run_start_id)
+	var result: Dictionary = await _run_session.start_run(_run_start_locale, _run_start_id)
 	_run_start_in_flight = false
 	if _is_error(result):
 		_run_start_last_error = result.duplicate(true)
+		return false
+	if str(result.get("locale", "")) != _run_start_locale:
+		_run_start_last_error = {
+			"error": "run_start_locale_mismatch",
+			"message": "RunService returned a different locale than the locked start locale.",
+		}
+		_run_start_halted_reason = "locale_mismatch"
 		return false
 	var town_snapshot := _town.presentation_snapshot()
 	if (
@@ -1497,10 +1525,11 @@ func _pause_safe_timer(seconds: float) -> void:
 
 
 func _api_locale() -> String:
-	# Korean is the authored M3R gameplay language in this milestone. The
-	# language setting already localizes client chrome; live conversation
-	# locale parity is scheduled for the later localization milestone.
-	return "ko-KR"
+	# The first start attempt locks this value for the run. Later language
+	# preference changes are persisted for the next run without mixing memories.
+	if not _run_start_locale.is_empty():
+		return _run_start_locale
+	return str(_localization.call("api_locale", _locale_name))
 
 
 func _is_error(result: Dictionary) -> bool:
@@ -1537,6 +1566,7 @@ func _set_bus_volume(bus_name: StringName, linear_volume: float) -> void:
 
 
 func _load_preferences() -> void:
+	_locale_name = str(_localization.call("default_locale"))
 	var config := ConfigFile.new()
 	if config.load(SETTINGS_PATH) != OK:
 		return
@@ -1556,7 +1586,7 @@ func _load_preferences() -> void:
 		0.0,
 		1.0
 	)
-	_locale_name = str(config.get_value("localization", "locale", "ko"))
+	_locale_name = str(config.get_value("localization", "locale", _locale_name))
 
 
 func _save_preferences() -> void:

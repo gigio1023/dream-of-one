@@ -1,14 +1,19 @@
 import type { z } from "zod";
 import {
   agentStepProposalJsonSchema,
-  agentStepProposalSchema,
+  agentStepProposalSchemaForLocale,
   conversationJudgmentJsonSchema,
-  conversationJudgmentSchema,
+  conversationJudgmentSchemaForLocale,
   conversationProposalJsonSchema,
-  conversationProposalSchema,
+  conversationProposalSchemaForLocale,
   mergedConversationTurnJsonSchema,
-  mergedConversationTurnSchema,
+  mergedConversationTurnSchemaForLocale,
 } from "./envelope.js";
+import {
+  providerLanguageName,
+  requireSupportedGameplayLocale,
+  supportedLocaleEntry,
+} from "../localization/supported-locales.js";
 import type {
   AgentStepProposal,
   AgentStepRequest,
@@ -39,6 +44,20 @@ Tool argument guide:
 - read_record: {recordId}
 - request: {targetActorId,action,whyLine?}
 Only use actors, objects, records, and tool names present in the observe packet.`;
+
+function localeOutputInstructions(locale: string, fields: string): string[] {
+  const supportedLocale = requireSupportedGameplayLocale(locale);
+  const instructions = [
+    `The immutable run locale is ${supportedLocale}. Write ${fields} in ${providerLanguageName(supportedLocale)}.`,
+    "Keep stable ids, intent labels, tool names, and tool argument keys unchanged.",
+  ];
+  if (supportedLocaleEntry(supportedLocale).presentationId === "ko") {
+    instructions.push(
+      "In player-visible text, do not mix Latin letters, Chinese characters, or other scripts into the Korean wording.",
+    );
+  }
+  return instructions;
+}
 
 interface SessionBudget {
   calls: number;
@@ -89,9 +108,12 @@ export class ProviderService implements NpcProposalPort {
     request: ConversationTurnRequest,
   ): Promise<ResolvedProposal<ConversationProposal>> {
     const instructions = [
-      "You are an NPC inside Dream of One, a Korean social-suspicion game.",
-      "Write in Korean. Stay in role and use only visible context.",
-      "Use natural modern Korean only in player-visible text; do not mix English, Chinese characters, or other scripts.",
+      "You are an NPC inside Dream of One, a social-suspicion game.",
+      "Stay in role and use only visible context.",
+      ...localeOutputInstructions(
+        request.locale,
+        "the NPC utterance and all three player reply suggestions",
+      ),
       "Return one NPC utterance and exactly three short player reply suggestions.",
       "The reply intent labels shape variety only; they never decide suspicion or game truth.",
       "Do not claim a verdict, hidden fact, or world mutation.",
@@ -114,7 +136,7 @@ export class ProviderService implements NpcProposalPort {
         schemaName: "npc_conversation_turn",
         jsonSchema: conversationProposalJsonSchema,
       },
-      schema: conversationProposalSchema,
+      schema: conversationProposalSchemaForLocale(request.locale),
     });
     if (resolved.ok) {
       return { proposal: resolved.value, meta: resolved.meta };
@@ -129,15 +151,15 @@ export class ProviderService implements NpcProposalPort {
     request: ConversationJudgmentRequest,
   ): Promise<ResolvedProposal<ConversationJudgment>> {
     const instructions = [
-      "You are the judging mind of one NPC inside Dream of One, a Korean social-suspicion game.",
+      "You are the judging mind of one NPC inside Dream of One, a social-suspicion game.",
       "Read the player's newest line and decide how it moves this NPC's suspicion and report pressure.",
       "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
       "Both scores use a 0..125 game scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
       "As calibration, a coherent routine answer is roughly -15..+5 suspicion and -10..+3 report; a notable mismatch is +10..30 suspicion and +5..20 report; an explicit contradiction, dream/outside claim, or local-memory gap is +30..60 suspicion and +20..50 report; several severe signals plus refusal or hostility may be +60..100 suspicion and +50..100 report.",
       "Those ranges are calibration, not a classifier: use the actual context and allow asymmetric or negative movement when warranted.",
       "List the signal labels that genuinely apply; an ordinary answer has none.",
-      "whyLine is one in-world Korean sentence the player will read as the reason suspicion moved.",
-      "Use natural modern Korean only in whyLine; do not mix English, Chinese characters, or other scripts.",
+      "whyLine is one in-world sentence the player will read as the reason suspicion moved.",
+      ...localeOutputInstructions(request.locale, "whyLine"),
       "Do not decide any verdict or session outcome.",
       "Return only JSON matching the supplied schema.",
     ].join(" ");
@@ -159,7 +181,7 @@ export class ProviderService implements NpcProposalPort {
         schemaName: "npc_conversation_judgment",
         jsonSchema: conversationJudgmentJsonSchema,
       },
-      schema: conversationJudgmentSchema,
+      schema: conversationJudgmentSchemaForLocale(request.locale),
     });
     if (resolved.ok) {
       return { proposal: resolved.value, meta: resolved.meta };
@@ -174,19 +196,22 @@ export class ProviderService implements NpcProposalPort {
     request: MergedConversationTurnRequest,
   ): Promise<ResolvedProposal<MergedConversationTurn>> {
     const instructions = [
-      "You are one NPC inside Dream of One, a Korean social-suspicion game.",
+      "You are one NPC inside Dream of One, a social-suspicion game.",
       "In one response, judge the player's newest line AND write your next spoken reply with exactly three short player reply suggestions.",
       "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
       "Both scores use a 0..125 game scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
       "As calibration, a coherent routine answer is roughly -15..+5 suspicion and -10..+3 report; a notable mismatch is +10..30 suspicion and +5..20 report; an explicit contradiction, dream/outside claim, or local-memory gap is +30..60 suspicion and +20..50 report; several severe signals plus refusal or hostility may be +60..100 suspicion and +50..100 report.",
       "Those ranges are calibration, not a classifier: use the actual context and allow asymmetric or negative movement when warranted.",
       "List the signal labels that genuinely apply; an ordinary answer has none.",
-      "whyLine is one in-world Korean sentence the player will read as the reason suspicion moved.",
+      "whyLine is one in-world sentence the player will read as the reason suspicion moved.",
       "Return stance as this NPC's coarse opinion after the exchange: oppose, uncertain, or vouch.",
       "meaningfulFirsthand is true only when this direct exchange gave the NPC substantive firsthand grounds; vouch requires it.",
-      "utterance is your next in-character Korean line after hearing the player.",
+      "utterance is your next in-character line after hearing the player.",
       "The reply intent labels shape variety only; they never decide suspicion or game truth.",
-      "Use natural modern Korean only in whyLine, utterance, and suggestion text; do not mix English, Chinese characters, or other scripts.",
+      ...localeOutputInstructions(
+        request.locale,
+        "whyLine, utterance, and all three suggestion texts",
+      ),
       "Do not decide any verdict or session outcome, and do not claim a hidden fact or world mutation.",
       "Return only JSON matching the supplied schema.",
     ].join(" ");
@@ -212,7 +237,7 @@ export class ProviderService implements NpcProposalPort {
         schemaName: "npc_merged_conversation_turn",
         jsonSchema: mergedConversationTurnJsonSchema,
       },
-      schema: mergedConversationTurnSchema,
+      schema: mergedConversationTurnSchemaForLocale(request.locale),
     });
     if (resolved.ok) {
       return { proposal: resolved.value, meta: resolved.meta };
@@ -229,7 +254,10 @@ export class ProviderService implements NpcProposalPort {
     const instructions = [
       "You choose one next action for a bounded NPC agent loop.",
       "Read the previous tool result before acting. A failed or blocked call must change the next attempt.",
-      "Write every player-visible utterance, rationale, and whyLine in natural modern Korean only; do not mix English, Chinese characters, or other scripts. Keep tool names and ids unchanged.",
+      ...localeOutputInstructions(
+        request.locale,
+        "every natural-language output field, including utterance, rationale, whyLine, and record prose",
+      ),
       "After a successful action completes the goal, return done=true on the next iteration. Never repeat an identical successful tool call.",
       "blockedSignatures contains calls already blocked or successfully completed during this beat; choose a different call or stop.",
       "The runtime validates and applies tools; never invent direct state changes or authority outcomes.",
@@ -237,7 +265,7 @@ export class ProviderService implements NpcProposalPort {
         ? [
             `This wake permits only talk_to targeting the exact actor id ${request.requiredToolCall.actorId}.`,
             request.requireUtterance
-              ? "Return one nonempty in-fiction Korean utterance with that talk_to call."
+              ? "Return one nonempty in-fiction utterance in the run locale with that talk_to call."
               : "Use that exact talk_to call if you act.",
           ]
         : []),
@@ -253,6 +281,7 @@ export class ProviderService implements NpcProposalPort {
       blockedSignatures: request.blockedSignatures,
       requiredToolCall: request.requiredToolCall ?? null,
       requireUtterance: request.requireUtterance ?? false,
+      locale: request.locale,
     });
     const resolved = await this.generateValidated({
       sessionId: request.sessionId,
@@ -263,7 +292,7 @@ export class ProviderService implements NpcProposalPort {
         schemaName: "npc_agent_step",
         jsonSchema: agentStepProposalJsonSchema,
       },
-      schema: agentStepProposalSchema,
+      schema: agentStepProposalSchemaForLocale(request.locale),
       budgetCeiling: request.budgetCeiling,
     });
     if (resolved.ok) {

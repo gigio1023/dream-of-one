@@ -41,11 +41,11 @@ game:
   Sol may run them, but they are engineering evidence only and never prove the
   LLM game experience.
 
-The currently landed live-provider smoke exercises `ko-KR`. The M3R
-locale-foundation slice must parameterize this same provider/adapter and Godot
-AI route for `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`; it must not add a
-second locale-specific smoke harness or weaken the Terra/Qwen/zero-fallback
-requirements.
+The currently landed spend-bearing live-provider smoke exercises `ko-KR`.
+M3R's final locale acceptance must parameterize this same provider/adapter and
+Godot AI route for `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`; it must
+not add a second locale-specific smoke harness or weaken the
+Terra/Qwen/zero-fallback requirements.
 
 ## Commands (engineering)
 

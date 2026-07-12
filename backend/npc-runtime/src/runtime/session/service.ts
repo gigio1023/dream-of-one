@@ -5,6 +5,11 @@ import type { ActorContextLite } from "../../agentloop/tools.js";
 import { TranscriptStore, type TranscriptEntry } from "../../agentloop/transcript.js";
 import type { NpcProposalPort, ProposalMeta, SuggestedReply } from "../../providers/ports.js";
 import { createProviderFromEnvironment } from "../../providers/registry.js";
+import { fallbackContent } from "../../localization/fallback-content.js";
+import {
+  requireSupportedGameplayLocale,
+  type GameplayLocale,
+} from "../../localization/supported-locales.js";
 import type { ConversationChoiceIntent, ConversationSuspicionSignal } from "../../contracts/types.js";
 import {
   clampConversationScore,
@@ -172,6 +177,7 @@ export class SessionError extends Error {
       | "unexpected_turn"
       | "unknown_choice"
       | "invalid_answer"
+      | "invalid_locale"
       | "storylet_not_found",
   ) {
     super(message);
@@ -181,7 +187,7 @@ export class SessionError extends Error {
 interface SessionState {
   sessionId: string;
   storylet: Storylet;
-  locale: string;
+  locale: GameplayLocale;
   world: WorldState;
   transcript: TranscriptStore;
   memory: Map<string, ActorMemory>;
@@ -260,6 +266,18 @@ export class SessionService {
 
   async start(storyletId: string, locale: string): Promise<SessionStartResult> {
     const storylet = this.getStorylet(storyletId);
+    let sessionLocale: GameplayLocale;
+    try {
+      sessionLocale = requireSupportedGameplayLocale(locale);
+    } catch {
+      throw new SessionError(`unsupported gameplay locale: ${locale}`, "invalid_locale");
+    }
+    if (storylet.locale !== sessionLocale) {
+      throw new SessionError(
+        `storylet ${storyletId} is authored for ${storylet.locale}, not ${sessionLocale}`,
+        "invalid_locale",
+      );
+    }
     const sessionId = `sess-${randomUUID()}`;
     const initialMeta: ProposalMeta = {
       profileId: this.proposalPort.profileId,
@@ -269,7 +287,7 @@ export class SessionService {
     const session: SessionState = {
       sessionId,
       storylet,
-      locale,
+      locale: sessionLocale,
       world: createSameOrderWorld(),
       transcript: new TranscriptStore(),
       memory: new Map(),
@@ -482,6 +500,7 @@ export class SessionService {
     const memory = this.memoryFor(session, pending.speakerId);
     const beatResult = await runBeat({
       sessionId,
+      locale: session.locale,
       world: session.world,
       actor,
       policy: DEFAULT_ROLE_POLICIES[actor.role],
@@ -552,6 +571,7 @@ export class SessionService {
       const actor = this.actorContext(session, actorId);
       const beatResult = await runBeat({
         sessionId,
+        locale: session.locale,
         world: session.world,
         actor,
         policy: DEFAULT_ROLE_POLICIES[actor.role],
@@ -702,7 +722,7 @@ export class SessionService {
       if (!text) throw new SessionError("free_input requires non-empty text", "invalid_answer");
       return { line: text, freeInputHash: hashText(text) };
     }
-    return { line: "(응답 지연)" };
+    return { line: fallbackContent(session.locale).hesitationMarker };
   }
 
   private projectRoute(session: SessionState): RouteId {

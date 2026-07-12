@@ -144,7 +144,7 @@ test("the model judges suspicion live; the rule classifier answers only as fallb
   assert.match(judged.proposal.whyLine, /[가-힣]/);
   assert.match(judgmentTextGen.requests[0].instructions, /0\.\.125 game scale/);
   assert.match(judgmentTextGen.requests[0].instructions, /not tiny 1\.\.5 ratings/);
-  assert.match(judgmentTextGen.requests[0].instructions, /do not mix English, Chinese characters/);
+  assert.match(judgmentTextGen.requests[0].instructions, /do not mix Latin letters, Chinese characters/);
 
   const down = new ProviderService({
     profileId: "test/judgment-down",
@@ -203,6 +203,7 @@ test("agent-step prompts keep visible language Korean and stop successful repeti
   });
   const result = await service.proposeNextStep({
     sessionId: "session-agent-language",
+    locale: "ko-KR",
     iteration: 2,
     goal: "보이는 기록을 읽고 반응한다.",
     observePacket: observePacket(),
@@ -216,11 +217,13 @@ test("agent-step prompts keep visible language Korean and stop successful repeti
   });
   assert.equal(result.meta.transport, "live");
   assert.equal(result.proposal.done, true);
-  assert.match(textGen.requests[0].instructions, /player-visible.*in natural modern Korean only/);
+  assert.match(textGen.requests[0].instructions, /run locale is ko-KR/);
+  assert.match(textGen.requests[0].instructions, /natural modern Korean/);
   assert.match(textGen.requests[0].instructions, /Never repeat an identical successful tool call/);
 
   const ambientFallback = await new RuleFallbackNpcAdapter().proposeNextStep({
     sessionId: "run-ambient-fallback",
+    locale: "ko-KR",
     iteration: 0,
     goal: "곁에 있는 주민과 직접 말한다.",
     observePacket: observePacket(),
@@ -255,6 +258,35 @@ test("mixed-script player text gets one repair before it reaches the game", asyn
   assert.equal(textGen.requests.length, 2);
   assert.equal(textGen.requests[1].purpose, "repair");
   assert.doesNotMatch(result.proposal.whyLine, /[\p{Script=Latin}\p{Script=Han}]/u);
+});
+
+test("provider prompts and validation follow a non-Korean run locale without another adapter", async () => {
+  const textGen = new FakeTextGen([
+    {
+      text: JSON.stringify({
+        suspicionDelta: -5,
+        reportDelta: 0,
+        signals: [],
+        whyLine: "That answer fits the facts established so far.",
+      }),
+    },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/english-locale",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const result = await service.judgeConversationTurn({
+    ...judgmentRequest(),
+    locale: "en-US",
+    playerLine: "I came to confirm the registration procedure.",
+  });
+  assert.equal(result.meta.transport, "live");
+  assert.equal(textGen.requests.length, 1);
+  assert.match(textGen.requests[0].instructions, /run locale is en-US/);
+  assert.match(textGen.requests[0].instructions, /natural American English/);
+  assert.doesNotMatch(textGen.requests[0].instructions, /do not mix Latin letters/);
+  assert.equal(JSON.parse(textGen.requests[0].input).locale, "en-US");
 });
 
 test("invalid provider JSON gets one bounded repair attempt", async () => {
@@ -319,6 +351,7 @@ test("missing credentials and exhausted budget use explicit fallback metadata", 
   });
   const stoppedBeforeRepair = await repairCeiling.proposeNextStep({
     sessionId: "run-ambient-repair-ceiling",
+    locale: "ko-KR",
     iteration: 0,
     goal: "곁에 있는 주민과 직접 말한다.",
     observePacket: observePacket(),
@@ -342,6 +375,7 @@ test("missing credentials and exhausted budget use explicit fallback metadata", 
   });
   const stoppedBeforeSpend = await tokenCeiling.proposeNextStep({
     sessionId: "run-ambient-token-ceiling",
+    locale: "ko-KR",
     iteration: 0,
     goal: "곁에 있는 주민과 직접 말한다.",
     observePacket: observePacket(),

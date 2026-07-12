@@ -40,6 +40,7 @@ export interface BeatResult {
 
 export interface RunBeatInput {
   sessionId: string;
+  locale: string;
   world: WorldState;
   actor: ActorContextLite;
   policy: ActorPolicy;
@@ -91,6 +92,7 @@ export async function runBeat(input: RunBeatInput): Promise<BeatResult> {
     const observedSummary = summarizeObservePacket(packet);
     const resolved = await input.proposalPort.proposeNextStep({
       sessionId: input.sessionId,
+      locale: input.locale,
       iteration,
       goal: input.goal,
       observePacket: packet,

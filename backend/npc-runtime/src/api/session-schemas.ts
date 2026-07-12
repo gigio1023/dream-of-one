@@ -204,7 +204,9 @@ const npcActionSchema = z
 // -------------------------------------------------------------------------
 
 export const startRequestSchema = z
-  .object({ storyletId: nonEmpty, locale: nonEmpty })
+  // The retained Same Order regression storylet is Korean-only. Six-locale
+  // production support belongs to the run-bound M3R request schemas.
+  .object({ storyletId: nonEmpty, locale: z.literal("ko-KR") })
   .strict();
 
 export const answerRequestSchema = z

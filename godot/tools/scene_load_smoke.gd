@@ -646,6 +646,23 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 	if not all_residents_ready:
 		_failures.append("%s did not preload conversations for all six residents" % label)
 		return
+	var locale_snapshot: Dictionary = instance.call("presentation_snapshot")
+	var locked_run_locale := str(locale_snapshot.get("runLocale", ""))
+	if locked_run_locale.is_empty() or locked_run_locale != str(instance.call("_api_locale")):
+		_failures.append("%s did not lock one API locale for the run" % label)
+	if not bool(locale_snapshot.get("languageAppliesNextRun", false)):
+		_failures.append("%s does not mark later language changes as next-run settings" % label)
+	var localization := root.get_node_or_null("Localization")
+	if (
+		localization == null
+		or str(
+			localization.call(
+				"api_locale",
+				str(locale_snapshot.get("presentationLocale", ""))
+			)
+		) != locked_run_locale
+	):
+		_failures.append("%s presentation and run locales start mixed" % label)
 	var town := instance.get_node_or_null("Town") as Town3D
 	for actor in actors:
 		var expected_connection := Callable(

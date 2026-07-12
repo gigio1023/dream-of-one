@@ -6,18 +6,34 @@ import {
 } from "../contracts/types.js";
 import { TOOL_NAMES } from "../agentloop/tools.js";
 import { RECORD_KINDS, WORLD_ROLES } from "../runtime/world/index.js";
+import { supportedLocaleEntry } from "../localization/supported-locales.js";
 
 const nonEmpty = z.string().trim().min(1);
 const forbiddenPlayerVisibleScript = /[\p{Script=Latin}\p{Script=Han}]/u;
-const modernKoreanText = nonEmpty.refine(value => !forbiddenPlayerVisibleScript.test(value), {
-  message: "player-visible text must use modern Korean without Latin or Han characters",
-});
 const intentSchema = z.enum(CONVERSATION_CHOICE_INTENTS);
-const suggestedReplySchema = z.object({ text: modernKoreanText, intent: intentSchema }).strict();
+const suggestedReplySchema = z.object({ text: nonEmpty, intent: intentSchema }).strict();
+
+function isKoreanLocale(locale: string): boolean {
+  return supportedLocaleEntry(locale).presentationId === "ko";
+}
+
+function addKoreanTextIssue(
+  context: z.RefinementCtx,
+  path: Array<string | number>,
+  text: string | undefined,
+): void {
+  if (text && forbiddenPlayerVisibleScript.test(text)) {
+    context.addIssue({
+      code: "custom",
+      path,
+      message: "player-visible text must use modern Korean without Latin or Han characters",
+    });
+  }
+}
 
 export const conversationProposalSchema = z
   .object({
-    utterance: modernKoreanText,
+    utterance: nonEmpty,
     suggestedReplies: z.tuple([
       suggestedReplySchema,
       suggestedReplySchema,
@@ -34,7 +50,7 @@ export const conversationJudgmentSchema = z
     suspicionDelta: z.number().int(),
     reportDelta: z.number().int(),
     signals: z.array(z.enum(CONVERSATION_SUSPICION_SIGNALS)),
-    whyLine: modernKoreanText,
+    whyLine: nonEmpty,
   })
   .strict();
 
@@ -43,10 +59,10 @@ export const mergedConversationTurnSchema = z
     suspicionDelta: z.number().int(),
     reportDelta: z.number().int(),
     signals: z.array(z.enum(CONVERSATION_SUSPICION_SIGNALS)),
-    whyLine: modernKoreanText,
+    whyLine: nonEmpty,
     stance: z.enum(COARSE_STANCES),
     meaningfulFirsthand: z.boolean(),
-    utterance: modernKoreanText,
+    utterance: nonEmpty,
     suggestedReplies: z.tuple([
       suggestedReplySchema,
       suggestedReplySchema,
@@ -79,20 +95,63 @@ export const agentStepProposalSchema = z
   }))
   .refine(value => value.done || value.toolCall !== undefined, {
     message: "an active agent step requires toolCall",
-  })
-  .refine(value => !value.utterance || !forbiddenPlayerVisibleScript.test(value.utterance), {
-    message: "player-visible utterance must use modern Korean without Latin or Han characters",
-  })
-  .refine(value => {
-    const args = value.toolCall?.args;
-    if (!args) return true;
-    const whyLine = typeof args.whyLine === "string" ? args.whyLine : undefined;
-    const record = args.record && typeof args.record === "object" ? args.record as Record<string, unknown> : undefined;
-    const stateBody = typeof record?.stateBody === "string" ? record.stateBody : undefined;
-    return [whyLine, stateBody].every(text => !text || !forbiddenPlayerVisibleScript.test(text));
-  }, {
-    message: "player-visible tool text must use modern Korean without Latin or Han characters",
   });
+
+export function conversationProposalSchemaForLocale(locale: string) {
+  const korean = isKoreanLocale(locale);
+  return conversationProposalSchema.superRefine((value, context) => {
+    if (!korean) return;
+    addKoreanTextIssue(context, ["utterance"], value.utterance);
+    value.suggestedReplies.forEach((reply, index) => {
+      addKoreanTextIssue(context, ["suggestedReplies", index, "text"], reply.text);
+    });
+  });
+}
+
+export function conversationJudgmentSchemaForLocale(locale: string) {
+  const korean = isKoreanLocale(locale);
+  return conversationJudgmentSchema.superRefine((value, context) => {
+    if (korean) addKoreanTextIssue(context, ["whyLine"], value.whyLine);
+  });
+}
+
+export function mergedConversationTurnSchemaForLocale(locale: string) {
+  const korean = isKoreanLocale(locale);
+  return mergedConversationTurnSchema.superRefine((value, context) => {
+    if (!korean) return;
+    addKoreanTextIssue(context, ["whyLine"], value.whyLine);
+    addKoreanTextIssue(context, ["utterance"], value.utterance);
+    value.suggestedReplies.forEach((reply, index) => {
+      addKoreanTextIssue(context, ["suggestedReplies", index, "text"], reply.text);
+    });
+  });
+}
+
+export function agentStepProposalSchemaForLocale(locale: string) {
+  const korean = isKoreanLocale(locale);
+  return agentStepProposalSchema
+    .refine(
+      value => !korean || !value.utterance || !forbiddenPlayerVisibleScript.test(value.utterance),
+      {
+        message: "player-visible utterance must use modern Korean without Latin or Han characters",
+      },
+    )
+    .refine(value => {
+      if (!korean) return true;
+      const args = value.toolCall?.args;
+      if (!args) return true;
+      const whyLine = typeof args.whyLine === "string" ? args.whyLine : undefined;
+      const record = args.record && typeof args.record === "object"
+        ? args.record as Record<string, unknown>
+        : undefined;
+      const stateBody = typeof record?.stateBody === "string" ? record.stateBody : undefined;
+      return [whyLine, stateBody].every(
+        text => !text || !forbiddenPlayerVisibleScript.test(text),
+      );
+    }, {
+      message: "player-visible tool text must use modern Korean without Latin or Han characters",
+    });
+}
 
 export const conversationProposalJsonSchema: Record<string, unknown> = {
   type: "object",

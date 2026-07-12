@@ -900,8 +900,10 @@ func _dispatch_hearing_open() -> void:
 	_hydrate_run_lifecycle(result)
 	_cache_provider_evidence(result)
 	_run_snapshot["worldRevision"] = int(result.get("worldRevision", 0))
-	_last_proposal_meta = _dictionary_or_empty(result.get("proposalMeta"))
-	_run_snapshot["lastProposalMeta"] = _last_proposal_meta.duplicate(true)
+	var opening_meta_value: Variant = result.get("proposalMeta")
+	if opening_meta_value is Dictionary:
+		_last_proposal_meta = (opening_meta_value as Dictionary).duplicate(true)
+		_run_snapshot["lastProposalMeta"] = _last_proposal_meta.duplicate(true)
 	_hearing_staging = _dictionary_or_empty(result.get("staging"))
 	await _stage_hearing(_dictionary_or_empty(result.get("nextTurn")))
 

@@ -614,7 +614,22 @@ func begin_conversation(actor: Dictionary) -> void:
 
 func show_turn(turn: Dictionary) -> bool:
 	var choices_value: Variant = turn.get("choices", [])
-	if not choices_value is Array or (choices_value as Array).size() != 3:
+	if not choices_value is Array:
+		show_conversation_error(&"hud.m3r.error.invalid_response")
+		return false
+	var choices: Array = choices_value as Array
+	var procedure := str(turn.get("procedure", "ordinary"))
+	var accepts_free_input := bool(turn.get("acceptsFreeInput", false))
+	var hearing_turn := procedure == "hearing"
+	if (
+		hearing_turn
+		and (
+			not choices.is_empty()
+			or not accepts_free_input
+			or bool(turn.get("continueConversation", true))
+			or turn.get("proposalMeta", {}) != null
+		)
+	) or (not hearing_turn and choices.size() != 3):
 		show_conversation_error(&"hud.m3r.error.invalid_response")
 		return false
 	_current_turn = turn.duplicate(true)
@@ -622,8 +637,10 @@ func show_turn(turn: Dictionary) -> bool:
 	_end_conversation_button.visible = false
 	_set_status("")
 	_typewrite_prompt(str(turn.get("prompt", "")))
-	var choices: Array = choices_value as Array
-	for index in _choice_buttons.size():
+	_choice_ids = ["", "", ""]
+	for button in _choice_buttons:
+		button.visible = false
+	for index in choices.size():
 		var choice_value: Variant = choices[index]
 		if not choice_value is Dictionary:
 			show_conversation_error(&"hud.m3r.error.invalid_response")
@@ -632,11 +649,14 @@ func show_turn(turn: Dictionary) -> bool:
 		_choice_ids[index] = str(choice.get("choiceId", ""))
 		_choice_buttons[index].text = str(choice.get("line", ""))
 		_choice_buttons[index].visible = true
-	_conversation_input_row.visible = bool(turn.get("acceptsFreeInput", false))
+	_conversation_input_row.visible = accepts_free_input
 	_conversation_free_input.clear()
 	_configure_hesitation_timer(turn)
 	set_conversation_busy(false)
-	_choice_buttons[0].grab_focus()
+	if hearing_turn:
+		_conversation_free_input.call_deferred("grab_focus")
+	else:
+		_choice_buttons[0].grab_focus()
 	return true
 
 

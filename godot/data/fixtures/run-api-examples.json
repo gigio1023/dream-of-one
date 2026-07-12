@@ -474,7 +474,7 @@
         "action": "open",
         "runId": "run-fixture-1",
         "hearingId": "hearing-fixture-1",
-        "worldRevision": 3,
+        "worldRevision": 2,
         "runStatus": "hearing_active",
         "hearingProcedure": {
           "hearingId": "hearing-fixture-1",
@@ -489,42 +489,18 @@
           "turnId": "hearing:hearing-fixture-1#0",
           "beatId": "station_hearing_opening",
           "promptId": "station_hearing_final_defense",
-          "choiceSetId": "station_hearing_opening.generated",
+          "choiceSetId": "station_hearing_final_defense.free_input",
           "speakerId": "NPC_Station_Officer",
-          "prompt": "스테이션 담당관입니다. 어떤 일로 말을 거셨습니까?",
+          "prompt": "청문회를 시작합니다. 여섯 주민의 증언을 검토하기 전에 최종 진술을 말씀해 주십시오.",
           "acceptsFreeInput": true,
           "continueConversation": false,
           "procedure": "hearing",
           "hesitationMs": 0,
-          "choices": [
-            {
-              "choiceId": "station_hearing_opening.generated.1",
-              "intent": "safe/local",
-              "line": "안내받은 절차를 확인하러 왔습니다."
-            },
-            {
-              "choiceId": "station_hearing_opening.generated.2",
-              "intent": "uncertain/repair",
-              "line": "먼저 어떤 접수인지 설명해 주세요."
-            },
-            {
-              "choiceId": "station_hearing_opening.generated.3",
-              "intent": "risky/weird",
-              "line": "여기 사람이 아니라서 잘 모르겠습니다."
-            }
-          ],
-          "proposalMeta": {
-            "profileId": "scripted/test",
-            "transport": "scripted",
-            "usedFallback": false
-          }
+          "choices": [],
+          "proposalMeta": null
         },
         "terminalResult": null,
-        "proposalMeta": {
-          "profileId": "scripted/test",
-          "transport": "scripted",
-          "usedFallback": false
-        },
+        "proposalMeta": null,
         "providerAudit": {
           "callsUsed": 0,
           "tokensUsed": 0,
@@ -540,16 +516,7 @@
           "complete": true,
           "truncated": false,
           "droppedCount": 0,
-          "entries": [
-            {
-              "seq": 1,
-              "meta": {
-                "profileId": "scripted/test",
-                "transport": "scripted",
-                "usedFallback": false
-              }
-            }
-          ]
+          "entries": []
         },
         "socialView": {
           "revision": 1,
@@ -575,15 +542,15 @@
         "hearingId": "hearing-fixture-1",
         "turnId": "hearing:hearing-fixture-1#0",
         "answer": {
-          "type": "choice",
-          "choiceId": "station_hearing_opening.generated.1"
+          "type": "free_input",
+          "text": "제 최종 진술을 제출합니다."
         }
       },
       "response": {
         "action": "answer",
         "runId": "run-fixture-1",
         "hearingId": "hearing-fixture-1",
-        "worldRevision": 4,
+        "worldRevision": 3,
         "runStatus": "terminal",
         "hearingProcedure": {
           "hearingId": "hearing-fixture-1",
@@ -596,7 +563,7 @@
           "verdict": "abnormal",
           "verdictWhyLine": "직접 대화를 근거로 한 주민 보증이 네 건에 미치지 못했습니다.",
           "officerLine": "제출된 증언과 최종 진술을 검토했습니다. 비정상으로 판정합니다.",
-          "finalDefense": "안내받은 절차를 확인하러 왔습니다.",
+          "finalDefense": "제 최종 진술을 제출합니다.",
           "evidencedVouchCount": 0,
           "residentAssessments": [
             {
@@ -648,7 +615,7 @@
             {
               "kind": "defense",
               "actorId": "player",
-              "line": "안내받은 절차를 확인하러 왔습니다.",
+              "line": "제 최종 진술을 제출합니다.",
               "sourceIds": []
             },
             {
@@ -695,7 +662,7 @@
             }
           ],
           "worldSeconds": 10,
-          "worldRevision": 4,
+          "worldRevision": 3,
           "proposalMeta": {
             "profileId": "scripted/test",
             "transport": "scripted",
@@ -730,14 +697,6 @@
                 "transport": "scripted",
                 "usedFallback": false
               }
-            },
-            {
-              "seq": 2,
-              "meta": {
-                "profileId": "scripted/test",
-                "transport": "scripted",
-                "usedFallback": false
-              }
             }
           ]
         },
@@ -755,42 +714,42 @@
             {
               "actorId": "NPC_Studio_Receptionist",
               "stance": "uncertain",
-              "stanceRevision": 4,
+              "stanceRevision": 3,
               "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
               "provenance": null
             },
             {
               "actorId": "NPC_Studio_Manager",
               "stance": "uncertain",
-              "stanceRevision": 4,
+              "stanceRevision": 3,
               "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
               "provenance": null
             },
             {
               "actorId": "NPC_Office_Worker",
               "stance": "uncertain",
-              "stanceRevision": 4,
+              "stanceRevision": 3,
               "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
               "provenance": null
             },
             {
               "actorId": "NPC_Park_Caretaker",
               "stance": "uncertain",
-              "stanceRevision": 4,
+              "stanceRevision": 3,
               "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
               "provenance": null
             },
             {
               "actorId": "NPC_Station_Officer",
               "stance": "uncertain",
-              "stanceRevision": 4,
+              "stanceRevision": 3,
               "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
               "provenance": null
             },
             {
               "actorId": "NPC_Roaming_Liaison",
               "stance": "uncertain",
-              "stanceRevision": 4,
+              "stanceRevision": 3,
               "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
               "provenance": null
             }
@@ -815,7 +774,7 @@
           "verdict": "abnormal",
           "verdictWhyLine": "직접 대화를 근거로 한 주민 보증이 네 건에 미치지 못했습니다.",
           "officerLine": "제출된 증언과 최종 진술을 검토했습니다. 비정상으로 판정합니다.",
-          "finalDefense": "안내받은 절차를 확인하러 왔습니다.",
+          "finalDefense": "제 최종 진술을 제출합니다.",
           "evidencedVouchCount": 0,
           "residentAssessments": [
             {
@@ -867,7 +826,7 @@
             {
               "kind": "defense",
               "actorId": "player",
-              "line": "안내받은 절차를 확인하러 왔습니다.",
+              "line": "제 최종 진술을 제출합니다.",
               "sourceIds": []
             },
             {
@@ -914,7 +873,7 @@
             }
           ],
           "worldSeconds": 10,
-          "worldRevision": 4,
+          "worldRevision": 3,
           "proposalMeta": {
             "profileId": "scripted/test",
             "transport": "scripted",
@@ -947,14 +906,6 @@
           "entries": [
             {
               "seq": 1,
-              "meta": {
-                "profileId": "scripted/test",
-                "transport": "scripted",
-                "usedFallback": false
-              }
-            },
-            {
-              "seq": 2,
               "meta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",

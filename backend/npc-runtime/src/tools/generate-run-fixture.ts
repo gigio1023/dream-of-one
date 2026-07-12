@@ -7,7 +7,7 @@ import { RunService, STUDIO_RECEPTIONIST_ID } from "../runtime/run-service.js";
 import type {
   RunAdvanceRequest,
   RunAdvanceResponse,
-  RunNextTurn,
+  RunGeneratedNextTurn,
   RunSnapshot,
   RunSessionAnswer,
 } from "../runtime/run-schema.js";
@@ -34,7 +34,7 @@ function sortedArrivalBatch(response: RunAdvanceResponse) {
 
 interface VariantSpec {
   variantId: string;
-  answerFor: (turn: RunNextTurn) => RunSessionAnswer;
+  answerFor: (turn: RunGeneratedNextTurn) => RunSessionAnswer;
 }
 
 async function driveHearingSequence() {
@@ -65,10 +65,7 @@ async function driveHearingSequence() {
     runId: started.runId,
     hearingId: openRequest.hearingId,
     turnId: openResponse.nextTurn.turnId,
-    answer: {
-      type: "choice" as const,
-      choiceId: openResponse.nextTurn.choices[0].choiceId,
-    },
+    answer: { type: "free_input" as const, text: "제 최종 진술을 제출합니다." },
   };
   const answerResponse = await service.hearing(answerRequest);
   if (answerResponse.action !== "answer") throw new Error("hearing fixture did not resolve");
@@ -743,7 +740,7 @@ export async function buildRunApiFixture() {
   const variants: VariantSpec[] = [
     ...([0, 1, 2] as const).map(choiceIndex => ({
       variantId: `choice_${choiceIndex + 1}`,
-      answerFor: (turn: RunNextTurn): RunSessionAnswer => ({
+      answerFor: (turn: RunGeneratedNextTurn): RunSessionAnswer => ({
         type: "choice",
         choiceId: turn.choices[choiceIndex].choiceId,
       }),

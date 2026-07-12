@@ -26,8 +26,10 @@ The domain port exposes six proposal operations plus a metadata-only audit
 snapshot. During ordinary conversation, the
 merged conversation-turn operation is the only provider work that blocks the
 player. The scheduled terminal hearing deliberately blocks once more on
-`judgeHearing`; opening lines, agent beats, and ambient work use the split
-operations without adding another ordinary-play wait.
+`judgeHearing`. Its localized procedure opening is deterministic runtime
+content and makes no provider-port call; `judgeHearing` is the hearing's one
+blocking provider resolution. Agent beats and ambient work continue to use
+the split operations without adding another ordinary-play wait.
 
 ```ts
 interface NpcProposalPort {

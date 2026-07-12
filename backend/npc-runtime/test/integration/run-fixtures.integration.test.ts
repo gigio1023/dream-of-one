@@ -39,6 +39,23 @@ test("backend and Godot run fixtures are byte-identical", () => {
   assert.equal(readFileSync(godotPath, "utf-8"), backendBody);
 });
 
+test("hearing fixture opens locally for free input and records only the final judgment", () => {
+  const opened = fixtures.endpoints.runHearingOpen.response;
+  const answered = fixtures.endpoints.runHearingAnswer.response;
+  assert.equal(opened.proposalMeta, null);
+  assert.equal(opened.nextTurn.procedure, "hearing");
+  assert.equal(opened.nextTurn.acceptsFreeInput, true);
+  assert.deepEqual(opened.nextTurn.choices, []);
+  assert.equal(opened.nextTurn.proposalMeta, null);
+  assert.deepEqual(opened.providerRuntimeTrace.entries, []);
+  assert.deepEqual(
+    answered.providerRuntimeTrace.entries.map((entry: { meta: { transport: string } }) =>
+      entry.meta.transport
+    ),
+    ["scripted"],
+  );
+});
+
 test("every run fixture packet validates against the public wire schemas", () => {
   const endpoints = fixtures.endpoints;
 

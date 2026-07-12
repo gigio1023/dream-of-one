@@ -826,7 +826,7 @@ const suggestedReplySchema = z
   })
   .strict();
 
-export const runNextTurnSchema = z
+export const runGeneratedNextTurnSchema = z
   .object({
     turnId: nonEmpty,
     beatId: nonEmpty,
@@ -836,12 +836,34 @@ export const runNextTurnSchema = z
     prompt: nonEmpty,
     acceptsFreeInput: z.boolean(),
     continueConversation: z.boolean(),
-    procedure: z.enum(["ordinary", "interrogation", "hearing"]),
+    procedure: z.enum(["ordinary", "interrogation"]),
     hesitationMs: z.number().int().nonnegative(),
     choices: z.tuple([suggestedReplySchema, suggestedReplySchema, suggestedReplySchema]),
     proposalMeta: proposalMetaSchema,
   })
   .strict();
+
+export const runHearingNextTurnSchema = z
+  .object({
+    turnId: nonEmpty,
+    beatId: nonEmpty,
+    promptId: nonEmpty,
+    choiceSetId: nonEmpty,
+    speakerId: nonEmpty,
+    prompt: nonEmpty,
+    acceptsFreeInput: z.literal(true),
+    continueConversation: z.literal(false),
+    procedure: z.literal("hearing"),
+    hesitationMs: z.literal(0),
+    choices: z.tuple([]),
+    proposalMeta: z.null(),
+  })
+  .strict();
+
+export const runNextTurnSchema = z.union([
+  runGeneratedNextTurnSchema,
+  runHearingNextTurnSchema,
+]);
 
 export const runStartRequestSchema = z
   .object({
@@ -1173,7 +1195,7 @@ export const runSessionStartResponseSchema = z
     sessionId: nonEmpty,
     worldRevision: z.number().int().positive(),
     actor: runActorSchema,
-    nextTurn: runNextTurnSchema,
+    nextTurn: runGeneratedNextTurnSchema,
     socialView: runSocialViewSchema,
     activeContact: runActiveContactSchema.nullable(),
   })
@@ -1190,11 +1212,13 @@ export const runSessionPreloadResponseSchema = z
   })
   .strict();
 
+const runFreeInputAnswerSchema = z
+  .object({ type: z.literal("free_input"), text: z.string().trim().min(1).max(120) })
+  .strict();
+
 export const runSessionAnswerSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("choice"), choiceId: nonEmpty }).strict(),
-  z
-    .object({ type: z.literal("free_input"), text: z.string().trim().min(1).max(120) })
-    .strict(),
+  runFreeInputAnswerSchema,
   z.object({ type: z.literal("hesitation") }).strict(),
 ]);
 
@@ -1209,7 +1233,7 @@ export const runHearingRequestSchema = z.discriminatedUnion("action", [
     runId: nonEmpty,
     hearingId: nonEmpty.max(128),
     turnId: nonEmpty,
-    answer: runSessionAnswerSchema,
+    answer: runFreeInputAnswerSchema,
   }).strict(),
 ]);
 
@@ -1225,9 +1249,9 @@ export const runHearingResponseSchema = z.discriminatedUnion("action", [
       playerAnchorRef: nonEmpty,
       focusAnchorRef: nonEmpty,
     }).strict(),
-    nextTurn: runNextTurnSchema,
+    nextTurn: runHearingNextTurnSchema,
     terminalResult: z.null(),
-    proposalMeta: proposalMetaSchema,
+    proposalMeta: z.null(),
     providerAudit: providerAuditSnapshotSchema,
     providerRuntimeTrace: providerRuntimeTraceSchema,
     socialView: runSocialViewSchema,
@@ -1304,7 +1328,7 @@ export const runSessionAnswerResponseSchema = z
     judgment: runJudgmentSchema,
     memoryDelta: runPlayerConversationMemorySchema,
     actor: runActorSchema,
-    nextTurn: runNextTurnSchema.nullable(),
+    nextTurn: runGeneratedNextTurnSchema.nullable(),
     proposalMeta: proposalMetaSchema,
     providerAudit: providerAuditSnapshotSchema,
     providerRuntimeTrace: providerRuntimeTraceSchema,
@@ -1369,7 +1393,7 @@ export const runSessionSnapshotResponseSchema = z
     worldRevision: z.number().int().nonnegative(),
     status: z.enum(["active", "awaiting_end", "ended"]),
     actor: runActorSchema,
-    nextTurn: runNextTurnSchema.nullable(),
+    nextTurn: runGeneratedNextTurnSchema.nullable(),
     lastJudgment: runJudgmentSchema.nullable(),
     lastMemory: runMemorySchema.nullable(),
     lastProposalMeta: proposalMetaSchema.nullable(),
@@ -1410,6 +1434,8 @@ export type RunHearingRequest = z.infer<typeof runHearingRequestSchema>;
 export type RunHearingResponse = z.infer<typeof runHearingResponseSchema>;
 export type RunEndRequest = z.infer<typeof runEndRequestSchema>;
 export type RunEndResponse = z.infer<typeof runEndResponseSchema>;
+export type RunGeneratedNextTurn = z.infer<typeof runGeneratedNextTurnSchema>;
+export type RunHearingNextTurn = z.infer<typeof runHearingNextTurnSchema>;
 export type RunNextTurn = z.infer<typeof runNextTurnSchema>;
 export type RunSessionAnswer = z.infer<typeof runSessionAnswerSchema>;
 export type RunJudgment = z.infer<typeof runJudgmentSchema>;

@@ -34,7 +34,7 @@
       }
     },
     "hearing": {
-      "opening": "청문회를 시작합니다. 여섯 주민의 증언과 최종 진술만 접수합니다.",
+      "opening": "청문회를 시작합니다. 여섯 주민의 증언을 검토하기 전에 최종 진술을 말씀해 주십시오.",
       "memoryGroundedTestimony": "직접 나눈 대화에서 이렇게 기억합니다. {memory}",
       "neverMetTestimony": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
       "missingEvidenceTestimony": "직접 대화는 했지만 제출된 기억만으로는 확인할 내용을 고를 수 없습니다.",
@@ -90,7 +90,7 @@
       }
     },
     "hearing": {
-      "opening": "The hearing is now in session. Only the six residents' testimony and the final statement will be received.",
+      "opening": "The hearing is now in session. Before I review the six residents' testimony, give your final statement.",
       "memoryGroundedTestimony": "From our direct conversation, this is what I remember: {memory}",
       "neverMetTestimony": "I have never spoken directly with this visitor, so I cannot vouch for them.",
       "missingEvidenceTestimony": "I spoke directly with this visitor, but the submitted memories contain nothing I can confirm.",
@@ -146,7 +146,7 @@
       }
     },
     "hearing": {
-      "opening": "L'udienza ha inizio. Saranno acquisite soltanto le testimonianze dei sei residenti e la dichiarazione finale.",
+      "opening": "L'udienza ha inizio. Prima di esaminare le testimonianze dei sei residenti, presenti la sua dichiarazione finale.",
       "memoryGroundedTestimony": "Del nostro colloquio diretto ricordo questo: {memory}",
       "neverMetTestimony": "Non ho mai parlato direttamente con questa persona, quindi non posso garantire per lei.",
       "missingEvidenceTestimony": "Ho parlato direttamente con questa persona, ma nei ricordi presentati non trovo nulla che possa confermare.",
@@ -202,7 +202,7 @@
       }
     },
     "hearing": {
-      "opening": "听证现在开始。只受理六名居民的证词和最终陈述。",
+      "opening": "听证现在开始。在审查六名居民的证词之前，请作最终陈述。",
       "memoryGroundedTestimony": "根据我们的直接交谈，我记得的是：{memory}",
       "neverMetTestimony": "我从未与这名来访者直接交谈，因此无法为其作保。",
       "missingEvidenceTestimony": "我与这名来访者直接交谈过，但提交的记忆中没有可供确认的内容。",
@@ -258,7 +258,7 @@
       }
     },
     "hearing": {
-      "opening": "L'audience commence. Seuls les témoignages des six résidents et la déclaration finale seront reçus.",
+      "opening": "L'audience commence. Avant d'examiner les témoignages des six résidents, présentez votre déclaration finale.",
       "memoryGroundedTestimony": "De notre entretien direct, voici ce dont je me souviens : {memory}",
       "neverMetTestimony": "Je n'ai jamais parlé directement avec cette personne et je ne peux donc pas me porter garant d'elle.",
       "missingEvidenceTestimony": "J'ai parlé directement avec cette personne, mais les souvenirs présentés ne contiennent rien que je puisse confirmer.",
@@ -314,7 +314,7 @@
       }
     },
     "hearing": {
-      "opening": "聴聞を開始します。六名の住民による証言と最終陳述のみを受理します。",
+      "opening": "聴聞を開始します。六名の住民の証言を審査する前に、最終陳述を述べてください。",
       "memoryGroundedTestimony": "直接交わした会話について、私はこう記憶しています。{memory}",
       "neverMetTestimony": "この来訪者とは直接話したことがないため、保証できません。",
       "missingEvidenceTestimony": "直接話したことはありますが、提出された記憶には確認できる内容がありません。",

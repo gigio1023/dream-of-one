@@ -1986,6 +1986,9 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		or not paused
 		or bool(player.get("_control_enabled"))
 		or str(staged_turn.get("procedure", "")) != "hearing"
+		or not bool(staged_turn.get("acceptsFreeInput", false))
+		or not (staged_turn.get("choices", []) as Array).is_empty()
+		or staged_turn.get("proposalMeta", {}) != null
 		or bool(staged_hud.get("hesitationTimerVisible", true))
 		or not expected_player_value is Vector3
 		or player.global_position.distance_to(expected_player_value as Vector3) > 0.05

@@ -83,6 +83,8 @@ import type {
   RunEncounterResponse,
   RunEndRequest,
   RunEndResponse,
+  RunGeneratedNextTurn,
+  RunHearingNextTurn,
   RunHearingProcedure,
   RunHearingRequest,
   RunHearingResponse,
@@ -90,7 +92,6 @@ import type {
   RunJudgment,
   RunMemory,
   RunMovementDelta,
-  RunNextTurn,
   RunNpcDecisionRequest,
   RunNpcDecisionResponse,
   RunNpcUtteranceMemory,
@@ -325,7 +326,7 @@ interface ConversationState {
   status: "active" | "awaiting_end" | "ended";
   dialogue: Array<{ speakerId: string; line: string }>;
   turnCount: number;
-  activeTurn: RunNextTurn | null;
+  activeTurn: RunGeneratedNextTurn | null;
   answerCache: Map<string, CachedAnswer>;
   lastJudgment: RunJudgment | null;
   lastMemory: RunMemory | null;
@@ -338,9 +339,7 @@ type HearingAnswerResponse = Extract<RunHearingResponse, { action: "answer" }>;
 
 interface HearingRuntimeState {
   hearingId: string;
-  openingRequest: ConversationTurnRequest;
-  openingResponse?: HearingOpenResponse;
-  openingInFlight?: Promise<HearingOpenResponse>;
+  openingResponse: HearingOpenResponse;
   answerSignature?: string;
   finalDefense?: string;
   answerResponse?: HearingAnswerResponse;
@@ -351,10 +350,6 @@ interface CachedRunEnd {
   endId: string;
   response: RunEndResponse;
 }
-
-type HearingOpenClaim =
-  | { response: HearingOpenResponse; inFlight?: never }
-  | { response?: never; inFlight: Promise<HearingOpenResponse> };
 
 type HearingAnswerClaim =
   | { response: HearingAnswerResponse; inFlight?: never }
@@ -857,44 +852,20 @@ export class RunService {
   private openHearing(
     request: Extract<RunHearingRequest, { action: "open" }>,
   ): Promise<HearingOpenResponse> {
-    return this.serialize(request.runId, async (): Promise<HearingOpenClaim> => {
+    return this.serialize(request.runId, async () => {
       const run = this.requireRun(request.runId);
       const existing = run.hearingRuntime;
       if (existing) {
         if (existing.hearingId !== request.hearingId) {
           throw new RunError("the run is already bound to another hearingId", "hearing_id_conflict");
         }
-        if (existing.openingResponse) return { response: clone(existing.openingResponse) };
-        if (existing.openingInFlight) return { inFlight: existing.openingInFlight };
-        if (
-          run.runStatus === "hearing_active" &&
-          run.hearingProcedure?.status === "opening"
-        ) {
-          const executing = this.executeHearingOpening(run.runId, existing);
-          existing.openingInFlight = executing;
-          void executing
-            .finally(() => {
-              if (existing.openingInFlight === executing) existing.openingInFlight = undefined;
-            })
-            .catch(() => undefined);
-          return { inFlight: executing };
-        }
+        return clone(existing.openingResponse);
       }
       if (run.runStatus !== "hearing_due") {
         throw new RunError(`hearing cannot open from ${run.runStatus}`, "hearing_not_due");
       }
 
-      const runtime: HearingRuntimeState = {
-        hearingId: request.hearingId,
-        openingRequest: this.hearingOpeningRequest(run, request.hearingId),
-      };
-      run.hearingRuntime = runtime;
       run.runStatus = "hearing_active";
-      run.hearingProcedure = {
-        hearingId: request.hearingId,
-        status: "opening",
-        turnId: null,
-      };
       run.activeContact = null;
       run.activeAmbientConversation = null;
       for (const [actorId, opening] of run.conversationOpenings) {
@@ -903,18 +874,37 @@ export class RunService {
       run.preloadRequiredEvidence.clear();
       for (const actor of run.actors.values()) actor.playerConversationReady = false;
       run.worldRevision += 1;
-
-      const executing = this.executeHearingOpening(run.runId, runtime);
-      runtime.openingInFlight = executing;
-      void executing
-        .finally(() => {
-          if (runtime.openingInFlight === executing) runtime.openingInFlight = undefined;
-        })
-        .catch(() => undefined);
-      return { inFlight: executing };
-    }).then(claim =>
-      claim.response ? clone(claim.response) : claim.inFlight.then(response => clone(response)),
-    );
+      const nextTurn = this.hearingNextTurn(run.locale, request.hearingId);
+      run.hearingProcedure = {
+        hearingId: request.hearingId,
+        status: "awaiting_defense",
+        turnId: nextTurn.turnId,
+      };
+      this.refreshProviderState(run);
+      const response: HearingOpenResponse = {
+        action: "open",
+        runId: run.runId,
+        hearingId: request.hearingId,
+        worldRevision: run.worldRevision,
+        runStatus: "hearing_active",
+        hearingProcedure: clone(run.hearingProcedure),
+        staging: {
+          playerAnchorRef: "Station.hearing_player",
+          focusAnchorRef: "Station.hearing_table",
+        },
+        nextTurn,
+        terminalResult: null,
+        proposalMeta: null,
+        providerAudit: clone(run.providerAudit),
+        providerRuntimeTrace: clone(run.providerRuntimeTrace),
+        socialView: this.publicSocialView(run),
+      };
+      run.hearingRuntime = {
+        hearingId: request.hearingId,
+        openingResponse: clone(response),
+      };
+      return clone(response);
+    });
   }
 
   private answerHearing(
@@ -945,10 +935,10 @@ export class RunService {
       if (request.turnId !== turn.turnId) {
         throw new RunError(`unexpected hearing turn: ${request.turnId}`, "unexpected_turn");
       }
-      if (request.answer.type === "hesitation") {
-        throw new RunError("hearing defense cannot use interrogation hesitation", "invalid_answer");
+      const finalDefense = request.answer.text.trim();
+      if (finalDefense.length === 0 || finalDefense.length > 120) {
+        throw new RunError("hearing defense must contain 1..120 characters", "invalid_answer");
       }
-      const finalDefense = this.resolvePlayerLine(turn, request.answer, run.locale);
       runtime.answerSignature = signature;
       runtime.finalDefense = finalDefense;
       const judgmentRequest = buildHearingJudgmentRequest({
@@ -972,77 +962,6 @@ export class RunService {
     }).then(claim =>
       claim.response ? clone(claim.response) : claim.inFlight.then(response => clone(response)),
     );
-  }
-
-  private async executeHearingOpening(
-    runId: string,
-    runtime: HearingRuntimeState,
-  ): Promise<HearingOpenResponse> {
-    await this.awaitBackgroundWorkSettled(runId);
-    let resolved: ResolvedProposal<ConversationProposal>;
-    try {
-      resolved = await this.proposalPort.proposeConversationTurn(clone(runtime.openingRequest));
-    } catch {
-      const locale = this.requireRun(runId).locale;
-      const content = fallbackContent(locale);
-      resolved = {
-        proposal: {
-          utterance: content.hearing.opening,
-          suggestedReplies: clone(content.conversation.generic.suggestedReplies),
-          continueConversation: false,
-        },
-        meta: this.goalFallbackMeta("transport_error"),
-      };
-    }
-
-    return this.serialize(runId, async () => {
-      const run = this.requireRun(runId);
-      if (
-        run.hearingRuntime !== runtime ||
-        run.runStatus !== "hearing_active" ||
-        run.hearingProcedure?.status !== "opening"
-      ) {
-        throw new RunError("hearing opening became stale", "run_not_active");
-      }
-      this.trackProposal(run, resolved.meta);
-      const nextTurn = this.nextTurn(
-        `hearing:${runtime.hearingId}`,
-        0,
-        "station_hearing_opening",
-        "station_hearing_final_defense",
-        STATION_OFFICER_ID,
-        { ...resolved.proposal, continueConversation: false },
-        resolved.meta,
-        "hearing",
-        0,
-      );
-      run.hearingProcedure = {
-        hearingId: runtime.hearingId,
-        status: "awaiting_defense",
-        turnId: nextTurn.turnId,
-      };
-      run.worldRevision += 1;
-      const response: HearingOpenResponse = {
-        action: "open",
-        runId: run.runId,
-        hearingId: runtime.hearingId,
-        worldRevision: run.worldRevision,
-        runStatus: "hearing_active",
-        hearingProcedure: clone(run.hearingProcedure),
-        staging: {
-          playerAnchorRef: "Station.hearing_player",
-          focusAnchorRef: "Station.hearing_table",
-        },
-        nextTurn,
-        terminalResult: null,
-        proposalMeta: clone(resolved.meta),
-        providerAudit: clone(run.providerAudit),
-        providerRuntimeTrace: clone(run.providerRuntimeTrace),
-        socialView: this.publicSocialView(run),
-      };
-      runtime.openingResponse = clone(response);
-      return response;
-    });
   }
 
   private async executeHearingJudgment(
@@ -4713,32 +4632,6 @@ export class RunService {
     };
   }
 
-  private hearingOpeningRequest(run: RunState, hearingId: string): ConversationTurnRequest {
-    const officer = this.requireActor(run, STATION_OFFICER_ID);
-    return {
-      sessionId: run.runId,
-      locale: run.locale,
-      beatId: `station_hearing:${hearingId}`,
-      actorId: officer.actorId,
-      objective:
-        "Open the final Station hearing and ask the player for one final defense. Do not decide the verdict yet.",
-      sceneFacts: [
-        "The run clock has reached the authored Station hearing boundary.",
-        "All six residents, run-owned memories, records, and ledger events will be judged only after the player's defense.",
-        "This opening must ask for a defense without inventing evidence or announcing a result.",
-      ],
-      observePacket: this.runObservePacket(
-        run,
-        officer,
-        [...run.actors.keys()].filter(actorId => actorId !== officer.actorId),
-        ["Open the final hearing and request the player's defense."],
-        [],
-        run.spatialFacts?.actors.get(officer.actorId),
-      ),
-      conversationHistory: [],
-    };
-  }
-
   private fallbackHearingJudgment(request: HearingJudgmentRequest): HearingJudgment {
     const content = fallbackContent(request.locale);
     const assessments = request.residents.map(resident => {
@@ -5548,16 +5441,16 @@ export class RunService {
     proposal: {
       utterance: string;
       suggestedReplies: readonly [
-        { text: string; intent: RunNextTurn["choices"][number]["intent"] },
-        { text: string; intent: RunNextTurn["choices"][number]["intent"] },
-        { text: string; intent: RunNextTurn["choices"][number]["intent"] },
+        { text: string; intent: RunGeneratedNextTurn["choices"][number]["intent"] },
+        { text: string; intent: RunGeneratedNextTurn["choices"][number]["intent"] },
+        { text: string; intent: RunGeneratedNextTurn["choices"][number]["intent"] },
       ];
       continueConversation: boolean;
     },
     proposalMeta: ProposalMeta,
-    procedure: RunNextTurn["procedure"] = "ordinary",
+    procedure: RunGeneratedNextTurn["procedure"] = "ordinary",
     hesitationMs = 0,
-  ): RunNextTurn {
+  ): RunGeneratedNextTurn {
     const choiceSetId = `${beatId}.generated`;
     return {
       turnId: `${sessionId}#${turnIndex}`,
@@ -5574,13 +5467,30 @@ export class RunService {
         choiceId: `${choiceSetId}.${index + 1}`,
         intent: reply.intent,
         line: reply.text,
-      })) as RunNextTurn["choices"],
+      })) as RunGeneratedNextTurn["choices"],
       proposalMeta: clone(proposalMeta),
     };
   }
 
+  private hearingNextTurn(locale: GameplayLocale, hearingId: string): RunHearingNextTurn {
+    return {
+      turnId: `hearing:${hearingId}#0`,
+      beatId: "station_hearing_opening",
+      promptId: "station_hearing_final_defense",
+      choiceSetId: "station_hearing_final_defense.free_input",
+      speakerId: STATION_OFFICER_ID,
+      prompt: fallbackContent(locale).hearing.opening,
+      acceptsFreeInput: true,
+      continueConversation: false,
+      procedure: "hearing",
+      hesitationMs: 0,
+      choices: [],
+      proposalMeta: null,
+    };
+  }
+
   private resolvePlayerLine(
-    turn: RunNextTurn,
+    turn: RunGeneratedNextTurn,
     answer: RunSessionAnswer,
     locale: GameplayLocale,
   ): string {

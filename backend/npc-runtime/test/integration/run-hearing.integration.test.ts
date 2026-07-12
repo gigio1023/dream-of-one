@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
 import { fallbackContent } from "../../src/localization/fallback-content.js";
+import { SUPPORTED_GAMEPLAY_LOCALES } from "../../src/localization/supported-locales.js";
 import { startSessionServer } from "../../src/api/http-server.js";
 import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import { ProviderService } from "../../src/providers/service.js";
@@ -14,6 +15,10 @@ import { createStudioReceptionScriptedAdapter } from "../../src/providers/testin
 import { createSameOrderScriptedAdapter } from "../../src/providers/testing/same-order-script.js";
 import { conversationZoneFor, loadRunLayout } from "../../src/runtime/run-layout.js";
 import { RunError, RunService } from "../../src/runtime/run-service.js";
+import {
+  runGeneratedNextTurnSchema,
+  runHearingNextTurnSchema,
+} from "../../src/runtime/run-schema.js";
 import type {
   RunActorSpatialFacts,
   RunScheduleWake,
@@ -190,49 +195,41 @@ async function resolveHearing(service: RunService, runId: string, hearingId: str
   });
 }
 
-test("hearing opening provider receives the officer's current visible objects", async () => {
-  const adapter = createStudioReceptionScriptedAdapter();
-  const originalOpening = adapter.proposeConversationTurn.bind(adapter);
-  let hearingVisibleObjectIds: string[] = [];
-  adapter.proposeConversationTurn = async request => {
-    if (request.beatId.startsWith("station_hearing:")) {
-      hearingVisibleObjectIds = request.observePacket.visibleObjects.map(object => object.objectId);
-    }
-    return originalOpening(request);
-  };
-  const layout = { ...loadRunLayout(), hearingAtSeconds: 10 };
-  const service = new RunService({
-    proposalPort: adapter,
-    idFactory: deterministicIds("hearing-spatial-context"),
-    layout,
-  });
-  const started = service.start("start-hearing-spatial-context", "ko-KR");
-  const actors = spatialActors(started);
-  const officer = actors.find(actor => actor.actorId === "NPC_Station_Officer");
-  assert.ok(officer);
-  officer.visibleObjectIds = ["Prop_Park_Box"];
-  await service.advance({
-    runId: started.runId,
-    advanceId: "hearing-spatial-context-seed",
-    observedWorldRevision: started.worldRevision,
-    elapsedSeconds: 0,
-    arrivals: [],
-    spatialFacts: {
-      observedWorldRevision: started.worldRevision,
-      player: { position: [0, 0, 0], locationId: "" },
-      actors,
-    },
-  });
-  await makeDue(service, started.runId, "due-hearing-spatial-context");
-  await service.hearing({
-    action: "open",
-    runId: started.runId,
-    hearingId: "hearing-spatial-context",
-  });
-  assert.deepEqual(hearingVisibleObjectIds, ["Prop_Park_Box"]);
+test("hearing open is an immediate localized free-input procedure in all six locales", async () => {
+  for (const locale of SUPPORTED_GAMEPLAY_LOCALES) {
+    const adapter = createStudioReceptionScriptedAdapter();
+    const originalOpening = adapter.proposeConversationTurn.bind(adapter);
+    let providerOpeningCalls = 0;
+    adapter.proposeConversationTurn = async request => {
+      if (request.beatId.startsWith("station_hearing:")) providerOpeningCalls += 1;
+      return originalOpening(request);
+    };
+    const service = new RunService({
+      proposalPort: adapter,
+      idFactory: deterministicIds(`localized-hearing-${locale}`),
+      layout: { ...loadRunLayout(), hearingAtSeconds: 10 },
+    });
+    const started = service.start(`start-localized-hearing-${locale}`, locale);
+    await makeDue(service, started.runId, `due-localized-hearing-${locale}`);
+    const opened = await service.hearing({
+      action: "open",
+      runId: started.runId,
+      hearingId: `localized-hearing-${locale}`,
+    });
+    assert.equal(providerOpeningCalls, 0);
+    assert.equal(opened.nextTurn.prompt, fallbackContent(locale).hearing.opening);
+    assert.equal(opened.nextTurn.acceptsFreeInput, true);
+    assert.deepEqual(opened.nextTurn.choices, []);
+    assert.equal(opened.nextTurn.proposalMeta, null);
+    assert.equal(opened.proposalMeta, null);
+    assert.deepEqual(opened.providerAudit.resolutions, []);
+    assert.deepEqual(opened.providerRuntimeTrace.entries, []);
+    assert.equal(runHearingNextTurnSchema.safeParse(opened.nextTurn).success, true);
+    assert.equal(runGeneratedNextTurnSchema.safeParse(opened.nextTurn).success, false);
+  }
 });
 
-test("hearing due cancels a queued preload and drains active background calls before hearing transport", async () => {
+test("hearing opens before background drain and answer waits before one final judgment", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
   const originalOpening = adapter.proposeConversationTurn.bind(adapter);
   const twoEntered = deferred();
@@ -250,15 +247,18 @@ test("hearing due cancels a queued preload and drains active background calls be
       if (residentTransportCalls === 2) twoEntered.resolve();
       await releaseResidents.promise;
       activeResidentCalls -= 1;
-    } else if (request.beatId.startsWith("station_hearing:")) {
-      hearingTransportCalls += 1;
-      assert.equal(
-        activeResidentCalls,
-        0,
-        "hearing provider work starts only after active background transport drains",
-      );
     }
     return originalOpening(request);
+  };
+  const originalHearing = adapter.judgeHearing.bind(adapter);
+  adapter.judgeHearing = async request => {
+    hearingTransportCalls += 1;
+    assert.equal(
+      activeResidentCalls,
+      0,
+      "the final hearing judgment starts only after active background transport drains",
+    );
+    return originalHearing(request);
   };
   const originalNextStep = adapter.proposeNextStep.bind(adapter);
   adapter.proposeNextStep = async request => {
@@ -300,16 +300,26 @@ test("hearing due cancels a queued preload and drains active background calls be
   });
   await makeDue(service, started.runId, "due-hearing-background-drain");
 
-  const opening = service.hearing({
+  const opened = await service.hearing({
     action: "open",
     runId: started.runId,
     hearingId: "hearing-background-drain",
   });
+  assert.equal(opened.action, "open");
+  assert.equal(hearingTransportCalls, 0, "opening is local and does not wait on provider work");
+  const answer = service.hearing({
+    action: "answer",
+    runId: started.runId,
+    hearingId: "hearing-background-drain",
+    turnId: opened.nextTurn.turnId,
+    answer: { type: "free_input", text: "최종 진술입니다." },
+  });
   await Promise.resolve();
-  assert.equal(hearingTransportCalls, 0, "hearing must wait while background calls remain active");
+  assert.equal(hearingTransportCalls, 0, "final judgment waits while background calls remain active");
   releaseResidents.resolve();
-  const opened = await opening;
+  const answered = await answer;
   assert.equal(hearingTransportCalls, 1);
+  assert.equal(answered.runStatus, "terminal");
   assert.equal(residentTransportCalls, 2);
   assert.equal(goalTransportCalls, 0);
   assert.equal(queuedResidentReachedTransport, false);
@@ -327,10 +337,76 @@ test("hearing due cancels a queued preload and drains active background calls be
     "hearing_due",
   ]);
   assert.deepEqual(
-    opened.providerRuntimeTrace.entries.map(entry => entry.meta.transport),
+    answered.providerRuntimeTrace.entries.map(entry => entry.meta.transport),
     ["scripted"],
     "cancelled/stale background work does not fabricate a fallback trace",
   );
+});
+
+test("immediate hearing open reports held live background transport accurately", async () => {
+  const entered = deferred();
+  const release = deferred();
+  const textGen: TextGenPort = {
+    adapterId: "held-hearing-audit",
+    preflight: async () => ({ available: true }),
+    generate: async () => {
+      entered.resolve();
+      await release.promise;
+      return {
+        text: JSON.stringify({
+          utterance: "방문 목적을 말씀해 주시겠습니까?",
+          suggestedReplies: [
+            { text: "업무 때문에 왔습니다.", intent: "safe/local" },
+            { text: "무엇을 확인하시는 건가요?", intent: "uncertain/repair" },
+            { text: "꿈에서 이곳을 봤습니다.", intent: "risky/weird" },
+          ],
+          continueConversation: true,
+        }),
+        usage: { inputTokens: 6, outputTokens: 4, totalTokens: 10 },
+      };
+    },
+  };
+  const layout = { ...loadRunLayout(), hearingAtSeconds: 10 };
+  const service = new RunService({
+    proposalPort: new ProviderService({
+      profileId: "test/held-hearing-audit",
+      textGen,
+      fallback: new RuleFallbackNpcAdapter(),
+    }),
+    idFactory: deterministicIds("held-hearing-audit"),
+    layout,
+  });
+  const started = service.start("start-held-hearing-audit", "ko-KR");
+  const actor = started.actors[0];
+  assert.ok(actor);
+  const zone = conversationZoneFor(layout, actor.actorId, actor.locationId);
+  assert.ok(zone);
+  const pendingPreload = service
+    .preloadConversation(started.runId, actor.actorId, zone.zoneId, "ko-KR")
+    .catch(() => undefined);
+  await entered.promise;
+  const due = await service.advance({
+    runId: started.runId,
+    advanceId: "due-held-hearing-audit",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 10,
+    arrivals: [],
+  });
+  assert.equal(due.clock.hearingDue, true);
+
+  const opened = await service.hearing({
+    action: "open",
+    runId: started.runId,
+    hearingId: "hearing-held-audit",
+  });
+  assert.equal(opened.providerAudit.complete, false);
+  assert.equal(opened.providerAudit.inFlightCalls, 1);
+  assert.deepEqual(opened.providerAudit.calls, []);
+  assert.deepEqual(opened.providerAudit.resolutions, []);
+  assert.deepEqual(opened.providerRuntimeTrace.entries, []);
+
+  release.resolve();
+  await pendingPreload;
 });
 
 test("hearing quorum uses evidenced vouches and preserves provider abnormal authority", async () => {
@@ -522,21 +598,9 @@ test("run-wide provider audit survives terminal hearing, end, and a fresh run re
     hearingId: "hearing-run-audit",
   });
   assert.equal(opened.action, "open");
-  assert.deepEqual(
-    opened.providerRuntimeTrace.entries.map(entry => entry.meta.transport),
-    ["fallback"],
-  );
-  assert.deepEqual(opened.providerAudit.resolutions.map(resolution => ({
-    purpose: resolution.purpose,
-    transport: resolution.transport,
-    fallbackReason: resolution.fallbackReason,
-    callSeqs: resolution.callSeqs,
-  })), [{
-    purpose: "conversation",
-    transport: "fallback",
-    fallbackReason: "missing_credentials",
-    callSeqs: [],
-  }]);
+  assert.equal(opened.proposalMeta, null);
+  assert.deepEqual(opened.providerRuntimeTrace.entries, []);
+  assert.deepEqual(opened.providerAudit.resolutions, []);
 
   const answered = await service.hearing({
     action: "answer",
@@ -553,11 +617,11 @@ test("run-wide provider audit survives terminal hearing, end, and a fresh run re
   assert.equal(answered.providerAudit.inFlightCalls, 0);
   assert.deepEqual(
     answered.providerAudit.resolutions.map(resolution => resolution.purpose),
-    ["conversation", "hearing_verdict"],
+    ["hearing_verdict"],
   );
   assert.deepEqual(
     answered.providerRuntimeTrace.entries.map(entry => entry.meta.transport),
-    ["fallback", "fallback"],
+    ["fallback"],
   );
   assert.ok(answered.providerAudit.resolutions.every(
     resolution =>
@@ -657,7 +721,6 @@ test("semantic-invalid live hearing remains visible as a runtime fallback", asyn
       fallbackReason: entry.meta.fallbackReason ?? null,
     })),
     [
-      { transport: "live", usedFallback: false, fallbackReason: null },
       { transport: "fallback", usedFallback: true, fallbackReason: "invalid_envelope" },
     ],
   );
@@ -665,16 +728,10 @@ test("semantic-invalid live hearing remains visible as a runtime fallback", asyn
   assert.equal(answered.proposalMeta.fallbackReason, "invalid_envelope");
 });
 
-test("runtime trace retains an early provider fallback followed by live judgment", async () => {
-  let preflightCount = 0;
+test("localized hearing opening leaves only the live judgment in the runtime trace", async () => {
   const textGen: TextGenPort = {
     adapterId: "runtime-fallback-then-live",
-    preflight: async () => {
-      preflightCount += 1;
-      return preflightCount === 1
-        ? { available: false, reason: "missing_credentials" }
-        : { available: true };
-    },
+    preflight: async () => ({ available: true }),
     generate: async request => {
       const input = JSON.parse(request.input) as {
         residents: Array<{ actorId: string }>;
@@ -723,7 +780,7 @@ test("runtime trace retains an early provider fallback followed by live judgment
   assert.equal(answered.action, "answer");
   assert.deepEqual(
     answered.providerRuntimeTrace.entries.map(entry => entry.meta.transport),
-    ["fallback", "live"],
+    ["live"],
   );
   assert.equal(answered.providerRuntimeTrace.complete, true);
   assert.equal(answered.providerRuntimeTrace.truncated, false);

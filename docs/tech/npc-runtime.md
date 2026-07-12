@@ -38,8 +38,9 @@ LOC onto the M3R target so an agent knows what to keep, trim, or build.
 > `socialView`; hidden records and pressure changes remain hidden until a valid
 > speech or record-surface encounter. The explicit run lifecycle now advances
 > through `active`, `hearing_due`, `hearing_active`, `terminal`, and `closed`.
-> A provider-generated hearing opening collects one final defense, then
-> `judgeHearing` reassesses exactly six residents from their real memories and
+> A deterministic six-locale procedure prompt collects one free-text final
+> defense without a provider wait, then `judgeHearing` reassesses exactly six
+> residents from their real memories and
 > cited run records. The runtime enforces citation ownership, never-met
 > testimony, the four-evidenced-vouch floor, terminal fallback, and idempotent
 > `/v1/run/hearing` and `/v1/run/end`. High-pressure ledger escalation may also
@@ -298,7 +299,8 @@ run lease.
 When the hearing becomes due, that background lane closes before any new
 transport may begin. Queued preload/goal work cancels as stale without a fake
 fallback trace; already active background calls and their stale cleanup drain
-before the hearing opening or verdict provider work starts.
+before the one final hearing-verdict provider call starts. The localized
+hearing opening commits immediately and never fabricates provider metadata.
 
 After grace, a 75-world-second opportunity epoch may add one special
 `move_to(player)` affordance. Candidate selection is deterministic (current

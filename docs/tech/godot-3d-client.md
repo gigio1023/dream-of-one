@@ -32,7 +32,9 @@ background preload is allowed at a time, the HTTP bridge keeps a foreground
 transport lane, and late responses rebase instead of re-enabling stale actors.
 At the hearing boundary the client stops ordinary world work, consumes the
 runtime's authored Station player/focus anchors, and reuses the conversation
-HUD for the generated final-defense choices or free text. The resulting
+HUD for one deterministic localized procedure prompt and a free-text final
+defense. The opening has no provider metadata; only the final `judgeHearing`
+call blocks the modal. The resulting
 terminal panel presents all six attributed testimonies, the officer line,
 vouch floor, cited record/ledger counts, recap entries, fallback status, and an
 idempotent restart. The client displays these facts but never computes the

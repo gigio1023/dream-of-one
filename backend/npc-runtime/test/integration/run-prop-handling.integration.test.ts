@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
+import { loadRunCast } from "../../src/runtime/run-cast.js";
 import { conversationZoneFor, loadRunLayout } from "../../src/runtime/run-layout.js";
 import {
   buildHearingJudgmentRequest,
@@ -21,6 +22,15 @@ import type {
 function deterministicIds() {
   const counts = { run: 0, sess: 0, mem: 0 };
   return (prefix: keyof typeof counts) => `${prefix}-prop-${++counts[prefix]}`;
+}
+
+function hearingPresentationContexts() {
+  const layout = loadRunLayout();
+  const cast = loadRunCast(layout);
+  return Object.fromEntries(Object.entries(cast.actors).map(([actorId, actor]) => [
+    actorId,
+    { publicIdentity: actor.publicIdentity, voice: actor.voice },
+  ]));
 }
 
 test("engine-observed prop handling creates only factual memories for visible residents", async () => {
@@ -124,6 +134,7 @@ test("engine-observed prop handling creates only factual memories for visible re
     finalDefense: "물건을 옮겼습니다.",
     institutionalPressure: snapshot.institutionalPressure,
     actors: snapshot.actors,
+    actorPresentationContexts: hearingPresentationContexts(),
     records: snapshot.records,
     ledgerEvents: snapshot.ledgerEvents,
   });
@@ -278,6 +289,7 @@ test("prop spam keeps snapshots and provider context bounded without expiring re
     finalDefense: "물건을 여러 번 옮겼습니다.",
     institutionalPressure: compacted.institutionalPressure,
     actors: compacted.actors,
+    actorPresentationContexts: hearingPresentationContexts(),
     records: compacted.records,
     ledgerEvents: compacted.ledgerEvents,
   });
@@ -391,6 +403,7 @@ test("same prop/action spam collapses to one latest fact in every provider surfa
     finalDefense: "같은 물건을 반복해서 들었습니다.",
     institutionalPressure: compacted.institutionalPressure,
     actors: compacted.actors,
+    actorPresentationContexts: hearingPresentationContexts(),
     records: compacted.records,
     ledgerEvents: compacted.ledgerEvents,
   });

@@ -12,10 +12,22 @@ const PROP_HINT: StringName = &"hud.m3r.onboarding.prop"
 const MOVE_DISTANCE_M := 2.25
 const HUD_POLL_SECONDS := 0.15
 const PROP_BIND_SECONDS := 0.5
+const PLAYER_BRIEF_DURATION_SECONDS := 14.0
+const PLAYER_BRIEF_FIELDS := [
+	"identityKey",
+	"arrivalKey",
+	"uncertaintyKey",
+]
 
 @export var player_path := NodePath("../Town/Actors/Player3D")
 @export var hud_path := NodePath("../HUD3D")
 
+@onready var _brief_panel: PanelContainer = %BriefPanel
+@onready var _brief_labels: Array[Label] = [
+	%IdentityLine,
+	%ArrivalLine,
+	%UncertaintyLine,
+]
 @onready var _hint_panel: PanelContainer = %HintPanel
 @onready var _hint_label: Label = %HintLabel
 
@@ -40,11 +52,16 @@ var _hint_remaining := -1.0
 var _suppressed := false
 var _hint_tween: Tween
 var _bound_props: Dictionary = {}
+var _player_brief_keys: Array[String] = []
+var _player_brief_lines: Array[String] = []
+var _player_brief_configured := false
+var _player_brief_remaining := 0.0
 
 
 func _ready() -> void:
 	_player = get_node_or_null(player_path) as CharacterBody3D
 	_hud = get_node_or_null(hud_path)
+	_brief_panel.visible = false
 	_hint_panel.visible = false
 	if _player != null:
 		_last_player_position = _player.global_position
@@ -74,8 +91,10 @@ func _process(delta: float) -> void:
 	# a defensive alias so a presentation-only rename cannot make hints overlap it.
 	if _modal_surface in ["settings", "log", "inspect", "outcome"]:
 		_set_suppressed(true)
+		_update_player_brief_visibility()
 		return
 	_set_suppressed(false)
+	_update_player_brief_visibility()
 	if _modal_surface == "conversation":
 		if not _dialogue_hint_shown:
 			_dialogue_hint_shown = true
@@ -83,6 +102,7 @@ func _process(delta: float) -> void:
 		_update_hint_timer(delta)
 		return
 
+	_update_player_brief_timer(delta)
 	_update_hint_timer(delta)
 	if _current_hint_key.is_empty():
 		_show_next_free_roam_hint()
@@ -103,12 +123,59 @@ func presentation_snapshot() -> Dictionary:
 		"propHandled": _prop_handled,
 		"modalSurface": _modal_surface,
 		"boundProps": _bound_props.size(),
+		"playerBrief": {
+			"configured": _player_brief_configured,
+			"visible": _brief_panel.visible,
+			"lines": _player_brief_lines.duplicate(),
+			"remainingSeconds": _player_brief_remaining,
+		},
 	}
+
+
+## Bind the public run brief by localization key. Missing or malformed legacy
+## snapshots leave the controls-only onboarding path unchanged.
+func set_player_brief(brief: Dictionary) -> void:
+	if brief.is_empty():
+		_clear_player_brief()
+		return
+	var incoming_keys: Array[String] = []
+	for field_name in PLAYER_BRIEF_FIELDS:
+		var key := str(brief.get(field_name, "")).strip_edges()
+		if key.is_empty():
+			_clear_player_brief()
+			return
+		incoming_keys.append(key)
+	if incoming_keys == _player_brief_keys and _player_brief_configured:
+		_player_brief_configured = _refresh_player_brief_text()
+		_update_player_brief_visibility()
+		return
+	_player_brief_keys = incoming_keys
+	_player_brief_lines.clear()
+	_player_brief_configured = _refresh_player_brief_text()
+	if not _player_brief_configured:
+		_player_brief_keys.clear()
+		_brief_panel.visible = false
+		return
+	_player_brief_remaining = PLAYER_BRIEF_DURATION_SECONDS
+	_update_player_brief_visibility()
+
+
+func _clear_player_brief() -> void:
+	_player_brief_keys.clear()
+	_player_brief_lines.clear()
+	_player_brief_configured = false
+	_player_brief_remaining = 0.0
+	for label in _brief_labels:
+		label.text = ""
+	_brief_panel.visible = false
 
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSLATION_CHANGED and is_instance_valid(_hint_label):
 		_refresh_current_text()
+		if not _player_brief_keys.is_empty():
+			_player_brief_configured = _refresh_player_brief_text()
+			_update_player_brief_visibility()
 
 
 func _begin_onboarding() -> void:
@@ -144,8 +211,55 @@ func _poll_hud_surface() -> void:
 	var snapshot := snapshot_value as Dictionary
 	_modal_surface = str(snapshot.get("modalSurface", "none"))
 	var ui_scale := clampf(float(snapshot.get("uiScale", 1.0)), 0.8, 1.5)
+	_brief_panel.scale = Vector2.ONE * ui_scale
+	_brief_panel.pivot_offset = Vector2(0.0, _brief_panel.size.y)
 	_hint_panel.scale = Vector2.ONE * ui_scale
 	_hint_panel.pivot_offset = Vector2(0.0, _hint_panel.size.y)
+
+
+func _refresh_player_brief_text() -> bool:
+	if _player_brief_keys.size() != PLAYER_BRIEF_FIELDS.size():
+		_player_brief_lines.clear()
+		return false
+	var localization := get_node_or_null("/root/Localization")
+	if localization == null or not localization.has_method("content_message"):
+		_player_brief_lines.clear()
+		return false
+	var locale_name := str(localization.call("locale"))
+	var resolved_lines: Array[String] = []
+	for key in _player_brief_keys:
+		var line := str(localization.call("content_message", locale_name, key)).strip_edges()
+		if line.is_empty() or line == key:
+			_player_brief_lines.clear()
+			return false
+		resolved_lines.append(line)
+	_player_brief_lines = resolved_lines
+	for index in _brief_labels.size():
+		_brief_labels[index].text = _player_brief_lines[index]
+	return true
+
+
+func _update_player_brief_visibility() -> void:
+	if not is_instance_valid(_brief_panel):
+		return
+	_brief_panel.visible = (
+		_player_brief_configured
+		and _player_brief_remaining > 0.0
+		and not _suppressed
+		and _modal_surface == "none"
+	)
+
+
+func _update_player_brief_timer(delta: float) -> void:
+	if not _player_brief_configured or _player_brief_remaining <= 0.0:
+		return
+	# Keep the run premise available while the opening movement lesson is still
+	# active. Once the player has actually moved through that lesson, leave the
+	# brief up for one final readable interval.
+	if not _move_complete:
+		return
+	_player_brief_remaining = maxf(0.0, _player_brief_remaining - delta)
+	_update_player_brief_visibility()
 
 
 func _show_next_free_roam_hint() -> void:
@@ -279,6 +393,7 @@ func _set_suppressed(value: bool) -> void:
 		return
 	_suppressed = value
 	_hint_panel.visible = not value and not _current_hint_key.is_empty()
+	_update_player_brief_visibility()
 	if not value:
 		_refresh_current_text()
 

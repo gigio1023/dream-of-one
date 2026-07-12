@@ -44,6 +44,12 @@ import {
   type RunMeetingWindow,
 } from "./run-layout.js";
 import {
+  assertRunCastMatchesLayout,
+  loadRunCast,
+  type RunCast,
+  type RunCastActor,
+} from "./run-cast.js";
+import {
   buildHearingJudgmentRequest,
   hearingContactBasisForMemories,
   validateHearingJudgment,
@@ -450,6 +456,7 @@ export interface RunServiceOptions {
   proposalPort?: NpcProposalPort;
   idFactory?: (prefix: IdPrefix) => string;
   layout?: RunLayout;
+  cast?: RunCast;
 }
 
 export type RunErrorCode =
@@ -673,11 +680,14 @@ export class RunService {
   private readonly proposalPort: NpcProposalPort;
   private readonly idFactory: (prefix: IdPrefix) => string;
   private readonly layout: RunLayout;
+  private readonly cast: RunCast;
 
   constructor(options: RunServiceOptions = {}) {
     this.proposalPort = options.proposalPort ?? createProviderFromEnvironment().proposalPort;
     this.idFactory = options.idFactory ?? (prefix => `${prefix}-${randomUUID()}`);
     this.layout = options.layout ?? loadRunLayout();
+    this.cast = options.cast ?? loadRunCast(this.layout);
+    assertRunCastMatchesLayout(this.cast, this.layout);
   }
 
   providerProfile(): string {
@@ -808,6 +818,7 @@ export class RunService {
       hearingProcedure: clone(run.hearingProcedure),
       terminalResult: clone(run.terminalResult),
       locale: run.locale,
+      playerBrief: clone(this.cast.player.briefKeys),
       worldClock: {
         elapsedSeconds: run.elapsedSeconds,
         graceEndsAtSeconds: run.graceEndsAtSeconds,
@@ -968,6 +979,19 @@ export class RunService {
         finalDefense,
         institutionalPressure: run.institutionalPressure,
         actors: [...run.actors.values()].map(actor => this.publicActor(actor)),
+        actorPresentationContexts: Object.fromEntries(
+          [...run.actors.keys()].map(actorId => {
+            const castActor = this.requireCastActor(actorId);
+            return [actorId, {
+              publicIdentity: castActor.publicIdentity,
+              voice: {
+                register: castActor.voice.register,
+                cadence: castActor.voice.cadence,
+                avoid: [...castActor.voice.avoid],
+              },
+            }];
+          }),
+        ),
         records: clone(run.records),
         ledgerEvents: clone(run.ledgerEvents),
       });
@@ -2439,14 +2463,14 @@ export class RunService {
     }
     this.refreshProviderState(run);
     const ambientReserveAvailable = this.hasAmbientReserve(run, 1);
-    const policy = DEFAULT_ROLE_POLICIES[actor.role];
+    const castActor = this.requireCastActor(actor.actorId);
     const contactOpportunity = contactCandidateActorId === actor.actorId;
     const interrogationOpportunity =
       contactOpportunity &&
       actor.actorId === STATION_OFFICER_ID &&
       this.pendingInterrogationLedgerSeq(run) !== null;
     const goal = [
-      ...policy.stableGoals,
+      ...castActor.stableGoals,
       "Advance one currently actionable role goal, then yield.",
       ...(contactOpportunity
         ? [interrogationOpportunity
@@ -4208,6 +4232,12 @@ export class RunService {
     };
   }
 
+  private requireCastActor(actorId: string): RunCastActor {
+    const actor = this.cast.actors[actorId];
+    if (!actor) throw new Error(`run cast did not hydrate actor ${actorId}`);
+    return actor;
+  }
+
   private publicSocialView(run: RunState): RunSocialView {
     return clone(run.socialView);
   }
@@ -4687,7 +4717,7 @@ export class RunService {
     procedure: "ordinary" | "interrogation" = "ordinary",
   ): string[] {
     return [
-      ...DEFAULT_ROLE_POLICIES[actor.role].stableGoals,
+      ...this.requireCastActor(actor.actorId).stableGoals,
       procedure === "interrogation"
         ? "Conduct one survivable Station interrogation about the newest pressure-bearing ledger event. Ask for clarification, never announce a verdict, and end back in the active world."
         : PLAYER_CONVERSATION_GOAL,
@@ -5374,6 +5404,7 @@ export class RunService {
     spatialFacts?: RunActorSpatialFacts,
   ): ObservePacket {
     const policy = DEFAULT_ROLE_POLICIES[actor.role];
+    const castActor = this.requireCastActor(actor.actorId);
     const visibleRecords = run.records
       .filter(record => record.visibleToActorIds.includes(actor.actorId))
       .map(record => ({
@@ -5439,9 +5470,27 @@ export class RunService {
       goals: [...goals],
       actorPolicy: {
         role: policy.role,
-        stableGoals: [...policy.stableGoals],
+        stableGoals: [...castActor.stableGoals],
         priorityShifts: [...policy.priorityShifts],
         forbiddenClaims: [...policy.forbiddenClaims],
+      },
+      actorContext: {
+        sourceLocale: this.cast.sourceLocale,
+        publicIdentity: castActor.publicIdentity,
+        personality: [...castActor.personality],
+        voice: {
+          register: castActor.voice.register,
+          cadence: castActor.voice.cadence,
+          avoid: [...castActor.voice.avoid],
+        },
+      },
+      selfContext: {
+        selfOnlyPressures: [...castActor.selfOnlyPressures],
+        knownRelationships: castActor.knownRelationships.map(relationship => ({
+          actorId: relationship.actorId,
+          facts: [...relationship.facts],
+        })),
+        residentKnownFacts: [...this.cast.player.residentKnownFacts],
       },
       actorMemory: {
         actorId: actor.actorId,

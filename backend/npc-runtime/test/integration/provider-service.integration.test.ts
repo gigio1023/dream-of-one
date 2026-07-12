@@ -535,6 +535,7 @@ test("provider service returns one live evidence-grounded hearing judgment", asy
   assert.equal(textGen.requests[0].purpose, "hearing_verdict");
   assert.equal(textGen.requests[0].schemaName, "station_hearing_judgment");
   assert.match(textGen.requests[0].instructions, /resident's own supplied memories/);
+  assert.match(textGen.requests[0].instructions, /publicIdentity and voice guide wording only/);
   assert.match(textGen.requests[0].instructions, /derive contactBasis exactly/);
   assert.match(textGen.requests[0].instructions, /at least four evidence-backed vouches/);
   assert.match(textGen.requests[0].instructions, /may still propose abnormal/);
@@ -677,6 +678,10 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
   assert.equal(textGen.requests.length, 1);
   assert.equal(textGen.requests[0].schemaName, "npc_merged_conversation_turn");
   assert.match(textGen.requests[0].instructions, /vouch requires it/);
+  assert.match(
+    textGen.requests[0].instructions,
+    /actorContext and selfContext describe only this resident's authored identity/,
+  );
   const input = JSON.parse(textGen.requests[0].input);
   assert.equal(input.stanceBefore, "uncertain");
   assert.equal(input.hasMeaningfulFirsthandConversation, false);

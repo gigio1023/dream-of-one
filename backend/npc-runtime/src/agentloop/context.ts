@@ -33,12 +33,36 @@ export interface ActorMemory {
   observedLedgerEventIds: string[];
 }
 
+/** Authored identity and voice for this exact actor, never another resident. */
+export interface ObserveActorContext {
+  sourceLocale: "ko-KR";
+  publicIdentity: string;
+  personality: string[];
+  voice: {
+    register: string;
+    cadence: string;
+    avoid: string[];
+  };
+}
+
+/** Holder-only motivation and prior relationships; never evidence about the player. */
+export interface ObserveSelfContext {
+  selfOnlyPressures: string[];
+  knownRelationships: Array<{
+    actorId: string;
+    facts: string[];
+  }>;
+  residentKnownFacts: string[];
+}
+
 export interface ObservePacket {
   actorId: string;
   role: WorldRole;
   landmarkId: string;
   goals: string[];
   actorPolicy: ActorPolicy;
+  actorContext: ObserveActorContext | null;
+  selfContext: ObserveSelfContext | null;
   actorMemory: ActorMemory;
   visibleObjects: Array<{ objectId: string; label: string; state: string }>;
   visibleRecords: Array<{
@@ -110,6 +134,9 @@ export function assembleObservePacket(world: WorldState, input: AssembleObserveI
       priorityShifts: [...input.policy.priorityShifts],
       forbiddenClaims: [...input.policy.forbiddenClaims],
     },
+    // The retained M1/M2 Session path has no M3R cast authority.
+    actorContext: null,
+    selfContext: null,
     actorMemory: {
       actorId: input.memory.actorId,
       ownActionNotes: [...input.memory.ownActionNotes],

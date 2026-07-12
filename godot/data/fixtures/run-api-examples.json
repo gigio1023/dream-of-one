@@ -17,6 +17,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
@@ -1360,6 +1365,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
@@ -2444,6 +2454,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 20,
           "graceEndsAtSeconds": 90,
@@ -5340,6 +5355,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 100,
           "graceEndsAtSeconds": 90,
@@ -7099,6 +7119,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
@@ -7711,6 +7736,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
@@ -8678,6 +8708,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
@@ -13872,6 +13907,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
@@ -14471,6 +14511,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
@@ -15328,6 +15373,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
@@ -15927,6 +15977,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
@@ -16796,6 +16851,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
@@ -17399,6 +17459,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
@@ -18258,6 +18323,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
@@ -18857,6 +18927,11 @@
         "hearingProcedure": null,
         "terminalResult": null,
         "locale": "ko-KR",
+        "playerBrief": {
+          "identityKey": "hud.m3r.player_brief.identity",
+          "arrivalKey": "hud.m3r.player_brief.arrival",
+          "uncertaintyKey": "hud.m3r.player_brief.uncertainty"
+        },
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,

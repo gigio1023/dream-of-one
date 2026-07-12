@@ -391,6 +391,22 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			_require_node(label, instance, "HUD3D")
 			_require_node(label, instance, "AudioFeedback")
 			_require_node(label, instance, "OnboardingOverlay")
+			_require_node(label, instance, "OnboardingOverlay/Overlay/BriefPanel")
+			_require_node(
+				label,
+				instance,
+				"OnboardingOverlay/Overlay/BriefPanel/BriefMargin/BriefLines/IdentityLine"
+			)
+			_require_node(
+				label,
+				instance,
+				"OnboardingOverlay/Overlay/BriefPanel/BriefMargin/BriefLines/ArrivalLine"
+			)
+			_require_node(
+				label,
+				instance,
+				"OnboardingOverlay/Overlay/BriefPanel/BriefMargin/BriefLines/UncertaintyLine"
+			)
 			_require_node(label, instance, "RunSession")
 			_require_node(label, instance, "AgentPlaytestSurface")
 			_check_audio_onboarding_contract(label, instance)
@@ -481,11 +497,60 @@ func _check_audio_onboarding_contract(label: String, instance: Node) -> void:
 	if not onboarding.has_method("presentation_snapshot"):
 		_failures.append("%s onboarding exposes no presentation snapshot" % label)
 		return
+	if not onboarding.has_method("set_player_brief"):
+		_failures.append("%s onboarding cannot bind the public run brief" % label)
 	var onboarding_snapshot: Dictionary = onboarding.call("presentation_snapshot")
 	if str(onboarding_snapshot.get("key", "")) != "hud.m3r.onboarding.move_jump":
 		_failures.append("%s onboarding does not begin with movement and jump" % label)
 	if str(onboarding_snapshot.get("text", "")).is_empty():
 		_failures.append("%s onboarding renders an empty localized hint" % label)
+	var brief_snapshot := onboarding_snapshot.get("playerBrief", {}) as Dictionary
+	if not brief_snapshot.has("configured") or not brief_snapshot.has("lines"):
+		_failures.append("%s onboarding exposes no optional player-brief state" % label)
+
+
+func _check_player_brief_contract(label: String, instance: Node) -> void:
+	var onboarding := instance.get_node_or_null("OnboardingOverlay")
+	if onboarding == null or not onboarding.has_method("presentation_snapshot"):
+		return
+	var fixture := _load_run_fixture()
+	var endpoints := fixture.get("endpoints", {}) as Dictionary
+	var run_start := endpoints.get("runStart", {}) as Dictionary
+	var run_response := run_start.get("response", {}) as Dictionary
+	var expected_value: Variant = run_response.get("playerBrief")
+	var snapshot := onboarding.call("presentation_snapshot") as Dictionary
+	var displayed := snapshot.get("playerBrief", {}) as Dictionary
+	if not expected_value is Dictionary:
+		if bool(displayed.get("configured", false)) or bool(displayed.get("visible", false)):
+			_failures.append("%s invents a player brief for a legacy snapshot" % label)
+		return
+	var expected := expected_value as Dictionary
+	var localization := root.get_node_or_null("Localization")
+	if localization == null:
+		_failures.append("%s cannot resolve the player brief without Localization" % label)
+		return
+	var locale_name := str(localization.call("locale"))
+	var expected_lines: Array[String] = []
+	for field_name in ["identityKey", "arrivalKey", "uncertaintyKey"]:
+		var key := str(expected.get(field_name, ""))
+		var line := str(localization.call("content_message", locale_name, key)).strip_edges()
+		if key.is_empty() or line.is_empty() or line == key:
+			_failures.append("%s fixture player brief has an unresolved %s" % [label, field_name])
+			return
+		expected_lines.append(line)
+	var displayed_lines: Array[String] = []
+	for line_value in displayed.get("lines", []):
+		displayed_lines.append(str(line_value))
+	if (
+		not bool(displayed.get("configured", false))
+		or not bool(displayed.get("visible", false))
+		or displayed_lines != expected_lines
+	):
+		_failures.append("%s does not visibly resolve the authoritative three-line player brief" % label)
+	for raw_key in expected.values():
+		if displayed_lines.has(str(raw_key)):
+			_failures.append("%s exposes a raw player-brief localization key" % label)
+			break
 
 func _check_social_hud_contract(label: String, hud: HUD3D) -> void:
 	if hud == null:
@@ -2156,6 +2221,7 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 		) != locked_run_locale
 	):
 		_failures.append("%s presentation and run locales start mixed" % label)
+	_check_player_brief_contract(label, instance)
 	var town := instance.get_node_or_null("Town") as Town3D
 	for actor in actors:
 		var expected_connection := Callable(

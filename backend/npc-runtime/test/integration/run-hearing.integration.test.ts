@@ -197,6 +197,35 @@ async function resolveHearing(service: RunService, runId: string, hearingId: str
   });
 }
 
+test("hearing receives public cast identity and voice without private cast context", async () => {
+  let captured: HearingJudgmentRequest | null = null;
+  const service = createService("hearing-cast-privacy", request => {
+    captured = structuredClone(request);
+    return proposalFor(request, "abnormal");
+  });
+  const started = service.start("start-hearing-cast-privacy", "ko-KR");
+  await makeDue(service, started.runId, "due-hearing-cast-privacy");
+  await resolveHearing(service, started.runId, "hearing-cast-privacy");
+
+  assert.ok(captured);
+  const residents = captured.residents;
+  assert.equal(residents.length, 6);
+  assert.equal(
+    residents.find(resident => resident.actorId === "NPC_Studio_Receptionist")?.publicIdentity,
+    "미라 — 스튜디오 접수 담당자",
+  );
+  assert.ok(residents.every(resident =>
+    resident.voice.register.length > 0 &&
+    resident.voice.cadence.length > 0 &&
+    resident.voice.avoid.length > 0
+  ));
+  const serialized = JSON.stringify(captured);
+  assert.ok(!serialized.includes("selfOnlyPressures"));
+  assert.ok(!serialized.includes("knownRelationships"));
+  assert.ok(!serialized.includes("예외를 한 번 승인"));
+  assert.ok(!serialized.includes("hud.m3r.player_brief.uncertainty"));
+});
+
 test("hearing open is an immediate localized free-input procedure in all six locales", async () => {
   for (const locale of SUPPORTED_GAMEPLAY_LOCALES) {
     const adapter = createStudioReceptionScriptedAdapter();

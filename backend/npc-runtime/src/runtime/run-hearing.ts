@@ -40,6 +40,12 @@ export interface HearingLedgerEventView {
 export interface HearingResidentView {
   actorId: string;
   role: RunActor["role"];
+  publicIdentity: string;
+  voice: {
+    register: string;
+    cadence: string;
+    avoid: string[];
+  };
   stanceBefore: CoarseStance;
   hasMeaningfulFirsthandConversation: boolean;
   memories: HearingMemoryView[];
@@ -208,15 +214,33 @@ export function buildHearingJudgmentRequest(options: {
   finalDefense: string;
   institutionalPressure: number;
   actors: RunActor[];
+  actorPresentationContexts: Record<string, {
+    publicIdentity: string;
+    voice: {
+      register: string;
+      cadence: string;
+      avoid: string[];
+    };
+  }>;
   records: RunRecord[];
   ledgerEvents: RunLedgerEvent[];
 }): HearingJudgmentRequest {
   if (options.actors.length !== 6) throw new Error("hearing requires exactly six residents");
   const residents = options.actors.map(actor => {
+    const presentation = options.actorPresentationContexts[actor.actorId];
+    if (!presentation) {
+      throw new Error(`hearing has no public cast context for ${actor.actorId}`);
+    }
     const memories = actor.memories.map(normalizeHearingMemory);
     return {
       actorId: actor.actorId,
       role: actor.role,
+      publicIdentity: presentation.publicIdentity,
+      voice: {
+        register: presentation.voice.register,
+        cadence: presentation.voice.cadence,
+        avoid: [...presentation.voice.avoid],
+      },
       stanceBefore: actor.stance,
       hasMeaningfulFirsthandConversation:
         hearingContactBasisForMemories(memories) === "meaningful_firsthand",

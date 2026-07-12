@@ -245,6 +245,34 @@ test("one meeting decision is single-flight and uses two calls with an exact gro
   assert.equal(ambientRequests[0]?.sourceSpeakerActorId, "NPC_Studio_Manager");
   assert.equal(ambientRequests[0]?.sourceUtterance, first.speechEvents[0]?.line);
   assert.equal(
+    requests[0]?.observePacket.actorContext?.publicIdentity,
+    "이보 — 스튜디오 관리자",
+  );
+  assert.ok(
+    requests[0]?.observePacket.selfContext?.selfOnlyPressures[0]?.includes("예외를 한 번 승인"),
+  );
+  assert.deepEqual(
+    requests[0]?.observePacket.selfContext?.knownRelationships.map(
+      relationship => relationship.actorId,
+    ),
+    ["NPC_Park_Caretaker"],
+  );
+  assert.equal(
+    ambientRequests[0]?.observePacket.actorContext?.publicIdentity,
+    "솔 — 공원 관리인",
+  );
+  assert.ok(
+    ambientRequests[0]?.observePacket.selfContext?.selfOnlyPressures[0]?.includes("식별하지 못했다"),
+  );
+  assert.deepEqual(
+    ambientRequests[0]?.observePacket.selfContext?.knownRelationships.map(
+      relationship => relationship.actorId,
+    ),
+    ["NPC_Studio_Manager", "NPC_Studio_Receptionist"],
+  );
+  assert.ok(!JSON.stringify(requests[0]?.observePacket).includes("현재 방문자인지는 식별"));
+  assert.ok(!JSON.stringify(ambientRequests[0]?.observePacket).includes("예외를 한 번 승인"));
+  assert.equal(
     ambientRequests[0]?.observePacket.heardSpeech.at(-1),
     `NPC_Studio_Manager: ${first.speechEvents[0]?.line}`,
   );

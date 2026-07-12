@@ -69,6 +69,8 @@ const observePacket: ObservePacket = {
     priorityShifts: [...rolePolicy.priorityShifts],
     forbiddenClaims: [...rolePolicy.forbiddenClaims],
   },
+  actorContext: null,
+  selfContext: null,
   actorMemory: {
     actorId,
     ownActionNotes: [],

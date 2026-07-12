@@ -785,6 +785,14 @@ export const runTerminalResultSchema = z
   })
   .strict();
 
+export const runPlayerBriefSchema = z
+  .object({
+    identityKey: nonEmpty,
+    arrivalKey: nonEmpty,
+    uncertaintyKey: nonEmpty,
+  })
+  .strict();
+
 export const runSnapshotSchema = z
   .object({
     runId: nonEmpty,
@@ -795,6 +803,7 @@ export const runSnapshotSchema = z
     hearingProcedure: runHearingProcedureSchema.nullable(),
     terminalResult: runTerminalResultSchema.nullable(),
     locale: gameplayLocaleSchema,
+    playerBrief: runPlayerBriefSchema,
     worldClock: z
       .object({
         elapsedSeconds: z.number().nonnegative(),

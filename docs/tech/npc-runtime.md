@@ -7,7 +7,14 @@ LOC onto the M3R target so an agent knows what to keep, trim, or build.
 > checked in alongside the retained M1 Session service. `RunService`
 > hydrates `world_layout.json` into six persistent actor workspaces, owns clock,
 > revisions, scheduler, and shared provider budget, and exposes idempotent run
-> start/advance/snapshot. All six residents use deterministic local schedule
+> start/advance/snapshot. It also joins the layout's exact actor-id set to the
+> backend-only M3R cast file. Every provider packet receives only that actor's
+> authored identity, voice, goals, self-only pressure, and holder-local
+> relationship knowledge. Those fields may motivate speech but are not
+> observations, memories, stance evidence, record sources, provenance, or
+> hearing citations. Public run snapshots expose only the player's three
+> localization keys; Godot never receives the private cast. All six residents
+> use deterministic local schedule
 > routes with staggered dwell times between provider wake-ups;
 > arrival-confirmed schedules feed real two-turn park meetings whose validated
 > listeners receive attributed memories. The second turn now merges the
@@ -57,6 +64,7 @@ src/
     schema.ts             # packet schemas (kept, extended)
     run-service.ts         # M3R: run lifecycle, clock, revision, hearing
     run-schema.ts          # M3R: RunState + run-bound request schemas
+    run-cast.ts            # strict backend-only cast/layout join
     decision-service.ts   # ordered decision core (kept)
     conversation-suspicion.ts  # signal classification (kept)
     fallback.ts           # deterministic lines (kept, feeds from line bank data)
@@ -74,7 +82,8 @@ src/
   memory/           # actor memory + run/session memory stores (kept, extended)
   api/http-server.ts# sidecar endpoints (kept, extended)
   godot/runtime-schema.ts # client-boundary schema (kept)
-data/storylets/     # compiled content from docs/scenario (v2)
+data/cast/          # M3R actor-private identity, voice, goals, pressures
+data/storylets/     # compiled regression/source content from docs/scenario
 ```
 
 ## v1 inventory — keep / trim / retire
@@ -114,9 +123,11 @@ Delete when the replacing module lands; don't leave both alive.
    supported gameplay locale.
 4. World mutations happen only through validated tool application, and each
    emits exactly one civic ledger event.
-5. NPC context assembly enforces visibility — no data an NPC couldn't know
-   ever enters its packet (this is both a fairness rule and the prompt-side
-   information boundary).
+5. NPC context assembly enforces visibility. A run packet may add only the
+   exact actor's immutable, backend-held cast context to what that actor
+   observed, remembered, heard, or read; no other resident's private context
+   enters it. Static cast context cannot itself create run memory, stance,
+   evidence, a record, provenance, or a hearing citation.
 6. The model judges what player speech means (suspicion movement, why-lines)
    within rule-enforced validity: clamped deltas, visibility-checked context,
    and a guaranteed session ending

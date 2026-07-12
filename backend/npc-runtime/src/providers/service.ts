@@ -61,6 +61,9 @@ Tool argument guide:
 - request: {targetActorId,action,whyLine?}
 Only use actors, objects, records, and tool names present in the observe packet.`;
 
+const PRIVATE_ACTOR_CONTEXT_GUIDE =
+  "actorContext and selfContext describe only this resident's authored identity, voice, private motivation, and holder-local relationship knowledge. They may shape tone, priorities, and questions, but they are not observations or evidence about the player. Treat only supplied memories, heard speech, visible records, and visible facts as evidence, and never reveal a private pressure unless this resident deliberately chooses to speak about it in-fiction.";
+
 function localeOutputInstructions(locale: string, fields: string): string[] {
   const supportedLocale = requireSupportedGameplayLocale(locale);
   const instructions = [
@@ -167,6 +170,7 @@ export class ProviderService implements NpcProposalPort {
     const instructions = [
       "You are an NPC inside Dream of One, a social-suspicion game.",
       "Stay in role and use only visible context.",
+      PRIVATE_ACTOR_CONTEXT_GUIDE,
       ...localeOutputInstructions(
         request.locale,
         "the NPC utterance and all three player reply suggestions",
@@ -205,6 +209,7 @@ export class ProviderService implements NpcProposalPort {
       "You are the judging mind of one NPC inside Dream of One, a social-suspicion game.",
       "Read the player's newest line and decide how it moves this NPC's suspicion and report pressure.",
       "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
+      PRIVATE_ACTOR_CONTEXT_GUIDE,
       "Both scores use a 0..125 game scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
       "As calibration, a coherent routine answer is roughly -15..+5 suspicion and -10..+3 report; a notable mismatch is +10..30 suspicion and +5..20 report; an explicit contradiction, dream/outside claim, or local-memory gap is +30..60 suspicion and +20..50 report; several severe signals plus refusal or hostility may be +60..100 suspicion and +50..100 report.",
       "Those ranges are calibration, not a classifier: use the actual context and allow asymmetric or negative movement when warranted.",
@@ -244,6 +249,7 @@ export class ProviderService implements NpcProposalPort {
       "You are one NPC inside Dream of One, a social-suspicion game.",
       "In one response, judge the player's newest line AND write your next spoken reply with exactly three short player reply suggestions.",
       "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
+      PRIVATE_ACTOR_CONTEXT_GUIDE,
       "Both scores use a 0..125 game scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
       "As calibration, a coherent routine answer is roughly -15..+5 suspicion and -10..+3 report; a notable mismatch is +10..30 suspicion and +5..20 report; an explicit contradiction, dream/outside claim, or local-memory gap is +30..60 suspicion and +20..50 report; several severe signals plus refusal or hostility may be +60..100 suspicion and +50..100 report.",
       "Those ranges are calibration, not a classifier: use the actual context and allow asymmetric or negative movement when warranted.",
@@ -294,6 +300,7 @@ export class ProviderService implements NpcProposalPort {
     const instructions = [
       "You choose one next action for a bounded NPC agent loop.",
       "Read the previous tool result before acting. A failed or blocked call must change the next attempt.",
+      PRIVATE_ACTOR_CONTEXT_GUIDE,
       ...localeOutputInstructions(
         request.locale,
         "every natural-language output field, including utterance, rationale, whyLine, and record prose",
@@ -347,6 +354,7 @@ export class ProviderService implements NpcProposalPort {
       "Reply once to the exact source utterance AND judge whether that remembered speech changes your personal opinion of the player.",
       "This is NPC hearsay, not a new player answer. Do not use player-answer signal labels, report pressure, records, institutional authority, or verdict semantics.",
       "Judge only from the exact source utterance and the listener-owned visible, heard, and remembered context supplied here; never invent unseen facts or imply that you directly witnessed something you only heard.",
+      PRIVATE_ACTOR_CONTEXT_GUIDE,
       "Suspicion uses a 0..125 game scale. Return an integer delta calibrated to that scale; the runtime clamps movement and the final score.",
       "If the exact speech gives no grounded reason to change an opinion of the player, return suspicionDelta=0, preserve stanceBefore as proposedStance, and explain the no-change judgment in whyLine.",
       "A positive vouch requires the listener's existing meaningful firsthand conversation with the player. This ambient exchange can never create firsthand provenance.",
@@ -396,6 +404,7 @@ export class ProviderService implements NpcProposalPort {
       "Never invent unseen context, testimony, facts, or ids. Cite only memory, record, and ledger-event ids present in the supplied packet.",
       "Return exactly one residentAssessment for each of the six residents, with six unique actorId values.",
       "Each resident testimony must rely only on that resident's own supplied memories. citedMemoryIds must contain only ids from that same resident and must name every memory used by testimonyLine.",
+      "A resident's publicIdentity and voice guide wording only. They are not evidence and disclose no private motivation or relationship context.",
       "For each resident, derive contactBasis exactly from that resident's supplied memories: meaningful_firsthand when any player_conversation has meaningfulFirsthand=true; limited_firsthand when player_conversation memory exists but none is meaningful; never_conversed when no player_conversation memory exists.",
       "When contactBasis is limited_firsthand, testimonyLine may acknowledge limited direct contact but must not claim substantive firsthand grounds. When it is never_conversed, testimonyLine must say there was no direct conversation. You still own the testimony wording and may cite that resident's attributed ambient memories.",
       "proposedStance is your memory-grounded reassessment after the final defense. The runtime validates provenance and may clamp an unsupported vouch.",

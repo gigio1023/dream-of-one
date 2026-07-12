@@ -30,6 +30,7 @@ const HEARING_OPEN_RETRY_MAX_SECONDS := 8.0
 @onready var _town: Town3D = $Town
 @onready var _player: CharacterBody3D = $Town/Actors/Player3D
 @onready var _hud: HUD3D = $HUD3D
+@onready var _onboarding: OnboardingOverlay = $OnboardingOverlay
 @onready var _run_session: RunSession3D = $RunSession
 @onready var _localization: Node = get_node("/root/Localization")
 
@@ -1432,6 +1433,7 @@ func _ensure_run() -> bool:
 	_run_start_attempts = 0
 	_fixture_replay_complete = false
 	_run_snapshot = result.duplicate(true)
+	_apply_player_brief_from_snapshot(result)
 	_cache_provider_evidence(result)
 	_hydrate_run_lifecycle(result)
 	_social_view = {}
@@ -2689,6 +2691,7 @@ func _rebase_run_after_advance_conflict() -> void:
 		_advance_retry_remaining = ADVANCE_RETRY_SECONDS
 		return
 	_run_snapshot = result.duplicate(true)
+	_apply_player_brief_from_snapshot(result)
 	_cache_provider_evidence(result)
 	_hydrate_run_lifecycle(result)
 	_apply_social_view_from_response(result)
@@ -2848,6 +2851,17 @@ func _apply_social_view_from_response(response: Dictionary) -> bool:
 		_run_snapshot["socialView"] = _social_view.duplicate(true)
 	_hud.set_social_view(_social_view)
 	return true
+
+
+func _apply_player_brief_from_snapshot(snapshot: Dictionary) -> void:
+	if not snapshot.has("playerBrief"):
+		return
+	var brief_value: Variant = snapshot.get("playerBrief")
+	_onboarding.set_player_brief(
+		(brief_value as Dictionary).duplicate(true)
+		if brief_value is Dictionary
+		else {}
+	)
 
 
 func _cache_provider_evidence(response: Dictionary) -> void:

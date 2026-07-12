@@ -126,9 +126,16 @@ can overhear with subtitles.
   Missing Qwen credentials block live acceptance rather than authorizing a
   substitute model. Exact commands and the distinction from model-free smokes
   live in [`../tech/verification.md`](../tech/verification.md).
-- **Scenario canon slices**: the player's concrete identity/secret and the
-  six resident identities are drafted from `docs/scenario/` canon for owner
-  approval as content slices inside this milestone.
+- **Scenario canon slice (owner-approved 2026-07-13).** The player wakes in
+  the park with only an uncertain clue that they may be included in a Studio
+  review schedule; neither the missing pre-waking memory nor the booking is a
+  mystery objective. The six residents are Mira, Ivo, Nora, Sol, Elian, and
+  Toma, with the roles, voices, and holder-local pressures recorded in
+  `docs/scenario/bible/07-characters-and-dialogue.md`. Public names and the
+  player's own uncertain brief use localization keys. Private cast context is
+  backend-only, filtered to its owning actor, and cannot become memory,
+  provenance, stance, record, ledger evidence, or hearing testimony unless it
+  is later expressed through a validated in-world action.
 - **Locale work follows the playable slices instead of becoming a second
   framework.** The shared six-locale foundation now carries the selected
   locale through the existing UI, run, session, provider, ambient, fallback,

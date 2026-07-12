@@ -37,11 +37,20 @@ const REQUIRED_STATIC_ASSETS: PackedStringArray = [
 	"res://assets/kaykit/furniture_bits/lamp_table.gltf",
 	"res://assets/kaykit/furniture_bits/table_low.gltf",
 	"res://assets/kaykit/furniture_bits/table_medium_long.gltf",
+	"res://assets/kaykit/city_builder_bits/car_hatchback.gltf",
+	"res://assets/kaykit/city_builder_bits/car_sedan.gltf",
+	"res://assets/kaykit/city_builder_bits/dumpster.gltf",
+	"res://assets/kaykit/city_builder_bits/firehydrant.gltf",
+	"res://assets/kaykit/city_builder_bits/streetlight.gltf",
+	"res://assets/kaykit/city_builder_bits/trafficlight_a.gltf",
+	"res://assets/kaykit/city_builder_bits/trash_a.gltf",
+	"res://assets/kaykit/city_builder_bits/trash_b.gltf",
 ]
 const TEXTURED_ASSETS: PackedStringArray = [
 	"res://assets/kenney3d/city_roads/road_straight.glb",
 	"res://assets/kenney3d/city_commercial/detail_awning.glb",
 	"res://assets/kaykit/furniture_bits/cabinet_medium_decorated.gltf",
+	"res://assets/kaykit/city_builder_bits/car_hatchback.gltf",
 ]
 const CHARACTER_ASSETS := {
 	"studio_manager": "res://assets/quaternius/men/casual_hoodie.gltf",
@@ -76,6 +85,11 @@ const SCALE_REFERENCE_ASSETS := {
 		"path": "res://assets/kaykit/furniture_bits/armchair_pillows.gltf",
 		"min_size": Vector3(1.7, 1.1, 1.5),
 		"max_size": Vector3(1.9, 1.35, 1.75),
+	},
+	"kaykit_city_car": {
+		"path": "res://assets/kaykit/city_builder_bits/car_hatchback.gltf",
+		"min_size": Vector3(1.9, 1.5, 3.8),
+		"max_size": Vector3(2.3, 1.9, 4.3),
 	},
 }
 

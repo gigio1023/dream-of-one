@@ -50,6 +50,15 @@
 [ext_resource type="PackedScene" uid="uid://bi3yqmvvy8ame" path="res://assets/kaykit/furniture_bits/table_low.gltf" id="41_low_table"]
 [ext_resource type="PackedScene" uid="uid://bvoh3trhcgtbx" path="res://assets/kaykit/furniture_bits/table_medium_long.gltf" id="42_long_table"]
 [ext_resource type="Script" path="res://scripts/town/record_surface_3d.gd" id="43_record_surface"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/city_builder_bits/car_hatchback.gltf" id="44_city_hatchback"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/city_builder_bits/car_sedan.gltf" id="45_city_sedan"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/city_builder_bits/dumpster.gltf" id="46_city_dumpster"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/city_builder_bits/firehydrant.gltf" id="47_city_hydrant"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/city_builder_bits/streetlight.gltf" id="48_city_streetlight"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/city_builder_bits/trafficlight_a.gltf" id="49_city_trafficlight"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/city_builder_bits/trash_a.gltf" id="50_city_trash_a"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/city_builder_bits/trash_b.gltf" id="51_city_trash_b"]
+[ext_resource type="PackedScene" path="res://scenes/props/physical_props_3d.tscn" id="52_physical_props"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_s1wib"]
 sky_top_color = Color(0.56078434, 0.7137255, 0.83137256, 1)
@@ -320,6 +329,27 @@ size = Vector3(1.4, 0.8, 0.06)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_record_surface"]
 size = Vector3(1.4, 0.8, 0.08)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_city_hatchback"]
+size = Vector3(2.05, 1.65, 4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_city_sedan"]
+size = Vector3(2.05, 1.65, 4.55)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_city_dumpster"]
+size = Vector3(2.7, 1.5, 1.65)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_city_hydrant"]
+height = 1.05
+radius = 0.3
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_city_streetlight"]
+height = 4.7
+radius = 0.16
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_city_trafficlight"]
+height = 3.55
+radius = 0.18
 
 [node name="Town" type="Node3D" unique_id=1757344954]
 script = ExtResource("1_txv5c")
@@ -641,6 +671,8 @@ end_position = Vector3(12.6, 0.2, 0)
 
 [node name="Props" type="Node3D" parent="." unique_id=649743328]
 
+[node name="PhysicalProps3D" parent="Props" instance=ExtResource("52_physical_props")]
+
 [node name="TextSurfaces" type="Node3D" parent="Props"]
 
 [node name="TS_Park_NoticeBoard" type="StaticBody3D" parent="Props/TextSurfaces"]
@@ -956,6 +988,183 @@ scale = Vector3(2.5, 2.5, 2.5)
 position = Vector3(12, 0.1, 22.05)
 scale = Vector3(2.5, 2.5, 2.5)
 
+[node name="CityBuilderDressing" type="Node3D" parent="Props/ExteriorDressing"]
+editor_description = "Mixed KayKit CC0 street furniture. Large silhouettes have project-owned primitive blockers; loose trash is collisionless."
+
+[node name="ParkedVehicles" type="Node3D" parent="Props/ExteriorDressing/CityBuilderDressing"]
+
+[node name="HatchbackWest" parent="Props/ExteriorDressing/CityBuilderDressing/ParkedVehicles" instance=ExtResource("44_city_hatchback")]
+position = Vector3(-7.2, 0.15, 17.4)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="SedanEast" parent="Props/ExteriorDressing/CityBuilderDressing/ParkedVehicles" instance=ExtResource("45_city_sedan")]
+position = Vector3(7, 0.15, 17.2)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="ServiceCorners" type="Node3D" parent="Props/ExteriorDressing/CityBuilderDressing"]
+
+[node name="StudioDumpster" parent="Props/ExteriorDressing/CityBuilderDressing/ServiceCorners" instance=ExtResource("46_city_dumpster")]
+position = Vector3(-7.6, 0, -18.6)
+rotation = Vector3(0, 0.25, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="OfficeDumpster" parent="Props/ExteriorDressing/CityBuilderDressing/ServiceCorners" instance=ExtResource("46_city_dumpster")]
+position = Vector3(-18.2, 0, 7.4)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StationDumpster" parent="Props/ExteriorDressing/CityBuilderDressing/ServiceCorners" instance=ExtResource("46_city_dumpster")]
+position = Vector3(18.3, 0, 7.4)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="MixedStreetFurniture" type="Node3D" parent="Props/ExteriorDressing/CityBuilderDressing"]
+
+[node name="LampStudioWest" parent="Props/ExteriorDressing/CityBuilderDressing/MixedStreetFurniture" instance=ExtResource("48_city_streetlight")]
+position = Vector3(-7.6, 0, -10.3)
+rotation = Vector3(0, 0.4, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="LampStudioEast" parent="Props/ExteriorDressing/CityBuilderDressing/MixedStreetFurniture" instance=ExtResource("48_city_streetlight")]
+position = Vector3(7.6, 0, -10.3)
+rotation = Vector3(0, 2.75, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="LampOfficeCorner" parent="Props/ExteriorDressing/CityBuilderDressing/MixedStreetFurniture" instance=ExtResource("48_city_streetlight")]
+position = Vector3(-10.7, 0, -7.8)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="LampStationCorner" parent="Props/ExteriorDressing/CityBuilderDressing/MixedStreetFurniture" instance=ExtResource("48_city_streetlight")]
+position = Vector3(10.7, 0, -7.8)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="LampSouthWest" parent="Props/ExteriorDressing/CityBuilderDressing/MixedStreetFurniture" instance=ExtResource("48_city_streetlight")]
+position = Vector3(-11.2, 0, 14.4)
+rotation = Vector3(0, 0.4, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="LampSouthEast" parent="Props/ExteriorDressing/CityBuilderDressing/MixedStreetFurniture" instance=ExtResource("48_city_streetlight")]
+position = Vector3(11.2, 0, 14.4)
+rotation = Vector3(0, 2.75, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrafficSouthWest" parent="Props/ExteriorDressing/CityBuilderDressing/MixedStreetFurniture" instance=ExtResource("49_city_trafficlight")]
+position = Vector3(-10.8, 0, 11.2)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrafficSouthEast" parent="Props/ExteriorDressing/CityBuilderDressing/MixedStreetFurniture" instance=ExtResource("49_city_trafficlight")]
+position = Vector3(10.8, 0, 11.2)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="HydrantStudio" parent="Props/ExteriorDressing/CityBuilderDressing/MixedStreetFurniture" instance=ExtResource("47_city_hydrant")]
+position = Vector3(5.3, 0, -10.5)
+rotation = Vector3(0, 0.3, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="HydrantOffice" parent="Props/ExteriorDressing/CityBuilderDressing/MixedStreetFurniture" instance=ExtResource("47_city_hydrant")]
+position = Vector3(-10.5, 0, 5.2)
+rotation = Vector3(0, 0.8, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="HydrantStation" parent="Props/ExteriorDressing/CityBuilderDressing/MixedStreetFurniture" instance=ExtResource("47_city_hydrant")]
+position = Vector3(10.5, 0, 5.2)
+rotation = Vector3(0, -0.8, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="HydrantSouth" parent="Props/ExteriorDressing/CityBuilderDressing/MixedStreetFurniture" instance=ExtResource("47_city_hydrant")]
+position = Vector3(-2.8, 0, 14.1)
+rotation = Vector3(0, -0.25, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="LooseStreetClutter" type="Node3D" parent="Props/ExteriorDressing/CityBuilderDressing"]
+editor_description = "Small collisionless pieces close empty ground without changing navigation."
+
+[node name="TrashStudioA" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("50_city_trash_a")]
+position = Vector3(-8.4, 0.03, -18)
+rotation = Vector3(0, 0.4, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashStudioB" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("51_city_trash_b")]
+position = Vector3(-7, 0.03, -17.6)
+rotation = Vector3(0, -0.7, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashOfficeA" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("50_city_trash_a")]
+position = Vector3(-17.1, 0.03, 7.9)
+rotation = Vector3(0, 1.1, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashOfficeB" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("51_city_trash_b")]
+position = Vector3(-19.4, 0.03, 7.1)
+rotation = Vector3(0, -0.5, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashStationA" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("50_city_trash_a")]
+position = Vector3(17.2, 0.03, 7.9)
+rotation = Vector3(0, -1, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashStationB" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("51_city_trash_b")]
+position = Vector3(19.4, 0.03, 7.1)
+rotation = Vector3(0, 0.6, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashBenchWestA" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("50_city_trash_a")]
+position = Vector3(-5.3, 0.03, 5.3)
+rotation = Vector3(0, 0.2, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashBenchWestB" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("51_city_trash_b")]
+position = Vector3(-5.8, 0.03, 4.8)
+rotation = Vector3(0, -0.9, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashBenchEastA" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("50_city_trash_a")]
+position = Vector3(5.3, 0.03, 5.3)
+rotation = Vector3(0, -0.4, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashBenchEastB" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("51_city_trash_b")]
+position = Vector3(5.8, 0.03, 4.8)
+rotation = Vector3(0, 0.8, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashSouthWestA" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("50_city_trash_a")]
+position = Vector3(-9.7, 0.03, 15.1)
+rotation = Vector3(0, 0.7, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashSouthWestB" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("51_city_trash_b")]
+position = Vector3(-4.4, 0.03, 18.8)
+rotation = Vector3(0, -0.35, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashSouthCenterA" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("50_city_trash_a")]
+position = Vector3(1.4, 0.03, 19.1)
+rotation = Vector3(0, 1.3, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashSouthCenterB" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("51_city_trash_b")]
+position = Vector3(2, 0.03, 18.6)
+rotation = Vector3(0, -1.1, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashSouthEastA" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("50_city_trash_a")]
+position = Vector3(9.5, 0.03, 15.3)
+rotation = Vector3(0, -0.8, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="TrashSouthEastB" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("51_city_trash_b")]
+position = Vector3(4.2, 0.03, 19)
+rotation = Vector3(0, 0.25, 0)
+scale = Vector3(5, 5, 5)
+
 [node name="StudioDressing" type="Node3D" parent="Props" unique_id=888187052]
 
 [node name="ReceptionDesk" parent="Props/StudioDressing" unique_id=644789109 instance=ExtResource("15_3oqdm")]
@@ -969,9 +1178,6 @@ transform = Transform3D(-8.742278e-08, 0, 2, 0, 2, 0, -2, 0, -8.742278e-08, 2, 0
 
 [node name="ReviewBookcase" parent="Props/StudioDressing" unique_id=1154998092 instance=ExtResource("18_6ms0r")]
 transform = Transform3D(-2, 0, -1.7484555e-07, 0, 2, 0, 1.7484555e-07, 0, -2, 4.5, 0, -18.5)
-
-[node name="ReceptionPlant" parent="Props/StudioDressing" unique_id=554574382 instance=ExtResource("19_is6wx")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -4.5, 0, -18.5)
 
 [node name="StudioWorkstations" type="Node3D" parent="Props/StudioDressing"]
 editor_description = "Furniture stays along the walls; the central portal-to-desk lane remains open."
@@ -993,11 +1199,6 @@ scale = Vector3(2, 2, 2)
 
 [node name="ReceptionScreen" parent="Props/StudioDressing/StudioWorkstations" instance=ExtResource("21_screen")]
 position = Vector3(-2.25, 0.78, -15.85)
-rotation = Vector3(0, 3.1415927, 0)
-scale = Vector3(2, 2, 2)
-
-[node name="ReceptionKeyboard" parent="Props/StudioDressing/StudioWorkstations" instance=ExtResource("20_keyboard")]
-position = Vector3(-2.4, 0.79, -15.35)
 rotation = Vector3(0, 3.1415927, 0)
 scale = Vector3(2, 2, 2)
 
@@ -1450,6 +1651,120 @@ position = Vector3(6, 1.1, 12.5)
 
 [node name="Collision" type="CollisionShape3D" parent="Props/Blockers/ExteriorDressingBlockers/ParasolEastBlocker"]
 shape = SubResource("CylinderShape3D_dressing_parasol")
+
+[node name="CityBuilderBlockers" type="Node3D" parent="Props/Blockers"]
+editor_description = "Project-owned primitive collision matching the large KayKit street silhouettes."
+
+[node name="HatchbackWestBlocker" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers"]
+position = Vector3(-7.2, 0.825, 17.4)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/HatchbackWestBlocker"]
+shape = SubResource("BoxShape3D_city_hatchback")
+
+[node name="SedanEastBlocker" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers"]
+position = Vector3(7, 0.825, 17.2)
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/SedanEastBlocker"]
+shape = SubResource("BoxShape3D_city_sedan")
+
+[node name="StudioDumpsterBlocker" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers"]
+position = Vector3(-7.6, 0.75, -18.6)
+rotation = Vector3(0, 0.25, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/StudioDumpsterBlocker"]
+shape = SubResource("BoxShape3D_city_dumpster")
+
+[node name="OfficeDumpsterBlocker" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers"]
+position = Vector3(-18.2, 0.75, 7.4)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/OfficeDumpsterBlocker"]
+shape = SubResource("BoxShape3D_city_dumpster")
+
+[node name="StationDumpsterBlocker" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers"]
+position = Vector3(18.3, 0.75, 7.4)
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/StationDumpsterBlocker"]
+shape = SubResource("BoxShape3D_city_dumpster")
+
+[node name="StreetlightBlockers" type="Node3D" parent="Props/Blockers/CityBuilderBlockers"]
+
+[node name="LampStudioWest" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers"]
+position = Vector3(-7.6, 2.35, -10.3)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers/LampStudioWest"]
+shape = SubResource("CylinderShape3D_city_streetlight")
+
+[node name="LampStudioEast" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers"]
+position = Vector3(7.6, 2.35, -10.3)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers/LampStudioEast"]
+shape = SubResource("CylinderShape3D_city_streetlight")
+
+[node name="LampOfficeCorner" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers"]
+position = Vector3(-10.7, 2.35, -7.8)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers/LampOfficeCorner"]
+shape = SubResource("CylinderShape3D_city_streetlight")
+
+[node name="LampStationCorner" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers"]
+position = Vector3(10.7, 2.35, -7.8)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers/LampStationCorner"]
+shape = SubResource("CylinderShape3D_city_streetlight")
+
+[node name="LampSouthWest" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers"]
+position = Vector3(-11.2, 2.35, 14.4)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers/LampSouthWest"]
+shape = SubResource("CylinderShape3D_city_streetlight")
+
+[node name="LampSouthEast" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers"]
+position = Vector3(11.2, 2.35, 14.4)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers/LampSouthEast"]
+shape = SubResource("CylinderShape3D_city_streetlight")
+
+[node name="TrafficSouthWest" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers"]
+position = Vector3(-10.8, 1.775, 11.2)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers/TrafficSouthWest"]
+shape = SubResource("CylinderShape3D_city_trafficlight")
+
+[node name="TrafficSouthEast" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers"]
+position = Vector3(10.8, 1.775, 11.2)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/StreetlightBlockers/TrafficSouthEast"]
+shape = SubResource("CylinderShape3D_city_trafficlight")
+
+[node name="HydrantBlockers" type="Node3D" parent="Props/Blockers/CityBuilderBlockers"]
+
+[node name="HydrantStudio" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers/HydrantBlockers"]
+position = Vector3(5.3, 0.525, -10.5)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/HydrantBlockers/HydrantStudio"]
+shape = SubResource("CylinderShape3D_city_hydrant")
+
+[node name="HydrantOffice" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers/HydrantBlockers"]
+position = Vector3(-10.5, 0.525, 5.2)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/HydrantBlockers/HydrantOffice"]
+shape = SubResource("CylinderShape3D_city_hydrant")
+
+[node name="HydrantStation" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers/HydrantBlockers"]
+position = Vector3(10.5, 0.525, 5.2)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/HydrantBlockers/HydrantStation"]
+shape = SubResource("CylinderShape3D_city_hydrant")
+
+[node name="HydrantSouth" type="StaticBody3D" parent="Props/Blockers/CityBuilderBlockers/HydrantBlockers"]
+position = Vector3(-2.8, 0.525, 14.1)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/CityBuilderBlockers/HydrantBlockers/HydrantSouth"]
+shape = SubResource("CylinderShape3D_city_hydrant")
 
 [node name="Markers" type="Node3D" parent="." unique_id=610698766]
 

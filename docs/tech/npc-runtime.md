@@ -208,13 +208,28 @@ location between zones). Each actor fact contains a 3D position plus bounded,
 unique `reachableAnchorRefs`, `visibleActorIds`, `audibleActorIds`, and
 `visibleObjectIds`, together with `playerVisible`, `playerAudible`,
 `playerReachable`, and a nullable `playerInteractionZoneId`. The runtime
-canonicalizes their order, requires known actors and anchors, and currently
-requires the object list to stay empty until the 3D prop slice provides one
-canonical object registry. Changed reachability, visibility, audibility, or
-objects emit an informational observation and may create one pending goal wake
-for each stable actor. `arrival`, `observation`, and `actor_schedule` wakes
-remain informational; the derived goal wake is the provider-bearing event.
-Position drift alone never opens a provider wake.
+canonicalizes their order and requires known actors, anchors, and objects;
+`visibleObjectIds` may name only one of the three ids in the layout's
+`physical_props` registry. Changed reachability, actor/player visibility, or
+audibility emits an informational observation and may create one pending goal
+wake for each stable actor. Object visibility remains available in the next
+independently scheduled observe packet and in tool validation, but is excluded
+from that material goal signature so moving a prop cannot by itself spend a
+provider call. `arrival`, `observation`, and `actor_schedule` wakes remain
+informational; the derived goal wake is the provider-bearing event. Position
+drift alone never opens a provider wake.
+
+Discrete player handling arrives on the same endpoint as bounded
+`propHandlingEvents`. Each event names one canonical prop, one of
+`pick_up|carry|place|throw`, player/object positions, the observed world
+revision, and exactly one visible/not-visible fact for each of the six
+residents. `RunService` keeps the event receipt for the life of the run and
+adds `prop_handling_observation` memory only to residents who actually saw it.
+That memory is factual only: the event directly schedules no provider, stance,
+suspicion, record, ledger, report, gossip, or goal mutation. The latest fact
+per resident, prop, and action may appear as bounded context in a later,
+independently triggered provider request; older repeats are compacted. It is
+excluded from administrative sources and meaningful-firsthand hearing vouches.
 
 Run creation and advance both have client-supplied idempotency keys. An exact
 retry returns the cached byte-identical response before stale-revision or

@@ -121,6 +121,38 @@
       ]
     },
     {
+      "name": "KayKit City Builder Bits Free",
+      "source": "https://kaylousberg.itch.io/city-builder-bits",
+      "downloadSource": "https://github.com/KayKit-Game-Assets/KayKit-City-Builder-Bits-1.0",
+      "sourceRevision": "63976910ca04d16f0fc531b9c614244be8128713",
+      "version": "1.0 Free, downloaded 2026-07-13",
+      "license": "CC0 1.0 Universal",
+      "tier": "committed",
+      "required": true,
+      "installPath": "res://assets/kaykit/city_builder_bits",
+      "licensePath": "res://assets/kaykit/city_builder_bits/License.txt",
+      "selectionPolicy": "render-only street clutter; no building, base, road, or automatic collision meshes; upstream A/B suffixes normalized to snake_case filenames",
+      "selectedAssets": [
+        "car_hatchback.gltf",
+        "car_hatchback.bin",
+        "car_sedan.gltf",
+        "car_sedan.bin",
+        "dumpster.gltf",
+        "dumpster.bin",
+        "firehydrant.gltf",
+        "firehydrant.bin",
+        "streetlight.gltf",
+        "streetlight.bin",
+        "trafficlight_a.gltf",
+        "trafficlight_a.bin",
+        "trash_a.gltf",
+        "trash_a.bin",
+        "trash_b.gltf",
+        "trash_b.bin",
+        "citybits_texture.png"
+      ]
+    },
+    {
       "name": "Quaternius Ultimate Modular Men",
       "source": "https://quaternius.com/packs/ultimatemodularcharacters.html",
       "version": "downloaded 2026-07-12",

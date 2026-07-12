@@ -287,7 +287,37 @@ test("run start and clock advance expose retry-safe HTTP conflicts", async () =>
     assert.equal(stale.status, 409);
     assert.equal(stale.json.error, "stale_world_revision");
 
-    let latest = advanced.json;
+    const layout = loadRunLayout();
+    const propEvent = {
+      eventId: "http-prop-event-1",
+      propId: "Prop_Studio_Keyboard",
+      action: "pick_up",
+      playerPosition: [0, 0, 0],
+      objectPosition: [0, 0.8, 0],
+      observedWorldRevision: advanced.json.worldRevision,
+      observers: layout.actors.map(actor => ({ actorId: actor.actorId, visible: true })),
+    };
+    const propAccepted = await post(base, "/v1/run/advance", {
+      runId: started.json.runId,
+      advanceId: "http-prop-advance-1",
+      observedWorldRevision: advanced.json.worldRevision,
+      elapsedSeconds: 0,
+      arrivals: [],
+      propHandlingEvents: [propEvent],
+    });
+    assert.equal(propAccepted.status, 200, JSON.stringify(propAccepted.json));
+    const propConflict = await post(base, "/v1/run/advance", {
+      runId: started.json.runId,
+      advanceId: "http-prop-advance-conflict",
+      observedWorldRevision: propAccepted.json.worldRevision,
+      elapsedSeconds: 0,
+      arrivals: [],
+      propHandlingEvents: [{ ...propEvent, action: "throw" }],
+    });
+    assert.equal(propConflict.status, 409);
+    assert.equal(propConflict.json.error, "prop_event_id_conflict");
+
+    let latest = propAccepted.json;
     for (let step = 2; step <= 9; step += 1) {
       const next = await post(base, "/v1/run/advance", {
         runId: started.json.runId,

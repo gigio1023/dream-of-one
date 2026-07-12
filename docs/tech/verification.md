@@ -58,6 +58,8 @@ $GODOT_BIN --version # Expected: 4.7.x stable
 $GODOT_BIN --headless --import --path godot
 DREAM_SESSION_MODE=fixture $GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
 DREAM_SESSION_MODE=fixture $GODOT_BIN --headless --path godot --script res://tools/route_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/npc_movement_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/physical_prop_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/localization_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/check_assets.gd
 $GODOT_BIN --headless --path godot --script res://tools/asset_validation_smoke.gd

@@ -1,0 +1,47 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/onboarding_overlay.gd" id="1_onboarding"]
+[ext_resource type="Theme" uid="uid://cveoqev2gg0t3" path="res://assets/greybox/town_hud_theme.tres" id="2_theme"]
+
+[node name="OnboardingOverlay" type="CanvasLayer"]
+process_mode = 3
+layer = 3
+script = ExtResource("1_onboarding")
+
+[node name="Overlay" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
+
+[node name="HintPanel" type="PanelContainer" parent="Overlay"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(560, 76)
+layout_mode = 0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -132.0
+offset_right = 592.0
+offset_bottom = -56.0
+mouse_filter = 2
+
+[node name="HintMargin" type="MarginContainer" parent="Overlay/HintPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 10
+
+[node name="HintLabel" type="Label" parent="Overlay/HintPanel/HintMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "hud.m3r.onboarding.move_jump"
+vertical_alignment = 1
+autowrap_mode = 3

@@ -25,6 +25,7 @@ const MAX_PITCH_RADIANS := deg_to_rad(85.0)
 @onready var _camera: Camera3D = $Head/Camera3D
 @onready var _interaction_ray: RayCast3D = $Head/Camera3D/InteractionRay
 @onready var _navigation_obstacle: NavigationObstacle3D = $NavigationObstacle3D
+@onready var _prop_interactor: PlayerPropInteractor = $PropInteractor
 
 var _control_enabled := true
 var _focused_target: Node = null
@@ -57,6 +58,17 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event.is_action_pressed("interact"):
 		interact_focused()
+		get_viewport().set_input_as_handled()
+		return
+
+	if (
+		event is InputEventMouseButton
+		and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT
+		and (event as InputEventMouseButton).pressed
+		and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+		and _prop_interactor.has_held_prop()
+	):
+		throw_held_prop()
 		get_viewport().set_input_as_handled()
 		return
 
@@ -99,9 +111,11 @@ func _physics_process(delta: float) -> void:
 	velocity.z = world_direction.z * walk_speed
 	move_and_slide()
 	_navigation_obstacle.velocity = velocity
+	_prop_interactor.physics_update()
 
 	_interaction_ray.force_raycast_update()
-	_set_focused_target(_interactable_collider())
+	var held_prop := _prop_interactor.held_prop()
+	_set_focused_target(held_prop if held_prop != null else _interactable_collider())
 
 
 func _apply_mouse_look(event: InputEventMouseMotion) -> void:
@@ -150,6 +164,7 @@ func _set_focused_target(target: Node) -> void:
 
 
 func _respawn() -> void:
+	_prop_interactor.force_drop()
 	var target_transform := _respawn_transform
 	var ancestor := get_parent()
 	while ancestor != null:
@@ -167,6 +182,10 @@ func _respawn() -> void:
 func set_control_enabled(enabled: bool) -> void:
 	_control_enabled = enabled
 	if not enabled:
+		# There is no inventory. Every modal/control-lock boundary places the
+		# carried object before camera or player transforms can jump elsewhere.
+		_prop_interactor.force_drop()
+		_set_focused_target(null)
 		velocity.x = 0.0
 		velocity.z = 0.0
 
@@ -219,7 +238,35 @@ func interact_focused() -> bool:
 	if target == null:
 		return false
 	target.call("interact", self)
+	# Dynamic prop prompts change after interaction even though the same object
+	# remains the focus target, so force one localized HUD refresh.
+	_set_focused_target(null)
+	var held_prop := _prop_interactor.held_prop()
+	if held_prop != null:
+		_set_focused_target(held_prop)
 	return true
+
+
+func try_pick_up_prop(prop: CarryableProp3D) -> bool:
+	return _prop_interactor.try_pick_up(prop)
+
+
+func place_held_prop() -> bool:
+	var placed := _prop_interactor.place()
+	if placed:
+		_set_focused_target(null)
+	return placed
+
+
+func throw_held_prop() -> bool:
+	var did_throw := _prop_interactor.throw()
+	if did_throw:
+		_set_focused_target(null)
+	return did_throw
+
+
+func held_prop() -> CarryableProp3D:
+	return _prop_interactor.held_prop()
 
 
 func set_look_settings(sensitivity: float, inverted: bool, fov: float) -> void:

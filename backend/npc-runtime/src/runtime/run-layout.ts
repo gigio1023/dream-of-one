@@ -126,6 +126,13 @@ const textSurfaceSchema = z.object({
   kind: nonEmpty,
 });
 
+const physicalPropSchema = z
+  .object({
+    id: nonEmpty,
+    label_key: nonEmpty,
+  })
+  .strict();
+
 const townLayoutSchema = z
   .object({
     world_id: nonEmpty,
@@ -146,6 +153,7 @@ const townLayoutSchema = z
     actors: z.array(layoutActorSchema).length(6),
     interaction_zones: z.array(interactionZoneSchema),
     text_surfaces: z.array(textSurfaceSchema),
+    physical_props: z.array(physicalPropSchema).min(1),
   })
   .refine(value => new Set(value.actors.map(actor => actor.id)).size === value.actors.length, {
     message: "town layout actor ids must be unique",
@@ -225,6 +233,7 @@ export interface RunLayout {
   hearingAtSeconds: number;
   conversationZones: RunInteractionZone[];
   recordSurfaces: RunRecordSurface[];
+  physicalPropIds: string[];
   anchorRefs: string[];
   anchorPositions: Record<string, readonly [number, number, number]>;
   routes: RunLayoutRoute[];
@@ -387,6 +396,7 @@ export function loadRunLayout(path = defaultLayoutPath()): RunLayout {
       };
     });
   assertUnique(recordSurfaces.map(surface => surface.surfaceId), "record surface ids");
+  assertUnique(parsed.physical_props.map(prop => prop.id), "physical prop ids");
 
   for (const window of meetingWindows) {
     for (const actorId of window.actorIds) {
@@ -464,6 +474,7 @@ export function loadRunLayout(path = defaultLayoutPath()): RunLayout {
     hearingAtSeconds: parsed.schedule.hearing_world_seconds,
     conversationZones,
     recordSurfaces,
+    physicalPropIds: parsed.physical_props.map(prop => prop.id),
     anchorRefs,
     anchorPositions,
     routes: parsed.routes.map(route => ({ routeId: route.id, points: [...route.points] })),

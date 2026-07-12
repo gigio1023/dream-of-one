@@ -96,6 +96,7 @@ function statusForRunError(error: RunError): number {
     case "unexpected_turn":
     case "start_id_conflict":
     case "advance_id_conflict":
+    case "prop_event_id_conflict":
     case "decision_id_conflict":
     case "wake_not_pending":
     case "wake_not_supported":

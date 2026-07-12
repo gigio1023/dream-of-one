@@ -134,6 +134,48 @@ async function resolveHearing(service: RunService, runId: string, hearingId: str
   });
 }
 
+test("hearing opening provider receives the officer's current visible objects", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalOpening = adapter.proposeConversationTurn.bind(adapter);
+  let hearingVisibleObjectIds: string[] = [];
+  adapter.proposeConversationTurn = async request => {
+    if (request.beatId.startsWith("station_hearing:")) {
+      hearingVisibleObjectIds = request.observePacket.visibleObjects.map(object => object.objectId);
+    }
+    return originalOpening(request);
+  };
+  const layout = { ...loadRunLayout(), hearingAtSeconds: 10 };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("hearing-spatial-context"),
+    layout,
+  });
+  const started = service.start("start-hearing-spatial-context", "ko-KR");
+  const actors = spatialActors(started);
+  const officer = actors.find(actor => actor.actorId === "NPC_Station_Officer");
+  assert.ok(officer);
+  officer.visibleObjectIds = ["Prop_Park_Box"];
+  await service.advance({
+    runId: started.runId,
+    advanceId: "hearing-spatial-context-seed",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [0, 0, 0], locationId: "" },
+      actors,
+    },
+  });
+  await makeDue(service, started.runId, "due-hearing-spatial-context");
+  await service.hearing({
+    action: "open",
+    runId: started.runId,
+    hearingId: "hearing-spatial-context",
+  });
+  assert.deepEqual(hearingVisibleObjectIds, ["Prop_Park_Box"]);
+});
+
 test("hearing quorum uses evidenced vouches and preserves provider abnormal authority", async () => {
   for (const scenario of [
     { scope: "three-ordinary", vouches: 3, proposed: "ordinary" as const, expected: "abnormal" },

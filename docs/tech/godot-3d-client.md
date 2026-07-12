@@ -252,9 +252,14 @@ roughly 30 seconds, and the park center keeps all three building entrances in
 view — this is what makes commutes legible and the park-idle acceptance test
 observable. Sightline composition closes the map per the art direction.
 
-**Props.** The few pick/move/throw props are `RigidBody3D` with primitive
-shapes, carried on a hold anchor in front of the camera. Physics is not a
-pillar; keep the prop count low and the interactions boring.
+**Props.** The baseline has exactly three canonical `RigidBody3D` props: the
+Studio keyboard, Studio plant, and park box. They use primitive collision,
+`E` to pick up/place, and captured left-click to throw from a camera hold
+anchor. Release velocity is capped, a short player-collision grace prevents
+self-launching, a forward ray keeps carried objects in front of walls, and an
+out-of-bounds prop returns to its authored spawn. Entering any control-lock or
+modal surface first drops the held object. Physics is not a pillar; keep the
+set small and the interactions deliberately plain.
 
 **Audio/audibility consistency.** Speech audibility, subtitles, and the
 runtime's heard-speech records all derive from the same `world_layout.json`
@@ -263,8 +268,13 @@ presentation derived from those volumes, not the authority check; Godot audio
 attenuation alone does not decide who heard an utterance. What the semantic
 audibility snapshot marks hearable is exactly what gets a direction cue and
 exactly what the runtime may record. Short spatial murmurs/blips make in-range
-speech audible without adding TTS. Zone ambience (park murmur, office hum)
-runs off `Area3D` zones.
+speech audible without adding TTS. The current `AudioFeedback` baseline
+deterministically synthesizes two footstep variants, prop impact, record
+scribble, park ambience, and one shared interior tone at startup, all on the
+SFX bus. It crossfades the two ambience loops from
+`Town3D.current_location_id()` and uses a quiet mixed state in the connective
+space around the permanently open portals; no audio state implies a closed
+door or owns semantic audibility.
 
 **Performance posture.** Tiny map, six NPCs: no occlusion culling, LOD, or
 baking until a measured frame problem exists. The bar is a clean frame on
@@ -320,9 +330,23 @@ the dev machine with all six NPC loops live.
   stamped with the advance's observed revision and rides the existing batched
   advance lane after movement, arrival/block, schedule, or rebase changes and
   while residents are moving. It is never a per-frame HTTP or provider call.
-  `visibleObjectIds` stays empty until the canonical prop registry lands.
+  `visibleObjectIds` contains only ids from the canonical physical-prop
+  registry, sorted after the same bounded distance and line-of-sight check used
+  for physical observation. Object visibility is current context for the next
+  independently scheduled goal but is excluded from the material goal
+  signature, so walking past or moving a prop does not itself create a provider
+  wake. A discrete pick/carry/place/throw event separately captures exact
+  observer visibility and may add factual memory.
 - **Interaction**: forward ray picks the nearest interactable (NPC, prop,
-  record surface); `interact` opens conversation, pickup, or inspect.
+  record surface); `interact` opens conversation, picks up/places a prop, or
+  inspects. Captured left-click throws only while a prop is held and otherwise
+  retains its normal mouse-look role.
+- **Contextual onboarding**: one presentation-only overlay introduces
+  movement/jump, the outsider premise and Studio-first purpose, NPC talk,
+  dialogue input, and prop controls in that order. It observes progress and
+  focus without consuming input or mutating the run, and hides behind
+  settings, log/inspect, conversation, and outcome surfaces. Every hint uses
+  the same six-locale content path as the HUD.
 - **Navigation**: one navigation map for the whole seamless town, with one
   baked surface resource and three bidirectional links across the permanently
   open building portals; NPC `move_to` resolves through `NavigationAgent3D`;
@@ -357,16 +381,23 @@ the dev machine with all six NPC loops live.
   talking from across the park). Each pair approaches distinct physical
   standing slots around one semantic meeting center so solid capsules cannot
   deadlock a meeting-ready condition. Outside an event or meeting, every
-  resident follows deterministic authored local routes with per-actor,
-  per-waypoint staggered dwell times. This ambient motion is ordinary game AI,
-  not an LLM decision or provider call; an event-driven move safely preempts
-  it and the schedule resumes afterward.
+  resident uses a stable per-actor random seed to choose small navmesh points
+  within 1.8 m of its current local center, with 1.5–3.75 second staggered
+  dwells. This ambient wander is ordinary game AI, not an LLM decision or
+  provider call. Runtime movement and player contact safely preempt it; modal
+  conversation pauses it. RVO priorities, progress sampling, a brief yield,
+  and at most two local replans prevent NPC/NPC and NPC/player stalls without
+  teleporting or forging a runtime arrival.
 - **Advance lane**: run start and clock packets use stable client idempotency
   keys. Only one mutation is in flight; an ambiguous transport failure retries
   the exact packet, while a stale revision rebases from a full run snapshot
-  before unsent time/arrivals receive a new ID. Opening conversation pauses
-  the tree, settles that lane, and sends no clock packet until clean resume.
-  Settings and log surfaces do not pause the clock.
+  before unsent time/arrivals receive a new ID. Prop observations use the same
+  single-flight lane and run-long event ids. Opening conversation drains those
+  queued facts before pausing and, for contact, follows with one fresh spatial
+  packet. A rejected nonessential prop fact is reported and discarded without
+  halting clock or arrival progress; an ambiguous transport result still
+  retries the exact immutable packet. No clock packet is sent until clean
+  conversation resume. Settings and log surfaces do not pause the clock.
 - **Decision delta application**: current NPC-decision responses apply only
   their typed `actionDeltas`: speech feeds subtitles/blips, readiness updates
   conversation availability, look turns the resident toward an actor, and
@@ -385,8 +416,9 @@ arrival acknowledgement, six sorted engine spatial facts, clock/physics
 pause, distinct meeting slots, exactly-once queued action application, and the
 full fixture receptionist flow from run start through modal pause, judgment,
 stance presentation, child-session end, and resumed control), a
-run/session route smoke against the sidecar API
-(fixture mode), `localization_smoke.gd`, `check_assets.gd`. Same commands as
+run/session route smoke against the sidecar API (fixture mode),
+`npc_movement_smoke.gd`, `physical_prop_smoke.gd`,
+`localization_smoke.gd`, `check_assets.gd`. Same commands as
 [`verification.md`](verification.md); resist additions without an escaped
 regression.
 

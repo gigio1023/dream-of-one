@@ -7,6 +7,7 @@ const FURNITURE := 2.0
 const NATURE := 2.5
 const CITY_KITS := 5.0
 const KAYKIT_FURNITURE := 1.0
+const KAYKIT_CITY := 5.0
 const CHARACTERS := 1.0
 
 
@@ -19,6 +20,8 @@ static func for_path(path: String) -> float:
 		return CITY_KITS
 	if path.begins_with("res://assets/kaykit/furniture_bits/"):
 		return KAYKIT_FURNITURE
+	if path.begins_with("res://assets/kaykit/city_builder_bits/"):
+		return KAYKIT_CITY
 	if path.begins_with("res://assets/quaternius/"):
 		return CHARACTERS
 	push_error("No validated 3D asset scale for %s" % path)

@@ -331,6 +331,11 @@ func advance(request: Dictionary) -> Dictionary:
 			"fixture_spatial_facts_invalid",
 			"Fixture advance spatial facts do not match the six-resident contract."
 		)
+	if request.has("propHandlingEvents") and not _prop_events_valid_for_request(request):
+		return _stored_error(
+			"fixture_prop_events_invalid",
+			"Fixture prop events do not match the six-resident observation contract."
+		)
 	var advance_id := str(request.get("advanceId", ""))
 	if _advance_cache.has(advance_id):
 		var cached := _dictionary_or_empty(_advance_cache.get(advance_id))
@@ -811,6 +816,8 @@ func _advance_request_signature(request: Dictionary) -> String:
 		signature["spatialFacts"] = null
 	else:
 		signature["spatialFacts"] = spatial_facts
+	var prop_events := _array_or_empty(request.get("propHandlingEvents"))
+	signature["propHandlingEvents"] = prop_events
 	return JSON.stringify(signature)
 
 
@@ -881,6 +888,57 @@ func _spatial_facts_valid_for_request(request: Dictionary) -> bool:
 		]:
 			if not actor.get(key, null) is Array:
 				return false
+	return true
+
+
+func _prop_events_valid_for_request(request: Dictionary) -> bool:
+	var events := _array_or_empty(request.get("propHandlingEvents"))
+	if events.is_empty() or events.size() > 8:
+		return false
+	var expected_actor_ids: PackedStringArray = []
+	for actor_value in _array_or_empty(
+		_dictionary_or_empty(_endpoint("runStart").get("response")).get("actors")
+	):
+		if actor_value is Dictionary:
+			expected_actor_ids.append(str((actor_value as Dictionary).get("actorId", "")))
+	expected_actor_ids.sort()
+	var event_ids: Dictionary = {}
+	for event_value in events:
+		if not event_value is Dictionary:
+			return false
+		var event := event_value as Dictionary
+		var event_id := str(event.get("eventId", ""))
+		if (
+			event_id.is_empty()
+			or event_ids.has(event_id)
+			or str(event.get("propId", "")).is_empty()
+			or str(event.get("action", "")) not in ["pick_up", "carry", "place", "throw"]
+			or int(event.get("observedWorldRevision", -1))
+			> int(request.get("observedWorldRevision", -2))
+			or _array_or_empty(event.get("playerPosition")).size() != 3
+			or _array_or_empty(event.get("objectPosition")).size() != 3
+		):
+			return false
+		event_ids[event_id] = true
+		var observers := _array_or_empty(event.get("observers"))
+		if observers.size() != expected_actor_ids.size():
+			return false
+		var observer_ids: PackedStringArray = []
+		for observer_value in observers:
+			if not observer_value is Dictionary:
+				return false
+			var observer := observer_value as Dictionary
+			var actor_id := str(observer.get("actorId", ""))
+			if (
+				actor_id.is_empty()
+				or observer_ids.has(actor_id)
+				or typeof(observer.get("visible", null)) != TYPE_BOOL
+			):
+				return false
+			observer_ids.append(actor_id)
+		observer_ids.sort()
+		if observer_ids != expected_actor_ids:
+			return false
 	return true
 
 

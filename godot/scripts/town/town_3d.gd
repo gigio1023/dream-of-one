@@ -10,6 +10,9 @@ extends Node3D
 @export_file("*.json") var layout_path := "res://data/world_layout.json"
 @export var player_path: NodePath = ^"Actors/Player3D"
 
+const PHYSICAL_PROP_VISIBILITY_DISTANCE_M := 12.0
+const PHYSICAL_PROP_VISIBILITY_MASK := 23 # World + player + NPC + physical prop.
+
 var _layout: Dictionary = {}
 var _binding_errors: PackedStringArray = []
 
@@ -123,6 +126,7 @@ func spatial_facts() -> Dictionary:
 	var facts: Array[Dictionary] = []
 	var actors := _npc_actors()
 	var anchor_refs := _layout_anchor_refs()
+	var physical_props := _physical_prop_nodes()
 	var navigation_map := _navigation_map()
 	var space_state := get_world_3d().direct_space_state
 	var player := get_node_or_null(player_path) as Node3D
@@ -140,6 +144,11 @@ func spatial_facts() -> Dictionary:
 				audible_actor_ids.append(str(target.actor_id))
 		visible_actor_ids.sort()
 		audible_actor_ids.sort()
+		var visible_object_ids := _visible_physical_prop_ids(
+			actor,
+			physical_props,
+			space_state
+		)
 		var player_visible := _nodes_have_line_of_sight(actor, player, space_state)
 		var player_audible := _nodes_share_audibility(actor, player)
 		var player_reachable := _navigation_points_reachable(
@@ -157,7 +166,7 @@ func spatial_facts() -> Dictionary:
 			),
 			"visibleActorIds": Array(visible_actor_ids),
 			"audibleActorIds": Array(audible_actor_ids),
-			"visibleObjectIds": [],
+			"visibleObjectIds": Array(visible_object_ids),
 			"playerVisible": player_visible,
 			"playerAudible": player_audible,
 			"playerReachable": player_reachable,
@@ -302,6 +311,71 @@ func _actors_have_line_of_sight(
 	space_state: PhysicsDirectSpaceState3D
 ) -> bool:
 	return _nodes_have_line_of_sight(source, target, space_state)
+
+
+func _physical_prop_nodes() -> Array[Node3D]:
+	var props: Array[Node3D] = []
+	for prop_value in _layout.get("physical_props", []):
+		if not prop_value is Dictionary:
+			continue
+		var prop_id := str((prop_value as Dictionary).get("id", ""))
+		var prop := get_node_or_null("Props/PhysicalProps3D/%s" % prop_id) as Node3D
+		if prop != null and str(prop.get("prop_id")) == prop_id:
+			props.append(prop)
+	props.sort_custom(func(a: Node3D, b: Node3D) -> bool:
+		return str(a.get("prop_id")) < str(b.get("prop_id"))
+	)
+	return props
+
+
+func _visible_physical_prop_ids(
+	observer: Node3D,
+	props: Array[Node3D],
+	space_state: PhysicsDirectSpaceState3D
+) -> PackedStringArray:
+	var visible_ids := PackedStringArray()
+	for prop in props:
+		if _physical_prop_is_visible(observer, prop, space_state):
+			visible_ids.append(str(prop.get("prop_id")))
+	visible_ids.sort()
+	return visible_ids
+
+
+func _physical_prop_is_visible(
+	observer: Node3D,
+	prop: Node3D,
+	space_state: PhysicsDirectSpaceState3D
+) -> bool:
+	var origin := observer.global_position + Vector3.UP * 1.35
+	var target := prop.global_position
+	if origin.distance_to(target) > PHYSICAL_PROP_VISIBILITY_DISTANCE_M:
+		return false
+	if origin.is_equal_approx(target):
+		return true
+	var carrier: Node3D = null
+	if prop.has_method(&"held_by"):
+		var carrier_value: Variant = prop.call(&"held_by")
+		if carrier_value is Node3D:
+			carrier = carrier_value as Node3D
+	var query := PhysicsRayQueryParameters3D.create(origin, target)
+	query.collision_mask = PHYSICAL_PROP_VISIBILITY_MASK
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	if observer is CollisionObject3D:
+		query.exclude = [(observer as CollisionObject3D).get_rid()]
+	var hit := space_state.intersect_ray(query)
+	if hit.is_empty():
+		# Carried props disable their own collision. An unobstructed ray to that
+		# endpoint is still a valid observation.
+		return carrier != null
+	var collider_value: Variant = hit.get("collider")
+	if not collider_value is Node:
+		return false
+	var collider := collider_value as Node
+	return (
+		_node_belongs_to(collider, prop)
+		or (carrier != null and _node_belongs_to(collider, carrier))
+	)
 
 
 func _nodes_have_line_of_sight(
@@ -550,6 +624,7 @@ func _validate_bindings() -> PackedStringArray:
 	_validate_spatial_markers("sight_volumes", "Markers/SightVolumes", errors)
 	_validate_spatial_markers("audibility_volumes", "Markers/AudibilityVolumes", errors)
 	_validate_text_surfaces(anchor_positions, errors)
+	_validate_physical_props(errors)
 
 	var player := get_node_or_null(player_path) as Node3D
 	var player_start: Variant = _layout.get("player_start", {})
@@ -654,6 +729,34 @@ func _validate_text_surfaces(
 		):
 			errors.append("Town3D text surface interaction kind drifted: %s" % surface_id)
 	_validate_no_extra_markers("Props/TextSurfaces", expected, errors)
+
+
+func _validate_physical_props(errors: PackedStringArray) -> void:
+	var expected: Dictionary = {}
+	for prop_value in _layout.get("physical_props", []):
+		if not prop_value is Dictionary:
+			continue
+		var prop := prop_value as Dictionary
+		var prop_id := str(prop.get("id", ""))
+		expected[prop_id] = true
+		var node := get_node_or_null("Props/PhysicalProps3D/%s" % prop_id)
+		if not node is RigidBody3D:
+			errors.append("Town3D missing physical prop: %s" % prop_id)
+			continue
+		if (
+			str(node.get("prop_id")) != prop_id
+			or str(node.get("label_key")) != str(prop.get("label_key", ""))
+		):
+			errors.append("Town3D physical prop binding drifted: %s" % prop_id)
+		for group_name in [
+			&"physical_props",
+			&"carryable_props",
+			&"spatial_props",
+			&"interactables",
+		]:
+			if not node.is_in_group(group_name):
+				errors.append("Town3D physical prop group missing: %s:%s" % [prop_id, group_name])
+	_validate_no_extra_markers("Props/PhysicalProps3D", expected, errors)
 
 
 func _validate_spatial_markers(

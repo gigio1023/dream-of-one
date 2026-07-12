@@ -7,6 +7,7 @@ const KENNEY_ATLAS := "res://assets/kenney2d/rpg-urban-pack/Tilemap/tilemap_pack
 const KENNEY_LICENSE := "res://assets/kenney2d/rpg-urban-pack/License.txt"
 const MANIFEST := "res://assets/third_party/manifest.json"
 const COMMERCIAL_TRIM_DIR := "res://assets/kenney3d/city_commercial"
+const KAYKIT_CITY_DIR := "res://assets/kaykit/city_builder_bits"
 const GREYBOX_ASSETS := [
 	"res://assets/greybox/queue_marker.png",
 	"res://assets/greybox/store_counter.png",
@@ -29,6 +30,7 @@ func _run() -> void:
 		_check_file(path, "greybox asset")
 	_check_manifest()
 	_check_no_closed_commercial_buildings()
+	_check_no_kaykit_city_architecture()
 
 	if _failures.is_empty():
 		print("PASS check_assets: committed 2D/3D packs, licenses, curated files, greybox assets, and manifest are valid")
@@ -129,6 +131,19 @@ func _check_no_closed_commercial_buildings() -> void:
 		var normalized := file_name.to_lower().replace("-", "_")
 		if normalized.begins_with("building_") or normalized.begins_with("low_detail_building_"):
 			_failures.append("closed City Kit building mesh is forbidden in the enterable town: %s" % file_name)
+
+func _check_no_kaykit_city_architecture() -> void:
+	if not _directory_exists(KAYKIT_CITY_DIR):
+		return
+	for file_name in DirAccess.get_files_at(KAYKIT_CITY_DIR):
+		var normalized := file_name.to_lower().replace("-", "_")
+		if (
+			normalized.begins_with("building_")
+			or normalized.begins_with("road_")
+			or normalized.begins_with("base_")
+			or normalized.begins_with("base.")
+		):
+			_failures.append("KayKit City architecture is forbidden in the enterable town: %s" % file_name)
 
 func _directory_exists(path: String) -> bool:
 	return DirAccess.dir_exists_absolute(ProjectSettings.globalize_path(path))

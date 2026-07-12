@@ -170,6 +170,32 @@ export const runPlayerContactOutcomeMemorySchema = z
   })
   .strict();
 
+export const RUN_PROP_HANDLING_ACTIONS = [
+  "pick_up",
+  "carry",
+  "place",
+  "throw",
+] as const;
+
+export const runPropHandlingActionSchema = z.enum(RUN_PROP_HANDLING_ACTIONS);
+
+/** Engine-observed handling fact. It is memory only, never a social judgment. */
+export const runPropHandlingObservationMemorySchema = z
+  .object({
+    memoryId: nonEmpty,
+    kind: z.literal("prop_handling_observation"),
+    sourceActorId: z.literal("player"),
+    listenerActorId: nonEmpty,
+    eventId: nonEmpty,
+    propId: nonEmpty,
+    action: runPropHandlingActionSchema,
+    playerPosition: position3Schema,
+    objectPosition: position3Schema,
+    worldSeconds: z.number().nonnegative(),
+    worldRevision: z.number().int().positive(),
+  })
+  .strict();
+
 export const runInterrogationOutcomeMemorySchema = z
   .object({
     memoryId: nonEmpty,
@@ -190,6 +216,7 @@ export const runMemorySchema = z.discriminatedUnion("kind", [
   runAmbientUtteranceMemorySchema,
   runRecordReadMemorySchema,
   runPlayerContactOutcomeMemorySchema,
+  runPropHandlingObservationMemorySchema,
   runInterrogationOutcomeMemorySchema,
 ]);
 
@@ -543,6 +570,42 @@ export const runArrivalObservationSchema = z
   })
   .strict();
 
+export const runPropObserverFactSchema = z
+  .object({
+    actorId: nonEmpty,
+    visible: z.boolean(),
+  })
+  .strict();
+
+export const runPropHandlingEventSchema = z
+  .object({
+    eventId: nonEmpty.max(128),
+    propId: nonEmpty,
+    action: runPropHandlingActionSchema,
+    playerPosition: z.tuple([
+      z.number().finite(),
+      z.number().finite(),
+      z.number().finite(),
+    ]),
+    objectPosition: z.tuple([
+      z.number().finite(),
+      z.number().finite(),
+      z.number().finite(),
+    ]),
+    observedWorldRevision: z.number().int().nonnegative(),
+    observers: z.array(runPropObserverFactSchema).length(6),
+  })
+  .strict()
+  .superRefine((event, context) => {
+    if (new Set(event.observers.map(observer => observer.actorId)).size !== 6) {
+      context.addIssue({
+        code: "custom",
+        path: ["observers"],
+        message: "prop observer actorIds must be unique",
+      });
+    }
+  });
+
 export const runActorSpatialFactsSchema = z
   .object({
     actorId: nonEmpty,
@@ -607,14 +670,20 @@ export const runAdvanceRequestSchema = z
     elapsedSeconds: z.number().min(0).max(10),
     arrivals: z.array(runArrivalObservationSchema).max(6),
     spatialFacts: runSpatialFactsBatchSchema.optional(),
+    propHandlingEvents: z.array(runPropHandlingEventSchema).max(8).optional(),
   })
   .strict()
   .superRefine((request, context) => {
-    if (request.elapsedSeconds === 0 && request.arrivals.length === 0 && !request.spatialFacts) {
+    if (
+      request.elapsedSeconds === 0 &&
+      request.arrivals.length === 0 &&
+      !request.spatialFacts &&
+      (request.propHandlingEvents?.length ?? 0) === 0
+    ) {
       context.addIssue({
         code: "custom",
         path: ["elapsedSeconds"],
-        message: "advance requires elapsed time or at least one arrival",
+        message: "advance requires elapsed time, an arrival, spatial facts, or a prop event",
       });
     }
     if (
@@ -639,6 +708,23 @@ export const runAdvanceRequestSchema = z
         code: "custom",
         path: ["arrivals"],
         message: "arrival movementIds must be unique within one advance",
+      });
+    }
+    for (const [index, event] of (request.propHandlingEvents ?? []).entries()) {
+      if (event.observedWorldRevision > request.observedWorldRevision) {
+        context.addIssue({
+          code: "custom",
+          path: ["propHandlingEvents", index, "observedWorldRevision"],
+          message: "prop events cannot observe a future world revision",
+        });
+      }
+    }
+    const propEventIds = (request.propHandlingEvents ?? []).map(event => event.eventId);
+    if (new Set(propEventIds).size !== propEventIds.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["propHandlingEvents"],
+        message: "prop eventIds must be unique within one advance",
       });
     }
   });
@@ -715,6 +801,8 @@ export const runAdvanceResponseSchema = z
     actorReadinessDeltas: z.array(runActorReadinessDeltaSchema),
     ambientSpeechEvents: z.array(runAmbientSpeechEventSchema),
     ambientSpeechCursor: z.number().int().nonnegative(),
+    acceptedPropEventIds: z.array(nonEmpty).optional(),
+    propObservationMemories: z.array(runPropHandlingObservationMemorySchema).optional(),
     scheduler: runSchedulerSnapshotSchema,
     socialView: runSocialViewSchema,
     activeContact: runActiveContactSchema.nullable(),
@@ -996,6 +1084,11 @@ export type RunActor = z.infer<typeof runActorSchema>;
 export type RunMemory = z.infer<typeof runMemorySchema>;
 export type RunRecordReadMemory = z.infer<typeof runRecordReadMemorySchema>;
 export type RunPlayerContactOutcomeMemory = z.infer<typeof runPlayerContactOutcomeMemorySchema>;
+export type RunPropHandlingAction = z.infer<typeof runPropHandlingActionSchema>;
+export type RunPropHandlingEvent = z.infer<typeof runPropHandlingEventSchema>;
+export type RunPropHandlingObservationMemory = z.infer<
+  typeof runPropHandlingObservationMemorySchema
+>;
 export type RunInterrogationOutcomeMemory = z.infer<typeof runInterrogationOutcomeMemorySchema>;
 export type RunOpenQuestion = z.infer<typeof runOpenQuestionSchema>;
 export type RunRecord = z.infer<typeof runRecordSchema>;

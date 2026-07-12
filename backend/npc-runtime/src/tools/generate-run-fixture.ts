@@ -86,6 +86,41 @@ async function driveHearingSequence() {
   };
 }
 
+async function drivePropHandlingSequence() {
+  const layout = loadRunLayout();
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: fixtureIds(),
+    layout,
+  });
+  const started = service.start("run-fixture-prop-handling", "ko-KR");
+  const visibleActorIds = new Set([
+    "NPC_Studio_Receptionist",
+    "NPC_Park_Caretaker",
+  ]);
+  const request: RunAdvanceRequest = {
+    runId: started.runId,
+    advanceId: "fixture-prop-handling-1",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    propHandlingEvents: [{
+      eventId: "fixture-prop-event-1",
+      propId: "Prop_Studio_Keyboard",
+      action: "pick_up",
+      playerPosition: [6.5, 0, 4.25],
+      objectPosition: [6.8, 0.85, 4.1],
+      observedWorldRevision: started.worldRevision,
+      observers: layout.actors.map(actor => ({
+        actorId: actor.actorId,
+        visible: visibleActorIds.has(actor.actorId),
+      })),
+    }],
+  };
+  const response = await service.advance(request);
+  return { request, response, snapshot: service.snapshot(started.runId) };
+}
+
 async function preloadAllResidents(service: RunService, runStartResponse: RunSnapshot) {
   const layout = loadRunLayout();
   const sessionPreloads = [];
@@ -667,6 +702,7 @@ export async function buildRunApiFixture() {
   const administration = await driveAdministrativeSequence();
   const playerContact = await drivePlayerContactSequence();
   const hearing = await driveHearingSequence();
+  const propHandling = await drivePropHandlingSequence();
 
   return {
     note: "Generated through the fixture-only Studio adapter and production RunService paths. Regenerate with `bun run --cwd backend/npc-runtime fixtures:run:generate`.",
@@ -701,6 +737,16 @@ export async function buildRunApiFixture() {
         endpoint: "POST /v1/run/advance",
         request: advancePath.initialRequest,
         response: advancePath.initialResponse,
+      },
+      runAdvancePropHandling: {
+        endpoint: "POST /v1/run/advance",
+        request: propHandling.request,
+        response: propHandling.response,
+      },
+      runSnapshotAfterPropHandling: {
+        endpoint: "GET /v1/run/snapshot",
+        request: { runId: propHandling.snapshot.runId },
+        response: propHandling.snapshot,
       },
       runAdvanceArrival: {
         endpoint: "POST /v1/run/advance",

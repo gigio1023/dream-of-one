@@ -1,7 +1,7 @@
 {
   "version": 3,
   "world_id": "m3r_first_person_town",
-  "world_revision": "rev-first-person-town-v4",
+  "world_revision": "rev-first-person-town-v5",
   "units": "meters",
   "coordinate_system": {
     "up": "+Y",
@@ -515,6 +515,20 @@
       "landmark": "Station",
       "anchor": "Station.hearing_notice",
       "kind": "hearing_notice"
+    }
+  ],
+  "physical_props": [
+    {
+      "id": "Prop_Studio_Keyboard",
+      "label_key": "prop.Prop_Studio_Keyboard.label"
+    },
+    {
+      "id": "Prop_Studio_Plant",
+      "label_key": "prop.Prop_Studio_Plant.label"
+    },
+    {
+      "id": "Prop_Park_Box",
+      "label_key": "prop.Prop_Park_Box.label"
     }
   ],
   "actors": [

@@ -91,6 +91,8 @@ import type {
   RunPlayerConversationMemory,
   RunPlayerContactOutcomeMemory,
   RunPlayerSpatialFacts,
+  RunPropHandlingEvent,
+  RunPropHandlingObservationMemory,
   RunRecord,
   RunRecordReadMemory,
   RunSessionAnswer,
@@ -113,6 +115,13 @@ export const RUN_PROVIDER_BUDGET = {
   reservedCalls: 20,
   reservedTokens: 50_000,
 } as const;
+
+/**
+ * Physical handling is low-value factual context and can be generated rapidly.
+ * Keep only the latest fact for each of the 3 props × 4 actions, while event
+ * receipts remain run-long for exact retry/conflict semantics.
+ */
+export const MAX_PROP_OBSERVATION_MEMORIES_PER_ACTOR = 12;
 
 const MAX_CONVERSATION_TURNS = 3;
 const AMBIENT_TURN_LIMIT = 2;
@@ -152,6 +161,11 @@ interface CachedAnswer {
 interface CachedEncounter {
   signature: string;
   response: RunEncounterResponse;
+}
+
+interface PropHandlingReceipt {
+  signature: string;
+  memories: RunPropHandlingObservationMemory[];
 }
 
 interface AmbientObservation {
@@ -350,6 +364,7 @@ interface RunState {
   encounterCache: Map<string, CachedEncounter>;
   encounteredIdentityIds: Set<string>;
   encounteredSpeechEventIds: Set<string>;
+  propHandlingReceipts: Map<string, PropHandlingReceipt>;
   lastInterrogatedLedgerSeq: number;
 }
 
@@ -392,7 +407,9 @@ export type RunErrorCode =
   | "invalid_arrival"
   | "invalid_spatial_facts"
   | "encounter_id_conflict"
-  | "encounter_not_visible";
+  | "encounter_not_visible"
+  | "invalid_prop_event"
+  | "prop_event_id_conflict";
 
 export class RunError extends Error {
   constructor(
@@ -415,6 +432,20 @@ function answerSignature(answer: RunSessionAnswer): string {
 
 function startSignature(locale: string): string {
   return JSON.stringify({ locale });
+}
+
+function propHandlingSignature(event: RunPropHandlingEvent): string {
+  return JSON.stringify({
+    eventId: event.eventId,
+    propId: event.propId,
+    action: event.action,
+    playerPosition: event.playerPosition,
+    objectPosition: event.objectPosition,
+    observedWorldRevision: event.observedWorldRevision,
+    observers: [...event.observers]
+      .sort((first, second) => first.actorId.localeCompare(second.actorId))
+      .map(observer => ({ actorId: observer.actorId, visible: observer.visible })),
+  });
 }
 
 function advanceSignature(request: RunAdvanceRequest): string {
@@ -455,6 +486,9 @@ function advanceSignature(request: RunAdvanceRequest): string {
     elapsedSeconds: request.elapsedSeconds,
     arrivals,
     spatialFacts,
+    propHandlingEvents: [...(request.propHandlingEvents ?? [])]
+      .sort((first, second) => first.eventId.localeCompare(second.eventId))
+      .map(event => JSON.parse(propHandlingSignature(event))),
   });
 }
 
@@ -535,13 +569,12 @@ function canonicalSpatialActor(facts: RunActorSpatialFacts): RunActorSpatialFact
 
 function spatialMaterialSignature(facts: RunActorSpatialFacts): string {
   // Continuous position drift is not a provider wake. Arrival has its own
-  // exact event; visibility, audibility, reachability, and objects are the
-  // material decision facts.
+  // exact event. Physical-object visibility is retained as current action
+  // grounding, but it is not itself a social goal/provider wake.
   return JSON.stringify({
     reachableAnchorRefs: facts.reachableAnchorRefs,
     visibleActorIds: facts.visibleActorIds,
     audibleActorIds: facts.audibleActorIds,
-    visibleObjectIds: facts.visibleObjectIds,
     playerVisible: facts.playerVisible,
     playerAudible: facts.playerAudible,
     playerReachable: facts.playerReachable,
@@ -657,6 +690,7 @@ export class RunService {
       encounterCache: new Map(),
       encounteredIdentityIds: new Set(),
       encounteredSpeechEventIds: new Set(),
+      propHandlingReceipts: new Map(),
       lastInterrogatedLedgerSeq: 0,
     };
     this.runs.set(runId, run);
@@ -1114,6 +1148,40 @@ export class RunService {
         }
       }
 
+      const expectedActorIds = new Set(this.layout.actors.map(actor => actor.actorId));
+      const propHandlingEvents = request.propHandlingEvents ?? [];
+      const requestPropEventIds = new Set<string>();
+      for (const event of propHandlingEvents) {
+        if (requestPropEventIds.has(event.eventId)) {
+          throw new RunError(
+            `prop event is duplicated within one advance: ${event.eventId}`,
+            "invalid_prop_event",
+          );
+        }
+        requestPropEventIds.add(event.eventId);
+        if (
+          event.observedWorldRevision > request.observedWorldRevision ||
+          !this.layout.physicalPropIds.includes(event.propId) ||
+          !["pick_up", "carry", "place", "throw"].includes(event.action) ||
+          event.observers.length !== expectedActorIds.size ||
+          new Set(event.observers.map(observer => observer.actorId)).size !== expectedActorIds.size ||
+          event.observers.some(observer => !expectedActorIds.has(observer.actorId)) ||
+          [...event.playerPosition, ...event.objectPosition].some(value => !Number.isFinite(value))
+        ) {
+          throw new RunError(
+            `prop event does not match the canonical run layout: ${event.eventId}`,
+            "invalid_prop_event",
+          );
+        }
+        const existing = run.propHandlingReceipts.get(event.eventId);
+        if (existing && existing.signature !== propHandlingSignature(event)) {
+          throw new RunError(
+            `prop eventId cannot be reused with a different payload: ${event.eventId}`,
+            "prop_event_id_conflict",
+          );
+        }
+      }
+
       let incomingSpatialFacts: Map<string, RunActorSpatialFacts> | null = null;
       let incomingPlayerFacts: RunPlayerSpatialFacts | null = null;
       if (request.spatialFacts) {
@@ -1123,7 +1191,6 @@ export class RunService {
             "invalid_spatial_facts",
           );
         }
-        const expectedActorIds = new Set(this.layout.actors.map(actor => actor.actorId));
         if (
           request.spatialFacts.player.locationId !== "" &&
           !this.layout.landmarkIds.includes(request.spatialFacts.player.locationId)
@@ -1160,9 +1227,9 @@ export class RunService {
               );
             }
           }
-          if (facts.visibleObjectIds.length > 0) {
+          if (facts.visibleObjectIds.some(propId => !this.layout.physicalPropIds.includes(propId))) {
             throw new RunError(
-              `spatial facts reference objects before a canonical object source exists: ${facts.actorId}`,
+              `spatial facts reference an unknown physical prop: ${facts.actorId}`,
               "invalid_spatial_facts",
             );
           }
@@ -1347,10 +1414,57 @@ export class RunService {
         schedulerResult.scheduleWakes.length > 0;
       if (schedulerMutation) run.elapsedSeconds = toSeconds;
 
-      for (const actor of run.actors.values()) {
-        const schedulerActor = run.scheduler.actors.get(actor.actorId);
-        if (schedulerActor?.pendingMovement) continue;
-        this.reconcileConversationOpening(run, actor, actorReadinessDeltas);
+      const propOnlyAdvance =
+        propHandlingEvents.length > 0 &&
+        request.elapsedSeconds === 0 &&
+        request.arrivals.length === 0 &&
+        !request.spatialFacts;
+      if (!propOnlyAdvance) {
+        for (const actor of run.actors.values()) {
+          const schedulerActor = run.scheduler.actors.get(actor.actorId);
+          if (schedulerActor?.pendingMovement) continue;
+          this.reconcileConversationOpening(run, actor, actorReadinessDeltas);
+        }
+      }
+
+      const acceptedPropEventIds: string[] = [];
+      const propObservationMemories: RunPropHandlingObservationMemory[] = [];
+      let propMemoryMutation = false;
+      for (const event of propHandlingEvents) {
+        acceptedPropEventIds.push(event.eventId);
+        const priorReceipt = run.propHandlingReceipts.get(event.eventId);
+        if (priorReceipt) {
+          propObservationMemories.push(...clone(priorReceipt.memories));
+          continue;
+        }
+        const memories = event.observers
+          .filter(observer => observer.visible)
+          .sort((first, second) => first.actorId.localeCompare(second.actorId))
+          .map((observer): RunPropHandlingObservationMemory => ({
+            memoryId: this.idFactory("mem"),
+            kind: "prop_handling_observation",
+            sourceActorId: "player",
+            listenerActorId: observer.actorId,
+            eventId: event.eventId,
+            propId: event.propId,
+            action: event.action,
+            playerPosition: clone(event.playerPosition),
+            objectPosition: clone(event.objectPosition),
+            worldSeconds: toSeconds,
+            worldRevision: candidateWorldRevision,
+          }));
+        for (const memory of memories) {
+          this.appendPropObservationMemory(
+            this.requireActor(run, memory.listenerActorId),
+            memory,
+          );
+        }
+        run.propHandlingReceipts.set(event.eventId, {
+          signature: propHandlingSignature(event),
+          memories: clone(memories),
+        });
+        if (memories.length > 0) propMemoryMutation = true;
+        propObservationMemories.push(...clone(memories));
       }
 
       const spatialPositionChanged = incomingSpatialFacts
@@ -1360,12 +1474,17 @@ export class RunService {
             incomingPlayerFacts as RunPlayerSpatialFacts,
           )
         : false;
+      const spatialObjectVisibilityChanged = incomingSpatialFacts
+        ? this.spatialObjectVisibilityChanged(run.spatialFacts, incomingSpatialFacts)
+        : false;
       const materialMutation =
         schedulerMutation ||
         actorReadinessDeltas.length > 0 ||
         contactCancelled ||
         spatialFactsChanged ||
-        spatialPositionChanged;
+        spatialPositionChanged ||
+        spatialObjectVisibilityChanged ||
+        propMemoryMutation;
       if (materialMutation) {
         if (!schedulerMutation) run.elapsedSeconds = toSeconds;
         run.worldRevision = candidateWorldRevision;
@@ -1425,6 +1544,12 @@ export class RunService {
           run.ambientSpeechEvents.filter(event => event.seq > (request.afterSpeechSeq ?? 0)),
         ),
         ambientSpeechCursor: run.ambientSpeechCursor,
+        ...(propHandlingEvents.length > 0
+          ? {
+              acceptedPropEventIds,
+              propObservationMemories,
+            }
+          : {}),
         scheduler: snapshotRunScheduler(this.layout, run.scheduler, run.elapsedSeconds),
         socialView: this.publicSocialView(run),
         activeContact: clone(run.activeContact),
@@ -1801,6 +1926,7 @@ export class RunService {
           ["player"],
           this.conversationGoals(actor),
           [playerLine],
+          run.spatialFacts?.actors.get(actor.actorId),
         ),
         suspicionBefore,
         reportPressureBefore: reportBefore,
@@ -3643,6 +3769,8 @@ export class RunService {
       actor,
       [targetActorId],
       ["Speak directly with the resident who arrived with you and remember only what you actually hear."],
+      [],
+      run.spatialFacts?.actors.get(speakerActorId),
     );
     packet.audibleActorIds = [targetActorId];
     return packet;
@@ -3772,6 +3900,27 @@ export class RunService {
       throw new RunError(`unknown conversation in run ${run.runId}: ${sessionId}`, "session_not_found");
     }
     return conversation;
+  }
+
+  private appendPropObservationMemory(
+    actor: RunActorState,
+    memory: RunPropHandlingObservationMemory,
+  ): void {
+    // Replace, rather than accumulate, repeated low-value facts. Removing all
+    // prior matches also compacts snapshots loaded from an older build.
+    for (let index = 0; index < actor.memories.length;) {
+      const candidate = actor.memories[index];
+      if (
+        candidate?.kind === "prop_handling_observation" &&
+        candidate.propId === memory.propId &&
+        candidate.action === memory.action
+      ) {
+        actor.memories.splice(index, 1);
+      } else {
+        index += 1;
+      }
+    }
+    actor.memories.push(memory);
   }
 
   private publicActor(actor: RunActorState): RunActor {
@@ -4101,6 +4250,8 @@ export class RunService {
         actor,
         ["player"],
         this.conversationGoals(actor, procedure),
+        [],
+        run.spatialFacts?.actors.get(actor.actorId),
       ),
       conversationHistory: [],
     };
@@ -4125,6 +4276,8 @@ export class RunService {
         officer,
         [...run.actors.keys()].filter(actorId => actorId !== officer.actorId),
         ["Open the final hearing and request the player's defense."],
+        [],
+        run.spatialFacts?.actors.get(officer.actorId),
       ),
       conversationHistory: [],
     };
@@ -4328,7 +4481,11 @@ export class RunService {
       scheduleBlockId: block?.blockId ?? "none",
       activity: block?.activity ?? "none",
       goals: this.conversationGoals(actor),
-      memoryIds: actor.memories.map(memory => memory.memoryId),
+      // Physical handling facts remain available in later observe packets,
+      // but do not by themselves invalidate/preload a provider-authored opening.
+      memoryIds: actor.memories
+        .filter(memory => memory.kind !== "prop_handling_observation")
+        .map(memory => memory.memoryId),
       visibleRecordVersions,
       activeContactProcedure:
         run.activeContact?.actorId === actor.actorId
@@ -4683,6 +4840,21 @@ export class RunService {
     return false;
   }
 
+  private spatialObjectVisibilityChanged(
+    prior: CanonicalSpatialFacts | null,
+    incoming: Map<string, RunActorSpatialFacts>,
+  ): boolean {
+    if (!prior) return false;
+    for (const [actorId, facts] of incoming) {
+      const previous = prior.actors.get(actorId);
+      if (
+        !previous ||
+        JSON.stringify(previous.visibleObjectIds) !== JSON.stringify(facts.visibleObjectIds)
+      ) return true;
+    }
+    return false;
+  }
+
   private runObservePacket(
     run: RunState,
     actor: RunActorState,
@@ -4723,6 +4895,13 @@ export class RunService {
       if (memory.kind === "interrogation_outcome") {
         return `[interrogation_outcome;ledger_seq=${memory.ledgerSeq}] ${memory.whyLine}`;
       }
+      if (memory.kind === "prop_handling_observation") {
+        return [
+          `[observed_player_prop_action=${memory.action}]`,
+          `prop=${memory.propId}`,
+          `event=${memory.eventId}`,
+        ].join(" ");
+      }
       return `[record_read=${memory.recordId}@${memory.recordRevision}] ${memory.stateBody}`;
     });
     const heardSpeech = actor.memories.flatMap(memory => {
@@ -4754,7 +4933,11 @@ export class RunService {
           .filter(event => event.visibleToActorIds.includes(actor.actorId))
           .map(event => event.eventId),
       },
-      visibleObjects: [],
+      visibleObjects: (spatialFacts?.visibleObjectIds ?? []).map(propId => ({
+        objectId: propId,
+        label: propId,
+        state: "physical_prop",
+      })),
       visibleRecords,
       visibleLedgerEvents: run.ledgerEvents
         .filter(event => event.visibleToActorIds.includes(actor.actorId))
@@ -4771,7 +4954,10 @@ export class RunService {
       heardSpeech: [...heardSpeech, ...additionalSpeech],
       toolCatalog: toolCatalogForRole(actor.role),
       administrativeSources: actor.memories
-        .filter(memory => !this.sourceAlreadyAdministered(run, actor.actorId, memory.memoryId))
+        .filter(memory =>
+          memory.kind !== "prop_handling_observation" &&
+          !this.sourceAlreadyAdministered(run, actor.actorId, memory.memoryId)
+        )
         .map(memory => {
         if (memory.kind === "player_conversation") {
           return {
@@ -4822,6 +5008,9 @@ export class RunService {
             whyLine: memory.whyLine,
             reportDelta: 0,
           };
+        }
+        if (memory.kind === "prop_handling_observation") {
+          throw new Error("physical observations are not administrative sources");
         }
         return {
           memoryId: memory.memoryId,

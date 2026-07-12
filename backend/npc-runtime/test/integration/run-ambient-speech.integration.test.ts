@@ -6,8 +6,10 @@ import type {
   NpcProposalPort,
 } from "../../src/providers/ports.js";
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
+import { loadRunLayout } from "../../src/runtime/run-layout.js";
 import { RunError, RunService, STUDIO_RECEPTIONIST_ID } from "../../src/runtime/run-service.js";
 import type {
+  RunActorSpatialFacts,
   RunAdvanceResponse,
   RunNpcDecisionRequest,
   RunScheduleWake,
@@ -82,6 +84,26 @@ function capturingAdapter() {
   return { adapter, requests };
 }
 
+function ambientSpatialActors(snapshot: RunSnapshot): RunActorSpatialFacts[] {
+  const layout = loadRunLayout();
+  return snapshot.scheduler.actors.map(schedulerActor => {
+    const position = layout.anchorPositions[schedulerActor.confirmedAnchorRef];
+    assert.ok(position);
+    return {
+      actorId: schedulerActor.actorId,
+      position: [position[0], position[1], position[2]],
+      reachableAnchorRefs: [],
+      visibleActorIds: [],
+      audibleActorIds: [],
+      visibleObjectIds: [],
+      playerVisible: false,
+      playerAudible: false,
+      playerReachable: false,
+      playerInteractionZoneId: null,
+    };
+  });
+}
+
 function deferred() {
   let resolve!: () => void;
   const promise = new Promise<void>(done => {
@@ -94,6 +116,30 @@ test("one meeting decision is single-flight, cached, and gives the responder the
   const { adapter, requests } = capturingAdapter();
   const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds("retry") });
   const meeting = await readyFirstMeeting(service, "ambient-retry");
+  const current = service.snapshot(meeting.started.runId);
+  const actors = ambientSpatialActors(current);
+  const manager = actors.find(actor => actor.actorId === "NPC_Studio_Manager");
+  const caretaker = actors.find(actor => actor.actorId === "NPC_Park_Caretaker");
+  assert.ok(manager);
+  assert.ok(caretaker);
+  manager.visibleActorIds = [caretaker.actorId];
+  manager.audibleActorIds = [caretaker.actorId];
+  manager.visibleObjectIds = ["Prop_Park_Box"];
+  caretaker.visibleActorIds = [manager.actorId];
+  caretaker.audibleActorIds = [manager.actorId];
+  caretaker.visibleObjectIds = ["Prop_Studio_Plant"];
+  await service.advance({
+    runId: meeting.started.runId,
+    advanceId: "ambient-retry:current-spatial-context",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: current.worldRevision,
+      player: { position: [0, 0, 0], locationId: "" },
+      actors,
+    },
+  });
 
   const [first, concurrent] = await Promise.all([
     service.decision(meeting.request),
@@ -105,6 +151,14 @@ test("one meeting decision is single-flight, cached, and gives the responder the
   assert.equal(requests.length, 2, "one wake produces exactly two provider proposals");
   assert.deepEqual(requests[0]?.observePacket.visibleActors, ["NPC_Park_Caretaker"]);
   assert.deepEqual(requests[1]?.observePacket.visibleActors, ["NPC_Studio_Manager"]);
+  assert.deepEqual(
+    requests[0]?.observePacket.visibleObjects.map(object => object.objectId),
+    ["Prop_Park_Box"],
+  );
+  assert.deepEqual(
+    requests[1]?.observePacket.visibleObjects.map(object => object.objectId),
+    ["Prop_Studio_Plant"],
+  );
   assert.deepEqual(requests[0]?.requiredToolCall, {
     tool: "talk_to",
     actorId: "NPC_Park_Caretaker",

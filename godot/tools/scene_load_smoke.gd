@@ -142,34 +142,41 @@ func _instance_scene(spec: Dictionary) -> void:
 			print("PASS scene_load_smoke: %s" % label)
 
 	if is_instance_valid(instance):
-		var stopped_speech_blip := _stop_scene_speech_blips(instance)
-		if stopped_speech_blip:
+		var stopped_audio := _stop_scene_audio_players(instance)
+		if stopped_audio:
 			await create_timer(0.2).timeout
-			_clear_scene_speech_blip_streams(instance)
-			await process_frame
+		_clear_scene_audio_streams(instance)
+		await process_frame
 		instance.queue_free()
 		await process_frame
 
 
-func _stop_scene_speech_blips(node: Node) -> bool:
+func _stop_scene_audio_players(node: Node) -> bool:
 	var stopped := false
-	if node is AudioStreamPlayer3D and node.name == &"SpeechBlip":
-		var player := node as AudioStreamPlayer3D
-		if player.playing:
-			player.stop()
+	if node is AudioStreamPlayer:
+		var player_2d := node as AudioStreamPlayer
+		if player_2d.playing:
+			player_2d.stop()
+			stopped = true
+	elif node is AudioStreamPlayer3D:
+		var player_3d := node as AudioStreamPlayer3D
+		if player_3d.playing:
+			player_3d.stop()
 			stopped = true
 	for child in node.get_children():
 		if child is Node:
-			stopped = _stop_scene_speech_blips(child as Node) or stopped
+			stopped = _stop_scene_audio_players(child as Node) or stopped
 	return stopped
 
 
-func _clear_scene_speech_blip_streams(node: Node) -> void:
-	if node is AudioStreamPlayer3D and node.name == &"SpeechBlip":
+func _clear_scene_audio_streams(node: Node) -> void:
+	if node is AudioStreamPlayer:
+		(node as AudioStreamPlayer).stream = null
+	elif node is AudioStreamPlayer3D:
 		(node as AudioStreamPlayer3D).stream = null
 	for child in node.get_children():
 		if child is Node:
-			_clear_scene_speech_blip_streams(child as Node)
+			_clear_scene_audio_streams(child as Node)
 
 
 func _wait_for_town_navigation(label: String, town: Node) -> void:
@@ -370,6 +377,7 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			]:
 				_require_node(label, instance, "Props/Blockers/%s/Collision" % tree_blocker_name)
 			_check_town_dressing_density(label, instance)
+			_check_physical_prop_startup_stability(label, instance)
 			_check_record_surface_bindings(label, instance)
 			if not instance.has_method("binding_errors"):
 				_failures.append("town_3d exposes no layout binding check")
@@ -381,8 +389,11 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			_require_node(label, instance, "Town")
 			_require_node(label, instance, "Town/Actors/Player3D")
 			_require_node(label, instance, "HUD3D")
+			_require_node(label, instance, "AudioFeedback")
+			_require_node(label, instance, "OnboardingOverlay")
 			_require_node(label, instance, "RunSession")
 			_require_node(label, instance, "AgentPlaytestSurface")
+			_check_audio_onboarding_contract(label, instance)
 			if instance.process_mode != Node.PROCESS_MODE_ALWAYS:
 				_failures.append("main_3d does not process during its modal pause")
 			var town := instance.get_node_or_null("Town")
@@ -408,6 +419,55 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			var playtest_surface := instance.get_node_or_null("AgentPlaytestSurface")
 			if playtest_surface == null or not playtest_surface.has_method("snapshot"):
 				_failures.append("main_3d has no AgentPlaytestSurface snapshot")
+
+
+func _check_audio_onboarding_contract(label: String, instance: Node) -> void:
+	var audio := instance.get_node_or_null("AudioFeedback")
+	if audio != null:
+		if not audio.has_method("presentation_snapshot"):
+			_failures.append("%s audio feedback exposes no presentation snapshot" % label)
+		else:
+			var snapshot: Dictionary = audio.call("presentation_snapshot")
+			if not bool(snapshot.get("procedural", false)):
+				_failures.append("%s audio feedback is not using its project-owned streams" % label)
+			if not bool(snapshot.get("parkPlaying", false)) or not bool(snapshot.get("interiorPlaying", false)):
+				_failures.append("%s zone ambience did not start" % label)
+			if int(snapshot.get("recordSurfaces", 0)) <= 0:
+				_failures.append("%s record scribble is not bound to any surface" % label)
+			if int(snapshot.get("speechBlipActors", 0)) <= 0:
+				_failures.append("%s reuses no spatial NPC speech blips" % label)
+			if int(snapshot.get("trackedProps", 0)) < 3:
+				_failures.append("%s prop impact audio tracks fewer than three props" % label)
+			if int(snapshot.get("propImpacts", -1)) != 0:
+				_failures.append("%s played prop impact audio during startup settle" % label)
+		for player_path in [
+			"Footstep",
+			"ParkAmbience",
+			"InteriorAmbience",
+			"PropImpact",
+			"RecordScribble",
+		]:
+			var player := audio.get_node_or_null(player_path)
+			if player == null:
+				_failures.append("%s audio feedback is missing %s" % [label, player_path])
+				continue
+			var stream := player.get("stream") as AudioStreamWAV
+			if stream == null or stream.data.is_empty():
+				_failures.append("%s %s has no synthesized PCM stream" % [label, player_path])
+			if StringName(player.get("bus")) != &"SFX":
+				_failures.append("%s %s bypasses the SFX bus" % [label, player_path])
+
+	var onboarding := instance.get_node_or_null("OnboardingOverlay")
+	if onboarding == null:
+		return
+	if not onboarding.has_method("presentation_snapshot"):
+		_failures.append("%s onboarding exposes no presentation snapshot" % label)
+		return
+	var onboarding_snapshot: Dictionary = onboarding.call("presentation_snapshot")
+	if str(onboarding_snapshot.get("key", "")) != "hud.m3r.onboarding.move_jump":
+		_failures.append("%s onboarding does not begin with movement and jump" % label)
+	if str(onboarding_snapshot.get("text", "")).is_empty():
+		_failures.append("%s onboarding renders an empty localized hint" % label)
 
 func _check_social_hud_contract(label: String, hud: HUD3D) -> void:
 	if hud == null:
@@ -747,6 +807,12 @@ func _check_npc_spatial_facts(label: String, instance: Node) -> void:
 		_failures.append("%s player spatial fact is incomplete" % label)
 	var by_actor: Dictionary = {}
 	var ordered_actor_ids: Array[String] = []
+	var canonical_prop_ids := _canonical_physical_prop_ids(instance)
+	if canonical_prop_ids.size() != 3:
+		_failures.append(
+			"%s canonical physical prop registry has %d entries instead of 3"
+			% [label, canonical_prop_ids.size()]
+		)
 	for fact_value in facts:
 		if not fact_value is Dictionary:
 			_failures.append("%s spatial packet contains a non-dictionary fact" % label)
@@ -779,8 +845,23 @@ func _check_npc_spatial_facts(label: String, instance: Node) -> void:
 				_failures.append("%s %s spatial %s is not sorted/deduped" % [label, actor_id, key])
 		if not (fact.get("reachableAnchorRefs", []) as Array).has("Park.center"):
 			_failures.append("%s %s cannot reach the connected town NavMesh" % [label, actor_id])
-		if not (fact.get("visibleObjectIds", []) as Array).is_empty():
-			_failures.append("%s invented visible 3D object ids before canonical props exist" % label)
+		var reported_object_ids: Array[String] = []
+		for id_value in fact.get("visibleObjectIds", []) as Array:
+			reported_object_ids.append(str(id_value))
+		for prop_id in reported_object_ids:
+			if not canonical_prop_ids.has(prop_id):
+				_failures.append("%s %s reported unknown visible prop %s" % [label, actor_id, prop_id])
+		var actor_node := instance.get_node_or_null("Actors/%s" % actor_id) as Node3D
+		var expected_object_ids := _expected_visible_physical_prop_ids(
+			instance,
+			actor_node,
+			canonical_prop_ids
+		)
+		if reported_object_ids != expected_object_ids:
+			_failures.append(
+				"%s %s visible props drifted: got=%s expected=%s"
+				% [label, actor_id, reported_object_ids, expected_object_ids]
+			)
 		for boolean_key in ["playerVisible", "playerAudible", "playerReachable"]:
 			if typeof(fact.get(boolean_key, null)) != TYPE_BOOL:
 				_failures.append(
@@ -822,6 +903,102 @@ func _check_npc_spatial_facts(label: String, instance: Node) -> void:
 				"%s remote %s inherited the player's Park interaction zone"
 				% [label, remote_actor_id]
 			)
+	_check_held_prop_visibility(label, instance)
+
+
+func _canonical_physical_prop_ids(town: Node) -> Array[String]:
+	var ids: Array[String] = []
+	var layout: Dictionary = town.call("layout_snapshot")
+	for prop_value in layout.get("physical_props", []):
+		if not prop_value is Dictionary:
+			continue
+		var prop_id := str((prop_value as Dictionary).get("id", ""))
+		var node := town.get_node_or_null("Props/PhysicalProps3D/%s" % prop_id)
+		if node != null and str(node.get("prop_id")) == prop_id:
+			ids.append(prop_id)
+	ids.sort()
+	return ids
+
+
+func _expected_visible_physical_prop_ids(
+	town: Node,
+	observer: Node3D,
+	prop_ids: Array[String]
+) -> Array[String]:
+	var visible_ids: Array[String] = []
+	if observer == null:
+		return visible_ids
+	var space_state := (town as Node3D).get_world_3d().direct_space_state
+	var origin := observer.global_position + Vector3.UP * 1.35
+	for prop_id in prop_ids:
+		var prop := town.get_node_or_null("Props/PhysicalProps3D/%s" % prop_id) as Node3D
+		if prop == null or origin.distance_to(prop.global_position) > 12.0:
+			continue
+		var carrier: Node3D = null
+		if prop.has_method(&"held_by"):
+			var carrier_value: Variant = prop.call(&"held_by")
+			if carrier_value is Node3D:
+				carrier = carrier_value as Node3D
+		var query := PhysicsRayQueryParameters3D.create(origin, prop.global_position)
+		query.collision_mask = 23
+		query.collide_with_areas = false
+		query.collide_with_bodies = true
+		if observer is CollisionObject3D:
+			query.exclude = [(observer as CollisionObject3D).get_rid()]
+		var hit := space_state.intersect_ray(query)
+		if hit.is_empty():
+			if carrier != null:
+				visible_ids.append(prop_id)
+			continue
+		var collider_value: Variant = hit.get("collider")
+		if (
+			collider_value is Node
+			and (
+				_smoke_node_belongs_to(collider_value as Node, prop)
+				or (
+					carrier != null
+					and _smoke_node_belongs_to(collider_value as Node, carrier)
+				)
+			)
+		):
+			visible_ids.append(prop_id)
+	visible_ids.sort()
+	return visible_ids
+
+
+func _check_held_prop_visibility(label: String, town: Node) -> void:
+	var caretaker := town.get_node_or_null("Actors/NPC_Park_Caretaker") as Node3D
+	var player := town.get_node_or_null("Actors/Player3D") as Node3D
+	var prop := town.get_node_or_null("Props/PhysicalProps3D/Prop_Park_Box") as RigidBody3D
+	if caretaker == null or player == null or prop == null:
+		_failures.append("%s cannot stage held-prop visibility" % label)
+		return
+	if not prop.has_method(&"begin_carry") or not bool(prop.call(&"begin_carry", player)):
+		_failures.append("%s could not enter held-prop visibility state" % label)
+		return
+	prop.call("update_carried_position", player.global_position + Vector3.UP * 1.1)
+	var held_facts: Array = town.call("npc_spatial_facts")
+	var caretaker_fact: Dictionary = {}
+	for fact_value in held_facts:
+		if (
+			fact_value is Dictionary
+			and str((fact_value as Dictionary).get("actorId", "")) == "NPC_Park_Caretaker"
+		):
+			caretaker_fact = fact_value as Dictionary
+			break
+	if not (caretaker_fact.get("visibleObjectIds", []) as Array).has("Prop_Park_Box"):
+		_failures.append("%s held prop was hidden when its carrier was the ray hit" % label)
+	prop.call("reset_to_spawn")
+	prop.sleeping = true
+
+
+func _smoke_node_belongs_to(node: Node, owner_node: Node) -> bool:
+	var current: Node = node
+	while current != null:
+		if current == owner_node:
+			return true
+		current = current.get_parent()
+	return false
 
 
 func _dedupe_strings(values: Array[String]) -> Array[String]:
@@ -830,6 +1007,25 @@ func _dedupe_strings(values: Array[String]) -> Array[String]:
 		if deduped.is_empty() or deduped[deduped.size() - 1] != value:
 			deduped.append(value)
 	return deduped
+
+
+func _check_physical_prop_startup_stability(label: String, town: Node) -> void:
+	var keyboard := town.get_node_or_null(
+		"Props/PhysicalProps3D/Prop_Studio_Keyboard"
+	) as RigidBody3D
+	if keyboard == null:
+		_failures.append("%s has no Studio keyboard prop" % label)
+		return
+	var expected_position := Vector3(-2.25, 0.86, -15.6)
+	if keyboard.position.distance_to(expected_position) > 0.04:
+		_failures.append(
+			"%s Studio keyboard fell from its desk: got=%s expected=%s"
+			% [label, keyboard.position, expected_position]
+		)
+	if keyboard.global_transform.basis.y.normalized().dot(Vector3.UP) < 0.98:
+		_failures.append("%s Studio keyboard tipped during startup settle" % label)
+	if keyboard.linear_velocity.length() > 0.2:
+		_failures.append("%s Studio keyboard did not settle on its desk" % label)
 
 
 func _check_semantic_meeting_slots(
@@ -1127,6 +1323,12 @@ func _check_player_contact(label: String, instance: Node) -> void:
 	player.global_position = receptionist.global_position + Vector3(0.0, 0.0, 3.6)
 	player.velocity = Vector3.ZERO
 	instance.call("_sync_active_contact_from_response", {"activeContact": first_contact})
+	# A same-revision response that began before this contact cannot revoke it.
+	# Real RunService contact changes always advance the world revision.
+	instance.call("_sync_active_contact_from_response", {
+		"worldRevision": int(run_snapshot.get("runWorldRevision", 0)),
+		"activeContact": null,
+	})
 	var conflict_arrival_count: Array[int] = [0]
 	var record_conflict_arrival := func(
 		_movement_id: String,

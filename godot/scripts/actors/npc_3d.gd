@@ -39,6 +39,23 @@ const CONTACT_RETARGET_SECONDS := 0.25
 const CONTACT_RETARGET_DISTANCE_M := 0.5
 const CONTACT_MIN_SAFE_DISTANCE_M := 1.2
 const CONTACT_MAX_SAFE_DISTANCE_M := 2.2
+const MOVE_NONE: StringName = &"none"
+const MOVE_AMBIENT: StringName = &"ambient"
+const MOVE_COMMAND: StringName = &"command"
+const MOVE_CONTACT: StringName = &"contact"
+const MOVE_CONTACT_RETURN: StringName = &"contact_return"
+const AMBIENT_TARGET_ATTEMPTS := 12
+const AMBIENT_MIN_DISPLACEMENT_M := 0.7
+const AMBIENT_PROJECTION_TOLERANCE_M := 0.65
+const AMBIENT_PATH_LENGTH_FACTOR := 3.0
+const PROGRESS_SAMPLE_SECONDS := 0.5
+const STUCK_GRACE_SECONDS := 0.75
+const STUCK_TRIGGER_SECONDS := 1.5
+const STUCK_MIN_PROGRESS_M := 0.08
+const MAX_LOCAL_REPATH_ATTEMPTS := 2
+const YIELD_MIN_SECONDS := 0.45
+const YIELD_MAX_SECONDS := 0.9
+const DESTINATION_CLEARANCE_M := 0.9
 
 @export var actor_id: StringName
 @export var label_key: StringName
@@ -47,6 +64,10 @@ const CONTACT_MAX_SAFE_DISTANCE_M := 2.2
 @export var character_scene: PackedScene
 @export var conversation_enabled := false
 @export_range(0.1, 8.0, 0.1, "or_greater") var walk_speed := 2.2
+@export var ambient_wander_enabled := true
+@export_range(0.8, 4.0, 0.1, "or_greater") var ambient_wander_radius := 1.8
+@export_range(0.25, 10.0, 0.25, "or_greater") var ambient_dwell_min_seconds := 1.5
+@export_range(0.25, 12.0, 0.25, "or_greater") var ambient_dwell_max_seconds := 3.75
 
 @onready var _visual_root: Node3D = $VisualRoot
 @onready var _role_accent: MeshInstance3D = $RoleAccent
@@ -57,7 +78,9 @@ var _animation_player: AnimationPlayer
 var _policy_state: StringName = POLICY_IDLE
 var _pending_target := Vector3.ZERO
 var _has_pending_target := false
+var _pending_move_mode: StringName = MOVE_NONE
 var _moving := false
+var _movement_mode: StringName = MOVE_NONE
 var _movement_id := ""
 var _movement_anchor_ref := ""
 var _movement_target := Vector3.ZERO
@@ -71,14 +94,41 @@ var _contact_ready_emitted := false
 var _contact_ready_signaled := false
 var _contact_retarget_count := 0
 var _default_target_desired_distance := 0.4
+var _ambient_rng := RandomNumberGenerator.new()
+var _ambient_center := Vector3.ZERO
+var _ambient_dwell_remaining := 0.0
+var _ambient_suspended := false
+var _ambient_cycle_count := 0
+var _ambient_reselection_count := 0
+var _ambient_selection_failure_count := 0
+var _yield_remaining := 0.0
+var _yield_resume_mode: StringName = MOVE_NONE
+var _yield_count := 0
+var _repath_attempts := 0
+var _stuck_recovery_count := 0
+var _progress_sample_remaining := PROGRESS_SAMPLE_SECONDS
+var _progress_grace_remaining := 0.0
+var _stuck_elapsed := 0.0
+var _progress_sample_position := Vector3.ZERO
+var _last_recovery_reason := ""
 
 
 func _ready() -> void:
 	add_to_group(&"npc_actors")
 	add_to_group(&"interactables")
 	_navigation_agent.avoidance_enabled = false
+	_navigation_agent.max_speed = walk_speed
+	# A stable per-actor priority breaks symmetric RVO deadlocks without making
+	# locomotion depend on a provider decision or frame timing.
+	var actor_hash := absi(str(actor_id).hash())
+	_navigation_agent.avoidance_priority = 0.35 + float(actor_hash % 41) * 0.01
 	_default_target_desired_distance = _navigation_agent.target_desired_distance
 	_navigation_agent.velocity_computed.connect(_on_velocity_computed)
+	_ambient_rng.seed = actor_hash + 1
+	_ambient_center = global_position
+	_ambient_suspended = not ambient_wander_enabled
+	_schedule_ambient_dwell(false)
+	_reset_progress_tracking()
 	_apply_role_accent()
 	_instantiate_character()
 	_speech_blip.stream = _build_speech_blip()
@@ -95,6 +145,11 @@ func _physics_process(delta: float) -> void:
 		_process_player_contact(delta)
 		return
 
+	if _yield_remaining > 0.0:
+		_process_yield(delta)
+		move_and_slide()
+		return
+
 	if _has_pending_target and _navigation_map_is_synchronized():
 		_begin_pending_move()
 		# NavigationServer3D applies the new target on its next synchronization.
@@ -103,6 +158,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if not _moving:
+		_tick_ambient_wander(delta)
 		velocity.x = 0.0
 		velocity.z = 0.0
 		move_and_slide()
@@ -110,6 +166,11 @@ func _physics_process(delta: float) -> void:
 
 	if _navigation_agent.is_navigation_finished():
 		_complete_move()
+		move_and_slide()
+		return
+
+	if _track_motion_progress(delta):
+		_recover_from_stuck_motion()
 		move_and_slide()
 		return
 
@@ -123,8 +184,10 @@ func _physics_process(delta: float) -> void:
 
 
 func move_to(target_position: Vector3) -> void:
-	_pending_target = target_position
-	_has_pending_target = true
+	_movement_id = ""
+	_movement_anchor_ref = ""
+	_ambient_suspended = false
+	_queue_navigation_move(target_position, MOVE_AMBIENT)
 
 
 func apply_movement_command(
@@ -140,23 +203,20 @@ func apply_movement_command(
 		# A schedule movement is presentation data; it cannot revoke the
 		# RunService-owned player contact order.
 		return false
+	_cancel_navigation_motion()
+	_ambient_suspended = false
 	_movement_id = movement_id
 	_movement_anchor_ref = anchor_ref
 	_movement_target = projected_target
-	move_to(projected_target)
+	_queue_navigation_move(projected_target, MOVE_COMMAND)
 	return true
 
 
 func stop() -> void:
 	_clear_contact_state()
-	_has_pending_target = false
-	_moving = false
-	_navigation_agent.avoidance_enabled = false
-	_navigation_agent.velocity = Vector3.ZERO
+	_cancel_navigation_motion()
+	_ambient_suspended = true
 	_navigation_agent.target_desired_distance = _default_target_desired_distance
-	velocity.x = 0.0
-	velocity.z = 0.0
-	set_policy_state(POLICY_IDLE)
 	_movement_id = ""
 	_movement_anchor_ref = ""
 	_movement_target = Vector3.ZERO
@@ -184,6 +244,7 @@ func begin_player_contact(
 		_navigation_agent.target_desired_distance = _contact_safe_distance
 		return true
 	stop()
+	_ambient_suspended = false
 	_contact_id = contact_id
 	_contact_target = target
 	_contact_safe_distance = clampf(
@@ -197,6 +258,7 @@ func begin_player_contact(
 	_contact_ready_emitted = false
 	_contact_ready_signaled = false
 	_contact_retarget_count = 0
+	_repath_attempts = 0
 	_navigation_agent.target_desired_distance = _contact_safe_distance
 	set_policy_state(POLICY_WALK)
 	return true
@@ -206,21 +268,20 @@ func cancel_player_contact(return_position: Variant = null) -> void:
 	if _contact_id.is_empty():
 		return
 	_clear_contact_state()
-	_has_pending_target = false
-	_moving = false
-	_navigation_agent.avoidance_enabled = false
-	_navigation_agent.velocity = Vector3.ZERO
+	_cancel_navigation_motion()
+	_ambient_suspended = false
 	_navigation_agent.target_desired_distance = _default_target_desired_distance
-	velocity.x = 0.0
-	velocity.z = 0.0
-	set_policy_state(POLICY_IDLE)
 	if return_position is Vector3:
 		# This is only visual recovery after an authoritative contact cancellation.
 		# It carries no runtime movement id and therefore cannot emit an arrival.
 		_movement_id = ""
 		_movement_anchor_ref = ""
 		_movement_target = return_position as Vector3
-		move_to(return_position as Vector3)
+		_queue_navigation_move(return_position as Vector3, MOVE_CONTACT_RETURN)
+	else:
+		_movement_target = Vector3.ZERO
+		_ambient_center = global_position
+		_schedule_ambient_dwell(false)
 
 
 func has_player_contact(contact_id := "") -> bool:
@@ -255,16 +316,33 @@ func play_speech_blip(max_distance_m: float) -> void:
 
 
 func is_moving() -> bool:
-	return _moving or _contact_moving
+	return _moving or _contact_moving or _has_pending_target or _yield_remaining > 0.0
 
 
 func movement_status() -> Dictionary:
 	return {
 		"movementId": _movement_id,
 		"anchorRef": _movement_anchor_ref,
-		"moving": _moving or _has_pending_target,
+		"moving": is_moving(),
+		"mode": str(_contact_mode() if not _contact_id.is_empty() else _movement_mode),
 		"targetPosition": _movement_target,
 		"finalPosition": _navigation_agent.get_final_position(),
+		"avoidanceEnabled": _navigation_agent.avoidance_enabled,
+		"avoidancePriority": _navigation_agent.avoidance_priority,
+		"yieldRemaining": _yield_remaining,
+		"yieldCount": _yield_count,
+		"repathAttempts": _repath_attempts,
+		"stuckRecoveryCount": _stuck_recovery_count,
+		"lastRecoveryReason": _last_recovery_reason,
+		"ambient": {
+			"enabled": ambient_wander_enabled,
+			"suspended": _ambient_suspended,
+			"center": _ambient_center,
+			"dwellRemaining": _ambient_dwell_remaining,
+			"cycleCount": _ambient_cycle_count,
+			"reselectionCount": _ambient_reselection_count,
+			"selectionFailureCount": _ambient_selection_failure_count,
+		},
 	}
 
 
@@ -305,23 +383,36 @@ func interact(_interactor: Node3D) -> void:
 func _begin_pending_move() -> void:
 	_navigation_agent.target_position = _pending_target
 	_has_pending_target = false
+	_movement_mode = _pending_move_mode
+	_pending_move_mode = MOVE_NONE
 	_moving = true
 	velocity.x = 0.0
 	velocity.z = 0.0
 	_navigation_agent.avoidance_enabled = true
+	_navigation_agent.max_speed = walk_speed
+	_reset_progress_tracking(STUCK_GRACE_SECONDS)
 	set_policy_state(POLICY_WALK)
 
 
 func _complete_move() -> void:
 	var completed_movement_id := _movement_id
 	var completed_anchor_ref := _movement_anchor_ref
+	var completed_mode := _movement_mode
 	var final_position := _navigation_agent.get_final_position()
 	var reached_final := _planar_distance(global_position, final_position) <= 0.85
 	var reached_target := _planar_distance(final_position, _movement_target) <= 0.05
-	stop()
-	if not completed_movement_id.is_empty() and reached_final and reached_target:
+	var reached := reached_final and reached_target
+	_cancel_navigation_motion()
+	_movement_id = ""
+	_movement_anchor_ref = ""
+	_movement_target = Vector3.ZERO
+	if completed_mode == MOVE_COMMAND and not completed_movement_id.is_empty() and reached:
+		_ambient_center = global_position
+		_ambient_suspended = false
+		_schedule_ambient_dwell(false)
 		movement_arrived.emit(completed_movement_id, actor_id, completed_anchor_ref)
-	elif not completed_movement_id.is_empty():
+	elif completed_mode == MOVE_COMMAND and not completed_movement_id.is_empty():
+		_ambient_suspended = true
 		push_warning(
 			"NPC %s could not reach projected runtime anchor %s; arrival not emitted."
 			% [actor_id, completed_anchor_ref]
@@ -332,6 +423,16 @@ func _complete_move() -> void:
 			completed_anchor_ref,
 			"navigation_unreachable"
 		)
+	elif completed_mode == MOVE_CONTACT_RETURN:
+		_ambient_center = global_position
+		_ambient_suspended = false
+		_schedule_ambient_dwell(false)
+	else:
+		# Ambient destinations are presentation-only. An unreachable local point
+		# is discarded and replaced after a short dwell; it never becomes a
+		# runtime arrival or a teleport.
+		_ambient_suspended = false
+		_schedule_ambient_dwell(not reached)
 
 
 func _planar_distance(a: Vector3, b: Vector3) -> float:
@@ -347,16 +448,23 @@ func _navigation_map_is_synchronized() -> bool:
 
 
 func _on_velocity_computed(safe_velocity: Vector3) -> void:
-	if not _moving and not _contact_moving:
+	if (_yield_remaining > 0.0) or (not _moving and not _contact_moving):
 		return
-	velocity.x = safe_velocity.x
-	velocity.z = safe_velocity.z
+	var planar_velocity := Vector2(safe_velocity.x, safe_velocity.z)
+	if planar_velocity.length() > walk_speed:
+		planar_velocity = planar_velocity.normalized() * walk_speed
+	velocity.x = planar_velocity.x
+	velocity.z = planar_velocity.y
 	move_and_slide()
 
 
 func _process_player_contact(delta: float) -> void:
 	if not is_instance_valid(_contact_target):
 		cancel_player_contact()
+		move_and_slide()
+		return
+	if _yield_remaining > 0.0:
+		_process_yield(delta)
 		move_and_slide()
 		return
 	var target_position := _contact_target.global_position
@@ -366,6 +474,7 @@ func _process_player_contact(delta: float) -> void:
 		and _contact_has_line_of_sight()
 	):
 		_contact_moving = false
+		_movement_mode = MOVE_NONE
 		_navigation_agent.avoidance_enabled = false
 		_navigation_agent.velocity = Vector3.ZERO
 		velocity.x = 0.0
@@ -373,6 +482,7 @@ func _process_player_contact(delta: float) -> void:
 		set_policy_state(POLICY_IDLE)
 		face_position(target_position + Vector3.UP * 1.35)
 		_contact_ready_emitted = true
+		_reset_progress_tracking()
 		if not _contact_ready_signaled:
 			_contact_ready_signaled = true
 			player_contact_ready.emit(_contact_id, actor_id)
@@ -396,20 +506,36 @@ func _process_player_contact(delta: float) -> void:
 			target_position
 		)
 		_navigation_agent.target_position = projected_target
+		_movement_target = projected_target
 		_contact_last_target_position = target_position
 		_contact_retarget_remaining = CONTACT_RETARGET_SECONDS
 		_contact_retarget_count += 1
 		_contact_moving = true
+		_movement_mode = MOVE_CONTACT
 		_contact_ready_emitted = false
 		_navigation_agent.avoidance_enabled = true
+		_navigation_agent.max_speed = walk_speed
+		_reset_progress_tracking(STUCK_GRACE_SECONDS)
 		set_policy_state(POLICY_WALK)
 		# Let NavigationServer3D synchronize the refreshed target before querying.
 		move_and_slide()
 		return
 
-	if not _contact_moving or _navigation_agent.is_navigation_finished():
+	if not _contact_moving:
 		velocity.x = 0.0
 		velocity.z = 0.0
+		move_and_slide()
+		return
+	if _navigation_agent.is_navigation_finished():
+		# Reaching the projected player point without safe-distance line of sight
+		# usually means a body or narrow portal won. Yield, then refresh the
+		# moving target instead of vibrating or forcing a teleport.
+		_repath_attempts += 1
+		_begin_yield(MOVE_CONTACT, "contact_endpoint_blocked")
+		move_and_slide()
+		return
+	if _track_motion_progress(delta):
+		_recover_from_stuck_motion()
 		move_and_slide()
 		return
 	var next_path_position := _navigation_agent.get_next_path_position()
@@ -419,6 +545,268 @@ func _process_player_contact(delta: float) -> void:
 		desired_direction = desired_direction.normalized()
 		look_at(global_position + desired_direction, Vector3.UP)
 	_navigation_agent.velocity = desired_direction * walk_speed
+
+
+func _queue_navigation_move(target_position: Vector3, mode: StringName) -> void:
+	if _moving or _has_pending_target or _yield_remaining > 0.0:
+		_cancel_navigation_motion()
+	_pending_target = target_position
+	_has_pending_target = true
+	_pending_move_mode = mode
+	_movement_target = target_position
+	_repath_attempts = 0
+
+
+func _cancel_navigation_motion() -> void:
+	_has_pending_target = false
+	_pending_move_mode = MOVE_NONE
+	_moving = false
+	_movement_mode = MOVE_NONE
+	_yield_remaining = 0.0
+	_yield_resume_mode = MOVE_NONE
+	_navigation_agent.avoidance_enabled = false
+	_navigation_agent.velocity = Vector3.ZERO
+	velocity.x = 0.0
+	velocity.z = 0.0
+	_reset_progress_tracking()
+	set_policy_state(POLICY_IDLE)
+
+
+func _tick_ambient_wander(delta: float) -> void:
+	if not ambient_wander_enabled or _ambient_suspended:
+		return
+	if not _navigation_map_is_synchronized():
+		return
+	_ambient_dwell_remaining = maxf(0.0, _ambient_dwell_remaining - delta)
+	if not is_zero_approx(_ambient_dwell_remaining):
+		return
+	var target_value: Variant = _select_ambient_target()
+	if not target_value is Vector3:
+		_ambient_selection_failure_count += 1
+		_schedule_ambient_dwell(true)
+		return
+	_ambient_cycle_count += 1
+	_queue_navigation_move(target_value as Vector3, MOVE_AMBIENT)
+
+
+func _select_ambient_target() -> Variant:
+	var navigation_map := _navigation_agent.get_navigation_map()
+	var origin := NavigationServer3D.map_get_closest_point(
+		navigation_map,
+		global_position
+	)
+	var minimum_radius := maxf(AMBIENT_MIN_DISPLACEMENT_M, ambient_wander_radius * 0.5)
+	for _attempt in range(AMBIENT_TARGET_ATTEMPTS):
+		var angle := _ambient_rng.randf_range(0.0, TAU)
+		var distance := _ambient_rng.randf_range(minimum_radius, ambient_wander_radius)
+		var raw_target := _ambient_center + Vector3(cos(angle), 0.0, sin(angle)) * distance
+		var projected_target := NavigationServer3D.map_get_closest_point(
+			navigation_map,
+			raw_target
+		)
+		if _planar_distance(projected_target, raw_target) > AMBIENT_PROJECTION_TOLERANCE_M:
+			continue
+		if _planar_distance(projected_target, _ambient_center) > ambient_wander_radius + 0.2:
+			continue
+		if _planar_distance(projected_target, global_position) < AMBIENT_MIN_DISPLACEMENT_M:
+			continue
+		if not _ambient_destination_has_clearance(projected_target):
+			continue
+		var path := NavigationServer3D.map_get_path(
+			navigation_map,
+			origin,
+			projected_target,
+			true,
+			_navigation_agent.navigation_layers
+		)
+		if path.size() < 2:
+			continue
+		if _path_length(path) > ambient_wander_radius * AMBIENT_PATH_LENGTH_FACTOR:
+			continue
+		return projected_target
+	return null
+
+
+func _ambient_destination_has_clearance(target_position: Vector3) -> bool:
+	for actor_value in get_tree().get_nodes_in_group(&"npc_actors"):
+		if not actor_value is NPC3D or actor_value == self:
+			continue
+		var other := actor_value as NPC3D
+		if _planar_distance(target_position, other.global_position) < DESTINATION_CLEARANCE_M:
+			return false
+		var other_status := other.movement_status()
+		if (
+			bool(other_status.get("moving", false))
+			and _planar_distance(
+				target_position,
+				other_status.get("targetPosition", other.global_position) as Vector3
+			) < DESTINATION_CLEARANCE_M
+		):
+			return false
+	for player_value in get_tree().get_nodes_in_group(&"player"):
+		if (
+			player_value is Node3D
+			and _planar_distance(target_position, (player_value as Node3D).global_position)
+			< DESTINATION_CLEARANCE_M + 0.25
+		):
+			return false
+	return true
+
+
+func _path_length(path: PackedVector3Array) -> float:
+	var total := 0.0
+	for index in range(1, path.size()):
+		total += path[index - 1].distance_to(path[index])
+	return total
+
+
+func _schedule_ambient_dwell(short_retry: bool) -> void:
+	if _ambient_suspended or not ambient_wander_enabled:
+		_ambient_dwell_remaining = 0.0
+		return
+	if short_retry:
+		_ambient_dwell_remaining = _ambient_rng.randf_range(0.45, 1.0)
+		return
+	var minimum := minf(ambient_dwell_min_seconds, ambient_dwell_max_seconds)
+	var maximum := maxf(ambient_dwell_min_seconds, ambient_dwell_max_seconds)
+	_ambient_dwell_remaining = _ambient_rng.randf_range(minimum, maximum)
+
+
+func _reset_progress_tracking(grace_seconds := 0.0) -> void:
+	_progress_sample_remaining = PROGRESS_SAMPLE_SECONDS
+	_progress_grace_remaining = maxf(0.0, grace_seconds)
+	_stuck_elapsed = 0.0
+	_progress_sample_position = global_position
+
+
+func _track_motion_progress(delta: float) -> bool:
+	if _progress_grace_remaining > 0.0:
+		_progress_grace_remaining = maxf(0.0, _progress_grace_remaining - delta)
+		_progress_sample_position = global_position
+		return false
+	_progress_sample_remaining = maxf(0.0, _progress_sample_remaining - delta)
+	if not is_zero_approx(_progress_sample_remaining):
+		return false
+	var progress := _planar_distance(global_position, _progress_sample_position)
+	_progress_sample_position = global_position
+	_progress_sample_remaining = PROGRESS_SAMPLE_SECONDS
+	if progress >= STUCK_MIN_PROGRESS_M:
+		_stuck_elapsed = 0.0
+		return false
+	_stuck_elapsed += PROGRESS_SAMPLE_SECONDS
+	return _stuck_elapsed >= STUCK_TRIGGER_SECONDS
+
+
+func _recover_from_stuck_motion() -> void:
+	_stuck_recovery_count += 1
+	match _movement_mode:
+		MOVE_COMMAND:
+			if _repath_attempts < MAX_LOCAL_REPATH_ATTEMPTS:
+				_repath_attempts += 1
+				_begin_yield(MOVE_COMMAND, "command_body_blocked")
+			else:
+				_block_runtime_movement("navigation_stuck")
+		MOVE_CONTACT:
+			_repath_attempts += 1
+			_begin_yield(MOVE_CONTACT, "contact_body_blocked")
+		MOVE_CONTACT_RETURN:
+			if _repath_attempts < MAX_LOCAL_REPATH_ATTEMPTS:
+				_repath_attempts += 1
+				_begin_yield(MOVE_CONTACT_RETURN, "contact_return_blocked")
+			else:
+				_cancel_navigation_motion()
+				_ambient_center = global_position
+				_ambient_suspended = false
+				_schedule_ambient_dwell(true)
+		_:
+			_ambient_reselection_count += 1
+			_begin_yield(MOVE_AMBIENT, "ambient_body_blocked")
+
+
+func _begin_yield(resume_mode: StringName, reason: String) -> void:
+	_yield_resume_mode = resume_mode
+	_yield_remaining = _ambient_rng.randf_range(YIELD_MIN_SECONDS, YIELD_MAX_SECONDS)
+	_yield_count += 1
+	_last_recovery_reason = reason
+	_has_pending_target = false
+	_pending_move_mode = MOVE_NONE
+	_moving = false
+	_contact_moving = false
+	# Keep the yielding body registered at zero velocity so other moving agents
+	# can route around it while this NPC waits its turn.
+	_navigation_agent.avoidance_enabled = true
+	_navigation_agent.velocity = Vector3.ZERO
+	velocity.x = 0.0
+	velocity.z = 0.0
+	set_policy_state(POLICY_IDLE)
+
+
+func _process_yield(delta: float) -> void:
+	_yield_remaining = maxf(0.0, _yield_remaining - delta)
+	_navigation_agent.velocity = Vector3.ZERO
+	velocity.x = 0.0
+	velocity.z = 0.0
+	if not is_zero_approx(_yield_remaining):
+		return
+	var resume_mode := _yield_resume_mode
+	_yield_resume_mode = MOVE_NONE
+	match resume_mode:
+		MOVE_COMMAND, MOVE_CONTACT_RETURN:
+			_resume_current_navigation_target(resume_mode)
+		MOVE_CONTACT:
+			_movement_mode = MOVE_NONE
+			_contact_last_target_position = Vector3(INF, INF, INF)
+			_contact_retarget_remaining = 0.0
+			_contact_moving = false
+			_reset_progress_tracking()
+		_:
+			_cancel_navigation_motion()
+			_movement_target = Vector3.ZERO
+			_ambient_suspended = false
+			_schedule_ambient_dwell(true)
+
+
+func _resume_current_navigation_target(mode: StringName) -> void:
+	_navigation_agent.target_position = _movement_target
+	_movement_mode = mode
+	_moving = true
+	_navigation_agent.avoidance_enabled = true
+	_navigation_agent.max_speed = walk_speed
+	_reset_progress_tracking(STUCK_GRACE_SECONDS)
+	set_policy_state(POLICY_WALK)
+
+
+func _block_runtime_movement(reason: String) -> void:
+	var blocked_movement_id := _movement_id
+	var blocked_anchor_ref := _movement_anchor_ref
+	_cancel_navigation_motion()
+	_ambient_suspended = true
+	_movement_id = ""
+	_movement_anchor_ref = ""
+	_movement_target = Vector3.ZERO
+	_last_recovery_reason = reason
+	if blocked_movement_id.is_empty():
+		return
+	push_warning(
+		"NPC %s stayed blocked en route to %s after %d local replans."
+		% [actor_id, blocked_anchor_ref, MAX_LOCAL_REPATH_ATTEMPTS]
+	)
+	movement_blocked.emit(
+		blocked_movement_id,
+		actor_id,
+		blocked_anchor_ref,
+		reason
+	)
+
+
+func _contact_mode() -> StringName:
+	if _yield_remaining > 0.0:
+		return &"contact_yield"
+	if _contact_moving:
+		return MOVE_CONTACT
+	if _contact_ready_emitted:
+		return &"contact_ready"
+	return &"contact_wait"
 
 
 func _contact_has_line_of_sight() -> bool:

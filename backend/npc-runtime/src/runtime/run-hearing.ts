@@ -155,6 +155,15 @@ export function normalizeHearingMemory(memory: RunMemory): HearingMemoryView {
       meaningfulFirsthand: false,
     };
   }
+  if (memory.kind === "prop_handling_observation") {
+    return {
+      memoryId: memory.memoryId,
+      kind: memory.kind,
+      sourceActorId: "player",
+      text: `${memory.action}:${memory.propId}`,
+      meaningfulFirsthand: false,
+    };
+  }
   return {
     memoryId: memory.memoryId,
     kind: memory.kind,

@@ -31,7 +31,7 @@ test("run/start hydrates the shared town layout into six persistent uncertain ac
   const snapshot = runSnapshotSchema.parse(service.start("run-test-start", "ko-KR"));
 
   assert.equal(snapshot.worldId, "m3r_first_person_town");
-  assert.equal(snapshot.layoutRevision, "rev-first-person-town-v4");
+  assert.equal(snapshot.layoutRevision, "rev-first-person-town-v5");
   assert.equal(snapshot.worldRevision, 0);
   assert.equal(snapshot.worldClock.graceEndsAtSeconds, 90);
   assert.equal(snapshot.worldClock.hearingAtSeconds, 1800);

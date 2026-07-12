@@ -1,0 +1,95 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/props/carryable_prop_3d.gd" id="1_prop"]
+[ext_resource type="PackedScene" path="res://assets/kenney3d/furniture/computer_keyboard.glb" id="2_keyboard"]
+[ext_resource type="PackedScene" path="res://assets/kenney3d/furniture/potted_plant.glb" id="3_plant"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_prop"]
+friction = 0.75
+bounce = 0.08
+
+[sub_resource type="BoxShape3D" id="BoxShape_keyboard"]
+size = Vector3(0.72, 0.14, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape_plant"]
+size = Vector3(0.62, 0.9, 0.62)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial_box"]
+albedo_color = Color(0.62, 0.46, 0.27, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_box"]
+material = SubResource("StandardMaterial_box")
+size = Vector3(0.75, 0.7, 0.75)
+
+[sub_resource type="BoxShape3D" id="BoxShape_box"]
+size = Vector3(0.75, 0.7, 0.75)
+
+[node name="PhysicalProps3D" type="Node3D"]
+
+[node name="Prop_Studio_Keyboard" type="RigidBody3D" parent="."]
+position = Vector3(-2.25, 0.86, -15.6)
+collision_layer = 24
+collision_mask = 7
+mass = 0.35
+physics_material_override = SubResource("PhysicsMaterial_prop")
+linear_damp = 1.6
+angular_damp = 2.4
+contact_monitor = true
+max_contacts_reported = 8
+continuous_cd = true
+script = ExtResource("1_prop")
+prop_id = "Prop_Studio_Keyboard"
+label_key = &"prop.Prop_Studio_Keyboard.label"
+wall_clearance_m = 0.28
+
+[node name="Visual" parent="Prop_Studio_Keyboard" instance=ExtResource("2_keyboard")]
+scale = Vector3(2, 2, 2)
+
+[node name="Collision" type="CollisionShape3D" parent="Prop_Studio_Keyboard"]
+shape = SubResource("BoxShape_keyboard")
+
+[node name="Prop_Studio_Plant" type="RigidBody3D" parent="."]
+position = Vector3(-4.5, 0.45, -18.5)
+collision_layer = 24
+collision_mask = 7
+mass = 1.2
+physics_material_override = SubResource("PhysicsMaterial_prop")
+linear_damp = 1.8
+angular_damp = 2.5
+contact_monitor = true
+max_contacts_reported = 8
+continuous_cd = true
+script = ExtResource("1_prop")
+prop_id = "Prop_Studio_Plant"
+label_key = &"prop.Prop_Studio_Plant.label"
+wall_clearance_m = 0.42
+
+[node name="Visual" parent="Prop_Studio_Plant" instance=ExtResource("3_plant")]
+position = Vector3(0, -0.45, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="Collision" type="CollisionShape3D" parent="Prop_Studio_Plant"]
+shape = SubResource("BoxShape_plant")
+
+[node name="Prop_Park_Box" type="RigidBody3D" parent="."]
+position = Vector3(-1.2, 0.38, 5.8)
+collision_layer = 24
+collision_mask = 7
+mass = 1.5
+physics_material_override = SubResource("PhysicsMaterial_prop")
+linear_damp = 1.5
+angular_damp = 2.0
+contact_monitor = true
+max_contacts_reported = 8
+continuous_cd = true
+script = ExtResource("1_prop")
+prop_id = "Prop_Park_Box"
+label_key = &"prop.Prop_Park_Box.label"
+wall_clearance_m = 0.48
+
+[node name="Visual" type="MeshInstance3D" parent="Prop_Park_Box"]
+mesh = SubResource("BoxMesh_box")
+
+[node name="Collision" type="CollisionShape3D" parent="Prop_Park_Box"]
+shape = SubResource("BoxShape_box")

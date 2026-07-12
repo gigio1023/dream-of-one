@@ -124,14 +124,25 @@ async function advanceToParkContactOpportunity(
 test("one spatial batch dispatches all six stable residents through the same goal path", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
   const calledActorIds: string[] = [];
+  const visibleObjectIdsByActor = new Map<string, string[]>();
   const original = adapter.proposeNextStep.bind(adapter);
   adapter.proposeNextStep = async request => {
     calledActorIds.push(request.observePacket.actorId);
+    visibleObjectIdsByActor.set(
+      request.observePacket.actorId,
+      request.observePacket.visibleObjects.map(object => object.objectId),
+    );
     assert.ok(Array.isArray(request.observePacket.reachableAnchorRefs));
     return original(request);
   };
   const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds("six") });
   const started = service.start("spatial-six", "ko-KR");
+  const initialActors = spatialActors(started);
+  const initialReceptionist = initialActors.find(
+    actor => actor.actorId === "NPC_Studio_Receptionist",
+  );
+  assert.ok(initialReceptionist);
+  initialReceptionist.visibleObjectIds = ["Prop_Studio_Keyboard"];
   const advanced = await service.advance({
     runId: started.runId,
     advanceId: "spatial-six-1",
@@ -141,7 +152,7 @@ test("one spatial batch dispatches all six stable residents through the same goa
     spatialFacts: {
       observedWorldRevision: started.worldRevision,
       player: { position: [8, 0.05, 5], locationId: "" },
-      actors: spatialActors(started),
+      actors: initialActors,
     },
   });
   const goalWakes = advanced.scheduleWakes.filter(wake => wake.kind === "goal");
@@ -158,6 +169,10 @@ test("one spatial batch dispatches all six stable residents through the same goa
     assert.deepEqual(response.actorIds, wake.actorIds);
   }
   assert.deepEqual(calledActorIds.sort(), started.actors.map(actor => actor.actorId).sort());
+  assert.deepEqual(
+    visibleObjectIdsByActor.get("NPC_Studio_Receptionist"),
+    ["Prop_Studio_Keyboard"],
+  );
 
   const current = service.snapshot(started.runId);
   const changedFacts = spatialActors(current);

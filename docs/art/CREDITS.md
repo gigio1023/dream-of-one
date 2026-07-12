@@ -52,3 +52,15 @@ pack as CC0.
 - Use: a small selected set of chairs, couch, cabinet, tables, lamps, and
   books for repeated low-poly dressing in the studio, office, and Station.
 - License copy: `godot/assets/kaykit/furniture_bits/License.txt`
+
+## KayKit City Builder Bits
+
+- Creator: Kay Lousberg (KayKit)
+- Source: [City Builder Bits](https://kaylousberg.itch.io/city-builder-bits),
+  Free version 1.0; files retrieved from the creator's
+  [official asset repository](https://github.com/KayKit-Game-Assets/KayKit-City-Builder-Bits-1.0)
+- License: CC0 1.0 Universal
+- Use: a selected set of stationary cars, a dumpster, fire hydrant, streetlight,
+  traffic light, and loose trash for repeated exterior dressing. Building and
+  road meshes are intentionally excluded.
+- License copy: `godot/assets/kaykit/city_builder_bits/License.txt`

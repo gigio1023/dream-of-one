@@ -55,9 +55,10 @@ and recap, not only menu chrome.
 8. **Minimal physicality**: a few pick/move/throw props; no inventory;
    observation may enter factual NPC memory, but has no automatic reaction and
    cannot directly advance a vouch.
-9. **Audio**: CC0 SFX and ambience land here (footsteps, park murmur, short
-   spatial speech murmurs/blips, the record-scribble cue); no TTS or BGM in
-   M3R.
+9. **Audio**: license-safe SFX and ambience land here (the current baseline is
+   project-owned procedural audio; verified CC0 replacements remain allowed):
+   footsteps, park murmur, short spatial speech murmurs/blips, and the
+   record-scribble cue; no TTS or BGM in M3R.
 10. **Six gameplay locales, one implementation**: presentation ids are
     `ko`, `en`, `it`, `zh`, `fr`, and `ja`; target run API locales are
     `ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`. Chinese means

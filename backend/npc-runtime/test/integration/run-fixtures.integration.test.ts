@@ -47,6 +47,10 @@ test("every run fixture packet validates against the public wire schemas", () =>
 
   runAdvanceRequestSchema.parse(endpoints.runAdvanceHearingDue.request);
   runAdvanceResponseSchema.parse(endpoints.runAdvanceHearingDue.response);
+  runAdvanceRequestSchema.parse(endpoints.runAdvancePropHandling.request);
+  runAdvanceResponseSchema.parse(endpoints.runAdvancePropHandling.response);
+  runSnapshotRequestSchema.parse(endpoints.runSnapshotAfterPropHandling.request);
+  runSnapshotSchema.parse(endpoints.runSnapshotAfterPropHandling.response);
   runHearingRequestSchema.parse(endpoints.runHearingOpen.request);
   runHearingResponseSchema.parse(endpoints.runHearingOpen.response);
   runHearingRequestSchema.parse(endpoints.runHearingAnswer.request);
@@ -126,6 +130,29 @@ test("every run fixture packet validates against the public wire schemas", () =>
   runEncounterResponseSchema.parse(endpoints.administrationRecordEncounter.response);
   runSnapshotRequestSchema.parse(endpoints.administrationFinalSnapshot.request);
   runSnapshotSchema.parse(endpoints.administrationFinalSnapshot.response);
+});
+
+test("prop fixture preserves the engine visibility boundary as factual memory", () => {
+  const endpoints = fixtures.endpoints;
+  const response = endpoints.runAdvancePropHandling.response;
+  assert.deepEqual(response.acceptedPropEventIds, ["fixture-prop-event-1"]);
+  assert.deepEqual(
+    response.propObservationMemories.map((memory: { listenerActorId: string }) =>
+      memory.listenerActorId
+    ).sort(),
+    ["NPC_Park_Caretaker", "NPC_Studio_Receptionist"],
+  );
+  assert.deepEqual(response.scheduleWakes, []);
+  assert.deepEqual(response.actorReadinessDeltas, []);
+  const snapshot = endpoints.runSnapshotAfterPropHandling.response;
+  assert.equal(snapshot.records.length, 0);
+  assert.equal(snapshot.ledgerEvents.length, 0);
+  assert.equal(snapshot.institutionalPressure, 0);
+  assert.equal(snapshot.actors.reduce(
+    (count: number, actor: { memories: Array<{ kind: string }> }) =>
+      count + actor.memories.filter(memory => memory.kind === "prop_handling_observation").length,
+    0,
+  ), 2);
 });
 
 test("contact fixture reaches the same preloaded session through one grounded provider choice", () => {

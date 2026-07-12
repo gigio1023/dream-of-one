@@ -17,6 +17,8 @@ const TARGETS_PROPERTY := &"godot_ai_semantic_targets"
 @export var world_path: NodePath = ^"../Town"
 @export var player_path: NodePath = ^"../Town/Actors/Player3D"
 @export var hud_path: NodePath = ^"../HUD3D"
+@export var audio_path: NodePath = ^"../AudioFeedback"
+@export var onboarding_path: NodePath = ^"../OnboardingOverlay"
 
 
 func _get_property_list() -> Array[Dictionary]:
@@ -98,10 +100,23 @@ func snapshot() -> Dictionary:
 	var world := get_node_or_null(world_path)
 	var player := get_node_or_null(player_path)
 	var hud := get_node_or_null(hud_path)
+	var audio := get_node_or_null(audio_path)
+	var onboarding := get_node_or_null(onboarding_path)
 	var main_source := _presentation_source(main, "main_node_not_found")
 	var world_source := _presentation_source(world, "world_node_not_found")
 	var hud_source := _presentation_source(hud, "hud_node_not_found")
-	var sources: Array[Dictionary] = [main_source, world_source, hud_source]
+	var audio_source := _presentation_source(audio, "audio_feedback_node_not_found")
+	var onboarding_source := _presentation_source(
+		onboarding,
+		"onboarding_overlay_node_not_found"
+	)
+	var sources: Array[Dictionary] = [
+		main_source,
+		world_source,
+		hud_source,
+		audio_source,
+		onboarding_source,
+	]
 	var turn := _first_dictionary(sources, [&"currentTurn", &"activeTurn", &"turn"])
 	var hud_view := _source_data(hud_source)
 
@@ -114,6 +129,8 @@ func snapshot() -> Dictionary:
 			"world": _source_status(world_source, world_path),
 			"player": _node_status(player, player_path, "player_node_not_found"),
 			"hud": _source_status(hud_source, hud_path),
+			"audio": _source_status(audio_source, audio_path),
+			"onboarding": _source_status(onboarding_source, onboarding_path),
 		},
 		"locationId": _first_value(sources, [&"locationId", &"location_id"], ""),
 		"runId": _first_value(sources, [&"runId", &"run_id"], ""),
@@ -137,6 +154,11 @@ func snapshot() -> Dictionary:
 		),
 		"worldClock": _first_value(sources, [&"worldClock", &"world_clock"], {}),
 		"advance": _first_value(sources, [&"advance"], {}),
+		"physicalProps": _first_value(
+			sources,
+			[&"physicalProps", &"physical_props"],
+			{}
+		),
 		"scheduler": _first_value(sources, [&"scheduler"], {}),
 		"scheduleWakes": _first_value(
 			sources,
@@ -178,6 +200,8 @@ func snapshot() -> Dictionary:
 		"modal": _modal_snapshot(hud_view),
 		"conversation": _conversation_snapshot(sources, turn),
 		"hud": _hud_snapshot(hud_view),
+		"audio": _json_safe(_source_data(audio_source)),
+		"onboarding": _json_safe(_source_data(onboarding_source)),
 		"encounteredStances": _stance_summaries(
 			_first_value(sources, [&"encounteredStances", &"encountered_stances"], [])
 		),
@@ -296,6 +320,7 @@ func _player_snapshot(player: Node) -> Dictionary:
 	var facing := -facing_node.global_transform.basis.z.normalized()
 	var input_state := _read_property(player, [&"input_enabled", &"control_enabled", &"_control_enabled"])
 	var focus := _focus_snapshot(player)
+	var held_prop := _held_prop_snapshot(player)
 	var input_enabled: Variant = null
 	if bool(input_state["available"]):
 		input_enabled = bool(input_state.get("value", false))
@@ -311,6 +336,7 @@ func _player_snapshot(player: Node) -> Dictionary:
 			"reason": str(input_state["reason"]),
 		},
 		"focus": focus,
+		"heldProp": held_prop,
 	}
 
 
@@ -347,6 +373,36 @@ func _focus_snapshot(player: Node) -> Dictionary:
 		"id": str(target.get("id", "")),
 		"title": str(target.get("title", "")),
 		"kind": str(target.get("kind", "unknown")),
+	}
+
+
+func _held_prop_snapshot(player: Node) -> Dictionary:
+	if not player.has_method(&"held_prop"):
+		return {
+			"available": false,
+			"reason": "held_prop_method_missing",
+			"hasProp": false,
+		}
+	var value: Variant = player.call(&"held_prop")
+	if value == null:
+		return {
+			"available": true,
+			"reason": "no_held_prop",
+			"hasProp": false,
+		}
+	if not value is Node:
+		return {
+			"available": false,
+			"reason": "held_prop_invalid",
+			"hasProp": false,
+		}
+	var prop := value as Node
+	return {
+		"available": true,
+		"reason": "",
+		"hasProp": true,
+		"propId": str(prop.get("prop_id")),
+		"path": str(prop.get_path()),
 	}
 
 

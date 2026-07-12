@@ -20,6 +20,7 @@ const MOVEMENT_MAX_RETRIES := 2
 const ADVANCE_RETRY_SECONDS := 1.0
 const ADVANCE_MAX_SECONDS := 10
 const ADVANCE_MAX_ARRIVALS := 6
+const ADVANCE_MAX_PROP_EVENTS := 8
 const AMBIENT_DECISION_RETRY_SECONDS := 1.0
 const CONTACT_SPATIAL_REFRESH_SECONDS := 0.25
 const PLAYER_SPATIAL_DIRTY_DISTANCE_M := 0.5
@@ -68,6 +69,11 @@ var _arrival_batch_remaining := -1.0
 var _advance_sequence := 0
 var _pending_advance_request: Dictionary = {}
 var _queued_arrivals: Array[Dictionary] = []
+var _queued_prop_events: Array[Dictionary] = []
+var _prop_event_sequence := 0
+var _last_accepted_prop_event_ids: Array = []
+var _last_prop_observation_memories: Array = []
+var _last_prop_event_rejection := ""
 var _arrival_batch_movement_ids: Dictionary = {}
 var _queued_movement_deltas: Array[Dictionary] = []
 var _active_movements: Dictionary = {}
@@ -159,6 +165,11 @@ func _ready() -> void:
 			actor.movement_blocked.connect(_on_npc_movement_blocked)
 			actor.player_contact_ready.connect(_on_player_contact_ready)
 			actor.conversation_requested.connect(_on_conversation_requested.bind(actor))
+	for prop_value in get_tree().get_nodes_in_group(&"physical_props"):
+		if prop_value is Node and (prop_value as Node).has_signal(&"handling_event"):
+			var prop := prop_value as Node
+			if not prop.is_connected(&"handling_event", _on_prop_handling_event):
+				prop.connect(&"handling_event", _on_prop_handling_event)
 	_hud.configure_look_settings(
 		float(_player.get("mouse_sensitivity")),
 		bool(_player.get("invert_y")),
@@ -241,9 +252,12 @@ func _process(delta: float) -> void:
 			_dispatch_advance()
 		return
 	var should_advance := (
-		is_zero_approx(_arrival_batch_remaining)
-		if not _queued_arrivals.is_empty()
-		else _advance_elapsed_buffer >= _advance_batch_seconds()
+		not _queued_prop_events.is_empty()
+		or (
+			is_zero_approx(_arrival_batch_remaining)
+			if not _queued_arrivals.is_empty()
+			else _advance_elapsed_buffer >= _advance_batch_seconds()
+		)
 	)
 	if should_advance:
 		_prepare_advance_request()
@@ -285,6 +299,12 @@ func presentation_snapshot() -> Dictionary:
 			"applied": _last_arrivals_applied.duplicate(true),
 			"rejected": _last_arrivals_rejected.duplicate(true),
 			"queuedCount": _queued_arrivals.size(),
+		},
+		"physicalProps": {
+			"queuedEventCount": _queued_prop_events.size(),
+			"lastAcceptedEventIds": _last_accepted_prop_event_ids.duplicate(true),
+			"lastObservationMemoryCount": _last_prop_observation_memories.size(),
+			"lastRejection": _last_prop_event_rejection,
 		},
 		"advance": {
 			"inFlight": _advance_in_flight,
@@ -473,6 +493,68 @@ func _update_player_spatial_dirty(delta: float) -> void:
 		_contact_spatial_refresh_remaining = CONTACT_SPATIAL_REFRESH_SECONDS
 
 
+func _on_prop_handling_event(event: Dictionary) -> void:
+	if _run_status != "active":
+		return
+	var prop_id := str(event.get("propId", ""))
+	var action := str(event.get("action", ""))
+	var player_position := _array_or_empty(event.get("playerPosition"))
+	var object_position := _array_or_empty(event.get("objectPosition"))
+	var observers := _array_or_empty(event.get("observers"))
+	if (
+		not _physical_prop_known(prop_id)
+		or action not in ["pick_up", "carry", "place", "throw"]
+		or player_position.size() != 3
+		or object_position.size() != 3
+		or not _prop_observers_are_exact(observers)
+	):
+		push_warning("Ignoring malformed physical prop observation: %s:%s" % [prop_id, action])
+		return
+	_prop_event_sequence += 1
+	var packet := {
+		"eventId": "prop-client-%d-%06d" % [OS.get_process_id(), _prop_event_sequence],
+		"propId": prop_id,
+		"action": action,
+		"playerPosition": player_position.duplicate(true),
+		"objectPosition": object_position.duplicate(true),
+		"observedWorldRevision": int(_run_snapshot.get("worldRevision", 0)),
+		"observers": observers.duplicate(true),
+	}
+	_queued_prop_events.append(packet)
+
+
+func _physical_prop_known(prop_id: String) -> bool:
+	if prop_id.is_empty():
+		return false
+	for prop_value in _town.layout_snapshot().get("physical_props", []):
+		if prop_value is Dictionary and str((prop_value as Dictionary).get("id", "")) == prop_id:
+			return true
+	return false
+
+
+func _prop_observers_are_exact(observers: Array) -> bool:
+	if observers.size() != 6:
+		return false
+	var expected_ids: PackedStringArray = []
+	for actor_value in _town.layout_snapshot().get("actors", []):
+		if actor_value is Dictionary:
+			expected_ids.append(str((actor_value as Dictionary).get("id", "")))
+	expected_ids.sort()
+	var received_ids: PackedStringArray = []
+	for observer_value in observers:
+		if not observer_value is Dictionary:
+			return false
+		var observer := observer_value as Dictionary
+		var actor_id := str(observer.get("actorId", ""))
+		if actor_id.is_empty() or received_ids.has(actor_id):
+			return false
+		if typeof(observer.get("visible", null)) != TYPE_BOOL:
+			return false
+		received_ids.append(actor_id)
+	received_ids.sort()
+	return received_ids == expected_ids
+
+
 func _on_player_contact_ready(contact_id: String, actor_id: StringName) -> void:
 	if _run_status != "active":
 		return
@@ -533,8 +615,24 @@ func _sync_active_contact_from_response(response: Dictionary) -> void:
 		if not _active_contact.is_empty():
 			_clear_active_contact(false)
 		return
+	# Every authoritative contact mutation advances the run revision. A response
+	# that started before the current contact may arrive later with
+	# `activeContact: null`; lower- or equal-revision absence cannot revoke the
+	# newer contact. Synthetic smoke packets omit worldRevision deliberately and
+	# retain the direct helper semantics used below.
+	var has_response_revision := response.has("worldRevision")
+	var current_revision := int(_run_snapshot.get("worldRevision", -1))
+	var response_revision := int(response.get("worldRevision", current_revision))
+	if has_response_revision and response_revision < current_revision:
+		return
 	var incoming_value: Variant = response.get("activeContact")
 	if incoming_value == null:
+		if (
+			has_response_revision
+			and not _active_contact.is_empty()
+			and response_revision <= current_revision
+		):
+			return
 		_clear_active_contact(_conversation_target == null)
 		return
 	if not incoming_value is Dictionary:
@@ -701,6 +799,7 @@ func _enter_hearing_due() -> void:
 		_clear_active_contact(false)
 	_queued_movement_deltas.clear()
 	_queued_arrivals.clear()
+	_queued_prop_events.clear()
 	_arrival_batch_movement_ids.clear()
 	_active_movements.clear()
 	_blocked_movements.clear()
@@ -1472,43 +1571,62 @@ func _initialize_run_background() -> void:
 func _prepare_advance_request(force_spatial_only := false) -> void:
 	if not _pending_advance_request.is_empty() or _run_id.is_empty():
 		return
+	var prop_only_advance := not _queued_prop_events.is_empty()
 	var elapsed_seconds := (
 		0
-		if not _queued_arrivals.is_empty()
+		if prop_only_advance or not _queued_arrivals.is_empty()
 		else mini(int(floor(_advance_elapsed_buffer)), ADVANCE_MAX_SECONDS)
 	)
 	var arrivals: Array[Dictionary] = []
 	var selected_actor_ids: Dictionary = {}
-	_queued_arrivals.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		var actor_compare := str(a.get("actorId", "")) < str(b.get("actorId", ""))
-		if str(a.get("actorId", "")) == str(b.get("actorId", "")):
-			return str(a.get("movementId", "")) < str(b.get("movementId", ""))
-		return actor_compare
-	)
-	var queued_arrival_count := _queued_arrivals.size()
-	for _index in queued_arrival_count:
-		var arrival := _queued_arrivals.pop_front() as Dictionary
-		var arrival_actor_id := str(arrival.get("actorId", ""))
-		if (
-			arrivals.size() < ADVANCE_MAX_ARRIVALS
-			and not selected_actor_ids.has(arrival_actor_id)
-		):
-			arrivals.append(arrival)
-			selected_actor_ids[arrival_actor_id] = true
-			_arrival_batch_movement_ids.erase(str(arrival.get("movementId", "")))
-		else:
-			_queued_arrivals.append(arrival)
-	_arrival_batch_remaining = (
-		ARRIVAL_BATCH_SECONDS if not _queued_arrivals.is_empty() else -1.0
-	)
-	if elapsed_seconds <= 0 and arrivals.is_empty() and not force_spatial_only:
+	if not prop_only_advance:
+		_queued_arrivals.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			var actor_compare := str(a.get("actorId", "")) < str(b.get("actorId", ""))
+			if str(a.get("actorId", "")) == str(b.get("actorId", "")):
+				return str(a.get("movementId", "")) < str(b.get("movementId", ""))
+			return actor_compare
+		)
+		var queued_arrival_count := _queued_arrivals.size()
+		for _index in queued_arrival_count:
+			var arrival := _queued_arrivals.pop_front() as Dictionary
+			var arrival_actor_id := str(arrival.get("actorId", ""))
+			if (
+				arrivals.size() < ADVANCE_MAX_ARRIVALS
+				and not selected_actor_ids.has(arrival_actor_id)
+			):
+				arrivals.append(arrival)
+				selected_actor_ids[arrival_actor_id] = true
+				_arrival_batch_movement_ids.erase(str(arrival.get("movementId", "")))
+			else:
+				_queued_arrivals.append(arrival)
+		_arrival_batch_remaining = (
+			ARRIVAL_BATCH_SECONDS if not _queued_arrivals.is_empty() else -1.0
+		)
+	var prop_events: Array[Dictionary] = []
+	if prop_only_advance:
+		for _index in mini(ADVANCE_MAX_PROP_EVENTS, _queued_prop_events.size()):
+			prop_events.append(_queued_prop_events.pop_front())
+	if (
+		elapsed_seconds <= 0
+		and arrivals.is_empty()
+		and prop_events.is_empty()
+		and not force_spatial_only
+	):
 		return
 	var observed_world_revision := int(_run_snapshot.get("worldRevision", 0))
+	for event in prop_events:
+		event["observedWorldRevision"] = mini(
+			int(event.get("observedWorldRevision", observed_world_revision)),
+			observed_world_revision
+		)
 	var spatial_facts_packet: Dictionary = {}
 	if (
-		_spatial_facts_dirty
-		or not arrivals.is_empty()
-		or not _active_movements.is_empty()
+		not prop_only_advance
+		and (
+			_spatial_facts_dirty
+			or not arrivals.is_empty()
+			or not _active_movements.is_empty()
+		)
 	):
 		spatial_facts_packet = _capture_spatial_facts(observed_world_revision)
 		if spatial_facts_packet.is_empty():
@@ -1528,6 +1646,8 @@ func _prepare_advance_request(force_spatial_only := false) -> void:
 		"elapsedSeconds": elapsed_seconds,
 		"arrivals": arrivals,
 	}
+	if not prop_events.is_empty():
+		_pending_advance_request["propHandlingEvents"] = prop_events.duplicate(true)
 	if not spatial_facts_packet.is_empty():
 		_pending_advance_request["spatialFacts"] = spatial_facts_packet.duplicate(true)
 		_last_spatial_facts_packet = spatial_facts_packet.duplicate(true)
@@ -1567,6 +1687,26 @@ func _dispatch_advance() -> void:
 		"advance_id_conflict":
 			_advance_lane_halted_reason = error_code
 			push_error("Run advance ID conflicted with a different payload; lane halted.")
+		"invalid_prop_event", "prop_event_id_conflict":
+			if request.has("propHandlingEvents"):
+				# The rejection is authoritative, but a noncritical physical fact must
+				# not permanently stop clock, movement, or arrival advancement.
+				_pending_advance_request = {}
+				_advance_retry_remaining = 0.0
+				_last_prop_event_rejection = error_code
+				push_warning("RunService rejected physical prop events: %s" % error_code)
+			else:
+				_advance_lane_halted_reason = error_code
+		"fixture_advance_miss":
+			if _run_session.mode() == "fixture" and request.has("propHandlingEvents"):
+				# Fixture mode cannot invent engine-dependent NPC memory. Keep the
+				# physical interaction playable and leave authoritative proof to HTTP.
+				_pending_advance_request = {}
+				_advance_retry_remaining = 0.0
+				push_warning("Fixture replay ignored a live physical-prop observation.")
+			else:
+				_advance_lane_halted_reason = error_code
+				push_error("Fixture advance packet did not match its generated response.")
 		"fixture_replay_complete":
 			if _run_session.mode() == "fixture":
 				_pending_advance_request = {}
@@ -1597,10 +1737,23 @@ func _restore_advance_request(request: Dictionary) -> void:
 		_arrival_batch_remaining = 0.0
 	if request.has("spatialFacts"):
 		_spatial_facts_dirty = true
+	var prop_events := _array_or_empty(request.get("propHandlingEvents"))
+	for index in range(prop_events.size() - 1, -1, -1):
+		var event_value: Variant = prop_events[index]
+		if not event_value is Dictionary:
+			continue
+		var event := event_value as Dictionary
+		var event_id := str(event.get("eventId", ""))
+		if not _prop_event_is_queued(event_id):
+			_queued_prop_events.push_front(event.duplicate(true))
 
 
 func _apply_advance_response(result: Dictionary) -> void:
 	_apply_social_view_from_response(result)
+	_last_accepted_prop_event_ids = _array_or_empty(result.get("acceptedPropEventIds"))
+	_last_prop_observation_memories = _array_or_empty(result.get("propObservationMemories"))
+	if not _last_accepted_prop_event_ids.is_empty():
+		_last_prop_event_rejection = ""
 	_ingest_ambient_speech_events(_array_or_empty(result.get("ambientSpeechEvents")))
 	_ambient_speech_cursor = maxi(
 		_ambient_speech_cursor,
@@ -2339,12 +2492,16 @@ func _advance_request_summary(request: Dictionary) -> Dictionary:
 	if request.is_empty():
 		return {}
 	var arrivals_value: Variant = request.get("arrivals", [])
+	var prop_events_value: Variant = request.get("propHandlingEvents", [])
 	return {
 		"advanceId": str(request.get("advanceId", "")),
 		"observedWorldRevision": int(request.get("observedWorldRevision", -1)),
 		"afterSpeechSeq": int(request.get("afterSpeechSeq", 0)),
 		"elapsedSeconds": float(request.get("elapsedSeconds", 0.0)),
 		"arrivalCount": (arrivals_value as Array).size() if arrivals_value is Array else 0,
+		"propEventCount": (
+			(prop_events_value as Array).size() if prop_events_value is Array else 0
+		),
 	}
 
 
@@ -2412,27 +2569,74 @@ func _arrival_is_queued(movement_id: String) -> bool:
 	return false
 
 
+func _prop_event_is_queued(event_id: String) -> bool:
+	if event_id.is_empty():
+		return false
+	for event in _queued_prop_events:
+		if str(event.get("eventId", "")) == event_id:
+			return true
+	var pending_events := _array_or_empty(_pending_advance_request.get("propHandlingEvents"))
+	for event_value in pending_events:
+		if (
+			event_value is Dictionary
+			and str((event_value as Dictionary).get("eventId", "")) == event_id
+		):
+			return true
+	return false
+
+
 func _settle_advance_lane_for_conversation(force_fresh_spatial := false) -> bool:
-	while _advance_in_flight:
+	while _advance_in_flight or _advance_rebase_in_flight:
 		await get_tree().process_frame
-	while _advance_rebase_in_flight:
-		await get_tree().process_frame
-	if (
-		force_fresh_spatial
-		and _run_session.mode() != "fixture"
-		and _pending_advance_request.is_empty()
-	):
-		_spatial_facts_dirty = true
-		_prepare_advance_request(true)
-	if not _pending_advance_request.is_empty():
+	# Control lock may just have placed a held prop. Drain those immutable
+	# event packets before the conversation owns the pause, then send the one
+	# requested fresh spatial packet. The paused tree prevents new prop input.
+	var prop_drain_budget := mini(
+		16,
+		maxi(2, ceili(float(_queued_prop_events.size()) / ADVANCE_MAX_PROP_EVENTS) + 4)
+	)
+	for _attempt in prop_drain_budget:
+		if _advance_needs_rebase:
+			await _rebase_run_after_advance_conflict()
+			while _advance_rebase_in_flight:
+				await get_tree().process_frame
+		if not _advance_lane_halted_reason.is_empty():
+			return false
+		if _pending_advance_request.is_empty():
+			if _queued_prop_events.is_empty():
+				break
+			_prepare_advance_request()
+		if _pending_advance_request.is_empty():
+			break
 		_advance_retry_remaining = 0.0
 		await _dispatch_advance()
 		while _advance_in_flight:
 			await get_tree().process_frame
-	if _advance_needs_rebase:
-		await _rebase_run_after_advance_conflict()
-		while _advance_rebase_in_flight:
-			await get_tree().process_frame
+	if not _queued_prop_events.is_empty() or not _pending_advance_request.is_empty():
+		return false
+
+	if force_fresh_spatial and _run_session.mode() != "fixture":
+		var spatial_accepted := false
+		for _attempt in 2:
+			if _advance_needs_rebase:
+				await _rebase_run_after_advance_conflict()
+				while _advance_rebase_in_flight:
+					await get_tree().process_frame
+			if not _advance_lane_halted_reason.is_empty():
+				return false
+			_spatial_facts_dirty = true
+			_prepare_advance_request(true)
+			if _pending_advance_request.is_empty():
+				return false
+			_advance_retry_remaining = 0.0
+			await _dispatch_advance()
+			while _advance_in_flight:
+				await get_tree().process_frame
+			if not _advance_needs_rebase and _pending_advance_request.is_empty():
+				spatial_accepted = true
+				break
+		if not spatial_accepted:
+			return false
 	return (
 		_pending_advance_request.is_empty()
 		and not _advance_needs_rebase

@@ -85,17 +85,17 @@ does not drive the game. The final Terra run owns hands-on validation.
 
 Programmatic results through 2026-07-13:
 
-- all 23 curated Kenney models, the eight selected KayKit Furniture Bits
-  models, the eight selected KayKit City Builder Bits models, and all six
-  Quaternius characters load as `PackedScene`; their shared palette textures
-  resolve;
+- all 23 curated Kenney models, the 17 selected KayKit Furniture Bits models,
+  the ten selected KayKit Prototype Bits models, the eight selected KayKit
+  City Builder Bits models, and all six Quaternius characters load as
+  `PackedScene`; their shared palette textures resolve;
 - the six character meshes measure 1.843–1.870 m at `1.0×` and every file has
   `Idle` and `Walk` among its 24 animations;
 - the single scale contract in `AssetScales` is Kenney Furniture `2.0×`,
   Nature `2.5×`, City kits `5.0×`, KayKit Furniture `1.0×`, KayKit City
-  `5.0×`, and Characters `1.0×`. This produces a 0.769 m desk, 4.27 m tree,
-  5 m road tile, 2.25 m parasol, 1.224 m KayKit armchair, and roughly 4 m
-  KayKit hatchback;
+  `5.0×`, KayKit Prototype `1.0×`, and Characters `1.0×`. This produces a
+  0.769 m desk, 4.27 m tree, 5 m road tile, 2.25 m parasol, a 1.224 m KayKit
+  armchair, a 1 m Prototype barrel, and roughly 4 m KayKit hatchback;
 - the test corner has a 1.65 m eye camera, 1.8 m capsule, 1.1 × 2.1 m greybox
   doorway, desk/chair, road, bench, tree, all six characters at park-view
   distance, and an automatic `Idle` → `Walk` doorway pass;
@@ -105,7 +105,7 @@ Programmatic results through 2026-07-13:
 The gates remain:
 
 1. **Scale reference scene** — a 1.8 m capsule, a 2.1 m doorway, a desk;
-   measure each family against it and keep the six validated multipliers in
+   measure each family against it and keep the seven validated multipliers in
    `AssetScales`; per-model scale exceptions are forbidden.
 2. **Import gate** — `$GODOT_BIN --headless --import` clean on every pack;
    GLB materials and textures resolve. Some Kenney kits carry the palette
@@ -201,14 +201,26 @@ its ability to stay below NPC utterances. Blend park and interior loops gently
 across permanently open portals; a hard zone switch would falsely imply a
 closed door.
 
-The density pass repeats the 23 committed Kenney models throughout all four
-zones and adds eight selected models from
-[KayKit Furniture Bits](https://kaylousberg.itch.io/furniture-bits) Free 1.0:
-armchair with pillows, books, decorated cabinet, couch with pillows, standing
-and table lamps, a low table, and a long table. The curated models, shared
-texture, and upstream CC0 license live under
-`godot/assets/kaykit/furniture_bits/`; Godot 4.7 import, texture, and `1.0×`
-family-scale checks pass. Exterior dressing also has eight CC0 models from
+The current density passes repeat the 23 committed Kenney models across the
+park, street, and three interiors and mix in models from
+[KayKit Furniture Bits](https://kaylousberg.itch.io/furniture-bits) Free 1.0.
+The committed Furniture selection contains 17 models: the original seating,
+tables, lamps, cabinet, and books plus small books, cabinets, plants, picture
+frames, rugs, and shelving. The mixed-asset child scene currently uses the
+small books, plants, frames, rugs, and lamps to break up empty floors, desks,
+and walls. The curated models, shared texture, and upstream CC0 license live
+under `godot/assets/kaykit/furniture_bits/`; Godot 4.7 import, texture, and
+`1.0×` family-scale checks pass. Ten models from
+[KayKit Prototype Bits](https://kaylousberg.itch.io/prototype-bits) Free 1.1
+extend the same palette with barrels, boxes, cans, decorated pallets, and a
+decorated table at `1.0×`. The current scene uses barrels and boxes inside
+existing solid service-corner footprints and keeps collisionless cans in
+low-traffic interior corners; larger pallets and the table remain available
+for later collision-aware placement. Only that portable clutter, its shared
+texture, and the verbatim CC0 license live under
+`godot/assets/kaykit/prototype_bits/`; architecture, targets, dummies, the full
+archive, and paid-tier files are excluded. Exterior dressing also has eight
+CC0 models from
 [KayKit City Builder Bits](https://kaylousberg.itch.io/city-builder-bits) Free
 1.0: two stationary cars, a dumpster, fire hydrant, streetlight, traffic light,
 and two small trash shapes. Only those model pairs, their shared texture, and

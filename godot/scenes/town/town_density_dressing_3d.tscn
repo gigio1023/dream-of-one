@@ -1,0 +1,884 @@
+[gd_scene load_steps=26 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/kenney3d/nature/tree_default.glb" id="density_01"]
+[ext_resource type="PackedScene" path="res://assets/kenney3d/nature/tree_oak.glb" id="density_02"]
+[ext_resource type="PackedScene" path="res://assets/kenney3d/nature/ground_grass.glb" id="density_03"]
+[ext_resource type="PackedScene" path="res://assets/kenney3d/nature/plant_bush.glb" id="density_04"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/city_builder_bits/trash_a.gltf" id="density_05"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/city_builder_bits/trash_b.gltf" id="density_06"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/furniture_bits/book_single.gltf" id="density_07"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/furniture_bits/book_set.gltf" id="density_08"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/furniture_bits/cactus_medium_a.gltf" id="density_09"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/furniture_bits/cactus_small_b.gltf" id="density_10"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/furniture_bits/pictureframe_large_a.gltf" id="density_11"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/furniture_bits/pictureframe_medium.gltf" id="density_12"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/furniture_bits/rug_oval_a.gltf" id="density_13"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/furniture_bits/rug_rectangle_stripes_b.gltf" id="density_14"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/furniture_bits/lamp_table.gltf" id="density_15"]
+[ext_resource type="PackedScene" path="res://assets/kenney3d/furniture/computer_screen.glb" id="density_16"]
+[ext_resource type="PackedScene" path="res://assets/kenney3d/furniture/computer_keyboard.glb" id="density_17"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/prototype_bits/barrel_a.gltf" id="density_18"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/prototype_bits/barrel_b.gltf" id="density_19"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/prototype_bits/box_a.gltf" id="density_20"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/prototype_bits/box_b.gltf" id="density_21"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/prototype_bits/box_c.gltf" id="density_22"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/prototype_bits/can_a.gltf" id="density_23"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/prototype_bits/can_b.gltf" id="density_24"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_density_tree"]
+height = 2.2
+radius = 0.45
+
+[node name="TownDensityDressing" type="Node3D"]
+editor_description = "Collision-light visual density pass. Each zone exposes three countable height layers; no scripts or interactions."
+
+[node name="Park" type="Node3D" parent="."]
+editor_description = "Park density keeps approaches, meeting points, benches, notice board, and player start readable."
+
+[node name="GroundLayer" type="Node3D" parent="Park"]
+editor_description = "Low, collisionless surface detail."
+
+[node name="EyeLevelLayer" type="Node3D" parent="Park"]
+editor_description = "Readable waist-to-eye-height clusters without authored meaning."
+
+[node name="VerticalLayer" type="Node3D" parent="Park"]
+editor_description = "Tall silhouettes and wall detail that close empty sightlines."
+
+[node name="Street" type="Node3D" parent="."]
+editor_description = "Street and service-yard clusters reuse existing solid blocker footprints for every large Prototype item."
+
+[node name="GroundLayer" type="Node3D" parent="Street"]
+editor_description = "Low, collisionless surface detail."
+
+[node name="EyeLevelLayer" type="Node3D" parent="Street"]
+editor_description = "Readable waist-to-eye-height clusters without authored meaning."
+
+[node name="VerticalLayer" type="Node3D" parent="Street"]
+editor_description = "Tall silhouettes and wall detail that close empty sightlines."
+
+[node name="Studio" type="Node3D" parent="."]
+editor_description = "Studio detail sits on surfaces, floors, and walls while the portal and social anchors remain open."
+
+[node name="GroundLayer" type="Node3D" parent="Studio"]
+editor_description = "Low, collisionless surface detail."
+
+[node name="EyeLevelLayer" type="Node3D" parent="Studio"]
+editor_description = "Readable waist-to-eye-height clusters without authored meaning."
+
+[node name="VerticalLayer" type="Node3D" parent="Studio"]
+editor_description = "Tall silhouettes and wall detail that close empty sightlines."
+
+[node name="Office" type="Node3D" parent="."]
+editor_description = "Office detail fills work and meeting context without adding authority or interaction."
+
+[node name="GroundLayer" type="Node3D" parent="Office"]
+editor_description = "Low, collisionless surface detail."
+
+[node name="EyeLevelLayer" type="Node3D" parent="Office"]
+editor_description = "Readable waist-to-eye-height clusters without authored meaning."
+
+[node name="VerticalLayer" type="Node3D" parent="Office"]
+editor_description = "Tall silhouettes and wall detail that close empty sightlines."
+
+[node name="Station" type="Node3D" parent="."]
+editor_description = "Station detail fills intake, waiting, and hearing context without blocking the hearing layout."
+
+[node name="GroundLayer" type="Node3D" parent="Station"]
+editor_description = "Low, collisionless surface detail."
+
+[node name="EyeLevelLayer" type="Node3D" parent="Station"]
+editor_description = "Readable waist-to-eye-height clusters without authored meaning."
+
+[node name="VerticalLayer" type="Node3D" parent="Station"]
+editor_description = "Tall silhouettes and wall detail that close empty sightlines."
+
+[node name="GrassPatch01" parent="Park/GroundLayer" instance=ExtResource("density_03")]
+position = Vector3(-7, 0.16, -4.8)
+rotation = Vector3(0, -0.34, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassPatch02" parent="Park/GroundLayer" instance=ExtResource("density_03")]
+position = Vector3(-5.8, 0.16, -6.8)
+rotation = Vector3(0, -0.17, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassPatch03" parent="Park/GroundLayer" instance=ExtResource("density_03")]
+position = Vector3(-3.2, 0.16, -7.8)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassPatch04" parent="Park/GroundLayer" instance=ExtResource("density_03")]
+position = Vector3(3.2, 0.16, -7.8)
+rotation = Vector3(0, 0.17, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassPatch05" parent="Park/GroundLayer" instance=ExtResource("density_03")]
+position = Vector3(5.8, 0.16, -6.8)
+rotation = Vector3(0, 0.34, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassPatch06" parent="Park/GroundLayer" instance=ExtResource("density_03")]
+position = Vector3(7, 0.16, -4.8)
+rotation = Vector3(0, -0.34, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassPatch07" parent="Park/GroundLayer" instance=ExtResource("density_03")]
+position = Vector3(-9.8, 0.16, -0.8)
+rotation = Vector3(0, -0.17, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassPatch08" parent="Park/GroundLayer" instance=ExtResource("density_03")]
+position = Vector3(9.8, 0.16, -0.8)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassPatch09" parent="Park/GroundLayer" instance=ExtResource("density_03")]
+position = Vector3(-8.8, 0.16, 7.8)
+rotation = Vector3(0, 0.17, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassPatch10" parent="Park/GroundLayer" instance=ExtResource("density_03")]
+position = Vector3(8.8, 0.16, 7.8)
+rotation = Vector3(0, 0.34, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassPatch11" parent="Park/GroundLayer" instance=ExtResource("density_03")]
+position = Vector3(-2.8, 0.16, 7.5)
+rotation = Vector3(0, -0.34, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassPatch12" parent="Park/GroundLayer" instance=ExtResource("density_03")]
+position = Vector3(2.8, 0.16, 7.5)
+rotation = Vector3(0, -0.17, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush11" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(-5.2, 0.1, 4.7)
+rotation = Vector3(0, -0.62, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush12" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(-5.55, 0.1, 3.7)
+rotation = Vector3(0, -0.31, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush13" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(5.2, 0.1, 4.7)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush14" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(5.55, 0.1, 3.7)
+rotation = Vector3(0, 0.31, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush15" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(-7.6, 0.1, 1.2)
+rotation = Vector3(0, 0.62, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush16" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(7.6, 0.1, 1.2)
+rotation = Vector3(0, 0.9299999999999999, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush03" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(-3.4, 0.1, -1.3)
+rotation = Vector3(0, -0.7, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush05" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(2.6, 0.1, -1.8)
+rotation = Vector3(0, 0.8, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush06" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(-2.7, 0.1, 1.4)
+rotation = Vector3(0, 0.4, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush04" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(3.3, 0.1, 1.1)
+rotation = Vector3(0, -0.5, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush07" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(-6.2, 0.1, -2)
+rotation = Vector3(0, 1.1, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush08" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(6.6, 0.1, -1.4)
+rotation = Vector3(0, -1, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush01" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(-6.4, 0.1, 6.8)
+rotation = Vector3(0, 0.2, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush09" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(5.7, 0.1, 6.1)
+rotation = Vector3(0, -0.3, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush10" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(-1.8, 0.1, 6.6)
+rotation = Vector3(0, 0.9, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkLowBush02" parent="Park/GroundLayer" instance=ExtResource("density_04")]
+position = Vector3(1.2, 0.1, 5.9)
+rotation = Vector3(0, -0.8, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkTrash01" parent="Park/EyeLevelLayer" instance=ExtResource("density_05")]
+position = Vector3(-5.8, 0.03, 5.1)
+rotation = Vector3(0, -0.68, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="ParkTrash02" parent="Park/EyeLevelLayer" instance=ExtResource("density_06")]
+position = Vector3(-6.2, 0.03, 4.5)
+rotation = Vector3(0, -0.34, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="ParkTrash03" parent="Park/EyeLevelLayer" instance=ExtResource("density_05")]
+position = Vector3(5.8, 0.03, 5.1)
+scale = Vector3(5, 5, 5)
+
+[node name="ParkTrash04" parent="Park/EyeLevelLayer" instance=ExtResource("density_06")]
+position = Vector3(6.2, 0.03, 4.5)
+rotation = Vector3(0, 0.34, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="ParkTrash05" parent="Park/EyeLevelLayer" instance=ExtResource("density_05")]
+position = Vector3(-9.8, 0.03, 4.5)
+rotation = Vector3(0, 0.68, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="ParkTrash06" parent="Park/EyeLevelLayer" instance=ExtResource("density_06")]
+position = Vector3(9.8, 0.03, 4.5)
+rotation = Vector3(0, 1.02, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="ParkEyeBush01" parent="Park/EyeLevelLayer" instance=ExtResource("density_04")]
+position = Vector3(-7.9, 0.1, -3.7)
+rotation = Vector3(0, -0.37, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkEyeBush02" parent="Park/EyeLevelLayer" instance=ExtResource("density_04")]
+position = Vector3(-9.9, 0.1, -4.2)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkEyeBush03" parent="Park/EyeLevelLayer" instance=ExtResource("density_04")]
+position = Vector3(7.9, 0.1, -3.7)
+rotation = Vector3(0, 0.37, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkEyeBush04" parent="Park/EyeLevelLayer" instance=ExtResource("density_04")]
+position = Vector3(9.9, 0.1, -4.2)
+rotation = Vector3(0, 0.74, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkEyeBush05" parent="Park/EyeLevelLayer" instance=ExtResource("density_04")]
+position = Vector3(-9.7, 0.1, 3.8)
+rotation = Vector3(0, -0.37, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkEyeBush06" parent="Park/EyeLevelLayer" instance=ExtResource("density_04")]
+position = Vector3(9.7, 0.1, 3.8)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkEyeBush07" parent="Park/EyeLevelLayer" instance=ExtResource("density_04")]
+position = Vector3(-6.7, 0.1, 7.8)
+rotation = Vector3(0, 0.37, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="TreeWestNorth" parent="Park/VerticalLayer" instance=ExtResource("density_01")]
+position = Vector3(-9, 0, -2.8)
+rotation = Vector3(0, 0.22, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="TreeEastNorth" parent="Park/VerticalLayer" instance=ExtResource("density_02")]
+position = Vector3(9, 0, -2.8)
+rotation = Vector3(0, -0.31, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="TreeWestSouth" parent="Park/VerticalLayer" instance=ExtResource("density_02")]
+position = Vector3(-9.5, 0, 2.8)
+rotation = Vector3(0, 0.61, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="TreeEastSouth" parent="Park/VerticalLayer" instance=ExtResource("density_01")]
+position = Vector3(9.5, 0, 2.8)
+rotation = Vector3(0, -0.48, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkVerticalBush01" parent="Park/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(-8.25, 0.1, -2)
+rotation = Vector3(0, -0.58, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkVerticalBush02" parent="Park/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(-9.8, 0.1, -1.9)
+rotation = Vector3(0, -0.29, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkVerticalBush03" parent="Park/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(-8.35, 0.1, -4)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkVerticalBush04" parent="Park/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(-9.75, 0.1, -3.9)
+rotation = Vector3(0, 0.29, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkVerticalBush05" parent="Park/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(8.25, 0.1, -2)
+rotation = Vector3(0, 0.58, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkVerticalBush06" parent="Park/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(9.8, 0.1, -1.9)
+rotation = Vector3(0, -0.58, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkVerticalBush07" parent="Park/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(8.35, 0.1, -4)
+rotation = Vector3(0, -0.29, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkVerticalBush08" parent="Park/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(9.75, 0.1, -3.9)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkVerticalBush09" parent="Park/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(-8.6, 0.1, 2.1)
+rotation = Vector3(0, 0.29, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkVerticalBush10" parent="Park/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(8.6, 0.1, 2.1)
+rotation = Vector3(0, 0.58, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="StreetLooseTrash09" parent="Street/GroundLayer" instance=ExtResource("density_05")]
+position = Vector3(-8.35, 0.03, -18.25)
+rotation = Vector3(0, -0.8400000000000001, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetLooseTrash10" parent="Street/GroundLayer" instance=ExtResource("density_06")]
+position = Vector3(-6.95, 0.03, -18.75)
+rotation = Vector3(0, -0.56, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetLooseTrash11" parent="Street/GroundLayer" instance=ExtResource("density_05")]
+position = Vector3(-18.55, 0.03, 6.75)
+rotation = Vector3(0, -0.28, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetLooseTrash12" parent="Street/GroundLayer" instance=ExtResource("density_06")]
+position = Vector3(-17.65, 0.03, 7.9)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetLooseTrash13" parent="Street/GroundLayer" instance=ExtResource("density_05")]
+position = Vector3(18.65, 0.03, 6.75)
+rotation = Vector3(0, 0.28, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetLooseTrash14" parent="Street/GroundLayer" instance=ExtResource("density_06")]
+position = Vector3(17.75, 0.03, 7.9)
+rotation = Vector3(0, 0.56, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetLooseTrash15" parent="Street/GroundLayer" instance=ExtResource("density_05")]
+position = Vector3(-8.5, 0.03, 17)
+rotation = Vector3(0, 0.8400000000000001, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetLooseTrash16" parent="Street/GroundLayer" instance=ExtResource("density_06")]
+position = Vector3(-6.1, 0.03, 18.2)
+rotation = Vector3(0, -0.8400000000000001, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetLooseTrash17" parent="Street/GroundLayer" instance=ExtResource("density_05")]
+position = Vector3(8.2, 0.03, 16.8)
+rotation = Vector3(0, -0.56, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetLooseTrash18" parent="Street/GroundLayer" instance=ExtResource("density_06")]
+position = Vector3(5.8, 0.03, 18.2)
+rotation = Vector3(0, -0.28, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetLooseTrash19" parent="Street/GroundLayer" instance=ExtResource("density_05")]
+position = Vector3(-1.8, 0.03, 17.7)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetLooseTrash20" parent="Street/GroundLayer" instance=ExtResource("density_06")]
+position = Vector3(1.8, 0.03, 17.7)
+rotation = Vector3(0, 0.28, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetTrash01" parent="Street/GroundLayer" instance=ExtResource("density_05")]
+position = Vector3(-8.65, 0.03, -18.9)
+rotation = Vector3(0, -0.82, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetTrash02" parent="Street/GroundLayer" instance=ExtResource("density_06")]
+position = Vector3(-6.7, 0.03, -18.2)
+rotation = Vector3(0, -0.41, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetTrash03" parent="Street/GroundLayer" instance=ExtResource("density_05")]
+position = Vector3(-18.8, 0.03, 8.3)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetTrash04" parent="Street/GroundLayer" instance=ExtResource("density_06")]
+position = Vector3(-17.6, 0.03, 6.6)
+rotation = Vector3(0, 0.41, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetTrash05" parent="Street/GroundLayer" instance=ExtResource("density_05")]
+position = Vector3(18.9, 0.03, 8.3)
+rotation = Vector3(0, 0.82, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetTrash06" parent="Street/GroundLayer" instance=ExtResource("density_06")]
+position = Vector3(17.7, 0.03, 6.6)
+rotation = Vector3(0, 1.23, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetTrash07" parent="Street/GroundLayer" instance=ExtResource("density_05")]
+position = Vector3(-10.2, 0.03, 18.7)
+rotation = Vector3(0, -0.82, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetTrash08" parent="Street/GroundLayer" instance=ExtResource("density_06")]
+position = Vector3(10.2, 0.03, 18.7)
+rotation = Vector3(0, -0.41, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StudioServiceBarrel" parent="Street/EyeLevelLayer" instance=ExtResource("density_18")]
+position = Vector3(-8.15, 0.5, -18.6)
+
+[node name="StudioServiceBox01" parent="Street/EyeLevelLayer" instance=ExtResource("density_20")]
+position = Vector3(-7.18, 0.01, -18.3)
+rotation = Vector3(0, 0.47, 0)
+
+[node name="StudioServiceBox02" parent="Street/EyeLevelLayer" instance=ExtResource("density_21")]
+position = Vector3(-7.05, 0.01, -18.950000000000003)
+rotation = Vector3(0, 0.94, 0)
+
+[node name="StudioServiceBox03" parent="Street/EyeLevelLayer" instance=ExtResource("density_22")]
+position = Vector3(-7.72, 0.01, -18.22)
+rotation = Vector3(0, 1.41, 0)
+
+[node name="OfficeServiceBarrel" parent="Street/EyeLevelLayer" instance=ExtResource("density_19")]
+position = Vector3(-18.2, 0.5, 6.9)
+rotation = Vector3(0, 0.63, 0)
+
+[node name="OfficeServiceBox01" parent="Street/EyeLevelLayer" instance=ExtResource("density_20")]
+position = Vector3(-18.55, 0.01, 7.8500000000000005)
+rotation = Vector3(0, 1.1, 0)
+
+[node name="OfficeServiceBox02" parent="Street/EyeLevelLayer" instance=ExtResource("density_21")]
+position = Vector3(-17.82, 0.01, 8.02)
+rotation = Vector3(0, 1.5699999999999998, 0)
+
+[node name="OfficeServiceBox03" parent="Street/EyeLevelLayer" instance=ExtResource("density_22")]
+position = Vector3(-17.95, 0.01, 6.78)
+rotation = Vector3(0, 2.04, 0)
+
+[node name="StationServiceBarrel" parent="Street/EyeLevelLayer" instance=ExtResource("density_18")]
+position = Vector3(18.3, 0.5, 6.9)
+rotation = Vector3(0, 1.26, 0)
+
+[node name="StationServiceBox01" parent="Street/EyeLevelLayer" instance=ExtResource("density_20")]
+position = Vector3(17.95, 0.01, 7.8500000000000005)
+rotation = Vector3(0, 1.73, 0)
+
+[node name="StationServiceBox02" parent="Street/EyeLevelLayer" instance=ExtResource("density_21")]
+position = Vector3(18.68, 0.01, 8.02)
+rotation = Vector3(0, 2.2, 0)
+
+[node name="StationServiceBox03" parent="Street/EyeLevelLayer" instance=ExtResource("density_22")]
+position = Vector3(18.55, 0.01, 6.78)
+rotation = Vector3(0, 2.67, 0)
+
+[node name="StreetBush01" parent="Street/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(-8.8, 0.1, -14.4)
+rotation = Vector3(0, -0.72, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="StreetBush02" parent="Street/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(8.8, 0.1, -14.4)
+rotation = Vector3(0, -0.36, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="StreetBush03" parent="Street/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(-20.8, 0.1, -5)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="StreetBush04" parent="Street/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(-20.8, 0.1, 4.8)
+rotation = Vector3(0, 0.36, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="StreetBush05" parent="Street/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(20.8, 0.1, -5)
+rotation = Vector3(0, 0.72, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="StreetBush06" parent="Street/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(20.8, 0.1, 4.8)
+rotation = Vector3(0, -0.72, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="StreetBush07" parent="Street/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(-13.5, 0.1, 20.2)
+rotation = Vector3(0, -0.36, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="StreetBush08" parent="Street/VerticalLayer" instance=ExtResource("density_04")]
+position = Vector3(13.5, 0.1, 20.2)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="StudioGround01" parent="Studio/GroundLayer" instance=ExtResource("density_14")]
+position = Vector3(-2, 0.051, -15.8)
+
+[node name="StudioGround02" parent="Studio/GroundLayer" instance=ExtResource("density_13")]
+position = Vector3(2, 0.051, -17.2)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="StudioGround03" parent="Studio/GroundLayer" instance=ExtResource("density_14")]
+position = Vector3(0.8, 0.051, -18.75)
+
+[node name="StudioGround04" parent="Studio/GroundLayer" instance=ExtResource("density_07")]
+position = Vector3(-5.2, 0.3, -18.8)
+rotation = Vector3(0, 0.4, 0)
+
+[node name="StudioGround05" parent="Studio/GroundLayer" instance=ExtResource("density_08")]
+position = Vector3(-5.1, 0.3, -13)
+rotation = Vector3(0, -0.5, 0)
+
+[node name="StudioGround06" parent="Studio/GroundLayer" instance=ExtResource("density_23")]
+position = Vector3(-4.8, 0.051, -13.3)
+rotation = Vector3(0, 0.3, 0)
+
+[node name="StudioGround07" parent="Studio/GroundLayer" instance=ExtResource("density_24")]
+position = Vector3(4.8, 0.051, -13.1)
+rotation = Vector3(0, -0.7, 0)
+
+[node name="StudioGround08" parent="Studio/GroundLayer" instance=ExtResource("density_07")]
+position = Vector3(4.7, 0.3, -19.2)
+rotation = Vector3(0, 1.1, 0)
+
+[node name="StudioEye01" parent="Studio/EyeLevelLayer" instance=ExtResource("density_07")]
+position = Vector3(-2.8, 1.03, -15.6)
+rotation = Vector3(0, 0.2, 0)
+
+[node name="StudioEye02" parent="Studio/EyeLevelLayer" instance=ExtResource("density_08")]
+position = Vector3(0.25, 1.03, -19.2)
+rotation = Vector3(0, -0.3, 0)
+
+[node name="StudioEye03" parent="Studio/EyeLevelLayer" instance=ExtResource("density_08")]
+position = Vector3(4.4, 1.05, -18.2)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="StudioEye04" parent="Studio/EyeLevelLayer" instance=ExtResource("density_07")]
+position = Vector3(-5.15, 1, -17.2)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="StudioEye05" parent="Studio/EyeLevelLayer" instance=ExtResource("density_09")]
+position = Vector3(-4.8, 0, -19)
+
+[node name="StudioEye06" parent="Studio/EyeLevelLayer" instance=ExtResource("density_10")]
+position = Vector3(5.1, 0, -13)
+rotation = Vector3(0, 0.4, 0)
+
+[node name="StudioEye07" parent="Studio/EyeLevelLayer" instance=ExtResource("density_10")]
+position = Vector3(-5.1, 0, -13.8)
+rotation = Vector3(0, -0.4, 0)
+
+[node name="StudioEye08" parent="Studio/EyeLevelLayer" instance=ExtResource("density_09")]
+position = Vector3(5.1, 0, -18.9)
+rotation = Vector3(0, 0.7, 0)
+
+[node name="StudioEye09" parent="Studio/EyeLevelLayer" instance=ExtResource("density_10")]
+position = Vector3(-2.65, 0.78, -15.4)
+rotation = Vector3(0, 0.4, 0)
+
+[node name="StudioEye10" parent="Studio/EyeLevelLayer" instance=ExtResource("density_15")]
+position = Vector3(0, 0.78, -19.05)
+rotation = Vector3(0, -0.5, 0)
+
+[node name="StudioEye11" parent="Studio/EyeLevelLayer" instance=ExtResource("density_16")]
+position = Vector3(-1.65, 0.78, -15.85)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="StudioEye12" parent="Studio/EyeLevelLayer" instance=ExtResource("density_17")]
+position = Vector3(-1.55, 0.79, -15.55)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="StudioWall01" parent="Studio/VerticalLayer" instance=ExtResource("density_11")]
+position = Vector3(-4.4, 1.7, -19.82)
+
+[node name="StudioWall02" parent="Studio/VerticalLayer" instance=ExtResource("density_12")]
+position = Vector3(-2.7, 1.65, -19.82)
+
+[node name="StudioWall03" parent="Studio/VerticalLayer" instance=ExtResource("density_11")]
+position = Vector3(2.4, 1.7, -19.82)
+
+[node name="StudioWall04" parent="Studio/VerticalLayer" instance=ExtResource("density_12")]
+position = Vector3(4.6, 1.65, -19.82)
+
+[node name="StudioWall05" parent="Studio/VerticalLayer" instance=ExtResource("density_12")]
+position = Vector3(-4.3, 1.65, -12.18)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="StudioWall06" parent="Studio/VerticalLayer" instance=ExtResource("density_11")]
+position = Vector3(-2.5, 1.7, -12.18)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="StudioWall07" parent="Studio/VerticalLayer" instance=ExtResource("density_11")]
+position = Vector3(2.5, 1.7, -12.18)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="StudioWall08" parent="Studio/VerticalLayer" instance=ExtResource("density_12")]
+position = Vector3(4.3, 1.65, -12.18)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="OfficeGround01" parent="Office/GroundLayer" instance=ExtResource("density_14")]
+position = Vector3(-15.5, 0.051, -1.5)
+
+[node name="OfficeGround02" parent="Office/GroundLayer" instance=ExtResource("density_13")]
+position = Vector3(-16.5, 0.051, 4.1)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="OfficeGround03" parent="Office/GroundLayer" instance=ExtResource("density_14")]
+position = Vector3(-14.7, 0.051, -4.8)
+
+[node name="OfficeGround04" parent="Office/GroundLayer" instance=ExtResource("density_07")]
+position = Vector3(-19.1, 0.3, -5.1)
+rotation = Vector3(0, 1.1, 0)
+
+[node name="OfficeGround05" parent="Office/GroundLayer" instance=ExtResource("density_08")]
+position = Vector3(-18.7, 0.3, 5.2)
+rotation = Vector3(0, -0.5, 0)
+
+[node name="OfficeGround06" parent="Office/GroundLayer" instance=ExtResource("density_23")]
+position = Vector3(-13, 0.051, -5.1)
+rotation = Vector3(0, 0.3, 0)
+
+[node name="OfficeGround07" parent="Office/GroundLayer" instance=ExtResource("density_24")]
+position = Vector3(-19.1, 0.051, 1.2)
+rotation = Vector3(0, -0.7, 0)
+
+[node name="OfficeGround08" parent="Office/GroundLayer" instance=ExtResource("density_07")]
+position = Vector3(-13.2, 0.3, 5.2)
+rotation = Vector3(0, 0.5, 0)
+
+[node name="OfficeEye01" parent="Office/EyeLevelLayer" instance=ExtResource("density_07")]
+position = Vector3(-14.8, 1.03, -1.85)
+rotation = Vector3(0, 0.2, 0)
+
+[node name="OfficeEye02" parent="Office/EyeLevelLayer" instance=ExtResource("density_08")]
+position = Vector3(-17.1, 1.26, 4.1)
+rotation = Vector3(0, -0.3, 0)
+
+[node name="OfficeEye03" parent="Office/EyeLevelLayer" instance=ExtResource("density_08")]
+position = Vector3(-17.8, 1.06, -5.55)
+
+[node name="OfficeEye04" parent="Office/EyeLevelLayer" instance=ExtResource("density_07")]
+position = Vector3(-14.8, 1.06, -5.55)
+
+[node name="OfficeEye05" parent="Office/EyeLevelLayer" instance=ExtResource("density_09")]
+position = Vector3(-19.1, 0, 5.2)
+
+[node name="OfficeEye06" parent="Office/EyeLevelLayer" instance=ExtResource("density_10")]
+position = Vector3(-13, 0, 5.1)
+rotation = Vector3(0, 0.4, 0)
+
+[node name="OfficeEye07" parent="Office/EyeLevelLayer" instance=ExtResource("density_10")]
+position = Vector3(-19.1, 0, -4.7)
+rotation = Vector3(0, -0.4, 0)
+
+[node name="OfficeEye08" parent="Office/EyeLevelLayer" instance=ExtResource("density_09")]
+position = Vector3(-13, 0, -5)
+rotation = Vector3(0, 0.7, 0)
+
+[node name="OfficeEye09" parent="Office/EyeLevelLayer" instance=ExtResource("density_15")]
+position = Vector3(-15, 0.79, -1.45)
+rotation = Vector3(0, 0.4, 0)
+
+[node name="OfficeEye10" parent="Office/EyeLevelLayer" instance=ExtResource("density_10")]
+position = Vector3(-16.6, 1.02, 4.55)
+rotation = Vector3(0, -0.5, 0)
+
+[node name="OfficeEye11" parent="Office/EyeLevelLayer" instance=ExtResource("density_16")]
+position = Vector3(-15.8, 0.78, -1.6)
+scale = Vector3(2, 2, 2)
+
+[node name="OfficeEye12" parent="Office/EyeLevelLayer" instance=ExtResource("density_17")]
+position = Vector3(-15.7, 0.79, -1.2)
+scale = Vector3(2, 2, 2)
+
+[node name="OfficeWall01" parent="Office/VerticalLayer" instance=ExtResource("density_11")]
+position = Vector3(-18.7, 1.7, -5.82)
+
+[node name="OfficeWall02" parent="Office/VerticalLayer" instance=ExtResource("density_12")]
+position = Vector3(-16.8, 1.65, -5.82)
+
+[node name="OfficeWall03" parent="Office/VerticalLayer" instance=ExtResource("density_11")]
+position = Vector3(-14.6, 1.7, -5.82)
+
+[node name="OfficeWall04" parent="Office/VerticalLayer" instance=ExtResource("density_12")]
+position = Vector3(-13, 1.65, -5.82)
+
+[node name="OfficeWall05" parent="Office/VerticalLayer" instance=ExtResource("density_12")]
+position = Vector3(-18.7, 1.65, 5.82)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="OfficeWall06" parent="Office/VerticalLayer" instance=ExtResource("density_11")]
+position = Vector3(-16.8, 1.7, 5.82)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="OfficeWall07" parent="Office/VerticalLayer" instance=ExtResource("density_11")]
+position = Vector3(-14.6, 1.7, 5.82)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="OfficeWall08" parent="Office/VerticalLayer" instance=ExtResource("density_12")]
+position = Vector3(-13, 1.65, 5.82)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="StationGround01" parent="Station/GroundLayer" instance=ExtResource("density_14")]
+position = Vector3(14.3, 0.051, -1.4)
+
+[node name="StationGround02" parent="Station/GroundLayer" instance=ExtResource("density_13")]
+position = Vector3(17.8, 0.051, -3.6)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="StationGround03" parent="Station/GroundLayer" instance=ExtResource("density_14")]
+position = Vector3(17.7, 0.051, 4.1)
+
+[node name="StationGround04" parent="Station/GroundLayer" instance=ExtResource("density_07")]
+position = Vector3(19.1, 0.3, -5.1)
+rotation = Vector3(0, -1.1, 0)
+
+[node name="StationGround05" parent="Station/GroundLayer" instance=ExtResource("density_08")]
+position = Vector3(18.8, 0.3, 5.2)
+rotation = Vector3(0, 0.5, 0)
+
+[node name="StationGround06" parent="Station/GroundLayer" instance=ExtResource("density_23")]
+position = Vector3(13, 0.051, -5.1)
+rotation = Vector3(0, -0.3, 0)
+
+[node name="StationGround07" parent="Station/GroundLayer" instance=ExtResource("density_24")]
+position = Vector3(19.1, 0.051, 1.1)
+rotation = Vector3(0, 0.7, 0)
+
+[node name="StationGround08" parent="Station/GroundLayer" instance=ExtResource("density_07")]
+position = Vector3(13.1, 0.3, 5.2)
+rotation = Vector3(0, -0.5, 0)
+
+[node name="StationEye01" parent="Station/EyeLevelLayer" instance=ExtResource("density_07")]
+position = Vector3(14.95, 1.03, -1.75)
+rotation = Vector3(0, -0.2, 0)
+
+[node name="StationEye02" parent="Station/EyeLevelLayer" instance=ExtResource("density_08")]
+position = Vector3(17.3, 1.03, -3.4)
+rotation = Vector3(0, 0.3, 0)
+
+[node name="StationEye03" parent="Station/EyeLevelLayer" instance=ExtResource("density_08")]
+position = Vector3(19.2, 1.05, -4.2)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="StationEye04" parent="Station/EyeLevelLayer" instance=ExtResource("density_07")]
+position = Vector3(19.2, 1.05, 1.8)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="StationEye05" parent="Station/EyeLevelLayer" instance=ExtResource("density_09")]
+position = Vector3(19.1, 0, 5.2)
+
+[node name="StationEye06" parent="Station/EyeLevelLayer" instance=ExtResource("density_10")]
+position = Vector3(13, 0, 5.1)
+rotation = Vector3(0, -0.4, 0)
+
+[node name="StationEye07" parent="Station/EyeLevelLayer" instance=ExtResource("density_10")]
+position = Vector3(19.1, 0, -4.9)
+rotation = Vector3(0, 0.4, 0)
+
+[node name="StationEye08" parent="Station/EyeLevelLayer" instance=ExtResource("density_09")]
+position = Vector3(13, 0, -5)
+rotation = Vector3(0, -0.7, 0)
+
+[node name="StationEye09" parent="Station/EyeLevelLayer" instance=ExtResource("density_15")]
+position = Vector3(14.8, 0.79, -1.35)
+rotation = Vector3(0, -0.4, 0)
+
+[node name="StationEye10" parent="Station/EyeLevelLayer" instance=ExtResource("density_15")]
+position = Vector3(18.1, 0.79, -3.35)
+rotation = Vector3(0, 0.5, 0)
+
+[node name="StationEye11" parent="Station/EyeLevelLayer" instance=ExtResource("density_16")]
+position = Vector3(17.1, 0.78, -3.5)
+scale = Vector3(2, 2, 2)
+
+[node name="StationEye12" parent="Station/EyeLevelLayer" instance=ExtResource("density_17")]
+position = Vector3(17.2, 0.79, -3.05)
+scale = Vector3(2, 2, 2)
+
+[node name="StationWall01" parent="Station/VerticalLayer" instance=ExtResource("density_11")]
+position = Vector3(13, 1.7, -5.82)
+
+[node name="StationWall02" parent="Station/VerticalLayer" instance=ExtResource("density_12")]
+position = Vector3(14.7, 1.65, -5.82)
+
+[node name="StationWall03" parent="Station/VerticalLayer" instance=ExtResource("density_11")]
+position = Vector3(17, 1.7, -5.82)
+
+[node name="StationWall04" parent="Station/VerticalLayer" instance=ExtResource("density_12")]
+position = Vector3(18.8, 1.65, -5.82)
+
+[node name="StationWall05" parent="Station/VerticalLayer" instance=ExtResource("density_12")]
+position = Vector3(13, 1.65, 5.82)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="StationWall06" parent="Station/VerticalLayer" instance=ExtResource("density_11")]
+position = Vector3(14.7, 1.7, 5.82)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="StationWall07" parent="Station/VerticalLayer" instance=ExtResource("density_11")]
+position = Vector3(17, 1.7, 5.82)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="StationWall08" parent="Station/VerticalLayer" instance=ExtResource("density_12")]
+position = Vector3(18.8, 1.65, 5.82)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="Blockers" type="Node3D" parent="." groups=["town_navigation_source"]]
+editor_description = "Primitive collision only for the four added park trees; included in the committed navigation bake."
+
+[node name="TreeWestNorthBlocker" type="StaticBody3D" parent="Blockers"]
+position = Vector3(-9, 1.1, -2.8)
+
+[node name="Collision" type="CollisionShape3D" parent="Blockers/TreeWestNorthBlocker"]
+shape = SubResource("CylinderShape3D_density_tree")
+
+[node name="TreeEastNorthBlocker" type="StaticBody3D" parent="Blockers"]
+position = Vector3(9, 1.1, -2.8)
+
+[node name="Collision" type="CollisionShape3D" parent="Blockers/TreeEastNorthBlocker"]
+shape = SubResource("CylinderShape3D_density_tree")
+
+[node name="TreeWestSouthBlocker" type="StaticBody3D" parent="Blockers"]
+position = Vector3(-9.5, 1.1, 2.8)
+
+[node name="Collision" type="CollisionShape3D" parent="Blockers/TreeWestSouthBlocker"]
+shape = SubResource("CylinderShape3D_density_tree")
+
+[node name="TreeEastSouthBlocker" type="StaticBody3D" parent="Blockers"]
+position = Vector3(9.5, 1.1, 2.8)
+
+[node name="Collision" type="CollisionShape3D" parent="Blockers/TreeEastSouthBlocker"]
+shape = SubResource("CylinderShape3D_density_tree")

@@ -10,5 +10,7 @@ godot/addons/godot_ai/** linguist-vendored -whitespace
 # Third-party 3D sources are vendored; embedded-buffer glTF files are enormous
 # single-line JSON documents and must not produce browser-hostile text diffs.
 godot/assets/kenney3d/** linguist-vendored -whitespace
+godot/assets/kaykit/** linguist-vendored -whitespace
+godot/assets/kaykit/**/*.gltf binary
 godot/assets/quaternius/** linguist-vendored -whitespace
 godot/assets/quaternius/**/*.gltf binary

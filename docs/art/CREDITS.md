@@ -49,9 +49,21 @@ pack as CC0.
 - Source: [Furniture Bits](https://kaylousberg.itch.io/furniture-bits), Free
   version 1.0
 - License: CC0 1.0 Universal
-- Use: a small selected set of chairs, couch, cabinet, tables, lamps, and
-  books for repeated low-poly dressing in the studio, office, and Station.
+- Use: a selected set of seating, cabinets, tables, lamps, books, plants,
+  picture frames, rugs, and shelving for repeated low-poly dressing in the
+  studio, office, and Station.
 - License copy: `godot/assets/kaykit/furniture_bits/License.txt`
+
+## KayKit Prototype Bits
+
+- Creator: Kay Lousberg (KayKit)
+- Source: [Prototype Bits](https://kaylousberg.itch.io/prototype-bits), Free
+  version 1.1
+- License: CC0 1.0 Universal
+- Use: a selected set of barrels, boxes, cans, decorated pallets, and a
+  decorated table for dense service-corner and interior clutter. Architecture,
+  targets, dummies, and paid-tier files are excluded.
+- License copy: `godot/assets/kaykit/prototype_bits/License.txt`
 
 ## KayKit City Builder Bits
 

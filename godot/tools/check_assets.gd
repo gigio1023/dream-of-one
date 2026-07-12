@@ -8,6 +8,7 @@ const KENNEY_LICENSE := "res://assets/kenney2d/rpg-urban-pack/License.txt"
 const MANIFEST := "res://assets/third_party/manifest.json"
 const COMMERCIAL_TRIM_DIR := "res://assets/kenney3d/city_commercial"
 const KAYKIT_CITY_DIR := "res://assets/kaykit/city_builder_bits"
+const KAYKIT_PROTOTYPE_DIR := "res://assets/kaykit/prototype_bits"
 const GREYBOX_ASSETS := [
 	"res://assets/greybox/queue_marker.png",
 	"res://assets/greybox/store_counter.png",
@@ -31,6 +32,7 @@ func _run() -> void:
 	_check_manifest()
 	_check_no_closed_commercial_buildings()
 	_check_no_kaykit_city_architecture()
+	_check_no_kaykit_prototype_forbidden_content()
 
 	if _failures.is_empty():
 		print("PASS check_assets: committed 2D/3D packs, licenses, curated files, greybox assets, and manifest are valid")
@@ -144,6 +146,22 @@ func _check_no_kaykit_city_architecture() -> void:
 			or normalized.begins_with("base.")
 		):
 			_failures.append("KayKit City architecture is forbidden in the enterable town: %s" % file_name)
+
+func _check_no_kaykit_prototype_forbidden_content() -> void:
+	if not _directory_exists(KAYKIT_PROTOTYPE_DIR):
+		return
+	for file_name in DirAccess.get_files_at(KAYKIT_PROTOTYPE_DIR):
+		var normalized := file_name.to_lower().replace("-", "_")
+		if (
+			normalized.begins_with("door_")
+			or normalized.begins_with("dummy_")
+			or normalized.begins_with("floor")
+			or normalized.begins_with("pillar_")
+			or normalized.begins_with("primitive_")
+			or normalized.begins_with("target")
+			or normalized.begins_with("wall")
+		):
+			_failures.append("KayKit Prototype architecture, target, or dummy asset is forbidden: %s" % file_name)
 
 func _directory_exists(path: String) -> bool:
 	return DirAccess.dir_exists_absolute(ProjectSettings.globalize_path(path))

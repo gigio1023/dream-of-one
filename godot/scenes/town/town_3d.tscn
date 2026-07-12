@@ -59,6 +59,7 @@
 [ext_resource type="PackedScene" path="res://assets/kaykit/city_builder_bits/trash_a.gltf" id="50_city_trash_a"]
 [ext_resource type="PackedScene" path="res://assets/kaykit/city_builder_bits/trash_b.gltf" id="51_city_trash_b"]
 [ext_resource type="PackedScene" path="res://scenes/props/physical_props_3d.tscn" id="52_physical_props"]
+[ext_resource type="PackedScene" path="res://scenes/town/town_density_dressing_3d.tscn" id="53_density_pass"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_s1wib"]
 sky_top_color = Color(0.56078434, 0.7137255, 0.83137256, 1)
@@ -672,6 +673,8 @@ end_position = Vector3(12.6, 0.2, 0)
 [node name="Props" type="Node3D" parent="." unique_id=649743328]
 
 [node name="PhysicalProps3D" parent="Props" instance=ExtResource("52_physical_props")]
+
+[node name="DensityPass" parent="Props" instance=ExtResource("53_density_pass")]
 
 [node name="TextSurfaces" type="Node3D" parent="Props"]
 

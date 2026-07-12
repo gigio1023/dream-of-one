@@ -2938,6 +2938,49 @@ func _check_town_dressing_density(label: String, town: Node) -> void:
 		_failures.append("%s dense town has no large-exterior-prop blocker group" % label)
 	elif _count_static_bodies(exterior_blockers) < 10:
 		_failures.append("%s dense town has fewer than 10 exterior prop blockers" % label)
+	var density_pass := town.get_node_or_null("Props/DensityPass")
+	if density_pass == null:
+		_failures.append("%s dense town has no mixed-asset density pass" % label)
+		return
+	var density_minimums := {
+		"Park": 50,
+		"Street": 36,
+		"Studio": 24,
+		"Office": 24,
+		"Station": 24,
+	}
+	var density_total := 0
+	for zone_name: String in density_minimums:
+		var zone := density_pass.get_node_or_null(zone_name)
+		if zone == null:
+			_failures.append("%s density pass is missing zone %s" % [label, zone_name])
+			continue
+		var visible_count := 0
+		for layer_name in ["GroundLayer", "EyeLevelLayer", "VerticalLayer"]:
+			var layer := zone.get_node_or_null(layer_name)
+			if layer == null:
+				_failures.append(
+					"%s density pass %s is missing %s" % [label, zone_name, layer_name]
+				)
+				continue
+			visible_count += layer.get_child_count()
+		density_total += visible_count
+		if visible_count < int(density_minimums[zone_name]):
+			_failures.append(
+				"%s density pass %s has only %d visible assets; expected at least %d"
+				% [label, zone_name, visible_count, int(density_minimums[zone_name])]
+			)
+	if density_total < 158:
+		_failures.append(
+			"%s mixed-asset density pass has only %d visible assets" % [label, density_total]
+		)
+	var density_blockers := density_pass.get_node_or_null("Blockers")
+	if density_blockers == null:
+		_failures.append("%s density pass has no blockers for its added park trees" % label)
+	elif not density_blockers.is_in_group(&"town_navigation_source"):
+		_failures.append("%s density blockers are absent from the navigation bake" % label)
+	elif _count_static_bodies(density_blockers) < 4:
+		_failures.append("%s density pass has fewer than four park-tree blockers" % label)
 
 
 func _count_scene_owned_descendants(node: Node, scene_owner: Node) -> int:

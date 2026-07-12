@@ -75,6 +75,62 @@ async function readyFirstMeeting(
   };
 }
 
+async function readyLaterMeeting(
+  service: RunService,
+  runId: string,
+  startRevision: number,
+  requestPrefix: string,
+  sourceId: string,
+): Promise<{
+  ready: RunAdvanceResponse;
+  wake: RunScheduleWake;
+  request: RunNpcDecisionRequest;
+}> {
+  let revision = startRevision;
+  for (let step = 1; step <= 50; step += 1) {
+    let advanced = await service.advance({
+      runId,
+      advanceId: `${requestPrefix}:clock:${step}`,
+      observedWorldRevision: revision,
+      elapsedSeconds: 10,
+      arrivals: [],
+    });
+    revision = advanced.worldRevision;
+    if (advanced.movementDeltas.length > 0) {
+      advanced = await service.advance({
+        runId,
+        advanceId: `${requestPrefix}:clock:${step}:arrivals`,
+        observedWorldRevision: revision,
+        elapsedSeconds: 0,
+        arrivals: advanced.movementDeltas.map(movement => ({
+          movementId: movement.movementId,
+          actorId: movement.actorId,
+          anchorRef: movement.targetAnchorRef,
+        })),
+      });
+      revision = advanced.worldRevision;
+    }
+    const wake = [
+      ...advanced.scheduleWakes,
+      ...service.snapshot(runId).scheduler.pendingWakes,
+    ].find(candidate =>
+      candidate.kind === "meeting_ready" && candidate.sourceId === sourceId
+    );
+    if (wake) {
+      return {
+        ready: advanced,
+        wake,
+        request: {
+          runId,
+          wakeId: wake.wakeId,
+          observedWorldRevision: wake.observedWorldRevision,
+        },
+      };
+    }
+  }
+  throw new Error(`meeting did not become ready: ${sourceId}`);
+}
+
 function capturingAdapter() {
   const adapter = createStudioReceptionScriptedAdapter();
   const requests: AgentStepRequest[] = [];
@@ -524,6 +580,24 @@ test("a neutral ambient reply still records one localized no-change judgment", a
   assert.equal(judgment.appliedStance, "uncertain");
   assert.equal(judgment.whyLine, fallbackContent("ko-KR").agent.ambientNoChangeWhy);
   assert.deepEqual(snapshot.socialView.encounteredResidents, []);
+
+  await service.preloadConversation(
+    meeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ko-KR",
+  );
+  const started = await service.startConversation(
+    meeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ko-KR",
+  );
+  assert.deepEqual(
+    started.socialView.encounteredResidents,
+    [],
+    "a pure no-change judgment remains diagnostic memory, not a social-view disclosure",
+  );
 });
 
 test("ambient hearsay cannot create a vouch without prior meaningful firsthand conversation", async () => {
@@ -628,6 +702,131 @@ test("preload keeps an off-screen ambient judgment hidden and the next conversat
     "ko-KR",
   );
   assert.equal(retried.socialView.revision, revision, "a start retry cannot disclose twice");
+});
+
+test("a newer no-change ambient judgment cannot hide or misattribute an earlier material change", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  let replyIndex = 0;
+  adapter.judgeAndProposeAmbientReply = async request => {
+    replyIndex += 1;
+    if (replyIndex === 1) {
+      return {
+        proposal: {
+          toolCall: { tool: "talk_to", args: { actorId: request.targetActorId } },
+          utterance: "그 이야기는 방문자에게 직접 확인해 봐야겠습니다.",
+          rationale: "처음 들은 말이 방문자에 대한 판단을 바꿨습니다.",
+          done: true,
+          suspicionDelta: 24,
+          proposedStance: "oppose",
+          whyLine: "스튜디오 관리자가 전한 말 때문에 방문자의 설명을 의심하게 됐습니다.",
+          openQuestion: {
+            status: "open",
+            text: "방문자는 왜 관리자에게 다른 설명을 했을까?",
+            whyLine: "관리자에게 들은 말과 직접 확인할 내용이 남았습니다.",
+          },
+        },
+        meta: {
+          profileId: "scripted/ambient-material-then-neutral",
+          transport: "scripted",
+          usedFallback: false,
+        },
+      };
+    }
+    return {
+      proposal: {
+        toolCall: { tool: "talk_to", args: { actorId: request.targetActorId } },
+        utterance: "그 말만으로는 판단을 더 바꾸지 않겠습니다.",
+        rationale: "두 번째 말에는 기존 판단을 바꿀 새 근거가 없습니다.",
+        done: true,
+        suspicionDelta: 0,
+        proposedStance: request.stanceBefore,
+        whyLine: "새로 들은 말만으로는 방문자에 대한 판단이 달라지지 않았습니다.",
+        openQuestion: null,
+      },
+      meta: {
+        profileId: "scripted/ambient-material-then-neutral",
+        transport: "scripted",
+        usedFallback: false,
+      },
+    };
+  };
+
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("material-then-neutral"),
+  });
+  const firstMeeting = await readyFirstMeeting(service, "ambient-material-then-neutral");
+  await service.decision(firstMeeting.request);
+  const afterMaterial = service.snapshot(firstMeeting.started.runId);
+  const caretakerAfterMaterial = afterMaterial.actors.find(
+    actor => actor.actorId === "NPC_Park_Caretaker",
+  );
+  assert.ok(caretakerAfterMaterial);
+  const material = caretakerAfterMaterial.memories.find(
+    memory => memory.kind === "ambient_stance_judgment",
+  );
+  assert.ok(material && material.kind === "ambient_stance_judgment");
+  assert.equal(material.sourceActorId, "NPC_Studio_Manager");
+  assert.equal(material.appliedStance, "oppose");
+
+  const secondMeeting = await readyLaterMeeting(
+    service,
+    firstMeeting.started.runId,
+    afterMaterial.worldRevision,
+    "ambient-material-then-neutral:second",
+    "MEET_RECEPTIONIST_CARETAKER",
+  );
+  await service.decision(secondMeeting.request);
+  const hidden = service.snapshot(firstMeeting.started.runId);
+  const caretaker = hidden.actors.find(actor => actor.actorId === "NPC_Park_Caretaker");
+  assert.ok(caretaker);
+  const judgments = caretaker.memories.filter(
+    memory => memory.kind === "ambient_stance_judgment",
+  );
+  assert.equal(judgments.length, 2);
+  const noChange = judgments[1];
+  assert.ok(noChange && noChange.kind === "ambient_stance_judgment");
+  assert.equal(noChange.sourceActorId, "NPC_Studio_Receptionist");
+  assert.ok(noChange.worldRevision > material.worldRevision);
+  assert.equal(noChange.suspicionDelta, 0);
+  assert.equal(noChange.appliedStance, noChange.stanceBefore);
+  assert.equal(noChange.openQuestion, null);
+  assert.deepEqual(hidden.socialView.encounteredResidents, []);
+
+  await service.preloadConversation(
+    firstMeeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ko-KR",
+  );
+  const started = await service.startConversation(
+    firstMeeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ko-KR",
+  );
+  const disclosed = started.socialView.encounteredResidents.find(
+    resident => resident.actorId === caretaker.actorId,
+  );
+  assert.ok(disclosed);
+  assert.equal(disclosed.stance, caretaker.stance, "the disclosed stance is the current stance");
+  assert.equal(disclosed.stance, "oppose");
+  assert.equal(disclosed.stanceRevision, material.worldRevision);
+  assert.equal(disclosed.whyLine, material.whyLine);
+  assert.equal(disclosed.provenance?.originActorId, material.sourceActorId);
+  assert.equal(disclosed.provenance?.sourceMemoryId, material.sourceMemoryId);
+  assert.equal(disclosed.provenance?.whyLine, material.whyLine);
+  assert.notEqual(disclosed.provenance?.originActorId, noChange.sourceActorId);
+  assert.notEqual(disclosed.provenance?.sourceMemoryId, noChange.sourceMemoryId);
+
+  const socialRevision = started.socialView.revision;
+  const retried = await service.startConversation(
+    firstMeeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ko-KR",
+  );
+  assert.equal(retried.socialView.revision, socialRevision, "the material change discloses once");
 });
 
 test("a target evidence change while the ambient reply is pending makes the queued exchange stale with no partial speech", async () => {

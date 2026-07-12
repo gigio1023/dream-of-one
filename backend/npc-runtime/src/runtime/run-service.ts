@@ -4349,16 +4349,21 @@ export class RunService {
   }
 
   private discloseLatestAmbientJudgment(run: RunState, actor: RunActorState): void {
-    const memory = [...actor.memories]
-      .reverse()
-      .find((candidate): candidate is RunAmbientStanceJudgmentMemory =>
-        candidate.kind === "ambient_stance_judgment"
-      );
-    if (!memory) return;
     const existing = run.socialView.encounteredResidents.find(
       entry => entry.actorId === actor.actorId,
     );
-    if (existing && existing.stanceRevision >= memory.worldRevision) return;
+    const memory = [...actor.memories]
+      .reverse()
+      .find((candidate): candidate is RunAmbientStanceJudgmentMemory =>
+        candidate.kind === "ambient_stance_judgment" &&
+        (!existing || candidate.worldRevision > existing.stanceRevision) &&
+        (
+          candidate.suspicionDelta !== 0 ||
+          candidate.appliedStance !== candidate.stanceBefore ||
+          candidate.openQuestion !== null
+        )
+      );
+    if (!memory) return;
     const provenance: RunSocialProvenance = {
       originKind: "speech",
       originActorId: memory.sourceActorId,

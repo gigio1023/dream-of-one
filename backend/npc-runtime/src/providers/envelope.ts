@@ -214,7 +214,6 @@ export function ambientReplyJudgmentSchemaForLocale(locale: string) {
   return ambientReplyJudgmentSchema.superRefine((value, context) => {
     if (!korean) return;
     addKoreanTextIssue(context, ["utterance"], value.utterance);
-    addKoreanTextIssue(context, ["rationale"], value.rationale);
     addKoreanTextIssue(context, ["whyLine"], value.whyLine);
     addKoreanTextIssue(context, ["openQuestion", "text"], value.openQuestion?.text);
     addKoreanTextIssue(

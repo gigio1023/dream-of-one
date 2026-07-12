@@ -338,9 +338,10 @@ listener-owned `ambient_utterance` memory, speaker, listener, before/after
 suspicion, proposed/applied stance, why-line, and provider metadata. It is
 available in debug snapshots and hearing context but is not an administrative
 record source. Only a later successful `session/start` with that resident may
-copy the newest undisclosed judgment into `socialView`, preserving
-`speaker → listener → sourceMemory → why`; preload and overhearing alone do not
-reveal another resident's internal opinion.
+copy the newest undisclosed material judgment into `socialView`, preserving
+`speaker → listener → sourceMemory → why`; a pure no-change judgment remains
+diagnostic memory, and preload or overhearing alone does not reveal another
+resident's internal opinion.
 
 The runtime verifies provenance and procedure; the selected live model judges
 meaning. At the scheduled hearing it enforces four evidenced vouches out of

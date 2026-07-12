@@ -275,6 +275,10 @@ test("ambient reply schema keeps the exact talk target and all listener judgment
   assert.equal(ambientReplyJudgmentSchemaForLocale("ko-KR").safeParse(valid).success, true);
   assert.equal(ambientReplyJudgmentSchemaForLocale("ko-KR").safeParse({
     ...valid,
+    rationale: "NPC_Store_Clerk compared sourceMemoryId mem-ambient-1 with current context.",
+  }).success, true, "internal rationale may contain stable ids and English diagnostics");
+  assert.equal(ambientReplyJudgmentSchemaForLocale("ko-KR").safeParse({
+    ...valid,
     done: false,
   }).success, false);
   assert.equal(ambientReplyJudgmentSchemaForLocale("ko-KR").safeParse({
@@ -408,8 +412,16 @@ test("provider service returns schema-validated live conversation proposals", as
 });
 
 test("ambient reply is one schema-validated call with its own audit purpose and neutral localized fallback", async () => {
+  const internalRationale =
+    "NPC_Store_Clerk compared sourceMemoryId mem-ambient-1 with current context.";
   const textGen = new FakeTextGen([
-    { text: validAmbientReply, usage: { inputTokens: 12, outputTokens: 18, totalTokens: 30 } },
+    {
+      text: JSON.stringify({
+        ...JSON.parse(validAmbientReply),
+        rationale: internalRationale,
+      }),
+      usage: { inputTokens: 12, outputTokens: 18, totalTokens: 30 },
+    },
   ]);
   const service = new ProviderService({
     profileId: "test/ambient-reply",
@@ -419,8 +431,11 @@ test("ambient reply is one schema-validated call with its own audit purpose and 
   const request = ambientReplyRequest();
   const result = await service.judgeAndProposeAmbientReply(request);
   assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.meta.fallbackReason, undefined);
   assert.equal(result.proposal.proposedStance, "oppose");
   assert.equal(result.proposal.suspicionDelta, 18);
+  assert.equal(result.proposal.rationale, internalRationale);
   assert.equal(textGen.requests.length, 1);
   assert.equal(textGen.requests[0]?.purpose, "ambient_reply");
   assert.equal(textGen.requests[0]?.schemaName, "npc_ambient_reply_judgment");

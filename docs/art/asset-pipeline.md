@@ -173,7 +173,7 @@ individual source pages on 2026-07-12:
 
 | Need | First source | License and selection rule |
 |---|---|---|
-| Latin/Hangul/Han/kana export font | [Noto Sans CJK](https://github.com/notofonts/noto-cjk/tree/main/Sans) | OFL-1.1. Try one Regular Pan-CJK collection in the shared HUD theme; if Godot cannot select appropriate SC/JP/KR faces, use those three Regular faces in one font fallback chain. System fallback is acceptable during development, not final export proof. |
+| Latin/Hangul/Han/kana export font | [Noto Sans CJK](https://github.com/notofonts/noto-cjk/tree/main/Sans) | OFL-1.1. Import one Regular Pan-CJK collection, then explicitly select SC for `zh`, JP for `ja`, and KR for `ko` from the run's immutable locale unless an in-engine render proves OpenType language tagging selects the right regional forms. Do not put those overlapping Han faces in a simple fallback chain: the first face already contains the glyph. System fallback is acceptable during development, not final export proof. |
 | Footsteps | [Kenney RPG Audio](https://kenney.nl/assets/rpg-audio) | 50 CC0 files, officially tagged `footstep`/`foley`; select 2–4 neutral variants, not a surface-material system. |
 | Pick/place/throw impact | [Kenney Impact Sounds](https://kenney.nl/assets/impact-sounds) | 130 CC0 files; select 2–3 small dull impacts. |
 | Park loop candidate | [Local Park Sound Ambience](https://freesound.org/s/265046/) | Individual sound is CC0, 19.815-second stereo WAV. Audition and make a clean loop before adoption. |
@@ -184,6 +184,14 @@ Freesound is not a single-license catalog. Recheck the chosen sound's own CC0
 page at download time and record its author, source URL, original filename, and
 date in the existing manifest and Credits. Download and commit only the chosen
 files plus license evidence, never a whole audio bundle.
+
+Priority is font/export proof first, then T8 footsteps and prop impacts. The
+park loop, shared interior tone, and scribble cue remain required for M3R but
+are selected during T8 after the physical path exists. Audition ambience by a
+clean loop seam, repetition fatigue over a 30–60 minute run, absence of
+intelligible speech or strong location signatures, and its ability to stay
+below NPC utterances. Blend park and interior loops gently across permanently
+open portals; a hard zone switch would falsely imply a closed door.
 
 No additional 3D pack is approved for T8. First make the existing committed
 Kenney `computer_keyboard.glb` and `potted_plant.glb`, plus one project-greybox

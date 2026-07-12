@@ -161,6 +161,36 @@ but functional. CI and headless smokes never depend on local-tier assets.
 
 ## Audio
 
-Same tiering: CC0/CC-BY packs committed with licenses; restricted packs
-local-only. M3R lands the SFX/ambience set (footsteps, doors, park murmur,
-record-scribble cue); BGM waits for M5.
+Same tiering: CC0/CC-BY files may be committed with their licenses; restricted
+packs stay local-only. M3R needs footsteps, one small prop impact/place family,
+park murmur, one reusable interior room tone, and a record-scribble cue. The
+town has permanently open portals, so it needs no door sound. The procedural
+spatial speech blip already in `npc_3d.gd` remains the speech cue; do not replace
+working project audio with another pack. BGM waits for M5.
+
+The remaining free acquisition shortlist was rechecked against creator or
+individual source pages on 2026-07-12:
+
+| Need | First source | License and selection rule |
+|---|---|---|
+| Latin/Hangul/Han/kana export font | [Noto Sans CJK](https://github.com/notofonts/noto-cjk/tree/main/Sans) | OFL-1.1. Try one Regular Pan-CJK collection in the shared HUD theme; if Godot cannot select appropriate SC/JP/KR faces, use those three Regular faces in one font fallback chain. System fallback is acceptable during development, not final export proof. |
+| Footsteps | [Kenney RPG Audio](https://kenney.nl/assets/rpg-audio) | 50 CC0 files, officially tagged `footstep`/`foley`; select 2–4 neutral variants, not a surface-material system. |
+| Pick/place/throw impact | [Kenney Impact Sounds](https://kenney.nl/assets/impact-sounds) | 130 CC0 files; select 2–3 small dull impacts. |
+| Park loop candidate | [Local Park Sound Ambience](https://freesound.org/s/265046/) | Individual sound is CC0, 19.815-second stereo WAV. Audition and make a clean loop before adoption. |
+| Interior loop candidate | [Office Room Tone](https://freesound.org/s/278154/) | Individual sound is CC0, 30.275-second mono WAV; reuse quietly in all three interiors. |
+| Record cue candidate | [Draw & Trace — Pencil](https://freesound.org/s/753216/) | Individual sound is CC0, clean mono recording; extract only one short scribble cue. |
+
+Freesound is not a single-license catalog. Recheck the chosen sound's own CC0
+page at download time and record its author, source URL, original filename, and
+date in the existing manifest and Credits. Download and commit only the chosen
+files plus license evidence, never a whole audio bundle.
+
+No additional 3D pack is approved for T8. First make the existing committed
+Kenney `computer_keyboard.glb` and `potted_plant.glb`, plus one project-greybox
+box fallback, into the deliberately tiny pick/move/throw set. Only those
+interactive props need wrapper scenes; static furniture keeps its current
+instances. [KayKit Furniture Bits](https://kaylousberg.itch.io/furniture-bits)
+(50+ free CC0 models, glTF included) is the single fallback source if the
+existing silhouettes fail in play. Do not install an asset-placement or
+first-person-controller addon: the current editor-authored town, Godot AI
+workflow, interaction ray, and controller already own those jobs.

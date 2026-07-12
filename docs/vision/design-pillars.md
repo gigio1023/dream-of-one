@@ -143,8 +143,9 @@ this block conflicts with any earlier block or pillar text, this block wins.
    attributed — through conversation, overheard speech with direction-aware
    subtitles, or inspectable records — plus an open-questions/rumor-log
    surface. An unattributed silent state change is a defect, not depth.
-10. **Scope floor and ceiling.** Doors plus a few pick/move/throw props; no
-    inventory system, no trespass, theft, combat, health, damage, or chase.
+10. **Scope floor and ceiling.** Permanently open building portals plus a few
+    pick/move/throw props; no physical door interaction, inventory system,
+    trespass, theft, combat, health, damage, or chase.
     Observed object handling may enter NPC factual memory but triggers no
     automatic reaction and cannot directly advance a vouch. Every visible
     building is enterable — park plus single-story studio reception, office,

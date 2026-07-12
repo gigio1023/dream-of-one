@@ -26,6 +26,29 @@
 [ext_resource type="PackedScene" uid="uid://bidmt781jrmn6" path="res://assets/quaternius/women/worker.gltf" id="18_7787r"]
 [ext_resource type="PackedScene" uid="uid://d31j7jqssauxj" path="res://assets/quaternius/men/casual_2.gltf" id="19_f2ht5"]
 [ext_resource type="PackedScene" uid="uid://dg4b3k4usfvj1" path="res://assets/kenney3d/furniture/potted_plant.glb" id="19_is6wx"]
+[ext_resource type="PackedScene" uid="uid://e7kwd5jvtqyj" path="res://assets/kenney3d/furniture/computer_keyboard.glb" id="20_keyboard"]
+[ext_resource type="PackedScene" uid="uid://dfbo1bua8wpe" path="res://assets/kenney3d/furniture/computer_screen.glb" id="21_screen"]
+[ext_resource type="PackedScene" uid="uid://b77xis2tjha7s" path="res://assets/kenney3d/nature/fence_simple.glb" id="22_fence"]
+[ext_resource type="PackedScene" uid="uid://tjydo0j1whld" path="res://assets/kenney3d/nature/ground_grass.glb" id="23_grass"]
+[ext_resource type="PackedScene" uid="uid://c6xelcpsruk6m" path="res://assets/kenney3d/nature/ground_path_straight.glb" id="24_path"]
+[ext_resource type="PackedScene" uid="uid://cqp6w1dtwwmkj" path="res://assets/kenney3d/nature/plant_bush.glb" id="25_bush"]
+[ext_resource type="PackedScene" uid="uid://c0foq23l58u8g" path="res://assets/kenney3d/nature/rock_large_a.glb" id="26_rock"]
+[ext_resource type="PackedScene" uid="uid://dc0mn3lr6q5bm" path="res://assets/kenney3d/city_roads/light_curved.glb" id="27_light"]
+[ext_resource type="PackedScene" uid="uid://d06pbmeyk25us" path="res://assets/kenney3d/city_roads/road_bend.glb" id="28_road_bend"]
+[ext_resource type="PackedScene" uid="uid://cb361pk2gqliy" path="res://assets/kenney3d/city_roads/road_end.glb" id="29_road_end"]
+[ext_resource type="PackedScene" uid="uid://daplmhajpc00o" path="res://assets/kenney3d/city_roads/road_intersection.glb" id="30_road_intersection"]
+[ext_resource type="PackedScene" uid="uid://dtj8kkigrop8m" path="res://assets/kenney3d/city_roads/road_straight.glb" id="31_road_straight"]
+[ext_resource type="PackedScene" uid="uid://c12o36pibx61m" path="res://assets/kenney3d/city_commercial/detail_awning.glb" id="32_awning"]
+[ext_resource type="PackedScene" uid="uid://ckvgecbr2hm7a" path="res://assets/kenney3d/city_commercial/detail_overhang.glb" id="33_overhang"]
+[ext_resource type="PackedScene" uid="uid://bv56lv3m0fnil" path="res://assets/kenney3d/city_commercial/detail_parasol_a.glb" id="34_parasol"]
+[ext_resource type="PackedScene" uid="uid://ckbblw0go5pbj" path="res://assets/kaykit/furniture_bits/armchair_pillows.gltf" id="35_armchair"]
+[ext_resource type="PackedScene" uid="uid://ch7rugctuulub" path="res://assets/kaykit/furniture_bits/book_set.gltf" id="36_books"]
+[ext_resource type="PackedScene" uid="uid://biwsdrqa250e5" path="res://assets/kaykit/furniture_bits/cabinet_medium_decorated.gltf" id="37_cabinet"]
+[ext_resource type="PackedScene" uid="uid://b0f8it8u6oof8" path="res://assets/kaykit/furniture_bits/couch_pillows.gltf" id="38_couch"]
+[ext_resource type="PackedScene" uid="uid://bhx5s4es3mmdv" path="res://assets/kaykit/furniture_bits/lamp_standing.gltf" id="39_floor_lamp"]
+[ext_resource type="PackedScene" uid="uid://45sdhn2028fr" path="res://assets/kaykit/furniture_bits/lamp_table.gltf" id="40_table_lamp"]
+[ext_resource type="PackedScene" uid="uid://bi3yqmvvy8ame" path="res://assets/kaykit/furniture_bits/table_low.gltf" id="41_low_table"]
+[ext_resource type="PackedScene" uid="uid://bvoh3trhcgtbx" path="res://assets/kaykit/furniture_bits/table_medium_long.gltf" id="42_long_table"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_s1wib"]
 sky_top_color = Color(0.56078434, 0.7137255, 0.83137256, 1)
@@ -233,6 +256,59 @@ radius = 0.45
 height = 2.2
 radius = 0.45
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_dressing_desk"]
+size = Vector3(1.55, 0.78, 1.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dressing_sofa_x"]
+size = Vector3(1.9, 0.86, 0.85)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dressing_sofa_z"]
+size = Vector3(0.85, 0.86, 1.9)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dressing_bookcase_x"]
+size = Vector3(1, 1.4, 0.55)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dressing_bookcase_z"]
+size = Vector3(0.55, 1.4, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dressing_armchair"]
+size = Vector3(1.8, 1.2, 1.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dressing_cabinet"]
+size = Vector3(1, 1.8, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dressing_meeting_table"]
+size = Vector3(3, 1, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dressing_waiting_couch"]
+size = Vector3(3, 1.22, 1.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dressing_low_table"]
+size = Vector3(2.4, 0.5, 1.5)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_dressing_rock"]
+height = 1.3
+radius = 1.35
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_dressing_light"]
+height = 3.3
+radius = 0.18
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_dressing_parasol"]
+height = 2.2
+radius = 0.2
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_exterior_rock"]
+size = Vector3(1.8, 0.65, 2.3)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_exterior_light"]
+height = 3.4
+radius = 0.18
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_exterior_parasol"]
+height = 2.25
+radius = 0.12
+
 [node name="Town" type="Node3D" unique_id=1757344954]
 script = ExtResource("1_txv5c")
 
@@ -263,7 +339,7 @@ omni_range = 7.0
 
 [node name="Geometry" type="Node3D" parent="." unique_id=238009825]
 
-[node name="Ground" type="Node3D" parent="Geometry" unique_id=1254835317]
+[node name="Ground" type="Node3D" parent="Geometry" unique_id=1254835317 groups=["town_navigation_source"]]
 
 [node name="TownGround" type="StaticBody3D" parent="Geometry/Ground" unique_id=244431035]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
@@ -312,7 +388,7 @@ mesh = SubResource("BoxMesh_6ms0r")
 
 [node name="Buildings" type="Node3D" parent="Geometry" unique_id=1578528126]
 
-[node name="StudioBack" type="StaticBody3D" parent="Geometry/Buildings" unique_id=664772190]
+[node name="StudioBack" type="StaticBody3D" parent="Geometry/Buildings" unique_id=664772190 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -20)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StudioBack" unique_id=989679012]
@@ -322,7 +398,7 @@ mesh = SubResource("BoxMesh_is6wx")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/StudioBack" unique_id=2066260011]
 shape = SubResource("BoxShape3D_gvglg")
 
-[node name="StudioWest" type="StaticBody3D" parent="Geometry/Buildings" unique_id=16857525]
+[node name="StudioWest" type="StaticBody3D" parent="Geometry/Buildings" unique_id=16857525 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.5, -16)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StudioWest" unique_id=2118476739]
@@ -332,7 +408,7 @@ mesh = SubResource("BoxMesh_027op")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/StudioWest" unique_id=848510692]
 shape = SubResource("BoxShape3D_y3n1p")
 
-[node name="StudioEast" type="StaticBody3D" parent="Geometry/Buildings" unique_id=839052753]
+[node name="StudioEast" type="StaticBody3D" parent="Geometry/Buildings" unique_id=839052753 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.5, -16)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StudioEast" unique_id=536813665]
@@ -342,7 +418,7 @@ mesh = SubResource("BoxMesh_vj6g0")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/StudioEast" unique_id=46626436]
 shape = SubResource("BoxShape3D_675mr")
 
-[node name="StudioFrontLeft" type="StaticBody3D" parent="Geometry/Buildings" unique_id=520072866]
+[node name="StudioFrontLeft" type="StaticBody3D" parent="Geometry/Buildings" unique_id=520072866 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 1.5, -12)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StudioFrontLeft" unique_id=1556758542]
@@ -352,7 +428,7 @@ mesh = SubResource("BoxMesh_gvglg")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/StudioFrontLeft" unique_id=1371428105]
 shape = SubResource("BoxShape3D_nyc7s")
 
-[node name="StudioFrontRight" type="StaticBody3D" parent="Geometry/Buildings" unique_id=1979960317]
+[node name="StudioFrontRight" type="StaticBody3D" parent="Geometry/Buildings" unique_id=1979960317 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, 1.5, -12)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StudioFrontRight" unique_id=1305087469]
@@ -372,7 +448,7 @@ mesh = SubResource("BoxMesh_kdj3r")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/StudioCeiling" unique_id=1074152698]
 shape = SubResource("BoxShape3D_kjof5")
 
-[node name="OfficeBack" type="StaticBody3D" parent="Geometry/Buildings" unique_id=705016950]
+[node name="OfficeBack" type="StaticBody3D" parent="Geometry/Buildings" unique_id=705016950 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 1.5, 0)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/OfficeBack" unique_id=1374546222]
@@ -382,7 +458,7 @@ mesh = SubResource("BoxMesh_34ynp")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/OfficeBack" unique_id=1369150567]
 shape = SubResource("BoxShape3D_7ipdd")
 
-[node name="OfficeNorth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=219251851]
+[node name="OfficeNorth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=219251851 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 1.5, -6)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/OfficeNorth" unique_id=2073330509]
@@ -392,7 +468,7 @@ mesh = SubResource("BoxMesh_rhl1y")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/OfficeNorth" unique_id=1058655932]
 shape = SubResource("BoxShape3D_wjxuu")
 
-[node name="OfficeSouth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=2020627671]
+[node name="OfficeSouth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=2020627671 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 1.5, 6)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/OfficeSouth" unique_id=1762242121]
@@ -402,7 +478,7 @@ mesh = SubResource("BoxMesh_cwpl7")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/OfficeSouth" unique_id=324601555]
 shape = SubResource("BoxShape3D_guvuc")
 
-[node name="OfficeFrontNorth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=1079770349]
+[node name="OfficeFrontNorth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=1079770349 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.5, -3.4)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/OfficeFrontNorth" unique_id=1228980718]
@@ -412,7 +488,7 @@ mesh = SubResource("BoxMesh_kjof5")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/OfficeFrontNorth" unique_id=1131182589]
 shape = SubResource("BoxShape3D_34ynp")
 
-[node name="OfficeFrontSouth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=555217358]
+[node name="OfficeFrontSouth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=555217358 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.5, 3.4)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/OfficeFrontSouth" unique_id=2025190522]
@@ -432,7 +508,7 @@ mesh = SubResource("BoxMesh_uba1s")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/OfficeCeiling" unique_id=200205794]
 shape = SubResource("BoxShape3D_o8pq0")
 
-[node name="StationBack" type="StaticBody3D" parent="Geometry/Buildings" unique_id=422020638]
+[node name="StationBack" type="StaticBody3D" parent="Geometry/Buildings" unique_id=422020638 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 1.5, 0)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StationBack" unique_id=136843930]
@@ -442,7 +518,7 @@ mesh = SubResource("BoxMesh_m1hki")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/StationBack" unique_id=13617912]
 shape = SubResource("BoxShape3D_l6cxy")
 
-[node name="StationNorth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=1418892647]
+[node name="StationNorth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=1418892647 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 1.5, -6)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StationNorth" unique_id=246214537]
@@ -452,7 +528,7 @@ mesh = SubResource("BoxMesh_680sb")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/StationNorth" unique_id=1890219190]
 shape = SubResource("BoxShape3D_i1avd")
 
-[node name="StationSouth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=1590958874]
+[node name="StationSouth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=1590958874 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 1.5, 6)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StationSouth" unique_id=426584984]
@@ -462,7 +538,7 @@ mesh = SubResource("BoxMesh_313o1")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/StationSouth" unique_id=725272020]
 shape = SubResource("BoxShape3D_rfl4i")
 
-[node name="StationFrontNorth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=1626608336]
+[node name="StationFrontNorth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=1626608336 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.5, -3.4)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StationFrontNorth" unique_id=1609326085]
@@ -472,7 +548,7 @@ mesh = SubResource("BoxMesh_wjxuu")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/StationFrontNorth" unique_id=1314350478]
 shape = SubResource("BoxShape3D_cwpl7")
 
-[node name="StationFrontSouth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=2124462945]
+[node name="StationFrontSouth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=2124462945 groups=["town_navigation_source"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.5, 3.4)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StationFrontSouth" unique_id=2038483899]
@@ -492,7 +568,7 @@ mesh = SubResource("BoxMesh_2jadv")
 [node name="Collision" type="CollisionShape3D" parent="Geometry/Buildings/StationCeiling" unique_id=339587517]
 shape = SubResource("BoxShape3D_s4hhb")
 
-[node name="Boundaries" type="Node3D" parent="Geometry" unique_id=867375778]
+[node name="Boundaries" type="Node3D" parent="Geometry" unique_id=867375778 groups=["town_navigation_source"]]
 
 [node name="NorthBoundary" type="StaticBody3D" parent="Geometry/Boundaries" unique_id=152650680]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -21)
@@ -556,10 +632,10 @@ end_position = Vector3(12.6, 0.2, 0)
 [node name="ParkDressing" type="Node3D" parent="Props" unique_id=1374841372]
 
 [node name="BenchWest" parent="Props/ParkDressing" unique_id=105426360 instance=ExtResource("12_o5t3x")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -4, 0, 2)
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -4, 0, 4.2)
 
 [node name="BenchEast" parent="Props/ParkDressing" unique_id=451594702 instance=ExtResource("12_o5t3x")]
-transform = Transform3D(-2, 0, -1.7484555e-07, 0, 2, 0, 1.7484555e-07, 0, -2, 4, 0, 2)
+transform = Transform3D(-2, 0, -1.7484555e-07, 0, 2, 0, 1.7484555e-07, 0, -2, 4, 0, 4.2)
 
 [node name="TreeNorthWest" parent="Props/ParkDressing" unique_id=557803751 instance=ExtResource("13_civqm")]
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -8, 0, -6)
@@ -573,13 +649,233 @@ transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -8, 0, 6)
 [node name="TreeSouthEast" parent="Props/ParkDressing" unique_id=1531191650 instance=ExtResource("13_civqm")]
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 8, 0, 6)
 
+[node name="ParkGroundDetails" type="Node3D" parent="Props/ParkDressing"]
+editor_description = "Collisionless Nature-kit ground dressing; 2.5x family scale."
+
+[node name="GrassWestEdge" parent="Props/ParkDressing/ParkGroundDetails" instance=ExtResource("23_grass")]
+position = Vector3(-9.2, 0.16, -1.8)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassNorthWest" parent="Props/ParkDressing/ParkGroundDetails" instance=ExtResource("23_grass")]
+position = Vector3(-5.8, 0.16, -7.3)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassNorthEast" parent="Props/ParkDressing/ParkGroundDetails" instance=ExtResource("23_grass")]
+position = Vector3(5.8, 0.16, -7.3)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassEastEdge" parent="Props/ParkDressing/ParkGroundDetails" instance=ExtResource("23_grass")]
+position = Vector3(9.2, 0.16, -1.8)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassSouthWest" parent="Props/ParkDressing/ParkGroundDetails" instance=ExtResource("23_grass")]
+position = Vector3(-8.8, 0.16, 7.5)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="GrassSouthEast" parent="Props/ParkDressing/ParkGroundDetails" instance=ExtResource("23_grass")]
+position = Vector3(8.8, 0.16, 7.5)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkPathSouth" parent="Props/ParkDressing/ParkGroundDetails" instance=ExtResource("24_path")]
+position = Vector3(0, 0.16, 8)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkPathMiddle" parent="Props/ParkDressing/ParkGroundDetails" instance=ExtResource("24_path")]
+position = Vector3(0, 0.16, 5.5)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkPathInner" parent="Props/ParkDressing/ParkGroundDetails" instance=ExtResource("24_path")]
+position = Vector3(0, 0.16, 3)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ParkSmallNature" type="Node3D" parent="Props/ParkDressing"]
+editor_description = "Collisionless foliage and rocks kept outside approach and meeting lanes."
+
+[node name="BushNorthWestOuter" parent="Props/ParkDressing/ParkSmallNature" instance=ExtResource("25_bush")]
+position = Vector3(-9.4, 0.1, -6.5)
+rotation = Vector3(0, 0.25, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="BushNorthWestInner" parent="Props/ParkDressing/ParkSmallNature" instance=ExtResource("25_bush")]
+position = Vector3(-6.8, 0.1, -7.8)
+rotation = Vector3(0, -0.4, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="BushNorthEastInner" parent="Props/ParkDressing/ParkSmallNature" instance=ExtResource("25_bush")]
+position = Vector3(6.8, 0.1, -7.8)
+rotation = Vector3(0, 0.55, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="BushNorthEastOuter" parent="Props/ParkDressing/ParkSmallNature" instance=ExtResource("25_bush")]
+position = Vector3(9.4, 0.1, -6.5)
+rotation = Vector3(0, -0.2, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="BushSouthWest" parent="Props/ParkDressing/ParkSmallNature" instance=ExtResource("25_bush")]
+position = Vector3(-9.4, 0.1, 5.5)
+rotation = Vector3(0, 0.75, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="BushSouthEast" parent="Props/ParkDressing/ParkSmallNature" instance=ExtResource("25_bush")]
+position = Vector3(9.4, 0.1, 5.5)
+rotation = Vector3(0, -0.7, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="RockWest" parent="Props/ParkDressing/ParkSmallNature" instance=ExtResource("26_rock")]
+position = Vector3(-10, 0.1, -8.3)
+rotation = Vector3(0, 0.35, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="RockEast" parent="Props/ParkDressing/ParkSmallNature" instance=ExtResource("26_rock")]
+position = Vector3(10, 0.1, -8.3)
+rotation = Vector3(0, -0.45, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="RockSouthWest" parent="Props/ParkDressing/ParkSmallNature" instance=ExtResource("26_rock")]
+position = Vector3(-10, 0.1, 8.3)
+rotation = Vector3(0, 1.05, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="RockSouthEast" parent="Props/ParkDressing/ParkSmallNature" instance=ExtResource("26_rock")]
+position = Vector3(10, 0.1, 8.3)
+rotation = Vector3(0, -1.1, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ExteriorDressing" type="Node3D" parent="Props"]
+editor_description = "City-kit presentation layer; large rocks and narrow light/parasol posts have matching primitive blockers."
+
+[node name="RoadLayer" type="Node3D" parent="Props/ExteriorDressing"]
+
+[node name="RoadStudioApproach" parent="Props/ExteriorDressing/RoadLayer" instance=ExtResource("29_road_end")]
+position = Vector3(0, -0.055, -10.5)
+scale = Vector3(5, 5, 5)
+
+[node name="RoadOfficeApproach" parent="Props/ExteriorDressing/RoadLayer" instance=ExtResource("29_road_end")]
+position = Vector3(-10.5, -0.055, 0)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="RoadStationApproach" parent="Props/ExteriorDressing/RoadLayer" instance=ExtResource("29_road_end")]
+position = Vector3(10.5, -0.055, 0)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="RoadSouthIntersection" parent="Props/ExteriorDressing/RoadLayer" instance=ExtResource("30_road_intersection")]
+position = Vector3(0, -0.095, 11.5)
+scale = Vector3(5, 5, 5)
+
+[node name="RoadSouthStraight" parent="Props/ExteriorDressing/RoadLayer" instance=ExtResource("31_road_straight")]
+position = Vector3(0, -0.095, 16.5)
+scale = Vector3(5, 5, 5)
+
+[node name="RoadSouthBendWest" parent="Props/ExteriorDressing/RoadLayer" instance=ExtResource("28_road_bend")]
+position = Vector3(-5, -0.095, 16.5)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="RoadSouthBendEast" parent="Props/ExteriorDressing/RoadLayer" instance=ExtResource("28_road_bend")]
+position = Vector3(5, -0.095, 16.5)
+scale = Vector3(5, 5, 5)
+
+[node name="RoadSouthEndWest" parent="Props/ExteriorDressing/RoadLayer" instance=ExtResource("29_road_end")]
+position = Vector3(-10, -0.095, 16.5)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="RoadSouthEndEast" parent="Props/ExteriorDressing/RoadLayer" instance=ExtResource("29_road_end")]
+position = Vector3(10, -0.095, 16.5)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StreetLights" type="Node3D" parent="Props/ExteriorDressing"]
+
+[node name="SouthLightWest" parent="Props/ExteriorDressing/StreetLights" instance=ExtResource("27_light")]
+position = Vector3(-7.5, 0, 12.8)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="SouthLightEast" parent="Props/ExteriorDressing/StreetLights" instance=ExtResource("27_light")]
+position = Vector3(7.5, 0, 12.8)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="OfficeApproachLight" parent="Props/ExteriorDressing/StreetLights" instance=ExtResource("27_light")]
+position = Vector3(-10.5, 0, -4.8)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StationApproachLight" parent="Props/ExteriorDressing/StreetLights" instance=ExtResource("27_light")]
+position = Vector3(10.5, 0, -4.8)
+scale = Vector3(5, 5, 5)
+
+[node name="BuildingTrim" type="Node3D" parent="Props/ExteriorDressing"]
+editor_description = "Commercial-kit trim stays on solid wall spans and never covers an open portal."
+
+[node name="StudioAwningLeft" parent="Props/ExteriorDressing/BuildingTrim" instance=ExtResource("32_awning")]
+position = Vector3(-3.2, 1.05, -12.05)
+scale = Vector3(5, 5, 5)
+
+[node name="StudioOverhangRight" parent="Props/ExteriorDressing/BuildingTrim" instance=ExtResource("33_overhang")]
+position = Vector3(3.2, 1.05, -12.05)
+scale = Vector3(5, 5, 5)
+
+[node name="OfficeAwningNorth" parent="Props/ExteriorDressing/BuildingTrim" instance=ExtResource("32_awning")]
+position = Vector3(-12.05, 1.05, -3.2)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="OfficeOverhangSouth" parent="Props/ExteriorDressing/BuildingTrim" instance=ExtResource("33_overhang")]
+position = Vector3(-12.05, 1.05, 3.2)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StationAwningNorth" parent="Props/ExteriorDressing/BuildingTrim" instance=ExtResource("32_awning")]
+position = Vector3(12.05, 1.05, -3.2)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StationOverhangSouth" parent="Props/ExteriorDressing/BuildingTrim" instance=ExtResource("33_overhang")]
+position = Vector3(12.05, 1.05, 3.2)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="SouthPlaza" type="Node3D" parent="Props/ExteriorDressing"]
+
+[node name="ParasolWest" parent="Props/ExteriorDressing/SouthPlaza" instance=ExtResource("34_parasol")]
+position = Vector3(-6, 0, 12.5)
+scale = Vector3(5, 5, 5)
+
+[node name="ParasolEast" parent="Props/ExteriorDressing/SouthPlaza" instance=ExtResource("34_parasol")]
+position = Vector3(6, 0, 12.5)
+rotation = Vector3(0, 0.65, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="PerimeterFence" type="Node3D" parent="Props/ExteriorDressing"]
+editor_description = "Fence visuals sit against the existing colliding south boundary."
+
+[node name="FenceSouthWestOuter" parent="Props/ExteriorDressing/PerimeterFence" instance=ExtResource("22_fence")]
+position = Vector3(-12, 0.1, 22.05)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="FenceSouthWestInner" parent="Props/ExteriorDressing/PerimeterFence" instance=ExtResource("22_fence")]
+position = Vector3(-4, 0.1, 22.05)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="FenceSouthEastInner" parent="Props/ExteriorDressing/PerimeterFence" instance=ExtResource("22_fence")]
+position = Vector3(4, 0.1, 22.05)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="FenceSouthEastOuter" parent="Props/ExteriorDressing/PerimeterFence" instance=ExtResource("22_fence")]
+position = Vector3(12, 0.1, 22.05)
+scale = Vector3(2.5, 2.5, 2.5)
+
 [node name="StudioDressing" type="Node3D" parent="Props" unique_id=888187052]
 
 [node name="ReceptionDesk" parent="Props/StudioDressing" unique_id=644789109 instance=ExtResource("15_3oqdm")]
-transform = Transform3D(-2, 0, -1.7484555e-07, 0, 2, 0, 1.7484555e-07, 0, -2, -2, 0, -15)
+transform = Transform3D(-2, 0, -1.7484555e-07, 0, 2, 0, 1.7484555e-07, 0, -2, -2, 0, -15.8)
 
 [node name="ReceptionChair" parent="Props/StudioDressing" unique_id=94031298 instance=ExtResource("16_qb6gb")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -2, 0, -16)
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -2, 0, -17)
 
 [node name="WaitingSofa" parent="Props/StudioDressing" unique_id=581668043 instance=ExtResource("17_h2cd6")]
 transform = Transform3D(-8.742278e-08, 0, 2, 0, 2, 0, -2, 0, -8.742278e-08, 2, 0, -17.5)
@@ -590,22 +886,270 @@ transform = Transform3D(-2, 0, -1.7484555e-07, 0, 2, 0, 1.7484555e-07, 0, -2, 4.
 [node name="ReceptionPlant" parent="Props/StudioDressing" unique_id=554574382 instance=ExtResource("19_is6wx")]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -4.5, 0, -18.5)
 
-[node name="Blockers" type="Node3D" parent="Props" unique_id=41252392]
+[node name="StudioWorkstations" type="Node3D" parent="Props/StudioDressing"]
+editor_description = "Furniture stays along the walls; the central portal-to-desk lane remains open."
+
+[node name="ManagerDesk" parent="Props/StudioDressing/StudioWorkstations" instance=ExtResource("15_3oqdm")]
+position = Vector3(0.75, 0, -19.5)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="ManagerScreen" parent="Props/StudioDressing/StudioWorkstations" instance=ExtResource("21_screen")]
+position = Vector3(0.55, 0.78, -19.5)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="ManagerKeyboard" parent="Props/StudioDressing/StudioWorkstations" instance=ExtResource("20_keyboard")]
+position = Vector3(0.45, 0.79, -19.05)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="ReceptionScreen" parent="Props/StudioDressing/StudioWorkstations" instance=ExtResource("21_screen")]
+position = Vector3(-2.25, 0.78, -15.85)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="ReceptionKeyboard" parent="Props/StudioDressing/StudioWorkstations" instance=ExtResource("20_keyboard")]
+position = Vector3(-2.4, 0.79, -15.35)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="ReviewBooks" parent="Props/StudioDressing/StudioWorkstations" instance=ExtResource("36_books")]
+position = Vector3(4.1, 1.05, -18.25)
+
+[node name="StudioWaitingArea" type="Node3D" parent="Props/StudioDressing"]
+
+[node name="VisitorChairFront" parent="Props/StudioDressing/StudioWaitingArea" instance=ExtResource("16_qb6gb")]
+position = Vector3(3, 0, -13)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="WallChairWest" parent="Props/StudioDressing/StudioWaitingArea" instance=ExtResource("16_qb6gb")]
+position = Vector3(-3.8, 0, -13.2)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="PillowArmchair" parent="Props/StudioDressing/StudioWaitingArea" instance=ExtResource("35_armchair")]
+position = Vector3(4.7, 0, -14.2)
+
+[node name="StandingLamp" parent="Props/StudioDressing/StudioWaitingArea" instance=ExtResource("39_floor_lamp")]
+position = Vector3(4.9, 0, -15.8)
+
+[node name="WestLoungeSofa" parent="Props/StudioDressing/StudioWaitingArea" instance=ExtResource("17_h2cd6")]
+position = Vector3(-5.6, 0, -14.7)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="StudioWallDetails" type="Node3D" parent="Props/StudioDressing"]
+
+[node name="WestBookcase" parent="Props/StudioDressing/StudioWallDetails" instance=ExtResource("18_6ms0r")]
+position = Vector3(-5.5, 0, -17.3)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="WestPlant" parent="Props/StudioDressing/StudioWallDetails" instance=ExtResource("19_is6wx")]
+position = Vector3(-5, 0, -15.8)
+scale = Vector3(2, 2, 2)
+
+[node name="BackPlantEast" parent="Props/StudioDressing/StudioWallDetails" instance=ExtResource("19_is6wx")]
+position = Vector3(3, 0, -19)
+rotation = Vector3(0, 0.45, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="RecordsPlant" parent="Props/StudioDressing/StudioWallDetails" instance=ExtResource("19_is6wx")]
+position = Vector3(5, 0, -16.7)
+rotation = Vector3(0, -0.35, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="OfficeDressing" type="Node3D" parent="Props"]
+editor_description = "Office presentation grouped away from the east portal and work/meeting anchors; large fixed furniture has primitive blockers."
+
+[node name="OfficeWorkstation" type="Node3D" parent="Props/OfficeDressing"]
+
+[node name="WorkDesk" parent="Props/OfficeDressing/OfficeWorkstation" instance=ExtResource("15_3oqdm")]
+position = Vector3(-15.5, 0, -1.5)
+scale = Vector3(2, 2, 2)
+
+[node name="WorkChair" parent="Props/OfficeDressing/OfficeWorkstation" instance=ExtResource("16_qb6gb")]
+position = Vector3(-14.8, 0, -2.8)
+scale = Vector3(2, 2, 2)
+
+[node name="WorkScreen" parent="Props/OfficeDressing/OfficeWorkstation" instance=ExtResource("21_screen")]
+position = Vector3(-15.2, 0.78, -1.6)
+scale = Vector3(2, 2, 2)
+
+[node name="WorkKeyboard" parent="Props/OfficeDressing/OfficeWorkstation" instance=ExtResource("20_keyboard")]
+position = Vector3(-15.1, 0.79, -1.2)
+scale = Vector3(2, 2, 2)
+
+[node name="OfficeMeetingArea" type="Node3D" parent="Props/OfficeDressing"]
+
+[node name="MeetingTable" parent="Props/OfficeDressing/OfficeMeetingArea" instance=ExtResource("42_long_table")]
+position = Vector3(-16.5, 0, 4.1)
+
+[node name="MeetingChairWest" parent="Props/OfficeDressing/OfficeMeetingArea" instance=ExtResource("16_qb6gb")]
+position = Vector3(-18.6, 0, 4.1)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="MeetingChairEast" parent="Props/OfficeDressing/OfficeMeetingArea" instance=ExtResource("16_qb6gb")]
+position = Vector3(-14.4, 0, 4.1)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="MeetingChairSouth" parent="Props/OfficeDressing/OfficeMeetingArea" instance=ExtResource("16_qb6gb")]
+position = Vector3(-16.5, 0, 5.5)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="MeetingScreen" parent="Props/OfficeDressing/OfficeMeetingArea" instance=ExtResource("21_screen")]
+position = Vector3(-17.3, 1.01, 3.9)
+scale = Vector3(2, 2, 2)
+
+[node name="MeetingKeyboard" parent="Props/OfficeDressing/OfficeMeetingArea" instance=ExtResource("20_keyboard")]
+position = Vector3(-16.2, 1.02, 3.6)
+scale = Vector3(2, 2, 2)
+
+[node name="MeetingLamp" parent="Props/OfficeDressing/OfficeMeetingArea" instance=ExtResource("40_table_lamp")]
+position = Vector3(-15.7, 1.02, 4.4)
+
+[node name="OfficeWallDetails" type="Node3D" parent="Props/OfficeDressing"]
+
+[node name="FilingCabinet" parent="Props/OfficeDressing/OfficeWallDetails" instance=ExtResource("37_cabinet")]
+position = Vector3(-19.45, 0, -3)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="BookcaseNorthWest" parent="Props/OfficeDressing/OfficeWallDetails" instance=ExtResource("18_6ms0r")]
+position = Vector3(-18.2, 0, -5.3)
+scale = Vector3(2, 2, 2)
+
+[node name="BookcaseNorthEast" parent="Props/OfficeDressing/OfficeWallDetails" instance=ExtResource("18_6ms0r")]
+position = Vector3(-15.2, 0, -5.3)
+scale = Vector3(2, 2, 2)
+
+[node name="NorthLoungeSofa" parent="Props/OfficeDressing/OfficeWallDetails" instance=ExtResource("17_h2cd6")]
+position = Vector3(-14.6, 0, -4.8)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="PlantSouthWest" parent="Props/OfficeDressing/OfficeWallDetails" instance=ExtResource("19_is6wx")]
+position = Vector3(-19, 0, 5.2)
+scale = Vector3(2, 2, 2)
+
+[node name="PlantSouthEast" parent="Props/OfficeDressing/OfficeWallDetails" instance=ExtResource("19_is6wx")]
+position = Vector3(-13, 0, 5)
+rotation = Vector3(0, 0.55, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="PlantNorthWest" parent="Props/OfficeDressing/OfficeWallDetails" instance=ExtResource("19_is6wx")]
+position = Vector3(-19, 0, -4.4)
+rotation = Vector3(0, -0.4, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="StationDressing" type="Node3D" parent="Props"]
+editor_description = "Station presentation kept off the west portal lane and hearing standing slots; large fixed furniture has primitive blockers."
+
+[node name="StationIntake" type="Node3D" parent="Props/StationDressing"]
+
+[node name="IntakeDesk" parent="Props/StationDressing/StationIntake" instance=ExtResource("15_3oqdm")]
+position = Vector3(14.3, 0, -1.4)
+scale = Vector3(2, 2, 2)
+
+[node name="IntakeChair" parent="Props/StationDressing/StationIntake" instance=ExtResource("16_qb6gb")]
+position = Vector3(15, 0, -2.8)
+scale = Vector3(2, 2, 2)
+
+[node name="IntakeScreen" parent="Props/StationDressing/StationIntake" instance=ExtResource("21_screen")]
+position = Vector3(14.7, 0.78, -1.5)
+scale = Vector3(2, 2, 2)
+
+[node name="IntakeKeyboard" parent="Props/StationDressing/StationIntake" instance=ExtResource("20_keyboard")]
+position = Vector3(14.8, 0.79, -1.1)
+scale = Vector3(2, 2, 2)
+
+[node name="StationHearingArea" type="Node3D" parent="Props/StationDressing"]
+
+[node name="HearingDesk" parent="Props/StationDressing/StationHearingArea" instance=ExtResource("15_3oqdm")]
+position = Vector3(17.3, 0, -3.4)
+scale = Vector3(2, 2, 2)
+
+[node name="HearingChair" parent="Props/StationDressing/StationHearingArea" instance=ExtResource("16_qb6gb")]
+position = Vector3(18, 0, -4.8)
+scale = Vector3(2, 2, 2)
+
+[node name="HearingScreen" parent="Props/StationDressing/StationHearingArea" instance=ExtResource("21_screen")]
+position = Vector3(17.7, 0.78, -3.5)
+scale = Vector3(2, 2, 2)
+
+[node name="HearingKeyboard" parent="Props/StationDressing/StationHearingArea" instance=ExtResource("20_keyboard")]
+position = Vector3(17.8, 0.79, -3.1)
+scale = Vector3(2, 2, 2)
+
+[node name="StationWaitingArea" type="Node3D" parent="Props/StationDressing"]
+
+[node name="WaitingChairWest" parent="Props/StationDressing/StationWaitingArea" instance=ExtResource("16_qb6gb")]
+position = Vector3(13.8, 0, 3.8)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="WaitingChairEast" parent="Props/StationDressing/StationWaitingArea" instance=ExtResource("16_qb6gb")]
+position = Vector3(15, 0, 3.8)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="WaitingCouch" parent="Props/StationDressing/StationWaitingArea" instance=ExtResource("38_couch")]
+position = Vector3(17.8, 0, 4.9)
+
+[node name="WaitingTable" parent="Props/StationDressing/StationWaitingArea" instance=ExtResource("41_low_table")]
+position = Vector3(17.8, 0, 3.2)
+
+[node name="StationWallDetails" type="Node3D" parent="Props/StationDressing"]
+
+[node name="BookcaseNorthEast" parent="Props/StationDressing/StationWallDetails" instance=ExtResource("18_6ms0r")]
+position = Vector3(19.4, 0, -4.2)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="BookcaseSouthEast" parent="Props/StationDressing/StationWallDetails" instance=ExtResource("18_6ms0r")]
+position = Vector3(19.4, 0, 1.8)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="NorthLoungeSofa" parent="Props/StationDressing/StationWallDetails" instance=ExtResource("17_h2cd6")]
+position = Vector3(15, 0, -5.1)
+scale = Vector3(2, 2, 2)
+
+[node name="PlantNorthWest" parent="Props/StationDressing/StationWallDetails" instance=ExtResource("19_is6wx")]
+position = Vector3(13, 0, -4.8)
+rotation = Vector3(0, 0.45, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="PlantSouthWest" parent="Props/StationDressing/StationWallDetails" instance=ExtResource("19_is6wx")]
+position = Vector3(12.8, 0, 5.1)
+rotation = Vector3(0, -0.35, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="PlantEastCenter" parent="Props/StationDressing/StationWallDetails" instance=ExtResource("19_is6wx")]
+position = Vector3(19.1, 0, -1.2)
+rotation = Vector3(0, 0.8, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="Blockers" type="Node3D" parent="Props" unique_id=41252392 groups=["town_navigation_source"]]
 
 [node name="BenchWestBlocker" type="StaticBody3D" parent="Props/Blockers" unique_id=1190981222]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.4, 2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.4, 4.2)
 
 [node name="Collision" type="CollisionShape3D" parent="Props/Blockers/BenchWestBlocker" unique_id=832331412]
 shape = SubResource("BoxShape3D_027op")
 
 [node name="BenchEastBlocker" type="StaticBody3D" parent="Props/Blockers" unique_id=1074191160]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.4, 2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.4, 4.2)
 
 [node name="Collision" type="CollisionShape3D" parent="Props/Blockers/BenchEastBlocker" unique_id=970216933]
 shape = SubResource("BoxShape3D_vj6g0")
 
 [node name="ReceptionDeskBlocker" type="StaticBody3D" parent="Props/Blockers" unique_id=576972335]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.39, -15)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.39, -15.8)
 
 [node name="Collision" type="CollisionShape3D" parent="Props/Blockers/ReceptionDeskBlocker" unique_id=282970395]
 shape = SubResource("BoxShape3D_33vhl")
@@ -645,6 +1189,180 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.1, 6)
 
 [node name="Collision" type="CollisionShape3D" parent="Props/Blockers/TreeSouthEastBlocker" unique_id=2146425827]
 shape = SubResource("CylinderShape3D_3oqdm")
+
+[node name="DressingBlockers" type="Node3D" parent="Props/Blockers"]
+editor_description = "Primitive collision for large fixed interior furniture only; render-only clutter stays collisionless."
+
+[node name="Studio" type="Node3D" parent="Props/Blockers/DressingBlockers"]
+
+[node name="ManagerDeskBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Studio"]
+position = Vector3(0.03, 0.39, -19.3)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Studio/ManagerDeskBlocker"]
+shape = SubResource("BoxShape3D_dressing_desk")
+
+[node name="WestLoungeSofaBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Studio"]
+position = Vector3(-5.19, 0.43, -13.72)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Studio/WestLoungeSofaBlocker"]
+shape = SubResource("BoxShape3D_dressing_sofa_z")
+
+[node name="PillowArmchairBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Studio"]
+position = Vector3(4.7, 0.6, -14.15)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Studio/PillowArmchairBlocker"]
+shape = SubResource("BoxShape3D_dressing_armchair")
+
+[node name="WestBookcaseBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Studio"]
+position = Vector3(-5.25, 0.7, -16.9)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Studio/WestBookcaseBlocker"]
+shape = SubResource("BoxShape3D_dressing_bookcase_z")
+
+[node name="Office" type="Node3D" parent="Props/Blockers/DressingBlockers"]
+
+[node name="WorkDeskBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Office"]
+position = Vector3(-14.78, 0.39, -1.7)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Office/WorkDeskBlocker"]
+shape = SubResource("BoxShape3D_dressing_desk")
+
+[node name="MeetingTableBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Office"]
+position = Vector3(-16.5, 0.5, 4.1)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Office/MeetingTableBlocker"]
+shape = SubResource("BoxShape3D_dressing_meeting_table")
+
+[node name="FilingCabinetBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Office"]
+position = Vector3(-19.45, 0.9, -3)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Office/FilingCabinetBlocker"]
+shape = SubResource("BoxShape3D_dressing_cabinet")
+
+[node name="NorthLoungeSofaBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Office"]
+position = Vector3(-15.58, 0.43, -4.39)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Office/NorthLoungeSofaBlocker"]
+shape = SubResource("BoxShape3D_dressing_sofa_x")
+
+[node name="BookcaseNorthWestBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Office"]
+position = Vector3(-17.8, 0.7, -5.55)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Office/BookcaseNorthWestBlocker"]
+shape = SubResource("BoxShape3D_dressing_bookcase_x")
+
+[node name="BookcaseNorthEastBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Office"]
+position = Vector3(-14.8, 0.7, -5.55)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Office/BookcaseNorthEastBlocker"]
+shape = SubResource("BoxShape3D_dressing_bookcase_x")
+
+[node name="Station" type="Node3D" parent="Props/Blockers/DressingBlockers"]
+
+[node name="IntakeDeskBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Station"]
+position = Vector3(15.02, 0.39, -1.6)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Station/IntakeDeskBlocker"]
+shape = SubResource("BoxShape3D_dressing_desk")
+
+[node name="HearingDeskBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Station"]
+position = Vector3(18.02, 0.39, -3.6)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Station/HearingDeskBlocker"]
+shape = SubResource("BoxShape3D_dressing_desk")
+
+[node name="WaitingCouchBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Station"]
+position = Vector3(17.8, 0.61, 4.95)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Station/WaitingCouchBlocker"]
+shape = SubResource("BoxShape3D_dressing_waiting_couch")
+
+[node name="WaitingTableBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Station"]
+position = Vector3(17.8, 0.25, 3.2)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Station/WaitingTableBlocker"]
+shape = SubResource("BoxShape3D_dressing_low_table")
+
+[node name="NorthLoungeSofaBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Station"]
+position = Vector3(15.98, 0.43, -5.51)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Station/NorthLoungeSofaBlocker"]
+shape = SubResource("BoxShape3D_dressing_sofa_x")
+
+[node name="BookcaseNorthEastBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Station"]
+position = Vector3(19.15, 0.7, -4.6)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Station/BookcaseNorthEastBlocker"]
+shape = SubResource("BoxShape3D_dressing_bookcase_z")
+
+[node name="BookcaseSouthEastBlocker" type="StaticBody3D" parent="Props/Blockers/DressingBlockers/Station"]
+position = Vector3(19.15, 0.7, 1.4)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/DressingBlockers/Station/BookcaseSouthEastBlocker"]
+shape = SubResource("BoxShape3D_dressing_bookcase_z")
+
+[node name="ExteriorDressingBlockers" type="Node3D" parent="Props/Blockers"]
+editor_description = "Primitive collision for large exterior dressing; foliage, roads, canopies, and trim remain render-only."
+
+[node name="RockNorthWestBlocker" type="StaticBody3D" parent="Props/Blockers/ExteriorDressingBlockers"]
+position = Vector3(-10, 0.65, -8.3)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/ExteriorDressingBlockers/RockNorthWestBlocker"]
+shape = SubResource("CylinderShape3D_dressing_rock")
+
+[node name="RockNorthEastBlocker" type="StaticBody3D" parent="Props/Blockers/ExteriorDressingBlockers"]
+position = Vector3(10, 0.65, -8.3)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/ExteriorDressingBlockers/RockNorthEastBlocker"]
+shape = SubResource("CylinderShape3D_dressing_rock")
+
+[node name="RockSouthWestBlocker" type="StaticBody3D" parent="Props/Blockers/ExteriorDressingBlockers"]
+position = Vector3(-10, 0.65, 8.3)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/ExteriorDressingBlockers/RockSouthWestBlocker"]
+shape = SubResource("CylinderShape3D_dressing_rock")
+
+[node name="RockSouthEastBlocker" type="StaticBody3D" parent="Props/Blockers/ExteriorDressingBlockers"]
+position = Vector3(10, 0.65, 8.3)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/ExteriorDressingBlockers/RockSouthEastBlocker"]
+shape = SubResource("CylinderShape3D_dressing_rock")
+
+[node name="SouthLightWestBlocker" type="StaticBody3D" parent="Props/Blockers/ExteriorDressingBlockers"]
+position = Vector3(-7.5, 1.65, 12.8)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/ExteriorDressingBlockers/SouthLightWestBlocker"]
+shape = SubResource("CylinderShape3D_dressing_light")
+
+[node name="SouthLightEastBlocker" type="StaticBody3D" parent="Props/Blockers/ExteriorDressingBlockers"]
+position = Vector3(7.5, 1.65, 12.8)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/ExteriorDressingBlockers/SouthLightEastBlocker"]
+shape = SubResource("CylinderShape3D_dressing_light")
+
+[node name="OfficeApproachLightBlocker" type="StaticBody3D" parent="Props/Blockers/ExteriorDressingBlockers"]
+position = Vector3(-10.5, 1.65, -4.8)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/ExteriorDressingBlockers/OfficeApproachLightBlocker"]
+shape = SubResource("CylinderShape3D_dressing_light")
+
+[node name="StationApproachLightBlocker" type="StaticBody3D" parent="Props/Blockers/ExteriorDressingBlockers"]
+position = Vector3(10.5, 1.65, -4.8)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/ExteriorDressingBlockers/StationApproachLightBlocker"]
+shape = SubResource("CylinderShape3D_dressing_light")
+
+[node name="ParasolWestBlocker" type="StaticBody3D" parent="Props/Blockers/ExteriorDressingBlockers"]
+position = Vector3(-6, 1.1, 12.5)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/ExteriorDressingBlockers/ParasolWestBlocker"]
+shape = SubResource("CylinderShape3D_dressing_parasol")
+
+[node name="ParasolEastBlocker" type="StaticBody3D" parent="Props/Blockers/ExteriorDressingBlockers"]
+position = Vector3(6, 1.1, 12.5)
+
+[node name="Collision" type="CollisionShape3D" parent="Props/Blockers/ExteriorDressingBlockers/ParasolEastBlocker"]
+shape = SubResource("CylinderShape3D_dressing_parasol")
 
 [node name="Markers" type="Node3D" parent="." unique_id=610698766]
 

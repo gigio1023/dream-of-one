@@ -23,8 +23,9 @@ and recap, not only menu chrome.
 ## Owner decisions shaping this milestone
 
 1. **Full conversion, not a probe.** The 2D presentation is replaced. Low-fi
-   free assets are the accepted norm; coherence, collision correctness, and
-   social legibility are the bars.
+   free assets are the accepted norm. A visibly occupied town, collision
+   correctness, and social legibility matter more than keeping every prop in
+   one art family; repeated or mixed CC0 dressing is acceptable.
 2. **World**: park center + enterable single-story studio reception, office,
    and Station; every building portal stays permanently open, with no physical
    door body or interaction; no loading screens; no fake buildings; sightline
@@ -99,11 +100,13 @@ can overhear with subtitles.
   completion. Add the scene-owned `AgentPlaytestSurface` with the 3D main
   scene, not as a later test-only slice. The full contract is
   [`../tech/godot-ai-playtest.md`](../tech/godot-ai-playtest.md).
-- **Asset validation before scene work.** The asset family is decided on
+- **Asset validation before scene work.** The asset baseline is decided on
   desk research (2026-07-11, recorded in
   [`../art/asset-pipeline.md`](../art/asset-pipeline.md)): greybox
-  architecture + Kenney environment/props + Quaternius modular characters,
-  all CC0 and committable. The first art slice runs that doc's in-engine
+  architecture + verified CC0 environment/props + Quaternius modular
+  characters. Kenney is the already-imported base, not an exclusivity rule;
+  other creator-sourced CC0 packs may join the dressing layer. The first art
+  slice runs that doc's in-engine
   validation gates (scale reference, import, character legibility,
   retargeting if needed, test corner) instead of re-surveying, and applies
   the recorded ranked fallback if a gate fails.
@@ -149,9 +152,10 @@ can overhear with subtitles.
 - One six-locale settings and content path (`ko/en/it/zh/fr/ja`) whose selected
   locale governs HUD, generated and fallback conversation, subtitles,
   records, hearing, and recap for the whole run.
-- The seamless town: park, studio reception, office, Station, street
-  connective space; all building portals remain open; collision and
-  navigation correct.
+- The seamless town: a densely dressed park, studio reception, office,
+  Station, and street connective space; all building portals remain open;
+  collision and navigation remain correct. Repetition and mixed CC0 prop
+  families are preferable to large empty surfaces.
 - Six residents on schedules with policy movement, meeting windows, and
   audible NPC-to-NPC conversations (subtitled when in earshot) whose content
   listeners actually remember.

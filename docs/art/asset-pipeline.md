@@ -33,15 +33,17 @@ blank survey. Licenses, formats, and pack contents below were verified on the
 creators' own pages and the curated subset was imported in Godot 4.7. The
 remaining visual judgment is named in the validation section.
 
-**Decision: one family per layer, greybox architecture.** No CC0 family ships
-walk-in modern buildings (city kits are exterior shells or miniature-scale
-props), and mixing families *within* a layer is what reads incoherent —
-proportions differ across creators more than palettes do. Therefore:
+**Decision: fixed greybox architecture, permissive CC0 dressing.** No surveyed
+CC0 family ships all of the walk-in modern buildings this game needs, so
+greybox remains authoritative for architecture, collision, portals, and
+navigation. The owner prefers a visibly occupied low-fi town to strict family
+coherence, so the dressing layer may repeat assets and mix creator-sourced,
+license-verified CC0 packs after their scale is measured in-engine.
 
 | Layer | Family | Why |
 |---|---|---|
 | Architecture — walls, doorways, floors of all three interiors, exterior massing | Project greybox | The only route that guarantees enterable interiors, primitive collision shapes, and navmesh-correct doorways sized to the NavigationAgent3D and first-person camera |
-| Environment and props — park, street, interior dressing | **Kenney**: [Furniture Kit](https://kenney.nl/assets/furniture-kit) (furniture only), [Nature Kit](https://kenney.nl/assets/nature-kit) (park), [City Kit Roads](https://kenney.nl/assets/city-kit-roads) (street), and [City Kit Commercial](https://kenney.nl/assets/city-kit-commercial) (awning/overhang/parasol trim only) | CC0; GLB imports cleanly in Godot. No City Kit building mesh and no Furniture wall/floor/doorway mesh may own visible architecture or collision; every visible building remains the enterable greybox structure |
+| Environment and props — park, street, interior dressing | Already imported **Kenney** Furniture, Nature, City Roads, and City Commercial as the base; **Quaternius**, **KayKit**, or another official-source CC0 pack may supplement it | Density outranks family purity. Every added family needs a preserved license, manifest/Credits entry, clean Godot import, and one measured family scale. No kit building mesh or furniture wall/floor/doorway mesh may own gameplay architecture or collision |
 | Characters — all six residents | **Quaternius**: [Ultimate Modular Men](https://quaternius.com/packs/ultimatemodularcharacters.html) + [Women](https://quaternius.com/packs/ultimatemodularwomen.html) packs | Six unarmed civilian variants (`Casual_2`, `Casual_Hoodie`, and `Worker`; `Casual`, `Formal`, and `Worker`) provide distinct base silhouettes, 24 bundled animations each, and self-contained glTF files. Armed Suit/SWAT variants were rejected for the non-combat town |
 | Animation upgrade path | Quaternius [Universal Animation Library](https://quaternius.com/packs/universalanimationlibrary.html) free tier (45 anims, on the official Godot store), then [KayKit Character Animations](https://kaylousberg.itch.io/kaykit-character-animations) (161 anims, CC0) | Both built for engine retargeting (Godot BoneMap + SkeletonProfileHumanoid) |
 
@@ -50,8 +52,8 @@ attempt, switch the character layer to
 [Kenney Blocky Characters 2.0](https://kenney.nl/assets/blocky-characters),
 the creator-listed animated CC0 pack, and accept the toy proportions. Do not
 rely on an unverified skin/clip count: inspect the downloaded archive and make
-role coverage, idle, and walk pass the same in-engine gate. The environment
-layer is unaffected either way; a full-Kenney world is the coherence floor.
+role coverage, idle, and walk pass the same in-engine gate. The permissive
+environment-dressing decision is unaffected either way.
 
 **Top known risk:** no candidate pack confirms a talk/gesture loop by name.
 Resolution order: use idle for speech → repurpose a bundled wave/interact/sit
@@ -83,13 +85,15 @@ does not drive the game. The final Terra run owns hands-on validation.
 
 Programmatic results on 2026-07-12:
 
-- all 23 curated Kenney models and all six Quaternius characters load as
-  `PackedScene`; City Kit palette textures resolve;
+- all 23 curated Kenney models, the eight selected KayKit Furniture Bits
+  models, and all six Quaternius characters load as `PackedScene`; both kit
+  palette textures resolve;
 - the six character meshes measure 1.843–1.870 m at `1.0×` and every file has
   `Idle` and `Walk` among its 24 animations;
-- the single scale contract in `AssetScales` is Furniture `2.0×`, Nature
-  `2.5×`, City kits `5.0×`, Characters `1.0×`. This produces a 0.769 m desk,
-  4.27 m tree, 5 m road tile, and 2.25 m parasol;
+- the single scale contract in `AssetScales` is Kenney Furniture `2.0×`,
+  Nature `2.5×`, City kits `5.0×`, KayKit Furniture `1.0×`, and Characters
+  `1.0×`. This produces a 0.769 m desk, 4.27 m tree, 5 m road tile, 2.25 m
+  parasol, and 1.224 m KayKit armchair;
 - the test corner has a 1.65 m eye camera, 1.8 m capsule, 1.1 × 2.1 m greybox
   doorway, desk/chair, road, bench, tree, all six characters at park-view
   distance, and an automatic `Idle` → `Walk` doorway pass;
@@ -99,7 +103,7 @@ Programmatic results on 2026-07-12:
 The gates remain:
 
 1. **Scale reference scene** — a 1.8 m capsule, a 2.1 m doorway, a desk;
-   measure each family against it and keep the four validated multipliers in
+   measure each family against it and keep the five validated multipliers in
    `AssetScales`; per-model scale exceptions are forbidden.
 2. **Import gate** — `$GODOT_BIN --headless --import` clean on every pack;
    GLB materials and textures resolve. Some Kenney kits carry the palette
@@ -126,7 +130,7 @@ same commit — it stays the single record of the choice.
 
 ## Greybox rules
 
-- Flat fills + label, on the family's proportions and grid, using the accent
+- Flat fills + label, on validated human-scale proportions and grid, using the accent
   palette from [`art-direction.md`](art-direction.md). Deliberately plain so
   real assets read as an upgrade, never a clash.
 - Interaction-critical surfaces (reception desk, dossier table, notice
@@ -193,12 +197,18 @@ intelligible speech or strong location signatures, and its ability to stay
 below NPC utterances. Blend park and interior loops gently across permanently
 open portals; a hard zone switch would falsely imply a closed door.
 
-No additional 3D pack is approved for T8. First make the existing committed
-Kenney `computer_keyboard.glb` and `potted_plant.glb`, plus one project-greybox
-box fallback, into the deliberately tiny pick/move/throw set. Only those
-interactive props need wrapper scenes; static furniture keeps its current
-instances. [KayKit Furniture Bits](https://kaylousberg.itch.io/furniture-bits)
-(50+ free CC0 models, glTF included) is the single fallback source if the
-existing silhouettes fail in play. Do not install an asset-placement or
+The density pass repeats the 23 committed Kenney models throughout all four
+zones and adds eight selected models from
+[KayKit Furniture Bits](https://kaylousberg.itch.io/furniture-bits) Free 1.0:
+armchair with pillows, books, decorated cabinet, couch with pillows, standing
+and table lamps, a low table, and a long table. The curated models, shared
+texture, and upstream CC0 license live under
+`godot/assets/kaykit/furniture_bits/`; Godot 4.7 import, texture, and `1.0×`
+family-scale checks pass. A later official-source CC0 pack remains allowed when
+it adds a useful silhouette without changing architecture, but it cannot block
+this pass. Keep only used files plus license evidence. T8 still starts its
+deliberately tiny pick/move/throw set with the committed Kenney
+`computer_keyboard.glb`, `potted_plant.glb`, and one project-greybox box; only
+interactive props need wrapper scenes. Do not install an asset-placement or
 first-person-controller addon: the current editor-authored town, Godot AI
 workflow, interaction ray, and controller already own those jobs.

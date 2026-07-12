@@ -90,6 +90,37 @@
       ]
     },
     {
+      "name": "KayKit Furniture Bits Free",
+      "source": "https://kaylousberg.itch.io/furniture-bits",
+      "version": "1.0 Free, downloaded 2026-07-12",
+      "license": "CC0 1.0 Universal",
+      "tier": "committed",
+      "required": true,
+      "installPath": "res://assets/kaykit/furniture_bits",
+      "licensePath": "res://assets/kaykit/furniture_bits/License.txt",
+      "sourceArchiveSha256": "e6d75f34c5545486b5a8f45f86209dbd49092f3e77ae23011bdb87edab89e7e4",
+      "selectionPolicy": "small interior-dressing subset; no architecture or automatic collision",
+      "selectedAssets": [
+        "armchair_pillows.gltf",
+        "armchair_pillows.bin",
+        "book_set.gltf",
+        "book_set.bin",
+        "cabinet_medium_decorated.gltf",
+        "cabinet_medium_decorated.bin",
+        "couch_pillows.gltf",
+        "couch_pillows.bin",
+        "lamp_standing.gltf",
+        "lamp_standing.bin",
+        "lamp_table.gltf",
+        "lamp_table.bin",
+        "table_low.gltf",
+        "table_low.bin",
+        "table_medium_long.gltf",
+        "table_medium_long.bin",
+        "furniturebits_texture.png"
+      ]
+    },
+    {
       "name": "Quaternius Ultimate Modular Men",
       "source": "https://quaternius.com/packs/ultimatemodularcharacters.html",
       "version": "downloaded 2026-07-12",

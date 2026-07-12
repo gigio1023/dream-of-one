@@ -29,10 +29,19 @@ const REQUIRED_STATIC_ASSETS: PackedStringArray = [
 	"res://assets/kenney3d/city_commercial/detail_awning.glb",
 	"res://assets/kenney3d/city_commercial/detail_overhang.glb",
 	"res://assets/kenney3d/city_commercial/detail_parasol_a.glb",
+	"res://assets/kaykit/furniture_bits/armchair_pillows.gltf",
+	"res://assets/kaykit/furniture_bits/book_set.gltf",
+	"res://assets/kaykit/furniture_bits/cabinet_medium_decorated.gltf",
+	"res://assets/kaykit/furniture_bits/couch_pillows.gltf",
+	"res://assets/kaykit/furniture_bits/lamp_standing.gltf",
+	"res://assets/kaykit/furniture_bits/lamp_table.gltf",
+	"res://assets/kaykit/furniture_bits/table_low.gltf",
+	"res://assets/kaykit/furniture_bits/table_medium_long.gltf",
 ]
 const TEXTURED_ASSETS: PackedStringArray = [
 	"res://assets/kenney3d/city_roads/road_straight.glb",
 	"res://assets/kenney3d/city_commercial/detail_awning.glb",
+	"res://assets/kaykit/furniture_bits/cabinet_medium_decorated.gltf",
 ]
 const CHARACTER_ASSETS := {
 	"studio_manager": "res://assets/quaternius/men/casual_hoodie.gltf",
@@ -63,6 +72,11 @@ const SCALE_REFERENCE_ASSETS := {
 		"min_size": Vector3(1.5, 2.0, 1.8),
 		"max_size": Vector3(2.1, 2.5, 2.2),
 	},
+	"kaykit_armchair": {
+		"path": "res://assets/kaykit/furniture_bits/armchair_pillows.gltf",
+		"min_size": Vector3(1.7, 1.1, 1.5),
+		"max_size": Vector3(1.9, 1.35, 1.75),
+	},
 }
 
 var _failures: Array[String] = []
@@ -74,7 +88,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	for path in REQUIRED_STATIC_ASSETS:
-		_check_scene_import(path, "curated Kenney asset")
+		_check_scene_import(path, "curated 3D asset")
 	for path in TEXTURED_ASSETS:
 		_check_albedo_texture(path)
 	for label: String in SCALE_REFERENCE_ASSETS:
@@ -85,7 +99,7 @@ func _run() -> void:
 
 	if _failures.is_empty():
 		print(
-			"PASS asset_validation_smoke: %d Kenney assets, six animated characters, materials, scale, and test corner are valid"
+			"PASS asset_validation_smoke: %d static assets, six animated characters, materials, scale, and test corner are valid"
 			% REQUIRED_STATIC_ASSETS.size()
 		)
 		quit(0)

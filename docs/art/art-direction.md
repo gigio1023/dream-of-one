@@ -35,12 +35,15 @@ undertone.
 The owner explicitly accepts visibly free, low-quality assets. The bars that
 do gate:
 
-- **One coherent asset family per layer.** All architecture from greybox,
-  all environment/props from one modular free family, all six residents
-  from one character family ([`asset-pipeline.md`](asset-pipeline.md)
-  records the chosen families); a style clash breaks the fiction faster
-  than plainness does, and mixing *within* a layer — where proportions
-  diverge — is what clashes.
+- **Stable gameplay layers, permissive dressing.** Greybox alone owns
+  architecture, portal geometry, and the navigation bake; fixed large props
+  may add only simple authored blockers. Quaternius remains the one character
+  family.
+  Environment and props may mix the validated Kenney base with KayKit or
+  another official-source CC0 family ([`asset-pipeline.md`](asset-pipeline.md)
+  records each adopted family). Cluster by use when convenient — Kenney for
+  work/park pieces, KayKit for lounge/storage — but visible occupancy and
+  measured scale matter more than palette purity.
 - **Collision and navigation correctness.** Nothing player-visible clips,
   floats, or blocks a doorway.
 - **Role readability.** The six residents are distinguishable at park
@@ -57,14 +60,14 @@ gates and never justify a slice.
 
 ## Look rules
 
-- **Warm base, cold authority.** Ordinary spaces use the asset family's
+- **Warm base, cold authority.** Ordinary spaces use the asset families'
   natural warm/neutral palette; Station elements (officer accent, citation
   surfaces, hearing room) carry the game's only systematic cold blue-grey.
   Suspicion UI borrows this accent as pressure rises.
 - **Greybox is a citizen.** Missing pieces ship as deliberately plain,
-  labeled greybox volumes on the family's proportions
-  ([`asset-pipeline.md`](asset-pipeline.md)) rather than style-clashing
-  imports.
+  labeled greybox volumes on validated proportions
+  ([`asset-pipeline.md`](asset-pipeline.md)) rather than unlicensed or
+  unmeasured imports.
 - **No horror styling** — dread comes from procedure and attention, not
   darkness. Daylight town, legible interiors.
 
@@ -82,8 +85,8 @@ gates and never justify a slice.
 
 ## Anti-goals
 
-- No fidelity race, no bespoke-art slices before M5 polish, no mixed asset
-  families within one layer (the per-layer split and greybox are by
-  design).
+- No fidelity race and no bespoke-art slices before M5 polish. Do not add an
+  asset whose redistribution terms or family scale are unknown; mixed verified
+  CC0 dressing and obvious repetition are allowed.
 - No darkness-as-mood; no camera effects that fight comfort (head-bob off by
   default, no forced FOV changes outside deliberate conversation framing).

@@ -355,6 +355,7 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 				"TreeSouthEastBlocker",
 			]:
 				_require_node(label, instance, "Props/Blockers/%s/Collision" % tree_blocker_name)
+			_check_town_dressing_density(label, instance)
 			if not instance.has_method("binding_errors"):
 				_failures.append("town_3d exposes no layout binding check")
 			else:
@@ -384,13 +385,42 @@ func _check_town_navigation(label: String, instance: Node, region: NavigationReg
 	if not navigation_map.is_valid() or NavigationServer3D.map_get_iteration_id(navigation_map) == 0:
 		_failures.append("%s navigation map did not synchronize" % label)
 		return
-	for vertex in region.navigation_mesh.get_vertices():
-		if vertex.y > 1.0:
-			_failures.append("%s navmesh contains a walkable ceiling island" % label)
-			break
+	var project_cell_size := float(
+		ProjectSettings.get_setting("navigation/3d/default_cell_size", 0.25)
+	)
+	var project_cell_height := float(
+		ProjectSettings.get_setting("navigation/3d/default_cell_height", 0.25)
+	)
+	if not is_equal_approx(project_cell_size, region.navigation_mesh.cell_size):
+		_failures.append(
+			"%s navigation map cell size does not match its baked mesh" % label
+		)
+	if not is_equal_approx(project_cell_height, region.navigation_mesh.cell_height):
+		_failures.append(
+			"%s navigation map cell height does not match its baked mesh" % label
+		)
 	var layout: Dictionary = instance.call("layout_snapshot")
 	var player_start: Dictionary = layout.get("player_start", {})
 	var start := _vector3_from_json(player_start.get("position", []))
+	var projected_start := NavigationServer3D.map_get_closest_point(
+		navigation_map,
+		start
+	)
+	for vertex in region.navigation_mesh.get_vertices():
+		if vertex.y <= 1.0:
+			continue
+		var elevated_path := NavigationServer3D.map_get_path(
+			navigation_map,
+			projected_start,
+			vertex,
+			true
+		)
+		if (
+			elevated_path.size() >= 2
+			and elevated_path[elevated_path.size() - 1].distance_to(vertex) <= 0.65
+		):
+			_failures.append("%s navmesh contains a reachable elevated island" % label)
+			break
 	var targets := {
 		"studio": _anchor_position(layout, "Studio.door_inside"),
 		"office": _anchor_position(layout, "Office.door_inside"),
@@ -418,6 +448,113 @@ func _check_town_navigation(label: String, instance: Node, region: NavigationReg
 				]
 			)
 	_check_semantic_meeting_slots(label, instance, region, layout, start)
+	_check_authored_route_paths(label, region, layout)
+	_check_actor_spawn_clearance(label, instance, region, layout)
+
+
+func _check_authored_route_paths(
+	label: String,
+	region: NavigationRegion3D,
+	layout: Dictionary
+) -> void:
+	var routes_value: Variant = layout.get("routes", [])
+	if not routes_value is Array or (routes_value as Array).is_empty():
+		_failures.append("%s layout has no authored NPC routes" % label)
+		return
+	var navigation_map := region.get_navigation_map()
+	for route_value in routes_value as Array:
+		if not route_value is Dictionary:
+			continue
+		var route := route_value as Dictionary
+		var route_id := str(route.get("id", "unknown"))
+		var points_value: Variant = route.get("points", [])
+		if not points_value is Array or (points_value as Array).size() < 2:
+			_failures.append("%s route %s has fewer than two points" % [label, route_id])
+			continue
+		var points := points_value as Array
+		for point_index in points.size():
+			var from_ref := str(points[point_index])
+			var to_ref := str(points[(point_index + 1) % points.size()])
+			var authored_from := _anchor_position(layout, from_ref)
+			var authored_to := _anchor_position(layout, to_ref)
+			var projected_from := NavigationServer3D.map_get_closest_point(
+				navigation_map,
+				authored_from
+			)
+			var projected_to := NavigationServer3D.map_get_closest_point(
+				navigation_map,
+				authored_to
+			)
+			if _planar_distance(projected_from, authored_from) > 0.65:
+				_failures.append(
+					"%s route %s projects too far from %s"
+					% [label, route_id, from_ref]
+				)
+				continue
+			if _planar_distance(projected_to, authored_to) > 0.65:
+				_failures.append(
+					"%s route %s projects too far from %s"
+					% [label, route_id, to_ref]
+				)
+				continue
+			if _planar_distance(projected_from, projected_to) <= 0.05:
+				continue
+			var path := NavigationServer3D.map_get_path(
+				navigation_map,
+				projected_from,
+				projected_to,
+				true
+			)
+			if (
+				path.size() < 2
+				or _planar_distance(path[path.size() - 1], projected_to) > 0.65
+			):
+				_failures.append(
+					"%s route %s cannot traverse %s -> %s"
+					% [label, route_id, from_ref, to_ref]
+				)
+
+
+func _planar_distance(left: Vector3, right: Vector3) -> float:
+	return Vector2(left.x - right.x, left.z - right.z).length()
+
+
+func _check_actor_spawn_clearance(
+	label: String,
+	instance: Node,
+	region: NavigationRegion3D,
+	layout: Dictionary
+) -> void:
+	var actors_value: Variant = layout.get("actors", [])
+	if not actors_value is Array:
+		_failures.append("%s layout has no resident spawn definitions" % label)
+		return
+	var navigation_map := region.get_navigation_map()
+	for actor_value in actors_value as Array:
+		if not actor_value is Dictionary:
+			continue
+		var actor := actor_value as Dictionary
+		var actor_id := str(actor.get("id", "unknown"))
+		var spawn_anchor := str(actor.get("spawn_anchor", ""))
+		var authored_spawn := _anchor_position(layout, spawn_anchor)
+		var projected_spawn := NavigationServer3D.map_get_closest_point(
+			navigation_map,
+			authored_spawn
+		)
+		if _planar_distance(projected_spawn, authored_spawn) > 0.35:
+			_failures.append(
+				"%s %s spawn is obstructed by baked collision"
+				% [label, actor_id]
+			)
+		var actor_node := instance.get_node_or_null("Actors/%s" % actor_id) as Node3D
+		if (
+			actor_node == null
+			or _planar_distance(actor_node.global_position, authored_spawn) > 0.05
+		):
+			_failures.append(
+				"%s %s did not instantiate at its authored spawn"
+				% [label, actor_id]
+			)
 
 
 func _check_npc_spatial_facts(label: String, instance: Node) -> void:
@@ -1468,6 +1605,69 @@ func _active_movement_actor_ids(snapshot: Dictionary) -> Dictionary:
 		if movement_value is Dictionary:
 			actor_ids[str((movement_value as Dictionary).get("actorId", ""))] = true
 	return actor_ids
+
+
+func _check_town_dressing_density(label: String, town: Node) -> void:
+	var zone_minimums := {
+		"Props/ParkDressing": 20,
+		"Props/ExteriorDressing": 25,
+		"Props/StudioDressing": 18,
+		"Props/OfficeDressing": 16,
+		"Props/StationDressing": 18,
+	}
+	var total_owned_nodes := 0
+	for path: String in zone_minimums:
+		var zone := town.get_node_or_null(path)
+		if zone == null:
+			_failures.append("%s dense town is missing %s" % [label, path])
+			continue
+		var owned_count := _count_scene_owned_descendants(zone, town)
+		total_owned_nodes += owned_count
+		if owned_count < int(zone_minimums[path]):
+			_failures.append(
+				"%s %s has only %d authored dressing nodes; expected at least %d"
+				% [label, path, owned_count, int(zone_minimums[path])]
+			)
+	if total_owned_nodes < 97:
+		_failures.append(
+			"%s dense town has only %d authored dressing nodes across all zones"
+			% [label, total_owned_nodes]
+		)
+	for kaykit_path in [
+		"Props/StudioDressing/StudioWaitingArea/PillowArmchair",
+		"Props/OfficeDressing/OfficeWallDetails/FilingCabinet",
+		"Props/StationDressing/StationWaitingArea/WaitingCouch",
+	]:
+		_require_node(label, town, kaykit_path)
+	var dressing_blockers := town.get_node_or_null("Props/Blockers/DressingBlockers")
+	if dressing_blockers == null:
+		_failures.append("%s dense town has no large-furniture blocker group" % label)
+	elif _count_static_bodies(dressing_blockers) < 16:
+		_failures.append("%s dense town has fewer than 16 large-furniture blockers" % label)
+	var exterior_blockers := town.get_node_or_null(
+		"Props/Blockers/ExteriorDressingBlockers"
+	)
+	if exterior_blockers == null:
+		_failures.append("%s dense town has no large-exterior-prop blocker group" % label)
+	elif _count_static_bodies(exterior_blockers) < 10:
+		_failures.append("%s dense town has fewer than 10 exterior prop blockers" % label)
+
+
+func _count_scene_owned_descendants(node: Node, scene_owner: Node) -> int:
+	var count := 0
+	for child_value in node.get_children():
+		var child := child_value as Node
+		if child.owner == scene_owner:
+			count += 1
+		count += _count_scene_owned_descendants(child, scene_owner)
+	return count
+
+
+func _count_static_bodies(node: Node) -> int:
+	var count := 1 if node is StaticBody3D else 0
+	for child_value in node.get_children():
+		count += _count_static_bodies(child_value as Node)
+	return count
 
 
 func _anchor_position(layout: Dictionary, anchor_ref: String) -> Vector3:

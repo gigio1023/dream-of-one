@@ -47,8 +47,9 @@ skill and the pinned Godot AI
   M3R comfort research slice tunes its numbers, not the list.
 - Low-fi free 3D assets are the accepted norm
   ([`../art/art-direction.md`](../art/art-direction.md)). Coherence bars:
-  one asset family per layer, correct collision, readable roles, legible
-  social state. Fidelity is never a gate.
+  verified redistribution terms, measured family scale, correct collision,
+  readable roles, and legible social state. Repeated or mixed CC0 dressing is
+  allowed; fidelity is never a gate.
 - Full keyboard+mouse play; keyboard-only fallback where feasible. Input
   map: move (WASD), look (mouse), `interact` (E), `choice_1..3` (1/2/3),
   `open_log` (Tab — records/open-questions surface), `cancel` (Esc),
@@ -207,24 +208,29 @@ interior ceilings 2.7–3.0 m; minimum corridor 1.6 m (twice the
 NavigationAgent3D radius plus margin). Each asset family gets one global
 import scale measured against this scene, never per-model fudging.
 
-**Greybox owns gameplay geometry.** Floors, walls, doorways, and thresholds
-are authored greybox volumes with primitive collision shapes, and the
-navmesh bakes from greybox surfaces only. Kit dressing (Kenney furniture,
-nature, city pieces) is presentation: simple convex or box collision only
+**Greybox owns gameplay geometry.** Floors, walls, doorways, thresholds, and
+all walkable surfaces are authored greybox volumes with primitive collision
+shapes. The navigation bake includes those surfaces plus simple authored
+blockers for fixed large props. Kit dressing (the imported Kenney base plus
+any creator-sourced, license-verified CC0 packs) is presentation: simple
+convex or box collision only
 where a piece should block movement, never trimesh-from-render-mesh. Fixed
 large furniture uses simple authored blocker geometry or a
 `NavigationObstacle3D` with `affect_navigation_mesh` in the bake;
 `avoidance_enabled` alone is not a substitute for static pathfinding geometry.
 Dynamic bodies use avoidance without triggering a rebake. Dressing can never
-break a proven blockout.
+break a proven blockout. Visual density has priority over family purity:
+repeat props, mix compatible CC0 families, and use collisionless foliage or
+small clutter wherever a blocker would compromise a route.
 
 **Construction order.** (1) Full-town greybox blockout from
 `world_layout.json` — park, three interiors, street. (2) Controller,
 permanently open portals, collision, and navmesh proven on the blockout. (3)
 Dress location by location with the kit layer, re-verifying collision/nav each
-time. The first playable proof needs a dressed park + studio reception; the
-office and Station may stay greybox longer (interaction-critical surfaces stay
-greybox longest by design).
+time. The park, studio reception, office, and Station all need enough repeated
+furniture, foliage, trim, and street objects to read as occupied rather than as
+empty blockout. Interaction-critical surfaces may stay greybox longest because
+their silhouette and placement carry gameplay meaning.
 
 **Building portals.** Every building doorway stays permanently open and has no
 physical door body, interaction, animation, or door SFX. Bake the walkable

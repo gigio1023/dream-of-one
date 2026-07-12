@@ -35,10 +35,11 @@ and vision pages rather than creating a parallel direction document.
   identities as owner-approved content slices; M5: prologue arc). New canon
   requires the content-guide rules, not new process.
 - **Art track:** committed CC0 base + local licensed tier per
-  [`../art/asset-pipeline.md`](../art/asset-pipeline.md); M3R's 3D family is
-  decided (greybox architecture + Kenney environment + Quaternius
-  characters, 2026-07-11) and validated in-engine as the first art slice;
-  M5 does the polish pass.
+  [`../art/asset-pipeline.md`](../art/asset-pipeline.md); M3R uses greybox
+  architecture, Kenney as the environment base, KayKit and other validated
+  permissive CC0 supplements for dressing, and Quaternius characters. Those
+  layers are validated in-engine as art enters the town; M5 does the polish
+  pass.
 - **Provider track:** M2 built ports and `proposeNextStep` together; M3R adds
   event-driven scheduling for six concurrent NPC loops and emergent
   propagation; M4 adds per-role profiles (cheap ambient / better Station);

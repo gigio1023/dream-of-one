@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bixg7wrm4v0o0"
-path.s3tc="res://.godot/imported/colormap.png-df23f2a1aee620dd44131a095d52ce11.s3tc.ctex"
+uid="uid://db2bdmk81hlm2"
+path.s3tc="res://.godot/imported/furniturebits_texture.png-e8f4f2e0a78304ab4570f395ddb87a4b.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/kenney3d/city_roads/Textures/colormap.png"
-dest_files=["res://.godot/imported/colormap.png-df23f2a1aee620dd44131a095d52ce11.s3tc.ctex"]
+source_file="res://assets/kaykit/furniture_bits/furniturebits_texture.png"
+dest_files=["res://.godot/imported/furniturebits_texture.png-e8f4f2e0a78304ab4570f395ddb87a4b.s3tc.ctex"]
 
 [params]
 

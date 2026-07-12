@@ -42,3 +42,13 @@ The labeled record props under `godot/assets/greybox/` are project-authored plac
 The license file shipped in the Women download says “Ultimate Modular Males.”
 It is preserved verbatim; the creator's official Women page identifies that
 pack as CC0.
+
+## KayKit Furniture Bits
+
+- Creator: Kay Lousberg (KayKit)
+- Source: [Furniture Bits](https://kaylousberg.itch.io/furniture-bits), Free
+  version 1.0
+- License: CC0 1.0 Universal
+- Use: a small selected set of chairs, couch, cabinet, tables, lamps, and
+  books for repeated low-poly dressing in the studio, office, and Station.
+- License copy: `godot/assets/kaykit/furniture_bits/License.txt`

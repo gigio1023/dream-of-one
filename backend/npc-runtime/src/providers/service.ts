@@ -29,7 +29,11 @@ import type {
   MergedConversationTurnRequest,
   NpcProposalPort,
   ProposalMeta,
+  ProviderAuditSnapshot,
+  ProviderCallAudit,
   ProviderFailureReason,
+  ProviderResolutionAudit,
+  ProviderResolutionPurpose,
   ProviderUsage,
   ResolvedProposal,
   TextGenPort,
@@ -74,6 +78,17 @@ interface SessionBudget {
   reservedTokens: number;
 }
 
+interface ProviderAuditState {
+  nextCallSeq: number;
+  nextResolutionSeq: number;
+  inFlight: Map<number, number>;
+  calls: ProviderCallAudit[];
+  resolutions: ProviderResolutionAudit[];
+  droppedCount: number;
+}
+
+const MAX_AUDIT_RESOLUTIONS = 256;
+
 export interface ProviderServiceOptions {
   profileId: string;
   textGen: TextGenPort;
@@ -91,6 +106,7 @@ export class ProviderService implements NpcProposalPort {
   private readonly maxTokens: number;
   private readonly maxOutputTokensPerCall: number;
   private readonly budgets = new Map<string, SessionBudget>();
+  private readonly audits = new Map<string, ProviderAuditState>();
 
   constructor(private readonly options: ProviderServiceOptions) {
     this.profileId = options.profileId;
@@ -109,6 +125,35 @@ export class ProviderService implements NpcProposalPort {
     return {
       callsUsed: budget.calls,
       tokensUsed: budget.inputTokens + budget.outputTokens + budget.reservedTokens,
+    };
+  }
+
+  auditSnapshot(scopeId: string): ProviderAuditSnapshot {
+    const budget = this.budgetFor(scopeId);
+    const audit = this.auditFor(scopeId);
+    const inFlightTokens = [...audit.inFlight.values()].reduce(
+      (total, reservedTokens) => total + reservedTokens,
+      0,
+    );
+    const inFlightCalls = audit.inFlight.size;
+    const resolvedCallSeqs = new Set(
+      audit.resolutions.flatMap(resolution => resolution.callSeqs),
+    );
+    return {
+      callsUsed: budget.calls,
+      tokensUsed: budget.inputTokens + budget.outputTokens + budget.reservedTokens,
+      inFlightCalls,
+      inFlightTokens,
+      complete:
+        audit.droppedCount === 0 &&
+        inFlightCalls === 0 &&
+        audit.calls.every(call => resolvedCallSeqs.has(call.seq)),
+      truncated: audit.droppedCount > 0,
+      droppedCount: audit.droppedCount,
+      calls: structuredClone(audit.calls).sort((first, second) => first.seq - second.seq),
+      resolutions: structuredClone(audit.resolutions).sort(
+        (first, second) => first.seq - second.seq,
+      ),
     };
   }
 
@@ -135,7 +180,7 @@ export class ProviderService implements NpcProposalPort {
       beatId: request.beatId,
       locale: request.locale,
     });
-    const resolved = await this.generateValidated({
+    return this.resolveValidated<ConversationProposal>({
       sessionId: request.sessionId,
       request: {
         purpose: "conversation",
@@ -145,14 +190,8 @@ export class ProviderService implements NpcProposalPort {
         jsonSchema: conversationProposalJsonSchema,
       },
       schema: conversationProposalSchemaForLocale(request.locale),
+      fallback: () => this.options.fallback.proposeConversationTurn(request),
     });
-    if (resolved.ok) {
-      return { proposal: resolved.value, meta: resolved.meta };
-    }
-    return this.withFallbackReason(
-      await this.options.fallback.proposeConversationTurn(request),
-      resolved.reason,
-    );
   }
 
   async judgeConversationTurn(
@@ -180,7 +219,7 @@ export class ProviderService implements NpcProposalPort {
       beatId: request.beatId,
       locale: request.locale,
     });
-    const resolved = await this.generateValidated({
+    return this.resolveValidated<ConversationJudgment>({
       sessionId: request.sessionId,
       request: {
         purpose: "conversation",
@@ -190,14 +229,8 @@ export class ProviderService implements NpcProposalPort {
         jsonSchema: conversationJudgmentJsonSchema,
       },
       schema: conversationJudgmentSchemaForLocale(request.locale),
+      fallback: () => this.options.fallback.judgeConversationTurn(request),
     });
-    if (resolved.ok) {
-      return { proposal: resolved.value, meta: resolved.meta };
-    }
-    return this.withFallbackReason(
-      await this.options.fallback.judgeConversationTurn(request),
-      resolved.reason,
-    );
   }
 
   async judgeAndProposeConversationTurn(
@@ -237,7 +270,7 @@ export class ProviderService implements NpcProposalPort {
       beatId: request.beatId,
       locale: request.locale,
     });
-    const resolved = await this.generateValidated({
+    return this.resolveValidated<MergedConversationTurn>({
       sessionId: request.sessionId,
       request: {
         purpose: "conversation_turn",
@@ -247,14 +280,8 @@ export class ProviderService implements NpcProposalPort {
         jsonSchema: mergedConversationTurnJsonSchema,
       },
       schema: mergedConversationTurnSchemaForLocale(request.locale),
+      fallback: () => this.options.fallback.judgeAndProposeConversationTurn(request),
     });
-    if (resolved.ok) {
-      return { proposal: resolved.value, meta: resolved.meta };
-    }
-    return this.withFallbackReason(
-      await this.options.fallback.judgeAndProposeConversationTurn(request),
-      resolved.reason,
-    );
   }
 
   async proposeNextStep(
@@ -293,7 +320,7 @@ export class ProviderService implements NpcProposalPort {
       requireUtterance: request.requireUtterance ?? false,
       locale: request.locale,
     });
-    const resolved = await this.generateValidated({
+    return this.resolveValidated<AgentStepProposal>({
       sessionId: request.sessionId,
       request: {
         purpose: "agent_step",
@@ -304,14 +331,8 @@ export class ProviderService implements NpcProposalPort {
       },
       schema: agentStepProposalSchemaForLocale(request.locale),
       budgetCeiling: request.budgetCeiling,
+      fallback: () => this.options.fallback.proposeNextStep(request),
     });
-    if (resolved.ok) {
-      return { proposal: resolved.value, meta: resolved.meta };
-    }
-    return this.withFallbackReason(
-      await this.options.fallback.proposeNextStep(request),
-      resolved.reason,
-    );
   }
 
   async judgeHearing(
@@ -344,7 +365,7 @@ export class ProviderService implements NpcProposalPort {
       records: request.records,
       ledgerEvents: request.ledgerEvents,
     });
-    const resolved = await this.generateValidated({
+    return this.resolveValidated<HearingJudgment>({
       sessionId: request.runId,
       request: {
         purpose: "hearing_verdict",
@@ -354,36 +375,57 @@ export class ProviderService implements NpcProposalPort {
         jsonSchema: hearingJudgmentJsonSchema,
       },
       schema: hearingJudgmentSchemaForLocale(request.locale),
+      fallback: () => this.options.fallback.judgeHearing(request),
     });
-    if (resolved.ok) {
-      return { proposal: resolved.value, meta: resolved.meta };
-    }
-    return this.withFallbackReason(
-      await this.options.fallback.judgeHearing(request),
-      resolved.reason,
+  }
+
+  private async resolveValidated<T>(input: {
+    sessionId: string;
+    request: TextGenRequest & { purpose: ProviderResolutionPurpose };
+    schema: z.ZodType<T>;
+    budgetCeiling?: { maxCalls: number; maxTokens: number };
+    fallback: () => Promise<ResolvedProposal<T>>;
+  }): Promise<ResolvedProposal<T>> {
+    const generated = await this.generateValidated(input);
+    const resolved = generated.ok
+      ? { proposal: generated.value, meta: generated.meta }
+      : this.withFallbackReason(await input.fallback(), generated.reason);
+    this.recordResolution(
+      input.sessionId,
+      input.request.purpose,
+      resolved.meta,
+      generated.callSeqs,
     );
+    return resolved;
   }
 
   private async generateValidated<T>(input: {
     sessionId: string;
-    request: TextGenRequest;
+    request: TextGenRequest & { purpose: ProviderResolutionPurpose };
     schema: z.ZodType<T>;
     budgetCeiling?: { maxCalls: number; maxTokens: number };
   }): Promise<
-    | { ok: true; value: T; meta: ProposalMeta }
-    | { ok: false; reason: ProviderFailureReason }
+    | { ok: true; value: T; meta: ProposalMeta; callSeqs: number[] }
+    | { ok: false; reason: ProviderFailureReason; callSeqs: number[] }
   > {
+    const callSeqs: number[] = [];
     if (this.isBudgetExhausted(input.sessionId, input.budgetCeiling)) {
-      return { ok: false, reason: "budget_exhausted" };
+      return { ok: false, reason: "budget_exhausted", callSeqs };
     }
-    const preflight = await this.options.textGen.preflight();
+    let preflight: Awaited<ReturnType<TextGenPort["preflight"]>>;
+    try {
+      preflight = await this.options.textGen.preflight();
+    } catch (error) {
+      return { ok: false, reason: this.normalizeFailure(error), callSeqs };
+    }
     if (!preflight.available) {
-      return { ok: false, reason: preflight.reason ?? "unavailable" };
+      return { ok: false, reason: preflight.reason ?? "unavailable", callSeqs };
     }
     try {
       const first = await this.generateOne(
         input.sessionId,
         input.request,
+        callSeqs,
         input.budgetCeiling,
       );
       const parsed = this.parseJson(input.schema, first.text);
@@ -392,11 +434,12 @@ export class ProviderService implements NpcProposalPort {
           ok: true,
           value: parsed.data,
           meta: this.liveMeta(first.usage),
+          callSeqs,
         };
       }
 
       if (this.isBudgetExhausted(input.sessionId, input.budgetCeiling)) {
-        return { ok: false, reason: "budget_exhausted" };
+        return { ok: false, reason: "budget_exhausted", callSeqs };
       }
       const repair = await this.generateOne(
         input.sessionId,
@@ -412,6 +455,7 @@ export class ProviderService implements NpcProposalPort {
             })),
           }),
         },
+        callSeqs,
         input.budgetCeiling,
       );
       const repaired = this.parseJson(input.schema, repair.text);
@@ -420,26 +464,18 @@ export class ProviderService implements NpcProposalPort {
             ok: true,
             value: repaired.data,
             meta: this.liveMeta(this.combineUsage(first.usage, repair.usage)),
+            callSeqs,
           }
-        : { ok: false, reason: "invalid_envelope" };
+        : { ok: false, reason: "invalid_envelope", callSeqs };
     } catch (error) {
-      const message = (error as Error).message.toLowerCase();
-      if (message.includes("provider budget ceiling")) {
-        return { ok: false, reason: "budget_exhausted" };
-      }
-      if (message.includes("timeout") || message.includes("aborted")) {
-        return { ok: false, reason: "timeout" };
-      }
-      if (message.includes("429") || message.includes("rate limit")) {
-        return { ok: false, reason: "rate_limited" };
-      }
-      return { ok: false, reason: "transport_error" };
+      return { ok: false, reason: this.normalizeFailure(error), callSeqs };
     }
   }
 
   private async generateOne(
     sessionId: string,
     request: TextGenRequest,
+    callSeqs: number[],
     ceiling?: { maxCalls: number; maxTokens: number },
   ): Promise<TextGenResult> {
     const reservedTokens = this.tokenReservation(request);
@@ -454,12 +490,34 @@ export class ProviderService implements NpcProposalPort {
       throw new Error("provider budget ceiling");
     }
     this.reserveCall(sessionId, reservedTokens);
+    const callSeq = this.beginCallAudit(sessionId, reservedTokens);
+    callSeqs.push(callSeq);
     try {
       const result = await this.withTimeout(this.options.textGen.generate(request));
-      this.completeCall(sessionId, reservedTokens, result.usage);
+      const chargedTokens = this.completeCall(sessionId, reservedTokens, result.usage);
+      this.finishCallAudit(sessionId, {
+        seq: callSeq,
+        purpose: request.purpose,
+        profileId: this.profileId,
+        transport: "live",
+        usedFallback: false,
+        outcome: "success",
+        failureReason: null,
+        chargedTokens,
+      });
       return result;
     } catch (error) {
-      this.completeCall(sessionId, reservedTokens);
+      const chargedTokens = this.completeCall(sessionId, reservedTokens);
+      this.finishCallAudit(sessionId, {
+        seq: callSeq,
+        purpose: request.purpose,
+        profileId: this.profileId,
+        transport: "live",
+        usedFallback: false,
+        outcome: "error",
+        failureReason: this.normalizeFailure(error),
+        chargedTokens,
+      });
       throw error;
     }
   }
@@ -508,6 +566,19 @@ export class ProviderService implements NpcProposalPort {
     return current;
   }
 
+  private auditFor(sessionId: string): ProviderAuditState {
+    const current = this.audits.get(sessionId) ?? {
+      nextCallSeq: 0,
+      nextResolutionSeq: 0,
+      inFlight: new Map<number, number>(),
+      calls: [],
+      resolutions: [],
+      droppedCount: 0,
+    };
+    this.audits.set(sessionId, current);
+    return current;
+  }
+
   private isBudgetExhausted(
     sessionId: string,
     ceiling?: { maxCalls: number; maxTokens: number },
@@ -531,16 +602,68 @@ export class ProviderService implements NpcProposalPort {
     sessionId: string,
     reservedTokens: number,
     usage?: ProviderUsage,
-  ): void {
+  ): number {
     const budget = this.budgetFor(sessionId);
     budget.reservedTokens = Math.max(0, budget.reservedTokens - reservedTokens);
     if (usage) {
       budget.inputTokens += usage.inputTokens;
       budget.outputTokens += usage.outputTokens;
+      return usage.inputTokens + usage.outputTokens;
     } else {
       // Missing usage must not make a potentially spent call look free.
       budget.inputTokens += reservedTokens;
+      return reservedTokens;
     }
+  }
+
+  private beginCallAudit(sessionId: string, reservedTokens: number): number {
+    const audit = this.auditFor(sessionId);
+    const seq = ++audit.nextCallSeq;
+    audit.inFlight.set(seq, reservedTokens);
+    return seq;
+  }
+
+  private finishCallAudit(sessionId: string, call: ProviderCallAudit): void {
+    const audit = this.auditFor(sessionId);
+    audit.inFlight.delete(call.seq);
+    audit.calls.push(call);
+  }
+
+  private recordResolution(
+    sessionId: string,
+    purpose: ProviderResolutionPurpose,
+    meta: ProposalMeta,
+    callSeqs: readonly number[],
+  ): void {
+    const audit = this.auditFor(sessionId);
+    const seq = ++audit.nextResolutionSeq;
+    if (audit.resolutions.length >= MAX_AUDIT_RESOLUTIONS) {
+      audit.droppedCount += 1;
+      return;
+    }
+    audit.resolutions.push({
+      seq,
+      purpose,
+      profileId: meta.profileId,
+      transport: meta.transport,
+      usedFallback: meta.usedFallback,
+      fallbackReason: meta.fallbackReason ?? null,
+      callSeqs: [...callSeqs],
+    });
+  }
+
+  private normalizeFailure(error: unknown): ProviderFailureReason {
+    const message = error instanceof Error
+      ? error.message.toLowerCase()
+      : String(error).toLowerCase();
+    if (message.includes("provider budget ceiling")) return "budget_exhausted";
+    if (message.includes("timeout") || message.includes("aborted")) return "timeout";
+    if (message.includes("429") || message.includes("rate limit")) return "rate_limited";
+    if (message.includes("credential") || message.includes("api key")) {
+      return "missing_credentials";
+    }
+    if (message.includes("unavailable")) return "unavailable";
+    return "transport_error";
   }
 
   private combineUsage(...usages: Array<ProviderUsage | undefined>): ProviderUsage | undefined {

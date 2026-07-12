@@ -14,8 +14,10 @@ import type {
   MergedConversationTurn,
   MergedConversationTurnRequest,
   NpcProposalPort,
+  ProviderAuditSnapshot,
   ResolvedProposal,
 } from "../ports.js";
+import { emptyProviderAuditSnapshot } from "../ports.js";
 
 function scriptedFallbackStance(
   suspicionAfter: number,
@@ -43,6 +45,10 @@ export class ScriptedNpcAdapter implements NpcProposalPort {
   readonly profileId = "scripted/test";
 
   constructor(private readonly handlers: ScriptedNpcHandlers) {}
+
+  auditSnapshot(_scopeId: string): ProviderAuditSnapshot {
+    return emptyProviderAuditSnapshot();
+  }
 
   async preflight(): Promise<{ available: boolean }> {
     return { available: true };

@@ -43,6 +43,64 @@ export interface ProposalMeta {
   usage?: ProviderUsage;
 }
 
+export type ProviderCallPurpose =
+  | "conversation"
+  | "conversation_turn"
+  | "agent_step"
+  | "hearing_verdict"
+  | "repair";
+
+export type ProviderResolutionPurpose = Exclude<ProviderCallPurpose, "repair">;
+
+/** Metadata-only record of one transport call. Never contains prompts or output. */
+export interface ProviderCallAudit {
+  seq: number;
+  purpose: ProviderCallPurpose;
+  profileId: string;
+  transport: "live";
+  usedFallback: false;
+  outcome: "success" | "error";
+  failureReason: ProviderFailureReason | null;
+  chargedTokens: number;
+}
+
+/** One domain proposal resolution and the exact transport calls that fed it. */
+export interface ProviderResolutionAudit {
+  seq: number;
+  purpose: ProviderResolutionPurpose;
+  profileId: string;
+  transport: ProposalMeta["transport"];
+  usedFallback: boolean;
+  fallbackReason: ProviderFailureReason | null;
+  callSeqs: number[];
+}
+
+export interface ProviderAuditSnapshot {
+  callsUsed: number;
+  tokensUsed: number;
+  inFlightCalls: number;
+  inFlightTokens: number;
+  complete: boolean;
+  truncated: boolean;
+  droppedCount: number;
+  calls: ProviderCallAudit[];
+  resolutions: ProviderResolutionAudit[];
+}
+
+export function emptyProviderAuditSnapshot(): ProviderAuditSnapshot {
+  return {
+    callsUsed: 0,
+    tokensUsed: 0,
+    inFlightCalls: 0,
+    inFlightTokens: 0,
+    complete: true,
+    truncated: false,
+    droppedCount: 0,
+    calls: [],
+    resolutions: [],
+  };
+}
+
 export interface SuggestedReply {
   text: string;
   /** Prompt-shaping hint only. Runtime classification never trusts this value. */
@@ -161,6 +219,8 @@ export interface NpcProposalPort {
   preflight(): Promise<{ available: boolean; reason?: ProviderFailureReason }>;
   /** Exact transport budget use for one run/session key, when this port owns a budget. */
   accountingSnapshot?(scopeId: string): { callsUsed: number; tokensUsed: number };
+  /** Run-wide metadata-only transport and resolution provenance for acceptance auditing. */
+  auditSnapshot(scopeId: string): ProviderAuditSnapshot;
   proposeConversationTurn(
     request: ConversationTurnRequest,
   ): Promise<ResolvedProposal<ConversationProposal>>;
@@ -176,12 +236,7 @@ export interface NpcProposalPort {
 }
 
 export interface TextGenRequest {
-  purpose:
-    | "conversation"
-    | "conversation_turn"
-    | "agent_step"
-    | "hearing_verdict"
-    | "repair";
+  purpose: ProviderCallPurpose;
   instructions: string;
   input: string;
   schemaName: string;

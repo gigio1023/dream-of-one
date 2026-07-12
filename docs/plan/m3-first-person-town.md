@@ -234,10 +234,12 @@ can overhear with subtitles.
       verdict), inside one sitting. No pre-hearing interrogation ends the run.
 - [ ] Interrogation before the hearing remains survivable by argument, and
       an in-run recovery path visibly lowers a wary NPC's suspicion.
-- [ ] No provider call ever blocks the player except the merged
-      judgment+reply call. Ambient calls never pause free exploration, stale
-      results cannot mutate a newer world revision, and any result completed
-      during the player's modal pause waits to apply until resume.
+- [ ] During ordinary exploration, no provider call blocks the player except
+      the merged judgment+reply call. The already-staged terminal hearing may
+      block once on its final model judgment. Ambient calls never pause free
+      exploration, stale results cannot mutate a newer world revision, and
+      any result completed during the player's modal pause waits to apply
+      until resume.
 - [ ] Provider-call accounting shows event-driven wake-ups only — zero
       per-tick provider calls; a full run stays inside the configured
       call/token budget.

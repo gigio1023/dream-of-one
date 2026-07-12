@@ -2,10 +2,13 @@ import assert from "node:assert/strict";
 import { test } from "bun:test";
 import { fallbackContent } from "../../src/localization/fallback-content.js";
 import { startSessionServer } from "../../src/api/http-server.js";
+import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
+import { ProviderService } from "../../src/providers/service.js";
 import type {
   HearingJudgment,
   HearingJudgmentRequest,
   ResolvedProposal,
+  TextGenPort,
 } from "../../src/providers/ports.js";
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
 import { createSameOrderScriptedAdapter } from "../../src/providers/testing/same-order-script.js";
@@ -264,6 +267,242 @@ test("hearing and run end are retry-stable, conflict-safe, and freeze ordinary m
   assert.equal(reset.runStatus, "active");
   assert.equal(reset.hearingProcedure, null);
   assert.equal(reset.terminalResult, null);
+});
+
+test("run-wide provider audit survives terminal hearing, end, and a fresh run reset", async () => {
+  const unavailableTextGen: TextGenPort = {
+    adapterId: "audit-unavailable",
+    preflight: async () => ({ available: false, reason: "missing_credentials" }),
+    generate: async () => {
+      throw new Error("unavailable transport must not be called");
+    },
+  };
+  const proposalPort = new ProviderService({
+    profileId: "test/run-audit",
+    textGen: unavailableTextGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const service = new RunService({
+    proposalPort,
+    idFactory: deterministicIds("run-audit"),
+    layout: { ...loadRunLayout(), hearingAtSeconds: 10 },
+  });
+  const started = service.start("start-run-audit", "ko-KR");
+  assert.equal(started.providerAudit.callsUsed, 0);
+  assert.deepEqual(started.providerAudit.resolutions, []);
+
+  await makeDue(service, started.runId, "due-run-audit");
+  const opened = await service.hearing({
+    action: "open",
+    runId: started.runId,
+    hearingId: "hearing-run-audit",
+  });
+  assert.equal(opened.action, "open");
+  assert.deepEqual(
+    opened.providerRuntimeTrace.entries.map(entry => entry.meta.transport),
+    ["fallback"],
+  );
+  assert.deepEqual(opened.providerAudit.resolutions.map(resolution => ({
+    purpose: resolution.purpose,
+    transport: resolution.transport,
+    fallbackReason: resolution.fallbackReason,
+    callSeqs: resolution.callSeqs,
+  })), [{
+    purpose: "conversation",
+    transport: "fallback",
+    fallbackReason: "missing_credentials",
+    callSeqs: [],
+  }]);
+
+  const answered = await service.hearing({
+    action: "answer",
+    runId: started.runId,
+    hearingId: "hearing-run-audit",
+    turnId: opened.nextTurn.turnId,
+    answer: { type: "free_input", text: "최종 진술입니다." },
+  });
+  assert.equal(answered.action, "answer");
+  assert.equal(answered.runStatus, "terminal");
+  assert.equal(answered.providerAudit.callsUsed, 0);
+  assert.equal(answered.providerAudit.complete, true);
+  assert.equal(answered.providerAudit.truncated, false);
+  assert.equal(answered.providerAudit.inFlightCalls, 0);
+  assert.deepEqual(
+    answered.providerAudit.resolutions.map(resolution => resolution.purpose),
+    ["conversation", "hearing_verdict"],
+  );
+  assert.deepEqual(
+    answered.providerRuntimeTrace.entries.map(entry => entry.meta.transport),
+    ["fallback", "fallback"],
+  );
+  assert.ok(answered.providerAudit.resolutions.every(
+    resolution =>
+      resolution.profileId === "test/run-audit" &&
+      resolution.transport === "fallback" &&
+      resolution.fallbackReason === "missing_credentials" &&
+      resolution.callSeqs.length === 0,
+  ));
+
+  const ended = await service.endRun({ runId: started.runId, endId: "end-run-audit" });
+  assert.deepEqual(ended.providerAudit, answered.providerAudit);
+  assert.deepEqual(ended.providerRuntimeTrace, answered.providerRuntimeTrace);
+  assert.deepEqual(service.snapshot(started.runId).providerAudit, answered.providerAudit);
+
+  const reset = service.start("start-run-audit-reset", "ko-KR");
+  assert.equal(reset.providerAudit.callsUsed, 0);
+  assert.deepEqual(reset.providerAudit.calls, []);
+  assert.deepEqual(reset.providerAudit.resolutions, []);
+  assert.deepEqual(reset.providerRuntimeTrace.entries, []);
+});
+
+test("semantic-invalid live hearing remains visible as a runtime fallback", async () => {
+  const liveTextGen: TextGenPort = {
+    adapterId: "semantic-invalid-live",
+    preflight: async () => ({ available: true }),
+    generate: async request => {
+      const usage = { inputTokens: 6, outputTokens: 4, totalTokens: 10 };
+      if (request.schemaName === "npc_conversation_turn") {
+        return {
+          text: JSON.stringify({
+            utterance: "최종 진술을 말씀해 주십시오.",
+            suggestedReplies: [
+              { text: "주민들과 직접 대화했습니다.", intent: "safe/local" },
+              { text: "기록을 다시 확인해 주십시오.", intent: "uncertain/repair" },
+              { text: "더 설명하지 않겠습니다.", intent: "risky/weird" },
+            ],
+            continueConversation: false,
+          }),
+          usage,
+        };
+      }
+      const input = JSON.parse(request.input) as {
+        residents: Array<{ actorId: string }>;
+      };
+      return {
+        text: JSON.stringify({
+          residentAssessments: input.residents.map((resident, index) => ({
+            actorId: resident.actorId,
+            proposedStance: "uncertain",
+            testimonyLine: "직접 확인할 근거가 충분하지 않습니다.",
+            citedMemoryIds: index === 0 ? ["memory-that-does-not-exist"] : [],
+          })),
+          proposedVerdict: "abnormal",
+          verdictWhyLine: "제출된 증언만으로는 평범함을 확인하기 어렵습니다.",
+          officerLine: "근거를 다시 검토한 결과 평범하다고 판정할 수 없습니다.",
+          citedRecordIds: [],
+          citedLedgerEventIds: [],
+        }),
+        usage,
+      };
+    },
+  };
+  const service = new RunService({
+    proposalPort: new ProviderService({
+      profileId: "test/semantic-invalid-live",
+      textGen: liveTextGen,
+      fallback: new RuleFallbackNpcAdapter(),
+    }),
+    idFactory: deterministicIds("semantic-invalid-live"),
+    layout: { ...loadRunLayout(), hearingAtSeconds: 10 },
+  });
+  const started = service.start("start-semantic-invalid-live", "ko-KR");
+  await makeDue(service, started.runId, "due-semantic-invalid-live");
+  const opened = await service.hearing({
+    action: "open",
+    runId: started.runId,
+    hearingId: "hearing-semantic-invalid-live",
+  });
+  const answered = await service.hearing({
+    action: "answer",
+    runId: started.runId,
+    hearingId: "hearing-semantic-invalid-live",
+    turnId: opened.nextTurn.turnId,
+    answer: { type: "free_input", text: "제 대화를 확인해 주십시오." },
+  });
+  assert.equal(answered.action, "answer");
+  assert.ok(answered.providerAudit.calls.every(
+    call => call.transport === "live" && call.outcome === "success",
+  ));
+  assert.ok(answered.providerAudit.resolutions.every(
+    resolution => resolution.transport === "live" && !resolution.usedFallback,
+  ));
+  assert.deepEqual(
+    answered.providerRuntimeTrace.entries.map(entry => ({
+      transport: entry.meta.transport,
+      usedFallback: entry.meta.usedFallback,
+      fallbackReason: entry.meta.fallbackReason ?? null,
+    })),
+    [
+      { transport: "live", usedFallback: false, fallbackReason: null },
+      { transport: "fallback", usedFallback: true, fallbackReason: "invalid_envelope" },
+    ],
+  );
+  assert.equal(answered.proposalMeta.transport, "fallback");
+  assert.equal(answered.proposalMeta.fallbackReason, "invalid_envelope");
+});
+
+test("runtime trace retains an early provider fallback followed by live judgment", async () => {
+  let preflightCount = 0;
+  const textGen: TextGenPort = {
+    adapterId: "runtime-fallback-then-live",
+    preflight: async () => {
+      preflightCount += 1;
+      return preflightCount === 1
+        ? { available: false, reason: "missing_credentials" }
+        : { available: true };
+    },
+    generate: async request => {
+      const input = JSON.parse(request.input) as {
+        residents: Array<{ actorId: string }>;
+      };
+      return {
+        text: JSON.stringify({
+          residentAssessments: input.residents.map(resident => ({
+            actorId: resident.actorId,
+            proposedStance: "uncertain",
+            testimonyLine: "직접 대화한 근거가 없어 보증할 수 없습니다.",
+            citedMemoryIds: [],
+          })),
+          proposedVerdict: "abnormal",
+          verdictWhyLine: "직접 대화에 근거한 보증이 부족합니다.",
+          officerLine: "현재 증언으로는 평범하다고 판정할 수 없습니다.",
+          citedRecordIds: [],
+          citedLedgerEventIds: [],
+        }),
+        usage: { inputTokens: 5, outputTokens: 5, totalTokens: 10 },
+      };
+    },
+  };
+  const service = new RunService({
+    proposalPort: new ProviderService({
+      profileId: "test/runtime-fallback-then-live",
+      textGen,
+      fallback: new RuleFallbackNpcAdapter(),
+    }),
+    idFactory: deterministicIds("runtime-fallback-then-live"),
+    layout: { ...loadRunLayout(), hearingAtSeconds: 10 },
+  });
+  const started = service.start("start-runtime-fallback-then-live", "ko-KR");
+  await makeDue(service, started.runId, "due-runtime-fallback-then-live");
+  const opened = await service.hearing({
+    action: "open",
+    runId: started.runId,
+    hearingId: "hearing-runtime-fallback-then-live",
+  });
+  const answered = await service.hearing({
+    action: "answer",
+    runId: started.runId,
+    hearingId: "hearing-runtime-fallback-then-live",
+    turnId: opened.nextTurn.turnId,
+    answer: { type: "free_input", text: "직접 대화한 기록을 확인해 주십시오." },
+  });
+  assert.equal(answered.action, "answer");
+  assert.deepEqual(
+    answered.providerRuntimeTrace.entries.map(entry => entry.meta.transport),
+    ["fallback", "live"],
+  );
+  assert.equal(answered.providerRuntimeTrace.complete, true);
+  assert.equal(answered.providerRuntimeTrace.truncated, false);
 });
 
 test("never-met vouches clamp and semantic-invalid or failed providers still terminalize", async () => {

@@ -25,7 +25,9 @@ import type {
   ConversationProposal,
   HearingJudgment,
   HearingJudgmentRequest,
+  ProviderAuditSnapshot,
 } from "./ports.js";
+import { emptyProviderAuditSnapshot } from "./ports.js";
 
 function localizedFallbackWhyLine(
   locale: string,
@@ -87,6 +89,10 @@ export function priorPlayerLines(
 /** Minimal resilience policy. It is never selected as the production profile. */
 export class RuleFallbackNpcAdapter implements NpcProposalPort {
   readonly profileId = "fallback/rules";
+
+  auditSnapshot(_scopeId: string): ProviderAuditSnapshot {
+    return emptyProviderAuditSnapshot();
+  }
 
   async preflight(): Promise<{ available: boolean }> {
     return { available: true };

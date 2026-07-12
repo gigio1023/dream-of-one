@@ -22,7 +22,8 @@ tests + fixture generation
         └── ScriptedNpcAdapter (never selectable from production config)
 ```
 
-The domain port exposes five operations. During ordinary conversation, the
+The domain port exposes five proposal operations plus a metadata-only audit
+snapshot. During ordinary conversation, the
 merged conversation-turn operation is the only provider work that blocks the
 player. The scheduled terminal hearing deliberately blocks once more on
 `judgeHearing`; opening lines, agent beats, and ambient work use the split
@@ -30,6 +31,7 @@ operations without adding another ordinary-play wait.
 
 ```ts
 interface NpcProposalPort {
+  auditSnapshot(scopeId): ProviderAuditSnapshot;
   proposeConversationTurn(request): Promise<ResolvedProposal<ConversationProposal>>;
   judgeConversationTurn(request): Promise<ResolvedProposal<ConversationJudgment>>;
   judgeAndProposeConversationTurn(request): Promise<ResolvedProposal<MergedConversationTurn>>;
@@ -37,6 +39,28 @@ interface NpcProposalPort {
   judgeHearing(request): Promise<ResolvedProposal<HearingJudgment>>;
 }
 ```
+
+`auditSnapshot` is metadata-only run accounting, not a transcript. `ProviderService`
+records each actual `TextGenPort.generate` attempt at the transport boundary,
+including failed calls and repair calls, then links those call sequence numbers
+to the final high-level live/fallback resolution. It never stores prompts,
+provider output, player text, credentials, or secrets. `callsUsed` and
+`tokensUsed` reconcile with completed call charges plus the explicitly exposed
+in-flight count/reservation. All transport calls are retained under the current
+120-call run cap; high-level resolutions retain the first 256 and mark
+`complete=false`, `truncated=true`, and `droppedCount` if that bound is exceeded.
+Direct scripted/rule adapters expose an empty complete audit, while fallback
+reached through `ProviderService` remains a recorded resolution even when it
+made zero transport calls.
+
+`RunService` separately keeps a bounded `providerRuntimeTrace` of every
+proposal metadata packet it actually consumes. This second trace catches a
+different failure class: a response can be valid provider JSON and therefore
+look live in `providerAudit`, then fail a runtime citation or tool-validity
+check and be replaced by deterministic fallback. Terminal acceptance requires
+both structures to be complete and free of fallback; a later live result
+cannot hide an earlier provider failure or runtime semantic fallback. Neither
+structure stores generated text.
 
 `MergedConversationTurn` is judgment fields (bounded suspicion/report deltas,
 signal classes, and a player-visible why-line) plus the NPC's next utterance
@@ -142,6 +166,10 @@ the deterministic signal classifier in
 `src/runtime/conversation-suspicion.ts`; for conversation and agent steps it
 is the bounded rule adapter. The HUD shows the selected profile,
 `live`/`fallback`/`scripted` transport, and fallback reason.
+The same metadata remains available run-wide as `providerAudit` and
+`providerRuntimeTrace` on snapshots, ordinary answer responses, hearing
+responses, and the terminal run-end response. This prevents a later successful
+call from hiding an earlier error, repair, or fallback during live acceptance.
 
 ## Scripted tests
 

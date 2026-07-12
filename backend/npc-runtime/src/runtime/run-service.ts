@@ -23,6 +23,7 @@ import type {
   ProposalMeta,
   ResolvedProposal,
 } from "../providers/ports.js";
+import { emptyProviderAuditSnapshot } from "../providers/ports.js";
 import { createProviderFromEnvironment } from "../providers/registry.js";
 import {
   clampConversationScore,
@@ -122,6 +123,23 @@ export const RUN_PROVIDER_BUDGET = {
  * receipts remain run-long for exact retry/conflict semantics.
  */
 export const MAX_PROP_OBSERVATION_MEMORIES_PER_ACTOR = 12;
+export const MAX_PROVIDER_RUNTIME_TRACE_ENTRIES = 512;
+
+export function appendProviderRuntimeTrace(
+  trace: RunSnapshot["providerRuntimeTrace"],
+  previousSeq: number,
+  meta: ProposalMeta,
+): number {
+  const seq = previousSeq + 1;
+  if (trace.entries.length < MAX_PROVIDER_RUNTIME_TRACE_ENTRIES) {
+    trace.entries.push({ seq, meta: structuredClone(meta) });
+  } else {
+    trace.droppedCount += 1;
+    trace.complete = false;
+    trace.truncated = true;
+  }
+  return seq;
+}
 
 const MAX_CONVERSATION_TURNS = 3;
 const AMBIENT_TURN_LIMIT = 2;
@@ -337,6 +355,9 @@ interface RunState {
   hearingAtSeconds: number;
   institutionalPressure: number;
   providerBudget: RunSnapshot["providerBudget"];
+  providerAudit: RunSnapshot["providerAudit"];
+  providerRuntimeTrace: RunSnapshot["providerRuntimeTrace"];
+  providerRuntimeTraceNextSeq: number;
   lastProposalMeta: ProposalMeta | null;
   activeConversationId: string | null;
   actors: Map<string, RunActorState>;
@@ -656,6 +677,14 @@ export class RunService {
         callsUsed: 0,
         tokensUsed: 0,
       },
+      providerAudit: emptyProviderAuditSnapshot(),
+      providerRuntimeTrace: {
+        complete: true,
+        truncated: false,
+        droppedCount: 0,
+        entries: [],
+      },
+      providerRuntimeTraceNextSeq: 0,
       lastProposalMeta: null,
       activeConversationId: null,
       actors,
@@ -706,6 +735,7 @@ export class RunService {
 
   snapshot(runId: string): RunSnapshot {
     const run = this.requireRun(runId);
+    this.refreshProviderState(run);
     return {
       runId: run.runId,
       worldId: run.worldId,
@@ -723,6 +753,8 @@ export class RunService {
       },
       institutionalPressure: run.institutionalPressure,
       providerBudget: clone(run.providerBudget),
+      providerAudit: clone(run.providerAudit),
+      providerRuntimeTrace: clone(run.providerRuntimeTrace),
       lastProposalMeta: clone(run.lastProposalMeta),
       activeConversationId: run.activeConversationId,
       actors: [...run.actors.values()].map(actor => this.publicActor(actor)),
@@ -757,7 +789,7 @@ export class RunService {
       if (run.runStatus !== "terminal" || !run.terminalResult) {
         throw new RunError(`run is not terminal: ${run.runStatus}`, "run_not_terminal");
       }
-      this.refreshProviderBudget(run);
+      this.refreshProviderState(run);
       run.runStatus = "closed";
       const response: RunEndResponse = {
         runId: run.runId,
@@ -765,6 +797,8 @@ export class RunService {
         runStatus: "closed",
         terminalResult: clone(run.terminalResult),
         providerBudget: clone(run.providerBudget),
+        providerAudit: clone(run.providerAudit),
+        providerRuntimeTrace: clone(run.providerRuntimeTrace),
         lastProposalMeta: clone(run.lastProposalMeta),
       };
       run.runEnd = { endId: request.endId, response: clone(response) };
@@ -951,6 +985,8 @@ export class RunService {
         nextTurn,
         terminalResult: null,
         proposalMeta: clone(resolved.meta),
+        providerAudit: clone(run.providerAudit),
+        providerRuntimeTrace: clone(run.providerRuntimeTrace),
         socialView: this.publicSocialView(run),
       };
       runtime.openingResponse = clone(response);
@@ -1022,6 +1058,8 @@ export class RunService {
         nextTurn: null,
         terminalResult: clone(terminalResult),
         proposalMeta: clone(meta),
+        providerAudit: clone(run.providerAudit),
+        providerRuntimeTrace: clone(run.providerRuntimeTrace),
         socialView: this.publicSocialView(run),
       };
       runtime.answerResponse = clone(response);
@@ -2038,6 +2076,8 @@ export class RunService {
         actor: this.publicActor(actor),
         nextTurn: clone(nextTurn),
         proposalMeta: clone(resolved.meta),
+        providerAudit: clone(run.providerAudit),
+        providerRuntimeTrace: clone(run.providerRuntimeTrace),
         socialView: this.publicSocialView(run),
         activeContact: clone(run.activeContact),
       };
@@ -2205,7 +2245,7 @@ export class RunService {
         invoke: async request => {
           const reserveAvailable = await this.serialize(runId, async () => {
             const run = this.requireRun(runId);
-            this.refreshProviderBudget(run);
+            this.refreshProviderState(run);
             return this.hasAmbientReserve(run, 1);
           });
           if (!reserveAvailable) {
@@ -2383,7 +2423,7 @@ export class RunService {
     ) {
       return this.finishGoalAttempt(run, attempt, "stale");
     }
-    this.refreshProviderBudget(run);
+    this.refreshProviderState(run);
     const ambientReserveAvailable = this.hasAmbientReserve(run, 1);
     const policy = DEFAULT_ROLE_POLICIES[actor.role];
     const contactOpportunity = contactCandidateActorId === actor.actorId;
@@ -2755,7 +2795,7 @@ export class RunService {
         invoke: async request => {
           const reserveAvailable = await this.serialize(runId, async () => {
             const current = this.requireRun(runId);
-            this.refreshProviderBudget(current);
+            this.refreshProviderState(current);
             return this.hasAmbientReserve(current, 1);
           });
           if (!reserveAvailable) {
@@ -3222,7 +3262,7 @@ export class RunService {
     status: "stale" | "budget_reserved" | "failed",
     completeGoalKey = false,
   ): RunNpcDecisionResponse {
-    this.refreshProviderBudget(run);
+    this.refreshProviderState(run);
     attempt.state = "terminal";
     if (run.activeAmbientConversation?.wakeId === attempt.request.wakeId) {
       run.activeAmbientConversation = null;
@@ -3420,7 +3460,7 @@ export class RunService {
           if (turnIndex > 0) {
             const reserveAvailable = await this.serialize(runId, async () => {
               const run = this.requireRun(runId);
-              this.refreshProviderBudget(run);
+              this.refreshProviderState(run);
               return this.hasAmbientReserve(run, AMBIENT_TURN_LIMIT - turnIndex);
             });
             if (!reserveAvailable) {
@@ -3503,7 +3543,7 @@ export class RunService {
       } catch {
         return this.serialize(runId, async () => {
           const run = this.requireRun(runId);
-          this.refreshProviderBudget(run);
+          this.refreshProviderState(run);
           return this.finishAmbientAttempt(run, attempt, "failed");
         });
       }
@@ -3553,7 +3593,7 @@ export class RunService {
     const meeting = this.currentAmbientMeeting(run, attempt);
     if (!meeting) return this.finishAmbientAttempt(run, attempt, "stale");
 
-    this.refreshProviderBudget(run);
+    this.refreshProviderState(run);
     if (!this.hasAmbientReserve(run, AMBIENT_TURN_LIMIT)) {
       return this.finishAmbientAttempt(run, attempt, "budget_reserved");
     }
@@ -3807,11 +3847,14 @@ export class RunService {
     );
   }
 
-  private refreshProviderBudget(run: RunState): void {
-    const exactAccounting = this.proposalPort.accountingSnapshot?.(run.runId);
-    if (!exactAccounting) return;
+  private refreshProviderState(run: RunState): boolean {
+    const audit = this.proposalPort.auditSnapshot?.(run.runId);
+    if (audit) run.providerAudit = clone(audit);
+    const exactAccounting = this.proposalPort.accountingSnapshot?.(run.runId) ?? audit;
+    if (!exactAccounting) return false;
     run.providerBudget.callsUsed = exactAccounting.callsUsed;
     run.providerBudget.tokensUsed = exactAccounting.tokensUsed;
+    return true;
   }
 
   private finishAmbientAttempt(
@@ -3819,7 +3862,7 @@ export class RunService {
     attempt: AmbientDecisionAttempt,
     status: "stale" | "budget_reserved" | "failed",
   ): RunNpcDecisionResponse {
-    this.refreshProviderBudget(run);
+    this.refreshProviderState(run);
     attempt.state = "terminal";
     finishRunWake(run.scheduler, attempt.request.wakeId, "terminal");
     if (run.activeAmbientConversation?.conversationId === attempt.conversationId) {
@@ -4108,7 +4151,7 @@ export class RunService {
           run.conversationOpenings.delete(attempt.actorId);
           run.preloadRequiredEvidence.delete(attempt.actorId);
         }
-        this.refreshProviderBudget(run);
+        this.refreshProviderState(run);
       });
       throw error;
     } finally {
@@ -5098,14 +5141,16 @@ export class RunService {
   }
 
   private trackProposal(run: RunState, meta: ProposalMeta): void {
-    const exactAccounting = this.proposalPort.accountingSnapshot?.(run.runId);
-    if (exactAccounting) {
-      run.providerBudget.callsUsed = exactAccounting.callsUsed;
-      run.providerBudget.tokensUsed = exactAccounting.tokensUsed;
-    } else if (meta.transport === "live") {
+    const hasExactAccounting = this.refreshProviderState(run);
+    if (!hasExactAccounting && meta.transport === "live") {
       run.providerBudget.callsUsed += 1;
       run.providerBudget.tokensUsed += meta.usage?.totalTokens ?? 0;
     }
+    run.providerRuntimeTraceNextSeq = appendProviderRuntimeTrace(
+      run.providerRuntimeTrace,
+      run.providerRuntimeTraceNextSeq,
+      meta,
+    );
     run.lastProposalMeta = clone(meta);
   }
 }

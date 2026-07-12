@@ -32,6 +32,23 @@
           "callsUsed": 0,
           "tokensUsed": 0
         },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": []
+        },
         "lastProposalMeta": null,
         "activeConversationId": null,
         "actors": [
@@ -508,6 +525,32 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "socialView": {
           "revision": 1,
           "hearing": {
@@ -663,6 +706,40 @@
           "profileId": "scripted/test",
           "transport": "scripted",
           "usedFallback": false
+        },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
         },
         "socialView": {
           "revision": 2,
@@ -851,6 +928,40 @@
           "reservedTokens": 50000,
           "callsUsed": 0,
           "tokensUsed": 0
+        },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
         },
         "lastProposalMeta": {
           "profileId": "scripted/test",
@@ -1300,6 +1411,23 @@
           "reservedTokens": 50000,
           "callsUsed": 0,
           "tokensUsed": 0
+        },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": []
         },
         "lastProposalMeta": null,
         "activeConversationId": null,
@@ -2368,6 +2496,72 @@
           "callsUsed": 0,
           "tokensUsed": 0
         },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "lastProposalMeta": {
           "profileId": "scripted/test",
           "transport": "scripted",
@@ -2958,7 +3152,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:218419a63a60d930",
+            "sourceId": "goal:e8515fea1bde9ef8",
             "actorIds": [
               "NPC_Office_Worker"
             ],
@@ -2971,7 +3165,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:2e18413b6d711f5d",
+            "sourceId": "goal:effdae0d3df868bb",
             "actorIds": [
               "NPC_Park_Caretaker"
             ],
@@ -2984,7 +3178,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:56fad69055525ca5",
+            "sourceId": "goal:a176d4ac8870eac8",
             "actorIds": [
               "NPC_Roaming_Liaison"
             ],
@@ -2997,7 +3191,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:9c07e4aa53cfc024",
+            "sourceId": "goal:21b075b31aac0fd8",
             "actorIds": [
               "NPC_Station_Officer"
             ],
@@ -3010,7 +3204,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:cd7b5e7efbc4f43f",
+            "sourceId": "goal:f4317480b76a81b5",
             "actorIds": [
               "NPC_Studio_Manager"
             ],
@@ -3023,7 +3217,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:66b1671ba92b06dd",
+            "sourceId": "goal:c526ec206819901a",
             "actorIds": [
               "NPC_Studio_Receptionist"
             ],
@@ -3036,7 +3230,7 @@
             "wakeId": "wake:run-fixture-1:observation:NPC_Office_Worker:1",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:ec1693f2b796366b",
+            "sourceId": "spatial:96797c6357189928",
             "actorIds": [
               "NPC_Office_Worker"
             ],
@@ -3049,7 +3243,7 @@
             "wakeId": "wake:run-fixture-1:observation:NPC_Park_Caretaker:1",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:67eb5ceef862b7fa",
+            "sourceId": "spatial:b731d7c9079e39cd",
             "actorIds": [
               "NPC_Park_Caretaker"
             ],
@@ -3062,7 +3256,7 @@
             "wakeId": "wake:run-fixture-1:observation:NPC_Roaming_Liaison:1",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:96b55fa5b16737fa",
+            "sourceId": "spatial:222139c27fb81f08",
             "actorIds": [
               "NPC_Roaming_Liaison"
             ],
@@ -3075,7 +3269,7 @@
             "wakeId": "wake:run-fixture-1:observation:NPC_Station_Officer:1",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:279cbe244d5894e7",
+            "sourceId": "spatial:6afb369713a9e40d",
             "actorIds": [
               "NPC_Station_Officer"
             ],
@@ -3088,7 +3282,7 @@
             "wakeId": "wake:run-fixture-1:observation:NPC_Studio_Manager:1",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:49f7da05752638cd",
+            "sourceId": "spatial:a50e5630ae4e7ceb",
             "actorIds": [
               "NPC_Studio_Manager"
             ],
@@ -3101,7 +3295,7 @@
             "wakeId": "wake:run-fixture-1:observation:NPC_Studio_Receptionist:1",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:f1db2745bea32dbb",
+            "sourceId": "spatial:0baab07f53c41239",
             "actorIds": [
               "NPC_Studio_Receptionist"
             ],
@@ -3154,7 +3348,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:218419a63a60d930",
+              "sourceId": "goal:e8515fea1bde9ef8",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -3167,7 +3361,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:2e18413b6d711f5d",
+              "sourceId": "goal:effdae0d3df868bb",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -3180,7 +3374,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:56fad69055525ca5",
+              "sourceId": "goal:a176d4ac8870eac8",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -3193,7 +3387,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:9c07e4aa53cfc024",
+              "sourceId": "goal:21b075b31aac0fd8",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -3206,7 +3400,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:cd7b5e7efbc4f43f",
+              "sourceId": "goal:f4317480b76a81b5",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -3219,7 +3413,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:66b1671ba92b06dd",
+              "sourceId": "goal:c526ec206819901a",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -4023,7 +4217,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:cb8783a55727ba43",
+            "sourceId": "goal:a7f3c678ec5d34d6",
             "actorIds": [
               "NPC_Park_Caretaker"
             ],
@@ -4036,7 +4230,7 @@
             "wakeId": "wake:run-fixture-1:observation:NPC_Park_Caretaker:11",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:b5b3d9d5cb60aa57",
+            "sourceId": "spatial:65a0d7d6a2e3e347",
             "actorIds": [
               "NPC_Park_Caretaker"
             ],
@@ -4060,7 +4254,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:218419a63a60d930",
+              "sourceId": "goal:e8515fea1bde9ef8",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -4073,7 +4267,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:2e18413b6d711f5d",
+              "sourceId": "goal:effdae0d3df868bb",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -4086,7 +4280,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:56fad69055525ca5",
+              "sourceId": "goal:a176d4ac8870eac8",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -4099,7 +4293,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:9c07e4aa53cfc024",
+              "sourceId": "goal:21b075b31aac0fd8",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -4112,7 +4306,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:cd7b5e7efbc4f43f",
+              "sourceId": "goal:f4317480b76a81b5",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -4125,7 +4319,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:66b1671ba92b06dd",
+              "sourceId": "goal:c526ec206819901a",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -4138,7 +4332,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:10",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6c04c2fe8125ff43",
+              "sourceId": "goal:f5d2158c3ce5034d",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -4151,7 +4345,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:cb8783a55727ba43",
+              "sourceId": "goal:a7f3c678ec5d34d6",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -4164,7 +4358,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:10",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:9c118a9bd158b52c",
+              "sourceId": "goal:9b892f40db2db034",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -4588,7 +4782,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:218419a63a60d930",
+              "sourceId": "goal:e8515fea1bde9ef8",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -4601,7 +4795,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:2e18413b6d711f5d",
+              "sourceId": "goal:effdae0d3df868bb",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -4614,7 +4808,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:56fad69055525ca5",
+              "sourceId": "goal:a176d4ac8870eac8",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -4627,7 +4821,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:9c07e4aa53cfc024",
+              "sourceId": "goal:21b075b31aac0fd8",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -4640,7 +4834,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:cd7b5e7efbc4f43f",
+              "sourceId": "goal:f4317480b76a81b5",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -4653,7 +4847,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:66b1671ba92b06dd",
+              "sourceId": "goal:c526ec206819901a",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -4666,7 +4860,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:10",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6c04c2fe8125ff43",
+              "sourceId": "goal:f5d2158c3ce5034d",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -4679,7 +4873,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:10",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:9c118a9bd158b52c",
+              "sourceId": "goal:9b892f40db2db034",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -5197,6 +5391,88 @@
           "reservedTokens": 50000,
           "callsUsed": 0,
           "tokensUsed": 0
+        },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 8,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
         },
         "lastProposalMeta": {
           "profileId": "scripted/test",
@@ -6023,6 +6299,80 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "socialView": {
           "revision": 1,
           "hearing": {
@@ -6234,6 +6584,80 @@
           "reservedTokens": 50000,
           "callsUsed": 0,
           "tokensUsed": 0
+        },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
         },
         "lastProposalMeta": {
           "profileId": "scripted/test",
@@ -6689,6 +7113,80 @@
           "reservedTokens": 50000,
           "callsUsed": 0,
           "tokensUsed": 0
+        },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
         },
         "lastProposalMeta": {
           "profileId": "scripted/test",
@@ -7494,6 +7992,96 @@
           "callsUsed": 0,
           "tokensUsed": 0
         },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 8,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 9,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "lastProposalMeta": {
           "profileId": "scripted/test",
           "transport": "scripted",
@@ -7640,7 +8228,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:9beb943d3602337a",
+              "sourceId": "goal:1888a528276d370f",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -7653,7 +8241,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:103e91264bf8e03d",
+              "sourceId": "goal:f2badb2abb6200d8",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -12294,6 +12882,80 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "socialView": {
           "revision": 1,
           "hearing": {
@@ -12492,6 +13154,80 @@
           "reservedTokens": 50000,
           "callsUsed": 0,
           "tokensUsed": 0
+        },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
         },
         "lastProposalMeta": {
           "profileId": "scripted/test",
@@ -12935,6 +13671,80 @@
           "callsUsed": 0,
           "tokensUsed": 0
         },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "lastProposalMeta": {
           "profileId": "scripted/test",
           "transport": "scripted",
@@ -13362,6 +14172,80 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "socialView": {
           "revision": 1,
           "hearing": {
@@ -13560,6 +14444,80 @@
           "reservedTokens": 50000,
           "callsUsed": 0,
           "tokensUsed": 0
+        },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
         },
         "lastProposalMeta": {
           "profileId": "scripted/test",
@@ -14002,6 +14960,80 @@
           "reservedTokens": 50000,
           "callsUsed": 0,
           "tokensUsed": 0
+        },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
         },
         "lastProposalMeta": {
           "profileId": "scripted/test",
@@ -14436,6 +15468,80 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "socialView": {
           "revision": 1,
           "hearing": {
@@ -14640,6 +15746,80 @@
           "reservedTokens": 50000,
           "callsUsed": 0,
           "tokensUsed": 0
+        },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
         },
         "lastProposalMeta": {
           "profileId": "scripted/test",
@@ -15087,6 +16267,80 @@
           "callsUsed": 0,
           "tokensUsed": 0
         },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "lastProposalMeta": {
           "profileId": "scripted/test",
           "transport": "scripted",
@@ -15516,6 +16770,80 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "socialView": {
           "revision": 1,
           "hearing": {
@@ -15714,6 +17042,80 @@
           "reservedTokens": 50000,
           "callsUsed": 0,
           "tokensUsed": 0
+        },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
         },
         "lastProposalMeta": {
           "profileId": "scripted/test",
@@ -16156,6 +17558,80 @@
           "reservedTokens": 50000,
           "callsUsed": 0,
           "tokensUsed": 0
+        },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
         },
         "lastProposalMeta": {
           "profileId": "scripted/test",

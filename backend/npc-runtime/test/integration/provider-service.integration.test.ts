@@ -13,6 +13,7 @@ import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import { createProviderFromEnvironment, loadProviderConfig } from "../../src/providers/registry.js";
 import { ProviderService } from "../../src/providers/service.js";
 import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-adapter.js";
+import { providerAuditSnapshotSchema } from "../../src/runtime/run-schema.js";
 import type {
   HearingJudgment,
   HearingJudgmentRequest,
@@ -318,6 +319,35 @@ test("provider service returns schema-validated live conversation proposals", as
   assert.equal(result.meta.usedFallback, false);
   assert.equal(result.proposal.suggestedReplies.length, 3);
   assert.equal(textGen.requests[0].schemaName, "npc_conversation_turn");
+  assert.deepEqual(service.auditSnapshot("session-provider-test"), {
+    callsUsed: 1,
+    tokensUsed: 50,
+    inFlightCalls: 0,
+    inFlightTokens: 0,
+    complete: true,
+    truncated: false,
+    droppedCount: 0,
+    calls: [{
+      seq: 1,
+      purpose: "conversation",
+      profileId: "test/live",
+      transport: "live",
+      usedFallback: false,
+      outcome: "success",
+      failureReason: null,
+      chargedTokens: 50,
+    }],
+    resolutions: [{
+      seq: 1,
+      purpose: "conversation",
+      profileId: "test/live",
+      transport: "live",
+      usedFallback: false,
+      fallbackReason: null,
+      callSeqs: [1],
+    }],
+  });
+  providerAuditSnapshotSchema.parse(service.auditSnapshot("session-provider-test"));
 });
 
 test("provider service returns one live evidence-grounded hearing judgment", async () => {
@@ -616,6 +646,19 @@ test("invalid provider JSON gets one bounded repair attempt", async () => {
     tokensUsed: 15,
   });
   assert.equal(result.meta.usage?.totalTokens, 15);
+  const repairAudit = service.auditSnapshot("session-provider-test");
+  assert.equal(repairAudit.calls.length, 2);
+  assert.deepEqual(repairAudit.calls.map(call => [call.seq, call.purpose, call.chargedTokens]), [
+    [1, "conversation", 6],
+    [2, "repair", 9],
+  ]);
+  assert.equal(repairAudit.resolutions.length, 1);
+  assert.deepEqual(repairAudit.resolutions[0]?.callSeqs, [1, 2]);
+  assert.equal(repairAudit.resolutions[0]?.transport, "live");
+  assert.equal(repairAudit.tokensUsed, repairAudit.calls.reduce(
+    (total, call) => total + call.chargedTokens,
+    0,
+  ));
 });
 
 test("missing credentials and exhausted budget use explicit fallback metadata", async () => {
@@ -628,6 +671,16 @@ test("missing credentials and exhausted budget use explicit fallback metadata", 
   assert.equal(missing.meta.transport, "fallback");
   assert.equal(missing.meta.fallbackReason, "missing_credentials");
   assert.equal(unavailable.accountingSnapshot("session-provider-test").callsUsed, 0);
+  assert.deepEqual(unavailable.auditSnapshot("session-provider-test").calls, []);
+  assert.deepEqual(unavailable.auditSnapshot("session-provider-test").resolutions, [{
+    seq: 1,
+    purpose: "conversation",
+    profileId: "test/missing",
+    transport: "fallback",
+    usedFallback: true,
+    fallbackReason: "missing_credentials",
+    callSeqs: [],
+  }]);
 
   const budgeted = new ProviderService({
     profileId: "test/budget",
@@ -713,6 +766,272 @@ test("provider timeout falls back without blocking the session", async () => {
   assert.equal(result.meta.transport, "fallback");
   assert.equal(result.meta.fallbackReason, "timeout");
   assert.equal(service.accountingSnapshot("session-provider-test").callsUsed, 1);
+  const audit = service.auditSnapshot("session-provider-test");
+  assert.equal(audit.calls[0]?.outcome, "error");
+  assert.equal(audit.calls[0]?.failureReason, "timeout");
+  assert.deepEqual(audit.resolutions[0]?.callSeqs, [1]);
+  assert.equal(audit.resolutions[0]?.fallbackReason, "timeout");
+});
+
+test("provider audit retains an early fallback followed by a live resolution", async () => {
+  let available = false;
+  const requests: TextGenRequest[] = [];
+  const textGen: TextGenPort = {
+    adapterId: "fallback-then-live",
+    preflight: async () => available
+      ? { available: true }
+      : { available: false, reason: "missing_credentials" },
+    generate: async request => {
+      requests.push(request);
+      return {
+        text: validConversation,
+        usage: { inputTokens: 11, outputTokens: 7, totalTokens: 18 },
+      };
+    },
+  };
+  const service = new ProviderService({
+    profileId: "test/fallback-then-live",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const fallback = await service.proposeConversationTurn(conversationRequest());
+  available = true;
+  const live = await service.proposeConversationTurn(conversationRequest());
+
+  assert.equal(fallback.meta.transport, "fallback");
+  assert.equal(live.meta.transport, "live");
+  assert.equal(requests.length, 1);
+  const audit = service.auditSnapshot("session-provider-test");
+  assert.equal(audit.callsUsed, 1);
+  assert.equal(audit.tokensUsed, 18);
+  assert.deepEqual(audit.resolutions.map(resolution => ({
+    transport: resolution.transport,
+    fallbackReason: resolution.fallbackReason,
+    callSeqs: resolution.callSeqs,
+  })), [
+    { transport: "fallback", fallbackReason: "missing_credentials", callSeqs: [] },
+    { transport: "live", fallbackReason: null, callSeqs: [1] },
+  ]);
+});
+
+test("provider audit isolates run scopes and starts a new scope empty", async () => {
+  const service = new ProviderService({
+    profileId: "test/scope-isolation",
+    textGen: new FakeTextGen([
+      { text: validConversation, usage: { inputTokens: 3, outputTokens: 2, totalTokens: 5 } },
+    ]),
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  await service.proposeConversationTurn({
+    ...conversationRequest(),
+    sessionId: "run-scope-a",
+  });
+
+  assert.equal(service.auditSnapshot("run-scope-a").callsUsed, 1);
+  assert.deepEqual(service.auditSnapshot("run-scope-b"), {
+    callsUsed: 0,
+    tokensUsed: 0,
+    inFlightCalls: 0,
+    inFlightTokens: 0,
+    complete: true,
+    truncated: false,
+    droppedCount: 0,
+    calls: [],
+    resolutions: [],
+  });
+});
+
+test("provider audit retains a live transport error before deterministic fallback", async () => {
+  const service = new ProviderService({
+    profileId: "test/transport-error",
+    textGen: new FakeTextGen([new Error("connection reset")]),
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const result = await service.proposeConversationTurn(conversationRequest());
+
+  assert.equal(result.meta.fallbackReason, "transport_error");
+  const audit = service.auditSnapshot("session-provider-test");
+  assert.equal(audit.calls.length, 1);
+  assert.equal(audit.calls[0]?.outcome, "error");
+  assert.equal(audit.calls[0]?.failureReason, "transport_error");
+  assert.equal(audit.calls[0]?.chargedTokens, audit.tokensUsed);
+  assert.deepEqual(audit.resolutions[0]?.callSeqs, [1]);
+  assert.equal(audit.resolutions[0]?.fallbackReason, "transport_error");
+});
+
+test("provider audit wire schema rejects accounting and completeness drift", () => {
+  const valid = {
+    callsUsed: 1,
+    tokensUsed: 5,
+    inFlightCalls: 0,
+    inFlightTokens: 0,
+    complete: true,
+    truncated: false,
+    droppedCount: 0,
+    calls: [{
+      seq: 1,
+      purpose: "conversation" as const,
+      profileId: "test/schema",
+      transport: "live" as const,
+      usedFallback: false as const,
+      outcome: "success" as const,
+      failureReason: null,
+      chargedTokens: 5,
+    }],
+    resolutions: [{
+      seq: 1,
+      purpose: "conversation" as const,
+      profileId: "test/schema",
+      transport: "live" as const,
+      usedFallback: false,
+      fallbackReason: null,
+      callSeqs: [1],
+    }],
+  };
+  providerAuditSnapshotSchema.parse(valid);
+  assert.equal(providerAuditSnapshotSchema.safeParse({ ...valid, tokensUsed: 4 }).success, false);
+  assert.equal(providerAuditSnapshotSchema.safeParse({ ...valid, complete: false }).success, false);
+  assert.equal(providerAuditSnapshotSchema.safeParse({
+    ...valid,
+    resolutions: [{ ...valid.resolutions[0], callSeqs: [2] }],
+  }).success, false);
+});
+
+test("provider audit exposes in-flight accounting without pretending to be complete", async () => {
+  let resolveGeneration: ((result: TextGenResult) => void) | undefined;
+  let markEntered: (() => void) | undefined;
+  const entered = new Promise<void>(resolve => {
+    markEntered = resolve;
+  });
+  const textGen: TextGenPort = {
+    adapterId: "audit-in-flight",
+    preflight: async () => ({ available: true }),
+    generate: async () => {
+      markEntered?.();
+      return await new Promise<TextGenResult>(resolve => {
+        resolveGeneration = resolve;
+      });
+    },
+  };
+  const service = new ProviderService({
+    profileId: "test/audit-in-flight",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const pending = service.proposeConversationTurn(conversationRequest());
+  await entered;
+
+  const inFlight = service.auditSnapshot("session-provider-test");
+  assert.equal(inFlight.callsUsed, 1);
+  assert.equal(inFlight.inFlightCalls, 1);
+  assert.ok(inFlight.inFlightTokens > 0);
+  assert.equal(inFlight.tokensUsed, inFlight.inFlightTokens);
+  assert.equal(inFlight.complete, false);
+  assert.deepEqual(inFlight.calls, []);
+  assert.deepEqual(inFlight.resolutions, []);
+
+  assert.ok(resolveGeneration);
+  resolveGeneration({
+    text: validConversation,
+    usage: { inputTokens: 4, outputTokens: 6, totalTokens: 10 },
+  });
+  await pending;
+  const completed = service.auditSnapshot("session-provider-test");
+  assert.equal(completed.complete, true);
+  assert.equal(completed.inFlightCalls, 0);
+  assert.equal(completed.inFlightTokens, 0);
+  assert.equal(completed.tokensUsed, 10);
+});
+
+test("concurrent provider operations keep invocation-local call sequences", async () => {
+  let enteredCount = 0;
+  let resolveBothEntered: (() => void) | undefined;
+  const bothEntered = new Promise<void>(resolve => {
+    resolveBothEntered = resolve;
+  });
+  let resolveConversation: ((result: TextGenResult) => void) | undefined;
+  let resolveAgent: ((result: TextGenResult) => void) | undefined;
+  const textGen: TextGenPort = {
+    adapterId: "audit-concurrent",
+    preflight: async () => ({ available: true }),
+    generate: async request => {
+      enteredCount += 1;
+      if (enteredCount === 2) resolveBothEntered?.();
+      return await new Promise<TextGenResult>(resolve => {
+        if (request.purpose === "conversation") resolveConversation = resolve;
+        else if (request.purpose === "agent_step") resolveAgent = resolve;
+        else throw new Error(`unexpected concurrent purpose: ${request.purpose}`);
+      });
+    },
+  };
+  const service = new ProviderService({
+    profileId: "test/audit-concurrent",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const conversation = service.proposeConversationTurn({
+    ...conversationRequest(),
+    sessionId: "run-concurrent",
+  });
+  const agent = service.proposeNextStep({
+    sessionId: "run-concurrent",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "주변 상황을 확인한다.",
+    observePacket: observePacket(),
+    blockedSignatures: [],
+  });
+  await bothEntered;
+
+  assert.ok(resolveAgent);
+  resolveAgent({
+    text: JSON.stringify({
+      toolCall: null,
+      utterance: null,
+      rationale: "상황 확인을 마칩니다.",
+      done: true,
+    }),
+    usage: { inputTokens: 2, outputTokens: 3, totalTokens: 5 },
+  });
+  await agent;
+  assert.ok(resolveConversation);
+  resolveConversation({
+    text: validConversation,
+    usage: { inputTokens: 3, outputTokens: 4, totalTokens: 7 },
+  });
+  await conversation;
+
+  const audit = service.auditSnapshot("run-concurrent");
+  assert.deepEqual(audit.calls.map(call => [call.seq, call.purpose]), [
+    [1, "conversation"],
+    [2, "agent_step"],
+  ]);
+  const byPurpose = new Map(audit.resolutions.map(resolution => [
+    resolution.purpose,
+    resolution.callSeqs,
+  ]));
+  assert.deepEqual(byPurpose.get("conversation"), [1]);
+  assert.deepEqual(byPurpose.get("agent_step"), [2]);
+});
+
+test("provider audit marks resolution truncation explicitly", async () => {
+  const service = new ProviderService({
+    profileId: "test/audit-truncation",
+    textGen: new FakeTextGen([], false),
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const request = { ...conversationRequest(), sessionId: "run-truncated-audit" };
+  for (let index = 0; index < 257; index += 1) {
+    await service.proposeConversationTurn(request);
+  }
+  const audit = service.auditSnapshot(request.sessionId);
+  assert.equal(audit.callsUsed, 0);
+  assert.equal(audit.resolutions.length, 256);
+  assert.equal(audit.droppedCount, 1);
+  assert.equal(audit.truncated, true);
+  assert.equal(audit.complete, false);
+  providerAuditSnapshotSchema.parse(audit);
 });
 
 test("production registry contains no scripted profile", () => {

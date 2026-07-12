@@ -8,22 +8,21 @@ import { gameplayLocaleSchema } from "../localization/supported-locales.js";
 import { RECORD_KINDS } from "./world/types.js";
 
 const nonEmpty = z.string().trim().min(1);
+const providerFailureReasonSchema = z.enum([
+  "missing_credentials",
+  "unavailable",
+  "timeout",
+  "rate_limited",
+  "invalid_envelope",
+  "budget_exhausted",
+  "transport_error",
+]);
 const proposalMetaSchema = z
   .object({
     profileId: nonEmpty,
     transport: z.enum(["live", "fallback", "scripted"]),
     usedFallback: z.boolean(),
-    fallbackReason: z
-      .enum([
-        "missing_credentials",
-        "unavailable",
-        "timeout",
-        "rate_limited",
-        "invalid_envelope",
-        "budget_exhausted",
-        "transport_error",
-      ])
-      .optional(),
+    fallbackReason: providerFailureReasonSchema.optional(),
     usage: z
       .object({
         inputTokens: z.number().int().nonnegative(),
@@ -34,6 +33,207 @@ const proposalMetaSchema = z
       .optional(),
   })
   .strict();
+
+const providerCallPurposeSchema = z.enum([
+  "conversation",
+  "conversation_turn",
+  "agent_step",
+  "hearing_verdict",
+  "repair",
+]);
+const providerResolutionPurposeSchema = z.enum([
+  "conversation",
+  "conversation_turn",
+  "agent_step",
+  "hearing_verdict",
+]);
+const providerCallAuditSchema = z
+  .object({
+    seq: z.number().int().positive(),
+    purpose: providerCallPurposeSchema,
+    profileId: nonEmpty,
+    transport: z.literal("live"),
+    usedFallback: z.literal(false),
+    outcome: z.enum(["success", "error"]),
+    failureReason: providerFailureReasonSchema.nullable(),
+    chargedTokens: z.number().int().nonnegative(),
+  })
+  .strict();
+const providerResolutionAuditSchema = z
+  .object({
+    seq: z.number().int().positive(),
+    purpose: providerResolutionPurposeSchema,
+    profileId: nonEmpty,
+    transport: z.enum(["live", "fallback", "scripted"]),
+    usedFallback: z.boolean(),
+    fallbackReason: providerFailureReasonSchema.nullable(),
+    callSeqs: z.array(z.number().int().positive()),
+  })
+  .strict();
+
+export const providerAuditSnapshotSchema = z
+  .object({
+    callsUsed: z.number().int().nonnegative(),
+    tokensUsed: z.number().int().nonnegative(),
+    inFlightCalls: z.number().int().nonnegative(),
+    inFlightTokens: z.number().int().nonnegative(),
+    complete: z.boolean(),
+    truncated: z.boolean(),
+    droppedCount: z.number().int().nonnegative(),
+    calls: z.array(providerCallAuditSchema),
+    resolutions: z.array(providerResolutionAuditSchema).max(256),
+  })
+  .strict()
+  .superRefine((audit, context) => {
+    const callSeqs = new Set(audit.calls.map(call => call.seq));
+    const resolutionSeqs = new Set(audit.resolutions.map(resolution => resolution.seq));
+    if (callSeqs.size !== audit.calls.length) {
+      context.addIssue({ code: "custom", path: ["calls"], message: "call seq values must be unique" });
+    }
+    if (resolutionSeqs.size !== audit.resolutions.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["resolutions"],
+        message: "resolution seq values must be unique",
+      });
+    }
+    if (audit.callsUsed !== audit.calls.length + audit.inFlightCalls) {
+      context.addIssue({
+        code: "custom",
+        path: ["callsUsed"],
+        message: "callsUsed must equal completed plus in-flight calls",
+      });
+    }
+    const chargedTokens = audit.calls.reduce((total, call) => total + call.chargedTokens, 0);
+    if (audit.tokensUsed !== chargedTokens + audit.inFlightTokens) {
+      context.addIssue({
+        code: "custom",
+        path: ["tokensUsed"],
+        message: "tokensUsed must equal charged plus in-flight tokens",
+      });
+    }
+    if ((audit.inFlightCalls === 0) !== (audit.inFlightTokens === 0)) {
+      context.addIssue({
+        code: "custom",
+        path: ["inFlightTokens"],
+        message: "in-flight calls and token reservations must agree",
+      });
+    }
+    const resolutionCallSeqs = audit.resolutions.flatMap(resolution => resolution.callSeqs);
+    const linkedCallSeqs = new Set(resolutionCallSeqs);
+    if (resolutionCallSeqs.length !== linkedCallSeqs.size) {
+      context.addIssue({
+        code: "custom",
+        path: ["resolutions"],
+        message: "one provider call cannot belong to multiple resolutions",
+      });
+    }
+    const allCallsLinked = audit.calls.every(call => linkedCallSeqs.has(call.seq));
+    if (
+      audit.complete !==
+        (audit.droppedCount === 0 && audit.inFlightCalls === 0 && allCallsLinked)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["complete"],
+        message: "complete requires no dropped, in-flight, or unresolved calls",
+      });
+    }
+    if (audit.truncated !== (audit.droppedCount > 0)) {
+      context.addIssue({
+        code: "custom",
+        path: ["truncated"],
+        message: "truncated must reflect droppedCount",
+      });
+    }
+    for (const [index, call] of audit.calls.entries()) {
+      if ((call.outcome === "success") !== (call.failureReason === null)) {
+        context.addIssue({
+          code: "custom",
+          path: ["calls", index, "failureReason"],
+          message: "only failed calls carry a failure reason",
+        });
+      }
+    }
+    for (const [index, resolution] of audit.resolutions.entries()) {
+      if (new Set(resolution.callSeqs).size !== resolution.callSeqs.length) {
+        context.addIssue({
+          code: "custom",
+          path: ["resolutions", index, "callSeqs"],
+          message: "resolution callSeqs must be unique",
+        });
+      }
+      if (resolution.callSeqs.some(seq => !callSeqs.has(seq))) {
+        context.addIssue({
+          code: "custom",
+          path: ["resolutions", index, "callSeqs"],
+          message: "resolution callSeqs must reference retained calls",
+        });
+      }
+      if (resolution.usedFallback !== (resolution.transport === "fallback")) {
+        context.addIssue({
+          code: "custom",
+          path: ["resolutions", index, "usedFallback"],
+          message: "fallback transport and usedFallback must agree",
+        });
+      }
+      if (resolution.usedFallback !== (resolution.fallbackReason !== null)) {
+        context.addIssue({
+          code: "custom",
+          path: ["resolutions", index, "fallbackReason"],
+          message: "only fallback resolutions carry a fallback reason",
+        });
+      }
+    }
+  });
+
+const providerRuntimeTraceEntrySchema = z
+  .object({
+    seq: z.number().int().positive(),
+    meta: proposalMetaSchema,
+  })
+  .strict();
+
+export const providerRuntimeTraceSchema = z
+  .object({
+    complete: z.boolean(),
+    truncated: z.boolean(),
+    droppedCount: z.number().int().nonnegative(),
+    entries: z.array(providerRuntimeTraceEntrySchema).max(512),
+  })
+  .strict()
+  .superRefine((trace, context) => {
+    if (trace.complete !== (trace.droppedCount === 0)) {
+      context.addIssue({
+        code: "custom",
+        path: ["complete"],
+        message: "complete requires no dropped runtime proposal metadata",
+      });
+    }
+    if (trace.truncated !== (trace.droppedCount > 0)) {
+      context.addIssue({
+        code: "custom",
+        path: ["truncated"],
+        message: "truncated must reflect droppedCount",
+      });
+    }
+    for (const [index, entry] of trace.entries.entries()) {
+      if (entry.seq !== index + 1) {
+        context.addIssue({
+          code: "custom",
+          path: ["entries", index, "seq"],
+          message: "runtime trace retains one-based proposal order",
+        });
+      }
+      if (entry.meta.usedFallback !== (entry.meta.transport === "fallback")) {
+        context.addIssue({
+          code: "custom",
+          path: ["entries", index, "meta", "usedFallback"],
+          message: "runtime fallback transport and usedFallback must agree",
+        });
+      }
+    }
+  });
 
 export const runOpenQuestionSchema = z
   .object({
@@ -517,6 +717,8 @@ export const runSnapshotSchema = z
         tokensUsed: z.number().int().nonnegative(),
       })
       .strict(),
+    providerAudit: providerAuditSnapshotSchema,
+    providerRuntimeTrace: providerRuntimeTraceSchema,
     lastProposalMeta: proposalMetaSchema.nullable(),
     activeConversationId: nonEmpty.nullable(),
     actors: z.array(runActorSchema).length(6),
@@ -939,6 +1141,8 @@ export const runHearingResponseSchema = z.discriminatedUnion("action", [
     nextTurn: runNextTurnSchema,
     terminalResult: z.null(),
     proposalMeta: proposalMetaSchema,
+    providerAudit: providerAuditSnapshotSchema,
+    providerRuntimeTrace: providerRuntimeTraceSchema,
     socialView: runSocialViewSchema,
   }).strict(),
   z.object({
@@ -951,6 +1155,8 @@ export const runHearingResponseSchema = z.discriminatedUnion("action", [
     nextTurn: z.null(),
     terminalResult: runTerminalResultSchema,
     proposalMeta: proposalMetaSchema,
+    providerAudit: providerAuditSnapshotSchema,
+    providerRuntimeTrace: providerRuntimeTraceSchema,
     socialView: runSocialViewSchema,
   }).strict(),
 ]);
@@ -973,6 +1179,8 @@ export const runEndResponseSchema = z
       callsUsed: z.number().int().nonnegative(),
       tokensUsed: z.number().int().nonnegative(),
     }).strict(),
+    providerAudit: providerAuditSnapshotSchema,
+    providerRuntimeTrace: providerRuntimeTraceSchema,
     lastProposalMeta: proposalMetaSchema.nullable(),
   })
   .strict();
@@ -1011,6 +1219,8 @@ export const runSessionAnswerResponseSchema = z
     actor: runActorSchema,
     nextTurn: runNextTurnSchema.nullable(),
     proposalMeta: proposalMetaSchema,
+    providerAudit: providerAuditSnapshotSchema,
+    providerRuntimeTrace: providerRuntimeTraceSchema,
     socialView: runSocialViewSchema,
     activeContact: runActiveContactSchema.nullable(),
   })
@@ -1080,6 +1290,8 @@ export const runSessionSnapshotResponseSchema = z
   .strict();
 
 export type RunSnapshot = z.infer<typeof runSnapshotSchema>;
+export type RunProviderAudit = z.infer<typeof providerAuditSnapshotSchema>;
+export type RunProviderRuntimeTrace = z.infer<typeof providerRuntimeTraceSchema>;
 export type RunActor = z.infer<typeof runActorSchema>;
 export type RunMemory = z.infer<typeof runMemorySchema>;
 export type RunRecordReadMemory = z.infer<typeof runRecordReadMemorySchema>;

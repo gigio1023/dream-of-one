@@ -13,6 +13,7 @@ const TARGET_GROUPS := [&"interactables", &"npc_actors", &"spatial_props", &"sem
 const CAPABILITIES_PROPERTY := &"godot_ai_capabilities"
 const SNAPSHOT_PROPERTY := &"godot_ai_snapshot"
 const TARGETS_PROPERTY := &"godot_ai_semantic_targets"
+const EXPECTED_PROVIDER_PROFILE_ID := "modelscope/qwen3.7-plus"
 
 @export var world_path: NodePath = ^"../Town"
 @export var player_path: NodePath = ^"../Town/Actors/Player3D"
@@ -119,6 +120,14 @@ func snapshot() -> Dictionary:
 	]
 	var turn := _first_dictionary(sources, [&"currentTurn", &"activeTurn", &"turn"])
 	var hud_view := _source_data(hud_source)
+	var provider_audit := _first_dictionary(
+		sources,
+		[&"providerAudit", &"provider_audit"]
+	)
+	var provider_runtime_trace := _first_dictionary(
+		sources,
+		[&"providerRuntimeTrace", &"provider_runtime_trace"]
+	)
 
 	return {
 		"available": true,
@@ -181,6 +190,12 @@ func snapshot() -> Dictionary:
 			sources,
 			[&"providerBudget", &"provider_budget"],
 			{}
+		),
+		"providerAudit": _json_safe(provider_audit),
+		"providerRuntimeTrace": _json_safe(provider_runtime_trace),
+		"providerAuditSummary": _provider_audit_summary(
+			provider_audit,
+			provider_runtime_trace
 		),
 		"ambientSpeech": _first_value(
 			sources,
@@ -530,6 +545,117 @@ func _provider_summary(value: Variant) -> Dictionary:
 	}
 
 
+func _provider_audit_summary(audit: Dictionary, runtime_trace: Dictionary) -> Dictionary:
+	var calls := _array_value(audit.get("calls"))
+	var resolutions := _array_value(audit.get("resolutions"))
+	var trace_entries := _array_value(runtime_trace.get("entries"))
+	var failed_call_count := 0
+	var fallback_resolution_count := 0
+	var charged_tokens := 0
+	var audit_profiles_live_no_fallback := true
+	for call_value in calls:
+		if not call_value is Dictionary:
+			audit_profiles_live_no_fallback = false
+			continue
+		var call := call_value as Dictionary
+		charged_tokens += int(call.get("chargedTokens", 0))
+		if str(call.get("outcome", "")) != "success":
+			failed_call_count += 1
+		if (
+			str(call.get("profileId", "")) != EXPECTED_PROVIDER_PROFILE_ID
+			or str(call.get("transport", "")) != "live"
+			or bool(call.get("usedFallback", true))
+		):
+			audit_profiles_live_no_fallback = false
+	for resolution_value in resolutions:
+		if not resolution_value is Dictionary:
+			audit_profiles_live_no_fallback = false
+			continue
+		var resolution := resolution_value as Dictionary
+		if (
+			str(resolution.get("transport", "")) == "fallback"
+			or bool(resolution.get("usedFallback", false))
+		):
+			fallback_resolution_count += 1
+		if (
+			str(resolution.get("profileId", "")) != EXPECTED_PROVIDER_PROFILE_ID
+			or str(resolution.get("transport", "")) != "live"
+			or bool(resolution.get("usedFallback", true))
+			or (
+				resolution.get("fallbackReason") != null
+				and not str(resolution.get("fallbackReason", "")).is_empty()
+			)
+		):
+			audit_profiles_live_no_fallback = false
+	var trace_profiles_live_no_fallback := not trace_entries.is_empty()
+	for entry_value in trace_entries:
+		if not entry_value is Dictionary:
+			trace_profiles_live_no_fallback = false
+			continue
+		var meta_value: Variant = _dictionary_value(
+			entry_value as Dictionary,
+			[&"meta"],
+			{}
+		)
+		var meta: Dictionary = meta_value if meta_value is Dictionary else {}
+		if (
+			str(_dictionary_value(meta, [&"profileId", &"profile_id"], ""))
+			!= EXPECTED_PROVIDER_PROFILE_ID
+			or str(_dictionary_value(meta, [&"transport"], "")) != "live"
+			or bool(_dictionary_value(meta, [&"usedFallback", &"used_fallback"], true))
+		):
+			trace_profiles_live_no_fallback = false
+	var calls_used := int(audit.get("callsUsed", 0))
+	var audit_complete := bool(audit.get("complete", false))
+	var audit_truncated := bool(audit.get("truncated", false))
+	var audit_dropped_count := int(audit.get("droppedCount", 0))
+	var in_flight_calls := int(audit.get("inFlightCalls", 0))
+	var in_flight_tokens := int(audit.get("inFlightTokens", 0))
+	var tokens_used := int(audit.get("tokensUsed", 0))
+	var trace_complete := bool(runtime_trace.get("complete", false))
+	var trace_truncated := bool(runtime_trace.get("truncated", false))
+	var trace_dropped_count := int(runtime_trace.get("droppedCount", 0))
+	var reconciled := (
+		calls_used == calls.size() + in_flight_calls
+		and tokens_used == charged_tokens + in_flight_tokens
+	)
+	return {
+		"expectedProfileId": EXPECTED_PROVIDER_PROFILE_ID,
+		"callsUsed": calls_used,
+		"tokensUsed": tokens_used,
+		"inFlightCalls": in_flight_calls,
+		"inFlightTokens": in_flight_tokens,
+		"complete": audit_complete,
+		"truncated": audit_truncated,
+		"droppedCount": audit_dropped_count,
+		"callCount": calls.size(),
+		"resolutionCount": resolutions.size(),
+		"traceComplete": trace_complete,
+		"traceTruncated": trace_truncated,
+		"traceDroppedCount": trace_dropped_count,
+		"runtimeTraceEntryCount": trace_entries.size(),
+		"reconciled": reconciled,
+		"allExpectedProfileLiveNoFallback": (
+			calls_used > 0
+			and audit_complete
+			and not audit_truncated
+			and audit_dropped_count == 0
+			and in_flight_calls == 0
+			and in_flight_tokens == 0
+			and failed_call_count == 0
+			and fallback_resolution_count == 0
+			and reconciled
+			and audit_profiles_live_no_fallback
+			and trace_complete
+			and not trace_truncated
+			and trace_dropped_count == 0
+			and trace_profiles_live_no_fallback
+		),
+		"failedCallCount": failed_call_count,
+		"fallbackResolutionCount": fallback_resolution_count,
+	}
+
+
 func _displayed_result(hud_view: Dictionary, keys: Array[StringName]) -> Dictionary:
 	var value: Variant = _dictionary_value(hud_view, keys, null)
 	if not value is Dictionary:
@@ -702,6 +828,10 @@ func _dictionary_value(source: Dictionary, keys: Array[StringName], fallback: Va
 		if source.has(key):
 			return _json_safe(source[key])
 	return _json_safe(fallback)
+
+
+func _array_value(value: Variant) -> Array:
+	return value if value is Array else []
 
 
 func _target_less(left: Dictionary, right: Dictionary) -> bool:

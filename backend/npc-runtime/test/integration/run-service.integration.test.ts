@@ -4,7 +4,13 @@ import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-ada
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
 import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import { loadProviderConfig } from "../../src/providers/registry.js";
-import { RunError, RunService, STUDIO_RECEPTIONIST_ID } from "../../src/runtime/run-service.js";
+import {
+  appendProviderRuntimeTrace,
+  MAX_PROVIDER_RUNTIME_TRACE_ENTRIES,
+  RunError,
+  RunService,
+  STUDIO_RECEPTIONIST_ID,
+} from "../../src/runtime/run-service.js";
 import { runSnapshotSchema } from "../../src/runtime/run-schema.js";
 
 const STUDIO_ZONE_ID = "StudioReceptionConversation";
@@ -381,4 +387,27 @@ test("rule fallback stays in-fiction and reaches a bounded clean end", async () 
   }
   assert.ok(lastAnswer);
   assert.equal(lastAnswer.nextTurn, null, "the deterministic turn cap guarantees an ending");
+});
+
+test("runtime proposal trace truncates explicitly instead of hiding later metadata", async () => {
+  const trace = {
+    complete: true,
+    truncated: false,
+    droppedCount: 0,
+    entries: [],
+  } satisfies ReturnType<RunService["start"]>["providerRuntimeTrace"];
+  let seq = 0;
+  for (let index = 0; index < MAX_PROVIDER_RUNTIME_TRACE_ENTRIES + 2; index += 1) {
+    seq = appendProviderRuntimeTrace(trace, seq, {
+      profileId: "scripted/test",
+      transport: "scripted",
+      usedFallback: false,
+    });
+  }
+  assert.equal(trace.entries.length, MAX_PROVIDER_RUNTIME_TRACE_ENTRIES);
+  assert.equal(trace.entries[0]?.seq, 1);
+  assert.equal(trace.entries.at(-1)?.seq, MAX_PROVIDER_RUNTIME_TRACE_ENTRIES);
+  assert.equal(trace.droppedCount, 2);
+  assert.equal(trace.truncated, true);
+  assert.equal(trace.complete, false);
 });

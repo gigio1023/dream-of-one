@@ -64,8 +64,9 @@ $GODOT_BIN --headless --path godot --script res://tools/localization_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/check_assets.gd
 $GODOT_BIN --headless --path godot --script res://tools/asset_validation_smoke.gd
 
-# Localhost Session API parity (starts and stops a scripted test adapter)
+# Localhost API parity (starts and stops scripted test adapters; no live model)
 GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/live-route-parity.sh
+GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/run-api-http-parity.sh
 
 # M3R opt-in live provider smoke (manual/spend-bearing; Qwen only)
 : "${MODELSCOPE_API_KEY:?MODELSCOPE_API_KEY is required for live Qwen verification}"
@@ -100,10 +101,21 @@ DREAM_SESSION_URL=http://127.0.0.1:18787 \
 ```
 
 `/health/ready` proves only the sidecar is serving. The Terra run must inspect
-the final run-wide provider accounting, require a model-call count greater
-than zero, and require **every** recorded model call to report
-`profileId=modelscope/qwen3.7-plus`, `transport=live`, and
-`usedFallback=false`. Sampling one response packet is insufficient. The
+`providerAudit` on the terminal hearing response before the client reloads,
+require `complete=true`, `truncated=false`, `droppedCount=0`,
+`inFlightCalls=0`, and a `callsUsed` count greater than zero. Every recorded
+call must report `profileId=modelscope/qwen3.7-plus`, `transport=live`,
+`usedFallback=false`, and `outcome=success`; every recorded resolution must
+use the same profile with `transport=live`, `usedFallback=false`, and no
+fallback reason. `callsUsed` must equal completed calls plus in-flight calls,
+and `tokensUsed` must equal the sum of `calls[].chargedTokens` plus
+`inFlightTokens`. The adjacent `providerRuntimeTrace` must also be complete,
+untruncated, non-empty, and contain only that same Qwen/live/no-fallback
+metadata; it catches deterministic runtime replacement after a structurally
+valid live envelope fails semantic validation. The Godot AI
+`providerAuditSummary.allExpectedProfileLiveNoFallback` field combines these
+checks and must be `true`. Sampling one response packet or checking only
+`lastProposalMeta` is insufficient. The
 OpenAI-compatible npm client used by the ModelScope adapter is transport code;
 the pinned base URL and returned profile identify the model route.
 

@@ -291,6 +291,10 @@ func presentation_snapshot() -> Dictionary:
 		"institutionalPressure": hud_snapshot.get("institutionalPressure", {}),
 		"provider": _last_proposal_meta.duplicate(true),
 		"providerBudget": _dictionary_or_empty(_run_snapshot.get("providerBudget")),
+		"providerAudit": _dictionary_or_empty(_run_snapshot.get("providerAudit")),
+		"providerRuntimeTrace": _dictionary_or_empty(
+			_run_snapshot.get("providerRuntimeTrace")
+		),
 		"actors": _actor_readiness_summaries(),
 		"worldClock": _dictionary_or_empty(_run_snapshot.get("worldClock")),
 		"scheduler": _dictionary_or_empty(_run_snapshot.get("scheduler")),
@@ -894,6 +898,7 @@ func _dispatch_hearing_open() -> void:
 		return
 	_apply_social_view_from_response(result)
 	_hydrate_run_lifecycle(result)
+	_cache_provider_evidence(result)
 	_run_snapshot["worldRevision"] = int(result.get("worldRevision", 0))
 	_last_proposal_meta = _dictionary_or_empty(result.get("proposalMeta"))
 	_run_snapshot["lastProposalMeta"] = _last_proposal_meta.duplicate(true)
@@ -987,6 +992,7 @@ func _on_restart_requested() -> void:
 		return
 	_hydrate_run_lifecycle(result)
 	_run_snapshot["providerBudget"] = _dictionary_or_empty(result.get("providerBudget"))
+	_cache_provider_evidence(result)
 	_last_proposal_meta = _dictionary_or_empty(result.get("lastProposalMeta"))
 	_reload_current_run_scene()
 
@@ -1227,6 +1233,7 @@ func _submit_answer(answer_payload: Dictionary) -> void:
 	_required_retry_answer = {}
 	_hesitation_retry_scheduled = false
 	_apply_social_view_from_response(result)
+	_cache_provider_evidence(result)
 	_run_snapshot["worldRevision"] = int(result.get("worldRevision", 0))
 	_spatial_facts_dirty = true
 	_update_run_actor(_dictionary_or_empty(result.get("actor")))
@@ -1298,6 +1305,7 @@ func _submit_hearing_answer(answer_payload: Dictionary) -> void:
 	_required_retry_answer = {}
 	_apply_social_view_from_response(result)
 	_hydrate_run_lifecycle(result)
+	_cache_provider_evidence(result)
 	_run_snapshot["worldRevision"] = int(result.get("worldRevision", 0))
 	_last_proposal_meta = _dictionary_or_empty(result.get("proposalMeta"))
 	_run_snapshot["lastProposalMeta"] = _last_proposal_meta.duplicate(true)
@@ -1405,6 +1413,7 @@ func _ensure_run() -> bool:
 	_run_start_attempts = 0
 	_fixture_replay_complete = false
 	_run_snapshot = result.duplicate(true)
+	_cache_provider_evidence(result)
 	_hydrate_run_lifecycle(result)
 	_social_view = {}
 	_apply_social_view_from_response(result)
@@ -2661,6 +2670,7 @@ func _rebase_run_after_advance_conflict() -> void:
 		_advance_retry_remaining = ADVANCE_RETRY_SECONDS
 		return
 	_run_snapshot = result.duplicate(true)
+	_cache_provider_evidence(result)
 	_hydrate_run_lifecycle(result)
 	_apply_social_view_from_response(result)
 	if not _social_view.is_empty():
@@ -2821,6 +2831,20 @@ func _apply_social_view_from_response(response: Dictionary) -> bool:
 	return true
 
 
+func _cache_provider_evidence(response: Dictionary) -> void:
+	var audit_value: Variant = response.get("providerAudit")
+	if audit_value is Dictionary:
+		var audit := (audit_value as Dictionary).duplicate(true)
+		_run_snapshot["providerAudit"] = audit
+		var provider_budget := _dictionary_or_empty(_run_snapshot.get("providerBudget"))
+		provider_budget["callsUsed"] = int(audit.get("callsUsed", 0))
+		provider_budget["tokensUsed"] = int(audit.get("tokensUsed", 0))
+		_run_snapshot["providerBudget"] = provider_budget
+	var trace_value: Variant = response.get("providerRuntimeTrace")
+	if trace_value is Dictionary:
+		_run_snapshot["providerRuntimeTrace"] = (trace_value as Dictionary).duplicate(true)
+
+
 func _debug_snapshot() -> Dictionary:
 	if not OS.is_debug_build():
 		return {}
@@ -2833,6 +2857,8 @@ func _debug_snapshot() -> Dictionary:
 		"records": _run_snapshot.get("records", []),
 		"ledgerEvents": _run_snapshot.get("ledgerEvents", []),
 		"providerBudget": _run_snapshot.get("providerBudget", {}),
+		"providerAudit": _run_snapshot.get("providerAudit", {}),
+		"providerRuntimeTrace": _run_snapshot.get("providerRuntimeTrace", {}),
 		"lastProposalMeta": _last_proposal_meta,
 		"activeContact": _active_contact.duplicate(true),
 		"contactPresentation": _contact_presentation_snapshot(),

@@ -180,6 +180,21 @@ Debug-capable responses retain `ProposalMeta`, transcript deltas, and raw
 `socialView`, whose encountered residents, questions, records, provenance, and
 qualitative pressure never reveal undisclosed state.
 
+Run snapshots, player-answer responses, both hearing responses, and run-end
+responses also carry strict `providerAudit` metadata. Actual provider calls are
+captured inside `ProviderService` before a result can become stale or be
+discarded by `RunService`; each final proposal resolution names the call
+sequence numbers it used, including a two-call invalid-envelope repair. The
+audit contains no prompt or generated text. Its call/token totals reconcile
+with the shared provider budget, and terminal acceptance requires a complete,
+untruncated audit with no calls left in flight.
+
+The adjacent `providerRuntimeTrace` records every proposal metadata packet the
+run actually consumes, including deterministic replacements created after a
+live envelope fails runtime semantic validation. Final live acceptance checks
+both records; transport success alone is not enough to claim that the played
+run remained fallback-free.
+
 The landed surface includes `POST /v1/run/start`, `POST /v1/run/advance`,
 `GET /v1/run/snapshot`, `POST /v1/run/encounter`, `POST /v1/session/preload`,
 the run-discriminated start/answer/snapshot/end session routes,

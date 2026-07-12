@@ -1608,6 +1608,203 @@ func _check_player_contact(label: String, instance: Node) -> void:
 	instance.call("_sync_active_contact_from_response", {"activeContact": null})
 
 
+func _check_fixture_provider_evidence(
+	label: String,
+	instance: Node,
+	snapshot: Dictionary,
+	stage: String
+) -> void:
+	var audit_value: Variant = snapshot.get("providerAudit")
+	var trace_value: Variant = snapshot.get("providerRuntimeTrace")
+	if not audit_value is Dictionary or not trace_value is Dictionary:
+		_failures.append("%s %s omitted raw provider evidence" % [label, stage])
+		return
+	var audit := audit_value as Dictionary
+	var trace := trace_value as Dictionary
+	var provider_budget := snapshot.get("providerBudget", {}) as Dictionary
+	if (
+		int(audit.get("callsUsed", -1)) != 0
+		or int(audit.get("tokensUsed", -1)) != 0
+		or int(audit.get("inFlightCalls", -1)) != 0
+		or not bool(audit.get("complete", false))
+		or bool(audit.get("truncated", true))
+		or int(audit.get("droppedCount", -1)) != 0
+		or not (audit.get("calls", []) as Array).is_empty()
+		or not (audit.get("resolutions", []) as Array).is_empty()
+	):
+		_failures.append("%s %s scripted provider audit is not empty and complete" % [label, stage])
+	if (
+		int(provider_budget.get("callsUsed", -1)) != int(audit.get("callsUsed", -2))
+		or int(provider_budget.get("tokensUsed", -1)) != int(audit.get("tokensUsed", -2))
+	):
+		_failures.append("%s %s provider budget did not reconcile from audit" % [label, stage])
+	if (
+		not bool(trace.get("complete", false))
+		or bool(trace.get("truncated", true))
+		or int(trace.get("droppedCount", -1)) != 0
+	):
+		_failures.append("%s %s scripted runtime trace is incomplete" % [label, stage])
+	for entry_value in trace.get("entries", []) as Array:
+		if not entry_value is Dictionary:
+			_failures.append("%s %s scripted runtime trace has malformed entries" % [label, stage])
+			break
+		var meta := (entry_value as Dictionary).get("meta", {}) as Dictionary
+		if str(meta.get("transport", "")) != "scripted" or bool(meta.get("usedFallback", true)):
+			_failures.append("%s %s runtime trace lost scripted provenance" % [label, stage])
+			break
+	var debug_snapshot: Dictionary = instance.call("_debug_snapshot")
+	if (
+		debug_snapshot.get("providerAudit", {}) != audit
+		or debug_snapshot.get("providerRuntimeTrace", {}) != trace
+	):
+		_failures.append("%s %s debug snapshot lost raw provider evidence" % [label, stage])
+	var playtest_surface := instance.get_node_or_null("AgentPlaytestSurface")
+	if (
+		playtest_surface == null
+		or not playtest_surface.has_method("_provider_audit_summary")
+	):
+		_failures.append("%s %s has no provider audit summary surface" % [label, stage])
+		return
+	var summary: Dictionary = playtest_surface.call(
+		"_provider_audit_summary",
+		audit,
+		trace
+	)
+	if (
+		int(summary.get("callsUsed", -1)) != 0
+		or int(summary.get("tokensUsed", -1)) != 0
+		or int(summary.get("inFlightCalls", -1)) != 0
+		or int(summary.get("inFlightTokens", -1)) != 0
+		or not bool(summary.get("complete", false))
+		or bool(summary.get("truncated", true))
+		or int(summary.get("droppedCount", -1)) != 0
+		or int(summary.get("callCount", -1)) != 0
+		or int(summary.get("resolutionCount", -1)) != 0
+		or not bool(summary.get("traceComplete", false))
+		or bool(summary.get("traceTruncated", true))
+		or int(summary.get("traceDroppedCount", -1)) != 0
+		or int(summary.get("runtimeTraceEntryCount", -1))
+		!= (trace.get("entries", []) as Array).size()
+		or not bool(summary.get("reconciled", false))
+		or bool(summary.get("allExpectedProfileLiveNoFallback", true))
+		or int(summary.get("failedCallCount", -1)) != 0
+		or int(summary.get("fallbackResolutionCount", -1)) != 0
+	):
+		_failures.append("%s %s empty scripted audit became live acceptance" % [label, stage])
+	if stage == "opening":
+		_check_provider_audit_summary_contract(label, playtest_surface)
+
+
+func _check_provider_audit_summary_contract(label: String, playtest_surface: Node) -> void:
+	var live_audit := {
+		"callsUsed": 1,
+		"tokensUsed": 7,
+		"inFlightCalls": 0,
+		"inFlightTokens": 0,
+		"complete": true,
+		"truncated": false,
+		"droppedCount": 0,
+		"calls": [{
+			"seq": 1,
+			"purpose": "conversation",
+			"profileId": "modelscope/qwen3.7-plus",
+			"transport": "live",
+			"usedFallback": false,
+			"outcome": "success",
+			"failureReason": null,
+			"chargedTokens": 7,
+		}],
+		"resolutions": [{
+			"seq": 1,
+			"purpose": "conversation",
+			"profileId": "modelscope/qwen3.7-plus",
+			"transport": "live",
+			"usedFallback": false,
+			"fallbackReason": null,
+			"callSeqs": [1],
+		}],
+	}
+	var live_trace := {
+		"complete": true,
+		"truncated": false,
+		"droppedCount": 0,
+		"entries": [{
+			"seq": 1,
+			"meta": {
+				"profileId": "modelscope/qwen3.7-plus",
+				"transport": "live",
+				"usedFallback": false,
+			},
+		}],
+	}
+	var live_summary: Dictionary = playtest_surface.call(
+		"_provider_audit_summary",
+		live_audit,
+		live_trace
+	)
+	if (
+		not bool(live_summary.get("allExpectedProfileLiveNoFallback", false))
+		or not bool(live_summary.get("reconciled", false))
+		or int(live_summary.get("failedCallCount", -1)) != 0
+		or int(live_summary.get("fallbackResolutionCount", -1)) != 0
+	):
+		_failures.append("%s exact live Qwen provider evidence did not pass summary" % label)
+
+	var failed_audit := live_audit.duplicate(true)
+	var failed_call := ((failed_audit.get("calls", []) as Array)[0] as Dictionary)
+	failed_call["outcome"] = "error"
+	failed_call["failureReason"] = "timeout"
+	var failed_summary: Dictionary = playtest_surface.call(
+		"_provider_audit_summary",
+		failed_audit,
+		live_trace
+	)
+	if (
+		int(failed_summary.get("failedCallCount", 0)) != 1
+		or bool(failed_summary.get("allExpectedProfileLiveNoFallback", true))
+	):
+		_failures.append("%s failed live call became provider acceptance" % label)
+
+	var fallback_audit := live_audit.duplicate(true)
+	var fallback_resolution := (
+		(fallback_audit.get("resolutions", []) as Array)[0] as Dictionary
+	)
+	fallback_resolution["transport"] = "fallback"
+	fallback_resolution["usedFallback"] = true
+	fallback_resolution["fallbackReason"] = "timeout"
+	var fallback_trace := live_trace.duplicate(true)
+	var fallback_meta := (
+		((fallback_trace.get("entries", []) as Array)[0] as Dictionary).get("meta", {})
+		as Dictionary
+	)
+	fallback_meta["transport"] = "fallback"
+	fallback_meta["usedFallback"] = true
+	fallback_meta["fallbackReason"] = "timeout"
+	var fallback_summary: Dictionary = playtest_surface.call(
+		"_provider_audit_summary",
+		fallback_audit,
+		fallback_trace
+	)
+	if (
+		int(fallback_summary.get("fallbackResolutionCount", 0)) != 1
+		or bool(fallback_summary.get("allExpectedProfileLiveNoFallback", true))
+	):
+		_failures.append("%s fallback resolution became provider acceptance" % label)
+
+	var unreconciled_audit := live_audit.duplicate(true)
+	unreconciled_audit["tokensUsed"] = 8
+	var unreconciled_summary: Dictionary = playtest_surface.call(
+		"_provider_audit_summary",
+		unreconciled_audit,
+		live_trace
+	)
+	if (
+		bool(unreconciled_summary.get("reconciled", true))
+		or bool(unreconciled_summary.get("allExpectedProfileLiveNoFallback", true))
+	):
+		_failures.append("%s unreconciled provider totals became acceptance" % label)
+
+
 func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 	if OS.get_environment("DREAM_SESSION_MODE") != "fixture":
 		_failures.append("%s hearing smoke requires DREAM_SESSION_MODE=fixture" % label)
@@ -1729,6 +1926,17 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		paused = false
 		return
 	var staged_snapshot: Dictionary = instance.call("presentation_snapshot")
+	_check_fixture_provider_evidence(label, instance, staged_snapshot, "hearing open")
+	var open_response := (
+		(endpoints.get("runHearingOpen", {}) as Dictionary).get("response", {})
+		as Dictionary
+	)
+	if (
+		staged_snapshot.get("providerAudit", {}) != open_response.get("providerAudit", {})
+		or staged_snapshot.get("providerRuntimeTrace", {})
+		!= open_response.get("providerRuntimeTrace", {})
+	):
+		_failures.append("%s hearing open did not cache provider evidence" % label)
 	var staged_hud := hud.presentation_snapshot()
 	var staged_turn := staged_hud.get("currentTurn", {}) as Dictionary
 	var expected_player_value: Variant = town.navigation_position("Station.hearing_player")
@@ -1770,6 +1978,14 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		paused = false
 		return
 	var terminal_snapshot: Dictionary = instance.call("presentation_snapshot")
+	_check_fixture_provider_evidence(label, instance, terminal_snapshot, "terminal hearing")
+	var answer_response := answer_packet.get("response", {}) as Dictionary
+	if (
+		terminal_snapshot.get("providerAudit", {}) != answer_response.get("providerAudit", {})
+		or terminal_snapshot.get("providerRuntimeTrace", {})
+		!= answer_response.get("providerRuntimeTrace", {})
+	):
+		_failures.append("%s terminal hearing lost provider evidence before restart" % label)
 	var terminal_result := terminal_snapshot.get("terminalResult", {}) as Dictionary
 	var outcome := terminal_snapshot.get("outcome", {}) as Dictionary
 	var presented_testimonies := outcome.get("testimonies", []) as Array
@@ -1859,6 +2075,7 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 		_failures.append("%s did not preload conversations for all six residents" % label)
 		return
 	var locale_snapshot: Dictionary = instance.call("presentation_snapshot")
+	_check_fixture_provider_evidence(label, instance, locale_snapshot, "opening")
 	var locked_run_locale := str(locale_snapshot.get("runLocale", ""))
 	if locked_run_locale.is_empty() or locked_run_locale != str(instance.call("_api_locale")):
 		_failures.append("%s did not lock one API locale for the run" % label)

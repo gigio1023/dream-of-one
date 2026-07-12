@@ -113,6 +113,16 @@ func _process(delta: float) -> void:
 	_advance_elapsed_buffer += delta
 	_advance_retry_remaining = maxf(0.0, _advance_retry_remaining - delta)
 	_tick_blocked_movements(delta)
+	var fixture_batch_state := _fixture_movement_batch_state()
+	match fixture_batch_state:
+		&"waiting":
+			return
+		&"blocked", &"lost":
+			_advance_lane_halted_reason = "fixture_movement_batch_%s" % fixture_batch_state
+			push_error("Fixture movement batch halted: %s." % fixture_batch_state)
+			return
+		&"ready":
+			_arrival_batch_remaining = 0.0
 	if not _queued_arrivals.is_empty() and _arrival_batch_remaining >= 0.0:
 		_arrival_batch_remaining = maxf(0.0, _arrival_batch_remaining - delta)
 	if _advance_in_flight or _advance_rebase_in_flight:
@@ -165,12 +175,14 @@ func presentation_snapshot() -> Dictionary:
 		"advance": {
 			"inFlight": _advance_in_flight,
 			"pending": not _pending_advance_request.is_empty(),
+			"pendingRequest": _advance_request_summary(_pending_advance_request),
 			"needsRebase": _advance_needs_rebase,
 			"haltedReason": _advance_lane_halted_reason,
 			"bufferedSeconds": _advance_elapsed_buffer,
 			"runStartAttempts": _run_start_attempts,
 			"runStartError": _run_start_last_error.duplicate(true),
 			"runStartHaltedReason": _run_start_halted_reason,
+			"adapter": _run_session.diagnostics_snapshot(),
 		},
 		"activeMovements": _active_movement_summaries(),
 		"blockedMovements": _blocked_movement_summaries(),
@@ -769,6 +781,53 @@ func _refresh_arrival_batch_timer() -> void:
 				_arrival_batch_remaining = ARRIVAL_BATCH_SECONDS
 			return
 	_arrival_batch_remaining = 0.0
+
+
+func _fixture_movement_batch_state() -> StringName:
+	if _run_session.mode() != "fixture" or _arrival_batch_movement_ids.is_empty():
+		return &"none"
+	var waiting := false
+	for movement_id_value in _arrival_batch_movement_ids:
+		var movement_id := str(movement_id_value)
+		if _arrival_is_queued(movement_id):
+			continue
+		if _movement_collection_has_id(_active_movements, movement_id):
+			waiting = true
+			continue
+		var blocked := _movement_collection_entry(_blocked_movements, movement_id)
+		if not blocked.is_empty():
+			if int(blocked.get("retryCount", 0)) < MOVEMENT_MAX_RETRIES:
+				waiting = true
+				continue
+			return &"blocked"
+		return &"lost"
+	return &"waiting" if waiting else &"ready"
+
+
+func _movement_collection_has_id(movements: Dictionary, movement_id: String) -> bool:
+	return not _movement_collection_entry(movements, movement_id).is_empty()
+
+
+func _movement_collection_entry(movements: Dictionary, movement_id: String) -> Dictionary:
+	for movement_value in movements.values():
+		if (
+			movement_value is Dictionary
+			and str((movement_value as Dictionary).get("movementId", "")) == movement_id
+		):
+			return (movement_value as Dictionary).duplicate(true)
+	return {}
+
+
+func _advance_request_summary(request: Dictionary) -> Dictionary:
+	if request.is_empty():
+		return {}
+	var arrivals_value: Variant = request.get("arrivals", [])
+	return {
+		"advanceId": str(request.get("advanceId", "")),
+		"observedWorldRevision": int(request.get("observedWorldRevision", -1)),
+		"elapsedSeconds": float(request.get("elapsedSeconds", 0.0)),
+		"arrivalCount": (arrivals_value as Array).size() if arrivals_value is Array else 0,
+	}
 
 
 func _tick_blocked_movements(delta: float) -> void:

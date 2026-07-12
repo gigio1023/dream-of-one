@@ -221,6 +221,10 @@ func last_error() -> Dictionary:
 	return _last_error.duplicate(true)
 
 
+func diagnostics_snapshot() -> Dictionary:
+	return {"advanceIndex": _advance_index}
+
+
 func _load_fixture() -> void:
 	if not FileAccess.file_exists(FIXTURE_PATH):
 		_last_error = _error("fixture_missing", "Missing fixture: %s" % FIXTURE_PATH)

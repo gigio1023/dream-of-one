@@ -24,6 +24,25 @@ func mode() -> String:
 	return _mode
 
 
+func diagnostics_snapshot() -> Dictionary:
+	var last_error: Dictionary = {}
+	if _backend != null and _backend.has_method("last_error"):
+		last_error = _backend.call("last_error")
+	var backend_diagnostics: Dictionary = {}
+	if _backend != null and _backend.has_method("diagnostics_snapshot"):
+		var diagnostics_value: Variant = _backend.call("diagnostics_snapshot")
+		if diagnostics_value is Dictionary:
+			backend_diagnostics = (diagnostics_value as Dictionary).duplicate(true)
+	var fixture_advance_index: Variant = null
+	if _mode == "fixture":
+		fixture_advance_index = backend_diagnostics.get("advanceIndex")
+	return {
+		"mode": _mode,
+		"lastError": _diagnostic_error_summary(last_error),
+		"fixtureAdvanceIndex": fixture_advance_index,
+	}
+
+
 func start_run(locale := "ko-KR", start_id := "") -> Dictionary:
 	await get_tree().process_frame
 	return await _backend.start_run(locale, start_id)
@@ -62,6 +81,15 @@ func run_snapshot(run_id: String) -> Dictionary:
 func advance(request: Dictionary) -> Dictionary:
 	await get_tree().process_frame
 	return await _backend.advance(request)
+
+
+func _diagnostic_error_summary(error: Dictionary) -> Dictionary:
+	if error.is_empty():
+		return {}
+	return {
+		"code": str(error.get("error", "unknown_error")),
+		"status": int(error.get("status", 0)),
+	}
 
 
 func _resolve_mode() -> String:

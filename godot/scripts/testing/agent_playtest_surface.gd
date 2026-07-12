@@ -10,10 +10,44 @@ extends Node
 const SCHEMA_VERSION := 1
 const PRESENTATION_METHOD := &"presentation_snapshot"
 const TARGET_GROUPS := [&"interactables", &"npc_actors", &"spatial_props", &"semantic_targets"]
+const CAPABILITIES_PROPERTY := &"godot_ai_capabilities"
+const SNAPSHOT_PROPERTY := &"godot_ai_snapshot"
+const TARGETS_PROPERTY := &"godot_ai_semantic_targets"
 
 @export var world_path: NodePath = ^"../Town"
 @export var player_path: NodePath = ^"../Town/Actors/Player3D"
 @export var hud_path: NodePath = ^"../HUD3D"
+
+
+func _get_property_list() -> Array[Dictionary]:
+	return [
+		{
+			"name": CAPABILITIES_PROPERTY,
+			"type": TYPE_DICTIONARY,
+			"usage": PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_READ_ONLY,
+		},
+		{
+			"name": SNAPSHOT_PROPERTY,
+			"type": TYPE_DICTIONARY,
+			"usage": PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_READ_ONLY,
+		},
+		{
+			"name": TARGETS_PROPERTY,
+			"type": TYPE_ARRAY,
+			"usage": PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_READ_ONLY,
+		},
+	]
+
+
+func _get(property: StringName) -> Variant:
+	match property:
+		CAPABILITIES_PROPERTY:
+			return capabilities()
+		SNAPSHOT_PROPERTY:
+			return snapshot()
+		TARGETS_PROPERTY:
+			return semantic_targets()
+	return null
 
 
 func capabilities() -> Dictionary:
@@ -41,6 +75,11 @@ func capabilities() -> Dictionary:
 		"reads": {
 			"snapshot": {"available": true, "reason": ""},
 			"semanticTargets": target_status,
+		},
+		"nativeProperties": {
+			"capabilities": str(CAPABILITIES_PROPERTY),
+			"snapshot": str(SNAPSHOT_PROPERTY),
+			"semanticTargets": str(TARGETS_PROPERTY),
 		},
 		"actions": [],
 	}
@@ -125,8 +164,8 @@ func snapshot() -> Dictionary:
 		"provider": _provider_summary(
 			_first_value(sources, [&"provider", &"providerProvenance", &"provider_provenance"], {})
 		),
-		"hearing": _displayed_result(hud_view, [&"hearing"]),
-		"outcome": _displayed_result(hud_view, [&"outcome"]),
+		"hearing": _not_implemented_result("hearing"),
+		"outcome": _not_implemented_result("outcome"),
 	}
 
 
@@ -397,6 +436,16 @@ func _displayed_result(hud_view: Dictionary, keys: Array[StringName]) -> Diction
 		"reason": "",
 		"visible": _dictionary_value(source, [&"visible"], false),
 		"result": _displayed_result_payload(source),
+	}
+
+
+func _not_implemented_result(surface: String) -> Dictionary:
+	return {
+		"available": false,
+		"reason": "not_implemented",
+		"surface": surface,
+		"visible": false,
+		"result": null,
 	}
 
 

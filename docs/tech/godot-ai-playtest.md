@@ -1,7 +1,7 @@
 # Godot AI Inspection and Routed Play Control
 
-**Status: foundation and 3D read surface implemented (2026-07-12).** The
-vendored add-on, editor plugin/autoload, portable repository skill,
+**Status: foundation, delegated inspection, and 3D read surface implemented
+(2026-07-12).** The vendored add-on, editor plugin/autoload, repository skills,
 editor/server/game-helper path, and scene-owned `AgentPlaytestSurface` are
 proven through native Godot AI calls. Hands-on M3R acceptance remains later
 work, explicitly routed below.
@@ -38,6 +38,10 @@ executor/provider route in [`verification.md`](verification.md).
   force every action through one layer.
 - Add a repository-local skill shared by Codex and Claude Code, plus this short
   technical source of truth.
+- Route high-volume Godot AI work through one native in-session subagent so its
+  run, MCP traffic, and evidence remain isolated. When native spawn has no model
+  selector, the user-selected parent session owns the Sol-high/Terra-high lane;
+  Terra high alone owns player input and gameplay capture.
 - When the integration is unavailable, attempt bounded automatic recovery once,
   then report the blocker. Do not silently fall back to Computer Use.
 - Use `godot-best-practice` as the engine-generic control and evidence contract.
@@ -89,13 +93,16 @@ Verified on 2026-07-12 against Godot `4.7.stable.official.5b4e0cb0f`:
   `ObjectDB` instances and two resources still in use. This did not affect the
   server/helper handshake or run stop, but remains a pinned-integration cleanup
   warning to recheck on upgrade; it is not hidden as a clean shutdown claim.
-- A fresh Codex harness exposed the native Godot AI tool surface after the
-  server and editor were available. The 3D blockout was authored and inspected
-  against the exact checkout session; a fixture-mode run returned a valid
-  `AgentPlaytestSurface` snapshot and nine semantic targets (six residents,
-  three doors) without player input or a gameplay model call. Claude Code
-  execution remains untested, while its package discovery path is the tracked
-  `.claude/skills` symlink.
+- A fresh native Codex subagent inherited the Godot AI tool surface after the
+  server and editor were available. It selected the exact checkout session,
+  launched a fixture-mode helper without player input, read the three
+  `godot_ai_*` properties on `/Main3D/AgentPlaytestSurface`, observed six
+  resident targets and no door targets, crossed the exact three-arrival replay
+  packet without an error, and returned the editor to stopped/ready. The native
+  spawn surface exposed no model/effort selector or worker identity, so its
+  binding is recorded as inherited rather than independently verified. Claude
+  Code execution remains untested, while its package discovery path is the
+  tracked `.claude/skills` symlink.
 - Stopping the agent-owned editor also stopped an externally started server in
   one observed run. Treat editor and server lifetime as coupled unless current
   session status proves otherwise; after editor shutdown, restart the server
@@ -107,7 +114,9 @@ Verified on 2026-07-12 against Godot `4.7.stable.official.5b4e0cb0f`:
 
 ```mermaid
 flowchart LR
-    A["Configured agent harness"] --> S["dream-godot-playtest skill"]
+    A["Configured agent harness"] --> D["dream-godot-delegation for long runs"]
+    A --> S["dream-godot-playtest skill"]
+    D --> S
     S --> M["Godot AI 2.9.1 MCP"]
     M --> E["Godot editor plugin"]
     E --> H["_mcp_game_helper in running game"]
@@ -140,7 +149,7 @@ Use the smallest surface that answers the current question.
 | See what the player sees | Godot AI running-game screenshot |
 | Read parse, load, debugger, or runtime errors | Godot AI editor and game logs |
 | Explore an unfamiliar node or UI | Godot AI runtime tree, node, and UI inspection |
-| Read stable game-specific presentation state after the 3D adapter lands | `AgentPlaytestSurface.snapshot()` through a bounded runtime call |
+| Read stable game-specific presentation state | Native runtime node read at `/Main3D/AgentPlaytestSurface`: `godot_ai_capabilities`, `godot_ai_snapshot`, `godot_ai_semantic_targets` |
 | Add, reparent, configure, or connect scene-owned nodes | Godot AI scene/node/resource operations with undo and save; direct text editing only for small, fully understood serialized changes |
 | Change GDScript or many text resources | Files and `apply_patch`; reload and inspect through Godot AI |
 | Import, smoke, or CI-style checks | Godot CLI and existing scripts |
@@ -172,6 +181,14 @@ For each 3D spatial/UI slice:
 4. Launch the fixture helper only when runtime state is necessary; inspect it
    without input or a model call, then stop it.
 
+Keep a bounded session/readiness check in the lead. When the work needs a run
+lifecycle plus repeated runtime reads, logs, or captures, apply
+`dream-godot-delegation`: one native worker spawned by the Sol-high parent owns
+complex non-play inspection from preflight through stop. After implementation
+and self-review, a separate native worker spawned by a Terra-high parent owns
+every player-input or gameplay-acceptance run. Never run two workers against
+the same editor.
+
 After one bounded recovery, a missing integration blocks spatial/UI completion
 and visual claims. It does not turn CLI checks into equivalent evidence.
 
@@ -200,6 +217,19 @@ func snapshot() -> Dictionary
 func semantic_targets() -> Array[Dictionary]
 ```
 
+Godot AI's runtime node inspector does not call those methods directly. The
+surface therefore publishes the same copied values as debug-only, read-only,
+non-storage properties:
+
+| Property | Value |
+| --- | --- |
+| `godot_ai_capabilities` | Schema, available reads, and property names |
+| `godot_ai_snapshot` | Current presentation snapshot |
+| `godot_ai_semantic_targets` | Visible actor/prop target summaries |
+
+Read them with the native runtime node-info operation at
+`/Main3D/AgentPlaytestSurface`. They expose no `_set` path and no actions.
+
 `capabilities()` returns the adapter schema version and supported reads.
 `snapshot()` returns a JSON-safe presentation snapshot containing only fields
 needed to play and debug:
@@ -213,7 +243,9 @@ needed to play and debug:
 - HUD busy/thinking state and whether a hesitation timer is visible;
 - encountered stance/institutional-pressure summaries and provider provenance
   already exposed by normal/debug UI;
-- whether the hearing or outcome surface is visible and its displayed result.
+- hearing and outcome currently report `available=false` with
+  `reason=not_implemented`; later player-facing surfaces replace those markers
+  when they exist.
 
 `semantic_targets()` returns visible/interactable actor and spatial-prop ids,
 titles, kinds, and world positions. It does not expose hidden NPC knowledge,
@@ -233,11 +265,12 @@ UI helper in a follow-up commit. It must exercise the same HUD signal path as a
 player, never call the run/session sidecar or mutate backend-owned state
 directly.
 
-## Repository skill
+## Repository skills
 
-The repository contains `.agents/skills/dream-godot-playtest/SKILL.md`. Its
-shared frontmatter uses only `name` and `description`; `.claude/skills`
-discovers the same package through the existing symlink.
+The repository contains `.agents/skills/dream-godot-playtest/SKILL.md` and
+`.agents/skills/dream-godot-delegation/SKILL.md`. Their shared frontmatter uses
+only `name` and `description`; `.claude/skills` discovers the same packages
+through the existing symlink.
 
 The skill should trigger when the user asks an agent to play, playtest, operate,
 or live-debug Dream of One, capture a runtime view, or reproduce a player-facing
@@ -260,6 +293,15 @@ stops unless the user asked to leave it open.
 Computer Use is not a fallback for this workflow. It remains available only if
 the user explicitly asks to test OS-window behavior outside Godot AI's control
 surface.
+
+`dream-godot-delegation` triggers when a task would otherwise keep the lead in
+a long MCP loop. It spawns one native subagent, gives that worker exclusive run
+ownership, and requires a compact evidence return. The current native Codex
+spawn surface passes Godot AI tools to a fresh worker but exposes no model or
+effort selector/identity. Until that changes, choose Sol high or Terra high on
+the parent session before spawning; never write a model name into the worker
+prompt and treat it as proof. `codex exec`, another agent CLI, curl, and
+screen-coordinate automation are not automatic fallbacks.
 
 ## Readiness and bounded recovery
 
@@ -322,9 +364,11 @@ editor, or use Computer Use without separate authority.
 - Open/import with the pinned Godot 4.7 binary, require a ready plugin/server,
   and confirm the game helper becomes live on project run.
 
-### Slice 2 — Add the portable repository skill — complete 2026-07-12
+### Slice 2 — Add the portable repository skills — complete 2026-07-12
 
 - Create `dream-godot-playtest` and the Godot AI 2.9.1 capability reference.
+- Create `dream-godot-delegation` for native worker spawning, exclusive run
+  ownership, parent-session model routing, and compact evidence return.
 - Update `.agents/skills/README.md`.
 - Validate frontmatter, links, positive triggers, and adjacent non-triggers.
 - Exercise the same basic workflow in Codex and Claude Code when both clients
@@ -367,9 +411,9 @@ The integration foundation implemented by slices 1–3 is complete when:
 - the pinned editor snapshot, Python server package 2.9.1, MIT license, and
   required project settings are tracked with no
   machine-specific configuration or secrets.
-- `dream-godot-playtest` is present in the shared canonical skill package;
-  Codex native discovery and Claude execution are reported as tested or
-  explicitly unavailable rather than inferred.
+- `dream-godot-playtest` and `dream-godot-delegation` are present in the shared
+  canonical skill package; Codex native discovery and Claude execution are
+  reported as tested or explicitly unavailable rather than inferred.
 - the exact editor/server/helper handshake succeeds in fixture mode without
   input and returns to stopped/ready.
 - a disconnected or broken integration receives at most one safe recovery pass

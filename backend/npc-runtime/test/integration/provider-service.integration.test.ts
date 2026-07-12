@@ -15,6 +15,7 @@ import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import { createProviderFromEnvironment, loadProviderConfig } from "../../src/providers/registry.js";
 import { ProviderService } from "../../src/providers/service.js";
 import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-adapter.js";
+import { validateHearingJudgment } from "../../src/runtime/run-hearing.js";
 import {
   providerAuditSnapshotSchema,
   providerRuntimeTraceSchema,
@@ -185,20 +186,21 @@ function hearingRequest(
   locale: HearingJudgmentRequest["locale"] = "ko-KR",
 ): HearingJudgmentRequest {
   const residents = HEARING_RESIDENTS.map(([actorId, role], index) => {
-    const hasMeaningfulFirsthandConversation = index < 5;
+    const hasMeaningfulFirsthandConversation = index < 4;
+    const hasLimitedFirsthandConversation = index === 4;
     return {
       actorId,
       role,
       stanceBefore: index < evidencedVouches ? "vouch" as const : "uncertain" as const,
       hasMeaningfulFirsthandConversation,
-      memories: hasMeaningfulFirsthandConversation
+      memories: hasMeaningfulFirsthandConversation || hasLimitedFirsthandConversation
         ? [{
             memoryId: `mem-hearing-${index + 1}`,
             kind: "player_conversation" as const,
             sourceActorId: "player",
             text: "방문자가 절차를 차분히 설명했습니다.",
             whyLine: "직접 들은 설명이 앞선 정황과 맞았습니다.",
-            meaningfulFirsthand: true,
+            meaningfulFirsthand: hasMeaningfulFirsthandConversation,
           }]
         : [],
     };
@@ -232,10 +234,17 @@ function validHearingJudgment(): HearingJudgment {
   return {
     residentAssessments: HEARING_RESIDENTS.map(([actorId], index) => ({
       actorId,
+      contactBasis: index < 4
+        ? "meaningful_firsthand" as const
+        : index === 4
+          ? "limited_firsthand" as const
+          : "never_conversed" as const,
       proposedStance: index < 4 ? "vouch" as const : "uncertain" as const,
       testimonyLine: index === 5
         ? "직접 대화한 적이 없어 보증할 수 없습니다."
-        : "직접 들은 설명이 앞선 정황과 맞았습니다.",
+        : index === 4
+          ? "직접 대화는 짧았고 보증할 만큼 충분하지 않았습니다."
+          : "직접 들은 설명이 앞선 정황과 맞았습니다.",
       citedMemoryIds: index === 5 ? [] : [`mem-hearing-${index + 1}`],
     })) as HearingJudgment["residentAssessments"],
     proposedVerdict: "ordinary",
@@ -305,6 +314,46 @@ test("hearing strict schema requires every property and exactly six unique resid
     residentAssessments: valid.residentAssessments.slice(0, 5),
   };
   assert.equal(hearingJudgmentSchemaForLocale("ko-KR").safeParse(missing).success, false);
+  const missingContactBasis = structuredClone(valid) as Record<string, any>;
+  delete missingContactBasis.residentAssessments[0].contactBasis;
+  assert.equal(
+    hearingJudgmentSchemaForLocale("ko-KR").safeParse(missingContactBasis).success,
+    false,
+  );
+  const retiredTwoStateBasis = structuredClone(valid) as Record<string, any>;
+  retiredTwoStateBasis.residentAssessments[5].contactBasis = "no_meaningful_firsthand";
+  assert.equal(
+    hearingJudgmentSchemaForLocale("ko-KR").safeParse(retiredTwoStateBasis).success,
+    false,
+  );
+});
+
+test("hearing contact basis distinguishes meaningful, limited, and never-conversed memory", () => {
+  const request = hearingRequest();
+  const valid = validHearingJudgment();
+  assert.equal(validateHearingJudgment(request, valid).ok, true);
+  assert.deepEqual(
+    valid.residentAssessments.map(assessment => assessment.contactBasis),
+    [
+      "meaningful_firsthand",
+      "meaningful_firsthand",
+      "meaningful_firsthand",
+      "meaningful_firsthand",
+      "limited_firsthand",
+      "never_conversed",
+    ],
+  );
+  for (const [index, wrongBasis] of [
+    [0, "limited_firsthand"],
+    [4, "never_conversed"],
+    [5, "meaningful_firsthand"],
+  ] as const) {
+    const mismatch = structuredClone(valid);
+    mismatch.residentAssessments[index].contactBasis = wrongBasis;
+    const result = validateHearingJudgment(request, mismatch);
+    assert.equal(result.ok, false);
+    if (!result.ok) assert.match(result.reason, /contact basis contradicts/);
+  }
 });
 
 test("Korean agent-step validation covers provider-authored administrative questions", () => {
@@ -486,6 +535,7 @@ test("provider service returns one live evidence-grounded hearing judgment", asy
   assert.equal(textGen.requests[0].purpose, "hearing_verdict");
   assert.equal(textGen.requests[0].schemaName, "station_hearing_judgment");
   assert.match(textGen.requests[0].instructions, /resident's own supplied memories/);
+  assert.match(textGen.requests[0].instructions, /derive contactBasis exactly/);
   assert.match(textGen.requests[0].instructions, /at least four evidence-backed vouches/);
   assert.match(textGen.requests[0].instructions, /may still propose abnormal/);
   assert.match(textGen.requests[0].instructions, /run locale is ko-KR/);
@@ -535,6 +585,9 @@ test("hearing fallback is terminal, preserves stances, and needs four evidenced 
     fallbackContent("ko-KR").hearing.neverMetTestimony,
   );
   assert.deepEqual(four.proposal.residentAssessments[5].citedMemoryIds, []);
+  assert.equal(four.proposal.residentAssessments[5].contactBasis, "never_conversed");
+  assert.equal(four.proposal.residentAssessments[4].contactBasis, "limited_firsthand");
+  assert.equal(four.proposal.residentAssessments[0].contactBasis, "meaningful_firsthand");
   assert.doesNotMatch(
     four.proposal.residentAssessments[0].testimonyLine,
     /NPC_|mem-hearing/,

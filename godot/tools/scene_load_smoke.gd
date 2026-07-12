@@ -2066,8 +2066,18 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 			not testimony_value is Dictionary
 			or str((testimony_value as Dictionary).get("actor", "")).is_empty()
 			or str((testimony_value as Dictionary).get("testimony", "")).is_empty()
+			or str((testimony_value as Dictionary).get("contactBasis", "")) not in [
+				"meaningful_firsthand",
+				"limited_firsthand",
+				"never_conversed",
+			]
+			or str(
+				(testimony_value as Dictionary).get("contactBasisLabel", "")
+			).is_empty()
 		):
-			_failures.append("%s outcome has an incomplete resident testimony" % label)
+			_failures.append(
+				"%s outcome has an incomplete resident testimony or contact basis" % label
+			)
 			break
 	var fallback_result := terminal_result.duplicate(true)
 	var fallback_meta := (fallback_result.get("proposalMeta", {}) as Dictionary).duplicate(true)

@@ -1,4 +1,7 @@
-import type { CoarseStance } from "../contracts/types.js";
+import type {
+  CoarseStance,
+  HearingContactBasis,
+} from "../contracts/types.js";
 import type { GameplayLocale } from "../localization/supported-locales.js";
 import type {
   RunActor,
@@ -63,6 +66,7 @@ export interface HearingJudgmentRequest {
 
 export interface HearingResidentAssessment {
   actorId: string;
+  contactBasis: HearingContactBasis;
   proposedStance: CoarseStance;
   testimonyLine: string;
   citedMemoryIds: string[];
@@ -104,6 +108,19 @@ export interface ValidatedHearingJudgment {
   citedRecordIds: string[];
   citedLedgerEventIds: string[];
   evidencedVouchCount: number;
+}
+
+/** Exact procedural contact basis derived only from one resident's memories. */
+export function hearingContactBasisForMemories(
+  memories: readonly HearingMemoryView[],
+): HearingContactBasis {
+  const playerConversations = memories.filter(
+    memory => memory.kind === "player_conversation" && memory.sourceActorId === "player",
+  );
+  if (playerConversations.some(memory => memory.meaningfulFirsthand)) {
+    return "meaningful_firsthand";
+  }
+  return playerConversations.length > 0 ? "limited_firsthand" : "never_conversed";
 }
 
 export function normalizeHearingMemory(memory: RunMemory): HearingMemoryView {
@@ -195,13 +212,17 @@ export function buildHearingJudgmentRequest(options: {
   ledgerEvents: RunLedgerEvent[];
 }): HearingJudgmentRequest {
   if (options.actors.length !== 6) throw new Error("hearing requires exactly six residents");
-  const residents = options.actors.map(actor => ({
-    actorId: actor.actorId,
-    role: actor.role,
-    stanceBefore: actor.stance,
-    hasMeaningfulFirsthandConversation: actor.hasMeaningfulFirsthandConversation,
-    memories: actor.memories.map(normalizeHearingMemory),
-  })) as HearingJudgmentRequest["residents"];
+  const residents = options.actors.map(actor => {
+    const memories = actor.memories.map(normalizeHearingMemory);
+    return {
+      actorId: actor.actorId,
+      role: actor.role,
+      stanceBefore: actor.stance,
+      hasMeaningfulFirsthandConversation:
+        hearingContactBasisForMemories(memories) === "meaningful_firsthand",
+      memories,
+    };
+  }) as HearingJudgmentRequest["residents"];
   return {
     runId: options.runId,
     hearingId: options.hearingId,
@@ -272,8 +293,15 @@ export function validateHearingJudgment(
     if (citedMemories.some(memory => memory === undefined)) {
       return { ok: false, reason: `hearing assessment cites memory outside ${resident.actorId}` };
     }
+    const expectedContactBasis = hearingContactBasisForMemories(resident.memories);
+    if (assessment.contactBasis !== expectedContactBasis) {
+      return {
+        ok: false,
+        reason: `hearing assessment contact basis contradicts ${resident.actorId} memories`,
+      };
+    }
     const evidencedVouch = Boolean(
-      resident.hasMeaningfulFirsthandConversation &&
+      expectedContactBasis === "meaningful_firsthand" &&
       citedMemories.some(memory =>
         memory?.kind === "player_conversation" &&
         memory.sourceActorId === "player" &&

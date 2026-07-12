@@ -396,6 +396,8 @@ export class ProviderService implements NpcProposalPort {
       "Never invent unseen context, testimony, facts, or ids. Cite only memory, record, and ledger-event ids present in the supplied packet.",
       "Return exactly one residentAssessment for each of the six residents, with six unique actorId values.",
       "Each resident testimony must rely only on that resident's own supplied memories. citedMemoryIds must contain only ids from that same resident and must name every memory used by testimonyLine.",
+      "For each resident, derive contactBasis exactly from that resident's supplied memories: meaningful_firsthand when any player_conversation has meaningfulFirsthand=true; limited_firsthand when player_conversation memory exists but none is meaningful; never_conversed when no player_conversation memory exists.",
+      "When contactBasis is limited_firsthand, testimonyLine may acknowledge limited direct contact but must not claim substantive firsthand grounds. When it is never_conversed, testimonyLine must say there was no direct conversation. You still own the testimony wording and may cite that resident's attributed ambient memories.",
       "proposedStance is your memory-grounded reassessment after the final defense. The runtime validates provenance and may clamp an unsupported vouch.",
       "An ordinary proposal is procedurally possible only when the runtime confirms at least four evidence-backed vouches. The runtime, not you, enforces that quorum.",
       "Even when four or more residents vouch, you may still propose abnormal when the supplied evidence or final defense warrants it.",

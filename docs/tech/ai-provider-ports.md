@@ -104,10 +104,20 @@ ordinary/abnormal verdict, the Station officer's final line, and record/ledger
 citations. The provider sees only the final defense and the run's normalized
 resident memories, records, and ledger events. `RunService` validates the
 exact actor set and every cited id, clamps unsupported or uncited stance
-movement, forces never-met testimony to say so, and enforces four evidenced
-vouches as a floor. Four vouches do not force an ordinary result: with the
-floor met, the selected model still owns the verdict. Invalid semantic
-citations switch the whole judgment to visibly marked deterministic fallback.
+movement, checks each structured `contactBasis` against that resident's actual
+meaningful player-conversation memory, and enforces four evidenced vouches as
+a floor. The three exact states are `meaningful_firsthand` when any player
+conversation is meaningful, `limited_firsthand` when direct conversation
+exists but none is meaningful, and `never_conversed` when no player
+conversation exists. The model still owns the testimony wording and may cite
+attributed ambient memories, but limited contact cannot claim substantive
+firsthand grounds. The provider prompt requires a never-conversed line to say
+so, while the client always presents the validated structured basis beside the
+model wording rather than pretending to semantically parse prose. A
+contact-basis mismatch or invalid semantic citation switches the whole
+judgment to visibly marked deterministic fallback and the runtime trace
+records that replacement. Four vouches do not force an ordinary result: with
+the floor met, the selected model still owns the verdict.
 
 ## Production profiles
 

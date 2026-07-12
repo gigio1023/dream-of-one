@@ -41,8 +41,9 @@ LOC onto the M3R target so an agent knows what to keep, trim, or build.
 > A deterministic six-locale procedure prompt collects one free-text final
 > defense without a provider wait, then `judgeHearing` reassesses exactly six
 > residents from their real memories and
-> cited run records. The runtime enforces citation ownership, never-met
-> testimony, the four-evidenced-vouch floor, terminal fallback, and idempotent
+> cited run records. The runtime enforces citation ownership, structured
+> contact-basis consistency, the four-evidenced-vouch floor, terminal
+> fallback, and idempotent
 > `/v1/run/hearing` and `/v1/run/end`. High-pressure ledger escalation may also
 > produce one grounded, survivable Station interrogation with the game's only
 > hesitation timer; it returns to the active run and cannot issue a verdict.
@@ -357,11 +358,17 @@ meaning. At the scheduled hearing it enforces four evidenced vouches out of
 six as the eligibility floor, then asks the model to reassess the final
 defense against pooled visible memories. An uncited assessment cannot apply a
 new proposed stance, and an uncited vouch is downgraded; a valid vouch must cite
-that resident's meaningful first-hand conversation. A resident who never met
-the player may still cite remembered ambient speech to oppose or remain
-uncertain, but cannot vouch. Valid provider testimony wording is preserved
-when a stance is clamped. Four
-valid vouches make an ordinary verdict possible but never mandatory. Invalid
+that resident's meaningful first-hand conversation. Every assessment also
+declares exactly one memory-derived contact basis: `meaningful_firsthand`,
+`limited_firsthand`, or `never_conversed`. The runtime distinguishes a limited
+direct exchange from no conversation at all and treats any mismatch as
+semantic fallback. A resident without meaningful firsthand memory may still
+cite remembered ambient speech to oppose or remain uncertain, but cannot
+vouch. The terminal packet carries the validated basis separately so the
+client can label a never-conversed assessment without rewriting or trying to
+classify the provider's prose. Valid provider testimony wording is preserved
+when the structured basis and citations agree. Four valid vouches make an
+ordinary verdict possible but never mandatory. Invalid
 citations or provider failure use a visibly marked deterministic judgment so
 the run still terminates. The recap is assembled only from the submitted
 defense, validated testimony, and actual cited record/ledger entries. No

@@ -568,6 +568,7 @@
           "residentAssessments": [
             {
               "actorId": "NPC_Studio_Receptionist",
+              "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
@@ -575,6 +576,7 @@
             },
             {
               "actorId": "NPC_Studio_Manager",
+              "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
@@ -582,6 +584,7 @@
             },
             {
               "actorId": "NPC_Office_Worker",
+              "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
@@ -589,6 +592,7 @@
             },
             {
               "actorId": "NPC_Park_Caretaker",
+              "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
@@ -596,6 +600,7 @@
             },
             {
               "actorId": "NPC_Station_Officer",
+              "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
@@ -603,6 +608,7 @@
             },
             {
               "actorId": "NPC_Roaming_Liaison",
+              "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
@@ -779,6 +785,7 @@
           "residentAssessments": [
             {
               "actorId": "NPC_Studio_Receptionist",
+              "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
@@ -786,6 +793,7 @@
             },
             {
               "actorId": "NPC_Studio_Manager",
+              "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
@@ -793,6 +801,7 @@
             },
             {
               "actorId": "NPC_Office_Worker",
+              "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
@@ -800,6 +809,7 @@
             },
             {
               "actorId": "NPC_Park_Caretaker",
+              "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
@@ -807,6 +817,7 @@
             },
             {
               "actorId": "NPC_Station_Officer",
+              "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
@@ -814,6 +825,7 @@
             },
             {
               "actorId": "NPC_Roaming_Liaison",
+              "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
               "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",

@@ -30,6 +30,7 @@ import type {
   ProviderAuditSnapshot,
 } from "./ports.js";
 import { emptyProviderAuditSnapshot } from "./ports.js";
+import { hearingContactBasisForMemories } from "../runtime/run-hearing.js";
 
 function localizedFallbackWhyLine(
   locale: string,
@@ -286,29 +287,38 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
   ): Promise<ResolvedProposal<HearingJudgment>> {
     const content = fallbackContent(request.locale).hearing;
     const residentAssessments = request.residents.map(resident => {
-      const groundedMemory = [...resident.memories]
+      const contactBasis = hearingContactBasisForMemories(resident.memories);
+      const meaningfulFirsthand = [...resident.memories]
         .reverse()
-        .find(memory => memory.meaningfulFirsthand)
-        ?? resident.memories.at(-1);
-      const hasDirectEvidence =
-        resident.hasMeaningfulFirsthandConversation && groundedMemory !== undefined;
-      const testimonyLine = !resident.hasMeaningfulFirsthandConversation
-        ? content.neverMetTestimony
-        : groundedMemory
-          ? content.memoryGroundedTestimony.replace("{memory}", groundedMemory.text)
-          : content.missingEvidenceTestimony;
+        .find(memory =>
+          memory.kind === "player_conversation" &&
+          memory.sourceActorId === "player" &&
+          memory.meaningfulFirsthand
+        );
+      const hasAnyPlayerConversation = resident.memories.some(
+        memory => memory.kind === "player_conversation" && memory.sourceActorId === "player",
+      );
+      const testimonyLine = meaningfulFirsthand
+        ? content.memoryGroundedTestimony.replace("{memory}", meaningfulFirsthand.text)
+        : hasAnyPlayerConversation
+          ? content.missingEvidenceTestimony
+          : content.neverMetTestimony;
       return {
         actorId: resident.actorId,
+        contactBasis,
         proposedStance: resident.stanceBefore,
         testimonyLine,
-        citedMemoryIds: hasDirectEvidence && groundedMemory ? [groundedMemory.memoryId] : [],
+        citedMemoryIds: meaningfulFirsthand ? [meaningfulFirsthand.memoryId] : [],
       };
     }) as HearingJudgment["residentAssessments"];
     const evidencedVouches = request.residents.filter(
       resident =>
         resident.stanceBefore === "vouch" &&
-        resident.hasMeaningfulFirsthandConversation &&
-        resident.memories.some(memory => memory.meaningfulFirsthand),
+        resident.memories.some(memory =>
+          memory.kind === "player_conversation" &&
+          memory.sourceActorId === "player" &&
+          memory.meaningfulFirsthand
+        ),
     ).length;
     const proposedVerdict: HearingJudgment["proposedVerdict"] =
       evidencedVouches >= 4 ? "ordinary" : "abnormal";

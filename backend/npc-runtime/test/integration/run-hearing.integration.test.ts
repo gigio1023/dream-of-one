@@ -14,6 +14,7 @@ import type {
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
 import { createSameOrderScriptedAdapter } from "../../src/providers/testing/same-order-script.js";
 import { conversationZoneFor, loadRunLayout } from "../../src/runtime/run-layout.js";
+import { hearingContactBasisForMemories } from "../../src/runtime/run-hearing.js";
 import { RunError, RunService } from "../../src/runtime/run-service.js";
 import {
   runGeneratedNextTurnSchema,
@@ -51,6 +52,7 @@ function proposalFor(
     );
     return {
       actorId: resident.actorId,
+      contactBasis: hearingContactBasisForMemories(resident.memories),
       proposedStance: firsthand || options.allVouch ? "vouch" as const : "uncertain" as const,
       testimonyLine: `testimony:${resident.actorId}`,
       citedMemoryIds:
@@ -428,7 +430,7 @@ test("hearing quorum uses evidenced vouches and preserves provider abnormal auth
   }
 });
 
-test("a never-met resident may preserve live oppose testimony when it cites its ambient judgment", async () => {
+test("a never-conversed resident may preserve live oppose testimony when it cites its ambient judgment", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
   adapter.judgeAndProposeAmbientReply = async request => ({
     proposal: {
@@ -451,6 +453,7 @@ test("a never-met resident may preserve live oppose testimony when it cites its 
         );
         return {
           actorId: resident.actorId,
+          contactBasis: hearingContactBasisForMemories(resident.memories),
           proposedStance: ambient ? "oppose" as const : resident.stanceBefore,
           testimonyLine: ambient
             ? "관리자에게 직접 들은 말을 근거로 방문자를 반대합니다."
@@ -643,7 +646,7 @@ test("run-wide provider audit survives terminal hearing, end, and a fresh run re
   assert.deepEqual(reset.providerRuntimeTrace.entries, []);
 });
 
-test("semantic-invalid live hearing remains visible as a runtime fallback", async () => {
+test("a live hearing contact-basis mismatch remains visible as a runtime fallback", async () => {
   const liveTextGen: TextGenPort = {
     adapterId: "semantic-invalid-live",
     preflight: async () => ({ available: true }),
@@ -670,9 +673,12 @@ test("semantic-invalid live hearing remains visible as a runtime fallback", asyn
         text: JSON.stringify({
           residentAssessments: input.residents.map((resident, index) => ({
             actorId: resident.actorId,
+            contactBasis: index === 0
+              ? "meaningful_firsthand"
+              : "never_conversed",
             proposedStance: "uncertain",
             testimonyLine: "직접 확인할 근거가 충분하지 않습니다.",
-            citedMemoryIds: index === 0 ? ["memory-that-does-not-exist"] : [],
+            citedMemoryIds: [],
           })),
           proposedVerdict: "abnormal",
           verdictWhyLine: "제출된 증언만으로는 평범함을 확인하기 어렵습니다.",
@@ -726,9 +732,12 @@ test("semantic-invalid live hearing remains visible as a runtime fallback", asyn
   );
   assert.equal(answered.proposalMeta.transport, "fallback");
   assert.equal(answered.proposalMeta.fallbackReason, "invalid_envelope");
+  assert.ok(answered.terminalResult.residentAssessments.every(
+    assessment => assessment.contactBasis === "never_conversed",
+  ));
 });
 
-test("localized hearing opening leaves only the live judgment in the runtime trace", async () => {
+test("valid never-conversed contact bases keep a live hearing fallback-free", async () => {
   const textGen: TextGenPort = {
     adapterId: "runtime-fallback-then-live",
     preflight: async () => ({ available: true }),
@@ -740,6 +749,7 @@ test("localized hearing opening leaves only the live judgment in the runtime tra
         text: JSON.stringify({
           residentAssessments: input.residents.map(resident => ({
             actorId: resident.actorId,
+            contactBasis: "never_conversed",
             proposedStance: "uncertain",
             testimonyLine: "직접 대화한 근거가 없어 보증할 수 없습니다.",
             citedMemoryIds: [],
@@ -778,6 +788,11 @@ test("localized hearing opening leaves only the live judgment in the runtime tra
     answer: { type: "free_input", text: "직접 대화한 기록을 확인해 주십시오." },
   });
   assert.equal(answered.action, "answer");
+  assert.equal(answered.proposalMeta.transport, "live");
+  assert.equal(answered.proposalMeta.usedFallback, false);
+  assert.ok(answered.terminalResult.residentAssessments.every(
+    assessment => assessment.contactBasis === "never_conversed",
+  ));
   assert.deepEqual(
     answered.providerRuntimeTrace.entries.map(entry => entry.meta.transport),
     ["live"],
@@ -786,7 +801,7 @@ test("localized hearing opening leaves only the live judgment in the runtime tra
   assert.equal(answered.providerRuntimeTrace.truncated, false);
 });
 
-test("never-met vouches clamp without replacing live testimony and semantic-invalid or failed providers still terminalize", async () => {
+test("never-conversed vouches clamp without replacing live testimony and semantic-invalid or failed providers still terminalize", async () => {
   const neverMet = createService("never-met", request =>
     proposalFor(request, "ordinary", { allVouch: true })
   );

@@ -3,6 +3,7 @@ import {
   COARSE_STANCES,
   CONVERSATION_CHOICE_INTENTS,
   CONVERSATION_SUSPICION_SIGNALS,
+  HEARING_CONTACT_BASES,
 } from "../contracts/types.js";
 import { TOOL_NAMES } from "../agentloop/tools.js";
 import { RECORD_KINDS, WORLD_ROLES } from "../runtime/world/index.js";
@@ -118,6 +119,7 @@ const uniqueIdListSchema = z.array(nonEmpty).superRefine((ids, context) => {
 const hearingResidentAssessmentSchema = z
   .object({
     actorId: nonEmpty,
+    contactBasis: z.enum(HEARING_CONTACT_BASES),
     proposedStance: z.enum(COARSE_STANCES),
     testimonyLine: nonEmpty,
     citedMemoryIds: uniqueIdListSchema,
@@ -443,9 +445,16 @@ export const hearingJudgmentJsonSchema: Record<string, unknown> = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["actorId", "proposedStance", "testimonyLine", "citedMemoryIds"],
+        required: [
+          "actorId",
+          "contactBasis",
+          "proposedStance",
+          "testimonyLine",
+          "citedMemoryIds",
+        ],
         properties: {
           actorId: { type: "string", minLength: 1 },
+          contactBasis: { type: "string", enum: [...HEARING_CONTACT_BASES] },
           proposedStance: { type: "string", enum: [...COARSE_STANCES] },
           testimonyLine: { type: "string", minLength: 1 },
           citedMemoryIds: {

@@ -3,6 +3,7 @@ import {
   COARSE_STANCES,
   CONVERSATION_CHOICE_INTENTS,
   CONVERSATION_SUSPICION_SIGNALS,
+  HEARING_CONTACT_BASES,
 } from "../contracts/types.js";
 import { gameplayLocaleSchema } from "../localization/supported-locales.js";
 import { RECORD_KINDS } from "./world/types.js";
@@ -742,6 +743,7 @@ export const runHearingProcedureSchema = z
 export const runHearingAssessmentSchema = z
   .object({
     actorId: nonEmpty,
+    contactBasis: z.enum(HEARING_CONTACT_BASES),
     proposedStance: stanceSchema,
     appliedStance: stanceSchema,
     testimonyLine: nonEmpty,

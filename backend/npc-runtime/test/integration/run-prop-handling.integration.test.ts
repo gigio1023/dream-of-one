@@ -130,6 +130,7 @@ test("engine-observed prop handling creates only factual memories for visible re
   const proposedVouches: HearingJudgment = {
     residentAssessments: hearingRequest.residents.map(resident => ({
       actorId: resident.actorId,
+      contactBasis: "never_conversed" as const,
       proposedStance: "vouch" as const,
       testimonyLine: "물건 취급만 보았으며 직접 대화한 근거는 없다.",
       citedMemoryIds: resident.memories

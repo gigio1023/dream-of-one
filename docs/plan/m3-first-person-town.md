@@ -251,8 +251,11 @@ can overhear with subtitles.
 - [ ] Provider-call accounting shows event-driven wake-ups only — zero
       per-tick provider calls; a full run stays inside the configured
       call/token budget.
-- [ ] An NPC that never conversed with the player contributes hearing
-      testimony consistent with that fact.
+- [ ] Each hearing assessment declares the exact memory-derived contact basis:
+      meaningful firsthand, limited direct conversation, or never conversed.
+      The player sees that validated basis beside the model's testimony, whose
+      live wording stays consistent with it; attributed ambient memory may
+      still support oppose or uncertain, but never a vouch.
 - [ ] Every off-screen stance/record change the player encounters arrives with
       its allowed provenance (who spoke or wrote, who heard or read, source
       memory, and why), while the open-questions surface reveals only content

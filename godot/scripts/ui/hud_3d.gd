@@ -988,15 +988,30 @@ func _refresh_outcome() -> void:
 		var line := str(testimony.get("testimony", "")).strip_edges()
 		if line.is_empty():
 			line = str(tr(&"hud.m3r.outcome.testimony_missing"))
+		var contact_basis := str(testimony.get("contactBasis", ""))
+		var contact_basis_label := ""
+		if contact_basis in [
+			"meaningful_firsthand",
+			"limited_firsthand",
+			"never_conversed",
+		]:
+			contact_basis_label = str(
+				tr("hud.m3r.outcome.contact_basis.%s" % contact_basis)
+			)
+		var displayed_testimony := line
+		if not contact_basis_label.is_empty():
+			displayed_testimony = "%s\n%s" % [contact_basis_label, line]
 		var actor_name := _actor_label(actor_id)
 		body_lines.append(str(tr(&"hud.m3r.outcome.testimony_entry")).format({
 			"actor": actor_name,
-			"testimony": line,
+			"testimony": displayed_testimony,
 		}))
 		_outcome_presented_testimonies.append({
 			"actorId": actor_id,
 			"actor": actor_name,
 			"testimony": line,
+			"contactBasis": contact_basis,
+			"contactBasisLabel": contact_basis_label,
 			"evidencedVouch": (
 				str(testimony.get("appliedStance", "")) == "vouch"
 				and not _array_or_empty(testimony.get("citedMemoryIds")).is_empty()

@@ -45,6 +45,7 @@ import {
 } from "./run-layout.js";
 import {
   buildHearingJudgmentRequest,
+  hearingContactBasisForMemories,
   validateHearingJudgment,
   type HearingJudgmentRequest,
   type ValidatedHearingJudgment,
@@ -4746,6 +4747,7 @@ export class RunService {
   private fallbackHearingJudgment(request: HearingJudgmentRequest): HearingJudgment {
     const content = fallbackContent(request.locale);
     const assessments = request.residents.map(resident => {
+      const contactBasis = hearingContactBasisForMemories(resident.memories);
       const firsthand = [...resident.memories]
         .reverse()
         .find(memory =>
@@ -4753,9 +4755,10 @@ export class RunService {
           memory.sourceActorId === "player" &&
           memory.meaningfulFirsthand
         );
-      if (resident.hasMeaningfulFirsthandConversation && firsthand) {
+      if (firsthand) {
         return {
           actorId: resident.actorId,
+          contactBasis,
           proposedStance: resident.stanceBefore,
           testimonyLine: content.hearing.memoryGroundedTestimony.replace(
             "{memory}",
@@ -4764,11 +4767,15 @@ export class RunService {
           citedMemoryIds: [firsthand.memoryId],
         };
       }
+      const hasAnyPlayerConversation = resident.memories.some(
+        memory => memory.kind === "player_conversation" && memory.sourceActorId === "player",
+      );
       return {
         actorId: resident.actorId,
+        contactBasis,
         proposedStance:
           resident.stanceBefore === "vouch" ? "uncertain" as const : resident.stanceBefore,
-        testimonyLine: resident.hasMeaningfulFirsthandConversation
+        testimonyLine: hasAnyPlayerConversation
           ? content.hearing.missingEvidenceTestimony
           : content.hearing.neverMetTestimony,
         citedMemoryIds: [],
@@ -4902,6 +4909,7 @@ export class RunService {
       evidencedVouchCount: judgment.evidencedVouchCount,
       residentAssessments: judgment.residentAssessments.map(assessment => ({
         actorId: assessment.actorId,
+        contactBasis: assessment.contactBasis,
         proposedStance: assessment.proposedStance,
         appliedStance: assessment.appliedStance,
         testimonyLine: assessment.testimonyLine,

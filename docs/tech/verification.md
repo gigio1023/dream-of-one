@@ -75,15 +75,18 @@ env -u OPENAI_API_KEY -u LOCAL_LLM_BASE_URL \
   NPC_PROVIDER_PROFILE=modelscope/qwen3.7-plus \
   MODELSCOPE_BASE_URL=https://api-inference.modelscope.ai/v1 \
   bun --no-env-file backend/npc-runtime/src/tools/provider-smoke.ts \
-  --profile modelscope/qwen3.7-plus | \
+  --profile modelscope/qwen3.7-plus --locale ko-KR | \
   jq -e '
     .profileId == "modelscope/qwen3.7-plus" and
-    .conversation.transport == "live" and
-    (.conversation.usedFallback | not) and
-    .judgment.transport == "live" and
-    (.judgment.usedFallback | not)
+    .locale == "ko-KR" and
+    .acceptancePassed == true
   '
 ```
+
+The same existing smoke accepts `--locale en-US|it-IT|zh-CN|fr-FR|ja-JP`
+for the other supported languages. It uses the M3R Studio receptionist
+opening and merged judgment/reply path; it is a provider calibration check,
+not a substitute for the final Godot AI play route.
 
 For a live game run, start the sidecar with the same guard and no dotenv
 autoload, then point Godot at it:

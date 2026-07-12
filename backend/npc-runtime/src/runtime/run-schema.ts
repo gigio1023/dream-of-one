@@ -402,7 +402,13 @@ export const runActorReadinessDeltaSchema = z
   .object({
     actorId: nonEmpty,
     playerConversationReady: z.boolean(),
-    reason: z.enum(["schedule_departure", "arrival_at_interaction"]),
+    reason: z.enum([
+      "schedule_departure",
+      "arrival_at_interaction",
+      "movement_started",
+      "opening_ready",
+      "preload_required",
+    ]),
   })
   .strict();
 
@@ -451,6 +457,7 @@ export const runNpcDecisionResponseSchema = z
     conversationId: nonEmpty,
     participantActorIds: z.tuple([nonEmpty, nonEmpty]),
     speechEvents: z.array(runAmbientSpeechEventSchema),
+    actorReadinessDeltas: z.array(runActorReadinessDeltaSchema),
     providerMetas: z.array(proposalMetaSchema).max(2),
   })
   .strict();
@@ -471,6 +478,16 @@ export const runSessionStartResponseSchema = z
     worldRevision: z.number().int().positive(),
     actor: runActorSchema,
     nextTurn: runNextTurnSchema,
+  })
+  .strict();
+
+export const runSessionPreloadResponseSchema = z
+  .object({
+    runId: nonEmpty,
+    worldRevision: z.number().int().positive(),
+    interactionZoneId: nonEmpty,
+    actor: runActorSchema,
+    proposalMeta: proposalMetaSchema,
   })
   .strict();
 
@@ -564,6 +581,7 @@ export type RunNextTurn = z.infer<typeof runNextTurnSchema>;
 export type RunSessionAnswer = z.infer<typeof runSessionAnswerSchema>;
 export type RunJudgment = z.infer<typeof runJudgmentSchema>;
 export type RunSessionStartResponse = z.infer<typeof runSessionStartResponseSchema>;
+export type RunSessionPreloadResponse = z.infer<typeof runSessionPreloadResponseSchema>;
 export type RunSessionAnswerResponse = z.infer<typeof runSessionAnswerResponseSchema>;
 export type RunSessionEndResponse = z.infer<typeof runSessionEndResponseSchema>;
 export type RunSessionSnapshotResponse = z.infer<typeof runSessionSnapshotResponseSchema>;

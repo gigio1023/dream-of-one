@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
-import type { AgentStepRequest, NpcProposalPort } from "../../src/providers/ports.js";
+import type {
+  AgentStepRequest,
+  ConversationTurnRequest,
+  NpcProposalPort,
+} from "../../src/providers/ports.js";
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
 import { RunError, RunService, STUDIO_RECEPTIONIST_ID } from "../../src/runtime/run-service.js";
 import type {
@@ -36,6 +40,28 @@ async function readyFirstMeeting(
       arrivals: [],
     });
     revision = atNinety.worldRevision;
+    if (step === 1) {
+      const fixedArrivals = atNinety.movementDeltas
+        .filter(movement => [
+          "NPC_Studio_Receptionist",
+          "NPC_Office_Worker",
+          "NPC_Station_Officer",
+        ].includes(movement.actorId))
+        .map(movement => ({
+          movementId: movement.movementId,
+          actorId: movement.actorId,
+          anchorRef: movement.targetAnchorRef,
+        }));
+      assert.equal(fixedArrivals.length, 3);
+      atNinety = await service.advance({
+        runId: started.runId,
+        advanceId: `${startId}:fixed-arrivals`,
+        observedWorldRevision: revision,
+        elapsedSeconds: 0,
+        arrivals: fixedArrivals,
+      });
+      revision = atNinety.worldRevision;
+    }
   }
   assert.ok(atNinety);
   const arrivals = atNinety.movementDeltas
@@ -183,6 +209,53 @@ test("ambient utterances enter only the speaker and current runtime-confirmed li
   assert.equal(afterCursor.ambientSpeechCursor, 2);
 });
 
+test("player opening context includes a listener's ambient memory but never leaks it to an uninvolved actor", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const openingRequests: ConversationTurnRequest[] = [];
+  const originalOpening = adapter.proposeConversationTurn.bind(adapter);
+  adapter.proposeConversationTurn = async request => {
+    openingRequests.push(structuredClone(request));
+    return originalOpening(request);
+  };
+  const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds("privacy") });
+  const meeting = await readyFirstMeeting(service, "ambient-privacy");
+  const response = await service.decision(meeting.request);
+  assert.equal(response.status, "completed");
+  assert.deepEqual(
+    response.actorReadinessDeltas.map(delta => delta.actorId).sort(),
+    ["NPC_Park_Caretaker", "NPC_Studio_Manager"].sort(),
+  );
+
+  await service.preloadConversation(
+    meeting.started.runId,
+    "NPC_Studio_Manager",
+    "ParkConversation",
+    "ko-KR",
+  );
+  await service.preloadConversation(
+    meeting.started.runId,
+    "NPC_Office_Worker",
+    "OfficeConversation",
+    "ko-KR",
+  );
+  const managerRequest = openingRequests.find(request => request.actorId === "NPC_Studio_Manager");
+  const officeRequest = openingRequests.find(request => request.actorId === "NPC_Office_Worker");
+  assert.ok(managerRequest);
+  assert.ok(officeRequest);
+  assert.deepEqual(managerRequest.observePacket.visibleActors, ["player"]);
+  assert.ok(managerRequest.observePacket.heardSpeech.some(
+    line => line.startsWith("NPC_Park_Caretaker:"),
+  ));
+  assert.ok(managerRequest.observePacket.actorMemory.ownActionNotes.some(
+    line => line.includes("[heard_from=NPC_Park_Caretaker]"),
+  ));
+  assert.deepEqual(officeRequest.observePacket.visibleActors, ["player"]);
+  assert.deepEqual(officeRequest.observePacket.heardSpeech, []);
+  assert.ok(officeRequest.observePacket.actorMemory.ownActionNotes.every(
+    line => !line.includes("NPC_Park_Caretaker"),
+  ));
+});
+
 test("run advance remains responsive while an ambient provider proposal is pending", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
   const original = adapter.proposeNextStep.bind(adapter);
@@ -241,6 +314,12 @@ test("a modal queues resolved ambient speech and exact retry commits it without 
   const pendingDecision = service.decision(meeting.request);
   await entered.promise;
 
+  await service.preloadConversation(
+    meeting.started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    "StudioReceptionConversation",
+    "ko-KR",
+  );
   const playerConversation = await service.startConversation(
     meeting.started.runId,
     STUDIO_RECEPTIONIST_ID,

@@ -11,7 +11,7 @@
       "response": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v3",
+        "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 0,
         "locale": "ko-KR",
         "worldClock": {
@@ -38,7 +38,7 @@
             "locationId": "Studio",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": true,
+            "playerConversationReady": false,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -222,15 +222,15 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000001",
-        "observedWorldRevision": 0,
+        "observedWorldRevision": 6,
         "elapsedSeconds": 10,
         "arrivals": []
       },
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000001",
-        "previousWorldRevision": 0,
-        "worldRevision": 1,
+        "previousWorldRevision": 6,
+        "worldRevision": 7,
         "clock": {
           "fromSeconds": 0,
           "toSeconds": 10,
@@ -277,7 +277,23 @@
             "routePointIndex": null
           }
         ],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -423,7 +439,7 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000002",
-        "observedWorldRevision": 1,
+        "observedWorldRevision": 7,
         "elapsedSeconds": 0,
         "arrivals": [
           {
@@ -446,8 +462,8 @@
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000002",
-        "previousWorldRevision": 1,
-        "worldRevision": 2,
+        "previousWorldRevision": 7,
+        "worldRevision": 8,
         "clock": {
           "fromSeconds": 10,
           "toSeconds": 10,
@@ -479,7 +495,23 @@
         "arrivalsRejected": [],
         "scheduleWakes": [],
         "movementDeltas": [],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "playerConversationReady": true,
+            "reason": "opening_ready"
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "playerConversationReady": true,
+            "reason": "opening_ready"
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "playerConversationReady": true,
+            "reason": "opening_ready"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -604,15 +636,15 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000003",
-        "observedWorldRevision": 2,
+        "observedWorldRevision": 8,
         "elapsedSeconds": 10,
         "arrivals": []
       },
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000003",
-        "previousWorldRevision": 2,
-        "worldRevision": 3,
+        "previousWorldRevision": 8,
+        "worldRevision": 9,
         "clock": {
           "fromSeconds": 10,
           "toSeconds": 20,
@@ -648,7 +680,18 @@
             "routePointIndex": 1
           }
         ],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -787,15 +830,15 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000003",
-        "observedWorldRevision": 2,
+        "observedWorldRevision": 8,
         "elapsedSeconds": 10,
         "arrivals": []
       },
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000003",
-        "previousWorldRevision": 2,
-        "worldRevision": 3,
+        "previousWorldRevision": 8,
+        "worldRevision": 9,
         "clock": {
           "fromSeconds": 10,
           "toSeconds": 20,
@@ -831,7 +874,18 @@
             "routePointIndex": 1
           }
         ],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -973,8 +1027,8 @@
       "response": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v3",
-        "worldRevision": 3,
+        "layoutRevision": "rev-first-person-town-v4",
+        "worldRevision": 9,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 20,
@@ -991,7 +1045,11 @@
           "callsUsed": 0,
           "tokensUsed": 0
         },
-        "lastProposalMeta": null,
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
         "activeConversationId": null,
         "actors": [
           {
@@ -1010,7 +1068,7 @@
             "locationId": "Studio",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -1020,7 +1078,7 @@
             "locationId": "Office",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -1040,7 +1098,7 @@
             "locationId": "Station",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -1198,14 +1256,14 @@
       "request": {
         "runId": "run-fixture-1",
         "wakeId": "wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
-        "observedWorldRevision": 15
+        "observedWorldRevision": 21
       },
       "response": {
         "runId": "run-fixture-1",
         "wakeId": "wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
         "status": "completed",
-        "observedWorldRevision": 15,
-        "worldRevision": 17,
+        "observedWorldRevision": 21,
+        "worldRevision": 23,
         "conversationId": "ambient:wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
         "participantActorIds": [
           "NPC_Studio_Manager",
@@ -1225,8 +1283,8 @@
             ],
             "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
             "worldSeconds": 90,
-            "observedWorldRevision": 15,
-            "worldRevision": 16,
+            "observedWorldRevision": 21,
+            "worldRevision": 22,
             "audibility": {
               "volumeId": "AUD_PUBLIC_CENTER",
               "maxSpeechDistanceM": 12,
@@ -1255,8 +1313,8 @@
             ],
             "line": "네, 말씀하신 내용을 들었습니다. 주변을 살피며 필요한 일만 이어 가겠습니다.",
             "worldSeconds": 90,
-            "observedWorldRevision": 15,
-            "worldRevision": 17,
+            "observedWorldRevision": 21,
+            "worldRevision": 23,
             "audibility": {
               "volumeId": "AUD_PUBLIC_CENTER",
               "maxSpeechDistanceM": 12,
@@ -1271,6 +1329,18 @@
               "transport": "scripted",
               "usedFallback": false
             }
+          }
+        ],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Studio_Manager",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": false,
+            "reason": "preload_required"
           }
         ],
         "providerMetas": [
@@ -1292,7 +1362,7 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000016",
-        "observedWorldRevision": 17,
+        "observedWorldRevision": 23,
         "afterSpeechSeq": 2,
         "elapsedSeconds": 10,
         "arrivals": []
@@ -1300,8 +1370,8 @@
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000016",
-        "previousWorldRevision": 17,
-        "worldRevision": 18,
+        "previousWorldRevision": 23,
+        "worldRevision": 24,
         "clock": {
           "fromSeconds": 90,
           "toSeconds": 100,
@@ -1344,7 +1414,7 @@
                 "NPC_Park_Caretaker"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 14,
+              "observedWorldRevision": 20,
               "requiresDecision": true,
               "status": "pending"
             },
@@ -1357,7 +1427,7 @@
                 "NPC_Studio_Manager"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 14,
+              "observedWorldRevision": 20,
               "requiresDecision": true,
               "status": "pending"
             }
@@ -1490,8 +1560,8 @@
       "response": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v3",
-        "worldRevision": 18,
+        "layoutRevision": "rev-first-person-town-v4",
+        "worldRevision": 24,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 100,
@@ -1547,8 +1617,8 @@
                 ],
                 "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
                 "worldSeconds": 90,
-                "observedWorldRevision": 15,
-                "worldRevision": 16,
+                "observedWorldRevision": 21,
+                "worldRevision": 22,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
                   "maxSpeechDistanceM": 12,
@@ -1579,8 +1649,8 @@
                 ],
                 "line": "네, 말씀하신 내용을 들었습니다. 주변을 살피며 필요한 일만 이어 가겠습니다.",
                 "worldSeconds": 90,
-                "observedWorldRevision": 15,
-                "worldRevision": 17,
+                "observedWorldRevision": 21,
+                "worldRevision": 23,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
                   "maxSpeechDistanceM": 12,
@@ -1606,7 +1676,7 @@
             "locationId": "Office",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -1632,8 +1702,8 @@
                 ],
                 "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
                 "worldSeconds": 90,
-                "observedWorldRevision": 15,
-                "worldRevision": 16,
+                "observedWorldRevision": 21,
+                "worldRevision": 22,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
                   "maxSpeechDistanceM": 12,
@@ -1664,8 +1734,8 @@
                 ],
                 "line": "네, 말씀하신 내용을 들었습니다. 주변을 살피며 필요한 일만 이어 가겠습니다.",
                 "worldSeconds": 90,
-                "observedWorldRevision": 15,
-                "worldRevision": 17,
+                "observedWorldRevision": 21,
+                "worldRevision": 23,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
                   "maxSpeechDistanceM": 12,
@@ -1691,7 +1761,7 @@
             "locationId": "Station",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -1721,7 +1791,7 @@
                 "NPC_Park_Caretaker"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 14,
+              "observedWorldRevision": 20,
               "requiresDecision": true,
               "status": "pending"
             },
@@ -1734,7 +1804,7 @@
                 "NPC_Studio_Manager"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 14,
+              "observedWorldRevision": 20,
               "requiresDecision": true,
               "status": "pending"
             }
@@ -1873,8 +1943,8 @@
               ],
               "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
               "worldSeconds": 90,
-              "observedWorldRevision": 15,
-              "worldRevision": 16,
+              "observedWorldRevision": 21,
+              "worldRevision": 22,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
                 "maxSpeechDistanceM": 12,
@@ -1903,8 +1973,8 @@
               ],
               "line": "네, 말씀하신 내용을 들었습니다. 주변을 살피며 필요한 일만 이어 가겠습니다.",
               "worldSeconds": 90,
-              "observedWorldRevision": 15,
-              "worldRevision": 17,
+              "observedWorldRevision": 21,
+              "worldRevision": 23,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
                 "maxSpeechDistanceM": 12,
@@ -1927,6 +1997,182 @@
         "ledgerEvents": []
       }
     },
+    "sessionPreloads": [
+      {
+        "endpoint": "POST /v1/session/preload",
+        "request": {
+          "runId": "run-fixture-1",
+          "actorId": "NPC_Studio_Receptionist",
+          "interactionZoneId": "StudioReceptionConversation",
+          "locale": "ko-KR"
+        },
+        "response": {
+          "runId": "run-fixture-1",
+          "worldRevision": 1,
+          "interactionZoneId": "StudioReceptionConversation",
+          "actor": {
+            "actorId": "NPC_Studio_Receptionist",
+            "role": "studio_receptionist",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "playerConversationReady": true,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        }
+      },
+      {
+        "endpoint": "POST /v1/session/preload",
+        "request": {
+          "runId": "run-fixture-1",
+          "actorId": "NPC_Studio_Manager",
+          "interactionZoneId": "StudioManagerConversation",
+          "locale": "ko-KR"
+        },
+        "response": {
+          "runId": "run-fixture-1",
+          "worldRevision": 2,
+          "interactionZoneId": "StudioManagerConversation",
+          "actor": {
+            "actorId": "NPC_Studio_Manager",
+            "role": "studio_manager",
+            "locationId": "Studio",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "playerConversationReady": true,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        }
+      },
+      {
+        "endpoint": "POST /v1/session/preload",
+        "request": {
+          "runId": "run-fixture-1",
+          "actorId": "NPC_Office_Worker",
+          "interactionZoneId": "OfficeConversation",
+          "locale": "ko-KR"
+        },
+        "response": {
+          "runId": "run-fixture-1",
+          "worldRevision": 3,
+          "interactionZoneId": "OfficeConversation",
+          "actor": {
+            "actorId": "NPC_Office_Worker",
+            "role": "office_worker",
+            "locationId": "Office",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "playerConversationReady": true,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        }
+      },
+      {
+        "endpoint": "POST /v1/session/preload",
+        "request": {
+          "runId": "run-fixture-1",
+          "actorId": "NPC_Park_Caretaker",
+          "interactionZoneId": "ParkConversation",
+          "locale": "ko-KR"
+        },
+        "response": {
+          "runId": "run-fixture-1",
+          "worldRevision": 4,
+          "interactionZoneId": "ParkConversation",
+          "actor": {
+            "actorId": "NPC_Park_Caretaker",
+            "role": "park_caretaker",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "playerConversationReady": true,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        }
+      },
+      {
+        "endpoint": "POST /v1/session/preload",
+        "request": {
+          "runId": "run-fixture-1",
+          "actorId": "NPC_Station_Officer",
+          "interactionZoneId": "StationIntakeConversation",
+          "locale": "ko-KR"
+        },
+        "response": {
+          "runId": "run-fixture-1",
+          "worldRevision": 5,
+          "interactionZoneId": "StationIntakeConversation",
+          "actor": {
+            "actorId": "NPC_Station_Officer",
+            "role": "station_officer",
+            "locationId": "Station",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "playerConversationReady": true,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        }
+      },
+      {
+        "endpoint": "POST /v1/session/preload",
+        "request": {
+          "runId": "run-fixture-1",
+          "actorId": "NPC_Roaming_Liaison",
+          "interactionZoneId": "ParkConversation",
+          "locale": "ko-KR"
+        },
+        "response": {
+          "runId": "run-fixture-1",
+          "worldRevision": 6,
+          "interactionZoneId": "ParkConversation",
+          "actor": {
+            "actorId": "NPC_Roaming_Liaison",
+            "role": "roaming_liaison",
+            "locationId": "Park",
+            "stance": "uncertain",
+            "suspicion": 0,
+            "playerConversationReady": true,
+            "hasMeaningfulFirsthandConversation": false,
+            "memories": []
+          },
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        }
+      }
+    ],
     "sessionStart": {
       "endpoint": "POST /v1/session/start",
       "request": {
@@ -1938,7 +2184,7 @@
       "response": {
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
-        "worldRevision": 1,
+        "worldRevision": 7,
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
           "role": "studio_receptionist",
@@ -1959,7 +2205,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -1970,26 +2216,26 @@
         },
         "nextTurn": {
           "turnId": "sess-fixture-1#0",
-          "beatId": "studio_arrival",
-          "promptId": "studio_visit_reason",
-          "choiceSetId": "studio_arrival.generated",
+          "beatId": "resident_opening_studio_receptionist",
+          "promptId": "resident_first_question",
+          "choiceSetId": "resident_opening_studio_receptionist.generated",
           "speakerId": "NPC_Studio_Receptionist",
           "prompt": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
           "acceptsFreeInput": true,
           "continueConversation": true,
           "choices": [
             {
-              "choiceId": "studio_arrival.generated.1",
+              "choiceId": "resident_opening_studio_receptionist.generated.1",
               "intent": "safe/local",
               "line": "안내받은 절차를 확인하러 왔습니다."
             },
             {
-              "choiceId": "studio_arrival.generated.2",
+              "choiceId": "resident_opening_studio_receptionist.generated.2",
               "intent": "uncertain/repair",
               "line": "먼저 어떤 접수인지 설명해 주세요."
             },
             {
-              "choiceId": "studio_arrival.generated.3",
+              "choiceId": "resident_opening_studio_receptionist.generated.3",
               "intent": "risky/weird",
               "line": "여기 사람이 아니라서 잘 모르겠습니다."
             }
@@ -2010,13 +2256,13 @@
         "turnId": "sess-fixture-1#0",
         "answer": {
           "type": "choice",
-          "choiceId": "studio_arrival.generated.1"
+          "choiceId": "resident_opening_studio_receptionist.generated.1"
         }
       },
       "response": {
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
-        "worldRevision": 2,
+        "worldRevision": 8,
         "judgment": {
           "signals": [],
           "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
@@ -2051,7 +2297,7 @@
           "appliedStance": "vouch",
           "meaningfulFirsthand": true,
           "worldSeconds": 0,
-          "worldRevision": 2,
+          "worldRevision": 8,
           "proposalMeta": {
             "profileId": "scripted/test",
             "transport": "scripted",
@@ -2078,7 +2324,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -2107,7 +2353,7 @@
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -2134,7 +2380,7 @@
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
         "actorId": "NPC_Studio_Receptionist",
-        "worldRevision": 2,
+        "worldRevision": 8,
         "status": "awaiting_end",
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
@@ -2156,7 +2402,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -2185,7 +2431,7 @@
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -2229,7 +2475,7 @@
           "appliedStance": "vouch",
           "meaningfulFirsthand": true,
           "worldSeconds": 0,
-          "worldRevision": 2,
+          "worldRevision": 8,
           "proposalMeta": {
             "profileId": "scripted/test",
             "transport": "scripted",
@@ -2251,8 +2497,8 @@
       "response": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v3",
-        "worldRevision": 2,
+        "layoutRevision": "rev-first-person-town-v4",
+        "worldRevision": 8,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -2296,7 +2542,7 @@
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
                 "worldSeconds": 0,
-                "worldRevision": 1,
+                "worldRevision": 7,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -2325,7 +2571,7 @@
                 "appliedStance": "vouch",
                 "meaningfulFirsthand": true,
                 "worldSeconds": 0,
-                "worldRevision": 2,
+                "worldRevision": 8,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -2340,7 +2586,7 @@
             "locationId": "Studio",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -2350,7 +2596,7 @@
             "locationId": "Office",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -2360,7 +2606,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -2370,7 +2616,7 @@
             "locationId": "Station",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -2380,7 +2626,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           }
@@ -2401,7 +2647,7 @@
                 "targetKind": "anchor",
                 "targetId": "Studio.reception_desk"
               },
-              "confirmedAnchorRef": "Studio.reception_desk",
+              "confirmedAnchorRef": "Studio.receptionist_spawn",
               "desiredAnchorRef": "Studio.reception_desk",
               "routePointIndex": null,
               "routePointArrivedAtSeconds": null,
@@ -2519,7 +2765,7 @@
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
         "ended": true,
-        "worldRevision": 3,
+        "worldRevision": 9,
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
           "role": "studio_receptionist",
@@ -2540,7 +2786,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -2569,7 +2815,7 @@
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -2589,8 +2835,8 @@
       "response": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v3",
-        "worldRevision": 3,
+        "layoutRevision": "rev-first-person-town-v4",
+        "worldRevision": 9,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -2634,7 +2880,7 @@
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
                 "worldSeconds": 0,
-                "worldRevision": 1,
+                "worldRevision": 7,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -2663,7 +2909,7 @@
                 "appliedStance": "vouch",
                 "meaningfulFirsthand": true,
                 "worldSeconds": 0,
-                "worldRevision": 2,
+                "worldRevision": 8,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -2678,7 +2924,7 @@
             "locationId": "Studio",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -2688,7 +2934,7 @@
             "locationId": "Office",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -2698,7 +2944,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -2708,7 +2954,7 @@
             "locationId": "Station",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -2718,7 +2964,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           }
@@ -2739,7 +2985,7 @@
                 "targetKind": "anchor",
                 "targetId": "Studio.reception_desk"
               },
-              "confirmedAnchorRef": "Studio.reception_desk",
+              "confirmedAnchorRef": "Studio.receptionist_spawn",
               "desiredAnchorRef": "Studio.reception_desk",
               "routePointIndex": null,
               "routePointArrivedAtSeconds": null,
@@ -2855,15 +3101,15 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000001",
-        "observedWorldRevision": 0,
+        "observedWorldRevision": 6,
         "elapsedSeconds": 10,
         "arrivals": []
       },
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000001",
-        "previousWorldRevision": 0,
-        "worldRevision": 1,
+        "previousWorldRevision": 6,
+        "worldRevision": 7,
         "clock": {
           "fromSeconds": 0,
           "toSeconds": 10,
@@ -2910,7 +3156,23 @@
             "routePointIndex": null
           }
         ],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -3057,7 +3319,7 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000002",
-        "observedWorldRevision": 1,
+        "observedWorldRevision": 7,
         "elapsedSeconds": 0,
         "arrivals": [
           {
@@ -3080,8 +3342,8 @@
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000002",
-        "previousWorldRevision": 1,
-        "worldRevision": 2,
+        "previousWorldRevision": 7,
+        "worldRevision": 8,
         "clock": {
           "fromSeconds": 10,
           "toSeconds": 10,
@@ -3113,7 +3375,23 @@
         "arrivalsRejected": [],
         "scheduleWakes": [],
         "movementDeltas": [],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "playerConversationReady": true,
+            "reason": "opening_ready"
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "playerConversationReady": true,
+            "reason": "opening_ready"
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "playerConversationReady": true,
+            "reason": "opening_ready"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -3239,15 +3517,15 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000003",
-        "observedWorldRevision": 2,
+        "observedWorldRevision": 8,
         "elapsedSeconds": 10,
         "arrivals": []
       },
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000003",
-        "previousWorldRevision": 2,
-        "worldRevision": 3,
+        "previousWorldRevision": 8,
+        "worldRevision": 9,
         "clock": {
           "fromSeconds": 10,
           "toSeconds": 20,
@@ -3283,7 +3561,18 @@
             "routePointIndex": 1
           }
         ],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -3423,7 +3712,7 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000004",
-        "observedWorldRevision": 3,
+        "observedWorldRevision": 9,
         "elapsedSeconds": 0,
         "arrivals": [
           {
@@ -3441,8 +3730,8 @@
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000004",
-        "previousWorldRevision": 3,
-        "worldRevision": 4,
+        "previousWorldRevision": 9,
+        "worldRevision": 10,
         "clock": {
           "fromSeconds": 20,
           "toSeconds": 20,
@@ -3468,7 +3757,18 @@
         "arrivalsRejected": [],
         "scheduleWakes": [],
         "movementDeltas": [],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": true,
+            "reason": "opening_ready"
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "playerConversationReady": true,
+            "reason": "opening_ready"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -3594,15 +3894,15 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000005",
-        "observedWorldRevision": 4,
+        "observedWorldRevision": 10,
         "elapsedSeconds": 10,
         "arrivals": []
       },
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000005",
-        "previousWorldRevision": 4,
-        "worldRevision": 5,
+        "previousWorldRevision": 10,
+        "worldRevision": 11,
         "clock": {
           "fromSeconds": 20,
           "toSeconds": 30,
@@ -3741,15 +4041,15 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000006",
-        "observedWorldRevision": 5,
+        "observedWorldRevision": 11,
         "elapsedSeconds": 10,
         "arrivals": []
       },
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000006",
-        "previousWorldRevision": 5,
-        "worldRevision": 6,
+        "previousWorldRevision": 11,
+        "worldRevision": 12,
         "clock": {
           "fromSeconds": 30,
           "toSeconds": 40,
@@ -3785,7 +4085,18 @@
             "routePointIndex": 2
           }
         ],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -3925,7 +4236,7 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000007",
-        "observedWorldRevision": 6,
+        "observedWorldRevision": 12,
         "elapsedSeconds": 0,
         "arrivals": [
           {
@@ -3943,8 +4254,8 @@
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000007",
-        "previousWorldRevision": 6,
-        "worldRevision": 7,
+        "previousWorldRevision": 12,
+        "worldRevision": 13,
         "clock": {
           "fromSeconds": 40,
           "toSeconds": 40,
@@ -3970,7 +4281,18 @@
         "arrivalsRejected": [],
         "scheduleWakes": [],
         "movementDeltas": [],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": true,
+            "reason": "opening_ready"
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -4096,15 +4418,15 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000008",
-        "observedWorldRevision": 7,
+        "observedWorldRevision": 13,
         "elapsedSeconds": 10,
         "arrivals": []
       },
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000008",
-        "previousWorldRevision": 7,
-        "worldRevision": 8,
+        "previousWorldRevision": 13,
+        "worldRevision": 14,
         "clock": {
           "fromSeconds": 40,
           "toSeconds": 50,
@@ -4243,15 +4565,15 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000009",
-        "observedWorldRevision": 8,
+        "observedWorldRevision": 14,
         "elapsedSeconds": 10,
         "arrivals": []
       },
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000009",
-        "previousWorldRevision": 8,
-        "worldRevision": 9,
+        "previousWorldRevision": 14,
+        "worldRevision": 15,
         "clock": {
           "fromSeconds": 50,
           "toSeconds": 60,
@@ -4287,7 +4609,13 @@
             "routePointIndex": 3
           }
         ],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -4427,7 +4755,7 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000010",
-        "observedWorldRevision": 9,
+        "observedWorldRevision": 15,
         "elapsedSeconds": 0,
         "arrivals": [
           {
@@ -4445,8 +4773,8 @@
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000010",
-        "previousWorldRevision": 9,
-        "worldRevision": 10,
+        "previousWorldRevision": 15,
+        "worldRevision": 16,
         "clock": {
           "fromSeconds": 60,
           "toSeconds": 60,
@@ -4472,7 +4800,18 @@
         "arrivalsRejected": [],
         "scheduleWakes": [],
         "movementDeltas": [],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": true,
+            "reason": "opening_ready"
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -4598,15 +4937,15 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000011",
-        "observedWorldRevision": 10,
+        "observedWorldRevision": 16,
         "elapsedSeconds": 10,
         "arrivals": []
       },
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000011",
-        "previousWorldRevision": 10,
-        "worldRevision": 11,
+        "previousWorldRevision": 16,
+        "worldRevision": 17,
         "clock": {
           "fromSeconds": 60,
           "toSeconds": 70,
@@ -4745,15 +5084,15 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000012",
-        "observedWorldRevision": 11,
+        "observedWorldRevision": 17,
         "elapsedSeconds": 10,
         "arrivals": []
       },
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000012",
-        "previousWorldRevision": 11,
-        "worldRevision": 12,
+        "previousWorldRevision": 17,
+        "worldRevision": 18,
         "clock": {
           "fromSeconds": 70,
           "toSeconds": 80,
@@ -4789,7 +5128,13 @@
             "routePointIndex": 4
           }
         ],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -4929,7 +5274,7 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000013",
-        "observedWorldRevision": 12,
+        "observedWorldRevision": 18,
         "elapsedSeconds": 0,
         "arrivals": [
           {
@@ -4947,8 +5292,8 @@
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000013",
-        "previousWorldRevision": 12,
-        "worldRevision": 13,
+        "previousWorldRevision": 18,
+        "worldRevision": 19,
         "clock": {
           "fromSeconds": 80,
           "toSeconds": 80,
@@ -4974,7 +5319,18 @@
         "arrivalsRejected": [],
         "scheduleWakes": [],
         "movementDeltas": [],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": true,
+            "reason": "opening_ready"
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -5100,15 +5456,15 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000014",
-        "observedWorldRevision": 13,
+        "observedWorldRevision": 19,
         "elapsedSeconds": 10,
         "arrivals": []
       },
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000014",
-        "previousWorldRevision": 13,
-        "worldRevision": 14,
+        "previousWorldRevision": 19,
+        "worldRevision": 20,
         "clock": {
           "fromSeconds": 80,
           "toSeconds": 90,
@@ -5129,7 +5485,7 @@
               "NPC_Park_Caretaker"
             ],
             "scheduledAtSeconds": 90,
-            "observedWorldRevision": 14,
+            "observedWorldRevision": 20,
             "requiresDecision": true,
             "status": "pending"
           },
@@ -5142,7 +5498,7 @@
               "NPC_Studio_Manager"
             ],
             "scheduledAtSeconds": 90,
-            "observedWorldRevision": 14,
+            "observedWorldRevision": 20,
             "requiresDecision": true,
             "status": "pending"
           },
@@ -5153,7 +5509,7 @@
             "sourceId": "grace_period",
             "actorIds": [],
             "scheduledAtSeconds": 90,
-            "observedWorldRevision": 14,
+            "observedWorldRevision": 20,
             "requiresDecision": false,
             "status": "informational"
           },
@@ -5167,7 +5523,7 @@
               "NPC_Park_Caretaker"
             ],
             "scheduledAtSeconds": 90,
-            "observedWorldRevision": 14,
+            "observedWorldRevision": 20,
             "requiresDecision": false,
             "status": "informational"
           }
@@ -5196,7 +5552,18 @@
             "routePointIndex": null
           }
         ],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Studio_Manager",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -5214,7 +5581,7 @@
                 "NPC_Park_Caretaker"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 14,
+              "observedWorldRevision": 20,
               "requiresDecision": true,
               "status": "pending"
             },
@@ -5227,7 +5594,7 @@
                 "NPC_Studio_Manager"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 14,
+              "observedWorldRevision": 20,
               "requiresDecision": true,
               "status": "pending"
             }
@@ -5365,7 +5732,7 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000015",
-        "observedWorldRevision": 14,
+        "observedWorldRevision": 20,
         "elapsedSeconds": 0,
         "arrivals": [
           {
@@ -5383,8 +5750,8 @@
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000015",
-        "previousWorldRevision": 14,
-        "worldRevision": 15,
+        "previousWorldRevision": 20,
+        "worldRevision": 21,
         "clock": {
           "fromSeconds": 90,
           "toSeconds": 90,
@@ -5419,13 +5786,24 @@
               "NPC_Park_Caretaker"
             ],
             "scheduledAtSeconds": 90,
-            "observedWorldRevision": 15,
+            "observedWorldRevision": 21,
             "requiresDecision": true,
             "status": "pending"
           }
         ],
         "movementDeltas": [],
-        "actorReadinessDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Studio_Manager",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          }
+        ],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -5443,7 +5821,7 @@
                 "NPC_Park_Caretaker"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 14,
+              "observedWorldRevision": 20,
               "requiresDecision": true,
               "status": "pending"
             },
@@ -5456,7 +5834,7 @@
                 "NPC_Studio_Manager"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 14,
+              "observedWorldRevision": 20,
               "requiresDecision": true,
               "status": "pending"
             },
@@ -5470,7 +5848,7 @@
                 "NPC_Park_Caretaker"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 15,
+              "observedWorldRevision": 21,
               "requiresDecision": true,
               "status": "pending"
             }
@@ -5594,7 +5972,7 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000016",
-        "observedWorldRevision": 17,
+        "observedWorldRevision": 23,
         "afterSpeechSeq": 2,
         "elapsedSeconds": 10,
         "arrivals": []
@@ -5602,8 +5980,8 @@
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000016",
-        "previousWorldRevision": 17,
-        "worldRevision": 18,
+        "previousWorldRevision": 23,
+        "worldRevision": 24,
         "clock": {
           "fromSeconds": 90,
           "toSeconds": 100,
@@ -5646,7 +6024,7 @@
                 "NPC_Park_Caretaker"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 14,
+              "observedWorldRevision": 20,
               "requiresDecision": true,
               "status": "pending"
             },
@@ -5659,7 +6037,7 @@
                 "NPC_Studio_Manager"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 14,
+              "observedWorldRevision": 20,
               "requiresDecision": true,
               "status": "pending"
             }
@@ -5794,13 +6172,13 @@
         "turnId": "sess-fixture-1#0",
         "answer": {
           "type": "choice",
-          "choiceId": "studio_arrival.generated.1"
+          "choiceId": "resident_opening_studio_receptionist.generated.1"
         }
       },
       "response": {
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
-        "worldRevision": 2,
+        "worldRevision": 8,
         "judgment": {
           "signals": [],
           "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
@@ -5835,7 +6213,7 @@
           "appliedStance": "vouch",
           "meaningfulFirsthand": true,
           "worldSeconds": 0,
-          "worldRevision": 2,
+          "worldRevision": 8,
           "proposalMeta": {
             "profileId": "scripted/test",
             "transport": "scripted",
@@ -5862,7 +6240,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -5891,7 +6269,7 @@
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -5911,7 +6289,7 @@
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
         "actorId": "NPC_Studio_Receptionist",
-        "worldRevision": 2,
+        "worldRevision": 8,
         "status": "awaiting_end",
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
@@ -5933,7 +6311,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -5962,7 +6340,7 @@
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -6006,7 +6384,7 @@
           "appliedStance": "vouch",
           "meaningfulFirsthand": true,
           "worldSeconds": 0,
-          "worldRevision": 2,
+          "worldRevision": 8,
           "proposalMeta": {
             "profileId": "scripted/test",
             "transport": "scripted",
@@ -6022,8 +6400,8 @@
       "runSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v3",
-        "worldRevision": 2,
+        "layoutRevision": "rev-first-person-town-v4",
+        "worldRevision": 8,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -6067,7 +6445,7 @@
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
                 "worldSeconds": 0,
-                "worldRevision": 1,
+                "worldRevision": 7,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -6096,7 +6474,7 @@
                 "appliedStance": "vouch",
                 "meaningfulFirsthand": true,
                 "worldSeconds": 0,
-                "worldRevision": 2,
+                "worldRevision": 8,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -6111,7 +6489,7 @@
             "locationId": "Studio",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -6121,7 +6499,7 @@
             "locationId": "Office",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -6131,7 +6509,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -6141,7 +6519,7 @@
             "locationId": "Station",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -6151,7 +6529,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           }
@@ -6172,7 +6550,7 @@
                 "targetKind": "anchor",
                 "targetId": "Studio.reception_desk"
               },
-              "confirmedAnchorRef": "Studio.reception_desk",
+              "confirmedAnchorRef": "Studio.receptionist_spawn",
               "desiredAnchorRef": "Studio.reception_desk",
               "routePointIndex": null,
               "routePointArrivedAtSeconds": null,
@@ -6283,7 +6661,7 @@
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
         "ended": true,
-        "worldRevision": 3,
+        "worldRevision": 9,
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
           "role": "studio_receptionist",
@@ -6304,7 +6682,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -6333,7 +6711,7 @@
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -6347,8 +6725,8 @@
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v3",
-        "worldRevision": 3,
+        "layoutRevision": "rev-first-person-town-v4",
+        "worldRevision": 9,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -6392,7 +6770,7 @@
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
                 "worldSeconds": 0,
-                "worldRevision": 1,
+                "worldRevision": 7,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -6421,7 +6799,7 @@
                 "appliedStance": "vouch",
                 "meaningfulFirsthand": true,
                 "worldSeconds": 0,
-                "worldRevision": 2,
+                "worldRevision": 8,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -6436,7 +6814,7 @@
             "locationId": "Studio",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -6446,7 +6824,7 @@
             "locationId": "Office",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -6456,7 +6834,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -6466,7 +6844,7 @@
             "locationId": "Station",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -6476,7 +6854,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           }
@@ -6497,7 +6875,7 @@
                 "targetKind": "anchor",
                 "targetId": "Studio.reception_desk"
               },
-              "confirmedAnchorRef": "Studio.reception_desk",
+              "confirmedAnchorRef": "Studio.receptionist_spawn",
               "desiredAnchorRef": "Studio.reception_desk",
               "routePointIndex": null,
               "routePointArrivedAtSeconds": null,
@@ -6613,13 +6991,13 @@
         "turnId": "sess-fixture-1#0",
         "answer": {
           "type": "choice",
-          "choiceId": "studio_arrival.generated.2"
+          "choiceId": "resident_opening_studio_receptionist.generated.2"
         }
       },
       "response": {
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
-        "worldRevision": 2,
+        "worldRevision": 8,
         "judgment": {
           "signals": [],
           "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
@@ -6654,7 +7032,7 @@
           "appliedStance": "uncertain",
           "meaningfulFirsthand": true,
           "worldSeconds": 0,
-          "worldRevision": 2,
+          "worldRevision": 8,
           "proposalMeta": {
             "profileId": "scripted/test",
             "transport": "scripted",
@@ -6681,7 +7059,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -6710,7 +7088,7 @@
               "appliedStance": "uncertain",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -6730,7 +7108,7 @@
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
         "actorId": "NPC_Studio_Receptionist",
-        "worldRevision": 2,
+        "worldRevision": 8,
         "status": "awaiting_end",
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
@@ -6752,7 +7130,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -6781,7 +7159,7 @@
               "appliedStance": "uncertain",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -6825,7 +7203,7 @@
           "appliedStance": "uncertain",
           "meaningfulFirsthand": true,
           "worldSeconds": 0,
-          "worldRevision": 2,
+          "worldRevision": 8,
           "proposalMeta": {
             "profileId": "scripted/test",
             "transport": "scripted",
@@ -6841,8 +7219,8 @@
       "runSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v3",
-        "worldRevision": 2,
+        "layoutRevision": "rev-first-person-town-v4",
+        "worldRevision": 8,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -6886,7 +7264,7 @@
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
                 "worldSeconds": 0,
-                "worldRevision": 1,
+                "worldRevision": 7,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -6915,7 +7293,7 @@
                 "appliedStance": "uncertain",
                 "meaningfulFirsthand": true,
                 "worldSeconds": 0,
-                "worldRevision": 2,
+                "worldRevision": 8,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -6930,7 +7308,7 @@
             "locationId": "Studio",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -6940,7 +7318,7 @@
             "locationId": "Office",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -6950,7 +7328,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -6960,7 +7338,7 @@
             "locationId": "Station",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -6970,7 +7348,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           }
@@ -6991,7 +7369,7 @@
                 "targetKind": "anchor",
                 "targetId": "Studio.reception_desk"
               },
-              "confirmedAnchorRef": "Studio.reception_desk",
+              "confirmedAnchorRef": "Studio.receptionist_spawn",
               "desiredAnchorRef": "Studio.reception_desk",
               "routePointIndex": null,
               "routePointArrivedAtSeconds": null,
@@ -7102,7 +7480,7 @@
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
         "ended": true,
-        "worldRevision": 3,
+        "worldRevision": 9,
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
           "role": "studio_receptionist",
@@ -7123,7 +7501,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -7152,7 +7530,7 @@
               "appliedStance": "uncertain",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -7166,8 +7544,8 @@
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v3",
-        "worldRevision": 3,
+        "layoutRevision": "rev-first-person-town-v4",
+        "worldRevision": 9,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -7211,7 +7589,7 @@
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
                 "worldSeconds": 0,
-                "worldRevision": 1,
+                "worldRevision": 7,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -7240,7 +7618,7 @@
                 "appliedStance": "uncertain",
                 "meaningfulFirsthand": true,
                 "worldSeconds": 0,
-                "worldRevision": 2,
+                "worldRevision": 8,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -7255,7 +7633,7 @@
             "locationId": "Studio",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -7265,7 +7643,7 @@
             "locationId": "Office",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -7275,7 +7653,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -7285,7 +7663,7 @@
             "locationId": "Station",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -7295,7 +7673,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           }
@@ -7316,7 +7694,7 @@
                 "targetKind": "anchor",
                 "targetId": "Studio.reception_desk"
               },
-              "confirmedAnchorRef": "Studio.reception_desk",
+              "confirmedAnchorRef": "Studio.receptionist_spawn",
               "desiredAnchorRef": "Studio.reception_desk",
               "routePointIndex": null,
               "routePointArrivedAtSeconds": null,
@@ -7432,13 +7810,13 @@
         "turnId": "sess-fixture-1#0",
         "answer": {
           "type": "choice",
-          "choiceId": "studio_arrival.generated.3"
+          "choiceId": "resident_opening_studio_receptionist.generated.3"
         }
       },
       "response": {
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
-        "worldRevision": 2,
+        "worldRevision": 8,
         "judgment": {
           "signals": [
             "role_script_break"
@@ -7477,7 +7855,7 @@
           "appliedStance": "oppose",
           "meaningfulFirsthand": true,
           "worldSeconds": 0,
-          "worldRevision": 2,
+          "worldRevision": 8,
           "proposalMeta": {
             "profileId": "scripted/test",
             "transport": "scripted",
@@ -7504,7 +7882,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -7535,7 +7913,7 @@
               "appliedStance": "oppose",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -7555,7 +7933,7 @@
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
         "actorId": "NPC_Studio_Receptionist",
-        "worldRevision": 2,
+        "worldRevision": 8,
         "status": "awaiting_end",
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
@@ -7577,7 +7955,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -7608,7 +7986,7 @@
               "appliedStance": "oppose",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -7656,7 +8034,7 @@
           "appliedStance": "oppose",
           "meaningfulFirsthand": true,
           "worldSeconds": 0,
-          "worldRevision": 2,
+          "worldRevision": 8,
           "proposalMeta": {
             "profileId": "scripted/test",
             "transport": "scripted",
@@ -7672,8 +8050,8 @@
       "runSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v3",
-        "worldRevision": 2,
+        "layoutRevision": "rev-first-person-town-v4",
+        "worldRevision": 8,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -7717,7 +8095,7 @@
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
                 "worldSeconds": 0,
-                "worldRevision": 1,
+                "worldRevision": 7,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -7748,7 +8126,7 @@
                 "appliedStance": "oppose",
                 "meaningfulFirsthand": true,
                 "worldSeconds": 0,
-                "worldRevision": 2,
+                "worldRevision": 8,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -7763,7 +8141,7 @@
             "locationId": "Studio",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -7773,7 +8151,7 @@
             "locationId": "Office",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -7783,7 +8161,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -7793,7 +8171,7 @@
             "locationId": "Station",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -7803,7 +8181,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           }
@@ -7824,7 +8202,7 @@
                 "targetKind": "anchor",
                 "targetId": "Studio.reception_desk"
               },
-              "confirmedAnchorRef": "Studio.reception_desk",
+              "confirmedAnchorRef": "Studio.receptionist_spawn",
               "desiredAnchorRef": "Studio.reception_desk",
               "routePointIndex": null,
               "routePointArrivedAtSeconds": null,
@@ -7935,7 +8313,7 @@
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
         "ended": true,
-        "worldRevision": 3,
+        "worldRevision": 9,
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
           "role": "studio_receptionist",
@@ -7956,7 +8334,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -7987,7 +8365,7 @@
               "appliedStance": "oppose",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -8001,8 +8379,8 @@
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v3",
-        "worldRevision": 3,
+        "layoutRevision": "rev-first-person-town-v4",
+        "worldRevision": 9,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -8046,7 +8424,7 @@
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
                 "worldSeconds": 0,
-                "worldRevision": 1,
+                "worldRevision": 7,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -8077,7 +8455,7 @@
                 "appliedStance": "oppose",
                 "meaningfulFirsthand": true,
                 "worldSeconds": 0,
-                "worldRevision": 2,
+                "worldRevision": 8,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -8092,7 +8470,7 @@
             "locationId": "Studio",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -8102,7 +8480,7 @@
             "locationId": "Office",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -8112,7 +8490,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -8122,7 +8500,7 @@
             "locationId": "Station",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -8132,7 +8510,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           }
@@ -8153,7 +8531,7 @@
                 "targetKind": "anchor",
                 "targetId": "Studio.reception_desk"
               },
-              "confirmedAnchorRef": "Studio.reception_desk",
+              "confirmedAnchorRef": "Studio.receptionist_spawn",
               "desiredAnchorRef": "Studio.reception_desk",
               "routePointIndex": null,
               "routePointArrivedAtSeconds": null,
@@ -8275,7 +8653,7 @@
       "response": {
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
-        "worldRevision": 2,
+        "worldRevision": 8,
         "judgment": {
           "signals": [],
           "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
@@ -8310,7 +8688,7 @@
           "appliedStance": "vouch",
           "meaningfulFirsthand": true,
           "worldSeconds": 0,
-          "worldRevision": 2,
+          "worldRevision": 8,
           "proposalMeta": {
             "profileId": "scripted/test",
             "transport": "scripted",
@@ -8337,7 +8715,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -8366,7 +8744,7 @@
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -8386,7 +8764,7 @@
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
         "actorId": "NPC_Studio_Receptionist",
-        "worldRevision": 2,
+        "worldRevision": 8,
         "status": "awaiting_end",
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
@@ -8408,7 +8786,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -8437,7 +8815,7 @@
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -8481,7 +8859,7 @@
           "appliedStance": "vouch",
           "meaningfulFirsthand": true,
           "worldSeconds": 0,
-          "worldRevision": 2,
+          "worldRevision": 8,
           "proposalMeta": {
             "profileId": "scripted/test",
             "transport": "scripted",
@@ -8497,8 +8875,8 @@
       "runSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v3",
-        "worldRevision": 2,
+        "layoutRevision": "rev-first-person-town-v4",
+        "worldRevision": 8,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -8542,7 +8920,7 @@
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
                 "worldSeconds": 0,
-                "worldRevision": 1,
+                "worldRevision": 7,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -8571,7 +8949,7 @@
                 "appliedStance": "vouch",
                 "meaningfulFirsthand": true,
                 "worldSeconds": 0,
-                "worldRevision": 2,
+                "worldRevision": 8,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -8586,7 +8964,7 @@
             "locationId": "Studio",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -8596,7 +8974,7 @@
             "locationId": "Office",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -8606,7 +8984,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -8616,7 +8994,7 @@
             "locationId": "Station",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -8626,7 +9004,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           }
@@ -8647,7 +9025,7 @@
                 "targetKind": "anchor",
                 "targetId": "Studio.reception_desk"
               },
-              "confirmedAnchorRef": "Studio.reception_desk",
+              "confirmedAnchorRef": "Studio.receptionist_spawn",
               "desiredAnchorRef": "Studio.reception_desk",
               "routePointIndex": null,
               "routePointArrivedAtSeconds": null,
@@ -8758,7 +9136,7 @@
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
         "ended": true,
-        "worldRevision": 3,
+        "worldRevision": 9,
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
           "role": "studio_receptionist",
@@ -8779,7 +9157,7 @@
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 0,
-              "worldRevision": 1,
+              "worldRevision": 7,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -8808,7 +9186,7 @@
               "appliedStance": "vouch",
               "meaningfulFirsthand": true,
               "worldSeconds": 0,
-              "worldRevision": 2,
+              "worldRevision": 8,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -8822,8 +9200,8 @@
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v3",
-        "worldRevision": 3,
+        "layoutRevision": "rev-first-person-town-v4",
+        "worldRevision": 9,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -8867,7 +9245,7 @@
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
                 "worldSeconds": 0,
-                "worldRevision": 1,
+                "worldRevision": 7,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -8896,7 +9274,7 @@
                 "appliedStance": "vouch",
                 "meaningfulFirsthand": true,
                 "worldSeconds": 0,
-                "worldRevision": 2,
+                "worldRevision": 8,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -8911,7 +9289,7 @@
             "locationId": "Studio",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -8921,7 +9299,7 @@
             "locationId": "Office",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -8931,7 +9309,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -8941,7 +9319,7 @@
             "locationId": "Station",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           },
@@ -8951,7 +9329,7 @@
             "locationId": "Park",
             "stance": "uncertain",
             "suspicion": 0,
-            "playerConversationReady": false,
+            "playerConversationReady": true,
             "hasMeaningfulFirsthandConversation": false,
             "memories": []
           }
@@ -8972,7 +9350,7 @@
                 "targetKind": "anchor",
                 "targetId": "Studio.reception_desk"
               },
-              "confirmedAnchorRef": "Studio.reception_desk",
+              "confirmedAnchorRef": "Studio.receptionist_spawn",
               "desiredAnchorRef": "Studio.reception_desk",
               "routePointIndex": null,
               "routePointArrivedAtSeconds": null,

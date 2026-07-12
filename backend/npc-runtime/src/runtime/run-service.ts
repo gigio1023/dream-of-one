@@ -1,14 +1,15 @@
 import { randomUUID } from "node:crypto";
 import {
-  assembleObservePacket,
   DEFAULT_ROLE_POLICIES,
   type ObservePacket,
 } from "../agentloop/context.js";
-import { validateToolCall } from "../agentloop/tools.js";
+import { toolCatalogForRole } from "../agentloop/tools.js";
 import type { CoarseStance } from "../contracts/types.js";
 import { agentStepProposalSchema } from "../providers/envelope.js";
 import type {
   AgentStepProposal,
+  ConversationProposal,
+  ConversationTurnRequest,
   NpcProposalPort,
   ProposalMeta,
   ResolvedProposal,
@@ -20,8 +21,8 @@ import {
   JUDGMENT_REPORT_DELTA_CAP,
   JUDGMENT_SUSPICION_DELTA_CAP,
 } from "./conversation-suspicion.js";
-import type { WorldState } from "./world/index.js";
 import {
+  conversationZoneFor,
   loadRunLayout,
   type RunAudibilityVolume,
   type RunLayout,
@@ -52,6 +53,7 @@ import type {
   RunSessionAnswer,
   RunSessionAnswerResponse,
   RunSessionEndResponse,
+  RunSessionPreloadResponse,
   RunSessionSnapshotResponse,
   RunSessionStartResponse,
   RunSnapshot,
@@ -69,14 +71,9 @@ const MAX_CONVERSATION_TURNS = 3;
 const AMBIENT_TURN_LIMIT = 2;
 const AMBIENT_MAX_CALLS_PER_TURN = 2;
 const AMBIENT_TOKEN_HEADROOM_PER_TURN = 4_000;
-const STUDIO_OBJECTIVE =
-  "Understand why the outsider entered the studio, ask grounded follow-ups, and form a memory-based personal stance.";
-const STUDIO_SCENE_FACTS = [
-  "The conversation happens face to face at the studio reception desk.",
-  "The player arrived from the park and has not supplied an administrative record.",
-  "The receptionist may judge only this conversation and memories they personally hold.",
-  "The scheduled Station hearing is later; this conversation cannot decide its verdict.",
-] as const;
+const MAX_CONCURRENT_OPENING_PRELOADS = 2;
+const PLAYER_CONVERSATION_GOAL =
+  "Speak face to face with the outsider, ask only what your role and memories support, and form a memory-based personal stance.";
 
 type RunActorState = RunActor;
 
@@ -124,6 +121,7 @@ interface AmbientDecisionAttempt {
   observation: AmbientObservation | null;
   resolvedTurns: AmbientResolvedTurn[];
   providerMetas: ProposalMeta[];
+  actorReadinessDeltas: RunActorReadinessDelta[];
   response?: RunNpcDecisionResponse;
   inFlight?: Promise<RunNpcDecisionResponse>;
 }
@@ -141,6 +139,24 @@ interface ConversationState {
   lastProposalMeta: ProposalMeta | null;
   endResponse?: RunSessionEndResponse;
 }
+
+interface ConversationOpeningAttempt {
+  actorId: string;
+  interactionZoneId: string;
+  evidenceKey: string;
+  request: ConversationTurnRequest;
+  resolved?: ResolvedProposal<ConversationProposal>;
+  inFlight?: Promise<RunSessionPreloadResponse>;
+}
+
+interface OpeningPreloadGate {
+  active: number;
+  waiters: Array<() => void>;
+}
+
+type ConversationOpeningClaim =
+  | { response: RunSessionPreloadResponse; inFlight?: never }
+  | { response?: never; inFlight: Promise<RunSessionPreloadResponse> };
 
 interface RunState {
   runId: string;
@@ -163,6 +179,9 @@ interface RunState {
   ambientSpeechCursor: number;
   activeAmbientConversation: RunAmbientConversation | null;
   conversations: Map<string, ConversationState>;
+  conversationOpenings: Map<string, ConversationOpeningAttempt>;
+  consumedConversationEvidence: Map<string, string>;
+  preloadRequiredEvidence: Map<string, string>;
   records: RunSnapshot["records"];
   ledgerEvents: RunSnapshot["ledgerEvents"];
 }
@@ -211,22 +230,6 @@ export class RunError extends Error {
 
 function clone<T>(value: T): T {
   return structuredClone(value);
-}
-
-function emptyWorld(): WorldState {
-  return {
-    objects: [],
-    records: [],
-    ledger: [],
-    economy: {
-      accountCredit: 0,
-      localTrust: 0,
-      recordBurden: 0,
-      stationAttention: 0,
-      favor: 0,
-    },
-    nextSeq: 0,
-  };
 }
 
 function answerSignature(answer: RunSessionAnswer): string {
@@ -306,6 +309,7 @@ export class RunService {
   private readonly runs = new Map<string, RunState>();
   private readonly startCache = new Map<string, CachedStart>();
   private readonly runChains = new Map<string, Promise<unknown>>();
+  private readonly openingPreloadGates = new Map<string, OpeningPreloadGate>();
   private readonly proposalPort: NpcProposalPort;
   private readonly idFactory: (prefix: IdPrefix) => string;
   private readonly layout: RunLayout;
@@ -348,7 +352,7 @@ export class RunService {
         locationId: anchorLocationId(confirmedAnchorRef),
         stance: "uncertain",
         suspicion: 0,
-        playerConversationReady: seed.actorId === STUDIO_RECEPTIONIST_ID,
+        playerConversationReady: false,
         hasMeaningfulFirsthandConversation: false,
         memories: [],
       });
@@ -378,6 +382,9 @@ export class RunService {
       ambientSpeechCursor: 0,
       activeAmbientConversation: null,
       conversations: new Map(),
+      conversationOpenings: new Map(),
+      consumedConversationEvidence: new Map(),
+      preloadRequiredEvidence: new Map(),
       records: [],
       ledgerEvents: [],
     };
@@ -479,44 +486,28 @@ export class RunService {
       for (const arrival of schedulerResult.arrivalsApplied) {
         const actor = this.requireActor(run, arrival.actorId);
         actor.locationId = arrival.locationId;
-        if (
-          actor.actorId === STUDIO_RECEPTIONIST_ID &&
-          arrival.anchorRef === this.layout.studioReceptionAnchorRef &&
-          !actor.playerConversationReady
-        ) {
-          actor.playerConversationReady = true;
-          actorReadinessDeltas.push({
-            actorId: actor.actorId,
-            playerConversationReady: true,
-            reason: "arrival_at_interaction",
-          });
-        }
       }
       for (const movement of schedulerResult.movementDeltas) {
-        if (
-          movement.actorId === STUDIO_RECEPTIONIST_ID &&
-          movement.targetAnchorRef !== this.layout.studioReceptionAnchorRef
-        ) {
-          const actor = this.requireActor(run, movement.actorId);
-          if (actor.playerConversationReady) {
-            actor.playerConversationReady = false;
-            actorReadinessDeltas.push({
-              actorId: actor.actorId,
-              playerConversationReady: false,
-              reason: "schedule_departure",
-            });
-          }
-        }
+        const actor = this.requireActor(run, movement.actorId);
+        this.setActorReadiness(actor, false, "movement_started", actorReadinessDeltas);
       }
 
-      const materialMutation =
+      const schedulerMutation =
         appliedElapsedSeconds > 0 ||
         schedulerResult.arrivalsApplied.length > 0 ||
         schedulerResult.movementDeltas.length > 0 ||
-        schedulerResult.scheduleWakes.length > 0 ||
-        actorReadinessDeltas.length > 0;
+        schedulerResult.scheduleWakes.length > 0;
+      if (schedulerMutation) run.elapsedSeconds = toSeconds;
+
+      for (const actor of run.actors.values()) {
+        const schedulerActor = run.scheduler.actors.get(actor.actorId);
+        if (schedulerActor?.pendingMovement) continue;
+        this.reconcileConversationOpening(run, actor, actorReadinessDeltas);
+      }
+
+      const materialMutation = schedulerMutation || actorReadinessDeltas.length > 0;
       if (materialMutation) {
-        run.elapsedSeconds = toSeconds;
+        if (!schedulerMutation) run.elapsedSeconds = toSeconds;
         run.worldRevision = candidateWorldRevision;
       }
       const response: RunAdvanceResponse = {
@@ -603,6 +594,7 @@ export class RunService {
         observation: null,
         resolvedTurns: [],
         providerMetas: [],
+        actorReadinessDeltas: [],
       };
       run.ambientDecisions.set(request.wakeId, attempt);
     }
@@ -617,6 +609,64 @@ export class RunService {
     return executing.then(response => clone(response));
   }
 
+  preloadConversation(
+    runId: string,
+    actorId: string,
+    interactionZoneId: string,
+    locale: string,
+  ): Promise<RunSessionPreloadResponse> {
+    return this.serialize(runId, async (): Promise<ConversationOpeningClaim> => {
+      const run = this.requireRun(runId);
+      const actor = this.requireActor(run, actorId);
+      this.validateConversationRequest(run, actor, interactionZoneId, locale);
+      if (run.activeConversationId !== null) {
+        throw new RunError("conversation openings cannot preload during a modal conversation", "run_paused");
+      }
+      if (run.scheduler.actors.get(actorId)?.pendingMovement) {
+        throw new RunError("actor is moving and has no stable conversation opening", "conversation_not_ready");
+      }
+
+      const evidenceKey = this.conversationEvidenceKey(run, actor);
+      if (run.consumedConversationEvidence.get(actorId) === evidenceKey) {
+        throw new RunError("unchanged evidence cannot reopen this conversation", "conversation_not_ready");
+      }
+      const existing = run.conversationOpenings.get(actorId);
+      if (
+        existing &&
+        existing.evidenceKey === evidenceKey &&
+        existing.interactionZoneId === interactionZoneId
+      ) {
+        if (existing.resolved) {
+          const wasReady = actor.playerConversationReady;
+          this.setActorReadiness(actor, true);
+          if (!wasReady) run.worldRevision += 1;
+          return { response: this.preloadResponse(run, actor, existing) };
+        }
+        if (existing.inFlight) return { inFlight: existing.inFlight };
+      }
+      if (existing) run.conversationOpenings.delete(actorId);
+
+      const attempt: ConversationOpeningAttempt = {
+        actorId,
+        interactionZoneId,
+        evidenceKey,
+        request: this.conversationOpeningRequest(run, actor),
+      };
+      run.conversationOpenings.set(actorId, attempt);
+      run.preloadRequiredEvidence.delete(actorId);
+      const executing = this.executeConversationOpening(runId, attempt);
+      attempt.inFlight = executing;
+      void executing
+        .finally(() => {
+          if (attempt.inFlight === executing) attempt.inFlight = undefined;
+        })
+        .catch(() => undefined);
+      return { inFlight: executing };
+    }).then(claim =>
+      claim.response ? clone(claim.response) : claim.inFlight.then(response => clone(response)),
+    );
+  }
+
   startConversation(
     runId: string,
     actorId: string,
@@ -628,16 +678,8 @@ export class RunService {
       if (locale !== run.locale) {
         throw new RunError(`conversation locale ${locale} does not match run locale ${run.locale}`, "invalid_locale");
       }
-      if (interactionZoneId !== this.layout.studioReceptionInteractionZoneId) {
-        throw new RunError(
-          `interaction zone cannot start the Studio receptionist conversation: ${interactionZoneId}`,
-          "invalid_interaction",
-        );
-      }
       const actor = this.requireActor(run, actorId);
-      if (actorId !== STUDIO_RECEPTIONIST_ID) {
-        throw new RunError(`actor has no player conversation surface in this slice: ${actorId}`, "actor_not_supported");
-      }
+      this.validateConversationRequest(run, actor, interactionZoneId, locale);
       if (run.activeConversationId) {
         const active = this.requireConversation(run, run.activeConversationId);
         // A timed-out start request can be retried safely. Returning the
@@ -661,32 +703,41 @@ export class RunService {
         throw new RunError("actor is not ready for a player conversation", "conversation_not_ready");
       }
 
+      const opening = run.conversationOpenings.get(actorId);
+      const evidenceKey = this.conversationEvidenceKey(run, actor);
+      if (
+        !opening?.resolved ||
+        opening.evidenceKey !== evidenceKey ||
+        opening.interactionZoneId !== interactionZoneId ||
+        run.consumedConversationEvidence.get(actorId) === evidenceKey ||
+        run.scheduler.actors.get(actorId)?.pendingMovement
+      ) {
+        actor.playerConversationReady = false;
+        run.conversationOpenings.delete(actorId);
+        throw new RunError("actor has no valid preloaded conversation opening", "conversation_not_ready");
+      }
+
       const sessionId = this.idFactory("sess");
-      const resolved = await this.proposalPort.proposeConversationTurn({
-        sessionId: run.runId,
-        locale: run.locale,
-        beatId: "studio_arrival",
-        actorId,
-        objective: STUDIO_OBJECTIVE,
-        sceneFacts: [...STUDIO_SCENE_FACTS],
-        observePacket: this.observePacket(run, actor),
-        conversationHistory: [],
-      });
-      this.trackProposal(run, resolved.meta);
+      const resolved = opening.resolved;
+      const confirmedAnchorRef = run.scheduler.actors.get(actor.actorId)?.confirmedAnchorRef;
+      if (!confirmedAnchorRef) {
+        throw new RunError("actor has no confirmed conversation position", "conversation_not_ready");
+      }
       alignActorForPlayerConversation(
         this.layout,
         run.scheduler,
         actor.actorId,
-        this.layout.studioReceptionAnchorRef,
+        confirmedAnchorRef,
         run.elapsedSeconds,
       );
-      actor.locationId = anchorLocationId(this.layout.studioReceptionAnchorRef);
       actor.playerConversationReady = false;
+      run.conversationOpenings.delete(actorId);
+      run.preloadRequiredEvidence.delete(actorId);
       const nextTurn = this.nextTurn(
         sessionId,
         0,
-        "studio_arrival",
-        "studio_visit_reason",
+        `resident_opening_${actor.role}`,
+        "resident_first_question",
         actorId,
         resolved.proposal,
         resolved.meta,
@@ -771,11 +822,17 @@ export class RunService {
         actorId: actor.actorId,
         playerLine,
         conversationHistory: clone(conversation.dialogue.slice(-10)),
-        observePacket: this.observePacket(run, actor, [playerLine]),
+        observePacket: this.runObservePacket(
+          run,
+          actor,
+          ["player"],
+          this.conversationGoals(actor),
+          [playerLine],
+        ),
         suspicionBefore,
         reportPressureBefore: reportBefore,
-        objective: STUDIO_OBJECTIVE,
-        sceneFacts: [...STUDIO_SCENE_FACTS],
+        objective: this.conversationObjective(actor),
+        sceneFacts: this.conversationSceneFacts(actor),
         stanceBefore,
         hasMeaningfulFirsthandConversation: actor.hasMeaningfulFirsthandConversation,
       });
@@ -853,8 +910,8 @@ export class RunService {
         ? this.nextTurn(
             sessionId,
             conversation.turnCount,
-            `studio_follow_up_${conversation.turnCount}`,
-            "studio_visit_follow_up",
+            `resident_follow_up_${actor.role}_${conversation.turnCount}`,
+            "resident_follow_up",
             actor.actorId,
             resolved.proposal,
             resolved.meta,
@@ -893,6 +950,13 @@ export class RunService {
       conversation.status = "ended";
       conversation.activeTurn = null;
       if (run.activeConversationId === sessionId) run.activeConversationId = null;
+      actor.playerConversationReady = false;
+      run.conversationOpenings.delete(actor.actorId);
+      run.preloadRequiredEvidence.delete(actor.actorId);
+      run.consumedConversationEvidence.set(
+        actor.actorId,
+        this.conversationEvidenceKey(run, actor),
+      );
       run.worldRevision += 1;
       const response: RunSessionEndResponse = {
         runId,
@@ -1138,6 +1202,7 @@ export class RunService {
     }
 
     const committed: RunAmbientSpeechEvent[] = [];
+    const memoryChangedActorIds = new Set<string>();
     for (let turnIndex = 0; turnIndex < attempt.resolvedTurns.length; turnIndex += 1) {
       const turn = attempt.resolvedTurns[turnIndex];
       if (!turn) return this.finishAmbientAttempt(run, attempt, "failed");
@@ -1186,11 +1251,21 @@ export class RunService {
           kind: "ambient_utterance",
         };
         this.requireActor(run, holderActorId).memories.push(memory);
+        memoryChangedActorIds.add(holderActorId);
       }
       run.ambientSpeechCursor = seq;
       run.ambientSpeechEvents.push(event);
       run.worldRevision = worldRevision;
       committed.push(event);
+    }
+
+    attempt.actorReadinessDeltas = [];
+    for (const actorId of memoryChangedActorIds) {
+      this.reconcileConversationOpening(
+        run,
+        this.requireActor(run, actorId),
+        attempt.actorReadinessDeltas,
+      );
     }
 
     attempt.state = "completed";
@@ -1269,43 +1344,12 @@ export class RunService {
     targetActorId: string,
   ): ObservePacket {
     const actor = this.requireActor(run, speakerActorId);
-    const ownActionNotes = actor.memories.map(memory => {
-      if (memory.kind === "npc_utterance") return `내 발언: ${memory.line}`;
-      if (memory.kind === "player_conversation") {
-        return `플레이어 발언: ${memory.playerLine} / 내 답변: ${memory.npcLine} / 판단: ${memory.whyLine}`;
-      }
-      return memory.speakerActorId === actor.actorId
-        ? `내 발언: ${memory.line}`
-        : `${memory.speakerActorId}에게 들은 말: ${memory.line}`;
-    });
-    const heardSpeech = actor.memories.flatMap(memory => {
-      if (memory.kind === "player_conversation") return [memory.playerLine];
-      if (
-        memory.kind === "ambient_utterance" &&
-        memory.speakerActorId !== actor.actorId &&
-        memory.listenerActorIds.includes(actor.actorId)
-      ) {
-        return [`${memory.speakerActorId}: ${memory.line}`];
-      }
-      return [];
-    });
-    return assembleObservePacket(emptyWorld(), {
-      actor: {
-        actorId: actor.actorId,
-        role: actor.role,
-        landmarkId: actor.locationId,
-        knownActorIds: [targetActorId],
-        knownLandmarkIds: ["Park", "Studio", "Office", "Station"],
-      },
-      goals: ["함께 도착한 주민과 직접 말을 나누고 들은 내용을 정확히 기억한다."],
-      policy: DEFAULT_ROLE_POLICIES[actor.role],
-      memory: {
-        actorId: actor.actorId,
-        ownActionNotes,
-        observedLedgerEventIds: [],
-      },
-      heardSpeech,
-    });
+    return this.runObservePacket(
+      run,
+      actor,
+      [targetActorId],
+      ["함께 도착한 주민과 직접 말을 나누고 들은 내용을 정확히 기억한다."],
+    );
   }
 
   private validatedAmbientLine(
@@ -1323,18 +1367,9 @@ export class RunService {
     ) {
       return null;
     }
-    const validation = validateToolCall(
-      emptyWorld(),
-      {
-        actorId: observePacket.actorId,
-        role: observePacket.role,
-        landmarkId: observePacket.landmarkId,
-        knownActorIds: observePacket.visibleActors,
-        knownLandmarkIds: ["Park", "Studio", "Office", "Station"],
-      },
-      proposal.toolCall,
-    );
-    return validation.ok ? proposal.utterance.trim() : null;
+    return observePacket.visibleActors.includes(targetActorId)
+      ? proposal.utterance.trim()
+      : null;
   }
 
   private hasAmbientReserve(run: RunState, remainingTurns: number): boolean {
@@ -1385,6 +1420,7 @@ export class RunService {
       conversationId: attempt.conversationId,
       participantActorIds: clone(attempt.participantActorIds),
       speechEvents: clone(speechEvents),
+      actorReadinessDeltas: clone(attempt.actorReadinessDeltas),
       providerMetas: clone(attempt.providerMetas),
     };
   }
@@ -1435,47 +1471,307 @@ export class RunService {
     };
   }
 
-  private observePacket(run: RunState, actor: RunActorState, additionalSpeech: string[] = []) {
-    return assembleObservePacket(emptyWorld(), {
-      actor: {
-        actorId: actor.actorId,
-        role: actor.role,
-        landmarkId: actor.locationId,
-        // The run has not received a sight/audibility observation for any
-        // bystander yet; sharing a landmark alone is not visibility proof.
-        knownActorIds: [],
-        knownLandmarkIds: ["Park", "Studio", "Office", "Station"],
-      },
-      goals: [STUDIO_OBJECTIVE],
-      policy: DEFAULT_ROLE_POLICIES[actor.role],
-      memory: {
-        actorId: actor.actorId,
-        ownActionNotes: actor.memories.map(memory => {
-          if (memory.kind === "npc_utterance") return `내 발언: ${memory.line}`;
-          if (memory.kind === "player_conversation") {
-            return `플레이어 발언: ${memory.playerLine} / 내 답변: ${memory.npcLine} / 판단: ${memory.whyLine}`;
-          }
-          return memory.speakerActorId === actor.actorId
-            ? `내 발언: ${memory.line}`
-            : `${memory.speakerActorId}에게 들은 말: ${memory.line}`;
-        }),
-        observedLedgerEventIds: [],
-      },
-      heardSpeech: [
-        ...actor.memories.flatMap(memory => {
-          if (memory.kind === "player_conversation") return [memory.playerLine];
-          if (
-            memory.kind === "ambient_utterance" &&
-            memory.speakerActorId !== actor.actorId &&
-            memory.listenerActorIds.includes(actor.actorId)
-          ) {
-            return [`${memory.speakerActorId}: ${memory.line}`];
-          }
-          return [];
-        }),
-        ...additionalSpeech,
-      ],
+  private async executeConversationOpening(
+    runId: string,
+    attempt: ConversationOpeningAttempt,
+  ): Promise<RunSessionPreloadResponse> {
+    await this.acquireOpeningPreloadSlot(runId);
+    let resolved: ResolvedProposal<ConversationProposal>;
+    try {
+      resolved = await this.proposalPort.proposeConversationTurn(clone(attempt.request));
+    } catch (error) {
+      await this.serialize(runId, async () => {
+        const run = this.requireRun(runId);
+        if (run.conversationOpenings.get(attempt.actorId) === attempt) {
+          run.conversationOpenings.delete(attempt.actorId);
+          run.preloadRequiredEvidence.delete(attempt.actorId);
+        }
+        this.refreshProviderBudget(run);
+      });
+      throw error;
+    } finally {
+      this.releaseOpeningPreloadSlot(runId);
+    }
+
+    return this.serialize(runId, async () => {
+      const run = this.requireRun(runId);
+      const actor = this.requireActor(run, attempt.actorId);
+      this.trackProposal(run, resolved.meta);
+      const current = run.conversationOpenings.get(actor.actorId);
+      const zone = conversationZoneFor(this.layout, actor.actorId, actor.locationId);
+      const evidenceKey = this.conversationEvidenceKey(run, actor);
+      if (
+        current !== attempt ||
+        zone?.zoneId !== attempt.interactionZoneId ||
+        evidenceKey !== attempt.evidenceKey ||
+        run.consumedConversationEvidence.get(actor.actorId) === evidenceKey ||
+        run.activeConversationId !== null ||
+        run.scheduler.actors.get(actor.actorId)?.pendingMovement
+      ) {
+        if (current === attempt) {
+          run.conversationOpenings.delete(actor.actorId);
+          run.preloadRequiredEvidence.delete(actor.actorId);
+          actor.playerConversationReady = false;
+        }
+        throw new RunError("conversation opening became stale before commit", "conversation_not_ready");
+      }
+      attempt.resolved = clone(resolved);
+      actor.playerConversationReady = true;
+      run.preloadRequiredEvidence.delete(actor.actorId);
+      run.worldRevision += 1;
+      return this.preloadResponse(run, actor, attempt);
     });
+  }
+
+  private async acquireOpeningPreloadSlot(runId: string): Promise<void> {
+    const gate = this.openingPreloadGates.get(runId) ?? { active: 0, waiters: [] };
+    this.openingPreloadGates.set(runId, gate);
+    if (gate.active < MAX_CONCURRENT_OPENING_PRELOADS) {
+      gate.active += 1;
+      return;
+    }
+    await new Promise<void>(resolve => gate.waiters.push(resolve));
+  }
+
+  private releaseOpeningPreloadSlot(runId: string): void {
+    const gate = this.openingPreloadGates.get(runId);
+    if (!gate) return;
+    const next = gate.waiters.shift();
+    if (next) {
+      next();
+      return;
+    }
+    gate.active = Math.max(0, gate.active - 1);
+    if (gate.active === 0) this.openingPreloadGates.delete(runId);
+  }
+
+  private validateConversationRequest(
+    run: RunState,
+    actor: RunActorState,
+    interactionZoneId: string,
+    locale: string,
+  ): void {
+    if (locale !== run.locale) {
+      throw new RunError(
+        `conversation locale ${locale} does not match run locale ${run.locale}`,
+        "invalid_locale",
+      );
+    }
+    const zone = conversationZoneFor(this.layout, actor.actorId, actor.locationId);
+    if (!zone || zone.zoneId !== interactionZoneId) {
+      throw new RunError(
+        `interaction zone ${interactionZoneId} does not match ${actor.actorId} at ${actor.locationId}`,
+        "invalid_interaction",
+      );
+    }
+  }
+
+  private conversationGoals(actor: RunActorState): string[] {
+    return [
+      ...DEFAULT_ROLE_POLICIES[actor.role].stableGoals,
+      PLAYER_CONVERSATION_GOAL,
+    ];
+  }
+
+  private conversationObjective(actor: RunActorState): string {
+    return this.conversationGoals(actor).join(" ");
+  }
+
+  private conversationSceneFacts(actor: RunActorState): string[] {
+    return [
+      `The conversation is face to face with the player at ${actor.locationId}.`,
+      `The speaker's role is ${actor.role}; it may use only its own memories, heard speech, and visible records.`,
+      "This personal conversation cannot create an administrative record or decide the later Station hearing.",
+    ];
+  }
+
+  private conversationOpeningRequest(
+    run: RunState,
+    actor: RunActorState,
+  ): ConversationTurnRequest {
+    return {
+      sessionId: run.runId,
+      locale: run.locale,
+      beatId: `resident_opening_${actor.role}`,
+      actorId: actor.actorId,
+      objective: this.conversationObjective(actor),
+      sceneFacts: this.conversationSceneFacts(actor),
+      observePacket: this.runObservePacket(
+        run,
+        actor,
+        ["player"],
+        this.conversationGoals(actor),
+      ),
+      conversationHistory: [],
+    };
+  }
+
+  private conversationEvidenceKey(run: RunState, actor: RunActorState): string {
+    const layoutActor = this.layout.actors.find(candidate => candidate.actorId === actor.actorId);
+    const block = layoutActor?.scheduleBlocks.find(
+      candidate => candidate.startSeconds <= run.elapsedSeconds && run.elapsedSeconds < candidate.endSeconds,
+    );
+    const visibleRecordVersions = run.records
+      .filter(record => record.visibleToActorIds.includes(actor.actorId))
+      .map(record => [record.recordId, record.lastLedgerEventId ?? "", record.stateBody])
+      .sort((first, second) => String(first[0]).localeCompare(String(second[0])));
+    return JSON.stringify({
+      role: actor.role,
+      locationId: actor.locationId,
+      scheduleBlockId: block?.blockId ?? "none",
+      activity: block?.activity ?? "none",
+      goals: this.conversationGoals(actor),
+      memoryIds: actor.memories.map(memory => memory.memoryId),
+      visibleRecordVersions,
+    });
+  }
+
+  private preloadResponse(
+    run: RunState,
+    actor: RunActorState,
+    attempt: ConversationOpeningAttempt,
+  ): RunSessionPreloadResponse {
+    if (!attempt.resolved) throw new Error("conversation opening has no resolved proposal");
+    return {
+      runId: run.runId,
+      worldRevision: run.worldRevision,
+      interactionZoneId: attempt.interactionZoneId,
+      actor: this.publicActor(actor),
+      proposalMeta: clone(attempt.resolved.meta),
+    };
+  }
+
+  private setActorReadiness(
+    actor: RunActorState,
+    ready: boolean,
+    reason?: RunActorReadinessDelta["reason"],
+    deltas?: RunActorReadinessDelta[],
+  ): void {
+    if (actor.playerConversationReady === ready) return;
+    actor.playerConversationReady = ready;
+    if (reason && deltas) {
+      deltas.push({ actorId: actor.actorId, playerConversationReady: ready, reason });
+    }
+  }
+
+  private markPreloadRequired(
+    run: RunState,
+    actor: RunActorState,
+    evidenceKey: string,
+    deltas: RunActorReadinessDelta[],
+  ): void {
+    if (run.preloadRequiredEvidence.get(actor.actorId) === evidenceKey) return;
+    run.preloadRequiredEvidence.set(actor.actorId, evidenceKey);
+    actor.playerConversationReady = false;
+    deltas.push({
+      actorId: actor.actorId,
+      playerConversationReady: false,
+      reason: "preload_required",
+    });
+  }
+
+  private reconcileConversationOpening(
+    run: RunState,
+    actor: RunActorState,
+    deltas: RunActorReadinessDelta[],
+  ): void {
+    const evidenceKey = this.conversationEvidenceKey(run, actor);
+    let opening = run.conversationOpenings.get(actor.actorId);
+    const zone = conversationZoneFor(this.layout, actor.actorId, actor.locationId);
+    if (
+      opening &&
+      (opening.evidenceKey !== evidenceKey || opening.interactionZoneId !== zone?.zoneId)
+    ) {
+      run.conversationOpenings.delete(actor.actorId);
+      opening = undefined;
+    }
+    if (run.scheduler.actors.get(actor.actorId)?.pendingMovement) {
+      this.setActorReadiness(actor, false);
+      return;
+    }
+    if (
+      opening?.resolved &&
+      run.consumedConversationEvidence.get(actor.actorId) !== evidenceKey
+    ) {
+      run.preloadRequiredEvidence.delete(actor.actorId);
+      this.setActorReadiness(actor, true, "opening_ready", deltas);
+      return;
+    }
+    if (opening?.inFlight) {
+      this.setActorReadiness(actor, false);
+      return;
+    }
+    if (run.consumedConversationEvidence.get(actor.actorId) !== evidenceKey) {
+      this.markPreloadRequired(run, actor, evidenceKey, deltas);
+    } else {
+      this.setActorReadiness(actor, false);
+    }
+  }
+
+  private runObservePacket(
+    run: RunState,
+    actor: RunActorState,
+    visibleActorIds: string[],
+    goals: string[],
+    additionalSpeech: string[] = [],
+  ): ObservePacket {
+    const policy = DEFAULT_ROLE_POLICIES[actor.role];
+    const visibleRecords = run.records
+      .filter(record => record.visibleToActorIds.includes(actor.actorId))
+      .map(record => ({
+        recordId: record.recordId,
+        kind: record.kind,
+        stateBody: record.stateBody,
+      }));
+    const ownActionNotes = actor.memories.map(memory => {
+      if (memory.kind === "npc_utterance") return `[self_utterance] ${memory.line}`;
+      if (memory.kind === "player_conversation") {
+        return [
+          `[player_utterance] ${memory.playerLine}`,
+          `[self_reply] ${memory.npcLine}`,
+          `[judgment_reason] ${memory.whyLine}`,
+        ].join(" / ");
+      }
+      return memory.speakerActorId === actor.actorId
+        ? `[self_utterance] ${memory.line}`
+        : `[heard_from=${memory.speakerActorId}] ${memory.line}`;
+    });
+    const heardSpeech = actor.memories.flatMap(memory => {
+      if (memory.kind === "player_conversation") return [memory.playerLine];
+      if (
+        memory.kind === "ambient_utterance" &&
+        memory.speakerActorId !== actor.actorId &&
+        memory.listenerActorIds.includes(actor.actorId)
+      ) {
+        return [`${memory.speakerActorId}: ${memory.line}`];
+      }
+      return [];
+    });
+    return {
+      actorId: actor.actorId,
+      role: actor.role,
+      landmarkId: actor.locationId,
+      goals: [...goals],
+      actorPolicy: {
+        role: policy.role,
+        stableGoals: [...policy.stableGoals],
+        priorityShifts: [...policy.priorityShifts],
+        forbiddenClaims: [...policy.forbiddenClaims],
+      },
+      actorMemory: {
+        actorId: actor.actorId,
+        ownActionNotes,
+        observedLedgerEventIds: run.ledgerEvents
+          .filter(event => event.actorId === actor.actorId)
+          .map(event => event.eventId),
+      },
+      visibleObjects: [],
+      visibleRecords,
+      visibleLedgerEvents: [],
+      visibleActors: [...new Set(visibleActorIds.filter(id => id !== actor.actorId))],
+      heardSpeech: [...heardSpeech, ...additionalSpeech],
+      toolCatalog: toolCatalogForRole(actor.role),
+    };
   }
 
   private nextTurn(

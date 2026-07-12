@@ -12,6 +12,7 @@ import {
   runSessionAnswerResponseSchema,
   runSessionEndRequestSchema,
   runSessionEndResponseSchema,
+  runSessionPreloadResponseSchema,
   runSessionSnapshotRequestSchema,
   runSessionSnapshotResponseSchema,
   runSessionStartRequestSchema,
@@ -56,6 +57,12 @@ test("every run fixture packet validates against the public wire schemas", () =>
   runAdvanceResponseSchema.parse(endpoints.runAdvanceAmbientSpeech.response);
   runSnapshotRequestSchema.parse(endpoints.runSnapshotAfterMeeting.request);
   runSnapshotSchema.parse(endpoints.runSnapshotAfterMeeting.response);
+
+  assert.equal(endpoints.sessionPreloads.length, 6);
+  for (const endpoint of endpoints.sessionPreloads) {
+    runSessionStartRequestSchema.parse(endpoint.request);
+    runSessionPreloadResponseSchema.parse(endpoint.response);
+  }
 
   runSessionStartRequestSchema.parse(endpoints.sessionStart.request);
   runSessionStartResponseSchema.parse(endpoints.sessionStart.response);

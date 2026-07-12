@@ -52,6 +52,29 @@ func layout_snapshot() -> Dictionary:
 	return _layout.duplicate(true)
 
 
+func conversation_zone_id(actor_id: String, landmark_id: String) -> String:
+	var matches: PackedStringArray = []
+	for zone_value in _layout.get("interaction_zones", []):
+		if not zone_value is Dictionary:
+			continue
+		var zone := zone_value as Dictionary
+		if (
+			str(zone.get("kind", "")) != "conversation"
+			or str(zone.get("landmark", "")) != landmark_id
+		):
+			continue
+		var actor_ids := _interaction_zone_actor_ids(zone)
+		if actor_ids.has(actor_id):
+			matches.append(str(zone.get("id", "")))
+	if matches.size() != 1:
+		push_error(
+			"Town3D expected one conversation zone for %s at %s, found %d."
+			% [actor_id, landmark_id, matches.size()]
+		)
+		return ""
+	return matches[0]
+
+
 func anchor_position(anchor_ref: String) -> Variant:
 	var marker_name := anchor_ref.replace(".", "__")
 	var marker := get_node_or_null("Markers/Anchors/%s" % marker_name) as Node3D
@@ -163,6 +186,20 @@ func _layout_entry_by_id(collection_key: String, entry_id: String) -> Dictionary
 		):
 			return (entry_value as Dictionary).duplicate(true)
 	return {}
+
+
+func _interaction_zone_actor_ids(zone: Dictionary) -> PackedStringArray:
+	var actor_ids := PackedStringArray()
+	var single_actor_id := str(zone.get("actor_id", ""))
+	if not single_actor_id.is_empty():
+		actor_ids.append(single_actor_id)
+	var actor_ids_value: Variant = zone.get("actor_ids", [])
+	if actor_ids_value is Array:
+		for actor_id_value in actor_ids_value as Array:
+			var actor_id := str(actor_id_value)
+			if not actor_id.is_empty() and not actor_ids.has(actor_id):
+				actor_ids.append(actor_id)
+	return actor_ids
 
 
 func _speech_audibility_result(

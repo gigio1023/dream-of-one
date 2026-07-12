@@ -14,6 +14,15 @@ function deterministicIds() {
   return (prefix: keyof typeof counts) => `${prefix}-test-${++counts[prefix]}`;
 }
 
+async function preloadReceptionist(service: RunService, runId: string) {
+  return service.preloadConversation(
+    runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ko-KR",
+  );
+}
+
 test("run/start hydrates the shared town layout into six persistent uncertain actors", () => {
   const service = new RunService({
     proposalPort: createStudioReceptionScriptedAdapter(),
@@ -22,7 +31,7 @@ test("run/start hydrates the shared town layout into six persistent uncertain ac
   const snapshot = runSnapshotSchema.parse(service.start("run-test-start", "ko-KR"));
 
   assert.equal(snapshot.worldId, "m3r_first_person_town");
-  assert.equal(snapshot.layoutRevision, "rev-first-person-town-v3");
+  assert.equal(snapshot.layoutRevision, "rev-first-person-town-v4");
   assert.equal(snapshot.worldRevision, 0);
   assert.equal(snapshot.worldClock.graceEndsAtSeconds, 90);
   assert.equal(snapshot.worldClock.hearingAtSeconds, 1800);
@@ -44,18 +53,81 @@ test("run/start hydrates the shared town layout into six persistent uncertain ac
   );
   assert.ok(snapshot.actors.every(actor => actor.stance === "uncertain"));
   assert.ok(snapshot.actors.every(actor => actor.memories.length === 0));
-  assert.equal(snapshot.actors[0].playerConversationReady, true);
-  assert.ok(snapshot.actors.slice(1).every(actor => !actor.playerConversationReady));
+  assert.ok(snapshot.actors.every(actor => !actor.playerConversationReady));
   assert.equal(snapshot.scheduler.actors.length, 6);
   assert.ok(snapshot.scheduler.actors.every(actor => actor.currentBlock !== null));
   assert.ok(snapshot.scheduler.actors.every(actor => actor.pendingMovement === null));
 });
 
+test("all six residents preload and consume a conversation through their current actor-location zone", async () => {
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: deterministicIds(),
+  });
+  const run = service.start("run-all-six", "ko-KR");
+  const zones: Record<string, string> = {
+    NPC_Studio_Receptionist: "StudioReceptionConversation",
+    NPC_Studio_Manager: "StudioManagerConversation",
+    NPC_Office_Worker: "OfficeConversation",
+    NPC_Park_Caretaker: "ParkConversation",
+    NPC_Station_Officer: "StationIntakeConversation",
+    NPC_Roaming_Liaison: "ParkConversation",
+  };
+
+  await assert.rejects(
+    service.preloadConversation(
+      run.runId,
+      "NPC_Office_Worker",
+      "StudioReceptionConversation",
+      "ko-KR",
+    ),
+    (error: unknown) => error instanceof RunError && error.code === "invalid_interaction",
+  );
+  for (const actor of run.actors) {
+    const zone = zones[actor.actorId];
+    assert.ok(zone);
+    const preloaded = await service.preloadConversation(
+      run.runId,
+      actor.actorId,
+      zone,
+      "ko-KR",
+    );
+    assert.equal(preloaded.interactionZoneId, zone);
+    assert.equal(preloaded.actor.actorId, actor.actorId);
+    assert.equal(preloaded.actor.playerConversationReady, true);
+  }
+  assert.ok(service.snapshot(run.runId).actors.every(actor => actor.playerConversationReady));
+
+  for (const actor of run.actors) {
+    const zone = zones[actor.actorId];
+    assert.ok(zone);
+    const started = await service.startConversation(run.runId, actor.actorId, zone, "ko-KR");
+    assert.equal(started.actor.actorId, actor.actorId);
+    assert.ok(started.nextTurn.prompt.length > 0);
+    const answered = await service.answer(
+      run.runId,
+      started.sessionId,
+      started.nextTurn.turnId,
+      { type: "choice", choiceId: started.nextTurn.choices[0].choiceId },
+    );
+    assert.equal(answered.nextTurn, null);
+    const ended = await service.endConversation(run.runId, started.sessionId);
+    assert.equal(ended.actor.actorId, actor.actorId);
+    assert.equal(ended.actor.playerConversationReady, false);
+  }
+});
+
 test("a Studio answer persists model judgment and stance once across idempotent retries", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
+  const originalOpening = adapter.proposeConversationTurn.bind(adapter);
   const originalMerged = adapter.judgeAndProposeConversationTurn.bind(adapter);
+  let openingCalls = 0;
   let mergedCalls = 0;
   let mergedRequest: Parameters<typeof adapter.judgeAndProposeConversationTurn>[0] | undefined;
+  adapter.proposeConversationTurn = async request => {
+    openingCalls += 1;
+    return originalOpening(request);
+  };
   adapter.judgeAndProposeConversationTurn = async request => {
     mergedCalls += 1;
     mergedRequest = request;
@@ -63,12 +135,20 @@ test("a Studio answer persists model judgment and stance once across idempotent 
   };
   const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
   const run = service.start("run-test-start", "ko-KR");
+  const [preloaded, preloadRetry] = await Promise.all([
+    preloadReceptionist(service, run.runId),
+    preloadReceptionist(service, run.runId),
+  ]);
+  assert.deepEqual(preloadRetry, preloaded);
+  assert.equal(openingCalls, 1, "concurrent preload retries share one provider call");
+  assert.equal(preloaded.actor.playerConversationReady, true);
   const started = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,
     STUDIO_ZONE_ID,
     "ko-KR",
   );
+  assert.equal(openingCalls, 1, "starting consumes the opening without a provider call");
   const startRetry = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -90,14 +170,14 @@ test("a Studio answer persists model judgment and stance once across idempotent 
 
   assert.deepEqual(retried, answered);
   assert.equal(mergedCalls, 1, "an answer retry must not call the provider or mutate twice");
-  assert.equal(answered.worldRevision, 2);
+  assert.equal(answered.worldRevision, 3);
   assert.equal(answered.judgment.stanceBefore, "uncertain");
   assert.equal(answered.judgment.stanceAfter, "vouch");
   assert.equal(answered.judgment.whyLine, "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.");
   assert.equal(answered.nextTurn, null);
   assert.equal(answered.proposalMeta.transport, "scripted");
   assert.ok(mergedRequest);
-  assert.deepEqual(mergedRequest.observePacket.visibleActors, []);
+  assert.deepEqual(mergedRequest.observePacket.visibleActors, ["player"]);
   assert.deepEqual(mergedRequest.conversationHistory, [
     {
       speakerId: STUDIO_RECEPTIONIST_ID,
@@ -162,6 +242,7 @@ test("vouch provenance is clamped and speech cannot silently move institutional 
   });
   const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
   const run = service.start("run-test-start", "ko-KR");
+  await preloadReceptionist(service, run.runId);
   const started = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -188,6 +269,7 @@ test("ending a child conversation is idempotent and leaves its run state alive",
     idFactory: deterministicIds(),
   });
   const run = service.start("run-test-start", "ko-KR");
+  await preloadReceptionist(service, run.runId);
   const started = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -206,7 +288,7 @@ test("ending a child conversation is idempotent and leaves its run state alive",
   const retried = await service.endConversation(run.runId, started.sessionId);
 
   assert.deepEqual(retried, ended);
-  assert.equal(ended.worldRevision, 3);
+  assert.equal(ended.worldRevision, 4);
   const snapshot = service.snapshot(run.runId);
   assert.equal(snapshot.activeConversationId, null);
   assert.equal(snapshot.worldClock.paused, false);
@@ -217,6 +299,57 @@ test("ending a child conversation is idempotent and leaves its run state alive",
     service.startConversation(run.runId, STUDIO_RECEPTIONIST_ID, STUDIO_ZONE_ID, "ko-KR"),
     (error: unknown) => error instanceof RunError && error.code === "conversation_not_ready",
   );
+  await assert.rejects(
+    preloadReceptionist(service, run.runId),
+    (error: unknown) => error instanceof RunError && error.code === "conversation_not_ready",
+  );
+
+  let latest = await service.advance({
+    runId: run.runId,
+    advanceId: "unchanged-clock-1",
+    observedWorldRevision: ended.worldRevision,
+    elapsedSeconds: 10,
+    arrivals: [],
+  });
+  await assert.rejects(
+    preloadReceptionist(service, run.runId),
+    (error: unknown) => error instanceof RunError && error.code === "conversation_not_ready",
+  );
+  for (let step = 2; step <= 46; step += 1) {
+    latest = await service.advance({
+      runId: run.runId,
+      advanceId: `changed-schedule-${step}`,
+      observedWorldRevision: latest.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: [],
+    });
+  }
+  const receptionistMove = latest.movementDeltas.find(
+    movement => movement.actorId === STUDIO_RECEPTIONIST_ID,
+  );
+  assert.ok(receptionistMove);
+  const arrived = await service.advance({
+    runId: run.runId,
+    advanceId: "changed-schedule-arrival",
+    observedWorldRevision: latest.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [{
+      movementId: receptionistMove.movementId,
+      actorId: receptionistMove.actorId,
+      anchorRef: receptionistMove.targetAnchorRef,
+    }],
+  });
+  assert.ok(arrived.actorReadinessDeltas.some(
+    delta => delta.actorId === STUDIO_RECEPTIONIST_ID && delta.reason === "preload_required",
+  ));
+  const changed = await service.preloadConversation(
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    "ParkConversation",
+    "ko-KR",
+  );
+  assert.equal(changed.actor.locationId, "Park");
+  assert.equal(changed.actor.playerConversationReady, true);
 });
 
 test("rule fallback stays in-fiction and reaches a bounded clean end", async () => {
@@ -225,6 +358,7 @@ test("rule fallback stays in-fiction and reaches a bounded clean end", async () 
     idFactory: deterministicIds(),
   });
   const run = service.start("run-test-start", "ko-KR");
+  await preloadReceptionist(service, run.runId);
   const started = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,

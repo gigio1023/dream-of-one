@@ -34,19 +34,25 @@ func diagnostics_snapshot() -> Dictionary:
 		if diagnostics_value is Dictionary:
 			backend_diagnostics = (diagnostics_value as Dictionary).duplicate(true)
 	var fixture_advance_index: Variant = null
+	var fixture_preload_count: Variant = null
 	var fixture_decision_call_count: Variant = null
+	var fixture_session_end_revision: Variant = null
 	if _mode == "fixture":
 		fixture_advance_index = backend_diagnostics.get("advanceIndex")
+		fixture_preload_count = backend_diagnostics.get("preloadCount")
 		fixture_decision_call_count = backend_diagnostics.get("decisionCallCount")
+		fixture_session_end_revision = backend_diagnostics.get("sessionEndRevision")
 	return {
 		"mode": _mode,
 		"lastError": _diagnostic_error_summary(last_error),
 		"fixtureAdvanceIndex": fixture_advance_index,
+		"fixturePreloadCount": fixture_preload_count,
 		"fixtureDecisionCallCount": fixture_decision_call_count,
+		"fixtureSessionEndRevision": fixture_session_end_revision,
 	}
 
 
-func start_run(locale := "ko-KR", start_id := "") -> Dictionary:
+func start_run(locale: String, start_id := "") -> Dictionary:
 	await get_tree().process_frame
 	return await _backend.start_run(locale, start_id)
 
@@ -55,10 +61,25 @@ func start_conversation(
 	run_id: String,
 	actor_id: String,
 	interaction_zone_id: String,
-	locale := "ko-KR"
+	locale: String
 ) -> Dictionary:
 	await get_tree().process_frame
 	return await _backend.start_conversation(run_id, actor_id, interaction_zone_id, locale)
+
+
+func preload_conversation(
+	run_id: String,
+	actor_id: String,
+	interaction_zone_id: String,
+	locale: String
+) -> Dictionary:
+	await get_tree().process_frame
+	return await _backend.preload_conversation(
+		run_id,
+		actor_id,
+		interaction_zone_id,
+		locale
+	)
 
 
 func answer(

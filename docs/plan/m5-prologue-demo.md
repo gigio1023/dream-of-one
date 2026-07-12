@@ -1,7 +1,7 @@
 # M5 — Prologue Demo
 
 **Status: queued — reconcile with the first-person direction at activation
-(2026-07-11).** The public target (15–30 min honest demo, KO/EN, exports)
+(2026-07-11).** The public target (15–30 min honest demo, six locales, exports)
 stands; the arc below predates the M3R conversion and the hearing-based run
 frame ([`roadmap.md`](roadmap.md)), so rewrite the arc against shipped M3R/M4
 reality before activating.
@@ -9,8 +9,8 @@ reality before activating.
 ## Goal
 
 Ship the honest public thing v1 never reached: a 15–30 minute prologue demo
-on itch.io, Korean and English, desktop exports, with public copy that
-matches the build exactly.
+on itch.io in Korean, English, Italian, Simplified Chinese, French, and
+Japanese, with desktop exports and public copy that matches the build exactly.
 
 ## Deliverables
 
@@ -21,8 +21,11 @@ and a finale reaching one of the four routes with an ending panel that
 reconstructs the player's record trail. Three deterministic outcomes minimum
 across the arc; replay produces a different trail.
 
-**Localization:** EN parity for all player-facing text; localization smoke
-covers both locales; KO voice review per the content guide.
+**Localization target:** KO-first parity for `ko-KR`, `en-US`, `it-IT`, `zh-CN`,
+`fr-FR`, and `ja-JP` across authored and generated/fallback text. The M3R
+localization smoke covers exact key and placeholder parity for all six; KO
+voice review follows the content guide, and each translation receives a
+language review before release.
 
 **Release engineering:** Windows/macOS/Linux exports with the runtime
 packaged (resolve the sidecar-vs-embedded decision from
@@ -47,7 +50,8 @@ GPU, 60fps at 640×360 scale).
       OSes without instructions.
 - [ ] Zero-key first run reaches the same routes as live-profile runs.
 - [ ] Every public claim on the itch page is true of the uploaded build.
-- [ ] KO and EN full-run parity.
+- [ ] All six target locales have complete authored content and one full-run
+      parity pass; generated/fallback text uses the selected run locale.
 - [ ] Fun gate, plus the release question: "would I send this to a friend
       without apologizing?" Ship only on yes.
 

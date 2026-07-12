@@ -3,21 +3,20 @@
 TypeScript runtime owning all deterministic truth. This doc maps v1's ~12.7k
 LOC onto the M3R target so an agent knows what to keep, trim, or build.
 
-> **Implementation status (2026-07-12):** the first two additive M3R run slices
-> are checked in alongside the retained M1 Session service. `RunService` hydrates
-> the one `world_layout.json` into six persistent actor workspaces, separates
-> topology revision from monotonic run revision, owns the initial clock and
-> shared provider budget, and exposes run start/snapshot plus a run-bound
-> Studio receptionist conversation. A validated answer persists that actor's
-> exact line, why-line, private report inclination, firsthand provenance, and
-> model-judged coarse stance; speech alone cannot mutate institutional
-> pressure. Child-session end is idempotent and leaves the run alive. The
-> second slice adds idempotent run start/advance, unpaused clock batching, an
-> arrival-confirmed six-actor scheduler, participant-specific meeting slots,
-> and pending schedule/meeting/grace/hearing wakes without making a provider
-> call. Ambient NPC decisions and conversation, records, and the hearing
-> procedure remain target work below; schedule wakes are data, not evidence
-> that those later surfaces already exist.
+> **Implementation status (2026-07-12):** the first three additive M3R social
+> slices are checked in alongside the retained M1 Session service. `RunService`
+> hydrates `world_layout.json` into six persistent actor workspaces, owns clock,
+> revisions, scheduler, and shared provider budget, and exposes idempotent run
+> start/advance/snapshot. Arrival-confirmed schedules feed real two-turn park
+> meetings whose validated listeners receive attributed memories. Every
+> resident now has one actor/location-authored conversation zone and a
+> meaningful-evidence opening cache. `POST /v1/session/preload` resolves through
+> the existing provider port outside the serialized run lane; the later
+> `session/start` consumes that opening with zero provider calls. Context is
+> limited to the actor's role, location, goals, own memories/heard speech, and
+> visible records. A clean end consumes that evidence until a material
+> schedule, goal, memory, or record change and leaves the run alive. General
+> event dispatch, administrative records, and the hearing remain target work.
 
 ## Target module shape
 
@@ -80,7 +79,8 @@ Delete when the replacing module lands; don't leave both alive.
    (`conversation.turnId`) — no latest-wins coalescing.
 3. The deterministic suspicion classifier stays pure and fixture-tested; it
    is the fallback for provider outages, never the product judgment path.
-   Adding a signal class requires fixtures for KO and EN phrasing.
+   Adding a signal class requires phrasing fixtures for every currently
+   supported gameplay locale.
 4. World mutations happen only through validated tool application, and each
    emits exactly one civic ledger event.
 5. NPC context assembly enforces visibility — no data an NPC couldn't know
@@ -105,6 +105,12 @@ Delete when the replacing module lands; don't leave both alive.
 9. A run reset clears every run-owned value together. Content, provider
    profile selection, and deterministic test fixtures are configuration, not
    remembered world state.
+10. A run has one immutable gameplay locale selected from the shared supported
+    registry. The same locale flows through player conversation, ambient agent
+    calls, records, hearing/recap, and deterministic fallback; stable ids and
+    world truth remain language-neutral. The currently landed runtime still
+    accepts only `ko-KR`; the six-locale foundation replaces that literal
+    before later M3R content surfaces expand it.
 
 ## Sidecar API (M3R target)
 
@@ -117,7 +123,8 @@ surface is:
 | `POST /v1/run/start` | Idempotently create one run from a client `startId`, six actor workspaces, clock, revision, budgets, and initial snapshot |
 | `POST /v1/run/advance` | Submit a bounded unpaused-time delta plus validated physical/world observations; returns due wakes and deltas |
 | `GET  /v1/run/snapshot` | Full run snapshot for HUD hydrate, reconnect, and debug inspection |
-| `POST /v1/session/start` | Start a child conversation from `runId` + actor id; returns the modal conversation view |
+| `POST /v1/session/preload` | Resolve and cache an opening from strict `{runId, actorId, interactionZoneId, locale}`; returns the ready actor plus `ProposalMeta` without starting or pausing a child conversation |
+| `POST /v1/session/start` | Consume that opening from the same strict actor/zone/locale packet with zero provider calls; returns the modal conversation view |
 | `POST /v1/session/answer` | Player choice/typed input/hesitation → signals, state delta, NPC reactions |
 | `POST /v1/npc/decision` | Event wake for one scheduled actor, carrying `runId`, `wakeId`, and observed `worldRevision` |
 | `GET  /v1/session/snapshot` | Renderable child-session state; never a substitute for the run snapshot |
@@ -130,13 +137,14 @@ client can distinguish live/fallback/scripted behavior and animate validated
 consequences incrementally.
 
 The landed subset is `POST /v1/run/start`, `POST /v1/run/advance`,
-`GET /v1/run/snapshot`, the run-discriminated
+`GET /v1/run/snapshot`, `POST /v1/session/preload`, the run-discriminated
 start/answer/snapshot/end session routes, and run-discriminated
 `POST /v1/npc/decision` for bounded ambient meetings. Legacy
 `{storyletId, locale}` packets still dispatch to `SessionService`; strict
 `{runId, ...}` packets dispatch to `RunService` on the same loopback server.
-Fixture-only Studio scripts generate byte-identical backend and Godot replay
-files covering all three issued choices and one bounded free-input path.
+Fixture-only scripts generate byte-identical backend and Godot replay files
+with all six openings plus all three issued receptionist choices and one
+bounded free-input path.
 Production still resolves wording, suggestions, judgment, and stance through
 the configured provider port.
 

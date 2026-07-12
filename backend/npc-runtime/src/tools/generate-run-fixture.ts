@@ -2,11 +2,13 @@ import { writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createStudioReceptionScriptedAdapter } from "../providers/testing/studio-reception-script.js";
+import { conversationZoneFor, loadRunLayout } from "../runtime/run-layout.js";
 import { RunService, STUDIO_RECEPTIONIST_ID } from "../runtime/run-service.js";
 import type {
   RunAdvanceRequest,
   RunAdvanceResponse,
   RunNextTurn,
+  RunSnapshot,
   RunSessionAnswer,
 } from "../runtime/run-schema.js";
 
@@ -35,12 +37,38 @@ interface VariantSpec {
   answerFor: (turn: RunNextTurn) => RunSessionAnswer;
 }
 
+async function preloadAllResidents(service: RunService, runStartResponse: RunSnapshot) {
+  const layout = loadRunLayout();
+  const sessionPreloads = [];
+  for (const actor of runStartResponse.actors) {
+    const zone = conversationZoneFor(layout, actor.actorId, actor.locationId);
+    if (!zone) throw new Error(`fixture actor has no conversation zone: ${actor.actorId}`);
+    const request = {
+      runId: runStartResponse.runId,
+      actorId: actor.actorId,
+      interactionZoneId: zone.zoneId,
+      locale: "ko-KR" as const,
+    };
+    sessionPreloads.push({
+      request,
+      response: await service.preloadConversation(
+        request.runId,
+        request.actorId,
+        request.interactionZoneId,
+        request.locale,
+      ),
+    });
+  }
+  return sessionPreloads;
+}
+
 async function driveVariant(spec: VariantSpec) {
   const service = new RunService({
     proposalPort: createStudioReceptionScriptedAdapter(),
     idFactory: fixtureIds(),
   });
   const runStartResponse = service.start("run-fixture-start-1", "ko-KR");
+  const sessionPreloads = await preloadAllResidents(service, runStartResponse);
   const sessionStartResponse = await service.startConversation(
     runStartResponse.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -73,6 +101,7 @@ async function driveVariant(spec: VariantSpec) {
   return {
     variantId: spec.variantId,
     runStartResponse,
+    sessionPreloads,
     sessionStartResponse,
     answerRequest,
     sessionAnswerResponse,
@@ -89,10 +118,12 @@ async function driveAdvanceSequence() {
     idFactory: fixtureIds(),
   });
   const runStartResponse = service.start("run-fixture-start-1", "ko-KR");
+  await preloadAllResidents(service, runStartResponse);
+  const preloadedRun = service.snapshot(runStartResponse.runId);
   const initialRequest = {
     runId: runStartResponse.runId,
     advanceId: `${runStartResponse.runId}:advance:000001`,
-    observedWorldRevision: runStartResponse.worldRevision,
+    observedWorldRevision: preloadedRun.worldRevision,
     elapsedSeconds: 10,
     arrivals: [],
   };
@@ -260,6 +291,11 @@ export async function buildRunApiFixture() {
         request: { runId: defaultPath.runStartResponse.runId },
         response: advancePath.runSnapshotAfterMeetingResponse,
       },
+      sessionPreloads: defaultPath.sessionPreloads.map(preload => ({
+        endpoint: "POST /v1/session/preload",
+        request: preload.request,
+        response: preload.response,
+      })),
       sessionStart: {
         endpoint: "POST /v1/session/start",
         request: {

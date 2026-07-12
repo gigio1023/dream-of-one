@@ -57,7 +57,9 @@ loading screens, no fake doors. Low-fidelity free assets are the accepted
 norm — coherence, collision correctness, and social legibility are the bars,
 not fidelity. The setting stays a **stateless administered district** —
 generic-modern, institutionally named, deliberately unlocatable; Korean is
-the authoring language of all content. Surveillance pressure is drawn with
+the authoring and tone-reference language of all content, with the same game
+path localized into English, Italian, Simplified Chinese, French, and
+Japanese. Surveillance pressure is drawn with
 direction-aware subtitles for audible speech, reaction markers, and
 inspectable records.
 
@@ -77,5 +79,6 @@ The current milestone target is the honest conversion: a playable
 first-person town where six NPCs verifiably live, talk, and remember, and one
 run — arrive, be doubted, gather standing, survive the hearing or not — fits
 a sitting. The first public target remains a 15–30 minute prologue demo
-(M5): one town, six deeply-instrumented NPCs, Korean and English. Not
+(M5): one town, six deeply-instrumented NPCs, Korean, English, Italian,
+Simplified Chinese, French, and Japanese. Not
 promised: open-ended chat, a fixed LLM model, a full campaign.

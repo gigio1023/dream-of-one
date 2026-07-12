@@ -631,14 +631,40 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 	var hud := instance.get_node_or_null("HUD3D") as HUD3D
 	if player == null or receptionist == null or hud == null:
 		return
-	if not receptionist.is_interaction_enabled():
-		_failures.append("%s Studio receptionist is not interactable" % label)
-		return
+	var actors: Array[NPC3D] = []
 	for actor_value in instance.get_tree().get_nodes_in_group(&"npc_actors"):
-		if not actor_value is NPC3D or actor_value == receptionist:
-			continue
-		if (actor_value as NPC3D).is_interaction_enabled():
-			_failures.append("%s exposes an unsupported NPC conversation" % label)
+		if actor_value is NPC3D:
+			actors.append(actor_value as NPC3D)
+	var all_residents_ready := false
+	for _frame in range(240):
+		await process_frame
+		all_residents_ready = actors.size() == 6 and actors.all(
+			func(actor: NPC3D) -> bool: return actor.is_interaction_enabled()
+		)
+		if all_residents_ready:
+			break
+	if not all_residents_ready:
+		_failures.append("%s did not preload conversations for all six residents" % label)
+		return
+	var town := instance.get_node_or_null("Town") as Town3D
+	for actor in actors:
+		var expected_connection := Callable(
+			instance,
+			"_on_conversation_requested"
+		).bind(actor)
+		if not actor.conversation_requested.is_connected(expected_connection):
+			_failures.append("%s leaves %s conversation signal unwired" % [label, actor.actor_id])
+		if town != null:
+			var actor_snapshot: Dictionary = instance.call("_actor_view", str(actor.actor_id))
+			var zone_id := town.conversation_zone_id(
+				str(actor.actor_id),
+				str(actor_snapshot.get("locationId", ""))
+			)
+			if zone_id.is_empty():
+				_failures.append(
+					"%s cannot derive %s conversation zone from current location"
+					% [label, actor.actor_id]
+				)
 
 	player.global_position = receptionist.global_position + Vector3(0.0, 0.0, 1.5)
 	receptionist.interact(player)
@@ -691,7 +717,13 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 	if receptionist.is_interaction_enabled():
 		_failures.append("%s leaves a false receptionist re-conversation prompt" % label)
 	var main_snapshot: Dictionary = instance.call("presentation_snapshot")
-	if int(main_snapshot.get("runWorldRevision", -1)) != 3:
+	var advance_diagnostics: Dictionary = main_snapshot.get("advance", {})
+	var adapter_diagnostics: Dictionary = advance_diagnostics.get("adapter", {})
+	var expected_end_revision := int(adapter_diagnostics.get("fixtureSessionEndRevision", -1))
+	if (
+		expected_end_revision < 0
+		or int(main_snapshot.get("runWorldRevision", -1)) != expected_end_revision
+	):
 		_failures.append("%s run revision did not reach idempotent child-session end" % label)
 	var provider: Dictionary = main_snapshot.get("provider", {})
 	if str(provider.get("transport", "")) != "scripted":
@@ -717,6 +749,17 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 	if office_worker == null:
 		_failures.append("%s has no office worker for schedule movement" % label)
 		return
+	var fixture := _load_run_fixture()
+	var fixture_endpoints: Dictionary = fixture.get("endpoints", {})
+	var preload_packets: Array = fixture_endpoints.get("sessionPreloads", [])
+	var preload_baseline_revision := 0
+	for preload_value in preload_packets:
+		if preload_value is Dictionary:
+			var preload_response: Dictionary = (preload_value as Dictionary).get("response", {})
+			preload_baseline_revision = maxi(
+				preload_baseline_revision,
+				int(preload_response.get("worldRevision", 0))
+			)
 
 	var snapshot: Dictionary = {}
 	var run_ready := false
@@ -724,18 +767,24 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 		await process_frame
 		snapshot = instance.call("presentation_snapshot")
 		var scheduler_value: Variant = snapshot.get("scheduler", {})
+		var adapter: Dictionary = (snapshot.get("advance", {}) as Dictionary).get(
+			"adapter",
+			{}
+		)
 		if (
 			not str(snapshot.get("runId", "")).is_empty()
 			and scheduler_value is Dictionary
 			and not (scheduler_value as Dictionary).is_empty()
+			and int(adapter.get("fixturePreloadCount", -1)) == preload_packets.size()
+			and int(snapshot.get("runWorldRevision", -1)) == preload_baseline_revision
 		):
 			run_ready = true
 			break
 	if not run_ready:
 		_failures.append("%s fixture run did not auto-start with scheduler state" % label)
 		return
-	if int(snapshot.get("runWorldRevision", -1)) != 0:
-		_failures.append("%s fresh schedule run did not start at revision zero" % label)
+	if int(snapshot.get("runWorldRevision", -1)) != preload_baseline_revision:
+		_failures.append("%s schedule run did not reach its preloaded baseline" % label)
 	var initial_clock: Dictionary = snapshot.get("worldClock", {})
 	if float(initial_clock.get("elapsedSeconds", -1.0)) != 0.0:
 		_failures.append("%s fresh schedule clock did not start at zero" % label)
@@ -755,7 +804,7 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 		snapshot = instance.call("presentation_snapshot")
 		var movement_actor_ids := _active_movement_actor_ids(snapshot)
 		if (
-			int(snapshot.get("runWorldRevision", -1)) == 1
+			int(snapshot.get("runWorldRevision", -1)) == preload_baseline_revision + 1
 			and movement_actor_ids.has("NPC_Studio_Receptionist")
 			and movement_actor_ids.has("NPC_Office_Worker")
 			and movement_actor_ids.has("NPC_Station_Officer")
@@ -818,7 +867,7 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 			[]
 		)
 		if (
-			int(snapshot.get("runWorldRevision", -1)) >= 2
+			int(snapshot.get("runWorldRevision", -1)) >= preload_baseline_revision + 2
 			and arrivals_value is Array
 			and (arrivals_value as Array).size() == 3
 		):
@@ -864,7 +913,7 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 		snapshot = instance.call("presentation_snapshot")
 		var route_actor_ids := _active_movement_actor_ids(snapshot)
 		if (
-			int(snapshot.get("runWorldRevision", -1)) == 3
+			int(snapshot.get("runWorldRevision", -1)) == preload_baseline_revision + 3
 			and route_actor_ids.has("NPC_Park_Caretaker")
 			and route_actor_ids.has("NPC_Roaming_Liaison")
 		):
@@ -945,17 +994,26 @@ func _check_ambient_speech(
 	):
 		return
 
+	var fixture := _load_run_fixture()
+	var fixture_endpoints: Dictionary = fixture.get("endpoints", {})
+	var preload_packets: Array = fixture_endpoints.get("sessionPreloads", [])
 	var run_ready := false
 	for _frame in range(120):
 		await process_frame
-		if not str(instance.call("presentation_snapshot").get("runId", "")).is_empty():
+		var startup_snapshot: Dictionary = instance.call("presentation_snapshot")
+		var startup_adapter: Dictionary = (
+			startup_snapshot.get("advance", {}) as Dictionary
+		).get("adapter", {})
+		if (
+			not str(startup_snapshot.get("runId", "")).is_empty()
+			and int(startup_adapter.get("fixturePreloadCount", -1)) == preload_packets.size()
+		):
 			run_ready = true
 			break
 	if not run_ready:
 		_failures.append("%s fixture run did not start for ambient speech" % label)
 		return
 
-	var fixture := _load_run_fixture()
 	var endpoints: Dictionary = fixture.get("endpoints", {})
 	var decision_packet: Dictionary = endpoints.get("npcDecision", {})
 	var delivery_packet: Dictionary = endpoints.get("runAdvanceAmbientSpeech", {})
@@ -998,6 +1056,24 @@ func _check_ambient_speech(
 			break
 	if not decision_completed:
 		_failures.append("%s main ambient decision lane did not complete" % label)
+		return
+	# The meeting changes participant memories and invalidates their initial
+	# openings. Fixture mode has no second authored opening, so those stale
+	# cache hits must fail once and drain rather than entering a rebase loop.
+	var ambient_preloads_settled := false
+	for _frame in range(32):
+		await process_frame
+		var queued_preloads: Array = instance.get("_conversation_preload_queue")
+		var in_flight_preloads: Dictionary = instance.get("_conversation_preload_in_flight")
+		if (
+			queued_preloads.is_empty()
+			and in_flight_preloads.is_empty()
+			and not bool(instance.get("_advance_needs_rebase"))
+		):
+			ambient_preloads_settled = true
+			break
+	if not ambient_preloads_settled:
+		_failures.append("%s stale fixture opening entered a preload/rebase loop" % label)
 		return
 
 	var delivery_response: Dictionary = delivery_packet.get("response", {})

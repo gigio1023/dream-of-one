@@ -87,6 +87,38 @@ const audibilityVolumeSchema = z
     }
   });
 
+const interactionZoneSchema = z
+  .object({
+    id: nonEmpty,
+    kind: nonEmpty,
+    landmark: nonEmpty,
+    anchor: nonEmpty,
+    radius: z.number().positive(),
+    actor_id: nonEmpty.optional(),
+    actor_ids: z.array(nonEmpty).min(1).optional(),
+  })
+  .strict()
+  .superRefine((zone, context) => {
+    const actorIds = [
+      ...(zone.actor_id ? [zone.actor_id] : []),
+      ...(zone.actor_ids ?? []),
+    ];
+    if (zone.kind === "conversation" && actorIds.length === 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["actor_ids"],
+        message: "conversation interaction zones require at least one actor",
+      });
+    }
+    if (new Set(actorIds).size !== actorIds.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["actor_ids"],
+        message: "interaction zone actor ids must be unique",
+      });
+    }
+  });
+
 const townLayoutSchema = z
   .object({
     world_id: nonEmpty,
@@ -105,15 +137,7 @@ const townLayoutSchema = z
     }),
     audibility_volumes: z.array(audibilityVolumeSchema).min(1),
     actors: z.array(layoutActorSchema).length(6),
-    interaction_zones: z.array(
-      z.object({
-        id: nonEmpty,
-        kind: nonEmpty,
-        landmark: nonEmpty,
-        anchor: nonEmpty,
-        actor_id: nonEmpty.optional(),
-      }),
-    ),
+    interaction_zones: z.array(interactionZoneSchema),
   })
   .refine(value => new Set(value.actors.map(actor => actor.id)).size === value.actors.length, {
     message: "town layout actor ids must be unique",
@@ -171,19 +195,37 @@ export interface RunAudibilityVolume {
   }>;
 }
 
+export interface RunInteractionZone {
+  zoneId: string;
+  landmarkId: string;
+  anchorRef: string;
+  radius: number;
+  actorIds: string[];
+}
+
 export interface RunLayout {
   worldId: string;
   layoutRevision: string;
   graceEndsAtSeconds: number;
   hearingAtSeconds: number;
-  studioReceptionInteractionZoneId: string;
-  studioReceptionAnchorRef: string;
+  conversationZones: RunInteractionZone[];
   anchorRefs: string[];
   anchorPositions: Record<string, readonly [number, number, number]>;
   routes: RunLayoutRoute[];
   meetingWindows: RunMeetingWindow[];
   audibilityVolumes: RunAudibilityVolume[];
   actors: RunLayoutActor[];
+}
+
+/** Resolve the one layout-authored conversation zone for an actor at a landmark. */
+export function conversationZoneFor(
+  layout: RunLayout,
+  actorId: string,
+  locationId: string,
+): RunInteractionZone | undefined {
+  return layout.conversationZones.find(
+    zone => zone.landmarkId === locationId && zone.actorIds.includes(actorId),
+  );
 }
 
 function defaultLayoutPath(): string {
@@ -335,17 +377,53 @@ export function loadRunLayout(path = defaultLayoutPath()): RunLayout {
     }
   }
 
-  const studioReception = parsed.interaction_zones.find(
-    zone => zone.id === "StudioReceptionConversation",
-  );
-  if (
-    !studioReception ||
-    studioReception.kind !== "conversation" ||
-    studioReception.landmark !== "Studio" ||
-    studioReception.actor_id !== "NPC_Studio_Receptionist" ||
-    !anchorRefSet.has(studioReception.anchor)
-  ) {
-    throw new Error("world layout has no valid Studio receptionist conversation zone");
+  const conversationZones: RunInteractionZone[] = parsed.interaction_zones
+    .filter(zone => zone.kind === "conversation")
+    .map(zone => {
+      if (!landmarkIds.has(zone.landmark)) {
+        throw new Error(`conversation zone ${zone.id} has unknown landmark ${zone.landmark}`);
+      }
+      if (!anchorRefSet.has(zone.anchor) || zone.anchor.split(".", 1)[0] !== zone.landmark) {
+        throw new Error(`conversation zone ${zone.id} has invalid anchor ${zone.anchor}`);
+      }
+      const zoneActorIds = [...(zone.actor_id ? [zone.actor_id] : []), ...(zone.actor_ids ?? [])];
+      for (const actorId of zoneActorIds) {
+        if (!actorIds.has(actorId)) {
+          throw new Error(`conversation zone ${zone.id} references unknown actor ${actorId}`);
+        }
+      }
+      return {
+        zoneId: zone.id,
+        landmarkId: zone.landmark,
+        anchorRef: zone.anchor,
+        radius: zone.radius,
+        actorIds: zoneActorIds,
+      };
+    });
+  assertUnique(conversationZones.map(zone => zone.zoneId), "conversation zone ids");
+
+  for (const actor of actors) {
+    const reachableLocations = new Set<string>([actor.spawnAnchorRef.split(".", 1)[0] ?? ""]);
+    for (const block of actor.scheduleBlocks) {
+      if (block.target.kind === "anchor") {
+        reachableLocations.add(block.target.id.split(".", 1)[0] ?? "");
+      } else {
+        const route = parsed.routes.find(candidate => candidate.id === block.target.id);
+        for (const anchorRef of route?.points ?? []) {
+          reachableLocations.add(anchorRef.split(".", 1)[0] ?? "");
+        }
+      }
+    }
+    for (const locationId of reachableLocations) {
+      const matches = conversationZones.filter(
+        zone => zone.landmarkId === locationId && zone.actorIds.includes(actor.actorId),
+      );
+      if (matches.length !== 1) {
+        throw new Error(
+          `actor ${actor.actorId} requires exactly one conversation zone at ${locationId}; found ${matches.length}`,
+        );
+      }
+    }
   }
 
   return {
@@ -353,8 +431,7 @@ export function loadRunLayout(path = defaultLayoutPath()): RunLayout {
     layoutRevision: parsed.world_revision,
     graceEndsAtSeconds: parsed.schedule.grace_period_world_seconds,
     hearingAtSeconds: parsed.schedule.hearing_world_seconds,
-    studioReceptionInteractionZoneId: studioReception.id,
-    studioReceptionAnchorRef: studioReception.anchor,
+    conversationZones,
     anchorRefs,
     anchorPositions,
     routes: parsed.routes.map(route => ({ routeId: route.id, points: [...route.points] })),

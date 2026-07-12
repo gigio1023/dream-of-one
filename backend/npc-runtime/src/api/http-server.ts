@@ -33,6 +33,7 @@ import {
   runSessionEndResponseSchema,
   runSessionSnapshotRequestSchema,
   runSessionSnapshotResponseSchema,
+  runSessionPreloadResponseSchema,
   runSessionStartRequestSchema,
   runSessionStartResponseSchema,
   runSnapshotRequestSchema,
@@ -207,6 +208,19 @@ export function createSessionServer(service: SessionService, runService = new Ru
         if (!parsed.success) return badRequest(res, parsed.error);
         const result = await service.start(parsed.data.storyletId, parsed.data.locale);
         respond(res, startResponseSchema, result);
+        return;
+      }
+
+      if (method === "POST" && path === "/v1/session/preload") {
+        const parsed = runSessionStartRequestSchema.safeParse(await readJsonBody(req));
+        if (!parsed.success) return badRequest(res, parsed.error);
+        const result = await runService.preloadConversation(
+          parsed.data.runId,
+          parsed.data.actorId,
+          parsed.data.interactionZoneId,
+          parsed.data.locale,
+        );
+        respond(res, runSessionPreloadResponseSchema, result);
         return;
       }
 

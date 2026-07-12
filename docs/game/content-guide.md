@@ -54,10 +54,26 @@ nowhere on a map.
 
 ## Localization
 
-- Author KO → translate EN. Parity is a release (M5) requirement, not a
-  per-slice gate.
-- The v1 localization smoke pattern carries over: a headless check that every
-  player-facing key resolves in both locales.
+- Author Korean first, then localize the same content into English, Italian,
+  Simplified Chinese, French, and Japanese. Target presentation ids are
+  `ko/en/it/zh/fr/ja`; gameplay API locales are
+  `ko-KR/en-US/it-IT/zh-CN/fr-FR/ja-JP`. Preserve the full gameplay tag even
+  where Godot uses a short presentation id.
+- Korean controls canon and tone, not geography. Translation preserves the
+  line's social function, evidence content, speaker role, and procedural
+  distance rather than Korean word order.
+- At six-locale parity, a run fixes one gameplay locale at start. Dialogue,
+  suggestions, why-lines,
+  ambient speech, records, hearing/recap, and deterministic fallback all use
+  it; UI language changes apply on the next run or explicit restart.
+- Every player-facing string belongs behind the existing localization/content
+  path. Target locale files have identical keys and placeholder sets, and the
+  smoke inspects each locale directly instead of passing through Korean
+  fallback.
+- Parity for the surfaces M3R ships is an M3R milestone gate, not a gate on
+  every intermediate slice. M5 adds parity and language review for its new
+  prologue/release content. New keys still land in Korean source data
+  immediately and may not be hardcoded in UI or runtime code.
 
 ## Provider-written text boundary
 

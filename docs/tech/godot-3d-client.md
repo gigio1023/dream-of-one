@@ -9,9 +9,11 @@ the default 3D client beside the retained 2D harness
 and studio, first-person controller, permanently open building portals, one
 navigation map, six resident shells, HUD/settings, layout binding, and
 `AgentPlaytestSurface`. Its local
-`RunSession` can start the shared run and carry a Studio receptionist
-conversation through generated choices or bounded free text, model judgment,
-coarse stance display, child-session end, and world resume. The modal owns
+`RunSession` can preload actor/location/evidence-grounded openings for all six
+residents and carry any ready resident into the same generated-choice or
+bounded-free-text conversation surface. The click-time start consumes the
+opening without another provider wait; model judgment, coarse stance display,
+child-session end, and world resume remain unchanged. The modal owns
 only presentation and pause; all memory and stance truth comes back from the
 TypeScript `RunService`. Outside a modal, the client batches unpaused time,
 applies runtime movement IDs to projected NavMesh targets, and acknowledges an
@@ -19,9 +21,9 @@ arrival only after the matching NPC physically reaches that target. The first
 park meeting now produces two attributed utterances, exact listener memory,
 direction-aware subtitles, and a short spatial speech blip from the shared
 audibility contract. Runtime
-`playerConversationReady` remains the only authority for prompts; the initial
-receptionist is the sole enabled conversation until the runtime supports the
-other five actors.
+`playerConversationReady` remains the only authority for prompts. One
+background preload is allowed at a time, the HTTP bridge keeps a foreground
+transport lane, and late responses rebase instead of re-enabling stale actors.
 `run/main_scene` now points to `res://scenes/main_3d.tscn`; the 2D scene remains
 reachable by explicit path as the deterministic M1 harness.
 
@@ -167,8 +169,11 @@ list.
 
 ### Settings surface (Esc), minimal
 
-Look sensitivity, invert Y, FOV, UI scale (M2 carryover), master/SFX
-volume, language (ko/en). Nothing else until live play asks for it.
+The target surface contains look sensitivity, invert Y, FOV, UI scale (M2
+carryover), master/SFX volume, and language (`ko/en/it/zh/fr/ja`). The landed
+selector still exposes only `ko/en`; the next locale-foundation slice makes one
+supported-locale registry feed it. No second hardcoded language list belongs
+in the HUD, and nothing else is added until live play asks for it.
 
 ## World construction plan
 
@@ -257,8 +262,15 @@ the dev machine with all six NPC loops live.
 - **Consequence surfacing ≤1s** of its ledger event; no silent state change.
 - **Fallback honesty** — provider status badge and fallback reason surface in
   play; raw ids stay behind F3 debug.
-- **Localization** — all player-facing strings through Godot translations
-  (`ko` primary, `en` parity by M5); localization smoke concept kept.
+- **Localization target** — all player-facing strings use the existing Godot
+  `TranslationServer` path. Korean is first-authored; `en/it/zh/fr/ja` use the
+  same keys and placeholder sets. The selected presentation id will map once to
+  the full immutable run locale (`ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`,
+  or `ja-JP`). The
+  parity smoke will read each locale directly so Korean fallback cannot hide a
+  missing translation. The shared theme must cover Latin accents, Hangul, Han,
+  and kana, and the existing HUD must wrap long Italian/French text rather
+  than branch by locale.
 
 ## New client responsibilities (3D-specific)
 

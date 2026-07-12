@@ -15,7 +15,8 @@ Setting note (unchanged, decided 2026-07-10): the town is a **placeless
 administrative zone** — no real-world country markers, generic-modern
 signage, institutional naming (구역/스테이션 numbering). Korean remains the
 authoring language of all content; the place stays unlocatable, which keeps
-KO/EN localization symmetrical and fits the dream-logic undertone.
+all six target localizations culturally neutral and fits the dream-logic
+undertone.
 
 ## Camera and world
 

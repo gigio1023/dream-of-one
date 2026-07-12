@@ -70,7 +70,7 @@ boundary (architecture passed, fun gate: no on immersion); M1 remains as the
 | [`plan/m3-agent-loop-npcs.md`](plan/m3-agent-loop-npcs.md) | Concurrent NPC society in the 2D frame | killed 2026-07-11 |
 | [`plan/m3-first-person-town.md`](plan/m3-first-person-town.md) | First-person 3D town conversion: six event-driven NPCs, stances, the hearing run frame | **active** |
 | [`plan/m4-town-social-sim.md`](plan/m4-town-social-sim.md) | Social depth: rumor-diffusion clock, incidents, notice board, save/load | queued (rescope at activation) |
-| [`plan/m5-prologue-demo.md`](plan/m5-prologue-demo.md) | 15–30 min prologue, KO/EN, exports, itch release | queued |
+| [`plan/m5-prologue-demo.md`](plan/m5-prologue-demo.md) | 15–30 min prologue, six target locales, exports, itch release | queued |
 
 ### History
 

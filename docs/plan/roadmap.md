@@ -17,11 +17,16 @@ boundaries (see anti-goals in
 | M3 | [Agent-loop society](m3-agent-loop-npcs.md) | Station verdicts become model-judged (reversible by argument); multiple NPCs pursue concurrent goals inside a long-breath run | ...one working agent loop does not produce believable society | **killed 2026-07-11** (opening slices shipped; see history below) |
 | M3R | [First-person town](m3-first-person-town.md) | Convert to one seamless first-person 3D town where six event-driven LLM NPCs live, talk, and remember; run frame = stances/vouches toward a scheduled Station hearing | ...the LLM society cannot carry an inhabitable world, and the game stays a cramped 2D test harness | **active** |
 | M4 | [Town social sim](m4-town-social-sim.md) | Social depth on the proven town: rumor-diffusion clock, NPC-initiated incidents, notice board, save/load | ...belief movement doesn't scale into replayable social drama | queued (rescope at activation) |
-| M5 | [Prologue demo](m5-prologue-demo.md) | 15–30 min honest public demo, KO/EN, desktop exports, itch page | ...nothing shippable exists (v1's terminal state) | queued |
+| M5 | [Prologue demo](m5-prologue-demo.md) | 15–30 min honest public demo in KO/EN/IT/ZH-CN/FR/JA, desktop exports, itch page | ...nothing shippable exists (v1's terminal state) | queued |
 
 Post-M5 (not planned in detail, listed to aim high): additional storylet
 packs from the social-cards canon, NPC cast growth, a second town block,
 Steam page, modding surface for storylet data.
+
+**Owner amendment (2026-07-12):** the six-locale target was explicitly added
+to active M3R and the public M5 target. This is the owner-directed exception
+to the normal no-scope-addition rule below; it edits the existing milestone
+and vision pages rather than creating a parallel direction document.
 
 ## Cross-cutting tracks
 
@@ -38,6 +43,10 @@ Steam page, modding surface for storylet data.
   event-driven scheduling for six concurrent NPC loops and emergent
   propagation; M4 adds per-role profiles (cheap ambient / better Station);
   M5 locks the demo's default profile + disclosure copy.
+- **Localization track:** Korean remains first-authored. M3R makes the single
+  UI/run/provider/fallback path locale-driven for `ko-KR`, `en-US`, `it-IT`,
+  `zh-CN`, `fr-FR`, and `ja-JP`; M5 ships content parity through that path
+  instead of adding language-specific implementations.
 
 ## Milestone rules
 

@@ -1,7 +1,7 @@
 {
   "version": 3,
   "world_id": "m3r_first_person_town",
-  "world_revision": "rev-first-person-town-v3",
+  "world_revision": "rev-first-person-town-v4",
   "units": "meters",
   "coordinate_system": {
     "up": "+Y",
@@ -429,8 +429,8 @@
       "kind": "conversation",
       "landmark": "Studio",
       "anchor": "Studio.reception_desk",
-      "radius": 2.5,
-      "actor_id": "NPC_Studio_Receptionist"
+      "radius": 4.5,
+      "actor_ids": ["NPC_Studio_Receptionist", "NPC_Roaming_Liaison"]
     },
     {
       "id": "StudioManagerConversation",
@@ -438,31 +438,38 @@
       "landmark": "Studio",
       "anchor": "Studio.manager_desk",
       "radius": 2.5,
-      "actor_id": "NPC_Studio_Manager"
+      "actor_ids": ["NPC_Studio_Manager"]
     },
     {
       "id": "OfficeConversation",
       "kind": "conversation",
       "landmark": "Office",
       "anchor": "Office.work_desk",
-      "radius": 2.5,
-      "actor_id": "NPC_Office_Worker"
+      "radius": 3,
+      "actor_ids": ["NPC_Office_Worker", "NPC_Roaming_Liaison"]
     },
     {
       "id": "ParkConversation",
       "kind": "conversation",
       "landmark": "Park",
       "anchor": "Park.center",
-      "radius": 8,
-      "actor_ids": ["NPC_Park_Caretaker", "NPC_Roaming_Liaison"]
+      "radius": 10,
+      "actor_ids": [
+        "NPC_Studio_Receptionist",
+        "NPC_Studio_Manager",
+        "NPC_Office_Worker",
+        "NPC_Park_Caretaker",
+        "NPC_Station_Officer",
+        "NPC_Roaming_Liaison"
+      ]
     },
     {
       "id": "StationIntakeConversation",
       "kind": "conversation",
       "landmark": "Station",
       "anchor": "Station.intake_desk",
-      "radius": 2.5,
-      "actor_id": "NPC_Station_Officer"
+      "radius": 4,
+      "actor_ids": ["NPC_Station_Officer", "NPC_Roaming_Liaison"]
     },
     {
       "id": "StationHearing",

@@ -255,6 +255,12 @@ test("meeting wakes require both participant slots after the schedule boundary",
 test("modal conversations pause clock and clock-only progress never reopens reception", async () => {
   const service = createService();
   const started = service.start("start-modal", "ko-KR");
+  await service.preloadConversation(
+    started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    "StudioReceptionConversation",
+    "ko-KR",
+  );
   const conversation = await service.startConversation(
     started.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -290,7 +296,9 @@ test("modal conversations pause clock and clock-only progress never reopens rece
     .snapshot(started.runId)
     .actors.find(actor => actor.actorId === STUDIO_RECEPTIONIST_ID);
   assert.equal(receptionist?.playerConversationReady, false);
-  assert.ok(tick.movementDeltas.every(movement => movement.actorId !== STUDIO_RECEPTIONIST_ID));
+  assert.ok(tick.actorReadinessDeltas.every(
+    delta => delta.actorId !== STUDIO_RECEPTIONIST_ID || !delta.playerConversationReady,
+  ));
 });
 
 test("hearing clamps one final batch and exact retry wins over terminal state", async () => {

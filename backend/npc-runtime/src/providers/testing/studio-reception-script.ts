@@ -9,11 +9,18 @@ import type {
 import { ScriptedNpcAdapter } from "./scripted-npc-adapter.js";
 
 function opening(request: ConversationTurnRequest): ConversationProposal {
-  if (request.actorId !== "NPC_Studio_Receptionist") {
-    throw new Error(`studio fixture cannot speak for ${request.actorId}`);
-  }
+  const roleOpenings: Record<string, string> = {
+    NPC_Studio_Receptionist: "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+    NPC_Studio_Manager: "스튜디오 관리 업무 중입니다. 저를 찾아온 이유를 말씀해 주세요.",
+    NPC_Office_Worker: "확인 업무를 맡고 있습니다. 어떤 일로 오셨는지 말씀해 주세요.",
+    NPC_Park_Caretaker: "공원을 돌보는 중입니다. 제게 하실 말씀이 있나요?",
+    NPC_Station_Officer: "스테이션 담당관입니다. 어떤 일로 말을 거셨습니까?",
+    NPC_Roaming_Liaison: "마을을 오가며 연락을 맡고 있습니다. 무엇을 확인하고 싶으신가요?",
+  };
+  const utterance = roleOpenings[request.actorId];
+  if (!utterance) throw new Error(`town fixture cannot speak for ${request.actorId}`);
   return {
-    utterance: "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+    utterance,
     suggestedReplies: [
       { text: "안내받은 절차를 확인하러 왔습니다.", intent: "safe/local" },
       { text: "먼저 어떤 접수인지 설명해 주세요.", intent: "uncertain/repair" },

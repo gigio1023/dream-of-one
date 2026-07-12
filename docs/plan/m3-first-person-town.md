@@ -15,6 +15,11 @@ an outsider, edit what residents believe about you through conversation only,
 and face a scheduled Station hearing that pools their real memories into a
 verdict.
 
+Korean remains the source and tone-reference language. The same game path must
+support Korean, English, Italian, Simplified Chinese, French, and Japanese —
+including generated dialogue, ambient speech, why-lines, fallback, hearing,
+and recap, not only menu chrome.
+
 ## Owner decisions shaping this milestone
 
 1. **Full conversion, not a probe.** The 2D presentation is replaced. Low-fi
@@ -51,6 +56,15 @@ verdict.
 9. **Audio**: CC0 SFX and ambience land here (footsteps, park murmur, short
    spatial speech murmurs/blips, the record-scribble cue); no TTS or BGM in
    M3R.
+10. **Six gameplay locales, one implementation**: presentation ids are
+    `ko`, `en`, `it`, `zh`, `fr`, and `ja`; target run API locales are
+    `ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`. Chinese means
+    Simplified Chinese for this target; preserve full
+    locale tags so a later Traditional Chinese target does not require a new
+    locale system. One run fixes its gameplay locale at start, and a settings
+    change applies to the next run or an explicit restart so memories never
+    mix languages. No locale gets a separate UI, conversation path, NPC loop,
+    or provider adapter.
 
 ## First playable proof
 
@@ -61,6 +75,15 @@ schedule outside and two residents hold an audible conversation the player
 can overhear with subtitles.
 
 ## Dependency notes and ordering
+
+- **Reuse before implementation.** Extend the existing Dream path first, then
+  Godot/Bun platform facilities; add only the smallest missing behavior. The
+  owner-referenced Ponytail repository is an agent instruction/plugin, not a
+  reusable game library; its audit identified no compatible Dream gameplay
+  component to import. It contributes this reuse order, not a dependency. In
+  particular, keep the existing `Localization` /
+  `TranslationServer`, `HUD3D`, `RunSession` / `RuntimeBridge`, `RunService`,
+  provider ports, and fixture generator instead of creating parallel systems.
 
 - **Godot AI is active in every 3D spatial/UI slice.** Before changing a slice,
   select the editor session whose canonical path is this checkout's `godot/`
@@ -101,6 +124,15 @@ can overhear with subtitles.
 - **Scenario canon slices**: the player's concrete identity/secret and the
   six resident identities are drafted from `docs/scenario/` canon for owner
   approval as content slices inside this milestone.
+- **Locale work follows the playable slices instead of becoming a second
+  framework.** The next locale-foundation slice, before the event loop and HUD
+  expand further, carries the selected locale through the existing run,
+  session, provider, fallback, and fixture paths. Subsequent ambient,
+  administrative, hearing, recap, physicality, and onboarding work adds text
+  only through that path. Milestone integration verifies exact key/placeholder
+  parity, long Latin text, CJK glyphs, IME input, and one bounded generated
+  round trip per locale. New player-facing text is always keyed content even
+  before translation parity lands.
 
 ## Player-visible deliverables
 
@@ -111,6 +143,9 @@ can overhear with subtitles.
   crouch, out-of-bounds failsafe, and the minimal Esc settings surface
   (FOV, sensitivity/invert, UI scale, volume, language). The comfort
   research slice tunes the numbers, not the list; keyboard+mouse full play.
+- One six-locale settings and content path (`ko/en/it/zh/fr/ja`) whose selected
+  locale governs HUD, generated and fallback conversation, subtitles,
+  records, hearing, and recap for the whole run.
 - The seamless town: park, studio reception, office, Station, street
   connective space; all building portals remain open; collision and
   navigation correct.
@@ -167,6 +202,11 @@ can overhear with subtitles.
   line of sight, audibility).
 - Provider cost/cadence research within the existing port layer (six agents,
   event-driven; per-run call/token budget proven in play).
+- A shared supported-locale contract used by Godot, run schemas, provider
+  prompts/envelopes, fallback content, and fixture generation. Exact locale
+  and placeholder-key parity is checked without accepting Korean fallback as
+  a missing translation; the HUD has a licensed Latin/Hangul/Han/kana font
+  fallback and wraps long Italian/French text without a locale-specific scene.
 
 ## Acceptance
 
@@ -208,6 +248,13 @@ can overhear with subtitles.
       packets show `profileId=modelscope/qwen3.7-plus`, `transport=live`, and
       no fallback. Fixture/scripted/fallback checks remain valid engineering
       evidence but do not prove the LLM game experience.
+- [ ] `ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP` each pass exact
+      player-facing key and placeholder parity, show no raw localization key,
+      preserve readable glyphs/layout at 100% and 150% UI scale, and accept
+      Korean/Chinese/Japanese IME composition where text entry is offered.
+      Each locale completes one bounded Qwen-live opening → answer → why-line
+      plus ambient/fallback language check; six full 30–60 minute runs are not
+      required.
 - [ ] `bun run --cwd backend/npc-runtime check`, headless import, and scene
       smoke pass; the fun gate is answered honestly in the PR.
 
@@ -217,4 +264,6 @@ The rumor-diffusion run clock and notice board (M4); save/load (M4, pulled
 forward only if runs outgrow a sitting); cross-run persistence; trespass,
 theft, combat, health, damage, chase; inventory; store/commerce; BGM (M5);
 graphical fidelity beyond coherence; local-model support; any second
-simulation tier for distant NPCs.
+simulation tier for distant NPCs. Traditional Chinese is not part of the
+initial six-locale content target, but the locale contract must preserve the
+tag needed to add it without redesign.

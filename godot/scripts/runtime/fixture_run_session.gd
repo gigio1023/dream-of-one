@@ -16,6 +16,7 @@ var _selected_answer_request: Dictionary = {}
 var _selected_answer_response: Dictionary = {}
 var _advance_index := 0
 var _advance_cache: Dictionary = {}
+var _preload_cache: Dictionary = {}
 var _decision_cache: Dictionary = {}
 var _decision_call_count := 0
 var _current_run_snapshot: Dictionary = {}
@@ -61,6 +62,17 @@ func start_conversation(
 		or locale != str(request.get("locale", ""))
 	):
 		return _stored_error("fixture_conversation_miss", "Fixture has no matching conversation start.")
+	var preload_signature := JSON.stringify({
+		"runId": run_id,
+		"actorId": actor_id,
+		"interactionZoneId": interaction_zone_id,
+		"locale": locale,
+	})
+	if not _preload_cache.has(preload_signature):
+		return _stored_error(
+			"conversation_not_ready",
+			"Fixture conversation opening was not preloaded."
+		)
 	if _ended:
 		return _stored_error(
 			"conversation_not_ready",
@@ -70,6 +82,72 @@ func start_conversation(
 		return _stored_error("conversation_active", "Fixture conversation is awaiting clean end.")
 	_conversation_started = true
 	return _dictionary_or_empty(packet.get("response"))
+
+
+func preload_conversation(
+	run_id: String,
+	actor_id: String,
+	interaction_zone_id: String,
+	locale: String
+) -> Dictionary:
+	if not _started:
+		return _stored_error("run_not_started", "Start the fixture run first.")
+	var signature := JSON.stringify({
+		"runId": run_id,
+		"actorId": actor_id,
+		"interactionZoneId": interaction_zone_id,
+		"locale": locale,
+	})
+	var session_start_request := _dictionary_or_empty(_endpoint("sessionStart").get("request"))
+	if _ended and actor_id == str(session_start_request.get("actorId", "")):
+		return _stored_error(
+			"conversation_not_ready",
+			"Fixture conversation evidence was already consumed."
+		)
+	if _preload_cache.has(signature):
+		var cached_response := _dictionary_or_empty(_preload_cache.get(signature))
+		var current_actor := _snapshot_actor(actor_id)
+		if (
+			not bool(current_actor.get("playerConversationReady", false))
+			and int(cached_response.get("worldRevision", 0))
+			< int(_current_run_snapshot.get("worldRevision", 0))
+		):
+			return _stored_error(
+				"conversation_not_ready",
+				"Fixture has no refreshed opening for the actor's newer evidence."
+			)
+		_last_error = {}
+		return cached_response
+	for packet_value in _preload_variants():
+		if not packet_value is Dictionary:
+			continue
+		var packet := packet_value as Dictionary
+		var request := _dictionary_or_empty(packet.get("request"))
+		if signature != JSON.stringify({
+			"runId": str(request.get("runId", "")),
+			"actorId": str(request.get("actorId", "")),
+			"interactionZoneId": str(request.get("interactionZoneId", "")),
+			"locale": str(request.get("locale", "")),
+		}):
+			continue
+		var response := _dictionary_or_empty(packet.get("response"))
+		if response.is_empty():
+			return _stored_error(
+				"fixture_conversation_preload_missing",
+				"Fixture conversation preload has no response."
+			)
+		_preload_cache[signature] = response.duplicate(true)
+		_current_run_snapshot["worldRevision"] = maxi(
+			int(_current_run_snapshot.get("worldRevision", 0)),
+			int(response.get("worldRevision", 0))
+		)
+		_patch_snapshot_actor(_dictionary_or_empty(response.get("actor")))
+		_last_error = {}
+		return response.duplicate(true)
+	return _stored_error(
+		"fixture_conversation_preload_miss",
+		"Fixture has no matching conversation preload."
+	)
 
 
 func answer(
@@ -247,6 +325,7 @@ func reset() -> void:
 	_selected_answer_response = {}
 	_advance_index = 0
 	_advance_cache = {}
+	_preload_cache = {}
 	_decision_cache = {}
 	_decision_call_count = 0
 	_current_run_snapshot = {}
@@ -258,9 +337,12 @@ func last_error() -> Dictionary:
 
 
 func diagnostics_snapshot() -> Dictionary:
+	var session_end_response := _dictionary_or_empty(_endpoint("sessionEnd").get("response"))
 	return {
 		"advanceIndex": _advance_index,
+		"preloadCount": _preload_cache.size(),
 		"decisionCallCount": _decision_call_count,
+		"sessionEndRevision": int(session_end_response.get("worldRevision", -1)),
 	}
 
 
@@ -286,6 +368,12 @@ func _answer_variants() -> Array:
 		return variants_value as Array
 	var endpoint := _endpoint("sessionAnswer")
 	return [endpoint] if not endpoint.is_empty() else []
+
+
+func _preload_variants() -> Array:
+	var endpoints := _dictionary_or_empty(_fixture.get("endpoints"))
+	var variants_value: Variant = endpoints.get("sessionPreloads", [])
+	return variants_value as Array if variants_value is Array else []
 
 
 func _advance_sequence() -> Array:
@@ -342,6 +430,9 @@ func _apply_decision_to_snapshot(response: Dictionary) -> void:
 		_highest_speech_seq(_array_or_empty(response.get("speechEvents"))),
 		null
 	)
+	for readiness_value in _array_or_empty(response.get("actorReadinessDeltas")):
+		if readiness_value is Dictionary:
+			_patch_snapshot_actor(readiness_value as Dictionary)
 
 
 func _apply_ambient_to_snapshot(
@@ -396,6 +487,16 @@ func _patch_snapshot_actor(patch: Dictionary) -> void:
 					actor[key] = patch[key]
 			actors[index] = actor
 			return
+
+
+func _snapshot_actor(actor_id: String) -> Dictionary:
+	for actor_value in _array_or_empty(_current_run_snapshot.get("actors")):
+		if (
+			actor_value is Dictionary
+			and str((actor_value as Dictionary).get("actorId", "")) == actor_id
+		):
+			return (actor_value as Dictionary).duplicate(true)
+	return {}
 
 
 func _advance_request_signature(request: Dictionary) -> String:

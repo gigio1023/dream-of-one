@@ -36,8 +36,8 @@ interface NpcProposalPort {
 ```
 
 `MergedConversationTurn` is judgment fields (bounded suspicion/report deltas,
-signal classes, Korean why-line) plus the NPC's next utterance and three
-reply suggestions. If a live model breaks that schema, `ProviderService`
+signal classes, and a player-visible why-line) plus the NPC's next utterance
+and three reply suggestions. If a live model breaks that schema, `ProviderService`
 retries once, then falls back to composing the rule judgment with the
 canned reply set — the schema contents are not shrunk.
 
@@ -45,7 +45,7 @@ canned reply set — the schema contents are not shrunk.
 suggestions. Reply intent labels shape variety only; they never decide
 suspicion. `ConversationJudgment` is the judging NPC's read of the player's
 answer: a bounded suspicion/report delta, the signal classes that applied,
-and a player-visible Korean why-line. The runtime clamps deltas and scores;
+and a player-visible why-line. The runtime clamps deltas and scores;
 it does not decide what the answer meant. `AgentStepProposal` contains at
 most one tool call, an optional utterance, and a stop flag. The runtime
 validates every tool against visibility, role authority, object state, and
@@ -82,19 +82,29 @@ classifier. This prevents providers that naturally emit 1–5 ratings from
 making report and Station pressure unreachable while leaving the actual
 meaning judgment with the NPC model.
 
-Agent-step prompts require Korean for every player-visible utterance and tell
-the model to stop after a successful goal-satisfying tool result instead of
+The currently landed M3R prompts require Korean for every player-visible
+utterance. The six-locale foundation replaces that literal with the run's
+supported locale and carries it into `AgentStepRequest`; it still tells the
+model to stop after a successful goal-satisfying tool result instead of
 repeating the same successful read or look until the iteration budget ends.
 Tool names and ids stay unchanged for validation. The generic agent-loop
 validator also suppresses an identical call after it has already succeeded or
 been blocked within the same beat, returning that result to the model so it can
 stop or choose a genuinely different next action.
 
-Player-visible dialogue, reply suggestions, judgment reasons, NPC utterances,
-and record/ledger prose also pass a modern-Korean script check at the provider
-envelope boundary. Latin or Han-character leakage receives the same single
-bounded repair attempt as malformed JSON; ids and tool names are excluded from
-that language check.
+The locale-foundation target is one locale-aware validation stage for
+player-visible dialogue, reply suggestions, judgment reasons, NPC utterances,
+and record/ledger prose. Korean keeps its modern-Korean script check; the other
+locales use bounded structural and locale instructions without introducing a
+second language detector. A mismatch will use the existing single repair
+attempt; ids and tool names remain excluded. Target gameplay locales are
+`ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`.
+
+The target run fixes its locale at creation. That tag will be part of
+opening-cache and request-idempotency signatures and will flow through
+conversation, ambient agent steps, record/hearing generation, and fallback
+selection. Adapters remain locale-agnostic transports; no vendor SDK, base
+URL, or provider profile is added per language.
 
 ## Envelope and failure handling
 

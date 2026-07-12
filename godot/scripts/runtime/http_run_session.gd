@@ -53,6 +53,25 @@ func start_conversation(
 	)
 
 
+func preload_conversation(
+	run_id: String,
+	actor_id: String,
+	interaction_zone_id: String,
+	locale: String
+) -> Dictionary:
+	return await _post(
+		"/v1/session/preload",
+		{
+			"runId": run_id,
+			"actorId": actor_id,
+			"interactionZoneId": interaction_zone_id,
+			"locale": locale,
+		},
+		START_TIMEOUT_SECONDS,
+		"conversation_preload_failed"
+	)
+
+
 func answer(
 	run_id: String,
 	session_id: String,

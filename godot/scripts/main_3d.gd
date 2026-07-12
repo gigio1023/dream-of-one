@@ -7,7 +7,9 @@ const DEFAULT_SFX_VOLUME := 0.8
 const CONVERSATION_ERROR_HOLD_SECONDS := 1.5
 const CONVERSATION_END_HOLD_SECONDS := 0.35
 const CONVERSATION_START_RETRY_ATTEMPTS := 3
-const STUDIO_INTERACTION_ZONE_ID := "StudioReceptionConversation"
+const CONVERSATION_PRELOAD_MAX_IN_FLIGHT := 1
+const CONVERSATION_PRELOAD_MAX_RETRIES := 3
+const CONVERSATION_PRELOAD_RETRY_SECONDS := 1.0
 const ADVANCE_BATCH_SECONDS := 1.0
 const FIXTURE_ADVANCE_BATCH_SECONDS := 10.0
 const ARRIVAL_BATCH_SECONDS := 2.0
@@ -24,7 +26,6 @@ const AMBIENT_DECISION_RETRY_SECONDS := 1.0
 @onready var _player: CharacterBody3D = $Town/Actors/Player3D
 @onready var _hud: HUD3D = $HUD3D
 @onready var _run_session: RunSession3D = $RunSession
-@onready var _studio_receptionist: NPC3D = $Town/Actors/NPC_Studio_Receptionist
 @onready var _localization: Node = get_node("/root/Localization")
 
 var _ui_scale := DEFAULT_UI_SCALE
@@ -46,6 +47,12 @@ var _resolving_answer := false
 var _ending_conversation := false
 var _required_retry_answer: Dictionary = {}
 var _conversation_start_retry_required := false
+var _conversation_preload_queue: Array[String] = []
+var _conversation_preload_queued: Dictionary = {}
+var _conversation_preload_in_flight: Dictionary = {}
+var _conversation_preload_requeue_requested: Dictionary = {}
+var _conversation_preload_retries: Dictionary = {}
+var _conversation_preload_refresh_required := false
 var _advance_elapsed_buffer := 0.0
 var _advance_in_flight := false
 var _advance_rebase_in_flight := false
@@ -101,11 +108,10 @@ func _ready() -> void:
 	_hud.ambient_subtitle_started.connect(_on_ambient_subtitle_started)
 	for actor_value in get_tree().get_nodes_in_group(&"npc_actors"):
 		if actor_value is NPC3D:
-			(actor_value as NPC3D).movement_arrived.connect(_on_npc_movement_arrived)
-			(actor_value as NPC3D).movement_blocked.connect(_on_npc_movement_blocked)
-	_studio_receptionist.conversation_requested.connect(
-		_on_conversation_requested.bind(_studio_receptionist)
-	)
+			var actor := actor_value as NPC3D
+			actor.movement_arrived.connect(_on_npc_movement_arrived)
+			actor.movement_blocked.connect(_on_npc_movement_blocked)
+			actor.conversation_requested.connect(_on_conversation_requested.bind(actor))
 	_hud.configure_look_settings(
 		float(_player.get("mouse_sensitivity")),
 		bool(_player.get("invert_y")),
@@ -280,6 +286,8 @@ func _on_conversation_requested(actor_id: StringName, target: NPC3D) -> void:
 	if _conversation_target != null or _resolving_answer or _ending_conversation:
 		return
 	_conversation_target = target
+	for in_flight_actor_id in _conversation_preload_in_flight:
+		_conversation_preload_requeue_requested[str(in_flight_actor_id)] = true
 	_active_session_id = ""
 	_active_turn = {}
 	_required_retry_answer = {}
@@ -300,6 +308,12 @@ func _on_conversation_requested(actor_id: StringName, target: NPC3D) -> void:
 		await _pause_safe_timer(CONVERSATION_ERROR_HOLD_SECONDS)
 		_finish_conversation_modal()
 		return
+	if not bool(_actor_view(str(actor_id)).get("playerConversationReady", false)):
+		_advance_needs_rebase = true
+		_hud.show_conversation_error(&"hud.m3r.error.conversation_start")
+		await _pause_safe_timer(CONVERSATION_ERROR_HOLD_SECONDS)
+		_finish_conversation_modal()
+		return
 
 	_hud.begin_conversation(_actor_view(str(actor_id)))
 	var result: Dictionary = await _start_conversation_with_retry(str(actor_id))
@@ -308,6 +322,15 @@ func _on_conversation_requested(actor_id: StringName, target: NPC3D) -> void:
 
 func _handle_conversation_start_result(result: Dictionary) -> void:
 	if _is_error(result):
+		if str(result.get("error", "")) == "conversation_not_ready":
+			var actor_id := (
+				str(_conversation_target.actor_id) if _conversation_target != null else ""
+			)
+			var actor := _actor_view(actor_id)
+			if not actor.is_empty():
+				actor["playerConversationReady"] = false
+				_update_run_actor(actor)
+			_advance_needs_rebase = true
 		if str(result.get("error", "")) == "conversation_start_retry_required":
 			_conversation_start_retry_required = true
 			_hud.show_conversation_start_retry()
@@ -332,12 +355,18 @@ func _handle_conversation_start_result(result: Dictionary) -> void:
 
 
 func _start_conversation_with_retry(actor_id: String) -> Dictionary:
+	var interaction_zone_id := _conversation_zone_for_actor(actor_id)
+	if interaction_zone_id.is_empty():
+		return {
+			"error": "invalid_interaction",
+			"message": "The resident has no conversation zone at their current location.",
+		}
 	var retry_seconds := 1.0
 	for attempt in CONVERSATION_START_RETRY_ATTEMPTS:
 		var result: Dictionary = await _run_session.start_conversation(
 			_run_id,
 			actor_id,
-			STUDIO_INTERACTION_ZONE_ID,
+			interaction_zone_id,
 			str(_run_snapshot.get("locale", _api_locale()))
 		)
 		if not _is_error(result):
@@ -488,6 +517,7 @@ func _ensure_run() -> bool:
 	_last_proposal_meta = _dictionary_or_empty(result.get("lastProposalMeta"))
 	_ingest_ambient_snapshot(result)
 	_apply_all_conversation_readiness()
+	_queue_initial_conversation_preloads()
 	_reconcile_scheduler_movements(_dictionary_or_empty(result.get("scheduler")))
 	return true
 
@@ -512,6 +542,114 @@ func _update_run_actor(actor: Dictionary) -> void:
 		if current is Dictionary and str((current as Dictionary).get("actorId", "")) == str(actor.get("actorId", "")):
 			actors[index] = actor.duplicate(true)
 			return
+
+
+func _conversation_zone_for_actor(actor_id: String) -> String:
+	var actor := _actor_view(actor_id)
+	if actor.is_empty():
+		return ""
+	return _town.conversation_zone_id(actor_id, str(actor.get("locationId", "")))
+
+
+func _queue_initial_conversation_preloads() -> void:
+	for actor_value in _run_snapshot.get("actors", []):
+		if not actor_value is Dictionary:
+			continue
+		var actor := actor_value as Dictionary
+		if not bool(actor.get("playerConversationReady", false)):
+			_queue_conversation_preload(str(actor.get("actorId", "")))
+	_pump_conversation_preloads()
+
+
+func _queue_conversation_preload(actor_id: String) -> void:
+	if actor_id.is_empty() or _run_id.is_empty():
+		return
+	var actor := _actor_view(actor_id)
+	if actor.is_empty() or bool(actor.get("playerConversationReady", false)):
+		return
+	if _conversation_preload_in_flight.has(actor_id):
+		_conversation_preload_requeue_requested[actor_id] = true
+		return
+	if _conversation_preload_queued.has(actor_id):
+		return
+	_conversation_preload_queued[actor_id] = true
+	_conversation_preload_queue.append(actor_id)
+	_pump_conversation_preloads()
+
+
+func _pump_conversation_preloads() -> void:
+	if get_tree().paused or _conversation_target != null:
+		return
+	while (
+		_conversation_preload_in_flight.size() < CONVERSATION_PRELOAD_MAX_IN_FLIGHT
+		and not _conversation_preload_queue.is_empty()
+	):
+		var actor_id: String = _conversation_preload_queue.pop_front()
+		_conversation_preload_queued.erase(actor_id)
+		if bool(_actor_view(actor_id).get("playerConversationReady", false)):
+			continue
+		_conversation_preload_in_flight[actor_id] = true
+		_dispatch_conversation_preload(actor_id)
+	if (
+		_conversation_preload_in_flight.is_empty()
+		and _conversation_preload_queue.is_empty()
+		and _conversation_preload_refresh_required
+	):
+		_conversation_preload_refresh_required = false
+		_advance_needs_rebase = true
+		call_deferred("_rebase_run_after_advance_conflict")
+
+
+func _dispatch_conversation_preload(actor_id: String) -> void:
+	var interaction_zone_id := _conversation_zone_for_actor(actor_id)
+	if interaction_zone_id.is_empty():
+		_conversation_preload_in_flight.erase(actor_id)
+		call_deferred("_pump_conversation_preloads")
+		return
+	var result: Dictionary = await _run_session.preload_conversation(
+		_run_id,
+		actor_id,
+		interaction_zone_id,
+		str(_run_snapshot.get("locale", _api_locale()))
+	)
+	_conversation_preload_in_flight.erase(actor_id)
+	var transport_retry_scheduled := false
+	if not _is_error(result):
+		_conversation_preload_retries.erase(actor_id)
+		_conversation_preload_refresh_required = true
+		var current_revision := int(_run_snapshot.get("worldRevision", 0))
+		var response_revision := int(result.get("worldRevision", 0))
+		if response_revision < current_revision:
+			# A newer movement/evidence delta may already have invalidated this
+			# actor. Rebase instead of letting the late opening re-enable it.
+			_advance_needs_rebase = true
+		else:
+			_run_snapshot["worldRevision"] = response_revision
+			_update_run_actor(_dictionary_or_empty(result.get("actor")))
+			_last_proposal_meta = _dictionary_or_empty(result.get("proposalMeta"))
+			_run_snapshot["lastProposalMeta"] = _last_proposal_meta.duplicate(true)
+	elif str(result.get("error", "")) == "conversation_preload_failed":
+		var retry_count := int(_conversation_preload_retries.get(actor_id, 0)) + 1
+		_conversation_preload_retries[actor_id] = retry_count
+		if retry_count <= CONVERSATION_PRELOAD_MAX_RETRIES:
+			transport_retry_scheduled = true
+			_retry_conversation_preload(
+				actor_id,
+				CONVERSATION_PRELOAD_RETRY_SECONDS * pow(2.0, retry_count - 1)
+			)
+	if _conversation_preload_requeue_requested.has(actor_id):
+		_conversation_preload_requeue_requested.erase(actor_id)
+		if (
+			not transport_retry_scheduled
+			and not bool(_actor_view(actor_id).get("playerConversationReady", false))
+		):
+			call_deferred("_queue_conversation_preload", actor_id)
+	call_deferred("_pump_conversation_preloads")
+
+
+func _retry_conversation_preload(actor_id: String, delay_seconds: float) -> void:
+	await _pause_safe_timer(delay_seconds)
+	_queue_conversation_preload(actor_id)
 
 
 func _initialize_run_background() -> void:
@@ -759,6 +897,7 @@ func _dispatch_ambient_decision() -> void:
 		int(_run_snapshot.get("worldRevision", 0)),
 		int(result.get("worldRevision", 0))
 	)
+	_apply_readiness_deltas(_array_or_empty(result.get("actorReadinessDeltas")))
 	match _ambient_last_decision_status:
 		"completed":
 			_ambient_pending_request = {}
@@ -927,6 +1066,20 @@ func _apply_readiness_deltas(deltas: Array) -> void:
 			delta.get("playerConversationReady", false)
 		)
 		_update_run_actor(actor)
+		var actor_id := str(actor.get("actorId", ""))
+		if (
+			not bool(actor.get("playerConversationReady", false))
+			and _conversation_preload_in_flight.has(actor_id)
+		):
+			_conversation_preload_requeue_requested[actor_id] = true
+		var reason := str(delta.get("reason", ""))
+		if reason == "preload_required":
+			_conversation_preload_retries.erase(actor_id)
+		if (
+			not bool(actor.get("playerConversationReady", false))
+			and reason in ["opening_invalidated", "evidence_changed", "preload_required"]
+		):
+			_queue_conversation_preload(actor_id)
 
 
 func _queue_or_apply_movement(movement: Dictionary) -> void:
@@ -1237,6 +1390,7 @@ func _rebase_run_after_advance_conflict() -> void:
 	_reconcile_scheduler_movements(_dictionary_or_empty(result.get("scheduler")))
 	_advance_needs_rebase = false
 	_advance_retry_remaining = 0.0
+	_queue_initial_conversation_preloads()
 
 
 func _flush_queued_movement_deltas() -> void:
@@ -1328,6 +1482,8 @@ func _finish_conversation_modal() -> void:
 	_flush_queued_movement_deltas()
 	if _advance_needs_rebase:
 		call_deferred("_rebase_run_after_advance_conflict")
+	else:
+		_queue_initial_conversation_preloads()
 
 
 func _set_run_clock_paused(value: bool) -> void:

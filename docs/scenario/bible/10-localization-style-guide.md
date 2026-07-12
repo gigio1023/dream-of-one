@@ -4,7 +4,17 @@ Detailed Korean voice notes and external localization references live in `docs/s
 
 ## Source Language
 
-Korean is the source language for player-facing scenario tone. English should preserve function and mood, not literal word order.
+Korean is the source language for player-facing scenario tone. English,
+Italian, Simplified Chinese, French, and Japanese preserve function and mood,
+not literal word order. Target gameplay locales are `ko-KR`, `en-US`,
+`it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`; other Chinese variants keep separate
+tags when added rather than being collapsed into `zh`.
+
+Every translation preserves speaker identity, evidence facts, procedural
+distance, placeholders, and stable ids. It may reshape sentence order and
+honorific strategy to sound native. Locale reviewers extend the terminology
+table below for their language before release; untranslated Korean fallback is
+never accepted as parity.
 
 ## Tone
 

@@ -49,6 +49,22 @@ test("run-bound Studio conversation and legacy session routes coexist on one sid
     assert.equal(run.json.actors.length, 6);
     assert.equal(run.json.lastProposalMeta, null);
 
+    const preloaded = await post(base, "/v1/session/preload", {
+      runId: run.json.runId,
+      actorId: STUDIO_RECEPTIONIST_ID,
+      interactionZoneId: "StudioReceptionConversation",
+      locale: "ko-KR",
+    });
+    assert.equal(preloaded.status, 200, JSON.stringify(preloaded.json));
+    assert.equal(preloaded.json.actor.playerConversationReady, true);
+    const preloadRetry = await post(base, "/v1/session/preload", {
+      runId: run.json.runId,
+      actorId: STUDIO_RECEPTIONIST_ID,
+      interactionZoneId: "StudioReceptionConversation",
+      locale: "ko-KR",
+    });
+    assert.deepEqual(preloadRetry, preloaded);
+
     const started = await post(base, "/v1/session/start", {
       runId: run.json.runId,
       actorId: STUDIO_RECEPTIONIST_ID,
@@ -126,14 +142,14 @@ test("run API keeps strict request bounds and explicit error codes", async () =>
     assert.equal(malformed.json.error, "invalid_request");
 
     const run = await post(base, "/v1/run/start", { startId: "api-run-2", locale: "ko-KR" });
-    const unsupported = await post(base, "/v1/session/start", {
+    const mismatchedActorZone = await post(base, "/v1/session/preload", {
       runId: run.json.runId,
       actorId: "NPC_Office_Worker",
       interactionZoneId: "StudioReceptionConversation",
       locale: "ko-KR",
     });
-    assert.equal(unsupported.status, 409);
-    assert.equal(unsupported.json.error, "actor_not_supported");
+    assert.equal(mismatchedActorZone.status, 400);
+    assert.equal(mismatchedActorZone.json.error, "invalid_interaction");
 
     const wrongLocale = await post(base, "/v1/session/start", {
       runId: run.json.runId,
@@ -153,6 +169,13 @@ test("run API keeps strict request bounds and explicit error codes", async () =>
     assert.equal(invalidInteraction.status, 400);
     assert.equal(invalidInteraction.json.error, "invalid_interaction");
 
+    const preload = await post(base, "/v1/session/preload", {
+      runId: run.json.runId,
+      actorId: STUDIO_RECEPTIONIST_ID,
+      interactionZoneId: "StudioReceptionConversation",
+      locale: "ko-KR",
+    });
+    assert.equal(preload.status, 200, JSON.stringify(preload.json));
     const started = await post(base, "/v1/session/start", {
       runId: run.json.runId,
       actorId: STUDIO_RECEPTIONIST_ID,

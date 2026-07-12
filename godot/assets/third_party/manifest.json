@@ -12,6 +12,24 @@
       "licensePath": "res://assets/kenney2d/rpg-urban-pack/License.txt"
     },
     {
+      "name": "Noto Sans CJK regional subset OTF Regular",
+      "source": "https://github.com/notofonts/noto-cjk/tree/f8d157532fbfaeda587e826d4cd5b21a49186f7c/Sans/SubsetOTF",
+      "sourceRevision": "f8d157532fbfaeda587e826d4cd5b21a49186f7c",
+      "version": "official main snapshot 2024-09-19, acquired 2026-07-13",
+      "license": "SIL Open Font License 1.1",
+      "tier": "committed",
+      "required": true,
+      "installPath": "res://assets/fonts/noto_sans_cjk",
+      "licensePath": "res://assets/fonts/noto_sans_cjk/LICENSE.txt",
+      "licenseSha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2",
+      "selectionPolicy": "three discrete regional single-face SubsetOTF Regular files; KR for ko/en/it/fr, SC for zh, JP for ja; no TTC face-index ambiguity and no system-font export fallback",
+      "selectedFileSha256": {
+        "NotoSansKR-Regular.otf": "69975a0ac8472717870aefeab0a4d52739308d90856b9955313b2ad5e0148d68",
+        "NotoSansSC-Regular.otf": "faa6c9df652116dde789d351359f3d7e5d2285a2b2a1f04a2d7244df706d5ea9",
+        "NotoSansJP-Regular.otf": "dff723ba59d57d136764a04b9b2d03205544f7cd785a711442d6d2d085ac5073"
+      }
+    },
+    {
       "name": "Kenney Furniture Kit",
       "source": "https://kenney.nl/assets/furniture-kit",
       "version": "2.0",

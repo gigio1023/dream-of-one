@@ -7,6 +7,37 @@ extends Node
 
 const LOCALE_REGISTRY_PATH := "res://data/supported_locales.json"
 const CONTENT_PATH_TEMPLATE := "res://content/localization/m3r_%s.json"
+const HUD_THEME_PATH := "res://assets/greybox/town_hud_theme.tres"
+const EXPORT_FONT_PATHS := {
+	"ko": "res://assets/fonts/noto_sans_cjk/NotoSansKR-Regular.otf",
+	"en": "res://assets/fonts/noto_sans_cjk/NotoSansKR-Regular.otf",
+	"it": "res://assets/fonts/noto_sans_cjk/NotoSansKR-Regular.otf",
+	"zh": "res://assets/fonts/noto_sans_cjk/NotoSansSC-Regular.otf",
+	"fr": "res://assets/fonts/noto_sans_cjk/NotoSansKR-Regular.otf",
+	"ja": "res://assets/fonts/noto_sans_cjk/NotoSansJP-Regular.otf",
+}
+const EXPORT_FONT_REGIONS := {
+	"ko": "KR",
+	"en": "KR",
+	"it": "KR",
+	"zh": "SC",
+	"fr": "KR",
+	"ja": "JP",
+}
+const EXPORT_FONT_FALLBACK_PATHS := {
+	"KR": [
+		"res://assets/fonts/noto_sans_cjk/NotoSansSC-Regular.otf",
+		"res://assets/fonts/noto_sans_cjk/NotoSansJP-Regular.otf",
+	],
+	"SC": [
+		"res://assets/fonts/noto_sans_cjk/NotoSansKR-Regular.otf",
+		"res://assets/fonts/noto_sans_cjk/NotoSansJP-Regular.otf",
+	],
+	"JP": [
+		"res://assets/fonts/noto_sans_cjk/NotoSansKR-Regular.otf",
+		"res://assets/fonts/noto_sans_cjk/NotoSansSC-Regular.otf",
+	],
+}
 
 const MESSAGES := {
 	"ko": {
@@ -229,11 +260,18 @@ var _supported_locales: Array[Dictionary] = []
 var _api_by_presentation: Dictionary = {}
 var _presentation_by_normalized: Dictionary = {}
 var _default_locale := ""
+var _primary_export_fonts: Dictionary = {}
+var _export_fonts: Dictionary = {}
+var _hud_theme: Theme
+var _selected_export_font_locale := ""
+var _selected_export_font_path := ""
+var _selected_export_font_region := ""
 
 func _enter_tree() -> void:
 	_load_locale_registry()
 	_messages = MESSAGES.duplicate(true)
 	_load_content_files()
+	_load_export_fonts()
 	_register()
 
 func _load_locale_registry() -> void:
@@ -271,6 +309,11 @@ func _load_locale_registry() -> void:
 			or _presentation_by_normalized.has(normalized_api)
 		):
 			push_error("Locale registry contains a duplicate locale: %s" % presentation_id)
+			continue
+		if not EXPORT_FONT_PATHS.has(presentation_id) or not EXPORT_FONT_REGIONS.has(
+			presentation_id
+		):
+			push_error("Locale registry entry has no bundled export-font mapping: %s" % presentation_id)
 			continue
 		var canonical := {
 			"presentationId": presentation_id,
@@ -326,6 +369,7 @@ func _register() -> void:
 		TranslationServer.add_translation(translation)
 	if not _default_locale.is_empty():
 		TranslationServer.set_locale(_default_locale)
+		_apply_export_font(_default_locale)
 
 ## Resolve a content-id key to its localized string, with optional {name} args.
 func t(key: String, args: Dictionary = {}) -> String:
@@ -368,6 +412,8 @@ func set_locale(locale_name: String) -> bool:
 	var requested := presentation_locale(locale_name)
 	if requested.is_empty() or not _messages.has(requested):
 		return false
+	if not _apply_export_font(requested):
+		return false
 	TranslationServer.set_locale(requested)
 	return true
 
@@ -386,6 +432,106 @@ func presentation_locale(locale_name: String) -> String:
 func api_locale(locale_name := "") -> String:
 	var requested := locale() if locale_name.is_empty() else presentation_locale(locale_name)
 	return str(_api_by_presentation.get(requested, ""))
+
+## Bundled export-font path selected for a presentation id or full API locale.
+func export_font_path(locale_name := "") -> String:
+	var requested := locale() if locale_name.is_empty() else presentation_locale(locale_name)
+	return str(EXPORT_FONT_PATHS.get(requested, ""))
+
+## Explicit regional face used for overlapping CJK glyphs: KR, SC, or JP.
+func export_font_region(locale_name := "") -> String:
+	var requested := locale() if locale_name.is_empty() else presentation_locale(locale_name)
+	return str(EXPORT_FONT_REGIONS.get(requested, ""))
+
+## Loaded single-face FontFile for deterministic export rendering.
+func export_font(locale_name := "") -> Font:
+	var requested := locale() if locale_name.is_empty() else presentation_locale(locale_name)
+	var value: Variant = _export_fonts.get(requested)
+	return value as Font if value is Font else null
+
+## Apply the active bundled face to a Control created dynamically at runtime.
+## Scene-authored HUD and onboarding Controls inherit their locale-aware Theme;
+## world-attached Labels without that parent theme should use this route.
+func apply_export_font(control: Control, font_name := StringName("font")) -> bool:
+	if control == null:
+		return false
+	var selected_font := export_font()
+	if selected_font == null:
+		return false
+	control.add_theme_font_override(font_name, selected_font)
+	return true
+
+func font_selection_snapshot() -> Dictionary:
+	var selected_font := export_font(_selected_export_font_locale)
+	return {
+		"locale": _selected_export_font_locale,
+		"region": _selected_export_font_region,
+		"path": _selected_export_font_path,
+		"loaded": selected_font != null,
+		"fontName": selected_font.get_font_name() if selected_font != null else "",
+		"faceCount": selected_font.get_face_count() if selected_font != null else 0,
+		"fallbackPaths": _font_paths(selected_font.fallbacks) if selected_font != null else [],
+	}
+
+func _load_export_fonts() -> void:
+	_primary_export_fonts.clear()
+	_export_fonts.clear()
+	var unique_paths: Dictionary = {}
+	for path_value in EXPORT_FONT_PATHS.values():
+		unique_paths[str(path_value)] = true
+	for path_value in unique_paths.keys():
+		var path := str(path_value)
+		var resource := load(path)
+		if not resource is Font:
+			push_error("Bundled export font is unreadable: %s" % path)
+			continue
+		_primary_export_fonts[path] = resource
+	for presentation_id_value in EXPORT_FONT_PATHS.keys():
+		var presentation_id := str(presentation_id_value)
+		var primary_path := str(EXPORT_FONT_PATHS[presentation_id])
+		var region := str(EXPORT_FONT_REGIONS[presentation_id])
+		var primary_value: Variant = _primary_export_fonts.get(primary_path)
+		if not primary_value is Font:
+			continue
+		var regional_font := FontVariation.new()
+		regional_font.base_font = primary_value as Font
+		regional_font.resource_name = "Noto Sans %s export face" % region
+		var fallbacks: Array[Font] = []
+		for fallback_path_value in EXPORT_FONT_FALLBACK_PATHS.get(region, []):
+			var fallback_value: Variant = _primary_export_fonts.get(str(fallback_path_value))
+			if fallback_value is Font:
+				fallbacks.append(fallback_value as Font)
+		regional_font.fallbacks = fallbacks
+		_export_fonts[presentation_id] = regional_font
+	_hud_theme = load(HUD_THEME_PATH) as Theme
+	if _hud_theme == null:
+		push_error("M3R HUD theme is unreadable: %s" % HUD_THEME_PATH)
+
+func _apply_export_font(locale_name: String) -> bool:
+	var requested := presentation_locale(locale_name)
+	var path := export_font_path(requested)
+	var region := export_font_region(requested)
+	var selected_font := export_font(requested)
+	if requested.is_empty() or path.is_empty() or region.is_empty() or selected_font == null:
+		push_error("Cannot select bundled export font for locale: %s" % locale_name)
+		return false
+	# ThemeDB covers any Control without the M3R theme. The shared HUD theme is
+	# also updated so its explicit default wins over platform/system fallbacks.
+	ThemeDB.fallback_font = selected_font
+	if _hud_theme == null:
+		push_error("M3R HUD theme is unreadable: %s" % HUD_THEME_PATH)
+		return false
+	_hud_theme.default_font = selected_font
+	_selected_export_font_locale = requested
+	_selected_export_font_path = path
+	_selected_export_font_region = region
+	return true
+
+func _font_paths(fonts: Array[Font]) -> Array[String]:
+	var result: Array[String] = []
+	for font in fonts:
+		result.append(font.resource_path)
+	return result
 
 func _normalize_locale_identifier(locale_name: String) -> String:
 	return locale_name.strip_edges().replace("_", "-").to_lower()

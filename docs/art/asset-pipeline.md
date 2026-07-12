@@ -165,6 +165,27 @@ but functional. CI and headless smokes never depend on local-tier assets.
 - Engine-practice details (import flags, LOD, lightmap choices) follow the
   repo's `godot-best-practice` skill at implementation time.
 
+## Bundled export fonts
+
+Exports use three Regular, single-face files from the official Noto CJK
+`Sans/SubsetOTF` tree at revision
+`f8d157532fbfaeda587e826d4cd5b21a49186f7c`: KR for `ko`, `en`, `it`, and
+`fr`; SC for `zh`; and JP for `ja`. They live under
+`godot/assets/fonts/noto_sans_cjk/` with the upstream OFL-1.1 text. Their
+per-file and license SHA-256 values are recorded in the third-party manifest
+and [`CREDITS.md`](CREDITS.md).
+
+The locale autoload wraps the regional face as the primary font, with the other
+two files available only for missing scripts such as the six-language picker.
+It assigns that selection to `ThemeDB`, the shared HUD theme, and the HUD's
+runtime UI-scale theme copy. Shared onboarding controls inherit the theme;
+an unthemed runtime `Control` can opt in through
+`Localization.apply_export_font()`.
+Because the locale's own face is always primary, overlapping Han glyphs do not
+fall through to the wrong region. Do not replace this with a fixed CJK fallback
+order or a platform font: the first face in a fixed chain already contains the
+overlapping glyph, and system availability differs between exports.
+
 ## Audio
 
 Same tiering: CC0/CC-BY files may be committed with their licenses; restricted
@@ -181,7 +202,6 @@ creator or individual source pages on 2026-07-12:
 
 | Need | First source | License and selection rule |
 |---|---|---|
-| Latin/Hangul/Han/kana export font | [Noto Sans CJK](https://github.com/notofonts/noto-cjk/tree/main/Sans) | OFL-1.1. Import one Regular Pan-CJK collection, then explicitly select SC for `zh`, JP for `ja`, and KR for `ko` from the run's immutable locale unless an in-engine render proves OpenType language tagging selects the right regional forms. Do not put those overlapping Han faces in a simple fallback chain: the first face already contains the glyph. System fallback is acceptable during development, not final export proof. |
 | Footsteps | [Kenney RPG Audio](https://kenney.nl/assets/rpg-audio) | 50 CC0 files, officially tagged `footstep`/`foley`; select 2–4 neutral variants, not a surface-material system. |
 | Pick/place/throw impact | [Kenney Impact Sounds](https://kenney.nl/assets/impact-sounds) | 130 CC0 files; select 2–3 small dull impacts. |
 | Park loop candidate | [Local Park Sound Ambience](https://freesound.org/s/265046/) | Individual sound is CC0, 19.815-second stereo WAV. Audition and make a clean loop before adoption. |
@@ -193,7 +213,8 @@ page at download time and record its author, source URL, original filename, and
 date in the existing manifest and Credits. Download and commit only the chosen
 files plus license evidence, never a whole audio bundle.
 
-Font/export proof remains the first acquisition priority. Replace the
+The export-font source, license, regional mapping, and glyph coverage are now
+bundled and checked by the asset and localization smokes. Replace the
 procedural audio only when live play demonstrates a concrete quality problem;
 then audition ambience by a clean loop seam, repetition fatigue over a 30–60
 minute run, absence of intelligible speech or strong location signatures, and

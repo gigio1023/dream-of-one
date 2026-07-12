@@ -48,12 +48,15 @@ func _check_file(path: String, label: String) -> void:
 		return
 	print("PASS check_assets: %s" % path)
 
-func _check_license_text(path: String, pack_name: String) -> void:
+func _check_license_text(path: String, pack_name: String, license_name: String) -> void:
 	if not FileAccess.file_exists(path):
 		return
 	var text := FileAccess.get_file_as_string(path)
 	if text.strip_edges().is_empty():
 		_failures.append("license file is empty for %s" % pack_name)
+	elif license_name.findn("Open Font") >= 0 or license_name.findn("OFL") >= 0:
+		if text.findn("SIL OPEN FONT LICENSE") < 0:
+			_failures.append("license does not identify SIL OFL for %s" % pack_name)
 	elif text.findn("CC0") < 0 and text.findn("Creative Commons Zero") < 0:
 		_failures.append("license does not identify CC0 for %s" % pack_name)
 
@@ -93,7 +96,8 @@ func _check_manifest() -> void:
 		if name.is_empty() or tier.is_empty() or install_path.is_empty():
 			_failures.append("manifest pack row is missing name/tier/installPath")
 			continue
-		if str(pack.get("source", "")).is_empty() or str(pack.get("license", "")).is_empty():
+		var license_name := str(pack.get("license", ""))
+		if str(pack.get("source", "")).is_empty() or license_name.is_empty():
 			_failures.append("manifest pack %s is missing source/license" % name)
 
 		var installed := _directory_exists(install_path)
@@ -106,7 +110,12 @@ func _check_manifest() -> void:
 			if license_path.is_empty() or not FileAccess.file_exists(license_path):
 				_failures.append("committed pack license is missing: %s" % name)
 			else:
-				_check_license_text(license_path, name)
+				_check_license_text(license_path, name, license_name)
+				_check_sha256(
+					license_path,
+					str(pack.get("licenseSha256", "")),
+					"license for %s" % name
+				)
 			_check_manifest_selection(pack, name, install_path)
 		else:
 			local_rows += 1
@@ -124,7 +133,20 @@ func _check_manifest_selection(pack: Dictionary, pack_name: String, install_path
 	if selected_hashes is Dictionary:
 		for relative_path_value in (selected_hashes as Dictionary).keys():
 			var relative_path := str(relative_path_value)
-			_check_file(install_path.path_join(relative_path), "selected file for %s" % pack_name)
+			var path := install_path.path_join(relative_path)
+			_check_file(path, "selected file for %s" % pack_name)
+			_check_sha256(
+				path,
+				str((selected_hashes as Dictionary).get(relative_path_value, "")),
+				"selected file for %s" % pack_name
+			)
+
+func _check_sha256(path: String, expected: String, label: String) -> void:
+	if expected.is_empty() or not FileAccess.file_exists(path):
+		return
+	var actual := FileAccess.get_sha256(path)
+	if actual.to_lower() != expected.to_lower():
+		_failures.append("SHA-256 mismatch for %s: expected %s, got %s" % [label, expected, actual])
 
 func _check_no_closed_commercial_buildings() -> void:
 	if not _directory_exists(COMMERCIAL_TRIM_DIR):

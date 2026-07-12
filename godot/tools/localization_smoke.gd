@@ -4,6 +4,82 @@ extends SceneTree
 ## not call tr() for parity checks, so Godot's Korean fallback cannot conceal a
 ## missing key, empty value, or changed format-placeholder contract.
 
+const HUD_THEME_PATH := "res://assets/greybox/town_hud_theme.tres"
+const EXPORT_FONT_EXPECTATIONS := {
+	"ko": {
+		"path": "res://assets/fonts/noto_sans_cjk/NotoSansKR-Regular.otf",
+		"region": "KR",
+		"fontName": "Noto Sans KR",
+		"sample": "한글 가나다",
+	},
+	"en": {
+		"path": "res://assets/fonts/noto_sans_cjk/NotoSansKR-Regular.otf",
+		"region": "KR",
+		"fontName": "Noto Sans KR",
+		"sample": "English façade",
+	},
+	"it": {
+		"path": "res://assets/fonts/noto_sans_cjk/NotoSansKR-Regular.otf",
+		"region": "KR",
+		"fontName": "Noto Sans KR",
+		"sample": "Perché l’identità è già qui.",
+	},
+	"zh": {
+		"path": "res://assets/fonts/noto_sans_cjk/NotoSansSC-Regular.otf",
+		"region": "SC",
+		"fontName": "Noto Sans SC",
+		"sample": "简体中文汉字门",
+	},
+	"fr": {
+		"path": "res://assets/fonts/noto_sans_cjk/NotoSansKR-Regular.otf",
+		"region": "KR",
+		"fontName": "Noto Sans KR",
+		"sample": "Élève, où êtes-vous déjà ?",
+	},
+	"ja": {
+		"path": "res://assets/fonts/noto_sans_cjk/NotoSansJP-Regular.otf",
+		"region": "JP",
+		"fontName": "Noto Sans JP",
+		"sample": "日本語かなカナ",
+	},
+}
+const EXPORT_FONT_FALLBACK_EXPECTATIONS := {
+	"KR": [
+		"res://assets/fonts/noto_sans_cjk/NotoSansSC-Regular.otf",
+		"res://assets/fonts/noto_sans_cjk/NotoSansJP-Regular.otf",
+	],
+	"SC": [
+		"res://assets/fonts/noto_sans_cjk/NotoSansKR-Regular.otf",
+		"res://assets/fonts/noto_sans_cjk/NotoSansJP-Regular.otf",
+	],
+	"JP": [
+		"res://assets/fonts/noto_sans_cjk/NotoSansKR-Regular.otf",
+		"res://assets/fonts/noto_sans_cjk/NotoSansSC-Regular.otf",
+	],
+}
+const LONG_UI_TEXT := {
+	"it": {
+		"prompt": "La receptionist abbassa la voce e ricostruisce con calma ciò che ha sentito: perché la tua identità dovrebbe risultare credibile, se ogni residente ricorda una versione leggermente diversa del tuo arrivo?",
+		"choices": [
+			"Posso spiegare la sequenza completa senza nascondere i passaggi che sembrano contraddittori.",
+			"Chiediamo prima agli altri residenti che cosa ricordano, poi confronteremo le loro parole con le mie.",
+			"Non ho una risposta semplice: l’identità che cercate potrebbe dipendere proprio da queste differenze.",
+		],
+		"input": "È una risposta digitata con accenti e apostrofi tipografici.",
+		"why": "La spiegazione rimane lunga e ambigua, ma collega ciò che la receptionist ha sentito alle parole attribuite agli altri residenti.",
+	},
+	"fr": {
+		"prompt": "La réceptionniste reprend posément chaque témoignage : pourquoi votre identité devrait-elle être reconnue, alors que plusieurs habitants décrivent votre arrivée d’une manière différente ?",
+		"choices": [
+			"Je peux expliquer toute la chronologie sans dissimuler les passages qui paraissent contradictoires.",
+			"Demandons d’abord aux autres habitants ce qu’ils ont retenu, puis comparons leurs paroles aux miennes.",
+			"Je n’ai pas de réponse simple : l’identité que vous cherchez dépend peut-être précisément de ces écarts.",
+		],
+		"input": "C’est une réponse saisie avec des accents et une apostrophe typographique.",
+		"why": "L’explication reste longue et ambiguë, mais relie ce que la réceptionniste a entendu aux paroles attribuées aux autres habitants.",
+	},
+}
+
 var _failures: Array[String] = []
 
 
@@ -27,6 +103,11 @@ func _run() -> void:
 		"locale",
 		"content_keys",
 		"content_message",
+		"export_font_path",
+		"export_font_region",
+		"export_font",
+		"apply_export_font",
+		"font_selection_snapshot",
 	]:
 		if not localization.has_method(method_name):
 			_failures.append("Localization does not expose %s()" % method_name)
@@ -118,12 +199,13 @@ func _run() -> void:
 			_failures.append("cannot switch with full API locale: %s" % api_locale_name)
 		elif str(localization.call("locale")) != presentation_id:
 			_failures.append("active presentation locale is not %s" % presentation_id)
+		_check_export_font(localization, presentation_id, locale_keys)
 
 	localization.call("set_locale", default_locale)
 	await _check_hud_registry(localization, locales, registry_order, default_locale)
 	if _failures.is_empty():
 		print(
-			"PASS localization_smoke: %d locales share %d exact M3R keys and placeholders"
+			"PASS localization_smoke: %d locales share %d exact M3R keys/placeholders; bundled KR/SC/JP glyph routes and long it/fr HUD at 100/150%% are valid"
 			% [locales.size(), reference_keys.size()]
 		)
 	_finish()
@@ -167,18 +249,135 @@ func _placeholders(text: String) -> Array[String]:
 	return result
 
 
+func _check_export_font(
+	localization: Node,
+	presentation_id: String,
+	locale_keys: Array[String]
+) -> void:
+	var expectation_value: Variant = EXPORT_FONT_EXPECTATIONS.get(presentation_id)
+	if not expectation_value is Dictionary:
+		_failures.append("no export-font smoke expectation for %s" % presentation_id)
+		return
+	var expectation := expectation_value as Dictionary
+	var expected_path := str(expectation.get("path", ""))
+	var expected_region := str(expectation.get("region", ""))
+	var expected_name := str(expectation.get("fontName", ""))
+	if str(localization.call("export_font_path", presentation_id)) != expected_path:
+		_failures.append("%s export-font path does not select %s" % [presentation_id, expected_path])
+	if str(localization.call("export_font_region", presentation_id)) != expected_region:
+		_failures.append("%s export-font region is not %s" % [presentation_id, expected_region])
+	var font_value: Variant = localization.call("export_font", presentation_id)
+	if not font_value is Font:
+		_failures.append("%s export font is not a loaded Font" % presentation_id)
+		return
+	var font := font_value as Font
+	if not font is FontVariation:
+		_failures.append("%s export font is not a locale-aware FontVariation" % presentation_id)
+	elif _primary_font_path(font) != expected_path:
+		_failures.append(
+			"%s loaded export-font primary path is %s"
+			% [presentation_id, _primary_font_path(font)]
+		)
+	if font.get_face_count() != 1:
+		_failures.append("%s export font is not a discrete single-face file" % presentation_id)
+	if font.get_font_name() != expected_name:
+		_failures.append(
+			"%s export font family is %s, expected %s"
+			% [presentation_id, font.get_font_name(), expected_name]
+		)
+	_check_font_glyphs(
+		font,
+		str(expectation.get("sample", "")),
+		"%s representative sample" % presentation_id
+	)
+	for key in locale_keys:
+		_check_font_glyphs(
+			font,
+			str(localization.call("content_message", presentation_id, key)),
+			"%s content key %s" % [presentation_id, key]
+		)
+	var expected_fallbacks := _ordered_string_array(
+		EXPORT_FONT_FALLBACK_EXPECTATIONS.get(expected_region, [])
+	)
+	if _ordered_string_array(_font_paths(font.fallbacks)) != expected_fallbacks:
+		_failures.append("%s export font has the wrong bundled fallback order" % presentation_id)
+	if ThemeDB.fallback_font == null or _primary_font_path(ThemeDB.fallback_font) != expected_path:
+		_failures.append("%s does not select its font through ThemeDB" % presentation_id)
+	var hud_theme := load(HUD_THEME_PATH) as Theme
+	if (
+		hud_theme == null
+		or hud_theme.default_font == null
+		or _primary_font_path(hud_theme.default_font) != expected_path
+	):
+		_failures.append("%s does not select its font on the shared HUD theme" % presentation_id)
+	var snapshot_value: Variant = localization.call("font_selection_snapshot")
+	if not snapshot_value is Dictionary:
+		_failures.append("%s export-font selection snapshot is invalid" % presentation_id)
+		return
+	var snapshot := snapshot_value as Dictionary
+	if (
+		str(snapshot.get("locale", "")) != presentation_id
+		or str(snapshot.get("region", "")) != expected_region
+		or str(snapshot.get("path", "")) != expected_path
+		or not bool(snapshot.get("loaded", false))
+		or int(snapshot.get("faceCount", 0)) != 1
+		or _ordered_string_array(snapshot.get("fallbackPaths", [])) != expected_fallbacks
+	):
+		_failures.append("%s export-font selection snapshot is inconsistent" % presentation_id)
+
+
+func _check_font_glyphs(font: Font, text: String, label: String) -> void:
+	var missing: Dictionary = {}
+	for index in text.length():
+		var codepoint := text.unicode_at(index)
+		if codepoint <= 0x20 or codepoint == 0x7F:
+			continue
+		if not font.has_char(codepoint):
+			missing["U+%04X" % codepoint] = true
+	if not missing.is_empty():
+		var codepoints := missing.keys()
+		codepoints.sort()
+		_failures.append("missing glyphs in %s: %s" % [label, codepoints])
+
+
+func _primary_font_path(font: Font) -> String:
+	if font is FontVariation:
+		var base_font := (font as FontVariation).base_font
+		return base_font.resource_path if base_font != null else ""
+	return font.resource_path if font != null else ""
+
+
+func _font_paths(fonts: Array[Font]) -> Array[String]:
+	var result: Array[String] = []
+	for font in fonts:
+		result.append(font.resource_path)
+	return result
+
+
 func _check_hud_registry(
 	localization: Node,
 	locales: Array,
 	registry_order: Array[String],
 	default_locale: String
 ) -> void:
+	root.size = Vector2i(1920, 1080)
 	var hud_scene := load("res://scenes/ui/hud_3d.tscn") as PackedScene
 	if hud_scene == null:
 		_failures.append("HUD3D scene could not load for locale registry smoke")
 		return
 	var hud := hud_scene.instantiate()
 	root.add_child(hud)
+	var onboarding_scene := load("res://scenes/ui/onboarding_overlay.tscn") as PackedScene
+	var onboarding: Node = null
+	if onboarding_scene == null:
+		_failures.append("Onboarding scene could not load for export-font smoke")
+	else:
+		onboarding = onboarding_scene.instantiate()
+		root.add_child(onboarding)
+	var dynamic_world_label := Label.new()
+	dynamic_world_label.name = "DynamicWorldLabelFontProbe"
+	root.add_child(dynamic_world_label)
+	await process_frame
 	await process_frame
 	var snapshot: Dictionary = hud.call("presentation_snapshot")
 	if _ordered_string_array(snapshot.get("languageOptions", [])) != registry_order:
@@ -206,8 +405,299 @@ func _check_hud_registry(
 		or language_label.text == "hud.settings.language_next_run"
 	):
 		_failures.append("HUD next-run language label is not localized")
-	hud.queue_free()
+
+	# HUD3D creates a private theme copy for UI scaling. Initialize that seam
+	# before locale changes, then prove the actual Overlay follows every
+	# regional face rather than retaining its initial KR font.
+	hud.call("set_ui_scale", 1.5)
+	for entry_value in locales:
+		if not entry_value is Dictionary:
+			continue
+		var presentation_id := str((entry_value as Dictionary).get("presentationId", ""))
+		if not bool(localization.call("set_locale", presentation_id)):
+			_failures.append("HUD font route cannot select locale %s" % presentation_id)
+			continue
+		await process_frame
+		hud.call("refresh_localized_text")
+		hud.call("set_ui_scale", 1.5)
+		await process_frame
+		_check_control_font_routes(
+			localization,
+			hud,
+			onboarding,
+			dynamic_world_label,
+			presentation_id
+		)
+
+	var revision := 100
+	for presentation_id in ["it", "fr"]:
+		for scale in [1.0, 1.5]:
+			revision += 1
+			await _check_long_locale_hud(
+				localization,
+				hud,
+				presentation_id,
+				scale,
+				revision
+			)
+
+	localization.call("set_locale", default_locale)
 	await process_frame
+	hud.call("refresh_localized_text")
+	hud.call("set_ui_scale", 1.0)
+	hud.queue_free()
+	if onboarding != null:
+		onboarding.queue_free()
+	dynamic_world_label.queue_free()
+	await process_frame
+
+
+func _check_control_font_routes(
+	localization: Node,
+	hud: Node,
+	onboarding: Node,
+	dynamic_world_label: Label,
+	presentation_id: String
+) -> void:
+	var expectation_value: Variant = EXPORT_FONT_EXPECTATIONS.get(presentation_id)
+	if not expectation_value is Dictionary:
+		return
+	var expected_path := str((expectation_value as Dictionary).get("path", ""))
+	var overlay := hud.get_node_or_null("Overlay") as Control
+	if overlay == null or overlay.theme == null:
+		_failures.append("HUD Overlay has no runtime theme for %s" % presentation_id)
+	else:
+		_check_font_path(
+			overlay.theme.default_font,
+			expected_path,
+			"HUD Overlay runtime theme for %s" % presentation_id
+		)
+	for control_name in ["StartHint", "ConversationChoice1", "ConversationFreeInput"]:
+		var control := hud.find_child(control_name, true, false) as Control
+		if control == null:
+			_failures.append("HUD font probe control is missing: %s" % control_name)
+			continue
+		_check_font_path(
+			control.get_theme_font(&"font"),
+			expected_path,
+			"HUD %s resolved font for %s" % [control_name, presentation_id]
+		)
+	var log_body := hud.find_child("LogBody", true, false) as RichTextLabel
+	if log_body == null:
+		_failures.append("HUD LogBody is missing for font route smoke")
+	else:
+		_check_font_path(
+			log_body.get_theme_font(&"normal_font"),
+			expected_path,
+			"HUD LogBody resolved font for %s" % presentation_id
+		)
+
+	if onboarding != null:
+		var onboarding_overlay := onboarding.get_node_or_null("Overlay") as Control
+		if onboarding_overlay == null or onboarding_overlay.theme == null:
+			_failures.append("Onboarding Overlay has no shared theme for %s" % presentation_id)
+		else:
+			_check_font_path(
+				onboarding_overlay.theme.default_font,
+				expected_path,
+				"Onboarding shared theme for %s" % presentation_id
+			)
+		var hint_label := onboarding.find_child("HintLabel", true, false) as Label
+		if hint_label == null:
+			_failures.append("Onboarding HintLabel is missing for font route smoke")
+		else:
+			_check_font_path(
+				hint_label.get_theme_font(&"font"),
+				expected_path,
+				"Onboarding resolved font for %s" % presentation_id
+			)
+
+	dynamic_world_label.text = str((expectation_value as Dictionary).get("sample", ""))
+	if not bool(localization.call("apply_export_font", dynamic_world_label, &"font")):
+		_failures.append("dynamic world Label could not apply the active export font")
+	_check_font_path(
+		dynamic_world_label.get_theme_font(&"font"),
+		expected_path,
+		"dynamic unthemed world Label for %s" % presentation_id
+	)
+
+
+func _check_font_path(font: Font, expected_path: String, label: String) -> void:
+	if font == null:
+		_failures.append("%s has no resolved Font" % label)
+	elif _primary_font_path(font) != expected_path:
+		_failures.append(
+			"%s resolved %s instead of %s"
+			% [label, _primary_font_path(font), expected_path]
+		)
+
+
+func _check_long_locale_hud(
+	localization: Node,
+	hud: Node,
+	presentation_id: String,
+	scale: float,
+	revision: int
+) -> void:
+	var text_value: Variant = LONG_UI_TEXT.get(presentation_id)
+	if not text_value is Dictionary:
+		_failures.append("no long-form UI sample for %s" % presentation_id)
+		return
+	var text := text_value as Dictionary
+	if not bool(localization.call("set_locale", presentation_id)):
+		_failures.append("cannot select %s for long-form HUD smoke" % presentation_id)
+		return
+	await process_frame
+	hud.call("refresh_localized_text")
+	hud.call("set_ui_scale", scale)
+	var why_line := str(text.get("why", ""))
+	hud.call("set_social_view", {
+		"revision": revision,
+		"hearing": {"due": false, "atSeconds": 720.0},
+		"pressure": {
+			"band": "raised",
+			"latestEncounteredWhyLine": why_line,
+		},
+		"encounteredResidents": [{
+			"actorId": "NPC_Studio_Receptionist",
+			"stance": "uncertain",
+			"whyLine": why_line,
+			"provenance": {
+				"originKind": "speech",
+				"originActorId": "NPC_Studio_Receptionist",
+				"recipientActorId": "player",
+				"whyLine": why_line,
+			},
+		}],
+		"openQuestions": [{
+			"status": "open",
+			"text": str(text.get("prompt", "")),
+			"whyLine": why_line,
+		}],
+		"encounteredRecords": [{
+			"authorActorId": "NPC_Studio_Receptionist",
+			"stateBody": str(text.get("prompt", "")),
+		}],
+	})
+	hud.call("open_log")
+	await process_frame
+	await process_frame
+	_check_visible_and_in_viewport(
+		hud.find_child("LogPanel", true, false) as Control,
+		"%s log panel at %d%%" % [presentation_id, roundi(scale * 100.0)]
+	)
+	_check_visible_and_in_viewport(
+		hud.find_child("CloseLogButton", true, false) as Control,
+		"%s log close control at %d%%" % [presentation_id, roundi(scale * 100.0)]
+	)
+	_check_no_visible_raw_keys(
+		hud,
+		"%s log at %d%%" % [presentation_id, roundi(scale * 100.0)]
+	)
+	hud.call("close_log")
+
+	hud.call("begin_conversation", {"actorId": "NPC_Studio_Receptionist"})
+	var choices_value: Variant = text.get("choices", [])
+	var choices: Array = choices_value as Array if choices_value is Array else []
+	if choices.size() != 3:
+		_failures.append("%s long-form conversation does not have three choices" % presentation_id)
+		hud.call("close_conversation")
+		return
+	var turn_choices: Array[Dictionary] = []
+	for index in choices.size():
+		turn_choices.append({
+			"choiceId": "long_%s_%d" % [presentation_id, index + 1],
+			"line": str(choices[index]),
+		})
+	var shown := bool(hud.call("show_turn", {
+		"prompt": str(text.get("prompt", "")),
+		"choices": turn_choices,
+		"acceptsFreeInput": true,
+	}))
+	if not shown:
+		_failures.append("%s long-form conversation was rejected" % presentation_id)
+	var input := hud.find_child("ConversationFreeInput", true, false) as LineEdit
+	if input != null:
+		input.text = str(text.get("input", ""))
+	await process_frame
+	await process_frame
+	var panel := hud.find_child("ConversationPanel", true, false) as Control
+	_check_visible_and_in_viewport(
+		panel,
+		"%s conversation panel at %d%%" % [presentation_id, roundi(scale * 100.0)]
+	)
+	for control_name in [
+		"ConversationChoice1",
+		"ConversationChoice2",
+		"ConversationChoice3",
+		"ConversationInputRow",
+		"ConversationFreeInput",
+		"ConversationSubmitButton",
+	]:
+		var control := hud.find_child(control_name, true, false) as Control
+		_check_visible_and_in_viewport(
+			control,
+			"%s %s at %d%%" % [presentation_id, control_name, roundi(scale * 100.0)]
+		)
+		if panel != null and control != null and not panel.get_global_rect().grow(1.0).encloses(
+			control.get_global_rect()
+		):
+			_failures.append(
+				"%s %s escapes the conversation panel at %d%%"
+				% [presentation_id, control_name, roundi(scale * 100.0)]
+			)
+	if input == null or input.text != str(text.get("input", "")):
+		_failures.append("%s Unicode LineEdit round-trip failed at %d%%" % [presentation_id, roundi(scale * 100.0)])
+	_check_no_visible_raw_keys(
+		hud,
+		"%s conversation at %d%%" % [presentation_id, roundi(scale * 100.0)]
+	)
+	hud.call("close_conversation")
+	await process_frame
+
+
+func _check_visible_and_in_viewport(control: Control, label: String) -> void:
+	if control == null:
+		_failures.append("%s is missing" % label)
+		return
+	if not control.is_visible_in_tree():
+		_failures.append("%s is not visible" % label)
+		return
+	var rect := control.get_global_rect()
+	var viewport_rect := control.get_viewport_rect()
+	if rect.size.x <= 0.0 or rect.size.y <= 0.0:
+		_failures.append("%s has no layout size" % label)
+	elif not viewport_rect.grow(1.0).encloses(rect):
+		_failures.append("%s escapes the viewport: %s outside %s" % [label, rect, viewport_rect])
+
+
+func _check_no_visible_raw_keys(node: Node, label: String) -> void:
+	var raw_entries: Array[String] = []
+	_collect_visible_raw_keys(node, raw_entries)
+	if not raw_entries.is_empty():
+		_failures.append("raw localization keys visible in %s: %s" % [label, raw_entries])
+
+
+func _collect_visible_raw_keys(node: Node, result: Array[String]) -> void:
+	if node is Control and not (node as Control).is_visible_in_tree():
+		return
+	var texts: Array[String] = []
+	if node is RichTextLabel:
+		texts.append((node as RichTextLabel).text)
+	elif node is Label:
+		texts.append((node as Label).text)
+	elif node is LineEdit:
+		texts.append((node as LineEdit).text)
+		texts.append((node as LineEdit).placeholder_text)
+	elif node is Button:
+		texts.append((node as Button).text)
+	for value in texts:
+		for prefix in ["hud.", "npc.", "world.", "choice.", "why.", "action.", "state.", "route."]:
+			if value.find(prefix) >= 0:
+				result.append("%s=%s" % [node.name, value.left(96)])
+				break
+	for child in node.get_children():
+		_collect_visible_raw_keys(child, result)
 
 
 func _ordered_string_array(value: Variant) -> Array[String]:

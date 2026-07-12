@@ -131,6 +131,7 @@ var _hearing_fade_tween: Tween
 
 func _ready() -> void:
 	_choice_buttons = [_conversation_choice_1, _conversation_choice_2, _conversation_choice_3]
+	_apply_export_font()
 	_populate_ui_scale_options()
 	_apply_localized_text()
 	_sensitivity_slider.value_changed.connect(_on_look_setting_changed)
@@ -169,6 +170,16 @@ func _ready() -> void:
 	_outcome_status_label.visible = false
 	_hearing_fade.visible = false
 	_debug_panel.visible = false
+
+
+func _notification(what: int) -> void:
+	if what != NOTIFICATION_TRANSLATION_CHANGED or not is_node_ready():
+		return
+	# Localization selects the regional export face before changing the
+	# TranslationServer locale. Refresh the HUD's private, UI-scale theme copy
+	# as part of the same notification so overlapping Han never stays on KR.
+	_apply_export_font()
+	_apply_localized_text()
 
 
 func _process(delta: float) -> void:
@@ -391,13 +402,12 @@ func configure_preferences(
 
 
 func set_ui_scale(value: float) -> void:
-	if _runtime_theme == null:
-		_runtime_theme = $Overlay.theme.duplicate(true) as Theme
-		$Overlay.theme = _runtime_theme
+	_ensure_runtime_theme()
 	_runtime_theme.default_base_scale = clampf(value, 0.8, 1.5)
 
 
 func refresh_localized_text() -> void:
+	_apply_export_font()
 	_apply_localized_text()
 
 
@@ -729,6 +739,7 @@ func presentation_snapshot() -> Dictionary:
 		"selectedLocale": _selected_language(),
 		"languageOptions": _language_options.duplicate(),
 		"languageAppliesNextRun": _language_applies_next_run,
+		"exportFont": _dictionary_or_empty(_localization.call("font_selection_snapshot")),
 		"currentTurn": _current_turn.duplicate(true),
 		"encounteredStances": _encountered_stance_snapshot(),
 		"socialView": _social_view.duplicate(true),
@@ -1461,6 +1472,24 @@ func _refresh_contact_cue() -> void:
 
 func _dictionary_or_empty(value: Variant) -> Dictionary:
 	return (value as Dictionary).duplicate(true) if value is Dictionary else {}
+
+
+func _ensure_runtime_theme() -> void:
+	if _runtime_theme != null:
+		return
+	_runtime_theme = $Overlay.theme.duplicate(true) as Theme
+	$Overlay.theme = _runtime_theme
+
+
+func _apply_export_font() -> void:
+	if not is_instance_valid(_localization) or not _localization.has_method("export_font"):
+		return
+	var selected_font: Variant = _localization.call("export_font")
+	if not selected_font is Font:
+		push_error("HUD3D could not resolve the bundled export font.")
+		return
+	_ensure_runtime_theme()
+	_runtime_theme.default_font = selected_font as Font
 
 
 func _array_or_empty(value: Variant) -> Array:

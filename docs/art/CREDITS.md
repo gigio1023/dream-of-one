@@ -12,6 +12,23 @@
 
 The labeled record props under `godot/assets/greybox/` are project-authored placeholders.
 
+## Noto Sans CJK
+
+- Creator: Adobe and Google, maintained by the notofonts project
+- Source: [Noto CJK `Sans/SubsetOTF`](https://github.com/notofonts/noto-cjk/tree/f8d157532fbfaeda587e826d4cd5b21a49186f7c/Sans/SubsetOTF), revision `f8d157532fbfaeda587e826d4cd5b21a49186f7c`
+- License: SIL Open Font License 1.1
+- Use: bundled Regular single-face regional fonts for deterministic exports.
+  `NotoSansKR-Regular.otf` serves Korean plus English, Italian, and French;
+  `NotoSansSC-Regular.otf` serves Simplified Chinese; and
+  `NotoSansJP-Regular.otf` serves Japanese. The explicit locale mapping avoids
+  choosing the wrong regional form for overlapping Han characters.
+- Selected file SHA-256:
+  - KR: `69975a0ac8472717870aefeab0a4d52739308d90856b9955313b2ad5e0148d68`
+  - SC: `faa6c9df652116dde789d351359f3d7e5d2285a2b2a1f04a2d7244df706d5ea9`
+  - JP: `dff723ba59d57d136764a04b9b2d03205544f7cd785a711442d6d2d085ac5073`
+- License copy: `godot/assets/fonts/noto_sans_cjk/LICENSE.txt` (SHA-256
+  `6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2`)
+
 ## Kenney 3D kits
 
 - Creator: Kenney (www.kenney.nl)

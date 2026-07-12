@@ -300,15 +300,23 @@ func _drive_route(session: Node, walkthrough: Dictionary, replay: Dictionary, fi
 			return false
 
 	var route_state: Dictionary = last_answer.get("routeState", {})
-	var transcript_value: Variant = last_answer.get("transcriptDeltas", [])
-	if not transcript_value is Array or (transcript_value as Array).is_empty():
-		_fail("%s returned no provider agent transcript" % expected_route)
-		return false
 	if not bool(route_state.get("terminal", false)):
 		_fail("%s did not return a terminal final answer" % expected_route)
 		return false
 	if ended.size() != 1:
 		_fail("%s emitted route_ended %d times" % [expected_route, ended.size()])
+		return false
+	# Player answers return before their deferred NPC aftermath so modal input is
+	# not held by background agent work. Session end drains that queue; assert
+	# the resulting provider transcript from the authoritative snapshot instead
+	# of requiring it in the terminal answer packet.
+	var final_snapshot: Dictionary = await session.snapshot()
+	if _has_error(final_snapshot):
+		_fail("%s final snapshot failed: %s" % [expected_route, JSON.stringify(final_snapshot)])
+		return false
+	var transcript_value: Variant = final_snapshot.get("agentTranscript", [])
+	if not transcript_value is Array or (transcript_value as Array).is_empty():
+		_fail("%s final snapshot contains no provider agent transcript" % expected_route)
 		return false
 	var end_result: Dictionary = ended[0]
 	if str(end_result.get("route", "")) != expected_route:

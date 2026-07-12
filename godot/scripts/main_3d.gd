@@ -1065,9 +1065,11 @@ func _begin_conversation(
 	_hud.begin_conversation(_actor_view(str(actor_id)))
 	get_tree().paused = true
 	_spatial_facts_dirty = true
-	var advance_settled := await _settle_advance_lane_for_conversation(
-		not contact_id.is_empty()
-	)
+	# Preload resolution advances the runtime revision. Rebase identical current
+	# engine facts before every HTTP start so ordinary and initiated conversations
+	# consume the cached opening from the same spatial authority boundary.
+	# Fixture replay deliberately skips the extra packet inside the settle helper.
+	var advance_settled := await _settle_advance_lane_for_conversation(true)
 	if lifecycle_generation != _lifecycle_generation or _run_status != "active":
 		return
 	if not advance_settled:
@@ -1163,7 +1165,18 @@ func _start_conversation_with_retry(actor_id: String, contact_id := "") -> Dicti
 		)
 		if not _is_error(result):
 			return result
-		if str(result.get("error", "")) != "conversation_start_failed":
+		var error_code := str(result.get("error", ""))
+		if _conversation_start_requires_fresh_spatial(result):
+			# A preload/background commit can land between the accepted spatial
+			# advance and this separate HTTP start. Keep the modal and cached
+			# opening, refresh only engine facts, and retry without waiting on
+			# provider work.
+			if attempt >= CONVERSATION_START_RETRY_ATTEMPTS - 1:
+				return result
+			if not await _settle_advance_lane_for_conversation(true):
+				return result
+			continue
+		if error_code != "conversation_start_failed":
 			return result
 		# The server may already have committed this start. RunService returns
 		# the existing active turn for the same run/actor, so remain modal and
@@ -1173,6 +1186,10 @@ func _start_conversation_with_retry(actor_id: String, contact_id := "") -> Dicti
 			await _pause_safe_timer(retry_seconds)
 			retry_seconds = minf(8.0, retry_seconds * 2.0)
 	return {"error": "conversation_start_retry_required"}
+
+
+func _conversation_start_requires_fresh_spatial(result: Dictionary) -> bool:
+	return str(result.get("error", "")) == "conversation_not_ready"
 
 
 func _on_choice_submitted(choice_id: String) -> void:

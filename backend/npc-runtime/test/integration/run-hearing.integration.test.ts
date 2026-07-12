@@ -20,6 +20,7 @@ import type {
   RunSnapshot,
 } from "../../src/runtime/run-schema.js";
 import { SessionService } from "../../src/runtime/session/service.js";
+import { groundOrdinaryConversation } from "./run-spatial-test-helpers.js";
 
 function deterministicIds(scope: string) {
   const counts = { run: 0, sess: 0, mem: 0 };
@@ -108,6 +109,13 @@ async function earnVouches(service: RunService, runId: string, count: number): P
     const zone = conversationZoneFor(layout, actor.actorId, actor.locationId);
     assert.ok(zone, `missing conversation zone for ${actor.actorId}@${actor.locationId}`);
     await service.preloadConversation(runId, actor.actorId, zone.zoneId, "ko-KR");
+    await groundOrdinaryConversation(
+      service,
+      runId,
+      actor.actorId,
+      zone.zoneId,
+      `ground-vouch-${actor.actorId}`,
+    );
     const started = await service.startConversation(runId, actor.actorId, zone.zoneId, "ko-KR");
     const safe = started.nextTurn.choices.find(choice => choice.intent === "safe/local");
     assert.ok(safe);
@@ -904,6 +912,13 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
     const zone = conversationZoneFor(layout, actor.actorId, actor.locationId);
     assert.ok(zone);
     await service.preloadConversation(started.runId, actor.actorId, zone.zoneId, "ko-KR");
+    await groundOrdinaryConversation(
+      service,
+      started.runId,
+      actor.actorId,
+      zone.zoneId,
+      `ground-interrogation-pressure-${index}`,
+    );
     const conversation = await service.startConversation(
       started.runId,
       actor.actorId,
@@ -1003,12 +1018,27 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
 
   const contact = contactDecision.activeContact;
   assert.ok(contact);
-  await service.preloadConversation(
+  const contactPreload = await service.preloadConversation(
     started.runId,
     contact.actorId,
     contact.interactionZoneId,
     "ko-KR",
   );
+  await service.advance({
+    runId: started.runId,
+    advanceId: "interrogation-contact-spatial-refresh",
+    observedWorldRevision: contactPreload.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: contactPreload.worldRevision,
+      player: {
+        position: [stationPosition[0], stationPosition[1], stationPosition[2]],
+        locationId: "Station",
+      },
+      actors: officerFacts,
+    },
+  });
   const interrogation = await service.startConversation(
     started.runId,
     contact.actorId,
@@ -1081,6 +1111,13 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
     liaison.actorId,
     liaisonZone.zoneId,
     "ko-KR",
+  );
+  await groundOrdinaryConversation(
+    service,
+    started.runId,
+    liaison.actorId,
+    liaisonZone.zoneId,
+    "ground-interrogation-escalation",
   );
   const liaisonConversation = await service.startConversation(
     started.runId,

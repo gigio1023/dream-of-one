@@ -234,6 +234,42 @@ function fixtureSpatialActors(snapshot: RunSnapshot, layout = loadRunLayout()) {
   });
 }
 
+async function groundFixtureConversation(
+  service: RunService,
+  runId: string,
+  actorId: string,
+  interactionZoneId: string,
+  advanceId: string,
+  layout = loadRunLayout(),
+) {
+  const snapshot = service.snapshot(runId);
+  const actor = snapshot.actors.find(candidate => candidate.actorId === actorId);
+  if (!actor) throw new Error(`fixture conversation actor is missing: ${actorId}`);
+  const actors = fixtureSpatialActors(snapshot, layout);
+  const facts = actors.find(candidate => candidate.actorId === actorId);
+  if (!facts) throw new Error(`fixture conversation facts are missing: ${actorId}`);
+  facts.playerVisible = true;
+  facts.playerAudible = true;
+  facts.playerReachable = true;
+  facts.playerInteractionZoneId = interactionZoneId;
+  const request: RunAdvanceRequest = {
+    runId,
+    advanceId,
+    observedWorldRevision: snapshot.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: snapshot.worldRevision,
+      player: {
+        position: [facts.position[0], facts.position[1], facts.position[2]],
+        locationId: actor.locationId,
+      },
+      actors,
+    },
+  };
+  return { request, response: await service.advance(request) };
+}
+
 function fixturePendingArrivals(snapshot: RunSnapshot) {
   return snapshot.scheduler.actors.flatMap(actor => actor.pendingMovement
     ? [{
@@ -385,6 +421,13 @@ async function driveVariant(spec: VariantSpec) {
   });
   const runStartResponse = service.start("run-fixture-start-1", "ko-KR");
   const sessionPreloads = await preloadAllResidents(service, runStartResponse);
+  const sessionGrounding = await groundFixtureConversation(
+    service,
+    runStartResponse.runId,
+    STUDIO_RECEPTIONIST_ID,
+    "StudioReceptionConversation",
+    "fixture-session-start-grounding",
+  );
   const sessionStartResponse = await service.startConversation(
     runStartResponse.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -418,6 +461,7 @@ async function driveVariant(spec: VariantSpec) {
     variantId: spec.variantId,
     runStartResponse,
     sessionPreloads,
+    sessionGrounding,
     sessionStartResponse,
     answerRequest,
     sessionAnswerResponse,
@@ -440,6 +484,14 @@ async function driveAdministrativeSequence() {
     STUDIO_RECEPTIONIST_ID,
     "StudioReceptionConversation",
     "ko-KR",
+  );
+  const conversationGrounding = await groundFixtureConversation(
+    service,
+    started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    "StudioReceptionConversation",
+    "fixture-admin-conversation-grounding",
+    layout,
   );
   const conversation = await service.startConversation(
     started.runId,
@@ -512,6 +564,16 @@ async function driveAdministrativeSequence() {
     observedWorldRevision: writeWake.observedWorldRevision,
   };
   const writeResponse = await service.decision(writeRequest);
+  const staleManagerWake = service.snapshot(started.runId).scheduler.pendingWakes.find(
+    candidate => candidate.kind === "goal" && candidate.actorIds[0] === "NPC_Studio_Manager",
+  );
+  if (staleManagerWake) {
+    await service.decision({
+      runId: started.runId,
+      wakeId: staleManagerWake.wakeId,
+      observedWorldRevision: staleManagerWake.observedWorldRevision,
+    });
+  }
   const afterWrite = service.snapshot(started.runId);
   const secondAdvanceRequest: RunAdvanceRequest = {
     runId: started.runId,
@@ -555,6 +617,7 @@ async function driveAdministrativeSequence() {
   return {
     answerRequest,
     answerResponse,
+    conversationGrounding,
     firstAdvanceRequest,
     firstAdvanceResponse,
     writeRequest,
@@ -826,6 +889,11 @@ export async function buildRunApiFixture() {
         request: preload.request,
         response: preload.response,
       })),
+      runAdvanceConversationGrounding: {
+        endpoint: "POST /v1/run/advance",
+        request: defaultPath.sessionGrounding.request,
+        response: defaultPath.sessionGrounding.response,
+      },
       sessionStart: {
         endpoint: "POST /v1/session/start",
         request: {

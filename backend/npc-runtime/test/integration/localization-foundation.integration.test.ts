@@ -28,6 +28,7 @@ import {
   runSnapshotSchema,
   runStartRequestSchema,
 } from "../../src/runtime/run-schema.js";
+import { groundOrdinaryConversation } from "./run-spatial-test-helpers.js";
 
 const EXACT_GAMEPLAY_LOCALES = [
   "ko-KR",
@@ -339,6 +340,13 @@ test("all six RunService conversations show a bounded localized consequence for 
       "NPC_Studio_Receptionist",
       "StudioReceptionConversation",
       locale,
+    );
+    await groundOrdinaryConversation(
+      service,
+      run.runId,
+      "NPC_Studio_Receptionist",
+      "StudioReceptionConversation",
+      `ground-fallback-risky-${locale}`,
     );
     const conversation = await service.startConversation(
       run.runId,

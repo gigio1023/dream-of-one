@@ -159,6 +159,12 @@ const CONTACT_COOLDOWN_SECONDS = 75;
 const CONTACT_LIFETIME_SECONDS = 30;
 const CONTACT_SAFE_DISTANCE_M = 2.2;
 const CONTACT_START_TOLERANCE_M = 0.8;
+/**
+ * The camera ray reaches 2.5 m to an NPC's near collider surface. NPC roots
+ * may therefore be one 0.35 m collider radius farther away while still being
+ * a valid ray-confirmed interaction.
+ */
+export const PLAYER_CONVERSATION_MAX_CENTER_DISTANCE_M = 2.85;
 const INTERROGATION_PRESSURE_THRESHOLD = 90;
 const INTERROGATION_HESITATION_MS = 40_000;
 const STATION_OFFICER_ID = "NPC_Station_Officer";
@@ -1579,19 +1585,23 @@ export class RunService {
       if (materialMutation) {
         if (!schedulerMutation) run.elapsedSeconds = toSeconds;
         run.worldRevision = candidateWorldRevision;
-        if (incomingSpatialFacts) {
-          run.spatialFacts = {
-            worldRevision: candidateWorldRevision,
-            player: clone(incomingPlayerFacts as RunPlayerSpatialFacts),
-            actors: incomingSpatialFacts,
-            materialSignatures: new Map(
-              [...incomingSpatialFacts].map(([actorId, facts]) => [
-                actorId,
-                spatialMaterialSignature(facts),
-              ]),
-            ),
-          };
-        }
+      }
+      if (incomingSpatialFacts) {
+        // A provider preload may advance the semantic run revision without any
+        // physical motion. Accepting an identical engine observation must
+        // still rebase its revision so a grounded conversation can consume the
+        // cached opening; this observation refresh is not itself a world event.
+        run.spatialFacts = {
+          worldRevision: run.worldRevision,
+          player: clone(incomingPlayerFacts as RunPlayerSpatialFacts),
+          actors: incomingSpatialFacts,
+          materialSignatures: new Map(
+            [...incomingSpatialFacts].map(([actorId, facts]) => [
+              actorId,
+              spatialMaterialSignature(facts),
+            ]),
+          ),
+        };
       }
       if (!run.socialView.hearing.due && run.elapsedSeconds >= run.hearingAtSeconds) {
         run.socialView.hearing.due = true;
@@ -1871,6 +1881,8 @@ export class RunService {
         this.validateActiveContactStart(run, actor, interactionZoneId, contactId);
       } else if (run.activeContact?.actorId === actor.actorId) {
         throw new RunError("an initiated player contact must be resolved first", "conversation_not_ready");
+      } else {
+        this.validateOrdinaryConversationStart(run, actor, interactionZoneId);
       }
       if (!actor.playerConversationReady) {
         throw new RunError("actor is not ready for a player conversation", "conversation_not_ready");
@@ -4661,9 +4673,12 @@ export class RunService {
   private conversationSceneFacts(
     actor: RunActorState,
     procedure: "ordinary" | "interrogation" = "ordinary",
+    speculativeOpening = false,
   ): string[] {
     return [
-      `The conversation is face to face with the player at ${actor.locationId}.`,
+      speculativeOpening
+        ? `Prepare an opening for a possible later face-to-face conversation at ${actor.locationId}; current player visibility comes only from the observe packet.`
+        : `The conversation is face to face with the player at ${actor.locationId}.`,
       `The speaker's role is ${actor.role}; it may use only its own memories, heard speech, and visible records.`,
       procedure === "interrogation"
         ? "This is a bounded Station interrogation caused by a new pressure ledger event. It is not the hearing, cannot end the run, and hesitation is a valid answer."
@@ -4685,11 +4700,11 @@ export class RunService {
       beatId: `resident_opening_${actor.role}`,
       actorId: actor.actorId,
       objective: this.conversationObjective(actor, procedure),
-      sceneFacts: this.conversationSceneFacts(actor, procedure),
+      sceneFacts: this.conversationSceneFacts(actor, procedure, true),
       observePacket: this.runObservePacket(
         run,
         actor,
-        ["player"],
+        this.currentSpatialFacts(run, actor.actorId)?.playerVisible ? ["player"] : [],
         this.conversationGoals(actor, procedure),
         [],
         run.spatialFacts?.actors.get(actor.actorId),
@@ -5186,8 +5201,8 @@ export class RunService {
     contactId: string,
   ): void {
     const contact = run.activeContact;
-    const facts = run.spatialFacts?.actors.get(actor.actorId);
-    const player = run.spatialFacts?.player;
+    const facts = this.currentSpatialFacts(run, actor.actorId);
+    const player = facts ? run.spatialFacts?.player : undefined;
     const grounded = facts && player
       ? this.groundedPlayerContact(run, actor, facts, player)
       : null;
@@ -5200,11 +5215,62 @@ export class RunService {
       !facts ||
       !player ||
       !grounded ||
+      !facts.playerAudible ||
       grounded.interactionZoneId !== interactionZoneId ||
       distanceBetween(facts.position, player.position) >
         contact.safeDistanceM + CONTACT_START_TOLERANCE_M
     ) {
       throw new RunError("initiated contact is not grounded at conversation distance", "conversation_not_ready");
+    }
+  }
+
+  private currentSpatialFacts(
+    run: RunState,
+    actorId: string,
+  ): RunActorSpatialFacts | null {
+    if (!run.spatialFacts || run.spatialFacts.worldRevision !== run.worldRevision) return null;
+    return run.spatialFacts.actors.get(actorId) ?? null;
+  }
+
+  private validateOrdinaryConversationStart(
+    run: RunState,
+    actor: RunActorState,
+    interactionZoneId: string,
+  ): void {
+    const spatial = run.spatialFacts;
+    const facts = this.currentSpatialFacts(run, actor.actorId);
+    const player = spatial?.player;
+    const zone = this.layout.conversationZones.find(
+      candidate => candidate.zoneId === interactionZoneId,
+    );
+    const zoneAnchor = zone ? this.layout.anchorPositions[zone.anchorRef] : undefined;
+    const playerInsideZone = player && zoneAnchor && zone
+      ? Math.hypot(
+          player.position[0] - zoneAnchor[0],
+          player.position[2] - zoneAnchor[2],
+        ) <= zone.radius
+      : false;
+    if (
+      !spatial ||
+      spatial.worldRevision !== run.worldRevision ||
+      !facts ||
+      !player ||
+      !zone ||
+      !zone.actorIds.includes(actor.actorId) ||
+      actor.locationId !== zone.landmarkId ||
+      player.locationId !== zone.landmarkId ||
+      facts.playerInteractionZoneId !== zone.zoneId ||
+      !facts.playerVisible ||
+      !facts.playerReachable ||
+      !facts.playerAudible ||
+      !playerInsideZone ||
+      distanceBetween(facts.position, player.position) >
+        PLAYER_CONVERSATION_MAX_CENTER_DISTANCE_M
+    ) {
+      throw new RunError(
+        "ordinary conversation start is not grounded in current visible, reachable, audible spatial facts",
+        "conversation_not_ready",
+      );
     }
   }
 

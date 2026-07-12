@@ -43,6 +43,57 @@ async function get(base: string, path: string): Promise<{ status: number; json: 
   return { status: response.status, json: await response.json() };
 }
 
+async function groundRunConversation(
+  base: string,
+  runId: string,
+  actorId: string,
+  interactionZoneId: string,
+  advanceId: string,
+): Promise<void> {
+  const snapshot = await get(base, `/v1/run/snapshot?runId=${encodeURIComponent(runId)}`);
+  assert.equal(snapshot.status, 200, JSON.stringify(snapshot.json));
+  const layout = loadRunLayout();
+  const actor = snapshot.json.actors.find((candidate: { actorId: string }) => candidate.actorId === actorId);
+  assert.ok(actor);
+  const actors = snapshot.json.scheduler.actors.map((schedulerActor: any) => {
+    const position = layout.anchorPositions[schedulerActor.confirmedAnchorRef];
+    assert.ok(position);
+    const target = schedulerActor.currentBlock;
+    const reachableAnchorRefs = target?.targetKind === "anchor"
+      ? [target.targetId]
+      : target?.targetKind === "route"
+        ? [...new Set(layout.routes.find(route => route.routeId === target.targetId)?.points ?? [])]
+        : [];
+    return {
+      actorId: schedulerActor.actorId,
+      position: [position[0], position[1], position[2]],
+      reachableAnchorRefs,
+      visibleActorIds: [],
+      audibleActorIds: [],
+      visibleObjectIds: [],
+      playerVisible: schedulerActor.actorId === actorId,
+      playerAudible: schedulerActor.actorId === actorId,
+      playerReachable: schedulerActor.actorId === actorId,
+      playerInteractionZoneId: schedulerActor.actorId === actorId ? interactionZoneId : null,
+    };
+  });
+  const grounded = actors.find((candidate: { actorId: string }) => candidate.actorId === actorId);
+  assert.ok(grounded);
+  const advanced = await post(base, "/v1/run/advance", {
+    runId,
+    advanceId,
+    observedWorldRevision: snapshot.json.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: snapshot.json.worldRevision,
+      player: { position: grounded.position, locationId: actor.locationId },
+      actors,
+    },
+  });
+  assert.equal(advanced.status, 200, JSON.stringify(advanced.json));
+}
+
 test("run-bound Studio conversation and legacy session routes coexist on one sidecar", async () => {
   await withServer(async base => {
     const run = await post(base, "/v1/run/start", { startId: "api-run-1", locale: "ko-KR" });
@@ -67,6 +118,13 @@ test("run-bound Studio conversation and legacy session routes coexist on one sid
       locale: "ko-KR",
     });
     assert.deepEqual(preloadRetry, preloaded);
+    await groundRunConversation(
+      base,
+      run.json.runId,
+      STUDIO_RECEPTIONIST_ID,
+      "StudioReceptionConversation",
+      "api-ground-run-1",
+    );
 
     const started = await post(base, "/v1/session/start", {
       runId: run.json.runId,
@@ -217,6 +275,13 @@ test("run API keeps strict request bounds and explicit error codes", async () =>
       locale: "ko-KR",
     });
     assert.equal(preload.status, 200, JSON.stringify(preload.json));
+    await groundRunConversation(
+      base,
+      run.json.runId,
+      STUDIO_RECEPTIONIST_ID,
+      "StudioReceptionConversation",
+      "api-ground-run-2",
+    );
     const started = await post(base, "/v1/session/start", {
       runId: run.json.runId,
       actorId: STUDIO_RECEPTIONIST_ID,

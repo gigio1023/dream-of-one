@@ -17,6 +17,7 @@ import type {
   RunScheduleWake,
   RunSnapshot,
 } from "../../src/runtime/run-schema.js";
+import { groundOrdinaryConversation } from "./run-spatial-test-helpers.js";
 
 function deterministicIds(label: string) {
   const counts = { run: 0, sess: 0, mem: 0 };
@@ -432,14 +433,14 @@ test("player opening context includes a listener's ambient memory but never leak
   const officeRequest = openingRequests.find(request => request.actorId === "NPC_Office_Worker");
   assert.ok(managerRequest);
   assert.ok(officeRequest);
-  assert.deepEqual(managerRequest.observePacket.visibleActors, ["player"]);
+  assert.deepEqual(managerRequest.observePacket.visibleActors, []);
   assert.ok(managerRequest.observePacket.heardSpeech.some(
     line => line.startsWith("NPC_Park_Caretaker:"),
   ));
   assert.ok(managerRequest.observePacket.actorMemory.ownActionNotes.some(
     line => line.includes("[heard_from=NPC_Park_Caretaker]"),
   ));
-  assert.deepEqual(officeRequest.observePacket.visibleActors, ["player"]);
+  assert.deepEqual(officeRequest.observePacket.visibleActors, []);
   assert.deepEqual(officeRequest.observePacket.heardSpeech, []);
   assert.ok(officeRequest.observePacket.actorMemory.ownActionNotes.every(
     line => !line.includes("NPC_Park_Caretaker"),
@@ -515,6 +516,14 @@ test("a modal queues resolved ambient speech and exact retry commits it without 
     "StudioReceptionConversation",
     "ko-KR",
   );
+  await groundOrdinaryConversation(
+    service,
+    meeting.started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    "StudioReceptionConversation",
+    "ground-ambient-modal-player",
+    [[meeting.wake.actorIds[0] as string, meeting.wake.actorIds[1] as string]],
+  );
   const playerConversation = await service.startConversation(
     meeting.started.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -586,6 +595,13 @@ test("a neutral ambient reply still records one localized no-change judgment", a
     caretaker.actorId,
     "ParkConversation",
     "ko-KR",
+  );
+  await groundOrdinaryConversation(
+    service,
+    meeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ground-ambient-no-change",
   );
   const started = await service.startConversation(
     meeting.started.runId,
@@ -676,6 +692,13 @@ test("preload keeps an off-screen ambient judgment hidden and the next conversat
     service.snapshot(meeting.started.runId).socialView.encounteredResidents,
     [],
     "preloading an opening is not a player encounter",
+  );
+  await groundOrdinaryConversation(
+    service,
+    meeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ground-ambient-disclosure",
   );
   const started = await service.startConversation(
     meeting.started.runId,
@@ -799,6 +822,13 @@ test("a newer no-change ambient judgment cannot hide or misattribute an earlier 
     "ParkConversation",
     "ko-KR",
   );
+  await groundOrdinaryConversation(
+    service,
+    firstMeeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ground-material-then-neutral",
+  );
   const started = await service.startConversation(
     firstMeeting.started.runId,
     caretaker.actorId,
@@ -849,6 +879,13 @@ test("a target evidence change while the ambient reply is pending makes the queu
     "NPC_Park_Caretaker",
     "ParkConversation",
     "ko-KR",
+  );
+  await groundOrdinaryConversation(
+    service,
+    meeting.started.runId,
+    "NPC_Park_Caretaker",
+    "ParkConversation",
+    "ground-ambient-stale-player",
   );
   const playerConversation = await service.startConversation(
     meeting.started.runId,

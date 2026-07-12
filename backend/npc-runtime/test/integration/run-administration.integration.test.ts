@@ -4,6 +4,7 @@ import { createStudioReceptionScriptedAdapter } from "../../src/providers/testin
 import { loadRunLayout } from "../../src/runtime/run-layout.js";
 import { RunError, RunService, STUDIO_RECEPTIONIST_ID } from "../../src/runtime/run-service.js";
 import type { RunActorSpatialFacts, RunSnapshot } from "../../src/runtime/run-schema.js";
+import { groundOrdinaryConversation } from "./run-spatial-test-helpers.js";
 
 function deterministicIds() {
   const counts = { run: 0, sess: 0, mem: 0 };
@@ -54,6 +55,13 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
     STUDIO_RECEPTIONIST_ID,
     "StudioReceptionConversation",
     "ko-KR",
+  );
+  await groundOrdinaryConversation(
+    service,
+    started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    "StudioReceptionConversation",
+    "ground-administration-source",
   );
   const conversation = await service.startConversation(
     started.runId,
@@ -183,7 +191,10 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
 
   // The manager's stale pre-record wake cannot read current facts. A fresh
   // record-version goal reads once; its next retry wake produces no mutation.
-  const initialManagerWake = advanced.scheduleWakes.find(
+  const initialManagerWake = [
+    ...advanced.scheduleWakes,
+    ...service.snapshot(started.runId).scheduler.pendingWakes,
+  ].find(
     candidate => candidate.kind === "goal" && candidate.actorIds[0] === "NPC_Studio_Manager",
   );
   assert.ok(initialManagerWake);

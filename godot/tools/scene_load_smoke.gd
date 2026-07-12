@@ -404,6 +404,8 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 				_failures.append("main_3d RunSession stops during conversation")
 			if run_session != null and not run_session.has_method("encounter"):
 				_failures.append("main_3d RunSession exposes no encounter endpoint")
+			if label == "main_3d":
+				_check_conversation_start_retry_contract(label, instance)
 			for surface_value in instance.get_tree().get_nodes_in_group(&"record_surfaces"):
 				if not surface_value is Node:
 					continue
@@ -419,6 +421,22 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			var playtest_surface := instance.get_node_or_null("AgentPlaytestSurface")
 			if playtest_surface == null or not playtest_surface.has_method("snapshot"):
 				_failures.append("main_3d has no AgentPlaytestSurface snapshot")
+
+
+func _check_conversation_start_retry_contract(label: String, instance: Node) -> void:
+	if not instance.has_method("_conversation_start_requires_fresh_spatial"):
+		_failures.append("%s exposes no grounded conversation retry policy" % label)
+		return
+	if not bool(instance.call(
+		"_conversation_start_requires_fresh_spatial",
+		{"error": "conversation_not_ready"}
+	)):
+		_failures.append("%s does not refresh spatial facts after conversation_not_ready" % label)
+	if bool(instance.call(
+		"_conversation_start_requires_fresh_spatial",
+		{"error": "conversation_start_failed"}
+	)):
+		_failures.append("%s misclassifies a transport failure as stale spatial grounding" % label)
 
 
 func _check_audio_onboarding_contract(label: String, instance: Node) -> void:

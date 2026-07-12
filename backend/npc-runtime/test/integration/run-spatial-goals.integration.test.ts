@@ -497,7 +497,7 @@ test("one post-grace provider candidate creates one idempotent player contact an
   assert.ok(closeActor);
   closeActor.position = [...opportunity.playerPosition];
   closeActor.playerVisible = true;
-  closeActor.playerAudible = true;
+  closeActor.playerAudible = false;
   closeActor.playerReachable = true;
   closeActor.playerInteractionZoneId = "ParkConversation";
   await service.advance({
@@ -510,6 +510,34 @@ test("one post-grace provider candidate creates one idempotent player contact an
       observedWorldRevision: beforeClose.worldRevision,
       player: { position: opportunity.playerPosition, locationId: "Park" },
       actors: closeActors,
+    },
+  });
+  await assert.rejects(
+    service.startConversation(
+      started.runId,
+      opportunity.actorId,
+      "ParkConversation",
+      "ko-KR",
+      contact.contactId,
+    ),
+    (error: unknown) => error instanceof RunError && error.code === "conversation_not_ready",
+    "a contact lease cannot start speech from fresh but inaudible facts",
+  );
+  const beforeAudible = service.snapshot(started.runId);
+  const audibleActors = structuredClone(closeActors);
+  const audibleActor = audibleActors.find(candidate => candidate.actorId === opportunity.actorId);
+  assert.ok(audibleActor);
+  audibleActor.playerAudible = true;
+  await service.advance({
+    runId: started.runId,
+    advanceId: "contact-audible-distance",
+    observedWorldRevision: beforeAudible.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: beforeAudible.worldRevision,
+      player: { position: opportunity.playerPosition, locationId: "Park" },
+      actors: audibleActors,
     },
   });
   const conversation = await service.startConversation(

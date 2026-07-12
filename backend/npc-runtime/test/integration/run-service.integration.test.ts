@@ -4,14 +4,20 @@ import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-ada
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
 import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import { loadProviderConfig } from "../../src/providers/registry.js";
+import { loadRunLayout } from "../../src/runtime/run-layout.js";
 import {
   appendProviderRuntimeTrace,
   MAX_PROVIDER_RUNTIME_TRACE_ENTRIES,
+  PLAYER_CONVERSATION_MAX_CENTER_DISTANCE_M,
   RunError,
   RunService,
   STUDIO_RECEPTIONIST_ID,
 } from "../../src/runtime/run-service.js";
 import { runSnapshotSchema } from "../../src/runtime/run-schema.js";
+import {
+  groundOrdinaryConversation,
+  runSpatialActors,
+} from "./run-spatial-test-helpers.js";
 
 const STUDIO_ZONE_ID = "StudioReceptionConversation";
 
@@ -104,9 +110,16 @@ test("all six residents preload and consume a conversation through their current
   }
   assert.ok(service.snapshot(run.runId).actors.every(actor => actor.playerConversationReady));
 
-  for (const actor of run.actors) {
+  for (const [index, actor] of run.actors.entries()) {
     const zone = zones[actor.actorId];
     assert.ok(zone);
+    await groundOrdinaryConversation(
+      service,
+      run.runId,
+      actor.actorId,
+      zone,
+      `ground-all-six-${index}`,
+    );
     const started = await service.startConversation(run.runId, actor.actorId, zone, "ko-KR");
     assert.equal(started.actor.actorId, actor.actorId);
     assert.ok(started.nextTurn.prompt.length > 0);
@@ -121,6 +134,213 @@ test("all six residents preload and consume a conversation through their current
     assert.equal(ended.actor.actorId, actor.actorId);
     assert.equal(ended.actor.playerConversationReady, false);
   }
+});
+
+test("speculative opening stays cached until current spatial facts ground an ordinary start", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const ordinaryOpening = adapter.proposeConversationTurn.bind(adapter);
+  let openingCalls = 0;
+  let openingVisibleActors: string[] | undefined;
+  adapter.proposeConversationTurn = async request => {
+    openingCalls += 1;
+    openingVisibleActors = [...request.observePacket.visibleActors];
+    return ordinaryOpening(request);
+  };
+  const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
+  const run = service.start("run-grounded-start", "ko-KR");
+  await preloadReceptionist(service, run.runId);
+  assert.deepEqual(openingVisibleActors, [], "a speculative preload cannot invent a visible player");
+  assert.equal(openingCalls, 1);
+
+  const submitFacts = async (
+    advanceId: string,
+    playerPosition: [number, number, number],
+    visible: boolean,
+  ) => {
+    const snapshot = service.snapshot(run.runId);
+    const actors = runSpatialActors(snapshot);
+    const receptionist = actors.find(actor => actor.actorId === STUDIO_RECEPTIONIST_ID);
+    assert.ok(receptionist);
+    receptionist.playerVisible = visible;
+    receptionist.playerAudible = true;
+    receptionist.playerReachable = true;
+    receptionist.playerInteractionZoneId = STUDIO_ZONE_ID;
+    await service.advance({
+      runId: run.runId,
+      advanceId,
+      observedWorldRevision: snapshot.worldRevision,
+      elapsedSeconds: 0,
+      arrivals: [],
+      spatialFacts: {
+        observedWorldRevision: snapshot.worldRevision,
+        player: { position: playerPosition, locationId: "Studio" },
+        actors,
+      },
+    });
+    return receptionist.position;
+  };
+
+  const initial = service.snapshot(run.runId);
+  const initialFacts = runSpatialActors(initial).find(
+    actor => actor.actorId === STUDIO_RECEPTIONIST_ID,
+  );
+  assert.ok(initialFacts);
+  await submitFacts(
+    "grounded-start-remote",
+    [initialFacts.position[0] + 10, initialFacts.position[1], initialFacts.position[2]],
+    true,
+  );
+  await assert.rejects(
+    service.startConversation(run.runId, STUDIO_RECEPTIONIST_ID, STUDIO_ZONE_ID, "ko-KR"),
+    (error: unknown) => error instanceof RunError && error.code === "conversation_not_ready",
+  );
+  assert.equal(service.snapshot(run.runId).actors[0]?.playerConversationReady, true);
+
+  const nearPosition = await submitFacts(
+    "grounded-start-hidden",
+    initialFacts.position,
+    false,
+  );
+  await assert.rejects(
+    service.startConversation(run.runId, STUDIO_RECEPTIONIST_ID, STUDIO_ZONE_ID, "ko-KR"),
+    (error: unknown) => error instanceof RunError && error.code === "conversation_not_ready",
+  );
+  assert.equal(service.snapshot(run.runId).actors[0]?.playerConversationReady, true);
+
+  await submitFacts("grounded-start-fresh", nearPosition, true);
+  const started = await service.startConversation(
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ko-KR",
+  );
+  assert.equal(started.actor.actorId, STUDIO_RECEPTIONIST_ID);
+  assert.equal(openingCalls, 1, "failed spatial starts do not consume the speculative opening");
+});
+
+test("ordinary conversation center distance includes the ray-hit collider radius only", async () => {
+  const layout = structuredClone(loadRunLayout());
+  const zone = layout.conversationZones.find(candidate => candidate.zoneId === STUDIO_ZONE_ID);
+  assert.ok(zone);
+  zone.radius = 10;
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: deterministicIds(),
+    layout,
+  });
+  const run = service.start("run-conversation-center-distance", "ko-KR");
+  await preloadReceptionist(service, run.runId);
+
+  const submitAtCenterDistance = async (advanceId: string, distance: number) => {
+    const snapshot = service.snapshot(run.runId);
+    const actors = runSpatialActors(snapshot);
+    const receptionist = actors.find(actor => actor.actorId === STUDIO_RECEPTIONIST_ID);
+    assert.ok(receptionist);
+    receptionist.playerVisible = true;
+    receptionist.playerAudible = true;
+    receptionist.playerReachable = true;
+    receptionist.playerInteractionZoneId = STUDIO_ZONE_ID;
+    await service.advance({
+      runId: run.runId,
+      advanceId,
+      observedWorldRevision: snapshot.worldRevision,
+      elapsedSeconds: 0,
+      arrivals: [],
+      spatialFacts: {
+        observedWorldRevision: snapshot.worldRevision,
+        player: {
+          position: [
+            receptionist.position[0] + distance,
+            receptionist.position[1],
+            receptionist.position[2],
+          ],
+          locationId: "Studio",
+        },
+        actors,
+      },
+    });
+  };
+
+  await submitAtCenterDistance(
+    "conversation-center-distance-outside",
+    PLAYER_CONVERSATION_MAX_CENTER_DISTANCE_M + 0.001,
+  );
+  await assert.rejects(
+    service.startConversation(run.runId, STUDIO_RECEPTIONIST_ID, STUDIO_ZONE_ID, "ko-KR"),
+    (error: unknown) => error instanceof RunError && error.code === "conversation_not_ready",
+  );
+
+  await submitAtCenterDistance(
+    "conversation-center-distance-inside",
+    PLAYER_CONVERSATION_MAX_CENTER_DISTANCE_M - 0.001,
+  );
+  const started = await service.startConversation(
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ko-KR",
+  );
+  assert.equal(started.actor.actorId, STUDIO_RECEPTIONIST_ID);
+});
+
+test("an identical post-preload spatial observation rebases grounding without a world event", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const ordinaryOpening = adapter.proposeConversationTurn.bind(adapter);
+  let openingCalls = 0;
+  let openingVisibleActors: string[] | undefined;
+  adapter.proposeConversationTurn = async request => {
+    openingCalls += 1;
+    openingVisibleActors = [...request.observePacket.visibleActors];
+    return ordinaryOpening(request);
+  };
+  const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
+  const run = service.start("run-identical-spatial-rebase", "ko-KR");
+  const actors = runSpatialActors(run);
+  const receptionist = actors.find(actor => actor.actorId === STUDIO_RECEPTIONIST_ID);
+  assert.ok(receptionist);
+  receptionist.playerVisible = true;
+  receptionist.playerAudible = true;
+  receptionist.playerReachable = true;
+  receptionist.playerInteractionZoneId = STUDIO_ZONE_ID;
+  const spatialFacts = {
+    player: { position: [...receptionist.position] as [number, number, number], locationId: "Studio" },
+    actors,
+  };
+  await service.advance({
+    runId: run.runId,
+    advanceId: "identical-spatial-seed",
+    observedWorldRevision: run.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: { observedWorldRevision: run.worldRevision, ...structuredClone(spatialFacts) },
+  });
+  await preloadReceptionist(service, run.runId);
+  assert.deepEqual(openingVisibleActors, ["player"]);
+  const beforeRefresh = service.snapshot(run.runId);
+
+  const refreshed = await service.advance({
+    runId: run.runId,
+    advanceId: "identical-spatial-refresh",
+    observedWorldRevision: beforeRefresh.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: beforeRefresh.worldRevision,
+      ...structuredClone(spatialFacts),
+    },
+  });
+  assert.equal(refreshed.worldRevision, beforeRefresh.worldRevision);
+  assert.equal(refreshed.clock.appliedElapsedSeconds, 0);
+  assert.deepEqual(refreshed.scheduleWakes, []);
+
+  const started = await service.startConversation(
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ko-KR",
+  );
+  assert.equal(started.actor.actorId, STUDIO_RECEPTIONIST_ID);
+  assert.equal(openingCalls, 1);
 });
 
 test("a Studio answer persists model judgment and stance once across idempotent retries", async () => {
@@ -148,6 +368,13 @@ test("a Studio answer persists model judgment and stance once across idempotent 
   assert.deepEqual(preloadRetry, preloaded);
   assert.equal(openingCalls, 1, "concurrent preload retries share one provider call");
   assert.equal(preloaded.actor.playerConversationReady, true);
+  await groundOrdinaryConversation(
+    service,
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ground-idempotent-start",
+  );
   const started = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -176,7 +403,7 @@ test("a Studio answer persists model judgment and stance once across idempotent 
 
   assert.deepEqual(retried, answered);
   assert.equal(mergedCalls, 1, "an answer retry must not call the provider or mutate twice");
-  assert.equal(answered.worldRevision, 3);
+  assert.equal(answered.worldRevision, 4);
   assert.equal(answered.judgment.stanceBefore, "uncertain");
   assert.equal(answered.judgment.stanceAfter, "vouch");
   assert.equal(answered.judgment.whyLine, "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.");
@@ -249,6 +476,13 @@ test("vouch provenance is clamped and speech cannot silently move institutional 
   const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
   const run = service.start("run-test-start", "ko-KR");
   await preloadReceptionist(service, run.runId);
+  await groundOrdinaryConversation(
+    service,
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ground-vouch-clamp",
+  );
   const started = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -322,6 +556,13 @@ test("a direct multi-turn conversation can visibly recover from oppose and high 
   const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
   const run = service.start("run-direct-recovery", "ko-KR");
   await preloadReceptionist(service, run.runId);
+  await groundOrdinaryConversation(
+    service,
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ground-direct-recovery",
+  );
   const started = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -370,6 +611,13 @@ test("ending a child conversation is idempotent and leaves its run state alive",
   });
   const run = service.start("run-test-start", "ko-KR");
   await preloadReceptionist(service, run.runId);
+  await groundOrdinaryConversation(
+    service,
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ground-child-end",
+  );
   const started = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -388,7 +636,7 @@ test("ending a child conversation is idempotent and leaves its run state alive",
   const retried = await service.endConversation(run.runId, started.sessionId);
 
   assert.deepEqual(retried, ended);
-  assert.equal(ended.worldRevision, 4);
+  assert.equal(ended.worldRevision, 5);
   const snapshot = service.snapshot(run.runId);
   assert.equal(snapshot.activeConversationId, null);
   assert.equal(snapshot.worldClock.paused, false);
@@ -459,6 +707,13 @@ test("rule fallback stays in-fiction and reaches a bounded clean end", async () 
   });
   const run = service.start("run-test-start", "ko-KR");
   await preloadReceptionist(service, run.runId);
+  await groundOrdinaryConversation(
+    service,
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ground-rule-fallback",
+  );
   const started = await service.startConversation(
     run.runId,
     STUDIO_RECEPTIONIST_ID,

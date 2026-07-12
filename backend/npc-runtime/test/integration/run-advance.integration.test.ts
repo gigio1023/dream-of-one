@@ -12,6 +12,7 @@ import {
 } from "../../src/runtime/run-scheduler.js";
 import { RunError, RunService, STUDIO_RECEPTIONIST_ID } from "../../src/runtime/run-service.js";
 import type { RunAdvanceResponse } from "../../src/runtime/run-schema.js";
+import { groundOrdinaryConversation } from "./run-spatial-test-helpers.js";
 
 function deterministicIds() {
   const counts = { run: 0, sess: 0, mem: 0 };
@@ -315,6 +316,13 @@ test("modal conversations pause clock and clock-only progress never reopens rece
     STUDIO_RECEPTIONIST_ID,
     "StudioReceptionConversation",
     "ko-KR",
+  );
+  await groundOrdinaryConversation(
+    service,
+    started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    "StudioReceptionConversation",
+    "ground-modal-conversation",
   );
   const conversation = await service.startConversation(
     started.runId,

@@ -479,6 +479,8 @@ test("visibility-only facts keep a preloaded opening and ground the later answer
     visibleObjectIds:
       facts.actorId === targetActorId ? ["Prop_Studio_Keyboard"] : [],
   }));
+  const targetFacts = withVisibleProp.find(facts => facts.actorId === targetActorId);
+  assert.ok(targetFacts);
   const visibilityUpdated = await service.advance({
     runId: started.runId,
     advanceId: "advance-prop-visibility-only",
@@ -496,6 +498,26 @@ test("visibility-only facts keep a preloaded opening and ground the later answer
   assert.deepEqual(visibilityUpdated.actorReadinessDeltas, []);
   assert.equal(openingProviderCalls, 1, "visibility-only facts must not reopen the cached opening");
   assert.equal(answerProviderCalls, 0);
+
+  const groundedWithVisibleProp = withVisibleProp.map(facts => ({
+    ...facts,
+    playerVisible: facts.actorId === targetActorId,
+    playerAudible: facts.actorId === targetActorId,
+    playerReachable: facts.actorId === targetActorId,
+    playerInteractionZoneId: facts.actorId === targetActorId ? zone.zoneId : null,
+  }));
+  await service.advance({
+    runId: started.runId,
+    advanceId: "advance-prop-conversation-grounding",
+    observedWorldRevision: visibilityUpdated.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: visibilityUpdated.worldRevision,
+      player: { position: [...targetFacts.position], locationId: targetActor.locationId },
+      actors: groundedWithVisibleProp,
+    },
+  });
 
   const conversation = await service.startConversation(
     started.runId,

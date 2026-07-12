@@ -12,6 +12,8 @@ signal record_surface_requested(surface_id: String)
 @export_enum("record_surface", "hearing_notice") var surface_kind := "record_surface"
 @export var affects_navigation := false
 
+var _interaction_enabled := true
+
 
 func _ready() -> void:
 	add_to_group(&"semantic_targets")
@@ -39,7 +41,15 @@ func interaction_kind() -> StringName:
 
 
 func is_interaction_enabled() -> bool:
-	return surface_kind == "record_surface" and not surface_id.is_empty()
+	return (
+		_interaction_enabled
+		and surface_kind == "record_surface"
+		and not surface_id.is_empty()
+	)
+
+
+func set_interaction_enabled(value: bool) -> void:
+	_interaction_enabled = value
 
 
 func interact(_interactor: Node3D) -> void:

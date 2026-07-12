@@ -1,7 +1,7 @@
 # Godot AI Inspection and Routed Play Control
 
-**Status: foundation, delegated inspection, and 3D read surface implemented
-(2026-07-12).** The vendored add-on, editor plugin/autoload, repository skills,
+**Status: foundation, delegated inspection, and hearing-capable M3R read surface
+implemented (2026-07-13).** The vendored add-on, editor plugin/autoload, repository skills,
 editor/server/game-helper path, and scene-owned `AgentPlaytestSurface` are
 proven through native Godot AI calls. Hands-on M3R acceptance remains later
 work, explicitly routed below.
@@ -243,9 +243,10 @@ needed to play and debug:
 - HUD busy/thinking state and whether a hesitation timer is visible;
 - encountered stance/institutional-pressure summaries and provider provenance
   already exposed by normal/debug UI;
-- hearing and outcome currently report `available=false` with
-  `reason=not_implemented`; later player-facing surfaces replace those markers
-  when they exist.
+- run status, hearing procedure/staging/retry state, terminal result, and the
+  player-visible outcome summary. The outcome read includes the verdict,
+  officer line, evidenced-vouch count, six attributed testimonies, recap
+  entries, citation counts, fallback marker, and restart state.
 
 `semantic_targets()` returns visible/interactable actor and spatial-prop ids,
 titles, kinds, and world positions. It does not expose hidden NPC knowledge,

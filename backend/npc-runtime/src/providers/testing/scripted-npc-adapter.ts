@@ -1,6 +1,7 @@
 import { ruleJudgeConversationTurn } from "../../runtime/conversation-suspicion.js";
 import { priorPlayerLines } from "../fallback.js";
 import { fallbackContent } from "../../localization/fallback-content.js";
+import { RuleFallbackNpcAdapter } from "../fallback.js";
 import type {
   AgentStepProposal,
   AgentStepRequest,
@@ -8,6 +9,8 @@ import type {
   ConversationJudgmentRequest,
   ConversationProposal,
   ConversationTurnRequest,
+  HearingJudgment,
+  HearingJudgmentRequest,
   MergedConversationTurn,
   MergedConversationTurnRequest,
   NpcProposalPort,
@@ -31,6 +34,8 @@ export interface ScriptedNpcHandlers {
   mergedTurn?(
     request: MergedConversationTurnRequest,
   ): MergedConversationTurn | Promise<MergedConversationTurn>;
+  /** Optional exact hearing result for a fixture or integration test. */
+  hearing?(request: HearingJudgmentRequest): HearingJudgment | Promise<HearingJudgment>;
 }
 
 /** Fixed proposal sets live here, never in production storylet data. */
@@ -132,6 +137,22 @@ export class ScriptedNpcAdapter implements NpcProposalPort {
   ): Promise<ResolvedProposal<AgentStepProposal>> {
     return {
       proposal: await this.handlers.nextStep(request),
+      meta: {
+        profileId: this.profileId,
+        transport: "scripted",
+        usedFallback: false,
+      },
+    };
+  }
+
+  async judgeHearing(
+    request: HearingJudgmentRequest,
+  ): Promise<ResolvedProposal<HearingJudgment>> {
+    const proposal = this.handlers.hearing
+      ? await this.handlers.hearing(request)
+      : (await new RuleFallbackNpcAdapter().judgeHearing(request)).proposal;
+    return {
+      proposal,
       meta: {
         profileId: this.profileId,
         transport: "scripted",

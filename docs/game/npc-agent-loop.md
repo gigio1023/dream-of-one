@@ -126,6 +126,14 @@ deterministic. Different models may attempt different valid tools and therefore 
 different records; that variation is intended as long as every mutation
 passes the same world rules.
 
+The scheduled hearing uses the same port boundary through `judgeHearing`, not
+an authored ending table. The model receives the player's final defense and a
+normalized view of the six residents' actual memories plus run records and
+ledger events. It owns testimony wording, memory-grounded reassessment, and
+the verdict after the runtime validates actor/citation identity and the
+four-evidenced-vouch eligibility floor. Provider failure produces a marked,
+terminal fallback result; it never leaves the run suspended.
+
 ## Transcript (player/agent-readable)
 
 Every NPC keeps a rolling transcript of loop iterations: observed context
@@ -142,14 +150,13 @@ change. Exposed two ways:
 
 ## Spatial validation in 3D
 
-Tool names and semantics are unchanged by the first-person conversion; their
-validators gain 3D grounding in the converted client's world model:
-`move_to` reachability resolves through navmesh paths, `look` line-of-sight
-through 3D sightlines, and `talk_to` audibility through distance/occlusion
-rules. The exact validation data (navpoints, sight volumes, audibility
-ranges) is design work inside the active milestone
-([`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md)); the
-authority split — runtime validates, model proposes — does not move.
+Tool names and semantics are unchanged by the first-person conversion. Their
+validators now consume revision-bound 3D facts from the client: `move_to`
+reachability resolves through navmesh paths, `look` line of sight through
+actor-height physics rays, and `talk_to` audibility through authored shared
+volumes and distance. The active milestone owns those exact anchors and
+volumes ([`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md));
+the authority split — runtime validates, model proposes — does not move.
 
 ## Milestone mapping
 

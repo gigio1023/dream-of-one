@@ -374,6 +374,17 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 
+[node name="ConversationTimerLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(820, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.72, 0.4, 1)
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
 [node name="ConversationWhyLineLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=337130830]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(820, 54)
@@ -541,6 +552,112 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
+
+[node name="OutcomeShade" type="ColorRect" parent="Overlay"]
+unique_name_in_owner = true
+visible = false
+z_index = 65
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.02, 0.028, 0.04, 0.94)
+
+[node name="OutcomePanel" type="PanelContainer" parent="Overlay/OutcomeShade"]
+layout_mode = 0
+anchor_left = 0.08
+anchor_top = 0.05
+anchor_right = 0.92
+anchor_bottom = 0.95
+
+[node name="OutcomeMargin" type="MarginContainer" parent="Overlay/OutcomeShade/OutcomePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 34
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 34
+theme_override_constants/margin_bottom = 28
+
+[node name="OutcomeColumns" type="VBoxContainer" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="OutcomeTitle" type="Label" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 34
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="OutcomeFallbackBadge" type="Label" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.68, 0.42, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="OutcomeVerdictLabel" type="Label" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="OutcomeVouchLabel" type="Label" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="OutcomeSeparator" type="HSeparator" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+layout_mode = 2
+
+[node name="OutcomeScroll" type="ScrollContainer" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+custom_minimum_size = Vector2(0, 380)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="OutcomeBody" type="RichTextLabel" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns/OutcomeScroll"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1200, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/normal_font_size = 19
+fit_content = true
+scroll_active = false
+
+[node name="OutcomeStatusLabel" type="Label" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.55, 0.48, 1)
+theme_override_font_sizes/font_size = 17
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="RestartButton" type="Button" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+text = "hud.m3r.outcome.restart"
+autowrap_mode = 3
+
+[node name="HearingFade" type="ColorRect" parent="Overlay"]
+unique_name_in_owner = true
+visible = false
+z_index = 80
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.015, 0.02, 0.03, 0)
 
 [node name="DebugPanel" type="PanelContainer" parent="Overlay"]
 unique_name_in_owner = true

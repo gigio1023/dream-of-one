@@ -23,6 +23,15 @@ var _decision_call_count := 0
 var _current_run_snapshot: Dictionary = {}
 var _last_error: Dictionary = {}
 var _last_start_contact_id := ""
+var _hearing_opened := false
+var _hearing_answered := false
+var _run_closed := false
+var _hearing_open_request: Dictionary = {}
+var _hearing_open_response: Dictionary = {}
+var _hearing_answer_request: Dictionary = {}
+var _hearing_answer_response: Dictionary = {}
+var _run_end_request: Dictionary = {}
+var _run_end_response: Dictionary = {}
 
 
 func _init() -> void:
@@ -243,6 +252,8 @@ func run_snapshot(run_id: String) -> Dictionary:
 	)
 	if run_id != expected_run_id:
 		return _stored_error("run_not_found", "Fixture has no run: %s" % run_id)
+	if _hearing_opened or _hearing_answered or _run_closed:
+		return _current_run_snapshot.duplicate(true)
 	if _ended and not _selected_end_run_snapshot_response.is_empty():
 		return _selected_end_run_snapshot_response.duplicate(true)
 	if _answered and not _selected_run_snapshot_response.is_empty():
@@ -398,6 +409,91 @@ func npc_decision(request: Dictionary) -> Dictionary:
 	return response.duplicate(true)
 
 
+func open_hearing(run_id: String, hearing_id: String) -> Dictionary:
+	if not _started:
+		return _stored_error("run_not_started", "Start the fixture run first.")
+	var packet := _endpoint("runHearingOpen")
+	if packet.is_empty():
+		return _stored_error("fixture_hearing_open_missing", "Fixture has no runHearingOpen packet.")
+	var request := _dictionary_or_empty(packet.get("request"))
+	if run_id != str(request.get("runId", "")) or hearing_id != str(request.get("hearingId", "")):
+		return _stored_error("fixture_hearing_open_miss", "Fixture has no matching hearing open.")
+	if _hearing_opened:
+		if request == _hearing_open_request:
+			_last_error = {}
+			return _hearing_open_response.duplicate(true)
+		return _stored_error("hearing_id_conflict", "Fixture hearingId was reused differently.")
+	var response := _dictionary_or_empty(packet.get("response"))
+	if response.is_empty():
+		return _stored_error("fixture_hearing_open_missing", "Fixture hearing open has no response.")
+	_hearing_opened = true
+	_hearing_open_request = request.duplicate(true)
+	_hearing_open_response = response.duplicate(true)
+	_apply_hearing_to_snapshot(response)
+	_last_error = {}
+	return response.duplicate(true)
+
+
+func answer_hearing(
+	run_id: String,
+	hearing_id: String,
+	turn_id: String,
+	answer_payload: Dictionary
+) -> Dictionary:
+	if not _hearing_opened:
+		return _stored_error("hearing_not_active", "Open the fixture hearing first.")
+	var packet := _endpoint("runHearingAnswer")
+	if packet.is_empty():
+		return _stored_error("fixture_hearing_answer_missing", "Fixture has no runHearingAnswer packet.")
+	var request := _dictionary_or_empty(packet.get("request"))
+	if (
+		run_id != str(request.get("runId", ""))
+		or hearing_id != str(request.get("hearingId", ""))
+		or turn_id != str(request.get("turnId", ""))
+		or not _answer_matches(_dictionary_or_empty(request.get("answer")), answer_payload)
+	):
+		return _stored_error("fixture_hearing_answer_miss", "Fixture has no matching hearing answer.")
+	if _hearing_answered:
+		if request == _hearing_answer_request:
+			_last_error = {}
+			return _hearing_answer_response.duplicate(true)
+		return _stored_error("unexpected_turn", "The fixture hearing already resolved.")
+	var response := _dictionary_or_empty(packet.get("response"))
+	if response.is_empty():
+		return _stored_error("fixture_hearing_answer_missing", "Fixture hearing answer has no response.")
+	_hearing_answered = true
+	_hearing_answer_request = request.duplicate(true)
+	_hearing_answer_response = response.duplicate(true)
+	_apply_hearing_to_snapshot(response)
+	_last_error = {}
+	return response.duplicate(true)
+
+
+func end_run(run_id: String, end_id: String) -> Dictionary:
+	if not _hearing_answered:
+		return _stored_error("run_not_terminal", "Resolve the fixture hearing before ending the run.")
+	var packet := _endpoint("runEnd")
+	if packet.is_empty():
+		return _stored_error("fixture_run_end_missing", "Fixture has no runEnd packet.")
+	var request := _dictionary_or_empty(packet.get("request"))
+	if run_id != str(request.get("runId", "")) or end_id != str(request.get("endId", "")):
+		return _stored_error("fixture_run_end_miss", "Fixture has no matching run end.")
+	if _run_closed:
+		if request == _run_end_request:
+			_last_error = {}
+			return _run_end_response.duplicate(true)
+		return _stored_error("end_id_conflict", "Fixture endId was reused differently.")
+	var response := _dictionary_or_empty(packet.get("response"))
+	if response.is_empty():
+		return _stored_error("fixture_run_end_missing", "Fixture run end has no response.")
+	_run_closed = true
+	_run_end_request = request.duplicate(true)
+	_run_end_response = response.duplicate(true)
+	_apply_hearing_to_snapshot(response)
+	_last_error = {}
+	return response.duplicate(true)
+
+
 func reset() -> void:
 	_started = false
 	_conversation_started = false
@@ -417,6 +513,15 @@ func reset() -> void:
 	_current_run_snapshot = {}
 	_last_error = {}
 	_last_start_contact_id = ""
+	_hearing_opened = false
+	_hearing_answered = false
+	_run_closed = false
+	_hearing_open_request = {}
+	_hearing_open_response = {}
+	_hearing_answer_request = {}
+	_hearing_answer_response = {}
+	_run_end_request = {}
+	_run_end_response = {}
 
 
 func last_error() -> Dictionary:
@@ -431,6 +536,9 @@ func diagnostics_snapshot() -> Dictionary:
 		"decisionCallCount": _decision_call_count,
 		"sessionEndRevision": int(session_end_response.get("worldRevision", -1)),
 		"lastStartContactId": _last_start_contact_id,
+		"hearingOpened": _hearing_opened,
+		"hearingAnswered": _hearing_answered,
+		"runClosed": _run_closed,
 	}
 
 
@@ -564,6 +672,10 @@ func _apply_advance_to_snapshot(response: Dictionary) -> void:
 		))
 		clock["paused"] = false
 		_current_run_snapshot["worldClock"] = clock
+		if bool(response_clock.get("hearingDue", false)):
+			_current_run_snapshot["runStatus"] = "hearing_due"
+			_current_run_snapshot["hearingProcedure"] = null
+			_current_run_snapshot["terminalResult"] = null
 	var scheduler := _dictionary_or_empty(response.get("scheduler"))
 	if not scheduler.is_empty():
 		_current_run_snapshot["scheduler"] = scheduler.duplicate(true)
@@ -583,6 +695,30 @@ func _apply_advance_to_snapshot(response: Dictionary) -> void:
 		int(response.get("ambientSpeechCursor", 0)),
 		null
 	)
+
+
+func _apply_hearing_to_snapshot(response: Dictionary) -> void:
+	if _current_run_snapshot.is_empty():
+		return
+	if response.has("worldRevision"):
+		_current_run_snapshot["worldRevision"] = maxi(
+			int(_current_run_snapshot.get("worldRevision", 0)),
+			int(response.get("worldRevision", 0))
+		)
+	if response.has("runStatus"):
+		_current_run_snapshot["runStatus"] = str(response.get("runStatus", ""))
+	if response.has("hearingProcedure"):
+		_current_run_snapshot["hearingProcedure"] = response.get("hearingProcedure")
+	if response.has("terminalResult"):
+		_current_run_snapshot["terminalResult"] = response.get("terminalResult")
+	var social_view := _dictionary_or_empty(response.get("socialView"))
+	if not social_view.is_empty():
+		_current_run_snapshot["socialView"] = social_view.duplicate(true)
+	var provider_budget := _dictionary_or_empty(response.get("providerBudget"))
+	if not provider_budget.is_empty():
+		_current_run_snapshot["providerBudget"] = provider_budget.duplicate(true)
+	if response.has("lastProposalMeta"):
+		_current_run_snapshot["lastProposalMeta"] = response.get("lastProposalMeta")
 
 
 func _apply_decision_to_snapshot(response: Dictionary) -> void:

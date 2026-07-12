@@ -8,6 +8,10 @@ import {
   runAdvanceResponseSchema,
   runEncounterRequestSchema,
   runEncounterResponseSchema,
+  runEndRequestSchema,
+  runEndResponseSchema,
+  runHearingRequestSchema,
+  runHearingResponseSchema,
   runNpcDecisionRequestSchema,
   runNpcDecisionResponseSchema,
   runSessionAnswerRequestSchema,
@@ -40,6 +44,15 @@ test("every run fixture packet validates against the public wire schemas", () =>
 
   runStartRequestSchema.parse(endpoints.runStart.request);
   runSnapshotSchema.parse(endpoints.runStart.response);
+
+  runAdvanceRequestSchema.parse(endpoints.runAdvanceHearingDue.request);
+  runAdvanceResponseSchema.parse(endpoints.runAdvanceHearingDue.response);
+  runHearingRequestSchema.parse(endpoints.runHearingOpen.request);
+  runHearingResponseSchema.parse(endpoints.runHearingOpen.response);
+  runHearingRequestSchema.parse(endpoints.runHearingAnswer.request);
+  runHearingResponseSchema.parse(endpoints.runHearingAnswer.response);
+  runEndRequestSchema.parse(endpoints.runEnd.request);
+  runEndResponseSchema.parse(endpoints.runEnd.response);
 
   for (const endpoint of [
     endpoints.runAdvanceInitial,

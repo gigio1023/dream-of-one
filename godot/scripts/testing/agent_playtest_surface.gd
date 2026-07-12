@@ -117,6 +117,17 @@ func snapshot() -> Dictionary:
 		},
 		"locationId": _first_value(sources, [&"locationId", &"location_id"], ""),
 		"runId": _first_value(sources, [&"runId", &"run_id"], ""),
+		"runStatus": _first_value(sources, [&"runStatus", &"run_status"], ""),
+		"hearingProcedure": _first_value(
+			sources,
+			[&"hearingProcedure", &"hearing_procedure"],
+			{}
+		),
+		"terminalResult": _first_value(
+			sources,
+			[&"terminalResult", &"terminal_result"],
+			{}
+		),
 		"sessionMode": _first_value(sources, [&"sessionMode", &"session_mode"], ""),
 		"worldRevision": _first_value(sources, [&"worldRevision", &"world_revision"], null),
 		"runWorldRevision": _first_value(
@@ -179,8 +190,9 @@ func snapshot() -> Dictionary:
 		"hearing": _hearing_summary(
 			_first_value(sources, [&"hearing"], {})
 		),
+		"hearingFlow": _first_value(sources, [&"hearingFlow", &"hearing_flow"], {}),
 		"log": _dictionary_value(hud_view, [&"log"], {}),
-		"outcome": _not_implemented_result("outcome"),
+		"outcome": _displayed_result(hud_view, [&"outcome"]),
 	}
 
 
@@ -354,6 +366,8 @@ func _conversation_snapshot(sources: Array[Dictionary], turn: Dictionary) -> Dic
 		"activeTurnId": _dictionary_value(turn, [&"turnId", &"turn_id"], ""),
 		"beatId": _dictionary_value(turn, [&"beatId", &"beat_id", &"beat"], ""),
 		"speakerId": _dictionary_value(turn, [&"speakerId", &"speaker_id", &"actorId", &"actor_id"], ""),
+		"procedure": _dictionary_value(turn, [&"procedure"], "ordinary"),
+		"hesitationMs": _dictionary_value(turn, [&"hesitationMs", &"hesitation_ms"], 0),
 		"visibleChoices": _visible_choices(choices_value),
 		"freeInputSupported": _dictionary_value(
 			turn,
@@ -388,6 +402,11 @@ func _hud_snapshot(hud_view: Dictionary) -> Dictionary:
 			hud_view,
 			[&"hesitationTimerVisible", &"hesitation_timer_visible"],
 			null
+		),
+		"hesitationTimer": _dictionary_value(
+			hud_view,
+			[&"hesitationTimer", &"hesitation_timer"],
+			{}
 		),
 		"ambientSubtitle": _dictionary_value(
 			hud_view,
@@ -487,8 +506,26 @@ func _displayed_result_payload(source: Dictionary) -> Dictionary:
 	return {
 		"route": _dictionary_value(source, [&"route"], ""),
 		"title": _dictionary_value(source, [&"title"], ""),
-		"body": _dictionary_value(source, [&"body", &"result", &"summary"], ""),
-		"citedLedgerIds": _dictionary_value(source, [&"citedLedgerIds", &"cited_ledger_ids"], []),
+		"body": _dictionary_value(source, [&"body"], ""),
+		"verdictWhy": _dictionary_value(source, [&"verdictWhy"], ""),
+		"officerLine": _dictionary_value(source, [&"officerLine"], ""),
+		"verdictDisplay": _dictionary_value(source, [&"verdictDisplay"], ""),
+		"vouchCount": _dictionary_value(source, [&"vouchCount"], 0),
+		"requiredVouches": _dictionary_value(source, [&"requiredVouches"], 4),
+		"fallbackVisible": _dictionary_value(source, [&"fallbackVisible"], false),
+		"fallbackReason": _dictionary_value(source, [&"fallbackReason"], ""),
+		"fallbackReasonText": _dictionary_value(source, [&"fallbackReasonText"], ""),
+		"testimonies": _dictionary_value(source, [&"testimonies"], []),
+		"recapLines": _dictionary_value(source, [&"recapLines"], []),
+		"recapEntries": _dictionary_value(source, [&"recapEntries"], []),
+		"citedRecordIds": _dictionary_value(source, [&"citedRecordIds"], []),
+		"citedLedgerEventIds": _dictionary_value(
+			source,
+			[&"citedLedgerEventIds"],
+			[]
+		),
+		"busy": _dictionary_value(source, [&"busy"], false),
+		"status": _dictionary_value(source, [&"status"], ""),
 	}
 
 

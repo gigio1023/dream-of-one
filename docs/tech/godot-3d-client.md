@@ -1,10 +1,10 @@
 # Godot 3D Client
 
 Target: Godot 4.7.x stable (keep `GODOT_BIN` per device). **Status: the M3R
-spatial foundation, first run-backed social contact, authoritative
-clock/schedule movement, first overheard NPC meeting, and six-resident event
-dispatch surface have landed as the default 3D client beside the retained 2D
-harness
+spatial foundation, run-backed social contact, authoritative clock/schedule
+movement, overheard NPC meetings, six-resident event dispatch, Station
+interrogation, and the complete hearing/outcome/restart lifecycle have landed
+as the default 3D client beside the retained 2D harness
 ([`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md)).**
 `res://scenes/main_3d.tscn` now provides the whole-town greybox, dressed park
 and studio, first-person controller, permanently open building portals, one
@@ -30,6 +30,13 @@ are the action-application surface for current runtime responses. Runtime
 `playerConversationReady` remains the only authority for prompts. One
 background preload is allowed at a time, the HTTP bridge keeps a foreground
 transport lane, and late responses rebase instead of re-enabling stale actors.
+At the hearing boundary the client stops ordinary world work, consumes the
+runtime's authored Station player/focus anchors, and reuses the conversation
+HUD for the generated final-defense choices or free text. The resulting
+terminal panel presents all six attributed testimonies, the officer line,
+vouch floor, cited record/ledger counts, recap entries, fallback status, and an
+idempotent restart. The client displays these facts but never computes the
+verdict.
 `run/main_scene` now points to `res://scenes/main_3d.tscn`; the 2D scene remains
 reachable by explicit path as the deterministic M1 harness.
 

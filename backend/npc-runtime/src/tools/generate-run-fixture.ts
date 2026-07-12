@@ -37,6 +37,55 @@ interface VariantSpec {
   answerFor: (turn: RunNextTurn) => RunSessionAnswer;
 }
 
+async function driveHearingSequence() {
+  const layout = { ...loadRunLayout(), hearingAtSeconds: 10 };
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: fixtureIds(),
+    layout,
+  });
+  const started = service.start("run-fixture-hearing", "ko-KR");
+  const advanceRequest: RunAdvanceRequest = {
+    runId: started.runId,
+    advanceId: "fixture-hearing-due-1",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 10,
+    arrivals: [],
+  };
+  const advanceResponse = await service.advance(advanceRequest);
+  const openRequest = {
+    action: "open" as const,
+    runId: started.runId,
+    hearingId: "hearing-fixture-1",
+  };
+  const openResponse = await service.hearing(openRequest);
+  if (openResponse.action !== "open") throw new Error("hearing fixture did not open");
+  const answerRequest = {
+    action: "answer" as const,
+    runId: started.runId,
+    hearingId: openRequest.hearingId,
+    turnId: openResponse.nextTurn.turnId,
+    answer: {
+      type: "choice" as const,
+      choiceId: openResponse.nextTurn.choices[0].choiceId,
+    },
+  };
+  const answerResponse = await service.hearing(answerRequest);
+  if (answerResponse.action !== "answer") throw new Error("hearing fixture did not resolve");
+  const endRequest = { runId: started.runId, endId: "end-fixture-1" };
+  const endResponse = await service.endRun(endRequest);
+  return {
+    advanceRequest,
+    advanceResponse,
+    openRequest,
+    openResponse,
+    answerRequest,
+    answerResponse,
+    endRequest,
+    endResponse,
+  };
+}
+
 async function preloadAllResidents(service: RunService, runStartResponse: RunSnapshot) {
   const layout = loadRunLayout();
   const sessionPreloads = [];
@@ -617,6 +666,7 @@ export async function buildRunApiFixture() {
   const spatialGoals = await driveSpatialGoalVariants();
   const administration = await driveAdministrativeSequence();
   const playerContact = await drivePlayerContactSequence();
+  const hearing = await driveHearingSequence();
 
   return {
     note: "Generated through the fixture-only Studio adapter and production RunService paths. Regenerate with `bun run --cwd backend/npc-runtime fixtures:run:generate`.",
@@ -626,6 +676,26 @@ export async function buildRunApiFixture() {
         endpoint: "POST /v1/run/start",
         request: { startId: "run-fixture-start-1", locale: "ko-KR" },
         response: defaultPath.runStartResponse,
+      },
+      runAdvanceHearingDue: {
+        endpoint: "POST /v1/run/advance",
+        request: hearing.advanceRequest,
+        response: hearing.advanceResponse,
+      },
+      runHearingOpen: {
+        endpoint: "POST /v1/run/hearing",
+        request: hearing.openRequest,
+        response: hearing.openResponse,
+      },
+      runHearingAnswer: {
+        endpoint: "POST /v1/run/hearing",
+        request: hearing.answerRequest,
+        response: hearing.answerResponse,
+      },
+      runEnd: {
+        endpoint: "POST /v1/run/end",
+        request: hearing.endRequest,
+        response: hearing.endResponse,
       },
       runAdvanceInitial: {
         endpoint: "POST /v1/run/advance",

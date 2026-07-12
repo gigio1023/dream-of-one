@@ -23,6 +23,8 @@ const ADVANCE_MAX_ARRIVALS := 6
 const AMBIENT_DECISION_RETRY_SECONDS := 1.0
 const CONTACT_SPATIAL_REFRESH_SECONDS := 0.25
 const PLAYER_SPATIAL_DIRTY_DISTANCE_M := 0.5
+const HEARING_OPEN_RETRY_MIN_SECONDS := 1.0
+const HEARING_OPEN_RETRY_MAX_SECONDS := 8.0
 
 @onready var _town: Town3D = $Town
 @onready var _player: CharacterBody3D = $Town/Actors/Player3D
@@ -104,6 +106,19 @@ var _conversation_contact_id := ""
 var _conversation_contact_zone_id := ""
 var _contact_spatial_refresh_remaining := 0.0
 var _last_spatial_player_position := Vector3(INF, INF, INF)
+var _run_status := "active"
+var _hearing_procedure: Dictionary = {}
+var _terminal_result: Dictionary = {}
+var _hearing_id := ""
+var _hearing_open_in_flight := false
+var _hearing_open_retry_remaining := 0.0
+var _hearing_open_attempts := 0
+var _hearing_open_halted_reason := ""
+var _hearing_staging: Dictionary = {}
+var _run_end_id := ""
+var _run_end_in_flight := false
+var _lifecycle_generation := 0
+var _hesitation_retry_scheduled := false
 
 
 func _ready() -> void:
@@ -125,7 +140,9 @@ func _ready() -> void:
 	_hud.language_requested.connect(_on_language_requested)
 	_hud.choice_submitted.connect(_on_choice_submitted)
 	_hud.free_input_submitted.connect(_on_free_input_submitted)
+	_hud.hesitation_expired.connect(_on_hesitation_expired)
 	_hud.conversation_end_retry_requested.connect(_on_conversation_end_retry_requested)
+	_hud.restart_requested.connect(_on_restart_requested)
 	_hud.ambient_subtitle_started.connect(_on_ambient_subtitle_started)
 	for surface_value in get_tree().get_nodes_in_group(&"record_surfaces"):
 		if surface_value is Node and (surface_value as Node).has_signal(
@@ -160,10 +177,24 @@ func _process(delta: float) -> void:
 		_hud.set_debug_snapshot(_debug_snapshot())
 	if get_tree().paused or _conversation_target != null:
 		return
-	_update_player_spatial_dirty(delta)
-	_try_open_pending_contact()
 	if _run_id.is_empty() or _run_start_in_flight:
 		return
+	if _run_status == "hearing_due":
+		_hearing_open_retry_remaining = maxf(
+			0.0,
+			_hearing_open_retry_remaining - delta
+		)
+		if (
+			not _hearing_open_in_flight
+			and _hearing_open_halted_reason.is_empty()
+			and is_zero_approx(_hearing_open_retry_remaining)
+		):
+			_dispatch_hearing_open()
+		return
+	if _run_status != "active":
+		return
+	_update_player_spatial_dirty(delta)
+	_try_open_pending_contact()
 	_ambient_decision_retry_remaining = maxf(
 		0.0,
 		_ambient_decision_retry_remaining - delta
@@ -182,6 +213,7 @@ func _process(delta: float) -> void:
 	if not _advance_lane_halted_reason.is_empty():
 		return
 	if bool(_dictionary_or_empty(_run_snapshot.get("worldClock")).get("hearingDue", false)):
+		_enter_hearing_due()
 		return
 	_advance_elapsed_buffer += delta
 	_advance_retry_remaining = maxf(0.0, _advance_retry_remaining - delta)
@@ -226,6 +258,11 @@ func presentation_snapshot() -> Dictionary:
 		"worldRevision": town_snapshot.get("worldRevision", ""),
 		"runWorldRevision": _run_snapshot.get("worldRevision", 0),
 		"runId": _run_id,
+		"runStatus": _run_status,
+		"hearingProcedure": _hearing_procedure.duplicate(true),
+		"terminalResult": _terminal_result.duplicate(true),
+		"hearingId": _hearing_id,
+		"runEndId": _run_end_id,
 		"sessionMode": _run_session.mode(),
 		"runLocale": _run_snapshot.get("locale", _run_start_locale),
 		"presentationLocale": hud_snapshot.get("locale", ""),
@@ -288,6 +325,17 @@ func presentation_snapshot() -> Dictionary:
 		},
 		"ambientSubtitle": hud_snapshot.get("ambientSubtitle", {}),
 		"contact": _contact_presentation_snapshot(),
+		"hearingFlow": {
+			"hearingId": _hearing_id,
+			"openInFlight": _hearing_open_in_flight,
+			"openAttempts": _hearing_open_attempts,
+			"retryRemaining": _hearing_open_retry_remaining,
+			"haltedReason": _hearing_open_halted_reason,
+			"staging": _hearing_staging.duplicate(true),
+			"endId": _run_end_id,
+			"endInFlight": _run_end_in_flight,
+		},
+		"outcome": hud_snapshot.get("outcome", {}),
 	}
 
 
@@ -316,7 +364,8 @@ func _on_debug_visibility_changed(visible: bool) -> void:
 
 func _restore_player_control_if_unlocked() -> void:
 	if (
-		_record_encounter_in_flight
+		_run_status in ["hearing_active", "terminal", "closed"]
+		or _record_encounter_in_flight
 		or _conversation_target != null
 		or _hud.settings_visible()
 		or _hud.log_visible()
@@ -328,7 +377,8 @@ func _restore_player_control_if_unlocked() -> void:
 
 func _on_record_surface_requested(surface_id: String) -> void:
 	if (
-		_record_encounter_in_flight
+		_run_status != "active"
+		or _record_encounter_in_flight
 		or _conversation_target != null
 		or _hud.settings_visible()
 		or _hud.log_visible()
@@ -351,6 +401,8 @@ func _on_record_surface_requested(surface_id: String) -> void:
 		}
 	)
 	_record_encounter_in_flight = false
+	if _run_status != "active":
+		return
 	if _is_error(result):
 		_hud.finish_log_busy(&"hud.m3r.error.record_inspect")
 		return
@@ -422,6 +474,8 @@ func _update_player_spatial_dirty(delta: float) -> void:
 
 
 func _on_player_contact_ready(contact_id: String, actor_id: StringName) -> void:
+	if _run_status != "active":
+		return
 	if not _contact_is_current(contact_id, str(actor_id)) or _contact_expired():
 		return
 	_pending_contact_ready_id = contact_id
@@ -429,6 +483,9 @@ func _on_player_contact_ready(contact_id: String, actor_id: StringName) -> void:
 
 
 func _try_open_pending_contact() -> void:
+	if _run_status != "active":
+		_pending_contact_ready_id = ""
+		return
 	if _pending_contact_ready_id.is_empty():
 		return
 	var contact_id := _pending_contact_ready_id
@@ -472,6 +529,10 @@ func _contact_expired() -> bool:
 func _sync_active_contact_from_response(response: Dictionary) -> void:
 	if not response.has("activeContact"):
 		return
+	if _run_status != "active":
+		if not _active_contact.is_empty():
+			_clear_active_contact(false)
+		return
 	var incoming_value: Variant = response.get("activeContact")
 	if incoming_value == null:
 		_clear_active_contact(_conversation_target == null)
@@ -483,7 +544,13 @@ func _sync_active_contact_from_response(response: Dictionary) -> void:
 	var contact_id := str(incoming.get("contactId", ""))
 	var actor_id := str(incoming.get("actorId", ""))
 	var interaction_zone_id := str(incoming.get("interactionZoneId", ""))
-	if contact_id.is_empty() or actor_id.is_empty() or interaction_zone_id.is_empty():
+	var procedure := str(incoming.get("procedure", ""))
+	if (
+		contact_id.is_empty()
+		or actor_id.is_empty()
+		or interaction_zone_id.is_empty()
+		or procedure not in ["ordinary", "interrogation"]
+	):
 		push_warning("Ignoring incomplete activeContact from RunService.")
 		return
 	var previous_id := str(_active_contact.get("contactId", ""))
@@ -496,7 +563,12 @@ func _sync_active_contact_from_response(response: Dictionary) -> void:
 
 
 func _resume_active_contact_follow() -> void:
-	if _active_contact.is_empty() or _conversation_target != null or get_tree().paused:
+	if (
+		_run_status != "active"
+		or _active_contact.is_empty()
+		or _conversation_target != null
+		or get_tree().paused
+	):
 		return
 	var actor_id := str(_active_contact.get("actorId", ""))
 	var contact_id := str(_active_contact.get("contactId", ""))
@@ -570,11 +642,269 @@ func _contact_presentation_snapshot() -> Dictionary:
 		"contactId": contact_id,
 		"actorId": actor_id,
 		"interactionZoneId": str(_active_contact.get("interactionZoneId", "")),
+		"procedure": str(_active_contact.get("procedure", "ordinary")),
 		"reason": str(_active_contact.get("reason", "")),
 		"status": status,
 		"expiresAtSeconds": float(_active_contact.get("expiresAtSeconds", 0.0)),
 		"follow": actor_status,
 	}
+
+
+func _hydrate_run_lifecycle(response: Dictionary) -> void:
+	if response.has("runStatus"):
+		var status := str(response.get("runStatus", ""))
+		if status in ["active", "hearing_due", "hearing_active", "terminal", "closed"]:
+			_run_status = status
+			_run_snapshot["runStatus"] = status
+	if response.has("hearingProcedure"):
+		var procedure_value: Variant = response.get("hearingProcedure")
+		_hearing_procedure = (
+			(procedure_value as Dictionary).duplicate(true)
+			if procedure_value is Dictionary
+			else {}
+		)
+		if _hearing_procedure.is_empty():
+			_run_snapshot["hearingProcedure"] = null
+		else:
+			_run_snapshot["hearingProcedure"] = _hearing_procedure.duplicate(true)
+	if response.has("terminalResult"):
+		var terminal_value: Variant = response.get("terminalResult")
+		_terminal_result = (
+			(terminal_value as Dictionary).duplicate(true)
+			if terminal_value is Dictionary
+			else {}
+		)
+		if _terminal_result.is_empty():
+			_run_snapshot["terminalResult"] = null
+		else:
+			_run_snapshot["terminalResult"] = _terminal_result.duplicate(true)
+
+
+func _enter_hearing_due() -> void:
+	if _run_status in ["hearing_active", "terminal", "closed"]:
+		return
+	var first_entry := _hearing_id.is_empty()
+	_run_status = "hearing_due"
+	_run_snapshot["runStatus"] = _run_status
+	_run_snapshot["hearingProcedure"] = null
+	_run_snapshot["terminalResult"] = null
+	_set_run_clock_paused(true)
+	if not first_entry:
+		return
+	_lifecycle_generation += 1
+	_hearing_id = _new_hearing_id()
+	_hearing_open_attempts = 0
+	_hearing_open_retry_remaining = 0.0
+	_hearing_open_halted_reason = ""
+	_pending_contact_ready_id = ""
+	if not _active_contact.is_empty():
+		_clear_active_contact(false)
+	_queued_movement_deltas.clear()
+	_queued_arrivals.clear()
+	_arrival_batch_movement_ids.clear()
+	_active_movements.clear()
+	_blocked_movements.clear()
+	for actor_value in get_tree().get_nodes_in_group(&"npc_actors"):
+		if actor_value is NPC3D:
+			var actor := actor_value as NPC3D
+			actor.conversation_enabled = false
+			actor.stop()
+	for surface_value in get_tree().get_nodes_in_group(&"record_surfaces"):
+		if surface_value is Node and (surface_value as Node).has_method(
+			"set_interaction_enabled"
+		):
+			(surface_value as Node).call("set_interaction_enabled", false)
+	_recent_schedule_wakes.clear()
+	_ambient_wake_queue.clear()
+	_ambient_pending_request = {}
+	_ambient_decision_waiting_for_resume = false
+	_deferred_ambient_speech_events.clear()
+	_conversation_preload_queue.clear()
+	_conversation_preload_queued.clear()
+	_conversation_preload_requeue_requested.clear()
+	_pending_advance_request = {}
+	_advance_needs_rebase = false
+	_advance_retry_remaining = 0.0
+	_active_session_id = ""
+	_active_turn = {}
+	_required_retry_answer = {}
+	_hesitation_retry_scheduled = false
+	_conversation_start_retry_required = false
+	_conversation_contact_id = ""
+	_conversation_contact_zone_id = ""
+	_record_encounter_in_flight = false
+	_resolving_answer = false
+	_ending_conversation = false
+	_conversation_target = null
+	_hud.close_conversation()
+	_hud.clear_ambient_subtitles()
+	_hud.clear_contact_approach()
+	_hud.set_focus(null)
+	_player.call("_set_focused_target", null)
+	_hud.finish_log_busy()
+	_hud.close_log()
+	_hud.close_settings()
+	_hud.show_hearing_opening(false)
+	_player.set_control_enabled(true)
+	_player.capture_mouse()
+	get_tree().paused = false
+
+
+func _new_hearing_id() -> String:
+	if _run_session.mode() == "fixture":
+		return "hearing-fixture-1"
+	return "godot-hearing-%d-%d" % [OS.get_process_id(), Time.get_ticks_usec()]
+
+
+func _dispatch_hearing_open() -> void:
+	if (
+		_hearing_open_in_flight
+		or _run_status != "hearing_due"
+		or _hearing_id.is_empty()
+	):
+		return
+	_hearing_open_in_flight = true
+	_hearing_open_attempts += 1
+	var hearing_id := _hearing_id
+	var lifecycle_generation := _lifecycle_generation
+	var result: Dictionary = await _run_session.open_hearing(_run_id, hearing_id)
+	_hearing_open_in_flight = false
+	if (
+		lifecycle_generation != _lifecycle_generation
+		or _run_status != "hearing_due"
+		or hearing_id != _hearing_id
+	):
+		return
+	if _is_error(result):
+		_hud.show_hearing_opening(true)
+		_hearing_open_retry_remaining = minf(
+			HEARING_OPEN_RETRY_MAX_SECONDS,
+			HEARING_OPEN_RETRY_MIN_SECONDS * pow(2.0, mini(_hearing_open_attempts - 1, 3))
+		)
+		return
+	if (
+		str(result.get("action", "")) != "open"
+		or str(result.get("hearingId", "")) != hearing_id
+		or str(result.get("runStatus", "")) != "hearing_active"
+		or not result.get("staging", null) is Dictionary
+		or not result.get("nextTurn", null) is Dictionary
+	):
+		_hearing_open_halted_reason = "invalid_hearing_open_response"
+		_hud.show_hearing_opening(true)
+		push_error("RunService returned an invalid hearing-open response.")
+		return
+	_apply_social_view_from_response(result)
+	_hydrate_run_lifecycle(result)
+	_run_snapshot["worldRevision"] = int(result.get("worldRevision", 0))
+	_last_proposal_meta = _dictionary_or_empty(result.get("proposalMeta"))
+	_run_snapshot["lastProposalMeta"] = _last_proposal_meta.duplicate(true)
+	_hearing_staging = _dictionary_or_empty(result.get("staging"))
+	await _stage_hearing(_dictionary_or_empty(result.get("nextTurn")))
+
+
+func _stage_hearing(next_turn: Dictionary) -> void:
+	var player_anchor_ref := str(_hearing_staging.get("playerAnchorRef", ""))
+	var focus_anchor_ref := str(_hearing_staging.get("focusAnchorRef", ""))
+	var player_position_value: Variant = _town.navigation_position(player_anchor_ref)
+	var focus_position_value: Variant = _town.anchor_position(focus_anchor_ref)
+	if not player_position_value is Vector3 or not focus_position_value is Vector3:
+		_hearing_open_halted_reason = "hearing_staging_anchor_missing"
+		_hud.show_hearing_opening(true)
+		push_error("Hearing staging could not resolve its authored Station anchors.")
+		return
+	_hud.clear_hearing_opening()
+	await _hud.fade_to_hearing()
+	if _run_status != "hearing_active":
+		return
+	_player.global_position = player_position_value as Vector3
+	_player.velocity = Vector3.ZERO
+	_player.call("face_position", focus_position_value as Vector3)
+	_player.set_control_enabled(false)
+	_player.release_mouse()
+	var speaker_id := str(next_turn.get("speakerId", "NPC_Station_Officer"))
+	_conversation_target = _town.get_node_or_null("Actors/%s" % speaker_id) as NPC3D
+	_active_session_id = ""
+	_active_turn = next_turn.duplicate(true)
+	_required_retry_answer = {}
+	_hud.begin_conversation(_actor_view(speaker_id))
+	get_tree().paused = true
+	_set_run_clock_paused(true)
+	if not _hud.show_turn(_active_turn):
+		_hearing_open_halted_reason = "invalid_hearing_turn"
+		_hud.show_conversation_error(&"hud.m3r.error.invalid_response")
+		return
+	await _hud.fade_from_hearing()
+
+
+func _enter_terminal_outcome() -> void:
+	if _terminal_result.is_empty():
+		push_error("Terminal run state has no terminalResult.")
+		return
+	_lifecycle_generation += 1
+	_run_status = "terminal"
+	_run_snapshot["runStatus"] = _run_status
+	_run_snapshot["terminalResult"] = _terminal_result.duplicate(true)
+	_active_session_id = ""
+	_active_turn = {}
+	_required_retry_answer = {}
+	_resolving_answer = false
+	_ending_conversation = false
+	_conversation_target = null
+	_pending_contact_ready_id = ""
+	_hud.clear_hearing_opening()
+	_hud.clear_contact_approach()
+	_hud.clear_ambient_subtitles()
+	_hud.show_outcome(_terminal_result)
+	_player.set_control_enabled(false)
+	_player.release_mouse()
+	_set_run_clock_paused(true)
+	get_tree().paused = true
+
+
+func _on_restart_requested() -> void:
+	if _run_end_in_flight or _terminal_result.is_empty():
+		_hud.set_outcome_busy(false, &"hud.m3r.error.run_end")
+		return
+	if _run_status == "closed":
+		_reload_current_run_scene()
+		return
+	if _run_status != "terminal":
+		_hud.set_outcome_busy(false, &"hud.m3r.error.run_end")
+		return
+	if _run_end_id.is_empty():
+		_run_end_id = _new_run_end_id()
+	_run_end_in_flight = true
+	var result: Dictionary = await _run_session.end_run(_run_id, _run_end_id)
+	_run_end_in_flight = false
+	if _is_error(result):
+		_hud.set_outcome_busy(false, &"hud.m3r.error.run_end")
+		return
+	if (
+		str(result.get("runId", "")) != _run_id
+		or str(result.get("endId", "")) != _run_end_id
+		or str(result.get("runStatus", "")) != "closed"
+	):
+		_hud.set_outcome_busy(false, &"hud.m3r.error.run_end")
+		return
+	_hydrate_run_lifecycle(result)
+	_run_snapshot["providerBudget"] = _dictionary_or_empty(result.get("providerBudget"))
+	_last_proposal_meta = _dictionary_or_empty(result.get("lastProposalMeta"))
+	_reload_current_run_scene()
+
+
+func _new_run_end_id() -> String:
+	if _run_session.mode() == "fixture":
+		return "end-fixture-1"
+	return "godot-end-%d-%d" % [OS.get_process_id(), Time.get_ticks_usec()]
+
+
+func _reload_current_run_scene() -> void:
+	get_tree().paused = false
+	var error := get_tree().reload_current_scene()
+	if error != OK:
+		get_tree().paused = true
+		_hud.set_outcome_busy(false, &"hud.m3r.error.run_end")
+		push_error("Could not reload the current 3D run scene: %s" % error_string(error))
 
 
 func _on_conversation_requested(actor_id: StringName, target: NPC3D) -> void:
@@ -593,6 +923,8 @@ func _begin_conversation(
 	target: NPC3D,
 	contact_id := ""
 ) -> void:
+	if _run_status != "active":
+		return
 	if _conversation_target != null or _resolving_answer or _ending_conversation:
 		return
 	if _hud.settings_visible() or _hud.log_visible() or _record_encounter_in_flight:
@@ -604,6 +936,7 @@ func _begin_conversation(
 		and (not _contact_is_current(contact_id, str(actor_id)) or _contact_expired())
 	):
 		return
+	var lifecycle_generation := _lifecycle_generation
 	_conversation_target = target
 	_conversation_contact_id = contact_id
 	_conversation_contact_zone_id = (
@@ -627,7 +960,12 @@ func _begin_conversation(
 	_hud.begin_conversation(_actor_view(str(actor_id)))
 	get_tree().paused = true
 	_spatial_facts_dirty = true
-	if not await _settle_advance_lane_for_conversation(not contact_id.is_empty()):
+	var advance_settled := await _settle_advance_lane_for_conversation(
+		not contact_id.is_empty()
+	)
+	if lifecycle_generation != _lifecycle_generation or _run_status != "active":
+		return
+	if not advance_settled:
 		_hud.show_conversation_error(&"hud.m3r.error.run_start")
 		await _pause_safe_timer(CONVERSATION_ERROR_HOLD_SECONDS)
 		_finish_conversation_modal()
@@ -637,6 +975,8 @@ func _begin_conversation(
 		_hud.show_conversation_error(&"hud.m3r.error.run_start")
 		await _pause_safe_timer(CONVERSATION_ERROR_HOLD_SECONDS)
 		_finish_conversation_modal()
+		return
+	if lifecycle_generation != _lifecycle_generation or _run_status != "active":
 		return
 	if not bool(_actor_view(str(actor_id)).get("playerConversationReady", false)):
 		_advance_needs_rebase = true
@@ -650,10 +990,15 @@ func _begin_conversation(
 		str(actor_id),
 		contact_id
 	)
-	await _handle_conversation_start_result(result)
+	await _handle_conversation_start_result(result, lifecycle_generation)
 
 
-func _handle_conversation_start_result(result: Dictionary) -> void:
+func _handle_conversation_start_result(
+	result: Dictionary,
+	lifecycle_generation: int
+) -> void:
+	if lifecycle_generation != _lifecycle_generation or _run_status != "active":
+		return
 	if _is_error(result):
 		if str(result.get("error", "")) == "conversation_not_ready":
 			var actor_id := (
@@ -733,13 +1078,21 @@ func _on_free_input_submitted(text: String) -> void:
 	await _submit_answer({"type": "free_input", "text": text.strip_edges()})
 
 
+func _on_hesitation_expired() -> void:
+	await _submit_answer({"type": "hesitation"})
+
+
 func _submit_answer(answer_payload: Dictionary) -> void:
 	if (
 		_resolving_answer
 		or _ending_conversation
-		or _active_session_id.is_empty()
 		or _active_turn.is_empty()
 	):
+		return
+	if str(_active_turn.get("procedure", "ordinary")) == "hearing":
+		await _submit_hearing_answer(answer_payload)
+		return
+	if _active_session_id.is_empty() or _run_status != "active":
 		return
 	if not _required_retry_answer.is_empty() and answer_payload != _required_retry_answer:
 		_hud.show_conversation_error(&"hud.m3r.error.conversation_answer")
@@ -747,6 +1100,7 @@ func _submit_answer(answer_payload: Dictionary) -> void:
 
 	_resolving_answer = true
 	_hud.set_conversation_busy(true)
+	var lifecycle_generation := _lifecycle_generation
 	var result: Dictionary = await _run_session.answer(
 		_run_id,
 		_active_session_id,
@@ -754,6 +1108,8 @@ func _submit_answer(answer_payload: Dictionary) -> void:
 		answer_payload
 	)
 	_resolving_answer = false
+	if lifecycle_generation != _lifecycle_generation or _run_status != "active":
+		return
 	if _is_error(result):
 		if _run_session.mode() == "fixture" and str(result.get("error", "")) == "fixture_replay_miss":
 			_hud.show_conversation_error(&"hud.m3r.error.conversation_answer")
@@ -762,9 +1118,15 @@ func _submit_answer(answer_payload: Dictionary) -> void:
 			return
 		_required_retry_answer = answer_payload.duplicate(true)
 		_hud.show_conversation_error(&"hud.m3r.error.conversation_answer")
+		if (
+			str(answer_payload.get("type", "")) == "hesitation"
+			and str(result.get("error", "")) == "conversation_answer_failed"
+		):
+			_schedule_hesitation_retry()
 		return
 
 	_required_retry_answer = {}
+	_hesitation_retry_scheduled = false
 	_apply_social_view_from_response(result)
 	_run_snapshot["worldRevision"] = int(result.get("worldRevision", 0))
 	_spatial_facts_dirty = true
@@ -784,6 +1146,65 @@ func _submit_answer(answer_payload: Dictionary) -> void:
 	await _end_active_conversation()
 
 
+func _schedule_hesitation_retry() -> void:
+	if _hesitation_retry_scheduled:
+		return
+	_hesitation_retry_scheduled = true
+	await _pause_safe_timer(1.0)
+	_hesitation_retry_scheduled = false
+	if (
+		_run_status != "active"
+		or _active_session_id.is_empty()
+		or _active_turn.is_empty()
+		or str(_required_retry_answer.get("type", "")) != "hesitation"
+	):
+		return
+	await _submit_answer(_required_retry_answer.duplicate(true))
+
+
+func _submit_hearing_answer(answer_payload: Dictionary) -> void:
+	if (
+		_resolving_answer
+		or _run_status != "hearing_active"
+		or _hearing_id.is_empty()
+		or _active_turn.is_empty()
+	):
+		return
+	if not _required_retry_answer.is_empty() and answer_payload != _required_retry_answer:
+		_hud.show_conversation_error(&"hud.m3r.error.hearing_answer")
+		return
+	_resolving_answer = true
+	_hud.set_conversation_busy(true)
+	var result: Dictionary = await _run_session.answer_hearing(
+		_run_id,
+		_hearing_id,
+		str(_active_turn.get("turnId", "")),
+		answer_payload
+	)
+	_resolving_answer = false
+	if _run_status != "hearing_active":
+		return
+	if _is_error(result):
+		_required_retry_answer = answer_payload.duplicate(true)
+		_hud.show_conversation_error(&"hud.m3r.error.hearing_answer")
+		return
+	if (
+		str(result.get("action", "")) != "answer"
+		or str(result.get("hearingId", "")) != _hearing_id
+		or str(result.get("runStatus", "")) != "terminal"
+	):
+		_required_retry_answer = answer_payload.duplicate(true)
+		_hud.show_conversation_error(&"hud.m3r.error.invalid_response")
+		return
+	_required_retry_answer = {}
+	_apply_social_view_from_response(result)
+	_hydrate_run_lifecycle(result)
+	_run_snapshot["worldRevision"] = int(result.get("worldRevision", 0))
+	_last_proposal_meta = _dictionary_or_empty(result.get("proposalMeta"))
+	_run_snapshot["lastProposalMeta"] = _last_proposal_meta.duplicate(true)
+	_enter_terminal_outcome()
+
+
 func _on_conversation_end_retry_requested() -> void:
 	if _conversation_start_retry_required and _active_session_id.is_empty():
 		_conversation_start_retry_required = false
@@ -796,7 +1217,7 @@ func _on_conversation_end_retry_requested() -> void:
 			actor_id,
 			_conversation_contact_id
 		)
-		await _handle_conversation_start_result(result)
+		await _handle_conversation_start_result(result, _lifecycle_generation)
 		return
 	await _end_active_conversation()
 
@@ -885,6 +1306,7 @@ func _ensure_run() -> bool:
 	_run_start_attempts = 0
 	_fixture_replay_complete = false
 	_run_snapshot = result.duplicate(true)
+	_hydrate_run_lifecycle(result)
 	_social_view = {}
 	_apply_social_view_from_response(result)
 	_spatial_facts_dirty = true
@@ -893,6 +1315,10 @@ func _ensure_run() -> bool:
 	_apply_all_conversation_readiness()
 	_queue_initial_conversation_preloads()
 	_reconcile_scheduler_movements(_dictionary_or_empty(result.get("scheduler")))
+	if _run_status == "hearing_due":
+		_enter_hearing_due()
+	elif _run_status == "terminal" and not _terminal_result.is_empty():
+		_enter_terminal_outcome()
 	return true
 
 
@@ -926,6 +1352,8 @@ func _conversation_zone_for_actor(actor_id: String) -> String:
 
 
 func _queue_initial_conversation_preloads() -> void:
+	if _run_status != "active":
+		return
 	for actor_value in _run_snapshot.get("actors", []):
 		if not actor_value is Dictionary:
 			continue
@@ -936,7 +1364,7 @@ func _queue_initial_conversation_preloads() -> void:
 
 
 func _queue_conversation_preload(actor_id: String) -> void:
-	if actor_id.is_empty() or _run_id.is_empty():
+	if _run_status != "active" or actor_id.is_empty() or _run_id.is_empty():
 		return
 	var actor := _actor_view(actor_id)
 	if actor.is_empty() or bool(actor.get("playerConversationReady", false)):
@@ -952,7 +1380,7 @@ func _queue_conversation_preload(actor_id: String) -> void:
 
 
 func _pump_conversation_preloads() -> void:
-	if get_tree().paused or _conversation_target != null:
+	if _run_status != "active" or get_tree().paused or _conversation_target != null:
 		return
 	while (
 		_conversation_preload_in_flight.size() < CONVERSATION_PRELOAD_MAX_IN_FLIGHT
@@ -987,6 +1415,8 @@ func _dispatch_conversation_preload(actor_id: String) -> void:
 		str(_run_snapshot.get("locale", _api_locale()))
 	)
 	_conversation_preload_in_flight.erase(actor_id)
+	if _run_status != "active":
+		return
 	var transport_retry_scheduled := false
 	if not _is_error(result):
 		_conversation_preload_retries.erase(actor_id)
@@ -1111,6 +1541,9 @@ func _dispatch_advance() -> void:
 	var request := _pending_advance_request.duplicate(true)
 	var result: Dictionary = await _run_session.advance(request)
 	_advance_in_flight = false
+	if _run_status != "active":
+		_pending_advance_request = {}
+		return
 	if request != _pending_advance_request:
 		push_error("Run advance lane changed an immutable in-flight packet.")
 		_advance_lane_halted_reason = "in_flight_packet_changed"
@@ -1205,6 +1638,9 @@ func _apply_advance_response(result: Dictionary) -> void:
 		)
 		world_clock["hearingDue"] = bool(response_clock.get("hearingDue", false))
 		_run_snapshot["worldClock"] = world_clock
+	if bool(world_clock.get("hearingDue", false)):
+		_enter_hearing_due()
+		return
 	var scheduler := _dictionary_or_empty(result.get("scheduler"))
 	if not scheduler.is_empty():
 		_run_snapshot["scheduler"] = scheduler.duplicate(true)
@@ -1297,6 +1733,9 @@ func _dispatch_ambient_decision() -> void:
 	var request := _ambient_pending_request.duplicate(true)
 	var result: Dictionary = await _run_session.npc_decision(request)
 	_ambient_decision_in_flight = false
+	if _run_status != "active":
+		_ambient_pending_request = {}
+		return
 	if request != _ambient_pending_request:
 		_ambient_decision_halted_reason = "in_flight_packet_changed"
 		push_error("Ambient NPC decision lane changed an immutable request.")
@@ -2017,17 +2456,24 @@ func _rebase_run_after_advance_conflict() -> void:
 		_advance_needs_rebase = true
 		_advance_retry_remaining = ADVANCE_RETRY_SECONDS
 		return
-	_apply_social_view_from_response(result)
 	_run_snapshot = result.duplicate(true)
+	_hydrate_run_lifecycle(result)
+	_apply_social_view_from_response(result)
 	if not _social_view.is_empty():
 		_run_snapshot["socialView"] = _social_view.duplicate(true)
 	_run_snapshot["worldRevision"] = maxi(current_revision, snapshot_revision)
 	_spatial_facts_dirty = true
 	_last_proposal_meta = _dictionary_or_empty(result.get("lastProposalMeta"))
-	_apply_all_conversation_readiness()
-	_reconcile_scheduler_movements(_dictionary_or_empty(result.get("scheduler")))
 	_advance_needs_rebase = false
 	_advance_retry_remaining = 0.0
+	if _run_status == "hearing_due":
+		_enter_hearing_due()
+		return
+	if _run_status == "terminal" and not _terminal_result.is_empty():
+		_enter_terminal_outcome()
+		return
+	_apply_all_conversation_readiness()
+	_reconcile_scheduler_movements(_dictionary_or_empty(result.get("scheduler")))
 	_queue_initial_conversation_preloads()
 
 
@@ -2105,9 +2551,12 @@ func _apply_actor_conversation_readiness(actor: Dictionary) -> void:
 
 
 func _finish_conversation_modal() -> void:
+	if _run_status != "active":
+		return
 	_active_session_id = ""
 	_active_turn = {}
 	_required_retry_answer = {}
+	_hesitation_retry_scheduled = false
 	_conversation_start_retry_required = false
 	_conversation_contact_id = ""
 	_conversation_contact_zone_id = ""
@@ -2146,6 +2595,7 @@ func _api_locale() -> String:
 
 
 func _apply_social_view_from_response(response: Dictionary) -> bool:
+	_hydrate_run_lifecycle(response)
 	_sync_active_contact_from_response(response)
 	var social_view := _dictionary_or_empty(response.get("socialView"))
 	if social_view.is_empty():

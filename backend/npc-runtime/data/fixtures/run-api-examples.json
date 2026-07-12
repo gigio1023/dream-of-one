@@ -13,6 +13,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 0,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -229,6 +232,630 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
+        }
+      }
+    },
+    "runAdvanceHearingDue": {
+      "endpoint": "POST /v1/run/advance",
+      "request": {
+        "runId": "run-fixture-1",
+        "advanceId": "fixture-hearing-due-1",
+        "observedWorldRevision": 0,
+        "elapsedSeconds": 10,
+        "arrivals": []
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "advanceId": "fixture-hearing-due-1",
+        "previousWorldRevision": 0,
+        "worldRevision": 1,
+        "clock": {
+          "fromSeconds": 0,
+          "toSeconds": 10,
+          "requestedElapsedSeconds": 10,
+          "appliedElapsedSeconds": 10,
+          "graceEnded": false,
+          "hearingDue": true
+        },
+        "arrivalsApplied": [],
+        "arrivalsRejected": [],
+        "scheduleWakes": [
+          {
+            "wakeId": "wake:run-fixture-1:hearing:10",
+            "kind": "hearing",
+            "phase": "due",
+            "sourceId": "station_hearing",
+            "actorIds": [
+              "NPC_Studio_Receptionist",
+              "NPC_Studio_Manager",
+              "NPC_Office_Worker",
+              "NPC_Park_Caretaker",
+              "NPC_Station_Officer",
+              "NPC_Roaming_Liaison"
+            ],
+            "scheduledAtSeconds": 10,
+            "observedWorldRevision": 1,
+            "requiresDecision": false,
+            "status": "informational"
+          }
+        ],
+        "movementDeltas": [],
+        "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Studio_Receptionist",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          },
+          {
+            "actorId": "NPC_Studio_Manager",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          },
+          {
+            "actorId": "NPC_Office_Worker",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          },
+          {
+            "actorId": "NPC_Station_Officer",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          },
+          {
+            "actorId": "NPC_Roaming_Liaison",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          }
+        ],
+        "ambientSpeechEvents": [],
+        "ambientSpeechCursor": 0,
+        "scheduler": {
+          "routeCadenceSeconds": 28,
+          "activeMeetingWindowIds": [],
+          "pendingWakes": [],
+          "actors": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "routeId": "StudioFrontDesk",
+              "currentBlock": {
+                "blockId": "NPC_Studio_Receptionist.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 460,
+                "activity": "front_desk",
+                "targetKind": "route",
+                "targetId": "StudioFrontDesk"
+              },
+              "confirmedAnchorRef": "Studio.receptionist_spawn",
+              "desiredAnchorRef": "Studio.receptionist_spawn",
+              "routePointIndex": 0,
+              "routePointArrivedAtSeconds": 0,
+              "nextRouteMoveAtSeconds": 17,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Studio_Manager",
+              "routeId": "StudioManagerRound",
+              "currentBlock": {
+                "blockId": "NPC_Studio_Manager.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 90,
+                "activity": "review_work",
+                "targetKind": "route",
+                "targetId": "StudioManagerRound"
+              },
+              "confirmedAnchorRef": "Studio.manager_spawn",
+              "desiredAnchorRef": "Studio.manager_spawn",
+              "routePointIndex": 0,
+              "routePointArrivedAtSeconds": 0,
+              "nextRouteMoveAtSeconds": 15,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Office_Worker",
+              "routeId": "OfficeShift",
+              "currentBlock": {
+                "blockId": "NPC_Office_Worker.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 700,
+                "activity": "office_work",
+                "targetKind": "route",
+                "targetId": "OfficeShift"
+              },
+              "confirmedAnchorRef": "Office.worker_spawn",
+              "desiredAnchorRef": "Office.worker_spawn",
+              "routePointIndex": 0,
+              "routePointArrivedAtSeconds": 0,
+              "nextRouteMoveAtSeconds": 18,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Park_Caretaker",
+              "routeId": "ParkCaretakerRound",
+              "currentBlock": {
+                "blockId": "NPC_Park_Caretaker.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 90,
+                "activity": "caretaking_round",
+                "targetKind": "route",
+                "targetId": "ParkCaretakerRound"
+              },
+              "confirmedAnchorRef": "Park.caretaker_spawn",
+              "desiredAnchorRef": "Park.caretaker_spawn",
+              "routePointIndex": 0,
+              "routePointArrivedAtSeconds": 0,
+              "nextRouteMoveAtSeconds": 26,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Station_Officer",
+              "routeId": "StationDuty",
+              "currentBlock": {
+                "blockId": "NPC_Station_Officer.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 1060,
+                "activity": "station_duty",
+                "targetKind": "route",
+                "targetId": "StationDuty"
+              },
+              "confirmedAnchorRef": "Station.officer_spawn",
+              "desiredAnchorRef": "Station.officer_spawn",
+              "routePointIndex": 0,
+              "routePointArrivedAtSeconds": 0,
+              "nextRouteMoveAtSeconds": 27,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Roaming_Liaison",
+              "routeId": "TownLiaisonCircuit",
+              "currentBlock": {
+                "blockId": "NPC_Roaming_Liaison.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 700,
+                "activity": "town_round",
+                "targetKind": "route",
+                "targetId": "TownLiaisonCircuit"
+              },
+              "confirmedAnchorRef": "Park.liaison_spawn",
+              "desiredAnchorRef": "Park.liaison_spawn",
+              "routePointIndex": 0,
+              "routePointArrivedAtSeconds": 0,
+              "nextRouteMoveAtSeconds": 12,
+              "pendingMovement": null
+            }
+          ]
+        },
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 10,
+            "due": true
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
+        },
+        "activeContact": null
+      }
+    },
+    "runHearingOpen": {
+      "endpoint": "POST /v1/run/hearing",
+      "request": {
+        "action": "open",
+        "runId": "run-fixture-1",
+        "hearingId": "hearing-fixture-1"
+      },
+      "response": {
+        "action": "open",
+        "runId": "run-fixture-1",
+        "hearingId": "hearing-fixture-1",
+        "worldRevision": 3,
+        "runStatus": "hearing_active",
+        "hearingProcedure": {
+          "hearingId": "hearing-fixture-1",
+          "status": "awaiting_defense",
+          "turnId": "hearing:hearing-fixture-1#0"
+        },
+        "staging": {
+          "playerAnchorRef": "Station.hearing_player",
+          "focusAnchorRef": "Station.hearing_table"
+        },
+        "nextTurn": {
+          "turnId": "hearing:hearing-fixture-1#0",
+          "beatId": "station_hearing_opening",
+          "promptId": "station_hearing_final_defense",
+          "choiceSetId": "station_hearing_opening.generated",
+          "speakerId": "NPC_Station_Officer",
+          "prompt": "스테이션 담당관입니다. 어떤 일로 말을 거셨습니까?",
+          "acceptsFreeInput": true,
+          "continueConversation": false,
+          "procedure": "hearing",
+          "hesitationMs": 0,
+          "choices": [
+            {
+              "choiceId": "station_hearing_opening.generated.1",
+              "intent": "safe/local",
+              "line": "안내받은 절차를 확인하러 왔습니다."
+            },
+            {
+              "choiceId": "station_hearing_opening.generated.2",
+              "intent": "uncertain/repair",
+              "line": "먼저 어떤 접수인지 설명해 주세요."
+            },
+            {
+              "choiceId": "station_hearing_opening.generated.3",
+              "intent": "risky/weird",
+              "line": "여기 사람이 아니라서 잘 모르겠습니다."
+            }
+          ],
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "terminalResult": null,
+        "proposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "socialView": {
+          "revision": 1,
+          "hearing": {
+            "atSeconds": 10,
+            "due": true
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
+        }
+      }
+    },
+    "runHearingAnswer": {
+      "endpoint": "POST /v1/run/hearing",
+      "request": {
+        "action": "answer",
+        "runId": "run-fixture-1",
+        "hearingId": "hearing-fixture-1",
+        "turnId": "hearing:hearing-fixture-1#0",
+        "answer": {
+          "type": "choice",
+          "choiceId": "station_hearing_opening.generated.1"
+        }
+      },
+      "response": {
+        "action": "answer",
+        "runId": "run-fixture-1",
+        "hearingId": "hearing-fixture-1",
+        "worldRevision": 4,
+        "runStatus": "terminal",
+        "hearingProcedure": {
+          "hearingId": "hearing-fixture-1",
+          "status": "resolved",
+          "turnId": "hearing:hearing-fixture-1#0"
+        },
+        "nextTurn": null,
+        "terminalResult": {
+          "hearingId": "hearing-fixture-1",
+          "verdict": "abnormal",
+          "verdictWhyLine": "직접 대화를 근거로 한 주민 보증이 네 건에 미치지 못했습니다.",
+          "officerLine": "제출된 증언과 최종 진술을 검토했습니다. 비정상으로 판정합니다.",
+          "finalDefense": "안내받은 절차를 확인하러 왔습니다.",
+          "evidencedVouchCount": 0,
+          "residentAssessments": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "citedMemoryIds": []
+            },
+            {
+              "actorId": "NPC_Studio_Manager",
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "citedMemoryIds": []
+            },
+            {
+              "actorId": "NPC_Office_Worker",
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "citedMemoryIds": []
+            },
+            {
+              "actorId": "NPC_Park_Caretaker",
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "citedMemoryIds": []
+            },
+            {
+              "actorId": "NPC_Station_Officer",
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "citedMemoryIds": []
+            },
+            {
+              "actorId": "NPC_Roaming_Liaison",
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "citedMemoryIds": []
+            }
+          ],
+          "citedRecordIds": [],
+          "citedLedgerEventIds": [],
+          "recap": [
+            {
+              "kind": "defense",
+              "actorId": "player",
+              "line": "안내받은 절차를 확인하러 왔습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "testimony",
+              "actorId": "NPC_Studio_Receptionist",
+              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "testimony",
+              "actorId": "NPC_Studio_Manager",
+              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "testimony",
+              "actorId": "NPC_Office_Worker",
+              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "testimony",
+              "actorId": "NPC_Park_Caretaker",
+              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "testimony",
+              "actorId": "NPC_Station_Officer",
+              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "testimony",
+              "actorId": "NPC_Roaming_Liaison",
+              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "verdict",
+              "actorId": "NPC_Station_Officer",
+              "line": "직접 대화를 근거로 한 주민 보증이 네 건에 미치지 못했습니다.",
+              "sourceIds": []
+            }
+          ],
+          "worldSeconds": 10,
+          "worldRevision": 4,
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "proposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "socialView": {
+          "revision": 2,
+          "hearing": {
+            "atSeconds": 10,
+            "due": true
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "stance": "uncertain",
+              "stanceRevision": 4,
+              "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "provenance": null
+            },
+            {
+              "actorId": "NPC_Studio_Manager",
+              "stance": "uncertain",
+              "stanceRevision": 4,
+              "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "provenance": null
+            },
+            {
+              "actorId": "NPC_Office_Worker",
+              "stance": "uncertain",
+              "stanceRevision": 4,
+              "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "provenance": null
+            },
+            {
+              "actorId": "NPC_Park_Caretaker",
+              "stance": "uncertain",
+              "stanceRevision": 4,
+              "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "provenance": null
+            },
+            {
+              "actorId": "NPC_Station_Officer",
+              "stance": "uncertain",
+              "stanceRevision": 4,
+              "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "provenance": null
+            },
+            {
+              "actorId": "NPC_Roaming_Liaison",
+              "stance": "uncertain",
+              "stanceRevision": 4,
+              "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "provenance": null
+            }
+          ],
+          "openQuestions": [],
+          "encounteredRecords": []
+        }
+      }
+    },
+    "runEnd": {
+      "endpoint": "POST /v1/run/end",
+      "request": {
+        "runId": "run-fixture-1",
+        "endId": "end-fixture-1"
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "endId": "end-fixture-1",
+        "runStatus": "closed",
+        "terminalResult": {
+          "hearingId": "hearing-fixture-1",
+          "verdict": "abnormal",
+          "verdictWhyLine": "직접 대화를 근거로 한 주민 보증이 네 건에 미치지 못했습니다.",
+          "officerLine": "제출된 증언과 최종 진술을 검토했습니다. 비정상으로 판정합니다.",
+          "finalDefense": "안내받은 절차를 확인하러 왔습니다.",
+          "evidencedVouchCount": 0,
+          "residentAssessments": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "citedMemoryIds": []
+            },
+            {
+              "actorId": "NPC_Studio_Manager",
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "citedMemoryIds": []
+            },
+            {
+              "actorId": "NPC_Office_Worker",
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "citedMemoryIds": []
+            },
+            {
+              "actorId": "NPC_Park_Caretaker",
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "citedMemoryIds": []
+            },
+            {
+              "actorId": "NPC_Station_Officer",
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "citedMemoryIds": []
+            },
+            {
+              "actorId": "NPC_Roaming_Liaison",
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "citedMemoryIds": []
+            }
+          ],
+          "citedRecordIds": [],
+          "citedLedgerEventIds": [],
+          "recap": [
+            {
+              "kind": "defense",
+              "actorId": "player",
+              "line": "안내받은 절차를 확인하러 왔습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "testimony",
+              "actorId": "NPC_Studio_Receptionist",
+              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "testimony",
+              "actorId": "NPC_Studio_Manager",
+              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "testimony",
+              "actorId": "NPC_Office_Worker",
+              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "testimony",
+              "actorId": "NPC_Park_Caretaker",
+              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "testimony",
+              "actorId": "NPC_Station_Officer",
+              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "testimony",
+              "actorId": "NPC_Roaming_Liaison",
+              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "sourceIds": []
+            },
+            {
+              "kind": "verdict",
+              "actorId": "NPC_Station_Officer",
+              "line": "직접 대화를 근거로 한 주민 보증이 네 건에 미치지 못했습니다.",
+              "sourceIds": []
+            }
+          ],
+          "worldSeconds": 10,
+          "worldRevision": 4,
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "providerBudget": {
+          "callLimit": 120,
+          "tokenLimit": 300000,
+          "reservedCalls": 20,
+          "reservedTokens": 50000,
+          "callsUsed": 0,
+          "tokensUsed": 0
+        },
+        "lastProposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
         }
       }
     },
@@ -1194,6 +1821,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 9,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 20,
@@ -1800,7 +2430,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:238d9ad696d15e53",
+            "sourceId": "goal:218419a63a60d930",
             "actorIds": [
               "NPC_Office_Worker"
             ],
@@ -1813,7 +2443,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:562e4395f5cece7e",
+            "sourceId": "goal:2e18413b6d711f5d",
             "actorIds": [
               "NPC_Park_Caretaker"
             ],
@@ -1826,7 +2456,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:8ee092bd78fe1c46",
+            "sourceId": "goal:56fad69055525ca5",
             "actorIds": [
               "NPC_Roaming_Liaison"
             ],
@@ -1839,7 +2469,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:858b5d3df1c2eb35",
+            "sourceId": "goal:9c07e4aa53cfc024",
             "actorIds": [
               "NPC_Station_Officer"
             ],
@@ -1852,7 +2482,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:00fe99a6334ea5ee",
+            "sourceId": "goal:cd7b5e7efbc4f43f",
             "actorIds": [
               "NPC_Studio_Manager"
             ],
@@ -1865,7 +2495,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:20ba60f4a9f64f17",
+            "sourceId": "goal:66b1671ba92b06dd",
             "actorIds": [
               "NPC_Studio_Receptionist"
             ],
@@ -1996,7 +2626,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:238d9ad696d15e53",
+              "sourceId": "goal:218419a63a60d930",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -2009,7 +2639,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:562e4395f5cece7e",
+              "sourceId": "goal:2e18413b6d711f5d",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -2022,7 +2652,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:8ee092bd78fe1c46",
+              "sourceId": "goal:56fad69055525ca5",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -2035,7 +2665,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:858b5d3df1c2eb35",
+              "sourceId": "goal:9c07e4aa53cfc024",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -2048,7 +2678,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:00fe99a6334ea5ee",
+              "sourceId": "goal:cd7b5e7efbc4f43f",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -2061,7 +2691,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:20ba60f4a9f64f17",
+              "sourceId": "goal:66b1671ba92b06dd",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -2865,7 +3495,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:45ab90da877277e5",
+            "sourceId": "goal:cb8783a55727ba43",
             "actorIds": [
               "NPC_Park_Caretaker"
             ],
@@ -2902,7 +3532,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:238d9ad696d15e53",
+              "sourceId": "goal:218419a63a60d930",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -2915,7 +3545,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:562e4395f5cece7e",
+              "sourceId": "goal:2e18413b6d711f5d",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -2928,7 +3558,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:8ee092bd78fe1c46",
+              "sourceId": "goal:56fad69055525ca5",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -2941,7 +3571,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:858b5d3df1c2eb35",
+              "sourceId": "goal:9c07e4aa53cfc024",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -2954,7 +3584,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:00fe99a6334ea5ee",
+              "sourceId": "goal:cd7b5e7efbc4f43f",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -2967,7 +3597,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:20ba60f4a9f64f17",
+              "sourceId": "goal:66b1671ba92b06dd",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -2980,7 +3610,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:10",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:b1872fec0c612450",
+              "sourceId": "goal:6c04c2fe8125ff43",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -2993,7 +3623,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:45ab90da877277e5",
+              "sourceId": "goal:cb8783a55727ba43",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -3006,7 +3636,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:10",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:87952385b8d833cc",
+              "sourceId": "goal:9c118a9bd158b52c",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -3211,7 +3841,8 @@
           "safeDistanceM": 2.2,
           "issuedAtSeconds": 90,
           "expiresAtSeconds": 120,
-          "reason": "현재 역할과 기억을 바탕으로 방문자에게 직접 확인할 필요가 있습니다."
+          "reason": "현재 역할과 기억을 바탕으로 방문자에게 직접 확인할 필요가 있습니다.",
+          "procedure": "ordinary"
         }
       }
     },
@@ -3250,7 +3881,8 @@
           "safeDistanceM": 2.2,
           "issuedAtSeconds": 90,
           "expiresAtSeconds": 120,
-          "reason": "현재 역할과 기억을 바탕으로 방문자에게 직접 확인할 필요가 있습니다."
+          "reason": "현재 역할과 기억을 바탕으로 방문자에게 직접 확인할 필요가 있습니다.",
+          "procedure": "ordinary"
         }
       }
     },
@@ -3413,21 +4045,7 @@
         },
         "arrivalsApplied": [],
         "arrivalsRejected": [],
-        "scheduleWakes": [
-          {
-            "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:14",
-            "kind": "goal",
-            "phase": "due",
-            "sourceId": "goal:42317f8b1fa506b3",
-            "actorIds": [
-              "NPC_Park_Caretaker"
-            ],
-            "scheduledAtSeconds": 90,
-            "observedWorldRevision": 14,
-            "requiresDecision": true,
-            "status": "pending"
-          }
-        ],
+        "scheduleWakes": [],
         "movementDeltas": [],
         "actorReadinessDeltas": [],
         "ambientSpeechEvents": [],
@@ -3442,7 +4060,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:238d9ad696d15e53",
+              "sourceId": "goal:218419a63a60d930",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -3455,7 +4073,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:562e4395f5cece7e",
+              "sourceId": "goal:2e18413b6d711f5d",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -3468,7 +4086,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:8ee092bd78fe1c46",
+              "sourceId": "goal:56fad69055525ca5",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -3481,7 +4099,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:858b5d3df1c2eb35",
+              "sourceId": "goal:9c07e4aa53cfc024",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -3494,7 +4112,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:00fe99a6334ea5ee",
+              "sourceId": "goal:cd7b5e7efbc4f43f",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -3507,7 +4125,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:20ba60f4a9f64f17",
+              "sourceId": "goal:66b1671ba92b06dd",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -3520,7 +4138,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:10",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:b1872fec0c612450",
+              "sourceId": "goal:6c04c2fe8125ff43",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -3530,23 +4148,10 @@
               "status": "pending"
             },
             {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:14",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:42317f8b1fa506b3",
-              "actorIds": [
-                "NPC_Park_Caretaker"
-              ],
-              "scheduledAtSeconds": 90,
-              "observedWorldRevision": 14,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:10",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:87952385b8d833cc",
+              "sourceId": "goal:9c118a9bd158b52c",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -3703,7 +4308,8 @@
           "safeDistanceM": 2.2,
           "issuedAtSeconds": 90,
           "expiresAtSeconds": 120,
-          "reason": "현재 역할과 기억을 바탕으로 방문자에게 직접 확인할 필요가 있습니다."
+          "reason": "현재 역할과 기억을 바탕으로 방문자에게 직접 확인할 필요가 있습니다.",
+          "procedure": "ordinary"
         }
       }
     },
@@ -3758,6 +4364,8 @@
           "prompt": "공원을 돌보는 중입니다. 제게 하실 말씀이 있나요?",
           "acceptsFreeInput": true,
           "continueConversation": true,
+          "procedure": "ordinary",
+          "hesitationMs": 0,
           "choices": [
             {
               "choiceId": "resident_opening_park_caretaker.generated.1",
@@ -4043,6 +4651,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 26,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 100,
@@ -4712,6 +5323,8 @@
           "prompt": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
           "acceptsFreeInput": true,
           "continueConversation": true,
+          "procedure": "ordinary",
+          "hesitationMs": 0,
           "choices": [
             {
               "choiceId": "resident_opening_studio_receptionist.generated.1",
@@ -5075,6 +5688,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 8,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -5527,6 +6143,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 9,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -6328,6 +6947,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 8,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -6490,7 +7112,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:8a9a3c650f268ce1",
+              "sourceId": "goal:9beb943d3602337a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -6503,7 +7125,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:bcda81af7d0adf71",
+              "sourceId": "goal:103e91264bf8e03d",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -11324,6 +11946,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 8,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -11763,6 +12388,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 9,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -12386,6 +13014,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 8,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -12825,6 +13456,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 9,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -13460,6 +14094,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 8,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -13903,6 +14540,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 9,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -14528,6 +15168,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 8,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,
@@ -14967,6 +15610,9 @@
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v4",
         "worldRevision": 9,
+        "runStatus": "active",
+        "hearingProcedure": null,
+        "terminalResult": null,
         "locale": "ko-KR",
         "worldClock": {
           "elapsedSeconds": 0,

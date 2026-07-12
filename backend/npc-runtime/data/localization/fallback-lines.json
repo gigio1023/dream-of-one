@@ -33,6 +33,16 @@
         ]
       }
     },
+    "hearing": {
+      "opening": "청문회를 시작합니다. 여섯 주민의 증언과 최종 진술만 접수합니다.",
+      "memoryGroundedTestimony": "직접 나눈 대화에서 이렇게 기억합니다. {memory}",
+      "neverMetTestimony": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+      "missingEvidenceTestimony": "직접 대화는 했지만 제출된 기억만으로는 확인할 내용을 고를 수 없습니다.",
+      "ordinaryVerdictWhy": "네 명 이상의 주민이 직접 대화를 근거로 보증했습니다.",
+      "abnormalVerdictWhy": "직접 대화를 근거로 한 주민 보증이 네 건에 미치지 못했습니다.",
+      "ordinaryOfficerLine": "제출된 증언과 최종 진술을 검토했습니다. 평범한 사람으로 판정합니다.",
+      "abnormalOfficerLine": "제출된 증언과 최종 진술을 검토했습니다. 비정상으로 판정합니다."
+    },
     "agent": {
       "previousResultWaitReason": "방금 결과를 다시 살핍니다",
       "previousResultRationale": "방금 행동의 결과를 확인하고 잠시 기다립니다.",
@@ -77,6 +87,16 @@
           { "text": "I am not from here.", "intent": "risky/weird" }
         ]
       }
+    },
+    "hearing": {
+      "opening": "The hearing is now in session. Only the six residents' testimony and the final statement will be received.",
+      "memoryGroundedTestimony": "From our direct conversation, this is what I remember: {memory}",
+      "neverMetTestimony": "I have never spoken directly with this visitor, so I cannot vouch for them.",
+      "missingEvidenceTestimony": "I spoke directly with this visitor, but the submitted memories contain nothing I can confirm.",
+      "ordinaryVerdictWhy": "At least four residents vouch for the visitor on the basis of direct conversations.",
+      "abnormalVerdictWhy": "Fewer than four residents vouch for the visitor on the basis of direct conversations.",
+      "ordinaryOfficerLine": "The submitted testimony and final statement have been reviewed. The visitor is classified as ordinary.",
+      "abnormalOfficerLine": "The submitted testimony and final statement have been reviewed. The visitor is classified as abnormal."
     },
     "agent": {
       "previousResultWaitReason": "review the latest result",
@@ -123,6 +143,16 @@
         ]
       }
     },
+    "hearing": {
+      "opening": "L'udienza ha inizio. Saranno acquisite soltanto le testimonianze dei sei residenti e la dichiarazione finale.",
+      "memoryGroundedTestimony": "Del nostro colloquio diretto ricordo questo: {memory}",
+      "neverMetTestimony": "Non ho mai parlato direttamente con questa persona, quindi non posso garantire per lei.",
+      "missingEvidenceTestimony": "Ho parlato direttamente con questa persona, ma nei ricordi presentati non trovo nulla che possa confermare.",
+      "ordinaryVerdictWhy": "Almeno quattro residenti garantiscono per questa persona sulla base di colloqui diretti.",
+      "abnormalVerdictWhy": "Le garanzie fondate su colloqui diretti sono meno di quattro.",
+      "ordinaryOfficerLine": "Le testimonianze presentate e la dichiarazione finale sono state esaminate. La persona è classificata come ordinaria.",
+      "abnormalOfficerLine": "Le testimonianze presentate e la dichiarazione finale sono state esaminate. La persona è classificata come anomala."
+    },
     "agent": {
       "previousResultWaitReason": "riesaminare l'ultimo risultato",
       "previousResultRationale": "Controllo il risultato dell'ultima azione e aspetto un momento.",
@@ -167,6 +197,16 @@
           { "text": "我不是这里的人。", "intent": "risky/weird" }
         ]
       }
+    },
+    "hearing": {
+      "opening": "听证现在开始。只受理六名居民的证词和最终陈述。",
+      "memoryGroundedTestimony": "根据我们的直接交谈，我记得的是：{memory}",
+      "neverMetTestimony": "我从未与这名来访者直接交谈，因此无法为其作保。",
+      "missingEvidenceTestimony": "我与这名来访者直接交谈过，但提交的记忆中没有可供确认的内容。",
+      "ordinaryVerdictWhy": "至少四名居民根据直接交谈为这名来访者作保。",
+      "abnormalVerdictWhy": "根据直接交谈作保的居民不足四名。",
+      "ordinaryOfficerLine": "已审查所提交的证词和最终陈述。现将这名来访者判定为普通人。",
+      "abnormalOfficerLine": "已审查所提交的证词和最终陈述。现将这名来访者判定为异常。"
     },
     "agent": {
       "previousResultWaitReason": "重新查看刚才的结果",
@@ -213,6 +253,16 @@
         ]
       }
     },
+    "hearing": {
+      "opening": "L'audience commence. Seuls les témoignages des six résidents et la déclaration finale seront reçus.",
+      "memoryGroundedTestimony": "De notre entretien direct, voici ce dont je me souviens : {memory}",
+      "neverMetTestimony": "Je n'ai jamais parlé directement avec cette personne et je ne peux donc pas me porter garant d'elle.",
+      "missingEvidenceTestimony": "J'ai parlé directement avec cette personne, mais les souvenirs présentés ne contiennent rien que je puisse confirmer.",
+      "ordinaryVerdictWhy": "Au moins quatre résidents se portent garants de cette personne sur la base d'entretiens directs.",
+      "abnormalVerdictWhy": "Moins de quatre résidents se portent garants de cette personne sur la base d'entretiens directs.",
+      "ordinaryOfficerLine": "Les témoignages présentés et la déclaration finale ont été examinés. Cette personne est déclarée ordinaire.",
+      "abnormalOfficerLine": "Les témoignages présentés et la déclaration finale ont été examinés. Cette personne est déclarée anormale."
+    },
     "agent": {
       "previousResultWaitReason": "réexaminer le dernier résultat",
       "previousResultRationale": "J'examine le résultat de ma dernière action et j'attends un instant.",
@@ -257,6 +307,16 @@
           { "text": "私はここの者ではありません。", "intent": "risky/weird" }
         ]
       }
+    },
+    "hearing": {
+      "opening": "聴聞を開始します。六名の住民による証言と最終陳述のみを受理します。",
+      "memoryGroundedTestimony": "直接交わした会話について、私はこう記憶しています。{memory}",
+      "neverMetTestimony": "この来訪者とは直接話したことがないため、保証できません。",
+      "missingEvidenceTestimony": "直接話したことはありますが、提出された記憶には確認できる内容がありません。",
+      "ordinaryVerdictWhy": "四名以上の住民が、直接の会話を根拠に保証しています。",
+      "abnormalVerdictWhy": "直接の会話を根拠に保証する住民が四名に達していません。",
+      "ordinaryOfficerLine": "提出された証言と最終陳述を審査しました。普通の人と判定します。",
+      "abnormalOfficerLine": "提出された証言と最終陳述を審査しました。異常と判定します。"
     },
     "agent": {
       "previousResultWaitReason": "直前の結果を見直す",

@@ -12,12 +12,22 @@ signal conversation_end_retry_requested
 signal ambient_subtitle_started(event: Dictionary)
 signal log_visibility_changed(visible: bool)
 signal debug_visibility_changed(visible: bool)
+signal hesitation_expired
+signal restart_requested
 
 const UI_SCALE_OPTIONS: Array[float] = [0.8, 1.0, 1.25, 1.5]
 const TYPEWRITER_CHARACTERS_PER_SECOND := 42.0
 const AMBIENT_SUBTITLE_MIN_SECONDS := 2.4
 const AMBIENT_SUBTITLE_MAX_SECONDS := 6.0
 const AMBIENT_SUBTITLE_SECONDS_PER_CHARACTER := 0.055
+const OUTCOME_ACTOR_IDS: PackedStringArray = [
+	"NPC_Studio_Receptionist",
+	"NPC_Studio_Manager",
+	"NPC_Office_Worker",
+	"NPC_Park_Caretaker",
+	"NPC_Station_Officer",
+	"NPC_Roaming_Liaison",
+]
 
 @onready var _reticle: Label = %Reticle
 @onready var _start_hint: Label = %StartHint
@@ -49,6 +59,7 @@ const AMBIENT_SUBTITLE_SECONDS_PER_CHARACTER := 0.055
 @onready var _conversation_provider_label: Label = %ConversationProviderLabel
 @onready var _conversation_prompt_label: Label = %ConversationPromptLabel
 @onready var _conversation_thinking_label: Label = %ConversationThinkingLabel
+@onready var _conversation_timer_label: Label = %ConversationTimerLabel
 @onready var _conversation_why_line_label: Label = %ConversationWhyLineLabel
 @onready var _conversation_choice_1: Button = %ConversationChoice1
 @onready var _conversation_choice_2: Button = %ConversationChoice2
@@ -66,6 +77,15 @@ const AMBIENT_SUBTITLE_SECONDS_PER_CHARACTER := 0.055
 @onready var _log_error_label: Label = %LogErrorLabel
 @onready var _log_busy_label: Label = %LogBusyLabel
 @onready var _close_log_button: Button = %CloseLogButton
+@onready var _outcome_shade: ColorRect = %OutcomeShade
+@onready var _outcome_title: Label = %OutcomeTitle
+@onready var _outcome_fallback_badge: Label = %OutcomeFallbackBadge
+@onready var _outcome_verdict_label: Label = %OutcomeVerdictLabel
+@onready var _outcome_vouch_label: Label = %OutcomeVouchLabel
+@onready var _outcome_body: RichTextLabel = %OutcomeBody
+@onready var _outcome_status_label: Label = %OutcomeStatusLabel
+@onready var _restart_button: Button = %RestartButton
+@onready var _hearing_fade: ColorRect = %HearingFade
 @onready var _debug_panel: PanelContainer = %DebugPanel
 @onready var _debug_text: RichTextLabel = %DebugText
 @onready var _localization: Node = get_node("/root/Localization")
@@ -95,6 +115,18 @@ var _language_options: Array[String] = []
 var _language_applies_next_run := false
 var _contact_cue_id := ""
 var _contact_cue_actor_id := ""
+var _hearing_opening_state := ""
+var _hesitation_active := false
+var _hesitation_emitted := false
+var _hesitation_duration_seconds := 0.0
+var _hesitation_remaining_seconds := 0.0
+var _outcome_visible := false
+var _outcome_busy := false
+var _outcome_result: Dictionary = {}
+var _outcome_presented_testimonies: Array[Dictionary] = []
+var _outcome_recap_lines: Array[String] = []
+var _outcome_presented_recap: Array[Dictionary] = []
+var _hearing_fade_tween: Tween
 
 
 func _ready() -> void:
@@ -115,12 +147,14 @@ func _ready() -> void:
 	_conversation_free_input.text_submitted.connect(_on_free_input_text_submitted)
 	_end_conversation_button.pressed.connect(_on_end_conversation_retry_pressed)
 	_close_log_button.pressed.connect(close_log)
+	_restart_button.pressed.connect(_on_restart_pressed)
 	_prompt_panel.visible = false
 	_contact_cue_panel.visible = false
 	_ambient_subtitle_panel.visible = false
 	_settings_shade.visible = false
 	_conversation_shade.visible = false
 	_conversation_thinking_label.visible = false
+	_conversation_timer_label.visible = false
 	_conversation_why_line_label.visible = false
 	_conversation_status_label.visible = false
 	_retry_button_mode = &"end"
@@ -130,10 +164,15 @@ func _ready() -> void:
 	_log_shade.visible = false
 	_log_error_label.visible = false
 	_log_busy_label.visible = false
+	_outcome_shade.visible = false
+	_outcome_fallback_badge.visible = false
+	_outcome_status_label.visible = false
+	_hearing_fade.visible = false
 	_debug_panel.visible = false
 
 
 func _process(delta: float) -> void:
+	_process_hesitation_timer(delta)
 	if _current_ambient_subtitle.is_empty():
 		return
 	if _conversation_visible or _settings_visible:
@@ -148,6 +187,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_debug") and OS.is_debug_build():
 		_set_debug_visible(not _debug_visible)
 		get_viewport().set_input_as_handled()
+		return
+	if _outcome_visible:
+		if event.is_action_pressed("cancel") or event.is_action_pressed("open_log"):
+			get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("open_log") and not _conversation_visible and not _settings_visible:
 		toggle_log()
@@ -175,7 +218,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func set_focus(target: Node) -> void:
 	_focused_target = target
-	if _conversation_visible or _settings_visible or _log_visible:
+	if _conversation_visible or _settings_visible or _log_visible or _outcome_visible:
 		_prompt_panel.visible = false
 		return
 	if target == null or not target.has_method("get_interaction_label_key"):
@@ -204,10 +247,128 @@ func clear_contact_approach(contact_id := "") -> void:
 	_refresh_contact_cue()
 
 
+func show_hearing_opening(retrying := false) -> void:
+	_hearing_opening_state = "retry" if retrying else "opening"
+	_refresh_contact_cue()
+
+
+func clear_hearing_opening() -> void:
+	_hearing_opening_state = ""
+	_refresh_contact_cue()
+
+
 func contact_cue_snapshot() -> Dictionary:
 	return {
 		"visible": _contact_cue_panel.visible,
 		"text": _contact_cue_label.text,
+		"hearingOpening": not _hearing_opening_state.is_empty(),
+	}
+
+
+func hesitation_timer_snapshot() -> Dictionary:
+	return {
+		"visible": _conversation_timer_label.visible,
+		"active": _hesitation_active,
+		"expired": _hesitation_emitted,
+		"durationSeconds": _hesitation_duration_seconds,
+		"remainingSeconds": _hesitation_remaining_seconds,
+		"text": _conversation_timer_label.text,
+	}
+
+
+func stop_hesitation_timer() -> void:
+	_hesitation_active = false
+	_conversation_timer_label.visible = false
+
+
+func fade_to_hearing() -> void:
+	if is_instance_valid(_hearing_fade_tween):
+		_hearing_fade_tween.kill()
+	_hearing_fade.visible = true
+	_hearing_fade.color.a = 0.0
+	_hearing_fade_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_hearing_fade_tween.tween_property(_hearing_fade, "color:a", 1.0, 0.22)
+	await _hearing_fade_tween.finished
+
+
+func fade_from_hearing() -> void:
+	if is_instance_valid(_hearing_fade_tween):
+		_hearing_fade_tween.kill()
+	_hearing_fade.visible = true
+	_hearing_fade.color.a = 1.0
+	_hearing_fade_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_hearing_fade_tween.tween_property(_hearing_fade, "color:a", 0.0, 0.22)
+	await _hearing_fade_tween.finished
+	_hearing_fade.visible = false
+
+
+func show_outcome(result: Dictionary) -> void:
+	if result.is_empty():
+		return
+	stop_hesitation_timer()
+	if _settings_visible:
+		_set_settings_visible(false)
+	if _log_visible:
+		_set_log_busy(false)
+		_set_log_visible(false)
+	if _conversation_visible:
+		close_conversation()
+	_outcome_result = result.duplicate(true)
+	_outcome_visible = true
+	_outcome_busy = false
+	_hearing_opening_state = ""
+	_outcome_shade.visible = true
+	_prompt_panel.visible = false
+	_reticle.visible = false
+	_contact_cue_panel.visible = false
+	_ambient_subtitle_panel.visible = false
+	_encountered_stance_panel.visible = false
+	_refresh_outcome()
+	_restart_button.grab_focus()
+
+
+func outcome_visible() -> bool:
+	return _outcome_visible
+
+
+func set_outcome_busy(value: bool, error_key := StringName()) -> void:
+	_outcome_busy = value
+	_restart_button.disabled = value
+	_outcome_status_label.text = "" if error_key.is_empty() else str(tr(error_key))
+	_outcome_status_label.visible = value or not _outcome_status_label.text.is_empty()
+	if value:
+		_outcome_status_label.text = str(tr(&"hud.m3r.outcome.restart_busy"))
+
+
+func outcome_snapshot() -> Dictionary:
+	var outcome_provider_meta := _outcome_provider_meta()
+	return {
+		"visible": _outcome_visible,
+		"busy": _outcome_busy,
+		"route": str(_outcome_result.get("verdict", "")),
+		"title": _outcome_title.text,
+		"verdictWhy": str(_outcome_result.get("verdictWhyLine", "")),
+		"officerLine": str(_outcome_result.get("officerLine", "")),
+		"verdictDisplay": _outcome_verdict_label.text,
+		"vouchCount": _outcome_vouch_count(),
+		"requiredVouches": 4,
+		"fallbackVisible": _outcome_fallback_badge.visible,
+		"fallbackReason": str(outcome_provider_meta.get("fallbackReason", "")),
+		"fallbackReasonText": (
+			_provider_fallback_reason_text(outcome_provider_meta)
+			if _outcome_fallback_badge.visible
+			else ""
+		),
+		"testimonies": _outcome_presented_testimonies.duplicate(true),
+		"recapLines": _outcome_recap_lines.duplicate(),
+		"recapEntries": _outcome_presented_recap.duplicate(true),
+		"citedRecordIds": _array_or_empty(_outcome_result.get("citedRecordIds")),
+		"citedLedgerEventIds": _array_or_empty(
+			_outcome_result.get("citedLedgerEventIds")
+		),
+		"body": _outcome_body.text,
+		"status": _outcome_status_label.text if _outcome_status_label.visible else "",
+		"restartDisabled": _restart_button.disabled,
 	}
 
 
@@ -299,8 +460,16 @@ func ambient_subtitle_snapshot() -> Dictionary:
 	}
 
 
+func clear_ambient_subtitles() -> void:
+	_ambient_subtitle_queue.clear()
+	_current_ambient_subtitle = {}
+	_ambient_subtitle_remaining = 0.0
+	_refresh_ambient_subtitle_text()
+	_refresh_ambient_subtitle_visibility()
+
+
 func open_settings() -> void:
-	if _conversation_visible or _log_visible:
+	if _conversation_visible or _log_visible or _outcome_visible:
 		return
 	_set_settings_visible(true)
 
@@ -330,13 +499,13 @@ func log_busy() -> bool:
 
 
 func toggle_log() -> void:
-	if _log_busy:
+	if _log_busy or _outcome_visible:
 		return
 	_set_log_visible(not _log_visible)
 
 
 func open_log(error_key := StringName()) -> void:
-	if _conversation_visible or _settings_visible:
+	if _conversation_visible or _settings_visible or _outcome_visible:
 		return
 	if not error_key.is_empty():
 		show_log_error(error_key)
@@ -350,7 +519,7 @@ func close_log() -> void:
 
 
 func open_log_busy() -> void:
-	if _conversation_visible or _settings_visible:
+	if _conversation_visible or _settings_visible or _outcome_visible:
 		return
 	clear_log_error()
 	_set_log_busy(true)
@@ -400,6 +569,8 @@ func set_debug_snapshot(value: Dictionary) -> void:
 
 
 func begin_conversation(actor: Dictionary) -> void:
+	if _outcome_visible:
+		return
 	if _settings_visible:
 		_set_settings_visible(false)
 	_conversation_visible = true
@@ -407,6 +578,7 @@ func begin_conversation(actor: Dictionary) -> void:
 	_conversation_actor_id = str(actor.get("actorId", ""))
 	_current_stance = _disclosed_stance(_conversation_actor_id)
 	_current_turn.clear()
+	_reset_hesitation_timer()
 	_last_why_line = ""
 	_provider_meta = {}
 	_choice_ids = ["", "", ""]
@@ -452,6 +624,7 @@ func show_turn(turn: Dictionary) -> bool:
 		_choice_buttons[index].visible = true
 	_conversation_input_row.visible = bool(turn.get("acceptsFreeInput", false))
 	_conversation_free_input.clear()
+	_configure_hesitation_timer(turn)
 	set_conversation_busy(false)
 	_choice_buttons[0].grab_focus()
 	return true
@@ -459,6 +632,8 @@ func show_turn(turn: Dictionary) -> bool:
 
 func set_conversation_busy(value: bool) -> void:
 	_conversation_busy = value
+	if value:
+		stop_hesitation_timer()
 	_conversation_thinking_label.visible = value
 	for button in _choice_buttons:
 		button.disabled = value
@@ -511,6 +686,7 @@ func show_conversation_ended() -> void:
 
 func clear_turn_controls() -> void:
 	_current_turn.clear()
+	stop_hesitation_timer()
 	for button in _choice_buttons:
 		button.visible = false
 	_conversation_input_row.visible = false
@@ -521,6 +697,7 @@ func close_conversation() -> void:
 		_prompt_tween.kill()
 	_conversation_visible = false
 	_conversation_busy = false
+	_reset_hesitation_timer()
 	_conversation_actor_id = ""
 	_retry_button_mode = &"end"
 	_current_turn.clear()
@@ -537,14 +714,16 @@ func close_conversation() -> void:
 func presentation_snapshot() -> Dictionary:
 	return {
 		"modalSurface": (
-			"conversation" if _conversation_visible
+			"outcome" if _outcome_visible
+			else "conversation" if _conversation_visible
 			else "inspect" if _log_visible
 			else "settings" if _settings_visible
 			else "none"
 		),
 		"busy": _conversation_busy,
 		"thinking": _conversation_busy,
-		"hesitationTimerVisible": false,
+		"hesitationTimerVisible": _conversation_timer_label.visible,
+		"hesitationTimer": hesitation_timer_snapshot(),
 		"uiScale": UI_SCALE_OPTIONS[_ui_scale_option.selected],
 		"locale": str(_localization.call("locale")),
 		"selectedLocale": _selected_language(),
@@ -565,11 +744,12 @@ func presentation_snapshot() -> Dictionary:
 		"provider": _provider_meta.duplicate(true),
 		"ambientSubtitle": ambient_subtitle_snapshot(),
 		"contactCue": contact_cue_snapshot(),
+		"outcome": outcome_snapshot(),
 	}
 
 
 func _set_settings_visible(should_show: bool) -> void:
-	if should_show and (_conversation_visible or _log_visible):
+	if should_show and (_conversation_visible or _log_visible or _outcome_visible):
 		return
 	if _settings_visible == should_show:
 		return
@@ -591,7 +771,7 @@ func _set_settings_visible(should_show: bool) -> void:
 func _set_log_visible(should_show: bool) -> void:
 	if not should_show and _log_busy:
 		return
-	if should_show and (_conversation_visible or _settings_visible):
+	if should_show and (_conversation_visible or _settings_visible or _outcome_visible):
 		return
 	if _log_visible == should_show:
 		return
@@ -686,6 +866,191 @@ func _on_end_conversation_retry_pressed() -> void:
 	conversation_end_retry_requested.emit()
 
 
+func _on_restart_pressed() -> void:
+	if not _outcome_visible or _outcome_busy:
+		return
+	set_outcome_busy(true)
+	restart_requested.emit()
+
+
+func _configure_hesitation_timer(turn: Dictionary) -> void:
+	_reset_hesitation_timer()
+	if (
+		str(turn.get("procedure", "ordinary")) != "interrogation"
+		or int(turn.get("hesitationMs", 0)) < 40000
+	):
+		return
+	_hesitation_duration_seconds = float(int(turn.get("hesitationMs", 0))) / 1000.0
+	_hesitation_remaining_seconds = _hesitation_duration_seconds
+	_hesitation_active = true
+	_refresh_hesitation_timer_text()
+	_conversation_timer_label.visible = true
+
+
+func _process_hesitation_timer(delta: float) -> void:
+	if not _hesitation_active:
+		return
+	_hesitation_remaining_seconds = maxf(0.0, _hesitation_remaining_seconds - delta)
+	_refresh_hesitation_timer_text()
+	if not is_zero_approx(_hesitation_remaining_seconds):
+		return
+	_hesitation_active = false
+	_conversation_timer_label.visible = false
+	if _hesitation_emitted:
+		return
+	_hesitation_emitted = true
+	_set_status(str(tr(&"hud.m3r.interrogation.hesitation_submitted")))
+	hesitation_expired.emit()
+
+
+func _reset_hesitation_timer() -> void:
+	_hesitation_active = false
+	_hesitation_emitted = false
+	_hesitation_duration_seconds = 0.0
+	_hesitation_remaining_seconds = 0.0
+	if is_instance_valid(_conversation_timer_label):
+		_conversation_timer_label.text = ""
+		_conversation_timer_label.visible = false
+
+
+func _refresh_hesitation_timer_text() -> void:
+	if not is_instance_valid(_conversation_timer_label):
+		return
+	_conversation_timer_label.text = str(
+		tr(&"hud.m3r.interrogation.timer")
+	).format({"seconds": ceili(_hesitation_remaining_seconds)})
+
+
+func _refresh_outcome() -> void:
+	if not is_instance_valid(_outcome_title):
+		return
+	var verdict := str(_outcome_result.get("verdict", "abnormal"))
+	if verdict not in ["ordinary", "abnormal"]:
+		verdict = "abnormal"
+	_outcome_title.text = str(tr("hud.m3r.outcome.title.%s" % verdict))
+	var verdict_why := str(_outcome_result.get("verdictWhyLine", "")).strip_edges()
+	var verdict_display := str(
+		tr(&"hud.m3r.outcome.verdict_why")
+	).format({"reason": verdict_why})
+	var officer_line := str(_outcome_result.get("officerLine", "")).strip_edges()
+	if not officer_line.is_empty():
+		verdict_display += "\n\n" + str(
+			tr(&"hud.m3r.outcome.officer_line")
+		).format({"line": officer_line})
+	_outcome_verdict_label.text = verdict_display
+	_outcome_vouch_label.text = str(tr(&"hud.m3r.outcome.vouches")).format({
+		"count": _outcome_vouch_count(),
+		"required": 4,
+	})
+	var provider_meta := _outcome_provider_meta()
+	_outcome_fallback_badge.visible = (
+		str(provider_meta.get("transport", "")) == "fallback"
+		or bool(provider_meta.get("usedFallback", false))
+	)
+	_outcome_fallback_badge.text = str(tr(&"hud.m3r.outcome.fallback")).format({
+		"reason": _provider_fallback_reason_text(provider_meta),
+	})
+	_outcome_presented_testimonies.clear()
+	var body_lines: Array[String] = [str(tr(&"hud.m3r.outcome.testimonies"))]
+	for actor_id in OUTCOME_ACTOR_IDS:
+		var testimony := _outcome_testimony(actor_id)
+		var line := str(testimony.get("testimony", "")).strip_edges()
+		if line.is_empty():
+			line = str(tr(&"hud.m3r.outcome.testimony_missing"))
+		var actor_name := _actor_label(actor_id)
+		body_lines.append(str(tr(&"hud.m3r.outcome.testimony_entry")).format({
+			"actor": actor_name,
+			"testimony": line,
+		}))
+		_outcome_presented_testimonies.append({
+			"actorId": actor_id,
+			"actor": actor_name,
+			"testimony": line,
+			"evidencedVouch": (
+				str(testimony.get("appliedStance", "")) == "vouch"
+				and not _array_or_empty(testimony.get("citedMemoryIds")).is_empty()
+			),
+		})
+	_outcome_presented_recap = _outcome_recap()
+	_outcome_recap_lines.clear()
+	for recap_entry in _outcome_presented_recap:
+		_outcome_recap_lines.append(str(recap_entry.get("line", "")))
+	body_lines.append("")
+	body_lines.append(str(tr(&"hud.m3r.outcome.recap")))
+	body_lines.append(str(tr(&"hud.m3r.outcome.evidence_counts")).format({
+		"records": _array_or_empty(_outcome_result.get("citedRecordIds")).size(),
+		"ledger": _array_or_empty(_outcome_result.get("citedLedgerEventIds")).size(),
+	}))
+	if _outcome_presented_recap.is_empty():
+		body_lines.append(str(tr(&"hud.m3r.outcome.recap_empty")))
+	else:
+		for recap_entry in _outcome_presented_recap:
+			var actor_id := str(recap_entry.get("actorId", ""))
+			body_lines.append(str(tr(&"hud.m3r.outcome.recap_entry")).format({
+				"kind": tr(
+					"hud.m3r.outcome.recap.kind.%s"
+					% str(recap_entry.get("kind", "verdict"))
+				),
+				"actor": (
+					_actor_label(actor_id)
+					if not actor_id.is_empty()
+					else tr(&"hud.m3r.outcome.recap.actor_none")
+				),
+				"entry": str(recap_entry.get("line", "")),
+				"sources": str(tr(&"hud.m3r.outcome.recap.source_count")).format({
+					"count": int(recap_entry.get("sourceCount", 0)),
+				}),
+			}))
+	_outcome_body.text = "\n\n".join(body_lines)
+	_restart_button.text = str(tr(&"hud.m3r.outcome.restart"))
+	_restart_button.disabled = _outcome_busy
+
+
+func _outcome_vouch_count() -> int:
+	return int(_outcome_result.get("evidencedVouchCount", 0))
+
+
+func _outcome_testimony(actor_id: String) -> Dictionary:
+	for value in _array_or_empty(_outcome_result.get("residentAssessments")):
+		if not value is Dictionary:
+			continue
+		var testimony := value as Dictionary
+		if str(testimony.get("actorId", "")) != actor_id:
+			continue
+		var normalized := testimony.duplicate(true)
+		normalized["testimony"] = str(testimony.get("testimonyLine", ""))
+		return normalized
+	return {}
+
+
+func _outcome_recap() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for value in _array_or_empty(_outcome_result.get("recap")):
+		if not value is Dictionary:
+			continue
+		var entry := value as Dictionary
+		var line := str(entry.get("line", "")).strip_edges()
+		if line.is_empty():
+			continue
+		var kind := str(entry.get("kind", "verdict"))
+		if kind not in ["defense", "testimony", "record", "ledger", "verdict"]:
+			kind = "verdict"
+		var actor_value: Variant = entry.get("actorId", null)
+		var source_ids := _array_or_empty(entry.get("sourceIds"))
+		result.append({
+			"kind": kind,
+			"actorId": "" if actor_value == null else str(actor_value),
+			"line": line,
+			"sourceCount": source_ids.size(),
+			"sourceIds": source_ids,
+		})
+	return result
+
+
+func _outcome_provider_meta() -> Dictionary:
+	return _dictionary_or_empty(_outcome_result.get("proposalMeta"))
+
+
 func _populate_ui_scale_options() -> void:
 	_ui_scale_option.clear()
 	for value in UI_SCALE_OPTIONS:
@@ -707,6 +1072,8 @@ func _apply_localized_text() -> void:
 	_sfx_volume_label.text = tr(&"hud.settings.sfx_volume")
 	_refresh_language_label()
 	_refresh_thinking_label()
+	if _hesitation_active:
+		_refresh_hesitation_timer_text()
 	_conversation_free_input.placeholder_text = tr(&"hud.m3r.conversation.input_placeholder")
 	_conversation_submit_button.text = tr(&"hud.m3r.conversation.submit")
 	_refresh_retry_button_text()
@@ -716,6 +1083,8 @@ func _apply_localized_text() -> void:
 	_refresh_log_body()
 	_refresh_ambient_subtitle_text()
 	_refresh_contact_cue()
+	if _outcome_visible:
+		_refresh_outcome()
 	_populate_language_options()
 	set_focus(_focused_target)
 
@@ -781,25 +1150,28 @@ func _refresh_provider_label() -> void:
 		_conversation_provider_label.visible = true
 		return
 	if transport == "fallback" or bool(_provider_meta.get("usedFallback", false)):
-		var reason := str(_provider_meta.get("fallbackReason", "unknown"))
-		if reason not in [
-			"missing_credentials",
-			"unavailable",
-			"timeout",
-			"rate_limited",
-			"invalid_envelope",
-			"budget_exhausted",
-			"transport_error",
-		]:
-			reason = "unknown"
-		var reason_text := str(tr("hud.m3r.provider.reason.%s" % reason))
 		_conversation_provider_label.text = str(
 			tr(&"hud.m3r.provider.fallback_format")
-		).format({"reason": reason_text})
+		).format({"reason": _provider_fallback_reason_text(_provider_meta)})
 		_conversation_provider_label.visible = true
 		return
 	_conversation_provider_label.text = ""
 	_conversation_provider_label.visible = false
+
+
+func _provider_fallback_reason_text(meta: Dictionary) -> String:
+	var reason := str(meta.get("fallbackReason", "unknown"))
+	if reason not in [
+		"missing_credentials",
+		"unavailable",
+		"timeout",
+		"rate_limited",
+		"invalid_envelope",
+		"budget_exhausted",
+		"transport_error",
+	]:
+		reason = "unknown"
+	return str(tr("hud.m3r.provider.reason.%s" % reason))
 
 
 func _refresh_encountered_stances() -> void:
@@ -825,7 +1197,10 @@ func _refresh_encountered_stances() -> void:
 	lines.append(str(tr(&"hud.m3r.log.hint")))
 	_encountered_stance_label.text = "\n".join(lines)
 	_encountered_stance_panel.visible = (
-		not _conversation_visible and not _settings_visible and not _log_visible
+		not _conversation_visible
+		and not _settings_visible
+		and not _log_visible
+		and not _outcome_visible
 	)
 
 
@@ -1049,11 +1424,25 @@ func _refresh_ambient_subtitle_visibility() -> void:
 		and not _conversation_visible
 		and not _settings_visible
 		and not _log_visible
+		and not _outcome_visible
 	)
 
 
 func _refresh_contact_cue() -> void:
 	if not is_instance_valid(_contact_cue_panel) or not is_instance_valid(_contact_cue_label):
+		return
+	if not _hearing_opening_state.is_empty():
+		_contact_cue_label.text = str(tr(
+			&"hud.m3r.hearing.opening_retry"
+			if _hearing_opening_state == "retry"
+			else &"hud.m3r.hearing.opening"
+		))
+		_contact_cue_panel.visible = (
+			not _conversation_visible
+			and not _settings_visible
+			and not _log_visible
+			and not _outcome_visible
+		)
 		return
 	if _contact_cue_id.is_empty() or _contact_cue_actor_id.is_empty():
 		_contact_cue_label.text = ""
@@ -1063,7 +1452,10 @@ func _refresh_contact_cue() -> void:
 		"speaker": _actor_label(_contact_cue_actor_id),
 	})
 	_contact_cue_panel.visible = (
-		not _conversation_visible and not _settings_visible and not _log_visible
+		not _conversation_visible
+		and not _settings_visible
+		and not _log_visible
+		and not _outcome_visible
 	)
 
 

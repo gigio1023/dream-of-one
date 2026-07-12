@@ -81,6 +81,52 @@ export const mergedConversationTurnSchema = z
   })
   .strict();
 
+const uniqueIdListSchema = z.array(nonEmpty).superRefine((ids, context) => {
+  if (new Set(ids).size !== ids.length) {
+    context.addIssue({
+      code: "custom",
+      message: "citation ids must be unique",
+    });
+  }
+});
+
+const hearingResidentAssessmentSchema = z
+  .object({
+    actorId: nonEmpty,
+    proposedStance: z.enum(COARSE_STANCES),
+    testimonyLine: nonEmpty,
+    citedMemoryIds: uniqueIdListSchema,
+  })
+  .strict();
+
+export const hearingJudgmentSchema = z
+  .object({
+    residentAssessments: z.tuple([
+      hearingResidentAssessmentSchema,
+      hearingResidentAssessmentSchema,
+      hearingResidentAssessmentSchema,
+      hearingResidentAssessmentSchema,
+      hearingResidentAssessmentSchema,
+      hearingResidentAssessmentSchema,
+    ]),
+    proposedVerdict: z.enum(["ordinary", "abnormal"]),
+    verdictWhyLine: nonEmpty,
+    officerLine: nonEmpty,
+    citedRecordIds: uniqueIdListSchema,
+    citedLedgerEventIds: uniqueIdListSchema,
+  })
+  .strict()
+  .superRefine((value, context) => {
+    const actorIds = value.residentAssessments.map(assessment => assessment.actorId);
+    if (new Set(actorIds).size !== actorIds.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["residentAssessments"],
+        message: "hearing judgment requires six unique resident actor ids",
+      });
+    }
+  });
+
 const toolCallSchema = z
   .object({
     tool: z.enum(TOOL_NAMES),
@@ -135,6 +181,22 @@ export function mergedConversationTurnSchemaForLocale(locale: string) {
     value.suggestedReplies.forEach((reply, index) => {
       addKoreanTextIssue(context, ["suggestedReplies", index, "text"], reply.text);
     });
+  });
+}
+
+export function hearingJudgmentSchemaForLocale(locale: string) {
+  const korean = isKoreanLocale(locale);
+  return hearingJudgmentSchema.superRefine((value, context) => {
+    if (!korean) return;
+    value.residentAssessments.forEach((assessment, index) => {
+      addKoreanTextIssue(
+        context,
+        ["residentAssessments", index, "testimonyLine"],
+        assessment.testimonyLine,
+      );
+    });
+    addKoreanTextIssue(context, ["verdictWhyLine"], value.verdictWhyLine);
+    addKoreanTextIssue(context, ["officerLine"], value.officerLine);
   });
 }
 
@@ -267,6 +329,51 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
       },
     },
     continueConversation: { type: "boolean" },
+  },
+};
+
+export const hearingJudgmentJsonSchema: Record<string, unknown> = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "residentAssessments",
+    "proposedVerdict",
+    "verdictWhyLine",
+    "officerLine",
+    "citedRecordIds",
+    "citedLedgerEventIds",
+  ],
+  properties: {
+    residentAssessments: {
+      type: "array",
+      minItems: 6,
+      maxItems: 6,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["actorId", "proposedStance", "testimonyLine", "citedMemoryIds"],
+        properties: {
+          actorId: { type: "string", minLength: 1 },
+          proposedStance: { type: "string", enum: [...COARSE_STANCES] },
+          testimonyLine: { type: "string", minLength: 1 },
+          citedMemoryIds: {
+            type: "array",
+            items: { type: "string", minLength: 1 },
+          },
+        },
+      },
+    },
+    proposedVerdict: { type: "string", enum: ["ordinary", "abnormal"] },
+    verdictWhyLine: { type: "string", minLength: 1 },
+    officerLine: { type: "string", minLength: 1 },
+    citedRecordIds: {
+      type: "array",
+      items: { type: "string", minLength: 1 },
+    },
+    citedLedgerEventIds: {
+      type: "array",
+      items: { type: "string", minLength: 1 },
+    },
   },
 };
 

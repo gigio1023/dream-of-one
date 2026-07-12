@@ -1,10 +1,24 @@
 import type { ObservePacket } from "../agentloop/context.js";
 import type { ToolCall } from "../agentloop/tools.js";
 import type {
+  HearingJudgment,
+  HearingJudgmentRequest,
+} from "../runtime/run-hearing.js";
+import type {
   CoarseStance,
   ConversationChoiceIntent,
   ConversationSuspicionSignal,
 } from "../contracts/types.js";
+
+export type {
+  HearingJudgment,
+  HearingJudgmentRequest,
+  HearingLedgerEventView,
+  HearingMemoryView,
+  HearingRecordView,
+  HearingResidentAssessment,
+  HearingResidentView,
+} from "../runtime/run-hearing.js";
 
 export type ProviderFailureReason =
   | "missing_credentials"
@@ -158,10 +172,16 @@ export interface NpcProposalPort {
     request: MergedConversationTurnRequest,
   ): Promise<ResolvedProposal<MergedConversationTurn>>;
   proposeNextStep(request: AgentStepRequest): Promise<ResolvedProposal<AgentStepProposal>>;
+  judgeHearing(request: HearingJudgmentRequest): Promise<ResolvedProposal<HearingJudgment>>;
 }
 
 export interface TextGenRequest {
-  purpose: "conversation" | "conversation_turn" | "agent_step" | "repair";
+  purpose:
+    | "conversation"
+    | "conversation_turn"
+    | "agent_step"
+    | "hearing_verdict"
+    | "repair";
   instructions: string;
   input: string;
   schemaName: string;

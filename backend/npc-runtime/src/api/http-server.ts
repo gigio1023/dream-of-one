@@ -1,6 +1,6 @@
 // Session API sidecar (docs/tech/npc-runtime.md).
 //
-// Localhost-only HTTP server exposing the five v2 session endpoints. Every
+// Localhost-only HTTP server exposing the strict session and run endpoints. Every
 // request and response is zod-validated (invariant #1). Provider proposals
 // remain behind SessionService's NpcProposalPort dependency.
 
@@ -27,6 +27,10 @@ import {
   runAdvanceResponseSchema,
   runEncounterRequestSchema,
   runEncounterResponseSchema,
+  runEndRequestSchema,
+  runEndResponseSchema,
+  runHearingRequestSchema,
+  runHearingResponseSchema,
   runNpcDecisionRequestSchema,
   runNpcDecisionResponseSchema,
   runSessionAnswerRequestSchema,
@@ -99,6 +103,11 @@ function statusForRunError(error: RunError): number {
     case "stale_world_revision":
     case "run_paused":
     case "hearing_due":
+    case "run_not_active":
+    case "hearing_not_due":
+    case "hearing_id_conflict":
+    case "end_id_conflict":
+    case "run_not_terminal":
     case "encounter_id_conflict":
       return 409;
     default:
@@ -198,6 +207,22 @@ export function createSessionServer(service: SessionService, runService = new Ru
         if (!parsed.success) return badRequest(res, parsed.error);
         const result = await runService.encounter(parsed.data);
         respond(res, runEncounterResponseSchema, result);
+        return;
+      }
+
+      if (method === "POST" && path === "/v1/run/hearing") {
+        const parsed = runHearingRequestSchema.safeParse(await readJsonBody(req));
+        if (!parsed.success) return badRequest(res, parsed.error);
+        const result = await runService.hearing(parsed.data);
+        respond(res, runHearingResponseSchema, result);
+        return;
+      }
+
+      if (method === "POST" && path === "/v1/run/end") {
+        const parsed = runEndRequestSchema.safeParse(await readJsonBody(req));
+        if (!parsed.success) return badRequest(res, parsed.error);
+        const result = await runService.endRun(parsed.data);
+        respond(res, runEndResponseSchema, result);
         return;
       }
 

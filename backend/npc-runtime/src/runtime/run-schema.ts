@@ -170,12 +170,27 @@ export const runPlayerContactOutcomeMemorySchema = z
   })
   .strict();
 
+export const runInterrogationOutcomeMemorySchema = z
+  .object({
+    memoryId: nonEmpty,
+    kind: z.literal("interrogation_outcome"),
+    sourceActorId: z.literal("player"),
+    listenerActorId: nonEmpty,
+    sessionId: nonEmpty,
+    ledgerSeq: z.number().int().positive(),
+    whyLine: nonEmpty,
+    worldSeconds: z.number().nonnegative(),
+    worldRevision: z.number().int().positive(),
+  })
+  .strict();
+
 export const runMemorySchema = z.discriminatedUnion("kind", [
   runNpcUtteranceMemorySchema,
   runPlayerConversationMemorySchema,
   runAmbientUtteranceMemorySchema,
   runRecordReadMemorySchema,
   runPlayerContactOutcomeMemorySchema,
+  runInterrogationOutcomeMemorySchema,
 ]);
 
 export const runActorSchema = z
@@ -382,6 +397,67 @@ export const runActiveContactSchema = z
     issuedAtSeconds: z.number().nonnegative(),
     expiresAtSeconds: z.number().positive(),
     reason: nonEmpty,
+    procedure: z.enum(["ordinary", "interrogation"]),
+  })
+  .strict();
+
+export const runStatusSchema = z.enum([
+  "active",
+  "hearing_due",
+  "hearing_active",
+  "terminal",
+  "closed",
+]);
+
+export const runHearingProcedureSchema = z
+  .object({
+    hearingId: nonEmpty,
+    status: z.enum(["opening", "awaiting_defense", "resolved"]),
+    turnId: nonEmpty.nullable(),
+  })
+  .strict();
+
+export const runHearingAssessmentSchema = z
+  .object({
+    actorId: nonEmpty,
+    proposedStance: stanceSchema,
+    appliedStance: stanceSchema,
+    testimonyLine: nonEmpty,
+    citedMemoryIds: z.array(nonEmpty),
+  })
+  .strict();
+
+export const runRecapEntrySchema = z
+  .object({
+    kind: z.enum(["defense", "testimony", "record", "ledger", "verdict"]),
+    actorId: nonEmpty.nullable(),
+    line: nonEmpty,
+    sourceIds: z.array(nonEmpty),
+  })
+  .strict();
+
+export const runTerminalResultSchema = z
+  .object({
+    hearingId: nonEmpty,
+    verdict: z.enum(["ordinary", "abnormal"]),
+    verdictWhyLine: nonEmpty,
+    officerLine: nonEmpty,
+    finalDefense: nonEmpty,
+    evidencedVouchCount: z.number().int().min(0).max(6),
+    residentAssessments: z.tuple([
+      runHearingAssessmentSchema,
+      runHearingAssessmentSchema,
+      runHearingAssessmentSchema,
+      runHearingAssessmentSchema,
+      runHearingAssessmentSchema,
+      runHearingAssessmentSchema,
+    ]),
+    citedRecordIds: z.array(nonEmpty),
+    citedLedgerEventIds: z.array(nonEmpty),
+    recap: z.array(runRecapEntrySchema).min(2),
+    worldSeconds: z.number().nonnegative(),
+    worldRevision: z.number().int().positive(),
+    proposalMeta: proposalMetaSchema,
   })
   .strict();
 
@@ -391,6 +467,9 @@ export const runSnapshotSchema = z
     worldId: nonEmpty,
     layoutRevision: nonEmpty,
     worldRevision: z.number().int().nonnegative(),
+    runStatus: runStatusSchema,
+    hearingProcedure: runHearingProcedureSchema.nullable(),
+    terminalResult: runTerminalResultSchema.nullable(),
     locale: gameplayLocaleSchema,
     worldClock: z
       .object({
@@ -441,6 +520,8 @@ export const runNextTurnSchema = z
     prompt: nonEmpty,
     acceptsFreeInput: z.boolean(),
     continueConversation: z.boolean(),
+    procedure: z.enum(["ordinary", "interrogation", "hearing"]),
+    hesitationMs: z.number().int().nonnegative(),
     choices: z.tuple([suggestedReplySchema, suggestedReplySchema, suggestedReplySchema]),
     proposalMeta: proposalMetaSchema,
   })
@@ -737,7 +818,76 @@ export const runSessionAnswerSchema = z.discriminatedUnion("type", [
   z
     .object({ type: z.literal("free_input"), text: z.string().trim().min(1).max(120) })
     .strict(),
+  z.object({ type: z.literal("hesitation") }).strict(),
 ]);
+
+export const runHearingRequestSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("open"),
+    runId: nonEmpty,
+    hearingId: nonEmpty.max(128),
+  }).strict(),
+  z.object({
+    action: z.literal("answer"),
+    runId: nonEmpty,
+    hearingId: nonEmpty.max(128),
+    turnId: nonEmpty,
+    answer: runSessionAnswerSchema,
+  }).strict(),
+]);
+
+export const runHearingResponseSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("open"),
+    runId: nonEmpty,
+    hearingId: nonEmpty,
+    worldRevision: z.number().int().positive(),
+    runStatus: z.literal("hearing_active"),
+    hearingProcedure: runHearingProcedureSchema,
+    staging: z.object({
+      playerAnchorRef: nonEmpty,
+      focusAnchorRef: nonEmpty,
+    }).strict(),
+    nextTurn: runNextTurnSchema,
+    terminalResult: z.null(),
+    proposalMeta: proposalMetaSchema,
+    socialView: runSocialViewSchema,
+  }).strict(),
+  z.object({
+    action: z.literal("answer"),
+    runId: nonEmpty,
+    hearingId: nonEmpty,
+    worldRevision: z.number().int().positive(),
+    runStatus: z.literal("terminal"),
+    hearingProcedure: runHearingProcedureSchema,
+    nextTurn: z.null(),
+    terminalResult: runTerminalResultSchema,
+    proposalMeta: proposalMetaSchema,
+    socialView: runSocialViewSchema,
+  }).strict(),
+]);
+
+export const runEndRequestSchema = z
+  .object({ runId: nonEmpty, endId: nonEmpty.max(128) })
+  .strict();
+
+export const runEndResponseSchema = z
+  .object({
+    runId: nonEmpty,
+    endId: nonEmpty,
+    runStatus: z.literal("closed"),
+    terminalResult: runTerminalResultSchema,
+    providerBudget: z.object({
+      callLimit: z.number().int().positive(),
+      tokenLimit: z.number().int().positive(),
+      reservedCalls: z.number().int().nonnegative(),
+      reservedTokens: z.number().int().nonnegative(),
+      callsUsed: z.number().int().nonnegative(),
+      tokensUsed: z.number().int().nonnegative(),
+    }).strict(),
+    lastProposalMeta: proposalMetaSchema.nullable(),
+  })
+  .strict();
 
 export const runSessionAnswerRequestSchema = z
   .object({
@@ -846,6 +996,7 @@ export type RunActor = z.infer<typeof runActorSchema>;
 export type RunMemory = z.infer<typeof runMemorySchema>;
 export type RunRecordReadMemory = z.infer<typeof runRecordReadMemorySchema>;
 export type RunPlayerContactOutcomeMemory = z.infer<typeof runPlayerContactOutcomeMemorySchema>;
+export type RunInterrogationOutcomeMemory = z.infer<typeof runInterrogationOutcomeMemorySchema>;
 export type RunOpenQuestion = z.infer<typeof runOpenQuestionSchema>;
 export type RunRecord = z.infer<typeof runRecordSchema>;
 export type RunLedgerEvent = z.infer<typeof runLedgerEventSchema>;
@@ -857,6 +1008,13 @@ export type RunAmbientUtteranceMemory = z.infer<typeof runAmbientUtteranceMemory
 export type RunAmbientSpeechEvent = z.infer<typeof runAmbientSpeechEventSchema>;
 export type RunAmbientConversation = z.infer<typeof runAmbientConversationSchema>;
 export type RunActiveContact = z.infer<typeof runActiveContactSchema>;
+export type RunStatus = z.infer<typeof runStatusSchema>;
+export type RunHearingProcedure = z.infer<typeof runHearingProcedureSchema>;
+export type RunTerminalResult = z.infer<typeof runTerminalResultSchema>;
+export type RunHearingRequest = z.infer<typeof runHearingRequestSchema>;
+export type RunHearingResponse = z.infer<typeof runHearingResponseSchema>;
+export type RunEndRequest = z.infer<typeof runEndRequestSchema>;
+export type RunEndResponse = z.infer<typeof runEndResponseSchema>;
 export type RunNextTurn = z.infer<typeof runNextTurnSchema>;
 export type RunSessionAnswer = z.infer<typeof runSessionAnswerSchema>;
 export type RunJudgment = z.infer<typeof runJudgmentSchema>;

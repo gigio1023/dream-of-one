@@ -1,15 +1,21 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
 import { assembleObservePacket, DEFAULT_ROLE_POLICIES } from "../../src/agentloop/context.js";
+import { fallbackContent } from "../../src/localization/fallback-content.js";
 import { createSameOrderWorld } from "../../src/runtime/world/index.js";
 import {
   agentStepProposalJsonSchema,
   agentStepProposalSchemaForLocale,
+  hearingJudgmentJsonSchema,
+  hearingJudgmentSchemaForLocale,
 } from "../../src/providers/envelope.js";
 import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import { createProviderFromEnvironment, loadProviderConfig } from "../../src/providers/registry.js";
 import { ProviderService } from "../../src/providers/service.js";
+import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-adapter.js";
 import type {
+  HearingJudgment,
+  HearingJudgmentRequest,
   ProviderFailureReason,
   TextGenPort,
   TextGenRequest,
@@ -121,6 +127,81 @@ const validMergedTurn = JSON.stringify({
   continueConversation: false,
 });
 
+const HEARING_RESIDENTS = [
+  ["NPC_Studio_Receptionist", "studio_receptionist"],
+  ["NPC_Studio_Manager", "studio_manager"],
+  ["NPC_Office_Worker", "office_worker"],
+  ["NPC_Park_Caretaker", "park_caretaker"],
+  ["NPC_Station_Officer", "station_officer"],
+  ["NPC_Roaming_Liaison", "roaming_liaison"],
+] as const;
+
+function hearingRequest(
+  evidencedVouches = 4,
+  locale: HearingJudgmentRequest["locale"] = "ko-KR",
+): HearingJudgmentRequest {
+  const residents = HEARING_RESIDENTS.map(([actorId, role], index) => {
+    const hasMeaningfulFirsthandConversation = index < 5;
+    return {
+      actorId,
+      role,
+      stanceBefore: index < evidencedVouches ? "vouch" as const : "uncertain" as const,
+      hasMeaningfulFirsthandConversation,
+      memories: hasMeaningfulFirsthandConversation
+        ? [{
+            memoryId: `mem-hearing-${index + 1}`,
+            kind: "player_conversation" as const,
+            sourceActorId: "player",
+            text: "방문자가 절차를 차분히 설명했습니다.",
+            whyLine: "직접 들은 설명이 앞선 정황과 맞았습니다.",
+            meaningfulFirsthand: true,
+          }]
+        : [],
+    };
+  }) as HearingJudgmentRequest["residents"];
+  return {
+    runId: "run-hearing-provider-test",
+    hearingId: "hearing-provider-test",
+    locale,
+    finalDefense: "주민들과 직접 나눈 대화를 확인해 주십시오.",
+    institutionalPressure: 35,
+    residents,
+    records: [{
+      recordId: "record-hearing-1",
+      kind: "note",
+      authorActorId: "NPC_Office_Worker",
+      stateBody: "방문자가 절차를 확인했다는 기록입니다.",
+      lastLedgerEventId: "ledger-hearing-1",
+    }],
+    ledgerEvents: [{
+      eventId: "ledger-hearing-1",
+      kind: "record_written",
+      actorId: "NPC_Office_Worker",
+      recordId: "record-hearing-1",
+      sourceMemoryId: "mem-hearing-3",
+      whyLine: "직접 들은 설명을 기록했습니다.",
+    }],
+  };
+}
+
+function validHearingJudgment(): HearingJudgment {
+  return {
+    residentAssessments: HEARING_RESIDENTS.map(([actorId], index) => ({
+      actorId,
+      proposedStance: index < 4 ? "vouch" as const : "uncertain" as const,
+      testimonyLine: index === 5
+        ? "직접 대화한 적이 없어 보증할 수 없습니다."
+        : "직접 들은 설명이 앞선 정황과 맞았습니다.",
+      citedMemoryIds: index === 5 ? [] : [`mem-hearing-${index + 1}`],
+    })) as HearingJudgment["residentAssessments"],
+    proposedVerdict: "ordinary",
+    verdictWhyLine: "직접 대화에 근거한 보증과 최종 진술이 서로 맞았습니다.",
+    officerLine: "제출된 증언을 검토했습니다. 평범한 사람으로 판정합니다.",
+    citedRecordIds: ["record-hearing-1"],
+    citedLedgerEventIds: ["ledger-hearing-1"],
+  };
+}
+
 function assertEveryObjectPropertyIsRequired(value: unknown, path = "root"): void {
   if (Array.isArray(value)) {
     value.forEach((entry, index) => assertEveryObjectPropertyIsRequired(entry, `${path}[${index}]`));
@@ -142,6 +223,26 @@ function assertEveryObjectPropertyIsRequired(value: unknown, path = "root"): voi
 
 test("agent-step strict schema requires every property in every object branch", () => {
   assertEveryObjectPropertyIsRequired(agentStepProposalJsonSchema);
+});
+
+test("hearing strict schema requires every property and exactly six unique residents", () => {
+  assertEveryObjectPropertyIsRequired(hearingJudgmentJsonSchema);
+  const residentArray = (
+    hearingJudgmentJsonSchema.properties as Record<string, Record<string, unknown>>
+  ).residentAssessments;
+  assert.equal(residentArray.minItems, 6);
+  assert.equal(residentArray.maxItems, 6);
+
+  const valid = validHearingJudgment();
+  assert.equal(hearingJudgmentSchemaForLocale("ko-KR").safeParse(valid).success, true);
+  const duplicate = structuredClone(valid);
+  duplicate.residentAssessments[5].actorId = duplicate.residentAssessments[0].actorId;
+  assert.equal(hearingJudgmentSchemaForLocale("ko-KR").safeParse(duplicate).success, false);
+  const missing = {
+    ...valid,
+    residentAssessments: valid.residentAssessments.slice(0, 5),
+  };
+  assert.equal(hearingJudgmentSchemaForLocale("ko-KR").safeParse(missing).success, false);
 });
 
 test("Korean agent-step validation covers provider-authored administrative questions", () => {
@@ -217,6 +318,111 @@ test("provider service returns schema-validated live conversation proposals", as
   assert.equal(result.meta.usedFallback, false);
   assert.equal(result.proposal.suggestedReplies.length, 3);
   assert.equal(textGen.requests[0].schemaName, "npc_conversation_turn");
+});
+
+test("provider service returns one live evidence-grounded hearing judgment", async () => {
+  const judgment = validHearingJudgment();
+  const textGen = new FakeTextGen([{ text: JSON.stringify(judgment) }]);
+  const service = new ProviderService({
+    profileId: "test/hearing-live",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const request = hearingRequest();
+  const result = await service.judgeHearing(request);
+
+  assert.equal(result.meta.transport, "live");
+  assert.deepEqual(result.proposal, judgment);
+  assert.equal(textGen.requests.length, 1);
+  assert.equal(textGen.requests[0].purpose, "hearing_verdict");
+  assert.equal(textGen.requests[0].schemaName, "station_hearing_judgment");
+  assert.match(textGen.requests[0].instructions, /resident's own supplied memories/);
+  assert.match(textGen.requests[0].instructions, /at least four evidence-backed vouches/);
+  assert.match(textGen.requests[0].instructions, /may still propose abnormal/);
+  assert.match(textGen.requests[0].instructions, /run locale is ko-KR/);
+  const providerInput = JSON.parse(textGen.requests[0].input);
+  assert.equal(providerInput.residents.length, 6);
+  assert.deepEqual(providerInput.records, request.records);
+  assert.deepEqual(providerInput.ledgerEvents, request.ledgerEvents);
+});
+
+test("an invalid hearing envelope receives one repair before fallback", async () => {
+  const invalid = validHearingJudgment();
+  invalid.residentAssessments[5].actorId = invalid.residentAssessments[0].actorId;
+  invalid.residentAssessments[0].testimonyLine = "직접 들은 來歷을 확인했습니다.";
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(invalid) },
+    { text: JSON.stringify(validHearingJudgment()) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/hearing-repair",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const result = await service.judgeHearing(hearingRequest());
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(textGen.requests.length, 2);
+  assert.equal(textGen.requests[1].purpose, "repair");
+  assert.equal(result.proposal.residentAssessments.length, 6);
+  assert.doesNotMatch(
+    result.proposal.residentAssessments[0].testimonyLine,
+    /[\p{Script=Latin}\p{Script=Han}]/u,
+  );
+});
+
+test("hearing fallback is terminal, preserves stances, and needs four evidenced vouches", async () => {
+  const fallback = new RuleFallbackNpcAdapter();
+  const fourRequest = hearingRequest(4);
+  const four = await fallback.judgeHearing(fourRequest);
+  assert.equal(four.proposal.proposedVerdict, "ordinary");
+  assert.equal(four.proposal.residentAssessments.length, 6);
+  assert.deepEqual(
+    four.proposal.residentAssessments.map(assessment => assessment.proposedStance),
+    fourRequest.residents.map(resident => resident.stanceBefore),
+  );
+  assert.equal(
+    four.proposal.residentAssessments[5].testimonyLine,
+    fallbackContent("ko-KR").hearing.neverMetTestimony,
+  );
+  assert.deepEqual(four.proposal.residentAssessments[5].citedMemoryIds, []);
+  assert.doesNotMatch(
+    four.proposal.residentAssessments[0].testimonyLine,
+    /NPC_|mem-hearing/,
+    "fallback testimony must not expose raw ids in player prose",
+  );
+
+  const three = await fallback.judgeHearing(hearingRequest(3));
+  assert.equal(three.proposal.proposedVerdict, "abnormal");
+  const unsupportedFourth = hearingRequest(4);
+  unsupportedFourth.residents[3].memories = [];
+  const unsupported = await fallback.judgeHearing(unsupportedFourth);
+  assert.equal(unsupported.proposal.proposedVerdict, "abnormal");
+
+  const unavailable = new ProviderService({
+    profileId: "test/hearing-unavailable",
+    textGen: new FakeTextGen([], false),
+    fallback,
+  });
+  const terminal = await unavailable.judgeHearing(fourRequest);
+  assert.equal(terminal.meta.transport, "fallback");
+  assert.equal(terminal.meta.fallbackReason, "missing_credentials");
+  assert.equal(terminal.proposal.proposedVerdict, "ordinary");
+  assert.ok(terminal.proposal.officerLine.length > 0);
+  assert.ok(terminal.proposal.verdictWhyLine.length > 0);
+});
+
+test("scripted provider tests may configure an exact hearing verdict", async () => {
+  const expected = validHearingJudgment();
+  expected.proposedVerdict = "abnormal";
+  const adapter = new ScriptedNpcAdapter({
+    conversation: () => JSON.parse(validConversation),
+    nextStep: () => ({ rationale: "테스트를 마칩니다.", done: true }),
+    hearing: () => expected,
+  });
+  const result = await adapter.judgeHearing(hearingRequest());
+  assert.equal(result.meta.transport, "scripted");
+  assert.equal(result.proposal.proposedVerdict, "abnormal");
 });
 
 test("the model judges suspicion live; the rule classifier answers only as fallback", async () => {
@@ -515,6 +721,10 @@ test("production registry contains no scripted profile", () => {
   assert.equal(Object.keys(config.profiles).some(profile => profile.startsWith("scripted/")), false);
   assert.equal(config.profiles["modelscope/qwen3.7-plus"]?.model, "Qwen-Ambassador/Qwen3.7-Plus");
   assert.equal(config.profiles["modelscope/qwen3.7-plus"]?.params.enableThinking, false);
+  assert.ok(
+    (config.profiles["modelscope/qwen3.7-plus"]?.params.maxTokens ?? 0) >= 1_200,
+    "the Qwen profile needs room for the exact-six hearing envelope",
+  );
 });
 
 test("OpenAI-compatible profiles require their configured base URL and local may be keyless", async () => {

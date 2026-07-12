@@ -6,6 +6,8 @@ import {
   conversationJudgmentSchemaForLocale,
   conversationProposalJsonSchema,
   conversationProposalSchemaForLocale,
+  hearingJudgmentJsonSchema,
+  hearingJudgmentSchemaForLocale,
   mergedConversationTurnJsonSchema,
   mergedConversationTurnSchemaForLocale,
 } from "./envelope.js";
@@ -21,6 +23,8 @@ import type {
   ConversationJudgmentRequest,
   ConversationProposal,
   ConversationTurnRequest,
+  HearingJudgment,
+  HearingJudgmentRequest,
   MergedConversationTurn,
   MergedConversationTurnRequest,
   NpcProposalPort,
@@ -306,6 +310,56 @@ export class ProviderService implements NpcProposalPort {
     }
     return this.withFallbackReason(
       await this.options.fallback.proposeNextStep(request),
+      resolved.reason,
+    );
+  }
+
+  async judgeHearing(
+    request: HearingJudgmentRequest,
+  ): Promise<ResolvedProposal<HearingJudgment>> {
+    const instructions = [
+      "You are the Station officer conducting the final hearing in Dream of One.",
+      "Judge the visitor only from the supplied final defense, six resident evidence packets, records, ledger events, and institutional pressure.",
+      "Never invent unseen context, testimony, facts, or ids. Cite only memory, record, and ledger-event ids present in the supplied packet.",
+      "Return exactly one residentAssessment for each of the six residents, with six unique actorId values.",
+      "Each resident testimony must rely only on that resident's own supplied memories. citedMemoryIds must contain only ids from that same resident and must name every memory used by testimonyLine.",
+      "proposedStance is your memory-grounded reassessment after the final defense. The runtime validates provenance and may clamp an unsupported vouch.",
+      "An ordinary proposal is procedurally possible only when the runtime confirms at least four evidence-backed vouches. The runtime, not you, enforces that quorum.",
+      "Even when four or more residents vouch, you may still propose abnormal when the supplied evidence or final defense warrants it.",
+      "The model owns the judgment and wording. The runtime owns citation validity, quorum, clamps, and terminal state.",
+      "verdictWhyLine is one concise player-readable reason, and officerLine is the Station officer's final spoken ruling.",
+      ...localeOutputInstructions(
+        request.locale,
+        "all six testimonyLine values, verdictWhyLine, and officerLine",
+      ),
+      "Return only JSON matching the supplied schema.",
+    ].join(" ");
+    const input = JSON.stringify({
+      runId: request.runId,
+      hearingId: request.hearingId,
+      locale: request.locale,
+      finalDefense: request.finalDefense,
+      institutionalPressure: request.institutionalPressure,
+      residents: request.residents,
+      records: request.records,
+      ledgerEvents: request.ledgerEvents,
+    });
+    const resolved = await this.generateValidated({
+      sessionId: request.runId,
+      request: {
+        purpose: "hearing_verdict",
+        instructions,
+        input,
+        schemaName: "station_hearing_judgment",
+        jsonSchema: hearingJudgmentJsonSchema,
+      },
+      schema: hearingJudgmentSchemaForLocale(request.locale),
+    });
+    if (resolved.ok) {
+      return { proposal: resolved.value, meta: resolved.meta };
+    }
+    return this.withFallbackReason(
+      await this.options.fallback.judgeHearing(request),
       resolved.reason,
     );
   }

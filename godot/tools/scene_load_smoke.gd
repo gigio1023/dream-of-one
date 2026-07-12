@@ -17,6 +17,7 @@ const SCENES := [
 	{"label": "town_3d", "path": "res://scenes/town/town_3d.tscn", "frames": 6},
 	{"label": "main_3d", "path": "res://scenes/main_3d.tscn", "frames": 6},
 	{"label": "main_3d_contact", "path": "res://scenes/main_3d.tscn", "frames": 6},
+	{"label": "main_3d_hearing", "path": "res://scenes/main_3d.tscn", "frames": 6},
 	{
 		"label": "main_3d_schedule",
 		"path": "res://scenes/main_3d.tscn",
@@ -107,6 +108,7 @@ func _instance_scene(spec: Dictionary) -> void:
 		"town_3d",
 		"main_3d",
 		"main_3d_contact",
+		"main_3d_hearing",
 		"main_3d_schedule",
 		"main_3d_ambient_inside",
 		"main_3d_ambient_outside",
@@ -126,6 +128,8 @@ func _instance_scene(spec: Dictionary) -> void:
 			await _check_run_conversation(label, instance)
 		if label == "main_3d_contact":
 			await _check_player_contact(label, instance)
+		if label == "main_3d_hearing":
+			await _check_hearing_and_outcome(label, instance)
 		if label == "main_3d_schedule":
 			await _check_run_clock_and_schedule(label, instance)
 		if label == "main_3d_ambient_inside":
@@ -1089,6 +1093,20 @@ func _check_player_contact(label: String, instance: Node) -> void:
 	if not ready:
 		_failures.append("%s contact actor never obtained a preloaded opening" % label)
 		return
+	# Isolate the contact race from unrelated fixture advance/ambient packets;
+	# otherwise a late backend-authored activeContact:null can correctly clear
+	# the manually injected contact while this focused proof is running.
+	instance.set("_fixture_replay_complete", true)
+	instance.set("_ambient_decision_halted_reason", "contact_smoke_isolation")
+	instance.set("_ambient_pending_request", {})
+	for _frame in range(300):
+		if (
+			not bool(instance.get("_advance_in_flight"))
+			and not bool(instance.get("_advance_rebase_in_flight"))
+			and not bool(instance.get("_ambient_decision_in_flight"))
+		):
+			break
+		await process_frame
 	instance.call("_sync_active_contact_from_response", {"activeContact": null})
 	var run_snapshot: Dictionary = instance.call("presentation_snapshot")
 	var elapsed := float((run_snapshot.get("worldClock", {}) as Dictionary).get(
@@ -1104,6 +1122,7 @@ func _check_player_contact(label: String, instance: Node) -> void:
 		"issuedAtSeconds": elapsed,
 		"expiresAtSeconds": elapsed + 60.0,
 		"reason": "smoke_internal_reason",
+		"procedure": "ordinary",
 	}
 	player.global_position = receptionist.global_position + Vector3(0.0, 0.0, 3.6)
 	player.velocity = Vector3.ZERO
@@ -1160,7 +1179,18 @@ func _check_player_contact(label: String, instance: Node) -> void:
 		or conflict_arrival_count[0] != 0
 	):
 		_failures.append(
-			"%s conflicting movement locally cancelled contact or forged arrival" % label
+			"%s conflicting movement locally cancelled contact or forged arrival: %s"
+			% [
+				label,
+				{
+					"contact": protected_contact,
+					"actorContact": receptionist.contact_status(),
+					"movement": receptionist.movement_status(),
+					"arrivalCount": conflict_arrival_count[0],
+					"runStatus": instance.get("_run_status"),
+					"queued": instance.get("_queued_movement_deltas"),
+				},
+			]
 		)
 	if receptionist.movement_arrived.is_connected(record_conflict_arrival):
 		receptionist.movement_arrived.disconnect(record_conflict_arrival)
@@ -1272,6 +1302,7 @@ func _check_player_contact(label: String, instance: Node) -> void:
 		"issuedAtSeconds": 90.0,
 		"expiresAtSeconds": 120.0,
 		"reason": "smoke_internal_reason",
+		"procedure": "ordinary",
 	}
 	player.global_position = caretaker.global_position + Vector3(0.0, 0.0, 3.4)
 	player.velocity = Vector3.ZERO
@@ -1361,6 +1392,7 @@ func _check_player_contact(label: String, instance: Node) -> void:
 		"issuedAtSeconds": elapsed + 2.0,
 		"expiresAtSeconds": elapsed + 120.0,
 		"reason": "smoke_resume",
+		"procedure": "ordinary",
 	}
 	instance.call("_sync_active_contact_from_response", {"activeContact": resume_contact})
 	receptionist.cancel_player_contact()
@@ -1372,6 +1404,232 @@ func _check_player_contact(label: String, instance: Node) -> void:
 	if paused or not receptionist.has_player_contact("contact-smoke-resume"):
 		_failures.append("%s failed-start cleanup did not resume authoritative contact" % label)
 	instance.call("_sync_active_contact_from_response", {"activeContact": null})
+
+
+func _check_hearing_and_outcome(label: String, instance: Node) -> void:
+	if OS.get_environment("DREAM_SESSION_MODE") != "fixture":
+		_failures.append("%s hearing smoke requires DREAM_SESSION_MODE=fixture" % label)
+		return
+	var player := instance.get_node_or_null("Town/Actors/Player3D") as CharacterBody3D
+	var town := instance.get_node_or_null("Town") as Town3D
+	var hud := instance.get_node_or_null("HUD3D") as HUD3D
+	var run_session := instance.get_node_or_null("RunSession") as RunSession3D
+	if player == null or town == null or hud == null or run_session == null:
+		_failures.append("%s hearing smoke is missing Main dependencies" % label)
+		return
+	var fixture := _load_run_fixture()
+	var endpoints: Dictionary = fixture.get("endpoints", {})
+	for endpoint_name in ["runHearingOpen", "runHearingAnswer", "runEnd"]:
+		if not endpoints.get(endpoint_name, null) is Dictionary:
+			_failures.append("%s fixture is missing %s" % [label, endpoint_name])
+			return
+	var ready := false
+	for _frame in range(360):
+		await process_frame
+		ready = not str(instance.call("presentation_snapshot").get("runId", "")).is_empty()
+		if ready:
+			break
+	if not ready:
+		_failures.append("%s run did not initialize before hearing smoke" % label)
+		return
+
+	# The same conversation surface owns all three procedures. Only an explicit
+	# interrogation turn with a runtime duration may start the timer.
+	var timer_signal_count: Array[int] = [0]
+	var record_hesitation := func() -> void: timer_signal_count[0] += 1
+	hud.hesitation_expired.connect(record_hesitation)
+	var base_turn := {
+		"turnId": "turn-smoke-procedure",
+		"beatId": "beat-smoke-procedure",
+		"speakerId": "NPC_Station_Officer",
+		"prompt": "Procedure smoke prompt.",
+		"acceptsFreeInput": true,
+		"continueConversation": true,
+		"procedure": "ordinary",
+		"hesitationMs": 0,
+		"choices": [
+			{"choiceId": "smoke-1", "line": "One"},
+			{"choiceId": "smoke-2", "line": "Two"},
+			{"choiceId": "smoke-3", "line": "Three"},
+		],
+		"proposalMeta": {"transport": "scripted"},
+	}
+	hud.begin_conversation({"actorId": "NPC_Station_Officer"})
+	hud.show_turn(base_turn)
+	if bool(hud.hesitation_timer_snapshot().get("visible", false)):
+		_failures.append("%s ordinary conversation exposed the hesitation timer" % label)
+	var interrogation_turn := base_turn.duplicate(true)
+	interrogation_turn["procedure"] = "interrogation"
+	interrogation_turn["hesitationMs"] = 45000
+	hud.show_turn(interrogation_turn)
+	var timer_started := hud.hesitation_timer_snapshot()
+	if (
+		not bool(timer_started.get("visible", false))
+		or not is_equal_approx(float(timer_started.get("durationSeconds", 0.0)), 45.0)
+	):
+		_failures.append("%s interrogation did not use runtime hesitationMs" % label)
+	hud.call("_process_hesitation_timer", 46.0)
+	hud.call("_process_hesitation_timer", 46.0)
+	if timer_signal_count[0] != 1:
+		_failures.append("%s interrogation hesitation emitted %d times" % [label, timer_signal_count[0]])
+	hud.show_turn(interrogation_turn)
+	hud.set_conversation_busy(true)
+	hud.show_conversation_error(&"hud.m3r.error.conversation_answer")
+	hud.call("_process_hesitation_timer", 46.0)
+	var timer_after_retry := hud.hesitation_timer_snapshot()
+	if (
+		timer_signal_count[0] != 1
+		or bool(timer_after_retry.get("visible", false))
+		or bool(timer_after_retry.get("active", false))
+	):
+		_failures.append("%s answer retry restarted the interrogation timer" % label)
+	if hud.hesitation_expired.is_connected(record_hesitation):
+		hud.hesitation_expired.disconnect(record_hesitation)
+	hud.close_conversation()
+
+	instance.call("_enter_hearing_due")
+	var due_snapshot: Dictionary = instance.call("presentation_snapshot")
+	if (
+		str(due_snapshot.get("runStatus", "")) != "hearing_due"
+		or not bool(player.get("_control_enabled"))
+		or bool((due_snapshot.get("contact", {}) as Dictionary).get("active", false))
+		or player.focused_interactable() != null
+	):
+		_failures.append("%s hearing due did not freeze world work while preserving control" % label)
+	for actor_value in instance.get_tree().get_nodes_in_group(&"npc_actors"):
+		if actor_value is NPC3D and (actor_value as NPC3D).is_interaction_enabled():
+			_failures.append("%s hearing due left a resident interaction prompt enabled" % label)
+			break
+	for surface_value in instance.get_tree().get_nodes_in_group(&"record_surfaces"):
+		if (
+			surface_value is Node
+			and (surface_value as Node).has_method("is_interaction_enabled")
+			and bool((surface_value as Node).call("is_interaction_enabled"))
+		):
+			_failures.append("%s hearing due left a record interaction prompt enabled" % label)
+			break
+	instance.call("_dispatch_hearing_open")
+	instance.call("_dispatch_hearing_open")
+	var staged := false
+	for _frame in range(360):
+		await process_frame
+		var snapshot: Dictionary = instance.call("presentation_snapshot")
+		var hud_snapshot := hud.presentation_snapshot()
+		if (
+			str(snapshot.get("runStatus", "")) == "hearing_active"
+			and str(hud_snapshot.get("modalSurface", "")) == "conversation"
+			and not (hud_snapshot.get("currentTurn", {}) as Dictionary).is_empty()
+		):
+			staged = true
+			break
+	if not staged:
+		_failures.append("%s hearing did not open and stage in the shared modal" % label)
+		paused = false
+		return
+	var staged_snapshot: Dictionary = instance.call("presentation_snapshot")
+	var staged_hud := hud.presentation_snapshot()
+	var staged_turn := staged_hud.get("currentTurn", {}) as Dictionary
+	var expected_player_value: Variant = town.navigation_position("Station.hearing_player")
+	var expected_focus_value: Variant = town.anchor_position("Station.hearing_table")
+	var facing_ok := false
+	if expected_focus_value is Vector3:
+		var planar_target := expected_focus_value as Vector3 - player.global_position
+		planar_target.y = 0.0
+		if not planar_target.is_zero_approx():
+			facing_ok = (-player.global_transform.basis.z).dot(planar_target.normalized()) > 0.95
+	if (
+		int((staged_snapshot.get("hearingFlow", {}) as Dictionary).get("openAttempts", 0)) != 1
+		or not paused
+		or bool(player.get("_control_enabled"))
+		or str(staged_turn.get("procedure", "")) != "hearing"
+		or bool(staged_hud.get("hesitationTimerVisible", true))
+		or not expected_player_value is Vector3
+		or player.global_position.distance_to(expected_player_value as Vector3) > 0.05
+		or not facing_ok
+	):
+		_failures.append("%s hearing staging lost one-shot, anchor, focus, or modal invariants" % label)
+
+	var answer_packet := endpoints.get("runHearingAnswer", {}) as Dictionary
+	var answer_request := answer_packet.get("request", {}) as Dictionary
+	var final_answer := answer_request.get("answer", {}) as Dictionary
+	instance.call("_submit_hearing_answer", final_answer)
+	var terminal := false
+	for _frame in range(360):
+		await process_frame
+		var snapshot: Dictionary = instance.call("presentation_snapshot")
+		if (
+			str(snapshot.get("runStatus", "")) == "terminal"
+			and bool((snapshot.get("outcome", {}) as Dictionary).get("visible", false))
+		):
+			terminal = true
+			break
+	if not terminal:
+		_failures.append("%s hearing answer did not reach the terminal outcome" % label)
+		paused = false
+		return
+	var terminal_snapshot: Dictionary = instance.call("presentation_snapshot")
+	var terminal_result := terminal_snapshot.get("terminalResult", {}) as Dictionary
+	var outcome := terminal_snapshot.get("outcome", {}) as Dictionary
+	var presented_testimonies := outcome.get("testimonies", []) as Array
+	if (
+		str(outcome.get("route", "")) != str(terminal_result.get("verdict", ""))
+		or int(outcome.get("vouchCount", -1)) != int(terminal_result.get("evidencedVouchCount", -2))
+		or int(outcome.get("requiredVouches", 0)) != 4
+		or presented_testimonies.size() != 6
+		or (outcome.get("recapLines", []) as Array).size()
+		!= (terminal_result.get("recap", []) as Array).size()
+		or (outcome.get("recapEntries", []) as Array).size()
+		!= (terminal_result.get("recap", []) as Array).size()
+		or str(outcome.get("officerLine", ""))
+		!= str(terminal_result.get("officerLine", ""))
+		or (outcome.get("citedRecordIds", []) as Array).size()
+		!= (terminal_result.get("citedRecordIds", []) as Array).size()
+		or (outcome.get("citedLedgerEventIds", []) as Array).size()
+		!= (terminal_result.get("citedLedgerEventIds", []) as Array).size()
+		or str(outcome.get("body", "")).contains("NPC_")
+	):
+		_failures.append("%s outcome omitted verdict, quorum, testimony, recap, or leaked ids" % label)
+	for testimony_value in presented_testimonies:
+		if (
+			not testimony_value is Dictionary
+			or str((testimony_value as Dictionary).get("actor", "")).is_empty()
+			or str((testimony_value as Dictionary).get("testimony", "")).is_empty()
+		):
+			_failures.append("%s outcome has an incomplete resident testimony" % label)
+			break
+	var fallback_result := terminal_result.duplicate(true)
+	var fallback_meta := (fallback_result.get("proposalMeta", {}) as Dictionary).duplicate(true)
+	fallback_meta["transport"] = "fallback"
+	fallback_meta["usedFallback"] = true
+	fallback_meta["fallbackReason"] = "timeout"
+	fallback_result["proposalMeta"] = fallback_meta
+	hud.show_outcome(fallback_result)
+	var fallback_outcome := hud.outcome_snapshot()
+	if (
+		not bool(fallback_outcome.get("fallbackVisible", false))
+		or str(fallback_outcome.get("fallbackReason", "")) != "timeout"
+		or str(fallback_outcome.get("fallbackReasonText", "")).is_empty()
+	):
+		_failures.append("%s fallback hearing verdict was not visibly marked" % label)
+	if not hud.restart_requested.is_connected(Callable(instance, "_on_restart_requested")):
+		_failures.append("%s restart button signal is not connected to Main" % label)
+	var end_packet := endpoints.get("runEnd", {}) as Dictionary
+	var end_request := end_packet.get("request", {}) as Dictionary
+	var first_end: Dictionary = await run_session.end_run(
+		str(end_request.get("runId", "")),
+		str(end_request.get("endId", ""))
+	)
+	var repeated_end: Dictionary = await run_session.end_run(
+		str(end_request.get("runId", "")),
+		str(end_request.get("endId", ""))
+	)
+	if (
+		str(first_end.get("runStatus", "")) != "closed"
+		or first_end != repeated_end
+		or not bool(run_session.diagnostics_snapshot().get("fixtureRunClosed", false))
+	):
+		_failures.append("%s run end was not strict and idempotent" % label)
+	paused = false
 
 
 func _check_run_conversation(label: String, instance: Node) -> void:

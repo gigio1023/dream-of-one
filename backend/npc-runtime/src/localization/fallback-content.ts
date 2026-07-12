@@ -41,6 +41,29 @@ const conversationVariantSchema = z
     }
   });
 
+const hearingFallbackSchema = z
+  .object({
+    opening: nonEmpty,
+    memoryGroundedTestimony: nonEmpty,
+    neverMetTestimony: nonEmpty,
+    missingEvidenceTestimony: nonEmpty,
+    ordinaryVerdictWhy: nonEmpty,
+    abnormalVerdictWhy: nonEmpty,
+    ordinaryOfficerLine: nonEmpty,
+    abnormalOfficerLine: nonEmpty,
+  })
+  .strict()
+  .superRefine((hearing, context) => {
+    const placeholders = hearing.memoryGroundedTestimony.match(/\{[^{}]+\}/g) ?? [];
+    if (placeholders.length !== 1 || placeholders[0] !== "{memory}") {
+      context.addIssue({
+        code: "custom",
+        path: ["memoryGroundedTestimony"],
+        message: "hearing memory testimony requires exactly the {memory} placeholder",
+      });
+    }
+  });
+
 const whyLineShape = Object.fromEntries(
   CONVERSATION_SUSPICION_SIGNALS.map(signal => [signal, nonEmpty]),
 ) as Record<(typeof CONVERSATION_SUSPICION_SIGNALS)[number], typeof nonEmpty>;
@@ -61,6 +84,7 @@ const localizedFallbackContentSchema = z
         generic: conversationVariantSchema,
       })
       .strict(),
+    hearing: hearingFallbackSchema,
     agent: z
       .object({
         previousResultWaitReason: nonEmpty,

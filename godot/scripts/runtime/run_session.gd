@@ -38,12 +38,18 @@ func diagnostics_snapshot() -> Dictionary:
 	var fixture_decision_call_count: Variant = null
 	var fixture_session_end_revision: Variant = null
 	var fixture_last_start_contact_id: Variant = null
+	var fixture_hearing_opened: Variant = null
+	var fixture_hearing_answered: Variant = null
+	var fixture_run_closed: Variant = null
 	if _mode == "fixture":
 		fixture_advance_index = backend_diagnostics.get("advanceIndex")
 		fixture_preload_count = backend_diagnostics.get("preloadCount")
 		fixture_decision_call_count = backend_diagnostics.get("decisionCallCount")
 		fixture_session_end_revision = backend_diagnostics.get("sessionEndRevision")
 		fixture_last_start_contact_id = backend_diagnostics.get("lastStartContactId")
+		fixture_hearing_opened = backend_diagnostics.get("hearingOpened")
+		fixture_hearing_answered = backend_diagnostics.get("hearingAnswered")
+		fixture_run_closed = backend_diagnostics.get("runClosed")
 	return {
 		"mode": _mode,
 		"lastError": _diagnostic_error_summary(last_error),
@@ -52,6 +58,9 @@ func diagnostics_snapshot() -> Dictionary:
 		"fixtureDecisionCallCount": fixture_decision_call_count,
 		"fixtureSessionEndRevision": fixture_session_end_revision,
 		"fixtureLastStartContactId": fixture_last_start_contact_id,
+		"fixtureHearingOpened": fixture_hearing_opened,
+		"fixtureHearingAnswered": fixture_hearing_answered,
+		"fixtureRunClosed": fixture_run_closed,
 	}
 
 
@@ -125,6 +134,31 @@ func advance(request: Dictionary) -> Dictionary:
 func npc_decision(request: Dictionary) -> Dictionary:
 	await get_tree().process_frame
 	return await _backend.npc_decision(request)
+
+
+func open_hearing(run_id: String, hearing_id: String) -> Dictionary:
+	await get_tree().process_frame
+	return await _backend.open_hearing(run_id, hearing_id)
+
+
+func answer_hearing(
+	run_id: String,
+	hearing_id: String,
+	turn_id: String,
+	answer_payload: Dictionary
+) -> Dictionary:
+	await get_tree().process_frame
+	return await _backend.answer_hearing(
+		run_id,
+		hearing_id,
+		turn_id,
+		answer_payload
+	)
+
+
+func end_run(run_id: String, end_id: String) -> Dictionary:
+	await get_tree().process_frame
+	return await _backend.end_run(run_id, end_id)
 
 
 func _diagnostic_error_summary(error: Dictionary) -> Dictionary:

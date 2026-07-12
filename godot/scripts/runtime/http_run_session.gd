@@ -8,6 +8,7 @@ const START_TIMEOUT_SECONDS := 60.0
 const ANSWER_TIMEOUT_SECONDS := 300.0
 const ADVANCE_TIMEOUT_SECONDS := 15.0
 const DECISION_TIMEOUT_SECONDS := 300.0
+const HEARING_TIMEOUT_SECONDS := 300.0
 
 var _bridge: Node
 var _last_error: Dictionary = {}
@@ -141,6 +142,44 @@ func npc_decision(request: Dictionary) -> Dictionary:
 		request,
 		DECISION_TIMEOUT_SECONDS,
 		"npc_decision_failed"
+	)
+
+
+func open_hearing(run_id: String, hearing_id: String) -> Dictionary:
+	return await _post(
+		"/v1/run/hearing",
+		{"action": "open", "runId": run_id, "hearingId": hearing_id},
+		HEARING_TIMEOUT_SECONDS,
+		"run_hearing_open_failed"
+	)
+
+
+func answer_hearing(
+	run_id: String,
+	hearing_id: String,
+	turn_id: String,
+	answer_payload: Dictionary
+) -> Dictionary:
+	return await _post(
+		"/v1/run/hearing",
+		{
+			"action": "answer",
+			"runId": run_id,
+			"hearingId": hearing_id,
+			"turnId": turn_id,
+			"answer": answer_payload,
+		},
+		HEARING_TIMEOUT_SECONDS,
+		"run_hearing_answer_failed"
+	)
+
+
+func end_run(run_id: String, end_id: String) -> Dictionary:
+	return await _post(
+		"/v1/run/end",
+		{"runId": run_id, "endId": end_id},
+		START_TIMEOUT_SECONDS,
+		"run_end_failed"
 	)
 
 

@@ -17,7 +17,7 @@
       "model": "Qwen-Ambassador/Qwen3.7-Plus",
       "params": {
         "temperature": 0.7,
-        "maxTokens": 500,
+        "maxTokens": 1600,
         "enableThinking": false
       },
       "structured": "json-instructed"

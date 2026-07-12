@@ -3,7 +3,7 @@
 TypeScript runtime owning all deterministic truth. This doc maps v1's ~12.7k
 LOC onto the M3R target so an agent knows what to keep, trim, or build.
 
-> **Implementation status (2026-07-12):** the additive M3R social slices are
+> **Implementation status (2026-07-13):** the additive M3R social slices are
 > checked in alongside the retained M1 Session service. `RunService`
 > hydrates `world_layout.json` into six persistent actor workspaces, owns clock,
 > revisions, scheduler, and shared provider budget, and exposes idempotent run
@@ -31,7 +31,15 @@ LOC onto the M3R target so an agent knows what to keep, trim, or build.
 > through run-scoped role, source, visibility, revision, pressure-clamp, and
 > exactly-one-ledger validation. The player receives a separate encountered-only
 > `socialView`; hidden records and pressure changes remain hidden until a valid
-> speech or record-surface encounter. The hearing remains target work.
+> speech or record-surface encounter. The explicit run lifecycle now advances
+> through `active`, `hearing_due`, `hearing_active`, `terminal`, and `closed`.
+> A provider-generated hearing opening collects one final defense, then
+> `judgeHearing` reassesses exactly six residents from their real memories and
+> cited run records. The runtime enforces citation ownership, never-met
+> testimony, the four-evidenced-vouch floor, terminal fallback, and idempotent
+> `/v1/run/hearing` and `/v1/run/end`. High-pressure ledger escalation may also
+> produce one grounded, survivable Station interrogation with the game's only
+> hesitation timer; it returns to the active run and cannot issue a verdict.
 
 ## Target module shape
 
@@ -164,24 +172,25 @@ surface is:
 | `POST /v1/npc/decision` | Claim one pending two-actor `meeting_ready` or single-actor `goal` wake, carrying `runId`, `wakeId`, and observed `worldRevision` |
 | `GET  /v1/session/snapshot` | Renderable child-session state; never a substitute for the run snapshot |
 | `POST /v1/session/end` | End the conversation and return queued run deltas; the run continues |
-| `POST /v1/run/hearing` | Open the scheduled, run-ending hearing after its clock condition is met |
-| `POST /v1/run/end` | Return terminal result, run telemetry, and provider accounting, then close the run |
+| `POST /v1/run/hearing` | Idempotently open the scheduled hearing or submit its final defense; returns a guaranteed terminal verdict |
+| `POST /v1/run/end` | Idempotently return the terminal result and provider accounting, then close the run |
 
 Debug-capable responses retain `ProposalMeta`, transcript deltas, and raw
 `ledgerEvents[]`. Normal player presentation reads only the sanitized
 `socialView`, whose encountered residents, questions, records, provenance, and
 qualitative pressure never reveal undisclosed state.
 
-The landed subset is `POST /v1/run/start`, `POST /v1/run/advance`,
-`GET /v1/run/snapshot`, `POST /v1/run/encounter`, `POST /v1/session/preload`, the run-discriminated
-start/answer/snapshot/end session routes, and run-discriminated
+The landed surface includes `POST /v1/run/start`, `POST /v1/run/advance`,
+`GET /v1/run/snapshot`, `POST /v1/run/encounter`, `POST /v1/session/preload`,
+the run-discriminated start/answer/snapshot/end session routes,
 `POST /v1/npc/decision` for bounded ambient meetings and single-resident goal
-decisions. Legacy
+decisions, and the terminal `POST /v1/run/hearing` plus `POST /v1/run/end`
+transitions. Legacy
 `{storyletId, locale}` packets still dispatch to `SessionService`; strict
 `{runId, ...}` packets dispatch to `RunService` on the same loopback server.
 Fixture-only scripts generate byte-identical backend and Godot replay files
-with all six openings plus all three issued receptionist choices and one
-bounded free-input path.
+with all six openings, all three issued receptionist choices, one bounded
+free-input path, and the complete due/open/answer/end hearing sequence.
 Production still resolves wording, suggestions, judgment, and stance through
 the configured provider port.
 
@@ -284,8 +293,15 @@ event; retrying or rereading the same revision cannot duplicate it.
 The runtime verifies provenance and procedure; the selected live model judges
 meaning. At the scheduled hearing it enforces four evidenced vouches out of
 six as the eligibility floor, then asks the model to reassess the final
-defense against pooled visible memories. No earlier interrogation can end an
-M3R run.
+defense against pooled visible memories. An uncited assessment cannot apply a
+new proposed stance, and an uncited vouch is downgraded; a valid vouch must cite
+that resident's meaningful first-hand conversation. A resident who never met
+the player says exactly that. Four
+valid vouches make an ordinary verdict possible but never mandatory. Invalid
+citations or provider failure use a visibly marked deterministic judgment so
+the run still terminates. The recap is assembled only from the submitted
+defense, validated testimony, and actual cited record/ledger entries. No
+earlier interrogation can end an M3R run.
 
 ## Checks
 

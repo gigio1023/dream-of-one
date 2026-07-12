@@ -23,6 +23,8 @@ import type {
   ResolvedProposal,
   AgentStepProposal,
   ConversationProposal,
+  HearingJudgment,
+  HearingJudgmentRequest,
 } from "./ports.js";
 
 function localizedFallbackWhyLine(
@@ -240,6 +242,58 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
         : { rationale: content.doneRationale, done: true };
     return {
       proposal,
+      meta: {
+        profileId: this.profileId,
+        transport: "fallback",
+        usedFallback: true,
+      },
+    };
+  }
+
+  async judgeHearing(
+    request: HearingJudgmentRequest,
+  ): Promise<ResolvedProposal<HearingJudgment>> {
+    const content = fallbackContent(request.locale).hearing;
+    const residentAssessments = request.residents.map(resident => {
+      const groundedMemory = [...resident.memories]
+        .reverse()
+        .find(memory => memory.meaningfulFirsthand)
+        ?? resident.memories.at(-1);
+      const hasDirectEvidence =
+        resident.hasMeaningfulFirsthandConversation && groundedMemory !== undefined;
+      const testimonyLine = !resident.hasMeaningfulFirsthandConversation
+        ? content.neverMetTestimony
+        : groundedMemory
+          ? content.memoryGroundedTestimony.replace("{memory}", groundedMemory.text)
+          : content.missingEvidenceTestimony;
+      return {
+        actorId: resident.actorId,
+        proposedStance: resident.stanceBefore,
+        testimonyLine,
+        citedMemoryIds: hasDirectEvidence && groundedMemory ? [groundedMemory.memoryId] : [],
+      };
+    }) as HearingJudgment["residentAssessments"];
+    const evidencedVouches = request.residents.filter(
+      resident =>
+        resident.stanceBefore === "vouch" &&
+        resident.hasMeaningfulFirsthandConversation &&
+        resident.memories.some(memory => memory.meaningfulFirsthand),
+    ).length;
+    const proposedVerdict: HearingJudgment["proposedVerdict"] =
+      evidencedVouches >= 4 ? "ordinary" : "abnormal";
+    return {
+      proposal: {
+        residentAssessments,
+        proposedVerdict,
+        verdictWhyLine: proposedVerdict === "ordinary"
+          ? content.ordinaryVerdictWhy
+          : content.abnormalVerdictWhy,
+        officerLine: proposedVerdict === "ordinary"
+          ? content.ordinaryOfficerLine
+          : content.abnormalOfficerLine,
+        citedRecordIds: [],
+        citedLedgerEventIds: [],
+      },
       meta: {
         profileId: this.profileId,
         transport: "fallback",

@@ -12,11 +12,13 @@ import {
   gameplayLocaleSchema,
   type GameplayLocale,
 } from "../localization/supported-locales.js";
+import { fallbackContent } from "../localization/fallback-content.js";
 import { agentStepProposalSchema } from "../providers/envelope.js";
 import type {
   AgentStepProposal,
   ConversationProposal,
   ConversationTurnRequest,
+  HearingJudgment,
   NpcProposalPort,
   ProposalMeta,
   ResolvedProposal,
@@ -35,6 +37,12 @@ import {
   type RunLayout,
   type RunMeetingWindow,
 } from "./run-layout.js";
+import {
+  buildHearingJudgmentRequest,
+  validateHearingJudgment,
+  type HearingJudgmentRequest,
+  type ValidatedHearingJudgment,
+} from "./run-hearing.js";
 import {
   advanceRunScheduler,
   alignActorForPlayerConversation,
@@ -66,6 +74,12 @@ import type {
   RunDecisionDelta,
   RunEncounterRequest,
   RunEncounterResponse,
+  RunEndRequest,
+  RunEndResponse,
+  RunHearingProcedure,
+  RunHearingRequest,
+  RunHearingResponse,
+  RunInterrogationOutcomeMemory,
   RunJudgment,
   RunMemory,
   RunMovementDelta,
@@ -86,8 +100,10 @@ import type {
   RunSessionSnapshotResponse,
   RunSessionStartResponse,
   RunSnapshot,
+  RunStatus,
   RunSocialProvenance,
   RunSocialView,
+  RunTerminalResult,
 } from "./run-schema.js";
 
 export const STUDIO_RECEPTIONIST_ID = "NPC_Studio_Receptionist";
@@ -110,6 +126,9 @@ const CONTACT_COOLDOWN_SECONDS = 75;
 const CONTACT_LIFETIME_SECONDS = 30;
 const CONTACT_SAFE_DISTANCE_M = 2.2;
 const CONTACT_START_TOLERANCE_M = 0.8;
+const INTERROGATION_PRESSURE_THRESHOLD = 90;
+const INTERROGATION_HESITATION_MS = 40_000;
+const STATION_OFFICER_ID = "NPC_Station_Officer";
 const PLAYER_CONVERSATION_GOAL =
   "Speak face to face with the outsider, ask only what your role and memories support, and form a memory-based personal stance.";
 
@@ -193,6 +212,7 @@ interface GoalObservation {
   factSignature: string;
   observePacket: ObservePacket;
   goal: string;
+  procedure: "ordinary" | "interrogation";
 }
 
 interface GoalDecisionAttempt {
@@ -229,6 +249,8 @@ interface ConversationState {
   sessionId: string;
   actorId: string;
   contactId: string | null;
+  procedure: "ordinary" | "interrogation";
+  interrogationLedgerSeq: number | null;
   status: "active" | "awaiting_end" | "ended";
   dialogue: Array<{ speakerId: string; line: string }>;
   turnCount: number;
@@ -239,6 +261,33 @@ interface ConversationState {
   lastProposalMeta: ProposalMeta | null;
   endResponse?: RunSessionEndResponse;
 }
+
+type HearingOpenResponse = Extract<RunHearingResponse, { action: "open" }>;
+type HearingAnswerResponse = Extract<RunHearingResponse, { action: "answer" }>;
+
+interface HearingRuntimeState {
+  hearingId: string;
+  openingRequest: ConversationTurnRequest;
+  openingResponse?: HearingOpenResponse;
+  openingInFlight?: Promise<HearingOpenResponse>;
+  answerSignature?: string;
+  finalDefense?: string;
+  answerResponse?: HearingAnswerResponse;
+  answerInFlight?: Promise<HearingAnswerResponse>;
+}
+
+interface CachedRunEnd {
+  endId: string;
+  response: RunEndResponse;
+}
+
+type HearingOpenClaim =
+  | { response: HearingOpenResponse; inFlight?: never }
+  | { response?: never; inFlight: Promise<HearingOpenResponse> };
+
+type HearingAnswerClaim =
+  | { response: HearingAnswerResponse; inFlight?: never }
+  | { response?: never; inFlight: Promise<HearingAnswerResponse> };
 
 interface ConversationOpeningAttempt {
   actorId: string;
@@ -263,6 +312,11 @@ interface RunState {
   worldId: string;
   layoutRevision: string;
   worldRevision: number;
+  runStatus: RunStatus;
+  hearingProcedure: RunHearingProcedure | null;
+  terminalResult: RunTerminalResult | null;
+  hearingRuntime: HearingRuntimeState | null;
+  runEnd: CachedRunEnd | null;
   locale: GameplayLocale;
   elapsedSeconds: number;
   graceEndsAtSeconds: number;
@@ -296,6 +350,7 @@ interface RunState {
   encounterCache: Map<string, CachedEncounter>;
   encounteredIdentityIds: Set<string>;
   encounteredSpeechEventIds: Set<string>;
+  lastInterrogatedLedgerSeq: number;
 }
 
 type IdPrefix = "run" | "sess" | "mem";
@@ -329,6 +384,11 @@ export type RunErrorCode =
   | "stale_world_revision"
   | "run_paused"
   | "hearing_due"
+  | "run_not_active"
+  | "hearing_not_due"
+  | "hearing_id_conflict"
+  | "end_id_conflict"
+  | "run_not_terminal"
   | "invalid_arrival"
   | "invalid_spatial_facts"
   | "encounter_id_conflict"
@@ -348,9 +408,9 @@ function clone<T>(value: T): T {
 }
 
 function answerSignature(answer: RunSessionAnswer): string {
-  return answer.type === "choice"
-    ? `choice:${answer.choiceId}`
-    : `free_input:${answer.text.trim()}`;
+  if (answer.type === "choice") return `choice:${answer.choiceId}`;
+  if (answer.type === "free_input") return `free_input:${answer.text.trim()}`;
+  return "hesitation";
 }
 
 function startSignature(locale: string): string {
@@ -548,6 +608,11 @@ export class RunService {
       worldId: this.layout.worldId,
       layoutRevision: this.layout.layoutRevision,
       worldRevision: 0,
+      runStatus: "active",
+      hearingProcedure: null,
+      terminalResult: null,
+      hearingRuntime: null,
+      runEnd: null,
       locale: runLocale,
       elapsedSeconds: 0,
       graceEndsAtSeconds: this.layout.graceEndsAtSeconds,
@@ -592,6 +657,7 @@ export class RunService {
       encounterCache: new Map(),
       encounteredIdentityIds: new Set(),
       encounteredSpeechEventIds: new Set(),
+      lastInterrogatedLedgerSeq: 0,
     };
     this.runs.set(runId, run);
     const response = this.snapshot(runId);
@@ -611,12 +677,15 @@ export class RunService {
       worldId: run.worldId,
       layoutRevision: run.layoutRevision,
       worldRevision: run.worldRevision,
+      runStatus: run.runStatus,
+      hearingProcedure: clone(run.hearingProcedure),
+      terminalResult: clone(run.terminalResult),
       locale: run.locale,
       worldClock: {
         elapsedSeconds: run.elapsedSeconds,
         graceEndsAtSeconds: run.graceEndsAtSeconds,
         hearingAtSeconds: run.hearingAtSeconds,
-        paused: run.activeConversationId !== null,
+        paused: run.activeConversationId !== null || run.runStatus !== "active",
       },
       institutionalPressure: run.institutionalPressure,
       providerBudget: clone(run.providerBudget),
@@ -634,6 +703,296 @@ export class RunService {
       ledgerEvents: clone(run.ledgerEvents),
       socialView: this.publicSocialView(run),
     };
+  }
+
+  hearing(request: RunHearingRequest): Promise<RunHearingResponse> {
+    return request.action === "open"
+      ? this.openHearing(request)
+      : this.answerHearing(request);
+  }
+
+  endRun(request: RunEndRequest): Promise<RunEndResponse> {
+    return this.serialize(request.runId, async () => {
+      const run = this.requireRun(request.runId);
+      if (run.runEnd) {
+        if (run.runEnd.endId !== request.endId) {
+          throw new RunError("a closed run cannot be retried with a different endId", "end_id_conflict");
+        }
+        return clone(run.runEnd.response);
+      }
+      if (run.runStatus !== "terminal" || !run.terminalResult) {
+        throw new RunError(`run is not terminal: ${run.runStatus}`, "run_not_terminal");
+      }
+      this.refreshProviderBudget(run);
+      run.runStatus = "closed";
+      const response: RunEndResponse = {
+        runId: run.runId,
+        endId: request.endId,
+        runStatus: "closed",
+        terminalResult: clone(run.terminalResult),
+        providerBudget: clone(run.providerBudget),
+        lastProposalMeta: clone(run.lastProposalMeta),
+      };
+      run.runEnd = { endId: request.endId, response: clone(response) };
+      return response;
+    });
+  }
+
+  private openHearing(
+    request: Extract<RunHearingRequest, { action: "open" }>,
+  ): Promise<HearingOpenResponse> {
+    return this.serialize(request.runId, async (): Promise<HearingOpenClaim> => {
+      const run = this.requireRun(request.runId);
+      const existing = run.hearingRuntime;
+      if (existing) {
+        if (existing.hearingId !== request.hearingId) {
+          throw new RunError("the run is already bound to another hearingId", "hearing_id_conflict");
+        }
+        if (existing.openingResponse) return { response: clone(existing.openingResponse) };
+        if (existing.openingInFlight) return { inFlight: existing.openingInFlight };
+        if (
+          run.runStatus === "hearing_active" &&
+          run.hearingProcedure?.status === "opening"
+        ) {
+          const executing = this.executeHearingOpening(run.runId, existing);
+          existing.openingInFlight = executing;
+          void executing
+            .finally(() => {
+              if (existing.openingInFlight === executing) existing.openingInFlight = undefined;
+            })
+            .catch(() => undefined);
+          return { inFlight: executing };
+        }
+      }
+      if (run.runStatus !== "hearing_due") {
+        throw new RunError(`hearing cannot open from ${run.runStatus}`, "hearing_not_due");
+      }
+
+      const runtime: HearingRuntimeState = {
+        hearingId: request.hearingId,
+        openingRequest: this.hearingOpeningRequest(run, request.hearingId),
+      };
+      run.hearingRuntime = runtime;
+      run.runStatus = "hearing_active";
+      run.hearingProcedure = {
+        hearingId: request.hearingId,
+        status: "opening",
+        turnId: null,
+      };
+      run.activeContact = null;
+      run.activeAmbientConversation = null;
+      run.conversationOpenings.clear();
+      run.preloadRequiredEvidence.clear();
+      for (const actor of run.actors.values()) actor.playerConversationReady = false;
+      run.worldRevision += 1;
+
+      const executing = this.executeHearingOpening(run.runId, runtime);
+      runtime.openingInFlight = executing;
+      void executing
+        .finally(() => {
+          if (runtime.openingInFlight === executing) runtime.openingInFlight = undefined;
+        })
+        .catch(() => undefined);
+      return { inFlight: executing };
+    }).then(claim =>
+      claim.response ? clone(claim.response) : claim.inFlight.then(response => clone(response)),
+    );
+  }
+
+  private answerHearing(
+    request: Extract<RunHearingRequest, { action: "answer" }>,
+  ): Promise<HearingAnswerResponse> {
+    return this.serialize(request.runId, async (): Promise<HearingAnswerClaim> => {
+      const run = this.requireRun(request.runId);
+      const runtime = run.hearingRuntime;
+      if (!runtime || runtime.hearingId !== request.hearingId) {
+        throw new RunError("answer does not match the active hearingId", "hearing_id_conflict");
+      }
+      const signature = JSON.stringify({ turnId: request.turnId, answer: answerSignature(request.answer) });
+      if (runtime.answerSignature) {
+        if (runtime.answerSignature !== signature) {
+          throw new RunError("the hearing turn cannot be retried with a different answer", "unexpected_turn");
+        }
+        if (runtime.answerResponse) return { response: clone(runtime.answerResponse) };
+        if (runtime.answerInFlight) return { inFlight: runtime.answerInFlight };
+      }
+      if (
+        run.runStatus !== "hearing_active" ||
+        run.hearingProcedure?.status !== "awaiting_defense" ||
+        !runtime.openingResponse
+      ) {
+        throw new RunError("hearing has no answerable defense turn", "unexpected_turn");
+      }
+      const turn = runtime.openingResponse.nextTurn;
+      if (request.turnId !== turn.turnId) {
+        throw new RunError(`unexpected hearing turn: ${request.turnId}`, "unexpected_turn");
+      }
+      if (request.answer.type === "hesitation") {
+        throw new RunError("hearing defense cannot use interrogation hesitation", "invalid_answer");
+      }
+      const finalDefense = this.resolvePlayerLine(turn, request.answer, run.locale);
+      runtime.answerSignature = signature;
+      runtime.finalDefense = finalDefense;
+      const judgmentRequest = buildHearingJudgmentRequest({
+        runId: run.runId,
+        hearingId: runtime.hearingId,
+        locale: run.locale,
+        finalDefense,
+        institutionalPressure: run.institutionalPressure,
+        actors: [...run.actors.values()].map(actor => this.publicActor(actor)),
+        records: clone(run.records),
+        ledgerEvents: clone(run.ledgerEvents),
+      });
+      const executing = this.executeHearingJudgment(run.runId, runtime, judgmentRequest);
+      runtime.answerInFlight = executing;
+      void executing
+        .finally(() => {
+          if (runtime.answerInFlight === executing) runtime.answerInFlight = undefined;
+        })
+        .catch(() => undefined);
+      return { inFlight: executing };
+    }).then(claim =>
+      claim.response ? clone(claim.response) : claim.inFlight.then(response => clone(response)),
+    );
+  }
+
+  private async executeHearingOpening(
+    runId: string,
+    runtime: HearingRuntimeState,
+  ): Promise<HearingOpenResponse> {
+    let resolved: ResolvedProposal<ConversationProposal>;
+    try {
+      resolved = await this.proposalPort.proposeConversationTurn(clone(runtime.openingRequest));
+    } catch {
+      const locale = this.requireRun(runId).locale;
+      const content = fallbackContent(locale);
+      resolved = {
+        proposal: {
+          utterance: content.hearing.opening,
+          suggestedReplies: clone(content.conversation.generic.suggestedReplies),
+          continueConversation: false,
+        },
+        meta: this.goalFallbackMeta("transport_error"),
+      };
+    }
+
+    return this.serialize(runId, async () => {
+      const run = this.requireRun(runId);
+      if (
+        run.hearingRuntime !== runtime ||
+        run.runStatus !== "hearing_active" ||
+        run.hearingProcedure?.status !== "opening"
+      ) {
+        throw new RunError("hearing opening became stale", "run_not_active");
+      }
+      this.trackProposal(run, resolved.meta);
+      const nextTurn = this.nextTurn(
+        `hearing:${runtime.hearingId}`,
+        0,
+        "station_hearing_opening",
+        "station_hearing_final_defense",
+        STATION_OFFICER_ID,
+        { ...resolved.proposal, continueConversation: false },
+        resolved.meta,
+        "hearing",
+        0,
+      );
+      run.hearingProcedure = {
+        hearingId: runtime.hearingId,
+        status: "awaiting_defense",
+        turnId: nextTurn.turnId,
+      };
+      run.worldRevision += 1;
+      const response: HearingOpenResponse = {
+        action: "open",
+        runId: run.runId,
+        hearingId: runtime.hearingId,
+        worldRevision: run.worldRevision,
+        runStatus: "hearing_active",
+        hearingProcedure: clone(run.hearingProcedure),
+        staging: {
+          playerAnchorRef: "Station.hearing_player",
+          focusAnchorRef: "Station.hearing_table",
+        },
+        nextTurn,
+        terminalResult: null,
+        proposalMeta: clone(resolved.meta),
+        socialView: this.publicSocialView(run),
+      };
+      runtime.openingResponse = clone(response);
+      return response;
+    });
+  }
+
+  private async executeHearingJudgment(
+    runId: string,
+    runtime: HearingRuntimeState,
+    request: HearingJudgmentRequest,
+  ): Promise<HearingAnswerResponse> {
+    let judgment: HearingJudgment;
+    let meta: ProposalMeta;
+    try {
+      const resolved = await this.proposalPort.judgeHearing(clone(request));
+      const validated = validateHearingJudgment(request, resolved.proposal);
+      if (validated.ok) {
+        judgment = resolved.proposal;
+        meta = resolved.meta;
+      } else {
+        judgment = this.fallbackHearingJudgment(request);
+        meta = this.goalFallbackMeta("invalid_envelope");
+      }
+    } catch {
+      judgment = this.fallbackHearingJudgment(request);
+      meta = this.goalFallbackMeta("transport_error");
+    }
+    const checked = validateHearingJudgment(request, judgment);
+    if (!checked.ok) throw new Error(`deterministic hearing fallback is invalid: ${checked.reason}`);
+    const validated = this.normalizeValidatedHearing(request, checked.value);
+
+    return this.serialize(runId, async () => {
+      const run = this.requireRun(runId);
+      if (
+        run.hearingRuntime !== runtime ||
+        run.runStatus !== "hearing_active" ||
+        run.hearingProcedure?.status !== "awaiting_defense" ||
+        !runtime.finalDefense
+      ) {
+        throw new RunError("hearing judgment became stale", "run_not_active");
+      }
+      this.trackProposal(run, meta);
+      const nextRevision = run.worldRevision + 1;
+      const terminalResult = this.commitHearingResult(
+        run,
+        runtime.hearingId,
+        runtime.finalDefense,
+        request,
+        validated,
+        meta,
+        nextRevision,
+      );
+      run.worldRevision = nextRevision;
+      run.runStatus = "terminal";
+      run.hearingProcedure = {
+        hearingId: runtime.hearingId,
+        status: "resolved",
+        turnId: runtime.openingResponse?.nextTurn.turnId ?? null,
+      };
+      run.terminalResult = clone(terminalResult);
+      const response: HearingAnswerResponse = {
+        action: "answer",
+        runId: run.runId,
+        hearingId: runtime.hearingId,
+        worldRevision: run.worldRevision,
+        runStatus: "terminal",
+        hearingProcedure: clone(run.hearingProcedure),
+        nextTurn: null,
+        terminalResult: clone(terminalResult),
+        proposalMeta: clone(meta),
+        socialView: this.publicSocialView(run),
+      };
+      runtime.answerResponse = clone(response);
+      return response;
+    });
   }
 
   encounter(request: RunEncounterRequest): Promise<RunEncounterResponse> {
@@ -731,6 +1090,14 @@ export class RunService {
         }
         return clone(cached.response);
       }
+      if (run.runStatus !== "active") {
+        throw new RunError(
+          run.runStatus === "hearing_due"
+            ? "the Station hearing is already due"
+            : `run is not active: ${run.runStatus}`,
+          run.runStatus === "hearing_due" ? "hearing_due" : "run_not_active",
+        );
+      }
       if (request.observedWorldRevision !== run.worldRevision) {
         throw new RunError(
           `advance observed revision ${request.observedWorldRevision}, current is ${run.worldRevision}`,
@@ -739,9 +1106,6 @@ export class RunService {
       }
       if (run.activeConversationId !== null) {
         throw new RunError("the unpaused run clock cannot advance during a modal conversation", "run_paused");
-      }
-      if (run.elapsedSeconds >= run.hearingAtSeconds) {
-        throw new RunError("the Station hearing is already due", "hearing_due");
       }
       for (const arrival of request.arrivals) {
         this.requireActor(run, arrival.actorId);
@@ -921,7 +1285,7 @@ export class RunService {
           }
         }
       }
-      if (goalSpatialActors) {
+      if (goalSpatialActors && toSeconds < run.hearingAtSeconds) {
         for (const layoutActor of this.layout.actors) {
           const facts = goalSpatialActors.get(layoutActor.actorId);
           if (
@@ -1021,6 +1385,11 @@ export class RunService {
       }
       if (!run.socialView.hearing.due && run.elapsedSeconds >= run.hearingAtSeconds) {
         run.socialView.hearing.due = true;
+        run.runStatus = "hearing_due";
+        run.hearingProcedure = null;
+        run.conversationOpenings.clear();
+        run.preloadRequiredEvidence.clear();
+        for (const actor of run.actors.values()) actor.playerConversationReady = false;
         this.bumpSocialRevision(run);
       }
       schedulerResult.scheduleWakes.sort((first, second) =>
@@ -1096,6 +1465,10 @@ export class RunService {
 
     if (ambientAttempt) return this.startAmbientDecisionExecution(request.runId, ambientAttempt);
     if (goalAttempt) return this.startGoalDecisionExecution(request.runId, goalAttempt);
+
+    if (run.runStatus !== "active") {
+      return Promise.reject(new RunError(`run is not active: ${run.runStatus}`, "run_not_active"));
+    }
 
     const wake = run.scheduler.pendingWakes.get(request.wakeId);
     if (!wake || wake.status !== "pending") {
@@ -1182,6 +1555,7 @@ export class RunService {
   ): Promise<RunSessionPreloadResponse> {
     return this.serialize(runId, async (): Promise<ConversationOpeningClaim> => {
       const run = this.requireRun(runId);
+      this.requireActiveRun(run);
       const actor = this.requireActor(run, actorId);
       this.validateConversationRequest(run, actor, interactionZoneId, locale);
       if (run.activeConversationId !== null) {
@@ -1241,6 +1615,7 @@ export class RunService {
   ): Promise<RunSessionStartResponse> {
     return this.serialize(runId, async () => {
       const run = this.requireRun(runId);
+      this.requireActiveRun(run);
       if (locale !== run.locale) {
         throw new RunError(`conversation locale ${locale} does not match run locale ${run.locale}`, "invalid_locale");
       }
@@ -1297,6 +1672,12 @@ export class RunService {
 
       const sessionId = this.idFactory("sess");
       const resolved = opening.resolved;
+      const procedure = contactId ? run.activeContact?.procedure ?? "ordinary" : "ordinary";
+      const interrogationLedgerSeq =
+        procedure === "interrogation" ? this.pendingInterrogationLedgerSeq(run) : null;
+      if (procedure === "interrogation" && interrogationLedgerSeq === null) {
+        throw new RunError("interrogation contact has no new pressure event", "conversation_not_ready");
+      }
       const confirmedAnchorRef = run.scheduler.actors.get(actor.actorId)?.confirmedAnchorRef;
       if (!confirmedAnchorRef) {
         throw new RunError("actor has no confirmed conversation position", "conversation_not_ready");
@@ -1319,6 +1700,8 @@ export class RunService {
         actorId,
         resolved.proposal,
         resolved.meta,
+        procedure,
+        procedure === "interrogation" ? INTERROGATION_HESITATION_MS : 0,
       );
       const openingRevision = run.worldRevision + 1;
       const openingMemory: RunNpcUtteranceMemory = {
@@ -1338,6 +1721,8 @@ export class RunService {
         sessionId,
         actorId,
         contactId: contactId ?? null,
+        procedure,
+        interrogationLedgerSeq,
         status: "active",
         dialogue: [{ speakerId: actorId, line: nextTurn.prompt }],
         turnCount: 0,
@@ -1385,6 +1770,7 @@ export class RunService {
         }
         return clone(cached.response);
       }
+      this.requireActiveRun(run);
       if (conversation.status !== "active" || !conversation.activeTurn) {
         throw new RunError("conversation has no answerable turn", "session_ended");
       }
@@ -1395,7 +1781,7 @@ export class RunService {
         );
       }
 
-      const playerLine = this.resolvePlayerLine(conversation.activeTurn, answer);
+      const playerLine = this.resolvePlayerLine(conversation.activeTurn, answer, run.locale);
       const actor = this.requireActor(run, conversation.actorId);
       const stanceBefore = actor.stance;
       const suspicionBefore = actor.suspicion;
@@ -1418,8 +1804,8 @@ export class RunService {
         ),
         suspicionBefore,
         reportPressureBefore: reportBefore,
-        objective: this.conversationObjective(actor),
-        sceneFacts: this.conversationSceneFacts(actor),
+        objective: this.conversationObjective(actor, conversation.procedure),
+        sceneFacts: this.conversationSceneFacts(actor, conversation.procedure),
         stanceBefore,
         hasMeaningfulFirsthandConversation: actor.hasMeaningfulFirsthandConversation,
       });
@@ -1437,7 +1823,10 @@ export class RunService {
         JUDGMENT_REPORT_DELTA_CAP,
       );
       const reportPressureAfter = reportBefore;
-      const meaningfulFirsthand = resolved.proposal.meaningfulFirsthand && playerLine.trim().length > 0;
+      const meaningfulFirsthand =
+        answer.type !== "hesitation" &&
+        resolved.proposal.meaningfulFirsthand &&
+        playerLine.trim().length > 0;
       const hasFirsthand = actor.hasMeaningfulFirsthandConversation || meaningfulFirsthand;
       const stanceAfter = this.validatedStance(resolved.proposal.stance, hasFirsthand);
       const nextRevision = run.worldRevision + 1;
@@ -1504,6 +1893,8 @@ export class RunService {
             actor.actorId,
             resolved.proposal,
             resolved.meta,
+            conversation.procedure,
+            conversation.procedure === "interrogation" ? INTERROGATION_HESITATION_MS : 0,
           )
         : null;
       conversation.activeTurn = nextTurn;
@@ -1534,6 +1925,7 @@ export class RunService {
       const run = this.requireRun(runId);
       const conversation = this.requireConversation(run, sessionId);
       if (conversation.endResponse) return clone(conversation.endResponse);
+      this.requireActiveRun(run);
       if (conversation.status === "active") {
         throw new RunError("conversation still has an answerable turn", "session_still_active");
       }
@@ -1542,6 +1934,26 @@ export class RunService {
       conversation.activeTurn = null;
       if (run.activeConversationId === sessionId) run.activeConversationId = null;
       const queuedRunDeltas = this.drainQueuedRunDeltas(run);
+      const nextRevision = run.worldRevision + 1;
+      if (conversation.procedure === "interrogation" && conversation.interrogationLedgerSeq) {
+        const memory: RunInterrogationOutcomeMemory = {
+          memoryId: this.idFactory("mem"),
+          kind: "interrogation_outcome",
+          sourceActorId: "player",
+          listenerActorId: actor.actorId,
+          sessionId,
+          ledgerSeq: conversation.interrogationLedgerSeq,
+          whyLine:
+            conversation.lastJudgment?.whyLine ?? fallbackContent(run.locale).whyLines.none,
+          worldSeconds: run.elapsedSeconds,
+          worldRevision: nextRevision,
+        };
+        actor.memories.push(memory);
+        run.lastInterrogatedLedgerSeq = Math.max(
+          run.lastInterrogatedLedgerSeq,
+          conversation.interrogationLedgerSeq,
+        );
+      }
       actor.playerConversationReady = false;
       run.conversationOpenings.delete(actor.actorId);
       run.preloadRequiredEvidence.delete(actor.actorId);
@@ -1549,7 +1961,7 @@ export class RunService {
         actor.actorId,
         this.conversationEvidenceKey(run, actor),
       );
-      run.worldRevision += 1;
+      run.worldRevision = nextRevision;
       for (const delta of queuedRunDeltas) {
         if (delta.kind === "look") delta.worldRevision = run.worldRevision;
       }
@@ -1719,9 +2131,28 @@ export class RunService {
       attempt.actionMeta = loop.accepted.length > 0 ? clone(loop.metas.at(-1) as ProposalMeta) : null;
     } catch (error) {
       if (budgetReserved || error === budgetStop) {
-        return this.serialize(runId, async () =>
-          this.finishGoalAttempt(this.requireRun(runId), attempt, "budget_reserved", true),
-        );
+        return this.serialize(runId, async () => {
+          const run = this.requireRun(runId);
+          if (
+            observation.procedure === "interrogation" &&
+            observation.observePacket.playerContact?.available
+          ) {
+            const priorMeta = attempt.providerMetas.at(-1);
+            const meta =
+              priorMeta?.fallbackReason === "budget_exhausted"
+                ? priorMeta
+                : this.goalFallbackMeta("budget_exhausted");
+            if (priorMeta !== meta) attempt.providerMetas.push(clone(meta));
+            attempt.resolvedAction = {
+              tool: "move_to_player",
+              contactReason: fallbackContent(run.locale).whyLines.none,
+            };
+            attempt.actionMeta = clone(meta);
+            this.trackProposal(run, meta);
+            return this.commitGoalDecision(run, attempt);
+          }
+          return this.finishGoalAttempt(run, attempt, "budget_reserved", true);
+        });
       }
       // The deterministic policy action below keeps the wake terminal and
       // honest without granting any world mutation after provider failure.
@@ -1733,7 +2164,14 @@ export class RunService {
     }
 
     if (!attempt.resolvedAction) {
-      attempt.resolvedAction = { tool: "wait", reason: "bounded goal fallback" };
+      attempt.resolvedAction =
+        observation.procedure === "interrogation" &&
+        observation.observePacket.playerContact?.available
+          ? {
+              tool: "move_to_player",
+              contactReason: fallbackContent(this.requireRun(runId).locale).whyLines.none,
+            }
+          : { tool: "wait", reason: "bounded goal fallback" };
       const fallbackMeta = this.goalFallbackMeta("invalid_envelope");
       attempt.actionMeta = fallbackMeta;
       attempt.providerMetas = [
@@ -1745,16 +2183,28 @@ export class RunService {
       const run = this.requireRun(runId);
       if (attempt.actionMeta?.usedFallback) {
         this.trackProposal(run, attempt.actionMeta);
+        const isInterrogationContact = attempt.resolvedAction?.tool === "move_to_player";
         run.agentTranscript.append({
           actorId: attempt.actorId,
           step: run.agentTranscript.nextStep(attempt.actorId),
           observedSummary: summarizeObservePacket(observation.observePacket),
-          tool: "wait",
-          args: { reason: "bounded goal fallback" },
-          rationale: "provider attempts exhausted; deterministic policy yields this beat",
+          tool: isInterrogationContact ? "move_to" : "wait",
+          args: isInterrogationContact
+            ? { targetId: "player" }
+            : { reason: "bounded goal fallback" },
+          rationale: isInterrogationContact
+            ? "provider attempts exhausted; deterministic policy preserves the required grounded interrogation"
+            : "provider attempts exhausted; deterministic policy yields this beat",
           proposalMeta: clone(attempt.actionMeta),
-          validation: { ok: true, note: "deterministic fallback wait" },
-          nextStepChange: "goal yields without a world mutation",
+          validation: {
+            ok: true,
+            note: isInterrogationContact
+              ? "deterministic grounded interrogation contact"
+              : "deterministic fallback wait",
+          },
+          nextStepChange: isInterrogationContact
+            ? "Station contact will be revalidated at commit"
+            : "goal yields without a world mutation",
         });
       }
       return this.commitGoalDecision(run, attempt);
@@ -1765,6 +2215,9 @@ export class RunService {
     run: RunState,
     attempt: GoalDecisionAttempt,
   ): RunNpcDecisionResponse | null {
+    if (run.runStatus !== "active") {
+      return this.finishGoalAttempt(run, attempt, "stale");
+    }
     const pending = run.scheduler.pendingWakes.get(attempt.request.wakeId);
     if (!pending || pending.status !== "pending") {
       throw new RunError(`wake is not pending: ${attempt.request.wakeId}`, "wake_not_pending");
@@ -1805,16 +2258,20 @@ export class RunService {
       return this.finishGoalAttempt(run, attempt, "stale");
     }
     this.refreshProviderBudget(run);
-    if (!this.hasAmbientReserve(run, 1)) {
-      return this.finishGoalAttempt(run, attempt, "budget_reserved", true);
-    }
+    const ambientReserveAvailable = this.hasAmbientReserve(run, 1);
     const policy = DEFAULT_ROLE_POLICIES[actor.role];
     const contactOpportunity = contactCandidateActorId === actor.actorId;
+    const interrogationOpportunity =
+      contactOpportunity &&
+      actor.actorId === STATION_OFFICER_ID &&
+      this.pendingInterrogationLedgerSeq(run) !== null;
     const goal = [
       ...policy.stableGoals,
       "Advance one currently actionable role goal, then yield.",
       ...(contactOpportunity
-        ? ["A grounded opportunity to approach the player is available; choose it only when your role or remembered facts warrant direct clarification."]
+        ? [interrogationOpportunity
+            ? "A new high-pressure ledger event requires a grounded Station interrogation. Approach the visible, reachable player and ask about the cited institutional facts; do not teleport or declare a verdict."
+            : "A grounded opportunity to approach the player is available; choose it only when your role or remembered facts warrant direct clarification."]
         : []),
     ].join(" ");
     const observePacket = this.runObservePacket(
@@ -1876,8 +2333,23 @@ export class RunService {
       factSignature,
       observePacket,
       goal,
+      procedure: interrogationOpportunity ? "interrogation" : "ordinary",
     };
     attempt.state = "resolving";
+    if (!ambientReserveAvailable) {
+      if (interrogationOpportunity && observePacket.playerContact?.available) {
+        const meta = this.goalFallbackMeta("budget_exhausted");
+        attempt.resolvedAction = {
+          tool: "move_to_player",
+          contactReason: fallbackContent(run.locale).whyLines.none,
+        };
+        attempt.actionMeta = meta;
+        attempt.providerMetas = [clone(meta)];
+        this.trackProposal(run, meta);
+        return this.commitGoalDecision(run, attempt);
+      }
+      return this.finishGoalAttempt(run, attempt, "budget_reserved", true);
+    }
     return null;
   }
 
@@ -1897,10 +2369,25 @@ export class RunService {
     }
     const step = parsed.data;
     if (step.done && !step.toolCall) {
+      if (observation.procedure === "interrogation") {
+        return {
+          reason: "invalid_args",
+          detail: "the pending Station interrogation requires a grounded move_to player action",
+        };
+      }
       return { action: { tool: "wait", reason: step.rationale } };
     }
     const call = step.toolCall;
     if (!call) return { reason: "invalid_args", detail: "goal step requires a tool or done" };
+    if (
+      observation.procedure === "interrogation" &&
+      !(call.tool === "move_to" && call.args.targetId === "player")
+    ) {
+      return {
+        reason: "invalid_args",
+        detail: "the pending Station interrogation requires move_to with targetId player",
+      };
+    }
     const asId = (value: unknown): string | null =>
       typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
     const asOpenQuestion = (value: unknown): RunOpenQuestion | null | undefined => {
@@ -1918,6 +2405,12 @@ export class RunService {
     };
     switch (call.tool) {
       case "wait":
+        if (observation.procedure === "interrogation") {
+          return {
+            reason: "invalid_args",
+            detail: "the pending Station interrogation cannot be consumed by waiting",
+          };
+        }
         return {
           action: {
             tool: "wait",
@@ -2305,6 +2798,9 @@ export class RunService {
     attempt: GoalDecisionAttempt,
   ): RunNpcDecisionResponse {
     if (attempt.response && attempt.state === "completed") return clone(attempt.response);
+    if (run.runStatus !== "active") {
+      return this.finishGoalAttempt(run, attempt, "stale");
+    }
     if (!attempt.observation || !attempt.resolvedAction || !attempt.actionMeta) {
       return this.finishGoalAttempt(run, attempt, "failed");
     }
@@ -2365,6 +2861,11 @@ export class RunService {
           run.elapsedSeconds + CONTACT_LIFETIME_SECONDS,
         ),
         reason: action.contactReason,
+        procedure:
+          actor.actorId === STATION_OFFICER_ID &&
+          this.pendingInterrogationLedgerSeq(run) !== null
+            ? "interrogation"
+            : "ordinary",
       };
     } else if (action.tool === "move_to") {
       const movement = issueActorGoalMovement({
@@ -2891,6 +3392,9 @@ export class RunService {
     run: RunState,
     attempt: AmbientDecisionAttempt,
   ): RunNpcDecisionResponse | null {
+    if (run.runStatus !== "active") {
+      return this.finishAmbientAttempt(run, attempt, "stale");
+    }
     const pendingWake = run.scheduler.pendingWakes.get(attempt.request.wakeId);
     if (!pendingWake || pendingWake.status !== "pending") {
       throw new RunError(`wake is not pending: ${attempt.request.wakeId}`, "wake_not_pending");
@@ -2961,6 +3465,9 @@ export class RunService {
     attempt: AmbientDecisionAttempt,
   ): RunNpcDecisionResponse {
     if (attempt.response && attempt.state === "completed") return clone(attempt.response);
+    if (run.runStatus !== "active") {
+      return this.finishAmbientAttempt(run, attempt, "stale");
+    }
     if (attempt.resolvedTurns.length !== AMBIENT_TURN_LIMIT || !attempt.observation) {
       return this.finishAmbientAttempt(run, attempt, "failed");
     }
@@ -3247,6 +3754,12 @@ export class RunService {
     return run;
   }
 
+  private requireActiveRun(run: RunState): void {
+    if (run.runStatus !== "active") {
+      throw new RunError(`run is not active: ${run.runStatus}`, "run_not_active");
+    }
+  }
+
   private requireActor(run: RunState, actorId: string): RunActorState {
     const actor = run.actors.get(actorId);
     if (!actor) throw new RunError(`unknown actor in run ${run.runId}: ${actorId}`, "actor_not_found");
@@ -3456,11 +3969,11 @@ export class RunService {
     return this.serialize(runId, async () => {
       const run = this.requireRun(runId);
       const actor = this.requireActor(run, attempt.actorId);
-      this.trackProposal(run, resolved.meta);
       const current = run.conversationOpenings.get(actor.actorId);
       const zone = conversationZoneFor(this.layout, actor.actorId, actor.locationId);
       const evidenceKey = this.conversationEvidenceKey(run, actor);
       if (
+        run.runStatus !== "active" ||
         current !== attempt ||
         zone?.zoneId !== attempt.interactionZoneId ||
         evidenceKey !== attempt.evidenceKey ||
@@ -3475,6 +3988,7 @@ export class RunService {
         }
         throw new RunError("conversation opening became stale before commit", "conversation_not_ready");
       }
+      this.trackProposal(run, resolved.meta);
       attempt.resolved = clone(resolved);
       actor.playerConversationReady = true;
       run.preloadRequiredEvidence.delete(actor.actorId);
@@ -3535,22 +4049,35 @@ export class RunService {
     }
   }
 
-  private conversationGoals(actor: RunActorState): string[] {
+  private conversationGoals(
+    actor: RunActorState,
+    procedure: "ordinary" | "interrogation" = "ordinary",
+  ): string[] {
     return [
       ...DEFAULT_ROLE_POLICIES[actor.role].stableGoals,
-      PLAYER_CONVERSATION_GOAL,
+      procedure === "interrogation"
+        ? "Conduct one survivable Station interrogation about the newest pressure-bearing ledger event. Ask for clarification, never announce a verdict, and end back in the active world."
+        : PLAYER_CONVERSATION_GOAL,
     ];
   }
 
-  private conversationObjective(actor: RunActorState): string {
-    return this.conversationGoals(actor).join(" ");
+  private conversationObjective(
+    actor: RunActorState,
+    procedure: "ordinary" | "interrogation" = "ordinary",
+  ): string {
+    return this.conversationGoals(actor, procedure).join(" ");
   }
 
-  private conversationSceneFacts(actor: RunActorState): string[] {
+  private conversationSceneFacts(
+    actor: RunActorState,
+    procedure: "ordinary" | "interrogation" = "ordinary",
+  ): string[] {
     return [
       `The conversation is face to face with the player at ${actor.locationId}.`,
       `The speaker's role is ${actor.role}; it may use only its own memories, heard speech, and visible records.`,
-      "This personal conversation cannot create an administrative record or decide the later Station hearing.",
+      procedure === "interrogation"
+        ? "This is a bounded Station interrogation caused by a new pressure ledger event. It is not the hearing, cannot end the run, and hesitation is a valid answer."
+        : "This personal conversation cannot create an administrative record or decide the later Station hearing.",
     ];
   }
 
@@ -3558,20 +4085,230 @@ export class RunService {
     run: RunState,
     actor: RunActorState,
   ): ConversationTurnRequest {
+    const procedure =
+      run.activeContact?.actorId === actor.actorId
+        ? run.activeContact.procedure
+        : "ordinary";
     return {
       sessionId: run.runId,
       locale: run.locale,
       beatId: `resident_opening_${actor.role}`,
       actorId: actor.actorId,
-      objective: this.conversationObjective(actor),
-      sceneFacts: this.conversationSceneFacts(actor),
+      objective: this.conversationObjective(actor, procedure),
+      sceneFacts: this.conversationSceneFacts(actor, procedure),
       observePacket: this.runObservePacket(
         run,
         actor,
         ["player"],
-        this.conversationGoals(actor),
+        this.conversationGoals(actor, procedure),
       ),
       conversationHistory: [],
+    };
+  }
+
+  private hearingOpeningRequest(run: RunState, hearingId: string): ConversationTurnRequest {
+    const officer = this.requireActor(run, STATION_OFFICER_ID);
+    return {
+      sessionId: run.runId,
+      locale: run.locale,
+      beatId: `station_hearing:${hearingId}`,
+      actorId: officer.actorId,
+      objective:
+        "Open the final Station hearing and ask the player for one final defense. Do not decide the verdict yet.",
+      sceneFacts: [
+        "The run clock has reached the authored Station hearing boundary.",
+        "All six residents, run-owned memories, records, and ledger events will be judged only after the player's defense.",
+        "This opening must ask for a defense without inventing evidence or announcing a result.",
+      ],
+      observePacket: this.runObservePacket(
+        run,
+        officer,
+        [...run.actors.keys()].filter(actorId => actorId !== officer.actorId),
+        ["Open the final hearing and request the player's defense."],
+      ),
+      conversationHistory: [],
+    };
+  }
+
+  private fallbackHearingJudgment(request: HearingJudgmentRequest): HearingJudgment {
+    const content = fallbackContent(request.locale);
+    const assessments = request.residents.map(resident => {
+      const firsthand = [...resident.memories]
+        .reverse()
+        .find(memory =>
+          memory.kind === "player_conversation" &&
+          memory.sourceActorId === "player" &&
+          memory.meaningfulFirsthand
+        );
+      if (resident.hasMeaningfulFirsthandConversation && firsthand) {
+        return {
+          actorId: resident.actorId,
+          proposedStance: resident.stanceBefore,
+          testimonyLine: content.hearing.memoryGroundedTestimony.replace(
+            "{memory}",
+            firsthand.whyLine ?? firsthand.text,
+          ),
+          citedMemoryIds: [firsthand.memoryId],
+        };
+      }
+      return {
+        actorId: resident.actorId,
+        proposedStance:
+          resident.stanceBefore === "vouch" ? "uncertain" as const : resident.stanceBefore,
+        testimonyLine: resident.hasMeaningfulFirsthandConversation
+          ? content.hearing.missingEvidenceTestimony
+          : content.hearing.neverMetTestimony,
+        citedMemoryIds: [],
+      };
+    }) as HearingJudgment["residentAssessments"];
+    const vouchCount = assessments.filter(assessment => assessment.proposedStance === "vouch").length;
+    const ordinary = vouchCount >= 4;
+    return {
+      residentAssessments: assessments,
+      proposedVerdict: ordinary ? "ordinary" : "abnormal",
+      verdictWhyLine: ordinary
+        ? content.hearing.ordinaryVerdictWhy
+        : content.hearing.abnormalVerdictWhy,
+      officerLine: ordinary
+        ? content.hearing.ordinaryOfficerLine
+        : content.hearing.abnormalOfficerLine,
+      citedRecordIds: [],
+      citedLedgerEventIds: [],
+    };
+  }
+
+  private normalizeValidatedHearing(
+    request: HearingJudgmentRequest,
+    judgment: ValidatedHearingJudgment,
+  ): ValidatedHearingJudgment {
+    const content = fallbackContent(request.locale);
+    const assessments = request.residents.map(resident => {
+      const assessment = judgment.residentAssessments.find(
+        candidate => candidate.actorId === resident.actorId,
+      );
+      if (!assessment) throw new Error(`validated hearing omitted ${resident.actorId}`);
+      if (!resident.hasMeaningfulFirsthandConversation) {
+        return {
+          ...assessment,
+          appliedStance:
+            resident.stanceBefore === "vouch" ? "uncertain" as const : resident.stanceBefore,
+          testimonyLine: content.hearing.neverMetTestimony,
+          citedMemoryIds: [],
+        };
+      }
+      if (assessment.citedMemoryIds.length === 0) {
+        return {
+          ...assessment,
+          appliedStance:
+            resident.stanceBefore === "vouch" ? "uncertain" as const : resident.stanceBefore,
+          testimonyLine: content.hearing.missingEvidenceTestimony,
+          citedMemoryIds: [],
+        };
+      }
+      return { ...assessment, citedMemoryIds: [...assessment.citedMemoryIds] };
+    }) as ValidatedHearingJudgment["residentAssessments"];
+    return {
+      ...judgment,
+      residentAssessments: assessments,
+      evidencedVouchCount: assessments.filter(assessment => assessment.appliedStance === "vouch").length,
+    };
+  }
+
+  private commitHearingResult(
+    run: RunState,
+    hearingId: string,
+    finalDefense: string,
+    request: HearingJudgmentRequest,
+    judgment: ValidatedHearingJudgment,
+    meta: ProposalMeta,
+    worldRevision: number,
+  ): RunTerminalResult {
+    const content = fallbackContent(run.locale);
+    const verdict =
+      judgment.evidencedVouchCount < 4 ? "abnormal" : judgment.proposedVerdict;
+    const quorumForced = judgment.evidencedVouchCount < 4 && judgment.proposedVerdict === "ordinary";
+    const verdictWhyLine = quorumForced
+      ? content.hearing.abnormalVerdictWhy
+      : judgment.verdictWhyLine;
+    const officerLine = quorumForced
+      ? content.hearing.abnormalOfficerLine
+      : judgment.officerLine;
+
+    for (const assessment of judgment.residentAssessments) {
+      this.requireActor(run, assessment.actorId).stance = assessment.appliedStance;
+      const existing = run.socialView.encounteredResidents.findIndex(
+        resident => resident.actorId === assessment.actorId,
+      );
+      const socialResident = {
+        actorId: assessment.actorId,
+        stance: assessment.appliedStance,
+        stanceRevision: worldRevision,
+        whyLine: assessment.testimonyLine,
+        provenance: null,
+      };
+      if (existing >= 0) run.socialView.encounteredResidents[existing] = socialResident;
+      else run.socialView.encounteredResidents.push(socialResident);
+    }
+    this.bumpSocialRevision(run);
+
+    const recap: RunTerminalResult["recap"] = [
+      { kind: "defense", actorId: "player", line: finalDefense, sourceIds: [] },
+      ...judgment.residentAssessments.map(assessment => ({
+        kind: "testimony" as const,
+        actorId: assessment.actorId,
+        line: assessment.testimonyLine,
+        sourceIds: [...assessment.citedMemoryIds],
+      })),
+    ];
+    for (const recordId of judgment.citedRecordIds) {
+      const record = request.records.find(candidate => candidate.recordId === recordId);
+      if (record) {
+        recap.push({
+          kind: "record",
+          actorId: record.authorActorId,
+          line: record.stateBody,
+          sourceIds: [record.recordId],
+        });
+      }
+    }
+    for (const eventId of judgment.citedLedgerEventIds) {
+      const event = request.ledgerEvents.find(candidate => candidate.eventId === eventId);
+      if (event) {
+        recap.push({
+          kind: "ledger",
+          actorId: event.actorId,
+          line: event.whyLine,
+          sourceIds: [event.eventId, event.recordId, event.sourceMemoryId],
+        });
+      }
+    }
+    recap.push({
+      kind: "verdict",
+      actorId: STATION_OFFICER_ID,
+      line: verdictWhyLine,
+      sourceIds: [...judgment.citedRecordIds, ...judgment.citedLedgerEventIds],
+    });
+
+    return {
+      hearingId,
+      verdict,
+      verdictWhyLine,
+      officerLine,
+      finalDefense,
+      evidencedVouchCount: judgment.evidencedVouchCount,
+      residentAssessments: judgment.residentAssessments.map(assessment => ({
+        actorId: assessment.actorId,
+        proposedStance: assessment.proposedStance,
+        appliedStance: assessment.appliedStance,
+        testimonyLine: assessment.testimonyLine,
+        citedMemoryIds: [...assessment.citedMemoryIds],
+      })) as RunTerminalResult["residentAssessments"],
+      citedRecordIds: [...judgment.citedRecordIds],
+      citedLedgerEventIds: [...judgment.citedLedgerEventIds],
+      recap,
+      worldSeconds: run.elapsedSeconds,
+      worldRevision,
+      proposalMeta: clone(meta),
     };
   }
 
@@ -3593,6 +4330,14 @@ export class RunService {
       goals: this.conversationGoals(actor),
       memoryIds: actor.memories.map(memory => memory.memoryId),
       visibleRecordVersions,
+      activeContactProcedure:
+        run.activeContact?.actorId === actor.actorId
+          ? run.activeContact.procedure
+          : null,
+      interrogationLedgerSeq:
+        actor.actorId === STATION_OFFICER_ID
+          ? this.pendingInterrogationLedgerSeq(run)
+          : null,
     });
   }
 
@@ -3718,6 +4463,24 @@ export class RunService {
     player: RunPlayerSpatialFacts,
     elapsedSeconds: number,
   ): string | null {
+    if (run.runStatus !== "active") return null;
+    const interrogationLedgerSeq = this.pendingInterrogationLedgerSeq(run);
+    if (interrogationLedgerSeq !== null) {
+      if (
+        elapsedSeconds >= run.hearingAtSeconds ||
+        run.activeContact !== null ||
+        run.activeConversationId !== null ||
+        run.activeAmbientConversation !== null
+      ) return null;
+      const officer = run.actors.get(STATION_OFFICER_ID);
+      const facts = actors.get(STATION_OFFICER_ID);
+      return officer &&
+        facts &&
+        !run.scheduler.actors.get(STATION_OFFICER_ID)?.pendingMovement &&
+        this.groundedPlayerContact(run, officer, facts, player)?.available
+        ? STATION_OFFICER_ID
+        : null;
+    }
     if (
       elapsedSeconds < run.graceEndsAtSeconds ||
       elapsedSeconds >= run.hearingAtSeconds ||
@@ -3748,6 +4511,14 @@ export class RunService {
       return memoryOrder !== 0 ? memoryOrder : first.actorId.localeCompare(second.actorId);
     });
     return candidates[0]?.actorId ?? null;
+  }
+
+  private pendingInterrogationLedgerSeq(run: RunState): number | null {
+    if (run.institutionalPressure < INTERROGATION_PRESSURE_THRESHOLD) return null;
+    const latest = [...run.ledgerEvents]
+      .reverse()
+      .find(event => event.pressureDelta > 0 && event.seq > run.lastInterrogatedLedgerSeq);
+    return latest?.seq ?? null;
   }
 
   private currentContactCandidateActorId(
@@ -3869,6 +4640,7 @@ export class RunService {
         .filter(memory =>
           memory.kind === "player_conversation" ||
           memory.kind === "player_contact_outcome" ||
+          memory.kind === "interrogation_outcome" ||
           memory.kind === "record_read" ||
           (memory.kind === "ambient_utterance" && memory.speakerActorId !== actor.actorId),
         )
@@ -3883,6 +4655,10 @@ export class RunService {
               Math.max(0, elapsedSeconds - run.graceEndsAtSeconds) /
                 CONTACT_OPPORTUNITY_EPOCH_SECONDS,
             )
+          : null,
+      interrogationLedgerSeq:
+        actor.actorId === STATION_OFFICER_ID
+          ? this.pendingInterrogationLedgerSeq(run)
           : null,
       spatialSignature,
     }))}`;
@@ -3943,6 +4719,9 @@ export class RunService {
       }
       if (memory.kind === "player_contact_outcome") {
         return `[player_contact=${memory.outcome};contact=${memory.contactId}] ${memory.contactReason}`;
+      }
+      if (memory.kind === "interrogation_outcome") {
+        return `[interrogation_outcome;ledger_seq=${memory.ledgerSeq}] ${memory.whyLine}`;
       }
       return `[record_read=${memory.recordId}@${memory.recordRevision}] ${memory.stateBody}`;
     });
@@ -4034,6 +4813,16 @@ export class RunService {
             reportDelta: 0,
           };
         }
+        if (memory.kind === "interrogation_outcome") {
+          return {
+            memoryId: memory.memoryId,
+            kind: memory.kind,
+            originActorId: "player",
+            summary: memory.whyLine,
+            whyLine: memory.whyLine,
+            reportDelta: 0,
+          };
+        }
         return {
           memoryId: memory.memoryId,
           kind: memory.kind,
@@ -4068,6 +4857,8 @@ export class RunService {
       continueConversation: boolean;
     },
     proposalMeta: ProposalMeta,
+    procedure: RunNextTurn["procedure"] = "ordinary",
+    hesitationMs = 0,
   ): RunNextTurn {
     const choiceSetId = `${beatId}.generated`;
     return {
@@ -4079,6 +4870,8 @@ export class RunService {
       prompt: proposal.utterance,
       acceptsFreeInput: true,
       continueConversation: proposal.continueConversation,
+      procedure,
+      hesitationMs,
       choices: proposal.suggestedReplies.map((reply, index) => ({
         choiceId: `${choiceSetId}.${index + 1}`,
         intent: reply.intent,
@@ -4088,11 +4881,21 @@ export class RunService {
     };
   }
 
-  private resolvePlayerLine(turn: RunNextTurn, answer: RunSessionAnswer): string {
+  private resolvePlayerLine(
+    turn: RunNextTurn,
+    answer: RunSessionAnswer,
+    locale: GameplayLocale,
+  ): string {
     if (answer.type === "choice") {
       const choice = turn.choices.find(candidate => candidate.choiceId === answer.choiceId);
       if (!choice) throw new RunError(`unknown choice: ${answer.choiceId}`, "unknown_choice");
       return choice.line;
+    }
+    if (answer.type === "hesitation") {
+      if (turn.procedure !== "interrogation") {
+        throw new RunError("hesitation is available only during interrogation", "invalid_answer");
+      }
+      return fallbackContent(locale).hesitationMarker;
     }
     const text = answer.text.trim();
     if (text.length === 0 || text.length > 120) {

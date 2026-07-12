@@ -22,9 +22,11 @@ tests + fixture generation
         └── ScriptedNpcAdapter (never selectable from production config)
 ```
 
-The domain port exposes four operations. The merged conversation-turn
-operation is the only provider work the player ever blocks on; the split
-operations remain for opening lines, agent beats, ambient work, and fallback.
+The domain port exposes five operations. During ordinary conversation, the
+merged conversation-turn operation is the only provider work that blocks the
+player. The scheduled terminal hearing deliberately blocks once more on
+`judgeHearing`; opening lines, agent beats, and ambient work use the split
+operations without adding another ordinary-play wait.
 
 ```ts
 interface NpcProposalPort {
@@ -32,6 +34,7 @@ interface NpcProposalPort {
   judgeConversationTurn(request): Promise<ResolvedProposal<ConversationJudgment>>;
   judgeAndProposeConversationTurn(request): Promise<ResolvedProposal<MergedConversationTurn>>;
   proposeNextStep(request): Promise<ResolvedProposal<AgentStepProposal>>;
+  judgeHearing(request): Promise<ResolvedProposal<HearingJudgment>>;
 }
 ```
 
@@ -50,6 +53,16 @@ it does not decide what the answer meant. `AgentStepProposal` contains at
 most one tool call, an optional utterance, and a stop flag. The runtime
 validates every tool against visibility, role authority, object state, and
 the offered catalog.
+
+`HearingJudgment` contains exactly six resident assessments, a proposed
+ordinary/abnormal verdict, the Station officer's final line, and record/ledger
+citations. The provider sees only the final defense and the run's normalized
+resident memories, records, and ledger events. `RunService` validates the
+exact actor set and every cited id, clamps unsupported or uncited stance
+movement, forces never-met testimony to say so, and enforces four evidenced
+vouches as a floor. Four vouches do not force an ordinary result: with the
+floor met, the selected model still owns the verdict. Invalid semantic
+citations switch the whole judgment to visibly marked deterministic fallback.
 
 ## Production profiles
 
@@ -71,7 +84,9 @@ or committed files.
 The ModelScope profile reads `MODELSCOPE_BASE_URL` and `MODELSCOPE_API_KEY`.
 It uses the private `Qwen-Ambassador/Qwen3.7-Plus` model id and disables Qwen
 thinking for the bounded JSON envelope; this keeps reasoning tokens from
-consuming the short response budget before the JSON body is emitted.
+consuming the response budget before the JSON body is emitted. Its output cap
+is 1,600 tokens so the exact-six hearing envelope is not truncated; this is a
+ceiling, not a request to lengthen ordinary dialogue.
 
 ## Live prompt calibration
 
@@ -100,9 +115,9 @@ attempt; ids and tool names remain excluded. Supported gameplay locales are
 `ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`.
 
 A run fixes its locale at creation. That tag is part of opening-cache and
-request-idempotency signatures and already flows through conversation,
-ambient agent steps, and fallback selection; later record/hearing/recap
-generation must reuse it. Adapters remain locale-agnostic transports; no
+request-idempotency signatures and flows through conversation, ambient agent
+steps, records, hearing/recap, and fallback selection. Adapters remain
+locale-agnostic transports; no
 vendor SDK, base URL, or provider profile is added per language. Localized
 fallback is structurally bounded in all six locales, while its legacy
 keyword signal classifier remains Korean/partial-English and is not treated

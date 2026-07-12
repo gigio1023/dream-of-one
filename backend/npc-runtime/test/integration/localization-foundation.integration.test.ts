@@ -15,6 +15,7 @@ import {
   conversationJudgmentSchemaForLocale,
 } from "../../src/providers/envelope.js";
 import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
+import type { HearingJudgmentRequest } from "../../src/providers/ports.js";
 import { createSameOrderWorld } from "../../src/runtime/world/index.js";
 import { RunError, RunService } from "../../src/runtime/run-service.js";
 import {
@@ -129,6 +130,72 @@ test("deterministic fallback has exact six-locale parity and selects the run loc
 
   for (const locale of EXACT_GAMEPLAY_LOCALES) {
     const content = fallbackContent(locale);
+    assert.deepEqual(
+      Object.keys(content.hearing).sort(),
+      [
+        "abnormalOfficerLine",
+        "abnormalVerdictWhy",
+        "memoryGroundedTestimony",
+        "missingEvidenceTestimony",
+        "neverMetTestimony",
+        "opening",
+        "ordinaryOfficerLine",
+        "ordinaryVerdictWhy",
+      ],
+    );
+    assert.equal(
+      Object.values(content.hearing).every(line => line.trim().length > 0),
+      true,
+      `${locale} hearing fallback lines must all be nonempty`,
+    );
+    assert.deepEqual(
+      content.hearing.memoryGroundedTestimony.match(/\{[^{}]+\}/g),
+      ["{memory}"],
+      `${locale} hearing testimony must keep exact placeholder parity`,
+    );
+    const hearingResidents = ([
+      ["NPC_Studio_Receptionist", "studio_receptionist"],
+      ["NPC_Studio_Manager", "studio_manager"],
+      ["NPC_Office_Worker", "office_worker"],
+      ["NPC_Park_Caretaker", "park_caretaker"],
+      ["NPC_Station_Officer", "station_officer"],
+      ["NPC_Roaming_Liaison", "roaming_liaison"],
+    ] as const).map(([actorId, role], index) => ({
+      actorId,
+      role,
+      stanceBefore: index < 4 ? "vouch" as const : "uncertain" as const,
+      hasMeaningfulFirsthandConversation: index < 5,
+      memories: index < 5
+        ? [{
+            memoryId: `memory-${locale}-${index}`,
+            kind: "player_conversation" as const,
+            sourceActorId: "player",
+            text: content.whyLines.none,
+            whyLine: content.whyLines.none,
+            meaningfulFirsthand: true,
+          }]
+        : [],
+    })) as HearingJudgmentRequest["residents"];
+    const hearing = await fallback.judgeHearing({
+      runId: `fallback-hearing-${locale}`,
+      hearingId: `hearing-${locale}`,
+      locale,
+      finalDefense: content.whyLines.none,
+      institutionalPressure: 0,
+      residents: hearingResidents,
+      records: [],
+      ledgerEvents: [],
+    });
+    assert.equal(hearing.proposal.proposedVerdict, "ordinary");
+    assert.equal(
+      hearing.proposal.residentAssessments[0].testimonyLine,
+      content.hearing.memoryGroundedTestimony.replace("{memory}", content.whyLines.none),
+    );
+    assert.equal(
+      hearing.proposal.residentAssessments[5].testimonyLine,
+      content.hearing.neverMetTestimony,
+    );
+    assert.equal(hearing.proposal.officerLine, content.hearing.ordinaryOfficerLine);
     const conversation = await fallback.proposeConversationTurn({
       sessionId: `fallback-${locale}`,
       locale,

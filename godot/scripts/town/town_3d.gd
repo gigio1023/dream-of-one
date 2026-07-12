@@ -173,34 +173,26 @@ func _validate_bindings() -> PackedStringArray:
 		if not is_equal_approx(player.rotation.y, expected_yaw):
 			errors.append("Town3D player start yaw drifted.")
 
-	var expected_doors: Dictionary = {}
-	for door_value in _layout.get("doors", []):
-		if not door_value is Dictionary:
+	var physical_doors := get_node_or_null("Doors")
+	if physical_doors != null and physical_doors.get_child_count() > 0:
+		errors.append("Town3D must keep building portals permanently open and door-free.")
+	for portal_value in _layout.get("open_portals", []):
+		if not portal_value is Dictionary:
 			continue
-		var door_id := str((door_value as Dictionary).get("id", ""))
-		expected_doors[door_id] = true
-		var door := get_node_or_null("Doors/%s" % door_id)
-		if door == null:
-			errors.append("Town3D missing door instance: %s" % door_id)
-		elif str(door.get("door_id")) != door_id:
-			errors.append("Town3D door semantic id drifted: %s" % door_id)
-		elif door.has_method("semantic_position"):
-			var semantic_position_value: Variant = door.call("semantic_position")
-			if (
-				not semantic_position_value is Vector3
-				or not _positions_match(
-					semantic_position_value as Vector3,
-					_vector3_from_array((door_value as Dictionary).get("position", []))
-				)
-			):
-				errors.append("Town3D door semantic position drifted: %s" % door_id)
-		if door != null:
-			var expected_door_yaw := deg_to_rad(
-				float((door_value as Dictionary).get("yaw_degrees", 0.0))
-			)
-			if not is_equal_approx((door as Node3D).rotation.y, expected_door_yaw):
-				errors.append("Town3D door yaw drifted: %s" % door_id)
-	_validate_no_extra_markers("Doors", expected_doors, errors)
+		var portal := portal_value as Dictionary
+		var portal_id := str(portal.get("id", ""))
+		var anchor_ref := str(portal.get("anchor", ""))
+		if str(portal.get("kind", "")) != "permanently_open":
+			errors.append("Town3D portal is not permanently open: %s" % portal_id)
+		elif not anchor_positions.has(anchor_ref):
+			errors.append("Town3D portal anchor is unknown: %s" % portal_id)
+		elif not _positions_match(
+			anchor_positions[anchor_ref] as Vector3,
+			_vector3_from_array(portal.get("position", []))
+		):
+			errors.append("Town3D portal position drifted: %s" % portal_id)
+		if float(portal.get("width", 0.0)) < 1.1:
+			errors.append("Town3D portal is too narrow: %s" % portal_id)
 
 	var expected_actors: Dictionary = {"Player3D": true}
 	for actor_value in _layout.get("actors", []):

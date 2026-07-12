@@ -43,7 +43,6 @@ const WEAPON_NAME_TOKENS: PackedStringArray = [
 @onready var _visual_root: Node3D = $VisualRoot
 @onready var _role_accent: MeshInstance3D = $RoleAccent
 @onready var _navigation_agent: NavigationAgent3D = $NavigationAgent3D
-@onready var _door_ray: RayCast3D = $DoorRay
 
 var _animation_player: AnimationPlayer
 var _policy_state: StringName = POLICY_IDLE
@@ -95,7 +94,6 @@ func _physics_process(delta: float) -> void:
 	if not desired_direction.is_zero_approx():
 		desired_direction = desired_direction.normalized()
 		look_at(global_position + desired_direction, Vector3.UP)
-		_open_door_ahead()
 	_navigation_agent.velocity = desired_direction * walk_speed
 
 
@@ -231,15 +229,6 @@ func _on_velocity_computed(safe_velocity: Vector3) -> void:
 	velocity.x = safe_velocity.x
 	velocity.z = safe_velocity.z
 	move_and_slide()
-
-
-func _open_door_ahead() -> void:
-	_door_ray.force_raycast_update()
-	if not _door_ray.is_colliding():
-		return
-	var collider := _door_ray.get_collider()
-	if collider is Node and (collider as Node).has_method("open_for_npc"):
-		(collider as Node).call("open_for_npc")
 
 
 func _instantiate_character() -> void:

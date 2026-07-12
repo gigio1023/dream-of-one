@@ -11,7 +11,7 @@
       "response": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v2",
+        "layoutRevision": "rev-first-person-town-v3",
         "worldRevision": 0,
         "locale": "ko-KR",
         "worldClock": {
@@ -960,7 +960,7 @@
       "response": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v2",
+        "layoutRevision": "rev-first-person-town-v3",
         "worldRevision": 3,
         "locale": "ko-KR",
         "worldClock": {
@@ -1499,7 +1499,7 @@
       "response": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v2",
+        "layoutRevision": "rev-first-person-town-v3",
         "worldRevision": 2,
         "locale": "ko-KR",
         "worldClock": {
@@ -1832,7 +1832,7 @@
       "response": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v2",
+        "layoutRevision": "rev-first-person-town-v3",
         "worldRevision": 3,
         "locale": "ko-KR",
         "worldClock": {
@@ -2887,7 +2887,7 @@
       "runSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v2",
+        "layoutRevision": "rev-first-person-town-v3",
         "worldRevision": 2,
         "locale": "ko-KR",
         "worldClock": {
@@ -3207,7 +3207,7 @@
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v2",
+        "layoutRevision": "rev-first-person-town-v3",
         "worldRevision": 3,
         "locale": "ko-KR",
         "worldClock": {
@@ -3696,7 +3696,7 @@
       "runSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v2",
+        "layoutRevision": "rev-first-person-town-v3",
         "worldRevision": 2,
         "locale": "ko-KR",
         "worldClock": {
@@ -4016,7 +4016,7 @@
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v2",
+        "layoutRevision": "rev-first-person-town-v3",
         "worldRevision": 3,
         "locale": "ko-KR",
         "worldClock": {
@@ -4517,7 +4517,7 @@
       "runSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v2",
+        "layoutRevision": "rev-first-person-town-v3",
         "worldRevision": 2,
         "locale": "ko-KR",
         "worldClock": {
@@ -4841,7 +4841,7 @@
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v2",
+        "layoutRevision": "rev-first-person-town-v3",
         "worldRevision": 3,
         "locale": "ko-KR",
         "worldClock": {
@@ -5332,7 +5332,7 @@
       "runSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v2",
+        "layoutRevision": "rev-first-person-town-v3",
         "worldRevision": 2,
         "locale": "ko-KR",
         "worldClock": {
@@ -5652,7 +5652,7 @@
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
-        "layoutRevision": "rev-first-person-town-v2",
+        "layoutRevision": "rev-first-person-town-v3",
         "worldRevision": 3,
         "locale": "ko-KR",
         "worldClock": {

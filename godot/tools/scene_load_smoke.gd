@@ -13,7 +13,6 @@ const SCENES := [
 	{"label": "main", "path": "res://scenes/main.tscn", "frames": 4},
 	{"label": "player_3d", "path": "res://scenes/actors/player_3d.tscn", "frames": 2},
 	{"label": "npc_3d", "path": "res://scenes/actors/npc_3d.tscn", "frames": 2},
-	{"label": "door_3d", "path": "res://scenes/town/door_3d.tscn", "frames": 2},
 	{"label": "hud_3d", "path": "res://scenes/ui/hud_3d.tscn", "frames": 2},
 	{"label": "town_3d", "path": "res://scenes/town/town_3d.tscn", "frames": 6},
 	{"label": "main_3d", "path": "res://scenes/main_3d.tscn", "frames": 6},
@@ -216,12 +215,6 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			_require_node(label, instance, "CollisionShape3D")
 			_require_node(label, instance, "RoleAccent")
 			_require_node(label, instance, "NavigationAgent3D")
-			_require_node(label, instance, "DoorRay")
-		"door_3d":
-			_require_node(label, instance, "PanelMesh")
-			_require_node(label, instance, "PanelCollision")
-			if not instance.has_method("interact") or not instance.has_method("open_for_npc"):
-				_failures.append("door_3d does not expose player and NPC interaction")
 		"hud_3d":
 			_require_node(label, instance, "Overlay/Reticle")
 			_require_node(label, instance, "Overlay/PromptPanel")
@@ -236,7 +229,9 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			_require_node(label, instance, "Environment/WorldEnvironment")
 			_require_node(label, instance, "Geometry/Ground/TownGround/Collision")
 			_require_node(label, instance, "Actors/Player3D")
-			_require_node(label, instance, "Doors/DOOR_STUDIO_FRONT")
+			var physical_doors := instance.get_node_or_null("Doors")
+			if physical_doors != null and physical_doors.get_child_count() > 0:
+				_failures.append("town_3d still contains physical doors")
 			var actors := instance.get_node_or_null("Actors")
 			if actors == null or actors.get_child_count() != 7:
 				_failures.append("town_3d does not contain player plus six residents")
@@ -448,12 +443,8 @@ func _check_respawn_anchor_contract(label: String, instance: Node) -> void:
 func _check_npc_movement(label: String, instance: Node) -> void:
 	var manager := instance.get_node_or_null("Actors/NPC_Studio_Manager") as NPC3D
 	var caretaker := instance.get_node_or_null("Actors/NPC_Park_Caretaker") as NPC3D
-	var studio_door := instance.get_node_or_null("Doors/DOOR_STUDIO_FRONT") as Door3D
-	if manager == null or caretaker == null or studio_door == null:
-		_failures.append("%s has no manager/caretaker/Studio-door movement proof" % label)
-		return
-	if studio_door.is_open():
-		_failures.append("%s Studio door did not start closed" % label)
+	if manager == null or caretaker == null:
+		_failures.append("%s has no manager/caretaker movement proof" % label)
 		return
 	var manager_anchor := "Park.meeting_north_west"
 	var caretaker_anchor := "Park.meeting_north_east"
@@ -499,11 +490,9 @@ func _check_npc_movement(label: String, instance: Node) -> void:
 		caretaker_anchor,
 		caretaker_target
 	)
-	var studio_door_opened := false
 	var convergence_frames := 540
 	for _frame in range(convergence_frames):
 		await physics_frame
-		studio_door_opened = studio_door_opened or studio_door.is_open()
 		if arrivals.size() == 2 or not blocks.is_empty():
 			break
 	var manager_position_before_stop := manager.global_position
@@ -527,7 +516,7 @@ func _check_npc_movement(label: String, instance: Node) -> void:
 		_failures.append(
 			(
 				"%s manager/caretaker did not converge in %d physics frames "
-				+ "(arrivals=%s manager=%s caretaker=%s doorOpen=%s)"
+				+ "(arrivals=%s manager=%s caretaker=%s)"
 			)
 			% [
 				label,
@@ -541,7 +530,6 @@ func _check_npc_movement(label: String, instance: Node) -> void:
 					"position": caretaker_position_before_stop,
 					"status": caretaker_status_before_stop,
 				},
-				studio_door_opened,
 			]
 		)
 		return
@@ -549,8 +537,6 @@ func _check_npc_movement(label: String, instance: Node) -> void:
 		_failures.append("%s manager arrived at the wrong semantic meeting slot" % label)
 	if str((arrivals["NPC_Park_Caretaker"] as Dictionary).get("anchorRef", "")) != caretaker_anchor:
 		_failures.append("%s caretaker arrived at the wrong semantic meeting slot" % label)
-	if not studio_door_opened:
-		_failures.append("%s manager did not open the closed Studio door en route" % label)
 	var manager_progress := Vector2(
 		manager.global_position.x - manager_start.x,
 		manager.global_position.z - manager_start.z

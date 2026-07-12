@@ -5,8 +5,9 @@ spatial foundation, first run-backed social contact, and authoritative
 clock/schedule movement have landed beside the retained 2D main
 ([`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md)).**
 `res://scenes/main_3d.tscn` now provides the whole-town greybox, dressed park
-and studio, first-person controller, doors, one navigation map, six resident
-shells, HUD/settings, layout binding, and `AgentPlaytestSurface`. Its local
+and studio, first-person controller, permanently open building portals, one
+navigation map, six resident shells, HUD/settings, layout binding, and
+`AgentPlaytestSurface`. Its local
 `RunSession` can start the shared run and carry a Studio receptionist
 conversation through generated choices or bounded free text, model judgment,
 coarse stance display, child-session end, and world resume. The modal owns
@@ -56,8 +57,8 @@ Landed together in the bounded engine-baseline slice before the blockout:
 - **3D physics: Jolt**, set explicitly (`physics/3d/physics_engine`) before
   the first 3D physics slice to `Jolt Physics`, then restart the editor as the
   [Godot 4.7 Jolt guide](https://docs.godotengine.org/en/4.7/tutorials/physics/using_jolt_physics.html)
-  requires. The player, six resident shells, doors, and static blockers now
-  exercise that baseline; no later physics-engine migration is planned.
+  requires. The player, six resident shells, and static blockers now exercise
+  that baseline; no later physics-engine migration is planned.
 - **Lighting: fixed daylight, no bakes.** One `DirectionalLight3D` with
   shadows plus `WorldEnvironment` ambient; interiors read through ambient
   plus a few `OmniLight3D`s. No day/night cycle (continuous world time is
@@ -78,7 +79,7 @@ Main (Node)
 ├── World (Node3D) — one seamless town scene
 │   ├── Terrain/buildings: park, studio reception, office, Station,
 │   │   street connective space (single navmesh world, no scene loads)
-│   ├── Doors (interactable, animated, never load-gated)
+│   ├── Building portals (permanently open; no interaction or scene load)
 │   ├── Props (few pick/move/throw physics objects)
 │   └── Actors
 │       ├── Player (CharacterBody3D + first-person Camera3D + interaction ray)
@@ -130,10 +131,10 @@ list.
 
 - A minimal center reticle (small dot). When the forward interaction ray
   (~2.5 m) hits an interactable, the reticle changes and a text prompt
-  names the action in-fiction ("E — 말 걸기 / 문 열기 / 살펴보기").
+  names the action in-fiction ("E — 말 걸기 / 집기 / 살펴보기").
   Nameplates stay quiet per the art direction; the prompt is the loud part.
-- Interactable kinds and their verbs: NPC → conversation, door →
-  open/close, prop → pick up (then place/throw), record surface → inspect.
+- Interactable kinds and their verbs: NPC → conversation, prop → pick up
+  (then place/throw), record surface → inspect.
 - An interactable out of range but centered shows nothing — no half-lit
   prompts.
 
@@ -147,10 +148,10 @@ list.
   other. If the player blocks an NPC's path, the NPC waits a beat and
   re-paths — standing in someone's way is observable social behavior, not
   a physics fight.
-- **Never trap the player**: schedule anchors never place an idle NPC
-  inside a doorway volume, and an NPC blocked in a doorway yields after a
-  moment. Interiors respect the minimum-corridor metric so one stationary
-  NPC never seals a room.
+- **Never trap the player**: schedule anchors never place an idle NPC inside a
+  building-portal volume, and an NPC blocked in a portal yields after a moment.
+  Interiors respect the minimum-corridor metric so one stationary NPC never
+  seals a room.
 - **Props**: small `RigidBody3D` props are pushable by walking but tuned
   (mass, damping) not to launch; a prop that can leave reachable space is
   a collision bug — greybox collision closes all gaps.
@@ -197,24 +198,24 @@ Dynamic bodies use avoidance without triggering a rebake. Dressing can never
 break a proven blockout.
 
 **Construction order.** (1) Full-town greybox blockout from
-`world_layout.json` — park, three interiors, street. (2) Controller, doors,
-collision, and navmesh proven on the blockout. (3) Dress location by
-location with the kit layer, re-verifying collision/nav each time. The first
-playable proof needs a dressed park + studio reception; the office and
-Station may stay greybox longer (interaction-critical surfaces stay greybox
-longest by design).
+`world_layout.json` — park, three interiors, street. (2) Controller,
+permanently open portals, collision, and navmesh proven on the blockout. (3)
+Dress location by location with the kit layer, re-verifying collision/nav each
+time. The first playable proof needs a dressed park + studio reception; the
+office and Station may stay greybox longer (interaction-critical surfaces stay
+greybox longest by design).
 
-**Doors.** Bake walkable surfaces with doorways open; a bidirectional
-`NavigationLink3D` bridges each narrow doorway's two baked surfaces inside the
-same navigation map. The link follows the physical opening and is not a scene
-transition. The door body animates out of the way. The player opens doors with
-`interact`; an NPC arriving at a closed door opens it automatically (same
-animation and sound). Doors are social and acoustic boundaries — they gate
-audibility volumes — never progression locks in M3R.
+**Building portals.** Every building doorway stays permanently open and has no
+physical door body, interaction, animation, or door SFX. Bake the walkable
+surfaces with the portals open; a bidirectional `NavigationLink3D` bridges each
+narrow portal's two baked surfaces inside the same navigation map. The link
+follows the physical opening and is not a scene transition. Portal ids and
+connections remain semantic visibility and audibility boundaries in
+`world_layout.json`; there is no dynamic open/closed state.
 
-**Town scale.** Small enough that any door-to-door walk stays under roughly
-30 seconds, and the park center keeps all three building entrances in view —
-this is what makes commutes legible and the park-idle acceptance test
+**Town scale.** Small enough that any building-to-building walk stays under
+roughly 30 seconds, and the park center keeps all three building entrances in
+view — this is what makes commutes legible and the park-idle acceptance test
 observable. Sightline composition closes the map per the art direction.
 
 **Props.** The few pick/move/throw props are `RigidBody3D` with primitive
@@ -266,12 +267,13 @@ the dev machine with all six NPC loops live.
   dialogue) renders as subtitles with speaker attribution and rough direction
   cues when in earshot; audibility ranges come from `world_layout.json`
   volumes so the runtime and presentation agree on what was hearable.
-- **Interaction**: forward ray picks the nearest interactable (NPC, door,
-  prop, record surface); `interact` opens conversation, door, or inspect.
+- **Interaction**: forward ray picks the nearest interactable (NPC, prop,
+  record surface); `interact` opens conversation, pickup, or inspect.
 - **Navigation**: one navigation map for the whole seamless town, with one
-  baked surface resource and three bidirectional doorway links; NPC `move_to`
-  resolves through `NavigationAgent3D`; doorways remain continuous paths,
-  never scene boundaries. Movement waits until the navigation map has
+  baked surface resource and three bidirectional links across the permanently
+  open building portals; NPC `move_to` resolves through `NavigationAgent3D`;
+  portals remain continuous paths, never scene boundaries. Movement waits
+  until the navigation map has
   synchronized, calls `get_next_path_position()` from `_physics_process`, and
   stops querying once `is_navigation_finished()` is true to avoid empty-path
   startup and endpoint jitter. Avoidance is enabled only while an NPC is

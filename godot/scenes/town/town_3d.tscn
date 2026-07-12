@@ -9,7 +9,6 @@
 [ext_resource type="Material" uid="uid://bnkdidk7xidoo" path="res://assets/greybox/town_office.tres" id="7_wqg2r"]
 [ext_resource type="Material" uid="uid://d4i0a3otisf7u" path="res://assets/greybox/town_station.tres" id="8_7hdwp"]
 [ext_resource type="Material" uid="uid://ci2ag8w6jprty" path="res://assets/greybox/town_boundary.tres" id="9_hgwq8"]
-[ext_resource type="PackedScene" uid="uid://dn62urr615u45" path="res://scenes/town/door_3d.tscn" id="10_1n6g8"]
 [ext_resource type="NavigationMesh" path="res://assets/greybox/town_navigation.tres" id="10_777i2"]
 [ext_resource type="PackedScene" uid="uid://2r1i1a18gx34" path="res://scenes/actors/player_3d.tscn" id="11_okexo"]
 [ext_resource type="PackedScene" uid="uid://c25hdh5mxv75q" path="res://assets/kenney3d/furniture/bench.glb" id="12_o5t3x"]
@@ -551,22 +550,6 @@ end_position = Vector3(-12.6, 0.2, 0)
 [node name="StationDoorLink" type="NavigationLink3D" parent="Navigation" unique_id=169369047]
 start_position = Vector3(11.4, 0.2, 0)
 end_position = Vector3(12.6, 0.2, 0)
-
-[node name="Doors" type="Node3D" parent="." unique_id=1464693435]
-
-[node name="DOOR_STUDIO_FRONT" parent="Doors" unique_id=1193602996 instance=ExtResource("10_1n6g8")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0, -12)
-door_id = &"DOOR_STUDIO_FRONT"
-open_angle_degrees = -95.0
-
-[node name="DOOR_OFFICE_FRONT" parent="Doors" unique_id=1920575576 instance=ExtResource("10_1n6g8")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 0, 0.6)
-door_id = &"DOOR_OFFICE_FRONT"
-
-[node name="DOOR_STATION_FRONT" parent="Doors" unique_id=999375264 instance=ExtResource("10_1n6g8")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12, 0, 0.6)
-door_id = &"DOOR_STATION_FRONT"
-open_angle_degrees = -95.0
 
 [node name="Props" type="Node3D" parent="." unique_id=649743328]
 

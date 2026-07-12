@@ -21,8 +21,9 @@ verdict.
    free assets are the accepted norm; coherence, collision correctness, and
    social legibility are the bars.
 2. **World**: park center + enterable single-story studio reception, office,
-   and Station; no loading screens; no fake buildings; sightline composition
-   closes the map.
+   and Station; every building portal stays permanently open, with no physical
+   door body or interaction; no loading screens; no fake buildings; sightline
+   composition closes the map.
 3. **Run frame**: the existing per-NPC opinion is presented as
    `oppose`/`uncertain`/`vouch`; four of six vouches are necessary (not
    sufficient) for the model-judged hearing to classify the player as
@@ -44,12 +45,12 @@ verdict.
    open-questions/rumor-log surface for encountered knowledge.
 7. **Modal conversation** locks movement and camera until a clean end;
    merged judgment+reply call stays the only player-blocking provider work.
-8. **Minimal physicality**: doors plus a few pick/move/throw props; no
-   inventory; observation may enter factual NPC memory, but has no automatic
-   reaction and cannot directly advance a vouch.
-9. **Audio**: CC0 SFX and ambience land here (footsteps, doors, park murmur,
-   short spatial speech murmurs/blips, the record-scribble cue); no TTS or BGM
-   in M3R.
+8. **Minimal physicality**: a few pick/move/throw props; no inventory;
+   observation may enter factual NPC memory, but has no automatic reaction and
+   cannot directly advance a vouch.
+9. **Audio**: CC0 SFX and ambience land here (footsteps, park murmur, short
+   spatial speech murmurs/blips, the record-scribble cue); no TTS or BGM in
+   M3R.
 
 ## First playable proof
 
@@ -111,7 +112,8 @@ can overhear with subtitles.
   (FOV, sensitivity/invert, UI scale, volume, language). The comfort
   research slice tunes the numbers, not the list; keyboard+mouse full play.
 - The seamless town: park, studio reception, office, Station, street
-  connective space; every door opens; collision and navigation correct.
+  connective space; all building portals remain open; collision and
+  navigation correct.
 - Six residents on schedules with policy movement, meeting windows, and
   audible NPC-to-NPC conversations (subtitled when in earshot) whose content
   listeners actually remember.

@@ -328,6 +328,28 @@ test("advance fixture replays staggered moves, batched arrivals, and arrival-gat
   assert.equal(afterMeeting.ambientSpeech.cursor, 2);
 });
 
+test("ambient fixture contains one listener-owned no-change judgment with exact speech provenance", () => {
+  const snapshot = fixtures.endpoints.runSnapshotAfterMeeting.response;
+  const caretaker = snapshot.actors.find(
+    (actor: { actorId: string }) => actor.actorId === "NPC_Park_Caretaker",
+  );
+  assert.ok(caretaker);
+  const judgment = caretaker.memories.find(
+    (memory: { kind: string }) => memory.kind === "ambient_stance_judgment",
+  );
+  assert.ok(judgment);
+  const source = caretaker.memories.find(
+    (memory: { memoryId: string }) => memory.memoryId === judgment.sourceMemoryId,
+  );
+  assert.ok(source);
+  assert.equal(source.kind, "ambient_utterance");
+  assert.equal(source.eventId, judgment.sourceSpeechEventId);
+  assert.equal(source.speakerActorId, judgment.sourceActorId);
+  assert.equal(judgment.listenerActorId, caretaker.actorId);
+  assert.equal(judgment.suspicionDelta, 0);
+  assert.equal(judgment.appliedStance, "uncertain");
+});
+
 test("the fixture proves one attributable Studio stance change without institutional mutation", () => {
   const answer = fixtures.endpoints.sessionAnswer.response;
   const afterAnswer = fixtures.endpoints.runSnapshotAfterAnswer.response;

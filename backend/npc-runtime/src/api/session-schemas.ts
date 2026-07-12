@@ -41,7 +41,23 @@ const proposalMetaSchema = z
       .strict()
       .optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((meta, context) => {
+    if (meta.usedFallback !== (meta.transport === "fallback")) {
+      context.addIssue({
+        code: "custom",
+        path: ["usedFallback"],
+        message: "only fallback transport may set usedFallback",
+      });
+    }
+    if (meta.transport !== "fallback" && meta.fallbackReason !== undefined) {
+      context.addIssue({
+        code: "custom",
+        path: ["fallbackReason"],
+        message: "live and scripted proposal metadata cannot carry a fallback reason",
+      });
+    }
+  });
 
 export const civicEconomySchema = z
   .object({

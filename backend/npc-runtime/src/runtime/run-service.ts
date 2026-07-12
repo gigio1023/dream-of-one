@@ -13,8 +13,13 @@ import {
   type GameplayLocale,
 } from "../localization/supported-locales.js";
 import { fallbackContent } from "../localization/fallback-content.js";
-import { agentStepProposalSchema } from "../providers/envelope.js";
+import {
+  agentStepProposalSchema,
+  ambientReplyJudgmentSchema,
+} from "../providers/envelope.js";
 import type {
+  AmbientReplyJudgment,
+  AmbientReplyRequest,
   AgentStepProposal,
   ConversationProposal,
   ConversationTurnRequest,
@@ -68,6 +73,7 @@ import type {
   RunActorSpatialFacts,
   RunAmbientConversation,
   RunAmbientSpeechEvent,
+  RunAmbientStanceJudgmentMemory,
   RunAmbientUtteranceMemory,
   RunAdvanceRequest,
   RunAdvanceResponse,
@@ -192,6 +198,22 @@ interface AmbientObservation {
   audibilityVolumeId: string;
   observePackets: Record<string, ObservePacket>;
   participantEvidenceKeys: Record<string, string>;
+  participantJudgmentStates: Record<string, AmbientListenerState>;
+}
+
+interface AmbientListenerState {
+  stance: CoarseStance;
+  suspicion: number;
+  hasMeaningfulFirsthandConversation: boolean;
+}
+
+interface AmbientListenerJudgment extends AmbientListenerState {
+  sourceSpeakerActorId: string;
+  sourceUtterance: string;
+  suspicionDelta: number;
+  proposedStance: CoarseStance;
+  whyLine: string;
+  openQuestion: RunOpenQuestion | null;
 }
 
 interface AmbientResolvedTurn {
@@ -199,6 +221,12 @@ interface AmbientResolvedTurn {
   targetActorId: string;
   line: string;
   meta: ProposalMeta;
+  listenerJudgment?: AmbientListenerJudgment;
+}
+
+interface CommittedAmbientConversation {
+  events: RunAmbientSpeechEvent[];
+  judgmentMemory: RunAmbientStanceJudgmentMemory;
 }
 
 interface AmbientMeetingValidation {
@@ -271,6 +299,11 @@ interface GoalConversationReplyClaim {
   speakerActorId: string;
   targetActorId: string;
   observePacket: ObservePacket;
+  listenerState: AmbientListenerState;
+  sourceSpeakerActorId: string;
+  sourceUtterance: string;
+  conversationId: string;
+  wakeId: string;
 }
 
 type GoalConversationReplyClaimResult =
@@ -332,7 +365,8 @@ interface ConversationOpeningAttempt {
 
 interface BackgroundProviderGate {
   active: number;
-  waiters: Array<() => void>;
+  waiters: Array<(granted: boolean) => void>;
+  drainWaiters: Array<() => void>;
 }
 
 type ConversationOpeningClaim =
@@ -438,6 +472,12 @@ export class RunError extends Error {
     readonly code: RunErrorCode,
   ) {
     super(message);
+  }
+}
+
+class BackgroundProviderLaneClosedError extends Error {
+  constructor(readonly runId: string) {
+    super(`background provider lane is closed for ${runId}`);
   }
 }
 
@@ -608,6 +648,7 @@ export class RunService {
   private readonly startCache = new Map<string, CachedStart>();
   private readonly runChains = new Map<string, Promise<unknown>>();
   private readonly backgroundProviderGates = new Map<string, BackgroundProviderGate>();
+  private readonly closedBackgroundProviderRuns = new Set<string>();
   private readonly proposalPort: NpcProposalPort;
   private readonly idFactory: (prefix: IdPrefix) => string;
   private readonly layout: RunLayout;
@@ -641,6 +682,7 @@ export class RunService {
       return clone(cached.response);
     }
     const runId = this.idFactory("run");
+    this.closedBackgroundProviderRuns.delete(runId);
     const scheduler = createRunScheduler(this.layout);
     const actors = new Map<string, RunActorState>();
     for (const seed of this.layout.actors) {
@@ -849,7 +891,9 @@ export class RunService {
       };
       run.activeContact = null;
       run.activeAmbientConversation = null;
-      run.conversationOpenings.clear();
+      for (const [actorId, opening] of run.conversationOpenings) {
+        if (!opening.inFlight) run.conversationOpenings.delete(actorId);
+      }
       run.preloadRequiredEvidence.clear();
       for (const actor of run.actors.values()) actor.playerConversationReady = false;
       run.worldRevision += 1;
@@ -928,6 +972,7 @@ export class RunService {
     runId: string,
     runtime: HearingRuntimeState,
   ): Promise<HearingOpenResponse> {
+    await this.awaitBackgroundWorkSettled(runId);
     let resolved: ResolvedProposal<ConversationProposal>;
     try {
       resolved = await this.proposalPort.proposeConversationTurn(clone(runtime.openingRequest));
@@ -999,6 +1044,7 @@ export class RunService {
     runtime: HearingRuntimeState,
     request: HearingJudgmentRequest,
   ): Promise<HearingAnswerResponse> {
+    await this.awaitBackgroundWorkSettled(runId);
     let judgment: HearingJudgment;
     let meta: ProposalMeta;
     try {
@@ -1018,6 +1064,13 @@ export class RunService {
     const checked = validateHearingJudgment(request, judgment);
     if (!checked.ok) throw new Error(`deterministic hearing fallback is invalid: ${checked.reason}`);
     const validated = this.normalizeValidatedHearing(request, checked.value);
+    if (validated.evidencedVouchCount < 4 && validated.proposedVerdict === "ordinary") {
+      // The model supplied a structurally valid judgment, but the runtime must
+      // replace its ordinary ruling and wording to enforce the evidenced-vouch
+      // floor. Mark that semantic replacement as fallback so terminal live
+      // acceptance cannot look clean merely because transport succeeded.
+      meta = this.goalFallbackMeta("invalid_envelope");
+    }
 
     return this.serialize(runId, async () => {
       const run = this.requireRun(runId);
@@ -1543,8 +1596,11 @@ export class RunService {
       if (!run.socialView.hearing.due && run.elapsedSeconds >= run.hearingAtSeconds) {
         run.socialView.hearing.due = true;
         run.runStatus = "hearing_due";
+        this.closeBackgroundProviderLane(run.runId);
         run.hearingProcedure = null;
-        run.conversationOpenings.clear();
+        for (const [actorId, opening] of run.conversationOpenings) {
+          if (!opening.inFlight) run.conversationOpenings.delete(actorId);
+        }
         run.preloadRequiredEvidence.clear();
         for (const actor of run.actors.values()) actor.playerConversationReady = false;
         this.bumpSocialRevision(run);
@@ -1795,6 +1851,7 @@ export class RunService {
           active.status === "active" &&
           active.activeTurn
         ) {
+          this.discloseLatestAmbientJudgment(run, actor);
           return {
             runId,
             sessionId: active.sessionId,
@@ -1904,6 +1961,7 @@ export class RunService {
       }
       run.worldRevision = openingRevision;
       run.encounteredIdentityIds.add(actor.actorId);
+      this.discloseLatestAmbientJudgment(run, actor);
       return {
         runId,
         sessionId,
@@ -2296,6 +2354,11 @@ export class RunService {
       attempt.resolvedAction = loop.accepted[0] ?? null;
       attempt.actionMeta = loop.accepted.length > 0 ? clone(loop.metas.at(-1) as ProposalMeta) : null;
     } catch (error) {
+      if (error instanceof BackgroundProviderLaneClosedError) {
+        return this.serialize(runId, async () =>
+          this.finishGoalAttempt(this.requireRun(runId), attempt, "stale"),
+        );
+      }
       if (budgetReserved || error === budgetStop) {
         return this.serialize(runId, async () => {
           const run = this.requireRun(runId);
@@ -2802,12 +2865,24 @@ export class RunService {
             budgetReserved = true;
             throw budgetStop;
           }
+          const ambientRequest: AmbientReplyRequest = {
+            sessionId: request.sessionId,
+            locale: request.locale,
+            wakeId: claim.wakeId,
+            conversationId: claim.conversationId,
+            sourceSpeakerActorId: claim.sourceSpeakerActorId,
+            sourceUtterance: claim.sourceUtterance,
+            listenerActorId: claim.speakerActorId,
+            targetActorId: claim.targetActorId,
+            stanceBefore: claim.listenerState.stance,
+            suspicionBefore: claim.listenerState.suspicion,
+            hasMeaningfulFirsthandConversation:
+              claim.listenerState.hasMeaningfulFirsthandConversation,
+            observePacket: clone(claim.observePacket),
+            ...(request.budgetCeiling ? { budgetCeiling: request.budgetCeiling } : {}),
+          };
           return this.withBackgroundProviderSlot(runId, () =>
-            this.proposalPort.proposeNextStep({
-              ...request,
-              requiredToolCall: { tool: "talk_to", actorId: claim.targetActorId },
-              requireUtterance: true,
-            }),
+            this.proposalPort.judgeAndProposeAmbientReply(ambientRequest),
           );
         },
         onMeta: async meta => {
@@ -2822,12 +2897,20 @@ export class RunService {
           }
         },
         evaluate: (proposal, meta) => {
-          const line = this.validatedAmbientLine(
-            { proposal, meta },
-            claim.observePacket,
-            claim.targetActorId,
+          const reply = this.validatedAmbientReply(
+            { proposal: proposal as AmbientReplyJudgment, meta },
+            {
+              wakeId: claim.wakeId,
+              conversationId: claim.conversationId,
+              sourceSpeakerActorId: claim.sourceSpeakerActorId,
+              sourceUtterance: claim.sourceUtterance,
+              listenerActorId: claim.speakerActorId,
+              targetActorId: claim.targetActorId,
+              listenerState: claim.listenerState,
+              observePacket: claim.observePacket,
+            },
           );
-          if (!line || !claim.observePacket.audibleActorIds.includes(claim.targetActorId)) {
+          if (!reply) {
             return {
               status: "blocked",
               validation: {
@@ -2841,12 +2924,7 @@ export class RunService {
           }
           return {
             status: "accepted",
-            value: {
-              speakerActorId: claim.speakerActorId,
-              targetActorId: claim.targetActorId,
-              line,
-              meta: clone(meta),
-            },
+            value: reply,
             validation: { ok: true, note: "validated bounded reply" },
             nextStepChange: "the two-turn exchange is ready for fresh commit revalidation",
           };
@@ -2858,6 +2936,11 @@ export class RunService {
         return null;
       }
     } catch (error) {
+      if (error instanceof BackgroundProviderLaneClosedError) {
+        return this.serialize(runId, async () =>
+          this.finishGoalAttempt(this.requireRun(runId), attempt, "stale"),
+        );
+      }
       if (budgetReserved || error === budgetStop) {
         return this.serialize(runId, async () =>
           this.finishGoalAttempt(this.requireRun(runId), attempt, "budget_reserved", true),
@@ -2955,6 +3038,11 @@ export class RunService {
         speakerActorId: action.targetActorId,
         targetActorId: attempt.actorId,
         observePacket,
+        listenerState: this.ambientListenerState(target),
+        sourceSpeakerActorId: attempt.actorId,
+        sourceUtterance: action.utterance,
+        conversationId,
+        wakeId: attempt.request.wakeId,
       },
     };
   }
@@ -3130,7 +3218,7 @@ export class RunService {
       ) return null;
     }
     const expectedVolumeId = active.audibilityVolumeId;
-    const events = this.commitResolvedConversationTurns(run, {
+    const committed = this.commitResolvedConversationTurns(run, {
       wakeId: attempt.request.wakeId,
       conversationId: attempt.conversationId,
       observedWorldRevision: attempt.observation.factRevision,
@@ -3150,11 +3238,11 @@ export class RunService {
           : null;
       },
     });
-    if (events) {
+    if (committed) {
       this.rememberPostCommitParticipantGoals(run, participants);
       run.activeAmbientConversation = null;
     }
-    return events;
+    return committed?.events ?? null;
   }
 
   private commitResolvedConversationTurns(
@@ -3170,16 +3258,49 @@ export class RunService {
         listenerActorIds: string[];
       } | null;
     },
-  ): RunAmbientSpeechEvent[] | null {
+  ): CommittedAmbientConversation | null {
     const resolvedAudibility = options.turns.map(turn => options.resolveAudibility(turn));
     if (resolvedAudibility.some(value => value === null)) return null;
-    const committed: RunAmbientSpeechEvent[] = [];
+    const firstTurn = options.turns[0];
+    const replyTurn = options.turns[1];
+    const sourceAudibility = resolvedAudibility[0];
+    const judgment = replyTurn?.listenerJudgment;
+    if (
+      options.turns.length !== 2 ||
+      !firstTurn ||
+      !replyTurn ||
+      !sourceAudibility ||
+      !judgment ||
+      options.turns.some((turn, index) => index !== 1 && turn.listenerJudgment !== undefined) ||
+      firstTurn.speakerActorId !== judgment.sourceSpeakerActorId ||
+      firstTurn.targetActorId !== replyTurn.speakerActorId ||
+      firstTurn.line !== judgment.sourceUtterance ||
+      replyTurn.targetActorId !== firstTurn.speakerActorId ||
+      !sourceAudibility.listenerActorIds.includes(replyTurn.speakerActorId)
+    ) {
+      return null;
+    }
+    const listener = this.requireActor(run, replyTurn.speakerActorId);
+    if (
+      listener.stance !== judgment.stance ||
+      listener.suspicion !== judgment.suspicion ||
+      listener.hasMeaningfulFirsthandConversation !==
+        judgment.hasMeaningfulFirsthandConversation
+    ) {
+      return null;
+    }
+
+    const baseSeq = run.ambientSpeechCursor;
+    const baseRevision = run.worldRevision;
+    const events: RunAmbientSpeechEvent[] = [];
+    const memoryAdditions = new Map<string, RunMemory[]>();
+    let sourceMemory: RunAmbientUtteranceMemory | null = null;
     for (let turnIndex = 0; turnIndex < options.turns.length; turnIndex += 1) {
       const turn = options.turns[turnIndex];
       const audibility = resolvedAudibility[turnIndex];
       if (!turn || !audibility) return null;
-      const seq = run.ambientSpeechCursor + 1;
-      const worldRevision = run.worldRevision + 1;
+      const seq = baseSeq + turnIndex + 1;
+      const worldRevision = baseRevision + turnIndex + 1;
       const event: RunAmbientSpeechEvent = {
         seq,
         eventId: `speech:${run.runId}:${seq}`,
@@ -3204,21 +3325,76 @@ export class RunService {
         },
         proposalMeta: clone(turn.meta),
       };
-      for (const holderActorId of [turn.speakerActorId, ...audibility.listenerActorIds]) {
+      for (const holderActorId of new Set([
+        turn.speakerActorId,
+        ...audibility.listenerActorIds,
+      ])) {
+        this.requireActor(run, holderActorId);
         const memory: RunAmbientUtteranceMemory = {
           ...clone(event),
           memoryId: this.idFactory("mem"),
           kind: "ambient_utterance",
         };
-        this.requireActor(run, holderActorId).memories.push(memory);
+        const additions = memoryAdditions.get(holderActorId) ?? [];
+        additions.push(memory);
+        memoryAdditions.set(holderActorId, additions);
+        if (turnIndex === 0 && holderActorId === replyTurn.speakerActorId) {
+          sourceMemory = memory;
+        }
       }
-      run.ambientSpeechCursor = seq;
-      run.ambientSpeechEvents.push(event);
-      run.lastGoalSpeechAt.set(turn.speakerActorId, run.elapsedSeconds);
-      run.worldRevision = worldRevision;
-      committed.push(event);
+      events.push(event);
     }
-    return committed;
+    const sourceEvent = events[0];
+    if (!sourceEvent || !sourceMemory) return null;
+
+    const suspicionAfter = clampConversationScore(
+      listener.suspicion +
+        clampJudgmentDelta(judgment.suspicionDelta, JUDGMENT_SUSPICION_DELTA_CAP),
+    );
+    const appliedStance = this.validatedStance(
+      judgment.proposedStance,
+      listener.hasMeaningfulFirsthandConversation,
+    );
+    const judgmentMemory: RunAmbientStanceJudgmentMemory = {
+      memoryId: this.idFactory("mem"),
+      kind: "ambient_stance_judgment",
+      sourceActorId: judgment.sourceSpeakerActorId,
+      listenerActorId: listener.actorId,
+      sourceSpeechEventId: sourceEvent.eventId,
+      sourceMemoryId: sourceMemory.memoryId,
+      wakeId: options.wakeId,
+      conversationId: options.conversationId,
+      suspicionBefore: listener.suspicion,
+      suspicionDelta: suspicionAfter - listener.suspicion,
+      suspicionAfter,
+      stanceBefore: listener.stance,
+      proposedStance: judgment.proposedStance,
+      appliedStance,
+      whyLine: judgment.whyLine,
+      openQuestion: clone(judgment.openQuestion),
+      worldSeconds: run.elapsedSeconds,
+      worldRevision: baseRevision + events.length + 1,
+      proposalMeta: clone(replyTurn.meta),
+    };
+    const listenerAdditions = memoryAdditions.get(listener.actorId) ?? [];
+    listenerAdditions.push(judgmentMemory);
+    memoryAdditions.set(listener.actorId, listenerAdditions);
+
+    // All ids, holders, audibility, provenance, and clamps are prepared before
+    // this point. Apply speech memories first, then the listener judgment, as
+    // one serialized mutation so a failed second call can never leak turn one.
+    for (const [actorId, memories] of memoryAdditions) {
+      this.requireActor(run, actorId).memories.push(...memories);
+    }
+    listener.suspicion = suspicionAfter;
+    listener.stance = appliedStance;
+    run.ambientSpeechCursor = events.at(-1)?.seq ?? baseSeq;
+    run.ambientSpeechEvents.push(...events);
+    for (const event of events) {
+      run.lastGoalSpeechAt.set(event.speakerActorId, run.elapsedSeconds);
+    }
+    run.worldRevision = judgmentMemory.worldRevision;
+    return { events, judgmentMemory };
   }
 
   private spatialNpcListeners(
@@ -3493,58 +3669,104 @@ export class RunService {
           if (turnIndex === 1 && firstTurn) {
             observePacket.heardSpeech.push(`${firstTurn.speakerActorId}: ${firstTurn.line}`);
           }
-          const resolved = await this.withBackgroundProviderSlot(runId, () =>
-            this.proposalPort.proposeNextStep({
-              sessionId: runId,
-              locale: this.requireRun(runId).locale,
-              iteration: turnIndex,
-              goal: "Speak one context-appropriate sentence directly to the resident who arrived with you, then end the exchange.",
+          const current = this.requireRun(runId);
+          const budgetCeiling = {
+            maxCalls: runAmbientCallCeiling(current),
+            maxTokens: runAmbientTokenCeiling(current),
+          };
+          let resolvedTurn: AmbientResolvedTurn | null = null;
+          let resolvedMeta: ProposalMeta;
+          if (turnIndex === 0) {
+            const resolved = await this.withBackgroundProviderSlot(runId, () =>
+              this.proposalPort.proposeNextStep({
+                sessionId: runId,
+                locale: current.locale,
+                iteration: turnIndex,
+                goal: "Speak one context-appropriate sentence directly to the resident who arrived with you, then end the exchange.",
+                observePacket,
+                blockedSignatures: [],
+                requiredToolCall: { tool: "talk_to", actorId: targetActorId },
+                requireUtterance: true,
+                budgetCeiling,
+              }),
+            );
+            resolvedMeta = resolved.meta;
+            const line = this.validatedAmbientLine(resolved, observePacket, targetActorId);
+            if (line) {
+              resolvedTurn = {
+                speakerActorId,
+                targetActorId,
+                line,
+                meta: clone(resolved.meta),
+              };
+            }
+          } else {
+            const listenerState = observation.participantJudgmentStates[speakerActorId];
+            if (!firstTurn || !listenerState) {
+              return this.serialize(runId, async () =>
+                this.finishAmbientAttempt(this.requireRun(runId), attempt, "failed"),
+              );
+            }
+            const resolved = await this.withBackgroundProviderSlot(runId, () =>
+              this.proposalPort.judgeAndProposeAmbientReply({
+                sessionId: runId,
+                locale: current.locale,
+                wakeId: attempt.request.wakeId,
+                conversationId: attempt.conversationId,
+                sourceSpeakerActorId: firstTurn.speakerActorId,
+                sourceUtterance: firstTurn.line,
+                listenerActorId: speakerActorId,
+                targetActorId,
+                stanceBefore: listenerState.stance,
+                suspicionBefore: listenerState.suspicion,
+                hasMeaningfulFirsthandConversation:
+                  listenerState.hasMeaningfulFirsthandConversation,
+                observePacket,
+                budgetCeiling,
+              }),
+            );
+            resolvedMeta = resolved.meta;
+            resolvedTurn = this.validatedAmbientReply(resolved, {
+              wakeId: attempt.request.wakeId,
+              conversationId: attempt.conversationId,
+              sourceSpeakerActorId: firstTurn.speakerActorId,
+              sourceUtterance: firstTurn.line,
+              listenerActorId: speakerActorId,
+              targetActorId,
+              listenerState,
               observePacket,
-              blockedSignatures: [],
-              requiredToolCall: { tool: "talk_to", actorId: targetActorId },
-              requireUtterance: true,
-              budgetCeiling: {
-                maxCalls: runAmbientCallCeiling(this.requireRun(runId)),
-                maxTokens: runAmbientTokenCeiling(this.requireRun(runId)),
-              },
-            }),
-          );
+            });
+          }
           await this.serialize(runId, async () => {
             const run = this.requireRun(runId);
-            this.trackProposal(run, resolved.meta);
+            this.trackProposal(run, resolvedMeta);
             if (run.activeAmbientConversation?.conversationId === attempt.conversationId) {
               run.activeAmbientConversation.currentSpeakerActorId =
               attempt.participantActorIds[Math.min(turnIndex + 1, AMBIENT_TURN_LIMIT - 1)];
             }
           });
-          attempt.providerMetas.push(clone(resolved.meta));
-          if (resolved.meta.fallbackReason === "budget_exhausted") {
+          attempt.providerMetas.push(clone(resolvedMeta));
+          if (resolvedMeta.fallbackReason === "budget_exhausted") {
             return this.serialize(runId, async () =>
               this.finishAmbientAttempt(this.requireRun(runId), attempt, "budget_reserved"),
             );
           }
-          const line = this.validatedAmbientLine(
-            resolved,
-            observePacket,
-            targetActorId,
-          );
-          if (!line) {
+          if (!resolvedTurn) {
             return this.serialize(runId, async () =>
               this.finishAmbientAttempt(this.requireRun(runId), attempt, "failed"),
             );
           }
-          attempt.resolvedTurns.push({
-            speakerActorId,
-            targetActorId,
-            line,
-            meta: clone(resolved.meta),
-          });
+          attempt.resolvedTurns.push(resolvedTurn);
         }
-      } catch {
+      } catch (error) {
         return this.serialize(runId, async () => {
           const run = this.requireRun(runId);
           this.refreshProviderState(run);
-          return this.finishAmbientAttempt(run, attempt, "failed");
+          return this.finishAmbientAttempt(
+            run,
+            attempt,
+            error instanceof BackgroundProviderLaneClosedError ? "stale" : "failed",
+          );
         });
       }
     }
@@ -3609,6 +3831,10 @@ export class RunService {
       participantEvidenceKeys: {
         [firstActorId]: this.conversationEvidenceKey(run, this.requireActor(run, firstActorId)),
         [secondActorId]: this.conversationEvidenceKey(run, this.requireActor(run, secondActorId)),
+      },
+      participantJudgmentStates: {
+        [firstActorId]: this.ambientListenerState(this.requireActor(run, firstActorId)),
+        [secondActorId]: this.ambientListenerState(this.requireActor(run, secondActorId)),
       },
     };
     attempt.state = "resolving";
@@ -3690,7 +3916,7 @@ export class RunService {
     if (!committed) return this.finishAmbientAttempt(run, attempt, "stale");
     this.rememberPostCommitParticipantGoals(run, attempt.participantActorIds);
     const memoryChangedActorIds = new Set(
-      committed.flatMap(event => [event.speakerActorId, ...event.listenerActorIds]),
+      committed.events.flatMap(event => [event.speakerActorId, ...event.listenerActorIds]),
     );
 
     attempt.actorReadinessDeltas = [];
@@ -3705,7 +3931,7 @@ export class RunService {
     attempt.state = "completed";
     finishRunWake(run.scheduler, attempt.request.wakeId, "completed");
     run.activeAmbientConversation = null;
-    const response = this.ambientDecisionResponse(run, attempt, "completed", committed);
+    const response = this.ambientDecisionResponse(run, attempt, "completed", committed.events);
     attempt.response = clone(response);
     return response;
   }
@@ -3834,6 +4060,58 @@ export class RunService {
     return observePacket.visibleActors.includes(targetActorId)
       ? proposal.utterance.trim()
       : null;
+  }
+
+  private validatedAmbientReply(
+    resolved: ResolvedProposal<AmbientReplyJudgment>,
+    context: {
+      wakeId: string;
+      conversationId: string;
+      sourceSpeakerActorId: string;
+      sourceUtterance: string;
+      listenerActorId: string;
+      targetActorId: string;
+      listenerState: AmbientListenerState;
+      observePacket: ObservePacket;
+    },
+  ): AmbientResolvedTurn | null {
+    const parsed = ambientReplyJudgmentSchema.safeParse(resolved.proposal);
+    if (!parsed.success) return null;
+    const proposal = parsed.data;
+    const exactHeardLine = `${context.sourceSpeakerActorId}: ${context.sourceUtterance}`;
+    if (
+      context.targetActorId !== context.sourceSpeakerActorId ||
+      context.observePacket.actorId !== context.listenerActorId ||
+      !context.observePacket.visibleActors.includes(context.targetActorId) ||
+      !context.observePacket.audibleActorIds.includes(context.targetActorId) ||
+      !context.observePacket.heardSpeech.includes(exactHeardLine) ||
+      proposal.toolCall.args.actorId !== context.targetActorId
+    ) {
+      return null;
+    }
+    return {
+      speakerActorId: context.listenerActorId,
+      targetActorId: context.targetActorId,
+      line: proposal.utterance.trim(),
+      meta: clone(resolved.meta),
+      listenerJudgment: {
+        ...clone(context.listenerState),
+        sourceSpeakerActorId: context.sourceSpeakerActorId,
+        sourceUtterance: context.sourceUtterance,
+        suspicionDelta: proposal.suspicionDelta,
+        proposedStance: proposal.proposedStance,
+        whyLine: proposal.whyLine,
+        openQuestion: clone(proposal.openQuestion),
+      },
+    };
+  }
+
+  private ambientListenerState(actor: RunActorState): AmbientListenerState {
+    return {
+      stance: actor.stance,
+      suspicion: actor.suspicion,
+      hasMeaningfulFirsthandConversation: actor.hasMeaningfulFirsthandConversation,
+    };
   }
 
   private hasAmbientReserve(run: RunState, remainingTurns: number): boolean {
@@ -4070,6 +4348,56 @@ export class RunService {
     this.bumpSocialRevision(run);
   }
 
+  private discloseLatestAmbientJudgment(run: RunState, actor: RunActorState): void {
+    const memory = [...actor.memories]
+      .reverse()
+      .find((candidate): candidate is RunAmbientStanceJudgmentMemory =>
+        candidate.kind === "ambient_stance_judgment"
+      );
+    if (!memory) return;
+    const existing = run.socialView.encounteredResidents.find(
+      entry => entry.actorId === actor.actorId,
+    );
+    if (existing && existing.stanceRevision >= memory.worldRevision) return;
+    const provenance: RunSocialProvenance = {
+      originKind: "speech",
+      originActorId: memory.sourceActorId,
+      recipientKind: "listener",
+      recipientActorId: memory.listenerActorId,
+      sourceMemoryId: memory.sourceMemoryId,
+      recordId: null,
+      recordRevision: null,
+      ledgerEventId: null,
+      whyLine: memory.whyLine,
+    };
+    const resident = {
+      actorId: actor.actorId,
+      stance: actor.stance,
+      stanceRevision: memory.worldRevision,
+      whyLine: memory.whyLine,
+      provenance,
+    };
+    const index = run.socialView.encounteredResidents.findIndex(
+      entry => entry.actorId === actor.actorId,
+    );
+    if (index >= 0) run.socialView.encounteredResidents[index] = resident;
+    else run.socialView.encounteredResidents.push(resident);
+    if (memory.openQuestion) {
+      run.socialView.openQuestions = run.socialView.openQuestions.filter(
+        entry => entry.subjectActorId !== actor.actorId,
+      );
+      run.socialView.openQuestions.push({
+        questionId: `question:${memory.memoryId}`,
+        subjectActorId: actor.actorId,
+        status: memory.openQuestion.status,
+        text: memory.openQuestion.text,
+        whyLine: memory.openQuestion.whyLine,
+        provenance: { ...provenance, whyLine: memory.openQuestion.whyLine },
+      });
+    }
+    this.bumpSocialRevision(run);
+  }
+
   private discloseSpeech(run: RunState, event: RunAmbientSpeechEvent): void {
     // The exact audible event is now known to the player, but speech text is
     // not mechanically promoted into an open question. A model judgment or
@@ -4140,9 +4468,11 @@ export class RunService {
     runId: string,
     attempt: ConversationOpeningAttempt,
   ): Promise<RunSessionPreloadResponse> {
-    await this.acquireBackgroundProviderSlot(runId);
+    let acquired = false;
     let resolved: ResolvedProposal<ConversationProposal>;
     try {
+      await this.acquireBackgroundProviderSlot(runId);
+      acquired = true;
       resolved = await this.proposalPort.proposeConversationTurn(clone(attempt.request));
     } catch (error) {
       await this.serialize(runId, async () => {
@@ -4153,9 +4483,15 @@ export class RunService {
         }
         this.refreshProviderState(run);
       });
+      if (error instanceof BackgroundProviderLaneClosedError) {
+        throw new RunError(
+          "conversation preload was cancelled because the Station hearing became due",
+          "hearing_due",
+        );
+      }
       throw error;
     } finally {
-      this.releaseBackgroundProviderSlot(runId);
+      if (acquired) this.releaseBackgroundProviderSlot(runId);
     }
 
     return this.serialize(runId, async () => {
@@ -4190,29 +4526,86 @@ export class RunService {
   }
 
   private async acquireBackgroundProviderSlot(runId: string): Promise<void> {
-    const gate = this.backgroundProviderGates.get(runId) ?? { active: 0, waiters: [] };
+    if (this.closedBackgroundProviderRuns.has(runId)) {
+      throw new BackgroundProviderLaneClosedError(runId);
+    }
+    const gate = this.backgroundProviderGates.get(runId) ?? {
+      active: 0,
+      waiters: [],
+      drainWaiters: [],
+    };
     this.backgroundProviderGates.set(runId, gate);
     if (gate.active < MAX_CONCURRENT_BACKGROUND_PROPOSALS) {
       gate.active += 1;
       return;
     }
-    await new Promise<void>(resolve => gate.waiters.push(resolve));
+    const granted = await new Promise<boolean>(resolve => gate.waiters.push(resolve));
+    if (!granted || this.closedBackgroundProviderRuns.has(runId)) {
+      if (granted) this.releaseBackgroundProviderSlot(runId);
+      throw new BackgroundProviderLaneClosedError(runId);
+    }
   }
 
   private releaseBackgroundProviderSlot(runId: string): void {
     const gate = this.backgroundProviderGates.get(runId);
     if (!gate) return;
-    const next = gate.waiters.shift();
+    const next = this.closedBackgroundProviderRuns.has(runId)
+      ? undefined
+      : gate.waiters.shift();
     if (next) {
-      next();
+      next(true);
       return;
     }
     gate.active = Math.max(0, gate.active - 1);
-    if (gate.active === 0) this.backgroundProviderGates.delete(runId);
+    if (gate.active === 0) {
+      for (const resolve of gate.drainWaiters.splice(0)) resolve();
+      this.backgroundProviderGates.delete(runId);
+    }
+  }
+
+  private closeBackgroundProviderLane(runId: string): void {
+    this.closedBackgroundProviderRuns.add(runId);
+    const gate = this.backgroundProviderGates.get(runId);
+    if (!gate) return;
+    for (const reject of gate.waiters.splice(0)) reject(false);
+    if (gate.active === 0) {
+      for (const resolve of gate.drainWaiters.splice(0)) resolve();
+      this.backgroundProviderGates.delete(runId);
+    }
+  }
+
+  private async awaitBackgroundProviderDrain(runId: string): Promise<void> {
+    const gate = this.backgroundProviderGates.get(runId);
+    if (!gate || gate.active === 0) return;
+    await new Promise<void>(resolve => gate.drainWaiters.push(resolve));
+  }
+
+  private async awaitBackgroundWorkSettled(runId: string): Promise<void> {
+    await this.awaitBackgroundProviderDrain(runId);
+    const run = this.requireRun(runId);
+    const pending = [
+      ...[...run.ambientDecisions.values()].flatMap(attempt =>
+        attempt.inFlight ? [attempt.inFlight] : []
+      ),
+      ...[...run.goalDecisions.values()].flatMap(attempt =>
+        attempt.inFlight ? [attempt.inFlight] : []
+      ),
+      ...[...run.conversationOpenings.values()].flatMap(attempt =>
+        attempt.inFlight ? [attempt.inFlight] : []
+      ),
+    ];
+    if (pending.length > 0) await Promise.allSettled(pending);
+    // Cross the serialized commit lane after every cancelled/stale background
+    // result so hearing audit and runtime-trace snapshots cannot race it.
+    await this.serialize(runId, async () => undefined);
   }
 
   private async withBackgroundProviderSlot<T>(runId: string, task: () => Promise<T>): Promise<T> {
     await this.acquireBackgroundProviderSlot(runId);
+    if (this.closedBackgroundProviderRuns.has(runId)) {
+      this.releaseBackgroundProviderSlot(runId);
+      throw new BackgroundProviderLaneClosedError(runId);
+    }
     try {
       return await task();
     } finally {
@@ -4377,27 +4770,18 @@ export class RunService {
     request: HearingJudgmentRequest,
     judgment: ValidatedHearingJudgment,
   ): ValidatedHearingJudgment {
-    const content = fallbackContent(request.locale);
     const assessments = request.residents.map(resident => {
       const assessment = judgment.residentAssessments.find(
         candidate => candidate.actorId === resident.actorId,
       );
       if (!assessment) throw new Error(`validated hearing omitted ${resident.actorId}`);
-      if (!resident.hasMeaningfulFirsthandConversation) {
-        return {
-          ...assessment,
-          appliedStance:
-            resident.stanceBefore === "vouch" ? "uncertain" as const : resident.stanceBefore,
-          testimonyLine: content.hearing.neverMetTestimony,
-          citedMemoryIds: [],
-        };
-      }
       if (assessment.citedMemoryIds.length === 0) {
         return {
           ...assessment,
-          appliedStance:
-            resident.stanceBefore === "vouch" ? "uncertain" as const : resident.stanceBefore,
-          testimonyLine: content.hearing.missingEvidenceTestimony,
+          // Wording remains model-owned even when the proposed movement has no
+          // cited support. Deterministic validity preserves the resident's
+          // current stance instead of inventing a canned testimony line.
+          appliedStance: resident.stanceBefore,
           citedMemoryIds: [],
         };
       }
@@ -4932,6 +5316,13 @@ export class RunService {
           ? `[self_utterance] ${memory.line}`
           : `[heard_from=${memory.speakerActorId}] ${memory.line}`;
       }
+      if (memory.kind === "ambient_stance_judgment") {
+        return [
+          `[ambient_judgment_from=${memory.sourceActorId}]`,
+          `stance=${memory.appliedStance}`,
+          `reason=${memory.whyLine}`,
+        ].join(" ");
+      }
       if (memory.kind === "player_contact_outcome") {
         return `[player_contact=${memory.outcome};contact=${memory.contactId}] ${memory.contactReason}`;
       }
@@ -4999,6 +5390,7 @@ export class RunService {
       administrativeSources: actor.memories
         .filter(memory =>
           memory.kind !== "prop_handling_observation" &&
+          memory.kind !== "ambient_stance_judgment" &&
           !this.sourceAlreadyAdministered(run, actor.actorId, memory.memoryId)
         )
         .map(memory => {
@@ -5054,6 +5446,9 @@ export class RunService {
         }
         if (memory.kind === "prop_handling_observation") {
           throw new Error("physical observations are not administrative sources");
+        }
+        if (memory.kind === "ambient_stance_judgment") {
+          throw new Error("ambient judgments are not administrative sources");
         }
         return {
           memoryId: memory.memoryId,

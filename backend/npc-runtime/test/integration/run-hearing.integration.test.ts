@@ -14,12 +14,24 @@ import { createStudioReceptionScriptedAdapter } from "../../src/providers/testin
 import { createSameOrderScriptedAdapter } from "../../src/providers/testing/same-order-script.js";
 import { conversationZoneFor, loadRunLayout } from "../../src/runtime/run-layout.js";
 import { RunError, RunService } from "../../src/runtime/run-service.js";
-import type { RunActorSpatialFacts, RunSnapshot } from "../../src/runtime/run-schema.js";
+import type {
+  RunActorSpatialFacts,
+  RunScheduleWake,
+  RunSnapshot,
+} from "../../src/runtime/run-schema.js";
 import { SessionService } from "../../src/runtime/session/service.js";
 
 function deterministicIds(scope: string) {
   const counts = { run: 0, sess: 0, mem: 0 };
   return (prefix: keyof typeof counts) => `${prefix}-${scope}-${++counts[prefix]}`;
+}
+
+function deferred() {
+  let resolve!: () => void;
+  const promise = new Promise<void>(done => {
+    resolve = done;
+  });
+  return { promise, resolve };
 }
 
 function proposalFor(
@@ -125,6 +137,39 @@ async function makeDue(service: RunService, runId: string, advanceId: string): P
   assert.equal(snapshot.worldClock.paused, true);
 }
 
+async function readyFirstMeeting(service: RunService, runId: string): Promise<RunScheduleWake> {
+  let revision = service.snapshot(runId).worldRevision;
+  for (let step = 1; step <= 9; step += 1) {
+    let advanced = await service.advance({
+      runId,
+      advanceId: `hearing-ambient-clock-${step}`,
+      observedWorldRevision: revision,
+      elapsedSeconds: 10,
+      arrivals: [],
+    });
+    revision = advanced.worldRevision;
+    if (advanced.movementDeltas.length > 0) {
+      advanced = await service.advance({
+        runId,
+        advanceId: `hearing-ambient-arrivals-${step}`,
+        observedWorldRevision: revision,
+        elapsedSeconds: 0,
+        arrivals: advanced.movementDeltas.map(movement => ({
+          movementId: movement.movementId,
+          actorId: movement.actorId,
+          anchorRef: movement.targetAnchorRef,
+        })),
+      });
+      revision = advanced.worldRevision;
+    }
+  }
+  const wake = service.snapshot(runId).scheduler.pendingWakes.find(
+    candidate => candidate.kind === "meeting_ready" && candidate.status === "pending",
+  );
+  assert.ok(wake);
+  return wake;
+}
+
 async function resolveHearing(service: RunService, runId: string, hearingId: string) {
   const opened = await service.hearing({ action: "open", runId, hearingId });
   assert.equal(opened.action, "open");
@@ -179,6 +224,107 @@ test("hearing opening provider receives the officer's current visible objects", 
   assert.deepEqual(hearingVisibleObjectIds, ["Prop_Park_Box"]);
 });
 
+test("hearing due cancels a queued preload and drains active background calls before hearing transport", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalOpening = adapter.proposeConversationTurn.bind(adapter);
+  const twoEntered = deferred();
+  const releaseResidents = deferred();
+  let residentTransportCalls = 0;
+  let activeResidentCalls = 0;
+  let hearingTransportCalls = 0;
+  let goalTransportCalls = 0;
+  let queuedResidentReachedTransport = false;
+  adapter.proposeConversationTurn = async request => {
+    if (request.beatId.startsWith("resident_opening_")) {
+      residentTransportCalls += 1;
+      if (residentTransportCalls > 2) queuedResidentReachedTransport = true;
+      activeResidentCalls += 1;
+      if (residentTransportCalls === 2) twoEntered.resolve();
+      await releaseResidents.promise;
+      activeResidentCalls -= 1;
+    } else if (request.beatId.startsWith("station_hearing:")) {
+      hearingTransportCalls += 1;
+      assert.equal(
+        activeResidentCalls,
+        0,
+        "hearing provider work starts only after active background transport drains",
+      );
+    }
+    return originalOpening(request);
+  };
+  const originalNextStep = adapter.proposeNextStep.bind(adapter);
+  adapter.proposeNextStep = async request => {
+    goalTransportCalls += 1;
+    return originalNextStep(request);
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("hearing-background-drain"),
+    layout: { ...loadRunLayout(), hearingAtSeconds: 10 },
+  });
+  const started = service.start("start-hearing-background-drain", "ko-KR");
+  const spatial = await service.advance({
+    runId: started.runId,
+    advanceId: "seed-hearing-background-goal",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [0, 0, 0], locationId: "" },
+      actors: spatialActors(started),
+    },
+  });
+  const goalWake = spatial.scheduleWakes.find(wake => wake.kind === "goal");
+  assert.ok(goalWake);
+  const layout = loadRunLayout();
+  const preloadPromises = started.actors.slice(0, 3).map(actor => {
+    const zone = conversationZoneFor(layout, actor.actorId, actor.locationId);
+    assert.ok(zone);
+    return service.preloadConversation(started.runId, actor.actorId, zone.zoneId, "ko-KR");
+  });
+  const preloadResults = Promise.allSettled(preloadPromises);
+  await twoEntered.promise;
+  const queuedGoal = service.decision({
+    runId: started.runId,
+    wakeId: goalWake.wakeId,
+    observedWorldRevision: goalWake.observedWorldRevision,
+  });
+  await makeDue(service, started.runId, "due-hearing-background-drain");
+
+  const opening = service.hearing({
+    action: "open",
+    runId: started.runId,
+    hearingId: "hearing-background-drain",
+  });
+  await Promise.resolve();
+  assert.equal(hearingTransportCalls, 0, "hearing must wait while background calls remain active");
+  releaseResidents.resolve();
+  const opened = await opening;
+  assert.equal(hearingTransportCalls, 1);
+  assert.equal(residentTransportCalls, 2);
+  assert.equal(goalTransportCalls, 0);
+  assert.equal(queuedResidentReachedTransport, false);
+  assert.equal((await queuedGoal).status, "stale");
+
+  const settled = await preloadResults;
+  const errorCodes = settled.flatMap(result =>
+    result.status === "rejected" && result.reason instanceof RunError
+      ? [result.reason.code]
+      : []
+  ).sort();
+  assert.deepEqual(errorCodes, [
+    "conversation_not_ready",
+    "conversation_not_ready",
+    "hearing_due",
+  ]);
+  assert.deepEqual(
+    opened.providerRuntimeTrace.entries.map(entry => entry.meta.transport),
+    ["scripted"],
+    "cancelled/stale background work does not fabricate a fallback trace",
+  );
+});
+
 test("hearing quorum uses evidenced vouches and preserves provider abnormal authority", async () => {
   for (const scenario of [
     { scope: "three-ordinary", vouches: 3, proposed: "ordinary" as const, expected: "abnormal" },
@@ -196,6 +342,76 @@ test("hearing quorum uses evidenced vouches and preserves provider abnormal auth
     assert.equal(result.terminalResult.verdict, scenario.expected);
     assert.equal(service.snapshot(started.runId).runStatus, "terminal");
   }
+});
+
+test("a never-met resident may preserve live oppose testimony when it cites its ambient judgment", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  adapter.judgeAndProposeAmbientReply = async request => ({
+    proposal: {
+      toolCall: { tool: "talk_to", args: { actorId: request.targetActorId } },
+      utterance: "그 이야기는 청문회에서도 분명히 말하겠습니다.",
+      rationale: "직접 들은 구체적인 말이 방문자에 대한 경계를 키웠습니다.",
+      done: true,
+      suspicionDelta: 30,
+      proposedStance: "oppose",
+      whyLine: "관리자에게 들은 설명 때문에 방문자를 경계하게 됐습니다.",
+      openQuestion: null,
+    },
+    meta: { profileId: "scripted/hearing-ambient", transport: "scripted", usedFallback: false },
+  });
+  adapter.judgeHearing = async request => ({
+    proposal: {
+      residentAssessments: request.residents.map(resident => {
+        const ambient = resident.memories.find(
+          memory => memory.kind === "ambient_stance_judgment",
+        );
+        return {
+          actorId: resident.actorId,
+          proposedStance: ambient ? "oppose" as const : resident.stanceBefore,
+          testimonyLine: ambient
+            ? "관리자에게 직접 들은 말을 근거로 방문자를 반대합니다."
+            : `직접 판단할 근거가 없습니다:${resident.actorId}`,
+          citedMemoryIds: ambient ? [ambient.memoryId] : [],
+        };
+      }) as HearingJudgment["residentAssessments"],
+      proposedVerdict: "abnormal",
+      verdictWhyLine: "주민의 실제 기억에 남은 의문이 해소되지 않았습니다.",
+      officerLine: "현재 증언으로는 평범하다고 판정할 수 없습니다.",
+      citedRecordIds: [],
+      citedLedgerEventIds: [],
+    },
+    meta: { profileId: adapter.profileId, transport: "scripted", usedFallback: false },
+  });
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("hearing-ambient-memory"),
+    layout: { ...loadRunLayout(), hearingAtSeconds: 100 },
+  });
+  const started = service.start("start-hearing-ambient-memory", "ko-KR");
+  const wake = await readyFirstMeeting(service, started.runId);
+  const ambient = await service.decision({
+    runId: started.runId,
+    wakeId: wake.wakeId,
+    observedWorldRevision: wake.observedWorldRevision,
+  });
+  assert.equal(ambient.status, "completed");
+  await makeDue(service, started.runId, "due-hearing-ambient-memory");
+  const result = await resolveHearing(
+    service,
+    started.runId,
+    "hearing-ambient-memory",
+  );
+  const caretaker = result.terminalResult.residentAssessments.find(
+    assessment => assessment.actorId === "NPC_Park_Caretaker",
+  );
+  assert.ok(caretaker);
+  assert.equal(caretaker.appliedStance, "oppose");
+  assert.equal(caretaker.citedMemoryIds.length, 1);
+  assert.equal(
+    caretaker.testimonyLine,
+    "관리자에게 직접 들은 말을 근거로 방문자를 반대합니다.",
+  );
+  assert.equal(result.proposalMeta.transport, "scripted");
 });
 
 test("hearing and run end are retry-stable, conflict-safe, and freeze ordinary mutations", async () => {
@@ -505,7 +721,7 @@ test("runtime trace retains an early provider fallback followed by live judgment
   assert.equal(answered.providerRuntimeTrace.truncated, false);
 });
 
-test("never-met vouches clamp and semantic-invalid or failed providers still terminalize", async () => {
+test("never-met vouches clamp without replacing live testimony and semantic-invalid or failed providers still terminalize", async () => {
   const neverMet = createService("never-met", request =>
     proposalFor(request, "ordinary", { allVouch: true })
   );
@@ -518,8 +734,12 @@ test("never-met vouches clamp and semantic-invalid or failed providers still ter
     assessment =>
       assessment.appliedStance === "uncertain" &&
       assessment.citedMemoryIds.length === 0 &&
-      assessment.testimonyLine === fallbackContent("ko-KR").hearing.neverMetTestimony,
+      assessment.testimonyLine === `testimony:${assessment.actorId}`,
   ));
+  assert.equal(neverMetResult.proposalMeta.transport, "fallback");
+  assert.equal(neverMetResult.proposalMeta.fallbackReason, "invalid_envelope");
+  assert.equal(neverMetResult.terminalResult.proposalMeta.transport, "fallback");
+  assert.equal(neverMetResult.providerRuntimeTrace.entries.at(-1)?.meta.transport, "fallback");
 
   const invalid = createService("invalid", request =>
     proposalFor(request, "ordinary", { invalidCitation: true })

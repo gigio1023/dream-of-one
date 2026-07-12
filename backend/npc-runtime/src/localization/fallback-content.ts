@@ -92,6 +92,7 @@ const localizedFallbackContentSchema = z
         heardUtterance: nonEmpty,
         talkUtterance: nonEmpty,
         talkRationale: nonEmpty,
+        ambientNoChangeWhy: nonEmpty,
         lookRationale: nonEmpty,
         doneRationale: nonEmpty,
         observeUtterance: nonEmpty,

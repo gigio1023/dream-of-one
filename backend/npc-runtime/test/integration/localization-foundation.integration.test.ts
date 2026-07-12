@@ -303,6 +303,28 @@ test("deterministic fallback has exact six-locale parity and selects the run loc
     });
     assert.equal(ambient.proposal.utterance, content.agent.talkUtterance);
     assert.equal(ambient.proposal.rationale, content.agent.talkRationale);
+    const listenerPacket = observePacket();
+    listenerPacket.visibleActors = ["NPC_Store_Manager"];
+    listenerPacket.audibleActorIds = ["NPC_Store_Manager"];
+    listenerPacket.heardSpeech = ["NPC_Store_Manager: exact source utterance"];
+    const ambientReply = await fallback.judgeAndProposeAmbientReply({
+      sessionId: `ambient-reply-${locale}`,
+      locale,
+      wakeId: `wake-${locale}`,
+      conversationId: `ambient:${locale}`,
+      sourceSpeakerActorId: "NPC_Store_Manager",
+      sourceUtterance: "exact source utterance",
+      listenerActorId: listenerPacket.actorId,
+      targetActorId: "NPC_Store_Manager",
+      stanceBefore: "uncertain",
+      suspicionBefore: 0,
+      hasMeaningfulFirsthandConversation: false,
+      observePacket: listenerPacket,
+    });
+    assert.equal(ambientReply.proposal.whyLine, content.agent.ambientNoChangeWhy);
+    assert.notEqual(ambientReply.proposal.whyLine, content.whyLines.none);
+    assert.equal(ambientReply.proposal.suspicionDelta, 0);
+    assert.equal(ambientReply.proposal.proposedStance, "uncertain");
   }
 });
 

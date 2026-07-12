@@ -196,11 +196,19 @@ can overhear with subtitles.
   conversation at a time. A run starts with 120 calls / 300k tokens, reserving
   the final 20 calls / 50k tokens for player conversation and the hearing;
   ambient exhaustion yields to policy movement rather than consuming the
-  reserve.
+  reserve. Reaching `hearing_due` closes the background lane: queued preload
+  or goal work cannot begin transport, and active background work plus stale
+  cleanup drains before the hearing provider path starts.
 - Bounded NPC-to-NPC conversation through the same validated tools: two
   agents alternate 2–4 real utterances, store an audibility snapshot, end
   cleanly, and append attributed listener memory only after each utterance is
-  validated.
+  validated. The current two-turn floor uses one ordinary first proposal and
+  one merged `ambient_reply` for the listener's exact reply plus model-owned
+  stance judgment, so reaction adds no third call. Speech and judgment commit
+  atomically after fresh evidence/audibility checks; no-change remains visible
+  in diagnostics, while a changed off-screen opinion reaches `socialView` only
+  at the player's next successful conversation start with exact
+  `speaker → listener → source memory → why` provenance.
 - Stance model: model-judged, rule-clamped presentation of existing per-NPC
   opinion (`oppose`/`uncertain`/`vouch`), with firsthand provenance required
   for a vouch. The four-of-six quorum is a deterministic eligibility floor;

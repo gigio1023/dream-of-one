@@ -1,5 +1,7 @@
 import type { z } from "zod";
 import {
+  ambientReplyJudgmentJsonSchema,
+  ambientReplyJudgmentSchemaForLocale,
   agentStepProposalJsonSchema,
   agentStepProposalSchemaForLocale,
   conversationJudgmentJsonSchema,
@@ -17,6 +19,8 @@ import {
   supportedLocaleEntry,
 } from "../localization/supported-locales.js";
 import type {
+  AmbientReplyJudgment,
+  AmbientReplyRequest,
   AgentStepProposal,
   AgentStepRequest,
   ConversationJudgment,
@@ -332,6 +336,54 @@ export class ProviderService implements NpcProposalPort {
       schema: agentStepProposalSchemaForLocale(request.locale),
       budgetCeiling: request.budgetCeiling,
       fallback: () => this.options.fallback.proposeNextStep(request),
+    });
+  }
+
+  async judgeAndProposeAmbientReply(
+    request: AmbientReplyRequest,
+  ): Promise<ResolvedProposal<AmbientReplyJudgment>> {
+    const instructions = [
+      "You are one resident listening to another resident inside Dream of One, a social-suspicion game.",
+      "Reply once to the exact source utterance AND judge whether that remembered speech changes your personal opinion of the player.",
+      "This is NPC hearsay, not a new player answer. Do not use player-answer signal labels, report pressure, records, institutional authority, or verdict semantics.",
+      "Judge only from the exact source utterance and the listener-owned visible, heard, and remembered context supplied here; never invent unseen facts or imply that you directly witnessed something you only heard.",
+      "Suspicion uses a 0..125 game scale. Return an integer delta calibrated to that scale; the runtime clamps movement and the final score.",
+      "If the exact speech gives no grounded reason to change an opinion of the player, return suspicionDelta=0, preserve stanceBefore as proposedStance, and explain the no-change judgment in whyLine.",
+      "A positive vouch requires the listener's existing meaningful firsthand conversation with the player. This ambient exchange can never create firsthand provenance.",
+      `toolCall must be exactly talk_to with actorId ${request.targetActorId}; utterance is the listener's one in-character reply and done must be true.`,
+      "openQuestion is null unless this exact exchange creates or resolves one concise question the player may later learn when meeting this listener.",
+      ...localeOutputInstructions(
+        request.locale,
+        "utterance, rationale, whyLine, and openQuestion text/whyLine",
+      ),
+      "Do not decide a verdict or mutate the world. Return only JSON matching the supplied schema.",
+    ].join(" ");
+    const input = JSON.stringify({
+      runId: request.sessionId,
+      wakeId: request.wakeId,
+      conversationId: request.conversationId,
+      sourceSpeakerActorId: request.sourceSpeakerActorId,
+      sourceUtterance: request.sourceUtterance,
+      listenerActorId: request.listenerActorId,
+      targetActorId: request.targetActorId,
+      stanceBefore: request.stanceBefore,
+      suspicionBefore: request.suspicionBefore,
+      hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
+      listener: request.observePacket,
+      locale: request.locale,
+    });
+    return this.resolveValidated<AmbientReplyJudgment>({
+      sessionId: request.sessionId,
+      request: {
+        purpose: "ambient_reply",
+        instructions,
+        input,
+        schemaName: "npc_ambient_reply_judgment",
+        jsonSchema: ambientReplyJudgmentJsonSchema,
+      },
+      schema: ambientReplyJudgmentSchemaForLocale(request.locale),
+      budgetCeiling: request.budgetCeiling,
+      fallback: () => this.options.fallback.judgeAndProposeAmbientReply(request),
     });
   }
 

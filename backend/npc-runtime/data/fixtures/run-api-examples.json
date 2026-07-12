@@ -2787,7 +2787,7 @@
         ],
         "status": "completed",
         "observedWorldRevision": 23,
-        "worldRevision": 25,
+        "worldRevision": 26,
         "conversationId": "ambient:wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
         "participantActorIds": [
           "NPC_Studio_Manager",
@@ -2835,7 +2835,7 @@
             "listenerActorIds": [
               "NPC_Studio_Manager"
             ],
-            "line": "네, 말씀하신 내용을 들었습니다. 주변을 살피며 필요한 일만 이어 가겠습니다.",
+            "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
             "worldSeconds": 90,
             "observedWorldRevision": 23,
             "worldRevision": 25,
@@ -2914,7 +2914,7 @@
               "listenerActorIds": [
                 "NPC_Studio_Manager"
               ],
-              "line": "네, 말씀하신 내용을 들었습니다. 주변을 살피며 필요한 일만 이어 가겠습니다.",
+              "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
               "worldSeconds": 90,
               "observedWorldRevision": 23,
               "worldRevision": 25,
@@ -3570,7 +3570,7 @@
           ],
           "status": "completed",
           "observedWorldRevision": 23,
-          "worldRevision": 25,
+          "worldRevision": 26,
           "conversationId": "ambient:wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
           "participantActorIds": [
             "NPC_Studio_Manager",
@@ -3618,7 +3618,7 @@
               "listenerActorIds": [
                 "NPC_Studio_Manager"
               ],
-              "line": "네, 말씀하신 내용을 들었습니다. 주변을 살피며 필요한 일만 이어 가겠습니다.",
+              "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
               "worldSeconds": 90,
               "observedWorldRevision": 23,
               "worldRevision": 25,
@@ -3697,7 +3697,7 @@
                 "listenerActorIds": [
                   "NPC_Studio_Manager"
                 ],
-                "line": "네, 말씀하신 내용을 들었습니다. 주변을 살피며 필요한 일만 이어 가겠습니다.",
+                "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
                 "worldSeconds": 90,
                 "observedWorldRevision": 23,
                 "worldRevision": 25,
@@ -5133,7 +5133,7 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000018",
-        "observedWorldRevision": 25,
+        "observedWorldRevision": 26,
         "afterSpeechSeq": 2,
         "elapsedSeconds": 10,
         "arrivals": []
@@ -5141,8 +5141,8 @@
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000018",
-        "previousWorldRevision": 25,
-        "worldRevision": 26,
+        "previousWorldRevision": 26,
+        "worldRevision": 27,
         "clock": {
           "fromSeconds": 90,
           "toSeconds": 100,
@@ -5372,7 +5372,7 @@
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v5",
-        "worldRevision": 26,
+        "worldRevision": 27,
         "runStatus": "active",
         "hearingProcedure": null,
         "terminalResult": null,
@@ -5543,7 +5543,7 @@
                 "listenerActorIds": [
                   "NPC_Studio_Manager"
                 ],
-                "line": "네, 말씀하신 내용을 들었습니다. 주변을 살피며 필요한 일만 이어 가겠습니다.",
+                "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
                 "worldSeconds": 90,
                 "observedWorldRevision": 23,
                 "worldRevision": 25,
@@ -5628,7 +5628,7 @@
                 "listenerActorIds": [
                   "NPC_Studio_Manager"
                 ],
-                "line": "네, 말씀하신 내용을 들었습니다. 주변을 살피며 필요한 일만 이어 가겠습니다.",
+                "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
                 "worldSeconds": 90,
                 "observedWorldRevision": 23,
                 "worldRevision": 25,
@@ -5648,6 +5648,31 @@
                 },
                 "memoryId": "mem-fixture-3",
                 "kind": "ambient_utterance"
+              },
+              {
+                "memoryId": "mem-fixture-5",
+                "kind": "ambient_stance_judgment",
+                "sourceActorId": "NPC_Studio_Manager",
+                "listenerActorId": "NPC_Park_Caretaker",
+                "sourceSpeechEventId": "speech:run-fixture-1:1",
+                "sourceMemoryId": "mem-fixture-2",
+                "wakeId": "wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
+                "conversationId": "ambient:wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
+                "suspicionBefore": 0,
+                "suspicionDelta": 0,
+                "suspicionAfter": 0,
+                "stanceBefore": "uncertain",
+                "proposedStance": "uncertain",
+                "appliedStance": "uncertain",
+                "whyLine": "방금 들은 말만으로는 방문자에 대한 제 판단을 바꿀 근거가 충분하지 않습니다.",
+                "openQuestion": null,
+                "worldSeconds": 90,
+                "worldRevision": 26,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
               }
             ]
           },
@@ -5854,7 +5879,7 @@
               "listenerActorIds": [
                 "NPC_Studio_Manager"
               ],
-              "line": "네, 말씀하신 내용을 들었습니다. 주변을 살피며 필요한 일만 이어 가겠습니다.",
+              "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
               "worldSeconds": 90,
               "observedWorldRevision": 23,
               "worldRevision": 25,
@@ -12520,7 +12545,7 @@
       "request": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000018",
-        "observedWorldRevision": 25,
+        "observedWorldRevision": 26,
         "afterSpeechSeq": 2,
         "elapsedSeconds": 10,
         "arrivals": []
@@ -12528,8 +12553,8 @@
       "response": {
         "runId": "run-fixture-1",
         "advanceId": "run-fixture-1:advance:000018",
-        "previousWorldRevision": 25,
-        "worldRevision": 26,
+        "previousWorldRevision": 26,
+        "worldRevision": 27,
         "clock": {
           "fromSeconds": 90,
           "toSeconds": 100,

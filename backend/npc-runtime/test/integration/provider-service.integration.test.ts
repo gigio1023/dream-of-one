@@ -4,6 +4,8 @@ import { assembleObservePacket, DEFAULT_ROLE_POLICIES } from "../../src/agentloo
 import { fallbackContent } from "../../src/localization/fallback-content.js";
 import { createSameOrderWorld } from "../../src/runtime/world/index.js";
 import {
+  ambientReplyJudgmentJsonSchema,
+  ambientReplyJudgmentSchemaForLocale,
   agentStepProposalJsonSchema,
   agentStepProposalSchemaForLocale,
   hearingJudgmentJsonSchema,
@@ -13,8 +15,12 @@ import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import { createProviderFromEnvironment, loadProviderConfig } from "../../src/providers/registry.js";
 import { ProviderService } from "../../src/providers/service.js";
 import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-adapter.js";
-import { providerAuditSnapshotSchema } from "../../src/runtime/run-schema.js";
+import {
+  providerAuditSnapshotSchema,
+  providerRuntimeTraceSchema,
+} from "../../src/runtime/run-schema.js";
 import type {
+  AmbientReplyRequest,
   HearingJudgment,
   HearingJudgmentRequest,
   ProviderFailureReason,
@@ -128,6 +134,43 @@ const validMergedTurn = JSON.stringify({
   continueConversation: false,
 });
 
+function ambientReplyRequest(locale = "ko-KR"): AmbientReplyRequest {
+  const packet = observePacket();
+  packet.visibleActors = ["NPC_Store_Manager"];
+  packet.audibleActorIds = ["NPC_Store_Manager"];
+  packet.heardSpeech = ["NPC_Store_Manager: 방문자가 앞서 다른 설명을 했습니다."];
+  return {
+    sessionId: "run-ambient-provider-test",
+    locale,
+    wakeId: "wake-ambient-provider-test",
+    conversationId: "ambient:wake-ambient-provider-test",
+    sourceSpeakerActorId: "NPC_Store_Manager",
+    sourceUtterance: "방문자가 앞서 다른 설명을 했습니다.",
+    listenerActorId: "NPC_Store_Clerk",
+    targetActorId: "NPC_Store_Manager",
+    stanceBefore: "uncertain",
+    suspicionBefore: 10,
+    hasMeaningfulFirsthandConversation: false,
+    observePacket: packet,
+    budgetCeiling: { maxCalls: 100, maxTokens: 250_000 },
+  };
+}
+
+const validAmbientReply = JSON.stringify({
+  toolCall: { tool: "talk_to", args: { actorId: "NPC_Store_Manager" } },
+  utterance: "그 설명이 왜 달랐는지 직접 확인해 보겠습니다.",
+  rationale: "관리자에게 들은 구체적인 말이 방문자에 대한 의문을 키웠습니다.",
+  done: true,
+  suspicionDelta: 18,
+  proposedStance: "oppose",
+  whyLine: "관리자에게 들은 설명 차이 때문에 방문자를 경계하게 됐습니다.",
+  openQuestion: {
+    status: "open",
+    text: "방문자는 왜 서로 다른 설명을 했을까?",
+    whyLine: "전해 들은 설명의 차이를 직접 확인해야 합니다.",
+  },
+});
+
 const HEARING_RESIDENTS = [
   ["NPC_Studio_Receptionist", "studio_receptionist"],
   ["NPC_Studio_Manager", "studio_manager"],
@@ -224,6 +267,20 @@ function assertEveryObjectPropertyIsRequired(value: unknown, path = "root"): voi
 
 test("agent-step strict schema requires every property in every object branch", () => {
   assertEveryObjectPropertyIsRequired(agentStepProposalJsonSchema);
+});
+
+test("ambient reply schema keeps the exact talk target and all listener judgment fields strict", () => {
+  assertEveryObjectPropertyIsRequired(ambientReplyJudgmentJsonSchema);
+  const valid = JSON.parse(validAmbientReply);
+  assert.equal(ambientReplyJudgmentSchemaForLocale("ko-KR").safeParse(valid).success, true);
+  assert.equal(ambientReplyJudgmentSchemaForLocale("ko-KR").safeParse({
+    ...valid,
+    done: false,
+  }).success, false);
+  assert.equal(ambientReplyJudgmentSchemaForLocale("ko-KR").safeParse({
+    ...valid,
+    whyLine: "관리자에게 들은 說明이 달랐습니다.",
+  }).success, false);
 });
 
 test("hearing strict schema requires every property and exactly six unique residents", () => {
@@ -348,6 +405,53 @@ test("provider service returns schema-validated live conversation proposals", as
     }],
   });
   providerAuditSnapshotSchema.parse(service.auditSnapshot("session-provider-test"));
+});
+
+test("ambient reply is one schema-validated call with its own audit purpose and neutral localized fallback", async () => {
+  const textGen = new FakeTextGen([
+    { text: validAmbientReply, usage: { inputTokens: 12, outputTokens: 18, totalTokens: 30 } },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/ambient-reply",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const request = ambientReplyRequest();
+  const result = await service.judgeAndProposeAmbientReply(request);
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.proposal.proposedStance, "oppose");
+  assert.equal(result.proposal.suspicionDelta, 18);
+  assert.equal(textGen.requests.length, 1);
+  assert.equal(textGen.requests[0]?.purpose, "ambient_reply");
+  assert.equal(textGen.requests[0]?.schemaName, "npc_ambient_reply_judgment");
+  assert.match(textGen.requests[0]?.instructions ?? "", /NPC hearsay, not a new player answer/);
+  const input = JSON.parse(textGen.requests[0]?.input ?? "{}");
+  assert.equal(input.sourceUtterance, request.sourceUtterance);
+  assert.equal(input.listenerActorId, request.listenerActorId);
+  assert.deepEqual(service.auditSnapshot(request.sessionId).resolutions, [{
+    seq: 1,
+    purpose: "ambient_reply",
+    profileId: "test/ambient-reply",
+    transport: "live",
+    usedFallback: false,
+    fallbackReason: null,
+    callSeqs: [1],
+  }]);
+
+  const unavailable = new ProviderService({
+    profileId: "test/ambient-unavailable",
+    textGen: new FakeTextGen([], false),
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const fallback = await unavailable.judgeAndProposeAmbientReply(request);
+  assert.equal(fallback.meta.fallbackReason, "missing_credentials");
+  assert.equal(fallback.proposal.suspicionDelta, 0);
+  assert.equal(fallback.proposal.proposedStance, request.stanceBefore);
+  assert.equal(
+    fallback.proposal.whyLine,
+    fallbackContent("ko-KR").agent.ambientNoChangeWhy,
+  );
+  assert.doesNotMatch(fallback.proposal.whyLine, /답변/);
 });
 
 test("provider service returns one live evidence-grounded hearing judgment", async () => {
@@ -895,6 +999,69 @@ test("provider audit wire schema rejects accounting and completeness drift", () 
   assert.equal(providerAuditSnapshotSchema.safeParse({
     ...valid,
     resolutions: [{ ...valid.resolutions[0], callSeqs: [2] }],
+  }).success, false);
+  assert.equal(providerAuditSnapshotSchema.safeParse({
+    ...valid,
+    resolutions: [{ ...valid.resolutions[0], callSeqs: [] }],
+  }).success, false, "live resolutions require a transport call");
+  assert.equal(providerAuditSnapshotSchema.safeParse({
+    ...valid,
+    calls: [{ ...valid.calls[0], purpose: "agent_step" }],
+  }).success, false, "the first transport purpose must match the resolution");
+
+  const repaired = {
+    ...valid,
+    callsUsed: 2,
+    tokensUsed: 8,
+    calls: [
+      valid.calls[0],
+      { ...valid.calls[0], seq: 2, purpose: "repair" as const, chargedTokens: 3 },
+    ],
+    resolutions: [{ ...valid.resolutions[0], callSeqs: [1, 2] }],
+  };
+  providerAuditSnapshotSchema.parse(repaired);
+  assert.equal(providerAuditSnapshotSchema.safeParse({
+    ...repaired,
+    calls: [repaired.calls[0], { ...repaired.calls[1], purpose: "conversation" }],
+  }).success, false, "only repair calls may follow the first call");
+  assert.equal(providerAuditSnapshotSchema.safeParse({
+    ...repaired,
+    resolutions: [{ ...repaired.resolutions[0], callSeqs: [2, 1] }],
+  }).success, false, "resolution call order is monotonic");
+});
+
+test("runtime proposal metadata cannot disguise live or scripted work as fallback", () => {
+  const base = {
+    complete: true,
+    truncated: false,
+    droppedCount: 0,
+    entries: [{
+      seq: 1,
+      meta: {
+        profileId: "test/runtime-meta",
+        transport: "live" as const,
+        usedFallback: false,
+      },
+    }],
+  };
+  providerRuntimeTraceSchema.parse(base);
+  assert.equal(providerRuntimeTraceSchema.safeParse({
+    ...base,
+    entries: [{
+      ...base.entries[0],
+      meta: { ...base.entries[0].meta, fallbackReason: "timeout" },
+    }],
+  }).success, false);
+  assert.equal(providerRuntimeTraceSchema.safeParse({
+    ...base,
+    entries: [{
+      ...base.entries[0],
+      meta: {
+        ...base.entries[0].meta,
+        transport: "scripted",
+        fallbackReason: "invalid_envelope",
+      },
+    }],
   }).success, false);
 });
 

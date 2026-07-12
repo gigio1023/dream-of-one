@@ -32,12 +32,29 @@ const proposalMetaSchema = z
       .strict()
       .optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((meta, context) => {
+    if (meta.usedFallback !== (meta.transport === "fallback")) {
+      context.addIssue({
+        code: "custom",
+        path: ["usedFallback"],
+        message: "only fallback transport may set usedFallback",
+      });
+    }
+    if (meta.transport !== "fallback" && meta.fallbackReason !== undefined) {
+      context.addIssue({
+        code: "custom",
+        path: ["fallbackReason"],
+        message: "live and scripted proposal metadata cannot carry a fallback reason",
+      });
+    }
+  });
 
 const providerCallPurposeSchema = z.enum([
   "conversation",
   "conversation_turn",
   "agent_step",
+  "ambient_reply",
   "hearing_verdict",
   "repair",
 ]);
@@ -45,6 +62,7 @@ const providerResolutionPurposeSchema = z.enum([
   "conversation",
   "conversation_turn",
   "agent_step",
+  "ambient_reply",
   "hearing_verdict",
 ]);
 const providerCallAuditSchema = z
@@ -170,6 +188,42 @@ export const providerAuditSnapshotSchema = z
           message: "resolution callSeqs must reference retained calls",
         });
       }
+      if (resolution.transport === "live" && resolution.callSeqs.length === 0) {
+        context.addIssue({
+          code: "custom",
+          path: ["resolutions", index, "callSeqs"],
+          message: "a live resolution must reference at least one transport call",
+        });
+      }
+      const referencedCalls = resolution.callSeqs
+        .map(seq => audit.calls.find(call => call.seq === seq))
+        .filter((call): call is z.infer<typeof providerCallAuditSchema> => call !== undefined);
+      if (resolution.callSeqs.some((seq, callIndex) =>
+        callIndex > 0 && seq <= (resolution.callSeqs[callIndex - 1] ?? 0)
+      )) {
+        context.addIssue({
+          code: "custom",
+          path: ["resolutions", index, "callSeqs"],
+          message: "resolution callSeqs must be strictly ascending",
+        });
+      }
+      if (
+        referencedCalls[0] &&
+        referencedCalls[0].purpose !== resolution.purpose
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["resolutions", index, "callSeqs", 0],
+          message: "the first call purpose must match its resolution purpose",
+        });
+      }
+      if (referencedCalls.slice(1).some(call => call.purpose !== "repair")) {
+        context.addIssue({
+          code: "custom",
+          path: ["resolutions", index, "callSeqs"],
+          message: "only repair calls may follow a resolution's first call",
+        });
+      }
       if (resolution.usedFallback !== (resolution.transport === "fallback")) {
         context.addIssue({
           code: "custom",
@@ -184,6 +238,13 @@ export const providerAuditSnapshotSchema = z
           message: "only fallback resolutions carry a fallback reason",
         });
       }
+    }
+    if (audit.complete && linkedCallSeqs.size !== audit.calls.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["complete"],
+        message: "a complete audit references every completed call exactly once",
+      });
     }
   });
 
@@ -289,6 +350,31 @@ export const runAmbientUtteranceMemorySchema = runAmbientSpeechEventSchema
   .extend({
     memoryId: nonEmpty,
     kind: z.literal("ambient_utterance"),
+  })
+  .strict();
+
+/** Listener-owned opinion change grounded in one exact ambient speech memory. */
+export const runAmbientStanceJudgmentMemorySchema = z
+  .object({
+    memoryId: nonEmpty,
+    kind: z.literal("ambient_stance_judgment"),
+    sourceActorId: nonEmpty,
+    listenerActorId: nonEmpty,
+    sourceSpeechEventId: nonEmpty,
+    sourceMemoryId: nonEmpty,
+    wakeId: nonEmpty,
+    conversationId: nonEmpty,
+    suspicionBefore: z.number().int().min(0).max(125),
+    suspicionDelta: z.number().int(),
+    suspicionAfter: z.number().int().min(0).max(125),
+    stanceBefore: stanceSchema,
+    proposedStance: stanceSchema,
+    appliedStance: stanceSchema,
+    whyLine: nonEmpty,
+    openQuestion: runOpenQuestionSchema.nullable(),
+    worldSeconds: z.number().nonnegative(),
+    worldRevision: z.number().int().positive(),
+    proposalMeta: proposalMetaSchema,
   })
   .strict();
 
@@ -414,6 +500,7 @@ export const runMemorySchema = z.discriminatedUnion("kind", [
   runNpcUtteranceMemorySchema,
   runPlayerConversationMemorySchema,
   runAmbientUtteranceMemorySchema,
+  runAmbientStanceJudgmentMemorySchema,
   runRecordReadMemorySchema,
   runPlayerContactOutcomeMemorySchema,
   runPropHandlingObservationMemorySchema,
@@ -1310,6 +1397,9 @@ export type RunSocialView = z.infer<typeof runSocialViewSchema>;
 export type RunNpcUtteranceMemory = z.infer<typeof runNpcUtteranceMemorySchema>;
 export type RunPlayerConversationMemory = z.infer<typeof runPlayerConversationMemorySchema>;
 export type RunAmbientUtteranceMemory = z.infer<typeof runAmbientUtteranceMemorySchema>;
+export type RunAmbientStanceJudgmentMemory = z.infer<
+  typeof runAmbientStanceJudgmentMemorySchema
+>;
 export type RunAmbientSpeechEvent = z.infer<typeof runAmbientSpeechEventSchema>;
 export type RunAmbientConversation = z.infer<typeof runAmbientConversationSchema>;
 export type RunActiveContact = z.infer<typeof runActiveContactSchema>;

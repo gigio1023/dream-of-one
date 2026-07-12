@@ -49,6 +49,7 @@
       "heardUtterance": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
       "talkUtterance": "잠시 이야기 나눌 수 있을까요? 지금 확인한 내용을 서로 맞춰 보고 싶습니다.",
       "talkRationale": "곁에 있는 주민과 직접 말을 나눕니다.",
+      "ambientNoChangeWhy": "방금 들은 말만으로는 방문자에 대한 제 판단을 바꿀 근거가 충분하지 않습니다.",
       "lookRationale": "보이는 물건을 먼저 살펴봅니다.",
       "doneRationale": "지금 할 수 있는 행동이 없어 멈춥니다.",
       "observeUtterance": "관찰하겠습니다."
@@ -104,6 +105,7 @@
       "heardUtterance": "I understand what you said. I will remember separately what I confirmed myself.",
       "talkUtterance": "Could we talk for a moment? I would like to compare what we have each confirmed.",
       "talkRationale": "I speak directly with the nearby resident.",
+      "ambientNoChangeWhy": "What I just heard is not enough to change my view of the visitor.",
       "lookRationale": "I inspect the visible object first.",
       "doneRationale": "There is nothing useful I can do now, so I stop.",
       "observeUtterance": "I will observe."
@@ -159,6 +161,7 @@
       "heardUtterance": "Ho capito ciò che ha detto. Terrò separato il ricordo di quello che ho verificato personalmente.",
       "talkUtterance": "Possiamo parlare un momento? Vorrei confrontare ciò che abbiamo verificato.",
       "talkRationale": "Parlo direttamente con la persona qui vicino.",
+      "ambientNoChangeWhy": "Quello che ho appena sentito non basta a cambiare la mia opinione sul visitatore.",
       "lookRationale": "Esamino prima l'oggetto che posso vedere.",
       "doneRationale": "Non c'è nulla di utile che possa fare adesso, quindi mi fermo.",
       "observeUtterance": "Osserverò."
@@ -214,6 +217,7 @@
       "heardUtterance": "我明白您说的内容。我会把自己亲自确认的事另外记清楚。",
       "talkUtterance": "可以聊一会儿吗？我想核对一下我们各自确认到的情况。",
       "talkRationale": "我与身边的居民直接交谈。",
+      "ambientNoChangeWhy": "刚才听到的话还不足以改变我对这位访客的看法。",
       "lookRationale": "我先查看眼前可见的物品。",
       "doneRationale": "现在没有可做的有效行动，因此我停下来。",
       "observeUtterance": "我会观察。"
@@ -269,6 +273,7 @@
       "heardUtterance": "J'ai compris ce que vous avez dit. Je garderai séparément le souvenir de ce que j'ai vérifié moi-même.",
       "talkUtterance": "Pouvons-nous parler un instant ? J'aimerais comparer ce que nous avons chacun vérifié.",
       "talkRationale": "Je parle directement à la personne qui se trouve près de moi.",
+      "ambientNoChangeWhy": "Ce que je viens d'entendre ne suffit pas à changer mon avis sur le visiteur.",
       "lookRationale": "J'examine d'abord l'objet visible.",
       "doneRationale": "Je ne peux rien faire d'utile pour le moment, alors je m'arrête.",
       "observeUtterance": "Je vais observer."
@@ -324,6 +329,7 @@
       "heardUtterance": "お話の内容は分かりました。自分で確認したことは別に覚えておきます。",
       "talkUtterance": "少し話せますか。お互いに確認したことを照らし合わせたいです。",
       "talkRationale": "近くにいる住民と直接話します。",
+      "ambientNoChangeWhy": "今聞いた話だけでは、訪問者への見方を変える根拠には足りません。",
       "lookRationale": "まず、見えている物を確認します。",
       "doneRationale": "今できる有益な行動がないので、ここで止めます。",
       "observeUtterance": "観察します。"

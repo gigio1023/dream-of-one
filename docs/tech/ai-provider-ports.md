@@ -22,7 +22,7 @@ tests + fixture generation
         └── ScriptedNpcAdapter (never selectable from production config)
 ```
 
-The domain port exposes five proposal operations plus a metadata-only audit
+The domain port exposes six proposal operations plus a metadata-only audit
 snapshot. During ordinary conversation, the
 merged conversation-turn operation is the only provider work that blocks the
 player. The scheduled terminal hearing deliberately blocks once more on
@@ -36,6 +36,7 @@ interface NpcProposalPort {
   judgeConversationTurn(request): Promise<ResolvedProposal<ConversationJudgment>>;
   judgeAndProposeConversationTurn(request): Promise<ResolvedProposal<MergedConversationTurn>>;
   proposeNextStep(request): Promise<ResolvedProposal<AgentStepProposal>>;
+  judgeAndProposeAmbientReply(request): Promise<ResolvedProposal<AmbientReplyJudgment>>;
   judgeHearing(request): Promise<ResolvedProposal<HearingJudgment>>;
 }
 ```
@@ -52,6 +53,10 @@ in-flight count/reservation. All transport calls are retained under the current
 Direct scripted/rule adapters expose an empty complete audit, while fallback
 reached through `ProviderService` remains a recorded resolution even when it
 made zero transport calls.
+Each live resolution cites at least one call: its first call purpose matches
+the resolution, later calls are ascending `repair` attempts, and a complete
+audit references every completed call exactly once. Live or scripted proposal
+metadata cannot carry a fallback reason.
 
 `RunService` separately keeps a bounded `providerRuntimeTrace` of every
 proposal metadata packet it actually consumes. This second trace catches a
@@ -61,6 +66,10 @@ check and be replaced by deterministic fallback. Terminal acceptance requires
 both structures to be complete and free of fallback; a later live result
 cannot hide an earlier provider failure or runtime semantic fallback. Neither
 structure stores generated text.
+If runtime procedure must replace otherwise valid model wording — for example,
+forcing an abnormal hearing result below the evidenced-vouch floor — the
+consumed proposal metadata becomes fallback even though the transport audit
+correctly remains live.
 
 `MergedConversationTurn` is judgment fields (bounded suspicion/report deltas,
 signal classes, and a player-visible why-line) plus the NPC's next utterance
@@ -77,6 +86,16 @@ it does not decide what the answer meant. `AgentStepProposal` contains at
 most one tool call, an optional utterance, and a stop flag. The runtime
 validates every tool against visibility, role authority, object state, and
 the offered catalog.
+
+`AmbientReplyJudgment` is the second and final call in a bounded two-resident
+exchange. It returns the listener's exact `talk_to` reply together with a
+personal suspicion delta, proposed coarse stance, why-line, and optional open
+question. It judges only the exact attributed speech and that listener's own
+observe packet: it has no player-answer signals, report-pressure delta,
+record mutation, or verdict authority. The runtime stores the exact source
+speech memory before applying the listener judgment, clamps suspicion, and
+never lets hearsay create meaningful-firsthand provenance. This replaces the
+old second `proposeNextStep`; it does not add another provider call.
 
 `HearingJudgment` contains exactly six resident assessments, a proposed
 ordinary/abnormal verdict, the Station officer's final line, and record/ledger
@@ -161,7 +180,7 @@ reported in `ProposalMeta`:
 - invalid envelope after repair;
 - per-session call or token budget exhaustion.
 
-Fallback is resilience, not the production policy. For judgment, fallback is
+Fallback is resilience, not the production policy. For player judgment, fallback is
 the deterministic signal classifier in
 `src/runtime/conversation-suspicion.ts`; for conversation and agent steps it
 is the bounded rule adapter. The HUD shows the selected profile,
@@ -170,6 +189,13 @@ The same metadata remains available run-wide as `providerAudit` and
 `providerRuntimeTrace` on snapshots, ordinary answer responses, hearing
 responses, and the terminal run-end response. This prevents a later successful
 call from hiding an earlier error, repair, or fallback during live acceptance.
+
+Ambient-reply fallback is deliberately neutral: one localized in-fiction
+reply, zero suspicion movement, the existing stance, and a dedicated
+six-locale reason that the heard statement is insufficient to change the
+listener's view. It never reuses player-answer wording or manufactures social
+drama during an outage. Provider audit records this operation under the
+distinct `ambient_reply` purpose, including repair calls and budget fallback.
 
 ## Scripted tests
 

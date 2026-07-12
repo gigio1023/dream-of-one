@@ -81,6 +81,31 @@ export const mergedConversationTurnSchema = z
   })
   .strict();
 
+export const ambientReplyJudgmentSchema = z
+  .object({
+    toolCall: z
+      .object({
+        tool: z.literal("talk_to"),
+        args: z.object({ actorId: nonEmpty }).strict(),
+      })
+      .strict(),
+    utterance: nonEmpty,
+    rationale: nonEmpty,
+    done: z.literal(true),
+    suspicionDelta: z.number().int(),
+    proposedStance: z.enum(COARSE_STANCES),
+    whyLine: nonEmpty,
+    openQuestion: z
+      .object({
+        status: z.enum(["open", "resolved"]),
+        text: nonEmpty,
+        whyLine: nonEmpty,
+      })
+      .strict()
+      .nullable(),
+  })
+  .strict();
+
 const uniqueIdListSchema = z.array(nonEmpty).superRefine((ids, context) => {
   if (new Set(ids).size !== ids.length) {
     context.addIssue({
@@ -181,6 +206,22 @@ export function mergedConversationTurnSchemaForLocale(locale: string) {
     value.suggestedReplies.forEach((reply, index) => {
       addKoreanTextIssue(context, ["suggestedReplies", index, "text"], reply.text);
     });
+  });
+}
+
+export function ambientReplyJudgmentSchemaForLocale(locale: string) {
+  const korean = isKoreanLocale(locale);
+  return ambientReplyJudgmentSchema.superRefine((value, context) => {
+    if (!korean) return;
+    addKoreanTextIssue(context, ["utterance"], value.utterance);
+    addKoreanTextIssue(context, ["rationale"], value.rationale);
+    addKoreanTextIssue(context, ["whyLine"], value.whyLine);
+    addKoreanTextIssue(context, ["openQuestion", "text"], value.openQuestion?.text);
+    addKoreanTextIssue(
+      context,
+      ["openQuestion", "whyLine"],
+      value.openQuestion?.whyLine,
+    );
   });
 }
 
@@ -329,6 +370,58 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
       },
     },
     continueConversation: { type: "boolean" },
+  },
+};
+
+export const ambientReplyJudgmentJsonSchema: Record<string, unknown> = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "toolCall",
+    "utterance",
+    "rationale",
+    "done",
+    "suspicionDelta",
+    "proposedStance",
+    "whyLine",
+    "openQuestion",
+  ],
+  properties: {
+    toolCall: {
+      type: "object",
+      additionalProperties: false,
+      required: ["tool", "args"],
+      properties: {
+        tool: { type: "string", const: "talk_to" },
+        args: {
+          type: "object",
+          additionalProperties: false,
+          required: ["actorId"],
+          properties: { actorId: { type: "string", minLength: 1 } },
+        },
+      },
+    },
+    utterance: { type: "string", minLength: 1 },
+    rationale: { type: "string", minLength: 1 },
+    done: { type: "boolean", const: true },
+    suspicionDelta: { type: "integer" },
+    proposedStance: { type: "string", enum: [...COARSE_STANCES] },
+    whyLine: { type: "string", minLength: 1 },
+    openQuestion: {
+      anyOf: [
+        { type: "null" },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["status", "text", "whyLine"],
+          properties: {
+            status: { type: "string", enum: ["open", "resolved"] },
+            text: { type: "string", minLength: 1 },
+            whyLine: { type: "string", minLength: 1 },
+          },
+        },
+      ],
+    },
   },
 };
 

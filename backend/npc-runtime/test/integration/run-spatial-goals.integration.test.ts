@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
+import type { AmbientReplyRequest } from "../../src/providers/ports.js";
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
 import { loadRunLayout } from "../../src/runtime/run-layout.js";
 import {
@@ -124,6 +125,7 @@ async function advanceToParkContactOpportunity(
 test("one spatial batch dispatches all six stable residents through the same goal path", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
   const calledActorIds: string[] = [];
+  const ambientReplyRequests: AmbientReplyRequest[] = [];
   const visibleObjectIdsByActor = new Map<string, string[]>();
   const original = adapter.proposeNextStep.bind(adapter);
   adapter.proposeNextStep = async request => {
@@ -134,6 +136,11 @@ test("one spatial batch dispatches all six stable residents through the same goa
     );
     assert.ok(Array.isArray(request.observePacket.reachableAnchorRefs));
     return original(request);
+  };
+  const originalAmbientReply = adapter.judgeAndProposeAmbientReply.bind(adapter);
+  adapter.judgeAndProposeAmbientReply = async request => {
+    ambientReplyRequests.push(structuredClone(request));
+    return originalAmbientReply(request);
   };
   const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds("six") });
   const started = service.start("spatial-six", "ko-KR");
@@ -210,6 +217,16 @@ test("one spatial batch dispatches all six stable residents through the same goa
   assert.equal(spoken.speechEvents.length, 2, "talk_to commits a bounded two-agent exchange");
   assert.equal(spoken.speechEvents[0]?.audibility.volumeId, "AUD_STUDIO");
   assert.equal(spoken.speechEvents[1]?.speakerActorId, manager.actorId);
+  assert.equal(ambientReplyRequests.length, 1);
+  assert.equal(ambientReplyRequests[0]?.listenerActorId, manager.actorId);
+  assert.equal(ambientReplyRequests[0]?.targetActorId, receptionist.actorId);
+  assert.equal(ambientReplyRequests[0]?.sourceSpeakerActorId, receptionist.actorId);
+  assert.equal(ambientReplyRequests[0]?.sourceUtterance, spoken.speechEvents[0]?.line);
+  assert.equal(
+    calledActorIds.length,
+    started.actors.length + 1,
+    "the goal action and first utterance stay in one proposal before the single ambient reply call",
+  );
   const callsAfterExchange = calledActorIds.length;
   const restamped = await service.advance({
     runId: started.runId,

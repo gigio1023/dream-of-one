@@ -603,6 +603,14 @@ func _provider_audit_summary(audit: Dictionary, runtime_trace: Dictionary) -> Di
 			!= EXPECTED_PROVIDER_PROFILE_ID
 			or str(_dictionary_value(meta, [&"transport"], "")) != "live"
 			or bool(_dictionary_value(meta, [&"usedFallback", &"used_fallback"], true))
+			or (
+				_dictionary_value(meta, [&"fallbackReason", &"fallback_reason"], null) != null
+				and not str(_dictionary_value(
+					meta,
+					[&"fallbackReason", &"fallback_reason"],
+					""
+				)).is_empty()
+			)
 		):
 			trace_profiles_live_no_fallback = false
 	var calls_used := int(audit.get("callsUsed", 0))

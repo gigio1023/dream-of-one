@@ -1791,6 +1791,22 @@ func _check_provider_audit_summary_contract(label: String, playtest_surface: Nod
 	):
 		_failures.append("%s fallback resolution became provider acceptance" % label)
 
+	var mislabeled_live_trace := live_trace.duplicate(true)
+	var mislabeled_live_meta := (
+		((mislabeled_live_trace.get("entries", []) as Array)[0] as Dictionary).get(
+			"meta",
+			{}
+		) as Dictionary
+	)
+	mislabeled_live_meta["fallbackReason"] = "invalid_envelope"
+	var mislabeled_summary: Dictionary = playtest_surface.call(
+		"_provider_audit_summary",
+		live_audit,
+		mislabeled_live_trace
+	)
+	if bool(mislabeled_summary.get("allExpectedProfileLiveNoFallback", true)):
+		_failures.append("%s live runtime trace with a fallback reason became acceptance" % label)
+
 	var unreconciled_audit := live_audit.duplicate(true)
 	unreconciled_audit["tokensUsed"] = 8
 	var unreconciled_summary: Dictionary = playtest_surface.call(

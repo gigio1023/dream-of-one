@@ -10,7 +10,12 @@ LOC onto the M3R target so an agent knows what to keep, trim, or build.
 > start/advance/snapshot. All six residents use deterministic local schedule
 > routes with staggered dwell times between provider wake-ups;
 > arrival-confirmed schedules feed real two-turn park meetings whose validated
-> listeners receive attributed memories. Every
+> listeners receive attributed memories. The second turn now merges the
+> listener's exact reply with a private model-owned stance judgment grounded
+> in the first speaker's exact memory; neutral judgments remain diagnosable,
+> hearsay never creates firsthand vouch provenance, and the result stays hidden
+> from `socialView` until the player next starts a conversation with that
+> listener. Every
 > resident now has one actor/location-authored conversation zone and a
 > meaningful-evidence opening cache. `POST /v1/session/preload` resolves through
 > the existing provider port outside the serialized run lane; the later
@@ -265,10 +270,13 @@ Meeting windows retain one semantic center but map every participant to a
 distinct physical standing-slot anchor. A `meeting_ready` wake becomes pending
 only when both actors have confirmed their own slots during the open window;
 the window boundary alone is informational. Run-discriminated
-`POST /v1/npc/decision` claims that wake exactly once, resolves two validated
-provider-backed utterances outside the run lock, then recomputes current
-listeners from confirmed anchors and the shared audibility volume before
-committing attributed memories. Exact retries are cached; a result completed
+`POST /v1/npc/decision` claims that wake exactly once and resolves two
+validated provider-backed utterances outside the run lock. The first uses an
+ordinary agent-step proposal; the second uses one `ambient_reply` call that
+returns the listener's exact reply and speech-grounded personal judgment
+without adding a third call. The runtime then recomputes current listeners
+from confirmed anchors and the shared audibility volume before atomically
+committing both utterances and the listener judgment. Exact retries are cached; a result completed
 during a player modal remains queued and commits on the same request after
 resume without another provider call. Ambient work cannot enter the reserved
 player/hearing budget. Grace and hearing wakes continue through the same
@@ -286,6 +294,11 @@ revalidated against current participant evidence and engine audibility before
 listener memories commit. The shared background gate allows at most two
 provider proposals in flight, and only one ambient conversation may hold the
 run lease.
+
+When the hearing becomes due, that background lane closes before any new
+transport may begin. Queued preload/goal work cancels as stale without a fake
+fallback trace; already active background calls and their stale cleanup drain
+before the hearing opening or verdict provider work starts.
 
 After grace, a 75-world-second opportunity epoch may add one special
 `move_to(player)` affordance. Candidate selection is deterministic (current
@@ -320,18 +333,32 @@ institutional pressure, but does not directly move personal stance. One
 successful record write, update, or first read produces exactly one ledger
 event; retrying or rereading the same revision cannot duplicate it.
 
+An `ambient_stance_judgment` memory links the source speech event, the exact
+listener-owned `ambient_utterance` memory, speaker, listener, before/after
+suspicion, proposed/applied stance, why-line, and provider metadata. It is
+available in debug snapshots and hearing context but is not an administrative
+record source. Only a later successful `session/start` with that resident may
+copy the newest undisclosed judgment into `socialView`, preserving
+`speaker → listener → sourceMemory → why`; preload and overhearing alone do not
+reveal another resident's internal opinion.
+
 The runtime verifies provenance and procedure; the selected live model judges
 meaning. At the scheduled hearing it enforces four evidenced vouches out of
 six as the eligibility floor, then asks the model to reassess the final
 defense against pooled visible memories. An uncited assessment cannot apply a
 new proposed stance, and an uncited vouch is downgraded; a valid vouch must cite
 that resident's meaningful first-hand conversation. A resident who never met
-the player says exactly that. Four
+the player may still cite remembered ambient speech to oppose or remain
+uncertain, but cannot vouch. Valid provider testimony wording is preserved
+when a stance is clamped. Four
 valid vouches make an ordinary verdict possible but never mandatory. Invalid
 citations or provider failure use a visibly marked deterministic judgment so
 the run still terminates. The recap is assembled only from the submitted
 defense, validated testimony, and actual cited record/ledger entries. No
 earlier interrogation can end an M3R run.
+If the provider proposes ordinary below the four-vouch floor, the runtime's
+forced abnormal wording is itself marked fallback in the terminal proposal
+metadata and runtime trace; a live transport cannot hide that replacement.
 
 ## Checks
 

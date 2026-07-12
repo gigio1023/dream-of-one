@@ -135,6 +135,16 @@ export function normalizeHearingMemory(memory: RunMemory): HearingMemoryView {
       meaningfulFirsthand: false,
     };
   }
+  if (memory.kind === "ambient_stance_judgment") {
+    return {
+      memoryId: memory.memoryId,
+      kind: memory.kind,
+      sourceActorId: memory.sourceActorId,
+      text: memory.whyLine,
+      whyLine: memory.whyLine,
+      meaningfulFirsthand: false,
+    };
+  }
   if (memory.kind === "record_read") {
     return {
       memoryId: memory.memoryId,

@@ -269,6 +269,100 @@ test("vouch provenance is clamped and speech cannot silently move institutional 
   assert.equal(service.snapshot(run.runId).ledgerEvents.length, 0);
 });
 
+test("a direct multi-turn conversation can visibly recover from oppose and high suspicion", async () => {
+  let turn = 0;
+  const adapter = new ScriptedNpcAdapter({
+    conversation: () => ({
+      utterance: "방문 목적을 정확히 설명해 주세요.",
+      suggestedReplies: [
+        { text: "처음에는 사실을 숨겼습니다.", intent: "risky/weird" },
+        { text: "어떤 부분부터 말할까요?", intent: "uncertain/repair" },
+        { text: "지금부터 모두 설명하겠습니다.", intent: "safe/local" },
+      ],
+      continueConversation: true,
+    }),
+    mergedTurn: () => {
+      turn += 1;
+      return turn === 1
+        ? {
+            suspicionDelta: 90,
+            reportDelta: 0,
+            signals: ["authority_evasion"],
+            whyLine: "처음 설명에서 중요한 사실을 숨겨 강하게 경계하게 됐습니다.",
+            stance: "oppose",
+            meaningfulFirsthand: true,
+            openQuestion: null,
+            utterance: "숨긴 사실이 무엇인지 지금 분명히 말해 주세요.",
+            suggestedReplies: [
+              { text: "두려워서 방문 경위를 숨겼습니다.", intent: "safe/local" },
+              { text: "어떤 증거가 필요한가요?", intent: "uncertain/repair" },
+              { text: "더는 답하지 않겠습니다.", intent: "risky/weird" },
+            ],
+            continueConversation: true,
+          }
+        : {
+            suspicionDelta: -70,
+            reportDelta: 0,
+            signals: [],
+            whyLine: "숨긴 이유와 방문 경위를 구체적으로 바로잡아 의심이 크게 줄었습니다.",
+            stance: "vouch",
+            meaningfulFirsthand: true,
+            openQuestion: null,
+            utterance: "이제 설명이 앞뒤가 맞습니다. 제가 직접 들은 내용으로 보증하겠습니다.",
+            suggestedReplies: [
+              { text: "고맙습니다.", intent: "safe/local" },
+              { text: "더 확인할 것이 있나요?", intent: "uncertain/repair" },
+              { text: "이제 가겠습니다.", intent: "risky/weird" },
+            ],
+            continueConversation: false,
+          };
+    },
+    nextStep: () => ({ rationale: "후속 행동 없음", done: true }),
+  });
+  const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
+  const run = service.start("run-direct-recovery", "ko-KR");
+  await preloadReceptionist(service, run.runId);
+  const started = await service.startConversation(
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ko-KR",
+  );
+  const first = await service.answer(
+    run.runId,
+    started.sessionId,
+    started.nextTurn.turnId,
+    { type: "choice", choiceId: started.nextTurn.choices[0].choiceId },
+  );
+  assert.equal(first.actor.suspicion, 90);
+  assert.equal(first.actor.stance, "oppose");
+  assert.ok(first.nextTurn);
+  const waryView = first.socialView.encounteredResidents.find(
+    resident => resident.actorId === STUDIO_RECEPTIONIST_ID,
+  );
+  assert.ok(waryView);
+  assert.equal(waryView.stance, "oppose");
+  assert.equal(waryView.whyLine, first.judgment.whyLine);
+  assert.equal("suspicion" in waryView, false, "numeric suspicion remains debug/internal");
+
+  const second = await service.answer(
+    run.runId,
+    started.sessionId,
+    first.nextTurn.turnId,
+    { type: "choice", choiceId: first.nextTurn.choices[0].choiceId },
+  );
+  assert.equal(second.actor.suspicion, 20);
+  assert.equal(second.actor.stance, "vouch");
+  assert.ok(second.actor.suspicion < first.actor.suspicion);
+  const recoveredView = second.socialView.encounteredResidents.find(
+    resident => resident.actorId === STUDIO_RECEPTIONIST_ID,
+  );
+  assert.ok(recoveredView);
+  assert.equal(recoveredView.stance, "vouch");
+  assert.equal(recoveredView.whyLine, second.judgment.whyLine);
+  assert.ok(recoveredView.stanceRevision > waryView.stanceRevision);
+});
+
 test("ending a child conversation is idempotent and leaves its run state alive", async () => {
   const service = new RunService({
     proposalPort: createStudioReceptionScriptedAdapter(),

@@ -3,6 +3,8 @@ import { priorPlayerLines } from "../fallback.js";
 import { fallbackContent } from "../../localization/fallback-content.js";
 import { RuleFallbackNpcAdapter } from "../fallback.js";
 import type {
+  AmbientReplyJudgment,
+  AmbientReplyRequest,
   AgentStepProposal,
   AgentStepRequest,
   ConversationJudgment,
@@ -38,6 +40,10 @@ export interface ScriptedNpcHandlers {
   ): MergedConversationTurn | Promise<MergedConversationTurn>;
   /** Optional exact hearing result for a fixture or integration test. */
   hearing?(request: HearingJudgmentRequest): HearingJudgment | Promise<HearingJudgment>;
+  /** Optional listener-owned ambient stance judgment; defaults to neutral no-change. */
+  ambientReply?(
+    request: AmbientReplyRequest,
+  ): AmbientReplyJudgment | Promise<AmbientReplyJudgment>;
 }
 
 /** Fixed proposal sets live here, never in production storylet data. */
@@ -143,6 +149,22 @@ export class ScriptedNpcAdapter implements NpcProposalPort {
   ): Promise<ResolvedProposal<AgentStepProposal>> {
     return {
       proposal: await this.handlers.nextStep(request),
+      meta: {
+        profileId: this.profileId,
+        transport: "scripted",
+        usedFallback: false,
+      },
+    };
+  }
+
+  async judgeAndProposeAmbientReply(
+    request: AmbientReplyRequest,
+  ): Promise<ResolvedProposal<AmbientReplyJudgment>> {
+    const proposal = this.handlers.ambientReply
+      ? await this.handlers.ambientReply(request)
+      : (await new RuleFallbackNpcAdapter().judgeAndProposeAmbientReply(request)).proposal;
+    return {
+      proposal,
       meta: {
         profileId: this.profileId,
         transport: "scripted",

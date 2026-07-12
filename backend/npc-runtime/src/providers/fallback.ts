@@ -13,6 +13,8 @@ import type {
   ConversationSuspicionSignal,
 } from "../contracts/types.js";
 import type {
+  AmbientReplyJudgment,
+  AmbientReplyRequest,
   AgentStepRequest,
   ConversationJudgment,
   ConversationJudgmentRequest,
@@ -248,6 +250,29 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
         : { rationale: content.doneRationale, done: true };
     return {
       proposal,
+      meta: {
+        profileId: this.profileId,
+        transport: "fallback",
+        usedFallback: true,
+      },
+    };
+  }
+
+  async judgeAndProposeAmbientReply(
+    request: AmbientReplyRequest,
+  ): Promise<ResolvedProposal<AmbientReplyJudgment>> {
+    const content = fallbackContent(request.locale);
+    return {
+      proposal: {
+        toolCall: { tool: "talk_to", args: { actorId: request.targetActorId } },
+        utterance: content.agent.heardUtterance,
+        rationale: content.agent.talkRationale,
+        done: true,
+        suspicionDelta: 0,
+        proposedStance: request.stanceBefore,
+        whyLine: content.agent.ambientNoChangeWhy,
+        openQuestion: null,
+      },
       meta: {
         profileId: this.profileId,
         transport: "fallback",

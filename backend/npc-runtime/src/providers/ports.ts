@@ -47,6 +47,7 @@ export type ProviderCallPurpose =
   | "conversation"
   | "conversation_turn"
   | "agent_step"
+  | "ambient_reply"
   | "hearing_verdict"
   | "repair";
 
@@ -118,6 +119,23 @@ export interface AgentStepProposal {
   utterance?: string;
   rationale: string;
   done: boolean;
+}
+
+/**
+ * One NPC listener's grounded reply to an exact ambient utterance plus the
+ * listener's model-owned personal judgment of the player. Administrative
+ * pressure and player-speech signal semantics deliberately do not belong to
+ * this envelope.
+ */
+export interface AmbientReplyJudgment {
+  toolCall: { tool: "talk_to"; args: { actorId: string } };
+  utterance: string;
+  rationale: string;
+  done: true;
+  suspicionDelta: number;
+  proposedStance: CoarseStance;
+  whyLine: string;
+  openQuestion: { status: "open" | "resolved"; text: string; whyLine: string } | null;
 }
 
 export interface ResolvedProposal<T> {
@@ -213,6 +231,23 @@ export interface AgentStepRequest {
   budgetCeiling?: { maxCalls: number; maxTokens: number };
 }
 
+/** One bounded NPC-to-NPC reply. `sessionId` is the owning run budget scope. */
+export interface AmbientReplyRequest {
+  sessionId: string;
+  locale: string;
+  wakeId: string;
+  conversationId: string;
+  sourceSpeakerActorId: string;
+  sourceUtterance: string;
+  listenerActorId: string;
+  targetActorId: string;
+  stanceBefore: CoarseStance;
+  suspicionBefore: number;
+  hasMeaningfulFirsthandConversation: boolean;
+  observePacket: ObservePacket;
+  budgetCeiling?: { maxCalls: number; maxTokens: number };
+}
+
 /** The only AI dependency visible to conversation and agent-loop domain code. */
 export interface NpcProposalPort {
   readonly profileId: string;
@@ -232,6 +267,10 @@ export interface NpcProposalPort {
     request: MergedConversationTurnRequest,
   ): Promise<ResolvedProposal<MergedConversationTurn>>;
   proposeNextStep(request: AgentStepRequest): Promise<ResolvedProposal<AgentStepProposal>>;
+  /** Exact ambient reply plus the listener's private, speech-grounded stance judgment. */
+  judgeAndProposeAmbientReply(
+    request: AmbientReplyRequest,
+  ): Promise<ResolvedProposal<AmbientReplyJudgment>>;
   judgeHearing(request: HearingJudgmentRequest): Promise<ResolvedProposal<HearingJudgment>>;
 }
 

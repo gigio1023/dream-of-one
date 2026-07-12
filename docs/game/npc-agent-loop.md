@@ -81,6 +81,18 @@ cleanly or earlier when either participant stops. One ambient NPC conversation
 may be active at a time in M3R; the player-facing lane always has priority.
 There is no model-generated transcript summary standing in for the exchange.
 
+The current M3R exchange uses the two-turn floor. Turn one remains an ordinary
+agent-step proposal. Turn two is one merged `ambient_reply`: the target
+listener answers the exact first utterance and judges whether that remembered
+speech changes its personal suspicion/stance. The runtime commits both speech
+events and the listener-owned judgment together only after fresh evidence and
+audibility validation. Other audible residents receive the utterance memory,
+not an automatic stance judgment; hearsay never creates firsthand vouch
+provenance. An off-screen judgment remains private until the player later
+starts a conversation with that listener, when its exact
+`speaker → listener → source memory → why` provenance becomes encountered
+knowledge.
+
 ## Tool catalog (v2 baseline, ≤ 8 tools)
 
 | Tool | Effect | Validation highlights |
@@ -125,6 +137,11 @@ Suspicion judgment is model-owned with rule-clamped deltas; authority
 deterministic. Different models may attempt different valid tools and therefore create
 different records; that variation is intended as long as every mutation
 passes the same world rules.
+
+Ambient personal judgment is likewise model-owned through
+`judgeAndProposeAmbientReply`, not inferred from deterministic keywords or an
+authored gossip branch. Its deterministic fallback is an explicitly marked,
+localized no-change judgment so an outage cannot manufacture social drama.
 
 The scheduled hearing uses the same port boundary through `judgeHearing`, not
 an authored ending table. The model receives the player's final defense and a

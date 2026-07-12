@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
+import { fallbackContent } from "../../src/localization/fallback-content.js";
 import type {
+  AmbientReplyRequest,
   AgentStepRequest,
   ConversationTurnRequest,
   NpcProposalPort,
@@ -76,12 +78,18 @@ async function readyFirstMeeting(
 function capturingAdapter() {
   const adapter = createStudioReceptionScriptedAdapter();
   const requests: AgentStepRequest[] = [];
+  const ambientRequests: AmbientReplyRequest[] = [];
   const original = adapter.proposeNextStep.bind(adapter);
+  const originalAmbientReply = adapter.judgeAndProposeAmbientReply.bind(adapter);
   adapter.proposeNextStep = async request => {
     requests.push(structuredClone(request));
     return original(request);
   };
-  return { adapter, requests };
+  adapter.judgeAndProposeAmbientReply = async request => {
+    ambientRequests.push(structuredClone(request));
+    return originalAmbientReply(request);
+  };
+  return { adapter, requests, ambientRequests };
 }
 
 function ambientSpatialActors(snapshot: RunSnapshot): RunActorSpatialFacts[] {
@@ -112,8 +120,8 @@ function deferred() {
   return { promise, resolve };
 }
 
-test("one meeting decision is single-flight, cached, and gives the responder the exact first line", async () => {
-  const { adapter, requests } = capturingAdapter();
+test("one meeting decision is single-flight and uses two calls with an exact grounded ambient reply", async () => {
+  const { adapter, requests, ambientRequests } = capturingAdapter();
   const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds("retry") });
   const meeting = await readyFirstMeeting(service, "ambient-retry");
   const current = service.snapshot(meeting.started.runId);
@@ -148,15 +156,16 @@ test("one meeting decision is single-flight, cached, and gives the responder the
   assert.deepEqual(concurrent, first);
   assert.equal(first.status, "completed");
   assert.equal(first.speechEvents.length, 2);
-  assert.equal(requests.length, 2, "one wake produces exactly two provider proposals");
+  assert.equal(requests.length, 1, "the first speaker still uses one ordinary agent proposal");
+  assert.equal(ambientRequests.length, 1, "the listener reply and judgment share one second call");
   assert.deepEqual(requests[0]?.observePacket.visibleActors, ["NPC_Park_Caretaker"]);
-  assert.deepEqual(requests[1]?.observePacket.visibleActors, ["NPC_Studio_Manager"]);
+  assert.deepEqual(ambientRequests[0]?.observePacket.visibleActors, ["NPC_Studio_Manager"]);
   assert.deepEqual(
     requests[0]?.observePacket.visibleObjects.map(object => object.objectId),
     ["Prop_Park_Box"],
   );
   assert.deepEqual(
-    requests[1]?.observePacket.visibleObjects.map(object => object.objectId),
+    ambientRequests[0]?.observePacket.visibleObjects.map(object => object.objectId),
     ["Prop_Studio_Plant"],
   );
   assert.deepEqual(requests[0]?.requiredToolCall, {
@@ -165,15 +174,23 @@ test("one meeting decision is single-flight, cached, and gives the responder the
   });
   assert.equal(requests[0]?.requireUtterance, true);
   assert.equal(requests[0]?.locale, "ko-KR");
-  assert.equal(requests[1]?.locale, "ko-KR");
+  assert.equal(ambientRequests[0]?.locale, "ko-KR");
+  assert.equal(ambientRequests[0]?.listenerActorId, "NPC_Park_Caretaker");
+  assert.equal(ambientRequests[0]?.targetActorId, "NPC_Studio_Manager");
+  assert.equal(ambientRequests[0]?.sourceSpeakerActorId, "NPC_Studio_Manager");
+  assert.equal(ambientRequests[0]?.sourceUtterance, first.speechEvents[0]?.line);
   assert.equal(
-    requests[1]?.observePacket.heardSpeech.at(-1),
+    ambientRequests[0]?.observePacket.heardSpeech.at(-1),
     `NPC_Studio_Manager: ${first.speechEvents[0]?.line}`,
   );
 
   const retried = await service.decision(meeting.request);
   assert.deepEqual(retried, first);
-  assert.equal(requests.length, 2, "a completed retry must not call the provider again");
+  assert.equal(
+    requests.length + ambientRequests.length,
+    2,
+    "a completed retry must not call the provider again",
+  );
   await assert.rejects(
     service.decision({
       ...meeting.request,
@@ -184,8 +201,22 @@ test("one meeting decision is single-flight, cached, and gives the responder the
 });
 
 test("ambient utterances enter only the speaker and current runtime-confirmed listeners with full provenance", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  adapter.judgeAndProposeAmbientReply = async request => ({
+    proposal: {
+      toolCall: { tool: "talk_to", args: { actorId: request.targetActorId } },
+      utterance: "그 이야기를 들으니 방문자를 조금 더 경계해야겠습니다.",
+      rationale: "직접 들은 말이 방문자에 대한 의문을 키웠습니다.",
+      done: true,
+      suspicionDelta: 35,
+      proposedStance: "oppose",
+      whyLine: "관리인이 전한 구체적인 말 때문에 방문자를 경계하게 됐습니다.",
+      openQuestion: null,
+    },
+    meta: { profileId: "scripted/ambient-change", transport: "scripted", usedFallback: false },
+  });
   const service = new RunService({
-    proposalPort: createStudioReceptionScriptedAdapter(),
+    proposalPort: adapter,
     idFactory: deterministicIds("memory"),
   });
   const meeting = await readyFirstMeeting(service, "ambient-memory");
@@ -199,20 +230,27 @@ test("ambient utterances enter only the speaker and current runtime-confirmed li
   assert.equal(snapshot.ambientSpeech.cursor, 2);
   assert.deepEqual(snapshot.ambientSpeech.events, response.speechEvents);
   assert.equal(snapshot.ambientSpeech.activeConversation, null);
-  assert.ok(snapshot.actors.every(actor => actor.stance === "uncertain"));
+  const manager = snapshot.actors.find(actor => actor.actorId === "NPC_Studio_Manager");
+  const caretaker = snapshot.actors.find(actor => actor.actorId === "NPC_Park_Caretaker");
+  assert.ok(manager);
+  assert.ok(caretaker);
+  assert.equal(manager.stance, "uncertain");
+  assert.equal(manager.suspicion, 0);
+  assert.equal(caretaker.stance, "oppose");
+  assert.equal(caretaker.suspicion, 35);
+  assert.equal(caretaker.hasMeaningfulFirsthandConversation, false);
   const expectedMemoryCount: Record<string, number> = {
     NPC_Studio_Receptionist: 0,
     NPC_Studio_Manager: 2,
     NPC_Office_Worker: 0,
-    NPC_Park_Caretaker: 2,
+    NPC_Park_Caretaker: 3,
     NPC_Station_Officer: 0,
     NPC_Roaming_Liaison: 0,
   };
   const memoryIds = new Set<string>();
   for (const actor of snapshot.actors) {
     assert.equal(actor.memories.length, expectedMemoryCount[actor.actorId]);
-    for (const memory of actor.memories) {
-      assert.equal(memory.kind, "ambient_utterance");
+    for (const memory of actor.memories.filter(memory => memory.kind === "ambient_utterance")) {
       if (memory.kind !== "ambient_utterance") continue;
       assert.ok(!memoryIds.has(memory.memoryId));
       memoryIds.add(memory.memoryId);
@@ -223,6 +261,30 @@ test("ambient utterances enter only the speaker and current runtime-confirmed li
     }
   }
   assert.equal(memoryIds.size, 4);
+  const sourceEvent = response.speechEvents[0];
+  assert.ok(sourceEvent);
+  const sourceMemory = caretaker.memories.find(
+    memory => memory.kind === "ambient_utterance" && memory.eventId === sourceEvent.eventId,
+  );
+  const judgmentMemory = caretaker.memories.find(
+    memory => memory.kind === "ambient_stance_judgment",
+  );
+  assert.ok(sourceMemory && sourceMemory.kind === "ambient_utterance");
+  assert.ok(judgmentMemory && judgmentMemory.kind === "ambient_stance_judgment");
+  assert.equal(judgmentMemory.sourceActorId, sourceEvent.speakerActorId);
+  assert.equal(judgmentMemory.listenerActorId, caretaker.actorId);
+  assert.equal(judgmentMemory.sourceSpeechEventId, sourceEvent.eventId);
+  assert.equal(judgmentMemory.sourceMemoryId, sourceMemory.memoryId);
+  assert.equal(judgmentMemory.suspicionBefore, 0);
+  assert.equal(judgmentMemory.suspicionDelta, 35);
+  assert.equal(judgmentMemory.suspicionAfter, 35);
+  assert.equal(judgmentMemory.stanceBefore, "uncertain");
+  assert.equal(judgmentMemory.proposedStance, "oppose");
+  assert.equal(judgmentMemory.appliedStance, "oppose");
+  assert.equal(snapshot.institutionalPressure, 0);
+  assert.deepEqual(snapshot.records, []);
+  assert.deepEqual(snapshot.ledgerEvents, []);
+  assert.deepEqual(snapshot.socialView.encounteredResidents, []);
   const afterCursor = await service.advance({
     runId: meeting.started.runId,
     advanceId: "ambient-after-cursor",
@@ -370,6 +432,7 @@ test("run advance remains responsive while an ambient provider proposal is pendi
 test("a modal queues resolved ambient speech and exact retry commits it without another provider call", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
   const original = adapter.proposeNextStep.bind(adapter);
+  const originalAmbientReply = adapter.judgeAndProposeAmbientReply.bind(adapter);
   const entered = deferred();
   const release = deferred();
   let ambientCalls = 0;
@@ -380,6 +443,10 @@ test("a modal queues resolved ambient speech and exact retry commits it without 
       await release.promise;
     }
     return original(request);
+  };
+  adapter.judgeAndProposeAmbientReply = async request => {
+    ambientCalls += 1;
+    return originalAmbientReply(request);
   };
   const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds("modal") });
   const meeting = await readyFirstMeeting(service, "ambient-modal");
@@ -423,11 +490,230 @@ test("a modal queues resolved ambient speech and exact retry commits it without 
     2,
     "the modal close drains each resolved utterance exactly once",
   );
+  const afterDrain = service.snapshot(meeting.started.runId);
+  const listenerJudgments = afterDrain.actors.flatMap(actor =>
+    actor.memories.filter(memory => memory.kind === "ambient_stance_judgment"),
+  );
+  assert.equal(listenerJudgments.length, 1, "the queued listener judgment commits exactly once");
   const committed = await service.decision(meeting.request);
   assert.equal(committed.status, "completed");
   assert.equal(committed.speechEvents.length, 0, "the decision retry cannot redeliver drained speech");
   assert.equal(ambientCalls, 2, "queued retry reuses both resolved proposals");
   assert.deepEqual(await service.decision(meeting.request), committed);
+});
+
+test("a neutral ambient reply still records one localized no-change judgment", async () => {
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: deterministicIds("no-change"),
+  });
+  const meeting = await readyFirstMeeting(service, "ambient-no-change");
+  const response = await service.decision(meeting.request);
+  assert.equal(response.status, "completed");
+
+  const snapshot = service.snapshot(meeting.started.runId);
+  const caretaker = snapshot.actors.find(actor => actor.actorId === "NPC_Park_Caretaker");
+  assert.ok(caretaker);
+  const judgment = caretaker.memories.find(
+    memory => memory.kind === "ambient_stance_judgment",
+  );
+  assert.ok(judgment && judgment.kind === "ambient_stance_judgment");
+  assert.equal(judgment.suspicionDelta, 0);
+  assert.equal(judgment.stanceBefore, "uncertain");
+  assert.equal(judgment.proposedStance, "uncertain");
+  assert.equal(judgment.appliedStance, "uncertain");
+  assert.equal(judgment.whyLine, fallbackContent("ko-KR").agent.ambientNoChangeWhy);
+  assert.deepEqual(snapshot.socialView.encounteredResidents, []);
+});
+
+test("ambient hearsay cannot create a vouch without prior meaningful firsthand conversation", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  adapter.judgeAndProposeAmbientReply = async request => ({
+    proposal: {
+      toolCall: { tool: "talk_to", args: { actorId: request.targetActorId } },
+      utterance: "그 말이라면 방문자를 믿어도 되겠습니다.",
+      rationale: "전해 들은 내용을 긍정적으로 판단했습니다.",
+      done: true,
+      suspicionDelta: -20,
+      proposedStance: "vouch",
+      whyLine: "전해 들은 설명은 긍정적이지만 직접 확인한 적은 없습니다.",
+      openQuestion: null,
+    },
+    meta: { profileId: "scripted/ambient-vouch", transport: "scripted", usedFallback: false },
+  });
+  const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds("vouch") });
+  const meeting = await readyFirstMeeting(service, "ambient-vouch-clamp");
+  await service.decision(meeting.request);
+  const caretaker = service.snapshot(meeting.started.runId).actors.find(
+    actor => actor.actorId === "NPC_Park_Caretaker",
+  );
+  assert.ok(caretaker);
+  const judgment = caretaker.memories.find(
+    memory => memory.kind === "ambient_stance_judgment",
+  );
+  assert.ok(judgment && judgment.kind === "ambient_stance_judgment");
+  assert.equal(judgment.proposedStance, "vouch");
+  assert.equal(judgment.appliedStance, "uncertain");
+  assert.equal(caretaker.stance, "uncertain");
+  assert.equal(caretaker.hasMeaningfulFirsthandConversation, false);
+});
+
+test("preload keeps an off-screen ambient judgment hidden and the next conversation start discloses exact speech provenance once", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  adapter.judgeAndProposeAmbientReply = async request => ({
+    proposal: {
+      toolCall: { tool: "talk_to", args: { actorId: request.targetActorId } },
+      utterance: "직접 만나서 그 부분을 확인해 봐야겠습니다.",
+      rationale: "전해 들은 내용에 확인할 점이 생겼습니다.",
+      done: true,
+      suspicionDelta: 24,
+      proposedStance: "oppose",
+      whyLine: "스튜디오 관리자가 전한 말 때문에 방문자의 설명을 의심하게 됐습니다.",
+      openQuestion: {
+        status: "open",
+        text: "방문자는 왜 관리자에게 다른 설명을 했을까?",
+        whyLine: "전해 들은 설명과 직접 확인할 내용이 남았습니다.",
+      },
+    },
+    meta: { profileId: "scripted/ambient-disclosure", transport: "scripted", usedFallback: false },
+  });
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("disclose"),
+  });
+  const meeting = await readyFirstMeeting(service, "ambient-disclosure");
+  const decision = await service.decision(meeting.request);
+  const hidden = service.snapshot(meeting.started.runId);
+  const caretaker = hidden.actors.find(actor => actor.actorId === "NPC_Park_Caretaker");
+  assert.ok(caretaker);
+  const judgment = caretaker.memories.find(
+    memory => memory.kind === "ambient_stance_judgment",
+  );
+  assert.ok(judgment && judgment.kind === "ambient_stance_judgment");
+  assert.deepEqual(hidden.socialView.encounteredResidents, []);
+
+  await service.preloadConversation(
+    meeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ko-KR",
+  );
+  assert.deepEqual(
+    service.snapshot(meeting.started.runId).socialView.encounteredResidents,
+    [],
+    "preloading an opening is not a player encounter",
+  );
+  const started = await service.startConversation(
+    meeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ko-KR",
+  );
+  const disclosed = started.socialView.encounteredResidents.find(
+    resident => resident.actorId === caretaker.actorId,
+  );
+  assert.ok(disclosed);
+  assert.equal(disclosed.stance, "oppose");
+  assert.equal(disclosed.stanceRevision, judgment.worldRevision);
+  assert.equal(disclosed.whyLine, judgment.whyLine);
+  assert.equal(disclosed.provenance?.originActorId, decision.speechEvents[0]?.speakerActorId);
+  assert.equal(disclosed.provenance?.recipientActorId, caretaker.actorId);
+  assert.equal(disclosed.provenance?.sourceMemoryId, judgment.sourceMemoryId);
+  assert.equal(disclosed.provenance?.whyLine, judgment.whyLine);
+  const revision = started.socialView.revision;
+  const retried = await service.startConversation(
+    meeting.started.runId,
+    caretaker.actorId,
+    "ParkConversation",
+    "ko-KR",
+  );
+  assert.equal(retried.socialView.revision, revision, "a start retry cannot disclose twice");
+});
+
+test("a target evidence change while the ambient reply is pending makes the queued exchange stale with no partial speech", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalAmbientReply = adapter.judgeAndProposeAmbientReply.bind(adapter);
+  const entered = deferred();
+  const release = deferred();
+  adapter.judgeAndProposeAmbientReply = async request => {
+    entered.resolve();
+    await release.promise;
+    return originalAmbientReply(request);
+  };
+  const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds("stale") });
+  const meeting = await readyFirstMeeting(service, "ambient-stale-evidence");
+  const pending = service.decision(meeting.request);
+  await entered.promise;
+
+  await service.preloadConversation(
+    meeting.started.runId,
+    "NPC_Park_Caretaker",
+    "ParkConversation",
+    "ko-KR",
+  );
+  const playerConversation = await service.startConversation(
+    meeting.started.runId,
+    "NPC_Park_Caretaker",
+    "ParkConversation",
+    "ko-KR",
+  );
+  await service.answer(
+    meeting.started.runId,
+    playerConversation.sessionId,
+    playerConversation.nextTurn.turnId,
+    { type: "choice", choiceId: playerConversation.nextTurn.choices[0].choiceId },
+  );
+  release.resolve();
+  const queued = await pending;
+  assert.equal(queued.status, "queued");
+  const ended = await service.endConversation(
+    meeting.started.runId,
+    playerConversation.sessionId,
+  );
+  assert.deepEqual(ended.queuedRunDeltas, []);
+  const stale = await service.decision(meeting.request);
+  assert.equal(stale.status, "stale");
+  assert.deepEqual(stale.speechEvents, []);
+  const snapshot = service.snapshot(meeting.started.runId);
+  assert.equal(snapshot.ambientSpeech.cursor, 0);
+  assert.ok(snapshot.actors.every(actor =>
+    actor.memories.every(memory => memory.kind !== "ambient_stance_judgment")
+  ));
+});
+
+test("losing the ambient reserve after turn one commits neither speech nor judgment", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const original = adapter.proposeNextStep.bind(adapter);
+  let firstCallCompleted = false;
+  let firstCalls = 0;
+  let replyCalls = 0;
+  adapter.proposeNextStep = async request => {
+    firstCalls += 1;
+    const resolved = await original(request);
+    firstCallCompleted = true;
+    return resolved;
+  };
+  const originalAmbientReply = adapter.judgeAndProposeAmbientReply.bind(adapter);
+  adapter.judgeAndProposeAmbientReply = async request => {
+    replyCalls += 1;
+    return originalAmbientReply(request);
+  };
+  Object.defineProperty(adapter, "accountingSnapshot", {
+    value: () => ({ callsUsed: firstCallCompleted ? 99 : 0, tokensUsed: 0 }),
+  });
+  const service = new RunService({
+    proposalPort: adapter as NpcProposalPort,
+    idFactory: deterministicIds("second-reserve"),
+  });
+  const meeting = await readyFirstMeeting(service, "ambient-second-reserve");
+  const response = await service.decision(meeting.request);
+  assert.equal(response.status, "budget_reserved");
+  assert.equal(firstCalls, 1);
+  assert.equal(replyCalls, 0);
+  assert.deepEqual(response.speechEvents, []);
+  const snapshot = service.snapshot(meeting.started.runId);
+  assert.equal(snapshot.ambientSpeech.cursor, 0);
+  assert.ok(snapshot.actors.every(actor => actor.memories.length === 0));
 });
 
 test("the run reserve stops ambient dispatch before any provider spend", async () => {

@@ -14,6 +14,7 @@ signal movement_blocked(
 	anchor_ref: String,
 	reason: String
 )
+signal player_contact_ready(contact_id: String, actor_id: StringName)
 
 const POLICY_IDLE: StringName = &"idle"
 const POLICY_WALK: StringName = &"walk"
@@ -34,6 +35,10 @@ const WEAPON_NAME_TOKENS: PackedStringArray = [
 const SPEECH_BLIP_MIX_RATE := 22050
 const SPEECH_BLIP_SECONDS := 0.14
 const SPEECH_BLIP_FREQUENCY_HZ := 210.0
+const CONTACT_RETARGET_SECONDS := 0.25
+const CONTACT_RETARGET_DISTANCE_M := 0.5
+const CONTACT_MIN_SAFE_DISTANCE_M := 1.2
+const CONTACT_MAX_SAFE_DISTANCE_M := 2.2
 
 @export var actor_id: StringName
 @export var label_key: StringName
@@ -56,12 +61,23 @@ var _moving := false
 var _movement_id := ""
 var _movement_anchor_ref := ""
 var _movement_target := Vector3.ZERO
+var _contact_id := ""
+var _contact_target: Node3D
+var _contact_safe_distance := 1.6
+var _contact_retarget_remaining := 0.0
+var _contact_last_target_position := Vector3(INF, INF, INF)
+var _contact_moving := false
+var _contact_ready_emitted := false
+var _contact_ready_signaled := false
+var _contact_retarget_count := 0
+var _default_target_desired_distance := 0.4
 
 
 func _ready() -> void:
 	add_to_group(&"npc_actors")
 	add_to_group(&"interactables")
 	_navigation_agent.avoidance_enabled = false
+	_default_target_desired_distance = _navigation_agent.target_desired_distance
 	_navigation_agent.velocity_computed.connect(_on_velocity_computed)
 	_apply_role_accent()
 	_instantiate_character()
@@ -74,6 +90,10 @@ func _physics_process(delta: float) -> void:
 		velocity += get_gravity() * delta
 	elif velocity.y < 0.0:
 		velocity.y = 0.0
+
+	if not _contact_id.is_empty():
+		_process_player_contact(delta)
+		return
 
 	if _has_pending_target and _navigation_map_is_synchronized():
 		_begin_pending_move()
@@ -116,6 +136,10 @@ func apply_movement_command(
 		return false
 	if movement_id == _movement_id:
 		return true
+	if not _contact_id.is_empty():
+		# A schedule movement is presentation data; it cannot revoke the
+		# RunService-owned player contact order.
+		return false
 	_movement_id = movement_id
 	_movement_anchor_ref = anchor_ref
 	_movement_target = projected_target
@@ -124,10 +148,12 @@ func apply_movement_command(
 
 
 func stop() -> void:
+	_clear_contact_state()
 	_has_pending_target = false
 	_moving = false
 	_navigation_agent.avoidance_enabled = false
 	_navigation_agent.velocity = Vector3.ZERO
+	_navigation_agent.target_desired_distance = _default_target_desired_distance
 	velocity.x = 0.0
 	velocity.z = 0.0
 	set_policy_state(POLICY_IDLE)
@@ -142,6 +168,85 @@ func face_position(target_position: Vector3) -> void:
 		look_at(flat_target, Vector3.UP)
 
 
+func begin_player_contact(
+	contact_id: String,
+	target: Node3D,
+	safe_distance_m := 1.6
+) -> bool:
+	if contact_id.is_empty() or target == null:
+		return false
+	if contact_id == _contact_id and target == _contact_target:
+		_contact_safe_distance = clampf(
+			safe_distance_m,
+			CONTACT_MIN_SAFE_DISTANCE_M,
+			CONTACT_MAX_SAFE_DISTANCE_M
+		)
+		_navigation_agent.target_desired_distance = _contact_safe_distance
+		return true
+	stop()
+	_contact_id = contact_id
+	_contact_target = target
+	_contact_safe_distance = clampf(
+		safe_distance_m,
+		CONTACT_MIN_SAFE_DISTANCE_M,
+		CONTACT_MAX_SAFE_DISTANCE_M
+	)
+	_contact_retarget_remaining = 0.0
+	_contact_last_target_position = Vector3(INF, INF, INF)
+	_contact_moving = false
+	_contact_ready_emitted = false
+	_contact_ready_signaled = false
+	_contact_retarget_count = 0
+	_navigation_agent.target_desired_distance = _contact_safe_distance
+	set_policy_state(POLICY_WALK)
+	return true
+
+
+func cancel_player_contact(return_position: Variant = null) -> void:
+	if _contact_id.is_empty():
+		return
+	_clear_contact_state()
+	_has_pending_target = false
+	_moving = false
+	_navigation_agent.avoidance_enabled = false
+	_navigation_agent.velocity = Vector3.ZERO
+	_navigation_agent.target_desired_distance = _default_target_desired_distance
+	velocity.x = 0.0
+	velocity.z = 0.0
+	set_policy_state(POLICY_IDLE)
+	if return_position is Vector3:
+		# This is only visual recovery after an authoritative contact cancellation.
+		# It carries no runtime movement id and therefore cannot emit an arrival.
+		_movement_id = ""
+		_movement_anchor_ref = ""
+		_movement_target = return_position as Vector3
+		move_to(return_position as Vector3)
+
+
+func has_player_contact(contact_id := "") -> bool:
+	return (
+		not _contact_id.is_empty()
+		and (contact_id.is_empty() or contact_id == _contact_id)
+	)
+
+
+func player_contact_is_ready(contact_id: String) -> bool:
+	return contact_id == _contact_id and _contact_ready_emitted
+
+
+func contact_status() -> Dictionary:
+	return {
+		"contactId": _contact_id,
+		"active": not _contact_id.is_empty(),
+		"moving": _contact_moving,
+		"ready": _contact_ready_emitted,
+		"readySignaled": _contact_ready_signaled,
+		"safeDistanceM": _contact_safe_distance,
+		"retargetCount": _contact_retarget_count,
+		"lastTargetPosition": _contact_last_target_position,
+	}
+
+
 func play_speech_blip(max_distance_m: float) -> void:
 	if max_distance_m <= 0.0 or _speech_blip.stream == null:
 		return
@@ -150,7 +255,7 @@ func play_speech_blip(max_distance_m: float) -> void:
 
 
 func is_moving() -> bool:
-	return _moving
+	return _moving or _contact_moving
 
 
 func movement_status() -> Dictionary:
@@ -242,11 +347,113 @@ func _navigation_map_is_synchronized() -> bool:
 
 
 func _on_velocity_computed(safe_velocity: Vector3) -> void:
-	if not _moving:
+	if not _moving and not _contact_moving:
 		return
 	velocity.x = safe_velocity.x
 	velocity.z = safe_velocity.z
 	move_and_slide()
+
+
+func _process_player_contact(delta: float) -> void:
+	if not is_instance_valid(_contact_target):
+		cancel_player_contact()
+		move_and_slide()
+		return
+	var target_position := _contact_target.global_position
+	var planar_distance := _planar_distance(global_position, target_position)
+	if (
+		planar_distance <= _contact_safe_distance + 0.15
+		and _contact_has_line_of_sight()
+	):
+		_contact_moving = false
+		_navigation_agent.avoidance_enabled = false
+		_navigation_agent.velocity = Vector3.ZERO
+		velocity.x = 0.0
+		velocity.z = 0.0
+		set_policy_state(POLICY_IDLE)
+		face_position(target_position + Vector3.UP * 1.35)
+		_contact_ready_emitted = true
+		if not _contact_ready_signaled:
+			_contact_ready_signaled = true
+			player_contact_ready.emit(_contact_id, actor_id)
+		move_and_slide()
+		return
+
+	_contact_retarget_remaining = maxf(0.0, _contact_retarget_remaining - delta)
+	var target_moved := (
+		_contact_last_target_position.x == INF
+		or _planar_distance(target_position, _contact_last_target_position)
+		>= CONTACT_RETARGET_DISTANCE_M
+	)
+	if (
+		is_zero_approx(_contact_retarget_remaining)
+		and target_moved
+		and _navigation_map_is_synchronized()
+	):
+		var navigation_map := _navigation_agent.get_navigation_map()
+		var projected_target := NavigationServer3D.map_get_closest_point(
+			navigation_map,
+			target_position
+		)
+		_navigation_agent.target_position = projected_target
+		_contact_last_target_position = target_position
+		_contact_retarget_remaining = CONTACT_RETARGET_SECONDS
+		_contact_retarget_count += 1
+		_contact_moving = true
+		_contact_ready_emitted = false
+		_navigation_agent.avoidance_enabled = true
+		set_policy_state(POLICY_WALK)
+		# Let NavigationServer3D synchronize the refreshed target before querying.
+		move_and_slide()
+		return
+
+	if not _contact_moving or _navigation_agent.is_navigation_finished():
+		velocity.x = 0.0
+		velocity.z = 0.0
+		move_and_slide()
+		return
+	var next_path_position := _navigation_agent.get_next_path_position()
+	var desired_direction := next_path_position - global_position
+	desired_direction.y = 0.0
+	if not desired_direction.is_zero_approx():
+		desired_direction = desired_direction.normalized()
+		look_at(global_position + desired_direction, Vector3.UP)
+	_navigation_agent.velocity = desired_direction * walk_speed
+
+
+func _contact_has_line_of_sight() -> bool:
+	if not is_instance_valid(_contact_target):
+		return false
+	var source_eye := global_position + Vector3.UP * 1.35
+	var target_eye := _contact_target.global_position + Vector3.UP * 1.35
+	var query := PhysicsRayQueryParameters3D.create(source_eye, target_eye)
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	query.exclude = [get_rid()]
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return false
+	var collider_value: Variant = hit.get("collider")
+	if not collider_value is Node:
+		return false
+	var current := collider_value as Node
+	while current != null:
+		if current == _contact_target:
+			return true
+		current = current.get_parent()
+	return false
+
+
+func _clear_contact_state() -> void:
+	_contact_id = ""
+	_contact_target = null
+	_contact_safe_distance = 1.6
+	_contact_retarget_remaining = 0.0
+	_contact_last_target_position = Vector3(INF, INF, INF)
+	_contact_moving = false
+	_contact_ready_emitted = false
+	_contact_ready_signaled = false
+	_contact_retarget_count = 0
 
 
 func _instantiate_character() -> void:

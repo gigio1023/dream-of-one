@@ -54,6 +54,21 @@ results queue without mutating until the world resumes. A stale proposal gets
 the structured current-state result and yields or replans; it never applies to
 the world it imagined.
 
+NPC-initiated player contact uses the same wake and tool path. After the grace
+period, the runtime may expose `move_to(player)` to exactly one grounded
+resident whose current zone, engine-reported sightline, and navmesh path make
+an approach possible. The provider still decides whether that resident's role
+and memories warrant approaching. A validated choice creates one short-lived
+contact lease; it does not open a conversation, change a stance, or move
+institutional pressure. Godot follows the moving player with ordinary
+navigation until the safe distance is reached, then starts the existing
+preloaded player conversation with the lease id. Walking away until the lease
+expires leaves one attributed `not_engaged` fact in the initiator's memory.
+That fact may inform a later provider judgment, but the runtime never turns it
+into a scripted social consequence. Opportunity epochs and cooldowns are
+measured in world time, so this remains event-driven rather than a provider
+call per tick.
+
 ### Bounded NPC-to-NPC conversation
 
 `talk_to` begins a real two-agent conversation, not a ledger-only notification.
@@ -70,7 +85,7 @@ There is no model-generated transcript summary standing in for the exchange.
 
 | Tool | Effect | Validation highlights |
 |---|---|---|
-| `move_to(place_or_actor)` | Pathfind toward a navpoint/actor | Reachability, role area permissions |
+| `move_to(place_or_actor)` | Pathfind toward a navpoint/actor; `player` may be offered to one runtime-selected contact candidate | Reachability, role area permissions, current contact lease/zone/cooldown |
 | `look(target)` | Add a visible object/actor/record to context | Line of sight, visibility rules |
 | `talk_to(actor, intent)` | Open/continue conversation; provider utterance, or a marked deterministic fallback utterance | Target availability (busy/refusing), social rules; scripted lines stay fixture/test-only |
 | `wait(reason)` | Yield a beat, keep intent | Always valid; consumes iteration |

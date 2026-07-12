@@ -38,16 +38,20 @@ func start_conversation(
 	run_id: String,
 	actor_id: String,
 	interaction_zone_id: String,
-	locale: String
+	locale: String,
+	contact_id := ""
 ) -> Dictionary:
+	var body := {
+		"runId": run_id,
+		"actorId": actor_id,
+		"interactionZoneId": interaction_zone_id,
+		"locale": locale,
+	}
+	if not contact_id.is_empty():
+		body["contactId"] = contact_id
 	return await _post(
 		"/v1/session/start",
-		{
-			"runId": run_id,
-			"actorId": actor_id,
-			"interactionZoneId": interaction_zone_id,
-			"locale": locale,
-		},
+		body,
 		START_TIMEOUT_SECONDS,
 		"conversation_start_failed"
 	)

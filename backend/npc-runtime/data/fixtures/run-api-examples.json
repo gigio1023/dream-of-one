@@ -213,6 +213,7 @@
           "events": [],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [],
         "ledgerEvents": [],
         "socialView": {
@@ -388,7 +389,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     "runAdvanceArrival": {
@@ -668,7 +670,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     "runAdvanceRoute": {
@@ -922,7 +925,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     "runAdvanceRouteRetry": {
@@ -1176,7 +1180,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     "runSnapshotAfterAdvance": {
@@ -1393,6 +1398,7 @@
           "events": [],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [],
         "ledgerEvents": [],
         "socialView": {
@@ -1619,7 +1625,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     "runAdvanceSpatialFacts": {
@@ -1632,6 +1639,14 @@
         "arrivals": [],
         "spatialFacts": {
           "observedWorldRevision": 0,
+          "player": {
+            "position": [
+              8,
+              0.05,
+              5
+            ],
+            "locationId": ""
+          },
           "actors": [
             {
               "actorId": "NPC_Studio_Receptionist",
@@ -1647,7 +1662,11 @@
               ],
               "visibleActorIds": [],
               "audibleActorIds": [],
-              "visibleObjectIds": []
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
             },
             {
               "actorId": "NPC_Studio_Manager",
@@ -1664,7 +1683,11 @@
               ],
               "visibleActorIds": [],
               "audibleActorIds": [],
-              "visibleObjectIds": []
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
             },
             {
               "actorId": "NPC_Office_Worker",
@@ -1681,7 +1704,11 @@
               ],
               "visibleActorIds": [],
               "audibleActorIds": [],
-              "visibleObjectIds": []
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
             },
             {
               "actorId": "NPC_Park_Caretaker",
@@ -1699,7 +1726,11 @@
               ],
               "visibleActorIds": [],
               "audibleActorIds": [],
-              "visibleObjectIds": []
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
             },
             {
               "actorId": "NPC_Station_Officer",
@@ -1716,7 +1747,11 @@
               ],
               "visibleActorIds": [],
               "audibleActorIds": [],
-              "visibleObjectIds": []
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
             },
             {
               "actorId": "NPC_Roaming_Liaison",
@@ -1736,7 +1771,11 @@
               ],
               "visibleActorIds": [],
               "audibleActorIds": [],
-              "visibleObjectIds": []
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
             }
           ]
         }
@@ -1761,7 +1800,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:cd44a7b0f36ff01f",
+            "sourceId": "goal:238d9ad696d15e53",
             "actorIds": [
               "NPC_Office_Worker"
             ],
@@ -1774,7 +1813,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:7e9d0eddc97463e0",
+            "sourceId": "goal:562e4395f5cece7e",
             "actorIds": [
               "NPC_Park_Caretaker"
             ],
@@ -1787,7 +1826,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:e3b17457b3e6b05d",
+            "sourceId": "goal:8ee092bd78fe1c46",
             "actorIds": [
               "NPC_Roaming_Liaison"
             ],
@@ -1800,7 +1839,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:9948be6da80ab537",
+            "sourceId": "goal:858b5d3df1c2eb35",
             "actorIds": [
               "NPC_Station_Officer"
             ],
@@ -1813,7 +1852,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:c87132181bdfae82",
+            "sourceId": "goal:00fe99a6334ea5ee",
             "actorIds": [
               "NPC_Studio_Manager"
             ],
@@ -1826,7 +1865,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:ce4769d0d8cb6f37",
+            "sourceId": "goal:20ba60f4a9f64f17",
             "actorIds": [
               "NPC_Studio_Receptionist"
             ],
@@ -1839,7 +1878,7 @@
             "wakeId": "wake:run-fixture-1:observation:NPC_Office_Worker:1",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:2e7332267166eea5",
+            "sourceId": "spatial:ec1693f2b796366b",
             "actorIds": [
               "NPC_Office_Worker"
             ],
@@ -1852,7 +1891,7 @@
             "wakeId": "wake:run-fixture-1:observation:NPC_Park_Caretaker:1",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:bc7c164d10b544b3",
+            "sourceId": "spatial:67eb5ceef862b7fa",
             "actorIds": [
               "NPC_Park_Caretaker"
             ],
@@ -1865,7 +1904,7 @@
             "wakeId": "wake:run-fixture-1:observation:NPC_Roaming_Liaison:1",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:5774838761be2552",
+            "sourceId": "spatial:96b55fa5b16737fa",
             "actorIds": [
               "NPC_Roaming_Liaison"
             ],
@@ -1878,7 +1917,7 @@
             "wakeId": "wake:run-fixture-1:observation:NPC_Station_Officer:1",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:9af09cb99bf31199",
+            "sourceId": "spatial:279cbe244d5894e7",
             "actorIds": [
               "NPC_Station_Officer"
             ],
@@ -1891,7 +1930,7 @@
             "wakeId": "wake:run-fixture-1:observation:NPC_Studio_Manager:1",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:b60eea2933e4d137",
+            "sourceId": "spatial:49f7da05752638cd",
             "actorIds": [
               "NPC_Studio_Manager"
             ],
@@ -1904,7 +1943,7 @@
             "wakeId": "wake:run-fixture-1:observation:NPC_Studio_Receptionist:1",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:59175e02c751f0a6",
+            "sourceId": "spatial:f1db2745bea32dbb",
             "actorIds": [
               "NPC_Studio_Receptionist"
             ],
@@ -1957,7 +1996,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:cd44a7b0f36ff01f",
+              "sourceId": "goal:238d9ad696d15e53",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -1970,7 +2009,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:7e9d0eddc97463e0",
+              "sourceId": "goal:562e4395f5cece7e",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -1983,7 +2022,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e3b17457b3e6b05d",
+              "sourceId": "goal:8ee092bd78fe1c46",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -1996,7 +2035,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:9948be6da80ab537",
+              "sourceId": "goal:858b5d3df1c2eb35",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -2009,7 +2048,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:c87132181bdfae82",
+              "sourceId": "goal:00fe99a6334ea5ee",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -2022,7 +2061,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:ce4769d0d8cb6f37",
+              "sourceId": "goal:20ba60f4a9f64f17",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -2156,7 +2195,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     "npcDecisionVariants": [
@@ -2368,7 +2408,8 @@
             "encounteredResidents": [],
             "openQuestions": [],
             "encounteredRecords": []
-          }
+          },
+          "activeContact": null
         }
       },
       {
@@ -2415,7 +2456,8 @@
             "encounteredResidents": [],
             "openQuestions": [],
             "encounteredRecords": []
-          }
+          },
+          "activeContact": null
         }
       },
       {
@@ -2462,7 +2504,8 @@
             "encounteredResidents": [],
             "openQuestions": [],
             "encounteredRecords": []
-          }
+          },
+          "activeContact": null
         }
       },
       {
@@ -2509,7 +2552,8 @@
             "encounteredResidents": [],
             "openQuestions": [],
             "encounteredRecords": []
-          }
+          },
+          "activeContact": null
         }
       },
       {
@@ -2556,7 +2600,8 @@
             "encounteredResidents": [],
             "openQuestions": [],
             "encounteredRecords": []
-          }
+          },
+          "activeContact": null
         }
       },
       {
@@ -2603,7 +2648,8 @@
             "encounteredResidents": [],
             "openQuestions": [],
             "encounteredRecords": []
-          }
+          },
+          "activeContact": null
         }
       },
       {
@@ -2650,10 +2696,1108 @@
             "encounteredResidents": [],
             "openQuestions": [],
             "encounteredRecords": []
-          }
+          },
+          "activeContact": null
         }
       }
     ],
+    "runAdvancePlayerContactOpportunity": {
+      "endpoint": "POST /v1/run/advance",
+      "request": {
+        "runId": "run-fixture-1",
+        "advanceId": "fixture-contact-opportunity",
+        "observedWorldRevision": 10,
+        "elapsedSeconds": 0,
+        "arrivals": [],
+        "spatialFacts": {
+          "observedWorldRevision": 10,
+          "player": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "locationId": "Park"
+          },
+          "actors": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "position": [
+                -2,
+                0,
+                -15
+              ],
+              "reachableAnchorRefs": [
+                "Studio.receptionist_spawn",
+                "Studio.reception_desk",
+                "Studio.waiting_seats"
+              ],
+              "visibleActorIds": [],
+              "audibleActorIds": [],
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
+            },
+            {
+              "actorId": "NPC_Studio_Manager",
+              "position": [
+                -0.8,
+                0,
+                -4
+              ],
+              "reachableAnchorRefs": [
+                "Park.meeting_north_west"
+              ],
+              "visibleActorIds": [],
+              "audibleActorIds": [],
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
+            },
+            {
+              "actorId": "NPC_Office_Worker",
+              "position": [
+                -16,
+                0,
+                2.5
+              ],
+              "reachableAnchorRefs": [
+                "Office.worker_spawn",
+                "Office.work_desk",
+                "Office.filing_wall",
+                "Office.meeting_table"
+              ],
+              "visibleActorIds": [],
+              "audibleActorIds": [],
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
+            },
+            {
+              "actorId": "NPC_Park_Caretaker",
+              "position": [
+                0.8,
+                0,
+                -4
+              ],
+              "reachableAnchorRefs": [
+                "Park.meeting_north_east"
+              ],
+              "visibleActorIds": [],
+              "audibleActorIds": [],
+              "visibleObjectIds": [],
+              "playerVisible": true,
+              "playerAudible": true,
+              "playerReachable": true,
+              "playerInteractionZoneId": "ParkConversation"
+            },
+            {
+              "actorId": "NPC_Station_Officer",
+              "position": [
+                18,
+                0,
+                -2
+              ],
+              "reachableAnchorRefs": [
+                "Station.officer_spawn",
+                "Station.intake_desk",
+                "Station.waiting_seats",
+                "Station.hearing_table"
+              ],
+              "visibleActorIds": [],
+              "audibleActorIds": [],
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
+            },
+            {
+              "actorId": "NPC_Roaming_Liaison",
+              "position": [
+                -16,
+                0,
+                2.5
+              ],
+              "reachableAnchorRefs": [
+                "Park.liaison_spawn",
+                "Park.studio_approach",
+                "Studio.waiting_seats",
+                "Park.office_approach",
+                "Office.meeting_table",
+                "Park.station_approach",
+                "Station.waiting_seats"
+              ],
+              "visibleActorIds": [],
+              "audibleActorIds": [],
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
+            }
+          ]
+        }
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "advanceId": "fixture-contact-opportunity",
+        "previousWorldRevision": 10,
+        "worldRevision": 11,
+        "clock": {
+          "fromSeconds": 90,
+          "toSeconds": 90,
+          "requestedElapsedSeconds": 0,
+          "appliedElapsedSeconds": 0,
+          "graceEnded": false,
+          "hearingDue": false
+        },
+        "arrivalsApplied": [],
+        "arrivalsRejected": [],
+        "scheduleWakes": [
+          {
+            "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
+            "kind": "goal",
+            "phase": "due",
+            "sourceId": "goal:45ab90da877277e5",
+            "actorIds": [
+              "NPC_Park_Caretaker"
+            ],
+            "scheduledAtSeconds": 90,
+            "observedWorldRevision": 11,
+            "requiresDecision": true,
+            "status": "pending"
+          },
+          {
+            "wakeId": "wake:run-fixture-1:observation:NPC_Park_Caretaker:11",
+            "kind": "observation",
+            "phase": "due",
+            "sourceId": "spatial:b5b3d9d5cb60aa57",
+            "actorIds": [
+              "NPC_Park_Caretaker"
+            ],
+            "scheduledAtSeconds": 90,
+            "observedWorldRevision": 11,
+            "requiresDecision": false,
+            "status": "informational"
+          }
+        ],
+        "movementDeltas": [],
+        "actorReadinessDeltas": [],
+        "ambientSpeechEvents": [],
+        "ambientSpeechCursor": 0,
+        "scheduler": {
+          "routeCadenceSeconds": 28,
+          "activeMeetingWindowIds": [
+            "MEET_MANAGER_CARETAKER"
+          ],
+          "pendingWakes": [
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:238d9ad696d15e53",
+              "actorIds": [
+                "NPC_Office_Worker"
+              ],
+              "scheduledAtSeconds": 10,
+              "observedWorldRevision": 1,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:562e4395f5cece7e",
+              "actorIds": [
+                "NPC_Park_Caretaker"
+              ],
+              "scheduledAtSeconds": 10,
+              "observedWorldRevision": 1,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:8ee092bd78fe1c46",
+              "actorIds": [
+                "NPC_Roaming_Liaison"
+              ],
+              "scheduledAtSeconds": 10,
+              "observedWorldRevision": 1,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:858b5d3df1c2eb35",
+              "actorIds": [
+                "NPC_Station_Officer"
+              ],
+              "scheduledAtSeconds": 10,
+              "observedWorldRevision": 1,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:00fe99a6334ea5ee",
+              "actorIds": [
+                "NPC_Studio_Manager"
+              ],
+              "scheduledAtSeconds": 10,
+              "observedWorldRevision": 1,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:20ba60f4a9f64f17",
+              "actorIds": [
+                "NPC_Studio_Receptionist"
+              ],
+              "scheduledAtSeconds": 10,
+              "observedWorldRevision": 1,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:10",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:b1872fec0c612450",
+              "actorIds": [
+                "NPC_Park_Caretaker"
+              ],
+              "scheduledAtSeconds": 90,
+              "observedWorldRevision": 10,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:45ab90da877277e5",
+              "actorIds": [
+                "NPC_Park_Caretaker"
+              ],
+              "scheduledAtSeconds": 90,
+              "observedWorldRevision": 11,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:10",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:87952385b8d833cc",
+              "actorIds": [
+                "NPC_Studio_Manager"
+              ],
+              "scheduledAtSeconds": 90,
+              "observedWorldRevision": 10,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
+              "kind": "meeting_ready",
+              "phase": "due",
+              "sourceId": "MEET_MANAGER_CARETAKER",
+              "actorIds": [
+                "NPC_Studio_Manager",
+                "NPC_Park_Caretaker"
+              ],
+              "scheduledAtSeconds": 90,
+              "observedWorldRevision": 10,
+              "requiresDecision": true,
+              "status": "pending"
+            }
+          ],
+          "actors": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "routeId": "StudioFrontDesk",
+              "currentBlock": {
+                "blockId": "NPC_Studio_Receptionist.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 460,
+                "activity": "front_desk",
+                "targetKind": "route",
+                "targetId": "StudioFrontDesk"
+              },
+              "confirmedAnchorRef": "Studio.reception_desk",
+              "desiredAnchorRef": "Studio.reception_desk",
+              "routePointIndex": 3,
+              "routePointArrivedAtSeconds": 80,
+              "nextRouteMoveAtSeconds": 93,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Studio_Manager",
+              "routeId": "StudioManagerRound",
+              "currentBlock": {
+                "blockId": "NPC_Studio_Manager.schedule.1",
+                "startSeconds": 90,
+                "endSeconds": 230,
+                "activity": "park_meeting",
+                "targetKind": "anchor",
+                "targetId": "Park.meeting_north_west"
+              },
+              "confirmedAnchorRef": "Park.meeting_north_west",
+              "desiredAnchorRef": "Park.meeting_north_west",
+              "routePointIndex": null,
+              "routePointArrivedAtSeconds": null,
+              "nextRouteMoveAtSeconds": null,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Office_Worker",
+              "routeId": "OfficeShift",
+              "currentBlock": {
+                "blockId": "NPC_Office_Worker.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 700,
+                "activity": "office_work",
+                "targetKind": "route",
+                "targetId": "OfficeShift"
+              },
+              "confirmedAnchorRef": "Office.meeting_table",
+              "desiredAnchorRef": "Office.meeting_table",
+              "routePointIndex": 3,
+              "routePointArrivedAtSeconds": 70,
+              "nextRouteMoveAtSeconds": 93,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Park_Caretaker",
+              "routeId": "ParkCaretakerRound",
+              "currentBlock": {
+                "blockId": "NPC_Park_Caretaker.schedule.1",
+                "startSeconds": 90,
+                "endSeconds": 230,
+                "activity": "park_meeting",
+                "targetKind": "anchor",
+                "targetId": "Park.meeting_north_east"
+              },
+              "confirmedAnchorRef": "Park.meeting_north_east",
+              "desiredAnchorRef": "Park.meeting_north_east",
+              "routePointIndex": null,
+              "routePointArrivedAtSeconds": null,
+              "nextRouteMoveAtSeconds": null,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Station_Officer",
+              "routeId": "StationDuty",
+              "currentBlock": {
+                "blockId": "NPC_Station_Officer.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 1060,
+                "activity": "station_duty",
+                "targetKind": "route",
+                "targetId": "StationDuty"
+              },
+              "confirmedAnchorRef": "Station.hearing_table",
+              "desiredAnchorRef": "Station.hearing_table",
+              "routePointIndex": 3,
+              "routePointArrivedAtSeconds": 80,
+              "nextRouteMoveAtSeconds": 94,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Roaming_Liaison",
+              "routeId": "TownLiaisonCircuit",
+              "currentBlock": {
+                "blockId": "NPC_Roaming_Liaison.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 700,
+                "activity": "town_round",
+                "targetKind": "route",
+                "targetId": "TownLiaisonCircuit"
+              },
+              "confirmedAnchorRef": "Office.meeting_table",
+              "desiredAnchorRef": "Office.meeting_table",
+              "routePointIndex": 4,
+              "routePointArrivedAtSeconds": 90,
+              "nextRouteMoveAtSeconds": 103,
+              "pendingMovement": null
+            }
+          ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
+        },
+        "activeContact": null
+      }
+    },
+    "npcDecisionPlayerContact": {
+      "endpoint": "POST /v1/npc/decision",
+      "request": {
+        "runId": "run-fixture-1",
+        "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
+        "observedWorldRevision": 11
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
+        "decisionKind": "actor_goal",
+        "wakeKind": "goal",
+        "actorIds": [
+          "NPC_Park_Caretaker"
+        ],
+        "status": "completed",
+        "observedWorldRevision": 11,
+        "worldRevision": 12,
+        "conversationId": null,
+        "participantActorIds": [],
+        "speechEvents": [],
+        "actorReadinessDeltas": [],
+        "actionDeltas": [],
+        "movementDeltas": [],
+        "providerMetas": [
+          {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        ],
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
+        },
+        "activeContact": {
+          "contactId": "contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
+          "actorId": "NPC_Park_Caretaker",
+          "interactionZoneId": "ParkConversation",
+          "originAnchorRef": "Park.meeting_north_east",
+          "safeDistanceM": 2.2,
+          "issuedAtSeconds": 90,
+          "expiresAtSeconds": 120,
+          "reason": "현재 역할과 기억을 바탕으로 방문자에게 직접 확인할 필요가 있습니다."
+        }
+      }
+    },
+    "sessionPreloadPlayerContact": {
+      "endpoint": "POST /v1/session/preload",
+      "request": {
+        "runId": "run-fixture-1",
+        "actorId": "NPC_Park_Caretaker",
+        "interactionZoneId": "ParkConversation",
+        "locale": "ko-KR"
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "worldRevision": 13,
+        "interactionZoneId": "ParkConversation",
+        "actor": {
+          "actorId": "NPC_Park_Caretaker",
+          "role": "park_caretaker",
+          "locationId": "Park",
+          "stance": "uncertain",
+          "suspicion": 0,
+          "playerConversationReady": true,
+          "hasMeaningfulFirsthandConversation": false,
+          "memories": []
+        },
+        "proposalMeta": {
+          "profileId": "scripted/test",
+          "transport": "scripted",
+          "usedFallback": false
+        },
+        "activeContact": {
+          "contactId": "contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
+          "actorId": "NPC_Park_Caretaker",
+          "interactionZoneId": "ParkConversation",
+          "originAnchorRef": "Park.meeting_north_east",
+          "safeDistanceM": 2.2,
+          "issuedAtSeconds": 90,
+          "expiresAtSeconds": 120,
+          "reason": "현재 역할과 기억을 바탕으로 방문자에게 직접 확인할 필요가 있습니다."
+        }
+      }
+    },
+    "runAdvancePlayerContactSafeDistance": {
+      "endpoint": "POST /v1/run/advance",
+      "request": {
+        "runId": "run-fixture-1",
+        "advanceId": "fixture-contact-safe-distance",
+        "observedWorldRevision": 13,
+        "elapsedSeconds": 0,
+        "arrivals": [],
+        "spatialFacts": {
+          "observedWorldRevision": 13,
+          "player": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "locationId": "Park"
+          },
+          "actors": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "position": [
+                -2,
+                0,
+                -15
+              ],
+              "reachableAnchorRefs": [
+                "Studio.receptionist_spawn",
+                "Studio.reception_desk",
+                "Studio.waiting_seats"
+              ],
+              "visibleActorIds": [],
+              "audibleActorIds": [],
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
+            },
+            {
+              "actorId": "NPC_Studio_Manager",
+              "position": [
+                -0.8,
+                0,
+                -4
+              ],
+              "reachableAnchorRefs": [
+                "Park.meeting_north_west"
+              ],
+              "visibleActorIds": [],
+              "audibleActorIds": [],
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
+            },
+            {
+              "actorId": "NPC_Office_Worker",
+              "position": [
+                -16,
+                0,
+                2.5
+              ],
+              "reachableAnchorRefs": [
+                "Office.worker_spawn",
+                "Office.work_desk",
+                "Office.filing_wall",
+                "Office.meeting_table"
+              ],
+              "visibleActorIds": [],
+              "audibleActorIds": [],
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
+            },
+            {
+              "actorId": "NPC_Park_Caretaker",
+              "position": [
+                0,
+                0,
+                0
+              ],
+              "reachableAnchorRefs": [
+                "Park.meeting_north_east"
+              ],
+              "visibleActorIds": [],
+              "audibleActorIds": [],
+              "visibleObjectIds": [],
+              "playerVisible": true,
+              "playerAudible": true,
+              "playerReachable": true,
+              "playerInteractionZoneId": "ParkConversation"
+            },
+            {
+              "actorId": "NPC_Station_Officer",
+              "position": [
+                18,
+                0,
+                -2
+              ],
+              "reachableAnchorRefs": [
+                "Station.officer_spawn",
+                "Station.intake_desk",
+                "Station.waiting_seats",
+                "Station.hearing_table"
+              ],
+              "visibleActorIds": [],
+              "audibleActorIds": [],
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
+            },
+            {
+              "actorId": "NPC_Roaming_Liaison",
+              "position": [
+                -16,
+                0,
+                2.5
+              ],
+              "reachableAnchorRefs": [
+                "Park.liaison_spawn",
+                "Park.studio_approach",
+                "Studio.waiting_seats",
+                "Park.office_approach",
+                "Office.meeting_table",
+                "Park.station_approach",
+                "Station.waiting_seats"
+              ],
+              "visibleActorIds": [],
+              "audibleActorIds": [],
+              "visibleObjectIds": [],
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
+            }
+          ]
+        }
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "advanceId": "fixture-contact-safe-distance",
+        "previousWorldRevision": 13,
+        "worldRevision": 14,
+        "clock": {
+          "fromSeconds": 90,
+          "toSeconds": 90,
+          "requestedElapsedSeconds": 0,
+          "appliedElapsedSeconds": 0,
+          "graceEnded": false,
+          "hearingDue": false
+        },
+        "arrivalsApplied": [],
+        "arrivalsRejected": [],
+        "scheduleWakes": [
+          {
+            "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:14",
+            "kind": "goal",
+            "phase": "due",
+            "sourceId": "goal:42317f8b1fa506b3",
+            "actorIds": [
+              "NPC_Park_Caretaker"
+            ],
+            "scheduledAtSeconds": 90,
+            "observedWorldRevision": 14,
+            "requiresDecision": true,
+            "status": "pending"
+          }
+        ],
+        "movementDeltas": [],
+        "actorReadinessDeltas": [],
+        "ambientSpeechEvents": [],
+        "ambientSpeechCursor": 0,
+        "scheduler": {
+          "routeCadenceSeconds": 28,
+          "activeMeetingWindowIds": [
+            "MEET_MANAGER_CARETAKER"
+          ],
+          "pendingWakes": [
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:238d9ad696d15e53",
+              "actorIds": [
+                "NPC_Office_Worker"
+              ],
+              "scheduledAtSeconds": 10,
+              "observedWorldRevision": 1,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:562e4395f5cece7e",
+              "actorIds": [
+                "NPC_Park_Caretaker"
+              ],
+              "scheduledAtSeconds": 10,
+              "observedWorldRevision": 1,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:8ee092bd78fe1c46",
+              "actorIds": [
+                "NPC_Roaming_Liaison"
+              ],
+              "scheduledAtSeconds": 10,
+              "observedWorldRevision": 1,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:858b5d3df1c2eb35",
+              "actorIds": [
+                "NPC_Station_Officer"
+              ],
+              "scheduledAtSeconds": 10,
+              "observedWorldRevision": 1,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:00fe99a6334ea5ee",
+              "actorIds": [
+                "NPC_Studio_Manager"
+              ],
+              "scheduledAtSeconds": 10,
+              "observedWorldRevision": 1,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:20ba60f4a9f64f17",
+              "actorIds": [
+                "NPC_Studio_Receptionist"
+              ],
+              "scheduledAtSeconds": 10,
+              "observedWorldRevision": 1,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:10",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:b1872fec0c612450",
+              "actorIds": [
+                "NPC_Park_Caretaker"
+              ],
+              "scheduledAtSeconds": 90,
+              "observedWorldRevision": 10,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:14",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:42317f8b1fa506b3",
+              "actorIds": [
+                "NPC_Park_Caretaker"
+              ],
+              "scheduledAtSeconds": 90,
+              "observedWorldRevision": 14,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:10",
+              "kind": "goal",
+              "phase": "due",
+              "sourceId": "goal:87952385b8d833cc",
+              "actorIds": [
+                "NPC_Studio_Manager"
+              ],
+              "scheduledAtSeconds": 90,
+              "observedWorldRevision": 10,
+              "requiresDecision": true,
+              "status": "pending"
+            },
+            {
+              "wakeId": "wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
+              "kind": "meeting_ready",
+              "phase": "due",
+              "sourceId": "MEET_MANAGER_CARETAKER",
+              "actorIds": [
+                "NPC_Studio_Manager",
+                "NPC_Park_Caretaker"
+              ],
+              "scheduledAtSeconds": 90,
+              "observedWorldRevision": 10,
+              "requiresDecision": true,
+              "status": "pending"
+            }
+          ],
+          "actors": [
+            {
+              "actorId": "NPC_Studio_Receptionist",
+              "routeId": "StudioFrontDesk",
+              "currentBlock": {
+                "blockId": "NPC_Studio_Receptionist.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 460,
+                "activity": "front_desk",
+                "targetKind": "route",
+                "targetId": "StudioFrontDesk"
+              },
+              "confirmedAnchorRef": "Studio.reception_desk",
+              "desiredAnchorRef": "Studio.reception_desk",
+              "routePointIndex": 3,
+              "routePointArrivedAtSeconds": 80,
+              "nextRouteMoveAtSeconds": 93,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Studio_Manager",
+              "routeId": "StudioManagerRound",
+              "currentBlock": {
+                "blockId": "NPC_Studio_Manager.schedule.1",
+                "startSeconds": 90,
+                "endSeconds": 230,
+                "activity": "park_meeting",
+                "targetKind": "anchor",
+                "targetId": "Park.meeting_north_west"
+              },
+              "confirmedAnchorRef": "Park.meeting_north_west",
+              "desiredAnchorRef": "Park.meeting_north_west",
+              "routePointIndex": null,
+              "routePointArrivedAtSeconds": null,
+              "nextRouteMoveAtSeconds": null,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Office_Worker",
+              "routeId": "OfficeShift",
+              "currentBlock": {
+                "blockId": "NPC_Office_Worker.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 700,
+                "activity": "office_work",
+                "targetKind": "route",
+                "targetId": "OfficeShift"
+              },
+              "confirmedAnchorRef": "Office.meeting_table",
+              "desiredAnchorRef": "Office.meeting_table",
+              "routePointIndex": 3,
+              "routePointArrivedAtSeconds": 70,
+              "nextRouteMoveAtSeconds": 93,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Park_Caretaker",
+              "routeId": "ParkCaretakerRound",
+              "currentBlock": {
+                "blockId": "NPC_Park_Caretaker.schedule.1",
+                "startSeconds": 90,
+                "endSeconds": 230,
+                "activity": "park_meeting",
+                "targetKind": "anchor",
+                "targetId": "Park.meeting_north_east"
+              },
+              "confirmedAnchorRef": "Park.meeting_north_east",
+              "desiredAnchorRef": "Park.meeting_north_east",
+              "routePointIndex": null,
+              "routePointArrivedAtSeconds": null,
+              "nextRouteMoveAtSeconds": null,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Station_Officer",
+              "routeId": "StationDuty",
+              "currentBlock": {
+                "blockId": "NPC_Station_Officer.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 1060,
+                "activity": "station_duty",
+                "targetKind": "route",
+                "targetId": "StationDuty"
+              },
+              "confirmedAnchorRef": "Station.hearing_table",
+              "desiredAnchorRef": "Station.hearing_table",
+              "routePointIndex": 3,
+              "routePointArrivedAtSeconds": 80,
+              "nextRouteMoveAtSeconds": 94,
+              "pendingMovement": null
+            },
+            {
+              "actorId": "NPC_Roaming_Liaison",
+              "routeId": "TownLiaisonCircuit",
+              "currentBlock": {
+                "blockId": "NPC_Roaming_Liaison.schedule.0",
+                "startSeconds": 0,
+                "endSeconds": 700,
+                "activity": "town_round",
+                "targetKind": "route",
+                "targetId": "TownLiaisonCircuit"
+              },
+              "confirmedAnchorRef": "Office.meeting_table",
+              "desiredAnchorRef": "Office.meeting_table",
+              "routePointIndex": 4,
+              "routePointArrivedAtSeconds": 90,
+              "nextRouteMoveAtSeconds": 103,
+              "pendingMovement": null
+            }
+          ]
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
+        },
+        "activeContact": {
+          "contactId": "contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
+          "actorId": "NPC_Park_Caretaker",
+          "interactionZoneId": "ParkConversation",
+          "originAnchorRef": "Park.meeting_north_east",
+          "safeDistanceM": 2.2,
+          "issuedAtSeconds": 90,
+          "expiresAtSeconds": 120,
+          "reason": "현재 역할과 기억을 바탕으로 방문자에게 직접 확인할 필요가 있습니다."
+        }
+      }
+    },
+    "sessionStartPlayerContact": {
+      "endpoint": "POST /v1/session/start",
+      "request": {
+        "runId": "run-fixture-1",
+        "actorId": "NPC_Park_Caretaker",
+        "interactionZoneId": "ParkConversation",
+        "locale": "ko-KR",
+        "contactId": "contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Park_Caretaker:11"
+      },
+      "response": {
+        "runId": "run-fixture-1",
+        "sessionId": "sess-fixture-1",
+        "worldRevision": 15,
+        "actor": {
+          "actorId": "NPC_Park_Caretaker",
+          "role": "park_caretaker",
+          "locationId": "Park",
+          "stance": "uncertain",
+          "suspicion": 0,
+          "playerConversationReady": false,
+          "hasMeaningfulFirsthandConversation": false,
+          "memories": [
+            {
+              "memoryId": "mem-fixture-1",
+              "kind": "npc_utterance",
+              "sourceActorId": "NPC_Park_Caretaker",
+              "listenerActorIds": [
+                "player"
+              ],
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#0",
+              "line": "공원을 돌보는 중입니다. 제게 하실 말씀이 있나요?",
+              "worldSeconds": 90,
+              "worldRevision": 15,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
+        "nextTurn": {
+          "turnId": "sess-fixture-1#0",
+          "beatId": "resident_opening_park_caretaker",
+          "promptId": "resident_first_question",
+          "choiceSetId": "resident_opening_park_caretaker.generated",
+          "speakerId": "NPC_Park_Caretaker",
+          "prompt": "공원을 돌보는 중입니다. 제게 하실 말씀이 있나요?",
+          "acceptsFreeInput": true,
+          "continueConversation": true,
+          "choices": [
+            {
+              "choiceId": "resident_opening_park_caretaker.generated.1",
+              "intent": "safe/local",
+              "line": "안내받은 절차를 확인하러 왔습니다."
+            },
+            {
+              "choiceId": "resident_opening_park_caretaker.generated.2",
+              "intent": "uncertain/repair",
+              "line": "먼저 어떤 접수인지 설명해 주세요."
+            },
+            {
+              "choiceId": "resident_opening_park_caretaker.generated.3",
+              "intent": "risky/weird",
+              "line": "여기 사람이 아니라서 잘 모르겠습니다."
+            }
+          ],
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
+        "socialView": {
+          "revision": 0,
+          "hearing": {
+            "atSeconds": 1800,
+            "due": false
+          },
+          "pressure": {
+            "band": "low",
+            "latestEncounteredWhyLine": null
+          },
+          "encounteredResidents": [],
+          "openQuestions": [],
+          "encounteredRecords": []
+        },
+        "activeContact": null
+      }
+    },
     "runAdvanceAmbientSpeech": {
       "endpoint": "POST /v1/run/advance",
       "request": {
@@ -2885,7 +4029,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     "runSnapshotAfterMeeting": {
@@ -3316,6 +4461,7 @@
           ],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [],
         "ledgerEvents": [],
         "socialView": {
@@ -3361,7 +4507,8 @@
             "profileId": "scripted/test",
             "transport": "scripted",
             "usedFallback": false
-          }
+          },
+          "activeContact": null
         }
       },
       {
@@ -3390,7 +4537,8 @@
             "profileId": "scripted/test",
             "transport": "scripted",
             "usedFallback": false
-          }
+          },
+          "activeContact": null
         }
       },
       {
@@ -3419,7 +4567,8 @@
             "profileId": "scripted/test",
             "transport": "scripted",
             "usedFallback": false
-          }
+          },
+          "activeContact": null
         }
       },
       {
@@ -3448,7 +4597,8 @@
             "profileId": "scripted/test",
             "transport": "scripted",
             "usedFallback": false
-          }
+          },
+          "activeContact": null
         }
       },
       {
@@ -3477,7 +4627,8 @@
             "profileId": "scripted/test",
             "transport": "scripted",
             "usedFallback": false
-          }
+          },
+          "activeContact": null
         }
       },
       {
@@ -3506,7 +4657,8 @@
             "profileId": "scripted/test",
             "transport": "scripted",
             "usedFallback": false
-          }
+          },
+          "activeContact": null
         }
       }
     ],
@@ -3596,7 +4748,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     "sessionAnswer": {
@@ -3779,7 +4932,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     "sessionSnapshot": {
@@ -4178,6 +5332,7 @@
           "events": [],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [],
         "ledgerEvents": [],
         "socialView": {
@@ -4358,7 +5513,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     "runSnapshotAfterEnd": {
@@ -4628,6 +5784,7 @@
           "events": [],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [],
         "ledgerEvents": [],
         "socialView": {
@@ -4863,7 +6020,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     "administrationReadDecision": {
@@ -5046,7 +6204,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     "administrationRecordEncounter": {
@@ -5331,7 +6490,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:81fa9765bca7bc1b",
+              "sourceId": "goal:8a9a3c650f268ce1",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -5344,7 +6503,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:2ac5a95eed255ceb",
+              "sourceId": "goal:bcda81af7d0adf71",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -5470,6 +6629,7 @@
           "events": [],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [
           {
             "recordId": "record:run-fixture-1:1",
@@ -5805,7 +6965,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -6060,7 +7221,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -6341,7 +7503,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -6550,7 +7713,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -6773,7 +7937,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -6959,7 +8124,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -7153,7 +8319,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -7385,7 +8552,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -7637,7 +8805,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -7846,7 +9015,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -8069,7 +9239,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -8273,7 +9444,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -8496,7 +9668,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -8751,7 +9924,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -9032,7 +10206,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -9313,7 +10488,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -9596,7 +10772,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     },
     {
@@ -9831,7 +11008,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       }
     }
   ],
@@ -10016,7 +11194,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       },
       "sessionSnapshotResponse": {
         "runId": "run-fixture-1",
@@ -10402,6 +11581,7 @@
           "events": [],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [],
         "ledgerEvents": [],
         "socialView": {
@@ -10575,7 +11755,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       },
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
@@ -10839,6 +12020,7 @@
           "events": [],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [],
         "ledgerEvents": [],
         "socialView": {
@@ -11074,7 +12256,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       },
       "sessionSnapshotResponse": {
         "runId": "run-fixture-1",
@@ -11460,6 +12643,7 @@
           "events": [],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [],
         "ledgerEvents": [],
         "socialView": {
@@ -11633,7 +12817,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       },
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
@@ -11897,6 +13082,7 @@
           "events": [],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [],
         "ledgerEvents": [],
         "socialView": {
@@ -12138,7 +13324,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       },
       "sessionSnapshotResponse": {
         "runId": "run-fixture-1",
@@ -12532,6 +13719,7 @@
           "events": [],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [],
         "ledgerEvents": [],
         "socialView": {
@@ -12707,7 +13895,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       },
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
@@ -12973,6 +14162,7 @@
           "events": [],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [],
         "ledgerEvents": [],
         "socialView": {
@@ -13208,7 +14398,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       },
       "sessionSnapshotResponse": {
         "runId": "run-fixture-1",
@@ -13594,6 +14785,7 @@
           "events": [],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [],
         "ledgerEvents": [],
         "socialView": {
@@ -13767,7 +14959,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "activeContact": null
       },
       "endRunSnapshotResponse": {
         "runId": "run-fixture-1",
@@ -14031,6 +15224,7 @@
           "events": [],
           "activeConversation": null
         },
+        "activeContact": null,
         "records": [],
         "ledgerEvents": [],
         "socialView": {

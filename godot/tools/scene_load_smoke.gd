@@ -16,6 +16,7 @@ const SCENES := [
 	{"label": "hud_3d", "path": "res://scenes/ui/hud_3d.tscn", "frames": 2},
 	{"label": "town_3d", "path": "res://scenes/town/town_3d.tscn", "frames": 6},
 	{"label": "main_3d", "path": "res://scenes/main_3d.tscn", "frames": 6},
+	{"label": "main_3d_contact", "path": "res://scenes/main_3d.tscn", "frames": 6},
 	{
 		"label": "main_3d_schedule",
 		"path": "res://scenes/main_3d.tscn",
@@ -105,6 +106,7 @@ func _instance_scene(spec: Dictionary) -> void:
 	if label in [
 		"town_3d",
 		"main_3d",
+		"main_3d_contact",
 		"main_3d_schedule",
 		"main_3d_ambient_inside",
 		"main_3d_ambient_outside",
@@ -122,6 +124,8 @@ func _instance_scene(spec: Dictionary) -> void:
 			await _check_npc_movement(label, instance)
 		if label == "main_3d":
 			await _check_run_conversation(label, instance)
+		if label == "main_3d_contact":
+			await _check_player_contact(label, instance)
 		if label == "main_3d_schedule":
 			await _check_run_clock_and_schedule(label, instance)
 		if label == "main_3d_ambient_inside":
@@ -726,6 +730,17 @@ func _check_npc_spatial_facts(label: String, instance: Node) -> void:
 		_failures.append("%s spatial packet does not contain exactly six residents" % label)
 		return
 	var facts := facts_value as Array
+	if not instance.has_method("spatial_facts"):
+		_failures.append("%s exposes no player-aware spatial packet" % label)
+		return
+	var spatial_packet: Dictionary = instance.call("spatial_facts")
+	var player_fact: Dictionary = spatial_packet.get("player", {})
+	if (
+		not player_fact.get("position", null) is Array
+		or (player_fact.get("position", []) as Array).size() != 3
+		or typeof(player_fact.get("locationId", "")) != TYPE_STRING
+	):
+		_failures.append("%s player spatial fact is incomplete" % label)
 	var by_actor: Dictionary = {}
 	var ordered_actor_ids: Array[String] = []
 	for fact_value in facts:
@@ -762,6 +777,14 @@ func _check_npc_spatial_facts(label: String, instance: Node) -> void:
 			_failures.append("%s %s cannot reach the connected town NavMesh" % [label, actor_id])
 		if not (fact.get("visibleObjectIds", []) as Array).is_empty():
 			_failures.append("%s invented visible 3D object ids before canonical props exist" % label)
+		for boolean_key in ["playerVisible", "playerAudible", "playerReachable"]:
+			if typeof(fact.get(boolean_key, null)) != TYPE_BOOL:
+				_failures.append(
+					"%s %s spatial %s is not boolean" % [label, actor_id, boolean_key]
+				)
+		var zone_value: Variant = fact.get("playerInteractionZoneId", null)
+		if zone_value != null and typeof(zone_value) != TYPE_STRING:
+			_failures.append("%s %s player conversation zone is invalid" % [label, actor_id])
 	var sorted_actor_ids := ordered_actor_ids.duplicate()
 	sorted_actor_ids.sort()
 	if ordered_actor_ids != sorted_actor_ids or by_actor.size() != 6:
@@ -778,6 +801,23 @@ func _check_npc_spatial_facts(label: String, instance: Node) -> void:
 		or not (liaison.get("audibleActorIds", []) as Array).has("NPC_Park_Caretaker")
 	):
 		_failures.append("%s authored park audibility did not connect nearby residents" % label)
+	if (
+		not bool(caretaker.get("playerReachable", false))
+		or str(caretaker.get("playerInteractionZoneId", "")) != "ParkConversation"
+	):
+		_failures.append("%s player contact facts ignored Park nav/radius/role bindings" % label)
+	for remote_actor_id in [
+		"NPC_Studio_Receptionist",
+		"NPC_Studio_Manager",
+		"NPC_Office_Worker",
+		"NPC_Station_Officer",
+	]:
+		var remote_fact := by_actor.get(remote_actor_id, {}) as Dictionary
+		if remote_fact.get("playerInteractionZoneId", null) != null:
+			_failures.append(
+				"%s remote %s inherited the player's Park interaction zone"
+				% [label, remote_actor_id]
+			)
 
 
 func _dedupe_strings(values: Array[String]) -> Array[String]:
@@ -1025,6 +1065,313 @@ func _check_npc_movement(label: String, instance: Node) -> void:
 	).length()
 	if slot_separation < 0.75:
 		_failures.append("%s physical meeting participants collapsed into one slot" % label)
+
+
+func _check_player_contact(label: String, instance: Node) -> void:
+	if OS.get_environment("DREAM_SESSION_MODE") != "fixture":
+		_failures.append("%s contact smoke requires DREAM_SESSION_MODE=fixture" % label)
+		return
+	var player := instance.get_node_or_null("Town/Actors/Player3D") as CharacterBody3D
+	var receptionist := instance.get_node_or_null(
+		"Town/Actors/NPC_Studio_Receptionist"
+	) as NPC3D
+	var caretaker := instance.get_node_or_null("Town/Actors/NPC_Park_Caretaker") as NPC3D
+	var hud := instance.get_node_or_null("HUD3D") as HUD3D
+	if player == null or receptionist == null or caretaker == null or hud == null:
+		_failures.append("%s contact smoke is missing player/resident/HUD" % label)
+		return
+	var ready := false
+	for _frame in range(300):
+		await process_frame
+		ready = receptionist.is_interaction_enabled()
+		if ready:
+			break
+	if not ready:
+		_failures.append("%s contact actor never obtained a preloaded opening" % label)
+		return
+	instance.call("_sync_active_contact_from_response", {"activeContact": null})
+	var run_snapshot: Dictionary = instance.call("presentation_snapshot")
+	var elapsed := float((run_snapshot.get("worldClock", {}) as Dictionary).get(
+		"elapsedSeconds",
+		0.0
+	))
+	var first_contact := {
+		"contactId": "contact-smoke-cancel",
+		"actorId": str(receptionist.actor_id),
+		"interactionZoneId": "StudioReceptionConversation",
+		"originAnchorRef": "Studio.receptionist_spawn",
+		"safeDistanceM": 1.6,
+		"issuedAtSeconds": elapsed,
+		"expiresAtSeconds": elapsed + 60.0,
+		"reason": "smoke_internal_reason",
+	}
+	player.global_position = receptionist.global_position + Vector3(0.0, 0.0, 3.6)
+	player.velocity = Vector3.ZERO
+	instance.call("_sync_active_contact_from_response", {"activeContact": first_contact})
+	var conflict_arrival_count: Array[int] = [0]
+	var record_conflict_arrival := func(
+		_movement_id: String,
+		_actor_id: StringName,
+		_anchor_ref: String
+	) -> void:
+		conflict_arrival_count[0] += 1
+	var stale_movement := {
+		"movementId": "movement-smoke-contact-stale",
+		"actorId": str(receptionist.actor_id),
+		"fromAnchorRef": "Studio.receptionist_spawn",
+		"targetAnchorRef": "Studio.waiting_seats",
+		"scheduleBlockId": "schedule-smoke-stale",
+		"activity": "wait",
+	}
+	var current_movement := {
+		"movementId": "movement-smoke-contact-current",
+		"actorId": str(receptionist.actor_id),
+		"fromAnchorRef": "Studio.receptionist_spawn",
+		"targetAnchorRef": "Studio.reception_desk",
+		"scheduleBlockId": "schedule-smoke-current",
+		"activity": "work",
+	}
+	var authoritative_scheduler := {
+		"actors": [{
+			"actorId": str(receptionist.actor_id),
+			"confirmedAnchorRef": "Studio.receptionist_spawn",
+			"currentBlock": {"activity": "work"},
+			"pendingMovement": current_movement,
+		}],
+	}
+	receptionist.movement_arrived.connect(record_conflict_arrival)
+	instance.call("_queue_or_apply_movement", stale_movement)
+	instance.call("_reconcile_scheduler_movements", authoritative_scheduler)
+	# Closing an unrelated modal flushes delayed movement through the same
+	# contact guard; it must simply requeue while the order is still active.
+	instance.set("_conversation_target", receptionist)
+	paused = true
+	instance.call("_finish_conversation_modal")
+	for _frame in range(4):
+		await physics_frame
+	var protected_contact: Dictionary = instance.call("presentation_snapshot").get(
+		"contact",
+		{}
+	)
+	if (
+		not bool(protected_contact.get("active", false))
+		or not receptionist.has_player_contact("contact-smoke-cancel")
+		or not str(receptionist.movement_status().get("movementId", "")).is_empty()
+		or conflict_arrival_count[0] != 0
+	):
+		_failures.append(
+			"%s conflicting movement locally cancelled contact or forged arrival" % label
+		)
+	if receptionist.movement_arrived.is_connected(record_conflict_arrival):
+		receptionist.movement_arrived.disconnect(record_conflict_arrival)
+	instance.call("_sync_active_contact_from_response", {"activeContact": null})
+	instance.call("_reconcile_scheduler_movements", authoritative_scheduler)
+	await physics_frame
+	var resumed_movement := receptionist.movement_status()
+	if (
+		receptionist.has_player_contact()
+		or str(resumed_movement.get("movementId", ""))
+		!= "movement-smoke-contact-current"
+	):
+		_failures.append(
+			"%s authoritative scheduler movement did not resume after contact cleared"
+			% label
+		)
+	instance.call("_drop_client_movement_for_actor", str(receptionist.actor_id))
+	receptionist.stop()
+	instance.call("_sync_active_contact_from_response", {"activeContact": first_contact})
+	hud.open_settings()
+	for _frame in range(8):
+		await physics_frame
+	var first_follow := receptionist.contact_status()
+	var first_retarget_count := int(first_follow.get("retargetCount", 0))
+	player.global_position += Vector3(0.75, 0.0, 0.0)
+	for _frame in range(24):
+		await physics_frame
+	var moved_follow := receptionist.contact_status()
+	var moved_retarget_count := int(moved_follow.get("retargetCount", 0))
+	if (
+		first_retarget_count < 1
+		or moved_retarget_count <= first_retarget_count
+		or moved_retarget_count > first_retarget_count + 3
+	):
+		_failures.append(
+			"%s contact target refresh was missing or unbounded: %s -> %s"
+			% [label, first_retarget_count, moved_retarget_count]
+		)
+	for contact_offset in [
+		Vector3(0.0, 0.0, 1.5),
+		Vector3(1.5, 0.0, 0.0),
+		Vector3(-1.5, 0.0, 0.0),
+		Vector3(0.0, 0.0, -1.5),
+	]:
+		player.global_position = receptionist.global_position + contact_offset
+		player.velocity = Vector3.ZERO
+		await physics_frame
+		if bool(receptionist.call("_contact_has_line_of_sight")):
+			break
+	for _frame in range(30):
+		await physics_frame
+		if str(instance.get("_pending_contact_ready_id")) == "contact-smoke-cancel":
+			break
+	var deferred_settings := hud.presentation_snapshot()
+	if (
+		paused
+		or str(deferred_settings.get("modalSurface", "")) != "settings"
+		or str(instance.get("_pending_contact_ready_id")) != "contact-smoke-cancel"
+	):
+		_failures.append(
+			"%s settings did not defer a ready contact while world time ran: %s"
+			% [
+				label,
+				{
+					"paused": paused,
+					"modal": deferred_settings.get("modalSurface", ""),
+					"pending": instance.get("_pending_contact_ready_id"),
+					"follow": receptionist.contact_status(),
+					"los": receptionist.call("_contact_has_line_of_sight"),
+					"distance": receptionist.global_position.distance_to(
+						player.global_position
+					),
+				},
+			]
+		)
+	var fake_arrival_count: Array[int] = [0]
+	var record_fake_arrival := func(
+		_movement_id: String,
+		_actor_id: StringName,
+		_anchor_ref: String
+	) -> void:
+		fake_arrival_count[0] += 1
+	receptionist.movement_arrived.connect(record_fake_arrival)
+	instance.call("_sync_active_contact_from_response", {"activeContact": null})
+	hud.close_settings()
+	for _frame in range(180):
+		await physics_frame
+		if not receptionist.is_moving():
+			break
+	if receptionist.movement_arrived.is_connected(record_fake_arrival):
+		receptionist.movement_arrived.disconnect(record_fake_arrival)
+	if (
+		str(hud.presentation_snapshot().get("modalSurface", "")) == "conversation"
+		or not str(instance.get("_pending_contact_ready_id")).is_empty()
+		or fake_arrival_count[0] != 0
+		or not str(receptionist.movement_status().get("movementId", "")).is_empty()
+	):
+		_failures.append("%s stale contact opened or cancel-return forged runtime arrival" % label)
+
+	var consumed_contact_id := (
+		"contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Park_Caretaker:11"
+	)
+	var second_contact := {
+		"contactId": consumed_contact_id,
+		"actorId": str(caretaker.actor_id),
+		"interactionZoneId": "ParkConversation",
+		"originAnchorRef": "Park.meeting_north_east",
+		"safeDistanceM": 2.2,
+		"issuedAtSeconds": 90.0,
+		"expiresAtSeconds": 120.0,
+		"reason": "smoke_internal_reason",
+	}
+	player.global_position = caretaker.global_position + Vector3(0.0, 0.0, 3.4)
+	player.velocity = Vector3.ZERO
+	instance.call("_sync_active_contact_from_response", {"activeContact": second_contact})
+	var cue := hud.contact_cue_snapshot()
+	if (
+		not bool(cue.get("visible", false))
+		or str(cue.get("text", "")).is_empty()
+		or str(cue.get("text", "")).contains("contact-smoke")
+		or str(cue.get("text", "")).contains("smoke_internal_reason")
+	):
+		_failures.append("%s contact cue is absent or leaks internal contact data" % label)
+	hud.open_log()
+	for _frame in range(8):
+		await physics_frame
+	for contact_offset in [
+		Vector3(0.0, 0.0, 1.5),
+		Vector3(1.5, 0.0, 0.0),
+		Vector3(-1.5, 0.0, 0.0),
+		Vector3(0.0, 0.0, -1.5),
+	]:
+		player.global_position = caretaker.global_position + contact_offset
+		player.velocity = Vector3.ZERO
+		await physics_frame
+		if bool(caretaker.call("_contact_has_line_of_sight")):
+			break
+	for _frame in range(45):
+		await physics_frame
+		if str(instance.get("_pending_contact_ready_id")) == consumed_contact_id:
+			break
+	var ready_position := caretaker.global_position
+	if paused or str(hud.presentation_snapshot().get("modalSurface", "")) != "inspect":
+		_failures.append("%s inspect log did not defer contact without pausing" % label)
+	hud.close_log()
+	var opened := false
+	for _frame in range(180):
+		await process_frame
+		var contact_hud := hud.presentation_snapshot()
+		if (
+			str(contact_hud.get("modalSurface", "")) == "conversation"
+			and not (contact_hud.get("currentTurn", {}) as Dictionary).is_empty()
+		):
+			opened = true
+			break
+	if not opened:
+		_failures.append("%s ready contact did not reuse the conversation modal" % label)
+		paused = false
+		return
+	var opened_main: Dictionary = instance.call("presentation_snapshot")
+	var adapter: Dictionary = (opened_main.get("advance", {}) as Dictionary).get(
+		"adapter",
+		{}
+	)
+	if (
+		not paused
+		or str(adapter.get("fixtureLastStartContactId", ""))
+		!= consumed_contact_id
+		or caretaker.has_player_contact(consumed_contact_id)
+		or caretaker.global_position.distance_to(ready_position) > 0.05
+	):
+		_failures.append(
+			"%s contact start lost its id, pause, or consumed-position invariant" % label
+		)
+	var current_turn: Dictionary = hud.presentation_snapshot().get("currentTurn", {})
+	var choices: Array = current_turn.get("choices", [])
+	if choices.size() != 3 or not choices[0] is Dictionary:
+		_failures.append("%s contacted conversation has no normal runtime choices" % label)
+		paused = false
+		return
+	# This fixture proves the contact opening only; normal answer/end replay is
+	# already covered by main_3d and is intentionally not a second dialogue path.
+	instance.call("_finish_conversation_modal")
+	await process_frame
+	if paused or str(hud.presentation_snapshot().get("modalSurface", "")) != "none":
+		_failures.append("%s contacted modal could not release its local presentation" % label)
+		paused = false
+		return
+
+	# Exercise the same cleanup used by a failed start: the authoritative order
+	# remains active, so presentation follow resumes instead of becoming stuck.
+	var resume_contact := {
+		"contactId": "contact-smoke-resume",
+		"actorId": str(receptionist.actor_id),
+		"interactionZoneId": "StudioReceptionConversation",
+		"originAnchorRef": "Studio.receptionist_spawn",
+		"safeDistanceM": 1.6,
+		"issuedAtSeconds": elapsed + 2.0,
+		"expiresAtSeconds": elapsed + 120.0,
+		"reason": "smoke_resume",
+	}
+	instance.call("_sync_active_contact_from_response", {"activeContact": resume_contact})
+	receptionist.cancel_player_contact()
+	instance.set("_conversation_target", receptionist)
+	instance.set("_conversation_contact_id", "contact-smoke-resume")
+	paused = true
+	instance.call("_finish_conversation_modal")
+	await process_frame
+	if paused or not receptionist.has_player_contact("contact-smoke-resume"):
+		_failures.append("%s failed-start cleanup did not resume authoritative contact" % label)
+	instance.call("_sync_active_contact_from_response", {"activeContact": null})
 
 
 func _check_run_conversation(label: String, instance: Node) -> void:

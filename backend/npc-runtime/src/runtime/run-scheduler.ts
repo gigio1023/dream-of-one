@@ -519,10 +519,20 @@ function emitMeetingReadyWakes(options: {
   elapsedSeconds: number;
   observedWorldRevision: number;
   scheduleWakes: RunScheduleWake[];
+  heldActorIds: ReadonlySet<string>;
 }): void {
-  const { runId, layout, runtime, elapsedSeconds, observedWorldRevision, scheduleWakes } = options;
+  const {
+    runId,
+    layout,
+    runtime,
+    elapsedSeconds,
+    observedWorldRevision,
+    scheduleWakes,
+    heldActorIds,
+  } = options;
   for (const window of layout.meetingWindows) {
     if (!(window.startSeconds <= elapsedSeconds && elapsedSeconds < window.endSeconds)) continue;
+    if (window.actorIds.some(actorId => heldActorIds.has(actorId))) continue;
     const allArrived = window.actorIds.every(
       actorId =>
         stateFor(runtime, actorId).confirmedAnchorRef === window.participantAnchorRefs[actorId],
@@ -554,6 +564,7 @@ export function advanceRunScheduler(options: {
   toSeconds: number;
   arrivals: readonly RunArrivalObservation[];
   observedWorldRevision: number;
+  heldActorIds?: ReadonlySet<string>;
 }): SchedulerAdvanceResult {
   const {
     runId,
@@ -563,6 +574,7 @@ export function advanceRunScheduler(options: {
     toSeconds,
     arrivals,
     observedWorldRevision,
+    heldActorIds = new Set<string>(),
   } = options;
   const { arrivalsApplied, arrivalsRejected } = applyArrivals(runtime, arrivals, fromSeconds);
   const scheduleWakes: RunScheduleWake[] = [];
@@ -578,16 +590,18 @@ export function advanceRunScheduler(options: {
       block => fromSeconds < block.startSeconds && block.startSeconds <= toSeconds,
     );
     for (const block of transitions) {
-      synchronizeBlock({
-        runId,
-        layout,
-        runtime,
-        actor,
-        state,
-        block,
-        atSeconds: block.startSeconds,
-        movementDeltas,
-      });
+      if (!heldActorIds.has(actor.actorId)) {
+        synchronizeBlock({
+          runId,
+          layout,
+          runtime,
+          actor,
+          state,
+          block,
+          atSeconds: block.startSeconds,
+          movementDeltas,
+        });
+      }
       emitRunWake(
         runtime,
         {
@@ -619,6 +633,7 @@ export function advanceRunScheduler(options: {
   // Seed t=0 anchor targets on the first material advance and repair any
   // anchor block whose confirmed position still differs from its target.
   for (const actor of layout.actors) {
+    if (heldActorIds.has(actor.actorId)) continue;
     const state = stateFor(runtime, actor.actorId);
     const block = blockAt(actor, toSeconds);
     if (!block) continue;
@@ -642,6 +657,7 @@ export function advanceRunScheduler(options: {
   }
 
   for (const actor of layout.actors) {
+    if (heldActorIds.has(actor.actorId)) continue;
     const state = stateFor(runtime, actor.actorId);
     const block = blockAt(actor, toSeconds);
     if (
@@ -681,6 +697,7 @@ export function advanceRunScheduler(options: {
     elapsedSeconds: toSeconds,
     observedWorldRevision,
     scheduleWakes,
+    heldActorIds,
   });
   scheduleWakes.sort((first, second) =>
     first.scheduledAtSeconds === second.scheduledAtSeconds

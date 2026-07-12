@@ -49,6 +49,7 @@ test("run-bound Studio conversation and legacy session routes coexist on one sid
     assert.equal(run.status, 200, JSON.stringify(run.json));
     assert.equal(run.json.actors.length, 6);
     assert.equal(run.json.lastProposalMeta, null);
+    assert.equal(run.json.activeContact, null);
 
     const preloaded = await post(base, "/v1/session/preload", {
       runId: run.json.runId,
@@ -58,6 +59,7 @@ test("run-bound Studio conversation and legacy session routes coexist on one sid
     });
     assert.equal(preloaded.status, 200, JSON.stringify(preloaded.json));
     assert.equal(preloaded.json.actor.playerConversationReady, true);
+    assert.equal(preloaded.json.activeContact, null);
     const preloadRetry = await post(base, "/v1/session/preload", {
       runId: run.json.runId,
       actorId: STUDIO_RECEPTIONIST_ID,
@@ -75,6 +77,7 @@ test("run-bound Studio conversation and legacy session routes coexist on one sid
     assert.equal(started.status, 200, JSON.stringify(started.json));
     assert.equal(started.json.nextTurn.choices.length, 3);
     assert.equal(started.json.nextTurn.proposalMeta.transport, "scripted");
+    assert.equal(started.json.activeContact, null);
     const startRetry = await post(base, "/v1/session/start", {
       runId: run.json.runId,
       actorId: STUDIO_RECEPTIONIST_ID,
@@ -143,6 +146,19 @@ test("run API keeps strict request bounds and explicit error codes", async () =>
     assert.equal(malformed.json.error, "invalid_request");
 
     const run = await post(base, "/v1/run/start", { startId: "api-run-2", locale: "ko-KR" });
+    const malformedSpatial = await post(base, "/v1/run/advance", {
+      runId: run.json.runId,
+      advanceId: "api-malformed-spatial",
+      observedWorldRevision: run.json.worldRevision,
+      elapsedSeconds: 0,
+      arrivals: [],
+      spatialFacts: {
+        observedWorldRevision: run.json.worldRevision,
+        actors: [],
+      },
+    });
+    assert.equal(malformedSpatial.status, 400);
+    assert.equal(malformedSpatial.json.error, "invalid_request");
     const layout = loadRunLayout();
     const surface = layout.recordSurfaces.find(candidate => candidate.surfaceId === "TS_Studio_ReviewRecords");
     assert.ok(surface);

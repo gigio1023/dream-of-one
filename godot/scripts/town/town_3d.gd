@@ -35,11 +35,15 @@ func current_location_id() -> String:
 	var player := get_node_or_null(player_path) as Node3D
 	if player == null:
 		return ""
+	return _location_id_for_point(player.global_position)
+
+
+func _location_id_for_point(point: Vector3) -> String:
 	for zone_value in _layout.get("zones", []):
 		if not zone_value is Dictionary:
 			continue
 		var zone := zone_value as Dictionary
-		if _point_in_zone(player.global_position, zone):
+		if _point_in_zone(point, zone):
 			return str(zone.get("landmark", zone.get("id", "")))
 	return ""
 
@@ -110,11 +114,20 @@ func navigation_position(anchor_ref: String) -> Variant:
 func npc_spatial_facts() -> Array[Dictionary]:
 	## Capture one event-time engine snapshot for the runtime's spatial validator.
 	## This is intentionally called by the run packet lane, never every frame.
+	return _dictionary_array(spatial_facts().get("actors", []))
+
+
+func spatial_facts() -> Dictionary:
+	## Keep the resident array at exactly six while reporting the player beside it.
+	## Contact orders remain backend-owned; these are revision-bound engine facts.
 	var facts: Array[Dictionary] = []
 	var actors := _npc_actors()
 	var anchor_refs := _layout_anchor_refs()
 	var navigation_map := _navigation_map()
 	var space_state := get_world_3d().direct_space_state
+	var player := get_node_or_null(player_path) as Node3D
+	if player == null:
+		return {"player": {}, "actors": facts}
 	for actor in actors:
 		var visible_actor_ids: PackedStringArray = []
 		var audible_actor_ids: PackedStringArray = []
@@ -127,6 +140,13 @@ func npc_spatial_facts() -> Array[Dictionary]:
 				audible_actor_ids.append(str(target.actor_id))
 		visible_actor_ids.sort()
 		audible_actor_ids.sort()
+		var player_visible := _nodes_have_line_of_sight(actor, player, space_state)
+		var player_audible := _nodes_share_audibility(actor, player)
+		var player_reachable := _navigation_points_reachable(
+			actor.global_position,
+			player.global_position,
+			navigation_map
+		)
 		facts.append({
 			"actorId": str(actor.actor_id),
 			"position": _vector3_to_array(actor.global_position),
@@ -138,11 +158,26 @@ func npc_spatial_facts() -> Array[Dictionary]:
 			"visibleActorIds": Array(visible_actor_ids),
 			"audibleActorIds": Array(audible_actor_ids),
 			"visibleObjectIds": [],
+			"playerVisible": player_visible,
+			"playerAudible": player_audible,
+			"playerReachable": player_reachable,
+			"playerInteractionZoneId": _player_conversation_zone_id(
+				str(actor.actor_id),
+				actor.global_position,
+				player.global_position,
+				player_reachable
+			),
 		})
 	facts.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return str(a.get("actorId", "")) < str(b.get("actorId", ""))
 	)
-	return facts
+	return {
+		"player": {
+			"position": _vector3_to_array(player.global_position),
+			"locationId": _location_id_for_point(player.global_position),
+		},
+		"actors": facts,
+	}
 
 
 func player_speech_audibility(audibility: Dictionary) -> Dictionary:
@@ -266,6 +301,14 @@ func _actors_have_line_of_sight(
 	target: NPC3D,
 	space_state: PhysicsDirectSpaceState3D
 ) -> bool:
+	return _nodes_have_line_of_sight(source, target, space_state)
+
+
+func _nodes_have_line_of_sight(
+	source: Node3D,
+	target: Node3D,
+	space_state: PhysicsDirectSpaceState3D
+) -> bool:
 	var source_eye := source.global_position + Vector3.UP * 1.35
 	var target_eye := target.global_position + Vector3.UP * 1.35
 	if source_eye.is_equal_approx(target_eye):
@@ -273,7 +316,8 @@ func _actors_have_line_of_sight(
 	var query := PhysicsRayQueryParameters3D.create(source_eye, target_eye)
 	query.collide_with_areas = false
 	query.collide_with_bodies = true
-	query.exclude = [source.get_rid()]
+	if source is CollisionObject3D:
+		query.exclude = [(source as CollisionObject3D).get_rid()]
 	var hit := space_state.intersect_ray(query)
 	if hit.is_empty():
 		return false
@@ -291,6 +335,10 @@ func _node_belongs_to(node: Node, owner_node: Node) -> bool:
 
 
 func _actors_share_audibility(source: NPC3D, target: NPC3D) -> bool:
+	return _nodes_share_audibility(source, target)
+
+
+func _nodes_share_audibility(source: Node3D, target: Node3D) -> bool:
 	var distance := source.global_position.distance_to(target.global_position)
 	for volume_value in _layout.get("audibility_volumes", []):
 		if not volume_value is Dictionary:
@@ -305,6 +353,74 @@ func _actors_share_audibility(source: NPC3D, target: NPC3D) -> bool:
 		):
 			return true
 	return false
+
+
+func _navigation_points_reachable(
+	from_position: Vector3,
+	to_position: Vector3,
+	navigation_map: RID
+) -> bool:
+	if not navigation_map.is_valid():
+		return false
+	var origin := NavigationServer3D.map_get_closest_point(navigation_map, from_position)
+	var target := NavigationServer3D.map_get_closest_point(navigation_map, to_position)
+	# A jump may put the player's root briefly above the floor. Only horizontal
+	# drift indicates that the player has actually left the walkable map.
+	if Vector2(target.x - to_position.x, target.z - to_position.z).length() > 0.75:
+		return false
+	if origin.distance_to(target) <= 0.05:
+		return true
+	var path := NavigationServer3D.map_get_path(navigation_map, origin, target, true)
+	return not path.is_empty() and path[path.size() - 1].distance_to(target) <= 0.05
+
+
+func _player_conversation_zone_id(
+	actor_id: String,
+	actor_position: Vector3,
+	player_position: Vector3,
+	player_reachable: bool
+) -> Variant:
+	if not player_reachable:
+		return null
+	var player_location_id := _location_id_for_point(player_position)
+	if _location_id_for_point(actor_position) != player_location_id:
+		return null
+	var matches: PackedStringArray = []
+	for zone_value in _layout.get("interaction_zones", []):
+		if not zone_value is Dictionary:
+			continue
+		var zone := zone_value as Dictionary
+		if (
+			str(zone.get("kind", "")) != "conversation"
+			or str(zone.get("landmark", "")) != player_location_id
+			or not _interaction_zone_actor_ids(zone).has(actor_id)
+		):
+			continue
+		var anchor_value: Variant = anchor_position(str(zone.get("anchor", "")))
+		if not anchor_value is Vector3:
+			continue
+		var anchor := anchor_value as Vector3
+		var radius := maxf(0.0, float(zone.get("radius", 0.0)))
+		var planar_distance := Vector2(
+			player_position.x - anchor.x,
+			player_position.z - anchor.z
+		).length()
+		if radius > 0.0 and planar_distance <= radius:
+			matches.append(str(zone.get("id", "")))
+	matches.sort()
+	if matches.is_empty():
+		return null
+	return matches[0]
+
+
+func _dictionary_array(value: Variant) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	if not value is Array:
+		return result
+	for entry_value in value as Array:
+		if entry_value is Dictionary:
+			result.append((entry_value as Dictionary).duplicate(true))
+	return result
 
 
 func _vector3_to_array(value: Vector3) -> Array[float]:

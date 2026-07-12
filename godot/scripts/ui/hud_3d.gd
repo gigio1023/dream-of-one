@@ -21,6 +21,8 @@ const AMBIENT_SUBTITLE_SECONDS_PER_CHARACTER := 0.055
 
 @onready var _reticle: Label = %Reticle
 @onready var _start_hint: Label = %StartHint
+@onready var _contact_cue_panel: PanelContainer = %ContactCuePanel
+@onready var _contact_cue_label: Label = %ContactCueLabel
 @onready var _prompt_panel: PanelContainer = %PromptPanel
 @onready var _prompt_label: Label = %PromptLabel
 @onready var _ambient_subtitle_panel: PanelContainer = %AmbientSubtitlePanel
@@ -91,6 +93,8 @@ var _current_ambient_subtitle: Dictionary = {}
 var _ambient_subtitle_remaining := 0.0
 var _language_options: Array[String] = []
 var _language_applies_next_run := false
+var _contact_cue_id := ""
+var _contact_cue_actor_id := ""
 
 
 func _ready() -> void:
@@ -112,6 +116,7 @@ func _ready() -> void:
 	_end_conversation_button.pressed.connect(_on_end_conversation_retry_pressed)
 	_close_log_button.pressed.connect(close_log)
 	_prompt_panel.visible = false
+	_contact_cue_panel.visible = false
 	_ambient_subtitle_panel.visible = false
 	_settings_shade.visible = false
 	_conversation_shade.visible = false
@@ -181,6 +186,29 @@ func set_focus(target: Node) -> void:
 	_prompt_label.text = tr(label_key)
 	_prompt_panel.visible = not _prompt_label.text.is_empty()
 	_reticle.modulate = Color(0.55, 0.95, 0.72, 1.0)
+
+
+func show_contact_approach(contact_id: String, actor_id: String) -> void:
+	if contact_id.is_empty() or actor_id.is_empty():
+		return
+	_contact_cue_id = contact_id
+	_contact_cue_actor_id = actor_id
+	_refresh_contact_cue()
+
+
+func clear_contact_approach(contact_id := "") -> void:
+	if not contact_id.is_empty() and contact_id != _contact_cue_id:
+		return
+	_contact_cue_id = ""
+	_contact_cue_actor_id = ""
+	_refresh_contact_cue()
+
+
+func contact_cue_snapshot() -> Dictionary:
+	return {
+		"visible": _contact_cue_panel.visible,
+		"text": _contact_cue_label.text,
+	}
 
 
 func configure_look_settings(sensitivity: float, inverted: bool, fov: float) -> void:
@@ -397,6 +425,7 @@ func begin_conversation(actor: Dictionary) -> void:
 		button.visible = false
 	_conversation_shade.visible = true
 	_prompt_panel.visible = false
+	_refresh_contact_cue()
 	_refresh_ambient_subtitle_visibility()
 	set_conversation_busy(true)
 
@@ -501,6 +530,7 @@ func close_conversation() -> void:
 	_end_conversation_button.visible = false
 	_refresh_encountered_stances()
 	_refresh_ambient_subtitle_visibility()
+	_refresh_contact_cue()
 	set_focus(_focused_target)
 
 
@@ -534,6 +564,7 @@ func presentation_snapshot() -> Dictionary:
 		"debugVisible": _debug_visible,
 		"provider": _provider_meta.duplicate(true),
 		"ambientSubtitle": ambient_subtitle_snapshot(),
+		"contactCue": contact_cue_snapshot(),
 	}
 
 
@@ -551,6 +582,7 @@ func _set_settings_visible(should_show: bool) -> void:
 		_refresh_encountered_stances()
 		set_focus(_focused_target)
 	_refresh_ambient_subtitle_visibility()
+	_refresh_contact_cue()
 	settings_visibility_changed.emit(should_show)
 	if should_show:
 		_close_settings_button.grab_focus()
@@ -575,6 +607,7 @@ func _set_log_visible(should_show: bool) -> void:
 		_refresh_encountered_stances()
 		set_focus(_focused_target)
 	_refresh_ambient_subtitle_visibility()
+	_refresh_contact_cue()
 	log_visibility_changed.emit(should_show)
 
 
@@ -682,6 +715,7 @@ func _apply_localized_text() -> void:
 	_refresh_encountered_stances()
 	_refresh_log_body()
 	_refresh_ambient_subtitle_text()
+	_refresh_contact_cue()
 	_populate_language_options()
 	set_focus(_focused_target)
 
@@ -1015,6 +1049,21 @@ func _refresh_ambient_subtitle_visibility() -> void:
 		and not _conversation_visible
 		and not _settings_visible
 		and not _log_visible
+	)
+
+
+func _refresh_contact_cue() -> void:
+	if not is_instance_valid(_contact_cue_panel) or not is_instance_valid(_contact_cue_label):
+		return
+	if _contact_cue_id.is_empty() or _contact_cue_actor_id.is_empty():
+		_contact_cue_label.text = ""
+		_contact_cue_panel.visible = false
+		return
+	_contact_cue_label.text = str(tr(&"hud.m3r.contact.approaching")).format({
+		"speaker": _actor_label(_contact_cue_actor_id),
+	})
+	_contact_cue_panel.visible = (
+		not _conversation_visible and not _settings_visible and not _log_visible
 	)
 
 

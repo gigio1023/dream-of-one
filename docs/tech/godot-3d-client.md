@@ -301,11 +301,15 @@ the dev machine with all six NPC loops live.
   dialogue) renders as subtitles with speaker attribution and rough direction
   cues when in earshot; audibility ranges come from `world_layout.json`
   volumes so the runtime and presentation agree on what was hearable.
-- **Spatial fact reporting**: `Town3D.npc_spatial_facts()` returns exactly six
-  actor facts in stable actor-id order. Reachable anchors come from
+- **Spatial fact reporting**: `Town3D.spatial_facts()` returns one player fact
+  beside exactly six actor facts in stable actor-id order. Reachable anchors come from
   `NavigationServer3D` paths on the synchronized town map; visible actors come
   from actor-height physics rays; audible actors must share an authored
-  `world_layout.json` volume and be inside its speech distance. The packet is
+  `world_layout.json` volume and be inside its speech distance. Each resident
+  also reports whether the player is visible, audible, navmesh-reachable, and
+  standing inside a conversation zone that admits that actor. A brief empty
+  player location between authored zones is reported honestly and simply
+  disables contact. The packet is
   stamped with the advance's observed revision and rides the existing batched
   advance lane after movement, arrival/block, schedule, or rebase changes and
   while residents are moving. It is never a per-frame HTTP or provider call.
@@ -330,6 +334,17 @@ the dev machine with all six NPC loops live.
   a later runtime movement supersedes it.
   These lifecycle rules follow the
   [Godot 4.7 NavigationAgent guide](https://docs.godotengine.org/en/4.7/tutorials/navigation/navigation_using_navigationagents.html).
+- **NPC-initiated contact**: an authoritative `activeContact` temporarily
+  preempts only the named resident's schedule presentation. `NPC3D` reuses its
+  `NavigationAgent3D`, refreshing the moving player target at most every 0.25
+  seconds and only after 0.5 m of player movement. It stops at the runtime safe
+  distance, faces the player, and emits readiness once. Main sends a fresh
+  batched spatial packet, then passes the contact id through the existing
+  preload-backed `session/start`; the ordinary conversation modal is the only
+  dialogue surface. Settings and the Tab log defer automatic opening without
+  pausing the world. Cancellation returns the actor visually toward the
+  contact's origin anchor without emitting a runtime arrival, while a consumed
+  contact leaves the actor at the conversation position.
 - **Schedule presentation**: NPCs visibly commute between anchors; meeting
   windows read at a glance (two residents talking look like two residents
   talking from across the park). Each pair approaches distinct physical

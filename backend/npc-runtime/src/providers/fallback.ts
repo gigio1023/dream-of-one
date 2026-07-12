@@ -191,6 +191,9 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
     const content = fallbackContent(request.locale).agent;
     const canLook = request.observePacket.toolCatalog.includes("look");
     const canTalk = request.observePacket.toolCatalog.includes("talk_to");
+    const canApproachPlayer =
+      request.observePacket.toolCatalog.includes("move_to") &&
+      request.observePacket.playerContact?.available === true;
     const requiredTalkTarget = request.requiredToolCall?.actorId;
     const visibleTarget = canLook && !requiredTalkTarget
       ? request.observePacket.visibleObjects[0]?.objectId
@@ -212,6 +215,12 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
           rationale: content.previousResultRationale,
           done: false,
         }
+      : canApproachPlayer
+        ? {
+            toolCall: { tool: "move_to", args: { targetId: "player" } },
+            rationale: content.talkRationale,
+            done: true,
+          }
       : visibleActor
         ? {
             toolCall: { tool: "talk_to", args: { actorId: visibleActor } },

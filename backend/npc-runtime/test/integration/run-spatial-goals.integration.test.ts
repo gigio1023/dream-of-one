@@ -8,6 +8,7 @@ import {
 } from "../../src/runtime/run-service.js";
 import type {
   RunActorSpatialFacts,
+  RunAdvanceResponse,
   RunSnapshot,
 } from "../../src/runtime/run-schema.js";
 
@@ -34,8 +35,90 @@ function spatialActors(snapshot: RunSnapshot): RunActorSpatialFacts[] {
       visibleActorIds: [],
       audibleActorIds: [],
       visibleObjectIds: [],
+      playerVisible: false,
+      playerAudible: false,
+      playerReachable: false,
+      playerInteractionZoneId: null,
     };
   });
+}
+
+function pendingArrivals(snapshot: RunSnapshot) {
+  return snapshot.scheduler.actors.flatMap(actor => actor.pendingMovement
+    ? [{
+        movementId: actor.pendingMovement.movementId,
+        actorId: actor.actorId,
+        anchorRef: actor.pendingMovement.targetAnchorRef,
+      }]
+    : []);
+}
+
+async function advanceToParkContactOpportunity(
+  service: RunService,
+  started: RunSnapshot,
+  label: string,
+): Promise<{ response: RunAdvanceResponse; actorId: string; playerPosition: [number, number, number] }> {
+  let current = started;
+  for (let step = 1; step <= 9; step += 1) {
+    await service.advance({
+      runId: started.runId,
+      advanceId: `${label}-clock-${step}`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: pendingArrivals(current),
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [0, 0, 0], locationId: "" },
+        actors: spatialActors(current),
+      },
+    });
+    current = service.snapshot(started.runId);
+  }
+  const arrivals = pendingArrivals(current);
+  if (arrivals.length > 0) {
+    await service.advance({
+      runId: started.runId,
+      advanceId: `${label}-settle-grace`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 0,
+      arrivals,
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [0, 0, 0], locationId: "" },
+        actors: spatialActors(current),
+      },
+    });
+    current = service.snapshot(started.runId);
+  }
+
+  const actorId = "NPC_Park_Caretaker";
+  const actors = spatialActors(current);
+  const actor = actors.find(candidate => candidate.actorId === actorId);
+  assert.ok(actor);
+  actor.playerVisible = true;
+  actor.playerAudible = true;
+  actor.playerReachable = true;
+  actor.playerInteractionZoneId = "ParkConversation";
+  const manager = actors.find(candidate => candidate.actorId === "NPC_Studio_Manager");
+  assert.ok(manager);
+  manager.playerVisible = true;
+  manager.playerAudible = true;
+  manager.playerReachable = true;
+  manager.playerInteractionZoneId = "ParkConversation";
+  const playerPosition: [number, number, number] = [0, 0, 0];
+  const response = await service.advance({
+    runId: started.runId,
+    advanceId: `${label}-park-contact-facts`,
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: current.worldRevision,
+      player: { position: playerPosition, locationId: "Park" },
+      actors,
+    },
+  });
+  return { response, actorId, playerPosition };
 }
 
 test("one spatial batch dispatches all six stable residents through the same goal path", async () => {
@@ -57,6 +140,7 @@ test("one spatial batch dispatches all six stable residents through the same goa
     arrivals: [],
     spatialFacts: {
       observedWorldRevision: started.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
       actors: spatialActors(started),
     },
   });
@@ -91,7 +175,11 @@ test("one spatial batch dispatches all six stable residents through the same goa
     observedWorldRevision: current.worldRevision,
     elapsedSeconds: 0,
     arrivals: [],
-    spatialFacts: { observedWorldRevision: current.worldRevision, actors: changedFacts },
+    spatialFacts: {
+      observedWorldRevision: current.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: changedFacts,
+    },
   });
   const receptionistWake = social.scheduleWakes.find(
     wake => wake.kind === "goal" && wake.actorIds[0] === receptionist.actorId,
@@ -114,7 +202,11 @@ test("one spatial batch dispatches all six stable residents through the same goa
     observedWorldRevision: spoken.worldRevision,
     elapsedSeconds: 0,
     arrivals: [],
-    spatialFacts: { observedWorldRevision: spoken.worldRevision, actors: changedFacts },
+    spatialFacts: {
+      observedWorldRevision: spoken.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: changedFacts,
+    },
   });
   assert.ok(
     restamped.scheduleWakes.every(
@@ -144,6 +236,7 @@ test("mismatched facts and stale goal results cannot mutate after a fresh materi
       arrivals: [],
       spatialFacts: {
         observedWorldRevision: started.worldRevision + 1,
+        player: { position: [8, 0.05, 5], locationId: "" },
         actors,
       },
     }),
@@ -157,7 +250,11 @@ test("mismatched facts and stale goal results cannot mutate after a fresh materi
     observedWorldRevision: started.worldRevision,
     elapsedSeconds: 0,
     arrivals: [],
-    spatialFacts: { observedWorldRevision: started.worldRevision, actors },
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors,
+    },
   });
   const oldWake = spatial.scheduleWakes.find(
     wake => wake.kind === "goal" && wake.actorIds[0] === "NPC_Park_Caretaker",
@@ -177,6 +274,7 @@ test("mismatched facts and stale goal results cannot mutate after a fresh materi
     arrivals: [],
     spatialFacts: {
       observedWorldRevision: spatial.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
       actors: changedActors,
     },
   });
@@ -196,4 +294,441 @@ test("mismatched facts and stale goal results cannot mutate after a fresh materi
     ),
     "a changed material fact batch must emit the fresh actor goal before the old result arrives",
   );
+});
+
+test("visible reachable player facts outside a conversation zone stay valid but cannot open contact", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  adapter.proposeNextStep = async () => ({
+    proposal: {
+      toolCall: { tool: "move_to", args: { targetId: "player" } },
+      rationale: "방문자에게 직접 확인하려고 합니다.",
+      done: true,
+    },
+    meta: { profileId: "scripted/studio-reception", transport: "scripted", usedFallback: false },
+  });
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("invalid-contact"),
+    layout: { ...loadRunLayout(), graceEndsAtSeconds: 0 },
+  });
+  const started = service.start("invalid-contact-start", "ko-KR");
+  const actors = spatialActors(started);
+  const receptionist = actors.find(actor => actor.actorId === "NPC_Studio_Receptionist");
+  assert.ok(receptionist);
+  receptionist.playerVisible = true;
+  receptionist.playerAudible = true;
+  receptionist.playerReachable = true;
+  receptionist.playerInteractionZoneId = null;
+  const advanced = await service.advance({
+    runId: started.runId,
+    advanceId: "invalid-contact-facts",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [0, 0, -13], locationId: "Studio" },
+      actors,
+    },
+  });
+  const wake = advanced.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === receptionist.actorId
+  );
+  assert.ok(wake);
+  const response = await service.decision({
+    runId: started.runId,
+    wakeId: wake.wakeId,
+    observedWorldRevision: wake.observedWorldRevision,
+  });
+  assert.equal(response.activeContact, null);
+  assert.equal(service.snapshot(started.runId).activeContact, null);
+});
+
+test("a valid player zone survives actor semantic-location lag without permitting early contact", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  adapter.proposeNextStep = async () => ({
+    proposal: {
+      toolCall: { tool: "move_to", args: { targetId: "player" } },
+      rationale: "방문자에게 직접 확인하려고 합니다.",
+      done: true,
+    },
+    meta: { profileId: "scripted/studio-reception", transport: "scripted", usedFallback: false },
+  });
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("contact-location-lag"),
+    layout: { ...loadRunLayout(), graceEndsAtSeconds: 0 },
+  });
+  const started = service.start("contact-location-lag-start", "ko-KR");
+  const actors = spatialActors(started);
+  const receptionist = actors.find(actor => actor.actorId === "NPC_Studio_Receptionist");
+  assert.ok(receptionist);
+  receptionist.position = [0, 0, -9.5];
+  receptionist.playerVisible = true;
+  receptionist.playerAudible = true;
+  receptionist.playerReachable = true;
+  receptionist.playerInteractionZoneId = "ParkConversation";
+  const advanced = await service.advance({
+    runId: started.runId,
+    advanceId: "contact-location-lag-facts",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [0, 0, -9], locationId: "Park" },
+      actors,
+    },
+  });
+  const wake = advanced.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === receptionist.actorId
+  );
+  assert.ok(wake);
+  const response = await service.decision({
+    runId: started.runId,
+    wakeId: wake.wakeId,
+    observedWorldRevision: wake.observedWorldRevision,
+  });
+  assert.equal(response.activeContact, null);
+  assert.equal(service.snapshot(started.runId).activeContact, null);
+});
+
+test("one post-grace provider candidate creates one idempotent player contact and reuses preload at safe distance", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  let openingCalls = 0;
+  const originalOpening = adapter.proposeConversationTurn.bind(adapter);
+  adapter.proposeConversationTurn = async request => {
+    openingCalls += 1;
+    return originalOpening(request);
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("contact"),
+  });
+  const started = service.start("contact-start", "ko-KR");
+  const opportunity = await advanceToParkContactOpportunity(service, started, "contact");
+  assert.ok(opportunity.response.clock.toSeconds <= 120);
+  const wake = opportunity.response.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === opportunity.actorId
+  );
+  assert.ok(wake, JSON.stringify(opportunity.response.scheduleWakes));
+  const nonCandidateWake = opportunity.response.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === "NPC_Studio_Manager"
+  );
+  assert.ok(nonCandidateWake);
+  const nonCandidate = await service.decision({
+    runId: started.runId,
+    wakeId: nonCandidateWake.wakeId,
+    observedWorldRevision: nonCandidateWake.observedWorldRevision,
+  });
+  assert.equal(nonCandidate.activeContact, null, "only the stable selected candidate sees the affordance");
+
+  const decided = await service.decision({
+    runId: started.runId,
+    wakeId: wake.wakeId,
+    observedWorldRevision: wake.observedWorldRevision,
+  });
+  const retried = await service.decision({
+    runId: started.runId,
+    wakeId: wake.wakeId,
+    observedWorldRevision: wake.observedWorldRevision,
+  });
+  assert.deepEqual(retried, decided);
+  assert.equal(decided.activeContact?.actorId, opportunity.actorId);
+  assert.equal(decided.activeContact?.interactionZoneId, "ParkConversation");
+  assert.equal(decided.activeContact?.originAnchorRef.startsWith("Park."), true);
+  const contact = decided.activeContact;
+  assert.ok(contact);
+
+  await service.preloadConversation(
+    started.runId,
+    opportunity.actorId,
+    "ParkConversation",
+    "ko-KR",
+  );
+  assert.equal(openingCalls, 1);
+  await assert.rejects(
+    service.startConversation(
+      started.runId,
+      opportunity.actorId,
+      "ParkConversation",
+      "ko-KR",
+      contact.contactId,
+    ),
+    (error: unknown) => error instanceof RunError && error.code === "conversation_not_ready",
+    "the preloaded opening cannot bypass physical contact distance",
+  );
+
+  const beforeClose = service.snapshot(started.runId);
+  const closeActors = spatialActors(beforeClose);
+  const closeActor = closeActors.find(candidate => candidate.actorId === opportunity.actorId);
+  assert.ok(closeActor);
+  closeActor.position = [...opportunity.playerPosition];
+  closeActor.playerVisible = true;
+  closeActor.playerAudible = true;
+  closeActor.playerReachable = true;
+  closeActor.playerInteractionZoneId = "ParkConversation";
+  await service.advance({
+    runId: started.runId,
+    advanceId: "contact-close-distance",
+    observedWorldRevision: beforeClose.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: beforeClose.worldRevision,
+      player: { position: opportunity.playerPosition, locationId: "Park" },
+      actors: closeActors,
+    },
+  });
+  const conversation = await service.startConversation(
+    started.runId,
+    opportunity.actorId,
+    "ParkConversation",
+    "ko-KR",
+    contact.contactId,
+  );
+  const startRetry = await service.startConversation(
+    started.runId,
+    opportunity.actorId,
+    "ParkConversation",
+    "ko-KR",
+    contact.contactId,
+  );
+  assert.deepEqual(startRetry, conversation);
+  assert.equal(conversation.activeContact, null);
+  assert.equal(openingCalls, 1, "session start consumes the existing opening without a second call");
+});
+
+test("active contact holds one actor across a schedule boundary and repairs policy movement after one expiry", async () => {
+  const layout = { ...loadRunLayout(), graceEndsAtSeconds: 80 };
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: deterministicIds("contact-hold"),
+    layout,
+  });
+  const started = service.start("contact-hold-start", "ko-KR");
+  const seeded = await service.advance({
+    runId: started.runId,
+    advanceId: "contact-hold-seed",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [0, 0, 0], locationId: "" },
+      actors: spatialActors(started),
+    },
+  });
+  const olderCaretakerWake = seeded.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === "NPC_Park_Caretaker"
+  );
+  assert.ok(olderCaretakerWake);
+
+  let current = service.snapshot(started.runId);
+  for (let step = 1; step <= 8; step += 1) {
+    await service.advance({
+      runId: started.runId,
+      advanceId: `contact-hold-clock-${step}`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: pendingArrivals(current),
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [0, 0, 0], locationId: "" },
+        actors: spatialActors(current),
+      },
+    });
+    current = service.snapshot(started.runId);
+  }
+  const arrivals = pendingArrivals(current);
+  if (arrivals.length > 0) {
+    await service.advance({
+      runId: started.runId,
+      advanceId: "contact-hold-settle",
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 0,
+      arrivals,
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [0, 0, 0], locationId: "" },
+        actors: spatialActors(current),
+      },
+    });
+    current = service.snapshot(started.runId);
+  }
+
+  const contactActors = spatialActors(current);
+  const caretakerFacts = contactActors.find(actor => actor.actorId === "NPC_Park_Caretaker");
+  assert.ok(caretakerFacts);
+  caretakerFacts.playerVisible = true;
+  caretakerFacts.playerAudible = true;
+  caretakerFacts.playerReachable = true;
+  caretakerFacts.playerInteractionZoneId = "ParkConversation";
+  const opportunity = await service.advance({
+    runId: started.runId,
+    advanceId: "contact-hold-opportunity",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: current.worldRevision,
+      player: { position: [0, 0, 0], locationId: "Park" },
+      actors: contactActors,
+    },
+  });
+  const contactWake = opportunity.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === "NPC_Park_Caretaker"
+  );
+  assert.ok(contactWake);
+  const contacted = await service.decision({
+    runId: started.runId,
+    wakeId: contactWake.wakeId,
+    observedWorldRevision: contactWake.observedWorldRevision,
+  });
+  assert.equal(contacted.activeContact?.actorId, "NPC_Park_Caretaker");
+
+  const conflicting = await service.decision({
+    runId: started.runId,
+    wakeId: olderCaretakerWake.wakeId,
+    observedWorldRevision: olderCaretakerWake.observedWorldRevision,
+  });
+  assert.equal(conflicting.status, "stale");
+  assert.deepEqual(conflicting.actionDeltas, []);
+  assert.deepEqual(conflicting.movementDeltas, []);
+
+  current = service.snapshot(started.runId);
+  const boundary = await service.advance({
+    runId: started.runId,
+    advanceId: "contact-hold-boundary",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 10,
+    arrivals: [],
+  });
+  assert.equal(boundary.clock.toSeconds, 90);
+  assert.equal(boundary.activeContact?.actorId, "NPC_Park_Caretaker");
+  assert.ok(boundary.movementDeltas.every(delta => delta.actorId !== "NPC_Park_Caretaker"));
+  assert.ok(boundary.scheduleWakes.every(wake =>
+    wake.kind !== "goal" || wake.actorIds[0] !== "NPC_Park_Caretaker"
+  ));
+
+  current = service.snapshot(started.runId);
+  await service.advance({
+    runId: started.runId,
+    advanceId: "contact-hold-before-expiry",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 10,
+    arrivals: [],
+  });
+  current = service.snapshot(started.runId);
+  const expiryRequest = {
+    runId: started.runId,
+    advanceId: "contact-hold-expiry",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 10,
+    arrivals: [],
+  };
+  const expired = await service.advance(expiryRequest);
+  const expiryRetry = await service.advance(expiryRequest);
+  assert.deepEqual(expiryRetry, expired);
+  assert.equal(expired.activeContact, null);
+  const afterExpiry = service.snapshot(started.runId);
+  const caretaker = afterExpiry.actors.find(actor => actor.actorId === "NPC_Park_Caretaker");
+  assert.equal(
+    caretaker?.memories.filter(memory => memory.kind === "player_contact_outcome").length,
+    1,
+  );
+
+  const repaired = await service.advance({
+    runId: started.runId,
+    advanceId: "contact-hold-repair",
+    observedWorldRevision: afterExpiry.worldRevision,
+    elapsedSeconds: 1,
+    arrivals: [],
+  });
+  assert.ok(repaired.movementDeltas.some(delta => delta.actorId === "NPC_Park_Caretaker"));
+  assert.equal(
+    service.snapshot(started.runId).actors
+      .find(actor => actor.actorId === "NPC_Park_Caretaker")
+      ?.memories.filter(memory => memory.kind === "player_contact_outcome").length,
+    1,
+  );
+});
+
+test("an unengaged contact expires once into attributable factual memory without judgment movement", async () => {
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: deterministicIds("contact-timeout"),
+  });
+  const started = service.start("contact-timeout-start", "ko-KR");
+  const opportunity = await advanceToParkContactOpportunity(
+    service,
+    started,
+    "contact-timeout",
+  );
+  const wake = opportunity.response.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === opportunity.actorId
+  );
+  assert.ok(wake);
+  const decided = await service.decision({
+    runId: started.runId,
+    wakeId: wake.wakeId,
+    observedWorldRevision: wake.observedWorldRevision,
+  });
+  assert.ok(decided.activeContact);
+  const before = service.snapshot(started.runId);
+  const beforeActor = before.actors.find(actor => actor.actorId === opportunity.actorId);
+  assert.ok(beforeActor);
+
+  let current = before;
+  let lastRequest: Parameters<RunService["advance"]>[0] | null = null;
+  for (let step = 1; step <= 3; step += 1) {
+    lastRequest = {
+      runId: started.runId,
+      advanceId: `contact-timeout-expire-${step}`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: [],
+    };
+    await service.advance(lastRequest);
+    current = service.snapshot(started.runId);
+  }
+  assert.equal(current.activeContact, null);
+  const afterActor = current.actors.find(actor => actor.actorId === opportunity.actorId);
+  assert.ok(afterActor);
+  const outcomes = afterActor.memories.filter(memory => memory.kind === "player_contact_outcome");
+  assert.equal(outcomes.length, 1);
+  assert.equal(outcomes[0]?.sourceActorId, "player");
+  assert.equal(outcomes[0]?.listenerActorId, opportunity.actorId);
+  assert.equal(outcomes[0]?.outcome, "not_engaged");
+  assert.equal(afterActor.stance, beforeActor.stance);
+  assert.equal(afterActor.suspicion, beforeActor.suspicion);
+  assert.equal(current.institutionalPressure, before.institutionalPressure);
+  assert.ok(lastRequest);
+  const retry = await service.advance(lastRequest);
+  assert.equal(retry.activeContact, null);
+  const afterRetry = service.snapshot(started.runId).actors.find(
+    actor => actor.actorId === opportunity.actorId,
+  );
+  assert.equal(
+    afterRetry?.memories.filter(memory => memory.kind === "player_contact_outcome").length,
+    1,
+  );
+  const cooled = await service.advance({
+    runId: started.runId,
+    advanceId: "contact-timeout-cooldown",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 1,
+    arrivals: [],
+  });
+  const followUp = cooled.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === opportunity.actorId
+  );
+  if (followUp) {
+    const result = await service.decision({
+      runId: started.runId,
+      wakeId: followUp.wakeId,
+      observedWorldRevision: followUp.observedWorldRevision,
+    });
+    assert.equal(result.activeContact, null, "cooldown forbids an immediate second approach");
+  }
 });

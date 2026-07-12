@@ -25,6 +25,10 @@ function spatialActors(snapshot: RunSnapshot): RunActorSpatialFacts[] {
       visibleActorIds: [],
       audibleActorIds: [],
       visibleObjectIds: [],
+      playerVisible: false,
+      playerAudible: false,
+      playerReachable: false,
+      playerInteractionZoneId: null,
     };
   });
 }
@@ -81,7 +85,11 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
     observedWorldRevision: beforeFacts.worldRevision,
     elapsedSeconds: 0,
     arrivals: [],
-    spatialFacts: { observedWorldRevision: beforeFacts.worldRevision, actors: facts },
+    spatialFacts: {
+      observedWorldRevision: beforeFacts.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: facts,
+    },
   });
   const wake = advanced.scheduleWakes.find(
     candidate => candidate.kind === "goal" && candidate.actorIds[0] === STUDIO_RECEPTIONIST_ID,
@@ -192,7 +200,11 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
     observedWorldRevision: afterWrite.worldRevision,
     elapsedSeconds: 0,
     arrivals: [],
-    spatialFacts: { observedWorldRevision: afterWrite.worldRevision, actors: spatialActors(afterWrite) },
+    spatialFacts: {
+      observedWorldRevision: afterWrite.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: spatialActors(afterWrite),
+    },
   });
   const readWake = refreshed.scheduleWakes.find(
     candidate => candidate.kind === "goal" && candidate.actorIds[0] === "NPC_Studio_Manager",
@@ -276,7 +288,11 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
     observedWorldRevision: afterRead.worldRevision,
     elapsedSeconds: 0,
     arrivals: [],
-    spatialFacts: { observedWorldRevision: afterRead.worldRevision, actors: spatialActors(afterRead) },
+    spatialFacts: {
+      observedWorldRevision: afterRead.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: spatialActors(afterRead),
+    },
   });
   const rereadWake = rereadAdvance.scheduleWakes.find(
     candidate => candidate.kind === "goal" && candidate.actorIds[0] === "NPC_Studio_Manager",

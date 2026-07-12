@@ -176,6 +176,33 @@ test("Korean agent-step validation covers provider-authored administrative quest
   assert.equal(agentStepProposalSchemaForLocale("ko-KR").safeParse(proposal).success, true);
 });
 
+test("deterministic fallback keeps a grounded player contact opportunity playable", async () => {
+  const packet = observePacket();
+  packet.playerContact = {
+    available: true,
+    targetActorId: "player",
+    interactionZoneId: "ParkConversation",
+    playerLocationId: "Park",
+    visible: true,
+    audible: true,
+    reachable: true,
+    safeDistanceM: 2.2,
+  };
+  const resolved = await new RuleFallbackNpcAdapter().proposeNextStep({
+    sessionId: "fallback-contact",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "방문자에게 직접 확인할지 판단한다.",
+    observePacket: packet,
+    blockedSignatures: [],
+  });
+  assert.deepEqual(resolved.proposal.toolCall, {
+    tool: "move_to",
+    args: { targetId: "player" },
+  });
+  assert.equal(resolved.meta.transport, "fallback");
+});
+
 test("provider service returns schema-validated live conversation proposals", async () => {
   const textGen = new FakeTextGen([
     { text: validConversation, usage: { inputTokens: 20, outputTokens: 30, totalTokens: 50 } },

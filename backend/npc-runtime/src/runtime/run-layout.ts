@@ -220,6 +220,7 @@ export interface RunRecordSurface {
 export interface RunLayout {
   worldId: string;
   layoutRevision: string;
+  landmarkIds: string[];
   graceEndsAtSeconds: number;
   hearingAtSeconds: number;
   conversationZones: RunInteractionZone[];
@@ -458,6 +459,7 @@ export function loadRunLayout(path = defaultLayoutPath()): RunLayout {
   return {
     worldId: parsed.world_id,
     layoutRevision: parsed.world_revision,
+    landmarkIds: [...landmarkIds],
     graceEndsAtSeconds: parsed.schedule.grace_period_world_seconds,
     hearingAtSeconds: parsed.schedule.hearing_world_seconds,
     conversationZones,

@@ -159,6 +159,7 @@ func snapshot() -> Dictionary:
 			[&"ambientSubtitle", &"ambient_subtitle"],
 			{}
 		),
+		"contact": _first_value(sources, [&"contact", &"activeContact"], {}),
 		"socialView": _first_value(sources, [&"socialView", &"social_view"], {}),
 		"player": _player_snapshot(player),
 		"transitioning": _first_value(sources, [&"transitioning"], null),

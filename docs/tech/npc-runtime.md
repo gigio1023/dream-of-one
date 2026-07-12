@@ -22,7 +22,12 @@ LOC onto the M3R target so an agent knows what to keep, trim, or build.
 > spatial packet: each stable resident can `wait`, `look`, `move_to`, or begin
 > a two-turn `talk_to` exchange through the same bounded proposal-loop core.
 > Current facts and schedule policy are revalidated before any typed action
-> delta commits. Provider-authored administrative record proposals now pass
+> delta commits. A post-grace goal may now offer `move_to(player)` to one
+> engine-grounded resident at a time. The runtime owns the resulting expiring
+> contact lease and cooldown; reaching its safe distance consumes the existing
+> preloaded opening through `session/start`, while a missed approach records
+> one factual `player_contact_outcome` without moving stance, suspicion, or
+> pressure. Provider-authored administrative record proposals now pass
 > through run-scoped role, source, visibility, revision, pressure-clamp, and
 > exactly-one-ledger validation. The player receives a separate encountered-only
 > `socialView`; hidden records and pressure changes remain hidden until a valid
@@ -126,8 +131,12 @@ Delete when the replacing module lands; don't leave both alive.
 11. Godot reports physical observations but never decides their gameplay
     meaning. A spatial batch names all six residents exactly once at the same
     observed revision as its advance and carries position, reachable anchors,
-    visible/audible actors, and visible object ids. `RunService` rejects
-    unknown ids and uses current facts to validate tools and listeners.
+    visible/audible actors, visible object ids, the player's position/location,
+    and each resident's grounded player visibility, audibility, reachability,
+    and conversation-zone binding. `RunService` rejects unknown ids and uses
+    current facts to validate tools, listeners, and contact starts. An empty
+    player location is a valid no-contact observation between authored zones,
+    not a reason to halt the advance lane.
     Continuous position changes refresh commit-time position and audibility,
     but only reachability, visibility, audibility, or object changes create a
     new material goal signature.
@@ -150,7 +159,7 @@ surface is:
 | `GET  /v1/run/snapshot` | Full run snapshot for HUD hydrate, reconnect, and debug inspection |
 | `POST /v1/run/encounter` | Idempotently acknowledge one actually presented ambient speech event or explicitly inspected record surface; returns the encountered-only `socialView` without changing `worldRevision` |
 | `POST /v1/session/preload` | Resolve and cache an opening from strict `{runId, actorId, interactionZoneId, locale}`; returns the ready actor plus `ProposalMeta` without starting or pausing a child conversation |
-| `POST /v1/session/start` | Consume that opening from the same strict actor/zone/locale packet with zero provider calls; returns the modal conversation view |
+| `POST /v1/session/start` | Consume that opening from the same strict actor/zone/locale packet with zero provider calls; an optional `contactId` proves a validated NPC-initiated approach and returns the same modal conversation view |
 | `POST /v1/session/answer` | Player choice/typed input/hesitation → signals, state delta, NPC reactions |
 | `POST /v1/npc/decision` | Claim one pending two-actor `meeting_ready` or single-actor `goal` wake, carrying `runId`, `wakeId`, and observed `worldRevision` |
 | `GET  /v1/session/snapshot` | Renderable child-session state; never a substitute for the run snapshot |
@@ -184,9 +193,12 @@ requests already in flight may finish, but their effects remain revision-
 checked and queued until the modal closes.
 
 The optional `spatialFacts` member of an advance is an all-or-nothing snapshot
-of the six residents at that request's `observedWorldRevision`. Each actor fact
-contains a 3D position plus bounded, unique `reachableAnchorRefs`,
-`visibleActorIds`, `audibleActorIds`, and `visibleObjectIds`. The runtime
+of the player and six residents at that request's `observedWorldRevision`.
+The player fact carries position and the current authored location (or an empty
+location between zones). Each actor fact contains a 3D position plus bounded,
+unique `reachableAnchorRefs`, `visibleActorIds`, `audibleActorIds`, and
+`visibleObjectIds`, together with `playerVisible`, `playerAudible`,
+`playerReachable`, and a nullable `playerInteractionZoneId`. The runtime
 canonicalizes their order, requires known actors and anchors, and currently
 requires the object list to stay empty until the 3D prop slice provides one
 canonical object registry. Changed reachability, visibility, audibility, or
@@ -235,6 +247,19 @@ revalidated against current participant evidence and engine audibility before
 listener memories commit. The shared background gate allows at most two
 provider proposals in flight, and only one ambient conversation may hold the
 run lease.
+
+After grace, a 75-world-second opportunity epoch may add one special
+`move_to(player)` affordance. Candidate selection is deterministic (current
+suspicion, relevant memories, then stable actor id), but the provider owns the
+choice to approach. A committed choice exposes one nullable `activeContact`
+on run, advance, NPC-decision, and run-bound session responses. It contains the
+actor, interaction zone, origin anchor, safe distance, issue/expiry times, and
+the provider's internal reason. The scheduler holds that actor without
+inventing an arbitrary semantic anchor. `session/start` with the matching id
+revalidates the latest distance, visibility, reachability, and zone before
+consuming the normal opening. Expiry or loss clears the lease, starts the
+75-second cooldown, and appends exactly one attributed `not_engaged` memory;
+no judgment or institutional mutation is implied.
 
 Current NPC decision responses use one typed `actionDeltas` stream: `speech`,
 `readiness`, `look`, `movement`, or validated `administration`. If a player modal owns the run when an

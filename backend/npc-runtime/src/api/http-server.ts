@@ -211,6 +211,7 @@ export function createSessionServer(service: SessionService, runService = new Ru
             parsed.data.actorId,
             parsed.data.interactionZoneId,
             parsed.data.locale,
+            parsed.data.contactId,
           );
           respond(res, runSessionStartResponseSchema, result);
           return;

@@ -4,6 +4,7 @@
     "hud.interaction.door": "E — ドアを開ける / 閉める",
     "hud.interaction.record": "E — 記録を調べる",
     "hud.m3r.start_hint": "ステーション前の公園を通り、スタジオ受付へ向かってください。",
+    "hud.m3r.contact.approaching": "{speaker}が話しかけようと近づいてきます。",
     "hud.m3r.ambient_subtitle.format": "{speaker} · {direction}\n{line}",
     "hud.m3r.ambient_subtitle.direction.left": "左",
     "hud.m3r.ambient_subtitle.direction.center": "正面",

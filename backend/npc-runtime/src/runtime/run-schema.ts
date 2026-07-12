@@ -154,11 +154,28 @@ export const runRecordReadMemorySchema = z
   })
   .strict();
 
+export const runPlayerContactOutcomeMemorySchema = z
+  .object({
+    memoryId: nonEmpty,
+    kind: z.literal("player_contact_outcome"),
+    sourceActorId: z.literal("player"),
+    listenerActorId: nonEmpty,
+    contactId: nonEmpty,
+    outcome: z.literal("not_engaged"),
+    contactReason: nonEmpty,
+    interactionZoneId: nonEmpty,
+    originAnchorRef: nonEmpty,
+    worldSeconds: z.number().nonnegative(),
+    worldRevision: z.number().int().positive(),
+  })
+  .strict();
+
 export const runMemorySchema = z.discriminatedUnion("kind", [
   runNpcUtteranceMemorySchema,
   runPlayerConversationMemorySchema,
   runAmbientUtteranceMemorySchema,
   runRecordReadMemorySchema,
+  runPlayerContactOutcomeMemorySchema,
 ]);
 
 export const runActorSchema = z
@@ -355,6 +372,19 @@ export const runAmbientSpeechSnapshotSchema = z
   })
   .strict();
 
+export const runActiveContactSchema = z
+  .object({
+    contactId: nonEmpty,
+    actorId: nonEmpty,
+    interactionZoneId: nonEmpty,
+    originAnchorRef: nonEmpty,
+    safeDistanceM: z.number().positive(),
+    issuedAtSeconds: z.number().nonnegative(),
+    expiresAtSeconds: z.number().positive(),
+    reason: nonEmpty,
+  })
+  .strict();
+
 export const runSnapshotSchema = z
   .object({
     runId: nonEmpty,
@@ -386,6 +416,7 @@ export const runSnapshotSchema = z
     actors: z.array(runActorSchema).length(6),
     scheduler: runSchedulerSnapshotSchema,
     ambientSpeech: runAmbientSpeechSnapshotSchema,
+    activeContact: runActiveContactSchema.nullable(),
     records: z.array(runRecordSchema),
     ledgerEvents: z.array(runLedgerEventSchema),
     socialView: runSocialViewSchema,
@@ -434,11 +465,15 @@ export const runArrivalObservationSchema = z
 export const runActorSpatialFactsSchema = z
   .object({
     actorId: nonEmpty,
-    position: position3Schema,
+    position: z.tuple([z.number().finite(), z.number().finite(), z.number().finite()]),
     reachableAnchorRefs: z.array(nonEmpty).max(64),
     visibleActorIds: z.array(nonEmpty).max(5),
     audibleActorIds: z.array(nonEmpty).max(5),
     visibleObjectIds: z.array(nonEmpty).max(32),
+    playerVisible: z.boolean(),
+    playerAudible: z.boolean(),
+    playerReachable: z.boolean(),
+    playerInteractionZoneId: nonEmpty.nullable(),
   })
   .strict()
   .superRefine((facts, context) => {
@@ -458,9 +493,17 @@ export const runActorSpatialFactsSchema = z
     }
   });
 
+export const runPlayerSpatialFactsSchema = z
+  .object({
+    position: z.tuple([z.number().finite(), z.number().finite(), z.number().finite()]),
+    locationId: z.string(),
+  })
+  .strict();
+
 export const runSpatialFactsBatchSchema = z
   .object({
     observedWorldRevision: z.number().int().nonnegative(),
+    player: runPlayerSpatialFactsSchema,
     actors: z.array(runActorSpatialFactsSchema).length(6),
   })
   .strict()
@@ -593,6 +636,7 @@ export const runAdvanceResponseSchema = z
     ambientSpeechCursor: z.number().int().nonnegative(),
     scheduler: runSchedulerSnapshotSchema,
     socialView: runSocialViewSchema,
+    activeContact: runActiveContactSchema.nullable(),
   })
   .strict();
 
@@ -651,6 +695,7 @@ export const runNpcDecisionResponseSchema = z
     movementDeltas: z.array(runMovementDeltaSchema),
     providerMetas: z.array(proposalMetaSchema).max(3),
     socialView: runSocialViewSchema,
+    activeContact: runActiveContactSchema.nullable(),
   })
   .strict();
 
@@ -660,6 +705,7 @@ export const runSessionStartRequestSchema = z
     actorId: nonEmpty,
     interactionZoneId: nonEmpty,
     locale: gameplayLocaleSchema,
+    contactId: nonEmpty.optional(),
   })
   .strict();
 
@@ -671,6 +717,7 @@ export const runSessionStartResponseSchema = z
     actor: runActorSchema,
     nextTurn: runNextTurnSchema,
     socialView: runSocialViewSchema,
+    activeContact: runActiveContactSchema.nullable(),
   })
   .strict();
 
@@ -681,6 +728,7 @@ export const runSessionPreloadResponseSchema = z
     interactionZoneId: nonEmpty,
     actor: runActorSchema,
     proposalMeta: proposalMetaSchema,
+    activeContact: runActiveContactSchema.nullable(),
   })
   .strict();
 
@@ -726,6 +774,7 @@ export const runSessionAnswerResponseSchema = z
     nextTurn: runNextTurnSchema.nullable(),
     proposalMeta: proposalMetaSchema,
     socialView: runSocialViewSchema,
+    activeContact: runActiveContactSchema.nullable(),
   })
   .strict();
 
@@ -742,6 +791,7 @@ export const runSessionEndResponseSchema = z
     actor: runActorSchema,
     queuedRunDeltas: z.array(runDecisionDeltaSchema),
     socialView: runSocialViewSchema,
+    activeContact: runActiveContactSchema.nullable(),
   })
   .strict();
 
@@ -795,6 +845,7 @@ export type RunSnapshot = z.infer<typeof runSnapshotSchema>;
 export type RunActor = z.infer<typeof runActorSchema>;
 export type RunMemory = z.infer<typeof runMemorySchema>;
 export type RunRecordReadMemory = z.infer<typeof runRecordReadMemorySchema>;
+export type RunPlayerContactOutcomeMemory = z.infer<typeof runPlayerContactOutcomeMemorySchema>;
 export type RunOpenQuestion = z.infer<typeof runOpenQuestionSchema>;
 export type RunRecord = z.infer<typeof runRecordSchema>;
 export type RunLedgerEvent = z.infer<typeof runLedgerEventSchema>;
@@ -805,6 +856,7 @@ export type RunPlayerConversationMemory = z.infer<typeof runPlayerConversationMe
 export type RunAmbientUtteranceMemory = z.infer<typeof runAmbientUtteranceMemorySchema>;
 export type RunAmbientSpeechEvent = z.infer<typeof runAmbientSpeechEventSchema>;
 export type RunAmbientConversation = z.infer<typeof runAmbientConversationSchema>;
+export type RunActiveContact = z.infer<typeof runActiveContactSchema>;
 export type RunNextTurn = z.infer<typeof runNextTurnSchema>;
 export type RunSessionAnswer = z.infer<typeof runSessionAnswerSchema>;
 export type RunJudgment = z.infer<typeof runJudgmentSchema>;
@@ -817,6 +869,7 @@ export type RunAdvanceRequest = z.infer<typeof runAdvanceRequestSchema>;
 export type RunAdvanceResponse = z.infer<typeof runAdvanceResponseSchema>;
 export type RunArrivalObservation = z.infer<typeof runArrivalObservationSchema>;
 export type RunActorSpatialFacts = z.infer<typeof runActorSpatialFactsSchema>;
+export type RunPlayerSpatialFacts = z.infer<typeof runPlayerSpatialFactsSchema>;
 export type RunSpatialFactsBatch = z.infer<typeof runSpatialFactsBatchSchema>;
 export type RunArrivalApplied = z.infer<typeof runArrivalAppliedSchema>;
 export type RunArrivalRejected = z.infer<typeof runArrivalRejectedSchema>;

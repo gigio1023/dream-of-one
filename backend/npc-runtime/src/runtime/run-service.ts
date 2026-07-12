@@ -54,6 +54,7 @@ import {
 import { RECORD_KINDS, type RecordKind } from "./world/types.js";
 import type {
   RunAdministrationDelta,
+  RunActiveContact,
   RunActorReadinessDelta,
   RunActorSpatialFacts,
   RunAmbientConversation,
@@ -74,6 +75,8 @@ import type {
   RunNpcUtteranceMemory,
   RunOpenQuestion,
   RunPlayerConversationMemory,
+  RunPlayerContactOutcomeMemory,
+  RunPlayerSpatialFacts,
   RunRecord,
   RunRecordReadMemory,
   RunSessionAnswer,
@@ -102,6 +105,11 @@ const AMBIENT_TOKEN_HEADROOM_PER_TURN = 4_000;
 const MAX_CONCURRENT_BACKGROUND_PROPOSALS = 2;
 const GOAL_MAX_ATTEMPTS = 3;
 const GOAL_SPEECH_COOLDOWN_SECONDS = 60;
+const CONTACT_OPPORTUNITY_EPOCH_SECONDS = 75;
+const CONTACT_COOLDOWN_SECONDS = 75;
+const CONTACT_LIFETIME_SECONDS = 30;
+const CONTACT_SAFE_DISTANCE_M = 2.2;
+const CONTACT_START_TOLERANCE_M = 0.8;
 const PLAYER_CONVERSATION_GOAL =
   "Speak face to face with the outsider, ask only what your role and memories support, and form a memory-based personal stance.";
 
@@ -165,6 +173,7 @@ interface AmbientDecisionAttempt {
 
 interface CanonicalSpatialFacts {
   worldRevision: number;
+  player: RunPlayerSpatialFacts;
   actors: Map<string, RunActorSpatialFacts>;
   materialSignatures: Map<string, string>;
 }
@@ -174,6 +183,7 @@ type GoalAction =
   | { tool: "look"; targetKind: "actor" | "object" | "record"; targetId: string }
   | { tool: "talk_to"; targetActorId: string; utterance: string }
   | { tool: "move_to"; targetAnchorRef: string }
+  | { tool: "move_to_player"; contactReason: string }
   | ValidatedAdministrativeAction;
 
 interface GoalObservation {
@@ -218,6 +228,7 @@ type GoalConversationReplyClaimResult =
 interface ConversationState {
   sessionId: string;
   actorId: string;
+  contactId: string | null;
   status: "active" | "awaiting_end" | "ended";
   dialogue: Array<{ speakerId: string; line: string }>;
   turnCount: number;
@@ -279,6 +290,9 @@ interface RunState {
   records: RunSnapshot["records"];
   ledgerEvents: RunSnapshot["ledgerEvents"];
   socialView: RunSocialView;
+  activeContact: RunActiveContact | null;
+  contactCooldownUntil: Map<string, number>;
+  contactGlobalCooldownUntil: number;
   encounterCache: Map<string, CachedEncounter>;
   encounteredIdentityIds: Set<string>;
   encounteredSpeechEventIds: Set<string>;
@@ -353,6 +367,10 @@ function advanceSignature(request: RunAdvanceRequest): string {
   const spatialFacts = request.spatialFacts
     ? {
         observedWorldRevision: request.spatialFacts.observedWorldRevision,
+        player: {
+          position: request.spatialFacts.player.position,
+          locationId: request.spatialFacts.player.locationId,
+        },
         actors: [...request.spatialFacts.actors]
           .sort((first, second) => first.actorId.localeCompare(second.actorId))
           .map(actor => ({
@@ -362,6 +380,10 @@ function advanceSignature(request: RunAdvanceRequest): string {
             visibleActorIds: [...actor.visibleActorIds].sort(),
             audibleActorIds: [...actor.audibleActorIds].sort(),
             visibleObjectIds: [...actor.visibleObjectIds].sort(),
+            playerVisible: actor.playerVisible,
+            playerAudible: actor.playerAudible,
+            playerReachable: actor.playerReachable,
+            playerInteractionZoneId: actor.playerInteractionZoneId,
           })),
       }
     : undefined;
@@ -444,6 +466,10 @@ function canonicalSpatialActor(facts: RunActorSpatialFacts): RunActorSpatialFact
     visibleActorIds: [...facts.visibleActorIds].sort(),
     audibleActorIds: [...facts.audibleActorIds].sort(),
     visibleObjectIds: [...facts.visibleObjectIds].sort(),
+    playerVisible: facts.playerVisible,
+    playerAudible: facts.playerAudible,
+    playerReachable: facts.playerReachable,
+    playerInteractionZoneId: facts.playerInteractionZoneId,
   };
 }
 
@@ -456,6 +482,10 @@ function spatialMaterialSignature(facts: RunActorSpatialFacts): string {
     visibleActorIds: facts.visibleActorIds,
     audibleActorIds: facts.audibleActorIds,
     visibleObjectIds: facts.visibleObjectIds,
+    playerVisible: facts.playerVisible,
+    playerAudible: facts.playerAudible,
+    playerReachable: facts.playerReachable,
+    playerInteractionZoneId: facts.playerInteractionZoneId,
   });
 }
 
@@ -556,6 +586,9 @@ export class RunService {
         openQuestions: [],
         encounteredRecords: [],
       },
+      activeContact: null,
+      contactCooldownUntil: new Map(),
+      contactGlobalCooldownUntil: 0,
       encounterCache: new Map(),
       encounteredIdentityIds: new Set(),
       encounteredSpeechEventIds: new Set(),
@@ -596,6 +629,7 @@ export class RunService {
         events: clone(run.ambientSpeechEvents),
         activeConversation: clone(run.activeAmbientConversation),
       },
+      activeContact: clone(run.activeContact),
       records: clone(run.records),
       ledgerEvents: clone(run.ledgerEvents),
       socialView: this.publicSocialView(run),
@@ -717,6 +751,7 @@ export class RunService {
       }
 
       let incomingSpatialFacts: Map<string, RunActorSpatialFacts> | null = null;
+      let incomingPlayerFacts: RunPlayerSpatialFacts | null = null;
       if (request.spatialFacts) {
         if (request.spatialFacts.observedWorldRevision !== request.observedWorldRevision) {
           throw new RunError(
@@ -725,6 +760,16 @@ export class RunService {
           );
         }
         const expectedActorIds = new Set(this.layout.actors.map(actor => actor.actorId));
+        if (
+          request.spatialFacts.player.locationId !== "" &&
+          !this.layout.landmarkIds.includes(request.spatialFacts.player.locationId)
+        ) {
+          throw new RunError(
+            `spatial facts reference an unknown player location ${request.spatialFacts.player.locationId}`,
+            "invalid_spatial_facts",
+          );
+        }
+        incomingPlayerFacts = clone(request.spatialFacts.player);
         const receivedActorIds = new Set(request.spatialFacts.actors.map(actor => actor.actorId));
         if (
           receivedActorIds.size !== expectedActorIds.size ||
@@ -771,6 +816,22 @@ export class RunService {
               );
             }
           }
+          const contactZone = facts.playerInteractionZoneId
+            ? this.layout.conversationZones.find(
+                zone => zone.zoneId === facts.playerInteractionZoneId,
+              )
+            : undefined;
+          if (
+            facts.playerInteractionZoneId !== null &&
+            (!contactZone ||
+              !contactZone.actorIds.includes(facts.actorId) ||
+              contactZone.landmarkId !== incomingPlayerFacts.locationId)
+          ) {
+            throw new RunError(
+              `spatial facts contain an invalid player interaction zone for ${facts.actorId}`,
+              "invalid_spatial_facts",
+            );
+          }
           incomingSpatialFacts.set(facts.actorId, facts);
         }
       }
@@ -791,6 +852,9 @@ export class RunService {
         toSeconds,
         arrivals: request.arrivals,
         observedWorldRevision: candidateWorldRevision,
+        heldActorIds: run.activeContact
+          ? new Set([run.activeContact.actorId])
+          : undefined,
       });
       for (const arrival of schedulerResult.arrivalsApplied) {
         emitRunWake(
@@ -809,6 +873,25 @@ export class RunService {
           schedulerResult.scheduleWakes,
         );
       }
+
+      const contactCancelled = this.cancelActiveContactIfInvalid(
+        run,
+        incomingSpatialFacts,
+        incomingPlayerFacts,
+        toSeconds,
+        candidateWorldRevision,
+      );
+      const goalSpatialActors = incomingSpatialFacts ?? run.spatialFacts?.actors ?? null;
+      const goalPlayerFacts = incomingPlayerFacts ?? run.spatialFacts?.player ?? null;
+      const contactCandidateActorId =
+        goalSpatialActors && goalPlayerFacts
+          ? this.contactCandidateFor(
+              run,
+              goalSpatialActors,
+              goalPlayerFacts,
+              toSeconds,
+            )
+          : null;
 
       let spatialFactsChanged = false;
       if (incomingSpatialFacts) {
@@ -836,11 +919,24 @@ export class RunService {
               schedulerResult.scheduleWakes,
             );
           }
-
-          const schedulerActor = run.scheduler.actors.get(layoutActor.actorId);
-          if (schedulerActor?.pendingMovement) continue;
+        }
+      }
+      if (goalSpatialActors) {
+        for (const layoutActor of this.layout.actors) {
+          const facts = goalSpatialActors.get(layoutActor.actorId);
+          if (
+            !facts ||
+            run.activeContact?.actorId === layoutActor.actorId ||
+            run.scheduler.actors.get(layoutActor.actorId)?.pendingMovement
+          ) continue;
           const actor = this.requireActor(run, layoutActor.actorId);
-          const goalKey = this.actorGoalKey(run, actor, materialSignature, toSeconds);
+          const goalKey = this.actorGoalKey(
+            run,
+            actor,
+            spatialMaterialSignature(facts),
+            toSeconds,
+            contactCandidateActorId,
+          );
           const goalAlreadyCompleted = run.completedGoalKeys.has(`${actor.actorId}:${goalKey}`);
           const goalAlreadyPending = [...run.scheduler.pendingWakes.values()].some(
             wake =>
@@ -894,11 +990,16 @@ export class RunService {
       }
 
       const spatialPositionChanged = incomingSpatialFacts
-        ? this.spatialPositionsChanged(run.spatialFacts, incomingSpatialFacts)
+        ? this.spatialPositionsChanged(
+            run.spatialFacts,
+            incomingSpatialFacts,
+            incomingPlayerFacts as RunPlayerSpatialFacts,
+          )
         : false;
       const materialMutation =
         schedulerMutation ||
         actorReadinessDeltas.length > 0 ||
+        contactCancelled ||
         spatialFactsChanged ||
         spatialPositionChanged;
       if (materialMutation) {
@@ -907,6 +1008,7 @@ export class RunService {
         if (incomingSpatialFacts) {
           run.spatialFacts = {
             worldRevision: candidateWorldRevision,
+            player: clone(incomingPlayerFacts as RunPlayerSpatialFacts),
             actors: incomingSpatialFacts,
             materialSignatures: new Map(
               [...incomingSpatialFacts].map(([actorId, facts]) => [
@@ -956,6 +1058,7 @@ export class RunService {
         ambientSpeechCursor: run.ambientSpeechCursor,
         scheduler: snapshotRunScheduler(this.layout, run.scheduler, run.elapsedSeconds),
         socialView: this.publicSocialView(run),
+        activeContact: clone(run.activeContact),
       };
       run.advanceCache.set(request.advanceId, { signature, response: clone(response) });
       while (run.advanceCache.size > 256) {
@@ -1134,6 +1237,7 @@ export class RunService {
     actorId: string,
     interactionZoneId: string,
     locale: string,
+    contactId?: string,
   ): Promise<RunSessionStartResponse> {
     return this.serialize(runId, async () => {
       const run = this.requireRun(runId);
@@ -1147,7 +1251,12 @@ export class RunService {
         // A timed-out start request can be retried safely. Returning the
         // current answerable turn also gives reconnecting clients a direct
         // reconciliation path without creating another provider call.
-        if (active.actorId === actorId && active.status === "active" && active.activeTurn) {
+        if (
+          active.actorId === actorId &&
+          active.contactId === (contactId ?? null) &&
+          active.status === "active" &&
+          active.activeTurn
+        ) {
           return {
             runId,
             sessionId: active.sessionId,
@@ -1155,12 +1264,18 @@ export class RunService {
             actor: this.publicActor(actor),
             nextTurn: clone(active.activeTurn),
             socialView: this.publicSocialView(run),
+            activeContact: clone(run.activeContact),
           };
         }
         throw new RunError(
           `run already has an active conversation: ${run.activeConversationId}`,
           "conversation_active",
         );
+      }
+      if (contactId) {
+        this.validateActiveContactStart(run, actor, interactionZoneId, contactId);
+      } else if (run.activeContact?.actorId === actor.actorId) {
+        throw new RunError("an initiated player contact must be resolved first", "conversation_not_ready");
       }
       if (!actor.playerConversationReady) {
         throw new RunError("actor is not ready for a player conversation", "conversation_not_ready");
@@ -1222,6 +1337,7 @@ export class RunService {
       const conversation: ConversationState = {
         sessionId,
         actorId,
+        contactId: contactId ?? null,
         status: "active",
         dialogue: [{ speakerId: actorId, line: nextTurn.prompt }],
         turnCount: 0,
@@ -1233,6 +1349,11 @@ export class RunService {
       };
       run.conversations.set(sessionId, conversation);
       run.activeConversationId = sessionId;
+      if (contactId) {
+        run.contactCooldownUntil.set(actor.actorId, run.elapsedSeconds + CONTACT_COOLDOWN_SECONDS);
+        run.contactGlobalCooldownUntil = run.elapsedSeconds + CONTACT_COOLDOWN_SECONDS;
+        run.activeContact = null;
+      }
       run.worldRevision = openingRevision;
       run.encounteredIdentityIds.add(actor.actorId);
       return {
@@ -1242,6 +1363,7 @@ export class RunService {
         actor: this.publicActor(actor),
         nextTurn: clone(nextTurn),
         socialView: this.publicSocialView(run),
+        activeContact: clone(run.activeContact),
       };
     });
   }
@@ -1400,6 +1522,7 @@ export class RunService {
         nextTurn: clone(nextTurn),
         proposalMeta: clone(resolved.meta),
         socialView: this.publicSocialView(run),
+        activeContact: clone(run.activeContact),
       };
       conversation.answerCache.set(turnId, { signature, response: clone(response) });
       return response;
@@ -1438,6 +1561,7 @@ export class RunService {
         actor: this.publicActor(actor),
         queuedRunDeltas,
         socialView: this.publicSocialView(run),
+        activeContact: clone(run.activeContact),
       };
       conversation.endResponse = clone(response);
       return response;
@@ -1645,6 +1769,9 @@ export class RunService {
     if (!pending || pending.status !== "pending") {
       throw new RunError(`wake is not pending: ${attempt.request.wakeId}`, "wake_not_pending");
     }
+    if (run.activeContact?.actorId === attempt.actorId) {
+      return this.finishGoalAttempt(run, attempt, "stale");
+    }
     const wake = claimRunWake(run.scheduler, attempt.request.wakeId);
     if (
       !wake ||
@@ -1665,7 +1792,16 @@ export class RunService {
     }
     const actor = this.requireActor(run, attempt.actorId);
     const factSignature = spatialMaterialSignature(facts);
-    if (this.actorGoalKey(run, actor, factSignature) !== attempt.goalKey) {
+    const contactCandidateActorId = this.currentContactCandidateActorId(run);
+    if (
+      this.actorGoalKey(
+        run,
+        actor,
+        factSignature,
+        run.elapsedSeconds,
+        contactCandidateActorId,
+      ) !== attempt.goalKey
+    ) {
       return this.finishGoalAttempt(run, attempt, "stale");
     }
     this.refreshProviderBudget(run);
@@ -1673,7 +1809,14 @@ export class RunService {
       return this.finishGoalAttempt(run, attempt, "budget_reserved", true);
     }
     const policy = DEFAULT_ROLE_POLICIES[actor.role];
-    const goal = [...policy.stableGoals, "Advance one currently actionable role goal, then yield."].join(" ");
+    const contactOpportunity = contactCandidateActorId === actor.actorId;
+    const goal = [
+      ...policy.stableGoals,
+      "Advance one currently actionable role goal, then yield.",
+      ...(contactOpportunity
+        ? ["A grounded opportunity to approach the player is available; choose it only when your role or remembered facts warrant direct clarification."]
+        : []),
+    ].join(" ");
     const observePacket = this.runObservePacket(
       run,
       actor,
@@ -1686,8 +1829,14 @@ export class RunService {
       this.schedulePermitsAnchor(run, actor.actorId, anchorRef) &&
       run.scheduler.actors.get(actor.actorId)?.confirmedAnchorRef !== anchorRef,
     );
+    observePacket.playerContact = contactOpportunity
+      ? this.playerContactContext(run, actor, facts)
+      : null;
     const offeredTools: ObservePacket["toolCatalog"] = ["wait"];
-    if (observePacket.reachableAnchorRefs.length > 0) offeredTools.unshift("move_to");
+    if (
+      observePacket.reachableAnchorRefs.length > 0 ||
+      observePacket.playerContact?.available
+    ) offeredTools.unshift("move_to");
     if (
       observePacket.visibleActors.length > 0 ||
       observePacket.visibleObjects.length > 0 ||
@@ -1827,6 +1976,20 @@ export class RunService {
         const targetAnchorRef = asId(call.args.targetId);
         if (!targetAnchorRef) {
           return { reason: "invalid_args", detail: "move_to requires targetId" };
+        }
+        if (targetAnchorRef === "player") {
+          if (!observation.observePacket.playerContact?.available) {
+            return {
+              reason: "target_unavailable",
+              detail: "the player is not the current grounded contact opportunity",
+            };
+          }
+          return {
+            action: {
+              tool: "move_to_player",
+              contactReason: step.rationale,
+            },
+          };
         }
         if (!observation.observePacket.reachableAnchorRefs.includes(targetAnchorRef)) {
           return { reason: "unreachable", detail: `${targetAnchorRef} is not navmesh-reachable` };
@@ -2145,6 +2308,9 @@ export class RunService {
     if (!attempt.observation || !attempt.resolvedAction || !attempt.actionMeta) {
       return this.finishGoalAttempt(run, attempt, "failed");
     }
+    if (run.activeContact?.actorId === attempt.actorId) {
+      return this.finishGoalAttempt(run, attempt, "stale");
+    }
     if (run.activeConversationId !== null) {
       if (attempt.state === "queued" && attempt.response) return clone(attempt.response);
       attempt.state = "queued";
@@ -2180,6 +2346,26 @@ export class RunService {
         targetId: action.targetId,
         worldRevision: run.worldRevision,
       });
+    } else if (action.tool === "move_to_player") {
+      const schedulerActor = run.scheduler.actors.get(actor.actorId);
+      const playerContact = this.playerContactContext(run, actor, facts);
+      if (!schedulerActor || !playerContact?.available || run.activeContact !== null) {
+        return this.finishGoalAttempt(run, attempt, "stale");
+      }
+      run.worldRevision += 1;
+      run.activeContact = {
+        contactId: `contact:${run.runId}:${attempt.request.wakeId}`,
+        actorId: actor.actorId,
+        interactionZoneId: playerContact.interactionZoneId,
+        originAnchorRef: schedulerActor.confirmedAnchorRef,
+        safeDistanceM: CONTACT_SAFE_DISTANCE_M,
+        issuedAtSeconds: run.elapsedSeconds,
+        expiresAtSeconds: Math.min(
+          run.hearingAtSeconds,
+          run.elapsedSeconds + CONTACT_LIFETIME_SECONDS,
+        ),
+        reason: action.contactReason,
+      };
     } else if (action.tool === "move_to") {
       const movement = issueActorGoalMovement({
         runId: run.runId,
@@ -2449,6 +2635,7 @@ export class RunService {
       movementDeltas: clone(movementDeltas),
       providerMetas: clone(attempt.providerMetas),
       socialView: this.publicSocialView(run),
+      activeContact: clone(run.activeContact),
     };
   }
 
@@ -2477,7 +2664,9 @@ export class RunService {
     facts: RunActorSpatialFacts,
   ): boolean {
     const action = attempt.resolvedAction;
-    if (!action || action.tool === "wait") return action !== null;
+    if (!action) return false;
+    if (run.activeContact?.actorId === attempt.actorId) return false;
+    if (action.tool === "wait") return true;
     if (action.tool === "look") {
       if (action.targetKind === "actor") return facts.visibleActorIds.includes(action.targetId);
       if (action.targetKind === "object") return facts.visibleObjectIds.includes(action.targetId);
@@ -2485,6 +2674,14 @@ export class RunService {
         record =>
           record.recordId === action.targetId &&
           record.visibleToActorIds.includes(attempt.actorId),
+      );
+    }
+    if (action.tool === "move_to_player") {
+      return Boolean(
+        run.activeContact === null &&
+        run.activeConversationId === null &&
+        this.currentContactCandidateActorId(run) === attempt.actorId &&
+        this.playerContactContext(run, this.requireActor(run, attempt.actorId), facts)?.available
       );
     }
     if (action.tool === "move_to") {
@@ -3027,6 +3224,7 @@ export class RunService {
       movementDeltas: [],
       providerMetas: clone(attempt.providerMetas),
       socialView: this.publicSocialView(run),
+      activeContact: clone(run.activeContact),
     };
   }
 
@@ -3410,6 +3608,7 @@ export class RunService {
       interactionZoneId: attempt.interactionZoneId,
       actor: this.publicActor(actor),
       proposalMeta: clone(attempt.resolved.meta),
+      activeContact: clone(run.activeContact),
     };
   }
 
@@ -3480,11 +3679,181 @@ export class RunService {
     }
   }
 
+  private groundedPlayerContact(
+    run: RunState,
+    actor: RunActorState,
+    facts: RunActorSpatialFacts,
+    player: RunPlayerSpatialFacts,
+  ): ObservePacket["playerContact"] {
+    const interactionZoneId = facts.playerInteractionZoneId;
+    const zone = interactionZoneId
+      ? this.layout.conversationZones.find(candidate => candidate.zoneId === interactionZoneId)
+      : undefined;
+    if (
+      !zone ||
+      player.locationId === "" ||
+      actor.locationId !== player.locationId ||
+      zone.landmarkId !== player.locationId ||
+      !zone.actorIds.includes(actor.actorId) ||
+      !facts.playerVisible ||
+      !facts.playerReachable
+    ) {
+      return null;
+    }
+    return {
+      available: true,
+      targetActorId: "player",
+      interactionZoneId: zone.zoneId,
+      playerLocationId: player.locationId,
+      visible: facts.playerVisible,
+      audible: facts.playerAudible,
+      reachable: facts.playerReachable,
+      safeDistanceM: CONTACT_SAFE_DISTANCE_M,
+    };
+  }
+
+  private contactCandidateFor(
+    run: RunState,
+    actors: Map<string, RunActorSpatialFacts>,
+    player: RunPlayerSpatialFacts,
+    elapsedSeconds: number,
+  ): string | null {
+    if (
+      elapsedSeconds < run.graceEndsAtSeconds ||
+      elapsedSeconds >= run.hearingAtSeconds ||
+      elapsedSeconds < run.contactGlobalCooldownUntil ||
+      run.activeContact !== null ||
+      run.activeConversationId !== null ||
+      run.activeAmbientConversation !== null
+    ) return null;
+    const candidates = [...run.actors.values()].filter(actor => {
+      const facts = actors.get(actor.actorId);
+      const cooldownUntil = run.contactCooldownUntil.get(actor.actorId) ?? 0;
+      return Boolean(
+        facts &&
+        elapsedSeconds >= cooldownUntil &&
+        !run.scheduler.actors.get(actor.actorId)?.pendingMovement &&
+        this.groundedPlayerContact(run, actor, facts, player)?.available
+      );
+    });
+    candidates.sort((first, second) => {
+      const suspicionOrder = second.suspicion - first.suspicion;
+      if (suspicionOrder !== 0) return suspicionOrder;
+      const relevance = (actor: RunActorState): number => actor.memories.filter(memory =>
+        memory.kind === "player_conversation" ||
+        memory.kind === "player_contact_outcome" ||
+        memory.kind === "record_read"
+      ).length;
+      const memoryOrder = relevance(second) - relevance(first);
+      return memoryOrder !== 0 ? memoryOrder : first.actorId.localeCompare(second.actorId);
+    });
+    return candidates[0]?.actorId ?? null;
+  }
+
+  private currentContactCandidateActorId(
+    run: RunState,
+    elapsedSeconds = run.elapsedSeconds,
+  ): string | null {
+    const spatial = run.spatialFacts;
+    return spatial
+      ? this.contactCandidateFor(run, spatial.actors, spatial.player, elapsedSeconds)
+      : null;
+  }
+
+  private playerContactContext(
+    run: RunState,
+    actor: RunActorState,
+    facts: RunActorSpatialFacts,
+  ): ObservePacket["playerContact"] {
+    const player = run.spatialFacts?.player;
+    return player ? this.groundedPlayerContact(run, actor, facts, player) : null;
+  }
+
+  private cancelActiveContactIfInvalid(
+    run: RunState,
+    actors: Map<string, RunActorSpatialFacts> | null,
+    player: RunPlayerSpatialFacts | null,
+    atSeconds: number,
+    worldRevision: number,
+  ): boolean {
+    const contact = run.activeContact;
+    if (!contact) return false;
+    const actor = this.requireActor(run, contact.actorId);
+    const facts = actors?.get(contact.actorId);
+    const zone = facts?.playerInteractionZoneId
+      ? this.layout.conversationZones.find(
+          candidate => candidate.zoneId === facts.playerInteractionZoneId,
+        )
+      : undefined;
+    const invalidGrounding = Boolean(
+      facts && player &&
+      (
+        !facts.playerReachable ||
+        player.locationId === "" ||
+        actor.locationId !== player.locationId ||
+        !zone ||
+        zone.zoneId !== contact.interactionZoneId ||
+        zone.landmarkId !== player.locationId ||
+        !zone.actorIds.includes(actor.actorId)
+      )
+    );
+    if (atSeconds < contact.expiresAtSeconds && !invalidGrounding) return false;
+
+    const memory: RunPlayerContactOutcomeMemory = {
+      memoryId: this.idFactory("mem"),
+      kind: "player_contact_outcome",
+      sourceActorId: "player",
+      listenerActorId: actor.actorId,
+      contactId: contact.contactId,
+      outcome: "not_engaged",
+      contactReason: contact.reason,
+      interactionZoneId: contact.interactionZoneId,
+      originAnchorRef: contact.originAnchorRef,
+      worldSeconds: atSeconds,
+      worldRevision,
+    };
+    actor.memories.push(memory);
+    run.contactCooldownUntil.set(actor.actorId, atSeconds + CONTACT_COOLDOWN_SECONDS);
+    run.contactGlobalCooldownUntil = atSeconds + CONTACT_COOLDOWN_SECONDS;
+    run.activeContact = null;
+    return true;
+  }
+
+  private validateActiveContactStart(
+    run: RunState,
+    actor: RunActorState,
+    interactionZoneId: string,
+    contactId: string,
+  ): void {
+    const contact = run.activeContact;
+    const facts = run.spatialFacts?.actors.get(actor.actorId);
+    const player = run.spatialFacts?.player;
+    const grounded = facts && player
+      ? this.groundedPlayerContact(run, actor, facts, player)
+      : null;
+    if (
+      !contact ||
+      contact.contactId !== contactId ||
+      contact.actorId !== actor.actorId ||
+      contact.interactionZoneId !== interactionZoneId ||
+      run.elapsedSeconds >= contact.expiresAtSeconds ||
+      !facts ||
+      !player ||
+      !grounded ||
+      grounded.interactionZoneId !== interactionZoneId ||
+      distanceBetween(facts.position, player.position) >
+        contact.safeDistanceM + CONTACT_START_TOLERANCE_M
+    ) {
+      throw new RunError("initiated contact is not grounded at conversation distance", "conversation_not_ready");
+    }
+  }
+
   private actorGoalKey(
     run: RunState,
     actor: RunActorState,
     spatialSignature: string,
     elapsedSeconds = run.elapsedSeconds,
+    contactCandidateActorId = this.currentContactCandidateActorId(run, elapsedSeconds),
   ): string {
     const layoutActor = this.layout.actors.find(candidate => candidate.actorId === actor.actorId);
     const block = layoutActor?.scheduleBlocks.find(
@@ -3499,6 +3868,7 @@ export class RunService {
       incomingMemoryIds: actor.memories
         .filter(memory =>
           memory.kind === "player_conversation" ||
+          memory.kind === "player_contact_outcome" ||
           memory.kind === "record_read" ||
           (memory.kind === "ambient_utterance" && memory.speakerActorId !== actor.actorId),
         )
@@ -3507,6 +3877,13 @@ export class RunService {
         .filter(record => record.visibleToActorIds.includes(actor.actorId))
         .map(record => `${record.recordId}@${record.recordRevision}`)
         .sort(),
+      contactOpportunity:
+        contactCandidateActorId === actor.actorId
+          ? Math.floor(
+              Math.max(0, elapsedSeconds - run.graceEndsAtSeconds) /
+                CONTACT_OPPORTUNITY_EPOCH_SECONDS,
+            )
+          : null,
       spatialSignature,
     }))}`;
   }
@@ -3514,8 +3891,13 @@ export class RunService {
   private spatialPositionsChanged(
     prior: CanonicalSpatialFacts | null,
     incoming: Map<string, RunActorSpatialFacts>,
+    player: RunPlayerSpatialFacts,
   ): boolean {
     if (!prior) return true;
+    if (
+      prior.player.locationId !== player.locationId ||
+      prior.player.position.some((value, index) => value !== player.position[index])
+    ) return true;
     for (const [actorId, facts] of incoming) {
       const previous = prior.actors.get(actorId);
       if (!previous || previous.position.some((value, index) => value !== facts.position[index])) {
@@ -3558,6 +3940,9 @@ export class RunService {
         return memory.speakerActorId === actor.actorId
           ? `[self_utterance] ${memory.line}`
           : `[heard_from=${memory.speakerActorId}] ${memory.line}`;
+      }
+      if (memory.kind === "player_contact_outcome") {
+        return `[player_contact=${memory.outcome};contact=${memory.contactId}] ${memory.contactReason}`;
       }
       return `[record_read=${memory.recordId}@${memory.recordRevision}] ${memory.stateBody}`;
     });
@@ -3603,6 +3988,7 @@ export class RunService {
       visibleActors: [...new Set(visibleActorIds.filter(id => id !== actor.actorId))],
       audibleActorIds: spatialFacts ? [...spatialFacts.audibleActorIds] : [],
       reachableAnchorRefs: spatialFacts ? [...spatialFacts.reachableAnchorRefs] : [],
+      playerContact: null,
       heardSpeech: [...heardSpeech, ...additionalSpeech],
       toolCatalog: toolCatalogForRole(actor.role),
       administrativeSources: actor.memories
@@ -3635,6 +4021,16 @@ export class RunService {
             originActorId: memory.sourceActorId,
             summary: memory.stateBody,
             whyLine: memory.whyLine,
+            reportDelta: 0,
+          };
+        }
+        if (memory.kind === "player_contact_outcome") {
+          return {
+            memoryId: memory.memoryId,
+            kind: memory.kind,
+            originActorId: "player",
+            summary: memory.outcome,
+            whyLine: memory.contactReason,
             reportDelta: 0,
           };
         }

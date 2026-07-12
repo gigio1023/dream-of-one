@@ -21,6 +21,8 @@ const ADVANCE_RETRY_SECONDS := 1.0
 const ADVANCE_MAX_SECONDS := 10
 const ADVANCE_MAX_ARRIVALS := 6
 const AMBIENT_DECISION_RETRY_SECONDS := 1.0
+const CONTACT_SPATIAL_REFRESH_SECONDS := 0.25
+const PLAYER_SPATIAL_DIRTY_DISTANCE_M := 0.5
 
 @onready var _town: Town3D = $Town
 @onready var _player: CharacterBody3D = $Town/Actors/Player3D
@@ -96,6 +98,12 @@ var _applied_conversation_end_batches: Dictionary = {}
 var _record_encounter_in_flight := false
 var _encounter_sequence := 0
 var _acknowledged_speech_encounters: Dictionary = {}
+var _active_contact: Dictionary = {}
+var _pending_contact_ready_id := ""
+var _conversation_contact_id := ""
+var _conversation_contact_zone_id := ""
+var _contact_spatial_refresh_remaining := 0.0
+var _last_spatial_player_position := Vector3(INF, INF, INF)
 
 
 func _ready() -> void:
@@ -132,6 +140,7 @@ func _ready() -> void:
 			var actor := actor_value as NPC3D
 			actor.movement_arrived.connect(_on_npc_movement_arrived)
 			actor.movement_blocked.connect(_on_npc_movement_blocked)
+			actor.player_contact_ready.connect(_on_player_contact_ready)
 			actor.conversation_requested.connect(_on_conversation_requested.bind(actor))
 	_hud.configure_look_settings(
 		float(_player.get("mouse_sensitivity")),
@@ -151,6 +160,8 @@ func _process(delta: float) -> void:
 		_hud.set_debug_snapshot(_debug_snapshot())
 	if get_tree().paused or _conversation_target != null:
 		return
+	_update_player_spatial_dirty(delta)
+	_try_open_pending_contact()
 	if _run_id.is_empty() or _run_start_in_flight:
 		return
 	_ambient_decision_retry_remaining = maxf(
@@ -276,6 +287,7 @@ func presentation_snapshot() -> Dictionary:
 			},
 		},
 		"ambientSubtitle": hud_snapshot.get("ambientSubtitle", {}),
+		"contact": _contact_presentation_snapshot(),
 	}
 
 
@@ -284,6 +296,7 @@ func _on_settings_visibility_changed(visible: bool) -> void:
 		_player.set_control_enabled(false)
 		_player.release_mouse()
 	else:
+		_try_open_pending_contact()
 		_restore_player_control_if_unlocked()
 
 
@@ -292,6 +305,7 @@ func _on_log_visibility_changed(visible: bool) -> void:
 		_player.set_control_enabled(false)
 		_player.release_mouse()
 	else:
+		_try_open_pending_contact()
 		_restore_player_control_if_unlocked()
 
 
@@ -387,10 +401,220 @@ func _on_language_requested(locale_name: String) -> void:
 	_save_preferences()
 
 
+func _update_player_spatial_dirty(delta: float) -> void:
+	if (
+		_last_spatial_player_position.x == INF
+		or _player.global_position.distance_to(_last_spatial_player_position)
+		>= PLAYER_SPATIAL_DIRTY_DISTANCE_M
+	):
+		_spatial_facts_dirty = true
+	if _active_contact.is_empty():
+		_contact_spatial_refresh_remaining = 0.0
+		return
+	_contact_spatial_refresh_remaining = maxf(
+		0.0,
+		_contact_spatial_refresh_remaining - delta
+	)
+	if is_zero_approx(_contact_spatial_refresh_remaining):
+		# This only dirties the next batched advance; it never sends per frame.
+		_spatial_facts_dirty = true
+		_contact_spatial_refresh_remaining = CONTACT_SPATIAL_REFRESH_SECONDS
+
+
+func _on_player_contact_ready(contact_id: String, actor_id: StringName) -> void:
+	if not _contact_is_current(contact_id, str(actor_id)) or _contact_expired():
+		return
+	_pending_contact_ready_id = contact_id
+	call_deferred("_try_open_pending_contact")
+
+
+func _try_open_pending_contact() -> void:
+	if _pending_contact_ready_id.is_empty():
+		return
+	var contact_id := _pending_contact_ready_id
+	var actor_id := str(_active_contact.get("actorId", ""))
+	if not _contact_is_current(contact_id, actor_id) or _contact_expired():
+		_pending_contact_ready_id = ""
+		return
+	if (
+		_conversation_target != null
+		or _resolving_answer
+		or _ending_conversation
+		or _record_encounter_in_flight
+		or _hud.settings_visible()
+		or _hud.log_visible()
+	):
+		return
+	var actor := _town.get_node_or_null("Actors/%s" % actor_id) as NPC3D
+	if actor == null or not actor.player_contact_is_ready(contact_id):
+		return
+	_begin_conversation(StringName(actor_id), actor, contact_id)
+
+
+func _contact_is_current(contact_id: String, actor_id := "") -> bool:
+	return (
+		not contact_id.is_empty()
+		and contact_id == str(_active_contact.get("contactId", ""))
+		and (actor_id.is_empty() or actor_id == str(_active_contact.get("actorId", "")))
+	)
+
+
+func _contact_expired() -> bool:
+	if _active_contact.is_empty():
+		return true
+	var expires_at := float(_active_contact.get("expiresAtSeconds", INF))
+	var elapsed := float(
+		_dictionary_or_empty(_run_snapshot.get("worldClock")).get("elapsedSeconds", 0.0)
+	)
+	return elapsed >= expires_at
+
+
+func _sync_active_contact_from_response(response: Dictionary) -> void:
+	if not response.has("activeContact"):
+		return
+	var incoming_value: Variant = response.get("activeContact")
+	if incoming_value == null:
+		_clear_active_contact(_conversation_target == null)
+		return
+	if not incoming_value is Dictionary:
+		push_warning("Ignoring malformed activeContact from RunService.")
+		return
+	var incoming := (incoming_value as Dictionary).duplicate(true)
+	var contact_id := str(incoming.get("contactId", ""))
+	var actor_id := str(incoming.get("actorId", ""))
+	var interaction_zone_id := str(incoming.get("interactionZoneId", ""))
+	if contact_id.is_empty() or actor_id.is_empty() or interaction_zone_id.is_empty():
+		push_warning("Ignoring incomplete activeContact from RunService.")
+		return
+	var previous_id := str(_active_contact.get("contactId", ""))
+	if not previous_id.is_empty() and previous_id != contact_id:
+		_clear_active_contact(_conversation_target == null)
+	_active_contact = incoming
+	if not _run_snapshot.is_empty():
+		_run_snapshot["activeContact"] = incoming.duplicate(true)
+	_resume_active_contact_follow()
+
+
+func _resume_active_contact_follow() -> void:
+	if _active_contact.is_empty() or _conversation_target != null or get_tree().paused:
+		return
+	var actor_id := str(_active_contact.get("actorId", ""))
+	var contact_id := str(_active_contact.get("contactId", ""))
+	var actor := _town.get_node_or_null("Actors/%s" % actor_id) as NPC3D
+	if actor == null or contact_id.is_empty():
+		return
+	if not actor.has_player_contact(contact_id):
+		_drop_client_movement_for_actor(actor_id)
+		if not actor.begin_player_contact(
+			contact_id,
+			_player,
+			float(_active_contact.get("safeDistanceM", 1.6))
+		):
+			push_warning("NPC %s rejected player contact %s." % [actor_id, contact_id])
+			return
+	_hud.show_contact_approach(contact_id, actor_id)
+	_spatial_facts_dirty = true
+
+
+func _clear_active_contact(return_to_origin: bool) -> void:
+	if _active_contact.is_empty():
+		return
+	var ended := _active_contact.duplicate(true)
+	var contact_id := str(ended.get("contactId", ""))
+	var actor_id := str(ended.get("actorId", ""))
+	var actor := _town.get_node_or_null("Actors/%s" % actor_id) as NPC3D
+	if actor != null and actor.has_player_contact(contact_id):
+		var return_position: Variant = null
+		if return_to_origin:
+			return_position = _town.navigation_position(str(ended.get("originAnchorRef", "")))
+		actor.cancel_player_contact(return_position)
+	if _pending_contact_ready_id == contact_id:
+		_pending_contact_ready_id = ""
+	_hud.clear_contact_approach(contact_id)
+	# Movements received while this contact was active were contradictory or
+	# stale by definition. A later authoritative scheduler snapshot may issue
+	# the still-current movement again after activeContact becomes null.
+	_discard_queued_movement_for_actor(actor_id)
+	_active_contact = {}
+	if not _run_snapshot.is_empty():
+		_run_snapshot["activeContact"] = null
+	_spatial_facts_dirty = true
+
+
+func _drop_client_movement_for_actor(actor_id: String) -> void:
+	_active_movements.erase(actor_id)
+	_blocked_movements.erase(actor_id)
+	_discard_queued_movement_for_actor(actor_id)
+	for index in range(_queued_arrivals.size() - 1, -1, -1):
+		if str(_queued_arrivals[index].get("actorId", "")) == actor_id:
+			_arrival_batch_movement_ids.erase(
+				str(_queued_arrivals[index].get("movementId", ""))
+			)
+			_queued_arrivals.remove_at(index)
+
+
+func _contact_presentation_snapshot() -> Dictionary:
+	if _active_contact.is_empty():
+		return {"active": false, "status": "none"}
+	var actor_id := str(_active_contact.get("actorId", ""))
+	var contact_id := str(_active_contact.get("contactId", ""))
+	var actor := _town.get_node_or_null("Actors/%s" % actor_id) as NPC3D
+	var status := "approaching"
+	var actor_status: Dictionary = {}
+	if actor != null:
+		actor_status = actor.contact_status()
+		if bool(actor_status.get("ready", false)):
+			status = "ready_deferred" if _pending_contact_ready_id == contact_id else "ready"
+	return {
+		"active": true,
+		"contactId": contact_id,
+		"actorId": actor_id,
+		"interactionZoneId": str(_active_contact.get("interactionZoneId", "")),
+		"reason": str(_active_contact.get("reason", "")),
+		"status": status,
+		"expiresAtSeconds": float(_active_contact.get("expiresAtSeconds", 0.0)),
+		"follow": actor_status,
+	}
+
+
 func _on_conversation_requested(actor_id: StringName, target: NPC3D) -> void:
+	var contact_id := ""
+	if (
+		str(_active_contact.get("actorId", "")) == str(actor_id)
+		and not str(_active_contact.get("contactId", "")).is_empty()
+		and not _contact_expired()
+	):
+		contact_id = str(_active_contact.get("contactId", ""))
+	_begin_conversation(actor_id, target, contact_id)
+
+
+func _begin_conversation(
+	actor_id: StringName,
+	target: NPC3D,
+	contact_id := ""
+) -> void:
 	if _conversation_target != null or _resolving_answer or _ending_conversation:
 		return
+	if _hud.settings_visible() or _hud.log_visible() or _record_encounter_in_flight:
+		if not contact_id.is_empty():
+			_pending_contact_ready_id = contact_id
+		return
+	if (
+		not contact_id.is_empty()
+		and (not _contact_is_current(contact_id, str(actor_id)) or _contact_expired())
+	):
+		return
 	_conversation_target = target
+	_conversation_contact_id = contact_id
+	_conversation_contact_zone_id = (
+		str(_active_contact.get("interactionZoneId", ""))
+		if not contact_id.is_empty()
+		else ""
+	)
+	_pending_contact_ready_id = ""
+	if not contact_id.is_empty():
+		target.cancel_player_contact()
+		_hud.clear_contact_approach(contact_id)
 	for in_flight_actor_id in _conversation_preload_in_flight:
 		_conversation_preload_requeue_requested[str(in_flight_actor_id)] = true
 	_active_session_id = ""
@@ -402,7 +626,8 @@ func _on_conversation_requested(actor_id: StringName, target: NPC3D) -> void:
 	_player.release_mouse()
 	_hud.begin_conversation(_actor_view(str(actor_id)))
 	get_tree().paused = true
-	if not await _settle_advance_lane_for_conversation():
+	_spatial_facts_dirty = true
+	if not await _settle_advance_lane_for_conversation(not contact_id.is_empty()):
 		_hud.show_conversation_error(&"hud.m3r.error.run_start")
 		await _pause_safe_timer(CONVERSATION_ERROR_HOLD_SECONDS)
 		_finish_conversation_modal()
@@ -421,7 +646,10 @@ func _on_conversation_requested(actor_id: StringName, target: NPC3D) -> void:
 		return
 
 	_hud.begin_conversation(_actor_view(str(actor_id)))
-	var result: Dictionary = await _start_conversation_with_retry(str(actor_id))
+	var result: Dictionary = await _start_conversation_with_retry(
+		str(actor_id),
+		contact_id
+	)
 	await _handle_conversation_start_result(result)
 
 
@@ -455,14 +683,20 @@ func _handle_conversation_start_result(result: Dictionary) -> void:
 	_update_run_actor(_dictionary_or_empty(result.get("actor")))
 	_last_proposal_meta = _dictionary_or_empty(_active_turn.get("proposalMeta"))
 	_run_snapshot["lastProposalMeta"] = _last_proposal_meta.duplicate(true)
+	if not _conversation_contact_id.is_empty():
+		_clear_active_contact(false)
 	if _active_session_id.is_empty() or _active_turn.is_empty() or not _hud.show_turn(_active_turn):
 		_hud.show_conversation_error(&"hud.m3r.error.invalid_response")
 		await _pause_safe_timer(CONVERSATION_ERROR_HOLD_SECONDS)
 		_finish_conversation_modal()
 
 
-func _start_conversation_with_retry(actor_id: String) -> Dictionary:
-	var interaction_zone_id := _conversation_zone_for_actor(actor_id)
+func _start_conversation_with_retry(actor_id: String, contact_id := "") -> Dictionary:
+	var interaction_zone_id := (
+		_conversation_contact_zone_id
+		if not contact_id.is_empty()
+		else _conversation_zone_for_actor(actor_id)
+	)
 	if interaction_zone_id.is_empty():
 		return {
 			"error": "invalid_interaction",
@@ -474,7 +708,8 @@ func _start_conversation_with_retry(actor_id: String) -> Dictionary:
 			_run_id,
 			actor_id,
 			interaction_zone_id,
-			str(_run_snapshot.get("locale", _api_locale()))
+			str(_run_snapshot.get("locale", _api_locale())),
+			contact_id
 		)
 		if not _is_error(result):
 			return result
@@ -557,7 +792,10 @@ func _on_conversation_end_retry_requested() -> void:
 		if actor_id.is_empty():
 			_finish_conversation_modal()
 			return
-		var result: Dictionary = await _start_conversation_with_retry(actor_id)
+		var result: Dictionary = await _start_conversation_with_retry(
+			actor_id,
+			_conversation_contact_id
+		)
 		await _handle_conversation_start_result(result)
 		return
 	await _end_active_conversation()
@@ -801,7 +1039,7 @@ func _initialize_run_background() -> void:
 		await _pause_safe_timer(retry_seconds)
 
 
-func _prepare_advance_request() -> void:
+func _prepare_advance_request(force_spatial_only := false) -> void:
 	if not _pending_advance_request.is_empty() or _run_id.is_empty():
 		return
 	var elapsed_seconds := (
@@ -833,7 +1071,7 @@ func _prepare_advance_request() -> void:
 	_arrival_batch_remaining = (
 		ARRIVAL_BATCH_SECONDS if not _queued_arrivals.is_empty() else -1.0
 	)
-	if elapsed_seconds <= 0 and arrivals.is_empty():
+	if elapsed_seconds <= 0 and arrivals.is_empty() and not force_spatial_only:
 		return
 	var observed_world_revision := int(_run_snapshot.get("worldRevision", 0))
 	var spatial_facts_packet: Dictionary = {}
@@ -1276,7 +1514,9 @@ func _ambient_decision_request_summary(request: Dictionary) -> Dictionary:
 
 
 func _capture_spatial_facts(observed_world_revision: int) -> Dictionary:
-	var actors := _town.npc_spatial_facts()
+	var captured := _town.spatial_facts()
+	var actors := _array_or_empty(captured.get("actors"))
+	var player := _dictionary_or_empty(captured.get("player"))
 	if actors.size() != 6:
 		_advance_lane_halted_reason = "spatial_fact_actor_count"
 		push_error("Town3D spatial packet must contain exactly six resident facts.")
@@ -1289,8 +1529,14 @@ func _capture_spatial_facts(observed_world_revision: int) -> Dictionary:
 			push_error("Town3D spatial packet has a missing or duplicate resident id.")
 			return {}
 		actor_ids[actor_id] = true
+	if _array_or_empty(player.get("position")).size() != 3:
+		_advance_lane_halted_reason = "spatial_fact_player"
+		push_error("Town3D spatial packet must contain the player's position.")
+		return {}
+	_last_spatial_player_position = _player.global_position
 	return {
 		"observedWorldRevision": observed_world_revision,
+		"player": player,
 		"actors": actors,
 	}
 
@@ -1308,6 +1554,7 @@ func _spatial_facts_summary(packet: Dictionary) -> Dictionary:
 		"observedWorldRevision": int(packet.get("observedWorldRevision", -1)),
 		"actorCount": actors.size(),
 		"actorIds": actor_ids,
+		"player": _dictionary_or_empty(packet.get("player")),
 	}
 
 
@@ -1415,14 +1662,45 @@ func _apply_readiness_deltas(deltas: Array) -> void:
 
 func _queue_or_apply_movement(movement: Dictionary) -> void:
 	_spatial_facts_dirty = true
-	if get_tree().paused or _conversation_target != null:
-		var actor_id := str(movement.get("actorId", ""))
-		for index in range(_queued_movement_deltas.size() - 1, -1, -1):
-			if str(_queued_movement_deltas[index].get("actorId", "")) == actor_id:
-				_queued_movement_deltas.remove_at(index)
-		_queued_movement_deltas.append(movement.duplicate(true))
+	var movement_actor_id := str(movement.get("actorId", ""))
+	if (
+		not _active_contact.is_empty()
+		and movement_actor_id == str(_active_contact.get("actorId", ""))
+	):
+		# Only activeContact may end an authoritative contact. Keep at most one
+		# conflicting movement until a later scheduler snapshot reconciles it.
+		_replace_queued_movement_for_actor(movement)
 		return
+	if get_tree().paused or _conversation_target != null:
+		_replace_queued_movement_for_actor(movement)
+		return
+	_discard_queued_movement_for_actor(movement_actor_id)
 	_apply_movement_delta(movement)
+
+
+func _replace_queued_movement_for_actor(movement: Dictionary) -> void:
+	var actor_id := str(movement.get("actorId", ""))
+	var movement_id := str(movement.get("movementId", ""))
+	for index in range(_queued_movement_deltas.size() - 1, -1, -1):
+		var queued := _queued_movement_deltas[index]
+		if str(queued.get("actorId", "")) != actor_id:
+			continue
+		var queued_movement_id := str(queued.get("movementId", ""))
+		if queued_movement_id != movement_id:
+			_arrival_batch_movement_ids.erase(queued_movement_id)
+		_queued_movement_deltas.remove_at(index)
+	_queued_movement_deltas.append(movement.duplicate(true))
+
+
+func _discard_queued_movement_for_actor(actor_id: String) -> void:
+	if actor_id.is_empty():
+		return
+	for index in range(_queued_movement_deltas.size() - 1, -1, -1):
+		var queued := _queued_movement_deltas[index]
+		if str(queued.get("actorId", "")) != actor_id:
+			continue
+		_arrival_batch_movement_ids.erase(str(queued.get("movementId", "")))
+		_queued_movement_deltas.remove_at(index)
 
 
 func _apply_movement_delta(movement: Dictionary) -> void:
@@ -1473,6 +1751,7 @@ func _reconcile_scheduler_movements(scheduler: Dictionary) -> void:
 	if scheduler.is_empty():
 		return
 	var authoritative_pending_by_actor: Dictionary = {}
+	var authoritative_pending_movements: Array[Dictionary] = []
 	for actor_value in _array_or_empty(scheduler.get("actors")):
 		if not actor_value is Dictionary:
 			continue
@@ -1485,7 +1764,21 @@ func _reconcile_scheduler_movements(scheduler: Dictionary) -> void:
 			var current_block := _dictionary_or_empty(scheduler_actor.get("currentBlock"))
 			pending["activity"] = str(current_block.get("activity", ""))
 			authoritative_pending_by_actor[actor_id] = str(pending.get("movementId", ""))
-			_queue_or_apply_movement(pending)
+			authoritative_pending_movements.append(pending)
+	# A modal or contact may have delayed a movement that is no longer current.
+	# Never replay it merely because presentation became available again.
+	for index in range(_queued_movement_deltas.size() - 1, -1, -1):
+		var queued := _queued_movement_deltas[index]
+		var queued_actor_id := str(queued.get("actorId", ""))
+		var queued_movement_id := str(queued.get("movementId", ""))
+		if (
+			not authoritative_pending_by_actor.has(queued_actor_id)
+			or str(authoritative_pending_by_actor[queued_actor_id]) != queued_movement_id
+		):
+			_arrival_batch_movement_ids.erase(queued_movement_id)
+			_queued_movement_deltas.remove_at(index)
+	for pending in authoritative_pending_movements:
+		_queue_or_apply_movement(pending)
 	for active_actor_id_value in _active_movements.keys():
 		var active_actor_id := str(active_actor_id_value)
 		var active_movement := _dictionary_or_empty(_active_movements.get(active_actor_id))
@@ -1680,11 +1973,18 @@ func _arrival_is_queued(movement_id: String) -> bool:
 	return false
 
 
-func _settle_advance_lane_for_conversation() -> bool:
+func _settle_advance_lane_for_conversation(force_fresh_spatial := false) -> bool:
 	while _advance_in_flight:
 		await get_tree().process_frame
 	while _advance_rebase_in_flight:
 		await get_tree().process_frame
+	if (
+		force_fresh_spatial
+		and _run_session.mode() != "fixture"
+		and _pending_advance_request.is_empty()
+	):
+		_spatial_facts_dirty = true
+		_prepare_advance_request(true)
 	if not _pending_advance_request.is_empty():
 		_advance_retry_remaining = 0.0
 		await _dispatch_advance()
@@ -1736,7 +2036,7 @@ func _flush_queued_movement_deltas() -> void:
 	_queued_movement_deltas.clear()
 	for movement_value in queued:
 		if movement_value is Dictionary:
-			_apply_movement_delta(movement_value as Dictionary)
+			_queue_or_apply_movement(movement_value as Dictionary)
 
 
 func _active_movement_summaries() -> Array[Dictionary]:
@@ -1809,6 +2109,8 @@ func _finish_conversation_modal() -> void:
 	_active_turn = {}
 	_required_retry_answer = {}
 	_conversation_start_retry_required = false
+	_conversation_contact_id = ""
+	_conversation_contact_zone_id = ""
 	_resolving_answer = false
 	_ending_conversation = false
 	_conversation_target = null
@@ -1818,6 +2120,7 @@ func _finish_conversation_modal() -> void:
 	get_tree().paused = false
 	_flush_deferred_ambient_speech_events()
 	_flush_queued_movement_deltas()
+	_resume_active_contact_follow()
 	if _advance_needs_rebase:
 		call_deferred("_rebase_run_after_advance_conflict")
 	else:
@@ -1843,6 +2146,7 @@ func _api_locale() -> String:
 
 
 func _apply_social_view_from_response(response: Dictionary) -> bool:
+	_sync_active_contact_from_response(response)
 	var social_view := _dictionary_or_empty(response.get("socialView"))
 	if social_view.is_empty():
 		for key in ["runSnapshot", "snapshot"]:
@@ -1876,6 +2180,8 @@ func _debug_snapshot() -> Dictionary:
 		"ledgerEvents": _run_snapshot.get("ledgerEvents", []),
 		"providerBudget": _run_snapshot.get("providerBudget", {}),
 		"lastProposalMeta": _last_proposal_meta,
+		"activeContact": _active_contact.duplicate(true),
+		"contactPresentation": _contact_presentation_snapshot(),
 	}
 
 

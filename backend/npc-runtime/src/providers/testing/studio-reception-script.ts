@@ -101,6 +101,13 @@ function nextStep(request: AgentStepRequest): AgentStepProposal {
   if (request.previousResult?.reason === "already_read") {
     return { rationale: "이미 읽은 기록을 반복하지 않습니다.", done: true };
   }
+  if (request.observePacket.playerContact?.available) {
+    return {
+      toolCall: { tool: "move_to", args: { targetId: "player" } },
+      rationale: "현재 역할과 기억을 바탕으로 방문자에게 직접 확인할 필요가 있습니다.",
+      done: true,
+    };
+  }
   const visibleRecord = request.observePacket.visibleRecords[0];
   if (visibleRecord && request.observePacket.role === "studio_manager") {
     return {

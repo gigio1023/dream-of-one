@@ -67,6 +67,17 @@ test("every run fixture packet validates against the public wire schemas", () =>
   runSnapshotRequestSchema.parse(endpoints.runSnapshotAfterMeeting.request);
   runSnapshotSchema.parse(endpoints.runSnapshotAfterMeeting.response);
 
+  runAdvanceRequestSchema.parse(endpoints.runAdvancePlayerContactOpportunity.request);
+  runAdvanceResponseSchema.parse(endpoints.runAdvancePlayerContactOpportunity.response);
+  runNpcDecisionRequestSchema.parse(endpoints.npcDecisionPlayerContact.request);
+  runNpcDecisionResponseSchema.parse(endpoints.npcDecisionPlayerContact.response);
+  runSessionStartRequestSchema.parse(endpoints.sessionPreloadPlayerContact.request);
+  runSessionPreloadResponseSchema.parse(endpoints.sessionPreloadPlayerContact.response);
+  runAdvanceRequestSchema.parse(endpoints.runAdvancePlayerContactSafeDistance.request);
+  runAdvanceResponseSchema.parse(endpoints.runAdvancePlayerContactSafeDistance.response);
+  runSessionStartRequestSchema.parse(endpoints.sessionStartPlayerContact.request);
+  runSessionStartResponseSchema.parse(endpoints.sessionStartPlayerContact.response);
+
   assert.equal(endpoints.sessionPreloads.length, 6);
   for (const endpoint of endpoints.sessionPreloads) {
     runSessionStartRequestSchema.parse(endpoint.request);
@@ -102,6 +113,22 @@ test("every run fixture packet validates against the public wire schemas", () =>
   runEncounterResponseSchema.parse(endpoints.administrationRecordEncounter.response);
   runSnapshotRequestSchema.parse(endpoints.administrationFinalSnapshot.request);
   runSnapshotSchema.parse(endpoints.administrationFinalSnapshot.response);
+});
+
+test("contact fixture reaches the same preloaded session through one grounded provider choice", () => {
+  const endpoints = fixtures.endpoints;
+  const opportunity = endpoints.runAdvancePlayerContactOpportunity.response;
+  assert.ok(opportunity.clock.toSeconds <= 120);
+  const decision = endpoints.npcDecisionPlayerContact.response;
+  assert.equal(decision.activeContact.actorId, "NPC_Park_Caretaker");
+  assert.equal(decision.activeContact.interactionZoneId, "ParkConversation");
+  assert.equal(decision.providerMetas.at(-1).transport, "scripted");
+  assert.equal(endpoints.sessionPreloadPlayerContact.response.activeContact.contactId,
+    decision.activeContact.contactId);
+  assert.equal(endpoints.sessionStartPlayerContact.request.contactId,
+    decision.activeContact.contactId);
+  assert.equal(endpoints.sessionStartPlayerContact.response.activeContact, null);
+  assert.equal(endpoints.sessionStartPlayerContact.response.nextTurn.choices.length, 3);
 });
 
 test("administration fixture carries provider prose through write, read, pressure, and disclosure", () => {

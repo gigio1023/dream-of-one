@@ -61,6 +61,17 @@ export interface ObservePacket {
   audibleActorIds: string[];
   /** Engine-confirmed navigation targets available to this actor now. */
   reachableAnchorRefs: string[];
+  /** One runtime-selected, engine-grounded opportunity to approach the player. */
+  playerContact: null | {
+    available: boolean;
+    targetActorId: "player";
+    interactionZoneId: string;
+    playerLocationId: string;
+    visible: boolean;
+    audible: boolean;
+    reachable: boolean;
+    safeDistanceM: number;
+  };
   heardSpeech: string[];
   toolCatalog: ToolName[];
   administrativeSources: Array<{
@@ -126,6 +137,7 @@ export function assembleObservePacket(world: WorldState, input: AssembleObserveI
     visibleActors: [...actor.knownActorIds],
     audibleActorIds: [],
     reachableAnchorRefs: [],
+    playerContact: null,
     heardSpeech: [...input.heardSpeech],
     toolCatalog: toolCatalogForRole(actor.role),
     administrativeSources: [],

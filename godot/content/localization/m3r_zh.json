@@ -4,6 +4,7 @@
     "hud.interaction.door": "E — 开门 / 关门",
     "hud.interaction.record": "E — 查阅记录",
     "hud.m3r.start_hint": "从管理站出发，穿过公园前往工作室接待处。",
+    "hud.m3r.contact.approaching": "{speaker}正走过来想和你说话。",
     "hud.m3r.ambient_subtitle.format": "{speaker} · {direction}\n{line}",
     "hud.m3r.ambient_subtitle.direction.left": "左侧",
     "hud.m3r.ambient_subtitle.direction.center": "前方",

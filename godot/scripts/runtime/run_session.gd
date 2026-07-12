@@ -37,11 +37,13 @@ func diagnostics_snapshot() -> Dictionary:
 	var fixture_preload_count: Variant = null
 	var fixture_decision_call_count: Variant = null
 	var fixture_session_end_revision: Variant = null
+	var fixture_last_start_contact_id: Variant = null
 	if _mode == "fixture":
 		fixture_advance_index = backend_diagnostics.get("advanceIndex")
 		fixture_preload_count = backend_diagnostics.get("preloadCount")
 		fixture_decision_call_count = backend_diagnostics.get("decisionCallCount")
 		fixture_session_end_revision = backend_diagnostics.get("sessionEndRevision")
+		fixture_last_start_contact_id = backend_diagnostics.get("lastStartContactId")
 	return {
 		"mode": _mode,
 		"lastError": _diagnostic_error_summary(last_error),
@@ -49,6 +51,7 @@ func diagnostics_snapshot() -> Dictionary:
 		"fixturePreloadCount": fixture_preload_count,
 		"fixtureDecisionCallCount": fixture_decision_call_count,
 		"fixtureSessionEndRevision": fixture_session_end_revision,
+		"fixtureLastStartContactId": fixture_last_start_contact_id,
 	}
 
 
@@ -61,10 +64,17 @@ func start_conversation(
 	run_id: String,
 	actor_id: String,
 	interaction_zone_id: String,
-	locale: String
+	locale: String,
+	contact_id := ""
 ) -> Dictionary:
 	await get_tree().process_frame
-	return await _backend.start_conversation(run_id, actor_id, interaction_zone_id, locale)
+	return await _backend.start_conversation(
+		run_id,
+		actor_id,
+		interaction_zone_id,
+		locale,
+		contact_id
+	)
 
 
 func preload_conversation(

@@ -85,6 +85,10 @@ async function driveSpatialGoalVariants() {
       visibleActorIds: [],
       audibleActorIds: [],
       visibleObjectIds: [],
+      playerVisible: false,
+      playerAudible: false,
+      playerReachable: false,
+      playerInteractionZoneId: null,
     };
   });
   const advanceRequest: RunAdvanceRequest = {
@@ -95,6 +99,7 @@ async function driveSpatialGoalVariants() {
     arrivals: [],
     spatialFacts: {
       observedWorldRevision: started.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
       actors,
     },
   };
@@ -121,6 +126,172 @@ async function driveSpatialGoalVariants() {
     });
   }
   return { advanceRequest, advanceResponse, decisions };
+}
+
+function fixtureSpatialActors(snapshot: RunSnapshot, layout = loadRunLayout()) {
+  return snapshot.scheduler.actors.map(schedulerActor => {
+    const position = layout.anchorPositions[schedulerActor.confirmedAnchorRef];
+    if (!position) throw new Error(`fixture actor has no position: ${schedulerActor.actorId}`);
+    const block = schedulerActor.currentBlock;
+    return {
+      actorId: schedulerActor.actorId,
+      position: [position[0], position[1], position[2]] as [number, number, number],
+      reachableAnchorRefs: block?.targetKind === "anchor"
+        ? [block.targetId]
+        : [...new Set(layout.routes.find(route => route.routeId === block?.targetId)?.points ?? [])],
+      visibleActorIds: [] as string[],
+      audibleActorIds: [] as string[],
+      visibleObjectIds: [] as string[],
+      playerVisible: false,
+      playerAudible: false,
+      playerReachable: false,
+      playerInteractionZoneId: null as string | null,
+    };
+  });
+}
+
+function fixturePendingArrivals(snapshot: RunSnapshot) {
+  return snapshot.scheduler.actors.flatMap(actor => actor.pendingMovement
+    ? [{
+        movementId: actor.pendingMovement.movementId,
+        actorId: actor.actorId,
+        anchorRef: actor.pendingMovement.targetAnchorRef,
+      }]
+    : []);
+}
+
+async function drivePlayerContactSequence() {
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: fixtureIds(),
+  });
+  const started = service.start("run-fixture-player-contact", "ko-KR");
+  let current = started;
+  for (let step = 1; step <= 9; step += 1) {
+    await service.advance({
+      runId: started.runId,
+      advanceId: `fixture-contact-clock-${step}`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: fixturePendingArrivals(current),
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [0, 0, 0], locationId: "" },
+        actors: fixtureSpatialActors(current),
+      },
+    });
+    current = service.snapshot(started.runId);
+  }
+  const graceArrivals = fixturePendingArrivals(current);
+  if (graceArrivals.length > 0) {
+    await service.advance({
+      runId: started.runId,
+      advanceId: "fixture-contact-settle-grace",
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 0,
+      arrivals: graceArrivals,
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [0, 0, 0], locationId: "" },
+        actors: fixtureSpatialActors(current),
+      },
+    });
+    current = service.snapshot(started.runId);
+  }
+
+  const actorId = "NPC_Park_Caretaker";
+  const contactActors = fixtureSpatialActors(current);
+  const contactActor = contactActors.find(actor => actor.actorId === actorId);
+  if (!contactActor) throw new Error("contact fixture has no caretaker");
+  contactActor.playerVisible = true;
+  contactActor.playerAudible = true;
+  contactActor.playerReachable = true;
+  contactActor.playerInteractionZoneId = "ParkConversation";
+  const opportunityRequest: RunAdvanceRequest = {
+    runId: started.runId,
+    advanceId: "fixture-contact-opportunity",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: current.worldRevision,
+      player: { position: [0, 0, 0], locationId: "Park" },
+      actors: contactActors,
+    },
+  };
+  const opportunityResponse = await service.advance(opportunityRequest);
+  const wake = opportunityResponse.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === actorId
+  );
+  if (!wake) throw new Error("contact fixture did not emit the caretaker opportunity");
+  const decisionRequest = {
+    runId: started.runId,
+    wakeId: wake.wakeId,
+    observedWorldRevision: wake.observedWorldRevision,
+  };
+  const decisionResponse = await service.decision(decisionRequest);
+  const contact = decisionResponse.activeContact;
+  if (!contact) throw new Error("contact fixture provider did not choose move_to(player)");
+  const preloadRequest = {
+    runId: started.runId,
+    actorId,
+    interactionZoneId: "ParkConversation",
+    locale: "ko-KR" as const,
+  };
+  const preloadResponse = await service.preloadConversation(
+    preloadRequest.runId,
+    preloadRequest.actorId,
+    preloadRequest.interactionZoneId,
+    preloadRequest.locale,
+  );
+  current = service.snapshot(started.runId);
+  const closeActors = fixtureSpatialActors(current);
+  const closeActor = closeActors.find(actor => actor.actorId === actorId);
+  if (!closeActor) throw new Error("contact fixture lost the caretaker");
+  closeActor.position = [0, 0, 0];
+  closeActor.playerVisible = true;
+  closeActor.playerAudible = true;
+  closeActor.playerReachable = true;
+  closeActor.playerInteractionZoneId = "ParkConversation";
+  const arrivalRequest: RunAdvanceRequest = {
+    runId: started.runId,
+    advanceId: "fixture-contact-safe-distance",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: current.worldRevision,
+      player: { position: [0, 0, 0], locationId: "Park" },
+      actors: closeActors,
+    },
+  };
+  const arrivalResponse = await service.advance(arrivalRequest);
+  const startRequest = {
+    runId: started.runId,
+    actorId,
+    interactionZoneId: "ParkConversation",
+    locale: "ko-KR" as const,
+    contactId: contact.contactId,
+  };
+  const startResponse = await service.startConversation(
+    startRequest.runId,
+    startRequest.actorId,
+    startRequest.interactionZoneId,
+    startRequest.locale,
+    startRequest.contactId,
+  );
+  return {
+    opportunityRequest,
+    opportunityResponse,
+    decisionRequest,
+    decisionResponse,
+    preloadRequest,
+    preloadResponse,
+    arrivalRequest,
+    arrivalResponse,
+    startRequest,
+    startResponse,
+  };
 }
 
 async function driveVariant(spec: VariantSpec) {
@@ -219,6 +390,10 @@ async function driveAdministrativeSequence() {
       visibleActorIds: [],
       audibleActorIds: [],
       visibleObjectIds: [],
+      playerVisible: false,
+      playerAudible: false,
+      playerReachable: false,
+      playerInteractionZoneId: null,
     };
   });
   const firstAdvanceRequest: RunAdvanceRequest = {
@@ -227,7 +402,11 @@ async function driveAdministrativeSequence() {
     observedWorldRevision: beforeFacts.worldRevision,
     elapsedSeconds: 0,
     arrivals: [],
-    spatialFacts: { observedWorldRevision: beforeFacts.worldRevision, actors },
+    spatialFacts: {
+      observedWorldRevision: beforeFacts.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors,
+    },
   };
   const firstAdvanceResponse = await service.advance(firstAdvanceRequest);
   for (const wake of firstAdvanceResponse.scheduleWakes.filter(
@@ -256,7 +435,11 @@ async function driveAdministrativeSequence() {
     observedWorldRevision: afterWrite.worldRevision,
     elapsedSeconds: 0,
     arrivals: [],
-    spatialFacts: { observedWorldRevision: afterWrite.worldRevision, actors },
+    spatialFacts: {
+      observedWorldRevision: afterWrite.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors,
+    },
   };
   const secondAdvanceResponse = await service.advance(secondAdvanceRequest);
   const readWake = secondAdvanceResponse.scheduleWakes.find(
@@ -433,6 +616,7 @@ export async function buildRunApiFixture() {
   const advancePath = await driveAdvanceSequence();
   const spatialGoals = await driveSpatialGoalVariants();
   const administration = await driveAdministrativeSequence();
+  const playerContact = await drivePlayerContactSequence();
 
   return {
     note: "Generated through the fixture-only Studio adapter and production RunService paths. Regenerate with `bun run --cwd backend/npc-runtime fixtures:run:generate`.",
@@ -486,6 +670,31 @@ export async function buildRunApiFixture() {
         },
         ...spatialGoals.decisions,
       ],
+      runAdvancePlayerContactOpportunity: {
+        endpoint: "POST /v1/run/advance",
+        request: playerContact.opportunityRequest,
+        response: playerContact.opportunityResponse,
+      },
+      npcDecisionPlayerContact: {
+        endpoint: "POST /v1/npc/decision",
+        request: playerContact.decisionRequest,
+        response: playerContact.decisionResponse,
+      },
+      sessionPreloadPlayerContact: {
+        endpoint: "POST /v1/session/preload",
+        request: playerContact.preloadRequest,
+        response: playerContact.preloadResponse,
+      },
+      runAdvancePlayerContactSafeDistance: {
+        endpoint: "POST /v1/run/advance",
+        request: playerContact.arrivalRequest,
+        response: playerContact.arrivalResponse,
+      },
+      sessionStartPlayerContact: {
+        endpoint: "POST /v1/session/start",
+        request: playerContact.startRequest,
+        response: playerContact.startResponse,
+      },
       runAdvanceAmbientSpeech: {
         endpoint: "POST /v1/run/advance",
         request: advancePath.ambientDeliveryRequest,
@@ -621,6 +830,8 @@ const repoRoot = resolve(toolsDir, "..", "..", "..", "..");
 const godotPath = resolve(repoRoot, "godot", "data", "fixtures", "run-api-examples.json");
 const body = `${JSON.stringify(fixture, null, 2)}\n`;
 writeFileSync(backendPath, body, "utf-8");
-writeFileSync(godotPath, body, "utf-8");
+if (process.env.RUN_FIXTURE_BACKEND_ONLY !== "1") {
+  writeFileSync(godotPath, body, "utf-8");
+}
 console.log(`wrote ${backendPath}`);
-console.log(`wrote ${godotPath}`);
+if (process.env.RUN_FIXTURE_BACKEND_ONLY !== "1") console.log(`wrote ${godotPath}`);

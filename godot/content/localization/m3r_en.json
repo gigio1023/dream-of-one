@@ -4,6 +4,7 @@
     "hud.interaction.door": "E — Open / close door",
     "hud.interaction.record": "E — Inspect records",
     "hud.m3r.start_hint": "Cross the park from the Station to the studio reception.",
+    "hud.m3r.contact.approaching": "{speaker} is coming over to speak with you.",
     "hud.m3r.ambient_subtitle.format": "{speaker} · {direction}\n{line}",
     "hud.m3r.ambient_subtitle.direction.left": "left",
     "hud.m3r.ambient_subtitle.direction.center": "ahead",

@@ -22,6 +22,7 @@ var _encounter_cache: Dictionary = {}
 var _decision_call_count := 0
 var _current_run_snapshot: Dictionary = {}
 var _last_error: Dictionary = {}
+var _last_start_contact_id := ""
 
 
 func _init() -> void:
@@ -50,17 +51,31 @@ func start_conversation(
 	run_id: String,
 	actor_id: String,
 	interaction_zone_id: String,
-	locale: String
+	locale: String,
+	contact_id := ""
 ) -> Dictionary:
 	if not _started:
 		return _stored_error("run_not_started", "Start the fixture run first.")
-	var packet := _endpoint("sessionStart")
+	var packet := _session_start_packet(
+		run_id,
+		actor_id,
+		interaction_zone_id,
+		locale,
+		contact_id
+	)
+	if packet.is_empty():
+		return _stored_error(
+			"fixture_conversation_miss",
+			"Fixture has no matching conversation start."
+		)
 	var request := _dictionary_or_empty(packet.get("request"))
+	var expected_contact_id := str(request.get("contactId", ""))
 	if (
 		run_id != str(request.get("runId", ""))
 		or actor_id != str(request.get("actorId", ""))
 		or interaction_zone_id != str(request.get("interactionZoneId", ""))
 		or locale != str(request.get("locale", ""))
+		or (not expected_contact_id.is_empty() and contact_id != expected_contact_id)
 	):
 		return _stored_error("fixture_conversation_miss", "Fixture has no matching conversation start.")
 	var preload_signature := JSON.stringify({
@@ -82,6 +97,7 @@ func start_conversation(
 	if _answered:
 		return _stored_error("conversation_active", "Fixture conversation is awaiting clean end.")
 	_conversation_started = true
+	_last_start_contact_id = contact_id
 	return _dictionary_or_empty(packet.get("response"))
 
 
@@ -400,6 +416,7 @@ func reset() -> void:
 	_decision_call_count = 0
 	_current_run_snapshot = {}
 	_last_error = {}
+	_last_start_contact_id = ""
 
 
 func last_error() -> Dictionary:
@@ -413,6 +430,7 @@ func diagnostics_snapshot() -> Dictionary:
 		"preloadCount": _preload_cache.size(),
 		"decisionCallCount": _decision_call_count,
 		"sessionEndRevision": int(session_end_response.get("worldRevision", -1)),
+		"lastStartContactId": _last_start_contact_id,
 	}
 
 
@@ -430,6 +448,36 @@ func _load_fixture() -> void:
 func _endpoint(name: String) -> Dictionary:
 	var endpoints := _dictionary_or_empty(_fixture.get("endpoints"))
 	return _dictionary_or_empty(endpoints.get(name))
+
+
+func _session_start_packet(
+	run_id: String,
+	actor_id: String,
+	interaction_zone_id: String,
+	locale: String,
+	contact_id: String
+) -> Dictionary:
+	var endpoints := _dictionary_or_empty(_fixture.get("endpoints"))
+	var candidates: Array[Dictionary] = []
+	for key in ["sessionStartPlayerContact", "sessionStart"]:
+		var candidate := _dictionary_or_empty(endpoints.get(key))
+		if not candidate.is_empty():
+			candidates.append(candidate)
+	for candidate in candidates:
+		var request := _dictionary_or_empty(candidate.get("request"))
+		if (
+			run_id == str(request.get("runId", ""))
+			and actor_id == str(request.get("actorId", ""))
+			and interaction_zone_id == str(request.get("interactionZoneId", ""))
+			and locale == str(request.get("locale", ""))
+			and contact_id == str(request.get("contactId", ""))
+		):
+			return candidate
+	# Old generated fixtures had no contact variant. Keep those replayable while
+	# requiring exact contactId matching once the variant is present.
+	if not contact_id.is_empty() and not endpoints.has("sessionStartPlayerContact"):
+		return _dictionary_or_empty(endpoints.get("sessionStart"))
+	return {}
 
 
 func _answer_variants() -> Array:
@@ -505,6 +553,8 @@ func _apply_advance_to_snapshot(response: Dictionary) -> void:
 		int(_current_run_snapshot.get("worldRevision", 0)),
 		int(response.get("worldRevision", 0))
 	)
+	if response.has("activeContact"):
+		_current_run_snapshot["activeContact"] = response.get("activeContact")
 	var clock := _dictionary_or_empty(_current_run_snapshot.get("worldClock"))
 	var response_clock := _dictionary_or_empty(response.get("clock"))
 	if not response_clock.is_empty():
@@ -542,6 +592,8 @@ func _apply_decision_to_snapshot(response: Dictionary) -> void:
 		int(_current_run_snapshot.get("worldRevision", 0)),
 		int(response.get("worldRevision", 0))
 	)
+	if response.has("activeContact"):
+		_current_run_snapshot["activeContact"] = response.get("activeContact")
 	_apply_ambient_to_snapshot(
 		_array_or_empty(response.get("speechEvents")),
 		_highest_speech_seq(_array_or_empty(response.get("speechEvents"))),
@@ -661,6 +713,11 @@ func _spatial_facts_valid_for_request(request: Dictionary) -> bool:
 	):
 		return false
 	var actors := _array_or_empty(packet.get("actors"))
+	var player := _dictionary_or_empty(packet.get("player"))
+	if _array_or_empty(player.get("position")).size() != 3:
+		return false
+	if typeof(player.get("locationId", "")) != TYPE_STRING:
+		return false
 	if actors.size() != 6:
 		return false
 	var actor_ids: Dictionary = {}
@@ -673,6 +730,12 @@ func _spatial_facts_valid_for_request(request: Dictionary) -> bool:
 			return false
 		actor_ids[actor_id] = true
 		if _array_or_empty(actor.get("position")).size() != 3:
+			return false
+		for boolean_key in ["playerVisible", "playerAudible", "playerReachable"]:
+			if typeof(actor.get(boolean_key, null)) != TYPE_BOOL:
+				return false
+		var contact_zone_value: Variant = actor.get("playerInteractionZoneId", null)
+		if contact_zone_value != null and typeof(contact_zone_value) != TYPE_STRING:
 			return false
 		for key in [
 			"reachableAnchorRefs",

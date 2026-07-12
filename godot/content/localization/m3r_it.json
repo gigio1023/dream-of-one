@@ -4,6 +4,7 @@
     "hud.interaction.door": "E — Apri / chiudi la porta",
     "hud.interaction.record": "E — Consulta i registri",
     "hud.m3r.start_hint": "Attraversa il parco dalla Station e raggiungi l'accoglienza dello studio.",
+    "hud.m3r.contact.approaching": "{speaker} si sta avvicinando per parlarti.",
     "hud.m3r.ambient_subtitle.format": "{speaker} · {direction}\n{line}",
     "hud.m3r.ambient_subtitle.direction.left": "a sinistra",
     "hud.m3r.ambient_subtitle.direction.center": "davanti",

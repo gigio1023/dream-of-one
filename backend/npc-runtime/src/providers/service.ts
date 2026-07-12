@@ -35,7 +35,7 @@ import type {
 
 const TOOL_GUIDE = `
 Tool argument guide:
-- move_to: {targetId}
+- move_to: {targetId}; when playerContact.available is true, targetId="player" means choosing one NPC-initiated approach
 - look: {targetId}
 - talk_to: {actorId}, with optional utterance at envelope level
 - wait: {reason}
@@ -266,6 +266,7 @@ export class ProviderService implements NpcProposalPort {
       "After a successful action completes the goal, return done=true on the next iteration. Never repeat an identical successful tool call.",
       "blockedSignatures contains calls already blocked or successfully completed during this beat; choose a different call or stop.",
       "The runtime validates and applies tools; never invent direct state changes or authority outcomes.",
+      "playerContact is offered to only one runtime-selected resident at a time. Choose move_to(player) only when your role goal or remembered facts warrant initiating a face-to-face question; otherwise choose another valid action or stop.",
       ...(request.requiredToolCall
         ? [
             `This wake permits only talk_to targeting the exact actor id ${request.requiredToolCall.actorId}.`,

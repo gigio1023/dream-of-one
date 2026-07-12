@@ -364,17 +364,11 @@
       "points": [
         "Park.liaison_spawn",
         "Park.studio_approach",
-        "Studio.front_door",
-        "Studio.reception_desk",
-        "Studio.front_door",
+        "Studio.waiting_seats",
         "Park.office_approach",
-        "Office.front_door",
         "Office.meeting_table",
-        "Office.front_door",
         "Park.station_approach",
-        "Station.front_door",
         "Station.waiting_seats",
-        "Station.front_door",
         "Park.liaison_spawn"
       ]
     }
@@ -385,7 +379,7 @@
     "meeting_windows": [
       {
         "id": "MEET_MANAGER_CARETAKER",
-        "start_world_seconds": 110,
+        "start_world_seconds": 90,
         "end_world_seconds": 230,
         "anchor": "Park.meeting_north",
         "actor_ids": ["NPC_Studio_Manager", "NPC_Park_Caretaker"],

@@ -34,12 +34,15 @@ func diagnostics_snapshot() -> Dictionary:
 		if diagnostics_value is Dictionary:
 			backend_diagnostics = (diagnostics_value as Dictionary).duplicate(true)
 	var fixture_advance_index: Variant = null
+	var fixture_decision_call_count: Variant = null
 	if _mode == "fixture":
 		fixture_advance_index = backend_diagnostics.get("advanceIndex")
+		fixture_decision_call_count = backend_diagnostics.get("decisionCallCount")
 	return {
 		"mode": _mode,
 		"lastError": _diagnostic_error_summary(last_error),
 		"fixtureAdvanceIndex": fixture_advance_index,
+		"fixtureDecisionCallCount": fixture_decision_call_count,
 	}
 
 
@@ -81,6 +84,11 @@ func run_snapshot(run_id: String) -> Dictionary:
 func advance(request: Dictionary) -> Dictionary:
 	await get_tree().process_frame
 	return await _backend.advance(request)
+
+
+func npc_decision(request: Dictionary) -> Dictionary:
+	await get_tree().process_frame
+	return await _backend.npc_decision(request)
 
 
 func _diagnostic_error_summary(error: Dictionary) -> Dictionary:

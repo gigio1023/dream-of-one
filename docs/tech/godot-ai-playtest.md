@@ -196,7 +196,7 @@ and visual claims. It does not turn CLI checks into equivalent evidence.
 
 ### Placement
 
-The opt-in first-person scene `res://scenes/main_3d.tscn` owns a node named
+The default first-person scene `res://scenes/main_3d.tscn` owns a node named
 `AgentPlaytestSurface` with
 `res://scripts/testing/agent_playtest_surface.gd` attached. It is not present
 in the retained 2D main scene and is not an autoload. The 3D main scene owns

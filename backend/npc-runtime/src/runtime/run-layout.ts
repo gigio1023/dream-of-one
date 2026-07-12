@@ -50,6 +50,43 @@ const meetingWindowSchema = z
     message: "meeting window start must be before end",
   });
 
+const vector3Schema = z.tuple([z.number(), z.number(), z.number()]);
+const audibilityBoxSchema = z
+  .object({
+    center: vector3Schema,
+    size: vector3Schema,
+  })
+  .strict();
+const audibilityVolumeSchema = z
+  .object({
+    id: nonEmpty,
+    zone_ids: z.array(nonEmpty).min(1),
+    shape: z.enum(["box", "boxes"]),
+    center: vector3Schema.optional(),
+    size: vector3Schema.optional(),
+    volumes: z.array(audibilityBoxSchema).optional(),
+    max_speech_distance_m: z.number().positive(),
+    portal_id: nonEmpty.optional(),
+    occlusion_mode: nonEmpty,
+  })
+  .strict()
+  .superRefine((volume, context) => {
+    const hasSingleBox = volume.center !== undefined && volume.size !== undefined;
+    const hasBoxes = volume.volumes !== undefined && volume.volumes.length > 0;
+    if (volume.shape === "box" && !hasSingleBox) {
+      context.addIssue({
+        code: "custom",
+        message: "box audibility volume requires center and size",
+      });
+    }
+    if (volume.shape === "boxes" && !hasBoxes) {
+      context.addIssue({
+        code: "custom",
+        message: "boxes audibility volume requires volumes",
+      });
+    }
+  });
+
 const townLayoutSchema = z
   .object({
     world_id: nonEmpty,
@@ -66,6 +103,7 @@ const townLayoutSchema = z
       hearing_world_seconds: z.number().positive(),
       meeting_windows: z.array(meetingWindowSchema),
     }),
+    audibility_volumes: z.array(audibilityVolumeSchema).min(1),
     actors: z.array(layoutActorSchema).length(6),
     interaction_zones: z.array(
       z.object({
@@ -124,6 +162,15 @@ export interface RunMeetingWindow {
   participantAnchorRefs: Record<string, string>;
 }
 
+export interface RunAudibilityVolume {
+  volumeId: string;
+  maxSpeechDistanceM: number;
+  boxes: Array<{
+    center: readonly [number, number, number];
+    size: readonly [number, number, number];
+  }>;
+}
+
 export interface RunLayout {
   worldId: string;
   layoutRevision: string;
@@ -135,6 +182,7 @@ export interface RunLayout {
   anchorPositions: Record<string, readonly [number, number, number]>;
   routes: RunLayoutRoute[];
   meetingWindows: RunMeetingWindow[];
+  audibilityVolumes: RunAudibilityVolume[];
   actors: RunLayoutActor[];
 }
 
@@ -176,6 +224,7 @@ export function loadRunLayout(path = defaultLayoutPath()): RunLayout {
   const routeIdSet = new Set(routeIds);
   assertUnique(routeIds, "town layout route ids");
   assertUnique(parsed.schedule.meeting_windows.map(window => window.id), "meeting window ids");
+  assertUnique(parsed.audibility_volumes.map(volume => volume.id), "audibility volume ids");
 
   for (const route of parsed.routes) {
     for (const anchorRef of route.points) {
@@ -310,6 +359,17 @@ export function loadRunLayout(path = defaultLayoutPath()): RunLayout {
     anchorPositions,
     routes: parsed.routes.map(route => ({ routeId: route.id, points: [...route.points] })),
     meetingWindows,
+    audibilityVolumes: parsed.audibility_volumes.map(volume => ({
+      volumeId: volume.id,
+      maxSpeechDistanceM: volume.max_speech_distance_m,
+      boxes:
+        volume.shape === "box"
+          ? [{ center: volume.center as [number, number, number], size: volume.size as [number, number, number] }]
+          : (volume.volumes as Array<{
+              center: [number, number, number];
+              size: [number, number, number];
+            }>).map(box => ({ center: box.center, size: box.size })),
+    })),
     actors,
   };
 }

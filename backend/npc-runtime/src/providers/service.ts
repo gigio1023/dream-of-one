@@ -25,6 +25,7 @@ import type {
   ResolvedProposal,
   TextGenPort,
   TextGenRequest,
+  TextGenResult,
 } from "./ports.js";
 
 const TOOL_GUIDE = `
@@ -43,6 +44,7 @@ interface SessionBudget {
   calls: number;
   inputTokens: number;
   outputTokens: number;
+  reservedTokens: number;
 }
 
 export interface ProviderServiceOptions {
@@ -52,6 +54,7 @@ export interface ProviderServiceOptions {
   timeoutMs?: number;
   maxCallsPerSession?: number;
   maxTokensPerSession?: number;
+  maxOutputTokensPerCall?: number;
 }
 
 export class ProviderService implements NpcProposalPort {
@@ -59,6 +62,7 @@ export class ProviderService implements NpcProposalPort {
   private readonly timeoutMs: number;
   private readonly maxCalls: number;
   private readonly maxTokens: number;
+  private readonly maxOutputTokensPerCall: number;
   private readonly budgets = new Map<string, SessionBudget>();
 
   constructor(private readonly options: ProviderServiceOptions) {
@@ -66,6 +70,7 @@ export class ProviderService implements NpcProposalPort {
     this.timeoutMs = options.timeoutMs ?? 2500;
     this.maxCalls = options.maxCallsPerSession ?? 50;
     this.maxTokens = options.maxTokensPerSession ?? 50_000;
+    this.maxOutputTokensPerCall = options.maxOutputTokensPerCall ?? 1_000;
   }
 
   preflight(): Promise<{ available: boolean; reason?: ProviderFailureReason }> {
@@ -76,7 +81,7 @@ export class ProviderService implements NpcProposalPort {
     const budget = this.budgetFor(scopeId);
     return {
       callsUsed: budget.calls,
-      tokensUsed: budget.inputTokens + budget.outputTokens,
+      tokensUsed: budget.inputTokens + budget.outputTokens + budget.reservedTokens,
     };
   }
 
@@ -228,6 +233,14 @@ export class ProviderService implements NpcProposalPort {
       "After a successful action completes the goal, return done=true on the next iteration. Never repeat an identical successful tool call.",
       "blockedSignatures contains calls already blocked or successfully completed during this beat; choose a different call or stop.",
       "The runtime validates and applies tools; never invent direct state changes or authority outcomes.",
+      ...(request.requiredToolCall
+        ? [
+            `This wake permits only talk_to targeting the exact actor id ${request.requiredToolCall.actorId}.`,
+            request.requireUtterance
+              ? "Return one nonempty in-fiction Korean utterance with that talk_to call."
+              : "Use that exact talk_to call if you act.",
+          ]
+        : []),
       "Return done=true with toolCall=null when the goal is complete or no useful action remains.",
       TOOL_GUIDE,
       "Return only JSON matching the supplied schema.",
@@ -238,6 +251,8 @@ export class ProviderService implements NpcProposalPort {
       observe: request.observePacket,
       previousResult: request.previousResult ?? null,
       blockedSignatures: request.blockedSignatures,
+      requiredToolCall: request.requiredToolCall ?? null,
+      requireUtterance: request.requireUtterance ?? false,
     });
     const resolved = await this.generateValidated({
       sessionId: request.sessionId,
@@ -249,6 +264,7 @@ export class ProviderService implements NpcProposalPort {
         jsonSchema: agentStepProposalJsonSchema,
       },
       schema: agentStepProposalSchema,
+      budgetCeiling: request.budgetCeiling,
     });
     if (resolved.ok) {
       return { proposal: resolved.value, meta: resolved.meta };
@@ -263,11 +279,12 @@ export class ProviderService implements NpcProposalPort {
     sessionId: string;
     request: TextGenRequest;
     schema: z.ZodType<T>;
+    budgetCeiling?: { maxCalls: number; maxTokens: number };
   }): Promise<
     | { ok: true; value: T; meta: ProposalMeta }
     | { ok: false; reason: ProviderFailureReason }
   > {
-    if (this.isBudgetExhausted(input.sessionId)) {
+    if (this.isBudgetExhausted(input.sessionId, input.budgetCeiling)) {
       return { ok: false, reason: "budget_exhausted" };
     }
     const preflight = await this.options.textGen.preflight();
@@ -275,9 +292,11 @@ export class ProviderService implements NpcProposalPort {
       return { ok: false, reason: preflight.reason ?? "unavailable" };
     }
     try {
-      this.reserveCall(input.sessionId);
-      const first = await this.withTimeout(this.options.textGen.generate(input.request));
-      this.recordTokens(input.sessionId, first.usage);
+      const first = await this.generateOne(
+        input.sessionId,
+        input.request,
+        input.budgetCeiling,
+      );
       const parsed = this.parseJson(input.schema, first.text);
       if (parsed.success) {
         return {
@@ -287,12 +306,12 @@ export class ProviderService implements NpcProposalPort {
         };
       }
 
-      if (this.isBudgetExhausted(input.sessionId)) {
+      if (this.isBudgetExhausted(input.sessionId, input.budgetCeiling)) {
         return { ok: false, reason: "budget_exhausted" };
       }
-      this.reserveCall(input.sessionId);
-      const repair = await this.withTimeout(
-        this.options.textGen.generate({
+      const repair = await this.generateOne(
+        input.sessionId,
+        {
           ...input.request,
           purpose: "repair",
           instructions: `${input.request.instructions}\nRepair the invalid JSON. Do not add commentary.`,
@@ -303,9 +322,9 @@ export class ProviderService implements NpcProposalPort {
               message: issue.message,
             })),
           }),
-        }),
+        },
+        input.budgetCeiling,
       );
-      this.recordTokens(input.sessionId, repair.usage);
       const repaired = this.parseJson(input.schema, repair.text);
       return repaired.success
         ? {
@@ -316,6 +335,9 @@ export class ProviderService implements NpcProposalPort {
         : { ok: false, reason: "invalid_envelope" };
     } catch (error) {
       const message = (error as Error).message.toLowerCase();
+      if (message.includes("provider budget ceiling")) {
+        return { ok: false, reason: "budget_exhausted" };
+      }
       if (message.includes("timeout") || message.includes("aborted")) {
         return { ok: false, reason: "timeout" };
       }
@@ -324,6 +346,44 @@ export class ProviderService implements NpcProposalPort {
       }
       return { ok: false, reason: "transport_error" };
     }
+  }
+
+  private async generateOne(
+    sessionId: string,
+    request: TextGenRequest,
+    ceiling?: { maxCalls: number; maxTokens: number },
+  ): Promise<TextGenResult> {
+    const reservedTokens = this.tokenReservation(request);
+    const budget = this.budgetFor(sessionId);
+    const maxCalls = Math.min(this.maxCalls, ceiling?.maxCalls ?? this.maxCalls);
+    const maxTokens = Math.min(this.maxTokens, ceiling?.maxTokens ?? this.maxTokens);
+    if (
+      budget.calls + 1 > maxCalls ||
+      budget.inputTokens + budget.outputTokens + budget.reservedTokens + reservedTokens >
+        maxTokens
+    ) {
+      throw new Error("provider budget ceiling");
+    }
+    this.reserveCall(sessionId, reservedTokens);
+    try {
+      const result = await this.withTimeout(this.options.textGen.generate(request));
+      this.completeCall(sessionId, reservedTokens, result.usage);
+      return result;
+    } catch (error) {
+      this.completeCall(sessionId, reservedTokens);
+      throw error;
+    }
+  }
+
+  private tokenReservation(request: TextGenRequest): number {
+    // A tokenizer cannot emit more tokens than the UTF-8 byte count of its
+    // input. Include the schema, configured output cap, and adapter framing
+    // headroom so concurrent calls cannot enter a protected token reserve.
+    const inputBytes = Buffer.byteLength(
+      `${request.instructions}\n${request.input}\n${JSON.stringify(request.jsonSchema)}`,
+      "utf-8",
+    );
+    return inputBytes + this.maxOutputTokensPerCall + 2_048;
   }
 
   private parseJson<T>(schema: z.ZodType<T>, text: string) {
@@ -349,25 +409,49 @@ export class ProviderService implements NpcProposalPort {
   }
 
   private budgetFor(sessionId: string): SessionBudget {
-    const current = this.budgets.get(sessionId) ?? { calls: 0, inputTokens: 0, outputTokens: 0 };
+    const current = this.budgets.get(sessionId) ?? {
+      calls: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+      reservedTokens: 0,
+    };
     this.budgets.set(sessionId, current);
     return current;
   }
 
-  private isBudgetExhausted(sessionId: string): boolean {
+  private isBudgetExhausted(
+    sessionId: string,
+    ceiling?: { maxCalls: number; maxTokens: number },
+  ): boolean {
     const budget = this.budgetFor(sessionId);
-    return budget.calls >= this.maxCalls || budget.inputTokens + budget.outputTokens >= this.maxTokens;
+    const maxCalls = Math.min(this.maxCalls, ceiling?.maxCalls ?? this.maxCalls);
+    const maxTokens = Math.min(this.maxTokens, ceiling?.maxTokens ?? this.maxTokens);
+    return (
+      budget.calls >= maxCalls ||
+      budget.inputTokens + budget.outputTokens + budget.reservedTokens >= maxTokens
+    );
   }
 
-  private reserveCall(sessionId: string): void {
+  private reserveCall(sessionId: string, reservedTokens: number): void {
     const budget = this.budgetFor(sessionId);
     budget.calls += 1;
+    budget.reservedTokens += reservedTokens;
   }
 
-  private recordTokens(sessionId: string, usage?: ProviderUsage): void {
+  private completeCall(
+    sessionId: string,
+    reservedTokens: number,
+    usage?: ProviderUsage,
+  ): void {
     const budget = this.budgetFor(sessionId);
-    budget.inputTokens += usage?.inputTokens ?? 0;
-    budget.outputTokens += usage?.outputTokens ?? 0;
+    budget.reservedTokens = Math.max(0, budget.reservedTokens - reservedTokens);
+    if (usage) {
+      budget.inputTokens += usage.inputTokens;
+      budget.outputTokens += usage.outputTokens;
+    } else {
+      // Missing usage must not make a potentially spent call look free.
+      budget.inputTokens += reservedTokens;
+    }
   }
 
   private combineUsage(...usages: Array<ProviderUsage | undefined>): ProviderUsage | undefined {

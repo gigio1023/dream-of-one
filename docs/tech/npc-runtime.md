@@ -130,8 +130,9 @@ client can distinguish live/fallback/scripted behavior and animate validated
 consequences incrementally.
 
 The landed subset is `POST /v1/run/start`, `POST /v1/run/advance`,
-`GET /v1/run/snapshot`, and the run-discriminated
-start/answer/snapshot/end session routes. Legacy
+`GET /v1/run/snapshot`, the run-discriminated
+start/answer/snapshot/end session routes, and run-discriminated
+`POST /v1/npc/decision` for bounded ambient meetings. Legacy
 `{storyletId, locale}` packets still dispatch to `SessionService`; strict
 `{runId, ...}` packets dispatch to `RunService` on the same loopback server.
 Fixture-only Studio scripts generate byte-identical backend and Godot replay
@@ -161,10 +162,15 @@ block transition may supersede an in-flight route movement.
 Meeting windows retain one semantic center but map every participant to a
 distinct physical standing-slot anchor. A `meeting_ready` wake becomes pending
 only when both actors have confirmed their own slots during the open window;
-the window boundary alone is informational. Grace and hearing wakes follow
-the same deterministic scheduler surface. These wakes carry no authored
-conversation and spend zero provider budget until a later `/v1/npc/decision`
-slice consumes them.
+the window boundary alone is informational. Run-discriminated
+`POST /v1/npc/decision` claims that wake exactly once, resolves two validated
+provider-backed utterances outside the run lock, then recomputes current
+listeners from confirmed anchors and the shared audibility volume before
+committing attributed memories. Exact retries are cached; a result completed
+during a player modal remains queued and commits on the same request after
+resume without another provider call. Ambient work cannot enter the reserved
+player/hearing budget. Grace and hearing wakes continue through the same
+deterministic scheduler surface.
 
 ## Run-scoped state and judgment
 

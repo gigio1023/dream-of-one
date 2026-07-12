@@ -180,6 +180,27 @@ func face_position(target_position: Vector3) -> void:
 	)
 
 
+func camera_relative_direction(target_position: Vector3) -> StringName:
+	var flat_direction := target_position - _camera.global_position
+	flat_direction.y = 0.0
+	if flat_direction.is_zero_approx():
+		return &"center"
+	flat_direction = flat_direction.normalized()
+	var forward := -_camera.global_transform.basis.z
+	forward.y = 0.0
+	forward = forward.normalized()
+	var right := _camera.global_transform.basis.x
+	right.y = 0.0
+	right = right.normalized()
+	var forward_dot := flat_direction.dot(forward)
+	if forward_dot < -0.35:
+		return &"behind"
+	var right_dot := flat_direction.dot(right)
+	if absf(right_dot) <= 0.35:
+		return &"center"
+	return &"right" if right_dot > 0.0 else &"left"
+
+
 func focused_interactable() -> Node:
 	if is_instance_valid(_focused_target):
 		return _focused_target

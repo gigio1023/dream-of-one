@@ -3,11 +3,31 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createStudioReceptionScriptedAdapter } from "../providers/testing/studio-reception-script.js";
 import { RunService, STUDIO_RECEPTIONIST_ID } from "../runtime/run-service.js";
-import type { RunNextTurn, RunSessionAnswer } from "../runtime/run-schema.js";
+import type {
+  RunAdvanceRequest,
+  RunAdvanceResponse,
+  RunNextTurn,
+  RunSessionAnswer,
+} from "../runtime/run-schema.js";
 
 function fixtureIds() {
   const counts = { run: 0, sess: 0, mem: 0 };
   return (prefix: keyof typeof counts) => `${prefix}-fixture-${++counts[prefix]}`;
+}
+
+function sortedArrivalBatch(response: RunAdvanceResponse) {
+  return response.movementDeltas
+    .map(movement => ({
+      movementId: movement.movementId,
+      actorId: movement.actorId,
+      anchorRef: movement.targetAnchorRef,
+    }))
+    .sort((first, second) => {
+      const actorOrder = first.actorId.localeCompare(second.actorId);
+      return actorOrder !== 0
+        ? actorOrder
+        : first.movementId.localeCompare(second.movementId);
+    });
 }
 
 interface VariantSpec {
@@ -82,18 +102,7 @@ async function driveAdvanceSequence() {
     advanceId: `${runStartResponse.runId}:advance:000002`,
     observedWorldRevision: initialResponse.worldRevision,
     elapsedSeconds: 0,
-    arrivals: initialResponse.movementDeltas
-      .map(movement => ({
-        movementId: movement.movementId,
-        actorId: movement.actorId,
-        anchorRef: movement.targetAnchorRef,
-      }))
-      .sort((first, second) => {
-        const actorOrder = first.actorId.localeCompare(second.actorId);
-        return actorOrder !== 0
-          ? actorOrder
-          : first.movementId.localeCompare(second.movementId);
-      }),
+    arrivals: sortedArrivalBatch(initialResponse),
   };
   const arrivalResponse = await service.advance(arrivalRequest);
   const routeRequest = {
@@ -106,6 +115,61 @@ async function driveAdvanceSequence() {
   const routeResponse = await service.advance(routeRequest);
   const routeRetryResponse = await service.advance(routeRequest);
   const runSnapshotAfterAdvanceResponse = service.snapshot(runStartResponse.runId);
+  const meetingReplaySteps: Array<{
+    stepId: string;
+    request: RunAdvanceRequest;
+    response: RunAdvanceResponse;
+  }> = [];
+  let latestResponse = routeResponse;
+  let sequence = 3;
+  let clockStep = 0;
+  let arrivalStep = 0;
+  let meetingWake = latestResponse.scheduleWakes.find(wake => wake.kind === "meeting_ready");
+  while (!meetingWake && meetingReplaySteps.length < 64) {
+    const arrivals = sortedArrivalBatch(latestResponse);
+    const isArrivalBatch = arrivals.length > 0;
+    const request: RunAdvanceRequest = {
+      runId: runStartResponse.runId,
+      advanceId: `${runStartResponse.runId}:advance:${String(++sequence).padStart(6, "0")}`,
+      observedWorldRevision: latestResponse.worldRevision,
+      elapsedSeconds: isArrivalBatch ? 0 : 10,
+      arrivals,
+    };
+    const response = await service.advance(request);
+    meetingReplaySteps.push({
+      stepId: isArrivalBatch
+        ? `first_meeting_arrivals_${++arrivalStep}`
+        : `first_meeting_clock_${++clockStep}`,
+      request,
+      response,
+    });
+    latestResponse = response;
+    meetingWake = response.scheduleWakes.find(wake => wake.kind === "meeting_ready");
+  }
+  if (!meetingWake) throw new Error("run fixture did not reach the first meeting_ready wake");
+  const meetingReadyStep = meetingReplaySteps.at(-1);
+  if (!meetingReadyStep || meetingReadyStep.request.arrivals.length === 0) {
+    throw new Error("first meeting_ready did not emerge from a confirmed arrival batch");
+  }
+  const npcDecisionRequest = {
+    runId: runStartResponse.runId,
+    wakeId: meetingWake.wakeId,
+    observedWorldRevision: meetingWake.observedWorldRevision,
+  };
+  const npcDecisionResponse = await service.decision(npcDecisionRequest);
+  if (npcDecisionResponse.status !== "completed") {
+    throw new Error(`run fixture ambient decision did not complete: ${npcDecisionResponse.status}`);
+  }
+  const ambientDeliveryRequest = {
+    runId: runStartResponse.runId,
+    advanceId: `${runStartResponse.runId}:advance:${String(++sequence).padStart(6, "0")}`,
+    observedWorldRevision: npcDecisionResponse.worldRevision,
+    afterSpeechSeq: npcDecisionResponse.speechEvents.at(-1)?.seq ?? 0,
+    elapsedSeconds: 10,
+    arrivals: [],
+  };
+  const ambientDeliveryResponse = await service.advance(ambientDeliveryRequest);
+  const runSnapshotAfterMeetingResponse = service.snapshot(runStartResponse.runId);
   return {
     initialRequest,
     initialResponse,
@@ -115,6 +179,12 @@ async function driveAdvanceSequence() {
     routeResponse,
     routeRetryResponse,
     runSnapshotAfterAdvanceResponse,
+    meetingReplaySteps,
+    npcDecisionRequest,
+    npcDecisionResponse,
+    ambientDeliveryRequest,
+    ambientDeliveryResponse,
+    runSnapshotAfterMeetingResponse,
   };
 }
 
@@ -174,6 +244,21 @@ export async function buildRunApiFixture() {
         endpoint: "GET /v1/run/snapshot",
         request: { runId: defaultPath.runStartResponse.runId },
         response: advancePath.runSnapshotAfterAdvanceResponse,
+      },
+      npcDecision: {
+        endpoint: "POST /v1/npc/decision",
+        request: advancePath.npcDecisionRequest,
+        response: advancePath.npcDecisionResponse,
+      },
+      runAdvanceAmbientSpeech: {
+        endpoint: "POST /v1/run/advance",
+        request: advancePath.ambientDeliveryRequest,
+        response: advancePath.ambientDeliveryResponse,
+      },
+      runSnapshotAfterMeeting: {
+        endpoint: "GET /v1/run/snapshot",
+        request: { runId: defaultPath.runStartResponse.runId },
+        response: advancePath.runSnapshotAfterMeetingResponse,
       },
       sessionStart: {
         endpoint: "POST /v1/session/start",
@@ -235,6 +320,18 @@ export async function buildRunApiFixture() {
         endpoint: "POST /v1/run/advance",
         request: advancePath.routeRequest,
         response: advancePath.routeResponse,
+      },
+      ...advancePath.meetingReplaySteps.map(step => ({
+        stepId: step.stepId,
+        endpoint: "POST /v1/run/advance",
+        request: step.request,
+        response: step.response,
+      })),
+      {
+        stepId: "first_meeting_speech_delivery",
+        endpoint: "POST /v1/run/advance",
+        request: advancePath.ambientDeliveryRequest,
+        response: advancePath.ambientDeliveryResponse,
       },
     ],
     sessionAnswerVariants: driven.map(variant => ({

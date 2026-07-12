@@ -7,6 +7,7 @@ const RuntimeBridge := preload("res://scripts/runtime/runtime_bridge.gd")
 const START_TIMEOUT_SECONDS := 60.0
 const ANSWER_TIMEOUT_SECONDS := 300.0
 const ADVANCE_TIMEOUT_SECONDS := 15.0
+const DECISION_TIMEOUT_SECONDS := 300.0
 
 var _bridge: Node
 var _last_error: Dictionary = {}
@@ -95,6 +96,15 @@ func advance(request: Dictionary) -> Dictionary:
 		request,
 		ADVANCE_TIMEOUT_SECONDS,
 		"run_advance_failed"
+	)
+
+
+func npc_decision(request: Dictionary) -> Dictionary:
+	return await _post(
+		"/v1/npc/decision",
+		request,
+		DECISION_TIMEOUT_SECONDS,
+		"npc_decision_failed"
 	)
 
 

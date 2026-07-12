@@ -76,6 +76,54 @@ func navigation_position(anchor_ref: String) -> Variant:
 	return NavigationServer3D.map_get_closest_point(navigation_map, anchor_value as Vector3)
 
 
+func player_speech_audibility(audibility: Dictionary) -> Dictionary:
+	var player := get_node_or_null(player_path) as Node3D
+	if player == null:
+		return _speech_audibility_result(false, "player_missing")
+	var volume_id := str(audibility.get("volumeId", ""))
+	var volume := _layout_entry_by_id("audibility_volumes", volume_id)
+	if volume.is_empty():
+		return _speech_audibility_result(false, "volume_unknown", volume_id)
+	var speaker_value: Variant = audibility.get("speakerPosition", [])
+	if not speaker_value is Array or (speaker_value as Array).size() != 3:
+		return _speech_audibility_result(false, "speaker_position_invalid", volume_id)
+	var speaker_position := _vector3_from_array(speaker_value)
+	var layout_max_distance := maxf(0.0, float(volume.get("max_speech_distance_m", 0.0)))
+	var packet_max_distance := maxf(0.0, float(audibility.get(
+		"maxSpeechDistanceM",
+		layout_max_distance
+	)))
+	var max_distance := minf(layout_max_distance, packet_max_distance)
+	var distance := player.global_position.distance_to(speaker_position)
+	var player_in_volume := _point_in_zone(player.global_position, volume)
+	var speaker_in_volume := _point_in_zone(speaker_position, volume)
+	var audible := (
+		max_distance > 0.0
+		and player_in_volume
+		and speaker_in_volume
+		and distance <= max_distance
+	)
+	var reason := ""
+	if not speaker_in_volume:
+		reason = "speaker_outside_volume"
+	elif not player_in_volume:
+		reason = "player_outside_volume"
+	elif max_distance <= 0.0:
+		reason = "distance_unconfigured"
+	elif distance > max_distance:
+		reason = "player_outside_distance"
+	return {
+		"audible": audible,
+		"reason": reason,
+		"volumeId": volume_id,
+		"distanceM": distance,
+		"maxDistanceM": max_distance,
+		"playerInVolume": player_in_volume,
+		"speakerInVolume": speaker_in_volume,
+		"speakerPosition": speaker_position,
+	}
+
+
 func nearest_anchor_position(point: Vector3) -> Vector3:
 	var nearest := _vector3_from_array(
 		(_layout.get("player_start", {}) as Dictionary).get("position", [])
@@ -105,6 +153,32 @@ func _load_layout() -> Dictionary:
 		push_error("Town3D layout root must be a Dictionary: %s" % layout_path)
 		return {}
 	return parsed as Dictionary
+
+
+func _layout_entry_by_id(collection_key: String, entry_id: String) -> Dictionary:
+	for entry_value in _layout.get(collection_key, []):
+		if (
+			entry_value is Dictionary
+			and str((entry_value as Dictionary).get("id", "")) == entry_id
+		):
+			return (entry_value as Dictionary).duplicate(true)
+	return {}
+
+
+func _speech_audibility_result(
+	audible: bool,
+	reason: String,
+	volume_id := ""
+) -> Dictionary:
+	return {
+		"audible": audible,
+		"reason": reason,
+		"volumeId": volume_id,
+		"distanceM": INF,
+		"maxDistanceM": 0.0,
+		"playerInVolume": false,
+		"speakerInVolume": false,
+	}
 
 
 func _validate_bindings() -> PackedStringArray:

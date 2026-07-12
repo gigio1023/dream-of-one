@@ -1,5 +1,6 @@
 import type {
   AgentStepProposal,
+  AgentStepRequest,
   ConversationProposal,
   ConversationTurnRequest,
   MergedConversationTurn,
@@ -74,8 +75,20 @@ function mergedTurn(request: MergedConversationTurnRequest): MergedConversationT
   };
 }
 
-function nextStep(): AgentStepProposal {
-  return { rationale: "첫 접수 대화 fixture에는 후속 세계 행동이 없습니다.", done: true };
+function nextStep(request: AgentStepRequest): AgentStepProposal {
+  const targetActorId = request.observePacket.visibleActors[0];
+  if (targetActorId) {
+    return {
+      toolCall: { tool: "talk_to", args: { actorId: targetActorId } },
+      utterance:
+        request.observePacket.heardSpeech.length > 0
+          ? "네, 말씀하신 내용을 들었습니다. 주변을 살피며 필요한 일만 이어 가겠습니다."
+          : "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
+      rationale: "함께 도착한 주민에게 직접 말합니다.",
+      done: true,
+    };
+  }
+  return { rationale: "첫 접수 대화에는 후속 세계 행동이 없습니다.", done: true };
 }
 
 /** Fixture-only deterministic Studio conversation; never selectable from provider config. */

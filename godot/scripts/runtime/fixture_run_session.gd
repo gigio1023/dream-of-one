@@ -16,6 +16,8 @@ var _selected_answer_request: Dictionary = {}
 var _selected_answer_response: Dictionary = {}
 var _advance_index := 0
 var _advance_cache: Dictionary = {}
+var _decision_cache: Dictionary = {}
+var _decision_call_count := 0
 var _current_run_snapshot: Dictionary = {}
 var _last_error: Dictionary = {}
 
@@ -201,6 +203,38 @@ func advance(request: Dictionary) -> Dictionary:
 	return response.duplicate(true)
 
 
+func npc_decision(request: Dictionary) -> Dictionary:
+	if not _started:
+		return _stored_error("run_not_started", "Start the fixture run first.")
+	var packet := _endpoint("npcDecision")
+	if packet.is_empty():
+		return _stored_error(
+			"fixture_npc_decision_missing",
+			"Fixture has no npcDecision packet."
+		)
+	var expected_request := _dictionary_or_empty(packet.get("request"))
+	var signature := _decision_request_signature(request)
+	if signature != _decision_request_signature(expected_request):
+		return _stored_error(
+			"fixture_npc_decision_miss",
+			"Fixture has no authoritative response for that NPC decision."
+		)
+	if _decision_cache.has(signature):
+		_last_error = {}
+		return _dictionary_or_empty(_decision_cache.get(signature))
+	var response := _dictionary_or_empty(packet.get("response"))
+	if response.is_empty():
+		return _stored_error(
+			"fixture_npc_decision_missing",
+			"Fixture NPC decision has no response."
+		)
+	_decision_cache[signature] = response.duplicate(true)
+	_decision_call_count += 1
+	_apply_decision_to_snapshot(response)
+	_last_error = {}
+	return response.duplicate(true)
+
+
 func reset() -> void:
 	_started = false
 	_conversation_started = false
@@ -213,6 +247,8 @@ func reset() -> void:
 	_selected_answer_response = {}
 	_advance_index = 0
 	_advance_cache = {}
+	_decision_cache = {}
+	_decision_call_count = 0
 	_current_run_snapshot = {}
 	_last_error = {}
 
@@ -222,7 +258,10 @@ func last_error() -> Dictionary:
 
 
 func diagnostics_snapshot() -> Dictionary:
-	return {"advanceIndex": _advance_index}
+	return {
+		"advanceIndex": _advance_index,
+		"decisionCallCount": _decision_call_count,
+	}
 
 
 func _load_fixture() -> void:
@@ -257,10 +296,10 @@ func _advance_sequence() -> Array:
 func _apply_advance_to_snapshot(response: Dictionary) -> void:
 	if _current_run_snapshot.is_empty():
 		return
-	_current_run_snapshot["worldRevision"] = int(response.get(
-		"worldRevision",
-		_current_run_snapshot.get("worldRevision", 0)
-	))
+	_current_run_snapshot["worldRevision"] = maxi(
+		int(_current_run_snapshot.get("worldRevision", 0)),
+		int(response.get("worldRevision", 0))
+	)
 	var clock := _dictionary_or_empty(_current_run_snapshot.get("worldClock"))
 	var response_clock := _dictionary_or_empty(response.get("clock"))
 	if not response_clock.is_empty():
@@ -284,6 +323,59 @@ func _apply_advance_to_snapshot(response: Dictionary) -> void:
 			"actorId": str(arrival.get("actorId", "")),
 			"locationId": str(arrival.get("locationId", "")),
 		})
+	_apply_ambient_to_snapshot(
+		_array_or_empty(response.get("ambientSpeechEvents")),
+		int(response.get("ambientSpeechCursor", 0)),
+		null
+	)
+
+
+func _apply_decision_to_snapshot(response: Dictionary) -> void:
+	if _current_run_snapshot.is_empty():
+		return
+	_current_run_snapshot["worldRevision"] = maxi(
+		int(_current_run_snapshot.get("worldRevision", 0)),
+		int(response.get("worldRevision", 0))
+	)
+	_apply_ambient_to_snapshot(
+		_array_or_empty(response.get("speechEvents")),
+		_highest_speech_seq(_array_or_empty(response.get("speechEvents"))),
+		null
+	)
+
+
+func _apply_ambient_to_snapshot(
+	events: Array,
+	cursor: int,
+	active_conversation: Variant
+) -> void:
+	var ambient := _dictionary_or_empty(_current_run_snapshot.get("ambientSpeech"))
+	var existing_events := _array_or_empty(ambient.get("events"))
+	var by_seq: Dictionary = {}
+	for event_value in existing_events:
+		if event_value is Dictionary:
+			by_seq[int((event_value as Dictionary).get("seq", -1))] = (
+				(event_value as Dictionary).duplicate(true)
+			)
+	for event_value in events:
+		if event_value is Dictionary:
+			by_seq[int((event_value as Dictionary).get("seq", -1))] = (
+				(event_value as Dictionary).duplicate(true)
+			)
+	var merged: Array = by_seq.values()
+	merged.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a.get("seq", -1)) < int(b.get("seq", -1))
+	)
+	ambient["events"] = merged
+	ambient["cursor"] = maxi(
+		int(ambient.get("cursor", 0)),
+		maxi(cursor, _highest_speech_seq(merged))
+	)
+	if active_conversation != null:
+		ambient["activeConversation"] = active_conversation
+	elif not ambient.has("activeConversation"):
+		ambient["activeConversation"] = null
+	_current_run_snapshot["ambientSpeech"] = ambient
 
 
 func _patch_snapshot_actor(patch: Dictionary) -> void:
@@ -326,9 +418,26 @@ func _advance_request_signature(request: Dictionary) -> String:
 		"runId": str(request.get("runId", "")),
 		"advanceId": str(request.get("advanceId", "")),
 		"observedWorldRevision": int(request.get("observedWorldRevision", -1)),
+		"afterSpeechSeq": int(request.get("afterSpeechSeq", 0)),
 		"elapsedSeconds": float(request.get("elapsedSeconds", -1.0)),
 		"arrivals": normalized_arrivals,
 	})
+
+
+func _decision_request_signature(request: Dictionary) -> String:
+	return JSON.stringify({
+		"runId": str(request.get("runId", "")),
+		"wakeId": str(request.get("wakeId", "")),
+		"observedWorldRevision": int(request.get("observedWorldRevision", -1)),
+	})
+
+
+func _highest_speech_seq(events: Array) -> int:
+	var highest := 0
+	for event_value in events:
+		if event_value is Dictionary:
+			highest = maxi(highest, int((event_value as Dictionary).get("seq", 0)))
+	return highest
 
 
 func _answer_matches(expected: Dictionary, actual: Dictionary) -> bool:

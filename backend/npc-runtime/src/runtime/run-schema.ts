@@ -46,6 +46,41 @@ const runActorRoleSchema = z.enum(RUN_ACTOR_ROLES);
 const stanceSchema = z.enum(COARSE_STANCES);
 const signalSchema = z.enum(CONVERSATION_SUSPICION_SIGNALS);
 const intentSchema = z.enum(CONVERSATION_CHOICE_INTENTS);
+const position3Schema = z.tuple([z.number(), z.number(), z.number()]);
+
+export const runAmbientAudibilitySchema = z
+  .object({
+    volumeId: nonEmpty,
+    maxSpeechDistanceM: z.number().positive(),
+    speakerPosition: position3Schema,
+  })
+  .strict();
+
+export const runAmbientSpeechEventSchema = z
+  .object({
+    seq: z.number().int().positive(),
+    eventId: nonEmpty,
+    wakeId: nonEmpty,
+    conversationId: nonEmpty,
+    turnId: nonEmpty,
+    speakerActorId: nonEmpty,
+    targetActorId: nonEmpty,
+    listenerActorIds: z.array(nonEmpty).min(1),
+    line: nonEmpty,
+    worldSeconds: z.number().nonnegative(),
+    observedWorldRevision: z.number().int().nonnegative(),
+    worldRevision: z.number().int().positive(),
+    audibility: runAmbientAudibilitySchema,
+    proposalMeta: proposalMetaSchema,
+  })
+  .strict();
+
+export const runAmbientUtteranceMemorySchema = runAmbientSpeechEventSchema
+  .extend({
+    memoryId: nonEmpty,
+    kind: z.literal("ambient_utterance"),
+  })
+  .strict();
 
 export const runNpcUtteranceMemorySchema = z
   .object({
@@ -94,6 +129,7 @@ export const runPlayerConversationMemorySchema = z
 export const runMemorySchema = z.discriminatedUnion("kind", [
   runNpcUtteranceMemorySchema,
   runPlayerConversationMemorySchema,
+  runAmbientUtteranceMemorySchema,
 ]);
 
 export const runActorSchema = z
@@ -196,6 +232,28 @@ export const runSchedulerSnapshotSchema = z
   })
   .strict();
 
+export const runAmbientConversationSchema = z
+  .object({
+    conversationId: nonEmpty,
+    wakeId: nonEmpty,
+    participantActorIds: z.tuple([nonEmpty, nonEmpty]),
+    initiatorActorId: nonEmpty,
+    currentSpeakerActorId: nonEmpty,
+    observedWorldRevision: z.number().int().nonnegative(),
+    status: z.enum(["resolving", "queued"]),
+    turnLimit: z.number().int().min(2).max(4),
+    audibilityVolumeId: nonEmpty,
+  })
+  .strict();
+
+export const runAmbientSpeechSnapshotSchema = z
+  .object({
+    cursor: z.number().int().nonnegative(),
+    events: z.array(runAmbientSpeechEventSchema),
+    activeConversation: runAmbientConversationSchema.nullable(),
+  })
+  .strict();
+
 export const runSnapshotSchema = z
   .object({
     runId: nonEmpty,
@@ -226,6 +284,7 @@ export const runSnapshotSchema = z
     activeConversationId: nonEmpty.nullable(),
     actors: z.array(runActorSchema).length(6),
     scheduler: runSchedulerSnapshotSchema,
+    ambientSpeech: runAmbientSpeechSnapshotSchema,
     records: z.array(runRecordSchema),
     ledgerEvents: z.array(runLedgerEventSchema),
   })
@@ -275,6 +334,7 @@ export const runAdvanceRequestSchema = z
     runId: nonEmpty,
     advanceId: nonEmpty.max(128),
     observedWorldRevision: z.number().int().nonnegative(),
+    afterSpeechSeq: z.number().int().nonnegative().optional(),
     elapsedSeconds: z.number().min(0).max(10),
     arrivals: z.array(runArrivalObservationSchema).max(6),
   })
@@ -367,7 +427,31 @@ export const runAdvanceResponseSchema = z
     scheduleWakes: z.array(runScheduleWakeSchema),
     movementDeltas: z.array(runMovementDeltaSchema),
     actorReadinessDeltas: z.array(runActorReadinessDeltaSchema),
+    ambientSpeechEvents: z.array(runAmbientSpeechEventSchema),
+    ambientSpeechCursor: z.number().int().nonnegative(),
     scheduler: runSchedulerSnapshotSchema,
+  })
+  .strict();
+
+export const runNpcDecisionRequestSchema = z
+  .object({
+    runId: nonEmpty,
+    wakeId: nonEmpty,
+    observedWorldRevision: z.number().int().nonnegative(),
+  })
+  .strict();
+
+export const runNpcDecisionResponseSchema = z
+  .object({
+    runId: nonEmpty,
+    wakeId: nonEmpty,
+    status: z.enum(["completed", "queued", "stale", "budget_reserved", "failed"]),
+    observedWorldRevision: z.number().int().nonnegative(),
+    worldRevision: z.number().int().nonnegative(),
+    conversationId: nonEmpty,
+    participantActorIds: z.tuple([nonEmpty, nonEmpty]),
+    speechEvents: z.array(runAmbientSpeechEventSchema),
+    providerMetas: z.array(proposalMetaSchema).max(2),
   })
   .strict();
 
@@ -473,6 +557,9 @@ export type RunActor = z.infer<typeof runActorSchema>;
 export type RunMemory = z.infer<typeof runMemorySchema>;
 export type RunNpcUtteranceMemory = z.infer<typeof runNpcUtteranceMemorySchema>;
 export type RunPlayerConversationMemory = z.infer<typeof runPlayerConversationMemorySchema>;
+export type RunAmbientUtteranceMemory = z.infer<typeof runAmbientUtteranceMemorySchema>;
+export type RunAmbientSpeechEvent = z.infer<typeof runAmbientSpeechEventSchema>;
+export type RunAmbientConversation = z.infer<typeof runAmbientConversationSchema>;
 export type RunNextTurn = z.infer<typeof runNextTurnSchema>;
 export type RunSessionAnswer = z.infer<typeof runSessionAnswerSchema>;
 export type RunJudgment = z.infer<typeof runJudgmentSchema>;
@@ -489,5 +576,7 @@ export type RunMovementDelta = z.infer<typeof runMovementDeltaSchema>;
 export type RunScheduleWake = z.infer<typeof runScheduleWakeSchema>;
 export type RunSchedulerSnapshot = z.infer<typeof runSchedulerSnapshotSchema>;
 export type RunActorReadinessDelta = z.infer<typeof runActorReadinessDeltaSchema>;
+export type RunNpcDecisionRequest = z.infer<typeof runNpcDecisionRequestSchema>;
+export type RunNpcDecisionResponse = z.infer<typeof runNpcDecisionResponseSchema>;
 
 export { proposalMetaSchema as runProposalMetaSchema };

@@ -222,5 +222,47 @@ test("run start and clock advance expose retry-safe HTTP conflicts", async () =>
     });
     assert.equal(stale.status, 409);
     assert.equal(stale.json.error, "stale_world_revision");
+
+    let latest = advanced.json;
+    for (let step = 2; step <= 9; step += 1) {
+      const next = await post(base, "/v1/run/advance", {
+        runId: started.json.runId,
+        advanceId: `http-meeting-clock-${step}`,
+        observedWorldRevision: latest.worldRevision,
+        elapsedSeconds: 10,
+        arrivals: [],
+      });
+      assert.equal(next.status, 200, JSON.stringify(next.json));
+      latest = next.json;
+    }
+    const meetingArrivals = latest.movementDeltas
+      .filter((movement: { actorId: string }) =>
+        ["NPC_Studio_Manager", "NPC_Park_Caretaker"].includes(movement.actorId),
+      )
+      .map((movement: { movementId: string; actorId: string; targetAnchorRef: string }) => ({
+        movementId: movement.movementId,
+        actorId: movement.actorId,
+        anchorRef: movement.targetAnchorRef,
+      }));
+    const arrived = await post(base, "/v1/run/advance", {
+      runId: started.json.runId,
+      advanceId: "http-meeting-arrivals",
+      observedWorldRevision: latest.worldRevision,
+      elapsedSeconds: 0,
+      arrivals: meetingArrivals,
+    });
+    assert.equal(arrived.status, 200, JSON.stringify(arrived.json));
+    const meetingWake = arrived.json.scheduleWakes.find(
+      (wake: { kind: string }) => wake.kind === "meeting_ready",
+    );
+    assert.ok(meetingWake);
+    const decision = await post(base, "/v1/npc/decision", {
+      runId: started.json.runId,
+      wakeId: meetingWake.wakeId,
+      observedWorldRevision: meetingWake.observedWorldRevision,
+    });
+    assert.equal(decision.status, 200, JSON.stringify(decision.json));
+    assert.equal(decision.json.status, "completed");
+    assert.equal(decision.json.speechEvents.length, 2);
   });
 });

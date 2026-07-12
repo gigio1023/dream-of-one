@@ -218,6 +218,23 @@ test("agent-step prompts keep visible language Korean and stop successful repeti
   assert.equal(result.proposal.done, true);
   assert.match(textGen.requests[0].instructions, /player-visible.*in natural modern Korean only/);
   assert.match(textGen.requests[0].instructions, /Never repeat an identical successful tool call/);
+
+  const ambientFallback = await new RuleFallbackNpcAdapter().proposeNextStep({
+    sessionId: "run-ambient-fallback",
+    iteration: 0,
+    goal: "곁에 있는 주민과 직접 말한다.",
+    observePacket: observePacket(),
+    blockedSignatures: [],
+    requiredToolCall: { tool: "talk_to", actorId: "NPC_Store_Manager" },
+    requireUtterance: true,
+  });
+  assert.equal(ambientFallback.proposal.toolCall?.tool, "talk_to");
+  assert.equal(ambientFallback.proposal.toolCall?.args.actorId, "NPC_Store_Manager");
+  assert.match(ambientFallback.proposal.utterance ?? "", /[가-힣]/);
+  assert.doesNotMatch(
+    ambientFallback.proposal.utterance ?? "",
+    /[\p{Script=Latin}\p{Script=Han}]/u,
+  );
 });
 
 test("mixed-script player text gets one repair before it reaches the game", async () => {
@@ -283,6 +300,59 @@ test("missing credentials and exhausted budget use explicit fallback metadata", 
   assert.equal(first.meta.transport, "live");
   assert.equal(second.meta.fallbackReason, "budget_exhausted");
   assert.equal(budgeted.accountingSnapshot("session-provider-test").callsUsed, 1);
+
+  const repairCeilingTextGen = new FakeTextGen([
+    { text: "not json", usage: { inputTokens: 5, outputTokens: 1, totalTokens: 6 } },
+    {
+      text: JSON.stringify({
+        toolCall: { tool: "talk_to", args: { actorId: "NPC_Store_Manager" } },
+        utterance: "지금 확인한 내용을 서로 맞춰 보겠습니다.",
+        rationale: "곁에 있는 주민과 직접 말합니다.",
+        done: true,
+      }),
+    },
+  ]);
+  const repairCeiling = new ProviderService({
+    profileId: "test/ambient-repair-ceiling",
+    textGen: repairCeilingTextGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const stoppedBeforeRepair = await repairCeiling.proposeNextStep({
+    sessionId: "run-ambient-repair-ceiling",
+    iteration: 0,
+    goal: "곁에 있는 주민과 직접 말한다.",
+    observePacket: observePacket(),
+    blockedSignatures: [],
+    requiredToolCall: { tool: "talk_to", actorId: "NPC_Store_Manager" },
+    requireUtterance: true,
+    budgetCeiling: { maxCalls: 1, maxTokens: 50_000 },
+  });
+  assert.equal(stoppedBeforeRepair.meta.fallbackReason, "budget_exhausted");
+  assert.equal(repairCeilingTextGen.requests.length, 1, "repair cannot enter the reserved call slot");
+  assert.equal(
+    repairCeiling.accountingSnapshot("run-ambient-repair-ceiling").callsUsed,
+    1,
+  );
+
+  const tokenCeilingTextGen = new FakeTextGen([{ text: validConversation }]);
+  const tokenCeiling = new ProviderService({
+    profileId: "test/ambient-token-ceiling",
+    textGen: tokenCeilingTextGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const stoppedBeforeSpend = await tokenCeiling.proposeNextStep({
+    sessionId: "run-ambient-token-ceiling",
+    iteration: 0,
+    goal: "곁에 있는 주민과 직접 말한다.",
+    observePacket: observePacket(),
+    blockedSignatures: [],
+    requiredToolCall: { tool: "talk_to", actorId: "NPC_Store_Manager" },
+    requireUtterance: true,
+    budgetCeiling: { maxCalls: 100, maxTokens: 1 },
+  });
+  assert.equal(stoppedBeforeSpend.meta.fallbackReason, "budget_exhausted");
+  assert.equal(tokenCeilingTextGen.requests.length, 0);
+  assert.equal(tokenCeiling.accountingSnapshot("run-ambient-token-ceiling").callsUsed, 0);
 });
 
 test("provider timeout falls back without blocking the session", async () => {

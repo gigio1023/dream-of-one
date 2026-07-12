@@ -31,6 +31,9 @@ const WEAPON_NAME_TOKENS: PackedStringArray = [
 	"knife",
 	"blade",
 ]
+const SPEECH_BLIP_MIX_RATE := 22050
+const SPEECH_BLIP_SECONDS := 0.14
+const SPEECH_BLIP_FREQUENCY_HZ := 210.0
 
 @export var actor_id: StringName
 @export var label_key: StringName
@@ -43,6 +46,7 @@ const WEAPON_NAME_TOKENS: PackedStringArray = [
 @onready var _visual_root: Node3D = $VisualRoot
 @onready var _role_accent: MeshInstance3D = $RoleAccent
 @onready var _navigation_agent: NavigationAgent3D = $NavigationAgent3D
+@onready var _speech_blip: AudioStreamPlayer3D = $SpeechBlip
 
 var _animation_player: AnimationPlayer
 var _policy_state: StringName = POLICY_IDLE
@@ -61,6 +65,7 @@ func _ready() -> void:
 	_navigation_agent.velocity_computed.connect(_on_velocity_computed)
 	_apply_role_accent()
 	_instantiate_character()
+	_speech_blip.stream = _build_speech_blip()
 	_play_policy_state()
 
 
@@ -129,6 +134,19 @@ func stop() -> void:
 	_movement_id = ""
 	_movement_anchor_ref = ""
 	_movement_target = Vector3.ZERO
+
+
+func face_position(target_position: Vector3) -> void:
+	var flat_target := Vector3(target_position.x, global_position.y, target_position.z)
+	if not flat_target.is_equal_approx(global_position):
+		look_at(flat_target, Vector3.UP)
+
+
+func play_speech_blip(max_distance_m: float) -> void:
+	if max_distance_m <= 0.0 or _speech_blip.stream == null:
+		return
+	_speech_blip.max_distance = clampf(max_distance_m, 1.0, 24.0)
+	_speech_blip.play()
 
 
 func is_moving() -> bool:
@@ -312,3 +330,25 @@ func _play_policy_state() -> void:
 	var animation_name: StringName = POLICY_ANIMATIONS[_policy_state]
 	if _animation_player.has_animation(animation_name):
 		_animation_player.play(animation_name)
+
+
+func _build_speech_blip() -> AudioStreamWAV:
+	var sample_count := roundi(SPEECH_BLIP_MIX_RATE * SPEECH_BLIP_SECONDS)
+	var bytes := PackedByteArray()
+	bytes.resize(sample_count * 2)
+	for sample_index in sample_count:
+		var time_seconds := float(sample_index) / float(SPEECH_BLIP_MIX_RATE)
+		var progress := float(sample_index) / float(maxi(1, sample_count - 1))
+		var envelope := sin(PI * progress)
+		var carrier := (
+			sin(TAU * SPEECH_BLIP_FREQUENCY_HZ * time_seconds)
+			+ 0.35 * sin(TAU * SPEECH_BLIP_FREQUENCY_HZ * 1.5 * time_seconds)
+		)
+		var sample := clampi(roundi(carrier * envelope * 9000.0), -32768, 32767)
+		bytes.encode_s16(sample_index * 2, sample)
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = SPEECH_BLIP_MIX_RATE
+	stream.stereo = false
+	stream.data = bytes
+	return stream

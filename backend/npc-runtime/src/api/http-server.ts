@@ -25,6 +25,8 @@ import {
 import {
   runAdvanceRequestSchema,
   runAdvanceResponseSchema,
+  runNpcDecisionRequestSchema,
+  runNpcDecisionResponseSchema,
   runSessionAnswerRequestSchema,
   runSessionAnswerResponseSchema,
   runSessionEndRequestSchema,
@@ -87,6 +89,10 @@ function statusForRunError(error: RunError): number {
     case "unexpected_turn":
     case "start_id_conflict":
     case "advance_id_conflict":
+    case "decision_id_conflict":
+    case "wake_not_pending":
+    case "wake_not_supported":
+    case "ambient_conversation_active":
     case "stale_world_revision":
     case "run_paused":
     case "hearing_due":
@@ -226,7 +232,15 @@ export function createSessionServer(service: SessionService, runService = new Ru
       }
 
       if (method === "POST" && path === "/v1/npc/decision") {
-        const parsed = decisionRequestSchema.safeParse(await readJsonBody(req));
+        const body = await readJsonBody(req);
+        if (hasRunId(body)) {
+          const parsed = runNpcDecisionRequestSchema.safeParse(body);
+          if (!parsed.success) return badRequest(res, parsed.error);
+          const result = await runService.decision(parsed.data);
+          respond(res, runNpcDecisionResponseSchema, result);
+          return;
+        }
+        const parsed = decisionRequestSchema.safeParse(body);
         if (!parsed.success) return badRequest(res, parsed.error);
         const result = await service.decision(parsed.data.sessionId, parsed.data.beat);
         respond(res, decisionResponseSchema, result);

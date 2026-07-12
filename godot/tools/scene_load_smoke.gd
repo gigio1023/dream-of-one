@@ -21,6 +21,21 @@ const SCENES := [
 		"path": "res://scenes/main_3d.tscn",
 		"frames": 6,
 	},
+	{
+		"label": "main_3d_ambient_inside",
+		"path": "res://scenes/main_3d.tscn",
+		"frames": 6,
+	},
+	{
+		"label": "main_3d_ambient_outside",
+		"path": "res://scenes/main_3d.tscn",
+		"frames": 6,
+	},
+	{
+		"label": "main_3d_ambient_leave",
+		"path": "res://scenes/main_3d.tscn",
+		"frames": 6,
+	},
 ]
 
 var _failures: Array[String] = []
@@ -67,7 +82,14 @@ func _instance_scene(spec: Dictionary) -> void:
 	root.add_child(instance)
 	for _frame in range(maxi(1, int(spec.get("frames", 1)))):
 		await process_frame
-	if label in ["town_3d", "main_3d", "main_3d_schedule"]:
+	if label in [
+		"town_3d",
+		"main_3d",
+		"main_3d_schedule",
+		"main_3d_ambient_inside",
+		"main_3d_ambient_outside",
+		"main_3d_ambient_leave",
+	]:
 		var town := instance if label == "town_3d" else instance.get_node_or_null("Town")
 		if town != null:
 			await _wait_for_town_navigation(label, town)
@@ -82,12 +104,44 @@ func _instance_scene(spec: Dictionary) -> void:
 			await _check_run_conversation(label, instance)
 		if label == "main_3d_schedule":
 			await _check_run_clock_and_schedule(label, instance)
+		if label == "main_3d_ambient_inside":
+			await _check_ambient_speech(label, instance, true)
+		if label == "main_3d_ambient_outside":
+			await _check_ambient_speech(label, instance, false)
+		if label == "main_3d_ambient_leave":
+			await _check_ambient_speech(label, instance, true, true)
 		if not _has_failure_for(label):
 			print("PASS scene_load_smoke: %s" % label)
 
 	if is_instance_valid(instance):
+		var stopped_speech_blip := _stop_scene_speech_blips(instance)
+		if stopped_speech_blip:
+			await create_timer(0.2).timeout
+			_clear_scene_speech_blip_streams(instance)
+			await process_frame
 		instance.queue_free()
 		await process_frame
+
+
+func _stop_scene_speech_blips(node: Node) -> bool:
+	var stopped := false
+	if node is AudioStreamPlayer3D and node.name == &"SpeechBlip":
+		var player := node as AudioStreamPlayer3D
+		if player.playing:
+			player.stop()
+			stopped = true
+	for child in node.get_children():
+		if child is Node:
+			stopped = _stop_scene_speech_blips(child as Node) or stopped
+	return stopped
+
+
+func _clear_scene_speech_blip_streams(node: Node) -> void:
+	if node is AudioStreamPlayer3D and node.name == &"SpeechBlip":
+		(node as AudioStreamPlayer3D).stream = null
+	for child in node.get_children():
+		if child is Node:
+			_clear_scene_speech_blip_streams(child as Node)
 
 
 func _wait_for_town_navigation(label: String, town: Node) -> void:
@@ -215,9 +269,22 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			_require_node(label, instance, "CollisionShape3D")
 			_require_node(label, instance, "RoleAccent")
 			_require_node(label, instance, "NavigationAgent3D")
+			_require_node(label, instance, "SpeechBlip")
+			var speech_blip := instance.get_node_or_null("SpeechBlip") as AudioStreamPlayer3D
+			if speech_blip != null:
+				var stream := speech_blip.stream as AudioStreamWAV
+				if stream == null:
+					_failures.append("npc_3d has no procedural speech blip stream")
+				elif (
+					stream.format != AudioStreamWAV.FORMAT_16_BITS
+					or stream.mix_rate != 22050
+					or stream.data.is_empty()
+				):
+					_failures.append("npc_3d speech blip PCM contract drifted")
 		"hud_3d":
 			_require_node(label, instance, "Overlay/Reticle")
 			_require_node(label, instance, "Overlay/PromptPanel")
+			_require_node(label, instance, "Overlay/AmbientSubtitlePanel")
 			_require_node(label, instance, "Overlay/SettingsShade")
 			_require_node(label, instance, "Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns/UiScaleOption")
 			_require_node(label, instance, "Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns/MasterVolumeSlider")
@@ -257,7 +324,7 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 				var binding_errors: Variant = instance.call("binding_errors")
 				if binding_errors is PackedStringArray and not (binding_errors as PackedStringArray).is_empty():
 					_failures.append("town_3d layout bindings failed: %s" % binding_errors)
-		"main_3d", "main_3d_schedule":
+		"main_3d", "main_3d_schedule", "main_3d_ambient_inside", "main_3d_ambient_outside", "main_3d_ambient_leave":
 			_require_node(label, instance, "Town")
 			_require_node(label, instance, "Town/Actors/Player3D")
 			_require_node(label, instance, "HUD3D")
@@ -812,6 +879,274 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 	var final_budget: Dictionary = snapshot.get("providerBudget", {})
 	if int(final_budget.get("callsUsed", -1)) != 0:
 		_failures.append("%s deterministic scheduling consumed provider calls" % label)
+
+	var run_session := instance.get_node_or_null("RunSession") as RunSession3D
+	var fixture_backend: Object = run_session.get("_backend") if run_session != null else null
+	if fixture_backend == null:
+		_failures.append("%s fixture run session backend is unavailable" % label)
+		return
+	var fixture_sequence: Array = fixture_backend.call("_advance_sequence")
+	fixture_backend.set("_advance_index", fixture_sequence.size())
+	instance.set("_pending_advance_request", {
+		"runId": snapshot.get("runId", ""),
+		"advanceId": "%s:fixture-complete-smoke" % snapshot.get("runId", ""),
+		"observedWorldRevision": snapshot.get("runWorldRevision", 0),
+		"afterSpeechSeq": 0,
+		"elapsedSeconds": 1,
+		"arrivals": [],
+	})
+	await instance.call("_dispatch_advance")
+	var completed_snapshot: Dictionary = instance.call("presentation_snapshot")
+	var completed_advance: Dictionary = completed_snapshot.get("advance", {})
+	if not bool(completed_advance.get("fixtureReplayComplete", false)):
+		_failures.append("%s fixture replay end was not exposed as completion" % label)
+	if bool(completed_advance.get("pending", true)):
+		_failures.append("%s fixture replay end retained a pending advance" % label)
+	if not str(completed_advance.get("haltedReason", "missing")).is_empty():
+		_failures.append("%s fixture replay end was exposed as a halted lane" % label)
+	var completed_revision := int(completed_snapshot.get("runWorldRevision", -1))
+	instance.set("_advance_elapsed_buffer", 10.0)
+	for _frame in range(4):
+		await process_frame
+	var settled_snapshot: Dictionary = instance.call("presentation_snapshot")
+	var settled_advance: Dictionary = settled_snapshot.get("advance", {})
+	if (
+		bool(settled_advance.get("pending", false))
+		or bool(settled_advance.get("inFlight", false))
+		or int(settled_snapshot.get("runWorldRevision", -1)) != completed_revision
+	):
+		_failures.append("%s fixture replay completion issued another advance" % label)
+
+
+func _check_ambient_speech(
+	label: String,
+	instance: Node,
+	player_inside: bool,
+	leave_before_second := false
+) -> void:
+	if OS.get_environment("DREAM_SESSION_MODE") != "fixture":
+		_failures.append("%s ambient speech smoke requires DREAM_SESSION_MODE=fixture" % label)
+		return
+	var player := instance.get_node_or_null("Town/Actors/Player3D") as CharacterBody3D
+	var hud := instance.get_node_or_null("HUD3D") as HUD3D
+	var run_session := instance.get_node_or_null("RunSession") as RunSession3D
+	var manager := instance.get_node_or_null(
+		"Town/Actors/NPC_Studio_Manager"
+	) as NPC3D
+	var caretaker := instance.get_node_or_null(
+		"Town/Actors/NPC_Park_Caretaker"
+	) as NPC3D
+	if (
+		player == null
+		or hud == null
+		or run_session == null
+		or manager == null
+		or caretaker == null
+	):
+		return
+
+	var run_ready := false
+	for _frame in range(120):
+		await process_frame
+		if not str(instance.call("presentation_snapshot").get("runId", "")).is_empty():
+			run_ready = true
+			break
+	if not run_ready:
+		_failures.append("%s fixture run did not start for ambient speech" % label)
+		return
+
+	var fixture := _load_run_fixture()
+	var endpoints: Dictionary = fixture.get("endpoints", {})
+	var decision_packet: Dictionary = endpoints.get("npcDecision", {})
+	var delivery_packet: Dictionary = endpoints.get("runAdvanceAmbientSpeech", {})
+	var snapshot_packet: Dictionary = endpoints.get("runSnapshotAfterMeeting", {})
+	if decision_packet.is_empty() or delivery_packet.is_empty() or snapshot_packet.is_empty():
+		_failures.append("%s generated ambient fixture endpoints are missing" % label)
+		return
+
+	player.global_position = (
+		Vector3(0.0, 0.05, 0.0)
+		if player_inside
+		else Vector3(0.0, 0.05, -16.0)
+	)
+	player.velocity = Vector3.ZERO
+	await physics_frame
+
+	var decision_response: Dictionary = decision_packet.get("response", {})
+	var decision_events: Array = decision_response.get("speechEvents", [])
+	if decision_events.size() != 2:
+		_failures.append("%s fixture NPC decision did not return exactly two utterances" % label)
+		return
+	var meeting_wake := _fixture_meeting_ready_wake(fixture)
+	if meeting_wake.is_empty():
+		_failures.append("%s fixture has no meeting-ready wake" % label)
+		return
+	instance.call("_queue_ambient_decision_wakes", [meeting_wake])
+	var decision_completed := false
+	for _frame in range(120):
+		await process_frame
+		var decision_snapshot: Dictionary = instance.call("presentation_snapshot")
+		var decision_ambient: Dictionary = decision_snapshot.get("ambientSpeech", {})
+		var decision_lane: Dictionary = decision_ambient.get("decisionLane", {})
+		var events_value: Variant = decision_ambient.get("events", [])
+		if (
+			str(decision_lane.get("lastStatus", "")) == "completed"
+			and events_value is Array
+			and (events_value as Array).size() == 2
+		):
+			decision_completed = true
+			break
+	if not decision_completed:
+		_failures.append("%s main ambient decision lane did not complete" % label)
+		return
+
+	var delivery_response: Dictionary = delivery_packet.get("response", {})
+	instance.call(
+		"apply_ambient_speech_events",
+		delivery_response.get("ambientSpeechEvents", [])
+	)
+	var meeting_snapshot: Dictionary = snapshot_packet.get("response", {})
+	var snapshot_ambient: Dictionary = meeting_snapshot.get("ambientSpeech", {})
+	instance.call("apply_ambient_speech_events", snapshot_ambient.get("events", []))
+	await process_frame
+
+	var main_snapshot: Dictionary = instance.call("presentation_snapshot")
+	var ambient: Dictionary = main_snapshot.get("ambientSpeech", {})
+	var ingested_events: Array = ambient.get("events", [])
+	if int(ambient.get("cursor", -1)) != 2 or ingested_events.size() != 2:
+		_failures.append(
+			"%s did not dedupe decision/advance/snapshot speech by seq" % label
+		)
+		return
+	var adapter_diagnostics: Dictionary = (main_snapshot.get("advance", {}) as Dictionary).get(
+		"adapter",
+		{}
+	)
+	if int(adapter_diagnostics.get("fixtureDecisionCallCount", -1)) != 1:
+		_failures.append("%s ambient wake did not use exactly one fixture decision call" % label)
+	if (
+		int((ingested_events[0] as Dictionary).get("seq", -1)) != 1
+		or int((ingested_events[1] as Dictionary).get("seq", -1)) != 2
+	):
+		_failures.append("%s ambient speech history lost sequence order" % label)
+	var expected_listeners: Variant = (decision_events[0] as Dictionary).get(
+		"listenerActorIds",
+		[]
+	)
+	if (ingested_events[0] as Dictionary).get("listenerActorIds", []) != expected_listeners:
+		_failures.append("%s client lost backend listener provenance" % label)
+
+	var hud_snapshot: Dictionary = hud.presentation_snapshot()
+	var subtitle: Dictionary = hud_snapshot.get("ambientSubtitle", {})
+	var manager_blip := manager.get_node_or_null("SpeechBlip") as AudioStreamPlayer3D
+	var caretaker_blip := caretaker.get_node_or_null("SpeechBlip") as AudioStreamPlayer3D
+	if player_inside:
+		var current: Dictionary = subtitle.get("current", {})
+		if (
+			not bool(subtitle.get("visible", false))
+			or int(current.get("seq", -1)) != 1
+			or int(subtitle.get("queuedCount", -1)) != 1
+		):
+			_failures.append("%s did not queue the two audible subtitles sequentially" % label)
+			return
+		if (
+			str(current.get("direction", ""))
+			not in ["left", "center", "right", "behind"]
+			or not str(current.get("formattedText", "")).contains(
+				str(current.get("line", ""))
+			)
+		):
+			_failures.append("%s audible subtitle lacks direction or generated line" % label)
+		if manager_blip == null or not manager_blip.playing:
+			_failures.append("%s first audible utterance did not play its spatial blip" % label)
+		elif not is_equal_approx(manager_blip.max_distance, 12.0):
+			_failures.append("%s spatial blip did not use semantic speech distance" % label)
+		var manager_forward := -manager.global_transform.basis.z.normalized()
+		var manager_to_caretaker := caretaker.global_position - manager.global_position
+		manager_to_caretaker.y = 0.0
+		if (
+			not manager_to_caretaker.is_zero_approx()
+			and manager_forward.dot(manager_to_caretaker.normalized()) < 0.95
+		):
+			_failures.append("%s meeting participants did not face one another" % label)
+		if leave_before_second:
+			player.global_position = Vector3(0.0, 0.05, -16.0)
+			player.velocity = Vector3.ZERO
+			await physics_frame
+			hud.set("_ambient_subtitle_remaining", 0.0)
+			var dropped_subtitle: Dictionary = {}
+			for _frame in range(4):
+				await process_frame
+				dropped_subtitle = hud.presentation_snapshot().get(
+					"ambientSubtitle",
+					{}
+				)
+				if (dropped_subtitle.get("current", {}) as Dictionary).is_empty():
+					break
+			if (
+				bool(dropped_subtitle.get("visible", false))
+				or not (dropped_subtitle.get("current", {}) as Dictionary).is_empty()
+				or int(dropped_subtitle.get("queuedCount", -1)) != 0
+			):
+				_failures.append(
+					"%s did not drop the queued subtitle after leaving audibility: %s"
+					% [label, dropped_subtitle]
+				)
+			if caretaker_blip != null and caretaker_blip.playing:
+				_failures.append(
+					"%s played the queued blip after leaving audibility" % label
+				)
+		else:
+			hud.set("_ambient_subtitle_remaining", 0.0)
+			await process_frame
+			var second_subtitle: Dictionary = hud.presentation_snapshot().get(
+				"ambientSubtitle",
+				{}
+			)
+			if (
+				int((second_subtitle.get("current", {}) as Dictionary).get("seq", -1)) != 2
+				or int(second_subtitle.get("queuedCount", -1)) != 0
+			):
+				_failures.append("%s second ambient subtitle did not follow the first" % label)
+			if caretaker_blip == null or not caretaker_blip.playing:
+				_failures.append("%s second audible utterance did not play its spatial blip" % label)
+	else:
+		if (
+			bool(subtitle.get("visible", false))
+			or int(subtitle.get("queuedCount", -1)) != 0
+		):
+			_failures.append("%s showed speech outside the semantic audibility volume" % label)
+		if (
+			(manager_blip != null and manager_blip.playing)
+			or (caretaker_blip != null and caretaker_blip.playing)
+		):
+			_failures.append("%s played a blip when the subtitle predicate was false" % label)
+
+
+func _load_run_fixture() -> Dictionary:
+	var path := "res://data/fixtures/run-api-examples.json"
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	return (parsed as Dictionary).duplicate(true) if parsed is Dictionary else {}
+
+
+func _fixture_meeting_ready_wake(fixture: Dictionary) -> Dictionary:
+	var sequence_value: Variant = fixture.get("runAdvanceSequence", [])
+	if not sequence_value is Array:
+		return {}
+	for packet_value in sequence_value as Array:
+		if not packet_value is Dictionary:
+			continue
+		var response: Dictionary = (packet_value as Dictionary).get("response", {})
+		var wakes_value: Variant = response.get("scheduleWakes", [])
+		if not wakes_value is Array:
+			continue
+		for wake_value in wakes_value as Array:
+			if (
+				wake_value is Dictionary
+				and str((wake_value as Dictionary).get("kind", "")) == "meeting_ready"
+			):
+				return (wake_value as Dictionary).duplicate(true)
+	return {}
 
 
 func _scheduler_actor(snapshot: Dictionary, actor_id: String) -> Dictionary:

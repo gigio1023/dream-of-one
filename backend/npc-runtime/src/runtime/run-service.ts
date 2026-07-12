@@ -1,7 +1,18 @@
 import { randomUUID } from "node:crypto";
-import { assembleObservePacket, DEFAULT_ROLE_POLICIES } from "../agentloop/context.js";
+import {
+  assembleObservePacket,
+  DEFAULT_ROLE_POLICIES,
+  type ObservePacket,
+} from "../agentloop/context.js";
+import { validateToolCall } from "../agentloop/tools.js";
 import type { CoarseStance } from "../contracts/types.js";
-import type { NpcProposalPort, ProposalMeta } from "../providers/ports.js";
+import { agentStepProposalSchema } from "../providers/envelope.js";
+import type {
+  AgentStepProposal,
+  NpcProposalPort,
+  ProposalMeta,
+  ResolvedProposal,
+} from "../providers/ports.js";
 import { createProviderFromEnvironment } from "../providers/registry.js";
 import {
   clampConversationScore,
@@ -10,7 +21,12 @@ import {
   JUDGMENT_SUSPICION_DELTA_CAP,
 } from "./conversation-suspicion.js";
 import type { WorldState } from "./world/index.js";
-import { loadRunLayout, type RunLayout } from "./run-layout.js";
+import {
+  loadRunLayout,
+  type RunAudibilityVolume,
+  type RunLayout,
+  type RunMeetingWindow,
+} from "./run-layout.js";
 import {
   advanceRunScheduler,
   alignActorForPlayerConversation,
@@ -20,12 +36,17 @@ import {
 } from "./run-scheduler.js";
 import type {
   RunActorReadinessDelta,
+  RunAmbientConversation,
+  RunAmbientSpeechEvent,
+  RunAmbientUtteranceMemory,
   RunAdvanceRequest,
   RunAdvanceResponse,
   RunActor,
   RunJudgment,
   RunMemory,
   RunNextTurn,
+  RunNpcDecisionRequest,
+  RunNpcDecisionResponse,
   RunNpcUtteranceMemory,
   RunPlayerConversationMemory,
   RunSessionAnswer,
@@ -45,6 +66,9 @@ export const RUN_PROVIDER_BUDGET = {
 } as const;
 
 const MAX_CONVERSATION_TURNS = 3;
+const AMBIENT_TURN_LIMIT = 2;
+const AMBIENT_MAX_CALLS_PER_TURN = 2;
+const AMBIENT_TOKEN_HEADROOM_PER_TURN = 4_000;
 const STUDIO_OBJECTIVE =
   "Understand why the outsider entered the studio, ask grounded follow-ups, and form a memory-based personal stance.";
 const STUDIO_SCENE_FACTS = [
@@ -69,6 +93,39 @@ interface CachedAdvance {
 interface CachedAnswer {
   signature: string;
   response: RunSessionAnswerResponse;
+}
+
+interface AmbientObservation {
+  windowId: string;
+  participantAnchorRefs: Record<string, string>;
+  audibilityVolumeId: string;
+  observePackets: Record<string, ObservePacket>;
+}
+
+interface AmbientResolvedTurn {
+  speakerActorId: string;
+  targetActorId: string;
+  line: string;
+  meta: ProposalMeta;
+}
+
+interface AmbientMeetingValidation {
+  window: RunMeetingWindow;
+  volume: RunAudibilityVolume;
+}
+
+interface AmbientDecisionAttempt {
+  signature: string;
+  request: RunNpcDecisionRequest;
+  windowId: string;
+  conversationId: string;
+  participantActorIds: [string, string];
+  state: "unclaimed" | "resolving" | "queued" | "completed" | "terminal";
+  observation: AmbientObservation | null;
+  resolvedTurns: AmbientResolvedTurn[];
+  providerMetas: ProposalMeta[];
+  response?: RunNpcDecisionResponse;
+  inFlight?: Promise<RunNpcDecisionResponse>;
 }
 
 interface ConversationState {
@@ -101,6 +158,10 @@ interface RunState {
   actors: Map<string, RunActorState>;
   scheduler: RunSchedulerRuntime;
   advanceCache: Map<string, CachedAdvance>;
+  ambientDecisions: Map<string, AmbientDecisionAttempt>;
+  ambientSpeechEvents: RunAmbientSpeechEvent[];
+  ambientSpeechCursor: number;
+  activeAmbientConversation: RunAmbientConversation | null;
   conversations: Map<string, ConversationState>;
   records: RunSnapshot["records"];
   ledgerEvents: RunSnapshot["ledgerEvents"];
@@ -130,6 +191,10 @@ export type RunErrorCode =
   | "invalid_locale"
   | "start_id_conflict"
   | "advance_id_conflict"
+  | "decision_id_conflict"
+  | "wake_not_pending"
+  | "wake_not_supported"
+  | "ambient_conversation_active"
   | "stale_world_revision"
   | "run_paused"
   | "hearing_due"
@@ -185,9 +250,52 @@ function advanceSignature(request: RunAdvanceRequest): string {
     runId: request.runId,
     advanceId: request.advanceId,
     observedWorldRevision: request.observedWorldRevision,
+    afterSpeechSeq: request.afterSpeechSeq ?? 0,
     elapsedSeconds: request.elapsedSeconds,
     arrivals,
   });
+}
+
+function decisionSignature(request: RunNpcDecisionRequest): string {
+  return JSON.stringify({
+    runId: request.runId,
+    wakeId: request.wakeId,
+    observedWorldRevision: request.observedWorldRevision,
+  });
+}
+
+function runAmbientCallCeiling(run: RunState): number {
+  return run.providerBudget.callLimit - run.providerBudget.reservedCalls;
+}
+
+function runAmbientTokenCeiling(run: RunState): number {
+  return run.providerBudget.tokenLimit - run.providerBudget.reservedTokens;
+}
+
+function pointInsideBox(
+  point: readonly [number, number, number],
+  center: readonly [number, number, number],
+  size: readonly [number, number, number],
+): boolean {
+  return point.every(
+    (coordinate, index) => Math.abs(coordinate - center[index]) <= size[index] / 2,
+  );
+}
+
+function volumeContains(
+  volume: RunAudibilityVolume,
+  point: readonly [number, number, number],
+): boolean {
+  return volume.boxes.some(box => pointInsideBox(point, box.center, box.size));
+}
+
+function distanceBetween(
+  first: readonly [number, number, number],
+  second: readonly [number, number, number],
+): number {
+  return Math.sqrt(
+    first.reduce((sum, coordinate, index) => sum + (coordinate - second[index]) ** 2, 0),
+  );
 }
 
 function anchorLocationId(anchorRef: string): string {
@@ -265,6 +373,10 @@ export class RunService {
       actors,
       scheduler,
       advanceCache: new Map(),
+      ambientDecisions: new Map(),
+      ambientSpeechEvents: [],
+      ambientSpeechCursor: 0,
+      activeAmbientConversation: null,
       conversations: new Map(),
       records: [],
       ledgerEvents: [],
@@ -300,6 +412,11 @@ export class RunService {
       activeConversationId: run.activeConversationId,
       actors: [...run.actors.values()].map(actor => this.publicActor(actor)),
       scheduler: snapshotRunScheduler(this.layout, run.scheduler, run.elapsedSeconds),
+      ambientSpeech: {
+        cursor: run.ambientSpeechCursor,
+        events: clone(run.ambientSpeechEvents),
+        activeConversation: clone(run.activeAmbientConversation),
+      },
       records: clone(run.records),
       ledgerEvents: clone(run.ledgerEvents),
     };
@@ -426,6 +543,10 @@ export class RunService {
         scheduleWakes: schedulerResult.scheduleWakes,
         movementDeltas: schedulerResult.movementDeltas,
         actorReadinessDeltas,
+        ambientSpeechEvents: clone(
+          run.ambientSpeechEvents.filter(event => event.seq > (request.afterSpeechSeq ?? 0)),
+        ),
+        ambientSpeechCursor: run.ambientSpeechCursor,
         scheduler: snapshotRunScheduler(this.layout, run.scheduler, run.elapsedSeconds),
       };
       run.advanceCache.set(request.advanceId, { signature, response: clone(response) });
@@ -436,6 +557,64 @@ export class RunService {
       }
       return response;
     });
+  }
+
+  decision(request: RunNpcDecisionRequest): Promise<RunNpcDecisionResponse> {
+    const run = this.requireRun(request.runId);
+    const signature = decisionSignature(request);
+    let attempt = run.ambientDecisions.get(request.wakeId);
+    if (attempt) {
+      if (attempt.signature !== signature) {
+        return Promise.reject(
+          new RunError(
+            "the same wakeId cannot be retried with a different payload",
+            "decision_id_conflict",
+          ),
+        );
+      }
+      if (attempt.inFlight) return attempt.inFlight.then(response => clone(response));
+      if (
+        attempt.response &&
+        (attempt.state === "completed" || attempt.state === "terminal")
+      ) {
+        return Promise.resolve(clone(attempt.response));
+      }
+    } else {
+      const wake = run.scheduler.pendingWakes.get(request.wakeId);
+      if (!wake) {
+        return Promise.reject(new RunError(`wake is not pending: ${request.wakeId}`, "wake_not_pending"));
+      }
+      if (wake.kind !== "meeting_ready" || wake.actorIds.length !== 2) {
+        return Promise.reject(
+          new RunError(`wake cannot open ambient speech: ${request.wakeId}`, "wake_not_supported"),
+        );
+      }
+      const [firstActorId, secondActorId] = wake.actorIds;
+      if (!firstActorId || !secondActorId) {
+        return Promise.reject(new RunError("meeting wake has invalid participants", "wake_not_supported"));
+      }
+      attempt = {
+        signature,
+        request: clone(request),
+        windowId: wake.sourceId,
+        conversationId: `ambient:${request.wakeId}`,
+        participantActorIds: [firstActorId, secondActorId],
+        state: "unclaimed",
+        observation: null,
+        resolvedTurns: [],
+        providerMetas: [],
+      };
+      run.ambientDecisions.set(request.wakeId, attempt);
+    }
+
+    const executing = this.executeAmbientDecision(request.runId, attempt);
+    attempt.inFlight = executing;
+    void executing
+      .finally(() => {
+        if (attempt?.inFlight === executing) attempt.inFlight = undefined;
+      })
+      .catch(() => undefined);
+    return executing.then(response => clone(response));
   }
 
   startConversation(
@@ -746,6 +925,470 @@ export class RunService {
     };
   }
 
+  private async executeAmbientDecision(
+    runId: string,
+    attempt: AmbientDecisionAttempt,
+  ): Promise<RunNpcDecisionResponse> {
+    if (attempt.state === "unclaimed") {
+      const early = await this.serialize(runId, async () =>
+        this.claimAmbientDecision(this.requireRun(runId), attempt),
+      );
+      if (early) return early;
+    }
+    if (attempt.response && (attempt.state === "completed" || attempt.state === "terminal")) {
+      return clone(attempt.response);
+    }
+    if (attempt.state === "queued") {
+      return this.serialize(runId, async () =>
+        this.commitAmbientDecision(this.requireRun(runId), attempt),
+      );
+    }
+
+    if (attempt.resolvedTurns.length === 0) {
+      try {
+        for (let turnIndex = 0; turnIndex < AMBIENT_TURN_LIMIT; turnIndex += 1) {
+          if (turnIndex > 0) {
+            const reserveAvailable = await this.serialize(runId, async () => {
+              const run = this.requireRun(runId);
+              this.refreshProviderBudget(run);
+              return this.hasAmbientReserve(run, AMBIENT_TURN_LIMIT - turnIndex);
+            });
+            if (!reserveAvailable) {
+              return this.serialize(runId, async () =>
+                this.finishAmbientAttempt(this.requireRun(runId), attempt, "budget_reserved"),
+              );
+            }
+          }
+
+          const observation = attempt.observation;
+          if (!observation) {
+            return this.serialize(runId, async () =>
+              this.finishAmbientAttempt(this.requireRun(runId), attempt, "failed"),
+            );
+          }
+          const speakerActorId = attempt.participantActorIds[turnIndex];
+          const targetActorId = attempt.participantActorIds[1 - turnIndex];
+          if (!speakerActorId || !targetActorId) {
+            return this.serialize(runId, async () =>
+              this.finishAmbientAttempt(this.requireRun(runId), attempt, "failed"),
+            );
+          }
+          const observePacket = clone(observation.observePackets[speakerActorId]);
+          if (!observePacket) {
+            return this.serialize(runId, async () =>
+              this.finishAmbientAttempt(this.requireRun(runId), attempt, "failed"),
+            );
+          }
+          const firstTurn = attempt.resolvedTurns[0];
+          if (turnIndex === 1 && firstTurn) {
+            observePacket.heardSpeech.push(`${firstTurn.speakerActorId}: ${firstTurn.line}`);
+          }
+          const resolved = await this.proposalPort.proposeNextStep({
+            sessionId: runId,
+            iteration: turnIndex,
+            goal: "함께 도착한 주민과 지금 상황에 맞는 한 문장을 직접 나누고 대화를 마친다.",
+            observePacket,
+            blockedSignatures: [],
+            requiredToolCall: { tool: "talk_to", actorId: targetActorId },
+            requireUtterance: true,
+            budgetCeiling: {
+              maxCalls: runAmbientCallCeiling(this.requireRun(runId)),
+              maxTokens: runAmbientTokenCeiling(this.requireRun(runId)),
+            },
+          });
+          await this.serialize(runId, async () => {
+            const run = this.requireRun(runId);
+            this.trackProposal(run, resolved.meta);
+            if (run.activeAmbientConversation?.conversationId === attempt.conversationId) {
+              run.activeAmbientConversation.currentSpeakerActorId =
+              attempt.participantActorIds[Math.min(turnIndex + 1, AMBIENT_TURN_LIMIT - 1)];
+            }
+          });
+          attempt.providerMetas.push(clone(resolved.meta));
+          if (resolved.meta.fallbackReason === "budget_exhausted") {
+            return this.serialize(runId, async () =>
+              this.finishAmbientAttempt(this.requireRun(runId), attempt, "budget_reserved"),
+            );
+          }
+          const line = this.validatedAmbientLine(
+            resolved,
+            observePacket,
+            targetActorId,
+          );
+          if (!line) {
+            return this.serialize(runId, async () =>
+              this.finishAmbientAttempt(this.requireRun(runId), attempt, "failed"),
+            );
+          }
+          attempt.resolvedTurns.push({
+            speakerActorId,
+            targetActorId,
+            line,
+            meta: clone(resolved.meta),
+          });
+        }
+      } catch {
+        return this.serialize(runId, async () => {
+          const run = this.requireRun(runId);
+          this.refreshProviderBudget(run);
+          return this.finishAmbientAttempt(run, attempt, "failed");
+        });
+      }
+    }
+
+    return this.serialize(runId, async () =>
+      this.commitAmbientDecision(this.requireRun(runId), attempt),
+    );
+  }
+
+  private claimAmbientDecision(
+    run: RunState,
+    attempt: AmbientDecisionAttempt,
+  ): RunNpcDecisionResponse | null {
+    const wake = run.scheduler.pendingWakes.get(attempt.request.wakeId);
+    if (!wake) {
+      throw new RunError(`wake is not pending: ${attempt.request.wakeId}`, "wake_not_pending");
+    }
+    if (
+      wake.kind !== "meeting_ready" ||
+      wake.sourceId !== attempt.windowId ||
+      wake.actorIds.length !== 2 ||
+      wake.actorIds[0] !== attempt.participantActorIds[0] ||
+      wake.actorIds[1] !== attempt.participantActorIds[1]
+    ) {
+      throw new RunError(`wake cannot open ambient speech: ${attempt.request.wakeId}`, "wake_not_supported");
+    }
+    if (
+      run.activeAmbientConversation &&
+      run.activeAmbientConversation.wakeId !== attempt.request.wakeId
+    ) {
+      throw new RunError(
+        `another ambient conversation is active: ${run.activeAmbientConversation.wakeId}`,
+        "ambient_conversation_active",
+      );
+    }
+
+    // Claim before any provider await. This wake can now finish only through
+    // this signature-bound attempt, including stale/failure outcomes.
+    run.scheduler.pendingWakes.delete(attempt.request.wakeId);
+    if (wake.observedWorldRevision !== attempt.request.observedWorldRevision) {
+      return this.finishAmbientAttempt(run, attempt, "stale");
+    }
+    const meeting = this.currentAmbientMeeting(run, attempt);
+    if (!meeting) return this.finishAmbientAttempt(run, attempt, "stale");
+
+    this.refreshProviderBudget(run);
+    if (!this.hasAmbientReserve(run, AMBIENT_TURN_LIMIT)) {
+      return this.finishAmbientAttempt(run, attempt, "budget_reserved");
+    }
+    const [firstActorId, secondActorId] = attempt.participantActorIds;
+    attempt.observation = {
+      windowId: meeting.window.windowId,
+      participantAnchorRefs: clone(meeting.window.participantAnchorRefs),
+      audibilityVolumeId: meeting.volume.volumeId,
+      observePackets: {
+        [firstActorId]: this.ambientObservePacket(run, firstActorId, secondActorId),
+        [secondActorId]: this.ambientObservePacket(run, secondActorId, firstActorId),
+      },
+    };
+    attempt.state = "resolving";
+    run.activeAmbientConversation = {
+      conversationId: attempt.conversationId,
+      wakeId: attempt.request.wakeId,
+      participantActorIds: clone(attempt.participantActorIds),
+      initiatorActorId: firstActorId,
+      currentSpeakerActorId: firstActorId,
+      observedWorldRevision: attempt.request.observedWorldRevision,
+      status: "resolving",
+      turnLimit: AMBIENT_TURN_LIMIT,
+      audibilityVolumeId: meeting.volume.volumeId,
+    };
+    return null;
+  }
+
+  private commitAmbientDecision(
+    run: RunState,
+    attempt: AmbientDecisionAttempt,
+  ): RunNpcDecisionResponse {
+    if (attempt.response && attempt.state === "completed") return clone(attempt.response);
+    if (attempt.resolvedTurns.length !== AMBIENT_TURN_LIMIT || !attempt.observation) {
+      return this.finishAmbientAttempt(run, attempt, "failed");
+    }
+    if (run.activeConversationId !== null) {
+      if (attempt.state === "queued" && attempt.response) return clone(attempt.response);
+      attempt.state = "queued";
+      if (run.activeAmbientConversation?.conversationId === attempt.conversationId) {
+        run.activeAmbientConversation.status = "queued";
+      }
+      const response = this.ambientDecisionResponse(run, attempt, "queued", []);
+      attempt.response = clone(response);
+      return response;
+    }
+
+    const meeting = this.currentAmbientMeeting(run, attempt);
+    if (
+      !meeting ||
+      meeting.window.windowId !== attempt.observation.windowId ||
+      meeting.volume.volumeId !== attempt.observation.audibilityVolumeId ||
+      Object.entries(attempt.observation.participantAnchorRefs).some(
+        ([actorId, anchorRef]) => meeting.window.participantAnchorRefs[actorId] !== anchorRef,
+      )
+    ) {
+      return this.finishAmbientAttempt(run, attempt, "stale");
+    }
+
+    const committed: RunAmbientSpeechEvent[] = [];
+    for (let turnIndex = 0; turnIndex < attempt.resolvedTurns.length; turnIndex += 1) {
+      const turn = attempt.resolvedTurns[turnIndex];
+      if (!turn) return this.finishAmbientAttempt(run, attempt, "failed");
+      const freshMeeting = this.currentAmbientMeeting(run, attempt);
+      if (!freshMeeting || freshMeeting.volume.volumeId !== attempt.observation.audibilityVolumeId) {
+        return this.finishAmbientAttempt(run, attempt, "stale");
+      }
+      const speakerPosition = this.actorPosition(run, turn.speakerActorId);
+      const listenerActorIds = this.currentNpcListeners(
+        run,
+        turn.speakerActorId,
+        freshMeeting.volume,
+        speakerPosition,
+      );
+      if (!listenerActorIds.includes(turn.targetActorId)) {
+        return this.finishAmbientAttempt(run, attempt, "stale");
+      }
+
+      const seq = run.ambientSpeechCursor + 1;
+      const worldRevision = run.worldRevision + 1;
+      const event: RunAmbientSpeechEvent = {
+        seq,
+        eventId: `speech:${run.runId}:${seq}`,
+        wakeId: attempt.request.wakeId,
+        conversationId: attempt.conversationId,
+        turnId: `${attempt.conversationId}#${turnIndex}`,
+        speakerActorId: turn.speakerActorId,
+        targetActorId: turn.targetActorId,
+        listenerActorIds,
+        line: turn.line,
+        worldSeconds: run.elapsedSeconds,
+        observedWorldRevision: attempt.request.observedWorldRevision,
+        worldRevision,
+        audibility: {
+          volumeId: freshMeeting.volume.volumeId,
+          maxSpeechDistanceM: freshMeeting.volume.maxSpeechDistanceM,
+          speakerPosition: [speakerPosition[0], speakerPosition[1], speakerPosition[2]],
+        },
+        proposalMeta: clone(turn.meta),
+      };
+      const memoryHolders = [turn.speakerActorId, ...listenerActorIds];
+      for (const holderActorId of memoryHolders) {
+        const memory: RunAmbientUtteranceMemory = {
+          ...clone(event),
+          memoryId: this.idFactory("mem"),
+          kind: "ambient_utterance",
+        };
+        this.requireActor(run, holderActorId).memories.push(memory);
+      }
+      run.ambientSpeechCursor = seq;
+      run.ambientSpeechEvents.push(event);
+      run.worldRevision = worldRevision;
+      committed.push(event);
+    }
+
+    attempt.state = "completed";
+    run.activeAmbientConversation = null;
+    const response = this.ambientDecisionResponse(run, attempt, "completed", committed);
+    attempt.response = clone(response);
+    return response;
+  }
+
+  private currentAmbientMeeting(
+    run: RunState,
+    attempt: AmbientDecisionAttempt,
+  ): AmbientMeetingValidation | null {
+    const window = this.layout.meetingWindows.find(
+      candidate => candidate.windowId === attempt.windowId,
+    );
+    if (
+      !window ||
+      !(window.startSeconds <= run.elapsedSeconds && run.elapsedSeconds < window.endSeconds) ||
+      window.actorIds[0] !== attempt.participantActorIds[0] ||
+      window.actorIds[1] !== attempt.participantActorIds[1]
+    ) {
+      return null;
+    }
+    const positions: Array<readonly [number, number, number]> = [];
+    for (const actorId of attempt.participantActorIds) {
+      const anchorRef = run.scheduler.actors.get(actorId)?.confirmedAnchorRef;
+      const expectedAnchorRef = window.participantAnchorRefs[actorId];
+      const position = anchorRef ? this.layout.anchorPositions[anchorRef] : undefined;
+      if (!anchorRef || anchorRef !== expectedAnchorRef || !position) return null;
+      positions.push(position);
+    }
+    const firstPosition = positions[0];
+    const secondPosition = positions[1];
+    if (!firstPosition || !secondPosition) return null;
+    const volume = this.layout.audibilityVolumes.find(
+      candidate =>
+        volumeContains(candidate, firstPosition) &&
+        volumeContains(candidate, secondPosition) &&
+        distanceBetween(firstPosition, secondPosition) <= candidate.maxSpeechDistanceM,
+    );
+    return volume ? { window, volume } : null;
+  }
+
+  private actorPosition(
+    run: RunState,
+    actorId: string,
+  ): readonly [number, number, number] {
+    const anchorRef = run.scheduler.actors.get(actorId)?.confirmedAnchorRef;
+    const position = anchorRef ? this.layout.anchorPositions[anchorRef] : undefined;
+    if (!anchorRef || !position) throw new Error(`actor has no confirmed position: ${actorId}`);
+    return position;
+  }
+
+  private currentNpcListeners(
+    run: RunState,
+    speakerActorId: string,
+    volume: RunAudibilityVolume,
+    speakerPosition: readonly [number, number, number],
+  ): string[] {
+    return this.layout.actors
+      .map(actor => actor.actorId)
+      .filter(actorId => {
+        if (actorId === speakerActorId) return false;
+        const position = this.actorPosition(run, actorId);
+        return (
+          volumeContains(volume, position) &&
+          distanceBetween(speakerPosition, position) <= volume.maxSpeechDistanceM
+        );
+      });
+  }
+
+  private ambientObservePacket(
+    run: RunState,
+    speakerActorId: string,
+    targetActorId: string,
+  ): ObservePacket {
+    const actor = this.requireActor(run, speakerActorId);
+    const ownActionNotes = actor.memories.map(memory => {
+      if (memory.kind === "npc_utterance") return `내 발언: ${memory.line}`;
+      if (memory.kind === "player_conversation") {
+        return `플레이어 발언: ${memory.playerLine} / 내 답변: ${memory.npcLine} / 판단: ${memory.whyLine}`;
+      }
+      return memory.speakerActorId === actor.actorId
+        ? `내 발언: ${memory.line}`
+        : `${memory.speakerActorId}에게 들은 말: ${memory.line}`;
+    });
+    const heardSpeech = actor.memories.flatMap(memory => {
+      if (memory.kind === "player_conversation") return [memory.playerLine];
+      if (
+        memory.kind === "ambient_utterance" &&
+        memory.speakerActorId !== actor.actorId &&
+        memory.listenerActorIds.includes(actor.actorId)
+      ) {
+        return [`${memory.speakerActorId}: ${memory.line}`];
+      }
+      return [];
+    });
+    return assembleObservePacket(emptyWorld(), {
+      actor: {
+        actorId: actor.actorId,
+        role: actor.role,
+        landmarkId: actor.locationId,
+        knownActorIds: [targetActorId],
+        knownLandmarkIds: ["Park", "Studio", "Office", "Station"],
+      },
+      goals: ["함께 도착한 주민과 직접 말을 나누고 들은 내용을 정확히 기억한다."],
+      policy: DEFAULT_ROLE_POLICIES[actor.role],
+      memory: {
+        actorId: actor.actorId,
+        ownActionNotes,
+        observedLedgerEventIds: [],
+      },
+      heardSpeech,
+    });
+  }
+
+  private validatedAmbientLine(
+    resolved: ResolvedProposal<AgentStepProposal>,
+    observePacket: ObservePacket,
+    targetActorId: string,
+  ): string | null {
+    const parsed = agentStepProposalSchema.safeParse(resolved.proposal);
+    if (!parsed.success) return null;
+    const proposal = parsed.data;
+    if (
+      proposal.toolCall?.tool !== "talk_to" ||
+      proposal.toolCall.args.actorId !== targetActorId ||
+      !proposal.utterance
+    ) {
+      return null;
+    }
+    const validation = validateToolCall(
+      emptyWorld(),
+      {
+        actorId: observePacket.actorId,
+        role: observePacket.role,
+        landmarkId: observePacket.landmarkId,
+        knownActorIds: observePacket.visibleActors,
+        knownLandmarkIds: ["Park", "Studio", "Office", "Station"],
+      },
+      proposal.toolCall,
+    );
+    return validation.ok ? proposal.utterance.trim() : null;
+  }
+
+  private hasAmbientReserve(run: RunState, remainingTurns: number): boolean {
+    const ambientCallCeiling = run.providerBudget.callLimit - run.providerBudget.reservedCalls;
+    const ambientTokenCeiling = run.providerBudget.tokenLimit - run.providerBudget.reservedTokens;
+    return (
+      run.providerBudget.callsUsed + remainingTurns * AMBIENT_MAX_CALLS_PER_TURN <=
+        ambientCallCeiling &&
+      run.providerBudget.tokensUsed + remainingTurns * AMBIENT_TOKEN_HEADROOM_PER_TURN <=
+        ambientTokenCeiling
+    );
+  }
+
+  private refreshProviderBudget(run: RunState): void {
+    const exactAccounting = this.proposalPort.accountingSnapshot?.(run.runId);
+    if (!exactAccounting) return;
+    run.providerBudget.callsUsed = exactAccounting.callsUsed;
+    run.providerBudget.tokensUsed = exactAccounting.tokensUsed;
+  }
+
+  private finishAmbientAttempt(
+    run: RunState,
+    attempt: AmbientDecisionAttempt,
+    status: "stale" | "budget_reserved" | "failed",
+  ): RunNpcDecisionResponse {
+    this.refreshProviderBudget(run);
+    attempt.state = "terminal";
+    if (run.activeAmbientConversation?.conversationId === attempt.conversationId) {
+      run.activeAmbientConversation = null;
+    }
+    const response = this.ambientDecisionResponse(run, attempt, status, []);
+    attempt.response = clone(response);
+    return response;
+  }
+
+  private ambientDecisionResponse(
+    run: RunState,
+    attempt: AmbientDecisionAttempt,
+    status: RunNpcDecisionResponse["status"],
+    speechEvents: RunAmbientSpeechEvent[],
+  ): RunNpcDecisionResponse {
+    return {
+      runId: run.runId,
+      wakeId: attempt.request.wakeId,
+      status,
+      observedWorldRevision: attempt.request.observedWorldRevision,
+      worldRevision: run.worldRevision,
+      conversationId: attempt.conversationId,
+      participantActorIds: clone(attempt.participantActorIds),
+      speechEvents: clone(speechEvents),
+      providerMetas: clone(attempt.providerMetas),
+    };
+  }
+
   private serialize<T>(runId: string, task: () => Promise<T>): Promise<T> {
     const previous = this.runChains.get(runId) ?? Promise.resolve();
     const next = previous.then(task, task);
@@ -807,18 +1450,29 @@ export class RunService {
       policy: DEFAULT_ROLE_POLICIES[actor.role],
       memory: {
         actorId: actor.actorId,
-        ownActionNotes: actor.memories.map(
-          memory =>
-            memory.kind === "npc_utterance"
-              ? `내 발언: ${memory.line}`
-              : `플레이어 발언: ${memory.playerLine} / 내 답변: ${memory.npcLine} / 판단: ${memory.whyLine}`,
-        ),
+        ownActionNotes: actor.memories.map(memory => {
+          if (memory.kind === "npc_utterance") return `내 발언: ${memory.line}`;
+          if (memory.kind === "player_conversation") {
+            return `플레이어 발언: ${memory.playerLine} / 내 답변: ${memory.npcLine} / 판단: ${memory.whyLine}`;
+          }
+          return memory.speakerActorId === actor.actorId
+            ? `내 발언: ${memory.line}`
+            : `${memory.speakerActorId}에게 들은 말: ${memory.line}`;
+        }),
         observedLedgerEventIds: [],
       },
       heardSpeech: [
-        ...actor.memories.flatMap(memory =>
-          memory.kind === "player_conversation" ? [memory.playerLine] : [],
-        ),
+        ...actor.memories.flatMap(memory => {
+          if (memory.kind === "player_conversation") return [memory.playerLine];
+          if (
+            memory.kind === "ambient_utterance" &&
+            memory.speakerActorId !== actor.actorId &&
+            memory.listenerActorIds.includes(actor.actorId)
+          ) {
+            return [`${memory.speakerActorId}: ${memory.line}`];
+          }
+          return [];
+        }),
         ...additionalSpeech,
       ],
     });

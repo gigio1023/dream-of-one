@@ -105,6 +105,7 @@ export function createProviderFromEnvironment(
       timeoutMs: config.runtime.timeoutMs,
       maxCallsPerSession: config.runtime.maxCallsPerSession,
       maxTokensPerSession: config.runtime.maxTokensPerSession,
+      maxOutputTokensPerCall: profile.params.maxTokens,
     }),
   };
 }

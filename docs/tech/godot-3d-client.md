@@ -1,8 +1,9 @@
 # Godot 3D Client
 
 Target: Godot 4.7.x stable (keep `GODOT_BIN` per device). **Status: the M3R
-spatial foundation, first run-backed social contact, and authoritative
-clock/schedule movement have landed beside the retained 2D main
+spatial foundation, first run-backed social contact, authoritative
+clock/schedule movement, and the first overheard NPC meeting have landed as
+the default 3D client beside the retained 2D harness
 ([`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md)).**
 `res://scenes/main_3d.tscn` now provides the whole-town greybox, dressed park
 and studio, first-person controller, permanently open building portals, one
@@ -14,12 +15,15 @@ coarse stance display, child-session end, and world resume. The modal owns
 only presentation and pause; all memory and stance truth comes back from the
 TypeScript `RunService`. Outside a modal, the client batches unpaused time,
 applies runtime movement IDs to projected NavMesh targets, and acknowledges an
-arrival only after the matching NPC physically reaches that target. Runtime
+arrival only after the matching NPC physically reaches that target. The first
+park meeting now produces two attributed utterances, exact listener memory,
+direction-aware subtitles, and a short spatial speech blip from the shared
+audibility contract. Runtime
 `playerConversationReady` remains the only authority for prompts; the initial
 receptionist is the sole enabled conversation until the runtime supports the
 other five actors.
-`run/main_scene` intentionally remains the 2D harness until the run-backed
-NPC-society slices complete the first playable proof.
+`run/main_scene` now points to `res://scenes/main_3d.tscn`; the 2D scene remains
+reachable by explicit path as the deterministic M1 harness.
 
 Engine practice (node choices, physics layers, import settings, pitfalls) is
 not duplicated here: implementing agents use the repo's `godot-best-practice`
@@ -67,10 +71,11 @@ Landed together in the bounded engine-baseline slice before the blockout:
 - **Single-story rule: no stairs anywhere.** Entrances are flush thresholds
   or short ramps. This deletes step-handling from the controller and keeps
   the navmesh effectively one plane.
-- **Parallel-tree migration.** The 3D world grows under its own scene tree
-  (`scenes/town/`) while the 2D main scene stays `run/main_scene`; the swap
-  lands in the first-playable-proof slice, and 2D deletion follows the
-  salvage map below (owner confirmation).
+- **Parallel-tree migration.** The 3D world grew under its own scene tree
+  (`scenes/town/`) until the first overheard-meeting proof made it
+  `run/main_scene`. The retained 2D scene remains an explicit-path regression
+  harness; deleting it still requires owner confirmation through the salvage
+  map below.
 
 ## Scene architecture (target)
 

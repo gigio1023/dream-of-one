@@ -77,6 +77,38 @@ theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="AmbientSubtitlePanel" type="PanelContainer" parent="Overlay" unique_id=1128530992]
+unique_name_in_owner = true
+visible = false
+z_index = 20
+custom_minimum_size = Vector2(760, 96)
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -380.0
+offset_top = -220.0
+offset_right = 380.0
+offset_bottom = -124.0
+mouse_filter = 2
+
+[node name="AmbientSubtitleMargin" type="MarginContainer" parent="Overlay/AmbientSubtitlePanel" unique_id=1822553197]
+layout_mode = 2
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 14
+
+[node name="AmbientSubtitleLabel" type="Label" parent="Overlay/AmbientSubtitlePanel/AmbientSubtitleMargin" unique_id=1644927685]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
 [node name="SettingsShade" type="ColorRect" parent="Overlay" unique_id=562713826]
 unique_name_in_owner = true
 visible = false

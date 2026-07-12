@@ -203,6 +203,10 @@ test("meeting wakes require both participant slots after the schedule boundary",
       ["NPC_Park_Caretaker", "Park.meeting_north_east"],
     ],
   );
+  assert.equal(
+    atNinety.scheduleWakes.filter(wake => wake.kind === "meeting_window").length,
+    1,
+  );
   const managerMove = meetingMoves.find(movement => movement.actorId === "NPC_Studio_Manager");
   const caretakerMove = meetingMoves.find(movement => movement.actorId === "NPC_Park_Caretaker");
   assert.ok(managerMove && caretakerMove);
@@ -220,29 +224,10 @@ test("meeting wakes require both participant slots after the schedule boundary",
     ],
   });
   assert.ok(managerArrived.scheduleWakes.every(wake => wake.kind !== "meeting_ready"));
-  const atHundred = await service.advance({
-    runId: started.runId,
-    advanceId: "meeting-100",
-    observedWorldRevision: managerArrived.worldRevision,
-    elapsedSeconds: 10,
-    arrivals: [],
-  });
-  const atOneTen = await service.advance({
-    runId: started.runId,
-    advanceId: "meeting-110",
-    observedWorldRevision: atHundred.worldRevision,
-    elapsedSeconds: 10,
-    arrivals: [],
-  });
-  assert.equal(
-    atOneTen.scheduleWakes.filter(wake => wake.kind === "meeting_window").length,
-    1,
-  );
-  assert.ok(atOneTen.scheduleWakes.every(wake => wake.kind !== "meeting_ready"));
   const caretakerArrived = await service.advance({
     runId: started.runId,
     advanceId: "meeting-caretaker-arrival",
-    observedWorldRevision: atOneTen.worldRevision,
+    observedWorldRevision: managerArrived.worldRevision,
     elapsedSeconds: 0,
     arrivals: [
       {
@@ -258,7 +243,7 @@ test("meeting wakes require both participant slots after the schedule boundary",
   assert.equal(ready[0]?.requiresDecision, true);
   const later = await service.advance({
     runId: started.runId,
-    advanceId: "meeting-120",
+    advanceId: "meeting-100",
     observedWorldRevision: caretakerArrived.worldRevision,
     elapsedSeconds: 10,
     arrivals: [],

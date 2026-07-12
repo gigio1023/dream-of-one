@@ -18,6 +18,7 @@ const MOVEMENT_MAX_RETRIES := 2
 const ADVANCE_RETRY_SECONDS := 1.0
 const ADVANCE_MAX_SECONDS := 10
 const ADVANCE_MAX_ARRIVALS := 6
+const AMBIENT_DECISION_RETRY_SECONDS := 1.0
 
 @onready var _town: Town3D = $Town
 @onready var _player: CharacterBody3D = $Town/Actors/Player3D
@@ -62,6 +63,21 @@ var _recent_schedule_wakes: Array = []
 var _last_arrivals_applied: Array = []
 var _last_arrivals_rejected: Array = []
 var _advance_lane_halted_reason := ""
+var _fixture_replay_complete := false
+var _ambient_speech_cursor := 0
+var _ambient_speech_events: Array[Dictionary] = []
+var _ambient_seen_seqs: Dictionary = {}
+var _ambient_active_conversation: Variant = null
+var _ambient_wake_queue: Array[Dictionary] = []
+var _ambient_claimed_wake_ids: Dictionary = {}
+var _ambient_pending_request: Dictionary = {}
+var _ambient_decision_in_flight := false
+var _ambient_decision_retry_remaining := 0.0
+var _ambient_decision_waiting_for_resume := false
+var _ambient_decision_halted_reason := ""
+var _ambient_last_decision_status := ""
+var _ambient_provider_metas: Array = []
+var _deferred_ambient_speech_events: Array[Dictionary] = []
 
 
 func _ready() -> void:
@@ -82,6 +98,7 @@ func _ready() -> void:
 	_hud.choice_submitted.connect(_on_choice_submitted)
 	_hud.free_input_submitted.connect(_on_free_input_submitted)
 	_hud.conversation_end_retry_requested.connect(_on_conversation_end_retry_requested)
+	_hud.ambient_subtitle_started.connect(_on_ambient_subtitle_started)
 	for actor_value in get_tree().get_nodes_in_group(&"npc_actors"):
 		if actor_value is NPC3D:
 			(actor_value as NPC3D).movement_arrived.connect(_on_npc_movement_arrived)
@@ -105,6 +122,21 @@ func _process(delta: float) -> void:
 	if get_tree().paused or _conversation_target != null:
 		return
 	if _run_id.is_empty() or _run_start_in_flight:
+		return
+	_ambient_decision_retry_remaining = maxf(
+		0.0,
+		_ambient_decision_retry_remaining - delta
+	)
+	if (
+		not _ambient_decision_in_flight
+		and _ambient_decision_halted_reason.is_empty()
+		and is_zero_approx(_ambient_decision_retry_remaining)
+	):
+		if _ambient_pending_request.is_empty():
+			_prepare_next_ambient_decision()
+		if not _ambient_pending_request.is_empty():
+			_dispatch_ambient_decision()
+	if _fixture_replay_complete:
 		return
 	if not _advance_lane_halted_reason.is_empty():
 		return
@@ -147,6 +179,7 @@ func _process(delta: float) -> void:
 
 func presentation_snapshot() -> Dictionary:
 	var town_snapshot := _town.presentation_snapshot()
+	var hud_snapshot := _hud.presentation_snapshot()
 	return {
 		"locationId": town_snapshot.get("locationId", ""),
 		"worldRevision": town_snapshot.get("worldRevision", ""),
@@ -156,7 +189,7 @@ func presentation_snapshot() -> Dictionary:
 		"transitioning": false,
 		"resolvingAnswer": _resolving_answer or _ending_conversation,
 		"currentTurn": _active_turn.duplicate(true),
-		"encounteredStances": _hud.presentation_snapshot().get("encounteredStances", []),
+		"encounteredStances": hud_snapshot.get("encounteredStances", []),
 		"institutionalPressure": {
 			"level": _run_snapshot.get("institutionalPressure", 0),
 			"summary": str(_run_snapshot.get("institutionalPressure", 0)),
@@ -178,6 +211,7 @@ func presentation_snapshot() -> Dictionary:
 			"pendingRequest": _advance_request_summary(_pending_advance_request),
 			"needsRebase": _advance_needs_rebase,
 			"haltedReason": _advance_lane_halted_reason,
+			"fixtureReplayComplete": _fixture_replay_complete,
 			"bufferedSeconds": _advance_elapsed_buffer,
 			"runStartAttempts": _run_start_attempts,
 			"runStartError": _run_start_last_error.duplicate(true),
@@ -186,6 +220,24 @@ func presentation_snapshot() -> Dictionary:
 		},
 		"activeMovements": _active_movement_summaries(),
 		"blockedMovements": _blocked_movement_summaries(),
+		"ambientSpeech": {
+			"cursor": _ambient_speech_cursor,
+			"events": _ambient_speech_events.duplicate(true),
+			"activeConversation": _ambient_active_conversation,
+			"deferredCount": _deferred_ambient_speech_events.size(),
+			"decisionLane": {
+				"inFlight": _ambient_decision_in_flight,
+				"pendingRequest": _ambient_decision_request_summary(
+					_ambient_pending_request
+				),
+				"queuedWakeCount": _ambient_wake_queue.size(),
+				"waitingForResume": _ambient_decision_waiting_for_resume,
+				"lastStatus": _ambient_last_decision_status,
+				"haltedReason": _ambient_decision_halted_reason,
+				"providerMetas": _ambient_provider_metas.duplicate(true),
+			},
+		},
+		"ambientSubtitle": hud_snapshot.get("ambientSubtitle", {}),
 	}
 
 
@@ -431,8 +483,10 @@ func _ensure_run() -> bool:
 		return false
 	_run_start_last_error = {}
 	_run_start_attempts = 0
+	_fixture_replay_complete = false
 	_run_snapshot = result.duplicate(true)
 	_last_proposal_meta = _dictionary_or_empty(result.get("lastProposalMeta"))
+	_ingest_ambient_snapshot(result)
 	_apply_all_conversation_readiness()
 	_reconcile_scheduler_movements(_dictionary_or_empty(result.get("scheduler")))
 	return true
@@ -512,6 +566,7 @@ func _prepare_advance_request() -> void:
 		"runId": _run_id,
 		"advanceId": "%s:advance:%06d" % [_run_id, _advance_sequence],
 		"observedWorldRevision": int(_run_snapshot.get("worldRevision", 0)),
+		"afterSpeechSeq": _ambient_speech_cursor,
 		"elapsedSeconds": elapsed_seconds,
 		"arrivals": arrivals,
 	}
@@ -548,7 +603,15 @@ func _dispatch_advance() -> void:
 			_advance_lane_halted_reason = error_code
 			push_error("Run advance ID conflicted with a different payload; lane halted.")
 		"fixture_replay_complete":
-			_advance_lane_halted_reason = error_code
+			if _run_session.mode() == "fixture":
+				_pending_advance_request = {}
+				_advance_retry_remaining = 0.0
+				_advance_needs_rebase = false
+				_advance_lane_halted_reason = ""
+				_fixture_replay_complete = true
+			else:
+				_advance_lane_halted_reason = error_code
+				push_error("HTTP run advance lane returned fixture-only completion.")
 		_:
 			_advance_lane_halted_reason = error_code
 			push_error("Run advance lane halted: %s" % error_code)
@@ -570,10 +633,19 @@ func _restore_advance_request(request: Dictionary) -> void:
 
 
 func _apply_advance_response(result: Dictionary) -> void:
-	_run_snapshot["worldRevision"] = int(result.get(
-		"worldRevision",
-		_run_snapshot.get("worldRevision", 0)
-	))
+	_ingest_ambient_speech_events(_array_or_empty(result.get("ambientSpeechEvents")))
+	_ambient_speech_cursor = maxi(
+		_ambient_speech_cursor,
+		int(result.get("ambientSpeechCursor", 0))
+	)
+	_recent_schedule_wakes = _array_or_empty(result.get("scheduleWakes"))
+	_queue_ambient_decision_wakes(_recent_schedule_wakes)
+	var current_revision := int(_run_snapshot.get("worldRevision", 0))
+	var response_revision := int(result.get("worldRevision", current_revision))
+	if response_revision < current_revision:
+		_advance_needs_rebase = true
+		return
+	_run_snapshot["worldRevision"] = maxi(current_revision, response_revision)
 	var response_clock := _dictionary_or_empty(result.get("clock"))
 	var world_clock := _dictionary_or_empty(_run_snapshot.get("worldClock"))
 	if not response_clock.is_empty():
@@ -591,7 +663,6 @@ func _apply_advance_response(result: Dictionary) -> void:
 	var scheduler := _dictionary_or_empty(result.get("scheduler"))
 	if not scheduler.is_empty():
 		_run_snapshot["scheduler"] = scheduler.duplicate(true)
-	_recent_schedule_wakes = _array_or_empty(result.get("scheduleWakes"))
 	_last_arrivals_applied = _array_or_empty(result.get("arrivalsApplied"))
 	_last_arrivals_rejected = _array_or_empty(result.get("arrivalsRejected"))
 	for arrival_value in _last_arrivals_applied:
@@ -615,6 +686,233 @@ func _apply_advance_response(result: Dictionary) -> void:
 		if movement_value is Dictionary:
 			_queue_or_apply_movement(movement_value as Dictionary)
 	_reconcile_scheduler_movements(scheduler)
+
+
+func _queue_ambient_decision_wakes(wakes: Array) -> void:
+	for wake_value in wakes:
+		if not wake_value is Dictionary:
+			continue
+		var wake := wake_value as Dictionary
+		if (
+			str(wake.get("kind", "")) != "meeting_ready"
+			or not bool(wake.get("requiresDecision", false))
+			or str(wake.get("status", "")) != "pending"
+		):
+			continue
+		var wake_id := str(wake.get("wakeId", ""))
+		if wake_id.is_empty() or _ambient_claimed_wake_ids.has(wake_id):
+			continue
+		_ambient_claimed_wake_ids[wake_id] = true
+		_ambient_wake_queue.append(wake.duplicate(true))
+	_ambient_wake_queue.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var time_a := float(a.get("scheduledAtSeconds", 0.0))
+		var time_b := float(b.get("scheduledAtSeconds", 0.0))
+		if is_equal_approx(time_a, time_b):
+			return str(a.get("wakeId", "")) < str(b.get("wakeId", ""))
+		return time_a < time_b
+	)
+
+
+func _prepare_next_ambient_decision() -> void:
+	if not _ambient_pending_request.is_empty() or _ambient_wake_queue.is_empty():
+		return
+	var wake: Dictionary = _ambient_wake_queue.pop_front()
+	_ambient_pending_request = {
+		"runId": _run_id,
+		"wakeId": str(wake.get("wakeId", "")),
+		"observedWorldRevision": int(wake.get(
+			"observedWorldRevision",
+			_run_snapshot.get("worldRevision", 0)
+		)),
+	}
+	_ambient_decision_waiting_for_resume = false
+
+
+func _dispatch_ambient_decision() -> void:
+	if _ambient_decision_in_flight or _ambient_pending_request.is_empty():
+		return
+	if (
+		_ambient_decision_waiting_for_resume
+		and (get_tree().paused or _conversation_target != null)
+	):
+		return
+	_ambient_decision_in_flight = true
+	var request := _ambient_pending_request.duplicate(true)
+	var result: Dictionary = await _run_session.npc_decision(request)
+	_ambient_decision_in_flight = false
+	if request != _ambient_pending_request:
+		_ambient_decision_halted_reason = "in_flight_packet_changed"
+		push_error("Ambient NPC decision lane changed an immutable request.")
+		return
+	if _is_error(result):
+		var error_code := str(result.get("error", "npc_decision_failed"))
+		if error_code == "npc_decision_failed":
+			_ambient_decision_retry_remaining = AMBIENT_DECISION_RETRY_SECONDS
+			return
+		_ambient_decision_halted_reason = error_code
+		push_error("Ambient NPC decision lane halted: %s" % error_code)
+		return
+
+	_ambient_last_decision_status = str(result.get("status", "failed"))
+	_ambient_provider_metas = _array_or_empty(result.get("providerMetas"))
+	_run_snapshot["worldRevision"] = maxi(
+		int(_run_snapshot.get("worldRevision", 0)),
+		int(result.get("worldRevision", 0))
+	)
+	match _ambient_last_decision_status:
+		"completed":
+			_ambient_pending_request = {}
+			_ambient_decision_waiting_for_resume = false
+			_ambient_active_conversation = null
+			_ingest_ambient_speech_events(_array_or_empty(result.get("speechEvents")))
+		"queued":
+			# The runtime has cached a resolved proposal while the player modal
+			# owns the pause. Preserve this exact request and retry after resume;
+			# the provider is not called a second time.
+			_ambient_decision_waiting_for_resume = true
+			_ambient_active_conversation = {
+				"conversationId": str(result.get("conversationId", "")),
+				"wakeId": str(result.get("wakeId", "")),
+				"participantActorIds": _array_or_empty(
+					result.get("participantActorIds")
+				),
+				"observedWorldRevision": int(result.get(
+					"observedWorldRevision",
+					0
+				)),
+				"status": "queued",
+			}
+		"stale", "budget_reserved", "failed":
+			# These are terminal for this stable wake id. The scheduler may
+			# produce a different wake later; changing this request would violate
+			# the runtime's exact claim/cache contract.
+			_ambient_pending_request = {}
+			_ambient_decision_waiting_for_resume = false
+			_ambient_active_conversation = null
+		_:
+			_ambient_decision_halted_reason = "invalid_decision_status"
+			push_error("Ambient NPC decision returned an unknown status.")
+
+
+func _ingest_ambient_snapshot(snapshot: Dictionary) -> void:
+	var ambient := _dictionary_or_empty(snapshot.get("ambientSpeech"))
+	if ambient.is_empty():
+		return
+	_ingest_ambient_speech_events(_array_or_empty(ambient.get("events")))
+	_ambient_speech_cursor = maxi(
+		_ambient_speech_cursor,
+		int(ambient.get("cursor", 0))
+	)
+	if int(snapshot.get("worldRevision", 0)) >= int(_run_snapshot.get("worldRevision", 0)):
+		_ambient_active_conversation = ambient.get("activeConversation", null)
+
+
+func apply_ambient_speech_events(events: Array) -> void:
+	_ingest_ambient_speech_events(events)
+
+
+func _ingest_ambient_speech_events(events: Array) -> void:
+	var ordered := events.duplicate(true)
+	ordered.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a.get("seq", -1)) < int(b.get("seq", -1))
+	)
+	for event_value in ordered:
+		if not event_value is Dictionary:
+			continue
+		var event := event_value as Dictionary
+		var seq := int(event.get("seq", -1))
+		if seq <= 0 or _ambient_seen_seqs.has(seq):
+			continue
+		_ambient_seen_seqs[seq] = true
+		_ambient_speech_cursor = maxi(_ambient_speech_cursor, seq)
+		_ambient_speech_events.append(event.duplicate(true))
+		if get_tree().paused or _conversation_target != null:
+			_deferred_ambient_speech_events.append(event.duplicate(true))
+		else:
+			_present_ambient_speech_event(event)
+	_ambient_speech_events.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a.get("seq", -1)) < int(b.get("seq", -1))
+	)
+
+
+func _present_ambient_speech_event(event: Dictionary) -> void:
+	_face_ambient_participants(event)
+	var audibility := _dictionary_or_empty(event.get("audibility"))
+	var player_audibility: Dictionary = _town.player_speech_audibility(audibility)
+	if not bool(player_audibility.get("audible", false)):
+		return
+	var speaker_position_value: Variant = player_audibility.get("speakerPosition")
+	if not speaker_position_value is Vector3:
+		return
+	var presentation_event := event.duplicate(true)
+	presentation_event["playerAudibility"] = player_audibility.duplicate(true)
+	var direction := StringName(str(_player.call(
+		"camera_relative_direction",
+		speaker_position_value as Vector3
+	)))
+	_hud.enqueue_ambient_subtitle(presentation_event, direction)
+
+
+func _face_ambient_participants(event: Dictionary) -> void:
+	var speaker := _town.get_node_or_null(
+		"Actors/%s" % str(event.get("speakerActorId", ""))
+	) as NPC3D
+	var target := _town.get_node_or_null(
+		"Actors/%s" % str(event.get("targetActorId", ""))
+	) as NPC3D
+	if speaker == null or target == null:
+		return
+	speaker.face_position(target.global_position + Vector3.UP * 1.35)
+	target.face_position(speaker.global_position + Vector3.UP * 1.35)
+
+
+func _on_ambient_subtitle_started(event: Dictionary) -> void:
+	var seq := int(event.get("seq", -1))
+	var audibility := _dictionary_or_empty(event.get("audibility"))
+	var player_audibility: Dictionary = _town.player_speech_audibility(audibility)
+	if not bool(player_audibility.get("audible", false)):
+		_hud.discard_current_ambient_subtitle(seq)
+		return
+	var speaker_position_value: Variant = player_audibility.get("speakerPosition")
+	if not speaker_position_value is Vector3:
+		_hud.discard_current_ambient_subtitle(seq)
+		return
+	var direction := StringName(str(_player.call(
+		"camera_relative_direction",
+		speaker_position_value as Vector3
+	)))
+	if not _hud.accept_current_ambient_subtitle(
+		seq,
+		direction,
+		player_audibility
+	):
+		return
+	var speaker := _town.get_node_or_null(
+		"Actors/%s" % str(event.get("speakerActorId", ""))
+	) as NPC3D
+	if speaker != null:
+		speaker.play_speech_blip(float(player_audibility.get("maxDistanceM", 0.0)))
+
+
+func _flush_deferred_ambient_speech_events() -> void:
+	var deferred := _deferred_ambient_speech_events.duplicate(true)
+	_deferred_ambient_speech_events.clear()
+	deferred.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a.get("seq", -1)) < int(b.get("seq", -1))
+	)
+	for event_value in deferred:
+		if event_value is Dictionary:
+			_present_ambient_speech_event(event_value as Dictionary)
+
+
+func _ambient_decision_request_summary(request: Dictionary) -> Dictionary:
+	if request.is_empty():
+		return {}
+	return {
+		"runId": str(request.get("runId", "")),
+		"wakeId": str(request.get("wakeId", "")),
+		"observedWorldRevision": int(request.get("observedWorldRevision", -1)),
+	}
 
 
 func _apply_readiness_deltas(deltas: Array) -> void:
@@ -825,6 +1123,7 @@ func _advance_request_summary(request: Dictionary) -> Dictionary:
 	return {
 		"advanceId": str(request.get("advanceId", "")),
 		"observedWorldRevision": int(request.get("observedWorldRevision", -1)),
+		"afterSpeechSeq": int(request.get("afterSpeechSeq", 0)),
 		"elapsedSeconds": float(request.get("elapsedSeconds", 0.0)),
 		"arrivalCount": (arrivals_value as Array).size() if arrivals_value is Array else 0,
 	}
@@ -924,7 +1223,15 @@ func _rebase_run_after_advance_conflict() -> void:
 	if _is_error(result):
 		_advance_retry_remaining = ADVANCE_RETRY_SECONDS
 		return
+	_ingest_ambient_snapshot(result)
+	var current_revision := int(_run_snapshot.get("worldRevision", 0))
+	var snapshot_revision := int(result.get("worldRevision", current_revision))
+	if snapshot_revision < current_revision:
+		_advance_needs_rebase = true
+		_advance_retry_remaining = ADVANCE_RETRY_SECONDS
+		return
 	_run_snapshot = result.duplicate(true)
+	_run_snapshot["worldRevision"] = maxi(current_revision, snapshot_revision)
 	_last_proposal_meta = _dictionary_or_empty(result.get("lastProposalMeta"))
 	_apply_all_conversation_readiness()
 	_reconcile_scheduler_movements(_dictionary_or_empty(result.get("scheduler")))
@@ -1017,6 +1324,7 @@ func _finish_conversation_modal() -> void:
 	_player.set_control_enabled(true)
 	_player.capture_mouse()
 	get_tree().paused = false
+	_flush_deferred_ambient_speech_events()
 	_flush_queued_movement_deltas()
 	if _advance_needs_rebase:
 		call_deferred("_rebase_run_after_advance_conflict")

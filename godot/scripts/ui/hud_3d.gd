@@ -9,15 +9,21 @@ signal language_requested(locale_name: String)
 signal choice_submitted(choice_id: String)
 signal free_input_submitted(text: String)
 signal conversation_end_retry_requested
+signal ambient_subtitle_started(event: Dictionary)
 
 const UI_SCALE_OPTIONS: Array[float] = [0.8, 1.0, 1.25, 1.5]
 const LANGUAGE_OPTIONS: Array[String] = ["ko", "en"]
 const TYPEWRITER_CHARACTERS_PER_SECOND := 42.0
+const AMBIENT_SUBTITLE_MIN_SECONDS := 2.4
+const AMBIENT_SUBTITLE_MAX_SECONDS := 6.0
+const AMBIENT_SUBTITLE_SECONDS_PER_CHARACTER := 0.055
 
 @onready var _reticle: Label = %Reticle
 @onready var _start_hint: Label = %StartHint
 @onready var _prompt_panel: PanelContainer = %PromptPanel
 @onready var _prompt_label: Label = %PromptLabel
+@onready var _ambient_subtitle_panel: PanelContainer = %AmbientSubtitlePanel
+@onready var _ambient_subtitle_label: Label = %AmbientSubtitleLabel
 @onready var _settings_shade: ColorRect = %SettingsShade
 @onready var _settings_title: Label = $Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns/SettingsTitle
 @onready var _sensitivity_label: Label = $Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns/SensitivityLabel
@@ -67,6 +73,9 @@ var _choice_buttons: Array[Button] = []
 var _encountered_stances: Dictionary = {}
 var _prompt_tween: Tween
 var _retry_button_mode: StringName = &"end"
+var _ambient_subtitle_queue: Array[Dictionary] = []
+var _current_ambient_subtitle: Dictionary = {}
+var _ambient_subtitle_remaining := 0.0
 
 
 func _ready() -> void:
@@ -87,6 +96,7 @@ func _ready() -> void:
 	_conversation_free_input.text_submitted.connect(_on_free_input_text_submitted)
 	_end_conversation_button.pressed.connect(_on_end_conversation_retry_pressed)
 	_prompt_panel.visible = false
+	_ambient_subtitle_panel.visible = false
 	_settings_shade.visible = false
 	_conversation_shade.visible = false
 	_conversation_thinking_label.visible = false
@@ -96,6 +106,17 @@ func _ready() -> void:
 	_refresh_retry_button_text()
 	_end_conversation_button.visible = false
 	_encountered_stance_panel.visible = false
+
+
+func _process(delta: float) -> void:
+	if _current_ambient_subtitle.is_empty():
+		return
+	if _conversation_visible or _settings_visible:
+		return
+	_ambient_subtitle_remaining = maxf(0.0, _ambient_subtitle_remaining - delta)
+	if is_zero_approx(_ambient_subtitle_remaining):
+		_current_ambient_subtitle = {}
+		_show_next_ambient_subtitle()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -158,6 +179,59 @@ func refresh_localized_text() -> void:
 	_apply_localized_text()
 
 
+func enqueue_ambient_subtitle(event: Dictionary, direction: StringName) -> void:
+	var line := str(event.get("line", "")).strip_edges()
+	if line.is_empty():
+		return
+	var queued := event.duplicate(true)
+	queued["direction"] = str(direction)
+	_ambient_subtitle_queue.append(queued)
+	if _current_ambient_subtitle.is_empty():
+		_show_next_ambient_subtitle()
+
+
+func accept_current_ambient_subtitle(
+	expected_seq: int,
+	direction: StringName,
+	player_audibility: Dictionary
+) -> bool:
+	if int(_current_ambient_subtitle.get("seq", -1)) != expected_seq:
+		return false
+	_current_ambient_subtitle["direction"] = str(direction)
+	_current_ambient_subtitle["playerAudibility"] = player_audibility.duplicate(true)
+	_refresh_ambient_subtitle_text()
+	_refresh_ambient_subtitle_visibility()
+	return true
+
+
+func discard_current_ambient_subtitle(expected_seq: int) -> bool:
+	if int(_current_ambient_subtitle.get("seq", -1)) != expected_seq:
+		return false
+	_current_ambient_subtitle = {}
+	_ambient_subtitle_remaining = 0.0
+	_refresh_ambient_subtitle_text()
+	_refresh_ambient_subtitle_visibility()
+	_show_next_ambient_subtitle()
+	return true
+
+
+func ambient_subtitle_snapshot() -> Dictionary:
+	if _current_ambient_subtitle.is_empty():
+		return {
+			"visible": false,
+			"queuedCount": _ambient_subtitle_queue.size(),
+			"current": {},
+		}
+	var current := _current_ambient_subtitle.duplicate(true)
+	current["formattedText"] = _ambient_subtitle_label.text
+	current["remainingSeconds"] = _ambient_subtitle_remaining
+	return {
+		"visible": _ambient_subtitle_panel.visible,
+		"queuedCount": _ambient_subtitle_queue.size(),
+		"current": current,
+	}
+
+
 func open_settings() -> void:
 	if _conversation_visible:
 		return
@@ -202,6 +276,7 @@ func begin_conversation(actor: Dictionary) -> void:
 		button.visible = false
 	_conversation_shade.visible = true
 	_prompt_panel.visible = false
+	_refresh_ambient_subtitle_visibility()
 	set_conversation_busy(true)
 
 
@@ -309,6 +384,7 @@ func close_conversation() -> void:
 	_conversation_thinking_label.visible = false
 	_end_conversation_button.visible = false
 	_refresh_encountered_stances()
+	_refresh_ambient_subtitle_visibility()
 	set_focus(_focused_target)
 
 
@@ -327,6 +403,7 @@ func presentation_snapshot() -> Dictionary:
 		"currentTurn": _current_turn.duplicate(true),
 		"encounteredStances": _encountered_stance_snapshot(),
 		"provider": _provider_meta.duplicate(true),
+		"ambientSubtitle": ambient_subtitle_snapshot(),
 	}
 
 
@@ -343,6 +420,7 @@ func _set_settings_visible(should_show: bool) -> void:
 	else:
 		_refresh_encountered_stances()
 		set_focus(_focused_target)
+	_refresh_ambient_subtitle_visibility()
 	settings_visibility_changed.emit(should_show)
 	if should_show:
 		_close_settings_button.grab_focus()
@@ -435,6 +513,7 @@ func _apply_localized_text() -> void:
 	_refresh_stance_label()
 	_refresh_provider_label()
 	_refresh_encountered_stances()
+	_refresh_ambient_subtitle_text()
 	_populate_language_options()
 	set_focus(_focused_target)
 
@@ -582,6 +661,57 @@ func _actor_label(actor_id: String) -> String:
 func _stance_text(stance: String) -> String:
 	var normalized := stance if stance in ["oppose", "uncertain", "vouch"] else "uncertain"
 	return str(tr("hud.m3r.stance.%s" % normalized))
+
+
+func _show_next_ambient_subtitle() -> void:
+	if _ambient_subtitle_queue.is_empty():
+		_current_ambient_subtitle = {}
+		_ambient_subtitle_remaining = 0.0
+		_refresh_ambient_subtitle_visibility()
+		return
+	_current_ambient_subtitle = _ambient_subtitle_queue.pop_front()
+	var line := str(_current_ambient_subtitle.get("line", ""))
+	_ambient_subtitle_remaining = clampf(
+		AMBIENT_SUBTITLE_MIN_SECONDS
+		+ float(line.length()) * AMBIENT_SUBTITLE_SECONDS_PER_CHARACTER,
+		AMBIENT_SUBTITLE_MIN_SECONDS,
+		AMBIENT_SUBTITLE_MAX_SECONDS
+	)
+	_refresh_ambient_subtitle_text()
+	# Main3D synchronously revalidates semantic audibility from the emitted
+	# candidate before the panel is allowed to become visible or play audio.
+	_ambient_subtitle_panel.visible = false
+	ambient_subtitle_started.emit(_current_ambient_subtitle.duplicate(true))
+	_refresh_ambient_subtitle_visibility()
+
+
+func _refresh_ambient_subtitle_text() -> void:
+	if not is_instance_valid(_ambient_subtitle_label):
+		return
+	if _current_ambient_subtitle.is_empty():
+		_ambient_subtitle_label.text = ""
+		return
+	var actor_id := str(_current_ambient_subtitle.get("speakerActorId", ""))
+	var direction := str(_current_ambient_subtitle.get("direction", "center"))
+	if direction not in ["left", "center", "right", "behind"]:
+		direction = "center"
+	_ambient_subtitle_label.text = str(
+		tr(&"hud.m3r.ambient_subtitle.format")
+	).format({
+		"speaker": _actor_label(actor_id),
+		"direction": tr("hud.m3r.ambient_subtitle.direction.%s" % direction),
+		"line": str(_current_ambient_subtitle.get("line", "")),
+	})
+
+
+func _refresh_ambient_subtitle_visibility() -> void:
+	if not is_instance_valid(_ambient_subtitle_panel):
+		return
+	_ambient_subtitle_panel.visible = (
+		not _current_ambient_subtitle.is_empty()
+		and not _conversation_visible
+		and not _settings_visible
+	)
 
 
 func _dictionary_or_empty(value: Variant) -> Dictionary:

@@ -130,6 +130,11 @@ export interface AgentStepRequest {
   observePacket: ObservePacket;
   previousResult?: AgentToolResult;
   blockedSignatures: string[];
+  /** Optional validity constraint for a wake whose only legal action is known. */
+  requiredToolCall?: { tool: "talk_to"; actorId: string };
+  requireUtterance?: boolean;
+  /** Absolute scope ceiling used by background work that must preserve a reserve. */
+  budgetCeiling?: { maxCalls: number; maxTokens: number };
 }
 
 /** The only AI dependency visible to conversation and agent-loop domain code. */

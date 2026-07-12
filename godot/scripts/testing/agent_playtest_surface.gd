@@ -149,6 +149,16 @@ func snapshot() -> Dictionary:
 			[&"providerBudget", &"provider_budget"],
 			{}
 		),
+		"ambientSpeech": _first_value(
+			sources,
+			[&"ambientSpeech", &"ambient_speech"],
+			{}
+		),
+		"ambientSubtitle": _first_value(
+			sources,
+			[&"ambientSubtitle", &"ambient_subtitle"],
+			{}
+		),
 		"player": _player_snapshot(player),
 		"transitioning": _first_value(sources, [&"transitioning"], null),
 		"resolvingAnswer": _first_value(sources, [&"resolvingAnswer", &"resolving_answer"], null),
@@ -373,6 +383,11 @@ func _hud_snapshot(hud_view: Dictionary) -> Dictionary:
 			hud_view,
 			[&"hesitationTimerVisible", &"hesitation_timer_visible"],
 			null
+		),
+		"ambientSubtitle": _dictionary_value(
+			hud_view,
+			[&"ambientSubtitle", &"ambient_subtitle"],
+			{}
 		),
 	}
 

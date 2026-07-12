@@ -153,19 +153,34 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
     request: AgentStepRequest,
   ): Promise<ResolvedProposal<AgentStepProposal>> {
     const visibleTarget = request.observePacket.visibleObjects[0]?.objectId;
+    const requiredTalkTarget = request.requiredToolCall?.actorId;
+    const visibleActor =
+      requiredTalkTarget && request.observePacket.visibleActors.includes(requiredTalkTarget)
+        ? requiredTalkTarget
+        : request.observePacket.visibleActors[0];
     const proposal: AgentStepProposal = request.previousResult
       ? {
-          toolCall: { tool: "wait", args: { reason: "reconsider after tool result" } },
-          rationale: "Yield after reading the previous result.",
+          toolCall: { tool: "wait", args: { reason: "방금 결과를 다시 살핍니다" } },
+          rationale: "방금 행동의 결과를 확인하고 잠시 기다립니다.",
           done: false,
         }
+      : visibleActor
+        ? {
+            toolCall: { tool: "talk_to", args: { actorId: visibleActor } },
+            utterance:
+              request.observePacket.heardSpeech.length > 0
+                ? "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다."
+                : "잠시 이야기 나눌 수 있을까요? 지금 확인한 내용을 서로 맞춰 보고 싶습니다.",
+            rationale: "곁에 있는 주민과 직접 말을 나눕니다.",
+            done: true,
+          }
       : visibleTarget
         ? {
             toolCall: { tool: "look", args: { targetId: visibleTarget } },
-            rationale: "Inspect one visible object before acting.",
+            rationale: "보이는 물건을 먼저 살펴봅니다.",
             done: false,
           }
-        : { rationale: "No visible affordance is available.", done: true };
+        : { rationale: "지금 할 수 있는 행동이 없어 멈춥니다.", done: true };
     return {
       proposal,
       meta: {

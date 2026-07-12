@@ -48,7 +48,7 @@ mkdir -p "$GODOT_HOME"
 		-u MODELSCOPE_API_KEY \
 		-u LOCAL_LLM_BASE_URL \
 		PORT="$REQUESTED_PORT" \
-		bun run serve:scripted
+		bun src/tools/scripted-session-server.ts
 ) >"$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 

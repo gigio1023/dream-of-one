@@ -133,11 +133,12 @@ list.
   conversation pauses world time; log/settings cursor surfaces suppress
   player movement while NPC simulation and the clock continue.
 - **Movement**: WASD with normalized diagonals; single walk speed, no
-  sprint, no stamina. **No jump, no crouch** — nothing in the design needs
-  them, and they create collision/navmesh edge cases for free. Space stays
-  an `interact` alternate as in the existing input map. `CharacterBody3D`
-  velocity stays in meters per second and is not multiplied by `delta` before
-  `move_and_slide()`.
+  sprint, no stamina. Space performs one modest grounded jump (initial
+  velocity `4.5 m/s`) only while player control is enabled; no route,
+  interaction, or progression gate may require it. There is no crouch, and
+  `interact` remains on E so one key cannot trigger both actions.
+  `CharacterBody3D` velocity stays in meters per second and is not multiplied
+  by `delta` before `move_and_slide()`.
 - **FOV**: default ≈ 75°, slider 60–100. Head bob off by default.
 
 ### Interaction feedback
@@ -327,7 +328,11 @@ the dev machine with all six NPC loops live.
   windows read at a glance (two residents talking look like two residents
   talking from across the park). Each pair approaches distinct physical
   standing slots around one semantic meeting center so solid capsules cannot
-  deadlock a meeting-ready condition.
+  deadlock a meeting-ready condition. Outside an event or meeting, every
+  resident follows deterministic authored local routes with per-actor,
+  per-waypoint staggered dwell times. This ambient motion is ordinary game AI,
+  not an LLM decision or provider call; an event-driven move safely preempts
+  it and the schedule resumes afterward.
 - **Advance lane**: run start and clock packets use stable client idempotency
   keys. Only one mutation is in flight; an ambiguous transport failure retries
   the exact packet, while a stale revision rebases from a full run snapshot

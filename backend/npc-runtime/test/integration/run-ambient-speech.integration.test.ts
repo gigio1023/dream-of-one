@@ -40,47 +40,23 @@ async function readyFirstMeeting(
       arrivals: [],
     });
     revision = atNinety.worldRevision;
-    if (step === 1) {
-      const fixedArrivals = atNinety.movementDeltas
-        .filter(movement => [
-          "NPC_Studio_Receptionist",
-          "NPC_Office_Worker",
-          "NPC_Station_Officer",
-        ].includes(movement.actorId))
-        .map(movement => ({
+    if (atNinety.movementDeltas.length > 0) {
+      atNinety = await service.advance({
+        runId: started.runId,
+        advanceId: `${startId}:clock:${step}:arrivals`,
+        observedWorldRevision: revision,
+        elapsedSeconds: 0,
+        arrivals: atNinety.movementDeltas.map(movement => ({
           movementId: movement.movementId,
           actorId: movement.actorId,
           anchorRef: movement.targetAnchorRef,
-        }));
-      assert.equal(fixedArrivals.length, 3);
-      atNinety = await service.advance({
-        runId: started.runId,
-        advanceId: `${startId}:fixed-arrivals`,
-        observedWorldRevision: revision,
-        elapsedSeconds: 0,
-        arrivals: fixedArrivals,
+        })),
       });
       revision = atNinety.worldRevision;
     }
   }
   assert.ok(atNinety);
-  const arrivals = atNinety.movementDeltas
-    .filter(movement =>
-      ["NPC_Studio_Manager", "NPC_Park_Caretaker"].includes(movement.actorId),
-    )
-    .map(movement => ({
-      movementId: movement.movementId,
-      actorId: movement.actorId,
-      anchorRef: movement.targetAnchorRef,
-    }));
-  assert.equal(arrivals.length, 2);
-  const ready = await service.advance({
-    runId: started.runId,
-    advanceId: `${startId}:meeting-arrivals`,
-    observedWorldRevision: atNinety.worldRevision,
-    elapsedSeconds: 0,
-    arrivals,
-  });
+  const ready = atNinety;
   const wake = ready.scheduleWakes.find(candidate => candidate.kind === "meeting_ready");
   assert.ok(wake);
   return {
@@ -162,14 +138,8 @@ test("ambient utterances enter only the speaker and current runtime-confirmed li
   const response = await service.decision(meeting.request);
   assert.equal(response.status, "completed");
   assert.deepEqual(response.speechEvents.map(event => event.seq), [1, 2]);
-  assert.deepEqual(response.speechEvents[0]?.listenerActorIds, [
-    "NPC_Park_Caretaker",
-    "NPC_Roaming_Liaison",
-  ]);
-  assert.deepEqual(response.speechEvents[1]?.listenerActorIds, [
-    "NPC_Studio_Manager",
-    "NPC_Roaming_Liaison",
-  ]);
+  assert.deepEqual(response.speechEvents[0]?.listenerActorIds, ["NPC_Park_Caretaker"]);
+  assert.deepEqual(response.speechEvents[1]?.listenerActorIds, ["NPC_Studio_Manager"]);
 
   const snapshot = service.snapshot(meeting.started.runId);
   assert.equal(snapshot.ambientSpeech.cursor, 2);
@@ -182,7 +152,7 @@ test("ambient utterances enter only the speaker and current runtime-confirmed li
     NPC_Office_Worker: 0,
     NPC_Park_Caretaker: 2,
     NPC_Station_Officer: 0,
-    NPC_Roaming_Liaison: 2,
+    NPC_Roaming_Liaison: 0,
   };
   const memoryIds = new Set<string>();
   for (const actor of snapshot.actors) {
@@ -198,7 +168,7 @@ test("ambient utterances enter only the speaker and current runtime-confirmed li
       assert.deepEqual(provenance, event);
     }
   }
-  assert.equal(memoryIds.size, 6);
+  assert.equal(memoryIds.size, 4);
   const afterCursor = await service.advance({
     runId: meeting.started.runId,
     advanceId: "ambient-after-cursor",

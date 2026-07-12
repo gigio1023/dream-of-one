@@ -14,6 +14,7 @@ const MAX_FIELD_OF_VIEW := 100.0
 const MAX_PITCH_RADIANS := deg_to_rad(85.0)
 
 @export_range(0.5, 8.0, 0.1, "or_greater") var walk_speed := 4.0
+@export_range(1.0, 12.0, 0.1, "or_greater") var jump_velocity := 4.5
 ## Degrees of camera rotation per logical mouse pixel.
 @export_range(0.01, 1.0, 0.01) var mouse_sensitivity := 0.12
 @export var invert_y := false
@@ -82,6 +83,8 @@ func _physics_process(delta: float) -> void:
 		velocity += get_gravity() * delta
 	elif velocity.y < 0.0:
 		velocity.y = 0.0
+	if can_jump() and Input.is_action_just_pressed(&"jump"):
+		velocity.y = jump_velocity
 
 	var input_direction := Vector2.ZERO
 	if _control_enabled:
@@ -166,6 +169,10 @@ func set_control_enabled(enabled: bool) -> void:
 	if not enabled:
 		velocity.x = 0.0
 		velocity.z = 0.0
+
+
+func can_jump() -> bool:
+	return _control_enabled and is_on_floor()
 
 
 func face_position(target_position: Vector3) -> void:

@@ -90,11 +90,11 @@ test("every run fixture packet validates against the public wire schemas", () =>
   runSnapshotSchema.parse(endpoints.runSnapshotAfterEnd.response);
 });
 
-test("advance fixture replays initial moves, batched arrivals, and arrival-gated routes", () => {
+test("advance fixture replays staggered moves, batched arrivals, and arrival-gated routes", () => {
   const sequence = fixtures.runAdvanceSequence;
   assert.deepEqual(
     sequence.slice(0, 3).map((step: { stepId: string }) => step.stepId),
-    ["initial_clock", "initial_arrivals", "first_route_moves"],
+    ["initial_clock", "first_route_moves", "initial_arrivals"],
   );
   assert.equal(sequence.at(-1)?.stepId, "first_meeting_speech_delivery");
   for (const step of sequence) {
@@ -136,13 +136,7 @@ test("advance fixture replays initial moves, batched arrivals, and arrival-gated
     }
   }
   const initial = fixtures.endpoints.runAdvanceInitial.response;
-  assert.deepEqual(
-    initial.movementDeltas.map((movement: { actorId: string }) => movement.actorId),
-    ["NPC_Studio_Receptionist", "NPC_Office_Worker", "NPC_Station_Officer"],
-  );
-  const arrival = fixtures.endpoints.runAdvanceArrival;
-  assert.equal(arrival.request.arrivals.length, 3);
-  assert.equal(arrival.response.arrivalsApplied.length, 3);
+  assert.deepEqual(initial.movementDeltas, []);
   const route = fixtures.endpoints.runAdvanceRoute.response;
   assert.deepEqual(
     route.movementDeltas.map((movement: { actorId: string; routePointIndex: number }) => [
@@ -150,11 +144,39 @@ test("advance fixture replays initial moves, batched arrivals, and arrival-gated
       movement.routePointIndex,
     ]),
     [
-      ["NPC_Park_Caretaker", 1],
+      ["NPC_Studio_Receptionist", 1],
+      ["NPC_Studio_Manager", 1],
+      ["NPC_Office_Worker", 1],
       ["NPC_Roaming_Liaison", 1],
     ],
   );
   assert.deepEqual(route, fixtures.endpoints.runAdvanceRouteRetry.response);
+  const arrival = fixtures.endpoints.runAdvanceArrival;
+  assert.equal(arrival.request.arrivals.length, 4);
+  assert.equal(arrival.response.arrivalsApplied.length, 4);
+  const earlyPolicyMovements = sequence.flatMap(
+    (step: { response: { clock: { toSeconds: number }; movementDeltas: Array<{
+      actorId: string;
+      issuedAtSeconds: number;
+    }> } }) => step.response.clock.toSeconds <= 30 ? step.response.movementDeltas : [],
+  );
+  assert.deepEqual(
+    [...new Set(earlyPolicyMovements.map((movement: { actorId: string }) => movement.actorId))].sort(),
+    [
+      "NPC_Office_Worker",
+      "NPC_Park_Caretaker",
+      "NPC_Roaming_Liaison",
+      "NPC_Station_Officer",
+      "NPC_Studio_Manager",
+      "NPC_Studio_Receptionist",
+    ],
+  );
+  assert.equal(
+    new Set(earlyPolicyMovements.map(
+      (movement: { issuedAtSeconds: number }) => movement.issuedAtSeconds,
+    )).size,
+    6,
+  );
   const postRouteArrival = sequence
     .slice(3, -1)
     .find(

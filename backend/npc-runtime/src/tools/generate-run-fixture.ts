@@ -189,30 +189,30 @@ async function driveAdvanceSequence() {
     arrivals: [],
   };
   const initialResponse = await service.advance(initialRequest);
-  const arrivalRequest = {
+  const routeRequest = {
     runId: runStartResponse.runId,
     advanceId: `${runStartResponse.runId}:advance:000002`,
     observedWorldRevision: initialResponse.worldRevision,
-    elapsedSeconds: 0,
-    arrivals: sortedArrivalBatch(initialResponse),
-  };
-  const arrivalResponse = await service.advance(arrivalRequest);
-  const routeRequest = {
-    runId: runStartResponse.runId,
-    advanceId: `${runStartResponse.runId}:advance:000003`,
-    observedWorldRevision: arrivalResponse.worldRevision,
     elapsedSeconds: 10,
     arrivals: [],
   };
   const routeResponse = await service.advance(routeRequest);
   const routeRetryResponse = await service.advance(routeRequest);
+  const arrivalRequest = {
+    runId: runStartResponse.runId,
+    advanceId: `${runStartResponse.runId}:advance:000003`,
+    observedWorldRevision: routeResponse.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: sortedArrivalBatch(routeResponse),
+  };
+  const arrivalResponse = await service.advance(arrivalRequest);
   const runSnapshotAfterAdvanceResponse = service.snapshot(runStartResponse.runId);
   const meetingReplaySteps: Array<{
     stepId: string;
     request: RunAdvanceRequest;
     response: RunAdvanceResponse;
   }> = [];
-  let latestResponse = routeResponse;
+  let latestResponse = arrivalResponse;
   let sequence = 3;
   let clockStep = 0;
   let arrivalStep = 0;
@@ -421,16 +421,16 @@ export async function buildRunApiFixture() {
         response: advancePath.initialResponse,
       },
       {
-        stepId: "initial_arrivals",
-        endpoint: "POST /v1/run/advance",
-        request: advancePath.arrivalRequest,
-        response: advancePath.arrivalResponse,
-      },
-      {
         stepId: "first_route_moves",
         endpoint: "POST /v1/run/advance",
         request: advancePath.routeRequest,
         response: advancePath.routeResponse,
+      },
+      {
+        stepId: "initial_arrivals",
+        endpoint: "POST /v1/run/advance",
+        request: advancePath.arrivalRequest,
+        response: advancePath.arrivalResponse,
       },
       ...advancePath.meetingReplaySteps.map(step => ({
         stepId: step.stepId,

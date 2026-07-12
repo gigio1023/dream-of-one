@@ -7,8 +7,10 @@ LOC onto the M3R target so an agent knows what to keep, trim, or build.
 > checked in alongside the retained M1 Session service. `RunService`
 > hydrates `world_layout.json` into six persistent actor workspaces, owns clock,
 > revisions, scheduler, and shared provider budget, and exposes idempotent run
-> start/advance/snapshot. Arrival-confirmed schedules feed real two-turn park
-> meetings whose validated listeners receive attributed memories. Every
+> start/advance/snapshot. All six residents use deterministic local schedule
+> routes with staggered dwell times between provider wake-ups;
+> arrival-confirmed schedules feed real two-turn park meetings whose validated
+> listeners receive attributed memories. Every
 > resident now has one actor/location-authored conversation zone and a
 > meaningful-evidence opening cache. `POST /v1/session/preload` resolves through
 > the existing provider port outside the serialized run lane; the later
@@ -190,9 +192,12 @@ time, and at most one exact arrival observation per actor. Arrivals apply
 before clock boundaries. An issued movement changes only scheduler intent;
 the actor's confirmed anchor and location change only after Godot reports the
 matching `movementId`, actor, and semantic anchor. Route progress is likewise
-arrival-gated: after a confirmed route point, the actor dwells for at least
-15 world seconds before another route movement can issue, while a schedule
-block transition may supersede an in-flight route movement.
+arrival-gated: after a confirmed route point, a stable hash of actor, route,
+and waypoint chooses a 12–28 world-second dwell. This staggers ordinary patrols
+without randomness, persistence, or a provider call. `nextRouteMoveAtSeconds`,
+automatic policy movement, and provider-proposed movement all honor the same
+exact due time, while a schedule block transition may supersede an in-flight
+route movement. Meeting and hearing blocks keep their exact authored anchors.
 
 Meeting windows retain one semantic center but map every participant to a
 distinct physical standing-slot anchor. A `meeting_ready` wake becomes pending

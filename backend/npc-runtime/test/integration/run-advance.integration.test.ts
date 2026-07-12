@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
+import { loadRunLayout } from "../../src/runtime/run-layout.js";
+import {
+  createRunScheduler,
+  issueActorGoalMovement,
+  ROUTE_DWELL_MAX_SECONDS,
+  ROUTE_DWELL_MIN_SECONDS,
+  routePointDwellSeconds,
+  snapshotRunScheduler,
+} from "../../src/runtime/run-scheduler.js";
 import { RunError, RunService, STUDIO_RECEPTIONIST_ID } from "../../src/runtime/run-service.js";
 import type { RunAdvanceResponse } from "../../src/runtime/run-schema.js";
 
@@ -43,13 +52,28 @@ async function advanceTo(
   return response;
 }
 
-test("run start and advance retries are exact, bounded, and provider-free", async () => {
+test("all six residents receive staggered early policy movement without provider work", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
   let providerCalls = 0;
   const originalConversation = adapter.proposeConversationTurn.bind(adapter);
+  const originalJudgment = adapter.judgeConversationTurn.bind(adapter);
+  const originalMerged = adapter.judgeAndProposeConversationTurn.bind(adapter);
+  const originalNextStep = adapter.proposeNextStep.bind(adapter);
   adapter.proposeConversationTurn = async request => {
     providerCalls += 1;
     return originalConversation(request);
+  };
+  adapter.judgeConversationTurn = async request => {
+    providerCalls += 1;
+    return originalJudgment(request);
+  };
+  adapter.judgeAndProposeConversationTurn = async request => {
+    providerCalls += 1;
+    return originalMerged(request);
+  };
+  adapter.proposeNextStep = async request => {
+    providerCalls += 1;
+    return originalNextStep(request);
   };
   const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
   const started = service.start("start-exact", "ko-KR");
@@ -58,6 +82,13 @@ test("run start and advance retries are exact, bounded, and provider-free", asyn
     () => service.start("start-exact", "en-US"),
     (error: unknown) => error instanceof RunError && error.code === "start_id_conflict",
   );
+  const initialDueTimes = started.scheduler.actors.map(actor => actor.nextRouteMoveAtSeconds);
+  assert.ok(started.scheduler.actors.every(actor => actor.currentBlock?.targetKind === "route"));
+  assert.ok(initialDueTimes.every(
+    dueAt => dueAt !== null &&
+      ROUTE_DWELL_MIN_SECONDS <= dueAt && dueAt <= ROUTE_DWELL_MAX_SECONDS,
+  ));
+  assert.equal(new Set(initialDueTimes).size, 6, "initial patrol departures must not lockstep");
 
   const request = {
     runId: started.runId,
@@ -69,11 +100,7 @@ test("run start and advance retries are exact, bounded, and provider-free", asyn
   const response = await service.advance(request);
   assert.equal(response.worldRevision, 1);
   assert.equal(response.clock.toSeconds, 10);
-  assert.equal(providerCalls, 0);
-  assert.deepEqual(
-    response.movementDeltas.map(movement => movement.actorId),
-    ["NPC_Studio_Receptionist", "NPC_Office_Worker", "NPC_Station_Officer"],
-  );
+  assert.deepEqual(response.movementDeltas, []);
   assert.deepEqual(await service.advance(request), response);
   await assert.rejects(
     service.advance({ ...request, elapsedSeconds: 9 }),
@@ -83,43 +110,50 @@ test("run start and advance retries are exact, bounded, and provider-free", asyn
     service.advance({ ...request, advanceId: "advance-stale" }),
     (error: unknown) => error instanceof RunError && error.code === "stale_world_revision",
   );
-});
 
-test("route progress waits for exact arrival and then dwells fifteen world seconds", async () => {
-  const service = createService();
-  const started = service.start("start-route", "ko-KR");
-  const initial = await service.advance({
+  const secondRequest = {
     runId: started.runId,
-    advanceId: "route-1",
-    observedWorldRevision: 0,
+    advanceId: "advance-policy-20",
+    observedWorldRevision: response.worldRevision,
+    elapsedSeconds: 10,
+    arrivals: [],
+  };
+  const second = await service.advance(secondRequest);
+  assert.deepEqual(await service.advance(secondRequest), second);
+  const third = await service.advance({
+    runId: started.runId,
+    advanceId: "advance-policy-30",
+    observedWorldRevision: second.worldRevision,
     elapsedSeconds: 10,
     arrivals: [],
   });
-  const initialArrivals = initial.movementDeltas.map(movement => ({
-    movementId: movement.movementId,
-    actorId: movement.actorId,
-    anchorRef: movement.targetAnchorRef,
-  }));
-  const arrived = await service.advance({
-    runId: started.runId,
-    advanceId: "route-2",
-    observedWorldRevision: initial.worldRevision,
-    elapsedSeconds: 0,
-    arrivals: initialArrivals,
-  });
+  const policyMovements = [...second.movementDeltas, ...third.movementDeltas];
+  assert.deepEqual(
+    policyMovements.map(movement => movement.actorId).sort(),
+    started.actors.map(actor => actor.actorId).sort(),
+  );
+  assert.deepEqual(
+    policyMovements.map(movement => movement.issuedAtSeconds).sort((first, next) => first - next),
+    initialDueTimes.filter((value): value is number => value !== null).sort((first, next) => first - next),
+  );
+  assert.ok(policyMovements.every(movement => movement.routePointIndex === 1));
+  assert.equal(providerCalls, 0, "conventional schedule movement must never call the provider");
+});
+
+test("route progress waits for exact arrival and exposes the next per-point due time", async () => {
+  const service = createService();
+  const started = service.start("start-route", "ko-KR");
+  const atTwenty = await advanceTo(service, started.runId, started, 20, "route-to-20");
   const firstRoutes = await service.advance({
     runId: started.runId,
-    advanceId: "route-3",
-    observedWorldRevision: arrived.worldRevision,
-    elapsedSeconds: 10,
+    advanceId: "route-caretaker-due",
+    observedWorldRevision: atTwenty.worldRevision,
+    elapsedSeconds: 6,
     arrivals: [],
   });
   assert.deepEqual(
     firstRoutes.movementDeltas.map(movement => [movement.actorId, movement.routePointIndex]),
-    [
-      ["NPC_Park_Caretaker", 1],
-      ["NPC_Roaming_Liaison", 1],
-    ],
+    [["NPC_Park_Caretaker", 1]],
   );
   const rejectedOnly = await service.advance({
     runId: started.runId,
@@ -136,23 +170,13 @@ test("route progress waits for exact arrival and then dwells fifteen world secon
   });
   assert.equal(rejectedOnly.worldRevision, firstRoutes.worldRevision);
   assert.equal(rejectedOnly.arrivalsRejected[0]?.reason, "not_current");
-  const waiting = await service.advance({
-    runId: started.runId,
-    advanceId: "route-4",
-    observedWorldRevision: rejectedOnly.worldRevision,
-    elapsedSeconds: 10,
-    arrivals: [],
-  });
-  assert.equal(waiting.movementDeltas.length, 0, "clock time must not supersede an in-flight route move");
 
-  const caretakerMove = firstRoutes.movementDeltas.find(
-    movement => movement.actorId === "NPC_Park_Caretaker",
-  );
+  const caretakerMove = firstRoutes.movementDeltas[0];
   assert.ok(caretakerMove);
   const caretakerArrived = await service.advance({
     runId: started.runId,
-    advanceId: "route-5",
-    observedWorldRevision: waiting.worldRevision,
+    advanceId: "route-caretaker-arrival",
+    observedWorldRevision: rejectedOnly.worldRevision,
     elapsedSeconds: 0,
     arrivals: [
       {
@@ -165,27 +189,54 @@ test("route progress waits for exact arrival and then dwells fifteen world secon
   const caretakerScheduler = caretakerArrived.scheduler.actors.find(
     actor => actor.actorId === "NPC_Park_Caretaker",
   );
-  assert.equal(caretakerScheduler?.routePointArrivedAtSeconds, 30);
-  assert.equal(caretakerScheduler?.nextRouteMoveAtSeconds, 45);
-  const beforeDwell = await service.advance({
-    runId: started.runId,
-    advanceId: "route-6",
-    observedWorldRevision: caretakerArrived.worldRevision,
-    elapsedSeconds: 10,
-    arrivals: [],
-  });
-  assert.equal(beforeDwell.movementDeltas.length, 0);
+  assert.equal(caretakerScheduler?.routePointArrivedAtSeconds, 26);
+  const expectedNextDue = 26 + routePointDwellSeconds(
+    "NPC_Park_Caretaker",
+    "ParkCaretakerRound",
+    1,
+  );
+  assert.equal(caretakerScheduler?.nextRouteMoveAtSeconds, expectedNextDue);
+  const beforeDwell = await advanceTo(
+    service,
+    started.runId,
+    caretakerArrived,
+    expectedNextDue - 1,
+    "route-before-next-due",
+  );
+  assert.ok(beforeDwell.movementDeltas.every(
+    movement => movement.actorId !== "NPC_Park_Caretaker",
+  ));
   const afterDwell = await service.advance({
     runId: started.runId,
-    advanceId: "route-7",
+    advanceId: "route-caretaker-next-due",
     observedWorldRevision: beforeDwell.worldRevision,
-    elapsedSeconds: 5,
+    elapsedSeconds: 1,
     arrivals: [],
   });
   assert.deepEqual(
     afterDwell.movementDeltas.map(movement => [movement.actorId, movement.routePointIndex]),
     [["NPC_Park_Caretaker", 2]],
   );
+});
+
+test("provider-selected route movement observes the same deterministic due time", () => {
+  const layout = loadRunLayout();
+  const runtime = createRunScheduler(layout);
+  const initial = snapshotRunScheduler(layout, runtime, 0);
+  const liaison = initial.actors.find(actor => actor.actorId === "NPC_Roaming_Liaison");
+  assert.equal(liaison?.nextRouteMoveAtSeconds, 12);
+
+  const options = {
+    runId: "run-goal-cadence",
+    layout,
+    runtime,
+    actorId: "NPC_Roaming_Liaison",
+    targetAnchorRef: "Park.studio_approach",
+  };
+  assert.equal(issueActorGoalMovement({ ...options, elapsedSeconds: 11 }), null);
+  const dueMovement = issueActorGoalMovement({ ...options, elapsedSeconds: 12 });
+  assert.equal(dueMovement?.issuedAtSeconds, liaison.nextRouteMoveAtSeconds);
+  assert.equal(dueMovement?.routePointIndex, 1);
 });
 
 test("meeting wakes require both participant slots after the schedule boundary", async () => {
@@ -202,6 +253,10 @@ test("meeting wakes require both participant slots after the schedule boundary",
       ["NPC_Studio_Manager", "Park.meeting_north_west"],
       ["NPC_Park_Caretaker", "Park.meeting_north_east"],
     ],
+  );
+  assert.ok(
+    meetingMoves.every(movement => movement.supersedesMovementId !== undefined),
+    "meeting anchors must preempt in-flight conventional patrol movement",
   );
   assert.equal(
     atNinety.scheduleWakes.filter(wake => wake.kind === "meeting_window").length,

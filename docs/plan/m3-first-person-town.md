@@ -41,8 +41,9 @@ and recap, not only menu chrome.
    revision before applying. No timer outside Station interrogation (≥40s
    there).
 5. **Six NPCs, one event-driven loop** regardless of player distance;
-   provider calls wake on events/goals, never per tick; policy-based
-   movement between wake-ups.
+   provider calls wake on events/goals, never per tick. Deterministic local
+   patrol routes and staggered dwell times keep residents moving between
+   wake-ups without spending an LLM call.
 6. **Personal propagation through real speech only**; explicit records remain
    a separate administrative path and cannot directly move stance.
    Direction-aware subtitles cover audible speech; every off-screen change is
@@ -140,8 +141,9 @@ can overhear with subtitles.
 - A first-person controller delivering the full interaction baseline in
   [`../tech/godot-3d-client.md`](../tech/godot-3d-client.md): mouse look
   with capture rules, reticle + in-fiction interaction prompts, slide-along
-  collision with no player/NPC shoving and never-trap rules, no jump or
-  crouch, out-of-bounds failsafe, and the minimal Esc settings surface
+  collision with no player/NPC shoving and never-trap rules, a small grounded
+  jump that is never required to reach content, no crouch, out-of-bounds
+  failsafe, and the minimal Esc settings surface
   (FOV, sensitivity/invert, UI scale, volume, language). The comfort
   research slice tunes the numbers, not the list; keyboard+mouse full play.
 - One six-locale settings and content path (`ko/en/it/zh/fr/ja`) whose selected

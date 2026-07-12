@@ -514,9 +514,9 @@
       "route_id": "StudioFrontDesk",
       "character_scene": "res://assets/quaternius/women/formal.gltf",
       "schedule_blocks": [
-        {"start": 0, "end": 460, "anchor": "Studio.reception_desk", "activity": "front_desk"},
+        {"start": 0, "end": 460, "route_id": "StudioFrontDesk", "activity": "front_desk"},
         {"start": 460, "end": 600, "anchor": "Park.meeting_north_west", "activity": "park_break"},
-        {"start": 600, "end": 1800, "anchor": "Studio.reception_desk", "activity": "front_desk"}
+        {"start": 600, "end": 1800, "route_id": "StudioFrontDesk", "activity": "front_desk"}
       ]
     },
     {
@@ -529,9 +529,9 @@
       "route_id": "StudioManagerRound",
       "character_scene": "res://assets/quaternius/men/casual_hoodie.gltf",
       "schedule_blocks": [
-        {"start": 0, "end": 90, "anchor": "Studio.manager_desk", "activity": "review_work"},
+        {"start": 0, "end": 90, "route_id": "StudioManagerRound", "activity": "review_work"},
         {"start": 90, "end": 230, "anchor": "Park.meeting_north_west", "activity": "park_meeting"},
-        {"start": 230, "end": 1800, "anchor": "Studio.manager_desk", "activity": "review_work"}
+        {"start": 230, "end": 1800, "route_id": "StudioManagerRound", "activity": "review_work"}
       ]
     },
     {
@@ -544,9 +544,9 @@
       "route_id": "OfficeShift",
       "character_scene": "res://assets/quaternius/women/casual.gltf",
       "schedule_blocks": [
-        {"start": 0, "end": 700, "anchor": "Office.work_desk", "activity": "office_work"},
+        {"start": 0, "end": 700, "route_id": "OfficeShift", "activity": "office_work"},
         {"start": 700, "end": 840, "anchor": "Park.meeting_west_north", "activity": "park_meeting"},
-        {"start": 840, "end": 1800, "anchor": "Office.work_desk", "activity": "office_work"}
+        {"start": 840, "end": 1800, "route_id": "OfficeShift", "activity": "office_work"}
       ]
     },
     {
@@ -576,7 +576,7 @@
       "route_id": "StationDuty",
       "character_scene": "res://assets/quaternius/women/worker.gltf",
       "schedule_blocks": [
-        {"start": 0, "end": 1060, "anchor": "Station.intake_desk", "activity": "station_duty"},
+        {"start": 0, "end": 1060, "route_id": "StationDuty", "activity": "station_duty"},
         {"start": 1060, "end": 1200, "anchor": "Park.meeting_east_north", "activity": "park_meeting"},
         {"start": 1200, "end": 1800, "anchor": "Station.hearing_table", "activity": "hearing_preparation"}
       ]

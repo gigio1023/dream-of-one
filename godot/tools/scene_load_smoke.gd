@@ -64,8 +64,26 @@ func _check_engine_baseline() -> void:
 		_failures.append("renderer is %s instead of forward_plus" % renderer)
 	if physics_engine != "Jolt Physics":
 		_failures.append("3D physics is %s instead of Jolt Physics" % physics_engine)
+	_check_jump_input_contract()
 	if renderer == "forward_plus" and physics_engine == "Jolt Physics":
 		print("PASS scene_load_smoke: Forward+ renderer and Jolt Physics baseline")
+
+
+func _check_jump_input_contract() -> void:
+	if not InputMap.has_action(&"jump"):
+		_failures.append("3D player jump action is missing")
+		return
+	if not _action_has_physical_key(&"jump", KEY_SPACE):
+		_failures.append("3D player jump action is not bound to physical Space")
+	if _action_has_physical_key(&"interact", KEY_SPACE):
+		_failures.append("physical Space still triggers interact as well as jump")
+
+
+func _action_has_physical_key(action: StringName, keycode: int) -> bool:
+	for event in InputMap.action_get_events(action):
+		if event is InputEventKey and int((event as InputEventKey).physical_keycode) == keycode:
+			return true
+	return false
 
 func _instance_scene(spec: Dictionary) -> void:
 	var label := str(spec.get("label", "unknown"))
@@ -265,6 +283,24 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			var camera := instance.get_node_or_null("Head/Camera3D") as Camera3D
 			if camera == null or not camera.current or not is_equal_approx(camera.fov, 75.0):
 				_failures.append("player_3d camera baseline drifted")
+			var player_body := instance as CharacterBody3D
+			var tuned_jump_velocity := float(instance.get("jump_velocity"))
+			if tuned_jump_velocity < 4.0 or tuned_jump_velocity > 5.0:
+				_failures.append(
+					"player_3d jump velocity is outside its grounded baseline: %s"
+					% tuned_jump_velocity
+				)
+			if not instance.has_method("can_jump"):
+				_failures.append("player_3d exposes no grounded jump eligibility")
+			elif bool(instance.call("can_jump")) != (
+				bool(instance.get("_control_enabled")) and player_body.is_on_floor()
+			):
+				_failures.append("player_3d jump eligibility ignores control or floor state")
+			else:
+				instance.call("set_control_enabled", false)
+				if bool(instance.call("can_jump")):
+					_failures.append("player_3d can jump while player control is locked")
+				instance.call("set_control_enabled", true)
 		"npc_3d":
 			_require_node(label, instance, "CollisionShape3D")
 			_require_node(label, instance, "RoleAccent")
@@ -773,6 +809,8 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 		_failures.append("%s world is not paused during conversation" % label)
 	if bool(player.get("_control_enabled")):
 		_failures.append("%s player control stayed enabled during conversation" % label)
+	if player.has_method("can_jump") and bool(player.call("can_jump")):
+		_failures.append("%s player can jump during modal conversation" % label)
 	var opened_snapshot := hud.presentation_snapshot()
 	var opened_provider: Dictionary = opened_snapshot.get("provider", {})
 	if str(opened_provider.get("transport", "")) != "scripted":
@@ -935,16 +973,14 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 		var movement_actor_ids := _active_movement_actor_ids(snapshot)
 		if (
 			int(snapshot.get("runWorldRevision", -1)) == preload_baseline_revision + 1
-			and movement_actor_ids.has("NPC_Studio_Receptionist")
-			and movement_actor_ids.has("NPC_Office_Worker")
-			and movement_actor_ids.has("NPC_Station_Officer")
+			and movement_actor_ids.is_empty()
 		):
 			first_advance_applied = true
 			break
 	if not first_advance_applied:
 		_failures.append(
 			(
-				"%s first ten-second advance did not issue initial movements "
+				"%s first ten-second advance did not settle before patrol departures "
 				+ "(advance=%s pending=%s)"
 			)
 			% [
@@ -955,9 +991,9 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 		)
 		return
 	var first_movement_actor_ids := _active_movement_actor_ids(snapshot)
-	if first_movement_actor_ids.size() != 3:
+	if not first_movement_actor_ids.is_empty():
 		_failures.append(
-			"%s initial movement batch contains unexpected actors: %s"
+			"%s patrol moved before its first deterministic due time: %s"
 			% [label, first_movement_actor_ids.keys()]
 		)
 	var first_clock: Dictionary = snapshot.get("worldClock", {})
@@ -972,6 +1008,36 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 		or int(first_spatial.get("actorCount", -1)) != 6
 	):
 		_failures.append("%s initial material advance omitted six revisioned spatial facts" % label)
+
+	instance.set("_advance_elapsed_buffer", 10.0)
+	var early_patrol_applied := false
+	for _frame in range(120):
+		await process_frame
+		snapshot = instance.call("presentation_snapshot")
+		var patrol_actor_ids := _active_movement_actor_ids(snapshot)
+		if (
+			int(snapshot.get("runWorldRevision", -1)) == preload_baseline_revision + 2
+			and patrol_actor_ids.has("NPC_Studio_Receptionist")
+			and patrol_actor_ids.has("NPC_Studio_Manager")
+			and patrol_actor_ids.has("NPC_Office_Worker")
+			and patrol_actor_ids.has("NPC_Roaming_Liaison")
+		):
+			early_patrol_applied = true
+			break
+	if not early_patrol_applied:
+		_failures.append(
+			"%s second ten-second advance did not issue the staggered early patrols" % label
+		)
+		return
+	var early_patrol_actor_ids := _active_movement_actor_ids(snapshot)
+	if early_patrol_actor_ids.size() != 4:
+		_failures.append(
+			"%s early patrol batch contains unexpected actors: %s"
+			% [label, early_patrol_actor_ids.keys()]
+		)
+	first_clock = snapshot.get("worldClock", {})
+	if float(first_clock.get("elapsedSeconds", -1.0)) != 20.0:
+		_failures.append("%s early patrol advance did not reach twenty world seconds" % label)
 
 	# Main processes while paused so conversation HTTP can finish, but its clock
 	# lane explicitly returns and Town/NPC physics are pausable.
@@ -993,7 +1059,10 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 
 	var physical_progress := false
 	var arrivals_applied := false
-	for _frame in range(240):
+	# The liaison's first patrol leg crosses the park while the other three
+	# residents move within their buildings; allow the longest authored leg to
+	# finish before the fixture's exact four-arrival batch is dispatched.
+	for _frame in range(480):
 		await physics_frame
 		var planar_progress := Vector2(
 			office_worker.global_position.x - pause_position.x,
@@ -1006,9 +1075,9 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 			[]
 		)
 		if (
-			int(snapshot.get("runWorldRevision", -1)) >= preload_baseline_revision + 2
+			int(snapshot.get("runWorldRevision", -1)) >= preload_baseline_revision + 3
 			and arrivals_value is Array
-			and (arrivals_value as Array).size() == 3
+			and (arrivals_value as Array).size() == 4
 		):
 			arrivals_applied = true
 			break
@@ -1042,7 +1111,7 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 	)
 	if (
 		int(arrival_spatial.get("observedWorldRevision", -1))
-		!= preload_baseline_revision + 1
+		!= preload_baseline_revision + 2
 		or int(arrival_spatial.get("actorCount", -1)) != 6
 	):
 		_failures.append("%s exact-arrival advance omitted refreshed spatial facts" % label)
@@ -1062,18 +1131,18 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 		snapshot = instance.call("presentation_snapshot")
 		var route_actor_ids := _active_movement_actor_ids(snapshot)
 		if (
-			int(snapshot.get("runWorldRevision", -1)) == preload_baseline_revision + 3
+			int(snapshot.get("runWorldRevision", -1)) == preload_baseline_revision + 4
 			and route_actor_ids.has("NPC_Park_Caretaker")
-			and route_actor_ids.has("NPC_Roaming_Liaison")
+			and route_actor_ids.has("NPC_Station_Officer")
 		):
 			route_advance_applied = true
 			break
 	if not route_advance_applied:
-		_failures.append("%s second ten-second advance did not issue route movements" % label)
+		_failures.append("%s third ten-second advance did not issue late patrol movements" % label)
 		return
 	var route_clock: Dictionary = snapshot.get("worldClock", {})
-	if float(route_clock.get("elapsedSeconds", -1.0)) != 20.0:
-		_failures.append("%s route advance did not reach twenty world seconds" % label)
+	if float(route_clock.get("elapsedSeconds", -1.0)) != 30.0:
+		_failures.append("%s late patrol advance did not reach thirty world seconds" % label)
 	var final_budget: Dictionary = snapshot.get("providerBudget", {})
 	if int(final_budget.get("callsUsed", -1)) != 0:
 		_failures.append("%s deterministic scheduling consumed provider calls" % label)

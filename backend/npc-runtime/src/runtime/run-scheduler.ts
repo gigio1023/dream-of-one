@@ -13,7 +13,14 @@ import type {
   RunScheduleBlock,
 } from "./run-layout.js";
 
-export const ROUTE_CADENCE_SECONDS = 15;
+export const ROUTE_DWELL_MIN_SECONDS = 12;
+export const ROUTE_DWELL_MAX_SECONDS = 28;
+/**
+ * Conservative scalar retained for the existing scheduler wire field and
+ * callers that cannot express per-point timing. `nextRouteMoveAtSeconds` is
+ * the authoritative due time for an individual resident.
+ */
+export const ROUTE_CADENCE_SECONDS = ROUTE_DWELL_MAX_SECONDS;
 const MAX_SUPERSEDED_MOVEMENTS = 64;
 
 export interface RunSchedulerActorState {
@@ -55,6 +62,46 @@ function routeById(layout: RunLayout, routeId: string): RunLayoutRoute {
   const found = layout.routes.find(candidate => candidate.routeId === routeId);
   if (!found) throw new Error(`layout route disappeared after validation: ${routeId}`);
   return found;
+}
+
+function stableHash(value: string): number {
+  let hash = 2_166_136_261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16_777_619);
+  }
+  return hash >>> 0;
+}
+
+/** Stable per-resident, per-waypoint dwell prevents conventional patrols from moving in lockstep. */
+export function routePointDwellSeconds(
+  actorId: string,
+  routeId: string,
+  routePointIndex: number,
+): number {
+  const span = ROUTE_DWELL_MAX_SECONDS - ROUTE_DWELL_MIN_SECONDS + 1;
+  return ROUTE_DWELL_MIN_SECONDS +
+    (stableHash(`${actorId}:${routeId}:${routePointIndex}`) % span);
+}
+
+function routeMoveDueAtSeconds(
+  actor: RunLayoutActor,
+  state: RunSchedulerActorState,
+  block: RunScheduleBlock | null,
+): number | null {
+  if (
+    block?.target.kind !== "route" ||
+    state.pendingMovement !== null ||
+    state.routePointIndex === null ||
+    state.routePointArrivedAtSeconds === null
+  ) {
+    return null;
+  }
+  return state.routePointArrivedAtSeconds + routePointDwellSeconds(
+    actor.actorId,
+    block.target.id,
+    state.routePointIndex,
+  );
 }
 
 function stateFor(runtime: RunSchedulerRuntime, actorId: string): RunSchedulerActorState {
@@ -166,10 +213,9 @@ export function snapshotRunScheduler(
         desiredAnchorRef: desiredAnchor(layout, state, block),
         routePointIndex: routeActive ? state.routePointIndex : null,
         routePointArrivedAtSeconds: routeActive ? state.routePointArrivedAtSeconds : null,
-        nextRouteMoveAtSeconds:
-          routeActive && state.pendingMovement === null && state.routePointArrivedAtSeconds !== null
-            ? state.routePointArrivedAtSeconds + ROUTE_CADENCE_SECONDS
-            : null,
+        nextRouteMoveAtSeconds: routeActive
+          ? routeMoveDueAtSeconds(actor, state, block)
+          : null,
         pendingMovement: state.pendingMovement ? structuredClone(state.pendingMovement) : null,
       };
     }) as RunSchedulerSnapshot["actors"],
@@ -607,7 +653,8 @@ export function advanceRunScheduler(options: {
     ) {
       continue;
     }
-    const dueAt = state.routePointArrivedAtSeconds + ROUTE_CADENCE_SECONDS;
+    const dueAt = routeMoveDueAtSeconds(actor, state, block);
+    if (dueAt === null) continue;
     if (!(fromSeconds < dueAt && dueAt <= toSeconds)) continue;
     const points = routeById(layout, block.target.id).points;
     if (points.length === 0) continue;
@@ -692,12 +739,10 @@ export function issueActorGoalMovement(options: {
     if (block.target.id !== targetAnchorRef) return null;
   } else {
     const points = routeById(layout, block.target.id).points;
-    if (
-      state.routePointIndex === null ||
-      state.routePointArrivedAtSeconds === null ||
-      elapsedSeconds < state.routePointArrivedAtSeconds + ROUTE_CADENCE_SECONDS
-    ) return null;
-    routePointIndex = (state.routePointIndex + 1) % points.length;
+    const dueAt = routeMoveDueAtSeconds(actor, state, block);
+    const currentIndex = state.routePointIndex;
+    if (dueAt === null || currentIndex === null || elapsedSeconds < dueAt) return null;
+    routePointIndex = (currentIndex + 1) % points.length;
     if (points[routePointIndex] !== targetAnchorRef) return null;
   }
   if (state.confirmedAnchorRef === targetAnchorRef) return null;

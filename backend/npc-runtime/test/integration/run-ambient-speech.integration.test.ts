@@ -347,10 +347,15 @@ test("a modal queues resolved ambient speech and exact retry commits it without 
     playerConversation.nextTurn.turnId,
     { type: "choice", choiceId: playerConversation.nextTurn.choices[0].choiceId },
   );
-  await service.endConversation(meeting.started.runId, playerConversation.sessionId);
+  const ended = await service.endConversation(meeting.started.runId, playerConversation.sessionId);
+  assert.equal(
+    ended.queuedRunDeltas.filter(delta => delta.kind === "speech").length,
+    2,
+    "the modal close drains each resolved utterance exactly once",
+  );
   const committed = await service.decision(meeting.request);
   assert.equal(committed.status, "completed");
-  assert.equal(committed.speechEvents.length, 2);
+  assert.equal(committed.speechEvents.length, 0, "the decision retry cannot redeliver drained speech");
   assert.equal(ambientCalls, 2, "queued retry reuses both resolved proposals");
   assert.deepEqual(await service.decision(meeting.request), committed);
 });

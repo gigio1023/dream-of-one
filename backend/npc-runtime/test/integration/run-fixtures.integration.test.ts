@@ -53,6 +53,13 @@ test("every run fixture packet validates against the public wire schemas", () =>
 
   runNpcDecisionRequestSchema.parse(endpoints.npcDecision.request);
   runNpcDecisionResponseSchema.parse(endpoints.npcDecision.response);
+  runAdvanceRequestSchema.parse(endpoints.runAdvanceSpatialFacts.request);
+  runAdvanceResponseSchema.parse(endpoints.runAdvanceSpatialFacts.response);
+  assert.equal(endpoints.npcDecisionVariants.length, 7);
+  for (const variant of endpoints.npcDecisionVariants) {
+    runNpcDecisionRequestSchema.parse(variant.request);
+    runNpcDecisionResponseSchema.parse(variant.response);
+  }
   runAdvanceRequestSchema.parse(endpoints.runAdvanceAmbientSpeech.request);
   runAdvanceResponseSchema.parse(endpoints.runAdvanceAmbientSpeech.response);
   runSnapshotRequestSchema.parse(endpoints.runSnapshotAfterMeeting.request);

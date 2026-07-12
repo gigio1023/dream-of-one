@@ -44,6 +44,10 @@ export interface ObservePacket {
     recordId?: string;
   }>;
   visibleActors: string[];
+  /** Engine-confirmed actors whose speech reaches this listener now. */
+  audibleActorIds: string[];
+  /** Engine-confirmed navigation targets available to this actor now. */
+  reachableAnchorRefs: string[];
   heardSpeech: string[];
   toolCatalog: ToolName[];
 }
@@ -95,6 +99,8 @@ export function assembleObservePacket(world: WorldState, input: AssembleObserveI
       recordId: event.recordId,
     })),
     visibleActors: [...actor.knownActorIds],
+    audibleActorIds: [],
+    reachableAnchorRefs: [],
     heardSpeech: [...input.heardSpeech],
     toolCatalog: toolCatalogForRole(actor.role),
   };

@@ -36,7 +36,7 @@ class FakeTextGen implements TextGenPort {
 }
 
 function observePacket() {
-  return assembleObservePacket(createSameOrderWorld(), {
+  const packet = assembleObservePacket(createSameOrderWorld(), {
     actor: {
       actorId: "NPC_Store_Clerk",
       role: "store_clerk",
@@ -49,6 +49,8 @@ function observePacket() {
     memory: { actorId: "NPC_Store_Clerk", ownActionNotes: [], observedLedgerEventIds: [] },
     heardSpeech: [],
   });
+  packet.audibleActorIds = ["player", "NPC_Store_Manager"];
+  return packet;
 }
 
 function conversationRequest() {
@@ -238,6 +240,19 @@ test("agent-step prompts keep visible language Korean and stop successful repeti
     ambientFallback.proposal.utterance ?? "",
     /[\p{Script=Latin}\p{Script=Han}]/u,
   );
+  const mismatchedPacket = observePacket();
+  mismatchedPacket.audibleActorIds = ["player"];
+  const exactTargetFallback = await new RuleFallbackNpcAdapter().proposeNextStep({
+    sessionId: "run-ambient-exact-target",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "지정된 주민에게만 답한다.",
+    observePacket: mismatchedPacket,
+    blockedSignatures: [],
+    requiredToolCall: { tool: "talk_to", actorId: "NPC_Store_Manager" },
+    requireUtterance: true,
+  });
+  assert.notEqual(exactTargetFallback.proposal.toolCall?.tool, "talk_to");
 });
 
 test("mixed-script player text gets one repair before it reaches the game", async () => {

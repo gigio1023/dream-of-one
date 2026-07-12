@@ -72,6 +72,8 @@ var _last_arrivals_applied: Array = []
 var _last_arrivals_rejected: Array = []
 var _advance_lane_halted_reason := ""
 var _fixture_replay_complete := false
+var _spatial_facts_dirty := true
+var _last_spatial_facts_packet: Dictionary = {}
 var _ambient_speech_cursor := 0
 var _ambient_speech_events: Array[Dictionary] = []
 var _ambient_seen_seqs: Dictionary = {}
@@ -84,8 +86,12 @@ var _ambient_decision_retry_remaining := 0.0
 var _ambient_decision_waiting_for_resume := false
 var _ambient_decision_halted_reason := ""
 var _ambient_last_decision_status := ""
+var _ambient_last_decision_kind := ""
+var _ambient_last_wake_kind := ""
+var _ambient_last_actor_ids: Array = []
 var _ambient_provider_metas: Array = []
 var _deferred_ambient_speech_events: Array[Dictionary] = []
+var _applied_conversation_end_batches: Dictionary = {}
 
 
 func _ready() -> void:
@@ -228,6 +234,8 @@ func presentation_snapshot() -> Dictionary:
 			"runStartAttempts": _run_start_attempts,
 			"runStartError": _run_start_last_error.duplicate(true),
 			"runStartHaltedReason": _run_start_halted_reason,
+			"spatialFactsDirty": _spatial_facts_dirty,
+			"lastSpatialFacts": _spatial_facts_summary(_last_spatial_facts_packet),
 			"adapter": _run_session.diagnostics_snapshot(),
 		},
 		"activeMovements": _active_movement_summaries(),
@@ -245,6 +253,9 @@ func presentation_snapshot() -> Dictionary:
 				"queuedWakeCount": _ambient_wake_queue.size(),
 				"waitingForResume": _ambient_decision_waiting_for_resume,
 				"lastStatus": _ambient_last_decision_status,
+				"lastDecisionKind": _ambient_last_decision_kind,
+				"lastWakeKind": _ambient_last_wake_kind,
+				"lastActorIds": _ambient_last_actor_ids.duplicate(true),
 				"haltedReason": _ambient_decision_halted_reason,
 				"providerMetas": _ambient_provider_metas.duplicate(true),
 			},
@@ -354,6 +365,7 @@ func _handle_conversation_start_result(result: Dictionary) -> void:
 	_active_session_id = str(result.get("sessionId", ""))
 	_active_turn = _dictionary_or_empty(result.get("nextTurn"))
 	_run_snapshot["worldRevision"] = int(result.get("worldRevision", 0))
+	_spatial_facts_dirty = true
 	_run_snapshot["activeConversationId"] = _active_session_id
 	_set_run_clock_paused(true)
 	_update_run_actor(_dictionary_or_empty(result.get("actor")))
@@ -435,6 +447,7 @@ func _submit_answer(answer_payload: Dictionary) -> void:
 
 	_required_retry_answer = {}
 	_run_snapshot["worldRevision"] = int(result.get("worldRevision", 0))
+	_spatial_facts_dirty = true
 	_update_run_actor(_dictionary_or_empty(result.get("actor")))
 	_last_proposal_meta = _dictionary_or_empty(result.get("proposalMeta"))
 	_run_snapshot["lastProposalMeta"] = _last_proposal_meta.duplicate(true)
@@ -476,9 +489,15 @@ func _end_active_conversation() -> void:
 		_hud.show_conversation_error(&"hud.m3r.error.conversation_end", true)
 		return
 	_run_snapshot["worldRevision"] = int(result.get("worldRevision", 0))
+	_spatial_facts_dirty = true
 	_run_snapshot["activeConversationId"] = null
 	_set_run_clock_paused(false)
 	_update_run_actor(_dictionary_or_empty(result.get("actor")))
+	_apply_conversation_end_deltas_once(
+		_active_session_id,
+		int(result.get("worldRevision", 0)),
+		_array_or_empty(result.get("queuedRunDeltas"))
+	)
 	_advance_needs_rebase = true
 	await _rebase_run_after_advance_conflict()
 	_hud.set_conversation_busy(false)
@@ -542,6 +561,7 @@ func _ensure_run() -> bool:
 	_run_start_attempts = 0
 	_fixture_replay_complete = false
 	_run_snapshot = result.duplicate(true)
+	_spatial_facts_dirty = true
 	_last_proposal_meta = _dictionary_or_empty(result.get("lastProposalMeta"))
 	_ingest_ambient_snapshot(result)
 	_apply_all_conversation_readiness()
@@ -653,6 +673,7 @@ func _dispatch_conversation_preload(actor_id: String) -> void:
 			_advance_needs_rebase = true
 		else:
 			_run_snapshot["worldRevision"] = response_revision
+			_spatial_facts_dirty = true
 			_update_run_actor(_dictionary_or_empty(result.get("actor")))
 			_last_proposal_meta = _dictionary_or_empty(result.get("proposalMeta"))
 			_run_snapshot["lastProposalMeta"] = _last_proposal_meta.duplicate(true)
@@ -726,16 +747,35 @@ func _prepare_advance_request() -> void:
 	)
 	if elapsed_seconds <= 0 and arrivals.is_empty():
 		return
+	var observed_world_revision := int(_run_snapshot.get("worldRevision", 0))
+	var spatial_facts_packet: Dictionary = {}
+	if (
+		_spatial_facts_dirty
+		or not arrivals.is_empty()
+		or not _active_movements.is_empty()
+	):
+		spatial_facts_packet = _capture_spatial_facts(observed_world_revision)
+		if spatial_facts_packet.is_empty():
+			for arrival in arrivals:
+				_queued_arrivals.append(arrival.duplicate(true))
+				_arrival_batch_movement_ids[str(arrival.get("movementId", ""))] = true
+			if not _queued_arrivals.is_empty():
+				_arrival_batch_remaining = 0.0
+			return
 	_advance_elapsed_buffer = maxf(0.0, _advance_elapsed_buffer - elapsed_seconds)
 	_advance_sequence += 1
 	_pending_advance_request = {
 		"runId": _run_id,
 		"advanceId": "%s:advance:%06d" % [_run_id, _advance_sequence],
-		"observedWorldRevision": int(_run_snapshot.get("worldRevision", 0)),
+		"observedWorldRevision": observed_world_revision,
 		"afterSpeechSeq": _ambient_speech_cursor,
 		"elapsedSeconds": elapsed_seconds,
 		"arrivals": arrivals,
 	}
+	if not spatial_facts_packet.is_empty():
+		_pending_advance_request["spatialFacts"] = spatial_facts_packet.duplicate(true)
+		_last_spatial_facts_packet = spatial_facts_packet.duplicate(true)
+		_spatial_facts_dirty = false
 
 
 func _dispatch_advance() -> void:
@@ -796,6 +836,8 @@ func _restore_advance_request(request: Dictionary) -> void:
 				_queued_arrivals.append((arrival_value as Dictionary).duplicate(true))
 	if not _queued_arrivals.is_empty():
 		_arrival_batch_remaining = 0.0
+	if request.has("spatialFacts"):
+		_spatial_facts_dirty = true
 
 
 func _apply_advance_response(result: Dictionary) -> void:
@@ -805,6 +847,16 @@ func _apply_advance_response(result: Dictionary) -> void:
 		int(result.get("ambientSpeechCursor", 0))
 	)
 	_recent_schedule_wakes = _array_or_empty(result.get("scheduleWakes"))
+	for wake_value in _recent_schedule_wakes:
+		if (
+			wake_value is Dictionary
+			and str((wake_value as Dictionary).get("kind", "")) == "actor_schedule"
+		):
+			# A schedule can change goals without issuing movement when two
+			# semantic anchors share one physical point. Refresh the engine facts
+			# so the runtime can emit that goal on the next material packet.
+			_spatial_facts_dirty = true
+			break
 	_queue_ambient_decision_wakes(_recent_schedule_wakes)
 	var current_revision := int(_run_snapshot.get("worldRevision", 0))
 	var response_revision := int(result.get("worldRevision", current_revision))
@@ -860,8 +912,7 @@ func _queue_ambient_decision_wakes(wakes: Array) -> void:
 			continue
 		var wake := wake_value as Dictionary
 		if (
-			str(wake.get("kind", "")) != "meeting_ready"
-			or not bool(wake.get("requiresDecision", false))
+			not bool(wake.get("requiresDecision", false))
 			or str(wake.get("status", "")) != "pending"
 		):
 			continue
@@ -882,7 +933,20 @@ func _queue_ambient_decision_wakes(wakes: Array) -> void:
 func _prepare_next_ambient_decision() -> void:
 	if not _ambient_pending_request.is_empty() or _ambient_wake_queue.is_empty():
 		return
-	var wake: Dictionary = _ambient_wake_queue.pop_front()
+	var selected_index := -1
+	var preloads_busy := (
+		not _conversation_preload_queue.is_empty()
+		or not _conversation_preload_in_flight.is_empty()
+	)
+	for wake_index in _ambient_wake_queue.size():
+		var candidate := _ambient_wake_queue[wake_index]
+		if preloads_busy and str(candidate.get("kind", "")) == "goal":
+			continue
+		selected_index = wake_index
+		break
+	if selected_index < 0:
+		return
+	var wake: Dictionary = _ambient_wake_queue.pop_at(selected_index)
 	_ambient_pending_request = {
 		"runId": _run_id,
 		"wakeId": str(wake.get("wakeId", "")),
@@ -920,18 +984,31 @@ func _dispatch_ambient_decision() -> void:
 		return
 
 	_ambient_last_decision_status = str(result.get("status", "failed"))
+	_ambient_last_decision_kind = str(result.get("decisionKind", ""))
+	_ambient_last_wake_kind = str(result.get("wakeKind", ""))
+	_ambient_last_actor_ids = _array_or_empty(result.get("actorIds"))
 	_ambient_provider_metas = _array_or_empty(result.get("providerMetas"))
 	_run_snapshot["worldRevision"] = maxi(
 		int(_run_snapshot.get("worldRevision", 0)),
 		int(result.get("worldRevision", 0))
 	)
-	_apply_readiness_deltas(_array_or_empty(result.get("actorReadinessDeltas")))
+	_spatial_facts_dirty = true
 	match _ambient_last_decision_status:
 		"completed":
 			_ambient_pending_request = {}
 			_ambient_decision_waiting_for_resume = false
 			_ambient_active_conversation = null
-			_ingest_ambient_speech_events(_array_or_empty(result.get("speechEvents")))
+			var action_deltas := _array_or_empty(result.get("actionDeltas"))
+			if not action_deltas.is_empty():
+				_apply_run_deltas(action_deltas)
+			else:
+				# Compatibility with the already-generated T2 meeting fixture. New
+				# runtime responses use actionDeltas as the sole application surface.
+				_apply_readiness_deltas(_array_or_empty(result.get("actorReadinessDeltas")))
+				_ingest_ambient_speech_events(_array_or_empty(result.get("speechEvents")))
+				for movement_value in _array_or_empty(result.get("movementDeltas")):
+					if movement_value is Dictionary:
+						_queue_or_apply_movement(movement_value as Dictionary)
 		"queued":
 			# The runtime has cached a resolved proposal while the player modal
 			# owns the pause. Preserve this exact request and retry after resume;
@@ -949,7 +1026,7 @@ func _dispatch_ambient_decision() -> void:
 				)),
 				"status": "queued",
 			}
-		"stale", "budget_reserved", "failed":
+		"stale", "budget_reserved", "failed", "terminal":
 			# These are terminal for this stable wake id. The scheduler may
 			# produce a different wake later; changing this request would violate
 			# the runtime's exact claim/cache contract.
@@ -1082,6 +1159,112 @@ func _ambient_decision_request_summary(request: Dictionary) -> Dictionary:
 	}
 
 
+func _capture_spatial_facts(observed_world_revision: int) -> Dictionary:
+	var actors := _town.npc_spatial_facts()
+	if actors.size() != 6:
+		_advance_lane_halted_reason = "spatial_fact_actor_count"
+		push_error("Town3D spatial packet must contain exactly six resident facts.")
+		return {}
+	var actor_ids: Dictionary = {}
+	for actor_value in actors:
+		var actor_id := str(actor_value.get("actorId", ""))
+		if actor_id.is_empty() or actor_ids.has(actor_id):
+			_advance_lane_halted_reason = "spatial_fact_actor_identity"
+			push_error("Town3D spatial packet has a missing or duplicate resident id.")
+			return {}
+		actor_ids[actor_id] = true
+	return {
+		"observedWorldRevision": observed_world_revision,
+		"actors": actors,
+	}
+
+
+func _spatial_facts_summary(packet: Dictionary) -> Dictionary:
+	if packet.is_empty():
+		return {}
+	var actors := _array_or_empty(packet.get("actors"))
+	var actor_ids: Array[String] = []
+	for actor_value in actors:
+		if actor_value is Dictionary:
+			actor_ids.append(str((actor_value as Dictionary).get("actorId", "")))
+	actor_ids.sort()
+	return {
+		"observedWorldRevision": int(packet.get("observedWorldRevision", -1)),
+		"actorCount": actors.size(),
+		"actorIds": actor_ids,
+	}
+
+
+func _apply_run_deltas(deltas: Array) -> void:
+	for delta_value in deltas:
+		if not delta_value is Dictionary:
+			push_warning("Ignoring non-dictionary runtime action delta.")
+			continue
+		var delta := delta_value as Dictionary
+		match str(delta.get("kind", "")):
+			"speech":
+				var speech_event := _dictionary_or_empty(delta.get("speechEvent"))
+				if speech_event.is_empty():
+					push_warning("Ignoring runtime speech delta without speechEvent.")
+				else:
+					_ingest_ambient_speech_events([speech_event])
+			"readiness":
+				var readiness_delta := _dictionary_or_empty(delta.get("readinessDelta"))
+				if readiness_delta.is_empty():
+					push_warning("Ignoring runtime readiness delta without readinessDelta.")
+				else:
+					_apply_readiness_deltas([readiness_delta])
+			"look":
+				_apply_look_delta(delta)
+			"movement":
+				var movement_delta := _dictionary_or_empty(delta.get("movementDelta"))
+				if movement_delta.is_empty():
+					push_warning("Ignoring runtime movement delta without movementDelta.")
+				else:
+					_queue_or_apply_movement(movement_delta)
+			_:
+				push_warning("Ignoring unknown runtime action delta kind: %s" % delta.get("kind", ""))
+
+
+func _apply_look_delta(delta: Dictionary) -> void:
+	var delta_revision := int(delta.get("worldRevision", -1))
+	if delta_revision != int(_run_snapshot.get("worldRevision", -2)):
+		push_warning("Ignoring look delta whose world revision is no longer current.")
+		return
+	var actor_id := str(delta.get("actorId", ""))
+	var target_kind := str(delta.get("targetKind", ""))
+	var target_id := str(delta.get("targetId", ""))
+	var actor := _town.get_node_or_null("Actors/%s" % actor_id) as NPC3D
+	if actor == null or target_id.is_empty():
+		push_warning("Ignoring look delta with an unavailable resident or target.")
+		return
+	if target_kind == "actor":
+		var target := _town.get_node_or_null("Actors/%s" % target_id) as NPC3D
+		if target == null:
+			push_warning("Ignoring look delta with an unavailable target resident.")
+			return
+		actor.face_position(target.global_position + Vector3.UP * 1.35)
+		return
+	# Object and record look targets cannot be valid until a canonical 3D
+	# semantic object id is included in visibleObjectIds by Town3D.
+	push_warning("Ignoring unavailable %s look target: %s" % [target_kind, target_id])
+
+
+func _apply_conversation_end_deltas_once(
+	session_id: String,
+	world_revision: int,
+	deltas: Array
+) -> void:
+	var batch_id := session_id
+	if session_id.is_empty() or _applied_conversation_end_batches.has(batch_id):
+		return
+	if world_revision != int(_run_snapshot.get("worldRevision", -1)):
+		push_warning("Ignoring queued session-end deltas whose world revision is stale.")
+		return
+	_applied_conversation_end_batches[batch_id] = true
+	_apply_run_deltas(deltas)
+
+
 func _apply_readiness_deltas(deltas: Array) -> void:
 	for delta_value in deltas:
 		if not delta_value is Dictionary:
@@ -1111,6 +1294,7 @@ func _apply_readiness_deltas(deltas: Array) -> void:
 
 
 func _queue_or_apply_movement(movement: Dictionary) -> void:
+	_spatial_facts_dirty = true
 	if get_tree().paused or _conversation_target != null:
 		var actor_id := str(movement.get("actorId", ""))
 		for index in range(_queued_movement_deltas.size() - 1, -1, -1):
@@ -1222,6 +1406,7 @@ func _on_npc_movement_arrived(
 			"actorId": actor_id,
 			"anchorRef": anchor_ref,
 		})
+	_spatial_facts_dirty = true
 	_active_movements.erase(actor_id)
 	_refresh_arrival_batch_timer()
 
@@ -1237,6 +1422,7 @@ func _on_npc_movement_blocked(
 	if movement.is_empty() or str(movement.get("movementId", "")) != movement_id:
 		return
 	_active_movements.erase(actor_id)
+	_spatial_facts_dirty = true
 	_blocked_movements[actor_id] = {
 		"movementId": movement_id,
 		"actorId": actor_id,
@@ -1413,6 +1599,7 @@ func _rebase_run_after_advance_conflict() -> void:
 		return
 	_run_snapshot = result.duplicate(true)
 	_run_snapshot["worldRevision"] = maxi(current_revision, snapshot_revision)
+	_spatial_facts_dirty = true
 	_last_proposal_meta = _dictionary_or_empty(result.get("lastProposalMeta"))
 	_apply_all_conversation_readiness()
 	_reconcile_scheduler_movements(_dictionary_or_empty(result.get("scheduler")))

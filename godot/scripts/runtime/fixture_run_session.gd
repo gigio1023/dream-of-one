@@ -238,6 +238,11 @@ func run_snapshot(run_id: String) -> Dictionary:
 func advance(request: Dictionary) -> Dictionary:
 	if not _started:
 		return _stored_error("run_not_started", "Start the fixture run first.")
+	if request.has("spatialFacts") and not _spatial_facts_valid_for_request(request):
+		return _stored_error(
+			"fixture_spatial_facts_invalid",
+			"Fixture advance spatial facts do not match the six-resident contract."
+		)
 	var advance_id := str(request.get("advanceId", ""))
 	if _advance_cache.has(advance_id):
 		var cached := _dictionary_or_empty(_advance_cache.get(advance_id))
@@ -263,7 +268,7 @@ func advance(request: Dictionary) -> Dictionary:
 		return _stored_error("fixture_advance_invalid", "Fixture advance packet is invalid.")
 	var packet := packet_value as Dictionary
 	var expected_request := _dictionary_or_empty(packet.get("request"))
-	if _advance_request_signature(request) != _advance_request_signature(expected_request):
+	if _advance_fixture_signature(request) != _advance_fixture_signature(expected_request):
 		return _stored_error(
 			"fixture_advance_miss",
 			"Fixture has no authoritative response for that advance packet."
@@ -273,7 +278,10 @@ func advance(request: Dictionary) -> Dictionary:
 		return _stored_error("fixture_advance_missing", "Fixture advance has no response.")
 	_advance_index += 1
 	_advance_cache[advance_id] = {
-		"request": expected_request.duplicate(true),
+		# Cache the actual immutable client packet. Fixture examples cannot encode
+		# engine-derived positions and ray results, but retries must still preserve
+		# those facts byte-for-byte at the Variant level.
+		"request": request.duplicate(true),
 		"response": response.duplicate(true),
 	}
 	_apply_advance_to_snapshot(response)
@@ -500,6 +508,16 @@ func _snapshot_actor(actor_id: String) -> Dictionary:
 
 
 func _advance_request_signature(request: Dictionary) -> String:
+	var signature := _dictionary_or_empty(JSON.parse_string(_advance_fixture_signature(request)))
+	var spatial_facts := _dictionary_or_empty(request.get("spatialFacts"))
+	if spatial_facts.is_empty():
+		signature["spatialFacts"] = null
+	else:
+		signature["spatialFacts"] = spatial_facts
+	return JSON.stringify(signature)
+
+
+func _advance_fixture_signature(request: Dictionary) -> String:
 	var arrivals: Array = _array_or_empty(request.get("arrivals"))
 	arrivals.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		if str(a.get("actorId", "")) == str(b.get("actorId", "")):
@@ -523,6 +541,39 @@ func _advance_request_signature(request: Dictionary) -> String:
 		"elapsedSeconds": float(request.get("elapsedSeconds", -1.0)),
 		"arrivals": normalized_arrivals,
 	})
+
+
+func _spatial_facts_valid_for_request(request: Dictionary) -> bool:
+	var packet := _dictionary_or_empty(request.get("spatialFacts"))
+	if (
+		packet.is_empty()
+		or int(packet.get("observedWorldRevision", -1))
+		!= int(request.get("observedWorldRevision", -2))
+	):
+		return false
+	var actors := _array_or_empty(packet.get("actors"))
+	if actors.size() != 6:
+		return false
+	var actor_ids: Dictionary = {}
+	for actor_value in actors:
+		if not actor_value is Dictionary:
+			return false
+		var actor := actor_value as Dictionary
+		var actor_id := str(actor.get("actorId", ""))
+		if actor_id.is_empty() or actor_ids.has(actor_id):
+			return false
+		actor_ids[actor_id] = true
+		if _array_or_empty(actor.get("position")).size() != 3:
+			return false
+		for key in [
+			"reachableAnchorRefs",
+			"visibleActorIds",
+			"audibleActorIds",
+			"visibleObjectIds",
+		]:
+			if not actor.get(key, null) is Array:
+				return false
+	return true
 
 
 func _decision_request_signature(request: Dictionary) -> String:

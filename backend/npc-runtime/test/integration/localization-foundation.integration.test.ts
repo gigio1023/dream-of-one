@@ -38,7 +38,7 @@ const EXACT_GAMEPLAY_LOCALES = [
 ] as const;
 
 function observePacket() {
-  return assembleObservePacket(createSameOrderWorld(), {
+  const packet = assembleObservePacket(createSameOrderWorld(), {
     actor: {
       actorId: "NPC_Store_Clerk",
       role: "store_clerk",
@@ -51,6 +51,8 @@ function observePacket() {
     memory: { actorId: "NPC_Store_Clerk", ownActionNotes: [], observedLedgerEventIds: [] },
     heardSpeech: [],
   });
+  packet.audibleActorIds = ["player", "NPC_Store_Manager"];
+  return packet;
 }
 
 test("the shared registry is the exact API locale source for run and conversation schemas", () => {

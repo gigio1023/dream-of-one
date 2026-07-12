@@ -309,6 +309,7 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 				_failures.append("town_3d NavigationMesh has no polygons")
 			else:
 				_check_town_navigation(label, instance, region)
+				_check_npc_spatial_facts(label, instance)
 			_check_town_location_coverage(label, instance)
 			_check_respawn_anchor_contract(label, instance)
 			for tree_blocker_name in [
@@ -381,6 +382,77 @@ func _check_town_navigation(label: String, instance: Node, region: NavigationReg
 				]
 			)
 	_check_semantic_meeting_slots(label, instance, region, layout, start)
+
+
+func _check_npc_spatial_facts(label: String, instance: Node) -> void:
+	if not instance.has_method("npc_spatial_facts"):
+		_failures.append("%s exposes no engine-derived NPC spatial facts" % label)
+		return
+	var facts_value: Variant = instance.call("npc_spatial_facts")
+	if not facts_value is Array or (facts_value as Array).size() != 6:
+		_failures.append("%s spatial packet does not contain exactly six residents" % label)
+		return
+	var facts := facts_value as Array
+	var by_actor: Dictionary = {}
+	var ordered_actor_ids: Array[String] = []
+	for fact_value in facts:
+		if not fact_value is Dictionary:
+			_failures.append("%s spatial packet contains a non-dictionary fact" % label)
+			continue
+		var fact := fact_value as Dictionary
+		var actor_id := str(fact.get("actorId", ""))
+		ordered_actor_ids.append(actor_id)
+		by_actor[actor_id] = fact
+		var position_value: Variant = fact.get("position", [])
+		if not position_value is Array or (position_value as Array).size() != 3:
+			_failures.append("%s %s spatial position is not a 3D tuple" % [label, actor_id])
+		for key in [
+			"reachableAnchorRefs",
+			"visibleActorIds",
+			"audibleActorIds",
+			"visibleObjectIds",
+		]:
+			var ids_value: Variant = fact.get(key, null)
+			if not ids_value is Array:
+				_failures.append("%s %s spatial %s is not an array" % [label, actor_id, key])
+				continue
+			var ids := ids_value as Array
+			var normalized: Array[String] = []
+			for id_value in ids:
+				normalized.append(str(id_value))
+			var sorted_unique := normalized.duplicate()
+			sorted_unique.sort()
+			sorted_unique = _dedupe_strings(sorted_unique)
+			if normalized != sorted_unique:
+				_failures.append("%s %s spatial %s is not sorted/deduped" % [label, actor_id, key])
+		if not (fact.get("reachableAnchorRefs", []) as Array).has("Park.center"):
+			_failures.append("%s %s cannot reach the connected town NavMesh" % [label, actor_id])
+		if not (fact.get("visibleObjectIds", []) as Array).is_empty():
+			_failures.append("%s invented visible 3D object ids before canonical props exist" % label)
+	var sorted_actor_ids := ordered_actor_ids.duplicate()
+	sorted_actor_ids.sort()
+	if ordered_actor_ids != sorted_actor_ids or by_actor.size() != 6:
+		_failures.append("%s spatial residents are not unique and deterministically ordered" % label)
+	var caretaker := by_actor.get("NPC_Park_Caretaker", {}) as Dictionary
+	var liaison := by_actor.get("NPC_Roaming_Liaison", {}) as Dictionary
+	if (
+		not (caretaker.get("visibleActorIds", []) as Array).has("NPC_Roaming_Liaison")
+		or not (liaison.get("visibleActorIds", []) as Array).has("NPC_Park_Caretaker")
+	):
+		_failures.append("%s engine LOS did not connect the unobstructed park residents" % label)
+	if (
+		not (caretaker.get("audibleActorIds", []) as Array).has("NPC_Roaming_Liaison")
+		or not (liaison.get("audibleActorIds", []) as Array).has("NPC_Park_Caretaker")
+	):
+		_failures.append("%s authored park audibility did not connect nearby residents" % label)
+
+
+func _dedupe_strings(values: Array[String]) -> Array[String]:
+	var deduped: Array[String] = []
+	for value in values:
+		if deduped.is_empty() or deduped[deduped.size() - 1] != value:
+			deduped.append(value)
+	return deduped
 
 
 func _check_semantic_meeting_slots(
@@ -754,6 +826,47 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 			_failures.append("%s did not present the runtime-judged vouch stance" % label)
 		elif str((stance_entry as Dictionary).get("summary", "")).is_empty():
 			_failures.append("%s did not persist the judgment why-line in normal UI" % label)
+	var manager := instance.get_node_or_null("Town/Actors/NPC_Studio_Manager") as NPC3D
+	var caretaker := instance.get_node_or_null("Town/Actors/NPC_Park_Caretaker") as NPC3D
+	if manager != null and caretaker != null:
+		var look_revision := int(main_snapshot.get("runWorldRevision", -1))
+		instance.call(
+			"_apply_conversation_end_deltas_once",
+			"smoke-queued-look",
+			look_revision,
+			[{
+				"kind": "look",
+				"actorId": str(manager.actor_id),
+				"targetKind": "actor",
+				"targetId": str(receptionist.actor_id),
+				"worldRevision": look_revision,
+			}]
+		)
+		var first_forward := -manager.global_transform.basis.z.normalized()
+		# A duplicate successful session-end response must not apply a second batch.
+		instance.call(
+			"_apply_conversation_end_deltas_once",
+			"smoke-queued-look",
+			look_revision,
+			[{
+				"kind": "look",
+				"actorId": str(manager.actor_id),
+				"targetKind": "actor",
+				"targetId": str(caretaker.actor_id),
+				"worldRevision": look_revision,
+			}]
+		)
+		var second_forward := -manager.global_transform.basis.z.normalized()
+		var to_receptionist := receptionist.global_position - manager.global_position
+		to_receptionist.y = 0.0
+		if (
+			first_forward.distance_to(second_forward) > 0.001
+			or (
+				not to_receptionist.is_zero_approx()
+				and second_forward.dot(to_receptionist.normalized()) < 0.99
+			)
+		):
+			_failures.append("%s queued look delta was not applied exactly once" % label)
 
 
 func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
@@ -850,6 +963,15 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 	var first_clock: Dictionary = snapshot.get("worldClock", {})
 	if float(first_clock.get("elapsedSeconds", -1.0)) != 10.0:
 		_failures.append("%s first advance did not reach ten world seconds" % label)
+	var first_spatial: Dictionary = (snapshot.get("advance", {}) as Dictionary).get(
+		"lastSpatialFacts",
+		{}
+	)
+	if (
+		int(first_spatial.get("observedWorldRevision", -1)) != preload_baseline_revision
+		or int(first_spatial.get("actorCount", -1)) != 6
+	):
+		_failures.append("%s initial material advance omitted six revisioned spatial facts" % label)
 
 	# Main processes while paused so conversation HTTP can finish, but its clock
 	# lane explicitly returns and Town/NPC physics are pausable.
@@ -914,6 +1036,16 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 			]
 		)
 		return
+	var arrival_spatial: Dictionary = (snapshot.get("advance", {}) as Dictionary).get(
+		"lastSpatialFacts",
+		{}
+	)
+	if (
+		int(arrival_spatial.get("observedWorldRevision", -1))
+		!= preload_baseline_revision + 1
+		or int(arrival_spatial.get("actorCount", -1)) != 6
+	):
+		_failures.append("%s exact-arrival advance omitted refreshed spatial facts" % label)
 	var arrived_office_scheduler := _scheduler_actor(snapshot, "NPC_Office_Worker")
 	var arrived_office_anchor := str(
 		arrived_office_scheduler.get("confirmedAnchorRef", "")

@@ -99,6 +99,44 @@ func navigation_position(anchor_ref: String) -> Variant:
 	return NavigationServer3D.map_get_closest_point(navigation_map, anchor_value as Vector3)
 
 
+func npc_spatial_facts() -> Array[Dictionary]:
+	## Capture one event-time engine snapshot for the runtime's spatial validator.
+	## This is intentionally called by the run packet lane, never every frame.
+	var facts: Array[Dictionary] = []
+	var actors := _npc_actors()
+	var anchor_refs := _layout_anchor_refs()
+	var navigation_map := _navigation_map()
+	var space_state := get_world_3d().direct_space_state
+	for actor in actors:
+		var visible_actor_ids: PackedStringArray = []
+		var audible_actor_ids: PackedStringArray = []
+		for target in actors:
+			if target == actor:
+				continue
+			if _actors_have_line_of_sight(actor, target, space_state):
+				visible_actor_ids.append(str(target.actor_id))
+			if _actors_share_audibility(actor, target):
+				audible_actor_ids.append(str(target.actor_id))
+		visible_actor_ids.sort()
+		audible_actor_ids.sort()
+		facts.append({
+			"actorId": str(actor.actor_id),
+			"position": _vector3_to_array(actor.global_position),
+			"reachableAnchorRefs": _reachable_anchor_refs(
+				actor.global_position,
+				anchor_refs,
+				navigation_map
+			),
+			"visibleActorIds": Array(visible_actor_ids),
+			"audibleActorIds": Array(audible_actor_ids),
+			"visibleObjectIds": [],
+		})
+	facts.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return str(a.get("actorId", "")) < str(b.get("actorId", ""))
+	)
+	return facts
+
+
 func player_speech_audibility(audibility: Dictionary) -> Dictionary:
 	var player := get_node_or_null(player_path) as Node3D
 	if player == null:
@@ -145,6 +183,124 @@ func player_speech_audibility(audibility: Dictionary) -> Dictionary:
 		"speakerInVolume": speaker_in_volume,
 		"speakerPosition": speaker_position,
 	}
+
+
+func _npc_actors() -> Array[NPC3D]:
+	var actors: Array[NPC3D] = []
+	for actor_value in get_tree().get_nodes_in_group(&"npc_actors"):
+		if actor_value is NPC3D and is_ancestor_of(actor_value as NPC3D):
+			actors.append(actor_value as NPC3D)
+	actors.sort_custom(func(a: NPC3D, b: NPC3D) -> bool:
+		return str(a.actor_id) < str(b.actor_id)
+	)
+	return actors
+
+
+func _layout_anchor_refs() -> PackedStringArray:
+	var anchor_refs: PackedStringArray = []
+	for landmark_value in _layout.get("landmarks", []):
+		if not landmark_value is Dictionary:
+			continue
+		var landmark := landmark_value as Dictionary
+		var landmark_id := str(landmark.get("id", ""))
+		var anchors_value: Variant = landmark.get("anchors", {})
+		if landmark_id.is_empty() or not anchors_value is Dictionary:
+			continue
+		for anchor_name_value in (anchors_value as Dictionary).keys():
+			anchor_refs.append("%s.%s" % [landmark_id, str(anchor_name_value)])
+	anchor_refs.sort()
+	return anchor_refs
+
+
+func _navigation_map() -> RID:
+	var region := get_node_or_null("Navigation/TownNavigation") as NavigationRegion3D
+	if region == null:
+		return RID()
+	var navigation_map := region.get_navigation_map()
+	if (
+		not navigation_map.is_valid()
+		or NavigationServer3D.map_get_iteration_id(navigation_map) <= 0
+	):
+		return RID()
+	return navigation_map
+
+
+func _reachable_anchor_refs(
+	actor_position: Vector3,
+	anchor_refs: PackedStringArray,
+	navigation_map: RID
+) -> Array[String]:
+	var reachable: Array[String] = []
+	if not navigation_map.is_valid():
+		return reachable
+	var origin := NavigationServer3D.map_get_closest_point(navigation_map, actor_position)
+	for anchor_ref in anchor_refs:
+		var target_value: Variant = navigation_position(anchor_ref)
+		if not target_value is Vector3:
+			continue
+		var target := target_value as Vector3
+		if origin.distance_to(target) <= 0.05:
+			reachable.append(anchor_ref)
+			continue
+		var path := NavigationServer3D.map_get_path(
+			navigation_map,
+			origin,
+			target,
+			true
+		)
+		if not path.is_empty() and path[path.size() - 1].distance_to(target) <= 0.05:
+			reachable.append(anchor_ref)
+	return reachable
+
+
+func _actors_have_line_of_sight(
+	source: NPC3D,
+	target: NPC3D,
+	space_state: PhysicsDirectSpaceState3D
+) -> bool:
+	var source_eye := source.global_position + Vector3.UP * 1.35
+	var target_eye := target.global_position + Vector3.UP * 1.35
+	if source_eye.is_equal_approx(target_eye):
+		return true
+	var query := PhysicsRayQueryParameters3D.create(source_eye, target_eye)
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	query.exclude = [source.get_rid()]
+	var hit := space_state.intersect_ray(query)
+	if hit.is_empty():
+		return false
+	var collider_value: Variant = hit.get("collider")
+	return collider_value is Node and _node_belongs_to(collider_value as Node, target)
+
+
+func _node_belongs_to(node: Node, owner_node: Node) -> bool:
+	var current: Node = node
+	while current != null:
+		if current == owner_node:
+			return true
+		current = current.get_parent()
+	return false
+
+
+func _actors_share_audibility(source: NPC3D, target: NPC3D) -> bool:
+	var distance := source.global_position.distance_to(target.global_position)
+	for volume_value in _layout.get("audibility_volumes", []):
+		if not volume_value is Dictionary:
+			continue
+		var volume := volume_value as Dictionary
+		var max_distance := maxf(0.0, float(volume.get("max_speech_distance_m", 0.0)))
+		if (
+			max_distance > 0.0
+			and distance <= max_distance
+			and _point_in_zone(source.global_position, volume)
+			and _point_in_zone(target.global_position, volume)
+		):
+			return true
+	return false
+
+
+func _vector3_to_array(value: Vector3) -> Array[float]:
+	return [value.x, value.y, value.z]
 
 
 func nearest_anchor_position(point: Vector3) -> Vector3:

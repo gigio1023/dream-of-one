@@ -197,6 +197,9 @@ export const runScheduleWakeSchema = z
       "actor_schedule",
       "meeting_window",
       "meeting_ready",
+      "arrival",
+      "observation",
+      "goal",
       "grace",
       "hearing",
     ]),
@@ -206,7 +209,7 @@ export const runScheduleWakeSchema = z
     scheduledAtSeconds: z.number().nonnegative(),
     observedWorldRevision: z.number().int().positive(),
     requiresDecision: z.boolean(),
-    status: z.enum(["informational", "pending"]),
+    status: z.enum(["informational", "pending", "claimed", "completed", "terminal"]),
   })
   .strict();
 
@@ -330,6 +333,49 @@ export const runArrivalObservationSchema = z
   })
   .strict();
 
+export const runActorSpatialFactsSchema = z
+  .object({
+    actorId: nonEmpty,
+    position: position3Schema,
+    reachableAnchorRefs: z.array(nonEmpty).max(64),
+    visibleActorIds: z.array(nonEmpty).max(5),
+    audibleActorIds: z.array(nonEmpty).max(5),
+    visibleObjectIds: z.array(nonEmpty).max(32),
+  })
+  .strict()
+  .superRefine((facts, context) => {
+    for (const key of [
+      "reachableAnchorRefs",
+      "visibleActorIds",
+      "audibleActorIds",
+      "visibleObjectIds",
+    ] as const) {
+      if (new Set(facts[key]).size !== facts[key].length) {
+        context.addIssue({
+          code: "custom",
+          path: [key],
+          message: `${key} must contain unique ids`,
+        });
+      }
+    }
+  });
+
+export const runSpatialFactsBatchSchema = z
+  .object({
+    observedWorldRevision: z.number().int().nonnegative(),
+    actors: z.array(runActorSpatialFactsSchema).length(6),
+  })
+  .strict()
+  .superRefine((batch, context) => {
+    if (new Set(batch.actors.map(actor => actor.actorId)).size !== batch.actors.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["actors"],
+        message: "spatial fact actorIds must be unique",
+      });
+    }
+  });
+
 export const runAdvanceRequestSchema = z
   .object({
     runId: nonEmpty,
@@ -338,14 +384,25 @@ export const runAdvanceRequestSchema = z
     afterSpeechSeq: z.number().int().nonnegative().optional(),
     elapsedSeconds: z.number().min(0).max(10),
     arrivals: z.array(runArrivalObservationSchema).max(6),
+    spatialFacts: runSpatialFactsBatchSchema.optional(),
   })
   .strict()
   .superRefine((request, context) => {
-    if (request.elapsedSeconds === 0 && request.arrivals.length === 0) {
+    if (request.elapsedSeconds === 0 && request.arrivals.length === 0 && !request.spatialFacts) {
       context.addIssue({
         code: "custom",
         path: ["elapsedSeconds"],
         message: "advance requires elapsed time or at least one arrival",
+      });
+    }
+    if (
+      request.spatialFacts &&
+      request.spatialFacts.observedWorldRevision !== request.observedWorldRevision
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["spatialFacts", "observedWorldRevision"],
+        message: "spatial facts must observe the same world revision as the advance",
       });
     }
     if (new Set(request.arrivals.map(arrival => arrival.actorId)).size !== request.arrivals.length) {
@@ -448,18 +505,40 @@ export const runNpcDecisionRequestSchema = z
   })
   .strict();
 
+export const runLookDeltaSchema = z
+  .object({
+    kind: z.literal("look"),
+    actorId: nonEmpty,
+    targetKind: z.enum(["actor", "object", "record"]),
+    targetId: nonEmpty,
+    worldRevision: z.number().int().positive(),
+  })
+  .strict();
+
+export const runDecisionDeltaSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("speech"), speechEvent: runAmbientSpeechEventSchema }).strict(),
+  z.object({ kind: z.literal("readiness"), readinessDelta: runActorReadinessDeltaSchema }).strict(),
+  runLookDeltaSchema,
+  z.object({ kind: z.literal("movement"), movementDelta: runMovementDeltaSchema }).strict(),
+]);
+
 export const runNpcDecisionResponseSchema = z
   .object({
     runId: nonEmpty,
     wakeId: nonEmpty,
+    decisionKind: z.enum(["ambient_conversation", "actor_goal"]),
+    wakeKind: z.enum(["meeting_ready", "goal"]),
+    actorIds: z.array(nonEmpty).min(1).max(2),
     status: z.enum(["completed", "queued", "stale", "budget_reserved", "failed"]),
     observedWorldRevision: z.number().int().nonnegative(),
     worldRevision: z.number().int().nonnegative(),
-    conversationId: nonEmpty,
-    participantActorIds: z.tuple([nonEmpty, nonEmpty]),
+    conversationId: nonEmpty.nullable(),
+    participantActorIds: z.array(nonEmpty).max(2),
     speechEvents: z.array(runAmbientSpeechEventSchema),
     actorReadinessDeltas: z.array(runActorReadinessDeltaSchema),
-    providerMetas: z.array(proposalMetaSchema).max(2),
+    actionDeltas: z.array(runDecisionDeltaSchema),
+    movementDeltas: z.array(runMovementDeltaSchema),
+    providerMetas: z.array(proposalMetaSchema).max(3),
   })
   .strict();
 
@@ -547,7 +626,7 @@ export const runSessionEndResponseSchema = z
     ended: z.literal(true),
     worldRevision: z.number().int().positive(),
     actor: runActorSchema,
-    queuedRunDeltas: z.tuple([]),
+    queuedRunDeltas: z.array(runDecisionDeltaSchema),
   })
   .strict();
 
@@ -589,12 +668,16 @@ export type RunSessionSnapshotResponse = z.infer<typeof runSessionSnapshotRespon
 export type RunAdvanceRequest = z.infer<typeof runAdvanceRequestSchema>;
 export type RunAdvanceResponse = z.infer<typeof runAdvanceResponseSchema>;
 export type RunArrivalObservation = z.infer<typeof runArrivalObservationSchema>;
+export type RunActorSpatialFacts = z.infer<typeof runActorSpatialFactsSchema>;
+export type RunSpatialFactsBatch = z.infer<typeof runSpatialFactsBatchSchema>;
 export type RunArrivalApplied = z.infer<typeof runArrivalAppliedSchema>;
 export type RunArrivalRejected = z.infer<typeof runArrivalRejectedSchema>;
 export type RunMovementDelta = z.infer<typeof runMovementDeltaSchema>;
 export type RunScheduleWake = z.infer<typeof runScheduleWakeSchema>;
 export type RunSchedulerSnapshot = z.infer<typeof runSchedulerSnapshotSchema>;
 export type RunActorReadinessDelta = z.infer<typeof runActorReadinessDeltaSchema>;
+export type RunDecisionDelta = z.infer<typeof runDecisionDeltaSchema>;
+export type RunLookDelta = z.infer<typeof runLookDeltaSchema>;
 export type RunNpcDecisionRequest = z.infer<typeof runNpcDecisionRequestSchema>;
 export type RunNpcDecisionResponse = z.infer<typeof runNpcDecisionResponseSchema>;
 

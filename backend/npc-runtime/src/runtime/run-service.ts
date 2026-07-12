@@ -1,9 +1,12 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import {
   DEFAULT_ROLE_POLICIES,
+  summarizeObservePacket,
   type ObservePacket,
 } from "../agentloop/context.js";
 import { toolCatalogForRole } from "../agentloop/tools.js";
+import { runBoundedProposalLoop } from "../agentloop/proposal-loop.js";
+import { TranscriptStore } from "../agentloop/transcript.js";
 import type { CoarseStance } from "../contracts/types.js";
 import {
   gameplayLocaleSchema,
@@ -35,20 +38,28 @@ import {
 import {
   advanceRunScheduler,
   alignActorForPlayerConversation,
+  claimRunWake,
   createRunScheduler,
+  emitRunWake,
+  finishRunWake,
+  issueActorGoalMovement,
+  ROUTE_CADENCE_SECONDS,
   snapshotRunScheduler,
   type RunSchedulerRuntime,
 } from "./run-scheduler.js";
 import type {
   RunActorReadinessDelta,
+  RunActorSpatialFacts,
   RunAmbientConversation,
   RunAmbientSpeechEvent,
   RunAmbientUtteranceMemory,
   RunAdvanceRequest,
   RunAdvanceResponse,
   RunActor,
+  RunDecisionDelta,
   RunJudgment,
   RunMemory,
+  RunMovementDelta,
   RunNextTurn,
   RunNpcDecisionRequest,
   RunNpcDecisionResponse,
@@ -75,7 +86,9 @@ const MAX_CONVERSATION_TURNS = 3;
 const AMBIENT_TURN_LIMIT = 2;
 const AMBIENT_MAX_CALLS_PER_TURN = 2;
 const AMBIENT_TOKEN_HEADROOM_PER_TURN = 4_000;
-const MAX_CONCURRENT_OPENING_PRELOADS = 2;
+const MAX_CONCURRENT_BACKGROUND_PROPOSALS = 2;
+const GOAL_MAX_ATTEMPTS = 3;
+const GOAL_SPEECH_COOLDOWN_SECONDS = 60;
 const PLAYER_CONVERSATION_GOAL =
   "Speak face to face with the outsider, ask only what your role and memories support, and form a memory-based personal stance.";
 
@@ -101,6 +114,7 @@ interface AmbientObservation {
   participantAnchorRefs: Record<string, string>;
   audibilityVolumeId: string;
   observePackets: Record<string, ObservePacket>;
+  participantEvidenceKeys: Record<string, string>;
 }
 
 interface AmbientResolvedTurn {
@@ -127,8 +141,60 @@ interface AmbientDecisionAttempt {
   providerMetas: ProposalMeta[];
   actorReadinessDeltas: RunActorReadinessDelta[];
   response?: RunNpcDecisionResponse;
+  deliveredViaSessionEnd?: boolean;
   inFlight?: Promise<RunNpcDecisionResponse>;
 }
+
+interface CanonicalSpatialFacts {
+  worldRevision: number;
+  actors: Map<string, RunActorSpatialFacts>;
+  materialSignatures: Map<string, string>;
+}
+
+type GoalAction =
+  | { tool: "wait"; reason: string }
+  | { tool: "look"; targetKind: "actor" | "object" | "record"; targetId: string }
+  | { tool: "talk_to"; targetActorId: string; utterance: string }
+  | { tool: "move_to"; targetAnchorRef: string };
+
+interface GoalObservation {
+  actorId: string;
+  goalKey: string;
+  factRevision: number;
+  factSignature: string;
+  observePacket: ObservePacket;
+  goal: string;
+}
+
+interface GoalDecisionAttempt {
+  signature: string;
+  request: RunNpcDecisionRequest;
+  actorId: string;
+  goalKey: string;
+  state: "unclaimed" | "resolving" | "queued" | "completed" | "terminal";
+  observation: GoalObservation | null;
+  resolvedAction: GoalAction | null;
+  actionMeta: ProposalMeta | null;
+  providerMetas: ProposalMeta[];
+  conversationId: string | null;
+  conversationActorIds: [string, string] | null;
+  conversationFactSignatures: Record<string, string>;
+  conversationEvidenceKeys: Record<string, string>;
+  resolvedTurns: AmbientResolvedTurn[];
+  response?: RunNpcDecisionResponse;
+  deliveredViaSessionEnd?: boolean;
+  inFlight?: Promise<RunNpcDecisionResponse>;
+}
+
+interface GoalConversationReplyClaim {
+  speakerActorId: string;
+  targetActorId: string;
+  observePacket: ObservePacket;
+}
+
+type GoalConversationReplyClaimResult =
+  | { claim: GoalConversationReplyClaim; response?: never }
+  | { claim?: never; response: RunNpcDecisionResponse };
 
 interface ConversationState {
   sessionId: string;
@@ -153,7 +219,7 @@ interface ConversationOpeningAttempt {
   inFlight?: Promise<RunSessionPreloadResponse>;
 }
 
-interface OpeningPreloadGate {
+interface BackgroundProviderGate {
   active: number;
   waiters: Array<() => void>;
 }
@@ -179,9 +245,14 @@ interface RunState {
   scheduler: RunSchedulerRuntime;
   advanceCache: Map<string, CachedAdvance>;
   ambientDecisions: Map<string, AmbientDecisionAttempt>;
+  goalDecisions: Map<string, GoalDecisionAttempt>;
   ambientSpeechEvents: RunAmbientSpeechEvent[];
   ambientSpeechCursor: number;
   activeAmbientConversation: RunAmbientConversation | null;
+  spatialFacts: CanonicalSpatialFacts | null;
+  completedGoalKeys: Set<string>;
+  lastGoalSpeechAt: Map<string, number>;
+  agentTranscript: TranscriptStore;
   conversations: Map<string, ConversationState>;
   conversationOpenings: Map<string, ConversationOpeningAttempt>;
   consumedConversationEvidence: Map<string, string>;
@@ -221,7 +292,8 @@ export type RunErrorCode =
   | "stale_world_revision"
   | "run_paused"
   | "hearing_due"
-  | "invalid_arrival";
+  | "invalid_arrival"
+  | "invalid_spatial_facts";
 
 export class RunError extends Error {
   constructor(
@@ -253,6 +325,21 @@ function advanceSignature(request: RunAdvanceRequest): string {
     const movementOrder = first.movementId.localeCompare(second.movementId);
     return movementOrder !== 0 ? movementOrder : first.anchorRef.localeCompare(second.anchorRef);
   });
+  const spatialFacts = request.spatialFacts
+    ? {
+        observedWorldRevision: request.spatialFacts.observedWorldRevision,
+        actors: [...request.spatialFacts.actors]
+          .sort((first, second) => first.actorId.localeCompare(second.actorId))
+          .map(actor => ({
+            actorId: actor.actorId,
+            position: actor.position,
+            reachableAnchorRefs: [...actor.reachableAnchorRefs].sort(),
+            visibleActorIds: [...actor.visibleActorIds].sort(),
+            audibleActorIds: [...actor.audibleActorIds].sort(),
+            visibleObjectIds: [...actor.visibleObjectIds].sort(),
+          })),
+      }
+    : undefined;
   return JSON.stringify({
     runId: request.runId,
     advanceId: request.advanceId,
@@ -260,6 +347,7 @@ function advanceSignature(request: RunAdvanceRequest): string {
     afterSpeechSeq: request.afterSpeechSeq ?? 0,
     elapsedSeconds: request.elapsedSeconds,
     arrivals,
+    spatialFacts,
   });
 }
 
@@ -309,11 +397,38 @@ function anchorLocationId(anchorRef: string): string {
   return anchorRef.split(".", 1)[0] ?? anchorRef;
 }
 
+function digest(value: string): string {
+  return createHash("sha256").update(value).digest("hex").slice(0, 16);
+}
+
+function canonicalSpatialActor(facts: RunActorSpatialFacts): RunActorSpatialFacts {
+  return {
+    actorId: facts.actorId,
+    position: [facts.position[0], facts.position[1], facts.position[2]],
+    reachableAnchorRefs: [...facts.reachableAnchorRefs].sort(),
+    visibleActorIds: [...facts.visibleActorIds].sort(),
+    audibleActorIds: [...facts.audibleActorIds].sort(),
+    visibleObjectIds: [...facts.visibleObjectIds].sort(),
+  };
+}
+
+function spatialMaterialSignature(facts: RunActorSpatialFacts): string {
+  // Continuous position drift is not a provider wake. Arrival has its own
+  // exact event; visibility, audibility, reachability, and objects are the
+  // material decision facts.
+  return JSON.stringify({
+    reachableAnchorRefs: facts.reachableAnchorRefs,
+    visibleActorIds: facts.visibleActorIds,
+    audibleActorIds: facts.audibleActorIds,
+    visibleObjectIds: facts.visibleObjectIds,
+  });
+}
+
 export class RunService {
   private readonly runs = new Map<string, RunState>();
   private readonly startCache = new Map<string, CachedStart>();
   private readonly runChains = new Map<string, Promise<unknown>>();
-  private readonly openingPreloadGates = new Map<string, OpeningPreloadGate>();
+  private readonly backgroundProviderGates = new Map<string, BackgroundProviderGate>();
   private readonly proposalPort: NpcProposalPort;
   private readonly idFactory: (prefix: IdPrefix) => string;
   private readonly layout: RunLayout;
@@ -384,9 +499,14 @@ export class RunService {
       scheduler,
       advanceCache: new Map(),
       ambientDecisions: new Map(),
+      goalDecisions: new Map(),
       ambientSpeechEvents: [],
       ambientSpeechCursor: 0,
       activeAmbientConversation: null,
+      spatialFacts: null,
+      completedGoalKeys: new Set(),
+      lastGoalSpeechAt: new Map(),
+      agentTranscript: new TranscriptStore(),
       conversations: new Map(),
       conversationOpenings: new Map(),
       consumedConversationEvidence: new Map(),
@@ -468,6 +588,65 @@ export class RunService {
         }
       }
 
+      let incomingSpatialFacts: Map<string, RunActorSpatialFacts> | null = null;
+      if (request.spatialFacts) {
+        if (request.spatialFacts.observedWorldRevision !== request.observedWorldRevision) {
+          throw new RunError(
+            "spatial facts must observe the same revision as the advance",
+            "invalid_spatial_facts",
+          );
+        }
+        const expectedActorIds = new Set(this.layout.actors.map(actor => actor.actorId));
+        const receivedActorIds = new Set(request.spatialFacts.actors.map(actor => actor.actorId));
+        if (
+          receivedActorIds.size !== expectedActorIds.size ||
+          [...expectedActorIds].some(actorId => !receivedActorIds.has(actorId))
+        ) {
+          throw new RunError(
+            "spatial facts must contain each of the six run actors exactly once",
+            "invalid_spatial_facts",
+          );
+        }
+        incomingSpatialFacts = new Map();
+        for (const rawFacts of request.spatialFacts.actors) {
+          const facts = canonicalSpatialActor(rawFacts);
+          for (const values of [
+            rawFacts.reachableAnchorRefs,
+            rawFacts.visibleActorIds,
+            rawFacts.audibleActorIds,
+            rawFacts.visibleObjectIds,
+          ]) {
+            if (new Set(values).size !== values.length) {
+              throw new RunError(
+                `spatial facts contain duplicate ids for ${rawFacts.actorId}`,
+                "invalid_spatial_facts",
+              );
+            }
+          }
+          if (facts.visibleObjectIds.length > 0) {
+            throw new RunError(
+              `spatial facts reference objects before a canonical object source exists: ${facts.actorId}`,
+              "invalid_spatial_facts",
+            );
+          }
+          if (facts.reachableAnchorRefs.some(anchorRef => !this.layout.anchorRefs.includes(anchorRef))) {
+            throw new RunError(
+              `spatial facts reference an unknown anchor for ${facts.actorId}`,
+              "invalid_spatial_facts",
+            );
+          }
+          for (const targetId of [...facts.visibleActorIds, ...facts.audibleActorIds]) {
+            if (!expectedActorIds.has(targetId) || targetId === facts.actorId) {
+              throw new RunError(
+                `spatial facts reference an invalid actor target ${facts.actorId}:${targetId}`,
+                "invalid_spatial_facts",
+              );
+            }
+          }
+          incomingSpatialFacts.set(facts.actorId, facts);
+        }
+      }
+
       const previousWorldRevision = run.worldRevision;
       const fromSeconds = run.elapsedSeconds;
       const appliedElapsedSeconds = Math.min(
@@ -485,6 +664,81 @@ export class RunService {
         arrivals: request.arrivals,
         observedWorldRevision: candidateWorldRevision,
       });
+      for (const arrival of schedulerResult.arrivalsApplied) {
+        emitRunWake(
+          run.scheduler,
+          {
+            wakeId: `wake:${run.runId}:arrival:${arrival.movementId}`,
+            kind: "arrival",
+            phase: "due",
+            sourceId: arrival.movementId,
+            actorIds: [arrival.actorId],
+            scheduledAtSeconds: fromSeconds,
+            observedWorldRevision: candidateWorldRevision,
+            requiresDecision: false,
+            status: "informational",
+          },
+          schedulerResult.scheduleWakes,
+        );
+      }
+
+      let spatialFactsChanged = false;
+      if (incomingSpatialFacts) {
+        const prior = run.spatialFacts;
+        for (const layoutActor of this.layout.actors) {
+          const facts = incomingSpatialFacts.get(layoutActor.actorId);
+          if (!facts) continue;
+          const materialSignature = spatialMaterialSignature(facts);
+          const priorMaterialSignature = prior?.materialSignatures.get(layoutActor.actorId);
+          if (priorMaterialSignature !== materialSignature) {
+            spatialFactsChanged = true;
+            emitRunWake(
+              run.scheduler,
+              {
+                wakeId: `wake:${run.runId}:observation:${layoutActor.actorId}:${candidateWorldRevision}`,
+                kind: "observation",
+                phase: "due",
+                sourceId: `spatial:${digest(materialSignature)}`,
+                actorIds: [layoutActor.actorId],
+                scheduledAtSeconds: toSeconds,
+                observedWorldRevision: candidateWorldRevision,
+                requiresDecision: false,
+                status: "informational",
+              },
+              schedulerResult.scheduleWakes,
+            );
+          }
+
+          const schedulerActor = run.scheduler.actors.get(layoutActor.actorId);
+          if (schedulerActor?.pendingMovement) continue;
+          const actor = this.requireActor(run, layoutActor.actorId);
+          const goalKey = this.actorGoalKey(run, actor, materialSignature, toSeconds);
+          const goalAlreadyCompleted = run.completedGoalKeys.has(`${actor.actorId}:${goalKey}`);
+          const goalAlreadyPending = [...run.scheduler.pendingWakes.values()].some(
+            wake =>
+              wake.kind === "goal" &&
+              wake.actorIds[0] === actor.actorId &&
+              wake.sourceId === goalKey &&
+              (wake.status === "pending" || wake.status === "claimed"),
+          );
+          if (goalAlreadyCompleted || goalAlreadyPending) continue;
+          emitRunWake(
+            run.scheduler,
+            {
+              wakeId: `wake:${run.runId}:goal:${actor.actorId}:${candidateWorldRevision}`,
+              kind: "goal",
+              phase: "due",
+              sourceId: goalKey,
+              actorIds: [actor.actorId],
+              scheduledAtSeconds: toSeconds,
+              observedWorldRevision: candidateWorldRevision,
+              requiresDecision: true,
+              status: "pending",
+            },
+            schedulerResult.scheduleWakes,
+          );
+        }
+      }
       const actorReadinessDeltas: RunActorReadinessDelta[] = [];
 
       // Arrivals are observations at the request's starting instant and are
@@ -511,11 +765,35 @@ export class RunService {
         this.reconcileConversationOpening(run, actor, actorReadinessDeltas);
       }
 
-      const materialMutation = schedulerMutation || actorReadinessDeltas.length > 0;
+      const spatialPositionChanged = incomingSpatialFacts
+        ? this.spatialPositionsChanged(run.spatialFacts, incomingSpatialFacts)
+        : false;
+      const materialMutation =
+        schedulerMutation ||
+        actorReadinessDeltas.length > 0 ||
+        spatialFactsChanged ||
+        spatialPositionChanged;
       if (materialMutation) {
         if (!schedulerMutation) run.elapsedSeconds = toSeconds;
         run.worldRevision = candidateWorldRevision;
+        if (incomingSpatialFacts) {
+          run.spatialFacts = {
+            worldRevision: candidateWorldRevision,
+            actors: incomingSpatialFacts,
+            materialSignatures: new Map(
+              [...incomingSpatialFacts].map(([actorId, facts]) => [
+                actorId,
+                spatialMaterialSignature(facts),
+              ]),
+            ),
+          };
+        }
       }
+      schedulerResult.scheduleWakes.sort((first, second) =>
+        first.scheduledAtSeconds === second.scheduledAtSeconds
+          ? first.wakeId.localeCompare(second.wakeId)
+          : first.scheduledAtSeconds - second.scheduledAtSeconds,
+      );
       const response: RunAdvanceResponse = {
         runId: run.runId,
         advanceId: request.advanceId,
@@ -559,9 +837,11 @@ export class RunService {
   decision(request: RunNpcDecisionRequest): Promise<RunNpcDecisionResponse> {
     const run = this.requireRun(request.runId);
     const signature = decisionSignature(request);
-    let attempt = run.ambientDecisions.get(request.wakeId);
-    if (attempt) {
-      if (attempt.signature !== signature) {
+    const ambientAttempt = run.ambientDecisions.get(request.wakeId);
+    const goalAttempt = run.goalDecisions.get(request.wakeId);
+    const existing = ambientAttempt ?? goalAttempt;
+    if (existing) {
+      if (existing.signature !== signature) {
         return Promise.reject(
           new RunError(
             "the same wakeId cannot be retried with a different payload",
@@ -569,28 +849,28 @@ export class RunService {
           ),
         );
       }
-      if (attempt.inFlight) return attempt.inFlight.then(response => clone(response));
+      if (existing.inFlight) return existing.inFlight.then(response => clone(response));
       if (
-        attempt.response &&
-        (attempt.state === "completed" || attempt.state === "terminal")
+        existing.response &&
+        (existing.state === "completed" || existing.state === "terminal")
       ) {
-        return Promise.resolve(clone(attempt.response));
+        return Promise.resolve(clone(existing.response));
       }
-    } else {
-      const wake = run.scheduler.pendingWakes.get(request.wakeId);
-      if (!wake) {
-        return Promise.reject(new RunError(`wake is not pending: ${request.wakeId}`, "wake_not_pending"));
-      }
-      if (wake.kind !== "meeting_ready" || wake.actorIds.length !== 2) {
-        return Promise.reject(
-          new RunError(`wake cannot open ambient speech: ${request.wakeId}`, "wake_not_supported"),
-        );
-      }
+    }
+
+    if (ambientAttempt) return this.startAmbientDecisionExecution(request.runId, ambientAttempt);
+    if (goalAttempt) return this.startGoalDecisionExecution(request.runId, goalAttempt);
+
+    const wake = run.scheduler.pendingWakes.get(request.wakeId);
+    if (!wake || wake.status !== "pending") {
+      return Promise.reject(new RunError(`wake is not pending: ${request.wakeId}`, "wake_not_pending"));
+    }
+    if (wake.kind === "meeting_ready" && wake.actorIds.length === 2) {
       const [firstActorId, secondActorId] = wake.actorIds;
       if (!firstActorId || !secondActorId) {
         return Promise.reject(new RunError("meeting wake has invalid participants", "wake_not_supported"));
       }
-      attempt = {
+      const attempt: AmbientDecisionAttempt = {
         signature,
         request: clone(request),
         windowId: wake.sourceId,
@@ -603,13 +883,56 @@ export class RunService {
         actorReadinessDeltas: [],
       };
       run.ambientDecisions.set(request.wakeId, attempt);
+      return this.startAmbientDecisionExecution(request.runId, attempt);
     }
+    if (wake.kind === "goal" && wake.actorIds.length === 1 && wake.actorIds[0]) {
+      const attempt: GoalDecisionAttempt = {
+        signature,
+        request: clone(request),
+        actorId: wake.actorIds[0],
+        goalKey: wake.sourceId,
+        state: "unclaimed",
+        observation: null,
+        resolvedAction: null,
+        actionMeta: null,
+        providerMetas: [],
+        conversationId: null,
+        conversationActorIds: null,
+        conversationFactSignatures: {},
+        conversationEvidenceKeys: {},
+        resolvedTurns: [],
+      };
+      run.goalDecisions.set(request.wakeId, attempt);
+      return this.startGoalDecisionExecution(request.runId, attempt);
+    }
+    return Promise.reject(
+      new RunError(`wake cannot open an NPC decision: ${request.wakeId}`, "wake_not_supported"),
+    );
+  }
 
-    const executing = this.executeAmbientDecision(request.runId, attempt);
+  private startAmbientDecisionExecution(
+    runId: string,
+    attempt: AmbientDecisionAttempt,
+  ): Promise<RunNpcDecisionResponse> {
+    const executing = this.executeAmbientDecision(runId, attempt);
     attempt.inFlight = executing;
     void executing
       .finally(() => {
         if (attempt?.inFlight === executing) attempt.inFlight = undefined;
+      })
+      .catch(() => undefined);
+    return executing.then(response => clone(response));
+  }
+
+  private startGoalDecisionExecution(
+    runId: string,
+    attempt: GoalDecisionAttempt,
+  ): Promise<RunNpcDecisionResponse> {
+    const executing = this.executeGoalDecision(runId, attempt);
+    attempt.inFlight = executing;
+    void executing
+      .finally(() => {
+        if (attempt.inFlight === executing) attempt.inFlight = undefined;
       })
       .catch(() => undefined);
     return executing.then(response => clone(response));
@@ -956,6 +1279,7 @@ export class RunService {
       conversation.status = "ended";
       conversation.activeTurn = null;
       if (run.activeConversationId === sessionId) run.activeConversationId = null;
+      const queuedRunDeltas = this.drainQueuedRunDeltas(run);
       actor.playerConversationReady = false;
       run.conversationOpenings.delete(actor.actorId);
       run.preloadRequiredEvidence.delete(actor.actorId);
@@ -964,13 +1288,16 @@ export class RunService {
         this.conversationEvidenceKey(run, actor),
       );
       run.worldRevision += 1;
+      for (const delta of queuedRunDeltas) {
+        if (delta.kind === "look") delta.worldRevision = run.worldRevision;
+      }
       const response: RunSessionEndResponse = {
         runId,
         sessionId,
         ended: true,
         worldRevision: run.worldRevision,
         actor: this.publicActor(actor),
-        queuedRunDeltas: [],
+        queuedRunDeltas,
       };
       conversation.endResponse = clone(response);
       return response;
@@ -993,6 +1320,935 @@ export class RunService {
       lastMemory: clone(conversation.lastMemory),
       lastProposalMeta: clone(conversation.lastProposalMeta),
     };
+  }
+
+  private drainQueuedRunDeltas(run: RunState): RunDecisionDelta[] {
+    const drained: RunDecisionDelta[] = [];
+    for (const attempt of run.ambientDecisions.values()) {
+      if (attempt.state !== "queued") continue;
+      const committed = this.commitAmbientDecision(run, attempt);
+      drained.push(...clone(committed.actionDeltas));
+      if (committed.actionDeltas.length > 0) {
+        attempt.deliveredViaSessionEnd = true;
+        attempt.response = {
+          ...clone(committed),
+          speechEvents: [],
+          actorReadinessDeltas: [],
+          actionDeltas: [],
+          movementDeltas: [],
+        };
+      }
+    }
+    for (const attempt of run.goalDecisions.values()) {
+      if (attempt.state !== "queued") continue;
+      const committed = this.commitGoalDecision(run, attempt);
+      drained.push(...clone(committed.actionDeltas));
+      if (committed.actionDeltas.length > 0) {
+        attempt.deliveredViaSessionEnd = true;
+        attempt.response = {
+          ...clone(committed),
+          speechEvents: [],
+          actorReadinessDeltas: [],
+          actionDeltas: [],
+          movementDeltas: [],
+        };
+      }
+    }
+    return drained;
+  }
+
+  private async executeGoalDecision(
+    runId: string,
+    attempt: GoalDecisionAttempt,
+  ): Promise<RunNpcDecisionResponse> {
+    if (attempt.state === "unclaimed") {
+      const early = await this.serialize(runId, async () =>
+        this.claimGoalDecision(this.requireRun(runId), attempt),
+      );
+      if (early) return early;
+    }
+    if (attempt.response && (attempt.state === "completed" || attempt.state === "terminal")) {
+      return clone(attempt.response);
+    }
+    if (attempt.state === "queued") {
+      return this.serialize(runId, async () =>
+        this.commitGoalDecision(this.requireRun(runId), attempt),
+      );
+    }
+
+    const observation = attempt.observation;
+    if (!observation) {
+      return this.serialize(runId, async () =>
+        this.finishGoalAttempt(this.requireRun(runId), attempt, "failed"),
+      );
+    }
+
+    let budgetReserved = false;
+    const budgetStop = new Error("goal_background_budget_reserved");
+    try {
+      const initialRun = this.requireRun(runId);
+      const loop = await runBoundedProposalLoop<GoalAction>({
+        sessionId: runId,
+        locale: initialRun.locale,
+        actorId: attempt.actorId,
+        goal: observation.goal,
+        maxAttempts: GOAL_MAX_ATTEMPTS,
+        proposalPort: this.proposalPort,
+        transcript: initialRun.agentTranscript,
+        observe: () => clone(observation.observePacket),
+        budgetCeiling: {
+          maxCalls: runAmbientCallCeiling(initialRun),
+          maxTokens: runAmbientTokenCeiling(initialRun),
+        },
+        invoke: async request => {
+          const reserveAvailable = await this.serialize(runId, async () => {
+            const run = this.requireRun(runId);
+            this.refreshProviderBudget(run);
+            return this.hasAmbientReserve(run, 1);
+          });
+          if (!reserveAvailable) {
+            budgetReserved = true;
+            throw budgetStop;
+          }
+          return this.withBackgroundProviderSlot(runId, () =>
+            this.proposalPort.proposeNextStep(request),
+          );
+        },
+        onMeta: async meta => {
+          await this.serialize(runId, async () => {
+            this.trackProposal(this.requireRun(runId), meta);
+          });
+          attempt.providerMetas.push(clone(meta));
+          while (attempt.providerMetas.length > 3) attempt.providerMetas.shift();
+          if (meta.fallbackReason === "budget_exhausted") {
+            budgetReserved = true;
+            throw budgetStop;
+          }
+        },
+        evaluate: proposal => {
+          const validated = this.validateGoalProposal(
+            this.requireRun(runId),
+            observation,
+            proposal,
+          );
+          if (validated.action) {
+            return {
+              status: "accepted",
+              value: validated.action,
+              validation: { ok: true, note: `validated ${validated.action.tool}` },
+              nextStepChange: "validated action is ready for fresh commit revalidation",
+            };
+          }
+          return {
+            status: "blocked",
+            validation: {
+              ok: false,
+              reason: validated.reason ?? "invalid_args",
+              detail: validated.detail ?? "goal proposal was not valid in current spatial facts",
+              note: validated.detail ?? "goal proposal blocked",
+            },
+            nextStepChange: `blocked (${validated.reason ?? "invalid_args"}); provider must re-plan`,
+          };
+        },
+      });
+      attempt.resolvedAction = loop.accepted[0] ?? null;
+      attempt.actionMeta = loop.accepted.length > 0 ? clone(loop.metas.at(-1) as ProposalMeta) : null;
+    } catch (error) {
+      if (budgetReserved || error === budgetStop) {
+        return this.serialize(runId, async () =>
+          this.finishGoalAttempt(this.requireRun(runId), attempt, "budget_reserved", true),
+        );
+      }
+      // The deterministic policy action below keeps the wake terminal and
+      // honest without granting any world mutation after provider failure.
+    }
+
+    if (attempt.resolvedAction?.tool === "talk_to" && attempt.actionMeta) {
+      const early = await this.resolveGoalConversationReply(runId, attempt);
+      if (early) return early;
+    }
+
+    if (!attempt.resolvedAction) {
+      attempt.resolvedAction = { tool: "wait", reason: "bounded goal fallback" };
+      const fallbackMeta = this.goalFallbackMeta("invalid_envelope");
+      attempt.actionMeta = fallbackMeta;
+      attempt.providerMetas = [
+        ...attempt.providerMetas.slice(-(GOAL_MAX_ATTEMPTS - 1)),
+        clone(fallbackMeta),
+      ];
+    }
+    return this.serialize(runId, async () => {
+      const run = this.requireRun(runId);
+      if (attempt.actionMeta?.usedFallback) {
+        this.trackProposal(run, attempt.actionMeta);
+        run.agentTranscript.append({
+          actorId: attempt.actorId,
+          step: run.agentTranscript.nextStep(attempt.actorId),
+          observedSummary: summarizeObservePacket(observation.observePacket),
+          tool: "wait",
+          args: { reason: "bounded goal fallback" },
+          rationale: "provider attempts exhausted; deterministic policy yields this beat",
+          proposalMeta: clone(attempt.actionMeta),
+          validation: { ok: true, note: "deterministic fallback wait" },
+          nextStepChange: "goal yields without a world mutation",
+        });
+      }
+      return this.commitGoalDecision(run, attempt);
+    });
+  }
+
+  private claimGoalDecision(
+    run: RunState,
+    attempt: GoalDecisionAttempt,
+  ): RunNpcDecisionResponse | null {
+    const pending = run.scheduler.pendingWakes.get(attempt.request.wakeId);
+    if (!pending || pending.status !== "pending") {
+      throw new RunError(`wake is not pending: ${attempt.request.wakeId}`, "wake_not_pending");
+    }
+    const wake = claimRunWake(run.scheduler, attempt.request.wakeId);
+    if (
+      !wake ||
+      wake.kind !== "goal" ||
+      wake.actorIds.length !== 1 ||
+      wake.actorIds[0] !== attempt.actorId ||
+      wake.sourceId !== attempt.goalKey
+    ) {
+      throw new RunError(`wake cannot open an actor goal: ${attempt.request.wakeId}`, "wake_not_supported");
+    }
+    const facts = run.spatialFacts?.actors.get(attempt.actorId);
+    if (
+      wake.observedWorldRevision !== attempt.request.observedWorldRevision ||
+      !facts ||
+      run.scheduler.actors.get(attempt.actorId)?.pendingMovement
+    ) {
+      return this.finishGoalAttempt(run, attempt, "stale");
+    }
+    const actor = this.requireActor(run, attempt.actorId);
+    const factSignature = spatialMaterialSignature(facts);
+    if (this.actorGoalKey(run, actor, factSignature) !== attempt.goalKey) {
+      return this.finishGoalAttempt(run, attempt, "stale");
+    }
+    this.refreshProviderBudget(run);
+    if (!this.hasAmbientReserve(run, 1)) {
+      return this.finishGoalAttempt(run, attempt, "budget_reserved", true);
+    }
+    const policy = DEFAULT_ROLE_POLICIES[actor.role];
+    const goal = [...policy.stableGoals, "Advance one currently actionable role goal, then yield."].join(" ");
+    const observePacket = this.runObservePacket(
+      run,
+      actor,
+      facts.visibleActorIds,
+      [goal],
+      [],
+      facts,
+    );
+    observePacket.reachableAnchorRefs = facts.reachableAnchorRefs.filter(anchorRef =>
+      this.schedulePermitsAnchor(run, actor.actorId, anchorRef) &&
+      run.scheduler.actors.get(actor.actorId)?.confirmedAnchorRef !== anchorRef,
+    );
+    const offeredTools: ObservePacket["toolCatalog"] = ["wait"];
+    if (observePacket.reachableAnchorRefs.length > 0) offeredTools.unshift("move_to");
+    if (
+      observePacket.visibleActors.length > 0 ||
+      observePacket.visibleObjects.length > 0 ||
+      observePacket.visibleRecords.length > 0
+    ) offeredTools.unshift("look");
+    const lastSpokeAt = run.lastGoalSpeechAt.get(actor.actorId);
+    const talkAvailable =
+      run.activeAmbientConversation === null &&
+      (lastSpokeAt === undefined ||
+        run.elapsedSeconds - lastSpokeAt >= GOAL_SPEECH_COOLDOWN_SECONDS) &&
+      facts.visibleActorIds.some(targetActorId => {
+        const targetFacts = run.spatialFacts?.actors.get(targetActorId);
+        const targetLastSpokeAt = run.lastGoalSpeechAt.get(targetActorId);
+        return Boolean(
+          facts.audibleActorIds.includes(targetActorId) &&
+          targetFacts?.audibleActorIds.includes(actor.actorId) &&
+          (targetLastSpokeAt === undefined ||
+            run.elapsedSeconds - targetLastSpokeAt >= GOAL_SPEECH_COOLDOWN_SECONDS) &&
+          !run.scheduler.actors.get(targetActorId)?.pendingMovement &&
+          this.spatialAudibilityVolume(run, actor.actorId, targetActorId),
+        );
+      });
+    if (talkAvailable) offeredTools.unshift("talk_to");
+    observePacket.toolCatalog = offeredTools;
+    attempt.observation = {
+      actorId: actor.actorId,
+      goalKey: attempt.goalKey,
+      factRevision: run.worldRevision,
+      factSignature,
+      observePacket,
+      goal,
+    };
+    attempt.state = "resolving";
+    return null;
+  }
+
+  private validateGoalProposal(
+    run: RunState,
+    observation: GoalObservation,
+    proposal: AgentStepProposal,
+  ): { action?: GoalAction; reason?: string; detail?: string } {
+    const parsed = agentStepProposalSchema.safeParse({
+      toolCall: proposal.toolCall ?? null,
+      utterance: proposal.utterance ?? null,
+      rationale: proposal.rationale,
+      done: proposal.done,
+    });
+    if (!parsed.success) {
+      return { reason: "invalid_args", detail: "agent step envelope is invalid" };
+    }
+    const step = parsed.data;
+    if (step.done && !step.toolCall) {
+      return { action: { tool: "wait", reason: step.rationale } };
+    }
+    const call = step.toolCall;
+    if (!call) return { reason: "invalid_args", detail: "goal step requires a tool or done" };
+    const asId = (value: unknown): string | null =>
+      typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+    switch (call.tool) {
+      case "wait":
+        return {
+          action: {
+            tool: "wait",
+            reason: asId(call.args.reason) ?? step.rationale,
+          },
+        };
+      case "look": {
+        const targetId = asId(call.args.targetId);
+        if (!targetId) return { reason: "invalid_args", detail: "look requires targetId" };
+        if (observation.observePacket.visibleActors.includes(targetId)) {
+          return { action: { tool: "look", targetKind: "actor", targetId } };
+        }
+        if (observation.observePacket.visibleObjects.some(object => object.objectId === targetId)) {
+          return { action: { tool: "look", targetKind: "object", targetId } };
+        }
+        if (observation.observePacket.visibleRecords.some(record => record.recordId === targetId)) {
+          return { action: { tool: "look", targetKind: "record", targetId } };
+        }
+        return { reason: "not_visible", detail: `${targetId} is not visible` };
+      }
+      case "talk_to": {
+        const targetActorId = asId(call.args.actorId);
+        if (!targetActorId || !step.utterance) {
+          return { reason: "invalid_args", detail: "talk_to requires actorId and utterance" };
+        }
+        if (
+          run.activeAmbientConversation !== null ||
+          !observation.observePacket.visibleActors.includes(targetActorId) ||
+          !observation.observePacket.audibleActorIds.includes(targetActorId) ||
+          !run.spatialFacts?.actors.get(targetActorId)?.audibleActorIds.includes(observation.actorId)
+        ) {
+          return { reason: "target_unavailable", detail: `${targetActorId} is not visible and audible` };
+        }
+        const lastSpokeAt = run.lastGoalSpeechAt.get(observation.actorId);
+        const targetLastSpokeAt = run.lastGoalSpeechAt.get(targetActorId);
+        if (
+          (lastSpokeAt !== undefined &&
+            run.elapsedSeconds - lastSpokeAt < GOAL_SPEECH_COOLDOWN_SECONDS) ||
+          (targetLastSpokeAt !== undefined &&
+            run.elapsedSeconds - targetLastSpokeAt < GOAL_SPEECH_COOLDOWN_SECONDS)
+        ) {
+          return {
+            reason: "target_unavailable",
+            detail: "a participant already spoke during this world-time instant",
+          };
+        }
+        if (!this.spatialAudibilityVolume(run, observation.actorId, targetActorId)) {
+          return {
+            reason: "target_unavailable",
+            detail: `${targetActorId} has no authored audibility volume shared with the speaker`,
+          };
+        }
+        return { action: { tool: "talk_to", targetActorId, utterance: step.utterance } };
+      }
+      case "move_to": {
+        const targetAnchorRef = asId(call.args.targetId);
+        if (!targetAnchorRef) {
+          return { reason: "invalid_args", detail: "move_to requires targetId" };
+        }
+        if (!observation.observePacket.reachableAnchorRefs.includes(targetAnchorRef)) {
+          return { reason: "unreachable", detail: `${targetAnchorRef} is not navmesh-reachable` };
+        }
+        if (!this.schedulePermitsAnchor(run, observation.actorId, targetAnchorRef)) {
+          return { reason: "unreachable", detail: `${targetAnchorRef} is outside current schedule policy` };
+        }
+        return { action: { tool: "move_to", targetAnchorRef } };
+      }
+      default:
+        return { reason: "role_authority_exceeded", detail: `${call.tool} is not legal for a T4 goal wake` };
+    }
+  }
+
+  private async resolveGoalConversationReply(
+    runId: string,
+    attempt: GoalDecisionAttempt,
+  ): Promise<RunNpcDecisionResponse | null> {
+    const claimed = await this.serialize(runId, async () =>
+      this.claimGoalConversationReply(this.requireRun(runId), attempt),
+    );
+    if (claimed.response) return claimed.response;
+    const claim = claimed.claim;
+    const budgetStop = new Error("goal_conversation_budget_reserved");
+    let budgetReserved = false;
+    try {
+      const run = this.requireRun(runId);
+      const loop = await runBoundedProposalLoop<AmbientResolvedTurn>({
+        sessionId: runId,
+        locale: run.locale,
+        actorId: claim.speakerActorId,
+        goal: "Reply once to the resident who addressed you, then end this exchange cleanly.",
+        maxAttempts: 1,
+        proposalPort: this.proposalPort,
+        transcript: run.agentTranscript,
+        observe: () => clone(claim.observePacket),
+        budgetCeiling: {
+          maxCalls: runAmbientCallCeiling(run),
+          maxTokens: runAmbientTokenCeiling(run),
+        },
+        invoke: async request => {
+          const reserveAvailable = await this.serialize(runId, async () => {
+            const current = this.requireRun(runId);
+            this.refreshProviderBudget(current);
+            return this.hasAmbientReserve(current, 1);
+          });
+          if (!reserveAvailable) {
+            budgetReserved = true;
+            throw budgetStop;
+          }
+          return this.withBackgroundProviderSlot(runId, () =>
+            this.proposalPort.proposeNextStep({
+              ...request,
+              requiredToolCall: { tool: "talk_to", actorId: claim.targetActorId },
+              requireUtterance: true,
+            }),
+          );
+        },
+        onMeta: async meta => {
+          await this.serialize(runId, async () => {
+            this.trackProposal(this.requireRun(runId), meta);
+          });
+          attempt.providerMetas.push(clone(meta));
+          while (attempt.providerMetas.length > 3) attempt.providerMetas.shift();
+          if (meta.fallbackReason === "budget_exhausted") {
+            budgetReserved = true;
+            throw budgetStop;
+          }
+        },
+        evaluate: (proposal, meta) => {
+          const line = this.validatedAmbientLine(
+            { proposal, meta },
+            claim.observePacket,
+            claim.targetActorId,
+          );
+          if (!line || !claim.observePacket.audibleActorIds.includes(claim.targetActorId)) {
+            return {
+              status: "blocked",
+              validation: {
+                ok: false,
+                reason: "target_unavailable",
+                detail: "reply target is not currently visible and audible",
+                note: "reply was blocked",
+              },
+              nextStepChange: "bounded exchange ends without committing partial speech",
+            };
+          }
+          return {
+            status: "accepted",
+            value: {
+              speakerActorId: claim.speakerActorId,
+              targetActorId: claim.targetActorId,
+              line,
+              meta: clone(meta),
+            },
+            validation: { ok: true, note: "validated bounded reply" },
+            nextStepChange: "the two-turn exchange is ready for fresh commit revalidation",
+          };
+        },
+      });
+      const reply = loop.accepted[0];
+      if (reply) {
+        attempt.resolvedTurns.push(reply);
+        return null;
+      }
+    } catch (error) {
+      if (budgetReserved || error === budgetStop) {
+        return this.serialize(runId, async () =>
+          this.finishGoalAttempt(this.requireRun(runId), attempt, "budget_reserved", true),
+        );
+      }
+    }
+
+    await this.serialize(runId, async () => {
+      const current = this.requireRun(runId);
+      if (current.activeAmbientConversation?.wakeId === attempt.request.wakeId) {
+        current.activeAmbientConversation = null;
+      }
+      attempt.resolvedAction = null;
+      attempt.actionMeta = null;
+      attempt.conversationId = null;
+      attempt.conversationActorIds = null;
+      attempt.conversationFactSignatures = {};
+      attempt.conversationEvidenceKeys = {};
+      attempt.resolvedTurns = [];
+    });
+    return null;
+  }
+
+  private claimGoalConversationReply(
+    run: RunState,
+    attempt: GoalDecisionAttempt,
+  ): GoalConversationReplyClaimResult {
+    const action = attempt.resolvedAction;
+    if (!attempt.observation || action?.tool !== "talk_to" || !attempt.actionMeta) {
+      return { response: this.finishGoalAttempt(run, attempt, "failed") };
+    }
+    if (
+      run.activeAmbientConversation &&
+      run.activeAmbientConversation.wakeId !== attempt.request.wakeId
+    ) {
+      return { response: this.finishGoalAttempt(run, attempt, "failed") };
+    }
+    const speakerFacts = run.spatialFacts?.actors.get(attempt.actorId);
+    const targetFacts = run.spatialFacts?.actors.get(action.targetActorId);
+    const volume = this.spatialAudibilityVolume(run, attempt.actorId, action.targetActorId);
+    const targetLastSpokeAt = run.lastGoalSpeechAt.get(action.targetActorId);
+    const actor = this.requireActor(run, attempt.actorId);
+    if (
+      !speakerFacts ||
+      !targetFacts ||
+      !volume ||
+      this.actorGoalKey(run, actor, spatialMaterialSignature(speakerFacts)) !== attempt.goalKey ||
+      (targetLastSpokeAt !== undefined &&
+        run.elapsedSeconds - targetLastSpokeAt < GOAL_SPEECH_COOLDOWN_SECONDS) ||
+      !this.goalActionStillValid(run, attempt, speakerFacts)
+    ) {
+      return { response: this.finishGoalAttempt(run, attempt, "stale") };
+    }
+    const target = this.requireActor(run, action.targetActorId);
+    const goal = "Reply once to the resident who addressed you, using only what you heard and know.";
+    const observePacket = this.runObservePacket(
+      run,
+      target,
+      targetFacts.visibleActorIds,
+      [goal],
+      [`${attempt.actorId}: ${action.utterance}`],
+      targetFacts,
+    );
+    observePacket.toolCatalog = ["talk_to", "wait"];
+    const conversationId = `goal:${attempt.request.wakeId}`;
+    attempt.conversationId = conversationId;
+    attempt.conversationActorIds = [attempt.actorId, action.targetActorId];
+    attempt.conversationFactSignatures = {
+      [attempt.actorId]: spatialMaterialSignature(speakerFacts),
+      [action.targetActorId]: spatialMaterialSignature(targetFacts),
+    };
+    attempt.conversationEvidenceKeys = {
+      [attempt.actorId]: this.conversationEvidenceKey(run, this.requireActor(run, attempt.actorId)),
+      [action.targetActorId]: this.conversationEvidenceKey(run, target),
+    };
+    attempt.resolvedTurns = [{
+      speakerActorId: attempt.actorId,
+      targetActorId: action.targetActorId,
+      line: action.utterance,
+      meta: clone(attempt.actionMeta),
+    }];
+    run.activeAmbientConversation = {
+      conversationId,
+      wakeId: attempt.request.wakeId,
+      participantActorIds: [attempt.actorId, action.targetActorId],
+      initiatorActorId: attempt.actorId,
+      currentSpeakerActorId: action.targetActorId,
+      observedWorldRevision: attempt.observation.factRevision,
+      status: "resolving",
+      turnLimit: 2,
+      audibilityVolumeId: volume.volumeId,
+    };
+    return {
+      claim: {
+        speakerActorId: action.targetActorId,
+        targetActorId: attempt.actorId,
+        observePacket,
+      },
+    };
+  }
+
+  private commitGoalDecision(
+    run: RunState,
+    attempt: GoalDecisionAttempt,
+  ): RunNpcDecisionResponse {
+    if (attempt.response && attempt.state === "completed") return clone(attempt.response);
+    if (!attempt.observation || !attempt.resolvedAction || !attempt.actionMeta) {
+      return this.finishGoalAttempt(run, attempt, "failed");
+    }
+    if (run.activeConversationId !== null) {
+      if (attempt.state === "queued" && attempt.response) return clone(attempt.response);
+      attempt.state = "queued";
+      if (run.activeAmbientConversation?.wakeId === attempt.request.wakeId) {
+        run.activeAmbientConversation.status = "queued";
+      }
+      const response = this.goalDecisionResponse(run, attempt, "queued", [], []);
+      attempt.response = clone(response);
+      return response;
+    }
+
+    const facts = run.spatialFacts?.actors.get(attempt.actorId);
+    const actor = this.requireActor(run, attempt.actorId);
+    if (
+      !facts ||
+      spatialMaterialSignature(facts) !== attempt.observation.factSignature ||
+      this.actorGoalKey(run, actor, attempt.observation.factSignature) !== attempt.goalKey ||
+      run.scheduler.actors.get(attempt.actorId)?.pendingMovement ||
+      !this.goalActionStillValid(run, attempt, facts)
+    ) {
+      return this.finishGoalAttempt(run, attempt, "stale");
+    }
+
+    const actionDeltas: RunDecisionDelta[] = [];
+    const movementDeltas: RunMovementDelta[] = [];
+    const readinessDeltas: RunActorReadinessDelta[] = [];
+    const action = attempt.resolvedAction;
+    if (action.tool === "look") {
+      actionDeltas.push({
+        kind: "look",
+        actorId: actor.actorId,
+        targetKind: action.targetKind,
+        targetId: action.targetId,
+        worldRevision: run.worldRevision,
+      });
+    } else if (action.tool === "move_to") {
+      const movement = issueActorGoalMovement({
+        runId: run.runId,
+        layout: this.layout,
+        runtime: run.scheduler,
+        actorId: actor.actorId,
+        targetAnchorRef: action.targetAnchorRef,
+        elapsedSeconds: run.elapsedSeconds,
+      });
+      if (!movement) return this.finishGoalAttempt(run, attempt, "stale");
+      run.worldRevision += 1;
+      movementDeltas.push(movement);
+      actionDeltas.push({ kind: "movement", movementDelta: clone(movement) });
+      this.setActorReadiness(actor, false, "movement_started", readinessDeltas);
+    } else if (action.tool === "talk_to") {
+      const events = this.commitGoalConversation(run, attempt);
+      if (!events) return this.finishGoalAttempt(run, attempt, "stale");
+      for (const event of events) {
+        actionDeltas.push({ kind: "speech", speechEvent: clone(event) });
+        for (const holderId of [event.speakerActorId, ...event.listenerActorIds]) {
+          this.reconcileConversationOpening(run, this.requireActor(run, holderId), readinessDeltas);
+        }
+      }
+    }
+    for (const readinessDelta of readinessDeltas) {
+      actionDeltas.push({ kind: "readiness", readinessDelta: clone(readinessDelta) });
+    }
+
+    this.rememberCompletedGoal(run, actor.actorId, attempt.goalKey);
+    attempt.state = "completed";
+    finishRunWake(run.scheduler, attempt.request.wakeId, "completed");
+    const response = this.goalDecisionResponse(
+      run,
+      attempt,
+      "completed",
+      actionDeltas,
+      movementDeltas,
+      readinessDeltas,
+    );
+    attempt.response = clone(response);
+    return response;
+  }
+
+  private commitGoalConversation(
+    run: RunState,
+    attempt: GoalDecisionAttempt,
+  ): RunAmbientSpeechEvent[] | null {
+    const participants = attempt.conversationActorIds;
+    const active = run.activeAmbientConversation;
+    if (
+      !attempt.observation ||
+      !attempt.conversationId ||
+      !participants ||
+      attempt.resolvedTurns.length !== 2 ||
+      !active ||
+      active.wakeId !== attempt.request.wakeId ||
+      active.conversationId !== attempt.conversationId
+    ) return null;
+    for (const actorId of participants) {
+      const facts = run.spatialFacts?.actors.get(actorId);
+      const lastSpokeAt = run.lastGoalSpeechAt.get(actorId);
+      if (
+        !facts ||
+        run.scheduler.actors.get(actorId)?.pendingMovement ||
+        (lastSpokeAt !== undefined &&
+          run.elapsedSeconds - lastSpokeAt < GOAL_SPEECH_COOLDOWN_SECONDS) ||
+        this.conversationEvidenceKey(run, this.requireActor(run, actorId)) !==
+          attempt.conversationEvidenceKeys[actorId] ||
+        spatialMaterialSignature(facts) !== attempt.conversationFactSignatures[actorId]
+      ) return null;
+    }
+    const expectedVolumeId = active.audibilityVolumeId;
+    const events = this.commitResolvedConversationTurns(run, {
+      wakeId: attempt.request.wakeId,
+      conversationId: attempt.conversationId,
+      observedWorldRevision: attempt.observation.factRevision,
+      turns: attempt.resolvedTurns,
+      resolveAudibility: turn => {
+        const volume = this.spatialAudibilityVolume(run, turn.speakerActorId, turn.targetActorId);
+        const speakerPosition = run.spatialFacts?.actors.get(turn.speakerActorId)?.position;
+        if (!volume || volume.volumeId !== expectedVolumeId || !speakerPosition) return null;
+        const listenerActorIds = this.spatialNpcListeners(
+          run,
+          turn.speakerActorId,
+          volume,
+          speakerPosition,
+        );
+        return listenerActorIds.includes(turn.targetActorId)
+          ? { volume, speakerPosition, listenerActorIds }
+          : null;
+      },
+    });
+    if (events) {
+      this.rememberPostCommitParticipantGoals(run, participants);
+      run.activeAmbientConversation = null;
+    }
+    return events;
+  }
+
+  private commitResolvedConversationTurns(
+    run: RunState,
+    options: {
+      wakeId: string;
+      conversationId: string;
+      observedWorldRevision: number;
+      turns: AmbientResolvedTurn[];
+      resolveAudibility: (turn: AmbientResolvedTurn) => {
+        volume: RunAudibilityVolume;
+        speakerPosition: readonly [number, number, number];
+        listenerActorIds: string[];
+      } | null;
+    },
+  ): RunAmbientSpeechEvent[] | null {
+    const resolvedAudibility = options.turns.map(turn => options.resolveAudibility(turn));
+    if (resolvedAudibility.some(value => value === null)) return null;
+    const committed: RunAmbientSpeechEvent[] = [];
+    for (let turnIndex = 0; turnIndex < options.turns.length; turnIndex += 1) {
+      const turn = options.turns[turnIndex];
+      const audibility = resolvedAudibility[turnIndex];
+      if (!turn || !audibility) return null;
+      const seq = run.ambientSpeechCursor + 1;
+      const worldRevision = run.worldRevision + 1;
+      const event: RunAmbientSpeechEvent = {
+        seq,
+        eventId: `speech:${run.runId}:${seq}`,
+        wakeId: options.wakeId,
+        conversationId: options.conversationId,
+        turnId: `${options.conversationId}#${turnIndex}`,
+        speakerActorId: turn.speakerActorId,
+        targetActorId: turn.targetActorId,
+        listenerActorIds: clone(audibility.listenerActorIds),
+        line: turn.line,
+        worldSeconds: run.elapsedSeconds,
+        observedWorldRevision: options.observedWorldRevision,
+        worldRevision,
+        audibility: {
+          volumeId: audibility.volume.volumeId,
+          maxSpeechDistanceM: audibility.volume.maxSpeechDistanceM,
+          speakerPosition: [
+            audibility.speakerPosition[0],
+            audibility.speakerPosition[1],
+            audibility.speakerPosition[2],
+          ],
+        },
+        proposalMeta: clone(turn.meta),
+      };
+      for (const holderActorId of [turn.speakerActorId, ...audibility.listenerActorIds]) {
+        const memory: RunAmbientUtteranceMemory = {
+          ...clone(event),
+          memoryId: this.idFactory("mem"),
+          kind: "ambient_utterance",
+        };
+        this.requireActor(run, holderActorId).memories.push(memory);
+      }
+      run.ambientSpeechCursor = seq;
+      run.ambientSpeechEvents.push(event);
+      run.lastGoalSpeechAt.set(turn.speakerActorId, run.elapsedSeconds);
+      run.worldRevision = worldRevision;
+      committed.push(event);
+    }
+    return committed;
+  }
+
+  private spatialNpcListeners(
+    run: RunState,
+    speakerActorId: string,
+    volume: RunAudibilityVolume,
+    speakerPosition: readonly [number, number, number],
+  ): string[] {
+    const spatial = run.spatialFacts;
+    if (!spatial) return [];
+    return [...spatial.actors.values()]
+      .filter(facts =>
+        facts.actorId !== speakerActorId &&
+        facts.audibleActorIds.includes(speakerActorId) &&
+        volumeContains(volume, facts.position) &&
+        distanceBetween(speakerPosition, facts.position) <= volume.maxSpeechDistanceM,
+      )
+      .map(facts => facts.actorId)
+      .sort();
+  }
+
+  private spatialAudibilityVolume(
+    run: RunState,
+    speakerActorId: string,
+    targetActorId: string,
+  ): RunAudibilityVolume | null {
+    const speaker = run.spatialFacts?.actors.get(speakerActorId);
+    const target = run.spatialFacts?.actors.get(targetActorId);
+    if (!speaker || !target) return null;
+    return this.layout.audibilityVolumes.find(
+      volume =>
+        volumeContains(volume, speaker.position) &&
+        volumeContains(volume, target.position) &&
+        distanceBetween(speaker.position, target.position) <= volume.maxSpeechDistanceM,
+    ) ?? null;
+  }
+
+  private finishGoalAttempt(
+    run: RunState,
+    attempt: GoalDecisionAttempt,
+    status: "stale" | "budget_reserved" | "failed",
+    completeGoalKey = false,
+  ): RunNpcDecisionResponse {
+    this.refreshProviderBudget(run);
+    attempt.state = "terminal";
+    if (run.activeAmbientConversation?.wakeId === attempt.request.wakeId) {
+      run.activeAmbientConversation = null;
+    }
+    finishRunWake(run.scheduler, attempt.request.wakeId, "terminal");
+    if (completeGoalKey) this.rememberCompletedGoal(run, attempt.actorId, attempt.goalKey);
+    const response = this.goalDecisionResponse(run, attempt, status, [], []);
+    attempt.response = clone(response);
+    return response;
+  }
+
+  private goalDecisionResponse(
+    run: RunState,
+    attempt: GoalDecisionAttempt,
+    status: RunNpcDecisionResponse["status"],
+    actionDeltas: RunDecisionDelta[],
+    movementDeltas: RunMovementDelta[],
+    actorReadinessDeltas: RunActorReadinessDelta[] = [],
+  ): RunNpcDecisionResponse {
+    const speechEvents = actionDeltas
+      .filter((delta): delta is Extract<RunDecisionDelta, { kind: "speech" }> => delta.kind === "speech")
+      .map(delta => clone(delta.speechEvent));
+    return {
+      runId: run.runId,
+      wakeId: attempt.request.wakeId,
+      decisionKind: "actor_goal",
+      wakeKind: "goal",
+      actorIds: [attempt.actorId],
+      status,
+      observedWorldRevision: attempt.request.observedWorldRevision,
+      worldRevision: run.worldRevision,
+      conversationId: attempt.conversationId,
+      participantActorIds: clone(attempt.conversationActorIds ?? []),
+      speechEvents,
+      actorReadinessDeltas: clone(actorReadinessDeltas),
+      actionDeltas: clone(actionDeltas),
+      movementDeltas: clone(movementDeltas),
+      providerMetas: clone(attempt.providerMetas),
+    };
+  }
+
+  private schedulePermitsAnchor(run: RunState, actorId: string, anchorRef: string): boolean {
+    const actor = this.layout.actors.find(candidate => candidate.actorId === actorId);
+    const block = actor?.scheduleBlocks.find(
+      candidate => candidate.startSeconds <= run.elapsedSeconds && run.elapsedSeconds < candidate.endSeconds,
+    );
+    if (!block) return false;
+    if (block.target.kind === "anchor") return block.target.id === anchorRef;
+    const schedulerActor = run.scheduler.actors.get(actorId);
+    const points = this.layout.routes.find(route => route.routeId === block.target.id)?.points;
+    if (
+      !schedulerActor ||
+      !points ||
+      schedulerActor.routePointIndex === null ||
+      schedulerActor.routePointArrivedAtSeconds === null ||
+      run.elapsedSeconds < schedulerActor.routePointArrivedAtSeconds + ROUTE_CADENCE_SECONDS
+    ) return false;
+    return points[(schedulerActor.routePointIndex + 1) % points.length] === anchorRef;
+  }
+
+  private goalActionStillValid(
+    run: RunState,
+    attempt: GoalDecisionAttempt,
+    facts: RunActorSpatialFacts,
+  ): boolean {
+    const action = attempt.resolvedAction;
+    if (!action || action.tool === "wait") return action !== null;
+    if (action.tool === "look") {
+      if (action.targetKind === "actor") return facts.visibleActorIds.includes(action.targetId);
+      if (action.targetKind === "object") return facts.visibleObjectIds.includes(action.targetId);
+      return run.records.some(
+        record =>
+          record.recordId === action.targetId &&
+          record.visibleToActorIds.includes(attempt.actorId),
+      );
+    }
+    if (action.tool === "move_to") {
+      return (
+        facts.reachableAnchorRefs.includes(action.targetAnchorRef) &&
+        this.schedulePermitsAnchor(run, attempt.actorId, action.targetAnchorRef) &&
+        run.scheduler.actors.get(attempt.actorId)?.confirmedAnchorRef !== action.targetAnchorRef
+      );
+    }
+    const targetFacts = run.spatialFacts?.actors.get(action.targetActorId);
+    const lastSpokeAt = run.lastGoalSpeechAt.get(attempt.actorId);
+    const targetLastSpokeAt = run.lastGoalSpeechAt.get(action.targetActorId);
+    return Boolean(
+      targetFacts &&
+      (run.activeAmbientConversation === null ||
+        run.activeAmbientConversation.wakeId === attempt.request.wakeId) &&
+      !run.scheduler.actors.get(action.targetActorId)?.pendingMovement &&
+      facts.visibleActorIds.includes(action.targetActorId) &&
+      facts.audibleActorIds.includes(action.targetActorId) &&
+      targetFacts.audibleActorIds.includes(attempt.actorId) &&
+      this.spatialAudibilityVolume(run, attempt.actorId, action.targetActorId) &&
+      (lastSpokeAt === undefined ||
+        run.elapsedSeconds - lastSpokeAt >= GOAL_SPEECH_COOLDOWN_SECONDS) &&
+      (targetLastSpokeAt === undefined ||
+        run.elapsedSeconds - targetLastSpokeAt >= GOAL_SPEECH_COOLDOWN_SECONDS),
+    );
+  }
+
+  private goalFallbackMeta(reason: ProposalMeta["fallbackReason"]): ProposalMeta {
+    return {
+      profileId: this.proposalPort.profileId,
+      transport: "fallback",
+      usedFallback: true,
+      ...(reason ? { fallbackReason: reason } : {}),
+    };
+  }
+
+  private rememberCompletedGoal(run: RunState, actorId: string, goalKey: string): void {
+    run.completedGoalKeys.add(`${actorId}:${goalKey}`);
+    while (run.completedGoalKeys.size > 512) {
+      const oldest = run.completedGoalKeys.values().next().value as string | undefined;
+      if (!oldest) break;
+      run.completedGoalKeys.delete(oldest);
+    }
+  }
+
+  private rememberPostCommitParticipantGoals(run: RunState, actorIds: readonly string[]): void {
+    for (const actorId of actorIds) {
+      const actor = this.requireActor(run, actorId);
+      const facts = run.spatialFacts?.actors.get(actorId);
+      if (!facts) continue;
+      const goalKey = this.actorGoalKey(run, actor, spatialMaterialSignature(facts));
+      this.rememberCompletedGoal(run, actorId, goalKey);
+    }
   }
 
   private async executeAmbientDecision(
@@ -1053,20 +2309,22 @@ export class RunService {
           if (turnIndex === 1 && firstTurn) {
             observePacket.heardSpeech.push(`${firstTurn.speakerActorId}: ${firstTurn.line}`);
           }
-          const resolved = await this.proposalPort.proposeNextStep({
-            sessionId: runId,
-            locale: this.requireRun(runId).locale,
-            iteration: turnIndex,
-            goal: "함께 도착한 주민과 지금 상황에 맞는 한 문장을 직접 나누고 대화를 마친다.",
-            observePacket,
-            blockedSignatures: [],
-            requiredToolCall: { tool: "talk_to", actorId: targetActorId },
-            requireUtterance: true,
-            budgetCeiling: {
-              maxCalls: runAmbientCallCeiling(this.requireRun(runId)),
-              maxTokens: runAmbientTokenCeiling(this.requireRun(runId)),
-            },
-          });
+          const resolved = await this.withBackgroundProviderSlot(runId, () =>
+            this.proposalPort.proposeNextStep({
+              sessionId: runId,
+              locale: this.requireRun(runId).locale,
+              iteration: turnIndex,
+              goal: "Speak one context-appropriate sentence directly to the resident who arrived with you, then end the exchange.",
+              observePacket,
+              blockedSignatures: [],
+              requiredToolCall: { tool: "talk_to", actorId: targetActorId },
+              requireUtterance: true,
+              budgetCeiling: {
+                maxCalls: runAmbientCallCeiling(this.requireRun(runId)),
+                maxTokens: runAmbientTokenCeiling(this.requireRun(runId)),
+              },
+            }),
+          );
           await this.serialize(runId, async () => {
             const run = this.requireRun(runId);
             this.trackProposal(run, resolved.meta);
@@ -1116,18 +2374,9 @@ export class RunService {
     run: RunState,
     attempt: AmbientDecisionAttempt,
   ): RunNpcDecisionResponse | null {
-    const wake = run.scheduler.pendingWakes.get(attempt.request.wakeId);
-    if (!wake) {
+    const pendingWake = run.scheduler.pendingWakes.get(attempt.request.wakeId);
+    if (!pendingWake || pendingWake.status !== "pending") {
       throw new RunError(`wake is not pending: ${attempt.request.wakeId}`, "wake_not_pending");
-    }
-    if (
-      wake.kind !== "meeting_ready" ||
-      wake.sourceId !== attempt.windowId ||
-      wake.actorIds.length !== 2 ||
-      wake.actorIds[0] !== attempt.participantActorIds[0] ||
-      wake.actorIds[1] !== attempt.participantActorIds[1]
-    ) {
-      throw new RunError(`wake cannot open ambient speech: ${attempt.request.wakeId}`, "wake_not_supported");
     }
     if (
       run.activeAmbientConversation &&
@@ -1138,10 +2387,19 @@ export class RunService {
         "ambient_conversation_active",
       );
     }
-
+    const wake = claimRunWake(run.scheduler, attempt.request.wakeId);
+    if (!wake) throw new RunError(`wake is not pending: ${attempt.request.wakeId}`, "wake_not_pending");
+    if (
+      wake.kind !== "meeting_ready" ||
+      wake.sourceId !== attempt.windowId ||
+      wake.actorIds.length !== 2 ||
+      wake.actorIds[0] !== attempt.participantActorIds[0] ||
+      wake.actorIds[1] !== attempt.participantActorIds[1]
+    ) {
+      throw new RunError(`wake cannot open ambient speech: ${attempt.request.wakeId}`, "wake_not_supported");
+    }
     // Claim before any provider await. This wake can now finish only through
     // this signature-bound attempt, including stale/failure outcomes.
-    run.scheduler.pendingWakes.delete(attempt.request.wakeId);
     if (wake.observedWorldRevision !== attempt.request.observedWorldRevision) {
       return this.finishAmbientAttempt(run, attempt, "stale");
     }
@@ -1160,6 +2418,10 @@ export class RunService {
       observePackets: {
         [firstActorId]: this.ambientObservePacket(run, firstActorId, secondActorId),
         [secondActorId]: this.ambientObservePacket(run, secondActorId, firstActorId),
+      },
+      participantEvidenceKeys: {
+        [firstActorId]: this.conversationEvidenceKey(run, this.requireActor(run, firstActorId)),
+        [secondActorId]: this.conversationEvidenceKey(run, this.requireActor(run, secondActorId)),
       },
     };
     attempt.state = "resolving";
@@ -1203,68 +2465,43 @@ export class RunService {
       meeting.volume.volumeId !== attempt.observation.audibilityVolumeId ||
       Object.entries(attempt.observation.participantAnchorRefs).some(
         ([actorId, anchorRef]) => meeting.window.participantAnchorRefs[actorId] !== anchorRef,
+      ) ||
+      attempt.participantActorIds.some(
+        actorId =>
+          this.conversationEvidenceKey(run, this.requireActor(run, actorId)) !==
+          attempt.observation?.participantEvidenceKeys[actorId],
       )
     ) {
       return this.finishAmbientAttempt(run, attempt, "stale");
     }
 
-    const committed: RunAmbientSpeechEvent[] = [];
-    const memoryChangedActorIds = new Set<string>();
-    for (let turnIndex = 0; turnIndex < attempt.resolvedTurns.length; turnIndex += 1) {
-      const turn = attempt.resolvedTurns[turnIndex];
-      if (!turn) return this.finishAmbientAttempt(run, attempt, "failed");
-      const freshMeeting = this.currentAmbientMeeting(run, attempt);
-      if (!freshMeeting || freshMeeting.volume.volumeId !== attempt.observation.audibilityVolumeId) {
-        return this.finishAmbientAttempt(run, attempt, "stale");
-      }
-      const speakerPosition = this.actorPosition(run, turn.speakerActorId);
-      const listenerActorIds = this.currentNpcListeners(
-        run,
-        turn.speakerActorId,
-        freshMeeting.volume,
-        speakerPosition,
-      );
-      if (!listenerActorIds.includes(turn.targetActorId)) {
-        return this.finishAmbientAttempt(run, attempt, "stale");
-      }
-
-      const seq = run.ambientSpeechCursor + 1;
-      const worldRevision = run.worldRevision + 1;
-      const event: RunAmbientSpeechEvent = {
-        seq,
-        eventId: `speech:${run.runId}:${seq}`,
-        wakeId: attempt.request.wakeId,
-        conversationId: attempt.conversationId,
-        turnId: `${attempt.conversationId}#${turnIndex}`,
-        speakerActorId: turn.speakerActorId,
-        targetActorId: turn.targetActorId,
-        listenerActorIds,
-        line: turn.line,
-        worldSeconds: run.elapsedSeconds,
-        observedWorldRevision: attempt.request.observedWorldRevision,
-        worldRevision,
-        audibility: {
-          volumeId: freshMeeting.volume.volumeId,
-          maxSpeechDistanceM: freshMeeting.volume.maxSpeechDistanceM,
-          speakerPosition: [speakerPosition[0], speakerPosition[1], speakerPosition[2]],
-        },
-        proposalMeta: clone(turn.meta),
-      };
-      const memoryHolders = [turn.speakerActorId, ...listenerActorIds];
-      for (const holderActorId of memoryHolders) {
-        const memory: RunAmbientUtteranceMemory = {
-          ...clone(event),
-          memoryId: this.idFactory("mem"),
-          kind: "ambient_utterance",
-        };
-        this.requireActor(run, holderActorId).memories.push(memory);
-        memoryChangedActorIds.add(holderActorId);
-      }
-      run.ambientSpeechCursor = seq;
-      run.ambientSpeechEvents.push(event);
-      run.worldRevision = worldRevision;
-      committed.push(event);
-    }
+    const committed = this.commitResolvedConversationTurns(run, {
+      wakeId: attempt.request.wakeId,
+      conversationId: attempt.conversationId,
+      observedWorldRevision: attempt.request.observedWorldRevision,
+      turns: attempt.resolvedTurns,
+      resolveAudibility: turn => {
+        const freshMeeting = this.currentAmbientMeeting(run, attempt);
+        if (!freshMeeting || freshMeeting.volume.volumeId !== attempt.observation?.audibilityVolumeId) {
+          return null;
+        }
+        const speakerPosition = this.actorPosition(run, turn.speakerActorId);
+        const listenerActorIds = this.currentNpcListeners(
+          run,
+          turn.speakerActorId,
+          freshMeeting.volume,
+          speakerPosition,
+        );
+        return listenerActorIds.includes(turn.targetActorId)
+          ? { volume: freshMeeting.volume, speakerPosition, listenerActorIds }
+          : null;
+      },
+    });
+    if (!committed) return this.finishAmbientAttempt(run, attempt, "stale");
+    this.rememberPostCommitParticipantGoals(run, attempt.participantActorIds);
+    const memoryChangedActorIds = new Set(
+      committed.flatMap(event => [event.speakerActorId, ...event.listenerActorIds]),
+    );
 
     attempt.actorReadinessDeltas = [];
     for (const actorId of memoryChangedActorIds) {
@@ -1276,6 +2513,7 @@ export class RunService {
     }
 
     attempt.state = "completed";
+    finishRunWake(run.scheduler, attempt.request.wakeId, "completed");
     run.activeAmbientConversation = null;
     const response = this.ambientDecisionResponse(run, attempt, "completed", committed);
     attempt.response = clone(response);
@@ -1299,15 +2537,34 @@ export class RunService {
     }
     const positions: Array<readonly [number, number, number]> = [];
     for (const actorId of attempt.participantActorIds) {
-      const anchorRef = run.scheduler.actors.get(actorId)?.confirmedAnchorRef;
+      const schedulerActor = run.scheduler.actors.get(actorId);
+      if (schedulerActor?.pendingMovement) return null;
+      const anchorRef = schedulerActor?.confirmedAnchorRef;
       const expectedAnchorRef = window.participantAnchorRefs[actorId];
-      const position = anchorRef ? this.layout.anchorPositions[anchorRef] : undefined;
+      const position = anchorRef
+        ? (run.spatialFacts?.actors.get(actorId)?.position ?? this.layout.anchorPositions[anchorRef])
+        : undefined;
       if (!anchorRef || anchorRef !== expectedAnchorRef || !position) return null;
       positions.push(position);
     }
     const firstPosition = positions[0];
     const secondPosition = positions[1];
     if (!firstPosition || !secondPosition) return null;
+    if (run.spatialFacts) {
+      const [firstActorId, secondActorId] = attempt.participantActorIds;
+      const firstFacts = run.spatialFacts.actors.get(firstActorId);
+      const secondFacts = run.spatialFacts.actors.get(secondActorId);
+      if (
+        !firstFacts ||
+        !secondFacts ||
+        !firstFacts.visibleActorIds.includes(secondActorId) ||
+        !firstFacts.audibleActorIds.includes(secondActorId) ||
+        !secondFacts.visibleActorIds.includes(firstActorId) ||
+        !secondFacts.audibleActorIds.includes(firstActorId)
+      ) {
+        return null;
+      }
+    }
     const volume = this.layout.audibilityVolumes.find(
       candidate =>
         volumeContains(candidate, firstPosition) &&
@@ -1321,6 +2578,8 @@ export class RunService {
     run: RunState,
     actorId: string,
   ): readonly [number, number, number] {
+    const enginePosition = run.spatialFacts?.actors.get(actorId)?.position;
+    if (enginePosition) return enginePosition;
     const anchorRef = run.scheduler.actors.get(actorId)?.confirmedAnchorRef;
     const position = anchorRef ? this.layout.anchorPositions[anchorRef] : undefined;
     if (!anchorRef || !position) throw new Error(`actor has no confirmed position: ${actorId}`);
@@ -1333,7 +2592,10 @@ export class RunService {
     volume: RunAudibilityVolume,
     speakerPosition: readonly [number, number, number],
   ): string[] {
-    return this.layout.actors
+    if (run.spatialFacts) {
+      return this.spatialNpcListeners(run, speakerActorId, volume, speakerPosition);
+    }
+    const layoutListeners = this.layout.actors
       .map(actor => actor.actorId)
       .filter(actorId => {
         if (actorId === speakerActorId) return false;
@@ -1343,6 +2605,7 @@ export class RunService {
           distanceBetween(speakerPosition, position) <= volume.maxSpeechDistanceM
         );
       });
+    return layoutListeners;
   }
 
   private ambientObservePacket(
@@ -1351,12 +2614,14 @@ export class RunService {
     targetActorId: string,
   ): ObservePacket {
     const actor = this.requireActor(run, speakerActorId);
-    return this.runObservePacket(
+    const packet = this.runObservePacket(
       run,
       actor,
       [targetActorId],
-      ["함께 도착한 주민과 직접 말을 나누고 들은 내용을 정확히 기억한다."],
+      ["Speak directly with the resident who arrived with you and remember only what you actually hear."],
     );
+    packet.audibleActorIds = [targetActorId];
+    return packet;
   }
 
   private validatedAmbientLine(
@@ -1404,6 +2669,7 @@ export class RunService {
   ): RunNpcDecisionResponse {
     this.refreshProviderBudget(run);
     attempt.state = "terminal";
+    finishRunWake(run.scheduler, attempt.request.wakeId, "terminal");
     if (run.activeAmbientConversation?.conversationId === attempt.conversationId) {
       run.activeAmbientConversation = null;
     }
@@ -1421,6 +2687,9 @@ export class RunService {
     return {
       runId: run.runId,
       wakeId: attempt.request.wakeId,
+      decisionKind: "ambient_conversation",
+      wakeKind: "meeting_ready",
+      actorIds: clone(attempt.participantActorIds),
       status,
       observedWorldRevision: attempt.request.observedWorldRevision,
       worldRevision: run.worldRevision,
@@ -1428,6 +2697,14 @@ export class RunService {
       participantActorIds: clone(attempt.participantActorIds),
       speechEvents: clone(speechEvents),
       actorReadinessDeltas: clone(attempt.actorReadinessDeltas),
+      actionDeltas: [
+        ...speechEvents.map(event => ({ kind: "speech" as const, speechEvent: clone(event) })),
+        ...attempt.actorReadinessDeltas.map(readinessDelta => ({
+          kind: "readiness" as const,
+          readinessDelta: clone(readinessDelta),
+        })),
+      ],
+      movementDeltas: [],
       providerMetas: clone(attempt.providerMetas),
     };
   }
@@ -1482,7 +2759,7 @@ export class RunService {
     runId: string,
     attempt: ConversationOpeningAttempt,
   ): Promise<RunSessionPreloadResponse> {
-    await this.acquireOpeningPreloadSlot(runId);
+    await this.acquireBackgroundProviderSlot(runId);
     let resolved: ResolvedProposal<ConversationProposal>;
     try {
       resolved = await this.proposalPort.proposeConversationTurn(clone(attempt.request));
@@ -1497,7 +2774,7 @@ export class RunService {
       });
       throw error;
     } finally {
-      this.releaseOpeningPreloadSlot(runId);
+      this.releaseBackgroundProviderSlot(runId);
     }
 
     return this.serialize(runId, async () => {
@@ -1530,18 +2807,18 @@ export class RunService {
     });
   }
 
-  private async acquireOpeningPreloadSlot(runId: string): Promise<void> {
-    const gate = this.openingPreloadGates.get(runId) ?? { active: 0, waiters: [] };
-    this.openingPreloadGates.set(runId, gate);
-    if (gate.active < MAX_CONCURRENT_OPENING_PRELOADS) {
+  private async acquireBackgroundProviderSlot(runId: string): Promise<void> {
+    const gate = this.backgroundProviderGates.get(runId) ?? { active: 0, waiters: [] };
+    this.backgroundProviderGates.set(runId, gate);
+    if (gate.active < MAX_CONCURRENT_BACKGROUND_PROPOSALS) {
       gate.active += 1;
       return;
     }
     await new Promise<void>(resolve => gate.waiters.push(resolve));
   }
 
-  private releaseOpeningPreloadSlot(runId: string): void {
-    const gate = this.openingPreloadGates.get(runId);
+  private releaseBackgroundProviderSlot(runId: string): void {
+    const gate = this.backgroundProviderGates.get(runId);
     if (!gate) return;
     const next = gate.waiters.shift();
     if (next) {
@@ -1549,7 +2826,16 @@ export class RunService {
       return;
     }
     gate.active = Math.max(0, gate.active - 1);
-    if (gate.active === 0) this.openingPreloadGates.delete(runId);
+    if (gate.active === 0) this.backgroundProviderGates.delete(runId);
+  }
+
+  private async withBackgroundProviderSlot<T>(runId: string, task: () => Promise<T>): Promise<T> {
+    await this.acquireBackgroundProviderSlot(runId);
+    try {
+      return await task();
+    } finally {
+      this.releaseBackgroundProviderSlot(runId);
+    }
   }
 
   private validateConversationRequest(
@@ -1716,12 +3002,53 @@ export class RunService {
     }
   }
 
+  private actorGoalKey(
+    run: RunState,
+    actor: RunActorState,
+    spatialSignature: string,
+    elapsedSeconds = run.elapsedSeconds,
+  ): string {
+    const layoutActor = this.layout.actors.find(candidate => candidate.actorId === actor.actorId);
+    const block = layoutActor?.scheduleBlocks.find(
+      candidate => candidate.startSeconds <= elapsedSeconds && elapsedSeconds < candidate.endSeconds,
+    );
+    return `goal:${digest(JSON.stringify({
+      actorId: actor.actorId,
+      blockId: block?.blockId ?? "none",
+      // An actor's own just-committed speech is not a new incoming goal.
+      // Listener memories and direct player speech are; this prevents an
+      // emergent self-echo from creating a provider wake every advance.
+      incomingMemoryIds: actor.memories
+        .filter(memory =>
+          memory.kind === "player_conversation" ||
+          (memory.kind === "ambient_utterance" && memory.speakerActorId !== actor.actorId),
+        )
+        .map(memory => memory.memoryId),
+      spatialSignature,
+    }))}`;
+  }
+
+  private spatialPositionsChanged(
+    prior: CanonicalSpatialFacts | null,
+    incoming: Map<string, RunActorSpatialFacts>,
+  ): boolean {
+    if (!prior) return true;
+    for (const [actorId, facts] of incoming) {
+      const previous = prior.actors.get(actorId);
+      if (!previous || previous.position.some((value, index) => value !== facts.position[index])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private runObservePacket(
     run: RunState,
     actor: RunActorState,
     visibleActorIds: string[],
     goals: string[],
     additionalSpeech: string[] = [],
+    spatialFacts?: RunActorSpatialFacts,
   ): ObservePacket {
     const policy = DEFAULT_ROLE_POLICIES[actor.role];
     const visibleRecords = run.records
@@ -1777,6 +3104,8 @@ export class RunService {
       visibleRecords,
       visibleLedgerEvents: [],
       visibleActors: [...new Set(visibleActorIds.filter(id => id !== actor.actorId))],
+      audibleActorIds: spatialFacts ? [...spatialFacts.audibleActorIds] : [],
+      reachableAnchorRefs: spatialFacts ? [...spatialFacts.reachableAnchorRefs] : [],
       heardSpeech: [...heardSpeech, ...additionalSpeech],
       toolCatalog: toolCatalogForRole(actor.role),
     };

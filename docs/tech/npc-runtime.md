@@ -3,8 +3,8 @@
 TypeScript runtime owning all deterministic truth. This doc maps v1's ~12.7k
 LOC onto the M3R target so an agent knows what to keep, trim, or build.
 
-> **Implementation status (2026-07-12):** the first three additive M3R social
-> slices are checked in alongside the retained M1 Session service. `RunService`
+> **Implementation status (2026-07-12):** the additive M3R social slices are
+> checked in alongside the retained M1 Session service. `RunService`
 > hydrates `world_layout.json` into six persistent actor workspaces, owns clock,
 > revisions, scheduler, and shared provider budget, and exposes idempotent run
 > start/advance/snapshot. Arrival-confirmed schedules feed real two-turn park
@@ -15,8 +15,12 @@ LOC onto the M3R target so an agent knows what to keep, trim, or build.
 > `session/start` consumes that opening with zero provider calls. Context is
 > limited to the actor's role, location, goals, own memories/heard speech, and
 > visible records. A clean end consumes that evidence until a material
-> schedule, goal, memory, or record change and leaves the run alive. General
-> event dispatch, administrative records, and the hearing remain target work.
+> schedule, goal, memory, or record change and leaves the run alive.
+> Six-resident goal dispatch is now grounded by one revision-bound engine
+> spatial packet: each stable resident can `wait`, `look`, `move_to`, or begin
+> a two-turn `talk_to` exchange through the same bounded proposal-loop core.
+> Current facts and schedule policy are revalidated before any typed action
+> delta commits. Administrative records and the hearing remain target work.
 
 ## Target module shape
 
@@ -37,6 +41,7 @@ src/
     context.ts            # observe-packet assembly (pure fn of world state)
     tools.ts              # tool catalog + validators
     engine.ts             # iterate/validate/apply/budget
+    proposal-loop.ts      # bounded attempts, retry suppression, transcript seam
     transcript.ts         # per-NPC loop transcript
   providers/        # ports, adapters, registry, budget, envelope, test adapters
   policy/           # reason taxonomy, hook policy (kept)
@@ -112,6 +117,14 @@ Delete when the replacing module lands; don't leave both alive.
     schemas accept exactly `ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and
     `ja-JP`; the retained Same Order regression storylet remains honestly
     `ko-KR`-only.
+11. Godot reports physical observations but never decides their gameplay
+    meaning. A spatial batch names all six residents exactly once at the same
+    observed revision as its advance and carries position, reachable anchors,
+    visible/audible actors, and visible object ids. `RunService` rejects
+    unknown ids and uses current facts to validate tools and listeners.
+    Continuous position changes refresh commit-time position and audibility,
+    but only reachability, visibility, audibility, or object changes create a
+    new material goal signature.
 
 ## Sidecar API (M3R target)
 
@@ -127,7 +140,7 @@ surface is:
 | `POST /v1/session/preload` | Resolve and cache an opening from strict `{runId, actorId, interactionZoneId, locale}`; returns the ready actor plus `ProposalMeta` without starting or pausing a child conversation |
 | `POST /v1/session/start` | Consume that opening from the same strict actor/zone/locale packet with zero provider calls; returns the modal conversation view |
 | `POST /v1/session/answer` | Player choice/typed input/hesitation → signals, state delta, NPC reactions |
-| `POST /v1/npc/decision` | Event wake for one scheduled actor, carrying `runId`, `wakeId`, and observed `worldRevision` |
+| `POST /v1/npc/decision` | Claim one pending two-actor `meeting_ready` or single-actor `goal` wake, carrying `runId`, `wakeId`, and observed `worldRevision` |
 | `GET  /v1/session/snapshot` | Renderable child-session state; never a substitute for the run snapshot |
 | `POST /v1/session/end` | End the conversation and return queued run deltas; the run continues |
 | `POST /v1/run/hearing` | Open the scheduled, run-ending hearing after its clock condition is met |
@@ -140,7 +153,8 @@ consequences incrementally.
 The landed subset is `POST /v1/run/start`, `POST /v1/run/advance`,
 `GET /v1/run/snapshot`, `POST /v1/session/preload`, the run-discriminated
 start/answer/snapshot/end session routes, and run-discriminated
-`POST /v1/npc/decision` for bounded ambient meetings. Legacy
+`POST /v1/npc/decision` for bounded ambient meetings and single-resident goal
+decisions. Legacy
 `{storyletId, locale}` packets still dispatch to `SessionService`; strict
 `{runId, ...}` packets dispatch to `RunService` on the same loopback server.
 Fixture-only scripts generate byte-identical backend and Godot replay files
@@ -155,6 +169,18 @@ advances the authoritative clock, and schedules only event-driven wakes. A
 player-modal conversation pauses these advance requests. Background NPC
 requests already in flight may finish, but their effects remain revision-
 checked and queued until the modal closes.
+
+The optional `spatialFacts` member of an advance is an all-or-nothing snapshot
+of the six residents at that request's `observedWorldRevision`. Each actor fact
+contains a 3D position plus bounded, unique `reachableAnchorRefs`,
+`visibleActorIds`, `audibleActorIds`, and `visibleObjectIds`. The runtime
+canonicalizes their order, requires known actors and anchors, and currently
+requires the object list to stay empty until the 3D prop slice provides one
+canonical object registry. Changed reachability, visibility, audibility, or
+objects emit an informational observation and may create one pending goal wake
+for each stable actor. `arrival`, `observation`, and `actor_schedule` wakes
+remain informational; the derived goal wake is the provider-bearing event.
+Position drift alone never opens a provider wake.
 
 Run creation and advance both have client-supplied idempotency keys. An exact
 retry returns the cached byte-identical response before stale-revision or
@@ -180,6 +206,27 @@ during a player modal remains queued and commits on the same request after
 resume without another provider call. Ambient work cannot enter the reserved
 player/hearing budget. Grace and hearing wakes continue through the same
 deterministic scheduler surface.
+
+For a single-resident goal wake, the runtime derives a stable key from the
+actor's active schedule block, incoming memories, and material spatial facts.
+It offers only currently legal `wait`, `look`, `move_to`, and `talk_to`
+affordances, with at most three proposal attempts. Goal decisions and the
+retained `runBeat` path share `agentloop/proposal-loop.ts`, so structured
+failure feedback, duplicate-call suppression, and transcript entries have one
+implementation. A valid `talk_to` resolves the initiator's utterance and one
+reply through the provider port as an atomic two-turn exchange; both turns are
+revalidated against current participant evidence and engine audibility before
+listener memories commit. The shared background gate allows at most two
+provider proposals in flight, and only one ambient conversation may hold the
+run lease.
+
+Current NPC decision responses use one typed `actionDeltas` stream: `speech`,
+`readiness`, `look`, or `movement`. If a player modal owns the run when an
+ambient result resolves, the signature-bound attempt becomes queued without a
+second provider call. `POST /v1/session/end` commits every still-valid queued
+attempt and returns `queuedRunDeltas`; an idempotent session-end retry returns
+the same batch, while the matching NPC-decision retry has its deltas cleared so
+the client cannot apply one mutation twice.
 
 ## Run-scoped state and judgment
 

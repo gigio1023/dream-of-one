@@ -2,8 +2,9 @@
 
 Target: Godot 4.7.x stable (keep `GODOT_BIN` per device). **Status: the M3R
 spatial foundation, first run-backed social contact, authoritative
-clock/schedule movement, and the first overheard NPC meeting have landed as
-the default 3D client beside the retained 2D harness
+clock/schedule movement, first overheard NPC meeting, and six-resident event
+dispatch surface have landed as the default 3D client beside the retained 2D
+harness
 ([`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md)).**
 `res://scenes/main_3d.tscn` now provides the whole-town greybox, dressed park
 and studio, first-person controller, permanently open building portals, one
@@ -20,7 +21,12 @@ applies runtime movement IDs to projected NavMesh targets, and acknowledges an
 arrival only after the matching NPC physically reaches that target. The first
 park meeting now produces two attributed utterances, exact listener memory,
 direction-aware subtitles, and a short spatial speech blip from the shared
-audibility contract. Runtime
+audibility contract. On the next batched advance after a material scene change,
+the client reports all six residents' NavMesh reachability, actor-height
+physics-ray line of sight, authored-volume audibility, and positions at one
+observed world revision. Runtime-authored `speech`, `readiness`, `look`, and
+`movement` deltas
+are the action-application surface for current runtime responses. Runtime
 `playerConversationReady` remains the only authority for prompts. One
 background preload is allowed at a time, the HTTP bridge keeps a foreground
 transport lane, and late responses rebase instead of re-enabling stale actors.
@@ -188,8 +194,10 @@ generation output (v1's 981-line world generator is the anti-pattern).
 `world_layout.json` stays the semantic truth (landmarks, zones, anchors,
 sight/audibility volumes) and binds to the scene through named marker nodes;
 a thin binding assertion inside the scene smoke checks the two agree in both
-directions. The client renders the scene; the runtime reasons over the JSON;
-neither invents world facts the other lacks.
+directions. The client renders the scene and measures live physical facts; the
+runtime reasons over those revisioned observations plus the JSON's semantic
+registry. Neither side invents an actor, anchor, volume, or object id the other
+cannot validate.
 
 **Metric standards.** Fixed once by the asset-pipeline scale reference scene
 and then binding on every slice: 1 unit = 1 m; player capsule 1.8 m tall,
@@ -286,6 +294,15 @@ the dev machine with all six NPC loops live.
   dialogue) renders as subtitles with speaker attribution and rough direction
   cues when in earshot; audibility ranges come from `world_layout.json`
   volumes so the runtime and presentation agree on what was hearable.
+- **Spatial fact reporting**: `Town3D.npc_spatial_facts()` returns exactly six
+  actor facts in stable actor-id order. Reachable anchors come from
+  `NavigationServer3D` paths on the synchronized town map; visible actors come
+  from actor-height physics rays; audible actors must share an authored
+  `world_layout.json` volume and be inside its speech distance. The packet is
+  stamped with the advance's observed revision and rides the existing batched
+  advance lane after movement, arrival/block, schedule, or rebase changes and
+  while residents are moving. It is never a per-frame HTTP or provider call.
+  `visibleObjectIds` stays empty until the canonical prop registry lands.
 - **Interaction**: forward ray picks the nearest interactable (NPC, prop,
   record surface); `interact` opens conversation, pickup, or inspect.
 - **Navigation**: one navigation map for the whole seamless town, with one
@@ -317,13 +334,22 @@ the dev machine with all six NPC loops live.
   before unsent time/arrivals receive a new ID. Opening conversation pauses
   the tree, settles that lane, and sends no clock packet until clean resume.
   Settings and log surfaces do not pause the clock.
+- **Decision delta application**: current NPC-decision responses apply only
+  their typed `actionDeltas`: speech feeds subtitles/blips, readiness updates
+  conversation availability, look turns the resident toward an actor, and
+  movement enters the existing arrival-confirmed navigation lane. A decision
+  that resolves during a player modal retains its exact wake request. On clean
+  session end, `queuedRunDeltas` is applied once per session id and only at the
+  matching world revision; the later decision retry therefore cannot replay
+  the same presentation effect.
 
 ## Smokes (headless, thin)
 
 Keep the thin list, rebuilt for 3D as slices land: `scene_load_smoke.gd`
 (scene instances, bidirectional layout binding, reachable interior path
 endpoints, no ceiling nav islands, runtime-issued physical NPC movement,
-arrival acknowledgement, clock/physics pause, distinct meeting slots, and the
+arrival acknowledgement, six sorted engine spatial facts, clock/physics
+pause, distinct meeting slots, exactly-once queued action application, and the
 full fixture receptionist flow from run start through modal pause, judgment,
 stance presentation, child-session end, and resumed control), a
 run/session route smoke against the sidecar API

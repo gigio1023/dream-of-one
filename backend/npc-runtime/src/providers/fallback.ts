@@ -189,12 +189,23 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
     request: AgentStepRequest,
   ): Promise<ResolvedProposal<AgentStepProposal>> {
     const content = fallbackContent(request.locale).agent;
-    const visibleTarget = request.observePacket.visibleObjects[0]?.objectId;
+    const canLook = request.observePacket.toolCatalog.includes("look");
+    const canTalk = request.observePacket.toolCatalog.includes("talk_to");
     const requiredTalkTarget = request.requiredToolCall?.actorId;
-    const visibleActor =
-      requiredTalkTarget && request.observePacket.visibleActors.includes(requiredTalkTarget)
+    const visibleTarget = canLook && !requiredTalkTarget
+      ? request.observePacket.visibleObjects[0]?.objectId
+      : undefined;
+    const visibleActor = requiredTalkTarget
+      ? canTalk &&
+        request.observePacket.visibleActors.includes(requiredTalkTarget) &&
+        request.observePacket.audibleActorIds.includes(requiredTalkTarget)
         ? requiredTalkTarget
-        : request.observePacket.visibleActors[0];
+        : undefined
+      : canTalk
+        ? request.observePacket.visibleActors.find(actorId =>
+            request.observePacket.audibleActorIds.includes(actorId),
+          )
+        : undefined;
     const proposal: AgentStepProposal = request.previousResult
       ? {
           toolCall: { tool: "wait", args: { reason: content.previousResultWaitReason } },

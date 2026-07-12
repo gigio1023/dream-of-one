@@ -176,7 +176,7 @@ export function snapshotRunScheduler(
   };
 }
 
-function emitWake(
+export function emitRunWake(
   runtime: RunSchedulerRuntime,
   value: RunScheduleWake,
   emitted: RunScheduleWake[],
@@ -185,6 +185,30 @@ function emitWake(
   runtime.emittedWakeIds.add(value.wakeId);
   emitted.push(value);
   if (value.status === "pending") runtime.pendingWakes.set(value.wakeId, value);
+}
+
+export function claimRunWake(
+  runtime: RunSchedulerRuntime,
+  wakeId: string,
+): RunScheduleWake | null {
+  const wake = runtime.pendingWakes.get(wakeId);
+  if (!wake || wake.status !== "pending") return null;
+  const claimed = { ...wake, status: "claimed" as const };
+  runtime.pendingWakes.set(wakeId, claimed);
+  return structuredClone(claimed);
+}
+
+export function finishRunWake(
+  runtime: RunSchedulerRuntime,
+  wakeId: string,
+  status: "completed" | "terminal",
+): void {
+  const wake = runtime.pendingWakes.get(wakeId);
+  if (!wake) return;
+  runtime.pendingWakes.set(wakeId, { ...wake, status });
+  // Completed lifecycle is retained by the signature-bound decision attempt;
+  // only actionable/claimed wakes belong in the scheduler snapshot.
+  runtime.pendingWakes.delete(wakeId);
 }
 
 function issueMovement(options: {
@@ -389,7 +413,7 @@ function emitBoundaryWakes(options: {
       ["ended", window.endSeconds],
     ] as const) {
       if (!(fromSeconds < scheduledAtSeconds && scheduledAtSeconds <= toSeconds)) continue;
-      emitWake(
+      emitRunWake(
         runtime,
         {
           wakeId: `wake:${runId}:meeting_window:${window.windowId}:${phase}`,
@@ -407,7 +431,7 @@ function emitBoundaryWakes(options: {
     }
   }
   if (fromSeconds < layout.graceEndsAtSeconds && layout.graceEndsAtSeconds <= toSeconds) {
-    emitWake(
+    emitRunWake(
       runtime,
       {
         wakeId: `wake:${runId}:grace:${layout.graceEndsAtSeconds}`,
@@ -424,7 +448,7 @@ function emitBoundaryWakes(options: {
     );
   }
   if (fromSeconds < layout.hearingAtSeconds && layout.hearingAtSeconds <= toSeconds) {
-    emitWake(
+    emitRunWake(
       runtime,
       {
         wakeId: `wake:${runId}:hearing:${layout.hearingAtSeconds}`,
@@ -458,7 +482,7 @@ function emitMeetingReadyWakes(options: {
         stateFor(runtime, actorId).confirmedAnchorRef === window.participantAnchorRefs[actorId],
     );
     if (!allArrived) continue;
-    emitWake(
+    emitRunWake(
       runtime,
       {
         wakeId: `wake:${runId}:meeting_ready:${window.windowId}`,
@@ -518,7 +542,7 @@ export function advanceRunScheduler(options: {
         atSeconds: block.startSeconds,
         movementDeltas,
       });
-      emitWake(
+      emitRunWake(
         runtime,
         {
           wakeId: `wake:${runId}:actor_schedule:${block.blockId}`,
@@ -528,8 +552,8 @@ export function advanceRunScheduler(options: {
           actorIds: [actor.actorId],
           scheduledAtSeconds: block.startSeconds,
           observedWorldRevision,
-          requiresDecision: true,
-          status: "pending",
+          requiresDecision: false,
+          status: "informational",
         },
         scheduleWakes,
       );
@@ -641,4 +665,54 @@ export function alignActorForPlayerConversation(
     state.routePointIndex = null;
     state.routePointArrivedAtSeconds = null;
   }
+}
+
+/**
+ * Issue one provider-selected movement without bypassing schedule policy.
+ * The target must belong to the actor's currently active schedule block;
+ * Godot still owns path execution and confirms the exact arrival later.
+ */
+export function issueActorGoalMovement(options: {
+  runId: string;
+  layout: RunLayout;
+  runtime: RunSchedulerRuntime;
+  actorId: string;
+  targetAnchorRef: string;
+  elapsedSeconds: number;
+}): RunMovementDelta | null {
+  const { runId, layout, runtime, actorId, targetAnchorRef, elapsedSeconds } = options;
+  const actor = layout.actors.find(candidate => candidate.actorId === actorId);
+  if (!actor) return null;
+  const state = stateFor(runtime, actorId);
+  const block = blockAt(actor, elapsedSeconds);
+  if (!block || state.pendingMovement) return null;
+
+  let routePointIndex: number | null = null;
+  if (block.target.kind === "anchor") {
+    if (block.target.id !== targetAnchorRef) return null;
+  } else {
+    const points = routeById(layout, block.target.id).points;
+    if (
+      state.routePointIndex === null ||
+      state.routePointArrivedAtSeconds === null ||
+      elapsedSeconds < state.routePointArrivedAtSeconds + ROUTE_CADENCE_SECONDS
+    ) return null;
+    routePointIndex = (state.routePointIndex + 1) % points.length;
+    if (points[routePointIndex] !== targetAnchorRef) return null;
+  }
+  if (state.confirmedAnchorRef === targetAnchorRef) return null;
+
+  const movementDeltas: RunMovementDelta[] = [];
+  issueMovement({
+    runId,
+    runtime,
+    actor,
+    state,
+    block,
+    targetAnchorRef,
+    routePointIndex,
+    issuedAtSeconds: elapsedSeconds,
+    movementDeltas,
+  });
+  return movementDeltas[0] ?? null;
 }

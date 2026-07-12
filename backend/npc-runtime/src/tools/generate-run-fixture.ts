@@ -62,6 +62,67 @@ async function preloadAllResidents(service: RunService, runStartResponse: RunSna
   return sessionPreloads;
 }
 
+async function driveSpatialGoalVariants() {
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: fixtureIds(),
+  });
+  const layout = loadRunLayout();
+  const started = service.start("run-fixture-spatial-goals", "ko-KR");
+  const actors = started.scheduler.actors.map(schedulerActor => {
+    const position = layout.anchorPositions[schedulerActor.confirmedAnchorRef];
+    if (!position) throw new Error(`fixture actor has no anchor position: ${schedulerActor.actorId}`);
+    const currentBlock = schedulerActor.currentBlock;
+    const reachableAnchorRefs = currentBlock?.targetKind === "anchor"
+      ? [currentBlock.targetId]
+      : currentBlock?.targetKind === "route"
+        ? [...new Set(layout.routes.find(route => route.routeId === currentBlock.targetId)?.points ?? [])]
+        : [];
+    return {
+      actorId: schedulerActor.actorId,
+      position: [position[0], position[1], position[2]] as [number, number, number],
+      reachableAnchorRefs,
+      visibleActorIds: [],
+      audibleActorIds: [],
+      visibleObjectIds: [],
+    };
+  });
+  const advanceRequest: RunAdvanceRequest = {
+    runId: started.runId,
+    advanceId: `${started.runId}:spatial:000001`,
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      actors,
+    },
+  };
+  const advanceResponse = await service.advance(advanceRequest);
+  const goalWakes = advanceResponse.scheduleWakes.filter(wake => wake.kind === "goal");
+  if (goalWakes.length !== 6) {
+    throw new Error(`spatial goal fixture expected six wakes, got ${goalWakes.length}`);
+  }
+  const decisions = [];
+  for (const wake of goalWakes) {
+    const request = {
+      runId: started.runId,
+      wakeId: wake.wakeId,
+      observedWorldRevision: wake.observedWorldRevision,
+    };
+    const response = await service.decision(request);
+    if (response.status !== "completed" || response.decisionKind !== "actor_goal") {
+      throw new Error(`spatial goal fixture did not complete ${wake.wakeId}`);
+    }
+    decisions.push({
+      variantId: `goal_${wake.actorIds[0]}`,
+      request,
+      response,
+    });
+  }
+  return { advanceRequest, advanceResponse, decisions };
+}
+
 async function driveVariant(spec: VariantSpec) {
   const service = new RunService({
     proposalPort: createStudioReceptionScriptedAdapter(),
@@ -241,6 +302,7 @@ export async function buildRunApiFixture() {
   const defaultPath = driven[0];
   if (!defaultPath) throw new Error("run fixture has no default path");
   const advancePath = await driveAdvanceSequence();
+  const spatialGoals = await driveSpatialGoalVariants();
 
   return {
     note: "Generated through the fixture-only Studio adapter and production RunService paths. Regenerate with `bun run --cwd backend/npc-runtime fixtures:run:generate`.",
@@ -281,6 +343,19 @@ export async function buildRunApiFixture() {
         request: advancePath.npcDecisionRequest,
         response: advancePath.npcDecisionResponse,
       },
+      runAdvanceSpatialFacts: {
+        endpoint: "POST /v1/run/advance",
+        request: spatialGoals.advanceRequest,
+        response: spatialGoals.advanceResponse,
+      },
+      npcDecisionVariants: [
+        {
+          variantId: "meeting",
+          request: advancePath.npcDecisionRequest,
+          response: advancePath.npcDecisionResponse,
+        },
+        ...spatialGoals.decisions,
+      ],
       runAdvanceAmbientSpeech: {
         endpoint: "POST /v1/run/advance",
         request: advancePath.ambientDeliveryRequest,

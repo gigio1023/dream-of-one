@@ -34,5 +34,5 @@ enable symlinks (Developer Mode + `git config core.symlinks true`) or read
 | `dream-npc-runtime` | Backend runtime: run/session state, social scheduler, judgment-vs-validity authority, provider boundary, checks |
 | `dream-godot-client` | Godot client: first-person town, presentation boundary, modal pause, information policy, assets, smokes |
 | `dream-godot-playtest` | Godot AI operation: exact-session routing, non-play inspection, routed live play, diagnostics, bounded recovery |
-| `dream-godot-delegation` | Native Godot worker routing: pinned per-worker Sol/Terra lanes, unchanged lead session, exclusive run ownership, compact evidence return |
+| `dream-godot-delegation` | Native Godot worker routing: repo-defined Sol/Terra custom roles, unchanged lead session, exclusive run ownership, compact evidence return |
 | `dream-content-authoring` | Korean-first content: canon reuse, tone, storylet contract, six-locale localization |

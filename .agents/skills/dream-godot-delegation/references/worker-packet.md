@@ -7,8 +7,9 @@ options before launch.
 Outcome: <one observable result this worker must produce>
 
 Requested worker lane: <GPT-5.6 Sol high | GPT-5.6 Terra high>.
-Worker binding: pinned by native model and effort selectors. Record the
-returned configuration; a model name in this packet is not proof.
+Codex role: <sol_high_godot | terra_high_playtest>. Its loaded repo config must
+pin the requested model and effort. Record role selection plus config; a model
+name in this packet is not proof.
 Lead session: remains unchanged and does not inherit the worker's lane.
 
 Authority mode: <inspect | play | implement>
@@ -52,7 +53,7 @@ Required evidence:
 Mechanical checks: <only checks relevant to this packet>
 
 Output:
-- requested worker lane, native pinning evidence, and selected session/version
+- requested worker lane, native role/config pinning evidence, and selected session/version
   preflight
 - chronological observations that decide the result
 - files changed/checks run, if authorized

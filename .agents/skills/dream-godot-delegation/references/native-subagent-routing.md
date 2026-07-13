@@ -8,9 +8,12 @@ subagent, task, thread, or team primitive; do not start another agent CLI.
 From a Codex parent turn, create the Godot worker with the collaboration
 `spawn_agent` capability. This is a direct harness call: do not invoke it
 through a shell command or use `codex exec` to create a second Codex process.
-Keep the lead session unchanged. Pin the requested worker model and reasoning
-effort in the spawn call; the returned child agent id owns the assigned Godot
-run.
+Keep the lead session unchanged. Select `sol_high_godot` for Sol-high work or
+`terra_high_playtest` for Terra-high play. `.codex/config.toml` registers those
+roles, and their relative config files pin `model` plus
+`model_reasoning_effort`. The returned child agent id owns the assigned Godot
+run. These role/config fields follow the official
+[Codex configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference#configtoml).
 
 - Use `followup_task` to continue work with that same child after it becomes
   idle and still owns the run.
@@ -29,24 +32,25 @@ ownership and evidence rules.
 Before assigning a live run, determine separately:
 
 1. whether a fresh native worker can see the configured Godot AI MCP tools;
-2. whether the spawn surface exposes a real model and reasoning-effort selector;
-3. whether the worker can report a verifiable model/effort identity.
+2. whether the trusted-project session exposes the required custom agent role;
+3. whether that role's config file pins the exact model and effort.
 
 Do not infer one capability from another. A child seeing Godot AI does not prove
-its model/effort. A spawn surface without explicit model and effort fields
-cannot execute a model-pinned lane.
+its model/effort. Role selection plus the loaded role config is the Codex
+pinning evidence; prompt prose or a matching task name is not.
 
 ## Model Routing
 
 - Keep the lead/main session on its current model.
-- Pin a Sol-high worker for implementation-time diagnosis and non-play
+- Select `sol_high_godot` for implementation-time diagnosis and non-play
   inspection when delegation is warranted.
-- After implementation and Sol self-review, pin a fresh Terra-high worker and
-  give it the closed play packet.
-- If native spawn lacks model or effort fields, stop with the packet ready and
-  report the missing per-worker selector. Do not switch the parent, write a
-  model name into the prompt and pretend it changed the worker, or use an
-  external agent CLI.
+- After implementation and Sol self-review, select a fresh
+  `terra_high_playtest` worker and give it the closed play packet.
+- A session created before the repo role config existed may not expose the new
+  role. Start one fresh session in this trusted project, then retry once. If the
+  role is still absent, stop with the packet ready. Do not switch the parent,
+  write a model name into the prompt and pretend it changed the worker, or use
+  an external agent CLI.
 
 ## Run Topology
 

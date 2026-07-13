@@ -62,10 +62,13 @@ ask the user to switch the parent merely to route a worker.
   first with the lead or a pinned Sol worker, stop that run, then give a fresh
   pinned Terra worker a closed play packet. Do not switch models midway through
   one run.
-- Pin model and effort in the native spawn call and record the returned worker
-  configuration. If the native spawn surface cannot set both, stop with a
-  routing-capability blocker. Do not switch the parent, launch an external CLI,
-  or treat an inherited/default worker as the requested lane.
+- In Codex, select the repo-defined `sol_high_godot` or
+  `terra_high_playtest` custom agent role. Their config layers under
+  `.codex/agents/` pin model and effort without changing the lead. Other
+  harnesses may pin equivalent settings directly in native spawn. Record the
+  selected role/configuration. If the required role or selector is unavailable,
+  stop with a routing-capability blocker. Do not switch the parent, launch an
+  external CLI, or treat an inherited/default worker as the requested lane.
 
 Model and effort are runtime settings, not prose requests. Naming a model in a
 worker prompt does not change it and must never be reported as proof.
@@ -94,8 +97,8 @@ state the test is meant to reach.
 
 Return a compact packet containing:
 
-- requested worker lane, native pinning evidence, authority mode, selected
-  project/session, and version preflight;
+- requested worker lane, selected native role and pinning evidence, authority
+  mode, selected project/session, and version preflight;
 - the observed state transitions relevant to the objective, with semantic
   values and capture paths when required;
 - new editor/game errors, fixture or live-provider provenance, and any fallback;
@@ -122,8 +125,10 @@ terminate the lane and report the conflict.
 - A high number of calls alone does not justify parallel workers; one isolated
   Godot worker is the safe topology because editor/run state is shared.
 - Some native Codex spawn surfaces expose Godot AI to children but no
-  model/effort selector. That is a model-routing blocker for Sol/Terra-specific
-  work, not a reason to switch the lead session or relabel a default child.
+  custom-agent role selector. After adding or changing `.codex/config.toml`,
+  start one fresh trusted-project session so Codex reloads the role registry.
+  If the named role is still unavailable, that is a model-routing blocker, not
+  a reason to switch the lead session or relabel a default child.
 - Native Godot AI calls can perturb timing. Prefer semantic checks at meaningful
   transitions over frame-by-frame polling, but do not reduce required evidence.
 - A child session may discover the repo skills but not inherit the lead's loaded

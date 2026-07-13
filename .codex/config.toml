@@ -1,0 +1,9 @@
+[agents.sol_high_godot]
+description = "Godot implementation, cross-layer diagnosis, and non-play runtime inspection worker. Never performs hands-on gameplay acceptance."
+config_file = "agents/sol-high-godot.toml"
+nickname_candidates = ["Sol"]
+
+[agents.terra_high_playtest]
+description = "Run-only Dream of One Godot AI play executor for a closed packet. May play and observe, but never edits or diagnoses."
+config_file = "agents/terra-high-playtest.toml"
+nickname_candidates = ["Terra"]

@@ -5165,9 +5165,11 @@ export class RunService {
         return {
           ...assessment,
           // Wording remains model-owned even when the proposed movement has no
-          // cited support. Deterministic validity preserves the resident's
-          // current stance instead of inventing a canned testimony line.
-          appliedStance: resident.stanceBefore,
+          // cited support. Deterministic validity preserves an existing
+          // non-vouch stance instead of inventing a canned testimony line,
+          // while an uncited vouch cannot survive as hearing evidence.
+          appliedStance:
+            resident.stanceBefore === "vouch" ? "uncertain" : resident.stanceBefore,
           citedMemoryIds: [],
         };
       }

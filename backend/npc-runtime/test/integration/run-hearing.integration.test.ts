@@ -459,6 +459,34 @@ test("hearing quorum uses evidenced vouches and preserves provider abnormal auth
   }
 });
 
+test("hearing excludes prior vouches when their assessments cite no firsthand memory", async () => {
+  const service = createService("uncited-prior-vouches", request => ({
+    ...proposalFor(request, "ordinary"),
+    residentAssessments: request.residents.map(resident => ({
+      actorId: resident.actorId,
+      contactBasis: hearingContactBasisForMemories(resident.memories),
+      proposedStance: resident.stanceBefore,
+      testimonyLine: `uncited testimony:${resident.actorId}`,
+      citedMemoryIds: [],
+    })) as HearingJudgment["residentAssessments"],
+  }));
+  const started = service.start("start-uncited-prior-vouches", "ko-KR");
+  await earnVouches(service, started.runId, 4);
+  await makeDue(service, started.runId, "due-uncited-prior-vouches");
+
+  const result = await resolveHearing(
+    service,
+    started.runId,
+    "hearing-uncited-prior-vouches",
+  );
+
+  assert.equal(result.terminalResult.evidencedVouchCount, 0);
+  assert.equal(result.terminalResult.verdict, "abnormal");
+  assert.ok(result.terminalResult.residentAssessments.every(
+    assessment => assessment.appliedStance === "uncertain",
+  ));
+});
+
 test("a never-conversed resident may preserve live oppose testimony when it cites its ambient judgment", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
   adapter.judgeAndProposeAmbientReply = async request => ({

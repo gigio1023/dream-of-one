@@ -9,6 +9,7 @@ import type { ObservePacket } from "../agentloop/context.js";
 import { TOOL_NAMES, type ToolName } from "../agentloop/tools.js";
 import { RECORD_KINDS, WORLD_ROLES } from "../runtime/world/index.js";
 import { supportedLocaleEntry } from "../localization/supported-locales.js";
+import type { RequiredAgentToolCall } from "./ports.js";
 
 const nonEmpty = z.string().trim().min(1);
 const forbiddenPlayerVisibleScript = /[\p{Script=Latin}\p{Script=Han}]/u;
@@ -307,7 +308,7 @@ export interface AgentStepRequestSchemaConstraints {
   observePacket: ObservePacket;
   recordContracts: AgentStepRecordContracts;
   allowedTalkActorIds?: readonly string[];
-  requiredToolCall?: { tool: "talk_to"; actorId: string };
+  requiredToolCall?: RequiredAgentToolCall;
   requireUtterance?: boolean;
 }
 
@@ -396,7 +397,10 @@ function visibleAndAudibleActorIds(packet: ObservePacket): string[] {
 
 function scopedTalkActorIds(constraints: AgentStepRequestSchemaConstraints): string[] {
   const groundedActorIds = visibleAndAudibleActorIds(constraints.observePacket);
-  if (constraints.requiredToolCall || constraints.allowedTalkActorIds === undefined) {
+  if (
+    constraints.requiredToolCall?.tool === "talk_to" ||
+    constraints.allowedTalkActorIds === undefined
+  ) {
     return groundedActorIds;
   }
   const grounded = new Set(groundedActorIds);
@@ -451,26 +455,34 @@ export function agentStepProposalSchemaForRequest(
         context.addIssue({
           code: "custom",
           path: ["toolCall"],
-          message: "required talk_to toolCall must not be null",
+          message: `required ${requiredToolCall.tool} toolCall must not be null`,
         });
       } else if (value.toolCall.tool !== requiredToolCall.tool) {
         context.addIssue({
           code: "custom",
           path: ["toolCall", "tool"],
-          message: "required toolCall must use talk_to",
+          message: `required toolCall must use ${requiredToolCall.tool}`,
         });
-      } else if (value.toolCall.args.actorId !== requiredToolCall.actorId) {
+      } else if (requiredToolCall.tool === "talk_to") {
+        if (value.toolCall.args.actorId !== requiredToolCall.actorId) {
+          context.addIssue({
+            code: "custom",
+            path: ["toolCall", "args", "actorId"],
+            message: `required talk_to actorId must equal ${requiredToolCall.actorId}`,
+          });
+        }
+      } else if (value.toolCall.args.targetId !== requiredToolCall.targetId) {
         context.addIssue({
           code: "custom",
-          path: ["toolCall", "args", "actorId"],
-          message: `required talk_to actorId must equal ${requiredToolCall.actorId}`,
+          path: ["toolCall", "args", "targetId"],
+          message: `required move_to targetId must equal ${requiredToolCall.targetId}`,
         });
       }
       if (!value.done) {
         context.addIssue({
           code: "custom",
           path: ["done"],
-          message: "required talk_to reply must finish with done=true",
+          message: `required ${requiredToolCall.tool} reply must finish with done=true`,
         });
       }
     }
@@ -692,11 +704,13 @@ export function agentStepProposalSchemaForRequest(
       }
     }
 
-    if ((requiredToolCall || constraints.requireUtterance) && !value.utterance) {
+    const requiresUtterance =
+      requiredToolCall?.tool === "talk_to" || constraints.requireUtterance === true;
+    if (requiresUtterance && !value.utterance) {
       context.addIssue({
         code: "custom",
         path: ["utterance"],
-        message: "required talk_to utterance must be nonempty",
+        message: "required utterance must be nonempty",
       });
     }
   });
@@ -1175,7 +1189,10 @@ export function agentStepProposalJsonSchemaForTools(
         );
       case "talk_to": {
         const actorIds = scopedTalkActorIds(constraints);
-        if (constraints.requiredToolCall && !actorIds.includes(constraints.requiredToolCall.actorId)) {
+        if (
+          constraints.requiredToolCall?.tool === "talk_to" &&
+          !actorIds.includes(constraints.requiredToolCall.actorId)
+        ) {
           // A required meeting reply should already be grounded by the runtime.
           // Keep an exact transport branch so local Zod can reject inconsistent
           // packets and deterministically invoke fallback instead of throwing.
@@ -1283,12 +1300,25 @@ export function agentStepProposalJsonSchemaForTools(
     const argsProperties = argsSchema?.properties as
       | Record<string, Record<string, unknown>>
       | undefined;
-    const actorIdSchema = argsProperties?.actorId;
-    if (!actorIdSchema) {
-      throw new Error("required talk_to JSON schema is missing actorId");
+    if (constraints.requiredToolCall.tool === "talk_to") {
+      const actorIdSchema = argsProperties?.actorId;
+      if (!actorIdSchema) {
+        throw new Error("required talk_to JSON schema is missing actorId");
+      }
+      actorIdSchema.const = constraints.requiredToolCall.actorId;
+    } else {
+      const targetIdSchema = argsProperties?.targetId;
+      if (!targetIdSchema) {
+        throw new Error("required move_to JSON schema is missing targetId");
+      }
+      targetIdSchema.const = constraints.requiredToolCall.targetId;
     }
-    actorIdSchema.const = constraints.requiredToolCall.actorId;
-    properties.utterance = { type: "string", minLength: 1 };
+    if (
+      constraints.requiredToolCall.tool === "talk_to" ||
+      constraints.requireUtterance === true
+    ) {
+      properties.utterance = { type: "string", minLength: 1 };
+    }
     properties.done = { type: "boolean", const: true };
   }
 

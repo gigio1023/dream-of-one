@@ -215,6 +215,10 @@ export interface AgentToolResult {
   note: string;
 }
 
+export type RequiredAgentToolCall =
+  | { tool: "talk_to"; actorId: string }
+  | { tool: "move_to"; targetId: "player" };
+
 export interface AgentStepRequest {
   sessionId: string;
   /** Immutable locale of the owning run/session. */
@@ -227,7 +231,7 @@ export interface AgentStepRequest {
   /** Optional request-local ceiling for otherwise grounded talk_to targets. */
   allowedTalkActorIds?: string[];
   /** Optional validity constraint for a wake whose only legal action is known. */
-  requiredToolCall?: { tool: "talk_to"; actorId: string };
+  requiredToolCall?: RequiredAgentToolCall;
   requireUtterance?: boolean;
   /** Absolute scope ceiling used by background work that must preserve a reserve. */
   budgetCeiling?: { maxCalls: number; maxTokens: number };

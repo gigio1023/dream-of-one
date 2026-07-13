@@ -465,6 +465,7 @@ interface RunState {
   preloadRequiredEvidence: Map<string, string>;
   records: RunSnapshot["records"];
   ledgerEvents: RunSnapshot["ledgerEvents"];
+  positiveAdministrativeRootIds: Set<string>;
   socialView: RunSocialView;
   activeContact: RunActiveContact | null;
   contactCooldownUntil: Map<string, number>;
@@ -821,6 +822,7 @@ export class RunService {
       preloadRequiredEvidence: new Map(),
       records: [],
       ledgerEvents: [],
+      positiveAdministrativeRootIds: new Set(),
       socialView: {
         revision: 0,
         hearing: { atSeconds: this.layout.hearingAtSeconds, due: false },
@@ -2144,7 +2146,7 @@ export class RunService {
           run,
           actor,
           ["player"],
-          this.conversationGoals(actor),
+          this.conversationGoals(actor, conversation.procedure),
           [playerLine],
           run.spatialFacts?.actors.get(actor.actorId),
         ),
@@ -2424,6 +2426,9 @@ export class RunService {
         transcript: initialRun.agentTranscript,
         observe: () => clone(observation.observePacket),
         allowedTalkActorIds: observation.allowedTalkActorIds,
+        ...(observation.procedure === "interrogation"
+          ? { requiredToolCall: { tool: "move_to" as const, targetId: "player" as const } }
+          : {}),
         budgetCeiling: {
           maxCalls: runAmbientCallCeiling(initialRun),
           maxTokens: runAmbientTokenCeiling(initialRun),
@@ -2935,6 +2940,10 @@ export class RunService {
         if (this.sourceAlreadyAdministered(run, observation.actorId, sourceMemoryId)) {
           return { reason: "already_recorded", detail: "that source memory already produced an administrative record" };
         }
+        const rootSourceMemoryId = this.administrativeRootSourceMemoryId(run, sourceMemoryId);
+        if (!rootSourceMemoryId) {
+          return { reason: "cited_event_unknown", detail: "administrative source lineage is missing, duplicated, or cyclic" };
+        }
         const existing = requestedRecordId
           ? run.records.find(record => record.recordId === requestedRecordId)
           : undefined;
@@ -2949,6 +2958,7 @@ export class RunService {
             tool: "write_record",
             recordKind: existing?.kind ?? recordKind,
             sourceMemoryId,
+            rootSourceMemoryId,
             originActorId: source.originActorId,
             stateBody,
             whyLine,
@@ -2989,11 +2999,16 @@ export class RunService {
         }
         const sourceMemoryId = record.sourceRefs[0]?.sourceMemoryId;
         if (!sourceMemoryId) return { reason: "cited_event_unknown", detail: "record has no source memory" };
+        const rootSourceMemoryId = this.administrativeRootSourceMemoryId(run, sourceMemoryId);
+        if (!rootSourceMemoryId) {
+          return { reason: "cited_event_unknown", detail: "record source lineage is missing, duplicated, or cyclic" };
+        }
         return {
           action: {
             tool: "read_record",
             recordId: record.recordId,
             sourceMemoryId,
+            rootSourceMemoryId,
             whyLine,
             institutionalPressureDelta: pressureDelta,
             openQuestion,
@@ -3345,12 +3360,24 @@ export class RunService {
       actionDeltas.push({ kind: "movement", movementDelta: clone(movement) });
       this.setActorReadiness(actor, false, "movement_started", readinessDeltas);
     } else if (action.tool === "write_record" || action.tool === "read_record") {
+      const freshRootSourceMemoryId = this.administrativeRootSourceMemoryId(
+        run,
+        action.sourceMemoryId,
+      );
+      if (!freshRootSourceMemoryId || freshRootSourceMemoryId !== action.rootSourceMemoryId) {
+        return this.finishGoalAttempt(run, attempt, "stale");
+      }
+      const committedAction =
+        action.institutionalPressureDelta > 0 &&
+        run.positiveAdministrativeRootIds.has(freshRootSourceMemoryId)
+          ? { ...action, institutionalPressureDelta: 0 }
+          : action;
       const nextRevision = run.worldRevision + 1;
       const applied = applyRunAdministration({
         runId: run.runId,
         actorId: actor.actorId,
         actorRole: actor.role,
-        action,
+        action: committedAction,
         records: run.records,
         ledgerEvents: run.ledgerEvents,
         institutionalPressure: run.institutionalPressure,
@@ -3361,6 +3388,9 @@ export class RunService {
       run.records = applied.records;
       run.ledgerEvents = applied.ledgerEvents;
       run.institutionalPressure = applied.institutionalPressure;
+      if (applied.delta.ledgerEvent.pressureDelta > 0) {
+        run.positiveAdministrativeRootIds.add(freshRootSourceMemoryId);
+      }
       run.worldRevision = nextRevision;
       if (applied.recordReadMemory) actor.memories.push(applied.recordReadMemory);
       actionDeltas.push(clone(applied.delta));
@@ -4538,6 +4568,26 @@ export class RunService {
         event.sourceMemoryId === memoryId &&
         (event.kind === "record_written" || event.kind === "record_updated"),
     );
+  }
+
+  private administrativeRootSourceMemoryId(run: RunState, memoryId: string): string | null {
+    let currentId = memoryId;
+    const visited = new Set<string>();
+    while (true) {
+      if (visited.has(currentId)) return null;
+      visited.add(currentId);
+      const matches: RunMemory[] = [];
+      for (const actor of run.actors.values()) {
+        for (const memory of actor.memories) {
+          if (memory.memoryId === currentId) matches.push(memory);
+        }
+      }
+      if (matches.length !== 1) return null;
+      const memory = matches[0];
+      if (!memory) return null;
+      if (memory.kind !== "record_read") return memory.memoryId;
+      currentId = memory.sourceMemoryId;
+    }
   }
 
   private recordVisibility(

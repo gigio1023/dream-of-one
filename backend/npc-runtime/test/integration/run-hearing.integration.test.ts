@@ -938,17 +938,26 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
   const adapter = createStudioReceptionScriptedAdapter();
   const ordinaryNextStep = adapter.proposeNextStep.bind(adapter);
   const ordinaryMergedTurn = adapter.judgeAndProposeConversationTurn.bind(adapter);
+  let interrogationAnswerGoals: string[] | null = null;
   adapter.judgeAndProposeConversationTurn = async request => {
     const resolved = await ordinaryMergedTurn(request);
     if (request.playerLine === fallbackContent(request.locale).hesitationMarker) {
+      interrogationAnswerGoals = [...request.observePacket.goals];
       resolved.proposal.meaningfulFirsthand = true;
       resolved.proposal.stance = "vouch";
     }
     return resolved;
   };
-  let forceInterrogationWait = false;
   let forceBudgetFallback = false;
+  let firstInterrogationRequiredToolCall: unknown = null;
   adapter.proposeNextStep = async request => {
+    if (
+      request.observePacket.playerContact?.available &&
+      !forceBudgetFallback &&
+      firstInterrogationRequiredToolCall === null
+    ) {
+      firstInterrogationRequiredToolCall = request.requiredToolCall ?? null;
+    }
     if (request.observePacket.playerContact?.available && forceBudgetFallback) {
       return {
         proposal: {
@@ -962,16 +971,6 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
           usedFallback: true,
           fallbackReason: "budget_exhausted",
         },
-      };
-    }
-    if (request.observePacket.playerContact?.available && forceInterrogationWait) {
-      return {
-        proposal: {
-          toolCall: { tool: "wait", args: { reason: "provider tries to skip interrogation" } },
-          rationale: "Try to wait.",
-          done: true,
-        },
-        meta: { profileId: adapter.profileId, transport: "scripted", usedFallback: false },
       };
     }
     if (request.observePacket.playerContact?.available) return ordinaryNextStep(request);
@@ -1076,7 +1075,6 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
     ));
   }
   assert.equal(service.snapshot(started.runId).institutionalPressure, 100);
-  forceInterrogationWait = true;
 
   const beforeContact = service.snapshot(started.runId);
   const officerFacts = spatialActors(beforeContact);
@@ -1115,7 +1113,12 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
   });
   assert.equal(contactDecision.activeContact?.actorId, "NPC_Station_Officer");
   assert.equal(contactDecision.activeContact?.procedure, "interrogation");
-  assert.equal(contactDecision.providerMetas.at(-1)?.transport, "fallback");
+  assert.equal(contactDecision.providerMetas.at(-1)?.transport, "scripted");
+  assert.equal(contactDecision.providerMetas.at(-1)?.usedFallback, false);
+  assert.deepEqual(firstInterrogationRequiredToolCall, {
+    tool: "move_to",
+    targetId: "player",
+  });
 
   const contact = contactDecision.activeContact;
   assert.ok(contact);
@@ -1160,6 +1163,12 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
   assert.equal(answered.memoryDelta.meaningfulFirsthand, false);
   assert.notEqual(answered.actor.stance, "vouch");
   assert.equal(answered.actor.hasMeaningfulFirsthandConversation, false);
+  assert.ok(interrogationAnswerGoals?.some(goal =>
+    goal.includes("Conduct one survivable Station interrogation")
+  ));
+  assert.equal(interrogationAnswerGoals?.some(goal =>
+    goal.includes("Speak face to face with the outsider")
+  ), false);
   const ended = await service.endConversation(started.runId, interrogation.sessionId);
   assert.equal(ended.ended, true);
   const after = service.snapshot(started.runId);
@@ -1202,7 +1211,6 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
   // the provider reports exact budget exhaustion after the pre-claim reserve
   // check. Contact is then deterministic and the foreground conversation can
   // still use the protected player/hearing reserve.
-  forceInterrogationWait = false;
   const liaison = after.actors.find(actor => actor.actorId === "NPC_Roaming_Liaison");
   assert.ok(liaison);
   const liaisonZone = conversationZoneFor(layout, liaison.actorId, liaison.locationId);

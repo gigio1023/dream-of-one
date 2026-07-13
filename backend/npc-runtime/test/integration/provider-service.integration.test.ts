@@ -409,7 +409,7 @@ test("required talk_to narrows transport and Zod contracts and repairs an invali
     },
     {
       path: "utterance",
-      message: "required talk_to utterance must be nonempty",
+      message: "required utterance must be nonempty",
     },
   ]);
 
@@ -492,6 +492,110 @@ test("required talk_to narrows transport and Zod contracts and repairs an invali
     fallbackReason: null,
     callSeqs: [1, 2],
   }]);
+});
+
+test("required move_to player narrows transport and Zod contracts without requiring speech", async () => {
+  const liveReply = {
+    toolCall: { tool: "move_to", args: { targetId: "player" } },
+    utterance: null,
+    rationale: "확인이 필요한 방문자에게 직접 다가갑니다.",
+    done: true,
+  };
+  const textGen = new FakeTextGen([{ text: JSON.stringify(liveReply) }]);
+  const service = new ProviderService({
+    profileId: "test/required-player-approach",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const packet = requestScopedPacket();
+  packet.toolCatalog = ["move_to", "talk_to", "wait"];
+  packet.playerContact = {
+    available: true,
+    targetActorId: "player",
+    interactionZoneId: "StationIntakeConversation",
+    playerLocationId: "Station",
+    visible: true,
+    audible: true,
+    reachable: true,
+    safeDistanceM: 2.2,
+  };
+  const requiredToolCall = { tool: "move_to" as const, targetId: "player" as const };
+
+  const result = await service.proposeNextStep({
+    sessionId: "run-required-player-approach",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "대기 중인 심문을 위해 방문자에게 접근한다.",
+    observePacket: packet,
+    blockedSignatures: [],
+    requiredToolCall,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.deepEqual(result.proposal.toolCall, liveReply.toolCall);
+  assert.equal(result.proposal.utterance, undefined);
+  assert.equal(textGen.requests.length, 1, "a conforming live-shaped reply needs no repair");
+  assert.match(textGen.requests[0].instructions, /only move_to targeting the exact id player/);
+  assert.match(textGen.requests[0].instructions, /utterance may be null/);
+  assert.doesNotMatch(textGen.requests[0].instructions, /only talk_to targeting/);
+
+  const schema = textGen.requests[0].jsonSchema as {
+    properties: {
+      toolCall: {
+        anyOf: Array<{
+          properties?: {
+            tool: { const: string };
+            args: { properties: { targetId?: { const?: string } } };
+          };
+        }>;
+      };
+      utterance: Record<string, unknown>;
+      done: Record<string, unknown>;
+    };
+  };
+  assert.deepEqual(
+    schema.properties.toolCall.anyOf.map(branch => branch.properties?.tool.const),
+    ["move_to"],
+  );
+  assert.equal(
+    schema.properties.toolCall.anyOf[0]?.properties?.args.properties.targetId?.const,
+    "player",
+  );
+  assert.deepEqual(schema.properties.utterance, { type: ["string", "null"] });
+  assert.deepEqual(schema.properties.done, { type: "boolean", const: true });
+
+  const requestSchema = agentStepProposalSchemaForRequest("ko-KR", {
+    effectiveTools: ["move_to"],
+    observePacket: packet,
+    recordContracts: {},
+    requiredToolCall,
+  });
+  assert.equal(requestSchema.safeParse(liveReply).success, true);
+  for (const invalid of [
+    { ...liveReply, toolCall: null },
+    { ...liveReply, toolCall: { tool: "move_to", args: { targetId: "Park.allowed_anchor" } } },
+    {
+      ...liveReply,
+      toolCall: { tool: "talk_to", args: { actorId: "NPC_Store_Manager" } },
+      utterance: "다른 주민에게 말합니다.",
+    },
+    { ...liveReply, done: false },
+  ]) {
+    assert.equal(requestSchema.safeParse(invalid).success, false);
+  }
+  const spokenMoveSchema = agentStepProposalSchemaForRequest("ko-KR", {
+    effectiveTools: ["move_to"],
+    observePacket: packet,
+    recordContracts: {},
+    requiredToolCall,
+    requireUtterance: true,
+  });
+  assert.equal(spokenMoveSchema.safeParse(liveReply).success, false);
+  assert.equal(spokenMoveSchema.safeParse({
+    ...liveReply,
+    utterance: "확인을 위해 직접 다가가겠습니다.",
+  }).success, true);
 });
 
 test("allowed talk actor scope narrows transport and Zod schemas while omission keeps visible-audible scope", async () => {
@@ -731,6 +835,18 @@ test("agent-step record contracts select only M3R or legacy schemas and guides",
   assert.match(textGen.requests[0].instructions, /write_record \(M3R administrativeAuthority\)/);
   assert.match(textGen.requests[0].instructions, /read_record \(M3R administrativeAuthority\)/);
   assert.doesNotMatch(textGen.requests[0].instructions, /legacy world path/);
+  const pressureGuide = /M3R institutionalPressureDelta must be an integer from -25 through 25/g;
+  assert.equal(
+    textGen.requests[0].instructions.match(pressureGuide)?.length,
+    1,
+    "one M3R pressure guide covers write and read without duplication",
+  );
+  assert.match(textGen.requests[0].instructions, /negative lowers institutional pressure/);
+  assert.match(textGen.requests[0].instructions, /zero leaves it unchanged/);
+  assert.match(textGen.requests[0].instructions, /positive raises it/);
+  assert.match(textGen.requests[0].instructions, /Judge both direction and magnitude from the supplied evidence/);
+  assert.match(textGen.requests[0].instructions, /no direction is preferred/);
+  assert.match(textGen.requests[0].instructions, /One independent non-record source may create positive pressure only once/);
 
   const legacySchema = textGen.requests[1].jsonSchema;
   assert.deepEqual(recordBranches(legacySchema, "write_record"), [[
@@ -745,6 +861,7 @@ test("agent-step record contracts select only M3R or legacy schemas and guides",
   assert.match(textGen.requests[1].instructions, /write_record \(legacy world path\)/);
   assert.match(textGen.requests[1].instructions, /read_record \(legacy world path\)/);
   assert.doesNotMatch(textGen.requests[1].instructions, /M3R administrativeAuthority/);
+  assert.doesNotMatch(textGen.requests[1].instructions, pressureGuide);
 
   const stepWith = (toolCall: Record<string, unknown>) => ({
     toolCall,
@@ -1917,6 +2034,74 @@ test("invalid provider JSON gets one bounded repair attempt", async () => {
     (total, call) => total + call.chargedTokens,
     0,
   ));
+});
+
+test("invalid first and repair envelopes emit one sanitized structured warning", async () => {
+  const sentinel = "PLAYER_PRIVATE_SENTINEL_DO_NOT_LOG";
+  const firstInvalid = {
+    utterance: sentinel,
+    suggestedReplies: [],
+    continueConversation: true,
+    [sentinel]: "private extra field",
+  };
+  const repairInvalid = {
+    utterance: sentinel,
+    suggestedReplies: [
+      { text: "I can explain the procedure.", intent: "safe/local" },
+      { text: "Please clarify the question.", intent: "uncertain/repair" },
+      { text: "I have nothing to add.", intent: "risky/weird" },
+    ],
+    continueConversation: "yes",
+    [sentinel]: "private extra field",
+  };
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(firstInvalid) },
+    { text: JSON.stringify(repairInvalid) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/sanitized-invalid-envelope-warning",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const warnings: unknown[][] = [];
+  const originalWarn = console.warn;
+  console.warn = (...args: unknown[]) => {
+    warnings.push(args);
+  };
+  let result;
+  try {
+    result = await service.proposeConversationTurn({
+      ...conversationRequest(),
+      sessionId: "run-sanitized-invalid-envelope-warning",
+      locale: "en-US",
+    });
+  } finally {
+    console.warn = originalWarn;
+  }
+
+  assert.equal(result?.meta.transport, "fallback");
+  assert.equal(result?.meta.fallbackReason, "invalid_envelope");
+  assert.equal(warnings.length, 1);
+  assert.equal(warnings[0]?.length, 1);
+  const warning = warnings[0]?.[0] as {
+    event: string;
+    purpose: string;
+    firstIssues: Array<{ path: string; code: string; message: string }>;
+    repairIssues: Array<{ path: string; code: string; message: string }>;
+  };
+  assert.equal(warning.event, "provider_invalid_envelope_after_repair");
+  assert.equal(warning.purpose, "conversation");
+  assert.ok(warning.firstIssues.some(issue =>
+    issue.path === "suggestedReplies" && issue.code.length > 0 && issue.message.length > 0
+  ));
+  assert.ok(warning.repairIssues.some(issue =>
+    issue.path === "continueConversation" && issue.code.length > 0 && issue.message.length > 0
+  ));
+  assert.ok([...warning.firstIssues, ...warning.repairIssues].some(issue =>
+    issue.message.includes("[redacted]")
+  ), "the warning must exercise value redaction instead of merely omitting output fields");
+  assert.doesNotMatch(JSON.stringify(warning), new RegExp(sentinel));
+  assert.deepEqual(textGen.requests.map(request => request.purpose), ["conversation", "repair"]);
 });
 
 test("missing credentials and exhausted budget use explicit fallback metadata", async () => {

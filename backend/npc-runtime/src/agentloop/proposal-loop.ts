@@ -6,6 +6,7 @@ import type {
   AgentToolResult,
   NpcProposalPort,
   ProposalMeta,
+  RequiredAgentToolCall,
   ResolvedProposal,
 } from "../providers/ports.js";
 import type { TranscriptEntry } from "./transcript.js";
@@ -41,6 +42,7 @@ export interface BoundedProposalLoopInput<T> {
   ) => Promise<ResolvedProposal<AgentStepProposal>>;
   onMeta?: (meta: ProposalMeta) => void | Promise<void>;
   allowedTalkActorIds?: readonly string[];
+  requiredToolCall?: RequiredAgentToolCall;
   budgetCeiling?: { maxCalls: number; maxTokens: number };
 }
 
@@ -83,6 +85,7 @@ export async function runBoundedProposalLoop<T>(
       ...(input.allowedTalkActorIds
         ? { allowedTalkActorIds: [...input.allowedTalkActorIds] }
         : {}),
+      ...(input.requiredToolCall ? { requiredToolCall: input.requiredToolCall } : {}),
       ...(input.budgetCeiling ? { budgetCeiling: input.budgetCeiling } : {}),
     };
     const resolved = input.invoke

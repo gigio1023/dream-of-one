@@ -77,6 +77,9 @@ const RECORD_TOOL_ARGUMENT_GUIDES = {
   },
 } as const;
 
+const M3R_INSTITUTIONAL_PRESSURE_GUIDE =
+  "- M3R institutionalPressureDelta must be an integer from -25 through 25: negative lowers institutional pressure, zero leaves it unchanged, and positive raises it. Judge both direction and magnitude from the supplied evidence; no direction is preferred. One independent non-record source may create positive pressure only once across its read/write lineage, so relaying the same evidence does not mint new positive pressure.";
+
 function recordContractsForRequest(
   request: AgentStepRequest,
   tools: readonly ToolName[],
@@ -111,6 +114,9 @@ function toolGuideForTools(
   recordContracts: AgentStepRecordContracts,
 ): string {
   const offered = [...new Set(tools)];
+  const usesM3rPressure = offered.some(tool =>
+    (tool === "write_record" || tool === "read_record") && recordContracts[tool] === "m3r"
+  );
   return [
     "Tool argument guide for the currently offered branches:",
     ...offered.flatMap(tool => {
@@ -121,8 +127,69 @@ function toolGuideForTools(
       }
       return TOOL_ARGUMENT_GUIDES[tool];
     }),
+    ...(usesM3rPressure ? [M3R_INSTITUTIONAL_PRESSURE_GUIDE] : []),
     "Only use actors, objects, records, and tool names present in the observe packet.",
   ].join("\n");
+}
+
+interface SanitizedValidationIssue {
+  path: string;
+  code: string;
+  message: string;
+}
+
+function sanitizeDiagnosticText(value: string): string {
+  return value
+    .replace(/[\u0000-\u001f\u007f-\u009f]/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
+function outputStringFragments(text: string): string[] {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return [];
+  }
+  const fragments = new Set<string>();
+  const visit = (value: unknown): void => {
+    if (typeof value === "string") {
+      const fragment = sanitizeDiagnosticText(value);
+      if (fragment.length > 0) fragments.add(fragment);
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    if (value && typeof value === "object") {
+      Object.entries(value as Record<string, unknown>).forEach(([key, entry]) => {
+        const fragment = sanitizeDiagnosticText(key);
+        if (fragment.length > 0) fragments.add(fragment);
+        visit(entry);
+      });
+    }
+  };
+  visit(parsed);
+  return [...fragments].sort((left, right) => right.length - left.length);
+}
+
+function sanitizedValidationIssues(
+  error: z.ZodError,
+  sensitiveFragments: readonly string[],
+): SanitizedValidationIssue[] {
+  return error.issues.map(issue => {
+    let message = sanitizeDiagnosticText(issue.message);
+    for (const fragment of sensitiveFragments) {
+      message = message.split(fragment).join("[redacted]");
+    }
+    return {
+      path: issue.path.join("."),
+      code: issue.code,
+      message: [...message].slice(0, 240).join(""),
+    };
+  });
 }
 
 const PRIVATE_ACTOR_CONTEXT_GUIDE =
@@ -389,17 +456,29 @@ export class ProviderService implements NpcProposalPort {
       "blockedSignatures contains calls already blocked or successfully completed during this beat; choose a different call or stop.",
       "The runtime validates and applies tools; never invent direct state changes or authority outcomes.",
       request.requiredToolCall
-        ? "Return exactly four top-level keys: toolCall, utterance, rationale, and done. For this required reply, toolCall and utterance must both be non-null. Do not add top-level keys."
+        ? request.requiredToolCall.tool === "talk_to"
+          ? "Return exactly four top-level keys: toolCall, utterance, rationale, and done. For this required reply, toolCall and utterance must both be non-null. Do not add top-level keys."
+          : request.requireUtterance
+            ? "Return exactly four top-level keys: toolCall, utterance, rationale, and done. For this required movement, toolCall and utterance must both be non-null. Do not add top-level keys."
+            : "Return exactly four top-level keys: toolCall, utterance, rationale, and done. For this required movement, toolCall must be non-null; utterance may be null. Do not add top-level keys."
         : "Return exactly four top-level keys: toolCall, utterance, rationale, and done. Never omit toolCall or utterance; use null when either is absent. Do not add top-level keys.",
       "Stable ids may appear in identifier-valued toolCall.args fields and internal rationale. Never copy an actor, object, record, memory, text-surface, or landmark id into utterance or other player-visible prose.",
       ...(effectiveTools.includes("move_to")
         ? ["playerContact is offered to only one runtime-selected resident at a time. Choose move_to(player) only when your role goal or remembered facts warrant initiating a face-to-face question; otherwise choose another valid action or stop."]
         : []),
-      ...(request.requiredToolCall
+      ...(request.requiredToolCall?.tool === "talk_to"
         ? [
             `This wake permits only talk_to targeting the exact actor id ${request.requiredToolCall.actorId}.`,
             "Return one nonempty in-fiction utterance in the run locale with that talk_to call and finish this single reply with done=true.",
           ]
+        : []),
+      ...(request.requiredToolCall?.tool === "move_to"
+          ? [
+              `This wake permits only move_to targeting the exact id ${request.requiredToolCall.targetId}.`,
+              request.requireUtterance
+                ? "Return that move_to call with done=true and one nonempty in-fiction utterance."
+                : "Return that move_to call with done=true. Do not invent speech; utterance may be null.",
+            ]
         : []),
       ...(!request.requiredToolCall && allowedTalkActorIds !== undefined
         ? [allowedTalkActorIds.length > 0
@@ -615,14 +694,25 @@ export class ProviderService implements NpcProposalPort {
         input.budgetCeiling,
       );
       const repaired = this.parseJson(input.schema, repair.text);
-      return repaired.success
-        ? {
-            ok: true,
-            value: repaired.data,
-            meta: this.liveMeta(this.combineUsage(first.usage, repair.usage)),
-            callSeqs,
-          }
-        : { ok: false, reason: "invalid_envelope", callSeqs };
+      if (repaired.success) {
+        return {
+          ok: true,
+          value: repaired.data,
+          meta: this.liveMeta(this.combineUsage(first.usage, repair.usage)),
+          callSeqs,
+        };
+      }
+      const sensitiveFragments = [
+        ...outputStringFragments(first.text),
+        ...outputStringFragments(repair.text),
+      ];
+      console.warn({
+        event: "provider_invalid_envelope_after_repair",
+        purpose: input.request.purpose,
+        firstIssues: sanitizedValidationIssues(parsed.error, sensitiveFragments),
+        repairIssues: sanitizedValidationIssues(repaired.error, sensitiveFragments),
+      });
+      return { ok: false, reason: "invalid_envelope", callSeqs };
     } catch (error) {
       return { ok: false, reason: this.normalizeFailure(error), callSeqs };
     }

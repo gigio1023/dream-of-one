@@ -203,7 +203,7 @@ test("administration fixture carries provider prose through write, read, pressur
     (delta: { kind: string }) => delta.kind === "administration",
   );
   assert.equal(read.action, "read_record");
-  assert.equal(read.ledgerEvent.pressureDelta, 10);
+  assert.equal(read.ledgerEvent.pressureDelta, 0);
   assert.equal(
     read.ledgerEvent.openQuestion.text,
     "관리자가 확인한 방문 경위는 누구에게 다시 물어야 하는가?",
@@ -213,7 +213,7 @@ test("administration fixture carries provider prose through write, read, pressur
   const finalSnapshot = endpoints.administrationFinalSnapshot.response;
   assert.equal(finalSnapshot.records.length, 1);
   assert.equal(finalSnapshot.ledgerEvents.length, 2);
-  assert.equal(finalSnapshot.institutionalPressure, 25);
+  assert.equal(finalSnapshot.institutionalPressure, 15);
   assert.equal(finalSnapshot.socialView.encounteredRecords.length, 1);
   assert.equal(finalSnapshot.socialView.pressure.band, "raised");
   assert.equal(

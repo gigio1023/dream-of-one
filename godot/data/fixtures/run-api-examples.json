@@ -9165,8 +9165,8 @@
               "sourceMemoryId": "mem-fixture-2",
               "recordRevision": 1,
               "pressureBefore": 15,
-              "pressureDelta": 10,
-              "pressureAfter": 25,
+              "pressureDelta": 0,
+              "pressureAfter": 15,
               "visibleToActorIds": [
                 "NPC_Station_Officer",
                 "NPC_Studio_Manager",
@@ -9183,7 +9183,7 @@
               "worldRevision": 9
             },
             "pressureBefore": 15,
-            "pressureAfter": 25
+            "pressureAfter": 15
           },
           {
             "kind": "readiness",
@@ -9464,7 +9464,7 @@
           "hearingAtSeconds": 1800,
           "paused": false
         },
-        "institutionalPressure": 25,
+        "institutionalPressure": 15,
         "providerBudget": {
           "callLimit": 120,
           "tokenLimit": 300000,
@@ -9913,8 +9913,8 @@
             "sourceMemoryId": "mem-fixture-2",
             "recordRevision": 1,
             "pressureBefore": 15,
-            "pressureDelta": 10,
-            "pressureAfter": 25,
+            "pressureDelta": 0,
+            "pressureAfter": 15,
             "visibleToActorIds": [
               "NPC_Station_Officer",
               "NPC_Studio_Manager",

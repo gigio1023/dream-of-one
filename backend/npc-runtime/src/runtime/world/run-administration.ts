@@ -13,6 +13,8 @@ export interface ValidatedRecordWrite {
   tool: "write_record";
   recordKind: RecordKind;
   sourceMemoryId: string;
+  /** Internal non-record evidence root used to prevent pressure echo loops. */
+  rootSourceMemoryId: string;
   originActorId: string;
   stateBody: string;
   whyLine: string;
@@ -27,6 +29,8 @@ export interface ValidatedRecordRead {
   tool: "read_record";
   recordId: string;
   sourceMemoryId: string;
+  /** Internal non-record evidence root used to prevent pressure echo loops. */
+  rootSourceMemoryId: string;
   whyLine: string;
   institutionalPressureDelta: number;
   openQuestion: RunOpenQuestion | null;

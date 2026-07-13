@@ -100,7 +100,10 @@ administratively authorized target ids are sent. Run-scoped ordinary
 audibility, both speech cooldowns, no pending movement, and a shared authored
 volume; an empty set remains explicit rather than widening back to visible
 actors. A required ambient reply
-narrows further to the exact `talk_to` actor id and `done=true`. The envelope
+narrows further to the exact `talk_to` actor id and `done=true`. A pending
+Station interrogation is already a runtime-mandated grounded approach, so its
+request is likewise narrowed to exactly `move_to(player)` and `done=true`;
+unlike ambient speech, that movement requires no utterance. The envelope
 always contains exactly
 `toolCall`, `utterance`, `rationale`, and `done`, using `null` for an absent
 nullable value. The same effective-tool constraint is enforced by the local
@@ -114,6 +117,17 @@ validation report field-specific paths to the single repair attempt, and
 repair must return a complete replacement JSON value. Runtime validation still
 rechecks fresh visibility, audibility, role authority, record ownership,
 clamps, and every world mutation at commit time.
+
+M3R record requests also give the model one shared pressure ruler rather than
+duplicating it per tool: `institutionalPressureDelta` is an integer from -25
+through 25, negative lowers shared pressure, zero leaves it unchanged, and
+positive raises it. Direction and magnitude remain model judgments from the
+supplied evidence; the prompt prefers no direction and the runtime still
+clamps before commit. One independent non-record memory may contribute a
+positive pressure event only once across its complete record read/write
+lineage. Later reads and derivative records remain legal, including zero or
+negative judgments, but they cannot mint another positive event from the same
+evidence root.
 
 `AmbientReplyJudgment` is the second and final call in a bounded two-resident
 exchange. It returns the listener's exact `talk_to` reply together with a
@@ -226,6 +240,13 @@ reported in `ProposalMeta`:
 - rate limiting or transport failure;
 - invalid envelope after repair;
 - per-session call or token budget exhaustion.
+
+If both the original envelope and its single repair fail validation,
+`ProviderService` emits one diagnostic warning containing only the request
+purpose and bounded Zod `path` / `code` / `message` entries for both attempts.
+It never logs the prompt, player line, or generated output, and the public
+audit continues to expose only `invalid_envelope`. This is enough to diagnose
+a live schema mismatch without turning provider text into a log surface.
 
 Fallback is resilience, not the production policy. For player judgment, fallback is
 the deterministic signal classifier in

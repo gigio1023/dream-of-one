@@ -205,7 +205,10 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
     const canApproachPlayer =
       request.observePacket.toolCatalog.includes("move_to") &&
       request.observePacket.playerContact?.available === true;
-    const requiredTalkTarget = request.requiredToolCall?.actorId;
+    const requiredTalkTarget = request.requiredToolCall?.tool === "talk_to"
+      ? request.requiredToolCall.actorId
+      : undefined;
+    const requiresPlayerApproach = request.requiredToolCall?.tool === "move_to";
     const allowedTalkTargets = request.allowedTalkActorIds === undefined
       ? null
       : new Set(request.allowedTalkActorIds);
@@ -224,7 +227,13 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
             (allowedTalkTargets === null || allowedTalkTargets.has(actorId)),
           )
         : undefined;
-    const proposal: AgentStepProposal = request.previousResult
+    const proposal: AgentStepProposal = requiresPlayerApproach && canApproachPlayer
+      ? {
+          toolCall: { tool: "move_to", args: { targetId: "player" } },
+          rationale: content.talkRationale,
+          done: true,
+        }
+      : request.previousResult
       ? {
           toolCall: { tool: "wait", args: { reason: content.previousResultWaitReason } },
           rationale: content.previousResultRationale,

@@ -389,6 +389,15 @@ consuming the normal opening. Expiry or loss clears the lease, starts the
 75-second cooldown, and appends exactly one attributed `not_engaged` memory;
 no judgment or institutional mutation is implied.
 
+The high-pressure Station interrogation is the exception to the optional
+approach choice: once its runtime conditions and fresh grounded contact facts
+hold, `move_to(player)` is already the only action the validator can accept.
+That goal therefore sends a request-scoped schema containing only the exact
+player approach, with nullable utterance and `done=true`, instead of paying up
+to three doomed alternatives before deterministic fallback. Opening wording,
+the interrogation question, and the answer judgment remain provider-owned;
+the runtime still revalidates contact facts before both claim and commit.
+
 Current NPC decision responses use one typed `actionDeltas` stream: `speech`,
 `readiness`, `look`, `movement`, or validated `administration`. If a player modal owns the run when an
 ambient result resolves, the signature-bound attempt becomes queued without a
@@ -408,6 +417,11 @@ player. Reading an administrative record may update factual memory or
 institutional pressure, but does not directly move personal stance. One
 successful record write, update, or first read produces exactly one ledger
 event; retrying or rereading the same revision cannot duplicate it.
+Record-read lineage is resolved back to one unique non-record source at both
+proposal validation and serialized commit. That root may create positive
+institutional pressure only once for the whole run; relaying, rereading, or
+rewriting the same evidence still creates the legitimate record, ledger, and
+provenance effects but clamps another requested positive delta to zero.
 
 An `ambient_stance_judgment` memory links the source speech event, the exact
 listener-owned `ambient_utterance` memory, speaker, listener, before/after

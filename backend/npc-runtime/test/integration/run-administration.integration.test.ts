@@ -84,6 +84,30 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
   const originalNextStep = adapter.proposeNextStep.bind(adapter);
   adapter.proposeNextStep = async request => {
     const resolved = await originalNextStep(request);
+    const derivedSource = request.observePacket.administrativeSources.find(
+      source => source.kind === "record_read",
+    );
+    const derivedRecordKind = request.observePacket.administrativeAuthority.allowedRecordKinds[0];
+    const derivedSurfaceId = request.observePacket.administrativeAuthority.writableTextSurfaceIds[0];
+    if (derivedSource && derivedRecordKind && derivedSurfaceId) {
+      resolved.proposal = {
+        toolCall: {
+          tool: "write_record",
+          args: {
+            recordKind: derivedRecordKind,
+            sourceMemoryId: derivedSource.memoryId,
+            stateBody: "관리자가 읽은 접수 기록을 후속 확인 기록으로 전파했습니다.",
+            whyLine: "같은 접수 근거를 다른 기록으로 전파했지만 새로운 독립 증거는 아닙니다.",
+            institutionalPressureDelta: 25,
+            textSurfaceId: derivedSurfaceId,
+            openQuestion: null,
+          },
+        },
+        rationale: "읽은 기록을 권한 안에서 후속 기록으로 전파합니다.",
+        done: true,
+      };
+      return resolved;
+    }
     if (resolved.proposal.toolCall?.tool === "write_record") {
       resolved.proposal.toolCall.args.institutionalPressureDelta = 999;
     }
@@ -351,7 +375,11 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
     delta => delta.kind === "administration" && delta.action === "read_record",
   );
   assert.ok(readDelta && readDelta.kind === "administration");
-  assert.equal(readDelta.ledgerEvent.pressureDelta, 10);
+  assert.equal(
+    readDelta.ledgerEvent.pressureDelta,
+    0,
+    "reading an already-positive evidence root cannot mint more pressure",
+  );
   assert.equal(
     readDelta.ledgerEvent.openQuestion?.text,
     "관리자가 확인한 방문 경위는 누구에게 다시 물어야 하는가?",
@@ -361,7 +389,7 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
   assert.equal(readDelta.record.lastLedgerEventId, readDelta.ledgerEvent.eventId);
   const afterRead = service.snapshot(started.runId);
   assert.equal(afterRead.ledgerEvents.length, 2);
-  assert.equal(afterRead.institutionalPressure, 35);
+  assert.equal(afterRead.institutionalPressure, 25);
   assert.equal(afterRead.records[0]?.recordRevision, adminDelta.record.recordRevision);
   assert.equal(afterRead.records[0]?.lastLedgerEventId, readDelta.ledgerEvent.eventId);
   assert.deepEqual(
@@ -432,11 +460,21 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
     candidate => candidate.kind === "goal" && candidate.actorIds[0] === "NPC_Studio_Manager",
   );
   assert.ok(rereadWake);
-  const reread = await service.decision({
+  const derivedWrite = await service.decision({
     runId: started.runId,
     wakeId: rereadWake.wakeId,
     observedWorldRevision: rereadWake.observedWorldRevision,
   });
-  assert.ok(reread.actionDeltas.every(delta => delta.kind !== "administration"));
-  assert.equal(service.snapshot(started.runId).ledgerEvents.length, 2);
+  const derivedDelta = derivedWrite.actionDeltas.find(
+    delta => delta.kind === "administration" && delta.action === "write_record",
+  );
+  assert.ok(derivedDelta && derivedDelta.kind === "administration");
+  assert.equal(derivedDelta.ledgerEvent.pressureDelta, 0);
+  assert.equal(derivedDelta.ledgerEvent.sourceMemoryId, manager.memories.find(
+    memory => memory.kind === "record_read"
+  )?.memoryId);
+  const afterDerivedWrite = service.snapshot(started.runId);
+  assert.equal(afterDerivedWrite.ledgerEvents.length, 3);
+  assert.equal(afterDerivedWrite.institutionalPressure, 25);
+  assert.equal(afterDerivedWrite.records.length, 2, "record propagation remains legal");
 });

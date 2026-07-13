@@ -144,6 +144,23 @@ func snapshot() -> Dictionary:
 		"locationId": _first_value(sources, [&"locationId", &"location_id"], ""),
 		"runId": _first_value(sources, [&"runId", &"run_id"], ""),
 		"runStatus": _first_value(sources, [&"runStatus", &"run_status"], ""),
+		"runLocale": _first_value(sources, [&"runLocale", &"run_locale"], ""),
+		"presentationLocale": _first_value(
+			sources,
+			[&"presentationLocale", &"presentation_locale", &"locale"],
+			""
+		),
+		"nextRunLocale": _first_value(
+			sources,
+			[&"nextRunLocale", &"next_run_locale"],
+			""
+		),
+		"languageAppliesNextRun": _first_value(
+			sources,
+			[&"languageAppliesNextRun", &"language_applies_next_run"],
+			false
+		),
+		"uiScale": _dictionary_value(hud_view, [&"uiScale", &"ui_scale"], null),
 		"hearingProcedure": _first_value(
 			sources,
 			[&"hearingProcedure", &"hearing_procedure"],

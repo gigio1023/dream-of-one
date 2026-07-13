@@ -466,15 +466,27 @@ func _current_scene_root() -> Node:
 func _game_input_key(params: Dictionary) -> Dictionary:
 	var key_name := str(params.get("key", ""))
 	var keycode := OS.find_keycode_from_string(key_name)
-	if keycode == KEY_NONE:
+	var unicode_codepoint := key_name.unicode_at(0) if key_name.length() == 1 else 0
+	if keycode == KEY_NONE and unicode_codepoint == 0:
 		return {"sent": false, "error": "Unknown key: %s" % key_name}
 	var ev := InputEventKey.new()
-	ev.keycode = keycode
-	ev.physical_keycode = keycode
+	if keycode != KEY_NONE:
+		ev.keycode = keycode
+		ev.physical_keycode = keycode
 	ev.pressed = bool(params.get("pressed", true))
 	ev.echo = bool(params.get("echo", false))
+	# LineEdit consumes committed text from InputEventKey.unicode. The stock
+	# helper filled only shortcut keycodes, which discarded native-script keys.
+	# As with real IME/virtual-keyboard events, only the press carries Unicode.
+	if ev.pressed:
+		ev.unicode = unicode_codepoint
 	Input.parse_input_event(ev)
-	return {"sent": true, "key": key_name, "pressed": ev.pressed}
+	return {
+		"sent": true,
+		"key": key_name,
+		"pressed": ev.pressed,
+		"unicode": ev.unicode,
+	}
 
 
 func _game_input_mouse(params: Dictionary) -> Dictionary:

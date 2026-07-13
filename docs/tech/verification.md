@@ -60,6 +60,7 @@ DREAM_SESSION_MODE=fixture $GODOT_BIN --headless --path godot --script res://too
 DREAM_SESSION_MODE=fixture $GODOT_BIN --headless --path godot --script res://tools/route_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/npc_movement_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/physical_prop_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/godot_ai_input_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/localization_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/check_assets.gd
 $GODOT_BIN --headless --path godot --script res://tools/asset_validation_smoke.gd

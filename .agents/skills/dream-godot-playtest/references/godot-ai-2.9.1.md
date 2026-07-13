@@ -7,13 +7,19 @@ Claude Code may add different MCP prefixes.
 ## Pinned provenance
 
 - `plugin.cfg` and the spawned Python package report `2.9.1`.
-- The vendored editor add-on is pinned to upstream commit
+- The vendored editor add-on uses upstream commit
   [`0ffbce6ef167e4f22e8d0674181ad06d9feeae79`](https://github.com/hi-godot/godot-ai/commit/0ffbce6ef167e4f22e8d0674181ad06d9feeae79),
   observed on upstream `main` on 2026-07-11.
-- It is not byte-identical to tag `v2.9.1` (`6cdd3573…`). The post-tag snapshot
-  changes only `client_configurator.gd`, `dock_panels/log_viewer.gd`, and
-  `mcp_dock.gd`; the repository preserves and names the actual owner-provided
-  snapshot instead of pretending it is the tag.
+- Before Dream's local helper patch, that upstream baseline is not
+  byte-identical to tag `v2.9.1` (`6cdd3573…`): the post-tag snapshot changes
+  only `client_configurator.gd`, `dock_panels/log_viewer.gd`, and `mcp_dock.gd`.
+  The repository names the actual owner-provided baseline instead of pretending
+  it is the tag.
+- Dream carries one narrow patch on that baseline: a one-character key string
+  also fills `InputEventKey.unicode` on its pressed event. The first-person
+  controller separately derives logical motion from consecutive absolute
+  positions when the helper supplies neither relative field. Both remain on
+  the generic `Input.parse_input_event` path; neither mutates game truth.
 - The editor spawns `godot-ai==2.9.1` over loopback. Ports and client config are
   per-device state and must never be committed.
 
@@ -37,6 +43,12 @@ Use `project_run` only as allowed by the main skill's route gate. During
 implementation it may establish the game-helper handshake without player
 input; hands-on play remains reserved for the executor named by the current
 verification contract.
+
+For first-person look, send one position-only mouse-motion baseline followed
+by bounded absolute-position motions; `Player3D` derives the missing logical
+delta only when both relative fields are zero. For committed native-script
+text, send one Unicode character per `input_key` press/release pair. This does
+not emulate OS IME preedit/commit and must not be reported as IME composition.
 
 ## State semantics
 

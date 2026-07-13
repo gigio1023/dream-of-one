@@ -76,11 +76,12 @@ executor/provider route in [`verification.md`](verification.md).
 
 Verified on 2026-07-12 against Godot `4.7.stable.official.5b4e0cb0f`:
 
-- `godot/addons/godot_ai/` is the owner-provided snapshot of upstream commit
-  `0ffbce6ef167e4f22e8d0674181ad06d9feeae79`. `plugin.cfg` reports 2.9.1 and
-  the plugin spawns `godot-ai==2.9.1`; this is not byte-identical to tag
-  `v2.9.1` (`6cdd3573…`). Three post-tag editor files differ, as recorded in
-  the repository skill reference.
+- `godot/addons/godot_ai/` uses the owner-provided upstream snapshot at commit
+  `0ffbce6ef167e4f22e8d0674181ad06d9feeae79` as its baseline, plus the narrow
+  committed-Unicode helper patch described below. `plugin.cfg` reports 2.9.1
+  and the plugin spawns `godot-ai==2.9.1`; the upstream baseline itself is not
+  byte-identical to tag `v2.9.1` (`6cdd3573…`). Three post-tag editor files
+  differ before Dream's local patch, as recorded in the skill reference.
 - `godot/project.godot` enables `res://addons/godot_ai/plugin.cfg` and registers
   `_mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"`.
 - With telemetry disabled and `DREAM_SESSION_MODE=fixture`, the editor connected
@@ -103,6 +104,15 @@ Verified on 2026-07-12 against Godot `4.7.stable.official.5b4e0cb0f`:
   binding is recorded as inherited rather than independently verified. Claude
   Code execution remains untested, while its package discovery path is the
   tracked `.claude/skills` symlink.
+- The stock 2.9.1 helper sends absolute mouse positions without relative
+  motion, while the first-person controller correctly consumes logical motion;
+  it also omits the Unicode field required for committed native-script text.
+  Dream now derives a zero-relative synthetic look delta from consecutive
+  absolute positions in `Player3D` and carries a one-character Unicode
+  codepoint in the vendored helper's normal `Input.parse_input_event` path.
+  `godot_ai_input_smoke.gd` protects both consequences without gameplay input
+  or a provider call. The playtest snapshot also exposes run/presentation/next
+  locale, deferred-language state, and UI scale for final locale evidence.
 - Stopping the agent-owned editor also stopped an externally started server in
   one observed run. Treat editor and server lifetime as coupled unless current
   session status proves otherwise; after editor shutdown, restart the server
@@ -259,6 +269,13 @@ nodes produce explicit availability fields rather than runtime errors.
 
 The initial adapter does not duplicate movement, key presses, mouse input,
 screenshots, or generic node inspection. Godot AI already owns those actions.
+
+Dream adds only input-transport fidelity around that generic path: two
+position-only mouse motions provide the fallback logical delta used by
+`Player3D`, and a one-character key string carries its committed Unicode
+codepoint. Neither path calls gameplay methods or mutates world truth. Direct
+Unicode commitment is not OS IME preedit/commit evidence; final acceptance
+must keep those claims distinct.
 
 If direct use shows that focused Korean text entry or another routine operation
 cannot be performed reliably through bounded Godot AI input, add one semantic
@@ -431,9 +448,11 @@ path.
 
 ## Risks and revisit rules
 
-- **Plugin drift:** pin editor commit `0ffbce6…` and server package 2.9.1.
-  Upgrade either only in a dedicated change that rechecks compatibility, the
-  tool mapping, live helper, skill reference, and routed direct-play loop.
+- **Plugin drift:** use editor commit `0ffbce6…` and server package 2.9.1 as
+  the upstream baseline plus the tracked one-character Unicode helper patch.
+  Upgrade either only in a dedicated change that rechecks compatibility,
+  reapplies or removes that patch deliberately, and verifies the tool mapping,
+  live helper, skill reference, input smoke, and routed direct-play loop.
 - **Skill drift:** the technical doc owns project semantics; the skill routes to
   it. Do not copy volatile node paths into both.
 - **Adapter growth:** when an action helper is proposed, require evidence that

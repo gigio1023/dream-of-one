@@ -31,6 +31,8 @@ var _control_enabled := true
 var _focused_target: Node = null
 var _respawn_transform: Transform3D
 var _respawn_pitch := 0.0
+var _synthetic_mouse_position := Vector2.ZERO
+var _has_synthetic_mouse_position := false
 
 
 func _ready() -> void:
@@ -119,8 +121,25 @@ func _physics_process(delta: float) -> void:
 
 
 func _apply_mouse_look(event: InputEventMouseMotion) -> void:
-	var yaw_delta := deg_to_rad(event.screen_relative.x * mouse_sensitivity)
-	var pitch_delta := deg_to_rad(event.screen_relative.y * mouse_sensitivity)
+	var look_delta := event.screen_relative
+	if look_delta.is_zero_approx():
+		look_delta = event.relative
+	if look_delta.is_zero_approx():
+		# Godot AI 2.9.1 supplies absolute mouse positions but no relative
+		# fields. Treat the first such event as a baseline and later events as
+		# normal logical mouse motion. Real captured-mouse events keep using
+		# screen_relative, as recommended by Godot for stretched viewports.
+		if _has_synthetic_mouse_position:
+			look_delta = event.position - _synthetic_mouse_position
+		_synthetic_mouse_position = event.position
+		_has_synthetic_mouse_position = true
+	else:
+		_synthetic_mouse_position = event.position
+		_has_synthetic_mouse_position = true
+	if look_delta.is_zero_approx():
+		return
+	var yaw_delta := deg_to_rad(look_delta.x * mouse_sensitivity)
+	var pitch_delta := deg_to_rad(look_delta.y * mouse_sensitivity)
 	rotate_y(-yaw_delta)
 	if invert_y:
 		_head.rotation.x += pitch_delta
@@ -278,8 +297,15 @@ func set_look_settings(sensitivity: float, inverted: bool, fov: float) -> void:
 
 
 func capture_mouse() -> void:
+	_reset_synthetic_mouse_baseline()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func release_mouse() -> void:
+	_reset_synthetic_mouse_baseline()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
+func _reset_synthetic_mouse_baseline() -> void:
+	_synthetic_mouse_position = Vector2.ZERO
+	_has_synthetic_mouse_position = false

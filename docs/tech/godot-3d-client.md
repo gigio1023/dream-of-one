@@ -424,13 +424,18 @@ the dev machine with all six NPC loops live.
   preload-backed `session/start`; the ordinary conversation modal is the only
   dialogue surface. Physical arrival and provider-backed opening readiness may
   complete in either order: the same pending contact id is retained and the
-  modal opens only after both are true, without a transient error/re-approach
-  loop. A final `conversation_not_ready` enters the same authoritative-rebase
+  ordinary contact becomes an `E` response cue only after both are true,
+  without a transient error/re-approach loop. Moving out of the safe-distance
+  sightline disables that prompt immediately. The same ready boundary opens a
+  mandatory Station interrogation automatically; once either conversation
+  begins, the existing modal remains non-dismissible. A final
+  `conversation_not_ready` enters the same authoritative-rebase
   and one-explicit-demand recovery path without discarding a still-valid
   physical contact. Only a prevalidated full snapshot may clear a contact at
   the same revision; an ordinary late response with an equal or older
   `activeContact: null` cannot erase newer client state. Settings and the Tab
-  log defer automatic opening without pausing the world. Cancellation returns
+  log hide the cue without pausing the world; closing them never accepts an
+  ordinary contact on the player's behalf. Cancellation returns
   the actor visually toward the contact's origin anchor without emitting a
   runtime arrival, while a consumed contact leaves the actor at the
   conversation position.

@@ -325,7 +325,17 @@ func has_player_contact(contact_id := "") -> bool:
 
 
 func player_contact_is_ready(contact_id: String) -> bool:
-	return contact_id == _contact_id and _contact_ready_emitted
+	if (
+		contact_id != _contact_id
+		or not _contact_ready_emitted
+		or not is_instance_valid(_contact_target)
+	):
+		return false
+	return (
+		_planar_distance(global_position, _contact_target.global_position)
+		<= _contact_safe_distance + 0.15
+		and _contact_has_line_of_sight()
+	)
 
 
 func contact_status() -> Dictionary:
@@ -333,7 +343,7 @@ func contact_status() -> Dictionary:
 		"contactId": _contact_id,
 		"active": not _contact_id.is_empty(),
 		"moving": _contact_moving,
-		"ready": _contact_ready_emitted,
+		"ready": player_contact_is_ready(_contact_id),
 		"readySignaled": _contact_ready_signaled,
 		"safeDistanceM": _contact_safe_distance,
 		"retargetCount": _contact_retarget_count,
@@ -409,11 +419,13 @@ func interaction_kind() -> StringName:
 
 
 func is_interaction_enabled() -> bool:
-	return conversation_enabled
+	if _contact_id.is_empty():
+		return conversation_enabled
+	return conversation_enabled and player_contact_is_ready(_contact_id)
 
 
 func interact(_interactor: Node3D) -> void:
-	if not conversation_enabled:
+	if not is_interaction_enabled():
 		return
 	conversation_requested.emit(actor_id)
 

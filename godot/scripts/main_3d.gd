@@ -601,6 +601,7 @@ func _try_open_pending_contact() -> void:
 	var actor_id := str(_active_contact.get("actorId", ""))
 	if not _contact_is_current(contact_id, actor_id) or _contact_expired():
 		_pending_contact_ready_id = ""
+		_hud.clear_contact_approach(contact_id)
 		return
 	if (
 		_conversation_target != null
@@ -612,14 +613,21 @@ func _try_open_pending_contact() -> void:
 	):
 		return
 	var actor := _town.get_node_or_null("Actors/%s" % actor_id) as NPC3D
-	if actor == null or not actor.player_contact_is_ready(contact_id):
+	if actor == null:
+		return
+	if not actor.player_contact_is_ready(contact_id):
+		_hud.show_contact_approach(contact_id, actor_id)
 		return
 	# Reaching the player and preparing a provider-backed opening are separate
 	# asynchronous events. Keep the contact lease pending until RunService says
 	# the opening is ready; otherwise `_begin_conversation` would surface a
 	# transient error modal and make the resident repeat the approach.
 	if not bool(_actor_view(actor_id).get("playerConversationReady", false)):
+		_hud.show_contact_approach(contact_id, actor_id)
 		call_deferred("_queue_nearby_conversation_preloads")
+		return
+	if str(_active_contact.get("procedure", "ordinary")) == "ordinary":
+		_hud.show_contact_ready(contact_id, actor_id)
 		return
 	_begin_conversation(StringName(actor_id), actor, contact_id)
 
@@ -723,6 +731,7 @@ func _resume_active_contact_follow() -> void:
 	var actor := _town.get_node_or_null("Actors/%s" % actor_id) as NPC3D
 	if actor == null or contact_id.is_empty():
 		return
+	var started_follow := false
 	if not actor.has_player_contact(contact_id):
 		_drop_client_movement_for_actor(actor_id)
 		if not actor.begin_player_contact(
@@ -732,7 +741,9 @@ func _resume_active_contact_follow() -> void:
 		):
 			push_warning("NPC %s rejected player contact %s." % [actor_id, contact_id])
 			return
-	_hud.show_contact_approach(contact_id, actor_id)
+		started_follow = true
+	if started_follow or not actor.player_contact_is_ready(contact_id):
+		_hud.show_contact_approach(contact_id, actor_id)
 	_spatial_facts_dirty = true
 
 
@@ -784,7 +795,12 @@ func _contact_presentation_snapshot() -> Dictionary:
 	if actor != null:
 		actor_status = actor.contact_status()
 		if bool(actor_status.get("ready", false)):
-			status = "ready_deferred" if _pending_contact_ready_id == contact_id else "ready"
+			status = (
+				"ready_waiting_player"
+				if str(_active_contact.get("procedure", "ordinary")) == "ordinary"
+				else "ready_deferred" if _pending_contact_ready_id == contact_id
+				else "ready"
+			)
 	return {
 		"active": true,
 		"contactId": contact_id,
@@ -1080,6 +1096,13 @@ func _on_conversation_requested(actor_id: StringName, target: NPC3D) -> void:
 		and not _contact_expired()
 	):
 		contact_id = str(_active_contact.get("contactId", ""))
+		if not target.player_contact_is_ready(contact_id):
+			return
+		if not bool(_actor_view(str(actor_id)).get("playerConversationReady", false)):
+			_pending_contact_ready_id = contact_id
+			_hud.show_contact_approach(contact_id, str(actor_id))
+			call_deferred("_queue_nearby_conversation_preloads")
+			return
 	_begin_conversation(actor_id, target, contact_id)
 
 

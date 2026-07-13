@@ -16,6 +16,7 @@
     "hud.m3r.onboarding.dialogue": "按 1–3 选择回答，或直接输入。",
     "hud.m3r.onboarding.prop": "面向物品并按 E — 拿起 / 放下 · 鼠标左键 — 投掷",
     "hud.m3r.contact.approaching": "{speaker}正走过来想和你说话。",
+    "hud.m3r.contact.ready": "{speaker}想和你交谈。E — 回应 · 离开或忽略",
     "hud.m3r.interrogation.timer": "审问答复剩余 {seconds} 秒",
     "hud.m3r.interrogation.hesitation_submitted": "延迟答复已作为陈述登记。",
     "hud.m3r.hearing.opening": "服务站正在准备听证程序。你仍可自由移动。",

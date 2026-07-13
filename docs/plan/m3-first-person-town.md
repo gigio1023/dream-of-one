@@ -179,7 +179,9 @@ can overhear with subtitles.
   per-NPC suspicion remains internal/inspect/debug data, not another normal
   HUD meter beside stance.
 - NPC-initiated contact: a resident whose suspicion or goals warrant it
-  approaches and questions the player unprompted.
+  approaches unprompted. Ordinary contact waits for the player's explicit `E`
+  response and may be ignored; mandatory Station interrogation begins
+  automatically after the grounded approach.
 - SFX/ambience per owner decision 9.
 
 ## Technical deliverables

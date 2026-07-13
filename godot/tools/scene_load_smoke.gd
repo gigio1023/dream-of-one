@@ -2665,7 +2665,7 @@ func _check_player_contact(label: String, instance: Node) -> void:
 		_failures.append("%s inspect log did not defer contact without pausing" % label)
 	# Physical arrival can beat the provider-backed opening. Closing the log in
 	# that state must retain the same pending contact without opening an error
-	# modal; readiness may then complete and consume it normally.
+	# modal; readiness may then complete and expose explicit player acceptance.
 	var unready_contact_actor: Dictionary = instance.call(
 		"_actor_view",
 		contact_actor_id
@@ -2695,6 +2695,86 @@ func _check_player_contact(label: String, instance: Node) -> void:
 	ready_contact_actor["playerConversationReady"] = true
 	instance.call("_update_run_actor", ready_contact_actor)
 	instance.call("_try_open_pending_contact")
+	await process_frame
+	var waiting_for_player := hud.presentation_snapshot()
+	var ready_cue := hud.contact_cue_snapshot()
+	if (
+		paused
+		or not bool(player.get("_control_enabled"))
+		or str(waiting_for_player.get("modalSurface", "")) == "conversation"
+		or instance.get("_conversation_target") != null
+		or str(instance.get("_pending_contact_ready_id")) != consumed_contact_id
+		or not contact_actor.has_player_contact(consumed_contact_id)
+		or not bool(ready_cue.get("visible", false))
+		or not bool(ready_cue.get("ready", false))
+		or str(ready_cue.get("contactId", "")) != consumed_contact_id
+		or str(ready_cue.get("actorId", "")) != contact_actor_id
+	):
+		_failures.append(
+			"%s ordinary ready contact opened without explicit player acceptance: %s"
+			% [
+				label,
+				{
+					"hud": waiting_for_player,
+					"cue": ready_cue,
+					"pending": instance.get("_pending_contact_ready_id"),
+					"follow": contact_actor.contact_status(),
+				},
+			]
+		)
+		paused = false
+		return
+
+	# Readiness is current geometry, not a sticky arrival bit. Walking away
+	# disables both the E prompt and the ready cue without accepting the lease.
+	player.global_position = contact_actor.global_position + Vector3(0.0, 0.0, 3.5)
+	player.velocity = Vector3.ZERO
+	await physics_frame
+	instance.call("_try_open_pending_contact")
+	var walked_away_cue := hud.contact_cue_snapshot()
+	if (
+		contact_actor.player_contact_is_ready(consumed_contact_id)
+		or contact_actor.is_interaction_enabled()
+		or bool(walked_away_cue.get("ready", false))
+		or str(hud.presentation_snapshot().get("modalSurface", "")) == "conversation"
+	):
+		_failures.append(
+			"%s walking away left an ordinary contact ready or opened: %s"
+			% [
+				label,
+				{
+					"cue": walked_away_cue,
+					"follow": contact_actor.contact_status(),
+					"interaction": contact_actor.is_interaction_enabled(),
+				},
+			]
+		)
+
+	for contact_offset in [
+		Vector3(0.0, 0.0, 1.5),
+		Vector3(1.5, 0.0, 0.0),
+		Vector3(-1.5, 0.0, 0.0),
+		Vector3(0.0, 0.0, -1.5),
+	]:
+		player.global_position = contact_actor.global_position + contact_offset
+		player.velocity = Vector3.ZERO
+		for _frame in range(12):
+			await physics_frame
+			if contact_actor.player_contact_is_ready(consumed_contact_id):
+				break
+		if contact_actor.player_contact_is_ready(consumed_contact_id):
+			break
+	instance.call("_try_open_pending_contact")
+	ready_position = contact_actor.global_position
+	if (
+		not contact_actor.player_contact_is_ready(consumed_contact_id)
+		or not contact_actor.is_interaction_enabled()
+		or not bool(hud.contact_cue_snapshot().get("ready", false))
+	):
+		_failures.append("%s ordinary contact did not become explicitly actionable" % label)
+		paused = false
+		return
+	contact_actor.interact(player)
 	var opened := false
 	for _frame in range(180):
 		await process_frame
@@ -2706,7 +2786,7 @@ func _check_player_contact(label: String, instance: Node) -> void:
 			opened = true
 			break
 	if not opened:
-		_failures.append("%s ready contact did not reuse the conversation modal" % label)
+		_failures.append("%s accepted contact did not reuse the conversation modal" % label)
 		paused = false
 		return
 	var opened_main: Dictionary = instance.call("presentation_snapshot")

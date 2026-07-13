@@ -16,6 +16,7 @@
     "hud.m3r.onboarding.dialogue": "Appuyez sur 1–3 pour choisir une réponse, ou saisissez la vôtre.",
     "hud.m3r.onboarding.prop": "Regardez un objet et appuyez sur E — Prendre / poser · Clic gauche — Lancer",
     "hud.m3r.contact.approaching": "{speaker} s’approche pour vous parler.",
+    "hud.m3r.contact.ready": "{speaker} souhaite vous parler. E — Répondre · S’éloigner ou ignorer",
     "hud.m3r.interrogation.timer": "Réponse à l’interrogatoire dans {seconds} s",
     "hud.m3r.interrogation.hesitation_submitted": "Votre retard a été enregistré comme déclaration.",
     "hud.m3r.hearing.opening": "La Station prépare la procédure d’audience. Vous pouvez continuer à vous déplacer.",

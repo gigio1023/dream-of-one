@@ -61,9 +61,13 @@ an approach possible. The provider still decides whether that resident's role
 and memories warrant approaching. A validated choice creates one short-lived
 contact lease; it does not open a conversation, change a stance, or move
 institutional pressure. Godot follows the moving player with ordinary
-navigation until the safe distance is reached, then starts the existing
-preloaded player conversation with the lease id. Walking away until the lease
-expires leaves one attributed `not_engaged` fact in the initiator's memory.
+navigation until the safe distance is reached, then waits at the existing
+preloaded conversation boundary with the lease id. An ordinary approach first
+becomes an explicit `E` response prompt; accepting it starts the conversation,
+while walking away or ignoring it leaves the world running. Only Station
+interrogation opens its modal automatically.
+Walking away until the lease expires leaves one attributed `not_engaged` fact
+in the initiator's memory.
 That fact may inform a later provider judgment, but the runtime never turns it
 into a scripted social consequence. Opportunity epochs and cooldowns are
 measured in world time, so this remains event-driven rather than a provider

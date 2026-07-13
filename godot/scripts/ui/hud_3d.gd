@@ -115,6 +115,7 @@ var _language_options: Array[String] = []
 var _language_applies_next_run := false
 var _contact_cue_id := ""
 var _contact_cue_actor_id := ""
+var _contact_cue_ready := false
 var _hearing_opening_state := ""
 var _hesitation_active := false
 var _hesitation_emitted := false
@@ -247,6 +248,16 @@ func show_contact_approach(contact_id: String, actor_id: String) -> void:
 		return
 	_contact_cue_id = contact_id
 	_contact_cue_actor_id = actor_id
+	_contact_cue_ready = false
+	_refresh_contact_cue()
+
+
+func show_contact_ready(contact_id: String, actor_id: String) -> void:
+	if contact_id.is_empty() or actor_id.is_empty():
+		return
+	_contact_cue_id = contact_id
+	_contact_cue_actor_id = actor_id
+	_contact_cue_ready = true
 	_refresh_contact_cue()
 
 
@@ -255,6 +266,7 @@ func clear_contact_approach(contact_id := "") -> void:
 		return
 	_contact_cue_id = ""
 	_contact_cue_actor_id = ""
+	_contact_cue_ready = false
 	_refresh_contact_cue()
 
 
@@ -272,6 +284,10 @@ func contact_cue_snapshot() -> Dictionary:
 	return {
 		"visible": _contact_cue_panel.visible,
 		"text": _contact_cue_label.text,
+		"contactId": _contact_cue_id,
+		"actorId": _contact_cue_actor_id,
+		"ready": _contact_cue_ready,
+		"status": "ready" if _contact_cue_ready else "approaching",
 		"hearingOpening": not _hearing_opening_state.is_empty(),
 	}
 
@@ -1495,7 +1511,11 @@ func _refresh_contact_cue() -> void:
 		_contact_cue_label.text = ""
 		_contact_cue_panel.visible = false
 		return
-	_contact_cue_label.text = str(tr(&"hud.m3r.contact.approaching")).format({
+	_contact_cue_label.text = str(tr(
+		&"hud.m3r.contact.ready"
+		if _contact_cue_ready
+		else &"hud.m3r.contact.approaching"
+	)).format({
 		"speaker": _actor_label(_contact_cue_actor_id),
 	})
 	_contact_cue_panel.visible = (

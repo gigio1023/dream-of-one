@@ -682,13 +682,20 @@ func _ambient_destination_has_clearance(target_position: Vector3) -> bool:
 			) < DESTINATION_CLEARANCE_M
 		):
 			return false
-	for player_value in get_tree().get_nodes_in_group(&"player"):
-		if (
-			player_value is Node3D
-			and _planar_distance(target_position, (player_value as Node3D).global_position)
-			< DESTINATION_CLEARANCE_M + 0.25
-		):
-			return false
+	for group_name in [&"player", &"physical_props"]:
+		for candidate_value in get_tree().get_nodes_in_group(group_name):
+			if not candidate_value is Node3D:
+				continue
+			var candidate := candidate_value as Node3D
+			if not _is_dynamic_navigation_body(candidate):
+				continue
+			var clearance := (
+				DESTINATION_CLEARANCE_M + 0.25
+				if group_name == &"player"
+				else DESTINATION_CLEARANCE_M
+			)
+			if _planar_distance(target_position, candidate.global_position) < clearance:
+				return false
 	return true
 
 
@@ -811,11 +818,13 @@ func _dynamic_command_blocker() -> Dictionary:
 		_planar_distance(global_position, _movement_target)
 		<= DESTINATION_CLEARANCE_M + 0.25
 	)
-	for group_name in [&"npc_actors", &"player"]:
+	for group_name in [&"npc_actors", &"player", &"physical_props"]:
 		for candidate_value in get_tree().get_nodes_in_group(group_name):
 			if not candidate_value is Node3D or candidate_value == self:
 				continue
 			var candidate := candidate_value as Node3D
+			if not _is_dynamic_navigation_body(candidate):
+				continue
 			var candidate_delta := candidate.global_position - global_position
 			candidate_delta.y = 0.0
 			var candidate_distance := candidate_delta.length()
@@ -849,7 +858,13 @@ func _face_movement_direction(desired_direction: Vector3) -> void:
 
 
 func _is_dynamic_navigation_body(candidate: Node3D) -> bool:
-	return candidate.is_in_group(&"npc_actors") or candidate.is_in_group(&"player")
+	if candidate.is_in_group(&"npc_actors") or candidate.is_in_group(&"player"):
+		return true
+	return (
+		candidate is RigidBody3D
+		and candidate.is_in_group(&"physical_props")
+		and (candidate as RigidBody3D).collision_layer != 0
+	)
 
 
 func _begin_yield(resume_mode: StringName, reason: String) -> void:

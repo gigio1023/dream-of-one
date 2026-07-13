@@ -51,6 +51,7 @@ func _run() -> void:
 	await _check_npc_crossing(town, actors)
 	await _check_player_yield(town, actors)
 	await _check_dynamic_endpoint_wait(town, actors)
+	await _check_dynamic_prop_endpoint_wait(town, actors)
 	await _check_contact_preemption(town, actors)
 	await _check_bounded_stuck_recovery(town, actors)
 
@@ -321,6 +322,116 @@ func _check_dynamic_endpoint_wait(town: Node, actors: Dictionary) -> void:
 			% actor.movement_status()
 		)
 	actor.stop()
+
+
+func _check_dynamic_prop_endpoint_wait(town: Node, actors: Dictionary) -> void:
+	var actor := actors["NPC_Park_Caretaker"] as NPC3D
+	var prop := town.get_node_or_null(
+		"Props/PhysicalProps3D/Prop_Park_Box"
+	) as RigidBody3D
+	var start_value: Variant = town.call("navigation_position", "Studio.door_outside")
+	var portal_value: Variant = town.call("navigation_position", "Studio.front_door")
+	var target_value: Variant = town.call("navigation_position", "Studio.door_inside")
+	if (
+		prop == null
+		or not start_value is Vector3
+		or not portal_value is Vector3
+		or not target_value is Vector3
+	):
+		_failures.append("dynamic-prop endpoint fixture is missing")
+		return
+
+	actor.stop()
+	actor.global_position = start_value as Vector3
+	var original_transform := prop.global_transform
+	var original_freeze := prop.freeze
+	var original_freeze_mode := prop.freeze_mode
+	var original_sleeping := prop.sleeping
+	var original_linear_velocity := prop.linear_velocity
+	var original_angular_velocity := prop.angular_velocity
+	prop.freeze_mode = RigidBody3D.FREEZE_MODE_STATIC
+	prop.freeze = true
+	prop.sleeping = false
+	prop.linear_velocity = Vector3.ZERO
+	prop.angular_velocity = Vector3.ZERO
+	var portal := portal_value as Vector3
+	prop.global_position = Vector3(portal.x, original_transform.origin.y, portal.z)
+	await physics_frame
+	await physics_frame
+
+	var blocked: Array[String] = []
+	var arrived := {"value": false}
+	var on_blocked := func(
+		movement_id: String,
+		_actor_id: StringName,
+		_anchor_ref: String,
+		_reason: String
+	) -> void:
+		if movement_id == "dynamic-prop-endpoint-smoke":
+			blocked.append(movement_id)
+	var on_arrived := func(
+		movement_id: String,
+		_actor_id: StringName,
+		_anchor_ref: String
+	) -> void:
+		if movement_id == "dynamic-prop-endpoint-smoke":
+			arrived["value"] = true
+	actor.movement_blocked.connect(on_blocked)
+	actor.movement_arrived.connect(on_arrived)
+	var before_status := actor.movement_status()
+	var yield_count_before := int(before_status.get("yieldCount", 0))
+	var replan_count_before := int(before_status.get("repathAttempts", 0))
+	actor.apply_movement_command(
+		"dynamic-prop-endpoint-smoke",
+		"Studio.door_inside",
+		target_value as Vector3
+	)
+	var waited_without_blocking := false
+	for _frame in range(STUCK_TIMEOUT_FRAMES):
+		await physics_frame
+		var status := actor.movement_status()
+		if not blocked.is_empty():
+			break
+		if (
+			int(status.get("yieldCount", 0))
+			>= yield_count_before + DYNAMIC_WAIT_MIN_YIELDS
+			and str(status.get("lastRecoveryReason", "")).begins_with(
+				"command_dynamic_body_blocked:"
+			)
+			and int(status.get("repathAttempts", 0)) == replan_count_before
+		):
+			waited_without_blocking = true
+			break
+	if not blocked.is_empty():
+		_failures.append("movable prop exhausted the runtime movement: %s" % blocked)
+	if not waited_without_blocking:
+		_failures.append(
+			"NPC did not preserve its command behind a movable prop: %s"
+			% actor.movement_status()
+		)
+
+	prop.global_transform = original_transform
+	await physics_frame
+	await physics_frame
+	for _frame in range(COMMAND_TIMEOUT_FRAMES):
+		await physics_frame
+		if bool(arrived["value"]):
+			break
+	if actor.movement_blocked.is_connected(on_blocked):
+		actor.movement_blocked.disconnect(on_blocked)
+	if actor.movement_arrived.is_connected(on_arrived):
+		actor.movement_arrived.disconnect(on_arrived)
+	if not bool(arrived["value"]):
+		_failures.append(
+			"NPC did not finish after the movable prop was cleared: %s"
+			% actor.movement_status()
+		)
+	actor.stop()
+	prop.freeze_mode = original_freeze_mode
+	prop.freeze = original_freeze
+	prop.sleeping = original_sleeping
+	prop.linear_velocity = original_linear_velocity
+	prop.angular_velocity = original_angular_velocity
 
 
 func _check_contact_preemption(town: Node, actors: Dictionary) -> void:

@@ -212,7 +212,14 @@ list.
   seals a room.
 - **Props**: small `RigidBody3D` props are pushable by walking but tuned
   (mass, damping) not to launch; a prop that can leave reachable space is
-  a collision bug — greybox collision closes all gaps.
+  a collision bug — greybox collision closes all gaps. A resting physical
+  prop that blocks a commanded NPC route is transient world state like a
+  person, not proof that the authored route is unreachable: after observed
+  loss of progress the resident yields without spending its static replan
+  budget, preserves the same runtime movement id, and resumes when the prop
+  is carried or pushed clear. A carried prop has collision disabled and is
+  therefore excluded from both that blocker policy and ambient destination
+  clearance.
 - **Out-of-bounds failsafe**: the closed single-story map should make
   falling impossible; a kill-Z below the world teleports the player to the
   nearest anchor and logs a warning. Cheap insurance, invisible in normal
@@ -441,7 +448,8 @@ the dev machine with all six NPC loops live.
   movement and player contact safely preempt local wander; modal conversation
   pauses every policy timer. RVO priorities, progress sampling, a brief yield,
   and at most two replans handle genuine static blockage. A player/NPC body may
-  still physically stall a resident until it moves, but repeated dynamic-body
+  still physically stall a resident until it moves; the same rule covers a
+  collidable `physical_props` body placed in the route. Repeated dynamic-body
   yields preserve the authoritative command without exhausting that static
   budget or reporting a false terminal route failure. Neither path teleports
   the resident or forges a runtime arrival.

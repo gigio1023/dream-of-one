@@ -303,10 +303,12 @@ the dev machine with all six NPC loops live.
   same M3R keys and placeholder sets. The selected presentation id maps once to
   the full immutable run locale (`ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`,
   or `ja-JP`). The parity smoke reads each JSON table directly so Korean
-  fallback cannot hide a missing translation. The current HUD uses Godot's
-  default/system font path and wraps long Italian/French text without a
-  locale-specific scene; glyph rendering and IME composition remain visual
-  and hands-on acceptance items.
+  fallback cannot hide a missing translation. The client bundles Noto Sans KR,
+  SC, and JP faces, selects the intended regional primary face per locale, and
+  routes the other two as fallbacks through the shared HUD theme and Godot's
+  fallback font. Long Italian/French text wraps without a locale-specific
+  scene. The smoke validates the route and glyph coverage; actual glyph
+  appearance and IME composition remain hands-on acceptance items.
 
 ## New client responsibilities (3D-specific)
 

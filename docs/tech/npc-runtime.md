@@ -236,6 +236,15 @@ runtime semantic validation. Staleness still applies no opening or world
 effect. Final live acceptance checks both records; transport success alone is
 not enough to claim that the played run remained fallback-free.
 
+A request-scoped background ceiling can reject a proposal before its first
+transport call while preserving the run's foreground reserve. `RunService`
+classifies the typed rejection as `budget_reserved` for ordinary goals, goal
+replies, and ambient work. It adds no synthetic proposal metadata, provider
+audit resolution, runtime-trace entry, speech, or world delta; an exact retry
+returns the cached result without another attempt. Evidence from an earlier
+successful turn is retained, and genuine provider hard-budget fallback remains
+visible in both provider surfaces.
+
 The landed surface includes `POST /v1/run/start`, `POST /v1/run/advance`,
 `GET /v1/run/snapshot`, `POST /v1/run/encounter`, `POST /v1/session/preload`,
 the run-discriminated start/answer/snapshot/end session routes,
@@ -403,6 +412,14 @@ player approach, with nullable utterance and `done=true`, instead of paying up
 to three doomed alternatives before deterministic fallback. Opening wording,
 the interrogation question, and the answer judgment remain provider-owned;
 the runtime still revalidates contact facts before both claim and commit.
+If the request-scoped background ceiling denies this mandatory approach before
+a provider call, the runtime commits the grounded `move_to(player)` as explicit
+interrogation policy without inventing provider metadata, an audit resolution,
+or a runtime-trace entry. This is the only metadata-free goal commit: the fresh
+Station candidate, pending pressure event, contact zone, visibility, and
+reachability must still pass the normal claim- and commit-time checks. A real
+provider fallback after transport remains visible instead of being relabeled as
+policy.
 
 Current NPC decision responses use one typed `actionDeltas` stream: `speech`,
 `readiness`, `look`, `movement`, or validated `administration`. If a player modal owns the run when an

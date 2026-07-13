@@ -29,6 +29,21 @@ export type ProviderFailureReason =
   | "budget_exhausted"
   | "transport_error";
 
+/**
+ * A caller-owned background ceiling rejected a proposal before its first
+ * transport call could be reserved. This is run policy, not provider failure:
+ * callers must stop the background beat without synthesizing fallback
+ * metadata or an audit resolution.
+ */
+export class ProviderBudgetReservedError extends Error {
+  readonly code = "provider_budget_reserved";
+
+  constructor() {
+    super("caller-supplied background provider budget is reserved");
+    this.name = "ProviderBudgetReservedError";
+  }
+}
+
 export interface ProviderUsage {
   inputTokens: number;
   outputTokens: number;

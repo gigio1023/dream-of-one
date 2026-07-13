@@ -4,6 +4,7 @@ import { fallbackContent } from "../../src/localization/fallback-content.js";
 import { SUPPORTED_GAMEPLAY_LOCALES } from "../../src/localization/supported-locales.js";
 import { startSessionServer } from "../../src/api/http-server.js";
 import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
+import { ProviderBudgetReservedError } from "../../src/providers/ports.js";
 import { ProviderService } from "../../src/providers/service.js";
 import type {
   HearingJudgment,
@@ -960,6 +961,102 @@ test("HTTP hearing and run-end routes validate the full lifecycle envelope", asy
   } finally {
     await running.close();
   }
+});
+
+test("a caller-reserved mandatory interrogation creates grounded contact without provider evidence", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const ordinaryNextStep = adapter.proposeNextStep.bind(adapter);
+  let interrogationAttempts = 0;
+  adapter.proposeNextStep = async request => {
+    if (request.observePacket.playerContact?.available) {
+      interrogationAttempts += 1;
+      throw new ProviderBudgetReservedError();
+    }
+    return ordinaryNextStep(request);
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("reserved-interrogation"),
+  });
+  const started = service.start("start-reserved-interrogation", "ko-KR");
+  type MutableRun = {
+    institutionalPressure: number;
+    ledgerEvents: RunSnapshot["ledgerEvents"];
+  };
+  const runs = Reflect.get(service, "runs") as Map<string, MutableRun>;
+  const internalRun = runs.get(started.runId);
+  assert.ok(internalRun);
+  internalRun.institutionalPressure = 90;
+  internalRun.ledgerEvents.push({
+    eventId: "ledger:reserved-interrogation:1",
+    seq: 1,
+    kind: "record_written",
+    actorId: "NPC_Studio_Manager",
+    actorRole: "studio_manager",
+    recordId: "record:reserved-interrogation:1",
+    sourceMemoryId: "memory:reserved-interrogation:1",
+    recordRevision: 1,
+    pressureBefore: 65,
+    pressureDelta: 25,
+    pressureAfter: 90,
+    visibleToActorIds: ["player", "NPC_Station_Officer"],
+    whyLine: "A recent pressure-bearing record requires a bounded Station interrogation.",
+    openQuestion: null,
+    worldSeconds: 0,
+    worldRevision: started.worldRevision,
+  });
+
+  const layout = loadRunLayout();
+  const beforeGrounding = service.snapshot(started.runId);
+  const actorFacts = spatialActors(beforeGrounding);
+  const officer = actorFacts.find(facts => facts.actorId === "NPC_Station_Officer");
+  const stationPosition = layout.anchorPositions["Station.officer_spawn"];
+  assert.ok(officer);
+  assert.ok(stationPosition);
+  officer.position = [stationPosition[0], stationPosition[1], stationPosition[2]];
+  officer.playerVisible = true;
+  officer.playerAudible = true;
+  officer.playerReachable = true;
+  officer.playerInteractionZoneId = "StationIntakeConversation";
+  const grounded = await service.advance({
+    runId: started.runId,
+    advanceId: "reserved-interrogation-grounding",
+    observedWorldRevision: beforeGrounding.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: beforeGrounding.worldRevision,
+      player: {
+        position: [stationPosition[0], stationPosition[1], stationPosition[2]],
+        locationId: "Station",
+      },
+      actors: actorFacts,
+    },
+  });
+  const wake = grounded.scheduleWakes.find(
+    candidate => candidate.kind === "goal" && candidate.actorIds[0] === "NPC_Station_Officer",
+  );
+  assert.ok(wake);
+  const beforeDecision = service.snapshot(started.runId);
+  const request = {
+    runId: started.runId,
+    wakeId: wake.wakeId,
+    observedWorldRevision: wake.observedWorldRevision,
+  };
+  const contact = await service.decision(request);
+  assert.equal(contact.status, "completed");
+  assert.equal(contact.activeContact?.actorId, "NPC_Station_Officer");
+  assert.equal(contact.activeContact?.procedure, "interrogation");
+  assert.deepEqual(contact.providerMetas, []);
+  assert.deepEqual(contact.providerAudit, beforeDecision.providerAudit);
+  assert.deepEqual(contact.providerRuntimeTrace, beforeDecision.providerRuntimeTrace);
+  assert.deepEqual(contact.speechEvents, []);
+  assert.deepEqual(contact.actorReadinessDeltas, []);
+  assert.deepEqual(contact.actionDeltas, []);
+  assert.deepEqual(contact.movementDeltas, []);
+  assert.equal(interrogationAttempts, 1);
+  assert.deepEqual(await service.decision(request), contact);
+  assert.equal(interrogationAttempts, 1);
 });
 
 test("high-pressure Station interrogation is grounded, hesitation-only, survivable, and once per ledger escalation", async () => {

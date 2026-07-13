@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
 import { fallbackContent } from "../../src/localization/fallback-content.js";
+import { ProviderBudgetReservedError } from "../../src/providers/ports.js";
 import type {
   AmbientReplyRequest,
   AgentStepRequest,
@@ -2216,4 +2217,35 @@ test("the run reserve stops ambient dispatch before any provider spend", async (
   assert.equal(snapshot.ambientSpeech.cursor, 0);
   assert.equal(snapshot.ambientSpeech.activeConversation, null);
   assert.deepEqual(await service.decision(meeting.request), response);
+});
+
+test("a caller-reserved first ambient call leaves no fallback or partial exchange", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  let proposalAttempts = 0;
+  adapter.proposeNextStep = async () => {
+    proposalAttempts += 1;
+    throw new ProviderBudgetReservedError();
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("ambient-caller-reserve"),
+  });
+  const meeting = await readyFirstMeeting(service, "ambient-caller-reserve");
+  const response = await service.decision(meeting.request);
+  assert.equal(response.status, "budget_reserved");
+  assert.equal(proposalAttempts, 1);
+  assert.deepEqual(response.speechEvents, []);
+  assert.deepEqual(response.actorReadinessDeltas, []);
+  assert.deepEqual(response.actionDeltas, []);
+  assert.deepEqual(response.movementDeltas, []);
+  assert.deepEqual(response.providerMetas, []);
+  assert.deepEqual(response.providerAudit.calls, []);
+  assert.deepEqual(response.providerAudit.resolutions, []);
+  assert.deepEqual(response.providerRuntimeTrace.entries, []);
+  const snapshot = service.snapshot(meeting.started.runId);
+  assert.equal(snapshot.ambientSpeech.cursor, 0);
+  assert.equal(snapshot.ambientSpeech.activeConversation, null);
+  assert.ok(snapshot.actors.every(actor => actor.memories.length === 0));
+  assert.deepEqual(await service.decision(meeting.request), response);
+  assert.equal(proposalAttempts, 1);
 });

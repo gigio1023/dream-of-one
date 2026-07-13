@@ -249,6 +249,17 @@ reported in `ProposalMeta`:
 - invalid envelope after repair;
 - per-session call or token budget exhaustion.
 
+Budget admission distinguishes the provider's hard per-session limit from a
+caller-supplied ceiling that protects foreground capacity from background
+work. Before preflight, and again immediately before reserving a transport
+call, `ProviderService` checks the projected call plus that exact request's
+token reservation. Crossing the hard limit remains a visible deterministic
+`budget_exhausted` fallback. If a caller ceiling denies the first call,
+`ProviderService` instead throws `ProviderBudgetReservedError`: no transport,
+fallback adapter, audit call, or audit resolution occurred. If the first live
+call completed but its one repair no longer fits, the final fallback remains
+linked to that call sequence rather than leaving an unresolved audit call.
+
 If both the original envelope and its single repair fail validation,
 `ProviderService` emits one diagnostic warning containing only the request
 purpose and bounded Zod `path` / `code` / `message` entries for both attempts.

@@ -32,7 +32,10 @@ import type {
   ProposalMeta,
   ResolvedProposal,
 } from "../providers/ports.js";
-import { emptyProviderAuditSnapshot } from "../providers/ports.js";
+import {
+  emptyProviderAuditSnapshot,
+  ProviderBudgetReservedError,
+} from "../providers/ports.js";
 import { createProviderFromEnvironment } from "../providers/registry.js";
 import {
   clampConversationScore,
@@ -327,6 +330,7 @@ interface GoalDecisionAttempt {
   observation: GoalObservation | null;
   resolvedAction: GoalAction | null;
   actionMeta: ProposalMeta | null;
+  policyAction: "budget_reserved_interrogation" | null;
   providerMetas: ProposalMeta[];
   conversationId: string | null;
   conversationActorIds: [string, string] | null;
@@ -1802,6 +1806,7 @@ export class RunService {
           observation: null,
           resolvedAction: null,
           actionMeta: null,
+          policyAction: null,
           providerMetas: [],
           conversationId: null,
           conversationActorIds: null,
@@ -1847,6 +1852,7 @@ export class RunService {
         observation: null,
         resolvedAction: null,
         actionMeta: null,
+        policyAction: null,
         providerMetas: [],
         conversationId: null,
         conversationActorIds: null,
@@ -2494,6 +2500,7 @@ export class RunService {
       });
       attempt.resolvedAction = loop.accepted[0] ?? null;
       attempt.actionMeta = loop.accepted.length > 0 ? clone(loop.metas.at(-1) as ProposalMeta) : null;
+      attempt.policyAction = null;
     } catch (error) {
       if (meetingOwnedBeforeTransport || error === meetingOwnershipStop) {
         return this.serialize(runId, async () =>
@@ -2505,6 +2512,14 @@ export class RunService {
           this.finishGoalAttempt(this.requireRun(runId), attempt, "stale"),
         );
       }
+      if (error instanceof ProviderBudgetReservedError) {
+        return this.serialize(runId, async () =>
+          this.commitBudgetReservedInterrogationPolicy(
+            this.requireRun(runId),
+            attempt,
+          ),
+        );
+      }
       if (budgetReserved || error === budgetStop) {
         return this.serialize(runId, async () => {
           const run = this.requireRun(runId);
@@ -2513,19 +2528,15 @@ export class RunService {
             observation.observePacket.playerContact?.available
           ) {
             const priorMeta = attempt.providerMetas.at(-1);
-            const meta =
-              priorMeta?.fallbackReason === "budget_exhausted"
-                ? priorMeta
-                : this.goalFallbackMeta("budget_exhausted");
-            if (priorMeta !== meta) {
-              attempt.providerMetas.push(clone(meta));
-              this.trackProposal(run, meta);
+            if (priorMeta?.fallbackReason !== "budget_exhausted") {
+              return this.commitBudgetReservedInterrogationPolicy(run, attempt);
             }
             attempt.resolvedAction = {
               tool: "move_to_player",
               contactReason: fallbackContent(run.locale).whyLines.none,
             };
-            attempt.actionMeta = clone(meta);
+            attempt.actionMeta = clone(priorMeta);
+            attempt.policyAction = null;
             return this.commitGoalDecision(run, attempt);
           }
           return this.finishGoalAttempt(run, attempt, "budget_reserved", true);
@@ -2551,6 +2562,7 @@ export class RunService {
           : { tool: "wait", reason: "bounded goal fallback" };
       const fallbackMeta = this.goalFallbackMeta("invalid_envelope");
       attempt.actionMeta = fallbackMeta;
+      attempt.policyAction = null;
       synthesizedRuntimeFallback = true;
       attempt.providerMetas = [
         ...attempt.providerMetas.slice(-(GOAL_MAX_ATTEMPTS - 1)),
@@ -2747,18 +2759,7 @@ export class RunService {
     };
     attempt.state = "resolving";
     if (!ambientReserveAvailable) {
-      if (interrogationOpportunity && observePacket.playerContact?.available) {
-        const meta = this.goalFallbackMeta("budget_exhausted");
-        attempt.resolvedAction = {
-          tool: "move_to_player",
-          contactReason: fallbackContent(run.locale).whyLines.none,
-        };
-        attempt.actionMeta = meta;
-        attempt.providerMetas = [clone(meta)];
-        this.trackProposal(run, meta);
-        return this.commitGoalDecision(run, attempt);
-      }
-      return this.finishGoalAttempt(run, attempt, "budget_reserved", true);
+      return this.commitBudgetReservedInterrogationPolicy(run, attempt);
     }
     return null;
   }
@@ -3149,6 +3150,16 @@ export class RunService {
           this.finishGoalAttempt(this.requireRun(runId), attempt, "stale"),
         );
       }
+      if (error instanceof ProviderBudgetReservedError) {
+        return this.serialize(runId, async () =>
+          this.finishGoalAttempt(
+            this.requireRun(runId),
+            attempt,
+            "budget_reserved",
+            true,
+          ),
+        );
+      }
       if (budgetReserved || error === budgetStop) {
         return this.serialize(runId, async () =>
           this.finishGoalAttempt(this.requireRun(runId), attempt, "budget_reserved", true),
@@ -3163,6 +3174,7 @@ export class RunService {
       }
       attempt.resolvedAction = null;
       attempt.actionMeta = null;
+      attempt.policyAction = null;
       attempt.conversationId = null;
       attempt.conversationActorIds = null;
       attempt.conversationFactSignatures = {};
@@ -3270,7 +3282,17 @@ export class RunService {
     if (run.runStatus !== "active") {
       return this.finishGoalAttempt(run, attempt, "stale");
     }
-    if (!attempt.observation || !attempt.resolvedAction || !attempt.actionMeta) {
+    const policyInterrogation = Boolean(
+      attempt.policyAction === "budget_reserved_interrogation" &&
+      attempt.observation?.procedure === "interrogation" &&
+      attempt.resolvedAction?.tool === "move_to_player" &&
+      attempt.actionMeta === null
+    );
+    if (
+      !attempt.observation ||
+      !attempt.resolvedAction ||
+      (!attempt.actionMeta && !policyInterrogation)
+    ) {
       return this.finishGoalAttempt(run, attempt, "failed");
     }
     if (
@@ -3825,6 +3847,27 @@ export class RunService {
     };
   }
 
+  /** Preserve the required grounded Station approach without fake provider evidence. */
+  private commitBudgetReservedInterrogationPolicy(
+    run: RunState,
+    attempt: GoalDecisionAttempt,
+  ): RunNpcDecisionResponse {
+    const observation = attempt.observation;
+    if (
+      observation?.procedure !== "interrogation" ||
+      !observation.observePacket.playerContact?.available
+    ) {
+      return this.finishGoalAttempt(run, attempt, "budget_reserved", true);
+    }
+    attempt.resolvedAction = {
+      tool: "move_to_player",
+      contactReason: fallbackContent(run.locale).whyLines.none,
+    };
+    attempt.actionMeta = null;
+    attempt.policyAction = "budget_reserved_interrogation";
+    return this.commitGoalDecision(run, attempt);
+  }
+
   private rememberCompletedGoal(run: RunState, actorId: string, goalKey: string): void {
     run.completedGoalKeys.add(`${actorId}:${goalKey}`);
     while (run.completedGoalKeys.size > 512) {
@@ -4037,7 +4080,11 @@ export class RunService {
           return this.finishAmbientAttempt(
             run,
             attempt,
-            error instanceof BackgroundProviderLaneClosedError ? "stale" : "failed",
+            error instanceof BackgroundProviderLaneClosedError
+              ? "stale"
+              : error instanceof ProviderBudgetReservedError
+                ? "budget_reserved"
+                : "failed",
           );
         });
       }

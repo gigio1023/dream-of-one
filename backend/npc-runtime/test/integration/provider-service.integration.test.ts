@@ -23,6 +23,7 @@ import {
   loadProviderConfig,
 } from "../../src/providers/registry.js";
 import { ProviderService } from "../../src/providers/service.js";
+import { ProviderBudgetReservedError } from "../../src/providers/ports.js";
 import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-adapter.js";
 import { validateHearingJudgment } from "../../src/runtime/run-hearing.js";
 import {
@@ -2293,6 +2294,17 @@ test("missing credentials and exhausted budget use explicit fallback metadata", 
   assert.equal(first.meta.transport, "live");
   assert.equal(second.meta.fallbackReason, "budget_exhausted");
   assert.equal(budgeted.accountingSnapshot("session-provider-test").callsUsed, 1);
+  const hardBudgetAudit = budgeted.auditSnapshot("session-provider-test");
+  assert.equal(hardBudgetAudit.complete, true);
+  assert.deepEqual(hardBudgetAudit.resolutions.at(-1), {
+    seq: 2,
+    purpose: "conversation",
+    profileId: "test/budget",
+    transport: "fallback",
+    usedFallback: true,
+    fallbackReason: "budget_exhausted",
+    callSeqs: [],
+  });
 
   const repairCeilingTextGen = new FakeTextGen([
     { text: "not json", usage: { inputTokens: 5, outputTokens: 1, totalTokens: 6 } },
@@ -2327,27 +2339,49 @@ test("missing credentials and exhausted budget use explicit fallback metadata", 
     repairCeiling.accountingSnapshot("run-ambient-repair-ceiling").callsUsed,
     1,
   );
+  const repairAudit = repairCeiling.auditSnapshot("run-ambient-repair-ceiling");
+  assert.equal(repairAudit.complete, true);
+  assert.equal(repairAudit.calls.length, 1);
+  assert.equal(repairAudit.resolutions.length, 1);
+  assert.equal(repairAudit.resolutions[0]?.fallbackReason, "budget_exhausted");
+  assert.deepEqual(repairAudit.resolutions[0]?.callSeqs, [1]);
 
   const tokenCeilingTextGen = new FakeTextGen([{ text: validConversation }]);
+  const tokenCeilingFallback = new RuleFallbackNpcAdapter();
+  const originalTokenFallback = tokenCeilingFallback.proposeNextStep.bind(tokenCeilingFallback);
+  let tokenFallbackCalls = 0;
+  tokenCeilingFallback.proposeNextStep = async request => {
+    tokenFallbackCalls += 1;
+    return originalTokenFallback(request);
+  };
   const tokenCeiling = new ProviderService({
     profileId: "test/ambient-token-ceiling",
     textGen: tokenCeilingTextGen,
-    fallback: new RuleFallbackNpcAdapter(),
+    fallback: tokenCeilingFallback,
   });
-  const stoppedBeforeSpend = await tokenCeiling.proposeNextStep({
-    sessionId: "run-ambient-token-ceiling",
-    locale: "ko-KR",
-    iteration: 0,
-    goal: "곁에 있는 주민과 직접 말한다.",
-    observePacket: observePacket(),
-    blockedSignatures: [],
-    requiredToolCall: { tool: "talk_to", actorId: "NPC_Store_Manager" },
-    requireUtterance: true,
-    budgetCeiling: { maxCalls: 100, maxTokens: 1 },
-  });
-  assert.equal(stoppedBeforeSpend.meta.fallbackReason, "budget_exhausted");
+  await assert.rejects(
+    tokenCeiling.proposeNextStep({
+      sessionId: "run-ambient-token-ceiling",
+      locale: "ko-KR",
+      iteration: 0,
+      goal: "곁에 있는 주민과 직접 말한다.",
+      observePacket: observePacket(),
+      blockedSignatures: [],
+      requiredToolCall: { tool: "talk_to", actorId: "NPC_Store_Manager" },
+      requireUtterance: true,
+      budgetCeiling: { maxCalls: 100, maxTokens: 1 },
+    }),
+    (error: unknown) =>
+      error instanceof ProviderBudgetReservedError &&
+      error.code === "provider_budget_reserved",
+  );
   assert.equal(tokenCeilingTextGen.requests.length, 0);
+  assert.equal(tokenFallbackCalls, 0);
   assert.equal(tokenCeiling.accountingSnapshot("run-ambient-token-ceiling").callsUsed, 0);
+  const tokenCeilingAudit = tokenCeiling.auditSnapshot("run-ambient-token-ceiling");
+  assert.equal(tokenCeilingAudit.complete, true);
+  assert.deepEqual(tokenCeilingAudit.calls, []);
+  assert.deepEqual(tokenCeilingAudit.resolutions, []);
 });
 
 test("provider timeout falls back without blocking the session", async () => {

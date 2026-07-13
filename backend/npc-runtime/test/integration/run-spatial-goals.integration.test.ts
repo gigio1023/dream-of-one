@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
 import type { AgentStepRequest } from "../../src/providers/ports.js";
+import { ProviderBudgetReservedError } from "../../src/providers/ports.js";
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
 import { buildHearingJudgmentRequest } from "../../src/runtime/run-hearing.js";
 import { loadRunLayout } from "../../src/runtime/run-layout.js";
@@ -175,6 +176,110 @@ async function advanceToParkContactOpportunity(
   });
   return { response, actorId, playerPosition };
 }
+
+test("a caller-reserved first goal call ends as policy without provider evidence", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  let proposalAttempts = 0;
+  adapter.proposeNextStep = async () => {
+    proposalAttempts += 1;
+    throw new ProviderBudgetReservedError();
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("goal-caller-reserve"),
+    layout: stationaryLayout(),
+  });
+  const started = service.start("goal-caller-reserve", "ko-KR");
+  const advanced = await service.advance({
+    runId: started.runId,
+    advanceId: "goal-caller-reserve:spatial",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: spatialActors(started),
+    },
+  });
+  const wake = advanced.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === "NPC_Office_Worker"
+  );
+  assert.ok(wake);
+  const request = {
+    runId: started.runId,
+    wakeId: wake.wakeId,
+    observedWorldRevision: wake.observedWorldRevision,
+  };
+  const response = await service.decision(request);
+  assert.equal(response.status, "budget_reserved");
+  assert.equal(proposalAttempts, 1);
+  assert.deepEqual(response.actorReadinessDeltas, []);
+  assert.deepEqual(response.actionDeltas, []);
+  assert.deepEqual(response.movementDeltas, []);
+  assert.deepEqual(response.speechEvents, []);
+  assert.deepEqual(response.providerMetas, []);
+  assert.deepEqual(response.providerAudit.calls, []);
+  assert.deepEqual(response.providerAudit.resolutions, []);
+  assert.deepEqual(response.providerRuntimeTrace.entries, []);
+  assert.deepEqual(await service.decision(request), response);
+  assert.equal(proposalAttempts, 1);
+});
+
+test("a caller-reserved goal reply adds no reply evidence or partial speech", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  let replyAttempts = 0;
+  adapter.judgeAndProposeAmbientReply = async () => {
+    replyAttempts += 1;
+    throw new ProviderBudgetReservedError();
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("goal-reply-caller-reserve"),
+    layout: stationaryLayout(),
+  });
+  const started = service.start("goal-reply-caller-reserve", "ko-KR");
+  const actors = spatialActors(started);
+  const receptionist = actors.find(actor => actor.actorId === "NPC_Studio_Receptionist");
+  const manager = actors.find(actor => actor.actorId === "NPC_Studio_Manager");
+  assert.ok(receptionist && manager);
+  receptionist.visibleActorIds = [manager.actorId];
+  receptionist.audibleActorIds = [manager.actorId];
+  manager.visibleActorIds = [receptionist.actorId];
+  manager.audibleActorIds = [receptionist.actorId];
+  const advanced = await service.advance({
+    runId: started.runId,
+    advanceId: "goal-reply-caller-reserve:spatial",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors,
+    },
+  });
+  const wake = advanced.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === receptionist.actorId
+  );
+  assert.ok(wake);
+  const request = {
+    runId: started.runId,
+    wakeId: wake.wakeId,
+    observedWorldRevision: wake.observedWorldRevision,
+  };
+  const response = await service.decision(request);
+  assert.equal(response.status, "budget_reserved");
+  assert.equal(replyAttempts, 1);
+  assert.deepEqual(response.actorReadinessDeltas, []);
+  assert.deepEqual(response.actionDeltas, []);
+  assert.deepEqual(response.movementDeltas, []);
+  assert.deepEqual(response.speechEvents, []);
+  assert.equal(response.providerMetas.length, 1, "only the successful first goal step remains");
+  assert.equal(response.providerRuntimeTrace.entries.length, 1);
+  assert.deepEqual(await service.decision(request), response);
+  assert.equal(replyAttempts, 1);
+});
 
 test("one initial spatial batch admits each resident once and a social exchange consumes its listener wake", async () => {
   const adapter = createStudioReceptionScriptedAdapter();

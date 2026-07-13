@@ -20,6 +20,7 @@ import {
   supportedLocaleEntry,
 } from "../localization/supported-locales.js";
 import type { ToolName } from "../agentloop/tools.js";
+import { ProviderBudgetReservedError } from "./ports.js";
 import type {
   AmbientReplyJudgment,
   AmbientReplyRequest,
@@ -225,6 +226,8 @@ interface ProviderAuditState {
   resolutions: ProviderResolutionAudit[];
   droppedCount: number;
 }
+
+type ProviderBudgetAdmission = "admitted" | "hard_exhausted" | "caller_reserved";
 
 const MAX_AUDIT_RESOLUTIONS = 256;
 
@@ -645,8 +648,16 @@ export class ProviderService implements NpcProposalPort {
     | { ok: false; reason: ProviderFailureReason; callSeqs: number[] }
   > {
     const callSeqs: number[] = [];
-    if (this.isBudgetExhausted(input.sessionId, input.budgetCeiling)) {
+    const initialAdmission = this.budgetAdmission(
+      input.sessionId,
+      input.request,
+      input.budgetCeiling,
+    );
+    if (initialAdmission === "hard_exhausted") {
       return { ok: false, reason: "budget_exhausted", callSeqs };
+    }
+    if (initialAdmission === "caller_reserved") {
+      throw new ProviderBudgetReservedError();
     }
     let preflight: Awaited<ReturnType<TextGenPort["preflight"]>>;
     try {
@@ -674,23 +685,32 @@ export class ProviderService implements NpcProposalPort {
         };
       }
 
-      if (this.isBudgetExhausted(input.sessionId, input.budgetCeiling)) {
+      const repairRequest: TextGenRequest = {
+        ...input.request,
+        purpose: "repair",
+        instructions: `${input.request.instructions}\nReturn a complete replacement JSON value that satisfies every validation issue. Do not return a patch or add commentary.`,
+        input: JSON.stringify({
+          invalidOutput: first.text,
+          validationIssues: parsed.error.issues.map(issue => ({
+            path: issue.path.join("."),
+            message: issue.message,
+          })),
+        }),
+      };
+      const repairAdmission = this.budgetAdmission(
+        input.sessionId,
+        repairRequest,
+        input.budgetCeiling,
+      );
+      if (repairAdmission !== "admitted") {
+        // A live first call must remain linked to one resolution. If only the
+        // repair no longer fits the caller reserve, retain the existing
+        // deterministic fallback resolution rather than orphaning that call.
         return { ok: false, reason: "budget_exhausted", callSeqs };
       }
       const repair = await this.generateOne(
         input.sessionId,
-        {
-          ...input.request,
-          purpose: "repair",
-          instructions: `${input.request.instructions}\nReturn a complete replacement JSON value that satisfies every validation issue. Do not return a patch or add commentary.`,
-          input: JSON.stringify({
-            invalidOutput: first.text,
-            validationIssues: parsed.error.issues.map(issue => ({
-              path: issue.path.join("."),
-              message: issue.message,
-            })),
-          }),
-        },
+        repairRequest,
         callSeqs,
         input.budgetCeiling,
       );
@@ -715,6 +735,10 @@ export class ProviderService implements NpcProposalPort {
       });
       return { ok: false, reason: "invalid_envelope", callSeqs };
     } catch (error) {
+      if (error instanceof ProviderBudgetReservedError) {
+        if (callSeqs.length === 0) throw error;
+        return { ok: false, reason: "budget_exhausted", callSeqs };
+      }
       return { ok: false, reason: this.normalizeFailure(error), callSeqs };
     }
   }
@@ -726,16 +750,11 @@ export class ProviderService implements NpcProposalPort {
     ceiling?: { maxCalls: number; maxTokens: number },
   ): Promise<TextGenResult> {
     const reservedTokens = this.tokenReservation(request);
-    const budget = this.budgetFor(sessionId);
-    const maxCalls = Math.min(this.maxCalls, ceiling?.maxCalls ?? this.maxCalls);
-    const maxTokens = Math.min(this.maxTokens, ceiling?.maxTokens ?? this.maxTokens);
-    if (
-      budget.calls + 1 > maxCalls ||
-      budget.inputTokens + budget.outputTokens + budget.reservedTokens + reservedTokens >
-        maxTokens
-    ) {
+    const admission = this.budgetAdmission(sessionId, request, ceiling, reservedTokens);
+    if (admission === "hard_exhausted") {
       throw new Error("provider budget ceiling");
     }
+    if (admission === "caller_reserved") throw new ProviderBudgetReservedError();
     this.reserveCall(sessionId, reservedTokens);
     const callSeq = this.beginCallAudit(sessionId, reservedTokens);
     callSeqs.push(callSeq);
@@ -826,17 +845,26 @@ export class ProviderService implements NpcProposalPort {
     return current;
   }
 
-  private isBudgetExhausted(
+  private budgetAdmission(
     sessionId: string,
+    request: TextGenRequest,
     ceiling?: { maxCalls: number; maxTokens: number },
-  ): boolean {
+    reservedTokens = this.tokenReservation(request),
+  ): ProviderBudgetAdmission {
     const budget = this.budgetFor(sessionId);
-    const maxCalls = Math.min(this.maxCalls, ceiling?.maxCalls ?? this.maxCalls);
-    const maxTokens = Math.min(this.maxTokens, ceiling?.maxTokens ?? this.maxTokens);
-    return (
-      budget.calls >= maxCalls ||
-      budget.inputTokens + budget.outputTokens + budget.reservedTokens >= maxTokens
-    );
+    const projectedCalls = budget.calls + 1;
+    const projectedTokens =
+      budget.inputTokens + budget.outputTokens + budget.reservedTokens + reservedTokens;
+    if (projectedCalls > this.maxCalls || projectedTokens > this.maxTokens) {
+      return "hard_exhausted";
+    }
+    if (
+      ceiling &&
+      (projectedCalls > ceiling.maxCalls || projectedTokens > ceiling.maxTokens)
+    ) {
+      return "caller_reserved";
+    }
+    return "admitted";
   }
 
   private reserveCall(sessionId: string, reservedTokens: number): void {

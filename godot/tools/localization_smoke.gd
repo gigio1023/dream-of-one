@@ -58,6 +58,26 @@ const EXPORT_FONT_FALLBACK_EXPECTATIONS := {
 	],
 }
 const LONG_UI_TEXT := {
+	"ko": {
+		"prompt": "접수 담당자는 주민마다 당신의 도착을 조금씩 다르게 기억하고 있다며, 서로 어긋나는 설명 속에서도 왜 당신을 평범한 방문자로 판단해야 하는지 차분히 묻습니다.",
+		"choices": [
+			"모순처럼 보이는 부분을 숨기지 않고 제가 기억하는 순서대로 전부 설명하겠습니다.",
+			"먼저 다른 주민들이 직접 들은 내용을 확인한 뒤 제 설명과 나란히 비교해 주세요.",
+			"간단한 답은 없지만, 확인할 수 있는 사실과 추정은 분명히 나누겠습니다.",
+		],
+		"input": "한글 조합이 완료된 긴 직접 입력 문장입니다.",
+		"why": "설명은 길고 불확실하지만 직접 들은 사실과 다른 주민에게서 전해진 추정을 구분했습니다.",
+	},
+	"en": {
+		"prompt": "The receptionist calmly reconstructs every account and asks why you should be treated as an ordinary visitor when each resident remembers your arrival a little differently.",
+		"choices": [
+			"I can explain the full sequence without hiding the parts that appear contradictory.",
+			"Ask the other residents what they heard first, then compare their accounts with mine.",
+			"There is no simple answer, but I can separate verifiable facts from assumptions.",
+		],
+		"input": "This is a long typed answer with punctuation and a typographic apostrophe.",
+		"why": "The explanation remains long and uncertain, but it separates firsthand facts from attributed claims.",
+	},
 	"it": {
 		"prompt": "La receptionist abbassa la voce e ricostruisce con calma ciò che ha sentito: perché la tua identità dovrebbe risultare credibile, se ogni residente ricorda una versione leggermente diversa del tuo arrivo?",
 		"choices": [
@@ -68,6 +88,16 @@ const LONG_UI_TEXT := {
 		"input": "È una risposta digitata con accenti e apostrofi tipografici.",
 		"why": "La spiegazione rimane lunga e ambigua, ma collega ciò che la receptionist ha sentito alle parole attribuite agli altri residenti.",
 	},
+	"zh": {
+		"prompt": "接待员平静地梳理每个人的说法，并问道：既然居民们对你如何来到这里的记忆并不一致，为什么仍应把你视为一名普通访客？",
+		"choices": [
+			"我可以按顺序说明全部经过，不隐瞒那些看起来互相矛盾的部分。",
+			"请先询问其他居民亲耳听到了什么，再把他们的说法与我的解释对照。",
+			"这件事没有简单答案，但我会把可核实的事实与推测明确分开。",
+		],
+		"input": "这是一段包含简体中文标点的完整输入。",
+		"why": "这段解释虽然较长且仍有不确定之处，但区分了亲历事实与转述内容。",
+	},
 	"fr": {
 		"prompt": "La réceptionniste reprend posément chaque témoignage : pourquoi votre identité devrait-elle être reconnue, alors que plusieurs habitants décrivent votre arrivée d’une manière différente ?",
 		"choices": [
@@ -77,6 +107,16 @@ const LONG_UI_TEXT := {
 		],
 		"input": "C’est une réponse saisie avec des accents et une apostrophe typographique.",
 		"why": "L’explication reste longue et ambiguë, mais relie ce que la réceptionniste a entendu aux paroles attribuées aux autres habitants.",
+	},
+	"ja": {
+		"prompt": "受付係は住民ごとにあなたの到着についての記憶が少しずつ違うと整理し、それでも普通の訪問者として扱うべき理由を落ち着いて尋ねます。",
+		"choices": [
+			"矛盾して見える部分を隠さず、覚えている順番どおりにすべて説明します。",
+			"まず他の住民が直接聞いた内容を確認し、それから私の説明と比べてください。",
+			"簡単な答えはありませんが、確認できる事実と推測は明確に分けます。",
+		],
+		"input": "これは日本語入力で確定した長い文章です。",
+		"why": "説明は長く不確かですが、直接確認した事実と伝聞による主張を区別しています。",
 	},
 }
 
@@ -205,7 +245,7 @@ func _run() -> void:
 	await _check_hud_registry(localization, locales, registry_order, default_locale)
 	if _failures.is_empty():
 		print(
-			"PASS localization_smoke: %d locales share %d exact M3R keys/placeholders; bundled KR/SC/JP glyph routes, source-excerpt logs, and long it/fr HUD at 100/150%% are valid"
+			"PASS localization_smoke: %d locales share %d exact M3R keys/placeholders; bundled KR/SC/JP glyph routes, source-excerpt logs, and long six-locale HUD at 100/150%% are valid"
 			% [locales.size(), reference_keys.size()]
 		)
 	_finish()
@@ -438,7 +478,7 @@ func _check_hud_registry(
 		)
 
 	var revision := 100
-	for presentation_id in ["it", "fr"]:
+	for presentation_id in ["ko", "en", "it", "zh", "fr", "ja"]:
 		for scale in [1.0, 1.5]:
 			revision += 1
 			await _check_long_locale_hud(

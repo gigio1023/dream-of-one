@@ -3701,6 +3701,19 @@ func _check_non_actor_look_targets(
 		) == "administration":
 			administration_delta = (delta_value as Dictionary).duplicate(true)
 			break
+	var administration_read_packet: Dictionary = endpoints.get(
+		"administrationReadDecision", {}
+	)
+	var administration_read_response: Dictionary = administration_read_packet.get(
+		"response", {}
+	)
+	var administration_read_delta: Dictionary = {}
+	for delta_value in administration_read_response.get("actionDeltas", []):
+		if delta_value is Dictionary and str(
+			(delta_value as Dictionary).get("kind", "")
+		) == "administration":
+			administration_read_delta = (delta_value as Dictionary).duplicate(true)
+			break
 	var authoritative_record: Dictionary = administration_delta.get("record", {})
 	if authoritative_record.is_empty():
 		_failures.append(
@@ -3713,8 +3726,15 @@ func _check_non_actor_look_targets(
 		# present, must survive the merge.
 		var record_id := str(authoritative_record.get("recordId", ""))
 		var text_surface_id := str(authoritative_record.get("textSurfaceId", ""))
+		var authoritative_ledger_event: Dictionary = administration_delta.get(
+			"ledgerEvent", {}
+		)
+		var ledger_event_id := str(authoritative_ledger_event.get("eventId", ""))
 		var delta_snapshot := saved_run_snapshot.duplicate(true)
 		delta_snapshot["worldRevision"] = int(administration_response.get("worldRevision", -1))
+		delta_snapshot["institutionalPressure"] = int(
+			administration_delta.get("pressureBefore", 0)
+		)
 		var starting_records: Array = []
 		var prior_records_value: Variant = delta_snapshot.get("records", [])
 		if prior_records_value is Array:
@@ -3726,9 +3746,18 @@ func _check_non_actor_look_targets(
 				):
 					starting_records.append((record_value as Dictionary).duplicate(true))
 		delta_snapshot["records"] = starting_records
+		var starting_ledger_events: Array = []
+		for ledger_value in delta_snapshot.get("ledgerEvents", []):
+			if (
+				ledger_value is Dictionary
+				and str((ledger_value as Dictionary).get("eventId", "")) != ledger_event_id
+			):
+				starting_ledger_events.append((ledger_value as Dictionary).duplicate(true))
+		delta_snapshot["ledgerEvents"] = starting_ledger_events
 		instance.set("_run_snapshot", delta_snapshot)
 		instance.call("_apply_run_deltas", [administration_delta])
-		var cached_records: Array = (instance.get("_run_snapshot") as Dictionary).get(
+		var applied_snapshot := instance.get("_run_snapshot") as Dictionary
+		var cached_records: Array = applied_snapshot.get(
 			"records", []
 		)
 		var cached_record := _record_by_id(cached_records, record_id)
@@ -3739,6 +3768,84 @@ func _check_non_actor_look_targets(
 			_failures.append(
 				"%s administration delta did not populate the authoritative record cache"
 				% label
+			)
+		var cached_ledger_events: Array = applied_snapshot.get("ledgerEvents", [])
+		var cached_ledger_matches := cached_ledger_events.filter(func(value: Variant) -> bool:
+			return (
+				value is Dictionary
+				and str((value as Dictionary).get("eventId", "")) == ledger_event_id
+			)
+		)
+		if (
+			authoritative_ledger_event.is_empty()
+			or cached_ledger_matches.size() != 1
+			or cached_ledger_matches[0] != authoritative_ledger_event
+			or int(applied_snapshot.get("institutionalPressure", -1))
+			!= int(administration_delta.get("pressureAfter", -2))
+		):
+			_failures.append(
+				"%s administration delta left pressure/ledger debug state stale" % label
+			)
+
+		# A read keeps the record revision but advances lastLedgerEventId. The
+		# client must accept that exact authoritative equal-revision mutation and
+		# apply its record/ledger/pressure tuple atomically after the write.
+		if administration_read_delta.is_empty():
+			_failures.append("%s fixture has no administration read delta" % label)
+		else:
+			instance.call("_apply_run_deltas", [administration_read_delta])
+			applied_snapshot = instance.get("_run_snapshot") as Dictionary
+			var read_record: Dictionary = administration_read_delta.get("record", {})
+			var read_ledger_event: Dictionary = administration_read_delta.get(
+				"ledgerEvent", {}
+			)
+			var read_event_id := str(read_ledger_event.get("eventId", ""))
+			var read_cached_record := _record_by_id(
+				applied_snapshot.get("records", []),
+				record_id
+			)
+			var read_event_matches := (
+				applied_snapshot.get("ledgerEvents", []) as Array
+			).filter(func(value: Variant) -> bool:
+				return (
+					value is Dictionary
+					and str((value as Dictionary).get("eventId", "")) == read_event_id
+				)
+			)
+			if (
+				read_cached_record != read_record
+				or int(read_cached_record.get("recordRevision", -1))
+				!= int(authoritative_record.get("recordRevision", -2))
+				or str(read_cached_record.get("lastLedgerEventId", "")) != read_event_id
+				or read_event_matches.size() != 1
+				or read_event_matches[0] != read_ledger_event
+				or int(applied_snapshot.get("institutionalPressure", -1))
+				!= int(administration_read_delta.get("pressureAfter", -2))
+			):
+				_failures.append(
+					"%s administration write/read sequence left authority state stale"
+					% label
+				)
+
+		# A conflicting ledger sequence must reject the whole tuple. In
+		# particular, it cannot leave a new record cached while pressure/ledger
+		# stay at the prior authority state.
+		var before_conflict := applied_snapshot.duplicate(true)
+		var conflicting_record := authoritative_record.duplicate(true)
+		conflicting_record["recordId"] = "record:smoke:conflicting-ledger-seq"
+		var conflicting_event := authoritative_ledger_event.duplicate(true)
+		conflicting_event["eventId"] = "ledger:smoke:conflicting-ledger-seq"
+		conflicting_event["recordId"] = conflicting_record["recordId"]
+		instance.call("_apply_run_deltas", [{
+			"kind": "administration",
+			"record": conflicting_record,
+			"ledgerEvent": conflicting_event,
+			"pressureBefore": administration_delta.get("pressureBefore", 0),
+			"pressureAfter": administration_delta.get("pressureAfter", 0),
+		}])
+		if (instance.get("_run_snapshot") as Dictionary) != before_conflict:
+			_failures.append(
+				"%s conflicting administration tuple applied a torn record state" % label
 			)
 		var record_surface := instance.get_node_or_null(
 			"Town/Props/TextSurfaces/%s" % text_surface_id

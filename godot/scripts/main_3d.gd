@@ -2802,6 +2802,9 @@ func _apply_administration_delta(delta: Dictionary) -> void:
 
 	var record_id := str(record_id_value)
 	var records := _array_or_empty(_run_snapshot.get("records"))
+	var record_index := -1
+	var cached_record: Dictionary = {}
+	var cached_record_revision := 0
 	for index in records.size():
 		var cached_value: Variant = records[index]
 		if not cached_value is Dictionary:
@@ -2812,11 +2815,101 @@ func _apply_administration_delta(delta: Dictionary) -> void:
 		var cached_revision := _positive_json_integer(cached.get("recordRevision"))
 		if cached_revision > 0 and record_revision < cached_revision:
 			return
-		records[index] = record.duplicate(true)
-		_run_snapshot["records"] = records
+		cached_record = cached
+		cached_record_revision = cached_revision
+		record_index = index
+		break
+
+	# The action delta is also the freshest authoritative pressure/ledger view.
+	# Keep the debug snapshot coherent without revealing either value through the
+	# normal HUD; player knowledge still comes only from socialView encounters.
+	var has_ledger_event := delta.has("ledgerEvent")
+	var has_pressure_after := delta.has("pressureAfter")
+	if has_ledger_event != has_pressure_after:
+		push_warning("Ignoring incomplete administration pressure/ledger metadata.")
 		return
-	records.append(record.duplicate(true))
+	var ledger_event_value: Variant = delta.get("ledgerEvent")
+	var pressure_after := _bounded_json_integer(delta.get("pressureAfter"), 0, 125)
+	var ledger_events := _array_or_empty(_run_snapshot.get("ledgerEvents"))
+	var ledger_event: Dictionary = {}
+	var ledger_event_id := ""
+	var ledger_event_index := -1
+	if has_ledger_event:
+		if not ledger_event_value is Dictionary or pressure_after < 0:
+			push_warning("Ignoring malformed administration pressure/ledger metadata.")
+			return
+		ledger_event = ledger_event_value as Dictionary
+		ledger_event_id = str(ledger_event.get("eventId", "")).strip_edges()
+		var event_seq := _positive_json_integer(ledger_event.get("seq"))
+		if (
+			ledger_event_id.is_empty()
+			or event_seq < 1
+			or str(ledger_event.get("recordId", "")) != record_id
+			or _positive_json_integer(ledger_event.get("recordRevision")) != record_revision
+			or _bounded_json_integer(ledger_event.get("pressureAfter"), 0, 125)
+			!= pressure_after
+		):
+			push_warning("Ignoring malformed administration pressure/ledger metadata.")
+			return
+		for index in ledger_events.size():
+			var cached_event_value: Variant = ledger_events[index]
+			if not cached_event_value is Dictionary:
+				continue
+			var cached_event := cached_event_value as Dictionary
+			if str(cached_event.get("eventId", "")) == ledger_event_id:
+				if cached_event != ledger_event:
+					push_warning("Ignoring administration ledger content drift at one event id.")
+					return
+				ledger_event_index = index
+				break
+			if _positive_json_integer(cached_event.get("seq")) == event_seq:
+				push_warning("Ignoring administration ledger event with a conflicting sequence.")
+				return
+
+	if (
+		cached_record_revision == record_revision
+		and str(delta.get("action", "")) == "read_record"
+	):
+		# A record read is the one legal equal-revision mutation: the backend
+		# advances lastLedgerEventId while retaining the authored record revision.
+		# Accept only that exact shape after its matching ledger event validates.
+		var expected_read_record := cached_record.duplicate(true)
+		expected_read_record["lastLedgerEventId"] = ledger_event_id
+		var is_authoritative_read := (
+			has_ledger_event
+			and str(ledger_event.get("kind", "")) == "record_read"
+			and str(record.get("lastLedgerEventId", "")) == ledger_event_id
+			and record == expected_read_record
+		)
+		if not is_authoritative_read:
+			push_warning("Ignoring administration record content drift at one revision.")
+			return
+	elif cached_record_revision == record_revision and cached_record != record:
+		push_warning("Ignoring administration record content drift at one revision.")
+		return
+
+	# All supplied authority metadata has now validated. Apply the record,
+	# ledger, and pressure together so diagnostics cannot observe a torn delta.
+	if record_index >= 0:
+		records[record_index] = record.duplicate(true)
+	else:
+		records.append(record.duplicate(true))
 	_run_snapshot["records"] = records
+	if not has_ledger_event:
+		return
+	if ledger_event_index >= 0:
+		ledger_events[ledger_event_index] = ledger_event.duplicate(true)
+	else:
+		ledger_events.append(ledger_event.duplicate(true))
+		ledger_events.sort_custom(func(left: Variant, right: Variant) -> bool:
+			if not left is Dictionary or not right is Dictionary:
+				return false
+			return int((left as Dictionary).get("seq", 0)) < int(
+				(right as Dictionary).get("seq", 0)
+			)
+		)
+	_run_snapshot["ledgerEvents"] = ledger_events
+	_run_snapshot["institutionalPressure"] = pressure_after
 
 
 func _positive_json_integer(value: Variant) -> int:
@@ -2828,6 +2921,17 @@ func _positive_json_integer(value: Variant) -> int:
 	if not is_finite(number) or number < 1.0 or number != floor(number):
 		return -1
 	return int(number)
+
+
+func _bounded_json_integer(value: Variant, minimum: int, maximum: int) -> int:
+	var integer := -1
+	if typeof(value) == TYPE_INT:
+		integer = int(value)
+	elif typeof(value) == TYPE_FLOAT:
+		var number := float(value)
+		if is_finite(number) and number == floor(number):
+			integer = int(number)
+	return integer if integer >= minimum and integer <= maximum else -1
 
 
 func _apply_look_delta(delta: Dictionary) -> void:

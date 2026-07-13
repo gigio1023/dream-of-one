@@ -483,7 +483,9 @@ the dev machine with all six NPC loops live.
   that facing for 0.75 seconds without canceling ambient movement, a runtime
   command, or player contact,
   administration copies the runtime-authored record revision into the local
-  surface-lookup cache without deriving record meaning, and movement enters the
+  surface-lookup cache and keeps the raw pressure/ledger debug snapshot aligned
+  with that same authoritative delta without deriving or disclosing record
+  meaning (normal UI knowledge still comes only from `socialView`), and movement enters the
   existing arrival-confirmed navigation lane. A decision
   that resolves during a player modal retains its exact wake request. On clean
   session end, `queuedRunDeltas` is applied once per session id and only at the

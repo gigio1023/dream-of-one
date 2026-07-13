@@ -461,7 +461,12 @@ meaning. At the scheduled hearing it enforces four evidenced vouches out of
 six as the eligibility floor, then asks the model to reassess the final
 defense against pooled visible memories. An uncited assessment cannot apply a
 new proposed stance, and an uncited vouch is downgraded; a valid vouch must cite
-that resident's meaningful first-hand conversation. Every assessment also
+that resident's meaningful first-hand conversation. `ProviderService` applies
+the same request-semantic validator before accepting a hearing response as
+live, and its one repair receives the original hearing evidence packet so it
+can correct actor identity, citation ownership, contact basis, or a
+below-quorum ordinary proposal. Failure after repair is explicit fallback;
+`RunService` repeats the validation at commit and keeps final authority. Every assessment also
 declares exactly one memory-derived contact basis: `meaningful_firsthand`,
 `limited_firsthand`, or `never_conversed`. The runtime distinguishes a limited
 direct exchange from no conversation at all and treats any mismatch as

@@ -146,7 +146,14 @@ resident memories, records, and ledger events. `RunService` validates the
 exact actor set and every cited id, clamps unsupported or uncited stance
 movement, checks each structured `contactBasis` against that resident's actual
 meaningful player-conversation memory, and enforces four evidenced vouches as
-a floor. The three exact states are `meaningful_firsthand` when any player
+a floor. Before a transport result is accepted as live, `ProviderService`
+applies that same authoritative validation against the exact request and gives
+a semantic failure the existing single repair attempt with the original
+hearing evidence packet attached. If fewer than four residents can possibly
+supply meaningful firsthand evidence, the request JSON schema also excludes
+an ordinary proposal. A failed repair becomes explicit `invalid_envelope`
+fallback; `RunService` still repeats the validation at commit and remains the
+final authority. The three exact states are `meaningful_firsthand` when any player
 conversation is meaningful, `limited_firsthand` when direct conversation
 exists but none is meaningful, and `never_conversed` when no player
 conversation exists. The model still owns the testimony wording and may cite

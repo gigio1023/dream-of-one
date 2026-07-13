@@ -8,6 +8,11 @@ import {
 import type { ObservePacket } from "../agentloop/context.js";
 import { TOOL_NAMES, type ToolName } from "../agentloop/tools.js";
 import { RECORD_KINDS, WORLD_ROLES } from "../runtime/world/index.js";
+import {
+  hearingContactBasisForMemories,
+  validateHearingJudgment,
+  type HearingJudgmentRequest,
+} from "../runtime/run-hearing.js";
 import { supportedLocaleEntry } from "../localization/supported-locales.js";
 import type { RequiredAgentToolCall } from "./ports.js";
 
@@ -301,6 +306,36 @@ export function hearingJudgmentSchemaForLocale(locale: string) {
       korean,
     );
     addPlayerVisibleTextIssues(context, ["officerLine"], value.officerLine, korean);
+  });
+}
+
+/**
+ * Provider-bound hearing validation against the exact run evidence packet.
+ * RunService remains the final authority and repeats this validation at
+ * commit time; doing it here gives the provider's one repair attempt a chance
+ * to fix request-semantic mistakes instead of turning a successful transport
+ * call directly into runtime fallback.
+ */
+export function hearingJudgmentSchemaForRequest(request: HearingJudgmentRequest) {
+  return hearingJudgmentSchemaForLocale(request.locale).superRefine((value, context) => {
+    const validated = validateHearingJudgment(request, value);
+    if (!validated.ok) {
+      context.addIssue({
+        code: "custom",
+        message: validated.reason,
+      });
+      return;
+    }
+    if (
+      value.proposedVerdict === "ordinary" &&
+      validated.value.evidencedVouchCount < 4
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["proposedVerdict"],
+        message: "ordinary verdict requires at least four evidenced vouches",
+      });
+    }
   });
 }
 
@@ -994,6 +1029,22 @@ export const hearingJudgmentJsonSchema: Record<string, unknown> = {
     },
   },
 };
+
+/** Keep the generic export stable while narrowing impossible verdicts per run. */
+export function hearingJudgmentJsonSchemaForRequest(
+  request: HearingJudgmentRequest,
+): Record<string, unknown> {
+  const schema = structuredClone(hearingJudgmentJsonSchema);
+  const possibleEvidenceBackedVouches = request.residents.filter(
+    resident =>
+      hearingContactBasisForMemories(resident.memories) === "meaningful_firsthand",
+  ).length;
+  if (possibleEvidenceBackedVouches < 4) {
+    const properties = schema.properties as Record<string, Record<string, unknown>>;
+    properties.proposedVerdict.enum = ["abnormal"];
+  }
+  return schema;
+}
 
 const administrativeOpenQuestionJsonSchema: Record<string, unknown> = {
   anyOf: [

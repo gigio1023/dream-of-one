@@ -8,8 +8,8 @@ import {
   conversationJudgmentSchemaForLocale,
   conversationProposalJsonSchema,
   conversationProposalSchemaForLocale,
-  hearingJudgmentJsonSchema,
-  hearingJudgmentSchemaForLocale,
+  hearingJudgmentJsonSchemaForRequest,
+  hearingJudgmentSchemaForRequest,
   mergedConversationTurnJsonSchema,
   mergedConversationTurnSchemaForLocale,
   type AgentStepRecordContracts,
@@ -594,7 +594,7 @@ export class ProviderService implements NpcProposalPort {
       ),
       "Return only JSON matching the supplied schema.",
     ].join(" ");
-    const input = JSON.stringify({
+    const requestContext = {
       runId: request.runId,
       hearingId: request.hearingId,
       locale: request.locale,
@@ -603,7 +603,8 @@ export class ProviderService implements NpcProposalPort {
       residents: request.residents,
       records: request.records,
       ledgerEvents: request.ledgerEvents,
-    });
+    };
+    const input = JSON.stringify(requestContext);
     return this.resolveValidated<HearingJudgment>({
       sessionId: request.runId,
       request: {
@@ -611,9 +612,10 @@ export class ProviderService implements NpcProposalPort {
         instructions,
         input,
         schemaName: "station_hearing_judgment",
-        jsonSchema: hearingJudgmentJsonSchema,
+        jsonSchema: hearingJudgmentJsonSchemaForRequest(request),
       },
-      schema: hearingJudgmentSchemaForLocale(request.locale),
+      schema: hearingJudgmentSchemaForRequest(request),
+      repairContext: requestContext,
       fallback: () => this.options.fallback.judgeHearing(request),
     });
   }
@@ -622,6 +624,7 @@ export class ProviderService implements NpcProposalPort {
     sessionId: string;
     request: TextGenRequest & { purpose: ProviderResolutionPurpose };
     schema: z.ZodType<T>;
+    repairContext?: unknown;
     budgetCeiling?: { maxCalls: number; maxTokens: number };
     fallback: () => Promise<ResolvedProposal<T>>;
   }): Promise<ResolvedProposal<T>> {
@@ -642,6 +645,7 @@ export class ProviderService implements NpcProposalPort {
     sessionId: string;
     request: TextGenRequest & { purpose: ProviderResolutionPurpose };
     schema: z.ZodType<T>;
+    repairContext?: unknown;
     budgetCeiling?: { maxCalls: number; maxTokens: number };
   }): Promise<
     | { ok: true; value: T; meta: ProposalMeta; callSeqs: number[] }
@@ -690,6 +694,9 @@ export class ProviderService implements NpcProposalPort {
         purpose: "repair",
         instructions: `${input.request.instructions}\nReturn a complete replacement JSON value that satisfies every validation issue. Do not return a patch or add commentary.`,
         input: JSON.stringify({
+          ...(input.repairContext === undefined
+            ? {}
+            : { requestContext: input.repairContext }),
           invalidOutput: first.text,
           validationIssues: parsed.error.issues.map(issue => ({
             path: issue.path.join("."),

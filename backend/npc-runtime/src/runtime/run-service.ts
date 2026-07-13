@@ -1073,6 +1073,7 @@ export class RunService {
         judgment = resolved.proposal;
         meta = resolved.meta;
       } else {
+        this.warnLiveHearingSemanticReplacement(resolved.meta, validated.reason);
         judgment = this.fallbackHearingJudgment(request);
         meta = this.goalFallbackMeta("invalid_envelope");
       }
@@ -1088,6 +1089,10 @@ export class RunService {
       // replace its ordinary ruling and wording to enforce the evidenced-vouch
       // floor. Mark that semantic replacement as fallback so terminal live
       // acceptance cannot look clean merely because transport succeeded.
+      this.warnLiveHearingSemanticReplacement(
+        meta,
+        "ordinary verdict had fewer than four evidenced vouches",
+      );
       meta = this.goalFallbackMeta("invalid_envelope");
     }
 
@@ -5197,6 +5202,15 @@ export class RunService {
       citedRecordIds: [],
       citedLedgerEventIds: [],
     };
+  }
+
+  private warnLiveHearingSemanticReplacement(meta: ProposalMeta, reason: string): void {
+    if (meta.transport !== "live" || meta.usedFallback) return;
+    console.warn({
+      event: "run_hearing_live_semantic_replacement",
+      category: "hearing_semantic_validation",
+      reason: reason.slice(0, 160),
+    });
   }
 
   private normalizeValidatedHearing(

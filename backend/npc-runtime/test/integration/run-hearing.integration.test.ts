@@ -704,56 +704,22 @@ test("run-wide provider audit survives terminal hearing, end, and a fresh run re
   assert.deepEqual(reset.providerRuntimeTrace.entries, []);
 });
 
-test("a live hearing contact-basis mismatch remains visible as a runtime fallback", async () => {
-  const liveTextGen: TextGenPort = {
-    adapterId: "semantic-invalid-live",
-    preflight: async () => ({ available: true }),
-    generate: async request => {
-      const usage = { inputTokens: 6, outputTokens: 4, totalTokens: 10 };
-      if (request.schemaName === "npc_conversation_turn") {
-        return {
-          text: JSON.stringify({
-            utterance: "최종 진술을 말씀해 주십시오.",
-            suggestedReplies: [
-              { text: "주민들과 직접 대화했습니다.", intent: "safe/local" },
-              { text: "기록을 다시 확인해 주십시오.", intent: "uncertain/repair" },
-              { text: "더 설명하지 않겠습니다.", intent: "risky/weird" },
-            ],
-            continueConversation: false,
-          }),
-          usage,
-        };
-      }
-      const input = JSON.parse(request.input) as {
-        residents: Array<{ actorId: string }>;
-      };
-      return {
-        text: JSON.stringify({
-          residentAssessments: input.residents.map((resident, index) => ({
-            actorId: resident.actorId,
-            contactBasis: index === 0
-              ? "meaningful_firsthand"
-              : "never_conversed",
-            proposedStance: "uncertain",
-            testimonyLine: "직접 확인할 근거가 충분하지 않습니다.",
-            citedMemoryIds: [],
-          })),
-          proposedVerdict: "abnormal",
-          verdictWhyLine: "제출된 증언만으로는 평범함을 확인하기 어렵습니다.",
-          officerLine: "근거를 다시 검토한 결과 평범하다고 판정할 수 없습니다.",
-          citedRecordIds: [],
-          citedLedgerEventIds: [],
-        }),
-        usage,
-      };
-    },
+test("RunService warns without prose when a live hearing still needs semantic replacement", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  adapter.judgeHearing = async request => {
+    const invalid = proposalFor(request, "abnormal");
+    invalid.residentAssessments[0].contactBasis = "meaningful_firsthand";
+    return {
+      proposal: invalid,
+      meta: {
+        profileId: "test/direct-live-semantic-invalid",
+        transport: "live",
+        usedFallback: false,
+      },
+    };
   };
   const service = new RunService({
-    proposalPort: new ProviderService({
-      profileId: "test/semantic-invalid-live",
-      textGen: liveTextGen,
-      fallback: new RuleFallbackNpcAdapter(),
-    }),
+    proposalPort: adapter,
     idFactory: deterministicIds("semantic-invalid-live"),
     layout: { ...loadRunLayout(), hearingAtSeconds: 10 },
   });
@@ -764,20 +730,22 @@ test("a live hearing contact-basis mismatch remains visible as a runtime fallbac
     runId: started.runId,
     hearingId: "hearing-semantic-invalid-live",
   });
-  const answered = await service.hearing({
-    action: "answer",
-    runId: started.runId,
-    hearingId: "hearing-semantic-invalid-live",
-    turnId: opened.nextTurn.turnId,
-    answer: { type: "free_input", text: "제 대화를 확인해 주십시오." },
-  });
+  const warnings: unknown[][] = [];
+  const originalWarn = console.warn;
+  console.warn = (...args: unknown[]) => warnings.push(args);
+  let answered;
+  try {
+    answered = await service.hearing({
+      action: "answer",
+      runId: started.runId,
+      hearingId: "hearing-semantic-invalid-live",
+      turnId: opened.nextTurn.turnId,
+      answer: { type: "free_input", text: "제 대화를 확인해 주십시오." },
+    });
+  } finally {
+    console.warn = originalWarn;
+  }
   assert.equal(answered.action, "answer");
-  assert.ok(answered.providerAudit.calls.every(
-    call => call.transport === "live" && call.outcome === "success",
-  ));
-  assert.ok(answered.providerAudit.resolutions.every(
-    resolution => resolution.transport === "live" && !resolution.usedFallback,
-  ));
   assert.deepEqual(
     answered.providerRuntimeTrace.entries.map(entry => ({
       transport: entry.meta.transport,
@@ -793,6 +761,14 @@ test("a live hearing contact-basis mismatch remains visible as a runtime fallbac
   assert.ok(answered.terminalResult.residentAssessments.every(
     assessment => assessment.contactBasis === "never_conversed",
   ));
+  assert.equal(warnings.length, 1);
+  assert.equal(warnings[0]?.length, 1);
+  const warning = warnings[0]?.[0] as Record<string, unknown>;
+  assert.deepEqual(Object.keys(warning).sort(), ["category", "event", "reason"]);
+  assert.equal(warning.event, "run_hearing_live_semantic_replacement");
+  assert.equal(warning.category, "hearing_semantic_validation");
+  assert.match(String(warning.reason), /contact basis contradicts/);
+  assert.doesNotMatch(JSON.stringify(warning), /제 대화를 확인|provider verdict|provider officer/);
 });
 
 test("valid never-conversed contact bases keep a live hearing fallback-free", async () => {

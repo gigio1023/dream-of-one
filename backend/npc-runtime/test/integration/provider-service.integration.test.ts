@@ -15,6 +15,7 @@ import {
   conversationJudgmentSchemaForLocale,
   hearingJudgmentJsonSchema,
   hearingJudgmentSchemaForLocale,
+  hearingJudgmentSchemaForRequest,
 } from "../../src/providers/envelope.js";
 import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import {
@@ -1860,6 +1861,199 @@ test("an invalid hearing envelope receives one repair before fallback", async ()
   assert.equal(textGen.requests[1].purpose, "repair");
   assert.equal(result.proposal.residentAssessments.length, 6);
   assert.match(result.proposal.residentAssessments[0].testimonyLine, /\p{Script=Hangul}/u);
+});
+
+test("request-scoped hearing semantic failures receive one repair and remain live", async () => {
+  const request = hearingRequest();
+  const cases: Array<{
+    name: string;
+    mutate: (judgment: HearingJudgment) => void;
+    reason: RegExp;
+  }> = [
+    {
+      name: "exact actor set",
+      mutate: judgment => {
+        judgment.residentAssessments[5].actorId = "NPC_Unknown_Resident";
+      },
+      reason: /exact six run actors/,
+    },
+    {
+      name: "actor-owned memory citation",
+      mutate: judgment => {
+        judgment.residentAssessments[0].citedMemoryIds = ["mem-hearing-2"];
+      },
+      reason: /memory outside/,
+    },
+    {
+      name: "contact basis",
+      mutate: judgment => {
+        judgment.residentAssessments[0].contactBasis = "limited_firsthand";
+      },
+      reason: /contact basis contradicts/,
+    },
+    {
+      name: "evidenced-vouch quorum",
+      mutate: judgment => {
+        judgment.residentAssessments[3].proposedStance = "uncertain";
+      },
+      reason: /ordinary verdict requires at least four evidenced vouches/,
+    },
+  ];
+
+  for (const candidate of cases) {
+    const invalid = validHearingJudgment();
+    candidate.mutate(invalid);
+    assert.equal(
+      hearingJudgmentSchemaForLocale(request.locale).safeParse(invalid).success,
+      true,
+      `${candidate.name} remains structurally valid`,
+    );
+    assert.equal(
+      hearingJudgmentSchemaForRequest(request).safeParse(invalid).success,
+      false,
+      `${candidate.name} must fail request semantics`,
+    );
+
+    const repaired = validHearingJudgment();
+    const textGen = new FakeTextGen([
+      { text: JSON.stringify(invalid) },
+      { text: JSON.stringify(repaired) },
+    ]);
+    const service = new ProviderService({
+      profileId: `test/hearing-semantic-repair-${candidate.name}`,
+      textGen,
+      fallback: new RuleFallbackNpcAdapter(),
+    });
+    const result = await service.judgeHearing(request);
+
+    assert.equal(result.meta.transport, "live", candidate.name);
+    assert.equal(result.meta.usedFallback, false, candidate.name);
+    assert.deepEqual(result.proposal, repaired, candidate.name);
+    assert.deepEqual(
+      textGen.requests.map(providerRequest => providerRequest.purpose),
+      ["hearing_verdict", "repair"],
+      candidate.name,
+    );
+    const repairInput = JSON.parse(textGen.requests[1]?.input ?? "{}") as {
+      requestContext: unknown;
+      validationIssues: Array<{ path: string; message: string }>;
+    };
+    assert.deepEqual(
+      repairInput.requestContext,
+      JSON.parse(textGen.requests[0]?.input ?? "{}"),
+      `${candidate.name} repair keeps the evidence packet needed to correct semantics`,
+    );
+    assert.ok(
+      repairInput.validationIssues.some(issue => candidate.reason.test(issue.message)),
+      `${candidate.name} repair must receive the authoritative semantic reason`,
+    );
+    assert.deepEqual(
+      service.auditSnapshot(request.runId).resolutions[0]?.callSeqs,
+      [1, 2],
+      candidate.name,
+    );
+  }
+});
+
+test("hearing semantic repair failure remains explicit provider fallback", async () => {
+  const request = hearingRequest();
+  const invalid = validHearingJudgment();
+  invalid.residentAssessments[0].contactBasis = "limited_firsthand";
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(invalid) },
+    { text: JSON.stringify(invalid) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/hearing-semantic-repair-failure",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const warnings: unknown[][] = [];
+  const originalWarn = console.warn;
+  console.warn = (...args: unknown[]) => warnings.push(args);
+  let result;
+  try {
+    result = await service.judgeHearing(request);
+  } finally {
+    console.warn = originalWarn;
+  }
+
+  assert.equal(result?.meta.transport, "fallback");
+  assert.equal(result?.meta.usedFallback, true);
+  assert.equal(result?.meta.fallbackReason, "invalid_envelope");
+  assert.deepEqual(
+    textGen.requests.map(providerRequest => providerRequest.purpose),
+    ["hearing_verdict", "repair"],
+  );
+  assert.equal(validateHearingJudgment(request, result!.proposal).ok, true);
+  assert.equal(warnings.length, 1);
+  assert.deepEqual(service.auditSnapshot(request.runId).resolutions, [{
+    seq: 1,
+    purpose: "hearing_verdict",
+    profileId: "test/hearing-semantic-repair-failure",
+    transport: "fallback",
+    usedFallback: true,
+    fallbackReason: "invalid_envelope",
+    callSeqs: [1, 2],
+  }]);
+});
+
+test("zero-vouch ordinary hearing repairs once to live abnormal under a narrowed schema", async () => {
+  const request = hearingRequest(0);
+  for (const resident of request.residents) {
+    resident.stanceBefore = "uncertain";
+    resident.hasMeaningfulFirsthandConversation = false;
+    resident.memories = [];
+  }
+  const judgment = validHearingJudgment();
+  judgment.residentAssessments = judgment.residentAssessments.map(assessment => ({
+    ...assessment,
+    contactBasis: "never_conversed",
+    proposedStance: "uncertain",
+    testimonyLine: "직접 대화한 적이 없어 보증할 수 없습니다.",
+    citedMemoryIds: [],
+  })) as HearingJudgment["residentAssessments"];
+  judgment.proposedVerdict = "abnormal";
+  judgment.citedRecordIds = [];
+  judgment.citedLedgerEventIds = [];
+  const invalid = structuredClone(judgment);
+  invalid.proposedVerdict = "ordinary";
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(invalid) },
+    { text: JSON.stringify(judgment) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/hearing-zero-vouch-schema",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.judgeHearing(request);
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.proposal.proposedVerdict, "abnormal");
+  assert.deepEqual(
+    textGen.requests.map(providerRequest => providerRequest.purpose),
+    ["hearing_verdict", "repair"],
+  );
+  const sentProperties = textGen.requests[0]?.jsonSchema.properties as Record<
+    string,
+    Record<string, unknown>
+  >;
+  assert.deepEqual(sentProperties.proposedVerdict.enum, ["abnormal"]);
+  assert.deepEqual(
+    service.auditSnapshot(request.runId).resolutions[0]?.callSeqs,
+    [1, 2],
+  );
+  const genericProperties = hearingJudgmentJsonSchema.properties as Record<
+    string,
+    Record<string, unknown>
+  >;
+  assert.deepEqual(
+    genericProperties.proposedVerdict.enum,
+    ["ordinary", "abnormal"],
+    "the generic exported schema stays unchanged",
+  );
 });
 
 test("hearing fallback is terminal, preserves stances, and needs four evidenced vouches", async () => {

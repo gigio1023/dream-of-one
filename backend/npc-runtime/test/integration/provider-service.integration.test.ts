@@ -29,6 +29,7 @@ import { validateHearingJudgment } from "../../src/runtime/run-hearing.js";
 import {
   providerAuditSnapshotSchema,
   providerRuntimeTraceSchema,
+  runSessionAnswerRequestSchema,
 } from "../../src/runtime/run-schema.js";
 import type {
   AmbientReplyRequest,
@@ -1994,6 +1995,51 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
   const input = JSON.parse(textGen.requests[0].input);
   assert.equal(input.stanceBefore, "uncertain");
   assert.equal(input.hasMeaningfulFirsthandConversation, false);
+});
+
+test("typed multilingual player text keeps exact Unicode bytes in the provider request after edge trim", async () => {
+  const expectedPlayerLine =
+    "한국어 안내  中文登记、日本語の確認； città già pronta, français: «cafe\u0301 déjà prêt»?!";
+  const submittedPlayerLine = ` \t\n${expectedPlayerLine}\u00a0 `;
+  assert.notEqual(
+    expectedPlayerLine.normalize("NFC"),
+    expectedPlayerLine,
+    "the fixture must retain a decomposed accent so normalization would be observable",
+  );
+  const parsedAnswer = runSessionAnswerRequestSchema.parse({
+    runId: "run-multilingual-player-line",
+    sessionId: "session-multilingual-player-line",
+    turnId: "turn-multilingual-player-line",
+    answer: { type: "free_input", text: submittedPlayerLine },
+  });
+  assert.equal(parsedAnswer.answer.text, expectedPlayerLine, "only outer whitespace is trimmed");
+
+  const textGen = new FakeTextGen([{ text: validMergedTurn }]);
+  const service = new ProviderService({
+    profileId: "test/multilingual-player-line",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const result = await service.judgeAndProposeConversationTurn({
+    ...judgmentRequest(),
+    sessionId: parsedAnswer.runId,
+    playerLine: parsedAnswer.answer.text,
+    objective: "방문 이유를 확인한다.",
+    sceneFacts: ["스튜디오 접수대에서 직접 대화하고 있다."],
+    stanceBefore: "uncertain",
+    hasMeaningfulFirsthandConversation: false,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(textGen.requests.length, 1);
+  const providerInput = JSON.parse(textGen.requests[0].input) as { playerLine: string };
+  assert.equal(providerInput.playerLine, expectedPlayerLine);
+  assert.equal(providerInput.playerLine.length, expectedPlayerLine.length, "text is not truncated");
+  assert.deepEqual(
+    Buffer.from(providerInput.playerLine),
+    Buffer.from(expectedPlayerLine),
+    "internal spaces, punctuation, and Unicode normalization form stay byte-exact",
+  );
 });
 
 test("player-visible stable ids get one bounded repair even when the prose contains Hangul", async () => {

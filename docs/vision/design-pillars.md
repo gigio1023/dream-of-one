@@ -129,10 +129,13 @@ this block conflicts with any earlier block or pillar text, this block wins.
    suspicious NPCs may initiate contact. No affection meters, absence-decay,
    or busywork timers.
 7. **Six persistent NPCs, one event-driven loop.** Exactly six NPCs run the
-   same agent loop regardless of player distance; provider calls wake on
-   schedules, arrivals, observations, goals, and conversations — never per
-   tick. Interpersonal claims move between NPCs only through real utterances
-   and listener memory; no scripted gossip or off-screen summary system.
+   same agent loop regardless of player distance. Schedules, arrivals, and
+   observations wake the deterministic scheduler and update the next bounded
+   observation; provider transport begins only for an admitted semantic goal,
+   conversation, conservatively rate-limited spatial refresh, or the scheduled
+   hearing judgment — never per tick. Interpersonal claims move between NPCs
+   only through real utterances and listener memory; no scripted gossip or
+   off-screen summary system.
    Explicit administrative records may still be written and read as validated
    world actions, but reading a record is not proxy dialogue and does not by
    itself change a personal stance.

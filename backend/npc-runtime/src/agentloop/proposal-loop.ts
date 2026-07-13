@@ -40,6 +40,7 @@ export interface BoundedProposalLoopInput<T> {
     request: Parameters<NpcProposalPort["proposeNextStep"]>[0],
   ) => Promise<ResolvedProposal<AgentStepProposal>>;
   onMeta?: (meta: ProposalMeta) => void | Promise<void>;
+  allowedTalkActorIds?: readonly string[];
   budgetCeiling?: { maxCalls: number; maxTokens: number };
 }
 
@@ -79,6 +80,9 @@ export async function runBoundedProposalLoop<T>(
       observePacket: packet,
       previousResult,
       blockedSignatures: [...blockedSignatures],
+      ...(input.allowedTalkActorIds
+        ? { allowedTalkActorIds: [...input.allowedTalkActorIds] }
+        : {}),
       ...(input.budgetCeiling ? { budgetCeiling: input.budgetCeiling } : {}),
     };
     const resolved = input.invoke

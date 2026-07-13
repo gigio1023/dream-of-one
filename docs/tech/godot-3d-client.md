@@ -10,9 +10,32 @@ as the default 3D client beside the retained 2D harness
 and studio, first-person controller, permanently open building portals, one
 navigation map, six resident shells, HUD/settings, layout binding, and
 `AgentPlaytestSurface`. Its local
-`RunSession` can preload actor/location/evidence-grounded openings for all six
-residents and carry any ready resident into the same generated-choice or
-bounded-free-text conversation surface. The click-time start consumes the
+`RunSession` supports actor/location/evidence-grounded openings for all six
+residents and carries any ready resident into the same generated-choice or
+bounded-free-text conversation surface. In live HTTP mode, `main_3d` maintains
+one preload-priority resident inside the 16 m nearby radius, using nearest
+distance with a 3 m switch margin so ambient wander cannot thrash the target.
+The NPC under the player's current raw interaction ray overrides nearest
+selection, and an active NPC-to-player contact overrides both. Raw aim may
+identify an interaction-disabled NPC only as provider-preparation intent; HUD
+focus, prompts, and `E` continue through the separate readiness-gated path.
+Each resident receives one automatic attempt when it first becomes the nearby
+priority. If evidence later invalidates that attempted opening, it stays
+dormant until raw aim or active contact explicitly demands a refresh. One
+continuous aim/contact demand epoch funds at most one invalidation retry; a
+second invalidation requires aim-out/aim-in or a new contact id. Only the
+priority resident may start or retry an opening, and no queued preload may
+dispatch while an authoritative rebase is required or in flight. Each
+successful preload rebases the run before another candidate starts. A normal
+`conversation_not_ready` race also rebases and enters this same bounded
+explicit-demand path instead of looping or permanently stranding the actor. A
+dropped or exhausted
+transport retry likewise requires a fresh raw-aim/contact demand; losing that
+demand while queued never consumes the recovery, and passive proximity never
+restarts it. Authoritative schedule or blocked movement removes a candidate,
+while ambient wander and an NPC's player-contact approach do not block
+preparation. Fixture mode retains the
+deterministic all-six preload sequence. The click-time start consumes a ready
 opening without another provider wait; model judgment, coarse stance display,
 child-session end, and world resume remain unchanged. The modal owns
 only presentation and pause; all memory and stance truth comes back from the
@@ -24,8 +47,8 @@ direction-aware subtitles, and a short spatial speech blip from the shared
 audibility contract. On the next batched advance after a material scene change,
 the client reports all six residents' NavMesh reachability, actor-height
 physics-ray line of sight, authored-volume audibility, and positions at one
-observed world revision. Runtime-authored `speech`, `readiness`, `look`, and
-`movement` deltas
+observed world revision. Runtime-authored `speech`, `readiness`, `look`,
+`administration`, and `movement` deltas
 are the action-application surface for current runtime responses. Runtime
 `playerConversationReady` remains the only authority for prompts. One
 background preload is allowed at a time, the HTTP bridge keeps a foreground
@@ -159,6 +182,11 @@ list.
   Nameplates stay quiet per the art direction; the prompt is the loud part.
 - Interactable kinds and their verbs: NPC → conversation, prop → pick up
   (then place/throw), record surface → inspect.
+- A ready NPC that walks just out of the ray keeps a 1.5-second interaction
+  grace while remaining within 3.25 m, inside a 30° camera cone, and directly
+  visible through a physics ray. This catches an intended E press without
+  extending the visible prompt, allowing through-wall/behind-camera input, or
+  bypassing the runtime's fresh spatial start validation.
 - An interactable out of range but centered shows nothing — no half-lit
   prompts.
 
@@ -169,9 +197,15 @@ list.
   damage, no knockback, no physics forces applied to the player.
 - **Player vs NPC**: both are solid; the player cannot shove NPCs and NPCs
   never push the player. NPC avoidance steers around the player and each
-  other. If the player blocks an NPC's path, the NPC waits a beat and
-  re-paths — standing in someone's way is observable social behavior, not
-  a physics fight.
+  other. If the player or another resident blocks a commanded path or its
+  endpoint, the NPC yields and keeps the same authoritative movement until
+  the body moves or a later schedule command supersedes it. Dynamic bodies do
+  not consume the finite static-path replan budget — standing in someone's
+  way is observable social behavior, not a physics fight or a false
+  unreachable-route failure. An actual slide collision or a body occupying
+  the NPC's current next-path/arrival region may keep yielding while it remains;
+  endpoint proximity alone earns only one speculative yield so a distant person
+  cannot hide a genuine static blockage forever.
 - **Never trap the player**: schedule anchors never place an idle NPC inside a
   building-portal volume, and an NPC blocked in a portal yields after a moment.
   Interiors respect the minimum-corridor metric so one stationary NPC never
@@ -376,10 +410,18 @@ the dev machine with all six NPC loops live.
   distance, faces the player, and emits readiness once. Main sends a fresh
   batched spatial packet, then passes the contact id through the existing
   preload-backed `session/start`; the ordinary conversation modal is the only
-  dialogue surface. Settings and the Tab log defer automatic opening without
-  pausing the world. Cancellation returns the actor visually toward the
-  contact's origin anchor without emitting a runtime arrival, while a consumed
-  contact leaves the actor at the conversation position.
+  dialogue surface. Physical arrival and provider-backed opening readiness may
+  complete in either order: the same pending contact id is retained and the
+  modal opens only after both are true, without a transient error/re-approach
+  loop. A final `conversation_not_ready` enters the same authoritative-rebase
+  and one-explicit-demand recovery path without discarding a still-valid
+  physical contact. Only a prevalidated full snapshot may clear a contact at
+  the same revision; an ordinary late response with an equal or older
+  `activeContact: null` cannot erase newer client state. Settings and the Tab
+  log defer automatic opening without pausing the world. Cancellation returns
+  the actor visually toward the contact's origin anchor without emitting a
+  runtime arrival, while a consumed contact leaves the actor at the
+  conversation position.
 - **Schedule presentation**: NPCs visibly commute between anchors; meeting
   windows read at a glance (two residents talking look like two residents
   talking from across the park). Each pair approaches distinct physical
@@ -390,8 +432,11 @@ the dev machine with all six NPC loops live.
   dwells. This ambient wander is ordinary game AI, not an LLM decision or
   provider call. Runtime movement and player contact safely preempt it; modal
   conversation pauses it. RVO priorities, progress sampling, a brief yield,
-  and at most two local replans prevent NPC/NPC and NPC/player stalls without
-  teleporting or forging a runtime arrival.
+  and at most two replans handle genuine static blockage. A player/NPC body may
+  still physically stall a resident until it moves, but repeated dynamic-body
+  yields preserve the authoritative command without exhausting that static
+  budget or reporting a false terminal route failure. Neither path teleports
+  the resident or forges a runtime arrival.
 - **Advance lane**: run start and clock packets use stable client idempotency
   keys. Only one mutation is in flight; an ambiguous transport failure retries
   the exact packet, while a stale revision rebases from a full run snapshot
@@ -401,11 +446,45 @@ the dev machine with all six NPC loops live.
   packet. A rejected nonessential prop fact is reported and discarded without
   halting clock or arrival progress; an ambiguous transport result still
   retries the exact immutable packet. No clock packet is sent until clean
-  conversation resume. Settings and log surfaces do not pause the clock.
+  conversation resume. A response older than the client's current world
+  revision contributes no wakes, speech, social view, or other presentation
+  mutation; it first forces an authoritative snapshot rebase, and ambient
+  dispatch remains guarded until that rebase finishes. The successful HTTP
+  rebase then reconciles the snapshot's authoritative pending decision wakes
+  back into the local queue exactly once while preserving any wake already
+  dispatched. A full snapshot now carries both the authoritative elapsed clock
+  and persistent `graceEnded`; the client also conservatively preserves an
+  already observed same-run true milestone while accepting an equal/newer
+  snapshot, and a new run never inherits it. Settings and log surfaces do not
+  pause the clock.
+- **Provider-evidence freshness**: successful preload and every typed NPC
+  decision response cache their cumulative `providerAudit` plus
+  `providerRuntimeTrace` before any presentation checkpoint; the client never
+  waits for an unrelated full snapshot to expose completed background work.
+  Because concurrent or cached responses may arrive out of order, one
+  run-scoped accepted cache compares the atomic componentwise progress vector
+  `(providerAudit.callsUsed, providerAudit.calls.length,
+  providerAudit.resolutions.length + providerAudit.droppedCount,
+  providerRuntimeTrace.entries.length + providerRuntimeTrace.droppedCount)`.
+  A candidate with any lower component is rejected as a whole, and the accepted
+  pair is overlaid after same-run snapshot replacement; tokens and world
+  revision are not freshness clocks. When both complete structures contain any
+  provider evidence, the playtest surface additionally requires the resolution
+  count to equal the runtime-trace entry count with zero drops; an empty
+  scripted/fixture pair remains valid engineering evidence. A new run resets
+  the cache. The playtest surface also reports client-known provider waits
+  (preload, NPC decision, and player/hearing answer); live acceptance cannot be
+  quiescent while that count is nonzero, even before the server can push an
+  updated audit.
 - **Decision delta application**: current NPC-decision responses apply only
   their typed `actionDeltas`: speech feeds subtitles/blips, readiness updates
-  conversation availability, look turns the resident toward an actor, and
-  movement enters the existing arrival-confirmed navigation lane. A decision
+  conversation availability, look resolves a live actor, canonical physical
+  prop, or authoritative record surface before turning the resident and holds
+  that facing for 0.75 seconds without canceling ambient movement, a runtime
+  command, or player contact,
+  administration copies the runtime-authored record revision into the local
+  surface-lookup cache without deriving record meaning, and movement enters the
+  existing arrival-confirmed navigation lane. A decision
   that resolves during a player modal retains its exact wake request. On clean
   session end, `queuedRunDeltas` is applied once per session id and only at the
   matching world revision; the later decision retry therefore cannot replay

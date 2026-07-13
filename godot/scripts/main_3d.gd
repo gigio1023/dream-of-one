@@ -10,6 +10,8 @@ const CONVERSATION_START_RETRY_ATTEMPTS := 3
 const CONVERSATION_PRELOAD_MAX_IN_FLIGHT := 1
 const CONVERSATION_PRELOAD_MAX_RETRIES := 3
 const CONVERSATION_PRELOAD_RETRY_SECONDS := 1.0
+const CONVERSATION_PRELOAD_DISTANCE_M := 16.0
+const CONVERSATION_PRELOAD_SWITCH_MARGIN_M := 3.0
 const ADVANCE_BATCH_SECONDS := 1.0
 const FIXTURE_ADVANCE_BATCH_SECONDS := 10.0
 const ARRIVAL_BATCH_SECONDS := 2.0
@@ -43,6 +45,11 @@ var _run_start_id := ""
 var _run_start_locale := ""
 var _active_session_id := ""
 var _run_snapshot: Dictionary = {}
+var _accepted_provider_evidence_run_id := ""
+var _accepted_provider_audit: Dictionary = {}
+var _accepted_provider_runtime_trace: Dictionary = {}
+var _accepted_provider_evidence_source := "none"
+var _accepted_provider_evidence_response_revision := -1
 var _social_view: Dictionary = {}
 var _active_turn: Dictionary = {}
 var _last_proposal_meta: Dictionary = {}
@@ -57,10 +64,21 @@ var _required_retry_answer: Dictionary = {}
 var _conversation_start_retry_required := false
 var _conversation_preload_queue: Array[String] = []
 var _conversation_preload_queued: Dictionary = {}
+var _conversation_preload_queued_cycle_kinds: Dictionary = {}
 var _conversation_preload_in_flight: Dictionary = {}
 var _conversation_preload_requeue_requested: Dictionary = {}
+var _conversation_preload_requeue_cycle_kinds: Dictionary = {}
 var _conversation_preload_retries: Dictionary = {}
+var _conversation_preload_retry_queued: Dictionary = {}
+var _conversation_preload_attempted: Dictionary = {}
 var _conversation_preload_refresh_required := false
+var _conversation_preload_invalidated: Dictionary = {}
+var _conversation_preload_recovery_required: Dictionary = {}
+var _conversation_preload_demand_signatures: Dictionary = {}
+var _conversation_preload_demand_epochs: Dictionary = {}
+var _conversation_preload_invalidation_demand_epochs: Dictionary = {}
+var _conversation_preload_recovery_demand_epochs: Dictionary = {}
+var _conversation_preload_priority_actor_id := ""
 var _advance_elapsed_buffer := 0.0
 var _advance_in_flight := false
 var _advance_rebase_in_flight := false
@@ -93,6 +111,8 @@ var _ambient_active_conversation: Variant = null
 var _ambient_wake_queue: Array[Dictionary] = []
 var _ambient_claimed_wake_ids: Dictionary = {}
 var _ambient_pending_request: Dictionary = {}
+var _ambient_pending_wake_kind := ""
+var _ambient_pending_request_dispatched := false
 var _ambient_decision_in_flight := false
 var _ambient_decision_retry_remaining := 0.0
 var _ambient_decision_waiting_for_resume := false
@@ -137,6 +157,7 @@ func _ready() -> void:
 	else:
 		_locale_name = str(_localization.call("locale"))
 	_player.focus_changed.connect(_hud.set_focus)
+	_player.preload_intent_changed.connect(_on_player_preload_intent_changed)
 	_player.settings_requested.connect(_hud.open_settings)
 	_hud.settings_visibility_changed.connect(_on_settings_visibility_changed)
 	_hud.log_visibility_changed.connect(_on_log_visibility_changed)
@@ -296,6 +317,7 @@ func presentation_snapshot() -> Dictionary:
 		"providerRuntimeTrace": _dictionary_or_empty(
 			_run_snapshot.get("providerRuntimeTrace")
 		),
+		"providerEvidenceFreshness": _provider_evidence_freshness_snapshot(),
 		"actors": _actor_readiness_summaries(),
 		"worldClock": _dictionary_or_empty(_run_snapshot.get("worldClock")),
 		"scheduler": _dictionary_or_empty(_run_snapshot.get("scheduler")),
@@ -592,6 +614,13 @@ func _try_open_pending_contact() -> void:
 	var actor := _town.get_node_or_null("Actors/%s" % actor_id) as NPC3D
 	if actor == null or not actor.player_contact_is_ready(contact_id):
 		return
+	# Reaching the player and preparing a provider-backed opening are separate
+	# asynchronous events. Keep the contact lease pending until RunService says
+	# the opening is ready; otherwise `_begin_conversation` would surface a
+	# transient error modal and make the resident repeat the approach.
+	if not bool(_actor_view(actor_id).get("playerConversationReady", false)):
+		call_deferred("_queue_nearby_conversation_preloads")
+		return
 	_begin_conversation(StringName(actor_id), actor, contact_id)
 
 
@@ -613,7 +642,10 @@ func _contact_expired() -> bool:
 	return elapsed >= expires_at
 
 
-func _sync_active_contact_from_response(response: Dictionary) -> void:
+func _sync_active_contact_from_response(
+	response: Dictionary,
+	authoritative_snapshot := false
+) -> void:
 	if not response.has("activeContact"):
 		return
 	if _run_status != "active":
@@ -636,6 +668,10 @@ func _sync_active_contact_from_response(response: Dictionary) -> void:
 			has_response_revision
 			and not _active_contact.is_empty()
 			and response_revision <= current_revision
+			and not (
+				authoritative_snapshot
+				and response_revision == current_revision
+			)
 		):
 			return
 		_clear_active_contact(_conversation_target == null)
@@ -657,12 +693,21 @@ func _sync_active_contact_from_response(response: Dictionary) -> void:
 		push_warning("Ignoring incomplete activeContact from RunService.")
 		return
 	var previous_id := str(_active_contact.get("contactId", ""))
+	var previous_actor_id := str(_active_contact.get("actorId", ""))
+	var contact_changed := previous_id != contact_id or previous_actor_id != actor_id
 	if not previous_id.is_empty() and previous_id != contact_id:
 		_clear_active_contact(_conversation_target == null)
 	_active_contact = incoming
 	if not _run_snapshot.is_empty():
 		_run_snapshot["activeContact"] = incoming.duplicate(true)
 	_resume_active_contact_follow()
+	if contact_changed or not bool(
+		_actor_view(actor_id).get("playerConversationReady", false)
+	):
+		# Active contact outranks raw aim and passive proximity in the existing
+		# bounded preload scheduler. Refresh that priority immediately instead of
+		# waiting for an unrelated advance or aim change.
+		call_deferred("_queue_nearby_conversation_preloads")
 
 
 func _resume_active_contact_follow() -> void:
@@ -820,12 +865,24 @@ func _enter_hearing_due() -> void:
 			(surface_value as Node).call("set_interaction_enabled", false)
 	_recent_schedule_wakes.clear()
 	_ambient_wake_queue.clear()
-	_ambient_pending_request = {}
+	_clear_ambient_pending_request()
 	_ambient_decision_waiting_for_resume = false
 	_deferred_ambient_speech_events.clear()
 	_conversation_preload_queue.clear()
 	_conversation_preload_queued.clear()
+	_conversation_preload_queued_cycle_kinds.clear()
 	_conversation_preload_requeue_requested.clear()
+	_conversation_preload_requeue_cycle_kinds.clear()
+	_conversation_preload_retries.clear()
+	_conversation_preload_retry_queued.clear()
+	_conversation_preload_attempted.clear()
+	_conversation_preload_invalidated.clear()
+	_conversation_preload_recovery_required.clear()
+	_conversation_preload_demand_signatures.clear()
+	_conversation_preload_demand_epochs.clear()
+	_conversation_preload_invalidation_demand_epochs.clear()
+	_conversation_preload_recovery_demand_epochs.clear()
+	_conversation_preload_priority_actor_id = ""
 	_pending_advance_request = {}
 	_advance_needs_rebase = false
 	_advance_retry_remaining = 0.0
@@ -1056,8 +1113,6 @@ func _begin_conversation(
 	if not contact_id.is_empty():
 		target.cancel_player_contact()
 		_hud.clear_contact_approach(contact_id)
-	for in_flight_actor_id in _conversation_preload_in_flight:
-		_conversation_preload_requeue_requested[str(in_flight_actor_id)] = true
 	_active_session_id = ""
 	_active_turn = {}
 	_required_retry_answer = {}
@@ -1118,7 +1173,19 @@ func _handle_conversation_start_result(
 			if not actor.is_empty():
 				actor["playerConversationReady"] = false
 				_update_run_actor(actor)
-			_advance_needs_rebase = true
+			_handle_recoverable_conversation_preload_error(
+				actor_id,
+				"conversation_not_ready"
+			)
+			if (
+				not _conversation_contact_id.is_empty()
+				and _contact_is_current(_conversation_contact_id, actor_id)
+				and not _contact_expired()
+			):
+				# The resident already completed the physical approach before this
+				# final opening race. Keep that lease pending while the authoritative
+				# rebase and one bounded explicit-demand preload repair the opening.
+				_pending_contact_ready_id = _conversation_contact_id
 		if str(result.get("error", "")) == "conversation_start_retry_required":
 			_conversation_start_retry_required = true
 			_hud.show_conversation_start_retry()
@@ -1432,7 +1499,7 @@ func _ensure_run() -> bool:
 	_run_start_last_error = {}
 	_run_start_attempts = 0
 	_fixture_replay_complete = false
-	_run_snapshot = result.duplicate(true)
+	_replace_run_snapshot(result, false)
 	_apply_player_brief_from_snapshot(result)
 	_cache_provider_evidence(result)
 	_hydrate_run_lifecycle(result)
@@ -1442,8 +1509,10 @@ func _ensure_run() -> bool:
 	_last_proposal_meta = _dictionary_or_empty(result.get("lastProposalMeta"))
 	_ingest_ambient_snapshot(result)
 	_apply_all_conversation_readiness()
-	_queue_initial_conversation_preloads()
-	_reconcile_scheduler_movements(_dictionary_or_empty(result.get("scheduler")))
+	var scheduler := _dictionary_or_empty(result.get("scheduler"))
+	_reconcile_ambient_goal_wakes(scheduler)
+	_reconcile_scheduler_movements(scheduler)
+	_queue_nearby_conversation_preloads()
 	if _run_status == "hearing_due":
 		_enter_hearing_due()
 	elif _run_status == "terminal" and not _terminal_result.is_empty():
@@ -1456,6 +1525,18 @@ func _actor_view(actor_id: String) -> Dictionary:
 		if actor_value is Dictionary and str((actor_value as Dictionary).get("actorId", "")) == actor_id:
 			return (actor_value as Dictionary).duplicate(true)
 	return {"actorId": actor_id}
+
+
+func _conversation_readiness(snapshot: Dictionary) -> Dictionary:
+	var readiness: Dictionary = {}
+	for actor_value in snapshot.get("actors", []):
+		if not actor_value is Dictionary:
+			continue
+		var actor := actor_value as Dictionary
+		readiness[str(actor.get("actorId", ""))] = bool(
+			actor.get("playerConversationReady", false)
+		)
+	return readiness
 
 
 func _update_run_actor(actor: Dictionary) -> void:
@@ -1480,49 +1561,194 @@ func _conversation_zone_for_actor(actor_id: String) -> String:
 	return _town.conversation_zone_id(actor_id, str(actor.get("locationId", "")))
 
 
-func _queue_initial_conversation_preloads() -> void:
+func _queue_nearby_conversation_preloads() -> void:
 	if _run_status != "active":
 		return
+	if _run_session.mode() == "fixture":
+		var fixture_contact_actor_id := str(_active_contact.get("actorId", ""))
+		var fixture_contact_id := str(_active_contact.get("contactId", ""))
+		var fixture_aimed_actor_id := _preload_intent_npc_actor_id()
+		_sync_conversation_preload_demands(
+			fixture_contact_actor_id,
+			fixture_contact_id,
+			fixture_aimed_actor_id
+		)
+		for actor_value in _run_snapshot.get("actors", []):
+			if not actor_value is Dictionary:
+				continue
+			var fixture_actor := actor_value as Dictionary
+			if bool(fixture_actor.get("playerConversationReady", false)):
+				continue
+			var fixture_actor_id := str(fixture_actor.get("actorId", ""))
+			var fixture_explicit_demand := (
+				fixture_actor_id == fixture_contact_actor_id
+				or fixture_actor_id == fixture_aimed_actor_id
+			)
+			var fixture_cycle_kind := ""
+			if (
+				fixture_explicit_demand
+				and _conversation_preload_invalidation_demand_available(fixture_actor_id)
+			):
+				fixture_cycle_kind = "invalidated"
+			elif (
+				fixture_explicit_demand
+				and _conversation_preload_recovery_demand_available(fixture_actor_id)
+			):
+				fixture_cycle_kind = "recovery"
+			if (
+				not _conversation_preload_attempted.has(fixture_actor_id)
+				or not fixture_cycle_kind.is_empty()
+			):
+				_queue_conversation_preload(fixture_actor_id, 0, fixture_cycle_kind)
+		_pump_conversation_preloads()
+		return
+	var candidates: Array[Dictionary] = []
+	var nearby_now: Dictionary = {}
 	for actor_value in _run_snapshot.get("actors", []):
 		if not actor_value is Dictionary:
 			continue
 		var actor := actor_value as Dictionary
-		if not bool(actor.get("playerConversationReady", false)):
-			_queue_conversation_preload(str(actor.get("actorId", "")))
+		var actor_id := str(actor.get("actorId", ""))
+		if not _conversation_preload_is_nearby(actor_id):
+			continue
+		nearby_now[actor_id] = true
+		var actor_node := _town.get_node_or_null("Actors/%s" % actor_id) as Node3D
+		if actor_node == null:
+			continue
+		candidates.append({
+			"actorId": actor_id,
+			"distance": _horizontal_distance(actor_node.global_position, _player.global_position),
+		})
+	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var distance_a := float(a.get("distance", INF))
+		var distance_b := float(b.get("distance", INF))
+		if is_equal_approx(distance_a, distance_b):
+			return str(a.get("actorId", "")) < str(b.get("actorId", ""))
+		return distance_a < distance_b
+	)
+	var previous_priority := _conversation_preload_priority_actor_id
+	var selected_priority := ""
+	var contact_actor_id := str(_active_contact.get("actorId", ""))
+	var contact_id := str(_active_contact.get("contactId", ""))
+	var aimed_actor_id := _preload_intent_npc_actor_id()
+	_sync_conversation_preload_demands(contact_actor_id, contact_id, aimed_actor_id)
+	if not contact_actor_id.is_empty() and nearby_now.has(contact_actor_id):
+		selected_priority = contact_actor_id
+	elif not aimed_actor_id.is_empty() and nearby_now.has(aimed_actor_id):
+		selected_priority = aimed_actor_id
+	elif not candidates.is_empty():
+		var closest := candidates[0]
+		selected_priority = str(closest.get("actorId", ""))
+		if nearby_now.has(previous_priority):
+			var previous_distance := INF
+			for candidate in candidates:
+				if str(candidate.get("actorId", "")) == previous_priority:
+					previous_distance = float(candidate.get("distance", INF))
+					break
+			if (
+				str(closest.get("actorId", "")) == previous_priority
+				or (
+					float(closest.get("distance", INF))
+					+ CONVERSATION_PRELOAD_SWITCH_MARGIN_M
+				) >= previous_distance
+			):
+				selected_priority = previous_priority
+	_conversation_preload_priority_actor_id = selected_priority
+	if not selected_priority.is_empty():
+		var selected_actor := _actor_view(selected_priority)
+		if bool(selected_actor.get("playerConversationReady", false)):
+			_clear_conversation_preload_failure_state(selected_priority)
+			_conversation_preload_invalidated.erase(selected_priority)
+		else:
+			var explicit_demand := (
+				selected_priority == contact_actor_id
+				or selected_priority == aimed_actor_id
+			)
+			var invalidated_cycle := (
+				explicit_demand
+				and _conversation_preload_invalidation_demand_available(
+					selected_priority
+				)
+			)
+			var recovery_cycle := (
+				explicit_demand
+				and _conversation_preload_recovery_demand_available(selected_priority)
+			)
+			var should_queue := not _conversation_preload_attempted.has(selected_priority)
+			should_queue = should_queue or invalidated_cycle or recovery_cycle
+			if should_queue:
+				var cycle_kind := ""
+				if invalidated_cycle:
+					cycle_kind = "invalidated"
+				elif recovery_cycle:
+					cycle_kind = "recovery"
+				# Eligibility is consumed only when this entry really dispatches.
+				# Losing aim/contact, priority, or proximity while queued therefore
+				# leaves the actor recoverable instead of stranding it.
+				_queue_conversation_preload(selected_priority, 0, cycle_kind)
 	_pump_conversation_preloads()
 
 
-func _queue_conversation_preload(actor_id: String) -> void:
+func _queue_conversation_preload(
+	actor_id: String,
+	transport_retry_count := 0,
+	cycle_kind := ""
+) -> bool:
 	if _run_status != "active" or actor_id.is_empty() or _run_id.is_empty():
-		return
+		return false
 	var actor := _actor_view(actor_id)
-	if actor.is_empty() or bool(actor.get("playerConversationReady", false)):
-		return
+	if (
+		actor.is_empty()
+		or bool(actor.get("playerConversationReady", false))
+		or not _conversation_preload_is_nearby(actor_id)
+		or not _conversation_preload_is_priority(actor_id)
+	):
+		return false
 	if _conversation_preload_in_flight.has(actor_id):
 		_conversation_preload_requeue_requested[actor_id] = true
-		return
+		if not cycle_kind.is_empty():
+			_conversation_preload_requeue_cycle_kinds[actor_id] = cycle_kind
+		return true
 	if _conversation_preload_queued.has(actor_id):
-		return
+		if not cycle_kind.is_empty():
+			_conversation_preload_queued_cycle_kinds[actor_id] = cycle_kind
+			_conversation_preload_retry_queued.erase(actor_id)
+		return true
 	_conversation_preload_queued[actor_id] = true
+	if transport_retry_count > 0:
+		_conversation_preload_retry_queued[actor_id] = transport_retry_count
+	if not cycle_kind.is_empty():
+		_conversation_preload_queued_cycle_kinds[actor_id] = cycle_kind
 	_conversation_preload_queue.append(actor_id)
 	_pump_conversation_preloads()
+	return true
 
 
 func _pump_conversation_preloads() -> void:
 	if _run_status != "active" or get_tree().paused or _conversation_target != null:
 		return
+	if (
+		_run_session.mode() != "fixture"
+		and _conversation_preload_in_flight.is_empty()
+		and _conversation_preload_refresh_required
+	):
+		_conversation_preload_refresh_required = false
+		_advance_needs_rebase = true
+		if not _advance_rebase_in_flight:
+			call_deferred("_rebase_run_after_advance_conflict")
+		return
+	if _conversation_preload_rebase_blocked():
+		return
 	while (
 		_conversation_preload_in_flight.size() < CONVERSATION_PRELOAD_MAX_IN_FLIGHT
-		and not _conversation_preload_queue.is_empty()
 	):
-		var actor_id: String = _conversation_preload_queue.pop_front()
-		_conversation_preload_queued.erase(actor_id)
-		if bool(_actor_view(actor_id).get("playerConversationReady", false)):
-			continue
-		_conversation_preload_in_flight[actor_id] = true
+		var actor_id := _take_next_conversation_preload_dispatch()
+		if actor_id.is_empty():
+			break
 		_dispatch_conversation_preload(actor_id)
 	if (
-		_conversation_preload_in_flight.is_empty()
+		_run_session.mode() == "fixture"
+		and _conversation_preload_in_flight.is_empty()
 		and _conversation_preload_queue.is_empty()
 		and _conversation_preload_refresh_required
 	):
@@ -1531,10 +1757,68 @@ func _pump_conversation_preloads() -> void:
 		call_deferred("_rebase_run_after_advance_conflict")
 
 
+func _conversation_preload_rebase_blocked() -> bool:
+	return _advance_needs_rebase or _advance_rebase_in_flight
+
+
+func _take_next_conversation_preload_dispatch() -> String:
+	# Queue admission is intentionally separate from dispatch. A queued actor
+	# survives an authoritative rebase barrier, and all cycle eligibility is
+	# consumed only when this helper returns that actor to the real transport.
+	if (
+		_conversation_preload_rebase_blocked()
+		or _conversation_preload_in_flight.size()
+		>= CONVERSATION_PRELOAD_MAX_IN_FLIGHT
+	):
+		return ""
+	while not _conversation_preload_queue.is_empty():
+		var actor_id: String = _conversation_preload_queue.pop_front()
+		_conversation_preload_queued.erase(actor_id)
+		var transport_retry_count := int(
+			_conversation_preload_retry_queued.get(actor_id, 0)
+		)
+		_conversation_preload_retry_queued.erase(actor_id)
+		var cycle_kind := str(_conversation_preload_queued_cycle_kinds.get(actor_id, ""))
+		_conversation_preload_queued_cycle_kinds.erase(actor_id)
+		if (
+			bool(_actor_view(actor_id).get("playerConversationReady", false))
+			or not _conversation_preload_is_nearby(actor_id)
+			or not _conversation_preload_is_priority(actor_id)
+			or (
+				not cycle_kind.is_empty()
+				and not _conversation_preload_has_explicit_demand(actor_id)
+			)
+		):
+			if (
+				transport_retry_count > 0
+				and int(_conversation_preload_retries.get(actor_id, 0))
+				== transport_retry_count
+			):
+				_mark_conversation_preload_recovery_required(
+					actor_id,
+					"transport_retry_dropped"
+				)
+			continue
+		if cycle_kind == "invalidated":
+			if not _consume_conversation_preload_invalidation_demand(actor_id):
+				continue
+		elif cycle_kind == "recovery":
+			if not _consume_conversation_preload_recovery_demand(actor_id):
+				continue
+		_conversation_preload_attempted[actor_id] = true
+		_conversation_preload_in_flight[actor_id] = true
+		return actor_id
+	return ""
+
+
 func _dispatch_conversation_preload(actor_id: String) -> void:
 	var interaction_zone_id := _conversation_zone_for_actor(actor_id)
 	if interaction_zone_id.is_empty():
 		_conversation_preload_in_flight.erase(actor_id)
+		_mark_conversation_preload_recovery_required(
+			actor_id,
+			"interaction_zone_unavailable"
+		)
 		call_deferred("_pump_conversation_preloads")
 		return
 	var result: Dictionary = await _run_session.preload_conversation(
@@ -1548,13 +1832,17 @@ func _dispatch_conversation_preload(actor_id: String) -> void:
 		return
 	var transport_retry_scheduled := false
 	if not _is_error(result):
-		_conversation_preload_retries.erase(actor_id)
+		_cache_provider_evidence(result, "preload")
+		_clear_conversation_preload_failure_state(actor_id)
 		_conversation_preload_refresh_required = true
 		var current_revision := int(_run_snapshot.get("worldRevision", 0))
 		var response_revision := int(result.get("worldRevision", 0))
 		if response_revision < current_revision:
 			# A newer movement/evidence delta may already have invalidated this
-			# actor. Rebase instead of letting the late opening re-enable it.
+			# actor. Rebase instead of letting the late opening re-enable it, and
+			# retain an explicit-demand retry path if the authoritative snapshot
+			# confirms that the actor is still unready.
+			_conversation_preload_invalidated[actor_id] = true
 			_advance_needs_rebase = true
 		else:
 			_run_snapshot["worldRevision"] = response_revision
@@ -1562,6 +1850,18 @@ func _dispatch_conversation_preload(actor_id: String) -> void:
 			_update_run_actor(_dictionary_or_empty(result.get("actor")))
 			_last_proposal_meta = _dictionary_or_empty(result.get("proposalMeta"))
 			_run_snapshot["lastProposalMeta"] = _last_proposal_meta.duplicate(true)
+			if (
+				actor_id == str(_active_contact.get("actorId", ""))
+				and bool(_actor_view(actor_id).get("playerConversationReady", false))
+			):
+				# A physically ready contact may have been waiting on this opening.
+				# Reuse the same pending contact id as soon as both halves are ready.
+				call_deferred("_try_open_pending_contact")
+	elif _handle_recoverable_conversation_preload_error(
+		actor_id,
+		str(result.get("error", ""))
+	):
+		pass
 	elif str(result.get("error", "")) == "conversation_preload_failed":
 		var retry_count := int(_conversation_preload_retries.get(actor_id, 0)) + 1
 		_conversation_preload_retries[actor_id] = retry_count
@@ -1569,21 +1869,212 @@ func _dispatch_conversation_preload(actor_id: String) -> void:
 			transport_retry_scheduled = true
 			_retry_conversation_preload(
 				actor_id,
-				CONVERSATION_PRELOAD_RETRY_SECONDS * pow(2.0, retry_count - 1)
+				CONVERSATION_PRELOAD_RETRY_SECONDS * pow(2.0, retry_count - 1),
+				retry_count
+			)
+		else:
+			_mark_conversation_preload_recovery_required(
+				actor_id,
+				"transport_retry_exhausted"
 			)
 	if _conversation_preload_requeue_requested.has(actor_id):
 		_conversation_preload_requeue_requested.erase(actor_id)
+		var requeue_cycle_kind := str(
+			_conversation_preload_requeue_cycle_kinds.get(actor_id, "")
+		)
+		_conversation_preload_requeue_cycle_kinds.erase(actor_id)
 		if (
 			not transport_retry_scheduled
 			and not bool(_actor_view(actor_id).get("playerConversationReady", false))
 		):
-			call_deferred("_queue_conversation_preload", actor_id)
+			call_deferred(
+				"_queue_conversation_preload",
+				actor_id,
+				0,
+				requeue_cycle_kind
+			)
 	call_deferred("_pump_conversation_preloads")
 
 
-func _retry_conversation_preload(actor_id: String, delay_seconds: float) -> void:
+func _retry_conversation_preload(
+	actor_id: String,
+	delay_seconds: float,
+	retry_count: int
+) -> void:
 	await _pause_safe_timer(delay_seconds)
-	_queue_conversation_preload(actor_id)
+	# A semantic invalidation or an explicit recovery may have started a newer
+	# cycle while this timer was waiting. Never let its old retry leak across.
+	if int(_conversation_preload_retries.get(actor_id, 0)) != retry_count:
+		return
+	if not _queue_conversation_preload(actor_id, retry_count):
+		_mark_conversation_preload_recovery_required(
+			actor_id,
+			"transport_retry_dropped"
+		)
+
+
+func _mark_conversation_preload_recovery_required(
+	actor_id: String,
+	reason: String
+) -> void:
+	if actor_id.is_empty():
+		return
+	_conversation_preload_retries.erase(actor_id)
+	_conversation_preload_retry_queued.erase(actor_id)
+	_conversation_preload_requeue_requested.erase(actor_id)
+	_conversation_preload_requeue_cycle_kinds.erase(actor_id)
+	_conversation_preload_recovery_required[actor_id] = reason
+	# Passive proximity remains spent after the first dispatch. A currently
+	# aimed actor or active contact may consume one recovery for its current
+	# demand epoch; another cycle needs a new aim/contact episode.
+	call_deferred("_queue_nearby_conversation_preloads")
+
+
+func _clear_conversation_preload_failure_state(actor_id: String) -> void:
+	_conversation_preload_retries.erase(actor_id)
+	_conversation_preload_retry_queued.erase(actor_id)
+	_conversation_preload_recovery_required.erase(actor_id)
+
+
+func _handle_recoverable_conversation_preload_error(
+	actor_id: String,
+	error_code: String
+) -> bool:
+	if error_code != "conversation_not_ready" or actor_id.is_empty():
+		return false
+	# The runtime rejected an opening whose actor, zone, or evidence changed
+	# before commit. Rebase before considering a fresh explicit-demand cycle;
+	# the consumed invalidation epoch prevents held aim/contact from looping.
+	_conversation_preload_retries.erase(actor_id)
+	_conversation_preload_retry_queued.erase(actor_id)
+	_conversation_preload_recovery_required.erase(actor_id)
+	_conversation_preload_invalidated[actor_id] = true
+	_advance_needs_rebase = true
+	return true
+
+
+func _sync_conversation_preload_demands(
+	contact_actor_id: String,
+	contact_id: String,
+	aimed_actor_id: String
+) -> void:
+	var next_signatures: Dictionary = {}
+	if not contact_actor_id.is_empty():
+		next_signatures[contact_actor_id] = "contact:%s" % contact_id
+	if not aimed_actor_id.is_empty():
+		var signature := str(next_signatures.get(aimed_actor_id, ""))
+		next_signatures[aimed_actor_id] = (
+			"aim" if signature.is_empty() else "%s|aim" % signature
+		)
+	for actor_id_value in next_signatures:
+		var actor_id := str(actor_id_value)
+		var next_signature := str(next_signatures.get(actor_id, ""))
+		if str(_conversation_preload_demand_signatures.get(actor_id, "")) == next_signature:
+			continue
+		_conversation_preload_demand_epochs[actor_id] = int(
+			_conversation_preload_demand_epochs.get(actor_id, 0)
+		) + 1
+	_conversation_preload_demand_signatures = next_signatures
+
+
+func _conversation_preload_has_explicit_demand(actor_id: String) -> bool:
+	return not str(
+		_conversation_preload_demand_signatures.get(actor_id, "")
+	).is_empty()
+
+
+func _conversation_preload_recovery_demand_available(actor_id: String) -> bool:
+	if (
+		not _conversation_preload_recovery_required.has(actor_id)
+		or not _conversation_preload_has_explicit_demand(actor_id)
+	):
+		return false
+	var demand_epoch := int(_conversation_preload_demand_epochs.get(actor_id, 0))
+	return demand_epoch > int(
+		_conversation_preload_recovery_demand_epochs.get(actor_id, 0)
+	)
+
+
+func _conversation_preload_invalidation_demand_available(actor_id: String) -> bool:
+	if (
+		not _conversation_preload_invalidated.has(actor_id)
+		or not _conversation_preload_has_explicit_demand(actor_id)
+	):
+		return false
+	var demand_epoch := int(_conversation_preload_demand_epochs.get(actor_id, 0))
+	return demand_epoch > int(
+		_conversation_preload_invalidation_demand_epochs.get(actor_id, 0)
+	)
+
+
+func _consume_conversation_preload_invalidation_demand(actor_id: String) -> bool:
+	if not _conversation_preload_invalidation_demand_available(actor_id):
+		return false
+	var demand_epoch := int(_conversation_preload_demand_epochs.get(actor_id, 0))
+	_conversation_preload_invalidation_demand_epochs[actor_id] = demand_epoch
+	_conversation_preload_invalidated.erase(actor_id)
+	_conversation_preload_retries.erase(actor_id)
+	_conversation_preload_retry_queued.erase(actor_id)
+	_conversation_preload_recovery_required.erase(actor_id)
+	_conversation_preload_recovery_demand_epochs.erase(actor_id)
+	return true
+
+
+func _consume_conversation_preload_recovery_demand(actor_id: String) -> bool:
+	if not _conversation_preload_recovery_demand_available(actor_id):
+		return false
+	var demand_epoch := int(_conversation_preload_demand_epochs.get(actor_id, 0))
+	_conversation_preload_recovery_demand_epochs[actor_id] = demand_epoch
+	_conversation_preload_recovery_required.erase(actor_id)
+	_conversation_preload_retries.erase(actor_id)
+	_conversation_preload_retry_queued.erase(actor_id)
+	return true
+
+
+func _conversation_preload_is_nearby(actor_id: String) -> bool:
+	if _run_session.mode() == "fixture":
+		return true
+	if (
+		actor_id.is_empty()
+		or _active_movements.has(actor_id)
+		or _blocked_movements.has(actor_id)
+	):
+		return false
+	var actor_node := _town.get_node_or_null("Actors/%s" % actor_id) as Node3D
+	if actor_node == null:
+		return false
+	if str(_active_contact.get("actorId", "")) == actor_id:
+		return true
+	return _horizontal_distance(
+		actor_node.global_position,
+		_player.global_position
+	) <= CONVERSATION_PRELOAD_DISTANCE_M
+
+
+func _conversation_preload_is_priority(actor_id: String) -> bool:
+	if _run_session.mode() == "fixture":
+		return true
+	return (
+		actor_id == _conversation_preload_priority_actor_id
+		or actor_id == str(_active_contact.get("actorId", ""))
+	)
+
+
+func _preload_intent_npc_actor_id() -> String:
+	var target: Node = _player.preload_intent_target()
+	if not target is NPC3D:
+		return ""
+	return str((target as NPC3D).actor_id)
+
+
+func _on_player_preload_intent_changed(_target: Node) -> void:
+	if _run_session.mode() == "fixture" or _run_id.is_empty():
+		return
+	call_deferred("_queue_nearby_conversation_preloads")
+
+
+func _horizontal_distance(first: Vector3, second: Vector3) -> float:
+	return Vector2(first.x, first.z).distance_to(Vector2(second.x, second.z))
 
 
 func _initialize_run_background() -> void:
@@ -1779,6 +2270,16 @@ func _restore_advance_request(request: Dictionary) -> void:
 
 
 func _apply_advance_response(result: Dictionary) -> void:
+	var current_revision := int(_run_snapshot.get("worldRevision", 0))
+	var response_revision := int(result.get("worldRevision", current_revision))
+	if response_revision < current_revision:
+		# Every field below is derived from the response's world revision. In
+		# particular, schedule wakes can spend provider work immediately, ambient
+		# speech mutates encounter state, and social/contact data can supersede
+		# newer local presentation. Apply none of them until a snapshot rebases the
+		# client onto authoritative state.
+		_advance_needs_rebase = true
+		return
 	_apply_social_view_from_response(result)
 	_last_accepted_prop_event_ids = _array_or_empty(result.get("acceptedPropEventIds"))
 	_last_prop_observation_memories = _array_or_empty(result.get("propObservationMemories"))
@@ -1801,11 +2302,6 @@ func _apply_advance_response(result: Dictionary) -> void:
 			_spatial_facts_dirty = true
 			break
 	_queue_ambient_decision_wakes(_recent_schedule_wakes)
-	var current_revision := int(_run_snapshot.get("worldRevision", 0))
-	var response_revision := int(result.get("worldRevision", current_revision))
-	if response_revision < current_revision:
-		_advance_needs_rebase = true
-		return
 	_run_snapshot["worldRevision"] = maxi(current_revision, response_revision)
 	var response_clock := _dictionary_or_empty(result.get("clock"))
 	var world_clock := _dictionary_or_empty(_run_snapshot.get("worldClock"))
@@ -1827,6 +2323,7 @@ func _apply_advance_response(result: Dictionary) -> void:
 	var scheduler := _dictionary_or_empty(result.get("scheduler"))
 	if not scheduler.is_empty():
 		_run_snapshot["scheduler"] = scheduler.duplicate(true)
+	_reconcile_ambient_goal_wakes(scheduler)
 	_last_arrivals_applied = _array_or_empty(result.get("arrivalsApplied"))
 	_last_arrivals_rejected = _array_or_empty(result.get("arrivalsRejected"))
 	for arrival_value in _last_arrivals_applied:
@@ -1850,6 +2347,7 @@ func _apply_advance_response(result: Dictionary) -> void:
 		if movement_value is Dictionary:
 			_queue_or_apply_movement(movement_value as Dictionary)
 	_reconcile_scheduler_movements(scheduler)
+	_queue_nearby_conversation_preloads()
 
 
 func _queue_ambient_decision_wakes(wakes: Array) -> void:
@@ -1877,7 +2375,12 @@ func _queue_ambient_decision_wakes(wakes: Array) -> void:
 
 
 func _prepare_next_ambient_decision() -> void:
-	if not _ambient_pending_request.is_empty() or _ambient_wake_queue.is_empty():
+	if (
+		_advance_needs_rebase
+		or _advance_rebase_in_flight
+		or not _ambient_pending_request.is_empty()
+		or _ambient_wake_queue.is_empty()
+	):
 		return
 	var selected_index := -1
 	var preloads_busy := (
@@ -1901,11 +2404,18 @@ func _prepare_next_ambient_decision() -> void:
 			_run_snapshot.get("worldRevision", 0)
 		)),
 	}
+	_ambient_pending_wake_kind = str(wake.get("kind", ""))
+	_ambient_pending_request_dispatched = false
 	_ambient_decision_waiting_for_resume = false
 
 
 func _dispatch_ambient_decision() -> void:
-	if _ambient_decision_in_flight or _ambient_pending_request.is_empty():
+	if (
+		_advance_needs_rebase
+		or _advance_rebase_in_flight
+		or _ambient_decision_in_flight
+		or _ambient_pending_request.is_empty()
+	):
 		return
 	if (
 		_ambient_decision_waiting_for_resume
@@ -1913,11 +2423,12 @@ func _dispatch_ambient_decision() -> void:
 	):
 		return
 	_ambient_decision_in_flight = true
+	_ambient_pending_request_dispatched = true
 	var request := _ambient_pending_request.duplicate(true)
 	var result: Dictionary = await _run_session.npc_decision(request)
 	_ambient_decision_in_flight = false
 	if _run_status != "active":
-		_ambient_pending_request = {}
+		_clear_ambient_pending_request()
 		return
 	if request != _ambient_pending_request:
 		_ambient_decision_halted_reason = "in_flight_packet_changed"
@@ -1932,6 +2443,7 @@ func _dispatch_ambient_decision() -> void:
 		push_error("Ambient NPC decision lane halted: %s" % error_code)
 		return
 
+	_cache_provider_evidence(result, "npc_decision")
 	_ambient_last_decision_status = str(result.get("status", "failed"))
 	_ambient_last_decision_kind = str(result.get("decisionKind", ""))
 	_ambient_last_wake_kind = str(result.get("wakeKind", ""))
@@ -1945,7 +2457,7 @@ func _dispatch_ambient_decision() -> void:
 	_spatial_facts_dirty = true
 	match _ambient_last_decision_status:
 		"completed":
-			_ambient_pending_request = {}
+			_clear_ambient_pending_request()
 			_ambient_decision_waiting_for_resume = false
 			_ambient_active_conversation = null
 			var action_deltas := _array_or_empty(result.get("actionDeltas"))
@@ -1980,12 +2492,63 @@ func _dispatch_ambient_decision() -> void:
 			# These are terminal for this stable wake id. The scheduler may
 			# produce a different wake later; changing this request would violate
 			# the runtime's exact claim/cache contract.
-			_ambient_pending_request = {}
+			_clear_ambient_pending_request()
 			_ambient_decision_waiting_for_resume = false
 			_ambient_active_conversation = null
 		_:
 			_ambient_decision_halted_reason = "invalid_decision_status"
 			push_error("Ambient NPC decision returned an unknown status.")
+
+
+func _clear_ambient_pending_request() -> void:
+	_ambient_pending_request = {}
+	_ambient_pending_wake_kind = ""
+	_ambient_pending_request_dispatched = false
+
+
+func _reconcile_ambient_goal_wakes(scheduler: Dictionary) -> void:
+	if scheduler.is_empty() or not scheduler.has("pendingWakes"):
+		return
+	var authoritative_goal_wake_ids: Dictionary = {}
+	for wake_value in _array_or_empty(scheduler.get("pendingWakes")):
+		if not wake_value is Dictionary:
+			continue
+		var wake := wake_value as Dictionary
+		if (
+			str(wake.get("kind", "")) != "goal"
+			or str(wake.get("status", "")) not in ["pending", "claimed"]
+		):
+			continue
+		var wake_id := str(wake.get("wakeId", ""))
+		if not wake_id.is_empty():
+			authoritative_goal_wake_ids[wake_id] = true
+	for index in range(_ambient_wake_queue.size() - 1, -1, -1):
+		var queued_wake := _ambient_wake_queue[index]
+		if str(queued_wake.get("kind", "")) != "goal":
+			continue
+		var queued_wake_id := str(queued_wake.get("wakeId", ""))
+		if authoritative_goal_wake_ids.has(queued_wake_id):
+			continue
+		_ambient_wake_queue.remove_at(index)
+		_ambient_claimed_wake_ids.erase(queued_wake_id)
+	if (
+		not _ambient_pending_request.is_empty()
+		and not _ambient_pending_request_dispatched
+		and _ambient_pending_wake_kind == "goal"
+	):
+		var pending_wake_id := str(_ambient_pending_request.get("wakeId", ""))
+		if not authoritative_goal_wake_ids.has(pending_wake_id):
+			_ambient_claimed_wake_ids.erase(pending_wake_id)
+			_clear_ambient_pending_request()
+
+
+func _recover_ambient_decision_wakes_after_rebase(scheduler: Dictionary) -> void:
+	# A stale advance response is discarded wholesale. Once the fresh snapshot
+	# has rebased the client, recover its still-authoritative decision wakes.
+	# Reconciliation first releases only vanished, undispatched goal claims;
+	# the shared queue helper then deduplicates queued and in-flight wake ids.
+	_reconcile_ambient_goal_wakes(scheduler)
+	_queue_ambient_decision_wakes(_array_or_empty(scheduler.get("pendingWakes")))
 
 
 func _ingest_ambient_snapshot(snapshot: Dictionary) -> void:
@@ -2208,11 +2771,63 @@ func _apply_run_deltas(deltas: Array) -> void:
 				else:
 					_queue_or_apply_movement(movement_delta)
 			"administration":
-				# The runtime has already committed and validated this mutation.
-				# Player knowledge arrives separately through authoritative socialView.
-				pass
+				# The runtime owns record truth. Cache only its authoritative record
+				# payload so later presentation deltas can resolve recordId to the
+				# correct world text surface; player knowledge still arrives through
+				# the separately authoritative socialView.
+				_apply_administration_delta(delta)
 			_:
 				push_warning("Ignoring unknown runtime action delta kind: %s" % delta.get("kind", ""))
+
+
+func _apply_administration_delta(delta: Dictionary) -> void:
+	var record_value: Variant = delta.get("record")
+	if not record_value is Dictionary:
+		push_warning("Ignoring administration delta without an authoritative record.")
+		return
+	var record := record_value as Dictionary
+	var record_id_value: Variant = record.get("recordId")
+	var text_surface_id_value: Variant = record.get("textSurfaceId")
+	var record_revision_value: Variant = record.get("recordRevision")
+	var record_revision := _positive_json_integer(record_revision_value)
+	if (
+		typeof(record_id_value) != TYPE_STRING
+		or str(record_id_value).strip_edges().is_empty()
+		or typeof(text_surface_id_value) != TYPE_STRING
+		or str(text_surface_id_value).strip_edges().is_empty()
+		or record_revision < 1
+	):
+		push_warning("Ignoring administration delta with an invalid record identity or revision.")
+		return
+
+	var record_id := str(record_id_value)
+	var records := _array_or_empty(_run_snapshot.get("records"))
+	for index in records.size():
+		var cached_value: Variant = records[index]
+		if not cached_value is Dictionary:
+			continue
+		var cached := cached_value as Dictionary
+		if str(cached.get("recordId", "")) != record_id:
+			continue
+		var cached_revision := _positive_json_integer(cached.get("recordRevision"))
+		if cached_revision > 0 and record_revision < cached_revision:
+			return
+		records[index] = record.duplicate(true)
+		_run_snapshot["records"] = records
+		return
+	records.append(record.duplicate(true))
+	_run_snapshot["records"] = records
+
+
+func _positive_json_integer(value: Variant) -> int:
+	if typeof(value) == TYPE_INT:
+		return int(value) if int(value) > 0 else -1
+	if typeof(value) != TYPE_FLOAT:
+		return -1
+	var number := float(value)
+	if not is_finite(number) or number < 1.0 or number != floor(number):
+		return -1
+	return int(number)
 
 
 func _apply_look_delta(delta: Dictionary) -> void:
@@ -2227,16 +2842,65 @@ func _apply_look_delta(delta: Dictionary) -> void:
 	if actor == null or target_id.is_empty():
 		push_warning("Ignoring look delta with an unavailable resident or target.")
 		return
-	if target_kind == "actor":
-		var target := _town.get_node_or_null("Actors/%s" % target_id) as NPC3D
-		if target == null:
-			push_warning("Ignoring look delta with an unavailable target resident.")
-			return
-		actor.face_position(target.global_position + Vector3.UP * 1.35)
+	var target_position_value: Variant = _look_target_position(target_kind, target_id)
+	if not target_position_value is Vector3:
+		push_warning("Ignoring unavailable %s look target: %s" % [target_kind, target_id])
 		return
-	# Object and record look targets cannot be valid until a canonical 3D
-	# semantic object id is included in visibleObjectIds by Town3D.
-	push_warning("Ignoring unavailable %s look target: %s" % [target_kind, target_id])
+	actor.face_position(target_position_value as Vector3)
+
+
+func _look_target_position(target_kind: String, target_id: String) -> Variant:
+	match target_kind:
+		"actor":
+			var actor := _town.get_node_or_null("Actors/%s" % target_id) as NPC3D
+			if actor != null:
+				return actor.global_position + Vector3.UP * 1.35
+		"object":
+			var prop := _physical_prop_node(target_id)
+			if prop != null:
+				return _semantic_target_center(prop, 0.35)
+		"record":
+			var surface := _record_surface_node(target_id)
+			if surface != null:
+				return _semantic_target_center(surface, 1.2)
+	return null
+
+
+func _physical_prop_node(prop_id: String) -> Node3D:
+	if not _physical_prop_known(prop_id):
+		return null
+	for prop_value in get_tree().get_nodes_in_group(&"physical_props"):
+		if prop_value is Node3D and str((prop_value as Node3D).get("prop_id")) == prop_id:
+			return prop_value as Node3D
+	return null
+
+
+func _record_surface_node(record_id: String) -> Node3D:
+	var text_surface_id := ""
+	for record_value in _array_or_empty(_run_snapshot.get("records")):
+		if (
+			record_value is Dictionary
+			and str((record_value as Dictionary).get("recordId", "")) == record_id
+		):
+			text_surface_id = str((record_value as Dictionary).get("textSurfaceId", ""))
+			break
+	if text_surface_id.is_empty():
+		return null
+	for surface_value in get_tree().get_nodes_in_group(&"record_surfaces"):
+		if (
+			surface_value is Node3D
+			and (surface_value as Node3D).has_method("get_semantic_id")
+			and str((surface_value as Node3D).call("get_semantic_id")) == text_surface_id
+		):
+			return surface_value as Node3D
+	return null
+
+
+func _semantic_target_center(target: Node3D, fallback_height_m: float) -> Vector3:
+	var collision := target.get_node_or_null("Collision") as Node3D
+	if collision != null:
+		return collision.global_position
+	return target.global_position + Vector3.UP * fallback_height_m
 
 
 func _apply_conversation_end_deltas_once(
@@ -2255,6 +2919,7 @@ func _apply_conversation_end_deltas_once(
 
 
 func _apply_readiness_deltas(deltas: Array) -> void:
+	var should_refresh_priority := false
 	for delta_value in deltas:
 		if not delta_value is Dictionary:
 			continue
@@ -2267,19 +2932,21 @@ func _apply_readiness_deltas(deltas: Array) -> void:
 		)
 		_update_run_actor(actor)
 		var actor_id := str(actor.get("actorId", ""))
-		if (
-			not bool(actor.get("playerConversationReady", false))
-			and _conversation_preload_in_flight.has(actor_id)
-		):
-			_conversation_preload_requeue_requested[actor_id] = true
 		var reason := str(delta.get("reason", ""))
 		if reason == "preload_required":
 			_conversation_preload_retries.erase(actor_id)
+			_conversation_preload_retry_queued.erase(actor_id)
 		if (
 			not bool(actor.get("playerConversationReady", false))
 			and reason in ["opening_invalidated", "evidence_changed", "preload_required"]
 		):
-			_queue_conversation_preload(actor_id)
+			_conversation_preload_invalidated[actor_id] = true
+			should_refresh_priority = true
+		elif bool(actor.get("playerConversationReady", false)):
+			_clear_conversation_preload_failure_state(actor_id)
+			_conversation_preload_invalidated.erase(actor_id)
+	if should_refresh_priority:
+		call_deferred("_queue_nearby_conversation_preloads")
 
 
 func _queue_or_apply_movement(movement: Dictionary) -> void:
@@ -2690,11 +3357,12 @@ func _rebase_run_after_advance_conflict() -> void:
 		_advance_needs_rebase = true
 		_advance_retry_remaining = ADVANCE_RETRY_SECONDS
 		return
-	_run_snapshot = result.duplicate(true)
+	var previous_readiness := _conversation_readiness(_run_snapshot)
+	_replace_run_snapshot(result, true)
 	_apply_player_brief_from_snapshot(result)
 	_cache_provider_evidence(result)
 	_hydrate_run_lifecycle(result)
-	_apply_social_view_from_response(result)
+	_apply_social_view_from_response(result, true)
 	if not _social_view.is_empty():
 		_run_snapshot["socialView"] = _social_view.duplicate(true)
 	_run_snapshot["worldRevision"] = maxi(current_revision, snapshot_revision)
@@ -2709,8 +3377,26 @@ func _rebase_run_after_advance_conflict() -> void:
 		_enter_terminal_outcome()
 		return
 	_apply_all_conversation_readiness()
-	_reconcile_scheduler_movements(_dictionary_or_empty(result.get("scheduler")))
-	_queue_initial_conversation_preloads()
+	if _run_session.mode() != "fixture":
+		var current_readiness := _conversation_readiness(_run_snapshot)
+		for actor_id_value in previous_readiness.keys():
+			var actor_id := str(actor_id_value)
+			if (
+				bool(previous_readiness.get(actor_id, false))
+				and not bool(current_readiness.get(actor_id, false))
+			):
+				_conversation_preload_retries.erase(actor_id)
+				_conversation_preload_retry_queued.erase(actor_id)
+				_conversation_preload_invalidated[actor_id] = true
+	var scheduler := _dictionary_or_empty(result.get("scheduler"))
+	if _run_session.mode() == "fixture":
+		# Generated fixture replays consume only their explicit scheduleWakes;
+		# snapshot recovery is an HTTP out-of-order-response concern.
+		_reconcile_ambient_goal_wakes(scheduler)
+	else:
+		_recover_ambient_decision_wakes_after_rebase(scheduler)
+	_reconcile_scheduler_movements(scheduler)
+	_queue_nearby_conversation_preloads()
 
 
 func _flush_queued_movement_deltas() -> void:
@@ -2809,13 +3495,54 @@ func _finish_conversation_modal() -> void:
 	if _advance_needs_rebase:
 		call_deferred("_rebase_run_after_advance_conflict")
 	else:
-		_queue_initial_conversation_preloads()
+		_queue_nearby_conversation_preloads()
 
 
 func _set_run_clock_paused(value: bool) -> void:
 	var clock := _dictionary_or_empty(_run_snapshot.get("worldClock"))
 	clock["paused"] = value
 	_run_snapshot["worldClock"] = clock
+
+
+func _replace_run_snapshot(
+	authoritative_snapshot: Dictionary,
+	preserve_same_run_clock_milestones: bool
+) -> void:
+	var replacement := authoritative_snapshot.duplicate(true)
+	var previous_run_id := str(_run_snapshot.get("runId", ""))
+	var replacement_run_id := str(replacement.get("runId", ""))
+	var same_run := (
+		not previous_run_id.is_empty()
+		and previous_run_id == replacement_run_id
+	)
+	if not same_run:
+		_reset_accepted_provider_evidence(replacement_run_id)
+	_accept_provider_evidence(replacement, "snapshot")
+	if preserve_same_run_clock_milestones:
+		var equal_or_newer := (
+			int(replacement.get("worldRevision", -1))
+			>= int(_run_snapshot.get("worldRevision", 0))
+		)
+		var replacement_clock_value: Variant = replacement.get("worldClock")
+		if (
+			same_run
+			and equal_or_newer
+			and replacement_clock_value is Dictionary
+			and bool(
+				_dictionary_or_empty(_run_snapshot.get("worldClock")).get(
+					"graceEnded",
+					false
+				)
+			)
+		):
+			# RunService owns both the elapsed clock and the grace transition. Retain
+			# an already-observed true milestone when an equal/newer same-run snapshot
+			# races with it; never derive time here or carry it across a run boundary.
+			var replacement_clock := _dictionary_or_empty(replacement_clock_value)
+			replacement_clock["graceEnded"] = true
+			replacement["worldClock"] = replacement_clock
+	_run_snapshot = replacement
+	_overlay_accepted_provider_evidence()
 
 
 func _pause_safe_timer(seconds: float) -> void:
@@ -2830,9 +3557,12 @@ func _api_locale() -> String:
 	return str(_localization.call("api_locale", _locale_name))
 
 
-func _apply_social_view_from_response(response: Dictionary) -> bool:
+func _apply_social_view_from_response(
+	response: Dictionary,
+	authoritative_snapshot := false
+) -> bool:
 	_hydrate_run_lifecycle(response)
-	_sync_active_contact_from_response(response)
+	_sync_active_contact_from_response(response, authoritative_snapshot)
 	var social_view := _dictionary_or_empty(response.get("socialView"))
 	if social_view.is_empty():
 		for key in ["runSnapshot", "snapshot"]:
@@ -2864,18 +3594,103 @@ func _apply_player_brief_from_snapshot(snapshot: Dictionary) -> void:
 	)
 
 
-func _cache_provider_evidence(response: Dictionary) -> void:
+func _cache_provider_evidence(
+	response: Dictionary,
+	source_kind: String = "response"
+) -> void:
+	if _accept_provider_evidence(response, source_kind):
+		_overlay_accepted_provider_evidence()
+
+
+func _accept_provider_evidence(response: Dictionary, source_kind: String) -> bool:
 	var audit_value: Variant = response.get("providerAudit")
-	if audit_value is Dictionary:
-		var audit := (audit_value as Dictionary).duplicate(true)
-		_run_snapshot["providerAudit"] = audit
-		var provider_budget := _dictionary_or_empty(_run_snapshot.get("providerBudget"))
-		provider_budget["callsUsed"] = int(audit.get("callsUsed", 0))
-		provider_budget["tokensUsed"] = int(audit.get("tokensUsed", 0))
-		_run_snapshot["providerBudget"] = provider_budget
 	var trace_value: Variant = response.get("providerRuntimeTrace")
-	if trace_value is Dictionary:
-		_run_snapshot["providerRuntimeTrace"] = (trace_value as Dictionary).duplicate(true)
+	if not audit_value is Dictionary or not trace_value is Dictionary:
+		return false
+	var candidate_run_id := str(response.get("runId", _run_id))
+	if candidate_run_id.is_empty():
+		return false
+	if (
+		not _accepted_provider_evidence_run_id.is_empty()
+		and candidate_run_id != _accepted_provider_evidence_run_id
+	):
+		return false
+	var audit := audit_value as Dictionary
+	var trace := trace_value as Dictionary
+	var candidate_progress := _provider_evidence_progress(audit, trace)
+	if not _accepted_provider_audit.is_empty() and not _accepted_provider_runtime_trace.is_empty():
+		var current_progress := _provider_evidence_progress(
+			_accepted_provider_audit,
+			_accepted_provider_runtime_trace
+		)
+		for index in candidate_progress.size():
+			if candidate_progress[index] < current_progress[index]:
+				return false
+	_accepted_provider_evidence_run_id = candidate_run_id
+	_accepted_provider_audit = audit.duplicate(true)
+	_accepted_provider_runtime_trace = trace.duplicate(true)
+	_accepted_provider_evidence_source = source_kind
+	_accepted_provider_evidence_response_revision = int(response.get("worldRevision", -1))
+	return true
+
+
+func _reset_accepted_provider_evidence(run_id: String) -> void:
+	_accepted_provider_evidence_run_id = run_id
+	_accepted_provider_audit = {}
+	_accepted_provider_runtime_trace = {}
+	_accepted_provider_evidence_source = "none"
+	_accepted_provider_evidence_response_revision = -1
+
+
+func _overlay_accepted_provider_evidence() -> void:
+	if (
+		_accepted_provider_evidence_run_id.is_empty()
+		or str(_run_snapshot.get("runId", "")) != _accepted_provider_evidence_run_id
+		or _accepted_provider_audit.is_empty()
+		or _accepted_provider_runtime_trace.is_empty()
+	):
+		return
+	_run_snapshot["providerAudit"] = _accepted_provider_audit.duplicate(true)
+	_run_snapshot["providerRuntimeTrace"] = (
+		_accepted_provider_runtime_trace.duplicate(true)
+	)
+	var provider_budget := _dictionary_or_empty(_run_snapshot.get("providerBudget"))
+	provider_budget["callsUsed"] = int(_accepted_provider_audit.get("callsUsed", 0))
+	provider_budget["tokensUsed"] = int(_accepted_provider_audit.get("tokensUsed", 0))
+	_run_snapshot["providerBudget"] = provider_budget
+
+
+func _provider_evidence_progress(
+	audit: Dictionary,
+	trace: Dictionary
+) -> Array[int]:
+	var calls := _array_or_empty(audit.get("calls"))
+	var resolutions := _array_or_empty(audit.get("resolutions"))
+	var entries := _array_or_empty(trace.get("entries"))
+	return [
+		int(audit.get("callsUsed", 0)),
+		calls.size(),
+		resolutions.size() + int(audit.get("droppedCount", 0)),
+		entries.size() + int(trace.get("droppedCount", 0)),
+	]
+
+
+func _provider_evidence_freshness_snapshot() -> Dictionary:
+	var client_request_in_flight_count := (
+		_conversation_preload_in_flight.size()
+		+ (1 if _ambient_decision_in_flight else 0)
+		+ (1 if _resolving_answer else 0)
+	)
+	return {
+		"clientProviderRequestInFlightCount": client_request_in_flight_count,
+		"acceptedRunId": _accepted_provider_evidence_run_id,
+		"sourceKind": _accepted_provider_evidence_source,
+		"responseWorldRevision": _accepted_provider_evidence_response_revision,
+		"progress": _provider_evidence_progress(
+			_accepted_provider_audit,
+			_accepted_provider_runtime_trace
+		),
+	}
 
 
 func _debug_snapshot() -> Dictionary:

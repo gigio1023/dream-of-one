@@ -94,8 +94,10 @@ can overhear with subtitles.
   `readiness=ready`. Files and the CLI own code, data, bulk resources, import,
   and smokes. Godot AI owns scene/Inspector work where appropriate, saved
   hierarchy/property inspection, current editor/game diagnostics, and the
-  smallest non-input capture needed for a visual claim. Sol may run the
-  fixture helper but sends no player input or gameplay model call. If one
+  smallest non-input capture needed for a visual claim. During implementation,
+  Sol may run the fixture helper without treating it as play evidence; final
+  live acceptance may be driven by a native Sol-ultra child with exclusive
+  Godot run ownership. If one
   bounded recovery cannot restore the integration, file/CLI evidence may
   diagnose the problem but the spatial/UI slice cannot claim scene or visual
   completion. Add the scene-owned `AgentPlaytestSurface` with the 3D main
@@ -117,11 +119,12 @@ can overhear with subtitles.
   children. Records, institutional pressure, hearing, and terminal recap
   extend that same scope rather than creating another state owner. Judgment,
   provider-port, fallback, and validity boundaries stay unchanged.
-- **Final live verification is owner-routed.** Planning, implementation, and
-  diagnosis remain with GPT-5.6 Sol ultra. After implementation and self-review
-  are complete, Sol produces one bounded run-only packet using the
-  `lower-capability-executor-prompt` contract; GPT-5.6 Terra high performs the
-  actual game play through Godot AI. Every model-backed play run pins
+- **Final live verification is owner-routed.** GPT-5.6 Sol ultra may own
+  planning, implementation, diagnosis, repair, and actual play through Godot
+  AI. High-volume Godot work stays in one native child with exclusive run
+  ownership so the lead session remains available. Do not use the
+  `lower-capability-executor-prompt` contract unless the owner explicitly asks
+  for it. Every model-backed play run pins
   `modelscope/qwen3.7-plus` and proves `transport=live` with zero fallback.
   Missing Qwen credentials block live acceptance rather than authorizing a
   substitute model. Exact commands and the distinction from model-free smokes
@@ -193,7 +196,7 @@ can overhear with subtitles.
 - A run-scoped runtime above conversation sessions: `runId`, six memories,
   stances, records/ledger, world clock, scheduler state, and shared provider
   accounting. Initial timing data sets a 90-world-second grace period and a
-  hearing after 30 minutes of unpaused world time; final Qwen/Terra play may
+  hearing after 30 minutes of unpaused world time; final Qwen live play may
   tune the numbers without changing the continuous-time model.
 - Event-driven NPC scheduler: wake events (schedule, arrival, observation,
   goal, conversation), policy movement between wakes, and stale-result
@@ -205,7 +208,29 @@ can overhear with subtitles.
   ambient exhaustion yields to policy movement rather than consuming the
   reserve. Reaching `hearing_due` closes the background lane: queued preload
   or goal work cannot begin transport, and active background work plus stale
-  cleanup drains before the hearing provider path starts.
+  cleanup drains before the hearing provider path starts. Semantic goal changes
+  (memory, records, gained or renewed contact, interrogation) wake immediately;
+  deterministic schedule transitions and contact loss do not spend a provider
+  call by themselves;
+  spatial-only changes are latest-state-wins, admit at most one goal per actor
+  every 600 world seconds, and never stack multiple active goals for one actor.
+  An authored meeting owns its participants' social goal throughout the
+  participant-anchor lead-in and active window so the same two-turn exchange is
+  not paid twice. A grounded player contact already active when ownership begins
+  remains higher priority and holds its participant in place, but a newly
+  available automatic contact does not create parallel participant work.
+  The live client gives each resident one automatic opening-preload attempt
+  when it first becomes the nearby priority. Nearest-distance hysteresis picks
+  the passive priority, the NPC under the current raw interaction ray overrides
+  it, and active contact overrides both. After evidence invalidates an attempted
+  opening, only raw aim or active contact may request another attempt; one
+  continuous demand epoch permits at most one such retry, and authoritative
+  rebase completes before another preload dispatch. Passive proximity cannot
+  create a preload treadmill. HUD focus, prompts, and `E`
+  remain gated by runtime conversation readiness. This conservative policy
+  follows a measured 367-world-second Qwen run in which the former 180-second,
+  eager-refresh path reached 54 used/reserved calls and 180,289 used/reserved
+  tokens.
 - Bounded NPC-to-NPC conversation through the same validated tools: two
   agents alternate 2–4 real utterances, store an audibility snapshot, end
   cleanly, and append attributed listener memory only after each utterance is
@@ -271,8 +296,8 @@ can overhear with subtitles.
       least 40 seconds.
 - [ ] Deterministic fallback keeps a run completable (visibly marked) when
       the provider is unavailable, including the hearing.
-- [ ] Every LLM-backed acceptance and fun-gate run is driven by GPT-5.6 Terra
-      high through Godot AI with the Qwen profile pinned, and the resulting
+- [ ] Every LLM-backed acceptance and fun-gate run is driven by GPT-5.6 Sol
+      ultra through Godot AI with the Qwen profile pinned, and the resulting
       packets show `profileId=modelscope/qwen3.7-plus`, `transport=live`, and
       no fallback. Fixture/scripted/fallback checks remain valid engineering
       evidence but do not prove the LLM game experience.

@@ -4,7 +4,11 @@ import {
   summarizeObservePacket,
   type ObservePacket,
 } from "../agentloop/context.js";
-import { recordKindsForRole, toolCatalogForRole } from "../agentloop/tools.js";
+import {
+  recordKindsForRole,
+  toolCatalogForRole,
+  type ToolName,
+} from "../agentloop/tools.js";
 import { runBoundedProposalLoop } from "../agentloop/proposal-loop.js";
 import { TranscriptStore } from "../agentloop/transcript.js";
 import type { CoarseStance } from "../contracts/types.js";
@@ -181,6 +185,10 @@ const AMBIENT_TOKEN_HEADROOM_PER_TURN = 4_000;
 const MAX_CONCURRENT_BACKGROUND_PROPOSALS = 2;
 const GOAL_MAX_ATTEMPTS = 3;
 const GOAL_SPEECH_COOLDOWN_SECONDS = 60;
+const SPATIAL_GOAL_REFRESH_SECONDS = 600;
+export const RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT = 12;
+export const RUN_OBSERVE_HEARD_SPEECH_LIMIT = 8;
+export const RUN_OBSERVE_ADMINISTRATIVE_SOURCE_LIMIT = 8;
 const CONTACT_OPPORTUNITY_EPOCH_SECONDS = 75;
 const CONTACT_COOLDOWN_SECONDS = 75;
 const CONTACT_LIFETIME_SECONDS = 30;
@@ -304,6 +312,7 @@ interface GoalObservation {
   factRevision: number;
   factSignature: string;
   observePacket: ObservePacket;
+  allowedTalkActorIds: string[];
   goal: string;
   procedure: "ordinary" | "interrogation";
 }
@@ -313,6 +322,7 @@ interface GoalDecisionAttempt {
   request: RunNpcDecisionRequest;
   actorId: string;
   goalKey: string;
+  semanticGoalKey: string;
   state: "unclaimed" | "resolving" | "queued" | "completed" | "terminal";
   observation: GoalObservation | null;
   resolvedAction: GoalAction | null;
@@ -326,6 +336,20 @@ interface GoalDecisionAttempt {
   response?: RunNpcDecisionResponse;
   deliveredViaSessionEnd?: boolean;
   inFlight?: Promise<RunNpcDecisionResponse>;
+}
+
+interface GoalAdmissionState {
+  semanticGoalKey: string;
+  nonContactSemanticGoalKey: string;
+  contactOpportunityEpoch: number | null;
+  spatialSignature: string;
+  admittedAtSeconds: number;
+}
+
+interface SupersededGoalWake {
+  actorId: string;
+  goalKey: string;
+  observedWorldRevision: number;
 }
 
 interface GoalConversationReplyClaim {
@@ -431,6 +455,8 @@ interface RunState {
   activeAmbientConversation: RunAmbientConversation | null;
   spatialFacts: CanonicalSpatialFacts | null;
   completedGoalKeys: Set<string>;
+  goalAdmissions: Map<string, GoalAdmissionState>;
+  supersededGoalWakes: Map<string, SupersededGoalWake>;
   lastGoalSpeechAt: Map<string, number>;
   agentTranscript: TranscriptStore;
   conversations: Map<string, ConversationState>;
@@ -671,6 +697,21 @@ function spatialMaterialSignature(facts: RunActorSpatialFacts): string {
   });
 }
 
+function semanticGoalKeyFromAdmission(goalKey: string): string {
+  const marker = ":spatial:";
+  const markerIndex = goalKey.indexOf(marker);
+  return markerIndex >= 0 ? goalKey.slice(0, markerIndex) : goalKey;
+}
+
+/**
+ * Choose the newest bounded history without changing the chronological order
+ * presented to the provider. Run-owned memory remains complete; current-turn
+ * evidence is appended separately after this historical selection.
+ */
+function selectRecentChronological<T>(values: readonly T[], limit: number): T[] {
+  return values.slice(Math.max(0, values.length - limit));
+}
+
 export class RunService {
   private readonly runs = new Map<string, RunState>();
   private readonly startCache = new Map<string, CachedStart>();
@@ -770,6 +811,8 @@ export class RunService {
       activeAmbientConversation: null,
       spatialFacts: null,
       completedGoalKeys: new Set(),
+      goalAdmissions: new Map(),
+      supersededGoalWakes: new Map(),
       lastGoalSpeechAt: new Map(),
       agentTranscript: new TranscriptStore(),
       conversations: new Map(),
@@ -822,6 +865,7 @@ export class RunService {
       worldClock: {
         elapsedSeconds: run.elapsedSeconds,
         graceEndsAtSeconds: run.graceEndsAtSeconds,
+        graceEnded: run.elapsedSeconds >= run.graceEndsAtSeconds,
         hearingAtSeconds: run.hearingAtSeconds,
         paused: run.activeConversationId !== null || run.runStatus !== "active",
       },
@@ -1415,28 +1459,105 @@ export class RunService {
       if (goalSpatialActors && toSeconds < run.hearingAtSeconds) {
         for (const layoutActor of this.layout.actors) {
           const facts = goalSpatialActors.get(layoutActor.actorId);
-          if (
-            !facts ||
-            run.activeContact?.actorId === layoutActor.actorId ||
-            run.scheduler.actors.get(layoutActor.actorId)?.pendingMovement
-          ) continue;
+          if (!facts) continue;
           const actor = this.requireActor(run, layoutActor.actorId);
-          const goalKey = this.actorGoalKey(
+          const spatialSignature = spatialMaterialSignature(facts);
+          const contactOpportunityEpoch = this.contactOpportunityEpochFor(
+            actor.actorId,
+            contactCandidateActorId,
+            toSeconds,
+          );
+          const nonContactSemanticGoalKey = this.actorSemanticGoalKey(
             run,
             actor,
-            spatialMaterialSignature(facts),
+            toSeconds,
+            null,
+          );
+          const semanticGoalKey = this.actorSemanticGoalKey(
+            run,
+            actor,
             toSeconds,
             contactCandidateActorId,
           );
-          const goalAlreadyCompleted = run.completedGoalKeys.has(`${actor.actorId}:${goalKey}`);
-          const goalAlreadyPending = [...run.scheduler.pendingWakes.values()].some(
+          const priorAdmission = run.goalAdmissions.get(actor.actorId);
+          // An authored meeting window already owns these participants' social
+          // beat from the start of their participant-anchor schedule block.
+          // Deterministic movement brings them to their slots, then the single
+          // meeting_ready decision supplies the exchange.
+          // A parallel schedule-derived goal would pay for a duplicate two-turn
+          // conversation before the same meeting wake is dispatched.
+          if (this.activeMeetingOwnsActorGoal(actor.actorId, toSeconds)) {
+            this.retirePendingGoalWakes(run, actor.actorId);
+            run.goalAdmissions.set(actor.actorId, {
+              semanticGoalKey,
+              nonContactSemanticGoalKey,
+              contactOpportunityEpoch,
+              spatialSignature,
+              admittedAtSeconds: toSeconds,
+            });
+            continue;
+          }
+          if (
+            run.activeContact?.actorId === layoutActor.actorId ||
+            run.scheduler.actors.get(layoutActor.actorId)?.pendingMovement
+          ) continue;
+          const nonContactSemanticChanged =
+            priorAdmission?.nonContactSemanticGoalKey !== nonContactSemanticGoalKey;
+          const contactOpportunityGainedOrAdvanced =
+            contactOpportunityEpoch !== null &&
+            priorAdmission?.contactOpportunityEpoch !== contactOpportunityEpoch;
+          const contactOpportunityLost =
+            priorAdmission !== undefined &&
+            priorAdmission.contactOpportunityEpoch !== null &&
+            contactOpportunityEpoch === null;
+          // Losing candidacy is not an actionable social event. Retire any
+          // now-obsolete contact wake and move the admission baseline forward;
+          // another actor becoming the candidate is handled on that actor.
+          if (contactOpportunityLost && !nonContactSemanticChanged) {
+            this.retirePendingGoalWakes(run, actor.actorId);
+            run.goalAdmissions.set(actor.actorId, {
+              semanticGoalKey,
+              nonContactSemanticGoalKey,
+              contactOpportunityEpoch,
+              spatialSignature,
+              admittedAtSeconds: toSeconds,
+            });
+            continue;
+          }
+          const semanticChanged =
+            nonContactSemanticChanged || contactOpportunityGainedOrAdvanced;
+          const spatialRefreshDue = Boolean(
+            priorAdmission &&
+            priorAdmission.spatialSignature !== spatialSignature &&
+            toSeconds - priorAdmission.admittedAtSeconds >= SPATIAL_GOAL_REFRESH_SECONDS,
+          );
+          if (!semanticChanged && !spatialRefreshDue) continue;
+
+          const activeGoalWakes = [...run.scheduler.pendingWakes.values()].filter(
             wake =>
               wake.kind === "goal" &&
               wake.actorIds[0] === actor.actorId &&
-              wake.sourceId === goalKey &&
               (wake.status === "pending" || wake.status === "claimed"),
           );
-          if (goalAlreadyCompleted || goalAlreadyPending) continue;
+          if (activeGoalWakes.some(wake => wake.status === "claimed")) continue;
+          if (semanticChanged) {
+            this.retirePendingGoalWakes(run, actor.actorId);
+          } else if (activeGoalWakes.length > 0) {
+            continue;
+          }
+
+          const goalKey = semanticChanged
+            ? semanticGoalKey
+            : `${semanticGoalKey}:spatial:${Math.floor(toSeconds / SPATIAL_GOAL_REFRESH_SECONDS)}`;
+          run.goalAdmissions.set(actor.actorId, {
+            semanticGoalKey,
+            nonContactSemanticGoalKey,
+            contactOpportunityEpoch,
+            spatialSignature,
+            admittedAtSeconds: toSeconds,
+          });
+          const goalAlreadyCompleted = run.completedGoalKeys.has(`${actor.actorId}:${goalKey}`);
+          if (goalAlreadyCompleted) continue;
           emitRunWake(
             run.scheduler,
             {
@@ -1664,6 +1785,33 @@ export class RunService {
 
     const wake = run.scheduler.pendingWakes.get(request.wakeId);
     if (!wake || wake.status !== "pending") {
+      const superseded = run.supersededGoalWakes.get(request.wakeId);
+      if (
+        superseded &&
+        superseded.observedWorldRevision === request.observedWorldRevision
+      ) {
+        const attempt: GoalDecisionAttempt = {
+          signature,
+          request: clone(request),
+          actorId: superseded.actorId,
+          goalKey: superseded.goalKey,
+          semanticGoalKey: semanticGoalKeyFromAdmission(superseded.goalKey),
+          state: "terminal",
+          observation: null,
+          resolvedAction: null,
+          actionMeta: null,
+          providerMetas: [],
+          conversationId: null,
+          conversationActorIds: null,
+          conversationFactSignatures: {},
+          conversationEvidenceKeys: {},
+          resolvedTurns: [],
+        };
+        const response = this.goalDecisionResponse(run, attempt, "stale", [], []);
+        attempt.response = clone(response);
+        run.goalDecisions.set(request.wakeId, attempt);
+        return Promise.resolve(response);
+      }
       return Promise.reject(new RunError(`wake is not pending: ${request.wakeId}`, "wake_not_pending"));
     }
     if (wake.kind === "meeting_ready" && wake.actorIds.length === 2) {
@@ -1692,6 +1840,7 @@ export class RunService {
         request: clone(request),
         actorId: wake.actorIds[0],
         goalKey: wake.sourceId,
+        semanticGoalKey: semanticGoalKeyFromAdmission(wake.sourceId),
         state: "unclaimed",
         observation: null,
         resolvedAction: null,
@@ -2260,6 +2409,9 @@ export class RunService {
 
     let budgetReserved = false;
     const budgetStop = new Error("goal_background_budget_reserved");
+    let meetingOwnedBeforeTransport = false;
+    const meetingOwnershipStop = new Error("goal_meeting_owned_before_transport");
+    let synthesizedRuntimeFallback = false;
     try {
       const initialRun = this.requireRun(runId);
       const loop = await runBoundedProposalLoop<GoalAction>({
@@ -2271,6 +2423,7 @@ export class RunService {
         proposalPort: this.proposalPort,
         transcript: initialRun.agentTranscript,
         observe: () => clone(observation.observePacket),
+        allowedTalkActorIds: observation.allowedTalkActorIds,
         budgetCeiling: {
           maxCalls: runAmbientCallCeiling(initialRun),
           maxTokens: runAmbientTokenCeiling(initialRun),
@@ -2285,9 +2438,17 @@ export class RunService {
             budgetReserved = true;
             throw budgetStop;
           }
-          return this.withBackgroundProviderSlot(runId, () =>
-            this.proposalPort.proposeNextStep(request),
-          );
+          return this.withBackgroundProviderSlot(runId, async () => {
+            const meetingOwnsGoal = await this.serialize(runId, async () => {
+              const run = this.requireRun(runId);
+              return this.activeMeetingOwnsActorGoal(attempt.actorId, run.elapsedSeconds);
+            });
+            if (meetingOwnsGoal) {
+              meetingOwnedBeforeTransport = true;
+              throw meetingOwnershipStop;
+            }
+            return this.proposalPort.proposeNextStep(request);
+          });
         },
         onMeta: async meta => {
           await this.serialize(runId, async () => {
@@ -2329,6 +2490,11 @@ export class RunService {
       attempt.resolvedAction = loop.accepted[0] ?? null;
       attempt.actionMeta = loop.accepted.length > 0 ? clone(loop.metas.at(-1) as ProposalMeta) : null;
     } catch (error) {
+      if (meetingOwnedBeforeTransport || error === meetingOwnershipStop) {
+        return this.serialize(runId, async () =>
+          this.finishGoalAttempt(this.requireRun(runId), attempt, "stale"),
+        );
+      }
       if (error instanceof BackgroundProviderLaneClosedError) {
         return this.serialize(runId, async () =>
           this.finishGoalAttempt(this.requireRun(runId), attempt, "stale"),
@@ -2346,13 +2512,15 @@ export class RunService {
               priorMeta?.fallbackReason === "budget_exhausted"
                 ? priorMeta
                 : this.goalFallbackMeta("budget_exhausted");
-            if (priorMeta !== meta) attempt.providerMetas.push(clone(meta));
+            if (priorMeta !== meta) {
+              attempt.providerMetas.push(clone(meta));
+              this.trackProposal(run, meta);
+            }
             attempt.resolvedAction = {
               tool: "move_to_player",
               contactReason: fallbackContent(run.locale).whyLines.none,
             };
             attempt.actionMeta = clone(meta);
-            this.trackProposal(run, meta);
             return this.commitGoalDecision(run, attempt);
           }
           return this.finishGoalAttempt(run, attempt, "budget_reserved", true);
@@ -2378,6 +2546,7 @@ export class RunService {
           : { tool: "wait", reason: "bounded goal fallback" };
       const fallbackMeta = this.goalFallbackMeta("invalid_envelope");
       attempt.actionMeta = fallbackMeta;
+      synthesizedRuntimeFallback = true;
       attempt.providerMetas = [
         ...attempt.providerMetas.slice(-(GOAL_MAX_ATTEMPTS - 1)),
         clone(fallbackMeta),
@@ -2386,7 +2555,7 @@ export class RunService {
     return this.serialize(runId, async () => {
       const run = this.requireRun(runId);
       if (attempt.actionMeta?.usedFallback) {
-        this.trackProposal(run, attempt.actionMeta);
+        if (synthesizedRuntimeFallback) this.trackProposal(run, attempt.actionMeta);
         const isInterrogationContact = attempt.resolvedAction?.tool === "move_to_player";
         run.agentTranscript.append({
           actorId: attempt.actorId,
@@ -2424,9 +2593,21 @@ export class RunService {
     }
     const pending = run.scheduler.pendingWakes.get(attempt.request.wakeId);
     if (!pending || pending.status !== "pending") {
+      const superseded = run.supersededGoalWakes.get(attempt.request.wakeId);
+      if (
+        superseded &&
+        superseded.actorId === attempt.actorId &&
+        superseded.goalKey === attempt.goalKey &&
+        superseded.observedWorldRevision === attempt.request.observedWorldRevision
+      ) {
+        return this.finishGoalAttempt(run, attempt, "stale");
+      }
       throw new RunError(`wake is not pending: ${attempt.request.wakeId}`, "wake_not_pending");
     }
     if (run.activeContact?.actorId === attempt.actorId) {
+      return this.finishGoalAttempt(run, attempt, "stale");
+    }
+    if (this.activeMeetingOwnsActorGoal(attempt.actorId, run.elapsedSeconds)) {
       return this.finishGoalAttempt(run, attempt, "stale");
     }
     const wake = claimRunWake(run.scheduler, attempt.request.wakeId);
@@ -2451,16 +2632,31 @@ export class RunService {
     const factSignature = spatialMaterialSignature(facts);
     const contactCandidateActorId = this.currentContactCandidateActorId(run);
     if (
-      this.actorGoalKey(
+      this.actorSemanticGoalKey(
         run,
         actor,
-        factSignature,
         run.elapsedSeconds,
         contactCandidateActorId,
-      ) !== attempt.goalKey
+      ) !== attempt.semanticGoalKey
     ) {
       return this.finishGoalAttempt(run, attempt, "stale");
     }
+    run.goalAdmissions.set(actor.actorId, {
+      semanticGoalKey: attempt.semanticGoalKey,
+      nonContactSemanticGoalKey: this.actorSemanticGoalKey(
+        run,
+        actor,
+        run.elapsedSeconds,
+        null,
+      ),
+      contactOpportunityEpoch: this.contactOpportunityEpochFor(
+        actor.actorId,
+        contactCandidateActorId,
+        run.elapsedSeconds,
+      ),
+      spatialSignature: factSignature,
+      admittedAtSeconds: run.elapsedSeconds,
+    });
     this.refreshProviderState(run);
     const ambientReserveAvailable = this.hasAmbientReserve(run, 1);
     const castActor = this.requireCastActor(actor.actorId);
@@ -2512,23 +2708,27 @@ export class RunService {
       observePacket.administrativeAuthority.writableTextSurfaceIds.length > 0
     ) offeredTools.unshift("write_record");
     const lastSpokeAt = run.lastGoalSpeechAt.get(actor.actorId);
-    const talkAvailable =
+    const allowedTalkActorIds = (
       run.activeAmbientConversation === null &&
       (lastSpokeAt === undefined ||
-        run.elapsedSeconds - lastSpokeAt >= GOAL_SPEECH_COOLDOWN_SECONDS) &&
-      facts.visibleActorIds.some(targetActorId => {
-        const targetFacts = run.spatialFacts?.actors.get(targetActorId);
-        const targetLastSpokeAt = run.lastGoalSpeechAt.get(targetActorId);
-        return Boolean(
-          facts.audibleActorIds.includes(targetActorId) &&
-          targetFacts?.audibleActorIds.includes(actor.actorId) &&
-          (targetLastSpokeAt === undefined ||
-            run.elapsedSeconds - targetLastSpokeAt >= GOAL_SPEECH_COOLDOWN_SECONDS) &&
-          !run.scheduler.actors.get(targetActorId)?.pendingMovement &&
-          this.spatialAudibilityVolume(run, actor.actorId, targetActorId),
-        );
-      });
-    if (talkAvailable) offeredTools.unshift("talk_to");
+        run.elapsedSeconds - lastSpokeAt >= GOAL_SPEECH_COOLDOWN_SECONDS)
+    )
+      ? facts.visibleActorIds.filter(targetActorId => {
+          const targetFacts = run.spatialFacts?.actors.get(targetActorId);
+          const targetLastSpokeAt = run.lastGoalSpeechAt.get(targetActorId);
+          return Boolean(
+            facts.audibleActorIds.includes(targetActorId) &&
+            targetFacts?.audibleActorIds.includes(actor.actorId) &&
+            (targetLastSpokeAt === undefined ||
+              run.elapsedSeconds - targetLastSpokeAt >= GOAL_SPEECH_COOLDOWN_SECONDS) &&
+            run.activeContact?.actorId !== targetActorId &&
+            !this.activeMeetingOwnsActorGoal(targetActorId, run.elapsedSeconds) &&
+            !run.scheduler.actors.get(targetActorId)?.pendingMovement &&
+            this.spatialAudibilityVolume(run, actor.actorId, targetActorId),
+          );
+        })
+      : [];
+    if (allowedTalkActorIds.length > 0) offeredTools.unshift("talk_to");
     observePacket.toolCatalog = offeredTools;
     attempt.observation = {
       actorId: actor.actorId,
@@ -2536,6 +2736,7 @@ export class RunService {
       factRevision: run.worldRevision,
       factSignature,
       observePacket,
+      allowedTalkActorIds,
       goal,
       procedure: interrogationOpportunity ? "interrogation" : "ordinary",
     };
@@ -2814,7 +3015,9 @@ export class RunService {
     if (claimed.response) return claimed.response;
     const claim = claimed.claim;
     const budgetStop = new Error("goal_conversation_budget_reserved");
+    const meetingOwnershipStop = new Error("goal_conversation_meeting_owned_before_reply");
     let budgetReserved = false;
+    let meetingOwnedBeforeReply = false;
     try {
       const run = this.requireRun(runId);
       const loop = await runBoundedProposalLoop<AmbientResolvedTurn>({
@@ -2856,9 +3059,19 @@ export class RunService {
             observePacket: clone(claim.observePacket),
             ...(request.budgetCeiling ? { budgetCeiling: request.budgetCeiling } : {}),
           };
-          return this.withBackgroundProviderSlot(runId, () =>
-            this.proposalPort.judgeAndProposeAmbientReply(ambientRequest),
-          );
+          return this.withBackgroundProviderSlot(runId, async () => {
+            const participantUnavailable = await this.serialize(runId, async () => {
+              const current = this.requireRun(runId);
+              return [claim.sourceSpeakerActorId, claim.speakerActorId].some(actorId =>
+                this.goalConversationParticipantUnavailable(current, actorId)
+              );
+            });
+            if (participantUnavailable) {
+              meetingOwnedBeforeReply = true;
+              throw meetingOwnershipStop;
+            }
+            return this.proposalPort.judgeAndProposeAmbientReply(ambientRequest);
+          });
         },
         onMeta: async meta => {
           await this.serialize(runId, async () => {
@@ -2911,6 +3124,11 @@ export class RunService {
         return null;
       }
     } catch (error) {
+      if (meetingOwnedBeforeReply || error === meetingOwnershipStop) {
+        return this.serialize(runId, async () =>
+          this.finishGoalAttempt(this.requireRun(runId), attempt, "stale"),
+        );
+      }
       if (error instanceof BackgroundProviderLaneClosedError) {
         return this.serialize(runId, async () =>
           this.finishGoalAttempt(this.requireRun(runId), attempt, "stale"),
@@ -2948,6 +3166,12 @@ export class RunService {
       return { response: this.finishGoalAttempt(run, attempt, "failed") };
     }
     if (
+      this.goalConversationParticipantUnavailable(run, attempt.actorId) ||
+      this.goalConversationParticipantUnavailable(run, action.targetActorId)
+    ) {
+      return { response: this.finishGoalAttempt(run, attempt, "stale") };
+    }
+    if (
       run.activeAmbientConversation &&
       run.activeAmbientConversation.wakeId !== attempt.request.wakeId
     ) {
@@ -2962,7 +3186,8 @@ export class RunService {
       !speakerFacts ||
       !targetFacts ||
       !volume ||
-      this.actorGoalKey(run, actor, spatialMaterialSignature(speakerFacts)) !== attempt.goalKey ||
+      spatialMaterialSignature(speakerFacts) !== attempt.observation.factSignature ||
+      this.actorSemanticGoalKey(run, actor) !== attempt.semanticGoalKey ||
       (targetLastSpokeAt !== undefined &&
         run.elapsedSeconds - targetLastSpokeAt < GOAL_SPEECH_COOLDOWN_SECONDS) ||
       !this.goalActionStillValid(run, attempt, speakerFacts)
@@ -2979,7 +3204,7 @@ export class RunService {
       [`${attempt.actorId}: ${action.utterance}`],
       targetFacts,
     );
-    observePacket.toolCatalog = ["talk_to", "wait"];
+    observePacket.toolCatalog = ["talk_to"];
     const conversationId = `goal:${attempt.request.wakeId}`;
     attempt.conversationId = conversationId;
     attempt.conversationActorIds = [attempt.actorId, action.targetActorId];
@@ -3033,7 +3258,16 @@ export class RunService {
     if (!attempt.observation || !attempt.resolvedAction || !attempt.actionMeta) {
       return this.finishGoalAttempt(run, attempt, "failed");
     }
-    if (run.activeContact?.actorId === attempt.actorId) {
+    if (
+      this.goalConversationParticipantUnavailable(run, attempt.actorId) ||
+      (
+        attempt.resolvedAction.tool === "talk_to" &&
+        this.goalConversationParticipantUnavailable(
+          run,
+          attempt.resolvedAction.targetActorId,
+        )
+      )
+    ) {
       return this.finishGoalAttempt(run, attempt, "stale");
     }
     if (run.activeConversationId !== null) {
@@ -3052,7 +3286,7 @@ export class RunService {
     if (
       !facts ||
       spatialMaterialSignature(facts) !== attempt.observation.factSignature ||
-      this.actorGoalKey(run, actor, attempt.observation.factSignature) !== attempt.goalKey ||
+      this.actorSemanticGoalKey(run, actor) !== attempt.semanticGoalKey ||
       run.scheduler.actors.get(attempt.actorId)?.pendingMovement ||
       !this.goalActionStillValid(run, attempt, facts)
     ) {
@@ -3433,6 +3667,7 @@ export class RunService {
     movementDeltas: RunMovementDelta[],
     actorReadinessDeltas: RunActorReadinessDelta[] = [],
   ): RunNpcDecisionResponse {
+    this.refreshProviderState(run);
     const speechEvents = actionDeltas
       .filter((delta): delta is Extract<RunDecisionDelta, { kind: "speech" }> => delta.kind === "speech")
       .map(delta => clone(delta.speechEvent));
@@ -3452,6 +3687,8 @@ export class RunService {
       actionDeltas: clone(actionDeltas),
       movementDeltas: clone(movementDeltas),
       providerMetas: clone(attempt.providerMetas),
+      providerAudit: clone(run.providerAudit),
+      providerRuntimeTrace: clone(run.providerRuntimeTrace),
       socialView: this.publicSocialView(run),
       activeContact: clone(run.activeContact),
     };
@@ -3576,13 +3813,52 @@ export class RunService {
     }
   }
 
+  private retirePendingGoalWakes(run: RunState, actorId: string): void {
+    for (const wake of run.scheduler.pendingWakes.values()) {
+      if (
+        wake.kind !== "goal" ||
+        wake.actorIds[0] !== actorId ||
+        wake.status !== "pending"
+      ) continue;
+      run.supersededGoalWakes.set(wake.wakeId, {
+        actorId,
+        goalKey: wake.sourceId,
+        observedWorldRevision: wake.observedWorldRevision,
+      });
+      finishRunWake(run.scheduler, wake.wakeId, "terminal");
+    }
+    while (run.supersededGoalWakes.size > 512) {
+      const oldest = run.supersededGoalWakes.keys().next().value as string | undefined;
+      if (!oldest) break;
+      run.supersededGoalWakes.delete(oldest);
+    }
+  }
+
   private rememberPostCommitParticipantGoals(run: RunState, actorIds: readonly string[]): void {
     for (const actorId of actorIds) {
       const actor = this.requireActor(run, actorId);
       const facts = run.spatialFacts?.actors.get(actorId);
       if (!facts) continue;
-      const goalKey = this.actorGoalKey(run, actor, spatialMaterialSignature(facts));
-      this.rememberCompletedGoal(run, actorId, goalKey);
+      const semanticGoalKey = this.actorSemanticGoalKey(run, actor);
+      const contactCandidateActorId = this.currentContactCandidateActorId(run);
+      run.goalAdmissions.set(actorId, {
+        semanticGoalKey,
+        nonContactSemanticGoalKey: this.actorSemanticGoalKey(
+          run,
+          actor,
+          run.elapsedSeconds,
+          null,
+        ),
+        contactOpportunityEpoch: this.contactOpportunityEpochFor(
+          actorId,
+          contactCandidateActorId,
+          run.elapsedSeconds,
+        ),
+        spatialSignature: spatialMaterialSignature(facts),
+        admittedAtSeconds: run.elapsedSeconds,
+      });
+      this.rememberCompletedGoal(run, actorId, semanticGoalKey);
+      this.retirePendingGoalWakes(run, actorId);
     }
   }
 
@@ -4014,6 +4290,7 @@ export class RunService {
       run.spatialFacts?.actors.get(speakerActorId),
     );
     packet.audibleActorIds = [targetActorId];
+    packet.toolCatalog = ["talk_to"];
     return packet;
   }
 
@@ -4132,6 +4409,7 @@ export class RunService {
     status: RunNpcDecisionResponse["status"],
     speechEvents: RunAmbientSpeechEvent[],
   ): RunNpcDecisionResponse {
+    this.refreshProviderState(run);
     return {
       runId: run.runId,
       wakeId: attempt.request.wakeId,
@@ -4154,6 +4432,8 @@ export class RunService {
       ],
       movementDeltas: [],
       providerMetas: clone(attempt.providerMetas),
+      providerAudit: clone(run.providerAudit),
+      providerRuntimeTrace: clone(run.providerRuntimeTrace),
       socialView: this.publicSocialView(run),
       activeContact: clone(run.activeContact),
     };
@@ -4575,6 +4855,11 @@ export class RunService {
     return this.serialize(runId, async () => {
       const run = this.requireRun(runId);
       const actor = this.requireActor(run, attempt.actorId);
+      // Transport completion is run evidence even when the speculative
+      // opening loses its semantic commit race. Track it before revalidating
+      // the opening so provider audit and runtime trace stay reconciled while
+      // the stale opening itself remains unapplied.
+      this.trackProposal(run, resolved.meta);
       const current = run.conversationOpenings.get(actor.actorId);
       const zone = conversationZoneFor(this.layout, actor.actorId, actor.locationId);
       const evidenceKey = this.conversationEvidenceKey(run, actor);
@@ -4594,7 +4879,6 @@ export class RunService {
         }
         throw new RunError("conversation opening became stale before commit", "conversation_not_ready");
       }
-      this.trackProposal(run, resolved.meta);
       attempt.resolved = clone(resolved);
       actor.playerConversationReady = true;
       run.preloadRequiredEvidence.delete(actor.actorId);
@@ -4993,12 +5277,15 @@ export class RunService {
     attempt: ConversationOpeningAttempt,
   ): RunSessionPreloadResponse {
     if (!attempt.resolved) throw new Error("conversation opening has no resolved proposal");
+    this.refreshProviderState(run);
     return {
       runId: run.runId,
       worldRevision: run.worldRevision,
       interactionZoneId: attempt.interactionZoneId,
       actor: this.publicActor(actor),
       proposalMeta: clone(attempt.resolved.meta),
+      providerAudit: clone(run.providerAudit),
+      providerRuntimeTrace: clone(run.providerRuntimeTrace),
       activeContact: clone(run.activeContact),
     };
   }
@@ -5316,20 +5603,14 @@ export class RunService {
     }
   }
 
-  private actorGoalKey(
+  private actorSemanticGoalKey(
     run: RunState,
     actor: RunActorState,
-    spatialSignature: string,
     elapsedSeconds = run.elapsedSeconds,
     contactCandidateActorId = this.currentContactCandidateActorId(run, elapsedSeconds),
   ): string {
-    const layoutActor = this.layout.actors.find(candidate => candidate.actorId === actor.actorId);
-    const block = layoutActor?.scheduleBlocks.find(
-      candidate => candidate.startSeconds <= elapsedSeconds && elapsedSeconds < candidate.endSeconds,
-    );
     return `goal:${digest(JSON.stringify({
       actorId: actor.actorId,
-      blockId: block?.blockId ?? "none",
       // An actor's own just-committed speech is not a new incoming goal.
       // Listener memories and direct player speech are; this prevents an
       // emergent self-echo from creating a provider wake every advance.
@@ -5347,18 +5628,51 @@ export class RunService {
         .map(record => `${record.recordId}@${record.recordRevision}`)
         .sort(),
       contactOpportunity:
-        contactCandidateActorId === actor.actorId
-          ? Math.floor(
-              Math.max(0, elapsedSeconds - run.graceEndsAtSeconds) /
-                CONTACT_OPPORTUNITY_EPOCH_SECONDS,
-            )
-          : null,
+        this.contactOpportunityEpochFor(
+          actor.actorId,
+          contactCandidateActorId,
+          elapsedSeconds,
+        ),
       interrogationLedgerSeq:
         actor.actorId === STATION_OFFICER_ID
           ? this.pendingInterrogationLedgerSeq(run)
           : null,
-      spatialSignature,
     }))}`;
+  }
+
+  private contactOpportunityEpochFor(
+    actorId: string,
+    contactCandidateActorId: string | null,
+    elapsedSeconds: number,
+  ): number | null {
+    return contactCandidateActorId === actorId
+      ? Math.floor(
+          Math.max(0, elapsedSeconds - this.layout.graceEndsAtSeconds) /
+            CONTACT_OPPORTUNITY_EPOCH_SECONDS,
+        )
+      : null;
+  }
+
+  private activeMeetingOwnsActorGoal(actorId: string, elapsedSeconds: number): boolean {
+    const layoutActor = this.layout.actors.find(candidate => candidate.actorId === actorId);
+    const block = layoutActor?.scheduleBlocks.find(
+      candidate => candidate.startSeconds <= elapsedSeconds && elapsedSeconds < candidate.endSeconds,
+    );
+    if (!block || block.target.kind !== "anchor") return false;
+    return this.layout.meetingWindows.some(window =>
+      elapsedSeconds < window.endSeconds &&
+      block.startSeconds < window.endSeconds &&
+      window.startSeconds < block.endSeconds &&
+      window.actorIds.includes(actorId) &&
+      window.participantAnchorRefs[actorId] === block.target.id
+    );
+  }
+
+  private goalConversationParticipantUnavailable(run: RunState, actorId: string): boolean {
+    return (
+      run.activeContact?.actorId === actorId ||
+      this.activeMeetingOwnsActorGoal(actorId, run.elapsedSeconds)
+    );
   }
 
   private spatialPositionsChanged(
@@ -5416,7 +5730,10 @@ export class RunService {
         sourceMemoryId: record.sourceRefs[0]?.sourceMemoryId,
         textSurfaceId: record.textSurfaceId,
       }));
-    const ownActionNotes = actor.memories.map(memory => {
+    const ownActionNotes = selectRecentChronological(
+      actor.memories,
+      RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT,
+    ).map(memory => {
       if (memory.kind === "npc_utterance") return `[self_utterance] ${memory.line}`;
       if (memory.kind === "player_conversation") {
         return [
@@ -5452,18 +5769,21 @@ export class RunService {
       }
       return `[record_read=${memory.recordId}@${memory.recordRevision}] ${memory.stateBody}`;
     });
-    const heardSpeech = actor.memories.flatMap(memory => {
-      if (memory.kind === "player_conversation") return [memory.playerLine];
-      if (
-        memory.kind === "ambient_utterance" &&
-        memory.speakerActorId !== actor.actorId &&
-        memory.listenerActorIds.includes(actor.actorId)
-      ) {
-        return [`${memory.speakerActorId}: ${memory.line}`];
-      }
-      return [];
-    });
-    return {
+    const heardSpeech = selectRecentChronological(
+      actor.memories.flatMap(memory => {
+        if (memory.kind === "player_conversation") return [memory.playerLine];
+        if (
+          memory.kind === "ambient_utterance" &&
+          memory.speakerActorId !== actor.actorId &&
+          memory.listenerActorIds.includes(actor.actorId)
+        ) {
+          return [`${memory.speakerActorId}: ${memory.line}`];
+        }
+        return [];
+      }),
+      RUN_OBSERVE_HEARD_SPEECH_LIMIT,
+    );
+    const packet: ObservePacket = {
       actorId: actor.actorId,
       role: actor.role,
       landmarkId: actor.locationId,
@@ -5518,14 +5838,15 @@ export class RunService {
       reachableAnchorRefs: spatialFacts ? [...spatialFacts.reachableAnchorRefs] : [],
       playerContact: null,
       heardSpeech: [...heardSpeech, ...additionalSpeech],
-      toolCatalog: toolCatalogForRole(actor.role),
-      administrativeSources: actor.memories
-        .filter(memory =>
+      toolCatalog: ["wait"],
+      administrativeSources: selectRecentChronological(
+        actor.memories.filter(memory =>
           memory.kind !== "prop_handling_observation" &&
           memory.kind !== "ambient_stance_judgment" &&
           !this.sourceAlreadyAdministered(run, actor.actorId, memory.memoryId)
-        )
-        .map(memory => {
+        ),
+        RUN_OBSERVE_ADMINISTRATIVE_SOURCE_LIMIT,
+      ).map(memory => {
         if (memory.kind === "player_conversation") {
           return {
             memoryId: memory.memoryId,
@@ -5590,7 +5911,7 @@ export class RunService {
           whyLine: memory.line,
           reportDelta: 0,
         };
-        }),
+      }),
       administrativeAuthority: {
         allowedRecordKinds: recordKindsForRole(actor.role),
         writableTextSurfaceIds: this.layout.recordSurfaces
@@ -5598,6 +5919,45 @@ export class RunService {
           .map(surface => surface.surfaceId),
       },
     };
+    packet.toolCatalog = this.currentRunObservationTools(actor.role, packet);
+    return packet;
+  }
+
+  private currentRunObservationTools(
+    role: RunActorState["role"],
+    packet: ObservePacket,
+  ): ToolName[] {
+    return toolCatalogForRole(role).filter(tool => {
+      switch (tool) {
+        case "move_to":
+          return packet.reachableAnchorRefs.length > 0 || Boolean(packet.playerContact?.available);
+        case "look":
+          return (
+            packet.visibleObjects.length > 0 ||
+            packet.visibleActors.length > 0 ||
+            packet.visibleRecords.length > 0
+          );
+        case "talk_to":
+          return packet.visibleActors.some(actorId => packet.audibleActorIds.includes(actorId));
+        case "wait":
+          return true;
+        case "use_object":
+          // M3R spatial facts expose physical presence, not a validated usable
+          // affordance/state transition. Do not advertise authority the packet
+          // cannot prove; the role catalog alone is insufficient.
+          return false;
+        case "write_record":
+          return (
+            packet.administrativeSources.length > 0 &&
+            packet.administrativeAuthority.allowedRecordKinds.length > 0 &&
+            packet.administrativeAuthority.writableTextSurfaceIds.length > 0
+          );
+        case "read_record":
+          return packet.visibleRecords.length > 0;
+        case "request":
+          return packet.visibleActors.length > 0;
+      }
+    });
   }
 
   private nextTurn(

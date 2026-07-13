@@ -8,12 +8,10 @@ subagent, task, thread, or team primitive; do not start another agent CLI.
 From a Codex parent turn, create the Godot worker with the collaboration
 `spawn_agent` capability. This is a direct harness call: do not invoke it
 through a shell command or use `codex exec` to create a second Codex process.
-Keep the lead session unchanged. Select `sol_high_godot` for Sol-high work or
-`terra_high_playtest` for Terra-high play. `.codex/config.toml` registers those
-roles, and their relative config files pin `model` plus
-`model_reasoning_effort`. The returned child agent id owns the assigned Godot
-run. These role/config fields follow the official
-[Codex configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference#configtoml).
+Keep the lead session unchanged. Apply an explicit model/effort selector only
+when the current spawn surface exposes one and the owner requires it; otherwise
+use the accepted native child route from `docs/tech/verification.md`. The
+returned child agent id owns the assigned Godot run.
 
 - Use `followup_task` to continue work with that same child after it becomes
   idle and still owns the run.
@@ -23,34 +21,32 @@ run. These role/config fields follow the official
 - Use a newly spawned child for a fresh isolated run after the previous child
   has stopped its worker-owned game run.
 
-These names are the Codex harness adapter, not part of the portable Godot
-contract. Claude uses its own native task or team primitive with the same
-ownership and evidence rules.
+These collaboration primitives are the Codex harness adapter, not part of the
+portable Godot contract. Claude uses its own native task or team primitive with
+the same ownership and evidence rules.
 
 ## Capability Preflight
 
 Before assigning a live run, determine separately:
 
 1. whether a fresh native worker can see the configured Godot AI MCP tools;
-2. whether the trusted-project session exposes the required custom agent role;
-3. whether that role's config file pins the exact model and effort.
+2. whether the current owner/runtime policy accepts the harness's native child;
+3. when an exact independent pin is required, whether the spawn surface exposes
+   and confirms that model/effort selection.
 
 Do not infer one capability from another. A child seeing Godot AI does not prove
-its model/effort. Role selection plus the loaded role config is the Codex
-pinning evidence; prompt prose or a matching task name is not.
+its model/effort. Prompt prose or a matching task name is never pinning evidence.
 
 ## Model Routing
 
 - Keep the lead/main session on its current model.
-- Select `sol_high_godot` for implementation-time diagnosis and non-play
-  inspection when delegation is warranted.
-- After implementation and Sol self-review, select a fresh
-  `terra_high_playtest` worker and give it the closed play packet.
-- A session created before the repo role config existed may not expose the new
-  role. Start one fresh session in this trusted project, then retry once. If the
-  role is still absent, stop with the packet ready. Do not switch the parent,
-  write a model name into the prompt and pretend it changed the worker, or use
-  an external agent CLI.
+- Follow the current owner policy in `docs/tech/verification.md`; the current
+  Codex default is GPT-5.6 Sol ultra for delegated diagnosis and hands-on play.
+- After implementation and self-review, select a fresh native worker and give
+  it the closed play packet.
+- Do not use `lower-capability-executor-prompt` unless the owner explicitly asks
+  for it. Do not switch the parent, write a model name into the prompt and
+  pretend it changed the worker, or use an external agent CLI.
 
 ## Run Topology
 
@@ -71,12 +67,13 @@ While it runs:
 
 If a fresh worker lacks Godot AI, retry once with a newly spawned native worker
 after confirming the editor/server is already available. If it still lacks the
-tools, report the native-delegation blocker. Do not switch automatically to
-`codex exec`, curl, or Computer Use.
+tools, report the native-delegation blocker. If the owner explicitly required a
+runtime pin and the harness cannot prove it, report that separate blocker. Do
+not switch automatically to `codex exec`, curl, or Computer Use.
 
 ## Completion
 
 The worker stops only the run it started and returns a compact result. The lead
 checks the final editor play state, worker artifact or diff, and material claims
-before closing the worker. Actual Terra play remains a separately pinned worker
-run; a Sol fixture inspection cannot stand in for it.
+before closing the worker. Fixture inspection cannot stand in for an authorized
+live play run.

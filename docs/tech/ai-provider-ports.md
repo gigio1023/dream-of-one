@@ -67,7 +67,10 @@ look live in `providerAudit`, then fail a runtime citation or tool-validity
 check and be replaced by deterministic fallback. Terminal acceptance requires
 both structures to be complete and free of fallback; a later live result
 cannot hide an earlier provider failure or runtime semantic fallback. Neither
-structure stores generated text.
+structure stores generated text. When the complete structures are non-empty,
+the client acceptance surface also requires one runtime-trace entry per
+high-level provider resolution and zero dropped entries; profile checks alone
+cannot detect a missing consumed result.
 If runtime procedure must replace otherwise valid model wording — for example,
 forcing an abnormal hearing result below the evidenced-vouch floor — the
 consumed proposal metadata becomes fallback even though the transport audit
@@ -77,7 +80,7 @@ correctly remains live.
 signal classes, and a player-visible why-line) plus the NPC's next utterance
 and three reply suggestions. If a live model breaks that schema, `ProviderService`
 retries once, then falls back to composing the rule judgment with the
-canned reply set — the schema contents are not shrunk.
+canned reply set — that merged-conversation schema is not request-shrunk.
 
 `ConversationProposal` contains an NPC utterance and three generated reply
 suggestions. Reply intent labels shape variety only; they never decide
@@ -88,6 +91,29 @@ it does not decide what the answer meant. `AgentStepProposal` contains at
 most one tool call, an optional utterance, and a stop flag. The runtime
 validates every tool against visibility, role authority, object state, and
 the offered catalog.
+
+For each agent-step request, `ProviderService` derives a strict JSON schema
+from that request's effective tool catalog and current observe packet. Only
+the offered tool branches and their currently reachable, visible, audible, or
+administratively authorized target ids are sent. Run-scoped ordinary
+`talk_to` narrows that set again to targets that also pass reciprocal
+audibility, both speech cooldowns, no pending movement, and a shared authored
+volume; an empty set remains explicit rather than widening back to visible
+actors. A required ambient reply
+narrows further to the exact `talk_to` actor id and `done=true`. The envelope
+always contains exactly
+`toolCall`, `utterance`, `rationale`, and `done`, using `null` for an absent
+nullable value. The same effective-tool constraint is enforced by the local
+Zod parse instead of trusting transport-side structured output. `move_to`,
+`look`, ordinary `talk_to`, `read_record`, and administrative writes therefore
+reject hidden or unavailable ids before a proposal enters the multi-step
+runtime loop. Record calls select exactly one structural contract: retained
+legacy world packets receive the legacy branch, while run-scoped
+administrative packets receive only the M3R branch. Locale and request
+validation report field-specific paths to the single repair attempt, and
+repair must return a complete replacement JSON value. Runtime validation still
+rechecks fresh visibility, audibility, role authority, record ownership,
+clamps, and every world mutation at commit time.
 
 `AmbientReplyJudgment` is the second and final call in a bounded two-resident
 exchange. It returns the listener's exact `talk_to` reply together with a
@@ -141,7 +167,15 @@ It uses the private `Qwen-Ambassador/Qwen3.7-Plus` model id and disables Qwen
 thinking for the bounded JSON envelope; this keeps reasoning tokens from
 consuming the response budget before the JSON body is emitted. Its output cap
 is 1,600 tokens so the exact-six hearing envelope is not truncated; this is a
-ceiling, not a request to lengthen ordinary dialogue.
+ceiling, not a request to lengthen ordinary dialogue. The profile also raises
+its finite transport and service timeout to 30 seconds; profiles without an
+override retain the 12-second runtime default. ModelScope calls were observed
+crossing the old 12-second boundary during live play. Background calls do not
+pause the world and conversation openings are preloaded, so the extra network
+margin avoids false fallback for most traffic. A merged response after the
+player answers can still block the modal, but it now has a finite 30-second
+ceiling rather than turning ordinary ModelScope latency into mandatory
+fallback.
 
 ## Live prompt calibration
 
@@ -186,8 +220,9 @@ repair request. The following conditions use deterministic fallback and are
 reported in `ProposalMeta`:
 
 - missing credentials or unavailable profile;
-- timeout (config `runtime.timeoutMs`; sized for judgment-grade calls, not
-  the old 2.5-second bark budget);
+- timeout (a profile `timeoutMs` override when present, otherwise
+  `runtime.timeoutMs`; sized for judgment-grade calls, not the old 2.5-second
+  bark budget);
 - rate limiting or transport failure;
 - invalid envelope after repair;
 - per-session call or token budget exhaustion.
@@ -197,10 +232,14 @@ the deterministic signal classifier in
 `src/runtime/conversation-suspicion.ts`; for conversation and agent steps it
 is the bounded rule adapter. The HUD shows the selected profile,
 `live`/`fallback`/`scripted` transport, and fallback reason.
-The same metadata remains available run-wide as `providerAudit` and
-`providerRuntimeTrace` on snapshots, ordinary answer responses, hearing
-responses, and the terminal run-end response. This prevents a later successful
-call from hiding an earlier error, repair, or fallback during live acceptance.
+The same cumulative metadata remains available run-wide as `providerAudit` and
+`providerRuntimeTrace` on snapshots, successful preload responses, every typed
+NPC-decision result, ordinary answer responses, hearing responses, and the
+terminal run-end response. Provider-bearing builders refresh accounting before
+cloning the pair; the one-second advance lane does not repeat the growing
+arrays. A structurally resolved preload is traced even if fresh semantic
+validation rejects its opening as stale. This prevents a later successful call
+from hiding an earlier error, repair, or fallback during live acceptance.
 
 Ambient-reply fallback is deliberately neutral: one localized in-fiction
 reply, zero suspicion movement, the existing stance, and a dedicated

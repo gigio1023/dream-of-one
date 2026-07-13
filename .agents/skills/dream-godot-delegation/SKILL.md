@@ -4,9 +4,9 @@ description: >
   Use when Dream of One work would require a long or high-volume Godot AI MCP
   session, repeated runtime inspection or captures, or any hands-on game
   playtest. Keeps the lead session in place, spawns one native in-session
-  subagent pinned to the required Sol-high or Terra-high worker runtime, and
-  returns compact evidence. NOT for code-only Godot edits, a bounded session
-  preflight, backend-only work, or generic parallelization.
+  high-capability subagent with exclusive run ownership, and returns compact
+  evidence. NOT for code-only Godot edits, a bounded session preflight,
+  backend-only work, or generic parallelization.
 ---
 
 # Dream of One — Godot Delegation
@@ -51,27 +51,24 @@ user explicitly asks for that execution surface.
 Keep the main/lead session on its current planning and integration model. Do not
 ask the user to switch the parent merely to route a worker.
 
-- Spawn a **GPT-5.6 Sol, high-effort worker** for cross-layer diagnosis,
-  unfamiliar scene or runtime reasoning, implementation decisions based on live
-  evidence, and non-play inspection where each result may change the next call.
-- Spawn a **GPT-5.6 Terra, high-effort worker** for a bounded, already
-  specified execution run. Every hands-on game playtest, player-input sequence,
-  visual acceptance pass, and gameplay capture belongs here, even when the
-  actions look simple.
-- When a change needs both, finish and mechanically verify the implementation
-  first with the lead or a pinned Sol worker, stop that run, then give a fresh
-  pinned Terra worker a closed play packet. Do not switch models midway through
-  one run.
-- In Codex, select the repo-defined `sol_high_godot` or
-  `terra_high_playtest` custom agent role. Their config layers under
-  `.codex/agents/` pin model and effort without changing the lead. Other
-  harnesses may pin equivalent settings directly in native spawn. Record the
-  selected role/configuration. If the required role or selector is unavailable,
-  stop with a routing-capability blocker. Do not switch the parent, launch an
-  external CLI, or treat an inherited/default worker as the requested lane.
+- Use the high-capability worker route named by the current owner and
+  `docs/tech/verification.md`. The current Codex default is GPT-5.6 Sol ultra
+  for diagnosis, implementation-time inspection, and hands-on play.
+- Use the harness's native child directly. If it exposes a model or effort
+  selector, apply the current owner policy there. A missing selector is a
+  blocker only when the owner explicitly required an exact independently
+  pinned child runtime; it is not a reason to switch the parent or launch an
+  external CLI.
+- When a change needs implementation and fresh play evidence, finish and
+  mechanically verify the implementation first, stop that run, then give one
+  fresh native child a closed play packet. Do not change runtime policy midway
+  through one run.
+- Never apply `lower-capability-executor-prompt` unless the owner explicitly
+  requests it.
 
 Model and effort are runtime settings, not prose requests. Naming a model in a
-worker prompt does not change it and must never be reported as proof.
+worker prompt does not change it and must never be reported as proof of an
+explicit pin.
 
 ## Worker Authority And Ownership
 
@@ -81,7 +78,7 @@ The packet declares exactly one authority mode:
 - `play`: send bounded player input through the normal game path; no source
   edits or direct backend/world mutation;
 - `implement`: edit only the listed files, then perform non-play inspection;
-  actual play remains a separate Terra run.
+  fresh acceptance play remains a separate run.
 
 Delegation never broadens user authority. Workers must preserve user changes,
 never stage the untracked transfer documents, never expose secrets, and never
@@ -97,8 +94,9 @@ state the test is meant to reach.
 
 Return a compact packet containing:
 
-- requested worker lane, selected native role and pinning evidence, authority
-  mode, selected project/session, and version preflight;
+- requested native worker route, any runtime-selection evidence actually
+  exposed by the harness, authority mode, selected project/session, and version
+  preflight;
 - the observed state transitions relevant to the objective, with semantic
   values and capture paths when required;
 - new editor/game errors, fixture or live-provider provenance, and any fallback;
@@ -114,21 +112,19 @@ artifact or diff before integrating the claim.
 ## Stop And Recovery
 
 Use one bounded recovery pass for session/helper connection failures, following
-`dream-godot-playtest`. Stop rather than switching to curl, Computer Use, a
-different model, or a restarted editor. If the worker edits outside its owned
-scope, loses exact session identity, observes another process taking run
-ownership, or cannot establish the packet's pinned model/effort provenance,
-terminate the lane and report the conflict.
+`dream-godot-playtest`. Stop rather than switching to curl, Computer Use, an
+external agent process, or a restarted editor. If the worker edits outside its
+owned scope, loses exact session identity, observes another process taking run
+ownership, or cannot establish a runtime pin that the owner explicitly
+required, terminate the lane and report the conflict.
 
 ## Gotchas
 
 - A high number of calls alone does not justify parallel workers; one isolated
   Godot worker is the safe topology because editor/run state is shared.
-- Some native Codex spawn surfaces expose Godot AI to children but no
-  custom-agent role selector. After adding or changing `.codex/config.toml`,
-  start one fresh trusted-project session so Codex reloads the role registry.
-  If the named role is still unavailable, that is a model-routing blocker, not
-  a reason to switch the lead session or relabel a default child.
+- Native spawn surfaces differ in whether they expose model and effort
+  selectors. Always verify Godot AI visibility; verify a runtime pin only when
+  the owner made that exact pin part of acceptance.
 - Native Godot AI calls can perturb timing. Prefer semantic checks at meaningful
   transitions over frame-by-frame polling, but do not reduce required evidence.
 - A child session may discover the repo skills but not inherit the lead's loaded

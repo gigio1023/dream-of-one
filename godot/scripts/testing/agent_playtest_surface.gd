@@ -128,6 +128,15 @@ func snapshot() -> Dictionary:
 		sources,
 		[&"providerRuntimeTrace", &"provider_runtime_trace"]
 	)
+	var provider_evidence_freshness := _first_dictionary(
+		sources,
+		[&"providerEvidenceFreshness", &"provider_evidence_freshness"]
+	)
+	var client_provider_request_in_flight_count := int(_dictionary_value(
+		provider_evidence_freshness,
+		[&"clientProviderRequestInFlightCount", &"client_provider_request_in_flight_count"],
+		0
+	))
 
 	return {
 		"available": true,
@@ -210,9 +219,11 @@ func snapshot() -> Dictionary:
 		),
 		"providerAudit": _json_safe(provider_audit),
 		"providerRuntimeTrace": _json_safe(provider_runtime_trace),
+		"providerEvidenceFreshness": _json_safe(provider_evidence_freshness),
 		"providerAuditSummary": _provider_audit_summary(
 			provider_audit,
-			provider_runtime_trace
+			provider_runtime_trace,
+			client_provider_request_in_flight_count
 		),
 		"ambientSpeech": _first_value(
 			sources,
@@ -562,7 +573,11 @@ func _provider_summary(value: Variant) -> Dictionary:
 	}
 
 
-func _provider_audit_summary(audit: Dictionary, runtime_trace: Dictionary) -> Dictionary:
+func _provider_audit_summary(
+	audit: Dictionary,
+	runtime_trace: Dictionary,
+	client_provider_request_in_flight_count: int = 0
+) -> Dictionary:
 	var calls := _array_value(audit.get("calls"))
 	var resolutions := _array_value(audit.get("resolutions"))
 	var trace_entries := _array_value(runtime_trace.get("entries"))
@@ -640,9 +655,27 @@ func _provider_audit_summary(audit: Dictionary, runtime_trace: Dictionary) -> Di
 	var trace_complete := bool(runtime_trace.get("complete", false))
 	var trace_truncated := bool(runtime_trace.get("truncated", false))
 	var trace_dropped_count := int(runtime_trace.get("droppedCount", 0))
+	var complete_cardinality_reconciled := true
+	if (
+		audit_complete
+		and not audit_truncated
+		and trace_complete
+		and not trace_truncated
+		and (not resolutions.is_empty() or not trace_entries.is_empty())
+	):
+		# Complete evidence is lossless by contract: every accepted provider
+		# resolution must have exactly one runtime trace entry, and neither side
+		# may report dropped history. Per-entry profile checks alone cannot prove
+		# that a trace entry is missing.
+		complete_cardinality_reconciled = (
+			audit_dropped_count == 0
+			and trace_dropped_count == 0
+			and resolutions.size() == trace_entries.size()
+		)
 	var reconciled := (
 		calls_used == calls.size() + in_flight_calls
 		and tokens_used == charged_tokens + in_flight_tokens
+		and complete_cardinality_reconciled
 	)
 	return {
 		"expectedProfileId": EXPECTED_PROVIDER_PROFILE_ID,
@@ -650,6 +683,12 @@ func _provider_audit_summary(audit: Dictionary, runtime_trace: Dictionary) -> Di
 		"tokensUsed": tokens_used,
 		"inFlightCalls": in_flight_calls,
 		"inFlightTokens": in_flight_tokens,
+		"clientProviderRequestInFlightCount": client_provider_request_in_flight_count,
+		"quiescent": (
+			in_flight_calls == 0
+			and in_flight_tokens == 0
+			and client_provider_request_in_flight_count == 0
+		),
 		"complete": audit_complete,
 		"truncated": audit_truncated,
 		"droppedCount": audit_dropped_count,
@@ -659,6 +698,7 @@ func _provider_audit_summary(audit: Dictionary, runtime_trace: Dictionary) -> Di
 		"traceTruncated": trace_truncated,
 		"traceDroppedCount": trace_dropped_count,
 		"runtimeTraceEntryCount": trace_entries.size(),
+		"completeCardinalityReconciled": complete_cardinality_reconciled,
 		"reconciled": reconciled,
 		"allExpectedProfileLiveNoFallback": (
 			calls_used > 0
@@ -667,6 +707,7 @@ func _provider_audit_summary(audit: Dictionary, runtime_trace: Dictionary) -> Di
 			and audit_dropped_count == 0
 			and in_flight_calls == 0
 			and in_flight_tokens == 0
+			and client_provider_request_in_flight_count == 0
 			and failed_call_count == 0
 			and fallback_resolution_count == 0
 			and reconciled

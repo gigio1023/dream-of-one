@@ -369,8 +369,8 @@ test("hearing opens before background drain and answer waits before one final ju
   ]);
   assert.deepEqual(
     answered.providerRuntimeTrace.entries.map(entry => entry.meta.transport),
-    ["scripted"],
-    "cancelled/stale background work does not fabricate a fallback trace",
+    ["scripted", "scripted", "scripted"],
+    "two structurally resolved stale openings remain traced, while the cancelled opening adds no fake fallback",
   );
 });
 
@@ -1291,6 +1291,8 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
     candidate => candidate.kind === "goal" && candidate.actorIds[0] === "NPC_Station_Officer",
   );
   assert.ok(exhaustedWake);
+  const traceCountBeforeExhaustion = service.snapshot(started.runId)
+    .providerRuntimeTrace.entries.length;
   const reserveContact = await service.decision({
     runId: started.runId,
     wakeId: exhaustedWake.wakeId,
@@ -1299,4 +1301,9 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
   assert.equal(reserveContact.activeContact?.procedure, "interrogation");
   assert.equal(reserveContact.providerMetas.at(-1)?.transport, "fallback");
   assert.equal(reserveContact.providerMetas.at(-1)?.fallbackReason, "budget_exhausted");
+  assert.equal(
+    reserveContact.providerRuntimeTrace.entries.length,
+    traceCountBeforeExhaustion + 1,
+    "one budget-exhausted provider packet contributes exactly one runtime-trace entry",
+  );
 });

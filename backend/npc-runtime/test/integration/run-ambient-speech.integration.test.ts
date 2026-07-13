@@ -13,6 +13,7 @@ import { RunError, RunService, STUDIO_RECEPTIONIST_ID } from "../../src/runtime/
 import type {
   RunActorSpatialFacts,
   RunAdvanceResponse,
+  RunMemory,
   RunNpcDecisionRequest,
   RunScheduleWake,
   RunSnapshot,
@@ -70,7 +71,10 @@ async function readyFirstMeeting(
   }
   assert.ok(atNinety);
   const ready = atNinety;
-  const wake = ready.scheduleWakes.find(candidate => candidate.kind === "meeting_ready");
+  const wake = [
+    ...ready.scheduleWakes,
+    ...service.snapshot(started.runId).scheduler.pendingWakes,
+  ].find(candidate => candidate.kind === "meeting_ready");
   assert.ok(wake);
   return {
     started,
@@ -177,6 +181,619 @@ function ambientSpatialActors(snapshot: RunSnapshot): RunActorSpatialFacts[] {
   });
 }
 
+function meetingBurstSpatialActors(
+  snapshot: RunSnapshot,
+  arrivals: ReadonlyArray<{ actorId: string; anchorRef: string }> = [],
+): RunActorSpatialFacts[] {
+  const layout = loadRunLayout();
+  const arrivalAnchors = new Map(arrivals.map(arrival => [arrival.actorId, arrival.anchorRef]));
+  const actors = ambientSpatialActors(snapshot);
+  for (const actor of actors) {
+    const arrivedAnchor = arrivalAnchors.get(actor.actorId);
+    if (arrivedAnchor) {
+      const position = layout.anchorPositions[arrivedAnchor];
+      assert.ok(position);
+      actor.position = [position[0], position[1], position[2]];
+    }
+  }
+
+  const receptionist = actors.find(actor => actor.actorId === "NPC_Studio_Receptionist");
+  assert.ok(receptionist);
+  receptionist.playerVisible = true;
+  receptionist.playerAudible = true;
+  receptionist.playerReachable = true;
+  receptionist.playerInteractionZoneId = "StudioReceptionConversation";
+
+  const manager = actors.find(actor => actor.actorId === "NPC_Studio_Manager");
+  const caretaker = actors.find(actor => actor.actorId === "NPC_Park_Caretaker");
+  assert.ok(manager);
+  assert.ok(caretaker);
+  const managerAtMeeting = manager.position.every(
+    (value, index) => value === layout.anchorPositions["Park.meeting_north_west"]?.[index],
+  );
+  const caretakerAtMeeting = caretaker.position.every(
+    (value, index) => value === layout.anchorPositions["Park.meeting_north_east"]?.[index],
+  );
+  if (managerAtMeeting && caretakerAtMeeting) {
+    manager.visibleActorIds = [caretaker.actorId];
+    manager.audibleActorIds = [caretaker.actorId];
+    caretaker.visibleActorIds = [manager.actorId];
+    caretaker.audibleActorIds = [manager.actorId];
+  }
+  return actors;
+}
+
+test("an active meeting owns participant social goals while an unrelated contact goal remains", async () => {
+  const { adapter, requests, ambientRequests } = capturingAdapter();
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("meeting-goal-ownership"),
+  });
+  const started = service.start("meeting-goal-ownership", "ko-KR");
+  const meetingOwnsActorGoal = Reflect.get(service, "activeMeetingOwnsActorGoal").bind(
+    service,
+  ) as (actorId: string, elapsedSeconds: number) => boolean;
+  assert.equal(meetingOwnsActorGoal("NPC_Studio_Manager", 70), true);
+  assert.equal(meetingOwnsActorGoal("NPC_Park_Caretaker", 70), true);
+  assert.equal(meetingOwnsActorGoal("NPC_Studio_Receptionist", 460), true);
+  assert.equal(meetingOwnsActorGoal("NPC_Park_Caretaker", 460), true);
+  assert.equal(meetingOwnsActorGoal("NPC_Office_Worker", 700), true);
+  assert.equal(meetingOwnsActorGoal("NPC_Roaming_Liaison", 700), true);
+  assert.equal(meetingOwnsActorGoal("NPC_Station_Officer", 1060), true);
+  assert.equal(meetingOwnsActorGoal("NPC_Roaming_Liaison", 1060), true);
+  const decisionStatuses: Array<{
+    wakeKind: string;
+    actorIds: string[];
+    status: string;
+    providerCalls: number;
+    speechCount: number;
+  }> = [];
+
+  const drainClientOrderedDecisions = async () => {
+    const pending = service.snapshot(started.runId).scheduler.pendingWakes
+      .filter(wake => wake.requiresDecision && wake.status === "pending")
+      .sort((first, second) =>
+        first.scheduledAtSeconds === second.scheduledAtSeconds
+          ? first.wakeId.localeCompare(second.wakeId)
+          : first.scheduledAtSeconds - second.scheduledAtSeconds
+      );
+    for (const wake of pending) {
+      const response = await service.decision({
+        runId: started.runId,
+        wakeId: wake.wakeId,
+        observedWorldRevision: wake.observedWorldRevision,
+      });
+      decisionStatuses.push({
+        wakeKind: response.wakeKind,
+        actorIds: [...response.actorIds],
+        status: response.status,
+        providerCalls: response.providerMetas.length,
+        speechCount: response.speechEvents.length,
+      });
+    }
+  };
+
+  const initial = await service.advance({
+    runId: started.runId,
+    advanceId: "meeting-goal-ownership:initial-spatial",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "Studio" },
+      actors: meetingBurstSpatialActors(started),
+    },
+  });
+  assert.equal(initial.scheduleWakes.filter(wake => wake.kind === "goal").length, 6);
+  await drainClientOrderedDecisions();
+  const callsBeforeWindow = requests.length + ambientRequests.length;
+  assert.equal(callsBeforeWindow, 6, "the initial grounded goal for each resident resolves once");
+  decisionStatuses.length = 0;
+
+  let meetingReadySeen = false;
+  for (let step = 1; step <= 9; step += 1) {
+    let current = service.snapshot(started.runId);
+    const advanced = await service.advance({
+      runId: started.runId,
+      advanceId: `meeting-goal-ownership:clock:${step}`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: [],
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [8, 0.05, 5], locationId: "Studio" },
+        actors: meetingBurstSpatialActors(current),
+      },
+    });
+    meetingReadySeen ||= advanced.scheduleWakes.some(wake => wake.kind === "meeting_ready");
+    await drainClientOrderedDecisions();
+    current = service.snapshot(started.runId);
+    const arrivals = advanced.movementDeltas.map(movement => ({
+      movementId: movement.movementId,
+      actorId: movement.actorId,
+      anchorRef: movement.targetAnchorRef,
+    }));
+    if (arrivals.length === 0) continue;
+    const settled = await service.advance({
+      runId: started.runId,
+      advanceId: `meeting-goal-ownership:clock:${step}:arrivals`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 0,
+      arrivals,
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [8, 0.05, 5], locationId: "Studio" },
+        actors: meetingBurstSpatialActors(current, arrivals),
+      },
+    });
+    meetingReadySeen ||= settled.scheduleWakes.some(wake => wake.kind === "meeting_ready");
+    await drainClientOrderedDecisions();
+  }
+
+  assert.equal(service.snapshot(started.runId).worldClock.elapsedSeconds, 90);
+  assert.equal(meetingReadySeen, true);
+  const windowCalls = requests.length + ambientRequests.length - callsBeforeWindow;
+  const meetingResolutions = decisionStatuses.filter(
+    decision => decision.wakeKind === "meeting_ready" && decision.status === "completed",
+  );
+  const contactResolutions = decisionStatuses.filter(
+    decision =>
+      decision.wakeKind === "goal" &&
+      decision.actorIds[0] === "NPC_Studio_Receptionist" &&
+      decision.status === "completed",
+  );
+  const participantGoalResolutions = decisionStatuses.filter(
+    decision =>
+      decision.wakeKind === "goal" &&
+      ["NPC_Studio_Manager", "NPC_Park_Caretaker"].includes(decision.actorIds[0] ?? "") &&
+      decision.providerCalls > 0,
+  );
+  assert.equal(windowCalls, 3, "one contact call plus exactly two meeting calls should resolve");
+  assert.equal(meetingResolutions.length, 1);
+  assert.equal(meetingResolutions[0]?.providerCalls, 2);
+  assert.equal(meetingResolutions[0]?.speechCount, 2);
+  assert.equal(contactResolutions.length, 1, "the unrelated receptionist contact goal remains live");
+  assert.equal(contactResolutions[0]?.providerCalls, 1);
+  assert.deepEqual(participantGoalResolutions, []);
+  assert.equal(service.snapshot(started.runId).ambientSpeech.events.length, 2);
+
+  const callsAfterMeeting = requests.length + ambientRequests.length;
+  let postMeetingGoalActors: string[] = [];
+  for (let step = 10; step <= 23; step += 1) {
+    let current = service.snapshot(started.runId);
+    const advanced = await service.advance({
+      runId: started.runId,
+      advanceId: `meeting-goal-ownership:post:${step}`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: [],
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [8, 0.05, 5], locationId: "Studio" },
+        actors: meetingBurstSpatialActors(current),
+      },
+    });
+    current = service.snapshot(started.runId);
+    const arrivals = advanced.movementDeltas.map(movement => ({
+      movementId: movement.movementId,
+      actorId: movement.actorId,
+      anchorRef: movement.targetAnchorRef,
+    }));
+    if (arrivals.length === 0) continue;
+    const settled = await service.advance({
+      runId: started.runId,
+      advanceId: `meeting-goal-ownership:post:${step}:arrivals`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 0,
+      arrivals,
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [8, 0.05, 5], locationId: "Studio" },
+        actors: meetingBurstSpatialActors(current, arrivals),
+      },
+    });
+    postMeetingGoalActors.push(
+      ...settled.scheduleWakes
+        .filter(wake => wake.kind === "goal")
+        .flatMap(wake => wake.actorIds),
+    );
+  }
+  postMeetingGoalActors = [...new Set(postMeetingGoalActors)].sort();
+  assert.equal(service.snapshot(started.runId).worldClock.elapsedSeconds, 230);
+  assert.deepEqual(
+    postMeetingGoalActors.filter(actorId =>
+      ["NPC_Studio_Manager", "NPC_Park_Caretaker"].includes(actorId)
+    ),
+    [],
+    "the deterministic return schedule and movement create no generic participant goal",
+  );
+  assert.equal(
+    requests.length + ambientRequests.length,
+    callsAfterMeeting,
+    "the 230-second return transition spends no provider call",
+  );
+
+  type MutableActor = { memories: RunMemory[] };
+  type MutableRun = { actors: Map<string, MutableActor> };
+  const internalRuns = Reflect.get(service, "runs") as Map<string, MutableRun>;
+  const internalRun = internalRuns.get(started.runId);
+  assert.ok(internalRun);
+  const beforeIndependentEvent = service.snapshot(started.runId);
+  for (const actorId of ["NPC_Studio_Manager", "NPC_Park_Caretaker"]) {
+    const actor = internalRun.actors.get(actorId);
+    const schedulerActor = beforeIndependentEvent.scheduler.actors.find(
+      candidate => candidate.actorId === actorId,
+    );
+    assert.ok(actor);
+    assert.ok(schedulerActor);
+    actor.memories.push({
+      memoryId: `independent-semantic-${actorId}`,
+      kind: "player_contact_outcome",
+      sourceActorId: "player",
+      listenerActorId: actorId,
+      contactId: `independent-contact-${actorId}`,
+      outcome: "not_engaged",
+      contactReason: "별도의 의미 사건을 기억했습니다.",
+      interactionZoneId: "ParkConversation",
+      originAnchorRef: schedulerActor.confirmedAnchorRef,
+      worldSeconds: beforeIndependentEvent.worldClock.elapsedSeconds,
+      worldRevision: beforeIndependentEvent.worldRevision,
+    });
+  }
+  const independentEvent = await service.advance({
+    runId: started.runId,
+    advanceId: "meeting-goal-ownership:independent-semantic",
+    observedWorldRevision: beforeIndependentEvent.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: beforeIndependentEvent.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "Studio" },
+      actors: meetingBurstSpatialActors(beforeIndependentEvent),
+    },
+  });
+  const independentParticipantWakes = independentEvent.scheduleWakes
+    .filter(wake =>
+      wake.kind === "goal" &&
+      ["NPC_Studio_Manager", "NPC_Park_Caretaker"].includes(wake.actorIds[0] ?? "")
+    )
+    .sort((first, second) => first.wakeId.localeCompare(second.wakeId));
+  assert.equal(independentParticipantWakes.length, 2);
+  for (const wake of independentParticipantWakes) {
+    const decision = await service.decision({
+      runId: started.runId,
+      wakeId: wake.wakeId,
+      observedWorldRevision: wake.observedWorldRevision,
+    });
+    assert.equal(decision.status, "completed");
+    assert.equal(decision.providerMetas.length, 1);
+  }
+  assert.equal(requests.length + ambientRequests.length, callsAfterMeeting + 2);
+});
+
+test("first-meeting arrivals suppress a new participant contact without suppressing unrelated contact", async () => {
+  const { adapter, requests, ambientRequests } = capturingAdapter();
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("first-meeting-contact-race"),
+  });
+  const started = service.start("first-meeting-contact-race", "ko-KR");
+  const seeded = await service.advance({
+    runId: started.runId,
+    advanceId: "first-meeting-contact-race:seed",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [0, 0, 0], locationId: "" },
+      actors: ambientSpatialActors(started),
+    },
+  });
+  const initialGoals = seeded.scheduleWakes
+    .filter(wake => wake.kind === "goal")
+    .sort((first, second) => first.wakeId.localeCompare(second.wakeId));
+  assert.equal(initialGoals.length, 6);
+  for (const wake of initialGoals) {
+    const decision = await service.decision({
+      runId: started.runId,
+      wakeId: wake.wakeId,
+      observedWorldRevision: wake.observedWorldRevision,
+    });
+    assert.equal(decision.status, "completed");
+  }
+  assert.equal(requests.length, 6);
+  assert.equal(ambientRequests.length, 0);
+
+  let meetingMoves: RunAdvanceResponse["movementDeltas"] = [];
+  for (let step = 1; step <= 8; step += 1) {
+    const current = service.snapshot(started.runId);
+    const advanced = await service.advance({
+      runId: started.runId,
+      advanceId: `first-meeting-contact-race:clock:${step}`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: [],
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [0, 0, 0], locationId: "" },
+        actors: ambientSpatialActors(current),
+      },
+    });
+    if (advanced.clock.toSeconds === 70) {
+      meetingMoves = advanced.movementDeltas.filter(movement =>
+        ["NPC_Studio_Manager", "NPC_Park_Caretaker"].includes(movement.actorId)
+      );
+    }
+  }
+  assert.deepEqual(
+    meetingMoves.map(movement => [movement.actorId, movement.targetAnchorRef]),
+    [
+      ["NPC_Studio_Manager", "Park.meeting_north_west"],
+      ["NPC_Park_Caretaker", "Park.meeting_north_east"],
+    ],
+  );
+
+  const beforeArrival = service.snapshot(started.runId);
+  assert.equal(beforeArrival.worldClock.elapsedSeconds, 80);
+  const arrivals = meetingMoves.map(movement => ({
+    movementId: movement.movementId,
+    actorId: movement.actorId,
+    anchorRef: movement.targetAnchorRef,
+  }));
+  const arrivalActors = meetingBurstSpatialActors(beforeArrival, arrivals);
+  const receptionist = arrivalActors.find(actor =>
+    actor.actorId === "NPC_Studio_Receptionist"
+  );
+  assert.ok(receptionist);
+  receptionist.playerVisible = false;
+  receptionist.playerAudible = false;
+  receptionist.playerReachable = false;
+  receptionist.playerInteractionZoneId = null;
+  const caretaker = arrivalActors.find(actor => actor.actorId === "NPC_Park_Caretaker");
+  assert.ok(caretaker);
+  caretaker.playerVisible = true;
+  caretaker.playerAudible = true;
+  caretaker.playerReachable = true;
+  caretaker.playerInteractionZoneId = "ParkConversation";
+  const simultaneousArrival = await service.advance({
+    runId: started.runId,
+    advanceId: "first-meeting-contact-race:simultaneous-arrival",
+    observedWorldRevision: beforeArrival.worldRevision,
+    elapsedSeconds: 10,
+    arrivals,
+    spatialFacts: {
+      observedWorldRevision: beforeArrival.worldRevision,
+      player: { position: [0, 0, 0], locationId: "Park" },
+      actors: arrivalActors,
+    },
+  });
+  assert.equal(simultaneousArrival.clock.toSeconds, 90);
+  const ready = simultaneousArrival.scheduleWakes.filter(wake => wake.kind === "meeting_ready");
+  assert.equal(ready.length, 1);
+  assert.deepEqual(ready[0]?.actorIds, ["NPC_Studio_Manager", "NPC_Park_Caretaker"]);
+  assert.ok(simultaneousArrival.scheduleWakes.every(wake =>
+    wake.kind !== "goal" ||
+    !["NPC_Studio_Manager", "NPC_Park_Caretaker"].includes(wake.actorIds[0] ?? "")
+  ));
+
+  const internalRuns = Reflect.get(service, "runs") as Map<string, unknown>;
+  const currentContactCandidateActorId = Reflect.get(
+    service,
+    "currentContactCandidateActorId",
+  ).bind(service) as (run: unknown, elapsedSeconds?: number) => string | null;
+  const internalRun = internalRuns.get(started.runId);
+  assert.ok(internalRun);
+  assert.equal(
+    currentContactCandidateActorId(internalRun, 90),
+    "NPC_Park_Caretaker",
+    "the participant is a grounded new contact candidate, but meeting ownership suppresses its goal",
+  );
+
+  const meetingWake = ready[0];
+  assert.ok(meetingWake);
+  const meetingDecision = await service.decision({
+    runId: started.runId,
+    wakeId: meetingWake.wakeId,
+    observedWorldRevision: meetingWake.observedWorldRevision,
+  });
+  assert.equal(meetingDecision.status, "completed");
+  assert.equal(meetingDecision.providerMetas.length, 2);
+  assert.equal(meetingDecision.speechEvents.length, 2);
+  assert.equal(requests.length, 7, "the meeting first turn is the only new agent-step call");
+  assert.equal(ambientRequests.length, 1, "the exact listener reply is the only ambient call");
+  assert.deepEqual(requests.at(-1)?.requiredToolCall, {
+    tool: "talk_to",
+    actorId: "NPC_Park_Caretaker",
+  });
+
+  const afterMeeting = service.snapshot(started.runId);
+  const receptionistScheduler = afterMeeting.scheduler.actors.find(actor =>
+    actor.actorId === "NPC_Studio_Receptionist"
+  );
+  assert.ok(receptionistScheduler);
+  const receptionistArrival = receptionistScheduler.pendingMovement
+    ? [{
+        movementId: receptionistScheduler.pendingMovement.movementId,
+        actorId: receptionistScheduler.actorId,
+        anchorRef: receptionistScheduler.pendingMovement.targetAnchorRef,
+      }]
+    : [];
+  const unrelatedContact = await service.advance({
+    runId: started.runId,
+    advanceId: "first-meeting-contact-race:unrelated-contact",
+    observedWorldRevision: afterMeeting.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: receptionistArrival,
+    spatialFacts: {
+      observedWorldRevision: afterMeeting.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "Studio" },
+      actors: meetingBurstSpatialActors(afterMeeting, receptionistArrival),
+    },
+  });
+  const unrelatedWake = unrelatedContact.scheduleWakes.find(wake =>
+    wake.kind === "goal" && wake.actorIds[0] === "NPC_Studio_Receptionist"
+  );
+  assert.ok(unrelatedWake);
+  assert.ok(unrelatedContact.scheduleWakes.every(wake =>
+    wake.kind !== "goal" ||
+    !["NPC_Studio_Manager", "NPC_Park_Caretaker"].includes(wake.actorIds[0] ?? "")
+  ));
+  const unrelatedDecision = await service.decision({
+    runId: started.runId,
+    wakeId: unrelatedWake.wakeId,
+    observedWorldRevision: unrelatedWake.observedWorldRevision,
+  });
+  assert.equal(unrelatedDecision.status, "completed");
+  assert.equal(unrelatedDecision.providerMetas.length, 1);
+  assert.equal(requests.length, 8);
+  assert.equal(ambientRequests.length, 1);
+});
+
+test("a claimed participant goal rechecks meeting ownership before provider transport", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalNextStep = adapter.proposeNextStep.bind(adapter);
+  let goalProviderCalls = 0;
+  adapter.proposeNextStep = async request => {
+    goalProviderCalls += 1;
+    return originalNextStep(request);
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("meeting-pre-transport"),
+  });
+  const started = service.start("meeting-pre-transport", "ko-KR");
+  const seeded = await service.advance({
+    runId: started.runId,
+    advanceId: "meeting-pre-transport:seed",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [0, 0, 0], locationId: "" },
+      actors: ambientSpatialActors(started),
+    },
+  });
+  const managerGoal = seeded.scheduleWakes.find(wake =>
+    wake.kind === "goal" && wake.actorIds[0] === "NPC_Studio_Manager"
+  );
+  assert.ok(managerGoal);
+  assert.equal(
+    service.snapshot(started.runId).scheduler.actors.find(
+      actor => actor.actorId === "NPC_Studio_Manager",
+    )?.pendingMovement,
+    null,
+  );
+
+  const acquireSlot = Reflect.get(service, "acquireBackgroundProviderSlot").bind(
+    service,
+  ) as (runId: string) => Promise<void>;
+  const releaseSlot = Reflect.get(service, "releaseBackgroundProviderSlot").bind(
+    service,
+  ) as (runId: string) => void;
+  let heldSlots = 0;
+  await acquireSlot(started.runId);
+  heldSlots += 1;
+  await acquireSlot(started.runId);
+  heldSlots += 1;
+
+  const decisionPromise = service.decision({
+    runId: started.runId,
+    wakeId: managerGoal.wakeId,
+    observedWorldRevision: managerGoal.observedWorldRevision,
+  });
+  try {
+    let claimed = false;
+    for (let spin = 0; spin < 50; spin += 1) {
+      claimed = service.snapshot(started.runId).scheduler.pendingWakes.some(wake =>
+        wake.wakeId === managerGoal.wakeId && wake.status === "claimed"
+      );
+      if (claimed) break;
+      await Promise.resolve();
+    }
+    assert.equal(claimed, true);
+    assert.equal(goalProviderCalls, 0, "the claimed goal is waiting outside provider transport");
+
+    for (let step = 1; step <= 7; step += 1) {
+      const current = service.snapshot(started.runId);
+      await service.advance({
+        runId: started.runId,
+        advanceId: `meeting-pre-transport:clock:${step}`,
+        observedWorldRevision: current.worldRevision,
+        elapsedSeconds: 10,
+        arrivals: [],
+        spatialFacts: {
+          observedWorldRevision: current.worldRevision,
+          player: { position: [0, 0, 0], locationId: "" },
+          actors: ambientSpatialActors(current),
+        },
+      });
+    }
+    assert.equal(service.snapshot(started.runId).worldClock.elapsedSeconds, 70);
+
+    releaseSlot(started.runId);
+    heldSlots -= 1;
+    const decision = await decisionPromise;
+    assert.equal(decision.status, "stale");
+    assert.deepEqual(decision.providerMetas, []);
+    assert.equal(goalProviderCalls, 0, "meeting ownership is rechecked after the slot wait");
+  } finally {
+    while (heldSlots > 0) {
+      releaseSlot(started.runId);
+      heldSlots -= 1;
+    }
+  }
+});
+
+test("a participant-anchor lead-in retires unrelated pending social work without provider calls", async () => {
+  const { adapter, requests, ambientRequests } = capturingAdapter();
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("meeting-lead-in"),
+  });
+  const started = service.start("meeting-lead-in", "ko-KR");
+  const initial = await service.advance({
+    runId: started.runId,
+    advanceId: "meeting-lead-in:spatial",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [0, 0, 0], locationId: "" },
+      actors: ambientSpatialActors(started),
+    },
+  });
+  assert.ok(initial.scheduleWakes.some(wake =>
+    wake.kind === "goal" && wake.actorIds[0] === "NPC_Studio_Receptionist"
+  ));
+
+  let atLeadIn: RunAdvanceResponse | null = null;
+  for (let step = 1; step <= 46; step += 1) {
+    const current = service.snapshot(started.runId);
+    atLeadIn = await service.advance({
+      runId: started.runId,
+      advanceId: `meeting-lead-in:clock:${step}`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: [],
+    });
+  }
+  assert.ok(atLeadIn);
+  assert.equal(atLeadIn.clock.toSeconds, 460);
+  assert.ok(atLeadIn.scheduleWakes.every(wake =>
+    wake.kind !== "goal" ||
+    !["NPC_Studio_Receptionist", "NPC_Park_Caretaker"].includes(wake.actorIds[0] ?? "")
+  ));
+  assert.ok(service.snapshot(started.runId).scheduler.pendingWakes.every(wake =>
+    wake.kind !== "goal" ||
+    !["NPC_Studio_Receptionist", "NPC_Park_Caretaker"].includes(wake.actorIds[0] ?? "")
+  ));
+  assert.equal(requests.length + ambientRequests.length, 0);
+});
+
 function deferred() {
   let resolve!: () => void;
   const promise = new Promise<void>(done => {
@@ -184,6 +801,517 @@ function deferred() {
   });
   return { promise, resolve };
 }
+
+function firstMeetingParticipantActors(snapshot: RunSnapshot): RunActorSpatialFacts[] {
+  return meetingBurstSpatialActors(snapshot, [
+    { actorId: "NPC_Studio_Manager", anchorRef: "Park.meeting_north_west" },
+    { actorId: "NPC_Park_Caretaker", anchorRef: "Park.meeting_north_east" },
+  ]);
+}
+
+function targetOwnershipRaceLayout() {
+  const base = loadRunLayout();
+  const managerId = "NPC_Studio_Manager";
+  const caretakerId = "NPC_Park_Caretaker";
+  const participantIds = new Set([managerId, caretakerId]);
+  const participantAnchorRefs = Object.fromEntries(
+    base.actors
+      .filter(actor => participantIds.has(actor.actorId))
+      .map(actor => [actor.actorId, actor.spawnAnchorRef]),
+  );
+  return {
+    ...base,
+    meetingWindows: [{
+      windowId: "TEST_TARGET_OWNERSHIP_RACE",
+      startSeconds: 30,
+      endSeconds: 60,
+      anchorRef: participantAnchorRefs[managerId] as string,
+      actorIds: [managerId, caretakerId] as [string, string],
+      participantAnchorRefs,
+    }],
+    actors: base.actors.map(actor => ({
+      ...actor,
+      scheduleBlocks: participantIds.has(actor.actorId)
+        ? [
+            {
+              blockId: `test-before-ownership-${actor.actorId}`,
+              startSeconds: 0,
+              endSeconds: 10,
+              activity: "test_before_ownership",
+              target: { kind: "anchor" as const, id: actor.spawnAnchorRef },
+            },
+            {
+              blockId: `test-meeting-lead-in-${actor.actorId}`,
+              startSeconds: 10,
+              endSeconds: base.hearingAtSeconds,
+              activity: "test_meeting_lead_in",
+              target: { kind: "anchor" as const, id: actor.spawnAnchorRef },
+            },
+          ]
+        : [{
+            blockId: `test-stationary-${actor.actorId}`,
+            startSeconds: 0,
+            endSeconds: base.hearingAtSeconds,
+            activity: "test_stationary",
+            target: { kind: "anchor" as const, id: actor.spawnAnchorRef },
+          }],
+    })),
+  };
+}
+
+function targetOwnershipRaceActors(snapshot: RunSnapshot): RunActorSpatialFacts[] {
+  const actors = ambientSpatialActors(snapshot);
+  const receptionist = actors.find(actor => actor.actorId === "NPC_Studio_Receptionist");
+  const manager = actors.find(actor => actor.actorId === "NPC_Studio_Manager");
+  assert.ok(receptionist && manager);
+  receptionist.visibleActorIds = [manager.actorId];
+  receptionist.audibleActorIds = [manager.actorId];
+  manager.visibleActorIds = [receptionist.actorId];
+  manager.audibleActorIds = [receptionist.actorId];
+  return actors;
+}
+
+async function advanceToFirstMeetingLeadIn(
+  service: RunService,
+  runId: string,
+  requestPrefix: string,
+): Promise<void> {
+  for (let step = 1; step <= 7; step += 1) {
+    let current = service.snapshot(runId);
+    const advanced = await service.advance({
+      runId,
+      advanceId: `${requestPrefix}:clock:${step}`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: [],
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [8, 0.05, 5], locationId: "Studio" },
+        actors: firstMeetingParticipantActors(current),
+      },
+    });
+    const arrivals = advanced.movementDeltas.map(movement => ({
+      movementId: movement.movementId,
+      actorId: movement.actorId,
+      anchorRef: movement.targetAnchorRef,
+    }));
+    if (arrivals.length === 0) continue;
+    current = service.snapshot(runId);
+    await service.advance({
+      runId,
+      advanceId: `${requestPrefix}:clock:${step}:arrivals`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 0,
+      arrivals,
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [8, 0.05, 5], locationId: "Studio" },
+        actors: firstMeetingParticipantActors(current),
+      },
+    });
+  }
+  const atLeadIn = service.snapshot(runId);
+  assert.equal(atLeadIn.worldClock.elapsedSeconds, 70);
+  assert.equal(
+    atLeadIn.scheduler.actors.find(actor => actor.actorId === "NPC_Studio_Manager")
+      ?.pendingMovement,
+    null,
+    "the held decision must be rejected by meeting ownership, not a pending movement",
+  );
+}
+
+test("an in-flight participant goal cannot commit after the first-meeting lead-in begins", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const entered = deferred();
+  const release = deferred();
+  let managerCalls = 0;
+  adapter.proposeNextStep = async _request => {
+    managerCalls += 1;
+    entered.resolve();
+    await release.promise;
+    return {
+      proposal: {
+        toolCall: { tool: "wait", args: { reason: "회의 전에 잠시 기다립니다." } },
+        rationale: "Wait once, then yield.",
+        done: true,
+      },
+      meta: { profileId: adapter.profileId, transport: "scripted", usedFallback: false },
+    };
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("meeting-in-flight-commit"),
+  });
+  const started = service.start("meeting-in-flight-commit", "ko-KR");
+  const seeded = await service.advance({
+    runId: started.runId,
+    advanceId: "meeting-in-flight-commit:seed",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "Studio" },
+      actors: firstMeetingParticipantActors(started),
+    },
+  });
+  const managerGoal = seeded.scheduleWakes.find(wake =>
+    wake.kind === "goal" && wake.actorIds[0] === "NPC_Studio_Manager"
+  );
+  assert.ok(managerGoal);
+  assert.equal(
+    service.snapshot(started.runId).scheduler.actors.find(
+      actor => actor.actorId === "NPC_Studio_Manager",
+    )?.pendingMovement,
+    null,
+  );
+
+  const pending = service.decision({
+    runId: started.runId,
+    wakeId: managerGoal.wakeId,
+    observedWorldRevision: managerGoal.observedWorldRevision,
+  });
+  const entryOutcome = await Promise.race([
+    entered.promise.then(() => "entered" as const),
+    pending.then(response => `resolved:${response.status}` as const),
+    new Promise<"timeout">(resolve => setTimeout(() => resolve("timeout"), 100)),
+  ]);
+  assert.equal(entryOutcome, "entered");
+  assert.equal(service.snapshot(started.runId).worldClock.elapsedSeconds, 0);
+  assert.equal(managerCalls, 1, "provider transport starts before meeting ownership begins");
+
+  await advanceToFirstMeetingLeadIn(service, started.runId, "meeting-in-flight-commit");
+  release.resolve();
+  const response = await pending;
+  assert.equal(response.status, "stale");
+  assert.equal(response.providerMetas.length, 1);
+  assert.deepEqual(response.actionDeltas, []);
+  assert.deepEqual(response.movementDeltas, []);
+  assert.deepEqual(response.speechEvents, []);
+});
+
+test("meeting ownership stops an in-flight participant talk before the reply provider spend", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalAmbientReply = adapter.judgeAndProposeAmbientReply.bind(adapter);
+  const entered = deferred();
+  const release = deferred();
+  let firstTurnCalls = 0;
+  let replyCalls = 0;
+  adapter.proposeNextStep = async _request => {
+    firstTurnCalls += 1;
+    entered.resolve();
+    await release.promise;
+    return {
+      proposal: {
+        toolCall: { tool: "talk_to", args: { actorId: "NPC_Park_Caretaker" } },
+        utterance: "회의 전에 확인할 말이 있습니다.",
+        rationale: "Address the audible caretaker once.",
+        done: true,
+      },
+      meta: { profileId: adapter.profileId, transport: "scripted", usedFallback: false },
+    };
+  };
+  adapter.judgeAndProposeAmbientReply = async request => {
+    replyCalls += 1;
+    return originalAmbientReply(request);
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("meeting-in-flight-talk"),
+  });
+  const started = service.start("meeting-in-flight-talk", "ko-KR");
+  const seeded = await service.advance({
+    runId: started.runId,
+    advanceId: "meeting-in-flight-talk:seed",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "Studio" },
+      actors: firstMeetingParticipantActors(started),
+    },
+  });
+  const managerGoal = seeded.scheduleWakes.find(wake =>
+    wake.kind === "goal" && wake.actorIds[0] === "NPC_Studio_Manager"
+  );
+  assert.ok(managerGoal);
+
+  const pending = service.decision({
+    runId: started.runId,
+    wakeId: managerGoal.wakeId,
+    observedWorldRevision: managerGoal.observedWorldRevision,
+  });
+  const entryOutcome = await Promise.race([
+    entered.promise.then(() => "entered" as const),
+    pending.then(response => `resolved:${response.status}` as const),
+    new Promise<"timeout">(resolve => setTimeout(() => resolve("timeout"), 100)),
+  ]);
+  assert.equal(entryOutcome, "entered");
+  assert.equal(firstTurnCalls, 1, "the first provider transport is genuinely in flight");
+
+  await advanceToFirstMeetingLeadIn(service, started.runId, "meeting-in-flight-talk");
+  release.resolve();
+  const response = await pending;
+  assert.equal(response.status, "stale");
+  assert.equal(response.providerMetas.length, 1);
+  assert.equal(replyCalls, 0, "meeting ownership is claimed before ambient reply transport");
+  assert.deepEqual(response.speechEvents, []);
+  assert.equal(service.snapshot(started.runId).ambientSpeech.activeConversation, null);
+});
+
+test("a nonparticipant cannot finish or newly target a meeting-owned participant", async () => {
+  const sourceActorId = "NPC_Studio_Receptionist";
+  const targetActorId = "NPC_Studio_Manager";
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalAmbientReply = adapter.judgeAndProposeAmbientReply.bind(adapter);
+  const replyEntered = deferred();
+  const replyRelease = deferred();
+  let phase: "race" | "observe" = "race";
+  let allowedAtClaim: string[] | undefined;
+  let allowedWhileOwned: string[] | undefined;
+  let replyCalls = 0;
+  adapter.proposeNextStep = async request => {
+    if (request.observePacket.actorId === sourceActorId) {
+      if (phase === "race") allowedAtClaim = [...(request.allowedTalkActorIds ?? [])];
+      else allowedWhileOwned = [...(request.allowedTalkActorIds ?? [])];
+    }
+    if (phase === "observe") {
+      return {
+        proposal: {
+          toolCall: null,
+          utterance: null,
+          rationale: "회의가 소유한 상대에게 별도 대화를 시도하지 않습니다.",
+          done: true,
+        },
+        meta: { profileId: adapter.profileId, transport: "scripted", usedFallback: false },
+      };
+    }
+    return {
+      proposal: {
+        toolCall: { tool: "talk_to", args: { actorId: targetActorId } },
+        utterance: "회의 전에 잠깐 확인할 말이 있습니다.",
+        rationale: "Address the currently available manager once.",
+        done: true,
+      },
+      meta: { profileId: adapter.profileId, transport: "scripted", usedFallback: false },
+    };
+  };
+  adapter.judgeAndProposeAmbientReply = async request => {
+    replyCalls += 1;
+    replyEntered.resolve();
+    await replyRelease.promise;
+    return originalAmbientReply(request);
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("meeting-owned-target"),
+    layout: targetOwnershipRaceLayout(),
+  });
+  const started = service.start("meeting-owned-target", "ko-KR");
+  const seeded = await service.advance({
+    runId: started.runId,
+    advanceId: "meeting-owned-target:seed",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "Studio" },
+      actors: targetOwnershipRaceActors(started),
+    },
+  });
+  const sourceGoal = seeded.scheduleWakes.find(wake =>
+    wake.kind === "goal" && wake.actorIds[0] === sourceActorId
+  );
+  assert.ok(sourceGoal);
+
+  const pending = service.decision({
+    runId: started.runId,
+    wakeId: sourceGoal.wakeId,
+    observedWorldRevision: sourceGoal.observedWorldRevision,
+  });
+  await replyEntered.promise;
+  assert.deepEqual(allowedAtClaim, [targetActorId]);
+  assert.equal(replyCalls, 1, "the reply was claimed while both actors were still available");
+
+  let current = service.snapshot(started.runId);
+  await service.advance({
+    runId: started.runId,
+    advanceId: "meeting-owned-target:lead-in",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 10,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: current.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "Studio" },
+      actors: targetOwnershipRaceActors(current),
+    },
+  });
+  const meetingOwnsActorGoal = Reflect.get(service, "activeMeetingOwnsActorGoal").bind(
+    service,
+  ) as (actorId: string, elapsedSeconds: number) => boolean;
+  assert.equal(meetingOwnsActorGoal(sourceActorId, 10), false);
+  assert.equal(meetingOwnsActorGoal(targetActorId, 10), true);
+
+  replyRelease.resolve();
+  const stale = await pending;
+  assert.equal(stale.status, "stale");
+  assert.equal(stale.providerMetas.length, 2);
+  assert.deepEqual(stale.speechEvents, []);
+  assert.equal(service.snapshot(started.runId).ambientSpeech.activeConversation, null);
+
+  type MutableActor = { memories: RunMemory[] };
+  type MutableRun = { actors: Map<string, MutableActor> };
+  const internalRuns = Reflect.get(service, "runs") as Map<string, MutableRun>;
+  const internalRun = internalRuns.get(started.runId);
+  const sourceActor = internalRun?.actors.get(sourceActorId);
+  current = service.snapshot(started.runId);
+  const sourceScheduler = current.scheduler.actors.find(actor => actor.actorId === sourceActorId);
+  assert.ok(sourceActor && sourceScheduler);
+  sourceActor.memories.push({
+    memoryId: "meeting-owned-target:new-semantic-memory",
+    kind: "player_contact_outcome",
+    sourceActorId: "player",
+    listenerActorId: sourceActorId,
+    contactId: "meeting-owned-target:contact",
+    outcome: "not_engaged",
+    contactReason: "새로운 의미 사건을 기억했습니다.",
+    interactionZoneId: "StudioReceptionConversation",
+    originAnchorRef: sourceScheduler.confirmedAnchorRef,
+    worldSeconds: current.worldClock.elapsedSeconds,
+    worldRevision: current.worldRevision,
+  });
+  phase = "observe";
+  const readmitted = await service.advance({
+    runId: started.runId,
+    advanceId: "meeting-owned-target:readmit",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: current.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "Studio" },
+      actors: targetOwnershipRaceActors(current),
+    },
+  });
+  const readmittedGoal = readmitted.scheduleWakes.find(wake =>
+    wake.kind === "goal" && wake.actorIds[0] === sourceActorId
+  );
+  assert.ok(readmittedGoal);
+  const observed = await service.decision({
+    runId: started.runId,
+    wakeId: readmittedGoal.wakeId,
+    observedWorldRevision: readmittedGoal.observedWorldRevision,
+  });
+  assert.equal(observed.status, "completed");
+  assert.deepEqual(
+    allowedWhileOwned,
+    [],
+    "meeting ownership removes the target from the exact provider scope",
+  );
+});
+
+test("a queued goal reply rechecks meeting ownership after its background slot is granted", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalAmbientReply = adapter.judgeAndProposeAmbientReply.bind(adapter);
+  const firstTurnReturned = deferred();
+  let replyCalls = 0;
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("meeting-queued-reply"),
+  });
+  const acquireSlot = Reflect.get(service, "acquireBackgroundProviderSlot").bind(
+    service,
+  ) as (runId: string) => Promise<void>;
+  const releaseSlot = Reflect.get(service, "releaseBackgroundProviderSlot").bind(
+    service,
+  ) as (runId: string) => void;
+  let heldSlots = 0;
+  let queuedHoldScheduled = false;
+  let queuedHoldAcquired = Promise.resolve();
+
+  adapter.proposeNextStep = async request => {
+    await acquireSlot(request.sessionId);
+    heldSlots += 1;
+    queuedHoldScheduled = true;
+    queuedHoldAcquired = acquireSlot(request.sessionId).then(() => {
+      heldSlots += 1;
+    });
+    firstTurnReturned.resolve();
+    return {
+      proposal: {
+        toolCall: { tool: "talk_to", args: { actorId: "NPC_Park_Caretaker" } },
+        utterance: "회의 전에 확인할 말이 있습니다.",
+        rationale: "Address the audible caretaker once.",
+        done: true,
+      },
+      meta: { profileId: adapter.profileId, transport: "scripted", usedFallback: false },
+    };
+  };
+  adapter.judgeAndProposeAmbientReply = async request => {
+    replyCalls += 1;
+    return originalAmbientReply(request);
+  };
+
+  const started = service.start("meeting-queued-reply", "ko-KR");
+  const seeded = await service.advance({
+    runId: started.runId,
+    advanceId: "meeting-queued-reply:seed",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "Studio" },
+      actors: firstMeetingParticipantActors(started),
+    },
+  });
+  const managerGoal = seeded.scheduleWakes.find(wake =>
+    wake.kind === "goal" && wake.actorIds[0] === "NPC_Studio_Manager"
+  );
+  assert.ok(managerGoal);
+
+  const pending = service.decision({
+    runId: started.runId,
+    wakeId: managerGoal.wakeId,
+    observedWorldRevision: managerGoal.observedWorldRevision,
+  });
+  try {
+    await firstTurnReturned.promise;
+    assert.equal(queuedHoldScheduled, true);
+    await queuedHoldAcquired;
+
+    type BackgroundGate = { active: number; waiters: unknown[] };
+    const gates = Reflect.get(service, "backgroundProviderGates") as Map<string, BackgroundGate>;
+    let replyQueued = false;
+    for (let spin = 0; spin < 100; spin += 1) {
+      const activeConversation = service.snapshot(started.runId).ambientSpeech.activeConversation;
+      const gate = gates.get(started.runId);
+      replyQueued = activeConversation?.wakeId === managerGoal.wakeId && gate?.waiters.length === 1;
+      if (replyQueued) break;
+      await Promise.resolve();
+    }
+    assert.equal(replyQueued, true, "the listener reply must be queued behind two held slots");
+    assert.equal(replyCalls, 0);
+
+    await advanceToFirstMeetingLeadIn(service, started.runId, "meeting-queued-reply");
+    releaseSlot(started.runId);
+    heldSlots -= 1;
+
+    const response = await pending;
+    assert.equal(response.status, "stale");
+    assert.equal(response.providerMetas.length, 1);
+    assert.equal(replyCalls, 0, "the granted reply slot rechecks both meeting participants");
+    assert.deepEqual(response.speechEvents, []);
+    assert.equal(service.snapshot(started.runId).ambientSpeech.activeConversation, null);
+  } finally {
+    while (heldSlots > 0) {
+      releaseSlot(started.runId);
+      heldSlots -= 1;
+    }
+  }
+});
 
 test("one meeting decision is single-flight and uses two calls with an exact grounded ambient reply", async () => {
   const { adapter, requests, ambientRequests } = capturingAdapter();

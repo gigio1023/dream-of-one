@@ -15,6 +15,7 @@
       "baseUrlEnv": "MODELSCOPE_BASE_URL",
       "apiKeyEnv": "MODELSCOPE_API_KEY",
       "model": "Qwen-Ambassador/Qwen3.7-Plus",
+      "timeoutMs": 30000,
       "params": {
         "temperature": 0.7,
         "maxTokens": 1600,

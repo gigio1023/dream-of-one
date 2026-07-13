@@ -187,10 +187,14 @@ func _run() -> void:
 			if _has_error(latest):
 				await _abort("meeting arrival advance failed: %s" % JSON.stringify(latest))
 				return
-			meeting_wake = _find_schedule_wake(
-				latest.get("scheduleWakes", []),
-				"meeting_ready"
-			)
+			# A clock batch may emit meeting_ready together with an unrelated
+			# resident's route movement. Confirm that movement without discarding
+			# the already-issued meeting wake; the arrival response need not repeat it.
+			if meeting_wake.is_empty():
+				meeting_wake = _find_schedule_wake(
+					latest.get("scheduleWakes", []),
+					"meeting_ready"
+				)
 		if not meeting_wake.is_empty():
 			break
 	if meeting_wake.is_empty():

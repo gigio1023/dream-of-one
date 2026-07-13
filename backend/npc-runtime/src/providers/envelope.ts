@@ -5,7 +5,8 @@ import {
   CONVERSATION_SUSPICION_SIGNALS,
   HEARING_CONTACT_BASES,
 } from "../contracts/types.js";
-import { TOOL_NAMES } from "../agentloop/tools.js";
+import type { ObservePacket } from "../agentloop/context.js";
+import { TOOL_NAMES, type ToolName } from "../agentloop/tools.js";
 import { RECORD_KINDS, WORLD_ROLES } from "../runtime/world/index.js";
 import { supportedLocaleEntry } from "../localization/supported-locales.js";
 
@@ -176,6 +177,7 @@ export const agentStepProposalSchema = z
     done: value.done,
   }))
   .refine(value => value.done || value.toolCall !== undefined, {
+    path: ["toolCall"],
     message: "an active agent step requires toolCall",
   });
 
@@ -226,6 +228,21 @@ export function ambientReplyJudgmentSchemaForLocale(locale: string) {
   });
 }
 
+export function ambientReplyJudgmentSchemaForRequest(
+  locale: string,
+  targetActorId: string,
+) {
+  return ambientReplyJudgmentSchemaForLocale(locale).superRefine((value, context) => {
+    if (value.toolCall.args.actorId !== targetActorId) {
+      context.addIssue({
+        code: "custom",
+        path: ["toolCall", "args", "actorId"],
+        message: `ambient reply actorId must equal ${targetActorId}`,
+      });
+    }
+  });
+}
+
 export function hearingJudgmentSchemaForLocale(locale: string) {
   const korean = isKoreanLocale(locale);
   return hearingJudgmentSchema.superRefine((value, context) => {
@@ -244,36 +261,445 @@ export function hearingJudgmentSchemaForLocale(locale: string) {
 
 export function agentStepProposalSchemaForLocale(locale: string) {
   const korean = isKoreanLocale(locale);
-  return agentStepProposalSchema
-    .refine(
-      value => !korean || !value.utterance || !forbiddenPlayerVisibleScript.test(value.utterance),
-      {
-        message: "player-visible utterance must use modern Korean without Latin or Han characters",
-      },
-    )
-    .refine(value => {
-      if (!korean) return true;
-      const args = value.toolCall?.args;
-      if (!args) return true;
-      const whyLine = typeof args.whyLine === "string" ? args.whyLine : undefined;
-      const record = args.record && typeof args.record === "object"
-        ? args.record as Record<string, unknown>
-        : undefined;
-      const stateBody = typeof record?.stateBody === "string" ? record.stateBody : undefined;
-      const directStateBody = typeof args.stateBody === "string" ? args.stateBody : undefined;
-      const openQuestion = args.openQuestion && typeof args.openQuestion === "object"
-        ? args.openQuestion as Record<string, unknown>
-        : undefined;
-      const openQuestionText = typeof openQuestion?.text === "string" ? openQuestion.text : undefined;
-      const openQuestionWhyLine = typeof openQuestion?.whyLine === "string"
-        ? openQuestion.whyLine
-        : undefined;
-      return [whyLine, stateBody, directStateBody, openQuestionText, openQuestionWhyLine].every(
-        text => !text || !forbiddenPlayerVisibleScript.test(text),
-      );
-    }, {
-      message: "player-visible tool text must use modern Korean without Latin or Han characters",
-    });
+  return agentStepProposalSchema.superRefine((value, context) => {
+    if (!korean) return;
+    addKoreanTextIssue(context, ["utterance"], value.utterance);
+    const args = value.toolCall?.args;
+    if (!args) return;
+    const whyLine = typeof args.whyLine === "string" ? args.whyLine : undefined;
+    const record = args.record && typeof args.record === "object"
+      ? args.record as Record<string, unknown>
+      : undefined;
+    const stateBody = typeof record?.stateBody === "string" ? record.stateBody : undefined;
+    const directStateBody = typeof args.stateBody === "string" ? args.stateBody : undefined;
+    const openQuestion = args.openQuestion && typeof args.openQuestion === "object"
+      ? args.openQuestion as Record<string, unknown>
+      : undefined;
+    const openQuestionText = typeof openQuestion?.text === "string" ? openQuestion.text : undefined;
+    const openQuestionWhyLine = typeof openQuestion?.whyLine === "string"
+      ? openQuestion.whyLine
+      : undefined;
+    addKoreanTextIssue(context, ["toolCall", "args", "whyLine"], whyLine);
+    addKoreanTextIssue(context, ["toolCall", "args", "record", "stateBody"], stateBody);
+    addKoreanTextIssue(context, ["toolCall", "args", "stateBody"], directStateBody);
+    addKoreanTextIssue(
+      context,
+      ["toolCall", "args", "openQuestion", "text"],
+      openQuestionText,
+    );
+    addKoreanTextIssue(
+      context,
+      ["toolCall", "args", "openQuestion", "whyLine"],
+      openQuestionWhyLine,
+    );
+  });
+}
+
+export type AgentStepRecordContract = "legacy" | "m3r";
+
+export interface AgentStepRecordContracts {
+  write_record?: AgentStepRecordContract;
+  read_record?: AgentStepRecordContract;
+}
+
+export interface AgentStepRequestSchemaConstraints {
+  effectiveTools: readonly ToolName[];
+  observePacket: ObservePacket;
+  recordContracts: AgentStepRecordContracts;
+  allowedTalkActorIds?: readonly string[];
+  requiredToolCall?: { tool: "talk_to"; actorId: string };
+  requireUtterance?: boolean;
+}
+
+const administrativeOpenQuestionValueSchema = z
+  .object({
+    status: z.enum(["open", "resolved"]),
+    text: nonEmpty,
+    whyLine: nonEmpty,
+  })
+  .strict()
+  .nullable();
+
+const legacyWriteRecordArgsSchema = z
+  .object({
+    objectId: z.string().nullable(),
+    toState: z.string().nullable(),
+    ledgerKind: z.string(),
+    record: z
+      .object({
+        recordId: z.string(),
+        kind: z.enum(RECORD_KINDS),
+        targetId: z.string(),
+        stateBody: z.string(),
+        visibleTo: z.array(z.enum(WORLD_ROLES)),
+      })
+      .strict(),
+    citedLedgerEventId: z.string().nullable(),
+    whyLine: z.string(),
+  })
+  .strict();
+
+const m3rWriteRecordArgsSchema = z
+  .object({
+    recordKind: z.enum(RECORD_KINDS),
+    sourceMemoryId: z.string(),
+    stateBody: z.string(),
+    whyLine: z.string(),
+    institutionalPressureDelta: z.number().int(),
+    textSurfaceId: z.string(),
+    recordId: z.string().optional(),
+    openQuestion: administrativeOpenQuestionValueSchema,
+  })
+  .strict();
+
+const legacyReadRecordArgsSchema = z.object({ recordId: z.string() }).strict();
+
+const m3rReadRecordArgsSchema = z
+  .object({
+    recordId: z.string(),
+    whyLine: z.string(),
+    institutionalPressureDelta: z.number().int(),
+    openQuestion: administrativeOpenQuestionValueSchema,
+  })
+  .strict();
+
+const requestScopedArgsSchemas = {
+  move_to: z.object({ targetId: nonEmpty }).strict(),
+  look: z.object({ targetId: nonEmpty }).strict(),
+  talk_to: z.object({ actorId: nonEmpty }).strict(),
+  wait: z.object({ reason: z.string() }).strict(),
+  use_object: z
+    .object({
+      objectId: nonEmpty,
+      toState: z.string(),
+      ledgerKind: z.string(),
+      whyLine: z.string(),
+    })
+    .strict(),
+  request: z
+    .object({
+      targetActorId: nonEmpty,
+      action: z.string(),
+      whyLine: z.string(),
+    })
+    .strict(),
+} as const;
+
+function uniqueStrings(values: readonly string[]): string[] {
+  return [...new Set(values.filter(value => value.length > 0))];
+}
+
+function visibleAndAudibleActorIds(packet: ObservePacket): string[] {
+  const audible = new Set(packet.audibleActorIds);
+  return uniqueStrings(packet.visibleActors.filter(actorId => audible.has(actorId)));
+}
+
+function scopedTalkActorIds(constraints: AgentStepRequestSchemaConstraints): string[] {
+  const groundedActorIds = visibleAndAudibleActorIds(constraints.observePacket);
+  if (constraints.requiredToolCall || constraints.allowedTalkActorIds === undefined) {
+    return groundedActorIds;
+  }
+  const grounded = new Set(groundedActorIds);
+  return uniqueStrings(constraints.allowedTalkActorIds).filter(actorId => grounded.has(actorId));
+}
+
+function moveTargetIds(packet: ObservePacket): string[] {
+  return uniqueStrings([
+    ...packet.reachableAnchorRefs,
+    ...(packet.playerContact?.available === true ? [packet.playerContact.targetActorId] : []),
+  ]);
+}
+
+function lookTargetIds(packet: ObservePacket): string[] {
+  return uniqueStrings([
+    ...packet.visibleActors,
+    ...packet.visibleObjects.map(object => object.objectId),
+    ...packet.visibleRecords.map(record => record.recordId),
+  ]);
+}
+
+function visibleRecordIds(
+  packet: ObservePacket,
+  contract: AgentStepRecordContract | undefined,
+): string[] {
+  return uniqueStrings(packet.visibleRecords
+    .filter(record => contract !== "m3r" || Number.isInteger(record.recordRevision))
+    .map(record => record.recordId));
+}
+
+function allowedRecordKinds(packet: ObservePacket): string[] {
+  const knownKinds = new Set<string>(RECORD_KINDS);
+  return uniqueStrings(packet.administrativeAuthority.allowedRecordKinds.filter(kind =>
+    knownKinds.has(kind)
+  ));
+}
+
+function ownedVisibleRecordIds(packet: ObservePacket): string[] {
+  return uniqueStrings(packet.visibleRecords
+    .filter(record => record.authorActorId === packet.actorId)
+    .map(record => record.recordId));
+}
+
+export function agentStepProposalSchemaForRequest(
+  locale: string,
+  constraints: AgentStepRequestSchemaConstraints,
+) {
+  return agentStepProposalSchemaForLocale(locale).superRefine((value, context) => {
+    const requiredToolCall = constraints.requiredToolCall;
+    if (requiredToolCall) {
+      if (!value.toolCall) {
+        context.addIssue({
+          code: "custom",
+          path: ["toolCall"],
+          message: "required talk_to toolCall must not be null",
+        });
+      } else if (value.toolCall.tool !== requiredToolCall.tool) {
+        context.addIssue({
+          code: "custom",
+          path: ["toolCall", "tool"],
+          message: "required toolCall must use talk_to",
+        });
+      } else if (value.toolCall.args.actorId !== requiredToolCall.actorId) {
+        context.addIssue({
+          code: "custom",
+          path: ["toolCall", "args", "actorId"],
+          message: `required talk_to actorId must equal ${requiredToolCall.actorId}`,
+        });
+      }
+      if (!value.done) {
+        context.addIssue({
+          code: "custom",
+          path: ["done"],
+          message: "required talk_to reply must finish with done=true",
+        });
+      }
+    }
+
+    const toolIsOffered = !value.toolCall || constraints.effectiveTools.includes(value.toolCall.tool);
+    if (!requiredToolCall && value.toolCall && !toolIsOffered) {
+      context.addIssue({
+        code: "custom",
+        path: ["toolCall", "tool"],
+        message: `tool ${value.toolCall.tool} is not offered in this request`,
+      });
+    }
+
+    const call = value.toolCall;
+    if (call && toolIsOffered) {
+      const addMembershipIssue = (argumentName: string, message: string): void => {
+        context.addIssue({
+          code: "custom",
+          path: ["toolCall", "args", argumentName],
+          message,
+        });
+      };
+      const addShapeIssue = (message: string): void => {
+        context.addIssue({
+          code: "custom",
+          path: ["toolCall", "args"],
+          message,
+        });
+      };
+
+      switch (call.tool) {
+        case "move_to": {
+          const parsed = requestScopedArgsSchemas.move_to.safeParse(call.args);
+          if (!parsed.success) {
+            addShapeIssue("move_to args must match the request contract");
+          } else if (!moveTargetIds(constraints.observePacket).includes(parsed.data.targetId)) {
+            addMembershipIssue(
+              "targetId",
+              `move_to target ${parsed.data.targetId} is not reachable in this observation`,
+            );
+          }
+          break;
+        }
+        case "look": {
+          const parsed = requestScopedArgsSchemas.look.safeParse(call.args);
+          if (!parsed.success) {
+            addShapeIssue("look args must match the request contract");
+          } else if (!lookTargetIds(constraints.observePacket).includes(parsed.data.targetId)) {
+            addMembershipIssue(
+              "targetId",
+              `look target ${parsed.data.targetId} is not visible in this observation`,
+            );
+          }
+          break;
+        }
+        case "talk_to": {
+          const parsed = requestScopedArgsSchemas.talk_to.safeParse(call.args);
+          if (!parsed.success) {
+            addShapeIssue("talk_to args must match the request contract");
+          } else if (!visibleAndAudibleActorIds(constraints.observePacket).includes(
+            parsed.data.actorId,
+          )) {
+            addMembershipIssue(
+              "actorId",
+              `talk_to target ${parsed.data.actorId} is not both visible and audible`,
+            );
+          } else if (!scopedTalkActorIds(constraints).includes(parsed.data.actorId)) {
+            addMembershipIssue(
+              "actorId",
+              `talk_to target ${parsed.data.actorId} is outside this request's allowed talk scope`,
+            );
+          }
+          break;
+        }
+        case "wait": {
+          if (!requestScopedArgsSchemas.wait.safeParse(call.args).success) {
+            addShapeIssue("wait args must match the request contract");
+          }
+          break;
+        }
+        case "use_object": {
+          const parsed = requestScopedArgsSchemas.use_object.safeParse(call.args);
+          if (!parsed.success) {
+            addShapeIssue("use_object args must match the request contract");
+          } else if (
+            !constraints.observePacket.visibleObjects.some(object =>
+              object.objectId === parsed.data.objectId
+            )
+          ) {
+            addMembershipIssue(
+              "objectId",
+              `use_object target ${parsed.data.objectId} is not visible`,
+            );
+          }
+          break;
+        }
+        case "request": {
+          const parsed = requestScopedArgsSchemas.request.safeParse(call.args);
+          if (!parsed.success) {
+            addShapeIssue("request args must match the request contract");
+          } else if (!constraints.observePacket.visibleActors.includes(parsed.data.targetActorId)) {
+            addMembershipIssue(
+              "targetActorId",
+              `request target ${parsed.data.targetActorId} is not visible`,
+            );
+          }
+          break;
+        }
+        case "read_record": {
+          const contract = constraints.recordContracts.read_record;
+          const argsSchema = contract === "m3r"
+            ? m3rReadRecordArgsSchema
+            : legacyReadRecordArgsSchema;
+          if (!contract) {
+            addShapeIssue("read_record is missing its request record contract");
+            break;
+          }
+          const parsed = argsSchema.safeParse(call.args);
+          if (!parsed.success) {
+            addShapeIssue(`read_record args must match the ${contract} contract`);
+          } else if (
+            !visibleRecordIds(constraints.observePacket, contract).includes(parsed.data.recordId)
+          ) {
+            addMembershipIssue(
+              "recordId",
+              `read_record target ${parsed.data.recordId} is not a visible record revision`,
+            );
+          }
+          break;
+        }
+        case "write_record": {
+          const contract = constraints.recordContracts.write_record;
+          const argsSchema = contract === "m3r"
+            ? m3rWriteRecordArgsSchema
+            : legacyWriteRecordArgsSchema;
+          if (!contract) {
+            addShapeIssue("write_record is missing its request record contract");
+            break;
+          }
+          const parsed = argsSchema.safeParse(call.args);
+          if (!parsed.success) {
+            addShapeIssue(`write_record args must match the ${contract} contract`);
+            break;
+          }
+          if (contract === "legacy") {
+            const args = parsed.data as z.infer<typeof legacyWriteRecordArgsSchema>;
+            if (
+              args.objectId !== null &&
+              !constraints.observePacket.visibleObjects.some(object =>
+                object.objectId === args.objectId
+              )
+            ) {
+              addMembershipIssue("objectId", `write_record object ${args.objectId} is not visible`);
+            }
+            if (
+              args.citedLedgerEventId !== null &&
+              !constraints.observePacket.visibleLedgerEvents.some(event =>
+                event.eventId === args.citedLedgerEventId
+              )
+            ) {
+              addMembershipIssue(
+                "citedLedgerEventId",
+                `write_record citation ${args.citedLedgerEventId} is not visible`,
+              );
+            }
+            break;
+          }
+
+          const args = parsed.data as z.infer<typeof m3rWriteRecordArgsSchema>;
+          if (!allowedRecordKinds(constraints.observePacket).includes(args.recordKind)) {
+            addMembershipIssue(
+              "recordKind",
+              `write_record kind ${args.recordKind} is not authorized`,
+            );
+          }
+          if (!constraints.observePacket.administrativeSources.some(source =>
+            source.memoryId === args.sourceMemoryId
+          )) {
+            addMembershipIssue(
+              "sourceMemoryId",
+              `write_record source ${args.sourceMemoryId} is not available`,
+            );
+          }
+          if (!constraints.observePacket.administrativeAuthority.writableTextSurfaceIds.includes(
+            args.textSurfaceId,
+          )) {
+            addMembershipIssue(
+              "textSurfaceId",
+              `write_record surface ${args.textSurfaceId} is not writable`,
+            );
+          }
+          if (args.recordId !== undefined) {
+            const existing = constraints.observePacket.visibleRecords.find(record =>
+              record.recordId === args.recordId &&
+              record.authorActorId === constraints.observePacket.actorId
+            );
+            if (!existing) {
+              addMembershipIssue(
+                "recordId",
+                `write_record update ${args.recordId} is not an owned visible record`,
+              );
+            } else {
+              if (existing.kind !== args.recordKind) {
+                addMembershipIssue(
+                  "recordKind",
+                  `write_record update kind must remain ${existing.kind}`,
+                );
+              }
+              if (existing.textSurfaceId !== args.textSurfaceId) {
+                addMembershipIssue(
+                  "textSurfaceId",
+                  `write_record update surface must remain ${existing.textSurfaceId}`,
+                );
+              }
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    if ((requiredToolCall || constraints.requireUtterance) && !value.utterance) {
+      context.addIssue({
+        code: "custom",
+        path: ["utterance"],
+        message: "required talk_to utterance must be nonempty",
+      });
+    }
+  });
 }
 
 export const conversationProposalJsonSchema: Record<string, unknown> = {
@@ -425,6 +851,23 @@ export const ambientReplyJudgmentJsonSchema: Record<string, unknown> = {
     },
   },
 };
+
+export function ambientReplyJudgmentJsonSchemaForTarget(
+  targetActorId: string,
+): Record<string, unknown> {
+  const schema = structuredClone(ambientReplyJudgmentJsonSchema);
+  const properties = schema.properties as Record<string, Record<string, unknown>>;
+  const toolCallProperties = properties.toolCall.properties as Record<
+    string,
+    Record<string, unknown>
+  >;
+  const argsProperties = toolCallProperties.args.properties as Record<
+    string,
+    Record<string, unknown>
+  >;
+  argsProperties.actorId.const = targetActorId;
+  return schema;
+}
 
 export const hearingJudgmentJsonSchema: Record<string, unknown> = {
   type: "object",
@@ -626,3 +1069,229 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
     done: { type: "boolean" },
   },
 };
+
+export function agentStepProposalJsonSchemaForTools(
+  constraints: AgentStepRequestSchemaConstraints,
+): Record<string, unknown> {
+  const schema = structuredClone(agentStepProposalJsonSchema);
+  const properties = schema.properties as Record<string, Record<string, unknown>>;
+  const toolCallSchema = properties.toolCall;
+  const branches = toolCallSchema?.anyOf;
+  if (!Array.isArray(branches)) {
+    throw new Error("agent-step JSON schema is missing toolCall variants");
+  }
+
+  const toolNameForBranch = (branch: unknown): ToolName | null => {
+    if (!branch || typeof branch !== "object" || Array.isArray(branch)) return null;
+    const branchProperties = (branch as Record<string, unknown>).properties;
+    if (!branchProperties || typeof branchProperties !== "object" || Array.isArray(branchProperties)) {
+      return null;
+    }
+    const toolSchema = (branchProperties as Record<string, unknown>).tool;
+    if (!toolSchema || typeof toolSchema !== "object" || Array.isArray(toolSchema)) return null;
+    const tool = (toolSchema as Record<string, unknown>).const;
+    return TOOL_NAMES.find(name => name === tool) ?? null;
+  };
+
+  const recordContractForBranch = (
+    branch: unknown,
+    tool: "write_record" | "read_record",
+  ): AgentStepRecordContract | null => {
+    if (!branch || typeof branch !== "object" || Array.isArray(branch)) return null;
+    const branchProperties = (branch as Record<string, unknown>).properties;
+    if (!branchProperties || typeof branchProperties !== "object" || Array.isArray(branchProperties)) {
+      return null;
+    }
+    const argsSchema = (branchProperties as Record<string, unknown>).args;
+    if (!argsSchema || typeof argsSchema !== "object" || Array.isArray(argsSchema)) return null;
+    const argsProperties = (argsSchema as Record<string, unknown>).properties;
+    if (!argsProperties || typeof argsProperties !== "object" || Array.isArray(argsProperties)) {
+      return null;
+    }
+    const argumentNames = argsProperties as Record<string, unknown>;
+    if (tool === "write_record") {
+      if (Object.hasOwn(argumentNames, "record")) return "legacy";
+      if (Object.hasOwn(argumentNames, "sourceMemoryId")) return "m3r";
+      return null;
+    }
+    return Object.hasOwn(argumentNames, "institutionalPressureDelta") ? "m3r" : "legacy";
+  };
+
+  const allowedTools = new Set<ToolName>(
+    constraints.requiredToolCall
+      ? [constraints.requiredToolCall.tool]
+      : constraints.effectiveTools,
+  );
+  for (const recordTool of ["write_record", "read_record"] as const) {
+    if (allowedTools.has(recordTool) && !constraints.recordContracts[recordTool]) {
+      throw new Error(`agent-step JSON schema requires a ${recordTool} contract`);
+    }
+  }
+
+  const argsPropertiesForBranch = (
+    branch: unknown,
+  ): Record<string, Record<string, unknown>> | null => {
+    if (!branch || typeof branch !== "object" || Array.isArray(branch)) return null;
+    const branchProperties = (branch as Record<string, unknown>).properties;
+    if (!branchProperties || typeof branchProperties !== "object" || Array.isArray(branchProperties)) {
+      return null;
+    }
+    const argsSchema = (branchProperties as Record<string, unknown>).args;
+    if (!argsSchema || typeof argsSchema !== "object" || Array.isArray(argsSchema)) return null;
+    const argsProperties = (argsSchema as Record<string, unknown>).properties;
+    return argsProperties && typeof argsProperties === "object" && !Array.isArray(argsProperties)
+      ? argsProperties as Record<string, Record<string, unknown>>
+      : null;
+  };
+
+  const constrainStringField = (
+    argsProperties: Record<string, Record<string, unknown>>,
+    field: string,
+    values: readonly string[],
+  ): boolean => {
+    const fieldSchema = argsProperties[field];
+    if (!fieldSchema) throw new Error(`agent-step JSON schema is missing ${field}`);
+    const allowed = uniqueStrings(values);
+    if (allowed.length === 0) return false;
+    fieldSchema.enum = allowed;
+    return true;
+  };
+
+  const constrainBranch = (branch: unknown, toolName: ToolName): boolean => {
+    const argsProperties = argsPropertiesForBranch(branch);
+    if (!argsProperties) return false;
+    switch (toolName) {
+      case "move_to":
+        return constrainStringField(
+          argsProperties,
+          "targetId",
+          moveTargetIds(constraints.observePacket),
+        );
+      case "look":
+        return constrainStringField(
+          argsProperties,
+          "targetId",
+          lookTargetIds(constraints.observePacket),
+        );
+      case "talk_to": {
+        const actorIds = scopedTalkActorIds(constraints);
+        if (constraints.requiredToolCall && !actorIds.includes(constraints.requiredToolCall.actorId)) {
+          // A required meeting reply should already be grounded by the runtime.
+          // Keep an exact transport branch so local Zod can reject inconsistent
+          // packets and deterministically invoke fallback instead of throwing.
+          actorIds.push(constraints.requiredToolCall.actorId);
+        }
+        return constrainStringField(argsProperties, "actorId", actorIds);
+      }
+      case "use_object":
+        return constrainStringField(
+          argsProperties,
+          "objectId",
+          constraints.observePacket.visibleObjects.map(object => object.objectId),
+        );
+      case "request":
+        return constrainStringField(
+          argsProperties,
+          "targetActorId",
+          constraints.observePacket.visibleActors,
+        );
+      case "read_record":
+        return constrainStringField(
+          argsProperties,
+          "recordId",
+          visibleRecordIds(
+            constraints.observePacket,
+            constraints.recordContracts.read_record,
+          ),
+        );
+      case "write_record": {
+        const contract = constraints.recordContracts.write_record;
+        if (contract === "legacy") {
+          const objectIdSchema = argsProperties.objectId;
+          const citedEventSchema = argsProperties.citedLedgerEventId;
+          if (!objectIdSchema || !citedEventSchema) return false;
+          objectIdSchema.enum = [
+            null,
+            ...uniqueStrings(
+              constraints.observePacket.visibleObjects.map(object => object.objectId),
+            ),
+          ];
+          citedEventSchema.enum = [
+            null,
+            ...uniqueStrings(
+              constraints.observePacket.visibleLedgerEvents.map(event => event.eventId),
+            ),
+          ];
+          return true;
+        }
+        if (contract !== "m3r") return false;
+        const hasBaseAuthority =
+          constrainStringField(
+            argsProperties,
+            "recordKind",
+            allowedRecordKinds(constraints.observePacket),
+          ) &&
+          constrainStringField(
+            argsProperties,
+            "sourceMemoryId",
+            constraints.observePacket.administrativeSources.map(source => source.memoryId),
+          ) &&
+          constrainStringField(
+            argsProperties,
+            "textSurfaceId",
+            constraints.observePacket.administrativeAuthority.writableTextSurfaceIds,
+          );
+        if (!hasBaseAuthority) return false;
+        return !Object.hasOwn(argsProperties, "recordId") || constrainStringField(
+          argsProperties,
+          "recordId",
+          ownedVisibleRecordIds(constraints.observePacket),
+        );
+      }
+      case "wait":
+        return true;
+    }
+  };
+
+  const narrowedBranches = branches.filter(branch => {
+    if (
+      branch &&
+      typeof branch === "object" &&
+      !Array.isArray(branch) &&
+      (branch as Record<string, unknown>).type === "null"
+    ) {
+      return constraints.requiredToolCall === undefined;
+    }
+    const toolName = toolNameForBranch(branch);
+    if (toolName === null || !allowedTools.has(toolName)) return false;
+    if (toolName === "write_record" || toolName === "read_record") {
+      if (
+        recordContractForBranch(branch, toolName) !== constraints.recordContracts[toolName]
+      ) return false;
+    }
+    return constrainBranch(branch, toolName);
+  });
+
+  if (constraints.requiredToolCall) {
+    const requiredBranch = narrowedBranches.find(
+      branch => toolNameForBranch(branch) === constraints.requiredToolCall?.tool,
+    ) as Record<string, unknown> | undefined;
+    const branchProperties = requiredBranch?.properties as
+      | Record<string, Record<string, unknown>>
+      | undefined;
+    const argsSchema = branchProperties?.args;
+    const argsProperties = argsSchema?.properties as
+      | Record<string, Record<string, unknown>>
+      | undefined;
+    const actorIdSchema = argsProperties?.actorId;
+    if (!actorIdSchema) {
+      throw new Error("required talk_to JSON schema is missing actorId");
+    }
+    actorIdSchema.const = constraints.requiredToolCall.actorId;
+    properties.utterance = { type: "string", minLength: 1 };
+    properties.done = { type: "boolean", const: true };
+  }
+
+  toolCallSchema.anyOf = narrowedBranches;
+  return schema;
+}

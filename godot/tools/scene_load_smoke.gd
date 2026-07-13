@@ -126,6 +126,8 @@ func _instance_scene(spec: Dictionary) -> void:
 			await _check_npc_movement(label, instance)
 		if label == "main_3d":
 			await _check_run_conversation(label, instance)
+			_check_monotonic_grace_clock_rebase_contract(label, instance)
+			_check_provider_evidence_freshness_contract(label, instance)
 		if label == "main_3d_contact":
 			await _check_player_contact(label, instance)
 		if label == "main_3d_hearing":
@@ -453,6 +455,991 @@ func _check_conversation_start_retry_contract(label: String, instance: Node) -> 
 		{"error": "conversation_start_failed"}
 	)):
 		_failures.append("%s misclassifies a transport failure as stale spatial grounding" % label)
+
+
+func _check_preload_failure_recovery_contract(
+	label: String,
+	instance: Node,
+	actor_id: String
+) -> void:
+	var saved_queue: Array[String] = instance.get("_conversation_preload_queue").duplicate(true)
+	var saved_queued: Dictionary = instance.get("_conversation_preload_queued").duplicate(true)
+	var saved_queued_kinds: Dictionary = (
+		instance.get("_conversation_preload_queued_cycle_kinds").duplicate(true)
+	)
+	var saved_in_flight: Dictionary = (
+		instance.get("_conversation_preload_in_flight").duplicate(true)
+	)
+	var saved_retries: Dictionary = instance.get("_conversation_preload_retries").duplicate(true)
+	var saved_retry_queued: Dictionary = (
+		instance.get("_conversation_preload_retry_queued").duplicate(true)
+	)
+	var saved_requeue: Dictionary = (
+		instance.get("_conversation_preload_requeue_requested").duplicate(true)
+	)
+	var saved_requeue_kinds: Dictionary = (
+		instance.get("_conversation_preload_requeue_cycle_kinds").duplicate(true)
+	)
+	var saved_invalidated: Dictionary = (
+		instance.get("_conversation_preload_invalidated").duplicate(true)
+	)
+	var saved_recovery: Dictionary = (
+		instance.get("_conversation_preload_recovery_required").duplicate(true)
+	)
+	var saved_signatures: Dictionary = (
+		instance.get("_conversation_preload_demand_signatures").duplicate(true)
+	)
+	var saved_epochs: Dictionary = (
+		instance.get("_conversation_preload_demand_epochs").duplicate(true)
+	)
+	var saved_recovery_epochs: Dictionary = (
+		instance.get("_conversation_preload_recovery_demand_epochs").duplicate(true)
+	)
+	var saved_target: Variant = instance.get("_conversation_target")
+	var saved_actor: Dictionary = instance.call("_actor_view", actor_id)
+	var actor_node := instance.get_node_or_null("Town/Actors/%s" % actor_id) as NPC3D
+
+	instance.call("_sync_conversation_preload_demands", "", "", "")
+	instance.call(
+		"_mark_conversation_preload_recovery_required",
+		actor_id,
+		"smoke_retry_dropped"
+	)
+	if bool(instance.call("_consume_conversation_preload_recovery_demand", actor_id)):
+		_failures.append("%s passive proximity reset a failed preload cycle" % label)
+
+	instance.call("_sync_conversation_preload_demands", "", "", actor_id)
+	if not bool(instance.call("_consume_conversation_preload_recovery_demand", actor_id)):
+		_failures.append("%s raw aim could not recover a dropped preload cycle" % label)
+	instance.call(
+		"_mark_conversation_preload_recovery_required",
+		actor_id,
+		"smoke_retry_exhausted"
+	)
+	if bool(instance.call("_consume_conversation_preload_recovery_demand", actor_id)):
+		_failures.append("%s one held aim opened an unbounded preload retry loop" % label)
+
+	instance.call("_sync_conversation_preload_demands", "", "", "")
+	instance.call(
+		"_sync_conversation_preload_demands",
+		actor_id,
+		"smoke-contact-1",
+		""
+	)
+	if not bool(instance.call("_consume_conversation_preload_recovery_demand", actor_id)):
+		_failures.append("%s active contact could not start a fresh recovery cycle" % label)
+
+	# Queue admission is not dispatch. If explicit demand disappears while an
+	# invalidation/recovery entry waits behind another modal or preload, pumping
+	# it must leave its eligibility intact for the next real aim/contact episode.
+	if actor_node != null and not saved_actor.is_empty():
+		var unavailable_actor := saved_actor.duplicate(true)
+		unavailable_actor["playerConversationReady"] = false
+		instance.call("_update_run_actor", unavailable_actor)
+		instance.set("_conversation_target", actor_node)
+		var queued_invalidation: Dictionary = {}
+		queued_invalidation[actor_id] = true
+		instance.set("_conversation_preload_invalidated", queued_invalidation)
+		instance.set("_conversation_preload_recovery_required", {})
+		instance.call("_sync_conversation_preload_demands", "", "", actor_id)
+		if not bool(instance.call(
+			"_queue_conversation_preload",
+			actor_id,
+			0,
+			"invalidated"
+		)):
+			_failures.append("%s could not stage an invalidated preload entry" % label)
+		elif not (instance.get("_conversation_preload_invalidated") as Dictionary).has(actor_id):
+			_failures.append("%s queue admission consumed invalidation before dispatch" % label)
+		instance.call("_sync_conversation_preload_demands", "", "", "")
+		instance.set("_conversation_target", null)
+		instance.call("_pump_conversation_preloads")
+		if (
+			not (instance.get("_conversation_preload_invalidated") as Dictionary).has(actor_id)
+			or not (instance.get("_conversation_preload_queue") as Array).is_empty()
+			or (instance.get("_conversation_preload_in_flight") as Dictionary).has(actor_id)
+		):
+			_failures.append("%s dropped queued invalidation stranded its actor" % label)
+
+		instance.set("_conversation_target", actor_node)
+		instance.set("_conversation_preload_invalidated", {})
+		instance.call(
+			"_mark_conversation_preload_recovery_required",
+			actor_id,
+			"smoke_queued_recovery"
+		)
+		instance.call("_sync_conversation_preload_demands", "", "", "")
+		instance.call("_sync_conversation_preload_demands", "", "", actor_id)
+		if not bool(instance.call(
+			"_queue_conversation_preload",
+			actor_id,
+			0,
+			"recovery"
+		)):
+			_failures.append("%s could not stage a recovery preload entry" % label)
+		elif not (instance.get("_conversation_preload_recovery_required") as Dictionary).has(actor_id):
+			_failures.append("%s queue admission consumed recovery before dispatch" % label)
+		instance.call("_sync_conversation_preload_demands", "", "", "")
+		instance.set("_conversation_target", null)
+		instance.call("_pump_conversation_preloads")
+		if (
+			not (instance.get("_conversation_preload_recovery_required") as Dictionary).has(actor_id)
+			or not (instance.get("_conversation_preload_queue") as Array).is_empty()
+			or (instance.get("_conversation_preload_in_flight") as Dictionary).has(actor_id)
+		):
+			_failures.append("%s dropped queued recovery stranded its actor" % label)
+		instance.call("_update_run_actor", saved_actor)
+
+	instance.set("_conversation_preload_queue", saved_queue)
+	instance.set("_conversation_preload_queued", saved_queued)
+	instance.set("_conversation_preload_queued_cycle_kinds", saved_queued_kinds)
+	instance.set("_conversation_preload_in_flight", saved_in_flight)
+	instance.set("_conversation_preload_retries", saved_retries)
+	instance.set("_conversation_preload_retry_queued", saved_retry_queued)
+	instance.set("_conversation_preload_requeue_requested", saved_requeue)
+	instance.set("_conversation_preload_requeue_cycle_kinds", saved_requeue_kinds)
+	instance.set("_conversation_preload_invalidated", saved_invalidated)
+	instance.set("_conversation_preload_recovery_required", saved_recovery)
+	instance.set("_conversation_preload_demand_signatures", saved_signatures)
+	instance.set("_conversation_preload_demand_epochs", saved_epochs)
+	instance.set("_conversation_preload_recovery_demand_epochs", saved_recovery_epochs)
+	instance.set("_conversation_target", saved_target)
+
+
+func _check_preload_rebase_and_invalidation_epoch_contract(
+	label: String,
+	instance: Node,
+	actor_id: String
+) -> void:
+	var actor_node := instance.get_node_or_null("Town/Actors/%s" % actor_id) as NPC3D
+	var saved_actor: Dictionary = instance.call("_actor_view", actor_id)
+	if actor_node == null or saved_actor.is_empty():
+		_failures.append("%s cannot stage bounded preload dispatch checks" % label)
+		return
+	var saved_queue: Array[String] = instance.get("_conversation_preload_queue").duplicate(true)
+	var saved_queued: Dictionary = instance.get("_conversation_preload_queued").duplicate(true)
+	var saved_queued_kinds: Dictionary = (
+		instance.get("_conversation_preload_queued_cycle_kinds").duplicate(true)
+	)
+	var saved_in_flight: Dictionary = (
+		instance.get("_conversation_preload_in_flight").duplicate(true)
+	)
+	var saved_retries: Dictionary = instance.get("_conversation_preload_retries").duplicate(true)
+	var saved_retry_queued: Dictionary = (
+		instance.get("_conversation_preload_retry_queued").duplicate(true)
+	)
+	var saved_attempted: Dictionary = (
+		instance.get("_conversation_preload_attempted").duplicate(true)
+	)
+	var saved_invalidated: Dictionary = (
+		instance.get("_conversation_preload_invalidated").duplicate(true)
+	)
+	var saved_recovery: Dictionary = (
+		instance.get("_conversation_preload_recovery_required").duplicate(true)
+	)
+	var saved_signatures: Dictionary = (
+		instance.get("_conversation_preload_demand_signatures").duplicate(true)
+	)
+	var saved_epochs: Dictionary = (
+		instance.get("_conversation_preload_demand_epochs").duplicate(true)
+	)
+	var saved_invalidation_epochs: Dictionary = (
+		instance.get("_conversation_preload_invalidation_demand_epochs").duplicate(true)
+	)
+	var saved_recovery_epochs: Dictionary = (
+		instance.get("_conversation_preload_recovery_demand_epochs").duplicate(true)
+	)
+	var saved_priority := str(instance.get("_conversation_preload_priority_actor_id"))
+	var saved_target: Variant = instance.get("_conversation_target")
+	var saved_refresh := bool(instance.get("_conversation_preload_refresh_required"))
+	var saved_needs_rebase := bool(instance.get("_advance_needs_rebase"))
+	var saved_rebase_in_flight := bool(instance.get("_advance_rebase_in_flight"))
+
+	var unavailable_actor := saved_actor.duplicate(true)
+	unavailable_actor["playerConversationReady"] = false
+	instance.call("_update_run_actor", unavailable_actor)
+	instance.set("_conversation_target", null)
+	instance.set("_conversation_preload_priority_actor_id", actor_id)
+	instance.set("_conversation_preload_in_flight", {})
+	instance.set("_conversation_preload_queued_cycle_kinds", {})
+	instance.set("_conversation_preload_retry_queued", {})
+	instance.set("_conversation_preload_refresh_required", false)
+	var staged_queue: Array[String] = [actor_id]
+	var staged_queued: Dictionary = {}
+	staged_queued[actor_id] = true
+	instance.set("_conversation_preload_queue", staged_queue)
+	instance.set("_conversation_preload_queued", staged_queued)
+
+	instance.set("_advance_needs_rebase", true)
+	instance.set("_advance_rebase_in_flight", false)
+	instance.call("_pump_conversation_preloads")
+	if (
+		(instance.get("_conversation_preload_queue") as Array).size() != 1
+		or not (instance.get("_conversation_preload_in_flight") as Dictionary).is_empty()
+	):
+		_failures.append("%s preload pump consumed work while rebase was required" % label)
+	instance.set("_advance_needs_rebase", false)
+	instance.set("_advance_rebase_in_flight", true)
+	instance.call("_pump_conversation_preloads")
+	if (
+		(instance.get("_conversation_preload_queue") as Array).size() != 1
+		or not (instance.get("_conversation_preload_in_flight") as Dictionary).is_empty()
+	):
+		_failures.append("%s preload pump consumed work during an active rebase" % label)
+	instance.set("_advance_rebase_in_flight", false)
+	var first_dispatch_actor := str(
+		instance.call("_take_next_conversation_preload_dispatch")
+	)
+	var second_dispatch_actor := str(
+		instance.call("_take_next_conversation_preload_dispatch")
+	)
+	if (
+		first_dispatch_actor != actor_id
+		or not second_dispatch_actor.is_empty()
+		or not (instance.get("_conversation_preload_in_flight") as Dictionary).has(actor_id)
+	):
+		_failures.append("%s queued preload did not resume exactly once after rebase" % label)
+
+	var empty_queue: Array[String] = []
+	instance.set("_conversation_preload_queue", empty_queue)
+	instance.set("_conversation_preload_queued", {})
+	instance.set("_conversation_preload_queued_cycle_kinds", {})
+	instance.set("_conversation_preload_in_flight", {})
+	instance.set("_conversation_preload_demand_signatures", {})
+	instance.set("_conversation_preload_demand_epochs", {})
+	instance.set("_conversation_preload_invalidation_demand_epochs", {})
+	var invalidated: Dictionary = {}
+	invalidated[actor_id] = true
+	instance.set("_conversation_preload_invalidated", invalidated)
+	instance.call("_sync_conversation_preload_demands", "", "", actor_id)
+	if not bool(instance.call("_consume_conversation_preload_invalidation_demand", actor_id)):
+		_failures.append("%s first raw-aim epoch could not fund invalidation recovery" % label)
+	invalidated = {}
+	invalidated[actor_id] = true
+	instance.set("_conversation_preload_invalidated", invalidated)
+	if bool(instance.call("_consume_conversation_preload_invalidation_demand", actor_id)):
+		_failures.append("%s held raw aim funded a second invalidation retry" % label)
+	instance.call("_sync_conversation_preload_demands", "", "", "")
+	instance.call("_sync_conversation_preload_demands", "", "", actor_id)
+	if not bool(instance.call("_consume_conversation_preload_invalidation_demand", actor_id)):
+		_failures.append("%s fresh raw-aim epoch did not reopen invalidation recovery" % label)
+
+	instance.call("_sync_conversation_preload_demands", "", "", "")
+	invalidated = {}
+	invalidated[actor_id] = true
+	instance.set("_conversation_preload_invalidated", invalidated)
+	instance.call(
+		"_sync_conversation_preload_demands",
+		actor_id,
+		"smoke-contact-epoch-a",
+		""
+	)
+	if not bool(instance.call("_consume_conversation_preload_invalidation_demand", actor_id)):
+		_failures.append("%s first contact id could not fund invalidation recovery" % label)
+	invalidated = {}
+	invalidated[actor_id] = true
+	instance.set("_conversation_preload_invalidated", invalidated)
+	instance.call(
+		"_sync_conversation_preload_demands",
+		actor_id,
+		"smoke-contact-epoch-a",
+		""
+	)
+	if bool(instance.call("_consume_conversation_preload_invalidation_demand", actor_id)):
+		_failures.append("%s unchanged contact id funded a second invalidation retry" % label)
+	instance.call(
+		"_sync_conversation_preload_demands",
+		actor_id,
+		"smoke-contact-epoch-b",
+		""
+	)
+	if not bool(instance.call("_consume_conversation_preload_invalidation_demand", actor_id)):
+		_failures.append("%s new contact id did not reopen invalidation recovery" % label)
+
+	instance.set("_conversation_preload_demand_signatures", {})
+	instance.set("_conversation_preload_demand_epochs", {})
+	instance.set("_conversation_preload_invalidation_demand_epochs", {})
+	instance.set("_conversation_preload_invalidated", {})
+	instance.set("_advance_needs_rebase", false)
+	instance.call("_sync_conversation_preload_demands", "", "", actor_id)
+	if not bool(instance.call(
+		"_handle_recoverable_conversation_preload_error",
+		actor_id,
+		"conversation_not_ready"
+	)):
+		_failures.append("%s conversation_not_ready was not classified as recoverable" % label)
+	if (
+		not bool(instance.get("_advance_needs_rebase"))
+		or not (instance.get("_conversation_preload_invalidated") as Dictionary).has(actor_id)
+	):
+		_failures.append("%s conversation_not_ready did not require rebase and invalidation" % label)
+	instance.set("_advance_needs_rebase", false)
+	if not bool(instance.call("_consume_conversation_preload_invalidation_demand", actor_id)):
+		_failures.append("%s conversation_not_ready did not admit one explicit recovery" % label)
+	instance.call(
+		"_handle_recoverable_conversation_preload_error",
+		actor_id,
+		"conversation_not_ready"
+	)
+	instance.set("_advance_needs_rebase", false)
+	if bool(instance.call("_consume_conversation_preload_invalidation_demand", actor_id)):
+		_failures.append("%s repeated conversation_not_ready looped under held aim" % label)
+	instance.call("_sync_conversation_preload_demands", "", "", "")
+	instance.call("_sync_conversation_preload_demands", "", "", actor_id)
+	if not bool(instance.call("_consume_conversation_preload_invalidation_demand", actor_id)):
+		_failures.append("%s fresh aim did not recover conversation_not_ready" % label)
+	instance.set("_conversation_preload_invalidated", {})
+	instance.set("_advance_needs_rebase", false)
+	if (
+		bool(instance.call(
+			"_handle_recoverable_conversation_preload_error",
+			actor_id,
+			"invalid_locale"
+		))
+		or bool(instance.get("_advance_needs_rebase"))
+		or not (instance.get("_conversation_preload_invalidated") as Dictionary).is_empty()
+	):
+		_failures.append("%s broadened preload recovery to an arbitrary error" % label)
+
+	instance.call("_update_run_actor", saved_actor)
+	instance.set("_conversation_preload_queue", saved_queue)
+	instance.set("_conversation_preload_queued", saved_queued)
+	instance.set("_conversation_preload_queued_cycle_kinds", saved_queued_kinds)
+	instance.set("_conversation_preload_in_flight", saved_in_flight)
+	instance.set("_conversation_preload_retries", saved_retries)
+	instance.set("_conversation_preload_retry_queued", saved_retry_queued)
+	instance.set("_conversation_preload_attempted", saved_attempted)
+	instance.set("_conversation_preload_invalidated", saved_invalidated)
+	instance.set("_conversation_preload_recovery_required", saved_recovery)
+	instance.set("_conversation_preload_demand_signatures", saved_signatures)
+	instance.set("_conversation_preload_demand_epochs", saved_epochs)
+	instance.set(
+		"_conversation_preload_invalidation_demand_epochs",
+		saved_invalidation_epochs
+	)
+	instance.set("_conversation_preload_recovery_demand_epochs", saved_recovery_epochs)
+	instance.set("_conversation_preload_priority_actor_id", saved_priority)
+	instance.set("_conversation_preload_refresh_required", saved_refresh)
+	instance.set("_advance_needs_rebase", saved_needs_rebase)
+	instance.set("_advance_rebase_in_flight", saved_rebase_in_flight)
+	instance.set("_conversation_target", saved_target)
+
+
+func _check_conversation_start_not_ready_recovery_contract(
+	label: String,
+	instance: Node,
+	actor_id: String
+) -> void:
+	var actor_node := instance.get_node_or_null("Town/Actors/%s" % actor_id) as NPC3D
+	var player := instance.get_node_or_null("Town/Actors/Player3D") as CharacterBody3D
+	var hud := instance.get_node_or_null("HUD3D") as HUD3D
+	var saved_actor: Dictionary = instance.call("_actor_view", actor_id)
+	if actor_node == null or player == null or hud == null or saved_actor.is_empty():
+		_failures.append("%s cannot stage final conversation start recovery" % label)
+		return
+	var saved_snapshot: Dictionary = instance.get("_run_snapshot").duplicate(true)
+	var saved_queue: Array[String] = instance.get("_conversation_preload_queue").duplicate(true)
+	var saved_queued: Dictionary = instance.get("_conversation_preload_queued").duplicate(true)
+	var saved_queued_kinds: Dictionary = (
+		instance.get("_conversation_preload_queued_cycle_kinds").duplicate(true)
+	)
+	var saved_in_flight: Dictionary = (
+		instance.get("_conversation_preload_in_flight").duplicate(true)
+	)
+	var saved_attempted: Dictionary = (
+		instance.get("_conversation_preload_attempted").duplicate(true)
+	)
+	var saved_invalidated: Dictionary = (
+		instance.get("_conversation_preload_invalidated").duplicate(true)
+	)
+	var saved_recovery: Dictionary = (
+		instance.get("_conversation_preload_recovery_required").duplicate(true)
+	)
+	var saved_retries: Dictionary = instance.get("_conversation_preload_retries").duplicate(true)
+	var saved_retry_queued: Dictionary = (
+		instance.get("_conversation_preload_retry_queued").duplicate(true)
+	)
+	var saved_signatures: Dictionary = (
+		instance.get("_conversation_preload_demand_signatures").duplicate(true)
+	)
+	var saved_epochs: Dictionary = (
+		instance.get("_conversation_preload_demand_epochs").duplicate(true)
+	)
+	var saved_invalidation_epochs: Dictionary = (
+		instance.get("_conversation_preload_invalidation_demand_epochs").duplicate(true)
+	)
+	var saved_recovery_epochs: Dictionary = (
+		instance.get("_conversation_preload_recovery_demand_epochs").duplicate(true)
+	)
+	var saved_priority := str(instance.get("_conversation_preload_priority_actor_id"))
+	var saved_target: Variant = instance.get("_conversation_target")
+	var saved_active_contact: Dictionary = instance.get("_active_contact").duplicate(true)
+	var saved_pending_contact_id := str(instance.get("_pending_contact_ready_id"))
+	var saved_conversation_contact_id := str(instance.get("_conversation_contact_id"))
+	var saved_conversation_contact_zone_id := str(
+		instance.get("_conversation_contact_zone_id")
+	)
+	var saved_needs_rebase := bool(instance.get("_advance_needs_rebase"))
+	var saved_rebase_in_flight := bool(instance.get("_advance_rebase_in_flight"))
+	var saved_paused := paused
+	var saved_control := bool(player.get("_control_enabled"))
+
+	var attempted: Dictionary = {}
+	attempted[actor_id] = true
+	var empty_queue: Array[String] = []
+	instance.set("_conversation_preload_queue", empty_queue)
+	instance.set("_conversation_preload_queued", {})
+	instance.set("_conversation_preload_queued_cycle_kinds", {})
+	instance.set("_conversation_preload_in_flight", {})
+	instance.set("_conversation_preload_attempted", attempted)
+	instance.set("_conversation_preload_invalidated", {})
+	instance.set("_conversation_preload_recovery_required", {})
+	instance.set("_conversation_preload_retries", {})
+	instance.set("_conversation_preload_retry_queued", {})
+	instance.set("_conversation_preload_demand_signatures", {})
+	instance.set("_conversation_preload_demand_epochs", {})
+	instance.set("_conversation_preload_invalidation_demand_epochs", {})
+	instance.set("_conversation_preload_recovery_demand_epochs", {})
+	instance.set("_conversation_preload_priority_actor_id", actor_id)
+	instance.set("_advance_needs_rebase", false)
+	# Keep the handler's deferred rebase from issuing a fixture request while
+	# this focused state machine proof inspects the exact post-error boundary.
+	instance.set("_advance_rebase_in_flight", true)
+	instance.set("_conversation_target", actor_node)
+	var staged_snapshot := instance.get("_run_snapshot") as Dictionary
+	var staged_clock := staged_snapshot.get("worldClock", {}) as Dictionary
+	var elapsed_seconds := float(
+		staged_clock.get("elapsedSeconds", 0.0)
+	)
+	var start_error_contact_id := "contact-smoke-start-not-ready"
+	var start_error_contact := {
+		"contactId": start_error_contact_id,
+		"actorId": actor_id,
+		"interactionZoneId": "StudioReceptionConversation",
+		"originAnchorRef": "Studio.receptionist_spawn",
+		"safeDistanceM": 1.6,
+		"issuedAtSeconds": elapsed_seconds,
+		"expiresAtSeconds": elapsed_seconds + 120.0,
+		"reason": "smoke_start_not_ready",
+		"procedure": "ordinary",
+	}
+	instance.set("_active_contact", start_error_contact)
+	staged_snapshot["activeContact"] = start_error_contact.duplicate(true)
+	instance.set("_run_snapshot", staged_snapshot)
+	instance.set("_conversation_contact_id", start_error_contact_id)
+	instance.set("_conversation_contact_zone_id", "StudioReceptionConversation")
+	player.set_control_enabled(false)
+	hud.begin_conversation(saved_actor)
+	paused = true
+	await instance.call(
+		"_handle_conversation_start_result",
+		{"error": "conversation_not_ready"},
+		int(instance.get("_lifecycle_generation"))
+	)
+	if (
+		not bool(instance.get("_advance_needs_rebase"))
+		or not (instance.get("_conversation_preload_invalidated") as Dictionary).has(
+			actor_id
+		)
+		or bool(instance.call("_actor_view", actor_id).get(
+			"playerConversationReady",
+			true
+		))
+		or instance.get("_conversation_target") != null
+		or str(instance.get("_pending_contact_ready_id")) != start_error_contact_id
+	):
+		_failures.append(
+			"%s final conversation_not_ready did not enter recoverable rebase state" % label
+		)
+	# Consume the handler's deferred callback while the in-flight guard is still
+	# set, then apply the same accepted full-snapshot path used by a real rebase.
+	await process_frame
+	var rebased_snapshot: Dictionary = instance.get("_run_snapshot").duplicate(true)
+	instance.call("_replace_run_snapshot", rebased_snapshot, true)
+	instance.call("_apply_social_view_from_response", rebased_snapshot, true)
+	instance.set("_advance_needs_rebase", false)
+	instance.set("_advance_rebase_in_flight", false)
+	instance.set("_conversation_target", actor_node)
+	instance.call("_sync_conversation_preload_demands", "", "", actor_id)
+	var queued_retry := bool(instance.call(
+		"_queue_conversation_preload",
+		actor_id,
+		0,
+		"invalidated"
+	))
+	instance.set("_conversation_target", null)
+	var dispatched_actor := str(instance.call("_take_next_conversation_preload_dispatch"))
+	if (
+		not queued_retry
+		or dispatched_actor != actor_id
+		or not (instance.get("_conversation_preload_in_flight") as Dictionary).has(actor_id)
+	):
+		_failures.append(
+			"%s rebase plus one explicit aim could not retry final conversation_not_ready"
+			% label
+		)
+
+	actor_node.cancel_player_contact()
+	instance.set("_run_snapshot", saved_snapshot)
+	instance.call("_apply_all_conversation_readiness")
+	instance.set("_conversation_preload_queue", saved_queue)
+	instance.set("_conversation_preload_queued", saved_queued)
+	instance.set("_conversation_preload_queued_cycle_kinds", saved_queued_kinds)
+	instance.set("_conversation_preload_in_flight", saved_in_flight)
+	instance.set("_conversation_preload_attempted", saved_attempted)
+	instance.set("_conversation_preload_invalidated", saved_invalidated)
+	instance.set("_conversation_preload_recovery_required", saved_recovery)
+	instance.set("_conversation_preload_retries", saved_retries)
+	instance.set("_conversation_preload_retry_queued", saved_retry_queued)
+	instance.set("_conversation_preload_demand_signatures", saved_signatures)
+	instance.set("_conversation_preload_demand_epochs", saved_epochs)
+	instance.set(
+		"_conversation_preload_invalidation_demand_epochs",
+		saved_invalidation_epochs
+	)
+	instance.set("_conversation_preload_recovery_demand_epochs", saved_recovery_epochs)
+	instance.set("_conversation_preload_priority_actor_id", saved_priority)
+	instance.set("_advance_needs_rebase", saved_needs_rebase)
+	instance.set("_advance_rebase_in_flight", saved_rebase_in_flight)
+	instance.set("_conversation_target", saved_target)
+	instance.set("_active_contact", saved_active_contact)
+	instance.set("_pending_contact_ready_id", saved_pending_contact_id)
+	instance.set("_conversation_contact_id", saved_conversation_contact_id)
+	instance.set("_conversation_contact_zone_id", saved_conversation_contact_zone_id)
+	player.set_control_enabled(saved_control)
+	paused = saved_paused
+
+
+func _check_stale_advance_response_contract(label: String, instance: Node) -> void:
+	var saved_snapshot: Dictionary = instance.get("_run_snapshot").duplicate(true)
+	var saved_social: Dictionary = instance.get("_social_view").duplicate(true)
+	var saved_accepted: Array = instance.get("_last_accepted_prop_event_ids").duplicate(true)
+	var saved_memories: Array = instance.get("_last_prop_observation_memories").duplicate(true)
+	var saved_cursor := int(instance.get("_ambient_speech_cursor"))
+	var saved_events: Array = instance.get("_ambient_speech_events").duplicate(true)
+	var saved_recent_wakes: Array = instance.get("_recent_schedule_wakes").duplicate(true)
+	var saved_wake_queue: Array[Dictionary] = instance.get("_ambient_wake_queue").duplicate(true)
+	var saved_claimed: Dictionary = instance.get("_ambient_claimed_wake_ids").duplicate(true)
+	var saved_pending: Dictionary = instance.get("_ambient_pending_request").duplicate(true)
+	var saved_pending_kind := str(instance.get("_ambient_pending_wake_kind"))
+	var saved_pending_dispatched := bool(instance.get("_ambient_pending_request_dispatched"))
+	var saved_needs_rebase := bool(instance.get("_advance_needs_rebase"))
+	var saved_rebase_in_flight := bool(instance.get("_advance_rebase_in_flight"))
+	var saved_decision_in_flight := bool(instance.get("_ambient_decision_in_flight"))
+	var current_revision := int(saved_snapshot.get("worldRevision", 1))
+	var stale_wake := {
+		"wakeId": "wake-stale-smoke",
+		"kind": "goal",
+		"status": "pending",
+		"requiresDecision": true,
+		"scheduledAtSeconds": 0.0,
+		"observedWorldRevision": current_revision - 1,
+	}
+	instance.call("_apply_advance_response", {
+		"worldRevision": current_revision - 1,
+		"clock": {"toSeconds": 9999.0},
+		"socialView": {"revision": 9999},
+		"acceptedPropEventIds": ["stale-prop"],
+		"propObservationMemories": [{"memoryId": "stale-memory"}],
+		"ambientSpeechCursor": saved_cursor + 1,
+		"ambientSpeechEvents": [{
+			"seq": saved_cursor + 1,
+			"speakerActorId": "NPC_Studio_Receptionist",
+			"line": "stale",
+		}],
+		"scheduleWakes": [stale_wake],
+	})
+	if not bool(instance.get("_advance_needs_rebase")):
+		_failures.append("%s stale advance did not require an authoritative rebase" % label)
+	if (
+		instance.get("_run_snapshot") != saved_snapshot
+		or instance.get("_social_view") != saved_social
+		or instance.get("_last_accepted_prop_event_ids") != saved_accepted
+		or instance.get("_last_prop_observation_memories") != saved_memories
+		or int(instance.get("_ambient_speech_cursor")) != saved_cursor
+		or instance.get("_ambient_speech_events") != saved_events
+		or instance.get("_recent_schedule_wakes") != saved_recent_wakes
+		or instance.get("_ambient_wake_queue") != saved_wake_queue
+	):
+		_failures.append("%s stale advance mutated revision-sensitive client state" % label)
+
+	var guarded_wake_queue: Array[Dictionary] = [stale_wake.duplicate(true)]
+	instance.set("_ambient_wake_queue", guarded_wake_queue)
+	instance.set("_ambient_claimed_wake_ids", {"wake-stale-smoke": true})
+	instance.set("_ambient_pending_request", {})
+	instance.set("_ambient_pending_wake_kind", "")
+	instance.set("_ambient_pending_request_dispatched", false)
+	instance.set("_ambient_decision_in_flight", false)
+	instance.call("_prepare_next_ambient_decision")
+	if (
+		not (instance.get("_ambient_pending_request") as Dictionary).is_empty()
+		or (instance.get("_ambient_wake_queue") as Array).size() != 1
+	):
+		_failures.append("%s stale goal was prepared before rebase" % label)
+	instance.set("_ambient_pending_request", {
+		"runId": saved_snapshot.get("runId", ""),
+		"wakeId": "wake-stale-smoke",
+		"observedWorldRevision": current_revision - 1,
+	})
+	instance.set("_ambient_pending_wake_kind", "goal")
+	instance.call("_dispatch_ambient_decision")
+	if bool(instance.get("_ambient_decision_in_flight")):
+		_failures.append("%s stale goal dispatched before rebase" % label)
+
+	var recovered_goal := {
+		"wakeId": "wake-rebase-goal-smoke",
+		"kind": "goal",
+		"status": "pending",
+		"requiresDecision": true,
+		"scheduledAtSeconds": 1.0,
+		"observedWorldRevision": current_revision,
+	}
+	var recovered_meeting := {
+		"wakeId": "wake-rebase-meeting-smoke",
+		"kind": "meeting_ready",
+		"status": "pending",
+		"requiresDecision": true,
+		"scheduledAtSeconds": 2.0,
+		"observedWorldRevision": current_revision,
+	}
+	var dispatched_wake := {
+		"wakeId": "wake-rebase-dispatched-smoke",
+		"kind": "goal",
+		"status": "pending",
+		"requiresDecision": true,
+		"scheduledAtSeconds": 0.0,
+		"observedWorldRevision": current_revision,
+	}
+	instance.set("_ambient_wake_queue", [])
+	instance.set("_ambient_claimed_wake_ids", {
+		"wake-rebase-dispatched-smoke": true,
+	})
+	instance.set("_ambient_pending_request", {
+		"runId": saved_snapshot.get("runId", ""),
+		"wakeId": "wake-rebase-dispatched-smoke",
+		"observedWorldRevision": current_revision,
+	})
+	instance.set("_ambient_pending_wake_kind", "goal")
+	instance.set("_ambient_pending_request_dispatched", true)
+	instance.call("_recover_ambient_decision_wakes_after_rebase", {
+		"pendingWakes": [dispatched_wake, recovered_goal, recovered_meeting],
+	})
+	var recovered_counts := {
+		"wake-rebase-goal-smoke": 0,
+		"wake-rebase-meeting-smoke": 0,
+		"wake-rebase-dispatched-smoke": 0,
+	}
+	for wake_value in instance.get("_ambient_wake_queue") as Array:
+		if wake_value is Dictionary:
+			var wake_id := str((wake_value as Dictionary).get("wakeId", ""))
+			if recovered_counts.has(wake_id):
+				recovered_counts[wake_id] = int(recovered_counts[wake_id]) + 1
+	if (
+		int(recovered_counts["wake-rebase-goal-smoke"]) != 1
+		or int(recovered_counts["wake-rebase-meeting-smoke"]) != 1
+		or int(recovered_counts["wake-rebase-dispatched-smoke"]) != 0
+	):
+		_failures.append(
+			"%s rebase recovery did not queue authoritative wakes exactly once" % label
+		)
+	if (
+		str((instance.get("_ambient_pending_request") as Dictionary).get(
+			"wakeId",
+			""
+		)) != "wake-rebase-dispatched-smoke"
+		or not bool(instance.get("_ambient_pending_request_dispatched"))
+	):
+		_failures.append(
+			"%s rebase recovery replaced or duplicated an already-dispatched wake" % label
+		)
+
+	instance.set("_run_snapshot", saved_snapshot)
+	instance.set("_social_view", saved_social)
+	instance.set("_last_accepted_prop_event_ids", saved_accepted)
+	instance.set("_last_prop_observation_memories", saved_memories)
+	instance.set("_ambient_speech_cursor", saved_cursor)
+	instance.set("_ambient_speech_events", saved_events)
+	instance.set("_recent_schedule_wakes", saved_recent_wakes)
+	instance.set("_ambient_wake_queue", saved_wake_queue)
+	instance.set("_ambient_claimed_wake_ids", saved_claimed)
+	instance.set("_ambient_pending_request", saved_pending)
+	instance.set("_ambient_pending_wake_kind", saved_pending_kind)
+	instance.set("_ambient_pending_request_dispatched", saved_pending_dispatched)
+	instance.set("_advance_needs_rebase", saved_needs_rebase)
+	instance.set("_advance_rebase_in_flight", saved_rebase_in_flight)
+	instance.set("_ambient_decision_in_flight", saved_decision_in_flight)
+
+
+func _check_monotonic_grace_clock_rebase_contract(label: String, instance: Node) -> void:
+	var saved_snapshot: Dictionary = instance.get("_run_snapshot").duplicate(true)
+	var saved_evidence_run_id := str(instance.get("_accepted_provider_evidence_run_id"))
+	var saved_audit: Dictionary = instance.get("_accepted_provider_audit").duplicate(true)
+	var saved_trace: Dictionary = (
+		instance.get("_accepted_provider_runtime_trace").duplicate(true)
+	)
+	var saved_source := str(instance.get("_accepted_provider_evidence_source"))
+	var saved_response_revision := int(
+		instance.get("_accepted_provider_evidence_response_revision")
+	)
+	instance.set("_run_snapshot", {
+		"runId": "run-clock-monotonic-smoke",
+		"worldRevision": 9,
+		"worldClock": {
+			"elapsedSeconds": 159.0,
+			"graceEndsAtSeconds": 90.0,
+			"hearingAtSeconds": 1800.0,
+			"paused": false,
+			"graceEnded": true,
+		},
+	})
+	instance.call("_replace_run_snapshot", {
+		"runId": "run-clock-monotonic-smoke",
+		"worldRevision": 10,
+		"worldClock": {
+			"elapsedSeconds": 177.0,
+			"graceEndsAtSeconds": 90.0,
+			"hearingAtSeconds": 1800.0,
+			"paused": false,
+		},
+	}, true)
+	var rebased_snapshot: Dictionary = instance.get("_run_snapshot")
+	var rebased_clock: Dictionary = rebased_snapshot.get("worldClock", {})
+	if (
+		not bool(rebased_clock.get("graceEnded", false))
+		or float(rebased_clock.get("elapsedSeconds", -1.0)) != 177.0
+	):
+		_failures.append(
+			"%s same-run rebase rolled back grace end or invented elapsed time" % label
+		)
+
+	instance.call("_replace_run_snapshot", {
+		"runId": "run-clock-fresh-smoke",
+		"worldRevision": 0,
+		"worldClock": {
+			"elapsedSeconds": 0.0,
+			"graceEndsAtSeconds": 90.0,
+			"hearingAtSeconds": 1800.0,
+			"paused": false,
+		},
+	}, true)
+	var fresh_snapshot: Dictionary = instance.get("_run_snapshot")
+	var fresh_clock: Dictionary = fresh_snapshot.get("worldClock", {})
+	if (
+		bool(fresh_clock.get("graceEnded", false))
+		or float(fresh_clock.get("elapsedSeconds", -1.0)) != 0.0
+	):
+		_failures.append("%s fresh run inherited the previous run's grace end" % label)
+	instance.set("_run_snapshot", saved_snapshot)
+	instance.set("_accepted_provider_evidence_run_id", saved_evidence_run_id)
+	instance.set("_accepted_provider_audit", saved_audit)
+	instance.set("_accepted_provider_runtime_trace", saved_trace)
+	instance.set("_accepted_provider_evidence_source", saved_source)
+	instance.set("_accepted_provider_evidence_response_revision", saved_response_revision)
+
+
+func _provider_evidence_packet(
+	run_id: String,
+	world_revision: int,
+	call_count: int,
+	resolution_count: int,
+	trace_count: int
+) -> Dictionary:
+	var calls: Array = []
+	for sequence in range(1, call_count + 1):
+		calls.append({
+			"seq": sequence,
+			"purpose": "agent_step",
+			"profileId": "modelscope/qwen3.7-plus",
+			"transport": "live",
+			"usedFallback": false,
+			"outcome": "success",
+			"failureReason": null,
+			"chargedTokens": 10,
+		})
+	var resolutions: Array = []
+	for sequence in range(1, resolution_count + 1):
+		resolutions.append({
+			"seq": sequence,
+			"purpose": "agent_step",
+			"profileId": "modelscope/qwen3.7-plus",
+			"transport": "live",
+			"usedFallback": false,
+			"fallbackReason": null,
+			"callSeqs": [mini(sequence, maxi(1, call_count))],
+		})
+	var trace_entries: Array = []
+	for sequence in range(1, trace_count + 1):
+		trace_entries.append({
+			"seq": sequence,
+			"meta": {
+				"profileId": "modelscope/qwen3.7-plus",
+				"transport": "live",
+				"usedFallback": false,
+			},
+		})
+	return {
+		"runId": run_id,
+		"worldRevision": world_revision,
+		"providerBudget": {
+			"callsUsed": call_count,
+			"tokensUsed": call_count * 10,
+		},
+		"providerAudit": {
+			"callsUsed": call_count,
+			"tokensUsed": call_count * 10,
+			"inFlightCalls": 0,
+			"inFlightTokens": 0,
+			"complete": true,
+			"truncated": false,
+			"droppedCount": 0,
+			"calls": calls,
+			"resolutions": resolutions,
+		},
+		"providerRuntimeTrace": {
+			"complete": true,
+			"truncated": false,
+			"droppedCount": 0,
+			"entries": trace_entries,
+		},
+	}
+
+
+func _provider_evidence_progress_from_snapshot(
+	instance: Node,
+	snapshot: Dictionary
+) -> Array[int]:
+	return instance.call(
+		"_provider_evidence_progress",
+		snapshot.get("providerAudit", {}) as Dictionary,
+		snapshot.get("providerRuntimeTrace", {}) as Dictionary
+	) as Array[int]
+
+
+func _provider_progress_is_at_least(
+	candidate: Array[int],
+	baseline: Array[int]
+) -> bool:
+	if candidate.size() != baseline.size():
+		return false
+	for index in candidate.size():
+		if candidate[index] < baseline[index]:
+			return false
+	return true
+
+
+func _check_provider_evidence_freshness_contract(
+	label: String,
+	instance: Node
+) -> void:
+	var saved_snapshot: Dictionary = instance.get("_run_snapshot").duplicate(true)
+	var saved_evidence_run_id := str(instance.get("_accepted_provider_evidence_run_id"))
+	var saved_audit: Dictionary = instance.get("_accepted_provider_audit").duplicate(true)
+	var saved_trace: Dictionary = (
+		instance.get("_accepted_provider_runtime_trace").duplicate(true)
+	)
+	var saved_source := str(instance.get("_accepted_provider_evidence_source"))
+	var saved_response_revision := int(
+		instance.get("_accepted_provider_evidence_response_revision")
+	)
+	var saved_preloads: Dictionary = (
+		instance.get("_conversation_preload_in_flight").duplicate(true)
+	)
+	var saved_decision_in_flight := bool(instance.get("_ambient_decision_in_flight"))
+	var saved_resolving_answer := bool(instance.get("_resolving_answer"))
+
+	var run_id := "run-provider-freshness-smoke"
+	instance.set("_run_snapshot", _provider_evidence_packet(run_id, 10, 0, 0, 0))
+	instance.call("_reset_accepted_provider_evidence", run_id)
+	var preload_response := _provider_evidence_packet(run_id, 11, 1, 1, 1)
+	instance.call("_cache_provider_evidence", preload_response, "preload")
+	var after_preload: Dictionary = instance.get("_run_snapshot")
+	if (
+		int((after_preload.get("providerAudit", {}) as Dictionary).get("callsUsed", -1)) != 1
+		or int(((after_preload.get("providerRuntimeTrace", {}) as Dictionary).get(
+			"entries", []
+		) as Array).size()) != 1
+	):
+		_failures.append("%s preload evidence waited for a snapshot rebase" % label)
+
+	var decision_response := _provider_evidence_packet(run_id, 12, 3, 3, 3)
+	instance.call("_cache_provider_evidence", decision_response, "npc_decision")
+	var after_decision: Dictionary = instance.get("_run_snapshot")
+	if (
+		int((after_decision.get("providerAudit", {}) as Dictionary).get("callsUsed", -1)) != 3
+		or int(((after_decision.get("providerRuntimeTrace", {}) as Dictionary).get(
+			"entries", []
+		) as Array).size()) != 3
+	):
+		_failures.append("%s NPC decision evidence waited for a snapshot rebase" % label)
+
+	# A response with farther audit counters but an older runtime trace must be
+	# rejected as one pair; accepting its audit alone would synthesize evidence
+	# that no server response actually carried.
+	instance.call(
+		"_cache_provider_evidence",
+		_provider_evidence_packet(run_id, 13, 4, 4, 2),
+		"out_of_order"
+	)
+	var after_out_of_order: Dictionary = instance.get("_run_snapshot")
+	var freshness: Dictionary = instance.call("_provider_evidence_freshness_snapshot")
+	if (
+		int((after_out_of_order.get("providerAudit", {}) as Dictionary).get(
+			"callsUsed", -1
+		)) != 3
+		or int(((after_out_of_order.get("providerRuntimeTrace", {}) as Dictionary).get(
+			"entries", []
+		) as Array).size()) != 3
+		or freshness.get("progress", []) != [3, 3, 3, 3]
+		or str(freshness.get("sourceKind", "")) != "npc_decision"
+	):
+		_failures.append("%s accepted an out-of-order provider evidence pair" % label)
+
+	# Even a higher world revision is not a provider-evidence freshness key.
+	instance.call(
+		"_replace_run_snapshot",
+		_provider_evidence_packet(run_id, 999, 2, 2, 2),
+		true
+	)
+	var after_rebase: Dictionary = instance.get("_run_snapshot")
+	if (
+		int((after_rebase.get("providerAudit", {}) as Dictionary).get("callsUsed", -1)) != 3
+		or int(((after_rebase.get("providerRuntimeTrace", {}) as Dictionary).get(
+			"entries", []
+		) as Array).size()) != 3
+	):
+		_failures.append("%s older full snapshot rolled provider evidence backward" % label)
+
+	instance.set("_conversation_preload_in_flight", {"NPC_Test": true})
+	instance.set("_ambient_decision_in_flight", true)
+	instance.set("_resolving_answer", true)
+	var busy_freshness: Dictionary = instance.call("_provider_evidence_freshness_snapshot")
+	if int(busy_freshness.get("clientProviderRequestInFlightCount", -1)) != 3:
+		_failures.append("%s did not expose all client-known provider requests" % label)
+
+	instance.call(
+		"_replace_run_snapshot",
+		_provider_evidence_packet("run-provider-freshness-new", 0, 0, 0, 0),
+		false
+	)
+	var fresh_run_evidence: Dictionary = instance.call(
+		"_provider_evidence_freshness_snapshot"
+	)
+	if (
+		str(fresh_run_evidence.get("acceptedRunId", ""))
+		!= "run-provider-freshness-new"
+		or fresh_run_evidence.get("progress", []) != [0, 0, 0, 0]
+	):
+		_failures.append("%s carried provider evidence across a run boundary" % label)
+
+	instance.set("_run_snapshot", saved_snapshot)
+	instance.set("_accepted_provider_evidence_run_id", saved_evidence_run_id)
+	instance.set("_accepted_provider_audit", saved_audit)
+	instance.set("_accepted_provider_runtime_trace", saved_trace)
+	instance.set("_accepted_provider_evidence_source", saved_source)
+	instance.set("_accepted_provider_evidence_response_revision", saved_response_revision)
+	instance.set("_conversation_preload_in_flight", saved_preloads)
+	instance.set("_ambient_decision_in_flight", saved_decision_in_flight)
+	instance.set("_resolving_answer", saved_resolving_answer)
 
 
 func _check_audio_onboarding_contract(label: String, instance: Node) -> void:
@@ -1375,9 +2362,28 @@ func _check_player_contact(label: String, instance: Node) -> void:
 	var receptionist := instance.get_node_or_null(
 		"Town/Actors/NPC_Studio_Receptionist"
 	) as NPC3D
-	var caretaker := instance.get_node_or_null("Town/Actors/NPC_Park_Caretaker") as NPC3D
 	var hud := instance.get_node_or_null("HUD3D") as HUD3D
-	if player == null or receptionist == null or caretaker == null or hud == null:
+	var fixture := _load_run_fixture()
+	var endpoints: Dictionary = fixture.get("endpoints", {})
+	var contact_packet: Dictionary = endpoints.get("npcDecisionPlayerContact", {})
+	var contact_response: Dictionary = contact_packet.get("response", {})
+	var contact_value: Variant = contact_response.get("activeContact")
+	var second_contact: Dictionary = (
+		(contact_value as Dictionary).duplicate(true)
+		if contact_value is Dictionary
+		else {}
+	)
+	var contact_actor_id := str(second_contact.get("actorId", ""))
+	var contact_actor := instance.get_node_or_null(
+		"Town/Actors/%s" % contact_actor_id
+	) as NPC3D
+	if (
+		player == null
+		or receptionist == null
+		or contact_actor == null
+		or hud == null
+		or second_contact.is_empty()
+	):
 		_failures.append("%s contact smoke is missing player/resident/HUD" % label)
 		return
 	var ready := false
@@ -1403,6 +2409,12 @@ func _check_player_contact(label: String, instance: Node) -> void:
 		):
 			break
 		await process_frame
+	# These contacts are deliberately synthetic and do not exist inside the
+	# fixture adapter. Discard only a leftover preload-rebase request after every
+	# real lane above has settled, or the now-correct authoritative null snapshot
+	# would revoke the setup before its movement/contact assertions run.
+	instance.set("_conversation_preload_refresh_required", false)
+	instance.set("_advance_needs_rebase", false)
 	instance.call("_sync_active_contact_from_response", {"activeContact": null})
 	var run_snapshot: Dictionary = instance.call("presentation_snapshot")
 	var elapsed := float((run_snapshot.get("worldClock", {}) as Dictionary).get(
@@ -1429,6 +2441,10 @@ func _check_player_contact(label: String, instance: Node) -> void:
 		"worldRevision": int(run_snapshot.get("runWorldRevision", 0)),
 		"activeContact": null,
 	})
+	if str((instance.get("_active_contact") as Dictionary).get("contactId", "")) != str(
+		first_contact.get("contactId", "")
+	):
+		_failures.append("%s equal-revision ordinary response cleared a newer contact" % label)
 	var conflict_arrival_count: Array[int] = [0]
 	var record_conflict_arrival := func(
 		_movement_id: String,
@@ -1466,10 +2482,16 @@ func _check_player_contact(label: String, instance: Node) -> void:
 	# Closing an unrelated modal flushes delayed movement through the same
 	# contact guard; it must simply requeue while the order is still active.
 	instance.set("_conversation_target", receptionist)
+	var synthetic_contact_run_id := str(instance.get("_run_id"))
+	# No backend fixture owns this synthetic contact. Keep the run id unavailable
+	# until deferred modal cleanup has drained, so an unrelated snapshot cannot
+	# correctly replace the setup with the fixture's authoritative null.
+	instance.set("_run_id", "")
 	paused = true
 	instance.call("_finish_conversation_modal")
 	for _frame in range(4):
 		await physics_frame
+	instance.set("_run_id", synthetic_contact_run_id)
 	var protected_contact: Dictionary = instance.call("presentation_snapshot").get(
 		"contact",
 		{}
@@ -1592,21 +2614,8 @@ func _check_player_contact(label: String, instance: Node) -> void:
 	):
 		_failures.append("%s stale contact opened or cancel-return forged runtime arrival" % label)
 
-	var consumed_contact_id := (
-		"contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Park_Caretaker:11"
-	)
-	var second_contact := {
-		"contactId": consumed_contact_id,
-		"actorId": str(caretaker.actor_id),
-		"interactionZoneId": "ParkConversation",
-		"originAnchorRef": "Park.meeting_north_east",
-		"safeDistanceM": 2.2,
-		"issuedAtSeconds": 90.0,
-		"expiresAtSeconds": 120.0,
-		"reason": "smoke_internal_reason",
-		"procedure": "ordinary",
-	}
-	player.global_position = caretaker.global_position + Vector3(0.0, 0.0, 3.4)
+	var consumed_contact_id := str(second_contact.get("contactId", ""))
+	player.global_position = contact_actor.global_position + Vector3(0.0, 0.0, 3.4)
 	player.velocity = Vector3.ZERO
 	instance.call("_sync_active_contact_from_response", {"activeContact": second_contact})
 	var cue := hud.contact_cue_snapshot()
@@ -1626,19 +2635,50 @@ func _check_player_contact(label: String, instance: Node) -> void:
 		Vector3(-1.5, 0.0, 0.0),
 		Vector3(0.0, 0.0, -1.5),
 	]:
-		player.global_position = caretaker.global_position + contact_offset
+		player.global_position = contact_actor.global_position + contact_offset
 		player.velocity = Vector3.ZERO
 		await physics_frame
-		if bool(caretaker.call("_contact_has_line_of_sight")):
+		if bool(contact_actor.call("_contact_has_line_of_sight")):
 			break
 	for _frame in range(45):
 		await physics_frame
 		if str(instance.get("_pending_contact_ready_id")) == consumed_contact_id:
 			break
-	var ready_position := caretaker.global_position
+	var ready_position := contact_actor.global_position
 	if paused or str(hud.presentation_snapshot().get("modalSurface", "")) != "inspect":
 		_failures.append("%s inspect log did not defer contact without pausing" % label)
+	# Physical arrival can beat the provider-backed opening. Closing the log in
+	# that state must retain the same pending contact without opening an error
+	# modal; readiness may then complete and consume it normally.
+	var unready_contact_actor: Dictionary = instance.call(
+		"_actor_view",
+		contact_actor_id
+	)
+	unready_contact_actor["playerConversationReady"] = false
+	instance.call("_update_run_actor", unready_contact_actor)
 	hud.close_log()
+	instance.call("_try_open_pending_contact")
+	var deferred_for_opening := hud.presentation_snapshot()
+	if (
+		str(deferred_for_opening.get("modalSurface", "")) == "conversation"
+		or str(instance.get("_pending_contact_ready_id")) != consumed_contact_id
+		or instance.get("_conversation_target") != null
+	):
+		_failures.append(
+			"%s physically ready contact did not wait for its provider opening: %s"
+			% [
+				label,
+				{
+					"modal": deferred_for_opening.get("modalSurface", ""),
+					"pending": instance.get("_pending_contact_ready_id"),
+					"target": instance.get("_conversation_target"),
+				},
+			]
+		)
+	var ready_contact_actor := unready_contact_actor.duplicate(true)
+	ready_contact_actor["playerConversationReady"] = true
+	instance.call("_update_run_actor", ready_contact_actor)
+	instance.call("_try_open_pending_contact")
 	var opened := false
 	for _frame in range(180):
 		await process_frame
@@ -1662,8 +2702,8 @@ func _check_player_contact(label: String, instance: Node) -> void:
 		not paused
 		or str(adapter.get("fixtureLastStartContactId", ""))
 		!= consumed_contact_id
-		or caretaker.has_player_contact(consumed_contact_id)
-		or caretaker.global_position.distance_to(ready_position) > 0.05
+		or contact_actor.has_player_contact(consumed_contact_id)
+		or contact_actor.global_position.distance_to(ready_position) > 0.05
 	):
 		_failures.append(
 			"%s contact start lost its id, pause, or consumed-position invariant" % label
@@ -1706,6 +2746,35 @@ func _check_player_contact(label: String, instance: Node) -> void:
 	if paused or not receptionist.has_player_contact("contact-smoke-resume"):
 		_failures.append("%s failed-start cleanup did not resume authoritative contact" % label)
 	instance.call("_sync_active_contact_from_response", {"activeContact": null})
+
+	# Run this full-snapshot authority check only after the synthetic contact
+	# scenarios above. The fixture adapter correctly owns `activeContact: null`,
+	# so rebasing mid-scenario would intentionally revoke their local setup.
+	var authoritative_revision := int(
+		(instance.get("_run_snapshot") as Dictionary).get("worldRevision", 0)
+	)
+	instance.call("_sync_active_contact_from_response", {"activeContact": first_contact})
+	instance.call(
+		"_sync_active_contact_from_response",
+		{
+			"worldRevision": authoritative_revision - 1,
+			"activeContact": null,
+		},
+		true
+	)
+	if str((instance.get("_active_contact") as Dictionary).get("contactId", "")) != str(
+		first_contact.get("contactId", "")
+	):
+		_failures.append("%s older authoritative snapshot cleared a newer contact" % label)
+	var authoritative_clear := (
+		(instance.get("_run_snapshot") as Dictionary).duplicate(true)
+	)
+	authoritative_clear["activeContact"] = null
+	authoritative_clear["worldRevision"] = authoritative_revision
+	instance.call("_replace_run_snapshot", authoritative_clear, true)
+	instance.call("_apply_social_view_from_response", authoritative_clear, true)
+	if not (instance.get("_active_contact") as Dictionary).is_empty():
+		_failures.append("%s equal-revision authoritative snapshot retained ghost contact" % label)
 
 
 func _check_fixture_provider_evidence(
@@ -1770,6 +2839,10 @@ func _check_fixture_provider_evidence(
 		audit,
 		trace
 	)
+	var fixture_cardinality_reconciled := (
+		(audit.get("resolutions", []) as Array).size()
+		== (trace.get("entries", []) as Array).size()
+	)
 	if (
 		int(summary.get("callsUsed", -1)) != 0
 		or int(summary.get("tokensUsed", -1)) != 0
@@ -1785,7 +2858,9 @@ func _check_fixture_provider_evidence(
 		or int(summary.get("traceDroppedCount", -1)) != 0
 		or int(summary.get("runtimeTraceEntryCount", -1))
 		!= (trace.get("entries", []) as Array).size()
-		or not bool(summary.get("reconciled", false))
+		or bool(summary.get("completeCardinalityReconciled", false))
+		!= fixture_cardinality_reconciled
+		or bool(summary.get("reconciled", false)) != fixture_cardinality_reconciled
 		or bool(summary.get("allExpectedProfileLiveNoFallback", true))
 		or int(summary.get("failedCallCount", -1)) != 0
 		or int(summary.get("fallbackResolutionCount", -1)) != 0
@@ -1844,11 +2919,69 @@ func _check_provider_audit_summary_contract(label: String, playtest_surface: Nod
 	)
 	if (
 		not bool(live_summary.get("allExpectedProfileLiveNoFallback", false))
+		or not bool(live_summary.get("quiescent", false))
 		or not bool(live_summary.get("reconciled", false))
 		or int(live_summary.get("failedCallCount", -1)) != 0
 		or int(live_summary.get("fallbackResolutionCount", -1)) != 0
 	):
 		_failures.append("%s exact live Qwen provider evidence did not pass summary" % label)
+	var two_resolution_audit := live_audit.duplicate(true)
+	two_resolution_audit["callsUsed"] = 2
+	two_resolution_audit["tokensUsed"] = 14
+	var second_call := ((two_resolution_audit.get("calls", []) as Array)[0] as Dictionary).duplicate(true)
+	second_call["seq"] = 2
+	(two_resolution_audit.get("calls", []) as Array).append(second_call)
+	var second_resolution := (
+		((two_resolution_audit.get("resolutions", []) as Array)[0] as Dictionary).duplicate(true)
+	)
+	second_resolution["seq"] = 2
+	second_resolution["callSeqs"] = [2]
+	(two_resolution_audit.get("resolutions", []) as Array).append(second_resolution)
+	var missing_trace_summary: Dictionary = playtest_surface.call(
+		"_provider_audit_summary",
+		two_resolution_audit,
+		live_trace
+	)
+	if (
+		bool(missing_trace_summary.get("completeCardinalityReconciled", true))
+		or bool(missing_trace_summary.get("reconciled", true))
+		or bool(missing_trace_summary.get("allExpectedProfileLiveNoFallback", true))
+	):
+		_failures.append("%s missing provider runtime trace entry became acceptance" % label)
+	var two_entry_trace := live_trace.duplicate(true)
+	var second_trace_entry := (
+		((two_entry_trace.get("entries", []) as Array)[0] as Dictionary).duplicate(true)
+	)
+	second_trace_entry["seq"] = 2
+	(two_entry_trace.get("entries", []) as Array).append(second_trace_entry)
+	var matching_cardinality_summary: Dictionary = playtest_surface.call(
+		"_provider_audit_summary",
+		two_resolution_audit,
+		two_entry_trace
+	)
+	if (
+		not bool(matching_cardinality_summary.get("completeCardinalityReconciled", false))
+		or not bool(matching_cardinality_summary.get("reconciled", false))
+		or not bool(matching_cardinality_summary.get(
+			"allExpectedProfileLiveNoFallback",
+			false
+		))
+	):
+		_failures.append("%s matching provider resolution/trace evidence did not pass" % label)
+	var busy_client_summary: Dictionary = playtest_surface.call(
+		"_provider_audit_summary",
+		live_audit,
+		live_trace,
+		1
+	)
+	if (
+		bool(busy_client_summary.get("allExpectedProfileLiveNoFallback", true))
+		or bool(busy_client_summary.get("quiescent", true))
+		or int(busy_client_summary.get(
+			"clientProviderRequestInFlightCount", -1
+		)) != 1
+	):
+		_failures.append("%s client-known provider wait became live acceptance" % label)
 
 	var failed_audit := live_audit.duplicate(true)
 	var failed_call := ((failed_audit.get("calls", []) as Array)[0] as Dictionary)
@@ -2004,6 +3137,10 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 
 	instance.call("_enter_hearing_due")
 	var due_snapshot: Dictionary = instance.call("presentation_snapshot")
+	var due_provider_progress := _provider_evidence_progress_from_snapshot(
+		instance,
+		due_snapshot
+	)
 	if (
 		str(due_snapshot.get("runStatus", "")) != "hearing_due"
 		or not bool(player.get("_control_enabled"))
@@ -2043,16 +3180,15 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		return
 	var staged_snapshot: Dictionary = instance.call("presentation_snapshot")
 	_check_fixture_provider_evidence(label, instance, staged_snapshot, "hearing open")
-	var open_response := (
-		(endpoints.get("runHearingOpen", {}) as Dictionary).get("response", {})
-		as Dictionary
+	var staged_provider_progress := _provider_evidence_progress_from_snapshot(
+		instance,
+		staged_snapshot
 	)
-	if (
-		staged_snapshot.get("providerAudit", {}) != open_response.get("providerAudit", {})
-		or staged_snapshot.get("providerRuntimeTrace", {})
-		!= open_response.get("providerRuntimeTrace", {})
+	if not _provider_progress_is_at_least(
+		staged_provider_progress,
+		due_provider_progress
 	):
-		_failures.append("%s hearing open did not cache provider evidence" % label)
+		_failures.append("%s hearing open rolled provider evidence backward" % label)
 	var staged_hud := hud.presentation_snapshot()
 	var staged_turn := staged_hud.get("currentTurn", {}) as Dictionary
 	var expected_player_value: Variant = town.navigation_position("Station.hearing_player")
@@ -2098,11 +3234,13 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		return
 	var terminal_snapshot: Dictionary = instance.call("presentation_snapshot")
 	_check_fixture_provider_evidence(label, instance, terminal_snapshot, "terminal hearing")
-	var answer_response := answer_packet.get("response", {}) as Dictionary
-	if (
-		terminal_snapshot.get("providerAudit", {}) != answer_response.get("providerAudit", {})
-		or terminal_snapshot.get("providerRuntimeTrace", {})
-		!= answer_response.get("providerRuntimeTrace", {})
+	var terminal_provider_progress := _provider_evidence_progress_from_snapshot(
+		instance,
+		terminal_snapshot
+	)
+	if not _provider_progress_is_at_least(
+		terminal_provider_progress,
+		staged_provider_progress
 	):
 		_failures.append("%s terminal hearing lost provider evidence before restart" % label)
 	var terminal_result := terminal_snapshot.get("terminalResult", {}) as Dictionary
@@ -2203,6 +3341,30 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 	if not all_residents_ready:
 		_failures.append("%s did not preload conversations for all six residents" % label)
 		return
+	# The final fixture opening makes every resident interactable before its
+	# authoritative snapshot rebase has necessarily finished. Let that lane
+	# settle before isolated preload-state assertions mutate the actor cache.
+	var initial_preloads_settled := false
+	for _frame in range(120):
+		await process_frame
+		if (
+			(instance.get("_conversation_preload_queue") as Array).is_empty()
+			and (instance.get("_conversation_preload_in_flight") as Dictionary).is_empty()
+			and not bool(instance.get("_advance_needs_rebase"))
+			and not bool(instance.get("_advance_rebase_in_flight"))
+		):
+			initial_preloads_settled = true
+			break
+	if not initial_preloads_settled:
+		_failures.append("%s initial conversation preload rebase did not settle" % label)
+		return
+	_check_preload_failure_recovery_contract(label, instance, str(receptionist.actor_id))
+	_check_preload_rebase_and_invalidation_epoch_contract(
+		label,
+		instance,
+		str(receptionist.actor_id)
+	)
+	_check_stale_advance_response_contract(label, instance)
 	var locale_snapshot: Dictionary = instance.call("presentation_snapshot")
 	_check_fixture_provider_evidence(label, instance, locale_snapshot, "opening")
 	var locked_run_locale := str(locale_snapshot.get("runLocale", ""))
@@ -2222,6 +3384,11 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 	):
 		_failures.append("%s presentation and run locales start mixed" % label)
 	_check_player_brief_contract(label, instance)
+	await _check_conversation_start_not_ready_recovery_contract(
+		label,
+		instance,
+		str(receptionist.actor_id)
+	)
 	var town := instance.get_node_or_null("Town") as Town3D
 	for actor in actors:
 		var expected_connection := Callable(
@@ -2253,7 +3420,19 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 			opened = true
 			break
 	if not opened:
-		_failures.append("%s fixture conversation did not open" % label)
+		_failures.append(
+			(
+				"%s fixture conversation did not open (enabled=%s, run=%s, paused=%s, "
+				+ "target=%s, advance=%s)"
+			) % [
+				label,
+				receptionist.is_interaction_enabled(),
+				str(instance.get("_run_status")),
+				paused,
+				str(instance.get("_conversation_target")),
+				str((instance.call("presentation_snapshot") as Dictionary).get("advance", {})),
+			]
+		)
 		paused = false
 		return
 	if not paused:
@@ -2406,6 +3585,18 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 	var caretaker := instance.get_node_or_null("Town/Actors/NPC_Park_Caretaker") as NPC3D
 	if manager != null and caretaker != null:
 		var look_revision := int(main_snapshot.get("runWorldRevision", -1))
+		var actor_target_position: Variant = instance.call(
+			"_look_target_position",
+			"actor",
+			str(receptionist.actor_id)
+		)
+		if (
+			not actor_target_position is Vector3
+			or not (actor_target_position as Vector3).is_equal_approx(
+				receptionist.global_position + Vector3.UP * 1.35
+			)
+		):
+			_failures.append("%s actor look target did not resolve canonically" % label)
 		instance.call(
 			"_apply_conversation_end_deltas_once",
 			"smoke-queued-look",
@@ -2443,6 +3634,233 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 			)
 		):
 			_failures.append("%s queued look delta was not applied exactly once" % label)
+		await _check_non_actor_look_targets(label, instance, manager, look_revision)
+
+
+func _check_non_actor_look_targets(
+	label: String,
+	instance: Node,
+	actor: NPC3D,
+	look_revision: int
+) -> void:
+	var prop_id := "Prop_Studio_Keyboard"
+	var prop := instance.get_node_or_null(
+		"Town/Props/PhysicalProps3D/%s" % prop_id
+	) as Node3D
+	if prop == null:
+		_failures.append("%s has no canonical physical prop for look resolution" % label)
+	else:
+		var object_target_position: Variant = instance.call(
+			"_look_target_position",
+			"object",
+			prop_id
+		)
+		var prop_collision := prop.get_node_or_null("Collision") as Node3D
+		if (
+			not object_target_position is Vector3
+			or prop_collision == null
+			or not (object_target_position as Vector3).is_equal_approx(
+				prop_collision.global_position
+			)
+		):
+			_failures.append(
+				"%s object look target did not resolve by canonical prop_id" % label
+			)
+		else:
+			instance.call("_apply_look_delta", {
+				"kind": "look",
+				"actorId": str(actor.actor_id),
+				"targetKind": "object",
+				"targetId": prop_id,
+				"worldRevision": look_revision,
+			})
+			if not _npc_faces_position(actor, object_target_position as Vector3):
+				_failures.append("%s object look delta did not face the physical prop" % label)
+			var object_look_forward := -actor.global_transform.basis.z.normalized()
+			for _frame in range(8):
+				await physics_frame
+			var held_object_forward := -actor.global_transform.basis.z.normalized()
+			if (
+				object_look_forward.distance_to(held_object_forward) > 0.001
+				or float(actor.movement_status().get("lookHoldRemaining", 0.0)) <= 0.0
+			):
+				_failures.append(
+					"%s object look delta was overwritten on the next physics frames" % label
+				)
+
+	var saved_run_snapshot: Dictionary = instance.get("_run_snapshot")
+	var fixture := _load_run_fixture()
+	var endpoints: Dictionary = fixture.get("endpoints", {})
+	var administration_packet: Dictionary = endpoints.get("administrationWriteDecision", {})
+	var administration_response: Dictionary = administration_packet.get("response", {})
+	var action_deltas: Array = administration_response.get("actionDeltas", [])
+	var administration_delta: Dictionary = {}
+	for delta_value in action_deltas:
+		if delta_value is Dictionary and str(
+			(delta_value as Dictionary).get("kind", "")
+		) == "administration":
+			administration_delta = (delta_value as Dictionary).duplicate(true)
+			break
+	var authoritative_record: Dictionary = administration_delta.get("record", {})
+	if authoritative_record.is_empty():
+		_failures.append(
+			"%s fixture has no authoritative administration record delta" % label
+		)
+	else:
+		# Mirror the live response order: the decision revision becomes current,
+		# then the generated backend delta enters the ordinary application path.
+		# Remove only this record from the starting cache so unrelated entries, if
+		# present, must survive the merge.
+		var record_id := str(authoritative_record.get("recordId", ""))
+		var text_surface_id := str(authoritative_record.get("textSurfaceId", ""))
+		var delta_snapshot := saved_run_snapshot.duplicate(true)
+		delta_snapshot["worldRevision"] = int(administration_response.get("worldRevision", -1))
+		var starting_records: Array = []
+		var prior_records_value: Variant = delta_snapshot.get("records", [])
+		if prior_records_value is Array:
+			var prior_records := prior_records_value as Array
+			for record_value in prior_records:
+				if (
+					record_value is Dictionary
+					and str((record_value as Dictionary).get("recordId", "")) != record_id
+				):
+					starting_records.append((record_value as Dictionary).duplicate(true))
+		delta_snapshot["records"] = starting_records
+		instance.set("_run_snapshot", delta_snapshot)
+		instance.call("_apply_run_deltas", [administration_delta])
+		var cached_records: Array = (instance.get("_run_snapshot") as Dictionary).get(
+			"records", []
+		)
+		var cached_record := _record_by_id(cached_records, record_id)
+		if (
+			cached_record != authoritative_record
+			or cached_records.size() != starting_records.size() + 1
+		):
+			_failures.append(
+				"%s administration delta did not populate the authoritative record cache"
+				% label
+			)
+		var record_surface := instance.get_node_or_null(
+			"Town/Props/TextSurfaces/%s" % text_surface_id
+		) as Node3D
+		var record_target_position: Variant = instance.call(
+			"_look_target_position",
+			"record",
+			record_id
+		)
+		var surface_collision: Node3D = null
+		if record_surface != null:
+			surface_collision = record_surface.get_node_or_null("Collision") as Node3D
+		if (
+			record_id.is_empty()
+			or text_surface_id.is_empty()
+			or not record_target_position is Vector3
+			or surface_collision == null
+			or not (record_target_position as Vector3).is_equal_approx(
+				surface_collision.global_position
+			)
+		):
+			_failures.append(
+				"%s record look target did not resolve through its authoritative text surface"
+				% label
+			)
+		else:
+			instance.call("_apply_look_delta", {
+				"kind": "look",
+				"actorId": str(actor.actor_id),
+				"targetKind": "record",
+				"targetId": record_id,
+				"worldRevision": int(administration_response.get("worldRevision", -1)),
+			})
+			if not _npc_faces_position(actor, record_target_position as Vector3):
+				_failures.append(
+					"%s record look delta did not face its text surface" % label
+				)
+			var record_look_forward := -actor.global_transform.basis.z.normalized()
+			for _frame in range(8):
+				await physics_frame
+			var held_record_forward := -actor.global_transform.basis.z.normalized()
+			if (
+				record_look_forward.distance_to(held_record_forward) > 0.001
+				or float(actor.movement_status().get("lookHoldRemaining", 0.0)) <= 0.0
+			):
+				_failures.append(
+					"%s record look delta was overwritten on the next physics frames" % label
+				)
+
+		# A lower revision for the same record id cannot roll back presentation
+		# identity, and malformed records cannot mutate the cache at all.
+		var monotonic_id := "record:smoke:monotonic"
+		var newer_record := authoritative_record.duplicate(true)
+		newer_record["recordId"] = monotonic_id
+		newer_record["recordRevision"] = 2
+		instance.call("_apply_run_deltas", [{
+			"kind": "administration",
+			"record": newer_record,
+		}])
+		var stale_record := newer_record.duplicate(true)
+		stale_record["recordRevision"] = 1
+		stale_record["textSurfaceId"] = "TS_Office_FilingIndex"
+		instance.call("_apply_run_deltas", [{
+			"kind": "administration",
+			"record": stale_record,
+		}])
+		cached_records = (instance.get("_run_snapshot") as Dictionary).get("records", [])
+		var retained_record := _record_by_id(cached_records, monotonic_id)
+		if (
+			int(retained_record.get("recordRevision", -1)) != 2
+			or str(retained_record.get("textSurfaceId", "")) != text_surface_id
+		):
+			_failures.append("%s stale administration record rolled the cache backward" % label)
+		var records_before_malformed := cached_records.duplicate(true)
+		instance.call("_apply_run_deltas", [{
+			"kind": "administration",
+			"record": {
+				"recordId": "record:smoke:malformed",
+				"textSurfaceId": text_surface_id,
+			},
+		}])
+		if (
+			(instance.get("_run_snapshot") as Dictionary).get("records", [])
+			!= records_before_malformed
+		):
+			_failures.append("%s malformed administration record mutated the cache" % label)
+	instance.set("_run_snapshot", saved_run_snapshot)
+
+	var before_unknown := -actor.global_transform.basis.z.normalized()
+	instance.call("_apply_look_delta", {
+		"kind": "look",
+		"actorId": str(actor.actor_id),
+		"targetKind": "object",
+		"targetId": "Prop_Unknown_Smoke",
+		"worldRevision": look_revision,
+	})
+	var after_unknown := -actor.global_transform.basis.z.normalized()
+	if before_unknown.distance_to(after_unknown) > 0.001:
+		_failures.append("%s unknown look target mutated resident presentation" % label)
+
+
+func _record_by_id(records: Array, record_id: String) -> Dictionary:
+	for record_value in records:
+		if (
+			record_value is Dictionary
+			and str((record_value as Dictionary).get("recordId", "")) == record_id
+		):
+			return (record_value as Dictionary).duplicate(true)
+	return {}
+
+
+func _npc_faces_position(actor: NPC3D, target_position: Vector3) -> bool:
+	var to_target := target_position - actor.global_position
+	to_target.y = 0.0
+	if to_target.is_zero_approx():
+		return false
+	var forward := -actor.global_transform.basis.z
+	forward.y = 0.0
+	return (
+		not forward.is_zero_approx()
+		and forward.normalized().dot(to_target.normalized()) >= 0.99
+	)
 
 
 func _check_run_clock_and_schedule(label: String, instance: Node) -> void:

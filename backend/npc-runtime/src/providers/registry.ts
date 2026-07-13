@@ -14,6 +14,7 @@ const profileSchema = z
     baseUrlEnv: z.string().optional(),
     apiKeyEnv: z.string().nullable(),
     model: z.string().min(1),
+    timeoutMs: z.number().int().positive().optional(),
     params: z
       .object({
         temperature: z.number().min(0).max(2).optional(),
@@ -45,6 +46,8 @@ const providerConfigSchema = z
   })
   .strict();
 
+export type ProviderConfig = z.infer<typeof providerConfigSchema>;
+
 function configPath(): string {
   return resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "providers.config.json");
 }
@@ -62,6 +65,13 @@ export function createProviderFromEnvironment(
   env: NodeJS.ProcessEnv = process.env,
 ): ProviderRegistryResult {
   const config = loadProviderConfig();
+  return createProviderFromConfig(config, env);
+}
+
+export function createProviderFromConfig(
+  config: ProviderConfig,
+  env: NodeJS.ProcessEnv = process.env,
+): ProviderRegistryResult {
   const override = env[config.selection.envOverride]?.trim();
   const profileId = override || config.selection.default;
   const profile = config.profiles[profileId];
@@ -71,6 +81,7 @@ export function createProviderFromEnvironment(
 
   const apiKey = profile.apiKeyEnv ? env[profile.apiKeyEnv] : "local-no-key";
   const baseURL = profile.baseUrlEnv ? env[profile.baseUrlEnv] : undefined;
+  const timeoutMs = profile.timeoutMs ?? config.runtime.timeoutMs;
   let textGen: TextGenPort;
   if (profile.adapter === "responses") {
     textGen = new ResponsesAdapter({
@@ -79,7 +90,7 @@ export function createProviderFromEnvironment(
       model: profile.model,
       maxTokens: profile.params.maxTokens,
       reasoningEffort: profile.params.reasoningEffort,
-      timeoutMs: config.runtime.timeoutMs,
+      timeoutMs,
     });
   } else {
     textGen = new ChatCompletionsAdapter({
@@ -91,7 +102,7 @@ export function createProviderFromEnvironment(
       maxTokens: profile.params.maxTokens,
       temperature: profile.params.temperature,
       enableThinking: profile.params.enableThinking,
-      timeoutMs: config.runtime.timeoutMs,
+      timeoutMs,
       structured: profile.structured,
     });
   }
@@ -102,7 +113,7 @@ export function createProviderFromEnvironment(
       profileId,
       textGen,
       fallback: new RuleFallbackNpcAdapter(),
-      timeoutMs: config.runtime.timeoutMs,
+      timeoutMs,
       maxCallsPerSession: config.runtime.maxCallsPerSession,
       maxTokensPerSession: config.runtime.maxTokensPerSession,
       maxOutputTokensPerCall: profile.params.maxTokens,

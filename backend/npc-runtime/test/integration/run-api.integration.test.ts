@@ -383,6 +383,11 @@ test("run start and clock advance expose retry-safe HTTP conflicts", async () =>
     assert.equal(propConflict.json.error, "prop_event_id_conflict");
 
     let latest = propAccepted.json;
+    const firstMeetingMovements = new Map<string, {
+      movementId: string;
+      actorId: string;
+      targetAnchorRef: string;
+    }>();
     for (let step = 2; step <= 9; step += 1) {
       const next = await post(base, "/v1/run/advance", {
         runId: started.json.runId,
@@ -392,17 +397,24 @@ test("run start and clock advance expose retry-safe HTTP conflicts", async () =>
         arrivals: [],
       });
       assert.equal(next.status, 200, JSON.stringify(next.json));
+      for (const movement of next.json.movementDeltas as Array<{
+        movementId: string;
+        actorId: string;
+        targetAnchorRef: string;
+      }>) {
+        if (["NPC_Studio_Manager", "NPC_Park_Caretaker"].includes(movement.actorId)) {
+          firstMeetingMovements.set(movement.actorId, movement);
+        }
+      }
       latest = next.json;
     }
-    const meetingArrivals = latest.movementDeltas
-      .filter((movement: { actorId: string }) =>
-        ["NPC_Studio_Manager", "NPC_Park_Caretaker"].includes(movement.actorId),
-      )
+    const meetingArrivals = [...firstMeetingMovements.values()]
       .map((movement: { movementId: string; actorId: string; targetAnchorRef: string }) => ({
         movementId: movement.movementId,
         actorId: movement.actorId,
         anchorRef: movement.targetAnchorRef,
       }));
+    assert.equal(meetingArrivals.length, 2);
     const arrived = await post(base, "/v1/run/advance", {
       runId: started.json.runId,
       advanceId: "http-meeting-arrivals",

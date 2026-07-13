@@ -243,9 +243,9 @@ test("provider-selected route movement observes the same deterministic due time"
 test("meeting wakes require both participant slots after the schedule boundary", async () => {
   const service = createService();
   const started = service.start("start-meeting", "ko-KR");
-  const atNinety = await advanceTo(service, started.runId, started, 90, "meeting-to-90");
-  assert.equal(atNinety.clock.graceEnded, true);
-  const meetingMoves = atNinety.movementDeltas.filter(movement =>
+  const atSeventy = await advanceTo(service, started.runId, started, 70, "meeting-to-70");
+  assert.equal(atSeventy.clock.graceEnded, false);
+  const meetingMoves = atSeventy.movementDeltas.filter(movement =>
     ["NPC_Studio_Manager", "NPC_Park_Caretaker"].includes(movement.actorId),
   );
   assert.deepEqual(
@@ -260,8 +260,8 @@ test("meeting wakes require both participant slots after the schedule boundary",
     "meeting anchors must preempt in-flight conventional patrol movement",
   );
   assert.equal(
-    atNinety.scheduleWakes.filter(wake => wake.kind === "meeting_window").length,
-    1,
+    atSeventy.scheduleWakes.filter(wake => wake.kind === "meeting_window").length,
+    0,
   );
   const managerMove = meetingMoves.find(movement => movement.actorId === "NPC_Studio_Manager");
   const caretakerMove = meetingMoves.find(movement => movement.actorId === "NPC_Park_Caretaker");
@@ -269,7 +269,7 @@ test("meeting wakes require both participant slots after the schedule boundary",
   const managerArrived = await service.advance({
     runId: started.runId,
     advanceId: "meeting-manager-arrival",
-    observedWorldRevision: atNinety.worldRevision,
+    observedWorldRevision: atSeventy.worldRevision,
     elapsedSeconds: 0,
     arrivals: [
       {
@@ -280,10 +280,23 @@ test("meeting wakes require both participant slots after the schedule boundary",
     ],
   });
   assert.ok(managerArrived.scheduleWakes.every(wake => wake.kind !== "meeting_ready"));
+  const atNinety = await advanceTo(
+    service,
+    started.runId,
+    managerArrived,
+    90,
+    "meeting-window-to-90",
+  );
+  assert.equal(atNinety.clock.graceEnded, true);
+  assert.equal(
+    atNinety.scheduleWakes.filter(wake => wake.kind === "meeting_window").length,
+    1,
+  );
+  assert.ok(atNinety.scheduleWakes.every(wake => wake.kind !== "meeting_ready"));
   const caretakerArrived = await service.advance({
     runId: started.runId,
     advanceId: "meeting-caretaker-arrival",
-    observedWorldRevision: managerArrived.worldRevision,
+    observedWorldRevision: atNinety.worldRevision,
     elapsedSeconds: 0,
     arrivals: [
       {
@@ -306,6 +319,35 @@ test("meeting wakes require both participant slots after the schedule boundary",
   });
   assert.ok(later.scheduleWakes.every(wake => wake.kind !== "meeting_ready"));
   assert.equal(later.scheduler.pendingWakes.filter(wake => wake.kind === "meeting_ready").length, 1);
+});
+
+test("run snapshots persist authoritative grace completion beyond one advance response", async () => {
+  const service = createService();
+  const started = service.start("start-persistent-grace", "ko-KR");
+  assert.equal(started.worldClock.graceEnded, false);
+
+  const beforeBoundary = await advanceTo(
+    service,
+    started.runId,
+    started,
+    80,
+    "persistent-grace-before",
+  );
+  assert.equal(beforeBoundary.clock.graceEnded, false);
+  const atBoundary = await advanceTo(
+    service,
+    started.runId,
+    beforeBoundary,
+    90,
+    "persistent-grace-boundary",
+  );
+  assert.equal(atBoundary.clock.graceEnded, true);
+  assert.equal(service.snapshot(started.runId).worldClock.graceEnded, true);
+  assert.equal(
+    beforeBoundary.clock.graceEnded,
+    false,
+    "an older one-shot advance remains stale while the full snapshot carries current truth",
+  );
 });
 
 test("modal conversations pause clock and clock-only progress never reopens reception", async () => {

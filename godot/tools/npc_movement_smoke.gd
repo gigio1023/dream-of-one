@@ -11,6 +11,7 @@ const EXPECTED_ACTOR_COUNT := 6
 const AMBIENT_OBSERVE_FRAMES := 420
 const COMMAND_TIMEOUT_FRAMES := 540
 const STUCK_TIMEOUT_FRAMES := 720
+const DYNAMIC_WAIT_MIN_YIELDS := 3
 
 var _failures: Array[String] = []
 
@@ -48,6 +49,7 @@ func _run() -> void:
 	await physics_frame
 	await _check_npc_crossing(town, actors)
 	await _check_player_yield(town, actors)
+	await _check_dynamic_endpoint_wait(town, actors)
 	await _check_contact_preemption(town, actors)
 	await _check_bounded_stuck_recovery(town, actors)
 
@@ -218,6 +220,84 @@ func _check_player_yield(town: Node, actors: Dictionary) -> void:
 	actor.stop()
 
 
+func _check_dynamic_endpoint_wait(town: Node, actors: Dictionary) -> void:
+	var actor := actors["NPC_Park_Caretaker"] as NPC3D
+	var player := town.get_node_or_null("Actors/Player3D") as Node3D
+	var start_value: Variant = town.call("navigation_position", "Park.meeting_west_north")
+	var target_value: Variant = town.call("navigation_position", "Park.meeting_west_south")
+	if player == null or not start_value is Vector3 or not target_value is Vector3:
+		_failures.append("dynamic endpoint wait anchors or player are missing")
+		return
+	var start := start_value as Vector3
+	var target := target_value as Vector3
+	actor.stop()
+	actor.global_position = start
+	player.global_position = target
+	await physics_frame
+	var blocked: Array[String] = []
+	var arrived := {"value": false}
+	var on_blocked := func(
+		movement_id: String,
+		_actor_id: StringName,
+		_anchor_ref: String,
+		_reason: String
+	) -> void:
+		if movement_id == "dynamic-endpoint-smoke":
+			blocked.append(movement_id)
+	var on_arrived := func(
+		movement_id: String,
+		_actor_id: StringName,
+		_anchor_ref: String
+	) -> void:
+		if movement_id == "dynamic-endpoint-smoke":
+			arrived["value"] = true
+	actor.movement_blocked.connect(on_blocked)
+	actor.movement_arrived.connect(on_arrived)
+	var yield_count_before := int(actor.movement_status().get("yieldCount", 0))
+	actor.apply_movement_command(
+		"dynamic-endpoint-smoke",
+		"smoke.dynamic_endpoint",
+		target
+	)
+	var waited_without_blocking := false
+	for _frame in range(STUCK_TIMEOUT_FRAMES):
+		await physics_frame
+		var status := actor.movement_status()
+		if not blocked.is_empty():
+			break
+		if (
+			int(status.get("yieldCount", 0))
+			>= yield_count_before + DYNAMIC_WAIT_MIN_YIELDS
+			and str(status.get("lastRecoveryReason", "")).begins_with(
+				"command_dynamic_body_blocked:"
+			)
+		):
+			waited_without_blocking = true
+			break
+	if not blocked.is_empty():
+		_failures.append("dynamic endpoint occupant exhausted the runtime movement: %s" % blocked)
+	if not waited_without_blocking:
+		_failures.append(
+			"NPC did not preserve its command while a dynamic body occupied the endpoint: %s"
+			% actor.movement_status()
+		)
+	player.global_position = target + Vector3(3.0, 0.0, 0.0)
+	for _frame in range(COMMAND_TIMEOUT_FRAMES):
+		await physics_frame
+		if bool(arrived["value"]):
+			break
+	if actor.movement_blocked.is_connected(on_blocked):
+		actor.movement_blocked.disconnect(on_blocked)
+	if actor.movement_arrived.is_connected(on_arrived):
+		actor.movement_arrived.disconnect(on_arrived)
+	if not bool(arrived["value"]):
+		_failures.append(
+			"NPC did not finish after the dynamic endpoint blocker moved: %s"
+			% actor.movement_status()
+		)
+	actor.stop()
+
+
 func _check_contact_preemption(town: Node, actors: Dictionary) -> void:
 	var actor := actors["NPC_Studio_Receptionist"] as NPC3D
 	var player := town.get_node_or_null("Actors/Player3D") as Node3D
@@ -291,16 +371,18 @@ func _check_bounded_stuck_recovery(town: Node, actors: Dictionary) -> void:
 		parked_actor.stop()
 		parked_actor.global_position = parked_positions[actor_id]
 	var player := town.get_node_or_null("Actors/Player3D") as Node3D
-	if player != null:
-		player.global_position = Vector3(8.0, 0.05, 5.0)
 	var start_value: Variant = town.call("navigation_position", "Park.meeting_west_north")
 	var target_value: Variant = town.call("navigation_position", "Park.meeting_west_south")
-	if not start_value is Vector3 or not target_value is Vector3:
+	if player == null or not start_value is Vector3 or not target_value is Vector3:
 		_failures.append("stuck-recovery anchors did not project")
 		return
 	var start := start_value as Vector3
 	var target := target_value as Vector3
 	actor.global_position = start
+	# A person near the destination is only inferred to be relevant while this
+	# actor is caged at the origin. That proximity must not hide the static cage
+	# behind an infinite dynamic-body yield loop.
+	player.global_position = target
 	var cage := _build_collision_cage(start)
 	root.add_child(cage)
 	await physics_frame
@@ -327,6 +409,9 @@ func _check_bounded_stuck_recovery(town: Node, actors: Dictionary) -> void:
 	var stuck_status := actor.movement_status()
 	if int(stuck_status.get("stuckRecoveryCount", 0)) < 3:
 		_failures.append("stuck detector did not exhaust local replan attempts")
+	if int(stuck_status.get("inferredDynamicYieldCount", 0)) > 1:
+		_failures.append("endpoint proximity caused unbounded inferred dynamic yields")
+	player.global_position = target + Vector3(3.0, 0.0, 0.0)
 	cage.queue_free()
 	await physics_frame
 	await physics_frame
@@ -417,7 +502,7 @@ func _finish() -> void:
 	if _failures.is_empty():
 		print(
 			"PASS npc_movement_smoke: six ambient walkers, modal pause/resume, "
-			+ "NPC/player avoidance, and bounded stuck recovery"
+			+ "NPC/player avoidance, dynamic-body waiting, and bounded static recovery"
 		)
 		quit(0)
 		return

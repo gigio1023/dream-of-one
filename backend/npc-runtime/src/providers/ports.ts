@@ -224,6 +224,8 @@ export interface AgentStepRequest {
   observePacket: ObservePacket;
   previousResult?: AgentToolResult;
   blockedSignatures: string[];
+  /** Optional request-local ceiling for otherwise grounded talk_to targets. */
+  allowedTalkActorIds?: string[];
   /** Optional validity constraint for a wake whose only legal action is known. */
   requiredToolCall?: { tool: "talk_to"; actorId: string };
   requireUtterance?: boolean;

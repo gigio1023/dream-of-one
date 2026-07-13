@@ -25,6 +25,7 @@
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": false
         },
@@ -147,7 +148,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -183,7 +184,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -365,7 +366,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -401,7 +402,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -996,7 +997,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -1032,7 +1033,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -1248,7 +1249,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -1284,7 +1285,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -1373,6 +1374,7 @@
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": false
         },
@@ -1539,7 +1541,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -1575,7 +1577,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -1827,7 +1829,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -1863,7 +1865,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -2061,7 +2063,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -2111,7 +2113,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -2316,7 +2318,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -2366,7 +2368,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -2462,6 +2464,7 @@
         "worldClock": {
           "elapsedSeconds": 20,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": false
         },
@@ -2637,7 +2640,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -2673,7 +2676,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -2752,7 +2755,7 @@
       "request": {
         "runId": "run-fixture-1",
         "wakeId": "wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
-        "observedWorldRevision": 23
+        "observedWorldRevision": 22
       },
       "response": {
         "runId": "run-fixture-1",
@@ -2764,7 +2767,7 @@
           "NPC_Park_Caretaker"
         ],
         "status": "completed",
-        "observedWorldRevision": 23,
+        "observedWorldRevision": 22,
         "worldRevision": 26,
         "conversationId": "ambient:wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
         "participantActorIds": [
@@ -2785,7 +2788,7 @@
             ],
             "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
             "worldSeconds": 90,
-            "observedWorldRevision": 23,
+            "observedWorldRevision": 22,
             "worldRevision": 24,
             "audibility": {
               "volumeId": "AUD_PUBLIC_CENTER",
@@ -2815,7 +2818,7 @@
             ],
             "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
             "worldSeconds": 90,
-            "observedWorldRevision": 23,
+            "observedWorldRevision": 22,
             "worldRevision": 25,
             "audibility": {
               "volumeId": "AUD_PUBLIC_CENTER",
@@ -2861,7 +2864,7 @@
               ],
               "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
               "worldSeconds": 90,
-              "observedWorldRevision": 23,
+              "observedWorldRevision": 22,
               "worldRevision": 24,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
@@ -2894,7 +2897,7 @@
               ],
               "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
               "worldSeconds": 90,
-              "observedWorldRevision": 23,
+              "observedWorldRevision": 22,
               "worldRevision": 25,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
@@ -2942,6 +2945,88 @@
             "usedFallback": false
           }
         ],
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 6,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 7,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 8,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "socialView": {
           "revision": 0,
           "hearing": {
@@ -3130,7 +3215,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:e8515fea1bde9ef8",
+            "sourceId": "goal:e18a2c21dc58c4b4",
             "actorIds": [
               "NPC_Office_Worker"
             ],
@@ -3143,7 +3228,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:effdae0d3df868bb",
+            "sourceId": "goal:5ef78e6fc0f99473",
             "actorIds": [
               "NPC_Park_Caretaker"
             ],
@@ -3156,7 +3241,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:a176d4ac8870eac8",
+            "sourceId": "goal:dca168d816e3bd2f",
             "actorIds": [
               "NPC_Roaming_Liaison"
             ],
@@ -3169,7 +3254,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:21b075b31aac0fd8",
+            "sourceId": "goal:6bc7a2737e7251e6",
             "actorIds": [
               "NPC_Station_Officer"
             ],
@@ -3182,7 +3267,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:f4317480b76a81b5",
+            "sourceId": "goal:4921d06c5167bb84",
             "actorIds": [
               "NPC_Studio_Manager"
             ],
@@ -3195,7 +3280,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:c526ec206819901a",
+            "sourceId": "goal:98b72e2961adbee7",
             "actorIds": [
               "NPC_Studio_Receptionist"
             ],
@@ -3326,7 +3411,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -3339,7 +3424,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
+              "sourceId": "goal:5ef78e6fc0f99473",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -3352,7 +3437,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -3365,7 +3450,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -3378,7 +3463,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
+              "sourceId": "goal:4921d06c5167bb84",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -3391,7 +3476,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:c526ec206819901a",
+              "sourceId": "goal:98b72e2961adbee7",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -3426,7 +3511,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -3462,7 +3547,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -3535,7 +3620,7 @@
         "request": {
           "runId": "run-fixture-1",
           "wakeId": "wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
-          "observedWorldRevision": 23
+          "observedWorldRevision": 22
         },
         "response": {
           "runId": "run-fixture-1",
@@ -3547,7 +3632,7 @@
             "NPC_Park_Caretaker"
           ],
           "status": "completed",
-          "observedWorldRevision": 23,
+          "observedWorldRevision": 22,
           "worldRevision": 26,
           "conversationId": "ambient:wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
           "participantActorIds": [
@@ -3568,7 +3653,7 @@
               ],
               "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
               "worldSeconds": 90,
-              "observedWorldRevision": 23,
+              "observedWorldRevision": 22,
               "worldRevision": 24,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
@@ -3598,7 +3683,7 @@
               ],
               "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
               "worldSeconds": 90,
-              "observedWorldRevision": 23,
+              "observedWorldRevision": 22,
               "worldRevision": 25,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
@@ -3644,7 +3729,7 @@
                 ],
                 "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
                 "worldSeconds": 90,
-                "observedWorldRevision": 23,
+                "observedWorldRevision": 22,
                 "worldRevision": 24,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
@@ -3677,7 +3762,7 @@
                 ],
                 "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
                 "worldSeconds": 90,
-                "observedWorldRevision": 23,
+                "observedWorldRevision": 22,
                 "worldRevision": 25,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
@@ -3725,6 +3810,88 @@
               "usedFallback": false
             }
           ],
+          "providerAudit": {
+            "callsUsed": 0,
+            "tokensUsed": 0,
+            "inFlightCalls": 0,
+            "inFlightTokens": 0,
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "calls": [],
+            "resolutions": []
+          },
+          "providerRuntimeTrace": {
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "entries": [
+              {
+                "seq": 1,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 2,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 3,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 4,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 5,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 6,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 7,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 8,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -3773,6 +3940,32 @@
               "usedFallback": false
             }
           ],
+          "providerAudit": {
+            "callsUsed": 0,
+            "tokensUsed": 0,
+            "inFlightCalls": 0,
+            "inFlightTokens": 0,
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "calls": [],
+            "resolutions": []
+          },
+          "providerRuntimeTrace": {
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "entries": [
+              {
+                "seq": 1,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -3821,6 +4014,40 @@
               "usedFallback": false
             }
           ],
+          "providerAudit": {
+            "callsUsed": 0,
+            "tokensUsed": 0,
+            "inFlightCalls": 0,
+            "inFlightTokens": 0,
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "calls": [],
+            "resolutions": []
+          },
+          "providerRuntimeTrace": {
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "entries": [
+              {
+                "seq": 1,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 2,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -3869,6 +4096,48 @@
               "usedFallback": false
             }
           ],
+          "providerAudit": {
+            "callsUsed": 0,
+            "tokensUsed": 0,
+            "inFlightCalls": 0,
+            "inFlightTokens": 0,
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "calls": [],
+            "resolutions": []
+          },
+          "providerRuntimeTrace": {
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "entries": [
+              {
+                "seq": 1,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 2,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 3,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -3917,6 +4186,56 @@
               "usedFallback": false
             }
           ],
+          "providerAudit": {
+            "callsUsed": 0,
+            "tokensUsed": 0,
+            "inFlightCalls": 0,
+            "inFlightTokens": 0,
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "calls": [],
+            "resolutions": []
+          },
+          "providerRuntimeTrace": {
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "entries": [
+              {
+                "seq": 1,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 2,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 3,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 4,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -3965,6 +4284,64 @@
               "usedFallback": false
             }
           ],
+          "providerAudit": {
+            "callsUsed": 0,
+            "tokensUsed": 0,
+            "inFlightCalls": 0,
+            "inFlightTokens": 0,
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "calls": [],
+            "resolutions": []
+          },
+          "providerRuntimeTrace": {
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "entries": [
+              {
+                "seq": 1,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 2,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 3,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 4,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 5,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -4013,6 +4390,72 @@
               "usedFallback": false
             }
           ],
+          "providerAudit": {
+            "callsUsed": 0,
+            "tokensUsed": 0,
+            "inFlightCalls": 0,
+            "inFlightTokens": 0,
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "calls": [],
+            "resolutions": []
+          },
+          "providerRuntimeTrace": {
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "entries": [
+              {
+                "seq": 1,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 2,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 3,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 4,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 5,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 6,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -4043,11 +4486,11 @@
           "observedWorldRevision": 10,
           "player": {
             "position": [
+              -2,
               0,
-              0,
-              0
+              -15
             ],
-            "locationId": "Park"
+            "locationId": "Studio"
           },
           "actors": [
             {
@@ -4065,10 +4508,10 @@
               "visibleActorIds": [],
               "audibleActorIds": [],
               "visibleObjectIds": [],
-              "playerVisible": false,
-              "playerAudible": false,
-              "playerReachable": false,
-              "playerInteractionZoneId": null
+              "playerVisible": true,
+              "playerAudible": true,
+              "playerReachable": true,
+              "playerInteractionZoneId": "StudioReceptionConversation"
             },
             {
               "actorId": "NPC_Studio_Manager",
@@ -4122,10 +4565,10 @@
               "visibleActorIds": [],
               "audibleActorIds": [],
               "visibleObjectIds": [],
-              "playerVisible": true,
-              "playerAudible": true,
-              "playerReachable": true,
-              "playerInteractionZoneId": "ParkConversation"
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
             },
             {
               "actorId": "NPC_Station_Officer",
@@ -4192,12 +4635,12 @@
         "arrivalsRejected": [],
         "scheduleWakes": [
           {
-            "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
+            "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:11",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:a7f3c678ec5d34d6",
+            "sourceId": "goal:947139f9592d1e1a",
             "actorIds": [
-              "NPC_Park_Caretaker"
+              "NPC_Studio_Receptionist"
             ],
             "scheduledAtSeconds": 90,
             "observedWorldRevision": 11,
@@ -4205,12 +4648,12 @@
             "status": "pending"
           },
           {
-            "wakeId": "wake:run-fixture-1:observation:NPC_Park_Caretaker:11",
+            "wakeId": "wake:run-fixture-1:observation:NPC_Studio_Receptionist:11",
             "kind": "observation",
             "phase": "due",
-            "sourceId": "spatial:65a0d7d6a2e3e347",
+            "sourceId": "spatial:f8ffb3b14e0905ca",
             "actorIds": [
-              "NPC_Park_Caretaker"
+              "NPC_Studio_Receptionist"
             ],
             "scheduledAtSeconds": 90,
             "observedWorldRevision": 11,
@@ -4232,22 +4675,9 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
-              ],
-              "scheduledAtSeconds": 10,
-              "observedWorldRevision": 1,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
-              "actorIds": [
-                "NPC_Park_Caretaker"
               ],
               "scheduledAtSeconds": 10,
               "observedWorldRevision": 1,
@@ -4258,7 +4688,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -4271,7 +4701,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -4281,67 +4711,15 @@
               "status": "pending"
             },
             {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
+              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:11",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
-              "actorIds": [
-                "NPC_Studio_Manager"
-              ],
-              "scheduledAtSeconds": 10,
-              "observedWorldRevision": 1,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:c526ec206819901a",
+              "sourceId": "goal:947139f9592d1e1a",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
-              "scheduledAtSeconds": 10,
-              "observedWorldRevision": 1,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:10",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:f5d2158c3ce5034d",
-              "actorIds": [
-                "NPC_Park_Caretaker"
-              ],
-              "scheduledAtSeconds": 90,
-              "observedWorldRevision": 10,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:a7f3c678ec5d34d6",
-              "actorIds": [
-                "NPC_Park_Caretaker"
-              ],
               "scheduledAtSeconds": 90,
               "observedWorldRevision": 11,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:10",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:9b892f40db2db034",
-              "actorIds": [
-                "NPC_Studio_Manager"
-              ],
-              "scheduledAtSeconds": 90,
-              "observedWorldRevision": 10,
               "requiresDecision": true,
               "status": "pending"
             },
@@ -4355,7 +4733,7 @@
                 "NPC_Park_Caretaker"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 10,
+              "observedWorldRevision": 9,
               "requiresDecision": true,
               "status": "pending"
             }
@@ -4384,7 +4762,7 @@
               "routeId": "StudioManagerRound",
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
@@ -4420,7 +4798,7 @@
               "routeId": "ParkCaretakerRound",
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
@@ -4492,16 +4870,16 @@
       "endpoint": "POST /v1/npc/decision",
       "request": {
         "runId": "run-fixture-1",
-        "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
+        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:11",
         "observedWorldRevision": 11
       },
       "response": {
         "runId": "run-fixture-1",
-        "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
+        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:11",
         "decisionKind": "actor_goal",
         "wakeKind": "goal",
         "actorIds": [
-          "NPC_Park_Caretaker"
+          "NPC_Studio_Receptionist"
         ],
         "status": "completed",
         "observedWorldRevision": 11,
@@ -4519,6 +4897,32 @@
             "usedFallback": false
           }
         ],
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "socialView": {
           "revision": 0,
           "hearing": {
@@ -4534,10 +4938,10 @@
           "encounteredRecords": []
         },
         "activeContact": {
-          "contactId": "contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
-          "actorId": "NPC_Park_Caretaker",
-          "interactionZoneId": "ParkConversation",
-          "originAnchorRef": "Park.meeting_north_east",
+          "contactId": "contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Studio_Receptionist:11",
+          "actorId": "NPC_Studio_Receptionist",
+          "interactionZoneId": "StudioReceptionConversation",
+          "originAnchorRef": "Studio.reception_desk",
           "safeDistanceM": 2.2,
           "issuedAtSeconds": 90,
           "expiresAtSeconds": 120,
@@ -4550,18 +4954,18 @@
       "endpoint": "POST /v1/session/preload",
       "request": {
         "runId": "run-fixture-1",
-        "actorId": "NPC_Park_Caretaker",
-        "interactionZoneId": "ParkConversation",
+        "actorId": "NPC_Studio_Receptionist",
+        "interactionZoneId": "StudioReceptionConversation",
         "locale": "ko-KR"
       },
       "response": {
         "runId": "run-fixture-1",
         "worldRevision": 13,
-        "interactionZoneId": "ParkConversation",
+        "interactionZoneId": "StudioReceptionConversation",
         "actor": {
-          "actorId": "NPC_Park_Caretaker",
-          "role": "park_caretaker",
-          "locationId": "Park",
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
           "stance": "uncertain",
           "suspicion": 0,
           "playerConversationReady": true,
@@ -4573,11 +4977,45 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "activeContact": {
-          "contactId": "contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
-          "actorId": "NPC_Park_Caretaker",
-          "interactionZoneId": "ParkConversation",
-          "originAnchorRef": "Park.meeting_north_east",
+          "contactId": "contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Studio_Receptionist:11",
+          "actorId": "NPC_Studio_Receptionist",
+          "interactionZoneId": "StudioReceptionConversation",
+          "originAnchorRef": "Studio.reception_desk",
           "safeDistanceM": 2.2,
           "issuedAtSeconds": 90,
           "expiresAtSeconds": 120,
@@ -4598,11 +5036,11 @@
           "observedWorldRevision": 13,
           "player": {
             "position": [
+              -2,
               0,
-              0,
-              0
+              -15
             ],
-            "locationId": "Park"
+            "locationId": "Studio"
           },
           "actors": [
             {
@@ -4620,10 +5058,10 @@
               "visibleActorIds": [],
               "audibleActorIds": [],
               "visibleObjectIds": [],
-              "playerVisible": false,
-              "playerAudible": false,
-              "playerReachable": false,
-              "playerInteractionZoneId": null
+              "playerVisible": true,
+              "playerAudible": true,
+              "playerReachable": true,
+              "playerInteractionZoneId": "StudioReceptionConversation"
             },
             {
               "actorId": "NPC_Studio_Manager",
@@ -4667,9 +5105,9 @@
             {
               "actorId": "NPC_Park_Caretaker",
               "position": [
+                0.8,
                 0,
-                0,
-                0
+                -4
               ],
               "reachableAnchorRefs": [
                 "Park.meeting_north_east"
@@ -4677,10 +5115,10 @@
               "visibleActorIds": [],
               "audibleActorIds": [],
               "visibleObjectIds": [],
-              "playerVisible": true,
-              "playerAudible": true,
-              "playerReachable": true,
-              "playerInteractionZoneId": "ParkConversation"
+              "playerVisible": false,
+              "playerAudible": false,
+              "playerReachable": false,
+              "playerInteractionZoneId": null
             },
             {
               "actorId": "NPC_Station_Officer",
@@ -4734,7 +5172,7 @@
         "runId": "run-fixture-1",
         "advanceId": "fixture-contact-safe-distance",
         "previousWorldRevision": 13,
-        "worldRevision": 14,
+        "worldRevision": 13,
         "clock": {
           "fromSeconds": 90,
           "toSeconds": 90,
@@ -4760,22 +5198,9 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
-              ],
-              "scheduledAtSeconds": 10,
-              "observedWorldRevision": 1,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
-              "actorIds": [
-                "NPC_Park_Caretaker"
               ],
               "scheduledAtSeconds": 10,
               "observedWorldRevision": 1,
@@ -4786,7 +5211,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -4799,64 +5224,12 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
               "scheduledAtSeconds": 10,
               "observedWorldRevision": 1,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
-              "actorIds": [
-                "NPC_Studio_Manager"
-              ],
-              "scheduledAtSeconds": 10,
-              "observedWorldRevision": 1,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:c526ec206819901a",
-              "actorIds": [
-                "NPC_Studio_Receptionist"
-              ],
-              "scheduledAtSeconds": 10,
-              "observedWorldRevision": 1,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:10",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:f5d2158c3ce5034d",
-              "actorIds": [
-                "NPC_Park_Caretaker"
-              ],
-              "scheduledAtSeconds": 90,
-              "observedWorldRevision": 10,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:10",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:9b892f40db2db034",
-              "actorIds": [
-                "NPC_Studio_Manager"
-              ],
-              "scheduledAtSeconds": 90,
-              "observedWorldRevision": 10,
               "requiresDecision": true,
               "status": "pending"
             },
@@ -4870,7 +5243,7 @@
                 "NPC_Park_Caretaker"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 10,
+              "observedWorldRevision": 9,
               "requiresDecision": true,
               "status": "pending"
             }
@@ -4899,7 +5272,7 @@
               "routeId": "StudioManagerRound",
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
@@ -4935,7 +5308,7 @@
               "routeId": "ParkCaretakerRound",
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
@@ -5001,10 +5374,10 @@
           "encounteredRecords": []
         },
         "activeContact": {
-          "contactId": "contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Park_Caretaker:11",
-          "actorId": "NPC_Park_Caretaker",
-          "interactionZoneId": "ParkConversation",
-          "originAnchorRef": "Park.meeting_north_east",
+          "contactId": "contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Studio_Receptionist:11",
+          "actorId": "NPC_Studio_Receptionist",
+          "interactionZoneId": "StudioReceptionConversation",
+          "originAnchorRef": "Studio.reception_desk",
           "safeDistanceM": 2.2,
           "issuedAtSeconds": 90,
           "expiresAtSeconds": 120,
@@ -5017,19 +5390,19 @@
       "endpoint": "POST /v1/session/start",
       "request": {
         "runId": "run-fixture-1",
-        "actorId": "NPC_Park_Caretaker",
-        "interactionZoneId": "ParkConversation",
+        "actorId": "NPC_Studio_Receptionist",
+        "interactionZoneId": "StudioReceptionConversation",
         "locale": "ko-KR",
-        "contactId": "contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Park_Caretaker:11"
+        "contactId": "contact:run-fixture-1:wake:run-fixture-1:goal:NPC_Studio_Receptionist:11"
       },
       "response": {
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
-        "worldRevision": 15,
+        "worldRevision": 14,
         "actor": {
-          "actorId": "NPC_Park_Caretaker",
-          "role": "park_caretaker",
-          "locationId": "Park",
+          "actorId": "NPC_Studio_Receptionist",
+          "role": "studio_receptionist",
+          "locationId": "Studio",
           "stance": "uncertain",
           "suspicion": 0,
           "playerConversationReady": false,
@@ -5038,15 +5411,15 @@
             {
               "memoryId": "mem-fixture-1",
               "kind": "npc_utterance",
-              "sourceActorId": "NPC_Park_Caretaker",
+              "sourceActorId": "NPC_Studio_Receptionist",
               "listenerActorIds": [
                 "player"
               ],
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
-              "line": "공원을 돌보는 중입니다. 제게 하실 말씀이 있나요?",
+              "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
               "worldSeconds": 90,
-              "worldRevision": 15,
+              "worldRevision": 14,
               "proposalMeta": {
                 "profileId": "scripted/test",
                 "transport": "scripted",
@@ -5057,28 +5430,28 @@
         },
         "nextTurn": {
           "turnId": "sess-fixture-1#0",
-          "beatId": "resident_opening_park_caretaker",
+          "beatId": "resident_opening_studio_receptionist",
           "promptId": "resident_first_question",
-          "choiceSetId": "resident_opening_park_caretaker.generated",
-          "speakerId": "NPC_Park_Caretaker",
-          "prompt": "공원을 돌보는 중입니다. 제게 하실 말씀이 있나요?",
+          "choiceSetId": "resident_opening_studio_receptionist.generated",
+          "speakerId": "NPC_Studio_Receptionist",
+          "prompt": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
           "acceptsFreeInput": true,
           "continueConversation": true,
           "procedure": "ordinary",
           "hesitationMs": 0,
           "choices": [
             {
-              "choiceId": "resident_opening_park_caretaker.generated.1",
+              "choiceId": "resident_opening_studio_receptionist.generated.1",
               "intent": "safe/local",
               "line": "안내받은 절차를 확인하러 왔습니다."
             },
             {
-              "choiceId": "resident_opening_park_caretaker.generated.2",
+              "choiceId": "resident_opening_studio_receptionist.generated.2",
               "intent": "uncertain/repair",
               "line": "먼저 어떤 접수인지 설명해 주세요."
             },
             {
-              "choiceId": "resident_opening_park_caretaker.generated.3",
+              "choiceId": "resident_opening_studio_receptionist.generated.3",
               "intent": "risky/weird",
               "line": "여기 사람이 아니라서 잘 모르겠습니다."
             }
@@ -5134,7 +5507,7 @@
         "scheduleWakes": [],
         "movementDeltas": [
           {
-            "movementId": "mov:run-fixture-1:22",
+            "movementId": "mov:run-fixture-1:20",
             "actorId": "NPC_Studio_Receptionist",
             "issuedAtSeconds": 93,
             "fromAnchorRef": "Studio.reception_desk",
@@ -5145,7 +5518,7 @@
             "routePointIndex": 0
           },
           {
-            "movementId": "mov:run-fixture-1:23",
+            "movementId": "mov:run-fixture-1:21",
             "actorId": "NPC_Office_Worker",
             "issuedAtSeconds": 93,
             "fromAnchorRef": "Office.meeting_table",
@@ -5156,7 +5529,7 @@
             "routePointIndex": 4
           },
           {
-            "movementId": "mov:run-fixture-1:24",
+            "movementId": "mov:run-fixture-1:22",
             "actorId": "NPC_Station_Officer",
             "issuedAtSeconds": 94,
             "fromAnchorRef": "Station.hearing_table",
@@ -5210,7 +5583,7 @@
               "routePointArrivedAtSeconds": 80,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
-                "movementId": "mov:run-fixture-1:22",
+                "movementId": "mov:run-fixture-1:20",
                 "targetAnchorRef": "Studio.receptionist_spawn",
                 "targetLocationId": "Studio",
                 "issuedAtSeconds": 93,
@@ -5223,7 +5596,7 @@
               "routeId": "StudioManagerRound",
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
@@ -5253,7 +5626,7 @@
               "routePointArrivedAtSeconds": 70,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
-                "movementId": "mov:run-fixture-1:23",
+                "movementId": "mov:run-fixture-1:21",
                 "targetAnchorRef": "Office.work_desk",
                 "targetLocationId": "Office",
                 "issuedAtSeconds": 93,
@@ -5266,7 +5639,7 @@
               "routeId": "ParkCaretakerRound",
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
@@ -5296,7 +5669,7 @@
               "routePointArrivedAtSeconds": 80,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
-                "movementId": "mov:run-fixture-1:24",
+                "movementId": "mov:run-fixture-1:22",
                 "targetAnchorRef": "Station.intake_desk",
                 "targetLocationId": "Station",
                 "issuedAtSeconds": 94,
@@ -5363,6 +5736,7 @@
         "worldClock": {
           "elapsedSeconds": 100,
           "graceEndsAtSeconds": 90,
+          "graceEnded": true,
           "hearingAtSeconds": 1800,
           "paused": false
         },
@@ -5496,7 +5870,7 @@
                 ],
                 "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
                 "worldSeconds": 90,
-                "observedWorldRevision": 23,
+                "observedWorldRevision": 22,
                 "worldRevision": 24,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
@@ -5528,7 +5902,7 @@
                 ],
                 "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
                 "worldSeconds": 90,
-                "observedWorldRevision": 23,
+                "observedWorldRevision": 22,
                 "worldRevision": 25,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
@@ -5581,7 +5955,7 @@
                 ],
                 "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
                 "worldSeconds": 90,
-                "observedWorldRevision": 23,
+                "observedWorldRevision": 22,
                 "worldRevision": 24,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
@@ -5613,7 +5987,7 @@
                 ],
                 "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
                 "worldSeconds": 90,
-                "observedWorldRevision": 23,
+                "observedWorldRevision": 22,
                 "worldRevision": 25,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
@@ -5704,7 +6078,7 @@
               "routePointArrivedAtSeconds": 80,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
-                "movementId": "mov:run-fixture-1:22",
+                "movementId": "mov:run-fixture-1:20",
                 "targetAnchorRef": "Studio.receptionist_spawn",
                 "targetLocationId": "Studio",
                 "issuedAtSeconds": 93,
@@ -5717,7 +6091,7 @@
               "routeId": "StudioManagerRound",
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
@@ -5747,7 +6121,7 @@
               "routePointArrivedAtSeconds": 70,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
-                "movementId": "mov:run-fixture-1:23",
+                "movementId": "mov:run-fixture-1:21",
                 "targetAnchorRef": "Office.work_desk",
                 "targetLocationId": "Office",
                 "issuedAtSeconds": 93,
@@ -5760,7 +6134,7 @@
               "routeId": "ParkCaretakerRound",
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
@@ -5790,7 +6164,7 @@
               "routePointArrivedAtSeconds": 80,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
-                "movementId": "mov:run-fixture-1:24",
+                "movementId": "mov:run-fixture-1:22",
                 "targetAnchorRef": "Station.intake_desk",
                 "targetLocationId": "Station",
                 "issuedAtSeconds": 94,
@@ -5834,7 +6208,7 @@
               ],
               "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
               "worldSeconds": 90,
-              "observedWorldRevision": 23,
+              "observedWorldRevision": 22,
               "worldRevision": 24,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
@@ -5864,7 +6238,7 @@
               ],
               "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
               "worldSeconds": 90,
-              "observedWorldRevision": 23,
+              "observedWorldRevision": 22,
               "worldRevision": 25,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
@@ -5931,6 +6305,32 @@
             "transport": "scripted",
             "usedFallback": false
           },
+          "providerAudit": {
+            "callsUsed": 0,
+            "tokensUsed": 0,
+            "inFlightCalls": 0,
+            "inFlightTokens": 0,
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "calls": [],
+            "resolutions": []
+          },
+          "providerRuntimeTrace": {
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "entries": [
+              {
+                "seq": 1,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
           "activeContact": null
         }
       },
@@ -5960,6 +6360,40 @@
             "profileId": "scripted/test",
             "transport": "scripted",
             "usedFallback": false
+          },
+          "providerAudit": {
+            "callsUsed": 0,
+            "tokensUsed": 0,
+            "inFlightCalls": 0,
+            "inFlightTokens": 0,
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "calls": [],
+            "resolutions": []
+          },
+          "providerRuntimeTrace": {
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "entries": [
+              {
+                "seq": 1,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 2,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
           },
           "activeContact": null
         }
@@ -5991,6 +6425,48 @@
             "transport": "scripted",
             "usedFallback": false
           },
+          "providerAudit": {
+            "callsUsed": 0,
+            "tokensUsed": 0,
+            "inFlightCalls": 0,
+            "inFlightTokens": 0,
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "calls": [],
+            "resolutions": []
+          },
+          "providerRuntimeTrace": {
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "entries": [
+              {
+                "seq": 1,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 2,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 3,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
           "activeContact": null
         }
       },
@@ -6020,6 +6496,56 @@
             "profileId": "scripted/test",
             "transport": "scripted",
             "usedFallback": false
+          },
+          "providerAudit": {
+            "callsUsed": 0,
+            "tokensUsed": 0,
+            "inFlightCalls": 0,
+            "inFlightTokens": 0,
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "calls": [],
+            "resolutions": []
+          },
+          "providerRuntimeTrace": {
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "entries": [
+              {
+                "seq": 1,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 2,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 3,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 4,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
           },
           "activeContact": null
         }
@@ -6051,6 +6577,64 @@
             "transport": "scripted",
             "usedFallback": false
           },
+          "providerAudit": {
+            "callsUsed": 0,
+            "tokensUsed": 0,
+            "inFlightCalls": 0,
+            "inFlightTokens": 0,
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "calls": [],
+            "resolutions": []
+          },
+          "providerRuntimeTrace": {
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "entries": [
+              {
+                "seq": 1,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 2,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 3,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 4,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 5,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
+          },
           "activeContact": null
         }
       },
@@ -6080,6 +6664,72 @@
             "profileId": "scripted/test",
             "transport": "scripted",
             "usedFallback": false
+          },
+          "providerAudit": {
+            "callsUsed": 0,
+            "tokensUsed": 0,
+            "inFlightCalls": 0,
+            "inFlightTokens": 0,
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "calls": [],
+            "resolutions": []
+          },
+          "providerRuntimeTrace": {
+            "complete": true,
+            "truncated": false,
+            "droppedCount": 0,
+            "entries": [
+              {
+                "seq": 1,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 2,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 3,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 4,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 5,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 6,
+                "meta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              }
+            ]
           },
           "activeContact": null
         }
@@ -6256,7 +6906,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:e8515fea1bde9ef8",
+            "sourceId": "goal:e18a2c21dc58c4b4",
             "actorIds": [
               "NPC_Office_Worker"
             ],
@@ -6269,7 +6919,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:effdae0d3df868bb",
+            "sourceId": "goal:5ef78e6fc0f99473",
             "actorIds": [
               "NPC_Park_Caretaker"
             ],
@@ -6282,7 +6932,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:a176d4ac8870eac8",
+            "sourceId": "goal:dca168d816e3bd2f",
             "actorIds": [
               "NPC_Roaming_Liaison"
             ],
@@ -6295,7 +6945,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:21b075b31aac0fd8",
+            "sourceId": "goal:6bc7a2737e7251e6",
             "actorIds": [
               "NPC_Station_Officer"
             ],
@@ -6308,7 +6958,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:f4317480b76a81b5",
+            "sourceId": "goal:4921d06c5167bb84",
             "actorIds": [
               "NPC_Studio_Manager"
             ],
@@ -6321,7 +6971,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:edc1de1bd5a55974",
+            "sourceId": "goal:98b72e2961adbee7",
             "actorIds": [
               "NPC_Studio_Receptionist"
             ],
@@ -6421,7 +7071,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -6434,7 +7084,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
+              "sourceId": "goal:5ef78e6fc0f99473",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -6447,7 +7097,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -6460,7 +7110,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -6473,7 +7123,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
+              "sourceId": "goal:4921d06c5167bb84",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -6486,7 +7136,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:edc1de1bd5a55974",
+              "sourceId": "goal:98b72e2961adbee7",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -6521,7 +7171,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -6557,7 +7207,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -7127,6 +7777,7 @@
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": true
         },
@@ -7342,7 +7993,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -7355,7 +8006,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
+              "sourceId": "goal:5ef78e6fc0f99473",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -7368,7 +8019,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -7381,7 +8032,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -7394,7 +8045,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
+              "sourceId": "goal:4921d06c5167bb84",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -7407,7 +8058,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:edc1de1bd5a55974",
+              "sourceId": "goal:98b72e2961adbee7",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -7442,7 +8093,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -7478,7 +8129,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -7744,6 +8395,7 @@
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": false
         },
@@ -7959,7 +8611,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -7972,7 +8624,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
+              "sourceId": "goal:5ef78e6fc0f99473",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -7985,7 +8637,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -7998,7 +8650,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -8011,7 +8663,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
+              "sourceId": "goal:4921d06c5167bb84",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -8024,7 +8676,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:edc1de1bd5a55974",
+              "sourceId": "goal:98b72e2961adbee7",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -8059,7 +8711,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -8095,7 +8747,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -8338,6 +8990,48 @@
             "usedFallback": false
           }
         ],
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "socialView": {
           "revision": 1,
           "hearing": {
@@ -8524,6 +9218,56 @@
             "usedFallback": false
           }
         ],
+        "providerAudit": {
+          "callsUsed": 0,
+          "tokensUsed": 0,
+          "inFlightCalls": 0,
+          "inFlightTokens": 0,
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "calls": [],
+          "resolutions": []
+        },
+        "providerRuntimeTrace": {
+          "complete": true,
+          "truncated": false,
+          "droppedCount": 0,
+          "entries": [
+            {
+              "seq": 1,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 2,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 3,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ]
+        },
         "socialView": {
           "revision": 1,
           "hearing": {
@@ -8716,6 +9460,7 @@
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": false
         },
@@ -8924,7 +9669,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:2",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -8937,7 +9682,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:2",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
+              "sourceId": "goal:5ef78e6fc0f99473",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -8950,22 +9695,9 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:2",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
-              ],
-              "scheduledAtSeconds": 0,
-              "observedWorldRevision": 2,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:2",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
-              "actorIds": [
-                "NPC_Station_Officer"
               ],
               "scheduledAtSeconds": 0,
               "observedWorldRevision": 2,
@@ -8976,7 +9708,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:8",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:1888a528276d370f",
+              "sourceId": "goal:f24cecfd874044f7",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -8986,23 +9718,10 @@
               "status": "pending"
             },
             {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:2",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:edc1de1bd5a55974",
-              "actorIds": [
-                "NPC_Studio_Receptionist"
-              ],
-              "scheduledAtSeconds": 0,
-              "observedWorldRevision": 2,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:8",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f2badb2abb6200d8",
+              "sourceId": "goal:5d06338cef902429",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -9037,7 +9756,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -9073,7 +9792,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -9369,7 +10088,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -9405,7 +10124,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -9604,7 +10323,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -9654,7 +10373,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -9907,7 +10626,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -9943,7 +10662,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -10103,7 +10822,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -10139,7 +10858,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -10341,7 +11060,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -10377,7 +11096,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -10521,7 +11240,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -10564,7 +11283,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -10723,7 +11442,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -10759,7 +11478,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -10942,7 +11661,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -10985,7 +11704,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -11209,7 +11928,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -11245,7 +11964,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -11405,7 +12124,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -11441,7 +12160,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -11643,7 +12362,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -11679,7 +12398,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -11771,10 +12490,59 @@
         },
         "arrivalsApplied": [],
         "arrivalsRejected": [],
-        "scheduleWakes": [],
+        "scheduleWakes": [
+          {
+            "wakeId": "wake:run-fixture-1:actor_schedule:NPC_Park_Caretaker.schedule.1",
+            "kind": "actor_schedule",
+            "phase": "started",
+            "sourceId": "NPC_Park_Caretaker.schedule.1",
+            "actorIds": [
+              "NPC_Park_Caretaker"
+            ],
+            "scheduledAtSeconds": 70,
+            "observedWorldRevision": 18,
+            "requiresDecision": false,
+            "status": "informational"
+          },
+          {
+            "wakeId": "wake:run-fixture-1:actor_schedule:NPC_Studio_Manager.schedule.1",
+            "kind": "actor_schedule",
+            "phase": "started",
+            "sourceId": "NPC_Studio_Manager.schedule.1",
+            "actorIds": [
+              "NPC_Studio_Manager"
+            ],
+            "scheduledAtSeconds": 70,
+            "observedWorldRevision": 18,
+            "requiresDecision": false,
+            "status": "informational"
+          }
+        ],
         "movementDeltas": [
           {
             "movementId": "mov:run-fixture-1:13",
+            "actorId": "NPC_Studio_Manager",
+            "issuedAtSeconds": 70,
+            "fromAnchorRef": "Studio.review_records",
+            "targetAnchorRef": "Park.meeting_north_west",
+            "targetLocationId": "Park",
+            "scheduleBlockId": "NPC_Studio_Manager.schedule.1",
+            "activity": "park_meeting",
+            "routePointIndex": null
+          },
+          {
+            "movementId": "mov:run-fixture-1:14",
+            "actorId": "NPC_Park_Caretaker",
+            "issuedAtSeconds": 70,
+            "fromAnchorRef": "Park.meeting_north",
+            "targetAnchorRef": "Park.meeting_north_east",
+            "targetLocationId": "Park",
+            "scheduleBlockId": "NPC_Park_Caretaker.schedule.1",
+            "activity": "park_meeting",
+            "routePointIndex": null
+          },
+          {
+            "movementId": "mov:run-fixture-1:15",
             "actorId": "NPC_Office_Worker",
             "issuedAtSeconds": 67,
             "fromAnchorRef": "Office.filing_wall",
@@ -11785,7 +12553,7 @@
             "routePointIndex": 3
           },
           {
-            "movementId": "mov:run-fixture-1:14",
+            "movementId": "mov:run-fixture-1:16",
             "actorId": "NPC_Roaming_Liaison",
             "issuedAtSeconds": 70,
             "fromAnchorRef": "Studio.waiting_seats",
@@ -11797,6 +12565,16 @@
           }
         ],
         "actorReadinessDeltas": [
+          {
+            "actorId": "NPC_Studio_Manager",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": false,
+            "reason": "movement_started"
+          },
           {
             "actorId": "NPC_Office_Worker",
             "playerConversationReady": false,
@@ -11832,19 +12610,26 @@
               "actorId": "NPC_Studio_Manager",
               "routeId": "StudioManagerRound",
               "currentBlock": {
-                "blockId": "NPC_Studio_Manager.schedule.0",
-                "startSeconds": 0,
-                "endSeconds": 90,
-                "activity": "review_work",
-                "targetKind": "route",
-                "targetId": "StudioManagerRound"
+                "blockId": "NPC_Studio_Manager.schedule.1",
+                "startSeconds": 70,
+                "endSeconds": 230,
+                "activity": "park_meeting",
+                "targetKind": "anchor",
+                "targetId": "Park.meeting_north_west"
               },
               "confirmedAnchorRef": "Studio.review_records",
-              "desiredAnchorRef": "Studio.review_records",
-              "routePointIndex": 2,
-              "routePointArrivedAtSeconds": 50,
-              "nextRouteMoveAtSeconds": 73,
-              "pendingMovement": null
+              "desiredAnchorRef": "Park.meeting_north_west",
+              "routePointIndex": null,
+              "routePointArrivedAtSeconds": null,
+              "nextRouteMoveAtSeconds": null,
+              "pendingMovement": {
+                "movementId": "mov:run-fixture-1:13",
+                "targetAnchorRef": "Park.meeting_north_west",
+                "targetLocationId": "Park",
+                "issuedAtSeconds": 70,
+                "scheduleBlockId": "NPC_Studio_Manager.schedule.1",
+                "routePointIndex": null
+              }
             },
             {
               "actorId": "NPC_Office_Worker",
@@ -11863,7 +12648,7 @@
               "routePointArrivedAtSeconds": 40,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
-                "movementId": "mov:run-fixture-1:13",
+                "movementId": "mov:run-fixture-1:15",
                 "targetAnchorRef": "Office.meeting_table",
                 "targetLocationId": "Office",
                 "issuedAtSeconds": 67,
@@ -11875,19 +12660,26 @@
               "actorId": "NPC_Park_Caretaker",
               "routeId": "ParkCaretakerRound",
               "currentBlock": {
-                "blockId": "NPC_Park_Caretaker.schedule.0",
-                "startSeconds": 0,
-                "endSeconds": 90,
-                "activity": "caretaking_round",
-                "targetKind": "route",
-                "targetId": "ParkCaretakerRound"
+                "blockId": "NPC_Park_Caretaker.schedule.1",
+                "startSeconds": 70,
+                "endSeconds": 230,
+                "activity": "park_meeting",
+                "targetKind": "anchor",
+                "targetId": "Park.meeting_north_east"
               },
               "confirmedAnchorRef": "Park.meeting_north",
-              "desiredAnchorRef": "Park.meeting_north",
-              "routePointIndex": 2,
-              "routePointArrivedAtSeconds": 60,
-              "nextRouteMoveAtSeconds": 77,
-              "pendingMovement": null
+              "desiredAnchorRef": "Park.meeting_north_east",
+              "routePointIndex": null,
+              "routePointArrivedAtSeconds": null,
+              "nextRouteMoveAtSeconds": null,
+              "pendingMovement": {
+                "movementId": "mov:run-fixture-1:14",
+                "targetAnchorRef": "Park.meeting_north_east",
+                "targetLocationId": "Park",
+                "issuedAtSeconds": 70,
+                "scheduleBlockId": "NPC_Park_Caretaker.schedule.1",
+                "routePointIndex": null
+              }
             },
             {
               "actorId": "NPC_Station_Officer",
@@ -11924,7 +12716,7 @@
               "routePointArrivedAtSeconds": 50,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
-                "movementId": "mov:run-fixture-1:14",
+                "movementId": "mov:run-fixture-1:16",
                 "targetAnchorRef": "Park.office_approach",
                 "targetLocationId": "Park",
                 "issuedAtSeconds": 70,
@@ -11961,14 +12753,24 @@
         "elapsedSeconds": 0,
         "arrivals": [
           {
-            "movementId": "mov:run-fixture-1:13",
+            "movementId": "mov:run-fixture-1:15",
             "actorId": "NPC_Office_Worker",
             "anchorRef": "Office.meeting_table"
           },
           {
             "movementId": "mov:run-fixture-1:14",
+            "actorId": "NPC_Park_Caretaker",
+            "anchorRef": "Park.meeting_north_east"
+          },
+          {
+            "movementId": "mov:run-fixture-1:16",
             "actorId": "NPC_Roaming_Liaison",
             "anchorRef": "Park.office_approach"
+          },
+          {
+            "movementId": "mov:run-fixture-1:13",
+            "actorId": "NPC_Studio_Manager",
+            "anchorRef": "Park.meeting_north_west"
           }
         ]
       },
@@ -11987,15 +12789,27 @@
         },
         "arrivalsApplied": [
           {
-            "movementId": "mov:run-fixture-1:13",
+            "movementId": "mov:run-fixture-1:15",
             "actorId": "NPC_Office_Worker",
             "anchorRef": "Office.meeting_table",
             "locationId": "Office"
           },
           {
             "movementId": "mov:run-fixture-1:14",
+            "actorId": "NPC_Park_Caretaker",
+            "anchorRef": "Park.meeting_north_east",
+            "locationId": "Park"
+          },
+          {
+            "movementId": "mov:run-fixture-1:16",
             "actorId": "NPC_Roaming_Liaison",
             "anchorRef": "Park.office_approach",
+            "locationId": "Park"
+          },
+          {
+            "movementId": "mov:run-fixture-1:13",
+            "actorId": "NPC_Studio_Manager",
+            "anchorRef": "Park.meeting_north_west",
             "locationId": "Park"
           }
         ],
@@ -12007,7 +12821,7 @@
             "phase": "due",
             "sourceId": "mov:run-fixture-1:13",
             "actorIds": [
-              "NPC_Office_Worker"
+              "NPC_Studio_Manager"
             ],
             "scheduledAtSeconds": 70,
             "observedWorldRevision": 19,
@@ -12020,6 +12834,32 @@
             "phase": "due",
             "sourceId": "mov:run-fixture-1:14",
             "actorIds": [
+              "NPC_Park_Caretaker"
+            ],
+            "scheduledAtSeconds": 70,
+            "observedWorldRevision": 19,
+            "requiresDecision": false,
+            "status": "informational"
+          },
+          {
+            "wakeId": "wake:run-fixture-1:arrival:mov:run-fixture-1:15",
+            "kind": "arrival",
+            "phase": "due",
+            "sourceId": "mov:run-fixture-1:15",
+            "actorIds": [
+              "NPC_Office_Worker"
+            ],
+            "scheduledAtSeconds": 70,
+            "observedWorldRevision": 19,
+            "requiresDecision": false,
+            "status": "informational"
+          },
+          {
+            "wakeId": "wake:run-fixture-1:arrival:mov:run-fixture-1:16",
+            "kind": "arrival",
+            "phase": "due",
+            "sourceId": "mov:run-fixture-1:16",
+            "actorIds": [
               "NPC_Roaming_Liaison"
             ],
             "scheduledAtSeconds": 70,
@@ -12031,9 +12871,19 @@
         "movementDeltas": [],
         "actorReadinessDeltas": [
           {
+            "actorId": "NPC_Studio_Manager",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          },
+          {
             "actorId": "NPC_Office_Worker",
             "playerConversationReady": true,
             "reason": "opening_ready"
+          },
+          {
+            "actorId": "NPC_Park_Caretaker",
+            "playerConversationReady": false,
+            "reason": "preload_required"
           },
           {
             "actorId": "NPC_Roaming_Liaison",
@@ -12070,18 +12920,18 @@
               "actorId": "NPC_Studio_Manager",
               "routeId": "StudioManagerRound",
               "currentBlock": {
-                "blockId": "NPC_Studio_Manager.schedule.0",
-                "startSeconds": 0,
-                "endSeconds": 90,
-                "activity": "review_work",
-                "targetKind": "route",
-                "targetId": "StudioManagerRound"
+                "blockId": "NPC_Studio_Manager.schedule.1",
+                "startSeconds": 70,
+                "endSeconds": 230,
+                "activity": "park_meeting",
+                "targetKind": "anchor",
+                "targetId": "Park.meeting_north_west"
               },
-              "confirmedAnchorRef": "Studio.review_records",
-              "desiredAnchorRef": "Studio.review_records",
-              "routePointIndex": 2,
-              "routePointArrivedAtSeconds": 50,
-              "nextRouteMoveAtSeconds": 73,
+              "confirmedAnchorRef": "Park.meeting_north_west",
+              "desiredAnchorRef": "Park.meeting_north_west",
+              "routePointIndex": null,
+              "routePointArrivedAtSeconds": null,
+              "nextRouteMoveAtSeconds": null,
               "pendingMovement": null
             },
             {
@@ -12106,18 +12956,18 @@
               "actorId": "NPC_Park_Caretaker",
               "routeId": "ParkCaretakerRound",
               "currentBlock": {
-                "blockId": "NPC_Park_Caretaker.schedule.0",
-                "startSeconds": 0,
-                "endSeconds": 90,
-                "activity": "caretaking_round",
-                "targetKind": "route",
-                "targetId": "ParkCaretakerRound"
+                "blockId": "NPC_Park_Caretaker.schedule.1",
+                "startSeconds": 70,
+                "endSeconds": 230,
+                "activity": "park_meeting",
+                "targetKind": "anchor",
+                "targetId": "Park.meeting_north_east"
               },
-              "confirmedAnchorRef": "Park.meeting_north",
-              "desiredAnchorRef": "Park.meeting_north",
-              "routePointIndex": 2,
-              "routePointArrivedAtSeconds": 60,
-              "nextRouteMoveAtSeconds": 77,
+              "confirmedAnchorRef": "Park.meeting_north_east",
+              "desiredAnchorRef": "Park.meeting_north_east",
+              "routePointIndex": null,
+              "routePointArrivedAtSeconds": null,
+              "nextRouteMoveAtSeconds": null,
               "pendingMovement": null
             },
             {
@@ -12203,7 +13053,7 @@
         "scheduleWakes": [],
         "movementDeltas": [
           {
-            "movementId": "mov:run-fixture-1:15",
+            "movementId": "mov:run-fixture-1:17",
             "actorId": "NPC_Studio_Receptionist",
             "issuedAtSeconds": 76,
             "fromAnchorRef": "Studio.waiting_seats",
@@ -12211,28 +13061,6 @@
             "targetLocationId": "Studio",
             "scheduleBlockId": "NPC_Studio_Receptionist.schedule.0",
             "activity": "front_desk",
-            "routePointIndex": 3
-          },
-          {
-            "movementId": "mov:run-fixture-1:16",
-            "actorId": "NPC_Studio_Manager",
-            "issuedAtSeconds": 73,
-            "fromAnchorRef": "Studio.review_records",
-            "targetAnchorRef": "Studio.waiting_seats",
-            "targetLocationId": "Studio",
-            "scheduleBlockId": "NPC_Studio_Manager.schedule.0",
-            "activity": "review_work",
-            "routePointIndex": 3
-          },
-          {
-            "movementId": "mov:run-fixture-1:17",
-            "actorId": "NPC_Park_Caretaker",
-            "issuedAtSeconds": 77,
-            "fromAnchorRef": "Park.meeting_north",
-            "targetAnchorRef": "Park.bench_east",
-            "targetLocationId": "Park",
-            "scheduleBlockId": "NPC_Park_Caretaker.schedule.0",
-            "activity": "caretaking_round",
             "routePointIndex": 3
           },
           {
@@ -12250,16 +13078,6 @@
         "actorReadinessDeltas": [
           {
             "actorId": "NPC_Studio_Receptionist",
-            "playerConversationReady": false,
-            "reason": "movement_started"
-          },
-          {
-            "actorId": "NPC_Studio_Manager",
-            "playerConversationReady": false,
-            "reason": "movement_started"
-          },
-          {
-            "actorId": "NPC_Park_Caretaker",
             "playerConversationReady": false,
             "reason": "movement_started"
           },
@@ -12293,7 +13111,7 @@
               "routePointArrivedAtSeconds": 50,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
-                "movementId": "mov:run-fixture-1:15",
+                "movementId": "mov:run-fixture-1:17",
                 "targetAnchorRef": "Studio.reception_desk",
                 "targetLocationId": "Studio",
                 "issuedAtSeconds": 76,
@@ -12305,26 +13123,19 @@
               "actorId": "NPC_Studio_Manager",
               "routeId": "StudioManagerRound",
               "currentBlock": {
-                "blockId": "NPC_Studio_Manager.schedule.0",
-                "startSeconds": 0,
-                "endSeconds": 90,
-                "activity": "review_work",
-                "targetKind": "route",
-                "targetId": "StudioManagerRound"
+                "blockId": "NPC_Studio_Manager.schedule.1",
+                "startSeconds": 70,
+                "endSeconds": 230,
+                "activity": "park_meeting",
+                "targetKind": "anchor",
+                "targetId": "Park.meeting_north_west"
               },
-              "confirmedAnchorRef": "Studio.review_records",
-              "desiredAnchorRef": "Studio.waiting_seats",
-              "routePointIndex": 2,
-              "routePointArrivedAtSeconds": 50,
+              "confirmedAnchorRef": "Park.meeting_north_west",
+              "desiredAnchorRef": "Park.meeting_north_west",
+              "routePointIndex": null,
+              "routePointArrivedAtSeconds": null,
               "nextRouteMoveAtSeconds": null,
-              "pendingMovement": {
-                "movementId": "mov:run-fixture-1:16",
-                "targetAnchorRef": "Studio.waiting_seats",
-                "targetLocationId": "Studio",
-                "issuedAtSeconds": 73,
-                "scheduleBlockId": "NPC_Studio_Manager.schedule.0",
-                "routePointIndex": 3
-              }
+              "pendingMovement": null
             },
             {
               "actorId": "NPC_Office_Worker",
@@ -12348,26 +13159,19 @@
               "actorId": "NPC_Park_Caretaker",
               "routeId": "ParkCaretakerRound",
               "currentBlock": {
-                "blockId": "NPC_Park_Caretaker.schedule.0",
-                "startSeconds": 0,
-                "endSeconds": 90,
-                "activity": "caretaking_round",
-                "targetKind": "route",
-                "targetId": "ParkCaretakerRound"
+                "blockId": "NPC_Park_Caretaker.schedule.1",
+                "startSeconds": 70,
+                "endSeconds": 230,
+                "activity": "park_meeting",
+                "targetKind": "anchor",
+                "targetId": "Park.meeting_north_east"
               },
-              "confirmedAnchorRef": "Park.meeting_north",
-              "desiredAnchorRef": "Park.bench_east",
-              "routePointIndex": 2,
-              "routePointArrivedAtSeconds": 60,
+              "confirmedAnchorRef": "Park.meeting_north_east",
+              "desiredAnchorRef": "Park.meeting_north_east",
+              "routePointIndex": null,
+              "routePointArrivedAtSeconds": null,
               "nextRouteMoveAtSeconds": null,
-              "pendingMovement": {
-                "movementId": "mov:run-fixture-1:17",
-                "targetAnchorRef": "Park.bench_east",
-                "targetLocationId": "Park",
-                "issuedAtSeconds": 77,
-                "scheduleBlockId": "NPC_Park_Caretaker.schedule.0",
-                "routePointIndex": 3
-              }
+              "pendingMovement": null
             },
             {
               "actorId": "NPC_Station_Officer",
@@ -12441,22 +13245,12 @@
         "elapsedSeconds": 0,
         "arrivals": [
           {
-            "movementId": "mov:run-fixture-1:17",
-            "actorId": "NPC_Park_Caretaker",
-            "anchorRef": "Park.bench_east"
-          },
-          {
             "movementId": "mov:run-fixture-1:18",
             "actorId": "NPC_Station_Officer",
             "anchorRef": "Station.hearing_table"
           },
           {
-            "movementId": "mov:run-fixture-1:16",
-            "actorId": "NPC_Studio_Manager",
-            "anchorRef": "Studio.waiting_seats"
-          },
-          {
-            "movementId": "mov:run-fixture-1:15",
+            "movementId": "mov:run-fixture-1:17",
             "actorId": "NPC_Studio_Receptionist",
             "anchorRef": "Studio.reception_desk"
           }
@@ -12477,25 +13271,13 @@
         },
         "arrivalsApplied": [
           {
-            "movementId": "mov:run-fixture-1:17",
-            "actorId": "NPC_Park_Caretaker",
-            "anchorRef": "Park.bench_east",
-            "locationId": "Park"
-          },
-          {
             "movementId": "mov:run-fixture-1:18",
             "actorId": "NPC_Station_Officer",
             "anchorRef": "Station.hearing_table",
             "locationId": "Station"
           },
           {
-            "movementId": "mov:run-fixture-1:16",
-            "actorId": "NPC_Studio_Manager",
-            "anchorRef": "Studio.waiting_seats",
-            "locationId": "Studio"
-          },
-          {
-            "movementId": "mov:run-fixture-1:15",
+            "movementId": "mov:run-fixture-1:17",
             "actorId": "NPC_Studio_Receptionist",
             "anchorRef": "Studio.reception_desk",
             "locationId": "Studio"
@@ -12504,38 +13286,12 @@
         "arrivalsRejected": [],
         "scheduleWakes": [
           {
-            "wakeId": "wake:run-fixture-1:arrival:mov:run-fixture-1:15",
-            "kind": "arrival",
-            "phase": "due",
-            "sourceId": "mov:run-fixture-1:15",
-            "actorIds": [
-              "NPC_Studio_Receptionist"
-            ],
-            "scheduledAtSeconds": 80,
-            "observedWorldRevision": 21,
-            "requiresDecision": false,
-            "status": "informational"
-          },
-          {
-            "wakeId": "wake:run-fixture-1:arrival:mov:run-fixture-1:16",
-            "kind": "arrival",
-            "phase": "due",
-            "sourceId": "mov:run-fixture-1:16",
-            "actorIds": [
-              "NPC_Studio_Manager"
-            ],
-            "scheduledAtSeconds": 80,
-            "observedWorldRevision": 21,
-            "requiresDecision": false,
-            "status": "informational"
-          },
-          {
             "wakeId": "wake:run-fixture-1:arrival:mov:run-fixture-1:17",
             "kind": "arrival",
             "phase": "due",
             "sourceId": "mov:run-fixture-1:17",
             "actorIds": [
-              "NPC_Park_Caretaker"
+              "NPC_Studio_Receptionist"
             ],
             "scheduledAtSeconds": 80,
             "observedWorldRevision": 21,
@@ -12560,16 +13316,6 @@
         "actorReadinessDeltas": [
           {
             "actorId": "NPC_Studio_Receptionist",
-            "playerConversationReady": true,
-            "reason": "opening_ready"
-          },
-          {
-            "actorId": "NPC_Studio_Manager",
-            "playerConversationReady": true,
-            "reason": "opening_ready"
-          },
-          {
-            "actorId": "NPC_Park_Caretaker",
             "playerConversationReady": true,
             "reason": "opening_ready"
           },
@@ -12608,18 +13354,18 @@
               "actorId": "NPC_Studio_Manager",
               "routeId": "StudioManagerRound",
               "currentBlock": {
-                "blockId": "NPC_Studio_Manager.schedule.0",
-                "startSeconds": 0,
-                "endSeconds": 90,
-                "activity": "review_work",
-                "targetKind": "route",
-                "targetId": "StudioManagerRound"
+                "blockId": "NPC_Studio_Manager.schedule.1",
+                "startSeconds": 70,
+                "endSeconds": 230,
+                "activity": "park_meeting",
+                "targetKind": "anchor",
+                "targetId": "Park.meeting_north_west"
               },
-              "confirmedAnchorRef": "Studio.waiting_seats",
-              "desiredAnchorRef": "Studio.waiting_seats",
-              "routePointIndex": 3,
-              "routePointArrivedAtSeconds": 80,
-              "nextRouteMoveAtSeconds": 99,
+              "confirmedAnchorRef": "Park.meeting_north_west",
+              "desiredAnchorRef": "Park.meeting_north_west",
+              "routePointIndex": null,
+              "routePointArrivedAtSeconds": null,
+              "nextRouteMoveAtSeconds": null,
               "pendingMovement": null
             },
             {
@@ -12644,18 +13390,18 @@
               "actorId": "NPC_Park_Caretaker",
               "routeId": "ParkCaretakerRound",
               "currentBlock": {
-                "blockId": "NPC_Park_Caretaker.schedule.0",
-                "startSeconds": 0,
-                "endSeconds": 90,
-                "activity": "caretaking_round",
-                "targetKind": "route",
-                "targetId": "ParkCaretakerRound"
+                "blockId": "NPC_Park_Caretaker.schedule.1",
+                "startSeconds": 70,
+                "endSeconds": 230,
+                "activity": "park_meeting",
+                "targetKind": "anchor",
+                "targetId": "Park.meeting_north_east"
               },
-              "confirmedAnchorRef": "Park.bench_east",
-              "desiredAnchorRef": "Park.bench_east",
-              "routePointIndex": 3,
-              "routePointArrivedAtSeconds": 80,
-              "nextRouteMoveAtSeconds": 93,
+              "confirmedAnchorRef": "Park.meeting_north_east",
+              "desiredAnchorRef": "Park.meeting_north_east",
+              "routePointIndex": null,
+              "routePointArrivedAtSeconds": null,
+              "nextRouteMoveAtSeconds": null,
               "pendingMovement": null
             },
             {
@@ -12740,32 +13486,6 @@
         "arrivalsRejected": [],
         "scheduleWakes": [
           {
-            "wakeId": "wake:run-fixture-1:actor_schedule:NPC_Park_Caretaker.schedule.1",
-            "kind": "actor_schedule",
-            "phase": "started",
-            "sourceId": "NPC_Park_Caretaker.schedule.1",
-            "actorIds": [
-              "NPC_Park_Caretaker"
-            ],
-            "scheduledAtSeconds": 90,
-            "observedWorldRevision": 22,
-            "requiresDecision": false,
-            "status": "informational"
-          },
-          {
-            "wakeId": "wake:run-fixture-1:actor_schedule:NPC_Studio_Manager.schedule.1",
-            "kind": "actor_schedule",
-            "phase": "started",
-            "sourceId": "NPC_Studio_Manager.schedule.1",
-            "actorIds": [
-              "NPC_Studio_Manager"
-            ],
-            "scheduledAtSeconds": 90,
-            "observedWorldRevision": 22,
-            "requiresDecision": false,
-            "status": "informational"
-          },
-          {
             "wakeId": "wake:run-fixture-1:grace:90",
             "kind": "grace",
             "phase": "ended",
@@ -12775,6 +13495,20 @@
             "observedWorldRevision": 22,
             "requiresDecision": false,
             "status": "informational"
+          },
+          {
+            "wakeId": "wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
+            "kind": "meeting_ready",
+            "phase": "due",
+            "sourceId": "MEET_MANAGER_CARETAKER",
+            "actorIds": [
+              "NPC_Studio_Manager",
+              "NPC_Park_Caretaker"
+            ],
+            "scheduledAtSeconds": 90,
+            "observedWorldRevision": 22,
+            "requiresDecision": true,
+            "status": "pending"
           },
           {
             "wakeId": "wake:run-fixture-1:meeting_window:MEET_MANAGER_CARETAKER:started",
@@ -12794,28 +13528,6 @@
         "movementDeltas": [
           {
             "movementId": "mov:run-fixture-1:19",
-            "actorId": "NPC_Studio_Manager",
-            "issuedAtSeconds": 90,
-            "fromAnchorRef": "Studio.waiting_seats",
-            "targetAnchorRef": "Park.meeting_north_west",
-            "targetLocationId": "Park",
-            "scheduleBlockId": "NPC_Studio_Manager.schedule.1",
-            "activity": "park_meeting",
-            "routePointIndex": null
-          },
-          {
-            "movementId": "mov:run-fixture-1:20",
-            "actorId": "NPC_Park_Caretaker",
-            "issuedAtSeconds": 90,
-            "fromAnchorRef": "Park.bench_east",
-            "targetAnchorRef": "Park.meeting_north_east",
-            "targetLocationId": "Park",
-            "scheduleBlockId": "NPC_Park_Caretaker.schedule.1",
-            "activity": "park_meeting",
-            "routePointIndex": null
-          },
-          {
-            "movementId": "mov:run-fixture-1:21",
             "actorId": "NPC_Roaming_Liaison",
             "issuedAtSeconds": 86,
             "fromAnchorRef": "Park.office_approach",
@@ -12826,18 +13538,7 @@
             "routePointIndex": 4
           }
         ],
-        "actorReadinessDeltas": [
-          {
-            "actorId": "NPC_Studio_Manager",
-            "playerConversationReady": false,
-            "reason": "movement_started"
-          },
-          {
-            "actorId": "NPC_Park_Caretaker",
-            "playerConversationReady": false,
-            "reason": "movement_started"
-          }
-        ],
+        "actorReadinessDeltas": [],
         "ambientSpeechEvents": [],
         "ambientSpeechCursor": 0,
         "scheduler": {
@@ -12845,7 +13546,22 @@
           "activeMeetingWindowIds": [
             "MEET_MANAGER_CARETAKER"
           ],
-          "pendingWakes": [],
+          "pendingWakes": [
+            {
+              "wakeId": "wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
+              "kind": "meeting_ready",
+              "phase": "due",
+              "sourceId": "MEET_MANAGER_CARETAKER",
+              "actorIds": [
+                "NPC_Studio_Manager",
+                "NPC_Park_Caretaker"
+              ],
+              "scheduledAtSeconds": 90,
+              "observedWorldRevision": 22,
+              "requiresDecision": true,
+              "status": "pending"
+            }
+          ],
           "actors": [
             {
               "actorId": "NPC_Studio_Receptionist",
@@ -12870,25 +13586,18 @@
               "routeId": "StudioManagerRound",
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
                 "targetId": "Park.meeting_north_west"
               },
-              "confirmedAnchorRef": "Studio.waiting_seats",
+              "confirmedAnchorRef": "Park.meeting_north_west",
               "desiredAnchorRef": "Park.meeting_north_west",
               "routePointIndex": null,
               "routePointArrivedAtSeconds": null,
               "nextRouteMoveAtSeconds": null,
-              "pendingMovement": {
-                "movementId": "mov:run-fixture-1:19",
-                "targetAnchorRef": "Park.meeting_north_west",
-                "targetLocationId": "Park",
-                "issuedAtSeconds": 90,
-                "scheduleBlockId": "NPC_Studio_Manager.schedule.1",
-                "routePointIndex": null
-              }
+              "pendingMovement": null
             },
             {
               "actorId": "NPC_Office_Worker",
@@ -12913,25 +13622,18 @@
               "routeId": "ParkCaretakerRound",
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
                 "targetId": "Park.meeting_north_east"
               },
-              "confirmedAnchorRef": "Park.bench_east",
+              "confirmedAnchorRef": "Park.meeting_north_east",
               "desiredAnchorRef": "Park.meeting_north_east",
               "routePointIndex": null,
               "routePointArrivedAtSeconds": null,
               "nextRouteMoveAtSeconds": null,
-              "pendingMovement": {
-                "movementId": "mov:run-fixture-1:20",
-                "targetAnchorRef": "Park.meeting_north_east",
-                "targetLocationId": "Park",
-                "issuedAtSeconds": 90,
-                "scheduleBlockId": "NPC_Park_Caretaker.schedule.1",
-                "routePointIndex": null
-              }
+              "pendingMovement": null
             },
             {
               "actorId": "NPC_Station_Officer",
@@ -12968,7 +13670,7 @@
               "routePointArrivedAtSeconds": 70,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
-                "movementId": "mov:run-fixture-1:21",
+                "movementId": "mov:run-fixture-1:19",
                 "targetAnchorRef": "Office.meeting_table",
                 "targetLocationId": "Office",
                 "issuedAtSeconds": 86,
@@ -13005,19 +13707,9 @@
         "elapsedSeconds": 0,
         "arrivals": [
           {
-            "movementId": "mov:run-fixture-1:20",
-            "actorId": "NPC_Park_Caretaker",
-            "anchorRef": "Park.meeting_north_east"
-          },
-          {
-            "movementId": "mov:run-fixture-1:21",
+            "movementId": "mov:run-fixture-1:19",
             "actorId": "NPC_Roaming_Liaison",
             "anchorRef": "Office.meeting_table"
-          },
-          {
-            "movementId": "mov:run-fixture-1:19",
-            "actorId": "NPC_Studio_Manager",
-            "anchorRef": "Park.meeting_north_west"
           }
         ]
       },
@@ -13036,22 +13728,10 @@
         },
         "arrivalsApplied": [
           {
-            "movementId": "mov:run-fixture-1:20",
-            "actorId": "NPC_Park_Caretaker",
-            "anchorRef": "Park.meeting_north_east",
-            "locationId": "Park"
-          },
-          {
-            "movementId": "mov:run-fixture-1:21",
+            "movementId": "mov:run-fixture-1:19",
             "actorId": "NPC_Roaming_Liaison",
             "anchorRef": "Office.meeting_table",
             "locationId": "Office"
-          },
-          {
-            "movementId": "mov:run-fixture-1:19",
-            "actorId": "NPC_Studio_Manager",
-            "anchorRef": "Park.meeting_north_west",
-            "locationId": "Park"
           }
         ],
         "arrivalsRejected": [],
@@ -13062,66 +13742,16 @@
             "phase": "due",
             "sourceId": "mov:run-fixture-1:19",
             "actorIds": [
-              "NPC_Studio_Manager"
-            ],
-            "scheduledAtSeconds": 90,
-            "observedWorldRevision": 23,
-            "requiresDecision": false,
-            "status": "informational"
-          },
-          {
-            "wakeId": "wake:run-fixture-1:arrival:mov:run-fixture-1:20",
-            "kind": "arrival",
-            "phase": "due",
-            "sourceId": "mov:run-fixture-1:20",
-            "actorIds": [
-              "NPC_Park_Caretaker"
-            ],
-            "scheduledAtSeconds": 90,
-            "observedWorldRevision": 23,
-            "requiresDecision": false,
-            "status": "informational"
-          },
-          {
-            "wakeId": "wake:run-fixture-1:arrival:mov:run-fixture-1:21",
-            "kind": "arrival",
-            "phase": "due",
-            "sourceId": "mov:run-fixture-1:21",
-            "actorIds": [
               "NPC_Roaming_Liaison"
             ],
             "scheduledAtSeconds": 90,
             "observedWorldRevision": 23,
             "requiresDecision": false,
             "status": "informational"
-          },
-          {
-            "wakeId": "wake:run-fixture-1:meeting_ready:MEET_MANAGER_CARETAKER",
-            "kind": "meeting_ready",
-            "phase": "due",
-            "sourceId": "MEET_MANAGER_CARETAKER",
-            "actorIds": [
-              "NPC_Studio_Manager",
-              "NPC_Park_Caretaker"
-            ],
-            "scheduledAtSeconds": 90,
-            "observedWorldRevision": 23,
-            "requiresDecision": true,
-            "status": "pending"
           }
         ],
         "movementDeltas": [],
         "actorReadinessDeltas": [
-          {
-            "actorId": "NPC_Studio_Manager",
-            "playerConversationReady": false,
-            "reason": "preload_required"
-          },
-          {
-            "actorId": "NPC_Park_Caretaker",
-            "playerConversationReady": false,
-            "reason": "preload_required"
-          },
           {
             "actorId": "NPC_Roaming_Liaison",
             "playerConversationReady": false,
@@ -13146,7 +13776,7 @@
                 "NPC_Park_Caretaker"
               ],
               "scheduledAtSeconds": 90,
-              "observedWorldRevision": 23,
+              "observedWorldRevision": 22,
               "requiresDecision": true,
               "status": "pending"
             }
@@ -13175,7 +13805,7 @@
               "routeId": "StudioManagerRound",
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
@@ -13211,7 +13841,7 @@
               "routeId": "ParkCaretakerRound",
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
@@ -13308,7 +13938,7 @@
         "scheduleWakes": [],
         "movementDeltas": [
           {
-            "movementId": "mov:run-fixture-1:22",
+            "movementId": "mov:run-fixture-1:20",
             "actorId": "NPC_Studio_Receptionist",
             "issuedAtSeconds": 93,
             "fromAnchorRef": "Studio.reception_desk",
@@ -13319,7 +13949,7 @@
             "routePointIndex": 0
           },
           {
-            "movementId": "mov:run-fixture-1:23",
+            "movementId": "mov:run-fixture-1:21",
             "actorId": "NPC_Office_Worker",
             "issuedAtSeconds": 93,
             "fromAnchorRef": "Office.meeting_table",
@@ -13330,7 +13960,7 @@
             "routePointIndex": 4
           },
           {
-            "movementId": "mov:run-fixture-1:24",
+            "movementId": "mov:run-fixture-1:22",
             "actorId": "NPC_Station_Officer",
             "issuedAtSeconds": 94,
             "fromAnchorRef": "Station.hearing_table",
@@ -13384,7 +14014,7 @@
               "routePointArrivedAtSeconds": 80,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
-                "movementId": "mov:run-fixture-1:22",
+                "movementId": "mov:run-fixture-1:20",
                 "targetAnchorRef": "Studio.receptionist_spawn",
                 "targetLocationId": "Studio",
                 "issuedAtSeconds": 93,
@@ -13397,7 +14027,7 @@
               "routeId": "StudioManagerRound",
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
@@ -13427,7 +14057,7 @@
               "routePointArrivedAtSeconds": 70,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
-                "movementId": "mov:run-fixture-1:23",
+                "movementId": "mov:run-fixture-1:21",
                 "targetAnchorRef": "Office.work_desk",
                 "targetLocationId": "Office",
                 "issuedAtSeconds": 93,
@@ -13440,7 +14070,7 @@
               "routeId": "ParkCaretakerRound",
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.1",
-                "startSeconds": 90,
+                "startSeconds": 70,
                 "endSeconds": 230,
                 "activity": "park_meeting",
                 "targetKind": "anchor",
@@ -13470,7 +14100,7 @@
               "routePointArrivedAtSeconds": 80,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
-                "movementId": "mov:run-fixture-1:24",
+                "movementId": "mov:run-fixture-1:22",
                 "targetAnchorRef": "Station.intake_desk",
                 "targetLocationId": "Station",
                 "issuedAtSeconds": 94,
@@ -13915,6 +14545,7 @@
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": true
         },
@@ -14130,7 +14761,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -14143,7 +14774,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
+              "sourceId": "goal:5ef78e6fc0f99473",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -14156,7 +14787,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -14169,7 +14800,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -14182,7 +14813,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
+              "sourceId": "goal:4921d06c5167bb84",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -14195,7 +14826,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:edc1de1bd5a55974",
+              "sourceId": "goal:98b72e2961adbee7",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -14230,7 +14861,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -14266,7 +14897,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -14519,6 +15150,7 @@
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": false
         },
@@ -14734,7 +15366,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -14747,7 +15379,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
+              "sourceId": "goal:5ef78e6fc0f99473",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -14760,7 +15392,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -14773,7 +15405,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -14786,7 +15418,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
+              "sourceId": "goal:4921d06c5167bb84",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -14799,7 +15431,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:edc1de1bd5a55974",
+              "sourceId": "goal:98b72e2961adbee7",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -14834,7 +15466,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -14870,7 +15502,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -15381,6 +16013,7 @@
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": true
         },
@@ -15596,7 +16229,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -15609,7 +16242,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
+              "sourceId": "goal:5ef78e6fc0f99473",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -15622,7 +16255,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -15635,7 +16268,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -15648,7 +16281,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
+              "sourceId": "goal:4921d06c5167bb84",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -15661,7 +16294,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:edc1de1bd5a55974",
+              "sourceId": "goal:98b72e2961adbee7",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -15696,7 +16329,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -15732,7 +16365,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -15985,6 +16618,7 @@
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": false
         },
@@ -16200,7 +16834,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -16213,7 +16847,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
+              "sourceId": "goal:5ef78e6fc0f99473",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -16226,7 +16860,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -16239,7 +16873,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -16252,7 +16886,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
+              "sourceId": "goal:4921d06c5167bb84",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -16265,7 +16899,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:edc1de1bd5a55974",
+              "sourceId": "goal:98b72e2961adbee7",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -16300,7 +16934,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -16336,7 +16970,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -16859,6 +17493,7 @@
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": true
         },
@@ -17076,7 +17711,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -17089,7 +17724,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
+              "sourceId": "goal:5ef78e6fc0f99473",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -17102,7 +17737,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -17115,7 +17750,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -17128,7 +17763,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
+              "sourceId": "goal:4921d06c5167bb84",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -17141,7 +17776,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:edc1de1bd5a55974",
+              "sourceId": "goal:98b72e2961adbee7",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -17176,7 +17811,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -17212,7 +17847,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -17467,6 +18102,7 @@
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": false
         },
@@ -17684,7 +18320,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -17697,7 +18333,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
+              "sourceId": "goal:5ef78e6fc0f99473",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -17710,7 +18346,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -17723,7 +18359,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -17736,7 +18372,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
+              "sourceId": "goal:4921d06c5167bb84",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -17749,7 +18385,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:edc1de1bd5a55974",
+              "sourceId": "goal:98b72e2961adbee7",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -17784,7 +18420,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -17820,7 +18456,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -18331,6 +18967,7 @@
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": true
         },
@@ -18546,7 +19183,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -18559,7 +19196,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
+              "sourceId": "goal:5ef78e6fc0f99473",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -18572,7 +19209,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -18585,7 +19222,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -18598,7 +19235,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
+              "sourceId": "goal:4921d06c5167bb84",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -18611,7 +19248,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:edc1de1bd5a55974",
+              "sourceId": "goal:98b72e2961adbee7",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -18646,7 +19283,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -18682,7 +19319,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"
@@ -18935,6 +19572,7 @@
         "worldClock": {
           "elapsedSeconds": 0,
           "graceEndsAtSeconds": 90,
+          "graceEnded": false,
           "hearingAtSeconds": 1800,
           "paused": false
         },
@@ -19150,7 +19788,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e8515fea1bde9ef8",
+              "sourceId": "goal:e18a2c21dc58c4b4",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -19163,7 +19801,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:effdae0d3df868bb",
+              "sourceId": "goal:5ef78e6fc0f99473",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -19176,7 +19814,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:a176d4ac8870eac8",
+              "sourceId": "goal:dca168d816e3bd2f",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -19189,7 +19827,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:21b075b31aac0fd8",
+              "sourceId": "goal:6bc7a2737e7251e6",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -19202,7 +19840,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f4317480b76a81b5",
+              "sourceId": "goal:4921d06c5167bb84",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -19215,7 +19853,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:edc1de1bd5a55974",
+              "sourceId": "goal:98b72e2961adbee7",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -19250,7 +19888,7 @@
               "currentBlock": {
                 "blockId": "NPC_Studio_Manager.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "review_work",
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
@@ -19286,7 +19924,7 @@
               "currentBlock": {
                 "blockId": "NPC_Park_Caretaker.schedule.0",
                 "startSeconds": 0,
-                "endSeconds": 90,
+                "endSeconds": 70,
                 "activity": "caretaking_round",
                 "targetKind": "route",
                 "targetId": "ParkCaretakerRound"

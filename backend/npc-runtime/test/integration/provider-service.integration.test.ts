@@ -5,14 +5,22 @@ import { fallbackContent } from "../../src/localization/fallback-content.js";
 import { createSameOrderWorld } from "../../src/runtime/world/index.js";
 import {
   ambientReplyJudgmentJsonSchema,
+  ambientReplyJudgmentJsonSchemaForTarget,
   ambientReplyJudgmentSchemaForLocale,
+  ambientReplyJudgmentSchemaForRequest,
   agentStepProposalJsonSchema,
+  agentStepProposalJsonSchemaForTools,
   agentStepProposalSchemaForLocale,
+  agentStepProposalSchemaForRequest,
   hearingJudgmentJsonSchema,
   hearingJudgmentSchemaForLocale,
 } from "../../src/providers/envelope.js";
 import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
-import { createProviderFromEnvironment, loadProviderConfig } from "../../src/providers/registry.js";
+import {
+  createProviderFromConfig,
+  createProviderFromEnvironment,
+  loadProviderConfig,
+} from "../../src/providers/registry.js";
 import { ProviderService } from "../../src/providers/service.js";
 import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-adapter.js";
 import { validateHearingJudgment } from "../../src/runtime/run-hearing.js";
@@ -68,6 +76,42 @@ function observePacket() {
     heardSpeech: [],
   });
   packet.audibleActorIds = ["player", "NPC_Store_Manager"];
+  return packet;
+}
+
+function requestScopedPacket() {
+  const packet = observePacket();
+  packet.visibleObjects = [{ objectId: "Prop_Visible", label: "보이는 물건", state: "idle" }];
+  packet.visibleActors = ["NPC_Store_Manager", "NPC_Visible_Silent"];
+  packet.audibleActorIds = ["NPC_Store_Manager"];
+  packet.reachableAnchorRefs = ["Park.allowed_anchor"];
+  packet.playerContact = null;
+  return packet;
+}
+
+function m3rAdministrativePacket() {
+  const packet = requestScopedPacket();
+  packet.administrativeSources = [{
+    memoryId: "mem-visible-source",
+    kind: "player_conversation",
+    originActorId: "player",
+    summary: "방문자가 접수 경위를 설명했습니다.",
+    whyLine: "직접 들은 설명입니다.",
+    reportDelta: 0,
+  }];
+  packet.administrativeAuthority = {
+    allowedRecordKinds: ["note"],
+    writableTextSurfaceIds: ["TS_Visible"],
+  };
+  packet.visibleRecords = [{
+    recordId: "record-visible",
+    kind: "note",
+    stateBody: "방문 경위를 확인한 기록입니다.",
+    recordRevision: 2,
+    authorActorId: packet.actorId,
+    sourceMemoryId: "mem-prior-source",
+    textSurfaceId: "TS_Visible",
+  }];
   return packet;
 }
 
@@ -274,8 +318,931 @@ function assertEveryObjectPropertyIsRequired(value: unknown, path = "root"): voi
   }
 }
 
+function agentStepToolArgsJsonSchema(
+  schemaValue: Record<string, unknown>,
+  tool: string,
+): Array<Record<string, Record<string, unknown>>> {
+  const properties = schemaValue.properties as Record<string, Record<string, unknown>>;
+  const branches = properties.toolCall.anyOf as Array<Record<string, unknown>>;
+  return branches.flatMap(branch => {
+    const branchProperties = branch.properties as
+      | Record<string, Record<string, unknown>>
+      | undefined;
+    if (branchProperties?.tool.const !== tool) return [];
+    return [
+      (branchProperties.args.properties ?? {}) as Record<string, Record<string, unknown>>,
+    ];
+  });
+}
+
 test("agent-step strict schema requires every property in every object branch", () => {
   assertEveryObjectPropertyIsRequired(agentStepProposalJsonSchema);
+});
+
+test("required talk_to narrows transport and Zod contracts and repairs an invalid target", async () => {
+  const targetActorId = "NPC_Store_Manager";
+  const invalidReply = {
+    toolCall: { tool: "talk_to", args: { actorId: "player" } },
+    utterance: null,
+    rationale: "The wrong actor was selected and no utterance was returned.",
+    done: false,
+  };
+  const repairedReply = {
+    ...invalidReply,
+    toolCall: { tool: "talk_to", args: { actorId: targetActorId } },
+    utterance: "관리자에게 확인 내용을 말하겠습니다.",
+    done: true,
+  };
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(invalidReply) },
+    { text: JSON.stringify(repairedReply) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/agent-step-repair",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const packet = observePacket();
+  packet.toolCatalog = ["talk_to", "wait"];
+
+  const result = await service.proposeNextStep({
+    sessionId: "run-agent-step-repair",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "지정된 주민에게 확인 내용을 한 번 말한다.",
+    observePacket: packet,
+    blockedSignatures: [],
+    requiredToolCall: { tool: "talk_to", actorId: targetActorId },
+    requireUtterance: true,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.proposal.utterance, repairedReply.utterance);
+  assert.deepEqual(textGen.requests.map(request => request.purpose), ["agent_step", "repair"]);
+  assert.match(textGen.requests[0].instructions, /exactly four top-level keys/);
+  assert.match(textGen.requests[0].instructions, /toolCall and utterance must both be non-null/);
+  assert.match(textGen.requests[0].instructions, /Never copy an actor, object, record/);
+  assert.match(textGen.requests[0].instructions, /Tool argument guide for the currently offered branches/);
+  assert.match(textGen.requests[0].instructions, /- talk_to: \{actorId\}/);
+  assert.match(
+    textGen.requests[0].instructions,
+    /Only use actors, objects, records, and tool names present in the observe packet/,
+  );
+  assert.doesNotMatch(
+    textGen.requests[0].instructions,
+    /\n- (?:move_to|look|wait|use_object|write_record|read_record|request)(?:\s|:)/,
+  );
+  assert.match(textGen.requests[1].instructions, /complete replacement JSON value/);
+
+  const repairInput = JSON.parse(textGen.requests[1].input) as {
+    validationIssues: Array<{ path: string; message: string }>;
+  };
+  assert.deepEqual(repairInput.validationIssues, [
+    {
+      path: "toolCall.args.actorId",
+      message: `required talk_to actorId must equal ${targetActorId}`,
+    },
+    {
+      path: "done",
+      message: "required talk_to reply must finish with done=true",
+    },
+    {
+      path: "utterance",
+      message: "required talk_to utterance must be nonempty",
+    },
+  ]);
+
+  const schema = textGen.requests[0].jsonSchema as {
+    properties: {
+      toolCall: {
+        anyOf: Array<{
+          type: string;
+          properties?: {
+            tool: { const: string };
+            args: { properties: { actorId?: { const?: string } } };
+          };
+        }>;
+      };
+    };
+  };
+  assertEveryObjectPropertyIsRequired(schema);
+  assert.deepEqual(
+    Object.keys((textGen.requests[0].jsonSchema as { properties: Record<string, unknown> }).properties),
+    ["toolCall", "utterance", "rationale", "done"],
+  );
+  assert.deepEqual(
+    schema.properties.toolCall.anyOf.map(branch =>
+      branch.type === "null" ? null : branch.properties?.tool.const
+    ),
+    ["talk_to"],
+  );
+  const talkToBranch = schema.properties.toolCall.anyOf.find(
+    branch => branch.properties?.tool.const === "talk_to",
+  );
+  assert.equal(talkToBranch?.properties?.args.properties.actorId?.const, targetActorId);
+  const utteranceSchema = (
+    textGen.requests[0].jsonSchema as { properties: { utterance: Record<string, unknown> } }
+  ).properties.utterance;
+  assert.deepEqual(utteranceSchema, { type: "string", minLength: 1 });
+  const doneSchema = (
+    textGen.requests[0].jsonSchema as { properties: { done: Record<string, unknown> } }
+  ).properties.done;
+  assert.deepEqual(doneSchema, { type: "boolean", const: true });
+
+  const requestSchema = agentStepProposalSchemaForRequest("ko-KR", {
+    effectiveTools: ["talk_to"],
+    observePacket: packet,
+    recordContracts: {},
+    requiredToolCall: { tool: "talk_to", actorId: targetActorId },
+    requireUtterance: true,
+  });
+  for (const invalid of [
+    { ...repairedReply, toolCall: null },
+    { ...repairedReply, toolCall: { tool: "talk_to", args: { actorId: "player" } } },
+    { ...repairedReply, utterance: null },
+    { ...repairedReply, utterance: "   " },
+    { ...repairedReply, done: false },
+  ]) {
+    assert.equal(requestSchema.safeParse(invalid).success, false);
+  }
+  assert.equal(requestSchema.safeParse(repairedReply).success, true);
+
+  const catalogSchema = agentStepProposalJsonSchemaForTools({
+    effectiveTools: ["look", "wait"],
+    observePacket: packet,
+    recordContracts: {},
+  }) as typeof schema;
+  assert.deepEqual(
+    catalogSchema.properties.toolCall.anyOf.map(branch =>
+      branch.type === "null" ? null : branch.properties?.tool.const
+    ),
+    [null, "look", "wait"],
+  );
+
+  const audit = service.auditSnapshot("run-agent-step-repair");
+  assert.deepEqual(audit.resolutions.map(resolution => ({
+    purpose: resolution.purpose,
+    transport: resolution.transport,
+    fallbackReason: resolution.fallbackReason,
+    callSeqs: resolution.callSeqs,
+  })), [{
+    purpose: "agent_step",
+    transport: "live",
+    fallbackReason: null,
+    callSeqs: [1, 2],
+  }]);
+});
+
+test("allowed talk actor scope narrows transport and Zod schemas while omission keeps visible-audible scope", async () => {
+  const allowedActorId = "NPC_Office_Worker";
+  const otherGroundedActorId = "NPC_Store_Manager";
+  const packet = requestScopedPacket();
+  packet.visibleActors = [otherGroundedActorId, allowedActorId];
+  packet.audibleActorIds = [otherGroundedActorId, allowedActorId];
+  packet.toolCatalog = ["talk_to", "wait"];
+  const validReply = {
+    toolCall: { tool: "talk_to", args: { actorId: allowedActorId } },
+    utterance: "지금 확인한 내용을 전해 드리겠습니다.",
+    rationale: "이번 요청에서 지정된 주민에게만 말합니다.",
+    done: true,
+  };
+  const textGen = new FakeTextGen([{ text: JSON.stringify(validReply) }]);
+  const service = new ProviderService({
+    profileId: "test/allowed-talk-target-live",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.proposeNextStep({
+    sessionId: "run-allowed-talk-target-live",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "지정된 주민에게만 확인 내용을 전한다.",
+    observePacket: packet,
+    blockedSignatures: [],
+    allowedTalkActorIds: [allowedActorId],
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.proposal.toolCall?.tool, "talk_to");
+  assert.equal(result.proposal.toolCall?.args.actorId, allowedActorId);
+  assert.equal(textGen.requests.length, 1);
+  assert.deepEqual(
+    agentStepToolArgsJsonSchema(textGen.requests[0]?.jsonSchema ?? {}, "talk_to")[0]
+      ?.actorId?.enum,
+    [allowedActorId],
+  );
+  assert.match(textGen.requests[0]?.instructions ?? "", /exact allowed ids/);
+  const input = JSON.parse(textGen.requests[0]?.input ?? "{}") as {
+    allowedTalkActorIds?: string[] | null;
+  };
+  assert.deepEqual(input.allowedTalkActorIds, [allowedActorId]);
+
+  const scopedConstraints = {
+    effectiveTools: ["talk_to", "wait"] as const,
+    observePacket: packet,
+    recordContracts: {},
+    allowedTalkActorIds: [allowedActorId],
+  };
+  const scopedZod = agentStepProposalSchemaForRequest("ko-KR", scopedConstraints);
+  assert.equal(scopedZod.safeParse(validReply).success, true);
+  assert.equal(scopedZod.safeParse({
+    ...validReply,
+    toolCall: { tool: "talk_to", args: { actorId: otherGroundedActorId } },
+  }).success, false);
+
+  const defaultConstraints = {
+    effectiveTools: ["talk_to", "wait"] as const,
+    observePacket: packet,
+    recordContracts: {},
+  };
+  const defaultJson = agentStepProposalJsonSchemaForTools(defaultConstraints);
+  assert.deepEqual(
+    agentStepToolArgsJsonSchema(defaultJson, "talk_to")[0]?.actorId?.enum,
+    [otherGroundedActorId, allowedActorId],
+  );
+  const defaultZod = agentStepProposalSchemaForRequest("ko-KR", defaultConstraints);
+  assert.equal(defaultZod.safeParse({
+    ...validReply,
+    toolCall: { tool: "talk_to", args: { actorId: otherGroundedActorId } },
+  }).success, true);
+});
+
+test("disallowed grounded talk target repairs once then uses deterministic invalid-envelope fallback", async () => {
+  const allowedActorId = "NPC_Office_Worker";
+  const disallowedActorId = "NPC_Store_Manager";
+  const packet = requestScopedPacket();
+  packet.visibleActors = [disallowedActorId, allowedActorId];
+  packet.audibleActorIds = [disallowedActorId, allowedActorId];
+  packet.toolCatalog = ["talk_to", "wait"];
+  const invalidReply = {
+    toolCall: { tool: "talk_to", args: { actorId: disallowedActorId } },
+    utterance: "다른 주민에게 이 내용을 전하겠습니다.",
+    rationale: "요청 범위와 다른 주민을 선택했습니다.",
+    done: true,
+  };
+  const invalidOutput = { text: JSON.stringify(invalidReply) };
+  const textGen = new FakeTextGen([invalidOutput, invalidOutput]);
+  const service = new ProviderService({
+    profileId: "test/allowed-talk-target-fallback",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.proposeNextStep({
+    sessionId: "run-allowed-talk-target-fallback",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "지정된 주민에게만 확인 내용을 전한다.",
+    observePacket: packet,
+    blockedSignatures: [],
+    allowedTalkActorIds: [allowedActorId],
+  });
+
+  assert.equal(result.meta.transport, "fallback");
+  assert.equal(result.meta.usedFallback, true);
+  assert.equal(result.meta.fallbackReason, "invalid_envelope");
+  assert.deepEqual(textGen.requests.map(request => request.purpose), ["agent_step", "repair"]);
+  const repairInput = JSON.parse(textGen.requests[1]?.input ?? "{}") as {
+    validationIssues: Array<{ path: string; message: string }>;
+  };
+  assert.deepEqual(repairInput.validationIssues, [{
+    path: "toolCall.args.actorId",
+    message: `talk_to target ${disallowedActorId} is outside this request's allowed talk scope`,
+  }]);
+  assert.equal(result.proposal.toolCall?.tool, "talk_to");
+  assert.equal(result.proposal.toolCall?.args.actorId, allowedActorId);
+  assert.deepEqual(
+    agentStepToolArgsJsonSchema(textGen.requests[0]?.jsonSchema ?? {}, "talk_to")[0]
+      ?.actorId?.enum,
+    [allowedActorId],
+  );
+  const audit = service.auditSnapshot("run-allowed-talk-target-fallback");
+  assert.equal(audit.callsUsed, 2);
+  assert.deepEqual(audit.resolutions[0]?.callSeqs, [1, 2]);
+});
+
+test("agent-step record contracts select only M3R or legacy schemas and guides", async () => {
+  const completedStep = JSON.stringify({
+    toolCall: null,
+    utterance: null,
+    rationale: "현재 목표에 필요한 기록 작업을 마쳤습니다.",
+    done: true,
+  });
+  const textGen = new FakeTextGen([{ text: completedStep }, { text: completedStep }]);
+  const service = new ProviderService({
+    profileId: "test/record-contracts",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const m3rPacket = observePacket();
+  m3rPacket.toolCatalog = ["write_record", "read_record"];
+  m3rPacket.administrativeSources = [{
+    memoryId: "mem-m3r-source",
+    kind: "player_conversation",
+    originActorId: "player",
+    summary: "방문자가 접수 경위를 설명했습니다.",
+    whyLine: "직접 들은 설명입니다.",
+    reportDelta: 0,
+  }];
+  m3rPacket.administrativeAuthority = {
+    allowedRecordKinds: ["note"],
+    writableTextSurfaceIds: ["TS_Studio_ReviewRecords"],
+  };
+  m3rPacket.visibleRecords = [{
+    recordId: "record-m3r-1",
+    kind: "note",
+    stateBody: "접수 경위를 확인한 기록입니다.",
+    recordRevision: 1,
+    authorActorId: m3rPacket.actorId,
+    sourceMemoryId: "mem-m3r-source",
+    textSurfaceId: "TS_Studio_ReviewRecords",
+  }];
+  await service.proposeNextStep({
+    sessionId: "run-record-contract-m3r",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "필요한 행정 기록을 확인한다.",
+    observePacket: m3rPacket,
+    blockedSignatures: [],
+  });
+
+  const legacyPacket = observePacket();
+  legacyPacket.toolCatalog = ["write_record", "read_record"];
+  legacyPacket.administrativeSources = [];
+  legacyPacket.administrativeAuthority.writableTextSurfaceIds = [];
+  legacyPacket.visibleRecords = [{
+    recordId: "record-legacy-1",
+    kind: "receipt",
+    stateBody: "기존 주문 기록입니다.",
+  }];
+  await service.proposeNextStep({
+    sessionId: "session-record-contract-legacy",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "기존 기록을 확인한다.",
+    observePacket: legacyPacket,
+    blockedSignatures: [],
+  });
+
+  const recordBranches = (schemaValue: Record<string, unknown>, tool: string) => {
+    const properties = schemaValue.properties as Record<string, Record<string, unknown>>;
+    const branches = properties.toolCall.anyOf as Array<Record<string, unknown>>;
+    return branches.filter(branch => {
+      const branchProperties = branch.properties as Record<string, Record<string, unknown>> | undefined;
+      return branchProperties?.tool.const === tool;
+    }).map(branch => {
+      const branchProperties = branch.properties as Record<string, Record<string, unknown>>;
+      const args = branchProperties.args;
+      return Object.keys(args.properties as Record<string, unknown>).sort();
+    });
+  };
+  const m3rSchema = textGen.requests[0].jsonSchema;
+  assert.deepEqual(recordBranches(m3rSchema, "write_record"), [
+    [
+      "institutionalPressureDelta",
+      "openQuestion",
+      "recordKind",
+      "sourceMemoryId",
+      "stateBody",
+      "textSurfaceId",
+      "whyLine",
+    ],
+    [
+      "institutionalPressureDelta",
+      "openQuestion",
+      "recordId",
+      "recordKind",
+      "sourceMemoryId",
+      "stateBody",
+      "textSurfaceId",
+      "whyLine",
+    ],
+  ]);
+  assert.deepEqual(recordBranches(m3rSchema, "read_record"), [[
+    "institutionalPressureDelta",
+    "openQuestion",
+    "recordId",
+    "whyLine",
+  ]]);
+  assert.match(textGen.requests[0].instructions, /write_record \(M3R administrativeAuthority\)/);
+  assert.match(textGen.requests[0].instructions, /read_record \(M3R administrativeAuthority\)/);
+  assert.doesNotMatch(textGen.requests[0].instructions, /legacy world path/);
+
+  const legacySchema = textGen.requests[1].jsonSchema;
+  assert.deepEqual(recordBranches(legacySchema, "write_record"), [[
+    "citedLedgerEventId",
+    "ledgerKind",
+    "objectId",
+    "record",
+    "toState",
+    "whyLine",
+  ]]);
+  assert.deepEqual(recordBranches(legacySchema, "read_record"), [["recordId"]]);
+  assert.match(textGen.requests[1].instructions, /write_record \(legacy world path\)/);
+  assert.match(textGen.requests[1].instructions, /read_record \(legacy world path\)/);
+  assert.doesNotMatch(textGen.requests[1].instructions, /M3R administrativeAuthority/);
+
+  const stepWith = (toolCall: Record<string, unknown>) => ({
+    toolCall,
+    utterance: null,
+    rationale: "현재 기록 맥락에 맞는 도구 인자입니다.",
+    done: true,
+  });
+  const legacyWrite = {
+    tool: "write_record",
+    args: {
+      objectId: null,
+      toState: null,
+      ledgerKind: "record_written",
+      record: {
+        recordId: "record-legacy-new",
+        kind: "note",
+        targetId: "player",
+        stateBody: "방문자 설명을 적었습니다.",
+        visibleTo: ["store_clerk"],
+      },
+      citedLedgerEventId: null,
+      whyLine: "기존 기록 절차를 따랐습니다.",
+    },
+  };
+  const m3rWrite = {
+    tool: "write_record",
+    args: {
+      recordKind: "note",
+      sourceMemoryId: "mem-m3r-source",
+      stateBody: "방문자 설명을 적었습니다.",
+      whyLine: "직접 들은 설명을 기록합니다.",
+      institutionalPressureDelta: 0,
+      textSurfaceId: "TS_Studio_ReviewRecords",
+      openQuestion: null,
+    },
+  };
+  const legacyRead = { tool: "read_record", args: { recordId: "record-legacy-1" } };
+  const m3rRead = {
+    tool: "read_record",
+    args: {
+      recordId: "record-m3r-1",
+      whyLine: "보이는 기록을 처음 확인합니다.",
+      institutionalPressureDelta: 0,
+      openQuestion: null,
+    },
+  };
+  for (const [tool, matchingCall, wrongCall] of [
+    ["write_record", m3rWrite, legacyWrite],
+    ["read_record", m3rRead, legacyRead],
+  ] as const) {
+    const schema = agentStepProposalSchemaForRequest("ko-KR", {
+      effectiveTools: [tool],
+      observePacket: m3rPacket,
+      recordContracts: { [tool]: "m3r" },
+    });
+    assert.equal(schema.safeParse(stepWith(matchingCall)).success, true);
+    assert.equal(schema.safeParse(stepWith(wrongCall)).success, false);
+  }
+  for (const [tool, matchingCall, wrongCall] of [
+    ["write_record", legacyWrite, m3rWrite],
+    ["read_record", legacyRead, m3rRead],
+  ] as const) {
+    const schema = agentStepProposalSchemaForRequest("ko-KR", {
+      effectiveTools: [tool],
+      observePacket: legacyPacket,
+      recordContracts: { [tool]: "legacy" },
+    });
+    assert.equal(schema.safeParse(stepWith(matchingCall)).success, true);
+    assert.equal(schema.safeParse(stepWith(wrongCall)).success, false);
+  }
+});
+
+test("request-scoped Zod repairs unoffered tools and wrong M3R record args", async () => {
+  const completedStep = {
+    toolCall: null,
+    utterance: null,
+    rationale: "현재 목표에서 더 필요한 행동이 없습니다.",
+    done: true,
+  };
+  const invalidUnofferedStep = {
+    toolCall: { tool: "look", args: { targetId: "record-hidden" } },
+    utterance: null,
+    rationale: "제공되지 않은 단서를 보려고 했습니다.",
+    done: false,
+  };
+  const invalidLegacyRead = {
+    toolCall: { tool: "read_record", args: { recordId: "record-m3r-repair" } },
+    utterance: null,
+    rationale: "기록을 확인합니다.",
+    done: true,
+  };
+  const repairedM3rRead = {
+    ...invalidLegacyRead,
+    toolCall: {
+      tool: "read_record",
+      args: {
+        recordId: "record-m3r-repair",
+        whyLine: "보이는 기록의 현재 개정을 처음 확인합니다.",
+        institutionalPressureDelta: 0,
+        openQuestion: null,
+      },
+    },
+  };
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(invalidUnofferedStep) },
+    { text: JSON.stringify(completedStep) },
+    { text: JSON.stringify(invalidLegacyRead) },
+    { text: JSON.stringify(repairedM3rRead) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/request-schema-repairs",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const waitOnlyPacket = observePacket();
+  waitOnlyPacket.toolCatalog = ["wait"];
+  const unofferedResult = await service.proposeNextStep({
+    sessionId: "run-unoffered-tool-repair",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "현재 맥락에서 가능한 행동만 고른다.",
+    observePacket: waitOnlyPacket,
+    blockedSignatures: [],
+  });
+  assert.equal(unofferedResult.meta.transport, "live");
+  assert.equal(unofferedResult.proposal.done, true);
+
+  const readOnlyPacket = observePacket();
+  readOnlyPacket.toolCatalog = ["read_record"];
+  readOnlyPacket.administrativeSources = [];
+  readOnlyPacket.administrativeAuthority = {
+    allowedRecordKinds: ["note"],
+    writableTextSurfaceIds: [],
+  };
+  readOnlyPacket.visibleRecords = [{
+    recordId: "record-m3r-repair",
+    kind: "note",
+    stateBody: "방문 경위를 확인한 기록입니다.",
+    recordRevision: 2,
+    authorActorId: "NPC_Studio_Receptionist",
+    sourceMemoryId: "mem-m3r-repair",
+    textSurfaceId: "TS_Studio_ReviewRecords",
+  }];
+  const recordResult = await service.proposeNextStep({
+    sessionId: "run-m3r-record-repair",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "보이는 행정 기록의 현재 개정을 확인한다.",
+    observePacket: readOnlyPacket,
+    blockedSignatures: [],
+  });
+  assert.equal(recordResult.meta.transport, "live");
+  assert.equal(recordResult.proposal.toolCall?.tool, "read_record");
+  assert.deepEqual(textGen.requests.map(request => request.purpose), [
+    "agent_step",
+    "repair",
+    "agent_step",
+    "repair",
+  ]);
+
+  const firstRepair = JSON.parse(textGen.requests[1].input) as {
+    validationIssues: Array<{ path: string; message: string }>;
+  };
+  assert.deepEqual(firstRepair.validationIssues, [{
+    path: "toolCall.tool",
+    message: "tool look is not offered in this request",
+  }]);
+  const secondRepair = JSON.parse(textGen.requests[3].input) as {
+    validationIssues: Array<{ path: string; message: string }>;
+  };
+  assert.deepEqual(secondRepair.validationIssues, [{
+    path: "toolCall.args",
+    message: "read_record args must match the m3r contract",
+  }]);
+});
+
+test("request-scoped target validation repairs once then falls back for hidden authority", async () => {
+  const step = (
+    toolCall: { tool: string; args: Record<string, unknown> },
+    utterance: string | null = null,
+  ) => ({
+    toolCall,
+    utterance,
+    rationale: "현재 관측에 근거해 행동합니다.",
+    done: true,
+  });
+  const cases: Array<{
+    name: string;
+    tool: string;
+    packet: () => ReturnType<typeof observePacket>;
+    invalid: ReturnType<typeof step>;
+    expectedIssuePath: string;
+    assertTransportSchema: (schema: Record<string, unknown>) => void;
+  }> = [
+    {
+      name: "hidden-look",
+      tool: "look",
+      packet: () => {
+        const packet = requestScopedPacket();
+        packet.toolCatalog = ["look", "wait"];
+        return packet;
+      },
+      invalid: step({ tool: "look", args: { targetId: "Prop_Hidden" } }),
+      expectedIssuePath: "toolCall.args.targetId",
+      assertTransportSchema: schema => {
+        const [args] = agentStepToolArgsJsonSchema(schema, "look");
+        const allowed = args?.targetId?.enum as string[] | undefined;
+        assert.ok(allowed?.includes("NPC_Store_Manager"));
+        assert.ok(allowed?.includes("NPC_Visible_Silent"));
+        assert.ok(allowed?.includes("Prop_Visible"));
+        assert.equal(allowed?.includes("Prop_Hidden"), false);
+      },
+    },
+    {
+      name: "unreachable-move",
+      tool: "move_to",
+      packet: () => {
+        const packet = requestScopedPacket();
+        packet.toolCatalog = ["move_to", "wait"];
+        return packet;
+      },
+      invalid: step({ tool: "move_to", args: { targetId: "Park.hidden_anchor" } }),
+      expectedIssuePath: "toolCall.args.targetId",
+      assertTransportSchema: schema => {
+        const [args] = agentStepToolArgsJsonSchema(schema, "move_to");
+        assert.deepEqual(args?.targetId?.enum, ["Park.allowed_anchor"]);
+      },
+    },
+    {
+      name: "inaudible-talk",
+      tool: "talk_to",
+      packet: () => {
+        const packet = requestScopedPacket();
+        packet.toolCatalog = ["talk_to", "wait"];
+        return packet;
+      },
+      invalid: step(
+        { tool: "talk_to", args: { actorId: "NPC_Visible_Silent" } },
+        "보이지만 들리지 않는 주민에게 말합니다.",
+      ),
+      expectedIssuePath: "toolCall.args.actorId",
+      assertTransportSchema: schema => {
+        const [args] = agentStepToolArgsJsonSchema(schema, "talk_to");
+        assert.deepEqual(args?.actorId?.enum, ["NPC_Store_Manager"]);
+      },
+    },
+    {
+      name: "hidden-read-record",
+      tool: "read_record",
+      packet: () => {
+        const packet = m3rAdministrativePacket();
+        packet.toolCatalog = ["read_record", "wait"];
+        return packet;
+      },
+      invalid: step({
+        tool: "read_record",
+        args: {
+          recordId: "record-hidden",
+          whyLine: "숨은 기록을 읽으려 합니다.",
+          institutionalPressureDelta: 0,
+          openQuestion: null,
+        },
+      }),
+      expectedIssuePath: "toolCall.args.recordId",
+      assertTransportSchema: schema => {
+        const [args] = agentStepToolArgsJsonSchema(schema, "read_record");
+        assert.deepEqual(args?.recordId?.enum, ["record-visible"]);
+      },
+    },
+    {
+      name: "unauthorized-write-record",
+      tool: "write_record",
+      packet: () => {
+        const packet = m3rAdministrativePacket();
+        packet.toolCatalog = ["write_record", "wait"];
+        return packet;
+      },
+      invalid: step({
+        tool: "write_record",
+        args: {
+          recordKind: "report",
+          sourceMemoryId: "mem-hidden-source",
+          stateBody: "숨은 정보로 기록을 만듭니다.",
+          whyLine: "현재 권한에 없는 기록입니다.",
+          institutionalPressureDelta: 0,
+          textSurfaceId: "TS_Hidden",
+          recordId: "record-hidden",
+          openQuestion: null,
+        },
+      }),
+      expectedIssuePath: "toolCall.args.recordKind",
+      assertTransportSchema: schema => {
+        const branches = agentStepToolArgsJsonSchema(schema, "write_record");
+        assert.equal(branches.length, 2);
+        for (const args of branches) {
+          assert.deepEqual(args.recordKind?.enum, ["note"]);
+          assert.deepEqual(args.sourceMemoryId?.enum, ["mem-visible-source"]);
+          assert.deepEqual(args.textSurfaceId?.enum, ["TS_Visible"]);
+        }
+        assert.deepEqual(branches.find(args => args.recordId)?.recordId?.enum, [
+          "record-visible",
+        ]);
+      },
+    },
+  ];
+
+  for (const candidate of cases) {
+    const invalidOutput = { text: JSON.stringify(candidate.invalid) };
+    const textGen = new FakeTextGen([invalidOutput, invalidOutput]);
+    const service = new ProviderService({
+      profileId: `test/request-target-${candidate.name}`,
+      textGen,
+      fallback: new RuleFallbackNpcAdapter(),
+    });
+    const packet = candidate.packet();
+    const sessionId = `run-request-target-${candidate.name}`;
+    const result = await service.proposeNextStep({
+      sessionId,
+      locale: "ko-KR",
+      iteration: 0,
+      goal: "현재 관측과 권한 안에서만 행동한다.",
+      observePacket: packet,
+      blockedSignatures: [],
+    });
+
+    assert.equal(result.meta.transport, "fallback", candidate.name);
+    assert.equal(result.meta.usedFallback, true, candidate.name);
+    assert.equal(result.meta.fallbackReason, "invalid_envelope", candidate.name);
+    assert.deepEqual(
+      textGen.requests.map(request => request.purpose),
+      ["agent_step", "repair"],
+      candidate.name,
+    );
+    const repairInput = JSON.parse(textGen.requests[1]?.input ?? "{}") as {
+      validationIssues: Array<{ path: string; message: string }>;
+    };
+    assert.ok(
+      repairInput.validationIssues.some(issue => issue.path === candidate.expectedIssuePath),
+      candidate.name,
+    );
+    candidate.assertTransportSchema(textGen.requests[0]?.jsonSchema ?? {});
+    const audit = service.auditSnapshot(sessionId);
+    assert.equal(audit.callsUsed, 2, candidate.name);
+    assert.equal(audit.resolutions.length, 1, candidate.name);
+    assert.equal(audit.resolutions[0]?.callSeqs.length, 2, candidate.name);
+    assert.ok((audit.resolutions[0]?.callSeqs.length ?? 0) <= 2, candidate.name);
+  }
+});
+
+test("request-scoped exact targets remain live and use one physical call", async () => {
+  const step = (
+    toolCall: { tool: string; args: Record<string, unknown> },
+    utterance: string | null = null,
+  ) => ({
+    toolCall,
+    utterance,
+    rationale: "현재 관측에 확인된 대상을 선택합니다.",
+    done: true,
+  });
+  const cases: Array<{
+    name: string;
+    packet: () => ReturnType<typeof observePacket>;
+    valid: ReturnType<typeof step>;
+  }> = [
+    {
+      name: "look",
+      packet: () => {
+        const packet = requestScopedPacket();
+        packet.toolCatalog = ["look", "wait"];
+        return packet;
+      },
+      valid: step({ tool: "look", args: { targetId: "Prop_Visible" } }),
+    },
+    {
+      name: "move-anchor",
+      packet: () => {
+        const packet = requestScopedPacket();
+        packet.toolCatalog = ["move_to", "wait"];
+        return packet;
+      },
+      valid: step({ tool: "move_to", args: { targetId: "Park.allowed_anchor" } }),
+    },
+    {
+      name: "move-player",
+      packet: () => {
+        const packet = requestScopedPacket();
+        packet.toolCatalog = ["move_to", "wait"];
+        packet.playerContact = {
+          available: true,
+          targetActorId: "player",
+          interactionZoneId: "ParkConversation",
+          playerLocationId: "Park",
+          visible: true,
+          audible: true,
+          reachable: true,
+          safeDistanceM: 2.2,
+        };
+        return packet;
+      },
+      valid: step({ tool: "move_to", args: { targetId: "player" } }),
+    },
+    {
+      name: "talk",
+      packet: () => {
+        const packet = requestScopedPacket();
+        packet.toolCatalog = ["talk_to", "wait"];
+        return packet;
+      },
+      valid: step(
+        { tool: "talk_to", args: { actorId: "NPC_Store_Manager" } },
+        "지금 확인한 사실을 말씀드리겠습니다.",
+      ),
+    },
+    {
+      name: "read-record",
+      packet: () => {
+        const packet = m3rAdministrativePacket();
+        packet.toolCatalog = ["read_record", "wait"];
+        return packet;
+      },
+      valid: step({
+        tool: "read_record",
+        args: {
+          recordId: "record-visible",
+          whyLine: "보이는 기록의 현재 개정을 확인합니다.",
+          institutionalPressureDelta: 0,
+          openQuestion: null,
+        },
+      }),
+    },
+    {
+      name: "write-record",
+      packet: () => {
+        const packet = m3rAdministrativePacket();
+        packet.toolCatalog = ["write_record", "wait"];
+        return packet;
+      },
+      valid: step({
+        tool: "write_record",
+        args: {
+          recordKind: "note",
+          sourceMemoryId: "mem-visible-source",
+          stateBody: "방문자가 설명한 접수 경위를 기록합니다.",
+          whyLine: "직접 들은 설명을 기록합니다.",
+          institutionalPressureDelta: 0,
+          textSurfaceId: "TS_Visible",
+          openQuestion: null,
+        },
+      }),
+    },
+    {
+      name: "update-owned-record",
+      packet: () => {
+        const packet = m3rAdministrativePacket();
+        packet.toolCatalog = ["write_record", "wait"];
+        return packet;
+      },
+      valid: step({
+        tool: "write_record",
+        args: {
+          recordKind: "note",
+          sourceMemoryId: "mem-visible-source",
+          stateBody: "기존 기록을 직접 들은 설명으로 갱신합니다.",
+          whyLine: "같은 표면의 본인 기록을 갱신합니다.",
+          institutionalPressureDelta: 0,
+          textSurfaceId: "TS_Visible",
+          recordId: "record-visible",
+          openQuestion: null,
+        },
+      }),
+    },
+  ];
+
+  for (const candidate of cases) {
+    const textGen = new FakeTextGen([{ text: JSON.stringify(candidate.valid) }]);
+    const service = new ProviderService({
+      profileId: `test/request-valid-${candidate.name}`,
+      textGen,
+      fallback: new RuleFallbackNpcAdapter(),
+    });
+    const sessionId = `run-request-valid-${candidate.name}`;
+    const result = await service.proposeNextStep({
+      sessionId,
+      locale: "ko-KR",
+      iteration: 0,
+      goal: "현재 관측과 권한 안에서 행동한다.",
+      observePacket: candidate.packet(),
+      blockedSignatures: [],
+    });
+
+    assert.equal(result.meta.transport, "live", candidate.name);
+    assert.equal(result.meta.usedFallback, false, candidate.name);
+    assert.deepEqual(result.proposal.toolCall, candidate.valid.toolCall, candidate.name);
+    const audit = service.auditSnapshot(sessionId);
+    assert.equal(audit.callsUsed, 1, candidate.name);
+    assert.deepEqual(audit.resolutions[0]?.callSeqs, [1], candidate.name);
+  }
 });
 
 test("ambient reply schema keeps the exact talk target and all listener judgment fields strict", () => {
@@ -294,6 +1261,120 @@ test("ambient reply schema keeps the exact talk target and all listener judgment
     ...valid,
     whyLine: "관리자에게 들은 說明이 달랐습니다.",
   }).success, false);
+
+  const requestSchema = ambientReplyJudgmentJsonSchemaForTarget("NPC_Store_Manager");
+  const requestProperties = requestSchema.properties as Record<string, Record<string, unknown>>;
+  const toolCallProperties = requestProperties.toolCall.properties as Record<
+    string,
+    Record<string, unknown>
+  >;
+  const argsProperties = toolCallProperties.args.properties as Record<
+    string,
+    Record<string, unknown>
+  >;
+  assert.equal(argsProperties.actorId.const, "NPC_Store_Manager");
+  assert.equal(
+    ambientReplyJudgmentSchemaForRequest("ko-KR", "NPC_Store_Manager").safeParse(valid).success,
+    true,
+  );
+  assert.equal(
+    ambientReplyJudgmentSchemaForRequest("ko-KR", "NPC_Store_Manager").safeParse({
+      ...valid,
+      toolCall: { tool: "talk_to", args: { actorId: "NPC_Office_Worker" } },
+    }).success,
+    false,
+  );
+});
+
+test("ambient reply repairs one wrong nonempty target then succeeds or falls back", async () => {
+  const request = ambientReplyRequest();
+  const valid = JSON.parse(validAmbientReply);
+  const wrongTarget = {
+    ...valid,
+    toolCall: { tool: "talk_to", args: { actorId: "NPC_Office_Worker" } },
+  };
+  const usage = { inputTokens: 4, outputTokens: 6, totalTokens: 10 };
+
+  const repairedTextGen = new FakeTextGen([
+    { text: JSON.stringify(wrongTarget), usage },
+    { text: validAmbientReply, usage },
+  ]);
+  const repairedService = new ProviderService({
+    profileId: "test/ambient-target-repair",
+    textGen: repairedTextGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const repaired = await repairedService.judgeAndProposeAmbientReply(request);
+
+  assert.equal(repaired.meta.transport, "live");
+  assert.equal(repaired.meta.usedFallback, false);
+  assert.equal(repaired.proposal.toolCall.args.actorId, request.targetActorId);
+  assert.deepEqual(
+    repairedTextGen.requests.map(providerRequest => providerRequest.purpose),
+    ["ambient_reply", "repair"],
+  );
+  const firstRequestProperties = repairedTextGen.requests[0]?.jsonSchema.properties as Record<
+    string,
+    Record<string, unknown>
+  >;
+  const firstToolCallProperties = firstRequestProperties.toolCall.properties as Record<
+    string,
+    Record<string, unknown>
+  >;
+  const firstArgsProperties = firstToolCallProperties.args.properties as Record<
+    string,
+    Record<string, unknown>
+  >;
+  assert.equal(firstArgsProperties.actorId.const, request.targetActorId);
+  const repairInput = JSON.parse(repairedTextGen.requests[1]?.input ?? "{}") as {
+    validationIssues: Array<{ path: string; message: string }>;
+  };
+  assert.deepEqual(repairInput.validationIssues, [{
+    path: "toolCall.args.actorId",
+    message: `ambient reply actorId must equal ${request.targetActorId}`,
+  }]);
+  assert.deepEqual(repairedService.auditSnapshot(request.sessionId).resolutions, [{
+    seq: 1,
+    purpose: "ambient_reply",
+    profileId: "test/ambient-target-repair",
+    transport: "live",
+    usedFallback: false,
+    fallbackReason: null,
+    callSeqs: [1, 2],
+  }]);
+
+  const fallbackRequest = {
+    ...request,
+    sessionId: "run-ambient-target-fallback",
+  };
+  const invalidTextGen = new FakeTextGen([
+    { text: JSON.stringify(wrongTarget), usage },
+    { text: JSON.stringify(wrongTarget), usage },
+  ]);
+  const fallbackService = new ProviderService({
+    profileId: "test/ambient-target-fallback",
+    textGen: invalidTextGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const fallback = await fallbackService.judgeAndProposeAmbientReply(fallbackRequest);
+
+  assert.equal(fallback.meta.transport, "fallback");
+  assert.equal(fallback.meta.usedFallback, true);
+  assert.equal(fallback.meta.fallbackReason, "invalid_envelope");
+  assert.equal(fallback.proposal.toolCall.args.actorId, request.targetActorId);
+  assert.deepEqual(
+    invalidTextGen.requests.map(providerRequest => providerRequest.purpose),
+    ["ambient_reply", "repair"],
+  );
+  assert.deepEqual(fallbackService.auditSnapshot(fallbackRequest.sessionId).resolutions, [{
+    seq: 1,
+    purpose: "ambient_reply",
+    profileId: "test/ambient-target-fallback",
+    transport: "fallback",
+    usedFallback: true,
+    fallbackReason: "invalid_envelope",
+    callSeqs: [1, 2],
+  }]);
 });
 
 test("hearing strict schema requires every property and exactly six unique residents", () => {
@@ -1277,13 +2358,62 @@ test("provider audit marks resolution truncation explicitly", async () => {
 test("production registry contains no scripted profile", () => {
   const config = loadProviderConfig();
   assert.equal(config.selection.default, "openai/gpt-5.4-mini");
+  assert.equal(config.runtime.timeoutMs, 12_000);
   assert.equal(Object.keys(config.profiles).some(profile => profile.startsWith("scripted/")), false);
   assert.equal(config.profiles["modelscope/qwen3.7-plus"]?.model, "Qwen-Ambassador/Qwen3.7-Plus");
+  assert.equal(config.profiles["modelscope/qwen3.7-plus"]?.timeoutMs, 30_000);
   assert.equal(config.profiles["modelscope/qwen3.7-plus"]?.params.enableThinking, false);
   assert.ok(
     (config.profiles["modelscope/qwen3.7-plus"]?.params.maxTokens ?? 0) >= 1_200,
     "the Qwen profile needs room for the exact-six hearing envelope",
   );
+});
+
+test("Qwen profile timeout governs both its transport and ProviderService boundary", async () => {
+  const server = Bun.serve({
+    port: 0,
+    async fetch() {
+      await Bun.sleep(100);
+      return Response.json({
+        id: "chatcmpl-timeout-contract",
+        object: "chat.completion",
+        created: 0,
+        model: "Qwen-Ambassador/Qwen3.7-Plus",
+        choices: [
+          {
+            index: 0,
+            message: { role: "assistant", content: validConversation },
+            finish_reason: "stop",
+          },
+        ],
+        usage: { prompt_tokens: 11, completion_tokens: 7, total_tokens: 18 },
+      });
+    },
+  });
+
+  try {
+    const config = structuredClone(loadProviderConfig());
+    // If either the adapter or ProviderService accidentally receives the
+    // runtime default, this deliberately slow compatible endpoint times out.
+    config.runtime.timeoutMs = 20;
+    config.profiles["modelscope/qwen3.7-plus"]!.timeoutMs = 3_000;
+    const { proposalPort } = createProviderFromConfig(config, {
+      NPC_PROVIDER_PROFILE: "modelscope/qwen3.7-plus",
+      MODELSCOPE_BASE_URL: new URL("v1", server.url).toString(),
+      MODELSCOPE_API_KEY: "test-only-key",
+    });
+
+    const result = await proposalPort.proposeConversationTurn({
+      ...conversationRequest(),
+      sessionId: "qwen-timeout-contract",
+    });
+    assert.equal(result.meta.profileId, "modelscope/qwen3.7-plus");
+    assert.equal(result.meta.transport, "live");
+    assert.equal(result.meta.usedFallback, false);
+    assert.equal(proposalPort.auditSnapshot("qwen-timeout-contract").calls[0]?.outcome, "success");
+  } finally {
+    server.stop(true);
+  }
 });
 
 test("OpenAI-compatible profiles require their configured base URL and local may be keyless", async () => {

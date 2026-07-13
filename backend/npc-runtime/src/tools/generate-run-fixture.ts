@@ -278,6 +278,7 @@ function fixturePendingArrivals(snapshot: RunSnapshot) {
 }
 
 async function drivePlayerContactSequence() {
+  const layout = loadRunLayout();
   const service = new RunService({
     proposalPort: createStudioReceptionScriptedAdapter(),
     idFactory: fixtureIds(),
@@ -316,14 +317,20 @@ async function drivePlayerContactSequence() {
     current = service.snapshot(started.runId);
   }
 
-  const actorId = "NPC_Park_Caretaker";
+  const actorId = STUDIO_RECEPTIONIST_ID;
+  const interactionZoneId = "StudioReceptionConversation";
+  const contactZone = layout.conversationZones.find(zone => zone.zoneId === interactionZoneId);
+  const contactPosition = contactZone
+    ? layout.anchorPositions[contactZone.anchorRef]
+    : undefined;
+  if (!contactZone || !contactPosition) throw new Error("contact fixture has no interaction zone");
   const contactActors = fixtureSpatialActors(current);
   const contactActor = contactActors.find(actor => actor.actorId === actorId);
-  if (!contactActor) throw new Error("contact fixture has no caretaker");
+  if (!contactActor) throw new Error("contact fixture has no target resident");
   contactActor.playerVisible = true;
   contactActor.playerAudible = true;
   contactActor.playerReachable = true;
-  contactActor.playerInteractionZoneId = "ParkConversation";
+  contactActor.playerInteractionZoneId = interactionZoneId;
   const opportunityRequest: RunAdvanceRequest = {
     runId: started.runId,
     advanceId: "fixture-contact-opportunity",
@@ -332,7 +339,10 @@ async function drivePlayerContactSequence() {
     arrivals: [],
     spatialFacts: {
       observedWorldRevision: current.worldRevision,
-      player: { position: [0, 0, 0], locationId: "Park" },
+      player: {
+        position: [contactPosition[0], contactPosition[1], contactPosition[2]],
+        locationId: contactZone.landmarkId,
+      },
       actors: contactActors,
     },
   };
@@ -340,7 +350,7 @@ async function drivePlayerContactSequence() {
   const wake = opportunityResponse.scheduleWakes.find(candidate =>
     candidate.kind === "goal" && candidate.actorIds[0] === actorId
   );
-  if (!wake) throw new Error("contact fixture did not emit the caretaker opportunity");
+  if (!wake) throw new Error("contact fixture did not emit the resident opportunity");
   const decisionRequest = {
     runId: started.runId,
     wakeId: wake.wakeId,
@@ -352,7 +362,7 @@ async function drivePlayerContactSequence() {
   const preloadRequest = {
     runId: started.runId,
     actorId,
-    interactionZoneId: "ParkConversation",
+    interactionZoneId,
     locale: "ko-KR" as const,
   };
   const preloadResponse = await service.preloadConversation(
@@ -364,12 +374,12 @@ async function drivePlayerContactSequence() {
   current = service.snapshot(started.runId);
   const closeActors = fixtureSpatialActors(current);
   const closeActor = closeActors.find(actor => actor.actorId === actorId);
-  if (!closeActor) throw new Error("contact fixture lost the caretaker");
-  closeActor.position = [0, 0, 0];
+  if (!closeActor) throw new Error("contact fixture lost the target resident");
+  closeActor.position = [contactPosition[0], contactPosition[1], contactPosition[2]];
   closeActor.playerVisible = true;
   closeActor.playerAudible = true;
   closeActor.playerReachable = true;
-  closeActor.playerInteractionZoneId = "ParkConversation";
+  closeActor.playerInteractionZoneId = interactionZoneId;
   const arrivalRequest: RunAdvanceRequest = {
     runId: started.runId,
     advanceId: "fixture-contact-safe-distance",
@@ -378,7 +388,10 @@ async function drivePlayerContactSequence() {
     arrivals: [],
     spatialFacts: {
       observedWorldRevision: current.worldRevision,
-      player: { position: [0, 0, 0], locationId: "Park" },
+      player: {
+        position: [contactPosition[0], contactPosition[1], contactPosition[2]],
+        locationId: contactZone.landmarkId,
+      },
       actors: closeActors,
     },
   };
@@ -386,7 +399,7 @@ async function drivePlayerContactSequence() {
   const startRequest = {
     runId: started.runId,
     actorId,
-    interactionZoneId: "ParkConversation",
+    interactionZoneId,
     locale: "ko-KR" as const,
     contactId: contact.contactId,
   };
@@ -695,9 +708,34 @@ async function driveAdvanceSequence() {
     meetingWake = response.scheduleWakes.find(wake => wake.kind === "meeting_ready");
   }
   if (!meetingWake) throw new Error("run fixture did not reach the first meeting_ready wake");
+  const trailingArrivals = sortedArrivalBatch(latestResponse);
+  if (trailingArrivals.length > 0) {
+    const request: RunAdvanceRequest = {
+      runId: runStartResponse.runId,
+      advanceId: `${runStartResponse.runId}:advance:${String(++sequence).padStart(6, "0")}`,
+      observedWorldRevision: latestResponse.worldRevision,
+      elapsedSeconds: 0,
+      arrivals: trailingArrivals,
+    };
+    const response = await service.advance(request);
+    meetingReplaySteps.push({
+      stepId: `first_meeting_arrivals_${++arrivalStep}`,
+      request,
+      response,
+    });
+    latestResponse = response;
+  }
   const meetingReadyStep = meetingReplaySteps.at(-1);
-  if (!meetingReadyStep || meetingReadyStep.request.arrivals.length === 0) {
-    throw new Error("first meeting_ready did not emerge from a confirmed arrival batch");
+  const meetingWindow = loadRunLayout().meetingWindows.find(window =>
+    window.windowId === meetingWake?.sourceId
+  );
+  const participantsConfirmed = meetingWindow?.actorIds.every(actorId => {
+    const actor = latestResponse.scheduler.actors.find(candidate => candidate.actorId === actorId);
+    return actor?.pendingMovement === null &&
+      actor.confirmedAnchorRef === meetingWindow.participantAnchorRefs[actorId];
+  }) ?? false;
+  if (!meetingReadyStep || !participantsConfirmed) {
+    throw new Error("first meeting_ready did not follow confirmed participant arrivals");
   }
   const npcDecisionRequest = {
     runId: runStartResponse.runId,

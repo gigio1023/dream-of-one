@@ -808,6 +808,7 @@ export const runSnapshotSchema = z
       .object({
         elapsedSeconds: z.number().nonnegative(),
         graceEndsAtSeconds: z.number().nonnegative(),
+        graceEnded: z.boolean(),
         hearingAtSeconds: z.number().positive(),
         paused: z.boolean(),
       })
@@ -1193,6 +1194,8 @@ export const runNpcDecisionResponseSchema = z
     actionDeltas: z.array(runDecisionDeltaSchema),
     movementDeltas: z.array(runMovementDeltaSchema),
     providerMetas: z.array(proposalMetaSchema).max(3),
+    providerAudit: providerAuditSnapshotSchema,
+    providerRuntimeTrace: providerRuntimeTraceSchema,
     socialView: runSocialViewSchema,
     activeContact: runActiveContactSchema.nullable(),
   })
@@ -1227,6 +1230,8 @@ export const runSessionPreloadResponseSchema = z
     interactionZoneId: nonEmpty,
     actor: runActorSchema,
     proposalMeta: proposalMetaSchema,
+    providerAudit: providerAuditSnapshotSchema,
+    providerRuntimeTrace: providerRuntimeTraceSchema,
     activeContact: runActiveContactSchema.nullable(),
   })
   .strict();

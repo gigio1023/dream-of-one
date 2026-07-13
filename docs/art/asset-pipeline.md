@@ -79,9 +79,10 @@ License rules the research made binding:
 
 ## M3R validation slice (first art task of the conversion)
 
-This slice proves the decision in-engine instead of re-surveying. Sol uses
-headless import plus Godot AI's non-play scene/log/snapshot inspection; it
-does not drive the game. The final Terra run owns hands-on validation.
+This slice proves the decision in-engine instead of re-surveying. Headless
+import and Godot AI scene/log/snapshot inspection establish the mechanical
+baseline. A native in-session GPT-5.6 Sol ultra child with exclusive run
+ownership performs the bounded hands-on Qwen-live validation.
 
 Programmatic results through 2026-07-13:
 
@@ -113,8 +114,8 @@ The gates remain:
 3. **Character gate** — six unarmed residents are distinguishable at park
    distance (the art-direction bar); `Walk`/`Idle` loops play in Godot 4.7. A
    separate conversation animation is optional. Headless import and animation
-   transition pass; final visual readability remains for Terra-high hands-on
-   acceptance.
+   transition pass; final visual readability remains for the bounded native
+   Sol-ultra hands-on acceptance.
 4. **Retarget gate (conditional)** — only if bundled animations are
    insufficient: BoneMap + SkeletonProfileHumanoid auto-maps on the
    Quaternius rig and one external clip plays without limb distortion. Godot's
@@ -122,9 +123,9 @@ The gates remain:
    requires compatible bone names *and rest transforms*; auto-mapping warnings
    do not block import, so visible limb validation remains mandatory.
 5. **Test corner** — park bench + road + greybox studio doorway + one character
-   transitioning from idle to walking through the door. Sol may take only a
-   non-play editor snapshot. Hands-on traversal, silhouette judgment, and
-   clipping acceptance occur only in the final Terra-high run.
+   transitioning from idle to walking through the door. Non-play snapshots are
+   supporting evidence; hands-on traversal, silhouette judgment, and clipping
+   acceptance occur in the final native Sol-ultra run.
 
 If gates 3–4 fail after one bounded fix attempt, apply the ranked fallback
 and record why in the PR. The decision section above is then updated in the

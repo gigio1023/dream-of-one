@@ -206,6 +206,9 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
       request.observePacket.toolCatalog.includes("move_to") &&
       request.observePacket.playerContact?.available === true;
     const requiredTalkTarget = request.requiredToolCall?.actorId;
+    const allowedTalkTargets = request.allowedTalkActorIds === undefined
+      ? null
+      : new Set(request.allowedTalkActorIds);
     const visibleTarget = canLook && !requiredTalkTarget
       ? request.observePacket.visibleObjects[0]?.objectId
       : undefined;
@@ -217,7 +220,8 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
         : undefined
       : canTalk
         ? request.observePacket.visibleActors.find(actorId =>
-            request.observePacket.audibleActorIds.includes(actorId),
+            request.observePacket.audibleActorIds.includes(actorId) &&
+            (allowedTalkTargets === null || allowedTalkTargets.has(actorId)),
           )
         : undefined;
     const proposal: AgentStepProposal = request.previousResult

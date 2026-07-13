@@ -6,11 +6,11 @@ options before launch.
 ```text
 Outcome: <one observable result this worker must produce>
 
-Requested worker lane: <GPT-5.6 Sol high | GPT-5.6 Terra high>.
-Codex role: <sol_high_godot | terra_high_playtest>. Its loaded repo config must
-pin the requested model and effort. Record role selection plus config; a model
-name in this packet is not proof.
-Lead session: remains unchanged and does not inherit the worker's lane.
+Requested native worker route: <current owner/runtime policy>.
+Runtime selection evidence: <native selector/config if the owner explicitly
+requires a pin; otherwise state that the inherited/default native route is
+accepted>. A model name in this packet is not proof of a runtime pin.
+Lead session: remains unchanged.
 
 Authority mode: <inspect | play | implement>
 
@@ -36,11 +36,12 @@ Godot route:
 - Match the editor by canonical <repo>/godot path and route every call by exact
   session id.
 - Verify Godot 4.7.x and plugin/server 2.9.1 before stateful work.
-- Launch mode/provider: <fixture inspection | live Qwen, zero fallback>.
+- Launch mode/provider: <fixture inspection | live
+  modelscope/qwen3.7-plus, zero fallback>.
 - This worker exclusively owns any run it starts and must stop it before exit.
 
 Actions allowed: <bounded reads, input sequence, or exact implementation scope>
-Actions forbidden: <player input for inspect/Sol, source edits for play/Terra,
+Actions forbidden: <player input for inspect, source edits for play,
 backend truth mutation, editor restart/quit, secret printing, staging/commit>
 
 Required evidence:
@@ -53,8 +54,8 @@ Required evidence:
 Mechanical checks: <only checks relevant to this packet>
 
 Output:
-- requested worker lane, native role/config pinning evidence, and selected session/version
-  preflight
+- requested native worker route, available runtime-selection evidence, and
+  selected session/version preflight
 - chronological observations that decide the result
 - files changed/checks run, if authorized
 - pass | fail | inconclusive | blocked

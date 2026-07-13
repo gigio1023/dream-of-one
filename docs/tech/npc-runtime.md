@@ -163,9 +163,17 @@ Delete when the replacing module lands; don't leave both alive.
     current facts to validate tools, listeners, and contact starts. An empty
     player location is a valid no-contact observation between authored zones,
     not a reason to halt the advance lane.
-    Continuous position changes refresh commit-time position and audibility,
-    but only reachability, visibility, audibility, or object changes create a
-    new material goal signature.
+    Continuous position and sight changes refresh commit-time grounding. Goal
+    admission uses a separate semantic key: incoming memory, visible record
+    revision, a gained or renewed contact opportunity, and interrogation state
+    bypass the cadence immediately. Deterministic schedule transitions remain
+    local movement policy and do not spend a provider call by themselves.
+    Losing contact candidacy likewise retires obsolete work and advances the
+    baseline without opening a new goal. Spatial-only changes can wake a stable
+    resident at most once per 600 world seconds and never stack a second
+    pending or claimed goal for that resident. The window is stamped again when
+    a delayed wake is actually claimed, so queued work cannot be followed by an
+    immediate spatial refresh.
 12. Player knowledge is a runtime-owned `socialView` with its own monotonic
     revision. Direct conversation judgments, actually presented audible speech,
     and explicitly inspected record surfaces are the only encounter inputs.
@@ -205,8 +213,14 @@ terminal and bidirectional control characters, and limits it to 160 Unicode
 code points. Missing, duplicated, or cross-owner sources fall back to visible
 record text or remain undisclosed rather than guessing at provenance.
 
-Run snapshots, player-answer responses, both hearing responses, and run-end
-responses also carry strict `providerAudit` metadata. Actual provider calls are
+Run snapshots, successful conversation-preload responses, every typed
+NPC-decision response (including queued/stale/budget/failed terminal states),
+player-answer responses, both hearing responses, and run-end responses also
+carry strict `providerAudit` metadata together with `providerRuntimeTrace`.
+The provider-bearing response builders refresh exact accounting immediately
+before cloning both cumulative structures; exact cached decision retries keep
+the original response bytes. `/v1/run/advance` deliberately does not carry the
+growing arrays. Actual provider calls are
 captured inside `ProviderService` before a result can become stale or be
 discarded by `RunService`; each final proposal resolution names the call
 sequence numbers it used, including a two-call invalid-envelope repair. The
@@ -214,11 +228,13 @@ audit contains no prompt or generated text. Its call/token totals reconcile
 with the shared provider budget, and terminal acceptance requires a complete,
 untruncated audit with no calls left in flight.
 
-The adjacent `providerRuntimeTrace` records every proposal metadata packet the
-run actually consumes, including deterministic replacements created after a
-live envelope fails runtime semantic validation. Final live acceptance checks
-both records; transport success alone is not enough to claim that the played
-run remained fallback-free.
+The adjacent `providerRuntimeTrace` records every structurally resolved
+proposal metadata packet the run consumes, including a conversation opening
+whose transport completed but whose speculative semantic commit later became
+stale, and deterministic replacements created after a live envelope fails
+runtime semantic validation. Staleness still applies no opening or world
+effect. Final live acceptance checks both records; transport success alone is
+not enough to claim that the played run remained fallback-free.
 
 The landed surface includes `POST /v1/run/start`, `POST /v1/run/advance`,
 `GET /v1/run/snapshot`, `POST /v1/run/encounter`, `POST /v1/session/preload`,
@@ -251,13 +267,20 @@ unique `reachableAnchorRefs`, `visibleActorIds`, `audibleActorIds`, and
 canonicalizes their order and requires known actors, anchors, and objects;
 `visibleObjectIds` may name only one of the three ids in the layout's
 `physical_props` registry. Changed reachability, actor/player visibility, or
-audibility emits an informational observation and may create one pending goal
-wake for each stable actor. Object visibility remains available in the next
-independently scheduled observe packet and in tool validation, but is excluded
-from that material goal signature so moving a prop cannot by itself spend a
-provider call. `arrival`, `observation`, and `actor_schedule` wakes remain
-informational; the derived goal wake is the provider-bearing event. Position
-drift alone never opens a provider wake.
+audibility emits an informational observation but does not immediately spend a
+provider call. After the initial admission, spatial-only changes are
+latest-state-wins and may create one refresh wake per stable actor only after
+600 world seconds. Incoming memories, visible record revisions, gained or
+renewed contact opportunities, and interrogation state bypass that cadence;
+schedule transitions only change deterministic movement. Contact loss updates
+the admission baseline and retires an obsolete unclaimed wake without spending
+a provider call.
+Each actor has at most one pending or claimed goal; an obsolete unclaimed wake
+is retired and remains retry-safe as a stale result. Object visibility remains
+available in the next independently scheduled observe packet and in tool
+validation, but cannot itself spend a provider call. `arrival`, `observation`,
+and `actor_schedule` wakes remain informational; an admitted goal wake is the
+provider-bearing event. Position drift alone never opens a provider wake.
 
 Discrete player handling arrives on the same endpoint as bounded
 `propHandlingEvents`. Each event names one canonical prop, one of
@@ -289,7 +312,16 @@ route movement. Meeting and hearing blocks keep their exact authored anchors.
 Meeting windows retain one semantic center but map every participant to a
 distinct physical standing-slot anchor. A `meeting_ready` wake becomes pending
 only when both actors have confirmed their own slots during the open window;
-the window boundary alone is informational. Run-discriminated
+the window boundary alone is informational. While a participant's active
+schedule block points at that window's standing slot—including its authored
+lead-in before the window opens—the meeting owns that resident's social beat:
+any older unclaimed goal is retired retry-safely and no duplicate goal
+conversation is admitted. A grounded player contact that was already active
+before meeting ownership began still outranks the schedule and holds that
+participant in place; a newly available automatic contact opportunity does
+not create parallel participant work. Later memory, record, contact, or
+interrogation events can admit normal goals after the meeting block ends;
+departing on schedule alone cannot. Run-discriminated
 `POST /v1/npc/decision` claims that wake exactly once and resolves two
 validated provider-backed utterances outside the run lock. The first uses an
 ordinary agent-step proposal; the second uses one `ambient_reply` call that
@@ -302,11 +334,34 @@ resume without another provider call. Ambient work cannot enter the reserved
 player/hearing budget. Grace and hearing wakes continue through the same
 deterministic scheduler surface.
 
-For a single-resident goal wake, the runtime derives a stable key from the
-actor's active schedule block, incoming memories, and material spatial facts.
-It offers only currently legal `wait`, `look`, `move_to`, and `talk_to`
-affordances, with at most three proposal attempts. Goal decisions and the
-retained `runBeat` path share `agentloop/proposal-loop.ts`, so structured
+For a single-resident goal wake, the runtime derives a semantic key from
+incoming memories, visible record revisions, and the current
+contact/interrogation opportunity. A contact epoch may renew the same grounded
+candidate, but candidate loss is non-actionable and creates no provider wake.
+Spatial facts remain a separate
+commit-time signature and a 600-world-second refresh trigger measured from the
+latest admission and restamped when a delayed wake is claimed. They can
+invalidate a stale action without turning ordinary movement into a provider
+treadmill. Provider-facing observations retain the newest 12 memory-derived
+own-action notes, eight historical heard-speech lines, and eight unadministered
+administrative sources in chronological order; current-turn speech is appended
+after that historical bound. Full actor memory remains in run state, snapshots,
+and hearing requests, so this is prompt budgeting rather than memory loss.
+
+The offered tool catalog is derived from current facts rather than role alone:
+`wait` remains available; `move_to`, `look`, `talk_to`, `read_record`,
+`write_record`, and `request` appear only when their packet prerequisites are
+present. A visible record is a valid `look` target even when no actor or
+physical prop is visible. An ordinary `talk_to` request carries the frozen
+subset that passes the runtime's full reciprocal-audibility, cooldown,
+movement, and authored-volume predicate, while commit still revalidates fresh
+facts. An active player-contact actor or a resident owned by an authored
+meeting cannot appear as the target. Both participants are checked again when
+the reply obtains its background-provider slot and at final commit, so queued
+work cannot spend or apply after ownership changes. `use_object` stays withheld
+because M3R physical props do not yet expose a validated usable-affordance
+transition. Each goal has at most three proposal attempts. Goal decisions and
+the retained `runBeat` path share `agentloop/proposal-loop.ts`, so structured
 failure feedback, duplicate-call suppression, and transcript entries have one
 implementation. A valid `talk_to` resolves the initiator's utterance and one
 reply through the provider port as an atomic two-turn exchange; both turns are

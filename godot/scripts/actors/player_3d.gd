@@ -5,6 +5,7 @@ extends CharacterBody3D
 ## looking, and interaction focus; world and social truth stay outside it.
 
 signal focus_changed(target: Node)
+signal preload_intent_changed(target: Node)
 signal settings_requested
 
 const MIN_LOOK_SENSITIVITY := 0.01
@@ -12,6 +13,9 @@ const MAX_LOOK_SENSITIVITY := 1.0
 const MIN_FIELD_OF_VIEW := 60.0
 const MAX_FIELD_OF_VIEW := 100.0
 const MAX_PITCH_RADIANS := deg_to_rad(85.0)
+const NPC_FOCUS_GRACE_MSEC := 1500
+const NPC_FOCUS_GRACE_DISTANCE_M := 3.25
+const NPC_FOCUS_GRACE_MIN_FORWARD_DOT := 0.8660254
 
 @export_range(0.5, 8.0, 0.1, "or_greater") var walk_speed := 4.0
 @export_range(1.0, 12.0, 0.1, "or_greater") var jump_velocity := 4.5
@@ -29,6 +33,9 @@ const MAX_PITCH_RADIANS := deg_to_rad(85.0)
 
 var _control_enabled := true
 var _focused_target: Node = null
+var _preload_intent_target: Node = null
+var _recent_npc_target: Node3D = null
+var _recent_npc_focus_expires_msec := 0
 var _respawn_transform: Transform3D
 var _respawn_pitch := 0.0
 var _synthetic_mouse_position := Vector2.ZERO
@@ -116,6 +123,7 @@ func _physics_process(delta: float) -> void:
 	_prop_interactor.physics_update()
 
 	_interaction_ray.force_raycast_update()
+	_set_preload_intent_target(_aimed_npc_actor() if _control_enabled else null)
 	var held_prop := _prop_interactor.held_prop()
 	_set_focused_target(held_prop if held_prop != null else _interactable_collider())
 
@@ -157,6 +165,20 @@ func _interactable_collider() -> Node:
 	return _find_interactable(collider as Node)
 
 
+func _aimed_npc_actor() -> Node:
+	if not _interaction_ray.is_colliding():
+		return null
+	var collider := _interaction_ray.get_collider()
+	if not collider is Node:
+		return null
+	var candidate := collider as Node
+	while candidate != null and candidate != self:
+		if candidate.is_in_group(&"npc_actors"):
+			return candidate
+		candidate = candidate.get_parent()
+	return null
+
+
 func _find_interactable(start: Node) -> Node:
 	var candidate := start
 	while candidate != null and candidate != self:
@@ -175,9 +197,22 @@ func _find_interactable(start: Node) -> Node:
 	return null
 
 
+func _set_preload_intent_target(target: Node) -> void:
+	if target == _preload_intent_target:
+		return
+	_preload_intent_target = target
+	preload_intent_changed.emit(_preload_intent_target)
+
+
 func _set_focused_target(target: Node) -> void:
 	if target == _focused_target:
 		return
+	if _is_npc_interactable(target):
+		_recent_npc_target = target as Node3D
+		_recent_npc_focus_expires_msec = Time.get_ticks_msec() + NPC_FOCUS_GRACE_MSEC
+	elif target == null and _is_npc_interactable(_focused_target):
+		_recent_npc_target = _focused_target as Node3D
+		_recent_npc_focus_expires_msec = Time.get_ticks_msec() + NPC_FOCUS_GRACE_MSEC
 	_focused_target = target
 	focus_changed.emit(_focused_target)
 
@@ -193,6 +228,8 @@ func _respawn() -> void:
 		ancestor = ancestor.get_parent()
 	global_transform = target_transform
 	_head.rotation.x = _respawn_pitch
+	_set_preload_intent_target(null)
+	_clear_recent_npc_focus()
 	velocity = Vector3.ZERO
 	_navigation_obstacle.velocity = Vector3.ZERO
 	push_warning("Player crossed kill_y and was returned to its spawn transform.")
@@ -204,7 +241,9 @@ func set_control_enabled(enabled: bool) -> void:
 		# There is no inventory. Every modal/control-lock boundary places the
 		# carried object before camera or player transforms can jump elsewhere.
 		_prop_interactor.force_drop()
+		_set_preload_intent_target(null)
 		_set_focused_target(null)
+		_clear_recent_npc_focus()
 		velocity.x = 0.0
 		velocity.z = 0.0
 
@@ -249,6 +288,28 @@ func camera_relative_direction(target_position: Vector3) -> StringName:
 func focused_interactable() -> Node:
 	if is_instance_valid(_focused_target):
 		return _focused_target
+	if (
+		is_instance_valid(_recent_npc_target)
+		and Time.get_ticks_msec() <= _recent_npc_focus_expires_msec
+		and _horizontal_distance(
+			global_position,
+			_recent_npc_target.global_position
+		) <= NPC_FOCUS_GRACE_DISTANCE_M
+		and _recent_npc_target_is_visible()
+		and (
+			not _recent_npc_target.has_method("is_interaction_enabled")
+			or bool(_recent_npc_target.call("is_interaction_enabled"))
+		)
+	):
+		return _recent_npc_target
+	_clear_recent_npc_focus()
+	return null
+
+
+func preload_intent_target() -> Node:
+	if is_instance_valid(_preload_intent_target):
+		return _preload_intent_target
+	_set_preload_intent_target(null)
 	return null
 
 
@@ -260,10 +321,51 @@ func interact_focused() -> bool:
 	# Dynamic prop prompts change after interaction even though the same object
 	# remains the focus target, so force one localized HUD refresh.
 	_set_focused_target(null)
+	_clear_recent_npc_focus()
 	var held_prop := _prop_interactor.held_prop()
 	if held_prop != null:
 		_set_focused_target(held_prop)
 	return true
+
+
+func _clear_recent_npc_focus() -> void:
+	_recent_npc_target = null
+	_recent_npc_focus_expires_msec = 0
+
+
+func _is_npc_interactable(target: Node) -> bool:
+	return target is Node3D and target.is_in_group(&"npc_actors")
+
+
+func _recent_npc_target_is_visible() -> bool:
+	var target_position := _recent_npc_target.global_position + Vector3.UP
+	var to_target := target_position - _camera.global_position
+	if to_target.is_zero_approx():
+		return false
+	var camera_forward := -_camera.global_transform.basis.z.normalized()
+	if camera_forward.dot(to_target.normalized()) < NPC_FOCUS_GRACE_MIN_FORWARD_DOT:
+		return false
+	var query := PhysicsRayQueryParameters3D.create(
+		_camera.global_position,
+		target_position,
+		_interaction_ray.collision_mask,
+		[get_rid()]
+	)
+	query.collide_with_areas = true
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	var collider: Variant = hit.get("collider")
+	if not collider is Node:
+		return false
+	var candidate := collider as Node
+	while candidate != null:
+		if candidate == _recent_npc_target:
+			return true
+		candidate = candidate.get_parent()
+	return false
+
+
+func _horizontal_distance(first: Vector3, second: Vector3) -> float:
+	return Vector2(first.x, first.z).distance_to(Vector2(second.x, second.z))
 
 
 func try_pick_up_prop(prop: CarryableProp3D) -> bool:

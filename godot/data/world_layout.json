@@ -557,8 +557,8 @@
       "route_id": "StudioManagerRound",
       "character_scene": "res://assets/quaternius/men/casual_hoodie.gltf",
       "schedule_blocks": [
-        {"start": 0, "end": 90, "route_id": "StudioManagerRound", "activity": "review_work"},
-        {"start": 90, "end": 230, "anchor": "Park.meeting_north_west", "activity": "park_meeting"},
+        {"start": 0, "end": 70, "route_id": "StudioManagerRound", "activity": "review_work"},
+        {"start": 70, "end": 230, "anchor": "Park.meeting_north_west", "activity": "park_meeting"},
         {"start": 230, "end": 1800, "route_id": "StudioManagerRound", "activity": "review_work"}
       ]
     },
@@ -587,8 +587,8 @@
       "route_id": "ParkCaretakerRound",
       "character_scene": "res://assets/quaternius/men/worker.gltf",
       "schedule_blocks": [
-        {"start": 0, "end": 90, "route_id": "ParkCaretakerRound", "activity": "caretaking_round"},
-        {"start": 90, "end": 230, "anchor": "Park.meeting_north_east", "activity": "park_meeting"},
+        {"start": 0, "end": 70, "route_id": "ParkCaretakerRound", "activity": "caretaking_round"},
+        {"start": 70, "end": 230, "anchor": "Park.meeting_north_east", "activity": "park_meeting"},
         {"start": 230, "end": 460, "route_id": "ParkCaretakerRound", "activity": "caretaking_round"},
         {"start": 460, "end": 600, "anchor": "Park.meeting_north_east", "activity": "park_meeting"},
         {"start": 600, "end": 1800, "route_id": "ParkCaretakerRound", "activity": "caretaking_round"}

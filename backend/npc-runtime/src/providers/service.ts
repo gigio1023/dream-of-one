@@ -1,9 +1,9 @@
 import type { z } from "zod";
 import {
-  ambientReplyJudgmentJsonSchema,
-  ambientReplyJudgmentSchemaForLocale,
-  agentStepProposalJsonSchema,
-  agentStepProposalSchemaForLocale,
+  ambientReplyJudgmentJsonSchemaForTarget,
+  ambientReplyJudgmentSchemaForRequest,
+  agentStepProposalJsonSchemaForTools,
+  agentStepProposalSchemaForRequest,
   conversationJudgmentJsonSchema,
   conversationJudgmentSchemaForLocale,
   conversationProposalJsonSchema,
@@ -12,12 +12,14 @@ import {
   hearingJudgmentSchemaForLocale,
   mergedConversationTurnJsonSchema,
   mergedConversationTurnSchemaForLocale,
+  type AgentStepRecordContracts,
 } from "./envelope.js";
 import {
   providerLanguageName,
   requireSupportedGameplayLocale,
   supportedLocaleEntry,
 } from "../localization/supported-locales.js";
+import type { ToolName } from "../agentloop/tools.js";
 import type {
   AmbientReplyJudgment,
   AmbientReplyRequest,
@@ -45,21 +47,83 @@ import type {
   TextGenResult,
 } from "./ports.js";
 
-const TOOL_GUIDE = `
-Tool argument guide:
-- move_to: {targetId}; when playerContact.available is true, targetId="player" means choosing one NPC-initiated approach
-- look: {targetId}
-- talk_to: {actorId}, with optional utterance at envelope level
-- wait: {reason}
-- use_object: {objectId,toState,ledgerKind,whyLine,economyDelta?}
-- write_record: {objectId?,toState?,ledgerKind,record,citedLedgerEventId?,whyLine,economyDelta?}
-- read_record: {recordId}
-- M3R write_record when administrativeAuthority is present:
-  {recordKind,sourceMemoryId,stateBody,whyLine,institutionalPressureDelta,textSurfaceId,recordId?,openQuestion}
-- M3R read_record: {recordId,whyLine,institutionalPressureDelta,openQuestion}; source memory is runtime-derived
-- M3R openQuestion is required and either null or {status,text,whyLine}. Author it only when the administrative action creates a concrete player-log question; never fill it mechanically.
-- request: {targetActorId,action,whyLine?}
-Only use actors, objects, records, and tool names present in the observe packet.`;
+const TOOL_ARGUMENT_GUIDES: Record<Exclude<ToolName, "write_record" | "read_record">, readonly string[]> = {
+  move_to: [
+    '- move_to: {targetId}; when playerContact.available is true, targetId="player" means choosing one NPC-initiated approach',
+  ],
+  look: ["- look: {targetId}"],
+  talk_to: ["- talk_to: {actorId}, with optional utterance at envelope level"],
+  wait: ["- wait: {reason}"],
+  use_object: ["- use_object: {objectId,toState,ledgerKind,whyLine}"],
+  request: ["- request: {targetActorId,action,whyLine}"],
+};
+
+const RECORD_TOOL_ARGUMENT_GUIDES = {
+  write_record: {
+    legacy: [
+      "- write_record (legacy world path): {objectId|null,toState|null,ledgerKind,record,citedLedgerEventId|null,whyLine}",
+    ],
+    m3r: [
+      "- write_record (M3R administrativeAuthority): {recordKind,sourceMemoryId,stateBody,whyLine,institutionalPressureDelta,textSurfaceId,recordId?,openQuestion}",
+      "- M3R write_record openQuestion is required and either null or {status,text,whyLine}. Author it only when the action creates a concrete player-log question; never fill it mechanically.",
+    ],
+  },
+  read_record: {
+    legacy: ["- read_record (legacy world path): {recordId}"],
+    m3r: [
+      "- read_record (M3R administrativeAuthority): {recordId,whyLine,institutionalPressureDelta,openQuestion}; source memory is runtime-derived",
+      "- M3R read_record openQuestion is required and either null or {status,text,whyLine}. Author it only when the action creates or resolves a concrete player-log question; never fill it mechanically.",
+    ],
+  },
+} as const;
+
+function recordContractsForRequest(
+  request: AgentStepRequest,
+  tools: readonly ToolName[],
+): AgentStepRecordContracts {
+  const packet = request.observePacket;
+  const contracts: AgentStepRecordContracts = {};
+  if (tools.includes("write_record")) {
+    const hasRunWriteAuthority =
+      packet.administrativeSources.length > 0 &&
+      packet.administrativeAuthority.allowedRecordKinds.length > 0 &&
+      packet.administrativeAuthority.writableTextSurfaceIds.length > 0;
+    contracts.write_record = hasRunWriteAuthority ? "m3r" : "legacy";
+  }
+  if (tools.includes("read_record")) {
+    const hasRunRecordRevision = packet.visibleRecords.some(record =>
+      Number.isInteger(record.recordRevision) &&
+      typeof record.authorActorId === "string" &&
+      record.authorActorId.length > 0 &&
+      typeof record.textSurfaceId === "string" &&
+      record.textSurfaceId.length > 0
+    );
+    contracts.read_record =
+      packet.administrativeAuthority.allowedRecordKinds.length > 0 && hasRunRecordRevision
+        ? "m3r"
+        : "legacy";
+  }
+  return contracts;
+}
+
+function toolGuideForTools(
+  tools: readonly ToolName[],
+  recordContracts: AgentStepRecordContracts,
+): string {
+  const offered = [...new Set(tools)];
+  return [
+    "Tool argument guide for the currently offered branches:",
+    ...offered.flatMap(tool => {
+      if (tool === "write_record" || tool === "read_record") {
+        const contract = recordContracts[tool];
+        if (!contract) throw new Error(`agent-step guide requires a ${tool} contract`);
+        return RECORD_TOOL_ARGUMENT_GUIDES[tool][contract];
+      }
+      return TOOL_ARGUMENT_GUIDES[tool];
+    }),
+    "Only use actors, objects, records, and tool names present in the observe packet.",
+  ].join("\n");
+}
 
 const PRIVATE_ACTOR_CONTEXT_GUIDE =
   "actorContext and selfContext describe only this resident's authored identity, voice, private motivation, and holder-local relationship knowledge. They may shape tone, priorities, and questions, but they are not observations or evidence about the player. Treat only supplied memories, heard speech, visible records, and visible facts as evidence, and never reveal a private pressure unless this resident deliberately chooses to speak about it in-fiction.";
@@ -297,6 +361,22 @@ export class ProviderService implements NpcProposalPort {
   async proposeNextStep(
     request: AgentStepRequest,
   ): Promise<ResolvedProposal<AgentStepProposal>> {
+    const allowedTalkActorIds = request.allowedTalkActorIds === undefined
+      ? undefined
+      : [...new Set(request.allowedTalkActorIds.filter(actorId => actorId.length > 0))];
+    const effectiveTools: ToolName[] = request.requiredToolCall
+      ? [request.requiredToolCall.tool]
+      : [...new Set(request.observePacket.toolCatalog)];
+    const recordContracts = recordContractsForRequest(request, effectiveTools);
+    const schemaConstraints = {
+      effectiveTools,
+      observePacket: request.observePacket,
+      recordContracts,
+      allowedTalkActorIds,
+      requiredToolCall: request.requiredToolCall,
+      requireUtterance: request.requireUtterance,
+    };
+    const jsonSchema = agentStepProposalJsonSchemaForTools(schemaConstraints);
     const instructions = [
       "You choose one next action for a bounded NPC agent loop.",
       "Read the previous tool result before acting. A failed or blocked call must change the next attempt.",
@@ -308,17 +388,28 @@ export class ProviderService implements NpcProposalPort {
       "After a successful action completes the goal, return done=true on the next iteration. Never repeat an identical successful tool call.",
       "blockedSignatures contains calls already blocked or successfully completed during this beat; choose a different call or stop.",
       "The runtime validates and applies tools; never invent direct state changes or authority outcomes.",
-      "playerContact is offered to only one runtime-selected resident at a time. Choose move_to(player) only when your role goal or remembered facts warrant initiating a face-to-face question; otherwise choose another valid action or stop.",
+      request.requiredToolCall
+        ? "Return exactly four top-level keys: toolCall, utterance, rationale, and done. For this required reply, toolCall and utterance must both be non-null. Do not add top-level keys."
+        : "Return exactly four top-level keys: toolCall, utterance, rationale, and done. Never omit toolCall or utterance; use null when either is absent. Do not add top-level keys.",
+      "Stable ids may appear in identifier-valued toolCall.args fields and internal rationale. Never copy an actor, object, record, memory, text-surface, or landmark id into utterance or other player-visible prose.",
+      ...(effectiveTools.includes("move_to")
+        ? ["playerContact is offered to only one runtime-selected resident at a time. Choose move_to(player) only when your role goal or remembered facts warrant initiating a face-to-face question; otherwise choose another valid action or stop."]
+        : []),
       ...(request.requiredToolCall
         ? [
             `This wake permits only talk_to targeting the exact actor id ${request.requiredToolCall.actorId}.`,
-            request.requireUtterance
-              ? "Return one nonempty in-fiction utterance in the run locale with that talk_to call."
-              : "Use that exact talk_to call if you act.",
+            "Return one nonempty in-fiction utterance in the run locale with that talk_to call and finish this single reply with done=true.",
           ]
         : []),
-      "Return done=true with toolCall=null when the goal is complete or no useful action remains.",
-      TOOL_GUIDE,
+      ...(!request.requiredToolCall && allowedTalkActorIds !== undefined
+        ? [allowedTalkActorIds.length > 0
+            ? `If you use talk_to, actorId must be one of this request's exact allowed ids: ${allowedTalkActorIds.join(", ")}.`
+            : "This request permits no talk_to target."]
+        : []),
+      ...(request.requiredToolCall
+        ? []
+        : ["Return done=true with toolCall=null when the goal is complete or no useful action remains."]),
+      toolGuideForTools(effectiveTools, recordContracts),
       "Return only JSON matching the supplied schema.",
     ].join("\n");
     const input = JSON.stringify({
@@ -327,6 +418,7 @@ export class ProviderService implements NpcProposalPort {
       observe: request.observePacket,
       previousResult: request.previousResult ?? null,
       blockedSignatures: request.blockedSignatures,
+      allowedTalkActorIds: allowedTalkActorIds ?? null,
       requiredToolCall: request.requiredToolCall ?? null,
       requireUtterance: request.requireUtterance ?? false,
       locale: request.locale,
@@ -338,9 +430,9 @@ export class ProviderService implements NpcProposalPort {
         instructions,
         input,
         schemaName: "npc_agent_step",
-        jsonSchema: agentStepProposalJsonSchema,
+        jsonSchema,
       },
-      schema: agentStepProposalSchemaForLocale(request.locale),
+      schema: agentStepProposalSchemaForRequest(request.locale, schemaConstraints),
       budgetCeiling: request.budgetCeiling,
       fallback: () => this.options.fallback.proposeNextStep(request),
     });
@@ -349,6 +441,7 @@ export class ProviderService implements NpcProposalPort {
   async judgeAndProposeAmbientReply(
     request: AmbientReplyRequest,
   ): Promise<ResolvedProposal<AmbientReplyJudgment>> {
+    const jsonSchema = ambientReplyJudgmentJsonSchemaForTarget(request.targetActorId);
     const instructions = [
       "You are one resident listening to another resident inside Dream of One, a social-suspicion game.",
       "Reply once to the exact source utterance AND judge whether that remembered speech changes your personal opinion of the player.",
@@ -387,9 +480,9 @@ export class ProviderService implements NpcProposalPort {
         instructions,
         input,
         schemaName: "npc_ambient_reply_judgment",
-        jsonSchema: ambientReplyJudgmentJsonSchema,
+        jsonSchema,
       },
-      schema: ambientReplyJudgmentSchemaForLocale(request.locale),
+      schema: ambientReplyJudgmentSchemaForRequest(request.locale, request.targetActorId),
       budgetCeiling: request.budgetCeiling,
       fallback: () => this.options.fallback.judgeAndProposeAmbientReply(request),
     });
@@ -509,7 +602,7 @@ export class ProviderService implements NpcProposalPort {
         {
           ...input.request,
           purpose: "repair",
-          instructions: `${input.request.instructions}\nRepair the invalid JSON. Do not add commentary.`,
+          instructions: `${input.request.instructions}\nReturn a complete replacement JSON value that satisfies every validation issue. Do not return a patch or add commentary.`,
           input: JSON.stringify({
             invalidOutput: first.text,
             validationIssues: parsed.error.issues.map(issue => ({

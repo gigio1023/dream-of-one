@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "bun:test";
+import { loadRunLayout } from "../../src/runtime/run-layout.js";
 import {
   runAdvanceRequestSchema,
   runAdvanceResponseSchema,
@@ -177,8 +178,8 @@ test("contact fixture reaches the same preloaded session through one grounded pr
   const opportunity = endpoints.runAdvancePlayerContactOpportunity.response;
   assert.ok(opportunity.clock.toSeconds <= 120);
   const decision = endpoints.npcDecisionPlayerContact.response;
-  assert.equal(decision.activeContact.actorId, "NPC_Park_Caretaker");
-  assert.equal(decision.activeContact.interactionZoneId, "ParkConversation");
+  assert.equal(decision.activeContact.actorId, "NPC_Studio_Receptionist");
+  assert.equal(decision.activeContact.interactionZoneId, "StudioReceptionConversation");
   assert.equal(decision.providerMetas.at(-1).transport, "scripted");
   assert.equal(endpoints.sessionPreloadPlayerContact.response.activeContact.contactId,
     decision.activeContact.contactId);
@@ -349,11 +350,24 @@ test("advance fixture replays staggered moves, batched arrivals, and arrival-gat
     .slice(0, -1)
     .find((step: { response: { scheduleWakes: Array<{ kind: string }> } }) =>
       step.response.scheduleWakes.some(wake => wake.kind === "meeting_ready"),
-    );
+  );
   assert.ok(meetingReadyStep);
-  assert.equal(meetingReadyStep.request.elapsedSeconds, 0);
-  assert.ok(meetingReadyStep.request.arrivals.length > 0);
   assert.equal(meetingReadyStep.response.clock.toSeconds, 90);
+  const meetingWake = meetingReadyStep.response.scheduleWakes.find(
+    (wake: { kind: string }) => wake.kind === "meeting_ready",
+  );
+  const meetingWindow = loadRunLayout().meetingWindows.find(
+    window => window.windowId === meetingWake?.sourceId,
+  );
+  assert.ok(meetingWindow);
+  for (const actorId of meetingWindow.actorIds) {
+    const participant = meetingReadyStep.response.scheduler.actors.find(
+      (actor: { actorId: string }) => actor.actorId === actorId,
+    );
+    assert.ok(participant);
+    assert.equal(participant.pendingMovement, null);
+    assert.equal(participant.confirmedAnchorRef, meetingWindow.participantAnchorRefs[actorId]);
+  }
   const decision = runNpcDecisionResponseSchema.parse(fixtures.endpoints.npcDecision.response);
   assert.equal(decision.status, "completed");
   assert.equal(decision.speechEvents.length, 2);

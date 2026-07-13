@@ -56,6 +56,8 @@ const MAX_LOCAL_REPATH_ATTEMPTS := 2
 const YIELD_MIN_SECONDS := 0.45
 const YIELD_MAX_SECONDS := 0.9
 const DESTINATION_CLEARANCE_M := 0.9
+const LOOK_HOLD_SECONDS := 0.75
+const MAX_INFERRED_DYNAMIC_YIELDS := 1
 
 @export var actor_id: StringName
 @export var label_key: StringName
@@ -111,6 +113,8 @@ var _progress_grace_remaining := 0.0
 var _stuck_elapsed := 0.0
 var _progress_sample_position := Vector3.ZERO
 var _last_recovery_reason := ""
+var _look_hold_remaining := 0.0
+var _inferred_dynamic_yield_count := 0
 
 
 func _ready() -> void:
@@ -136,6 +140,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_look_hold_remaining = maxf(0.0, _look_hold_remaining - delta)
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 	elif velocity.y < 0.0:
@@ -179,7 +184,7 @@ func _physics_process(delta: float) -> void:
 	desired_direction.y = 0.0
 	if not desired_direction.is_zero_approx():
 		desired_direction = desired_direction.normalized()
-		look_at(global_position + desired_direction, Vector3.UP)
+		_face_movement_direction(desired_direction)
 	_navigation_agent.velocity = desired_direction * walk_speed
 
 
@@ -226,6 +231,10 @@ func face_position(target_position: Vector3) -> void:
 	var flat_target := Vector3(target_position.x, global_position.y, target_position.z)
 	if not flat_target.is_equal_approx(global_position):
 		look_at(flat_target, Vector3.UP)
+		# Runtime-authored look is presentation, so it must not cancel a schedule
+		# command or player contact. Hold the facing briefly while locomotion keeps
+		# advancing; later path steering then resumes without forging an arrival.
+		_look_hold_remaining = LOOK_HOLD_SECONDS
 
 
 func begin_player_contact(
@@ -327,6 +336,8 @@ func movement_status() -> Dictionary:
 		"mode": str(_contact_mode() if not _contact_id.is_empty() else _movement_mode),
 		"targetPosition": _movement_target,
 		"finalPosition": _navigation_agent.get_final_position(),
+		"targetReachable": _navigation_agent.is_target_reachable(),
+		"navigationFinished": _navigation_agent.is_navigation_finished(),
 		"avoidanceEnabled": _navigation_agent.avoidance_enabled,
 		"avoidancePriority": _navigation_agent.avoidance_priority,
 		"yieldRemaining": _yield_remaining,
@@ -334,6 +345,8 @@ func movement_status() -> Dictionary:
 		"repathAttempts": _repath_attempts,
 		"stuckRecoveryCount": _stuck_recovery_count,
 		"lastRecoveryReason": _last_recovery_reason,
+		"lookHoldRemaining": _look_hold_remaining,
+		"inferredDynamicYieldCount": _inferred_dynamic_yield_count,
 		"ambient": {
 			"enabled": ambient_wander_enabled,
 			"suspended": _ambient_suspended,
@@ -543,7 +556,7 @@ func _process_player_contact(delta: float) -> void:
 	desired_direction.y = 0.0
 	if not desired_direction.is_zero_approx():
 		desired_direction = desired_direction.normalized()
-		look_at(global_position + desired_direction, Vector3.UP)
+		_face_movement_direction(desired_direction)
 	_navigation_agent.velocity = desired_direction * walk_speed
 
 
@@ -555,6 +568,7 @@ func _queue_navigation_move(target_position: Vector3, mode: StringName) -> void:
 	_pending_move_mode = mode
 	_movement_target = target_position
 	_repath_attempts = 0
+	_inferred_dynamic_yield_count = 0
 
 
 func _cancel_navigation_motion() -> void:
@@ -701,7 +715,34 @@ func _recover_from_stuck_motion() -> void:
 	_stuck_recovery_count += 1
 	match _movement_mode:
 		MOVE_COMMAND:
-			if _repath_attempts < MAX_LOCAL_REPATH_ATTEMPTS:
+			var dynamic_blocker := _dynamic_command_blocker()
+			var blocker_value: Variant = dynamic_blocker.get("body")
+			var direct_collision := bool(dynamic_blocker.get("directCollision", false))
+			var path_local_occupancy := bool(
+				dynamic_blocker.get("pathLocalOccupancy", false)
+			)
+			var may_yield_for_dynamic := (
+				blocker_value is Node3D
+				and (
+					direct_collision
+					or path_local_occupancy
+					or _inferred_dynamic_yield_count < MAX_INFERRED_DYNAMIC_YIELDS
+				)
+			)
+			if may_yield_for_dynamic:
+				# A player or another resident is transient world state, not proof
+				# that the authored route is unreachable. Yield without consuming
+				# the finite static-path replan budget when physics actually observed
+				# the body. Endpoint/forward proximity gets one speculative yield;
+				# after that, a distant body cannot mask a static cage forever.
+				if not direct_collision and not path_local_occupancy:
+					_inferred_dynamic_yield_count += 1
+				var blocker := blocker_value as Node3D
+				_begin_yield(
+					MOVE_COMMAND,
+					"command_dynamic_body_blocked:%s" % blocker.get_path()
+				)
+			elif _repath_attempts < MAX_LOCAL_REPATH_ATTEMPTS:
 				_repath_attempts += 1
 				_begin_yield(MOVE_COMMAND, "command_body_blocked")
 			else:
@@ -721,6 +762,69 @@ func _recover_from_stuck_motion() -> void:
 		_:
 			_ambient_reselection_count += 1
 			_begin_yield(MOVE_AMBIENT, "ambient_body_blocked")
+
+
+func _dynamic_command_blocker() -> Dictionary:
+	for collision_index in get_slide_collision_count():
+		var collision := get_slide_collision(collision_index)
+		if collision == null:
+			continue
+		var collider_value: Variant = collision.get_collider()
+		if collider_value is Node3D and _is_dynamic_navigation_body(
+			collider_value as Node3D
+		):
+			return {
+				"body": collider_value as Node3D,
+				"directCollision": true,
+				"pathLocalOccupancy": true,
+			}
+
+	var next_path_delta := _navigation_agent.get_next_path_position() - global_position
+	next_path_delta.y = 0.0
+	var next_path_direction := next_path_delta.normalized()
+	var within_arrival_radius := (
+		_planar_distance(global_position, _movement_target)
+		<= DESTINATION_CLEARANCE_M + 0.25
+	)
+	for group_name in [&"npc_actors", &"player"]:
+		for candidate_value in get_tree().get_nodes_in_group(group_name):
+			if not candidate_value is Node3D or candidate_value == self:
+				continue
+			var candidate := candidate_value as Node3D
+			var candidate_delta := candidate.global_position - global_position
+			candidate_delta.y = 0.0
+			var candidate_distance := candidate_delta.length()
+			var occupies_target := _planar_distance(
+				candidate.global_position,
+				_movement_target
+			) < DESTINATION_CLEARANCE_M
+			var blocks_forward_motion := (
+				candidate_distance < DESTINATION_CLEARANCE_M + 0.25
+				and (
+					next_path_direction.is_zero_approx()
+					or next_path_direction.dot(candidate_delta.normalized()) > 0.25
+				)
+			)
+			if occupies_target or blocks_forward_motion:
+				return {
+					"body": candidate,
+					"directCollision": false,
+					"pathLocalOccupancy": (
+						blocks_forward_motion
+						or (occupies_target and within_arrival_radius)
+					),
+				}
+	return {}
+
+
+func _face_movement_direction(desired_direction: Vector3) -> void:
+	if _look_hold_remaining > 0.0:
+		return
+	look_at(global_position + desired_direction, Vector3.UP)
+
+
+func _is_dynamic_navigation_body(candidate: Node3D) -> bool:
+	return candidate.is_in_group(&"npc_actors") or candidate.is_in_group(&"player")
 
 
 func _begin_yield(resume_mode: StringName, reason: String) -> void:
@@ -779,6 +883,12 @@ func _resume_current_navigation_target(mode: StringName) -> void:
 func _block_runtime_movement(reason: String) -> void:
 	var blocked_movement_id := _movement_id
 	var blocked_anchor_ref := _movement_anchor_ref
+	var blocked_position := global_position
+	var blocked_target := _movement_target
+	var blocked_final_position := _navigation_agent.get_final_position()
+	var blocked_target_reachable := _navigation_agent.is_target_reachable()
+	var blocked_navigation_finished := _navigation_agent.is_navigation_finished()
+	var blocker_path := _latest_slide_blocker_path()
 	_cancel_navigation_motion()
 	_ambient_suspended = true
 	_movement_id = ""
@@ -788,8 +898,21 @@ func _block_runtime_movement(reason: String) -> void:
 	if blocked_movement_id.is_empty():
 		return
 	push_warning(
-		"NPC %s stayed blocked en route to %s after %d local replans."
-		% [actor_id, blocked_anchor_ref, MAX_LOCAL_REPATH_ATTEMPTS]
+		(
+			"NPC %s stayed blocked en route to %s after %d local replans; "
+			+ "position=%s target=%s final=%s reachable=%s finished=%s blocker=%s."
+		)
+		% [
+			actor_id,
+			blocked_anchor_ref,
+			MAX_LOCAL_REPATH_ATTEMPTS,
+			blocked_position,
+			blocked_target,
+			blocked_final_position,
+			blocked_target_reachable,
+			blocked_navigation_finished,
+			blocker_path,
+		]
 	)
 	movement_blocked.emit(
 		blocked_movement_id,
@@ -797,6 +920,17 @@ func _block_runtime_movement(reason: String) -> void:
 		blocked_anchor_ref,
 		reason
 	)
+
+
+func _latest_slide_blocker_path() -> String:
+	for collision_index in get_slide_collision_count():
+		var collision := get_slide_collision(collision_index)
+		if collision == null:
+			continue
+		var collider_value: Variant = collision.get_collider()
+		if collider_value is Node:
+			return str((collider_value as Node).get_path())
+	return "none"
 
 
 func _contact_mode() -> StringName:

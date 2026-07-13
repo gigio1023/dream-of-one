@@ -1,16 +1,17 @@
 # Godot AI Inspection and Routed Play Control
 
-**Status: foundation, delegated inspection, and hearing-capable M3R read surface
-implemented (2026-07-13).** The vendored add-on, editor plugin/autoload, repository skills,
-editor/server/game-helper path, and scene-owned `AgentPlaytestSurface` are
-proven through native Godot AI calls. Hands-on M3R acceptance remains later
-work, explicitly routed below.
+**Status: foundation, delegated inspection, and hearing-capable M3R play surface
+implemented (2026-07-13).** The vendored add-on, editor plugin/autoload,
+repository skills, editor/server/game-helper path, and scene-owned
+`AgentPlaytestSurface` are proven through native Godot AI calls. Hands-on M3R
+acceptance uses the routed live path below and remains incomplete until the
+current milestone's play gates pass.
 
 ## Reader job
 
 An implementing agent should be able to inspect and debug the exact Godot
-editor through Godot AI without macOS Computer Use. The separately designated
-play executor should be able to drive final live acceptance through the same
+editor through Godot AI without macOS Computer Use. An authorized native
+in-session child should be able to drive final live acceptance through the same
 surface, discovered from the repository skill, without reconstructing private
 node paths or inventing a mutation shortcut.
 
@@ -23,9 +24,10 @@ reproduce, and poorly grounded in game state. The project therefore treats
 integration and adds a small Dream-specific layer on top.
 
 The target is an efficient live control surface, not a new automated testing
-platform. Implementation agents inspect state, errors, and captures without
-hands-on input; actual exploration and conversations occur only under the
-executor/provider route in [`verification.md`](verification.md).
+platform. Intermediate implementation checks may inspect state, errors, and
+captures without hands-on input; actual exploration and conversations occur
+only under the bounded worker/provider route in
+[`verification.md`](verification.md).
 
 ## Confirmed decisions
 
@@ -40,20 +42,21 @@ executor/provider route in [`verification.md`](verification.md).
   technical source of truth.
 - Route high-volume Godot AI work through one native in-session subagent so its
   run, MCP traffic, and evidence remain isolated. Keep the lead session in
-  place and select the repo-defined `sol_high_godot` or
-  `terra_high_playtest` custom agent role. Their `.codex/agents/` config layers
-  pin worker model and effort. Terra high alone owns player input and gameplay
-  capture; a session without the required role blocks that routed run.
+  place and give the worker exclusive run ownership. The current/default
+  high-capability route is GPT-5.6 Sol ultra for inspection, diagnosis, and
+  actual play. Never substitute `codex exec`, another agent CLI or harness,
+  `curl`, or a hand-rolled HTTP client for the native in-session route.
 - When the integration is unavailable, attempt bounded automatic recovery once,
   then report the blocker. Do not silently fall back to Computer Use.
 - Use `godot-best-practice` as the engine-generic control and evidence contract.
-- During M3R, every 3D spatial/UI slice uses the non-play implementation route:
-  exact-session preflight, scene/Inspector inspection or mutation where
-  appropriate, diagnostics, and a state-appropriate capture. Sol may run a
-  fixture-mode helper handshake, but sends no player input and makes no gameplay
-  model call. After implementation and self-review, the bounded executor packet
-  assigns actual play to Terra high; all in-game model calls are Qwen live with
-  zero fallback. The maintained command contract is
+- During M3R, every 3D spatial/UI slice uses exact-session preflight,
+  scene/Inspector inspection or mutation where appropriate, diagnostics, and a
+  state-appropriate capture. Fixture-mode checks send no gameplay model call.
+  Bounded acceptance play uses the same native Sol-ultra route; every in-game
+  model call must return `modelscope/qwen3.7-plus`, `transport=live`, and zero
+  fallback. Do not use the
+  `lower-capability-executor-prompt` contract unless the owner explicitly asks
+  for it. The maintained command contract is
   [`verification.md`](verification.md).
 
 ## Non-goals
@@ -102,10 +105,10 @@ Verified on 2026-07-12 against Godot `4.7.stable.official.5b4e0cb0f`:
   `godot_ai_*` properties on `/Main3D/AgentPlaytestSurface`, observed six
   resident targets and no door targets, crossed the exact three-arrival replay
   packet without an error, and returned the editor to stopped/ready. That run
-  proves native child MCP visibility only: that session predated the tracked
-  custom agent roles and exposed no model/effort identity, so it cannot satisfy
-  a model-pinned Sol/Terra lane. Claude Code execution remains untested, while
-  its package discovery path is the tracked `.claude/skills` symlink.
+  proves native child MCP visibility only: that session exposed no model or
+  effort identity, so it did not prove which worker runtime performed the
+  check. Claude Code execution remains untested, while its package discovery
+  path is the tracked `.claude/skills` symlink.
 - The stock 2.9.1 helper sends absolute mouse positions without relative
   motion, while the first-person controller correctly consumes logical motion;
   it also omits the Unicode field required for committed native-script text.
@@ -196,10 +199,11 @@ For each 3D spatial/UI slice:
 Keep a bounded session/readiness check in the lead. When the work needs a run
 lifecycle plus repeated runtime reads, logs, or captures, apply
 `dream-godot-delegation`: keep the lead session unchanged and spawn one native
-`sol_high_godot` worker for complex non-play inspection from preflight through
-stop. After implementation and self-review, spawn a separate native
-`terra_high_playtest` worker for every player-input or gameplay-acceptance run.
-Never run two workers against the same editor.
+in-session child on the current/default GPT-5.6 Sol ultra route. That child
+exclusively owns the run from preflight through stop, whether the authorized
+work is complex non-play inspection or bounded gameplay acceptance. Never run
+two workers against the same editor, and never substitute `codex exec`, another
+agent CLI or harness, `curl`, or a hand-rolled HTTP client for that child.
 
 After one bounded recovery, a missing integration blocks spatial/UI completion
 and visual claims. It does not turn CLI checks into equivalent evidence.
@@ -306,24 +310,23 @@ as read-only inspection, implementation-time non-play inspection, or explicitly
 authorized play, then performs the matching branch. Every branch selects the
 canonical project root and requires Godot 4.7 plus ready plugin/server 2.9.1.
 The non-play branch may prove helper liveness but sends no input. The play
-branch applies the executor/Qwen preflight before launch, uses bounded generic
-input, checks semantic/log transitions, captures the exercised state, and
-stops unless the user asked to leave it open.
+branch applies the native-worker/Qwen preflight before launch, uses bounded
+generic input, checks semantic/log transitions, captures the exercised state,
+and stops unless the user asked to leave it open.
 
 Computer Use is not a fallback for this workflow. It remains available only if
 the user explicitly asks to test OS-window behavior outside Godot AI's control
 surface.
 
 `dream-godot-delegation` triggers when a task would otherwise keep the lead in
-a long MCP loop. It spawns one native subagent, gives that worker exclusive run
-ownership, and requires a compact evidence return. The lead session remains on
-its current model. Codex selects the tracked `sol_high_godot` or
-`terra_high_playtest` custom role; each role config pins worker model and effort.
-A session created before those roles existed must be restarted once to reload
-the trusted-project role registry. If the named role remains unavailable, do
-not switch the parent or write a model name into the worker prompt and treat it
-as proof. `codex exec`, another agent CLI, curl, and screen-coordinate
-automation are not automatic fallbacks.
+a long MCP loop. It spawns one native in-session child on the current/default
+GPT-5.6 Sol ultra route, gives that worker exclusive run ownership, and requires
+a compact evidence return. The lead session remains on its current model. If a
+fresh child cannot access the native Godot AI tools after one bounded recovery,
+report the routing blocker. Never switch to `codex exec`, another agent CLI or
+harness, `curl`, a hand-rolled HTTP client, or screen-coordinate automation.
+Never use `lower-capability-executor-prompt` unless the owner explicitly
+requests it.
 
 ## Readiness and bounded recovery
 
@@ -364,7 +367,8 @@ editor, or use Computer Use without separate authority.
   insufficient.
 - A review or status request permits reads only. A build/change request permits
   in-scope editor changes and the non-play helper handshake. Hands-on game
-  input requires the separate current executor route.
+  input requires the current native-child route plus Qwen live/zero-fallback
+  preflight.
 - Never use editor property mutation or runtime evaluation to manufacture the
   state that a gameplay claim is supposed to prove.
 - Do not print or store provider credentials. The play surface reports session
@@ -390,7 +394,7 @@ editor, or use Computer Use without separate authority.
 
 - Create `dream-godot-playtest` and the Godot AI 2.9.1 capability reference.
 - Create `dream-godot-delegation` for native worker spawning, exclusive run
-  ownership, custom-role per-worker model routing, and compact evidence return.
+  ownership, and compact evidence return.
 - Update `.agents/skills/README.md`.
 - Validate frontmatter, links, positive triggers, and adjacent non-triggers.
 - Exercise the same basic workflow in Codex and Claude Code when both clients
@@ -406,12 +410,13 @@ editor, or use Computer Use without separate authority.
 - Do not use generic input in the implementation slice. Final routed play proves
   the snapshot changes without an alternate mutation API.
 
-### Slice 4 — Prove the direct-play loop — final routed Terra/Qwen run
+### Slice 4 — Prove the direct-play loop — final native Sol/Qwen run
 
-After all M3R implementation and Sol self-review, issue the bounded executor
-packet from `verification.md`. From the unchanged lead session, spawn a fresh
-native `terra_high_playtest` worker with the repository skill active and Qwen
-live/zero-fallback preflight passed:
+After all M3R implementation and self-review, issue the bounded play packet
+from `verification.md`. From the unchanged lead session, spawn one native
+in-session child on the current/default GPT-5.6 Sol ultra route, give it
+exclusive ownership of the run, activate the repository skill, and pass the
+`modelscope/qwen3.7-plus` live/zero-fallback preflight:
 
 1. select the exact editor session;
 2. launch the main project and reach `live` helper status;
@@ -447,7 +452,7 @@ The integration foundation implemented by slices 1–3 is complete when:
   authority boundary is unchanged.
 
 The full M3R play surface is complete later when the adapter exposes the
-finished run-backed conversation/hearing surfaces and the bounded Terra/Qwen
+finished run-backed conversation/hearing surfaces and the bounded Sol/Qwen
 direct-play loop passes without Computer Use or an alternate state mutation
 path.
 

@@ -48,6 +48,7 @@ func _run() -> void:
 	await _check_modal_pause_resume(town, actors["NPC_Roaming_Liaison"] as NPC3D)
 	_stop_all(actors)
 	await physics_frame
+	_check_bounded_facing(actors["NPC_Park_Caretaker"] as NPC3D)
 	await _check_npc_crossing(town, actors)
 	await _check_player_yield(town, actors)
 	await _check_dynamic_endpoint_wait(town, actors)
@@ -152,6 +153,30 @@ func _check_modal_pause_resume(town: Node, actor: NPC3D) -> void:
 	if not resumed:
 		_failures.append("NPC did not resume policy movement after modal pause")
 	actor.stop()
+
+
+func _check_bounded_facing(actor: NPC3D) -> void:
+	actor.stop()
+	actor.rotation = Vector3.ZERO
+	actor.set("_look_hold_remaining", 0.0)
+	actor.call("_face_movement_direction", Vector3.RIGHT, 0.25)
+	var first_step := absf(angle_difference(0.0, actor.rotation.y))
+	var maximum_step := deg_to_rad(60.0) + 0.001
+	if first_step <= 0.001 or first_step > maximum_step:
+		_failures.append(
+			"NPC facing was not a bounded 240-degree-per-second turn: %.4f"
+			% first_step
+		)
+	for _step in range(6):
+		actor.call("_face_movement_direction", Vector3.RIGHT, 0.1)
+	if absf(angle_difference(actor.rotation.y, -PI / 2.0)) > 0.01:
+		_failures.append("NPC bounded facing never converged on its travel direction")
+	actor.face_position(actor.global_position + Vector3.LEFT)
+	var held_yaw := actor.rotation.y
+	actor.call("_face_movement_direction", Vector3.BACK, 0.25)
+	if absf(angle_difference(held_yaw, actor.rotation.y)) > 0.001:
+		_failures.append("runtime-authored look hold was overwritten by locomotion facing")
+	actor.set("_look_hold_remaining", 0.0)
 
 
 func _check_npc_crossing(town: Node, actors: Dictionary) -> void:
@@ -637,8 +662,9 @@ func _planar_distance(a: Vector3, b: Vector3) -> float:
 func _finish() -> void:
 	if _failures.is_empty():
 		print(
-			"PASS npc_movement_smoke: six ambient walkers, modal pause/resume, "
-			+ "NPC/player avoidance, dynamic-body waiting, and bounded static recovery"
+			"PASS npc_movement_smoke: six ambient walkers, bounded facing, modal "
+			+ "pause/resume, NPC/player avoidance, dynamic-body waiting, and "
+			+ "bounded static recovery"
 		)
 		quit(0)
 		return

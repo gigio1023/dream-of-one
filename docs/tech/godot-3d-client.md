@@ -401,6 +401,11 @@ the dev machine with all six NPC loops live.
   stops querying once `is_navigation_finished()` is true to avoid empty-path
   startup and endpoint jitter. Avoidance is enabled only while an NPC is
   moving; the agent's `velocity_computed` signal supplies the safe velocity.
+  Residents face that final RVO-safe velocity rather than the raw path point,
+  with yaw capped at 240 degrees per second. Avoidance therefore cannot snap a
+  model toward a pre-avoidance direction; it turns into the detour over several
+  physics frames. A runtime-authored `look` still holds its facing briefly
+  before locomotion steering resumes.
   Semantic anchors are projected onto this map before becoming agent targets;
   this keeps desk/surface markers authored above floor height from becoming
   false arrival checks. Arrival signals carry the runtime movement ID and

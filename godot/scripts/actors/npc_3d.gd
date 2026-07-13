@@ -58,6 +58,7 @@ const YIELD_MAX_SECONDS := 0.9
 const DESTINATION_CLEARANCE_M := 0.9
 const LOOK_HOLD_SECONDS := 0.75
 const MAX_INFERRED_DYNAMIC_YIELDS := 1
+const TURN_SPEED_RADIANS_PER_SECOND := deg_to_rad(240.0)
 
 @export var actor_id: StringName
 @export var label_key: StringName
@@ -185,7 +186,6 @@ func _physics_process(delta: float) -> void:
 	desired_direction.y = 0.0
 	if not desired_direction.is_zero_approx():
 		desired_direction = desired_direction.normalized()
-		_face_movement_direction(desired_direction)
 	_navigation_agent.velocity = desired_direction * walk_speed
 
 
@@ -491,6 +491,11 @@ func _on_velocity_computed(safe_velocity: Vector3) -> void:
 	var planar_velocity := Vector2(safe_velocity.x, safe_velocity.z)
 	if planar_velocity.length() > walk_speed:
 		planar_velocity = planar_velocity.normalized() * walk_speed
+	if not planar_velocity.is_zero_approx():
+		_face_movement_direction(
+			Vector3(planar_velocity.x, 0.0, planar_velocity.y).normalized(),
+			get_physics_process_delta_time()
+		)
 	velocity.x = planar_velocity.x
 	velocity.z = planar_velocity.y
 	move_and_slide()
@@ -581,7 +586,6 @@ func _process_player_contact(delta: float) -> void:
 	desired_direction.y = 0.0
 	if not desired_direction.is_zero_approx():
 		desired_direction = desired_direction.normalized()
-		_face_movement_direction(desired_direction)
 	_navigation_agent.velocity = desired_direction * walk_speed
 
 
@@ -851,10 +855,15 @@ func _dynamic_command_blocker() -> Dictionary:
 	return {}
 
 
-func _face_movement_direction(desired_direction: Vector3) -> void:
+func _face_movement_direction(desired_direction: Vector3, delta: float) -> void:
 	if _look_hold_remaining > 0.0:
 		return
-	look_at(global_position + desired_direction, Vector3.UP)
+	var target_yaw := atan2(-desired_direction.x, -desired_direction.z)
+	rotation.y = rotate_toward(
+		rotation.y,
+		target_yaw,
+		TURN_SPEED_RADIANS_PER_SECOND * maxf(delta, 0.0)
+	)
 
 
 func _is_dynamic_navigation_body(candidate: Node3D) -> bool:

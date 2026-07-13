@@ -39,9 +39,10 @@ executor/provider route in [`verification.md`](verification.md).
 - Add a repository-local skill shared by Codex and Claude Code, plus this short
   technical source of truth.
 - Route high-volume Godot AI work through one native in-session subagent so its
-  run, MCP traffic, and evidence remain isolated. When native spawn has no model
-  selector, the user-selected parent session owns the Sol-high/Terra-high lane;
-  Terra high alone owns player input and gameplay capture.
+  run, MCP traffic, and evidence remain isolated. Keep the lead session in
+  place and pin Sol-high or Terra-high as worker runtime settings in the native
+  spawn call. Terra high alone owns player input and gameplay capture; a spawn
+  surface without per-worker model/effort selectors blocks that routed run.
 - When the integration is unavailable, attempt bounded automatic recovery once,
   then report the blocker. Do not silently fall back to Computer Use.
 - Use `godot-best-practice` as the engine-generic control and evidence contract.
@@ -99,11 +100,11 @@ Verified on 2026-07-12 against Godot `4.7.stable.official.5b4e0cb0f`:
   launched a fixture-mode helper without player input, read the three
   `godot_ai_*` properties on `/Main3D/AgentPlaytestSurface`, observed six
   resident targets and no door targets, crossed the exact three-arrival replay
-  packet without an error, and returned the editor to stopped/ready. The native
-  spawn surface exposed no model/effort selector or worker identity, so its
-  binding is recorded as inherited rather than independently verified. Claude
-  Code execution remains untested, while its package discovery path is the
-  tracked `.claude/skills` symlink.
+  packet without an error, and returned the editor to stopped/ready. That run
+  proves native child MCP visibility only: the observed spawn surface exposed
+  no model/effort selector or worker identity, so it cannot satisfy a
+  model-pinned Sol/Terra lane. Claude Code execution remains untested, while its
+  package discovery path is the tracked `.claude/skills` symlink.
 - The stock 2.9.1 helper sends absolute mouse positions without relative
   motion, while the first-person controller correctly consumes logical motion;
   it also omits the Unicode field required for committed native-script text.
@@ -193,11 +194,11 @@ For each 3D spatial/UI slice:
 
 Keep a bounded session/readiness check in the lead. When the work needs a run
 lifecycle plus repeated runtime reads, logs, or captures, apply
-`dream-godot-delegation`: one native worker spawned by the Sol-high parent owns
-complex non-play inspection from preflight through stop. After implementation
-and self-review, a separate native worker spawned by a Terra-high parent owns
-every player-input or gameplay-acceptance run. Never run two workers against
-the same editor.
+`dream-godot-delegation`: keep the lead session unchanged and spawn one native
+worker pinned to Sol high for complex non-play inspection from preflight through
+stop. After implementation and self-review, spawn a separate native worker
+pinned to Terra high for every player-input or gameplay-acceptance run. Never
+run two workers against the same editor.
 
 After one bounded recovery, a missing integration blocks spatial/UI completion
 and visual claims. It does not turn CLI checks into equivalent evidence.
@@ -314,12 +315,12 @@ surface.
 
 `dream-godot-delegation` triggers when a task would otherwise keep the lead in
 a long MCP loop. It spawns one native subagent, gives that worker exclusive run
-ownership, and requires a compact evidence return. The current native Codex
-spawn surface passes Godot AI tools to a fresh worker but exposes no model or
-effort selector/identity. Until that changes, choose Sol high or Terra high on
-the parent session before spawning; never write a model name into the worker
-prompt and treat it as proof. `codex exec`, another agent CLI, curl, and
-screen-coordinate automation are not automatic fallbacks.
+ownership, and requires a compact evidence return. The lead session remains on
+its current model; the spawn call must pin the worker model and effort. A native
+surface that passes Godot AI tools but exposes no per-worker selector cannot run
+the Sol/Terra-specific lane. Do not switch the parent or write a model name into
+the worker prompt and treat it as proof. `codex exec`, another agent CLI, curl,
+and screen-coordinate automation are not automatic fallbacks.
 
 ## Readiness and bounded recovery
 
@@ -386,7 +387,7 @@ editor, or use Computer Use without separate authority.
 
 - Create `dream-godot-playtest` and the Godot AI 2.9.1 capability reference.
 - Create `dream-godot-delegation` for native worker spawning, exclusive run
-  ownership, parent-session model routing, and compact evidence return.
+  ownership, pinned per-worker model routing, and compact evidence return.
 - Update `.agents/skills/README.md`.
 - Validate frontmatter, links, positive triggers, and adjacent non-triggers.
 - Exercise the same basic workflow in Codex and Claude Code when both clients
@@ -405,8 +406,9 @@ editor, or use Computer Use without separate authority.
 ### Slice 4 — Prove the direct-play loop — final routed Terra/Qwen run
 
 After all M3R implementation and Sol self-review, issue the bounded executor
-packet from `verification.md`. From a fresh Terra-high session with the
-repository skill active and Qwen live/zero-fallback preflight passed:
+packet from `verification.md`. From the unchanged lead session, spawn a fresh
+native worker pinned to Terra high with the repository skill active and Qwen
+live/zero-fallback preflight passed:
 
 1. select the exact editor session;
 2. launch the main project and reach `live` helper status;

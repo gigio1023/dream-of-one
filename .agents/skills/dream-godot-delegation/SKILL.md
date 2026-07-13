@@ -3,9 +3,10 @@ name: dream-godot-delegation
 description: >
   Use when Dream of One work would require a long or high-volume Godot AI MCP
   session, repeated runtime inspection or captures, or any hands-on game
-  playtest. Spawns one native in-session subagent under a Sol-high or Terra-high
-  parent and returns compact evidence. NOT for code-only Godot edits, a bounded
-  session preflight, backend-only work, or generic parallelization.
+  playtest. Keeps the lead session in place, spawns one native in-session
+  subagent pinned to the required Sol-high or Terra-high worker runtime, and
+  returns compact evidence. NOT for code-only Godot edits, a bounded session
+  preflight, backend-only work, or generic parallelization.
 ---
 
 # Dream of One — Godot Delegation
@@ -47,21 +48,24 @@ user explicitly asks for that execution surface.
 
 ## Route The Worker
 
-- Use a **GPT-5.6 Sol, high-effort parent session** for cross-layer diagnosis,
+Keep the main/lead session on its current planning and integration model. Do not
+ask the user to switch the parent merely to route a worker.
+
+- Spawn a **GPT-5.6 Sol, high-effort worker** for cross-layer diagnosis,
   unfamiliar scene or runtime reasoning, implementation decisions based on live
   evidence, and non-play inspection where each result may change the next call.
-- Use a **GPT-5.6 Terra, high-effort parent session** for a bounded, already
+- Spawn a **GPT-5.6 Terra, high-effort worker** for a bounded, already
   specified execution run. Every hands-on game playtest, player-input sequence,
   visual acceptance pass, and gameplay capture belongs here, even when the
   actions look simple.
 - When a change needs both, finish and mechanically verify the implementation
-  first with the lead/Sol lane, stop that run, then give a fresh Terra worker a
-  closed play packet. Do not switch models midway through one run.
-- When native spawn exposes a model/effort selector, pin it there. When it does
-  not, native workers inherit the user-selected parent lane; record that the
-  worker identity is inherited and not independently verifiable. If the current
-  parent is not the required lane, stop and hand the packet to a correctly
-  configured parent session rather than launching an external CLI.
+  first with the lead or a pinned Sol worker, stop that run, then give a fresh
+  pinned Terra worker a closed play packet. Do not switch models midway through
+  one run.
+- Pin model and effort in the native spawn call and record the returned worker
+  configuration. If the native spawn surface cannot set both, stop with a
+  routing-capability blocker. Do not switch the parent, launch an external CLI,
+  or treat an inherited/default worker as the requested lane.
 
 Model and effort are runtime settings, not prose requests. Naming a model in a
 worker prompt does not change it and must never be reported as proof.
@@ -90,8 +94,8 @@ state the test is meant to reach.
 
 Return a compact packet containing:
 
-- requested parent lane, whether worker identity was pinned or inherited,
-  authority mode, selected project/session, and version preflight;
+- requested worker lane, native pinning evidence, authority mode, selected
+  project/session, and version preflight;
 - the observed state transitions relevant to the objective, with semantic
   values and capture paths when required;
 - new editor/game errors, fixture or live-provider provenance, and any fallback;
@@ -110,16 +114,16 @@ Use one bounded recovery pass for session/helper connection failures, following
 `dream-godot-playtest`. Stop rather than switching to curl, Computer Use, a
 different model, or a restarted editor. If the worker edits outside its owned
 scope, loses exact session identity, observes another process taking run
-ownership, or cannot establish the packet's declared binding provenance,
+ownership, or cannot establish the packet's pinned model/effort provenance,
 terminate the lane and report the conflict.
 
 ## Gotchas
 
 - A high number of calls alone does not justify parallel workers; one isolated
   Godot worker is the safe topology because editor/run state is shared.
-- Current native Codex subagents inherit Godot AI MCP but expose no model/effort
-  selector or identity. Route exact Sol/Terra work by the parent session until
-  the native spawn surface proves otherwise.
+- Some native Codex spawn surfaces expose Godot AI to children but no
+  model/effort selector. That is a model-routing blocker for Sol/Terra-specific
+  work, not a reason to switch the lead session or relabel a default child.
 - Native Godot AI calls can perturb timing. Prefer semantic checks at meaningful
   transitions over frame-by-frame polling, but do not reduce required evidence.
 - A child session may discover the repo skills but not inherit the lead's loaded

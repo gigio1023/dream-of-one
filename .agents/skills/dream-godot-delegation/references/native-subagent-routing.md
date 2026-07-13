@@ -8,12 +8,14 @@ subagent, task, thread, or team primitive; do not start another agent CLI.
 From a Codex parent turn, create the Godot worker with the collaboration
 `spawn_agent` capability. This is a direct harness call: do not invoke it
 through a shell command or use `codex exec` to create a second Codex process.
-The returned child agent id owns the assigned Godot run.
+Keep the lead session unchanged. Pin the requested worker model and reasoning
+effort in the spawn call; the returned child agent id owns the assigned Godot
+run.
 
 - Use `followup_task` to continue work with that same child after it becomes
   idle and still owns the run.
 - Use `send_message` only to add context to a child that is already running.
-- Use `interrupt_agent` when the objective, authority, or required parent lane
+- Use `interrupt_agent` when the objective, authority, or required worker lane
   changes and the current child must stop.
 - Use a newly spawned child for a fresh isolated run after the previous child
   has stopped its worker-owned game run.
@@ -30,22 +32,21 @@ Before assigning a live run, determine separately:
 2. whether the spawn surface exposes a real model and reasoning-effort selector;
 3. whether the worker can report a verifiable model/effort identity.
 
-Do not infer one capability from another. In the current Codex surface, a fresh
-native worker successfully called Godot AI session discovery, but the spawn
-schema and worker tool registry exposed no model/effort selector or identity.
+Do not infer one capability from another. A child seeing Godot AI does not prove
+its model/effort. A spawn surface without explicit model and effort fields
+cannot execute a model-pinned lane.
 
 ## Model Routing
 
-- If native spawn supports model and effort fields, pin the requested Sol-high
-  or Terra-high lane there and record the returned configuration.
-- Otherwise, select the requested model/effort on the parent Codex session
-  before invoking this skill. Spawn one native worker from that parent and
-  describe its routing as inherited, not independently verified.
-- A Sol parent handles implementation-time diagnosis and non-play inspection.
-- After all implementation and Sol self-review, hand one closed run packet to a
-  Terra-high parent. That parent spawns the native play worker.
-- If the current parent is the wrong lane, stop with the packet ready. Do not
-  write a model name into the prompt and pretend it changed the worker.
+- Keep the lead/main session on its current model.
+- Pin a Sol-high worker for implementation-time diagnosis and non-play
+  inspection when delegation is warranted.
+- After implementation and Sol self-review, pin a fresh Terra-high worker and
+  give it the closed play packet.
+- If native spawn lacks model or effort fields, stop with the packet ready and
+  report the missing per-worker selector. Do not switch the parent, write a
+  model name into the prompt and pretend it changed the worker, or use an
+  external agent CLI.
 
 ## Run Topology
 
@@ -73,5 +74,5 @@ tools, report the native-delegation blocker. Do not switch automatically to
 
 The worker stops only the run it started and returns a compact result. The lead
 checks the final editor play state, worker artifact or diff, and material claims
-before closing the worker. Actual Terra play remains a later, separately routed
+before closing the worker. Actual Terra play remains a separately pinned worker
 run; a Sol fixture inspection cannot stand in for it.

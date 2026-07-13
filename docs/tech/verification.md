@@ -28,9 +28,12 @@ game:
   self-review.
 - Once implementation and self-review are complete, Sol writes one bounded
   run-only packet using the `lower-capability-executor-prompt` contract.
-  GPT-5.6 Terra high alone drives the actual game through Godot AI and records
-  the fun/acceptance observations. Terra does not edit or diagnose on failure;
-  it reports, Sol repairs, and a new bounded Terra run is issued.
+  The lead session stays in place and native spawn pins a GPT-5.6 Terra-high
+  worker for the actual game drive through Godot AI and the fun/acceptance
+  observations. Terra does not edit or diagnose on failure; it reports, Sol
+  repairs, and a new bounded Terra run is issued. If native spawn cannot set
+  the worker model and effort, live acceptance is blocked; changing the parent
+  or naming Terra only in prompt prose is not a substitute.
 - Every real NPC/model call in those play runs pins
   `modelscope/qwen3.7-plus`. A live result counts only when the returned
   metadata says that profile, `transport=live`, and no fallback. Missing Qwen

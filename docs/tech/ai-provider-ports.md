@@ -211,11 +211,19 @@ stop or choose a genuinely different next action.
 
 One locale-aware validation stage covers
 player-visible dialogue, reply suggestions, judgment reasons, NPC utterances,
-and record/ledger prose. Korean keeps its modern-Korean script check; the other
-locales use bounded structural and locale instructions without introducing a
-second language detector. A mismatch will use the existing single repair
-attempt; ids and tool names remain excluded. Supported gameplay locales are
-`ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`.
+and record/ledger prose. Every nonempty Korean player-visible field must contain
+at least one Hangul code point. This lightweight presence check rejects pure
+English, pure Chinese/Hanja, digits-only, and punctuation-only output while
+allowing natural Korean to include names in Latin script, established acronyms,
+numerals, and occasional Hanja. It is an envelope-validity guard, not a language
+quality classifier: wording and style remain provider-owned and content-review
+owned. An independent all-locale guard rejects canonical internal stable-ID
+shapes such as actor, memory, record-surface, movement, and semantic-anchor ids
+from every player-visible field while leaving tool arguments and internal
+rationale untouched. Other locales keep structural and locale instructions
+without adding a second language detector. Either mismatch uses the existing
+single repair attempt. Supported gameplay locales are `ko-KR`, `en-US`,
+`it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`.
 
 A run fixes its locale at creation. That tag is part of opening-cache and
 request-idempotency signatures and flows through conversation, ambient agent

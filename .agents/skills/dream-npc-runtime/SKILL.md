@@ -77,11 +77,18 @@ it.
    meaningful first-hand player conversation.
 
 Player-visible text is Korean-first but resolves in the run's immutable
-supported locale. Korean packets pass the modern-Korean script check at the
-envelope boundary (ids and tool names exempt); other locales keep structural
-validation without pretending a lightweight script regex can prove language
-quality. Fallback lines must stay in-fiction and use the same run locale — no
-goal strings, meta text, or cross-locale leakage into dialogue.
+supported locale. Every nonempty Korean player-visible field must contain at
+least one Hangul code point at the envelope boundary (ids and tool names are
+exempt). Natural Korean may include Latin-script names, established acronyms,
+numerals, and occasional Hanja; pure English, pure Chinese/Hanja, digits-only,
+or punctuation-only fields are invalid. This is a lightweight presence guard,
+not a style classifier: wording remains provider-owned and content review owns
+language quality. Every locale independently rejects canonical internal
+stable-ID shapes from player-visible fields; tool arguments and internal
+rationale remain exempt. Other locales keep structural validation without
+pretending a script regex can prove language quality. Fallback lines must stay
+in-fiction and use the same run locale — no goal strings, meta text, or
+cross-locale leakage into dialogue.
 
 ## Verification
 

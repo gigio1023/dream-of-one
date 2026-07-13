@@ -12,7 +12,14 @@ import { supportedLocaleEntry } from "../localization/supported-locales.js";
 import type { RequiredAgentToolCall } from "./ports.js";
 
 const nonEmpty = z.string().trim().min(1);
-const forbiddenPlayerVisibleScript = /[\p{Script=Latin}\p{Script=Han}]/u;
+const requiredPlayerVisibleHangul = /\p{Script=Hangul}/u;
+const forbiddenPlayerVisibleStableIds = [
+  /\b[A-Za-z][A-Za-z0-9]*_[A-Za-z0-9_]+\b/u,
+  /\b(?:mem|sess|rec|led)-[A-Za-z0-9_.:-]+\b/u,
+  /\b(?:record|ledger|wake|mov|contact|run|session|conversation|turn|beat|question|speech|event|goal|hearing)-(?=[A-Za-z0-9_.:-]*\d)[A-Za-z0-9_.:-]+\b/u,
+  /\b(?:provider-smoke|mem|sess|rec|led|record|ledger|wake|mov|contact|run|session|conversation|turn|beat|question|speech|event|goal|hearing|ambient|spatial):[A-Za-z0-9_.:#-]+\b/u,
+  /\b(?:Park|Studio|Office|Station)\.[A-Za-z0-9_.-]+\b/u,
+] as const;
 const intentSchema = z.enum(CONVERSATION_CHOICE_INTENTS);
 const suggestedReplySchema = z.object({ text: nonEmpty, intent: intentSchema }).strict();
 
@@ -20,16 +27,25 @@ function isKoreanLocale(locale: string): boolean {
   return supportedLocaleEntry(locale).presentationId === "ko";
 }
 
-function addKoreanTextIssue(
+function addPlayerVisibleTextIssues(
   context: z.RefinementCtx,
   path: Array<string | number>,
   text: string | undefined,
+  requireHangul: boolean,
 ): void {
-  if (text && forbiddenPlayerVisibleScript.test(text)) {
+  if (!text) return;
+  if (forbiddenPlayerVisibleStableIds.some(pattern => pattern.test(text))) {
     context.addIssue({
       code: "custom",
       path,
-      message: "player-visible text must use modern Korean without Latin or Han characters",
+      message: "player-visible text must not expose an internal stable id",
+    });
+  }
+  if (requireHangul && !requiredPlayerVisibleHangul.test(text)) {
+    context.addIssue({
+      code: "custom",
+      path,
+      message: "player-visible Korean text must contain at least one Hangul code point",
     });
   }
 }
@@ -185,10 +201,14 @@ export const agentStepProposalSchema = z
 export function conversationProposalSchemaForLocale(locale: string) {
   const korean = isKoreanLocale(locale);
   return conversationProposalSchema.superRefine((value, context) => {
-    if (!korean) return;
-    addKoreanTextIssue(context, ["utterance"], value.utterance);
+    addPlayerVisibleTextIssues(context, ["utterance"], value.utterance, korean);
     value.suggestedReplies.forEach((reply, index) => {
-      addKoreanTextIssue(context, ["suggestedReplies", index, "text"], reply.text);
+      addPlayerVisibleTextIssues(
+        context,
+        ["suggestedReplies", index, "text"],
+        reply.text,
+        korean,
+      );
     });
   });
 }
@@ -196,20 +216,34 @@ export function conversationProposalSchemaForLocale(locale: string) {
 export function conversationJudgmentSchemaForLocale(locale: string) {
   const korean = isKoreanLocale(locale);
   return conversationJudgmentSchema.superRefine((value, context) => {
-    if (korean) addKoreanTextIssue(context, ["whyLine"], value.whyLine);
+    addPlayerVisibleTextIssues(context, ["whyLine"], value.whyLine, korean);
   });
 }
 
 export function mergedConversationTurnSchemaForLocale(locale: string) {
   const korean = isKoreanLocale(locale);
   return mergedConversationTurnSchema.superRefine((value, context) => {
-    if (!korean) return;
-    addKoreanTextIssue(context, ["whyLine"], value.whyLine);
-    addKoreanTextIssue(context, ["utterance"], value.utterance);
-    addKoreanTextIssue(context, ["openQuestion", "text"], value.openQuestion?.text);
-    addKoreanTextIssue(context, ["openQuestion", "whyLine"], value.openQuestion?.whyLine);
+    addPlayerVisibleTextIssues(context, ["whyLine"], value.whyLine, korean);
+    addPlayerVisibleTextIssues(context, ["utterance"], value.utterance, korean);
+    addPlayerVisibleTextIssues(
+      context,
+      ["openQuestion", "text"],
+      value.openQuestion?.text,
+      korean,
+    );
+    addPlayerVisibleTextIssues(
+      context,
+      ["openQuestion", "whyLine"],
+      value.openQuestion?.whyLine,
+      korean,
+    );
     value.suggestedReplies.forEach((reply, index) => {
-      addKoreanTextIssue(context, ["suggestedReplies", index, "text"], reply.text);
+      addPlayerVisibleTextIssues(
+        context,
+        ["suggestedReplies", index, "text"],
+        reply.text,
+        korean,
+      );
     });
   });
 }
@@ -217,14 +251,19 @@ export function mergedConversationTurnSchemaForLocale(locale: string) {
 export function ambientReplyJudgmentSchemaForLocale(locale: string) {
   const korean = isKoreanLocale(locale);
   return ambientReplyJudgmentSchema.superRefine((value, context) => {
-    if (!korean) return;
-    addKoreanTextIssue(context, ["utterance"], value.utterance);
-    addKoreanTextIssue(context, ["whyLine"], value.whyLine);
-    addKoreanTextIssue(context, ["openQuestion", "text"], value.openQuestion?.text);
-    addKoreanTextIssue(
+    addPlayerVisibleTextIssues(context, ["utterance"], value.utterance, korean);
+    addPlayerVisibleTextIssues(context, ["whyLine"], value.whyLine, korean);
+    addPlayerVisibleTextIssues(
+      context,
+      ["openQuestion", "text"],
+      value.openQuestion?.text,
+      korean,
+    );
+    addPlayerVisibleTextIssues(
       context,
       ["openQuestion", "whyLine"],
       value.openQuestion?.whyLine,
+      korean,
     );
   });
 }
@@ -247,24 +286,28 @@ export function ambientReplyJudgmentSchemaForRequest(
 export function hearingJudgmentSchemaForLocale(locale: string) {
   const korean = isKoreanLocale(locale);
   return hearingJudgmentSchema.superRefine((value, context) => {
-    if (!korean) return;
     value.residentAssessments.forEach((assessment, index) => {
-      addKoreanTextIssue(
+      addPlayerVisibleTextIssues(
         context,
         ["residentAssessments", index, "testimonyLine"],
         assessment.testimonyLine,
+        korean,
       );
     });
-    addKoreanTextIssue(context, ["verdictWhyLine"], value.verdictWhyLine);
-    addKoreanTextIssue(context, ["officerLine"], value.officerLine);
+    addPlayerVisibleTextIssues(
+      context,
+      ["verdictWhyLine"],
+      value.verdictWhyLine,
+      korean,
+    );
+    addPlayerVisibleTextIssues(context, ["officerLine"], value.officerLine, korean);
   });
 }
 
 export function agentStepProposalSchemaForLocale(locale: string) {
   const korean = isKoreanLocale(locale);
   return agentStepProposalSchema.superRefine((value, context) => {
-    if (!korean) return;
-    addKoreanTextIssue(context, ["utterance"], value.utterance);
+    addPlayerVisibleTextIssues(context, ["utterance"], value.utterance, korean);
     const args = value.toolCall?.args;
     if (!args) return;
     const whyLine = typeof args.whyLine === "string" ? args.whyLine : undefined;
@@ -280,18 +323,35 @@ export function agentStepProposalSchemaForLocale(locale: string) {
     const openQuestionWhyLine = typeof openQuestion?.whyLine === "string"
       ? openQuestion.whyLine
       : undefined;
-    addKoreanTextIssue(context, ["toolCall", "args", "whyLine"], whyLine);
-    addKoreanTextIssue(context, ["toolCall", "args", "record", "stateBody"], stateBody);
-    addKoreanTextIssue(context, ["toolCall", "args", "stateBody"], directStateBody);
-    addKoreanTextIssue(
+    addPlayerVisibleTextIssues(
+      context,
+      ["toolCall", "args", "whyLine"],
+      whyLine,
+      korean,
+    );
+    addPlayerVisibleTextIssues(
+      context,
+      ["toolCall", "args", "record", "stateBody"],
+      stateBody,
+      korean,
+    );
+    addPlayerVisibleTextIssues(
+      context,
+      ["toolCall", "args", "stateBody"],
+      directStateBody,
+      korean,
+    );
+    addPlayerVisibleTextIssues(
       context,
       ["toolCall", "args", "openQuestion", "text"],
       openQuestionText,
+      korean,
     );
-    addKoreanTextIssue(
+    addPlayerVisibleTextIssues(
       context,
       ["toolCall", "args", "openQuestion", "whyLine"],
       openQuestionWhyLine,
+      korean,
     );
   });
 }

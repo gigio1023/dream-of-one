@@ -12,6 +12,7 @@ import {
   agentStepProposalJsonSchemaForTools,
   agentStepProposalSchemaForLocale,
   agentStepProposalSchemaForRequest,
+  conversationJudgmentSchemaForLocale,
   hearingJudgmentJsonSchema,
   hearingJudgmentSchemaForLocale,
 } from "../../src/providers/envelope.js";
@@ -1377,7 +1378,15 @@ test("ambient reply schema keeps the exact talk target and all listener judgment
   assert.equal(ambientReplyJudgmentSchemaForLocale("ko-KR").safeParse({
     ...valid,
     whyLine: "관리자에게 들은 說明이 달랐습니다.",
-  }).success, false);
+  }).success, true, "natural Korean may contain occasional Hanja");
+  assert.equal(ambientReplyJudgmentSchemaForLocale("ko-KR").safeParse({
+    ...valid,
+    whyLine: "NPC_Store_Manager의 설명을 다시 확인했습니다.",
+  }).success, false, "player-visible judgment must not expose an actor id");
+  assert.equal(ambientReplyJudgmentSchemaForLocale("ko-KR").safeParse({
+    ...valid,
+    utterance: "mem-ambient-1을 읽어 보세요.",
+  }).success, false, "player-visible speech must not expose a memory id");
 
   const requestSchema = ambientReplyJudgmentJsonSchemaForTarget("NPC_Store_Manager");
   const requestProperties = requestSchema.properties as Record<string, Record<string, unknown>>;
@@ -1576,14 +1585,99 @@ test("Korean agent-step validation covers provider-authored administrative quest
     rationale: "접수 기록을 남깁니다.",
     done: true,
   };
-  assert.equal(agentStepProposalSchemaForLocale("ko-KR").safeParse(proposal).success, false);
+  assert.equal(
+    agentStepProposalSchemaForLocale("ko-KR").safeParse(proposal).success,
+    true,
+    "natural Korean may contain occasional Hanja",
+  );
   assert.equal(agentStepProposalSchemaForLocale("en-US").safeParse(proposal).success, true);
   proposal.toolCall.args.openQuestion = {
     status: "open",
-    text: "방문 경위는 무엇인가?",
-    whyLine: "기록의 근거를 다시 확인해야 합니다.",
+    text: "來歷?",
+    whyLine: "根據",
   };
-  assert.equal(agentStepProposalSchemaForLocale("ko-KR").safeParse(proposal).success, true);
+  assert.equal(
+    agentStepProposalSchemaForLocale("ko-KR").safeParse(proposal).success,
+    false,
+    "Hanja without Hangul is not Korean prose",
+  );
+});
+
+test("Korean player-visible fields require Hangul but allow natural mixed content", () => {
+  const base = {
+    suspicionDelta: 0,
+    reportDelta: 0,
+    signals: [],
+    whyLine: "확인했습니다.",
+  };
+  const accepted = [
+    "Mira가 확인했습니다.",
+    "AI 기록을 확인했습니다.",
+    "QR 표식을 확인했습니다.",
+    "기록 2개를 확인했습니다.",
+    "방문자의 來歷을 확인했습니다.",
+  ];
+  for (const whyLine of accepted) {
+    assert.equal(
+      conversationJudgmentSchemaForLocale("ko-KR").safeParse({ ...base, whyLine }).success,
+      true,
+      whyLine,
+    );
+  }
+
+  const rejected = ["Mira checked it.", "來歷確認", "确认来历", "2026", "?!…"];
+  for (const whyLine of rejected) {
+    const parsed = conversationJudgmentSchemaForLocale("ko-KR").safeParse({
+      ...base,
+      whyLine,
+    });
+    assert.equal(parsed.success, false, whyLine);
+    if (!parsed.success) {
+      assert.equal(
+        parsed.error.issues[0]?.message,
+        "player-visible Korean text must contain at least one Hangul code point",
+      );
+      assert.equal(parsed.error.issues[0]?.message.includes(whyLine), false);
+    }
+    assert.equal(
+      conversationJudgmentSchemaForLocale("en-US").safeParse({ ...base, whyLine }).success,
+      true,
+      `non-Korean locale behavior changed for ${whyLine}`,
+    );
+  }
+});
+
+test("stable-id validation preserves ordinary English compounds", () => {
+  const base = {
+    suspicionDelta: 0,
+    reportDelta: 0,
+    signals: [],
+  };
+  const accepted = [
+    "Record-keeping is a run-of-the-mill duty.",
+    "This is event-related, turn-based, contact-free, and session-long work.",
+  ];
+  for (const whyLine of accepted) {
+    assert.equal(
+      conversationJudgmentSchemaForLocale("en-US").safeParse({ ...base, whyLine }).success,
+      true,
+      whyLine,
+    );
+  }
+
+  const rejected = [
+    "sess-fixture-1",
+    "rec-1",
+    "goal:wake-abc-1",
+    "hearing:hearing-fixture-1#0",
+  ];
+  for (const whyLine of rejected) {
+    assert.equal(
+      conversationJudgmentSchemaForLocale("en-US").safeParse({ ...base, whyLine }).success,
+      false,
+      whyLine,
+    );
+  }
 });
 
 test("deterministic fallback keeps a grounded player contact opportunity playable", async () => {
@@ -1747,7 +1841,7 @@ test("provider service returns one live evidence-grounded hearing judgment", asy
 test("an invalid hearing envelope receives one repair before fallback", async () => {
   const invalid = validHearingJudgment();
   invalid.residentAssessments[5].actorId = invalid.residentAssessments[0].actorId;
-  invalid.residentAssessments[0].testimonyLine = "직접 들은 來歷을 확인했습니다.";
+  invalid.residentAssessments[0].testimonyLine = "Direct testimony was unavailable.";
   const textGen = new FakeTextGen([
     { text: JSON.stringify(invalid) },
     { text: JSON.stringify(validHearingJudgment()) },
@@ -1763,10 +1857,7 @@ test("an invalid hearing envelope receives one repair before fallback", async ()
   assert.equal(textGen.requests.length, 2);
   assert.equal(textGen.requests[1].purpose, "repair");
   assert.equal(result.proposal.residentAssessments.length, 6);
-  assert.doesNotMatch(
-    result.proposal.residentAssessments[0].testimonyLine,
-    /[\p{Script=Latin}\p{Script=Han}]/u,
-  );
+  assert.match(result.proposal.residentAssessments[0].testimonyLine, /\p{Script=Hangul}/u);
 });
 
 test("hearing fallback is terminal, preserves stances, and needs four evidenced vouches", async () => {
@@ -1840,7 +1931,9 @@ test("the model judges suspicion live; the rule classifier answers only as fallb
   assert.match(judged.proposal.whyLine, /[가-힣]/);
   assert.match(judgmentTextGen.requests[0].instructions, /0\.\.125 game scale/);
   assert.match(judgmentTextGen.requests[0].instructions, /not tiny 1\.\.5 ratings/);
-  assert.match(judgmentTextGen.requests[0].instructions, /do not mix Latin letters, Chinese characters/);
+  assert.match(judgmentTextGen.requests[0].instructions, /at least one Hangul code point/);
+  assert.match(judgmentTextGen.requests[0].instructions, /AI or QR/);
+  assert.match(judgmentTextGen.requests[0].instructions, /never copy stable ids/i);
 
   const down = new ProviderService({
     profileId: "test/judgment-down",
@@ -1856,7 +1949,20 @@ test("the model judges suspicion live; the rule classifier answers only as fallb
 });
 
 test("the one blocking merged call returns model-owned stance with firsthand grounding", async () => {
-  const textGen = new FakeTextGen([{ text: validMergedTurn }]);
+  const mixedNaturalKoreanTurn = {
+    ...JSON.parse(validMergedTurn),
+    openQuestion: {
+      status: "open",
+      text: "다음 확인 대상은 누구인가요?",
+      whyLine: "Mira의 AI 기록과 2次 확인을 비교해야 합니다.",
+    },
+    suggestedReplies: [
+      { text: "Mira에게 QR 기록 2개를 확인해 달라고 하겠습니다.", intent: "safe/local" },
+      { text: "AI 메모와 來歷을 함께 살펴보겠습니다.", intent: "uncertain/repair" },
+      { text: "3번 창구에서 다시 설명하겠습니다.", intent: "risky/weird" },
+    ],
+  };
+  const textGen = new FakeTextGen([{ text: JSON.stringify(mixedNaturalKoreanTurn) }]);
   const service = new ProviderService({
     profileId: "test/merged-stance",
     textGen,
@@ -1874,6 +1980,10 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
   assert.equal(result.proposal.stance, "vouch");
   assert.equal(result.proposal.meaningfulFirsthand, true);
   assert.equal(textGen.requests.length, 1);
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.proposal.openQuestion?.whyLine, mixedNaturalKoreanTurn.openQuestion.whyLine);
+  assert.deepEqual(result.proposal.suggestedReplies, mixedNaturalKoreanTurn.suggestedReplies);
+  assert.equal(textGen.requests[0].purpose, "conversation_turn");
   assert.equal(textGen.requests[0].schemaName, "npc_merged_conversation_turn");
   assert.match(textGen.requests[0].instructions, /vouch requires it/);
   assert.match(
@@ -1883,6 +1993,52 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
   const input = JSON.parse(textGen.requests[0].input);
   assert.equal(input.stanceBefore, "uncertain");
   assert.equal(input.hasMeaningfulFirsthandConversation, false);
+});
+
+test("player-visible stable ids get one bounded repair even when the prose contains Hangul", async () => {
+  const leakedStableIds = {
+    ...JSON.parse(validMergedTurn),
+    openQuestion: {
+      status: "open",
+      text: "다음 확인 대상은 누구인가요?",
+      whyLine: "NPC_Studio_Manager의 mem-question-1을 확인해야 합니다.",
+    },
+    suggestedReplies: [
+      { text: "Mira에게 다시 묻겠습니다.", intent: "safe/local" },
+      { text: "TS_Studio_ReviewRecords를 확인하겠습니다.", intent: "uncertain/repair" },
+      { text: "아직 판단하지 않겠습니다.", intent: "risky/weird" },
+    ],
+  };
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(leakedStableIds) },
+    { text: validMergedTurn },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/stable-id-repair",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const result = await service.judgeAndProposeConversationTurn({
+    ...judgmentRequest(),
+    objective: "방문 이유를 확인한다.",
+    sceneFacts: ["스튜디오 접수대에서 직접 대화하고 있다."],
+    stanceBefore: "uncertain",
+    hasMeaningfulFirsthandConversation: false,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(textGen.requests.length, 2);
+  assert.equal(textGen.requests[1]?.purpose, "repair");
+  assert.doesNotMatch(
+    JSON.stringify({
+      utterance: result.proposal.utterance,
+      whyLine: result.proposal.whyLine,
+      openQuestion: result.proposal.openQuestion,
+      suggestedReplies: result.proposal.suggestedReplies,
+    }),
+    /NPC_|mem-|TS_/,
+  );
 });
 
 test("agent-step prompts keep visible language Korean and stop successful repetition", async () => {
@@ -1936,7 +2092,7 @@ test("agent-step prompts keep visible language Korean and stop successful repeti
   assert.match(ambientFallback.proposal.utterance ?? "", /[가-힣]/);
   assert.doesNotMatch(
     ambientFallback.proposal.utterance ?? "",
-    /[\p{Script=Latin}\p{Script=Han}]/u,
+    /NPC_|mem-|TS_/,
   );
   const mismatchedPacket = observePacket();
   mismatchedPacket.audibleActorIds = ["player"];
@@ -1953,14 +2109,14 @@ test("agent-step prompts keep visible language Korean and stop successful repeti
   assert.notEqual(exactTargetFallback.proposal.toolCall?.tool, "talk_to");
 });
 
-test("mixed-script player text gets one repair before it reaches the game", async () => {
-  const mixedScriptJudgment = JSON.stringify({
+test("non-Korean player text gets one repair before it reaches the game", async () => {
+  const nonKoreanJudgment = JSON.stringify({
     suspicionDelta: 45,
     reportDelta: 30,
     signals: ["dream_language_leak"],
-    whyLine: "꿈이라는 단어를公然히 사용했습니다.",
+    whyLine: "The player explicitly described another world.",
   });
-  const textGen = new FakeTextGen([{ text: mixedScriptJudgment }, { text: validJudgment }]);
+  const textGen = new FakeTextGen([{ text: nonKoreanJudgment }, { text: validJudgment }]);
   const service = new ProviderService({
     profileId: "test/korean-repair",
     textGen,
@@ -1970,7 +2126,7 @@ test("mixed-script player text gets one repair before it reaches the game", asyn
   assert.equal(result.meta.transport, "live");
   assert.equal(textGen.requests.length, 2);
   assert.equal(textGen.requests[1].purpose, "repair");
-  assert.doesNotMatch(result.proposal.whyLine, /[\p{Script=Latin}\p{Script=Han}]/u);
+  assert.match(result.proposal.whyLine, /\p{Script=Hangul}/u);
 });
 
 test("provider prompts and validation follow a non-Korean run locale without another adapter", async () => {
@@ -1998,7 +2154,8 @@ test("provider prompts and validation follow a non-Korean run locale without ano
   assert.equal(textGen.requests.length, 1);
   assert.match(textGen.requests[0].instructions, /run locale is en-US/);
   assert.match(textGen.requests[0].instructions, /natural American English/);
-  assert.doesNotMatch(textGen.requests[0].instructions, /do not mix Latin letters/);
+  assert.match(textGen.requests[0].instructions, /never copy stable ids/i);
+  assert.doesNotMatch(textGen.requests[0].instructions, /Hangul code point/);
   assert.equal(JSON.parse(textGen.requests[0].input).locale, "en-US");
 });
 

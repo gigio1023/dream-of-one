@@ -199,11 +199,12 @@ function localeOutputInstructions(locale: string, fields: string): string[] {
   const supportedLocale = requireSupportedGameplayLocale(locale);
   const instructions = [
     `The immutable run locale is ${supportedLocale}. Write ${fields} in ${providerLanguageName(supportedLocale)}.`,
-    "Keep stable ids, intent labels, tool names, and tool argument keys unchanged.",
+    "Keep stable ids, intent labels, tool names, and tool argument keys unchanged in machine-readable fields; never copy stable ids into player-visible text.",
   ];
   if (supportedLocaleEntry(supportedLocale).presentationId === "ko") {
     instructions.push(
-      "In player-visible text, do not mix Latin letters, Chinese characters, or other scripts into the Korean wording.",
+      "Write natural Korean prose in every player-visible text field, and include at least one Hangul code point in each nonempty field.",
+      "Latin-script names, established acronyms such as AI or QR, numerals, and occasional Hanja are allowed when natural, but they cannot replace Korean prose.",
     );
   }
   return instructions;

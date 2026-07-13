@@ -2672,6 +2672,16 @@ func _check_player_contact(label: String, instance: Node) -> void:
 	)
 	unready_contact_actor["playerConversationReady"] = false
 	instance.call("_update_run_actor", unready_contact_actor)
+	var playtest_surface := instance.get_node_or_null("AgentPlaytestSurface")
+	if playtest_surface == null or not playtest_surface.has_method("_target_snapshot"):
+		_failures.append("%s has no semantic target snapshot for contact readiness" % label)
+	else:
+		var unready_target_snapshot: Dictionary = playtest_surface.call(
+			"_target_snapshot",
+			contact_actor
+		)
+		if bool(unready_target_snapshot.get("interactable", true)):
+			_failures.append("%s semantic target exposed an unready contact as interactable" % label)
 	hud.close_log()
 	instance.call("_try_open_pending_contact")
 	var deferred_for_opening := hud.presentation_snapshot()
@@ -2696,6 +2706,23 @@ func _check_player_contact(label: String, instance: Node) -> void:
 	instance.call("_update_run_actor", ready_contact_actor)
 	instance.call("_try_open_pending_contact")
 	await process_frame
+	if playtest_surface != null and playtest_surface.has_method("_target_snapshot"):
+		var ready_target_snapshot: Dictionary = playtest_surface.call(
+			"_target_snapshot",
+			contact_actor
+		)
+		var semantic_position: Dictionary = ready_target_snapshot.get("worldPosition", {})
+		var interaction_aim := contact_actor.get_interaction_aim_position()
+		if (
+			not bool(ready_target_snapshot.get("interactable", false))
+			or not is_equal_approx(float(semantic_position.get("x", INF)), interaction_aim.x)
+			or not is_equal_approx(float(semantic_position.get("y", INF)), interaction_aim.y)
+			or not is_equal_approx(float(semantic_position.get("z", INF)), interaction_aim.z)
+		):
+			_failures.append(
+				"%s playtest target did not expose current readiness at the canonical aim point"
+				% label
+			)
 	var waiting_for_player := hud.presentation_snapshot()
 	var ready_cue := hud.contact_cue_snapshot()
 	if (
@@ -2774,7 +2801,14 @@ func _check_player_contact(label: String, instance: Node) -> void:
 		_failures.append("%s ordinary contact did not become explicitly actionable" % label)
 		paused = false
 		return
-	contact_actor.interact(player)
+	if not await _interact_with_npc_through_player(
+		label,
+		player,
+		contact_actor,
+		"ordinary contact"
+	):
+		paused = false
+		return
 	var opened := false
 	for _frame in range(180):
 		await process_frame
@@ -3506,7 +3540,15 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 				)
 
 	player.global_position = receptionist.global_position + Vector3(0.0, 0.0, 1.5)
-	receptionist.interact(player)
+	player.velocity = Vector3.ZERO
+	if not await _interact_with_npc_through_player(
+		label,
+		player,
+		receptionist,
+		"normal conversation"
+	):
+		paused = false
+		return
 	var opened := false
 	for _frame in range(120):
 		await process_frame
@@ -4627,6 +4669,28 @@ func _active_movement_actor_ids(snapshot: Dictionary) -> Dictionary:
 		if movement_value is Dictionary:
 			actor_ids[str((movement_value as Dictionary).get("actorId", ""))] = true
 	return actor_ids
+
+
+func _interact_with_npc_through_player(
+	label: String,
+	player: CharacterBody3D,
+	actor: NPC3D,
+	context: String
+) -> bool:
+	player.face_position(actor.get_interaction_aim_position())
+	for _frame in range(3):
+		await physics_frame
+	var focused: Node = player.focused_interactable()
+	if focused != actor:
+		_failures.append(
+			"%s %s did not acquire the NPC through Player3D focus: %s"
+			% [label, context, str(focused)]
+		)
+		return false
+	if not player.interact_focused():
+		_failures.append("%s %s did not accept Player3D interact" % [label, context])
+		return false
+	return true
 
 
 func _check_town_dressing_density(label: String, town: Node) -> void:

@@ -384,8 +384,11 @@ the dev machine with all six NPC loops live.
   observer visibility and may add factual memory.
 - **Interaction**: forward ray picks the nearest interactable (NPC, prop,
   record surface); `interact` opens conversation, picks up/places a prop, or
-  inspects. Captured left-click throws only while a prop is held and otherwise
-  retains its normal mouse-look role.
+  inspects. If that exact ray has no target, first acquisition may assist only
+  a currently enabled, visible NPC inside 2.5 m and a narrow camera-relative
+  cone; this never creates provider preload intent, and exact targets and held
+  props keep priority. Captured left-click throws only while a prop is held and
+  otherwise retains its normal mouse-look role.
 - **Contextual onboarding**: one presentation-only overlay introduces
   movement/jump, the outsider premise and Studio-first purpose, NPC talk,
   dialogue input, and prop controls in that order. It observes progress and

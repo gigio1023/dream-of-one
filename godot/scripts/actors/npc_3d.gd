@@ -59,6 +59,7 @@ const DESTINATION_CLEARANCE_M := 0.9
 const LOOK_HOLD_SECONDS := 0.75
 const MAX_INFERRED_DYNAMIC_YIELDS := 1
 const TURN_SPEED_RADIANS_PER_SECOND := deg_to_rad(240.0)
+const INTERACTION_AIM_HEIGHT_M := 1.35
 
 @export var actor_id: StringName
 @export var label_key: StringName
@@ -408,6 +409,10 @@ func policy_state() -> StringName:
 
 func get_interaction_label_key() -> StringName:
 	return &"hud.interaction.npc"
+
+
+func get_interaction_aim_position() -> Vector3:
+	return global_position + Vector3.UP * INTERACTION_AIM_HEIGHT_M
 
 
 func get_interaction_target_key() -> StringName:

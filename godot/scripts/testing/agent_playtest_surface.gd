@@ -797,6 +797,9 @@ func _target_snapshot(node: Node) -> Dictionary:
 	var id_state := _target_id(node)
 	var title_state := _target_title(node)
 	var kind := _target_kind(node)
+	var interactable := node.is_in_group(&"interactables") and node.has_method(&"interact")
+	if interactable and node.has_method(&"is_interaction_enabled"):
+		interactable = bool(node.call(&"is_interaction_enabled"))
 	var result := {
 		"available": bool(id_state["available"]),
 		"reason": str(id_state["reason"]),
@@ -806,10 +809,15 @@ func _target_snapshot(node: Node) -> Dictionary:
 		"titleAvailable": bool(title_state["available"]),
 		"kind": kind,
 		"visible": node is Node3D and (node as Node3D).is_visible_in_tree(),
-		"interactable": node.is_in_group(&"interactables") and node.has_method(&"interact"),
+		"interactable": interactable,
 	}
 	if node is Node3D:
-		result["worldPosition"] = _vector3_json((node as Node3D).global_position)
+		var world_position := (node as Node3D).global_position
+		if node.has_method(&"get_interaction_aim_position"):
+			var aim_value: Variant = node.call(&"get_interaction_aim_position")
+			if aim_value is Vector3:
+				world_position = aim_value
+		result["worldPosition"] = _vector3_json(world_position)
 	return result
 
 

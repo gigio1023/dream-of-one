@@ -16,6 +16,9 @@ const MAX_PITCH_RADIANS := deg_to_rad(85.0)
 const NPC_FOCUS_GRACE_MSEC := 1500
 const NPC_FOCUS_GRACE_DISTANCE_M := 3.25
 const NPC_FOCUS_GRACE_MIN_FORWARD_DOT := 0.8660254
+const NPC_AIM_ASSIST_DISTANCE_M := 2.5
+const NPC_AIM_ASSIST_MAX_HORIZONTAL_RADIANS := deg_to_rad(10.0)
+const NPC_AIM_ASSIST_MAX_VERTICAL_RADIANS := deg_to_rad(25.0)
 
 @export_range(0.5, 8.0, 0.1, "or_greater") var walk_speed := 4.0
 @export_range(1.0, 12.0, 0.1, "or_greater") var jump_velocity := 4.5
@@ -125,7 +128,12 @@ func _physics_process(delta: float) -> void:
 	_interaction_ray.force_raycast_update()
 	_set_preload_intent_target(_aimed_npc_actor() if _control_enabled else null)
 	var held_prop := _prop_interactor.held_prop()
-	_set_focused_target(held_prop if held_prop != null else _interactable_collider())
+	var focus_target: Node = held_prop
+	if focus_target == null and _control_enabled:
+		focus_target = _interactable_collider()
+	if focus_target == null and _control_enabled:
+		focus_target = _ready_npc_aim_assist()
+	_set_focused_target(focus_target)
 
 
 func _apply_mouse_look(event: InputEventMouseMotion) -> void:
@@ -177,6 +185,76 @@ func _aimed_npc_actor() -> Node:
 			return candidate
 		candidate = candidate.get_parent()
 	return null
+
+
+func _ready_npc_aim_assist() -> Node:
+	var camera_origin := _camera.global_position
+	var camera_forward := -_camera.global_transform.basis.z.normalized()
+	var camera_right := _camera.global_transform.basis.x.normalized()
+	var camera_up := _camera.global_transform.basis.y.normalized()
+
+	var best_target: Node3D = null
+	var best_has_contact := false
+	var best_angular_error := INF
+	var best_distance := INF
+	for candidate_value in get_tree().get_nodes_in_group(&"npc_actors"):
+		if not candidate_value is Node3D:
+			continue
+		var candidate := candidate_value as Node3D
+		if (
+			not candidate.is_visible_in_tree()
+			or not candidate.has_method("get_interaction_label_key")
+			or not candidate.has_method("interact")
+			or not candidate.has_method("is_interaction_enabled")
+			or not bool(candidate.call("is_interaction_enabled"))
+		):
+			continue
+		var aim_position := _npc_interaction_aim_position(candidate)
+		var to_target := aim_position - camera_origin
+		var distance := to_target.length()
+		if distance <= 0.001 or distance > NPC_AIM_ASSIST_DISTANCE_M:
+			continue
+		var target_direction := to_target / distance
+		var forward_amount := target_direction.dot(camera_forward)
+		if forward_amount <= 0.0:
+			continue
+		var right_amount := target_direction.dot(camera_right)
+		var up_amount := target_direction.dot(camera_up)
+		if (
+			absf(atan2(right_amount, forward_amount))
+			> NPC_AIM_ASSIST_MAX_HORIZONTAL_RADIANS
+		):
+			continue
+		if (
+			absf(atan2(up_amount, Vector2(forward_amount, right_amount).length()))
+			> NPC_AIM_ASSIST_MAX_VERTICAL_RADIANS
+		):
+			continue
+		if not _npc_has_interaction_line_of_sight(candidate, aim_position):
+			continue
+
+		var has_contact := (
+			candidate.has_method("has_player_contact")
+			and bool(candidate.call("has_player_contact"))
+		)
+		var angular_error := acos(clampf(camera_forward.dot(target_direction), -1.0, 1.0))
+		var is_better := best_target == null
+		if not is_better and has_contact != best_has_contact:
+			is_better = has_contact
+		elif not is_better and is_equal_approx(angular_error, best_angular_error):
+			if is_equal_approx(distance, best_distance):
+				is_better = str(candidate.get_path()) < str(best_target.get_path())
+			else:
+				is_better = distance < best_distance
+		elif not is_better:
+			is_better = angular_error < best_angular_error
+		if not is_better:
+			continue
+		best_target = candidate
+		best_has_contact = has_contact
+		best_angular_error = angular_error
+		best_distance = distance
+	return best_target
 
 
 func _find_interactable(start: Node) -> Node:
@@ -338,13 +416,25 @@ func _is_npc_interactable(target: Node) -> bool:
 
 
 func _recent_npc_target_is_visible() -> bool:
-	var target_position := _recent_npc_target.global_position + Vector3.UP
+	var target_position := _npc_interaction_aim_position(_recent_npc_target)
 	var to_target := target_position - _camera.global_position
 	if to_target.is_zero_approx():
 		return false
 	var camera_forward := -_camera.global_transform.basis.z.normalized()
 	if camera_forward.dot(to_target.normalized()) < NPC_FOCUS_GRACE_MIN_FORWARD_DOT:
 		return false
+	return _npc_has_interaction_line_of_sight(_recent_npc_target, target_position)
+
+
+func _npc_interaction_aim_position(target: Node3D) -> Vector3:
+	if target.has_method("get_interaction_aim_position"):
+		var value: Variant = target.call("get_interaction_aim_position")
+		if value is Vector3:
+			return value
+	return target.global_position + Vector3.UP
+
+
+func _npc_has_interaction_line_of_sight(target: Node3D, target_position: Vector3) -> bool:
 	var query := PhysicsRayQueryParameters3D.create(
 		_camera.global_position,
 		target_position,
@@ -358,7 +448,7 @@ func _recent_npc_target_is_visible() -> bool:
 		return false
 	var candidate := collider as Node
 	while candidate != null:
-		if candidate == _recent_npc_target:
+		if candidate == target:
 			return true
 		candidate = candidate.get_parent()
 	return false

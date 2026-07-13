@@ -3158,6 +3158,7 @@ func _reconcile_scheduler_movements(scheduler: Dictionary) -> void:
 			pending["activity"] = str(current_block.get("activity", ""))
 			authoritative_pending_by_actor[actor_id] = str(pending.get("movementId", ""))
 			authoritative_pending_movements.append(pending)
+	_sync_meeting_ambient_policy_holds(scheduler)
 	# A modal or contact may have delayed a movement that is no longer current.
 	# Never replay it merely because presentation became available again.
 	for index in range(_queued_movement_deltas.size() - 1, -1, -1):
@@ -3193,6 +3194,26 @@ func _reconcile_scheduler_movements(scheduler: Dictionary) -> void:
 			!= str(blocked_movement.get("movementId", ""))
 		):
 			_blocked_movements.erase(blocked_actor_id)
+
+
+func _sync_meeting_ambient_policy_holds(scheduler: Dictionary) -> void:
+	var held_by_actor: Dictionary = {}
+	for actor_value in _array_or_empty(scheduler.get("actors")):
+		if not actor_value is Dictionary:
+			continue
+		var scheduler_actor := actor_value as Dictionary
+		var actor_id := str(scheduler_actor.get("actorId", ""))
+		var current_block := _dictionary_or_empty(scheduler_actor.get("currentBlock"))
+		var target_anchor_ref := str(current_block.get("targetId", ""))
+		held_by_actor[actor_id] = (
+			str(current_block.get("targetKind", "")) == "anchor"
+			and _town.is_meeting_participant_anchor(actor_id, target_anchor_ref)
+		)
+	for actor_value in get_tree().get_nodes_in_group(&"npc_actors"):
+		if not actor_value is NPC3D or not _town.is_ancestor_of(actor_value as NPC3D):
+			continue
+		var actor := actor_value as NPC3D
+		actor.set_ambient_policy_hold(bool(held_by_actor.get(str(actor.actor_id), false)))
 
 
 func _on_npc_movement_arrived(

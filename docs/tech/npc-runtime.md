@@ -307,7 +307,13 @@ and waypoint chooses a 12–28 world-second dwell. This staggers ordinary patrol
 without randomness, persistence, or a provider call. `nextRouteMoveAtSeconds`,
 automatic policy movement, and provider-proposed movement all honor the same
 exact due time, while a schedule block transition may supersede an in-flight
-route movement. Meeting and hearing blocks keep their exact authored anchors.
+route movement. If player contact holds a resident past that due time, the
+scheduler issues the overdue route once at the first unheld advance rather than
+leaving the actor locally frozen. Cyclic route selection also skips semantic
+anchors that share the confirmed anchor's physical position and preserves the
+first physically distinct point's semantic index; an all-coincident route emits
+no meaningless movement. Meeting and hearing blocks keep their exact authored
+anchors.
 
 Meeting windows retain one semantic center but map every participant to a
 distinct physical standing-slot anchor. A `meeting_ready` wake becomes pending

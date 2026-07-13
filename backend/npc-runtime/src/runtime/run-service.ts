@@ -63,12 +63,12 @@ import {
 import {
   advanceRunScheduler,
   alignActorForPlayerConversation,
+  canIssueActorGoalMovement,
   claimRunWake,
   createRunScheduler,
   emitRunWake,
   finishRunWake,
   issueActorGoalMovement,
-  ROUTE_CADENCE_SECONDS,
   snapshotRunScheduler,
   type RunSchedulerRuntime,
 } from "./run-scheduler.js";
@@ -3725,22 +3725,13 @@ export class RunService {
   }
 
   private schedulePermitsAnchor(run: RunState, actorId: string, anchorRef: string): boolean {
-    const actor = this.layout.actors.find(candidate => candidate.actorId === actorId);
-    const block = actor?.scheduleBlocks.find(
-      candidate => candidate.startSeconds <= run.elapsedSeconds && run.elapsedSeconds < candidate.endSeconds,
-    );
-    if (!block) return false;
-    if (block.target.kind === "anchor") return block.target.id === anchorRef;
-    const schedulerActor = run.scheduler.actors.get(actorId);
-    const points = this.layout.routes.find(route => route.routeId === block.target.id)?.points;
-    if (
-      !schedulerActor ||
-      !points ||
-      schedulerActor.routePointIndex === null ||
-      schedulerActor.routePointArrivedAtSeconds === null ||
-      run.elapsedSeconds < schedulerActor.routePointArrivedAtSeconds + ROUTE_CADENCE_SECONDS
-    ) return false;
-    return points[(schedulerActor.routePointIndex + 1) % points.length] === anchorRef;
+    return canIssueActorGoalMovement({
+      layout: this.layout,
+      runtime: run.scheduler,
+      actorId,
+      targetAnchorRef: anchorRef,
+      elapsedSeconds: run.elapsedSeconds,
+    });
   }
 
   private goalActionStillValid(

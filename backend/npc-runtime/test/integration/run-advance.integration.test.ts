@@ -3,6 +3,8 @@ import { test } from "bun:test";
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
 import { loadRunLayout } from "../../src/runtime/run-layout.js";
 import {
+  advanceRunScheduler,
+  canIssueActorGoalMovement,
   createRunScheduler,
   issueActorGoalMovement,
   ROUTE_DWELL_MAX_SECONDS,
@@ -137,7 +139,20 @@ test("all six residents receive staggered early policy movement without provider
     policyMovements.map(movement => movement.issuedAtSeconds).sort((first, next) => first - next),
     initialDueTimes.filter((value): value is number => value !== null).sort((first, next) => first - next),
   );
-  assert.ok(policyMovements.every(movement => movement.routePointIndex === 1));
+  assert.deepEqual(
+    policyMovements
+      .map(movement => [movement.actorId, movement.routePointIndex] as const)
+      .sort(([first], [secondActor]) => first.localeCompare(secondActor)),
+    [
+      ["NPC_Office_Worker", 1],
+      ["NPC_Park_Caretaker", 1],
+      ["NPC_Roaming_Liaison", 1],
+      ["NPC_Station_Officer", 1],
+      ["NPC_Studio_Manager", 2],
+      ["NPC_Studio_Receptionist", 1],
+    ],
+    "the manager skips its co-located desk alias without changing the stable due time",
+  );
   assert.equal(providerCalls, 0, "conventional schedule movement must never call the provider");
 });
 
@@ -220,6 +235,154 @@ test("route progress waits for exact arrival and exposes the next per-point due 
   );
 });
 
+test("a route move held past its due time issues once when the hold clears", () => {
+  const layout = loadRunLayout();
+  const runtime = createRunScheduler(layout);
+  const actorId = "NPC_Roaming_Liaison";
+  const dueAt = snapshotRunScheduler(layout, runtime, 0).actors.find(
+    actor => actor.actorId === actorId,
+  )?.nextRouteMoveAtSeconds;
+  assert.equal(dueAt, 12);
+
+  const beforeDue = advanceRunScheduler({
+    runId: "run-held-route",
+    layout,
+    runtime,
+    fromSeconds: 0,
+    toSeconds: 11,
+    arrivals: [],
+    observedWorldRevision: 0,
+    heldActorIds: new Set([actorId]),
+  });
+  assert.ok(beforeDue.movementDeltas.every(movement => movement.actorId !== actorId));
+  const heldPastDue = advanceRunScheduler({
+    runId: "run-held-route",
+    layout,
+    runtime,
+    fromSeconds: 11,
+    toSeconds: 20,
+    arrivals: [],
+    observedWorldRevision: 1,
+    heldActorIds: new Set([actorId]),
+  });
+  assert.ok(heldPastDue.movementDeltas.every(movement => movement.actorId !== actorId));
+
+  const released = advanceRunScheduler({
+    runId: "run-held-route",
+    layout,
+    runtime,
+    fromSeconds: 20,
+    toSeconds: 21,
+    arrivals: [],
+    observedWorldRevision: 2,
+  });
+  const releasedMovements = released.movementDeltas.filter(
+    movement => movement.actorId === actorId,
+  );
+  assert.equal(releasedMovements.length, 1);
+  assert.equal(releasedMovements[0]?.issuedAtSeconds, 21);
+
+  const whilePending = advanceRunScheduler({
+    runId: "run-held-route",
+    layout,
+    runtime,
+    fromSeconds: 21,
+    toSeconds: 22,
+    arrivals: [],
+    observedWorldRevision: 3,
+  });
+  assert.ok(whilePending.movementDeltas.every(movement => movement.actorId !== actorId));
+});
+
+test("automatic routes skip adjacent aliases across the cyclic boundary", () => {
+  const layout = loadRunLayout();
+  const actorId = "NPC_Roaming_Liaison";
+  const route = layout.routes.find(candidate => candidate.routeId === "TownLiaisonCircuit");
+  assert.ok(route);
+  route.points = [
+    "Park.liaison_spawn",
+    "Park.studio_approach",
+    "Studio.waiting_seats",
+    "Park.office_approach",
+  ];
+  const aliasPosition = layout.anchorPositions["Park.liaison_spawn"];
+  assert.ok(aliasPosition);
+  layout.anchorPositions["Park.studio_approach"] = aliasPosition;
+  layout.anchorPositions["Park.office_approach"] = aliasPosition;
+
+  const runtime = createRunScheduler(layout);
+  const actorState = runtime.actors.get(actorId);
+  assert.ok(actorState);
+  actorState.confirmedAnchorRef = "Park.office_approach";
+  actorState.routePointIndex = 3;
+  actorState.routePointArrivedAtSeconds = 0;
+  const dueAt = routePointDwellSeconds(actorId, route.routeId, 3);
+
+  const due = advanceRunScheduler({
+    runId: "run-route-alias",
+    layout,
+    runtime,
+    fromSeconds: 0,
+    toSeconds: dueAt,
+    arrivals: [],
+    observedWorldRevision: 0,
+  });
+  const movement = due.movementDeltas.find(candidate => candidate.actorId === actorId);
+  assert.equal(movement?.fromAnchorRef, "Park.office_approach");
+  assert.equal(movement?.targetAnchorRef, "Studio.waiting_seats");
+  assert.equal(movement?.routePointIndex, 2);
+  assert.equal(movement?.issuedAtSeconds, dueAt);
+  assert.notDeepEqual(
+    layout.anchorPositions[movement?.fromAnchorRef ?? ""],
+    layout.anchorPositions[movement?.targetAnchorRef ?? ""],
+  );
+
+  const whilePending = advanceRunScheduler({
+    runId: "run-route-alias",
+    layout,
+    runtime,
+    fromSeconds: dueAt,
+    toSeconds: dueAt + 1,
+    arrivals: [],
+    observedWorldRevision: 1,
+  });
+  assert.ok(whilePending.movementDeltas.every(candidate => candidate.actorId !== actorId));
+});
+
+test("an all-alias route stays bounded and emits no no-op movement", () => {
+  const layout = loadRunLayout();
+  const actorId = "NPC_Roaming_Liaison";
+  const route = layout.routes.find(candidate => candidate.routeId === "TownLiaisonCircuit");
+  assert.ok(route);
+  const aliasPosition = layout.anchorPositions["Park.liaison_spawn"];
+  assert.ok(aliasPosition);
+  for (const anchorRef of route.points) layout.anchorPositions[anchorRef] = aliasPosition;
+  const runtime = createRunScheduler(layout);
+  const dueAt = routePointDwellSeconds(actorId, route.routeId, 0);
+
+  const due = advanceRunScheduler({
+    runId: "run-all-alias",
+    layout,
+    runtime,
+    fromSeconds: 0,
+    toSeconds: dueAt,
+    arrivals: [],
+    observedWorldRevision: 0,
+  });
+  assert.ok(due.movementDeltas.every(candidate => candidate.actorId !== actorId));
+  const later = advanceRunScheduler({
+    runId: "run-all-alias",
+    layout,
+    runtime,
+    fromSeconds: dueAt,
+    toSeconds: dueAt + 1,
+    arrivals: [],
+    observedWorldRevision: 1,
+  });
+  assert.ok(later.movementDeltas.every(candidate => candidate.actorId !== actorId));
+  assert.equal(runtime.actors.get(actorId)?.pendingMovement, null);
+});
+
 test("provider-selected route movement observes the same deterministic due time", () => {
   const layout = loadRunLayout();
   const runtime = createRunScheduler(layout);
@@ -238,6 +401,51 @@ test("provider-selected route movement observes the same deterministic due time"
   const dueMovement = issueActorGoalMovement({ ...options, elapsedSeconds: 12 });
   assert.equal(dueMovement?.issuedAtSeconds, liaison.nextRouteMoveAtSeconds);
   assert.equal(dueMovement?.routePointIndex, 1);
+});
+
+test("provider-selected route movement skips a co-located semantic point", () => {
+  const layout = loadRunLayout();
+  const runtime = createRunScheduler(layout);
+  const actorId = "NPC_Studio_Manager";
+  const initial = snapshotRunScheduler(layout, runtime, 0);
+  const manager = initial.actors.find(actor => actor.actorId === actorId);
+  assert.ok(manager);
+  const dueAt = manager.nextRouteMoveAtSeconds;
+  assert.notEqual(dueAt, null);
+  if (dueAt === null) throw new Error("manager route due time missing");
+
+  assert.equal(canIssueActorGoalMovement({
+    layout,
+    runtime,
+    actorId,
+    targetAnchorRef: "Studio.manager_desk",
+    elapsedSeconds: dueAt,
+  }), false, "a semantic alias at the confirmed physical point is not offered");
+  assert.equal(canIssueActorGoalMovement({
+    layout,
+    runtime,
+    actorId,
+    targetAnchorRef: "Studio.review_records",
+    elapsedSeconds: dueAt - 1,
+  }), false, "the per-waypoint dwell is authoritative");
+  assert.equal(canIssueActorGoalMovement({
+    layout,
+    runtime,
+    actorId,
+    targetAnchorRef: "Studio.review_records",
+    elapsedSeconds: dueAt,
+  }), true);
+
+  const movement = issueActorGoalMovement({
+    runId: "run-goal-alias",
+    layout,
+    runtime,
+    actorId,
+    targetAnchorRef: "Studio.review_records",
+    elapsedSeconds: dueAt,
+  });
+  assert.equal(movement?.targetAnchorRef, "Studio.review_records");
+  assert.equal(movement?.routePointIndex, 2);
 });
 
 test("meeting wakes require both participant slots after the schedule boundary", async () => {

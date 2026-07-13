@@ -426,12 +426,20 @@ the dev machine with all six NPC loops live.
   windows read at a glance (two residents talking look like two residents
   talking from across the park). Each pair approaches distinct physical
   standing slots around one semantic meeting center so solid capsules cannot
-  deadlock a meeting-ready condition. Outside an event or meeting, every
+  deadlock a meeting-ready condition. A resident whose current schedule block
+  owns one of those participant slots keeps local ambient movement held from
+  the authored lead-in through the meeting; schedule travel and player contact
+  still preempt that hold. This prevents the client from drifting away from a
+  slot the runtime has already confirmed. Outside an event or meeting, every
   resident uses a stable per-actor random seed to choose small navmesh points
   within 1.8 m of its current local center, with 1.5–3.75 second staggered
   dwells. This ambient wander is ordinary game AI, not an LLM decision or
-  provider call. Runtime movement and player contact safely preempt it; modal
-  conversation pauses it. RVO priorities, progress sampling, a brief yield,
+  provider call. The locomotion priority is modal pause, player contact,
+  authoritative schedule travel, meeting-slot hold, then ambient presentation.
+  The model may propose only offered semantic movement tools; it never chooses
+  coordinates, velocity, paths, avoidance, arrival truth, or recovery. Runtime
+  movement and player contact safely preempt local wander; modal conversation
+  pauses every policy timer. RVO priorities, progress sampling, a brief yield,
   and at most two replans handle genuine static blockage. A player/NPC body may
   still physically stall a resident until it moves, but repeated dynamic-body
   yields preserve the authoritative command without exhausting that static

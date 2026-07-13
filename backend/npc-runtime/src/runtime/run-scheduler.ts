@@ -120,6 +120,72 @@ function samePosition(layout: RunLayout, firstRef: string, secondRef: string): b
   );
 }
 
+function nextPhysicallyDistinctRoutePoint(
+  layout: RunLayout,
+  points: readonly string[],
+  currentIndex: number,
+  confirmedAnchorRef: string,
+): { anchorRef: string; index: number } | null {
+  for (let offset = 1; offset <= points.length; offset += 1) {
+    const index = (currentIndex + offset) % points.length;
+    const anchorRef = points[index];
+    if (anchorRef && !samePosition(layout, confirmedAnchorRef, anchorRef)) {
+      return { anchorRef, index };
+    }
+  }
+  return null;
+}
+
+interface ActorGoalMovementOpportunity {
+  actor: RunLayoutActor;
+  state: RunSchedulerActorState;
+  block: RunScheduleBlock;
+  routePointIndex: number | null;
+}
+
+function actorGoalMovementOpportunity(options: {
+  layout: RunLayout;
+  runtime: RunSchedulerRuntime;
+  actorId: string;
+  targetAnchorRef: string;
+  elapsedSeconds: number;
+}): ActorGoalMovementOpportunity | null {
+  const { layout, runtime, actorId, targetAnchorRef, elapsedSeconds } = options;
+  const actor = layout.actors.find(candidate => candidate.actorId === actorId);
+  if (!actor) return null;
+  const state = stateFor(runtime, actorId);
+  const block = blockAt(actor, elapsedSeconds);
+  if (!block || state.pendingMovement || state.confirmedAnchorRef === targetAnchorRef) return null;
+
+  if (block.target.kind === "anchor") {
+    return block.target.id === targetAnchorRef
+      ? { actor, state, block, routePointIndex: null }
+      : null;
+  }
+
+  const dueAt = routeMoveDueAtSeconds(actor, state, block);
+  if (dueAt === null || elapsedSeconds < dueAt || state.routePointIndex === null) return null;
+  const nextPoint = nextPhysicallyDistinctRoutePoint(
+    layout,
+    routeById(layout, block.target.id).points,
+    state.routePointIndex,
+    state.confirmedAnchorRef,
+  );
+  if (!nextPoint || nextPoint.anchorRef !== targetAnchorRef) return null;
+  return { actor, state, block, routePointIndex: nextPoint.index };
+}
+
+/** True only while the exact schedule-owned movement can be issued now. */
+export function canIssueActorGoalMovement(options: {
+  layout: RunLayout;
+  runtime: RunSchedulerRuntime;
+  actorId: string;
+  targetAnchorRef: string;
+  elapsedSeconds: number;
+}): boolean {
+  return actorGoalMovementOpportunity(options) !== null;
+}
+
 function rememberSuperseded(state: RunSchedulerActorState, movementId: string): void {
   state.supersededMovementIds.add(movementId);
   while (state.supersededMovementIds.size > MAX_SUPERSEDED_MOVEMENTS) {
@@ -671,21 +737,25 @@ export function advanceRunScheduler(options: {
     }
     const dueAt = routeMoveDueAtSeconds(actor, state, block);
     if (dueAt === null) continue;
-    if (!(fromSeconds < dueAt && dueAt <= toSeconds)) continue;
+    if (dueAt > toSeconds) continue;
     const points = routeById(layout, block.target.id).points;
     if (points.length === 0) continue;
-    const nextIndex = (state.routePointIndex + 1) % points.length;
-    const targetAnchorRef = points[nextIndex];
-    if (!targetAnchorRef) continue;
+    const nextPoint = nextPhysicallyDistinctRoutePoint(
+      layout,
+      points,
+      state.routePointIndex,
+      state.confirmedAnchorRef,
+    );
+    if (!nextPoint) continue;
     issueMovement({
       runId,
       runtime,
       actor,
       state,
       block,
-      targetAnchorRef,
-      routePointIndex: nextIndex,
-      issuedAtSeconds: dueAt,
+      targetAnchorRef: nextPoint.anchorRef,
+      routePointIndex: nextPoint.index,
+      issuedAtSeconds: dueAt <= fromSeconds ? toSeconds : dueAt,
       movementDeltas,
     });
   }
@@ -745,34 +815,24 @@ export function issueActorGoalMovement(options: {
   elapsedSeconds: number;
 }): RunMovementDelta | null {
   const { runId, layout, runtime, actorId, targetAnchorRef, elapsedSeconds } = options;
-  const actor = layout.actors.find(candidate => candidate.actorId === actorId);
-  if (!actor) return null;
-  const state = stateFor(runtime, actorId);
-  const block = blockAt(actor, elapsedSeconds);
-  if (!block || state.pendingMovement) return null;
-
-  let routePointIndex: number | null = null;
-  if (block.target.kind === "anchor") {
-    if (block.target.id !== targetAnchorRef) return null;
-  } else {
-    const points = routeById(layout, block.target.id).points;
-    const dueAt = routeMoveDueAtSeconds(actor, state, block);
-    const currentIndex = state.routePointIndex;
-    if (dueAt === null || currentIndex === null || elapsedSeconds < dueAt) return null;
-    routePointIndex = (currentIndex + 1) % points.length;
-    if (points[routePointIndex] !== targetAnchorRef) return null;
-  }
-  if (state.confirmedAnchorRef === targetAnchorRef) return null;
+  const opportunity = actorGoalMovementOpportunity({
+    layout,
+    runtime,
+    actorId,
+    targetAnchorRef,
+    elapsedSeconds,
+  });
+  if (!opportunity) return null;
 
   const movementDeltas: RunMovementDelta[] = [];
   issueMovement({
     runId,
     runtime,
-    actor,
-    state,
-    block,
+    actor: opportunity.actor,
+    state: opportunity.state,
+    block: opportunity.block,
     targetAnchorRef,
-    routePointIndex,
+    routePointIndex: opportunity.routePointIndex,
     issuedAtSeconds: elapsedSeconds,
     movementDeltas,
   });

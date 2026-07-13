@@ -59,6 +59,26 @@ func layout_snapshot() -> Dictionary:
 	return _layout.duplicate(true)
 
 
+func is_meeting_participant_anchor(actor_id: String, anchor_ref: String) -> bool:
+	if actor_id.is_empty() or anchor_ref.is_empty():
+		return false
+	var schedule_value: Variant = _layout.get("schedule", {})
+	if not schedule_value is Dictionary:
+		return false
+	for window_value in (schedule_value as Dictionary).get("meeting_windows", []):
+		if not window_value is Dictionary:
+			continue
+		var participant_refs_value: Variant = (
+			(window_value as Dictionary).get("participant_anchor_refs", {})
+		)
+		if (
+			participant_refs_value is Dictionary
+			and str((participant_refs_value as Dictionary).get(actor_id, "")) == anchor_ref
+		):
+			return true
+	return false
+
+
 func text_surface_snapshot() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for surface_value in _layout.get("text_surfaces", []):

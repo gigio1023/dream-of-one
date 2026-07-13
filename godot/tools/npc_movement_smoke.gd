@@ -44,6 +44,7 @@ func _run() -> void:
 		return
 
 	await _check_ambient_wander(actors)
+	await _check_ambient_policy_hold(actors["NPC_Park_Caretaker"] as NPC3D)
 	await _check_modal_pause_resume(town, actors["NPC_Roaming_Liaison"] as NPC3D)
 	_stop_all(actors)
 	await physics_frame
@@ -86,6 +87,30 @@ func _check_ambient_wander(actors: Dictionary) -> void:
 			_failures.append("%s ambient wander escaped its local radius" % actor_id)
 	if moved_count < 4:
 		_failures.append("only %d/6 NPCs made readable ambient progress" % moved_count)
+
+
+func _check_ambient_policy_hold(actor: NPC3D) -> void:
+	actor.set_ambient_policy_hold(true)
+	await physics_frame
+	var held_position := actor.global_position
+	var held_status := actor.movement_status()
+	var held_ambient := held_status.get("ambient", {}) as Dictionary
+	if not bool(held_ambient.get("policyHeld", false)):
+		_failures.append("ambient meeting hold was not exposed in movement status")
+	for _frame in range(180):
+		await physics_frame
+	if _planar_distance(actor.global_position, held_position) > 0.02:
+		_failures.append("ambient meeting hold allowed a resident to drift from its slot")
+	actor.set_ambient_policy_hold(false)
+	var resumed := false
+	for _frame in range(AMBIENT_OBSERVE_FRAMES):
+		await physics_frame
+		if _planar_distance(actor.global_position, held_position) > 0.2:
+			resumed = true
+			break
+	if not resumed:
+		_failures.append("ambient wander did not resume after the meeting hold released")
+	actor.stop()
 
 
 func _check_modal_pause_resume(town: Node, actor: NPC3D) -> void:

@@ -1672,7 +1672,7 @@
           {
             "movementId": "mov:run-fixture-1:2",
             "actorId": "NPC_Studio_Manager",
-            "anchorRef": "Studio.manager_desk"
+            "anchorRef": "Studio.review_records"
           },
           {
             "movementId": "mov:run-fixture-1:1",
@@ -1710,7 +1710,7 @@
           {
             "movementId": "mov:run-fixture-1:2",
             "actorId": "NPC_Studio_Manager",
-            "anchorRef": "Studio.manager_desk",
+            "anchorRef": "Studio.review_records",
             "locationId": "Studio"
           },
           {
@@ -1834,11 +1834,11 @@
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
               },
-              "confirmedAnchorRef": "Studio.manager_desk",
-              "desiredAnchorRef": "Studio.manager_desk",
-              "routePointIndex": 1,
+              "confirmedAnchorRef": "Studio.review_records",
+              "desiredAnchorRef": "Studio.review_records",
+              "routePointIndex": 2,
               "routePointArrivedAtSeconds": 20,
-              "nextRouteMoveAtSeconds": 48,
+              "nextRouteMoveAtSeconds": 43,
               "pendingMovement": null
             },
             {
@@ -1974,11 +1974,11 @@
             "actorId": "NPC_Studio_Manager",
             "issuedAtSeconds": 15,
             "fromAnchorRef": "Studio.manager_spawn",
-            "targetAnchorRef": "Studio.manager_desk",
+            "targetAnchorRef": "Studio.review_records",
             "targetLocationId": "Studio",
             "scheduleBlockId": "NPC_Studio_Manager.schedule.0",
             "activity": "review_work",
-            "routePointIndex": 1
+            "routePointIndex": 2
           },
           {
             "movementId": "mov:run-fixture-1:3",
@@ -2069,17 +2069,17 @@
                 "targetId": "StudioManagerRound"
               },
               "confirmedAnchorRef": "Studio.manager_spawn",
-              "desiredAnchorRef": "Studio.manager_desk",
+              "desiredAnchorRef": "Studio.review_records",
               "routePointIndex": 0,
               "routePointArrivedAtSeconds": 0,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
                 "movementId": "mov:run-fixture-1:2",
-                "targetAnchorRef": "Studio.manager_desk",
+                "targetAnchorRef": "Studio.review_records",
                 "targetLocationId": "Studio",
                 "issuedAtSeconds": 15,
                 "scheduleBlockId": "NPC_Studio_Manager.schedule.0",
-                "routePointIndex": 1
+                "routePointIndex": 2
               }
             },
             {
@@ -2229,11 +2229,11 @@
             "actorId": "NPC_Studio_Manager",
             "issuedAtSeconds": 15,
             "fromAnchorRef": "Studio.manager_spawn",
-            "targetAnchorRef": "Studio.manager_desk",
+            "targetAnchorRef": "Studio.review_records",
             "targetLocationId": "Studio",
             "scheduleBlockId": "NPC_Studio_Manager.schedule.0",
             "activity": "review_work",
-            "routePointIndex": 1
+            "routePointIndex": 2
           },
           {
             "movementId": "mov:run-fixture-1:3",
@@ -2324,17 +2324,17 @@
                 "targetId": "StudioManagerRound"
               },
               "confirmedAnchorRef": "Studio.manager_spawn",
-              "desiredAnchorRef": "Studio.manager_desk",
+              "desiredAnchorRef": "Studio.review_records",
               "routePointIndex": 0,
               "routePointArrivedAtSeconds": 0,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
                 "movementId": "mov:run-fixture-1:2",
-                "targetAnchorRef": "Studio.manager_desk",
+                "targetAnchorRef": "Studio.review_records",
                 "targetLocationId": "Studio",
                 "issuedAtSeconds": 15,
                 "scheduleBlockId": "NPC_Studio_Manager.schedule.0",
-                "routePointIndex": 1
+                "routePointIndex": 2
               }
             },
             {
@@ -2645,11 +2645,11 @@
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
               },
-              "confirmedAnchorRef": "Studio.manager_desk",
-              "desiredAnchorRef": "Studio.manager_desk",
-              "routePointIndex": 1,
+              "confirmedAnchorRef": "Studio.review_records",
+              "desiredAnchorRef": "Studio.review_records",
+              "routePointIndex": 2,
               "routePointArrivedAtSeconds": 20,
-              "nextRouteMoveAtSeconds": 48,
+              "nextRouteMoveAtSeconds": 43,
               "pendingMovement": null
             },
             {
@@ -10234,11 +10234,11 @@
             "actorId": "NPC_Studio_Manager",
             "issuedAtSeconds": 15,
             "fromAnchorRef": "Studio.manager_spawn",
-            "targetAnchorRef": "Studio.manager_desk",
+            "targetAnchorRef": "Studio.review_records",
             "targetLocationId": "Studio",
             "scheduleBlockId": "NPC_Studio_Manager.schedule.0",
             "activity": "review_work",
-            "routePointIndex": 1
+            "routePointIndex": 2
           },
           {
             "movementId": "mov:run-fixture-1:3",
@@ -10329,17 +10329,17 @@
                 "targetId": "StudioManagerRound"
               },
               "confirmedAnchorRef": "Studio.manager_spawn",
-              "desiredAnchorRef": "Studio.manager_desk",
+              "desiredAnchorRef": "Studio.review_records",
               "routePointIndex": 0,
               "routePointArrivedAtSeconds": 0,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
                 "movementId": "mov:run-fixture-1:2",
-                "targetAnchorRef": "Studio.manager_desk",
+                "targetAnchorRef": "Studio.review_records",
                 "targetLocationId": "Studio",
                 "issuedAtSeconds": 15,
                 "scheduleBlockId": "NPC_Studio_Manager.schedule.0",
-                "routePointIndex": 1
+                "routePointIndex": 2
               }
             },
             {
@@ -10469,7 +10469,7 @@
           {
             "movementId": "mov:run-fixture-1:2",
             "actorId": "NPC_Studio_Manager",
-            "anchorRef": "Studio.manager_desk"
+            "anchorRef": "Studio.review_records"
           },
           {
             "movementId": "mov:run-fixture-1:1",
@@ -10507,7 +10507,7 @@
           {
             "movementId": "mov:run-fixture-1:2",
             "actorId": "NPC_Studio_Manager",
-            "anchorRef": "Studio.manager_desk",
+            "anchorRef": "Studio.review_records",
             "locationId": "Studio"
           },
           {
@@ -10631,11 +10631,11 @@
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
               },
-              "confirmedAnchorRef": "Studio.manager_desk",
-              "desiredAnchorRef": "Studio.manager_desk",
-              "routePointIndex": 1,
+              "confirmedAnchorRef": "Studio.review_records",
+              "desiredAnchorRef": "Studio.review_records",
+              "routePointIndex": 2,
               "routePointArrivedAtSeconds": 20,
-              "nextRouteMoveAtSeconds": 48,
+              "nextRouteMoveAtSeconds": 43,
               "pendingMovement": null
             },
             {
@@ -10827,11 +10827,11 @@
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
               },
-              "confirmedAnchorRef": "Studio.manager_desk",
-              "desiredAnchorRef": "Studio.manager_desk",
-              "routePointIndex": 1,
+              "confirmedAnchorRef": "Studio.review_records",
+              "desiredAnchorRef": "Studio.review_records",
+              "routePointIndex": 2,
               "routePointArrivedAtSeconds": 20,
-              "nextRouteMoveAtSeconds": 48,
+              "nextRouteMoveAtSeconds": 43,
               "pendingMovement": null
             },
             {
@@ -11065,11 +11065,11 @@
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
               },
-              "confirmedAnchorRef": "Studio.manager_desk",
-              "desiredAnchorRef": "Studio.manager_desk",
-              "routePointIndex": 1,
+              "confirmedAnchorRef": "Studio.review_records",
+              "desiredAnchorRef": "Studio.review_records",
+              "routePointIndex": 2,
               "routePointArrivedAtSeconds": 20,
-              "nextRouteMoveAtSeconds": 48,
+              "nextRouteMoveAtSeconds": 43,
               "pendingMovement": null
             },
             {
@@ -11245,11 +11245,11 @@
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
               },
-              "confirmedAnchorRef": "Studio.manager_desk",
-              "desiredAnchorRef": "Studio.manager_desk",
-              "routePointIndex": 1,
+              "confirmedAnchorRef": "Studio.review_records",
+              "desiredAnchorRef": "Studio.review_records",
+              "routePointIndex": 2,
               "routePointArrivedAtSeconds": 20,
-              "nextRouteMoveAtSeconds": 48,
+              "nextRouteMoveAtSeconds": 43,
               "pendingMovement": null
             },
             {
@@ -11447,11 +11447,11 @@
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
               },
-              "confirmedAnchorRef": "Studio.manager_desk",
-              "desiredAnchorRef": "Studio.manager_desk",
-              "routePointIndex": 1,
+              "confirmedAnchorRef": "Studio.review_records",
+              "desiredAnchorRef": "Studio.review_records",
+              "routePointIndex": 2,
               "routePointArrivedAtSeconds": 20,
-              "nextRouteMoveAtSeconds": 48,
+              "nextRouteMoveAtSeconds": 43,
               "pendingMovement": null
             },
             {
@@ -11586,13 +11586,13 @@
           {
             "movementId": "mov:run-fixture-1:9",
             "actorId": "NPC_Studio_Manager",
-            "issuedAtSeconds": 48,
-            "fromAnchorRef": "Studio.manager_desk",
-            "targetAnchorRef": "Studio.review_records",
+            "issuedAtSeconds": 43,
+            "fromAnchorRef": "Studio.review_records",
+            "targetAnchorRef": "Studio.waiting_seats",
             "targetLocationId": "Studio",
             "scheduleBlockId": "NPC_Studio_Manager.schedule.0",
             "activity": "review_work",
-            "routePointIndex": 2
+            "routePointIndex": 3
           },
           {
             "movementId": "mov:run-fixture-1:10",
@@ -11666,18 +11666,18 @@
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
               },
-              "confirmedAnchorRef": "Studio.manager_desk",
-              "desiredAnchorRef": "Studio.review_records",
-              "routePointIndex": 1,
+              "confirmedAnchorRef": "Studio.review_records",
+              "desiredAnchorRef": "Studio.waiting_seats",
+              "routePointIndex": 2,
               "routePointArrivedAtSeconds": 20,
               "nextRouteMoveAtSeconds": null,
               "pendingMovement": {
                 "movementId": "mov:run-fixture-1:9",
-                "targetAnchorRef": "Studio.review_records",
+                "targetAnchorRef": "Studio.waiting_seats",
                 "targetLocationId": "Studio",
-                "issuedAtSeconds": 48,
+                "issuedAtSeconds": 43,
                 "scheduleBlockId": "NPC_Studio_Manager.schedule.0",
-                "routePointIndex": 2
+                "routePointIndex": 3
               }
             },
             {
@@ -11795,7 +11795,7 @@
           {
             "movementId": "mov:run-fixture-1:9",
             "actorId": "NPC_Studio_Manager",
-            "anchorRef": "Studio.review_records"
+            "anchorRef": "Studio.waiting_seats"
           },
           {
             "movementId": "mov:run-fixture-1:8",
@@ -11827,7 +11827,7 @@
           {
             "movementId": "mov:run-fixture-1:9",
             "actorId": "NPC_Studio_Manager",
-            "anchorRef": "Studio.review_records",
+            "anchorRef": "Studio.waiting_seats",
             "locationId": "Studio"
           },
           {
@@ -11933,11 +11933,11 @@
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
               },
-              "confirmedAnchorRef": "Studio.review_records",
-              "desiredAnchorRef": "Studio.review_records",
-              "routePointIndex": 2,
+              "confirmedAnchorRef": "Studio.waiting_seats",
+              "desiredAnchorRef": "Studio.waiting_seats",
+              "routePointIndex": 3,
               "routePointArrivedAtSeconds": 50,
-              "nextRouteMoveAtSeconds": 73,
+              "nextRouteMoveAtSeconds": 69,
               "pendingMovement": null
             },
             {
@@ -12129,11 +12129,11 @@
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
               },
-              "confirmedAnchorRef": "Studio.review_records",
-              "desiredAnchorRef": "Studio.review_records",
-              "routePointIndex": 2,
+              "confirmedAnchorRef": "Studio.waiting_seats",
+              "desiredAnchorRef": "Studio.waiting_seats",
+              "routePointIndex": 3,
               "routePointArrivedAtSeconds": 50,
-              "nextRouteMoveAtSeconds": 73,
+              "nextRouteMoveAtSeconds": 69,
               "pendingMovement": null
             },
             {
@@ -12367,11 +12367,11 @@
                 "targetKind": "route",
                 "targetId": "StudioManagerRound"
               },
-              "confirmedAnchorRef": "Studio.review_records",
-              "desiredAnchorRef": "Studio.review_records",
-              "routePointIndex": 2,
+              "confirmedAnchorRef": "Studio.waiting_seats",
+              "desiredAnchorRef": "Studio.waiting_seats",
+              "routePointIndex": 3,
               "routePointArrivedAtSeconds": 50,
-              "nextRouteMoveAtSeconds": 73,
+              "nextRouteMoveAtSeconds": 69,
               "pendingMovement": null
             },
             {
@@ -12523,7 +12523,7 @@
             "movementId": "mov:run-fixture-1:13",
             "actorId": "NPC_Studio_Manager",
             "issuedAtSeconds": 70,
-            "fromAnchorRef": "Studio.review_records",
+            "fromAnchorRef": "Studio.waiting_seats",
             "targetAnchorRef": "Park.meeting_north_west",
             "targetLocationId": "Park",
             "scheduleBlockId": "NPC_Studio_Manager.schedule.1",
@@ -12617,7 +12617,7 @@
                 "targetKind": "anchor",
                 "targetId": "Park.meeting_north_west"
               },
-              "confirmedAnchorRef": "Studio.review_records",
+              "confirmedAnchorRef": "Studio.waiting_seats",
               "desiredAnchorRef": "Park.meeting_north_west",
               "routePointIndex": null,
               "routePointArrivedAtSeconds": null,

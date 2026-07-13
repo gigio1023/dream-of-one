@@ -307,7 +307,7 @@ test("advance fixture replays staggered moves, batched arrivals, and arrival-gat
     ]),
     [
       ["NPC_Studio_Receptionist", 1],
-      ["NPC_Studio_Manager", 1],
+      ["NPC_Studio_Manager", 2],
       ["NPC_Office_Worker", 1],
       ["NPC_Roaming_Liaison", 1],
     ],

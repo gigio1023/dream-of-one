@@ -381,6 +381,20 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			_check_town_dressing_density(label, instance)
 			_check_physical_prop_startup_stability(label, instance)
 			_check_record_surface_bindings(label, instance)
+			if (
+				not instance.has_method("is_meeting_participant_anchor")
+				or not bool(instance.call(
+					"is_meeting_participant_anchor",
+					"NPC_Park_Caretaker",
+					"Park.meeting_north_east"
+				))
+				or bool(instance.call(
+					"is_meeting_participant_anchor",
+					"NPC_Park_Caretaker",
+					"Park.bench_west"
+				))
+			):
+				_failures.append("town_3d meeting participant anchor policy drifted")
 			if not instance.has_method("binding_errors"):
 				_failures.append("town_3d exposes no layout binding check")
 			else:
@@ -424,6 +438,8 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 				_failures.append("main_3d RunSession exposes no encounter endpoint")
 			if label == "main_3d":
 				_check_conversation_start_retry_contract(label, instance)
+				if not instance.has_method("_sync_meeting_ambient_policy_holds"):
+					_failures.append("main_3d exposes no meeting ambient hold policy")
 			for surface_value in instance.get_tree().get_nodes_in_group(&"record_surfaces"):
 				if not surface_value is Node:
 					continue

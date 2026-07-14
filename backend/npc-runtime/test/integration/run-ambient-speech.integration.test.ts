@@ -1445,8 +1445,14 @@ test("ambient utterances enter only the speaker and current runtime-confirmed li
   const response = await service.decision(meeting.request);
   assert.equal(response.status, "completed");
   assert.deepEqual(response.speechEvents.map(event => event.seq), [1, 2]);
-  assert.deepEqual(response.speechEvents[0]?.listenerActorIds, ["NPC_Park_Caretaker"]);
-  assert.deepEqual(response.speechEvents[1]?.listenerActorIds, ["NPC_Studio_Manager"]);
+  assert.deepEqual(
+    response.speechEvents[0]?.listenerActorIds,
+    ["NPC_Park_Caretaker", "NPC_Roaming_Liaison"],
+  );
+  assert.deepEqual(
+    response.speechEvents[1]?.listenerActorIds,
+    ["NPC_Studio_Manager", "NPC_Roaming_Liaison"],
+  );
 
   const snapshot = service.snapshot(meeting.started.runId);
   assert.equal(snapshot.ambientSpeech.cursor, 2);
@@ -1467,7 +1473,7 @@ test("ambient utterances enter only the speaker and current runtime-confirmed li
     NPC_Office_Worker: 0,
     NPC_Park_Caretaker: 3,
     NPC_Station_Officer: 0,
-    NPC_Roaming_Liaison: 0,
+    NPC_Roaming_Liaison: 2,
   };
   const memoryIds = new Set<string>();
   for (const actor of snapshot.actors) {
@@ -1482,7 +1488,7 @@ test("ambient utterances enter only the speaker and current runtime-confirmed li
       assert.deepEqual(provenance, event);
     }
   }
-  assert.equal(memoryIds.size, 4);
+  assert.equal(memoryIds.size, 6);
   const sourceEvent = response.speechEvents[0];
   assert.ok(sourceEvent);
   const sourceMemory = caretaker.memories.find(
@@ -1579,7 +1585,7 @@ test("player opening context includes a listener's ambient memory but never leak
   assert.equal(response.status, "completed");
   assert.deepEqual(
     response.actorReadinessDeltas.map(delta => delta.actorId).sort(),
-    ["NPC_Park_Caretaker", "NPC_Studio_Manager"].sort(),
+    ["NPC_Park_Caretaker", "NPC_Roaming_Liaison", "NPC_Studio_Manager"].sort(),
   );
 
   await service.preloadConversation(

@@ -203,6 +203,7 @@ const CONTACT_START_TOLERANCE_M = 0.8;
  * a valid ray-confirmed interaction.
  */
 export const PLAYER_CONVERSATION_MAX_CENTER_DISTANCE_M = 2.85;
+export const PLAYER_CONVERSATION_APPROACH_HOLD_DISTANCE_M = 5;
 const INTERROGATION_PRESSURE_THRESHOLD = 90;
 const INTERROGATION_HESITATION_MS = 40_000;
 const STATION_OFFICER_ID = "NPC_Station_Officer";
@@ -415,6 +416,7 @@ interface ConversationOpeningAttempt {
   evidenceKey: string;
   request: ConversationTurnRequest;
   resolved?: ResolvedProposal<ConversationProposal>;
+  routeHoldUntilSeconds?: number;
   inFlight?: Promise<RunSessionPreloadResponse>;
 }
 
@@ -1390,6 +1392,8 @@ export class RunService {
       );
       const toSeconds = fromSeconds + appliedElapsedSeconds;
       const candidateWorldRevision = previousWorldRevision + 1;
+      const routeHoldSpatialActors = incomingSpatialFacts ?? run.spatialFacts?.actors ?? null;
+      const routeHoldPlayer = incomingPlayerFacts ?? run.spatialFacts?.player ?? null;
       const schedulerResult = advanceRunScheduler({
         runId: run.runId,
         layout: this.layout,
@@ -1401,6 +1405,22 @@ export class RunService {
         heldActorIds: run.activeContact
           ? new Set([run.activeContact.actorId])
           : undefined,
+        routeHeldActorIds: new Set(
+          [...run.conversationOpenings.values()]
+            .filter(
+              attempt =>
+                attempt.inFlight !== undefined ||
+                (attempt.resolved !== undefined &&
+                  ((attempt.routeHoldUntilSeconds ?? -1) > toSeconds ||
+                    this.preparedOpeningHoldsRouteForPlayer(
+                      run,
+                      attempt,
+                      routeHoldSpatialActors,
+                      routeHoldPlayer,
+                    ))),
+            )
+            .map(attempt => attempt.actorId),
+        ),
       });
       for (const arrival of schedulerResult.arrivalsApplied) {
         emitRunWake(
@@ -4973,6 +4993,10 @@ export class RunService {
         throw new RunError("conversation opening became stale before commit", "conversation_not_ready");
       }
       attempt.resolved = clone(resolved);
+      // Provider latency must not make a nearby resident walk away between
+      // preparation and the player's E press. Hold route cadence only; schedule
+      // transitions still invalidate stale openings through the checks above.
+      attempt.routeHoldUntilSeconds = run.elapsedSeconds + 15;
       actor.playerConversationReady = true;
       run.preloadRequiredEvidence.delete(actor.actorId);
       run.worldRevision += 1;
@@ -5705,6 +5729,38 @@ export class RunService {
         "conversation_not_ready",
       );
     }
+  }
+
+  private preparedOpeningHoldsRouteForPlayer(
+    run: RunState,
+    opening: ConversationOpeningAttempt,
+    spatialActors: Map<string, RunActorSpatialFacts> | null,
+    player: RunPlayerSpatialFacts | null,
+  ): boolean {
+    if (!opening.resolved || !spatialActors || !player) return false;
+    const actor = run.actors.get(opening.actorId);
+    const facts = spatialActors.get(opening.actorId);
+    const zone = this.layout.conversationZones.find(
+      candidate => candidate.zoneId === opening.interactionZoneId,
+    );
+    const zoneAnchor = zone ? this.layout.anchorPositions[zone.anchorRef] : undefined;
+    if (!actor || !actor.playerConversationReady || !facts || !zone || !zoneAnchor) return false;
+    const playerInsideZone = Math.hypot(
+      player.position[0] - zoneAnchor[0],
+      player.position[2] - zoneAnchor[2],
+    ) <= zone.radius;
+    return (
+      zone.actorIds.includes(actor.actorId) &&
+      actor.locationId === zone.landmarkId &&
+      player.locationId === zone.landmarkId &&
+      facts.playerInteractionZoneId === zone.zoneId &&
+      facts.playerVisible &&
+      facts.playerReachable &&
+      facts.playerAudible &&
+      playerInsideZone &&
+      distanceBetween(facts.position, player.position) <=
+        PLAYER_CONVERSATION_APPROACH_HOLD_DISTANCE_M
+    );
   }
 
   private actorSemanticGoalKey(

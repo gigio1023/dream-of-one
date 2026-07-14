@@ -255,8 +255,15 @@ test("administration fixture carries provider prose through write, read, pressur
 test("advance fixture replays staggered moves, batched arrivals, and arrival-gated routes", () => {
   const sequence = fixtures.runAdvanceSequence;
   assert.deepEqual(
-    sequence.slice(0, 3).map((step: { stepId: string }) => step.stepId),
-    ["initial_clock", "first_route_moves", "initial_arrivals"],
+    sequence.slice(0, 6).map((step: { stepId: string }) => step.stepId),
+    [
+      "initial_clock",
+      "initial_dwell_clock_1",
+      "initial_dwell_clock_2",
+      "initial_dwell_clock_3",
+      "first_route_moves",
+      "initial_arrivals",
+    ],
   );
   assert.equal(sequence.at(-1)?.stepId, "first_meeting_speech_delivery");
   for (const step of sequence) {
@@ -306,21 +313,19 @@ test("advance fixture replays staggered moves, batched arrivals, and arrival-gat
       movement.routePointIndex,
     ]),
     [
-      ["NPC_Studio_Receptionist", 1],
       ["NPC_Studio_Manager", 2],
       ["NPC_Office_Worker", 1],
-      ["NPC_Roaming_Liaison", 1],
     ],
   );
   assert.deepEqual(route, fixtures.endpoints.runAdvanceRouteRetry.response);
   const arrival = fixtures.endpoints.runAdvanceArrival;
-  assert.equal(arrival.request.arrivals.length, 4);
-  assert.equal(arrival.response.arrivalsApplied.length, 4);
+  assert.equal(arrival.request.arrivals.length, 2);
+  assert.equal(arrival.response.arrivalsApplied.length, 2);
   const earlyPolicyMovements = sequence.flatMap(
     (step: { response: { clock: { toSeconds: number }; movementDeltas: Array<{
       actorId: string;
       issuedAtSeconds: number;
-    }> } }) => step.response.clock.toSeconds <= 30 ? step.response.movementDeltas : [],
+    }> } }) => step.response.clock.toSeconds <= 60 ? step.response.movementDeltas : [],
   );
   assert.deepEqual(
     [...new Set(earlyPolicyMovements.map((movement: { actorId: string }) => movement.actorId))].sort(),

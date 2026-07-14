@@ -103,7 +103,16 @@ func _check_ambient_policy_hold(actor: NPC3D) -> void:
 		await physics_frame
 	if _planar_distance(actor.global_position, held_position) > 0.02:
 		_failures.append("ambient meeting hold allowed a resident to drift from its slot")
+	actor.set_player_attention_hold(true)
 	actor.set_ambient_policy_hold(false)
+	for _frame in range(60):
+		await physics_frame
+	if _planar_distance(actor.global_position, held_position) > 0.02:
+		_failures.append("player attention hold did not compose with meeting hold")
+	var attention_status := actor.movement_status().get("ambient", {}) as Dictionary
+	if not bool(attention_status.get("playerAttentionHeld", false)):
+		_failures.append("player attention hold was not exposed in movement status")
+	actor.set_player_attention_hold(false)
 	var resumed := false
 	for _frame in range(AMBIENT_OBSERVE_FRAMES):
 		await physics_frame

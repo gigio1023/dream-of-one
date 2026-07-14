@@ -295,13 +295,13 @@ test("meeting decision returns both physical calls and both consumed runtime met
   assert.equal(textGen.requests.length, 2);
 });
 
-test("a stale completed preload tracks its live resolution once without applying the opening", async () => {
+test("a live preload holds route cadence through provider latency and a bounded ready grace", async () => {
   const textGen = new DeferredTextGen();
   const service = new RunService({
     proposalPort: liveProvider(textGen),
-    idFactory: deterministicIds("stale-preload-evidence"),
+    idFactory: deterministicIds("held-preload-evidence"),
   });
-  const started = service.start("provider-stale-preload-evidence", "ko-KR");
+  const started = service.start("provider-held-preload-evidence", "ko-KR");
   const pending = service.preloadConversation(
     started.runId,
     STUDIO_RECEPTIONIST_ID,
@@ -310,35 +310,101 @@ test("a stale completed preload tracks its live resolution once without applying
   );
   await textGen.started;
 
-  let moving = false;
   for (let step = 1; step <= 8; step += 1) {
     const snapshot = service.snapshot(started.runId);
     await service.advance({
       runId: started.runId,
-      advanceId: `provider-stale-preload-evidence:clock:${step}`,
+      advanceId: `provider-held-preload-evidence:clock:${step}`,
       observedWorldRevision: snapshot.worldRevision,
       elapsedSeconds: 10,
       arrivals: [],
     });
-    moving = service.snapshot(started.runId).scheduler.actors.some(
-      actor => actor.actorId === STUDIO_RECEPTIONIST_ID && actor.pendingMovement !== null,
+    const receptionist = service.snapshot(started.runId).scheduler.actors.find(
+      actor => actor.actorId === STUDIO_RECEPTIONIST_ID,
     );
-    if (moving) break;
+    assert.equal(receptionist?.pendingMovement, null);
   }
-  assert.equal(moving, true, "the test must invalidate the speculative opening with movement");
   textGen.finish(liveOpening);
-  await assert.rejects(
-    pending,
-    (error: unknown) => error instanceof RunError && error.code === "conversation_not_ready",
-  );
+  const preloaded = await pending;
+  assert.equal(preloaded.actor.playerConversationReady, true);
 
-  const snapshot = service.snapshot(started.runId);
+  let snapshot = service.snapshot(started.runId);
   assert.equal(snapshot.providerAudit.calls.length, 1);
   assert.equal(snapshot.providerAudit.resolutions.length, 1);
   assert.equal(snapshot.providerRuntimeTrace.entries.length, 1);
   assert.equal(snapshot.providerRuntimeTrace.entries[0]?.meta.transport, "live");
   assert.equal(snapshot.actors.find(
     actor => actor.actorId === STUDIO_RECEPTIONIST_ID,
+  )?.playerConversationReady, true);
+  assert.equal(textGen.requests.length, 1);
+
+  const withinGrace = await service.advance({
+    runId: started.runId,
+    advanceId: "provider-held-preload-evidence:ready-grace",
+    observedWorldRevision: snapshot.worldRevision,
+    elapsedSeconds: 10,
+    arrivals: [],
+  });
+  assert.ok(withinGrace.movementDeltas.every(
+    movement => movement.actorId !== STUDIO_RECEPTIONIST_ID,
+  ));
+  snapshot = service.snapshot(started.runId);
+  const afterGrace = await service.advance({
+    runId: started.runId,
+    advanceId: "provider-held-preload-evidence:released",
+    observedWorldRevision: snapshot.worldRevision,
+    elapsedSeconds: 10,
+    arrivals: [],
+  });
+  assert.equal(
+    afterGrace.movementDeltas.filter(
+      movement => movement.actorId === STUDIO_RECEPTIONIST_ID,
+    ).length,
+    1,
+  );
+});
+
+test("a schedule transition still makes an in-flight preload stale and tracks it once", async () => {
+  const textGen = new DeferredTextGen();
+  const service = new RunService({
+    proposalPort: liveProvider(textGen),
+    idFactory: deterministicIds("scheduled-stale-preload-evidence"),
+  });
+  const started = service.start("provider-scheduled-stale-preload-evidence", "ko-KR");
+  const pending = service.preloadConversation(
+    started.runId,
+    "NPC_Studio_Manager",
+    "StudioManagerConversation",
+    "ko-KR",
+  );
+  await textGen.started;
+
+  for (let step = 1; step <= 7; step += 1) {
+    const snapshot = service.snapshot(started.runId);
+    await service.advance({
+      runId: started.runId,
+      advanceId: `provider-scheduled-stale-preload-evidence:clock:${step}`,
+      observedWorldRevision: snapshot.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: [],
+    });
+  }
+  const manager = service.snapshot(started.runId).scheduler.actors.find(
+    actor => actor.actorId === "NPC_Studio_Manager",
+  );
+  assert.ok(manager?.pendingMovement, "the t=70 schedule transition must outrank route hold");
+
+  textGen.finish(liveOpening);
+  await assert.rejects(
+    pending,
+    (error: unknown) => error instanceof RunError && error.code === "conversation_not_ready",
+  );
+  const snapshot = service.snapshot(started.runId);
+  assert.equal(snapshot.providerAudit.calls.length, 1);
+  assert.equal(snapshot.providerAudit.resolutions.length, 1);
+  assert.equal(snapshot.providerRuntimeTrace.entries.length, 1);
+  assert.equal(snapshot.actors.find(
+    actor => actor.actorId === "NPC_Studio_Manager",
   )?.playerConversationReady, false);
   assert.equal(textGen.requests.length, 1);
 });

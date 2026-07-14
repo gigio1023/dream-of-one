@@ -410,13 +410,40 @@ func _nodes_have_line_of_sight(
 	var query := PhysicsRayQueryParameters3D.create(source_eye, target_eye)
 	query.collide_with_areas = false
 	query.collide_with_bodies = true
+	var excluded_rids: Array[RID] = []
 	if source is CollisionObject3D:
-		query.exclude = [(source as CollisionObject3D).get_rid()]
+		excluded_rids.append((source as CollisionObject3D).get_rid())
+		query.exclude = excluded_rids
 	var hit := space_state.intersect_ray(query)
 	if hit.is_empty():
 		return false
 	var collider_value: Variant = hit.get("collider")
+	# Text surfaces are thin inspectable overlays. They must not make a resident
+	# behind a desk board semantically invisible, but world geometry and physical
+	# props continue to stop the authoritative sight ray.
+	if collider_value is Node:
+		var record_surface := _record_surface_collision_owner(collider_value as Node)
+		if record_surface != null:
+			excluded_rids.append(record_surface.get_rid())
+			query.exclude = excluded_rids
+			hit = space_state.intersect_ray(query)
+			if hit.is_empty():
+				return false
+			collider_value = hit.get("collider")
 	return collider_value is Node and _node_belongs_to(collider_value as Node, target)
+
+
+func _record_surface_collision_owner(node: Node) -> CollisionObject3D:
+	var current: Node = node
+	while current != null:
+		if (
+			current is CollisionObject3D
+			and current.has_method("interaction_kind")
+			and str(current.call("interaction_kind")) == "record_surface"
+		):
+			return current as CollisionObject3D
+		current = current.get_parent()
+	return null
 
 
 func _node_belongs_to(node: Node, owner_node: Node) -> bool:

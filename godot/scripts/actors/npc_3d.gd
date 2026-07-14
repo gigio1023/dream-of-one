@@ -103,6 +103,7 @@ var _ambient_center := Vector3.ZERO
 var _ambient_dwell_remaining := 0.0
 var _ambient_suspended := false
 var _ambient_policy_held := false
+var _player_attention_held := false
 var _ambient_cycle_count := 0
 var _ambient_reselection_count := 0
 var _ambient_selection_failure_count := 0
@@ -232,12 +233,31 @@ func stop() -> void:
 func set_ambient_policy_hold(held: bool) -> void:
 	if _ambient_policy_held == held:
 		return
+	var was_held := _ambient_motion_held()
 	_ambient_policy_held = held
+	_apply_ambient_motion_hold_change(was_held)
+
+
+func set_player_attention_hold(held: bool) -> void:
+	if _player_attention_held == held:
+		return
+	var was_held := _ambient_motion_held()
+	_player_attention_held = held
+	_apply_ambient_motion_hold_change(was_held)
+
+
+func _ambient_motion_held() -> bool:
+	return _ambient_policy_held or _player_attention_held
+
+
+func _apply_ambient_motion_hold_change(was_held: bool) -> void:
+	var held := _ambient_motion_held()
+	if was_held == held:
+		return
 	if held:
 		# Schedule travel and player contact still preempt this presentation
-		# hold. Only local, non-authoritative wander is cancelled so a resident
-		# that reached a meeting slot cannot drift away while the runtime still
-		# treats that slot as confirmed.
+		# hold. Only local, non-authoritative wander is cancelled so a meeting
+		# participant or a ready resident under player focus cannot drift away.
 		if (
 			_movement_mode == MOVE_AMBIENT
 			or _pending_move_mode == MOVE_AMBIENT
@@ -386,6 +406,7 @@ func movement_status() -> Dictionary:
 			"enabled": ambient_wander_enabled,
 			"suspended": _ambient_suspended,
 			"policyHeld": _ambient_policy_held,
+			"playerAttentionHeld": _player_attention_held,
 			"center": _ambient_center,
 			"dwellRemaining": _ambient_dwell_remaining,
 			"cycleCount": _ambient_cycle_count,
@@ -633,7 +654,7 @@ func _cancel_navigation_motion() -> void:
 
 
 func _tick_ambient_wander(delta: float) -> void:
-	if not ambient_wander_enabled or _ambient_suspended or _ambient_policy_held:
+	if not ambient_wander_enabled or _ambient_suspended or _ambient_motion_held():
 		return
 	if not _navigation_map_is_synchronized():
 		return
@@ -728,7 +749,7 @@ func _path_length(path: PackedVector3Array) -> float:
 
 
 func _schedule_ambient_dwell(short_retry: bool) -> void:
-	if _ambient_suspended or _ambient_policy_held or not ambient_wander_enabled:
+	if _ambient_suspended or _ambient_motion_held() or not ambient_wander_enabled:
 		_ambient_dwell_remaining = 0.0
 		return
 	if short_retry:

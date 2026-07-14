@@ -41,6 +41,23 @@ class FocusNpc:
 	func interact(_player: Node) -> void:
 		interaction_count += 1
 
+
+class FocusRecord:
+	extends StaticBody3D
+	var interaction_count := 0
+
+	func get_interaction_label_key() -> StringName:
+		return &"test.focus_record"
+
+	func is_interaction_enabled() -> bool:
+		return true
+
+	func interaction_kind() -> StringName:
+		return &"record_surface"
+
+	func interact(_player: Node) -> void:
+		interaction_count += 1
+
 var _failures: Array[String] = []
 var _last_preload_intent_target: Node = null
 var _unfocused_interaction_count := 0
@@ -153,19 +170,43 @@ func _run() -> void:
 	occluder.queue_free()
 	await physics_frame
 
-	# A ready NPC just outside the exact capsule ray remains easy to acquire,
-	# without becoming raw provider-preload intent.
+	# A nearby NPC just outside the exact capsule ray is still an explicit look:
+	# it may recover a provider opening, while only a ready NPC becomes E focus.
 	npc_capsule.radius = 0.1
 	focus_npc.position = Vector3(0.3, 0.0, -2.0)
 	focus_npc.interaction_enabled = true
 	await physics_frame
 	await physics_frame
-	if player.call("preload_intent_target") != null:
-		_failures.append("NPC aim assist leaked into raw provider-preload intent")
+	if player.call("preload_intent_target") != focus_npc:
+		_failures.append("NPC aim assist did not recover nearby provider-preload intent")
 	if player.call("focused_interactable") != focus_npc:
 		_failures.append("ready NPC inside the narrow aim assist was not acquired")
 	if not bool(player.call("interact_focused")) or focus_npc.interaction_count != 2:
 		_failures.append("ready NPC aim assist did not reach the normal interaction path")
+
+	# A ready resident in front of an inspectable board wins the social focus,
+	# even near the outer observed route angle, while the exact ray remains
+	# demonstrably aimed at the board.
+	focus_npc.position = Vector3(1.15, 0.0, -2.0)
+	var focus_record := FocusRecord.new()
+	focus_record.position = Vector3(0.0, 0.0, -1.7)
+	var record_shape := CollisionShape3D.new()
+	var record_box := BoxShape3D.new()
+	# The wide board blocks the NPC torso ray unless record surfaces are treated
+	# as thin interaction overlays for ready-resident acquisition.
+	record_box.size = Vector3(2.5, 2.0, 0.1)
+	record_shape.position = Vector3.UP
+	record_shape.shape = record_box
+	focus_record.add_child(record_shape)
+	root.add_child(focus_record)
+	await physics_frame
+	await physics_frame
+	if player.call("_interactable_collider") != focus_record:
+		_failures.append("record-priority proof did not hold the exact interaction ray")
+	if player.call("focused_interactable") != focus_npc:
+		_failures.append("ready NPC did not outrank a nearby exact record surface")
+	focus_record.queue_free()
+	await physics_frame
 	player.global_position = Vector3.ZERO
 	player.velocity = Vector3.ZERO
 	focus_npc.position = Vector3(0.12, 0.0, -0.75)
@@ -173,8 +214,8 @@ func _run() -> void:
 	player.call("_clear_recent_npc_focus")
 	await physics_frame
 	await physics_frame
-	if player.call("preload_intent_target") != null:
-		_failures.append("near NPC aim-assist proof accidentally hit the exact ray")
+	if player.call("preload_intent_target") != focus_npc:
+		_failures.append("near NPC aim assist did not preserve provider-preload intent")
 	if player.call("focused_interactable") != focus_npc:
 		_failures.append("NPC aim assist rejected a visible torso at close conversation range")
 
@@ -205,6 +246,8 @@ func _run() -> void:
 	focus_npc.interaction_enabled = false
 	await physics_frame
 	await physics_frame
+	if player.call("preload_intent_target") != focus_npc:
+		_failures.append("unready nearby NPC did not receive assisted preload intent")
 	if player.call("focused_interactable") != null or bool(player.call("interact_focused")):
 		_failures.append("unready NPC leaked into aim-assist interaction")
 
@@ -212,6 +255,8 @@ func _run() -> void:
 	focus_npc.visible = false
 	await physics_frame
 	await physics_frame
+	if player.call("preload_intent_target") != null:
+		_failures.append("invisible NPC leaked into assisted preload intent")
 	if player.call("focused_interactable") != null or bool(player.call("interact_focused")):
 		_failures.append("invisible NPC leaked into aim-assist interaction")
 	focus_npc.visible = true
@@ -225,6 +270,8 @@ func _run() -> void:
 	root.add_child(assist_occluder)
 	await physics_frame
 	await physics_frame
+	if player.call("preload_intent_target") != null:
+		_failures.append("assisted preload intent passed through an occluding wall")
 	if player.call("focused_interactable") != null or bool(player.call("interact_focused")):
 		_failures.append("NPC aim assist passed through an occluding wall")
 	assist_occluder.queue_free()
@@ -274,11 +321,18 @@ func _run() -> void:
 		_failures.append("Player3D directly routed an unfocused E to a guessed contact target")
 	focus_npc.active_contact = false
 
-	focus_npc.position = Vector3(0.0, 0.0, -2.7)
+	focus_npc.position = Vector3(0.0, 0.0, -3.2)
 	await physics_frame
 	await physics_frame
+	if player.call("preload_intent_target") != focus_npc:
+		_failures.append("NPC approach intent did not extend beyond the E acquisition bound")
 	if player.call("focused_interactable") != null or bool(player.call("interact_focused")):
-		_failures.append("NPC aim assist exceeded its 2.5 meter acquisition bound")
+		_failures.append("NPC aim assist exceeded its 3 meter acquisition bound")
+	focus_npc.position = Vector3(0.0, 0.0, -5.2)
+	await physics_frame
+	await physics_frame
+	if player.call("preload_intent_target") != null:
+		_failures.append("NPC assisted preload intent exceeded its 5 meter approach bound")
 	focus_npc.queue_free()
 
 	await _finish(probe, player)
@@ -302,5 +356,5 @@ func _finish(probe: Node, player: Node) -> void:
 			push_error(failure)
 		quit(1)
 		return
-	print("Godot AI input smoke passed: mouse look, Unicode, raw preload aim, gated E, unfocused owner handoff, safe focus grace, and bounded ready-NPC aim assist")
+	print("Godot AI input smoke passed: mouse look, Unicode, assisted preload aim, gated E, unfocused owner handoff, safe focus grace, and bounded ready-NPC aim assist")
 	quit()

@@ -146,6 +146,8 @@ var _run_end_id := ""
 var _run_end_in_flight := false
 var _lifecycle_generation := 0
 var _hesitation_retry_scheduled := false
+var _player_focus_attention_target: Node = null
+var _player_preload_attention_target: Node = null
 
 
 func _ready() -> void:
@@ -156,7 +158,7 @@ func _ready() -> void:
 		_localization.call("set_locale", _locale_name)
 	else:
 		_locale_name = str(_localization.call("locale"))
-	_player.focus_changed.connect(_hud.set_focus)
+	_player.focus_changed.connect(_on_player_focus_changed)
 	_player.preload_intent_changed.connect(_on_player_preload_intent_changed)
 	_player.unfocused_interaction_requested.connect(_on_unfocused_interaction_requested)
 	_player.settings_requested.connect(_hud.open_settings)
@@ -2119,9 +2121,44 @@ func _preload_intent_npc_actor_id() -> String:
 	return str((target as NPC3D).actor_id)
 
 
-func _on_player_preload_intent_changed(_target: Node) -> void:
+func _on_player_focus_changed(target: Node) -> void:
+	_hud.set_focus(target)
+	_player_focus_attention_target = target
+	_sync_player_attention_holds()
+	if target is NPC3D:
+		(target as NPC3D).face_position(_player.global_position)
 	if _run_session.mode() == "fixture" or _run_id.is_empty():
 		return
+	# Focus acquisition/removal can be the material change that makes an already
+	# prepared resident talkable. Refresh the next batched engine observation so
+	# RunService never decides a due route from pre-focus spatial facts.
+	_spatial_facts_dirty = true
+
+
+func _sync_player_attention_holds() -> void:
+	var focused: Node = (
+		_player_focus_attention_target
+		if is_instance_valid(_player_focus_attention_target)
+		else null
+	)
+	var preload_intent: Node = (
+		_player_preload_attention_target
+		if is_instance_valid(_player_preload_attention_target)
+		else null
+	)
+	for actor_value in get_tree().get_nodes_in_group(&"npc_actors"):
+		if not actor_value is NPC3D or not _town.is_ancestor_of(actor_value as NPC3D):
+			continue
+		var actor := actor_value as NPC3D
+		actor.set_player_attention_hold(actor == focused or actor == preload_intent)
+
+
+func _on_player_preload_intent_changed(target: Node) -> void:
+	_player_preload_attention_target = target
+	_sync_player_attention_holds()
+	if _run_session.mode() == "fixture" or _run_id.is_empty():
+		return
+	_spatial_facts_dirty = true
 	call_deferred("_queue_nearby_conversation_preloads")
 
 

@@ -368,7 +368,7 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 				_failures.append("town_3d NavigationMesh has no polygons")
 			else:
 				_check_town_navigation(label, instance, region)
-				_check_npc_spatial_facts(label, instance)
+				await _check_npc_spatial_facts(label, instance)
 			_check_town_location_coverage(label, instance)
 			_check_respawn_anchor_contract(label, instance)
 			for tree_blocker_name in [
@@ -438,6 +438,7 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 				_failures.append("main_3d RunSession exposes no encounter endpoint")
 			if label == "main_3d":
 				_check_conversation_start_retry_contract(label, instance)
+				_check_player_attention_hold_wiring(label, instance)
 				if not instance.has_method("_sync_meeting_ambient_policy_holds"):
 					_failures.append("main_3d exposes no meeting ambient hold policy")
 			for surface_value in instance.get_tree().get_nodes_in_group(&"record_surfaces"):
@@ -471,6 +472,62 @@ func _check_conversation_start_retry_contract(label: String, instance: Node) -> 
 		{"error": "conversation_start_failed"}
 	)):
 		_failures.append("%s misclassifies a transport failure as stale spatial grounding" % label)
+
+
+func _check_player_attention_hold_wiring(label: String, instance: Node) -> void:
+	var player := instance.get_node_or_null("Town/Actors/Player3D")
+	var actor := instance.get_node_or_null("Town/Actors/NPC_Roaming_Liaison") as NPC3D
+	if player == null or actor == null:
+		_failures.append("%s cannot stage player-attention hold wiring" % label)
+		return
+	if (
+		not player.is_connected(
+			&"preload_intent_changed",
+			Callable(instance, "_on_player_preload_intent_changed")
+		)
+		or not player.is_connected(
+			&"focus_changed",
+			Callable(instance, "_on_player_focus_changed")
+		)
+	):
+		_failures.append("%s player attention signals are not wired" % label)
+		return
+	player.call("_set_preload_intent_target", actor)
+	player.call("_set_focused_target", null)
+	var ambient_status := actor.movement_status().get("ambient", {}) as Dictionary
+	if not bool(ambient_status.get("playerAttentionHeld", false)):
+		_failures.append("%s preload intent did not hold resident ambient motion" % label)
+	var playtest_surface := instance.get_node_or_null("AgentPlaytestSurface")
+	var semantic_attention_proven := false
+	if (
+		playtest_surface != null
+		and playtest_surface.has_method("_target_snapshot_with_player_state")
+	):
+		var target: Dictionary = playtest_surface.call(
+			"_target_snapshot_with_player_state",
+			actor,
+			player,
+			null,
+			actor
+		)
+		semantic_attention_proven = (
+			bool(target.get("playerPreloadIntent", false))
+			and bool(target.get("playerAttentionHeld", false))
+			and not bool(target.get("playerFocused", true))
+			and target.has("conversationReady")
+			and target.has("distanceToPlayerM")
+		)
+	if not semantic_attention_proven:
+		_failures.append("%s playtest target omitted separated NPC attention state" % label)
+	player.call("_set_focused_target", actor)
+	player.call("_set_preload_intent_target", null)
+	ambient_status = actor.movement_status().get("ambient", {}) as Dictionary
+	if not bool(ambient_status.get("playerAttentionHeld", false)):
+		_failures.append("%s focus did not preserve resident attention hold" % label)
+	player.call("_set_focused_target", null)
+	ambient_status = actor.movement_status().get("ambient", {}) as Dictionary
+	if bool(ambient_status.get("playerAttentionHeld", true)):
+		_failures.append("%s resident attention hold survived focus and intent loss" % label)
 
 
 func _check_preload_failure_recovery_contract(
@@ -2006,7 +2063,104 @@ func _check_npc_spatial_facts(label: String, instance: Node) -> void:
 				"%s remote %s inherited the player's Park interaction zone"
 				% [label, remote_actor_id]
 			)
+	await _check_studio_record_conversation_facts(label, instance)
+	await _check_record_surface_los_overlay(label, instance)
 	_check_held_prop_visibility(label, instance)
+
+
+func _check_studio_record_conversation_facts(label: String, town: Node) -> void:
+	var manager := town.get_node_or_null("Actors/NPC_Studio_Manager") as Node3D
+	var player := town.get_node_or_null("Actors/Player3D") as Node3D
+	if manager == null or player == null:
+		_failures.append("%s cannot stage Studio conversation facts" % label)
+		return
+	var manager_transform := manager.global_transform
+	var player_transform := player.global_transform
+	var manager_physics := manager.is_physics_processing()
+	var player_physics := player.is_physics_processing()
+	manager.set_physics_process(false)
+	player.set_physics_process(false)
+	manager.global_position = Vector3(3.3, 0.05, -17.45)
+	player.global_position = Vector3(2.1, 0.05, -19.49)
+	await physics_frame
+	await physics_frame
+	var packet: Dictionary = town.call("spatial_facts")
+	var manager_fact: Dictionary = {}
+	for fact_value in packet.get("actors", []) as Array:
+		if (
+			fact_value is Dictionary
+			and str((fact_value as Dictionary).get("actorId", ""))
+			== "NPC_Studio_Manager"
+		):
+			manager_fact = fact_value as Dictionary
+			break
+	if (
+		manager_fact.is_empty()
+		or not bool(manager_fact.get("playerVisible", false))
+		or not bool(manager_fact.get("playerAudible", false))
+		or not bool(manager_fact.get("playerReachable", false))
+		or str(manager_fact.get("playerInteractionZoneId", ""))
+		!= "StudioManagerConversation"
+	):
+		_failures.append(
+			"%s Studio record conversation facts are not grounded: %s"
+			% [label, JSON.stringify(manager_fact)]
+		)
+	manager.global_transform = manager_transform
+	player.global_transform = player_transform
+	manager.set_physics_process(manager_physics)
+	player.set_physics_process(player_physics)
+	await physics_frame
+
+
+func _check_record_surface_los_overlay(label: String, town: Node) -> void:
+	var surface := town.get_node_or_null(
+		"Props/TextSurfaces/TS_Studio_ReviewRecords"
+	) as CollisionObject3D
+	if surface == null:
+		_failures.append("%s cannot stage record-overlay spatial LOS" % label)
+		return
+	var surface_transform := surface.global_transform
+	surface.global_position = Vector3(0.0, 50.0, 0.0)
+	var board_center := surface.global_position
+	var board_normal := surface.global_transform.basis.z.normalized()
+	var source := Node3D.new()
+	var target := StaticBody3D.new()
+	var target_shape := CollisionShape3D.new()
+	var target_box := BoxShape3D.new()
+	target_box.size = Vector3(0.6, 0.6, 0.6)
+	target_shape.position = Vector3.UP * 1.35
+	target_shape.shape = target_box
+	target.add_child(target_shape)
+	town.add_child(source)
+	town.add_child(target)
+	source.global_position = board_center - board_normal - Vector3.UP * 1.35
+	target.global_position = board_center + board_normal - Vector3.UP * 1.35
+	await physics_frame
+	var space_state := (town as Node3D).get_world_3d().direct_space_state
+	var source_eye := source.global_position + Vector3.UP * 1.35
+	var target_eye := target.global_position + Vector3.UP * 1.35
+	var raw_query := PhysicsRayQueryParameters3D.create(source_eye, target_eye)
+	raw_query.collide_with_areas = false
+	raw_query.collide_with_bodies = true
+	var raw_hit := space_state.intersect_ray(raw_query)
+	var raw_collider: Variant = raw_hit.get("collider")
+	if not raw_collider is Node or not _smoke_node_belongs_to(
+		raw_collider as Node,
+		surface
+	):
+		_failures.append("%s record-overlay proof did not block the raw sight ray" % label)
+	elif not bool(town.call(
+		"_nodes_have_line_of_sight",
+		source,
+		target,
+		space_state
+	)):
+		_failures.append("%s record surface hid a resident from spatial LOS" % label)
+	surface.global_transform = surface_transform
+	source.queue_free()
+	target.queue_free()
+	await physics_frame
 
 
 func _canonical_physical_prop_ids(town: Node) -> Array[String]:
@@ -4257,35 +4411,46 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 	):
 		_failures.append("%s initial material advance omitted six revisioned spatial facts" % label)
 
-	instance.set("_advance_elapsed_buffer", 10.0)
-	var early_patrol_applied := false
-	for _frame in range(120):
-		await process_frame
-		snapshot = instance.call("presentation_snapshot")
-		var patrol_actor_ids := _active_movement_actor_ids(snapshot)
-		if (
-			int(snapshot.get("runWorldRevision", -1)) == preload_baseline_revision + 2
-			and patrol_actor_ids.has("NPC_Studio_Receptionist")
-			and patrol_actor_ids.has("NPC_Studio_Manager")
-			and patrol_actor_ids.has("NPC_Office_Worker")
-			and patrol_actor_ids.has("NPC_Roaming_Liaison")
+	# Semantic route dwell is deliberately long enough for a live provider
+	# opening to resolve. Advance through the quiet part of the initial dwell,
+	# then verify the first staggered departures at 50 world seconds.
+	var initial_patrol_applied := false
+	for target_seconds in [20, 30, 40, 50]:
+		instance.set("_advance_elapsed_buffer", 10.0)
+		var target_revision := preload_baseline_revision + int(target_seconds / 10)
+		var target_settled := false
+		for _frame in range(120):
+			await process_frame
+			snapshot = instance.call("presentation_snapshot")
+			var target_clock: Dictionary = snapshot.get("worldClock", {})
+			if (
+				int(snapshot.get("runWorldRevision", -1)) == target_revision
+				and float(target_clock.get("elapsedSeconds", -1.0)) == float(target_seconds)
+			):
+				target_settled = true
+				break
+		if not target_settled:
+			_failures.append(
+				"%s schedule advance did not settle at %s world seconds" % [label, target_seconds]
+			)
+			return
+		var target_actor_ids := _active_movement_actor_ids(snapshot)
+		if target_seconds < 50 and not target_actor_ids.is_empty():
+			_failures.append(
+				"%s patrol moved before the configured 45-60 second dwell: %s"
+				% [label, target_actor_ids.keys()]
+			)
+		elif (
+			target_seconds == 50
+			and target_actor_ids.has("NPC_Studio_Manager")
+			and target_actor_ids.has("NPC_Office_Worker")
+			and target_actor_ids.size() == 2
 		):
-			early_patrol_applied = true
-			break
-	if not early_patrol_applied:
-		_failures.append(
-			"%s second ten-second advance did not issue the staggered early patrols" % label
-		)
+			initial_patrol_applied = true
+	if not initial_patrol_applied:
+		_failures.append("%s initial staggered patrols were not issued at 50 seconds" % label)
 		return
-	var early_patrol_actor_ids := _active_movement_actor_ids(snapshot)
-	if early_patrol_actor_ids.size() != 4:
-		_failures.append(
-			"%s early patrol batch contains unexpected actors: %s"
-			% [label, early_patrol_actor_ids.keys()]
-		)
 	first_clock = snapshot.get("worldClock", {})
-	if float(first_clock.get("elapsedSeconds", -1.0)) != 20.0:
-		_failures.append("%s early patrol advance did not reach twenty world seconds" % label)
 
 	# Main processes while paused so conversation HTTP can finish, but its clock
 	# lane explicitly returns and Town/NPC physics are pausable.
@@ -4307,9 +4472,7 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 
 	var physical_progress := false
 	var arrivals_applied := false
-	# The liaison's first patrol leg crosses the park while the other three
-	# residents move within their buildings; allow the longest authored leg to
-	# finish before the fixture's exact four-arrival batch is dispatched.
+	# The first dwell batch contains two short indoor legs.
 	for _frame in range(480):
 		await physics_frame
 		var planar_progress := Vector2(
@@ -4323,9 +4486,9 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 			[]
 		)
 		if (
-			int(snapshot.get("runWorldRevision", -1)) >= preload_baseline_revision + 3
+			int(snapshot.get("runWorldRevision", -1)) >= preload_baseline_revision + 6
 			and arrivals_value is Array
-			and (arrivals_value as Array).size() == 4
+			and (arrivals_value as Array).size() == 2
 		):
 			arrivals_applied = true
 			break
@@ -4341,7 +4504,7 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 	if not arrivals_applied:
 		_failures.append(
 			(
-				"%s initial movement arrivals were not acknowledged together "
+				"%s first movement arrivals were not acknowledged together "
 				+ "(advance=%s pending=%s active=%s queued=%s)"
 			)
 			% [
@@ -4359,7 +4522,7 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 	)
 	if (
 		int(arrival_spatial.get("observedWorldRevision", -1))
-		!= preload_baseline_revision + 2
+		!= preload_baseline_revision + 5
 		or int(arrival_spatial.get("actorCount", -1)) != 6
 	):
 		_failures.append("%s exact-arrival advance omitted refreshed spatial facts" % label)
@@ -4372,25 +4535,48 @@ func _check_run_clock_and_schedule(label: String, instance: Node) -> void:
 	elif arrived_office_anchor == initial_office_anchor:
 		_failures.append("%s arrival acknowledgement did not change confirmed anchor" % label)
 
+	# The remaining four residents reach their individual 45-60 second dwell
+	# deadlines in the next material advance.
 	instance.set("_advance_elapsed_buffer", 10.0)
-	var route_advance_applied := false
+	var late_patrol_applied := false
 	for _frame in range(120):
 		await process_frame
 		snapshot = instance.call("presentation_snapshot")
-		var route_actor_ids := _active_movement_actor_ids(snapshot)
+		var late_actor_ids := _active_movement_actor_ids(snapshot)
 		if (
-			int(snapshot.get("runWorldRevision", -1)) == preload_baseline_revision + 4
-			and route_actor_ids.has("NPC_Park_Caretaker")
-			and route_actor_ids.has("NPC_Station_Officer")
+			int(snapshot.get("runWorldRevision", -1)) == preload_baseline_revision + 7
+			and late_actor_ids.has("NPC_Studio_Receptionist")
+			and late_actor_ids.has("NPC_Park_Caretaker")
+			and late_actor_ids.has("NPC_Station_Officer")
+			and late_actor_ids.has("NPC_Roaming_Liaison")
+			and late_actor_ids.size() == 4
 		):
-			route_advance_applied = true
+			late_patrol_applied = true
 			break
-	if not route_advance_applied:
-		_failures.append("%s third ten-second advance did not issue late patrol movements" % label)
+	if not late_patrol_applied:
+		_failures.append("%s remaining staggered patrols were not issued at 60 seconds" % label)
 		return
-	var route_clock: Dictionary = snapshot.get("worldClock", {})
-	if float(route_clock.get("elapsedSeconds", -1.0)) != 30.0:
-		_failures.append("%s late patrol advance did not reach thirty world seconds" % label)
+	var late_clock: Dictionary = snapshot.get("worldClock", {})
+	if float(late_clock.get("elapsedSeconds", -1.0)) != 60.0:
+		_failures.append("%s late patrol advance did not reach sixty world seconds" % label)
+	var late_arrivals_applied := false
+	for _frame in range(720):
+		await physics_frame
+		snapshot = instance.call("presentation_snapshot")
+		var late_arrivals_value: Variant = (snapshot.get("arrivals", {}) as Dictionary).get(
+			"applied",
+			[]
+		)
+		if (
+			int(snapshot.get("runWorldRevision", -1)) >= preload_baseline_revision + 8
+			and late_arrivals_value is Array
+			and (late_arrivals_value as Array).size() == 4
+		):
+			late_arrivals_applied = true
+			break
+	if not late_arrivals_applied:
+		_failures.append("%s remaining staggered patrol arrivals were not acknowledged" % label)
+		return
 	var final_budget: Dictionary = snapshot.get("providerBudget", {})
 	if int(final_budget.get("callsUsed", -1)) != 0:
 		_failures.append("%s deterministic scheduling consumed provider calls" % label)

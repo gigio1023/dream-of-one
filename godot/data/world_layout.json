@@ -1,7 +1,7 @@
 {
   "version": 3,
   "world_id": "m3r_first_person_town",
-  "world_revision": "rev-first-person-town-v5",
+  "world_revision": "rev-first-person-town-v6",
   "units": "meters",
   "coordinate_system": {
     "up": "+Y",
@@ -429,7 +429,7 @@
       "kind": "conversation",
       "landmark": "Studio",
       "anchor": "Studio.reception_desk",
-      "radius": 4.5,
+      "radius": 7,
       "actor_ids": ["NPC_Studio_Receptionist", "NPC_Roaming_Liaison"]
     },
     {
@@ -437,7 +437,7 @@
       "kind": "conversation",
       "landmark": "Studio",
       "anchor": "Studio.manager_desk",
-      "radius": 2.5,
+      "radius": 7,
       "actor_ids": ["NPC_Studio_Manager"]
     },
     {
@@ -445,7 +445,7 @@
       "kind": "conversation",
       "landmark": "Office",
       "anchor": "Office.work_desk",
-      "radius": 3,
+      "radius": 7,
       "actor_ids": ["NPC_Office_Worker", "NPC_Roaming_Liaison"]
     },
     {
@@ -453,7 +453,7 @@
       "kind": "conversation",
       "landmark": "Park",
       "anchor": "Park.center",
-      "radius": 10,
+      "radius": 12.5,
       "actor_ids": [
         "NPC_Studio_Receptionist",
         "NPC_Studio_Manager",
@@ -468,7 +468,7 @@
       "kind": "conversation",
       "landmark": "Station",
       "anchor": "Station.intake_desk",
-      "radius": 4,
+      "radius": 6.5,
       "actor_ids": ["NPC_Station_Officer", "NPC_Roaming_Liaison"]
     },
     {

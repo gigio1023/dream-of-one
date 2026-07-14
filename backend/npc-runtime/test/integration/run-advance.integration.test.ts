@@ -123,14 +123,22 @@ test("all six residents receive staggered early policy movement without provider
   };
   const second = await service.advance(secondRequest);
   assert.deepEqual(await service.advance(secondRequest), second);
-  const third = await service.advance({
-    runId: started.runId,
-    advanceId: "advance-policy-30",
-    observedWorldRevision: second.worldRevision,
-    elapsedSeconds: 10,
-    arrivals: [],
-  });
-  const policyMovements = [...second.movementDeltas, ...third.movementDeltas];
+  const policyMovements = [...second.movementDeltas];
+  let policyRevision = second.worldRevision;
+  let policySeconds = 20;
+  while (policySeconds < ROUTE_DWELL_MAX_SECONDS) {
+    const elapsedSeconds = Math.min(10, ROUTE_DWELL_MAX_SECONDS - policySeconds);
+    policySeconds += elapsedSeconds;
+    const step = await service.advance({
+      runId: started.runId,
+      advanceId: `advance-policy-${policySeconds}`,
+      observedWorldRevision: policyRevision,
+      elapsedSeconds,
+      arrivals: [],
+    });
+    policyRevision = step.worldRevision;
+    policyMovements.push(...step.movementDeltas);
+  }
   assert.deepEqual(
     policyMovements.map(movement => movement.actorId).sort(),
     started.actors.map(actor => actor.actorId).sort(),
@@ -159,17 +167,33 @@ test("all six residents receive staggered early policy movement without provider
 test("route progress waits for exact arrival and exposes the next per-point due time", async () => {
   const service = createService();
   const started = service.start("start-route", "ko-KR");
-  const atTwenty = await advanceTo(service, started.runId, started, 20, "route-to-20");
+  const actorId = STUDIO_RECEPTIONIST_ID;
+  const firstDue = started.scheduler.actors.find(
+    actor => actor.actorId === actorId,
+  )?.nextRouteMoveAtSeconds;
+  assert.notEqual(firstDue, null);
+  if (firstDue === null || firstDue === undefined) {
+    throw new Error("receptionist route due time missing");
+  }
+  const beforeFirstDue = await advanceTo(
+    service,
+    started.runId,
+    started,
+    firstDue - 1,
+    "route-before-first-due",
+  );
   const firstRoutes = await service.advance({
     runId: started.runId,
     advanceId: "route-caretaker-due",
-    observedWorldRevision: atTwenty.worldRevision,
-    elapsedSeconds: 6,
+    observedWorldRevision: beforeFirstDue.worldRevision,
+    elapsedSeconds: 1,
     arrivals: [],
   });
   assert.deepEqual(
-    firstRoutes.movementDeltas.map(movement => [movement.actorId, movement.routePointIndex]),
-    [["NPC_Park_Caretaker", 1]],
+    firstRoutes.movementDeltas
+      .filter(movement => movement.actorId === actorId)
+      .map(movement => [movement.actorId, movement.routePointIndex]),
+    [[actorId, 1]],
   );
   const rejectedOnly = await service.advance({
     runId: started.runId,
@@ -179,16 +203,18 @@ test("route progress waits for exact arrival and exposes the next per-point due 
     arrivals: [
       {
         movementId: "mov:known-but-not-current",
-        actorId: "NPC_Park_Caretaker",
-        anchorRef: "Park.bench_west",
+        actorId,
+        anchorRef: "Studio.waiting_seats",
       },
     ],
   });
   assert.equal(rejectedOnly.worldRevision, firstRoutes.worldRevision);
   assert.equal(rejectedOnly.arrivalsRejected[0]?.reason, "not_current");
 
-  const caretakerMove = firstRoutes.movementDeltas[0];
-  assert.ok(caretakerMove);
+  const residentMove = firstRoutes.movementDeltas.find(
+    movement => movement.actorId === actorId,
+  );
+  assert.ok(residentMove);
   const caretakerArrived = await service.advance({
     runId: started.runId,
     advanceId: "route-caretaker-arrival",
@@ -196,22 +222,22 @@ test("route progress waits for exact arrival and exposes the next per-point due 
     elapsedSeconds: 0,
     arrivals: [
       {
-        movementId: caretakerMove.movementId,
-        actorId: caretakerMove.actorId,
-        anchorRef: caretakerMove.targetAnchorRef,
+        movementId: residentMove.movementId,
+        actorId: residentMove.actorId,
+        anchorRef: residentMove.targetAnchorRef,
       },
     ],
   });
-  const caretakerScheduler = caretakerArrived.scheduler.actors.find(
-    actor => actor.actorId === "NPC_Park_Caretaker",
+  const receptionistScheduler = caretakerArrived.scheduler.actors.find(
+    actor => actor.actorId === actorId,
   );
-  assert.equal(caretakerScheduler?.routePointArrivedAtSeconds, 26);
-  const expectedNextDue = 26 + routePointDwellSeconds(
-    "NPC_Park_Caretaker",
-    "ParkCaretakerRound",
+  assert.equal(receptionistScheduler?.routePointArrivedAtSeconds, firstDue);
+  const expectedNextDue = firstDue + routePointDwellSeconds(
+    actorId,
+    "StudioFrontDesk",
     1,
   );
-  assert.equal(caretakerScheduler?.nextRouteMoveAtSeconds, expectedNextDue);
+  assert.equal(receptionistScheduler?.nextRouteMoveAtSeconds, expectedNextDue);
   const beforeDwell = await advanceTo(
     service,
     started.runId,
@@ -220,7 +246,7 @@ test("route progress waits for exact arrival and exposes the next per-point due 
     "route-before-next-due",
   );
   assert.ok(beforeDwell.movementDeltas.every(
-    movement => movement.actorId !== "NPC_Park_Caretaker",
+    movement => movement.actorId !== actorId,
   ));
   const afterDwell = await service.advance({
     runId: started.runId,
@@ -230,8 +256,10 @@ test("route progress waits for exact arrival and exposes the next per-point due 
     arrivals: [],
   });
   assert.deepEqual(
-    afterDwell.movementDeltas.map(movement => [movement.actorId, movement.routePointIndex]),
-    [["NPC_Park_Caretaker", 2]],
+    afterDwell.movementDeltas
+      .filter(movement => movement.actorId === actorId)
+      .map(movement => [movement.actorId, movement.routePointIndex]),
+    [[actorId, 2]],
   );
 });
 
@@ -242,14 +270,15 @@ test("a route move held past its due time issues once when the hold clears", () 
   const dueAt = snapshotRunScheduler(layout, runtime, 0).actors.find(
     actor => actor.actorId === actorId,
   )?.nextRouteMoveAtSeconds;
-  assert.equal(dueAt, 12);
+  assert.notEqual(dueAt, null);
+  if (dueAt === null || dueAt === undefined) throw new Error("liaison route due time missing");
 
   const beforeDue = advanceRunScheduler({
     runId: "run-held-route",
     layout,
     runtime,
     fromSeconds: 0,
-    toSeconds: 11,
+    toSeconds: dueAt - 1,
     arrivals: [],
     observedWorldRevision: 0,
     heldActorIds: new Set([actorId]),
@@ -259,8 +288,8 @@ test("a route move held past its due time issues once when the hold clears", () 
     runId: "run-held-route",
     layout,
     runtime,
-    fromSeconds: 11,
-    toSeconds: 20,
+    fromSeconds: dueAt - 1,
+    toSeconds: dueAt + 8,
     arrivals: [],
     observedWorldRevision: 1,
     heldActorIds: new Set([actorId]),
@@ -271,8 +300,8 @@ test("a route move held past its due time issues once when the hold clears", () 
     runId: "run-held-route",
     layout,
     runtime,
-    fromSeconds: 20,
-    toSeconds: 21,
+    fromSeconds: dueAt + 8,
+    toSeconds: dueAt + 9,
     arrivals: [],
     observedWorldRevision: 2,
   });
@@ -280,14 +309,14 @@ test("a route move held past its due time issues once when the hold clears", () 
     movement => movement.actorId === actorId,
   );
   assert.equal(releasedMovements.length, 1);
-  assert.equal(releasedMovements[0]?.issuedAtSeconds, 21);
+  assert.equal(releasedMovements[0]?.issuedAtSeconds, dueAt + 9);
 
   const whilePending = advanceRunScheduler({
     runId: "run-held-route",
     layout,
     runtime,
-    fromSeconds: 21,
-    toSeconds: 22,
+    fromSeconds: dueAt + 9,
+    toSeconds: dueAt + 10,
     arrivals: [],
     observedWorldRevision: 3,
   });
@@ -388,7 +417,11 @@ test("provider-selected route movement observes the same deterministic due time"
   const runtime = createRunScheduler(layout);
   const initial = snapshotRunScheduler(layout, runtime, 0);
   const liaison = initial.actors.find(actor => actor.actorId === "NPC_Roaming_Liaison");
-  assert.equal(liaison?.nextRouteMoveAtSeconds, 12);
+  const liaisonDue = liaison?.nextRouteMoveAtSeconds;
+  assert.notEqual(liaisonDue, null);
+  if (liaisonDue === null || liaisonDue === undefined) {
+    throw new Error("liaison route due time missing");
+  }
 
   const options = {
     runId: "run-goal-cadence",
@@ -397,8 +430,8 @@ test("provider-selected route movement observes the same deterministic due time"
     actorId: "NPC_Roaming_Liaison",
     targetAnchorRef: "Park.studio_approach",
   };
-  assert.equal(issueActorGoalMovement({ ...options, elapsedSeconds: 11 }), null);
-  const dueMovement = issueActorGoalMovement({ ...options, elapsedSeconds: 12 });
+  assert.equal(issueActorGoalMovement({ ...options, elapsedSeconds: liaisonDue - 1 }), null);
+  const dueMovement = issueActorGoalMovement({ ...options, elapsedSeconds: liaisonDue });
   assert.equal(dueMovement?.issuedAtSeconds, liaison.nextRouteMoveAtSeconds);
   assert.equal(dueMovement?.routePointIndex, 1);
 });

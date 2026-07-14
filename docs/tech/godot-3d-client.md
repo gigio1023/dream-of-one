@@ -15,13 +15,14 @@ residents and carries any ready resident into the same generated-choice or
 bounded-free-text conversation surface. In live HTTP mode, `main_3d` maintains
 one preload-priority resident inside the 16 m nearby radius, using nearest
 distance with a 3 m switch margin so ambient wander cannot thrash the target.
-The NPC under the player's current raw interaction ray overrides nearest
-selection, and an active NPC-to-player contact overrides both. Raw aim may
-identify an interaction-disabled NPC only as provider-preparation intent; HUD
-focus, prompts, and `E` continue through the separate readiness-gated path.
+The NPC under the player's current interaction ray overrides nearest selection,
+and an active NPC-to-player contact overrides both. A visible resident inside
+the same 5 m, 32-degree camera-relative approach cone also counts as explicit
+provider-preparation intent, even before their opening is ready; HUD focus,
+prompts, and `E` continue through the separate readiness-gated 3 m path.
 Each resident receives one automatic attempt when it first becomes the nearby
 priority. If evidence later invalidates that attempted opening, it stays
-dormant until raw aim or active contact explicitly demands a refresh. One
+dormant until an explicit nearby look or active contact demands a refresh. One
 continuous aim/contact demand epoch funds at most one invalidation retry; a
 second invalidation requires aim-out/aim-in or a new contact id. Only the
 priority resident may start or retry an opening, and no queued preload may
@@ -30,13 +31,24 @@ successful preload rebases the run before another candidate starts. A normal
 `conversation_not_ready` race also rebases and enters this same bounded
 explicit-demand path instead of looping or permanently stranding the actor. A
 dropped or exhausted
-transport retry likewise requires a fresh raw-aim/contact demand; losing that
+transport retry likewise requires a fresh look/contact demand; losing that
 demand while queued never consumes the recovery, and passive proximity never
 restarts it. Authoritative schedule or blocked movement removes a candidate,
 while ambient wander and an NPC's player-contact approach do not block
 preparation. Fixture mode retains the
 deterministic all-six preload sequence. The click-time start consumes a ready
-opening without another provider wait; model judgment, coarse stance display,
+opening without another provider wait. While a live opening is prepared,
+RunService defers only that resident's ordinary route cadence and keeps the
+ready anchor for a 15-second input grace. Valid current engine facts extend the
+hold while the player remains visibly, audibly, and reachably in conversation
+range. NPC focus and preload-intent changes dirty the next batched spatial
+observation so a route due at the same moment cannot reuse pre-focus facts;
+the focused resident also pauses only its scene-local ambient wander and faces
+the player until focus leaves. Explicit approach intent also pauses only that
+resident's scene-local wander, without exposing an early interaction prompt.
+Authoritative route commands, authored schedule
+transitions, and the rest of the world continue. Model
+judgment, coarse stance display,
 child-session end, and world resume remain unchanged. The modal owns
 only presentation and pause; all memory and stance truth comes back from the
 TypeScript `RunService`. Outside a modal, the client batches unpaused time,
@@ -385,9 +397,15 @@ the dev machine with all six NPC loops live.
 - **Interaction**: forward ray picks the nearest interactable (NPC, prop,
   record surface); `interact` opens conversation, picks up/places a prop, or
   inspects. If that exact ray has no target, first acquisition may assist only
-  a currently enabled, visible NPC inside 2.5 m and a narrow camera-relative
-  cone; this never creates provider preload intent, and exact targets and held
-  props keep priority. Captured left-click throws only while a prop is held and
+  a visible NPC inside a 5 m, 32-degree camera-relative approach cone. That
+  assisted look may recover a stale provider opening and holds only that
+  resident's local wander while the player closes the distance. The NPC becomes
+  an `E` target only when ready and inside 3 m. A ready NPC inside that
+  cone outranks an exact static record surface; that thin inspectable overlay
+  alone does not occlude either the NPC torso check or the engine spatial sight
+  fact used to ground conversation. Walls, held props, and exact NPC or
+  physical-prop rays retain priority, and looking outside the cone exposes the
+  record normally. Captured left-click throws only while a prop is held and
   otherwise retains its normal mouse-look role.
 - **Contextual onboarding**: one presentation-only overlay introduces
   movement/jump, the outsider premise and Studio-first purpose, NPC talk,

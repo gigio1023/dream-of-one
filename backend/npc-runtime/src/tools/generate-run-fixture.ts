@@ -658,18 +658,44 @@ async function driveAdvanceSequence() {
     arrivals: [],
   };
   const initialResponse = await service.advance(initialRequest);
-  const routeRequest = {
-    runId: runStartResponse.runId,
-    advanceId: `${runStartResponse.runId}:advance:000002`,
-    observedWorldRevision: initialResponse.worldRevision,
-    elapsedSeconds: 10,
-    arrivals: [],
-  };
-  const routeResponse = await service.advance(routeRequest);
+  const preRouteReplaySteps: Array<{
+    stepId: string;
+    request: RunAdvanceRequest;
+    response: RunAdvanceResponse;
+  }> = [];
+  let latestResponse = initialResponse;
+  let sequence = 1;
+  let dwellStep = 0;
+  let routeRequest: RunAdvanceRequest | undefined;
+  let routeResponse: RunAdvanceResponse | undefined;
+  while (!routeResponse && dwellStep < 6) {
+    const request: RunAdvanceRequest = {
+      runId: runStartResponse.runId,
+      advanceId: `${runStartResponse.runId}:advance:${String(++sequence).padStart(6, "0")}`,
+      observedWorldRevision: latestResponse.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: [],
+    };
+    const response = await service.advance(request);
+    if (response.movementDeltas.length > 0) {
+      routeRequest = request;
+      routeResponse = response;
+      break;
+    }
+    preRouteReplaySteps.push({
+      stepId: `initial_dwell_clock_${++dwellStep}`,
+      request,
+      response,
+    });
+    latestResponse = response;
+  }
+  if (!routeRequest || !routeResponse) {
+    throw new Error("run fixture did not reach the first staggered route departure");
+  }
   const routeRetryResponse = await service.advance(routeRequest);
-  const arrivalRequest = {
+  const arrivalRequest: RunAdvanceRequest = {
     runId: runStartResponse.runId,
-    advanceId: `${runStartResponse.runId}:advance:000003`,
+    advanceId: `${runStartResponse.runId}:advance:${String(++sequence).padStart(6, "0")}`,
     observedWorldRevision: routeResponse.worldRevision,
     elapsedSeconds: 0,
     arrivals: sortedArrivalBatch(routeResponse),
@@ -681,8 +707,7 @@ async function driveAdvanceSequence() {
     request: RunAdvanceRequest;
     response: RunAdvanceResponse;
   }> = [];
-  let latestResponse = arrivalResponse;
-  let sequence = 3;
+  latestResponse = arrivalResponse;
   let clockStep = 0;
   let arrivalStep = 0;
   let meetingWake = latestResponse.scheduleWakes.find(wake => wake.kind === "meeting_ready");
@@ -764,6 +789,7 @@ async function driveAdvanceSequence() {
     routeRequest,
     routeResponse,
     routeRetryResponse,
+    preRouteReplaySteps,
     runSnapshotAfterAdvanceResponse,
     meetingReplaySteps,
     npcDecisionRequest,
@@ -998,6 +1024,12 @@ export async function buildRunApiFixture() {
         request: advancePath.initialRequest,
         response: advancePath.initialResponse,
       },
+      ...advancePath.preRouteReplaySteps.map(step => ({
+        stepId: step.stepId,
+        endpoint: "POST /v1/run/advance",
+        request: step.request,
+        response: step.response,
+      })),
       {
         stepId: "first_route_moves",
         endpoint: "POST /v1/run/advance",

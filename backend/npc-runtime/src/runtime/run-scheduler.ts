@@ -13,8 +13,8 @@ import type {
   RunScheduleBlock,
 } from "./run-layout.js";
 
-export const ROUTE_DWELL_MIN_SECONDS = 12;
-export const ROUTE_DWELL_MAX_SECONDS = 28;
+export const ROUTE_DWELL_MIN_SECONDS = 45;
+export const ROUTE_DWELL_MAX_SECONDS = 60;
 /**
  * Conservative scalar retained for the existing scheduler wire field and
  * callers that cannot express per-point timing. `nextRouteMoveAtSeconds` is
@@ -631,6 +631,7 @@ export function advanceRunScheduler(options: {
   arrivals: readonly RunArrivalObservation[];
   observedWorldRevision: number;
   heldActorIds?: ReadonlySet<string>;
+  routeHeldActorIds?: ReadonlySet<string>;
 }): SchedulerAdvanceResult {
   const {
     runId,
@@ -641,6 +642,7 @@ export function advanceRunScheduler(options: {
     arrivals,
     observedWorldRevision,
     heldActorIds = new Set<string>(),
+    routeHeldActorIds = new Set<string>(),
   } = options;
   const { arrivalsApplied, arrivalsRejected } = applyArrivals(runtime, arrivals, fromSeconds);
   const scheduleWakes: RunScheduleWake[] = [];
@@ -723,7 +725,7 @@ export function advanceRunScheduler(options: {
   }
 
   for (const actor of layout.actors) {
-    if (heldActorIds.has(actor.actorId)) continue;
+    if (heldActorIds.has(actor.actorId) || routeHeldActorIds.has(actor.actorId)) continue;
     const state = stateFor(runtime, actor.actorId);
     const block = blockAt(actor, toSeconds);
     if (

@@ -8,6 +8,7 @@ import { loadRunLayout } from "../../src/runtime/run-layout.js";
 import {
   appendProviderRuntimeTrace,
   MAX_PROVIDER_RUNTIME_TRACE_ENTRIES,
+  PLAYER_CONVERSATION_APPROACH_HOLD_DISTANCE_M,
   PLAYER_CONVERSATION_MAX_CENTER_DISTANCE_M,
   RunError,
   RunService,
@@ -43,7 +44,7 @@ test("run/start hydrates the shared town layout into six persistent uncertain ac
   const snapshot = runSnapshotSchema.parse(service.start("run-test-start", "ko-KR"));
 
   assert.equal(snapshot.worldId, "m3r_first_person_town");
-  assert.equal(snapshot.layoutRevision, "rev-first-person-town-v5");
+  assert.equal(snapshot.layoutRevision, "rev-first-person-town-v6");
   assert.equal(snapshot.worldRevision, 0);
   assert.equal(snapshot.worldClock.graceEndsAtSeconds, 90);
   assert.equal(snapshot.worldClock.graceEnded, false);
@@ -70,6 +71,137 @@ test("run/start hydrates the shared town layout into six persistent uncertain ac
   assert.equal(snapshot.scheduler.actors.length, 6);
   assert.ok(snapshot.scheduler.actors.every(actor => actor.currentBlock !== null));
   assert.ok(snapshot.scheduler.actors.every(actor => actor.pendingMovement === null));
+});
+
+test("conversation zones cover every authored resident position plus interaction reach", () => {
+  const layout = loadRunLayout();
+  const routes = new Map(layout.routes.map(route => [route.routeId, route.points]));
+
+  for (const actor of layout.actors) {
+    const anchorRefs = new Set<string>([
+      actor.spawnAnchorRef,
+      ...(routes.get(actor.routeId) ?? []),
+    ]);
+    for (const block of actor.scheduleBlocks) {
+      if (block.target.kind === "anchor") anchorRefs.add(block.target.id);
+      else for (const anchorRef of routes.get(block.target.id) ?? []) anchorRefs.add(anchorRef);
+    }
+
+    for (const anchorRef of anchorRefs) {
+      const landmarkId = anchorRef.split(".", 1)[0] ?? "";
+      const zone = layout.conversationZones.find(candidate =>
+        candidate.landmarkId === landmarkId && candidate.actorIds.includes(actor.actorId)
+      );
+      assert.ok(zone, `${actor.actorId} has no conversation zone at ${anchorRef}`);
+      const zonePosition = layout.anchorPositions[zone.anchorRef];
+      const actorPosition = layout.anchorPositions[anchorRef];
+      assert.ok(zonePosition && actorPosition);
+      const routeDistance = Math.hypot(
+        actorPosition[0] - zonePosition[0],
+        actorPosition[2] - zonePosition[2],
+      );
+      assert.ok(
+        zone.radius + 0.001 >= routeDistance + PLAYER_CONVERSATION_MAX_CENTER_DISTANCE_M,
+        `${zone.zoneId} cannot support ${actor.actorId} at ${anchorRef}: ` +
+          `radius ${zone.radius} < required ${(
+            routeDistance + PLAYER_CONVERSATION_MAX_CENTER_DISTANCE_M
+          ).toFixed(3)}`,
+      );
+    }
+  }
+});
+
+test("a ready resident keeps its route anchor while the player approaches in grounded range", async () => {
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: deterministicIds(),
+  });
+  const started = service.start("run-ready-player-route-hold", "ko-KR");
+  await preloadReceptionist(service, started.runId);
+  await groundOrdinaryConversation(
+    service,
+    started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ground-ready-player-route-hold",
+  );
+
+  let snapshot = service.snapshot(started.runId);
+  const approachActors = runSpatialActors(snapshot);
+  const receptionistFacts = approachActors.find(
+    actor => actor.actorId === STUDIO_RECEPTIONIST_ID,
+  );
+  assert.ok(receptionistFacts);
+  receptionistFacts.playerVisible = true;
+  receptionistFacts.playerAudible = true;
+  receptionistFacts.playerReachable = true;
+  receptionistFacts.playerInteractionZoneId = STUDIO_ZONE_ID;
+  await service.advance({
+    runId: started.runId,
+    advanceId: "ready-player-route-hold:approach",
+    observedWorldRevision: snapshot.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: snapshot.worldRevision,
+      player: {
+        position: [
+          receptionistFacts.position[0] +
+            PLAYER_CONVERSATION_APPROACH_HOLD_DISTANCE_M - 0.25,
+          receptionistFacts.position[1],
+          receptionistFacts.position[2],
+        ],
+        locationId: "Studio",
+      },
+      actors: approachActors,
+    },
+  });
+
+  for (let step = 1; step <= 8; step += 1) {
+    snapshot = service.snapshot(started.runId);
+    const held = await service.advance({
+      runId: started.runId,
+      advanceId: `ready-player-route-hold:${step}`,
+      observedWorldRevision: snapshot.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: [],
+    });
+    assert.ok(held.movementDeltas.every(
+      movement => movement.actorId !== STUDIO_RECEPTIONIST_ID,
+    ));
+    const receptionist = held.scheduler.actors.find(
+      actor => actor.actorId === STUDIO_RECEPTIONIST_ID,
+    );
+    assert.equal(receptionist?.pendingMovement, null);
+  }
+
+  snapshot = service.snapshot(started.runId);
+  await service.advance({
+    runId: started.runId,
+    advanceId: "ready-player-route-hold:player-left",
+    observedWorldRevision: snapshot.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: snapshot.worldRevision,
+      player: { position: [0, 0, 0], locationId: "Park" },
+      actors: runSpatialActors(snapshot),
+    },
+  });
+  snapshot = service.snapshot(started.runId);
+  const released = await service.advance({
+    runId: started.runId,
+    advanceId: "ready-player-route-hold:released",
+    observedWorldRevision: snapshot.worldRevision,
+    elapsedSeconds: 1,
+    arrivals: [],
+  });
+  assert.equal(
+    released.movementDeltas.filter(
+      movement => movement.actorId === STUDIO_RECEPTIONIST_ID,
+    ).length,
+    1,
+  );
 });
 
 test("all six residents preload and consume a conversation through their current actor-location zone", async () => {

@@ -312,17 +312,27 @@ before clock boundaries. An issued movement changes only scheduler intent;
 the actor's confirmed anchor and location change only after Godot reports the
 matching `movementId`, actor, and semantic anchor. Route progress is likewise
 arrival-gated: after a confirmed route point, a stable hash of actor, route,
-and waypoint chooses a 12–28 world-second dwell. This staggers ordinary patrols
-without randomness, persistence, or a provider call. `nextRouteMoveAtSeconds`,
+and waypoint chooses a 45–60 world-second semantic dwell. Scene-local ambient
+wander continues inside that anchor, so residents keep moving while a live
+conversation opening has enough time to prepare. This staggers ordinary
+patrols without randomness, persistence, or a provider call. `nextRouteMoveAtSeconds`,
 automatic policy movement, and provider-proposed movement all honor the same
 exact due time, while a schedule block transition may supersede an in-flight
 route movement. If player contact holds a resident past that due time, the
 scheduler issues the overdue route once at the first unheld advance rather than
-leaving the actor locally frozen. Cyclic route selection also skips semantic
-anchors that share the confirmed anchor's physical position and preserves the
-first physically distinct point's semantic index; an all-coincident route emits
-no meaningless movement. Meeting and hearing blocks keep their exact authored
-anchors.
+leaving the actor locally frozen. A provider-backed conversation opening also
+holds only that resident's ordinary route cadence while the proposal is in
+flight and for 15 world seconds after it becomes ready. If current engine facts
+still place the player inside that resident's valid visible, audible, reachable
+5 m approach range, the route hold lasts until those facts change; the actual
+conversation start remains independently limited to 2.85 m center distance.
+Schedule transitions, meeting ownership, the world clock, and scene-local
+ambient wander continue; the first advance after the grace or grounded
+proximity ends issues any overdue route move once. Cyclic route selection also
+skips semantic anchors that share the confirmed anchor's physical position and
+preserves the first physically distinct point's semantic index; an
+all-coincident route emits no meaningless movement. Meeting and hearing blocks
+keep their exact authored anchors.
 
 Meeting windows retain one semantic center but map every participant to a
 distinct physical standing-slot anchor. A `meeting_ready` wake becomes pending

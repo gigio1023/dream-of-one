@@ -7,7 +7,7 @@ extends Node
 ## the Godot client authority boundary intact by returning only state that is
 ## already exposed by scene presentation nodes.
 
-const SCHEMA_VERSION := 1
+const SCHEMA_VERSION := 2
 const PRESENTATION_METHOD := &"presentation_snapshot"
 const TARGET_GROUPS := [&"interactables", &"npc_actors", &"spatial_props", &"semantic_targets"]
 const CAPABILITIES_PROPERTY := &"godot_ai_capabilities"
@@ -272,6 +272,17 @@ func semantic_targets() -> Array[Dictionary]:
 	var world := get_node_or_null(world_path)
 	if world == null:
 		return targets
+	var player := get_node_or_null(player_path)
+	var focused_target: Node = null
+	var preload_target: Node = null
+	if player != null and player.has_method(&"focused_interactable"):
+		var focused_value: Variant = player.call(&"focused_interactable")
+		if focused_value is Node:
+			focused_target = focused_value as Node
+	if player != null and player.has_method(&"preload_intent_target"):
+		var preload_value: Variant = player.call(&"preload_intent_target")
+		if preload_value is Node:
+			preload_target = preload_value as Node
 
 	var candidates: Array[Node] = []
 	_collect_target_nodes(world, candidates)
@@ -281,7 +292,12 @@ func semantic_targets() -> Array[Dictionary]:
 		var spatial := candidate as Node3D
 		if not spatial.is_visible_in_tree():
 			continue
-		targets.append(_target_snapshot(spatial))
+		targets.append(_target_snapshot_with_player_state(
+			spatial,
+			player,
+			focused_target,
+			preload_target
+		))
 	targets.sort_custom(_target_less)
 	return targets
 
@@ -824,6 +840,38 @@ func _target_snapshot(node: Node) -> Dictionary:
 				world_position = aim_value
 		result["worldPosition"] = _vector3_json(world_position)
 	return result
+
+
+func _target_snapshot_with_player_state(
+	node: Node3D,
+	player: Node,
+	focused_target: Node,
+	preload_target: Node
+) -> Dictionary:
+	var target := _target_snapshot(node)
+	if not node.is_in_group(&"npc_actors"):
+		return target
+	var conversation_ready := false
+	if node.has_method(&"is_interaction_enabled"):
+		conversation_ready = bool(node.call(&"is_interaction_enabled"))
+	var player_attention_held := false
+	if node.has_method(&"movement_status"):
+		var movement_value: Variant = node.call(&"movement_status")
+		if movement_value is Dictionary:
+			var ambient_value: Variant = (movement_value as Dictionary).get("ambient", {})
+			if ambient_value is Dictionary:
+				player_attention_held = bool(
+					(ambient_value as Dictionary).get("playerAttentionHeld", false)
+				)
+	target["conversationReady"] = conversation_ready
+	target["playerFocused"] = node == focused_target
+	target["playerPreloadIntent"] = node == preload_target
+	target["playerAttentionHeld"] = player_attention_held
+	if player is Node3D:
+		target["distanceToPlayerM"] = (player as Node3D).global_position.distance_to(
+			node.global_position
+		)
+	return target
 
 
 func _target_id(node: Node) -> Dictionary:

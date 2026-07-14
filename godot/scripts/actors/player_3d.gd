@@ -17,8 +17,9 @@ const MAX_PITCH_RADIANS := deg_to_rad(85.0)
 const NPC_FOCUS_GRACE_MSEC := 1500
 const NPC_FOCUS_GRACE_DISTANCE_M := 3.25
 const NPC_FOCUS_GRACE_MIN_FORWARD_DOT := 0.8660254
-const NPC_AIM_ASSIST_DISTANCE_M := 2.5
-const NPC_AIM_ASSIST_MAX_HORIZONTAL_RADIANS := deg_to_rad(10.0)
+const NPC_AIM_ASSIST_DISTANCE_M := 3.0
+const NPC_PRELOAD_AIM_ASSIST_DISTANCE_M := 5.0
+const NPC_AIM_ASSIST_MAX_HORIZONTAL_RADIANS := deg_to_rad(32.0)
 const NPC_AIM_ASSIST_MAX_VERTICAL_RADIANS := deg_to_rad(25.0)
 
 @export_range(0.5, 8.0, 0.1, "or_greater") var walk_speed := 4.0
@@ -128,13 +129,27 @@ func _physics_process(delta: float) -> void:
 	_prop_interactor.physics_update()
 
 	_interaction_ray.force_raycast_update()
-	_set_preload_intent_target(_aimed_npc_actor() if _control_enabled else null)
+	var preload_target: Node = null
+	if _control_enabled:
+		preload_target = _aimed_npc_actor()
+		if preload_target == null:
+			# A resident whose opening was invalidated while moving cannot yet
+			# enter the interactive-focus path. Treat the same narrow, visible
+			# torso aim assist as explicit preload intent so looking at a nearby
+			# person can recover their opening without pixel hunting.
+			preload_target = _npc_aim_assist(
+				false,
+				NPC_PRELOAD_AIM_ASSIST_DISTANCE_M
+			)
+	_set_preload_intent_target(preload_target)
 	var held_prop := _prop_interactor.held_prop()
 	var focus_target: Node = held_prop
 	if focus_target == null and _control_enabled:
 		focus_target = _interactable_collider()
-	if focus_target == null and _control_enabled:
-		focus_target = _ready_npc_aim_assist()
+	if _control_enabled and _ready_npc_may_override(focus_target):
+		var assisted_npc := _ready_npc_aim_assist()
+		if assisted_npc != null:
+			focus_target = assisted_npc
 	_set_focused_target(focus_target)
 
 
@@ -190,6 +205,24 @@ func _aimed_npc_actor() -> Node:
 
 
 func _ready_npc_aim_assist() -> Node:
+	return _npc_aim_assist(true, NPC_AIM_ASSIST_DISTANCE_M)
+
+
+func _ready_npc_may_override(exact_target: Node) -> bool:
+	if exact_target == null:
+		return true
+	if not exact_target.has_method("interaction_kind"):
+		return false
+	# A ready person standing at an inspectable board should remain the primary
+	# social target. Exact NPCs and physical props keep their direct-ray priority;
+	# looking outside the NPC cone still exposes the record surface normally.
+	return str(exact_target.call("interaction_kind")) == "record_surface"
+
+
+func _npc_aim_assist(
+	require_interaction_ready: bool,
+	max_distance_m: float
+) -> Node:
 	var camera_origin := _camera.global_position
 	var camera_forward := -_camera.global_transform.basis.z.normalized()
 	var camera_right := _camera.global_transform.basis.x.normalized()
@@ -208,13 +241,16 @@ func _ready_npc_aim_assist() -> Node:
 			or not candidate.has_method("get_interaction_label_key")
 			or not candidate.has_method("interact")
 			or not candidate.has_method("is_interaction_enabled")
-			or not bool(candidate.call("is_interaction_enabled"))
+			or (
+				require_interaction_ready
+				and not bool(candidate.call("is_interaction_enabled"))
+			)
 		):
 			continue
 		var aim_position := _npc_interaction_aim_position(candidate)
 		var to_target := aim_position - camera_origin
 		var distance := to_target.length()
-		if distance <= 0.001 or distance > NPC_AIM_ASSIST_DISTANCE_M:
+		if distance <= 0.001 or distance > max_distance_m:
 			continue
 		var target_direction := to_target / distance
 		var forward_amount := target_direction.dot(camera_forward)
@@ -437,15 +473,30 @@ func _npc_interaction_aim_position(target: Node3D) -> Vector3:
 
 
 func _npc_has_interaction_line_of_sight(target: Node3D, target_position: Vector3) -> bool:
+	var excluded_rids: Array[RID] = [get_rid()]
 	var query := PhysicsRayQueryParameters3D.create(
 		_camera.global_position,
 		target_position,
 		_interaction_ray.collision_mask,
-		[get_rid()]
+		excluded_rids
 	)
 	query.collide_with_areas = true
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	var collider: Variant = hit.get("collider")
+	# Inspectable boards are thin interaction overlays, not sight walls. If one
+	# is the sole blocker between the camera and a ready nearby resident, look
+	# through that surface once; physical props and world geometry still block.
+	if collider is Node:
+		var blocker := _find_interactable(collider as Node)
+		if (
+			blocker is CollisionObject3D
+			and blocker.has_method("interaction_kind")
+			and str(blocker.call("interaction_kind")) == "record_surface"
+		):
+			excluded_rids.append((blocker as CollisionObject3D).get_rid())
+			query.exclude = excluded_rids
+			hit = get_world_3d().direct_space_state.intersect_ray(query)
+			collider = hit.get("collider")
 	if not collider is Node:
 		return false
 	var candidate := collider as Node

@@ -118,6 +118,26 @@ Verified on 2026-07-12 against Godot `4.7.stable.official.5b4e0cb0f`:
   `godot_ai_input_smoke.gd` protects both consequences without gameplay input
   or a provider call. The playtest snapshot also exposes run/presentation/next
   locale, deferred-language state, and UI scale for final locale evidence.
+- A bounded native-child Qwen run on 2026-07-14 proved the repaired talkability
+  path. At world second 81, `NPC_Roaming_Liaison` was 2.176 m away and 1.657°
+  off-center; `conversationReady`, `playerPreloadIntent`,
+  `playerAttentionHeld`, and `playerFocused` were all true. The next native
+  inspection showed zero actor displacement and retained the same focus. One
+  physical `E` opened a nonempty conversation turn, paused the world, and
+  disabled player input. The complete provider audit contained seven
+  successful `modelscope/qwen3.7-plus` live calls, 10,625 charged tokens, no
+  fallback or failed calls, and reconciled/quiescent accounting. No answer was
+  submitted and no new editor/game error appeared.
+- That run did not capture the separate 3–5 m approach handoff: its first
+  outer-distance mouse input faced away from the resident, so preload intent
+  and attention hold were not expected to engage. The talkability slice is
+  proven, but Slice 4 remains incomplete. Resume with one fresh bounded run
+  that first holds an aimed resident between 3 m and 5 m and records
+  `playerPreloadIntent=true`, `playerAttentionHeld=true`, and
+  `playerFocused=false`; then close to 3 m, submit one displayed answer, inspect
+  the next response, and proceed to the remaining M3R hearing/fallback/locale
+  acceptance routes. Do not repeat the already-proven close-focus `E` path as
+  a standalone task.
 - Stopping the agent-owned editor also stopped an externally started server in
   one observed run. Treat editor and server lifetime as coupled unless current
   session status proves otherwise; after editor shutdown, restart the server
@@ -265,8 +285,12 @@ needed to play and debug:
   entries, citation counts, fallback marker, and restart state.
 
 `semantic_targets()` returns visible/interactable actor and spatial-prop ids,
-titles, kinds, and world positions. It does not expose hidden NPC knowledge,
-unreadable records, projected routes, or provider secrets.
+titles, kinds, and world positions. NPC entries separate backend conversation
+readiness from current player focus and preload intent, expose the scene-local
+`playerAttentionHeld` presentation flag, and include current player distance.
+This lets a play run distinguish a prepared resident at 3–5 m from an actual
+focus/`E` target inside 3 m without reading private nodes. It does not expose
+hidden NPC knowledge, unreadable records, projected routes, or provider secrets.
 
 The adapter must return copies, not references to mutable dictionaries. Missing
 nodes produce explicit availability fields rather than runtime errors.

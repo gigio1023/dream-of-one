@@ -158,6 +158,7 @@ func _ready() -> void:
 		_locale_name = str(_localization.call("locale"))
 	_player.focus_changed.connect(_hud.set_focus)
 	_player.preload_intent_changed.connect(_on_player_preload_intent_changed)
+	_player.unfocused_interaction_requested.connect(_on_unfocused_interaction_requested)
 	_player.settings_requested.connect(_hud.open_settings)
 	_hud.settings_visibility_changed.connect(_on_settings_visibility_changed)
 	_hud.log_visibility_changed.connect(_on_log_visibility_changed)
@@ -591,6 +592,30 @@ func _on_player_contact_ready(contact_id: String, actor_id: StringName) -> void:
 	call_deferred("_try_open_pending_contact")
 
 
+func _on_unfocused_interaction_requested() -> void:
+	# Ordinary NPC contact owns a global response cue, so accepting it cannot
+	# depend on keeping a moving resident inside the camera focus cone. Main owns
+	# the authoritative contact id; reusing its readiness checks avoids a second
+	# player-side target scan or any broader unfocused interaction behavior.
+	if (
+		_run_status != "active"
+		or _active_contact.is_empty()
+		or str(_active_contact.get("procedure", "ordinary")) != "ordinary"
+		or _contact_expired()
+	):
+		return
+	var actor_id := str(_active_contact.get("actorId", ""))
+	var contact_id := str(_active_contact.get("contactId", ""))
+	var actor := _town.get_node_or_null("Actors/%s" % actor_id) as NPC3D
+	if (
+		actor == null
+		or not actor.player_contact_is_ready(contact_id)
+		or not bool(_actor_view(actor_id).get("playerConversationReady", false))
+	):
+		return
+	_begin_conversation(StringName(actor_id), actor, contact_id)
+
+
 func _try_open_pending_contact() -> void:
 	if _run_status != "active":
 		_pending_contact_ready_id = ""
@@ -795,12 +820,16 @@ func _contact_presentation_snapshot() -> Dictionary:
 	if actor != null:
 		actor_status = actor.contact_status()
 		if bool(actor_status.get("ready", false)):
-			status = (
-				"ready_waiting_player"
-				if str(_active_contact.get("procedure", "ordinary")) == "ordinary"
-				else "ready_deferred" if _pending_contact_ready_id == contact_id
-				else "ready"
-			)
+			if str(_active_contact.get("procedure", "ordinary")) == "ordinary":
+				status = (
+					"ready_waiting_player"
+						if bool(_actor_view(actor_id).get("playerConversationReady", false))
+						else "ready_waiting_opening"
+				)
+			elif _pending_contact_ready_id == contact_id:
+				status = "ready_deferred"
+			else:
+				status = "ready"
 	return {
 		"active": true,
 		"contactId": contact_id,

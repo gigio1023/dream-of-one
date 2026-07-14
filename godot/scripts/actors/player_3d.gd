@@ -6,6 +6,7 @@ extends CharacterBody3D
 
 signal focus_changed(target: Node)
 signal preload_intent_changed(target: Node)
+signal unfocused_interaction_requested
 signal settings_requested
 
 const MIN_LOOK_SENSITIVITY := 0.01
@@ -69,7 +70,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event.is_action_pressed("interact"):
-		interact_focused()
+		if not interact_focused():
+			unfocused_interaction_requested.emit()
 		get_viewport().set_input_as_handled()
 		return
 

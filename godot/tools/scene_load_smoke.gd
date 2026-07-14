@@ -2685,10 +2685,15 @@ func _check_player_contact(label: String, instance: Node) -> void:
 	hud.close_log()
 	instance.call("_try_open_pending_contact")
 	var deferred_for_opening := hud.presentation_snapshot()
+	var deferred_contact: Dictionary = instance.call("presentation_snapshot").get(
+		"contact",
+		{}
+	)
 	if (
 		str(deferred_for_opening.get("modalSurface", "")) == "conversation"
 		or str(instance.get("_pending_contact_ready_id")) != consumed_contact_id
 		or instance.get("_conversation_target") != null
+		or str(deferred_contact.get("status", "")) != "ready_waiting_opening"
 	):
 		_failures.append(
 			"%s physically ready contact did not wait for its provider opening: %s"
@@ -2725,6 +2730,16 @@ func _check_player_contact(label: String, instance: Node) -> void:
 			)
 	var waiting_for_player := hud.presentation_snapshot()
 	var ready_cue := hud.contact_cue_snapshot()
+	var ready_contact: Dictionary = instance.call("presentation_snapshot").get(
+		"contact",
+		{}
+	)
+	var projected_cue: Dictionary = {}
+	if playtest_surface != null and playtest_surface.has_method("_hud_snapshot"):
+		projected_cue = (playtest_surface.call(
+			"_hud_snapshot",
+			waiting_for_player
+		) as Dictionary).get("contactCue", {})
 	if (
 		paused
 		or not bool(player.get("_control_enabled"))
@@ -2736,6 +2751,10 @@ func _check_player_contact(label: String, instance: Node) -> void:
 		or not bool(ready_cue.get("ready", false))
 		or str(ready_cue.get("contactId", "")) != consumed_contact_id
 		or str(ready_cue.get("actorId", "")) != contact_actor_id
+		or str(ready_contact.get("status", "")) != "ready_waiting_player"
+		or not bool(projected_cue.get("visible", false))
+		or not bool(projected_cue.get("ready", false))
+		or str(projected_cue.get("contactId", "")) != consumed_contact_id
 	):
 		_failures.append(
 			"%s ordinary ready contact opened without explicit player acceptance: %s"
@@ -2744,6 +2763,8 @@ func _check_player_contact(label: String, instance: Node) -> void:
 				{
 					"hud": waiting_for_player,
 					"cue": ready_cue,
+					"projectedCue": projected_cue,
+					"contact": ready_contact,
 					"pending": instance.get("_pending_contact_ready_id"),
 					"follow": contact_actor.contact_status(),
 				},
@@ -2776,6 +2797,18 @@ func _check_player_contact(label: String, instance: Node) -> void:
 				},
 			]
 		)
+	var walked_away_press := InputEventKey.new()
+	walked_away_press.physical_keycode = KEY_E
+	walked_away_press.pressed = true
+	Input.parse_input_event(walked_away_press)
+	await process_frame
+	var walked_away_release := InputEventKey.new()
+	walked_away_release.physical_keycode = KEY_E
+	walked_away_release.pressed = false
+	Input.parse_input_event(walked_away_release)
+	await process_frame
+	if str(hud.presentation_snapshot().get("modalSurface", "")) == "conversation":
+		_failures.append("%s unfocused E accepted a contact outside its ready distance" % label)
 
 	for contact_offset in [
 		Vector3(0.0, 0.0, 1.5),
@@ -2801,14 +2834,28 @@ func _check_player_contact(label: String, instance: Node) -> void:
 		_failures.append("%s ordinary contact did not become explicitly actionable" % label)
 		paused = false
 		return
-	if not await _interact_with_npc_through_player(
-		label,
-		player,
-		contact_actor,
-		"ordinary contact"
-	):
+	# Preserve the ready contact while placing it behind the camera, then press
+	# the actual project E action. Main must accept its own current contact even
+	# though Player3D has no ordinary focus target.
+	player.face_position(contact_actor.get_interaction_aim_position())
+	player.rotate_y(PI)
+	player.call("_set_focused_target", null)
+	player.call("_clear_recent_npc_focus")
+	await physics_frame
+	if player.focused_interactable() != null:
+		_failures.append("%s off-camera contact test retained an ordinary focus target" % label)
 		paused = false
 		return
+	var contact_press := InputEventKey.new()
+	contact_press.physical_keycode = KEY_E
+	contact_press.pressed = true
+	Input.parse_input_event(contact_press)
+	await process_frame
+	var contact_release := InputEventKey.new()
+	contact_release.physical_keycode = KEY_E
+	contact_release.pressed = false
+	Input.parse_input_event(contact_release)
+	await process_frame
 	var opened := false
 	for _frame in range(180):
 		await process_frame

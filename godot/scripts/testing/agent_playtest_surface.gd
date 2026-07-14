@@ -512,6 +512,11 @@ func _hud_snapshot(hud_view: Dictionary) -> Dictionary:
 			[&"ambientSubtitle", &"ambient_subtitle"],
 			{}
 		),
+		"contactCue": _dictionary_value(
+			hud_view,
+			[&"contactCue", &"contact_cue"],
+			{}
+		),
 		"socialView": _dictionary_value(hud_view, [&"socialView", &"social_view"], {}),
 		"log": _dictionary_value(hud_view, [&"log"], {}),
 	}

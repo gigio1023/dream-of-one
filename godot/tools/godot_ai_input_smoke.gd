@@ -43,6 +43,7 @@ class FocusNpc:
 
 var _failures: Array[String] = []
 var _last_preload_intent_target: Node = null
+var _unfocused_interaction_count := 0
 
 
 func _initialize() -> void:
@@ -61,6 +62,7 @@ func _run() -> void:
 	var player := PLAYER_SCENE.instantiate() as CharacterBody3D
 	root.add_child(player)
 	player.preload_intent_changed.connect(_on_preload_intent_changed)
+	player.unfocused_interaction_requested.connect(_on_unfocused_interaction_requested)
 	await process_frame
 
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -247,6 +249,31 @@ func _run() -> void:
 	if player.call("focused_interactable") != null or bool(player.call("interact_focused")):
 		_failures.append("NPC aim assist allowed a target behind the camera")
 
+	# A global owner such as Main may route an otherwise unfocused E press to its
+	# authoritative active contact without teaching Player3D about run state.
+	focus_npc.active_contact = true
+	var contact_interaction_count := focus_npc.interaction_count
+	var unfocused_count_before := _unfocused_interaction_count
+	var contact_press: Dictionary = helper.call("_game_input_key", {
+		"key": "E",
+		"pressed": true,
+		"echo": false,
+	})
+	await process_frame
+	var contact_release: Dictionary = helper.call("_game_input_key", {
+		"key": "E",
+		"pressed": false,
+		"echo": false,
+	})
+	await process_frame
+	if not bool(contact_press.get("sent", false)) or not bool(contact_release.get("sent", false)):
+		_failures.append("Godot AI E event was rejected without a focused target")
+	elif _unfocused_interaction_count != unfocused_count_before + 1:
+		_failures.append("unfocused E did not reach the owning scene through the normal input path")
+	elif focus_npc.interaction_count != contact_interaction_count:
+		_failures.append("Player3D directly routed an unfocused E to a guessed contact target")
+	focus_npc.active_contact = false
+
 	focus_npc.position = Vector3(0.0, 0.0, -2.7)
 	await physics_frame
 	await physics_frame
@@ -261,6 +288,10 @@ func _on_preload_intent_changed(target: Node) -> void:
 	_last_preload_intent_target = target
 
 
+func _on_unfocused_interaction_requested() -> void:
+	_unfocused_interaction_count += 1
+
+
 func _finish(probe: Node, player: Node) -> void:
 	if player != null:
 		player.queue_free()
@@ -271,5 +302,5 @@ func _finish(probe: Node, player: Node) -> void:
 			push_error(failure)
 		quit(1)
 		return
-	print("Godot AI input smoke passed: mouse look, Unicode, raw preload aim, gated E, safe focus grace, and bounded ready-NPC aim assist")
+	print("Godot AI input smoke passed: mouse look, Unicode, raw preload aim, gated E, unfocused owner handoff, safe focus grace, and bounded ready-NPC aim assist")
 	quit()

@@ -2643,7 +2643,7 @@
             "worldRevision": 19,
             "audibility": {
               "volumeId": "AUD_PUBLIC_CENTER",
-              "maxSpeechDistanceM": 12,
+              "maxSpeechDistanceM": 13,
               "speakerPosition": [
                 -0.8,
                 0,
@@ -2674,7 +2674,7 @@
             "worldRevision": 20,
             "audibility": {
               "volumeId": "AUD_PUBLIC_CENTER",
-              "maxSpeechDistanceM": 12,
+              "maxSpeechDistanceM": 13,
               "speakerPosition": [
                 0.8,
                 0,
@@ -2726,7 +2726,7 @@
               "worldRevision": 19,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
-                "maxSpeechDistanceM": 12,
+                "maxSpeechDistanceM": 13,
                 "speakerPosition": [
                   -0.8,
                   0,
@@ -2760,7 +2760,7 @@
               "worldRevision": 20,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
-                "maxSpeechDistanceM": 12,
+                "maxSpeechDistanceM": 13,
                 "speakerPosition": [
                   0.8,
                   0,
@@ -3525,7 +3525,7 @@
               "worldRevision": 19,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
-                "maxSpeechDistanceM": 12,
+                "maxSpeechDistanceM": 13,
                 "speakerPosition": [
                   -0.8,
                   0,
@@ -3556,7 +3556,7 @@
               "worldRevision": 20,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
-                "maxSpeechDistanceM": 12,
+                "maxSpeechDistanceM": 13,
                 "speakerPosition": [
                   0.8,
                   0,
@@ -3608,7 +3608,7 @@
                 "worldRevision": 19,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
-                  "maxSpeechDistanceM": 12,
+                  "maxSpeechDistanceM": 13,
                   "speakerPosition": [
                     -0.8,
                     0,
@@ -3642,7 +3642,7 @@
                 "worldRevision": 20,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
-                  "maxSpeechDistanceM": 12,
+                  "maxSpeechDistanceM": 13,
                   "speakerPosition": [
                     0.8,
                     0,
@@ -5713,7 +5713,7 @@
                 "worldRevision": 19,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
-                  "maxSpeechDistanceM": 12,
+                  "maxSpeechDistanceM": 13,
                   "speakerPosition": [
                     -0.8,
                     0,
@@ -5746,7 +5746,7 @@
                 "worldRevision": 20,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
-                  "maxSpeechDistanceM": 12,
+                  "maxSpeechDistanceM": 13,
                   "speakerPosition": [
                     0.8,
                     0,
@@ -5800,7 +5800,7 @@
                 "worldRevision": 19,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
-                  "maxSpeechDistanceM": 12,
+                  "maxSpeechDistanceM": 13,
                   "speakerPosition": [
                     -0.8,
                     0,
@@ -5833,7 +5833,7 @@
                 "worldRevision": 20,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
-                  "maxSpeechDistanceM": 12,
+                  "maxSpeechDistanceM": 13,
                   "speakerPosition": [
                     0.8,
                     0,
@@ -5912,7 +5912,7 @@
                 "worldRevision": 19,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
-                  "maxSpeechDistanceM": 12,
+                  "maxSpeechDistanceM": 13,
                   "speakerPosition": [
                     -0.8,
                     0,
@@ -5945,7 +5945,7 @@
                 "worldRevision": 20,
                 "audibility": {
                   "volumeId": "AUD_PUBLIC_CENTER",
-                  "maxSpeechDistanceM": 12,
+                  "maxSpeechDistanceM": 13,
                   "speakerPosition": [
                     0.8,
                     0,
@@ -6108,7 +6108,7 @@
               "worldRevision": 19,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
-                "maxSpeechDistanceM": 12,
+                "maxSpeechDistanceM": 13,
                 "speakerPosition": [
                   -0.8,
                   0,
@@ -6139,7 +6139,7 @@
               "worldRevision": 20,
               "audibility": {
                 "volumeId": "AUD_PUBLIC_CENTER",
-                "maxSpeechDistanceM": 12,
+                "maxSpeechDistanceM": 13,
                 "speakerPosition": [
                   0.8,
                   0,

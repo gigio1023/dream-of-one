@@ -2396,7 +2396,33 @@ func _check_semantic_meeting_slots(
 		_failures.append("%s layout has no semantic meeting windows" % label)
 		return
 	var navigation_map := region.get_navigation_map()
-	for meeting_value in meeting_windows_value as Array:
+	var public_speech_distance := 0.0
+	for volume_value in layout.get("audibility_volumes", []) as Array:
+		if (
+			volume_value is Dictionary
+			and str((volume_value as Dictionary).get("id", "")) == "AUD_PUBLIC_CENTER"
+		):
+			public_speech_distance = float(
+				(volume_value as Dictionary).get("max_speech_distance_m", 0.0)
+			)
+			break
+	if public_speech_distance <= 0.0:
+		_failures.append("%s layout has no public-center speech distance" % label)
+	var meeting_windows := meeting_windows_value as Array
+	var first_meeting_index := 0
+	var first_meeting_start := INF
+	for candidate_index in meeting_windows.size():
+		var candidate_value: Variant = meeting_windows[candidate_index]
+		if not candidate_value is Dictionary:
+			continue
+		var candidate_start := float(
+			(candidate_value as Dictionary).get("start_world_seconds", INF)
+		)
+		if candidate_start < first_meeting_start:
+			first_meeting_start = candidate_start
+			first_meeting_index = candidate_index
+	for meeting_index in meeting_windows.size():
+		var meeting_value: Variant = meeting_windows[meeting_index]
 		if not meeting_value is Dictionary:
 			continue
 		var meeting := meeting_value as Dictionary
@@ -2409,6 +2435,19 @@ func _check_semantic_meeting_slots(
 		for anchor_ref_value in (participant_refs_value as Dictionary).values():
 			var anchor_ref := str(anchor_ref_value)
 			var authored_position := _anchor_position(layout, anchor_ref)
+			if (
+				meeting_index == first_meeting_index
+				and start.distance_to(authored_position) > public_speech_distance
+			):
+				_failures.append(
+					"%s first meeting is not audible from player spawn: %s %.2fm > %.2fm"
+					% [
+						label,
+						anchor_ref,
+						start.distance_to(authored_position),
+						public_speech_distance,
+					]
+				)
 			var projected_value: Variant = instance.call("navigation_position", anchor_ref)
 			if not projected_value is Vector3:
 				_failures.append(
@@ -4879,6 +4918,10 @@ func _check_ambient_speech(
 	var caretaker_blip := caretaker.get_node_or_null("SpeechBlip") as AudioStreamPlayer3D
 	if player_inside:
 		var current: Dictionary = subtitle.get("current", {})
+		var current_audibility := current.get("audibility", {}) as Dictionary
+		var expected_blip_distance := float(
+			current_audibility.get("maxSpeechDistanceM", 0.0)
+		)
 		if (
 			not bool(subtitle.get("visible", false))
 			or int(current.get("seq", -1)) != 1
@@ -4896,7 +4939,10 @@ func _check_ambient_speech(
 			_failures.append("%s audible subtitle lacks direction or generated line" % label)
 		if manager_blip == null or not manager_blip.playing:
 			_failures.append("%s first audible utterance did not play its spatial blip" % label)
-		elif not is_equal_approx(manager_blip.max_distance, 12.0):
+		elif (
+			expected_blip_distance <= 0.0
+			or not is_equal_approx(manager_blip.max_distance, expected_blip_distance)
+		):
 			_failures.append("%s spatial blip did not use semantic speech distance" % label)
 		var manager_forward := -manager.global_transform.basis.z.normalized()
 		var manager_to_caretaker := caretaker.global_position - manager.global_position

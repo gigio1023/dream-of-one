@@ -268,7 +268,7 @@
         {"center": [-10.5, 1.5, 0], "size": [5, 3, 4]},
         {"center": [10.5, 1.5, 0], "size": [5, 3, 4]}
       ],
-      "max_speech_distance_m": 12,
+      "max_speech_distance_m": 13,
       "occlusion_mode": "scene_geometry"
     },
     {

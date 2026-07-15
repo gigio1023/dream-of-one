@@ -84,20 +84,47 @@ const M3R_INSTITUTIONAL_PRESSURE_GUIDE =
   "- M3R institutionalPressureDelta must be an integer from -25 through 25: negative lowers institutional pressure, zero leaves it unchanged, and positive raises it. Judge both direction and magnitude from the supplied evidence; no direction is preferred. One independent non-record source may create positive pressure only once across its read/write lineage, so relaying the same evidence does not mint new positive pressure.";
 
 const REACHABLE_SUSPICION_DELTA_GUIDE =
-  "suspicionBefore is the current bounded 0..125 score. Never return a suspicionDelta that would move it below 0 or above 125; at a boundary use zero or move inward, and make whyLine describe only the reachable movement.";
+  "The schema's suspicionDelta minimum and maximum are hard inclusive bounds that override calibration. At score 0, reassurance uses delta 0, not a negative; at 125, worsening uses 0, not a positive. Make whyLine match the reachable movement.";
+
+function suspicionDeltaBounds(suspicionBefore: number): {
+  minimum: number;
+  maximum: number;
+} {
+  return {
+    minimum: suspicionBefore === 0 ? 0 : -suspicionBefore,
+    maximum: 125 - suspicionBefore,
+  };
+}
+
+function withSuspicionDeltaBounds(
+  schema: Record<string, unknown>,
+  suspicionBefore: number,
+): Record<string, unknown> {
+  const boundedSchema = structuredClone(schema);
+  const properties = boundedSchema.properties as Record<string, unknown>;
+  const suspicionDelta = properties.suspicionDelta as Record<string, unknown>;
+  const bounds = suspicionDeltaBounds(suspicionBefore);
+  properties.suspicionDelta = {
+    ...suspicionDelta,
+    minimum: bounds.minimum,
+    maximum: bounds.maximum,
+  };
+  return boundedSchema;
+}
 
 function requireReachableSuspicionDelta(
   value: { suspicionDelta: number },
   context: z.RefinementCtx,
   suspicionBefore: number,
 ): void {
+  const bounds = suspicionDeltaBounds(suspicionBefore);
   const suspicionAfter = suspicionBefore + value.suspicionDelta;
   if (suspicionAfter >= 0 && suspicionAfter <= 125) return;
   context.addIssue({
     code: "custom",
     path: ["suspicionDelta"],
     message:
-      `suspicionDelta must keep suspicion within 0..125 from current score ${suspicionBefore}`,
+      `suspicionDelta must be within ${bounds.minimum}..${bounds.maximum} from current score ${suspicionBefore}`,
   });
 }
 
@@ -634,7 +661,10 @@ export class ProviderService implements NpcProposalPort {
         request.suspicionBefore,
       ),
     );
-    const proposalJsonSchema = conversationJudgmentJsonSchemaForLocale(request.locale);
+    const proposalJsonSchema = withSuspicionDeltaBounds(
+      conversationJudgmentJsonSchemaForLocale(request.locale),
+      request.suspicionBefore,
+    );
     const instructions = [
       "You are the judging mind of one NPC inside Dream of One, a social-suspicion game.",
       "Read the player's newest line and decide how it moves this NPC's suspicion and report pressure.",
@@ -693,7 +723,10 @@ export class ProviderService implements NpcProposalPort {
         request.suspicionBefore,
       ),
     );
-    const proposalJsonSchema = mergedConversationTurnJsonSchemaForLocale(request.locale);
+    const proposalJsonSchema = withSuspicionDeltaBounds(
+      mergedConversationTurnJsonSchemaForLocale(request.locale),
+      request.suspicionBefore,
+    );
     const instructions = [
       "You are one NPC inside Dream of One, a social-suspicion game.",
       "In one response, judge the player's newest line AND write your next spoken reply with exactly three short player reply suggestions.",

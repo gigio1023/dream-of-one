@@ -2618,8 +2618,16 @@ test("the model judges suspicion live; the rule classifier answers only as fallb
   assert.match(judgmentTextGen.requests[0].instructions, /not tiny 1\.\.5 ratings/);
   assert.match(
     judgmentTextGen.requests[0].instructions,
-    /Never return a suspicionDelta that would move it below 0 or above 125/,
+    /hard inclusive bounds that override calibration/,
   );
+  const judgmentSchema = judgmentTextGen.requests[0].jsonSchema as {
+    properties: { suspicionDelta: { minimum: number; maximum: number } };
+  };
+  assert.deepEqual(judgmentSchema.properties.suspicionDelta, {
+    type: "integer",
+    minimum: 0,
+    maximum: 125,
+  });
   assert.match(judgmentTextGen.requests[0].instructions, /at least one Hangul code point/);
   assert.match(judgmentTextGen.requests[0].instructions, /QR or ID/);
   assert.match(judgmentTextGen.requests[0].instructions, /never copy stable ids/i);
@@ -2681,8 +2689,14 @@ test("merged conversation judgments repair a delta below the suspicion floor", a
   };
   const repairedTurn = JSON.parse(validMergedTurn);
   const textGen = new FakeTextGen([
-    { text: JSON.stringify(unreachableTurn) },
-    { text: JSON.stringify(repairedTurn) },
+    {
+      text: JSON.stringify(unreachableTurn),
+      usage: { inputTokens: 60, outputTokens: 40, totalTokens: 100 },
+    },
+    {
+      text: JSON.stringify(repairedTurn),
+      usage: { inputTokens: 70, outputTokens: 30, totalTokens: 100 },
+    },
   ]);
   const service = new ProviderService({
     profileId: "test/reachable-suspicion-delta",
@@ -2698,7 +2712,7 @@ test("merged conversation judgments repair a delta below the suspicion floor", a
     hasMeaningfulFirsthandConversation: false,
   });
 
-  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.transport, "live", JSON.stringify(result.meta));
   assert.equal(result.meta.usedFallback, false);
   assert.equal(result.proposal.suspicionDelta, 0);
   assert.equal(result.proposal.whyLine, repairedTurn.whyLine);
@@ -2711,8 +2725,13 @@ test("merged conversation judgments repair a delta below the suspicion floor", a
   };
   assert.deepEqual(repairInput.validationIssues, [{
     path: "suspicionDelta",
-    message: "suspicionDelta must keep suspicion within 0..125 from current score 0",
+    message: "suspicionDelta must be within 0..125 from current score 0",
   }]);
+  const initialSchema = textGen.requests[0].jsonSchema as {
+    properties: { suspicionDelta: { minimum: number; maximum: number } };
+  };
+  assert.equal(initialSchema.properties.suspicionDelta.minimum, 0);
+  assert.equal(initialSchema.properties.suspicionDelta.maximum, 125);
 });
 
 test("the one blocking merged call returns model-owned stance with firsthand grounding", async () => {
@@ -2950,8 +2969,14 @@ test("merged Korean conversation repair receives every rejected Latin token", as
     utterance: "스튜디오 담당자에게 확인하겠습니다.",
   };
   const textGen = new FakeTextGen([
-    { text: JSON.stringify(invalidTurn) },
-    { text: JSON.stringify(repairedTurn) },
+    {
+      text: JSON.stringify(invalidTurn),
+      usage: { inputTokens: 60, outputTokens: 40, totalTokens: 100 },
+    },
+    {
+      text: JSON.stringify(repairedTurn),
+      usage: { inputTokens: 70, outputTokens: 30, totalTokens: 100 },
+    },
   ]);
   const service = new ProviderService({
     profileId: "test/merged-korean-latin-repair",

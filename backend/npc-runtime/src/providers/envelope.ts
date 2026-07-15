@@ -22,6 +22,8 @@ const forbiddenKoreanPlayerVisibleKana = /[\p{Script=Hiragana}\p{Script=Katakana
 const forbiddenKoreanPlayerVisibleChineseFragments =
   /(?:为何|为什么|因为|所以|没有|不是|已经|可以|需要|如果|但是|这个|那个|他们|我们|你们)/u;
 const koreanPlayerVisibleLatinWords = /\p{Script=Latin}+/gu;
+const MAX_REPORTED_INVALID_LATIN_TOKENS = 16;
+const MAX_REPORTED_INVALID_LATIN_TOKEN_LENGTH = 80;
 const forbiddenPlayerVisibleStableIds = [
   /\b[A-Za-z][A-Za-z0-9]*_[A-Za-z0-9_]+\b/u,
   /\b(?:mem|sess|rec|led)-[A-Za-z0-9_.:-]+\b/u,
@@ -90,20 +92,25 @@ function addPlayerVisibleTextIssues(
       message: "player-visible Korean text must not contain Chinese function words or clauses",
     });
   }
-  if (
-    requireHangul &&
-    [...text.matchAll(koreanPlayerVisibleLatinWords)].some(match => {
-      const token = match[0];
-      return token.length > 1 &&
-        !/^[A-Z][a-z]+$/u.test(token) &&
-        !/^[A-Z0-9]{2,6}$/u.test(token);
-    })
-  ) {
+  const invalidLatinTokens = requireHangul
+    ? [...new Set(
+      [...text.matchAll(koreanPlayerVisibleLatinWords)]
+        .map(match => match[0])
+        .filter(token =>
+          token.length > 1 &&
+          !/^[A-Z][a-z]+$/u.test(token) &&
+          !/^[A-Z0-9]{2,6}$/u.test(token)
+        )
+        .map(token => [...token].slice(0, MAX_REPORTED_INVALID_LATIN_TOKEN_LENGTH).join("")),
+    )].slice(0, MAX_REPORTED_INVALID_LATIN_TOKENS)
+    : [];
+  if (invalidLatinTokens.length > 0) {
     context.addIssue({
       code: "custom",
       path,
       message:
         "player-visible Korean text may use Latin script only for title-case names or short uppercase acronyms",
+      params: { offendingLatinTokens: invalidLatinTokens },
     });
   }
 }
@@ -961,6 +968,16 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
     continueConversation: { type: "boolean" },
   },
 };
+
+export function mergedConversationTurnJsonSchemaForLocale(
+  locale: string,
+): Record<string, unknown> {
+  const schema = structuredClone(mergedConversationTurnJsonSchema);
+  if (isKoreanLocale(locale)) {
+    annotateKoreanPlayerVisibleDescriptions(schema);
+  }
+  return schema;
+}
 
 export const ambientReplyJudgmentJsonSchema: Record<string, unknown> = {
   type: "object",

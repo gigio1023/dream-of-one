@@ -541,12 +541,17 @@ test("Korean agent-step repair rewrites a lowercase Latin utterance instead of f
   assert.match(textGen.requests[0].instructions, /Studio as 스튜디오/);
   assert.match(textGen.requests[1].instructions, /rewrite that entire field from scratch/);
   const repairInput = JSON.parse(textGen.requests[1].input) as {
-    validationIssues: Array<{ path: string; message: string }>;
+    validationIssues: Array<{
+      path: string;
+      message: string;
+      offendingLatinTokens?: string[];
+    }>;
   };
   assert.deepEqual(repairInput.validationIssues, [{
     path: "utterance",
     message:
       "player-visible Korean text may use Latin script only for title-case names or short uppercase acronyms",
+    offendingLatinTokens: ["studio"],
   }]);
   const schema = textGen.requests[0].jsonSchema as {
     properties: { utterance: { description?: string } };
@@ -1756,6 +1761,12 @@ test("Korean player-visible fields require Hangul but allow natural mixed conten
       lowercaseEnglishResult.error.issues[0]?.message,
       "player-visible Korean text may use Latin script only for title-case names or short uppercase acronyms",
     );
+    assert.deepEqual(
+      (lowercaseEnglishResult.error.issues[0] as {
+        params?: { offendingLatinTokens?: string[] };
+      } | undefined)?.params?.offendingLatinTokens,
+      ["stated"],
+    );
   }
 
   const rejected = ["Mira checked it.", "來歷確認", "确认来历", "2026", "?!…"];
@@ -2338,6 +2349,10 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
   );
   assert.match(
     textGen.requests[0].instructions,
+    /external procedural question may remain open while stance is vouch/,
+  );
+  assert.match(
+    textGen.requests[0].instructions,
     /Set meaningfulFirsthand=true.*coherent handling of a role-supported question/,
   );
   assert.match(
@@ -2373,6 +2388,60 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
     mergedSchema.properties?.suggestedReplies?.items?.properties?.text?.description ?? "",
     /player's own identity or possession/,
   );
+  assert.match(
+    mergedSchema.properties?.suggestedReplies?.items?.properties?.text?.description ?? "",
+    /Hangul-dominant natural Korean/,
+  );
+});
+
+test("merged Korean conversation repair receives every rejected Latin token", async () => {
+  const invalidTurn = {
+    ...JSON.parse(validMergedTurn),
+    utterance: "studio의 OpenAI handler에게 확인하겠습니다.",
+  };
+  const repairedTurn = {
+    ...invalidTurn,
+    utterance: "스튜디오 담당자에게 확인하겠습니다.",
+  };
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(invalidTurn) },
+    { text: JSON.stringify(repairedTurn) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/merged-korean-latin-repair",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.judgeAndProposeConversationTurn({
+    ...judgmentRequest(),
+    objective: "방문 이유를 확인한다.",
+    sceneFacts: ["스튜디오 접수대에서 직접 대화하고 있다."],
+    stanceBefore: "uncertain",
+    hasMeaningfulFirsthandConversation: false,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.proposal.utterance, repairedTurn.utterance);
+  assert.deepEqual(textGen.requests.map(request => request.purpose), [
+    "conversation_turn",
+    "repair",
+  ]);
+  assert.match(textGen.requests[1].instructions, /every listed token/);
+  const repairInput = JSON.parse(textGen.requests[1].input) as {
+    validationIssues: Array<{
+      path: string;
+      message: string;
+      offendingLatinTokens?: string[];
+    }>;
+  };
+  assert.deepEqual(repairInput.validationIssues, [{
+    path: "utterance",
+    message:
+      "player-visible Korean text may use Latin script only for title-case names or short uppercase acronyms",
+    offendingLatinTokens: ["studio", "OpenAI", "handler"],
+  }]);
 });
 
 test("typed multilingual player text keeps exact Unicode bytes in the provider request after edge trim", async () => {
@@ -2672,14 +2741,15 @@ test("invalid provider JSON gets one bounded repair attempt", async () => {
 
 test("invalid first and repair envelopes emit one sanitized structured warning", async () => {
   const sentinel = "PLAYER_PRIVATE_SENTINEL_DO_NOT_LOG";
+  const offendingLatinToken = "secretword";
   const firstInvalid = {
-    utterance: sentinel,
+    utterance: `방문자가 ${offendingLatinToken}를 말했습니다.`,
     suggestedReplies: [],
     continueConversation: true,
     [sentinel]: "private extra field",
   };
   const repairInvalid = {
-    utterance: sentinel,
+    utterance: `방문자가 ${offendingLatinToken}를 다시 말했습니다.`,
     suggestedReplies: [
       { text: "I can explain the procedure.", intent: "safe/local" },
       { text: "Please clarify the question.", intent: "uncertain/repair" },
@@ -2707,7 +2777,7 @@ test("invalid first and repair envelopes emit one sanitized structured warning",
     result = await service.proposeConversationTurn({
       ...conversationRequest(),
       sessionId: "run-sanitized-invalid-envelope-warning",
-      locale: "en-US",
+      locale: "ko-KR",
     });
   } finally {
     console.warn = originalWarn;
@@ -2735,6 +2805,7 @@ test("invalid first and repair envelopes emit one sanitized structured warning",
     issue.message.includes("[redacted]")
   ), "the warning must exercise value redaction instead of merely omitting output fields");
   assert.doesNotMatch(JSON.stringify(warning), new RegExp(sentinel));
+  assert.doesNotMatch(JSON.stringify(warning), new RegExp(offendingLatinToken));
   assert.deepEqual(textGen.requests.map(request => request.purpose), ["conversation", "repair"]);
 });
 

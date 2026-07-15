@@ -10,7 +10,7 @@ import {
   conversationProposalSchemaForLocale,
   hearingJudgmentJsonSchemaForRequest,
   hearingJudgmentSchemaForRequest,
-  mergedConversationTurnJsonSchema,
+  mergedConversationTurnJsonSchemaForLocale,
   mergedConversationTurnSchemaForLocale,
   type AgentStepRecordContracts,
 } from "./envelope.js";
@@ -139,6 +139,12 @@ interface SanitizedValidationIssue {
   message: string;
 }
 
+interface ProviderRepairValidationIssue {
+  path: string;
+  message: string;
+  offendingLatinTokens?: string[];
+}
+
 function sanitizeDiagnosticText(value: string): string {
   return value
     .replace(/[\u0000-\u001f\u007f-\u009f]/gu, " ")
@@ -191,6 +197,22 @@ function sanitizedValidationIssues(
       message: [...message].slice(0, 240).join(""),
     };
   });
+}
+
+function providerRepairValidationIssue(issue: z.ZodIssue): ProviderRepairValidationIssue {
+  const base = {
+    path: issue.path.join("."),
+    message: issue.message,
+  };
+  if (issue.code !== "custom") return base;
+  const tokens = issue.params?.offendingLatinTokens;
+  if (
+    !Array.isArray(tokens) ||
+    !tokens.every(token => typeof token === "string" && token.length > 0)
+  ) {
+    return base;
+  }
+  return { ...base, offendingLatinTokens: [...tokens] };
 }
 
 const PRIVATE_ACTOR_CONTEXT_GUIDE =
@@ -453,6 +475,7 @@ export class ProviderService implements NpcProposalPort {
       "Return stance as this NPC's coarse personal opinion after the exchange: oppose, uncertain, or vouch.",
       "Vouch is bounded personal testimony, not proof of the player's identity, booking, institutional approval, biography, or final innocence: it means this NPC would tell the later hearing that the player's directly heard answers were coherent and ordinary for the role-supported question.",
       "When an initially uncertain NPC receives a substantive direct answer that addresses or honestly narrows its role-supported question, stays consistent with the exchange, and carries no grounded contradiction or suspicion signal, vouch is normally appropriate; do not require an external record, prior acquaintance, or a discoverable answer to hidden facts.",
+      "Do not treat completion of actor stable goals or resolution of an external booking, source, handler, or other procedural fact as a prerequisite for vouch. A direct, consistent statement that the player does not know that fact may resolve the personal question of what the player knows and count as meaningful firsthand; an external procedural question may remain open while stance is vouch.",
       "Politeness, repetition, lack of hostility, or merely lowering suspicion without addressing a material question is not substantive; keep uncertain or oppose while a role-supported question remains materially open.",
       "Set meaningfulFirsthand=true when this direct exchange gives the NPC a relevant basis it can later cite, including firsthand evidence of the player's coherent handling of a role-supported question; it need not prove identity or an external fact. Vouch requires meaningfulFirsthand.",
       "openQuestion is either null or one concise player-log question authored from this exchange, with its own open/resolved status, text, and whyLine.",
@@ -492,7 +515,7 @@ export class ProviderService implements NpcProposalPort {
         instructions,
         input,
         schemaName: "npc_merged_conversation_turn",
-        jsonSchema: mergedConversationTurnJsonSchema,
+        jsonSchema: mergedConversationTurnJsonSchemaForLocale(request.locale),
       },
       schema: mergedConversationTurnSchemaForLocale(request.locale),
       repairContext: requestContext,
@@ -770,16 +793,13 @@ export class ProviderService implements NpcProposalPort {
       const repairRequest: TextGenRequest = {
         ...input.request,
         purpose: "repair",
-        instructions: `${input.request.instructions}\nReturn a complete replacement JSON value that satisfies every validation issue. Do not return a patch or add commentary. Always rewrite the whole affected field when it is player-visible, using natural in-fiction prose in the immutable run language; do not preserve a rejected foreign-language fragment. For Korean, use Hangul-dominant Korean and translate lowercase Latin prose, Simplified Chinese forms, Chinese function words or clauses, hiragana, and katakana; retain only natural title-case names, short uppercase acronyms, numerals, and occasional Hanja. If a Korean validation issue cites Latin script, rewrite that entire field from scratch without copying any lowercase Latin token. Render machine-context place labels as Korean, for example Studio as 스튜디오, Office as 사무실, Station as 스테이션, and Park as 공원, and transliterate non-acronym names when necessary. When a player-visible field exposes an internal stable id, never repeat the identifier, an underscore token, or an internal id-shaped substitute.`,
+        instructions: `${input.request.instructions}\nReturn a complete replacement JSON value that satisfies every validation issue. Do not return a patch or add commentary. Always rewrite the whole affected field when it is player-visible, using natural in-fiction prose in the immutable run language; do not preserve a rejected foreign-language fragment. For Korean, use Hangul-dominant Korean and translate invalid Latin prose, Simplified Chinese forms, Chinese function words or clauses, hiragana, and katakana; retain only natural title-case names, short uppercase acronyms, numerals, and occasional Hanja. When a Korean validation issue includes offendingLatinTokens, remove, translate, or transliterate every listed token in its affected field, rewrite that entire field from scratch, and recheck every Latin token rather than only lowercase words. Render machine-context place labels as Korean, for example Studio as 스튜디오, Office as 사무실, Station as 스테이션, and Park as 공원, and transliterate non-acronym names when necessary. When a player-visible field exposes an internal stable id, never repeat the identifier, an underscore token, or an internal id-shaped substitute.`,
         input: JSON.stringify({
           ...(input.repairContext === undefined
             ? {}
             : { requestContext: input.repairContext }),
           invalidOutput: first.text,
-          validationIssues: parsed.error.issues.map(issue => ({
-            path: issue.path.join("."),
-            message: issue.message,
-          })),
+          validationIssues: parsed.error.issues.map(providerRepairValidationIssue),
         }),
       };
       const repairAdmission = this.budgetAdmission(

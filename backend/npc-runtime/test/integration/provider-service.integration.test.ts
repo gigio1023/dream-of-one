@@ -2388,7 +2388,7 @@ test("ambient reply is one schema-validated call with its own audit purpose and 
   assert.equal(textGen.requests.length, 1);
   assert.equal(textGen.requests[0]?.purpose, "ambient_reply");
   assert.equal(textGen.requests[0]?.schemaName, "npc_ambient_reply_judgment");
-  assert.match(textGen.requests[0]?.instructions ?? "", /NPC hearsay, not a new player answer/);
+  assert.match(textGen.requests[0]?.instructions ?? "", /attributed hearsay, not a new visitor answer/);
   assert.match(
     textGen.requests[0]?.instructions ?? "",
     new RegExp(`no longer than ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points`),
@@ -2771,7 +2771,7 @@ test("the model judges suspicion live; the rule classifier answers only as fallb
   assert.equal(judged.proposal.suspicionDelta, 35);
   assert.deepEqual(judged.proposal.signals, ["dream_language_leak"]);
   assert.match(judged.proposal.whyLine, /[가-힣]/);
-  assert.match(judgmentTextGen.requests[0].instructions, /0\.\.125 game scale/);
+  assert.match(judgmentTextGen.requests[0].instructions, /internal 0\.\.125 scale/);
   assert.match(judgmentTextGen.requests[0].instructions, /not tiny 1\.\.5 ratings/);
   assert.match(
     judgmentTextGen.requests[0].instructions,
@@ -2891,6 +2891,78 @@ test("merged conversation judgments repair a delta below the suspicion floor", a
   assert.equal(initialSchema.properties.suspicionDelta.maximum, 125);
 });
 
+test("merged conversation repair rewrites meta-framed open-question reasons in fiction", async () => {
+  const metaFramedTurn = {
+    ...JSON.parse(validMergedTurn),
+    stance: "uncertain",
+    openQuestion: {
+      status: "open",
+      text: "방문 목적은 무엇인가요?",
+      whyLine: "플레이어의 답변이 충분하지 않아 질문을 유지합니다.",
+    },
+    continueConversation: true,
+  };
+  const repairedTurn = {
+    ...metaFramedTurn,
+    openQuestion: {
+      ...metaFramedTurn.openQuestion,
+      whyLine: "방문 목적이 아직 분명하지 않아 추가 확인이 필요합니다.",
+    },
+  };
+  const textGen = new FakeTextGen([
+    {
+      text: JSON.stringify(metaFramedTurn),
+      usage: { inputTokens: 60, outputTokens: 40, totalTokens: 100 },
+    },
+    {
+      text: JSON.stringify(repairedTurn),
+      usage: { inputTokens: 70, outputTokens: 30, totalTokens: 100 },
+    },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/in-fiction-open-question-repair",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.judgeAndProposeConversationTurn({
+    ...judgmentRequest(),
+    objective: "방문 이유를 확인한다.",
+    sceneFacts: ["스튜디오 접수대에서 직접 대화하고 있다."],
+    stanceBefore: "uncertain",
+    hasMeaningfulFirsthandConversation: false,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.proposal.openQuestion?.whyLine, repairedTurn.openQuestion.whyLine);
+  assert.deepEqual(textGen.requests.map(request => request.purpose), [
+    "conversation_turn",
+    "repair",
+  ]);
+  assert.doesNotMatch(textGen.requests[0].instructions, /social-suspicion game/i);
+  assert.match(textGen.requests[0].instructions, /resident described in requestContext/);
+  assert.match(
+    textGen.requests[0].instructions,
+    /openQuestion.*never describe a player, user, NPC, game, model, prompt, or generated response/,
+  );
+  assert.match(
+    textGen.requests[1].instructions,
+    /rewrite that entire field from the resident's in-world viewpoint/,
+  );
+  assert.match(
+    textGen.requests[1].instructions,
+    /remove every same-language or foreign-language mention of player, user, NPC, game, AI/,
+  );
+  const repairInput = JSON.parse(textGen.requests[1].input) as {
+    validationIssues: Array<{ path: string; message: string }>;
+  };
+  assert.deepEqual(repairInput.validationIssues, [{
+    path: "openQuestion.whyLine",
+    message: "player-visible text must remain in fiction and must not expose game or model framing",
+  }]);
+});
+
 test("the one blocking merged call returns model-owned stance with firsthand grounding", async () => {
   const mixedNaturalKoreanTurn = {
     ...JSON.parse(validMergedTurn),
@@ -2935,7 +3007,7 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
   );
   assert.match(
     textGen.requests[0].instructions,
-    /not proof of the player's identity, booking, institutional approval/,
+    /not proof of the visitor's identity, booking, institutional approval/,
   );
   assert.match(
     textGen.requests[0].instructions,

@@ -301,6 +301,8 @@ export interface TextGenRequest {
   input: string;
   schemaName: string;
   jsonSchema: Record<string, unknown>;
+  /** Optional per-operation transport ceiling; the provider default remains authoritative otherwise. */
+  timeoutMs?: number;
 }
 
 export interface TextGenResult {

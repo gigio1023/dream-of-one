@@ -272,6 +272,7 @@ interface ProviderAuditState {
 type ProviderBudgetAdmission = "admitted" | "hard_exhausted" | "caller_reserved";
 
 const MAX_AUDIT_RESOLUTIONS = 256;
+const HEARING_PROVIDER_TIMEOUT_MS = 120_000;
 
 export interface ProviderServiceOptions {
   profileId: string;
@@ -683,6 +684,7 @@ export class ProviderService implements NpcProposalPort {
         input,
         schemaName: "station_hearing_judgment",
         jsonSchema: hearingJudgmentJsonSchemaForRequest(request),
+        timeoutMs: Math.max(this.timeoutMs, HEARING_PROVIDER_TIMEOUT_MS),
       },
       schema: hearingJudgmentSchemaForRequest(request),
       repairContext: requestContext,
@@ -836,7 +838,10 @@ export class ProviderService implements NpcProposalPort {
     const callSeq = this.beginCallAudit(sessionId, reservedTokens);
     callSeqs.push(callSeq);
     try {
-      const result = await this.withTimeout(this.options.textGen.generate(request));
+      const result = await this.withTimeout(
+        this.options.textGen.generate(request),
+        request.timeoutMs ?? this.timeoutMs,
+      );
       const chargedTokens = this.completeCall(sessionId, reservedTokens, result.usage);
       this.finishCallAudit(sessionId, {
         seq: callSeq,
@@ -884,13 +889,13 @@ export class ProviderService implements NpcProposalPort {
     }
   }
 
-  private async withTimeout<T>(promise: Promise<T>): Promise<T> {
+  private async withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       return await Promise.race([
         promise,
         new Promise<T>((_, reject) => {
-          timer = setTimeout(() => reject(new Error("provider timeout")), this.timeoutMs);
+          timer = setTimeout(() => reject(new Error("provider timeout")), timeoutMs);
         }),
       ]);
     } finally {

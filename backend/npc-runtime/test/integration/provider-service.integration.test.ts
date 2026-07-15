@@ -1907,6 +1907,7 @@ test("provider service returns one live evidence-grounded hearing judgment", asy
   assert.equal(textGen.requests.length, 1);
   assert.equal(textGen.requests[0].purpose, "hearing_verdict");
   assert.equal(textGen.requests[0].schemaName, "station_hearing_judgment");
+  assert.equal(textGen.requests[0].timeoutMs, 120_000);
   assert.match(textGen.requests[0].instructions, /resident's own supplied memories/);
   assert.match(textGen.requests[0].instructions, /publicIdentity and voice guide wording only/);
   assert.match(textGen.requests[0].instructions, /derive contactBasis exactly/);
@@ -3183,6 +3184,49 @@ test("Qwen profile timeout governs both its transport and ProviderService bounda
     assert.equal(result.meta.transport, "live");
     assert.equal(result.meta.usedFallback, false);
     assert.equal(proposalPort.auditSnapshot("qwen-timeout-contract").calls[0]?.outcome, "success");
+  } finally {
+    server.stop(true);
+  }
+});
+
+test("the final hearing can outlive the ordinary Qwen profile timeout inside the game ceiling", async () => {
+  const server = Bun.serve({
+    port: 0,
+    async fetch() {
+      await Bun.sleep(80);
+      return Response.json({
+        id: "chatcmpl-hearing-timeout-contract",
+        object: "chat.completion",
+        created: 0,
+        model: "Qwen-Ambassador/Qwen3.7-Plus",
+        choices: [
+          {
+            index: 0,
+            message: { role: "assistant", content: JSON.stringify(validHearingJudgment()) },
+            finish_reason: "stop",
+          },
+        ],
+        usage: { prompt_tokens: 101, completion_tokens: 67, total_tokens: 168 },
+      });
+    },
+  });
+
+  try {
+    const config = structuredClone(loadProviderConfig());
+    config.runtime.timeoutMs = 10;
+    config.profiles["modelscope/qwen3.7-plus"]!.timeoutMs = 20;
+    const { proposalPort } = createProviderFromConfig(config, {
+      NPC_PROVIDER_PROFILE: "modelscope/qwen3.7-plus",
+      MODELSCOPE_BASE_URL: new URL("v1", server.url).toString(),
+      MODELSCOPE_API_KEY: "test-only-key",
+    });
+
+    const result = await proposalPort.judgeHearing(hearingRequest());
+    assert.equal(result.meta.profileId, "modelscope/qwen3.7-plus");
+    assert.equal(result.meta.transport, "live");
+    assert.equal(result.meta.usedFallback, false);
+    assert.equal(result.proposal.residentAssessments.length, 6);
+    assert.equal(proposalPort.auditSnapshot(hearingRequest().runId).calls[0]?.outcome, "success");
   } finally {
     server.stop(true);
   }

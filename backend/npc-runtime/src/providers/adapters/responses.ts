@@ -39,23 +39,26 @@ export class ResponsesAdapter implements TextGenPort {
     if (!this.client) {
       throw new Error(`missing credentials for ${this.options.profileId}`);
     }
-    const response = await this.client.responses.create({
-      model: this.options.model,
-      instructions: request.instructions,
-      input: request.input,
-      max_output_tokens: this.options.maxTokens,
-      reasoning: this.options.reasoningEffort
-        ? { effort: this.options.reasoningEffort }
-        : undefined,
-      text: {
-        format: {
-          type: "json_schema",
-          name: request.schemaName,
-          strict: true,
-          schema: request.jsonSchema,
+    const response = await this.client.responses.create(
+      {
+        model: this.options.model,
+        instructions: request.instructions,
+        input: request.input,
+        max_output_tokens: this.options.maxTokens,
+        reasoning: this.options.reasoningEffort
+          ? { effort: this.options.reasoningEffort }
+          : undefined,
+        text: {
+          format: {
+            type: "json_schema",
+            name: request.schemaName,
+            strict: true,
+            schema: request.jsonSchema,
+          },
         },
       },
-    });
+      { timeout: request.timeoutMs ?? this.options.timeoutMs },
+    );
     if (!response.output_text) {
       throw new Error("Responses API returned no output_text");
     }

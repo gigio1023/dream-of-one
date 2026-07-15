@@ -361,8 +361,15 @@ interface GoalAdmissionState {
   semanticGoalKey: string;
   nonContactSemanticGoalKey: string;
   contactOpportunityEpoch: number | null;
+  administrativeOpportunityKey: string | null;
   spatialSignature: string;
   admittedAtSeconds: number;
+}
+
+interface DeferredGoalBudgetState {
+  semanticGoalKey: string;
+  callsUsed: number;
+  tokensUsed: number;
 }
 
 interface SupersededGoalWake {
@@ -477,6 +484,7 @@ interface RunState {
   spatialFacts: CanonicalSpatialFacts | null;
   completedGoalKeys: Set<string>;
   goalAdmissions: Map<string, GoalAdmissionState>;
+  deferredGoalBudgets: Map<string, DeferredGoalBudgetState>;
   supersededGoalWakes: Map<string, SupersededGoalWake>;
   lastGoalSpeechAt: Map<string, number>;
   agentTranscript: TranscriptStore;
@@ -734,6 +742,29 @@ function selectRecentChronological<T>(values: readonly T[], limit: number): T[] 
   return values.slice(Math.max(0, values.length - limit));
 }
 
+/**
+ * Keep model-authored report inclinations in the bounded administrative view
+ * before filling the remaining slots with the newest other sources. Selected
+ * memories retain their original chronological order.
+ */
+function selectAdministrativeSourceMemories(
+  values: readonly RunMemory[],
+  limit: number,
+): RunMemory[] {
+  const selected = new Set<RunMemory>();
+  const reportBearing = values.filter(
+    memory => memory.kind === "player_conversation" && memory.reportDelta !== 0,
+  );
+  for (const memory of reportBearing.slice(Math.max(0, reportBearing.length - limit))) {
+    selected.add(memory);
+  }
+  for (let index = values.length - 1; index >= 0 && selected.size < limit; index -= 1) {
+    const memory = values[index];
+    if (memory) selected.add(memory);
+  }
+  return values.filter(memory => selected.has(memory));
+}
+
 export class RunService {
   private readonly runs = new Map<string, RunState>();
   private readonly startCache = new Map<string, CachedStart>();
@@ -834,6 +865,7 @@ export class RunService {
       spatialFacts: null,
       completedGoalKeys: new Set(),
       goalAdmissions: new Map(),
+      deferredGoalBudgets: new Map(),
       supersededGoalWakes: new Map(),
       lastGoalSpeechAt: new Map(),
       agentTranscript: new TranscriptStore(),
@@ -1473,6 +1505,10 @@ export class RunService {
               toSeconds,
             )
           : null;
+      // Exact provider accounting may drop an in-flight reservation after a
+      // prior decision returned. Refresh once so a deferred semantic goal can
+      // be re-admitted only when capacity actually changed, never per tick.
+      this.refreshProviderState(run);
 
       let spatialFactsChanged = false;
       if (incomingSpatialFacts) {
@@ -1513,10 +1549,15 @@ export class RunService {
             contactCandidateActorId,
             toSeconds,
           );
+          const administrativeOpportunityKey = this.pendingAdministrativeOpportunityKey(
+            run,
+            actor,
+          );
           const nonContactSemanticGoalKey = this.actorSemanticGoalKey(
             run,
             actor,
             toSeconds,
+            null,
             null,
           );
           const semanticGoalKey = this.actorSemanticGoalKey(
@@ -1524,6 +1565,7 @@ export class RunService {
             actor,
             toSeconds,
             contactCandidateActorId,
+            administrativeOpportunityKey,
           );
           const priorAdmission = run.goalAdmissions.get(actor.actorId);
           // An authored meeting window already owns these participants' social
@@ -1536,8 +1578,14 @@ export class RunService {
             this.retirePendingGoalWakes(run, actor.actorId);
             run.goalAdmissions.set(actor.actorId, {
               semanticGoalKey,
-              nonContactSemanticGoalKey,
+              // Meeting speech owns the current social beat, but it must not
+              // erase a later player/record memory that arrives while the
+              // schedule block is still meeting-owned. Preserve that earlier
+              // semantic baseline so one fresh goal can resume after release.
+              nonContactSemanticGoalKey:
+                priorAdmission?.nonContactSemanticGoalKey ?? nonContactSemanticGoalKey,
               contactOpportunityEpoch,
+              administrativeOpportunityKey,
               spatialSignature,
               admittedAtSeconds: toSeconds,
             });
@@ -1552,26 +1600,60 @@ export class RunService {
           const contactOpportunityGainedOrAdvanced =
             contactOpportunityEpoch !== null &&
             priorAdmission?.contactOpportunityEpoch !== contactOpportunityEpoch;
+          const administrativeOpportunityGained =
+            administrativeOpportunityKey !== null &&
+            priorAdmission?.administrativeOpportunityKey !== administrativeOpportunityKey;
           const contactOpportunityLost =
             priorAdmission !== undefined &&
             priorAdmission.contactOpportunityEpoch !== null &&
             contactOpportunityEpoch === null;
+          const administrativeOpportunityLost =
+            priorAdmission !== undefined &&
+            priorAdmission.administrativeOpportunityKey !== null &&
+            administrativeOpportunityKey === null;
           // Losing candidacy is not an actionable social event. Retire any
           // now-obsolete contact wake and move the admission baseline forward;
           // another actor becoming the candidate is handled on that actor.
-          if (contactOpportunityLost && !nonContactSemanticChanged) {
+          if (
+            (contactOpportunityLost || administrativeOpportunityLost) &&
+            !nonContactSemanticChanged &&
+            !contactOpportunityGainedOrAdvanced &&
+            !administrativeOpportunityGained
+          ) {
             this.retirePendingGoalWakes(run, actor.actorId);
+            run.deferredGoalBudgets.delete(actor.actorId);
             run.goalAdmissions.set(actor.actorId, {
               semanticGoalKey,
               nonContactSemanticGoalKey,
               contactOpportunityEpoch,
+              administrativeOpportunityKey,
               spatialSignature,
               admittedAtSeconds: toSeconds,
             });
             continue;
           }
+          const deferred = run.deferredGoalBudgets.get(actor.actorId);
+          if (deferred && deferred.semanticGoalKey !== semanticGoalKey) {
+            run.deferredGoalBudgets.delete(actor.actorId);
+          }
+          const deferredBudgetChanged = Boolean(
+            deferred &&
+            deferred.semanticGoalKey === semanticGoalKey &&
+            (deferred.callsUsed !== run.providerBudget.callsUsed ||
+              deferred.tokensUsed !== run.providerBudget.tokensUsed),
+          );
+          const deferredBudgetEligible = Boolean(
+            deferredBudgetChanged && this.hasAmbientReserve(run, 1),
+          );
+          if (deferredBudgetChanged && !deferredBudgetEligible && deferred) {
+            deferred.callsUsed = run.providerBudget.callsUsed;
+            deferred.tokensUsed = run.providerBudget.tokensUsed;
+          }
           const semanticChanged =
-            nonContactSemanticChanged || contactOpportunityGainedOrAdvanced;
+            nonContactSemanticChanged ||
+            contactOpportunityGainedOrAdvanced ||
+            administrativeOpportunityGained ||
+            deferredBudgetEligible;
           const spatialRefreshDue = Boolean(
             priorAdmission &&
             priorAdmission.spatialSignature !== spatialSignature &&
@@ -1599,9 +1681,11 @@ export class RunService {
             semanticGoalKey,
             nonContactSemanticGoalKey,
             contactOpportunityEpoch,
+            administrativeOpportunityKey,
             spatialSignature,
             admittedAtSeconds: toSeconds,
           });
+          if (deferredBudgetEligible) run.deferredGoalBudgets.delete(actor.actorId);
           const goalAlreadyCompleted = run.completedGoalKeys.has(`${actor.actorId}:${goalKey}`);
           if (goalAlreadyCompleted) continue;
           emitRunWake(
@@ -2640,7 +2724,8 @@ export class RunService {
             attempt.policyAction = null;
             return this.commitGoalDecision(run, attempt);
           }
-          return this.finishGoalAttempt(run, attempt, "budget_reserved", true);
+          this.deferGoalForBudget(run, attempt);
+          return this.finishGoalAttempt(run, attempt, "budget_reserved");
         });
       }
       // The deterministic policy action below keeps the wake terminal and
@@ -2766,12 +2851,14 @@ export class RunService {
         actor,
         run.elapsedSeconds,
         null,
+        null,
       ),
       contactOpportunityEpoch: this.contactOpportunityEpochFor(
         actor.actorId,
         contactCandidateActorId,
         run.elapsedSeconds,
       ),
+      administrativeOpportunityKey: this.pendingAdministrativeOpportunityKey(run, actor),
       spatialSignature: factSignature,
       admittedAtSeconds: run.elapsedSeconds,
     });
@@ -2783,7 +2870,7 @@ export class RunService {
       contactOpportunity &&
       actor.actorId === STATION_OFFICER_ID &&
       this.pendingInterrogationLedgerSeq(run) !== null;
-    const goal = [
+    let goal = [
       ...castActor.stableGoals,
       "Advance one currently actionable role goal, then yield.",
       ...(contactOpportunity
@@ -2800,6 +2887,18 @@ export class RunService {
       [],
       facts,
     );
+    const hasPendingAdministrativeDecision = Boolean(
+      observePacket.administrativeSources.some(source => source.reportDelta !== 0) &&
+      observePacket.administrativeAuthority.allowedRecordKinds.length > 0 &&
+      observePacket.administrativeAuthority.writableTextSurfaceIds.length > 0,
+    );
+    if (hasPendingAdministrativeDecision) {
+      goal = [
+        goal,
+        "A fresh unadministered source carries a nonzero, model-authored report inclination and a writable procedure is available. Before unrelated movement, observation, or speech, judge whether to preserve one source with write_record or deliberately leave it unwritten with wait. The inclination is evidence for this decision, never a deterministic mandate to write.",
+      ].join(" ");
+      observePacket.goals = [goal];
+    }
     observePacket.reachableAnchorRefs = facts.reachableAnchorRefs.filter(anchorRef =>
       this.schedulePermitsAnchor(run, actor.actorId, anchorRef) &&
       run.scheduler.actors.get(actor.actorId)?.confirmedAnchorRef !== anchorRef,
@@ -2807,26 +2906,30 @@ export class RunService {
     observePacket.playerContact = contactOpportunity
       ? this.playerContactContext(run, actor, facts)
       : null;
-    const offeredTools: ObservePacket["toolCatalog"] = ["wait"];
-    if (
-      observePacket.reachableAnchorRefs.length > 0 ||
-      observePacket.playerContact?.available
-    ) offeredTools.unshift("move_to");
-    if (
-      observePacket.visibleActors.length > 0 ||
-      observePacket.visibleObjects.length > 0 ||
-      observePacket.visibleRecords.length > 0
-    ) offeredTools.unshift("look");
-    if (observePacket.visibleRecords.some(record =>
-      !this.hasReadRecordRevision(actor, record.recordId, record.recordRevision ?? 0)
-    )) offeredTools.unshift("read_record");
-    if (
-      observePacket.administrativeSources.length > 0 &&
-      observePacket.administrativeAuthority.allowedRecordKinds.length > 0 &&
-      observePacket.administrativeAuthority.writableTextSurfaceIds.length > 0
-    ) offeredTools.unshift("write_record");
+    const offeredTools: ObservePacket["toolCatalog"] = hasPendingAdministrativeDecision
+      ? ["write_record", "wait"]
+      : ["wait"];
+    if (!hasPendingAdministrativeDecision) {
+      if (
+        observePacket.reachableAnchorRefs.length > 0 ||
+        observePacket.playerContact?.available
+      ) offeredTools.unshift("move_to");
+      if (
+        observePacket.visibleActors.length > 0 ||
+        observePacket.visibleObjects.length > 0 ||
+        observePacket.visibleRecords.length > 0
+      ) offeredTools.unshift("look");
+      if (observePacket.visibleRecords.some(record =>
+        !this.hasReadRecordRevision(actor, record.recordId, record.recordRevision ?? 0)
+      )) offeredTools.unshift("read_record");
+      if (
+        observePacket.administrativeSources.length > 0 &&
+        observePacket.administrativeAuthority.allowedRecordKinds.length > 0 &&
+        observePacket.administrativeAuthority.writableTextSurfaceIds.length > 0
+      ) offeredTools.unshift("write_record");
+    }
     const lastSpokeAt = run.lastGoalSpeechAt.get(actor.actorId);
-    const allowedTalkActorIds = (
+    const allowedTalkActorIds = !hasPendingAdministrativeDecision && (
       run.activeAmbientConversation === null &&
       (lastSpokeAt === undefined ||
         run.elapsedSeconds - lastSpokeAt >= GOAL_SPEECH_COOLDOWN_SECONDS)
@@ -3337,19 +3440,18 @@ export class RunService {
         );
       }
       if (error instanceof ProviderBudgetReservedError) {
-        return this.serialize(runId, async () =>
-          this.finishGoalAttempt(
-            this.requireRun(runId),
-            attempt,
-            "budget_reserved",
-            true,
-          ),
-        );
+        return this.serialize(runId, async () => {
+          const run = this.requireRun(runId);
+          this.deferGoalForBudget(run, attempt);
+          return this.finishGoalAttempt(run, attempt, "budget_reserved");
+        });
       }
       if (budgetReserved || error === budgetStop) {
-        return this.serialize(runId, async () =>
-          this.finishGoalAttempt(this.requireRun(runId), attempt, "budget_reserved", true),
-        );
+        return this.serialize(runId, async () => {
+          const run = this.requireRun(runId);
+          this.deferGoalForBudget(run, attempt);
+          return this.finishGoalAttempt(run, attempt, "budget_reserved");
+        });
       }
     }
 
@@ -3622,6 +3724,7 @@ export class RunService {
       actionDeltas.push({ kind: "readiness", readinessDelta: clone(readinessDelta) });
     }
 
+    run.deferredGoalBudgets.delete(actor.actorId);
     this.rememberCompletedGoal(run, actor.actorId, attempt.goalKey);
     attempt.state = "completed";
     finishRunWake(run.scheduler, attempt.request.wakeId, "completed");
@@ -4060,7 +4163,8 @@ export class RunService {
       observation?.procedure !== "interrogation" ||
       !observation.observePacket.playerContact?.available
     ) {
-      return this.finishGoalAttempt(run, attempt, "budget_reserved", true);
+      this.deferGoalForBudget(run, attempt);
+      return this.finishGoalAttempt(run, attempt, "budget_reserved");
     }
     attempt.resolvedAction = {
       tool: "move_to_player",
@@ -4069,6 +4173,20 @@ export class RunService {
     attempt.actionMeta = null;
     attempt.policyAction = "budget_reserved_interrogation";
     return this.commitGoalDecision(run, attempt);
+  }
+
+  /**
+   * Preserve one denied semantic goal without polling it every advance. A new
+   * wake is admitted only after exact provider accounting changes and the
+   * ordinary background ceiling has room again; semantic supersession drops it.
+   */
+  private deferGoalForBudget(run: RunState, attempt: GoalDecisionAttempt): void {
+    this.refreshProviderState(run);
+    run.deferredGoalBudgets.set(attempt.actorId, {
+      semanticGoalKey: attempt.semanticGoalKey,
+      callsUsed: run.providerBudget.callsUsed,
+      tokensUsed: run.providerBudget.tokensUsed,
+    });
   }
 
   private rememberCompletedGoal(run: RunState, actorId: string, goalKey: string): void {
@@ -4115,12 +4233,14 @@ export class RunService {
           actor,
           run.elapsedSeconds,
           null,
+          null,
         ),
         contactOpportunityEpoch: this.contactOpportunityEpochFor(
           actorId,
           contactCandidateActorId,
           run.elapsedSeconds,
         ),
+        administrativeOpportunityKey: this.pendingAdministrativeOpportunityKey(run, actor),
         spatialSignature: spatialMaterialSignature(facts),
         admittedAtSeconds: run.elapsedSeconds,
       });
@@ -6057,6 +6177,7 @@ export class RunService {
     actor: RunActorState,
     elapsedSeconds = run.elapsedSeconds,
     contactCandidateActorId = this.currentContactCandidateActorId(run, elapsedSeconds),
+    administrativeOpportunityKey = this.pendingAdministrativeOpportunityKey(run, actor),
   ): string {
     return `goal:${digest(JSON.stringify({
       actorId: actor.actorId,
@@ -6082,11 +6203,41 @@ export class RunService {
           contactCandidateActorId,
           elapsedSeconds,
         ),
+      administrativeOpportunity: administrativeOpportunityKey,
       interrogationLedgerSeq:
         actor.actorId === STATION_OFFICER_ID
           ? this.pendingInterrogationLedgerSeq(run)
           : null,
     }))}`;
+  }
+
+  /**
+   * A model-authored nonzero report inclination becomes newly actionable when
+   * its holder reaches an authorized text surface. This key lets that gained
+   * opportunity wake once without making ordinary schedule movement semantic.
+   * The provider still decides between writing and deliberately waiting.
+   */
+  private pendingAdministrativeOpportunityKey(
+    run: RunState,
+    actor: RunActorState,
+  ): string | null {
+    if (recordKindsForRole(actor.role).length === 0) return null;
+    const writableTextSurfaceIds = this.layout.recordSurfaces
+      .filter(surface => surface.landmarkId === actor.locationId)
+      .map(surface => surface.surfaceId)
+      .sort();
+    if (writableTextSurfaceIds.length === 0) return null;
+    const sourceMemoryIds = actor.memories
+      .filter(
+        memory =>
+          memory.kind === "player_conversation" &&
+          memory.reportDelta !== 0 &&
+          !this.sourceAlreadyAdministered(run, actor.actorId, memory.memoryId),
+      )
+      .map(memory => memory.memoryId)
+      .sort();
+    if (sourceMemoryIds.length === 0) return null;
+    return digest(JSON.stringify({ sourceMemoryIds, writableTextSurfaceIds }));
   }
 
   private contactOpportunityEpochFor(
@@ -6288,7 +6439,7 @@ export class RunService {
       playerContact: null,
       heardSpeech: [...heardSpeech, ...additionalSpeech],
       toolCatalog: ["wait"],
-      administrativeSources: selectRecentChronological(
+      administrativeSources: selectAdministrativeSourceMemories(
         actor.memories.filter(memory =>
           memory.kind !== "prop_handling_observation" &&
           memory.kind !== "ambient_stance_judgment" &&

@@ -476,6 +476,151 @@ test("an active meeting owns participant social goals while an unrelated contact
   assert.equal(requests.length + ambientRequests.length, callsAfterMeeting + 2);
 });
 
+test("a semantic memory gained after meeting speech wakes once when ownership releases", async () => {
+  const { adapter, requests } = capturingAdapter();
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("meeting-deferred-memory"),
+  });
+  const meeting = await readyFirstMeeting(service, "meeting-deferred-memory");
+  const committed = await service.decision(meeting.request);
+  assert.equal(committed.status, "completed");
+
+  type MutableActor = { memories: RunMemory[] };
+  type MutableRun = { actors: Map<string, MutableActor> };
+  const internalRuns = Reflect.get(service, "runs") as Map<string, MutableRun>;
+  const internalRun = internalRuns.get(meeting.started.runId);
+  const manager = internalRun?.actors.get("NPC_Studio_Manager");
+  const afterMeetingSpeech = service.snapshot(meeting.started.runId);
+  await service.advance({
+    runId: meeting.started.runId,
+    advanceId: "meeting-deferred-memory:baseline",
+    observedWorldRevision: afterMeetingSpeech.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: afterMeetingSpeech.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "Studio" },
+      actors: firstMeetingParticipantActors(afterMeetingSpeech),
+    },
+  });
+  const atMeeting = service.snapshot(meeting.started.runId);
+  const schedulerManager = atMeeting.scheduler.actors.find(
+    actor => actor.actorId === "NPC_Studio_Manager",
+  );
+  assert.ok(manager && schedulerManager);
+  manager.memories.push({
+    memoryId: "meeting-deferred-memory:new-player-event",
+    kind: "player_contact_outcome",
+    sourceActorId: "player",
+    listenerActorId: "NPC_Studio_Manager",
+    contactId: "meeting-deferred-memory:contact",
+    outcome: "not_engaged",
+    contactReason: "회의 발화가 끝난 뒤 방문자와 별도의 일이 생겼습니다.",
+    interactionZoneId: "ParkConversation",
+    originAnchorRef: schedulerManager.confirmedAnchorRef,
+    worldSeconds: atMeeting.worldClock.elapsedSeconds,
+    worldRevision: atMeeting.worldRevision,
+  });
+
+  const owned = await service.advance({
+    runId: meeting.started.runId,
+    advanceId: "meeting-deferred-memory:owned",
+    observedWorldRevision: atMeeting.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: atMeeting.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "Studio" },
+      actors: firstMeetingParticipantActors(atMeeting),
+    },
+  });
+  assert.ok(owned.scheduleWakes.every(
+    wake => wake.kind !== "goal" || wake.actorIds[0] !== "NPC_Studio_Manager",
+  ));
+
+  const releasedWakes: RunScheduleWake[] = [];
+  let current = service.snapshot(meeting.started.runId);
+  for (let step = 10; step <= 23; step += 1) {
+    let advanced = await service.advance({
+      runId: meeting.started.runId,
+      advanceId: `meeting-deferred-memory:clock:${step}`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: [],
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [8, 0.05, 5], locationId: "Studio" },
+        actors: firstMeetingParticipantActors(current),
+      },
+    });
+    releasedWakes.push(...advanced.scheduleWakes);
+    current = service.snapshot(meeting.started.runId);
+    const arrivals = advanced.movementDeltas.map(movement => ({
+      movementId: movement.movementId,
+      actorId: movement.actorId,
+      anchorRef: movement.targetAnchorRef,
+    }));
+    if (arrivals.length === 0) continue;
+    advanced = await service.advance({
+      runId: meeting.started.runId,
+      advanceId: `meeting-deferred-memory:clock:${step}:arrivals`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 0,
+      arrivals,
+      spatialFacts: {
+        observedWorldRevision: current.worldRevision,
+        player: { position: [8, 0.05, 5], locationId: "Studio" },
+        actors: meetingBurstSpatialActors(current, arrivals),
+      },
+    });
+    releasedWakes.push(...advanced.scheduleWakes);
+    current = service.snapshot(meeting.started.runId);
+  }
+  assert.equal(current.worldClock.elapsedSeconds, 230);
+  const managerWakes = releasedWakes.filter(
+    wake => wake.kind === "goal" && wake.actorIds[0] === "NPC_Studio_Manager",
+  );
+  assert.equal(managerWakes.length, 1);
+  assert.ok(releasedWakes.every(
+    wake => wake.kind !== "goal" || wake.actorIds[0] !== "NPC_Park_Caretaker",
+  ));
+
+  const managerWake = managerWakes[0];
+  assert.ok(managerWake);
+  const resolved = await service.decision({
+    runId: meeting.started.runId,
+    wakeId: managerWake.wakeId,
+    observedWorldRevision: managerWake.observedWorldRevision,
+  });
+  assert.equal(resolved.status, "completed");
+  const managerRequest = requests.find(
+    request =>
+      request.observePacket.actorId === "NPC_Studio_Manager" &&
+      request.observePacket.administrativeSources.some(
+        source => source.memoryId === "meeting-deferred-memory:new-player-event",
+      ),
+  );
+  assert.ok(managerRequest);
+
+  const settled = service.snapshot(meeting.started.runId);
+  const unchanged = await service.advance({
+    runId: meeting.started.runId,
+    advanceId: "meeting-deferred-memory:unchanged",
+    observedWorldRevision: settled.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: settled.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "Studio" },
+      actors: ambientSpatialActors(settled),
+    },
+  });
+  assert.ok(unchanged.scheduleWakes.every(
+    wake => wake.kind !== "goal" || wake.actorIds[0] !== "NPC_Studio_Manager",
+  ));
+});
+
 test("first-meeting arrivals suppress a new participant contact without suppressing unrelated contact", async () => {
   const { adapter, requests, ambientRequests } = capturingAdapter();
   const service = new RunService({

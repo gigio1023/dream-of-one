@@ -349,7 +349,9 @@ before meeting ownership began still outranks the schedule and holds that
 participant in place; a newly available automatic contact opportunity does
 not create parallel participant work. Later memory, record, contact, or
 interrogation events can admit normal goals after the meeting block ends;
-departing on schedule alone cannot. Run-discriminated
+the meeting-owned admission preserves its earlier semantic baseline so an
+event gained after the meeting exchange is not silently consumed before that
+release. Departing on schedule alone cannot. Run-discriminated
 `POST /v1/npc/decision` claims that wake exactly once and resolves two
 validated provider-backed utterances outside the run lock. The first uses an
 ordinary agent-step proposal; the second uses one `ambient_reply` call that
@@ -372,9 +374,12 @@ latest admission and restamped when a delayed wake is claimed. They can
 invalidate a stale action without turning ordinary movement into a provider
 treadmill. Provider-facing observations retain the newest 12 memory-derived
 own-action notes, eight historical heard-speech lines, and eight unadministered
-administrative sources in chronological order; current-turn speech is appended
-after that historical bound. Full actor memory remains in run state, snapshots,
-and hearing requests, so this is prompt budgeting rather than memory loss.
+administrative sources in chronological order. Unadministered player memories
+with a nonzero model-authored report inclination take those bounded slots
+before newer zero-inclination ambient sources can evict them; current-turn
+speech is appended after that historical bound. Full actor memory remains in
+run state, snapshots, and hearing requests, so this is prompt budgeting rather
+than memory loss.
 
 The offered tool catalog is derived from current facts rather than role alone:
 `wait` remains available; `move_to`, `look`, `talk_to`, `read_record`,
@@ -400,6 +405,18 @@ revalidated against current participant evidence and engine audibility before
 listener memories commit. The shared background gate allows at most two
 provider proposals in flight, and only one ambient conversation may hold the
 run lease.
+
+A nonzero report inclination still does not mandate a record. When its holder
+has an authorized writable surface, that gained opportunity enters the
+semantic key once and the bounded goal offers only `write_record` and `wait`:
+the provider must deliberately preserve one grounded source or leave it
+unwritten instead of deferring the choice through unrelated movement or
+speech. Leaving the surface is non-actionable. If caller-side budget
+reservation interrupts the choice or the second turn of a proposed
+conversation, the runtime commits no partial consequence and does not mark the
+semantic goal complete. It re-admits once only after exact provider accounting
+changes and the ordinary background ceiling has capacity, avoiding both event
+loss and per-tick polling.
 
 When the hearing becomes due, that background lane closes before any new
 transport may begin. Queued preload/goal work cancels as stale without a fake

@@ -110,6 +110,40 @@ function ambientHistoryMemory(sequence: number, listenerActorId: string): RunMem
   };
 }
 
+function reportBearingMemory(listenerActorId: string): RunMemory {
+  return {
+    memoryId: "memory-bounded-report-bearing",
+    kind: "player_conversation",
+    sourceActorId: "player",
+    listenerActorId,
+    conversationId: "conversation-bounded-report-bearing",
+    turnId: "turn-bounded-report-bearing",
+    playerLine: "기록을 조작했다고 직접 말했습니다.",
+    npcLine: "그 진술은 별도로 판단해야 합니다.",
+    citedRecords: [],
+    signals: [],
+    whyLine: "방문자가 기록 조작을 직접 말했다.",
+    suspicionBefore: 0,
+    suspicionAfter: 20,
+    suspicionDelta: 20,
+    reportPressureBefore: 0,
+    reportPressureAfter: 0,
+    reportDelta: 20,
+    institutionalPressureDelta: 0,
+    proposedStance: "oppose",
+    appliedStance: "oppose",
+    meaningfulFirsthand: true,
+    openQuestion: null,
+    worldSeconds: 0,
+    worldRevision: 0,
+    proposalMeta: {
+      profileId: "scripted/studio-reception",
+      transport: "scripted",
+      usedFallback: false,
+    },
+  };
+}
+
 async function advanceToParkContactOpportunity(
   service: RunService,
   started: RunSnapshot,
@@ -178,13 +212,20 @@ async function advanceToParkContactOpportunity(
   return { response, actorId, playerPosition };
 }
 
-test("a caller-reserved first goal call ends as policy without provider evidence", async () => {
+test("a caller-reserved goal stays quiet until changed accounting admits one retry", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
+  const original = adapter.proposeNextStep.bind(adapter);
   let proposalAttempts = 0;
-  adapter.proposeNextStep = async () => {
+  let reserveDenied = true;
+  let accountedCalls = 0;
+  adapter.proposeNextStep = async request => {
     proposalAttempts += 1;
-    throw new ProviderBudgetReservedError();
+    if (reserveDenied) throw new ProviderBudgetReservedError();
+    return original(request);
   };
+  Object.defineProperty(adapter, "accountingSnapshot", {
+    value: () => ({ callsUsed: accountedCalls, tokensUsed: 0 }),
+  });
   const service = new RunService({
     proposalPort: adapter,
     idFactory: deterministicIds("goal-caller-reserve"),
@@ -225,15 +266,66 @@ test("a caller-reserved first goal call ends as policy without provider evidence
   assert.deepEqual(response.providerRuntimeTrace.entries, []);
   assert.deepEqual(await service.decision(request), response);
   assert.equal(proposalAttempts, 1);
+
+  let current = service.snapshot(started.runId);
+  const unchanged = await service.advance({
+    runId: started.runId,
+    advanceId: "goal-caller-reserve:unchanged-accounting",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: current.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: spatialActors(current),
+    },
+  });
+  assert.ok(unchanged.scheduleWakes.every(candidate =>
+    candidate.kind !== "goal" || candidate.actorIds[0] !== "NPC_Office_Worker"
+  ));
+
+  reserveDenied = false;
+  accountedCalls = 1;
+  current = service.snapshot(started.runId);
+  const eligible = await service.advance({
+    runId: started.runId,
+    advanceId: "goal-caller-reserve:changed-accounting",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: current.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: spatialActors(current),
+    },
+  });
+  const resumedWake = eligible.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === "NPC_Office_Worker"
+  );
+  assert.ok(resumedWake, "the denied semantic goal resumes once after accounting changes");
+  const resumed = await service.decision({
+    runId: started.runId,
+    wakeId: resumedWake.wakeId,
+    observedWorldRevision: resumedWake.observedWorldRevision,
+  });
+  assert.equal(resumed.status, "completed");
+  assert.equal(proposalAttempts, 2);
 });
 
-test("a caller-reserved goal reply adds no reply evidence or partial speech", async () => {
+test("a caller-reserved goal reply preserves no partial speech and resumes once", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
+  const originalReply = adapter.judgeAndProposeAmbientReply.bind(adapter);
   let replyAttempts = 0;
-  adapter.judgeAndProposeAmbientReply = async () => {
+  let replyDenied = true;
+  let accountedCalls = 0;
+  adapter.judgeAndProposeAmbientReply = async request => {
     replyAttempts += 1;
-    throw new ProviderBudgetReservedError();
+    if (replyDenied) throw new ProviderBudgetReservedError();
+    return originalReply(request);
   };
+  Object.defineProperty(adapter, "accountingSnapshot", {
+    value: () => ({ callsUsed: accountedCalls, tokensUsed: 0 }),
+  });
   const service = new RunService({
     proposalPort: adapter,
     idFactory: deterministicIds("goal-reply-caller-reserve"),
@@ -280,6 +372,42 @@ test("a caller-reserved goal reply adds no reply evidence or partial speech", as
   assert.equal(response.providerRuntimeTrace.entries.length, 1);
   assert.deepEqual(await service.decision(request), response);
   assert.equal(replyAttempts, 1);
+
+  replyDenied = false;
+  accountedCalls = 1;
+  const current = service.snapshot(started.runId);
+  const resumedActors = spatialActors(current);
+  const resumedReceptionist = resumedActors.find(actor => actor.actorId === receptionist.actorId);
+  const resumedManager = resumedActors.find(actor => actor.actorId === manager.actorId);
+  assert.ok(resumedReceptionist && resumedManager);
+  resumedReceptionist.visibleActorIds = [resumedManager.actorId];
+  resumedReceptionist.audibleActorIds = [resumedManager.actorId];
+  resumedManager.visibleActorIds = [resumedReceptionist.actorId];
+  resumedManager.audibleActorIds = [resumedReceptionist.actorId];
+  const eligible = await service.advance({
+    runId: started.runId,
+    advanceId: "goal-reply-caller-reserve:changed-accounting",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: current.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: resumedActors,
+    },
+  });
+  const resumedWake = eligible.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === receptionist.actorId
+  );
+  assert.ok(resumedWake);
+  const resumed = await service.decision({
+    runId: started.runId,
+    wakeId: resumedWake.wakeId,
+    observedWorldRevision: resumedWake.observedWorldRevision,
+  });
+  assert.equal(resumed.status, "completed");
+  assert.equal(resumed.speechEvents.length, 2);
+  assert.equal(replyAttempts, 2);
 });
 
 test("one initial spatial batch admits each resident once and a social exchange consumes its listener wake", async () => {
@@ -1088,6 +1216,7 @@ test("provider run observations bound recent history without deleting runtime or
   assert.deepEqual(sparsePacket.toolCatalog, ["wait"]);
 
   internalActor.memories.push(
+    reportBearingMemory(actorId),
     ...Array.from({ length: historyCount }, (_, sequence) =>
       ambientHistoryMemory(sequence, actorId)
     ),
@@ -1110,8 +1239,8 @@ test("provider run observations bound recent history without deleting runtime or
   const fullSnapshot = service.snapshot(started.runId);
   const fullActor = fullSnapshot.actors.find(actor => actor.actorId === actorId);
   assert.ok(fullActor);
-  assert.equal(fullActor.memories.length, historyCount);
-  assert.equal(fullActor.memories[0]?.memoryId, "memory-bounded-000");
+  assert.equal(fullActor.memories.length, historyCount + 1);
+  assert.equal(fullActor.memories[0]?.memoryId, "memory-bounded-report-bearing");
   assert.equal(
     fullActor.memories.at(-1)?.memoryId,
     `memory-bounded-${String(historyCount - 1).padStart(3, "0")}`,
@@ -1134,8 +1263,8 @@ test("provider run observations bound recent history without deleting runtime or
   });
   const hearingActor = hearingRequest.residents.find(actor => actor.actorId === actorId);
   assert.ok(hearingActor);
-  assert.equal(hearingActor.memories.length, historyCount);
-  assert.equal(hearingActor.memories[0]?.memoryId, "memory-bounded-000");
+  assert.equal(hearingActor.memories.length, historyCount + 1);
+  assert.equal(hearingActor.memories[0]?.memoryId, "memory-bounded-report-bearing");
 
   const advanced = await service.advance({
     runId: started.runId,
@@ -1184,7 +1313,10 @@ test("provider run observations bound recent history without deleting runtime or
   );
   assert.deepEqual(
     observed.observePacket.administrativeSources.map(source => source.memoryId),
-    expectedIds(RUN_OBSERVE_ADMINISTRATIVE_SOURCE_LIMIT),
+    [
+      "memory-bounded-report-bearing",
+      ...expectedIds(RUN_OBSERVE_ADMINISTRATIVE_SOURCE_LIMIT - 1),
+    ],
   );
   assert.deepEqual(observed.observePacket.administrativeSources.at(-1), {
     memoryId: `memory-bounded-${String(historyCount - 1).padStart(3, "0")}`,
@@ -1196,7 +1328,7 @@ test("provider run observations bound recent history without deleting runtime or
   });
   assert.equal(service.snapshot(started.runId).actors.find(
     actor => actor.actorId === actorId
-  )?.memories.length, historyCount);
+  )?.memories.length, historyCount + 1);
 });
 
 test("visible reachable player facts outside a conversation zone stay valid but cannot open contact", async () => {

@@ -2100,8 +2100,13 @@ export class RunService {
       ) {
         if (existing.resolved) {
           const wasReady = actor.playerConversationReady;
+          const contactLeaseRefreshed = this.refreshActiveContactOpeningLease(
+            run,
+            actor.actorId,
+            interactionZoneId,
+          );
           this.setActorReadiness(actor, true);
-          if (!wasReady) run.worldRevision += 1;
+          if (!wasReady || contactLeaseRefreshed) run.worldRevision += 1;
           return { response: this.preloadResponse(run, actor, existing) };
         }
         if (existing.inFlight) return { inFlight: existing.inFlight };
@@ -5722,6 +5727,11 @@ export class RunService {
       attempt.routeHoldUntilSeconds = run.elapsedSeconds + 15;
       actor.playerConversationReady = true;
       run.preloadRequiredEvidence.delete(actor.actorId);
+      this.refreshActiveContactOpeningLease(
+        run,
+        actor.actorId,
+        attempt.interactionZoneId,
+      );
       run.worldRevision += 1;
       return this.preloadResponse(run, actor, attempt);
     });
@@ -6352,6 +6362,26 @@ export class RunService {
         !zone.actorIds.includes(actor.actorId)
       )
     );
+    const opening = run.conversationOpenings.get(contact.actorId);
+    const openingStillPreparing = Boolean(
+      opening?.inFlight &&
+      opening.interactionZoneId === contact.interactionZoneId
+    );
+    if (
+      !invalidGrounding &&
+      atSeconds >= contact.expiresAtSeconds &&
+      openingStillPreparing &&
+      atSeconds < run.hearingAtSeconds
+    ) {
+      // Provider queueing and generation are not player hesitation. Keep a
+      // grounded contact alive while its opening is still preparing, then the
+      // successful preload grants a fresh full input window below.
+      contact.expiresAtSeconds = Math.min(
+        run.hearingAtSeconds,
+        atSeconds + CONTACT_LIFETIME_SECONDS,
+      );
+      return false;
+    }
     if (atSeconds < contact.expiresAtSeconds && !invalidGrounding) return false;
 
     const memory: RunPlayerContactOutcomeMemory = {
@@ -6371,6 +6401,27 @@ export class RunService {
     run.contactCooldownUntil.set(actor.actorId, atSeconds + CONTACT_COOLDOWN_SECONDS);
     run.contactGlobalCooldownUntil = atSeconds + CONTACT_COOLDOWN_SECONDS;
     run.activeContact = null;
+    return true;
+  }
+
+  private refreshActiveContactOpeningLease(
+    run: RunState,
+    actorId: string,
+    interactionZoneId: string,
+  ): boolean {
+    const contact = run.activeContact;
+    if (
+      !contact ||
+      contact.actorId !== actorId ||
+      contact.interactionZoneId !== interactionZoneId ||
+      run.elapsedSeconds >= run.hearingAtSeconds
+    ) return false;
+    const expiresAtSeconds = Math.min(
+      run.hearingAtSeconds,
+      run.elapsedSeconds + CONTACT_LIFETIME_SECONDS,
+    );
+    if (expiresAtSeconds <= contact.expiresAtSeconds) return false;
+    contact.expiresAtSeconds = expiresAtSeconds;
     return true;
   }
 

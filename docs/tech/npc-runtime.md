@@ -458,6 +458,11 @@ revalidates the latest distance, visibility, reachability, and zone before
 consuming the normal opening. Expiry or loss clears the lease, starts the
 75-second cooldown, and appends exactly one attributed `not_engaged` memory;
 no judgment or institutional mutation is implied.
+Provider queueing and generation do not consume that player input window. A
+still-grounded contact remains held while its opening is in flight, and a
+successful preload grants a fresh 30 world seconds to press interact. Leaving
+the zone or losing reachability still cancels immediately, and the hearing
+deadline remains an absolute upper bound.
 
 The high-pressure Station interrogation is the exception to the optional
 approach choice: once its runtime conditions and fresh grounded contact facts

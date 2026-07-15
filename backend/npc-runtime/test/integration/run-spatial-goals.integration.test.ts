@@ -1580,6 +1580,116 @@ test("one post-grace provider candidate creates one idempotent player contact an
   assert.equal(openingCalls, 1, "session start consumes the existing opening without a second call");
 });
 
+test("provider latency cannot consume a grounded contact's player input window", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalOpening = adapter.proposeConversationTurn.bind(adapter);
+  let markOpeningStarted: (() => void) | null = null;
+  const openingStarted = new Promise<void>(resolve => {
+    markOpeningStarted = resolve;
+  });
+  let releaseOpening: (() => void) | null = null;
+  const openingReleased = new Promise<void>(resolve => {
+    releaseOpening = resolve;
+  });
+  adapter.proposeConversationTurn = async request => {
+    markOpeningStarted?.();
+    await openingReleased;
+    return originalOpening(request);
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("contact-provider-latency"),
+  });
+  const started = service.start("contact-provider-latency-start", "ko-KR");
+  const opportunity = await advanceToParkContactOpportunity(
+    service,
+    started,
+    "contact-provider-latency",
+  );
+  const wake = opportunity.response.scheduleWakes.find(candidate =>
+    candidate.kind === "goal" && candidate.actorIds[0] === opportunity.actorId
+  );
+  assert.ok(wake);
+  const decided = await service.decision({
+    runId: started.runId,
+    wakeId: wake.wakeId,
+    observedWorldRevision: wake.observedWorldRevision,
+  });
+  const contact = decided.activeContact;
+  assert.ok(contact);
+
+  const preload = service.preloadConversation(
+    started.runId,
+    opportunity.actorId,
+    "ParkConversation",
+    "ko-KR",
+  );
+  await openingStarted;
+  let current = service.snapshot(started.runId);
+  for (let step = 1; step <= 4; step += 1) {
+    await service.advance({
+      runId: started.runId,
+      advanceId: `contact-provider-latency-waiting-clock-${step}`,
+      observedWorldRevision: current.worldRevision,
+      elapsedSeconds: 10,
+      arrivals: [],
+    });
+    current = service.snapshot(started.runId);
+  }
+  assert.equal(current.activeContact?.contactId, contact.contactId);
+  assert.ok(
+    (current.activeContact?.expiresAtSeconds ?? 0) > current.worldClock.elapsedSeconds,
+    "a pending opening keeps the still-grounded lease usable",
+  );
+
+  releaseOpening?.();
+  const preloaded = await preload;
+  current = service.snapshot(started.runId);
+  assert.equal(preloaded.activeContact?.contactId, contact.contactId);
+  assert.equal(
+    current.activeContact?.expiresAtSeconds,
+    current.worldClock.elapsedSeconds + 30,
+    "opening readiness starts a fresh full player input window",
+  );
+
+  const closeActors = spatialActors(current);
+  const closeActor = closeActors.find(candidate => candidate.actorId === opportunity.actorId);
+  assert.ok(closeActor);
+  closeActor.position = [...opportunity.playerPosition];
+  closeActor.playerVisible = true;
+  closeActor.playerAudible = true;
+  closeActor.playerReachable = true;
+  closeActor.playerInteractionZoneId = "ParkConversation";
+  await service.advance({
+    runId: started.runId,
+    advanceId: "contact-provider-latency-close",
+    observedWorldRevision: current.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: current.worldRevision,
+      player: { position: opportunity.playerPosition, locationId: "Park" },
+      actors: closeActors,
+    },
+  });
+  const conversation = await service.startConversation(
+    started.runId,
+    opportunity.actorId,
+    "ParkConversation",
+    "ko-KR",
+    contact.contactId,
+  );
+  assert.equal(conversation.actor.actorId, opportunity.actorId);
+  assert.equal(conversation.activeContact, null);
+  assert.equal(
+    service.snapshot(started.runId).actors
+      .find(actor => actor.actorId === opportunity.actorId)
+      ?.memories.filter(memory => memory.kind === "player_contact_outcome").length,
+    0,
+    "provider latency never fabricates a not-engaged outcome",
+  );
+});
+
 test("active contact holds one actor across a schedule boundary and repairs policy movement after one expiry", async () => {
   const layout = { ...loadRunLayout(), graceEndsAtSeconds: 60 };
   const service = new RunService({

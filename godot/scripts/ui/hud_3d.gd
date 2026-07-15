@@ -97,6 +97,9 @@ var _log_visible := false
 var _log_busy := false
 var _debug_visible := false
 var _focused_target: Node
+var _preload_target: Node
+var _interaction_prompt_actionable := false
+var _interaction_prompt_preparing := false
 var _runtime_theme: Theme
 var _conversation_actor_id := ""
 var _current_turn: Dictionary = {}
@@ -234,17 +237,49 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func set_focus(target: Node) -> void:
 	_focused_target = target
+	_refresh_interaction_prompt()
+
+
+func set_preload_target(target: Node) -> void:
+	_preload_target = target
+	_refresh_interaction_prompt()
+
+
+func _refresh_interaction_prompt() -> void:
+	_interaction_prompt_actionable = false
+	_interaction_prompt_preparing = false
 	if _conversation_visible or _settings_visible or _log_visible or _outcome_visible:
 		_prompt_panel.visible = false
 		return
-	if target == null or not target.has_method("get_interaction_label_key"):
+	var prompt_target: Node = (
+		_focused_target if is_instance_valid(_focused_target) else null
+	)
+	var label_method := "get_interaction_label_key"
+	if prompt_target != null:
+		_interaction_prompt_actionable = true
+	elif (
+		is_instance_valid(_preload_target)
+		and _preload_target.has_method("get_preload_status_label_key")
+		and (
+			not _preload_target.has_method("is_interaction_enabled")
+			or not bool(_preload_target.call("is_interaction_enabled"))
+		)
+	):
+		prompt_target = _preload_target
+		label_method = "get_preload_status_label_key"
+		_interaction_prompt_preparing = true
+	if prompt_target == null or not prompt_target.has_method(label_method):
 		_prompt_panel.visible = false
 		_reticle.modulate = Color(0.9, 0.9, 0.86, 0.8)
 		return
-	var label_key := str(target.call("get_interaction_label_key"))
+	var label_key := str(prompt_target.call(label_method))
 	_prompt_label.text = tr(label_key)
 	_prompt_panel.visible = not _prompt_label.text.is_empty()
-	_reticle.modulate = Color(0.55, 0.95, 0.72, 1.0)
+	_reticle.modulate = (
+		Color(0.55, 0.95, 0.72, 1.0)
+		if _interaction_prompt_actionable
+		else Color(0.95, 0.78, 0.42, 0.95)
+	)
 
 
 func show_contact_approach(contact_id: String, actor_id: String) -> void:
@@ -789,6 +824,12 @@ func presentation_snapshot() -> Dictionary:
 		"uiScale": UI_SCALE_OPTIONS[_ui_scale_option.selected],
 		"locale": str(_localization.call("locale")),
 		"selectedLocale": _selected_language(),
+		"interactionPrompt": {
+			"visible": _prompt_panel.visible,
+			"text": _prompt_label.text if _prompt_panel.visible else "",
+			"actionable": _interaction_prompt_actionable,
+			"preparing": _interaction_prompt_preparing,
+		},
 		"languageOptions": _language_options.duplicate(),
 		"languageAppliesNextRun": _language_applies_next_run,
 		"exportFont": _dictionary_or_empty(_localization.call("font_selection_snapshot")),

@@ -423,8 +423,10 @@ the dev machine with all six NPC loops live.
   alone does not occlude either the NPC torso check or the engine spatial sight
   fact used to ground conversation. Walls, held props, and exact NPC or
   physical-prop rays retain priority, and looking outside the cone exposes the
-  record normally. Captured left-click throws only while a prop is held and
-  otherwise retains its normal mouse-look role.
+  record normally. Looking at a preload-eligible but not-ready resident may
+  show a neutral localized preparation status, but it is not green interaction
+  focus and cannot accept `E`. Captured left-click throws only while a prop is
+  held and otherwise retains its normal mouse-look role.
 - **Contextual onboarding**: one presentation-only overlay introduces
   movement/jump, the outsider premise and Studio-first purpose, NPC talk,
   dialogue input, and prop controls in that order. It observes progress and

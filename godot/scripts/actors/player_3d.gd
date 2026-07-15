@@ -152,10 +152,9 @@ func _physics_process(delta: float) -> void:
 	if focus_target == null and _control_enabled:
 		focus_target = _interactable_collider()
 	if _control_enabled and _ready_npc_may_override(focus_target):
-		# Keep a resident focusable during its provider-backed opening preload.
-		# The HUD then says that speech is being prepared instead of making E
-		# appear broken. The authoritative ready gate still lives in Main/runtime.
-		var assisted_npc := _npc_aim_assist(false, NPC_AIM_ASSIST_DISTANCE_M)
+		# Only a runtime-ready resident may enter the actionable focus path. The
+		# separate preload intent still lets the HUD explain a pending opening.
+		var assisted_npc := _ready_npc_aim_assist()
 		if assisted_npc != null:
 			focus_target = assisted_npc
 	_set_focused_target(focus_target)
@@ -218,10 +217,7 @@ func _aimed_npc_actor() -> Node:
 	var candidate := collider as Node
 	while candidate != null and candidate != self:
 		if candidate.is_in_group(&"npc_actors"):
-			if (
-				candidate.has_method("is_interaction_focusable")
-				and not bool(candidate.call("is_interaction_focusable"))
-			):
+			if not _npc_is_preload_targetable(candidate):
 				return null
 			return candidate
 		candidate = candidate.get_parent()
@@ -265,10 +261,7 @@ func _npc_aim_assist(
 			or not candidate.has_method("get_interaction_label_key")
 			or not candidate.has_method("interact")
 			or not candidate.has_method("is_interaction_enabled")
-			or (
-				candidate.has_method("is_interaction_focusable")
-				and not bool(candidate.call("is_interaction_focusable"))
-			)
+			or not _npc_is_preload_targetable(candidate)
 			or (
 				require_interaction_ready
 				and not bool(candidate.call("is_interaction_enabled"))
@@ -337,14 +330,7 @@ func _find_interactable(start: Node) -> Node:
 			and candidate.has_method("interact")
 		):
 			if (
-				candidate.has_method("is_interaction_focusable")
-				and not bool(candidate.call("is_interaction_focusable"))
-			):
-				candidate = candidate.get_parent()
-				continue
-			if (
-				not candidate.has_method("is_interaction_focusable")
-				and candidate.has_method("is_interaction_enabled")
+				candidate.has_method("is_interaction_enabled")
 				and not bool(candidate.call("is_interaction_enabled"))
 			):
 				candidate = candidate.get_parent()
@@ -468,10 +454,7 @@ func focused_interactable() -> Node:
 				global_position.distance_to(
 					(_focused_target as Node3D).global_position
 				) > NPC_INTERACTION_MAX_CENTER_DISTANCE_M
-				or not _npc_focus_target_is_current(
-					_focused_target as Node3D,
-					false
-				)
+				or not _npc_focus_target_is_current(_focused_target as Node3D)
 			)
 		):
 			_set_focused_target(null)
@@ -525,7 +508,7 @@ func _is_npc_interactable(target: Node) -> bool:
 
 
 func _recent_npc_target_is_visible() -> bool:
-	if not _npc_focus_target_is_current(_recent_npc_target, true):
+	if not _npc_focus_target_is_current(_recent_npc_target):
 		return false
 	var target_position := _npc_interaction_aim_position(_recent_npc_target)
 	var to_target := target_position - _camera.global_position
@@ -537,20 +520,24 @@ func _recent_npc_target_is_visible() -> bool:
 	return _npc_has_interaction_line_of_sight(_recent_npc_target, target_position)
 
 
-func _npc_focus_target_is_current(target: Node3D, require_ready: bool) -> bool:
+func _npc_focus_target_is_current(target: Node3D) -> bool:
 	if not target.is_visible_in_tree():
 		return false
-	if target.has_method("is_interaction_focusable"):
-		if not bool(target.call("is_interaction_focusable")):
-			return false
-	elif (
+	if (
 		target.has_method("is_interaction_enabled")
 		and not bool(target.call("is_interaction_enabled"))
 	):
 		return false
+	return true
+
+
+func _npc_is_preload_targetable(target: Node) -> bool:
+	if target.has_method("is_preload_targetable"):
+		return bool(target.call("is_preload_targetable"))
+	if target.has_method("is_interaction_focusable"):
+		return bool(target.call("is_interaction_focusable"))
 	return (
-		not require_ready
-		or not target.has_method("is_interaction_enabled")
+		not target.has_method("is_interaction_enabled")
 		or bool(target.call("is_interaction_enabled"))
 	)
 

@@ -347,15 +347,21 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			var npc := instance as NPC3D
 			npc.set_conversation_state(true, false)
 			if (
-				not npc.is_interaction_focusable()
+				not npc.is_preload_targetable()
+				or npc.is_interaction_focusable()
 				or npc.is_interaction_enabled()
 				or npc.get_interaction_label_key()
+				!= &"hud.interaction.npc"
+				or npc.get_preload_status_label_key()
 				!= &"hud.m3r.interaction.npc_preparing"
 			):
 				_failures.append("npc_3d does not expose its pending conversation state")
+			npc.set_conversation_state(true, true)
+			if not npc.is_interaction_focusable() or not npc.is_interaction_enabled():
+				_failures.append("npc_3d does not expose its ready conversation state")
 			npc.set_conversation_state(false, false)
-			if npc.is_interaction_focusable():
-				_failures.append("npc_3d remains focusable after conversation eligibility ends")
+			if npc.is_preload_targetable() or npc.is_interaction_focusable():
+				_failures.append("npc_3d remains targetable after conversation eligibility ends")
 		"hud_3d":
 			_require_node(label, instance, "Overlay/Reticle")
 			_require_node(label, instance, "Overlay/PromptPanel")
@@ -1673,6 +1679,34 @@ func _check_player_brief_contract(label: String, instance: Node) -> void:
 func _check_social_hud_contract(label: String, hud: HUD3D) -> void:
 	if hud == null:
 		return
+	var preparing_npc := NPC3D.new()
+	preparing_npc.set_conversation_state(true, false)
+	hud.set_focus(null)
+	hud.set_preload_target(preparing_npc)
+	var preparing_prompt: Dictionary = (
+		hud.presentation_snapshot().get("interactionPrompt", {}) as Dictionary
+	)
+	if (
+		not bool(preparing_prompt.get("visible", false))
+		or bool(preparing_prompt.get("actionable", true))
+		or not bool(preparing_prompt.get("preparing", false))
+		or str(preparing_prompt.get("text", "")).is_empty()
+	):
+		_failures.append("%s does not separate preload status from actionable E focus" % label)
+	preparing_npc.set_conversation_state(true, true)
+	hud.set_focus(preparing_npc)
+	var ready_prompt: Dictionary = (
+		hud.presentation_snapshot().get("interactionPrompt", {}) as Dictionary
+	)
+	if (
+		not bool(ready_prompt.get("visible", false))
+		or not bool(ready_prompt.get("actionable", false))
+		or bool(ready_prompt.get("preparing", true))
+	):
+		_failures.append("%s does not expose runtime-ready NPC focus as actionable" % label)
+	hud.set_focus(null)
+	hud.set_preload_target(null)
+	preparing_npc.free()
 	var sample_view := {
 		"revision": 2,
 		"hearing": {"atSeconds": 900, "due": false},

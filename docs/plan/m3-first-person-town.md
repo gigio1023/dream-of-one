@@ -232,8 +232,10 @@ can overhear with subtitles.
   opening, only raw aim or active contact may request another attempt; one
   continuous demand epoch permits at most one such retry, and authoritative
   rebase completes before another preload dispatch. Passive proximity cannot
-  create a preload treadmill. HUD focus, prompts, and `E`
-  remain gated by runtime conversation readiness. This conservative policy
+  create a preload treadmill. A localized, non-actionable preparation status
+  may reflect explicit preload intent, but green HUD focus, the `E` talk
+  prompt, and `E` interaction remain gated by runtime conversation readiness.
+  This conservative policy
   follows a measured 367-world-second Qwen run in which the former 180-second,
   eager-refresh path reached 54 used/reserved calls and 180,289 used/reserved
   tokens.

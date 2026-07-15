@@ -24,17 +24,23 @@ class FocusNpc:
 	extends StaticBody3D
 	var interaction_count := 0
 	var interaction_enabled := true
-	var interaction_focusable := true
+	var preload_targetable := true
 	var active_contact := false
 
 	func get_interaction_label_key() -> StringName:
 		return &"test.focus_npc"
 
+	func get_preload_status_label_key() -> StringName:
+		return &"test.focus_npc_preparing"
+
 	func is_interaction_enabled() -> bool:
 		return interaction_enabled
 
 	func is_interaction_focusable() -> bool:
-		return interaction_focusable
+		return interaction_enabled
+
+	func is_preload_targetable() -> bool:
+		return preload_targetable
 
 	func get_interaction_aim_position() -> Vector3:
 		return global_position + Vector3.UP * 1.35
@@ -43,7 +49,7 @@ class FocusNpc:
 		return active_contact
 
 	func interact(_player: Node) -> void:
-		if not interaction_focusable:
+		if not interaction_enabled:
 			return
 		interaction_count += 1
 
@@ -145,7 +151,7 @@ func _run() -> void:
 
 	var focus_npc := FocusNpc.new()
 	focus_npc.interaction_enabled = false
-	focus_npc.interaction_focusable = false
+	focus_npc.preload_targetable = false
 	focus_npc.add_to_group(&"npc_actors")
 	focus_npc.position = Vector3(0.0, 0.0, -2.0)
 	var npc_shape := CollisionShape3D.new()
@@ -195,21 +201,20 @@ func _run() -> void:
 		_failures.append("unavailable NPC accepted gated E interaction")
 
 	# A resident whose conversation exists but whose opening is still resolving
-	# remains a readable target. E reasserts preload demand without claiming the
-	# runtime-ready conversation has already started.
-	focus_npc.interaction_focusable = true
+	# remains readable through preload intent without becoming an E target.
+	focus_npc.preload_targetable = true
 	await physics_frame
 	await physics_frame
 	if player.call("preload_intent_target") != focus_npc:
 		_failures.append("preparing NPC did not receive provider-preload intent")
-	if player.call("focused_interactable") != focus_npc:
-		_failures.append("preparing NPC was missing from the HUD/E focus path")
+	if player.call("focused_interactable") != null:
+		_failures.append("preparing NPC leaked into the HUD/E focus path")
 	var preparing_interaction_count := focus_npc.interaction_count
 	if (
-		not bool(player.call("interact_focused"))
-		or focus_npc.interaction_count != preparing_interaction_count + 1
+		bool(player.call("interact_focused"))
+		or focus_npc.interaction_count != preparing_interaction_count
 	):
-		_failures.append("preparing NPC did not accept one preload-demand interaction")
+		_failures.append("preparing NPC accepted E before runtime readiness")
 	focus_npc.interaction_enabled = true
 	await physics_frame
 	var moving_interaction_count := focus_npc.interaction_count
@@ -324,14 +329,14 @@ func _run() -> void:
 	await physics_frame
 	if player.call("preload_intent_target") != focus_npc:
 		_failures.append("preparing nearby NPC did not receive assisted preload intent")
-	if player.call("focused_interactable") != focus_npc:
-		_failures.append("preparing NPC was missing from aim-assist interaction")
+	if player.call("focused_interactable") != null:
+		_failures.append("preparing NPC leaked into aim-assist interaction")
 	var repeated_preparing_count := focus_npc.interaction_count
 	if (
-		not bool(player.call("interact_focused"))
-		or focus_npc.interaction_count != repeated_preparing_count + 1
+		bool(player.call("interact_focused"))
+		or focus_npc.interaction_count != repeated_preparing_count
 	):
-		_failures.append("preparing NPC did not reassert preload demand through E")
+		_failures.append("preparing aim-assist NPC accepted E before runtime readiness")
 
 	focus_npc.interaction_enabled = true
 	focus_npc.visible = false

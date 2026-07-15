@@ -1141,9 +1141,8 @@ func _on_conversation_requested(actor_id: StringName, target: NPC3D) -> void:
 			call_deferred("_queue_nearby_conversation_preloads")
 			return
 	if not bool(_actor_view(str(actor_id)).get("playerConversationReady", false)):
-		# A pending resident remains focusable so the player gets a localized
-		# preparation prompt. Reassert the explicit raw-aim demand without opening
-		# a modal the runtime would reject as not ready.
+		# Defensive stale-input handling: reassert the explicit raw-aim demand
+		# without opening a modal the runtime would reject as not ready.
 		call_deferred("_queue_nearby_conversation_preloads")
 		return
 	_begin_conversation(actor_id, target, contact_id)
@@ -2177,6 +2176,7 @@ func _sync_player_attention_holds() -> void:
 
 func _on_player_preload_intent_changed(target: Node) -> void:
 	_player_preload_attention_target = target
+	_hud.set_preload_target(target)
 	_sync_player_attention_holds()
 	if _run_session.mode() == "fixture" or _run_id.is_empty():
 		return

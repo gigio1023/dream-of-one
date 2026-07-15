@@ -730,13 +730,24 @@ export class ProviderService implements NpcProposalPort {
     const proposalSchema = mergedConversationTurnSchemaForRequest(
       request.locale,
       visibleRecordIds,
-    ).superRefine(
-      (value, context) => requireReachableSuspicionDelta(
-        value,
-        context,
-        request.suspicionBefore,
-      ),
-    );
+    )
+      .superRefine(
+        (value, context) => requireReachableSuspicionDelta(
+          value,
+          context,
+          request.suspicionBefore,
+        ),
+      )
+      .superRefine((value, context) => {
+        if (request.currentOpenQuestion != null && value.openQuestion == null) {
+          context.addIssue({
+            code: "custom",
+            path: ["openQuestion"],
+            message:
+              "a tracked currentOpenQuestion requires one complete open or resolved question object",
+          });
+        }
+      });
     const proposalJsonSchema = withSuspicionDeltaBounds(
       mergedConversationTurnJsonSchemaForRequest(request.locale, visibleRecordIds),
       request.suspicionBefore,

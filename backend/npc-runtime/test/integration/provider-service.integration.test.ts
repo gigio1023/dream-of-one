@@ -3052,6 +3052,73 @@ test("merged conversation repair completes nullable open-question objects with n
   }]);
 });
 
+test("merged conversation repair cannot erase a tracked open question", async () => {
+  const trackedQuestion = {
+    status: "open" as const,
+    text: "청문회는 어디에서 열리나요?",
+    whyLine: "방문자가 청문회 장소를 아직 알지 못합니다.",
+  };
+  const erasedTurn = {
+    ...JSON.parse(validMergedTurn),
+    stance: "uncertain",
+    openQuestion: null,
+    continueConversation: true,
+  };
+  const repairedTurn = {
+    ...erasedTurn,
+    openQuestion: {
+      ...trackedQuestion,
+      status: "resolved",
+      whyLine: "방문자가 청문회가 스테이션에서 열린다고 답했습니다.",
+    },
+  };
+  const textGen = new FakeTextGen([
+    {
+      text: JSON.stringify(erasedTurn),
+      usage: { inputTokens: 60, outputTokens: 40, totalTokens: 100 },
+    },
+    {
+      text: JSON.stringify(repairedTurn),
+      usage: { inputTokens: 70, outputTokens: 30, totalTokens: 100 },
+    },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/preserve-tracked-open-question",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.judgeAndProposeConversationTurn({
+    ...judgmentRequest(),
+    playerLine: "청문회는 스테이션에서 열리는 것으로 알고 있습니다.",
+    objective: "청문회 장소를 확인한다.",
+    sceneFacts: ["공원에서 직접 대화하고 있다."],
+    stanceBefore: "uncertain",
+    hasMeaningfulFirsthandConversation: true,
+    currentOpenQuestion: trackedQuestion,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.proposal.openQuestion?.status, "resolved");
+  assert.equal(result.proposal.openQuestion?.text, trackedQuestion.text);
+  assert.deepEqual(textGen.requests.map(request => request.purpose), [
+    "conversation_turn",
+    "repair",
+  ]);
+  const initialInput = JSON.parse(textGen.requests[0].input) as {
+    currentOpenQuestion: typeof trackedQuestion;
+  };
+  assert.deepEqual(initialInput.currentOpenQuestion, trackedQuestion);
+  const repairInput = JSON.parse(textGen.requests[1].input) as {
+    validationIssues: Array<{ path: string; message: string }>;
+  };
+  assert.deepEqual(repairInput.validationIssues, [{
+    path: "openQuestion",
+    message: "a tracked currentOpenQuestion requires one complete open or resolved question object",
+  }]);
+});
+
 test("the one blocking merged call returns model-owned stance with firsthand grounding", async () => {
   const mixedNaturalKoreanTurn = {
     ...JSON.parse(validMergedTurn),

@@ -83,6 +83,24 @@ const RECORD_TOOL_ARGUMENT_GUIDES = {
 const M3R_INSTITUTIONAL_PRESSURE_GUIDE =
   "- M3R institutionalPressureDelta must be an integer from -25 through 25: negative lowers institutional pressure, zero leaves it unchanged, and positive raises it. Judge both direction and magnitude from the supplied evidence; no direction is preferred. One independent non-record source may create positive pressure only once across its read/write lineage, so relaying the same evidence does not mint new positive pressure.";
 
+const REACHABLE_SUSPICION_DELTA_GUIDE =
+  "suspicionBefore is the current bounded 0..125 score. Never return a suspicionDelta that would move it below 0 or above 125; at a boundary use zero or move inward, and make whyLine describe only the reachable movement.";
+
+function requireReachableSuspicionDelta(
+  value: { suspicionDelta: number },
+  context: z.RefinementCtx,
+  suspicionBefore: number,
+): void {
+  const suspicionAfter = suspicionBefore + value.suspicionDelta;
+  if (suspicionAfter >= 0 && suspicionAfter <= 125) return;
+  context.addIssue({
+    code: "custom",
+    path: ["suspicionDelta"],
+    message:
+      `suspicionDelta must keep suspicion within 0..125 from current score ${suspicionBefore}`,
+  });
+}
+
 function recordContractsForRequest(
   request: AgentStepRequest,
   tools: readonly ToolName[],
@@ -609,7 +627,13 @@ export class ProviderService implements NpcProposalPort {
   async judgeConversationTurn(
     request: ConversationJudgmentRequest,
   ): Promise<ResolvedProposal<ConversationJudgment>> {
-    const proposalSchema = conversationJudgmentSchemaForLocale(request.locale);
+    const proposalSchema = conversationJudgmentSchemaForLocale(request.locale).superRefine(
+      (value, context) => requireReachableSuspicionDelta(
+        value,
+        context,
+        request.suspicionBefore,
+      ),
+    );
     const proposalJsonSchema = conversationJudgmentJsonSchemaForLocale(request.locale);
     const instructions = [
       "You are the judging mind of one NPC inside Dream of One, a social-suspicion game.",
@@ -620,6 +644,7 @@ export class ProviderService implements NpcProposalPort {
       PRIVATE_ACTOR_CONTEXT_GUIDE,
       CONVERSATION_VISIBLE_FACT_GUIDE,
       "Both scores use a 0..125 game scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
+      REACHABLE_SUSPICION_DELTA_GUIDE,
       "As calibration, a coherent routine answer is roughly -15..+5 suspicion and -10..+3 report; a notable mismatch is +10..30 suspicion and +5..20 report; an explicit contradiction, dream/outside claim, or local-memory gap is +30..60 suspicion and +20..50 report; several severe signals plus refusal or hostility may be +60..100 suspicion and +50..100 report.",
       "Those ranges are calibration, not a classifier: use the actual context and allow asymmetric or negative movement when warranted.",
       "List the signal labels that genuinely apply; an ordinary answer has none.",
@@ -661,7 +686,13 @@ export class ProviderService implements NpcProposalPort {
   async judgeAndProposeConversationTurn(
     request: MergedConversationTurnRequest,
   ): Promise<ResolvedProposal<MergedConversationTurn>> {
-    const proposalSchema = mergedConversationTurnSchemaForLocale(request.locale);
+    const proposalSchema = mergedConversationTurnSchemaForLocale(request.locale).superRefine(
+      (value, context) => requireReachableSuspicionDelta(
+        value,
+        context,
+        request.suspicionBefore,
+      ),
+    );
     const proposalJsonSchema = mergedConversationTurnJsonSchemaForLocale(request.locale);
     const instructions = [
       "You are one NPC inside Dream of One, a social-suspicion game.",
@@ -672,6 +703,7 @@ export class ProviderService implements NpcProposalPort {
       PRIVATE_ACTOR_CONTEXT_GUIDE,
       CONVERSATION_VISIBLE_FACT_GUIDE,
       "Both scores use a 0..125 game scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
+      REACHABLE_SUSPICION_DELTA_GUIDE,
       "As calibration, a coherent routine answer is roughly -15..+5 suspicion and -10..+3 report; a notable mismatch is +10..30 suspicion and +5..20 report; an explicit contradiction, dream/outside claim, or local-memory gap is +30..60 suspicion and +20..50 report; several severe signals plus refusal or hostility may be +60..100 suspicion and +50..100 report.",
       "Those ranges are calibration, not a classifier: use the actual context and allow asymmetric or negative movement when warranted.",
       "List the signal labels that genuinely apply; an ordinary answer has none.",

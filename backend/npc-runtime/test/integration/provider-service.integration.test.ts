@@ -169,10 +169,10 @@ const validJudgment = JSON.stringify({
 });
 
 const validMergedTurn = JSON.stringify({
-  suspicionDelta: -10,
+  suspicionDelta: 0,
   reportDelta: 0,
   signals: [],
-  whyLine: "방문 이유를 분명하게 설명해 의문이 줄었습니다.",
+  whyLine: "방문 이유를 분명하게 설명해 새로운 의심이 생기지 않았습니다.",
   stance: "vouch",
   meaningfulFirsthand: true,
   openQuestion: null,
@@ -2616,6 +2616,10 @@ test("the model judges suspicion live; the rule classifier answers only as fallb
   assert.match(judged.proposal.whyLine, /[가-힣]/);
   assert.match(judgmentTextGen.requests[0].instructions, /0\.\.125 game scale/);
   assert.match(judgmentTextGen.requests[0].instructions, /not tiny 1\.\.5 ratings/);
+  assert.match(
+    judgmentTextGen.requests[0].instructions,
+    /Never return a suspicionDelta that would move it below 0 or above 125/,
+  );
   assert.match(judgmentTextGen.requests[0].instructions, /at least one Hangul code point/);
   assert.match(judgmentTextGen.requests[0].instructions, /QR or ID/);
   assert.match(judgmentTextGen.requests[0].instructions, /never copy stable ids/i);
@@ -2631,6 +2635,84 @@ test("the model judges suspicion live; the rule classifier answers only as fallb
   // The dream-language line still registers through the deterministic classifier.
   assert.ok(fallback.proposal.signals.includes("dream_language_leak"));
   assert.ok(fallback.proposal.suspicionDelta > 0);
+});
+
+test("standalone conversation judgments repair a delta above the suspicion ceiling", async () => {
+  const unreachableJudgment = {
+    ...JSON.parse(validJudgment),
+    suspicionDelta: 15,
+    whyLine: "그 표현 때문에 의심이 더 커졌습니다.",
+  };
+  const repairedJudgment = {
+    ...unreachableJudgment,
+    suspicionDelta: 0,
+    whyLine: "이미 가장 강하게 의심하고 있어 판단이 더 바뀌지 않았습니다.",
+  };
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(unreachableJudgment) },
+    { text: JSON.stringify(repairedJudgment) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/reachable-standalone-suspicion-delta",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.judgeConversationTurn({
+    ...judgmentRequest(),
+    suspicionBefore: 125,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.proposal.suspicionDelta, 0);
+  assert.equal(result.proposal.whyLine, repairedJudgment.whyLine);
+  assert.deepEqual(textGen.requests.map(request => request.purpose), [
+    "conversation",
+    "repair",
+  ]);
+});
+
+test("merged conversation judgments repair a delta below the suspicion floor", async () => {
+  const unreachableTurn = {
+    ...JSON.parse(validMergedTurn),
+    suspicionDelta: -15,
+    whyLine: "방문 목적이 분명해 의심이 줄었습니다.",
+  };
+  const repairedTurn = JSON.parse(validMergedTurn);
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(unreachableTurn) },
+    { text: JSON.stringify(repairedTurn) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/reachable-suspicion-delta",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.judgeAndProposeConversationTurn({
+    ...judgmentRequest(),
+    objective: "방문 이유를 확인한다.",
+    sceneFacts: ["스튜디오 접수대에서 직접 대화하고 있다."],
+    stanceBefore: "uncertain",
+    hasMeaningfulFirsthandConversation: false,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.proposal.suspicionDelta, 0);
+  assert.equal(result.proposal.whyLine, repairedTurn.whyLine);
+  assert.deepEqual(textGen.requests.map(request => request.purpose), [
+    "conversation_turn",
+    "repair",
+  ]);
+  const repairInput = JSON.parse(textGen.requests[1].input) as {
+    validationIssues: Array<{ path: string; message: string }>;
+  };
+  assert.deepEqual(repairInput.validationIssues, [{
+    path: "suspicionDelta",
+    message: "suspicionDelta must keep suspicion within 0..125 from current score 0",
+  }]);
 });
 
 test("the one blocking merged call returns model-owned stance with firsthand grounding", async () => {
@@ -3178,6 +3260,7 @@ test("provider prompts and validation follow a non-Korean run locale without ano
     ...judgmentRequest(),
     locale: "en-US",
     playerLine: "I came to confirm the registration procedure.",
+    suspicionBefore: 10,
   });
   assert.equal(result.meta.transport, "live");
   assert.equal(textGen.requests.length, 1);

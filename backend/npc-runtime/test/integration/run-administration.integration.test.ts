@@ -157,6 +157,14 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
     answered.socialView.openQuestions[0]?.provenance.sourceExcerpt,
     answered.memoryDelta.playerLine,
   );
+  assert.ok(answered.nextTurn);
+  const recovered = await service.answer(
+    started.runId,
+    conversation.sessionId,
+    answered.nextTurn.turnId,
+    { type: "free_input", text: "안내받은 절차를 확인하러 왔습니다." },
+  );
+  assert.equal(recovered.nextTurn, null);
   const beforeEnd = service.snapshot(started.runId);
   assert.equal(beforeEnd.institutionalPressure, 0);
   assert.equal(beforeEnd.ledgerEvents.length, 0);
@@ -203,7 +211,11 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
   assert.equal(hidden.records.length, 1);
   assert.equal(hidden.ledgerEvents.length, 1);
   assert.equal(hidden.institutionalPressure, 25);
-  assert.equal(hidden.actors[0]?.stance, "oppose");
+  assert.equal(
+    hidden.actors[0]?.stance,
+    "vouch",
+    "the immediate recovery turn may repair stance without erasing the earlier pressure source",
+  );
   assert.equal(hidden.socialView.pressure.band, "low", "hidden administration must not leak");
   assert.deepEqual(hidden.socialView.encounteredRecords, []);
   assert.ok(hidden.socialView.openQuestions.every(

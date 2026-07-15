@@ -985,6 +985,82 @@ test("a direct multi-turn conversation can visibly recover from oppose and high 
   assert.ok(recoveredView.stanceRevision > waryView.stanceRevision);
 });
 
+test("the final bounded player turn ends without erasing an unanswered open question", async () => {
+  const continuationFlags: Array<boolean | undefined> = [];
+  const question = {
+    status: "open" as const,
+    text: "청문회 장소를 알고 있나요?",
+    whyLine: "방문자가 청문회 장소를 아직 확인하지 못했습니다.",
+  };
+  const adapter = new ScriptedNpcAdapter({
+    conversation: () => ({
+      utterance: "청문회 절차에 관해 아는 내용을 말씀해 주세요.",
+      suggestedReplies: [
+        { text: "아는 범위부터 말씀드리겠습니다.", intent: "safe/local" },
+        { text: "정확한 장소는 모릅니다.", intent: "uncertain/repair" },
+        { text: "답하지 않겠습니다.", intent: "risky/weird" },
+      ],
+      continueConversation: true,
+    }),
+    mergedTurn: request => {
+      continuationFlags.push(request.continuationAllowed);
+      const finalTurn = request.continuationAllowed === false;
+      return {
+        suspicionDelta: 0,
+        reportDelta: 0,
+        signals: [],
+        whyLine: "방문자가 아는 범위를 일관되게 설명했습니다.",
+        stance: "uncertain",
+        meaningfulFirsthand: true,
+        openQuestion: question,
+        utterance: finalTurn
+          ? "말씀하신 범위는 이해했습니다."
+          : "청문회 장소에 관해 조금 더 아는 내용이 있나요?",
+        suggestedReplies: [
+          { text: "아는 내용은 여기까지입니다.", intent: "safe/local" },
+          { text: "더 떠오르는 것은 없습니다.", intent: "uncertain/repair" },
+          { text: "이제 그만 묻으십시오.", intent: "risky/weird" },
+        ],
+        continueConversation: !finalTurn,
+      };
+    },
+    nextStep: () => ({ rationale: "후속 행동 없음", done: true }),
+  });
+  const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
+  const run = service.start("run-final-turn-capacity", "ko-KR");
+  await preloadReceptionist(service, run.runId);
+  await groundOrdinaryConversation(
+    service,
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ground-final-turn-capacity",
+  );
+  const started = await service.startConversation(
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ko-KR",
+  );
+
+  let turn = started.nextTurn;
+  for (let index = 0; index < 3; index += 1) {
+    const answered = await service.answer(run.runId, started.sessionId, turn.turnId, {
+      type: "choice",
+      choiceId: turn.choices[0].choiceId,
+    });
+    if (index < 2) {
+      assert.ok(answered.nextTurn);
+      turn = answered.nextTurn;
+    } else {
+      assert.equal(answered.nextTurn, null);
+      assert.equal(answered.memoryDelta.openQuestion?.status, "open");
+    }
+  }
+
+  assert.deepEqual(continuationFlags, [true, true, false]);
+});
+
 test("ending a child conversation is idempotent and leaves its run state alive", async () => {
   const service = new RunService({
     proposalPort: createStudioReceptionScriptedAdapter(),

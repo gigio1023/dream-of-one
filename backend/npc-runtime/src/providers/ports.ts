@@ -233,6 +233,8 @@ export interface MergedConversationTurnRequest extends ConversationJudgmentReque
     text: string;
     whyLine: string;
   } | null;
+  /** Whether the runtime has capacity to present another modal turn after this answer. */
+  continuationAllowed?: boolean;
 }
 
 export interface AgentToolResult {

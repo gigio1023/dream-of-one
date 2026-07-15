@@ -1150,12 +1150,20 @@ test("high-pressure Station interrogation is grounded, recoverable, survivable, 
     }
     const risky = conversation.nextTurn.choices.find(choice => choice.intent === "risky/weird");
     assert.ok(risky);
-    await service.answer(
+    const riskyAnswer = await service.answer(
       started.runId,
       conversation.sessionId,
       conversation.nextTurn.turnId,
       { type: "choice", choiceId: risky.choiceId },
     );
+    assert.ok(riskyAnswer.nextTurn);
+    const recovered = await service.answer(
+      started.runId,
+      conversation.sessionId,
+      riskyAnswer.nextTurn.turnId,
+      { type: "free_input", text: "안내받은 절차를 확인하러 왔습니다." },
+    );
+    assert.equal(recovered.nextTurn, null);
     await service.endConversation(started.runId, conversation.sessionId);
 
     const beforeFacts = service.snapshot(started.runId);
@@ -1354,12 +1362,20 @@ test("high-pressure Station interrogation is grounded, recoverable, survivable, 
     choice => choice.intent === "risky/weird",
   );
   assert.ok(liaisonRisky);
-  await service.answer(
+  const liaisonRiskyAnswer = await service.answer(
     started.runId,
     liaisonConversation.sessionId,
     liaisonConversation.nextTurn.turnId,
     { type: "choice", choiceId: liaisonRisky.choiceId },
   );
+  assert.ok(liaisonRiskyAnswer.nextTurn);
+  const liaisonRecovered = await service.answer(
+    started.runId,
+    liaisonConversation.sessionId,
+    liaisonRiskyAnswer.nextTurn.turnId,
+    { type: "free_input", text: "안내받은 절차를 확인하러 왔습니다." },
+  );
+  assert.equal(liaisonRecovered.nextTurn, null);
   await service.endConversation(started.runId, liaisonConversation.sessionId);
   const beforeEscalation = service.snapshot(started.runId);
   const escalationAdvance = await service.advance({

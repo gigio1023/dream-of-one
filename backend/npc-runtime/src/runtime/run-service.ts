@@ -2200,6 +2200,10 @@ export class RunService {
       const suspicionBefore = actor.suspicion;
       const reportBefore = run.institutionalPressure;
       const currentTurnAllowsContinuation = conversation.activeTurn.continueConversation;
+      const continuationAllowed =
+        conversation.procedure === "ordinary" &&
+        currentTurnAllowsContinuation &&
+        conversation.turnCount + 1 < MAX_CONVERSATION_TURNS;
       const observePacket = this.runObservePacket(
         run,
         actor,
@@ -2228,6 +2232,7 @@ export class RunService {
             ? conversation.lastMemory.openQuestion
             : null,
         ),
+        continuationAllowed,
       });
       this.trackProposal(run, resolved.meta);
       const observedCitations = this.observedRecordCitations(
@@ -2326,9 +2331,13 @@ export class RunService {
         { speakerId: "player", line: playerLine },
         { speakerId: actor.actorId, line: resolved.proposal.utterance },
       );
+      const requiresRecoveryTurn =
+        continuationAllowed &&
+        stanceAfter !== "vouch" &&
+        resolved.proposal.openQuestion?.status === "open";
       const continueConversation =
-        currentTurnAllowsContinuation &&
-        resolved.proposal.continueConversation &&
+        continuationAllowed &&
+        (requiresRecoveryTurn || resolved.proposal.continueConversation) &&
         conversation.turnCount < MAX_CONVERSATION_TURNS;
       const nextTurn = continueConversation
         ? this.nextTurn(

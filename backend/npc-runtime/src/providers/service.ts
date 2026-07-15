@@ -727,6 +727,7 @@ export class ProviderService implements NpcProposalPort {
     request: MergedConversationTurnRequest,
   ): Promise<ResolvedProposal<MergedConversationTurn>> {
     const visibleRecordIds = request.observePacket.visibleRecords.map(record => record.recordId);
+    const continuationAllowed = request.continuationAllowed !== false;
     const proposalSchema = mergedConversationTurnSchemaForRequest(
       request.locale,
       visibleRecordIds,
@@ -745,6 +746,26 @@ export class ProviderService implements NpcProposalPort {
             path: ["openQuestion"],
             message:
               "a tracked currentOpenQuestion requires one complete open or resolved question object",
+          });
+        }
+        if (!continuationAllowed && value.continueConversation) {
+          context.addIssue({
+            code: "custom",
+            path: ["continueConversation"],
+            message: "continueConversation must be false when continuationAllowed is false",
+          });
+        }
+        if (
+          continuationAllowed &&
+          value.stance !== "vouch" &&
+          value.openQuestion?.status === "open" &&
+          !value.continueConversation
+        ) {
+          context.addIssue({
+            code: "custom",
+            path: ["continueConversation"],
+            message:
+              "an uncertain or opposing open question must continue immediately while capacity remains",
           });
         }
       });
@@ -775,6 +796,7 @@ export class ProviderService implements NpcProposalPort {
       "openQuestion is either null or one concise in-world question for the visitor, authored from this exchange, with its own open/resolved status, text, and whyLine. If openQuestion is an object, text and whyLine must each be a nonempty natural-language string: never return null, an empty string, or whitespace for either field. If there is no concrete question to write, return the whole openQuestion field as null instead of a partial object. Its whyLine states only the resident's in-world reason the question remains open or became resolved; never describe a player, user, NPC, game, model, prompt, or generated response.",
       "currentOpenQuestion is the exact question tracked from the previous judged turn, if any. When the visitor's newest line directly answers it or honestly establishes the limit of what the visitor knows, return that question with status=resolved and a whyLine grounded in the answer; never leave an answered question stale by returning null or repeating it as open. Replace it with an open question only when the new question is materially different, role-supported, grounded, and useful for the visitor to answer.",
       "After stance becomes vouch, set continueConversation=false unless one materially different grounded question still warrants an immediate answer. If you continue, the utterance and all suggestions must advance that question: safe/local should directly answer it or state a concrete knowledge boundary, never merely promise a future record check.",
+      "continuationAllowed is a hard runtime capacity boundary. When it is false, set continueConversation=false but preserve any genuinely unanswered tracked question as open; never invent a resolution merely because the modal must end. When it is true, an oppose or uncertain stance with status=open requires continueConversation=true so the visitor can answer immediately instead of chasing the resident later. A vouch may close with a still-open external procedural question because that question does not negate the resident's bounded personal testimony.",
       "utterance is your next in-character line after hearing the visitor.",
       "citedRecordIds must contain every currently visible record whose content the resident utterance meaningfully conveys, and no other id. Use [] when the utterance cites no record. whyLine, openQuestion, and reply suggestions must not introduce resident-only record content absent from the resident utterance or prior visitor speech.",
       "Use the intent labels only as a relative social-risk gradient: safe/local is the least exposing plausible answer, uncertain/repair hedges or clarifies, and risky/weird may offer a bolder cover claim or lie. They are hidden candidate metadata and never decide suspicion or world truth.",
@@ -801,6 +823,7 @@ export class ProviderService implements NpcProposalPort {
       stanceBefore: request.stanceBefore,
       hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
       currentOpenQuestion: request.currentOpenQuestion ?? null,
+      continuationAllowed,
       groundingContract: conversationGroundingContract(request, request.playerLine),
       playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
     };

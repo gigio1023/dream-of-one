@@ -3119,6 +3119,86 @@ test("merged conversation repair cannot erase a tracked open question", async ()
   }]);
 });
 
+test("merged conversation keeps open questions inside an allowed immediate continuation", async () => {
+  const openQuestion = {
+    status: "open" as const,
+    text: "청문회 장소를 알고 있나요?",
+    whyLine: "청문회 장소를 아직 확인하지 못했습니다.",
+  };
+  const invalidClosedTurn = {
+    ...JSON.parse(validMergedTurn),
+    stance: "uncertain",
+    openQuestion,
+    continueConversation: false,
+  };
+  const repairedContinuingTurn = {
+    ...invalidClosedTurn,
+    continueConversation: true,
+  };
+  const invalidFinalTurn = {
+    ...repairedContinuingTurn,
+    continueConversation: true,
+  };
+  const repairedFinalTurn = {
+    ...invalidFinalTurn,
+    continueConversation: false,
+  };
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(invalidClosedTurn), usage: { inputTokens: 60, outputTokens: 40, totalTokens: 100 } },
+    { text: JSON.stringify(repairedContinuingTurn), usage: { inputTokens: 70, outputTokens: 30, totalTokens: 100 } },
+    { text: JSON.stringify(invalidFinalTurn), usage: { inputTokens: 60, outputTokens: 40, totalTokens: 100 } },
+    { text: JSON.stringify(repairedFinalTurn), usage: { inputTokens: 70, outputTokens: 30, totalTokens: 100 } },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/open-question-continuation",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const base = {
+    ...judgmentRequest(),
+    objective: "청문회 장소를 확인한다.",
+    sceneFacts: ["공원에서 직접 대화하고 있다."],
+    stanceBefore: "uncertain" as const,
+    hasMeaningfulFirsthandConversation: true,
+  };
+
+  const continuing = await service.judgeAndProposeConversationTurn({
+    ...base,
+    sessionId: "open-question-continuing",
+    continuationAllowed: true,
+  });
+  assert.equal(continuing.meta.transport, "live");
+  assert.equal(continuing.meta.usedFallback, false);
+  assert.equal(continuing.proposal.openQuestion?.status, "open");
+  assert.equal(continuing.proposal.continueConversation, true);
+
+  const final = await service.judgeAndProposeConversationTurn({
+    ...base,
+    sessionId: "open-question-final",
+    currentOpenQuestion: openQuestion,
+    continuationAllowed: false,
+  });
+  assert.equal(final.meta.transport, "live");
+  assert.equal(final.meta.usedFallback, false);
+  assert.equal(final.proposal.openQuestion?.status, "open");
+  assert.equal(final.proposal.continueConversation, false);
+  const finalInput = JSON.parse(textGen.requests[2].input) as { continuationAllowed: boolean };
+  assert.equal(finalInput.continuationAllowed, false);
+  assert.match(
+    textGen.requests[2].instructions,
+    /preserve any genuinely unanswered tracked question as open/,
+  );
+  const finalRepairInput = JSON.parse(textGen.requests[3].input) as {
+    validationIssues: Array<{ path: string; message: string }>;
+  };
+  assert.deepEqual(finalRepairInput.validationIssues, [
+    {
+      path: "continueConversation",
+      message: "continueConversation must be false when continuationAllowed is false",
+    },
+  ]);
+});
+
 test("the one blocking merged call returns model-owned stance with firsthand grounding", async () => {
   const mixedNaturalKoreanTurn = {
     ...JSON.parse(validMergedTurn),
@@ -3132,6 +3212,7 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
       { text: "접수 메모와 來歷을 함께 살펴보겠습니다.", intent: "uncertain/repair" },
       { text: "3번 창구에서 다시 설명하겠습니다.", intent: "risky/weird" },
     ],
+    continueConversation: true,
   };
   const textGen = new FakeTextGen([{ text: JSON.stringify(mixedNaturalKoreanTurn) }]);
   const service = new ProviderService({

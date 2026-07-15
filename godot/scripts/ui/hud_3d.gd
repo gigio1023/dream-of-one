@@ -191,7 +191,7 @@ func _process(delta: float) -> void:
 	_process_hesitation_timer(delta)
 	if _current_ambient_subtitle.is_empty():
 		return
-	if _conversation_visible or _settings_visible:
+	if _conversation_visible or _settings_visible or _log_visible:
 		return
 	_ambient_subtitle_remaining = maxf(0.0, _ambient_subtitle_remaining - delta)
 	if is_zero_approx(_ambient_subtitle_remaining):

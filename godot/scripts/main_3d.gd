@@ -32,6 +32,7 @@ const HEARING_OPEN_RETRY_MAX_SECONDS := 8.0
 @onready var _town: Town3D = $Town
 @onready var _player: CharacterBody3D = $Town/Actors/Player3D
 @onready var _hud: HUD3D = $HUD3D
+@onready var _audio_feedback: AudioFeedback = $AudioFeedback
 @onready var _onboarding: OnboardingOverlay = $OnboardingOverlay
 @onready var _run_session: RunSession3D = $RunSession
 @onready var _localization: Node = get_node("/root/Localization")
@@ -2735,9 +2736,6 @@ func _face_ambient_participants(event: Dictionary) -> void:
 
 func _on_ambient_subtitle_started(event: Dictionary) -> void:
 	var seq := int(event.get("seq", -1))
-	if _hud.log_visible() or _hud.settings_visible():
-		_hud.discard_current_ambient_subtitle(seq)
-		return
 	var audibility := _dictionary_or_empty(event.get("audibility"))
 	var player_audibility: Dictionary = _town.player_speech_audibility(audibility)
 	if not bool(player_audibility.get("audible", false)):
@@ -3005,6 +3003,15 @@ func _apply_administration_delta(delta: Dictionary) -> void:
 	else:
 		records.append(record.duplicate(true))
 	_run_snapshot["records"] = records
+	if (
+		str(delta.get("action", "")) == "write_record"
+		and cached_record_revision < record_revision
+	):
+		var record_surface := _record_surface_node(record_id)
+		if record_surface != null and is_instance_valid(_audio_feedback):
+			_audio_feedback.play_record_scribble(
+				record_surface.global_position + Vector3.UP * 1.1
+			)
 	if not has_ledger_event:
 		return
 	if ledger_event_index >= 0:

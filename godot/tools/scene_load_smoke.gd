@@ -38,6 +38,11 @@ const SCENES := [
 		"path": "res://scenes/main_3d.tscn",
 		"frames": 6,
 	},
+	{
+		"label": "main_3d_ambient_log",
+		"path": "res://scenes/main_3d.tscn",
+		"frames": 6,
+	},
 ]
 
 var _failures: Array[String] = []
@@ -113,6 +118,7 @@ func _instance_scene(spec: Dictionary) -> void:
 		"main_3d_ambient_inside",
 		"main_3d_ambient_outside",
 		"main_3d_ambient_leave",
+		"main_3d_ambient_log",
 	]:
 		var town := instance if label == "town_3d" else instance.get_node_or_null("Town")
 		if town != null:
@@ -140,6 +146,8 @@ func _instance_scene(spec: Dictionary) -> void:
 			await _check_ambient_speech(label, instance, false)
 		if label == "main_3d_ambient_leave":
 			await _check_ambient_speech(label, instance, true, true)
+		if label == "main_3d_ambient_log":
+			await _check_ambient_speech(label, instance, true, false, true)
 		if not _has_failure_for(label):
 			print("PASS scene_load_smoke: %s" % label)
 
@@ -4223,6 +4231,7 @@ func _check_non_actor_look_targets(
 				)
 
 	var saved_run_snapshot: Dictionary = instance.get("_run_snapshot")
+	var audio_feedback := instance.get_node_or_null("AudioFeedback") as AudioFeedback
 	var fixture := _load_run_fixture()
 	var endpoints: Dictionary = fixture.get("endpoints", {})
 	var administration_packet: Dictionary = endpoints.get("administrationWriteDecision", {})
@@ -4264,6 +4273,14 @@ func _check_non_actor_look_targets(
 			"ledgerEvent", {}
 		)
 		var ledger_event_id := str(authoritative_ledger_event.get("eventId", ""))
+		var scribbles_before := -1
+		if audio_feedback != null:
+			scribbles_before = int(
+				(audio_feedback.presentation_snapshot() as Dictionary).get(
+					"recordScribbles",
+					-1
+				)
+			)
 		var delta_snapshot := saved_run_snapshot.duplicate(true)
 		delta_snapshot["worldRevision"] = int(administration_response.get("worldRevision", -1))
 		delta_snapshot["institutionalPressure"] = int(
@@ -4291,6 +4308,18 @@ func _check_non_actor_look_targets(
 		instance.set("_run_snapshot", delta_snapshot)
 		instance.call("_apply_run_deltas", [administration_delta])
 		var applied_snapshot := instance.get("_run_snapshot") as Dictionary
+		if (
+			audio_feedback == null
+			or int(
+				(audio_feedback.presentation_snapshot() as Dictionary).get(
+					"recordScribbles",
+					-1
+				)
+			) != scribbles_before + 1
+		):
+			_failures.append(
+				"%s authoritative record write did not play one spatial scribble" % label
+			)
 		var cached_records: Array = applied_snapshot.get(
 			"records", []
 		)
@@ -4329,6 +4358,16 @@ func _check_non_actor_look_targets(
 		else:
 			instance.call("_apply_run_deltas", [administration_read_delta])
 			applied_snapshot = instance.get("_run_snapshot") as Dictionary
+			if (
+				audio_feedback != null
+				and int(
+					(audio_feedback.presentation_snapshot() as Dictionary).get(
+						"recordScribbles",
+						-1
+					)
+				) != scribbles_before + 1
+			):
+				_failures.append("%s record read replayed the write scribble" % label)
 			var read_record: Dictionary = administration_read_delta.get("record", {})
 			var read_ledger_event: Dictionary = administration_read_delta.get(
 				"ledgerEvent", {}
@@ -4818,7 +4857,8 @@ func _check_ambient_speech(
 	label: String,
 	instance: Node,
 	player_inside: bool,
-	leave_before_second := false
+	leave_before_second := false,
+	log_during_delivery := false
 ) -> void:
 	if OS.get_environment("DREAM_SESSION_MODE") != "fixture":
 		_failures.append("%s ambient speech smoke requires DREAM_SESSION_MODE=fixture" % label)
@@ -4924,6 +4964,9 @@ func _check_ambient_speech(
 		return
 
 	var delivery_response: Dictionary = delivery_packet.get("response", {})
+	if log_during_delivery:
+		hud.open_log()
+		await process_frame
 	instance.call(
 		"apply_ambient_speech_events",
 		delivery_response.get("ambientSpeechEvents", [])
@@ -4932,6 +4975,47 @@ func _check_ambient_speech(
 	var snapshot_ambient: Dictionary = meeting_snapshot.get("ambientSpeech", {})
 	instance.call("apply_ambient_speech_events", snapshot_ambient.get("events", []))
 	await process_frame
+	if log_during_delivery:
+		var hidden_subtitle: Dictionary = hud.presentation_snapshot().get(
+			"ambientSubtitle",
+			{}
+		)
+		var hidden_current := hidden_subtitle.get("current", {}) as Dictionary
+		var held_remaining := float(hidden_current.get("remainingSeconds", -1.0))
+		if (
+			bool(hidden_subtitle.get("visible", false))
+			or int(hidden_current.get("seq", -1)) != 1
+			or int(hidden_subtitle.get("queuedCount", -1)) != 1
+			or held_remaining <= 0.0
+		):
+			_failures.append("%s discarded speech while the record log was open" % label)
+			return
+		for _frame in range(3):
+			await process_frame
+		var held_subtitle: Dictionary = hud.presentation_snapshot().get(
+			"ambientSubtitle",
+			{}
+		)
+		var held_current := held_subtitle.get("current", {}) as Dictionary
+		if not is_equal_approx(
+			float(held_current.get("remainingSeconds", -2.0)),
+			held_remaining
+		):
+			_failures.append("%s consumed hidden speech while the record log was open" % label)
+			return
+		hud.close_log()
+		await process_frame
+		var resumed_subtitle: Dictionary = hud.presentation_snapshot().get(
+			"ambientSubtitle",
+			{}
+		)
+		if (
+			not bool(resumed_subtitle.get("visible", false))
+			or int((resumed_subtitle.get("current", {}) as Dictionary).get("seq", -1)) != 1
+			or int(resumed_subtitle.get("queuedCount", -1)) != 1
+		):
+			_failures.append("%s did not resume retained speech after closing the record log" % label)
+			return
 
 	var main_snapshot: Dictionary = instance.call("presentation_snapshot")
 	var ambient: Dictionary = main_snapshot.get("ambientSpeech", {})

@@ -15,6 +15,7 @@
     "hud.m3r.player_brief.uncertainty": "目を覚ます前の出来事も、予約が本当に自分のものかも確認されていません。聴聞で通常と判定されなければ、この区域を出られません。",
     "hud.m3r.onboarding.talk": "住民に視線を合わせて E — 会話開始",
     "hud.m3r.onboarding.dialogue": "1～3で返答を選ぶか、直接入力してください。",
+    "hud.m3r.onboarding.records": "矛盾した陳述は記録に残ることがあります。記録が重なると、ステーションから直接質問を受けることがあります。",
     "hud.m3r.onboarding.prop": "物に視線を合わせて E — 持つ / 置く · 左クリック — 投げる",
     "hud.m3r.contact.approaching": "{speaker}が話しかけようと近づいてきます。",
     "hud.m3r.contact.ready": "{speaker}が話したがっています。E — 応じる · 離れるか無視する",

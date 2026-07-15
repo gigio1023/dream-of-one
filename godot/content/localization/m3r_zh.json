@@ -15,6 +15,7 @@
     "hud.m3r.player_brief.uncertainty": "醒来前发生的事，以及预约是否确实属于你，都尚未确认。只有在听证中被判定为正常，你才能离开。",
     "hud.m3r.onboarding.talk": "面向居民并按 E — 开始交谈",
     "hud.m3r.onboarding.dialogue": "按 1–3 选择回答，或直接输入。",
+    "hud.m3r.onboarding.records": "前后矛盾的陈述可能会被写入记录。记录累积后，管理站可能会直接询问你。",
     "hud.m3r.onboarding.prop": "面向物品并按 E — 拿起 / 放下 · 鼠标左键 — 投掷",
     "hud.m3r.contact.approaching": "{speaker}正走过来想和你说话。",
     "hud.m3r.contact.ready": "{speaker}想和你交谈。E — 回应 · 离开或忽略",

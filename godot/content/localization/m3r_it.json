@@ -15,6 +15,7 @@
     "hud.m3r.player_brief.uncertainty": "Non è confermato cosa sia accaduto prima del risveglio né se la prenotazione sia davvero tua. Potrai andartene solo se l'udienza ti classificherà come persona ordinaria.",
     "hud.m3r.onboarding.talk": "Guarda un residente e premi E — Inizia a parlare",
     "hud.m3r.onboarding.dialogue": "Premi 1–3 per scegliere una risposta, oppure scrivine una.",
+    "hud.m3r.onboarding.records": "Le dichiarazioni contraddittorie possono essere registrate. Se i registri si accumulano, la Station può interrogarti direttamente.",
     "hud.m3r.onboarding.prop": "Guarda un oggetto e premi E — Prendi / posa · Clic sinistro — Lancia",
     "hud.m3r.contact.approaching": "{speaker} si sta avvicinando per parlarti.",
     "hud.m3r.contact.ready": "{speaker} vuole parlarti. E — Rispondi · Allontanati o ignora",

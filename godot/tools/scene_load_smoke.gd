@@ -1604,6 +1604,19 @@ func _check_audio_onboarding_contract(label: String, instance: Node) -> void:
 	var brief_snapshot := onboarding_snapshot.get("playerBrief", {}) as Dictionary
 	if not brief_snapshot.has("configured") or not brief_snapshot.has("lines"):
 		_failures.append("%s onboarding exposes no optional player-brief state" % label)
+	if not onboarding.has_method("_poll_hud_surface"):
+		_failures.append("%s onboarding cannot observe a completed conversation" % label)
+		return
+	onboarding.set("_dialogue_hint_shown", true)
+	onboarding.set("_modal_surface", "conversation")
+	onboarding.call("_poll_hud_surface")
+	var record_hint_snapshot := onboarding.call("presentation_snapshot") as Dictionary
+	if (
+		str(record_hint_snapshot.get("key", "")) != "hud.m3r.onboarding.records"
+		or str(record_hint_snapshot.get("text", "")).is_empty()
+		or not bool(record_hint_snapshot.get("recordHintShown", false))
+	):
+		_failures.append("%s onboarding does not disclose the post-conversation record risk" % label)
 
 
 func _check_player_brief_contract(label: String, instance: Node) -> void:

@@ -15,6 +15,7 @@
     "hud.m3r.player_brief.uncertainty": "깨어나기 전의 일과 실제 예약 여부는 확인되지 않았습니다. 청문회에서 일반 판정을 받아야 떠날 수 있습니다.",
     "hud.m3r.onboarding.talk": "주민을 바라보고 E — 대화 시작",
     "hud.m3r.onboarding.dialogue": "1–3으로 답변을 고르거나 직접 입력하세요.",
+    "hud.m3r.onboarding.records": "서로 어긋난 진술은 기록으로 남을 수 있습니다. 기록이 누적되면 스테이션의 직접 질문으로 이어질 수 있습니다.",
     "hud.m3r.onboarding.prop": "물건을 바라보고 E — 집기 / 놓기 · 왼쪽 클릭 — 던지기",
     "hud.m3r.contact.approaching": "{speaker}가 말을 걸려고 다가옵니다.",
     "hud.m3r.contact.ready": "{speaker}가 말을 걸려고 합니다. E — 응답 · 자리를 벗어나거나 무시",

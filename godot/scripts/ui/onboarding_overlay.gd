@@ -8,6 +8,7 @@ const MOVE_HINT: StringName = &"hud.m3r.onboarding.move_jump"
 const PURPOSE_HINT: StringName = &"hud.m3r.onboarding.purpose"
 const TALK_HINT: StringName = &"hud.m3r.onboarding.talk"
 const DIALOGUE_HINT: StringName = &"hud.m3r.onboarding.dialogue"
+const RECORD_HINT: StringName = &"hud.m3r.onboarding.records"
 const PROP_HINT: StringName = &"hud.m3r.onboarding.prop"
 const MOVE_DISTANCE_M := 2.25
 const HUD_POLL_SECONDS := 0.15
@@ -42,6 +43,7 @@ var _purpose_pending := false
 var _purpose_shown := false
 var _talk_hint_shown := false
 var _dialogue_hint_shown := false
+var _record_hint_shown := false
 var _prop_hint_shown := false
 var _prop_handled := false
 var _modal_surface := "none"
@@ -119,6 +121,7 @@ func presentation_snapshot() -> Dictionary:
 		"purposeShown": _purpose_shown,
 		"talkHintShown": _talk_hint_shown,
 		"dialogueHintShown": _dialogue_hint_shown,
+		"recordHintShown": _record_hint_shown,
 		"propHintShown": _prop_hint_shown,
 		"propHandled": _prop_handled,
 		"modalSurface": _modal_surface,
@@ -209,12 +212,21 @@ func _poll_hud_surface() -> void:
 	if not snapshot_value is Dictionary:
 		return
 	var snapshot := snapshot_value as Dictionary
+	var previous_modal_surface := _modal_surface
 	_modal_surface = str(snapshot.get("modalSurface", "none"))
 	var ui_scale := clampf(float(snapshot.get("uiScale", 1.0)), 0.8, 1.5)
 	_brief_panel.scale = Vector2.ONE * ui_scale
 	_brief_panel.pivot_offset = Vector2(0.0, _brief_panel.size.y)
 	_hint_panel.scale = Vector2.ONE * ui_scale
 	_hint_panel.pivot_offset = Vector2(0.0, _hint_panel.size.y)
+	if (
+		previous_modal_surface == "conversation"
+		and _modal_surface == "none"
+		and _dialogue_hint_shown
+		and not _record_hint_shown
+	):
+		_record_hint_shown = true
+		_show_hint(RECORD_HINT, 9.0)
 
 
 func _refresh_player_brief_text() -> bool:

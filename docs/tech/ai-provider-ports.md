@@ -78,10 +78,16 @@ correctly remains live.
 
 `MergedConversationTurn` is judgment fields (bounded suspicion/report deltas,
 signal classes, and a player-visible why-line) plus the NPC's next utterance
-and three reply suggestions. If a live model breaks that schema, `ProviderService`
-retries once with the original grounded request context plus field-specific
-validation issues, then falls back to composing the rule judgment with the
-canned reply set — that merged-conversation schema is not request-shrunk.
+and three reply suggestions. The suggestions are requested in fixed
+`safe/local` → `uncertain/repair` → `risky/weird` order. When an otherwise
+valid merged turn repeats one of those hidden labels, the envelope boundary
+normalizes only the three labels by position before spending a repair call;
+model-authored text, judgment, stance, and memory inputs remain unchanged.
+Any visible-language, fiction, stable-id, shape, or other validation failure
+still makes `ProviderService` retry once with the original grounded request
+context plus field-specific issues, then fall back to composing the rule
+judgment with the canned reply set — that merged-conversation schema is not
+request-shrunk.
 
 `ConversationProposal` contains an NPC utterance and three generated reply
 suggestions. Reply intent labels shape variety only; they never decide

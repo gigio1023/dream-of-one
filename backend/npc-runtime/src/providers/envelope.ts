@@ -55,6 +55,14 @@ const forbiddenPlayerVisibleMetaByPresentationId: Record<string, RegExp> = {
 };
 const intentSchema = z.enum(CONVERSATION_CHOICE_INTENTS);
 const suggestedReplySchema = z.object({ text: nonEmpty, intent: intentSchema }).strict();
+const mergedSuggestedReplySchema = z.preprocess(
+  value => normalizeMergedSuggestedReplyIntents(value),
+  z.tuple([
+    suggestedReplySchema,
+    suggestedReplySchema,
+    suggestedReplySchema,
+  ]),
+);
 const playerVisibleJsonString = {
   type: "string",
   minLength: 1,
@@ -67,7 +75,7 @@ const suggestedReplyJsonString = {
     "Player-visible natural-language prose only. Stay entirely in fiction: never call anyone a player, user, or NPC, and never mention games, AI, language models, prompts, or system messages. Never include an internal stable id, identifier token, or underscore name. This is an uncommitted candidate utterance, not an established fact or a line the speaker has already chosen; it becomes evidence only if selected. The reply must be a complete, self-contained, in-character first-person utterance that can be spoken verbatim. Never narrate, summarize, or label the speaker. Explicitly preserve the person, object, source, or claim being answered whenever omission could make a noun phrase sound like the speaker's own identity or possession; never return a bare name, role, object, yes/no fragment, or context-dependent copular noun phrase.",
 } as const;
 const suggestedReplySetJsonDescription =
-  "Return exactly one candidate for each intent and make their relative social risk clear from the wording. safe/local is the least exposing plausible answer and may use a modest cover claim; uncertain/repair hedges, qualifies, admits uncertainty, or asks for clarification; risky/weird may make a bolder unsupported cover claim or lie. All three remain uncommitted until selected, and intent never determines the NPC judgment.";
+  "Return exactly one candidate for each intent in this fixed array order: safe/local first, uncertain/repair second, risky/weird third. Make their relative social risk clear from the wording. safe/local is the least exposing plausible answer and may use a modest cover claim; uncertain/repair hedges, qualifies, admits uncertainty, or asks for clarification; risky/weird may make a bolder unsupported cover claim or lie. All three remain uncommitted until selected, and intent never determines the NPC judgment.";
 const nullablePlayerVisibleJsonString = {
   type: ["string", "null"],
   description:
@@ -89,6 +97,31 @@ function addSuggestedReplyIntentIssues(
     message:
       "suggested replies must contain exactly one safe/local, one uncertain/repair, and one risky/weird intent",
   });
+}
+
+function normalizeMergedSuggestedReplyIntents(value: unknown): unknown {
+  if (!Array.isArray(value) || value.length !== CONVERSATION_CHOICE_INTENTS.length) {
+    return value;
+  }
+  if (!value.every(reply =>
+    typeof reply === "object" &&
+    reply !== null &&
+    intentSchema.safeParse((reply as { intent?: unknown }).intent).success
+  )) {
+    return value;
+  }
+  const intents = value.map(reply =>
+    (reply as { intent: ConversationChoiceIntent }).intent
+  );
+  if (CONVERSATION_CHOICE_INTENTS.every(intent =>
+    intents.filter(candidate => candidate === intent).length === 1
+  )) {
+    return value;
+  }
+  return value.map((reply, index) => ({
+    ...(reply as Record<string, unknown>),
+    intent: CONVERSATION_CHOICE_INTENTS[index],
+  }));
 }
 
 const KOREAN_PLAYER_VISIBLE_JSON_SCHEMA_SUFFIX =
@@ -221,11 +254,7 @@ export const mergedConversationTurnSchema = z
       .nullable()
       .optional(),
     utterance: nonEmpty,
-    suggestedReplies: z.tuple([
-      suggestedReplySchema,
-      suggestedReplySchema,
-      suggestedReplySchema,
-    ]),
+    suggestedReplies: mergedSuggestedReplySchema,
     continueConversation: z.boolean(),
   })
   .strict()

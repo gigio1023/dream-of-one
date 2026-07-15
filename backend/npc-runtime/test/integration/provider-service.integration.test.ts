@@ -2695,6 +2695,107 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
     mergedSchemaText,
     /Hangul-dominant natural Korean/,
   );
+  assert.match(
+    mergedSchemaText,
+    /fixed array order: safe\/local first, uncertain\/repair second, risky\/weird third/,
+  );
+});
+
+test("merged conversation normalizes only duplicate hidden intent labels without repair", async () => {
+  const duplicateIntents = JSON.parse(validMergedTurn);
+  duplicateIntents.suggestedReplies[0].intent = "safe/local";
+  duplicateIntents.suggestedReplies[1].intent = "safe/local";
+  duplicateIntents.suggestedReplies[2].intent = "risky/weird";
+  const authoredTexts = duplicateIntents.suggestedReplies.map(
+    (reply: { text: string }) => reply.text,
+  );
+  const authoredJudgment = {
+    suspicionDelta: duplicateIntents.suspicionDelta,
+    reportDelta: duplicateIntents.reportDelta,
+    signals: duplicateIntents.signals,
+    whyLine: duplicateIntents.whyLine,
+    stance: duplicateIntents.stance,
+    meaningfulFirsthand: duplicateIntents.meaningfulFirsthand,
+    openQuestion: duplicateIntents.openQuestion,
+    utterance: duplicateIntents.utterance,
+    continueConversation: duplicateIntents.continueConversation,
+  };
+  const textGen = new FakeTextGen([{ text: JSON.stringify(duplicateIntents) }]);
+  const service = new ProviderService({
+    profileId: "test/merged-intent-normalization",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.judgeAndProposeConversationTurn({
+    ...judgmentRequest(),
+    objective: "방문 이유를 확인한다.",
+    sceneFacts: ["스튜디오 접수대에서 직접 대화하고 있다."],
+    stanceBefore: "uncertain",
+    hasMeaningfulFirsthandConversation: false,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(textGen.requests.length, 1, "hidden metadata must not spend a repair call");
+  assert.deepEqual(
+    result.proposal.suggestedReplies.map(reply => reply.text),
+    authoredTexts,
+    "provider-authored player-visible text stays byte-for-byte unchanged",
+  );
+  assert.deepEqual(
+    result.proposal.suggestedReplies.map(reply => reply.intent),
+    ["safe/local", "uncertain/repair", "risky/weird"],
+  );
+  assert.deepEqual({
+    suspicionDelta: result.proposal.suspicionDelta,
+    reportDelta: result.proposal.reportDelta,
+    signals: result.proposal.signals,
+    whyLine: result.proposal.whyLine,
+    stance: result.proposal.stance,
+    meaningfulFirsthand: result.proposal.meaningfulFirsthand,
+    openQuestion: result.proposal.openQuestion,
+    utterance: result.proposal.utterance,
+    continueConversation: result.proposal.continueConversation,
+  }, authoredJudgment, "judgment and NPC speech remain model-owned");
+});
+
+test("merged intent normalization never bypasses visible-text repair", async () => {
+  const invalidVisibleText = JSON.parse(validMergedTurn);
+  invalidVisibleText.utterance = "NPC_Studio_Manager에게 확인하겠습니다.";
+  invalidVisibleText.suggestedReplies[1].intent = "safe/local";
+  const repaired = JSON.parse(validMergedTurn);
+  repaired.utterance = "스튜디오 책임자에게 확인하겠습니다.";
+  repaired.suggestedReplies[1].intent = "safe/local";
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(invalidVisibleText) },
+    { text: JSON.stringify(repaired) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/merged-intent-normalization-after-repair",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.judgeAndProposeConversationTurn({
+    ...judgmentRequest(),
+    objective: "방문 이유를 확인한다.",
+    sceneFacts: ["스튜디오 접수대에서 직접 대화하고 있다."],
+    stanceBefore: "uncertain",
+    hasMeaningfulFirsthandConversation: false,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.deepEqual(textGen.requests.map(request => request.purpose), [
+    "conversation_turn",
+    "repair",
+  ]);
+  assert.equal(result.proposal.utterance, repaired.utterance);
+  assert.deepEqual(
+    result.proposal.suggestedReplies.map(reply => reply.intent),
+    ["safe/local", "uncertain/repair", "risky/weird"],
+  );
 });
 
 test("merged Korean conversation repair receives every rejected Latin token", async () => {

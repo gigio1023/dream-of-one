@@ -6132,7 +6132,10 @@ export class RunService {
         case "read_record":
           return packet.visibleRecords.length > 0;
         case "request":
-          return packet.visibleActors.length > 0;
+          // The generic role catalog retains request for the M1/v2 world,
+          // but M3R has no run-scoped request action or commit contract yet.
+          // Never advertise a proposal that this run lane must reject.
+          return false;
       }
     });
   }

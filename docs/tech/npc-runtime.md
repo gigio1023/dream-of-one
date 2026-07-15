@@ -378,8 +378,8 @@ and hearing requests, so this is prompt budgeting rather than memory loss.
 
 The offered tool catalog is derived from current facts rather than role alone:
 `wait` remains available; `move_to`, `look`, `talk_to`, `read_record`,
-`write_record`, and `request` appear only when their packet prerequisites are
-present. A visible record is a valid `look` target even when no actor or
+and `write_record` appear only when their packet prerequisites are present. A
+visible record is a valid `look` target even when no actor or
 physical prop is visible. An ordinary `talk_to` request carries the frozen
 subset that passes the runtime's full reciprocal-audibility, cooldown,
 movement, and authored-volume predicate, while commit still revalidates fresh
@@ -388,7 +388,10 @@ meeting cannot appear as the target. Both participants are checked again when
 the reply obtains its background-provider slot and at final commit, so queued
 work cannot spend or apply after ownership changes. `use_object` stays withheld
 because M3R physical props do not yet expose a validated usable-affordance
-transition. Each goal has at most three proposal attempts. Goal decisions and
+transition. The generic v2 role catalog also retains `request`, but M3R
+withholds it until a run-scoped request action and commit contract exist; a
+provider is never offered a tool this lane would reject by construction. Each
+goal has at most three proposal attempts. Goal decisions and
 the retained `runBeat` path share `agentloop/proposal-loop.ts`, so structured
 failure feedback, duplicate-call suppression, and transcript entries have one
 implementation. A valid `talk_to` resolves the initiator's utterance and one

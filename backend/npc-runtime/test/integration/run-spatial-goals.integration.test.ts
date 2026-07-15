@@ -367,13 +367,18 @@ test("one initial spatial batch admits each resident once and a social exchange 
   ));
 });
 
-test("run goals expose only fully executable talk targets to the provider", async () => {
+test("run goals expose only fully executable actions and talk targets to the provider", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
   const allowedTalkActorIdsByActor = new Map<string, string[] | undefined>();
+  const toolCatalogByActor = new Map<string, string[]>();
   adapter.proposeNextStep = async request => {
     allowedTalkActorIdsByActor.set(
       request.observePacket.actorId,
       request.allowedTalkActorIds ? [...request.allowedTalkActorIds] : undefined,
+    );
+    toolCatalogByActor.set(
+      request.observePacket.actorId,
+      [...request.observePacket.toolCatalog],
     );
     return {
       proposal: {
@@ -443,6 +448,21 @@ test("run goals expose only fully executable talk targets to the provider", asyn
     [],
     "an empty exact set stays explicit instead of widening to visible-and-audible",
   );
+  const implementedGoalTools = new Set([
+    "wait",
+    "look",
+    "talk_to",
+    "move_to",
+    "write_record",
+    "read_record",
+  ]);
+  for (const [actorId, tools] of toolCatalogByActor) {
+    assert.ok(
+      tools.every(tool => implementedGoalTools.has(tool)),
+      `${actorId} advertised a tool without an M3R GoalAction path: ${tools.join(", ")}`,
+    );
+    assert.equal(tools.includes("request"), false);
+  }
 });
 
 test("a visible record alone admits both look and read without inventing an object", async () => {

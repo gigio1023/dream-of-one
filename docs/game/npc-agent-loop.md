@@ -108,7 +108,7 @@ knowledge.
 | `use_object(object, affordance)` | Trigger an object affordance (serve, mark queue, post notice, pause service) | Affordance exists for role, object state |
 | `write_record(kind, source_memory, surface, prose, why, pressure_delta)` | Create/update a provider-authored record (note, correction, report, posting, citation) | Role authority, owned source memory, authored surface, immutable target/visibility, revision check, pressure clamp; exactly one ledger event |
 | `read_record(record, why, pressure_delta)` | Load one visible record revision into factual memory | Visibility (열람 rules), first-read idempotency, pressure clamp; rereading the same revision is a no-op |
-| `request(actor, action)` | Ask another NPC to act (handoff, confirmation) | Target role can perform the action |
+| `request(actor, action)` | Ask another NPC to act (handoff, confirmation); retained in the generic v2 catalog but not offered by M3R until its run-scoped action contract exists | Target role can perform the action |
 
 Suspicion judgment of player speech is **not** a tool: it flows through
 `judgeConversationTurn` on the proposal port, with rules clamping the delta

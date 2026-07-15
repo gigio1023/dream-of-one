@@ -263,6 +263,8 @@ export interface AgentStepRequest {
   allowedTalkActorIds?: string[];
   /** Optional validity constraint for a wake whose only legal action is known. */
   requiredToolCall?: RequiredAgentToolCall;
+  /** Require an explicit choice from the offered tools without selecting one for the model. */
+  requireToolCall?: boolean;
   requireUtterance?: boolean;
   /** Absolute scope ceiling used by background work that must preserve a reserve. */
   budgetCeiling?: { maxCalls: number; maxTokens: number };

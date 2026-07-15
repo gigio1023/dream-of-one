@@ -43,6 +43,7 @@ export interface BoundedProposalLoopInput<T> {
   onMeta?: (meta: ProposalMeta) => void | Promise<void>;
   allowedTalkActorIds?: readonly string[];
   requiredToolCall?: RequiredAgentToolCall;
+  requireToolCall?: boolean;
   budgetCeiling?: { maxCalls: number; maxTokens: number };
 }
 
@@ -86,6 +87,7 @@ export async function runBoundedProposalLoop<T>(
         ? { allowedTalkActorIds: [...input.allowedTalkActorIds] }
         : {}),
       ...(input.requiredToolCall ? { requiredToolCall: input.requiredToolCall } : {}),
+      ...(input.requireToolCall ? { requireToolCall: true } : {}),
       ...(input.budgetCeiling ? { budgetCeiling: input.budgetCeiling } : {}),
     };
     const resolved = input.invoke

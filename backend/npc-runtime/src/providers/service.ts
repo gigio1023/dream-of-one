@@ -859,6 +859,7 @@ export class ProviderService implements NpcProposalPort {
       recordContracts,
       allowedTalkActorIds,
       requiredToolCall: request.requiredToolCall,
+      requireToolCall: request.requireToolCall,
       requireUtterance: request.requireUtterance,
     };
     const jsonSchema = agentStepProposalJsonSchemaForTools(schemaConstraints, request.locale);
@@ -881,7 +882,9 @@ export class ProviderService implements NpcProposalPort {
           : request.requireUtterance
             ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. For this required movement, toolCall and utterance must both be non-null. Do not add top-level keys."
             : "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. For this required movement, toolCall must be non-null; utterance may be null. Do not add top-level keys."
-        : "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Never omit toolCall, utterance, or citedRecordIds; use null for absent speech and [] for no citation. Do not add top-level keys.",
+        : request.requireToolCall
+          ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Choose one explicit non-null toolCall from the offered branches; this requires a decision but does not prefer any branch. Use null only for absent speech and [] for no citation. Do not add top-level keys."
+          : "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Never omit toolCall, utterance, or citedRecordIds; use null for absent speech and [] for no citation. Do not add top-level keys.",
       "Stable ids may appear in identifier-valued toolCall.args fields and internal rationale. Never copy an actor, object, record, memory, text-surface, or landmark id into utterance or other player-visible prose.",
       ...(effectiveTools.includes("move_to")
         ? ["playerContact is offered to only one runtime-selected resident at a time. Choose move_to(player) only when your role goal or remembered facts warrant initiating a face-to-face question; otherwise choose another valid action or stop."]
@@ -910,7 +913,9 @@ export class ProviderService implements NpcProposalPort {
         : []),
       ...(request.requiredToolCall
         ? []
-        : ["Return done=true with toolCall=null when the goal is complete or no useful action remains."]),
+        : request.requireToolCall
+          ? ["This wake requires one explicit offered tool action. Do not use toolCall=null as a shortcut; wait remains available when deliberate inaction is the judged choice."]
+          : ["Return done=true with toolCall=null when the goal is complete or no useful action remains."]),
       toolGuideForTools(effectiveTools, recordContracts),
       "Return only JSON matching the supplied schema.",
     ].join("\n");
@@ -922,6 +927,7 @@ export class ProviderService implements NpcProposalPort {
       blockedSignatures: request.blockedSignatures,
       allowedTalkActorIds: allowedTalkActorIds ?? null,
       requiredToolCall: request.requiredToolCall ?? null,
+      requireToolCall: request.requireToolCall ?? false,
       requireUtterance: request.requireUtterance ?? false,
       playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
     };

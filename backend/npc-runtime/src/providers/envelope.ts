@@ -661,6 +661,7 @@ export interface AgentStepRequestSchemaConstraints {
   recordContracts: AgentStepRecordContracts;
   allowedTalkActorIds?: readonly string[];
   requiredToolCall?: RequiredAgentToolCall;
+  requireToolCall?: boolean;
   requireUtterance?: boolean;
 }
 
@@ -837,6 +838,13 @@ export function agentStepProposalSchemaForRequest(
           message: `required ${requiredToolCall.tool} reply must finish with done=true`,
         });
       }
+    }
+    if (!requiredToolCall && constraints.requireToolCall && !value.toolCall) {
+      context.addIssue({
+        code: "custom",
+        path: ["toolCall"],
+        message: "this decision requires one explicit offered toolCall",
+      });
     }
 
     const toolIsOffered = !value.toolCall || constraints.effectiveTools.includes(value.toolCall.tool);
@@ -1769,7 +1777,10 @@ export function agentStepProposalJsonSchemaForTools(
       !Array.isArray(branch) &&
       (branch as Record<string, unknown>).type === "null"
     ) {
-      return constraints.requiredToolCall === undefined;
+      return (
+        constraints.requiredToolCall === undefined &&
+        constraints.requireToolCall !== true
+      );
     }
     const toolName = toolNameForBranch(branch);
     if (toolName === null || !allowedTools.has(toolName)) return false;

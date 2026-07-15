@@ -127,6 +127,7 @@ test("a report-bearing writable goal asks for an explicit provider choice withou
       request.observePacket.toolCatalog.includes("write_record")
     ) {
       administrativeChoices += 1;
+      assert.equal(request.requireToolCall, true);
       assert.deepEqual(request.observePacket.toolCatalog, ["write_record", "wait"]);
       assert.match(request.goal, /report-inclination change of 25/);
       assert.match(request.goal, /A positive change favors preserving/);

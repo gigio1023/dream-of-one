@@ -411,7 +411,10 @@ has an authorized writable surface, that gained opportunity enters the
 semantic key once and the bounded goal offers only `write_record` and `wait`:
 the provider must deliberately preserve one grounded source or give it a
 final unwritten disposition instead of deferring the choice through unrelated
-movement or speech. The packet repeats the earlier model-authored report
+movement or speech. The provider envelope removes its nullable completion
+branch for this decision, so `wait` remains model-owned but must be explicit
+and reasoned rather than the cheapest generic `done` shape. The packet repeats
+the earlier model-authored report
 inclination and why-line: a positive change favors recording, a negative change
 favors leaving it unwritten, and reversing that direction asks for a current
 fact or concrete role-policy reason rather than generic delay. This is a

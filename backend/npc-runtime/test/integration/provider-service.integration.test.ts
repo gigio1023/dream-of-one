@@ -837,6 +837,79 @@ test("disallowed grounded talk target repairs once then uses deterministic inval
   assert.deepEqual(audit.resolutions[0]?.callSeqs, [1, 2]);
 });
 
+test("an explicit offered-tool decision cannot escape through a null completion", async () => {
+  const packet = m3rAdministrativePacket();
+  packet.toolCatalog = ["write_record", "wait"];
+  packet.administrativeSources[0]!.reportDelta = 25;
+  const nullCompletion = {
+    toolCall: null,
+    utterance: null,
+    citedRecordIds: [],
+    rationale: "아무 행동 없이 목표를 끝냅니다.",
+    done: true,
+  };
+  const explicitWait = {
+    toolCall: {
+      tool: "wait",
+      args: { reason: "역할 정책상 외부 확인 전에는 이 출처를 기록하지 않습니다." },
+    },
+    utterance: null,
+    citedRecordIds: [],
+    rationale: "기록 보류를 명시적으로 선택합니다.",
+    done: true,
+  };
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(nullCompletion) },
+    { text: JSON.stringify(explicitWait) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/required-offered-tool",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.proposeNextStep({
+    sessionId: "run-required-offered-tool",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "기록하거나 명시적으로 보류한다.",
+    observePacket: packet,
+    blockedSignatures: [],
+    requireToolCall: true,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.proposal.toolCall?.tool, "wait");
+  assert.equal(textGen.requests.length, 2);
+  const firstSchema = textGen.requests[0]?.jsonSchema ?? {};
+  const properties = firstSchema.properties as Record<string, Record<string, unknown>>;
+  const toolCallBranches = properties.toolCall?.anyOf as Array<Record<string, unknown>>;
+  assert.ok(toolCallBranches.every(branch => branch.type !== "null"));
+  assert.match(
+    textGen.requests[0]?.instructions ?? "",
+    /Choose one explicit non-null toolCall/,
+  );
+  const input = JSON.parse(textGen.requests[0]?.input ?? "{}") as {
+    requireToolCall?: boolean;
+  };
+  assert.equal(input.requireToolCall, true);
+  const constraints = {
+    effectiveTools: ["write_record", "wait"] as const,
+    observePacket: packet,
+    recordContracts: { write_record: "m3r" as const },
+    requireToolCall: true,
+  };
+  assert.equal(
+    agentStepProposalSchemaForRequest("ko-KR", constraints).safeParse(nullCompletion).success,
+    false,
+  );
+  assert.equal(
+    agentStepProposalSchemaForRequest("ko-KR", constraints).safeParse(explicitWait).success,
+    true,
+  );
+});
+
 test("agent-step record contracts select only M3R or legacy schemas and guides", async () => {
   const completedStep = JSON.stringify({
     toolCall: null,

@@ -2655,6 +2655,9 @@ export class RunService {
         ...(observation.procedure === "interrogation"
           ? { requiredToolCall: { tool: "move_to" as const, targetId: "player" as const } }
           : {}),
+        ...(observation.administrativeDecisionSourceMemoryId !== null
+          ? { requireToolCall: true }
+          : {}),
         budgetCeiling: {
           maxCalls: runAmbientCallCeiling(initialRun),
           maxTokens: runAmbientTokenCeiling(initialRun),

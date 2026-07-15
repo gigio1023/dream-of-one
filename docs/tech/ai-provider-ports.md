@@ -181,7 +181,12 @@ Zod parse instead of trusting transport-side structured output. `move_to`,
 reject hidden or unavailable ids before a proposal enters the multi-step
 runtime loop. Record calls select exactly one structural contract: retained
 legacy world packets receive the legacy branch, while run-scoped
-administrative packets receive only the M3R branch. Locale and request
+administrative packets receive only the M3R branch. When a report-bearing
+source reaches a writable procedure, the request still offers both
+`write_record` and `wait` but removes the nullable completion branch: the model
+must make one explicit tool choice without the runtime preferring either one.
+An explicit wait therefore carries its own reason into resident memory instead
+of escaping through a generic `done` response. Locale and request
 validation report field-specific paths to the single repair attempt, and
 repair must return a complete replacement JSON value. Runtime validation still
 rechecks fresh visibility, audibility, role authority, record ownership,

@@ -68,6 +68,8 @@ const forbiddenPlayerVisibleMetaByPresentationId: Record<string, RegExp> = {
   fr: /\b(?:joueur|joueuse|utilisateur|utilisatrice|intelligence artificielle|modèle de langage|prompt|message système|jeu vidéo)\b/iu,
   ja: /(?:プレイヤー|ユーザー|人工知能|言語モデル|プロンプト|システムメッセージ|ビデオゲーム)/u,
 };
+const frenchInfinitiveUserContexts =
+  /\b(?:à|de|pour|sans|peut|peuvent|pourrait|pourraient|doit|doivent|va|vont)\s+user\b/giu;
 const intentSchema = z.enum(CONVERSATION_CHOICE_INTENTS);
 const suggestedReplySchema = z.object({ text: nonEmpty, intent: intentSchema }).strict();
 const mergedSuggestedReplySchema = z.preprocess(
@@ -158,6 +160,21 @@ function isKoreanLocale(locale: string): boolean {
   return supportedLocaleEntry(locale).presentationId === "ko";
 }
 
+function exposesLocalizedMetaFraming(text: string, presentationId: string): boolean {
+  return Object.entries(forbiddenPlayerVisibleMetaByPresentationId).some(
+    ([sourcePresentationId, pattern]) => {
+      if (presentationId !== "fr" || sourcePresentationId !== "en") {
+        return pattern.test(text);
+      }
+      const withoutFrenchUserVerbs = text.replace(
+        frenchInfinitiveUserContexts,
+        match => match.replace(/user/iu, ""),
+      );
+      return pattern.test(withoutFrenchUserVerbs);
+    },
+  );
+}
+
 function addPlayerVisibleTextIssues(
   context: z.RefinementCtx,
   path: Array<string | number>,
@@ -177,7 +194,7 @@ function addPlayerVisibleTextIssues(
   const exposesMetaFraming =
     forbiddenPlayerVisibleGlobalMeta.test(text) ||
     forbiddenPlayerVisibleUppercaseAi.test(text) ||
-    Object.values(forbiddenPlayerVisibleMetaByPresentationId).some(pattern => pattern.test(text));
+    exposesLocalizedMetaFraming(text, presentationId);
   if (exposesMetaFraming) {
     context.addIssue({
       code: "custom",

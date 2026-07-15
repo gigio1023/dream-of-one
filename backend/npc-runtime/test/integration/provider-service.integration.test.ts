@@ -1898,6 +1898,7 @@ test("all gameplay locales reject explicit game and model framing in player-visi
     ["ko-KR", "Player가 평범하게 답했습니다."],
     ["zh-CN", "The player 回答得很连贯。"],
     ["ja-JP", "playerは一貫して答えました。"],
+    ["fr-FR", "The user answered coherently."],
   ] as const) {
     assert.equal(
       conversationJudgmentSchemaForLocale(locale).safeParse({ ...base, whyLine }).success,
@@ -1915,12 +1916,13 @@ test("all gameplay locales reject explicit game and model framing in player-visi
   );
   for (const [locale, whyLine] of [
     ["fr-FR", "J'ai répondu de manière cohérente."],
+    ["fr-FR", "Cette procédure peut user la patience du visiteur."],
     ["it-IT", "Ho parlato ai presenti con calma."],
   ] as const) {
     assert.equal(
       conversationJudgmentSchemaForLocale(locale).safeParse({ ...base, whyLine }).success,
       true,
-      `${locale} must not confuse ordinary lowercase 'ai' with the AI acronym`,
+      `${locale} must not confuse ordinary local grammar with model framing`,
     );
   }
   for (const locale of ["ko-KR", "en-US", "it-IT", "zh-CN", "fr-FR", "ja-JP"] as const) {
